@@ -2,9 +2,11 @@
 ## Aktuální stav
 
 - Obnoveno potvrzeným checkpointem: 2026-10-19 13:00 CEST
+- Lokální vývoj 2026-11-04: 05/P1-B ve větvi `data/parallel-20261104`; bez integrace do main a bez nasazení. Report `reports/codex_appserver_p1b_20261104.md`.
 
 ### Hotovo
 - Human–Adam upřednostňuje chat a aktuální stav; technické účtenky jsou dostupné v panelu Práce
+- Lokální klient žádá obnovu bez historie, rozlišuje final_answer a zachovává strukturované chyby. Kompatibilitu posuzuje podle připojeného serveru, nikoli lokálního CLI; 100 cílených testů PASS.
 
 ### Otevřeno
 - Pozdější nasazení nového checkpointu zatím není tímto snapshotem doložené.
@@ -12,8 +14,10 @@
 
 ### Rizika
 - Poslední ověřené nasazení patří jinému commitu než main před tímto checkpointem.
+- 05/P1-B dosud není v provozu. Neznámý, starší než 0.163.0 nebo prerelease server je záměrně odmítnut před prací s vláknem; živá kompatibilita se ověří až v samostatně autorizované přejímce.
 
 ### Další krok
+- Předat Willovi lokální diff 05/P1-B k porovnání s jeho proudem; integraci a nasazení posoudit samostatně.
 - Po samostatném nasazení vizuálně ověřit čitelnost chatu a panel Práce na Linuxu a iPhonu
 
 ### Rozhodnutí
@@ -26,7 +30,7 @@
 - Změna prošla rychlou syntax/whitespace bránou; cílené testy doložila dokončovací účtenka vývojového tahu.
 - Git před checkpointem: lokální `main` na `3538da49cd0c`; GitHub může být starší a čeká na denní balíček.
 - Poslední serverově potvrzené nasazení: `2e14eaf244e9` · je starší než ověřený main před tímto checkpointem · 0 testů · smoke 5/5 · 2026-10-17T22:14:52+00:00.
-- Read-only živý stav: main=`local_ahead`, deployment=`verified_other_main`, runtime=`connected`.
+- Historický read-only živý stav při checkpointu 2026-10-19: main=`local_ahead`, deployment=`verified_other_main`, runtime=`connected`; 05/P1-B ho živě neověřuje.
 - Tento snapshot je součástí lokálního checkpointu; push na GitHub zůstává odložený do potvrzeného denního balíčku.
 - Tato sekce nahrazuje pouze předchozí aktuální souhrn; chronologické bloky níže zůstávají historickými snapshoty.
 <!-- SAMANTHA_CURRENT_STATUS_END -->
@@ -2849,3 +2853,22 @@ Technický důkaz:
 - Změněné cesty před paměťovým zápisem (3): `Samantha_Agent/app/communication/human_adam_ui.py`, `Samantha_Agent/tests/luna_release_frontend.test.cjs`, `Samantha_Agent/tests/test_human_adam_ui.py`
 - Commit: `Zjednodušit úvodní obrazovku Human–Adam`
 - Další krok: Po samostatném nasazení vizuálně ověřit čitelnost chatu a panel Práce na Linuxu a iPhonu
+
+### 2026-11-04 23:01 CET — 05/P1-B: lokální modernizace App Server klienta
+
+Hotovo:
+- Obnova vlákna žádá metadata bez historie; explicitní final_answer má přednost před commentary a partial textem. Strukturované RPC a turn chyby jsou přístupné bez zahrnutí soukromého obsahu do běžného textu výjimky.
+- Před prací s vláknem se ověří stabilní verze připojeného serveru od 0.163.0. Zůstává přesný důkaz doručení i blokace opakování nejisté akce po restartu session hubu.
+
+Rozhodnutí:
+- Míla výslovně schválil 05/P1-B a nový zápis. Zachovat původního klienta bez adopce SDK, bez změn runtime, Cockpitu či e-mailů; vše pouze ve vlastní větvi.
+
+Další krok:
+- Will převezme diff a report; integrace do main a provozní přejímka vyžadují samostatné rozhodnutí. Přímé převzetí není potvrzené.
+
+Navrhované další kroky:
+- Po případné autorizované integraci a nasazení ověřit handshake a reconnect stejného vlákna se zachovanými oprávněními. Proxy a Mac/iPhone přejímka zůstávají samostatné.
+
+Technický důkaz:
+- 100 cílených testů PASS; úplná Cockpit brána PASS: 2 373 testů, 0 chyb a selhání, 5 skipů PDF exportů bez ReportLabu. Podrobnosti v `reports/codex_appserver_p1b_20261104.md`; pilotní commit `607fc538`.
+- Žádný modelový tah, živá služba, sdílený provozní zápis, push, restart ani integrace do main. Kanonický TVBCP `tvbcp/architektura_komunikace_samantha.txt` aktualizován ve stejném kroku.

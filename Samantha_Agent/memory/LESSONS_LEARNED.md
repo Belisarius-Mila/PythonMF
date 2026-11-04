@@ -1601,3 +1601,11 @@ Doplnění 17102026 k LL-071: Nativní modelový pomocník navíc zdvojuje roli,
 - Ověření: šest skutečných Azure MP3, 274 účtovaných znaků, 22,488s spojený poslech a přesně shodné SHA-256 všech původních souborů obou kopií scény. 44 cílených testů PASS. Lidské přijetí celého zvuku je samostatný krok; viz mmtx_scene06_azure_preview_20261101.md.
 
 - Doplnění 2026-11-01 po přijetí ukázek: zbývajících 128 stop dokončeno 128 unikátními Azure požadavky, 5 870 znaků; plná sada 144/144 a staré MP3 beze změny. Testy výběru ukázek a překročení rozpočtu mají používat syntetická data, aby po dokončení scény nezávisely na skutečně chybějících stopách.
+
+### LL-089 — Modernizace App Serveru nesmí obejít důkaz doručení
+
+- Problém: resume zbytečně načítal historii, commentary se mohlo stát odpovědí a obecná chyba zahazovala strukturu. Lokální verze CLI sama nedokládá verzi sdíleného listeneru.
+- Typ: opakující se
+- Řešení nalezeno: 04112026
+- Řešení: před operací s vláknem ověřit metadata připojeného serveru; potom posílat excludeTurns. Volit explicitní final_answer, phase-less ponechat jako legacy; zachovat started, přesný client ID a completed. Strukturované chyby uchovat v atributech, nikoli v běžném textu výjimky. willRetry je činnost serveru uvnitř tahu, ne pokyn k druhému odeslání.
+- Ověření: 100 cílených testů PASS včetně skutečného klienta nad syntetickým transportem, session hubu a obnovy stavu bez opakování. Report codex_appserver_p1b_20261104.md. Živá přejímka je samostatná.

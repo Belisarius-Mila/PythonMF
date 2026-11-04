@@ -180,6 +180,8 @@ Tento soubor je rozcestnik dlouhodobe pameti pro Samantha Agent.
 
 ## Handoffs
 
+- `reports/codex_appserver_p1b_20261104.md`; `handoffs/data_05_appserver_sdk_pilot_20261104.md` — 05/P1-B: lokální modernizace původního klienta na `data/parallel-20261104`: excludeTurns, phase, strukturované chyby a kontrola verze připojeného serveru. 100 cílených testů PASS; plná Cockpit brána PASS (2 373 testů, 5 PDF skipů); bez integrace do main a bez nasazení. Kanonický proud je `layer-human-adam-development`.
+
 - `handoffs/human_adam_layer_workstream_start_2026_07_20.md` - kanonický aktuální
   handoff Human–Adam. Dokončovací stav je autoritativně perzistentní,
   samoobnovitelný po restartu a potvrzený checkpoint synchronizuje handoff,

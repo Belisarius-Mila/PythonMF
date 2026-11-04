@@ -1,23 +1,275 @@
 from __future__ import annotations
 
 import json
+import tempfile
 import unittest
 from pathlib import Path
-from unittest.mock import patch
+from unittest.mock import Mock, patch
 
 from app.codex_appserver import (
     AppServerContractError,
+    AppServerRpcError,
+    AppServerTimeout,
+    AppServerTurnError,
     CodexAppServerClient,
     CodexVersion,
     TurnReceipt,
     UNIX_APP_SERVER_MAX_MESSAGE_BYTES,
     UnixSocketAppServerTransport,
+    StdioAppServerTransport,
+    app_server_version,
     completed_generated_images,
     codex_environment,
 )
 
 
 class CodexContractTests(unittest.TestCase):
+    def client(self, transport):
+        with patch("app.codex_appserver.read_codex_version", return_value=CodexVersion.parse("codex-cli 0.166.0")):
+            return CodexAppServerClient(transport_factory=lambda **_kwargs: transport)
+
+    def test_connected_server_version_is_independent_of_local_cli(self):
+        for version in ("0.163.0", "0.166.0"):
+            transport = _ScriptedTransport(completed_items=[])
+            original = transport.request
+            with patch.object(transport, "request", side_effect=lambda method, params: (
+                {"userAgent": f"codex_cli_rs/{version} (synthetic)"} if method == "initialize"
+                else original(method, params))):
+                client = self.client(transport)
+            self.assertEqual(client.version.minor, 166)
+            self.assertEqual(client.server_version.raw, f"codex-cli {version}")
+
+    def test_unknown_old_and_prerelease_server_fail_before_thread_or_turn_requests(self):
+        for metadata in ({}, {"userAgent": "unknown"}, {"userAgent": "codex/0.162.0"},
+                         {"userAgent": "codex/0.163.0-beta.1"}, {"serverInfo": {"version": "invalid"}}):
+            with self.subTest(metadata=metadata):
+                transport = _ScriptedTransport(completed_items=[])
+                with patch.object(transport, "request", return_value=metadata) as request:
+                    with self.assertRaises(AppServerContractError):
+                        self.client(transport)
+                self.assertFalse(transport.running)
+                self.assertEqual([c.args[0] for c in request.call_args_list], ["initialize"])
+
+    def test_server_info_version_and_invalid_version_privacy(self):
+        self.assertEqual(app_server_version({"serverInfo": {"version": "0.166.0"}}).minor, 166)
+        with self.assertRaises(AppServerContractError) as raised:
+            app_server_version({"userAgent": "PRIVATE_METADATA"})
+        self.assertNotIn("PRIVATE_METADATA", str(raised.exception))
+
+    def test_resume_excludes_history_and_preserves_thread_model_permissions(self):
+        transport = _ScriptedTransport(completed_items=[])
+        client = self.client(transport)
+        with patch.object(transport, "request", return_value={"thread": {"id": "saved-thread"}}) as request:
+            self.assertEqual(client.resume_thread("saved-thread", cwd=Path.cwd(), model="approved-model",
+                             developer_instructions="unchanged", sandbox="read-only", approval_policy="never"), "saved-thread")
+        request.assert_called_once_with("thread/resume", {
+            "threadId": "saved-thread", "excludeTurns": True, "cwd": str(Path.cwd().resolve()),
+            "model": "approved-model", "developerInstructions": "unchanged",
+            "sandbox": "read-only", "approvalPolicy": "never",
+        })
+
+    def test_resume_rejection_or_different_thread_never_retries_or_forks(self):
+        for result in ({"thread": {"id": "different"}}, AppServerRpcError("thread/resume", {"code": -32602, "message": "synthetic"})):
+            client = self.client(_ScriptedTransport(completed_items=[]))
+            with patch.object(client.transport, "request") as request:
+                if isinstance(result, Exception):
+                    request.side_effect = result
+                else:
+                    request.return_value = result
+                with self.assertRaises(AppServerContractError):
+                    client.resume_thread("saved-thread", cwd=Path.cwd())
+            self.assertEqual([c.args[0] for c in request.call_args_list], ["thread/resume"])
+
+    def test_final_answer_wins_over_streamed_commentary_partial_and_legacy(self):
+        transport = _ScriptedTransport(completed_items=[])
+        transport._events[2]["params"]["item"]["phase"] = "final_answer"
+        for phase in ("commentary", "partial_answer", None, "future_phase"):
+            transport._events.insert(-1, {"method": "item/completed", "params": {
+                "threadId": "thread-1", "turnId": "turn-1", "item": {
+                    "type": "agentMessage", "id": f"extra-{phase}", "text": "not-final", "phase": phase}}})
+        receipt = self.client(transport).send_text(thread_id="thread-1", text="synthetic", client_message_id="message-1")
+        self.assertEqual(receipt.answer, "ano")
+
+    def test_completed_snapshot_uses_phase_and_is_authoritative(self):
+        transport = _ScriptedTransport(completed_items=[
+            {"type": "agentMessage", "id": "final", "phase": "final_answer", "text": "snapshot-final"},
+            {"type": "agentMessage", "id": "progress", "phase": "commentary", "text": "snapshot-progress"},
+        ])
+        receipt = self.client(transport).send_text(thread_id="thread-1", text="synthetic", client_message_id="message-1")
+        self.assertEqual(receipt.answer, "snapshot-final")
+        self.assertEqual(receipt.user_item_count, 1)
+
+    def test_nonfinal_unknown_and_empty_explicit_final_are_not_delivery(self):
+        for phase, text in (("commentary", "progress"), ("partial_answer", "partial"),
+                            ("future_phase", "future"), ("final_answer", ""), ("final_answer", 42)):
+            transport = _ScriptedTransport(completed_items=[])
+            transport._events[2]["params"]["item"].update(phase=phase, text=text)
+            with self.subTest(phase=phase, text=text), self.assertRaises(AppServerContractError):
+                self.client(transport).send_text(thread_id="thread-1", text="synthetic", client_message_id="message-1")
+
+    def test_empty_final_does_not_fall_back_to_legacy_text(self):
+        transport = _ScriptedTransport(completed_items=[
+            {"type": "agentMessage", "text": "legacy"},
+            {"type": "agentMessage", "phase": "final_answer", "text": " "},
+        ])
+        with self.assertRaises(AppServerContractError):
+            self.client(transport).send_text(thread_id="thread-1", text="synthetic", client_message_id="message-1")
+
+    def test_phase_less_messages_keep_last_legacy_answer(self):
+        transport = _ScriptedTransport(completed_items=[
+            {"type": "agentMessage", "text": "first"}, {"type": "agentMessage", "phase": None, "text": "last"}])
+        receipt = self.client(transport).send_text(thread_id="thread-1", text="synthetic", client_message_id="message-1")
+        self.assertEqual(receipt.answer, "last")
+
+    def test_conflicting_finals_are_rejected_but_same_item_can_repeat(self):
+        for second_id, second_text, accepted in (("a", "final", True), ("a", "changed", False), ("b", "other", False)):
+            transport = _ScriptedTransport(completed_items=[
+                {"type": "agentMessage", "id": "a", "phase": "final_answer", "text": "final"},
+                {"type": "agentMessage", "id": second_id, "phase": "final_answer", "text": second_text}])
+            client = self.client(transport)
+            if accepted:
+                self.assertEqual(client.send_text(thread_id="thread-1", text="synthetic", client_message_id="message-1").answer, "final")
+            else:
+                with self.assertRaises(AppServerContractError):
+                    client.send_text(thread_id="thread-1", text="synthetic", client_message_id="message-1")
+
+    def test_multiple_final_users_or_missing_started_proof_are_rejected(self):
+        for missing_started in (False, True):
+            transport = _ScriptedTransport(completed_items=[] if missing_started else [
+                {"type": "userMessage", "clientId": "message-1"},
+                {"type": "userMessage", "clientId": "other"}])
+            if missing_started:
+                transport._events.pop(0)
+            with self.assertRaises(AppServerContractError):
+                self.client(transport).send_text(thread_id="thread-1", text="synthetic", client_message_id="message-1")
+
+    def test_rpc_errors_preserve_structured_details_without_printing_private_data(self):
+        transport = StdioAppServerTransport.__new__(StdioAppServerTransport)
+        transport._next_request_id = 1
+        transport._send = Mock()
+        error = {"code": -32001, "message": "PRIVATE_MESSAGE", "data": {"codexErrorInfo": "server_overloaded", "private": "PRIVATE_DATA"}}
+        transport.receive = Mock(return_value={"id": 1, "error": error})
+        with self.assertRaises(AppServerRpcError) as raised:
+            transport.request("turn/start", {})
+        exc = raised.exception
+        self.assertEqual(exc.code, -32001)
+        self.assertEqual(exc.data, error["data"])
+        self.assertEqual(exc.server_message, "PRIVATE_MESSAGE")
+        error["data"]["private"] = "mutated"
+        self.assertEqual(exc.data["private"], "PRIVATE_DATA")
+        self.assertNotIn("PRIVATE", str(exc))
+        self.assertNotIn("PRIVATE", repr(exc))
+        transport._send.assert_called_once()
+
+    def test_malformed_rpc_error_remains_a_safe_contract_failure(self):
+        transport = StdioAppServerTransport.__new__(StdioAppServerTransport)
+        transport._next_request_id = 1
+        transport._send = Mock()
+        transport.receive = Mock(return_value={"id": 1, "error": "PRIVATE"})
+        with self.assertRaises(AppServerContractError) as raised:
+            transport.request("turn/start", {})
+        self.assertNotIn("PRIVATE", str(raised.exception))
+
+    def test_failed_or_interrupted_turn_preserves_error_and_never_repeats_start(self):
+        for status in ("failed", "interrupted"):
+            transport = _ScriptedTransport(completed_items=[])
+            error = {"message": "PRIVATE", "additionalDetails": "PRIVATE_DETAIL",
+                     "codexErrorInfo": {"httpConnectionFailed": {"httpStatusCode": 503}}}
+            transport._events[-1]["params"]["turn"].update(status=status, error=error)
+            client = self.client(transport)
+            with patch.object(transport, "request", wraps=transport.request) as request:
+                with self.assertRaises(AppServerTurnError) as raised:
+                    client.send_text(thread_id="thread-1", text="synthetic", client_message_id="message-1")
+            self.assertEqual(raised.exception.status, status)
+            self.assertEqual(raised.exception.turn_error, error)
+            self.assertIs(raised.exception.will_retry, False)
+            self.assertNotIn("PRIVATE", str(raised.exception))
+            self.assertEqual([c.args[0] for c in request.call_args_list], ["turn/start"])
+
+    def test_retry_notification_does_not_resend_and_completion_can_still_succeed(self):
+        transport = _ScriptedTransport(completed_items=[])
+        transport._events.insert(1, {"method": "error", "params": {"threadId": "thread-1", "turnId": "turn-1",
+            "error": {"message": "synthetic overload", "codexErrorInfo": "serverOverloaded"}, "willRetry": True}})
+        client = self.client(transport)
+        with patch.object(transport, "request", wraps=transport.request) as request:
+            self.assertTrue(client.send_text(thread_id="thread-1", text="synthetic", client_message_id="message-1").delivered)
+        self.assertEqual([c.args[0] for c in request.call_args_list], ["turn/start"])
+
+    def test_retry_notification_survives_transport_timeout_without_success_or_resend(self):
+        transport = _ScriptedTransport(completed_items=[])
+        client = self.client(transport)
+        error = {"message": "PRIVATE", "codexErrorInfo": {"httpConnectionFailed": {"httpStatusCode": 503}}}
+        timeout = AppServerTimeout("safe timeout")
+        with patch.object(transport, "receive", side_effect=[
+            {"method": "error", "params": {"threadId": "thread-1", "turnId": "turn-1", "error": error, "willRetry": True}}, timeout]), \
+             patch.object(transport, "request", wraps=transport.request) as request:
+            with self.assertRaises(AppServerTimeout) as raised:
+                client.send_text(thread_id="thread-1", text="synthetic", client_message_id="message-1")
+        self.assertIs(raised.exception, timeout)
+        self.assertEqual(timeout.turn_error, error)
+        self.assertIs(timeout.will_retry, True)
+        self.assertNotIn("PRIVATE", str(timeout))
+        self.assertEqual([c.args[0] for c in request.call_args_list], ["turn/start"])
+
+    def test_error_notification_supplies_missing_terminal_error(self):
+        transport = _ScriptedTransport(completed_items=[])
+        error = {"message": "synthetic", "codexErrorInfo": "usageLimitExceeded"}
+        transport._events.insert(-1, {"method": "error", "params": {"threadId": "thread-1", "turnId": "turn-1", "error": error, "willRetry": False}})
+        transport._events[-1]["params"]["turn"]["status"] = "failed"
+        with self.assertRaises(AppServerTurnError) as raised:
+            self.client(transport).send_text(thread_id="thread-1", text="synthetic", client_message_id="message-1")
+        self.assertEqual(raised.exception.turn_error, error)
+
+    def test_invalid_terminal_status_is_rejected(self):
+        transport = _ScriptedTransport(completed_items=[])
+        transport._events[-1]["params"]["turn"]["status"] = "inProgress"
+        with self.assertRaises(AppServerContractError):
+            self.client(transport).send_text(thread_id="thread-1", text="synthetic", client_message_id="message-1")
+
+    def test_real_client_failure_stays_unknown_across_hub_restart_without_resend(self):
+        from app.communication.session_hub import CanonicalSessionHub, SessionDeliveryUnknownError
+
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            transport = _ScriptedTransport(completed_items=[])
+            transport._events[-1]["params"]["turn"].update(status="failed", error={"message": "PRIVATE_ERROR"})
+
+            def hub():
+                return CanonicalSessionHub(state_path=root / "session.json", workspace=root,
+                    client_factory=lambda: self.client(transport), developer_instructions="synthetic",
+                    sandbox="read-only", sandbox_policy={"type": "readOnly"}, approval_policy="never", reasoning_effort="low")
+
+            with patch.object(transport, "request", wraps=transport.request) as request:
+                first = hub()
+                with self.assertRaises(AppServerTurnError):
+                    first.send(text="synthetic", client_message_id="message-1")
+                for instance in (first, hub()):
+                    with self.assertRaises(SessionDeliveryUnknownError):
+                        instance.send(text="synthetic", client_message_id="message-1")
+            self.assertEqual(sum(c.args[0] == "turn/start" for c in request.call_args_list), 1)
+            state = json.loads((root / "session.json").read_text())
+            self.assertEqual(state["thread_id"], "thread-1")
+            self.assertEqual(state["messages"][-1]["status"], "delivery_unknown")
+            self.assertNotIn("PRIVATE_ERROR", json.dumps(state))
+
+    def test_server_compatibility_failure_cannot_trigger_hubs_empty_thread_fallback(self):
+        from app.communication.session_hub import CanonicalSessionHub, empty_session_state
+
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            state = empty_session_state()
+            state["thread_id"] = "saved-empty-thread"
+            (root / "session.json").write_text(json.dumps(state))
+            transport = _ScriptedTransport(completed_items=[])
+            with patch.object(transport, "request", return_value={}) as request:
+                hub = CanonicalSessionHub(state_path=root / "session.json", workspace=root,
+                    client_factory=lambda: self.client(transport), developer_instructions="synthetic",
+                    sandbox="read-only", sandbox_policy={"type": "readOnly"}, approval_policy="never", reasoning_effort="low")
+                with self.assertRaises(AppServerContractError):
+                    hub.send(text="synthetic", client_message_id="message-1")
+            self.assertEqual([c.args[0] for c in request.call_args_list], ["initialize"])
+            self.assertEqual(json.loads((root / "session.json").read_text())["thread_id"], "saved-empty-thread")
+
     def test_thread_overrides_are_per_thread_and_optional(self) -> None:
         transport = _ScriptedTransport(completed_items=[])
         with patch("app.codex_appserver.read_codex_version", return_value=CodexVersion.parse("codex-cli 0.147.0")):
@@ -304,9 +556,11 @@ class _ScriptedTransport:
 
     def request(self, method: str, _params: dict[str, object]) -> dict[str, object]:
         if method == "initialize":
-            return {}
+            return {"userAgent": "codex_cli_rs/0.166.0 (synthetic)"}
         if method == "turn/start":
             return {"turn": {"id": "turn-1"}}
+        if method in {"thread/start", "thread/resume"}:
+            return {"thread": {"id": "thread-1"}}
         raise AssertionError(f"Neočekávaný požadavek: {method}")
 
     def notify(self, _method: str, _params: dict[str, object] | None = None) -> None:

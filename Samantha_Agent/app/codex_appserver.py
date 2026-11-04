@@ -11,6 +11,7 @@ import subprocess
 import threading
 import time
 import uuid
+from copy import deepcopy
 from dataclasses import asdict, dataclass
 from datetime import datetime, timezone
 from pathlib import Path
@@ -37,6 +38,8 @@ CODEX_PATH_PREFIXES = (
 # local WebSocket frame.  Keep a finite limit, but leave enough headroom for a
 # conversation containing generated images (observed resume frame: about 44.2 MiB).
 UNIX_APP_SERVER_MAX_MESSAGE_BYTES = 64 * 1024 * 1024
+# Conservative protocol baseline verified by the 05/P1 schemas and contracts.
+MIN_APP_SERVER_VERSION = (0, 163, 0)
 
 
 def utc_now() -> str:
@@ -46,6 +49,12 @@ def utc_now() -> str:
 class AppServerError(RuntimeError):
     """Base error for an app-server contract or transport failure."""
 
+    def __init__(self, message: str):
+        super().__init__(message)
+        # Explicit inspection only: callers log str(exc), never private payloads.
+        self.turn_error: dict[str, Any] | None = None
+        self.will_retry: bool | None = None
+
 
 class AppServerTimeout(AppServerError):
     """Raised when required protocol evidence does not arrive in time."""
@@ -53,6 +62,27 @@ class AppServerTimeout(AppServerError):
 
 class AppServerContractError(AppServerError):
     """Raised when the server response violates the expected protocol contract."""
+
+
+class AppServerRpcError(AppServerContractError):
+    """Structured RPC rejection; its printable message contains no server data."""
+
+    def __init__(self, method: str, error: dict[str, Any]):
+        super().__init__(f"App-server odmítl {method}.")
+        self.method = method
+        self.code = error.get("code")
+        self.data = deepcopy(error.get("data"))
+        self.server_message = error.get("message")
+
+
+class AppServerTurnError(AppServerContractError):
+    """Terminal failure or interruption, never an instruction to resend."""
+
+    def __init__(self, status: str, error: dict[str, Any] | None):
+        super().__init__("App-server tah nebyl potvrzen jako dokončený.")
+        self.status = status
+        self.turn_error = deepcopy(error)
+        self.will_retry = False
 
 
 def codex_environment(base_env: dict[str, str] | None = None) -> dict[str, str]:
@@ -84,6 +114,44 @@ class CodexVersion:
         if not match:
             raise AppServerContractError("Codex vrátil neznámý formát verze.")
         return cls(raw=raw, major=int(match.group(1)), minor=int(match.group(2)), patch=int(match.group(3)))
+
+
+def app_server_version(metadata: dict[str, Any]) -> CodexVersion:
+    """Read the connected server's version, not the separately installed CLI.
+
+    Current initialize replies identify the server through userAgent. Accept
+    serverInfo too for compatible protocol adapters, but never fall back to the
+    local CLI: a shared listener may still be running an older executable.
+    """
+    server = metadata.get("serverInfo")
+    raw = server.get("version") if isinstance(server, dict) else None
+    if raw is None:
+        user_agent = metadata.get("userAgent")
+        match = re.match(r"[^/\s]+/(\d+\.\d+\.\d+(?:[-+][^\s]+)?)(?:\s|$)",
+                         user_agent if isinstance(user_agent, str) else "")
+        raw = match.group(1) if match else None
+    if not isinstance(raw, str) or not re.fullmatch(r"\d+\.\d+\.\d+", raw):
+        raise AppServerContractError("App-server neposkytl ověřenou stabilní verzi protokolu.")
+    version = CodexVersion.parse(f"codex-cli {raw}")
+    if (version.major, version.minor, version.patch) < MIN_APP_SERVER_VERSION:
+        raise AppServerContractError("App-server je starší než podporovaná verze 0.163.0.")
+    return version
+
+
+def final_agent_answer(items: list[dict[str, Any]]) -> str:
+    """Explicit terminal phase wins; absent phase retains legacy compatibility."""
+    finals = [item for item in items if item.get("phase") == "final_answer"]
+    if finals:
+        first = finals[0]
+        # Repeated delivery of the same item is harmless; distinct terminal
+        # answers or conflicting snapshots are not an unambiguous receipt.
+        if len(finals) > 1 and (not first.get("id") or any(item != first for item in finals[1:])):
+            raise AppServerContractError("Tah obsahuje nejednoznačnou finální odpověď.")
+        text = first.get("text")
+        return text.strip() if isinstance(text, str) else ""
+    legacy = [item["text"] for item in items if item.get("phase") is None
+              and isinstance(item.get("text"), str) and item["text"].strip()]
+    return legacy[-1].strip() if legacy else ""
 
 
 @dataclass(frozen=True)
@@ -249,7 +317,10 @@ class StdioAppServerTransport:
             description=f"odpověď na {method}",
         )
         if "error" in response:
-            raise AppServerContractError(f"App-server odmítl {method}.")
+            error = response["error"]
+            if not isinstance(error, dict):
+                raise AppServerContractError(f"App-server vrátil neplatnou chybu pro {method}.")
+            raise AppServerRpcError(method, error)
         result = response.get("result")
         if not isinstance(result, dict):
             raise AppServerContractError(f"App-server neposkytl objektový výsledek pro {method}.")
@@ -390,7 +461,7 @@ class CodexAppServerClient:
         self.transport = transport_factory(codex_binary=codex_binary, timeout=timeout)
         self.process_id = self.transport.process_id
         try:
-            self.transport.request(
+            metadata = self.transport.request(
                 "initialize",
                 {
                     "clientInfo": {
@@ -401,6 +472,9 @@ class CodexAppServerClient:
                     "capabilities": None,
                 },
             )
+            # Check before any thread operation. In particular, a compatibility
+            # error must not be mistaken for an unmaterialized thread by the hub.
+            self.server_version = app_server_version(metadata)
             self.transport.notify("initialized")
         except Exception:
             self.close()
@@ -453,6 +527,7 @@ class CodexAppServerClient:
             raise AppServerContractError("Chybí threadId pro obnovení.")
         params: dict[str, Any] = {
             "threadId": expected,
+            "excludeTurns": True,
             "cwd": str(cwd.resolve()),
             "sandbox": sandbox,
             "approvalPolicy": approval_policy,
@@ -520,15 +595,24 @@ class CodexAppServerClient:
         turn_started_confirmed = False
         started_at = ""
         user_items: list[dict[str, Any]] = []
-        agent_messages: list[str] = []
+        agent_messages: list[dict[str, Any]] = []
         generated_images: tuple[dict[str, str], ...] = ()
         status = ""
         token_usage = None
+        last_turn_error = None
+        will_retry = None
         while not status:
-            event = self.transport.receive(
-                lambda candidate: self._belongs_to_turn(candidate, thread_id=thread_id, turn_id=turn_id),
-                description=f"událost turnu {turn_id}",
-            )
+            try:
+                event = self.transport.receive(
+                    lambda candidate: self._belongs_to_turn(candidate, thread_id=thread_id, turn_id=turn_id),
+                    description=f"událost turnu {turn_id}",
+                )
+            except AppServerError as exc:
+                # Preserve transport exception type and safe printable message.
+                # A server retry notification never authorizes another turn/start.
+                exc.turn_error = deepcopy(last_turn_error)
+                exc.will_retry = will_retry
+                raise
             method = event.get("method")
             params = event.get("params")
             if not isinstance(params, dict):
@@ -536,6 +620,9 @@ class CodexAppServerClient:
             if method == "turn/started":
                 turn_started_confirmed = True
                 started_at = utc_now()
+            if method == "error":
+                last_turn_error = params.get("error") if isinstance(params.get("error"), dict) else None
+                will_retry = params.get("willRetry") if isinstance(params.get("willRetry"), bool) else None
             if method == "thread/tokenUsage/updated":
                 # Thread total, not turn delta; includes all calls since thread creation.
                 raw_usage = params.get("tokenUsage")
@@ -545,8 +632,8 @@ class CodexAppServerClient:
             if method == "item/completed" and isinstance(item, dict):
                 if item.get("type") == "userMessage" and item.get("clientId") == message_id:
                     user_items.append(item)
-                if item.get("type") == "agentMessage" and isinstance(item.get("text"), str):
-                    agent_messages.append(item["text"])
+                if item.get("type") == "agentMessage":
+                    agent_messages.append(item)
                 if item.get("type") == "imageGeneration":
                     completed_image = completed_generated_images([item])
                     if completed_image and all(
@@ -559,6 +646,11 @@ class CodexAppServerClient:
                 if not isinstance(completed_turn, dict):
                     raise AppServerContractError("turn/completed neobsahuje turn.")
                 status = str(completed_turn.get("status") or "")
+                if status not in {"completed", "failed", "interrupted"}:
+                    raise AppServerContractError("turn/completed nemá platný koncový stav.")
+                if status != "completed":
+                    error = completed_turn.get("error")
+                    raise AppServerTurnError(status, error if isinstance(error, dict) else last_turn_error)
                 completed_items = completed_turn.get("items")
                 if isinstance(completed_items, list) and completed_items:
                     completed_user_items = [
@@ -572,18 +664,17 @@ class CodexAppServerClient:
                         if item.get("clientId") == message_id
                     ]
                     authoritative_answers = [
-                        str(item.get("text"))
+                        item
                         for item in completed_items
                         if isinstance(item, dict)
                         and item.get("type") == "agentMessage"
-                        and str(item.get("text") or "").strip()
                     ]
                     # Codex 0.147 may omit input items from the final turn while
                     # still reporting the matching userMessage via item/completed.
                     # Preserve that earlier proof only when the final turn does
                     # not contain any user message of its own.
                     if completed_user_items:
-                        user_items = authoritative_users
+                        user_items = authoritative_users if len(completed_user_items) == 1 else []
                     if authoritative_answers:
                         agent_messages = authoritative_answers
                     authoritative_images = completed_generated_images(completed_items)
@@ -599,7 +690,7 @@ class CodexAppServerClient:
             started_at=started_at,
             completed_at=utc_now(),
             status=status,
-            answer=agent_messages[-1].strip() if agent_messages else "",
+            answer=final_agent_answer(agent_messages),
             turn_started_confirmed=turn_started_confirmed,
             user_item_count=len(user_items),
             duration_ms=round((time.monotonic() - started_monotonic) * 1000),
