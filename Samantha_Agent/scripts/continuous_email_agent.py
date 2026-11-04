@@ -15,7 +15,7 @@ if str(PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(PROJECT_ROOT))
 
 from app.email.continuous_agent import ContinuousEmailAgent
-from app.email.service import ServiceSettings, launch_agent_preview, readiness, service_tick
+from app.email.service import ServiceSettings, launch_agent_preview, readiness, run_service_check
 from app.email.pushcut import pushcut_status
 
 
@@ -34,16 +34,17 @@ def main() -> int:
         return 0
     if args.command in {"readiness", "tick"}:
         try:
-            result = readiness() if args.command == "readiness" else service_tick()
+            result = readiness() if args.command == "readiness" else run_service_check()
         except Exception as exc:
             print(json.dumps({"ok": False, "error_type": type(exc).__name__,
                               "message": "Cyklus nelze spustit; ověř konfiguraci a připravenost služby."}, ensure_ascii=False))
             return 1
         print(json.dumps(result, ensure_ascii=False))
-        return 0
+        return 1 if result.get("status") == "failed" else 0
+    from app.email.service_control import EmailServiceController
     state = ContinuousEmailAgent().status()
     print(json.dumps({
-        "activation": "not_verified",
+        "activation": EmailServiceController().status(),
         "items": dict(Counter(item["status"] for item in state["items"].values())),
         "sources": [{"health": item.get("health", "unchecked"), "checked_at": item.get("checked_at", "")}
                     for item in state["sources"].values()],

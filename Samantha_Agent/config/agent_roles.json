@@ -1,6 +1,18 @@
 {
   "schema": 1,
   "roles": {
+    "continuous_email": {
+      "label": "Průběžný e-mailový agent",
+      "preferred_model": "gpt-6.1-terra",
+      "approved_models": [
+        {
+          "model": "gpt-6.1-terra",
+          "reasoning_effort": "high",
+          "cost_review": "Mila chose Terra for hourly full-email assessment; Standard credits/MTok 25 input, 1.25 cached, 125 output verified 2026-11-05. All new mail; no default count cap.",
+          "dry_run_evidence": "data/private/continuous_agent/pilot_20261104_2.json"
+        }
+      ]
+    },
     "release_executor": {
       "label": "Vykonavatel p+n",
       "preferred_model": "gpt-6.1-terra",

@@ -4,9 +4,44 @@ Nazev: Průběžný osobní agent pro e-maily a Apple/iCloud kalendář
 Priorita: 1
 Stav: rozpracovane
 Pripomenout pri startu: ano
-Datum: 2026-11-04
+Datum: 2026-11-05
 
-## Aktuální stav 2026-11-04 23:24 CET
+## Aktuální stav 2026-11-05 — instalátor před systémovým potvrzením
+
+- Pushcut vydaný po b372355c: Terra p+n job
+  `9f34b5d5fa3be12a0124646c4d353050`, push/deployment confirmed,
+  2386 PASS, smoke 5/5, GitHub CI 41927780373 success. Míla přijal
+  doručení na skutečný iPhone i otevření E-mailů k řešení klepnutím.
+  Private webhook připojený/zapnutý, test accepted.
+- Míla zadal dokončit řízenou instalaci a provoz. Nová role continuous_email
+  je Terra/high, doložené dřívější živé e-mailové zkoušky a cenové posouzení;
+  aktuální katalog model potvrdil bez fallbacku. Produkční App Server ani
+  souběžná práce Data se nemění.
+- Výchozí provoz zahrnuje všechny nové celé zprávy, bez denního početního
+  limitu. Dřívější 20/den byl návrh. Dávky navážou další minutu; dokončená
+  hodina se neopakuje. Rozsah 07–22 Europe/Prague, přihlášený uživatel Macu.
+- Nový instalátor připraví uvnitř projektu kopii čistého commitnutého main;
+  po systémovém potvrzení vytvoří vlastní Application Support runtime
+  a LaunchAgent, odmítne přepsat existující cíl/job. Private stav, přístupy
+  a role sdílí přes odkazy, běžný vývoj nepřepisuje instalovaný kód.
+- Registrované continuous_email_service_{status,prepare,install,pause,
+  resume,verify-restart}. Instalace/obnova vyžadují přesnou globální větu.
+  iCloud kurzor se zachová; Seznam při aktivaci začne od aktuálního konce.
+  Změna UIDVALIDITY zastaví instalaci bez čtení historických těl.
+- Samostatný malý heartbeat dokládá skutečný check bez přepisování těl.
+  Selhání startu službu vypne a zachová data/runtime. Ověření obnovy odmítá
+  přerušit aktivní posouzení; neprovádí fyzický reboot celého Macu.
+- 67 cílených scénářů PASS, finální plná brána 2403 PASS (388,8 s), včetně opravy vnořeného archivu. Podrobnosti a logy:
+  reports/continuous_email_service_installation_20261105.md.
+- Čerstvá readiness: role/socket dostupné, iCloud inicializovaný,
+  Seznam zatím ne, služba vypnutá, LaunchAgent neexistuje. Systémová
+  instalace zatím neproběhla: přesná věta globální brzdy nebyla zadána.
+  Nový placený modelový tah, SMTP, archivace ani ruční Pushcut test neběžel.
+  Míla následně výslovně schválil převzetí Datových commitů a společné p+n včetně oprav do čistého repozitáře. Nový TVBCP nebyl domluvený ani založený.
+- Čerstvý report zálohy: poslední úspěch 2026-10-30, starší než tři dny.
+  Autosave běží a zapisuje; SSD upozornění při 25,2 GiB. Záloha neběžela.
+
+## Předchozí stav 2026-11-04 23:24 CET
 
 - Příprava hodinového vstupu je již vydaná po 77f7e12f: Terra p+n
   `742135a3ba9990edc0afe6734d125166`, 2368 PASS, smoke 5/5 a GitHub CI
@@ -341,11 +376,12 @@ odsouhlasený rozsah čtení k potvrzování jednotlivých zpráv.
 
 ## Další krok
 
-Samostatné p+n Pushcutu, propojení skutečné notifikace a fyzický test zvuku
-a otevření E-mailů k řešení na iPhonu. Potom řízený instalátor a aktivace,
-profil Terry/počet/rozpočet a výchozí pozice Seznamu; iCloud kurzor zachovat.
-Runtime rozpoznávající vlastní roli je už vydaný. Příště nedůležité také,
-jeho fyzické QA a živá přejímka archivace/metadat čekají. Editor/SMTP přijaté.
+Po lokálním checkpointu připravit plán z výsledného čistého commitu. Jeho
+otisk/source_head jsou v private installation_plan.json. Potom vyžádat přesnou větu globální brzdy, nainstalovat vlastní LaunchAgent,
+inicializovat Seznam a zachovat iCloud, ověřit čerstvý heartbeat a obnovu.
+První ostrý průchod čeká na provozní okno 07–22; mimo ně se ověří pouze
+funkční spouštění. Pushcut i editor/SMTP jsou přijaté. Živé QA preference,
+archivace/metadat a CalDAV čekají. Instalace není p+n společného Cockpitu.
 
 ## Navrhované další kroky
 

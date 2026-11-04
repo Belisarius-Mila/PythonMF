@@ -11,7 +11,7 @@ from unittest.mock import Mock, patch
 from app.communication.agent_roles import AgentRoleError, EMAIL_ROLE, load_role
 from app.email.continuous_agent import ContinuousEmailAgent
 from app.email.hourly_agent import HourlyEmailScheduler
-from app.email.service import ServiceSettings, approved_selection, launch_agent_preview, readiness, service_tick
+from app.email.service import ServiceSettings, approved_selection, launch_agent_preview, readiness, service_tick, run_service_check
 from app.file_persistence import exclusive_file_lock
 from tests.test_continuous_email_agent import FakeSource, observed, proposal
 
@@ -52,6 +52,32 @@ class EmailServiceTests(unittest.TestCase):
         self.select.assert_not_called()
         self.assertEqual(self.source.calls, [])
         self.assertFalse(self.worker.root.exists())
+
+    def test_default_processes_more_than_twenty_messages_without_daily_cap(self):
+        self.configure()
+        self.source.messages = [observed(str(uid)) for uid in range(1, 22)]
+        self.initialize()
+        self.assertIsNone(ServiceSettings().max_assessments_per_day)
+        self.assertEqual(self.tick()["proposals"], 20)
+        self.assertEqual(self.tick()["proposals"], 1)
+        self.assertEqual(self.model.call_count, 21)
+
+    def test_heartbeat_failure_is_redacted_and_persistent(self):
+        def fail(**kwargs):
+            raise RuntimeError("sensitive synthetic text")
+        result = run_service_check(worker=self.worker, tick=fail)
+        health = (self.worker.root / "service_health.json").read_text()
+        self.assertEqual(result["status"], "failed")
+        self.assertNotIn("sensitive", health)
+        self.assertIn("finished_at", health)
+
+    def test_idle_check_does_not_rewrite_mail_state(self):
+        self.initialize()
+        path = self.worker.root / "state.json"
+        before = path.stat().st_mtime_ns
+        result = run_service_check(worker=self.worker, tick=lambda **kwargs: {"status": "outside_hours"})
+        self.assertEqual(result["status"], "outside_hours")
+        self.assertEqual(before, path.stat().st_mtime_ns)
 
     def test_missing_baseline_does_not_read_history_or_call_model(self):
         self.configure()

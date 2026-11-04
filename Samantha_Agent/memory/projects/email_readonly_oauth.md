@@ -714,3 +714,25 @@ Technický důkaz: Místní SMTP účtenka `smtp_sent`, kopie `saved`, návrh by
 uživatelem změněný. 78 e-mailových a 290 Cockpit/frontend scénářů PASS
 pro novou funkci. Plná brána persistence 2352 testů PASS v příslušném logu.
 Nová funkce nebyla nasazená a nevolal se další živý model ani SMTP.
+
+## 2026-11-05 — Pushcut přijatý, řízená instalace připravená
+
+Pushcut po b372355c vydaný: Terra p+n 9f34b5d5fa3be12a0124646c4d353050,
+2386 PASS, smoke 5/5, GitHub CI 41927780373 success. Míla přijal doručení
+na iPhone i otevření E-mailů k řešení. Private připojení je zapnuté/accepted.
+
+Na pokyn dokončit řízenou instalaci vznikl instalátor vlastní kopie čistého
+commitnutého main a per-user LaunchAgentu, heartbeat, pause/resume a ověření
+obnovy bez přerušení aktivního posouzení. Model continuous_email Terra/high
+schválen z předchozích živých zkoušek a cenového posouzení; katalog aktuálně
+potvrzen bez fallbacku. Všechny nové celé zprávy, 07–22 Europe/Prague,
+výchozí denní početní limit null. Dřívější 20/den nebylo schváleným limitem.
+
+67 cílených testů PASS, plná brána 2403 PASS (377,5 s). Systémový zápis ani aktivace
+zatím neproběhly: exact globální věta nebyla zadána. iCloud pozice zachovaná,
+Seznam bude inicializován od aktuálního konce až při aktivaci. Nový modelový
+tah/SMTP/archivace/ruční Pushcut test neběžel. Míla následně schválil převzetí Data a společné p+n včetně oprav do čistého
+repozitáře. Bez nového TVBCP; produkční App Server a Data práce zachované. Další krok: dokončit
+bránu/commit/konkrétní plán, systémové potvrzení, instalace/check/obnova
+a první ostrá hodina. Viz reports/continuous_email_service_installation_20261105.md
+a handoffs/continuous_personal_agent_2026_11_04.md.

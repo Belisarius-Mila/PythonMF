@@ -29,6 +29,13 @@ nebo jejichž princip lze znovu použít v jiné části projektu.
 
 ## Záznamy
 
+### LL-096 — Git archive ve vnořeném projektu už používá relativní kořen
+
+- Problém: izolovaný test s projektem v kořeni Gitu prošel, ale příprava runtime ve skutečném Samantha_Agent pod rodičovským PythonMF skončila pathspec chybou; prefix podprojektu byl přidaný dvakrát.
+- Typ: opakující se
+- Řešení nalezeno: 05112026
+- Řešení: při `git -C podprojekt archive HEAD` použít cesty relativní k podprojektu a stejné relativní názvy v archivu. Nepřidávat znovu `rev-parse --show-prefix`. Instalační fixture musí mít stejný vnořený projekt jako produkční checkout. Ověřeno na skutečném repozitáři (původní pathspec exit 128, relativní archive exit 0) a třinácti instalačními regresními testy.
+
 ### LL-095 — Úspěšný test oznámení patří ke konkrétnímu nastavení
 
 - Problém: po změně notifikační adresy nebo cílového odkazu by starý úspěšný test klamně potvrzoval nové nastavení; pád po HTTP pokusu by zase mohl způsobit dvojí zvuk.

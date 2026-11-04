@@ -318,6 +318,22 @@ def _camino_service_commands() -> tuple[WorkflowCommand, ...]:
 
 
 WORKFLOW_COMMANDS: tuple[WorkflowCommand, ...] = (
+    *(WorkflowCommand(
+        command_id="continuous_email_service_" + action,
+        title="Hodinová e-mailová služba: " + action,
+        purpose="Připraví nebo spravuje pouze vlastní e-mailový LaunchAgent a zachová pozice zpráv.",
+        aliases=("e-mailová služba " + action,),
+        argv=(str(PYTHON_BIN), str(SAMANTHA_DIR / "scripts/continuous_email_agent_service.py"), action)
+             + (("--confirmation", "Potvrzuji globální brzdu: rozumím riziku a chci pokračovat.")
+                if action in {"install", "verify-restart"} else
+                ("--confirmed",) if action in {"pause", "resume"} else ()),
+        cwd=SAMANTHA_DIR,
+        risk="read_only" if action == "status" else "private_service_write",
+        writes="nic" if action == "status" else "Soukromý plán/stav; instalace a obnova pouze vlastního LaunchAgentu po globální brzdě.",
+        requires_confirmation=action in {"install", "verify-restart", "pause", "resume"},
+        confirmation_phrase="Potvrzuji globální brzdu: rozumím riziku a chci pokračovat."
+            if action in {"install", "verify-restart"} else "",
+    ) for action in ("status", "prepare", "install", "pause", "resume", "verify-restart")),
     WorkflowCommand(
         command_id="continuous_email_agent_readiness",
         title="Připravenost hodinové e-mailové služby",

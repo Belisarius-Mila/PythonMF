@@ -15,6 +15,13 @@ from app.workflows.commands import (
 
 
 class WorkflowCommandTests(unittest.TestCase):
+    def test_email_install_and_reload_require_exact_system_confirmation(self):
+        commands = {c.command_id: c for c in workflow_commands.WORKFLOW_COMMANDS}
+        for action in ("install", "verify-restart"):
+            command = commands["continuous_email_service_" + action]
+            self.assertTrue(command.requires_confirmation)
+            self.assertEqual(command.confirmation_phrase, "Potvrzuji globální brzdu: rozumím riziku a chci pokračovat.")
+        self.assertFalse(commands["continuous_email_service_prepare"].requires_confirmation)
     def test_camino_backup_is_registered_with_separate_preview_and_confirmed_execute(self):
         commands = {c.command_id: c for c in workflow_commands.WORKFLOW_COMMANDS}
         preview, execute = commands["backup_camino_dry_run"], commands["backup_camino_execute"]

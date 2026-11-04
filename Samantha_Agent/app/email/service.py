@@ -6,6 +6,8 @@ from datetime import datetime, timezone
 from functools import partial
 from pathlib import Path
 import plistlib
+import os
+from uuid import uuid4
 from typing import Literal
 
 from pydantic import BaseModel, ConfigDict, Field
@@ -14,6 +16,7 @@ from app.communication.agent_roles import EMAIL_ROLE, AgentRoleError, load_role,
 from app.communication.local_runtime import DEFAULT_SOCKET_PATH
 from app.codex_appserver import CodexAppServerClient, UnixSocketAppServerTransport
 from app.file_persistence import FileLockTimeoutError, exclusive_file_lock
+from app.work_repository import JsonWorkRepository, RepositoryMutation
 from .continuous_agent import ContinuousEmailAgent, DEFAULT_ROOT
 from .continuous_source import IMAPAgentSource
 from .codex_proposer import CodexEmailProposer
@@ -30,7 +33,7 @@ class ServiceSettings(BaseModel):
     model_config = ConfigDict(extra="forbid", strict=True)
     enabled: bool = False
     providers: list[Literal["icloud", "seznam"]] = Field(default_factory=lambda: ["icloud", "seznam"], min_length=1)
-    max_assessments_per_day: int = Field(default=20, ge=1, le=1000)
+    max_assessments_per_day: int | None = Field(default=None, ge=1, le=1000)
     batch_size: int = Field(default=10, ge=1, le=100)
     max_batches: int = Field(default=2, ge=1, le=20)
 
@@ -88,6 +91,9 @@ def launch_agent_preview(*, project: Path = PROJECT_ROOT, python: Path | None = 
     return {"Label": LABEL,
             "ProgramArguments": [str(python), str(project / "scripts/continuous_email_agent.py"), "tick"],
             "WorkingDirectory": str(project), "StartInterval": 60, "RunAtLoad": True,
+            "StartCalendarInterval": {"Minute": 0},
+            "EnvironmentVariables": {"PATH": "/usr/bin:/bin:/usr/sbin:/sbin:/usr/local/bin:/opt/homebrew/bin",
+                                     "PYTHONUNBUFFERED": "1", "PYTHONDONTWRITEBYTECODE": "1", "TZ": "Europe/Prague"},
             "ProcessType": "Background",
             "StandardOutPath": str(project / "logs/continuous_email_service.out.log"),
             "StandardErrorPath": str(project / "logs/continuous_email_service.err.log")}
@@ -138,7 +144,7 @@ def service_tick(*, settings_path: Path = SETTINGS_PATH, worker=None, now: datet
                 current = load_settings(settings_path)
                 used = worker.status().get("service", {}).get("daily_attempts", {}).get(day, 0)
                 return (not current.enabled or current.providers != settings.providers
-                        or used >= current.max_assessments_per_day)
+                        or (current.max_assessments_per_day is not None and used >= current.max_assessments_per_day))
 
             if paused():
                 return finish({"status": "paused", "proposals": 0})
@@ -156,5 +162,25 @@ def service_tick(*, settings_path: Path = SETTINGS_PATH, worker=None, now: datet
 
             return finish(HourlyEmailScheduler(worker).tick(sources, propose, now=now,
                 batch_size=settings.batch_size, max_batches=settings.max_batches, should_stop=paused))
+    except FileLockTimeoutError:
+        return {"status": "busy", "proposals": 0}
+
+
+def run_service_check(*, worker=None, tick=service_tick, **kwargs) -> dict:
+    """A small independent heartbeat; do not rewrite mail bodies every idle minute."""
+    worker = worker or ContinuousEmailAgent()
+    health = JsonWorkRepository(worker.root / "service_health.json")
+    try:
+        with exclusive_file_lock(worker.root / "service_check", timeout=0):
+            marker = {"check_id": uuid4().hex, "pid": os.getpid(), "started_at": datetime.now(timezone.utc).isoformat(),
+                      "status": "running"}
+            health.transact(lambda _: RepositoryMutation(marker))
+            try:
+                outcome = tick(worker=worker, **kwargs)
+            except Exception as exc:
+                outcome = {"status": "failed", "error_type": type(exc).__name__, "proposals": 0}
+            health.transact(lambda _: RepositoryMutation({**marker, **outcome,
+                "finished_at": datetime.now(timezone.utc).isoformat()}))
+            return outcome
     except FileLockTimeoutError:
         return {"status": "busy", "proposals": 0}
