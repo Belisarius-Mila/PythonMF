@@ -62,7 +62,7 @@ Tento soubor je rozcestnik dlouhodobe pameti pro Samantha Agent.
 
 ## Projects
 
-- `handoffs/continuous_personal_agent_2026_11_04.md`; `projects/email_readonly_oauth.md` — [PRIPOMENOUT] priorita 1: Terra p+n po `d9bf3a7c111a` ověřené (2337 PASS + smoke 5/5). Následně lokálně opravené strict schéma výstupu (LL-092, 65 cílených scénářů PASS) a jeden nový živý pilot Terry/high úspěšný: důležitá karta čeká v Cockpitu na přejímku metadat, odpověď nenavržená. 28 684 tokenů, odhad 0,7392 Standard kreditu. Bez archivu/SMTP, hodinová služba vypnutá. Před aktivací provozní profil/rozpočet a další vzorky; notifikace, CalDAV a fyzické QA čekají. Oprava zatím bez dalšího p+n, nový TVBCP nevznikl.
+- `handoffs/continuous_personal_agent_2026_11_04.md`; `projects/email_readonly_oauth.md` — [PRIPOMENOUT] priorita 1: Terra p+n po `d1e5e72c` ověřené, účtenka `2be778ce`, místní brána 2338 PASS + smoke 5/5. Míla na Macu vyřadil první kartu. Další 2 živé vzorky Terry: 1 reklamní hodinový řádek + 1 důležitá technická karta, 0 chyb; pro třetí vzorek/koncept čeká Mílův výběr zprávy. Bez archivu/SMTP, hodinová služba vypnutá. GitHub CI stejného vydání má 2 chyby testů Camina kvůli nenalezeným ffmpeg/ffprobe na runneru, samostatně otevřené. Před aktivací provozní profil/rozpočet, přejímka metadat/odpovědi; notifikace, CalDAV a fyzické QA čekají.
 
 - `projects/camino.md`; `handoffs/workstreams/project-camino.md`; `tvbcp/workstreams/project-camino.md`; `reports/camino_film_resume_latest_20261028.md` — 2026-10-28 15:37 CET: poslední rozpracovaný film při otevření střižny nasazený do 03b9047f přes Terru, účtenka df3e2ff0. Plná brána 2262 PASS, smoke 5/5; živé HTML přesně nové a resume_project ověřené. Fyzická přejímka čeká.
 

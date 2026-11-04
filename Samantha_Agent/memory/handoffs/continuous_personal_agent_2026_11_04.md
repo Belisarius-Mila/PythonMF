@@ -6,7 +6,42 @@ Stav: rozpracovane
 Pripomenout pri startu: ano
 Datum: 2026-11-04
 
-## Aktuální stav 2026-11-04 19:35 CET
+## Aktuální stav 2026-11-04 20:13 CET
+
+- Následné Terra p+n je dokončené po `d1e5e72c7f88`: 2 commity,
+  účtenka `2be778ce2781fc3396856daf24ead8d6`, plná místní brána 2338 PASS,
+  smoke 5/5. Vzdálený head, živý stamp `6eedb2457fff8304` a stránka
+  nezávisle ověřené; důkazy jsou v
+  `logs/continuous_email_schema_release_20261104.log` a navazujícím
+  `continuous_email_schema_release_verification_20261104.log`.
+- Míla na Macu osobně vyřadil první kartu a uvedl, že Cockpit funguje.
+  Čerstvý stav potvrdil `dismissed`. Jde o dílčí Mac QA místního vyřazení,
+  nikoli o přejímku archivace, SMTP, metadat nebo iPhonu; kartu neobnovovat
+  automaticky. Originální zprávu místní vyřazení nemaže.
+- Míla souhlasil s malým dalším pilotem. Dvě dosud neposuzované iCloud
+  zprávy dostala Terra/high celé a každou posoudila jednou: hromadná nabídka
+  → `hourly_summary`, technické upozornění → `awaiting_confirmation`.
+  Obě bez návrhu odpovědi/archivace. Živé API ověřilo 1 kartu, 1 hodinový
+  řádek a 0 chyb. Běžné kurzory i původní vyřazení zachované.
+- Soukromá účtenka `representative_pilot_20261104/proof_v1.json` obsahuje
+  oba potvrzené pokusy, otisky a usage. Celkem 65 777 input, 42 496 cached
+  (podmnožina vstupu), 454 output tokenů: při dosavadních Standard sazbách
+  odhad 0,691895 kreditu za oba pokusy. Úspora cache není zárukou dalšího
+  provozu; profil/rozpočet zatím nejsou aktivované.
+- Pro pilot konceptu chybí konkrétní aktuální zpráva, kterou Míla chce
+  zodpovědět. Asynchronně byl požádán o odesílatele a předmět. Žádost
+  nenahrazovat vymyšleným zájmem, souhlasem nebo odpovědí na oznámení.
+  Celkový zamýšlený limit tohoto malého pilota je nejvýše 3 zprávy.
+- Technický nález z pošty: GitHub Actions pro vydání `d1e5e72c` skončily
+  chybou ve 2 mediálních testech Camina (`test_camino_film_photo_layers`,
+  `test_camino_film_orus`), protože runner nenalezl ffmpeg/ffprobe.
+  Vzdálená CI tedy neprošla, ačkoli místní publikační brána prošla.
+  Potvrzený run 41890802397; log `logs/github_email_gate_failed_20261104.log`.
+  Jde o samostatný otevřený nález, nikoli provedenou opravu CI.
+- Nic se neodeslalo ani nearchivovalo. Hodinová služba a notifikace zůstaly
+  vypnuté; kalendář se nečetl. Tento krok neměnil produkční kód ani role.
+
+## Předchozí milník 2026-11-04 19:35 CET
 
 - Po Mílově „jdi na to“ byl jedním syntetickým diagnostickým průchodem
   doložen skutečný důvod: HTTP 400 `invalid_json_schema`. Modelový výstup
@@ -175,10 +210,11 @@ odsouhlasený rozsah čtení k potvrzování jednotlivých zpráv.
 
 ## Další krok
 
-Mílova přejímka první skutečné karty a jejích metadat v Cockpitu. Pak
-provozní modelový profil a rozpočet s ohledem na naměřenou režii; další
-pilot musí být vědomě vymezený. Trvalá aktivace a další p+n zůstávají
-samostatnými kroky.
+Mílova kontrola nové důležité karty a reklamního hodinového řádku; doplnit
+konkrétní zprávu pro pilot konceptu odpovědi. Poté potvrzené uložení,
+editor a samostatně domluvená testovací zpráva/příjemce pro SMTP.
+Před pravidelným provozem profil/rozpočet a aktivace; zvlášť dořešit
+zjištěné selhání vzdálené CI Camina. Nový p+n nyní není součástí pilota.
 
 ## Navrhované další kroky
 

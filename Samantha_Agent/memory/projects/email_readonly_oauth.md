@@ -2,6 +2,23 @@
 
 ## Aktuální směr 2026-11-04 — průběžný osobní agent
 
+- Stav 20:13 CET: oprava schématu je již nasazená po `d1e5e72c`
+  (Terra p+n `2be778ce`, místní plná brána 2338 PASS, smoke 5/5,
+  nezávislé ověření). Starší údaj „pouze lokální“ níže je překonaný.
+- Míla osobně ověřil vyřazení první karty na Macu; stav `dismissed`
+  potvrzený, originální e-mail tím není smazaný. Metadata/archiv/SMTP
+  ani fyzický iPhone test tím přijaté nejsou.
+- Další malý pilot: Terra/high jednou zpracovala 2 celé nové iCloud zprávy.
+  Hromadná nabídka správně vytvořila hodinový řádek, technické upozornění
+  důležitou kartu. Živé API: 1 karta, 1 řádek, 0 chyb, žádný koncept.
+  Oba modelové výsledky potvrzené, běžné kurzory a staré vyřazení zachované.
+- Třetí vzorek pro koncept čeká na Mílův výběr aktuální zprávy (odesílatel
+  a předmět); žádost poslaná v konverzaci. Celkový limit malého pilota 3.
+  Modelové role, hodinová služba, archivace ani SMTP se neaktivovaly.
+- GitHub Actions run 41890802397 selhal ve dvou mediálních testech Camina
+  kvůli nenalezeným ffmpeg/ffprobe na runneru. Místní publikační brána
+  a vzdálená CI jsou různé důkazy; CI zůstává samostatně otevřená.
+
 - Oprava a úspěšný pilot 19:35 CET: příčina prvního selhání je doložená
   syntetickým průchodem: `invalid_json_schema`, chybějící `important` a
   `reply_subject` v `required`. Adaptér nyní požaduje všechny vlastnosti
@@ -561,3 +578,25 @@ Regrese FAIL→PASS, 65 cílených scénářů a statická brána PASS. Nový ž
 modelový výsledek potvrzený, API má 1 přesně shodnou kartu a 0 chyb.
 Spotřeba 28 463 vstup + 221 výstup tokenů, odhad 0,7392 Standard kreditu;
 žádná cache. Oprava adaptéru je lokální, nasazený head zůstává d9bf3a7c.
+
+## 2026-11-04 20:13 CET — Dva další živé vzorky a dílčí Mac QA
+
+Hotovo: Po nasazení opravy Míla osobně ověřil vyřazení první karty na Macu.
+Další dvě zprávy Terra celým obsahem jednou posoudila: reklama je hodinový
+řádek, technické upozornění vlastní důležitá karta. Živé API ukazuje oba
+výsledky a žádnou chybu. Původní vyřazení i běžné kurzory zůstaly zachované.
+
+Rozhodnutí: Míla souhlasil s malým dalším pilotem. Pro koncept chybí jeho
+výběr konkrétní aktuální zprávy; nejde o souhlas se skutečným odesláním.
+
+Další krok: Vybraná zpráva pro koncept odpovědi a Mílova přejímka nových
+dvou výsledků v Cockpitu.
+
+Navrhované další kroky: Potvrzené uložení/editor, domluvený SMTP test,
+provozní profil/rozpočet a služba, notifikace/CalDAV.
+
+Technický důkaz: P+n d1e5e72c / 2be778ce, místní 2338 PASS + smoke 5/5.
+Soukromá účtenka reprezentativního pilota potvrzuje oba modelové pokusy,
+65 777 input (42 496 cached) + 454 output tokenů, odhad 0,691895 Standard
+kreditu. GitHub CI run 41890802397 samostatně selhal ve 2 mediálních
+testech Camina kvůli nenalezeným ffmpeg/ffprobe; tento nález nebyl opravován.
