@@ -1,6 +1,24 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
+- 2026-11-04 20:20 CET: Terra na výslovný Mílův pokyn lokálně opravila
+  dvě selhání GitHub CI v testech komentářů. Mockovaný stdin kontrakt
+  nevyhledává skutečné binárky; Orus má samostatný kontrakt celého textu
+  a 90% tempa bez médií. Původní skutečná integrace zůstává a kontroluje
+  dostupnost ffmpeg i ffprobe s přesným důvodem případného přeskočení.
+- Převzetí Adamem: diff jen dvou testových modulů, bez změny produkčního
+  kódu, workflow, služeb nebo osobních dat. Terra doložila původní 2 chyby
+  při simulaci nedostupných binárek; po opravě 2 PASS + 1 přeskočená reálná
+  integrace. Samostatně ověřené chybějící ffprobe. Běžné prostředí 37/37
+  PASS bez přeskočení; službový PATH 32 PASS + 5 přeskočených, skutečný
+  Orus integrační test v něm samostatně PASS.
+- GitHub run 41890802397 po d1e5e72c zůstává historicky neúspěšný;
+  nový vzdálený běh opravy dosud neproběhl. Tento vývoj nezahrnuje p+n.
+  Další krok: samostatná publikace opravy a přejímka nového GitHub CI,
+  potom návrat k rozpracovanému pilotu odpovědi na e-mail.
+- Dřívější UI milník a dosud otevřená fyzická přejímka níže zůstávají
+  zachované. Žádný nový produktový rozsah se touto testovou opravou nepřidává.
+
 - 2026-10-28 15:37 CET: Oprava výchozího otevření střižny je publikovaná a nasazená do 03b9047fb81a4c610fb097d7f8bad7f6e8cf18f2. Střižna nabízí poslední platný uložený střih napříč cestami podle času poslední editovací revize; během práce zachovává ruční výběr a při novém otevření nabídku znovu ověří.
 - Registrované Terra p+n df3e2ff061892d509ed9a09c354af6d6 completed, push/deployment confirmed, dva commity, project-camino → Cockpit, gpt-6.1-terra/high. Plná publikační brána 2262 PASS / 381,8 s, smoke 5/5, protected_services_unchanged=true. Předtím 86 cílených testů a rychlá statická brána PASS.
 - Jedna Adamova kontrola: GitHub/main přesně na vydaném headu 0/0 před tímto zápisem; health a stránka HTTP 200, živé HTML přesně odpovídá zdroji (SHA-256 d9c0bb7bb6c2b68f2be5203add479324757d7795f7bce51b14c7537695ed776c), code_stamp 693ef47d90d9a288. Živá nabídka resume_project patří ověřené cestě i katalogu; soukromé názvy, ID a obsah se do zápisu nekopírují.

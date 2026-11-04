@@ -1,9 +1,22 @@
 # Camino
 
-Aktualizováno: 2026-10-28 15:37 CET — návrat na poslední rozpracovaný film nasazený přes Terru
+Aktualizováno: 2026-11-04 20:20 CET — lokální oprava přenositelnosti mediálních testů CI
 Pracovní proud: `project-camino` · typ Project · režim active · priorita 1.
 
 ## Aktuální stav
+
+- 2026-11-04 20:20 CET: Míla výslovně předal Terře opravu 2 chyb
+  GitHub Actions runu 41890802397, zjištěných v e-mailovém pilotu.
+  Příčina: testy vyžadovaly mediální binárky, které runner neměl.
+  Mockovaný stdin test nyní mockuje i dohledání binárky; Orus samostatně
+  kontroluje celý text a 90% tempo bez nástrojů, zatímco skutečná mediální
+  integrace zůstává zachovaná a přeskočí se jen při nedostupném konkrétním
+  ffmpeg/ffprobe. Produkční kód ani workflow se neměnily.
+- Terra doložila FAIL→PASS při nedostupnosti binárek; 37/37 běžných testů
+  PASS bez skip, službový PATH 32 PASS + 5 skip a samostatný skutečný Orus
+  integrační PASS v tomto PATH. Adam převzal a zkontroloval přesný diff.
+  Nové p+n/GitHub CI ještě neproběhly; nelze tvrdit, že vzdálený run opravy
+  je zelený. Navazuje samostatné vydání a návrat k e-mailovému pilotu.
 
 - 2026-10-28 15:37 CET: Oprava výchozího otevření střižny je publikovaná a nasazená do 03b9047fb81a4c610fb097d7f8bad7f6e8cf18f2. Střižna nabízí poslední platný uložený střih napříč cestami podle času poslední editovací revize; během práce zachovává ruční výběr a při novém otevření nabídku znovu ověří.
 - Registrované Terra p+n df3e2ff061892d509ed9a09c354af6d6 completed, push/deployment confirmed, dva commity, project-camino → Cockpit, gpt-6.1-terra/high. Plná publikační brána 2262 PASS / 381,8 s, smoke 5/5, protected_services_unchanged=true. Předtím 86 cílených testů a rychlá statická brána PASS.

@@ -179,6 +179,7 @@ class PhotoLayerTests(unittest.TestCase):
         def media(args, **kwargs):
             if args[-1].endswith("speech.m4a"): Path(args[-1]).write_bytes(b"mock m4a")
         with patch("app.camino_film_narration.subprocess.run", side_effect=run), \
+             patch("app.camino_film_narration.media_binary", side_effect=lambda name: name), \
              patch("app.camino_film_render.ffmpeg", side_effect=media), \
              patch("app.camino_film_narration.probe", return_value={"streams": [{"codec_type": "audio"}]}), \
              patch("app.camino_film_narration.duration_ms", return_value=150000):

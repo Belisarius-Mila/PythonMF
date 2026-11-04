@@ -111,9 +111,37 @@ class OrusContractTests(unittest.TestCase):
         self.assertEqual(result, wav_bytes())
         self.assertIsNone(orus._NoRedirect().redirect_request(None, None, None, None, None, None))
 
+    def test_joined_audio_contract_keeps_full_text_and_slower_tempo_without_media_tools(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            directory = Path(tmp)
+            text = "🙂" * 6000
+            parts = orus.split_text(text)
+            def fake_ffmpeg(args, **kwargs):
+                if args[-1].endswith("speech.m4a"):
+                    Path(args[-1]).write_bytes(b"mock m4a")
+            with patch.object(orus, "access_token", return_value="synthetic"), \
+                 patch.object(orus, "request_audio", return_value=wav_bytes()) as request, \
+                 patch("app.camino_film_narration.media_binary", side_effect=lambda name: name), \
+                 patch("app.camino_film_render.ffmpeg", side_effect=fake_ffmpeg) as ffmpeg, \
+                 patch("camino.film.media.probe", return_value={"streams": [{"codec_name": "pcm_s16le"}]}), \
+                 patch("camino.film.media.duration_ms", return_value=1234):
+                revalidate = Mock()
+                self.assertEqual(orus.synthesize_orus(text, directory, consent(text), revalidate), 1234)
+            self.assertEqual("".join(c.args[0] for c in request.call_args_list), text)
+            self.assertEqual(request.call_count, len(parts))
+            self.assertEqual(revalidate.call_count, len(parts) + 1)
+            args = ffmpeg.call_args_list[0].args[0]
+            self.assertIn(f"concat=n={len(parts)}:v=0:a=1,atempo=0.9[speech]", args[args.index("-filter_complex") + 1])
+            self.assertEqual(len(list(directory.glob("cloud-part-*-request.json"))), len(parts))
+
     def test_real_joined_audio_keeps_full_6000_characters_and_slower_tempo(self):
         from camino.film.media import probe, duration_ms
         with tempfile.TemporaryDirectory() as tmp, patch.dict(os.environ, {"PATH": "/usr/bin:/bin:/usr/sbin:/sbin"}):
+            for name in ("ffmpeg", "ffprobe"):
+                try:
+                    media_binary(name)
+                except FilmError:
+                    self.skipTest(f"Local media tool {name} required")
             directory = Path(tmp)
             text = "🙂" * 6000
             parts = orus.split_text(text)

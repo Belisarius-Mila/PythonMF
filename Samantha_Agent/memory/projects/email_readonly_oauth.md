@@ -2,6 +2,12 @@
 
 ## Aktuální směr 2026-11-04 — průběžný osobní agent
 
+- Dodatek 20:20 CET: na Mílův výslovný pokyn Terra lokálně opravila obě
+  zjištěné chyby mediálních testů Camina. Běžné moduly 37/37 PASS,
+  reprodukce prostředí bez binárek FAIL→PASS, skutečná integrace zachovaná.
+  Vývoj je kanonicky zapsaný v `project-camino`; nový p+n/GitHub run opravy
+  zatím neproběhly. Poté se vracíme k nedokončenému testu konceptu odpovědi.
+
 - Stav 20:13 CET: oprava schématu je již nasazená po `d1e5e72c`
   (Terra p+n `2be778ce`, místní plná brána 2338 PASS, smoke 5/5,
   nezávislé ověření). Starší údaj „pouze lokální“ níže je překonaný.

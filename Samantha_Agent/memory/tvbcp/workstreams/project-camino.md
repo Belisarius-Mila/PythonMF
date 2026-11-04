@@ -1,6 +1,17 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
+- 2026-11-04 20:20 CET: Lokální testová oprava Terry odstraňuje závislost
+  čistého stdin kontraktu na FFmpeg a doplňuje samostatný Orus kontrakt
+  celého textu/90% tempa bez instalovaných médií. Skutečná integrace zůstala
+  zachovaná s kontrolou dostupnosti obou nástrojů.
+- 37 testů v běžném prostředí PASS, 0 skip; službový PATH 32 PASS + 5 skip.
+  Reprodukce původních 2 chyb bez binárek → po opravě 2 PASS + 1 skip
+  skutečné integrace, přesný důvod ffmpeg/ffprobe ověřený. Adam převzal diff
+  pouze dvou testů; produkční kód ani workflow se nemění.
+- Jen lokální vývoj; oprava dosud nemá nový GitHub run ani nové p+n.
+  Další krok: samostatná publikace a vzdálená CI přejímka, pak e-mailový pilot.
+
 - 2026-10-28 15:37 CET: Oprava výchozího otevření střižny je publikovaná a nasazená do 03b9047fb81a4c610fb097d7f8bad7f6e8cf18f2. Střižna nabízí poslední platný uložený střih napříč cestami podle času poslední editovací revize; během práce zachovává ruční výběr a při novém otevření nabídku znovu ověří.
 - Registrované Terra p+n df3e2ff061892d509ed9a09c354af6d6 completed, push/deployment confirmed, dva commity, project-camino → Cockpit, gpt-6.1-terra/high. Plná publikační brána 2262 PASS / 381,8 s, smoke 5/5, protected_services_unchanged=true. Předtím 86 cílených testů a rychlá statická brána PASS.
 - Jedna Adamova kontrola: GitHub/main přesně na vydaném headu 0/0 před tímto zápisem; health a stránka HTTP 200, živé HTML přesně odpovídá zdroji (SHA-256 d9c0bb7bb6c2b68f2be5203add479324757d7795f7bce51b14c7537695ed776c), code_stamp 693ef47d90d9a288. Živá nabídka resume_project patří ověřené cestě i katalogu; soukromé názvy, ID a obsah se do zápisu nekopírují.
@@ -5373,3 +5384,24 @@ Technický důkaz:
 - Účtenka df3e2ff061892d509ed9a09c354af6d6 completed, push_state/deployment_state=confirmed, dva commity do 03b9047fb81a4c610fb097d7f8bad7f6e8cf18f2. Plná brána 2262 PASS / 381,8 s, smoke 5/5, protected_services_unchanged=true.
 - Jedna kontrola Adama: GitHub/main 0/0 na vydaném headu před zápisem, health/HTML HTTP 200 a přesná shoda HTML SHA-256 d9c0bb7bb6c2b68f2be5203add479324757d7795f7bce51b14c7537695ed776c, code_stamp 693ef47d90d9a288. Živé resume_project patří povolené cestě a ověřenému filmovému katalogu; osobní identifikátory ani data nejsou v zápisu.
 - Caller účtenku převzal; returned_to_adam=false nepotvrzuje automatický portálový návrat a není důvodem opakování. Předchozí 86 cílených testů PASS; browser/Safari/iPhone proklik NEOVĚŘENO. Následuje jen lokální výsledkový checkpoint, žádná další publikace.
+
+## 2026-11-04 20:20 CET — Přenositelnost mediálních testů GitHub CI
+
+Hotovo: Test předání celého textu místnímu hlasu již nepotřebuje skutečné
+FFmpeg. Orus má kontrolu celého textu a pomalejšího tempa i bez binárek;
+skutečná mediální zkouška zůstává a při chybějícím nástroji uvede přesný důvod.
+
+Rozhodnutí: Míla výslovně předal tuto úzkou opravu Terře před návratem
+k testu e-mailů. Vývoj nemění produkční kód, workflow ani služby.
+
+Další krok: Samostatné p+n a ověření nového GitHub CI runu.
+
+Navrhované další kroky: Návrat k pilotu konceptu e-mailové odpovědi;
+dosud otevřené fyzické přejímky Camina zůstávají zachované.
+
+Technický důkaz: Terra reprodukovala 2 chyby bez binárek; po opravě 2 PASS
+a 1 přeskočená skutečná integrace s konkrétním důvodem. Chybějící ffprobe
+ověřené zvlášť. Běžné moduly 37/37 PASS bez skip, službový PATH 32 PASS +
+5 skip a samostatný skutečný Orus PASS. Adam jednou převzal přesný diff
+dvou testových souborů. Vzdálený run 41890802397 je původní neúspěšný běh,
+nikoli důkaz výsledku této lokální opravy.

@@ -6,7 +6,17 @@ Stav: rozpracovane
 Pripomenout pri startu: ano
 Datum: 2026-11-04
 
-## Aktuální stav 2026-11-04 20:13 CET
+## Aktuální stav 2026-11-04 20:20 CET
+
+- Míla výslovně předal Terře dokončení opravy zjištěných chyb CI před
+  návratem k e-mailovému testu. Terra lokálně upravila pouze 2 testové
+  soubory Camina; Adam převzal diff. Reprodukce bez binárek FAIL→PASS,
+  37/37 běžných testů PASS, skutečná mediální integrace zachovaná.
+  Kanonický vývojový zápis je v handoffu/TVBCP `project-camino` a v
+  `projects/camino.md`. Nové p+n ani vzdálená CI opravy zatím neproběhly.
+  E-mailový pilot a výběr zprávy pro koncept tím nebyly změněné.
+
+## Předchozí milník 2026-11-04 20:13 CET
 
 - Následné Terra p+n je dokončené po `d1e5e72c7f88`: 2 commity,
   účtenka `2be778ce2781fc3396856daf24ead8d6`, plná místní brána 2338 PASS,

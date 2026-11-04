@@ -1514,6 +1514,8 @@ Doplnění 17102026 k LL-071: Nativní modelový pomocník navíc zdvojuje roli,
 
 - Doplnění LL-080 (2. 11., MMTX rozpočet): test odmítnutí placeného požadavku nemá vyžadovat instalované FFmpeg. Mockovat dohledání nástroje, vynutit PATH služby a ověřit skutečnou rozpočtovou chybu i nulové dekódování/odeslání. Reprodukce FAIL→PASS, Azure/builder 11 PASS v obou prostředích; skutečné mediální kontroly zůstávají samostatné.
 
+- Doplnění LL-080 (4. 11., GitHub CI): mockovaný stdin test musí mockovat i `media_binary`, jinak selže dřív než ověří předání celého textu. U Orusu samostatně testovat celý text/concat/90% tempo bez binárek a zachovat skutečnou integraci s konkrétním preflightem ffmpeg i ffprobe. Terra doložila 2 původní chyby bez nástrojů → 2 PASS + přeskočenou skutečnou integraci s důvodem; běžné moduly 37 PASS bez skip. Zelený místní běh s Homebrew není důkaz dostupnosti nástrojů na GitHub runneru.
+
 ### LL-081 — Pracovní text a historie hlasových pokusů se nesmějí přepisovat navzájem
 
 - Problém: samotné přepsání textu a nahrazení aktuálního audio odkazu neumožní porovnat pokusy ani obnovit jejich znění; skrytí záznamu navíc nesmí poškodit starší film.
