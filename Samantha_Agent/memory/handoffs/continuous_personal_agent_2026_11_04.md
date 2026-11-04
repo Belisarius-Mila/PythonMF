@@ -6,7 +6,39 @@ Stav: rozpracovane
 Pripomenout pri startu: ano
 Datum: 2026-11-04
 
-## Aktuální stav 2026-11-04 19:27 CET
+## Aktuální stav 2026-11-04 19:35 CET
+
+- Po Mílově „jdi na to“ byl jedním syntetickým diagnostickým průchodem
+  doložen skutečný důvod: HTTP 400 `invalid_json_schema`. Modelový výstup
+  vyžaduje všechny vlastnosti v `required`; generované Pydantic schéma
+  vynechávalo `important` a `reply_subject` kvůli místním výchozím hodnotám.
+- `CodexEmailProposer` nyní pro výstup požaduje všechny kořenové vlastnosti.
+  Lokální model a jeho výchozí hodnoty se nemění, staré návrhy zůstávají
+  kompatibilní. Regresní test ověřil FAIL před úpravou a PASS po ní, včetně
+  požadavků na vnořené objekty. Celkem 65 cílených scénářů PASS a rychlá
+  statická Cockpit brána PASS (`logs/continuous_email_schema_static_20261104.log`).
+- Následoval právě jeden nový živý pokus Terry/high nad stejnou úplnou
+  iCloud zprávou se shodným otiskem. Modelový výsledek je potvrzený:
+  důležitá zpráva, doporučené uložení, odpověď nenavržená. Karta je ve
+  stavu `awaiting_confirmation`; živé API ověřilo 1 kartu, 0 hodinových
+  řádků, 0 chyb a přesnou shodu návrhu i celého textu s výsledkem pilota.
+- Původní selhání je zachované v `assessment_history` a první soukromé
+  účtence. Nový pokus má samostatnou soukromou účtenku
+  `pilot_20261104_2.json`; kurzor běžného zdroje nebyl posunutý.
+  Nic se nearchivovalo ani neodeslalo a hodinová služba zůstala vypnutá.
+- Potvrzená spotřeba tohoto nového pokusu: 28 463 vstupních tokenů,
+  0 cached, 221 výstupních, 28 684 celkem; modelový tah 5 724 ms.
+  Při ověřených Standard sazbách jde o 0,7392 kreditu, nikoli částku v Kč.
+  Jeden vzorek není odhad celého provozu; před aktivací posoudit režii
+  základních instrukcí/nástrojů, dávkování a další reálné zprávy.
+- Oprava adaptéru je zatím pouze lokální. Nasazený Cockpit zůstává na
+  `d9bf3a7c111a`; jeho již nasazené API a stránka čtou novou kartu ze
+  společného soukromého stavu. V této navazující etapě se p+n neopakovalo.
+- Skutečnou kvalitu důležitosti a metadat ještě musí přijmout Míla na kartě
+  v Komunikace → E-maily k řešení. Živé odesílání/archivace ani fyzická
+  browser/iPhone přejímka tím nejsou doložené. Trvalá role se neměnila.
+
+## Předchozí milník 2026-11-04 19:27 CET
 
 - Míla výslovně schválil pořadí „nejdříve terra p+n a pak řízený pilot
   Terry“. Původní odklad p+n níže je tím překonaný; trvalá aktivace schválená
@@ -119,10 +151,10 @@ odsouhlasený rozsah čtení k potvrzování jednotlivých zpráv.
 
 ## Co není hotové
 
-- Terra je Mílou zvolená. První pilot neprošel potvrzením výsledku; zbývá
-  diagnostika kontraktu App Serveru, úspěšný pilot, provozní posouzení, centrální
-  modelový profil a skutečná přejímka kvality odpovědí a metadat.
-- Živá SMTP/IMAP přejímka na konkrétní schválené testovací zprávě a příjemci;
+- Terra je Mílou zvolená a jeden skutečný modelový průchod je potvrzený.
+  Zbývá provozní posouzení, centrální modelový profil a skutečná přejímka
+  kvality odpovědí a metadat na reprezentativních zprávách.
+- Živá SMTP přejímka na konkrétní schválené testovací zprávě a příjemci;
   syntetická přejímka odesílacího kódu není důkaz skutečného doručení.
 - Ruční audit nejistého odeslání podle původního Message-ID. Automatický
   retry není povolený; UI jej při nejistotě nenabízí.
@@ -143,10 +175,10 @@ odsouhlasený rozsah čtení k potvrzování jednotlivých zpráv.
 
 ## Další krok
 
-Doplnit přesnou diagnostiku neúspěšného modelového kontraktu a odlišit
-chybu modelu od neúplného potvrzení vstupu/výstupu. Teprve poté vědomě
-rozhodnout o novém jednotlivém pilotu; původní nejistý pokus neopakovat
-automaticky. Následuje kvalita metadat/odpovědí, modelová role a aktivace.
+Mílova přejímka první skutečné karty a jejích metadat v Cockpitu. Pak
+provozní modelový profil a rozpočet s ohledem na naměřenou režii; další
+pilot musí být vědomě vymezený. Trvalá aktivace a další p+n zůstávají
+samostatnými kroky.
 
 ## Navrhované další kroky
 
@@ -164,8 +196,9 @@ automaticky. Následuje kvalita metadat/odpovědí, modelová role a aktivace.
 - Těla důležitých zpráv jsou zatím součástí místního JSON stavu karet.
   Před trvalým provozem ověřit odezvu přehledu na větší dávce; případné
   samostatné úložiště těl a stránkování odvodit z výsledku tohoto měření.
-- Syntetická přejímka adaptéru neodhalila chybu prvního živého pokusu.
-  Jedna zpráva byla živě načtená; modelový konečný výsledek není potvrzený.
+- Původní syntetická přejímka adaptéru neodhalila neplatné strict schéma.
+  Nyní je doložená reprodukce, oprava a jeden potvrzený živý výsledek;
+  reprezentativnost a kvalita návrhů zatím přijaté nejsou.
   Kalendář se nečetl a žádný e-mail se neodeslal ani nearchivoval.
   Publikování/nasazení doložené výše není aktivací hodinového agenta.
 - Projektový Python je `3.12.0rc3`; stabilní prostředí služby je doporučená

@@ -26,6 +26,10 @@ class CodexEmailProposer:
     def __call__(self, observed) -> EmailProposal:
         source = asdict(observed.source)
         source.pop("original_eml")
+        output_schema = EmailProposal.model_json_schema()
+        # Structured output requires every property, including fields whose
+        # local Pydantic defaults keep historical saved proposals compatible.
+        output_schema["required"] = list(output_schema["properties"])
         instructions = (
             "Jsi osobní e-mailový agent Míly. Přečti celý předložený e-mail a rozhodni jeho důležitost. "
             "Reklamy a běžné hromadné nabídky jsou zpravidla nedůležité; důležitost urči podle obsahu, "
@@ -41,7 +45,7 @@ class CodexEmailProposer:
                                              sandbox="read-only", approval_policy="never")
                 receipt = client.send_text(thread_id=thread, text=json.dumps(source, ensure_ascii=False),
                                            model=self.model, effort=self.effort,
-                                           output_schema=EmailProposal.model_json_schema(),
+                                           output_schema=output_schema,
                                            sandbox_policy={"type": "readOnly"}, approval_policy="never")
         if not receipt.delivered:
             raise ValueError("Modelové posouzení nemá potvrzený konečný výsledek.")

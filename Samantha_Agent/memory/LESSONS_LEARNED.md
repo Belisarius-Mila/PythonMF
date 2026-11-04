@@ -29,6 +29,13 @@ nebo jejichž princip lze znovu použít v jiné části projektu.
 
 ## Záznamy
 
+### LL-092 — Výchozí hodnoty Pydantic nejsou volitelná pole strict výstupu modelu
+
+- Problém: syntetický klient přijal schéma, ale skutečný App Server/Model je odmítl jako `invalid_json_schema`; Pydantic vynechal pole s výchozími hodnotami z `required`.
+- Typ: opakující se
+- Řešení nalezeno: 04112026
+- Řešení: výstupní schéma musí vyžadovat všechny vlastnosti objektu, včetně `important` a `reply_subject`. Lokální výchozí hodnoty zachovat pro kompatibilitu starých záznamů. Testovat tento kontrakt i u vnořených objektů, ne pouze předání schématu falešnému klientovi. Doloženo skutečným HTTP 400, regresí FAIL→PASS, 65 cílenými scénáři a jedním úspěšným živým pilotem Terry. Chybové události zachytit v soukromé diagnostické účtence; neplatné schéma neopakovat automaticky. Oficiální podklad: https://developers.openai.com/api/docs/guides/structured-outputs.
+
 ### LL-091 — Potvrzené SMTP přijetí nepřeváděj na nové odeslání při chybě QUIT nebo kopie
 
 - Problém: server může zprávu přijmout a až potom selže ukončení relace nebo IMAP kopie; opakování celého postupu by poslalo druhý e-mail.

@@ -13,7 +13,7 @@ from app.cockpit_email_agent import (
     email_agent_archive_action, email_agent_dismiss_action, email_agent_edit_action, email_agent_overview,
 )
 from app.email.codex_proposer import CodexEmailProposer
-from app.email.continuous_agent import ContinuousEmailAgent
+from app.email.continuous_agent import ContinuousEmailAgent, EmailProposal
 from app.email.hourly_agent import HourlyEmailScheduler, hourly_slot
 from tests.test_continuous_email_agent import FakeSource, observed, proposal
 
@@ -185,6 +185,36 @@ class HourlyEmailTests(unittest.TestCase):
 
 
 class CodexProposalTests(unittest.TestCase):
+    def test_strict_output_requires_all_fields_including_local_defaults(self):
+        def require_strict_objects(schema):
+            if isinstance(schema, dict):
+                if schema.get("type") == "object":
+                    if set(schema.get("required", [])) != set(schema.get("properties", {})):
+                        raise ValueError("invalid_json_schema: every property must be required")
+                    if schema.get("additionalProperties") is not False:
+                        raise ValueError("invalid_json_schema: additionalProperties must be false")
+                for value in schema.values():
+                    require_strict_objects(value)
+            elif isinstance(schema, list):
+                for value in schema:
+                    require_strict_objects(value)
+
+        class StrictClient:
+            def __enter__(self): return self
+            def __exit__(self, *_): pass
+            def start_thread(self, **kwargs): return "strict-test"
+            def send_text(self, **kwargs):
+                require_strict_objects(kwargs["output_schema"])
+                return SimpleNamespace(delivered=True, answer=proposal().model_dump_json())
+
+        result = CodexEmailProposer("gpt-6.1-terra", client_factory=StrictClient)(observed())
+        self.assertTrue(result.important)
+        # Historical saved proposals still accept their original local defaults.
+        old = proposal().model_dump()
+        old.pop("important")
+        old.pop("reply_subject")
+        self.assertEqual(EmailProposal.model_validate(old).reply_subject, "")
+
     def test_explicit_terra_model_full_body_and_schema_reach_appserver(self):
         calls = []
         class Client:

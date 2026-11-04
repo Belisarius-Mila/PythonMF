@@ -2,6 +2,20 @@
 
 ## Aktuální směr 2026-11-04 — průběžný osobní agent
 
+- Oprava a úspěšný pilot 19:35 CET: příčina prvního selhání je doložená
+  syntetickým průchodem: `invalid_json_schema`, chybějící `important` a
+  `reply_subject` v `required`. Adaptér nyní požaduje všechny vlastnosti
+  výstupu, místní výchozí hodnoty pro staré návrhy zachovává.
+  Regrese FAIL→PASS, 65 cílených scénářů a statická brána PASS.
+- Jeden nový potvrzený pokus Terry/high nad stejnou celou zprávou vytvořil
+  důležitou kartu s doporučením uložení, bez návrhu odpovědi. Živé API
+  ověřilo přesnou shodu návrhu/těla a 0 chyb. Historie původního selhání
+  i kurzor zachované; archiv/SMTP se nevolaly, služba zůstává vypnutá.
+- Naměřeno 28 463 input + 221 output tokenů, bez cache, 5 724 ms;
+  odhad 0,7392 Standard kreditu za tento pokus. Před trvalou aktivací
+  posoudit režii vstupu a další vzorky. Další krok je Mílova přejímka karty
+  a metadat, pak provozní profil/rozpočet. Oprava je lokální, bez dalšího p+n.
+
 - Aktuální vydání 19:27 CET: Míla schválil Terra p+n a následný řízený
   pilot. P+n dokončené po `d9bf3a7c111a`, účtenka
   `c3a38a12547115a5ed292a3826a9e70e`, 2337 PASS, smoke 5/5;
@@ -12,7 +26,7 @@
   doručení/dokončení (`AppServerContractError`), proto nevznikl potvrzený
   návrh; položka zůstala `analysis_failed`. Bez automatického opakování,
   bez archivu/SMTP a bez zapnutí hodinové služby. Spotřeba tohoto pokusu
-  není doložená. Další krok je přesná diagnostika kontraktu před novým pilotem.
+  není doložená. Tento neúspěšný stav překonal nový pilot popsaný výše.
 - Jednorázový pilot vybral schválenou Terru z centrální konfigurace;
   nevznikla nová trvalá role. Provozní profil, přejímka kvality a fyzické
   browser/iPhone ověření zůstávají otevřené. Úplný stav a důkazy jsou v handoffu.
@@ -49,8 +63,8 @@
 - Základní lokální backend je v `app/email/continuous_agent.py` a
   `continuous_source.py`: úplný IMAP/MIME vstup, obnovení dávky, modelové návrhy,
   upravitelný návrh s otiskem a potvrzený archiv s původním EML. Model se volí
-  explicitně. Míla zvolil Terru; žádný živý modelový běh ani nastavení role
-  zatím neproběhlo. Nová cesta je v `codex_proposer.py` a `hourly_agent.py`.
+  explicitně. Míla zvolil Terru; první potvrzený živý běh je popsaný výše,
+  trvalá role zatím nevznikla. Nová cesta je v `codex_proposer.py` a `hourly_agent.py`.
 - Trvalý pracovní stav obsahuje identitu zdroje a návrhy; obchodní archiv se
   vytváří po potvrzení. Nový archiv je zatím oddělený, není integrován do UI
   existujícího archivu ani do importu jednotlivých příloh v dokumentovém vaultu.
@@ -525,3 +539,25 @@ Technický důkaz: Vydání `d9bf3a7c111a`, účtenka `c3a38a12`, plná brána
 2337 PASS a smoke 5/5, nezávislá shoda živé stránky. Pilot: právě jeden
 pokus, `AppServerContractError`, soukromý stav `analysis_failed`; živé API
 potvrzuje jednu chybu a nula karet/řádků. Usage ani kořenová příčina nedoložené.
+
+## 2026-11-04 19:35 CET — Oprava schématu a potvrzený živý výsledek
+
+Hotovo: Terra přečetla stejný celý e-mail a úspěšně připravila důležitou
+kartu s doporučeným uložením; odpověď nepovažovala za potřebnou. Karta
+je v živém Cockpitu k Mílově přejímce. Nic se nearchivovalo ani neodeslalo.
+
+Rozhodnutí: Míla zadal pokračovat opravou a řízeným pilotem. Jeden nový
+modelový pokus následoval až po doložené příčině a regresní opravě;
+hodinový provoz ani další p+n se nespouštěly.
+
+Další krok: Mílova přejímka důležitosti a metadat na první skutečné kartě.
+
+Navrhované další kroky: Provozní modelový profil/rozpočet s dalšími vzorky,
+aktivace služby, notifikace a CalDAV.
+
+Technický důkaz: Syntetický diagnostický průchod doložil HTTP 400
+`invalid_json_schema` kvůli chybějícím výchozím polím v `required`.
+Regrese FAIL→PASS, 65 cílených scénářů a statická brána PASS. Nový živý
+modelový výsledek potvrzený, API má 1 přesně shodnou kartu a 0 chyb.
+Spotřeba 28 463 vstup + 221 výstup tokenů, odhad 0,7392 Standard kreditu;
+žádná cache. Oprava adaptéru je lokální, nasazený head zůstává d9bf3a7c.
