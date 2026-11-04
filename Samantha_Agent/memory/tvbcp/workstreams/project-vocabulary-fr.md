@@ -1,13 +1,14 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
-- Aktualizováno: 2026-11-04 12:01 CET.
-- Janin připojený sdílený iCloud má 451 řádků. Doplněno 38 chybějících párů Sentence/SentenceT, nyní 451/451 kompletních; původní věty, FR/CZ, pořadí, L/HT a gender_fr zachované. Mílovo FR 234 a IT 471 řádků beze změny.
-- Kanonický český abecední Pict/mapping.json má 1110 vazeb (+28). Doplnění používají existující obrázky, žádná původní vazba změněná. Janina distribuční kopie bajtově shodná; všechny použité existující obrázky už měla.
-- Skutečné desktopové/Pythonista resolvery prověřené ve všech třech oblastech. FR Míla a IT Míla bez chybějících obrázků; u Jany zbývá 9 řádků pro 8 nových ilustrací. Záměrný obecný obrázek u chez zůstává zachovaný. Ověřeno 902 unikátních používaných obrazových souborů, 6 testů kanonického mappingu PASS a rychlá statická brána PASS.
-- Připravený request a úspěšný dry-run 8 nových obrázků: bez, letuška, perlivá voda, pilot, bunda, zapomenout, padesát, sto. Generování ani jejich mapování se nespustilo; čeká výslovný souhlas s generováním a případným pověřením Adama k vizuálnímu výběru. Zářijové pověření platilo jen pro tehdejší dávku.
-- Starý jana_vocabularyfr_fill_sentences.py je navázaný na historická Order; nynější náhled by přepsal 10 jiných FR hesel. Nebyl použit pro zápis. Doplnění přes existující vocabulary_csv_store.save_csv_atomic, shoda aktuálních hesel/snímků, ověřená záloha a atomické nahrazení. Soukromý plán, zálohy, účtenka a úplný audit: data/private/vocabularyfr_refresh_20261104/; Janina data nepatří do Gitu.
-- Další krok: po souhlasu vytvořit 8 obrázků, vizuálně přijmout, doplnit 9 cílových vazeb a zopakovat společný audit. Soukromé poznámky k několika významům čekají na revizi; hesla nebyla automaticky přepisovaná. Vzdálená iCloud synchronizace a fyzický běh na Janině zařízení NEOVĚŘENO. Bez push a nasazení Cockpitu.
+- Aktualizováno: 2026-11-04 12:21 CET.
+- Janina připojená sdílená iCloud složka má 451/451 kompletních párů Sentence/SentenceT po předchozím doplnění 38 dvojic. Nyní doplněno 8 nových obrázků a 9 českých vazeb: bez, letuška, perlivá, pilot, bunda, dvě podoby zapomenout, padesát, sto.
+- Všech osm ilustrací vytvořeno vestavěným image_gen a vizuálně přijato Adamem podle Mílova souhlasu. WebP 1254 × 1254 px, každý pod 250000 B (maximum 234496 B), dohromady 1616214 B. Originály zachované; kopie v kanonickém Pict a Janině sdíleném Pict přesně shodné.
+- Kanonický český abecední mapping 1119 vazeb: +9 v tomto kroku, +37 za celou dávku. Obě distribuční kopie bajtově shodné a všechny původní vazby zachované. Všech devět cílových řádků volí správný nový obrázek v desktopovém i Pythonista resolveru.
+- U cent opravena jediná hodnota CZ ze „sto, setina“ na „sto“; setina je centième. Ověřená záloha a atomický CSV zápis, proti záloze se liší pouze tento jeden sloupec řádku 448. Všechny původní věty, L/HT a ostatní hodnoty zachované; Mílova FR i IT CSV beze změny.
+- Společný audit FR Míla 234 / FR Jana 451 / IT Míla 471 bez chybějících vět a obrázků; chez má dříve přijatý gramatický fallback. Skutečné resolvery, 907 používaných obrazových souborů, SHA-256 nových kopií, šest kanonických testů a rychlá statická brána prošly.
+- Prompty a technický protokol: PictNew/generated/20261104_fr_jana_refresh_batch001/generation_report.json; vizuální náhled review.html. Soukromé plány, zálohy a úplné důkazy v data/private/vocabularyfr_refresh_20261104/, zejména images_apply_receipt.json, cent_meaning_correction.json a audit_completed_images.json. Janina CSV nejsou v Gitu.
+- Další krok: načíst aktualizovaná data v Janině aplikaci a prakticky ověřit zařízení. Doručení přes vzdálený iCloud a fyzický běh Mac/iPhone NEOVĚŘENO; samostatné sestavení aplikace není potřeba. Bez push a nasazení Cockpitu. Dvě ostatní soukromé lexikální poznámky zůstávají k pozdější revizi.
 <!-- SAMANTHA_CURRENT_STATUS_END -->
 
 # TVBCP: Vocabulary FR
@@ -353,3 +354,26 @@ Technický důkaz:
 - Zbývá 9 Janiných řádků / 8 nových ilustrací; chez má záměrný gramatický fallback. FR Míla a IT Míla bez obrazových mezer. 6 kanonických testů a rychlá statická brána PASS. Nová osmička pouze request/dry-run, bez API volání.
 - Soukromé důkazy prepared_plan.json, apply_receipt.json, audit_after_existing.json a image_requests.json ve vocabularyfr_refresh_20261104. Zálohy CSV i mappingů ověřené. Lokální servisní mapping.json.lock zachovaný a přesně vyloučený v místním Git exclude, nic smazáno.
 - Kód aplikací, Janina app, Mílovy CSV a existující obrázky beze změny; vzdálený iCloud přenos a fyzické zařízení neověřené. Bez push/nasazení.
+
+### 2026-11-04 12:21 CET — Osm obrázků pro Janu doplněných do obou Pict
+
+Hotovo:
+- Všech devět zbývajících Janiných řádků dostalo správný obrázek; osm nových ilustrací je v obou používaných Pict a společné mapování je shodné.
+- Číselné karty mají jasné 50 a 100. Chybný význam cent opraven na sto; příkladové věty a značky učení zachované.
+
+Rozhodnutí:
+- Míla odpověděl „OK, vše jasné, doplň prosím 8 nových obrázků...“ na připravenou konkrétní žádost o generování, Adamův vizuální výběr a distribuci do Pict/mappingu.
+- Použít vestavěný image_gen podle dovednosti imagegen, jeden obrázek na volání. U čísel jasný jediný údaj bez doplňkových počítacích objektů; žádné přepnutí na placený CLI/API fallback. Všech osm výstupů přijato bez opakování generování.
+
+Další krok:
+- Načíst aktualizovaná data na Janině zařízení a ověřit praktické zobrazení.
+
+Navrhované další kroky:
+- Ostatní dvě soukromé lexikální poznámky řešit samostatnou revizí; nyní beze změny.
+
+Technický důkaz:
+- Osm WebP 1254 × 1254, max. 234496 B, celkem 1616214 B; zdroje zachované. Všech 16 distribučních souborů má očekávané SHA-256. Mapping 1110 → 1119, devět nových českých klíčů, všechny původní vazby a abecední řazení zachované; obě kopie přesně shodné.
+- Společný audit FR Míla 234 / Jana 451 / IT Míla 471 bez chybějících vět a obrázků; záměrný chez fallback zachovaný. Všech devět cílových řádků má shodný správný výběr na desktopu a v Pythonistě. 907 používaných souborů načtených a dekódovaných, šest kanonických testů a rychlá statická brána PASS.
+- Jediný nový CSV rozdíl vůči ověřené záloze: Order 448, CZ „sto, setina“ → „sto“. Jde o opravu nutnou k pravdivému významu a korektnímu iPhone lookupu; bez zavedení chybného aliasu setina → hundred. Ověřeno podle Larousse cent/centième, soukromý bezpečný CSV store a záloha. Mílova CSV a všechny existující věty i L/HT zachované.
+- Prompty, rozměry a otisky v PictNew/generated/20261104_fr_jana_refresh_batch001/generation_report.json, náhled review.html. Úplné soukromé důkazy images_apply_receipt.json, cent_meaning_correction.json a audit_completed_images.json ve vocabularyfr_refresh_20261104.
+- Vzdálené doručení a fyzický Mac/iPhone běh nejsou tímto místním auditem potvrzené. Kód aplikací se neměnil; bez sestavení, push nebo nasazení Cockpitu.

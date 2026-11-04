@@ -1,0 +1,107 @@
+{
+  "date": "2026-11-04",
+  "generator": "built-in image_gen",
+  "user_approval": "Míla explicitly approved the eight proposed assets and Adam visual selection before Pict/mapping distribution.",
+  "format": "webp",
+  "max_bytes": 250000,
+  "items": [
+    {
+      "stem": "without",
+      "prompt": "Use case: illustration-story. Asset type: one square standalone vocabulary illustration.\nCreate one square vocabulary card illustration for sans (bez). A person enjoys a plain cup of black coffee. Next to it, a sugar bowl and sugar cubes are clearly crossed out with a small red slash. Communicate coffee WITHOUT sugar. No written words. Warm vocabulary-card illustration for a child learner, but not babyish. Use a clear everyday scene with a simple background, natural details, soft shadows, and a little story or action. Vary people when they are useful: different children or adults, not always the same boy and girl; use at most one main boy or one main girl unless the meaning requires interaction. Keep the main idea instantly readable. Avoid random text, foreign words, decorative letters, and meaningless labels. A short Czech label or sign is allowed only when it makes the meaning clearer. No watermark, no signature.\nUse a warm polished storybook illustration with gently painterly texture, warm natural light and a clean, readable focal point. The red slash crosses ONLY the sugar cubes and sugar bowl, never the coffee or person. Make the coffee visibly plain black. No written text, no border, no watermark.",
+      "visual_review": "accepted_by_Adam_under_user_delegation",
+      "file": "without.webp",
+      "width": 1254,
+      "height": 1254,
+      "bytes": 214678,
+      "quality": 80,
+      "sha256": "d997619658cae6af17f267037ab3f2e30fab32085c1cc239943a86e64f5e0d84",
+      "status": "generated"
+    },
+    {
+      "stem": "flightattendant",
+      "prompt": "Use case: illustration-story. Asset type: one square standalone vocabulary illustration.\nCreate one square vocabulary card illustration for hôtesse (letuška). A friendly female flight attendant in a neutral unbranded uniform serves a glass of water in a passenger airplane cabin; visible airplane windows and seats. No logos, no text. Warm vocabulary-card illustration for a child learner, but not babyish. Use a clear everyday scene with a simple background, natural details, soft shadows, and a little story or action. Vary people when they are useful: different children or adults, not always the same boy and girl; use at most one main boy or one main girl unless the meaning requires interaction. Keep the main idea instantly readable. Avoid random text, foreign words, decorative letters, and meaningless labels. A short Czech label or sign is allowed only when it makes the meaning clearer. No watermark, no signature.\nWarm polished storybook illustration, gently painterly finish, natural proportions, soft daylight, instantly readable main subject. The attendant holds a tray with a single clear glass of water. Show cabin windows and passenger seats, not a cockpit. No text, border, logos or watermark.",
+      "visual_review": "accepted_by_Adam_under_user_delegation",
+      "file": "flightattendant.webp",
+      "width": 1254,
+      "height": 1254,
+      "bytes": 221822,
+      "quality": 90,
+      "sha256": "e706f94c85f1aaeb7865b7f00270a8d555752966b0bbaee7bab9820030daeea9",
+      "status": "generated"
+    },
+    {
+      "stem": "sparklingwater",
+      "prompt": "Use case: illustration-story. Asset type: one square standalone vocabulary illustration.\nCreate one square vocabulary card illustration for pétillante (perlivá). A clear glass of sparkling mineral water and a simple unbranded water bottle. Many tiny bubbles rise visibly through the clear water. No lemon, no wine, no alcohol, no text. Warm vocabulary-card illustration for a child learner, but not babyish. Use a clear everyday scene with a simple background, natural details, soft shadows, and a little story or action. Vary people when they are useful: different children or adults, not always the same boy and girl; use at most one main boy or one main girl unless the meaning requires interaction. Keep the main idea instantly readable. Avoid random text, foreign words, decorative letters, and meaningless labels. A short Czech label or sign is allowed only when it makes the meaning clearer. No watermark, no signature.\nWarm polished storybook illustration with subtle painterly texture and clean natural details. Close still life on a light wooden table: a transparent tall tumbler filled with sparkling water, with many clearly visible tiny carbonation bubbles rising from its bottom through the liquid and fizz at the surface. A clear unbranded mineral water bottle beside it. The bubbling water is the strong central visual meaning. No words, labels, people, lemon, wine or alcohol, no border or watermark.",
+      "visual_review": "accepted_by_Adam_under_user_delegation",
+      "file": "sparklingwater.webp",
+      "width": 1254,
+      "height": 1254,
+      "bytes": 230668,
+      "quality": 80,
+      "sha256": "d4b94694f81bf7fc1e65f48f67b3bc52e22fba048a753356c734d89eb5d36d0c",
+      "status": "generated"
+    },
+    {
+      "stem": "pilot",
+      "prompt": "Use case: illustration-story. Asset type: one square standalone vocabulary illustration.\nCreate one square vocabulary card illustration for pilote (pilot). An adult airline pilot wearing a neutral unbranded pilot uniform and headset seated at the controls in a clearly recognizable airplane cockpit. No readable instrument text or logos. Warm vocabulary-card illustration for a child learner, but not babyish. Use a clear everyday scene with a simple background, natural details, soft shadows, and a little story or action. Vary people when they are useful: different children or adults, not always the same boy and girl; use at most one main boy or one main girl unless the meaning requires interaction. Keep the main idea instantly readable. Avoid random text, foreign words, decorative letters, and meaningless labels. A short Czech label or sign is allowed only when it makes the meaning clearer. No watermark, no signature.\nWarm polished storybook illustration with a subtle painterly finish, same visual family as modern vocabulary cards, natural proportions and clear focal point. An adult male airline pilot is seen in three-quarter profile at the flight controls, one hand naturally holding the yoke, headset microphone near mouth, captain's neutral navy uniform with shoulder stripes. Cockpit windows show blue sky. No text, airline branding, labels, border or watermark.",
+      "visual_review": "accepted_by_Adam_under_user_delegation",
+      "file": "pilot.webp",
+      "width": 1254,
+      "height": 1254,
+      "bytes": 201280,
+      "quality": 85,
+      "sha256": "5e30303f5a181b2f9e7abf03849a3aa10dc0d79e3735e91c81ba5dde3f86efcb",
+      "status": "generated"
+    },
+    {
+      "stem": "jacket",
+      "prompt": "Use case: illustration-story. Asset type: one square standalone vocabulary illustration.\nCreate one square vocabulary card illustration for veste (bunda). A woman puts on a practical waist-length casual outdoor zip jacket before leaving on a cool day. The jacket is the clear main focus, no long coat, no suit blazer, no text. Warm vocabulary-card illustration for a child learner, but not babyish. Use a clear everyday scene with a simple background, natural details, soft shadows, and a little story or action. Vary people when they are useful: different children or adults, not always the same boy and girl; use at most one main boy or one main girl unless the meaning requires interaction. Keep the main idea instantly readable. Avoid random text, foreign words, decorative letters, and meaningless labels. A short Czech label or sign is allowed only when it makes the meaning clearer. No watermark, no signature.\nWarm polished storybook illustration with gently painterly texture and natural proportions, clear focused composition. A woman at the open door of her home puts on a practical waist-length blue casual zip-up outdoor jacket on a cool autumn morning. The jacket has long sleeves, visible zipper, pockets and a short stand collar. It is clearly a casual jacket, not a dress, shirt, blazer, long coat or ski suit. No text, logos, border, watermark.",
+      "visual_review": "accepted_by_Adam_under_user_delegation",
+      "file": "jacket.webp",
+      "width": 1254,
+      "height": 1254,
+      "bytes": 213542,
+      "quality": 80,
+      "sha256": "00299402469356061815384290746c59448f1ce13cf1e144d731beeaf79afdd2",
+      "status": "generated"
+    },
+    {
+      "stem": "forget",
+      "prompt": "Use case: illustration-story. Asset type: one square standalone vocabulary illustration.\nCreate one square vocabulary card illustration for oublier, oublié (zapomenout). A woman has just arrived at an airport check-in desk, looks worried at her open bag, and remembers her passport left clearly on a small table at home, shown in a simple thought bubble. Show forgetting one needed object, no text. Warm vocabulary-card illustration for a child learner, but not babyish. Use a clear everyday scene with a simple background, natural details, soft shadows, and a little story or action. Vary people when they are useful: different children or adults, not always the same boy and girl; use at most one main boy or one main girl unless the meaning requires interaction. Keep the main idea instantly readable. Avoid random text, foreign words, decorative letters, and meaningless labels. A short Czech label or sign is allowed only when it makes the meaning clearer. No watermark, no signature.\nWarm polished storybook illustration with gently painterly texture, natural proportions and clear simple visual storytelling. A worried adult woman at an airport check-in desk holds her open handbag and searches its visibly empty passport pocket. One large simple thought bubble above her shows the passport lying forgotten on a small table at home next to a house key. The passport in the bubble must be the only passport in the entire picture: she does NOT hold a passport and there is no passport on the check-in counter. Show a flight terminal in the soft background. No readable writing, no text, no logos, border or watermark.",
+      "visual_review": "accepted_by_Adam_under_user_delegation",
+      "file": "forget.webp",
+      "width": 1254,
+      "height": 1254,
+      "bytes": 234496,
+      "quality": 85,
+      "sha256": "5f85cc17756de7b921f1ef5af2c022b938d6d0e849f461b88f01555887bfa7c3",
+      "status": "generated"
+    },
+    {
+      "stem": "fifty",
+      "prompt": "Use case: scientific-educational. Asset type: one square standalone vocabulary illustration for the French number \"cinquante\", Czech \"padesát\". Primary request: an immediately readable warm illustrated number card for FIFTY.\nA single sturdy pale cream learning card stands upright on a light wooden desk, filling most of the square composition. The EXACT large numeral \"50\" is centered on the card, very bold, dark navy blue, simple clean typography. Spell the numeral exactly as five then zero. Make the numeral occupy about sixty percent of the image height. A very soft, understated sunlit room background, a small unmarked pencil near the edge of the desk. Warm polished storybook illustration with subtle painterly texture and soft shadows, consistent with modern vocabulary-card illustrations. Keep the number completely unobstructed. There are no counters, coins, counting grids, other numbers, letters, words, logos, decorative lettering, watermark or signature. Only the exact text \"50\".",
+      "visual_review": "accepted_by_Adam_under_user_delegation",
+      "file": "fifty.webp",
+      "width": 1254,
+      "height": 1254,
+      "bytes": 140286,
+      "quality": 90,
+      "sha256": "ccb40662fbb3fa342036e480be78fbcd54efcd8538e4c37e977190f349b5e354",
+      "status": "generated"
+    },
+    {
+      "stem": "hundred",
+      "prompt": "Use case: scientific-educational. Asset type: one square standalone vocabulary illustration for the French number \"cent\", Czech \"sto\". Primary request: an immediately readable warm illustrated number card for ONE HUNDRED.\nA single sturdy pale cream learning card stands upright on a light wooden desk, filling most of the square composition. The EXACT large numeral \"100\" is centered on the card, very bold, dark navy blue, simple clean typography. Spell the numeral exactly as one then zero then zero. Make the numeral occupy about sixty percent of the image height. A very soft, understated sunlit room background, a small unmarked pencil near the edge of the desk. Warm polished storybook illustration with subtle painterly texture and soft shadows, consistent with modern vocabulary-card illustrations. Keep the number completely unobstructed. There are no counters, coins, counting grids, other numbers, letters, words, logos, decorative lettering, watermark or signature. Only the exact text \"100\".",
+      "visual_review": "accepted_by_Adam_under_user_delegation",
+      "file": "hundred.webp",
+      "width": 1254,
+      "height": 1254,
+      "bytes": 159442,
+      "quality": 90,
+      "sha256": "acf0feb256feaf5e0e251e7fdcf76e797b1ef3613f8e58672540ba06f0e5dcd0",
+      "status": "generated"
+    }
+  ],
+  "technical_review": "8 square images decode; each <=250000 bytes; number cards 50 and 100 visually verified.",
+  "number_prompt_choice": "Clear numeral cards without auxiliary counters to keep the numerical meaning unambiguous."
+}

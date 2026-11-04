@@ -1,13 +1,14 @@
 # PictNew: opakovatelné generování obrázků pro slovíčka
 
-## Aktualizace Jany 2026-11-04 12:01 CET — věty hotové, nová osmička čeká
+## Ověřená aktualizace Jany 2026-11-04 12:21 CET
 
-- Jana 451/451 Sentence/SentenceT po doplnění 38 párů; FR Míla 234 a IT Míla 471 beze změny. Původní věty a ostatní hodnoty zachované.
-- Kanonický český abecední mapping 1110 (+28), bajtově shodný s Janinou kopií. Použité existující obrázky už v obou Pict; žádná regenerace nebo kopie obrázku.
-- Skutečné desktop/Pythonista resolvery: FR Míla a IT Míla bez mezer, Jana ještě 9 řádků / 8 nových ilustrací, plus záměrný gramatický chez fallback. Ověřeno 902 používaných souborů a 6 kanonických testů.
-- Připravený request a dry-run: bez, letuška, perlivá voda, pilot, bunda, zapomenout, padesát, sto. Nové generování, vizuální výběr a navazující distribuce čekají na odpověď Míly; zářijové pověření bylo omezené na tehdejší dávku.
-- Historický jana_vocabularyfr_fill_sentences.py dnes podle starých Order navrhuje přepsat jiná hesla; jen čtecí náhled, nepoužít pro zápis. Pro tento krok existující vocabulary_csv_store.save_csv_atomic a přesné aktuální řádky/otisky, ověřené privátní zálohy. Důkazy data/private/vocabularyfr_refresh_20261104/.
-- Vzdálená iCloud synchronizace a fyzické zařízení neověřené; žádné nové sestavení aplikace ani nasazení Cockpitu není potřeba.
+- Jana 451/451 Sentence/SentenceT po doplnění 38 dvojic; nyní osm nových ilustrací a devět nových českých vazeb. FR Míla 234 a IT Míla 471 beze změny.
+- Osm schválených WebP přes vestavěný image_gen, jeden výstup na koncept: bez, letuška, perlivá voda, pilot, bunda, zapomenout, padesát, sto. 1254 × 1254 px, maximum 234496 B, celkem 1616214 B. Adamův vizuální výběr Míla pro tuto osmičku schválil; stejné obrázky v obou Pict.
+- Kanonický český abecední mapping 1119 (+9 nyní, +37 za dávku), bajtově shodný s Janinou kopií, původní vazby zachované. Všech devět řádků má správný výběr v desktopu i Pythonistě.
+- Společný audit všech tří slovníků bez chybějících vět a obrázků, 907 použitých souborů dekódovaných. Šest kanonických testů a rychlá statická brána PASS; chez ponechán s přijatým gramatickým obrázkem.
+- U cent opravena jediná hodnota CZ na sto (setina = centième), bezpečný CSV store se zálohou; jiné sloupce, existující věty a L/HT zachované. Zbylé dvě soukromé lexikální poznámky se nyní neřešily.
+- Prompty a otisky: PictNew/generated/20261104_fr_jana_refresh_batch001/generation_report.json; náhled review.html. Privátní plány, zálohy a účtenky data/private/vocabularyfr_refresh_20261104/. Nové soubory byly create-only; nic se nemazalo ani nepřepisovalo.
+- Další krok: načíst data na Janině zařízení. Vzdálená iCloud synchronizace a fyzický běh stále neověřené; bez sestavení aplikace nebo nasazení Cockpitu.
 
 ## Ověřená aktualizace 2026-09-13 10:12 CEST
 
