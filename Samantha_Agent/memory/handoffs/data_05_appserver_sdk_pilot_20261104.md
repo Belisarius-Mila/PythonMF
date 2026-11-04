@@ -1,4 +1,20 @@
-# Data → Will: 05/P1 App Server / Python SDK, první etapa
+# Data → Will: 05/P1 App Server / Python SDK, etapy A a B
+
+## Aktuální lokální stav — 05/P1-B
+
+Míla schválil pokračování 05/P1-B. Původní klient nyní žádá `excludeTurns:true`,
+ověřuje připojený stabilní server od 0.163.0 před operací s vláknem, rozlišuje
+final_answer a uchovává strukturované chyby bez jejich běžného logování.
+SDK se neadoptuje; session hub, runtime, Cockpit a e-mailové moduly se nemění.
+100 cílených testů PASS; úplná Cockpit brána PASS: 2 373 testů, 0 chyb a selhání,
+5 přeskočených PDF testů bez ReportLabu.
+Podrobnosti: `codex_appserver_p1b_20261104.md`; kanonický writeback je ve
+stávajícím handoffu a TVBCP proudu `layer-human-adam-development`.
+
+Další krok: Will převezme diff; integrace do main, nasazení a živá přejímka
+zůstávají samostatně autorizované. Přímé převzetí Willem dosud nepotvrzené.
+
+## Historický podklad — etapa A
 
 Priorita: P1. Datum: 2026-11-04. Větev: `data/parallel-20261104`.
 Rozsah: nové pilotní soubory, lokální commit; žádná integrace do main.

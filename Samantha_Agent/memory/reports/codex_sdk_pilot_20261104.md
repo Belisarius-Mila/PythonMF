@@ -3,6 +3,10 @@
 Datum: 2026-11-04. Autor: Data. Větev: `data/parallel-20261104`.
 Etapa: izolovaný pilot, bez integrace, modelového volání a připojení k živému socketu.
 
+Navazující lokální implementace 05/P1-B je popsána v
+`codex_appserver_p1b_20261104.md`. Následující matice zachovává stav první etapy
+před touto změnou; její tři nálezy původního klienta už pokrývají regresní testy.
+
 ## Výsledek a doporučení
 
 **Dílčí úpravy současného klienta; SDK zatím neadoptovat do produkce.**

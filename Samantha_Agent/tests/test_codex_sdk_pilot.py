@@ -170,27 +170,27 @@ class AcceptanceContractTests(unittest.TestCase):
             self.assertTrue(all(c.args[0] == "thread/turns/list" for c in request.call_args_list))
 
 
-class CurrentClientCharacterizationTests(unittest.TestCase):
-    def test_current_resume_omits_exclude_turns(self):
+class CurrentClientRegressionTests(unittest.TestCase):
+    def test_current_resume_excludes_turns(self):
         client = current_client([])
         client.resume_thread("t", cwd=ROOT)
-        self.assertNotIn("excludeTurns", client.transport.calls[0][1])
+        self.assertIs(client.transport.calls[0][1]["excludeTurns"], True)
 
-    def test_current_response_can_be_later_commentary(self):
+    def test_current_response_uses_final_answer_before_later_commentary(self):
         client = current_client(transcript())
         receipt = client.send_text(thread_id="t", text="synthetic", client_message_id="c")
         self.assertTrue(receipt.delivered)
-        self.assertEqual(receipt.answer, "progress")
+        self.assertEqual(receipt.answer, "final")
 
-    def test_current_rpc_exception_loses_error_code_and_data(self):
+    def test_current_rpc_exception_preserves_error_code_and_data(self):
         transport = StdioAppServerTransport.__new__(StdioAppServerTransport)
         transport._next_request_id = 1
         transport._send = Mock()
         transport.receive = Mock(return_value={"id": 1, "error": {"code": -32001, "message": "synthetic", "data": {"reason": "busy"}}})
         with self.assertRaises(AppServerContractError) as raised:
             transport.request("turn/start", {})
-        self.assertFalse(hasattr(raised.exception, "code"))
-        self.assertFalse(hasattr(raised.exception, "data"))
+        self.assertEqual(raised.exception.code, -32001)
+        self.assertEqual(raised.exception.data, {"reason": "busy"})
         transport._send.assert_called_once()
 
     def test_current_disconnect_after_start_does_not_start_again(self):
