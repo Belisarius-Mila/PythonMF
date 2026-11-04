@@ -29,6 +29,13 @@ nebo jejichž princip lze znovu použít v jiné části projektu.
 
 ## Záznamy
 
+### LL-090 — Dlouhé modelové posouzení nesmí držet zámek uživatelských karet
+
+- Problém: společný zámek přes celé síťové/modelové posouzení blokoval vyřazení nebo úpravu už připravených karet.
+- Typ: opakující se
+- Řešení nalezeno: 04112026
+- Řešení: samostatný zámek serializuje pozorovací cykly, krátké uživatelské operace mají svůj zámek a všechny změny stavu používají existující atomický repository transaction. Test s pozastaveným modelem ověřil, že lze vyřadit jinou kartu a po dokončení modelu se ani jedna změna neztratí. Nepřenášet dlouhý I/O zámek do UI.
+
 ### LL-089 — Úplné modelové čtení nesmí použít zkrácený náhled zprávy
 
 - Problém: e-mailové náhledy mají znakové limity; ani přítomnost původního EML sama neprokazuje, že model dostal konec dlouhého textu.

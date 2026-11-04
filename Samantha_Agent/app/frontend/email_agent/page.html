@@ -1,0 +1,15 @@
+<!doctype html>
+<html lang="cs"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>E-maily k řešení · Samantha</title><style>{{SAMANTHA_CSS}}</style></head>
+<body><main><header><div><p class="eyebrow">SAMANTHA · KOMUNIKACE</p><h1>E-maily k řešení</h1></div>
+<a href="/">Zpět do Cockpitu</a></header>
+<p id="status" role="status">Načítám přehled…</p><p id="notice" role="status"></p>
+<section aria-labelledby="importantTitle"><h2 id="importantTitle">Důležité zprávy</h2><div id="cards"></div></section>
+<section aria-labelledby="hoursTitle"><h2 id="hoursTitle">Ostatní pošta po hodinách</h2><div id="hours"></div></section>
+<details><summary>Uložené zprávy</summary><div id="archived"></div></details>
+</main><dialog id="replyEditor"><form id="replyForm"><h2>Koncept odpovědi</h2><p id="replyRecipient"></p>
+<label>Předmět<input id="replySubject" maxlength="998" required></label>
+<label>Odpověď<textarea id="replyBody" rows="12"></textarea></label>
+<p id="replyStatus" role="status"></p>
+<div class="actions"><button type="submit">Uložit koncept</button><button id="closeEditor" type="button" class="secondary">Zavřít</button></div>
+</form></dialog><script>{{SAMANTHA_JAVASCRIPT}}</script></body></html>

@@ -115,7 +115,7 @@ class ContinuousEmailTests(unittest.TestCase):
         self.assertIn("FINAL_MARKER", seen[0])
         self.assertFalse((self.root / "archive").exists())
         state_text = (self.root / "state.json").read_text()
-        self.assertNotIn("FINAL_MARKER", state_text)
+        self.assertIn("FINAL_MARKER", state_text)
         self.assertNotIn("original_eml", state_text)
 
     def test_restart_and_batches_do_not_duplicate_or_skip(self):

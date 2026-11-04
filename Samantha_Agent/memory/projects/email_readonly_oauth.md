@@ -2,6 +2,16 @@
 
 ## Aktuální směr 2026-11-04 — průběžný osobní agent
 
+- Druhý lokální krok: kontrola každou hodinu 7–22 v Europe/Prague, Terra přes
+  App Server, ranní dočtení od posledního večerního cyklu. Produkční start
+  vyžaduje explicitní inicializaci pozic; historie se automaticky nespouští.
+- V Komunikaci je nový lokální vstup E-maily k řešení: důležité zprávy
+  jednotlivě s celým tělem a návrhy, ostatní po hodinách pouze s hlavičkami.
+  Ignorování/vyřazení je pouze místní. Koncept předmětu a odpovědi se upravuje
+  ve vlastním editoru. Uložení je potvrzované, SMTP není připojené.
+- 42 cílených testů i plná brána 2315 testů prošly. Vizuální browser QA je otevřená kvůli nedostupnému
+  ovládacímu hostu. P+n Míla výslovně odložil; žádný provoz nebyl aktivovaný.
+
 - Míla stanovil prioritu průběžného agenta pro e-maily a Apple/iCloud kalendář.
   Mac bude stále online. Čtení se týká celého obsahu e-mailů, nikoli jen hlaviček
   nebo zkrácených ukázek. Dosavadní omezení této historické reference nejsou
@@ -12,10 +22,11 @@
 - Míla zapnul Kalendář na iCloudu, potvrdil sloučení a následně osobně potvrdil
   funkční synchronizaci na Macu i iPhonu. Programové CalDAV připojení dosud
   ověřené není. Tento směr je odlišný od rodinného registru narozenin a svátků.
-- První lokální backend je v `app/email/continuous_agent.py` a
+- Základní lokální backend je v `app/email/continuous_agent.py` a
   `continuous_source.py`: úplný IMAP/MIME vstup, obnovení dávky, modelové návrhy,
   upravitelný návrh s otiskem a potvrzený archiv s původním EML. Model se volí
-  explicitně; žádný živý modelový běh ani nastavení role zatím neproběhlo.
+  explicitně. Míla zvolil Terru; žádný živý modelový běh ani nastavení role
+  zatím neproběhlo. Nová cesta je v `codex_proposer.py` a `hourly_agent.py`.
 - Trvalý pracovní stav obsahuje identitu zdroje a návrhy; obchodní archiv se
   vytváří po potvrzení. Nový archiv je zatím oddělený, není integrován do UI
   existujícího archivu ani do importu jednotlivých příloh v dokumentovém vaultu.

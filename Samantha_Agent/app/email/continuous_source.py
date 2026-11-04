@@ -5,6 +5,7 @@ from __future__ import annotations
 import hashlib
 import imaplib
 from dataclasses import dataclass, replace
+from functools import partial
 
 from .archive_models import EmailArchiveSource
 from .config import load_icloud_mail_config, load_seznam_mail_config
@@ -51,7 +52,28 @@ class IMAPAgentSource:
         self.config, self.password = config, password
         identity = f"{provider}|{config.address.casefold()}|{folder}"
         self.key = hashlib.sha256(identity.encode()).hexdigest()
-        self.imap_factory = imap_factory or imaplib.IMAP4_SSL
+        self.imap_factory = imap_factory or partial(imaplib.IMAP4_SSL, timeout=30)
+
+    def baseline_cursor(self) -> dict:
+        with self.imap_factory(self.config.host, self.config.port) as imap:
+            imap.login(self.config.address, self.password)
+            status, _ = imap.select(self.folder, readonly=True)
+            if status != "OK":
+                raise RuntimeError("Nelze otevřít sledovanou schránku.")
+            _, validity = imap.response("UIDVALIDITY")
+            _, next_uid = imap.response("UIDNEXT")
+            if not validity or not validity[0] or not next_uid or not next_uid[0]:
+                raise RuntimeError("Chybí výchozí pozice schránky.")
+            return {"uidvalidity": validity[0].decode("ascii"), "after_uid": int(next_uid[0]) - 1,
+                    "health": "initialized"}
+
+    def read_item(self, item: dict) -> ObservedEmail:
+        if item["account"] != self.key:
+            raise ValueError("Zdrojový účet neodpovídá kartě.")
+        scan = self.scan({"uidvalidity": item["uidvalidity"], "after_uid": int(item["uid"]) - 1}, limit=1)
+        if scan.uidvalidity != item["uidvalidity"] or not scan.messages or scan.messages[0].source.uid != item["uid"]:
+            raise ValueError("Původní zpráva už není dostupná v očekávané schránce.")
+        return scan.messages[0]
 
     def scan(self, cursor: dict, *, limit: int = 10) -> MailScan:
         if not 1 <= limit <= 100:

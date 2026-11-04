@@ -40,8 +40,12 @@ from app.cockpit_document_readers import (
 )
 from app.cockpit_frontend import (
     COCKPIT_HTML,
+    EMAIL_AGENT_HTML,
     EMAIL_ARCHIVE_HTML,
     EMAIL_PROCESSING_HTML,
+)
+from app.cockpit_email_agent import (
+    email_agent_overview, email_agent_dismiss_action, email_agent_edit_action, email_agent_archive_action,
 )
 from app.cockpit_awake_mode import (
     cockpit_awake_mode_action,
@@ -8651,6 +8655,15 @@ def shell_quote_for_applescript(value: str) -> str:
 
 
 COCKPIT_POST_ACTIONS: tuple[dict[str, str], ...] = (
+    {"path": "/api/email-agent/dismiss", "label": "Vyřadit položku pouze z Cockpitu",
+     "risk": "private_write", "confirmation": "explicit_local_dismiss_button",
+     "handler_name": "email_agent_dismiss_action", "test_level": "direct"},
+    {"path": "/api/email-agent/edit", "label": "Uložit upravený koncept odpovědi",
+     "risk": "private_write", "confirmation": "explicit_save_draft_button",
+     "handler_name": "email_agent_edit_action", "test_level": "direct"},
+    {"path": "/api/email-agent/archive", "label": "Uložit e-mail podle potvrzeného návrhu agenta",
+     "risk": "private_write", "confirmation": "confirmed_current_proposal_digest",
+     "handler_name": "email_agent_archive_action", "test_level": "direct"},
     {
         "path": "/api/camino/film/source",
         "label": "Připravit chráněné přehrání celého videa nebo hlasového komentáře",
@@ -9756,6 +9769,12 @@ class CockpitServer:
                 if parsed.path == "/email-processing/":
                     self.respond_html(EMAIL_PROCESSING_HTML)
                     return
+                if parsed.path == "/emails-to-resolve/":
+                    self.respond_html(EMAIL_AGENT_HTML)
+                    return
+                if parsed.path == "/api/email-agent/overview":
+                    self.respond_json(email_agent_overview())
+                    return
                 if email_archive_read_routes.dispatch(parsed=parsed, responder=self):
                     return
                 if parsed.path == "/janicka-kucharka/":
@@ -10011,6 +10030,15 @@ class CockpitServer:
                         self.respond_json({"ok": False, "message": "Vykonavatel zpracovává přesný balíček; další změna počká na ověření."},
                                           status=HTTPStatus.CONFLICT)
                         return
+                if parsed.path == "/api/email-agent/dismiss":
+                    self.respond_json(email_agent_dismiss_action(self.read_json()))
+                    return
+                if parsed.path == "/api/email-agent/edit":
+                    self.respond_json(email_agent_edit_action(self.read_json()))
+                    return
+                if parsed.path == "/api/email-agent/archive":
+                    self.respond_json(email_agent_archive_action(self.read_json()))
+                    return
                 if parsed.path == "/api/camino/film/source":
                     self.respond_film_edit("source", parsed)
                     return

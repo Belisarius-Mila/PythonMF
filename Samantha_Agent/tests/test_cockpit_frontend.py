@@ -11,6 +11,7 @@ from app import cockpit
 from app import cockpit_document_readers
 from app.cockpit_frontend import (
     COCKPIT_HTML,
+    EMAIL_AGENT_HTML,
     EMAIL_ARCHIVE_HTML,
     EMAIL_PROCESSING_HTML,
     FRONTEND_JAVASCRIPT_MODULES,
@@ -22,6 +23,12 @@ from scripts.cockpit_quality_gate import node_binary
 
 
 EXPECTED_PAGES = {
+    "email_agent": (
+        EMAIL_AGENT_HTML,
+        8588,
+        120,
+        "c7c679d3283bcd37a9a099ce735d8b1317831b1882e2b3c380b75e5613ae5215",
+    ),
     "email_archive": (
         EMAIL_ARCHIVE_HTML,
         38504,
@@ -36,9 +43,9 @@ EXPECTED_PAGES = {
     ),
     "cockpit": (
         COCKPIT_HTML,
-        636202,
-        11945,
-        "d9c0bb7bb6c2b68f2be5203add479324757d7795f7bce51b14c7537695ed776c",
+        636538,
+        11950,
+        "cb48e329c0925b9b4f3bf595afc596bdb9482fb099ea1ccb4f3f8de8a17562e8",
     ),
 }
 
