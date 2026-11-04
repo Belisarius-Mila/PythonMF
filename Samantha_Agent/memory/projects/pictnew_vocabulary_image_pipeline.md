@@ -1,5 +1,12 @@
 # PictNew: opakovatelné generování obrázků pro slovíčka
 
+## Přenos Janiných hesel k Mílovi 2026-11-04 13:21 CET
+
+- Mílovo FR rozšířené 234 → 477: 243 celých záznamů pro 235 chybějících FR hesel. Původní řádky přesně zachované, nové převzaté ze zdroje včetně příkladů, rodu a L/HT, jen Order navazuje 235–477. Dva opakované FR/CZ páry nepřidány; existující vlastní hesla se nepřepisovala.
+- Shoda FR zachovává diakritiku, ignoruje velikost, interpunkci/mezery a běžné ligatury œ/oe, æ/ae. Mezi novými hesly zachované různé FR/CZ páry; žádné odhadování lemmat nebo tichá změna překladu.
+- Povinný audit FR Míla 477 / Jana 451 / IT Míla 471 bez mezer ve větách a obrázcích, 1007 použitých souborů dekódováno. Mapování 1119 a obě distribuční kopie nezměněné; nové obrázky ani vazby nebyly potřeba. Šest testů a rychlá statická brána PASS.
+- Bezpečný CSV store se zálohou a kontrolou snímků. Jana i IT hashově beze změny; soukromé důkazy data/private/vocabularyfr_merge_jana_to_mila_20261104/. Další krok: reload Mílova slovníku; bez push a nasazení aplikací.
+
 ## Ověřená aktualizace Jany 2026-11-04 12:21 CET
 
 - Jana 451/451 Sentence/SentenceT po doplnění 38 dvojic; nyní osm nových ilustrací a devět nových českých vazeb. FR Míla 234 a IT Míla 471 beze změny.

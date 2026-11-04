@@ -1,14 +1,14 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
-- Aktualizováno: 2026-11-04 12:21 CET.
-- Janina připojená sdílená iCloud složka má 451/451 kompletních párů Sentence/SentenceT po předchozím doplnění 38 dvojic. Nyní doplněno 8 nových obrázků a 9 českých vazeb: bez, letuška, perlivá, pilot, bunda, dvě podoby zapomenout, padesát, sto.
-- Všech osm ilustrací vytvořeno vestavěným image_gen a vizuálně přijato Adamem podle Mílova souhlasu. WebP 1254 × 1254 px, každý pod 250000 B (maximum 234496 B), dohromady 1616214 B. Originály zachované; kopie v kanonickém Pict a Janině sdíleném Pict přesně shodné.
-- Kanonický český abecední mapping 1119 vazeb: +9 v tomto kroku, +37 za celou dávku. Obě distribuční kopie bajtově shodné a všechny původní vazby zachované. Všech devět cílových řádků volí správný nový obrázek v desktopovém i Pythonista resolveru.
-- U cent opravena jediná hodnota CZ ze „sto, setina“ na „sto“; setina je centième. Ověřená záloha a atomický CSV zápis, proti záloze se liší pouze tento jeden sloupec řádku 448. Všechny původní věty, L/HT a ostatní hodnoty zachované; Mílova FR i IT CSV beze změny.
-- Společný audit FR Míla 234 / FR Jana 451 / IT Míla 471 bez chybějících vět a obrázků; chez má dříve přijatý gramatický fallback. Skutečné resolvery, 907 používaných obrazových souborů, SHA-256 nových kopií, šest kanonických testů a rychlá statická brána prošly.
-- Prompty a technický protokol: PictNew/generated/20261104_fr_jana_refresh_batch001/generation_report.json; vizuální náhled review.html. Soukromé plány, zálohy a úplné důkazy v data/private/vocabularyfr_refresh_20261104/, zejména images_apply_receipt.json, cent_meaning_correction.json a audit_completed_images.json. Janina CSV nejsou v Gitu.
-- Další krok: načíst aktualizovaná data v Janině aplikaci a prakticky ověřit zařízení. Doručení přes vzdálený iCloud a fyzický běh Mac/iPhone NEOVĚŘENO; samostatné sestavení aplikace není potřeba. Bez push a nasazení Cockpitu. Dvě ostatní soukromé lexikální poznámky zůstávají k pozdější revizi.
+- Aktualizováno: 2026-11-04 13:21 CET.
+- Mílovo VocabularyFR/VocabularyFR.csv má 477 řádků místo 234: doplněno 243 celých záznamů pro 235 chybějících francouzských hesel z Janina připojeného iCloud CSV. Všech 234 původních řádků přesně zachovaných.
+- Přejaté všechny sloupce včetně Sentence/SentenceT, gender_fr a zdrojových L/HT podle pokynu přidat celou datovou větu. Jen Order nově 235–477; žádné kolize. Odlišné české významy chybějícího hesla zachované samostatně; dva opakované FR/CZ páry nepřidány.
+- Porovnání ignoruje velikost písmen, mezery/interpunkci a běžné ligatury œ/oe, æ/ae; diakritiku zachovává. Existující francouzská hesla se nepřepisují. Všechna Janina hesla mají nyní v Mílově souboru odpovídající normalizovaný protějšek. Janino CSV 451 řádků i IT 471 řádků zůstaly beze změny.
+- Společný audit FR Míla 477 / FR Jana 451 / IT Míla 471 bez chybějících vět a obrázků, 1007 používaných obrazových souborů dekódovaných. Mapping 1119, obě kopie shodné a nezměněné; žádné nové obrázky ani mapování nebyly potřeba. U Jany zachovaný přijatý chez fallback. Šest kanonických testů a rychlá statická brána PASS.
+- Dříve doplněných 38 Janiných párů vět, osm ilustrací a devět vazeb zůstává zachovaných. U cent správně sto. Prompty/náhled obrázků: PictNew/generated/20261104_fr_jana_refresh_batch001/generation_report.json a review.html.
+- Bezpečný CSV store, snímky obou zdrojů, ověřená záloha a přesná kontrola výsledku. Soukromé plány a důkazy v data/private/vocabularyfr_merge_jana_to_mila_20261104/ (plan.json, apply_receipt.json, audit_after_import.json). Janina CSV ani plány nejsou v Gitu.
+- Další krok: znovu načíst Mílův slovník v používané aplikaci. Praktický reload a vzdálené doručení na zařízení tímto souborovým auditem NEOVĚŘENO. Bez push, změny aplikací nebo nasazení Cockpitu.
 <!-- SAMANTHA_CURRENT_STATUS_END -->
 
 # TVBCP: Vocabulary FR
@@ -377,3 +377,26 @@ Technický důkaz:
 - Jediný nový CSV rozdíl vůči ověřené záloze: Order 448, CZ „sto, setina“ → „sto“. Jde o opravu nutnou k pravdivému významu a korektnímu iPhone lookupu; bez zavedení chybného aliasu setina → hundred. Ověřeno podle Larousse cent/centième, soukromý bezpečný CSV store a záloha. Mílova CSV a všechny existující věty i L/HT zachované.
 - Prompty, rozměry a otisky v PictNew/generated/20261104_fr_jana_refresh_batch001/generation_report.json, náhled review.html. Úplné soukromé důkazy images_apply_receipt.json, cent_meaning_correction.json a audit_completed_images.json ve vocabularyfr_refresh_20261104.
 - Vzdálené doručení a fyzický Mac/iPhone běh nejsou tímto místním auditem potvrzené. Kód aplikací se neměnil; bez sestavení, push nebo nasazení Cockpitu.
+
+### 2026-11-04 13:21 CET — Chybějící Janina hesla doplněná do Mílova FR
+
+Hotovo:
+- Mílův slovník rozšířen ze 234 na 477 řádků. Přibylo 235 dosud chybějících francouzských hesel v 243 úplných řádcích včetně variant českého významu.
+- Původní záznamy beze změny; všechna přidaná hesla mají příklad, překlad i funkční obrázek.
+
+Rozhodnutí:
+- Míla zadal porovnat Janin iCloud VocabularyFR.csv s jeho PythonMF/VocabularyFR/VocabularyFR.csv a přidat celé chybějící datové věty.
+- Přenést všechny původní sloupce nových řádků, tedy také gender_fr a Janiny zdrojové L/HT; pouze Order přečíslovat návazně. Neupravovat vlastní existující věty ani jejich L/HT.
+- Ignorovat při srovnání velikost písmen, interpunkci/mezery a œ/oe, æ/ae; zachovat významotvornou diakritiku. Mezi dosud chybějícími hesly zachovat každý různý FR/CZ pár jednou. Nepřevádět další významy již existujících FR hesel automaticky.
+
+Další krok:
+- Znovu načíst Mílův rozšířený slovník v aplikaci.
+
+Navrhované další kroky:
+- Zachované praktické ověření dřívější aktualizace na Janině zařízení; jiné rozšíření nevzniklo.
+
+Technický důkaz:
+- Atomický CSV store s ověřenou privátní zálohou a konfliktní kontrolou. 243 přidaných / 0 změněných původních řádků; nové Order 235–477 jedinečné. Všechny přenesené hodnoty kromě Order přesně odpovídají zdroji, včetně 22 zdrojově naučených řádků. Dva opakované FR/CZ páry nepřidány, existující duplicity v původním souboru nedotčené.
+- Jana 451 a IT 471 hashově beze změny; oba mappingy 1119 beze změny a shodné. Společný audit 477/451/471 přes skutečné desktopové/Pythonista resolvery, 1007 obrazových souborů plně dekódováno, žádné chybějící věty či obrázky; u Jany záměrný chez fallback.
+- Šest kanonických testů a rychlá statická brána PASS. Soukromé důkazy vocabularyfr_merge_jana_to_mila_20261104/plan.json, apply_receipt.json, audit_after_import.json; žádný export Janina CSV nebo plánů do Gitu.
+- Kód aplikací, obrázky a mapování se neměnily; bez push, nasazení nebo ověření fyzického reloadu.
