@@ -2,13 +2,22 @@
 
 ## Aktuální směr 2026-11-04 — průběžný osobní agent
 
+- Třetí lokální krok: Odeslat připraví konečné potvrzení s konkrétním účtem
+  a adresátem; až druhé tlačítko spustí SMTP. Odpověď zachovává návaznost na
+  původní zprávu a respektuje Reply-To. Opakování nevytváří duplicitu,
+  nejistý výsledek blokuje další pokus, chyba QUIT/kopie neruší SMTP přijetí.
+- 64 cílených scénářů PASS pouze na umělých zprávách a falešném SMTP;
+  plná Cockpit brána 2337 testů PASS.
+  Živá přejímka a fyzický browser/iPhone test zůstávají otevřené.
+
 - Druhý lokální krok: kontrola každou hodinu 7–22 v Europe/Prague, Terra přes
   App Server, ranní dočtení od posledního večerního cyklu. Produkční start
   vyžaduje explicitní inicializaci pozic; historie se automaticky nespouští.
 - V Komunikaci je nový lokální vstup E-maily k řešení: důležité zprávy
   jednotlivě s celým tělem a návrhy, ostatní po hodinách pouze s hlavičkami.
   Ignorování/vyřazení je pouze místní. Koncept předmětu a odpovědi se upravuje
-  ve vlastním editoru. Uložení je potvrzované, SMTP není připojené.
+  ve vlastním editoru. Uložení je potvrzované; SMTP kód doplnil třetí krok,
+  ale živý provoz zatím připojený ani aktivovaný není.
 - 42 cílených testů i plná brána 2315 testů prošly. Vizuální browser QA je otevřená kvůli nedostupnému
   ovládacímu hostu. P+n Míla výslovně odložil; žádný provoz nebyl aktivovaný.
 

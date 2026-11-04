@@ -24,7 +24,8 @@ function find(element, label) {
 
 (async () => {
   const ids = Object.fromEntries(['replyEditor','replyRecipient','replySubject','replyBody','replyStatus','replyForm',
-    'closeEditor','status','notice','cards','hours','archived'].map(id => [id, new Element(id)]));
+    'closeEditor','status','notice','cards','hours','archived','replyConfirmation','replyQuestion','replySender',
+    'reallySendReply','backToReply','prepareReplySend','saveReplyDraft'].map(id => [id, new Element(id)]));
   const metadata = {title: 'Podklady', domain: 'work', document_type: 'email', counterparty: 'Firma', tags: ['schůzka']};
   const data = {schedule: {}, sources: [], assessment_errors: 0, archived: [],
     cards: [{id: 'important', header: {subject: '<img src=x onerror=alert(1)>', sender: 'Firma', date: '4. 11.'},
@@ -34,15 +35,30 @@ function find(element, label) {
     hours: [{text: '18:00: Firma — Reklama', ids: ['low-1','low-2']}]};
   const calls = [], intervals = [];
   let confirmChoice = true;
+  let preparationCount = 0;
+  let preparationHold = null;
   const context = {document: {getElementById: id => ids[id], createElement: tag => new Element(tag)},
     window: {setInterval: fn => intervals.push(fn), confirm: () => confirmChoice},
     fetch: async (url, options) => {
       const payload = options?.body ? JSON.parse(options.body) : null;
       calls.push({url, payload});
       if (url.endsWith('/edit')) { data.cards[0].proposal = payload.proposal; data.cards[0].proposal_digest = 'new-digest'; }
+      if (url.endsWith('/prepare-reply')) {
+        if (preparationHold) await preparationHold;
+        preparationCount += 1;
+        return {ok: true, json: async () => ({ok: true, prepared: {
+          recipient_name: 'Firma', recipient: 'reply@example.test', sender: 'owner@example.test',
+          subject: data.cards[0].proposal.reply_subject, body: data.cards[0].proposal.reply_draft,
+          confirmation_token: `token-${preparationCount}`, confirmation_digest: `digest-${preparationCount}`
+        }})};
+      }
+      if (url.endsWith('/send-reply')) data.cards[0].reply = {status: 'smtp_sent'};
       if (url.endsWith('/dismiss')) data.hours = [];
       if (url.endsWith('/archive')) { data.archived.push(data.cards.pop()); }
-      return {ok: true, json: async () => JSON.parse(JSON.stringify(url.endsWith('/overview') ? {ok: true, ...data} : {ok: true}))};
+      const result = url.endsWith('/overview') ? {ok: true, ...data} : url.endsWith('/edit')
+        ? {ok: true, proposal_digest: 'new-digest'} : url.endsWith('/send-reply')
+        ? {ok: true, receipt: {status: 'smtp_sent', sent_copy_status: 'saved'}} : {ok: true};
+      return {ok: true, json: async () => JSON.parse(JSON.stringify(result))};
     }, Date, Error, JSON};
   const source = fs.readFileSync(path.join(__dirname, '../app/frontend/email_agent/app.js'), 'utf8');
   vm.runInNewContext(source, context);
@@ -64,6 +80,37 @@ function find(element, label) {
   assert.equal(edit.payload.expected_digest, 'original-digest');
   assert.equal(ids.replyEditor.open, false);
   assert.equal(submitter.disabled, false);
+  await find(ids.cards, 'Upravit odpověď').click();
+  ids.replyBody.value = 'Text ke skutečnému druhému potvrzení';
+  let releasePreparation;
+  preparationHold = new Promise(resolve => { releasePreparation = resolve; });
+  const preparing = ids.prepareReplySend.click();
+  await flush();
+  assert.equal(ids.closeEditor.disabled, true);
+  let preventedCancel = false;
+  ids.replyEditor.listeners.cancel({preventDefault() { preventedCancel = true; }});
+  assert.equal(preventedCancel, true);
+  await ids.closeEditor.click();
+  assert.equal(ids.replyEditor.open, true);
+  releasePreparation(); await preparing; preparationHold = null;
+  assert.equal(calls.filter(call => call.url.endsWith('/send-reply')).length, 0);
+  assert.equal(ids.replyConfirmation.hidden, false);
+  assert.match(ids.replyQuestion.textContent, /reply@example.test/);
+  assert.match(ids.replySender.textContent, /owner@example.test/);
+  assert.equal(ids.replyBody.readOnly, true);
+  await ids.backToReply.click();
+  assert.equal(ids.replyBody.readOnly, false);
+  ids.replyBody.value = 'Ještě upravený konečný text';
+  await ids.prepareReplySend.click();
+  await ids.reallySendReply.click();
+  await ids.reallySendReply.click();
+  const sent = calls.filter(call => call.url.endsWith('/send-reply'));
+  assert.equal(sent.length, 1);
+  assert.equal(sent[0].payload.confirmed, true);
+  assert.equal(sent[0].payload.confirmation_token, 'token-2');
+  assert.equal(sent[0].payload.confirmation_digest, 'digest-2');
+  assert.equal(data.cards[0].proposal.reply_draft, 'Ještě upravený konečný text');
+  assert.equal(ids.replyEditor.open, false);
   await find(ids.hours, 'Smazat z Cockpitu').click();
   assert.deepEqual(calls.find(call => call.url.endsWith('/dismiss')).payload.ids, ['low-1','low-2']);
   assert.equal(data.hours.length, 0);
@@ -75,6 +122,6 @@ function find(element, label) {
   assert.equal(calls.filter(call => call.url.endsWith('/archive')).length, 1);
   assert.equal(calls.find(call => call.url.endsWith('/archive')).payload.proposal_digest, 'new-digest');
   assert.equal(data.cards.length, 0);
-  assert.equal(calls.some(call => /send|purge|trash/.test(call.url)), false);
-  console.log('Email agent frontend: editor, polling, local dismissal and confirmed archive OK');
+  assert.equal(calls.some(call => /purge|trash/.test(call.url)), false);
+  console.log('Email agent frontend: editor, polling, two-step reply, dismissal and archive OK');
 })().catch(error => { console.error(error); process.exitCode = 1; });

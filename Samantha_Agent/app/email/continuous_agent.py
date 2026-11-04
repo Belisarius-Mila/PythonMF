@@ -134,7 +134,9 @@ class ContinuousEmailAgent:
             def update(document):
                 for item_id in item_ids:
                     item = document["items"][item_id]
-                    if item["status"] not in {"awaiting_confirmation", "hourly_summary", "dismissed", "ignored"}:
+                    if item.get("reply", {}).get("status") == "sending":
+                        raise ValueError("Odeslání právě probíhá; vyčkej na výsledek.")
+                    if item["status"] not in {"awaiting_confirmation", "hourly_summary", "dismissed", "ignored", "archived"}:
                         raise ValueError("Tuto položku nyní nelze vyřadit.")
                     item.update(status="dismissed" if action == "dismiss" else "ignored", dismissed_at=_now())
             self._update(update)
@@ -157,9 +159,15 @@ class ContinuousEmailAgent:
         """An edited draft gets a new digest, invalidating confirmation of the old one."""
         with exclusive_file_lock(self.root / "worker", timeout=0):
             item = self.status()["items"][item_id]
-            if item["status"] != "awaiting_confirmation" or item["proposal_digest"] != expected_digest:
+            if (item["status"] not in {"awaiting_confirmation", "archived"}
+                or item["proposal_digest"] != expected_digest
+                or item.get("reply", {}).get("status") in {"sending", "smtp_sent", "delivery_unknown"}):
                 raise ValueError("Návrh se změnil nebo už není připravený k úpravě.")
             value = EmailProposal.model_validate(proposal).model_dump()
+            if item["status"] == "archived":
+                for field in set(value) - {"reply_subject", "reply_draft"}:
+                    if value[field] != item["proposal"].get(field):
+                        raise ValueError("U uložené zprávy lze upravit pouze koncept odpovědi.")
             digest = proposal_digest(value)
             self._update(lambda d: d["items"][item_id].update(proposal=value, proposal_digest=digest))
             return digest

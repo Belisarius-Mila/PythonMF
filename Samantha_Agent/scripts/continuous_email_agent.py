@@ -23,7 +23,7 @@ def main() -> int:
     args = parser.parse_args()
     if args.command == "synthetic-test":
         return subprocess.run(
-            [sys.executable, "-m", "unittest", "tests.test_continuous_email_agent", "tests.test_hourly_email_agent", "tests.test_cockpit_email_agent", "-q"],
+            [sys.executable, "-m", "unittest", "tests.test_continuous_email_agent", "tests.test_hourly_email_agent", "tests.test_cockpit_email_agent", "tests.test_agent_reply", "-q"],
             cwd=PROJECT_ROOT, check=False,
         ).returncode
     state = ContinuousEmailAgent().status()

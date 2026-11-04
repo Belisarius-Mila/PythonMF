@@ -24,6 +24,7 @@ NODE_FALLBACK_PATHS = (
 )
 
 COMPILE_PATHS = (
+    "app/email/agent_reply.py",
     "app/cockpit_email_agent.py",
     "app/email/hourly_agent.py",
     "app/email/codex_proposer.py",
@@ -417,6 +418,7 @@ TEST_MODULES = (
     "tests.test_continuous_email_agent",
     "tests.test_hourly_email_agent",
     "tests.test_cockpit_email_agent",
+    "tests.test_agent_reply",
     "tests.test_email_work_models",
     "tests.test_document_persistence",
     "tests.test_document_archive_browser",

@@ -181,7 +181,7 @@ class HourlyEmailTests(unittest.TestCase):
         self.assertTrue(result["ok"])
         view = email_agent_overview(worker=self.worker)
         self.assertEqual(len(view["archived"]), 1)
-        self.assertEqual(view["cards"], [])
+        self.assertEqual(len(view["cards"]), 1)  # Pending reply remains available after archiving.
 
 
 class CodexProposalTests(unittest.TestCase):

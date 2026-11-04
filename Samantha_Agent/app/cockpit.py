@@ -46,6 +46,7 @@ from app.cockpit_frontend import (
 )
 from app.cockpit_email_agent import (
     email_agent_overview, email_agent_dismiss_action, email_agent_edit_action, email_agent_archive_action,
+    email_agent_prepare_reply_action, email_agent_send_reply_action,
 )
 from app.cockpit_awake_mode import (
     cockpit_awake_mode_action,
@@ -8664,6 +8665,12 @@ COCKPIT_POST_ACTIONS: tuple[dict[str, str], ...] = (
     {"path": "/api/email-agent/archive", "label": "Uložit e-mail podle potvrzeného návrhu agenta",
      "risk": "private_write", "confirmation": "confirmed_current_proposal_digest",
      "handler_name": "email_agent_archive_action", "test_level": "direct"},
+    {"path": "/api/email-agent/prepare-reply", "label": "Připravit přesné potvrzení odpovědi",
+     "risk": "private_write", "confirmation": "explicit_prepare_send_button",
+     "handler_name": "email_agent_prepare_reply_action", "test_level": "direct"},
+    {"path": "/api/email-agent/send-reply", "label": "Odeslat podruhé potvrzenou odpověď",
+     "risk": "external_send", "confirmation": "second_confirmation_exact_message_token_and_digest",
+     "handler_name": "email_agent_send_reply_action", "test_level": "direct"},
     {
         "path": "/api/camino/film/source",
         "label": "Připravit chráněné přehrání celého videa nebo hlasového komentáře",
@@ -10038,6 +10045,12 @@ class CockpitServer:
                     return
                 if parsed.path == "/api/email-agent/archive":
                     self.respond_json(email_agent_archive_action(self.read_json()))
+                    return
+                if parsed.path == "/api/email-agent/prepare-reply":
+                    self.respond_json(email_agent_prepare_reply_action(self.read_json()))
+                    return
+                if parsed.path == "/api/email-agent/send-reply":
+                    self.respond_json(email_agent_send_reply_action(self.read_json()))
                     return
                 if parsed.path == "/api/camino/film/source":
                     self.respond_film_edit("source", parsed)

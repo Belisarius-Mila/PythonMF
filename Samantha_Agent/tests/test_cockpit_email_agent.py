@@ -11,7 +11,8 @@ from unittest.mock import patch
 from urllib.request import Request, urlopen
 
 from app import cockpit
-from app.cockpit_email_agent import email_agent_dismiss_action, email_agent_edit_action, email_agent_overview
+from app.cockpit_email_agent import (email_agent_dismiss_action, email_agent_edit_action, email_agent_overview,
+                                   email_agent_prepare_reply_action, email_agent_send_reply_action)
 from app.cockpit_frontend import EMAIL_AGENT_HTML
 from app.email.continuous_agent import ContinuousEmailAgent
 from tests.test_continuous_email_agent import FakeSource, observed, proposal
@@ -68,17 +69,39 @@ class EmailAgentHTTPTests(unittest.TestCase):
         self.assertTrue(json.loads(body)["ok"])
         self.assertEqual(email_agent_overview(worker=self.worker)["cards"][0]["proposal"]["reply_draft"], "My final answer")
 
-    def test_new_page_keeps_content_as_text_and_contains_no_send_or_delete_mailbox_endpoint(self):
+    def test_new_page_keeps_content_as_text_and_cannot_delete_mailbox_messages(self):
         self.assertIn("textContent", EMAIL_AGENT_HTML)
         self.assertNotIn("innerHTML", EMAIL_AGENT_HTML)
         self.assertIn("Smazat z Cockpitu", EMAIL_AGENT_HTML)
         self.assertNotIn("/api/email-processing/purge-trash", EMAIL_AGENT_HTML)
-        self.assertNotIn("/api/email-agent/send", EMAIL_AGENT_HTML)
+        self.assertIn("/api/email-agent/send-reply", EMAIL_AGENT_HTML)
+        self.assertIn("Opravdu odeslat odpověď", EMAIL_AGENT_HTML)
 
-    def test_editor_polling_dismissal_and_confirmed_archive_frontend(self):
+    def test_editor_polling_double_send_confirmation_and_archive_frontend(self):
         result = subprocess.run([node_binary(), str(Path(__file__).with_name("email_agent_frontend.test.cjs"))],
                                 capture_output=True, text=True, timeout=20, check=False)
         self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+
+    def test_reply_preparation_and_second_confirmation_routes_over_http(self):
+        calls = []
+        class Service:
+            def prepare(self, item_id, **kwargs):
+                calls.append(("prepare", item_id, kwargs))
+                return {"recipient": "sender@example.test", "confirmation_token": "test-token", "confirmation_digest": "test-digest"}
+            def send(self, item_id, **kwargs):
+                calls.append(("send", item_id, kwargs))
+                return {"status": "smtp_sent"}
+        service = Service()
+        with patch("app.cockpit.email_agent_prepare_reply_action", side_effect=lambda data: email_agent_prepare_reply_action(data, service=service)):
+            _, raw, _ = self.request("/api/email-agent/prepare-reply", {"id": self.message.item_id, "expected_digest": "current"})
+        prepared = json.loads(raw)["prepared"]
+        self.assertEqual(len(calls), 1)
+        with patch("app.cockpit.email_agent_send_reply_action", side_effect=lambda data: email_agent_send_reply_action(data, service=service)):
+            _, raw, _ = self.request("/api/email-agent/send-reply", {"id": self.message.item_id, "confirmed": True,
+                                                                    "confirmation_token": prepared["confirmation_token"],
+                                                                    "confirmation_digest": prepared["confirmation_digest"]})
+        self.assertEqual(json.loads(raw)["receipt"]["status"], "smtp_sent")
+        self.assertEqual(calls[-1][2]["confirmed"], True)
 
 
 if __name__ == "__main__":

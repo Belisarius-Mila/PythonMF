@@ -16,6 +16,24 @@ odsouhlasený rozsah čtení k potvrzování jednotlivých zpráv.
 
 ## Co je hotové lokálně
 
+- Třetí vývojový krok 2026-11-04 18:55 CET: editor má Odeslat a druhé
+  potvrzení přesného příjemce, účtu, předmětu a konečného textu. První
+  tlačítko pouze připraví potvrzení; SMTP se volá až po druhém.
+- Odpověď respektuje jednoznačné Reply-To (jinak From), přidává vlastní
+  Message-ID a návaznost In-Reply-To/References. Použije zdrojový účet;
+  změna účtu, příjemce nebo textu původní potvrzení zneplatní.
+- Stav `sending` se persistuje před síťovým pokusem. Úspěšné SMTP přijetí
+  zůstává platné i při chybě QUIT nebo ukládání kopie do Odeslané pošty.
+  Nejistý/přerušený pokus se automaticky neposílá znovu. Opakované i souběžné
+  potvrzení nevytvoří druhé odeslání; jiné karty lze mezitím vyřizovat.
+- Karta se po archivaci zachová, pokud ještě čeká navržená odpověď. U již
+  uložené zprávy lze měnit pouze koncept odpovědi, ne přepisovat archivní
+  metadata. Uložené zprávy zůstanou v historii i po místním vyřazení karty.
+- 64 cílených scénářů PASS včetně falešného SMTP, HTTP cest a JS editoru.
+  Žádný živý SMTP/IMAP ani placený model se při této přejímce nevolal.
+  Plná Cockpit brána 2337 testů PASS; důkaz v
+  `logs/continuous_email_reply_gate_20261104.log`.
+
 - Druhý vývojový krok 2026-11-04 18:29 CET: hodinový plánovač 7:00 až 22:00
   v Europe/Prague, včetně ranní návaznosti na večerní pozici, dočtení celé dávky
   po stránkách a pokračování po výpadku. Dokončená hodina se znovu neposuzuje.
@@ -34,7 +52,7 @@ odsouhlasený rozsah čtení k potvrzování jednotlivých zpráv.
   nemaže a vyřazená identita se po restartu znovu nenabízí.
 - Koncept odpovědi se otevírá ve vlastním editoru, lze upravit předmět a text
   a uložit novou verzi. Běžící kontrola ani automatická obnova stránky
-  nepřepisují rozepsaný editor. Odesílací tlačítka a SMTP zatím připojené nejsou.
+  nepřepisují rozepsaný editor. Odesílání doplnil třetí lokální krok výše.
 - Potvrzený místní archiv je napojený na kartu; před uložením se znovu načte
   očekávaný zdroj. Přerušené uložení má v kartě možnost opětovného ověření.
 - 42 cílených scénářů PASS: hodinové hranice včetně letního času, noční
@@ -70,8 +88,10 @@ odsouhlasený rozsah čtení k potvrzování jednotlivých zpráv.
 
 - Terra je Mílou zvolená. Zbývá provozní cenové posouzení/pilot, centrální
   modelový profil a skutečná přejímka kvality odpovědí a metadat.
-- Dvoukrokové potvrzení odeslání skutečné odpovědi správnému příjemci,
-  návaznost na původní vlákno a ověřený výsledek SMTP bez duplicit.
+- Živá SMTP/IMAP přejímka na konkrétní schválené testovací zprávě a příjemci;
+  syntetická přejímka odesílacího kódu není důkaz skutečného doručení.
+- Ruční audit nejistého odeslání podle původního Message-ID. Automatický
+  retry není povolený; UI jej při nejistotě nenabízí.
 - Ruční pokračování neúspěšného modelového posouzení a odložení karet.
 - Import příloh do dokumentového vaultu a zobrazení nového archivu ve
   stávajícím archivním UI. První archiv je zatím samostatný lokální výsledek.
@@ -89,9 +109,9 @@ odsouhlasený rozsah čtení k potvrzování jednotlivých zpráv.
 
 ## Další krok
 
-Doplnit do editoru skutečnou odpověď s druhým potvrzením příjemce a ověřeným
-výsledkem odeslání, nejdřív na syntetickém SMTP. Poté modelový profil a
-řízená přejímka skutečného e-mailu. P+n i aktivace zůstávají odložené.
+Připravit centrální modelový profil Terry s provozním posouzením a dohodnout
+konkrétní zprávu/příjemce pro řízený živý pilot. Poté notifikace a kalendář;
+p+n ani hodinový provoz se bez dalšího pokynu nespouští.
 
 ## Navrhované další kroky
 
@@ -122,7 +142,8 @@ výsledkem odeslání, nejdřív na syntetickém SMTP. Poté modelový profil a
 `continuous_agent.py`, `continuous_source.py`, `continuous_email_agent.py`,
 `test_continuous_email_agent.py`, `icloud_provider.py`, `commands.py`,
 `cockpit_quality_gate.py`, `email_readonly_oauth.md`, `hourly_agent.py`,
-`codex_proposer.py`, `cockpit_email_agent.py`, `frontend/email_agent/`.
+`codex_proposer.py`, `cockpit_email_agent.py`, `agent_reply.py`,
+`test_agent_reply.py`, `frontend/email_agent/`.
 
 ## Bezpečnost / neukládat
 

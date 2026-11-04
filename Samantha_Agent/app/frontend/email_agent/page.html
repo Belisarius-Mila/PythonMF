@@ -11,5 +11,9 @@
 <label>Předmět<input id="replySubject" maxlength="998" required></label>
 <label>Odpověď<textarea id="replyBody" rows="12"></textarea></label>
 <p id="replyStatus" role="status"></p>
-<div class="actions"><button type="submit">Uložit koncept</button><button id="closeEditor" type="button" class="secondary">Zavřít</button></div>
+<section id="replyConfirmation" hidden><h3 id="replyQuestion"></h3><p id="replySender"></p>
+<div class="actions"><button id="reallySendReply" type="button">Opravdu odeslat odpověď</button>
+<button id="backToReply" type="button" class="secondary">Zpět k úpravě</button></div></section>
+<div class="actions"><button type="submit" id="saveReplyDraft">Uložit koncept</button>
+<button id="prepareReplySend" type="button">Odeslat</button><button id="closeEditor" type="button" class="secondary">Zavřít</button></div>
 </form></dialog><script>{{SAMANTHA_JAVASCRIPT}}</script></body></html>

@@ -29,6 +29,13 @@ nebo jejichž princip lze znovu použít v jiné části projektu.
 
 ## Záznamy
 
+### LL-091 — Potvrzené SMTP přijetí nepřeváděj na nové odeslání při chybě QUIT nebo kopie
+
+- Problém: server může zprávu přijmout a až potom selže ukončení relace nebo IMAP kopie; opakování celého postupu by poslalo druhý e-mail.
+- Typ: opakující se
+- Řešení nalezeno: 04112026
+- Řešení: evidovat sending před sítí a SMTP výsledek odděleně od QUIT/kopie. Potvrzený výsledek vrátit idempotentně, chybějící potvrzení ponechat nejisté bez retry. Testy odpovědí ověřily QUIT a kopii po přijetí, přerušení, přesný otisk obálky/textu a dvě souběžná potvrzení s jediným SMTP pokusem. Stejný princip už používá rodinný kalendář.
+
 ### LL-090 — Dlouhé modelové posouzení nesmí držet zámek uživatelských karet
 
 - Problém: společný zámek přes celé síťové/modelové posouzení blokoval vyřazení nebo úpravu už připravených karet.

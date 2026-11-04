@@ -2,6 +2,9 @@
   const byId = id => document.getElementById(id);
   const editor = byId("replyEditor");
   let editing = null;
+  let pendingReply = null;
+  let replyBusy = false;
+  let replyOutcomeLocked = false;
   function node(tag, text, className) {
     const element = document.createElement(tag);
     if (text !== undefined) element.textContent = text;
@@ -44,18 +47,25 @@
     card.append(metadata);
     const buttons = node("div", undefined, "actions");
     const enabled = item.status === "awaiting_confirmation";
-    if (enabled) {
+    const archived = item.status === "archived";
+    const replyStatus = (item.reply || {}).status;
+    if (replyStatus === "smtp_sent") card.append(node("p", "Odpověď přijal odesílací server."));
+    if (["sending", "delivery_unknown"].includes(replyStatus)) card.append(node("p", "Výsledek odeslání vyžaduje ověření. Odpověď znovu neposílej."));
+    if ((item.reply || {}).receipt?.sent_copy_status === "failed") card.append(node("p", "Kopie v Odeslané poště se nepodařila ověřit; odpověď znovu neposílej."));
+    if (enabled || archived) {
+      if (!archived)
       buttons.append(action("Uložit", async () => {
         if (!window.confirm(`Uložit e-mail „${m.title}“ podle zobrazeného návrhu?`)) return;
         await request("/api/email-agent/archive", {id: item.id, proposal_digest: item.proposal_digest, confirmed: true});
         byId("notice").textContent = "E-mail byl uložen do místního archivu.";
       }));
-      if (proposal.reply_draft) buttons.append(action("Upravit odpověď", async () => {
+      if (proposal.reply_draft && !["sending", "delivery_unknown", "smtp_sent"].includes(replyStatus)) buttons.append(action("Upravit odpověď", async () => {
         editing = item;
         byId("replyRecipient").textContent = `Odpověď na zprávu od: ${header.sender || ""}`;
         byId("replySubject").value = proposal.reply_subject || `Re: ${header.subject || ""}`;
         byId("replyBody").value = proposal.reply_draft;
         byId("replyStatus").textContent = "";
+        resetConfirmation();
         editor.showModal();
       }));
       for (const [label, kind] of [["Ignorovat", "ignore"], ["Smazat z Cockpitu", "dismiss"]]) {
@@ -66,6 +76,30 @@
     }));
     card.append(buttons);
     return card;
+  }
+  function resetConfirmation() {
+    pendingReply = null;
+    replyOutcomeLocked = false;
+    byId("replyConfirmation").hidden = true;
+    byId("prepareReplySend").hidden = false;
+    byId("saveReplyDraft").hidden = false;
+    setReplyBusy(false);
+  }
+  function setReplyBusy(busy) {
+    replyBusy = busy;
+    byId("closeEditor").disabled = busy;
+    byId("saveReplyDraft").disabled = busy || replyOutcomeLocked;
+    byId("prepareReplySend").disabled = busy || replyOutcomeLocked;
+    byId("reallySendReply").disabled = busy || !pendingReply;
+    byId("backToReply").disabled = busy || replyOutcomeLocked;
+    byId("replySubject").readOnly = busy || Boolean(pendingReply) || replyOutcomeLocked;
+    byId("replyBody").readOnly = busy || Boolean(pendingReply) || replyOutcomeLocked;
+  }
+  async function saveEditor() {
+    const current = editing;
+    const proposal = {...current.proposal, reply_subject: byId("replySubject").value, reply_draft: byId("replyBody").value};
+    const result = await request("/api/email-agent/edit", {id: current.id, expected_digest: current.proposal_digest, proposal});
+    editing = {...current, proposal, proposal_digest: result.proposal_digest};
   }
   async function refresh() {
     if (editor.open) return;
@@ -88,16 +122,63 @@
     data.archived.forEach(item => archived.append(node("p", item.proposal.metadata.title)));
     if (!data.archived.length) archived.append(node("p", "Zatím žádné uložené zprávy."));
   }
-  byId("closeEditor").addEventListener("click", () => editor.close());
+  byId("closeEditor").addEventListener("click", () => { if (!replyBusy) editor.close(); });
+  editor.addEventListener("cancel", event => { if (replyBusy) event.preventDefault(); });
   byId("replyForm").addEventListener("submit", async event => {
     event.preventDefault();
+    if (replyBusy || replyOutcomeLocked) return;
+    setReplyBusy(true);
     const button = event.submitter; if (button) button.disabled = true;
     try {
-      const proposal = {...editing.proposal, reply_subject: byId("replySubject").value, reply_draft: byId("replyBody").value};
-      await request("/api/email-agent/edit", {id: editing.id, expected_digest: editing.proposal_digest, proposal});
+      await saveEditor();
       editor.close(); await refresh();
     } catch (error) { byId("replyStatus").textContent = error.message; }
-    finally { if (button) button.disabled = false; }
+    finally { if (button) button.disabled = false; setReplyBusy(false); }
+  });
+  byId("backToReply").addEventListener("click", () => { if (!replyBusy && !replyOutcomeLocked) resetConfirmation(); });
+  byId("prepareReplySend").addEventListener("click", async () => {
+    if (replyBusy || replyOutcomeLocked) return;
+    setReplyBusy(true);
+    try {
+      await saveEditor();
+      const result = await request("/api/email-agent/prepare-reply", {id: editing.id, expected_digest: editing.proposal_digest});
+      pendingReply = result.prepared;
+      byId("replySubject").value = pendingReply.subject;
+      byId("replyBody").value = pendingReply.body;
+      byId("replySubject").readOnly = true; byId("replyBody").readOnly = true;
+      byId("replyQuestion").textContent = `Opravdu odeslat odpověď ${pendingReply.recipient_name || ""} <${pendingReply.recipient}>?`;
+      byId("replySender").textContent = `Z účtu: ${pendingReply.sender}`;
+      byId("replyConfirmation").hidden = false;
+      byId("prepareReplySend").hidden = true; byId("saveReplyDraft").hidden = true;
+      byId("replyStatus").textContent = "Zkontroluj příjemce, předmět a konečný text nad tímto potvrzením.";
+    } catch (error) { byId("replyStatus").textContent = error.message; }
+    finally { setReplyBusy(false); }
+  });
+  byId("reallySendReply").addEventListener("click", async () => {
+    if (!pendingReply || replyBusy || replyOutcomeLocked) return;
+    if (byId("replySubject").value !== pendingReply.subject || byId("replyBody").value !== pendingReply.body) {
+      resetConfirmation(); byId("replyStatus").textContent = "Text se změnil. Připrav nové potvrzení."; return;
+    }
+    setReplyBusy(true);
+    byId("replyStatus").textContent = "Odesílám odpověď…";
+    try {
+      const result = await request("/api/email-agent/send-reply", {id: editing.id, confirmed: true,
+        confirmation_token: pendingReply.confirmation_token, confirmation_digest: pendingReply.confirmation_digest});
+      pendingReply = null;
+      if (result.receipt.status === "smtp_sent") {
+        editor.close();
+        byId("notice").textContent = result.receipt.sent_copy_status === "failed"
+          ? "Odpověď přijal odesílací server; kopii v Odeslané poště se nepodařilo ověřit."
+          : "Odpověď přijal odesílací server.";
+        await refresh();
+      } else {
+        replyOutcomeLocked = result.receipt.status !== "not_sent";
+        byId("replyStatus").textContent = result.receipt.status === "not_sent"
+          ? "Server odpověď nepřijal. Zavři okno a zkontroluj stav karty."
+          : "Výsledek odeslání je nejistý. Odpověď znovu neposílej; nejdřív ověř původní pokus.";
+      }
+    } catch (error) { pendingReply = null; replyOutcomeLocked = true; byId("replyStatus").textContent = error.message; }
+    finally { setReplyBusy(false); }
   });
   refresh().catch(error => { byId("status").textContent = error.message; });
   window.setInterval(() => refresh().catch(error => { byId("status").textContent = error.message; }), 30000);
