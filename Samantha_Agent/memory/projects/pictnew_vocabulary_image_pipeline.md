@@ -1,5 +1,12 @@
 # PictNew: opakovatelné generování obrázků pro slovíčka
 
+## Terra p+n slovníkového balíčku 2026-11-04 14:40 CET
+
+- Čtyři schválené commity do b3b302b2 odeslané na GitHub a nasazené standardním cílem project-vocabulary-fr → Cockpit; účtenka 9ea7a7007816df4117a71a750031c507 completed, push/deployment confirmed, Terra 6.1/high.
+- Plná brána 2273 evidovaných testů / 449,8 s prošla, smoke 5/5, protected_services_unchanged=true. Jedna Adamova kontrola GitHub headu a health HTTP 200 prošla; code_stamp ae3b321d9492092a a nový PID 67574.
+- Slovníková data FR Míla 477 / Jana 451 / IT 471, mapping 1119 a všech 16 kopií nových ilustrací po nasazení hashově zachované. Dřívější společný obrazový audit 1007 souborů zůstává platný.
+- Caller účtenku převzal, bez retry. Žádné samostatné vydání VocabularyFR.app ani nové Pages. Další krok je fyzický reload dat v aplikacích; vzdálené iCloud doručení čeká na skutečné zařízení. Tento výsledkový zápis místně pro další balíček.
+
 ## Přenos Janiných hesel k Mílovi 2026-11-04 13:21 CET
 
 - Mílovo FR rozšířené 234 → 477: 243 celých záznamů pro 235 chybějících FR hesel. Původní řádky přesně zachované, nové převzaté ze zdroje včetně příkladů, rodu a L/HT, jen Order navazuje 235–477. Dva opakované FR/CZ páry nepřidány; existující vlastní hesla se nepřepisovala.

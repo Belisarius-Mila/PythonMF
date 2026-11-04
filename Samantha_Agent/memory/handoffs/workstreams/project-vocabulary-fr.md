@@ -1,14 +1,14 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
-- Aktualizováno: 2026-11-04 13:21 CET.
-- Mílovo VocabularyFR/VocabularyFR.csv má 477 řádků místo 234: doplněno 243 celých záznamů pro 235 chybějících francouzských hesel z Janina připojeného iCloud CSV. Všech 234 původních řádků přesně zachovaných.
-- Přejaté všechny sloupce včetně Sentence/SentenceT, gender_fr a zdrojových L/HT podle pokynu přidat celou datovou větu. Jen Order nově 235–477; žádné kolize. Odlišné české významy chybějícího hesla zachované samostatně; dva opakované FR/CZ páry nepřidány.
-- Porovnání ignoruje velikost písmen, mezery/interpunkci a běžné ligatury œ/oe, æ/ae; diakritiku zachovává. Existující francouzská hesla se nepřepisují. Všechna Janina hesla mají nyní v Mílově souboru odpovídající normalizovaný protějšek. Janino CSV 451 řádků i IT 471 řádků zůstaly beze změny.
-- Společný audit FR Míla 477 / FR Jana 451 / IT Míla 471 bez chybějících vět a obrázků, 1007 používaných obrazových souborů dekódovaných. Mapping 1119, obě kopie shodné a nezměněné; žádné nové obrázky ani mapování nebyly potřeba. U Jany zachovaný přijatý chez fallback. Šest kanonických testů a rychlá statická brána PASS.
-- Dříve doplněných 38 Janiných párů vět, osm ilustrací a devět vazeb zůstává zachovaných. U cent správně sto. Prompty/náhled obrázků: PictNew/generated/20261104_fr_jana_refresh_batch001/generation_report.json a review.html.
-- Bezpečný CSV store, snímky obou zdrojů, ověřená záloha a přesná kontrola výsledku. Soukromé plány a důkazy v data/private/vocabularyfr_merge_jana_to_mila_20261104/ (plan.json, apply_receipt.json, audit_after_import.json). Janina CSV ani plány nejsou v Gitu.
-- Další krok: znovu načíst Mílův slovník v používané aplikaci. Praktický reload a vzdálené doručení na zařízení tímto souborovým auditem NEOVĚŘENO. Bez push, změny aplikací nebo nasazení Cockpitu.
+- Aktualizováno: 2026-11-04 14:40 CET.
+- Mílovo FR má 477 řádků po doplnění 243 celých záznamů pro 235 chybějících hesel od Jany. Původních 234 řádků přesně zachovaných; nové obsahují původní příklady, rod i zdrojové L/HT, pouze Order navazuje 235–477. Jana má 451 řádků a IT 471.
+- Osm nových ilustrací je v obou Pict, společný český abecední mapping má 1119 vazeb a obě kopie jsou shodné. Janiny věty 451/451 úplné, u cent opraveno sto. Společný audit všech tří slovníků bez mezer, 1007 používaných souborů dekódovaných.
+- Terra 6.1/high dokončila p+n čtyř čekajících commitů do b3b302b291d7863a5d5a26796d4f6e5993e5b31c. Účtenka 9ea7a7007816df4117a71a750031c507, project-vocabulary-fr → cockpit, completed, push_state/deployment_state=confirmed.
+- Plná publikační brána prošla: evidováno 2273 testů, 449,8 s. Následná kontrola běhu 5/5 a protected_services_unchanged=true. Jedna Adamova kontrola: skutečný GitHub head shodný s vydaným, health HTTP 200, Cockpit PID 67574 a code_stamp ae3b321d9492092a. Slovníková data, mappingy a všech 16 kopií nových obrázků hashově zachované po nasazení.
+- Caller převzal konečnou účtenku v této terminálové relaci. returned_to_adam=false je portálový příznak a není důvodem retry. Neproběhlo samostatné sestavení nebo vydání VocabularyFR.app ani nové Pages vydání; Janina sdílená data byla doplněná již před p+n. Následný výsledkový zápis je místní pro další balíček.
+- Prompty a náhled: PictNew/generated/20261104_fr_jana_refresh_batch001/generation_report.json a review.html. Soukromé importní důkazy v data/private/vocabularyfr_merge_jana_to_mila_20261104/ a obrazové důkazy ve vocabularyfr_refresh_20261104/; žádná Janina CSV nebo soukromé plány v Gitu.
+- Další krok: načíst aktualizovaná slovníková data v používaných aplikacích. Fyzický reload a vzdálené iCloud doručení tímto vydáním NEOVĚŘENO; dvě ostatní soukromé lexikální poznámky zůstávají k případné samostatné revizi.
 <!-- SAMANTHA_CURRENT_STATUS_END -->
 
 # Handoff pracovního proudu: Vocabulary FR
@@ -332,3 +332,25 @@ Technický důkaz:
 - Jana 451 a IT 471 hashově beze změny; oba mappingy 1119 beze změny a shodné. Společný audit 477/451/471 přes skutečné desktopové/Pythonista resolvery, 1007 obrazových souborů plně dekódováno, žádné chybějící věty či obrázky; u Jany záměrný chez fallback.
 - Šest kanonických testů a rychlá statická brána PASS. Soukromé důkazy vocabularyfr_merge_jana_to_mila_20261104/plan.json, apply_receipt.json, audit_after_import.json; žádný export Janina CSV nebo plánů do Gitu.
 - Kód aplikací, obrázky a mapování se neměnily; bez push, nasazení nebo ověření fyzického reloadu.
+
+### 2026-11-04 14:40 CET — Terra p+n aktualizace Vocabulary FR dokončené
+
+Hotovo:
+- Schválený slovníkový balíček je na GitHubu a registrované nasazení Samanthy/Cockpitu prošlo následnou kontrolou.
+- Data zůstala zachovaná: Míla FR 477, Jana FR 451, Míla IT 471, osm nových obrázků v obou Pict a shodné mapování.
+
+Rozhodnutí:
+- Míla výslovně zadal „OK, předej terra p+n, děkuju.“ Jediné nové submit_release(wait=True) předalo čtyři čekající commity, projekt Vocabulary FR a centrálně schválenou Terru 6.1/high. Vydávací kontext před startem bezpečně přepnut z MMTX na Vocabulary FR registrovanou cestou.
+- Samostatná aplikace VocabularyFR.app ani web Pages se tímto standardním p+n nevydávaly; konkrétní registrovaný cíl tohoto proudu je Cockpit. Žádná změna rolí, vývoje, dat nebo dalšího vydání.
+
+Další krok:
+- Znovu načíst slovník v používané aplikaci a prakticky ověřit data na zařízení.
+
+Navrhované další kroky:
+- Zachované ověření vzdáleného iCloud doručení na Janině zařízení; ostatní lexikální poznámky samostatně.
+
+Technický důkaz:
+- Účtenka 9ea7a7007816df4117a71a750031c507 completed, project-vocabulary-fr → cockpit, gpt-6.1-terra/high, push_state/deployment_state=confirmed, čtyři commity do b3b302b291d7863a5d5a26796d4f6e5993e5b31c.
+- Plná brána: 2273 evidovaných testů, 449,8 s, passed=true. Smoke 5/5, protected_services_unchanged=true.
+- Jedna Adamova kontrola: GitHub main přesně na vydaném headu, health HTTP 200, nový Cockpit PID 67574 / code_stamp ae3b321d9492092a. FR 477/451 a IT 471, všechny CSV/mapping otisky i 16 distribučních kopií nových obrázků přesně shodné s předávacími důkazy.
+- Caller účtenku převzal; returned_to_adam=false neprokazuje automatické portálové doručení a není důvodem retry. Bez opakování p+n. Tento výsledkový zápis místně pro další balíček; fyzický reload a vzdálená synchronizace neověřené.
