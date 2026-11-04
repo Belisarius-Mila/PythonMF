@@ -2,6 +2,21 @@
 
 ## Aktuální směr 2026-11-04 — průběžný osobní agent
 
+- Aktuální vydání 19:27 CET: Míla schválil Terra p+n a následný řízený
+  pilot. P+n dokončené po `d9bf3a7c111a`, účtenka
+  `c3a38a12547115a5ed292a3826a9e70e`, 2337 PASS, smoke 5/5;
+  vzdálený main, živý code stamp i stránka nezávisle ověřené.
+  Starší zmínky o odkladu p+n v milnících níže jsou překonané.
+- První živý jednorázový pilot načetl jeden celý nejnovější iCloud e-mail
+  a provedl jeden pokus Terry/high. App Server nepotvrdil jednoznačné
+  doručení/dokončení (`AppServerContractError`), proto nevznikl potvrzený
+  návrh; položka zůstala `analysis_failed`. Bez automatického opakování,
+  bez archivu/SMTP a bez zapnutí hodinové služby. Spotřeba tohoto pokusu
+  není doložená. Další krok je přesná diagnostika kontraktu před novým pilotem.
+- Jednorázový pilot vybral schválenou Terru z centrální konfigurace;
+  nevznikla nová trvalá role. Provozní profil, přejímka kvality a fyzické
+  browser/iPhone ověření zůstávají otevřené. Úplný stav a důkazy jsou v handoffu.
+
 - Třetí lokální krok: Odeslat připraví konečné potvrzení s konkrétním účtem
   a adresátem; až druhé tlačítko spustí SMTP. Odpověď zachovává návaznost na
   původní zprávu a respektuje Reply-To. Opakování nevytváří duplicitu,
@@ -490,3 +505,23 @@ Nejmenší další krok:
   záznamu a potvrdit dostupnost stažené přílohy.
 - Mazání, odesílání, přesun do koše a nové ukládání obsahu zůstávají mimo tento
   retest a za svými potvrzovacími hranicemi.
+
+## 2026-11-04 19:27 CET — Terra p+n a první živý pilot
+
+Hotovo: E-maily k řešení jsou nasazené. První řízený vstup načetl jeden celý
+e-mail z iCloudu. Modelový výsledek není potvrzený; nevznikla karta ani
+hodinový řádek, pouze viditelná chyba posouzení. Nic nebylo archivováno ani
+odesláno a hodinový provoz zůstal vypnutý.
+
+Rozhodnutí: Míla výslovně zvolil pořadí Terra p+n, potom řízený pilot.
+Nejistý jednotlivý modelový pokus se automaticky neopakuje.
+
+Další krok: Získat přesnou diagnostiku kontraktu App Serveru před novým pilotem.
+
+Navrhované další kroky: Přijmout kvalitu návrhů a metadat, poté připravit
+centrální modelovou roli a aktivaci služby; navázat notifikacemi a CalDAV.
+
+Technický důkaz: Vydání `d9bf3a7c111a`, účtenka `c3a38a12`, plná brána
+2337 PASS a smoke 5/5, nezávislá shoda živé stránky. Pilot: právě jeden
+pokus, `AppServerContractError`, soukromý stav `analysis_failed`; živé API
+potvrzuje jednu chybu a nula karet/řádků. Usage ani kořenová příčina nedoložené.

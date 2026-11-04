@@ -1,10 +1,43 @@
-# Průběžný osobní agent — první lokální backend
+# Průběžný osobní agent — nasazení a první živý pilot
 
 Nazev: Průběžný osobní agent pro e-maily a Apple/iCloud kalendář
 Priorita: 1
 Stav: rozpracovane
 Pripomenout pri startu: ano
 Datum: 2026-11-04
+
+## Aktuální stav 2026-11-04 19:27 CET
+
+- Míla výslovně schválil pořadí „nejdříve terra p+n a pak řízený pilot
+  Terry“. Původní odklad p+n níže je tím překonaný; trvalá aktivace schválená
+  ani provedená není.
+- Registrované p+n v proudu `project-email-cases` dokončila Terra/high:
+  4 commity publikované a nasazené po `d9bf3a7c111a`. Účtenka
+  `c3a38a12547115a5ed292a3826a9e70e`, plná brána 2337 PASS, smoke 5/5.
+  Nezávisle ověřený vzdálený main, živý code stamp `deeec06862f3711e`
+  a přesná shoda nasazené stránky E-maily k řešení se zdrojem.
+  Bezpečný důkaz: `logs/continuous_email_release_20261104.log`.
+- Následný jednorázový pilot načetl celý jeden nejnovější e-mail z iCloudu
+  přes read-only IMAP a vyvolal právě jeden modelový pokus Terry/high přes
+  nasazený adaptér. Žádný archiv, SMTP, notifikace ani běžící hodinová služba.
+- Pilot neprošel: `CodexAppServerClient.send_text` skončil
+  `AppServerContractError`: „Turn nebyl jednoznačně potvrzen jako doručený
+  a dokončený.“ Není potvrzený návrh, klasifikace ani usage; nelze tvrdit,
+  že model zprávu dokončil nebo že pokus nic nestál. Kořenová příčina není
+  doložená; dostupné logy ji nerozlišily. Žádný automatický opakovaný pokus.
+- Soukromý stav obsahuje právě jednu položku `analysis_failed`, žádnou
+  kartu ani hodinový řádek; živé API ukazuje `assessment_errors=1`.
+  Scheduler má `completed` pro dokončení vstupního průchodu, nikoli pro
+  úspěch modelové analýzy. Jednorázový kurzor zůstal u vybrané zprávy;
+  při další aktivaci jej nemazat ani nepřesouvat bez vědomého rozhodnutí.
+- Soukromá účtenka a chyba jsou pod `data/private/continuous_agent/`;
+  neobsahovat je v Git zápisech. Nová trvalá modelová role nevznikla:
+  jednorázový pilot použil centrálně schválenou Terru/high, nikoli fallback.
+- Oficiální Standard sazby byly znovu ověřené: 25 vstup / 1,25 cached /
+  125 výstup kreditů za milion tokenů, https://learn.chatgpt.com/docs/pricing.
+  Provozní odhad čeká na úspěšný pilot s doloženou spotřebou.
+- Browser/iPhone přejímka zůstává otevřená. Důkazy HTTP a testy ji
+  nenahrazují. Níže uvedené lokální milníky jsou historie před tímto vydáním.
 
 ## Co se řešilo
 
@@ -86,7 +119,8 @@ odsouhlasený rozsah čtení k potvrzování jednotlivých zpráv.
 
 ## Co není hotové
 
-- Terra je Mílou zvolená. Zbývá provozní cenové posouzení/pilot, centrální
+- Terra je Mílou zvolená. První pilot neprošel potvrzením výsledku; zbývá
+  diagnostika kontraktu App Serveru, úspěšný pilot, provozní posouzení, centrální
   modelový profil a skutečná přejímka kvality odpovědí a metadat.
 - Živá SMTP/IMAP přejímka na konkrétní schválené testovací zprávě a příjemci;
   syntetická přejímka odesílacího kódu není důkaz skutečného doručení.
@@ -101,17 +135,18 @@ odsouhlasený rozsah čtení k potvrzování jednotlivých zpráv.
   „Zkontroluj e-maily v Cockpitu“. Cockpit se otevře klepnutím na oznámení;
   samovolné otevření přes jinou aplikaci se neslibuje. Specifický tón a
   konkrétní notifikační cesta ještě vyžadují výběr a zkoušku na telefonu.
-- Míla výslovně odložil p+n na později. Lokální vývoj není instalací ani
-  zapnutím hodinového provozu; součástí této etapy není skutečné odesílání.
+- P+n je dokončené podle aktuálního stavu výše. Hodinový provoz není
+  zapnutý; součástí této etapy nebylo skutečné odesílání.
 - Nový samostatný pracovní proud ani nový TVBCP nebyly domluvené či založené.
   Tento terminálový krok je zapsán u existující e-mailové oblasti; před
   převzetím do Human–Adam musí být určena schválená kanonická vazba.
 
 ## Další krok
 
-Připravit centrální modelový profil Terry s provozním posouzením a dohodnout
-konkrétní zprávu/příjemce pro řízený živý pilot. Poté notifikace a kalendář;
-p+n ani hodinový provoz se bez dalšího pokynu nespouští.
+Doplnit přesnou diagnostiku neúspěšného modelového kontraktu a odlišit
+chybu modelu od neúplného potvrzení vstupu/výstupu. Teprve poté vědomě
+rozhodnout o novém jednotlivém pilotu; původní nejistý pokus neopakovat
+automaticky. Následuje kvalita metadat/odpovědí, modelová role a aktivace.
 
 ## Navrhované další kroky
 
@@ -129,9 +164,10 @@ p+n ani hodinový provoz se bez dalšího pokynu nespouští.
 - Těla důležitých zpráv jsou zatím součástí místního JSON stavu karet.
   Před trvalým provozem ověřit odezvu přehledu na větší dávce; případné
   samostatné úložiště těl a stránkování odvodit z výsledku tohoto měření.
-- Výsledek jednotlivého modelového pokusu je synteticky ověřený adaptérem,
-  nikoli skutečným placeným modelem. Živé e-maily ani kalendář se při testech
-  nečetly a nic nebylo odesláno, instalováno, publikováno nebo nasazeno.
+- Syntetická přejímka adaptéru neodhalila chybu prvního živého pokusu.
+  Jedna zpráva byla živě načtená; modelový konečný výsledek není potvrzený.
+  Kalendář se nečetl a žádný e-mail se neodeslal ani nearchivoval.
+  Publikování/nasazení doložené výše není aktivací hodinového agenta.
 - Projektový Python je `3.12.0rc3`; stabilní prostředí služby je doporučená
   příprava před trvalým provozem. Současné závislosti prošly `pip check`.
 - Předchozí kontrola zálohy: poslední úspěch 2026-10-30; nová záloha se v této
