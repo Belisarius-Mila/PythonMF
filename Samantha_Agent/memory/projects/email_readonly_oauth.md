@@ -736,3 +736,15 @@ repozitáře. Bez nového TVBCP; produkční App Server a Data práce zachované
 bránu/commit/konkrétní plán, systémové potvrzení, instalace/check/obnova
 a první ostrá hodina. Viz reports/continuous_email_service_installation_20261105.md
 a handoffs/continuous_personal_agent_2026_11_04.md.
+
+
+Navazující noční integrace: Míla schválil převzetí Data a společné p+n včetně
+oprav. Will převzal dva commity jako 1b6fd61e/ccece787, zkontroloval původní
+App Server klient (excludeTurns/final_answer/strukturované chyby); SDK zůstává
+offline. 192 společných cílených testů: 172 PASS, 20 volitelných SDK SKIP.
+Živý handshake/katalog serveru 0.163.0 PASS. Odesílání ani e-mailové pozice
+tímto krokem nebyly měněné; aktivace LaunchAgentu dál čeká na přesnou větu.
+
+Společná integrační brána prošla 2462 testy: 2442 PASS, 20 volitelných SDK
+SKIP (377,0 s), logs/data_email_integration_gate_20261105.log. P+n je
+autorizované; konečný provozní výsledek doloží přesná účtenka a živý audit.

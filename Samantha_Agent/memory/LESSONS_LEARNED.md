@@ -1623,7 +1623,7 @@ Doplnění 17102026 k LL-071: Nativní modelový pomocník navíc zdvojuje roli,
 
 - Doplnění 2026-11-01 po přijetí ukázek: zbývajících 128 stop dokončeno 128 unikátními Azure požadavky, 5 870 znaků; plná sada 144/144 a staré MP3 beze změny. Testy výběru ukázek a překročení rozpočtu mají používat syntetická data, aby po dokončení scény nezávisely na skutečně chybějících stopách.
 
-### LL-089 — Modernizace App Serveru nesmí obejít důkaz doručení
+### LL-097 — Modernizace App Serveru nesmí obejít důkaz doručení
 
 - Problém: resume zbytečně načítal historii, commentary se mohlo stát odpovědí a obecná chyba zahazovala strukturu. Lokální verze CLI sama nedokládá verzi sdíleného listeneru.
 - Typ: opakující se

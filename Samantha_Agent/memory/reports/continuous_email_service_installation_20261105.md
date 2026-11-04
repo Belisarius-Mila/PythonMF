@@ -61,3 +61,11 @@ Záloha 2026-10-30 je starší než tři dny; nová se nespouštěla.
 Python 3.12.0rc3 zůstává; update není součástí tohoto kroku.
 Na napájení už je automatické uspání vypnuté (pmset sleep=0); neměnilo se.
 CalDAV a živá přejímka archivních metadat jsou další samostatné kroky.
+
+## Společná přejímka s Datovými commity
+
+Po převzetí Data (1b6fd61e/ccece787) 192 cílených testů: 172 PASS, 20 SDK
+SKIP. Plná společná brána 2462 testů: 2442 PASS, 20 SDK SKIP (377,0 s),
+logs/data_email_integration_gate_20261105.log. Upravený původní klient
+ověřil živý server 0.163.0 a katalog. SDK zůstává offline. P+n je výslovně
+autorizované, konečný stav je nutné číst z přesné účtenky a živého auditu.

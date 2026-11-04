@@ -3,6 +3,17 @@
 Datum: 2026-11-04. Autor: Data. Větev: `data/parallel-20261104`.
 Výchozí bod: pilot `607fc538`. Pracovní proud: `layer-human-adam-development`.
 
+## Integrace Willem — 2026-11-05 00:53 CET
+
+Na výslovný Mílův pokyn převzaty originály 607fc538/862b6225 do main jako
+1b6fd61e/ccece787. Will zkontroloval produkční diff i oddělení SDK a ověřil
+společné kontrakty: 192 testů: 172 PASS a 20 explicitních skipů volitelného SDK prostředí.
+Živý upravený klient se připojil k serveru 0.163.0 a načetl katalog; lokální
+CLI je 0.166.0. Produkční SDK/runtime architektura ani závislosti se nemění.
+Společná plná brána prošla: 2462 testů, 2442 PASS a 20 SDK SKIP (377,0 s), log data_email_integration_gate_20261105.log.
+Následuje autorizované registrované p+n; jeho výsledek je autoritativní až
+v přesné účtence. Starší vývojový report níže popisuje stav před integrací.
+
 ## Výsledek
 
 Původní klient je lokálně upravený, SDK se neadoptuje. Běžný reconnect žádá

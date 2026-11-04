@@ -24,6 +24,8 @@ NODE_FALLBACK_PATHS = (
 )
 
 COMPILE_PATHS = (
+    "app/codex_sdk_pilot.py",
+    "scripts/codex_sdk_synthetic_peer.py",
     "app/email/service_control.py",
     "scripts/continuous_email_agent_service.py",
     "app/email/pushcut.py",
@@ -316,6 +318,7 @@ TEST_MODULES = (
     "tests.test_command_cheatsheet",
     "tests.test_workflow_commands",
     "tests.test_codex_appserver",
+    "tests.test_codex_sdk_pilot",
     "tests.test_release_usage",
     "tests.test_routine_tasks",
     "tests.test_simple_development",

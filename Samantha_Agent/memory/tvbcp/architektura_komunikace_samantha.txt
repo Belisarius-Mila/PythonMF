@@ -1,38 +1,37 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
-- Obnoveno potvrzeným checkpointem: 2026-10-19 13:00 CEST
-- Lokální vývoj 2026-11-04: 05/P1-B ve větvi `data/parallel-20261104`; bez integrace do main a bez nasazení. Report `reports/codex_appserver_p1b_20261104.md`.
+- Integrační krok: 2026-11-05 00:53 CET, schválený Mílou pro dokončení a p+n do čistého repozitáře.
 
 ### Hotovo
-- Human–Adam upřednostňuje chat a aktuální stav; technické účtenky jsou dostupné v panelu Práce
-- Lokální klient žádá obnovu bez historie, rozlišuje final_answer a zachovává strukturované chyby. Kompatibilitu posuzuje podle připojeného serveru, nikoli lokálního CLI; 100 cílených testů PASS.
+- Will převzal a zkontroloval oba Datovy kroky: SDK zůstává izolovaným offline pilotem; produkce používá původní klient.
+- Klient obnovuje bez historie, upřednostňuje final_answer, uchovává strukturované chyby a před prací s vláknem ověřuje verzi skutečně připojeného serveru. Nejisté akce se neopakují.
+- Samostatný instalační balíček e-mailového agenta je lokálně dokončený; jeho aktivace není součástí společného restartu Cockpitu.
 
 ### Otevřeno
-- Pozdější nasazení nového checkpointu zatím není tímto snapshotem doložené.
-- Lokální commity čekají na samostatný denní GitHub balíček.
+- Registrované p+n společného balíčku a kontrola jeho přesné účtenky. Aktuální nasazení vždy ověřit živým auditem, nikoli z tohoto indexového snapshotu.
+- Fyzická Mac/iPhone přejímka nového reconnectu/UI zůstává samostatná; SDK proxy se neaktivuje.
 
 ### Rizika
-- Poslední ověřené nasazení patří jinému commitu než main před tímto checkpointem.
-- 05/P1-B dosud není v provozu. Neznámý, starší než 0.163.0 nebo prerelease server je záměrně odmítnut před prací s vláknem; živá kompatibilita se ověří až v samostatně autorizované přejímce.
+- Server pod stabilní 0.163.0 je záměrně odmítnut. Živý handshake v integračním kroku potvrdil 0.163.0; lokální CLI je 0.166.0.
+- Volitelné SDK testy potřebují vlastní izolované prostředí. Produkční závislosti se kvůli pilotu nemění.
+- Instalace e-mailového LaunchAgentu čeká na přesnou globální větu, kterou Míla ještě nezadal.
 
 ### Další krok
-- Předat Willovi lokální diff 05/P1-B k porovnání s jeho proudem; integraci a nasazení posoudit samostatně.
-- Po samostatném nasazení vizuálně ověřit čitelnost chatu a panel Práce na Linuxu a iPhonu
+- Dokončit společnou bránu, checkpoint a registrované p+n. Chybu opravit, znovu ověřit a předat nový přesný balíček podle Mílova nočního pokynu.
 
 ### Rozhodnutí
-- Úvodní obrazovka zobrazuje stručný aktuální stav, technické účtenky a podrobnosti se otevírají v panelu Práce
+- Míla výslovně schválil převzetí Data a samostatné p+n včetně potřebných oprav do čistého repozitáře. SDK se do produkce nepřevádí; session hub a komunikační architektura zůstávají zachované.
 
 ### Navrhované další kroky
-- Žádné další návrhy nad rámec bezprostředního kroku.
+- Po potvrzení globální brzdy aktivovat připravenou e-mailovou službu a ověřit první ostrou hodinu. SDK proxy a fyzickou přejímku řešit samostatně.
 
 ### Technický stav checkpointu
-- Změna prošla rychlou syntax/whitespace bránou; cílené testy doložila dokončovací účtenka vývojového tahu.
-- Git před checkpointem: lokální `main` na `3538da49cd0c`; GitHub může být starší a čeká na denní balíček.
-- Poslední serverově potvrzené nasazení: `2e14eaf244e9` · je starší než ověřený main před tímto checkpointem · 0 testů · smoke 5/5 · 2026-10-17T22:14:52+00:00.
-- Historický read-only živý stav při checkpointu 2026-10-19: main=`local_ahead`, deployment=`verified_other_main`, runtime=`connected`; 05/P1-B ho živě neověřuje.
-- Tento snapshot je součástí lokálního checkpointu; push na GitHub zůstává odložený do potvrzeného denního balíčku.
-- Tato sekce nahrazuje pouze předchozí aktuální souhrn; chronologické bloky níže zůstávají historickými snapshoty.
+- Datovy originály 607fc538 a 862b6225 převzaty cherry-pickem s původem jako 1b6fd61e a ccece787. Větev Data zůstává čistá a zachovaná.
+- Integrovaná cílená sada 192 testů: 172 PASS, 20 explicitních SDK SKIP; logs/data_email_integration_targeted_20261105.log. Bez nového placeného e-mailového tahu nebo SMTP.
+- Plná integrační brána: logs/data_email_integration_gate_20261105.log, 2462 testů: 2442 PASS, 20 SDK SKIP (377,0 s). E-mailový instalátor samostatně 2403 PASS, finální regrese vnořeného archivu PASS.
+- Účtenka registrovaného vydání a živý audit jsou provozní autoritou; jejich stav zde není předem prohlášen za úspěch.
+- Tato sekce nahrazuje jen aktuální souhrn; starší chronologické bloky zůstávají historické.
 <!-- SAMANTHA_CURRENT_STATUS_END -->
 
 # TVBCP – Architektura komunikace Samantha
@@ -4392,3 +4391,24 @@ Navrhované další kroky:
 Technický důkaz:
 - 100 cílených testů PASS; úplná Cockpit brána PASS: 2 373 testů, 0 chyb a selhání, 5 skipů PDF exportů bez ReportLabu. Podrobnosti v `reports/codex_appserver_p1b_20261104.md`; pilotní commit `607fc538`.
 - Žádný modelový tah, živá služba, sdílený provozní zápis, push, restart ani integrace do main. Kanonický handoff aktualizován ve stejném kroku; nový TVBCP nevznikl.
+
+
+## 2026-11-05 00:53 CET — Převzetí Data a společný balíček
+
+Hotovo: Will převzal oba Datovy commity do main po kontrole změn a jejich
+slučitelnosti s e-mailovým proudem. Původní klient je modernizovaný; SDK
+zůstává offline. Živý handshake a katalog potvrdily kompatibilní připojení.
+
+Rozhodnutí: Míla před spaním výslovně zadal převzít Data, zkontrolovat a
+provést p+n včetně oprav do čistého repozitáře. Systémová instalace nového
+e-mailového LaunchAgentu dál vyžaduje přesnou globální větu.
+
+Další krok: Dokončit společnou bránu a registrované p+n; konečný provozní
+stav ověřit z přesné účtenky a živého auditu, nepředpokládat ho z indexu.
+
+Navrhované další kroky: Potvrzená aktivace e-mailového agenta a první ostrý
+cyklus; fyzická přejímka reconnectu. SDK proxy nebyla aktivována.
+
+Technický důkaz: 192 cílených testů: 172 PASS, 20 volitelných SDK SKIP,
+logs/data_email_integration_targeted_20261105.log; server 0.163.0 proti
+lokální CLI 0.166.0. Plná integrační brána: 2462 testů, 2442 PASS, 20 SDK SKIP (377,0 s) v příslušném logu.

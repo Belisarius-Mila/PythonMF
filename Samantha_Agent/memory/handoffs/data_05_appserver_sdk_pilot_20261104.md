@@ -1,6 +1,16 @@
 # Data → Will: 05/P1 App Server / Python SDK, etapy A a B
 
-## Aktuální lokální stav — 05/P1-B
+## Převzato Willem do main — 2026-11-05 00:53 CET
+
+Míla výslovně schválil převzetí, kontrolu a společné p+n. Originály
+607fc538 a 862b6225 byly převzaty jako 1b6fd61e a ccece787. Větev Data je
+zachovaná a čistá. Společná cílená sada 192 testů: 172 PASS, 20 volitelných SDK SKIP,
+živý handshake 0.163.0 a katalog úspěšné. Plná integrační brána prošla 2462 testy (2442 PASS, 20 SDK SKIP);
+aktualizovaný kanonický handoff/TVBCP a log data_email_integration_gate_20261105.log.
+SDK nadále není produkční závislost. P+n je autorizované, úspěch se doloží
+přesnou účtenkou; starší omezení integrace níže jsou tímto pokynem překonaná.
+
+## Předchozí lokální stav — 05/P1-B
 
 Míla schválil pokračování 05/P1-B. Původní klient nyní žádá `excludeTurns:true`,
 ověřuje připojený stabilní server od 0.163.0 před operací s vláknem, rozlišuje

@@ -15,8 +15,8 @@ Datum: 2026-11-05
   Private webhook připojený/zapnutý, test accepted.
 - Míla zadal dokončit řízenou instalaci a provoz. Nová role continuous_email
   je Terra/high, doložené dřívější živé e-mailové zkoušky a cenové posouzení;
-  aktuální katalog model potvrdil bez fallbacku. Produkční App Server ani
-  souběžná práce Data se nemění.
+  aktuální katalog model potvrdil bez fallbacku. Samotný instalátor nemění
+  App Server; navazující noční pokyn autorizoval převzetí Datových změn.
 - Výchozí provoz zahrnuje všechny nové celé zprávy, bez denního početního
   limitu. Dřívější 20/den byl návrh. Dávky navážou další minutu; dokončená
   hodina se neopakuje. Rozsah 07–22 Europe/Prague, přihlášený uživatel Macu.
@@ -40,6 +40,12 @@ Datum: 2026-11-05
   Míla následně výslovně schválil převzetí Datových commitů a společné p+n včetně oprav do čistého repozitáře. Nový TVBCP nebyl domluvený ani založený.
 - Čerstvý report zálohy: poslední úspěch 2026-10-30, starší než tři dny.
   Autosave běží a zapisuje; SSD upozornění při 25,2 GiB. Záloha neběžela.
+
+- Následně Will převzal oba Datovy commity do main (1b6fd61e/ccece787):
+  modernizovaný původní klient, SDK stále offline. Společně 192 cílených
+  testů: 172 PASS a 20 volitelných SDK SKIP; živý handshake/katalog na
+  serveru 0.163.0 úspěšné. Společná plná brána 2462 testů: 2442 PASS, 20 SDK SKIP. P+n je další
+  autorizovaný krok; kanonický App Server handoff/TVBCP byly synchronně aktualizované.
 
 ## Předchozí stav 2026-11-04 23:24 CET
 
