@@ -1,39 +1,13 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
-- Aktualizováno: 2026-09-13 10:12 CEST
-
-### Hotovo
-- Doplněno 7 FR položek z NewWords.txt; Míla má celkem 234 slovíček.
-- U Jany doplněno 7 chybějících párů vět a dva české překlepy;
-  nyní všech 413 řádků kompletních. Nová Mílova hesla se Janě nepřidávala.
-- Dříve potvrzená samostatná Janina aplikace a trénink 107 sloves /
-  1 926 vět zůstávají zachované; tato aktualizace mění jen slovníková data.
-- Společný audit: FR Míla 234 / FR Jana 413 / IT Míla 471 řádků,
-  žádné chybějící obrázky v desktopových ani Pythonista resolverech.
-- Doplněno také devět starších Janiných českých vazeb chybějících v Pythonistě.
-- Osm nových ilustrací WebP do 250 kB; kanonické české abecední mapování
-  1 082 položek (+27) je bajtově shodné s Janinou sdílenou kopií.
-- Šest testů kanonického mappingu i rychlá statická brána prošly; původní řádky Míly včetně L/HT
-  zachované. Všechny nové položky mají Sentence/SentenceT a L=ne, HT=ne.
-
-
-### Rozhodnutí
-- Míla pověřil Adama doplněním dat, výběrem/generováním ilustrací i c+p
-  bez mezidotazů a bez schvalovací galerie. Výběr významů je v reportu.
-
-### Další krok
-- Načíst aktualizovaná data v používané aplikaci; vzdálenou iCloud synchronizaci
-  a skutečný iPhone běh tento místní audit nepotvrzuje.
-
-### Navrhované další kroky
-- Další obsah doplňovat stejným společným auditem tří slovníků.
-
-### Rizika a technický důkaz
-- Před zápisem soukromé zálohy a kontrola vstupních snímků. Janina data mimo Git.
-- Kód aplikací se neměnil. Dřívější otevřené náměty, např. Linux poslech
-  a reload CSV po konfliktu, nejsou tímto datovým krokem vyřešené.
-- Podrobnosti: `reports/vocabulary_fr_it_refresh_2026_09_13.md`.
+- Aktualizováno: 2026-11-04 12:01 CET.
+- Janin připojený sdílený iCloud má 451 řádků. Doplněno 38 chybějících párů Sentence/SentenceT, nyní 451/451 kompletních; původní věty, FR/CZ, pořadí, L/HT a gender_fr zachované. Mílovo FR 234 a IT 471 řádků beze změny.
+- Kanonický český abecední Pict/mapping.json má 1110 vazeb (+28). Doplnění používají existující obrázky, žádná původní vazba změněná. Janina distribuční kopie bajtově shodná; všechny použité existující obrázky už měla.
+- Skutečné desktopové/Pythonista resolvery prověřené ve všech třech oblastech. FR Míla a IT Míla bez chybějících obrázků; u Jany zbývá 9 řádků pro 8 nových ilustrací. Záměrný obecný obrázek u chez zůstává zachovaný. Ověřeno 902 unikátních používaných obrazových souborů, 6 testů kanonického mappingu PASS a rychlá statická brána PASS.
+- Připravený request a úspěšný dry-run 8 nových obrázků: bez, letuška, perlivá voda, pilot, bunda, zapomenout, padesát, sto. Generování ani jejich mapování se nespustilo; čeká výslovný souhlas s generováním a případným pověřením Adama k vizuálnímu výběru. Zářijové pověření platilo jen pro tehdejší dávku.
+- Starý jana_vocabularyfr_fill_sentences.py je navázaný na historická Order; nynější náhled by přepsal 10 jiných FR hesel. Nebyl použit pro zápis. Doplnění přes existující vocabulary_csv_store.save_csv_atomic, shoda aktuálních hesel/snímků, ověřená záloha a atomické nahrazení. Soukromý plán, zálohy, účtenka a úplný audit: data/private/vocabularyfr_refresh_20261104/; Janina data nepatří do Gitu.
+- Další krok: po souhlasu vytvořit 8 obrázků, vizuálně přijmout, doplnit 9 cílových vazeb a zopakovat společný audit. Soukromé poznámky k několika významům čekají na revizi; hesla nebyla automaticky přepisovaná. Vzdálená iCloud synchronizace a fyzický běh na Janině zařízení NEOVĚŘENO. Bez push a nasazení Cockpitu.
 <!-- SAMANTHA_CURRENT_STATUS_END -->
 
 # Handoff pracovního proudu: Vocabulary FR
@@ -287,3 +261,27 @@ Technický důkaz:
 - Report `reports/vocabulary_fr_it_refresh_2026_09_13.md`; soukromé důkazy
   `vocabulary_refresh_20260913/audit_result.json` a `apply_manifest.json`.
 - Riziko: stav na vzdáleném iPhonu/Macu závisí na následném přenosu dat.
+
+### 2026-11-04 12:01 CET — Janiny příkladové věty a existující obrázkové vazby
+
+Hotovo:
+- Janě doplněno 38 párů francouzských vět s českými překlady, nyní všech 451 hesel úplných.
+- Doplněno 28 českých vazeb k existujícím obrázkům; oba mappingy shodné. Opravené také mezery mezi desktopovým a Pythonista výběrem, včetně šesti existujících IT aliasů při povinném společném auditu.
+
+Rozhodnutí:
+- Míla zadal doplnění Janiných příkladů, chybějících obrázků a mappingu. Použít vhodné existující obrázky, zachovat ostatní data a nové placené generování potvrdit podle kanonického postupu. Dřívější souhlas pro zářijovou dávku nepřenášet na novou.
+- Starý helper má historická Order, a proto se nepoužil pro zápis. Existující bezpečný CSV store uložil jen chybějící věty podle ověřených aktuálních hesel a otisku souboru.
+
+Další krok:
+- Získat odpověď na konkrétní připravenou žádost o 8 nových obrázků a případné pověření Adama k jejich vizuálnímu výběru.
+
+Navrhované další kroky:
+- Po generování doplnit devět vazeb a provést společný audit; následně načíst data na Janině zařízení.
+- Samostatně projít tři soukromé lexikální poznámky bez tichého přepisu hesel.
+
+Technický důkaz:
+- FR Míla 234 / FR Jana 451 / IT Míla 471, žádné chybějící příkladové páry. Janiny změny pouze 38 dvojic Sentence/SentenceT; původní hodnoty ostatních sloupců a existující věty zachované, Mílova CSV hashově beze změny.
+- Pict/mapping.json 1082 → 1110, pouze 28 přidaných českých klíčů, původní vazby zachované, abecední a bajtově shodné s Janinou kopií. Obrázkové soubory nebylo nutné kopírovat. Skutečné desktopové/Pythonista resolvery a 902 používaných souborů prověřené.
+- Zbývá 9 Janiných řádků / 8 nových ilustrací; chez má záměrný gramatický fallback. FR Míla a IT Míla bez obrazových mezer. 6 kanonických testů a rychlá statická brána PASS. Nová osmička pouze request/dry-run, bez API volání.
+- Soukromé důkazy prepared_plan.json, apply_receipt.json, audit_after_existing.json a image_requests.json ve vocabularyfr_refresh_20261104. Zálohy CSV i mappingů ověřené. Lokální servisní mapping.json.lock zachovaný a přesně vyloučený v místním Git exclude, nic smazáno.
+- Kód aplikací, Janina app, Mílovy CSV a existující obrázky beze změny; vzdálený iCloud přenos a fyzické zařízení neověřené. Bez push/nasazení.

@@ -396,6 +396,8 @@ Doplnění 17102026 k LL-071: Nativní modelový pomocník navíc zdvojuje roli,
 
 ### LL-002 — Slovníkové aplikace: konzistence kódu, mappingu a obrázků
 
+- Doplnění 4. 11. 2026: historické opravy podle Order nelze použít na nově uspořádané CSV. Náhled starého Janina helperu by přepsal 10 jiných hesel. Doplňovat jen prázdné věty podle aktuálního FR/CZ a snímku souboru; použít existující bezpečný CSV store s ověřenou zálohou a konfliktní kontrolou. Celý původní řádek a L/HT ověřit po zápisu. Stávající helper má zůstat jen čtecím podkladem, dokud nebude samostatně opravený.
+
 - Problém: Obrázky se nemusí zobrazovat, přestože mapping vypadá správně.
   Příčinou může být záměna variant aplikace nebo mappingu, neúplný `Pict`, jiná
   cesta na cílovém zařízení, starý obsah v paměti nebo rozdíl ve formátu či

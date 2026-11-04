@@ -1,5 +1,14 @@
 # PictNew: opakovatelné generování obrázků pro slovíčka
 
+## Aktualizace Jany 2026-11-04 12:01 CET — věty hotové, nová osmička čeká
+
+- Jana 451/451 Sentence/SentenceT po doplnění 38 párů; FR Míla 234 a IT Míla 471 beze změny. Původní věty a ostatní hodnoty zachované.
+- Kanonický český abecední mapping 1110 (+28), bajtově shodný s Janinou kopií. Použité existující obrázky už v obou Pict; žádná regenerace nebo kopie obrázku.
+- Skutečné desktop/Pythonista resolvery: FR Míla a IT Míla bez mezer, Jana ještě 9 řádků / 8 nových ilustrací, plus záměrný gramatický chez fallback. Ověřeno 902 používaných souborů a 6 kanonických testů.
+- Připravený request a dry-run: bez, letuška, perlivá voda, pilot, bunda, zapomenout, padesát, sto. Nové generování, vizuální výběr a navazující distribuce čekají na odpověď Míly; zářijové pověření bylo omezené na tehdejší dávku.
+- Historický jana_vocabularyfr_fill_sentences.py dnes podle starých Order navrhuje přepsat jiná hesla; jen čtecí náhled, nepoužít pro zápis. Pro tento krok existující vocabulary_csv_store.save_csv_atomic a přesné aktuální řádky/otisky, ověřené privátní zálohy. Důkazy data/private/vocabularyfr_refresh_20261104/.
+- Vzdálená iCloud synchronizace a fyzické zařízení neověřené; žádné nové sestavení aplikace ani nasazení Cockpitu není potřeba.
+
 ## Ověřená aktualizace 2026-09-13 10:12 CEST
 
 - NewWords.txt: FR 234 (+7), IT 471 (+8), všechny nové položky s CZ a větami.
