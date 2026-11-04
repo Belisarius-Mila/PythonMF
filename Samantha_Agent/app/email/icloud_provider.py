@@ -483,7 +483,7 @@ def _message_data_to_email_message(
 def _message_data_to_archive_source(
     uid: str,
     message_data: list[object],
-    max_chars: int,
+    max_chars: int | None,
     folder: str = "INBOX",
     max_message_bytes: int = MAX_MESSAGE_BYTES,
 ) -> EmailArchiveSource:
@@ -493,9 +493,9 @@ def _message_data_to_archive_source(
 
     message = message_from_bytes(raw_message)
     body_text, body_html = _extract_body_text_and_html(message)
-    if len(body_text) > max_chars:
+    if max_chars is not None and len(body_text) > max_chars:
         body_text = body_text[:max_chars].rstrip()
-    if len(body_html) > max_chars:
+    if max_chars is not None and len(body_html) > max_chars:
         body_html = body_html[:max_chars].rstrip()
 
     email_message = EmailMessage(

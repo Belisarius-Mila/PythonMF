@@ -1,5 +1,28 @@
 # E-mail read-only OAuth integrace
 
+## Aktuální směr 2026-11-04 — průběžný osobní agent
+
+- Míla stanovil prioritu průběžného agenta pro e-maily a Apple/iCloud kalendář.
+  Mac bude stále online. Čtení se týká celého obsahu e-mailů, nikoli jen hlaviček
+  nebo zkrácených ukázek. Dosavadní omezení této historické reference nejsou
+  novým požadavkem na jednotlivá potvrzení průběžného čtení.
+- Agent má obsahově připravit reakci, odpověď a návrh uložení včetně metadat.
+  Uložení provede až po Mílově potvrzení; původní heuristická klasifikace není
+  pro tento cyklus autorem metadat. Automatické odesílání nebylo zadáno.
+- Míla zapnul Kalendář na iCloudu, potvrdil sloučení a následně osobně potvrdil
+  funkční synchronizaci na Macu i iPhonu. Programové CalDAV připojení dosud
+  ověřené není. Tento směr je odlišný od rodinného registru narozenin a svátků.
+- První lokální backend je v `app/email/continuous_agent.py` a
+  `continuous_source.py`: úplný IMAP/MIME vstup, obnovení dávky, modelové návrhy,
+  upravitelný návrh s otiskem a potvrzený archiv s původním EML. Model se volí
+  explicitně; žádný živý modelový běh ani nastavení role zatím neproběhlo.
+- Trvalý pracovní stav obsahuje identitu zdroje a návrhy; obchodní archiv se
+  vytváří po potvrzení. Nový archiv je zatím oddělený, není integrován do UI
+  existujícího archivu ani do importu jednotlivých příloh v dokumentovém vaultu.
+- Přejímka prvního kroku a zbývající práce jsou v
+  `../handoffs/continuous_personal_agent_2026_11_04.md`.
+- Níže zůstává historický návrh a popis již existujících ručních nástrojů.
+
 ## Cil
 
 Mila chce jit cestou bezpecne dlouhodobe integrace, ve ktere Samantha dokaze cist vybrane e-maily pres OAuth, ne pres Apple Mail GUI. Prvni verze ma byt read-only a bez moznosti odesilani, mazani nebo uprav zprav.

@@ -24,6 +24,9 @@ NODE_FALLBACK_PATHS = (
 )
 
 COMPILE_PATHS = (
+    "app/email/continuous_source.py",
+    "app/email/continuous_agent.py",
+    "scripts/continuous_email_agent.py",
     "app/speech/azure_tts_mp3.py",
     "../MatysekANJ/build_scene06_audio.py",
     "app/backup/camino.py",
@@ -408,6 +411,7 @@ TEST_MODULES = (
     "tests.test_email_work_outbox",
     "tests.test_work_repository",
     "tests.test_email_work_repository",
+    "tests.test_continuous_email_agent",
     "tests.test_email_work_models",
     "tests.test_document_persistence",
     "tests.test_document_archive_browser",

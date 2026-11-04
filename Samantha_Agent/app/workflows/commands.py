@@ -319,6 +319,22 @@ def _camino_service_commands() -> tuple[WorkflowCommand, ...]:
 
 WORKFLOW_COMMANDS: tuple[WorkflowCommand, ...] = (
     WorkflowCommand(
+        command_id="continuous_email_agent_status",
+        title="Stav průběžného e-mailového agenta",
+        purpose="Přečte pouze agregované stavy návrhů a zdrojů, bez kontaktování pošty a modelu.",
+        aliases=("stav průběžného agenta",),
+        argv=(str(PYTHON_BIN), str(SAMANTHA_DIR / "scripts/continuous_email_agent.py"), "status"),
+        cwd=SAMANTHA_DIR, risk="read_only", writes="nic",
+    ),
+    WorkflowCommand(
+        command_id="continuous_email_agent_synthetic_test",
+        title="Syntetická přejímka průběžného e-mailového agenta",
+        purpose="Ověří úplné čtení, návrhy, obnovu a potvrzený archiv na umělých zprávách.",
+        aliases=("syntetický test průběžného agenta",),
+        argv=(str(PYTHON_BIN), str(SAMANTHA_DIR / "scripts/continuous_email_agent.py"), "synthetic-test"),
+        cwd=SAMANTHA_DIR, risk="local_test", writes="jen dočasné syntetické testovací soubory",
+    ),
+    WorkflowCommand(
         command_id="mmtx_scene06_azure_complete",
         title="Doplnění schváleného audia MMTX přes Azure",
         purpose="Doplní chybějící MP3 scény 6; zachová hotové soubory, hlasy a -10 %, limit 10000 znaků bez retry.",

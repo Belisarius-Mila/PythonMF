@@ -29,6 +29,13 @@ nebo jejichž princip lze znovu použít v jiné části projektu.
 
 ## Záznamy
 
+### LL-089 — Úplné modelové čtení nesmí použít zkrácený náhled zprávy
+
+- Problém: e-mailové náhledy mají znakové limity; ani přítomnost původního EML sama neprokazuje, že model dostal konec dlouhého textu.
+- Typ: opakující se
+- Řešení nalezeno: 04112026
+- Řešení: pro obsahový agentní cyklus použít explicitní úplnou MIME cestu bez ořezu textu a HTML, zachovat dosavadní náhledové limity a testovat unikátní marker až za jejich hranicí přímo ve vstupu modelu. Syntetická zpráva přes 200 000 znaků ověřila text, HTML i původní EML; běžný omezený náhled zůstal zachovaný.
+
 ### LL-084 — Výmaz projektu zahrnuje historii fronty a nezařazené pracovní kopie
 
 - Problém: samotné odstranění projektových řádků a finálních médií ponechá texty v přijatých obálkách, dříve smazané záznamy, karanténu a odvozeniny; stará fronta může projekt znovu založit.
