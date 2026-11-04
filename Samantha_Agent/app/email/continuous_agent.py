@@ -154,13 +154,15 @@ class ContinuousEmailAgent:
         return tuple(matches[:5])
 
     def cycle(self, source, propose: Callable[[ObservedEmail], EmailProposal], *, limit: int = 10,
-              cycle_at: datetime | None = None) -> dict:
+              cycle_at: datetime | None = None, should_stop: Callable[[], bool] = lambda: False) -> dict:
         """Process each identity once. First scan starts with oldest existing mail.
 
         A failed/interrupted model request remains visible and is never retried
         automatically. Later messages can proceed; the failed item retains its UID.
         """
         with exclusive_file_lock(self.root / "cycle", timeout=0):
+            if should_stop():
+                return {"health": "paused", "proposals": 0, "fetched": 0}
             state = self.status()
             cursor = state["sources"].get(source.key, {})
             try:
@@ -173,6 +175,8 @@ class ContinuousEmailAgent:
             hour = (cycle_at or datetime.now(timezone.utc)).astimezone(ZoneInfo("Europe/Prague")).replace(
                 minute=0, second=0, microsecond=0).isoformat()
             for observed in scan.messages:
+                if should_stop():
+                    return {"health": "paused", "proposals": created, "fetched": len(scan.messages)}
                 item_id = observed.item_id
                 existing = self.status()["items"].get(item_id)
                 if existing is None:

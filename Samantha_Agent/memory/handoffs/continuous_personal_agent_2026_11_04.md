@@ -6,7 +6,35 @@ Stav: rozpracovane
 Pripomenout pri startu: ano
 Datum: 2026-11-04
 
-## Aktuální stav 2026-11-04 21:19 CET
+## Aktuální stav 2026-11-04 22:40 CET
+
+- Míla zadal pokračovat na e-mailech, zatímco druhý terminál Data samostatně
+  ověřuje App Server SDK. Produkční App Server klient ani runtime se zde nemění.
+- Příště nedůležité je už nasazené po 592d247b: Terra p+n
+  `1f89c512868687f9d1828d14c9337dbd`, 2352 testů PASS, smoke 5/5;
+  živý stamp a stránka ověřené, GitHub run 41908363646 success.
+  Níže uvedené starší tvrzení „pouze lokálně“ je překonané.
+- Nový lokální krok připravuje samostatný omezený provozní vstup `tick`,
+  čtecí readiness a náhled macOS LaunchAgentu. Zatím bez instalace/p+n.
+- Denní počítadlo rezervuje pokus před modelovým voláním, zahrnuje nejistý
+  výsledek a přežije restart. Vypnutí či změna účtů zastaví další zprávu
+  bez přeskočení její pozice. Vzorový limit 20/den je návrh, nikoli schválený
+  finanční/provozní rozpočet. Celé zprávy se nezkracují.
+- Rozpoznávaná samostatná role `continuous_email` zatím není aktivovaná
+  v config/agent_roles.json. Chybějící schválení zastaví vstup před katalogem,
+  není použita role p+n a neexistuje automatický modelový fallback.
+- Opravené UIDVALIDITY: změna schránky zastaví zdroj před SEARCH/FETCH,
+  zachová starý kurzor a vystaví konkrétní chybu. Původní chování by četlo
+  historii od začátku. Reprodukce FAIL před opravou, regrese PASS.
+- Čerstvá readiness: iCloud pozice existuje, Seznam potřebuje výchozí pozici;
+  chybí povolená provozní konfigurace a schválená vlastní role. Žádný nový
+  živý IMAP/model/SMTP pokus ani archivace; čtyři staré položky zachované.
+- Podrobnosti a důkazy: `reports/continuous_email_service_preparation_20261104.md`.
+  Finální cílená sada 112 PASS, nová servisní sada 15 PASS; plná Cockpit
+  brána 2366 PASS (498,4 s) a finální statická brána PASS.
+  Notifikace, CalDAV, fyzické QA preference a živé archivace dál čekají.
+
+## Předchozí stav 2026-11-04 21:19 CET
 
 - Míla osobně ověřil úpravu odpovědi, uložení a následné skutečné odeslání.
   Čtecí audit vybrané položky potvrzuje upravený návrh, `smtp_sent` a kopii
@@ -285,10 +313,11 @@ odsouhlasený rozsah čtení k potvrzování jednotlivých zpráv.
 
 ## Další krok
 
-Samostatně vydat lokální paměť důležitosti a přijmout
-volbu Příště nedůležité i její zrušení na Macu/iPhonu. Potom živý test
-potvrzeného uložení a provozní profil/rozpočet před aktivací služby.
-Editor i skutečné odeslání odpovědi jsou přijaté; chyba CI Camina uzavřená.
+Nejprve samostatné p+n kompatibilního runtime, potom aktivace nové role;
+starší běžící parser ji ještě nezná. Dokončit profil Terry a počet/rozpočet, připravit výchozí
+pozici Seznamu a řízenou instalaci/aktivaci. Dosavadní iCloud kurzor zachovat.
+Příště nedůležité už je vydané, fyzická přejímka volby/zrušení a živý test
+potvrzené archivace/metadat zůstávají otevřené. Editor/SMTP jsou přijaté.
 
 ## Navrhované další kroky
 

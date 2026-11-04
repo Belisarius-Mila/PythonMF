@@ -361,11 +361,23 @@ class IMAPSourceTests(unittest.TestCase):
         self.assertIn(("FETCH", b"3", "(RFC822.SIZE BODY.PEEK[])"), calls)
         self.assertIn(("SEARCH", None, "UID", "3:*"), calls)
 
-    def test_new_epoch_starts_at_oldest_uid(self):
+    def test_changed_epoch_blocks_before_search_or_body_fetch(self):
         source, calls = self.make_source(validity=b"11")
-        scan = source.scan({"uidvalidity": "10", "after_uid": 900}, limit=2)
-        self.assertEqual([m.source.uid for m in scan.messages], ["2", "3"])
-        self.assertIn(("SEARCH", None, "UID", "1:*"), calls)
+        with self.assertRaisesRegex(RuntimeError, "UIDVALIDITY"):
+            source.scan({"uidvalidity": "10", "after_uid": 900}, limit=2)
+        self.assertFalse(any(call[0] in {"SEARCH", "FETCH"} for call in calls))
+
+    def test_changed_epoch_preserves_worker_cursor_and_never_calls_model(self):
+        source, calls = self.make_source(validity=b"11")
+        with tempfile.TemporaryDirectory() as directory:
+            worker = ContinuousEmailAgent(Path(directory))
+            worker._update(lambda d: d["sources"].update({source.key: {"uidvalidity": "10", "after_uid": 900}}))
+            result = worker.cycle(source, lambda _: self.fail("No model on changed mailbox"))
+            self.assertEqual(result["health"], "error")
+            cursor = worker.status()["sources"][source.key]
+            self.assertEqual((cursor["uidvalidity"], cursor["after_uid"]), ("10", 900))
+            self.assertEqual(cursor["error"], "MailboxEpochChanged")
+        self.assertFalse(any(call[0] in {"SEARCH", "FETCH"} for call in calls))
 
     def test_seznam_source_keeps_provider_identity(self):
         source, _ = self.make_source(provider="seznam")

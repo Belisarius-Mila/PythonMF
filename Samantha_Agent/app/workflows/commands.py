@@ -319,6 +319,31 @@ def _camino_service_commands() -> tuple[WorkflowCommand, ...]:
 
 WORKFLOW_COMMANDS: tuple[WorkflowCommand, ...] = (
     WorkflowCommand(
+        command_id="continuous_email_agent_readiness",
+        title="Připravenost hodinové e-mailové služby",
+        purpose="Ověří místní konfiguraci, roli, pozice a existenci socketu; bez připojení k poště či modelu.",
+        aliases=("připravenost e-mailového agenta",),
+        argv=(str(PYTHON_BIN), str(SAMANTHA_DIR / "scripts/continuous_email_agent.py"), "readiness"),
+        cwd=SAMANTHA_DIR, risk="read_only", writes="nic",
+    ),
+    WorkflowCommand(
+        command_id="continuous_email_agent_service_preview",
+        title="Náhled hodinové e-mailové služby",
+        purpose="Vypíše budoucí LaunchAgent a vypnutý konfigurační vzor; nic neinstaluje ani nespouští.",
+        aliases=("náhled e-mailové služby",),
+        argv=(str(PYTHON_BIN), str(SAMANTHA_DIR / "scripts/continuous_email_agent.py"), "service-preview"),
+        cwd=SAMANTHA_DIR, risk="read_only", writes="nic",
+    ),
+    WorkflowCommand(
+        command_id="continuous_email_agent_tick",
+        title="Jeden omezený hodinový e-mailový cyklus",
+        purpose="Pouze s aktivovanou konfigurací, schválenou e-mailovou rolí a výchozími pozicemi přečte nové celé zprávy a připraví návrhy.",
+        aliases=("spusť hodinový e-mailový cyklus",),
+        argv=(str(PYTHON_BIN), str(SAMANTHA_DIR / "scripts/continuous_email_agent.py"), "tick"),
+        cwd=SAMANTHA_DIR, risk="private_model_processing", requires_confirmation=True,
+        writes="Soukromé pozice, návrhy a počítadlo pokusů; bez SMTP, archivace a změn schránky.",
+    ),
+    WorkflowCommand(
         command_id="continuous_email_agent_status",
         title="Stav průběžného e-mailového agenta",
         purpose="Přečte pouze agregované stavy návrhů a zdrojů, bez kontaktování pošty a modelu.",

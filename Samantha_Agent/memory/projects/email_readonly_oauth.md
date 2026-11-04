@@ -2,6 +2,24 @@
 
 ## Aktuální směr 2026-11-04 — průběžný osobní agent
 
+- Stav 22:40 CET: paměť důležitosti je již vydaná po 592d247b; místní plná
+  brána i GitHub CI 2352 PASS, živá stránka/stamp ověřené. Fyzické QA čeká.
+- Pokračování připravuje samostatnou hodinovou službu: registrovaný čtecí
+  readiness/náhled LaunchAgentu a opt-in `tick` s denním trvalým počítadlem
+  modelových pokusů, kooperativním pozastavením a ochranou před souběhem.
+  Vzor je vypnutý; 20 posouzení/den je pouze návrh, ne přijatý rozpočet.
+- Vlastní role `continuous_email` je rozpoznávaná, ale centrální konfigurace
+  se neměnila a role není aktivní. Bez schválení se model nekontaktuje;
+  role p+n se automaticky nepřebírá. Celé zprávy a potvrzované akce zachované.
+- Změna UIDVALIDITY nově zastaví zdroj před načtením historie, zachová
+  kurzor a konkrétní chybu. Čerstvá místní readiness: iCloud inicializovaný,
+  Seznam dosud ne; provozní konfigurace a vlastní role chybí. Žádný nový
+  živý pokus/model/SMTP/archivace, žádná instalace služby ani p+n.
+- Důkazy, omezení a další krok: `../reports/continuous_email_service_preparation_20261104.md`.
+  Finální cílené ověření 112 PASS, nová servisní sada 15 PASS;
+  plná Cockpit brána 2366 PASS (498,4 s), finální statická brána PASS.
+  Starší neaktuální provozní formulace níže patří k předchozím milníkům.
+
 - Stav 21:19 CET: Míla osobně úspěšně upravil/uložil koncept a odeslal
   skutečnou odpověď. Audit potvrzuje změnu návrhu, `smtp_sent` a kopii
   `saved`. Následně výslovně zadal implementovat „Příště nedůležité“.

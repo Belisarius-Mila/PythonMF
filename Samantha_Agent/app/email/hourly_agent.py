@@ -36,7 +36,7 @@ class HourlyEmailScheduler:
                 self.worker._update(lambda d: d["sources"].__setitem__(source.key, cursor))
 
     def tick(self, sources, propose, *, now: datetime | None = None, batch_size: int = 20,
-             max_batches: int = 20) -> dict:
+             max_batches: int = 20, should_stop=lambda: False) -> dict:
         now = now or datetime.now(timezone.utc)
         slot = hourly_slot(now)
         if slot is None:
@@ -59,7 +59,7 @@ class HourlyEmailScheduler:
                 for _ in range(max_batches):
                     try:
                         result = self.worker.cycle(source, propose, limit=batch_size,
-                                                   cycle_at=datetime.fromisoformat(slot))
+                                                   cycle_at=datetime.fromisoformat(slot), should_stop=should_stop)
                     except FileLockTimeoutError:
                         complete = False
                         break

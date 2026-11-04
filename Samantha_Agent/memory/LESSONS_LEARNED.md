@@ -29,6 +29,13 @@ nebo jejichž princip lze znovu použít v jiné části projektu.
 
 ## Záznamy
 
+### LL-094 — Změna UIDVALIDITY nesmí sama znovu spustit celou historii
+
+- Problém: po přestavbě IMAP schránky se staré UID nepoužijí; reset kurzoru na nulu by bez rozhodnutí uživatele znovu posuzoval historickou poštu.
+- Typ: opakující se
+- Řešení nalezeno: 04112026
+- Řešení: porovnat uložené UIDVALIDITY před SEARCH/FETCH a při změně zdroj zastavit s konkrétní chybou. Zachovat původní pozici; nové vymezení historie je explicitní servisní krok. Regrese FAIL→PASS ověřila nulový SEARCH/FETCH/modelový pokus i zachování starého UID a kurzoru v repository.
+
 ### LL-093 — Preference důležitosti je výslovné vodítko, ne přeskočení celého e-mailu
 
 - Problém: odstranění karty může znamenat vyřízení i omyl; automatické učení z něj by potlačovalo další důležitou poštu. Pravidlo jen podle odesílatele je příliš široké.

@@ -37,6 +37,10 @@ class MailScan:
     messages: tuple[ObservedEmail, ...]
 
 
+class MailboxEpochChanged(RuntimeError):
+    """Stored UIDs no longer describe this mailbox; never restart history silently."""
+
+
 class IMAPAgentSource:
     """Read whole messages without marking them read; no content classification."""
 
@@ -88,7 +92,9 @@ class IMAPAgentSource:
             if not validity_data or not validity_data[0]:
                 raise RuntimeError("Schránka nevrátila UIDVALIDITY.")
             validity = validity_data[0].decode("ascii")
-            after = int(cursor.get("after_uid", 0)) if cursor.get("uidvalidity") == validity else 0
+            if cursor.get("uidvalidity") and cursor["uidvalidity"] != validity:
+                raise MailboxEpochChanged("UIDVALIDITY se změnilo; výchozí pozici musí znovu určit uživatel.")
+            after = int(cursor.get("after_uid", 0))
             status, data = imap.uid("SEARCH", None, "UID", f"{after + 1}:*")
             if status != "OK" or not data or not isinstance(data[0], bytes):
                 raise RuntimeError("Kontrola nových e-mailů selhala.")

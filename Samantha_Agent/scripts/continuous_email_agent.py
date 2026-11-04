@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Read-only status and isolated acceptance tests; no live activation entry point."""
+"""Registered service diagnostics and opt-in bounded tick; never installs itself."""
 
 from __future__ import annotations
 
@@ -15,24 +15,39 @@ if str(PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(PROJECT_ROOT))
 
 from app.email.continuous_agent import ContinuousEmailAgent
+from app.email.service import ServiceSettings, launch_agent_preview, readiness, service_tick
 
 
 def main() -> int:
-    parser = argparse.ArgumentParser(description="Průběžný e-mailový agent: stav / syntetická přejímka.")
-    parser.add_argument("command", choices=("status", "synthetic-test"))
+    parser = argparse.ArgumentParser(description="Průběžný e-mailový agent: stav, příprava a omezený cyklus.")
+    parser.add_argument("command", choices=("status", "synthetic-test", "readiness", "service-preview", "tick"))
     args = parser.parse_args()
     if args.command == "synthetic-test":
         return subprocess.run(
-            [sys.executable, "-m", "unittest", "tests.test_continuous_email_agent", "tests.test_hourly_email_agent", "tests.test_cockpit_email_agent", "tests.test_agent_reply", "-q"],
+            [sys.executable, "-m", "unittest", "tests.test_continuous_email_agent", "tests.test_hourly_email_agent", "tests.test_cockpit_email_agent", "tests.test_agent_reply", "tests.test_email_agent_service", "-q"],
             cwd=PROJECT_ROOT, check=False,
         ).returncode
+    if args.command == "service-preview":
+        print(json.dumps({"installation_performed": False, "preview_only": True, "launch_agent": launch_agent_preview(),
+                          "settings_template": ServiceSettings().model_dump()}, ensure_ascii=False))
+        return 0
+    if args.command in {"readiness", "tick"}:
+        try:
+            result = readiness() if args.command == "readiness" else service_tick()
+        except Exception as exc:
+            print(json.dumps({"ok": False, "error_type": type(exc).__name__,
+                              "message": "Cyklus nelze spustit; ověř konfiguraci a připravenost služby."}, ensure_ascii=False))
+            return 1
+        print(json.dumps(result, ensure_ascii=False))
+        return 0
     state = ContinuousEmailAgent().status()
     print(json.dumps({
-        "activation": "not_installed",
+        "activation": "not_verified",
         "items": dict(Counter(item["status"] for item in state["items"].values())),
         "sources": [{"health": item.get("health", "unchecked"), "checked_at": item.get("checked_at", "")}
                     for item in state["sources"].values()],
         "schedule": state.get("schedule", {}),
+        "service": state.get("service", {}),
     }, ensure_ascii=False))
     return 0
 
