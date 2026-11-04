@@ -6,7 +6,39 @@ Stav: rozpracovane
 Pripomenout pri startu: ano
 Datum: 2026-11-04
 
-## Aktuální stav 2026-11-04 20:20 CET
+## Aktuální stav 2026-11-04 21:02 CET
+
+- Následné Terra p+n je uzavřené po `13b41716`, účtenka
+  `bfdfc2299ef6712e615f68e1d3fed3ed`: místní plná brána 2339 PASS,
+  smoke 5/5, push/deployment confirmed. Nový GitHub CI run 41898753725
+  na přesném headu success: 2339 testů, 23 skip, žádná chyba.
+  Důkaz `logs/camino_ci_media_release_verification_20261104.log`.
+- Míla uvedl, že předchozí e-maily v testu byly v pořádku, a vybral konkrétní
+  personální korespondenci pro koncept odpovědi. Adresa, předmět ani obsah
+  se do Git zápisu nekopírují. Zdroj byl znovu úplně načtený a přesně ověřený.
+- Třetí vzorek malého pilota: jeden potvrzený pokus Terry/high vytvořil
+  důležitou kartu s upravitelným předmětem a krátkým poděkováním.
+  Odpověď na toto oznámení je volitelná; její přípravu si Míla výslovně
+  zadal pro pilot. Tento kontext se neposílá do běžného hodinového cyklu.
+- Živé API ověřilo návrh i celé tělo: 1 karta s konceptem, 0 chyb,
+  3 předchozí vyřazené/ignorované položky zachované a kurzor neposunutý.
+  SMTP, archivace ani příprava potvrzení odeslání se nevolaly.
+  Soukromý důkaz `representative_pilot_20261104/reply_selected_v1.json`,
+  bezpečný souhrn `logs/continuous_email_selected_reply_pilot_20261104.log`.
+- Spotřeba třetího vzorku: 25 854 input, 0 cached, 278 output tokenů,
+  6 946 ms; odhad při dosavadních sazbách 0,6811 Standard kreditu.
+  Celkový zamýšlený třízprávový pilot je tím zpracovaný; další vzorky
+  ani zapnutí služby nebyly automaticky zahájené.
+- Míla navrhl malou paměť odesílatelů/předmětů pro budoucí důležitost.
+  Adam doporučil výslovnou volbu „Příště nedůležité“ jako modelové vodítko:
+  nevyřízený e-mail zůstává důležitý, vyřazení karty samo neznamená
+  nedůležitý obsah. Jde o návrh k diskusi, implementace nebyla schválená
+  ani provedená; dosavadní akce žádná nová pravidla neučí.
+- Další přejímka: Míla otevře Upravit odpověď, zkontroluje/upraví předmět
+  a text a použije Uložit koncept. Skutečný SMTP test a archivace zůstávají
+  samostatnými kroky. Hodinová služba, notifikace i CalDAV zatím vypnuté.
+
+## Předchozí milník 2026-11-04 20:20 CET
 
 - Míla výslovně předal Terře dokončení opravy zjištěných chyb CI před
   návratem k e-mailovému testu. Terra lokálně upravila pouze 2 testové
@@ -220,11 +252,11 @@ odsouhlasený rozsah čtení k potvrzování jednotlivých zpráv.
 
 ## Další krok
 
-Mílova kontrola nové důležité karty a reklamního hodinového řádku; doplnit
-konkrétní zprávu pro pilot konceptu odpovědi. Poté potvrzené uložení,
-editor a samostatně domluvená testovací zpráva/příjemce pro SMTP.
-Před pravidelným provozem profil/rozpočet a aktivace; zvlášť dořešit
-zjištěné selhání vzdálené CI Camina. Nový p+n nyní není součástí pilota.
+Mílova přejímka editoru skutečného konceptu přes Upravit odpověď a Uložit
+koncept. Poté potvrzené uložení a samostatně domluvený SMTP test.
+Před pravidelným provozem profil/rozpočet a aktivace. Návrh paměti
+preferencí je zatím pouze k diskusi. Zjištěná chyba CI Camina už má
+potvrzenou opravu i úspěšný vzdálený run; tento blokátor je uzavřený.
 
 ## Navrhované další kroky
 

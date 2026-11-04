@@ -2,6 +2,21 @@
 
 ## Aktuální směr 2026-11-04 — průběžný osobní agent
 
+- Stav 21:02 CET: předchozí vzorky Míla označil za v pořádku a vybral
+  konkrétní zprávu pro koncept. Třetí vzorek prošel jedním potvrzeným
+  pokusem Terry/high: důležitá karta s editovatelným předmětem a krátkým
+  poděkováním. Reakce je volitelná a byla výslovně vyžádaná pro tento pilot.
+  Živé API ověřilo přesný návrh/tělo a 0 chyb; archiv/SMTP se nevolaly,
+  staré položky i kurzor zachované. Následuje lidský test editoru a uložení
+  konceptu, nikoli automatické odeslání nebo zapnutí služby.
+- Paměť preferencí odesílatel/předmět navrhl Míla k diskusi. Doporučené
+  rozlišení: nevyřízené zůstává důležité, vyřazení je místní úklid;
+  budoucí „Příště nedůležité“ by bylo výslovné modelové vodítko. Nová
+  funkce zatím není schválená ani implementovaná; staré akce se neučí.
+- Oprava CI mezitím vydaná po `13b41716` (Terra bfdfc229, místní
+  2339 PASS + smoke 5/5); GitHub run 41898753725 success, 2339 testů,
+  23 skip. Dřívější otevřený CI nález v této historii je uzavřený.
+
 - Dodatek 20:20 CET: na Mílův výslovný pokyn Terra lokálně opravila obě
   zjištěné chyby mediálních testů Camina. Běžné moduly 37/37 PASS,
   reprodukce prostředí bez binárek FAIL→PASS, skutečná integrace zachovaná.
@@ -606,3 +621,25 @@ Soukromá účtenka reprezentativního pilota potvrzuje oba modelové pokusy,
 65 777 input (42 496 cached) + 454 output tokenů, odhad 0,691895 Standard
 kreditu. GitHub CI run 41890802397 samostatně selhal ve 2 mediálních
 testech Camina kvůli nenalezeným ffmpeg/ffprobe; tento nález nebyl opravován.
+
+## 2026-11-04 21:02 CET — Koncept na uživatelem vybrané zprávě
+
+Hotovo: Po přijetí předchozích vzorků Mílou připravila Terra na konkrétně
+vybrané zprávě krátkou zdvořilou odpověď. V živém Cockpitu je karta
+s předvyplněným předmětem a textem pro editor. Nic se neodeslalo ani
+nearchivovalo, dřívější vyřazení se nezměnila.
+
+Rozhodnutí: Míla výslovně vybral zprávu pro test konceptu; odpověď byla
+připravená na tento pokyn, přestože je obsahově volitelná. Nápad na paměť
+budoucí důležitosti je diskuse, nikoli schválená nová automatika.
+
+Další krok: Mílova přejímka Upravit odpověď → Uložit koncept.
+
+Navrhované další kroky: Potvrzené uložení, domluvený SMTP test,
+provozní profil/rozpočet se službou, diskuse paměti preferencí.
+
+Technický důkaz: Jeden modelový pokus Terra/high, potvrzený výsledek,
+25 854 input + 278 output tokenů, bez cache. Živé API: karta/koncept/tělo
+shodné, 0 chyb, 3 předchozí položky a zdrojový kurzor zachované.
+Vývojový kód, trvalé role a služba se neměnily. Souběžný předchozí CI
+nález uzavřel nový úspěšný vzdálený run 41898753725 po 13b41716.
