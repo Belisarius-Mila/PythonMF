@@ -25,9 +25,9 @@ function find(element, label) {
 (async () => {
   const ids = Object.fromEntries(['replyEditor','replyRecipient','replySubject','replyBody','replyStatus','replyForm',
     'closeEditor','status','notice','cards','hours','archived','replyConfirmation','replyQuestion','replySender',
-    'reallySendReply','backToReply','prepareReplySend','saveReplyDraft'].map(id => [id, new Element(id)]));
+    'reallySendReply','backToReply','prepareReplySend','saveReplyDraft','importancePreferences'].map(id => [id, new Element(id)]));
   const metadata = {title: 'Podklady', domain: 'work', document_type: 'email', counterparty: 'Firma', tags: ['schůzka']};
-  const data = {schedule: {}, sources: [], assessment_errors: 0, archived: [],
+  const data = {schedule: {}, sources: [], assessment_errors: 0, archived: [], importance_preferences: [],
     cards: [{id: 'important', header: {subject: '<img src=x onerror=alert(1)>', sender: 'Firma', date: '4. 11.'},
       created_at: '2026-11-04', status: 'awaiting_confirmation', proposal_digest: 'original-digest',
       message: {body_text: 'CELÉ TĚLO A KONEC'}, proposal: {summary: 'Schůzka', reason: 'Je třeba odpověď',
@@ -53,6 +53,9 @@ function find(element, label) {
         }})};
       }
       if (url.endsWith('/send-reply')) data.cards[0].reply = {status: 'smtp_sent'};
+      if (url.endsWith('/remember-importance')) data.importance_preferences = [{id: 'pref-1',
+        sender: 'sender@example.test', subject: data.cards[0].header.subject}];
+      if (url.endsWith('/forget-importance')) data.importance_preferences = [];
       if (url.endsWith('/dismiss')) data.hours = [];
       if (url.endsWith('/archive')) { data.archived.push(data.cards.pop()); }
       const result = url.endsWith('/overview') ? {ok: true, ...data} : url.endsWith('/edit')
@@ -66,6 +69,16 @@ function find(element, label) {
   await flush();
   assert.match(ids.cards.textContent, /CELÉ TĚLO A KONEC/);
   assert.match(ids.cards.textContent, /<img src=x onerror=alert\(1\)>/);
+  await find(ids.cards, 'Příště nedůležité').click();
+  assert.equal(data.cards.length, 1, 'Preference must not dismiss the current card');
+  assert.equal(calls.some(call => /dismiss|archive|send-reply/.test(call.url)), false);
+  assert.deepEqual(calls.find(call => call.url.endsWith('/remember-importance')).payload, {id: 'important'});
+  assert.match(ids.importancePreferences.textContent, /sender@example.test/);
+  assert.match(ids.importancePreferences.textContent, /<img src=x onerror=alert\(1\)>/);
+  await find(ids.importancePreferences, 'Zrušit preferenci').click();
+  assert.deepEqual(calls.find(call => call.url.endsWith('/forget-importance')).payload, {id: 'pref-1'});
+  assert.equal(data.cards.length, 1);
+  assert.equal(data.importance_preferences.length, 0);
   await find(ids.cards, 'Upravit odpověď').click();
   assert.equal(ids.replyEditor.open, true);
   ids.replySubject.value = 'Můj předmět'; ids.replyBody.value = 'Moje upravená odpověď';

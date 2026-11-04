@@ -12,7 +12,8 @@ from urllib.request import Request, urlopen
 
 from app import cockpit
 from app.cockpit_email_agent import (email_agent_dismiss_action, email_agent_edit_action, email_agent_overview,
-                                   email_agent_prepare_reply_action, email_agent_send_reply_action)
+                                   email_agent_prepare_reply_action, email_agent_send_reply_action,
+                                   email_agent_remember_importance_action, email_agent_forget_importance_action)
 from app.cockpit_frontend import EMAIL_AGENT_HTML
 from app.email.continuous_agent import ContinuousEmailAgent
 from tests.test_continuous_email_agent import FakeSource, observed, proposal
@@ -68,6 +69,33 @@ class EmailAgentHTTPTests(unittest.TestCase):
                                                                "expected_digest": card["proposal_digest"]})
         self.assertTrue(json.loads(body)["ok"])
         self.assertEqual(email_agent_overview(worker=self.worker)["cards"][0]["proposal"]["reply_draft"], "My final answer")
+
+    def test_remember_importance_post_uses_stored_header_and_keeps_current_card(self):
+        before = self.worker.status()["items"][self.message.item_id]
+        with patch("app.cockpit.email_agent_remember_importance_action", side_effect=lambda data: email_agent_remember_importance_action(data, worker=self.worker)):
+            _, raw, _ = self.request("/api/email-agent/remember-importance", {"id": self.message.item_id,
+                "sender": "other@example.test", "subject": "untrusted replacement"})
+        self.assertTrue(json.loads(raw)["ok"])
+        view = email_agent_overview(worker=self.worker)
+        self.assertEqual(len(view["cards"]), 1)
+        self.assertEqual(self.worker.status()["items"][self.message.item_id], before)
+        self.assertEqual(view["importance_preferences"][0]["sender"], "sender@example.test")
+        self.assertEqual(view["importance_preferences"][0]["subject"], self.message.source.subject)
+        self.assertNotIn("account", view["importance_preferences"][0])
+
+    def test_forget_importance_post_removes_hint_without_touching_mail_or_card(self):
+        key = self.worker.remember_low_importance(self.message.item_id)
+        before = self.worker.status()["items"]
+        with patch("app.cockpit.email_agent_forget_importance_action", side_effect=lambda data: email_agent_forget_importance_action(data, worker=self.worker)):
+            _, raw, _ = self.request("/api/email-agent/forget-importance", {"id": key})
+        self.assertTrue(json.loads(raw)["ok"])
+        self.assertEqual(email_agent_overview(worker=self.worker)["importance_preferences"], [])
+        self.assertEqual(self.worker.status()["items"], before)
+
+    def test_invalid_preference_item_is_rejected_without_creating_a_rule(self):
+        self.assertFalse(email_agent_remember_importance_action({"id": "missing"}, worker=self.worker)["ok"])
+        self.assertFalse(email_agent_forget_importance_action({"id": "missing"}, worker=self.worker)["ok"])
+        self.assertNotIn("importance_preferences", self.worker.status())
 
     def test_new_page_keeps_content_as_text_and_cannot_delete_mailbox_messages(self):
         self.assertIn("textContent", EMAIL_AGENT_HTML)

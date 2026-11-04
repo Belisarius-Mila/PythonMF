@@ -18,11 +18,12 @@ from app.email.continuous_source import IMAPAgentSource, MailScan, ObservedEmail
 from app.email.icloud_provider import _message_data_to_archive_source
 
 
-def observed(uid="1", *, account="account-a", validity="10", body="Celá zpráva."):
+def observed(uid="1", *, account="account-a", validity="10", body="Celá zpráva.",
+             sender="sender@example.test", subject="Podklady ke schůzce"):
     message = EmailMessage()
-    message["From"] = "sender@example.test"
+    message["From"] = sender
     message["To"] = "recipient@example.test"
-    message["Subject"] = "Podklady ke schůzce"
+    message["Subject"] = subject
     message["Message-ID"] = "<test@example.test>"
     message.set_content(body)
     raw = message.as_bytes()
@@ -221,6 +222,111 @@ class ContinuousEmailTests(unittest.TestCase):
         self.assertEqual(SDKEmailProposer("explicit-test-model", runner=runner)(message), proposal())
         with self.assertRaises(ValueError):
             SDKEmailProposer("")
+
+
+class ImportancePreferenceTests(unittest.TestCase):
+    def setUp(self):
+        self.temp = tempfile.TemporaryDirectory()
+        self.addCleanup(self.temp.cleanup)
+        self.worker = ContinuousEmailAgent(Path(self.temp.name) / "agent")
+        self.message = observed(sender="Firma <Sender@EXAMPLE.test>", subject="Nové pracovní nabídky 4. 11. 2026")
+        self.worker.cycle(FakeSource([self.message]), lambda _: proposal())
+
+    def test_explicit_preference_survives_restart_and_double_click_without_changing_card(self):
+        before = self.worker.status()
+        key = self.worker.remember_low_importance(self.message.item_id)
+        self.assertEqual(self.worker.remember_low_importance(self.message.item_id), key)
+        restarted = ContinuousEmailAgent(self.worker.root)
+        after = restarted.status()
+        self.assertEqual(after["items"], before["items"])
+        self.assertEqual(after["sources"], before["sources"])
+        self.assertEqual(len(after["importance_preferences"]), 1)
+        self.assertEqual(after["importance_preferences"][key]["sender"], "sender@example.test")
+        self.assertEqual(len(restarted.matching_importance_preferences(self.message)), 1)
+
+    def test_matching_is_scoped_to_account_sender_and_similar_subject(self):
+        self.worker.remember_low_importance(self.message.item_id)
+        for account, sender, subject, expected in (
+            ("account-a", "Jiné jméno <sender@example.test>", "RE: FW: Nové pracovní nabídky 5. 11. 2026", True),
+            ("account-a", "sender@example.test", "Nové pracovní nabídky na 5. 11. 2026", True),
+            ("account-b", "sender@example.test", self.message.source.subject, False),
+            ("account-a", "sender@other.test", self.message.source.subject, False),
+            ("account-a", "sender@example.test", "Urgentní žádost o potvrzení schůzky", False),
+        ):
+            with self.subTest(account=account, sender=sender, subject=subject):
+                message = observed("2", account=account, sender=sender, subject=subject)
+                self.assertEqual(bool(self.worker.matching_importance_preferences(message)), expected)
+
+    def test_dismiss_ignore_and_unprocessed_cards_do_not_teach_preferences(self):
+        self.assertEqual(self.worker.matching_importance_preferences(self.message), ())
+        self.worker.dismiss([self.message.item_id], action="ignore")
+        self.assertEqual(self.worker.matching_importance_preferences(self.message), ())
+        second = observed("2")
+        self.worker.cycle(FakeSource([self.message, second]), lambda _: proposal())
+        self.worker.dismiss([second.item_id], action="dismiss")
+        self.assertNotIn("importance_preferences", self.worker.status())
+
+    def test_forgetting_is_persistent_and_restoring_the_same_preference_is_idempotent(self):
+        key = self.worker.remember_low_importance(self.message.item_id)
+        created_at = self.worker.status()["importance_preferences"][key]["created_at"]
+        self.worker.forget_importance_preference(key)
+        self.worker.forget_importance_preference(key)
+        restarted = ContinuousEmailAgent(self.worker.root)
+        self.assertEqual(restarted.matching_importance_preferences(self.message), ())
+        self.assertEqual(restarted.remember_low_importance(self.message.item_id), key)
+        self.assertEqual(restarted.status()["importance_preferences"][key]["created_at"], created_at)
+
+    def test_model_still_gets_complete_body_and_can_keep_important_despite_preference(self):
+        key = self.worker.remember_low_importance(self.message.item_id)
+        critical = observed("2", subject=self.message.source.subject, body="x" * 30000 + "URGENT_FULL_END")
+        ordinary = observed("3", subject=self.message.source.subject, body="Reklama FULL_END")
+        seen = []
+        def assess(message):
+            self.assertEqual(message.importance_preferences[0]["id"], key)
+            self.assertTrue(message.source.body_text.rstrip().endswith("FULL_END"))
+            seen.append(message.source.uid)
+            return proposal().model_copy(update={"important": message.source.uid == "2"})
+        self.worker.cycle(FakeSource([self.message, critical, ordinary]), assess)
+        self.assertEqual(seen, ["2", "3"])
+        state = self.worker.status()["items"]
+        self.assertEqual(state[critical.item_id]["status"], "awaiting_confirmation")
+        self.assertEqual(state[critical.item_id]["message"]["body_text"], critical.source.body_text)
+        self.assertEqual(state[ordinary.item_id]["status"], "hourly_summary")
+        self.assertEqual(state[ordinary.item_id]["message"], {})
+        self.assertEqual(critical.importance_preferences, ())
+
+    def test_invalid_or_ambiguous_sender_and_empty_subject_cannot_create_broad_rules(self):
+        for index, changes in enumerate((
+            {"sender": "neznámý"}, {"sender": "one@example.test, two@example.test"},
+            {"subject": ""}, {"subject": "123 456"},
+        ), 2):
+            message = observed(str(index), **changes)
+            self.worker.cycle(FakeSource([message]), lambda _: proposal())
+            with self.assertRaises(ValueError): self.worker.remember_low_importance(message.item_id)
+        self.assertNotIn("importance_preferences", self.worker.status())
+
+    def test_preference_does_not_change_existing_reply_confirmation(self):
+        self.worker._update(lambda d: d["items"][self.message.item_id].update(
+            reply={"status": "prepared", "confirmation_token": "synthetic-token", "confirmation_digest": "synthetic-digest"}))
+        before = self.worker.status()["items"][self.message.item_id]
+        self.worker.remember_low_importance(self.message.item_id)
+        self.assertEqual(self.worker.status()["items"][self.message.item_id], before)
+
+    def test_sdk_model_receives_the_same_soft_hint_with_the_complete_source(self):
+        self.worker.remember_low_importance(self.message.item_id)
+        message = replace(self.message, importance_preferences=self.worker.matching_importance_preferences(self.message))
+        def runner(agent, prompt, **kwargs):
+            payload = json.loads(prompt)
+            self.assertEqual(payload["body_text"], message.source.body_text)
+            self.assertEqual(payload["importance_preferences"][0]["sender"], "sender@example.test")
+            self.assertIn("ponech important=true", agent.instructions)
+            return SimpleNamespace(final_output=proposal())
+        self.assertTrue(SDKEmailProposer("explicit-test-model", runner=runner)(message).important)
+
+    def test_failed_assessment_cannot_be_used_as_a_preference(self):
+        self.worker._update(lambda d: d["items"][self.message.item_id].update(status="analysis_failed"))
+        with self.assertRaises(ValueError): self.worker.remember_low_importance(self.message.item_id)
+        self.assertNotIn("importance_preferences", self.worker.status())
 
 
 class IMAPSourceTests(unittest.TestCase):

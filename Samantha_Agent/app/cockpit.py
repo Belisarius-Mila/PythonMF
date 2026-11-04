@@ -47,6 +47,7 @@ from app.cockpit_frontend import (
 from app.cockpit_email_agent import (
     email_agent_overview, email_agent_dismiss_action, email_agent_edit_action, email_agent_archive_action,
     email_agent_prepare_reply_action, email_agent_send_reply_action,
+    email_agent_remember_importance_action, email_agent_forget_importance_action,
 )
 from app.cockpit_awake_mode import (
     cockpit_awake_mode_action,
@@ -8656,6 +8657,12 @@ def shell_quote_for_applescript(value: str) -> str:
 
 
 COCKPIT_POST_ACTIONS: tuple[dict[str, str], ...] = (
+    {"path": "/api/email-agent/remember-importance", "label": "Příště podobné zprávy méně důležité",
+     "risk": "private_write", "confirmation": "explicit_importance_preference_button",
+     "handler_name": "email_agent_remember_importance_action", "test_level": "direct"},
+    {"path": "/api/email-agent/forget-importance", "label": "Zrušit preferenci důležitosti",
+     "risk": "private_write", "confirmation": "explicit_forget_preference_button",
+     "handler_name": "email_agent_forget_importance_action", "test_level": "direct"},
     {"path": "/api/email-agent/dismiss", "label": "Vyřadit položku pouze z Cockpitu",
      "risk": "private_write", "confirmation": "explicit_local_dismiss_button",
      "handler_name": "email_agent_dismiss_action", "test_level": "direct"},
@@ -10037,6 +10044,12 @@ class CockpitServer:
                         self.respond_json({"ok": False, "message": "Vykonavatel zpracovává přesný balíček; další změna počká na ověření."},
                                           status=HTTPStatus.CONFLICT)
                         return
+                if parsed.path == "/api/email-agent/remember-importance":
+                    self.respond_json(email_agent_remember_importance_action(self.read_json()))
+                    return
+                if parsed.path == "/api/email-agent/forget-importance":
+                    self.respond_json(email_agent_forget_importance_action(self.read_json()))
+                    return
                 if parsed.path == "/api/email-agent/dismiss":
                     self.respond_json(email_agent_dismiss_action(self.read_json()))
                     return

@@ -29,6 +29,13 @@ nebo jejichž princip lze znovu použít v jiné části projektu.
 
 ## Záznamy
 
+### LL-093 — Preference důležitosti je výslovné vodítko, ne přeskočení celého e-mailu
+
+- Problém: odstranění karty může znamenat vyřízení i omyl; automatické učení z něj by potlačovalo další důležitou poštu. Pravidlo jen podle odesílatele je příliš široké.
+- Typ: opakující se
+- Řešení nalezeno: 04112026
+- Řešení: učit jen výslovnou volbou, v rozsahu účtu + přesné adresy + podobného předmětu. Uložit atomicky, dvojklik sloučit a umožnit deaktivaci. Předat shodu modelu vedle kompletního textu/HTML, nevyřazovat před čtením a nepřepisovat modelový verdikt. Testy ověřily restart, rozsah pravidla, zrušení, zachování současné karty/SMTP potvrzení i plného konce textu při shodné preferenci; falešný model mohl ponechat nový e-mail důležitý.
+
 ### LL-092 — Výchozí hodnoty Pydantic nejsou volitelná pole strict výstupu modelu
 
 - Problém: syntetický klient přijal schéma, ale skutečný App Server/Model je odmítl jako `invalid_json_schema`; Pydantic vynechal pole s výchozími hodnotami z `required`.

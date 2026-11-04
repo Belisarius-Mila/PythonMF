@@ -17,6 +17,7 @@ class ObservedEmail:
     account: str
     uidvalidity: str
     source: EmailArchiveSource
+    importance_preferences: tuple[dict[str, str], ...] = ()
 
     @property
     def item_id(self) -> str:

@@ -71,6 +71,10 @@
       for (const [label, kind] of [["Ignorovat", "ignore"], ["Smazat z Cockpitu", "dismiss"]]) {
         buttons.append(action(label, () => request("/api/email-agent/dismiss", {ids: [item.id], action: kind}), true));
       }
+      buttons.append(action("Příště nedůležité", async () => {
+        await request("/api/email-agent/remember-importance", {id: item.id});
+        byId("notice").textContent = "Preference pro tohoto odesílatele a podobný předmět je uložená. Tuto kartu můžeš dál vyřídit.";
+      }, true));
     } else buttons.append(action("Ověřit uložení", async () => {
       await request("/api/email-agent/archive", {id: item.id, proposal_digest: item.proposal_digest, confirmed: true});
     }));
@@ -118,6 +122,17 @@
       hours.append(row);
     }
     if (!data.hours.length) hours.append(node("p", "Žádné další zprávy v přehledu."));
+    const preferences = byId("importancePreferences"); preferences.replaceChildren();
+    for (const preference of data.importance_preferences || []) {
+      const row = node("div", undefined, "hour");
+      row.append(node("p", `${preference.sender} · podobný předmět: ${preference.subject}`),
+        action("Zrušit preferenci", async () => {
+          await request("/api/email-agent/forget-importance", {id: preference.id});
+          byId("notice").textContent = "Preference byla zrušena. Další zprávy budou posouzené bez tohoto vodítka.";
+        }, true));
+      preferences.append(row);
+    }
+    if (!preferences.children.length) preferences.append(node("p", "Zatím žádné uložené preference."));
     const archived = byId("archived"); archived.replaceChildren();
     data.archived.forEach(item => archived.append(node("p", item.proposal.metadata.title)));
     if (!data.archived.length) archived.append(node("p", "Zatím žádné uložené zprávy."));

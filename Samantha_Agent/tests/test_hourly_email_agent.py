@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from datetime import datetime
+from dataclasses import replace
 import json
 import tempfile
 import unittest
@@ -185,6 +186,25 @@ class HourlyEmailTests(unittest.TestCase):
 
 
 class CodexProposalTests(unittest.TestCase):
+    def test_preference_is_a_hint_next_to_the_full_body_not_a_filter(self):
+        calls = []
+        class Client:
+            def __enter__(self): return self
+            def __exit__(self, *_): pass
+            def start_thread(self, **kwargs): calls.append(kwargs); return "hint-test"
+            def send_text(self, **kwargs):
+                calls.append(kwargs)
+                return SimpleNamespace(delivered=True, answer=proposal().model_dump_json())
+        hint = {"id": "pref-1", "sender": "sender@example.test", "subject": "Newsletter",
+                "preference": "prefer_low_importance"}
+        message = replace(observed(body="x" * 30000 + "FULL_END"), importance_preferences=(hint,))
+        result = CodexEmailProposer("gpt-6.1-terra", client_factory=Client)(message)
+        payload = json.loads(calls[1]["text"])
+        self.assertEqual(payload["importance_preferences"], [hint])
+        self.assertTrue(payload["body_text"].rstrip().endswith("FULL_END"))
+        self.assertIn("ponech important=true", calls[0]["developer_instructions"])
+        self.assertTrue(result.important)
+
     def test_strict_output_requires_all_fields_including_local_defaults(self):
         def require_strict_objects(schema):
             if isinstance(schema, dict):

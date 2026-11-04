@@ -45,10 +45,28 @@ def email_agent_overview(*, worker=None) -> dict:
         label = datetime.fromisoformat(hour).strftime("%d. %m. %Y, kontrola v %H:%M")
         rows.append({"hour": hour, "ids": group["ids"], "text": label + ": " + "; ".join(entries)})
     counts = Counter(item["status"] for item in state["items"].values())
+    preferences = [{"id": key, "sender": p["sender"], "subject": p["subject"]}
+                   for key, p in state.get("importance_preferences", {}).items() if p["active"]]
     return {"ok": True, "cards": sorted(cards, key=lambda item: item["created_at"], reverse=True),
             "hours": rows, "archived": archived, "schedule": state.get("schedule", {}),
-            "sources": list(state["sources"].values()),
+            "sources": list(state["sources"].values()), "importance_preferences": preferences,
             "assessment_errors": sum(counts[s] for s in ("analysis_failed", "analysis_interrupted", "analyzing"))}
+
+
+def email_agent_remember_importance_action(payload: dict, *, worker=None) -> dict:
+    try:
+        preference_id = (worker or ContinuousEmailAgent()).remember_low_importance(str(payload["id"]))
+        return {"ok": True, "preference_id": preference_id}
+    except (OSError, ValueError, KeyError, FilePersistenceError, WorkRepositoryError) as exc:
+        return {"ok": False, "message": str(exc)}
+
+
+def email_agent_forget_importance_action(payload: dict, *, worker=None) -> dict:
+    try:
+        (worker or ContinuousEmailAgent()).forget_importance_preference(str(payload["id"]))
+        return {"ok": True}
+    except (OSError, ValueError, KeyError, FilePersistenceError, WorkRepositoryError) as exc:
+        return {"ok": False, "message": str(exc)}
 
 
 def email_agent_dismiss_action(payload: dict, *, worker=None) -> dict:

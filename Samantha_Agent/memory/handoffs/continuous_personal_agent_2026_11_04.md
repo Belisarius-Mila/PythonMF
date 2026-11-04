@@ -1,4 +1,4 @@
-# Průběžný osobní agent — nasazení a první živý pilot
+# Průběžný osobní agent — pilot a paměť důležitosti
 
 Nazev: Průběžný osobní agent pro e-maily a Apple/iCloud kalendář
 Priorita: 1
@@ -6,7 +6,40 @@ Stav: rozpracovane
 Pripomenout pri startu: ano
 Datum: 2026-11-04
 
-## Aktuální stav 2026-11-04 21:02 CET
+## Aktuální stav 2026-11-04 21:19 CET
+
+- Míla osobně ověřil úpravu odpovědi, uložení a následné skutečné odeslání.
+  Čtecí audit vybrané položky potvrzuje upravený návrh, `smtp_sent` a kopii
+  do Odeslané pošty `saved`. Jde o přijatý živý SMTP/editor pilot, nikoli
+  pouze syntetický test. Potvrzená archivace touto zkouškou ověřená není.
+- Míla výslovně schválil a zadal implementaci „Příště nedůležité“.
+  Lokální vývoj přidává tlačítko k důležitým kartám a sekci Předvolby
+  důležitosti se zrušením preference. Aktuální karta se tím nevyřazuje.
+- Preference jsou součástí existujícího soukromého atomického JSON
+  repository; žádná nová databázová závislost ani služba. Rozsah je konkrétní
+  účet, přesná adresa odesílatele a podobný předmět. Normalizují se běžné
+  odpovědní/přeposílací prefixy, velikost písmen, interpunkce a číselné
+  varianty; volnější podobnost platí jen u delších dostatečně shodných názvů.
+  Krátké předměty vyžadují shodu, nejednoznačné adresy a prázdné/čistě
+  číselné vzory pravidlo nevytvoří.
+- Kliknutí výslovně uloží či obnoví preferenci, opakování je idempotentní;
+  Zrušit preferenci ji deaktivuje. Ignorování, vyřazení či nečinnost žádná
+  pravidla neučí. Staré návrhy, kurzory a potvrzení odpovědí se nemění.
+- Nový cyklus předává odpovídající preference oběma adaptérům jako vodítko
+  vedle celého textu a HTML. Model dál čte úplný obsah a může nový důležitý
+  požadavek/termín/platbu vyhodnotit jako důležitý. Aplikace modelový verdikt
+  nepřepisuje; shoda preference nevyřazuje zprávu před posouzením.
+- Cíleně 78 e-mailových scénářů PASS a 290 Cockpit/frontend scénářů PASS,
+  včetně restartu, izolace účtů/odesílatelů/témat, dvojkliku, zrušení,
+  úplného těla, modelového přepsání vodítka, HTTP akcí a DOM chování.
+  Plná brána persistence 2352 testů PASS; důkaz v
+  `logs/continuous_email_importance_gate_20261104.log`.
+- Nový kód je zatím lokální, bez p+n, placeného modelového pokusu nebo
+  dalšího živého SMTP. Běžící Cockpit nemá tuto novou volbu dosud nasazenou.
+  Fyzická přejímka preference a jejího zrušení čeká na vydání. Hodinová
+  služba, notifikace a CalDAV zůstávají neaktivované.
+
+## Předchozí milník 2026-11-04 21:02 CET
 
 - Následné Terra p+n je uzavřené po `13b41716`, účtenka
   `bfdfc2299ef6712e615f68e1d3fed3ed`: místní plná brána 2339 PASS,
@@ -231,8 +264,8 @@ odsouhlasený rozsah čtení k potvrzování jednotlivých zpráv.
 - Terra je Mílou zvolená a jeden skutečný modelový průchod je potvrzený.
   Zbývá provozní posouzení, centrální modelový profil a skutečná přejímka
   kvality odpovědí a metadat na reprezentativních zprávách.
-- Živá SMTP přejímka na konkrétní schválené testovací zprávě a příjemci;
-  syntetická přejímka odesílacího kódu není důkaz skutečného doručení.
+- Potvrzená živá archivace a přejímka metadat; editor/SMTP už Míla osobně
+  úspěšně otestoval a místní účtenka potvrzuje přijetí i Odeslanou kopii.
 - Ruční audit nejistého odeslání podle původního Message-ID. Automatický
   retry není povolený; UI jej při nejistotě nenabízí.
 - Ruční pokračování neúspěšného modelového posouzení a odložení karet.
@@ -244,19 +277,18 @@ odsouhlasený rozsah čtení k potvrzování jednotlivých zpráv.
   „Zkontroluj e-maily v Cockpitu“. Cockpit se otevře klepnutím na oznámení;
   samovolné otevření přes jinou aplikaci se neslibuje. Specifický tón a
   konkrétní notifikační cesta ještě vyžadují výběr a zkoušku na telefonu.
-- P+n je dokončené podle aktuálního stavu výše. Hodinový provoz není
-  zapnutý; součástí této etapy nebylo skutečné odesílání.
+- Předchozí vydání je po 13b41716 ověřené. Nová paměť preferencí zatím
+  vydaná není a hodinový provoz není zapnutý.
 - Nový samostatný pracovní proud ani nový TVBCP nebyly domluvené či založené.
   Tento terminálový krok je zapsán u existující e-mailové oblasti; před
   převzetím do Human–Adam musí být určena schválená kanonická vazba.
 
 ## Další krok
 
-Mílova přejímka editoru skutečného konceptu přes Upravit odpověď a Uložit
-koncept. Poté potvrzené uložení a samostatně domluvený SMTP test.
-Před pravidelným provozem profil/rozpočet a aktivace. Návrh paměti
-preferencí je zatím pouze k diskusi. Zjištěná chyba CI Camina už má
-potvrzenou opravu i úspěšný vzdálený run; tento blokátor je uzavřený.
+Samostatně vydat lokální paměť důležitosti a přijmout
+volbu Příště nedůležité i její zrušení na Macu/iPhonu. Potom živý test
+potvrzeného uložení a provozní profil/rozpočet před aktivací služby.
+Editor i skutečné odeslání odpovědi jsou přijaté; chyba CI Camina uzavřená.
 
 ## Navrhované další kroky
 
@@ -276,8 +308,9 @@ potvrzenou opravu i úspěšný vzdálený run; tento blokátor je uzavřený.
   samostatné úložiště těl a stránkování odvodit z výsledku tohoto měření.
 - Původní syntetická přejímka adaptéru neodhalila neplatné strict schéma.
   Nyní je doložená reprodukce, oprava a jeden potvrzený živý výsledek;
-  reprezentativnost a kvalita návrhů zatím přijaté nejsou.
-  Kalendář se nečetl a žádný e-mail se neodeslal ani nearchivoval.
+  Míla přijal dosavadní vzorky i editor/skutečné odeslání. Širší
+  reprezentativnost návrhů, metadata a paměť preferencí ještě vyžadují přejímku.
+  Kalendář se nečetl a žádný e-mail se při tomto vývoji nearchivoval.
   Publikování/nasazení doložené výše není aktivací hodinového agenta.
 - Projektový Python je `3.12.0rc3`; stabilní prostředí služby je doporučená
   příprava před trvalým provozem. Současné závislosti prošly `pip check`.

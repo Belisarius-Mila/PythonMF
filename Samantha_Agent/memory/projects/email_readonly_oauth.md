@@ -2,6 +2,20 @@
 
 ## Aktuální směr 2026-11-04 — průběžný osobní agent
 
+- Stav 21:19 CET: Míla osobně úspěšně upravil/uložil koncept a odeslal
+  skutečnou odpověď. Audit potvrzuje změnu návrhu, `smtp_sent` a kopii
+  `saved`. Následně výslovně zadal implementovat „Příště nedůležité“.
+- Nová lokální funkce ukládá výslovnou preferenci pro účet, přesnou adresu
+  odesílatele a podobný předmět do existujícího soukromého JSON repository.
+  UI zachová současnou kartu a nabízí zrušení preference v Předvolbách
+  důležitosti. Ignorování/mazání/nečinnost se automaticky neučí.
+- Celé tělo se dál načítá a posuzuje modelem. Shodné preference putují
+  oběma modelovým adaptérům jako vodítko; nový významný obsah může model
+  ponechat důležitý. Před posouzením se nic nefiltruje ani nepřepisuje verdikt.
+- 78 e-mailových a 290 Cockpit/frontend scénářů PASS; plná brána persistence
+  2352 testů PASS. Zatím bez nového p+n a fyzické přejímky nové volby,
+  žádný nový placený model/SMTP pokus. Trvalý provoz zůstává vypnutý.
+
 - Stav 21:02 CET: předchozí vzorky Míla označil za v pořádku a vybral
   konkrétní zprávu pro koncept. Třetí vzorek prošel jedním potvrzeným
   pokusem Terry/high: důležitá karta s editovatelným předmětem a krátkým
@@ -643,3 +657,24 @@ Technický důkaz: Jeden modelový pokus Terra/high, potvrzený výsledek,
 shodné, 0 chyb, 3 předchozí položky a zdrojový kurzor zachované.
 Vývojový kód, trvalé role a služba se neměnily. Souběžný předchozí CI
 nález uzavřel nový úspěšný vzdálený run 41898753725 po 13b41716.
+
+## 2026-11-04 21:19 CET — Živé odeslání přijato a paměť důležitosti
+
+Hotovo: Míla ověřil editor, uložení a skutečné odeslání odpovědi. Nová
+lokální volba Příště nedůležité uchová preferenci pro podobné další zprávy
+od stejného odesílatele; aktuální kartu zachová. Preferenci lze zrušit.
+
+Rozhodnutí: Míla tuto funkci výslovně schválil. Preference je vodítkem
+pro plné obsahové posouzení, nikoli náhradou čtení nebo automatickým
+pravidlem odvozeným ze smazání či nečinnosti.
+
+Další krok: Vydat samostatným p+n a fyzicky přijmout
+nové tlačítko i zrušení preference.
+
+Navrhované další kroky: Živé potvrzené uložení, provozní profil/rozpočet,
+hodinová služba a notifikace/CalDAV.
+
+Technický důkaz: Místní SMTP účtenka `smtp_sent`, kopie `saved`, návrh byl
+uživatelem změněný. 78 e-mailových a 290 Cockpit/frontend scénářů PASS
+pro novou funkci. Plná brána persistence 2352 testů PASS v příslušném logu.
+Nová funkce nebyla nasazená a nevolal se další živý model ani SMTP.
