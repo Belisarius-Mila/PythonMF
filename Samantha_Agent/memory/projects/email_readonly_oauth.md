@@ -1,5 +1,14 @@
 # E-mail read-only OAuth integrace
 
+
+## 2026-11-05 21:22 CET — servisní kompatibilita modelových rolí
+
+Vlastní hodinový agent je registrovaně přepnutý ac9f3bed → 2fe0481e pro podporu
+nové interior_architect role. Celý business otisk, nastavení a e-mailová modelová
+politika zůstaly shodné; starý release zachovaný, nový check already_completed
+bez návrhů/oznámení. Instalovaný parser načetl nový JSON. Handoff continuous_personal_agent_2026_11_04.md;
+důkaz logs/interior_ai_email_compat_upgrade_20261105.log. Nový TVBCP nevzniká.
+
 ## 2026-11-05 — nezobrazování opakované nedůležité pošty
 
 Míla rozlišil „Příště nedůležité“ u důležitých karet a „Příště nezobrazovat“

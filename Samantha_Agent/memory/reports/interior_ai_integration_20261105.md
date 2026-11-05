@@ -3,6 +3,29 @@
 Datum: 2026-11-05. Autor: Will. Proud: project-neuberk-kacenka.
 Výchozí vydání: b9b59c7d (MPO oprava; CI 42083732254 success).
 
+## 2026-11-05 21:22 CET — kompatibilní runtime a role architekta
+
+Kompatibilní balíček 2fe0481e byl přes Terru skutečně pushnutý a nasazený.
+Účtenka cfe0fe13e59143348f7bc9fbcdc2a72c: push/deploy confirmed, plná brána
+2574 testů, smoke 5/5, chráněné služby beze změny. GitHub CI první etapy
+42102140926 je samostatný důkaz. Konečný stav: logs/interior_ai_compat_release_20261105.log.
+
+Registrované pause/prepare/upgrade přepnuly vlastní hodinovou e-mailovou kopii
+z ac9f3bed na 2fe0481e. Shodný business SHA před/po, shodná nastavení a modelová
+politika, původní release a servisní záloha zachované. installed/owned/loaded/
+enabled=true; nový check already_completed, 0 návrhů, 0 nových oznámení.
+Instalovaný parser už skutečně načetl sdílený JSON s novou rolí bez chyby.
+Důkaz: logs/interior_ai_email_compat_upgrade_20261105.log.
+
+Z přijatého skutečného pilotu je nyní atomicky zapsaná pouze interior_architect
+(Terra/high, Standard); ostatní centrální role se nezměnily. 80 cílených kontrol
+po změně politiky PASS. Běžící proces zůstává cíleně disabled do schváleného
+závěrečného p+n; pouhá editace JSON jej nezapne. Jeho autoritativní účtenka
+patří do logs/interior_ai_role_release_20261105.log. Neprovádět nový placený pilot.
+Po vydání ověřit živé capabilities / obě uložené varianty bez dalšího generování.
+Fyzický první rozhovor Jany a Mac/iPhone přejímka zůstávají uživatelské.
+Nový TVBCP není založený; dosud nedohodnutá vazba zůstává otevřená.
+
 ## 2026-11-05 21:04 CET — schválený živý AI pilot a příprava nasazení
 
 Míla přesnou větou globální brzdy schválil Terra/high, jeden rozbor vybraných

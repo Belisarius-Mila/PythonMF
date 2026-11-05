@@ -213,7 +213,9 @@ Doplnění 17102026 k LL-071: Nativní modelový pomocník navíc zdvojuje roli,
   Aktivaci blokovat do kompatibilního nasazení a registrovaného upgrade;
   modelová politika se má zpřístupnit až odpovídajícímu běžícímu procesu.
   Ověřeno živým AST čtením kopie ac9f3bed a testy blokované / kompatibilní
-  aktivace v interior_ai_activation.py; skutečný upgrade v tomto kroku neproběhl.
+  aktivace v interior_ai_activation.py. Následný skutečný registrovaný upgrade
+  5. 11. na 2fe0481e zachoval celý business otisk i nastavení; instalovaný parser
+  úspěšně načetl sdílený JSON s novou rolí.
 
 ### LL-069 — Obecné p+n musí zmrazit projekt i registrovaný cíl
 

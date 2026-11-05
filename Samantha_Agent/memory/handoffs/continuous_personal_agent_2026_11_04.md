@@ -1,5 +1,21 @@
 # Průběžný osobní agent — e-mailový provoz a Pushcut
 
+## 2026-11-05 21:22 CET — kompatibilita s rolí architekta
+
+Míla schválil potřebný servisní upgrade přesnou globální větou spolu s AI
+Ateliérem. Registrované pause/prepare/upgrade přepnuly vlastní hodinovou kopii
+ac9f3bed → 2fe0481e, aby starý KNOWN_ROLES neodmítal interior_architect.
+Instalovaná kopie následně skutečně načetla novou centrální politiku.
+
+Ověřeno: installed/owned/loaded/enabled; stejný úplný business otisk před/po,
+stejná nastavení a e-mailová modelová politika. Stará kopie a servisní záloha
+zachované. První check already_completed, 0 nových návrhů a 0 oznámení.
+Karty, visibility/importance předvolby, koncepty, UID kurzory a denní počítadla
+se nezměnily. Žádné další modelové posouzení ani odchozí e-mail se nespouštěly.
+Důkaz: logs/interior_ai_email_compat_upgrade_20261105.log; soukromý před/po
+snapshot je pouze v lokálním servisním úložišti, nikoli v Gitu.
+Samostatný TVBCP e-mailového proudu se tímto nezakládá.
+
 ## 2026-11-05 — samostatné „Příště nezobrazovat“
 
 Míla upřesnil význam obou voleb a schválil vývoj i okamžité Terra p+n.

@@ -42,6 +42,18 @@
           "dry_run_evidence": "data/private/simple_development_probes/3a1b667eeb634603be866357921150f5/proof.json"
         }
       ]
+    },
+    "interior_architect": {
+      "label": "AI architekt interiérového Ateliéru",
+      "preferred_model": "gpt-6.1-terra",
+      "approved_models": [
+        {
+          "model": "gpt-6.1-terra",
+          "reasoning_effort": "high",
+          "cost_review": "Mila approved 2026-11-05: Terra Standard 25 input / 1.25 cached / 125 output credits per MTok; native image billed extra. One analysis + one image request; no automatic retry.",
+          "dry_run_evidence": "data/private/neuberk_interier_design/ai_probes/0b337c126be6ac62096bf15bdb49806a/proof.json"
+        }
+      ]
     }
   }
 }
