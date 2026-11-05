@@ -4,6 +4,10 @@ on:
   workflow_dispatch:
   pull_request:
     paths:
+      - "Samantha_Agent/app/interior*.py"
+      - "Samantha_Agent/app/cockpit_interior.py"
+      - "Samantha_Agent/tests/test_interior*.py"
+      - "Samantha_Agent/tests/interior_*.test.cjs"
       - ".github/workflows/cockpit-quality-gate.yml"
       - "Samantha_Agent/requirements.txt"
       - "Samantha_Agent/camino/server/requirements.txt"
@@ -80,6 +84,10 @@ on:
     branches:
       - main
     paths:
+      - "Samantha_Agent/app/interior*.py"
+      - "Samantha_Agent/app/cockpit_interior.py"
+      - "Samantha_Agent/tests/test_interior*.py"
+      - "Samantha_Agent/tests/interior_*.test.cjs"
       - ".github/workflows/cockpit-quality-gate.yml"
       - "Samantha_Agent/requirements.txt"
       - "Samantha_Agent/camino/server/requirements.txt"

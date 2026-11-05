@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from app.cockpit_interior import INTERIOR_HTML, InteriorRoutes, interior_atelier_action
+from app.interior_ai import interior_ai_start_action, interior_ai_recover_action
 
 import csv
 import errno
@@ -8664,6 +8665,12 @@ COCKPIT_POST_ACTIONS: tuple[dict[str, str], ...] = (
     {"path": "/api/interior/action", "label": "Uložit vlastní práci v interiérovém Ateliéru",
      "risk": "private_write", "confirmation": "explicit_project_source_or_variant_action",
      "handler_name": "interior_atelier_action", "test_level": "direct"},
+    {"path": "/api/interior/ai/start", "label": "Zeptat se architekta nebo vytvořit jednu AI variantu",
+     "risk": "external_ai", "confirmation": "explicit_ai_button_with_selected_private_sources",
+     "handler_name": "interior_ai_start_action", "test_level": "direct"},
+    {"path": "/api/interior/ai/recover", "label": "Ověřit původní výsledek architekta bez opakování modelu",
+     "risk": "private_write", "confirmation": "explicit_check_original_ai_request",
+     "handler_name": "interior_ai_recover_action", "test_level": "direct"},
     {"path": "/api/email-agent/pushcut/configure", "label": "Nastavit upozornění na iPhone",
      "risk": "private_write", "confirmation": "explicit_pushcut_settings_button",
      "handler_name": "email_agent_pushcut_configure_action", "test_level": "direct"},
@@ -10070,6 +10077,12 @@ class CockpitServer:
                     result = interior_atelier_action(self.read_json())
                     self.respond_json(result, status=HTTPStatus.OK if result["ok"] else (
                         HTTPStatus.CONFLICT if result.get("error") in {"conflict", "storage_error"} else HTTPStatus.BAD_REQUEST))
+                    return
+                if parsed.path == "/api/interior/ai/start":
+                    self.respond_json(interior_ai_start_action(self.read_json()))
+                    return
+                if parsed.path == "/api/interior/ai/recover":
+                    self.respond_json(interior_ai_recover_action(self.read_json()))
                     return
                 if parsed.path == "/api/email-agent/pushcut/configure":
                     self.respond_json(email_agent_pushcut_configure_action(self.read_json()))

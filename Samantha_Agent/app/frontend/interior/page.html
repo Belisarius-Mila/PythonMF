@@ -39,10 +39,17 @@
 <button id="saveDraft" type="submit" class="secondary">Uložit rozpracováno</button>
 <button id="saveVariant" type="button">Uložit novou variantu</button></div></form></section>
 </main>
-<aside id="notesPanel" class="notes" aria-label="Rozhovor a připomínky"><h2>Zadání a připomínky</h2>
-<p id="notesContext" class="muted"></p><p class="stage-note">Tato etapa uchovává tvoje poznámky. AI architekt a generování obrázků zatím nejsou připojené.</p>
-<div id="notes"></div><form id="noteForm"><label>Poznámka k vybranému návrhu<textarea id="noteText" maxlength="12000" rows="4" required></textarea></label>
-<button type="submit">Uložit poznámku</button></form></aside></div>
+<aside id="notesPanel" class="notes" aria-label="AI architekt a připomínky"><h2>Architekt</h2>
+<p id="notesContext" class="muted"></p><p id="aiStatus" class="stage-note" role="status">Ověřuji připojení architekta…</p>
+<p id="aiSources" class="muted"></p><button id="useRoomSources" type="button" class="secondary" hidden>Použít nahrané podklady</button>
+<div id="aiConversation" aria-live="polite"></div>
+<form id="aiForm"><label>Otázka nebo požadovaná změna<textarea id="aiText" maxlength="12000" rows="4" placeholder="Například: Co bys v této místnosti změnil a proč?"></textarea></label>
+<div class="actions"><button id="askArchitect" type="submit" disabled>Zeptat se architekta</button>
+<button id="generateProposal" type="button" disabled>Vytvořit AI návrh</button>
+<button id="checkAISend" type="button" class="secondary" hidden>Ověřit odeslání</button></div></form>
+<p class="muted">AI uvidí vybrané podklady, uložené zadání, rozhovor a poznámky k této variantě. Každé odeslání využije model; obrazový návrh navíc generování obrázku. Návrh je koncepční vizualizace, rozměry je třeba ověřit.</p>
+<details><summary>Moje poznámky</summary><div id="notes"></div><form id="noteForm"><label>Poznámka k vybranému návrhu<textarea id="noteText" maxlength="12000" rows="3" required></textarea></label>
+<button type="submit" class="secondary">Uložit poznámku</button></form></details></aside></div>
 <main id="sourcesView" class="sources-view" hidden><div class="workspace-heading"><div><h2>Podklady místnosti</h2>
 <p class="muted">Vyber reference a jeden pracovní obrázek. Originály zůstávají zachované.</p></div>
 <button id="closeSources" type="button">← Zpět k návrhu</button></div>

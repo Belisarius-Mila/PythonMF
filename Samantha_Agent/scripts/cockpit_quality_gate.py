@@ -25,6 +25,8 @@ NODE_FALLBACK_PATHS = (
 
 COMPILE_PATHS = (
     "app/interior_atelier.py",
+    "app/interior_ai.py",
+    "app/interior_ai_activation.py",
     "app/cockpit_interior.py",
     "app/codex_sdk_pilot.py",
     "scripts/codex_sdk_synthetic_peer.py",
@@ -266,6 +268,8 @@ SHELL_PATHS = (
 
 TEST_MODULES = (
     "tests.test_interior_atelier",
+    "tests.test_interior_ai",
+    "tests.test_interior_ai_activation",
     "tests.test_cockpit_interior",
     "tests.test_speech_azure_tts_mp3",
     "tests.test_mmtx_scene06_azure_audio",

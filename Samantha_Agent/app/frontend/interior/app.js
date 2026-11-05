@@ -32,6 +32,8 @@
   let revision = 0, dirty = false, busy = false, loading = false, view = "gallery", returnView = "gallery", notesOpen = true, drawing = false, comparing = false;
   let serverDraft = null;
   let selectedFiles = [], createMode = "project", cacheWarning = false;
+  const aiLoader = gate();
+  let aiState = {enabled:false, jobs:[]}, aiSending = false;
   const kindName = {photo: "Skutečný stav", plan: "Náčrt nebo rozměry", inspiration: "Inspirace"};
 
   function status(message, error = false) {
@@ -42,7 +44,7 @@
   function cacheRead(key) { try { return JSON.parse(localStorage.getItem(key) || "null"); } catch (_) { return null; } }
   function stash() {
     if (!scope.room) return;
-    try { localStorage.setItem(cacheKey(), JSON.stringify({draft, revision, dirty, note: $("noteText").value})); }
+    try { localStorage.setItem(cacheKey(), JSON.stringify({draft, revision, dirty, note: $("noteText").value, aiText: $("aiText").value})); }
     catch (_) { cacheWarning = true; status("Prohlížeč neuchová rozpracované změny. Použij Uložit rozpracováno.", true); }
   }
   function remember() {
@@ -73,6 +75,7 @@
     $("sourceKind").disabled = locked;
     $("newRoom").disabled = locked || !scope.project;
     $("sourceList").querySelectorAll("input").forEach(el => el.disabled = locked);
+    if (data.room) renderAI();
   }
   async function mutate(action, details, captured = context()) {
     return api("/api/interior/action", {action, request_id: crypto.randomUUID(), ...details,
@@ -94,6 +97,7 @@
     const token = loader.begin();
     loading = true; setBusy(busy);
     const wanted = {...next};
+    if (scopeKey(wanted) !== scopeKey(scope)) { aiLoader.begin(); aiState = {enabled:false,jobs:[],message:"Ověřuji architekta pro tuto místnost…"}; }
     let response;
     try {
       response = await api("/api/interior/state" + (wanted.room ? "?" + new URLSearchParams({
@@ -112,10 +116,11 @@
       const restored = restoreDraft(response.draft, cached);
       draft = restored.draft; revision = restored.revision; dirty = restored.dirty;
       $("noteText").value = cached && typeof cached.note === "string" ? cached.note : "";
+      $("aiText").value = cached && typeof cached.aiText === "string" ? cached.aiText : "";
       status(restored.conflict ? "Server obsahuje novější zadání. Tvoje rozepsané změny zůstaly v editoru; před uložením je porovnej." :
         dirty ? "Obnovené neuložené změny." : "Načtený uložený stav.", restored.conflict);
     } else { draft = emptyDraft(); revision = 0; dirty = false; status("Vytvoř první projekt."); }
-    remember(); render(); loading = false; setBusy(busy);
+    remember(); render(); loading = false; setBusy(busy); refreshAI();
   }
   function picture(record, thumbnail = false) {
     if (!record || !record.image_source_id || !data.room.sources[record.image_source_id]) return '<div class="placeholder">Vyber pracovní obrázek v Podkladech.</div>';
@@ -159,7 +164,7 @@
     $("variantTitle").textContent = (view === "edit" ? "Úprava: " : "") + name;
     $("variantOrigin").textContent = current && current.parent_id ? "Vychází z: " + data.room.variants[current.parent_id].title : "Samostatné zadání";
     $("variants").innerHTML = Object.values(data.room.variants).map(v => '<button type="button" class="thumb ' + (v.id === scope.base ? "selected" : "") + '" data-variant="' + v.id + '">' +
-      picture(v, true) + '<span class="thumb-label">' + escape(v.title) + '<span class="muted">Uložené zadání s poznámkami</span></span></button>').join("") ||
+      picture(v, true) + '<span class="thumb-label">' + escape(v.title) + '<span class="muted">' + (v.kind === "ai_proposal" ? "AI vizualizace" : "Uložené zadání s poznámkami") + '</span></span></button>').join("") ||
       '<p class="muted">Zatím bez uložených variant. Přidej podklady a připrav první zadání.</p>';
     $("variants").querySelectorAll("[data-variant]").forEach(button => button.addEventListener("click", () => {
       if (busy) return; view = "gallery"; comparing = false; drawing = false; load({...scope, base: button.dataset.variant});
@@ -169,7 +174,9 @@
     $("compare").hidden = view === "edit";
     $("compare").disabled = !current || !current.parent_id;
     $("compare").setAttribute("aria-pressed", String(comparing));
-    $("visualCaption").textContent = "Pracovní podklad a kreslené poznámky · nejde o AI vizualizaci ani rozměrový výkres";
+    $("visualCaption").textContent = current && current.kind === "ai_proposal" && view !== "edit" ?
+      "AI koncepční vizualizace · rozměry a proveditelnost je třeba ověřit" :
+      "Pracovní podklad a kreslené poznámky · nejde o rozměrový výkres";
     $("draftTitle").value = draft.title || "";
     $("draftPrompt").value = draft.prompt || "";
     $("draftFixed").value = draft.fixed_elements || "";
@@ -179,7 +186,89 @@
       "\n\nCo zachovat:\n" + serverDraft.fixed_elements + "\n\nVybrané podklady: " + serverDraft.source_ids.length : "";
     $("notesContext").textContent = "K návrhu: " + name;
     $("notes").innerHTML = data.room.notes.filter(n => n.base_id === scope.base).map(n => '<div class="note">' + escape(n.text) + '</div>').join("");
-    renderPicture(); renderSources();
+    renderPicture(); renderSources(); renderAI();
+  }
+  function pendingAIKey(captured = scope) { return "samantha-interior-ai-send-v1:" + scopeKey(captured); }
+  function pendingAI() { return cacheRead(pendingAIKey()); }
+  function aiBlocked() { return (aiState.jobs || []).some(job => ["queued","running","delivery_unknown","result_ready"].includes(job.status)); }
+  function renderAI() {
+    if (!data.room) return;
+    const count = new Set([draft.image_source_id, ...draft.source_ids].filter(Boolean)).size;
+    $("aiStatus").textContent = aiState.enabled ? `AI architekt · ${aiState.model}` : aiState.message || "AI architekt zatím není aktivovaný.";
+    $("aiSources").textContent = count ? `Pro architekta vybráno podkladů: ${count}. Výběr změníš v Podkladech.` : "Nejprve vyber podklady pro architekta.";
+    $("useRoomSources").hidden = count > 0 || !Object.keys(data.room.sources).length;
+    $("useRoomSources").disabled = busy || loading || aiSending;
+    const pending = pendingAI();
+    const locked = !aiState.enabled || !count || busy || loading || aiSending || aiBlocked() || Boolean(pending);
+    $("askArchitect").disabled = locked;
+    $("generateProposal").disabled = locked || !draft.image_source_id || aiState.image_generation === false;
+    $("checkAISend").hidden = !pending;
+    $("checkAISend").disabled = aiSending;
+    const conversation = $("aiConversation"); conversation.replaceChildren();
+    for (const job of aiState.jobs || []) {
+      const article = document.createElement("article"); article.className = "ai-exchange";
+      const question = document.createElement("p"); question.textContent = "Ty: " + job.message;
+      const answer = document.createElement("p"); answer.className = "ai-answer";
+      answer.textContent = job.answer || ({queued:"Požadavek je připravený…",running:"Architekt pracuje…",
+        delivery_unknown:"Výsledek vyžaduje ověření. Požadavek znovu neposílej.",result_ready:"Výsledek AI je zachovaný; dokonči jeho uložení.",
+        not_started:"Požadavek se nespustil.",failed:"Model požadavek nedokončil. Nový pokus se automaticky nespustí.",no_image:"AI odpověděla, ale obrazový návrh nevytvořila."}[job.status] || "");
+      article.append(question, answer);
+      if (job.status === "no_image") {
+        const notice = document.createElement("p"); notice.className = "stage-note";
+        notice.textContent = "Obrazový návrh nevznikl. Další placený pokus se automaticky nespustí."; article.append(notice);
+      }
+      if (["delivery_unknown","result_ready"].includes(job.status)) {
+        const button = document.createElement("button"); button.type = "button"; button.className = "secondary";
+        button.textContent = "Ověřit původní výsledek";
+        button.addEventListener("click", () => perform(async () => {
+          await api("/api/interior/ai/recover", {project_id:scope.project, room_id:scope.room, request_id:job.id});
+          await refreshAI();
+        })); article.append(button);
+      }
+      if (job.variant_id) {
+        const button = document.createElement("button"); button.type = "button"; button.textContent = "Otevřít AI návrh";
+        button.addEventListener("click", () => { if (!busy) { view = "gallery"; load({...scope, base:job.variant_id}); } });
+        article.append(button);
+      }
+      conversation.append(article);
+    }
+  }
+  async function refreshAI() {
+    if (!scope.room) return;
+    const captured = context(), token = aiLoader.begin();
+    try {
+      const state = await api("/api/interior/ai/status?" + new URLSearchParams({project_id:captured.project,room_id:captured.room,base_id:captured.base}));
+      if (!aiLoader.current(token) || scopeKey(captured) !== scopeKey(scope)) return;
+      aiState = state;
+      const pending = pendingAI();
+      if (pending && state.jobs.some(job => job.client_request_id === pending.request_id)) localStorage.removeItem(pendingAIKey());
+      renderAI();
+    } catch (_) {
+      if (scopeKey(captured) === scopeKey(scope)) { aiState = {enabled:false,jobs:aiState.jobs || [],message:"Stav architekta se nepodařilo ověřit. Obnov stav před dalším odesláním."}; renderAI(); }
+    }
+  }
+  async function submitAI(mode, previous = null) {
+    if (aiSending || busy || loading || (!previous && aiBlocked())) return;
+    aiSending = true; setBusy(true); renderAI();
+    const captured = context();
+    let payload = previous;
+    try {
+      if (!payload) {
+        const message = $("aiText").value.trim() || (mode === "image" ? draft.prompt.trim() : "");
+        if (!message) throw new Error("Napiš otázku nebo požadovanou změnu pro architekta.");
+        await save();
+        payload = {project_id:captured.project,room_id:captured.room,base_id:captured.base,expected_revision:revision,
+          request_id:crypto.randomUUID(),message,mode};
+        localStorage.setItem(pendingAIKey(captured), JSON.stringify(payload));
+      }
+      await api("/api/interior/ai/start", payload);
+      if (scopeKey(captured) === scopeKey(scope)) {
+        $("aiText").value = ""; stash(); await refreshAI();
+      }
+    } catch (error) {
+      if (error.code === "request_rejected") localStorage.removeItem(pendingAIKey(captured));
+      if (scopeKey(captured) === scopeKey(scope)) status(error.message, true);
+    } finally { aiSending = false; setBusy(false); if (scopeKey(captured) === scopeKey(scope)) renderAI(); }
   }
   function renderSources() {
     $("sourceList").innerHTML = Object.values(data.room.sources).map(source => '<article class="source-card"><img src="' +
@@ -283,6 +372,17 @@
     await mutate("add_note", {base_id: scope.base, text}); $("noteText").value = ""; await load(); status("Poznámka je uložená.");
   }); });
   $("noteText").addEventListener("input", stash);
+  $("aiText").addEventListener("input", stash);
+  $("aiForm").addEventListener("submit", event => { event.preventDefault(); submitAI("chat"); });
+  $("generateProposal").addEventListener("click", () => submitAI("image"));
+  $("checkAISend").addEventListener("click", () => { const pending = pendingAI(); if (pending) submitAI(pending.mode, pending); });
+  $("useRoomSources").addEventListener("click", () => perform(async () => {
+    const ids = Object.keys(data.room.sources);
+    if (!ids.length || ids.length > 6) throw new Error("V Podkladech vyber nejvýše šest obrázků.");
+    draft.source_ids = ids;
+    if (!draft.image_source_id) draft.image_source_id = ids.find(id => data.room.sources[id].kind === "photo") || ids[0];
+    changed(); await save(); render(); status("Podklady pro architekta jsou vybrané.");
+  }));
   $("sourceFiles").addEventListener("change", () => { selectedFiles = [...$("sourceFiles").files]; });
   $("dropzone").addEventListener("dragover", event => { event.preventDefault(); $("dropzone").classList.add("dragging"); });
   $("dropzone").addEventListener("dragleave", () => $("dropzone").classList.remove("dragging"));
@@ -310,4 +410,5 @@
   let initial;
   try { initial = JSON.parse(localStorage.getItem("samantha-interior-selection-v1") || "null"); } catch (_) {}
   load(initial && typeof initial.project === "string" && typeof initial.room === "string" ? {...initial, base: initial.base || "base"} : scope);
+  root.setInterval(() => { if (scope.room && notesOpen && !aiSending && !loading && !busy) refreshAI(); }, 5000);
 })(globalThis);

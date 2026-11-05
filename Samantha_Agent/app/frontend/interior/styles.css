@@ -24,6 +24,7 @@ label{display:grid;gap:5px}h1,h2,h3,p{margin:0}h1{font:500 25px Georgia,serif}h2
 .picture{position:relative;width:100%;margin:auto;max-width:1100px}.picture img{display:block;width:100%;height:auto}.picture svg{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
 .picture path{stroke:var(--mark);fill:none;stroke-width:3;stroke-linecap:round;stroke-linejoin:round}.picture.draw-mode{touch-action:none;cursor:crosshair}
 #visualCaption{margin:9px 0 16px}.draw-tools{margin-bottom:12px}#draftForm{display:grid;gap:12px}
+.ai-exchange{padding:10px 0;border-bottom:1px solid var(--line)}.ai-exchange p{white-space:pre-wrap;overflow-wrap:anywhere}.ai-answer{line-height:1.5}.ai-exchange button{margin:5px 5px 0 0}#aiForm{display:grid;gap:10px;margin-top:14px}
 .notes #notes{display:grid;gap:9px}.notes form{display:grid;gap:9px;margin-top:auto}.note{padding:11px;background:var(--soft);border-radius:8px;white-space:pre-wrap;overflow-wrap:anywhere}
 .source-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:18px;margin:20px 0}
 .source-card{padding:12px;background:var(--panel);border:1px solid var(--line);border-radius:8px;display:grid;gap:10px}

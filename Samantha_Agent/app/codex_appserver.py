@@ -566,10 +566,14 @@ class CodexAppServerClient:
         approval_policy: str = "never",
         model: str | None = None,
         output_schema: dict[str, Any] | None = None,
+        local_image_paths: tuple[Path, ...] = (),
     ) -> TurnReceipt:
         clean_text = str(text or "").strip()
         if not clean_text:
             raise AppServerContractError("Nelze odeslat prázdnou zprávu.")
+        if (not isinstance(local_image_paths, tuple) or len(local_image_paths) > 8
+                or any(not isinstance(path, Path) or not path.is_absolute() for path in local_image_paths)):
+            raise AppServerContractError("Obrazové vstupy vyžadují nejvýše osm absolutních cest.")
         message_id = str(client_message_id or f"appserver-client-{uuid.uuid4().hex}").strip()
         requested_at = utc_now()
         started_monotonic = time.monotonic()
@@ -585,6 +589,8 @@ class CodexAppServerClient:
             params["model"] = model
         if output_schema is not None:
             params["outputSchema"] = dict(output_schema)
+        if local_image_paths:
+            params["input"].extend({"type": "localImage", "path": str(path)} for path in local_image_paths)
         result = self.transport.request("turn/start", params)
         accepted_at = utc_now()
         turn = result.get("turn")

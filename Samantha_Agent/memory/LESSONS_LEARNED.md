@@ -193,6 +193,13 @@ Doplnění 17102026 k LL-071: Nativní modelový pomocník navíc zdvojuje roli,
   Kandidátský probe používá pouze syntetický vstup a nic neschvaluje ani
   nepublikuje. Bez schválené kompatibilní náhrady se zastaví před push.
   Ověřeno integračními testy a skutečnými read-only zkouškami nové role.
+- Doplnění 05112026: novou roli nelze přidat do sdíleného JSON jen podle
+  parseru hlavního checkoutu. Ověřit také skutečné vlastněné runtime kopie
+  (zejména hodinový e-mailový agent), které odmítají neznámé KNOWN_ROLES.
+  Aktivaci blokovat do kompatibilního nasazení a registrovaného upgrade;
+  modelová politika se má zpřístupnit až odpovídajícímu běžícímu procesu.
+  Ověřeno živým AST čtením kopie ac9f3bed a testy blokované / kompatibilní
+  aktivace v interior_ai_activation.py; skutečný upgrade v tomto kroku neproběhl.
 
 ### LL-069 — Obecné p+n musí zmrazit projekt i registrovaný cíl
 

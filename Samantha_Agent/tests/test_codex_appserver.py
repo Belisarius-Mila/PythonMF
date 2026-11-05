@@ -24,6 +24,26 @@ from app.codex_appserver import (
 
 
 class CodexContractTests(unittest.TestCase):
+    def test_local_images_are_explicit_input_items_and_keep_the_same_delivery_contract(self):
+        transport = _ScriptedTransport(completed_items=[])
+        client = self.client(transport)
+        with patch.object(transport, "request", wraps=transport.request) as request:
+            receipt = client.send_text(thread_id="thread-1", text="Describe the room", client_message_id="message-1",
+                                       local_image_paths=(Path("/tmp/selected.png"),))
+        self.assertTrue(receipt.delivered)
+        request.assert_called_once()
+        self.assertEqual(request.call_args.args[0], "turn/start")
+        self.assertEqual(request.call_args.args[1]["input"], [{"type": "text", "text": "Describe the room"},
+            {"type": "localImage", "path": "/tmp/selected.png"}])
+
+    def test_invalid_image_input_stops_before_any_model_turn(self):
+        for images in ((Path("relative.png"),), ("/tmp/photo.png",), tuple(Path("/tmp/x.png") for _ in range(9))):
+            transport = _ScriptedTransport(completed_items=[])
+            client = self.client(transport)
+            with patch.object(transport, "request") as request, self.assertRaises(AppServerContractError):
+                client.send_text(thread_id="thread-1", text="Describe", local_image_paths=images)
+            request.assert_not_called()
+
     def client(self, transport):
         with patch("app.codex_appserver.read_codex_version", return_value=CodexVersion.parse("codex-cli 0.166.0")):
             return CodexAppServerClient(transport_factory=lambda **_kwargs: transport)

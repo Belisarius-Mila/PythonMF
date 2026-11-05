@@ -197,6 +197,7 @@ class InteriorAtelier:
             _, room = self._room(data, project_id, room_id)
             result["room"] = copy.deepcopy(room)
             result["room"].pop("drafts")
+            result["room"].pop("ai_requests", None)
             result["draft"] = self._draft(room, base_id)
         return result
 

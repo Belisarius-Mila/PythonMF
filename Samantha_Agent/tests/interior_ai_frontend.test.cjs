@@ -1,0 +1,116 @@
+const test = require('node:test');
+const assert = require('node:assert/strict');
+const fs = require('node:fs');
+const path = require('node:path');
+const vm = require('node:vm');
+
+class Element {
+  constructor(tag) { this.tag = tag; this.children = []; this.listeners = {}; this.dataset = {}; this.value = ''; this.disabled = false; this._text = ''; this._html = ''; this.classList = {toggle(){},add(){},remove(){}}; }
+  set textContent(value) { this._text = String(value); this.children = []; }
+  get textContent() { return this._text + this.children.map(c => c.textContent).join(''); }
+  set innerHTML(value) { this._html = value; this.children = []; this._text = ''; }
+  get innerHTML() { return this._html; }
+  append(...nodes) { this.children.push(...nodes); }
+  appendChild(node) { this.children.push(node); }
+  replaceChildren(...nodes) { this.children = nodes; this._text = ''; }
+  addEventListener(name, handler) { this.listeners[name] = handler; }
+  setAttribute(name, value) { this[name] = value; }
+  querySelector(selector) { return selector === 'button' ? (this.button ||= new Element('button')) : null; }
+  querySelectorAll() { return []; }
+  showModal() { this.open = true; }
+  close() { this.open = false; }
+  async click() { if (!this.disabled) await this.listeners.click?.({preventDefault(){}}); }
+}
+
+const clone = value => JSON.parse(JSON.stringify(value));
+const flush = async () => { for (let i=0;i<10;i++) await new Promise(resolve => setImmediate(resolve)); };
+function fixture() {
+  const page = fs.readFileSync(path.join(__dirname, '../app/frontend/interior/page.html'),'utf8');
+  const ids = Object.fromEntries([...page.matchAll(/id="([^"]+)"/g)].map(m => [m[1], new Element(m[1])]));
+  const cache = new Map(), intervals = [], calls = [], paid = new Set();
+  const jobs = {A:[],B:[]};
+  const draft = {title:'Saved title',prompt:'Keep the room',fixed_elements:'Door',source_ids:['photo'],image_source_id:'photo',annotations:[],revision:2};
+  let sequence = 0, holdStart = null, holdStatusA = null, throwStart = false;
+  function room(id) { return {id,title:'Room '+id,sources:{photo:{id:'photo',title:'Private photo',kind:'photo'}},variants:{},notes:[]}; }
+  const projects = [{id:'project',title:'Private project',rooms:[{id:'A',title:'A'},{id:'B',title:'B'}]}];
+  const context = {document:{getElementById:id=>ids[id],createElement:tag=>new Element(tag)},
+    localStorage:{getItem:k=>cache.get(k)??null,setItem:(k,v)=>cache.set(k,v),removeItem:k=>cache.delete(k)},
+    crypto:{randomUUID:()=>`synthetic-request-${++sequence}`},URLSearchParams,console,confirm:()=>true,
+    setInterval:fn=>intervals.push(fn),
+    fetch:async (url, options) => {
+      const payload = options?.body ? JSON.parse(options.body) : null;
+      calls.push({url,payload});
+      let result;
+      if (url.startsWith('/api/interior/state')) {
+        const selected = new URLSearchParams(url.split('?')[1]).get('room_id');
+        result={ok:true,projects,room:selected?room(selected):null,draft:selected?clone(draft):null};
+      } else if (url.startsWith('/api/interior/ai/status')) {
+        const selected=new URLSearchParams(url.split('?')[1]).get('room_id');
+        const captured=clone(jobs[selected]);
+        if (selected==='A' && holdStatusA) await holdStatusA;
+        result={ok:true,enabled:true,image_generation:true,model:'approved-model',jobs:captured};
+      } else if (url==='/api/interior/action') {
+        assert.equal(payload.action,'save_draft');
+        draft.revision++;
+        result={ok:true,revision:draft.revision};
+      } else if (url==='/api/interior/ai/start') {
+        if (!paid.has(payload.request_id)) {
+          paid.add(payload.request_id);
+          jobs[payload.room_id].push({id:'job-'+payload.request_id,client_request_id:payload.request_id,
+            message:payload.message,status:'queued',answer:'',variant_id:'',created_at:'now'});
+        }
+        if (holdStart) await holdStart;
+        if (throwStart) { throwStart=false; throw new Error('Network outcome unknown'); }
+        result={ok:true,request_id:'job-'+payload.request_id};
+      } else throw new Error('Unexpected endpoint '+url);
+      return {ok:true,json:async()=>clone(result)};
+    }};
+  vm.runInNewContext(fs.readFileSync(path.join(__dirname,'../app/frontend/interior/app.js'),'utf8'),context);
+  return {ids,calls,cache,jobs,intervals,paid,
+    setHoldStart:p=>holdStart=p,setHoldStatusA:p=>holdStatusA=p,setThrowStart:()=>throwStart=true};
+}
+
+test('double AI submission produces one request; completed text stays plain and draft polling is preserved',async()=>{
+  const f=fixture();await flush();
+  assert.equal(f.ids.askArchitect.disabled,false);
+  assert.match(f.ids.aiSources.textContent,/1/);
+  f.ids.aiText.value='Describe selected photos';
+  let release;f.setHoldStart(new Promise(resolve=>release=resolve));
+  f.ids.aiForm.listeners.submit({preventDefault(){}});await flush();
+  assert.equal(f.ids.projectSelect.disabled,true,'Scope cannot change while preparing the request');
+  f.ids.aiForm.listeners.submit({preventDefault(){}});await flush();
+  assert.equal(f.calls.filter(c=>c.url.endsWith('/ai/start')).length,1);
+  release();await flush();f.setHoldStart(null);
+  assert.equal(f.ids.askArchitect.disabled,true,'Queued request blocks another paid send');
+  f.ids.draftPrompt.value='My newer unfinished draft';f.ids.draftPrompt.listeners.input();
+  f.jobs.A[0].status='completed';f.jobs.A[0].answer='<img src=x onerror=evil()> Architect answer';
+  f.intervals[0]();await flush();
+  assert.match(f.ids.aiConversation.textContent,/<img src=x onerror=evil\(\)> Architect answer/);
+  assert.equal(f.ids.aiConversation.children[0].children[1].tag,'p');
+  assert.equal(f.ids.draftPrompt.value,'My newer unfinished draft');
+  assert.equal(f.ids.askArchitect.disabled,false);
+  assert.equal(f.paid.size,1);
+});
+
+test('late AI status from room A cannot enter room B conversation',async()=>{
+  const f=fixture();await flush();
+  f.jobs.A.push({id:'old',message:'ROOM_A_PRIVATE',answer:'A answer',status:'completed',created_at:'old'});
+  let release;f.setHoldStatusA(new Promise(resolve=>release=resolve));
+  f.intervals[0]();await flush();
+  f.ids.roomSelect.value='B';f.ids.roomSelect.listeners.change();await flush();
+  release();await flush();
+  assert.doesNotMatch(f.ids.aiConversation.textContent,/ROOM_A_PRIVATE/);
+  assert.equal(f.calls.filter(c=>c.url.endsWith('/ai/start')).length,0);
+});
+
+test('unknown HTTP outcome is reconciled by status without another model request',async()=>{
+  const f=fixture();await flush();
+  f.ids.aiText.value='Question with uncertain HTTP';f.setThrowStart();
+  f.ids.aiForm.listeners.submit({preventDefault(){}});await flush();
+  assert.equal(f.ids.checkAISend.hidden,false);
+  assert.equal(f.ids.askArchitect.disabled,true);
+  f.intervals[0]();await flush();
+  assert.equal(f.ids.checkAISend.hidden,true,'Original durable request was found');
+  assert.equal(f.calls.filter(c=>c.url.endsWith('/ai/start')).length,1);
+  assert.equal(f.paid.size,1);
+});

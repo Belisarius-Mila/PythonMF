@@ -18,6 +18,8 @@ from app import cockpit
 from app.cockpit_frontend import INTERIOR_HTML
 from app.cockpit_interior import interior_atelier_action
 from app.interior_atelier import InteriorAtelier
+from app.interior_ai import InteriorAI
+from tests.test_interior_ai import FakeDriver
 from scripts.cockpit_quality_gate import node_binary
 from tests.test_interior_atelier import image_bytes
 
@@ -143,6 +145,44 @@ class CockpitInteriorTests(unittest.TestCase):
         result = subprocess.run([node_binary(), "--test", str(Path(__file__).with_name("interior_atelier_frontend.test.cjs"))],
                                 text=True, capture_output=True, timeout=20)
         self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+
+    def test_ai_frontend_double_send_room_race_and_unknown_delivery(self):
+        result = subprocess.run([node_binary(), "--test", str(Path(__file__).with_name("interior_ai_frontend.test.cjs"))],
+                                text=True, capture_output=True, timeout=20)
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+
+    def test_ai_capabilities_are_readonly_without_initializing_a_room(self):
+        status, body, _ = self.request("/api/interior/ai/status")
+        self.assertEqual(status, 200)
+        self.assertEqual(json.loads(body)["protocol"], "interior-ai-v1")
+        self.assertFalse(self.root.exists())
+
+    def test_ai_http_queues_one_request_and_hides_internal_context(self):
+        project, room = self.project()
+        _, body, _ = self.command("add_source", project_id=project, room_id=room, title="Photo", kind="photo",
+                                  data=base64.b64encode(image_bytes()).decode())
+        asset = json.loads(body)["asset_id"]
+        draft = self.store.state(project, room)["draft"]
+        self.command("save_draft", project_id=project, room_id=room, base_id="base", expected_revision=0,
+            draft={k:v for k,v in draft.items() if k!="revision"} | {"source_ids":[asset],"image_source_id":asset})
+        queue, driver = [], FakeDriver()
+        service = InteriorAI(self.store, driver=driver, launcher=queue.append, require_activation=False)
+        payload = {"project_id":project,"room_id":room,"base_id":"base","expected_revision":1,
+                   "request_id":uuid.uuid4().hex,"message":"Describe the room","mode":"chat"}
+        with patch("app.interior_ai.INTERIOR_AI", service), patch("app.cockpit_interior.INTERIOR_AI", service):
+            for _ in range(2):
+                code, body, _ = self.request("/api/interior/ai/start", payload)
+                self.assertEqual(code, 200)
+                self.assertTrue(json.loads(body)["ok"])
+            self.assertEqual(len(queue), 1)
+            queue.pop()()
+            code, body, _ = self.request("/api/interior/ai/status?" + urlencode({"project_id":project,"room_id":room}))
+            self.assertEqual(json.loads(body)["jobs"][0]["status"], "completed")
+            self.assertNotIn(b"thread_id", body)
+            self.assertNotIn(b"context", body)
+            self.assertEqual(len(driver.calls), 1)
+            _, body, _ = self.request("/api/interior/state?" + urlencode({"project_id":project,"room_id":room}))
+            self.assertNotIn("ai_requests", json.loads(body)["room"])
 
     def test_frontend_has_unique_controls_and_fullscreen_source_edit_views(self):
         from html.parser import HTMLParser

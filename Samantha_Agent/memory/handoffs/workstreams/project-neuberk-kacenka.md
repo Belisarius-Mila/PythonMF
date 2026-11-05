@@ -6,6 +6,54 @@ Stav: rozpracovane
 Pripomenout pri startu: ne
 Datum: 2026-11-05
 
+## 2026-11-05 — zapojení AI, lokální příprava aktivace
+
+Míla po praktickém vyzkoušení Ateliéru zadal „Zapoj teď AI“. Oprava iPhone
+JPEG/MPO je už nasazená do b9b59c7d, CI 42083732254 success; tehdejší CI
+bylo spuštěné ručně kvůli chybějícím filtrům cest. Ty jsou nyní doplněné.
+
+Lokálně je připravený skutečný AI rozhovor nad vybranými podklady a samostatná
+obrazová varianta. Každý požadavek má neměnný snapshot zadání, podkladů,
+kreslených značek a rozhovoru konkrétní varianty. Generovaný obrázek vytvoří
+nový neměnný návrh; původní podklady a novější rozepsané změny zůstanou.
+Asynchronní UI rozlišuje čekání, výsledek, neúspěšné generování a neověřené
+doručení. Ověření původního výsledku neprovádí další modelový tah.
+
+Připojení používá současný sdílený App Server a jeho localImage vstupy.
+Model má jen vybrané metadata-free náhledy, omezené čtení snapshotu,
+vypnutý shell, konektory, paměti, web a delegaci. V chat režimu je systémově
+vypnuté generování obrázků; povolí se jen samostatnému obrazovému požadavku.
+Volba modelu je připravená pro centrální roli interior_architect. Produkční
+config/agent_roles.json zatím není změněný a neproběhl žádný placený pilot.
+
+Ověření: 145 cílených Python kontrol PASS, včetně 3 nových Node DOM scénářů
+a původních 8 frontendových scénářů. Závěrečná plná brána PASS: 2559 testů,
+0 chyb, 31 přeskočených (388,844 s). Lokální krok je dokončený; bez push a nasazení. Report: memory/reports/interior_ai_integration_20261105.md.
+
+### Otevřené vstupy a brány
+
+- Asynchronně je položená volba Terra/high: jeden skutečný rozbor vybraných
+  soukromých podkladů, případně navíc jeden obrazový návrh. Odpověď dosud
+  není doložená. Bez ní se placený pilot nespouští. Sazby byly znovu ověřené
+  v oficiální dokumentaci; nejde o pevný slib ceny jednoho obrázku.
+- Nasazení tohoto nového AI balíčku nebylo výslovně zadáno; předchozí p+n
+  se vztahovalo k opravě MPO. Pro živé zapnutí je nutný kompatibilní Cockpit
+  a pak přijatý pilot / centrální modelová politika.
+- Skutečný čtecí audit zjistil, že hodinová e-mailová kopie ac9f3bed má
+  starší KNOWN_ROLES bez interior_architect. Přidání nové role by ji rozbilo.
+  Aktivace je proto blokovaná, dokud registrovaný upgrade její vlastní kopie
+  nedoplní kompatibilní parser. Služba ani její data se zatím neměnily.
+  Upgrade vyžaduje přesnou globální potvrzovací větu; běžné „zapoj AI“ ji
+  nenahrazuje. Příprava respektuje app/email/service_control.py a global_safety_brake.md.
+- Model se zpřístupní až po nasazení s odpovídající politikou; samotná změna
+  JSON jej v běžícím starém procesu nezapne. Starý parser Cockpitu také nesmí
+  dostat novou roli před prvním kompatibilním p+n.
+- Nový TVBCP stále nebyl domluvený; nevzniká tímto terminálovým krokem.
+
+Další krok: dokončit checkpoint, získat volbu pilotu a konkrétní souhlas
+k následnému kompatibilnímu nasazení / servisnímu přepnutí. Teprve po živém
+ověření lze tvrdit, že AI v uživatelově Cockpitu skutečně pracuje.
+
 ## 2026-11-05 — oprava příjmu iPhone JPEG/MPO
 
 Míla při praktickém zkoušení narazil na odmítnutí tří iPhone JPEG po cca

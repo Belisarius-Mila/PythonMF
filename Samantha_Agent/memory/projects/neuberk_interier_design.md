@@ -1,5 +1,34 @@
 # Neuberk interier design
 
+## 2026-11-05 — skutečný AI architekt připravený lokálně
+
+Míla zadal zapojení AI. Nové lokální rozhraní má rozhovor nad explicitně
+vybranými podklady a samostatné „Vytvořit AI návrh“. Výsledky patří ke
+konkrétní variantě, obrazový výstup vytvoří nový neměnný návrh. Celé zadání,
+poznámky, rozhovor a obrazové vstupy se před odesláním zmrazí. Přepnutí
+místnosti ani novější rozepsané změny odpověď nepřesměrují nebo nepřepíšou.
+Nejistý požadavek se neopakuje; původní výsledek lze číst a místně dokončit.
+
+Transport zůstává Codex App Server; klient nově přijímá volitelné localImage
+vstupy, výchozí textový kontrakt zůstává. Pouze náhledy vybraných podkladů,
+bez EXIF, kontext aktuální varianty, žádné automatické generování. Chat má
+vypnuté obrazové generování, shell, konektory, paměti a delegaci; obrazový
+režim povoluje jen nativní obrazový nástroj navíc. Nezavádí se nové závislosti.
+
+145 cílených kontrol PASS, Node DOM dvojklik/kontext/neověřené HTTP PASS;
+plná brána PASS: 2559 testů, 0 chyb, 31 přeskočených. Lokální krok dokončený.
+Produkční role ještě není aktivovaná, placený pilot ani
+nové p+n nebyly provedené. Položená otázka na Terra/high a rozsah jednoho
+pilotního rozboru / jednoho obrázku zatím nemá odpověď.
+
+Nová role vyžaduje před aktivací kompatibilní parser v běžícím Cockpitu
+i samostatném e-mailovém agentu. Audit jeho kopie ac9f3bed tuto kompatibilitu
+nepotvrdil; příslušný registrovaný upgrade vyžaduje přesnou globální větu.
+Zatím se služba, její stav a config/agent_roles.json neměnily. Aktivátor tyto
+brány kontroluje a zpřístupnění role odkládá až do odpovídajícího nasazení.
+Handoff: project-neuberk-kacenka.md; report interior_ai_integration_20261105.md.
+Starší výroky níže jsou historické milníky; živé AI zapnutí zatím není prokázané.
+
 ## 2026-11-05 — praktická přejímka a příjem iPhone JPEG
 
 První Ateliér byl vydaný do eb0d98e6 a je zachovaný i v b933de0f. Při
