@@ -1,35 +1,34 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
-- 15/P2-B: Míla schválil kandidáta GPT-Live 1. Připravený je neaktivovaný serverový broker, sideband, trvalý záznam pokusu a časový dohled. 91 cílených testů PASS; plná brána 2429 testů PASS, 5 PDF skipů. Report `reports/voice_conversation_p2b_20261105.md`.
-- Samostatné potvrzení jedné placené zkoušky do 60 sekund je stále pending. Nula API volání, žádné čtení klíče, aktivace role, připojení do Cockpitu nebo nasazení.
-- Přejímka 05/P1 zůstává uzavřená přes Mílu/Willa; původní modernizovaný klient se používá dál.
+- 15/P2-C: Míla schválil jednu syntetickou hlasovou zkoušku do 60 s. GPT-Live 1 skutečně prošel: právě jeden session.start, finální session.closed, 47 s spotřeby ≈ 0,039167 USD, první audio 4,648 s od začátku pokusu. Žádný mikrofon ani soukromá data.
+- 97 cílených testů PASS, plná brána 2448 testů PASS s 5 PDF skipy. Zápis `reports/voice_conversation_probe_20261105.md`, Data handoff `handoffs/data_15_voice_conversation_pilot_20261105.md`.
+- Data hlasový broker/panel do běžícího Cockpitu nepřipojoval; nový živý audit main neprováděl. Produkční role, původní backend, SDK a závislosti se neměnily. Přejímka 05/P1 zůstává uzavřená.
 
 ### Hotovo
-- Kandidát GPT-Live 1 potvrzený Mílou; nejde o aktivaci produkční role ani automatický souhlas s placenou relací.
-- Broker pevně váže vlastníka, proud/vlákno, kandidáta a dobu. HTTP adaptér kontroluje serverový principal, přesný Origin a CSRF. Browser nemůže dodat model nebo operaci backendu.
-- Journal rezervuje grant před API a blokuje opakování i po restartu/souběhu. Sideband vrací jen hrubý stav práce; reflektované audio se nezpracovává jako nástrojová událost a neukládá se. Serverový dohled je nezávislý na stránce.
-- Snapshot má krátký deadline, hlas nikdy neruší backendovou úlohu. Nová kandidátní operace je registrovaná a oba hlasové moduly/testy zahrnuté do standardní brány.
+- Ověřený skutečný přístup ke GPT-Live a hlasový výstup s českým kontrolním markerem, nenulovým PCM a potvrzenými finálními sekundami. Lokální MP3 ukázka má přibližně 2 s po odstranění krajního ticha; přehrání nevolá API.
+- První transport skončil před session.start. Výchozí TLS store Pythonu měl 0 CA; provider nyní používá ověřovaný existující certifi bundle (118 CA), stejně jako dosavadní OpenAI/httpx klient. Systémové certifikáty se neměnily.
+- Druhé připojení bylo přípustné jen s trvalým důkazem, že modelový start nebyl ani zkusen. Společný create-only záznam před jediným session.start blokuje další modelové spuštění při nejistotě i napříč pokusy. Původní proof zůstal zachovaný.
+- Probe je registrovaná operace a jeho syntetické testy jsou ve standardní bráně. Žádný textový backendový model, nástrojová akce, App Server tah ani živá místní služba se nespouštěly.
 
 ### Otevřeno
-- Čeká explicitní potvrzení času/rozpočtu placené zkoušky; při jeho absenci nesmí vzniknout placená relace. Účet a skutečné API chování nebyly živě ověřeny.
-- Kandidátní HTTP adaptér není připojený do Cockpitu. Host musí dodat skutečně autentizovaného vlastníka, souhlasový grant a explicitní privátní journal; produkční hlasová role zůstává nepřidaná.
-- Čeština, přerušování, iPhone, latence, skutečná spotřeba a souhlas zůstávají fyzická přejímka. Celý bod 15 není hotový.
+- Míla dosud nepotvrdil subjektivní poslech ukázky. Skutečný mluvený vstup, přerušování a iPhone/WebRTC/sideband nad backendem nejsou přijaté; celý bod 15 není hotový.
+- Pro integrační etapu je třeba kompatibilní centrální hlasová role, důvěryhodná vazba na vybraný proud a rozpočet pro další placené relace. Modelovou roli samotný probe neaktivoval.
 
 ### Rizika
-- Serverový časovač není fakturační hard limit. Při pádu hosta nebo výpadku sítě může zůstat relace neukončená; neznámé vytvoření bez ID vyžaduje audit, nikoli retry.
-- Hlasová cena je 0,05 USD/min, backend zvlášť. Finální spotřeba je potvrzená jen z platného session.closed, nikoli z hangup HTTP odpovědi.
-- Modelová role, requirements ani SDK se neměnily. Main má vlastní změny v Cockpitu, rolích a e-mailovém proudu, které při integraci zachovat.
+- Dosavadní souhlas byl na jednu zkoušku a jediný modelový start byl využitý. Další relaci nelze odvodit ze zbylých sekund nebo ceny pod odhadem; žádný nejistý modelový start se neopakuje.
+- 4,648 s měří připojení a startup do prvního audia, nikoli latenci živé odpovědi. Cena je přepočet z providerem potvrzených 47 sekund při 0,05 USD/min, nikoli faktura.
+- Serverový watchdog není providerový fakturační strop. Produkční role a připojení vyžadují vlastní integraci do aktuálního main, bez přepsání Willových změn.
 
 ### Další krok
-- Vyčkat na samostatné potvrzení jedné živé syntetické zkoušky do 60 sekund (odhad hlasu 0,05 USD); schváleného kandidáta se znovu nedotazovat.
+- Míla poslechne krátkou lokální ukázku; poté připravit integrační etapu čtecího pilotu do Cockpitu a samostatnou iPhone přejímku.
 
 ### Rozhodnutí
-- GPT-Live 1 je Mílou schválený kandidát. Placená zkouška, produkční role a nasazení zatím schválené nejsou.
+- Kandidát i jedna placená syntetická zkouška byly schválené; technická zkouška PASS. Produkční hlasová role, další relace a nasazení tím nebyly aktivované.
 
 ### Navrhované další kroky
-- V potvrzeném rozsahu nejprve provést jednorázový syntetický probe bez soukromých dat a uložit skutečné final usage; nejistý pokus neopakovat.
-- Teprve po přijatém probe připravit kompatibilní centrální roli a připojení do aktuálního Cockpitu, poté fyzickou iPhone přejímku.
+- Připravit kompatibilní centralizovanou voice roli bez falešného reasoning_effort, callback na skutečný vybraný proud a ovládání mikrofonu/spotřeby v Cockpitu.
+- Samostatně ověřit na iPhonu český hlasový vstup, přerušení řeči, zachování úlohy a finální spotřebu. Novou placenou přejímku zahrnout do nového výslovného rozsahu.
 
 ### Technický stav checkpointu
 - Změna prošla rychlou syntax/whitespace bránou; cílené testy doložila dokončovací účtenka vývojového tahu.
@@ -3012,3 +3011,24 @@ Navrhované další kroky:
 Technický důkaz:
 - 91 cílených testů PASS, z toho 32 nových brokerových; plná brána 2429 testů PASS, 5 PDF skipů, syntax a pip check PASS. Report reports/voice_conversation_p2b_20261105.md.
 - Nula API volání, žádné čtení klíče, žádné živé služby, sdílená data, modelové role, nové závislosti, push, deploy či integrace. Změněný je lokální capability registr a standardní testovací brána.
+
+### 2026-11-05 19:11 CET — 15/P2-C: skutečná hlasová zkouška GPT-Live PASS
+
+Hotovo:
+- Míla výslovně schválil jednu syntetickou živou zkoušku do 60 sekund. Model byl spuštěn právě jednou; potvrdil ukončení a 47 sekund spotřeby, přepočteně přibližně 0,039167 USD. První audio 4,648 s od začátku pokusu, kontrolní český marker a nenulové PCM potvrzené.
+- Krátká lokální MP3/HTML ukázka je připravená pro Mílu; žádný mikrofon, soukromé záznamy, nástrojová akce ani textový backendový model se nepoužily.
+- Po prvním transportním selhání před session.start bylo opraveno ověřování TLS přes existující certifi. Společný trvalý model-start záznam a hash původního proof dokládají, že druhé připojení neopakovalo modelový požadavek.
+
+Rozhodnutí:
+- Technický probe PASS; produkční role se neaktivuje automaticky. Jednorázový souhlas je využitý, další placená relace z něho neplyne.
+
+Další krok:
+- Míla poslechne ukázku; poté připravit integrační etapu read-only pilotu do aktuálního Cockpitu.
+
+Navrhované další kroky:
+- Připravit kompatibilní centrální hlasovou roli a skutečnou vazbu na vybraný proud bez přepsání Willových změn.
+- Následně samostatná placená iPhone/WebRTC přejímka mluveného vstupu, přerušování, latence a spotřeby.
+
+Technický důkaz:
+- 97 cílených testů PASS, plná brána 2448 testů PASS, 5 PDF skipů; syntax, TLS ověření, jediný model-start claim a lokální MP3 decode PASS. Report reports/voice_conversation_probe_20261105.md.
+- Žádná služba, sdílená data, produkční role, SDK/dependency změna, push, deploy či integrace do main. Soukromé důkazy a audio jen ve vlastní ignorované .venv.

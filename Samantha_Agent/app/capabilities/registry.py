@@ -12,6 +12,16 @@ from app.capabilities.models import (
 
 CAPABILITIES: tuple[CapabilityRecord, ...] = (
     CapabilityRecord(
+        capability_id="probe_voice_candidate", label="One confirmed synthetic GPT-Live voice probe",
+        risk=RiskLevel.EXTERNAL_SEND,
+        reads=("explicit candidate and paid-test grant", "fixed synthetic greeting and silence", "project credential in process environment"),
+        writes=("one primary voice session", "private durable attempt/final-usage proof and synthetic output audio"),
+        tool="app.communication.voice_conversation_probe.run_voice_candidate_probe",
+        requires_confirmation=True, confirmation_policy=ConfirmationPolicy.EXACT_CURRENT_MESSAGE,
+        voice_allowed=VoicePolicy.BLOCKED, mobile_allowed=MobilePolicy.APPROVAL_CARD,
+        notes="One stable grant, no microphone, user history, backend model/tool, retry, fallback, role activation or deployment. Candidate choice and paid probe separately approved. Final usage only from session.closed; duration/cost are not a provider billing ceiling.",
+    ),
+    CapabilityRecord(
         capability_id="create_voice_candidate_session", label="One explicitly approved synthetic voice candidate test",
         risk=RiskLevel.EXTERNAL_SEND,
         reads=("server-authenticated principal and CSRF", "bound synthetic read-only snapshot", "explicit GPT-Live candidate and price-reviewed one-shot grant"),

@@ -1,6 +1,36 @@
 # Data → další krok: 15/P2 přirozený hlasový rozhovor
 
-## Aktuální stav — 2026-11-05 13:43 CET, 15/P2-B
+## Aktuální stav — 2026-11-05 19:11 CET, 15/P2-C
+
+Míla schválil kandidáta i jednu skutečnou syntetickou zkoušku do 60 s.
+**Technický probe GPT-Live 1 PASS:** jediný session.start, session.closed,
+finální usage 47 s, přepočteně 0,039167 USD. První audio 4,648 s od začátku
+pokusu; český marker a nenulové PCM potvrzené. 97 cílených testů PASS,
+plná brána 2448 testů PASS s 5 PDF skipy.
+
+První TLS připojení skončilo před session.start. Výchozí Python CA store
+byl prázdný; explicitní existující certifi bundle opravil ověřování, bez
+zásahu do systému. Druhé spojení použilo tentýž schválený grant, hash
+původního proof a společný create-only model-start claim. Model nebyl
+spuštěný dvakrát a žádný nejistý modelový požadavek se neopakoval.
+
+Souhlas pro jednu zkoušku je využitý. **Žádný další placený modelový start
+z tohoto grantu.** Nespouštět probe znovu, neuvolňovat claim ani nemazat
+původní proof. Role, SDK, produkční backend a služby beze změn.
+
+Mílův poslech je otevřený. Ukázka a privátní důkazy jsou ve vlastní
+.venv/voice-candidate-probe/20261105-approved-1847-tls-fixed/ (listen.html,
+synthetic-speech-preview.mp3, synthetic-output.wav, proof.json). Nepřenášet
+session ID, klíč či audio do Gitu. Report reports/voice_conversation_probe_20261105.md.
+Přenositelný bezpečný výtah metrik a hashů je vedle reportu v JSON; z něj
+se nesmí odvozovat přijetí iPhonu, skutečného rozhovoru či produkční role.
+
+Další krok: poslech, poté integrační read-only pilot do aktuálního Cockpitu
+s kompatibilní centrální voice rolí. iPhone/WebRTC/sideband nad skutečným
+backendem nejsou přijaté. Podkladem A 0e97e4de, B 3c78092a a tento krok;
+main a Willovy e-mailové změny zachovat. Bez push, deploy nebo restartu.
+
+## Historický stav — 2026-11-05 13:43 CET, 15/P2-B
 
 Míla schválil kandidáta GPT-Live 1. Samostatná otázka na jednu placenou
 syntetickou zkoušku do 60 sekund s odhadem 0,05 USD za běžící hlas zůstává

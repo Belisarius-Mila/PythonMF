@@ -3,6 +3,10 @@
 Datum: 2026-11-05. Autor: Data. Větev: `data/parallel-20261104`.
 Výchozí commit: `0e97e4de`. Proud: `layer-human-adam-development`.
 
+Aktualizace: Míla následně schválil i jednu placenou zkoušku; skutečný probe
+PASS s 47 sekundami je v `voice_conversation_probe_20261105.md`. Následující
+report zachovává historický stav B před tímto schválením.
+
 ## Oprávnění a stav
 
 Míla schválil kandidáta **GPT-Live 1**. Schválení modelu není automaticky

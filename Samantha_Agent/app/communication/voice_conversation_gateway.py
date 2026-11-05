@@ -15,6 +15,7 @@ import json
 import logging
 import queue
 import re
+import ssl
 import threading
 import time
 import urllib.error
@@ -125,7 +126,12 @@ class OpenAILiveProvider:
         if not isinstance(api_key, str) or not api_key or any(c.isspace() for c in api_key):
             raise VoiceGatewayError("Project credential is unavailable")
         self._key = api_key
-        self._opener = opener or urllib.request.build_opener(_NoRedirect())
+        # Match the existing OpenAI/httpx trust source. Some macOS framework
+        # Pythons have an empty system CA store; never disable verification.
+        import certifi
+        self._ssl = ssl.create_default_context(cafile=certifi.where())
+        self._opener = opener or urllib.request.build_opener(
+            _NoRedirect(), urllib.request.HTTPSHandler(context=self._ssl))
         self._connect = connect
 
     def _post(self, path: str, payload: dict[str, Any] | None, *, timeout: float):
@@ -149,6 +155,18 @@ class OpenAILiveProvider:
     def create(self, payload, *, timeout=8):
         return self._post("", payload, timeout=timeout)
 
+    def primary(self, *, timeout=8):
+        """One primary WebSocket connection; session.start is caller-owned."""
+        connect = self._connect
+        if connect is None:
+            from websockets.sync.client import connect
+        raw = connect("wss://api.openai.com/v1/live/sessions",
+                      ssl=self._ssl,
+                      additional_headers={"Authorization": "Bearer " + self._key},
+                      open_timeout=timeout, close_timeout=1, max_size=262144,
+                      logger=logging.Logger("samantha.voice.probe", level=logging.CRITICAL))
+        return _Sideband(raw)
+
     def attach(self, session_id, *, timeout=5):
         if not isinstance(session_id, str) or not _ID.fullmatch(session_id):
             raise VoiceGatewayError("Invalid voice session identity")
@@ -156,6 +174,7 @@ class OpenAILiveProvider:
         if connect is None:
             from websockets.sync.client import connect
         raw = connect("wss://api.openai.com/v1/live/sessions/" + urllib.parse.quote(session_id, safe="") + "/attach",
+                      ssl=self._ssl,
                       additional_headers={"Authorization": "Bearer " + self._key},
                       open_timeout=timeout, close_timeout=1, max_size=262144,
                       logger=logging.Logger("samantha.voice.transport", level=logging.CRITICAL))
