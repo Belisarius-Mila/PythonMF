@@ -82,6 +82,7 @@ function harness(apiHandler, confirmResult=true) {
   scope.threadRotationConfirmation.value = "";
   scope.busy = false;
   scope.sendInFlight = false;
+  scope.pendingSubmission = null;
   scope.sessionTurnBusy = false;
   scope.voiceStarting = false;
   scope.voiceRecording = false;

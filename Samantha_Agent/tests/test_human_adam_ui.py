@@ -11,6 +11,14 @@ from scripts.cockpit_quality_gate import node_binary
 
 
 class HumanAdamUiTests(unittest.TestCase):
+    def test_send_failure_behaviour_in_node_vm(self) -> None:
+        result = subprocess.run(
+            [node_binary(), str(Path(__file__).with_name("human_adam_send_frontend.test.cjs"))],
+            input=json.dumps(HUMAN_ADAM_HTML), text=True, capture_output=True,
+            timeout=30, check=False,
+        )
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+
     def test_ui_exposes_explicit_connection_send_time_and_delivery_evidence(self) -> None:
         for element_id in (
             "connectBtn",
@@ -191,7 +199,7 @@ class HumanAdamUiTests(unittest.TestCase):
         self.assertIn('!lastSession || !String(lastSession.thread_id || "")', HUMAN_ADAM_HTML)
         self.assertIn("setWriteIntentArmed(false);", HUMAN_ADAM_HTML)
         self.assertIn("input.disabled = lunaReleaseBusy;", HUMAN_ADAM_HTML)
-        self.assertIn("sendBtn.disabled = busy || sendInFlight || sessionTurnBusy || voiceStarting || voiceRecording || voiceTranscribing || lunaReleaseBusy;", HUMAN_ADAM_HTML)
+        self.assertIn("sendBtn.disabled = busy || sendInFlight || sessionTurnBusy || Boolean(pendingSubmission) || voiceStarting || voiceRecording || voiceTranscribing || lunaReleaseBusy;", HUMAN_ADAM_HTML)
         self.assertIn("|| !lunaReleaseStatusLoaded", HUMAN_ADAM_HTML)
         self.assertIn('String(audit.workstream_id || "") !== activeWorkstreamId', HUMAN_ADAM_HTML)
         self.assertIn('if (!dryRun) {\n        const pendingMessage', HUMAN_ADAM_HTML)
@@ -1677,7 +1685,7 @@ class HumanAdamUiTests(unittest.TestCase):
         send_end = HUMAN_ADAM_HTML.index('connectBtn.addEventListener("click", connect);', send_start)
         send_source = HUMAN_ADAM_HTML[send_start:send_end]
         catch_start = send_source.index("} catch (error) {")
-        unknown_start = send_source.index('const confirmedRejection = new Set(["human_adam_busy","human_adam_send_failed"])', catch_start)
+        unknown_start = send_source.index('const confirmedRejection = error.status === "human_adam_busy";', catch_start)
         rejected_start = send_source.index("} else {", unknown_start)
         rejected_end = send_source.index("\n      }", rejected_start)
 
