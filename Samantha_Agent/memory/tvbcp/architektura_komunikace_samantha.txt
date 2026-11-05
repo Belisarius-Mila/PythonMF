@@ -2,30 +2,30 @@
 ## Aktuální stav
 
 - Obnoveno potvrzeným checkpointem: 2026-10-19 13:00 CEST
-- 05/P1-B: nasazení potvrzené Mílou 2026-11-05, převzetí Willem doložené v main. Mac přejímka OK, iPhone FAIL. Nová lokální UI oprava ve větvi Data dosud není nasazená; report `reports/human_adam_iphone_send_failure_20261105.md`.
+- 05/P1-B: Mac bod 1 OK, iPhone bod 2 po úpravě OK podle Míly 2026-11-05 11:41 CET. UI oprava převzatá do main jako `6972ea5c`; další scénáře přejímky otevřené. Report `reports/human_adam_iphone_send_failure_20261105.md`.
 
 ### Hotovo
-- Lokální UI zachová text při selhání přípravy před POST a viditelně uchová nejistý dotaz bez možnosti druhého odeslání; 150 cílených testů PASS.
+- Míla potvrdil úspěšnou odpověď na iPhonu a návaznost předchozí značky po UI opravě; původní bod 2 FAIL je po retestu PASS.
 - Human–Adam upřednostňuje chat a aktuální stav; technické účtenky jsou dostupné v panelu Práce
 - Lokální klient žádá obnovu bez historie, rozlišuje final_answer a zachovává strukturované chyby. Kompatibilitu posuzuje podle připojeného serveru, nikoli lokálního CLI; 100 cílených testů PASS.
 
 ### Otevřeno
-- Mobilní přejímka nového klienta selhala; UI oprava je pouze lokální a vyžaduje samostatné převzetí a nasazení.
-- Původní dva kroky Data převzal Will do main; nová lokální oprava odesílání čeká na samostatné předání.
+- Zbývá návrat na Mac a kontrola duplicit (bod 3), obnova stránky během práce (bod 4) a samostatný technický reconnect.
+- Všechny tři kódové kroky Data jsou převzaté do main; nový paměťový zápis výsledku zůstává pouze ve větvi Data.
 
 ### Rizika
-- Přesná příčina selhání na telefonu není prokázaná. Oprava pokrývá reprodukovanou ztrátu textu a viditelnost chyby, nikoli hotovou fyzickou přejímku.
-- 05/P1-B dosud není v provozu. Neznámý, starší než 0.163.0 nebo prerelease server je záměrně odmítnut před prací s vláknem; živá kompatibilita se ověří až v samostatně autorizované přejímce.
+- Přesný původní spouštěč na telefonu nebyl prokázán. Uživatelsky je potvrzené běžné odeslání a návaznost konverzace; další scénáře zatím ne.
+- Neznámý, starší než 0.163.0 nebo prerelease server je podle kontraktu odmítnut před prací s vláknem. Nový technický reconnect není doložený samotným úspěšným mobilním dotazem.
 
 ### Další krok
-- Předat Willovi nový lokální diff opravy mobilního odesílání; integraci a nasazení posoudit samostatně.
-- Po samostatném nasazení vizuálně ověřit čitelnost chatu a panel Práce na Linuxu a iPhonu
+- Podle přejímacího postupu zkontrolovat návrat na Mac a jediné zobrazení zpráv (bod 3).
 
 ### Rozhodnutí
 - Úvodní obrazovka zobrazuje stručný aktuální stav, technické účtenky a podrobnosti se otevírají v panelu Práce
 
 ### Navrhované další kroky
-- Žádné další návrhy nad rámec bezprostředního kroku.
+- Samostatně ověřit bod 4 a technický reconnect App Serveru.
+- Původní vizuální přejímka chatu a panelu Práce na Linuxu/iPhonu zůstává oddělená od testu doručení zprávy.
 
 ### Technický stav checkpointu
 - Změna prošla rychlou syntax/whitespace bránou; cílené testy doložila dokončovací účtenka vývojového tahu.
@@ -4413,3 +4413,22 @@ Navrhované další kroky:
 Technický důkaz:
 - Reprodukce FAIL→PASS nad skutečným JavaScriptem; 150 cílených testů PASS. Úplná Cockpit brána PASS: 2 374 testů, 0 chyb a selhání, 5 PDF skipů bez ReportLabu.
 - Report reports/human_adam_iphone_send_failure_20261105.md. Bez nového modelového tahu, změny sdílených dat, restartu služby či automatického opakování.
+
+### 2026-11-05 11:41 CET — iPhone přejímka bodu 2 po UI opravě PASS
+
+Hotovo:
+- Míla po úpravě potvrdil doručenou odpověď na iPhonu a správnou zkušební značku z předchozího tahu. Mac bod 1 i iPhone bod 2 jsou uživatelsky ověřené; původní selhání bodu 2 je po retestu uzavřené.
+- Převzetí UI opravy do main je doložené commitem 6972ea5c (originál Data 5363238b).
+
+Rozhodnutí:
+- Žádná nová architektonická dohoda ani oprávnění k dalším akcím. Úspěšný dotaz sám nepotvrzuje obnovu během práce, nepřítomnost duplicit ani technický reconnect.
+
+Další krok:
+- Podle přejímacího postupu zkontrolovat návrat na Mac a jediné zobrazení zpráv (bod 3).
+
+Navrhované další kroky:
+- Samostatně ověřit obnovení stránky během rozpracované odpovědi (bod 4). Technický reconnect App Serveru a případný SDK pilot zůstávají oddělené.
+
+Technický důkaz:
+- Přímé uživatelské potvrzení výsledku po úpravě; žádný nový modelový tah ani nový runtime audit. Report reports/human_adam_iphone_send_failure_20261105.md.
+- Jde o dokumentační zápis. Kód, služby, sdílená provozní data, push a nasazení se neměnily.

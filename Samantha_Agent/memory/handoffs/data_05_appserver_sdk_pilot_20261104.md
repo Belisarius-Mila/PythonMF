@@ -1,19 +1,20 @@
 # Data → Will: 05/P1 App Server / Python SDK, etapy A a B
 
-## Aktuální přejímka — 2026-11-05
+## Aktuální přejímka — 2026-11-05 11:41 CET
 
-05/P1-B je podle Míly pushnuté a nasazené; převzetí Willem doloženo v main
-(`1b6fd61e`, `ccece787`). Přejímka: Mac bod 1 OK, iPhone bod 2 FAIL — dotaz
-zmizí bez zahájení a bez chyby, stejný výsledek i při ad hoc otázce.
-Lokální UI oprava řeší reprodukovanou ztrátu textu před POST a viditelnost
-nejistého výsledku bez nového odeslání; 150 cílených testů PASS; plná Cockpit brána PASS: 2 374 testů, 5 PDF skipů.
-Přesná příčina konkrétního telefonu zatím neprokázaná. HTTPS Serve čtecím
-auditem odpovídá téže instanci Cockpitu. Report:
-`human_adam_iphone_send_failure_20261105.md`.
+Míla po úpravě potvrdil úspěšnou odpověď v Human–Adam na iPhonu a správnou
+zkušební značku z předchozího tahu. Mac bod 1 OK, iPhone bod 2 nyní OK;
+původní zmizení dotazu je po retestu uzavřené. UI oprava `5363238b` je
+převzatá v main jako `6972ea5c`; původní A/B jako `1b6fd61e` a `ccece787`.
 
-Další krok: předat ověřenou lokální opravu Willovi; převzetí/push/nasazení
-této opravy není aktuálně autorizované. Mobilní přejímku uzavřít až po reálném
-úspěšném retestu. Neopakovat nejistý pokyn, nepřevádět SDK do produkce.
+Zbývá bod 3 (návrat na Mac a duplicity), bod 4 (obnova stránky během práce)
+a technický reconnect App Serveru. SDK se do produkce nepřevádí. Samotná
+úspěšná odpověď tyto další scénáře neprokazuje.
+
+Report `human_adam_iphone_send_failure_20261105.md` zachovává původní selhání,
+reprodukci, 150 cílených testů a plnou bránu 2 374 testů s 5 PDF skipy.
+Tento krok je pouze paměťový zápis výsledku od Míly: bez nových modelových
+volání, runtime auditu, změny služeb, integrace, push nebo nasazení.
 
 ## Předchozí lokální stav — 05/P1-B
 

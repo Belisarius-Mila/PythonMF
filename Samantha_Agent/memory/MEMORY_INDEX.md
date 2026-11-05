@@ -180,7 +180,7 @@ Tento soubor je rozcestnik dlouhodobe pameti pro Samantha Agent.
 
 ## Handoffs
 
-- `reports/human_adam_iphone_send_failure_20261105.md`; `handoffs/data_05_appserver_sdk_pilot_20261104.md` — 05/P1-B nasazení potvrzené Mílou; Mac přejímka OK, iPhone FAIL (zmizelý dotaz bez práce či chyby). Lokální UI oprava přípravy před POST a viditelného nejistého výsledku, 150 cílených testů PASS; dosud bez nasazení opravy. Přesná chyba konkrétního iPhonu neprokázaná.
+- `reports/human_adam_iphone_send_failure_20261105.md`; `handoffs/data_05_appserver_sdk_pilot_20261104.md` — 2026-11-05 11:41 CET: po UI opravě Míla potvrdil iPhone bod 2 PASS a správnou značku z předchozího tahu; Mac bod 1 PASS již dříve. Oprava převzatá do main jako 6972ea5c. Zbývají body 3/4 a technický reconnect; nový runtime audit se neprováděl.
 
 - `reports/codex_appserver_p1b_20261104.md`; `handoffs/data_05_appserver_sdk_pilot_20261104.md` — 05/P1-B: lokální modernizace původního klienta na `data/parallel-20261104`: excludeTurns, phase, strukturované chyby a kontrola verze připojeného serveru. 100 cílených testů PASS; plná Cockpit brána PASS (2 373 testů, 5 PDF skipů); bez integrace do main a bez nasazení. Kanonický proud je `layer-human-adam-development`.
 
