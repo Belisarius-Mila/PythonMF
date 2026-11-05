@@ -1,5 +1,23 @@
 # Data → další krok: 15/P2 přirozený hlasový rozhovor
 
+## Aktuální stav — 2026-11-05 22:06 CET, Datův čtecí hlas v Cockpitu
+
+### Hotovo
+- Datova větev a5e401e6 je pravidelným merge zachovaná v main 11b4ce64; vlastní Datův worktree zůstává čistý na původním headu. Novější e-mail, Ateliér a původní App Server klient zůstaly zachované. 05/P1 je uzavřená 17/17; SDK neadoptované.
+- Terra p+n kompatibilního kódu dokončeno: účtenka 6e9bbb2a6f7dbcd6f9e3f11cc2b88909, push/deploy confirmed, plná brána 2668 testů / 0 chyb / 31 SKIP, smoke 5/5 a protected_services_unchanged=true. Předtím 239 integračních kontrol PASS.
+- Vlastní hodinový e-mailový LaunchAgent registrovaně upgradovaný 2fe0481e → 11b4ce64. Installed/owned/loaded/enabled; úplný business otisk, nastavení a Email politika před/po shodné, stará kopie i záloha zachované. První check already_completed, bez nového modelového posouzení či oznámení.
+- Teprve po skutečném ověření instalovaného parseru přidaná přesná schválená read_only_voice role z Datova a5e401e6. GPT-Live 1 bez reasoning_effort, všechny předchozí bindingy nezměněné. 141 následných cílených kontrol PASS.
+- Živé neplacené GET panelu HTTP 200: připravený existující proud, mikrofon vypnutý, cenový souhlas přítomný a žádná změna trvalých voice účtenek. Ateliér dál hlásí enabled/image_generation=true.
+
+### Rozhodnutí
+- Míla autorizoval samostatné Terra p+n Datova vedlejšího proudu i úklid. Závěrečný konfigurační checkpoint obsahuje jen schválenou hlasovou roli a provozní zápisy; konečný stav jeho p+n určuje účtenka logs/data_voice_role_release_20261105.log. Potvrzené vydání vyžaduje completed + push/deploy confirmed stejného headu.
+- Žádný další placený hlasový start, mikrofon, mazání/reset, force push ani restart sdíleného App Serveru. Původní 47s probe je spotřebovaný; nikdy jej neopakovat.
+
+### Další krok a otevřená přejímka
+- Po návratu Míly praktický poslech a zvlášť cenově potvrzený rozhovor do 60 s. Mikrofon, iPhone/WebRTC, přerušování a subjektivní latence zůstávají otevřené; celý bod 15 tím není uzavřený. Hlas čte jen hrubý stav a neschvaluje ani nemění úlohy.
+- Technický důkaz: logs/data_voice_code_release_20261105.log, data_voice_email_compat_upgrade_20261105.log, data_voice_role_activation_20261105.log, data_voice_role_targeted_20261105.log, data_voice_live_precommit_20261105.log. Závěrečný provozní audit: logs/data_voice_final_verified_20261105.log; GitHub CI obou přesných headů v data_voice_code_ci_20261105.log a data_voice_role_ci_20261105.log. Žádný nový TVBCP.
+
+
 ## 2026-11-05 21:44 CET — Willovo integrační převzetí
 
 Míla po dokončení Ateliéru výslovně zadal p+n i za tento Datův vedlejší proud
@@ -23,7 +41,7 @@ zůstávají uživatelská přejímka. Konečné účtenky budou v logs/data_voi
 a logs/data_voice_role_release_20261105.log. Canonical handoff a stávající TVBCP
 Human–Adam aktualizované současně, žádný nový TVBCP.
 
-## Aktuální stav — 15/P2-D, čtecí hlas v Cockpitu (lokálně)
+## Historický stav — 15/P2-D, čtecí hlas v Cockpitu (lokálně)
 
 - Míla zadal připojení čtecího hlasu. Human–Adam má vstup Další → Čtecí hlas;
   oddělený panel je napojený na skutečný existující hub vybraného proudu.

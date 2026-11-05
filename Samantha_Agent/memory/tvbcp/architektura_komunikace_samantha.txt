@@ -1,23 +1,20 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
-## Aktuální stav — 2026-11-05 21:38 CET, převzetí Datova 15/P2-D
+## Aktuální stav — 2026-11-05 22:06 CET, Datův čtecí hlas v Cockpitu
 
 ### Hotovo
-- Will převzal hotovou Datovu větev a5e401e6 po dokončení AI Ateliéru. Čtecí hlas má samostatný panel Human–Adam → Další → Čtecí hlas nad již existujícím hubem vybraného proudu; neobnovuje backend ani nečte historii.
-- Jeden <=60s pokus vyžaduje konkrétní cenový souhlas. Origin/CSRF/cookie, trvalý create-only grant a serverový sideband/watchdog brání automatickému opakování po refreshi, restartu nebo neznámém vytvoření. Hlas neumí měnit úlohy ani schvalovat akce.
-- Datův již přijatý GPT-Live 1 probe: právě jeden session.start, session.closed/final usage, 47 s a nenulové české PCM. Grant je spotřebovaný; Will žádný nový placený hlasový test nespouští.
-- Novější e-mailová a Ateliérová práce i původní CodexAppServerClient jsou zachované. 05/P1 zůstává uzavřené podle živého reconnectu 17/17; SDK se neadoptuje.
+- Datova větev a5e401e6 je pravidelným merge zachovaná v main 11b4ce64; vlastní Datův worktree zůstává čistý na původním headu. Novější e-mail, Ateliér a původní App Server klient zůstaly zachované. 05/P1 je uzavřená 17/17; SDK neadoptované.
+- Terra p+n kompatibilního kódu dokončeno: účtenka 6e9bbb2a6f7dbcd6f9e3f11cc2b88909, push/deploy confirmed, plná brána 2668 testů / 0 chyb / 31 SKIP, smoke 5/5 a protected_services_unchanged=true. Předtím 239 integračních kontrol PASS.
+- Vlastní hodinový e-mailový LaunchAgent registrovaně upgradovaný 2fe0481e → 11b4ce64. Installed/owned/loaded/enabled; úplný business otisk, nastavení a Email politika před/po shodné, stará kopie i záloha zachované. První check already_completed, bez nového modelového posouzení či oznámení.
+- Teprve po skutečném ověření instalovaného parseru přidaná přesná schválená read_only_voice role z Datova a5e401e6. GPT-Live 1 bez reasoning_effort, všechny předchozí bindingy nezměněné. 141 následných cílených kontrol PASS.
+- Živé neplacené GET panelu HTTP 200: připravený existující proud, mikrofon vypnutý, cenový souhlas přítomný a žádná změna trvalých voice účtenek. Ateliér dál hlásí enabled/image_generation=true.
 
 ### Rozhodnutí
-- Míla večerním pokynem výslovně autorizoval p+n za Datův vedlejší proud a úklid repozitáře po dokončení Ateliéru.
-- Nejdřív kompatibilní kód, potom kompatibilita všech konzumentů centrálního JSON a teprve poté samostatná read_only_voice role. Živá politika během merge zůstala byteově shodná; Voice role je z prvního integračního checkpointu záměrně odložená.
-- Zachovat Email/Interior/Release/Development bindingy, samostatnou Datovu větev a jeho vlastní worktree. Žádné reset/force push ani mazání práce.
+- Míla autorizoval samostatné Terra p+n Datova vedlejšího proudu i úklid. Závěrečný konfigurační checkpoint obsahuje jen schválenou hlasovou roli a provozní zápisy; konečný stav jeho p+n určuje účtenka logs/data_voice_role_release_20261105.log. Potvrzené vydání vyžaduje completed + push/deploy confirmed stejného headu.
+- Žádný další placený hlasový start, mikrofon, mazání/reset, force push ani restart sdíleného App Serveru. Původní 47s probe je spotřebovaný; nikdy jej neopakovat.
 
-### Další krok
-- Integrační kontroly PASS: 239 cílených a plná brána 2668 testů / 0 chyb / 31 SKIP. Následuje registrované samostatné Terra p+n kódu v layer-human-adam-development. Potom kontrolovaný upgrade vlastního e-mailového parseru a aktivace pouze již schválené hlasové role.
-
-### Otevřená přejímka a důkaz
-- Skutečný mikrofon, iPhone/WebRTC, Mílův poslech a subjektivní latence zůstávají otevřené. Nejde o dokončení celého bodu 15 ani neomezený hlasový asistent.
-- Podklady: data_15_voice_conversation_pilot_20261105.md, voice_conversation_cockpit_20261105.md, voice_conversation_probe_20261105.json. Konečný provozní stav určují logs/data_voice_code_release_20261105.log a logs/data_voice_role_release_20261105.log.
+### Další krok a otevřená přejímka
+- Po návratu Míly praktický poslech a zvlášť cenově potvrzený rozhovor do 60 s. Mikrofon, iPhone/WebRTC, přerušování a subjektivní latence zůstávají otevřené; celý bod 15 tím není uzavřený. Hlas čte jen hrubý stav a neschvaluje ani nemění úlohy.
+- Technický důkaz: logs/data_voice_code_release_20261105.log, data_voice_email_compat_upgrade_20261105.log, data_voice_role_activation_20261105.log, data_voice_role_targeted_20261105.log, data_voice_live_precommit_20261105.log. Závěrečný provozní audit: logs/data_voice_final_verified_20261105.log; GitHub CI obou přesných headů v data_voice_code_ci_20261105.log a data_voice_role_ci_20261105.log. Žádný nový TVBCP.
 <!-- SAMANTHA_CURRENT_STATUS_END -->
 
 # TVBCP – Architektura komunikace Samantha
@@ -4537,3 +4534,21 @@ Navrhované další kroky:
 
 Technický důkaz:
 - Integrační brána 2668 testů / 0 chyb / 31 SKIP a 239 cílených kontrol PASS. Datovy zdroje 0e97e4de, 3c78092a, e5f5a8f4, e32884f9, a5e401e6; vlastní worktree čistý. Bez dalšího modelového startu. Detail v voice_conversation_cockpit_20261105.md a data_15_voice_conversation_pilot_20261105.md.
+
+
+## Provozní předání — 2026-11-05 22:06 CET, Datův čtecí hlas v Cockpitu
+
+### Hotovo
+- Datova větev a5e401e6 je pravidelným merge zachovaná v main 11b4ce64; vlastní Datův worktree zůstává čistý na původním headu. Novější e-mail, Ateliér a původní App Server klient zůstaly zachované. 05/P1 je uzavřená 17/17; SDK neadoptované.
+- Terra p+n kompatibilního kódu dokončeno: účtenka 6e9bbb2a6f7dbcd6f9e3f11cc2b88909, push/deploy confirmed, plná brána 2668 testů / 0 chyb / 31 SKIP, smoke 5/5 a protected_services_unchanged=true. Předtím 239 integračních kontrol PASS.
+- Vlastní hodinový e-mailový LaunchAgent registrovaně upgradovaný 2fe0481e → 11b4ce64. Installed/owned/loaded/enabled; úplný business otisk, nastavení a Email politika před/po shodné, stará kopie i záloha zachované. První check already_completed, bez nového modelového posouzení či oznámení.
+- Teprve po skutečném ověření instalovaného parseru přidaná přesná schválená read_only_voice role z Datova a5e401e6. GPT-Live 1 bez reasoning_effort, všechny předchozí bindingy nezměněné. 141 následných cílených kontrol PASS.
+- Živé neplacené GET panelu HTTP 200: připravený existující proud, mikrofon vypnutý, cenový souhlas přítomný a žádná změna trvalých voice účtenek. Ateliér dál hlásí enabled/image_generation=true.
+
+### Rozhodnutí
+- Míla autorizoval samostatné Terra p+n Datova vedlejšího proudu i úklid. Závěrečný konfigurační checkpoint obsahuje jen schválenou hlasovou roli a provozní zápisy; konečný stav jeho p+n určuje účtenka logs/data_voice_role_release_20261105.log. Potvrzené vydání vyžaduje completed + push/deploy confirmed stejného headu.
+- Žádný další placený hlasový start, mikrofon, mazání/reset, force push ani restart sdíleného App Serveru. Původní 47s probe je spotřebovaný; nikdy jej neopakovat.
+
+### Další krok a otevřená přejímka
+- Po návratu Míly praktický poslech a zvlášť cenově potvrzený rozhovor do 60 s. Mikrofon, iPhone/WebRTC, přerušování a subjektivní latence zůstávají otevřené; celý bod 15 tím není uzavřený. Hlas čte jen hrubý stav a neschvaluje ani nemění úlohy.
+- Technický důkaz: logs/data_voice_code_release_20261105.log, data_voice_email_compat_upgrade_20261105.log, data_voice_role_activation_20261105.log, data_voice_role_targeted_20261105.log, data_voice_live_precommit_20261105.log. Závěrečný provozní audit: logs/data_voice_final_verified_20261105.log; GitHub CI obou přesných headů v data_voice_code_ci_20261105.log a data_voice_role_ci_20261105.log. Žádný nový TVBCP.

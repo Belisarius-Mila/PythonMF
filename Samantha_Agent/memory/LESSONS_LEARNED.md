@@ -228,6 +228,9 @@ Doplnění 17102026 k LL-071: Nativní modelový pomocník navíc zdvojuje roli,
   aktivace v interior_ai_activation.py. Následný skutečný registrovaný upgrade
   5. 11. na 2fe0481e zachoval celý business otisk i nastavení; instalovaný parser
   úspěšně načetl sdílený JSON s novou rolí.
+  Totéž ověřeno pro audio roli bez reasoning_effort: další registrovaný upgrade
+  2fe0481e → 11b4ce64 zachoval stav i všechny dosavadní bindingy; skutečný
+  instalovaný parser načetl Voice i Interior. 141 následných kontrol PASS.
 
 ### LL-069 — Obecné p+n musí zmrazit projekt i registrovaný cíl
 

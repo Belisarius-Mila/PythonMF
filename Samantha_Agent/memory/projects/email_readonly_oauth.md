@@ -1,5 +1,20 @@
 # E-mail read-only OAuth integrace
 
+## 2026-11-05 22:06 CET — kompatibilita s Datovou hlasovou rolí
+
+Po Mílově výslovném rozšíření p+n i na Datův projekt proběhl druhý potřebný
+registrovaný upgrade vlastní hodinové kopie 2fe0481e → 11b4ce64. Vztahuje se
+na stejný dříve potvrzený kompatibilitní servis; jiné služby se neměnily.
+Instalovaný parser skutečně načetl Email/Interior i novou read_only_voice roli.
+Installed/owned/loaded/enabled, úplný business otisk a nastavení před/po shodné,
+e-mailová politika nezměněná, stará kopie i záloha zachované. První check
+already_completed, 0 návrhů a 0 oznámení. Žádná nová hlasová či e-mailová modelová
+zkouška; příští hodinové kontroly zůstávají běžným dříve schváleným provozem.
+Důkaz logs/data_voice_email_compat_upgrade_20261105.log a
+logs/data_voice_role_activation_20261105.log. Samostatný e-mailový TVBCP stále
+není domluvený; nový nevzniká. Další krok: běžný provoz a uživatelská přejímka.
+
+
 
 ## 2026-11-05 21:22 CET — servisní kompatibilita modelových rolí
 
