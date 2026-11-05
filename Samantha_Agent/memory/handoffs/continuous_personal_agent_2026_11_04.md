@@ -8,6 +8,14 @@ Datum: 2026-11-05
 
 ## Aktuální opravený provoz — 2026-11-05 10:47 CET
 
+- První moje p+n už dokončené: 87d2d78c037c00d17b7251752ecdc1d0,
+  target 3f3b5b25, 2473 testů (20 SDK SKIP), smoke 5/5, chráněné služby
+  beze změny; CI 42006566022 success. Automatická 11. hodina začala v
+  11:00:09 CET a zpracovala dvě čekající zprávy, oba zdroje OK, 0 chyb.
+  Datův nový UI commit je nyní převzatý k druhému oddělenému p+n; na
+  samostatné provozní kopii e-mailového agenta 167e629f nic nemění.
+
+
 - Běžící e-mailová služba je řízeně přepnutá z b6375a33 na 167e629f.
   installed/owned/loaded/enabled=true, nový skutečný check již dokončený.
 - Opravena příčina minutových retry: úspěšné prázdné iCloud SEARCH OK/[None]
@@ -23,10 +31,10 @@ Datum: 2026-11-05
   (504,5 s). Kódový commit 167e629f; model Terra/high a rozsah 07–22 beze změny.
 - Míla nyní výslovně určil dvě vydání v pořadí: nejdřív můj dokončený krok,
   potom samostatně Datův nový commit 5363238b. Jeho UI změnu jsem zatím jen
-  přečetl; v main dosud není. Před fyzickou iPhone přejímkou nebude označena
+  přečetl; po prvním dokončeném vydání je nyní převzatý k samostatnému druhému p+n. Před fyzickou iPhone přejímkou nebude označena
   za přijatou. Žádné nejisté uživatelské odeslání se nesmí opakovat.
-- Další krok: mé p+n kódu + provozního writebacku, ověřit automatickou 11.
-  hodinu, potom integrace/review Data a druhé p+n do čistého repozitáře.
+- První moje p+n i automatická 11. hodina jsou potvrzené; další krok je
+  druhé p+n převzaté Datovy UI opravy a konečné dočištění repozitáře.
 - Provozní důkazy: logs/email_empty_search_upgrade_20261105.log,
   logs/email_empty_search_upgrade_verified_20261105.log; source_head služby
   je 167e629f i po případném pozdějším čistě paměťovém commitu. Karty ani

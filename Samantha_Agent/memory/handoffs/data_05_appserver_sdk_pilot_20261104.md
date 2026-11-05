@@ -1,5 +1,33 @@
 # Data → Will: 05/P1 App Server / Python SDK, etapy A a B
 
+## Aktuální převzetí Willem — 2026-11-05 11:08 CET
+
+Míla výslovně schválil převzetí a druhé samostatné p+n commitů Data po
+Willově e-mailovém vydání. Will zkontroloval 5363238b a začlenil UI změnu;
+250 cílených testů v aktuálním main PASS. Konflikty paměťových souhrnů
+sloučené, historie obou větví zachovaná. Předchozí tvrzení níže o chybějícím
+oprávnění je historický stav, který tento Mílův pokyn překonal.
+
+První balíček 3f3b5b25 je vydaný, CI 42006566022 success. Nyní druhé p+n
+Datovy UI opravy; fyzický iPhone retest zůstává otevřený. Přesná původní
+chyba telefonu nebyla prokázaná a žádný starý pokyn se nesmí opakovat.
+
+
+## Předchozí přejímka ve větvi Data — 2026-11-05
+
+05/P1-B je podle Míly pushnuté a nasazené; převzetí Willem doloženo v main
+(`1b6fd61e`, `ccece787`). Přejímka: Mac bod 1 OK, iPhone bod 2 FAIL — dotaz
+zmizí bez zahájení a bez chyby, stejný výsledek i při ad hoc otázce.
+Lokální UI oprava řeší reprodukovanou ztrátu textu před POST a viditelnost
+nejistého výsledku bez nového odeslání; 150 cílených testů PASS; plná Cockpit brána PASS: 2 374 testů, 5 PDF skipů.
+Přesná příčina konkrétního telefonu zatím neprokázaná. HTTPS Serve čtecím
+auditem odpovídá téže instanci Cockpitu. Report:
+`human_adam_iphone_send_failure_20261105.md`.
+
+Další krok: předat ověřenou lokální opravu Willovi; převzetí/push/nasazení
+této opravy není aktuálně autorizované. Mobilní přejímku uzavřít až po reálném
+úspěšném retestu. Neopakovat nejistý pokyn, nepřevádět SDK do produkce.
+
 ## Převzato Willem do main — 2026-11-05 00:53 CET
 
 Míla výslovně schválil převzetí, kontrolu a společné p+n. Originály

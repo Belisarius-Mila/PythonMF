@@ -232,6 +232,10 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
         <button class="primary" id="sendBtn" type="submit">Odeslat</button>
       </div>
     </div>
+    <section id="sendFailure" role="alert" hidden style="border:1px solid #b45309;padding:10px;margin-top:8px;overflow-wrap:anywhere">
+      <p id="sendFailureText"></p>
+      <blockquote id="sendFailureDraft" hidden style="white-space:pre-wrap;max-height:6em;overflow:auto;margin:8px 0 0"></blockquote>
+    </section>
   </form>
   <aside class="tvbcp-panel" id="tvbcpPanel" hidden aria-label="Projektový TVBCP">
     <div class="tvbcp-head">
@@ -560,6 +564,7 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
   const deployBtn = document.getElementById("deployBtn");
   let busy = false;
   let sendInFlight = false;
+  let pendingSubmission = null;
   let sessionTurnBusy = false;
   let voiceRecorder = null;
   let voiceStream = null;
@@ -619,7 +624,14 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
   const LUNA_RELEASE_POLL_INTERVAL_MS = 2500;
 
   function messageId() {
-    if (window.crypto && crypto.randomUUID) return `human-adam-${crypto.randomUUID()}`;
+    try {
+      const cryptoApi = window.crypto;
+      if (cryptoApi && typeof cryptoApi.randomUUID === "function") {
+        return `human-adam-${cryptoApi.randomUUID()}`;
+      }
+    } catch (_error) {
+      // The identifier is a correlation key, not an authorization credential.
+    }
     return `human-adam-${Date.now()}-${Math.random().toString(16).slice(2)}`;
   }
 
@@ -774,7 +786,7 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
     refreshBtn.disabled = busy || resultWatchActive;
     workOpenBtn.disabled = busy;
     refreshBtn.textContent = resultWatchActive ? "Čekám na výsledek…" : "Stav";
-    sendBtn.disabled = busy || sendInFlight || sessionTurnBusy || voiceStarting || voiceRecording || voiceTranscribing || lunaReleaseBusy;
+    sendBtn.disabled = busy || sendInFlight || sessionTurnBusy || Boolean(pendingSubmission) || voiceStarting || voiceRecording || voiceTranscribing || lunaReleaseBusy;
     input.disabled = lunaReleaseBusy;
     writeIntentBtn.disabled = busy || sendInFlight || sessionTurnBusy || voiceStarting || voiceRecording || voiceTranscribing || lunaReleaseBusy || !sessionConnected || !workstreamDevelopmentEnabled;
     writeIntentBtn.classList.toggle("armed", writeIntentArmed);
@@ -993,6 +1005,7 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
         : "";
       turnActivity.hidden = !deliveryUncertain;
     }
+    if (pendingSubmission) deliveryUncertain = true;
     updateMobileStatusSummary();
     syncControls();
   }
@@ -1000,6 +1013,29 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
   function clearMessageInput() {
     input.value = "";
     input.defaultValue = "";
+  }
+
+  function showSendFailure(message, originalText="") {
+    const panel = document.getElementById("sendFailure");
+    const detail = document.getElementById("sendFailureText");
+    const draft = document.getElementById("sendFailureDraft");
+    detail.textContent = message;
+    draft.textContent = originalText;
+    draft.hidden = !originalText;
+    panel.hidden = false;
+    notice.textContent = message;
+    runSendUiBestEffort(() => panel.scrollIntoView({block:"nearest",behavior:"auto"}));
+  }
+
+  function reconcilePendingSubmission(session) {
+    if (!pendingSubmission || !session) return;
+    if (pendingSubmission.threadId && session.thread_id !== pendingSubmission.threadId) return;
+    const messages = Array.isArray(session.messages) ? session.messages : [];
+    const proof = messages.find(item => item.client_message_id === pendingSubmission.clientId);
+    if (!proof || proof.status !== "completed" || proof.delivery_confirmed !== true) return;
+    pendingSubmission = null;
+    document.getElementById("sendFailure").hidden = true;
+    document.getElementById("sendFailureDraft").textContent = "";
   }
 
   function runSendUiBestEffort(action) {
@@ -1618,6 +1654,7 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
     const options = arguments.length > 1 && arguments[1] ? arguments[1] : {};
     const keepAtEnd = Boolean(options.forceScrollToEnd) || isChatNearEnd();
     stopAnswerSpeech(false);
+    reconcilePendingSubmission(session);
     lastSession = session || null;
     chat.replaceChildren();
     const messages = session && Array.isArray(session.messages) ? session.messages : [];
@@ -2005,6 +2042,7 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
   }
 
   function resultWatchTargetId() {
+    if (pendingSubmission) return pendingSubmission.clientId;
     const activeTurn = lastSession && lastSession.active_turn ? lastSession.active_turn : {};
     const activeId = String(activeTurn.client_message_id || "");
     if (activeId) return activeId;
@@ -3599,7 +3637,7 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
 
   async function sendMessage(event) {
     event.preventDefault();
-    if (busy || sendInFlight || sessionTurnBusy || voiceStarting || voiceRecording || voiceTranscribing || !lunaReleaseStatusLoaded) return;
+    if (busy || sendInFlight || sessionTurnBusy || pendingSubmission || voiceStarting || voiceRecording || voiceTranscribing || !lunaReleaseStatusLoaded) return;
     const text = input.value.trim();
     if (!text) { notice.textContent = "Napiš nejdřív zprávu."; return; }
     if (shouldInterceptLunaReleaseCommand(text)) {
@@ -3608,34 +3646,47 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
       return;
     }
     const writeIntent = writeIntentArmed;
+    let sentAt, clientId, requestBody, optimistic, submittedThreadId;
+    try {
+      sentAt = new Date().toISOString();
+      clientId = messageId();
+      submittedThreadId = lastSession && lastSession.thread_id || "";
+      requestBody = JSON.stringify({message:text,client_message_id:clientId,client_sent_at:sentAt,write_intent:writeIntent});
+      const pendingMessage = {client_message_id:clientId,user_text:text,client_sent_at:sentAt,received_at:sentAt,status:"pending",answer:""};
+      optimistic = lastSession
+        ? {...lastSession, turn_busy:true, active_turn:{client_message_id:clientId,started_at:sentAt}, messages:[...(lastSession.messages || []), pendingMessage]}
+        : {turn_busy:true, active_turn:{client_message_id:clientId,started_at:sentAt}, messages:[pendingMessage]};
+    } catch (_error) {
+      showSendFailure("Zprávu se nepodařilo připravit k odeslání. Text zůstal v poli; nic nebylo odesláno.");
+      return;
+    }
+    document.getElementById("sendFailure").hidden = true;
     writeIntentArmed = false;
     sendInFlight = true;
     clearMessageInput();
     runSendUiBestEffort(syncControls);
-    primeCompletionMediaSound().catch(() => {});
-    const sentAt = new Date().toISOString();
-    const clientId = messageId();
-    const pendingMessage = {user_text:text,client_sent_at:sentAt,received_at:sentAt,status:"pending",answer:""};
-    const optimistic = lastSession
-      ? {...lastSession, turn_busy:true, active_turn:{client_message_id:clientId,started_at:sentAt}, messages:[...(lastSession.messages || []), pendingMessage]}
-      : {turn_busy:true, active_turn:{client_message_id:clientId,started_at:sentAt}, messages:[pendingMessage]};
+    runSendUiBestEffort(() => { primeCompletionMediaSound().catch(() => {}); });
     runSendUiBestEffort(() => {
       renderSession(optimistic, {forceScrollToEnd:true});
       renderTurnState(optimistic);
       notice.textContent = `Odesláno ${formatTime(sentAt)} · Adam pracuje…`;
     });
     let failure = "";
+    let uncertainFailure = false;
     let payload = null;
     try {
-      payload = await api(HUMAN_ADAM_SEND_PATH, {method:"POST", body:JSON.stringify({message:text,client_message_id:clientId,client_sent_at:sentAt,write_intent:writeIntent})});
+      payload = await api(HUMAN_ADAM_SEND_PATH, {method:"POST", body:requestBody});
       if (!payload.ok) {
         const error = new Error(payload.message || "Odeslání selhalo.");
         error.status = String(payload.status || "");
         throw error;
       }
     } catch (error) {
-      const confirmedRejection = new Set(["human_adam_busy","human_adam_send_failed"]).has(error.status);
+      const confirmedRejection = error.status === "human_adam_busy";
       if (!confirmedRejection) {
+        uncertainFailure = true;
+        pendingSubmission = {clientId,threadId:submittedThreadId};
+        deliveryUncertain = true;
         failure = `Stav doručení je nejistý: ${error.message} Pokyn neposílej znovu.`;
       } else {
         restoreRejectedMessage(text);
@@ -3659,7 +3710,11 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
       await prepareImageCandidate(text, clientId);
     }
     await loadStatus();
-    if (failure) notice.textContent = failure;
+    if (failure && (!uncertainFailure || pendingSubmission)) {
+      showSendFailure(failure, uncertainFailure ? text : "");
+      runSendUiBestEffort(syncControls);
+      runSendUiBestEffort(updateMobileStatusSummary);
+    } else if (uncertainFailure) notice.textContent = "Výsledek byl ověřen bez opakovaného odeslání.";
     else if (imageImportFailure) notice.textContent = imageImportFailure;
   }
 

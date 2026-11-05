@@ -1,38 +1,33 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
-## Aktuální stav
-
-- Integrační krok: 2026-11-05 00:53 CET, schválený Mílou pro dokončení a p+n do čistého repozitáře.
+## Aktuální stav — 2026-11-05 11:08 CET
 
 ### Hotovo
-- Potvrzené vydání b6375a33: p+n 09e6c05f658a1ce16750dfd5cd15c514, push/deploy confirmed, 2462 testů (20 SDK skipů), smoke 5/5, chráněné služby beze změny; GitHub CI 41938993126 success.
-- Will převzal a zkontroloval oba Datovy kroky: SDK zůstává izolovaným offline pilotem; produkce používá původní klient.
-- Klient obnovuje bez historie, upřednostňuje final_answer, uchovává strukturované chyby a před prací s vláknem ověřuje verzi skutečně připojeného serveru. Nejisté akce se neopakují.
-- Samostatný instalační balíček e-mailového agenta je lokálně dokončený; jeho aktivace není součástí společného restartu Cockpitu.
+- Will po dokončení prvního e-mailového p+n převzal Datův commit 5363238b k oddělenému druhému vydání. UI připraví požadavek před vymazáním editoru, zachová text při chybě a viditelně uchová nejisté odeslání bez automatického opakování.
+- Původní klient/session hub, SDK, modelové role a e-mailové moduly se touto UI opravou nemění. SDK je stále offline pilot.
+- V aktuálním main prošlo 250 cílených testů UI/profilů/session hubu/klienta/recovery, včetně Node VM regresí skutečného JS. Historie obou větví je zachovaná; konflikty byly jen v paměťových dokumentech.
+- E-mailová oprava už samostatně vydaná po 3f3b5b25, p+n 87d2d78c037c00d17b7251752ecdc1d0, 2473 testů (20 SDK SKIP), smoke 5/5, chráněné služby beze změny, CI 42006566022 success. Agent běží z 167e629f; automatická 11. hodina zpracovala dvě čekající zprávy bez chyb, oba účty OK.
 
 ### Otevřeno
-- Předchozí společný kódový balíček je vydaný a ověřený; další provozní stav vždy ověřit živým auditem, nikoli jen z tohoto snapshotu.
-- Fyzická Mac/iPhone přejímka nového reconnectu/UI zůstává samostatná; SDK proxy se neaktivuje.
+- Samostatné druhé p+n Datovy UI opravy a živá kontrola nasazeného kódu.
+- Fyzický iPhone retest po načtení čerstvé stránky musí provést Míla. Dosavadní mobilní FAIL se nenahrazuje úspěchem Node VM či HTTP kontroly.
 
 ### Rizika
-- Server pod stabilní 0.163.0 je záměrně odmítnut. Živý handshake v integračním kroku potvrdil 0.163.0; lokální CLI je 0.166.0.
-- Volitelné SDK testy potřebují vlastní izolované prostředí. Produkční závislosti se kvůli pilotu nemění.
-- E-mailový LaunchAgent po přesné globální větě aktivovaný v 08:48 CET; první ostrý cyklus a obnova služby jsou ověřené v e-mailovém handoffu. SDK ani komunikační architektura se tím nemění.
-
-### Další krok
-- Sledovat běžný provoz e-mailové služby; fyzická přejímka reconnectu a SDK proxy zůstávají samostatné.
+- Přesná příčina konkrétního selhání telefonu není prokázaná. Oprava řeší reprodukovanou ztrátu textu před POST a viditelnost nejistého výsledku; neznamená předem potvrzenou fyzickou přejímku.
+- Neopakovat žádné dřívější nejisté dotazy. Nový retest má být jediný neškodný pokyn zadaný Mílou.
+- E-mailová služba má samostatnou neměnnou kopii 167e629f; nový Human–Adam UI nevyžaduje její další výměnu.
 
 ### Rozhodnutí
-- Míla výslovně schválil převzetí Data a samostatné p+n včetně potřebných oprav do čistého repozitáře. SDK se do produkce nepřevádí; session hub a komunikační architektura zůstávají zachované.
+- Míla výslovně určil pořadí: moje dokončené e-mailové p+n, potom Data a jeho samostatné p+n, nakonec čistý repozitář. První vydání i jeho CI jsou potvrzené; tento krok je druhý balíček.
+
+### Další krok
+- Dokončit lokální checkpoint, zarovnat čisté neaktivní profily a registrované druhé p+n. Ověřit přesnou účtenku, vzdálené CI a zachování běžících služeb.
 
 ### Navrhované další kroky
-- Po potvrzení globální brzdy aktivovat připravenou e-mailovou službu a ověřit první ostrou hodinu. SDK proxy a fyzickou přejímku řešit samostatně.
+- Po návratu Míly fyzický iPhone retest. SDK proxy a CalDAV jsou samostatné kroky.
 
-### Technický stav checkpointu
-- Datovy originály 607fc538 a 862b6225 převzaty cherry-pickem s původem jako 1b6fd61e a ccece787. Větev Data zůstává čistá a zachovaná.
-- Integrovaná cílená sada 192 testů: 172 PASS, 20 explicitních SDK SKIP; logs/data_email_integration_targeted_20261105.log. Bez nového placeného e-mailového tahu nebo SMTP.
-- Plná integrační brána: logs/data_email_integration_gate_20261105.log, 2462 testů: 2442 PASS, 20 SDK SKIP (377,0 s). E-mailový instalátor samostatně 2403 PASS, finální regrese vnořeného archivu PASS.
-- Účtenka registrovaného vydání a živý audit jsou provozní autoritou; jejich stav zde není předem prohlášen za úspěch.
-- Tato sekce nahrazuje jen aktuální souhrn; starší chronologické bloky zůstávají historické.
+### Technický důkaz
+- Zdroj Data 5363238b, logs/data_iphone_integration_targeted_20261105.log: 250 PASS. Úspěšná první CI 42006566022 patří 3f3b5b25; výsledek druhého vydání teprve doloží nová přesná účtenka a živý audit.
+- Modelové API ani soukromý send se při přejímce této UI změny nevolaly. Historické bloky níže zůstávají zachované.
 <!-- SAMANTHA_CURRENT_STATUS_END -->
 
 Nazev: Human–Adam / vyvojove prostredi - zalozeni pracovniho proudu Layer
@@ -2914,3 +2909,44 @@ Technický důkaz: p+n 09e6c05f658a1ce16750dfd5cd15c514, push/deploy confirmed,
 41938993126 success. E-mailová provozní přejímka: 6 zpráv, 3 důležité karty,
 3 nedůležité v jednom řádku, 0 chyb, Pushcut API accepted=1; obnova bez
 opakování posouzení. Viz kanonický continuous_personal_agent handoff.
+
+### 2026-11-05 09:26 CET — Mobilní přejímka 05/P1-B a lokální oprava odesílání
+
+Hotovo:
+- Míla potvrdil nasazené 05/P1-B a úspěšný Mac test. iPhone viděl stejnou historii, ale opakovaně ztratil odeslaný dotaz bez práce či chyby; přejímka zůstává neuzavřená.
+- Čtecí audit potvrdil soukromý HTTPS Serve do stejné instance. Aktivní serverový proud obsahoval pouze první dokončený přejímací dotaz; žádné nové odeslání se neprovádělo.
+- Lokální UI připraví požadavek před vymazáním editoru, zachová text při chybě přípravy a zobrazí nejistý dotaz u editoru. Obecné selhání nepovolí opakování; stav uvolní jen přesná potvrzená účtenka.
+
+Rozhodnutí:
+- Žádná nová architektonická dohoda. SDK, session hub, runtime, modelové role a e-mailové moduly zůstávají v dosavadním režimu. Přesná chyba konkrétního iPhonu není prokázaná; syntetická reprodukce není fyzická přejímka.
+
+Další krok:
+- Předat ověřenou lokální opravu Willovi. Převzetí, push a nasazení nové opravy jsou samostatné; po nasazení načíst čerstvé UI a provést jediný neškodný retest na iPhonu.
+
+Navrhované další kroky:
+- Mobilní přejímku uzavřít až podle Mílova skutečného výsledku. Technický reconnect App Serveru a SDK pilot zůstávají samostatné.
+
+Technický důkaz:
+- Reprodukce FAIL→PASS nad skutečným JavaScriptem; 150 cílených testů PASS. Úplná Cockpit brána PASS: 2 374 testů, 0 chyb a selhání, 5 PDF skipů bez ReportLabu.
+- Report reports/human_adam_iphone_send_failure_20261105.md. Bez nového modelového tahu, změny sdílených dat, restartu služby či automatického opakování.
+
+
+## 2026-11-05 11:08 CET — Převzetí nové Datovy iPhone opravy po prvním p+n
+
+Hotovo: Will zkontroloval a převzal zdrojový commit 5363238b. Konkrétní
+reprodukovaná slabina vymazání textu před POST je ošetřená, nejistý dotaz
+zůstane viditelný bez automatického opakování. V aktuálním main 250 cílených
+PASS; konflikty společných paměťových souhrnů sloučené se zachováním historie.
+
+Rozhodnutí: Míla výslovně zadal po mém dokončeném vydání samostatně vydat
+Data. První balíček 3f3b5b25 má potvrzené p+n i CI, Data je druhý krok.
+
+Další krok: Registrované druhé p+n přes centrální roli Terra a živé ověření
+nasazeného zdroje; mobilní přejímku neprohlašovat za hotovou bez Míly.
+
+Navrhované další kroky: Po čerstvém načtení UI jeden neškodný iPhone retest.
+
+Technický důkaz: 250 PASS v data_iphone_integration_targeted_20261105.log,
+bez placeného modelového tahu či POST send. Kanonický handoff a TVBCP
+aktualizované společně; nový TVBCP nevzniká. E-mailový agent 167e629f je
+aktivní; 11. hodina automaticky zpracovala dvě zprávy, oba providery OK.

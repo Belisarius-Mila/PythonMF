@@ -62,7 +62,7 @@ Tento soubor je rozcestnik dlouhodobe pameti pro Samantha Agent.
 
 ## Projects
 
-- `handoffs/continuous_personal_agent_2026_11_04.md`; `projects/email_readonly_oauth.md`; `reports/continuous_email_service_installation_20261105.md` — [PRIPOMENOUT] priorita 1, 2026-11-05 10:47 CET: Opravený hodinový vstup už běží v 167e629f. Prázdné iCloud SEARCH OK/[None] nově správně dokončí hodinu; regrese 10:00/10:19/11:00 PASS. 118 cílených PASS, plná brána 2473 (20 SDK SKIP). Skutečný upgrade zachoval celý business stav; přímo instalovaná kopie ověřila oba prázdné IMAP vstupy, služba aktivní. Nyní mé p+n, automatická 11. hodina, potom zvlášť Data 5363238b a druhé p+n do čistého repo. Míla potvrdil skutečný Pushcut a nastavil trvalý banner; CalDAV a archivní metadata čekají.
+- `handoffs/continuous_personal_agent_2026_11_04.md`; `projects/email_readonly_oauth.md`; `reports/continuous_email_service_installation_20261105.md` — [PRIPOMENOUT] priorita 1, 2026-11-05 10:47 CET: Opravený hodinový vstup už běží v 167e629f. Prázdné iCloud SEARCH OK/[None] nově správně dokončí hodinu; regrese 10:00/10:19/11:00 PASS. 118 cílených PASS, plná brána 2473 (20 SDK SKIP). Skutečný upgrade zachoval celý business stav; přímo instalovaná kopie ověřila oba prázdné IMAP vstupy, služba aktivní. Moje p+n 3f3b5b25 a CI 42006566022 potvrzené, automatická 11. hodina úspěšná se dvěma zprávami. Nyní převzatý Data 5363238b a jeho druhé p+n do čistého repo. Míla potvrdil skutečný Pushcut a nastavil trvalý banner; CalDAV a archivní metadata čekají.
 
 - `projects/camino.md`; `handoffs/workstreams/project-camino.md`; `tvbcp/workstreams/project-camino.md`; `reports/camino_film_resume_latest_20261028.md` — 2026-11-04 20:20 CET: Terra lokálně opravila 2 chyby mediálních testů GitHub CI (mock dohledání binárky, samostatný Orus kontrakt bez médií, přesný preflight skutečné integrace). Reprodukce FAIL→PASS; 37/37 běžných testů PASS, službový PATH 32 PASS + 5 skip, skutečný Orus zvlášť PASS. Bez změny produkce/workflow a bez nového p+n; nový vzdálený CI run čeká. Předchozí UI výběru posledního filmu a jeho fyzická přejímka zůstávají zachované.
 
@@ -179,6 +179,8 @@ Tento soubor je rozcestnik dlouhodobe pameti pro Samantha Agent.
   chyba zvuku nikdy nemeni stav doruceni.
 
 ## Handoffs
+
+- `reports/human_adam_iphone_send_failure_20261105.md`; `handoffs/data_05_appserver_sdk_pilot_20261104.md` — 2026-11-05 11:08 CET: Will převzal zdroj Data 5363238b po dokončení vlastního e-mailového p+n 3f3b5b25 a zeleném CI 42006566022. 250 cílených testů v aktuálním main PASS, jen paměťové konflikty sloučené. Nyní výslovně autorizované samostatné druhé p+n; fyzický iPhone retest stále otevřený a původní konkrétní příčina telefonu neprokázaná. Žádný nejistý dotaz se neopakuje.
 
 - `reports/codex_appserver_p1b_20261104.md`; `handoffs/data_05_appserver_sdk_pilot_20261104.md` — 2026-11-05: Will po Mílově výslovném pokynu převzal oba Datovy commity jako 1b6fd61e/ccece787; původní klient modernizovaný, SDK stále offline. 192 cílených testů: 172 PASS, 20 volitelných SDK SKIP, živý handshake/katalog serveru 0.163.0 úspěšné. Plná společná brána 2462 testů: 2442 PASS, 20 SDK SKIP. Společné p+n b6375a33 potvrzené, smoke 5/5 a CI 41938993126 success. Kanonický proud layer-human-adam-development, aktuální nasazení ověřit živým auditem.
 

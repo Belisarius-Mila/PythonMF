@@ -1637,3 +1637,11 @@ Doplnění 17102026 k LL-071: Nativní modelový pomocník navíc zdvojuje roli,
 - Řešení nalezeno: 04112026
 - Řešení: před operací s vláknem ověřit metadata připojeného serveru; potom posílat excludeTurns. Volit explicitní final_answer, phase-less ponechat jako legacy; zachovat started, přesný client ID a completed. Strukturované chyby uchovat v atributech, nikoli v běžném textu výjimky. willRetry je činnost serveru uvnitř tahu, ne pokyn k druhému odeslání.
 - Ověření: 100 cílených testů PASS včetně skutečného klienta nad syntetickým transportem, session hubu a obnovy stavu bez opakování. Report codex_appserver_p1b_20261104.md. Živá přejímka je samostatná.
+
+### LL-099 — Editor nemaž před dokončením přípravy požadavku
+
+- Problém: mobilní dotaz zmizel bez viditelné práce či chyby. Syntetická výjimka při přípravě ID reprodukovala vymazání textu a blokaci před prvním POST; přesná chyba telefonu nebyla prokázaná.
+- Typ: opakující se
+- Řešení nalezeno: 05112026
+- Řešení: ID, serializaci a optimistický stav připravit před vymazáním editoru. Při selhání přípravy text zachovat a ukázat chybu u editoru. U nejistého výsledku zachovat needitovatelnou kopii a blokovat nový send do korelovaného potvrzení; obecné serverové selhání není důkazem nulového účinku. Model ani akci automaticky neopakovat.
+- Ověření: FAIL→PASS Node VM nad skutečnou obsluhou, 150 cílených testů PASS; fyzický retest je samostatný. Report human_adam_iphone_send_failure_20261105.md.
