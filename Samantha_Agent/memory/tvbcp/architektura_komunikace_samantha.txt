@@ -1,32 +1,32 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
-- Obnoveno potvrzeným checkpointem: 2026-10-19 13:00 CEST
-- 05/P1-C dokončeno lokálně: 105 cílených testů PASS (12 nových), statická brána PASS. SDK/CLI proxy není kompatibilní se současným Unix WebSocket transportem; ponechat původní klient. Míla přijal i obnovu stránky během odpovědi, body 1–4 PASS; oznámil nasazení C, bez nového živého auditu Data. Přejímka 05/P1 nyní uzavřená podle Mílova potvrzení uživatelské i Willovy technické části. Report `reports/codex_sdk_p1c_20261105.md`.
+- 15/P2-A: nový neaktivovaný základ čtecího hlasového rozhovoru nad současným backendem. 132 cílených testů PASS (26 nových), rychlá statická brána PASS. Report `reports/voice_conversation_p2a_20261105.md`; Data handoff `handoffs/data_15_voice_conversation_pilot_20261105.md`.
+- Přejímka 05/P1 zůstává uzavřená: uživatelské body 1–4 i technická část potvrzené přes Mílu/Willa. SDK se neadoptuje; původní modernizovaný klient zůstává.
 
 ### Hotovo
-- Míla potvrdil také obnovu Safari během odpovědi na iPhonu. Uživatelské body 1–4 jsou PASS; původní iPhone FAIL je po retestu uzavřený.
-- Izolovaný SDK pilot C ověřil dva klienty, sdílený syntetický stav, životní cyklus proxy, oprávnění a nejisté doručení bez retry. Proudový socket PASS; současný WebSocket transport přes CLI proxy NEKOMPATIBILNÍ.
-- Human–Adam upřednostňuje chat a aktuální stav; technické účtenky jsou dostupné v panelu Práce
-- Lokální klient žádá obnovu bez historie, rozlišuje final_answer a zachovává strukturované chyby. Kompatibilitu posuzuje podle připojeného serveru, nikoli lokálního CLI; 100 cílených testů PASS.
+- Míla zadal bod 15 návrhu z Downloads: přirozený hlas nad současným backendem. Připravený je protokolový adaptér, WebRTC controller a samostatný neaktivní český panel.
+- Čtecí adaptér vrací jen hrubý stav pevně navázaného vlákna. Nemá cestu ke spuštění, změně, potvrzení nebo zrušení úlohy. Test skutečné metody snapshot prokázal zachování aktivní práce po odpojení hlasu.
+- Testy ověřují mikrofon, ztišení, nejisté vytvoření bez retry, pozdní výsledky, konečnou spotřebu a transcript jako data. Produkční backend, UI, routy, role a závislosti se nezměnily.
 
 ### Otevřeno
-- Přejímka 05/P1 uzavřená: uživatelské body 1–4 PASS a technický reconnect PASS podle Mílova sdělení o potvrzení Willem. Data neprovedl vlastní nový živý audit.
-- Míla oznámil nasazení C; přesný nasazený head Data novým auditem neověřoval. Tento nový zápis přejímky zůstává pouze ve větvi Data.
+- Celý bod 15 není hotový. Chybí volba hlasového kandidáta/rozpočtu, ověření přístupu účtu, autentizovaný broker se sidebandem a serverovým watchdogem, evidence nejistého vytvoření a připojení do Cockpitu.
+- Živá čeština, barge-in, iPhone, latence, skutečná spotřeba a fyzické pochopení souhlasu nebyly ověřeny. Nula placených volání; pilot není aktivovaný.
 
 ### Rizika
-- Přesný původní spouštěč na telefonu nebyl prokázán. Uživatelský retest i technická přejímka byly přijaty; technický výsledek je převzatý z Mílova sdělení, nikoli nového auditu Data. SDK proxy vyžaduje jiný protokol než současný socket.
-- Neznámý, starší než 0.163.0 nebo prerelease server je podle kontraktu odmítnut před prací s vláknem. SDK zůstává izolovaným pilotem.
+- Kandidát GPT-Live stojí podle ověřené dokumentace 0,05 USD/min po sekundách, backend zvlášť; vytvoření WebRTC může účtovat i při neúspěšném startu. Časovač pilotu není zaručený fakturační strop.
+- Hlasový přepis není souhlas k akci. Prohlížeč nemůže přenastavit roli/delegaci ani poslat backendový výsledek; serverové předání musí zůstat důvěryhodné a jen čtecí.
+- Instalované openai 2.54.0 nemá Live modul; nepovýšeno. Aktuální main obsahuje jiné změny v Cockpitu a rolích, které při integraci zachovat.
 
 ### Další krok
-- Přejímka 05/P1 je uzavřená; převzít nové zadání od Míly.
+- Míla vybere hlasového kandidáta a rozpočet pro jednu skutečnou syntetickou zkoušku. Návrh: gpt-live-1 do 60 s, odhad 0,05 USD za běžící hlas; žádná produkční aktivace tím nebyla udělena.
 
 ### Rozhodnutí
-- Úvodní obrazovka zobrazuje stručný aktuální stav, technické účtenky a podrobnosti se otevírají v panelu Práce
+- Míla chce implementovat bod 15 nad současným backendem. Žádná hlasová role, placená zkouška, nový SDK ani nasazení zatím nebyly aktivované.
 
 ### Navrhované další kroky
-- Pro 05/P1 nyní není požadován další krok; doporučení je ponechat současný klient.
-- Původní vizuální přejímka chatu a panelu Práce na Linuxu/iPhonu zůstává oddělená od testu doručení zprávy.
+- V 15/P2-B doplnit autentizovaný broker/sideband, serverovou kontrolu délky a obnovu nejistoty. Centrální hlasovou roli připravit až s cenovým posouzením, skutečným probe a kompatibilním runtime.
+- Pak samostatně provést iPhone hlasovou přejímku podle reportu. Zápisové hlasové povely a doplnění aktivní úlohy jsou pozdější etapa.
 
 ### Technický stav checkpointu
 - Změna prošla rychlou syntax/whitespace bránou; cílené testy doložila dokončovací účtenka vývojového tahu.
@@ -4489,3 +4489,23 @@ Navrhované další kroky:
 Technický důkaz:
 - Uzavření podle Mílova sdělení o Willově potvrzení technického reconnectu; Data neprovedl vlastní nový živý audit ani neobdržel technickou účtenku.
 - Pouze projektový zápis ve větvi Data, bez změny kódu, služeb či sdílených dat, bez modelového tahu, integrace, push nebo nasazení.
+
+### 2026-11-05 13:16 CET — 15/P2-A: neaktivovaný základ čtecího hlasového rozhovoru
+
+Hotovo:
+- Míla zadal bod 15 návrhu z Downloads. Připravený je samostatný protokolový adaptér, WebRTC controller a neaktivní český panel nad read-only snapshotem současného backendu.
+- Odpojení hlasu nezmění aktivní úlohu; nejisté vytvoření se neopakuje, přepis není souhlas. Testy ověřují mikrofon, ztišení, pozdní výsledky a rozlišení konečné/nepotvrzené spotřeby.
+
+Rozhodnutí:
+- Vývoj bodu 15 je požadovaný; kandidát GPT-Live ani placená zkouška zatím nejsou schválené či aktivované. Současný textový backend a role se nemění.
+
+Další krok:
+- Míla vybere hlasového kandidáta a rozpočet pro jednorázový syntetický probe; návrh gpt-live-1 do 60 s, odhad 0,05 USD za běžící hlas.
+
+Navrhované další kroky:
+- Doplnit autentizovaný broker/sideband, serverový watchdog a obnovu nejistoty; po kompatibilním runtime připravit centrální hlasovou roli.
+- Živě ověřit češtinu, přerušování, iPhone, latenci, souhlas a skutečnou spotřebu. Celý bod 15 zatím není dokončený.
+
+Technický důkaz:
+- 132 cílených testů PASS, z toho 26 nových a Node kontrakt; Python/JS syntax a rychlá statická brána PASS. Report reports/voice_conversation_p2a_20261105.md obsahuje oficiální zdroje a limity.
+- Nové samostatné soubory, bez nových závislostí, modelových rolí, živých služeb, mikrofonu, placených tahů, provozních dat, integrace, push nebo nasazení.

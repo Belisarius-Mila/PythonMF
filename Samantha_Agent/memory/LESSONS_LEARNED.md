@@ -29,6 +29,14 @@ nebo jejichž princip lze znovu použít v jiné části projektu.
 
 ## Záznamy
 
+### LL-096 — Ukončení hlasu není konec úlohy ani potvrzení ceny
+
+- Problém: spojení hlasu, přepis a backendová práce mají odlišný životní cyklus. Výpadek může zanechat nepotvrzenou spotřebu a opakování vytvoření může založit další placenou relaci.
+- Typ: opakující se
+- Řešení nalezeno: 05112026
+- Řešení: hlasový adaptér oddělit od vlastníka úlohy. Přepis není souhlas; čtecí pilot dostává jen snapshot callback. usage.seconds je kumulativní, konečný až z platného session.closed; bez něj nepředstírat konečnou cenu. Vytvoření neopakovat, pozdní známé session ID předat důvěryhodnému brokeru k úklidu. Při Stop ihned uvolnit mikrofon, data channel držet jen do finální události či timeoutu. Browserový časovač nenahrazuje serverovou kontrolu délky ani fakturační strop.
+- Ověření: 132 cílených testů PASS včetně 26 nových, skutečné metody snapshot nad syntetickým stavem a Node browserových scénářů. Jde o neaktivovaný základ, nikoli živou hlasovou přejímku; voice_conversation_p2a_20261105.md.
+
 ### LL-095 — Unix socket nezaručuje shodný aplikační protokol
 
 - Problém: kandidátní SDK konfigurace s `app-server proxy --sock` vypadá jako náhrada přímého Unix spojení; současná Samantha ale používá WebSocket a CLI proxy přenáší prosté bajty.
