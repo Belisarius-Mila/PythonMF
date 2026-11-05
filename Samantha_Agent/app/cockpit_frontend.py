@@ -7,6 +7,7 @@ FRONTEND_ROOT = Path(__file__).resolve().with_name("frontend")
 CSS_MARKER = "{{SAMANTHA_CSS}}"
 JAVASCRIPT_MARKER = "{{SAMANTHA_JAVASCRIPT}}"
 FRONTEND_PAGE_IDS = (
+    "interior",
     "email_agent",
     "email_archive",
     "email_processing",
@@ -64,6 +65,7 @@ def _read_asset(path: Path) -> str:
         ) from exc
 
 
+INTERIOR_HTML = load_frontend_page("interior")
 EMAIL_ARCHIVE_HTML = load_frontend_page("email_archive")
 EMAIL_AGENT_HTML = load_frontend_page("email_agent")
 EMAIL_PROCESSING_HTML = load_frontend_page("email_processing")

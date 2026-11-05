@@ -169,7 +169,7 @@ class CockpitTests(unittest.TestCase):
         document_routes = re.findall(r'if parsed\.path == "([^"]+)":', document_source)
         archive_source = inspect.getsource(cockpit_module.EmailArchiveReadRoutes.dispatch)
         archive_routes = re.findall(r'if parsed\.path == "([^"]+)":', archive_source)
-        return inline_routes + document_routes + archive_routes + list(cockpit_module.HEALTH_RECOVERY_STATUS_GET_PATHS)
+        return inline_routes + document_routes + archive_routes + list(cockpit_module.HEALTH_RECOVERY_STATUS_GET_PATHS) + list(cockpit_module.InteriorRoutes.paths)
 
     def cockpit_do_get_prefix_routes(self) -> list[str]:
         source = Path(cockpit_module.__file__).read_text(encoding="utf-8")
@@ -180,6 +180,7 @@ class CockpitTests(unittest.TestCase):
 
     def frontend_literal_routes(self) -> list[tuple[str, str]]:
         html_sources = {
+            "interior": cockpit_module.INTERIOR_HTML,
             "cockpit": COCKPIT_HTML,
             "email_processing": EMAIL_PROCESSING_HTML,
             "lekarna_admin": cockpit_module.lekarna_admin_page_html(),

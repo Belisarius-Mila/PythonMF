@@ -24,6 +24,8 @@ NODE_FALLBACK_PATHS = (
 )
 
 COMPILE_PATHS = (
+    "app/interior_atelier.py",
+    "app/cockpit_interior.py",
     "app/codex_sdk_pilot.py",
     "scripts/codex_sdk_synthetic_peer.py",
     "app/email/service_control.py",
@@ -262,6 +264,8 @@ SHELL_PATHS = (
 )
 
 TEST_MODULES = (
+    "tests.test_interior_atelier",
+    "tests.test_cockpit_interior",
     "tests.test_speech_azure_tts_mp3",
     "tests.test_mmtx_scene06_azure_audio",
     "tests.test_backup_camino",
@@ -662,6 +666,10 @@ def main(argv: Sequence[str] | None = None) -> int:
     run_checked(
         "Library photo worker javascript syntax",
         [node_binary(), "--check", "app/frontend/cockpit/library_image_worker.js"],
+    )
+    run_checked(
+        "Interior atelier javascript syntax",
+        [node_binary(), "--check", "app/frontend/interior/app.js"],
     )
     run_checked(
         "Human–Adam javascript syntax",

@@ -12,6 +12,26 @@ from app.capabilities.models import (
 
 CAPABILITIES: tuple[CapabilityRecord, ...] = (
     CapabilityRecord(
+        capability_id="interior_atelier_state", label="Read private interior projects and proposal metadata",
+        risk=RiskLevel.READ_ONLY, reads=("explicit private atelier project and room metadata",),
+        writes=(), tool="app.interior_atelier.InteriorAtelier.state",
+        notes="No legacy import, file creation, model call or shared App Server change. Same controlled Cockpit access.",
+    ),
+    CapabilityRecord(
+        capability_id="interior_atelier_asset", label="Read an explicitly selected interior source image",
+        risk=RiskLevel.READ_ONLY, reads=("selected room-owned immutable image and verified hash",),
+        writes=(), tool="app.interior_atelier.InteriorAtelier.asset",
+        notes="Opaque project/room/asset IDs, no path input, symlink rejection and no-store response.",
+    ),
+    CapabilityRecord(
+        capability_id="interior_atelier_edit", label="Save interior projects, selected images and human proposal versions",
+        risk=RiskLevel.LOCAL_WRITE, reads=("explicitly selected image upload or room-scoped proposal and expected revision",),
+        writes=("private immutable image objects", "transactional private atelier metadata"),
+        tool="app.interior_atelier.InteriorAtelier.execute", requires_confirmation=True,
+        confirmation_policy=ConfirmationPolicy.SUMMARY_BEFORE_ACTION,
+        notes="Dedicated user actions authorize each local write. Stable request identity and revision conflicts; no deletion, external AI, paid generation, filesystem path input or legacy source mutation.",
+    ),
+    CapabilityRecord(
         capability_id="review_luna_development_anchors", label="Review a misquoted source anchor without another model turn",
         risk=RiskLevel.LOCAL_WRITE, reads=("exact retained Luna answer digest", "unchanged selected public source/context and role"),
         writes=("one deterministic private review receipt", "isolated copy and test evidence"),

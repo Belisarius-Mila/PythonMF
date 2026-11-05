@@ -1,3 +1,8 @@
+Aktualizace 2026-11-05: Tento checkpoint zachovává historickou návrhovou práci.
+Nový schválený Interiérový ateliér a aktuální další krok sleduj v kanonickém
+memory/handoffs/workstreams/project-neuberk-kacenka.md. Soukromé červnové
+podklady se automaticky neimportují ani nemění.
+
 Nazev: Neuberk Kacenka - jizni pohled v6, tram a komin
 Priorita: 2
 Stav: rozpracovane

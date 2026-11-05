@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from app.cockpit_interior import INTERIOR_HTML, InteriorRoutes, interior_atelier_action
+
 import csv
 import errno
 import base64
@@ -8658,6 +8660,9 @@ def shell_quote_for_applescript(value: str) -> str:
 
 
 COCKPIT_POST_ACTIONS: tuple[dict[str, str], ...] = (
+    {"path": "/api/interior/action", "label": "Uložit vlastní práci v interiérovém Ateliéru",
+     "risk": "private_write", "confirmation": "explicit_project_source_or_variant_action",
+     "handler_name": "interior_atelier_action", "test_level": "direct"},
     {"path": "/api/email-agent/pushcut/configure", "label": "Nastavit upozornění na iPhone",
      "risk": "private_write", "confirmation": "explicit_pushcut_settings_button",
      "handler_name": "email_agent_pushcut_configure_action", "test_level": "direct"},
@@ -9591,6 +9596,7 @@ class CockpitServer:
     def make_handler(self):
         cockpit_host = self.host
         cockpit_port = self.port
+        interior_routes = InteriorRoutes()
         health_recovery_status_dispatch = build_health_recovery_status_dispatch(
             status_loader=lambda: cockpit_status(),
             live_status_loader=lambda: cockpit_live_status(),
@@ -9701,6 +9707,8 @@ class CockpitServer:
             def do_GET(self) -> None:  # noqa: N802
                 self.validate_request_access(require_origin=False)
                 parsed = urlparse(self.path)
+                if interior_routes.dispatch(parsed=parsed, responder=self):
+                    return
                 if parsed.path == "/api/camino/film/trips":
                     if parsed.query:
                         self.respond_json({"ok": False, "error": "invalid_request"}, status=HTTPStatus.BAD_REQUEST)
@@ -10051,6 +10059,11 @@ class CockpitServer:
                         self.respond_json({"ok": False, "message": "Vykonavatel zpracovává přesný balíček; další změna počká na ověření."},
                                           status=HTTPStatus.CONFLICT)
                         return
+                if parsed.path == "/api/interior/action":
+                    result = interior_atelier_action(self.read_json())
+                    self.respond_json(result, status=HTTPStatus.OK if result["ok"] else (
+                        HTTPStatus.CONFLICT if result.get("error") in {"conflict", "storage_error"} else HTTPStatus.BAD_REQUEST))
+                    return
                 if parsed.path == "/api/email-agent/pushcut/configure":
                     self.respond_json(email_agent_pushcut_configure_action(self.read_json()))
                     return

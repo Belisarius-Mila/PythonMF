@@ -1,5 +1,36 @@
 # Neuberk interier design
 
+## Interiérový ateliér a schválené rozložení 2026-11-05
+
+Míla navázal novou infrastrukturou: Jana pracuje ze svého Macu přes Cockpit,
+v samostatném celoobrazovkovém ateliéru. Schválil rozložení Ateliér s miniaturami
+vlevo, hlavní plochou uprostřed a zasouvatelným rozhovorem vpravo. Podklady a
+úprava konkrétní varianty mají vlastní pracovní pohled v témže okně.
+
+Ověření: 50 cílených kontrol PASS, 23 frontendových kontraktů PASS; plná
+brána persistence 2 519 testů, 31 SKIP, bez chyb. Lokálně, zatím bez vydání.
+
+První lokální milník ukládá projekty, místnosti, explicitně nahrané PNG/JPEG/
+WebP, výběr referencí a pracovního obrázku, kreslené poznámky, rozpracované zadání
+s kontrolou revize, neměnné varianty a připomínky vázané k návrhu. Žádná výchozí
+ukázková data nejsou vydávaná za skutečné rodinné návrhy.
+
+Původní soukromý strom zůstává zachovaný. Nová data jsou pouze v jeho oddělené
+složce atelier/, originály a odvozené náhledy se evidují obsahovými otisky.
+Čtení nic nevytváří, nesmí sledovat symlinky ani vydat obrázek cizí místnosti.
+Frontend přenáší jen neprůhledné identity; nemá vstup pro libovolnou cestu.
+
+AI generování a modelový chat nejsou připojené. Jde o lidské návrhy/poznámky
+nad podkladem; rozměrový model, Konva, 3D a kolize následují samostatně.
+Placená aktivace potřebuje volbu modelu, měření a schválený rozpočet.
+Nové závislosti, systémová instalace, push a nasazení nejsou součástí kroku.
+
+Aktuální kanonický handoff je memory/handoffs/workstreams/project-neuberk-kacenka.md;
+historické červnové návrhy níže se tím nemažou. Kanonická cesta nového TVBCP
+je registrovaná, ale dokument nebyl výslovně domluven ani vytvořen; vazbu
+dořešit před dalším vývojem přes Human–Adam. Přesný důkaz a další krok:
+memory/reports/interior_atelier_p1_20261105.md.
+
 Zalozeno: 2026-05-31
 Priorita: 2
 Stav: soukromy pracovni prostor zalozen; pro Kacenku existuji soukrome fotky,
