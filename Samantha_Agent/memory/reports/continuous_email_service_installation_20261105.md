@@ -132,3 +132,29 @@ autorizované, konečný stav je nutné číst z přesné účtenky a živého a
   chybnou verzi bez opravy. Nový TVBCP ani změna modelu nevznikly.
 - Důkazy: email_service_hourly_timing_diagnosis_20261105.log,
   email_empty_search_{regression_before,targeted,live_fixed,full_gate,pause}_20261105.log.
+
+## Aktuální opravený provoz — 2026-11-05 10:47 CET
+
+- Běžící e-mailová služba je řízeně přepnutá z b6375a33 na 167e629f.
+  installed/owned/loaded/enabled=true, nový skutečný check již dokončený.
+- Opravena příčina minutových retry: úspěšné prázdné iCloud SEARCH OK/[None]
+  se nově uzavírá jako prázdná hodinová kontrola. Skutečné chyby zůstávají
+  chybami. Test 10:00/10:19/11:00 potvrdil čekání nové zprávy na další hodinu.
+- Celý business stav před/po skutečném upgrade má stejný otisk: karty,
+  předvolby, UID kurzory i denní počítadla zachované. Nový check po reloadu
+  already_completed, 0 modelových posouzení, 0 nových oznámení.
+- Přímo nainstalovaná kopie v Application Support úspěšně prošla živou
+  prázdnou IMAP sondou obou providerů. Dočasný diagnostický kurzor se neukládá.
+  Stará kopie a záloha jejího plist/účtenky zůstávají pro obnovu.
+- Ověření: 118 cílených PASS; plná brána 2473 testů, 2453 PASS a 20 SDK SKIP
+  (504,5 s). Kódový commit 167e629f; model Terra/high a rozsah 07–22 beze změny.
+- Míla nyní výslovně určil dvě vydání v pořadí: nejdřív můj dokončený krok,
+  potom samostatně Datův nový commit 5363238b. Jeho UI změnu jsem zatím jen
+  přečetl; v main dosud není. Před fyzickou iPhone přejímkou nebude označena
+  za přijatou. Žádné nejisté uživatelské odeslání se nesmí opakovat.
+- Další krok: mé p+n kódu + provozního writebacku, ověřit automatickou 11.
+  hodinu, potom integrace/review Data a druhé p+n do čistého repozitáře.
+- Provozní důkazy: logs/email_empty_search_upgrade_20261105.log,
+  logs/email_empty_search_upgrade_verified_20261105.log; source_head služby
+  je 167e629f i po případném pozdějším čistě paměťovém commitu. Karty ani
+  zprávy nebyly při opravě smazané, neposílal se SMTP ani ruční Pushcut test.

@@ -802,3 +802,26 @@ pozastavený. Žádný SMTP, archivace nebo smazání zpráv; služba do výměn
 Technický výsledek před výměnou: plná brána 2473 testů, 2453 PASS a 20 SDK
 SKIP (504,5 s), logs/email_empty_search_full_gate_20261105.log. Živé prázdné
 sondy obou providerů prošly bez modelu/oznámení/posunu uložených kurzorů.
+
+
+## 2026-11-05 10:47 CET — Opravený hodinový vstup je již v běžící službě
+
+Hotovo: Řízený upgrade na 167e629f dokončený, nový check již úspěšný;
+nainstalovaná kopie přímo ověřila prázdný iCloud i Seznam vstup. Business
+stav má před/po shodný otisk, žádné nové posouzení ani oznámení při reloadu.
+Stará kopie a konfigurační záloha zachované. Oprava prázdného výsledku už
+platí v provozu; další nová pošta čeká na příští hodinový průchod.
+
+Rozhodnutí: Míla výslovně určil nejprve p+n mého dokončeného kroku, potom
+samostatně Datův nový commit 5363238b a dočištění repo. Data zatím není v main.
+
+Další krok: Vydat mé commity s provozním zápisem a ověřit automatickou
+11. hodinu, následně převzít a vydat Data.
+
+Navrhované další kroky: Fyzická přejímka Datovy iPhone opravy po návratu Míly.
+
+Technický důkaz: upgrade b6375a33 → 167e629f, installed/owned/loaded/enabled;
+118 cílených PASS, plná brána 2473 (20 SDK SKIP); stejné kurzory/karty/
+předvolby/počítadla; nové already_completed s 0 návrhy. Nainstalovaný kód
+prošel živou prázdnou sondou obou providerů. Viz email_empty_search_upgrade*
+a full_gate logy. Bez změny modelu, SMTP, archivace nebo mazání e-mailů.
