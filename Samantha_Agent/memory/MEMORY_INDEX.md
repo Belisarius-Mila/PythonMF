@@ -180,6 +180,8 @@ Tento soubor je rozcestnik dlouhodobe pameti pro Samantha Agent.
 
 ## Handoffs
 
+- `handoffs/data_05_appserver_sdk_pilot_20261104.md`; `reports/codex_sdk_p1c_20261105.md` — 2026-11-05 13:03 CET: přejímka 05/P1 uzavřená. Uživatelské body 1–4 PASS; Míla sdělil úspěšné Willovo ověření technického reconnectu. Převzaté potvrzení, bez vlastního nového živého auditu Data. Ponechat současný klient, SDK neadoptováno; další úkol dosud nezadán.
+
 - `reports/codex_sdk_p1c_20261105.md`; `handoffs/data_05_appserver_sdk_pilot_20261104.md` — 2026-11-05 12:41 CET: Míla potvrdil obnovu Safari během odpovědi PASS (původní bod 4); všechny uživatelské body 1–4 přijaté. Oznámil nasazení C, bez nového živého auditu Data. K uzavření zbývá pouze technický reconnect pro Willa.
 
 - `reports/codex_sdk_p1c_20261105.md`; `handoffs/data_05_appserver_sdk_pilot_20261104.md` — 05/P1-C: 105 cílených testů PASS (12 nových), statická brána PASS. Skutečná SDK/CLI proxy nad syntetickým proudovým socketem funguje; se současným Unix WebSocket transportem nekompatibilní. Ponechat původní klient, SDK neadoptovat. Body přejímky 1–3 přijaté Mílou; bod 4 a skutečný reconnect otevřené. Pouze vlastní větev, bez živých zásahů, integrace či publikování.

@@ -2,7 +2,7 @@
 ## Aktuální stav
 
 - Obnoveno potvrzeným checkpointem: 2026-10-19 13:00 CEST
-- 05/P1-C dokončeno lokálně: 105 cílených testů PASS (12 nových), statická brána PASS. SDK/CLI proxy není kompatibilní se současným Unix WebSocket transportem; ponechat původní klient. Míla přijal i obnovu stránky během odpovědi, body 1–4 PASS; oznámil nasazení C, bez nového živého auditu Data. Report `reports/codex_sdk_p1c_20261105.md`.
+- 05/P1-C dokončeno lokálně: 105 cílených testů PASS (12 nových), statická brána PASS. SDK/CLI proxy není kompatibilní se současným Unix WebSocket transportem; ponechat původní klient. Míla přijal i obnovu stránky během odpovědi, body 1–4 PASS; oznámil nasazení C, bez nového živého auditu Data. Přejímka 05/P1 nyní uzavřená podle Mílova potvrzení uživatelské i Willovy technické části. Report `reports/codex_sdk_p1c_20261105.md`.
 
 ### Hotovo
 - Míla potvrdil také obnovu Safari během odpovědi na iPhonu. Uživatelské body 1–4 jsou PASS; původní iPhone FAIL je po retestu uzavřený.
@@ -11,21 +11,21 @@
 - Lokální klient žádá obnovu bez historie, rozlišuje final_answer a zachovává strukturované chyby. Kompatibilitu posuzuje podle připojeného serveru, nikoli lokálního CLI; 100 cílených testů PASS.
 
 ### Otevřeno
-- Zbývá už jen samostatný technický reconnect skutečného sdíleného App Serveru. Syntetické testy C ani obnova prohlížeče jej neprokazují.
+- Přejímka 05/P1 uzavřená: uživatelské body 1–4 PASS a technický reconnect PASS podle Mílova sdělení o potvrzení Willem. Data neprovedl vlastní nový živý audit.
 - Míla oznámil nasazení C; přesný nasazený head Data novým auditem neověřoval. Tento nový zápis přejímky zůstává pouze ve větvi Data.
 
 ### Rizika
-- Přesný původní spouštěč na telefonu nebyl prokázán. Uživatelské body 1–4 jsou přijaté; skutečný technický reconnect zatím ne. SDK proxy vyžaduje jiný protokol než současný socket.
-- Neznámý, starší než 0.163.0 nebo prerelease server je podle kontraktu odmítnut před prací s vláknem. Nový technický reconnect není doložený samotným úspěšným mobilním dotazem.
+- Přesný původní spouštěč na telefonu nebyl prokázán. Uživatelský retest i technická přejímka byly přijaty; technický výsledek je převzatý z Mílova sdělení, nikoli nového auditu Data. SDK proxy vyžaduje jiný protokol než současný socket.
+- Neznámý, starší než 0.163.0 nebo prerelease server je podle kontraktu odmítnut před prací s vláknem. SDK zůstává izolovaným pilotem.
 
 ### Další krok
-- Will provede technický reconnect současného transportu podle reportu C bez modelového tahu a restartu; po jeho doložení uzavřít přejímku.
+- Přejímka 05/P1 je uzavřená; převzít nové zadání od Míly.
 
 ### Rozhodnutí
 - Úvodní obrazovka zobrazuje stručný aktuální stav, technické účtenky a podrobnosti se otevírají v panelu Práce
 
 ### Navrhované další kroky
-- Doložit technický reconnect App Serveru; fyzická obnova stránky již PASS.
+- Pro 05/P1 nyní není požadován další krok; doporučení je ponechat současný klient.
 - Původní vizuální přejímka chatu a panelu Práce na Linuxu/iPhonu zůstává oddělená od testu doručení zprávy.
 
 ### Technický stav checkpointu
@@ -4471,3 +4471,21 @@ Navrhované další kroky:
 
 Technický důkaz:
 - Přímé Mílovo potvrzení fyzického testu; technický reconnect tím není prokázán. Jen dokumentační zápis, bez nových modelových tahů, změn produkce, provozních dat, integrace, push či nasazení ze strany Data.
+
+### 2026-11-05 13:03 CET — Přejímka 05/P1 uzavřena
+
+Hotovo:
+- Míla sdělil, že Will potvrdil úspěch technické části přejímky (bod 2 dvoubodového návodu). Po již přijatých uživatelských bodech 1–4 je přejímka 05/P1 uzavřená.
+
+Rozhodnutí:
+- Ponechává se modernizovaný původní klient; SDK se neadoptuje. Míla přechází k novému zadání.
+
+Další krok:
+- Převzít nové zadání od Míly.
+
+Navrhované další kroky:
+- Žádný další krok 05/P1 není nyní požadován.
+
+Technický důkaz:
+- Uzavření podle Mílova sdělení o Willově potvrzení technického reconnectu; Data neprovedl vlastní nový živý audit ani neobdržel technickou účtenku.
+- Pouze projektový zápis ve větvi Data, bez změny kódu, služeb či sdílených dat, bez modelového tahu, integrace, push nebo nasazení.

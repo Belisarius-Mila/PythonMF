@@ -5,6 +5,11 @@ Pracovní proud: `layer-human-adam-development`.
 
 ## Stav přejímky
 
+**Uzavřeno 2026-11-05 13:03 CET:** Míla po přijetí uživatelských bodů 1–4 sdělil také
+úspěšné Willovo potvrzení technického reconnectu. Přejímka 05/P1 uzavřená;
+bez nového vlastního živého auditu Data. Následující záznamy zachovávají
+předchozí průběh a tehdy otevřené kroky.
+
 **Navazující přejímka 2026-11-05: bod 3 PASS podle Mílova „Funguje to!“**
 Návrat na Mac / kontrola duplicit je po navazujícím postupu přijatý.
 Následně Míla potvrdil i bod 4 (obnova Safari během odpovědi) jako zcela OK.

@@ -3,6 +3,14 @@
 Datum: 2026-11-05. Autor: Data. Větev: `data/parallel-20261104`.
 Proud: `layer-human-adam-development`. Výchozí commit: `d50fccbd`.
 
+## Uzavření přejímky — 2026-11-05 13:03 CET
+
+**05/P1 přejímka uzavřená.** Míla po uživatelských bodech 1–4 sdělil také
+úspěch Willovy technické části (bod 2 dvoubodového návodu, reconnect).
+Data neprovedl nový vlastní živý audit ani neobdržel technickou účtenku.
+Doporučení se nemění: ponechat současný klient, SDK neadoptovat. Níže je
+zachovaný předchozí vývojový report a postup nyní přijaté technické zkoušky.
+
 ## Výsledek a doporučení
 
 **Ponechat modernizovaný původní klient. SDK nyní neadoptovat.**

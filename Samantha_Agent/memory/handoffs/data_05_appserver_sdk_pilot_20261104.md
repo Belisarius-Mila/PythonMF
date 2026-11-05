@@ -1,6 +1,17 @@
 # Data → Will: 05/P1 App Server / Python SDK, etapy A, B a C
 
-## Aktuální přejímka — 2026-11-05 12:41 CET
+## Přejímka uzavřena — 2026-11-05 13:03 CET
+
+Míla sdělil, že Will úspěšně dokončil technickou část přejímky (bod 2
+předchozího dvoubodového postupu). Uživatelské body 1–4 už byly přijaté;
+**přejímka 05/P1 je uzavřená**. Data nepřevzal technickou účtenku ani
+neprovedl nový vlastní živý audit; jde o zápis potvrzení předaného Mílou.
+
+Ponechat modernizovaný původní klient; SDK se neadoptuje. Pro 05/P1 nyní
+není požadován další krok. Míla přechází k novému zadání. Jen dokumentační
+zápis a lokální commit ve větvi Data, bez publikování či zásahu do provozu.
+
+## Předchozí přejímka — 2026-11-05 12:41 CET
 
 Míla oznámil nasazení C a potvrdil obnovu Safari během odpovědi na iPhonu
 jako zcela úspěšnou. „Jednička“ z posledního návodu je původní bod 4:
