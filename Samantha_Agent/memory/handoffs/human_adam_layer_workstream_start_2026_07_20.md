@@ -4,7 +4,7 @@
 ### Hotovo
 - Míla podle předání Data přijal Mac/iPhone scénáře 1–3. UI oprava je v main jako 6972ea5c, její p+n 3f41b8ca192876a3cef360e4c189d756 i CI 42009849549 úspěšné.
 - Will na výslovné nové p+n převzal Datův zápis d50fccbd a izolovaný pilot c49da146. SDK se do produkce nepřevádí; původní klient, session hub a jejich transport jsou zachované.
-- Data doložil 105 cílených PASS v oddělené .venv, včetně 12 syntetických SDK/socket testů. CLI proxy nepřevádí proudový Unix protokol na současný WebSocket protokol.
+- Data doložil 105 cílených PASS v oddělené .venv. Will po integraci ověřil 102 PASS + 3 historické schema SKIP kvůli cestě exportů; všech 12 nových C testů skutečně PASS. CLI proxy nepřevádí proudový Unix protokol na současný WebSocket protokol.
 - E-mailový krok c846775b má lokální plnou bránu 2476 testů (20 SDK SKIP), 55 závěrečných cílených PASS a dvě skutečné zkoušky Terra/high. Běžící kopie dosud 167e629f.
 
 ### Rozhodnutí

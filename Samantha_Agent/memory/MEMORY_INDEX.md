@@ -180,6 +180,8 @@ Tento soubor je rozcestnik dlouhodobe pameti pro Samantha Agent.
 
 ## Handoffs
 
+- `handoffs/data_05_appserver_sdk_pilot_20261104.md`; `reports/codex_sdk_p1c_20261105.md` — Will převzal d50fccbd/c49da146 jako 5ad99375/4a337100 ke společnému Terra p+n s e-mailovou opravou. Nových 12 SDK C testů skutečně PASS v oddělené .venv; produkční závislosti/transport beze změny. V main integračně 102 PASS + 3 historické schema SKIP; verze exportů se kontroluje zvlášť. Nová registrace pilotu ve společné bráně.
+
 - `reports/codex_sdk_p1c_20261105.md`; `handoffs/data_05_appserver_sdk_pilot_20261104.md` — 05/P1-C: 105 cílených testů PASS (12 nových), statická brána PASS. Skutečná SDK/CLI proxy nad syntetickým proudovým socketem funguje; se současným Unix WebSocket transportem nekompatibilní. Ponechat původní klient, SDK neadoptovat. Body přejímky 1–3 přijaté Mílou; bod 4 a skutečný reconnect otevřené. Pouze vlastní větev, bez živých zásahů, integrace či publikování.
 
 - `reports/human_adam_iphone_send_failure_20261105.md`; `handoffs/data_05_appserver_sdk_pilot_20261104.md` — 2026-11-05 11:41 CET: po UI opravě Míla potvrdil iPhone bod 2 PASS a správnou značku z předchozího tahu; Mac bod 1 PASS již dříve. Oprava převzatá do main jako 6972ea5c. Zbývají body 3/4 a technický reconnect; nový runtime audit se neprováděl.

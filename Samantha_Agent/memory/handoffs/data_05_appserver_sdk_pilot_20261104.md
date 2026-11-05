@@ -1,5 +1,25 @@
 # Data → Will: 05/P1 App Server / Python SDK, etapy A, B a C
 
+## Převzetí Willem k výslovně schválenému společnému p+n — 2026-11-05
+
+- Zápis přejímky d50fccbd převzat jako 5ad99375, SDK pilot c49da146 jako
+  4a337100. Kód pilotu/fixture/testů je byte-for-byte shodný se zdrojem Data;
+  konflikty byly pouze v paměťových souhrnech. Novější e-mailové zápisy zachované.
+- V hlavním checkoutu s Datovým odděleným interpretem 105 cílených testů:
+  102 PASS, 3 historické schema SKIP kvůli checkout-relative .venv exportům.
+  Všech 12 nových C testů skutečně PASS, ResourceWarning jako chyba.
+  Běžné produkční prostředí novou volitelnou SDK knihovnu neinstaluje.
+- Historické schema testy zvlášť v původním prostředí s exporty: 3 PASS;
+  jejich zdroj i syntetický peer jsou shodné s main. Společná brána nově
+  registruje také test_codex_sdk_socket_pilot; v produkční .venv zůstává
+  volitelných 11 C případů SKIP, nikoli falešně deklarovaný PASS.
+- Míla nyní výslovně autorizoval Terra p+n pro Willovy i Datovy commity.
+  Předchozí omezení integrace/push v historických předáních tím jsou překonaná.
+  SDK se neadoptuje, role a produkční transport zachované. Provozní výměna
+  hodinového agenta patří k e-mailové opravě c846775b, nikoli k SDK pilotu.
+- Důkazy: logs/data_sdk_c_integration_20261105.log,
+  logs/data_sdk_c_main_tests_20261105.log. P+n a živé ověření teprve následují.
+
 ## Aktuální předání — 05/P1-C, 2026-11-05 11:58 CET
 
 Míla schválil krok C a navazujícím „Funguje to!“ přijal bod 3 přejímky
