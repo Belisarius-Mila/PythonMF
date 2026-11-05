@@ -1,0 +1,50 @@
+{
+  "schema": 1,
+  "checked_at": "2026-11-05T19:13:15.749853+01:00",
+  "phase": "15/P2-C",
+  "base_commit": "3c78092a",
+  "result": {
+    "model": "gpt-live-1",
+    "transport": "primary_websocket",
+    "session_start_attempted": true,
+    "session_started": true,
+    "session_closed": true,
+    "final_usage_confirmed": true,
+    "seconds": 47.0,
+    "voice_usd_estimate": "0.039167",
+    "output_audio_bytes": 2139840,
+    "non_silent_audio": true,
+    "czech_marker_observed": true,
+    "probe_pass": true,
+    "elapsed_seconds": 51.766,
+    "first_audio_seconds": 4.648,
+    "audio_sha256": "ce0d4ea86ee30f07a3d5cffde5084b3868e775a2d1d153f53677a94c1605b920"
+  },
+  "audit": {
+    "transport_connections": 2,
+    "model_start_attempts": 1,
+    "pre_start_failure_seconds": 0.163,
+    "default_system_ca_count": 0,
+    "verified_certifi_ca_count": 118,
+    "catalog_model_present": true,
+    "microphone_accessed": false,
+    "private_context_sent": false,
+    "backend_model_turns": 0,
+    "webrtc_acceptance": false,
+    "iphone_acceptance": false,
+    "human_listening_confirmed": false
+  },
+  "pricing": {
+    "voice_usd_per_minute": "0.05",
+    "derived_from_final_usage": true,
+    "invoice_verified": false
+  },
+  "proof_sha256": {
+    "pre_start": "d9adbd299072befca3513db99c72c70e7b19fc7d72bd06d94e64fe309ecd2440",
+    "successful": "798bcc72a5bc6a02682f81d81fa20ab0238b1bd7cb45253c582552d889815f85"
+  },
+  "source_sha256": {
+    "app/communication/voice_conversation_probe.py": "66a2c86d88c77ba2708b9769982c024dc89656e5ce53c4e0fdf93e09ba20acd8",
+    "app/communication/voice_conversation_gateway.py": "e7afafeae775045a63712f615ce490844186f8cef4b16315fbc96752d67754f8"
+  }
+}

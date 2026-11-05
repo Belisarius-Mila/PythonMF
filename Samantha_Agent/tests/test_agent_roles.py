@@ -33,6 +33,23 @@ class AgentRoleTests(unittest.TestCase):
     def write(self):
         self.path.write_text(json.dumps(self.document))
 
+    def test_audio_role_does_not_change_existing_email_or_interior_policy(self):
+        for role in (roles.EMAIL_ROLE, roles.INTERIOR_ROLE):
+            self.document["roles"][role] = {"label":"Reviewed existing role", "preferred_model":"model-current",
+                                             "approved_models":[candidate()]}
+        self.write()
+        before = {role:roles.load_role(self.path,role=role)["policy_digest"]
+                  for role in (roles.ROLE,roles.EMAIL_ROLE,roles.INTERIOR_ROLE)}
+        self.document["roles"][roles.VOICE_ROLE] = {
+            "label":"Reviewed read only audio", "preferred_model":"gpt-live-1", "approved_models":[{
+                "model":"gpt-live-1", "cost_review":"Explicit audio budget review",
+                "dry_run_evidence":"Recorded final audio usage proof"}]}
+        self.write()
+        for role,expected in before.items():
+            self.assertEqual(roles.load_role(self.path,role=role)["policy_digest"],expected)
+        with self.assertRaises(roles.AgentRoleError):
+            roles.load_role(self.path,role=roles.VOICE_ROLE)  # Audio cannot become a reasoning-model selection.
+
     def test_shared_policy_resolves_preferred_role_without_using_catalog_default(self):
         selected = roles.resolve_role([entry("expensive-default", isDefault=True), entry()], path=self.path)
         self.assertEqual(selected["model"], "model-current")

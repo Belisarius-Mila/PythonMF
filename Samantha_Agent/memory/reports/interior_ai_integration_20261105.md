@@ -3,6 +3,19 @@
 Datum: 2026-11-05. Autor: Will. Proud: project-neuberk-kacenka.
 Výchozí vydání: b9b59c7d (MPO oprava; CI 42083732254 success).
 
+## 2026-11-05 21:44 CET — AI Ateliér dokončený a živě ověřený
+
+Terra p+n bbb4da79 je dokončené: účtenka 28165fa20e7f1f45651bca93343bbd98,
+push/deploy confirmed, plná brána 2574 testů, smoke 5/5, chráněné služby beze změny.
+Živé API hlásí enabled=true, image_generation=true a gpt-6.1-terra. Obě skutečné
+AI varianty jsou dostupné; původní revize 7 zachovaná a interní journal se do
+běžného stavu neposílá. E-mailový agent aktivní na kompatibilní kopii 2fe0481e.
+GitHub CI 42104144596 je další samostatný důkaz (logs/interior_ai_role_ci_20261105.log).
+Provozní výsledek: logs/interior_ai_live_verified_20261105.log. Žádný další
+placený AI pilot. Další uživatelský krok: praktický rozhovor Jany a výběr návrhu;
+fyzický Mac/iPhone není tímto HTTP ověřením nahrazený. TVBCP vazba dosud nedomluvená.
+Míla následně autorizoval samostatné převzetí a p+n Datova čtecího hlasu.
+
 ## 2026-11-05 21:22 CET — kompatibilní runtime a role architekta
 
 Kompatibilní balíček 2fe0481e byl přes Terru skutečně pushnutý a nasazený.

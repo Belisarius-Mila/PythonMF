@@ -1,24 +1,23 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
-## Aktuální stav — 05/P1 přejímka uzavřená, 2026-11-05 12:50 CET
+## Aktuální stav — 2026-11-05 21:38 CET, převzetí Datova 15/P2-D
 
 ### Hotovo
-- Uživatelské Mac/iPhone body 1–4 Míla výslovně potvrdil. Will dokončil poslední živou technickou přejímku reconnectu: všech 17 kontrol PASS.
-- Současný CodexAppServerClient / UnixSocketAppServerTransport připojil A a B k původnímu sdílenému serveru 0.163.0. Obě spojení obnovila stejné existující nečinné vlákno s excludeTurns:true. Po zavření A četlo B stejná metadata; znovupřipojené A obnovilo stejné vlákno a nastavení.
-- Model gpt-6.1-sol/high, provider openai, cwd, approvalPolicy, sandbox i další efektivní nastavení shodné. Obnova poslala jen threadId a excludeTurns, žádné přepsání instrukcí či konfigurace. Celý rollout včetně instrukcí a celý stav Cockpit session zůstaly beze změny.
-- Původní server PID 5791 i jeho launcher 5789, jejich identita a inode socketu zůstaly shodné i po zavření všech auditních spojení. Žádný turn/start, náhradní vlákno, opakování zprávy, restart ani placený modelový tah.
-- Společné Terra p+n do 040fea77 je dokončené, CI 42017584830 success; dokládá logs/email_data_quality_verified_final_20261105.log a kontrola GitHub CI při obnově kontextu. Samostatná e-mailová kopie je podle finálního release logu na ac9f3bed; tato přejímka ji neměnila.
-- Redigovaný trvalý důkaz: memory/reports/codex_p1_reconnect_20261105.md; podrobná místní účtenka logs/codex_p1_reconnect_verified_20261105.log.
+- Will převzal hotovou Datovu větev a5e401e6 po dokončení AI Ateliéru. Čtecí hlas má samostatný panel Human–Adam → Další → Čtecí hlas nad již existujícím hubem vybraného proudu; neobnovuje backend ani nečte historii.
+- Jeden <=60s pokus vyžaduje konkrétní cenový souhlas. Origin/CSRF/cookie, trvalý create-only grant a serverový sideband/watchdog brání automatickému opakování po refreshi, restartu nebo neznámém vytvoření. Hlas neumí měnit úlohy ani schvalovat akce.
+- Datův již přijatý GPT-Live 1 probe: právě jeden session.start, session.closed/final usage, 47 s a nenulové české PCM. Grant je spotřebovaný; Will žádný nový placený hlasový test nespouští.
+- Novější e-mailová a Ateliérová práce i původní CodexAppServerClient jsou zachované. 05/P1 zůstává uzavřené podle živého reconnectu 17/17; SDK se neadoptuje.
 
 ### Rozhodnutí
-- Přejímka 05/P1 je uzavřená PASS: uživatelské body 1–4 i technický reconnect jsou doložené. Zachovat modernizovaný původní klient a CanonicalSessionHub; SDK se neadoptuje.
-- Will zůstává v hlavním checkoutu, Data ve vlastní větvi data/parallel-20261104; Datův worktree nebyl změněný.
-
-### Rizika a rozsah
-- Ověřen je reconnect nečinného existujícího vlákna na současném transportu. Tento audit netestuje výpadek během aktivního tahu ani trvalý recovery journal SDK. Žádná nejistá zpráva se nesmí automaticky opakovat.
-- Širší proud Human–Adam pokračuje; uzavírá se pouze přejímka 05/P1. Dřívější otevřené publikační a přejímací položky níže jsou historické.
+- Míla večerním pokynem výslovně autorizoval p+n za Datův vedlejší proud a úklid repozitáře po dokončení Ateliéru.
+- Nejdřív kompatibilní kód, potom kompatibilita všech konzumentů centrálního JSON a teprve poté samostatná read_only_voice role. Živá politika během merge zůstala byteově shodná; Voice role je z prvního integračního checkpointu záměrně odložená.
+- Zachovat Email/Interior/Release/Development bindingy, samostatnou Datovu větev a jeho vlastní worktree. Žádné reset/force push ani mazání práce.
 
 ### Další krok
-- Čekat na další Mílův úkol; 05/P1 už nemá otevřený přejímací bod. Nové publikování ani nasazení se tímto krokem nezahajuje.
+- Integrační kontroly PASS: 239 cílených a plná brána 2668 testů / 0 chyb / 31 SKIP. Následuje registrované samostatné Terra p+n kódu v layer-human-adam-development. Potom kontrolovaný upgrade vlastního e-mailového parseru a aktivace pouze již schválené hlasové role.
+
+### Otevřená přejímka a důkaz
+- Skutečný mikrofon, iPhone/WebRTC, Mílův poslech a subjektivní latence zůstávají otevřené. Nejde o dokončení celého bodu 15 ani neomezený hlasový asistent.
+- Podklady: data_15_voice_conversation_pilot_20261105.md, voice_conversation_cockpit_20261105.md, voice_conversation_probe_20261105.json. Konečný provozní stav určují logs/data_voice_code_release_20261105.log a logs/data_voice_role_release_20261105.log.
 <!-- SAMANTHA_CURRENT_STATUS_END -->
 
 Nazev: Human–Adam / vyvojove prostredi - zalozeni pracovniho proudu Layer
