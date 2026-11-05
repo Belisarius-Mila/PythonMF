@@ -180,6 +180,8 @@ Tento soubor je rozcestnik dlouhodobe pameti pro Samantha Agent.
 
 ## Handoffs
 
+- `reports/codex_sdk_p1c_20261105.md`; `handoffs/data_05_appserver_sdk_pilot_20261104.md` — 05/P1-C: 105 cílených testů PASS (12 nových), statická brána PASS. Skutečná SDK/CLI proxy nad syntetickým proudovým socketem funguje; se současným Unix WebSocket transportem nekompatibilní. Ponechat původní klient, SDK neadoptovat. Body přejímky 1–3 přijaté Mílou; bod 4 a skutečný reconnect otevřené. Pouze vlastní větev, bez živých zásahů, integrace či publikování.
+
 - `reports/human_adam_iphone_send_failure_20261105.md`; `handoffs/data_05_appserver_sdk_pilot_20261104.md` — 2026-11-05 11:41 CET: po UI opravě Míla potvrdil iPhone bod 2 PASS a správnou značku z předchozího tahu; Mac bod 1 PASS již dříve. Oprava převzatá do main jako 6972ea5c. Zbývají body 3/4 a technický reconnect; nový runtime audit se neprováděl.
 
 - `reports/codex_appserver_p1b_20261104.md`; `handoffs/data_05_appserver_sdk_pilot_20261104.md` — 2026-11-05: Will po Mílově výslovném pokynu převzal oba Datovy commity jako 1b6fd61e/ccece787; původní klient modernizovaný, SDK stále offline. 192 cílených testů: 172 PASS, 20 volitelných SDK SKIP, živý handshake/katalog serveru 0.163.0 úspěšné. Plná společná brána 2462 testů: 2442 PASS, 20 SDK SKIP. Společné p+n b6375a33 potvrzené, smoke 5/5 a CI 41938993126 success. Kanonický proud layer-human-adam-development, aktuální nasazení ověřit živým auditem.

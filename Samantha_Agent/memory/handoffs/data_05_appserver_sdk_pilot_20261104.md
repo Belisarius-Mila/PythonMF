@@ -1,6 +1,30 @@
-# Data → Will: 05/P1 App Server / Python SDK, etapy A a B
+# Data → Will: 05/P1 App Server / Python SDK, etapy A, B a C
 
-## Aktuální přejímka — 2026-11-05 11:41 CET
+## Aktuální předání — 05/P1-C, 2026-11-05 11:58 CET
+
+Míla schválil krok C a navazujícím „Funguje to!“ přijal bod 3 přejímky
+(návrat na Mac / kontrola duplicit). Body 1–3 PASS podle uživatele; bod 4
+a skutečný technický reconnect App Serveru zůstávají otevřené.
+
+**C dokončeno lokálně: 105 cílených testů PASS (12 nových), statická brána
+PASS.** Skutečné SDK 0.163.0 + CLI proxy 0.166.0 fungují nad syntetickým
+proudovým Unix socketem, dva klienti zachovají společnou identitu vlákna,
+uzavření proxy neukončí posluchač, nejisté výsledky se neopakují.
+**CLI proxy není kompatibilní se současným Unix WebSocket transportem
+Samanthy.** Pozitivní kontrola současným transportem nad stejnou fixture PASS.
+
+Doporučení Data: ponechat modernizovaný původní klient, SDK neadoptovat.
+Report a přesný další krok: `reports/codex_sdk_p1c_20261105.md`.
+Nový kód pouze v samostatném pilotu, fixture a testech; produkce, závislosti,
+role, sdílený socket a provozní data beze změn. Nula placených tahů.
+
+Will má převzít testy a závěry C, zachovat novější paměť main a následně
+samostatně ověřit bod 4 a read-only reconnect současného transportu bez
+turn/start či restartu. Nyní žádný push, deploy, integrace ani živý audit.
+Předání je souborové; přímý Willův agent zde není, převzetí nepotvrzené.
+Data po lokálním commitu čeká.
+
+## Předchozí přejímka — 2026-11-05 11:41 CET
 
 Míla po úpravě potvrdil úspěšnou odpověď v Human–Adam na iPhonu a správnou
 zkušební značku z předchozího tahu. Mac bod 1 OK, iPhone bod 2 nyní OK;

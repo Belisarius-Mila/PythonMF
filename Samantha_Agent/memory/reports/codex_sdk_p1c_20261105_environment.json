@@ -1,0 +1,76 @@
+{
+  "checked_at": "2026-11-05T11:59:06.259387+01:00",
+  "baseline_commit": "d50fccbd1fedb0c9956d8a248fcaf7c06902cc1e",
+  "branch": "data/parallel-20261104",
+  "python": "3.11.5",
+  "environment": "existing isolated worktree .venv; no packages installed in C",
+  "global_cli": "codex-cli 0.166.0",
+  "packages": {
+    "openai-codex": "0.163.0",
+    "openai-codex-cli-bin": "0.163.0",
+    "websockets": "16.0",
+    "pydantic": "2.14.2"
+  },
+  "pypi_stable_checked": "0.163.0",
+  "paid_model_turns": 0,
+  "live_socket_connections": 0,
+  "live_services_started_or_restarted": 0,
+  "transports": {
+    "ndjson_unix_fixture": "pass via actual CLI proxy",
+    "websocket_unix_fixture": "incompatible with CLI proxy; bounded timeout",
+    "current_custom_transport_to_same_websocket_fixture": "pass"
+  },
+  "tests": {
+    "new_p1c": 12,
+    "targeted_total": 105,
+    "failures": 0,
+    "errors": 0,
+    "skips": 0,
+    "resource_warning_as_error": true,
+    "static_gate": "PASS",
+    "pip_check": "PASS",
+    "full_production_gate_rerun": false
+  },
+  "production_control": {
+    "app/codex_appserver.py": {
+      "sha256": "e312b871dedd8f40a7f793046a0f2ef01bd4fc617d90890b4a9639cd7cb6d478",
+      "unchanged_from_start": true
+    },
+    "app/communication/local_runtime.py": {
+      "sha256": "c62f6257ed203b7271cc566646b60f590221c9cbe4e459b774c69db02e9268db",
+      "unchanged_from_start": true
+    },
+    "app/communication/session_hub.py": {
+      "sha256": "68136d51a0527d2630768e113bfe84709ba87cdf8d280845127a337835ac4373",
+      "unchanged_from_start": true
+    },
+    "config/agent_roles.json": {
+      "sha256": "1217409512a6f7eed6e9b8f1ec9c9eaf06ffa523f5b8fd0968e769e41923bfd6",
+      "unchanged_from_start": true
+    },
+    "requirements.txt": {
+      "sha256": "f321d63e73e2c6b86544649aa078cc150ee2d3933d04e3f0754fe2f510131bd2",
+      "unchanged_from_start": true
+    },
+    "app/communication/human_adam_ui.py": {
+      "sha256": "07acdb282e3645c637832b8bc26b98a4e703bd020a2190cf60ac14324f78e30d",
+      "unchanged_from_start": true
+    }
+  },
+  "pilot_sha256": {
+    "app/codex_sdk_socket_pilot.py": "a87df83a04e7ac0247a6e63e93f1d7d214e0db3f895f234f034d2ff2fd1121ad",
+    "scripts/codex_sdk_socket_fixture.py": "1ff3a3bae8657813cd10935a4547d7841e026a158b4efe35aef5d281f4f3eb13",
+    "tests/test_codex_sdk_socket_pilot.py": "0df8a526f81579270ebf56c60edd646659fe05b513e65a06830a2ebe7fa7c016"
+  },
+  "targeted_log_sha256": "98619d0b985d2b0e44595ac6c86d8a5ccef4ada451237060247f5876d8f39e89",
+  "sources": [
+    "https://developers.openai.com/codex/sdk/",
+    "https://github.com/openai/codex/blob/rust-v0.166.0/codex-rs/stdio-to-uds/src/lib.rs",
+    "https://pypi.org/pypi/openai-codex/json"
+  ],
+  "limitations": [
+    "synthetic only; no live shared-runtime or device fault proof",
+    "in-memory guard is not a persistent journal",
+    "no model entitlement or actual inference/schema-conformance proof"
+  ]
+}

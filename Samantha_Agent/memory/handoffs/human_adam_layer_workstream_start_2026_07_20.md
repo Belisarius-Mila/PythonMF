@@ -1,38 +1,23 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
-## Aktuální stav
-
-- Obnoveno potvrzeným checkpointem: 2026-10-19 13:00 CEST
-- 05/P1-B: Mac bod 1 OK, iPhone bod 2 po úpravě OK podle Míly 2026-11-05 11:41 CET. UI oprava převzatá do main jako `6972ea5c`; další scénáře přejímky otevřené. Report `reports/human_adam_iphone_send_failure_20261105.md`.
+## Aktuální stav — převzetí dalšího Datova balíčku 2026-11-05
 
 ### Hotovo
-- Míla potvrdil úspěšnou odpověď na iPhonu a návaznost předchozí značky po UI opravě; původní bod 2 FAIL je po retestu PASS.
-- Human–Adam upřednostňuje chat a aktuální stav; technické účtenky jsou dostupné v panelu Práce
-- Lokální klient žádá obnovu bez historie, rozlišuje final_answer a zachovává strukturované chyby. Kompatibilitu posuzuje podle připojeného serveru, nikoli lokálního CLI; 100 cílených testů PASS.
-
-### Otevřeno
-- Zbývá návrat na Mac a kontrola duplicit (bod 3), obnova stránky během práce (bod 4) a samostatný technický reconnect.
-- Všechny tři kódové kroky Data jsou převzaté do main; nový paměťový zápis výsledku zůstává pouze ve větvi Data.
-
-### Rizika
-- Přesný původní spouštěč na telefonu nebyl prokázán. Uživatelsky je potvrzené běžné odeslání a návaznost konverzace; další scénáře zatím ne.
-- Neznámý, starší než 0.163.0 nebo prerelease server je podle kontraktu odmítnut před prací s vláknem. Nový technický reconnect není doložený samotným úspěšným mobilním dotazem.
-
-### Další krok
-- Podle přejímacího postupu zkontrolovat návrat na Mac a jediné zobrazení zpráv (bod 3).
+- Míla podle předání Data přijal Mac/iPhone scénáře 1–3. UI oprava je v main jako 6972ea5c, její p+n 3f41b8ca192876a3cef360e4c189d756 i CI 42009849549 úspěšné.
+- Will na výslovné nové p+n převzal Datův zápis d50fccbd a izolovaný pilot c49da146. SDK se do produkce nepřevádí; původní klient, session hub a jejich transport jsou zachované.
+- Data doložil 105 cílených PASS v oddělené .venv, včetně 12 syntetických SDK/socket testů. CLI proxy nepřevádí proudový Unix protokol na současný WebSocket protokol.
+- E-mailový krok c846775b má lokální plnou bránu 2476 testů (20 SDK SKIP), 55 závěrečných cílených PASS a dvě skutečné zkoušky Terra/high. Běžící kopie dosud 167e629f.
 
 ### Rozhodnutí
-- Míla výslovně určil pořadí: moje dokončené e-mailové p+n, potom Data a jeho samostatné p+n, nakonec čistý repozitář. První vydání i jeho CI jsou potvrzené; tento krok je druhý balíček.
+- Míla výslovně autorizoval nové Terra p+n pro Willovy i Datovy commity jako společný balíček. Zachovat centrální modely i dosavadní produkční architekturu.
+
+### Otevřeno a rizika
+- Publikační brána, přesná účtenka, GitHub CI a řízené přepnutí samostatné e-mailové kopie na nový čistý commit ještě čekají.
+- Fyzická obnova stránky během práce (bod 4) a skutečný technický reconnect App Serveru zůstávají oddělené; syntetické testy nejsou jejich důkazem.
+- Žádný nejistý dotaz neopakovat. Pilot má procesový guard, nikoli trvalý journal.
 
 ### Další krok
-- Dokončit lokální checkpoint, zarovnat čisté neaktivní profily a registrované druhé p+n. Ověřit přesnou účtenku, vzdálené CI a zachování běžících služeb.
-
-### Navrhované další kroky
-- Samostatně ověřit bod 4 a technický reconnect App Serveru.
-- Původní vizuální přejímka chatu a panelu Práce na Linuxu/iPhonu zůstává oddělená od testu doručení zprávy.
-
-### Technický důkaz
-- Zdroj Data 5363238b, logs/data_iphone_integration_targeted_20261105.log: 250 PASS. Úspěšná první CI 42006566022 patří 3f3b5b25; výsledek druhého vydání teprve doloží nová přesná účtenka a živý audit.
-- Modelové API ani soukromý send se při přejímce této UI změny nevolaly. Historické bloky níže zůstávají zachované.
+- Ověřit převzatý pilot v odděleném prostředí i registraci ve společné bráně; sjednotit čisté profily, vydat registrovaným submit_release(wait=True) a ověřit živý stav.
+- Kanonický handoff i TVBCP aktualizované společně. Historické bloky níže zůstávají zachované.
 <!-- SAMANTHA_CURRENT_STATUS_END -->
 
 Nazev: Human–Adam / vyvojove prostredi - zalozeni pracovniho proudu Layer
@@ -2974,3 +2959,23 @@ Navrhované další kroky:
 Technický důkaz:
 - Přímé uživatelské potvrzení výsledku po úpravě; žádný nový modelový tah ani nový runtime audit. Report reports/human_adam_iphone_send_failure_20261105.md.
 - Jde o dokumentační zápis. Kód, služby, sdílená provozní data, push a nasazení se neměnily.
+
+### 2026-11-05 11:58 CET — 05/P1-C: SDK proxy a přijetí bodu 3
+
+Hotovo:
+- Míla navazujícím „Funguje to!“ přijal bod 3 předchozího postupu; body 1–3 uživatelsky PASS. Bod 4 a skutečný technický reconnect zůstávají otevřené.
+- Izolovaný pilot se skutečným SDK/CLI prokázal sdílení syntetického proudového socketu dvěma klienty, přežití posluchače po uzavření proxy a blokaci opakované akce po nejistotě. CLI proxy se současným WebSocket transportem nefunguje; současný transport proti téže fixture PASS.
+
+Rozhodnutí:
+- Nová architektonická dohoda nevznikla. Doporučení Data je ponechat modernizovaný původní klient; SDK se neadoptovalo.
+
+Další krok:
+- Předat Willovi lokální testy a závěry C; integrace se v této větvi neprovádí.
+
+Navrhované další kroky:
+- Dokončit bod 4 s Mílou a samostatně autorizovaný read-only reconnect současného transportu bez turn/start, náhradního vlákna či restartu.
+- SDK migraci otevřít jen po konkrétním přínosu a samostatném rozhodnutí; vyžaduje skutečný WebSocket adaptér a zachování trvalého journalu.
+
+Technický důkaz:
+- 105 cílených testů PASS, včetně 12 nových; statická brána a pip check PASS. Report reports/codex_sdk_p1c_20261105.md a kontrolní environment JSON.
+- Jen syntetické fixture, nula placených modelových tahů. Produkční klient/runtime/UI/e-mail, role, requirements a sdílená data beze změn; bez živého auditu, restartu, integrace, push a nasazení.
