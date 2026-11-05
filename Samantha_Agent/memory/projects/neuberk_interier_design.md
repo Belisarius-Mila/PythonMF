@@ -15,6 +15,10 @@ skutečné fotografie i izolovaný příjem se shodou originálů PASS. Plná br
 samostatné nové p+n nebylo zadané. Report interior_iphone_jpeg_mpo_20261105.md.
 Původní fotografie a živý projekt se neměnily. Nový TVBCP se nezakládá.
 
+Míla následně potvrdil „Ano, nasaď prosím…“: oprava b449f805 schválená
+k Terra p+n v existujícím proudu. Konečný výsledek až podle
+logs/interior_mpo_release_20261105.log a interior_mpo_verified_20261105.log.
+
 ## Interiérový ateliér a schválené rozložení 2026-11-05
 
 Míla navázal novou infrastrukturou: Jana pracuje ze svého Macu přes Cockpit,

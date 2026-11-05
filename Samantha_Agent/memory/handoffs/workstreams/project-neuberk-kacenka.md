@@ -29,6 +29,15 @@ memory/reports/interior_iphone_jpeg_mpo_20261105.md.
 není nasazená; tento požadavek byl diagnostika aktuální chyby, nové p+n
 zatím výslovně nezaznělo. AI a chybějící TVBCP zůstávají samostatné.
 
+### Následné potvrzení vydání
+
+Míla poté výslovně potvrdil „Ano, nasaď prosím…“. Ověřená oprava b449f805
+je schválená k registrovanému Terra p+n v project-neuberk-kacenka společně
+s tímto potvrzovacím zápisem. Konečný výsledek podle účtenky
+logs/interior_mpo_release_20261105.log a následného čtecího ověření
+logs/interior_mpo_verified_20261105.log. Předchozí čekání na souhlas je
+tím překonané; úspěch se nevydává za potvrzený před dokončením úlohy.
+
 ## Aktuální vývojový krok
 
 Míla schválil rozložení Ateliér: samostatná celoobrazovková pracovní plocha,

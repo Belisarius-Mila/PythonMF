@@ -45,3 +45,11 @@ Oprava je lokální; tento diagnostický pokyn nezadal nové p+n. Nasazení
 vyžaduje samostatný pokyn podle AGENTS.md. Fyzická přejímka nahrání těchto
 fotografií v nasazeném Safari zatím není uzavřená. Data/worktree, App Server,
 e-mailová služba, originály a uživatelská data se neměnily.
+
+## Následně schválené vydání
+
+Míla výslovně potvrdil nasazení opravy b449f805: „Ano, nasaď prosím…“.
+Registrované Terra p+n v project-neuberk-kacenka vydá opravu i tento
+potvrzovací zápis. Konečná účtenka logs/interior_mpo_release_20261105.log,
+čtecí ověření logs/interior_mpo_verified_20261105.log. Fyzický opakovaný
+upload v Safari je samostatný důkaz; předběžný zápis jej nenahrazuje.
