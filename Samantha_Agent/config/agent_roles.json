@@ -30,6 +30,17 @@
           "dry_run_evidence": "data/private/simple_development_probes/3a1b667eeb634603be866357921150f5/proof.json"
         }
       ]
+    },
+    "read_only_voice": {
+      "label": "Čtecí hlasový pilot",
+      "preferred_model": "gpt-live-1",
+      "approved_models": [
+        {
+          "model": "gpt-live-1",
+          "cost_review": "Mila 2026-11-05 approved GPT-Live 1 candidate: 0.05 USD/min; explicit browser consent per <=60s pilot, estimated <=0.05 USD; watchdog is not a billing ceiling.",
+          "dry_run_evidence": "memory/reports/voice_conversation_probe_20261105.json"
+        }
+      ]
     }
   }
 }
