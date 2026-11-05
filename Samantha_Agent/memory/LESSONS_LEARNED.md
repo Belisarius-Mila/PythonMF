@@ -36,6 +36,7 @@ nebo jejichž princip lze znovu použít v jiné části projektu.
 - Řešení nalezeno: 05112026
 - Řešení: hlasový adaptér oddělit od vlastníka úlohy. Přepis není souhlas; čtecí pilot dostává jen snapshot callback. usage.seconds je kumulativní, konečný až z platného session.closed; bez něj nepředstírat konečnou cenu. Vytvoření neopakovat, pozdní známé session ID předat důvěryhodnému brokeru k úklidu. Při Stop ihned uvolnit mikrofon, data channel držet jen do finální události či timeoutu. Browserový časovač nenahrazuje serverovou kontrolu délky ani fakturační strop.
 - Ověření: 132 cílených testů PASS včetně 26 nových, skutečné metody snapshot nad syntetickým stavem a Node browserových scénářů. Jde o neaktivovaný základ, nikoli živou hlasovou přejímku; voice_conversation_p2a_20261105.md.
+- Doplnění 15/P2-B: kandidát a placená zkouška jsou dvě odlišná oprávnění. Serverová rezervace jednoho grantu musí přežít restart a vzniknout před API; při neznámém vytvoření nezakládat další relaci. Sideband reflektované audio nemá event_id, proto jej před obecným parserem vyřadit a neukládat. 32 brokerových testů, se souvisejícími moduly 91 PASS; voice_conversation_p2b_20261105.md.
 
 ### LL-095 — Unix socket nezaručuje shodný aplikační protokol
 

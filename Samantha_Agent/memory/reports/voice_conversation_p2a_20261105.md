@@ -5,6 +5,10 @@ Výchozí commit: `95ed9cdb`. Proud: `layer-human-adam-development`.
 Zdroj zadání: bod 15 návrhu `Samantha_navrh_rozvoje_a_kontinualni_agent_2026-11-04.txt`
 v Downloads. Celý bod 15 není dokončený; toto je jeho první vývojový krok.
 
+Aktuální navazující stav: Míla schválil kandidáta GPT-Live 1; serverový broker
+je připravený v 15/P2-B. Placená zkouška čeká na samostatné potvrzení.
+Viz `voice_conversation_p2b_20261105.md`; následující report je historický základ A.
+
 ## Co je připravené
 
 Samostatný protokolový adaptér a WebRTC controller, které lze po doplnění

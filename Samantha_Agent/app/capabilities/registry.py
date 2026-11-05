@@ -12,6 +12,16 @@ from app.capabilities.models import (
 
 CAPABILITIES: tuple[CapabilityRecord, ...] = (
     CapabilityRecord(
+        capability_id="create_voice_candidate_session", label="One explicitly approved synthetic voice candidate test",
+        risk=RiskLevel.EXTERNAL_SEND,
+        reads=("server-authenticated principal and CSRF", "bound synthetic read-only snapshot", "explicit GPT-Live candidate and price-reviewed one-shot grant"),
+        writes=("private durable create-attempt receipt", "one paid voice session and final usage"),
+        tool="app.communication.voice_conversation_gateway.create_candidate_session",
+        requires_confirmation=True, confirmation_policy=ConfirmationPolicy.EXACT_CURRENT_MESSAGE,
+        voice_allowed=VoicePolicy.BLOCKED, mobile_allowed=MobilePolicy.APPROVAL_CARD,
+        notes="Candidate approval alone is not a paid-test grant. At most one creation per stable grant even after restart; no production role/config edit, backend mutation, model fallback or automatic retry. Server watchdog is not a provider billing ceiling. Routes remain unmounted until separately integrated.",
+    ),
+    CapabilityRecord(
         capability_id="review_luna_development_anchors", label="Review a misquoted source anchor without another model turn",
         risk=RiskLevel.LOCAL_WRITE, reads=("exact retained Luna answer digest", "unchanged selected public source/context and role"),
         writes=("one deterministic private review receipt", "isolated copy and test evidence"),

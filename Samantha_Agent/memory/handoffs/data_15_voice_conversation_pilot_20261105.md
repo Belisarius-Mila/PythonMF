@@ -1,5 +1,29 @@
 # Data → další krok: 15/P2 přirozený hlasový rozhovor
 
+## Aktuální stav — 2026-11-05 13:43 CET, 15/P2-B
+
+Míla schválil kandidáta GPT-Live 1. Samostatná otázka na jednu placenou
+syntetickou zkoušku do 60 sekund s odhadem 0,05 USD za běžící hlas zůstává
+pending. Kandidáta znovu neschvalovat, placenou relaci zatím nevytvářet.
+
+Připravený je neaktivovaný broker, sideband/watchdog, auth/Origin/CSRF adaptér
+a trvalá rezervace grantu před jediným create. 91 cílených testů PASS;
+plná brána 2429 testů PASS, 5 PDF skipů. Bez API volání, čtení klíče,
+změny rolí/SDK, připojení do Cockpitu nebo publikování. Nová kandidátní
+operace je registrovaná a hlasové testy jsou součást standardní brány.
+
+Po potvrzení rozpočtu a délky provést jeden skutečný syntetický probe.
+Nejistý výsledek neopakovat. Teprve po přijetí probe centrální role,
+kompatibilní runtime a integrace do aktuálního Cockpitu; skutečná iPhone
+přejímka zůstává otevřená. Podrobnosti: reports/voice_conversation_p2b_20261105.md.
+
+B závisí na základu A `0e97e4de`; při převzetí obou kroků nejdříve A,
+poté B. Zachovat novější main a Willův e-mailový proud. Poslední tři
+kontroly zavření/HTTP jsou zahrnuté v 91 cílených testech; plný běh měl 2 429
+testů před přidáním těchto tří případů. Žádný skutečný modelový důkaz.
+
+## Historický základ 15/P2-A
+
 Stav: první neaktivovaný základ 15/P2-A, celý bod 15 není dokončený.
 Datum: 2026-11-05. Větev: data/parallel-20261104. Proud: layer-human-adam-development.
 

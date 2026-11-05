@@ -180,6 +180,8 @@ Tento soubor je rozcestnik dlouhodobe pameti pro Samantha Agent.
 
 ## Handoffs
 
+- `reports/voice_conversation_p2b_20261105.md`; `handoffs/data_15_voice_conversation_pilot_20261105.md` — 15/P2-B: GPT-Live 1 schválený kandidát. Placený probe do 60 s čeká na samostatné potvrzení. Neaktivovaný broker se sidebandem, serverovým dohledem a trvalým jediným pokusem připravený; 91 cílených testů PASS, plná brána 2429 PASS s 5 PDF skipy. Nula API volání, bez role/SDK/živé integrace.
+
 - `handoffs/data_15_voice_conversation_pilot_20261105.md`; `reports/voice_conversation_p2a_20261105.md` — 15/P2-A: první neaktivovaný základ čtecího hlasového rozhovoru nad snapshotem současného backendu. 132 cílených testů PASS (26 nových), statická brána PASS. GPT-Live kandidát 0,05 USD/min; žádná placená relace, změna rolí ani produkce. Další krok: volba kandidáta/rozpočtu, pak broker/sideband/watchdog a živá iPhone přejímka. Kanonický proud Human–Adam, stávající TVBCP.
 
 - `handoffs/data_05_appserver_sdk_pilot_20261104.md`; `reports/codex_sdk_p1c_20261105.md` — 2026-11-05 13:03 CET: přejímka 05/P1 uzavřená. Uživatelské body 1–4 PASS; Míla sdělil úspěšné Willovo ověření technického reconnectu. Převzaté potvrzení, bez vlastního nového živého auditu Data. Ponechat současný klient, SDK neadoptováno; další úkol dosud nezadán.

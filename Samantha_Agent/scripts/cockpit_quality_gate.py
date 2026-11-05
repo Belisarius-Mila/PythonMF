@@ -136,6 +136,8 @@ COMPILE_PATHS = (
     "app/communication/agent_roles.py",
     "scripts/luna_release_worker.py",
     "app/communication/human_adam_service.py",
+    "app/communication/voice_conversation_pilot.py",
+    "app/communication/voice_conversation_gateway.py",
     "app/communication/human_adam_images.py",
     "app/communication/trusted_external_generation.py",
     "app/communication/human_adam_ui.py",
@@ -411,6 +413,8 @@ TEST_MODULES = (
     "tests.test_safety_quick_checks",
     "tests.test_autosave_continuity",
     "tests.test_speech_transcribe",
+    "tests.test_voice_conversation_pilot",
+    "tests.test_voice_conversation_gateway",
     "tests.test_email_outbound_tools",
     "tests.test_email_work_outbox",
     "tests.test_work_repository",
@@ -656,6 +660,12 @@ def main(argv: Sequence[str] | None = None) -> int:
         [node_binary(), "--check", "-"],
         input_text=human_adam_javascript_source(),
     )
+    for path in (
+        "app/frontend/voice_pilot/conversation.js",
+        "app/frontend/voice_pilot/panel.js",
+        "tests/voice_conversation_frontend.test.cjs",
+    ):
+        run_checked("Voice candidate javascript syntax", [node_binary(), "--check", path])
     run_checked(
         "Janička R2 javascript syntax",
         [node_binary(), "--check", "-"],

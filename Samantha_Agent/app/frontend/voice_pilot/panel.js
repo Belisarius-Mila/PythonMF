@@ -30,3 +30,28 @@ window.mountSamanthaVoicePilot=function(broker) {
   window.addEventListener("pagehide",()=>conversation.dispose());
   return conversation;
 };
+
+window.makeSamanthaVoiceCandidateBroker=function(csrfToken) {
+  "use strict";
+  if(typeof csrfToken!=="string" || csrfToken.length<24) throw new Error("Chybí serverové oprávnění pilotu.");
+  let attempted=false;
+  async function post(path,body) {
+    const controller=new AbortController();
+    const timer=setTimeout(()=>controller.abort(),15000);
+    try {
+      const result=await fetch(path,{method:"POST",credentials:"same-origin",cache:"no-store",
+        signal:controller.signal,keepalive:path.endsWith("/close"),
+        headers:{"Content-Type":"application/json","X-Voice-CSRF":csrfToken},body:JSON.stringify(body)});
+      if(!result.ok) throw new Error("Hlasové spojení není potvrzené; požadavek neopakuj.");
+      return await result.json();
+    } finally {clearTimeout(timer);}
+  }
+  return {
+    create({sdp}) {
+      if(attempted) return Promise.reject(new Error("Tento pokus už byl odeslán; další relaci nevytvářím."));
+      attempted=true;
+      return post("/api/human-adam/voice-candidate/session",{sdp});
+    },
+    abandon(session_id) {return post("/api/human-adam/voice-candidate/close",{session_id});},
+  };
+};
