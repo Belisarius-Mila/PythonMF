@@ -180,7 +180,7 @@ Tento soubor je rozcestnik dlouhodobe pameti pro Samantha Agent.
 
 ## Handoffs
 
-- `reports/human_adam_iphone_send_failure_20261105.md`; `handoffs/data_05_appserver_sdk_pilot_20261104.md` — 2026-11-05 11:08 CET: Will převzal zdroj Data 5363238b po dokončení vlastního e-mailového p+n 3f3b5b25 a zeleném CI 42006566022. 250 cílených testů v aktuálním main PASS, jen paměťové konflikty sloučené. Nyní výslovně autorizované samostatné druhé p+n; fyzický iPhone retest stále otevřený a původní konkrétní příčina telefonu neprokázaná. Žádný nejistý dotaz se neopakuje.
+- `reports/human_adam_iphone_send_failure_20261105.md`; `handoffs/data_05_appserver_sdk_pilot_20261104.md` — 2026-11-05 11:41 CET: po UI opravě Míla potvrdil iPhone bod 2 PASS a správnou značku z předchozího tahu; Mac bod 1 PASS již dříve. Oprava převzatá do main jako 6972ea5c. Zbývají body 3/4 a technický reconnect; nový runtime audit se neprováděl.
 
 - `reports/codex_appserver_p1b_20261104.md`; `handoffs/data_05_appserver_sdk_pilot_20261104.md` — 2026-11-05: Will po Mílově výslovném pokynu převzal oba Datovy commity jako 1b6fd61e/ccece787; původní klient modernizovaný, SDK stále offline. 192 cílených testů: 172 PASS, 20 volitelných SDK SKIP, živý handshake/katalog serveru 0.163.0 úspěšné. Plná společná brána 2462 testů: 2442 PASS, 20 SDK SKIP. Společné p+n b6375a33 potvrzené, smoke 5/5 a CI 41938993126 success. Kanonický proud layer-human-adam-development, aktuální nasazení ověřit živým auditem.
 

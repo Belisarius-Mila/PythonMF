@@ -20,7 +20,14 @@ neodvozuje. Historická část níže popisuje stav při Datově předání.
 
 Míla potvrdil push a nasazení 05/P1-B. Převzetí původních commitů Data jako
 `1b6fd61e` a `ccece787` je doložené v historii main a Willově integračním handoffu.
-Přejímka však **není uzavřená**:
+**Aktualizace 2026-11-05 11:41 CET: bod 2 na iPhonu PASS.** Míla po úpravě potvrdil
+doručenou odpověď a správnou testovací značku z předchozího tahu. Normální
+odeslání a návaznost Mac → iPhone jsou tím uživatelsky ověřené. Návrat
+během rozpracované odpovědi, kontrola duplicit a technický reconnect App Serveru
+zůstávají samostatně neověřené. UI oprava byla převzata z `5363238b` do main
+jako `6972ea5c`; nový živý audit nasazení se při tomto paměťovém zápisu neprováděl.
+
+Původní průběh před opravou:
 
 - Bod 1 na Macu: Míla potvrdil OK.
 - Bod 2 na iPhonu: původní Mac zpráva byla viditelná, odeslaný dotaz zmizel
@@ -88,15 +95,15 @@ tvrzení o chování Mílova telefonu.
 
 ## Další krok a omezení
 
-Oprava je pouze v pracovní kopii. Bez push, integrace do main a nasazení;
-produkční přejímka iPhone tedy stále FAIL. Po samostatně autorizovaném převzetí
-a nasazení načíst čerstvou stránku a zopakovat jediný neškodný test. Úspěch
-nelze odvodit z Node VM ani ze zdravého HTTPS health.
+UI oprava je nyní doložená v main jako `6972ea5c`. Míla po úpravě potvrdil
+úspěšnou odpověď na iPhonu a návaznost testovací značky. Původní selhání bodu 2
+je tím po uživatelském retestu uzavřené; přesný původní spouštěč nebyl dodatečně
+prokázán. Tento zápis nepředstírá nový audit runtime ani další nasazení.
 
-Při případném dalším selhání už má UI zachovat text a viditelně rozlišit
-neodeslanou přípravu od nejistého výsledku. Přejímku uzavřít až po Mílově
-potvrzení skutečného výsledku na iPhonu. Technický reconnect App Serveru
-zůstává samostatným bodem.
+Další krok: zkontrolovat návrat na Mac a jediné zobrazení zpráv (bod 3),
+potom samostatně obnovu stránky během rozpracované odpovědi (bod 4). Tyto
+výsledky nejsou obsažené v samotné úspěšné odpovědi na iPhonu. Technický
+reconnect App Serveru a SDK pilot zůstávají samostatnými body.
 
 Změněný kód/testy: `human_adam_ui.py`, `test_human_adam_ui.py`,
 `human_adam_send_frontend.test.cjs`, `luna_release_frontend.test.cjs`.
