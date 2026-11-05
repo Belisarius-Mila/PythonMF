@@ -775,3 +775,30 @@ posouzení a stejná data/počítadla. Důkazy email_service_activation_20261105
 Předchozí p+n 09e6c05f658a1ce16750dfd5cd15c514 potvrzené, 2462 testů (20 SDK
 skipů), smoke 5/5; GitHub CI 41938993126 success. Žádný fyzický reboot Macu,
 nový SMTP, archivace či smazání ve schránce. Nový TVBCP nebyl založen.
+
+
+## 2026-11-05 10:37 CET — Oprava hodinového režimu po prázdném iCloud výsledku
+
+Hotovo: Diagnostika přesně vysvětlila oznámení mimo celou hodinu. iCloud
+vracel pro nulový počet nových UID úspěšné OK/[None], klient je mylně odmítal
+jako chybu; nedokončená hodina se opakovala a v 10:19 přijala novou zprávu.
+Lokální oprava prázdnou kontrolu řádně dokončí. Cíleně 118 testů PASS.
+
+Rozhodnutí: Zachován Mílův původní hodinový režim. Dřívější pokyn opravovat
+chyby a dokončit p+n do čistého repozitáře dál platí; přesná globální věta
+pro tuto službu už byla zadána. Model a rozsah úplného čtení se nemění.
+
+Další krok: Dokončit plnou bránu a řízeně přepnout pozastavenou službu na
+opravenou kopii commitu, ověřit skutečný prázdný vstup a hodinové čekání.
+
+Navrhované další kroky: Po provozním writebacku autorizované p+n; CalDAV
+zůstává samostatný krok.
+
+Technický důkaz: Read-only iCloud SEARCH OK/[None], Seznam OK/bytes s 0 UID;
+regrese před opravou ERROR/FAIL, po opravě 118 PASS včetně 10:00/10:19/11:00.
+Upgrade má testy zachování dat, zámku, cizí změny a návratu na starý job
+pozastavený. Žádný SMTP, archivace nebo smazání zpráv; služba do výměny paused.
+
+Technický výsledek před výměnou: plná brána 2473 testů, 2453 PASS a 20 SDK
+SKIP (504,5 s), logs/email_empty_search_full_gate_20261105.log. Živé prázdné
+sondy obou providerů prošly bez modelu/oznámení/posunu uložených kurzorů.

@@ -17,7 +17,7 @@ from app.workflows.commands import (
 class WorkflowCommandTests(unittest.TestCase):
     def test_email_install_and_reload_require_exact_system_confirmation(self):
         commands = {c.command_id: c for c in workflow_commands.WORKFLOW_COMMANDS}
-        for action in ("install", "verify-restart"):
+        for action in ("install", "upgrade", "verify-restart"):
             command = commands["continuous_email_service_" + action]
             self.assertTrue(command.requires_confirmation)
             self.assertEqual(command.confirmation_phrase, "Potvrzuji globální brzdu: rozumím riziku a chci pokračovat.")

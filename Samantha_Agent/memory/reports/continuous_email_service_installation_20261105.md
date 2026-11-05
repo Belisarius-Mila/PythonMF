@@ -104,3 +104,31 @@ SKIP. Plná společná brána 2462 testů: 2442 PASS, 20 SDK SKIP (377,0 s),
 logs/data_email_integration_gate_20261105.log. Upravený původní klient
 ověřil živý server 0.163.0 a katalog. SDK zůstává offline. P+n je výslovně
 autorizované, konečný stav je nutné číst z přesné účtenky a živého auditu.
+
+
+## Aktuální oprava hodinového režimu — 2026-11-05 10:37 CET
+
+- Míla potvrdil, že provozní upozornění v 08:49 skutečně dorazilo, jen ho
+  nezaznamenal. Další oznámení v 10:19 slyšel tiše a banner rychle zmizel;
+  nastavil jeho trvalé zobrazení. Doručení na iPhone tím je potvrzené.
+- Zpochybnil okamžitou reakci na novou zprávu mimo celou hodinu. Audit
+  prokázal opakované incomplete a dokončení cyklu pro 10. hodinu až 10:19;
+  zpráva měla v Date 10:18:38, Pushcut accepted v 10:19:18 CET.
+- Přímý read-only IMAP audit: iCloud na prázdné UID SEARCH vrací OK/[None],
+  Seznam OK/bytes s nulovým novým UID. Klient úspěšný iCloud výsledek chybně
+  považoval za chybu. Nešlo o zamýšlený okamžitý režim, ale minutové retry.
+- Lokální oprava přijímá pouze tento úspěšný prázdný výsledek, zachovává
+  chyby NO/BAD a vadné odpovědi. Regrese FAIL→PASS ověřuje dokončení prázdné
+  10:00 bez modelu a čekání zprávy z 10:19 do 11:00. Cíleně 118 PASS.
+- Běžící b6375a33 je do řízené výměny pozastavený (enabled=false); karty,
+  předvolby, denní počítadla i pozice schránek zůstávají zachované.
+- Nový registrovaný continuous_email_service_upgrade přepíná pouze vlastní
+  pozastavený job na kopii čistého commitu, se stejnou přesnou globální větou.
+  Stará kopie a plist/účtenka zůstanou uložené; při chybě obnoví starý job
+  pozastavený, neobnovuje starší obchodní data a nepřeruší aktivní posouzení.
+- Plná brána 2473 testů: 2453 PASS, 20 SDK SKIP (504,5 s). Další krok: lokální checkpoint, prepare/upgrade,
+  skutečné ověření prázdného vstupu a hodinové obnovy, provozní writeback
+  a autorizované p+n do čistého repozitáře. Aktivní službu nevracet na starou
+  chybnou verzi bez opravy. Nový TVBCP ani změna modelu nevznikly.
+- Důkazy: email_service_hourly_timing_diagnosis_20261105.log,
+  email_empty_search_{regression_before,targeted,live_fixed,full_gate,pause}_20261105.log.

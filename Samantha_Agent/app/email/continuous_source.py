@@ -96,6 +96,9 @@ class IMAPAgentSource:
                 raise MailboxEpochChanged("UIDVALIDITY se změnilo; výchozí pozici musí znovu určit uživatel.")
             after = int(cursor.get("after_uid", 0))
             status, data = imap.uid("SEARCH", None, "UID", f"{after + 1}:*")
+            # imaplib represents iCloud's successful empty SEARCH as [None].
+            if status == "OK" and data == [None]:
+                data = [b""]
             if status != "OK" or not data or not isinstance(data[0], bytes):
                 raise RuntimeError("Kontrola nových e-mailů selhala.")
             uids = sorted({int(uid) for uid in data[0].split() if int(uid) > after})[:limit]

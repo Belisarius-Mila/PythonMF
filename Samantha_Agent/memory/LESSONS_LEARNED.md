@@ -29,6 +29,13 @@ nebo jejichž princip lze znovu použít v jiné části projektu.
 
 ## Záznamy
 
+### LL-098 — Úspěšný prázdný IMAP SEARCH není chyba hodinové dávky
+
+- Problém: iCloud vrací při nulovém počtu nových UID `OK, [None]`; klient očekával jen bytes a nechal hodinovou kontrolu nedokončenou. Minutový retry potom zpracoval nově příchozí zprávu mimo celou hodinu.
+- Typ: opakující se
+- Řešení nalezeno: 05112026
+- Řešení: převést pouze úspěšné `OK, [None]` na prázdný seznam UID; skutečné NO/BAD a vadné odpovědi dál odmítat. Prázdnou hodinu dokončit bez FETCH/modelu a bez posunu kurzoru. Regrese reprodukovala původní selhání; po opravě nová zpráva v 10:19 čeká na 11:00. Ověřeno skutečným iCloud vstupem i cílenými testy; diagnostické čtení kurzory nemění.
+
 ### LL-096 — Git archive ve vnořeném projektu už používá relativní kořen
 
 - Problém: izolovaný test s projektem v kořeni Gitu prošel, ale příprava runtime ve skutečném Samantha_Agent pod rodičovským PythonMF skončila pathspec chybou; prefix podprojektu byl přidaný dvakrát.

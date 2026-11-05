@@ -16,15 +16,15 @@ from app.email.service_control import EmailServiceController
 
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("action", choices=("prepare", "install", "status", "pause", "resume", "verify-restart"))
+    parser.add_argument("action", choices=("prepare", "install", "upgrade", "status", "pause", "resume", "verify-restart"))
     parser.add_argument("--confirmation", default="")
     parser.add_argument("--confirmed", action="store_true")
     args = parser.parse_args()
     controller = EmailServiceController()
     try:
-        if args.action == "install":
+        if args.action in {"install", "upgrade"}:
             digest = json.loads(controller.plan_path.read_text())["digest"]
-            result = controller.install(confirmation=args.confirmation, plan_digest=digest)
+            result = getattr(controller, args.action)(confirmation=args.confirmation, plan_digest=digest)
         elif args.action == "verify-restart":
             result = controller.verify_restart(confirmation=args.confirmation)
         elif args.action in {"pause", "resume"}:

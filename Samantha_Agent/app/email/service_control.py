@@ -16,7 +16,7 @@ import time
 from uuid import uuid4
 
 from app.communication.agent_roles import EMAIL_ROLE, load_role
-from app.file_persistence import atomic_write_text, exclusive_file_lock
+from app.file_persistence import atomic_write_text, exclusive_file_lock, FileLockTimeoutError
 from app.work_repository import JsonWorkRepository
 from .continuous_agent import ContinuousEmailAgent
 from .continuous_source import IMAPAgentSource, MailboxEpochChanged
@@ -226,6 +226,79 @@ class EmailServiceController:
                 _write(self.receipt_path, receipt)
                 raise
             return {"ok": True, "installed": True, "first_check": health, "source_head": plan["source_head"]}
+
+    def upgrade(self, *, confirmation: str, plan_digest: str, verifier=None) -> dict:
+        """Switch only the owned paused job; retain both releases and rollback data."""
+        if confirmation != CONFIRMATION:
+            raise ValueError("Aktualizace LaunchAgentu vyžaduje přesnou větu globální brzdy.")
+        with exclusive_file_lock(self.root / "installation", timeout=0):
+            plan = self._plan(plan_digest)
+            current = self.status()
+            if not current["owned"] or plan["settings"]["enabled"]:
+                raise ValueError("Aktualizovat lze jen vlastní pozastavenou službu.")
+            old = JsonWorkRepository(self.receipt_path).read()
+            if old["source_head"] == plan["source_head"]:
+                raise ValueError("Tento kód je již nainstalovaný; použij obnovení služby.")
+            old_xml = self.target.read_text()
+            new_xml = plistlib.dumps(plan["plist"]).decode()
+            new_hash = hashlib.sha256(new_xml.encode()).hexdigest()
+            receipt = {**old, "source_head": plan["source_head"], "plan_digest": plan_digest,
+                       "runtime": plan["runtime"], "plist_sha256": new_hash,
+                       "previous_source_head": old["source_head"], "status": "upgrading"}
+
+            def restore():
+                _write(self.settings_path, {**plan["settings"], "enabled": False})
+                if (self.target.is_symlink() or not self.target.exists()
+                        or hashlib.sha256(self.target.read_bytes()).hexdigest() not in {old["plist_sha256"], new_hash}):
+                    _write(self.receipt_path, {**receipt, "status": "upgrade_attention_disabled"})
+                    raise ValueError("Cizí změnu systémového souboru nelze přepsat při obnově.")
+                self._launchctl("bootout", self.job, check=False)
+                atomic_write_text(self.target, old_xml)
+                _write(self.receipt_path, {**old, "status": "upgrade_failed_disabled", "failed_at": _stamp()})
+                if current["loaded"]:
+                    self._launchctl("bootstrap", f"gui/{os.getuid()}", str(self.target), check=False)
+
+            # A busy worker must fail before copying/replacing any system files.
+            with exclusive_file_lock(self.root / "service_check", timeout=0):
+                self.selector()
+                runtime = Path(plan["runtime"])
+                if runtime.exists() or runtime.is_symlink() or self.support.is_symlink() or runtime.parent.is_symlink():
+                    raise ValueError("Cílová kopie už existuje; zachovaná data vyžadují servisní kontrolu.")
+                backup = self.root / "service_backups" / (uuid4().hex + ".json")
+                _write(backup, {"receipt": old, "plist_xml": old_xml, "saved_at": _stamp()})
+                runtime.parent.mkdir(parents=True, exist_ok=True)
+                shutil.copytree(plan["stage"], runtime, symlinks=True)
+                try:
+                    # Recheck ownership immediately before the atomic replacement.
+                    if not self.status()["owned"]:
+                        raise ValueError("Vlastnictví služby se během přípravy změnilo.")
+                    if current["loaded"]:
+                        self._launchctl("bootout", self.job)
+                    atomic_write_text(self.target, new_xml)
+                    _write(self.receipt_path, receipt)
+                    _write(self.settings_path, {**plan["settings"], "enabled": True})
+                    self._launchctl("bootstrap", f"gui/{os.getuid()}", str(self.target))
+                    self._launchctl("enable", self.job)
+                except Exception:
+                    restore()
+                    raise
+            started = _stamp()
+            try:
+                self._launchctl("kickstart", self.job)
+                health = (verifier or self._wait_check)(started)
+            except Exception:
+                _write(self.settings_path, {**plan["settings"], "enabled": False})
+                try:
+                    with exclusive_file_lock(self.root / "service_check", timeout=0):
+                        restore()
+                except FileLockTimeoutError:
+                    # Preserve an active assessment; pause stops the next message.
+                    _write(self.receipt_path, {**receipt, "status": "upgrade_attention_disabled"})
+                raise
+            receipt.update(status="installed", verified_at=_stamp(), upgrade_check=health)
+            _write(self.receipt_path, receipt)
+            return {"ok": True, "upgraded": True, "source_head": plan["source_head"],
+                    "previous_source_head": old["source_head"], "health": health}
 
     def pause(self, *, confirmed: bool) -> dict:
         if confirmed is not True:

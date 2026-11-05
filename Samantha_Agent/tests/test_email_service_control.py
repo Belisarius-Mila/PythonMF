@@ -54,6 +54,7 @@ class ServiceControlTests(unittest.TestCase):
         self.git("-c", "user.name=Synthetic", "-c", "user.email=synthetic@example.test", "commit", "-m", "fixture")
         self.loaded = False
         self.bootstrap_fails = False
+        self.bootstrap_failures = 0
         self.system_calls = []
         self.sources = {name: Source(name) for name in ("icloud", "seznam")}
         role = load_role(self.project / "config/agent_roles.json", role=EMAIL_ROLE)
@@ -79,7 +80,8 @@ class ServiceControlTests(unittest.TestCase):
         if argv[1] == "print":
             code = 0 if self.loaded else 113
         elif argv[1] == "bootstrap":
-            code = 5 if self.bootstrap_fails else 0
+            code = 5 if self.bootstrap_fails or self.bootstrap_failures else 0
+            self.bootstrap_failures = max(0, self.bootstrap_failures - 1)
             self.loaded = not code
         elif argv[1] == "bootout":
             self.loaded = False
@@ -202,3 +204,96 @@ class ServiceControlTests(unittest.TestCase):
         self.assertEqual(self.control._wait_check("2026-11-05T00:00:00+00:00")["status"], "outside_hours")
         path.write_text(json.dumps({"started_at": "2026-11-05T00:01:00+00:00", "status": "failed"}))
         with self.assertRaises(RuntimeError): self.control._wait_check("2026-11-05T00:00:00+00:00")
+
+    def prepare_upgrade(self):
+        self.prepare()
+        self.install()
+        self.old_plan = self.plan
+        self.old_receipt = json.loads(self.control.receipt_path.read_text())
+        self.old_plist = self.control.target.read_bytes()
+        self.old_state = self.control.worker.status()
+        self.control.pause(confirmed=True)
+        (self.project / "app/example.py").write_text("value = 2\n")
+        self.git("add", "app/example.py")
+        self.git("-c", "user.name=Synthetic", "-c", "user.email=synthetic@example.test", "commit", "-m", "upgrade fixture")
+        self.prepare()
+
+    def upgrade(self, verifier=None, confirmation=CONFIRMATION):
+        return self.control.upgrade(confirmation=confirmation, plan_digest=self.plan["plan_digest"],
+            verifier=verifier or (lambda started: {"started_at": started, "status": "already_completed"}))
+
+    def test_upgrade_retains_old_release_and_all_business_state(self):
+        self.prepare_upgrade()
+        result = self.upgrade()
+        self.assertTrue(result["upgraded"])
+        self.assertEqual(result["previous_source_head"], self.old_plan["source_head"])
+        self.assertEqual(self.control.worker.status(), self.old_state)
+        self.assertEqual((Path(self.old_plan["runtime"]) / "app/example.py").read_text(), "value = 1\n")
+        self.assertEqual((Path(self.plan["runtime"]) / "app/example.py").read_text(), "value = 2\n")
+        self.assertTrue(self.control.status()["owned"])
+        self.assertTrue(self.control.status()["loaded"])
+        self.assertTrue(self.control.status()["enabled"])
+        self.assertEqual(self.control.status()["source_head"], self.plan["source_head"])
+        self.assertEqual(len(list((self.control.root / "service_backups").glob("*.json"))), 1)
+
+    def test_upgrade_requires_exact_phrase_and_paused_service(self):
+        self.prepare_upgrade()
+        with self.assertRaises(ValueError): self.upgrade(confirmation="ano")
+        settings = json.loads(self.control.settings_path.read_text())
+        settings["enabled"] = True
+        self.control.settings_path.write_text(json.dumps(settings))
+        with self.assertRaises(ValueError): self.upgrade()
+        self.assertEqual(self.control.target.read_bytes(), self.old_plist)
+
+    def test_upgrade_never_interrupts_active_worker_or_copies_system_files(self):
+        self.prepare_upgrade()
+        with exclusive_file_lock(self.control.root / "service_check", timeout=0):
+            with self.assertRaises(FileLockTimeoutError): self.upgrade()
+        self.assertFalse(Path(self.plan["runtime"]).exists())
+        self.assertTrue(self.loaded)
+        self.assertEqual(self.control.target.read_bytes(), self.old_plist)
+
+    def test_upgrade_refuses_foreign_plist(self):
+        self.prepare_upgrade()
+        self.control.target.write_text("foreign")
+        with self.assertRaises(ValueError): self.upgrade()
+        self.assertEqual(self.control.target.read_text(), "foreign")
+        self.assertFalse(Path(self.plan["runtime"]).exists())
+
+    def test_upgrade_bootstrap_failure_restores_old_job_paused(self):
+        self.prepare_upgrade()
+        self.bootstrap_failures = 1
+        with self.assertRaises(RuntimeError): self.upgrade()
+        self.assertEqual(self.control.target.read_bytes(), self.old_plist)
+        status = self.control.status()
+        self.assertTrue(status["owned"] and status["loaded"])
+        self.assertFalse(status["enabled"])
+        self.assertEqual(status["source_head"], self.old_receipt["source_head"])
+        self.assertEqual(self.control.worker.status(), self.old_state)
+        self.assertTrue(Path(self.plan["runtime"]).exists())
+
+    def test_upgrade_first_check_failure_restores_old_job_paused(self):
+        self.prepare_upgrade()
+        def fail(started): raise RuntimeError("synthetic startup failure")
+        with self.assertRaises(RuntimeError): self.upgrade(verifier=fail)
+        self.assertEqual(self.control.target.read_bytes(), self.old_plist)
+        self.assertTrue(self.control.status()["loaded"])
+        self.assertFalse(self.control.status()["enabled"])
+        self.assertEqual(self.control.worker.status(), self.old_state)
+
+    def test_upgrade_rollback_preserves_foreign_edit(self):
+        self.prepare_upgrade()
+        def edit_then_fail(started):
+            self.control.target.write_text("manual edit during startup")
+            raise RuntimeError("synthetic failure")
+        with self.assertRaises(ValueError): self.upgrade(verifier=edit_then_fail)
+        self.assertEqual(self.control.target.read_text(), "manual edit during startup")
+        self.assertFalse(load_settings(self.control.settings_path).enabled)
+
+    def test_upgrade_refuses_same_head(self):
+        self.prepare()
+        self.install()
+        self.control.pause(confirmed=True)
+        self.prepare()
+        with self.assertRaises(ValueError): self.upgrade()
+        self.assertTrue(self.control.status()["owned"])

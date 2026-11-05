@@ -4,6 +4,7 @@ import json
 import tempfile
 import unittest
 from dataclasses import replace
+from datetime import datetime
 from email.message import EmailMessage
 from pathlib import Path
 from types import SimpleNamespace
@@ -386,6 +387,41 @@ class IMAPSourceTests(unittest.TestCase):
     def test_search_failure_is_not_empty_success(self):
         source, _ = self.make_source(search_status="NO")
         with self.assertRaises(RuntimeError): source.scan({})
+
+    def test_successful_empty_imap_search_is_empty_without_body_fetch(self):
+        for payload in (None, b""):
+            with self.subTest(payload=payload):
+                source, calls = self.make_source(uids=payload)
+                scan = source.scan({"uidvalidity": "10", "after_uid": 3})
+                self.assertEqual(scan.messages, ())
+                self.assertFalse(any(call[0] == "FETCH" for call in calls))
+
+    def test_empty_icloud_hour_completes_and_later_mail_waits_for_next_hour(self):
+        from app.email.hourly_agent import HourlyEmailScheduler
+        empty, _ = self.make_source(uids=None)
+        later, calls = self.make_source(uids=b"4")
+        with tempfile.TemporaryDirectory() as directory:
+            worker = ContinuousEmailAgent(Path(directory))
+            worker._update(lambda d: d["sources"].update({empty.key: {"uidvalidity": "10", "after_uid": 3}}))
+            scheduler = HourlyEmailScheduler(worker)
+            now = datetime.fromisoformat("2026-11-05T10:00:00+01:00")
+            seen = []
+            def assess(message):
+                seen.append(message.source.uid)
+                return proposal()
+            self.assertEqual(scheduler.tick([empty], assess, now=now), {"status": "completed", "proposals": 0})
+            self.assertEqual(scheduler.tick([later], assess, now=now.replace(minute=19))["status"], "already_completed")
+            self.assertEqual(calls, [])
+            self.assertEqual(seen, [])
+            self.assertEqual(worker.status()["sources"][empty.key]["after_uid"], 3)
+            self.assertEqual(scheduler.tick([later], assess, now=now.replace(hour=11))["proposals"], 1)
+            self.assertEqual(seen, ["4"])
+
+    def test_rejected_or_malformed_search_does_not_become_empty_success(self):
+        for status, payload in (("NO", None), ("BAD", None), ("OK", "unexpected")):
+            source, calls = self.make_source(uids=payload, search_status=status)
+            with self.assertRaises(RuntimeError): source.scan({"uidvalidity": "10", "after_uid": 3})
+            self.assertFalse(any(call[0] == "FETCH" for call in calls))
 
     def test_uidvalidity_is_required(self):
         source, _ = self.make_source(validity=None)
