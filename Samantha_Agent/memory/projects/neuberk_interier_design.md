@@ -1,5 +1,44 @@
 # Neuberk interier design
 
+
+## 2026-11-05 21:04 CET — schválený živý AI pilot a příprava nasazení
+
+Míla přesnou větou globální brzdy schválil Terra/high, jeden rozbor vybraných
+soukromých podkladů, jeden obrazový požadavek, následné Terra p+n a registrovaný
+upgrade kompatibility vlastní e-mailové služby. Není nutné souhlas opakovat.
+
+Živý pilot je přijatý. Proběhl právě jeden potvrzený chatový tah a jeden
+potvrzený obrazový tah přes původní sdílený socket/server 0.163.0. Obrazový tah
+vrátil dva platné PNG (1672 × 941) a rozporný chybový text; oba skutečné
+výsledky byly místně ověřené a uložené jako dvě neměnné AI varianty bez dalšího
+modelu. UI stav vychází z ověřených artefaktů a nabízí otevření obou variant.
+Žádný další placený pilot se nespouštěl. Původní zadání má stále revizi 7,
+původní podklady zachované; model dostal jen jeden explicitně vybraný podklad.
+
+Dvě přípravná selhání nepřijala žádný modelový tah. Dokumentovaný readOnly.access
+server odmítá; používá se explicitně povolené permission-profile API, soukromý
+profil pouze v konfiguraci konkrétního vlákna, minimální systémové čtení a čtení
+snapshotu bez zápisu/sítě. Server musí potvrdit přesný profil, cwd, model a
+approvalPolicy=never. Prázdná konfigurace permissions=null je ošetřená.
+Pokračování přípravy zachovalo původní job/client ID/vlákno a vyžadovalo
+nečinné vlákno, pouze metadatový rollout a doloženou sondou zakázané odesílání.
+Timeout ani skutečný dřívější tah opakovat nelze. Globální konfigurace a App Server
+se neměnily. Rychlost je výslovně Standard; zděděné priority/Fast se nepoužije.
+
+Kritický modelový klient, instrukce a oprávnění mají otisk skutečné exekuce.
+Následná oprava pouze zpracování obrazových artefaktů byla ověřená přehráním
+původních terminálních journalů; změna exekučního otisku takové ověření blokuje.
+Důkaz: logs/interior_ai_pilot_verified_20261105.log; cílených 133 testů PASS
+včetně 4 Node DOM scénářů; závěrečná plná brána PASS: 2574 testů,
+0 chyb, 31 přeskočených (393,754 s). Soukromé důkazy, fotografie
+a odpovědi zůstávají mimo Git. Centrální role ještě není zapsaná ani aktivní.
+
+Další krok: checkpoint a registrované kompatibilní p+n přes Terru,
+upgrade vlastní e-mailové kopie se zachováním business stavu, potom aktivace role
+z přijatého důkazu a závěrečné p+n. Nový TVBCP stále nebyl domluvený.
+Starší záznam o čekajícím souhlasu níže je historický, nyní překonaný.
+
+
 ## 2026-11-05 — skutečný AI architekt připravený lokálně
 
 Míla zadal zapojení AI. Nové lokální rozhraní má rozhovor nad explicitně

@@ -18,9 +18,9 @@ CAPABILITIES: tuple[CapabilityRecord, ...] = (
         notes="No model calls, replay, input snapshots, thread IDs or raw receipts in public output.",
     ),
     CapabilityRecord(
-        capability_id="interior_ai_request", label="Ask the architect or create one interior concept image",
+        capability_id="interior_ai_request", label="Ask the architect or request interior concept images",
         risk=RiskLevel.EXTERNAL_SEND, reads=("explicit selected private previews, annotations, saved draft and scoped conversation",),
-        writes=("durable private AI journal", "immutable room-owned image variant after confirmed result"),
+        writes=("durable private AI journal", "bounded immutable room-owned image variants after confirmed result"),
         tool="app.interior_ai.InteriorAI.start", requires_confirmation=True,
         confirmation_policy=ConfirmationPolicy.EXACT_CURRENT_MESSAGE,
         notes="Dedicated user AI button. Approved central role only, frozen inputs, stable identity, no background generation or automatic retry, no other projects or connectors.",
@@ -28,7 +28,7 @@ CAPABILITIES: tuple[CapabilityRecord, ...] = (
     CapabilityRecord(
         capability_id="interior_ai_recover", label="Recover the original architect result without another paid turn",
         risk=RiskLevel.LOCAL_WRITE, reads=("original room-owned result journal or original App Server thread",),
-        writes=("verified original result and at most one immutable image variant",),
+        writes=("verified original result and at most four immutable image variants",),
         tool="app.interior_ai.InteriorAI.recover", requires_confirmation=True,
         confirmation_policy=ConfirmationPolicy.SUMMARY_BEFORE_ACTION,
         notes="Read original thread only; never resume, thread/start or turn/start. Result and request identity remain bound to the original room.",
@@ -36,10 +36,10 @@ CAPABILITIES: tuple[CapabilityRecord, ...] = (
     CapabilityRecord(
         capability_id="interior_ai_probe", label="Run a price-reviewed bounded architect pilot",
         risk=RiskLevel.EXTERNAL_SEND, reads=("explicit model/cost review and selected room image inputs",),
-        writes=("private probe proof", "at most one analysis and one optional image result in the selected room"),
+        writes=("private probe proof", "at most one analysis and one optional image request in the selected room"),
         tool="app.interior_ai_activation.probe_candidate", requires_confirmation=True,
         confirmation_policy=ConfirmationPolicy.EXACT_CURRENT_MESSAGE,
-        notes="Explicit pilot choice required. Private per-probe role binding only; production config unchanged. Replayed probe identity never starts another paid request.",
+        notes="Explicit pilot choice required. Private per-probe role binding only; production config unchanged. Replayed identity never starts another paid request. Explicit continue_verified_empty requires idle owned thread, matching metadata-only rollout and no accepted turn; preparation recovery additionally requires a source-bound no-turn diagnostic. revalidate_results replays only original terminal journals with unchanged execution digest and selected-input hashes; no RPC/model call.",
     ),
     CapabilityRecord(
         capability_id="interior_ai_activate", label="Activate the reviewed architect role after compatible deployment",

@@ -22,6 +22,8 @@ class FakeDriver:
         self.calls = []
         self.fail = False
         self.with_image = False
+        self.outputs = None
+        self.answer = "Ponech dveře a ověř rozměry."
 
     def selection(self):
         return {"role": "interior_architect", "model": "approved-test", "reasoning_effort": "high", "policy_digest": "a" * 64}
@@ -31,8 +33,8 @@ class FakeDriver:
         on_thread("synthetic-thread")
         if self.fail:
             raise TimeoutError("PRIVATE_TRANSPORT_ERROR")
-        return {"answer": "Ponech dveře a ověř rozměry.", "receipt": {"delivered": True}, "images":
-            [{"result": base64.b64encode(image_bytes()).decode()}] if self.with_image else []}
+        images = [{"result": base64.b64encode(image_bytes()).decode()}] if self.with_image else []
+        return {"answer": self.answer, "receipt": {"delivered": True}, "images": self.outputs if self.outputs is not None else images}
 
 
 class InteriorAITests(unittest.TestCase):
@@ -131,6 +133,44 @@ class InteriorAITests(unittest.TestCase):
         self.ai.start(self.payload(mode="image")); self.queue.pop()()
         self.assertEqual(self.jobs()[0]["status"], "no_image")
         self.assertEqual(self.store.state(self.project, self.room)["room"]["variants"], {})
+
+    def test_multiple_real_outputs_survive_false_error_text_and_recovery_without_model(self):
+        self.driver.outputs = [{"result":base64.b64encode(image_bytes(size=size)).decode()} for size in ((600,400),(800,400))]
+        self.driver.answer = "PRIVATE_FALSE_ERROR: send again"
+        payload = self.payload(mode="image")
+        job_id = self.ai.start(payload)["request_id"]; self.queue.pop()()
+        job = self.jobs()[0]
+        self.assertEqual(job["status"], "completed")
+        self.assertEqual(job["output_count"], 2)
+        self.assertEqual(len(job["variant_ids"]), 2)
+        self.assertNotIn("PRIVATE_FALSE_ERROR", str(job))
+        state = self.store.state(self.project,self.room)
+        self.assertEqual(len(state["room"]["variants"]), 2)
+        self.assertEqual(state["draft"]["revision"], 1)
+        self.assertNotIn("PRIVATE_FALSE_ERROR", str(state))
+        for variant_id in job["variant_ids"]:
+            variant = state["room"]["variants"][variant_id]
+            raw,_ = self.store.asset(self.project,self.room,variant["image_source_id"],"preview")
+            with Image.open(io.BytesIO(raw)) as image: image.verify()
+        self.ai.recover(self.project,self.room,job_id)
+        self.assertTrue(self.ai.start(payload)["replayed"])
+        self.assertEqual(len(self.driver.calls), 1)
+        self.assertEqual(len(self.store.state(self.project,self.room)["room"]["variants"]), 2)
+
+    def test_identical_encoded_outputs_create_one_variant(self):
+        image = {"result":base64.b64encode(image_bytes()).decode()}
+        self.driver.outputs = [image, image.copy()]
+        self.ai.start(self.payload(mode="image")); self.queue.pop()()
+        self.assertEqual(self.jobs()[0]["output_count"], 1)
+
+    def test_excessive_output_count_is_retained_and_blocks_new_paid_request(self):
+        self.driver.outputs = [{"result":base64.b64encode(image_bytes()).decode()} for _ in range(5)]
+        job_id = self.ai.start(self.payload(mode="image"))["request_id"]; self.queue.pop()()
+        self.assertEqual(self.jobs()[0]["status"], "result_ready")
+        self.assertTrue((self.store.root/"ai_inputs"/job_id/"result.json").exists())
+        self.assertEqual(self.store.state(self.project,self.room)["room"]["variants"], {})
+        with self.assertRaises(AtelierConflict):self.ai.start(self.payload(mode="image"))
+        self.assertEqual(len(self.driver.calls), 1)
 
     def test_altered_snapshot_stops_without_a_paid_turn(self):
         job_id = self.ai.start(self.payload())["request_id"]

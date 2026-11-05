@@ -29,6 +29,20 @@ nebo jejichž princip lze znovu použít v jiné části projektu.
 
 ## Záznamy
 
+### LL-103 — Chybový text modelu nemusí znamenat ztracený obrazový výsledek
+
+- Problém: jeden obrazový tah vrátil dvě dokončené imageGeneration položky s platnými PNG, ale text tvrdil chybu a doporučoval nové odeslání.
+- Typ: opakující se
+- Řešení nalezeno: 05112026
+- Řešení: před jakýmkoli dalším modelem ověřit původní terminální účtenku a uložené artefakty. Jedinečné platné výstupy převzít jako samostatné varianty (omezená dávka), duplicity sloučit; UI oznámí ověřené uložení místo nepravdivé rady k opakování. Při opravě pouze zpracování výsledku lze lokálně přehrát původní journal, pokud modelový klient, instrukce, oprávnění a input hashes zůstávají přesně stejné. Změna exekučního otisku, vadná účtenka nebo výstup přehrání blokuje. Ověřeno skutečnými dvěma PNG z jednoho tahu a regresí bez nového RPC/modelu.
+
+### LL-102 — Dokumentovaný sandbox musí potvrdit skutečný App Server
+
+- Problém: server 0.163.0 odmítl dokumentované readOnly.access; vygenerované schéma místo něj zpřístupňuje pojmenovaný permission profile přes explicitní experimentalApi.
+- Typ: opakující se
+- Řešení nalezeno: 05112026
+- Řešení: nejprve schéma konkrétního binárního serveru a neplacený command/exec preflight. Pro Ateliér pouze vlastní per-thread profil s minimálním systémovým čtením a jedním snapshot root, bez sítě/zápisu; žádná změna globální konfigurace nebo restart. Potvrdit přesný activePermissionProfile, cwd, model a never approval, bez širšího fallbacku. project_doc_max_bytes=0 je nutné znovu předat i při resume. Globální priority/Fast nepřebírat do Standard pilotu: explicitní serviceTierForTurn=default. Běžný textový klient zůstává bez opt-in a beze změny protokolu.
+
 ### LL-101 — Unix socket nezaručuje shodný aplikační protokol
 
 - Problém: kandidátní SDK konfigurace s `app-server proxy --sock` vypadá jako náhrada přímého Unix spojení; současná Samantha ale používá WebSocket a CLI proxy přenáší prosté bajty.

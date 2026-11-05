@@ -180,7 +180,7 @@ Tento soubor je rozcestnik dlouhodobe pameti pro Samantha Agent.
 
 ## Handoffs
 
-- `reports/interior_ai_integration_20261105.md`; `handoffs/workstreams/project-neuberk-kacenka.md`; `projects/neuberk_interier_design.md` — 5. 11.: místní AI rozhovor a skutečné obrazové varianty připravené; 145 cílených kontrol PASS, plná brána 2559 testů / 0 chyb / 31 přeskočených PASS; lokální krok dokončený. Žádný placený pilot ani nová role/nasazení zatím neproběhly. Čeká volba Terra/high a rozsahu pilotu. Aktivace vyžaduje kompatibilní Cockpit i registrovaný upgrade staršího parseru e-mailové kopie ac9f3bed s přesnou globální větou; nedávat interior_architect do sdíleného JSON před těmito branami.
+- `reports/interior_ai_integration_20261105.md`; `handoffs/workstreams/project-neuberk-kacenka.md`; `projects/neuberk_interier_design.md` — 5. 11.: Míla schválil celý pilot, Terra p+n a servisní upgrade přesnou globální větou. Přijatý skutečný pilot Terra/high Standard: 1 chat + 1 obrazový tah, 2 skutečné obrazové varianty převzaté z původního journalu bez nového modelu; 133 cílených testů a plná brána 2574 / 0 chyb / 31 SKIP PASS. Centrální role zatím neaktivní; následuje kompatibilní runtime, registrovaný upgrade starého e-mailového parseru a závěrečná aktivace/p+n. Nový TVBCP dosud nedomluvený.
 
 - `reports/interior_iphone_jpeg_mpo_20261105.md`; `handoffs/workstreams/project-neuberk-kacenka.md` — 5. 11.: iPhone JPEG do 2,4 MB odmítané jako MPO se dvěma obrazy. Lokální oprava používá hlavní obraz a uchovává celý originál, limity zůstávají. 30 cílených testů a tři skutečné fotografie PASS; plná brána 2530 testů / 31 SKIP PASS. Následné Terra p+n výslovně potvrzené; konečná účtenka logs/interior_mpo_release_20261105.log a *_verified_*.log.
 

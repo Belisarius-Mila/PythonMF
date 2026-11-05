@@ -24,6 +24,54 @@ from app.codex_appserver import (
 
 
 class CodexContractTests(unittest.TestCase):
+    def test_named_permission_profile_is_explicit_and_keeps_legacy_defaults(self):
+        transport = _ScriptedTransport(completed_items=[])
+        with patch("app.codex_appserver.read_codex_version", return_value=CodexVersion.parse("codex-cli 0.163.0")), patch.object(transport, "request", wraps=transport.request) as request:
+            client = CodexAppServerClient(transport_factory=lambda **_: transport, experimental_api=True)
+        self.assertEqual(request.call_args.args[1]["capabilities"], {"experimentalApi": True})
+        reply = {"thread": {"id": "profile-thread"}, "model": "approved", "cwd": str(Path.cwd()),
+                 "approvalPolicy": "never", "activePermissionProfile": {"id": "atelier-test", "extends": None},
+                 "sandbox": {"type": "readOnly", "networkAccess": False}}
+        with patch.object(transport, "request", return_value=reply) as request:
+            client.start_thread(cwd=Path.cwd(), model="approved", permission_profile="atelier-test")
+            params = request.call_args.args[1]
+            self.assertEqual(params["permissions"], "atelier-test")
+            self.assertNotIn("sandbox", params)
+            client.resume_thread("profile-thread", cwd=Path.cwd(), model="approved", permission_profile="atelier-test",
+                                 config_overrides={"project_doc_max_bytes": 0})
+            self.assertTrue(request.call_args.args[1]["excludeTurns"])
+            self.assertNotIn("sandbox", request.call_args.args[1])
+
+    def test_profile_fallback_broader_permissions_and_model_change_are_rejected(self):
+        transport = _ScriptedTransport(completed_items=[])
+        client = self.client(transport); client.experimental_api = True
+        base = {"thread": {"id": "profile-thread"}, "model": "approved", "cwd": str(Path.cwd()),
+                "approvalPolicy": "never", "activePermissionProfile": {"id": "atelier-test", "extends": None},
+                "sandbox": {"type": "readOnly", "networkAccess": False}}
+        for change in ({"activePermissionProfile": {"id": ":read-only"}},
+                       {"activePermissionProfile": {"id": "atelier-test", "extends": ":read-only"}},
+                       {"sandbox": {"type": "readOnly", "networkAccess": True}}, {"model": "other"},
+                       {"cwd": "/another"}, {"approvalPolicy": "on-request"}):
+            with patch.object(transport, "request", return_value=base | change) as request, self.assertRaises(AppServerContractError):
+                client.start_thread(cwd=Path.cwd(), model="approved", permission_profile="atelier-test")
+            self.assertEqual(request.call_args.args[0], "thread/start")
+
+    def test_profile_turn_omits_legacy_policy_and_requires_opt_in(self):
+        transport = _ScriptedTransport(completed_items=[])
+        client = self.client(transport)
+        with patch.object(transport, "request") as request, self.assertRaises(AppServerContractError):
+            client.send_text(thread_id="thread-1", text="hello", permission_profile="atelier-test", client_message_id="message-1")
+        request.assert_not_called()
+        client.experimental_api = True
+        with patch.object(transport, "request", wraps=transport.request) as request:
+            client.send_text(thread_id="thread-1", text="hello", permission_profile="atelier-test", client_message_id="message-1", service_tier_for_turn="default")
+        self.assertEqual(request.call_args.args[1]["permissions"], "atelier-test")
+        self.assertEqual(request.call_args.args[1]["serviceTierForTurn"], "default")
+        self.assertNotIn("sandboxPolicy", request.call_args.args[1])
+        with patch.object(transport, "request") as request, self.assertRaises(AppServerContractError):
+            client.send_text(thread_id="thread-1", text="hello", permission_profile="atelier-test", sandbox_policy={"type": "readOnly"})
+        request.assert_not_called()
+
     def test_local_images_are_explicit_input_items_and_keep_the_same_delivery_contract(self):
         transport = _ScriptedTransport(completed_items=[])
         client = self.client(transport)

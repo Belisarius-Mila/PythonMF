@@ -454,7 +454,11 @@ class CodexAppServerClient:
         codex_binary: str = "codex",
         timeout: float = 120.0,
         transport_factory: Callable[..., StdioAppServerTransport] = StdioAppServerTransport,
+        experimental_api: bool = False,
     ):
+        if type(experimental_api) is not bool:
+            raise AppServerContractError("Neplatné povolení experimentálního protokolu.")
+        self.experimental_api = experimental_api
         self.codex_binary = codex_binary
         self.connection_id = uuid.uuid4().hex
         self.version = read_codex_version(codex_binary)
@@ -469,7 +473,7 @@ class CodexAppServerClient:
                         "title": "Samantha App-server Core",
                         "version": "0.1.0",
                     },
-                    "capabilities": None,
+                    "capabilities": {"experimentalApi": True} if experimental_api else None,
                 },
             )
             # Check before any thread operation. In particular, a compatibility
@@ -495,6 +499,7 @@ class CodexAppServerClient:
         model: str | None = None,
         config_overrides: dict[str, Any] | None = None,
         base_instructions: str | None = None,
+        permission_profile: str | None = None,
     ) -> str:
         params: dict[str, Any] = {
             "cwd": str(cwd.resolve()),
@@ -509,7 +514,9 @@ class CodexAppServerClient:
             params["config"] = dict(config_overrides)
         if base_instructions is not None:
             params["baseInstructions"] = base_instructions
+        self._permission_params(params, permission_profile, legacy="sandbox")
         result = self.transport.request("thread/start", params)
+        self._verify_permission_profile(result, permission_profile, model=model, cwd=cwd)
         return self._thread_id(result, operation="thread/start")
 
     def resume_thread(
@@ -521,6 +528,9 @@ class CodexAppServerClient:
         sandbox: str = "read-only",
         approval_policy: str = "never",
         model: str | None = None,
+        config_overrides: dict[str, Any] | None = None,
+        base_instructions: str | None = None,
+        permission_profile: str | None = None,
     ) -> str:
         expected = str(thread_id or "").strip()
         if not expected:
@@ -535,11 +545,37 @@ class CodexAppServerClient:
         }
         if model:
             params["model"] = model
+        if config_overrides is not None:
+            params["config"] = dict(config_overrides)
+        if base_instructions is not None:
+            params["baseInstructions"] = base_instructions
+        self._permission_params(params, permission_profile, legacy="sandbox")
         result = self.transport.request("thread/resume", params)
+        self._verify_permission_profile(result, permission_profile, model=model, cwd=cwd)
         resumed = self._thread_id(result, operation="thread/resume")
         if resumed != expected:
             raise AppServerContractError("App-server obnovil jiné vlákno.")
         return resumed
+
+    def _permission_params(self, params, profile, *, legacy):
+        if profile is None:
+            return
+        if (not self.experimental_api or not isinstance(profile, str)
+                or not re.fullmatch(r"[a-zA-Z][a-zA-Z0-9_-]{0,79}", profile)):
+            raise AppServerContractError("Profil vyžaduje explicitní podporu experimentálního protokolu.")
+        params.pop(legacy, None)
+        params["permissions"] = profile
+
+    @staticmethod
+    def _verify_permission_profile(result, profile, *, model, cwd):
+        if profile is None:
+            return
+        active, sandbox = result.get("activePermissionProfile", {}), result.get("sandbox", {})
+        if (active.get("id") != profile or active.get("extends") is not None
+                or sandbox.get("type") != "readOnly" or sandbox.get("networkAccess") is not False
+                or result.get("approvalPolicy") != "never" or result.get("cwd") != str(cwd.resolve())
+                or model is not None and result.get("model") != model):
+            raise AppServerContractError("Server nepotvrdil omezený profil pouze pro čtení bez sítě.")
 
     def archive_thread(self, thread_id: str) -> None:
         target = str(thread_id or "").strip()
@@ -567,6 +603,8 @@ class CodexAppServerClient:
         model: str | None = None,
         output_schema: dict[str, Any] | None = None,
         local_image_paths: tuple[Path, ...] = (),
+        permission_profile: str | None = None,
+        service_tier_for_turn: str | None = None,
     ) -> TurnReceipt:
         clean_text = str(text or "").strip()
         if not clean_text:
@@ -591,6 +629,13 @@ class CodexAppServerClient:
             params["outputSchema"] = dict(output_schema)
         if local_image_paths:
             params["input"].extend({"type": "localImage", "path": str(path)} for path in local_image_paths)
+        if permission_profile is not None and sandbox_policy is not None:
+            raise AppServerContractError("Nelze kombinovat profil oprávnění se starou sandbox politikou.")
+        self._permission_params(params, permission_profile, legacy="sandboxPolicy")
+        if service_tier_for_turn is not None:
+            if service_tier_for_turn not in {"default", "priority"}:
+                raise AppServerContractError("Neplatná rychlost zpracování tahu.")
+            params["serviceTierForTurn"] = service_tier_for_turn
         result = self.transport.request("turn/start", params)
         accepted_at = utc_now()
         turn = result.get("turn")

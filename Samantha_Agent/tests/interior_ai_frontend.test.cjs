@@ -114,3 +114,15 @@ test('unknown HTTP outcome is reconciled by status without another model request
   assert.equal(f.calls.filter(c=>c.url.endsWith('/ai/start')).length,1);
   assert.equal(f.paid.size,1);
 });
+
+test('all verified outputs can be opened without another generation request',async()=>{
+  const f=fixture();await flush();
+  f.jobs.A.push({id:'verified',message:'One image request',status:'completed',answer:'Two verified variants',
+    variant_id:'variant-1',variant_ids:['variant-1','variant-2'],output_count:2,created_at:'now'});
+  f.intervals[0]();await flush();
+  const buttons=f.ids.aiConversation.children[0].children.filter(node=>node.tag==='button');
+  assert.deepEqual(buttons.map(node=>node.textContent),['Otevřít AI návrh 1','Otevřít AI návrh 2']);
+  await buttons[1].click();await flush();
+  assert.ok(f.calls.some(call=>call.url.includes('/api/interior/state?')&&call.url.includes('base_id=variant-2')));
+  assert.equal(f.paid.size,0);
+});

@@ -12,7 +12,7 @@ import uuid
 
 from PIL import Image, ImageDraw
 
-from app.codex_appserver import AppServerError, AppServerTurnError, CodexAppServerClient, UnixSocketAppServerTransport, completed_generated_images, final_agent_answer
+from app.codex_appserver import AppServerError, AppServerRpcError, AppServerTurnError, CodexAppServerClient, UnixSocketAppServerTransport, completed_generated_images, final_agent_answer
 from app.communication import agent_roles
 from app.communication.local_runtime import DEFAULT_SOCKET_PATH
 from app.file_persistence import FilePersistenceError, atomic_write_json
@@ -47,7 +47,7 @@ def digest(value):
 
 def new_client():
     from functools import partial
-    return CodexAppServerClient(timeout=600, transport_factory=partial(
+    return CodexAppServerClient(timeout=600, experimental_api=True, transport_factory=partial(
         UnixSocketAppServerTransport, socket_path=DEFAULT_SOCKET_PATH))
 
 
@@ -59,8 +59,9 @@ def selected_role(catalog, path=agent_roles.CONFIG_PATH):
 
 
 class CodexInteriorDriver:
-    def __init__(self, *, client_factory=new_client, roles_path=agent_roles.CONFIG_PATH):
+    def __init__(self, *, client_factory=new_client, roles_path=agent_roles.CONFIG_PATH, resume_empty_thread=None):
         self.client_factory, self.roles_path = client_factory, Path(roles_path)
+        self.resume_empty_thread = resume_empty_thread
 
     def selection(self):
         with self.client_factory() as client:
@@ -77,20 +78,32 @@ class CodexInteriorDriver:
             servers = config.get("mcp_servers", {})
             if not isinstance(servers, dict):
                 raise AtelierError("Nelze ověřit izolaci připojených nástrojů architekta.")
-            thread = client.start_thread(cwd=home, ephemeral=False, model=selected["model"],
-                developer_instructions=INSTRUCTIONS, base_instructions=INSTRUCTIONS,
-                config_overrides={"project_doc_max_bytes": 0, "web_search": "disabled",
+            profile = "atelier-" + job["id"]
+            profiles = config.get("permissions") or {}
+            if not isinstance(profiles, dict) or profile in profiles:
+                raise AtelierError("Profil architekta už existuje mimo tento požadavek.")
+            overrides = {"project_doc_max_bytes": 0, "web_search": "disabled",
+                    "model_reasoning_effort": selected["reasoning_effort"],
+                    "service_tier": "default",
+                    "permissions": {profile: {"filesystem": {":minimal": "read", str(home): "read"},
+                                              "network": {"enabled": False}}},
                     "mcp_servers": {name: {"enabled": False} for name in servers},
                     "features": {"apps": False, "memories": False, "multi_agent": False, "remote_plugin": False,
                         "shell_tool": False, "view_image": False, "sleep_tool": False, "tool_suggest": False,
-                        "image_generation": job["mode"] == "image"}},
-                sandbox="read-only", approval_policy="never")
+                        "image_generation": job["mode"] == "image"}}
+            options = dict(cwd=home, model=selected["model"], developer_instructions=INSTRUCTIONS,
+                base_instructions=INSTRUCTIONS, config_overrides=overrides,
+                permission_profile=profile, approval_policy="never")
+            if self.resume_empty_thread:
+                thread = client.resume_thread(self.resume_empty_thread, **options)
+                self.resume_empty_thread = None  # Only the explicitly verified empty analysis thread.
+            else:
+                thread = client.start_thread(ephemeral=False, **options)
             on_thread(thread)
             receipt = client.send_text(thread_id=thread, text=json.dumps(job["context"], ensure_ascii=False),
                 client_message_id="atelier-" + job["id"], model=selected["model"], effort=selected["reasoning_effort"],
-                local_image_paths=tuple(images), approval_policy="never",
-                sandbox_policy={"type": "readOnly", "access": {"type": "restricted",
-                    "includePlatformDefaults": True, "readableRoots": [str(home)]}})
+                local_image_paths=tuple(images), approval_policy="never", permission_profile=profile,
+                service_tier_for_turn="default")
         if not receipt.delivered:
             raise AtelierError("Odpověď architekta nemá potvrzený konečný výsledek.")
         return {"answer": receipt.answer, "images": list(receipt.generated_images),
@@ -154,7 +167,7 @@ class InteriorAI:
             if status in ACTIVE and (job.get("run_nonce") != self.nonce or job["id"] not in self._running):
                 status = "delivery_unknown"
             jobs.append({k: copy.deepcopy(job[k]) for k in ("id", "mode", "message", "created_at",
-                "answer", "variant_id", "image_count", "client_request_id") if k in job} | {"status": status})
+                "answer", "variant_id", "variant_ids", "output_count", "image_count", "client_request_id") if k in job} | {"status": status})
         return {**self.capabilities(), "jobs": sorted(jobs, key=lambda j: j["created_at"])}
 
     def _update_job(self, project_id, room_id, job_id, **changes):
@@ -289,6 +302,11 @@ class InteriorAI:
         except AppServerTurnError as error:
             # This exception is authoritative turn/completed evidence, not a timeout.
             self._update_job(project_id, room_id, job_id, status="failed", error_type=type(error).__name__)
+        except AppServerRpcError as error:
+            # Keep structured diagnostics private; an RPC rejection is never an automatic retry.
+            self._update_job(project_id, room_id, job_id, status="delivery_unknown",
+                error_type=type(error).__name__, rpc_method=error.method, rpc_code=error.code,
+                rpc_message=error.server_message)
         except Exception as error:
             # An exception never proves that a paid turn was not accepted.
             status = "result_ready" if result_path.exists() else "delivery_unknown" if invoked else "not_started"
@@ -301,30 +319,46 @@ class InteriorAI:
         answer, images = result["answer"], result.get("images", [])
         if not isinstance(answer, str) or not answer.strip() or len(answer) > 100000 or not isinstance(images, list):
             raise AtelierError("Uložená odpověď architekta nemá platný obsah.")
-        if job["mode"] == "image" and len(images) != 1:
+        if job["mode"] == "image" and not images:
             self._update_job(project_id, room_id, job_id, status="no_image", answer=answer,
                              receipt=result.get("receipt", {}))
             return
+        if job["mode"] == "image":
+            if len(images) > 4 or any(not isinstance(item, dict) or not isinstance(item.get("result"), str) for item in images):
+                raise AtelierError("Obrazové výstupy vyžadují ruční ověření; zůstávají zachované.")
+            images = list({item["result"]: item for item in images}.values())
         def complete(state):
             _, room = self.store._room(state, project_id, room_id)
             target = room["ai_requests"][job_id]
             if target["status"] == "completed":
                 return RepositoryMutation(state)
             variant_id = ""
+            variant_ids = []
             if job["mode"] == "image":
-                if len(room["variants"]) >= 200:
+                if len(room["variants"]) + len(images) > 200:
                     raise AtelierError("Místnost už obsahuje maximální počet variant. Výsledek AI zůstává zachovaný.")
-                source = self.store._add_source(room, {"title": "AI návrh", "kind": "inspiration",
-                    "data": images[0]["result"]}, _now())
-                variant_id = uuid.uuid4().hex
-                draft = job["context"]["draft"]
-                room["variants"][variant_id] = {k: copy.deepcopy(v) for k, v in draft.items() if k != "revision"} | {
-                    "id": variant_id, "parent_id": None if job["base_id"] == "base" else job["base_id"],
-                    "title": draft["title"] or "AI návrh", "kind": "ai_proposal", "created_at": _now(),
-                    "image_source_id": source["asset_id"],
-                    "source_ids": list(dict.fromkeys([source["asset_id"], *draft["source_ids"]])),
-                    "annotations": [], "ai_request_id": job_id}
-            target.update(status="completed", answer=answer, variant_id=variant_id,
+                for index, image in enumerate(images, 1):
+                    source = self.store._add_source(room, {"title": "AI návrh", "kind": "inspiration",
+                        "data": image["result"]}, _now())
+                    variant_id = uuid.uuid4().hex
+                    variant_ids.append(variant_id)
+                    draft = job["context"]["draft"]
+                    title = draft["title"] or "AI návrh"
+                    if len(images) > 1:
+                        title += f" · varianta {index}"
+                    room["variants"][variant_id] = {k: copy.deepcopy(v) for k, v in draft.items() if k != "revision"} | {
+                        "id": variant_id, "parent_id": None if job["base_id"] == "base" else job["base_id"],
+                        "title": title, "kind": "ai_proposal", "created_at": _now(),
+                        "image_source_id": source["asset_id"],
+                        "source_ids": list(dict.fromkeys([source["asset_id"], *draft["source_ids"]])),
+                        "annotations": [], "ai_request_id": job_id}
+            visible_answer = answer
+            if job["mode"] == "image":
+                visible_answer = ("Ateliér uložil ověřený obrazový návrh." if len(images) == 1 else
+                    f"Ateliér uložil {len(images)} ověřené obrazové varianty z jednoho požadavku.")
+                visible_answer += " Jde o koncepční vizualizaci; rozměry a proveditelnost je třeba ověřit."
+            target.update(status="completed", answer=visible_answer, variant_id=variant_ids[0] if variant_ids else "",
+                          variant_ids=variant_ids, output_count=len(variant_ids), model_answer=answer,
                           receipt=result.get("receipt", {}), updated_at=_now())
             return RepositoryMutation(state)
         self.store.repository.transact(complete)

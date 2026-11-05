@@ -3,7 +3,44 @@
 Datum: 2026-11-05. Autor: Will. Proud: project-neuberk-kacenka.
 Výchozí vydání: b9b59c7d (MPO oprava; CI 42083732254 success).
 
-## Požadavek a aktuální výsledek
+## 2026-11-05 21:04 CET — schválený živý AI pilot a příprava nasazení
+
+Míla přesnou větou globální brzdy schválil Terra/high, jeden rozbor vybraných
+soukromých podkladů, jeden obrazový požadavek, následné Terra p+n a registrovaný
+upgrade kompatibility vlastní e-mailové služby. Není nutné souhlas opakovat.
+
+Živý pilot je přijatý. Proběhl právě jeden potvrzený chatový tah a jeden
+potvrzený obrazový tah přes původní sdílený socket/server 0.163.0. Obrazový tah
+vrátil dva platné PNG (1672 × 941) a rozporný chybový text; oba skutečné
+výsledky byly místně ověřené a uložené jako dvě neměnné AI varianty bez dalšího
+modelu. UI stav vychází z ověřených artefaktů a nabízí otevření obou variant.
+Žádný další placený pilot se nespouštěl. Původní zadání má stále revizi 7,
+původní podklady zachované; model dostal jen jeden explicitně vybraný podklad.
+
+Dvě přípravná selhání nepřijala žádný modelový tah. Dokumentovaný readOnly.access
+server odmítá; používá se explicitně povolené permission-profile API, soukromý
+profil pouze v konfiguraci konkrétního vlákna, minimální systémové čtení a čtení
+snapshotu bez zápisu/sítě. Server musí potvrdit přesný profil, cwd, model a
+approvalPolicy=never. Prázdná konfigurace permissions=null je ošetřená.
+Pokračování přípravy zachovalo původní job/client ID/vlákno a vyžadovalo
+nečinné vlákno, pouze metadatový rollout a doloženou sondou zakázané odesílání.
+Timeout ani skutečný dřívější tah opakovat nelze. Globální konfigurace a App Server
+se neměnily. Rychlost je výslovně Standard; zděděné priority/Fast se nepoužije.
+
+Kritický modelový klient, instrukce a oprávnění mají otisk skutečné exekuce.
+Následná oprava pouze zpracování obrazových artefaktů byla ověřená přehráním
+původních terminálních journalů; změna exekučního otisku takové ověření blokuje.
+Důkaz: logs/interior_ai_pilot_verified_20261105.log; cílených 133 testů PASS
+včetně 4 Node DOM scénářů; závěrečná plná brána PASS: 2574 testů,
+0 chyb, 31 přeskočených (393,754 s). Soukromé důkazy, fotografie
+a odpovědi zůstávají mimo Git. Centrální role ještě není zapsaná ani aktivní.
+
+Další krok: checkpoint a registrované kompatibilní p+n přes Terru,
+upgrade vlastní e-mailové kopie se zachováním business stavu, potom aktivace role
+z přijatého důkazu a závěrečné p+n. Nový TVBCP stále nebyl domluvený.
+Starší záznam o čekajícím souhlasu níže je historický, nyní překonaný.
+
+## Původní specifikace před živým pilotem (historie)
 
 Míla po praktickém vyzkoušení zadal „Zapoj teď AI“. Je připravená lokální
 implementace skutečného rozhovoru nad podklady a vytvoření jedné obrazové
@@ -45,8 +82,9 @@ push, nasazení, změna e-mailové služby, instalace závislostí ani změna ro
   chybě ukládání se může dokončit místně; při nejistém doručení se čte jen
   původní vlákno. Obnova nikdy nevolá thread/start, thread/resume nebo turn/start.
 - Při chybě či restartu není automatický placený retry. Neověřený výsledek
-  blokuje další požadavek v témže kontextu. Nulový nebo vícenásobný obrazový
-  výstup se nevydává za jednu úspěšnou AI variantu.
+  blokuje další požadavek v témže kontextu. Nulový výstup je no_image; až čtyři
+  skutečné jedinečné obrazové výstupy se uchovají jako samostatné AI varianty.
+  Nadlimitní či vadný výstup zůstává v journalu k ověření, nikoli k novému modelu.
 - Standardní GET stavu nevrací interní journal, snapshoty, thread IDs ani
   syrové účtenky. Samostatné AI status API vrací jen příslušný rozhovor/stav.
 
@@ -110,4 +148,6 @@ Fyzická přejímka skutečného AI rozhovoru a obrazového návrhu zůstává o
 
 Oficiální podklady: [App Server](https://learn.chatgpt.com/docs/app-server),
 [generování obrázků](https://learn.chatgpt.com/docs/image-generation),
-[ceny a spotřeba](https://learn.chatgpt.com/docs/pricing).
+[ceny a spotřeba](https://learn.chatgpt.com/docs/pricing),
+[permission profiles](https://learn.chatgpt.com/docs/permissions),
+[rozpor readOnly.access](https://github.com/openai/codex/issues/38791).

@@ -225,9 +225,11 @@
           await refreshAI();
         })); article.append(button);
       }
-      if (job.variant_id) {
-        const button = document.createElement("button"); button.type = "button"; button.textContent = "Otevřít AI návrh";
-        button.addEventListener("click", () => { if (!busy) { view = "gallery"; load({...scope, base:job.variant_id}); } });
+      const variants = Array.isArray(job.variant_ids) ? job.variant_ids : job.variant_id ? [job.variant_id] : [];
+      for (const [index, id] of variants.entries()) {
+        const button = document.createElement("button"); button.type = "button";
+        button.textContent = "Otevřít AI návrh" + (variants.length > 1 ? ` ${index + 1}` : "");
+        button.addEventListener("click", () => { if (!busy) { view = "gallery"; load({...scope, base:id}); } });
         article.append(button);
       }
       conversation.append(article);
