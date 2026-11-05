@@ -31,6 +31,12 @@ je registrovaná, ale dokument nebyl výslovně domluven ani vytvořen; vazbu
 dořešit před dalším vývojem přes Human–Adam. Přesný důkaz a další krok:
 memory/reports/interior_atelier_p1_20261105.md.
 
+Vydání: následným „ok p+n pro vše“ dne 2026-11-05 Míla výslovně schválil
+společný push a nasazení celého hotového main. Závazný konečný výsledek bude
+v logs/interior_all_release_20261105.log a interior_all_verified_20261105.log;
+tento zápis sám nepotvrzuje dokončení. Oddělená Datova větev není součástí.
+Fyzická přejímka Jany a připojení AI zůstávají dalšími samostatnými kroky.
+
 Zalozeno: 2026-05-31
 Priorita: 2
 Stav: soukromy pracovni prostor zalozen; pro Kacenku existuji soukrome fotky,

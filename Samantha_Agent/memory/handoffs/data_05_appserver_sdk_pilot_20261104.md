@@ -1,5 +1,13 @@
 # Data → Will: 05/P1 App Server / Python SDK, etapy A, B a C
 
+## Přejímka 05/P1 uzavřená Willem — 2026-11-05 12:50 CET
+
+- Míla výslovně potvrdil uživatelské body 1–4. Poslední technický reconnect nyní PASS, všech 17 živých kontrol. Starší otevřené přejímací položky níže jsou tím překonané.
+- Současný klient a Unix WebSocket transport: A a B obnovily stejné existující idle vlákno; po zavření A čte B totožná metadata; znovupřipojené A vrací stejné vlákno i efektivní nastavení. Server handshake 0.163.0, původní procesy a socket nepřerušené.
+- Resume pouze threadId + excludeTurns:true, bez přepsání instrukcí, modelu, provideru, cwd a oprávnění. Celý rollout i stav Cockpit session beze změny. Žádný turn/start, nové vlákno, replay, restart či placený modelový tah.
+- Společné vydání 040fea77 a CI už potvrzené. SDK se neadoptuje. Kanonický handoff a TVBCP proudu layer-human-adam-development aktualizované společně; důkaz memory/reports/codex_p1_reconnect_20261105.md a logs/codex_p1_reconnect_verified_20261105.log.
+- Will změnil jen hlavní checkout. Data zůstává ve vlastní větvi/worktree; nic se tam neintegrovalo ani nepřepisovalo. Další krok: čekat na Mílův úkol.
+
 ## Převzetí Willem k výslovně schválenému společnému p+n — 2026-11-05
 
 - Zápis přejímky d50fccbd převzat jako 5ad99375, SDK pilot c49da146 jako

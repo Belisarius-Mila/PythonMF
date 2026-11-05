@@ -1,26 +1,24 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
-## Aktuální stav — převzetí dalšího Datova balíčku 2026-11-05
+## Aktuální stav — 05/P1 přejímka uzavřená, 2026-11-05 12:50 CET
 
 ### Hotovo
-- Míla podle předání Data přijal Mac/iPhone scénáře 1–3. UI oprava je v main jako 6972ea5c, její p+n 3f41b8ca192876a3cef360e4c189d756 i CI 42009849549 úspěšné.
-- Will na výslovné nové p+n převzal Datův zápis d50fccbd a izolovaný pilot c49da146. SDK se do produkce nepřevádí; původní klient, session hub a jejich transport jsou zachované.
-- Data doložil 105 cílených PASS v oddělené .venv. Will po integraci ověřil 102 PASS + 3 historické schema SKIP kvůli cestě exportů; všech 12 nových C testů skutečně PASS. CLI proxy nepřevádí proudový Unix protokol na současný WebSocket protokol.
-- E-mailový krok c846775b má lokální plnou bránu 2476 testů (20 SDK SKIP), 55 závěrečných cílených PASS a dvě skutečné zkoušky Terra/high. Běžící kopie dosud 167e629f.
-
-- Willova integrační kontrola: 12 nových SDK C případů PASS; 3 historické schema testy zvlášť PASS s exporty, zdroj shodný. Nový pilot je registrovaný ve společné bráně.
-- Hodinová e-mailová kopie skutečně přepnutá na ac9f3bed; celý business stav shodný, první check already_completed. Společná publikační účtenka a finální živé důkazy: logs/email_data_quality_release_20261105.log a *_verified_*.log. Gitový snapshot se během vydání nemění.
+- Uživatelské Mac/iPhone body 1–4 Míla výslovně potvrdil. Will dokončil poslední živou technickou přejímku reconnectu: všech 17 kontrol PASS.
+- Současný CodexAppServerClient / UnixSocketAppServerTransport připojil A a B k původnímu sdílenému serveru 0.163.0. Obě spojení obnovila stejné existující nečinné vlákno s excludeTurns:true. Po zavření A četlo B stejná metadata; znovupřipojené A obnovilo stejné vlákno a nastavení.
+- Model gpt-6.1-sol/high, provider openai, cwd, approvalPolicy, sandbox i další efektivní nastavení shodné. Obnova poslala jen threadId a excludeTurns, žádné přepsání instrukcí či konfigurace. Celý rollout včetně instrukcí a celý stav Cockpit session zůstaly beze změny.
+- Původní server PID 5791 i jeho launcher 5789, jejich identita a inode socketu zůstaly shodné i po zavření všech auditních spojení. Žádný turn/start, náhradní vlákno, opakování zprávy, restart ani placený modelový tah.
+- Společné Terra p+n do 040fea77 je dokončené, CI 42017584830 success; dokládá logs/email_data_quality_verified_final_20261105.log a kontrola GitHub CI při obnově kontextu. Samostatná e-mailová kopie je podle finálního release logu na ac9f3bed; tato přejímka ji neměnila.
+- Redigovaný trvalý důkaz: memory/reports/codex_p1_reconnect_20261105.md; podrobná místní účtenka logs/codex_p1_reconnect_verified_20261105.log.
 
 ### Rozhodnutí
-- Míla výslovně autorizoval nové Terra p+n pro Willovy i Datovy commity jako společný balíček. Zachovat centrální modely i dosavadní produkční architekturu.
+- Přejímka 05/P1 je uzavřená PASS: uživatelské body 1–4 i technický reconnect jsou doložené. Zachovat modernizovaný původní klient a CanonicalSessionHub; SDK se neadoptuje.
+- Will zůstává v hlavním checkoutu, Data ve vlastní větvi data/parallel-20261104; Datův worktree nebyl změněný.
 
-### Otevřeno a rizika
-- Publikační brána, přesná účtenka, GitHub CI a řízené přepnutí samostatné e-mailové kopie na nový čistý commit ještě čekají.
-- Fyzická obnova stránky během práce (bod 4) a skutečný technický reconnect App Serveru zůstávají oddělené; syntetické testy nejsou jejich důkazem.
-- Žádný nejistý dotaz neopakovat. Pilot má procesový guard, nikoli trvalý journal.
+### Rizika a rozsah
+- Ověřen je reconnect nečinného existujícího vlákna na současném transportu. Tento audit netestuje výpadek během aktivního tahu ani trvalý recovery journal SDK. Žádná nejistá zpráva se nesmí automaticky opakovat.
+- Širší proud Human–Adam pokračuje; uzavírá se pouze přejímka 05/P1. Dřívější otevřené publikační a přejímací položky níže jsou historické.
 
 ### Další krok
-- Ověřit převzatý pilot v odděleném prostředí i registraci ve společné bráně; sjednotit čisté profily, vydat registrovaným submit_release(wait=True) a ověřit živý stav.
-- Kanonický handoff i TVBCP aktualizované společně. Historické bloky níže zůstávají zachované.
+- Čekat na další Mílův úkol; 05/P1 už nemá otevřený přejímací bod. Nové publikování ani nasazení se tímto krokem nezahajuje.
 <!-- SAMANTHA_CURRENT_STATUS_END -->
 
 Nazev: Human–Adam / vyvojove prostredi - zalozeni pracovniho proudu Layer

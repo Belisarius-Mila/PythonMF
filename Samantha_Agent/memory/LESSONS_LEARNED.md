@@ -35,7 +35,7 @@ nebo jejichž princip lze znovu použít v jiné části projektu.
 - Typ: opakující se
 - Řešení nalezeno: 05112026
 - Řešení: ověřit skutečný protokol nad socketem dvěma kontrolami. SDK/CLI proxy proti proudové fixture funguje; proti WebSocket fixture skončí deadline, zatímco současný UnixSocketAppServerTransport se připojí. Nepoužívat proxy jako náhradu tohoto transportu a po nejistém výsledku nevytvářet fallback vlákno ani další tah. Deadline ukončuje pouze proxy, nikoli sdílený server; výchozí SDK approvals je nutné výslovně odmítnout.
-- Ověření: 105 cílených testů PASS včetně 12 nových pro krok C. Jen syntetické sockety, bez modelů; živý reconnect a fyzická přejímka zůstávají samostatné. Report codex_sdk_p1c_20261105.md.
+- Ověření: 105 cílených testů PASS včetně 12 nových pro krok C, jen syntetické sockety. Navazující skutečný reconnect současného transportu 5. 11. 12:50 CET: 17/17 kontrol PASS, A/B/A stejné existující idle vlákno, pouze threadId + excludeTurns:true bez override; původní procesy/socket i celý rollout zachované, žádný modelový tah. Míla potvrdil body 1–4; 05/P1 uzavřené. Reporty codex_sdk_p1c_20261105.md a codex_p1_reconnect_20261105.md.
 
 ### LL-100 — Celý vstup sám nezaručuje pravdivý koncept odpovědi
 

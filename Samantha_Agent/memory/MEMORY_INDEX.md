@@ -180,6 +180,8 @@ Tento soubor je rozcestnik dlouhodobe pameti pro Samantha Agent.
 
 ## Handoffs
 
+- `reports/codex_p1_reconnect_20261105.md`; `handoffs/human_adam_layer_workstream_start_2026_07_20.md`; `handoffs/data_05_appserver_sdk_pilot_20261104.md` — 2026-11-05 12:50 CET: **05/P1 přejímka uzavřená PASS**. Míla potvrdil body 1–4; živý reconnect A/B/A 17/17 PASS na původním serveru 0.163.0, stejné vlákno/nastavení/instrukce, žádný modelový tah či restart. SDK se neadoptuje; historické otevřené body v záznamech níže jsou překonané.
+
 - `handoffs/data_05_appserver_sdk_pilot_20261104.md`; `reports/codex_sdk_p1c_20261105.md` — Will převzal d50fccbd/c49da146 jako 5ad99375/4a337100 ke společnému Terra p+n s e-mailovou opravou. Nových 12 SDK C testů skutečně PASS v oddělené .venv; produkční závislosti/transport beze změny. V main integračně 102 PASS + 3 historické schema SKIP; verze exportů se kontroluje zvlášť. Nová registrace pilotu ve společné bráně.
 
 - `reports/codex_sdk_p1c_20261105.md`; `handoffs/data_05_appserver_sdk_pilot_20261104.md` — 05/P1-C: 105 cílených testů PASS (12 nových), statická brána PASS. Skutečná SDK/CLI proxy nad syntetickým proudovým socketem funguje; se současným Unix WebSocket transportem nekompatibilní. Ponechat původní klient, SDK neadoptovat. Body přejímky 1–3 přijaté Mílou; bod 4 a skutečný reconnect otevřené. Pouze vlastní větev, bez živých zásahů, integrace či publikování.

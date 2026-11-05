@@ -78,3 +78,15 @@ Navrhované další kroky: Omezený multimodální a obrazový pilot se zvolený
 modelem/rozpočtem; rozměrový půdorys a 3D až navazující milníky.
 Technický důkaz: 2 519 testů / 31 SKIP, bez selhání; cílené nové moduly
 28 PASS bez SKIP; report interior_atelier_p1_20261105.md.
+
+## 2026-11-05 — výslovně schválené společné p+n
+
+Míla zadal „ok p+n pro vše“: schvaluje vydání celého hotového rozsahu
+lokálního main včetně Ateliéru a zápisů uzavřené přejímky 05/P1.
+Předchozí omezení na lokální vývoj tím pro tento balíček končí. Oddělená
+Datova větev se bez integračního zadání nepřebírá. Vydání provede jediný
+registrovaný submit_release(wait=True), vykonavatele vybere centrální role.
+Výsledek až podle konečné účtenky a živého ověření; nikoli podle tohoto
+předběžného zápisu. Místní důkazy: logs/interior_all_release_20261105.log
+a logs/interior_all_verified_20261105.log. Mac/Safari přejímka Jany zůstává
+samostatná; AI modely ani nový TVBCP se tímto pokynem nezavádějí.
