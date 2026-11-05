@@ -62,7 +62,7 @@ Tento soubor je rozcestnik dlouhodobe pameti pro Samantha Agent.
 
 ## Projects
 
-- `handoffs/continuous_personal_agent_2026_11_04.md`; `projects/email_readonly_oauth.md`; `reports/continuous_email_service_installation_20261105.md` — [PRIPOMENOUT] priorita 1, 2026-11-05: Pushcut po b372355c vydaný, 2386 PASS + smoke 5/5, CI zelené; Míla přijal doručení i otevření Cockpitu na iPhonu. Na pokyn dokončit provoz lokálně instalátor vlastní kopie commitnutého kódu/LaunchAgentu, heartbeat, pause/resume a obnova; Terra/high, všechny nové zprávy 07–22 bez výchozího denního limitu. 67 cílených PASS, plná brána 2403 PASS. Systémová instalace dosud neprovedená, chybí přesná globální věta. Potom aktivace s novou Seznam pozicí, zachovat iCloud a ověřit první ostrou hodinu. CalDAV a živá archivace čekají.
+- `handoffs/continuous_personal_agent_2026_11_04.md`; `projects/email_readonly_oauth.md`; `reports/continuous_email_service_installation_20261105.md` — [PRIPOMENOUT] priorita 1, 2026-11-05 08:55 CET: E-mailová služba po přesné globální větě skutečně aktivní, Terra/high, všechny nové celé zprávy 07–22 bez denního limitu. První ostrý průchod 6 zpráv: 3 karty s těly, 3 nedůležité v jednom hodinovém řádku, 0 chyb; Pushcut API accepted=1. iCloud pozice zachovaná, Seznam inicializovaný od aktuálního konce. Ověřena obnova vlastního jobu bez opakování a bez změny dat/počítadel; fyzický reboot Macu se neprováděl. Kód b6375a33 vydaný, p+n potvrzené a CI 41938993126 success. Další automatická hodina, CalDAV a živá archivní metadata jsou další ověření.
 
 - `projects/camino.md`; `handoffs/workstreams/project-camino.md`; `tvbcp/workstreams/project-camino.md`; `reports/camino_film_resume_latest_20261028.md` — 2026-11-04 20:20 CET: Terra lokálně opravila 2 chyby mediálních testů GitHub CI (mock dohledání binárky, samostatný Orus kontrakt bez médií, přesný preflight skutečné integrace). Reprodukce FAIL→PASS; 37/37 běžných testů PASS, službový PATH 32 PASS + 5 skip, skutečný Orus zvlášť PASS. Bez změny produkce/workflow a bez nového p+n; nový vzdálený CI run čeká. Předchozí UI výběru posledního filmu a jeho fyzická přejímka zůstávají zachované.
 
@@ -180,7 +180,7 @@ Tento soubor je rozcestnik dlouhodobe pameti pro Samantha Agent.
 
 ## Handoffs
 
-- `reports/codex_appserver_p1b_20261104.md`; `handoffs/data_05_appserver_sdk_pilot_20261104.md` — 2026-11-05: Will po Mílově výslovném pokynu převzal oba Datovy commity jako 1b6fd61e/ccece787; původní klient modernizovaný, SDK stále offline. 192 cílených testů: 172 PASS, 20 volitelných SDK SKIP, živý handshake/katalog serveru 0.163.0 úspěšné. Plná společná brána 2462 testů: 2442 PASS, 20 SDK SKIP; p+n je autorizované včetně oprav do čistého repozitáře. Kanonický proud layer-human-adam-development, aktuální nasazení ověřit živým auditem.
+- `reports/codex_appserver_p1b_20261104.md`; `handoffs/data_05_appserver_sdk_pilot_20261104.md` — 2026-11-05: Will po Mílově výslovném pokynu převzal oba Datovy commity jako 1b6fd61e/ccece787; původní klient modernizovaný, SDK stále offline. 192 cílených testů: 172 PASS, 20 volitelných SDK SKIP, živý handshake/katalog serveru 0.163.0 úspěšné. Plná společná brána 2462 testů: 2442 PASS, 20 SDK SKIP. Společné p+n b6375a33 potvrzené, smoke 5/5 a CI 41938993126 success. Kanonický proud layer-human-adam-development, aktuální nasazení ověřit živým auditem.
 
 - `handoffs/human_adam_layer_workstream_start_2026_07_20.md` - kanonický aktuální
   handoff Human–Adam. Dokončovací stav je autoritativně perzistentní,

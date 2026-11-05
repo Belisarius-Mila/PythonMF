@@ -4,21 +4,22 @@
 - Integrační krok: 2026-11-05 00:53 CET, schválený Mílou pro dokončení a p+n do čistého repozitáře.
 
 ### Hotovo
+- Potvrzené vydání b6375a33: p+n 09e6c05f658a1ce16750dfd5cd15c514, push/deploy confirmed, 2462 testů (20 SDK skipů), smoke 5/5, chráněné služby beze změny; GitHub CI 41938993126 success.
 - Will převzal a zkontroloval oba Datovy kroky: SDK zůstává izolovaným offline pilotem; produkce používá původní klient.
 - Klient obnovuje bez historie, upřednostňuje final_answer, uchovává strukturované chyby a před prací s vláknem ověřuje verzi skutečně připojeného serveru. Nejisté akce se neopakují.
 - Samostatný instalační balíček e-mailového agenta je lokálně dokončený; jeho aktivace není součástí společného restartu Cockpitu.
 
 ### Otevřeno
-- Registrované p+n společného balíčku a kontrola jeho přesné účtenky. Aktuální nasazení vždy ověřit živým auditem, nikoli z tohoto indexového snapshotu.
+- Předchozí společný kódový balíček je vydaný a ověřený; další provozní stav vždy ověřit živým auditem, nikoli jen z tohoto snapshotu.
 - Fyzická Mac/iPhone přejímka nového reconnectu/UI zůstává samostatná; SDK proxy se neaktivuje.
 
 ### Rizika
 - Server pod stabilní 0.163.0 je záměrně odmítnut. Živý handshake v integračním kroku potvrdil 0.163.0; lokální CLI je 0.166.0.
 - Volitelné SDK testy potřebují vlastní izolované prostředí. Produkční závislosti se kvůli pilotu nemění.
-- Instalace e-mailového LaunchAgentu čeká na přesnou globální větu, kterou Míla ještě nezadal.
+- E-mailový LaunchAgent po přesné globální větě aktivovaný v 08:48 CET; první ostrý cyklus a obnova služby jsou ověřené v e-mailovém handoffu. SDK ani komunikační architektura se tím nemění.
 
 ### Další krok
-- Dokončit společnou bránu, checkpoint a registrované p+n. Chybu opravit, znovu ověřit a předat nový přesný balíček podle Mílova nočního pokynu.
+- Sledovat běžný provoz e-mailové služby; fyzická přejímka reconnectu a SDK proxy zůstávají samostatné.
 
 ### Rozhodnutí
 - Míla výslovně schválil převzetí Data a samostatné p+n včetně potřebných oprav do čistého repozitáře. SDK se do produkce nepřevádí; session hub a komunikační architektura zůstávají zachované.
@@ -4412,3 +4413,24 @@ cyklus; fyzická přejímka reconnectu. SDK proxy nebyla aktivována.
 Technický důkaz: 192 cílených testů: 172 PASS, 20 volitelných SDK SKIP,
 logs/data_email_integration_targeted_20261105.log; server 0.163.0 proti
 lokální CLI 0.166.0. Plná integrační brána: 2462 testů, 2442 PASS, 20 SDK SKIP (377,0 s) v příslušném logu.
+
+
+## 2026-11-05 08:55 CET — Potvrzené společné vydání a aktivace e-mailové služby
+
+Hotovo: Předchozí společný balíček Data + instalátor b6375a33 je skutečně
+vydaný; vzdálené CI úspěšné. E-mailový LaunchAgent byl po přesné globální
+větě samostatně aktivován, první ostrý průchod i obnova ověřené. SDK se do
+produkčního runtime nezavádí a přetrvávající session hub zůstává zachovaný.
+
+Rozhodnutí: Míla přesnou větou schválil dříve připravený systémový krok.
+Dále platí jeho noční pokyn dokončit záznamy a vydání do čistého repozitáře.
+
+Další krok: Sledovat automatickou hodinovou kontrolu a běžné vyřizování karet.
+
+Navrhované další kroky: Fyzická přejímka reconnectu; SDK proxy samostatně.
+
+Technický důkaz: p+n 09e6c05f658a1ce16750dfd5cd15c514, push/deploy confirmed,
+2462 testů (20 SDK skipů), smoke 5/5 a chráněné služby beze změny; CI
+41938993126 success. E-mailová provozní přejímka: 6 zpráv, 3 důležité karty,
+3 nedůležité v jednom řádku, 0 chyb, Pushcut API accepted=1; obnova bez
+opakování posouzení. Viz kanonický continuous_personal_agent handoff.

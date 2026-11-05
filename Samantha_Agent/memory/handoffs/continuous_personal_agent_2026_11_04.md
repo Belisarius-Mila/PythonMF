@@ -6,7 +6,42 @@ Stav: rozpracovane
 Pripomenout pri startu: ano
 Datum: 2026-11-05
 
-## Aktuální stav 2026-11-05 — instalátor před systémovým potvrzením
+## Aktuální provozní stav — 2026-11-05 08:55 CET
+
+- Míla zadal přesnou větu globální brzdy. Registrovaný instalátor dokončil
+  systémovou instalaci a aktivaci vlastního LaunchAgentu; installed/owned/
+  loaded/enabled=true. Vlastní kód je z vydaného b6375a33 v Application
+  Support, sdílený kanonický private stav a centrální role zůstaly zachované.
+- První skutečný cyklus 08:48:53–08:49:38 CET dokončil 6 nových zpráv:
+  3 důležité karty s těly a 3 nedůležité zprávy v jednom hodinovém řádku.
+  Živé API potvrdilo všechny počty, těla karet a 0 chyb posouzení.
+- Pushcut API accepted=1 pro nový důležitý hodinový souhrn. Nejde o tvrzení,
+  že Míla fyzicky přijal toto konkrétní provozní oznámení; předchozí ruční
+  test doručení a klepnutí už přijal. Žádný další ruční test se neposílal.
+- iCloud kurzor se při aktivaci nezresetoval, Seznam začal od aktuálního
+  konce. Oba zdroje jsou inicializované. Předchozí vyřazení/ignorování zůstala.
+- V 08:52 CET ověřen unload/bootstrap vlastního jobu a nový skutečný check:
+  already_completed, 0 nových návrhů/oznámení. Kurzory, počet položek a denní
+  počet modelových posouzení byly před/po obnově shodné. Fyzický reboot Macu
+  se neprováděl; ověřena byla obnova samotné služby.
+- Terra/high, všechny nové celé zprávy, 07–22 Europe/Prague, bez výchozího
+  denního početního limitu. Dokončená hodina se neopakuje, další minuty
+  kontrolují stav a případně dokončují dávky. Per-user služba vyžaduje
+  přihlášený účet a bdělý Mac; AC sleep=0 už bylo nastavené, neměnilo se.
+- Odeslání odpovědí a uložení zůstávají potvrzované v Cockpitu. Tento krok
+  žádný e-mail neodeslal, nearchivoval ani nesmazal ve schránce.
+- Předchozí společné vydání Data + instalátor b6375a33 potvrzené:
+  p+n 09e6c05f658a1ce16750dfd5cd15c514, push/deploy confirmed,
+  2462 testů (20 SDK skipů), smoke 5/5, chráněné služby beze změny,
+  GitHub CI 41938993126 success. SDK zůstává offline.
+- Provozní důkazy: logs/email_service_activation_20261105_{install,
+  first_cycle,restart,verification,api_check}.log; soukromá účtenka
+  installation.json a service_health.json. Obsah e-mailů/přístupy do Gitu nepatří.
+- Další krok: sledovat další automatickou hodinovou kontrolu; případné
+  hodnocení důležitosti upravovat výslovnou preferencí. CalDAV a živá
+  přejímka archivních metadat zůstávají samostatné kroky. Nový TVBCP nevznikl.
+
+## Předchozí stav 2026-11-05 — instalátor před systémovým potvrzením
 
 - Pushcut vydaný po b372355c: Terra p+n job
   `9f34b5d5fa3be12a0124646c4d353050`, push/deployment confirmed,

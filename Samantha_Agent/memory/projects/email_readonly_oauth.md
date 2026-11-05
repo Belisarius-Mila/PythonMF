@@ -748,3 +748,30 @@ tímto krokem nebyly měněné; aktivace LaunchAgentu dál čeká na přesnou v�
 Společná integrační brána prošla 2462 testy: 2442 PASS, 20 volitelných SDK
 SKIP (377,0 s), logs/data_email_integration_gate_20261105.log. P+n je
 autorizované; konečný provozní výsledek doloží přesná účtenka a živý audit.
+
+
+## 2026-11-05 08:55 CET — Hodinová služba aktivní, první ostrý cyklus a obnova ověřené
+
+Hotovo: Po přesné globální větě je per-user e-mailový LaunchAgent skutečně
+nainstalovaný, načtený a zapnutý. První cyklus 08:48:53–08:49:38 CET
+zpracoval 6 zpráv: 3 důležité karty s těly a 3 nízké důležitosti v jednom
+hodinovém řádku. Živé API potvrzuje 0 chyb; Pushcut přijal jeden provozní
+požadavek. Fyzické přijetí tohoto nového oznámení se nepředpokládá z API.
+
+Rozhodnutí: Míla přesnou větou schválil dříve připravenou instalaci a obnovu
+vlastní služby. Platí jeho zadání všechny nové celé zprávy, Terra/high,
+07–22 Europe/Prague bez výchozího denního početního limitu. Uložení a SMTP
+zůstávají potvrzované; tento krok je neprovedl.
+
+Další krok: Ověřit další automatickou hodinovou kontrolu a sledovat kvalitu
+návrhů při běžném vyřizování v Cockpitu.
+
+Navrhované další kroky: CalDAV a živá přejímka archivních metadat.
+
+Technický důkaz: Běžící kopie b6375a33, installed/owned/loaded/enabled=true;
+iCloud kurzor nezresetovaný, Seznam od aktuálního konce. V 08:52 CET vlastní
+job vyložen/obnoven a potvrzen nový check already_completed, 0 opakovaných
+posouzení a stejná data/počítadla. Důkazy email_service_activation_20261105_*.log.
+Předchozí p+n 09e6c05f658a1ce16750dfd5cd15c514 potvrzené, 2462 testů (20 SDK
+skipů), smoke 5/5; GitHub CI 41938993126 success. Žádný fyzický reboot Macu,
+nový SMTP, archivace či smazání ve schránce. Nový TVBCP nebyl založen.
