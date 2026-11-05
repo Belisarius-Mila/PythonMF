@@ -1,5 +1,42 @@
 # Data → další krok: 15/P2 přirozený hlasový rozhovor
 
+## Aktuální stav — 15/P2-D, čtecí hlas v Cockpitu (lokálně)
+
+- Míla zadal připojení čtecího hlasu. Human–Adam má vstup Další → Čtecí hlas;
+  oddělený panel je napojený na skutečný existující hub vybraného proudu.
+- Cenový souhlas před jednou <=60s relací, centrální read_only_voice role bez
+  reasoning_effort a s již skutečným důkazem P2-C. Nový rozhovor až po serverovém
+  closed/final usage; refresh/restart/nejasný create nikdy nezaloží druhý pokus.
+- 120 cílených testů PASS včetně 19 nových kontraktů a rozšíření Node scénáře;
+  statická brána PASS. Plná brána 2467 testů OK (skipped=5). Report voice_conversation_cockpit_20261105.md.
+- Jen vlastní worktree data/parallel-20261104: žádný push, deploy, restart,
+  zápis sdílených provozních dat ani další placený modelový start. iPhone/WebRTC
+  a skutečný mikrofon jsou stále otevřená přejímka; 05/P1 zůstává uzavřená.
+
+### Hotovo
+- Serverová vazba na původní vlákno, routy, mikrofon/Stop/spotřeba a explicitní
+  nový rozhovor. Jen stručný allowlist stavu, žádné odpovědi/historie nebo akce.
+- Ochrana Origin/CSRF/browser cookie, trvalý jediný create a nezávislý watchdog.
+  Cookie je identita pokusu v síťové důvěře Cockpitu, nikoli osobní přihlášení.
+
+### Rozhodnutí
+- Souhlas s kandidátem a jeho skutečný probe doplnil pokyn připojit čtecí hlas.
+  Kód je připravený odděleně od centrální role kvůli starému přísnému parseru.
+  Vývoj neudělil oprávnění k push, nasazení ani dalšímu placenému testu Datou.
+
+### Další krok
+- Will převezme kód do aktuálního main se zachováním e-mailové práce a rolí;
+  nasazení kompatibilního kódu musí předcházet aktivaci samostatné voice role.
+
+### Navrhované další kroky
+- Po samostatně povoleném p+n ověřit neplacené načtení panelu; až pak Mílův
+  výslovně potvrzený <=60s iPhone/WebRTC rozhovor a finální spotřeba.
+- Bez konečného serverového closed/final usage neopakovat placený pokus.
+
+### Technický důkaz
+- reports/voice_conversation_cockpit_20261105.md; handoffs/data_15_voice_conversation_pilot_20261105.md.
+
+
 ## Aktuální stav — 2026-11-05 19:11 CET, 15/P2-C
 
 Míla schválil kandidáta i jednu skutečnou syntetickou zkoušku do 60 s.
@@ -91,3 +128,28 @@ Důkaz a obnova:
 - Veškerá práce jen ve worktree Data; bez živých služeb, sdílených dat,
   push, deploy či integrace. Main mezitím pokročil; jeho novější paměť
   a Willovu e-mailovou integraci při budoucím převzetí zachovat.
+
+## 2026-11-05 19:28 CET — 15/P2-D: připojení čtecího hlasu do Cockpitu (lokálně)
+
+### Hotovo
+Human–Adam dostal samostatný čtecí hlasový panel nad vybraným existujícím
+vláknem. Mikrofon a jedna <=60s relace začínají až po cenovém souhlasu a Start.
+Stop hlasu neruší úlohu, nový rozhovor vyžaduje serverově potvrzený konec.
+
+### Rozhodnutí
+Míla zadal „Připoj čtecí hlas do cockpitu...“. Přijatý GPT-Live 1 a skutečný
+probe P2-C umožňují centrální read_only_voice roli; kód a konfigurace jsou
+oddělené kvůli kompatibilitě starého runtime. Žádný push ani deploy zadán nebyl.
+
+### Další krok
+Will převezme kód do aktuálního main a zachová své e-mailové změny i role;
+nejdříve samostatně povolené nasazení kompatibilního parseru, pak hlasová role.
+
+### Navrhované další kroky
+Po nasazení neplacená kontrola panelu, poté Mílův zvlášť potvrzený iPhone
+rozhovor do 60 s s kontrolou úlohy, vlákna, Stop a finální serverové spotřeby.
+
+### Technický důkaz
+120 cílených testů PASS, z toho 19 nových integračních kontraktů; statická
+brána PASS, plná brána 2467 testů OK (skipped=5). Report voice_conversation_cockpit_20261105.md.
+Žádná nová placená relace, mikrofon ani změna živých služeb/provozních dat.

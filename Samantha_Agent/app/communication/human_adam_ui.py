@@ -201,6 +201,7 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
             <button id="threadRotationOpenBtn" type="button">Vlákno</button>
             <button id="tvbcpOpenBtn" type="button">TVBCP</button>
             <button id="refreshBtn" type="button">Obnovit stav</button>
+            <a href="/human-adam/voice/" target="_blank" rel="noopener">Čtecí hlas</a>
           </div>
         </details>
       </div>

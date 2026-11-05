@@ -1,10 +1,11 @@
-"""15/P2-B candidate broker. Inert until constructed by trusted application code.
+"""Bounded read-only voice broker, inert until constructed by trusted host code.
 
-No routes, services, role edits, credentials or model calls on import. A candidate
-grant authorizes ONE synthetic session, not a production model role. The HTTP
-adapter requires a server-authenticated principal, exact Origin and a CSRF token.
-Only a bound read-only snapshot reaches the voice model. Receipts never contain
-audio, SDP, transcripts, credentials or backend text.
+No routes, services, role edits, credentials or model calls on import. A grant
+permits ONE explicitly price-confirmed session; the Cockpit adapter additionally
+checks the central audio role and binds an existing thread. Exact Origin/CSRF
+and server-owned browser identity inherit the host's network trust, not human
+authentication. Only allowlisted status reaches the model. Receipts never
+contain audio, SDP, transcripts, credentials or backend text.
 """
 
 from __future__ import annotations
@@ -50,13 +51,14 @@ class CandidateVoiceGrant:
     confirmed_live_test: bool = False
 
     def validate(self):
-        # Candidate choice and a paid test are separate decisions. No default
-        # role resolution, account upgrade or fallback is performed here.
+        # Candidate choice and a paid session are separate decisions. The legacy
+        # confirmed_live_test flag also carries explicit Cockpit session consent.
+        # Central role approval is checked by that host, never inferred here.
         if (self.confirmed_live_test is not True or self.model != "gpt-live-1"
                 or not all(isinstance(x, str) and _ID.fullmatch(x) for x in (self.request_id, self.owner))
                 or not isinstance(self.binding, VoiceBinding)
                 or type(self.max_seconds) is not int or not 15 <= self.max_seconds <= 60):
-            raise VoiceGatewayError("One explicit price-reviewed candidate test grant is required")
+            raise VoiceGatewayError("One explicit price-reviewed read-only session grant is required")
 
 
 class VoiceAttemptJournal:
@@ -318,7 +320,7 @@ class VoiceSessionSupervisor:
 
 
 class CandidateVoiceGateway:
-    """A trusted HTTP host must supply the authenticated principal separately.
+    """A trusted HTTP host must supply its verified browser principal separately.
 
     No request can choose the model, grant, workstream, thread or backend method.
     This does not activate a production role or mount an HTTP route by itself.
@@ -435,7 +437,7 @@ class CandidateVoiceGateway:
         return {"close_requested": True, "final_usage_confirmed": receipt["final_usage_confirmed"]}
 
     def dispatch(self, *, method, path, principal, headers, body):
-        """Inert exact-path adapter; the host supplies its authenticated principal."""
+        """Inert exact-path adapter; the host supplies its server-owned principal."""
         routes = {"/api/human-adam/voice-candidate/session": self.create,
                   "/api/human-adam/voice-candidate/close": self.abandon}
         if path not in routes:

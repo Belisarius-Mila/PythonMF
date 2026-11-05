@@ -22,14 +22,14 @@ CAPABILITIES: tuple[CapabilityRecord, ...] = (
         notes="One stable grant, no microphone, user history, backend model/tool, retry, fallback, role activation or deployment. Candidate choice and paid probe separately approved. Final usage only from session.closed; duration/cost are not a provider billing ceiling.",
     ),
     CapabilityRecord(
-        capability_id="create_voice_candidate_session", label="One explicitly approved synthetic voice candidate test",
+        capability_id="create_voice_candidate_session", label="One explicitly approved read-only voice pilot session",
         risk=RiskLevel.EXTERNAL_SEND,
-        reads=("server-authenticated principal and CSRF", "bound synthetic read-only snapshot", "explicit GPT-Live candidate and price-reviewed one-shot grant"),
+        reads=("server-owned browser identity, exact Origin and CSRF", "bound read-only status snapshot", "explicit GPT-Live candidate and price-reviewed one-shot grant"),
         writes=("private durable create-attempt receipt", "one paid voice session and final usage"),
         tool="app.communication.voice_conversation_gateway.create_candidate_session",
         requires_confirmation=True, confirmation_policy=ConfirmationPolicy.EXACT_CURRENT_MESSAGE,
         voice_allowed=VoicePolicy.BLOCKED, mobile_allowed=MobilePolicy.APPROVAL_CARD,
-        notes="Candidate approval alone is not a paid-test grant. At most one creation per stable grant even after restart; no production role/config edit, backend mutation, model fallback or automatic retry. Server watchdog is not a provider billing ceiling. Routes remain unmounted until separately integrated.",
+        notes="Explicit browser price consent is required per <=60s session; central read_only_voice role requires accepted trial evidence. At most one create per stable browser attempt even after restart. Cookie inherits Cockpit network trust, not human identity. No backend mutation, history, fallback, retry or voice approval. A deliberate new session requires server-confirmed closed receipt/final usage. Server watchdog is not a provider billing ceiling.",
     ),
     CapabilityRecord(
         capability_id="review_luna_development_anchors", label="Review a misquoted source anchor without another model turn",

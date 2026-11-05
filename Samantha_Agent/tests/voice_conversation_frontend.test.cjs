@@ -177,6 +177,40 @@ const flush=()=>new Promise(resolve=>setImmediate(resolve));
   await assert.rejects(failedBroker.create({sdp:"v=0 once"}));
   await assert.rejects(failedBroker.create({sdp:"v=0 twice"}));
   assert.throws(()=>context.window.makeSamanthaVoiceCandidateBroker("short"));
+  // Cockpit mounting is inert until explicit checkbox + click, and renew is separate.
+  for(const item of Object.values(elements)) item.dataset={};
+  elements.consent=new Emitter();elements.consent.checked=false;
+  const bound=context.window.mountSamanthaVoicePilot(httpBroker,{requireConsent:true,maxSeconds:60});
+  assert.equal(elements.start.disabled,true);
+  elements.start.emit("click");await flush();
+  assert.equal(bound.state,"idle");
+  elements.consent.checked=true;elements.consent.emit("change");
+  assert.equal(elements.start.disabled,false);
+  assert.equal(bound.maxSeconds,60);
+  const confirmation="Synthetic explicit price consent";
+  context.fetch=async(path,options)=>{httpCalls.push({path,options});return {ok:true,json:async()=>({ok:true})};};
+  const approvedBroker=context.window.makeSamanthaVoiceCandidateBroker("synthetic-csrf-token-1234567890",confirmation);
+  await approvedBroker.create({sdp:"v=0 consent"});
+  assert.deepEqual(JSON.parse(httpCalls.at(-1).options.body),{sdp:"v=0 consent",confirmation});
+  await approvedBroker.renew();
+  assert.equal(httpCalls.at(-1).path,"/api/human-adam/voice-candidate/new");
+  assert.deepEqual(JSON.parse(httpCalls.at(-1).options.body),{confirmation});
+  const bootElements={voiceConfig:{dataset:{csrf:"synthetic-csrf-token-1234567890",confirmation,ready:"true",canRenew:"false"}},
+    new:new Emitter(),status:{textContent:""}};
+  const mountSpy=[];
+  const bootContext={window:{isSecureContext:true,RTCPeerConnection:class{},
+    makeSamanthaVoiceCandidateBroker:()=>({renew:async()=>{}}),mountSamanthaVoicePilot:(...args)=>mountSpy.push(args)},
+    navigator:{mediaDevices:{}},document:{getElementById:id=>bootElements[id]}};
+  const boot=fs.readFileSync("app/frontend/voice_pilot/cockpit.js","utf8");
+  vm.runInNewContext(boot,bootContext);
+  assert.equal(mountSpy.length,1);
+  assert.equal(mountSpy[0][1].requireConsent,true);
+  assert.equal(bootElements.new.disabled,true);
+  mountSpy[0][1].onState({finalUsage:true});
+  assert.equal(bootElements.new.disabled,false);
+  bootElements.voiceConfig.dataset.ready="false";
+  vm.runInNewContext(boot,bootContext);
+  assert.equal(mountSpy.length,1,"used/recovered attempt never remounts a session");
   const page=fs.readFileSync("app/frontend/voice_pilot/page.html","utf8");
   assert(page.includes('id="start" disabled'));
   assert(page.includes("playsinline"));
