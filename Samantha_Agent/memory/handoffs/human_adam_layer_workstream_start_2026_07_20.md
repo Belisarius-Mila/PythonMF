@@ -7,6 +7,9 @@
 - Data doložil 105 cílených PASS v oddělené .venv. Will po integraci ověřil 102 PASS + 3 historické schema SKIP kvůli cestě exportů; všech 12 nových C testů skutečně PASS. CLI proxy nepřevádí proudový Unix protokol na současný WebSocket protokol.
 - E-mailový krok c846775b má lokální plnou bránu 2476 testů (20 SDK SKIP), 55 závěrečných cílených PASS a dvě skutečné zkoušky Terra/high. Běžící kopie dosud 167e629f.
 
+- Willova integrační kontrola: 12 nových SDK C případů PASS; 3 historické schema testy zvlášť PASS s exporty, zdroj shodný. Nový pilot je registrovaný ve společné bráně.
+- Hodinová e-mailová kopie skutečně přepnutá na ac9f3bed; celý business stav shodný, první check already_completed. Společná publikační účtenka a finální živé důkazy: logs/email_data_quality_release_20261105.log a *_verified_*.log. Gitový snapshot se během vydání nemění.
+
 ### Rozhodnutí
 - Míla výslovně autorizoval nové Terra p+n pro Willovy i Datovy commity jako společný balíček. Zachovat centrální modely i dosavadní produkční architekturu.
 

@@ -1,5 +1,35 @@
 # E-mail read-only OAuth integrace
 
+## Řízené přepnutí a společné vydání s Datou — 2026-11-05 12:07 CET
+
+- Míla výslovně zadal Terra p+n pro Willovy i Datovy commity. E-mailový
+  kód c846775b a Data d50fccbd/c49da146 (v main 5ad99375/4a337100)
+  jsou společně převzaté; integrační checkpoint ac9f3bed.
+- Registrované pause/prepare/upgrade dokončily přepnutí vlastního hodinového
+  agenta z 167e629f na ac9f3bed. Stará kopie a servisní záloha zůstaly.
+  installed/owned/loaded/enabled=true, první skutečná kontrola
+  already_completed, 0 modelových posouzení a 0 oznámení.
+- Celý stav před/po má shodný SHA-256: karty, upravené koncepty, předvolby,
+  zdrojové UID pozice, denní počítadla i doručovací fronta beze změny.
+  Nainstalované moduly návrhu/podpisu se byte-for-byte shodují s ověřeným
+  zdrojem. Podpis čte místní konfiguraci, model zůstává Terra/high.
+- SDK pilot zůstává izolovaný. V main s Datovým interpretem 102 PASS +
+  3 historické schema SKIP; všech 12 nových C případů skutečně PASS.
+  Chybějící 3 schema testy zvlášť v původním prostředí s exporty PASS,
+  jejich zdroj i syntetický peer shodný. Žádná instalace závislostí do produkce.
+- Důkazy: logs/email_quality_upgrade_verified_20261105.log,
+  logs/data_sdk_c_integration_20261105.log,
+  logs/data_sdk_c_schema_verification_20261105.log. Uživatelské Mac/iPhone
+  přejímky 1–3 Data zaznamenal jako PASS; bod 4 a skutečný technický reconnect
+  jsou nadále otevřené, syntetické zkoušky je nenahrazují.
+- Tento checkpoint zmrazí podklady pro registrované submit_release(wait=True)
+  v project-email-cases; centrální vykonavatel a společný cíl se ověří auditem.
+  Konečný stav publikace a její přesnou účtenku dokládá
+  logs/email_data_quality_release_20261105.log a následné *_verified_*.log.
+  Během vydání se Gitový snapshot nemění. Po vydání ověřit živé UI, CI,
+  samostatnou službu a čistotu main i profilů; další plné posouzení nového
+  e-mailu a fyzické kliknutí na novou volbu nejsou předem prohlášené za přijaté.
+
 ## Lokální oprava kvality konceptů a předvolby ostatní pošty — 2026-11-05 11:46 CET
 
 - Míla upozornil na chybějící předvolbu u nedůležité pošty a na věcně
