@@ -18,9 +18,12 @@ Nula placených modelových tahů, žádný push, deploy ani integrace do main.
 
 Mílovo navazující „Funguje to!“ evidujeme jako přijetí bodu 3 předchozího
 postupu (návrat na Mac / kontrola jedinečného zobrazení). Body 1–3 jsou
-uživatelsky přijaté. Bod 4 (obnova stránky během práce) a skutečný technický
-reconnect sdíleného App Serveru zůstávají otevřené. Syntetické testy C je
-nenahrazují. Nový živý audit nasazení nebyl proveden.
+uživatelsky přijaté. Následně Míla potvrdil i bod 4: obnova Safari během
+odpovědi na iPhonu zcela OK. **Uživatelské body 1–4 PASS.** Zbývá pouze
+skutečný technický reconnect sdíleného App Serveru pro Willa; syntetické testy
+C jej nenahrazují. Míla oznámil nasazení C, Data neprovedl nový živý audit.
+Původní vývojový rozsah a jeho zákazy výše zachycují práci Data, nikoli
+pozdější nasazení oznámené Mílou.
 
 ## Ověřené prostředí a zdroje
 
@@ -93,10 +96,11 @@ jako produkční adaptér a nezaručuje globální serializaci různých operac�
 
 ## Přesný další integrační krok pro Willa
 
-1. Převzít pouze tento lokální C commit jako testovací a dokumentační balíček;
-   při konfliktu paměti zachovat novější kanonický stav main a přidat závěry C.
-   **Produkční klient, controller, session hub, role a závislosti neměnit.**
-2. Před uzavřením přejímky dokončit bod 4 s Mílou. Technický reconnect provést
+1. C je podle Míly nasazené. Do kanonického stavu main převzít také tento
+   následný zápis úspěšné fyzické přejímky; při konfliktu paměti zachovat
+   novější stav main. **Produkční klient, controller, session hub, role
+   a závislosti se tím nemění.**
+2. Bod 4 je po Mílově fyzickém testu přijatý. Technický reconnect provést
    jako samostatně autorizovanou read-only zkoušku současného transportu:
    dvě nová klientská spojení k existujícímu socketu, initialize a metadata
    verze, resume původního vlákna s excludeTurns, kontrola ID a stejných
@@ -107,7 +111,7 @@ jako produkční adaptér a nezaručuje globální serializaci různých operac�
    veřejné deadline, explicitní approvals a napojení na trvalý journal. Pouhá
    náhrada executable za CLI proxy pro současnou Samanthu nefunguje.
 
-Krok 1 je připravené souborové předání, nikoli provedená integrace. Přímý
-Willův agent není v této relaci k dispozici; převzetí zatím nepotvrzené.
-Data po lokálním commitu čeká. Další živé testy ani publikování tento krok
-neautorizuje.
+Míla oznámil nasazení C; přesný nasazený head ani přímé převzetí Willem
+Data novým auditem neověřoval. Následný zápis fyzické přejímky je připravený
+k souborovému předání z větve Data. Přímý Willův agent zde není k dispozici.
+Data po lokálním commitu čeká; další živé testy ani publikování neprovádí.

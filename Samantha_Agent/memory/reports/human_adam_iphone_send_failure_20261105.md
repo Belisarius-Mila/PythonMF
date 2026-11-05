@@ -7,8 +7,9 @@ Pracovní proud: `layer-human-adam-development`.
 
 **Navazující přejímka 2026-11-05: bod 3 PASS podle Mílova „Funguje to!“**
 Návrat na Mac / kontrola duplicit je po navazujícím postupu přijatý.
-Body 1–3 jsou uzavřené; bod 4 (obnova během práce) a skutečný technický
-reconnect zůstávají otevřené. Krok C je samostatný syntetický SDK/socket
+Následně Míla potvrdil i bod 4 (obnova Safari během odpovědi) jako zcela OK.
+**Body 1–4 jsou uživatelsky uzavřené.** Zbývá pouze technický reconnect.
+Míla oznámil nasazení C; nový živý audit Data neprovedl. Krok C je samostatný syntetický SDK/socket
 pilot, viz `codex_sdk_p1c_20261105.md`; živou přejímku výpadku nenahrazuje.
 Následující záznam bodu 2 zachovává předchozí stav.
 
@@ -94,9 +95,9 @@ UI oprava je nyní doložená v main jako `6972ea5c`. Míla po úpravě potvrdil
 je tím po uživatelském retestu uzavřené; přesný původní spouštěč nebyl dodatečně
 prokázán. Tento zápis nepředstírá nový audit runtime ani další nasazení.
 
-Další krok: samostatně ověřit obnovu stránky během rozpracované odpovědi
-(bod 4) a skutečný technický reconnect App Serveru. Bod 3 byl mezitím
-Mílou přijat; výsledek izolovaného SDK pilotu C je v samostatném reportu.
+Další krok: Will doloží skutečný technický reconnect App Serveru. Body 1–4
+včetně obnovy stránky byly mezitím Mílou přijaty; výsledek izolovaného SDK
+pilotu C a postup technické přejímky jsou v samostatném reportu.
 
 Změněný kód/testy: `human_adam_ui.py`, `test_human_adam_ui.py`,
 `human_adam_send_frontend.test.cjs`, `luna_release_frontend.test.cjs`.

@@ -1,6 +1,18 @@
 # Data → Will: 05/P1 App Server / Python SDK, etapy A, B a C
 
-## Aktuální předání — 05/P1-C, 2026-11-05 11:58 CET
+## Aktuální přejímka — 2026-11-05 12:41 CET
+
+Míla oznámil nasazení C a potvrdil obnovu Safari během odpovědi na iPhonu
+jako zcela úspěšnou. „Jednička“ z posledního návodu je původní bod 4:
+**uživatelská přejímka bodů 1–4 PASS**. Nový živý audit nasazení Data neprovedl.
+
+Zbývá pouze technický reconnect pro Willa podle reportu C: dvě spojení ke
+stávajícímu socketu, stejný thread/model/oprávnění/cwd, zavření prvního a
+ověření druhého. Bez restartu, turn/start či opakování zprávy. Po doložení
+uzavřít přejímku 05/P1. SDK se neadoptuje. Tento zápis jen ve větvi Data;
+bez změn kódu či služeb, nového push, deploy nebo integrace ze strany Data.
+
+## Předchozí předání — 05/P1-C, 2026-11-05 11:58 CET
 
 Míla schválil krok C a navazujícím „Funguje to!“ přijal bod 3 přejímky
 (návrat na Mac / kontrola duplicit). Body 1–3 PASS podle uživatele; bod 4
