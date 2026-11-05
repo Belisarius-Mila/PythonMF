@@ -29,6 +29,14 @@ nebo jejichž princip lze znovu použít v jiné části projektu.
 
 ## Záznamy
 
+### LL-095 — Unix socket nezaručuje shodný aplikační protokol
+
+- Problém: kandidátní SDK konfigurace s `app-server proxy --sock` vypadá jako náhrada přímého Unix spojení; současná Samantha ale používá WebSocket a CLI proxy přenáší prosté bajty.
+- Typ: opakující se
+- Řešení nalezeno: 05112026
+- Řešení: ověřit skutečný protokol nad socketem dvěma kontrolami. SDK/CLI proxy proti proudové fixture funguje; proti WebSocket fixture skončí deadline, zatímco současný UnixSocketAppServerTransport se připojí. Nepoužívat proxy jako náhradu tohoto transportu a po nejistém výsledku nevytvářet fallback vlákno ani další tah. Deadline ukončuje pouze proxy, nikoli sdílený server; výchozí SDK approvals je nutné výslovně odmítnout.
+- Ověření: 105 cílených testů PASS včetně 12 nových pro krok C. Jen syntetické sockety, bez modelů; živý reconnect a fyzická přejímka zůstávají samostatné. Report codex_sdk_p1c_20261105.md.
+
 ### LL-093 — Preference důležitosti je výslovné vodítko, ne přeskočení celého e-mailu
 
 - Problém: odstranění karty může znamenat vyřízení i omyl; automatické učení z něj by potlačovalo další důležitou poštu. Pravidlo jen podle odesílatele je příliš široké.

@@ -2,23 +2,24 @@
 ## Aktuální stav
 
 - Obnoveno potvrzeným checkpointem: 2026-10-19 13:00 CEST
-- 05/P1-B: Mac bod 1 OK, iPhone bod 2 po úpravě OK podle Míly 2026-11-05 11:41 CET. UI oprava převzatá do main jako `6972ea5c`; další scénáře přejímky otevřené. Report `reports/human_adam_iphone_send_failure_20261105.md`.
+- 05/P1-C dokončeno lokálně: 105 cílených testů PASS (12 nových), statická brána PASS. SDK/CLI proxy není kompatibilní se současným Unix WebSocket transportem; ponechat původní klient. Míla přijal i bod 3, body 1–3 PASS. Report `reports/codex_sdk_p1c_20261105.md`.
 
 ### Hotovo
-- Míla potvrdil úspěšnou odpověď na iPhonu a návaznost předchozí značky po UI opravě; původní bod 2 FAIL je po retestu PASS.
+- Míla potvrdil běžnou komunikaci a přijal navazující bod 3 (návrat na Mac / kontrola duplicit). Body 1–3 jsou uživatelsky přijaté; původní iPhone FAIL je po retestu PASS.
+- Izolovaný SDK pilot C ověřil dva klienty, sdílený syntetický stav, životní cyklus proxy, oprávnění a nejisté doručení bez retry. Proudový socket PASS; současný WebSocket transport přes CLI proxy NEKOMPATIBILNÍ.
 - Human–Adam upřednostňuje chat a aktuální stav; technické účtenky jsou dostupné v panelu Práce
 - Lokální klient žádá obnovu bez historie, rozlišuje final_answer a zachovává strukturované chyby. Kompatibilitu posuzuje podle připojeného serveru, nikoli lokálního CLI; 100 cílených testů PASS.
 
 ### Otevřeno
-- Zbývá návrat na Mac a kontrola duplicit (bod 3), obnova stránky během práce (bod 4) a samostatný technický reconnect.
-- Všechny tři kódové kroky Data jsou převzaté do main; nový paměťový zápis výsledku zůstává pouze ve větvi Data.
+- Zbývá obnova stránky během práce (bod 4) a samostatný technický reconnect skutečného sdíleného App Serveru. Syntetické testy C nejsou živá přejímka.
+- Předchozí tři kódové kroky Data jsou převzaté do main. Nový pilot C a zápisy přejímky jsou pouze ve větvi Data; bez nové integrace, push či nasazení.
 
 ### Rizika
-- Přesný původní spouštěč na telefonu nebyl prokázán. Uživatelsky je potvrzené běžné odeslání a návaznost konverzace; další scénáře zatím ne.
+- Přesný původní spouštěč na telefonu nebyl prokázán. Body 1–3 jsou uživatelsky přijaté; obnova stránky během práce a skutečný technický reconnect zatím ne. SDK proxy vyžaduje jiný protokol než současný socket.
 - Neznámý, starší než 0.163.0 nebo prerelease server je podle kontraktu odmítnut před prací s vláknem. Nový technický reconnect není doložený samotným úspěšným mobilním dotazem.
 
 ### Další krok
-- Podle přejímacího postupu zkontrolovat návrat na Mac a jediné zobrazení zpráv (bod 3).
+- Will převezme samostatný testovací a dokumentační balíček C; dále samostatně ověřit bod 4 a read-only reconnect současného transportu podle reportu C.
 
 ### Rozhodnutí
 - Úvodní obrazovka zobrazuje stručný aktuální stav, technické účtenky a podrobnosti se otevírají v panelu Práce
@@ -4432,3 +4433,23 @@ Navrhované další kroky:
 Technický důkaz:
 - Přímé uživatelské potvrzení výsledku po úpravě; žádný nový modelový tah ani nový runtime audit. Report reports/human_adam_iphone_send_failure_20261105.md.
 - Jde o dokumentační zápis. Kód, služby, sdílená provozní data, push a nasazení se neměnily.
+
+### 2026-11-05 11:58 CET — 05/P1-C: SDK proxy a přijetí bodu 3
+
+Hotovo:
+- Míla navazujícím „Funguje to!“ přijal bod 3 předchozího postupu; body 1–3 uživatelsky PASS. Bod 4 a skutečný technický reconnect zůstávají otevřené.
+- Izolovaný pilot se skutečným SDK/CLI prokázal sdílení syntetického proudového socketu dvěma klienty, přežití posluchače po uzavření proxy a blokaci opakované akce po nejistotě. CLI proxy se současným WebSocket transportem nefunguje; současný transport proti téže fixture PASS.
+
+Rozhodnutí:
+- Nová architektonická dohoda nevznikla. Doporučení Data je ponechat modernizovaný původní klient; SDK se neadoptovalo.
+
+Další krok:
+- Předat Willovi lokální testy a závěry C; integrace se v této větvi neprovádí.
+
+Navrhované další kroky:
+- Dokončit bod 4 s Mílou a samostatně autorizovaný read-only reconnect současného transportu bez turn/start, náhradního vlákna či restartu.
+- SDK migraci otevřít jen po konkrétním přínosu a samostatném rozhodnutí; vyžaduje skutečný WebSocket adaptér a zachování trvalého journalu.
+
+Technický důkaz:
+- 105 cílených testů PASS, včetně 12 nových; statická brána a pip check PASS. Report reports/codex_sdk_p1c_20261105.md a kontrolní environment JSON.
+- Jen syntetické fixture, nula placených modelových tahů. Produkční klient/runtime/UI/e-mail, role, requirements a sdílená data beze změn; bez živého auditu, restartu, integrace, push a nasazení.
