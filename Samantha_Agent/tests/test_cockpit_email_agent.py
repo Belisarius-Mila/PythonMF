@@ -85,6 +85,22 @@ class EmailAgentHTTPTests(unittest.TestCase):
         self.assertEqual(view["importance_preferences"][0]["subject"], self.message.source.subject)
         self.assertNotIn("account", view["importance_preferences"][0])
 
+    def test_hourly_messages_expose_only_headers_and_accept_individual_preference(self):
+        message = observed("2", body="PRIVATE LOW BODY", subject="Novinky pro čtenáře")
+        low = proposal().model_copy(update={"important": False, "reply_draft": ""})
+        self.worker.cycle(FakeSource([message]), lambda _: low)
+        view = email_agent_overview(worker=self.worker)
+        row = view["hours"][0]
+        self.assertEqual(row["messages"], [{"id": message.item_id, "text": row["text"].split(": ", 1)[1]}])
+        self.assertNotIn("PRIVATE LOW BODY", json.dumps(row))
+        before = self.worker.status()
+        with patch("app.cockpit.email_agent_remember_importance_action", side_effect=lambda data: email_agent_remember_importance_action(data, worker=self.worker)):
+            _, raw, _ = self.request("/api/email-agent/remember-importance", {"id": message.item_id})
+        self.assertTrue(json.loads(raw)["ok"])
+        self.assertEqual(self.worker.status()["items"], before["items"])
+        self.assertEqual(self.worker.status()["sources"], before["sources"])
+        self.assertEqual(email_agent_overview(worker=self.worker)["hours"], view["hours"])
+
     def test_forget_importance_post_removes_hint_without_touching_mail_or_card(self):
         key = self.worker.remember_low_importance(self.message.item_id)
         before = self.worker.status()["items"]

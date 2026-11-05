@@ -31,20 +31,23 @@ def email_agent_overview(*, worker=None) -> dict:
             hour = item["hour"]
             group = groups.setdefault(hour, {"hour": hour, "ids": [], "messages": []})
             group["ids"].append(item_id)
-            group["messages"].append(item["header"])
+            group["messages"].append({"id": item_id, **item["header"]})
         if item.get("receipt"):
             archived.append({"id": item_id, "header": item.get("header", {}), "proposal": item["proposal"]})
     rows = []
     for hour, group in sorted(groups.items(), reverse=True):
-        entries = []
+        entries, messages = [], []
         for message in group["messages"]:
             try:
                 date_text = parsedate_to_datetime(message["date"]).astimezone(ZoneInfo("Europe/Prague")).strftime("%d. %m. %H:%M")
             except (ValueError, TypeError, OverflowError):
                 date_text = message["date"] or "čas neuveden"
-            entries.append(f"{date_text} {message['sender']} — {message['subject'] or '(bez předmětu)'}")
+            text = f"{date_text} {message['sender']} — {message['subject'] or '(bez předmětu)'}"
+            entries.append(text)
+            messages.append({"id": message["id"], "text": text})
         label = datetime.fromisoformat(hour).strftime("%d. %m. %Y, kontrola v %H:%M")
-        rows.append({"hour": hour, "ids": group["ids"], "text": label + ": " + "; ".join(entries)})
+        rows.append({"hour": hour, "ids": group["ids"], "text": label + ": " + "; ".join(entries),
+                     "messages": messages})
     counts = Counter(item["status"] for item in state["items"].values())
     preferences = [{"id": key, "sender": p["sender"], "subject": p["subject"]}
                    for key, p in state.get("importance_preferences", {}).items() if p["active"]]

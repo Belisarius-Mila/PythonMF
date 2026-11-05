@@ -244,7 +244,7 @@ class CodexProposalTests(unittest.TestCase):
             def send_text(self, **kwargs):
                 calls.append(kwargs)
                 return SimpleNamespace(delivered=True, answer=proposal().model_dump_json())
-        adapter = CodexEmailProposer("gpt-6.1-terra", client_factory=Client)
+        adapter = CodexEmailProposer("gpt-6.1-terra", client_factory=Client, reply_name="")
         self.assertEqual(adapter(observed(body="x" * 30_000 + "SOURCE_END")), proposal())
         self.assertEqual(calls[0]["model"], "gpt-6.1-terra")
         self.assertIn("SOURCE_END", calls[1]["text"])

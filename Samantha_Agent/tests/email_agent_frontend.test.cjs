@@ -34,7 +34,8 @@ function find(element, label) {
       created_at: '2026-11-04', status: 'awaiting_confirmation', proposal_digest: 'original-digest',
       message: {body_text: 'CELÉ TĚLO A KONEC'}, proposal: {summary: 'Schůzka', reason: 'Je třeba odpověď',
         metadata, reply_subject: 'Re: Schůzka', reply_draft: 'Potvrzuji účast.'}}],
-    hours: [{text: '18:00: Firma — Reklama', ids: ['low-1','low-2']}]};
+    hours: [{text: '18:00: Firma — Reklama', ids: ['low-1','low-2'], messages: [
+      {id: 'low-1', text: 'Firma — Reklama'}, {id: 'low-2', text: '<script> — Jiné novinky'}]}]};
   const calls = [], intervals = [];
   let confirmChoice = true;
   let preparationCount = 0;
@@ -89,6 +90,13 @@ function find(element, label) {
   assert.deepEqual(calls.find(call => call.url.endsWith('/forget-importance')).payload, {id: 'pref-1'});
   assert.equal(data.cards.length, 1);
   assert.equal(data.importance_preferences.length, 0);
+  const hourBefore = JSON.stringify(data.hours);
+  assert.match(ids.hours.textContent, /Příště nedůležité…/);
+  assert.match(ids.hours.textContent, /<script> — Jiné novinky/);
+  await find(ids.hours, 'Příště nedůležité').click();
+  assert.deepEqual(calls.filter(call => call.url.endsWith('/remember-importance')).at(-1).payload, {id: 'low-1'});
+  assert.equal(JSON.stringify(data.hours), hourBefore, 'Preference preserves the complete hourly row');
+  assert.equal(calls.some(call => /dismiss|archive|send-reply/.test(call.url)), false);
   await find(ids.cards, 'Upravit odpověď').click();
   assert.equal(ids.replyEditor.open, true);
   ids.replySubject.value = 'Můj předmět'; ids.replyBody.value = 'Moje upravená odpověď';

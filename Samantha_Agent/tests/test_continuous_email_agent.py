@@ -220,12 +220,28 @@ class ContinuousEmailTests(unittest.TestCase):
             self.assertEqual(agent.model, "explicit-test-model")
             self.assertEqual(agent.tools, [])
             return SimpleNamespace(final_output=proposal())
-        self.assertEqual(SDKEmailProposer("explicit-test-model", runner=runner)(message), proposal())
+        self.assertEqual(SDKEmailProposer("explicit-test-model", runner=runner, reply_name="")(message), proposal())
         with self.assertRaises(ValueError):
             SDKEmailProposer("")
 
 
 class ImportancePreferenceTests(unittest.TestCase):
+    def test_hourly_preference_preserves_row_body_policy_and_survives_restart(self):
+        message = observed("2", body="Newsletter obsah", subject="Pravidelné novinky")
+        low = proposal().model_copy(update={"important": False, "reply_draft": ""})
+        self.worker.cycle(FakeSource([message]), lambda _: low)
+        before = self.worker.status()
+        key = self.worker.remember_low_importance(message.item_id)
+        after = self.worker.status()
+        self.assertEqual(after["items"], before["items"])
+        self.assertEqual(after["sources"], before["sources"])
+        self.assertEqual(after["items"][message.item_id]["message"], {})
+        restarted = ContinuousEmailAgent(self.worker.root)
+        self.assertEqual(restarted.remember_low_importance(message.item_id), key)
+        self.assertEqual(restarted.matching_importance_preferences(message)[0]["id"], key)
+        restarted.forget_importance_preference(key)
+        self.assertEqual(restarted.matching_importance_preferences(message), ())
+
     def setUp(self):
         self.temp = tempfile.TemporaryDirectory()
         self.addCleanup(self.temp.cleanup)

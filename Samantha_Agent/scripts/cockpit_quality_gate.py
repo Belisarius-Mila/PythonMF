@@ -423,6 +423,7 @@ TEST_MODULES = (
     "tests.test_work_repository",
     "tests.test_email_work_repository",
     "tests.test_continuous_email_agent",
+    "tests.test_email_proposal_policy",
     "tests.test_email_agent_service",
     "tests.test_email_service_control",
     "tests.test_email_pushcut",

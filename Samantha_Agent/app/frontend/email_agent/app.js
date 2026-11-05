@@ -128,8 +128,19 @@
     if (!data.cards.length) cards.append(node("p", "Žádné důležité zprávy k řešení."));
     const hours = byId("hours"); hours.replaceChildren();
     for (const hour of data.hours) {
-      const row = node("div", undefined, "hour");
+      const row = node("div", undefined, "hour mail-hour");
       row.append(node("p", hour.text), action("Smazat z Cockpitu", () => request("/api/email-agent/dismiss", {ids: hour.ids, action: "dismiss"}), true));
+      const choices = node("details");
+      choices.append(node("summary", "Příště nedůležité…"));
+      for (const message of hour.messages || []) {
+        const choice = node("div", undefined, "actions");
+        choice.append(node("span", message.text), action("Příště nedůležité", async () => {
+          await request("/api/email-agent/remember-importance", {id: message.id});
+          byId("notice").textContent = "Preference pro vybraného odesílatele a podobný předmět je uložená. Hodinový přehled zůstává zachovaný.";
+        }, true));
+        choices.append(choice);
+      }
+      if ((hour.messages || []).length) row.append(choices);
       hours.append(row);
     }
     if (!data.hours.length) hours.append(node("p", "Žádné další zprávy v přehledu."));

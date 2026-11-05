@@ -1,5 +1,53 @@
 # E-mail read-only OAuth integrace
 
+## Lokální oprava kvality konceptů a předvolby ostatní pošty — 2026-11-05 11:46 CET
+
+- Míla upozornil na chybějící předvolbu u nedůležité pošty a na věcně
+  chybný koncept s nepodloženým tvrzením o příloze. Read-only načtení
+  konkrétní zprávy ověřilo shodu původního EML digestu i celého uloženého
+  těla (1801 znaků textu, 13908 znaků HTML). Oba úplné formáty předává
+  adaptér modelu; zkrácení vstupu se nepotvrdilo. Původní koncept se po
+  uživatelské úpravě nezachoval, jeho přesné znění není zpětně doložitelné.
+- Ve zdrojích je doplněná volba jednotlivé zprávy uvnitř rozbalení
+  Příště nedůležité… v hodinovém řádku. Ukládá se stejná výslovná
+  preference účet + odesílatel + podobný předmět. Řádek, těla, UID kurzory
+  a schránka zůstávají zachované; smazání se dál neučí automaticky.
+- Oba modelové adaptéry sdílejí pravidla: rozlišit hotové úkony od
+  požadavků, zachovat termín, podklady a alternativy doručení, nezaměňovat
+  běžnou odpověď za úřední podání. Editor posílá pouze text bez příloh;
+  koncept nemá tvrdit, že něco přikládá nebo že už byla žádost podána.
+  Požadované oslovení vychází z From/podpisu, při neznámé osobě obecné.
+- Podpis se doplní programově jen novému konceptu podle lokálního
+  SAMANTHA_EMAIL_REPLY_NAME. Jméno bylo ověřeno v uživatelem uloženém
+  konceptu a nastaveno pouze v místním .env; Git obsahuje jen prázdný vzor.
+  Uživatelské úpravy a potvrzené odchozí zprávy se tím nepřepisují.
+- Dvě skutečné jednorázové zkoušky Terra/high: syntetická žádost a
+  původní zpráva. Obě správně oddělily odpověď od podání, zachovaly termín,
+  oslovení a podpis, bez tvrzení o příloze či dokončeném úkonu. Původní
+  karta a koncept beze změny. Jde o dva ověřené případy, nikoli záruku
+  bezchybnosti všech dalších e-mailů. Žádný SMTP ani Pushcut test.
+- Aktuální centrální role i skutečný App Server potvrzují Terra/high.
+  Katalog podporuje také xhigh/max; vyšší úroveň by vyžadovala samostatné
+  srovnání kvality, času a spotřeby. Model ani jeho úroveň se neměnily.
+- Ověření: plná brána 2476 testů, 2456 PASS a 20 SDK SKIP (406,1 s).
+  Po poslední úpravě rozložení a registrace nového policy modulu navíc
+  55 cílených kontrol PASS; finální statická brána PASS. Dvě živé zkoušky
+  Terra/high PASS. Otisk změněné stránky byl aktualizován bez oslabení kontraktu.
+  Důkazy: logs/email_proposal_diagnosis_20261105.log,
+  logs/email_quality_live_review_20261105.log,
+  logs/email_quality_full_gate_20261105.log. Soukromý náhled leží pouze
+  pod data/private/continuous_agent/quality_preview_20261105.json.
+- Stav vydání: pouze lokální změna, bez nového p+n. Běžící hodinový agent
+  zůstává na 167e629f; pro zapnutí opravy je nutné schválené p+n Cockpitu
+  a řízený upgrade jeho samostatné kopie. Starý uživatelský koncept se
+  automaticky nepřegeneruje. Nový TVBCP nebyl domluven ani založen;
+  jde o terminálový vývoj stávajícího e-mailového proudu.
+- Předchozí vydání obou kroků skončila úspěšně: moje 3f3b5b25 / CI
+  42006566022 a Data 6972ea5c / CI 42009849549. Datův vývoj zde neměněn.
+  Další krok po lokálním checkpointu: samostatné p+n project-email-cases
+  a řízený pause/prepare/upgrade hodinové kopie se zachováním dat a pozic.
+  Nový p+n v tomto kroku nebyl zadán. CalDAV a archivní metadata zvlášť.
+
 ## Aktuální směr 2026-11-04 — průběžný osobní agent
 
 - Stav 23:24 CET: příprava hodinového vstupu je vydaná po 77f7e12f,

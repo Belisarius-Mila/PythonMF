@@ -29,6 +29,13 @@ nebo jejichž princip lze znovu použít v jiné části projektu.
 
 ## Záznamy
 
+### LL-100 — Celý vstup sám nezaručuje pravdivý koncept odpovědi
+
+- Problém: agent obdržel celý text i HTML a správně shrnul požadovaný postup, ale koncept mohl zaměnit požadované podání za již hotový úkon nebo tvrdit nepřiloženou přílohu; editor přitom odesílá pouze text.
+- Typ: opakující se
+- Řešení nalezeno: 05112026
+- Řešení: ověřit původní EML digest a celý vstup, oddělit požadavky od provedených úkonů i odpověď osobě od formálního podání. Zadání musí uvést skutečné možnosti editoru, termíny a chybějící podklady; oslovení odvodit z doložené osoby a podpis doplnit podle místní identity jen novému konceptu. Dvě skutečné zkoušky Terra/high po úpravě zachovaly termín, správný postup, oslovení a podpis bez tvrzení o příloze; stará karta zůstala zachovaná. Jednotlivý úspěch není obecná záruka kvality a původní text přepsaný uživatelem nelze bez historie zpětně doložit.
+
 ### LL-098 — Úspěšný prázdný IMAP SEARCH není chyba hodinové dávky
 
 - Problém: iCloud vrací při nulovém počtu nových UID `OK, [None]`; klient očekával jen bytes a nechal hodinovou kontrolu nedokončenou. Minutový retry potom zpracoval nově příchozí zprávu mimo celou hodinu.
