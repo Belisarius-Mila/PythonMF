@@ -11,6 +11,7 @@ from app.email.continuous_agent import ContinuousEmailAgent, EmailProposal
 from app.email.continuous_source import IMAPAgentSource
 from app.email.agent_reply import AgentReplyService
 from app.email.pushcut import PushcutNotifier, pushcut_status
+from app.email.visibility_preferences import EmailVisibilityPreferences, hidden_low_importance
 from app.file_persistence import FilePersistenceError
 from app.work_repository import WorkRepositoryError
 
@@ -27,7 +28,7 @@ def email_agent_overview(*, worker=None) -> dict:
             public["reply"] = {key: value for key, value in reply.items()
                                if key not in {"confirmation_token", "message_b64", "confirmation_digest"}}
             cards.append(public)
-        elif status == "hourly_summary":
+        elif status == "hourly_summary" and not hidden_low_importance(item, state.get("visibility_preferences", {})):
             hour = item["hour"]
             group = groups.setdefault(hour, {"hour": hour, "ids": [], "messages": []})
             group["ids"].append(item_id)
@@ -51,9 +52,12 @@ def email_agent_overview(*, worker=None) -> dict:
     counts = Counter(item["status"] for item in state["items"].values())
     preferences = [{"id": key, "sender": p["sender"], "subject": p["subject"]}
                    for key, p in state.get("importance_preferences", {}).items() if p["active"]]
+    visibility = [{"id": key, "sender": p["sender"], "subject": p["subject"]}
+                  for key, p in state.get("visibility_preferences", {}).items() if p["active"]]
     return {"ok": True, "cards": sorted(cards, key=lambda item: item["created_at"], reverse=True),
             "hours": rows, "archived": archived, "schedule": state.get("schedule", {}),
             "sources": list(state["sources"].values()), "importance_preferences": preferences,
+            "visibility_preferences": visibility,
             "assessment_errors": sum(counts[s] for s in ("analysis_failed", "analysis_interrupted", "analyzing")),
             "pushcut": pushcut_status(worker or ContinuousEmailAgent())}
 
@@ -88,6 +92,22 @@ def email_agent_remember_importance_action(payload: dict, *, worker=None) -> dic
 def email_agent_forget_importance_action(payload: dict, *, worker=None) -> dict:
     try:
         (worker or ContinuousEmailAgent()).forget_importance_preference(str(payload["id"]))
+        return {"ok": True}
+    except (OSError, ValueError, KeyError, FilePersistenceError, WorkRepositoryError) as exc:
+        return {"ok": False, "message": str(exc)}
+
+
+def email_agent_remember_visibility_action(payload: dict, *, worker=None) -> dict:
+    try:
+        key = EmailVisibilityPreferences(worker or ContinuousEmailAgent()).remember(str(payload["id"]))
+        return {"ok": True, "preference_id": key}
+    except (OSError, ValueError, KeyError, FilePersistenceError, WorkRepositoryError) as exc:
+        return {"ok": False, "message": str(exc)}
+
+
+def email_agent_forget_visibility_action(payload: dict, *, worker=None) -> dict:
+    try:
+        EmailVisibilityPreferences(worker or ContinuousEmailAgent()).forget(str(payload["id"]))
         return {"ok": True}
     except (OSError, ValueError, KeyError, FilePersistenceError, WorkRepositoryError) as exc:
         return {"ok": False, "message": str(exc)}

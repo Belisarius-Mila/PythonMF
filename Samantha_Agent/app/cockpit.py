@@ -50,6 +50,7 @@ from app.cockpit_email_agent import (
     email_agent_overview, email_agent_dismiss_action, email_agent_edit_action, email_agent_archive_action,
     email_agent_prepare_reply_action, email_agent_send_reply_action,
     email_agent_remember_importance_action, email_agent_forget_importance_action,
+    email_agent_remember_visibility_action, email_agent_forget_visibility_action,
     email_agent_pushcut_configure_action, email_agent_pushcut_test_action,
 )
 from app.cockpit_awake_mode import (
@@ -8672,6 +8673,12 @@ COCKPIT_POST_ACTIONS: tuple[dict[str, str], ...] = (
     {"path": "/api/email-agent/remember-importance", "label": "Příště podobné zprávy méně důležité",
      "risk": "private_write", "confirmation": "explicit_importance_preference_button",
      "handler_name": "email_agent_remember_importance_action", "test_level": "direct"},
+    {"path": "/api/email-agent/remember-visibility", "label": "Příště nezobrazovat podobné nedůležité zprávy",
+     "risk": "private_write", "confirmation": "explicit_visibility_preference_button",
+     "handler_name": "email_agent_remember_visibility_action", "test_level": "direct"},
+    {"path": "/api/email-agent/forget-visibility", "label": "Zrušit nezobrazování nedůležitých zpráv",
+     "risk": "private_write", "confirmation": "explicit_forget_visibility_button",
+     "handler_name": "email_agent_forget_visibility_action", "test_level": "direct"},
     {"path": "/api/email-agent/forget-importance", "label": "Zrušit preferenci důležitosti",
      "risk": "private_write", "confirmation": "explicit_forget_preference_button",
      "handler_name": "email_agent_forget_importance_action", "test_level": "direct"},
@@ -10072,6 +10079,12 @@ class CockpitServer:
                     return
                 if parsed.path == "/api/email-agent/remember-importance":
                     self.respond_json(email_agent_remember_importance_action(self.read_json()))
+                    return
+                if parsed.path == "/api/email-agent/remember-visibility":
+                    self.respond_json(email_agent_remember_visibility_action(self.read_json()))
+                    return
+                if parsed.path == "/api/email-agent/forget-visibility":
+                    self.respond_json(email_agent_forget_visibility_action(self.read_json()))
                     return
                 if parsed.path == "/api/email-agent/forget-importance":
                     self.respond_json(email_agent_forget_importance_action(self.read_json()))

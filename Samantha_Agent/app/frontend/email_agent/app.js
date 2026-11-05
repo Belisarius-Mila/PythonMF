@@ -131,12 +131,12 @@
       const row = node("div", undefined, "hour mail-hour");
       row.append(node("p", hour.text), action("Smazat z Cockpitu", () => request("/api/email-agent/dismiss", {ids: hour.ids, action: "dismiss"}), true));
       const choices = node("details");
-      choices.append(node("summary", "Příště nedůležité…"));
+      choices.append(node("summary", "Příště nezobrazovat…"));
       for (const message of hour.messages || []) {
         const choice = node("div", undefined, "actions");
-        choice.append(node("span", message.text), action("Příště nedůležité", async () => {
-          await request("/api/email-agent/remember-importance", {id: message.id});
-          byId("notice").textContent = "Preference pro vybraného odesílatele a podobný předmět je uložená. Hodinový přehled zůstává zachovaný.";
+        choice.append(node("span", message.text), action("Příště nezobrazovat", async () => {
+          await request("/api/email-agent/remember-visibility", {id: message.id});
+          byId("notice").textContent = "Podobné nedůležité zprávy od tohoto odesílatele se nezobrazují ani v dosavadním přehledu. Důležité zprávy se dál zobrazí.";
         }, true));
         choices.append(choice);
       }
@@ -155,6 +155,17 @@
       preferences.append(row);
     }
     if (!preferences.children.length) preferences.append(node("p", "Zatím žádné uložené preference."));
+    const visibility = byId("visibilityPreferences"); visibility.replaceChildren();
+    for (const preference of data.visibility_preferences || []) {
+      const row = node("div", undefined, "hour");
+      row.append(node("p", `${preference.sender} · podobný předmět: ${preference.subject}`),
+        action("Zrušit nezobrazování", async () => {
+          await request("/api/email-agent/forget-visibility", {id: preference.id});
+          byId("notice").textContent = "Nezobrazování bylo zrušeno. Odpovídající nedůležité zprávy se opět zobrazují.";
+        }, true));
+      visibility.append(row);
+    }
+    if (!visibility.children.length) visibility.append(node("p", "Zatím žádná pravidla nezobrazování."));
     const archived = byId("archived"); archived.replaceChildren();
     data.archived.forEach(item => archived.append(node("p", item.proposal.metadata.title)));
     if (!data.archived.length) archived.append(node("p", "Zatím žádné uložené zprávy."));

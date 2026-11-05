@@ -12,6 +12,22 @@ from app.capabilities.models import (
 
 CAPABILITIES: tuple[CapabilityRecord, ...] = (
     CapabilityRecord(
+        capability_id="remember_email_visibility", label="Hide similar unimportant messages from Cockpit",
+        risk=RiskLevel.LOCAL_WRITE, reads=("selected assessed unimportant message header and account",),
+        writes=("transactional private visibility preference",),
+        tool="app.email.visibility_preferences.EmailVisibilityPreferences.remember", requires_confirmation=True,
+        confirmation_policy=ConfirmationPolicy.SUMMARY_BEFORE_ACTION,
+        notes="Explicit user button; exact account/address and similar subject. Reversible overview filter after full assessment, including existing low-priority rows. Important mail, mailbox, drafts, cursors and importance hints remain intact.",
+    ),
+    CapabilityRecord(
+        capability_id="forget_email_visibility", label="Restore display of matching unimportant email",
+        risk=RiskLevel.LOCAL_WRITE, reads=("selected private visibility preference ID",),
+        writes=("deactivate transactional private visibility preference",),
+        tool="app.email.visibility_preferences.EmailVisibilityPreferences.forget", requires_confirmation=True,
+        confirmation_policy=ConfirmationPolicy.SUMMARY_BEFORE_ACTION,
+        notes="Explicit cancel button, preserves messages and restores matching existing hourly rows. No deletion or mailbox change.",
+    ),
+    CapabilityRecord(
         capability_id="interior_atelier_state", label="Read private interior projects and proposal metadata",
         risk=RiskLevel.READ_ONLY, reads=("explicit private atelier project and room metadata",),
         writes=(), tool="app.interior_atelier.InteriorAtelier.state",

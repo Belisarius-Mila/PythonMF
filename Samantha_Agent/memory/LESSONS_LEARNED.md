@@ -78,6 +78,7 @@ nebo jejichž princip lze znovu použít v jiné části projektu.
 - Typ: opakující se
 - Řešení nalezeno: 04112026
 - Řešení: učit jen výslovnou volbou, v rozsahu účtu + přesné adresy + podobného předmětu. Uložit atomicky, dvojklik sloučit a umožnit deaktivaci. Předat shodu modelu vedle kompletního textu/HTML, nevyřazovat před čtením a nepřepisovat modelový verdikt. Testy ověřily restart, rozsah pravidla, zrušení, zachování současné karty/SMTP potvrzení i plného konce textu při shodné preferenci; falešný model mohl ponechat nový e-mail důležitý.
+- Upřesnění Míly 5. 11.: „Příště nezobrazovat“ je oddělený vratný seznam visibility_preferences pro hodinovou nedůležitou poštu. Filtruje až po plném posouzení a jen při important=false; důležitý výsledek se zobrazí i při shodném pravidle. Staré importance_preferences se nekonvertují. Zrušení pravidla obnoví existující přehled; položky, kurzory, koncepty a schránka se filtrem nemění. Doménové, HTTP a Node regrese: email_visibility_20261105.md.
 
 ### LL-092 — Výchozí hodnoty Pydantic nejsou volitelná pole strict výstupu modelu
 

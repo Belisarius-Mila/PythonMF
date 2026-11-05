@@ -1,5 +1,31 @@
 # Průběžný osobní agent — e-mailový provoz a Pushcut
 
+## 2026-11-05 — samostatné „Příště nezobrazovat“
+
+Míla upřesnil význam obou voleb a schválil vývoj i okamžité Terra p+n.
+U důležitých karet zůstává „Příště nedůležité“ jako vodítko pro plné modelové
+posouzení. U ostatní pošty má jednotlivá zpráva „Příště nezobrazovat“.
+Ukládá se oddělené vratné pravidlo: účet + přesná adresa + podobný předmět.
+Přehled skryje odpovídající již posouzené nedůležité zprávy, včetně dosavadních
+hodinových řádků. Důležitou zprávu pravidlo neskryje; celé modelové posouzení
+zůstává zachované. Pravidlo lze zrušit v samostatném seznamu a přehled obnovit.
+
+Staré importance_preferences se nekonvertují; data zpráv, koncepty, kurzory,
+notifikace a schránka se filtrem nemění. Nové visibility_preferences jsou
+transakční doplňující pole společného private stavu. Stávající hodinový
+worker zachovává neznámá pole; jeho zdroje/roli/instalaci tento krok nemění.
+Přepnutí samostatné služby ani další modelové posouzení není k nasazení
+tohoto Cockpit filtru potřeba. Živě ověřeno installed/owned/loaded/enabled,
+zdroj služby ac9f3bed. Datův vlastní worktree zůstává oddělený.
+
+Ověření: 54 funkčních testů, 46 kontraktových kontrol a Node scénář PASS;
+plná brána 2 528 testů, 2 497 PASS, 31 SKIP, bez selhání (511,548 s).
+Report: memory/reports/email_visibility_20261105.md. Přesný konečný stav
+vydání: logs/email_visibility_release_20261105.log a
+logs/email_visibility_verified_20261105.log. Fyzické kliknutí Míly je další
+uživatelská přejímka. Samostatný kanonický TVBCP e-mailového proudu stále
+není domluvený ani založený; nejde o uzavření této dříve otevřené vazby.
+
 ## Řízené přepnutí a společné vydání s Datou — 2026-11-05 12:07 CET
 
 - Míla výslovně zadal Terra p+n pro Willovy i Datovy commity. E-mailový

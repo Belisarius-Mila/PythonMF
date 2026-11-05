@@ -1,5 +1,23 @@
 # E-mail read-only OAuth integrace
 
+## 2026-11-05 — nezobrazování opakované nedůležité pošty
+
+Míla rozlišil „Příště nedůležité“ u důležitých karet a „Příště nezobrazovat“
+u jednotlivých zpráv hodinového přehledu; výslovně schválil vývoj a Terra p+n.
+Samostatná visibility_preferences používají účet, přesnou adresu a podobný
+předmět. Filtruje se již posouzená nedůležitá pošta, včetně dosavadního
+přehledu; důležitá odpovídající zpráva zůstává viditelná. Zrušení pravidla
+obnoví přehled, nic se nemaže. Staré preference důležitosti se nekonvertují.
+Celé posuzování, těla, upravené koncepty, UID pozice, notifikace a schránka
+zůstávají zachované. Změna se provádí v Cockpitu, hodinová kopie ac9f3bed
+ani její instalace/model se nemění; společné repository zachovává nová pole.
+Ověření: 54 funkčních testů, 46 kontraktů a Node PASS; plná brána 2 528 testů,
+2 497 PASS, 31 SKIP, bez selhání (511,548 s).
+Report email_visibility_20261105.md; konečná účtenka a živý důkaz v
+logs/email_visibility_release_20261105.log a email_visibility_verified_20261105.log.
+Kanonický handoff: continuous_personal_agent_2026_11_04.md. Samostatný TVBCP
+stále nebyl domluvený; fyzická uživatelská přejímka nové volby je otevřená.
+
 ## Řízené přepnutí a společné vydání s Datou — 2026-11-05 12:07 CET
 
 - Míla výslovně zadal Terra p+n pro Willovy i Datovy commity. E-mailový

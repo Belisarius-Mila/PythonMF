@@ -25,7 +25,7 @@ function find(element, label) {
 (async () => {
   const ids = Object.fromEntries(['replyEditor','replyRecipient','replySubject','replyBody','replyStatus','replyForm',
     'closeEditor','status','notice','cards','hours','archived','replyConfirmation','replyQuestion','replySender',
-    'reallySendReply','backToReply','prepareReplySend','saveReplyDraft','importancePreferences',
+    'reallySendReply','backToReply','prepareReplySend','saveReplyDraft','importancePreferences','visibilityPreferences',
     'pushcutForm','pushcutCockpitUrl','pushcutWebhook','pushcutEnabled','savePushcut','testPushcut',
     'pushcutStatus','pushcutTestStatus'].map(id => [id, new Element(id)]));
   const metadata = {title: 'Podklady', domain: 'work', document_type: 'email', counterparty: 'Firma', tags: ['schůzka']};
@@ -41,6 +41,8 @@ function find(element, label) {
   let preparationCount = 0;
   let preparationHold = null;
   let pushcutHold = null;
+  let visibilityHold = null;
+  let savedHours = null;
   const context = {document: {getElementById: id => ids[id], createElement: tag => new Element(tag)},
     window: {setInterval: fn => intervals.push(fn), confirm: () => confirmChoice},
     fetch: async (url, options) => {
@@ -67,6 +69,15 @@ function find(element, label) {
       if (url.endsWith('/remember-importance')) data.importance_preferences = [{id: 'pref-1',
         sender: 'sender@example.test', subject: data.cards[0].header.subject}];
       if (url.endsWith('/forget-importance')) data.importance_preferences = [];
+      if (url.endsWith('/remember-visibility')) {
+        if (visibilityHold) await visibilityHold;
+        savedHours = JSON.parse(JSON.stringify(data.hours));
+        data.visibility_preferences = [{id: 'visibility-1', sender: '<script>@example.test', subject: 'Reklama'}];
+        data.hours[0].ids = data.hours[0].ids.filter(id => id !== payload.id);
+        data.hours[0].messages = data.hours[0].messages.filter(message => message.id !== payload.id);
+        data.hours[0].text = '18:00: <script> — Jiné novinky';
+      }
+      if (url.endsWith('/forget-visibility')) { data.visibility_preferences = []; data.hours = savedHours; }
       if (url.endsWith('/dismiss')) data.hours = [];
       if (url.endsWith('/archive')) { data.archived.push(data.cards.pop()); }
       const result = url.endsWith('/overview') ? {ok: true, ...data} : url.endsWith('/edit')
@@ -91,11 +102,24 @@ function find(element, label) {
   assert.equal(data.cards.length, 1);
   assert.equal(data.importance_preferences.length, 0);
   const hourBefore = JSON.stringify(data.hours);
-  assert.match(ids.hours.textContent, /Příště nedůležité…/);
+  assert.match(ids.hours.textContent, /Příště nezobrazovat…/);
+  assert.doesNotMatch(ids.hours.textContent, /Příště nedůležité/);
   assert.match(ids.hours.textContent, /<script> — Jiné novinky/);
-  await find(ids.hours, 'Příště nedůležité').click();
-  assert.deepEqual(calls.filter(call => call.url.endsWith('/remember-importance')).at(-1).payload, {id: 'low-1'});
-  assert.equal(JSON.stringify(data.hours), hourBefore, 'Preference preserves the complete hourly row');
+  let releaseVisibility;
+  visibilityHold = new Promise(resolve => { releaseVisibility = resolve; });
+  const hideButton = find(ids.hours, 'Příště nezobrazovat');
+  const hiding = hideButton.click();
+  await flush(); await hideButton.click();
+  assert.equal(calls.filter(call => call.url.endsWith('/remember-visibility')).length, 1, 'Double click stores one rule');
+  releaseVisibility(); await hiding; visibilityHold = null;
+  assert.deepEqual(calls.find(call => call.url.endsWith('/remember-visibility')).payload, {id: 'low-1'});
+  assert.deepEqual(data.hours[0].ids, ['low-2']);
+  assert.equal(find(ids.hours, 'Příště nezobrazovat').disabled, false);
+  assert.equal(data.cards.length, 1, 'Hiding low mail keeps the important card');
+  assert.match(ids.visibilityPreferences.textContent, /<script>@example.test/);
+  await find(ids.visibilityPreferences, 'Zrušit nezobrazování').click();
+  assert.deepEqual(calls.find(call => call.url.endsWith('/forget-visibility')).payload, {id: 'visibility-1'});
+  assert.equal(JSON.stringify(data.hours), hourBefore, 'Cancelling restores the prior hourly row');
   assert.equal(calls.some(call => /dismiss|archive|send-reply/.test(call.url)), false);
   await find(ids.cards, 'Upravit odpověď').click();
   assert.equal(ids.replyEditor.open, true);
