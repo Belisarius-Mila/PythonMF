@@ -6,6 +6,29 @@ Stav: rozpracovane
 Pripomenout pri startu: ne
 Datum: 2026-11-05
 
+## 2026-11-05 — oprava příjmu iPhone JPEG/MPO
+
+Míla při praktickém zkoušení narazil na odmítnutí tří iPhone JPEG po cca
+2 MiB, 4032 × 2268 px. Příčina živě reprodukovaná: dekodér je kvůli druhé
+pomocné obrazové vrstvě klasifikuje jako MPO, které příjem nepovoloval.
+Nejde o překročení limitu 6 MiB ani 32 Mpx. Chyba byla ve validačním kódu.
+
+Lokální oprava povoluje JPEG/MPO, používá výhradně hlavní obraz seek(0),
+respektuje EXIF orientaci a vytváří statické náhledy bez metadat. Originál
+zůstává přesně zachovaný včetně pomocných vrstev, MIME image/jpeg.
+PNG/WebP animace se dál odmítají a původní limity se nezvyšují. Chybové
+hlášky nyní oddělují nepodporovaný formát a příliš velké rozlišení.
+
+Ověření: regrese před opravou FAIL, po opravě 30 cílených testů PASS.
+Všechny tři skutečné fotografie mají úspěšný decode i odvozené náhledy;
+izolovaný příjem tří souborů, znovunačtení a shoda originálů ověřené.
+Plná brána PASS: 2 530 testů, 2 499 PASS, 31 SKIP, bez selhání (493,044 s).
+Report:
+memory/reports/interior_iphone_jpeg_mpo_20261105.md.
+Živý projekt a původní soubory se při zkoušce neměnily. Oprava zatím
+není nasazená; tento požadavek byl diagnostika aktuální chyby, nové p+n
+zatím výslovně nezaznělo. AI a chybějící TVBCP zůstávají samostatné.
+
 ## Aktuální vývojový krok
 
 Míla schválil rozložení Ateliér: samostatná celoobrazovková pracovní plocha,

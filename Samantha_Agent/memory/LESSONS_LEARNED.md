@@ -286,6 +286,12 @@ Doplnění 17102026 k LL-071: Nativní modelový pomocník navíc zdvojuje roli,
   zachovat celý rám a originál včetně dalších vrstev. Na výsledku ověřit
   i přesný počet snímků, nejen délku kontejneru. Syntetické dvouvrstvé
   MPO i skutečné 720p/1080p se všemi 25 záběry prošly.
+- Doplnění 05112026 pro Ateliér: iPhone soubor s příponou JPG může Pillow
+  klasifikovat jako MPO a is_animated=true kvůli pomocné vrstvě. Neodmítat
+  jej jako animaci a nezvyšovat kvůli tomu MB/Mpx limity. Explicitně povolit
+  MPO jako JPEG, načíst hlavní obraz, zachovat celý originál a nadále odmítat
+  skutečné PNG/WebP animace. Tři skutečné 4032 × 2268 fotografie a orientovaný
+  dvouvrstvý syntetický vzorek ověřené; interior_iphone_jpeg_mpo_20261105.md.
 - Doplnění 23102026: rozlišení originálu fotografie není limit výstupního
   videa. Platný JPEG 5918 × 3860 blokoval společný 4096px vstupní limit.
   Sdílený dekodér připraví hlavní obraz do cílového rozměru (Lanczos, celý

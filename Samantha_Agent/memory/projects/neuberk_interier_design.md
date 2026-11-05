@@ -1,5 +1,20 @@
 # Neuberk interier design
 
+## 2026-11-05 — praktická přejímka a příjem iPhone JPEG
+
+První Ateliér byl vydaný do eb0d98e6 a je zachovaný i v b933de0f. Při
+praktické zkoušce Míla založil vlastní projekt a zkusil tři iPhone JPEG.
+Příjem je odmítl: jejich skutečný dekódovaný formát je MPO se dvěma vrstvami,
+velikost cca 2 MiB a rozlišení 4032 × 2268 splňují původní limity.
+
+Lokálně opravené: přijmout JPEG/MPO, pro náhled a kresbu jen hlavní obraz
+se správnou EXIF orientací, celý originál zachovat. Limity 6 MiB a 32 Mpx
+zůstávají; PNG/WebP animace se nepovolují. 30 cílených testů PASS, tři
+skutečné fotografie i izolovaný příjem se shodou originálů PASS. Plná brána
+2 530 testů, 2 499 PASS, 31 SKIP, bez selhání (493,044 s). Oprava zatím není nasazená;
+samostatné nové p+n nebylo zadané. Report interior_iphone_jpeg_mpo_20261105.md.
+Původní fotografie a živý projekt se neměnily. Nový TVBCP se nezakládá.
+
 ## Interiérový ateliér a schválené rozložení 2026-11-05
 
 Míla navázal novou infrastrukturou: Jana pracuje ze svého Macu přes Cockpit,

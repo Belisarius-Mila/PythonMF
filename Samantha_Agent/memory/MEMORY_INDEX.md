@@ -180,6 +180,8 @@ Tento soubor je rozcestnik dlouhodobe pameti pro Samantha Agent.
 
 ## Handoffs
 
+- `reports/interior_iphone_jpeg_mpo_20261105.md`; `handoffs/workstreams/project-neuberk-kacenka.md` — 5. 11.: iPhone JPEG do 2,4 MB odmítané jako MPO se dvěma obrazy. Lokální oprava používá hlavní obraz a uchovává celý originál, limity zůstávají. 30 cílených testů a tři skutečné fotografie PASS; plná brána 2530 testů / 31 SKIP PASS. Nové p+n zatím nezadané.
+
 - `reports/email_visibility_20261105.md`; `handoffs/continuous_personal_agent_2026_11_04.md`; `projects/email_readonly_oauth.md` — 5. 11.: Míla rozlišil „Příště nedůležité“ a samostatné „Příště nezobrazovat“. Vratný Cockpit filtr účtu/adresy/podobného předmětu skrývá jen posouzenou nedůležitou poštu, důležité zprávy ponechává. Staré preference se nekonvertují. Vývoj a okamžité Terra p+n schválené; přesný výsledek v logs/email_visibility_release_20261105.log a *_verified_*.log. Hodinová kopie a schránka beze změny.
 
 - `reports/codex_p1_reconnect_20261105.md`; `handoffs/human_adam_layer_workstream_start_2026_07_20.md`; `handoffs/data_05_appserver_sdk_pilot_20261104.md` — 2026-11-05 12:50 CET: **05/P1 přejímka uzavřená PASS**. Míla potvrdil body 1–4; živý reconnect A/B/A 17/17 PASS na původním serveru 0.163.0, stejné vlákno/nastavení/instrukce, žádný modelový tah či restart. SDK se neadoptuje; historické otevřené body v záznamech níže jsou překonané.

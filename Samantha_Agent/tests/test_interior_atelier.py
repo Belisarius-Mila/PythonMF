@@ -120,6 +120,41 @@ class InteriorAtelierTests(unittest.TestCase):
             with self.assertRaises(AtelierError):
                 self.source(project, room)
 
+    def test_iphone_jpeg_mpo_preserves_original_and_uses_only_oriented_main_photo(self):
+        project, room = self.project()
+        output = io.BytesIO()
+        exif = Image.Exif()
+        exif[274] = 6
+        exif[315] = "PRIVATE_SYNTHETIC_AUTHOR"
+        Image.new("RGB", (240, 160), "blue").save(output, format="MPO", save_all=True,
+            append_images=[Image.new("RGB", (240, 160), "red")], exif=exif)
+        raw = output.getvalue()
+        asset = self.source(project, room, raw)
+        self.assertEqual(self.store.asset(project, room, asset, "original"), (raw, "image/jpeg"))
+        source = self.store.state(project, room)["room"]["sources"][asset]
+        self.assertEqual((source["width"], source["height"]), (160, 240))
+        for view in ("preview", "thumbnail"):
+            content, mime = self.store.asset(project, room, asset, view)
+            self.assertEqual(mime, "image/png")
+            with Image.open(io.BytesIO(content)) as image:
+                self.assertEqual(image.size, (160, 240))
+                self.assertEqual(getattr(image, "n_frames", 1), 1)
+                self.assertGreater(image.getpixel((80, 120))[2], 200)
+                self.assertLess(image.getpixel((80, 120))[0], 20)
+                self.assertFalse(image.getexif())
+                self.assertNotIn("exif", image.info)
+            self.assertNotIn(b"PRIVATE_SYNTHETIC_AUTHOR", content)
+
+    def test_mpo_still_obeys_pixel_limit_without_publishing_partial_source(self):
+        project, room = self.project()
+        output = io.BytesIO()
+        Image.new("RGB", (100, 100), "blue").save(output, format="MPO", save_all=True,
+            append_images=[Image.new("RGB", (100, 100), "red")])
+        before = self.store.state(project, room)
+        with patch("app.interior_atelier.MAX_IMAGE_PIXELS", 100), self.assertRaisesRegex(AtelierError, "rozlišení"):
+            self.source(project, room, output.getvalue())
+        self.assertEqual(self.store.state(project, room), before)
+
     def test_other_room_cannot_read_or_reference_an_asset(self):
         project, room = self.project()
         asset = self.source(project, room)

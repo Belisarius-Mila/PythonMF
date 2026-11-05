@@ -112,13 +112,19 @@ def _image(data):
         with warnings.catch_warnings():
             warnings.simplefilter("error", Image.DecompressionBombWarning)
             with Image.open(io.BytesIO(raw)) as image:
-                if image.format not in {"PNG", "JPEG", "WEBP"} or image.width * image.height > MAX_IMAGE_PIXELS:
-                    raise AtelierError("Nepodporovaný formát nebo příliš velké rozlišení obrázku.")
-                mime = Image.MIME[image.format]
-                if getattr(image, "n_frames", 1) != 1:
+                # iPhone JPEGs may contain an auxiliary MPO image (e.g. a gain map).
+                # Decode only their primary photo; retain every original byte.
+                image.seek(0)
+                if image.format not in {"PNG", "JPEG", "MPO", "WEBP"}:
+                    raise AtelierError("Nepodporovaný formát obrázku. Použij PNG, JPEG nebo WebP.")
+                if image.width * image.height > MAX_IMAGE_PIXELS:
+                    raise AtelierError("Příliš velké rozlišení obrázku; maximum je 32 milionů pixelů.")
+                mime = "image/jpeg" if image.format == "MPO" else Image.MIME[image.format]
+                if image.format != "MPO" and getattr(image, "n_frames", 1) != 1:
                     raise AtelierError("Použij jeden statický obrázek.")
                 image.verify()
             with Image.open(io.BytesIO(raw)) as image:
+                image.seek(0)
                 image = ImageOps.exif_transpose(image)
                 image.load()
                 width, height = image.size
