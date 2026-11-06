@@ -138,3 +138,58 @@ Protokolové podklady: [oficiální WebRTC průvodce](https://developers.openai.
 a [serverové řízení hlasu](https://developers.openai.com/api/docs/guides/voice-server-controls?api=live).
 Skutečný cenový/modelový důkaz je v voice_conversation_probe_20261105.json;
 WebSocket zkouška se tím nepovažuje za WebRTC nebo iPhone přejímku.
+
+## P2-E — selhání vstupní browserové kontroly, 2026-11-06
+
+Míla hlásí nasazení a při iPhone přejímce v Chromu obecnou hlášku
+„Hlas vyžaduje HTTPS nebo localhost a podporovaný prohlížeč“.
+Hlášku vyvolá OR tří různých stavů ještě před gUM a placeným create;
+nelze z ní určit konkrétní příčinu ani tvrdit, že Chrome hlas neumí.
+Dotaz na protokol adresy je zatím otevřený. Živý deployment nebyl auditovaný.
+
+Lokální oprava cockpit.js rozlišuje secure context (včetně odlišného textu
+pro HTTP a neuznané HTTPS), chybějící getUserMedia a chybějící RTCPeerConnection.
+Zablokuje i checkbox souhlasu, aby zaškrtnutí neslibovalo dostupný Start.
+Neoslabuje kontroly, nespouští mikrofon ani relaci a nemění jinou logiku.
+
+77 testů PASS; Node scénář ověřuje nezabezpečené HTTP, neuznaný secure
+context na HTTPS, chybějící mediaDevices/metodu, chybějící RTC a úspěšný
+preflight bez volání mikrofonu. Statická brána PASS.
+Plná brána z P2-D se neopakuje pro tuto úzkou frontendovou opravu.
+Změněné implementační soubory: cockpit.js a voice_conversation_frontend.test.cjs;
+dále kanonický handoff, TVBCP, Data handoff, index, ACTIVE_PROJECTS a LL-096.
+
+Při HTTP je řešením skutečný privátní HTTPS vstup s platným certifikátem.
+Pouhá záměna http za https na původním portu není konfigurace TLS serveru.
+Localhost na iPhonu znamená samotný iPhone. Aktuální HTTPS URL ani Tailscale
+Serve mapování se nesmí odhadnout. Změnu proxy nebo služeb tento krok neprovádí.
+
+Podklady: [MDN getUserMedia](https://developer.mozilla.org/en-US/docs/Web/API/MediaDevices/getUserMedia)
+a [Tailscale HTTPS](https://tailscale.com/docs/how-to/set-up-https-certificates).
+[Google: mikrofon v Chromu na iPhonu](https://support.google.com/chrome/answer/2693767?co=GENIE.Platform%3DiOS&hl=en)
+potvrzuje přístup webů k mikrofonu; skutečnou WebRTC přejímku tím nenahrazujeme.
+
+## 2026-11-06 23:13 CET — 15/P2-E: iPhone blokuje hlas před mikrofonem
+
+### Hotovo
+Obecná hláška byla rozdělena na nezabezpečenou stránku, chybějící mikrofonní
+API a chybějící WebRTC. Při HTTP vysvětluje nutnost privátní HTTPS adresy a to,
+že Tailscale ani localhost jiného zařízení nenahradí secure context.
+
+### Rozhodnutí
+Míla hlásí nasazení, ale přejímka na iPhonu v Chromu selhala před žádostí
+o mikrofon a vytvořením relace. Konkrétní HTTP/HTTPS zatím neověřené; nelze
+označit Chrome za nepodporovaný. HTTPS kontrola se neobchází, síť se nemění.
+
+### Další krok
+Ověřit protokol adresy na iPhonu; při HTTP otevřít skutečný privátní HTTPS
+vstup Cockpitu, případně připravit jeho samostatnou provozní konfiguraci.
+
+### Navrhované další kroky
+Po odstranění browserové blokace samostatná krátká hlasová přejímka a finální
+serverová spotřeba. Nejasný placený požadavek neopakovat.
+
+### Technický důkaz
+77 cílených testů PASS (pilot, Cockpit adaptér, gateway a Node browserové
+scénáře). Statická brána PASS. Žádný mikrofon, placený start,
+restart, push nebo nasazení Datou. Síťová ani modelová konfigurace beze změny.

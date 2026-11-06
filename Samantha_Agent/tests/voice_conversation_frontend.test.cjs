@@ -196,11 +196,11 @@ const flush=()=>new Promise(resolve=>setImmediate(resolve));
   assert.equal(httpCalls.at(-1).path,"/api/human-adam/voice-candidate/new");
   assert.deepEqual(JSON.parse(httpCalls.at(-1).options.body),{confirmation});
   const bootElements={voiceConfig:{dataset:{csrf:"synthetic-csrf-token-1234567890",confirmation,ready:"true",canRenew:"false"}},
-    new:new Emitter(),status:{textContent:""}};
+    new:new Emitter(),status:{textContent:"",dataset:{}},consent:{disabled:false}};
   const mountSpy=[];
   const bootContext={window:{isSecureContext:true,RTCPeerConnection:class{},
     makeSamanthaVoiceCandidateBroker:()=>({renew:async()=>{}}),mountSamanthaVoicePilot:(...args)=>mountSpy.push(args)},
-    navigator:{mediaDevices:{}},document:{getElementById:id=>bootElements[id]}};
+    navigator:{mediaDevices:{getUserMedia(){throw Error("preflight must never request microphone");}}},document:{getElementById:id=>bootElements[id]}};
   const boot=fs.readFileSync("app/frontend/voice_pilot/cockpit.js","utf8");
   vm.runInNewContext(boot,bootContext);
   assert.equal(mountSpy.length,1);
@@ -211,6 +211,32 @@ const flush=()=>new Promise(resolve=>setImmediate(resolve));
   bootElements.voiceConfig.dataset.ready="false";
   vm.runInNewContext(boot,bootContext);
   assert.equal(mountSpy.length,1,"used/recovered attempt never remounts a session");
+  // Missing secure context is distinct from API support and permission denial.
+  bootElements.voiceConfig.dataset.ready="true";
+  function preflight({secure=true,protocol="https:",media=true,method=true,rtc=true}={}) {
+    bootElements.status.dataset={};bootElements.status.textContent="";bootElements.consent.disabled=false;
+    bootContext.window.isSecureContext=secure;
+    bootContext.window.location={protocol};
+    bootContext.navigator.mediaDevices=media ? (method ? {getUserMedia(){throw Error("no microphone during preflight");}} : {}) : undefined;
+    bootContext.window.RTCPeerConnection=rtc ? class{} : undefined;
+    const before=mountSpy.length;
+    vm.runInNewContext(boot,bootContext);
+    return {mounted:mountSpy.length-before,reason:bootElements.status.dataset.blockedReason,message:bootElements.status.textContent};
+  }
+  let check=preflight({secure:false,protocol:"http:",media:false});
+  assert.equal(check.mounted,0);assert.equal(check.reason,"secure_context");
+  assert.match(check.message,/HTTP/);assert.match(check.message,/Tailscale/);
+  assert.equal(bootElements.consent.disabled,true);
+  check=preflight({secure:false});
+  assert.equal(check.reason,"secure_context");assert.match(check.message,/certifikátem/);
+  for(const state of [{media:false},{method:false}]) {
+    check=preflight(state);assert.equal(check.mounted,0);assert.equal(check.reason,"microphone_api");
+  }
+  check=preflight({rtc:false});
+  assert.equal(check.mounted,0);assert.equal(check.reason,"webrtc");
+  check=preflight();
+  assert.equal(check.mounted,1);assert.equal(check.reason,undefined);
+  assert.equal(bootElements.consent.disabled,false);
   const page=fs.readFileSync("app/frontend/voice_pilot/page.html","utf8");
   assert(page.includes('id="start" disabled'));
   assert(page.includes("playsinline"));

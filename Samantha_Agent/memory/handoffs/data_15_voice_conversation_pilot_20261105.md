@@ -1,6 +1,41 @@
 # Data → další krok: 15/P2 přirozený hlasový rozhovor
 
-## Aktuální stav — 15/P2-D, čtecí hlas v Cockpitu (lokálně)
+## Aktuální stav — 15/P2-E, iPhone: upřesnění blokace mikrofonu
+
+- Míla hlásí nasazení P2-D. V Chromu na iPhonu vidí při otevření panelu
+  obecnou hlášku HTTPS/localhost/prohlížeč; hlasový rozhovor nepřijal.
+  Nezávislý živý audit nasazení v tomto kroku neproběhl.
+- Původní hláška spojuje chybějící secure context, mikrofonní API a WebRTC.
+  HTTP je pravděpodobná příčina, konkrétní protokol iPhonu zatím není potvrzený.
+  Tailscale šifruje síť, ale HTTP stránka tím nezíská browserový secure context.
+- Lokální oprava rozlišuje tři příčiny, vysvětluje HTTP/Tailscale a localhost
+  a při blokaci deaktivuje i cenový souhlas. Kontroly nevolají mikrofon ani API.
+- 77 cílených testů PASS včetně rozšířeného Node browserového kontraktu.
+  Statická brána PASS. Dřívější plná brána P2-D (2467/5 skipů)
+  není novou fyzickou přejímkou. Hlas, modelové role a provozní síť se nemění.
+
+### Hotovo
+- Rozlišení secure_context / microphone_api / webrtc a výstižná další instrukce;
+  nepodporované prostředí neumožní zaškrtnutím vyvolat placenou relaci.
+
+### Rozhodnutí
+- HTTPS požadavek se neobchází, síťové služby se nekonfigurují ani nerestartují.
+  Pouhé nasazení není dokončená iPhone přejímka.
+
+### Další krok
+- Zjistit http:// versus https:// na iPhonu; při HTTP použít ověřený privátní
+  HTTPS vstup Cockpitu. Konkrétní URL ani existenci TLS proxy neodhadovat.
+
+### Navrhované další kroky
+- Po odstranění blokace Mílův výslovně spuštěný krátký rozhovor a ověření Stop,
+  zachování backendové úlohy a finální serverové spotřeby.
+
+### Technický důkaz
+- voice_conversation_cockpit_20261105.md; voice-https-preflight-tests.log v místní .venv.
+- Jen Data worktree; bez push, nasazení, změny provozních dat a placené relace.
+
+
+## Historický stav — 15/P2-D, čtecí hlas v Cockpitu (lokálně)
 
 - Míla zadal připojení čtecího hlasu. Human–Adam má vstup Další → Čtecí hlas;
   oddělený panel je napojený na skutečný existující hub vybraného proudu.
@@ -153,3 +188,28 @@ rozhovor do 60 s s kontrolou úlohy, vlákna, Stop a finální serverové spotř
 120 cílených testů PASS, z toho 19 nových integračních kontraktů; statická
 brána PASS, plná brána 2467 testů OK (skipped=5). Report voice_conversation_cockpit_20261105.md.
 Žádná nová placená relace, mikrofon ani změna živých služeb/provozních dat.
+
+## 2026-11-06 23:13 CET — 15/P2-E: iPhone blokuje hlas před mikrofonem
+
+### Hotovo
+Obecná hláška byla rozdělena na nezabezpečenou stránku, chybějící mikrofonní
+API a chybějící WebRTC. Při HTTP vysvětluje nutnost privátní HTTPS adresy a to,
+že Tailscale ani localhost jiného zařízení nenahradí secure context.
+
+### Rozhodnutí
+Míla hlásí nasazení, ale přejímka na iPhonu v Chromu selhala před žádostí
+o mikrofon a vytvořením relace. Konkrétní HTTP/HTTPS zatím neověřené; nelze
+označit Chrome za nepodporovaný. HTTPS kontrola se neobchází, síť se nemění.
+
+### Další krok
+Ověřit protokol adresy na iPhonu; při HTTP otevřít skutečný privátní HTTPS
+vstup Cockpitu, případně připravit jeho samostatnou provozní konfiguraci.
+
+### Navrhované další kroky
+Po odstranění browserové blokace samostatná krátká hlasová přejímka a finální
+serverová spotřeba. Nejasný placený požadavek neopakovat.
+
+### Technický důkaz
+77 cílených testů PASS (pilot, Cockpit adaptér, gateway a Node browserové
+scénáře). Statická brána PASS. Žádný mikrofon, placený start,
+restart, push nebo nasazení Datou. Síťová ani modelová konfigurace beze změny.
