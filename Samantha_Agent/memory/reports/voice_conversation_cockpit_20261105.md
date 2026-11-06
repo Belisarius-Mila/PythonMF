@@ -246,3 +246,76 @@ Po získání mikrofonu pokračovat přejímkou hlasu, Stop a finální spotřeb
 ### Technický důkaz
 77 testů PASS včetně čekajícího/nepovoleného mikrofonu a opožděného povolení
 po timeoutu bez create. Statická brána PASS; žádné placené volání ani nasazení.
+
+## P2-G — konkrétní chyba časovačů před getUserMedia
+
+Míla po HTTPS zkusil Chrome i Safari; oba zůstaly na čekání na mikrofon.
+Čtecí HTTPS audit 3 skriptů potvrzuje původní nasazenou implementaci D,
+nikoli místní E/F. Permissions-Policy má microphone=(self). Samotný audit
+nezkouší zařízení nebo žádost o mikrofon a nezakládá relaci.
+
+Nasazený conversation.js SHA-256:
+013904da18d2af128f0f0e218f4f3f7ac9d4d3f607487bdfdba311022dea8780.
+Nasazený cockpit.js SHA-256:
+da8e3677baeb7aa9223a0562b4ff444b1fe329c236465cbcae8917326596416c.
+
+Chyba: konstruktor bere default setTimer=setTimeout a clearTimer=clearTimeout,
+ale pak volá this.setTimer/this.clearTimer. Nativní browserová metoda tak
+obdrží this=VoiceConversation. Startup timer se volá před try/getUserMedia,
+proto při odmítnutí receiveru zůstane connecting a původní text, není timer,
+není žádost o mikrofon ani placený create. Starší testy vždy injektovaly fake
+timer bez tohoto browserového kontraktu; Node globální timer ho také nevynucuje.
+
+Oprava je pouze ve výchozích wrappech přes globalThis.setTimeout/clearTimeout.
+Není třeba měnit iPhone nastavení, model, grant, provider nebo délku limitu
+pro tuto konkrétní chybu. Případná další platformní příčina zbývá fyzicky ověřit.
+
+Reprodukce před opravou: TypeError: Illegal invocation: timer receiver,
+microphoneCalls=0, timers=0, state=connecting. Po opravě ve stejném VM kontraktu:
+error=null, microphoneCalls=1, timers=1; synteticky zamítnutý mikrofon vede
+na disconnected a uklizený timer, paidCalls=0. Test výslovně používá defaultní
+časovače, kontroluje receiver a nemaškaráduje tuto cestu injekcí fake do konstruktoru.
+
+77 cílených testů PASS, statická brána PASS. Plná brána z P2-D není živý
+browserový důkaz a pro tuto úzkou opravu nebyla opakovaná. Pokus otevřít
+izolovaný browserový test přes CUA skončil „browser access host unavailable“;
+nebyl spuštěn skutečný browser/mikrofon ani placená session. VM test není
+fyzická iPhone přejímka.
+
+Změněné implementační soubory: conversation.js (výchozí timer wrappery)
+a voice_conversation_frontend.test.cjs (receiver kontrakt); dále kanonický
+handoff, TVBCP, Data handoff, ACTIVE_PROJECTS, MEMORY_INDEX, LL-096 a tento report.
+Původní bezpečnostní hranice (Stop, pozdní oprávnění, jeden create) beze změny.
+
+Další krok pro Willa: převzít E 4bf110fd, F 73fdc08e a tento G v pořadí do
+aktuálního main, zachovat e-mailové změny a role. Teprve po samostatném
+oprávnění použít registrovaný p+n workflow. Po nasazení ověřit zdrojový asset
+obsahuje globální wrappery a bez modelového startu funguje načtení. Pak Míla
+jedním výslovným Start ověří žádost o mikrofon. Pokud se neukáže, zaznamenat
+novou konkrétní chybu/timeout; žádný automatický nový placený pokus.
+
+Podklad vazby globálních timerů: [HTML Standard](https://html.spec.whatwg.org/multipage/timers-and-user-prompts.html#dom-settimeout).
+
+## 2026-11-06 23:30 CET — 15/P2-G: časovač zablokoval žádost o mikrofon
+
+### Hotovo
+Opravená výchozí vazba setTimeout i clearTimeout na globální browserový objekt.
+Nový kontrakt reprodukuje chybné this, které starší fake časovač nepodchytil.
+
+### Rozhodnutí
+Stejné chování Chromu/Safari nepřipisovat bez důkazu nastavení telefonu.
+Čtecí audit potvrzuje původní nasazený controller. Výchozí timer může skončit
+výjimkou ještě před getUserMedia; synteticky reprodukováno. Fyzický iPhone
+stále není přijatý. Žádné obcházení oprávnění nebo automatický placený retry.
+
+### Další krok
+Will převezme E/F/G v pořadí, po samostatně povoleném nasazení ověří nový
+asset a s Mílou jednou zkusí žádost o mikrofon přes HTTPS.
+
+### Navrhované další kroky
+Po získání mikrofonu ověřit rozhovor, Stop, zachování úlohy a finální usage.
+
+### Technický důkaz
+77 testů PASS. Před opravou receiver kontrakt: TypeError, 0 mic calls,
+state connecting; po opravě bez výjimky, 1 mic call a čistý disconnected při
+syntetickém zamítnutí, 0 paid calls. Statická brána PASS. Bez push či deploy.

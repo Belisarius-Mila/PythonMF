@@ -257,6 +257,31 @@ const flush=()=>new Promise(resolve=>setImmediate(resolve));
   check=preflight();
   assert.equal(check.mounted,1);assert.equal(check.reason,undefined);
   assert.equal(bootElements.consent.disabled,false);
+  // Window timers reject foreign receivers; Node/fake timers previously hid this.
+  const timerBrowser=vm.createContext({});
+  vm.runInContext(`
+    window=globalThis;var micCalls=0,paidCalls=0,timerCalls=0,cancelCalls=0;
+    setTimeout=function(callback,delay){"use strict";
+      if(this!==globalThis)throw new TypeError("Illegal invocation: timer receiver");
+      timerCalls++;return timerCalls;
+    };
+    clearTimeout=function(id){"use strict";
+      if(this!==globalThis)throw new TypeError("Illegal invocation: timer receiver");
+      cancelCalls++;
+    };
+  `,timerBrowser);
+  vm.runInContext(fs.readFileSync("app/frontend/voice_pilot/conversation.js","utf8"),timerBrowser);
+  const browserController=vm.runInContext(`new SamanthaVoiceConversation({
+    broker:{create(){paidCalls++;throw Error("no paid I/O")},abandon(){}},
+    mediaDevices:{getUserMedia(){micCalls++;return Promise.reject(Object.assign(Error("denied"),{name:"NotAllowedError"}));}},
+    PeerConnection:class{},audio:{pause(){}}
+  })`,timerBrowser);
+  await browserController.start();
+  assert.equal(timerBrowser.timerCalls,1);
+  assert.equal(timerBrowser.micCalls,1,"default browser timer must reach microphone request");
+  assert.equal(timerBrowser.cancelCalls,1,"default browser cleanup uses correct timer receiver");
+  assert.equal(timerBrowser.paidCalls,0);
+  assert.equal(browserController.state,"disconnected");
   const page=fs.readFileSync("app/frontend/voice_pilot/page.html","utf8");
   assert(page.includes('id="start" disabled'));
   assert(page.includes("playsinline"));

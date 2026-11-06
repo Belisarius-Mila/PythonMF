@@ -1,32 +1,36 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
-## Aktuální stav — 15/P2-F, čekání na mikrofon v iPhone Chromu
+## Aktuální stav — 15/P2-G, oprava browserového časovače před mikrofonem
 
-- Po přechodu na ověřený privátní HTTPS vstup se panel otevře, souhlas aktivuje
-  Start a Míla hlásí čekání na oprávnění mikrofonu bez dalšího postupu.
-  Přejímka se dostala za původní blokaci HTTP; mikrofon/rozhovor nepřijaté.
-- Doporučený první krok je Ukončit rozhovor, potom ověřit iOS Nastavení →
-  Aplikace → Chrome → Mikrofon a oprávnění konkrétní HTTPS stránky.
-  Skutečný stav přepínače/příčina čekání na telefonu zatím není potvrzená.
+- Míla hlásí stejné čekání na mikrofon v Chromu i Safari přes HTTPS.
+- Nalezena konkrétní chyba panelu: nativní setTimeout/clearTimeout se ukládaly
+  do instance a volaly s this=VoiceConversation místo browserového globálu.
+  Výjimka při startup timeru vzniká před try/getUserMedia, takže zůstane hláška
+  o čekání, aniž by se žádost o mikrofon vůbec provedla. Předchozí fake timer
+  tento chybný receiver toleroval. Příčina na fyzickém iPhonu zbývá potvrdit.
 
 ### Hotovo
-- Lokálně srozumitelná žádost a nápověda v panelu, rozlišení čekání na mikrofon
-  od připojování a bezpečné texty pro zamítnutý/nenalezený/nedostupný mikrofon.
-  Dosavadní limit 20 s, explicitní Start a zákaz opakování create zůstávají.
+- Dva výchozí wrappery volají časovače přes globalThis. Nový VM kontrakt ověřuje
+  defaultní cestu s browserovým receiverem, žádost o mikrofon a bezpečný úklid.
+- Před/po synteticky: výjimka + 0 getUserMedia → bez výjimky + 1 getUserMedia;
+  zamítnutí končí bezpečně bez create. Čtecí audit serveru ověřil starý asset.
 
 ### Rozhodnutí
-- Žádné automatické opakování mikrofonu ani placené relace; nastavení telefonu,
-  běžící služby a role se tímto vývojem nemění. Oprava dosud není nasazená.
+- Žádné další pokusy na telefonu před nasazením opravy. Nelze zatím tvrdit,
+  že příčinou je systémové nastavení nebo nepodporovaný Chrome/Safari.
+- Bez změny časových limitů, grantu, jediného create, modelové role a služeb.
 
 ### Další krok
-- Míla ověří systémové a webové oprávnění Chromu, potom po ukončení původního
-  čekání provede jeden nový vědomý start v HTTPS panelu.
+- Will převezme lokální opravy E/F/G (E a F jsou 4bf110fd a 73fdc08e), po
+  samostatně povoleném p+n ověří zdroj a provede s Mílou jeden iPhone start.
 
 ### Navrhované další kroky
-- Po skutečně získaném mikrofonu ověřit rozhovor, Stop a finální spotřebu.
+- Ověřit, že se žádost opravdu ukáže; až po získání mikrofonu rozhovor, Stop
+  a finální spotřeba. Nejasný placený požadavek neopakovat.
 
 ### Technický důkaz
-- 77 cílených testů PASS včetně timeoutu, Stop a opožděného mikrofonu bez create;
-  statická brána PASS. Bez placeného volání, push, restartu či nasazení Datou.
+- 77 cílených testů PASS včetně regresního receiver testu; statická brána PASS.
+  Browserový host pro skutečný UI test není dostupný, fyzická přejímka otevřená.
+- Data nezapnul mikrofon, API ani živou službu, nic nepushnul a nenasadil.
 <!-- SAMANTHA_CURRENT_STATUS_END -->
 
 Nazev: Human–Adam / vyvojove prostredi - zalozeni pracovniho proudu Layer
@@ -3094,3 +3098,27 @@ Po získání mikrofonu pokračovat přejímkou hlasu, Stop a finální spotřeb
 ### Technický důkaz
 77 testů PASS včetně čekajícího/nepovoleného mikrofonu a opožděného povolení
 po timeoutu bez create. Statická brána PASS; žádné placené volání ani nasazení.
+
+## 2026-11-06 23:30 CET — 15/P2-G: časovač zablokoval žádost o mikrofon
+
+### Hotovo
+Opravená výchozí vazba setTimeout i clearTimeout na globální browserový objekt.
+Nový kontrakt reprodukuje chybné this, které starší fake časovač nepodchytil.
+
+### Rozhodnutí
+Stejné chování Chromu/Safari nepřipisovat bez důkazu nastavení telefonu.
+Čtecí audit potvrzuje původní nasazený controller. Výchozí timer může skončit
+výjimkou ještě před getUserMedia; synteticky reprodukováno. Fyzický iPhone
+stále není přijatý. Žádné obcházení oprávnění nebo automatický placený retry.
+
+### Další krok
+Will převezme E/F/G v pořadí, po samostatně povoleném nasazení ověří nový
+asset a s Mílou jednou zkusí žádost o mikrofon přes HTTPS.
+
+### Navrhované další kroky
+Po získání mikrofonu ověřit rozhovor, Stop, zachování úlohy a finální usage.
+
+### Technický důkaz
+77 testů PASS. Před opravou receiver kontrakt: TypeError, 0 mic calls,
+state connecting; po opravě bez výjimky, 1 mic call a čistý disconnected při
+syntetickém zamítnutí, 0 paid calls. Statická brána PASS. Bez push či deploy.

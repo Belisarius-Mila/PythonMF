@@ -6,7 +6,8 @@
   "use strict";
   class VoiceConversation {
     constructor({broker, mediaDevices, PeerConnection, audio, onState=()=>{}, onEvent=()=>{},
-                 setTimer=setTimeout, clearTimer=clearTimeout, maxSeconds=300}) {
+                 setTimer=(action,delay)=>globalThis.setTimeout(action,delay),
+                 clearTimer=id=>globalThis.clearTimeout(id), maxSeconds=300}) {
       this.broker=broker;
       this.mediaDevices=mediaDevices;
       this.PeerConnection=PeerConnection;
