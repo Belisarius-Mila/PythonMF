@@ -1,5 +1,28 @@
 # Obecna rutina pro automaticke opakujici se ukoly
 
+## 2026-11-06 13:12 CET — Jednorázová ruční promluva pro 6. listopadu
+
+Hotovo: Přesně dodaný text je v jediném řádku 2026-11-06, ostatní řádky
+zůstaly shodné. Jediné TTS vytvořilo MP3 106 272 B / 17,712 s, úplné dekódování
+FFmpeg PASS. Obě statické webové kopie vybírají stejné audio a mají nové cache
+otisky. 44 cílených kontrol PASS. Uživatelský poslech zatím nepotvrzený.
+
+Rozhodnutí: Míla výslovně zadal jednorázové nasazení této promluvy. Po zrušení
+cloudového generování se dnešní hotová MP3 ukládá jako záměrný statický asset
+obou webových kopií; starší pravidlo pro necommitované automatické výstupy se
+na tento ručně nasazovaný statický obsah nepoužije. Žádný návrat cronu, TTS ve
+workflow ani běžné denní rutiny. Hlas Antonin a rychlost -10 % zachované.
+
+Další krok: Registrované Terra p+n v project-colors-and-numbers; výsledek určí
+logs/owl_20261106_release.log a následné nezávislé veřejné JS/MP3 ověření.
+
+Navrhované další kroky: Žádné nové. Hlavní úkoly Willa a vlastní worktree Data
+zůstávají oddělené; žádný restart Cockpitu či placený hlasový start.
+
+Technický důkaz: owl_061126.mp3, logs/owl_20261106_targeted.log. Veřejné nasazení
+zatím není tímto přípravným zápisem potvrzené. Text se do paměti nekopíruje.
+
+
 ## 2026-10-28 14:45 CET — Zrušení soví automatiky zveřejněné
 
 Opravený balíček do 30d3c58b je na GitHubu a Pages. Terra p+n 6b2cea8e completed,
