@@ -24,6 +24,8 @@ NODE_FALLBACK_PATHS = (
 )
 
 COMPILE_PATHS = (
+    "app/calendar_access_pilot.py",
+    "scripts/calendar_access_pilot.py",
     "app/interior_atelier.py",
     "app/interior_ai.py",
     "app/interior_ai_activation.py",
@@ -441,6 +443,7 @@ TEST_MODULES = (
     "tests.test_email_work_outbox",
     "tests.test_work_repository",
     "tests.test_email_work_repository",
+    "tests.test_calendar_access_pilot",
     "tests.test_continuous_email_agent",
     "tests.test_email_visibility_preferences",
     "tests.test_email_proposal_policy",

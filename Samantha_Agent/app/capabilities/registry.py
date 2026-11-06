@@ -12,6 +12,23 @@ from app.capabilities.models import (
 
 CAPABILITIES: tuple[CapabilityRecord, ...] = (
     CapabilityRecord(
+        capability_id="calendar_access_pilot_status", label="Read EventKit pilot authorization status",
+        risk=RiskLevel.READ_ONLY, reads=("owned helper build hashes and current native authorization",),
+        writes=(), tool="app.calendar_access_pilot.CalendarAccessPilot.status",
+        notes="Metadata only; no event-store query, model, calendar writes or system permission reset.",
+    ),
+    *(CapabilityRecord(
+        capability_id="calendar_access_pilot_" + action,
+        label="Read-only EventKit pilot: " + action,
+        risk=RiskLevel.LOCAL_WRITE,
+        reads=("reviewed native helper source", "explicitly approved local calendar metadata and seven-day iCloud event count"),
+        writes=("private build and bounded local proof", "one owned transient user launchd job for a service probe"),
+        tool="app.calendar_access_pilot.CalendarAccessPilot." + action,
+        requires_confirmation=True, confirmation_policy=ConfirmationPolicy.SUMMARY_BEFORE_ACTION,
+        audit=AuditPolicy.REDACTED,
+        notes="No calendar mutation API, model, persistent LaunchAgent, existing-service restart or TCC reset. Native access still requires the user's macOS permission dialog. Calendar names/IDs stay private.",
+    ) for action in ("build", "authorize", "probe")),
+    CapabilityRecord(
         capability_id="interior_ai_status", label="Read room-scoped architect conversation and request outcomes",
         risk=RiskLevel.READ_ONLY, reads=("selected room and proposal AI request metadata", "approved model policy"),
         writes=(), tool="app.interior_ai.InteriorAI.status",

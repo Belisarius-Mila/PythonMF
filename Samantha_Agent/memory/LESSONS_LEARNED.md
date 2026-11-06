@@ -1705,3 +1705,10 @@ Doplnění 17102026 k LL-071: Nativní modelový pomocník navíc zdvojuje roli,
 - Řešení nalezeno: 05112026
 - Řešení: ID, serializaci a optimistický stav připravit před vymazáním editoru. Při selhání přípravy text zachovat a ukázat chybu u editoru. U nejistého výsledku zachovat needitovatelnou kopii a blokovat nový send do korelovaného potvrzení; obecné serverové selhání není důkazem nulového účinku. Model ani akci automaticky neopakovat.
 - Ověření: FAIL→PASS Node VM nad skutečnou obsluhou, 150 cílených testů PASS; fyzický retest je samostatný. Report human_adam_iphone_send_failure_20261105.md.
+
+### LL-105 — EventKit oprávnění ověřovat ve skutečném kontextu helperu
+
+- Problém: přímé spuštění z Codexu hlásilo write_only, přestože uživatel povolil plný přístup samostatné kalendářové aplikaci.
+- Typ: zobecnitelné
+- Řešení nalezeno: 07112026
+- Řešení: samostatný podepsaný read-only .app helper ve vlastní aplikační složce, GUI žádost přes LaunchServices a skutečný krátký launchd probe s ověřeným rodičem PID 1. Tento kontext potvrdil full_access a omezené čtení. Kalendářové zápisy nejsou v pilotu vůbec implementované. Přímé CLI oprávnění není důkaz servisního oprávnění; po změně binárního podpisu provést novou přejímku. Do logů/Gitu jen agregované důkazy, názvy kalendářů a ID soukromě.

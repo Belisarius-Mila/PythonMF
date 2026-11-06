@@ -1,5 +1,9 @@
 # E-mail read-only OAuth integrace
 
+Kalendářový pilot 7. 11.: bod 1 čtecího přístupu přes EventKit/launchd ověřený;
+úplný plán je doplněný do původního TXT. Další krok je výběr kalendářů a čtecí
+přehled, podrobnosti v posledním časovaném záznamu a reportu calendar_access_pilot_20261107.md.
+
 Aktuální stav 6. 11.: Terra p+n e82a5d47 dokončené, nový editor živě ověřený.
 Potvrzený upgrade na f2d6ef79 aktivoval zdvořilostní pravidlo i v hodinovém
 agentu; úplný business stav zachovaný, první check already_completed.
@@ -1045,3 +1049,31 @@ Bez SMTP, nového modelového probe či přeposouzení původní zprávy.
 Předchozí p+n e82a5d47/b3165b2a a plná brána 2669 testů zůstávají platné;
 servisní kód ani testy se v tomto kroku neměnily. Tento výsledkový zápis je
 lokální pro příští balíček; nový TVBCP nevzniká.
+
+## 2026-11-07 00:01 CET — Kalendářový agent, bod 1: čtecí přístup ověřený
+
+Hotovo: Úplný sedmibodový návrh je připojený na konec zadaného soukromého TXT;
+původní obsah zachovaný bajtově. V hlavním checkoutu je samostatný čtecí
+EventKit pilot, registrované schopnosti a přesné CLI workflow. Míla povolil
+nativní aplikaci přístup. Skutečná jednorázová launchd zkouška rozpoznala
+8 kalendářů / 4 iCloud a ověřila sedmidenní okno; žádné události nezapsala.
+Dočasný vlastní job už je odstraněný, trvalý LaunchAgent nevznikl.
+
+Rozhodnutí: Míla schválil zahájení bodu 1, další body zůstávají návrhem.
+Ověřená cesta používá samostatnou podepsanou aplikaci a soukromý request/result
+kanál. Přímý kontext Codexu hlásí pouze write_only, samostatný launchd helper
+full_access; nelze zaměňovat oprávnění různých exekučních kontextů.
+
+Další krok: Bod 2 — vybrat čtené kalendáře a budoucí cílový kalendář, navrhnout
+čtecí přehled. Bez implementace dalších etap a bez nového p+n v tomto kroku.
+
+Navrhované další kroky: Samostatně zachované dřívější téma diagnostiky selhání
+Human–Adam. Aktualizace nativního podpisu/TCC a fyzická iPhone přejímka mají
+v dalších etapách vlastní ověření.
+
+Technický důkaz: 44 cílených testů a 4 nativní kontroly PASS; reálná čtecí
+launchd přejímka PASS. Plná brána 2683 testů / 31 SKIP, bez selhání PASS
+(512,463 s unit část). Report
+calendar_access_pilot_20261107.md a logs/calendar_access_*_20261106.log.
+Osobní názvy kalendářů/ID zůstávají soukromě, texty událostí se neexportují.
+Nový e-mailový TVBCP nevzniká. Hodinová služba a Cockpit se nepřepínaly.
