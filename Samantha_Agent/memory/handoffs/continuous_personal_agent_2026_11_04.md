@@ -1,8 +1,8 @@
 # Průběžný osobní agent — e-mailový provoz a Pushcut
 
-Aktuální lokální krok 6. 11.: zdvořilostní odpovědi a Napsat odpověď bez
-konceptu; podrobnosti v posledním časovaném záznamu. Nasazení a upgrade
-hodinové kopie nejsou součástí tohoto vývojového pokynu.
+Aktuální stav 6. 11.: Terra p+n e82a5d47 dokončené, nový editor živě ověřený.
+Zdvořilostní pravidlo hodinového agenta čeká na samostatný potvrzený upgrade
+vlastního LaunchAgentu; podrobnosti v posledním časovaném záznamu.
 
 ## 2026-11-05 22:06 CET — kompatibilita s Datovou hlasovou rolí
 
@@ -695,3 +695,35 @@ SMTP a odesílání až po samostatném potvrzení. Plná brána 2669 testů,
 logs/email_courtesy_full_gate_20261106.log. Nové pravidlo nebylo zkoušené živým
 modelem; fyzická Mac/iPhone přejímka je otevřená. Soukromý e-mail ani adresy
 se do tohoto zápisu nekopírují. Nový e-mailový TVBCP se nezakládá.
+
+## 2026-11-06 16:57 CET — Terra p+n editoru dokončené, hodinová pravidla čekají na servis
+
+Hotovo: Cockpit má nové Napsat odpověď u karty bez konceptu. Terra p+n na
+výslovný pokyn Míly dokončené pro e82a5d473198677c83deb805fd0b303ff8034671;
+push i deployment confirmed, plná brána 2669 testů PASS / 482,1 s, smoke 5/5,
+protected_services_unchanged=true. Živé HTML HTTP 200 se přesně shoduje se
+zdrojem, SHA-256 de672549c799950265dba9bdb14e73755e1fb61a4c444cf34137528c32468247.
+Fyzická přejímka otevření editoru na Macu/iPhonu zůstává samostatná.
+
+Rozhodnutí: Míla schválil „ok terra p+n“. Samostatná hodinová služba dál
+installed/owned/loaded/enabled na 11b4ce64; její proposal_policy je dosud
+původní. P+n Cockpitu nepřepíná tento vlastní LaunchAgent. Žádný nový placený
+modelový pokus ani přeposouzení staré karty se neprováděly.
+
+Další krok: Pro aktivaci zdvořilostního pravidla v hodinovém agentu získat
+přesnou globální potvrzovací větu podle global_safety_brake.md a service_control.py.
+Potom registrované pause → prepare aktuálního čistého main → upgrade, se
+zachováním karet, konceptů, předvoleb, UID pozic a modelové politiky; ověřit
+business otisk a první check. Porovnání 11b4ce64..e82a5d47 v Python app kódu
+mění pouze proposal_policy.py. Služba zatím nebyla pozastavená ani přepnutá.
+
+Navrhované další kroky: Samostatná diagnostika dřívějšího selhání Human–Adam
+podle Mílova původního pořadí.
+
+Technický důkaz: Účtenka b3165b2afa348909c291ff989fd12207 completed,
+logs/email_courtesy_release_20261106.log a email_courtesy_verified_20261106.log.
+return_channel=caller; returned_to_adam=false není důvodem opakovat vydání.
+Main/GitHub byly před tímto výsledkovým zápisem shodné, profily zarovnané,
+Datův vlastní worktree čistý a zachovaný. Tento dokumentační checkpoint je
+lokální pro příští balíček; neprovádí nové nasazení. Soukromý e-mail ani
+přihlašovací údaje se do zápisu nekopírují. Nový TVBCP nevzniká.
