@@ -1,6 +1,138 @@
 # Data → další krok: 15/P2 přirozený hlasový rozhovor
 
-## Aktuální stav — 2026-11-05 22:06 CET, Datův čtecí hlas v Cockpitu
+## Aktuální stav — 2026-11-07 00:18 CET, společná integrace Willa a Daty
+
+### Hotovo
+- Do novějšího main s Willovým čtecím EventKit pilotem c0963d6b jsou převzaté
+  Datovy commity 4bf110fd, 73fdc08e a 975f0900. Browserové assety a Node kontrakt
+  jsou byteově shodné s Datovým 975f0900; jeho vlastní worktree se nemění.
+- Hlasový panel rozlišuje HTTP/API/WebRTC, bezpečně vysvětluje čekání a chyby
+  mikrofonu a opravuje receiver výchozích setTimeout/clearTimeout přes globalThis.
+- E-mailová zdvořilostní politika, Ateliér, modelové role a samostatná hodinová
+  služba zůstávají zachované. Kalendářový pilot je nadále pouze čtecí.
+
+### Rozhodnutí
+- Míla výslovně autorizoval převzetí a Terra p+n Willových i Datových commitů.
+  Společné vydání přes registrované submit_release(wait=True), připnuté k Terře
+  a výslednému schválenému merge headu; bez dalšího mikrofonu či placeného probe.
+- Původní 47s hlasový probe je spotřebovaný a neopakuje se. Žádný restart
+  sdíleného App Serveru, změna sítí nebo update vlastní e-mailové kopie.
+
+### Další krok
+Dokončit registrované společné p+n; autoritou jsou přesná účtenka a následné
+živé ověření v logs/calendar_voice_release_20261107.log a
+calendar_voice_verified_20261107.log. Potom Mílův samostatný iPhone Start a
+poslech; fyzická přejímka mikrofonu/WebRTC/ceny se tímto kódem nepředstírá.
+
+### Navrhované další kroky
+Kalendářový bod 2 (výběr kalendářů a čtecí přehled) až jako další vývojový krok.
+
+### Technický důkaz
+Node browserový kontrakt a 114 cílených testů PASS, statická brána PASS dle
+logs/calendar_voice_integration_targeted_20261107.log a
+calendar_voice_integration_static_20261107.log. Plnou publikační bránu provede
+vykonavatel. Soukromá data, žádosti o oprávnění a původní e-mail nepatří do Gitu.
+
+## Historický stav — 15/P2-G, oprava browserového časovače před mikrofonem
+
+- Míla hlásí stejné čekání na mikrofon v Chromu i Safari přes HTTPS.
+- Nalezena konkrétní chyba panelu: nativní setTimeout/clearTimeout se ukládaly
+  do instance a volaly s this=VoiceConversation místo browserového globálu.
+  Výjimka při startup timeru vzniká před try/getUserMedia, takže zůstane hláška
+  o čekání, aniž by se žádost o mikrofon vůbec provedla. Předchozí fake timer
+  tento chybný receiver toleroval. Příčina na fyzickém iPhonu zbývá potvrdit.
+
+### Hotovo
+- Dva výchozí wrappery volají časovače přes globalThis. Nový VM kontrakt ověřuje
+  defaultní cestu s browserovým receiverem, žádost o mikrofon a bezpečný úklid.
+- Před/po synteticky: výjimka + 0 getUserMedia → bez výjimky + 1 getUserMedia;
+  zamítnutí končí bezpečně bez create. Čtecí audit serveru ověřil starý asset.
+
+### Rozhodnutí
+- Žádné další pokusy na telefonu před nasazením opravy. Nelze zatím tvrdit,
+  že příčinou je systémové nastavení nebo nepodporovaný Chrome/Safari.
+- Bez změny časových limitů, grantu, jediného create, modelové role a služeb.
+
+### Další krok
+- Will převezme lokální opravy E/F/G (E a F jsou 4bf110fd a 73fdc08e), po
+  samostatně povoleném p+n ověří zdroj a provede s Mílou jeden iPhone start.
+
+### Navrhované další kroky
+- Ověřit, že se žádost opravdu ukáže; až po získání mikrofonu rozhovor, Stop
+  a finální spotřeba. Nejasný placený požadavek neopakovat.
+
+### Technický důkaz
+- 77 cílených testů PASS včetně regresního receiver testu; statická brána PASS.
+  Browserový host pro skutečný UI test není dostupný, fyzická přejímka otevřená.
+- Data nezapnul mikrofon, API ani živou službu, nic nepushnul a nenasadil.
+
+
+## Historický stav — 15/P2-F, čekání na mikrofon v iPhone Chromu
+
+- Po přechodu na ověřený privátní HTTPS vstup se panel otevře, souhlas aktivuje
+  Start a Míla hlásí čekání na oprávnění mikrofonu bez dalšího postupu.
+  Přejímka se dostala za původní blokaci HTTP; mikrofon/rozhovor nepřijaté.
+- Doporučený první krok je Ukončit rozhovor, potom ověřit iOS Nastavení →
+  Aplikace → Chrome → Mikrofon a oprávnění konkrétní HTTPS stránky.
+  Skutečný stav přepínače/příčina čekání na telefonu zatím není potvrzená.
+
+### Hotovo
+- Lokálně srozumitelná žádost a nápověda v panelu, rozlišení čekání na mikrofon
+  od připojování a bezpečné texty pro zamítnutý/nenalezený/nedostupný mikrofon.
+  Dosavadní limit 20 s, explicitní Start a zákaz opakování create zůstávají.
+
+### Rozhodnutí
+- Žádné automatické opakování mikrofonu ani placené relace; nastavení telefonu,
+  běžící služby a role se tímto vývojem nemění. Oprava dosud není nasazená.
+
+### Další krok
+- Míla ověří systémové a webové oprávnění Chromu, potom po ukončení původního
+  čekání provede jeden nový vědomý start v HTTPS panelu.
+
+### Navrhované další kroky
+- Po skutečně získaném mikrofonu ověřit rozhovor, Stop a finální spotřebu.
+
+### Technický důkaz
+- 77 cílených testů PASS včetně timeoutu, Stop a opožděného mikrofonu bez create;
+  statická brána PASS. Bez placeného volání, push, restartu či nasazení Datou.
+
+
+## Historický stav — 15/P2-E, iPhone: upřesnění blokace mikrofonu
+
+- Míla hlásí nasazení P2-D. V Chromu na iPhonu vidí při otevření panelu
+  obecnou hlášku HTTPS/localhost/prohlížeč; hlasový rozhovor nepřijal.
+  Nezávislý živý audit nasazení v tomto kroku neproběhl.
+- Původní hláška spojuje chybějící secure context, mikrofonní API a WebRTC.
+  HTTP je pravděpodobná příčina, konkrétní protokol iPhonu zatím není potvrzený.
+  Tailscale šifruje síť, ale HTTP stránka tím nezíská browserový secure context.
+- Lokální oprava rozlišuje tři příčiny, vysvětluje HTTP/Tailscale a localhost
+  a při blokaci deaktivuje i cenový souhlas. Kontroly nevolají mikrofon ani API.
+- 77 cílených testů PASS včetně rozšířeného Node browserového kontraktu.
+  Statická brána PASS. Dřívější plná brána P2-D (2467/5 skipů)
+  není novou fyzickou přejímkou. Hlas, modelové role a provozní síť se nemění.
+
+### Hotovo
+- Rozlišení secure_context / microphone_api / webrtc a výstižná další instrukce;
+  nepodporované prostředí neumožní zaškrtnutím vyvolat placenou relaci.
+
+### Rozhodnutí
+- HTTPS požadavek se neobchází, síťové služby se nekonfigurují ani nerestartují.
+  Pouhé nasazení není dokončená iPhone přejímka.
+
+### Další krok
+- Zjistit http:// versus https:// na iPhonu; při HTTP použít ověřený privátní
+  HTTPS vstup Cockpitu. Konkrétní URL ani existenci TLS proxy neodhadovat.
+
+### Navrhované další kroky
+- Po odstranění blokace Mílův výslovně spuštěný krátký rozhovor a ověření Stop,
+  zachování backendové úlohy a finální serverové spotřeby.
+
+### Technický důkaz
+- voice_conversation_cockpit_20261105.md; voice-https-preflight-tests.log v místní .venv.
+- Jen Data worktree; bez push, nasazení, změny provozních dat a placené relace.
+
+
+## Historický stav — 2026-11-05 22:06 CET, Datův čtecí hlas v Cockpitu
 
 ### Hotovo
 - Datova větev a5e401e6 je pravidelným merge zachovaná v main 11b4ce64; vlastní Datův worktree zůstává čistý na původním headu. Novější e-mail, Ateliér a původní App Server klient zůstaly zachované. 05/P1 je uzavřená 17/17; SDK neadoptované.
@@ -194,3 +326,74 @@ rozhovor do 60 s s kontrolou úlohy, vlákna, Stop a finální serverové spotř
 120 cílených testů PASS, z toho 19 nových integračních kontraktů; statická
 brána PASS, plná brána 2467 testů OK (skipped=5). Report voice_conversation_cockpit_20261105.md.
 Žádná nová placená relace, mikrofon ani změna živých služeb/provozních dat.
+
+## 2026-11-06 23:13 CET — 15/P2-E: iPhone blokuje hlas před mikrofonem
+
+### Hotovo
+Obecná hláška byla rozdělena na nezabezpečenou stránku, chybějící mikrofonní
+API a chybějící WebRTC. Při HTTP vysvětluje nutnost privátní HTTPS adresy a to,
+že Tailscale ani localhost jiného zařízení nenahradí secure context.
+
+### Rozhodnutí
+Míla hlásí nasazení, ale přejímka na iPhonu v Chromu selhala před žádostí
+o mikrofon a vytvořením relace. Konkrétní HTTP/HTTPS zatím neověřené; nelze
+označit Chrome za nepodporovaný. HTTPS kontrola se neobchází, síť se nemění.
+
+### Další krok
+Ověřit protokol adresy na iPhonu; při HTTP otevřít skutečný privátní HTTPS
+vstup Cockpitu, případně připravit jeho samostatnou provozní konfiguraci.
+
+### Navrhované další kroky
+Po odstranění browserové blokace samostatná krátká hlasová přejímka a finální
+serverová spotřeba. Nejasný placený požadavek neopakovat.
+
+### Technický důkaz
+77 cílených testů PASS (pilot, Cockpit adaptér, gateway a Node browserové
+scénáře). Statická brána PASS. Žádný mikrofon, placený start,
+restart, push nebo nasazení Datou. Síťová ani modelová konfigurace beze změny.
+
+## 2026-11-06 23:24 CET — 15/P2-F: čekání na oprávnění mikrofonu
+
+### Hotovo
+Panel vysvětlí povolení mikrofonu a dosavadní timeout odliší od chyby spojení.
+Zamítnutí, chybějící nebo nedostupný mikrofon mají vlastní bezpečné instrukce.
+
+### Rozhodnutí
+Míla se přes HTTPS dostal ke Start a hlásí čekání na mikrofon. To je před
+placeným create, příčina na telefonu zůstává neověřená. Nastavení telefonu,
+serverový backend, role a provozní síť se nemění; žádný automatický retry.
+
+### Další krok
+Nejprve ukončit původní čekání, pak ověřit oprávnění pro Chrome a konkrétní
+HTTPS stránku. Teprve poté jeden nový ruční Start s cenovým souhlasem.
+
+### Navrhované další kroky
+Po získání mikrofonu pokračovat přejímkou hlasu, Stop a finální spotřeby.
+
+### Technický důkaz
+77 testů PASS včetně čekajícího/nepovoleného mikrofonu a opožděného povolení
+po timeoutu bez create. Statická brána PASS; žádné placené volání ani nasazení.
+
+## 2026-11-06 23:30 CET — 15/P2-G: časovač zablokoval žádost o mikrofon
+
+### Hotovo
+Opravená výchozí vazba setTimeout i clearTimeout na globální browserový objekt.
+Nový kontrakt reprodukuje chybné this, které starší fake časovač nepodchytil.
+
+### Rozhodnutí
+Stejné chování Chromu/Safari nepřipisovat bez důkazu nastavení telefonu.
+Čtecí audit potvrzuje původní nasazený controller. Výchozí timer může skončit
+výjimkou ještě před getUserMedia; synteticky reprodukováno. Fyzický iPhone
+stále není přijatý. Žádné obcházení oprávnění nebo automatický placený retry.
+
+### Další krok
+Will převezme E/F/G v pořadí, po samostatně povoleném nasazení ověří nový
+asset a s Mílou jednou zkusí žádost o mikrofon přes HTTPS.
+
+### Navrhované další kroky
+Po získání mikrofonu ověřit rozhovor, Stop, zachování úlohy a finální usage.
+
+### Technický důkaz
+77 testů PASS. Před opravou receiver kontrakt: TypeError, 0 mic calls,
+state connecting; po opravě bez výjimky, 1 mic call a čistý disconnected při
+syntetickém zamítnutí, 0 paid calls. Statická brána PASS. Bez push či deploy.

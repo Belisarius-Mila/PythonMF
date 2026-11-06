@@ -1,20 +1,36 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
-## Aktuální stav — 2026-11-05 22:06 CET, Datův čtecí hlas v Cockpitu
+## Aktuální stav — 2026-11-07 00:18 CET, společná integrace Willa a Daty
 
 ### Hotovo
-- Datova větev a5e401e6 je pravidelným merge zachovaná v main 11b4ce64; vlastní Datův worktree zůstává čistý na původním headu. Novější e-mail, Ateliér a původní App Server klient zůstaly zachované. 05/P1 je uzavřená 17/17; SDK neadoptované.
-- Terra p+n kompatibilního kódu dokončeno: účtenka 6e9bbb2a6f7dbcd6f9e3f11cc2b88909, push/deploy confirmed, plná brána 2668 testů / 0 chyb / 31 SKIP, smoke 5/5 a protected_services_unchanged=true. Předtím 239 integračních kontrol PASS.
-- Vlastní hodinový e-mailový LaunchAgent registrovaně upgradovaný 2fe0481e → 11b4ce64. Installed/owned/loaded/enabled; úplný business otisk, nastavení a Email politika před/po shodné, stará kopie i záloha zachované. První check already_completed, bez nového modelového posouzení či oznámení.
-- Teprve po skutečném ověření instalovaného parseru přidaná přesná schválená read_only_voice role z Datova a5e401e6. GPT-Live 1 bez reasoning_effort, všechny předchozí bindingy nezměněné. 141 následných cílených kontrol PASS.
-- Živé neplacené GET panelu HTTP 200: připravený existující proud, mikrofon vypnutý, cenový souhlas přítomný a žádná změna trvalých voice účtenek. Ateliér dál hlásí enabled/image_generation=true.
+- Do novějšího main s Willovým čtecím EventKit pilotem c0963d6b jsou převzaté
+  Datovy commity 4bf110fd, 73fdc08e a 975f0900. Browserové assety a Node kontrakt
+  jsou byteově shodné s Datovým 975f0900; jeho vlastní worktree se nemění.
+- Hlasový panel rozlišuje HTTP/API/WebRTC, bezpečně vysvětluje čekání a chyby
+  mikrofonu a opravuje receiver výchozích setTimeout/clearTimeout přes globalThis.
+- E-mailová zdvořilostní politika, Ateliér, modelové role a samostatná hodinová
+  služba zůstávají zachované. Kalendářový pilot je nadále pouze čtecí.
 
 ### Rozhodnutí
-- Míla autorizoval samostatné Terra p+n Datova vedlejšího proudu i úklid. Závěrečný konfigurační checkpoint obsahuje jen schválenou hlasovou roli a provozní zápisy; konečný stav jeho p+n určuje účtenka logs/data_voice_role_release_20261105.log. Potvrzené vydání vyžaduje completed + push/deploy confirmed stejného headu.
-- Žádný další placený hlasový start, mikrofon, mazání/reset, force push ani restart sdíleného App Serveru. Původní 47s probe je spotřebovaný; nikdy jej neopakovat.
+- Míla výslovně autorizoval převzetí a Terra p+n Willových i Datových commitů.
+  Společné vydání přes registrované submit_release(wait=True), připnuté k Terře
+  a výslednému schválenému merge headu; bez dalšího mikrofonu či placeného probe.
+- Původní 47s hlasový probe je spotřebovaný a neopakuje se. Žádný restart
+  sdíleného App Serveru, změna sítí nebo update vlastní e-mailové kopie.
 
-### Další krok a otevřená přejímka
-- Po návratu Míly praktický poslech a zvlášť cenově potvrzený rozhovor do 60 s. Mikrofon, iPhone/WebRTC, přerušování a subjektivní latence zůstávají otevřené; celý bod 15 tím není uzavřený. Hlas čte jen hrubý stav a neschvaluje ani nemění úlohy.
-- Technický důkaz: logs/data_voice_code_release_20261105.log, data_voice_email_compat_upgrade_20261105.log, data_voice_role_activation_20261105.log, data_voice_role_targeted_20261105.log, data_voice_live_precommit_20261105.log. Závěrečný provozní audit: logs/data_voice_final_verified_20261105.log; GitHub CI obou přesných headů v data_voice_code_ci_20261105.log a data_voice_role_ci_20261105.log. Žádný nový TVBCP.
+### Další krok
+Dokončit registrované společné p+n; autoritou jsou přesná účtenka a následné
+živé ověření v logs/calendar_voice_release_20261107.log a
+calendar_voice_verified_20261107.log. Potom Mílův samostatný iPhone Start a
+poslech; fyzická přejímka mikrofonu/WebRTC/ceny se tímto kódem nepředstírá.
+
+### Navrhované další kroky
+Kalendářový bod 2 (výběr kalendářů a čtecí přehled) až jako další vývojový krok.
+
+### Technický důkaz
+Node browserový kontrakt a 114 cílených testů PASS, statická brána PASS dle
+logs/calendar_voice_integration_targeted_20261107.log a
+calendar_voice_integration_static_20261107.log. Plnou publikační bránu provede
+vykonavatel. Soukromá data, žádosti o oprávnění a původní e-mail nepatří do Gitu.
 <!-- SAMANTHA_CURRENT_STATUS_END -->
 
 Nazev: Human–Adam / vyvojove prostredi - zalozeni pracovniho proudu Layer
@@ -2994,3 +3010,120 @@ Technický důkaz:
 ### Další krok a otevřená přejímka
 - Po návratu Míly praktický poslech a zvlášť cenově potvrzený rozhovor do 60 s. Mikrofon, iPhone/WebRTC, přerušování a subjektivní latence zůstávají otevřené; celý bod 15 tím není uzavřený. Hlas čte jen hrubý stav a neschvaluje ani nemění úlohy.
 - Technický důkaz: logs/data_voice_code_release_20261105.log, data_voice_email_compat_upgrade_20261105.log, data_voice_role_activation_20261105.log, data_voice_role_targeted_20261105.log, data_voice_live_precommit_20261105.log. Závěrečný provozní audit: logs/data_voice_final_verified_20261105.log; GitHub CI obou přesných headů v data_voice_code_ci_20261105.log a data_voice_role_ci_20261105.log. Žádný nový TVBCP.
+
+### Historický Datův lokální další krok před tehdejší integrací
+Will převezme kód do aktuálního main a zachová své e-mailové změny i role;
+nejdříve samostatně povolené nasazení kompatibilního parseru, pak hlasová role.
+
+### Navrhované další kroky
+Po nasazení neplacená kontrola panelu, poté Mílův zvlášť potvrzený iPhone
+rozhovor do 60 s s kontrolou úlohy, vlákna, Stop a finální serverové spotřeby.
+
+### Technický důkaz
+120 cílených testů PASS, z toho 19 nových integračních kontraktů; statická
+brána PASS, plná brána 2467 testů OK (skipped=5). Report voice_conversation_cockpit_20261105.md.
+Žádná nová placená relace, mikrofon ani změna živých služeb/provozních dat.
+
+## 2026-11-06 23:13 CET — 15/P2-E: iPhone blokuje hlas před mikrofonem
+
+### Hotovo
+Obecná hláška byla rozdělena na nezabezpečenou stránku, chybějící mikrofonní
+API a chybějící WebRTC. Při HTTP vysvětluje nutnost privátní HTTPS adresy a to,
+že Tailscale ani localhost jiného zařízení nenahradí secure context.
+
+### Rozhodnutí
+Míla hlásí nasazení, ale přejímka na iPhonu v Chromu selhala před žádostí
+o mikrofon a vytvořením relace. Konkrétní HTTP/HTTPS zatím neověřené; nelze
+označit Chrome za nepodporovaný. HTTPS kontrola se neobchází, síť se nemění.
+
+### Další krok
+Ověřit protokol adresy na iPhonu; při HTTP otevřít skutečný privátní HTTPS
+vstup Cockpitu, případně připravit jeho samostatnou provozní konfiguraci.
+
+### Navrhované další kroky
+Po odstranění browserové blokace samostatná krátká hlasová přejímka a finální
+serverová spotřeba. Nejasný placený požadavek neopakovat.
+
+### Technický důkaz
+77 cílených testů PASS (pilot, Cockpit adaptér, gateway a Node browserové
+scénáře). Statická brána PASS. Žádný mikrofon, placený start,
+restart, push nebo nasazení Datou. Síťová ani modelová konfigurace beze změny.
+
+## 2026-11-06 23:24 CET — 15/P2-F: čekání na oprávnění mikrofonu
+
+### Hotovo
+Panel vysvětlí povolení mikrofonu a dosavadní timeout odliší od chyby spojení.
+Zamítnutí, chybějící nebo nedostupný mikrofon mají vlastní bezpečné instrukce.
+
+### Rozhodnutí
+Míla se přes HTTPS dostal ke Start a hlásí čekání na mikrofon. To je před
+placeným create, příčina na telefonu zůstává neověřená. Nastavení telefonu,
+serverový backend, role a provozní síť se nemění; žádný automatický retry.
+
+### Další krok
+Nejprve ukončit původní čekání, pak ověřit oprávnění pro Chrome a konkrétní
+HTTPS stránku. Teprve poté jeden nový ruční Start s cenovým souhlasem.
+
+### Navrhované další kroky
+Po získání mikrofonu pokračovat přejímkou hlasu, Stop a finální spotřeby.
+
+### Technický důkaz
+77 testů PASS včetně čekajícího/nepovoleného mikrofonu a opožděného povolení
+po timeoutu bez create. Statická brána PASS; žádné placené volání ani nasazení.
+
+## 2026-11-06 23:30 CET — 15/P2-G: časovač zablokoval žádost o mikrofon
+
+### Hotovo
+Opravená výchozí vazba setTimeout i clearTimeout na globální browserový objekt.
+Nový kontrakt reprodukuje chybné this, které starší fake časovač nepodchytil.
+
+### Rozhodnutí
+Stejné chování Chromu/Safari nepřipisovat bez důkazu nastavení telefonu.
+Čtecí audit potvrzuje původní nasazený controller. Výchozí timer může skončit
+výjimkou ještě před getUserMedia; synteticky reprodukováno. Fyzický iPhone
+stále není přijatý. Žádné obcházení oprávnění nebo automatický placený retry.
+
+### Další krok
+Will převezme E/F/G v pořadí, po samostatně povoleném nasazení ověří nový
+asset a s Mílou jednou zkusí žádost o mikrofon přes HTTPS.
+
+### Navrhované další kroky
+Po získání mikrofonu ověřit rozhovor, Stop, zachování úlohy a finální usage.
+
+### Technický důkaz
+77 testů PASS. Před opravou receiver kontrakt: TypeError, 0 mic calls,
+state connecting; po opravě bez výjimky, 1 mic call a čistý disconnected při
+syntetickém zamítnutí, 0 paid calls. Statická brána PASS. Bez push či deploy.
+
+## Provozní předání — 2026-11-07 00:18 CET, společná integrace Willa a Daty
+
+### Hotovo
+- Do novějšího main s Willovým čtecím EventKit pilotem c0963d6b jsou převzaté
+  Datovy commity 4bf110fd, 73fdc08e a 975f0900. Browserové assety a Node kontrakt
+  jsou byteově shodné s Datovým 975f0900; jeho vlastní worktree se nemění.
+- Hlasový panel rozlišuje HTTP/API/WebRTC, bezpečně vysvětluje čekání a chyby
+  mikrofonu a opravuje receiver výchozích setTimeout/clearTimeout přes globalThis.
+- E-mailová zdvořilostní politika, Ateliér, modelové role a samostatná hodinová
+  služba zůstávají zachované. Kalendářový pilot je nadále pouze čtecí.
+
+### Rozhodnutí
+- Míla výslovně autorizoval převzetí a Terra p+n Willových i Datových commitů.
+  Společné vydání přes registrované submit_release(wait=True), připnuté k Terře
+  a výslednému schválenému merge headu; bez dalšího mikrofonu či placeného probe.
+- Původní 47s hlasový probe je spotřebovaný a neopakuje se. Žádný restart
+  sdíleného App Serveru, změna sítí nebo update vlastní e-mailové kopie.
+
+### Další krok
+Dokončit registrované společné p+n; autoritou jsou přesná účtenka a následné
+živé ověření v logs/calendar_voice_release_20261107.log a
+calendar_voice_verified_20261107.log. Potom Mílův samostatný iPhone Start a
+poslech; fyzická přejímka mikrofonu/WebRTC/ceny se tímto kódem nepředstírá.
+
+### Navrhované další kroky
+Kalendářový bod 2 (výběr kalendářů a čtecí přehled) až jako další vývojový krok.
+
+### Technický důkaz
+Node browserový kontrakt a 114 cílených testů PASS, statická brána PASS dle
+logs/calendar_voice_integration_targeted_20261107.log a
+calendar_voice_integration_static_20261107.log. Plnou publikační bránu provede
+vykonavatel. Soukromá data, žádosti o oprávnění a původní e-mail nepatří do Gitu.

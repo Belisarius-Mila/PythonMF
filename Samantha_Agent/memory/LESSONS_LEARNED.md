@@ -41,6 +41,14 @@ nebo jejichž princip lze znovu použít v jiné části projektu.
 
 - Doplnění 15/P2-D: při připojení ke skutečnému Cockpitu číst jen již existující _hub; .hub/active_service mohou cold obnovou vytvořit stav. Server fixuje proud i thread a odmítne změnu výběru. Browser cookie dědí síťovou důvěru, není osobní autentizace; exact Origin/CSRF + explicitní cenový souhlas před create. Nový pokus až po closed/final usage, ne po refreshi nebo chybě. Novou audio roli bez reasoning_effort aktivovat až na kompatibilním parseru, odděleně od kódu; při převzetí zachovat cizí role.
 
+- Doplnění 15/P2-E (06112026): společná hláška HTTPS/prohlížeč nerozlišuje secure context, getUserMedia a RTCPeerConnection. Tyto podmínky kontrolovat zvlášť a blokaci popsat před cenovým souhlasem; zaškrtnutí nemůže povolit mikrofon na HTTP. Tailscale šifruje přenos, ale HTTP stránka tím nezískává browserový secure context; localhost platí pro zařízení prohlížeče. Neodhadovat HTTPS URL ani nekonfigurovat proxy bez provozního oprávnění.
+
+- Doplnění 15/P2-F (06112026): getUserMedia může zůstat nevyřízené. Čekání odlišit od připojování; nejprve Stop, pak ověřit iOS oprávnění aplikace a webu. Zachovat timeout, generaci pokusu a uvolnění pozdní stopy bez create. Neodvozovat zamítnutí jen z čekání; jména chyb mapovat na bezpečné instrukce, neposílat jejich raw text.
+
+- Doplnění 15/P2-G (06112026): callback browserového setTimeout/clearTimeout uložený do instance a volaný this.timerMethod získá cizí receiver. Může skončit Illegal invocation ještě před getUserMedia a mimo try. Výchozí wrappery volat přes globalThis; testovat defaultní cestu s browserovým receiver kontraktem, nikoli jen injektovaný fake/Node timer. Zaseknutá hláška není důkaz čekajícího OS dialogu. V tomto případě 0 mic calls před opravou → 1 po opravě, 0 paid calls; fyzická přejímka zůstává samostatná.
+
+### LL-095 — Unix socket nezaručuje shodný aplikační protokol
+
 ### LL-103 — Chybový text modelu nemusí znamenat ztracený obrazový výsledek
 
 - Problém: jeden obrazový tah vrátil dvě dokončené imageGeneration položky s platnými PNG, ale text tvrdil chybu a doporučoval nové odeslání.

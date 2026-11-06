@@ -102,6 +102,26 @@ const flush=()=>new Promise(resolve=>setImmediate(resolve));
 
   const denied=harness({microphone:()=>Promise.reject(Error("denied"))});
   await denied.c.start();assert.equal(denied.calls.create,0);
+  for(const [name,expected] of [["NotAllowedError",/nebyl povolený/],["SecurityError",/zablokoval/],
+      ["NotFoundError",/nenašel mikrofon/],["NotReadableError",/nepodařilo otevřít/],["unexpected",/nepodařilo otevřít/],
+      ["__proto__",/nepodařilo otevřít/]]) {
+    const micError=harness({microphone:()=>Promise.reject(Object.assign(Error("PRIVATE ERROR TEXT"),{name}))});
+    await micError.c.start();
+    assert.equal(micError.calls.create,0);assert.equal(micError.c.state,"disconnected");
+    assert.match(micError.calls.states.at(-1).message,expected);
+    assert.match(micError.calls.states.at(-1).message,/relace nebyla vytvořena/);
+    assert(!micError.calls.states.at(-1).message.includes("PRIVATE"));
+    await micError.c.start();assert.equal(micError.calls.mic,1,"permission errors never prompt again automatically");
+  }
+  const permission=deferred(), stalled=harness({microphone:()=>permission.promise});
+  const stalledStart=stalled.c.start();
+  assert.match(stalled.calls.states.at(-1).message,/Nastavení/);
+  [...stalled.calls.timers.values()].find(timer=>timer.ms===20000).fn();
+  assert.equal(stalled.c.state,"disconnected");assert.equal(stalled.calls.create,0);
+  assert.match(stalled.calls.states.at(-1).message,/Přístup k mikrofonu nebyl potvrzený/);
+  permission.resolve(stalled.stream);await stalledStart;
+  assert.equal(stalled.calls.tracksStopped,1,"late permission after timeout releases microphone");
+  assert.equal(stalled.calls.create,0,"late permission never creates a paid session");
   const failed=harness({create:()=>Promise.reject(Error("unknown delivery"))});
   await failed.c.start();await failed.c.start();
   assert.equal(failed.calls.create,1,"unknown creation is never retried");
@@ -196,11 +216,11 @@ const flush=()=>new Promise(resolve=>setImmediate(resolve));
   assert.equal(httpCalls.at(-1).path,"/api/human-adam/voice-candidate/new");
   assert.deepEqual(JSON.parse(httpCalls.at(-1).options.body),{confirmation});
   const bootElements={voiceConfig:{dataset:{csrf:"synthetic-csrf-token-1234567890",confirmation,ready:"true",canRenew:"false"}},
-    new:new Emitter(),status:{textContent:""}};
+    new:new Emitter(),status:{textContent:"",dataset:{}},consent:{disabled:false}};
   const mountSpy=[];
   const bootContext={window:{isSecureContext:true,RTCPeerConnection:class{},
     makeSamanthaVoiceCandidateBroker:()=>({renew:async()=>{}}),mountSamanthaVoicePilot:(...args)=>mountSpy.push(args)},
-    navigator:{mediaDevices:{}},document:{getElementById:id=>bootElements[id]}};
+    navigator:{mediaDevices:{getUserMedia(){throw Error("preflight must never request microphone");}}},document:{getElementById:id=>bootElements[id]}};
   const boot=fs.readFileSync("app/frontend/voice_pilot/cockpit.js","utf8");
   vm.runInNewContext(boot,bootContext);
   assert.equal(mountSpy.length,1);
@@ -211,6 +231,57 @@ const flush=()=>new Promise(resolve=>setImmediate(resolve));
   bootElements.voiceConfig.dataset.ready="false";
   vm.runInNewContext(boot,bootContext);
   assert.equal(mountSpy.length,1,"used/recovered attempt never remounts a session");
+  // Missing secure context is distinct from API support and permission denial.
+  bootElements.voiceConfig.dataset.ready="true";
+  function preflight({secure=true,protocol="https:",media=true,method=true,rtc=true}={}) {
+    bootElements.status.dataset={};bootElements.status.textContent="";bootElements.consent.disabled=false;
+    bootContext.window.isSecureContext=secure;
+    bootContext.window.location={protocol};
+    bootContext.navigator.mediaDevices=media ? (method ? {getUserMedia(){throw Error("no microphone during preflight");}} : {}) : undefined;
+    bootContext.window.RTCPeerConnection=rtc ? class{} : undefined;
+    const before=mountSpy.length;
+    vm.runInNewContext(boot,bootContext);
+    return {mounted:mountSpy.length-before,reason:bootElements.status.dataset.blockedReason,message:bootElements.status.textContent};
+  }
+  let check=preflight({secure:false,protocol:"http:",media:false});
+  assert.equal(check.mounted,0);assert.equal(check.reason,"secure_context");
+  assert.match(check.message,/HTTP/);assert.match(check.message,/Tailscale/);
+  assert.equal(bootElements.consent.disabled,true);
+  check=preflight({secure:false});
+  assert.equal(check.reason,"secure_context");assert.match(check.message,/certifikátem/);
+  for(const state of [{media:false},{method:false}]) {
+    check=preflight(state);assert.equal(check.mounted,0);assert.equal(check.reason,"microphone_api");
+  }
+  check=preflight({rtc:false});
+  assert.equal(check.mounted,0);assert.equal(check.reason,"webrtc");
+  check=preflight();
+  assert.equal(check.mounted,1);assert.equal(check.reason,undefined);
+  assert.equal(bootElements.consent.disabled,false);
+  // Window timers reject foreign receivers; Node/fake timers previously hid this.
+  const timerBrowser=vm.createContext({});
+  vm.runInContext(`
+    window=globalThis;var micCalls=0,paidCalls=0,timerCalls=0,cancelCalls=0;
+    setTimeout=function(callback,delay){"use strict";
+      if(this!==globalThis)throw new TypeError("Illegal invocation: timer receiver");
+      timerCalls++;return timerCalls;
+    };
+    clearTimeout=function(id){"use strict";
+      if(this!==globalThis)throw new TypeError("Illegal invocation: timer receiver");
+      cancelCalls++;
+    };
+  `,timerBrowser);
+  vm.runInContext(fs.readFileSync("app/frontend/voice_pilot/conversation.js","utf8"),timerBrowser);
+  const browserController=vm.runInContext(`new SamanthaVoiceConversation({
+    broker:{create(){paidCalls++;throw Error("no paid I/O")},abandon(){}},
+    mediaDevices:{getUserMedia(){micCalls++;return Promise.reject(Object.assign(Error("denied"),{name:"NotAllowedError"}));}},
+    PeerConnection:class{},audio:{pause(){}}
+  })`,timerBrowser);
+  await browserController.start();
+  assert.equal(timerBrowser.timerCalls,1);
+  assert.equal(timerBrowser.micCalls,1,"default browser timer must reach microphone request");
+  assert.equal(timerBrowser.cancelCalls,1,"default browser cleanup uses correct timer receiver");
+  assert.equal(timerBrowser.paidCalls,0);
+  assert.equal(browserController.state,"disconnected");
   const page=fs.readFileSync("app/frontend/voice_pilot/page.html","utf8");
   assert(page.includes('id="start" disabled'));
   assert(page.includes("playsinline"));

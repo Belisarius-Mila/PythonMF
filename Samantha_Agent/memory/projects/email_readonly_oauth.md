@@ -1077,3 +1077,18 @@ launchd přejímka PASS. Plná brána 2683 testů / 31 SKIP, bez selhání PASS
 calendar_access_pilot_20261107.md a logs/calendar_access_*_20261106.log.
 Osobní názvy kalendářů/ID zůstávají soukromě, texty událostí se neexportují.
 Nový e-mailový TVBCP nevzniká. Hodinová služba a Cockpit se nepřepínaly.
+
+## 2026-11-07 00:18 CET — Schválené společné Terra p+n s Datovým hlasovým panelem
+
+Hotovo: Čtecí kalendářový bod 1 c0963d6b je připravený společně s Datovými
+opravami E/F/G 4bf110fd, 73fdc08e, 975f0900. Obě historie a provozní výsledky
+jsou zachované; střety byly pouze v dokumentaci.
+Rozhodnutí: Míla zadal p+n Willových i Datových commitů přes Terru. Nevzniká
+nové oprávnění k zápisům kalendáře, mikrofonu, placenému probe nebo upgradu
+samostatné hodinové kopie; ta už má aktivní zdvořilostní pravidlo na f2d6ef79.
+Další krok: Konečná účtenka logs/calendar_voice_release_20261107.log a živé
+ověření calendar_voice_verified_20261107.log. Vydání není předběžným zápisem
+potvrzené. Kalendářový bod 2 zůstává další etapa.
+Navrhované další kroky: Mílova skutečná iPhone přejímka hlasového panelu.
+Technický důkaz: Cílená integrace a statická brána dle příslušných logů;
+plná publikační brána uvnitř Terry. Datův vlastní worktree se nemění.

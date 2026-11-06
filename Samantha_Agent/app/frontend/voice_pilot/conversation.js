@@ -6,7 +6,8 @@
   "use strict";
   class VoiceConversation {
     constructor({broker, mediaDevices, PeerConnection, audio, onState=()=>{}, onEvent=()=>{},
-                 setTimer=setTimeout, clearTimer=clearTimeout, maxSeconds=300}) {
+                 setTimer=(action,delay)=>globalThis.setTimeout(action,delay),
+                 clearTimer=id=>globalThis.clearTimeout(id), maxSeconds=300}) {
       this.broker=broker;
       this.mediaDevices=mediaDevices;
       this.PeerConnection=PeerConnection;
@@ -82,10 +83,14 @@
       const generation=++this.generation;
       const current=()=>generation===this.generation;
       this.state="connecting";
-      this.notify("Čekám na oprávnění mikrofonu…");
-      this.timer(()=>this.fail("Spojení překročilo časový limit; automaticky je neopakuji."),20000);
+      let awaitingMicrophone=true;
+      this.notify("Čekám na oprávnění mikrofonu. Povol mikrofon v žádosti Chromu nebo Safari. Pokud se žádost neukáže, ukonči čekání a zkontroluj Nastavení → Aplikace → Chrome → Mikrofon.");
+      this.timer(()=>this.fail(awaitingMicrophone
+        ? "Přístup k mikrofonu nebyl potvrzený. Zkontroluj oprávnění Chromu nebo Safari a této stránky. Hlasová relace nebyla vytvořena. Pozdější povolení tento pokus nespustí."
+        : "Spojení překročilo časový limit; automaticky je neopakuji."),20000);
       try {
         const stream=await this.mediaDevices.getUserMedia({audio:{echoCancellation:true,noiseSuppression:true}});
+        awaitingMicrophone=false;
         if(!current()) { stream.getTracks().forEach(track=>track.stop()); return; }
         this.microphone=stream;
         this.notify("Mikrofon je zapnutý; připojuji rozhovor…");
@@ -147,9 +152,21 @@
         await peer.setRemoteDescription({type:"answer",sdp:result.transport.sdp});
         // HTTP creation starts the session. NEVER send session.start here.
       } catch(_error) {
-        if(current()) this.fail(this.creationAttempted
-          ? "Výsledek vytvoření hlasového spojení je nejistý. Nové spojení automaticky nevytvářím."
-          : "Mikrofon nebo spojení se nepodařilo spustit. Použij textový Human–Adam.");
+        if(current()) {
+          const microphoneErrors={
+            NotAllowedError:"Přístup k mikrofonu nebyl povolený. Na iPhonu ověř Nastavení → Aplikace → Chrome → Mikrofon a oprávnění této HTTPS stránky. Hlasová relace nebyla vytvořena.",
+            SecurityError:"Prohlížeč přístup k mikrofonu zablokoval. Ověř oprávnění prohlížeče a této HTTPS stránky. Hlasová relace nebyla vytvořena.",
+            NotFoundError:"Prohlížeč nenašel mikrofon. Ověř zvukový vstup zařízení. Hlasová relace nebyla vytvořena.",
+            NotReadableError:"Mikrofon se nepodařilo otevřít. Ověř, zda jej nepoužívá hovor nebo jiná aplikace. Hlasová relace nebyla vytvořena.",
+          };
+          const message=this.creationAttempted
+            ? "Výsledek vytvoření hlasového spojení je nejistý. Nové spojení automaticky nevytvářím."
+            : awaitingMicrophone
+              ? (Object.prototype.hasOwnProperty.call(microphoneErrors,_error?.name) ? microphoneErrors[_error.name]
+                : "Mikrofon se nepodařilo otevřít. Ověř oprávnění a zvukový vstup zařízení. Hlasová relace nebyla vytvořena.")
+              : "Hlasové spojení se nepodařilo spustit. Použij textový Human–Adam.";
+          this.fail(message);
+        }
       }
     }
     receive(event) {
