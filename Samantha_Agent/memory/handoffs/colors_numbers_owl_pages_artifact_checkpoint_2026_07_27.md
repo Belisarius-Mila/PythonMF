@@ -13,14 +13,13 @@ obou webových kopií; starší pravidlo pro necommitované automatické výstup
 na tento ručně nasazovaný statický obsah nepoužije. Žádný návrat cronu, TTS ve
 workflow ani běžné denní rutiny. Hlas Antonin a rychlost -10 % zachované.
 
-Další krok: Registrované Terra p+n v project-colors-and-numbers; výsledek určí
-logs/owl_20261106_release.log a následné nezávislé veřejné JS/MP3 ověření.
+Další krok: Nasazení a veřejné JS/MP3 ověření dokončené; konečný důkaz v posledním časovaném záznamu.
 
 Navrhované další kroky: Žádné nové. Hlavní úkoly Willa a vlastní worktree Data
 zůstávají oddělené; žádný restart Cockpitu či placený hlasový start.
 
 Technický důkaz: owl_061126.mp3, logs/owl_20261106_targeted.log. Veřejné nasazení
-zatím není tímto přípravným zápisem potvrzené. Text se do paměti nekopíruje.
+potvrzuje následný konečný záznam. Text se do paměti nekopíruje.
 
 
 Opravený balíček do 30d3c58b je na GitHubu a Pages. Terra p+n 6b2cea8e completed,
@@ -255,3 +254,24 @@ Technický důkaz:
 - Účtenka 6b2cea8ea2f983ae95be21cb287ee2e4 completed, push_state/deployment_state=confirmed, Terra 6.1/high, 2 commity do 30d3c58be7aee89d1003864a0c8b0335fe8e20f7. Publikační full gate 2260 PASS/472,6 s, protected_services_unchanged=true. Pages workflow 40699075925 success, deployment 7387046778.
 - Jedna Adamova kontrola: GitHub/main 0/0 na vydaném headu před tímto zápisem, HTTP 200 + přesná shoda 13/13 zdrojů. HTML SHA-256 f538f932e84b00eea2b817ea11610b7e407e2650c8885711b41bab628788b719. Nový build pouze Checkout→Configure Pages→Upload→Deploy, bez TTS a bez denního cronu.
 - return_channel=caller: terminálový Adam převzal a ověřil; returned_to_adam=false nepotvrzuje automatický portálový návrat a není důvodem retry. Předchozí gate 2260/511,838 s a 43 cílených kontrol/YAML PASS. Řeči scény 6 nadále 2/144 a fyzický browser/poslech NEOVĚŘENO. Následný lokální dokumentační checkpoint.
+
+## 2026-11-06 13:24 CET — Promluva pro 6. listopadu veřejně nasazená
+
+Hotovo: Dnešní doslovná promluva je dostupná v přehrávači ColorsAndNumbers.
+Veřejná MP3 má 106 272 B / 17,712 s; HTTP 200 / audio/mp3, shoda SHA-256
+s náhledem a úplné dekódování FFmpeg PASS. Uživatelský poslech nepotvrzený.
+
+Rozhodnutí: Jednorázové ruční zveřejnění dle výslovného pokynu Míly;
+automatické TTS, cron, sdílené workflow, role a běžící služby se neměnily.
+
+Další krok: Pro tuto promluvu žádný další zásah; pokračovat hlavním zadáním.
+Navrhované další kroky: Žádné nové.
+
+Technický důkaz: Zdroj 857be9d91c247c9ed4eaf039468e3bd3a6774f1d,
+Terra účtenka 634555a653a93b94a7469ea788e0053f completed, push/deploy confirmed,
+2668 testů / 49 SKIP PASS, protected_services_unchanged=true. Pages workflow
+42217107265 a deployment 7599971580; veřejný app.js?v=20cfc60f4259ee2b vybírá
+owl_061126.mp3?v=20261106a-f24c1e0639c5. Účtenka v ignorovaném
+data/daily_3am/receipts/20261106_publication.json. Původní aktivní Human–Adam
+obnovený; vlastní worktree Data zachovaný. Tento výsledkový dokumentační
+checkpoint je lokální a neprovádí nové nasazení.
