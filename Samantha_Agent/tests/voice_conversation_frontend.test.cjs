@@ -102,6 +102,26 @@ const flush=()=>new Promise(resolve=>setImmediate(resolve));
 
   const denied=harness({microphone:()=>Promise.reject(Error("denied"))});
   await denied.c.start();assert.equal(denied.calls.create,0);
+  for(const [name,expected] of [["NotAllowedError",/nebyl povolený/],["SecurityError",/zablokoval/],
+      ["NotFoundError",/nenašel mikrofon/],["NotReadableError",/nepodařilo otevřít/],["unexpected",/nepodařilo otevřít/],
+      ["__proto__",/nepodařilo otevřít/]]) {
+    const micError=harness({microphone:()=>Promise.reject(Object.assign(Error("PRIVATE ERROR TEXT"),{name}))});
+    await micError.c.start();
+    assert.equal(micError.calls.create,0);assert.equal(micError.c.state,"disconnected");
+    assert.match(micError.calls.states.at(-1).message,expected);
+    assert.match(micError.calls.states.at(-1).message,/relace nebyla vytvořena/);
+    assert(!micError.calls.states.at(-1).message.includes("PRIVATE"));
+    await micError.c.start();assert.equal(micError.calls.mic,1,"permission errors never prompt again automatically");
+  }
+  const permission=deferred(), stalled=harness({microphone:()=>permission.promise});
+  const stalledStart=stalled.c.start();
+  assert.match(stalled.calls.states.at(-1).message,/Nastavení/);
+  [...stalled.calls.timers.values()].find(timer=>timer.ms===20000).fn();
+  assert.equal(stalled.c.state,"disconnected");assert.equal(stalled.calls.create,0);
+  assert.match(stalled.calls.states.at(-1).message,/Přístup k mikrofonu nebyl potvrzený/);
+  permission.resolve(stalled.stream);await stalledStart;
+  assert.equal(stalled.calls.tracksStopped,1,"late permission after timeout releases microphone");
+  assert.equal(stalled.calls.create,0,"late permission never creates a paid session");
   const failed=harness({create:()=>Promise.reject(Error("unknown delivery"))});
   await failed.c.start();await failed.c.start();
   assert.equal(failed.calls.create,1,"unknown creation is never retried");

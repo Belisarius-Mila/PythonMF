@@ -1,6 +1,36 @@
 # Data → další krok: 15/P2 přirozený hlasový rozhovor
 
-## Aktuální stav — 15/P2-E, iPhone: upřesnění blokace mikrofonu
+## Aktuální stav — 15/P2-F, čekání na mikrofon v iPhone Chromu
+
+- Po přechodu na ověřený privátní HTTPS vstup se panel otevře, souhlas aktivuje
+  Start a Míla hlásí čekání na oprávnění mikrofonu bez dalšího postupu.
+  Přejímka se dostala za původní blokaci HTTP; mikrofon/rozhovor nepřijaté.
+- Doporučený první krok je Ukončit rozhovor, potom ověřit iOS Nastavení →
+  Aplikace → Chrome → Mikrofon a oprávnění konkrétní HTTPS stránky.
+  Skutečný stav přepínače/příčina čekání na telefonu zatím není potvrzená.
+
+### Hotovo
+- Lokálně srozumitelná žádost a nápověda v panelu, rozlišení čekání na mikrofon
+  od připojování a bezpečné texty pro zamítnutý/nenalezený/nedostupný mikrofon.
+  Dosavadní limit 20 s, explicitní Start a zákaz opakování create zůstávají.
+
+### Rozhodnutí
+- Žádné automatické opakování mikrofonu ani placené relace; nastavení telefonu,
+  běžící služby a role se tímto vývojem nemění. Oprava dosud není nasazená.
+
+### Další krok
+- Míla ověří systémové a webové oprávnění Chromu, potom po ukončení původního
+  čekání provede jeden nový vědomý start v HTTPS panelu.
+
+### Navrhované další kroky
+- Po skutečně získaném mikrofonu ověřit rozhovor, Stop a finální spotřebu.
+
+### Technický důkaz
+- 77 cílených testů PASS včetně timeoutu, Stop a opožděného mikrofonu bez create;
+  statická brána PASS. Bez placeného volání, push, restartu či nasazení Datou.
+
+
+## Historický stav — 15/P2-E, iPhone: upřesnění blokace mikrofonu
 
 - Míla hlásí nasazení P2-D. V Chromu na iPhonu vidí při otevření panelu
   obecnou hlášku HTTPS/localhost/prohlížeč; hlasový rozhovor nepřijal.
@@ -213,3 +243,25 @@ serverová spotřeba. Nejasný placený požadavek neopakovat.
 77 cílených testů PASS (pilot, Cockpit adaptér, gateway a Node browserové
 scénáře). Statická brána PASS. Žádný mikrofon, placený start,
 restart, push nebo nasazení Datou. Síťová ani modelová konfigurace beze změny.
+
+## 2026-11-06 23:24 CET — 15/P2-F: čekání na oprávnění mikrofonu
+
+### Hotovo
+Panel vysvětlí povolení mikrofonu a dosavadní timeout odliší od chyby spojení.
+Zamítnutí, chybějící nebo nedostupný mikrofon mají vlastní bezpečné instrukce.
+
+### Rozhodnutí
+Míla se přes HTTPS dostal ke Start a hlásí čekání na mikrofon. To je před
+placeným create, příčina na telefonu zůstává neověřená. Nastavení telefonu,
+serverový backend, role a provozní síť se nemění; žádný automatický retry.
+
+### Další krok
+Nejprve ukončit původní čekání, pak ověřit oprávnění pro Chrome a konkrétní
+HTTPS stránku. Teprve poté jeden nový ruční Start s cenovým souhlasem.
+
+### Navrhované další kroky
+Po získání mikrofonu pokračovat přejímkou hlasu, Stop a finální spotřeby.
+
+### Technický důkaz
+77 testů PASS včetně čekajícího/nepovoleného mikrofonu a opožděného povolení
+po timeoutu bez create. Statická brána PASS; žádné placené volání ani nasazení.

@@ -1,37 +1,32 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
-## Aktuální stav — 15/P2-E, iPhone: upřesnění blokace mikrofonu
+## Aktuální stav — 15/P2-F, čekání na mikrofon v iPhone Chromu
 
-- Míla hlásí nasazení P2-D. V Chromu na iPhonu vidí při otevření panelu
-  obecnou hlášku HTTPS/localhost/prohlížeč; hlasový rozhovor nepřijal.
-  Nezávislý živý audit nasazení v tomto kroku neproběhl.
-- Původní hláška spojuje chybějící secure context, mikrofonní API a WebRTC.
-  HTTP je pravděpodobná příčina, konkrétní protokol iPhonu zatím není potvrzený.
-  Tailscale šifruje síť, ale HTTP stránka tím nezíská browserový secure context.
-- Lokální oprava rozlišuje tři příčiny, vysvětluje HTTP/Tailscale a localhost
-  a při blokaci deaktivuje i cenový souhlas. Kontroly nevolají mikrofon ani API.
-- 77 cílených testů PASS včetně rozšířeného Node browserového kontraktu.
-  Statická brána PASS. Dřívější plná brána P2-D (2467/5 skipů)
-  není novou fyzickou přejímkou. Hlas, modelové role a provozní síť se nemění.
+- Po přechodu na ověřený privátní HTTPS vstup se panel otevře, souhlas aktivuje
+  Start a Míla hlásí čekání na oprávnění mikrofonu bez dalšího postupu.
+  Přejímka se dostala za původní blokaci HTTP; mikrofon/rozhovor nepřijaté.
+- Doporučený první krok je Ukončit rozhovor, potom ověřit iOS Nastavení →
+  Aplikace → Chrome → Mikrofon a oprávnění konkrétní HTTPS stránky.
+  Skutečný stav přepínače/příčina čekání na telefonu zatím není potvrzená.
 
 ### Hotovo
-- Rozlišení secure_context / microphone_api / webrtc a výstižná další instrukce;
-  nepodporované prostředí neumožní zaškrtnutím vyvolat placenou relaci.
+- Lokálně srozumitelná žádost a nápověda v panelu, rozlišení čekání na mikrofon
+  od připojování a bezpečné texty pro zamítnutý/nenalezený/nedostupný mikrofon.
+  Dosavadní limit 20 s, explicitní Start a zákaz opakování create zůstávají.
 
 ### Rozhodnutí
-- HTTPS požadavek se neobchází, síťové služby se nekonfigurují ani nerestartují.
-  Pouhé nasazení není dokončená iPhone přejímka.
+- Žádné automatické opakování mikrofonu ani placené relace; nastavení telefonu,
+  běžící služby a role se tímto vývojem nemění. Oprava dosud není nasazená.
 
 ### Další krok
-- Zjistit http:// versus https:// na iPhonu; při HTTP použít ověřený privátní
-  HTTPS vstup Cockpitu. Konkrétní URL ani existenci TLS proxy neodhadovat.
+- Míla ověří systémové a webové oprávnění Chromu, potom po ukončení původního
+  čekání provede jeden nový vědomý start v HTTPS panelu.
 
 ### Navrhované další kroky
-- Po odstranění blokace Mílův výslovně spuštěný krátký rozhovor a ověření Stop,
-  zachování backendové úlohy a finální serverové spotřeby.
+- Po skutečně získaném mikrofonu ověřit rozhovor, Stop a finální spotřebu.
 
 ### Technický důkaz
-- voice_conversation_cockpit_20261105.md; voice-https-preflight-tests.log v místní .venv.
-- Jen Data worktree; bez push, nasazení, změny provozních dat a placené relace.
+- 77 cílených testů PASS včetně timeoutu, Stop a opožděného mikrofonu bez create;
+  statická brána PASS. Bez placeného volání, push, restartu či nasazení Datou.
 <!-- SAMANTHA_CURRENT_STATUS_END -->
 
 Nazev: Human–Adam / vyvojove prostredi - zalozeni pracovniho proudu Layer
@@ -3077,3 +3072,25 @@ serverová spotřeba. Nejasný placený požadavek neopakovat.
 77 cílených testů PASS (pilot, Cockpit adaptér, gateway a Node browserové
 scénáře). Statická brána PASS. Žádný mikrofon, placený start,
 restart, push nebo nasazení Datou. Síťová ani modelová konfigurace beze změny.
+
+## 2026-11-06 23:24 CET — 15/P2-F: čekání na oprávnění mikrofonu
+
+### Hotovo
+Panel vysvětlí povolení mikrofonu a dosavadní timeout odliší od chyby spojení.
+Zamítnutí, chybějící nebo nedostupný mikrofon mají vlastní bezpečné instrukce.
+
+### Rozhodnutí
+Míla se přes HTTPS dostal ke Start a hlásí čekání na mikrofon. To je před
+placeným create, příčina na telefonu zůstává neověřená. Nastavení telefonu,
+serverový backend, role a provozní síť se nemění; žádný automatický retry.
+
+### Další krok
+Nejprve ukončit původní čekání, pak ověřit oprávnění pro Chrome a konkrétní
+HTTPS stránku. Teprve poté jeden nový ruční Start s cenovým souhlasem.
+
+### Navrhované další kroky
+Po získání mikrofonu pokračovat přejímkou hlasu, Stop a finální spotřeby.
+
+### Technický důkaz
+77 testů PASS včetně čekajícího/nepovoleného mikrofonu a opožděného povolení
+po timeoutu bez create. Statická brána PASS; žádné placené volání ani nasazení.

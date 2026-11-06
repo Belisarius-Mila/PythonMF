@@ -180,6 +180,8 @@ Tento soubor je rozcestnik dlouhodobe pameti pro Samantha Agent.
 
 ## Handoffs
 
+- `reports/voice_conversation_cockpit_20261105.md`; `handoffs/data_15_voice_conversation_pilot_20261105.md` — 15/P2-F: HTTPS vstup ověřený čtecím auditem, Míla prošel k Start a čeká na mikrofon. Ověřit Chrome iOS/web permission až po Stop. Lokální nápověda, konkrétní chyby a timeout bez retry; 77 testů PASS, statická brána PASS. Žádný placený start/deploy; mikrofon a rozhovor stále otevřené.
+
 - `reports/voice_conversation_cockpit_20261105.md`; `handoffs/data_15_voice_conversation_pilot_20261105.md` — 15/P2-E: nasazení dle Míly, iPhone/Chrome blokuje preflight. HTTP zatím hypotéza. Lokálně přesné rozlišení secure context/mikrofon/WebRTC, 77 testů PASS; statická brána PASS. Tailscale nenahradí HTTPS, localhost na telefonu není Mac. Bez síťových změn a placeného startu; další krok ověřit protokol a skutečný HTTPS vstup.
 
 - `reports/voice_conversation_cockpit_20261105.md`; `handoffs/data_15_voice_conversation_pilot_20261105.md` — 15/P2-D: na Mílův pokyn čtecí hlas v lokálním Cockpitu, pevné existující vlákno, <=60s cenový souhlas, centrální read_only_voice a trvalý jeden pokus. 120 cílených testů/statická brána PASS, plná brána 2467 testů OK (skipped=5). Kód nasadit před oddělenou rolí, zachovat Willovu e-mailovou práci. Bez push/deploy/placeného startu; iPhone/WebRTC otevřené.

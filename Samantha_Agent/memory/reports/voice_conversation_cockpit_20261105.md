@@ -193,3 +193,56 @@ serverová spotřeba. Nejasný placený požadavek neopakovat.
 77 cílených testů PASS (pilot, Cockpit adaptér, gateway a Node browserové
 scénáře). Statická brána PASS. Žádný mikrofon, placený start,
 restart, push nebo nasazení Datou. Síťová ani modelová konfigurace beze změny.
+
+## P2-F — čekání na mikrofon po přechodu na HTTPS
+
+Čtecí audit v předchozím diagnostickém kroku našel existující privátní Tailscale
+Serve HTTPS root pro Cockpit, ověřil validní TLS, health 200 a voice bootstrap
+200; Funnel vypnutý. Konfigurace a služby se neměnily. Soukromá URL/IP se zde
+neopisuje. Míla po otevření tohoto vstupu vidí funkční souhlas/Start, pak čekání
+na oprávnění mikrofonu. To odpovídá fázi getUserMedia před broker.create.
+Není to důkaz zamítnutí ani potvrzení příčiny na telefonu.
+
+První instrukce je Ukončit rozhovor, potom iOS Nastavení → Aplikace → Chrome →
+Mikrofon a oprávnění pro konkrétní HTTPS stránku. Google výslovně upozorňuje,
+že vypnutý mikrofon na úrovni aplikace může zabránit zobrazení webové žádosti.
+MDN uvádí i možnost, že se žádost o mikrofon nikdy nevyřeší.
+
+Lokální úprava conversation.js rozlišuje čekání na mikrofon při původním
+20s timeoutu od připojování; rozliší bezpečně jména chyb NotAllowedError,
+SecurityError, NotFoundError a NotReadableError bez raw chybových textů.
+Page.html dostal trvalou nápovědu. Bez změny časových limitů, oprávnění,
+provideru, modelu, serverových rolí nebo politiky jediného placeného pokusu.
+
+77 cílených testů PASS. Rozšířený Node kontrakt potvrzuje konkrétní chybové
+texty, neuniknutí soukromé chyby, žádný opakovaný prompt/create, timeout během
+čekání a opožděné povolení, které uvolní stopu bez vytvoření relace.
+Statická brána PASS. Změněné soubory: conversation.js, page.html,
+voice_conversation_frontend.test.cjs a kanonický projektový zápis.
+Žádný skutečný mikrofon, placená relace, push, restart nebo deploy Datou.
+Fyzické získání mikrofonu a hlasový rozhovor zůstávají otevřené.
+
+Podklady: [Google — Chrome na iPhonu](https://support.google.com/chrome/answer/2693767?co=GENIE.Platform%3DiOS&hl=en),
+[MDN — getUserMedia](https://developer.mozilla.org/en-US/docs/Web/API/MediaDevices/getUserMedia).
+
+## 2026-11-06 23:24 CET — 15/P2-F: čekání na oprávnění mikrofonu
+
+### Hotovo
+Panel vysvětlí povolení mikrofonu a dosavadní timeout odliší od chyby spojení.
+Zamítnutí, chybějící nebo nedostupný mikrofon mají vlastní bezpečné instrukce.
+
+### Rozhodnutí
+Míla se přes HTTPS dostal ke Start a hlásí čekání na mikrofon. To je před
+placeným create, příčina na telefonu zůstává neověřená. Nastavení telefonu,
+serverový backend, role a provozní síť se nemění; žádný automatický retry.
+
+### Další krok
+Nejprve ukončit původní čekání, pak ověřit oprávnění pro Chrome a konkrétní
+HTTPS stránku. Teprve poté jeden nový ruční Start s cenovým souhlasem.
+
+### Navrhované další kroky
+Po získání mikrofonu pokračovat přejímkou hlasu, Stop a finální spotřeby.
+
+### Technický důkaz
+77 testů PASS včetně čekajícího/nepovoleného mikrofonu a opožděného povolení
+po timeoutu bez create. Statická brána PASS; žádné placené volání ani nasazení.

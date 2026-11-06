@@ -43,6 +43,8 @@ nebo jejichž princip lze znovu použít v jiné části projektu.
 
 - Doplnění 15/P2-E (06112026): společná hláška HTTPS/prohlížeč nerozlišuje secure context, getUserMedia a RTCPeerConnection. Tyto podmínky kontrolovat zvlášť a blokaci popsat před cenovým souhlasem; zaškrtnutí nemůže povolit mikrofon na HTTP. Tailscale šifruje přenos, ale HTTP stránka tím nezískává browserový secure context; localhost platí pro zařízení prohlížeče. Neodhadovat HTTPS URL ani nekonfigurovat proxy bez provozního oprávnění.
 
+- Doplnění 15/P2-F (06112026): getUserMedia může zůstat nevyřízené. Čekání odlišit od připojování; nejprve Stop, pak ověřit iOS oprávnění aplikace a webu. Zachovat timeout, generaci pokusu a uvolnění pozdní stopy bez create. Neodvozovat zamítnutí jen z čekání; jména chyb mapovat na bezpečné instrukce, neposílat jejich raw text.
+
 ### LL-095 — Unix socket nezaručuje shodný aplikační protokol
 
 - Problém: kandidátní SDK konfigurace s `app-server proxy --sock` vypadá jako náhrada přímého Unix spojení; současná Samantha ale používá WebSocket a CLI proxy přenáší prosté bajty.
