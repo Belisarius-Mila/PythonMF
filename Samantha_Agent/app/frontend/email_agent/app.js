@@ -61,11 +61,11 @@
         await request("/api/email-agent/archive", {id: item.id, proposal_digest: item.proposal_digest, confirmed: true});
         byId("notice").textContent = "E-mail byl uložen do místního archivu.";
       }));
-      if (proposal.reply_draft && !["sending", "delivery_unknown", "smtp_sent"].includes(replyStatus)) buttons.append(action("Upravit odpověď", async () => {
+      if (!["sending", "delivery_unknown", "smtp_sent"].includes(replyStatus)) buttons.append(action(proposal.reply_draft ? "Upravit odpověď" : "Napsat odpověď", async () => {
         editing = item;
         byId("replyRecipient").textContent = `Odpověď na zprávu od: ${header.sender || ""}`;
         byId("replySubject").value = proposal.reply_subject || `Re: ${header.subject || ""}`;
-        byId("replyBody").value = proposal.reply_draft;
+        byId("replyBody").value = proposal.reply_draft || "";
         byId("replyStatus").textContent = "";
         resetConfirmation();
         editor.showModal();

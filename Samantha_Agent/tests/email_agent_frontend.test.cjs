@@ -91,6 +91,39 @@ function find(element, label) {
   await flush();
   assert.match(ids.cards.textContent, /CELÉ TĚLO A KONEC/);
   assert.match(ids.cards.textContent, /<img src=x onerror=alert\(1\)>/);
+  const initialProposal = {...data.cards[0].proposal};
+  data.cards[0].proposal = {...initialProposal, reply_subject: '', reply_draft: ''};
+  await intervals[0]();
+  const writeReply = find(ids.cards, 'Napsat odpověď');
+  assert.ok(writeReply, 'A card without a generated draft must offer a blank editor');
+  const mutationsBeforeOpen = calls.filter(call => call.payload !== null).length;
+  await writeReply.click();
+  assert.equal(ids.replyEditor.open, true);
+  assert.equal(ids.replyBody.value, '');
+  assert.equal(ids.replySubject.value, `Re: ${data.cards[0].header.subject}`);
+  assert.equal(calls.filter(call => call.payload !== null).length, mutationsBeforeOpen,
+    'Opening an empty editor must not save, prepare or send a reply');
+  ids.replyBody.value = 'Děkuji za zprávu.';
+  await intervals[0]();
+  assert.equal(ids.replyBody.value, 'Děkuji za zprávu.', 'Polling preserves a new manual draft');
+  await ids.replyForm.listeners.submit({preventDefault() {}});
+  assert.equal(data.cards[0].proposal.reply_draft, 'Děkuji za zprávu.');
+  assert.equal(calls.some(call => /prepare-reply|send-reply/.test(call.url)), false);
+  await find(ids.cards, 'Upravit odpověď').click();
+  assert.equal(ids.replyBody.value, 'Děkuji za zprávu.');
+  await ids.closeEditor.click();
+  data.cards[0].proposal = {...initialProposal, reply_subject: '', reply_draft: ''};
+  for (const status of ['sending', 'delivery_unknown', 'smtp_sent']) {
+    data.cards[0].reply = {status};
+    await intervals[0]();
+    assert.equal(find(ids.cards, 'Napsat odpověď'), null, `Do not reopen a ${status} reply`);
+    assert.equal(find(ids.cards, 'Upravit odpověď'), null);
+  }
+  delete data.cards[0].reply;
+  data.cards[0].proposal = initialProposal;
+  data.cards[0].proposal_digest = 'original-digest';
+  await intervals[0]();
+  calls.length = 0;
   await find(ids.cards, 'Příště nedůležité').click();
   assert.equal(data.cards.length, 1, 'Preference must not dismiss the current card');
   assert.equal(calls.some(call => /dismiss|archive|send-reply/.test(call.url)), false);

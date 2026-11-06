@@ -60,7 +60,9 @@ class EmailProposalPolicyTests(unittest.TestCase):
         self.assertFalse(payload["reply_context"]["outgoing_attachments_supported"])
         self.assertEqual(payload["reply_context"]["user_name"], "Jan Testovací")
         self.assertEqual(calls[0]["developer_instructions"], captured[0])
-        for phrase in ("datovou schránku", "podání nenahrazuje", "pouze text bez příloh", "oslovením konkrétní osoby", "nepodložená tvrzení"):
+        for phrase in ("datovou schránku", "podání nenahrazuje", "pouze text bez příloh", "oslovením konkrétní osoby", "nepodložená tvrzení",
+                       "věcný nebo zdvořilostní význam", "výsledek výběrového řízení", "important=true",
+                       "povinnou reakci od vhodné dobrovolné odpovědi"):
             self.assertIn(phrase, captured[0])
 
 

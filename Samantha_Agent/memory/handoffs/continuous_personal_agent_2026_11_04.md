@@ -1,5 +1,9 @@
 # Průběžný osobní agent — e-mailový provoz a Pushcut
 
+Aktuální lokální krok 6. 11.: zdvořilostní odpovědi a Napsat odpověď bez
+konceptu; podrobnosti v posledním časovaném záznamu. Nasazení a upgrade
+hodinové kopie nejsou součástí tohoto vývojového pokynu.
+
 ## 2026-11-05 22:06 CET — kompatibilita s Datovou hlasovou rolí
 
 Po Mílově výslovném rozšíření p+n i na Datův projekt proběhl druhý potřebný
@@ -659,3 +663,35 @@ archivace/metadat a CalDAV čekají. Instalace není p+n společného Cockpitu.
 
 Do Git zápisů patří pouze technický a redigovaný stav. Živý obsah a přístupy
 nepatří do tohoto handoffu; provozní data jsou pod ignorovaným `data/private/`.
+
+## 2026-11-06 16:34 CET — Zdvořilostní odpovědi a prázdný editor (lokálně)
+
+Hotovo: Společná politika obou modelových adaptérů vyžaduje návrh i při
+zdvořilostním významu odpovědi, například poděkování za osobní/pracovní zprávu
+nebo výsledek výběrového řízení. Odlišuje povinnou reakci od dobrovolné;
+zprávu s navrženou odpovědí ponechá k lidskému posouzení jako important=true.
+Reklama, newsletter ani zjevné no-reply samy o sobě zdvořilou reakci neodůvodňují.
+Karta bez konceptu má Napsat odpověď s prázdným tělem a odvozeným Re: předmětem;
+existující koncept dál nabízí Upravit odpověď. Otevření nic neukládá.
+
+Rozhodnutí: Míla výslovně požaduje připravit odpověď vždy, pokud má i
+zdvořilostní význam, a souhlasil s prázdným editorem. Vývoj je lokální;
+push, nasazení Cockpitu ani upgrade samostatné hodinové služby nebyly zadané.
+Model a role se nemění. Stávající živé návrhy se nepřegenerovávají.
+
+Další krok: Samostatně schválit p+n a registrovaný upgrade vlastní hodinové
+kopie; pouhý nový main její zmrazená pravidla nezmění. Lokální vývoj a plná
+brána jsou dokončené; tento záznam je součástí lokálního checkpointu.
+
+Navrhované další kroky: Podle původního pořadí Míly zvlášť analyzovat,
+proč Human–Adam nedokázal diagnostiku konkrétního problému provést.
+
+Technický důkaz: Regrese prázdného editoru před změnou FAIL, po změně PASS.
+61 cílených Python testů včetně rozšířeného Node DOM scénáře PASS. Ověřené
+ruční napsání/uložení/znovuotevření, ochrana rozepsaného textu, blokace
+sending/delivery_unknown/smtp_sent a odmítnutí prázdného textu. Příprava bez
+SMTP a odesílání až po samostatném potvrzení. Plná brána 2669 testů,
+31 SKIP, bez selhání PASS (513,892 s unit část):
+logs/email_courtesy_full_gate_20261106.log. Nové pravidlo nebylo zkoušené živým
+modelem; fyzická Mac/iPhone přejímka je otevřená. Soukromý e-mail ani adresy
+se do tohoto zápisu nekopírují. Nový e-mailový TVBCP se nezakládá.

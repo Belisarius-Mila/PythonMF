@@ -61,6 +61,22 @@ class AgentReplyTests(unittest.TestCase):
         self.assertEqual(prepared["body"], proposal().reply_draft)
         self.assertNotIn("message_b64", prepared)
 
+    def test_manual_reply_from_empty_proposal_requires_text_and_separate_confirmation(self):
+        empty = proposal().model_copy(update={"reply_subject": "", "reply_draft": ""})
+        self.digest = self.worker.edit_proposal(self.item_id, empty, expected_digest=self.digest)
+        with self.assertRaisesRegex(ValueError, "text odpovědi"):
+            self.prepare()
+        manual = empty.model_copy(update={"reply_subject": "Re: Podklady", "reply_draft": "Děkuji za zprávu."})
+        self.digest = self.worker.edit_proposal(self.item_id, manual, expected_digest=self.digest)
+        prepared = self.prepare()
+        self.assertEqual(prepared["body"], "Děkuji za zprávu.")
+        self.assertEqual(prepared["recipient"], "sender@example.test")
+        self.assertEqual(self.sent, [])
+        self.assertEqual(self.copies, [])
+        with self.assertRaises(ValueError):
+            self.send(prepared, confirmed=False)
+        self.assertEqual(self.sent, [])
+
     def test_second_confirmation_sends_once_and_copies_sent_message(self):
         prepared = self.prepare()
         receipt = self.send(prepared)
