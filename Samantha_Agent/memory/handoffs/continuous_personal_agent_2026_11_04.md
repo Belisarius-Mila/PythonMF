@@ -1,8 +1,9 @@
 # Průběžný osobní agent — e-mailový provoz a Pushcut
 
 Aktuální stav 6. 11.: Terra p+n e82a5d47 dokončené, nový editor živě ověřený.
-Zdvořilostní pravidlo hodinového agenta čeká na samostatný potvrzený upgrade
-vlastního LaunchAgentu; podrobnosti v posledním časovaném záznamu.
+Potvrzený upgrade na f2d6ef79 aktivoval zdvořilostní pravidlo i v hodinovém
+agentu; úplný business stav zachovaný, první check already_completed.
+Podrobnosti v posledním časovaném záznamu.
 
 ## 2026-11-05 22:06 CET — kompatibilita s Datovou hlasovou rolí
 
@@ -727,3 +728,34 @@ Main/GitHub byly před tímto výsledkovým zápisem shodné, profily zarovnané
 Datův vlastní worktree čistý a zachovaný. Tento dokumentační checkpoint je
 lokální pro příští balíček; neprovádí nové nasazení. Soukromý e-mail ani
 přihlašovací údaje se do zápisu nekopírují. Nový TVBCP nevzniká.
+
+## 2026-11-06 17:03 CET — Zdvořilostní pravidlo aktivní i v hodinové službě
+
+Hotovo: Hodinový e-mailový agent nyní používá nové pravidlo zdvořilostních
+odpovědí. Registrované pause → prepare → upgrade převedly vlastní LaunchAgent
+z 11b4ce64 na f2d6ef79. Installed/owned/loaded/enabled=true; čerstvý import
+z instalované kopie potvrdil nové pravidlo a byteovou shodu proposal_policy.py.
+První dokončená kontrola already_completed, žádné nové placené posouzení.
+
+Rozhodnutí: Míla po dokončeném Terra p+n výslovně poslal přesnou větu globální
+brzdy pro tento servisní upgrade. Kód odpovídá již přijatému e82a5d47;
+f2d6ef79 oproti němu přidává pouze dokumentační výsledek vydání.
+
+Další krok: U dalších běžně posuzovaných zpráv ověřit praktickou kvalitu
+zdvořilostních konceptů; původní již posouzená karta se nepřegenerovává.
+Napsat odpověď je v nasazeném Cockpitu dostupné i bez původního konceptu.
+
+Navrhované další kroky: Samostatně navázat na Mílův původní požadavek proč
+Human–Adam nedokázal konkrétní e-mailový problém diagnostikovat.
+
+Technický důkaz: Všech 12 servisních kontrol PASS. Úplný business stav před/po
+shodný (karty, koncepty, předvolby, UID pozice, počítadla i doručovací fronty),
+shodná nastavení a všechny role; předchozí release i nová servisní záloha
+zachované. Otisk business stavu
+338d2a91f2bb5402cda3848a2f383a76845e6d9c3012670b603b10783e5662a4.
+Důkaz logs/email_courtesy_service_upgrade_20261106.log; úplný soukromý baseline
+a redigovaný verified.json jen v ignorovaném service_audits/courtesy_policy_upgrade_20261106.
+Bez SMTP, nového modelového probe či přeposouzení původní zprávy.
+Předchozí p+n e82a5d47/b3165b2a a plná brána 2669 testů zůstávají platné;
+servisní kód ani testy se v tomto kroku neměnily. Tento výsledkový zápis je
+lokální pro příští balíček; nový TVBCP nevzniká.
