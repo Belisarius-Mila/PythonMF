@@ -1167,3 +1167,64 @@ Technický důkaz: logs/calendar_rec05_targeted_20261107.log a
 calendar_rec05_environment_20261107.log. Plná brána posledního balíčku je
 povinná u registrovaného workeru. Bez změny hodinové kopie, výběru kalendářů,
 produkčních TXT/iCloud kopií nebo aktivace plánovače.
+
+## 2026-11-07 14:56 CET — REC-06: konkrétní jednorázová kalibrace před placeným pilotem
+
+### Hotovo
+- Čtecí audit připojeného App Serveru, účtu a přesného Sol/medium. Standard
+  pro jeden tah doložen oficiální dokumentací a schématem přesného peeru .163.0.
+- Nový oddělený kandidátní vstup s pevným syntetickým podkladem, přesnou
+  kartou souhlasu, kontrolou oprávnění/socketu, trvalým slotem a bez retry.
+- Testy výpadků/souběhu, neznámé spotřeby a obsahu; konkrétní cenová karta
+  a reprodukční omezení jsou v recovery_guide_rec06_20261107.md.
+
+### Rozhodnutí
+- Pokyn k REC-06 autorizuje přípravu přejímky. Samostatný souhlas s konkrétní
+  placenou zkouškou podle schváleného plánu zatím chybí; živé modelové tahy 0.
+- Návrh první kalibrace: jeden Sol/medium Standard tah, pět syntetických
+  záznamů bez skutečného návodu; rezerva 1,6 Standard kreditu a přijímací
+  mez 2 kredity. Nejde o tvrdý fakturační/výstupní strop. Karta není souhlas.
+- Přesný tokenizer Solu zůstává nedoložený; referenčních 500 tokenů není
+  fallback pro celý korpus. Produkční run/tick, role a služba neaktivované.
+
+### Další krok
+- Míla přijme přesnou kartu jediné syntetické kalibrace; poté ji Data může
+  jednou provést nad stejným digestem. Nejasný výsledek se neopakuje.
+
+### Navrhované další kroky
+- Vyhodnotit skutečnou spotřebu a odděleně přijmout úplný korpus/cenový pilot TXT.
+- Will převezme nový modul/testy/zápis do aktuálního main, uchová své role/práci.
+- Přijmout celý návrh, povolený produkční adaptér a dvě kopie; upload/iPhone zvlášť.
+- Samostatně schválit p+n, centrální roli, den/čas/rozpočet a launchd/auth přejímku.
+
+### Technický důkaz
+- 28 nových testů; cílená sada 193/193 OK. Plná brána persistenčního vstupu: 2 570 testů OK, 5 skipped.
+  Po malé čtecí normalizaci peer verze dalších 28/28 cílených testů OK;
+  závěrečná statická brána OK.
+- Globální CLI .166.0, připojený peer .163.0; stará ownership sidecar není
+  důkaz současného listeneru. Žádná změna služby, globálního CLI, závislostí
+  projektu, modelových rolí či provozních TXT; žádný push/nasazení/integrace.
+
+## 2026-11-07 15:47 CET — Will: schválené p+n zbývajícího REC-06 commitu
+
+Hotovo: Will přebírá Datův 282c68b4 nad nasazený 51d88679. Nový modul
+recovery_guide_trial a jeho syntetické testy připravují jedinou přesně vázanou
+kalibraci. Stávající kalendář, přenositelné launcher fixture, role a sdílené
+služby zůstávají zachované. Datův vlastní worktree se nepřepisuje.
+
+Rozhodnutí: Míla výslovně schválil p+n zbylým commitům. Publikuje se zdrojový
+kód; placená kalibrace se neprovádí, centrální recovery role, služba a produkční
+TXT/iCloud publikace zůstávají vypnuté. Přesná karta placené zkoušky má dál
+samostatné oprávnění; audit peeru/ceny z Datovy zprávy je historický podklad,
+nikoli nová živá kalibrace v tomto předání.
+
+Další krok: registrované Terra p+n proudu project-samantha-infrastructure,
+společný Cockpit. Aktuální výsledek určují přesná účtenka a
+logs/recovery_rec06_release_20261107.log a recovery_rec06_verified_20261107.log,
+nikoli tento zápis před vydáním. Potom ověřit zdroje, role, guardy a GitHub CI.
+
+Technický důkaz: cílená sada dle logs/recovery_rec06_integration_targeted_20261107.log;
+statická brána dle recovery_rec06_static_20261107.log. Plnou publikační bránu,
+push, restart Cockpitu a smoke provede jediný registrovaný vykonavatel.
+Žádné modelové volání kalibrace, změna CLI/transportu, závislostí, oprávnění,
+instalace plánovače ani zápis původních TXT nejsou součástí tohoto vydání.

@@ -120,8 +120,9 @@ s mazáním není implementovaná ani schválená.
 
 1. Přijmout úplný zdrojový manifest a doplnit bezpečné doklady nastavení.
    Vybrat a ověřit přesný tokenizer daného modelu. V testech je počítadlo
-   syntetické, nikoli měření skutečných tokenů. Nic nebylo do prostředí
-   doinstalované a cena skutečného týdenního čtení dosud není změřená.
+   syntetické, nikoli měření skutečných tokenů. Izolovaný tiktoken 0.14.0
+   přesný Sol nezná; referenční o200k_base jej nenahrazuje. Cena skutečného
+   týdenního čtení dosud není změřená.
 2. Schválit konkrétní nepublikující cenový pilot a limity, připojit živý
    adaptér k příslušnému povolenému vstupu. Nynější CLI run/tick je uzavřený.
    Před trialem znovu ověřit model, Standard režim a spotřebu. Výstupní
@@ -158,6 +159,25 @@ nová centrální role; v této etapě žádná aktivace JSON, služby nebo mode
 Po převzetí znovu vytvořit neplacený manifest nad čistým skutečným main.
 Nejbližší krok je uzavření rozsahu/metadata cílů a tokenizační preflight;
 teprve z konkrétního náhledu požadovat souhlas s cenovým pilotem.
+
+## REC-06: samostatná syntetická kalibrace
+
+`app.recovery_guide_trial.prepare()` vytvoří pevnou neplacenou kartu pro
+jeden Sol/medium tah se Standardem připnutým pouze na tento tah. Nečte
+obnovovací TXT ani projektový korpus, neaktivuje centrální roli a nepublikuje.
+`app.recovery_guide_trial.run(approved_digest=...)` vyžaduje konkrétní souhlas
+s původní kartou. Není připojený k produkčnímu run/tick. Trvalý jeden slot
+blokuje opakování při chybě, výpadku i restartu; zkouška nemá reset/retry.
+
+Pilot používá pouze vlastní `.venv/recovery_rec06_trial`; žádný výstup se
+nepřenese do iCloudu. Statický protokol pochází z oficiálního .163.0 balíčku
+ve vlastní `.venv/recovery_rec06_cli`, nikoli ze změny globálního Codexu.
+Při změně peeru, socketu, implementace nebo schématu je nutná nová kontrola.
+
+Karta odděluje referenční počet tokenů od nepodporovaného přesného mapování
+Solu, přijímací rozpočet od tvrdého fakturačního limitu a vypnuté vystavení
+shellu od povinně zapnutého backendu unified_exec. Příprava karty není živý
+důkaz izolace. Detaily a další oddělené přejímky v REC-06 reportu.
 
 ## Ověření a podklady
 
