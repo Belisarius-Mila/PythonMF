@@ -1,5 +1,10 @@
 # E-mail read-only OAuth integrace
 
+Navigace (lokální změna 7. 11. 2026): Kalendář patří do Komunikace vedle
+e-mailů, samostatný odkaz v hlavní liště odstraněný. Běžící Cockpit zatím
+vrací původní menu; změna čeká na samostatné p+n. Kanonický UI zápis:
+`handoffs/workstreams/project-cockpit.md` a `tvbcp/workstreams/project-cockpit.md`.
+
 Kalendář nově lokálně používá jednu kartu se čtyřmi poli: název, začátek,
 typ a místo. Kliknutí Do kalendáře připraví návrh přes stávající Terra roli;
 úpravy i kontrola kolizí probíhají automaticky. Výchozí pásmo Europe/Prague,

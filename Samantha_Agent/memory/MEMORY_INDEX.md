@@ -20,6 +20,8 @@ Tento soubor je rozcestnik dlouhodobe pameti pro Samantha Agent.
 
 ## Reports
 
+- `handoffs/workstreams/project-cockpit.md`; `tvbcp/workstreams/project-cockpit.md`; `projects/email_readonly_oauth.md` — 7. 11.: lokální přesun Kalendáře z hlavní lišty do Komunikace vedle e-mailů. Odkaz zůstává jediný /calendar/; původní dialog/ID zachované. Cílené ověření logs/calendar_navigation_20261107.log, statická brána calendar_navigation_static_20261107.log. Běžící Cockpit ještě vrací původní menu, bez nového p+n.
+
 - `reports/python_315_assessment_2026_10_24.md` — 2026-10-24 09:49 CEST: Python 3.15.1 posouzen proti místnímu 3.12.0rc3, 18 metadat a úspěšný binární resolver pro Mac/arm64. Doporučený oddělený pilot, žádná instalace nebo změna provozu.
 
 - `reports/cockpit_ui_u06_2026_09_14.json` - U06 navigace a 16 dialogů, zachované drafty při návratu; 28 cílených testů a tři browser scénáře včetně vnořených návratů a šesti hash odkazů. Lokálně bez nasazení.
