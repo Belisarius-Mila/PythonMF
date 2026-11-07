@@ -162,6 +162,15 @@ teprve z konkrétního náhledu požadovat souhlas s cenovým pilotem.
 
 ## REC-06: samostatná syntetická kalibrace
 
+Aktuálně 2026-11-07 16:18 CET: Míla schválil přesnou původní kartu a jediná
+skutečná zkouška **prošla**. Jeden dokončený tah, všech pět klasifikací/citací
+správně, bez zaznamenaných nástrojových položek. Input 5 248, output 188,
+total 5 436 tokenů, čas 6 646 ms; odhad **0,3094 Standard kreditu**. Doklad:
+`reports/recovery_guide_rec06_result_20261107.json`. Nejde o celý čtecí pilot
+REC-02 ani o publikaci/aktivaci. Původní trvalá účtenka brání dalšímu pokusu.
+Referenční počet 500 tokenů nevystihuje skutečný input a nenahrazuje přesný
+tokenizer; samotný poměr není spolehlivá extrapolace ceny celého korpusu.
+
 `app.recovery_guide_trial.prepare()` vytvoří pevnou neplacenou kartu pro
 jeden Sol/medium tah se Standardem připnutým pouze na tento tah. Nečte
 obnovovací TXT ani projektový korpus, neaktivuje centrální roli a nepublikuje.

@@ -1124,3 +1124,40 @@ závislosti bez konkrétní potřeby. Nejde o rozšíření e-mailové business 
 - Globální CLI .166.0, připojený peer .163.0; stará ownership sidecar není
   důkaz současného listeneru. Žádná změna služby, globálního CLI, závislostí
   projektu, modelových rolí či provozních TXT; žádný push/nasazení/integrace.
+
+## 2026-11-07 16:19 CET — REC-06: skutečná syntetická kalibrace Solem prošla
+
+### Hotovo
+- Jedna schválená živá zkouška Sol/medium se Standardem pro jediný tah prošla.
+  Všech pět klasifikací i přesných citací sedí: dokumentace, historie, návrh,
+  zrušený placený hlas jako irrelevant a neověřené nastavení iPhonu.
+- Potvrzeno jedno doručení, žádný zaznamenaný nástrojový typ, žádné opakování.
+  Skutečná spotřeba 5 436 tokenů; odhad 0,3094 Standard kreditu proti rezervě 1,6.
+
+### Rozhodnutí
+- Míla výslovně schválil přesnou naceněnou zkoušku a oznámil nasazení balíčku.
+  Použita původní karta/digest, žádné přegenerování ani druhý request.
+- Souhlas nepokrývá další placené čtení celého korpusu, publikaci TXT nebo
+  aktivaci týdenní služby. Tyto kroky touto zkouškou neproběhly.
+- REC-06 zůstává otevřená do skutečného návrhu, obou kopií, uploadu/iPhonu
+  a zvlášť povoleného spuštění automatizace. Celý REC-02 pilot není uzavřený.
+
+### Další krok
+- Připravit aktuální manifest nad převzatým main, bezpečné Mac/iPhone
+  doklady a konkrétní rozpočet úplného čtecího pilotu; dosavadní odhad
+  o200k_base nepovažovat za přesný Sol prompt ani univerzální násobek ceny.
+
+### Navrhované další kroky
+- Will převezme tento výsledkový zápis, zachová své role a souběžnou práci.
+- Po obsahové a cenové přejímce provést skutečný čtecí pilot a přijmout celý TXT.
+- Autorizovaný produkční adapter, dvě kopie, skutečný upload a iPhone přejímka.
+- Samostatně povolená centrální role, termín/limity, launchd/auth a plánovaný slot.
+
+### Technický důkaz
+- Původní approval digest d613768b…0a4329a; jedna trvalá účtenka trial_passed.
+  Input 5 248, cache 0, output 188 (reasoning 0); čas 6 646 ms; 51 skills vypnuto.
+- Git-safe numerický a syntetický výsledek v recovery_guide_rec06_result_20261107.json.
+  Projekce porovnána s původní účtenkou; závěrečná statická brána OK.
+  Soukromá původní karta/účtenka zůstávají ve vlastní .venv, mimo Git.
+- Produkční klient, role, závislosti ani provozní TXT se neměnily. V tomto
+  kroku žádný deploy/restart/push; nasazení bylo oznámeno Mílou, neprovedeno Datou.

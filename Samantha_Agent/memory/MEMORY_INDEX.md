@@ -108,7 +108,7 @@ Tento soubor je rozcestnik dlouhodobe pameti pro Samantha Agent.
 
 ## Infrastructure Recovery
 
-- `projects/samantha_external_backup.md`; `technical/recovery_guide_maintainer.md`; `reports/recovery_guide_rec06_20261107.md`; `handoffs/workstreams/project-samantha-infrastructure.md`; `tvbcp/workstreams/project-samantha-infrastructure.md` — 2026-11-07: REC-06 rozpracovaná; konkrétní jednorázová syntetická kalibrace Sol/medium se Standardem, kartou souhlasu a trvalým slotem bez retry. Čtecí runtime audit; přesný tokenizer Solu chybí. Čeká zvláštní souhlas s cenovou kartou; žádný živý model/TXT/aktivace/p+n.
+- `projects/samantha_external_backup.md`; `technical/recovery_guide_maintainer.md`; `reports/recovery_guide_rec06_20261107.md`; `reports/recovery_guide_rec06_result_20261107.json`; `handoffs/workstreams/project-samantha-infrastructure.md`; `tvbcp/workstreams/project-samantha-infrastructure.md` — 2026-11-07: REC-06 skutečná syntetická kalibrace Sol/medium Standard PASS, jeden tah, bez retry, 5 436 tokenů / odhad 0,3094 Standard kreditu. Další celý čtecí pilot vyžaduje aktuální manifest a konkrétní cenovou přejímku; TXT/iPhone/týdenní aktivace touto zkouškou neověřené.
 
 - `infrastructure/operating_model.md`; `handoffs/workstreams/project-samantha-infrastructure.md`; `tvbcp/workstreams/project-samantha-infrastructure.md` — 24. 10. úklid SSD dokončen: skutečně +30,20 GiB, volno 49,28 GiB. Systémová cache zachovaná; čekající instalační kopie a sestavovací/testovací zbytky uklizené s ověřenou záchranou potřebných dat. Camino/Cockpit/autosave shodné. Další krok: praktická přejímka střižny Camino.
 
