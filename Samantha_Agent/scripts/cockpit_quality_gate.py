@@ -27,6 +27,7 @@ COMPILE_PATHS = (
     "app/recovery_guide_sources.py",
     "app/recovery_guide_maintainer.py",
     "app/recovery_guide_preflight.py",
+    "app/recovery_guide_quality.py",
     "app/recovery_guide_publish.py",
     "scripts/recovery_guide.py",
     "scripts/recovery_guide_launchd.py",
@@ -264,6 +265,7 @@ SHELL_PATHS = (
 TEST_MODULES = (
     "tests.test_recovery_guide",
     "tests.test_recovery_guide_preflight",
+    "tests.test_recovery_guide_quality",
     "tests.test_speech_azure_tts_mp3",
     "tests.test_mmtx_scene06_azure_audio",
     "tests.test_backup_camino",

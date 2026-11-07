@@ -95,40 +95,9 @@ def citation(row: dict, texts: dict[str, str]) -> None:
 
 
 def validate_candidate(answer: dict, snapshot: Snapshot) -> str:
-    """Structural/evidence gate; semantic review remains mandatory for pilot.
-
-    Citations cannot prove that arbitrary prose or restore commands are correct.
-    This deliberately does not return an automatic-publication approval.
-    """
-    texts = {s.path: s.text for s in (snapshot.original, *snapshot.sources)}
-    if not isinstance(answer, dict) or set(answer) != {"paragraphs"}:
-        raise ValueError("Neplatný formát syntézy.")
-    rows = answer["paragraphs"]
-    if not isinstance(rows, list) or not rows:
-        raise ValueError("Prázdný návod.")
-    for row in rows:
-        if (not isinstance(row, dict) or set(row) != {"text", "status", "evidence"}
-                or not isinstance(row["text"], str) or not row["text"].strip()
-                or row["status"] not in {"unchanged", "documented", "unverified"}
-                or not isinstance(row["evidence"], list)):
-            raise ValueError("Neplatný odstavec.")
-        if row["status"] == "unchanged":
-            if row["text"] not in snapshot.original.text:
-                raise ValueError("Změněný obsah označený jako původní.")
-        elif not row["evidence"]:
-            raise ValueError("Nový odstavec bez důkazu.")
-        if row["status"] != "unchanged" and re.search(r"read_only_voice|readOnlyVoice|voice_bridge|/api/voice", row["text"]):
-            raise ValueError("Návrh odkazuje na zrušený hlasový runtime; nutná ruční revize.")
-        for evidence in row["evidence"]:
-            citation(evidence, texts)
-    candidate = "\n\n".join(row["text"] for row in rows) + "\n"
-    reject_secrets(candidate)
-    # Uppercase numbered chapter headings avoid confusing dated sentences with
-    # chapters (the real original also contains sentences beginning '18. 10.').
-    headings = re.findall(r"(?m)^\d{1,2}\. [A-ZÁČĎÉĚÍŇÓŘŠŤÚŮÝŽ][A-ZÁČĎÉĚÍŇÓŘŠŤÚŮÝŽ ,/–()0-9-]+$", snapshot.original.text)
-    if not headings or any(h not in candidate for h in headings) or len(candidate) < len(snapshot.original.text) * .75:
-        raise ValueError("Návod ztratil podstatné kapitoly nebo rozsah.")
-    return candidate
+    """Mandatory REC-03 gate; independent acceptance still cannot publish."""
+    from app.recovery_guide_quality import validate
+    return validate(answer, snapshot)
 
 
 def plan(snapshot: Snapshot, count_tokens: Callable[[str], int], limits: Limits) -> dict:
@@ -260,9 +229,12 @@ def run(snapshot: Snapshot, *, state_dir: Path, now: datetime, limits: Limits,
                     record.update(state="review", candidate_sha256=digest(candidate),
                                   semantic_acceptance="required", publication="not_authorized")
                 atomic_write_json(path, record)
-        except Exception:
+        except Exception as exc:
             # Do not persist arbitrary exception text or model output (secrets).
             record.update(state="attention", reason="Výsledek neověřen; automaticky neopakovat.")
+            from app.recovery_guide_quality import QualityError
+            if isinstance(exc, QualityError):
+                record["quality_issue"] = exc.code
             atomic_write_json(path, record)
         return record
 

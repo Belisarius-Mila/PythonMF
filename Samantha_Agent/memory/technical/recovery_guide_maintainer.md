@@ -209,3 +209,21 @@ Standard preference se nesmí zaměnit za nové provozní ověření. Živý pil
 neproběhl, REC-02 není celá uzavřená. CLI run/tick i role stále neaktivované.
 Další krok je doložení izolovaného Standard kontraktu ve Willově aktuálním
 runtime a konkrétní přijetí kalibračního/cenového pilotu. Žádný restart zde.
+
+## 2026-11-07 13:03 CET — REC-03, přejímka kvality
+
+Povinný core validator přesměrovaný do recovery_guide_quality.validate.
+Bezpečné kódy chyb jsou v quality_issue; chybná syntéza se neukládá ani
+neopakuje. Navíc samostatné review nad explicitně schválenou inventurou
+aplikací, Mac/iPhone checklistem a důvěryhodnými datovanými doklady.
+Výchozí produkční inventura je prázdná a neschválená; žádné hádané role/aplikace.
+
+Základní kontrola je zapojená do pilotního řadiče. Úplné review/checklist
+je samostatné knihovní API a testy; existující modelový kontrakt jej zatím
+sám nevytváří. REC-04 musí jeho účtenku a konkrétní přijetí Mílou svázat
+s přesným kandidátem/kontextem/checklistem/cíli. Ani review není povolení
+publikace. Podrobná specifikace a známé meze jsou v REC-03 reportu.
+
+Cold-reader balíček byl čten novým izolovaným procesem bez projektové
+historie; lidská/modelová přejímka skutečného návrhu ještě neproběhla.
+Dosavadní REC-02 blokátory zůstávají, bez nového modelu/služby či zápisu TXT.

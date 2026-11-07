@@ -977,3 +977,40 @@ závislosti bez konkrétní potřeby. Nejde o rozšíření e-mailové business 
 - Plná projektová brána: 2 423 testů OK, 5 skipped; po doplnění Fast a měsíčního regresního případu znovu 76 cílených testů OK (11 nových v REC-02), závěrečná statická brána OK.
 - Bez změny config/agent_roles.json, společné .venv, globálního CLI,
   provozních TXT, služeb, Gitu mimo vlastní větev, push či nasazení.
+
+## 2026-11-07 13:03 CET — REC-03: kontrola kvality a důkazů
+
+### Hotovo
+- Povinná kontrola syntézy nyní zachová kapitoly i jejich obsah/úvod, váže
+  nové cesty/role/příkazy na přesné citace a blokuje známý zrušený hlas,
+  skrytá tajemství, falešné aktuální ověření a změnu pouhého data.
+- Samostatná přejímka vyžaduje schválený úplný seznam aplikací, Mac/iPhone
+  checklist, zdrojové otisky, autoritu a stáří důkazů. Nový OS/rozpor blokuje.
+  Ani úspěšný strojový výsledek sám nepovoluje publikaci.
+- Připraven balíček bez soukromé historie a otestované čtení novým izolovaným
+  procesem pouze přes stdin. Nejde o lidskou/modelovou přejímku skutečného TXT.
+- Stávající TXT pouze čtecí kontrolou prošel a vrací se přesně 62 778 B;
+  žádné umělé přidání newline ani změna verze při běhu beze změn.
+
+### Rozhodnutí
+- Míla schválil třetí etapu REC-03. Rozsah nadále nezahrnuje placený pilot,
+  publikaci provozních TXT, aktivaci role/služby, push ani nasazení.
+- Checklist a důkazy smějí schválit pouze důvěryhodný řadič/operátor,
+  nikoli model. Úplný skutečný seznam aplikací zatím schválený není.
+
+### Další krok
+- REC-04: svázat konkrétně přijatou kvalitativní účtenku, checklist, kandidát
+  a oba pevné cíle s writerem; testovat přerušení a souběžné úpravy na kopiích.
+
+### Navrhované další kroky
+- Will převezme vývoj do aktuálního main s uchováním své práce/rolí.
+- Dořešit dosud otevřený REC-02 tokenizer/Standard/runtime kontrakt a cenový pilot.
+- Přijmout skutečný úplný korpus/aplikace a doložená nastavení včetně iPhonu.
+- Po skutečném návrhu provést lidskou přejímku čtenářem bez soukromé historie.
+
+### Technický důkaz
+- 38 nových REC-03 testů; závěrečná cílená sada 114/114 OK. Plná projektová brána: 2 459 testů OK, 5 skipped. Po závěrečných zpřesněních znovu cílená sada a statická brána OK; nezměněné testy se zbytečně neopakovaly..
+- Podrobný kontrakt/scénáře v reports/recovery_guide_rec03_20261107.md;
+  bezpečný syntetický balíček v recovery_guide_rec03_example_20261107.json.
+- Chybná syntéza -> attention + quality_issue, bez kandidáta/retry.
+  Bez změny produkčního klienta/runtime/Cockpitu/e-mailu, rolí a služeb.

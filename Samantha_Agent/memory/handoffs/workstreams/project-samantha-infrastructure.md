@@ -1,42 +1,40 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
-## 2026-11-07 12:39 CET — REC-02: neplacený preflight, živý pilot dosud neproveden
+## 2026-11-07 13:03 CET — REC-03: kontrola kvality a důkazů
 
 ### Hotovo
-- Změřen celý zmrazený korpus 509 dokumentů a původní TXT; plán 10 dávek +
-  syntéza, úplné pokrytí bez zkrácení souborů. Referenčně 2 222 784 vstupních
-  a 112 000 rezervovaných výstupních tokenů, 139,1392 Standard kreditů bez
-  cache. Není to potvrzená cena Solu ani tvrdý fakturační strop.
-- Tiktoken 0.14.0 nainstalovaný jen do vlastního izolovaného prostředí.
-  Nový neplacený preflight/runtime workflow a oddělená rezerva inspekce
-  a syntézy; zachování známé ceny i po nadlimitním výstupu.
-- Redigovaný manifest/plán/audit je v reports/recovery_guide_rec02_20261107.json,
-  praktické vysvětlení v příslušném .md. Žádný placený tah ani nový thread.
+- Povinná kontrola syntézy nyní zachová kapitoly i jejich obsah/úvod, váže
+  nové cesty/role/příkazy na přesné citace a blokuje známý zrušený hlas,
+  skrytá tajemství, falešné aktuální ověření a změnu pouhého data.
+- Samostatná přejímka vyžaduje schválený úplný seznam aplikací, Mac/iPhone
+  checklist, zdrojové otisky, autoritu a stáří důkazů. Nový OS/rozpor blokuje.
+  Ani úspěšný strojový výsledek sám nepovoluje publikaci.
+- Připraven balíček bez soukromé historie a otestované čtení novým izolovaným
+  procesem pouze přes stdin. Nejde o lidskou/modelovou přejímku skutečného TXT.
+- Stávající TXT pouze čtecí kontrolou prošel a vrací se přesně 62 778 B;
+  žádné umělé přidání newline ani změna verze při běhu beze změn.
 
 ### Rozhodnutí
-- Míla schválil pokračování fází 2. Nezadaná cena/rozsah živého pilotu se
-  nepovažují za schválené utrácení; žádná aktivace rolí, služeb či writeru.
-- Fáze REC-02 není celá hotová: upstream tiktoken nezná mapování Solu,
-  reference o200k_base není náhradou modelu. Připojený server hlásí 0.163.0,
-  lokální CLI 0.166.0; preference runtime nevyhovuje Standard kontrole,
-  kontext a účinnost izolace zatím nejsou doložené. Nic se nepřepínalo.
+- Míla schválil třetí etapu REC-03. Rozsah nadále nezahrnuje placený pilot,
+  publikaci provozních TXT, aktivaci role/služby, push ani nasazení.
+- Checklist a důkazy smějí schválit pouze důvěryhodný řadič/operátor,
+  nikoli model. Úplný skutečný seznam aplikací zatím schválený není.
 
 ### Další krok
-- Will převezme vývoj do současného main a registrovaným read-only auditem
-  doloží skutečný kontrakt runtime a možnost izolovaného Standard tahu.
-  Případný release/restart potřebuje samostatné oprávnění; Data jej nespouští.
+- REC-04: svázat konkrétně přijatou kvalitativní účtenku, checklist, kandidát
+  a oba pevné cíle s writerem; testovat přerušení a souběžné úpravy na kopiích.
 
 ### Navrhované další kroky
-- Uzavřít tokenizační důkaz nebo výslovně přijmout poctivý odhad + kalibraci.
-- Nad čistým cílovým HEAD přijmout úplný korpus a konkrétní cenový rozsah
-  jednoho pevného syntetického Sol/medium kandidátního tahu; bez retry.
-- Potom přijmout cenu čtení celého korpusu a konkrétní návrh TXT.
-- Migrace dvou kopií, iPhone přejímka a týdenní aktivace zůstávají samostatně.
+- Will převezme vývoj do aktuálního main s uchováním své práce/rolí.
+- Dořešit dosud otevřený REC-02 tokenizer/Standard/runtime kontrakt a cenový pilot.
+- Přijmout skutečný úplný korpus/aplikace a doložená nastavení včetně iPhonu.
+- Po skutečném návrhu provést lidskou přejímku čtenářem bez soukromé historie.
 
 ### Technický důkaz
-- Podrobná evidence, oba snapshot/plan otisky a oficiální zdroje v REC-02 reportu.
-- Plná projektová brána: 2 423 testů OK, 5 skipped; po doplnění Fast a měsíčního regresního případu znovu 76 cílených testů OK (11 nových v REC-02), závěrečná statická brána OK.
-- Bez změny config/agent_roles.json, společné .venv, globálního CLI,
-  provozních TXT, služeb, Gitu mimo vlastní větev, push či nasazení.
+- 38 nových REC-03 testů; závěrečná cílená sada 114/114 OK. Plná projektová brána: 2 459 testů OK, 5 skipped. Po závěrečných zpřesněních znovu cílená sada a statická brána OK; nezměněné testy se zbytečně neopakovaly..
+- Podrobný kontrakt/scénáře v reports/recovery_guide_rec03_20261107.md;
+  bezpečný syntetický balíček v recovery_guide_rec03_example_20261107.json.
+- Chybná syntéza -> attention + quality_issue, bez kandidáta/retry.
+  Bez změny produkčního klienta/runtime/Cockpitu/e-mailu, rolí a služeb.
 <!-- SAMANTHA_CURRENT_STATUS_END -->
 
 ### Předchozí stav infrastruktury
@@ -586,3 +584,40 @@ souborů / 5 002 170 B. Stávající rutinní pilot není obecný writer/schedul
 - Plná projektová brána: 2 423 testů OK, 5 skipped; po doplnění Fast a měsíčního regresního případu znovu 76 cílených testů OK (11 nových v REC-02), závěrečná statická brána OK.
 - Bez změny config/agent_roles.json, společné .venv, globálního CLI,
   provozních TXT, služeb, Gitu mimo vlastní větev, push či nasazení.
+
+## 2026-11-07 13:03 CET — REC-03: kontrola kvality a důkazů
+
+### Hotovo
+- Povinná kontrola syntézy nyní zachová kapitoly i jejich obsah/úvod, váže
+  nové cesty/role/příkazy na přesné citace a blokuje známý zrušený hlas,
+  skrytá tajemství, falešné aktuální ověření a změnu pouhého data.
+- Samostatná přejímka vyžaduje schválený úplný seznam aplikací, Mac/iPhone
+  checklist, zdrojové otisky, autoritu a stáří důkazů. Nový OS/rozpor blokuje.
+  Ani úspěšný strojový výsledek sám nepovoluje publikaci.
+- Připraven balíček bez soukromé historie a otestované čtení novým izolovaným
+  procesem pouze přes stdin. Nejde o lidskou/modelovou přejímku skutečného TXT.
+- Stávající TXT pouze čtecí kontrolou prošel a vrací se přesně 62 778 B;
+  žádné umělé přidání newline ani změna verze při běhu beze změn.
+
+### Rozhodnutí
+- Míla schválil třetí etapu REC-03. Rozsah nadále nezahrnuje placený pilot,
+  publikaci provozních TXT, aktivaci role/služby, push ani nasazení.
+- Checklist a důkazy smějí schválit pouze důvěryhodný řadič/operátor,
+  nikoli model. Úplný skutečný seznam aplikací zatím schválený není.
+
+### Další krok
+- REC-04: svázat konkrétně přijatou kvalitativní účtenku, checklist, kandidát
+  a oba pevné cíle s writerem; testovat přerušení a souběžné úpravy na kopiích.
+
+### Navrhované další kroky
+- Will převezme vývoj do aktuálního main s uchováním své práce/rolí.
+- Dořešit dosud otevřený REC-02 tokenizer/Standard/runtime kontrakt a cenový pilot.
+- Přijmout skutečný úplný korpus/aplikace a doložená nastavení včetně iPhonu.
+- Po skutečném návrhu provést lidskou přejímku čtenářem bez soukromé historie.
+
+### Technický důkaz
+- 38 nových REC-03 testů; závěrečná cílená sada 114/114 OK. Plná projektová brána: 2 459 testů OK, 5 skipped. Po závěrečných zpřesněních znovu cílená sada a statická brána OK; nezměněné testy se zbytečně neopakovaly..
+- Podrobný kontrakt/scénáře v reports/recovery_guide_rec03_20261107.md;
+  bezpečný syntetický balíček v recovery_guide_rec03_example_20261107.json.
+- Chybná syntéza -> attention + quality_issue, bez kandidáta/retry.
+  Bez změny produkčního klienta/runtime/Cockpitu/e-mailu, rolí a služeb.

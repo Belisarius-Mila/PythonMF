@@ -1,0 +1,756 @@
+{
+  "synthetic_only": true,
+  "real_device_settings": false,
+  "production_scope_approved": false,
+  "purpose": "REC-03 cold reader transport example; no model or human acceptance claimed",
+  "bundle": {
+    "guide": "1. MAC\nPython .venv Codex App Server config/agent_roles.json Cockpit launchd PATH\nTailscale HTTPS záloha data mimo Git Camino Xcode podpis instalace přihlášení\noprávnění a iCloud. Obnov všechny potřebné soubory podle uvedených zdrojů.\n\n2. IPHONE\niPhone instalace a podpis, spojení Tailscale HTTPS, důvěra vývojáři,\noprávnění a iCloud. Fyzické ověření je samostatný ruční krok.\n",
+    "application_dossier": {
+      "applications": [
+        {
+          "fields": {
+            "configuration": {
+              "observed_on": null,
+              "quote": null,
+              "source": null,
+              "status": "unverified",
+              "value": "neověřeno"
+            },
+            "data": {
+              "observed_on": null,
+              "quote": null,
+              "source": null,
+              "status": "unverified",
+              "value": "neověřeno"
+            },
+            "installation": {
+              "observed_on": null,
+              "quote": null,
+              "source": null,
+              "status": "unverified",
+              "value": "neověřeno"
+            },
+            "iphone_installation": {
+              "observed_on": null,
+              "quote": null,
+              "source": null,
+              "status": "unverified",
+              "value": "neověřeno"
+            },
+            "iphone_permissions": {
+              "observed_on": null,
+              "quote": null,
+              "source": null,
+              "status": "unverified",
+              "value": "neověřeno"
+            },
+            "iphone_verification": {
+              "observed_on": null,
+              "quote": null,
+              "source": null,
+              "status": "unverified",
+              "value": "neověřeno"
+            },
+            "mac_connection": {
+              "observed_on": null,
+              "quote": null,
+              "source": null,
+              "status": "unverified",
+              "value": "neověřeno"
+            },
+            "permissions": {
+              "observed_on": null,
+              "quote": null,
+              "source": null,
+              "status": "unverified",
+              "value": "neověřeno"
+            },
+            "purpose": {
+              "observed_on": null,
+              "quote": null,
+              "source": null,
+              "status": "unverified",
+              "value": "neověřeno"
+            },
+            "requirement": {
+              "observed_on": null,
+              "quote": null,
+              "source": null,
+              "status": "unverified",
+              "value": "neověřeno"
+            },
+            "sign_in": {
+              "observed_on": null,
+              "quote": null,
+              "source": null,
+              "status": "unverified",
+              "value": "neověřeno"
+            },
+            "start": {
+              "observed_on": null,
+              "quote": null,
+              "source": null,
+              "status": "unverified",
+              "value": "neověřeno"
+            },
+            "verification": {
+              "observed_on": null,
+              "quote": null,
+              "source": null,
+              "status": "unverified",
+              "value": "neověřeno"
+            },
+            "version": {
+              "observed_on": null,
+              "quote": null,
+              "source": null,
+              "status": "unverified",
+              "value": "neověřeno"
+            }
+          },
+          "name": "Python"
+        },
+        {
+          "fields": {
+            "configuration": {
+              "observed_on": null,
+              "quote": null,
+              "source": null,
+              "status": "unverified",
+              "value": "neověřeno"
+            },
+            "data": {
+              "observed_on": null,
+              "quote": null,
+              "source": null,
+              "status": "unverified",
+              "value": "neověřeno"
+            },
+            "installation": {
+              "observed_on": null,
+              "quote": null,
+              "source": null,
+              "status": "unverified",
+              "value": "neověřeno"
+            },
+            "iphone_installation": {
+              "observed_on": null,
+              "quote": null,
+              "source": null,
+              "status": "unverified",
+              "value": "neověřeno"
+            },
+            "iphone_permissions": {
+              "observed_on": null,
+              "quote": null,
+              "source": null,
+              "status": "unverified",
+              "value": "neověřeno"
+            },
+            "iphone_verification": {
+              "observed_on": null,
+              "quote": null,
+              "source": null,
+              "status": "unverified",
+              "value": "neověřeno"
+            },
+            "mac_connection": {
+              "observed_on": null,
+              "quote": null,
+              "source": null,
+              "status": "unverified",
+              "value": "neověřeno"
+            },
+            "permissions": {
+              "observed_on": null,
+              "quote": null,
+              "source": null,
+              "status": "unverified",
+              "value": "neověřeno"
+            },
+            "purpose": {
+              "observed_on": null,
+              "quote": null,
+              "source": null,
+              "status": "unverified",
+              "value": "neověřeno"
+            },
+            "requirement": {
+              "observed_on": null,
+              "quote": null,
+              "source": null,
+              "status": "unverified",
+              "value": "neověřeno"
+            },
+            "sign_in": {
+              "observed_on": null,
+              "quote": null,
+              "source": null,
+              "status": "unverified",
+              "value": "neověřeno"
+            },
+            "start": {
+              "observed_on": null,
+              "quote": null,
+              "source": null,
+              "status": "unverified",
+              "value": "neověřeno"
+            },
+            "verification": {
+              "observed_on": null,
+              "quote": null,
+              "source": null,
+              "status": "unverified",
+              "value": "neověřeno"
+            },
+            "version": {
+              "observed_on": null,
+              "quote": null,
+              "source": null,
+              "status": "unverified",
+              "value": "neověřeno"
+            }
+          },
+          "name": "Codex"
+        },
+        {
+          "fields": {
+            "configuration": {
+              "observed_on": null,
+              "quote": null,
+              "source": null,
+              "status": "unverified",
+              "value": "neověřeno"
+            },
+            "data": {
+              "observed_on": null,
+              "quote": null,
+              "source": null,
+              "status": "unverified",
+              "value": "neověřeno"
+            },
+            "installation": {
+              "observed_on": null,
+              "quote": null,
+              "source": null,
+              "status": "unverified",
+              "value": "neověřeno"
+            },
+            "iphone_installation": {
+              "observed_on": null,
+              "quote": null,
+              "source": null,
+              "status": "unverified",
+              "value": "neověřeno"
+            },
+            "iphone_permissions": {
+              "observed_on": null,
+              "quote": null,
+              "source": null,
+              "status": "unverified",
+              "value": "neověřeno"
+            },
+            "iphone_verification": {
+              "observed_on": null,
+              "quote": null,
+              "source": null,
+              "status": "unverified",
+              "value": "neověřeno"
+            },
+            "mac_connection": {
+              "observed_on": null,
+              "quote": null,
+              "source": null,
+              "status": "unverified",
+              "value": "neověřeno"
+            },
+            "permissions": {
+              "observed_on": null,
+              "quote": null,
+              "source": null,
+              "status": "unverified",
+              "value": "neověřeno"
+            },
+            "purpose": {
+              "observed_on": null,
+              "quote": null,
+              "source": null,
+              "status": "unverified",
+              "value": "neověřeno"
+            },
+            "requirement": {
+              "observed_on": null,
+              "quote": null,
+              "source": null,
+              "status": "unverified",
+              "value": "neověřeno"
+            },
+            "sign_in": {
+              "observed_on": null,
+              "quote": null,
+              "source": null,
+              "status": "unverified",
+              "value": "neověřeno"
+            },
+            "start": {
+              "observed_on": null,
+              "quote": null,
+              "source": null,
+              "status": "unverified",
+              "value": "neověřeno"
+            },
+            "verification": {
+              "observed_on": null,
+              "quote": null,
+              "source": null,
+              "status": "unverified",
+              "value": "neověřeno"
+            },
+            "version": {
+              "observed_on": null,
+              "quote": null,
+              "source": null,
+              "status": "unverified",
+              "value": "neověřeno"
+            }
+          },
+          "name": "Cockpit"
+        },
+        {
+          "fields": {
+            "configuration": {
+              "observed_on": null,
+              "quote": null,
+              "source": null,
+              "status": "unverified",
+              "value": "neověřeno"
+            },
+            "data": {
+              "observed_on": null,
+              "quote": null,
+              "source": null,
+              "status": "unverified",
+              "value": "neověřeno"
+            },
+            "installation": {
+              "observed_on": null,
+              "quote": null,
+              "source": null,
+              "status": "unverified",
+              "value": "neověřeno"
+            },
+            "iphone_installation": {
+              "observed_on": null,
+              "quote": null,
+              "source": null,
+              "status": "unverified",
+              "value": "neověřeno"
+            },
+            "iphone_permissions": {
+              "observed_on": null,
+              "quote": null,
+              "source": null,
+              "status": "unverified",
+              "value": "neověřeno"
+            },
+            "iphone_verification": {
+              "observed_on": null,
+              "quote": null,
+              "source": null,
+              "status": "unverified",
+              "value": "neověřeno"
+            },
+            "mac_connection": {
+              "observed_on": null,
+              "quote": null,
+              "source": null,
+              "status": "unverified",
+              "value": "neověřeno"
+            },
+            "permissions": {
+              "observed_on": null,
+              "quote": null,
+              "source": null,
+              "status": "unverified",
+              "value": "neověřeno"
+            },
+            "purpose": {
+              "observed_on": null,
+              "quote": null,
+              "source": null,
+              "status": "unverified",
+              "value": "neověřeno"
+            },
+            "requirement": {
+              "observed_on": null,
+              "quote": null,
+              "source": null,
+              "status": "unverified",
+              "value": "neověřeno"
+            },
+            "sign_in": {
+              "observed_on": null,
+              "quote": null,
+              "source": null,
+              "status": "unverified",
+              "value": "neověřeno"
+            },
+            "start": {
+              "observed_on": null,
+              "quote": null,
+              "source": null,
+              "status": "unverified",
+              "value": "neověřeno"
+            },
+            "verification": {
+              "observed_on": null,
+              "quote": null,
+              "source": null,
+              "status": "unverified",
+              "value": "neověřeno"
+            },
+            "version": {
+              "observed_on": null,
+              "quote": null,
+              "source": null,
+              "status": "unverified",
+              "value": "neověřeno"
+            }
+          },
+          "name": "Tailscale"
+        },
+        {
+          "fields": {
+            "configuration": {
+              "observed_on": null,
+              "quote": null,
+              "source": null,
+              "status": "unverified",
+              "value": "neověřeno"
+            },
+            "data": {
+              "observed_on": null,
+              "quote": null,
+              "source": null,
+              "status": "unverified",
+              "value": "neověřeno"
+            },
+            "installation": {
+              "observed_on": null,
+              "quote": null,
+              "source": null,
+              "status": "unverified",
+              "value": "neověřeno"
+            },
+            "iphone_installation": {
+              "observed_on": null,
+              "quote": null,
+              "source": null,
+              "status": "unverified",
+              "value": "neověřeno"
+            },
+            "iphone_permissions": {
+              "observed_on": null,
+              "quote": null,
+              "source": null,
+              "status": "unverified",
+              "value": "neověřeno"
+            },
+            "iphone_verification": {
+              "observed_on": null,
+              "quote": null,
+              "source": null,
+              "status": "unverified",
+              "value": "neověřeno"
+            },
+            "mac_connection": {
+              "observed_on": null,
+              "quote": null,
+              "source": null,
+              "status": "unverified",
+              "value": "neověřeno"
+            },
+            "permissions": {
+              "observed_on": null,
+              "quote": null,
+              "source": null,
+              "status": "unverified",
+              "value": "neověřeno"
+            },
+            "purpose": {
+              "observed_on": null,
+              "quote": null,
+              "source": null,
+              "status": "unverified",
+              "value": "neověřeno"
+            },
+            "requirement": {
+              "observed_on": null,
+              "quote": null,
+              "source": null,
+              "status": "unverified",
+              "value": "neověřeno"
+            },
+            "sign_in": {
+              "observed_on": null,
+              "quote": null,
+              "source": null,
+              "status": "unverified",
+              "value": "neověřeno"
+            },
+            "start": {
+              "observed_on": null,
+              "quote": null,
+              "source": null,
+              "status": "unverified",
+              "value": "neověřeno"
+            },
+            "verification": {
+              "observed_on": null,
+              "quote": null,
+              "source": null,
+              "status": "unverified",
+              "value": "neověřeno"
+            },
+            "version": {
+              "observed_on": null,
+              "quote": null,
+              "source": null,
+              "status": "unverified",
+              "value": "neověřeno"
+            }
+          },
+          "name": "Camino"
+        },
+        {
+          "fields": {
+            "configuration": {
+              "observed_on": null,
+              "quote": null,
+              "source": null,
+              "status": "unverified",
+              "value": "neověřeno"
+            },
+            "data": {
+              "observed_on": null,
+              "quote": null,
+              "source": null,
+              "status": "unverified",
+              "value": "neověřeno"
+            },
+            "installation": {
+              "observed_on": null,
+              "quote": null,
+              "source": null,
+              "status": "unverified",
+              "value": "neověřeno"
+            },
+            "iphone_installation": {
+              "observed_on": null,
+              "quote": null,
+              "source": null,
+              "status": "unverified",
+              "value": "neověřeno"
+            },
+            "iphone_permissions": {
+              "observed_on": null,
+              "quote": null,
+              "source": null,
+              "status": "unverified",
+              "value": "neověřeno"
+            },
+            "iphone_verification": {
+              "observed_on": null,
+              "quote": null,
+              "source": null,
+              "status": "unverified",
+              "value": "neověřeno"
+            },
+            "mac_connection": {
+              "observed_on": null,
+              "quote": null,
+              "source": null,
+              "status": "unverified",
+              "value": "neověřeno"
+            },
+            "permissions": {
+              "observed_on": null,
+              "quote": null,
+              "source": null,
+              "status": "unverified",
+              "value": "neověřeno"
+            },
+            "purpose": {
+              "observed_on": null,
+              "quote": null,
+              "source": null,
+              "status": "unverified",
+              "value": "neověřeno"
+            },
+            "requirement": {
+              "observed_on": null,
+              "quote": null,
+              "source": null,
+              "status": "unverified",
+              "value": "neověřeno"
+            },
+            "sign_in": {
+              "observed_on": null,
+              "quote": null,
+              "source": null,
+              "status": "unverified",
+              "value": "neověřeno"
+            },
+            "start": {
+              "observed_on": null,
+              "quote": null,
+              "source": null,
+              "status": "unverified",
+              "value": "neověřeno"
+            },
+            "verification": {
+              "observed_on": null,
+              "quote": null,
+              "source": null,
+              "status": "unverified",
+              "value": "neověřeno"
+            },
+            "version": {
+              "observed_on": null,
+              "quote": null,
+              "source": null,
+              "status": "unverified",
+              "value": "neověřeno"
+            }
+          },
+          "name": "Xcode"
+        },
+        {
+          "fields": {
+            "configuration": {
+              "observed_on": null,
+              "quote": null,
+              "source": null,
+              "status": "unverified",
+              "value": "neověřeno"
+            },
+            "data": {
+              "observed_on": null,
+              "quote": null,
+              "source": null,
+              "status": "unverified",
+              "value": "neověřeno"
+            },
+            "installation": {
+              "observed_on": null,
+              "quote": null,
+              "source": null,
+              "status": "unverified",
+              "value": "neověřeno"
+            },
+            "iphone_installation": {
+              "observed_on": null,
+              "quote": null,
+              "source": null,
+              "status": "unverified",
+              "value": "neověřeno"
+            },
+            "iphone_permissions": {
+              "observed_on": null,
+              "quote": null,
+              "source": null,
+              "status": "unverified",
+              "value": "neověřeno"
+            },
+            "iphone_verification": {
+              "observed_on": null,
+              "quote": null,
+              "source": null,
+              "status": "unverified",
+              "value": "neověřeno"
+            },
+            "mac_connection": {
+              "observed_on": null,
+              "quote": null,
+              "source": null,
+              "status": "unverified",
+              "value": "neověřeno"
+            },
+            "permissions": {
+              "observed_on": null,
+              "quote": null,
+              "source": null,
+              "status": "unverified",
+              "value": "neověřeno"
+            },
+            "purpose": {
+              "observed_on": null,
+              "quote": null,
+              "source": null,
+              "status": "unverified",
+              "value": "neověřeno"
+            },
+            "requirement": {
+              "observed_on": null,
+              "quote": null,
+              "source": null,
+              "status": "unverified",
+              "value": "neověřeno"
+            },
+            "sign_in": {
+              "observed_on": null,
+              "quote": null,
+              "source": null,
+              "status": "unverified",
+              "value": "neověřeno"
+            },
+            "start": {
+              "observed_on": null,
+              "quote": null,
+              "source": null,
+              "status": "unverified",
+              "value": "neověřeno"
+            },
+            "verification": {
+              "observed_on": null,
+              "quote": null,
+              "source": null,
+              "status": "unverified",
+              "value": "neověřeno"
+            },
+            "version": {
+              "observed_on": null,
+              "quote": null,
+              "source": null,
+              "status": "unverified",
+              "value": "neověřeno"
+            }
+          },
+          "name": "iCloud"
+        }
+      ]
+    },
+    "quality_receipt": {
+      "schema_version": 1,
+      "validator_version": 1,
+      "state": "review",
+      "snapshot_sha256": "9dfc8ed49fbc63c8556afac8f015e003ff45b41ba764286524ab832e00045f3b",
+      "context_sha256": "5ee39bbdd59529cc815950fe6f358ce1e5fd24bd8d839cf37820bd3e290ba8bb",
+      "publication_authorized": false,
+      "semantic_review_required": true,
+      "issues": [],
+      "anchors": [],
+      "candidate_sha256": "2de13a0913ff026d9e43b201091dc1b5a39bf668bf2fb46e2ca52f08b0934a79",
+      "dossier_sha256": "d7d25040c77ca7e967b6ae1227ef7aad8a9fac400c6b36816db70b918b93c6ee"
+    },
+    "private_history_included": false,
+    "reader_test_executed": false,
+    "instructions": "Použij pouze tento návod. Nic neinstaluj ani nespouštěj. Označ chybějící kroky, nejasná nastavení a nedoložené přístupy. Ruční neověřené údaje nepovažuj za aktuální měření."
+  },
+  "reader_questions": [
+    "Které instalace a přihlášení zůstávají neověřené?",
+    "Kde chybí konkrétní verze nebo oprávnění iPhonu?",
+    "Jak odlišíš dokumentované nastavení od skutečně ověřeného stavu?",
+    "Proč tato účtenka nepovoluje publikaci ani obnovovací příkazy?"
+  ]
+}

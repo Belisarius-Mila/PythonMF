@@ -1657,3 +1657,15 @@ Doplnění 17102026 k LL-071: Nativní modelový pomocník navíc zdvojuje roli,
   použít resolve cíle. Pole klíčů v JXA přemostit na NSArray, NSNumber 0/1 na
   bool a chybějící metadata nikdy nezaměnit za upload. Ověřeno čtecím auditem
   skutečného iCloudu a syntetickým testem; dostupnost složky není upload TXT.
+
+### LL-098 — Přejímka návodu musí vázat přesný důkaz, ne jen správný JSON
+
+- Problém: platná citace někde v dlouhém souboru nebo zachované nadpisy
+  neprokazují nové nastavení, zachování kroků ani ověření telefonu.
+- Typ: opakující se
+- Řešení nalezeno: 07112026
+- Řešení: oddělit core validaci od obsahové přejímky. Kontrolovat každou
+  kapitolu, přesné technické literály v citaci, schválený seznam aplikací,
+  autoritu/stáří a kotvu ručního důkazu. Účtenku svázat s kandidátem,
+  kontextem i checklistem. Strojový výsledek review není publikace.
+  Ověřeno synteticky v REC-03; lidskou přejímku a skutečnou obnovu nepředstírat.
