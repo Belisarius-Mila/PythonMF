@@ -25,6 +25,9 @@ NODE_FALLBACK_PATHS = (
 
 COMPILE_PATHS = (
     "app/calendar_access_pilot.py",
+    "app/calendar_overview.py",
+    "app/cockpit_calendar.py",
+    "scripts/calendar_overview.py",
     "scripts/calendar_access_pilot.py",
     "app/interior_atelier.py",
     "app/interior_ai.py",
@@ -444,6 +447,8 @@ TEST_MODULES = (
     "tests.test_work_repository",
     "tests.test_email_work_repository",
     "tests.test_calendar_access_pilot",
+    "tests.test_calendar_overview",
+    "tests.test_cockpit_calendar",
     "tests.test_continuous_email_agent",
     "tests.test_email_visibility_preferences",
     "tests.test_email_proposal_policy",
@@ -689,6 +694,7 @@ def main(argv: Sequence[str] | None = None) -> int:
         "Interior atelier javascript syntax",
         [node_binary(), "--check", "app/frontend/interior/app.js"],
     )
+    run_checked("Calendar overview javascript syntax", [node_binary(), "--check", "app/frontend/calendar_overview/app.js"])
     run_checked(
         "Human–Adam javascript syntax",
         [node_binary(), "--check", "-"],

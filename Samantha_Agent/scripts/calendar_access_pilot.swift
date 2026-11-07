@@ -67,6 +67,51 @@ func probe(_ request: [String: Any]) throws -> [String: Any] {
     return result
 }
 
+func overview(_ request: [String: Any]) throws -> [String: Any] {
+    let (start, end) = try interval(request)
+    guard let ids = request["calendar_ids"] as? [String], ids.count <= 512,
+          Set(ids).count == ids.count else { throw PilotError.invalidRequest }
+    var result = base("overview")
+    result["start"] = request["start"]; result["end"] = request["end"]
+    result["calendar_ids"] = ids
+    guard authorization() == "full_access" else {
+        result["status"] = "authorization_required"
+        return result
+    }
+    let store = EKEventStore()
+    let calendars = store.calendars(for: .event)
+    guard calendars.count <= 512 else { throw PilotError.invalidRequest }
+    result["calendars"] = calendars.map { calendar in
+        ["id": calendar.calendarIdentifier, "title": String(calendar.title.prefix(200)),
+         "source_title": String(calendar.source.title.prefix(200)),
+         "writable": calendar.allowsContentModifications] as [String: Any]
+    }
+    let selected = calendars.filter { ids.contains($0.calendarIdentifier) }
+    let missing = ids.filter { id in !selected.contains { $0.calendarIdentifier == id } }
+    result["missing_calendar_ids"] = missing
+    // An empty selection must never become EventKit's calendars:nil (all).
+    let events = selected.isEmpty ? [] : store.events(matching:
+        store.predicateForEvents(withStart: start, end: end, calendars: selected))
+        .filter { $0.startDate < end && $0.endDate > start }
+        .sorted { $0.startDate < $1.startDate }
+    result["truncated"] = events.count > 2000
+    let iso = ISO8601DateFormatter()
+    result["events"] = events.prefix(2000).map { event -> [String: Any] in
+        let zone = event.timeZone ?? TimeZone.current
+        let day = DateFormatter(); day.calendar = Calendar(identifier: .gregorian)
+        day.locale = Locale(identifier: "en_US_POSIX"); day.timeZone = zone
+        day.dateFormat = "yyyy-MM-dd"
+        return ["calendar_id": event.calendar.calendarIdentifier,
+                "title": String((event.title ?? "Bez názvu").prefix(400)),
+                "start": iso.string(from: event.startDate), "end": iso.string(from: event.endDate),
+                "all_day": event.isAllDay, "timezone": zone.identifier,
+                "start_day": day.string(from: event.startDate),
+                "end_day": day.string(from: event.endDate)]
+    }
+    result["status"] = "overview_read"
+    return result
+}
+
 func loadRequest(_ filename: String) throws -> (URL, [String: Any]) {
     let input = URL(fileURLWithPath: filename).standardizedFileURL
     guard let configured = Bundle.main.object(forInfoDictionaryKey: "SamanthaPilotRoot") as? String else {
@@ -80,11 +125,12 @@ func loadRequest(_ filename: String) throws -> (URL, [String: Any]) {
           directory.deletingLastPathComponent().path == root.appendingPathComponent("requests").path,
           UUID(uuidString: directory.lastPathComponent) != nil,
           let value = try JSONSerialization.jsonObject(with: Data(contentsOf: input)) as? [String: Any],
-          Set(value.keys) == Set(["schema", "operation", "request_id", "start", "end"]),
+          Set(value.keys) == Set(["schema", "operation", "request_id", "start", "end"] +
+            (value["operation"] as? String == "overview" ? ["calendar_ids"] : [])),
           value["schema"] as? Int == 1,
           value["request_id"] as? String == directory.lastPathComponent,
           let operation = value["operation"] as? String,
-          ["authorize", "probe"].contains(operation) else { throw PilotError.invalidRequest }
+          ["authorize", "probe", "overview"].contains(operation) else { throw PilotError.invalidRequest }
     _ = try interval(value)
     return (directory.appendingPathComponent("response.json"), value)
 }
@@ -137,7 +183,7 @@ do {
                 app.run()
             }
         } else {
-            emit(try probe(request), to: output)
+            emit(try (request["operation"] as? String == "overview" ? overview(request) : probe(request)), to: output)
         }
     } else { throw PilotError.invalidRequest }
 } catch {

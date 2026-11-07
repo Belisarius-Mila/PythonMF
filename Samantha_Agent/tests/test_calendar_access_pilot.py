@@ -52,6 +52,8 @@ class CalendarAccessPilotTests(unittest.TestCase):
                  "calendar_writes": False, "status": "read_verified", "authorization": "full_access",
                  "parent_pid": 1, "calendar_count": 2, "icloud_calendar_count": 1, "event_count": 3,
                  "calendars": [{"title": "PRIVATE TITLE", "id": "PRIVATE ID"}], **overrides}
+        if request["operation"] == "overview":
+            value.update(status="overview_read", calendar_ids=request["calendar_ids"])
         (path.parent / "response.json").write_text(json.dumps(value))
 
     def test_status_is_read_only_and_does_not_create_requests(self):
@@ -161,6 +163,34 @@ class CalendarAccessPilotTests(unittest.TestCase):
         for api in ("save(", "remove(", "reset(", "requestWriteOnlyAccessToEvents", "EKReminder("):
             self.assertNotIn(api, source)
         self.assertIn("end.timeIntervalSince(start) <= 31 * 86400", source)
+
+    def test_overview_uses_launchd_even_when_cli_context_has_no_grant(self):
+        self.authorization = "write_only"
+        result = self.pilot.read_overview([], confirmed=True)
+        self.assertEqual(result["calendar_ids"], [])
+        request = json.loads((self.root / "requests" / result["request_id"] / "request.json").read_text())
+        self.assertEqual(request["operation"], "overview")
+        self.assertEqual(request["calendar_ids"], [])
+        self.assertEqual(len([c for c in self.calls if c[:2] == ["/bin/launchctl", "submit"]]), 1)
+        self.assertEqual(len([c for c in self.calls if c[:2] == ["/bin/launchctl", "remove"]]), 1)
+
+    def test_overview_requires_confirmation_and_cannot_accept_another_parent(self):
+        with self.assertRaises(CalendarPilotError): self.pilot.read_overview([])
+        self.assertEqual(self.calls, [])
+        self.parent_pid = 123
+        with self.assertRaises(CalendarPilotError): self.pilot.read_overview([], confirmed=True)
+
+    def test_authorization_for_current_binary_is_idempotent_and_usable_by_legacy_probe(self):
+        self.fail_open = True
+        with self.assertRaises(CalendarPilotError): self.pilot.authorize_current(confirmed=True)
+        self.pilot.authorize(confirmed=True)
+        self.assertEqual(sum(c[0] == "/usr/bin/open" for c in self.calls), 1)
+        info, _, _ = self.pilot._build_info()
+        pointer = self.root / ("authorization_request_" + info["binary_sha256"] + ".json")
+        request = Path(json.loads(pointer.read_text())["request"])
+        self.response(request, status="authorization_checked")
+        self.authorization = "write_only"
+        self.assertTrue(self.pilot.probe(confirmed=True, service=True)["ok"])
 
 
 if __name__ == "__main__":

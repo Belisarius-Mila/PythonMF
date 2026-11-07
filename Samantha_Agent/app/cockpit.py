@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from app.cockpit_interior import INTERIOR_HTML, InteriorRoutes, interior_atelier_action
+from app.cockpit_calendar import CalendarOverviewRoutes, calendar_overview_action
 from app.interior_ai import interior_ai_start_action, interior_ai_recover_action
 
 import csv
@@ -8663,6 +8664,9 @@ def shell_quote_for_applescript(value: str) -> str:
 
 
 COCKPIT_POST_ACTIONS: tuple[dict[str, str], ...] = (
+    {"path": "/api/calendar/action", "label": "Načíst kalendáře nebo uložit jejich soukromý výběr",
+     "risk": "private_write", "confirmation": "explicit_calendar_read_selection_or_permission_button",
+     "handler_name": "calendar_overview_action", "test_level": "direct"},
     {"path": "/api/interior/action", "label": "Uložit vlastní práci v interiérovém Ateliéru",
      "risk": "private_write", "confirmation": "explicit_project_source_or_variant_action",
      "handler_name": "interior_atelier_action", "test_level": "direct"},
@@ -9612,6 +9616,7 @@ class CockpitServer:
         cockpit_host = self.host
         cockpit_port = self.port
         interior_routes = InteriorRoutes()
+        calendar_routes = CalendarOverviewRoutes()
         voice_routes = CockpitVoiceRoutes(HUMAN_ADAM)
         health_recovery_status_dispatch = build_health_recovery_status_dispatch(
             status_loader=lambda: cockpit_status(),
@@ -9723,6 +9728,8 @@ class CockpitServer:
             def do_GET(self) -> None:  # noqa: N802
                 self.validate_request_access(require_origin=False)
                 parsed = urlparse(self.path)
+                if calendar_routes.dispatch(parsed=parsed, responder=self):
+                    return
                 if interior_routes.dispatch(parsed=parsed, responder=self):
                     return
                 if parsed.path == "/api/camino/film/trips":
@@ -10089,6 +10096,11 @@ class CockpitServer:
                         self.respond_json({"ok": False, "message": "Vykonavatel zpracovává přesný balíček; další změna počká na ověření."},
                                           status=HTTPStatus.CONFLICT)
                         return
+                if parsed.path == "/api/calendar/action":
+                    result = calendar_overview_action(self.read_json()) if not parsed.query else {"ok": False, "error": "invalid_request"}
+                    self.respond_json(result, status=HTTPStatus.OK if result["ok"] else (
+                        HTTPStatus.CONFLICT if result.get("error") in {"conflict", "unavailable"} else HTTPStatus.BAD_REQUEST))
+                    return
                 if parsed.path == "/api/interior/action":
                     result = interior_atelier_action(self.read_json())
                     self.respond_json(result, status=HTTPStatus.OK if result["ok"] else (

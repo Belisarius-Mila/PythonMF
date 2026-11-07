@@ -116,7 +116,7 @@ class CalendarAccessPilot:
         return {"ok": True, "built": True, "authorization": result["authorization"],
                 "context": "direct_cli", "calendar_writes": False, "observed_at": result["observed_at"]}
 
-    def _request(self, operation):
+    def _request(self, operation, *, calendar_ids=None, days=7):
         self._build_info()
         now = datetime.now(timezone.utc).replace(microsecond=0)
         request_id = str(uuid4())
@@ -124,7 +124,9 @@ class CalendarAccessPilot:
         directory.mkdir(parents=True, mode=0o700)
         request = {"schema": 1, "operation": operation, "request_id": request_id,
                    "start": now.isoformat().replace("+00:00", "Z"),
-                   "end": (now + timedelta(days=7)).isoformat().replace("+00:00", "Z")}
+                   "end": (now + timedelta(days=days)).isoformat().replace("+00:00", "Z")}
+        if operation == "overview":
+            request["calendar_ids"] = calendar_ids
         path = directory / "request.json"
         self._write(path, request)
         return path
@@ -137,7 +139,8 @@ class CalendarAccessPilot:
             time.sleep(0.2)
         if not response_path.exists():
             return {"ok": True, "status": "pending", "request_id": request["request_id"], "calendar_writes": False}
-        if response_path.stat().st_size > 1024 * 1024:
+        limit = 4 * 1024 * 1024 if request["operation"] == "overview" else 1024 * 1024
+        if response_path.stat().st_size > limit:
             raise CalendarPilotError("Výsledek překročil povolenou velikost.")
         result = json.loads(response_path.read_text())
         if (result.get("request_id") != request["request_id"] or result.get("operation") != request["operation"]
@@ -166,23 +169,65 @@ class CalendarAccessPilot:
         return self._response(self._safe(Path(saved["request"])))
 
     def authorize(self, *, confirmed=False):
+        return self.authorize_current(confirmed=confirmed)
+
+    def authorize_current(self, *, confirmed=False):
+        """One GUI request per exact binary; an older grant is never replayed."""
         if confirmed is not True:
             raise CalendarPilotError("Žádost o systémový přístup vyžaduje výslovný souhlas.")
+        info, app, _ = self._build_info()
+        pointer = self._safe(self.root / ("authorization_request_" + info["binary_sha256"] + ".json"))
         with exclusive_file_lock(self.root / "authorize", timeout=0):
-            pointer = self._safe(self.root / "authorization_request.json")
             if pointer.exists():
                 return self._permission_response(pointer)
-            info, app, _ = self._build_info()
+            legacy = self._safe(self.root / "authorization_request.json")
+            if legacy.exists():
+                saved = json.loads(legacy.read_text())
+                if (saved.get("binary_sha256") == info["binary_sha256"] or
+                        ("binary_sha256" not in saved and legacy.stat().st_mtime >= (self.root / "build.json").stat().st_mtime)):
+                    return self._permission_response(legacy)
             request = self._request("authorize")
             self._write(pointer, {"request": str(request), "binary_sha256": info["binary_sha256"]})
             self._run(["/usr/bin/open", "-n", "-a", app, "--args", request])
             return self._response(request, wait_seconds=3)
+
+    def read_overview(self, calendar_ids, *, confirmed=False):
+        """Private bounded inventory and selected events in the actual launchd context."""
+        if confirmed is not True:
+            raise CalendarPilotError("Načtení přehledu vyžaduje výslovný pokyn.")
+        if (not isinstance(calendar_ids, list) or len(calendar_ids) > 512
+                or any(not isinstance(value, str) or not 0 < len(value) <= 512 for value in calendar_ids)
+                or len(set(calendar_ids)) != len(calendar_ids)):
+            raise CalendarPilotError("Neplatný výběr kalendářů.")
+        _, _, binary = self._build_info()
+        request = self._request("overview", calendar_ids=calendar_ids, days=30)
+        label = "com.samantha.calendar-readonly-overview." + request.parent.name
+        self._write(request.parent / "launchd_plan.json", {
+            "label": label, "binary": str(binary), "request": str(request), "persistent_install": False})
+        self._run(["/bin/launchctl", "submit", "-l", label, "-o", request.parent / "stdout.log",
+                   "-e", request.parent / "stderr.log", "--", binary, request])
+        public = self._response(request, wait_seconds=25)
+        if public.get("status") == "pending":
+            raise CalendarPilotError("Načtení zatím není potvrzené. Poslední přehled není aktuálně ověřený.")
+        registered = self.runner(["/bin/launchctl", "print", f"gui/{os.getuid()}/{label}"],
+                                 capture_output=True, text=True, timeout=10, check=False).returncode == 0
+        self._run(["/bin/launchctl", "remove", label])
+        if not registered or public.get("parent_pid") != 1:
+            raise CalendarPilotError("Servisní kontext přehledu nebyl ověřený.")
+        result = json.loads(self._safe(request.parent / "response.json").read_text())
+        if result.get("start") != json.loads(request.read_text())["start"] or result.get("end") != json.loads(request.read_text())["end"] or result.get("calendar_ids") != calendar_ids:
+            raise CalendarPilotError("Přehled patří jinému výběru nebo období.")
+        return result
 
     def probe(self, *, confirmed=False, service=False):
         if confirmed is not True:
             raise CalendarPilotError("Čtení kalendáře vyžaduje výslovně potvrzený pilot.")
         authorization = self.status().get("authorization")
         pointer = self._safe(self.root / "authorization_request.json")
+        info, _, _ = self._build_info()
+        current = self._safe(self.root / ("authorization_request_" + info["binary_sha256"] + ".json"))
+        if current.exists():
+            pointer = current
         if authorization != "full_access" and pointer.exists():
             authorization = self._permission_response(pointer).get("authorization")
         if authorization != "full_access":

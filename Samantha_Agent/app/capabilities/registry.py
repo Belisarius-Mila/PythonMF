@@ -12,6 +12,21 @@ from app.capabilities.models import (
 
 CAPABILITIES: tuple[CapabilityRecord, ...] = (
     CapabilityRecord(
+        capability_id="calendar_overview_status", label="Read private calendar overview snapshot",
+        risk=RiskLevel.READ_ONLY, reads=("private selected calendars and last bounded snapshot",),
+        writes=(), tool="app.calendar_overview.CalendarOverview.snapshot", audit=AuditPolicy.REDACTED,
+        notes="No live calendar query. CLI returns aggregates only; private names/events remain in Cockpit.",
+    ),
+    *(CapabilityRecord(
+        capability_id="calendar_overview_" + action, label="Private read-only calendar overview: " + action,
+        risk=RiskLevel.LOCAL_WRITE, reads=("explicit calendar selection and at most 30 days of selected events",),
+        writes=("private selection or bounded snapshot", "owned transient user launchd read job or exact-build permission request"),
+        tool="app.calendar_overview.CalendarOverview." + action,
+        requires_confirmation=True, confirmation_policy=ConfirmationPolicy.SUMMARY_BEFORE_ACTION,
+        audit=AuditPolicy.REDACTED,
+        notes="No event mutation API or model. Calendar target is a future preference only; OS grant remains a user action on the Mac.",
+    ) for action in ("refresh", "save_selection", "authorize")),
+    CapabilityRecord(
         capability_id="calendar_access_pilot_status", label="Read EventKit pilot authorization status",
         risk=RiskLevel.READ_ONLY, reads=("owned helper build hashes and current native authorization",),
         writes=(), tool="app.calendar_access_pilot.CalendarAccessPilot.status",

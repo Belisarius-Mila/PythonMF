@@ -4,6 +4,12 @@ on:
   workflow_dispatch:
   pull_request:
     paths:
+      - "Samantha_Agent/app/calendar_overview.py"
+      - "Samantha_Agent/app/cockpit_calendar.py"
+      - "Samantha_Agent/scripts/calendar_overview.py"
+      - "Samantha_Agent/tests/test_calendar_overview.py"
+      - "Samantha_Agent/tests/test_cockpit_calendar.py"
+      - "Samantha_Agent/tests/calendar_overview_frontend.test.cjs"
       - "Samantha_Agent/app/calendar_access_pilot.py"
       - "Samantha_Agent/scripts/calendar_access_pilot.py"
       - "Samantha_Agent/scripts/calendar_access_pilot.swift"
@@ -90,6 +96,12 @@ on:
     branches:
       - main
     paths:
+      - "Samantha_Agent/app/calendar_overview.py"
+      - "Samantha_Agent/app/cockpit_calendar.py"
+      - "Samantha_Agent/scripts/calendar_overview.py"
+      - "Samantha_Agent/tests/test_calendar_overview.py"
+      - "Samantha_Agent/tests/test_cockpit_calendar.py"
+      - "Samantha_Agent/tests/calendar_overview_frontend.test.cjs"
       - "Samantha_Agent/app/calendar_access_pilot.py"
       - "Samantha_Agent/scripts/calendar_access_pilot.py"
       - "Samantha_Agent/scripts/calendar_access_pilot.swift"

@@ -1,8 +1,10 @@
 # Průběžný osobní agent — e-mailový provoz a Pushcut
 
-Kalendářový pilot 7. 11.: bod 1 čtecího přístupu přes EventKit/launchd ověřený;
-úplný plán je doplněný do původního TXT. Další krok je výběr kalendářů a čtecí
-přehled, podrobnosti v posledním časovaném záznamu a reportu calendar_access_pilot_20261107.md.
+Kalendářový bod 2 (7. 11.): čtecí přehled v Cockpitu → Kalendář (/calendar/),
+výběr čtených kalendářů a oddělený budoucí cíl zápisu. Nové nativní sestavení
+vyžaduje nový macOS souhlas; výběr zůstává prázdný pro Mílu. Skutečná přejímka
+Mac/iPhone je otevřená. Report calendar_overview_20261107.md; výsledek schváleného
+Terra p+n dle logs/calendar_overview_release_20261107.log a *_verified_*.log.
 
 Aktuální stav 6. 11.: Terra p+n e82a5d47 dokončené, nový editor živě ověřený.
 Potvrzený upgrade na f2d6ef79 aktivoval zdvořilostní pravidlo i v hodinovém
@@ -806,3 +808,30 @@ potvrzené. Kalendářový bod 2 zůstává další etapa.
 Navrhované další kroky: Mílova skutečná iPhone přejímka hlasového panelu.
 Technický důkaz: Cílená integrace a statická brána dle příslušných logů;
 plná publikační brána uvnitř Terry. Datův vlastní worktree se nemění.
+
+## 2026-11-07 00:51 CET — Kalendářový bod 2: výběr a čtecí přehled
+
+Hotovo: Cockpit má samostatnou cestu Kalendář (/calendar/). Soukromě ukládá
+výběr čtených kalendářů a oddělený budoucí cíl. Přehled načítá 30 dní, ukazuje
+poslední čas, celodenní i časové události a označí neúplné/zastaralé načtení.
+Chybějící kalendář, odebrané oprávnění ani prázdný snímek nejsou důkazem volna.
+
+Rozhodnutí: Míla autorizoval bod 2 a okamžité Terra p+n. Výběr je výchozí
+prázdný; konkrétní kalendáře musí vybrat sám. Žádná událost, hodinová služba,
+modelová role ani Datův worktree se nemění. Obsah přehledu se neposílá modelu.
+
+Další krok: Po nasazení na Macu v Kalendář → Povolit přístup na Macu potvrdit
+nové nativní sestavení, Obnovit kalendáře, zvolit výběr a Uložit výběr a načíst.
+Následně porovnat skutečné události s Kalendářem na Macu a iPhonu. Bez této
+přejímky není bod 2 uzavřený jako skutečný provozní přístup.
+
+Navrhované další kroky: Bod 3, návrhy událostí z vybraných e-mailů, až jako
+samostatný vývoj. Diagnostika dřívějšího selhání Human–Adam zůstává zachovaná.
+
+Technický důkaz: 87 cílených testů a Safari QA nad izolovanými umělými daty
+PASS; nativní sestavení a 4 syntetické kontroly PASS. Skutečné jednorázové
+launchd čtení po změně cdhash hlásí not_determined / authorization_required,
+nebyl automaticky spuštěn nový OS dialog. Staré binární sestavení, původní
+oprávnění a žádosti jsou zachované. Plná brána: logs/calendar_overview_full_gate_20261107.log;
+publikační autorita: calendar_overview_release_20261107.log a calendar_overview_verified_20261107.log.
+Živé názvy, ID a události zůstávají soukromě; nový TVBCP nebyl domluvený.

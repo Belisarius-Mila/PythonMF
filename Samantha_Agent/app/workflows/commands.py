@@ -319,6 +319,17 @@ def _camino_service_commands() -> tuple[WorkflowCommand, ...]:
 
 WORKFLOW_COMMANDS: tuple[WorkflowCommand, ...] = (
     *(WorkflowCommand(
+        command_id="calendar_overview_" + action,
+        title="Čtecí přehled kalendářů: " + action,
+        purpose="Stav nebo explicitní načtení vybraných kalendářů; žádné změny událostí.",
+        aliases=("kalendářový přehled " + action,),
+        argv=(str(PYTHON_BIN), str(SAMANTHA_DIR / "scripts/calendar_overview.py"), action)
+             + (() if action == "status" else ("--confirmed",)),
+        cwd=SAMANTHA_DIR, risk="read_only" if action == "status" else "private_calendar_pilot",
+        writes="nic" if action == "status" else "Pouze soukromý snímek/žádost a vlastní dočasná launchd úloha; žádné události nebo trvalý LaunchAgent.",
+        requires_confirmation=action != "status",
+    ) for action in ("status", "refresh", "authorize")),
+    *(WorkflowCommand(
         command_id="calendar_access_pilot_" + action.replace("-", "_"),
         title="Čtecí EventKit pilot: " + action,
         purpose="Ověřit místní kalendářový přístup a jednorázovou vlastní launchd zkoušku bez zápisu událostí.",
