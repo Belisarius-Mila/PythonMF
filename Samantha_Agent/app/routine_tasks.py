@@ -68,7 +68,9 @@ def start_data_only_thread(client: Any, context: Path, model: str, instructions:
     overrides = {"project_doc_max_bytes": 0, "web_search": "disabled",
                  "features.shell_tool": False, "features.apps": False,
                  "features.multi_agent": False, "features.hooks": False,
-                 "features.memories": False}
+                 "features.memories": False, "features.plugins": False,
+                 "features.request_permissions_tool": False,
+                 "skills.bundled.enabled": False, "skills.include_instructions": False}
     overrides.update({f"mcp_servers.{name}.enabled": False for name in servers})
     skill_roots = client.transport.request("skills/list", {"cwds": [str(context)]}).get("data")
     if not isinstance(skill_roots, list) or any(row.get("errors") for row in skill_roots):

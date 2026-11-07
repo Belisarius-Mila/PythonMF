@@ -318,6 +318,14 @@ def _camino_service_commands() -> tuple[WorkflowCommand, ...]:
 
 
 WORKFLOW_COMMANDS: tuple[WorkflowCommand, ...] = (
+    *(WorkflowCommand(
+        command_id="recovery_guide_" + action,
+        title="Obnovovací návod: " + action,
+        purpose="Neplacený náhled/stav; run zůstává blokovaný do samostatné aktivace pilotu.",
+        aliases=("obnovovací návod " + action,),
+        argv=(str(PYTHON_BIN), str(SAMANTHA_DIR / "scripts/recovery_guide.py"), action),
+        cwd=SAMANTHA_DIR, risk="read_only_preview", writes="nic; žádný modelový tah",
+    ) for action in ("preview", "status", "run")),
     WorkflowCommand(
         command_id="continuous_email_agent_status",
         title="Stav průběžného e-mailového agenta",

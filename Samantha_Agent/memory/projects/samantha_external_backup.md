@@ -900,3 +900,41 @@ závislosti bez konkrétní potřeby. Nejde o rozšíření e-mailové business 
 - [Codex/ChatGPT Work: Standard kredity](https://learn.chatgpt.com/docs/pricing#token-rates)
 - [API changelog: automations](https://developers.openai.com/api/docs/changelog#october-2026)
   — existence cloudového plánovače není důvod migrovat místní Samanthu.
+
+## 2026-11-07 12:23 CET — vývojový základ týdenního správce obnovy
+
+### Hotovo
+- Po Mílově pokynu zahájen vývoj podle REC-01 až REC-06. Připraven neaktivní
+  izolovaný pilot: úplné soubory/manifest, dávky a syntéza, citace/kapitoly,
+  trvalý stav bez automatického opakování, rozpočty, dva jednotlivé atomické
+  zápisy s historií a kontrolou iCloud uploadu, návrh plánovače.
+- Registrované neplacené preview/status; run/tick zůstává activation_required.
+  Nový parser zná budoucí roli, centrální JSON ani modelové role se neměnily.
+- Nález: také sledovaný Samantha_Agent TXT je shodný s Plochou a kořenem
+  iCloudu. Oba nové cílové TXT stále chybějí. Foundation po rozřešení známého
+  aliasu Documents potvrzuje synchronizaci skutečné složky; nikoli nový TXT.
+
+### Rozhodnutí
+- Míla schválil zahájení vývoje. Placený pilot, provozní kopírování, aktivace
+  role/plánovače a p+n zůstávají samostatné kroky původního plánu.
+- Nejde o dokončený bezobslužný agent. Podrobný kontrakt a chybějící části
+  jsou v technical/recovery_guide_maintainer.md. Výstup syntézy vždy review.
+
+### Další krok
+- Will převezme lokální vývojový balíček do aktuálního main, sjednotí známé
+  role se svými novějšími rolemi a nad čistým main vytvoří neplacený manifest.
+  Potom dokončit rozsah zdrojů a přesný tokenizační preflight pro cenový pilot.
+
+### Navrhované další kroky
+- Doplnit registrované bezpečné důkazy nastavení Mac/iPhone a přijmout korpus.
+- Teprve nad konkrétním rozpočtem schválit jeden živý čtecí pilot Solem.
+- Přijmout celý návrh TXT, provést samostatně schválenou migraci, upload/iPhone.
+- Propojit přijatou účtenku s pevnými cíli a aktivovat týdenní běh až po přejímce.
+
+### Technický důkaz
+- Výchozí neplacená inventura před zápisem této etapy: 508 zdrojů,
+  5 899 527 B, 114 vynechaných textů; jde o návrh rozsahu, ne přijatý korpus.
+- Cílené ověření a plná brána: 65 cílených testů OK (37 nových); plná brána 2 413 testů OK, 5 skipped; po posledním zpřesnění metadat znovu cílené testy a statická brána OK..
+- Testy pouze syntetické/dočasné. Foundation audit čtecí; původní iCloud TXT
+  i skutečný cíl Documents: ubiquitous/uploaded true, uploading/error false.
+- Bez placeného tahu, zápisu provozních TXT, instalace, push či nasazení.

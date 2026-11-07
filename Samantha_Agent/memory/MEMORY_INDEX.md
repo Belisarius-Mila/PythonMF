@@ -108,7 +108,7 @@ Tento soubor je rozcestnik dlouhodobe pameti pro Samantha Agent.
 
 ## Infrastructure Recovery
 
-- `projects/samantha_external_backup.md`; `handoffs/workstreams/project-samantha-infrastructure.md`; `tvbcp/workstreams/project-samantha-infrastructure.md` — 2026-11-07: plán REC-01 až REC-06 týdenního správce obnovy. Model 6.1-Sol, celé podklady a původní TXT, nastavení aplikací Mac/iPhone, dvě shodné kopie PythonMF + iCloud Dokumenty a potvrzený upload. Aktuální soubor je zatím pouze Plocha/kořen iCloudu; nové cíle se ještě nezapisovaly. Plán není implementace ani aktivace; další krok odsouhlasení a neplacený manifest.
+- `projects/samantha_external_backup.md`; `technical/recovery_guide_maintainer.md`; `handoffs/workstreams/project-samantha-infrastructure.md`; `tvbcp/workstreams/project-samantha-infrastructure.md` — 2026-11-07: zahájen schválený vývoj týdenního správce obnovy. Neaktivní pilot, manifest/dávky, bezpečný writer a návrh plánovače; žádný placený tah ani aktivace. Další krok Willovo převzetí kódu, manifest na čistém main a tokenizační preflight. Nové provozní TXT zatím nejsou; známý Documents alias se audituje přes skutečný synchronizovaný cíl.
 
 - `infrastructure/operating_model.md`; `handoffs/workstreams/project-samantha-infrastructure.md`; `tvbcp/workstreams/project-samantha-infrastructure.md` — 24. 10. úklid SSD dokončen: skutečně +30,20 GiB, volno 49,28 GiB. Systémová cache zachovaná; čekající instalační kopie a sestavovací/testovací zbytky uklizené s ověřenou záchranou potřebných dat. Camino/Cockpit/autosave shodné. Další krok: praktická přejímka střižny Camino.
 

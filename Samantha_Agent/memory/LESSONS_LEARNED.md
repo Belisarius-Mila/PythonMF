@@ -1645,3 +1645,15 @@ Doplnění 17102026 k LL-071: Nativní modelový pomocník navíc zdvojuje roli,
 - Řešení nalezeno: 05112026
 - Řešení: ID, serializaci a optimistický stav připravit před vymazáním editoru. Při selhání přípravy text zachovat a ukázat chybu u editoru. U nejistého výsledku zachovat needitovatelnou kopii a blokovat nový send do korelovaného potvrzení; obecné serverové selhání není důkazem nulového účinku. Model ani akci automaticky neopakovat.
 - Ověření: FAIL→PASS Node VM nad skutečnou obsluhou, 150 cílených testů PASS; fyzický retest je samostatný. Report human_adam_iphone_send_failure_20261105.md.
+
+### LL-097 — Metadata iCloud aliasu ověřuj na připnutém skutečném cíli
+
+- Problém: NSURL na systémovém aliasu CloudDocs/Documents hlásí neubiquitous,
+  přestože skutečná složka Dokumenty synchronizovaná je. Nepřemostěné JS pole
+  klíčů navíc může přes Foundation vrátit prázdný slovník.
+- Typ: opakující se
+- Řešení nalezeno: 07112026
+- Řešení: nejprve ověřit připnutou identitu a povolený alias, pro NSURL audit
+  použít resolve cíle. Pole klíčů v JXA přemostit na NSArray, NSNumber 0/1 na
+  bool a chybějící metadata nikdy nezaměnit za upload. Ověřeno čtecím auditem
+  skutečného iCloudu a syntetickým testem; dostupnost složky není upload TXT.

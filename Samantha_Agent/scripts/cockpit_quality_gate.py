@@ -24,6 +24,11 @@ NODE_FALLBACK_PATHS = (
 )
 
 COMPILE_PATHS = (
+    "app/recovery_guide_sources.py",
+    "app/recovery_guide_maintainer.py",
+    "app/recovery_guide_publish.py",
+    "scripts/recovery_guide.py",
+    "scripts/recovery_guide_launchd.py",
     "app/email/agent_reply.py",
     "app/cockpit_email_agent.py",
     "app/email/hourly_agent.py",
@@ -256,6 +261,7 @@ SHELL_PATHS = (
 )
 
 TEST_MODULES = (
+    "tests.test_recovery_guide",
     "tests.test_speech_azure_tts_mp3",
     "tests.test_mmtx_scene06_azure_audio",
     "tests.test_backup_camino",

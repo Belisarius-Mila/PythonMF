@@ -1,33 +1,41 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
-## Aktuální stav — 2026-11-07 12:02 CET, plán týdenního správce obnovy
+## 2026-11-07 12:23 CET — vývojový základ týdenního správce obnovy
 
 ### Hotovo
-- Připravený plán REC-01 až REC-06 v projects/samantha_external_backup.md:
-  podklady, čtecí Sol pilot, kvalita návodu, dvě kopie, týdenní plánovač,
-  přejímka. Žádná implementace ani aktivace automatického běhu.
-- Read-only ověřeno: TXT 1.2 je na Ploše a shodně v kořeni iCloudu;
-  v PythonMF a iCloud Dokumentech zatím není. Známý alias Documents jde
-  na ~/Documents. Dílčí dokumentace main má 409 souborů / 5 002 170 B.
+- Po Mílově pokynu zahájen vývoj podle REC-01 až REC-06. Připraven neaktivní
+  izolovaný pilot: úplné soubory/manifest, dávky a syntéza, citace/kapitoly,
+  trvalý stav bez automatického opakování, rozpočty, dva jednotlivé atomické
+  zápisy s historií a kontrolou iCloud uploadu, návrh plánovače.
+- Registrované neplacené preview/status; run/tick zůstává activation_required.
+  Nový parser zná budoucí roli, centrální JSON ani modelové role se neměnily.
+- Nález: také sledovaný Samantha_Agent TXT je shodný s Plochou a kořenem
+  iCloudu. Oba nové cílové TXT stále chybějí. Foundation po rozřešení známého
+  aliasu Documents potvrzuje synchronizaci skutečné složky; nikoli nový TXT.
 
 ### Rozhodnutí
-- Míla požaduje 6.1-Sol, celou dokumentaci jednou týdně a vždy TXT do
-  PythonMF i iCloud Dokumentů. Volba dne/času, rozpočet a aktivace zatím čekají.
-- Plán navazuje na místní App Server a existující izolaci rutinních úloh;
-  není to migrace na jiné SDK ani rozšíření Willova e-mailového agenta.
+- Míla schválil zahájení vývoje. Placený pilot, provozní kopírování, aktivace
+  role/plánovače a p+n zůstávají samostatné kroky původního plánu.
+- Nejde o dokončený bezobslužný agent. Podrobný kontrakt a chybějící části
+  jsou v technical/recovery_guide_maintainer.md. Výstup syntézy vždy review.
 
 ### Další krok
-- Odsouhlasit plán a začít REC-01: přesný manifest zdrojů, identity cílů,
-  pravidla čtení/psaní a neplacený náhled; aktuální TXT zatím neměnit.
+- Will převezme lokální vývojový balíček do aktuálního main, sjednotí známé
+  role se svými novějšími rolemi a nad čistým main vytvoří neplacený manifest.
+  Potom dokončit rozsah zdrojů a přesný tokenizační preflight pro cenový pilot.
 
 ### Navrhované další kroky
-- Pilot změří skutečnou cenu úplného čtení, teprve pak limit a autonomie.
-- Před aktivací ověřit shodu kopií, macOS upload stav a čitelnost na iPhonu.
-- Návrh termínu: neděle 09:00 Europe/Prague, dosud neaktivovaný.
+- Doplnit registrované bezpečné důkazy nastavení Mac/iPhone a přijmout korpus.
+- Teprve nad konkrétním rozpočtem schválit jeden živý čtecí pilot Solem.
+- Přijmout celý návrh TXT, provést samostatně schválenou migraci, upload/iPhone.
+- Propojit přijatou účtenku s pevnými cíli a aktivovat týdenní běh až po přejímce.
 
 ### Technický důkaz
-- Plán v projects/samantha_external_backup.md; oficiální model a ceník
-  ověřené, současné routine_tasks omezené na 12kB čtecí úlohu.
-- Bez placených tahů, kopírování/přepisu TXT, změny rolí, služeb, push/deploy.
+- Výchozí neplacená inventura před zápisem této etapy: 508 zdrojů,
+  5 899 527 B, 114 vynechaných textů; jde o návrh rozsahu, ne přijatý korpus.
+- Cílené ověření a plná brána: 65 cílených testů OK (37 nových); plná brána 2 413 testů OK, 5 skipped; po posledním zpřesnění metadat znovu cílené testy a statická brána OK..
+- Testy pouze syntetické/dočasné. Foundation audit čtecí; původní iCloud TXT
+  i skutečný cíl Documents: ubiquitous/uploaded true, uploading/error false.
+- Bez placeného tahu, zápisu provozních TXT, instalace, push či nasazení.
 <!-- SAMANTHA_CURRENT_STATUS_END -->
 
 ### Předchozí stav infrastruktury
@@ -627,3 +635,41 @@ týdenní plánovač a fyzická přejímka na iPhonu. Harmonogram/rozpočet doho
 Read-only ověřené současné kopie i chybějící cíle; dílčí dokumentace 409
 souborů / 5 002 170 B. Stávající rutinní pilot není obecný writer/scheduler.
 Žádné modelové volání, změna souboru obnovy, role, LaunchAgentu, push/deploy.
+
+## 2026-11-07 12:23 CET — vývojový základ týdenního správce obnovy
+
+### Hotovo
+- Po Mílově pokynu zahájen vývoj podle REC-01 až REC-06. Připraven neaktivní
+  izolovaný pilot: úplné soubory/manifest, dávky a syntéza, citace/kapitoly,
+  trvalý stav bez automatického opakování, rozpočty, dva jednotlivé atomické
+  zápisy s historií a kontrolou iCloud uploadu, návrh plánovače.
+- Registrované neplacené preview/status; run/tick zůstává activation_required.
+  Nový parser zná budoucí roli, centrální JSON ani modelové role se neměnily.
+- Nález: také sledovaný Samantha_Agent TXT je shodný s Plochou a kořenem
+  iCloudu. Oba nové cílové TXT stále chybějí. Foundation po rozřešení známého
+  aliasu Documents potvrzuje synchronizaci skutečné složky; nikoli nový TXT.
+
+### Rozhodnutí
+- Míla schválil zahájení vývoje. Placený pilot, provozní kopírování, aktivace
+  role/plánovače a p+n zůstávají samostatné kroky původního plánu.
+- Nejde o dokončený bezobslužný agent. Podrobný kontrakt a chybějící části
+  jsou v technical/recovery_guide_maintainer.md. Výstup syntézy vždy review.
+
+### Další krok
+- Will převezme lokální vývojový balíček do aktuálního main, sjednotí známé
+  role se svými novějšími rolemi a nad čistým main vytvoří neplacený manifest.
+  Potom dokončit rozsah zdrojů a přesný tokenizační preflight pro cenový pilot.
+
+### Navrhované další kroky
+- Doplnit registrované bezpečné důkazy nastavení Mac/iPhone a přijmout korpus.
+- Teprve nad konkrétním rozpočtem schválit jeden živý čtecí pilot Solem.
+- Přijmout celý návrh TXT, provést samostatně schválenou migraci, upload/iPhone.
+- Propojit přijatou účtenku s pevnými cíli a aktivovat týdenní běh až po přejímce.
+
+### Technický důkaz
+- Výchozí neplacená inventura před zápisem této etapy: 508 zdrojů,
+  5 899 527 B, 114 vynechaných textů; jde o návrh rozsahu, ne přijatý korpus.
+- Cílené ověření a plná brána: 65 cílených testů OK (37 nových); plná brána 2 413 testů OK, 5 skipped; po posledním zpřesnění metadat znovu cílené testy a statická brána OK..
+- Testy pouze syntetické/dočasné. Foundation audit čtecí; původní iCloud TXT
+  i skutečný cíl Documents: ubiquitous/uploaded true, uploading/error false.
+- Bez placeného tahu, zápisu provozních TXT, instalace, push či nasazení.
