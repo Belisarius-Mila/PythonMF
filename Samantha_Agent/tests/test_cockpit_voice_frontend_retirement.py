@@ -413,5 +413,37 @@ class CockpitVoiceFrontendRetirementTests(unittest.TestCase):
         self.assertIn('PROJECT_ROOT / "data" / "private" / "voice_bridge"', migration_source)
 
 
+class PaidVoiceConversationRetirementTests(unittest.TestCase):
+    def test_paid_voice_implementation_is_absent(self):
+        for name in ("pilot", "gateway", "probe", "roles", "cockpit"):
+            self.assertFalse((PROJECT_ROOT / "app/communication" / f"voice_conversation_{name}.py").exists())
+        for name in ("conversation.js", "panel.js", "cockpit.js", "page.html"):
+            self.assertFalse((PROJECT_ROOT / "app/frontend/voice_pilot" / name).exists())
+
+    def test_paid_voice_cannot_be_reached_or_resolved(self):
+        import json
+        from app.capabilities import all_capabilities
+        from app.communication.agent_roles import KNOWN_ROLES, load_role
+        source = (PROJECT_ROOT / "app/cockpit.py").read_text()
+        human = (PROJECT_ROOT / "app/communication/human_adam_ui.py").read_text()
+        for token in ("CockpitVoiceRoutes", "VOICE_API_PREFIX", "voice_routes", "/human-adam/voice/"):
+            self.assertNotIn(token, source)
+        self.assertNotIn("/human-adam/voice/", human)
+        self.assertNotIn("read_only_voice", KNOWN_ROLES)
+        self.assertNotIn("read_only_voice", json.loads((PROJECT_ROOT / "config/agent_roles.json").read_text())["roles"])
+        self.assertTrue({"probe_voice_candidate", "create_voice_candidate_session"}.isdisjoint(
+            {item.capability_id for item in all_capabilities()}))
+        self.assertEqual(load_role()["role"], "release_executor")
+        # Existing transcription and reading are separate features.
+        self.assertIn("/api/human-adam/transcribe", source)
+        self.assertIn("/api/speech/speak", source)
+
+    def test_active_gate_has_no_retired_modules(self):
+        gate = (PROJECT_ROOT / "scripts/cockpit_quality_gate.py").read_text()
+        self.assertNotIn("voice_conversation_", gate)
+        self.assertNotIn("voice_pilot", gate)
+        self.assertNotIn("voice_conversation_frontend.test.cjs", gate)
+
+
 if __name__ == "__main__":
     unittest.main()

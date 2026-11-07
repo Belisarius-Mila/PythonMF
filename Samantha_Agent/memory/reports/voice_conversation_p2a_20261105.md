@@ -1,5 +1,11 @@
 # 15/P2-A — čtecí hlasový rozhovor, neaktivovaný základ pilotu
 
+> **ARCHIV — ZRUŠENO rozhodnutím Míly 2026-11-07.** Placený hlasový rozhovor
+> není pro Agenta SDK Samantha relevantní. Níže je historický průběh, nikoli
+> aktuální plán nebo povolení ke spuštění, adopci či nasazení. Aktuální stav:
+> paid_voice_retirement_20261107.md a kanonický handoff Human–Adam.
+
+
 Datum: 2026-11-05. Autor: Data. Větev: `data/parallel-20261104`.
 Výchozí commit: `95ed9cdb`. Proud: `layer-human-adam-development`.
 Zdroj zadání: bod 15 návrhu `Samantha_navrh_rozvoje_a_kontinualni_agent_2026-11-04.txt`

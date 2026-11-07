@@ -180,19 +180,13 @@ Tento soubor je rozcestnik dlouhodobe pameti pro Samantha Agent.
 
 ## Handoffs
 
-- `reports/voice_conversation_cockpit_20261105.md`; `handoffs/data_15_voice_conversation_pilot_20261105.md` — 15/P2-G: konkrétní chyba receiveru nativního timeru před getUserMedia, syntetická reprodukce a defaultní globální wrappery. 77 testů PASS; statická brána PASS. Živý read-only audit potvrzuje starý JS. Převzít E/F/G a po povoleném p+n ověřit asset, pak jeden iPhone Start. Žádný placený pokus Datou; CUA browser host nedostupný.
+- `reports/paid_voice_retirement_20261107.md`; `handoffs/data_15_voice_conversation_pilot_20261105.md` — 2026-11-07: Míla zrušil celý placený hlasový rozhovor 15/P2: není pro Agenta SDK Samantha relevantní. Historické A–G neopravňují pokračovat; žádné nové testovací relace ani adopce. Po přesné globální brzdě odstraněno 14 verzovaných a 10 generovaných souborů, 113 cílených testů PASS; plná brána 2377 testů OK (skipped=5). Běžné nahrávání/předčítání a audio Camina zachovat.
 
-- `reports/voice_conversation_cockpit_20261105.md`; `handoffs/data_15_voice_conversation_pilot_20261105.md` — 15/P2-F: HTTPS vstup ověřený čtecím auditem, Míla prošel k Start a čeká na mikrofon. Ověřit Chrome iOS/web permission až po Stop. Lokální nápověda, konkrétní chyby a timeout bez retry; 77 testů PASS, statická brána PASS. Žádný placený start/deploy; mikrofon a rozhovor stále otevřené.
 
-- `reports/voice_conversation_cockpit_20261105.md`; `handoffs/data_15_voice_conversation_pilot_20261105.md` — 15/P2-E: nasazení dle Míly, iPhone/Chrome blokuje preflight. HTTP zatím hypotéza. Lokálně přesné rozlišení secure context/mikrofon/WebRTC, 77 testů PASS; statická brána PASS. Tailscale nenahradí HTTPS, localhost na telefonu není Mac. Bez síťových změn a placeného startu; další krok ověřit protokol a skutečný HTTPS vstup.
 
-- `reports/voice_conversation_cockpit_20261105.md`; `handoffs/data_15_voice_conversation_pilot_20261105.md` — 15/P2-D: na Mílův pokyn čtecí hlas v lokálním Cockpitu, pevné existující vlákno, <=60s cenový souhlas, centrální read_only_voice a trvalý jeden pokus. 120 cílených testů/statická brána PASS, plná brána 2467 testů OK (skipped=5). Kód nasadit před oddělenou rolí, zachovat Willovu e-mailovou práci. Bez push/deploy/placeného startu; iPhone/WebRTC otevřené.
 
-- `reports/voice_conversation_probe_20261105.md`; `handoffs/data_15_voice_conversation_pilot_20261105.md` — 15/P2-C: Míla schválil jednu skutečnou zkoušku, GPT-Live 1 PASS s jediným session.start, finálními 47 s (≈0,039167 USD), prvním audiem 4,648 s. 97 cílených testů a plná brána 2448 PASS s 5 PDF skipy. TLS opravený přes existující certifi, žádná role/SDK/produkční aktivace. Další krok: poslech ukázky a integrace/read-only iPhone přejímka v novém rozsahu.
 
-- `reports/voice_conversation_p2b_20261105.md`; `handoffs/data_15_voice_conversation_pilot_20261105.md` — 15/P2-B: GPT-Live 1 schválený kandidát. Placený probe do 60 s čeká na samostatné potvrzení. Neaktivovaný broker se sidebandem, serverovým dohledem a trvalým jediným pokusem připravený; 91 cílených testů PASS, plná brána 2429 PASS s 5 PDF skipy. Nula API volání, bez role/SDK/živé integrace.
 
-- `handoffs/data_15_voice_conversation_pilot_20261105.md`; `reports/voice_conversation_p2a_20261105.md` — 15/P2-A: první neaktivovaný základ čtecího hlasového rozhovoru nad snapshotem současného backendu. 132 cílených testů PASS (26 nových), statická brána PASS. GPT-Live kandidát 0,05 USD/min; žádná placená relace, změna rolí ani produkce. Další krok: volba kandidáta/rozpočtu, pak broker/sideband/watchdog a živá iPhone přejímka. Kanonický proud Human–Adam, stávající TVBCP.
 
 - `handoffs/data_05_appserver_sdk_pilot_20261104.md`; `reports/codex_sdk_p1c_20261105.md` — 2026-11-05 13:03 CET: přejímka 05/P1 uzavřená. Uživatelské body 1–4 PASS; Míla sdělil úspěšné Willovo ověření technického reconnectu. Převzaté potvrzení, bez vlastního nového živého auditu Data. Ponechat současný klient, SDK neadoptováno; další úkol dosud nezadán.
 

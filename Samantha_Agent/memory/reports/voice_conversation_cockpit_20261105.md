@@ -1,5 +1,11 @@
 # 15/P2-D — Čtecí hlas připojený ke zdrojům Cockpitu
 
+> **ARCHIV — ZRUŠENO rozhodnutím Míly 2026-11-07.** Placený hlasový rozhovor
+> není pro Agenta SDK Samantha relevantní. Níže je historický průběh, nikoli
+> aktuální plán nebo povolení ke spuštění, adopci či nasazení. Aktuální stav:
+> paid_voice_retirement_20261107.md a kanonický handoff Human–Adam.
+
+
 Stav: lokální implementace v Data worktree, nikoli nasazená služba.
 Proud: `layer-human-adam-development`. Větev: `data/parallel-20261104`.
 Pokyn Míly: „Připoj čtecí hlas do cockpitu...“
