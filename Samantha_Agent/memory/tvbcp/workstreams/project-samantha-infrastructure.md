@@ -1,11 +1,33 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
-## Aktuální stav
+## Aktuální stav — 2026-11-07 12:02 CET, plán týdenního správce obnovy
 
-- 2026-10-25 14:53 CET: Nová schválená recovery záloha dokončená a ověřená. Projekt `20261025_142837`: 63 143 souborů, 17 050 kopírovaných, 46 092 hardlinků, 1 symlink, 0 skipped; 4 309 588 279 nových B. Skutečně připojený šifrovaný cíl ověřený před/po; starší snapshoty zachované.
-- Živé Camino `20261025_143650-abf7e7e5`: 1 647 souborů / 5 167 041 733 B, čtyři DB; 921 operací, 132 Momentů, 4 cesty a 316 originálů / 2379212189 B. Registrovaný běh ověřil úplné SHA, DB i mediální účtenky a shodný zmrazený zdroj.
-- Závěrečná kontrola PASS: čtyři projektové SHA a skutečná rekonstrukce do nové dočasné složky; čtyři DB quick_check; auth.json a nouzové autosave vyloučené. Soukromá .env shodná, bez výpisu citlivých dat. Camino owner HTTP/HTTPS zpět, config/Serve a Cockpit PID/stamp shodné.
-- backup_status nyní potvrzuje 25. 10. 2026; na šifrovaném cíli ~406 GiB volných. Zdrojový kód ani síť se neměnily, žádná starší data/záloha se nemazala. Není to obraz celého Macu; kompletní instalace a fyzická přejímka náhradního počítače zůstává samostatná.
-- Podrobnosti: memory/reports/backup_recovery_20261025.md; shodný souhrn na SSD v recovery_updates, soukromé důkazy v data/private/backup_recovery_20261025/. TXT 1.2 zachovává historické příklady; aktuální dvojici snapshotů určuje dnešní manifest. Další krok: pravidelná další záloha, k původnímu tématu upozornění se vrátit samostatně. Tento výsledkový zápis je jen lokální dokumentační checkpoint, bez push/deploy.
+### Hotovo
+- Připravený plán REC-01 až REC-06 v projects/samantha_external_backup.md:
+  podklady, čtecí Sol pilot, kvalita návodu, dvě kopie, týdenní plánovač,
+  přejímka. Žádná implementace ani aktivace automatického běhu.
+- Read-only ověřeno: TXT 1.2 je na Ploše a shodně v kořeni iCloudu;
+  v PythonMF a iCloud Dokumentech zatím není. Známý alias Documents jde
+  na ~/Documents. Dílčí dokumentace main má 409 souborů / 5 002 170 B.
+
+### Rozhodnutí
+- Míla požaduje 6.1-Sol, celou dokumentaci jednou týdně a vždy TXT do
+  PythonMF i iCloud Dokumentů. Volba dne/času, rozpočet a aktivace zatím čekají.
+- Plán navazuje na místní App Server a existující izolaci rutinních úloh;
+  není to migrace na jiné SDK ani rozšíření Willova e-mailového agenta.
+
+### Další krok
+- Odsouhlasit plán a začít REC-01: přesný manifest zdrojů, identity cílů,
+  pravidla čtení/psaní a neplacený náhled; aktuální TXT zatím neměnit.
+
+### Navrhované další kroky
+- Pilot změří skutečnou cenu úplného čtení, teprve pak limit a autonomie.
+- Před aktivací ověřit shodu kopií, macOS upload stav a čitelnost na iPhonu.
+- Návrh termínu: neděle 09:00 Europe/Prague, dosud neaktivovaný.
+
+### Technický důkaz
+- Plán v projects/samantha_external_backup.md; oficiální model a ceník
+  ověřené, současné routine_tasks omezené na 12kB čtecí úlohu.
+- Bez placených tahů, kopírování/přepisu TXT, změny rolí, služeb, push/deploy.
 <!-- SAMANTHA_CURRENT_STATUS_END -->
 
 ### Předchozí stav infrastruktury
@@ -582,3 +604,26 @@ Technický důkaz:
 - Exit 0; 63 143 projektových souborů, 17 050 copied, 46 092 linked, 1 symlink, 0 skipped, 4 309 588 279 nových B; správná evidence 25. 10. 2026.
 - Camino 1 647 souborů / 5 167 041 733 B, 4 DB; 316 mediálních originálů SHA/účtenky PASS. Čtyři vybrané projektové SHA a jejich skutečná zkušební obnova PASS, čtyři DB quick_check PASS.
 - Šifrovaný mount před/po ověřený; auth.json/autosave vyloučené, HTTP/HTTPS i config/Serve/Cockpit shodné. Přesný souhrn backup_recovery_20261025.md je v projektu i v šifrovaném recovery_updates; soukromá evidence mimo Git. Zápis výsledku následný lokální checkpoint, bez push/deploy.
+
+## 2026-11-07 12:02 CET — plán vývoje týdenního správce obnovovacího TXT
+
+### Hotovo
+Připravený plán šesti etap od úplného čtení podkladů po dvě ověřené kopie
+návodu a týdenní provoz. Detail v projects/samantha_external_backup.md.
+
+### Rozhodnutí
+Míla požaduje model 6.1-Sol, jednou týdně celý návod a dokumentaci, aktualizace
+se zaměřením na aplikace/nastavení Macu a iPhonu. TXT vždy PythonMF a iCloud
+Dokumenty. Dnes schválené plánování, nikoli spuštění modelu nebo plánovače.
+
+### Další krok
+Po přijetí plánu REC-01: explicitní úplný manifest a identita obou cílů.
+
+### Navrhované další kroky
+Čtecí Sol pilot s nákladem, validátor, writer se shodnými hash/uploadem,
+týdenní plánovač a fyzická přejímka na iPhonu. Harmonogram/rozpočet dohodnout.
+
+### Technický důkaz
+Read-only ověřené současné kopie i chybějící cíle; dílčí dokumentace 409
+souborů / 5 002 170 B. Stávající rutinní pilot není obecný writer/scheduler.
+Žádné modelové volání, změna souboru obnovy, role, LaunchAgentu, push/deploy.
