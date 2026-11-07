@@ -1760,3 +1760,10 @@ Doplnění 17102026 k LL-071: Nativní modelový pomocník navíc zdvojuje roli,
   uchovat dokončení každé kopie i záměr rollbacku. Dokončená kopie smí při
   obnovení zůstat pouze ve schváleném stavu. Aktivní marker dále odmítne
   starou žádost po novějším vydání. Ověřeno syntetickým REC-04 přenosem.
+
+### LL-109 — Test návrhu služby nesmí vyžadovat skutečnou lokální .venv
+
+- Problém: REC plist test prošel v hlavním checkoutu, ale publikační profil bez .venv skončil chybou ještě před push.
+- Typ: zobecnitelné
+- Řešení nalezeno: 07112026
+- Řešení: metadata planneru ověřit na vlastním dočasném projektu s fixture interpretu a skriptu; nic nespouštět ani neinstalovat. Produkční is_file validaci ponechat a přidat negativní kontrolu chybějících souborů. 125 cílených REC testů PASS; plnou izolovanou bránu ověří nové přesné vydání.

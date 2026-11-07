@@ -28,3 +28,24 @@ Technický důkaz: 198 cílených integračních testů PASS. Plná společná b
 smoke, přesné nasazení a CI jsou podmínkou vydání; zajišťuje registrovaný worker
 a následná kontrola Willa. Žádná změna hodinové kopie, produkčního návodu,
 iCloud cílů, služeb Camina či autosave mimo standardní chráněné vydání Cockpitu.
+
+## 2026-11-07 14:18 CET — oprava přenositelnosti testu po publikační bráně
+
+Hotovo: Test návrhu plist používá vlastní TemporaryDirectory s připraveným
+interpretem a skriptem. Ověřuje pouze vytvoření specifikace bez změn fixture;
+nový negativní scénář zachovává odmítnutí chybějícího Pythonu nebo skriptu.
+Produkční launcher ani služby se nemění. 125 REC testů PASS.
+
+Rozhodnutí: Původní přesná účtenka d525499100547f133a7214951cc661dd zůstává
+zachovaná v attention/push_state=uncertain. Diagnostika doložila jedinou chybu
+v plné bráně (2780 testů, 49 SKIP): lokální .venv chybí v izolovaném profilu.
+GitHub živě stále 9730a662. V github_batch.py brána vyhazuje výjimku před
+_push_exact_head, tedy tento pokus žádný Git push neprovedl; nasazení nezačalo.
+Nejde o opakování nejasného síťového push. Po opravě vzniká nový commit a nový
+přesný balíček podle stále platného Mílova p+n.
+
+Další krok: nové registrované předání v2; autorita aktuálního vydání
+logs/calendar_recovery_release_v2_20261107.log a calendar_recovery_verified_20261107.log.
+Technický důkaz selhání: logs/calendar_recovery_gate_failed_fixture_20261107.log;
+oprava: logs/calendar_recovery_fixture_fix_20261107.log. Produkční REC aktivace
+zůstává vypnutá a Datův REC-05 ve vlastním worktree zachovaný.

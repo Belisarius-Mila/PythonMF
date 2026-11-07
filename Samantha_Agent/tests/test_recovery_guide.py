@@ -358,11 +358,27 @@ class Inventory(unittest.TestCase):
         self.assertTrue(s.eligible("camino/docs/setup.md"))
 
     def test_plist_is_proposal_without_installer(self):
-        project = Path(__file__).resolve().parents[1]
-        spec = launch_agent(project)
-        self.assertEqual(spec["ProgramArguments"][-1], "tick")
-        self.assertEqual(spec["StartInterval"], 900)
-        self.assertTrue(all(Path(x).is_absolute() for x in spec["ProgramArguments"][:2]))
+        with tempfile.TemporaryDirectory() as directory:
+            project = Path(directory).resolve()
+            python = project / ".venv/bin/python"
+            script = project / "scripts/recovery_guide.py"
+            for path in (python, script):
+                path.parent.mkdir(parents=True, exist_ok=True)
+                path.write_text("synthetic fixture, never executed")
+            before = {str(path.relative_to(project)): path.read_bytes() for path in project.rglob('*') if path.is_file()}
+            spec = launch_agent(project)
+            self.assertEqual(spec["ProgramArguments"], [str(python), str(script), "tick"])
+            self.assertEqual(spec["WorkingDirectory"], str(project))
+            self.assertEqual(spec["StartInterval"], 900)
+            self.assertEqual({str(path.relative_to(project)): path.read_bytes() for path in project.rglob('*') if path.is_file()}, before)
+
+    def test_plist_rejects_missing_interpreter_or_script(self):
+        with tempfile.TemporaryDirectory() as directory:
+            project = Path(directory).resolve()
+            with self.assertRaises(ValueError): launch_agent(project)
+            python = project / ".venv/bin/python"
+            python.parent.mkdir(parents=True); python.write_text("not executed")
+            with self.assertRaises(ValueError): launch_agent(project)
 
 
 if __name__ == "__main__":

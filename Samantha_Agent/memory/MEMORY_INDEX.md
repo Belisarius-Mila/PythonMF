@@ -62,7 +62,7 @@ Tento soubor je rozcestnik dlouhodobe pameti pro Samantha Agent.
 
 ## Projects
 
-- `reports/calendar_recovery_release_20261107.md` — 7. 11.: Will přebírá všech pět Datových hotových REC-01 až REC-04 commitů do kalendáře 9f7ce93e; společné Terra p+n výslovně schválené. REC-05 WIP zachovaný, produkční REC role/plánovač/TXT publikace vypnuté. Výsledek podle logs/calendar_recovery_release_20261107.log a *_verified_*.log.
+- `reports/calendar_recovery_release_20261107.md` — 7. 11.: Will přebírá všech pět Datových hotových REC-01 až REC-04 commitů do kalendáře 9f7ce93e; společné Terra p+n výslovně schválené. REC-05 WIP zachovaný, produkční REC role/plánovač/TXT publikace vypnuté. První brána odhalila nepřenositelný test .venv; opraven vlastní fixture. Aktuální výsledek podle logs/calendar_recovery_release_v2_20261107.log a calendar_recovery_verified_20261107.log.
 
 - `reports/email_calendar_review_20261107.md`; `handoffs/continuous_personal_agent_2026_11_04.md`; `projects/email_readonly_oauth.md` — 7. 11.: bod 4 lokálně: odvozené koncové datum/délka, dva výchozí alarmy 24 h/60 min, čerstvé kolize a konečný potvrzovaný náhled. Skutečné omezené čtení čtyř vybraných kalendářů PASS; budoucí zápis až bod 5. Bez nového p+n; místní brána/commit dle logs/calendar_review_verified_20261107.log.
 
