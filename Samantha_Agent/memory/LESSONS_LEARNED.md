@@ -1725,6 +1725,8 @@ Doplnění 17102026 k LL-071: Nativní modelový pomocník navíc zdvojuje roli,
 - Řešení: samostatný podepsaný read-only .app helper ve vlastní aplikační složce, GUI žádost přes LaunchServices a skutečný krátký launchd probe s ověřeným rodičem PID 1. Tento kontext potvrdil full_access a omezené čtení. Kalendářové zápisy nejsou v pilotu vůbec implementované. Přímé CLI oprávnění není důkaz servisního oprávnění; po změně binárního podpisu provést novou přejímku. Do logů/Gitu jen agregované důkazy, názvy kalendářů a ID soukromě. Ověřeno znovu v bodě 2: nové ad-hoc sestavení má jiný cdhash a launchd kontext not_determined. Žádost evidovat samostatně pro přesný binární otisk, starou uchovat; GUI grant se automaticky nepřenáší ani neopakuje. Přehled má zůstat authorization_required do nové uživatelské přejímky.
 - Doplnění 07112026, bod 4: pro kontrolu návrhu stačí přesné omezené start/end v již podporovaném native overview požadavku. Pythonová změna období nevyžaduje nové Swift sestavení ani OS souhlas. Skutečný launchd read čtyř vybraných kalendářů PASS při nezměněném binárním otisku a nastavení; logy pouze agregované.
 
+- Doplnění 07112026: novou schopnost zápisu lze sestavit jako samostatný podepsaný helper a ponechat čtecí Swift/bundle/OS grant beze změny. Sdílet jen parametrizovanou stavební infrastrukturu. Ověřeno shodou původního zdrojového/binárního otisku a sestavením nového create-only writeru; jeho vlastní OS grant a živý zápis tím nejsou přejaté. Report calendar_simple_20261107.md.
+
 ### LL-106 — Metadata iCloud aliasu ověřuj na připnutém skutečném cíli
 
 - Problém: NSURL na systémovém aliasu CloudDocs/Documents hlásí neubiquitous,

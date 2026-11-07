@@ -11,9 +11,10 @@
 <main>
 <div id="notice" role="status" aria-live="polite">Načítám uložený přehled…</div>
 <div id="permission" hidden><p>Přístup ke kalendářům potvrď na Macu, na kterém běží Samantha. Potom obnov přehled.</p><button id="authorize" type="button">Povolit přístup na Macu</button></div>
+<section id="saved-event" class="event" hidden aria-live="polite"></section>
 <div class="layout">
 <section class="agenda" aria-labelledby="agenda-title"><div class="section-head"><h2 id="agenda-title">Přehled událostí</h2><span id="count"></span></div><p id="loaded" class="muted">Zatím nenačteno.</p><div id="events"></div></section>
-<aside><details id="selection" open><summary>Výběr kalendářů</summary><form id="settings"><fieldset><legend>Číst pro přehled a budoucí kontrolu kolizí</legend><div id="calendars"><p>Nejdřív obnov dostupné kalendáře.</p></div></fieldset><label for="target">Budoucí cíl pro přidávání událostí</label><select id="target"><option value="">Zatím nevybrán</option></select><p class="muted">Tato etapa ukládá pouze výběr. Vytváření ani změny událostí nejsou zapnuté.</p><button id="save" type="submit" disabled>Uložit výběr a načíst</button><p id="draft" class="muted" aria-live="polite"></p></form></details><p class="privacy">Kalendáře se čtou pouze na tvém Macu. Přehled se neposílá modelu.</p></aside>
+<aside><details id="selection" open><summary>Výběr kalendářů</summary><form id="settings"><fieldset><legend>Číst pro přehled a kontrolu kolizí</legend><div id="calendars"><p>Nejdřív obnov dostupné kalendáře.</p></div></fieldset><label for="target">Kalendář pro přidávání událostí</label><select id="target"><option value="">Zatím nevybrán</option></select><p class="muted">Novou událost z e-mailu přidáš tlačítkem Do kalendáře; zápis vždy potvrdíš na kartě.</p><button id="save" type="submit" disabled>Uložit výběr a načíst</button><p id="draft" class="muted" aria-live="polite"></p></form></details><p class="privacy">Kalendáře se čtou pouze na tvém Macu. Přehled se neposílá modelu.</p></aside>
 </div>
 </main>
 <script>{{SAMANTHA_JAVASCRIPT}}</script>

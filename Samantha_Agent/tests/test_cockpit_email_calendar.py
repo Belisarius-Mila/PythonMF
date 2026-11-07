@@ -51,7 +51,7 @@ class EmailCalendarHTTPTests(unittest.TestCase):
         self.assertEqual(code,200);self.assertIsNone(json.loads(raw)['draft']);self.assertIn('no-store',headers['Cache-Control'])
         self.assertFalse(self.service.root.exists());self.assertEqual(self.driver.calls,0)
         code,raw,_=self.request('/emails-to-resolve/')
-        self.assertEqual(code,200);self.assertIn('Navrhnout událost',raw.decode());self.assertIn('calendarDraftEditor',raw.decode())
+        self.assertEqual(code,200);self.assertIn('Do kalendáře',raw.decode());self.assertIn('calendarDraftEditor',raw.decode())
 
     def test_explicit_prepare_save_and_read_current_draft_over_http(self):
         body={'action':'prepare','confirmed':True,'id':self.mail.item_id,'expected_content_digest':self.mail.content_digest,'request_id':'http-calendar-draft-001'}
@@ -98,4 +98,15 @@ class EmailCalendarHTTPTests(unittest.TestCase):
         self.assertEqual(self.request('/api/email-agent/calendar-draft',{**confirmation,'acknowledged':False})[0],400)
         code,body,_=self.request('/api/email-agent/calendar-draft',confirmation)
         self.assertEqual(code,200);self.assertIsNotNone(json.loads(body)['confirmation'])
+        from tests.test_email_calendar_write import FakeWriter
+        writer=FakeWriter(Path(self.temp.name)/'writer');self.service.writer=writer
+        write={'action':'write','id':self.mail.item_id,'expected_revision':0,
+               'review_fingerprint':json.loads(body)['review']['fingerprint'],'confirmed':True}
+        self.assertEqual(self.request('/api/email-agent/calendar-draft',write,origin='https://other.invalid')[0],403)
+        self.assertEqual(self.request('/api/email-agent/calendar-draft',{**write,'confirmed':False})[0],400)
+        self.assertEqual(writer.calls,[])
+        code,body,_=self.request('/api/email-agent/calendar-draft',write)
+        self.assertEqual(code,200);self.assertEqual(json.loads(body)['write']['state'],'verified')
+        self.assertEqual(self.request('/api/email-agent/calendar-draft',write)[0],200)
+        self.assertEqual(len(writer.calls),1)
         self.assertEqual(self.worker.status(),before);self.assertEqual(self.driver.calls,1)

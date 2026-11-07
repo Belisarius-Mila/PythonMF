@@ -1,4 +1,4 @@
-"""One explicit email -> durable editable suggestion; no calendar/SMTP mutation."""
+"""One selected email -> editable suggestion and explicitly confirmed calendar create."""
 from __future__ import annotations
 
 import copy
@@ -24,8 +24,10 @@ from .continuous_agent import ContinuousEmailAgent
 from .continuous_source import IMAPAgentSource
 from .icloud_provider import _html_to_text
 from .calendar_proposal import (Candidate, Claim, FIELD_NAMES, INSTRUCTIONS,
-    derive_fields, evidence_issues, materialize, strict_schema, validate_fields, validate_reminders)
+    derive_fields, simple_defaults, edit_simple, evidence_issues, materialize, strict_schema, validate_fields, validate_reminders)
 from .calendar_review import CalendarReview
+from .calendar_write import CalendarWrite
+from app.calendar_writer import CalendarWriter
 
 ID = re.compile(r'[0-9a-f]{64}')
 REQUEST = re.compile(r'[A-Za-z0-9_-]{8,96}')
@@ -85,7 +87,7 @@ class CalendarDraftDriver:
 
 
 class CalendarDraftService:
-    def __init__(self, worker=None, *, source_factory=IMAPAgentSource, driver=None, launcher=None, calendar=None, clock=None):
+    def __init__(self, worker=None, *, source_factory=IMAPAgentSource, driver=None, launcher=None, calendar=None, clock=None, writer=None):
         self.worker=worker or ContinuousEmailAgent()
         self.root=self.worker.root/'calendar_drafts'
         self.repository=JsonWorkRepository(self.root/'state.json',default={'items':{}})
@@ -95,6 +97,8 @@ class CalendarDraftService:
         self.calendar=calendar or CalendarOverview()
         self.clock=clock or (lambda: datetime.now(timezone.utc))
         self.review=CalendarReview(self)
+        self.writer=writer or CalendarWriter()
+        self.write=CalendarWrite(self)
 
     @staticmethod
     def _launch(callback):
@@ -129,7 +133,10 @@ class CalendarDraftService:
         if draft: draft.setdefault('reminders', [1440, 60])  # Side-effect-free compatibility for existing concepts.
         return {'ok':True,'source':{'id':item_id,'subject':card['header']['subject'],'date':card['header']['date']},
             'model':entry['job'].get('selection',{}).get('model','') if entry else agent_roles.load_role(role=agent_roles.EMAIL_ROLE)['preferred_model'],
-            'job':job,'draft':draft,**self.review.status(entry), 'calendar_writes':False}
+            'job':job,'draft':draft,**self.review.status(entry),
+            'write':copy.deepcopy(entry.get('write')) if entry else None,
+            'writer_built':(self.writer.root/'build.json').exists(),
+            'calendar_writes':bool(entry and entry.get('write',{}).get('state')=='verified')}
 
     def prepare(self,payload):
         if (set(payload)!={'action','id','request_id','expected_content_digest','confirmed'} or payload.get('confirmed') is not True
@@ -189,7 +196,7 @@ class CalendarDraftService:
         entry=self.repository.read()['items'][item_id]
         self._card(item_id,entry['content_digest'])
         fields,evidence,warnings=materialize(candidate,entry['job']['input'])
-        fields,calculated=derive_fields(fields)
+        fields,calculated=simple_defaults(fields)
         for name in calculated:
             evidence[name]={'source':'calculation','quote':'','origin':'calculated'}
         if any(len(warning)>1000 for warning in warnings):raise ValueError('Upozornění překročilo limit.')
@@ -217,6 +224,8 @@ class CalendarDraftService:
             entry=document['items'].get(item_id)
             if not entry or not entry.get('draft') or entry['content_digest']!=card['content_digest']:
                 raise ValueError('Původní návrh není dostupný.')
+            if entry.get('write',{}).get('state','blocked') != 'blocked':
+                raise ValueError('Událost už má evidovaný zápis; úpravy další zápis nepovolí.')
             draft=entry['draft']
             if draft['revision']!=payload['expected_revision']:raise ValueError('Návrh se mezitím změnil. Tvoje úpravy zůstávají v editoru; obnov stav.')
             fields,calculated=derive_fields(payload['fields'],draft['fields'],draft['evidence'])
@@ -240,5 +249,20 @@ class CalendarDraftService:
         if not isinstance(payload,dict):raise ValueError('Neplatný požadavek.')
         if payload.get('action')=='prepare':return self.prepare(payload)
         if payload.get('action')=='save':return self.save(payload)
+        if payload.get('action')=='save_simple':
+            if set(payload)!={'action','id','expected_revision','values'}:raise ValueError('Neplatná úprava karty.')
+            entry=self.review._entry(payload['id'],payload['expected_revision'])
+            return self.save({'action':'save','id':payload['id'],'expected_revision':payload['expected_revision'],
+                             'fields':edit_simple(entry['draft'],payload['values']),'reminders':[1440,60]})
+        if payload.get('action')=='write':return self.write.execute(payload)
+        if payload.get('action')=='authorize_writer':
+            if set(payload)!={'action','id','confirmed'} or payload['confirmed'] is not True:
+                raise ValueError('Povolení zápisu vyžaduje výslovný pokyn.')
+            self._card(payload['id'])
+            self.writer.build(confirmed=True)
+            self.writer.authorize_current(confirmed=True)
+            result=self.status(payload['id'])
+            result['message']='Na Macu potvrď přístup aplikace Samantha Calendar Writer. Potom znovu potvrď zápis.'
+            return result
         if payload.get('action') in {'review','confirm'}:return self.review.execute(payload)
         raise ValueError('Neznámá akce návrhu.')

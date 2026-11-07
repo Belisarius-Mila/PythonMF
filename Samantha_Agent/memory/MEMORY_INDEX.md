@@ -64,6 +64,8 @@ Tento soubor je rozcestnik dlouhodobe pameti pro Samantha Agent.
 
 - `reports/recovery_rec06_integration_release_20261107.md`; `reports/recovery_guide_rec06_20261107.md` — 7. 11.: Will přebírá zbývající 282c68b4 nad 51d88679 pro výslovně schválené Terra p+n infrastruktury. Publikace kódu bez placené kalibrace/role/plánovače. Výsledek logs/recovery_rec06_release_20261107.log a recovery_rec06_verified_20261107.log.
 
+- `reports/calendar_simple_20261107.md`; `handoffs/continuous_personal_agent_2026_11_04.md`; `projects/email_readonly_oauth.md` — 7. 11.: lokálně schválená jednoduchá karta (název/začátek/typ/místo), implicitní Praha a hodina, výslovný konec má přednost. Automatické ukládání/kolize, potvrzený create-only zápis a dva alarmy. Writer sestavený, read-only helper zachovaný; skutečný zápis a nové OS oprávnění nepřejaté, Safari QA blokuje nedostupné okno/host. Bez nového p+n; brána logs/calendar_simple_gate_20261107.log.
+
 - `reports/calendar_recovery_release_20261107.md`; `reports/recovery_guide_rec05_20261107.md` — 7. 11.: první balíček 135f46e7 potvrzeně nasazený (2781 testů, smoke 5/5). Will přebírá následně dokončený REC-05 aa18a6e7 pro úplné Mílovo p+n; stále bez produkční aktivace. Konečný stav logs/calendar_recovery_rec05_release_20261107.log a calendar_recovery_verified_20261107.log.
 
 - `reports/calendar_recovery_release_20261107.md` — 7. 11.: Will přebírá všech pět Datových hotových REC-01 až REC-04 commitů do kalendáře 9f7ce93e; společné Terra p+n výslovně schválené. REC-05 WIP zachovaný, produkční REC role/plánovač/TXT publikace vypnuté. První brána odhalila nepřenositelný test .venv; opraven vlastní fixture. Aktuální výsledek podle logs/calendar_recovery_release_v2_20261107.log a calendar_recovery_verified_20261107.log.

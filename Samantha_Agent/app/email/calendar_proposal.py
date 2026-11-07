@@ -24,7 +24,8 @@ Název lze stručně navrhnout z předmětu. Normalizace: date/end_date YYYY-MM-
 start_time/end_time HH:MM, duration_minutes celé minuty jako řetězec, time_zone IANA.
 Relativní datum posuzuj vůči datu původní zprávy; když referenční datum chybí nebo je
 nejednoznačné, datum nedoplňuj. Nejasnosti a variantní termíny výslovně uveď v uncertainties.
-Chybějící konec/délku neodhaduj. Nepředpokládej Europe/Prague bez podkladu.
+Výslovný konec i jinou výslovnou délku převezmi přesně. Chybějící konec/délku a pásmo
+nech prázdné; aplikace doplní schválenou hodinu a Europe/Prague.
 all_day je pravda jen pro výslovně celodenní schůzku nebo termín úkolu bez času.
 U task_deadline bez hodiny nevymýšlej začátek, konec ani schůzku. Budoucí potvrzení řeší člověk.
 U task_deadline s hodinou je start_time nejzazší čas splnění; end_time, end_date a duration_minutes nech prázdné.
@@ -107,7 +108,7 @@ def check_shape(fields):
 
 
 def derive_fields(fields, previous=None, evidence=None):
-    """User-approved defaults and arithmetic only; never invent an end time."""
+    """Date and interval arithmetic; the simple card applies its own approved defaults."""
     check_shape(fields)
     fields = dict(fields)
     changed = set()
@@ -149,6 +150,58 @@ def derive_fields(fields, previous=None, evidence=None):
         except (ValueError, ZoneInfoNotFoundError, OverflowError):
             pass
     return fields, changed
+
+
+def simple_defaults(fields):
+    """Private-calendar defaults; explicit end/duration/zone always win."""
+    check_shape(fields)
+    fields = dict(fields)
+    changed = set()
+    if not fields['time_zone']:
+        fields['time_zone'] = 'Europe/Prague'; changed.add('time_zone')
+    if fields['kind'] == 'meeting' and not fields['all_day']:
+        if not fields['end_time'] and not fields['duration_minutes']:
+            fields['duration_minutes'] = '60'; changed.add('duration_minutes')
+        if not fields['end_time']:
+            try:
+                zone = ZoneInfo(fields['time_zone']); issues = []
+                start = resolve_local(date.fromisoformat(fields['date']), fields['start_time'], zone, issues)
+                duration = int(fields['duration_minutes'])
+                if start and not issues and 0 < duration <= 10080:
+                    end = (start + timedelta(minutes=duration)).astimezone(zone)
+                    fields.update(end_date=end.date().isoformat(), end_time=end.strftime('%H:%M'))
+                    changed.update({'end_date', 'end_time'})
+            except (ValueError, ZoneInfoNotFoundError, OverflowError):
+                pass
+    fields, derived = derive_fields(fields)
+    return fields, changed | derived
+
+
+def edit_simple(draft, values):
+    """Four editable values; moving start preserves the proposed interval length."""
+    if (not isinstance(values, dict) or set(values) != {'title', 'start', 'kind', 'location'}
+            or values['kind'] not in {'meeting', 'all_day', 'task_deadline'}
+            or any(not isinstance(value, str) or len(value) > 1000 or '\x00' in value for value in values.values())):
+        raise ValueError('Vyplň název, začátek, typ a případně místo.')
+    old = draft['fields']
+    fields = dict(old)
+    raw = values['start'].split('T')
+    fields.update(title=values['title'], location=values['location'],
+                  kind='task_deadline' if values['kind'] == 'task_deadline' else 'meeting',
+                  all_day=values['kind'] == 'all_day' or values['kind']=='task_deadline' and len(raw)==1)
+    fields.update(date=raw[0], start_time=raw[1] if len(raw) == 2 else '')
+    if len(raw) > 2: raise ValueError('Neplatný začátek.')
+    if (fields['date'], fields['start_time'], fields['kind'], fields['all_day']) != (old['date'], old['start_time'], old['kind'], old['all_day']):
+        fields.update(end_date='', end_time='', duration_minutes=old['duration_minutes'] if old['kind']=='meeting' and not old['all_day'] else '')
+        if fields['all_day'] and old['all_day'] and old['end_date']:
+            try:
+                days = date.fromisoformat(old['end_date'])-date.fromisoformat(old['date'])
+                fields['end_date'] = (date.fromisoformat(fields['date'])+days).isoformat()
+            except ValueError: pass
+    if fields['kind'] == 'task_deadline':
+        fields.update(end_date='', end_time='', duration_minutes='')
+    if fields['all_day']: fields.update(start_time='', end_time='', duration_minutes='')
+    return simple_defaults(fields)[0]
 
 
 def validate_reminders(value):

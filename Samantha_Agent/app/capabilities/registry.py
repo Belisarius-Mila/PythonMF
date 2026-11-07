@@ -11,6 +11,33 @@ from app.capabilities.models import (
 
 
 CAPABILITIES: tuple[CapabilityRecord, ...] = (
+    CapabilityRecord(
+        capability_id="email_calendar_draft_write", label="Create the exact human-confirmed calendar event",
+        risk=RiskLevel.EXTERNAL_SEND, reads=("current four-field draft, fresh conflicts and configured writable target",),
+        writes=("one new calendar event and two alarms", "private durable single-attempt journal"),
+        tool="app.email.calendar_write.CalendarWrite.execute", requires_confirmation=True,
+        confirmation_policy=ConfirmationPolicy.EXACT_CURRENT_MESSAGE, audit=AuditPolicy.REDACTED,
+        notes="Only the Write button; changed target/conflicts require another click. Read-back verification. Unknown results recover by read only, never retry create. No update/delete, attendees or invitation sending.",
+    ),
+    CapabilityRecord(
+        capability_id="calendar_writer_build", label="Build the separate create-only EventKit helper",
+        risk=RiskLevel.LOCAL_WRITE, reads=("reviewed native writer source",), writes=("owned signed app and synthetic build proof",),
+        tool="app.calendar_writer.CalendarWriter.build", requires_confirmation=True,
+        confirmation_policy=ConfirmationPolicy.SUMMARY_BEFORE_ACTION, audit=AuditPolicy.REDACTED,
+    ),
+    CapabilityRecord(
+        capability_id="email_calendar_draft_authorize_writer", label="Request Mac access for the exact writer build",
+        risk=RiskLevel.LOCAL_WRITE, reads=("exact owned writer build",), writes=("private permission receipt and GUI permission request",),
+        tool="app.email.calendar_draft.CalendarDraftService.execute", requires_confirmation=True,
+        confirmation_policy=ConfirmationPolicy.SUMMARY_BEFORE_ACTION, audit=AuditPolicy.REDACTED,
+        notes="Explicit permission button, one request per binary hash. No event creation or TCC reset; existing read-only helper stays unchanged.",
+    ),
+    CapabilityRecord(
+        capability_id="email_calendar_draft_save_simple", label="Autosave the four private calendar fields",
+        risk=RiskLevel.LOCAL_WRITE, reads=("user edits and current draft revision",), writes=("private draft only",),
+        tool="app.email.calendar_draft.CalendarDraftService.execute", requires_confirmation=True,
+        confirmation_policy=ConfirmationPolicy.SUMMARY_BEFORE_ACTION, audit=AuditPolicy.REDACTED,
+    ),
     *(CapabilityRecord(
         capability_id="email_calendar_draft_" + action, label="Review calendar conflicts and approve an exact suggestion: " + action,
         risk=RiskLevel.LOCAL_WRITE, reads=("selected private email draft", "fresh bounded selected calendar intervals and writable destination"),
@@ -31,14 +58,14 @@ CAPABILITIES: tuple[CapabilityRecord, ...] = (
         writes=("private single-attempt journal and editable draft",),
         tool="app.email.calendar_draft.CalendarDraftService.prepare", requires_confirmation=True,
         confirmation_policy=ConfirmationPolicy.EXACT_CURRENT_MESSAGE, audit=AuditPolicy.REDACTED,
-        notes="Dedicated model button after disclosure. One attempt per source mail; no calendar data, calendar mutation, mail send, automatic retry or hourly integration. ICS/recognized recurrence is handled locally as manual-required.",
+        notes="The dedicated Do kalendáře click prepares a proposal from this selected mail. One attempt per source mail; no calendar data, calendar mutation, mail send, automatic retry or hourly integration. ICS/recognized recurrence is handled locally as manual-required.",
     ),
     CapabilityRecord(
         capability_id="email_calendar_draft_save", label="Save human changes to a private calendar suggestion",
         risk=RiskLevel.LOCAL_WRITE, reads=("current private draft revision and user edits",),
         writes=("private draft only",), tool="app.email.calendar_draft.CalendarDraftService.save",
         requires_confirmation=True, confirmation_policy=ConfirmationPolicy.SUMMARY_BEFORE_ACTION, audit=AuditPolicy.REDACTED,
-        notes="Explicit Save draft and revision check. Invalid/incomplete times remain visibly unresolved. No model or calendar write.",
+        notes="Private save with revision check; the simple card autosaves edits. Invalid/incomplete times remain visibly unresolved. No model or calendar write.",
     ),
     CapabilityRecord(
         capability_id="calendar_overview_status", label="Read private calendar overview snapshot",
@@ -53,7 +80,7 @@ CAPABILITIES: tuple[CapabilityRecord, ...] = (
         tool="app.calendar_overview.CalendarOverview." + action,
         requires_confirmation=True, confirmation_policy=ConfirmationPolicy.SUMMARY_BEFORE_ACTION,
         audit=AuditPolicy.REDACTED,
-        notes="No event mutation API or model. Calendar target is a future preference only; OS grant remains a user action on the Mac.",
+        notes="No event mutation API or model. The configured target is used only by a separately confirmed writer; OS grant remains a user action on the Mac.",
     ) for action in ("refresh", "save_selection", "authorize")),
     CapabilityRecord(
         capability_id="calendar_access_pilot_status", label="Read EventKit pilot authorization status",

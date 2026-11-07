@@ -32,9 +32,9 @@ EXPECTED_PAGES = {
     ),
     "email_agent": (
         EMAIL_AGENT_HTML,
-        44923,
-        695,
-        "cd8ef53bf22d307c63a404b976ebae6651a56ff55128d78d9163e95eff1790da",
+        32684,
+        488,
+        "4962984b30ec3c07fcca9bfdcae69f3ccb5c67fcebccb345c060ed2fb69f6b07",
     ),
     "email_archive": (
         EMAIL_ARCHIVE_HTML,

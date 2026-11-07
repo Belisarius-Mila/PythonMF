@@ -1,14 +1,22 @@
 # E-mail read-only OAuth integrace
 
-Kalendářový bod 4 je lokálně připravený: automatické koncové datum, vypočtená
-délka, výchozí upozornění 24 h a 60 min, čerstvé kolize a konečný náhled s cílem.
-Potvrzení je vázané na přesný návrh a platí 5 minut; skutečný zápis je až bod 5.
-Bod 3 + Datovo odstranění placeného hlasu jsou nasazené v 9730a662
-(Terra, 2636 testů, smoke 5/5, CI PASS). Míla nově schválil společné Terra p+n bodu 4 a Datových REC-01 až REC-04 commitů; výsledek dle logs/calendar_recovery_verified_20261107.log.
-Míla již povolil přístup a vybral čtyři čtené kalendáře i cíl; nové omezené čtení
-ze skutečného launchd kontextu PASS bez změny buildu, nastavení nebo událostí.
-Konečný místní commit a brána dle logs/calendar_review_verified_20261107.log.
-Nový TVBCP nebyl dohodnutý; kanonický proud zůstává project-email-cases.
+Kalendář nově lokálně používá jednu kartu se čtyřmi poli: název, začátek,
+typ a místo. Kliknutí Do kalendáře připraví návrh přes stávající Terra roli;
+úpravy i kontrola kolizí probíhají automaticky. Výchozí pásmo Europe/Prague,
+konec +1 hodina; výslovný konec/délka/pásmo mají přednost. Při posunu začátku
+se zachová navržená délka, také vícedenní celodenní období. Dva alarmy 24 h/60 min.
+Samostatný create-only EventKit writer zapisuje až po kliknutí Zapsat do
+kalendáře. Nové kolize či změna cíle vyžadují další kliknutí na aktualizovanou
+kartu. Ověřuje uložené údaje i alarmy; nejistý výsledek dovoluje pouze čtecí
+obnovu původního zápisu, nikoli druhý create. Původní read-only Swift/bundle a
+jeho OS souhlas zůstávají beze změny. Writer vyžaduje vlastní OS souhlas na Macu.
+Tento vývoj zatím není pushnutý ani nasazený; poslední nasazený základ je
+2909ea5a. Žádná skutečná událost ani nový placený modelový tah při vývoji.
+Plná brána 2874 testů PASS (31 SKIP), posledních 128 cílených PASS a statická
+brána PASS. Nativní build + šest syntetických kontrol PASS; fyzická přejímka nového
+writeru a Safari/iPhonu je otevřená. Safari QA blokuje cgWindowNotFound a
+nedostupný browser host. Podrobnosti reports/calendar_simple_20261107.md a
+logs/calendar_simple_gate_20261107.log. Samostatný e-mailový TVBCP není domluvený.
 
 Aktuální stav 6. 11.: Terra p+n e82a5d47 dokončené, nový editor živě ověřený.
 Potvrzený upgrade na f2d6ef79 aktivoval zdvořilostní pravidlo i v hodinovém
@@ -1327,3 +1335,22 @@ Technický důkaz: logs/calendar_rec05_targeted_20261107.log a
 calendar_rec05_environment_20261107.log. Plná brána posledního balíčku je
 povinná u registrovaného workeru. Bez změny hodinové kopie, výběru kalendářů,
 produkčních TXT/iCloud kopií nebo aktivace plánovače.
+
+## 2026-11-07 19:26 CET — jednoduchý soukromý kalendář a potvrzený zápis
+
+Hotovo: Jedna karta se čtyřmi poli, automatická příprava/ukládání/kontrola,
+jedno tlačítko pro zápis a samostatný create-only helper s oběma alarmy.
+
+Rozhodnutí: Míla schválil zjednodušení pro soukromé účely; výslovný konec
+má přednost před hodinou. Bez nového p+n; poslední nasazení 2909ea5a.
+
+Další krok: po samostatně schváleném p+n povolit přesný writer na Macu a
+potvrdit jednu konkrétní skutečnou událost pro přejímku.
+
+Navrhované další kroky: přejímka na iPhonu. Nový TVBCP nevzniká bez dohody.
+
+Technický důkaz: report calendar_simple_20261107.md; úplná brána
+logs/calendar_simple_gate_20261107.log a nativní build
+logs/calendar_simple_native_20261107.log. Skutečný EventKit zápis ani nový
+modelový tah nebyly spuštěny. Browser QA blokuje nedostupné okno/host; neprošla
+fyzická přejímka. Hodinový e-mailový runtime, placený hlas a Data worktree se nemění.

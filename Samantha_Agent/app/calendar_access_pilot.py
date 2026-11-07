@@ -31,6 +31,14 @@ def _sha(path):
 
 
 class CalendarAccessPilot:
+    source = SOURCE
+    bundle_id = BUNDLE_ID
+    binary_name = "CalendarReadOnlyPilot"
+    app_name = "SamanthaCalendarReadOnly.app"
+    display_name = "Samantha Calendar Read Only"
+    usage = "Samantha ověří čtení iCloud kalendářů. Tento pilot neumí události vytvářet, měnit ani mazat."
+    self_test_checks = 4
+
     def __init__(self, root=DEFAULT_ROOT, *, runner=subprocess.run):
         if Path(root).is_symlink():
             raise CalendarPilotError("Kořen pilotu nesmí být symlink.")
@@ -61,10 +69,10 @@ class CalendarAccessPilot:
         path = self._safe(self.root / "build.json")
         value = json.loads(path.read_text())
         app = self._safe(Path(value["app"]))
-        binary = self._safe(app / "Contents/MacOS/CalendarReadOnlyPilot")
+        binary = self._safe(app / ("Contents/MacOS/" + self.binary_name))
         info = self._safe(app / "Contents/Info.plist")
         if (_sha(binary) != value["binary_sha256"] or _sha(info) != value["info_sha256"]
-                or _sha(SOURCE) != value["source_sha256"]):
+                or _sha(self.source) != value["source_sha256"]):
             raise CalendarPilotError("Sestavený pilot nebo jeho zdroj se změnil.")
         return value, app, binary
 
@@ -76,33 +84,33 @@ class CalendarAccessPilot:
         with exclusive_file_lock(self.root / "build", timeout=0):
             if (self.root / "build.json").exists():
                 previous = json.loads((self.root / "build.json").read_text())
-                if previous.get("source_sha256") == _sha(SOURCE):
+                if previous.get("source_sha256") == _sha(self.source):
                     self._build_info()
                     return {"ok": True, "built": True, "reused": True}
                 history = self.root / "build_history"
                 history.mkdir(exist_ok=True, mode=0o700)
                 self._write(history / (uuid4().hex + ".json"), previous)
-            app = self.root / "builds" / uuid4().hex / "SamanthaCalendarReadOnly.app"
-            binary = app / "Contents/MacOS/CalendarReadOnlyPilot"
+            app = self.root / "builds" / uuid4().hex / self.app_name
+            binary = app / ("Contents/MacOS/" + self.binary_name)
             binary.parent.mkdir(parents=True, mode=0o700)
             info = app / "Contents/Info.plist"
             info.write_bytes(plistlib.dumps({
-                "CFBundleIdentifier": BUNDLE_ID, "CFBundleName": "Samantha Calendar Read Only",
+                "CFBundleIdentifier": self.bundle_id, "CFBundleName": self.display_name,
                 "CFBundleExecutable": binary.name, "CFBundlePackageType": "APPL",
                 "CFBundleVersion": "1", "LSUIElement": True, "LSMinimumSystemVersion": "14.0",
-                "NSCalendarsFullAccessUsageDescription": "Samantha ověří čtení iCloud kalendářů. Tento pilot neumí události vytvářet, měnit ani mazat.",
+                "NSCalendarsFullAccessUsageDescription": self.usage,
                 "SamanthaPilotRoot": str(self.root),
             }))
-            self._run(["/usr/bin/xcrun", "swiftc", "-swift-version", "5", str(SOURCE),
+            self._run(["/usr/bin/xcrun", "swiftc", "-swift-version", "5", str(self.source),
                        "-framework", "AppKit", "-framework", "EventKit", "-o", str(binary)], timeout=180)
             self._run(["/usr/bin/codesign", "--sign", "-", str(app)])
             self._run(["/usr/bin/codesign", "--verify", "--deep", "--strict", str(app)])
             test = json.loads(self._run([str(binary), "--self-test"]))
-            if test != {"self_test": True, "checks": 4, "calendar_accessed": False}:
+            if test != {"self_test": True, "checks": self.self_test_checks, "calendar_accessed": False}:
                 raise CalendarPilotError("Nativní syntetická zkouška neprošla.")
-            self._write(self.root / "build.json", {"app": str(app), "source_sha256": _sha(SOURCE),
-                "binary_sha256": _sha(binary), "info_sha256": _sha(info), "bundle_id": BUNDLE_ID})
-            return {"ok": True, "built": True, "reused": False, "native_self_test_checks": 4}
+            self._write(self.root / "build.json", {"app": str(app), "source_sha256": _sha(self.source),
+                "binary_sha256": _sha(binary), "info_sha256": _sha(info), "bundle_id": self.bundle_id})
+            return {"ok": True, "built": True, "reused": False, "native_self_test_checks": self.self_test_checks}
 
     def status(self):
         if not (self.root / "build.json").exists():
@@ -110,7 +118,7 @@ class CalendarAccessPilot:
         _, _, binary = self._build_info()
         result = json.loads(self._run([binary, "--status-json"]))
         if (result.get("operation") != "status" or result.get("schema") != 1
-                or result.get("calendar_writes") is not False or result.get("bundle_identifier") != BUNDLE_ID
+                or result.get("calendar_writes") is not False or result.get("bundle_identifier") != self.bundle_id
                 or result.get("authorization") not in AUTHORIZATIONS):
             raise CalendarPilotError("Nativní stav nemá platný protokol.")
         return {"ok": True, "built": True, "authorization": result["authorization"],
@@ -145,7 +153,7 @@ class CalendarAccessPilot:
         result = json.loads(response_path.read_text())
         if (result.get("request_id") != request["request_id"] or result.get("operation") != request["operation"]
                 or result.get("schema") != 1 or result.get("calendar_writes") is not False
-                or result.get("bundle_identifier") != BUNDLE_ID or result.get("authorization") not in AUTHORIZATIONS):
+                or result.get("bundle_identifier") != self.bundle_id or result.get("authorization") not in AUTHORIZATIONS):
             raise CalendarPilotError("Výsledek patří jiné operaci nebo nepovoluje čtecí režim.")
         if result.get("status") == "read_verified":
             for key in ("calendar_count", "icloud_calendar_count", "event_count"):

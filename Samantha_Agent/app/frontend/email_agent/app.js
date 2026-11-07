@@ -50,7 +50,7 @@
     const buttons = node("div", undefined, "actions");
     const enabled = item.status === "awaiting_confirmation";
     const archived = item.status === "archived";
-    if ((enabled || archived) && window.SamanthaCalendarDraft) buttons.append(action("Navrhnout událost", () => window.SamanthaCalendarDraft.open(item), true));
+    if ((enabled || archived) && window.SamanthaCalendarDraft) buttons.append(action("Do kalendáře", () => window.SamanthaCalendarDraft.open(item), true));
     const replyStatus = (item.reply || {}).status;
     if (replyStatus === "smtp_sent") card.append(node("p", "Odpověď přijal odesílací server."));
     if (["sending", "delivery_unknown"].includes(replyStatus)) card.append(node("p", "Výsledek odeslání vyžaduje ověření. Odpověď znovu neposílej."));

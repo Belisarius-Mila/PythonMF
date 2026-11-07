@@ -97,7 +97,22 @@
       dirty=false; render(await api({action:"refresh",confirmed:true}));
     });
   });
-  run(async () => render(await api()));
+  async function showSavedEvent() {
+    const email = typeof location === "undefined" ? "" : new URLSearchParams(location.search).get("email");
+    if (!email || !/^[0-9a-f]{64}$/.test(email)) return;
+    const panel = $("saved-event"); panel.hidden = false; panel.textContent = "Načítám zapsanou událost…";
+    try {
+      const response = await fetch("/api/email-agent/calendar-draft?id="+email, {cache:"no-store"});
+      const data = await response.json();
+      if (!response.ok || !data.ok || data.write?.state !== "verified") throw new Error("Ověřený zápis není dostupný.");
+      const event=data.write.verified_event;
+      panel.replaceChildren(element("h2",event.title), element("p",dateFormat.format(new Date(event.start))+" – "+dateFormat.format(new Date(event.end))),
+        element("p",event.location || ""), element("p","Upozornění: "+event.reminders.map(n => n===1440 ? "den předem" : "hodinu předem").join(", ")+". Zápis ověřen "+dateFormat.format(new Date(data.write.checked_at))+". Pozdější změny se projeví po obnovení přehledu."));
+      if (event.join_url) { const link=element("a","Připojit se"); const url=new URL(event.join_url); if (["http:","https:"].includes(url.protocol) && !url.username && !url.password) { link.href=url.href; link.rel="noreferrer"; panel.append(link); } }
+      panel.scrollIntoView?.({block:"start"});
+    } catch(error) { panel.textContent=error.message || "Zápis není dostupný."; }
+  }
+  run(async () => { render(await api()); await showSavedEvent(); });
   // A returning page must not keep a previously "ready" banner indefinitely.
   setInterval(() => { if (state && !busy && state.ready && Date.now()-Date.parse(state.last_loaded_at)>900000) { state={...state,ready:false,status:"refresh_required"}; render(state); } },30000);
 })();

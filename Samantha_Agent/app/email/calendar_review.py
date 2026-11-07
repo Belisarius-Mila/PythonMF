@@ -9,7 +9,7 @@ from uuid import uuid4
 from zoneinfo import ZoneInfo
 from app.file_persistence import exclusive_file_lock
 
-from .calendar_proposal import derive_fields, validate_fields, validate_reminders
+from .calendar_proposal import simple_defaults, validate_fields, validate_reminders, resolve_local
 
 
 def instant(value):
@@ -49,11 +49,18 @@ class CalendarReview:
 
     def _preview(self, entry):
         draft = entry['draft']
-        fields, _ = derive_fields(draft['fields'])
+        fields, _ = simple_defaults(draft['fields'])
         issues, normalized = validate_fields(fields)
         if issues: raise ValueError('Před kontrolou doplň návrh: ' + ' '.join(issues))
+        if not normalized and fields['kind']=='task_deadline' and fields['all_day']:
+            from datetime import date
+            zone = ZoneInfo(fields['time_zone']); errors = []
+            day = date.fromisoformat(fields['date'])
+            start = resolve_local(day, '00:00', zone, errors)
+            end = resolve_local(day+timedelta(days=1), '00:00', zone, errors)
+            if start and end and not errors: normalized = {'start':start.isoformat(), 'end':end.isoformat()}
         if not normalized:
-            raise ValueError('Pro kontrolu termínu a upozornění doplň konkrétní čas termínu.')
+            raise ValueError('Doplň konkrétní čas termínu nebo vyber typ Celý den.')
         point = normalized.get('deadline')
         start = instant(point or normalized['start'])
         end = start + timedelta(seconds=1) if point else instant(normalized['end'])

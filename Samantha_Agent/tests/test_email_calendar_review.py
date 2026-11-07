@@ -183,7 +183,7 @@ class CalendarReviewTests(unittest.TestCase):
             self.assertIsNone(self.state()['confirmation']);self.assertFalse(self.state()['review']['valid'])
 
     def test_incomplete_or_manual_draft_is_not_confirmable(self):
-        for changes in ({'time_zone':''},{'end_time':'','duration_minutes':''},{'kind':'manual_required'}):
+        for changes in ({'date':''},{'start_time':''},{'kind':'manual_required'}):
             self.save(**changes)
             with self.assertRaises(ValueError):
                 self.service.execute({'action':'review','id':self.mail.item_id,'expected_revision':self.state()['draft']['revision'],'confirmed':True})
