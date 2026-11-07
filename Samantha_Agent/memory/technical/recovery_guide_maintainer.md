@@ -341,3 +341,24 @@ Zachovat raw citace a přísný gate; další návrh je programový source/ancho
 ID resolver pro inspect i synthesis. Není implementovaný ani modelově
 ověřený. Nový placený trial nevzniká automaticky z nevyužité rezervy tohoto
 uzavřeného běhu. Zdrojové/účetní důkazy v REC-06 run reportu a full_result JSON.
+
+## 2026-11-07 — offline source/anchor protokol
+
+Nové samostatné `recovery_guide_anchors.py`, `recovery_guide_anchor_protocol.py`
+a čtecí `recovery_guide_anchor_audit.py` nevolají SDK. Modelový kontrakt vybírá
+source/anchor ID; přesný text vrací program z katalogu celého snapshotu.
+Inspect vyžaduje pevné pokrytí všech dokumentů, synthesis všechny dávky právě
+jednou a pouze předané evidence (plus celý original). Nezměněný quality gate
+nadále kontroluje přesné citace, historii i neschválené příkazy.
+
+Offline regrese: 24 testů, 530 dokumentů + original zachovaných beze zkrácení,
+14 requestů, 101 fixture dokumentů včetně dvou doložených kapitalizací.
+Není to živá modelová přejímka ani nové přijetí starých notes. Uzavřený v2 job,
+raw účtenky a původních 21,013 Standard kreditu se nemění; žádný placený tah.
+
+Katalog/request hashe nejsou autorizace. Prázdné zdroje nejsou podporované,
+max 996 zdrojů/schema. Chybí živý adapter a nové tokenové/cenové posouzení
+(včetně celých řádků, metadat, schémat a syntézy). Další krok je nový izolovaný
+trial a konkrétní neplacená karta, poté samostatně přijatý malý živý test.
+Doklad a přesný návrh: reports/recovery_guide_anchors_20261107.md a
+reports/recovery_guide_anchors_offline_20261107.json. REC-06 zůstává otevřená.

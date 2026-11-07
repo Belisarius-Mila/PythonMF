@@ -1,43 +1,40 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
-## 2026-11-07 21:44 CET — REC-06: živý pilot zastaven citačním kontraktem po dvou tazích
+## 2026-11-07 22:53 CET — REC-06: offline source/anchor protokol hotov
 
 ### Hotovo
-- Schválená v2 revize proběhla kontrolovaně do druhé SDK dávky. Obě odpovědi
-  jsou completed/delivered; dva jedinečné turny, žádný SDK retry. První odpověď
-  byla v pokračování převzata lokálně, původní raw soubor zůstává beze změny.
-- Celkem 387 928 tokenů, odhad 21,013 Standard kreditu včetně první ceny jednou.
-  V doručených odpovědích je 101 dokumentů; 99 raw citací je doslovných.
-- Druhá dávka se zastavila na dvou změnách prvního písmena citace proti zdroji
-  (Restart/restart, Oddělit/oddělit). Celý návrh TXT ani syntéza nevznikly.
+- Nový neměnný katalog a inspect/synthesis protokol: model vybírá ID,
+  přesné citace dodává program ze zmrazeného textu. Původní quality gate zůstává.
+- 24 nových testů OK. Čtecí audit historického v2 zachoval celý original
+  a 530 dokumentů; 14 úplných requestů, 81 612 neprázdných anchorů.
+- Offline fixture pro 101 dokumentů včetně dvou známých kapitalizačních
+  případů prošly; neúplná syntéza byla odmítnuta. Fixture nejsou nový modelový výsledek.
 
 ### Rozhodnutí
-- Dalších 13 plánovaných SDK tahů se neodesílá. Doslovný citační kontrakt
-  zůstává přísný; dvě nepřesné modelové citace se automaticky nenahradily
-  zdrojovým textem. Nejde o nejisté doručení, ale o doloženou chybu přesnosti.
-- REC-06 ani celý REC-02 nejsou přijaté; týdenní automatiku zatím neaktivovat.
-  Další placená zkouška vyžaduje nový konkrétní podklad, nikoli retry z této rezervy.
-- Produkční TXT/kopie, role JSON, služby a nasazení se v tomto kroku neměnily.
+- Žádný nový SDK/modelový tah; staré raw účtenky i uzavřený job beze změny.
+  Původní odhad 21,013 Standard kreditu zůstává historickou cenou dvou tahů.
+- REC-06 zůstává otevřená, nový protokol nemá živou modelovou přejímku.
+  Exact reference nedokazuje správnost tvrzení ani nastavení Macu/iPhonu.
+- Žádná změna produkčního klienta/runtime, role JSON, provozních TXT/kopií,
+  iCloudu, služeb, aktivace, push nebo nasazení.
 
 ### Další krok
-- Neplaceně připravit pilot source/anchor ID: model odkazuje na povolené
-  úseky, přesnou citaci vrací program ze zmrazených znaků zdroje. Ověřit
-  inspect i synthesis a stávající doslovný validátor zachovat.
+- Připravit nový izolovaný anchor trial adapter a neplacenou kartu s novou
+  identitou, přepočtem tokenů/ceny včetně anchor/schema/synthesis režie.
+  Malou živou zkoušku předložit zvlášť; uzavřený v2 job se nesmí znovu spustit.
 
 ### Navrhované další kroky
-- Will převezme známý výsledek a izolovanou opravu s uchováním své kalendářové práce.
-- Po offline anchor testech znovu nacenit a výslovně přijmout případnou novou zkoušku.
-- Až po celém kandidátovi doplnit Mac/iPhone dossier a obsahovou přejímku.
-- Teprve potom povolené dvě kopie/upload/iPhone a samostatná týdenní aktivace.
+- Will přezkoumá lokální pilotní diff a zachová svoji kalendářovou práci.
+- Neplacený live adapter/cenová karta, potom samostatně přijatý malý živý test.
+- Teprve po úspěchu případně nový úplný pilot a obsahový Mac/iPhone dossier.
+- Přijetí kopií/upload/iPhone a týdenní aktivace zůstávají samostatné kroky.
 
 ### Technický důkaz
-- Celkem input 379 845, cached 0, output 8 083 (reasoning subset 109).
-  Ceny dvou SDK účtenek 10,44505 + 10,56795 = 21,013; historické ledgery nesčítat.
-- První 36-dokumentová dávka převzata; druhá 65-dokumentová dávka atomicky
-  odmítnuta kvůli 2 ze 65 citací. Žádný raw soubor třetího SDK tahu.
-- 47 cílených testů, plná brána 2 618 OK / 5 skipped; finální statická brána OK.
-- Účtenky zůstávají v soukromé .venv. Git-safe důkaz
-  recovery_guide_rec06_full_result_20261107.json a report recovery_guide_rec06_run_20261107.md.
-  Starý run/refresh i známé pokračování jsou uzavřené; znovu je nespouštět.
+- recovery_guide_anchors_20261107.md a recovery_guide_anchors_offline_20261107.json.
+- Katalog ceb6dbe4…ac238dc, snapshot 90e85eb7…27ab8ad; 6 290 890 zdrojových B.
+- 14 inspect payloadů 8 742 382 B + schémata 47 756 B; není to cena ani
+  tokenový odhad. max 996 zdrojů/schema, prázdné zdroje nepodporovány.
+- 24 cílených testů OK; plná brána 2 642 testů OK / 5 skipped (620,921 s).
+  Finální statická brána a git diff --check OK.
 <!-- SAMANTHA_CURRENT_STATUS_END -->
 
 ### Předchozí stav infrastruktury
@@ -936,3 +933,40 @@ souborů / 5 002 170 B. Stávající rutinní pilot není obecný writer/schedul
 - Účtenky zůstávají v soukromé .venv. Git-safe důkaz
   recovery_guide_rec06_full_result_20261107.json a report recovery_guide_rec06_run_20261107.md.
   Starý run/refresh i známé pokračování jsou uzavřené; znovu je nespouštět.
+
+## 2026-11-07 22:53 CET — REC-06: offline source/anchor protokol hotov
+
+### Hotovo
+- Nový neměnný katalog a inspect/synthesis protokol: model vybírá ID,
+  přesné citace dodává program ze zmrazeného textu. Původní quality gate zůstává.
+- 24 nových testů OK. Čtecí audit historického v2 zachoval celý original
+  a 530 dokumentů; 14 úplných requestů, 81 612 neprázdných anchorů.
+- Offline fixture pro 101 dokumentů včetně dvou známých kapitalizačních
+  případů prošly; neúplná syntéza byla odmítnuta. Fixture nejsou nový modelový výsledek.
+
+### Rozhodnutí
+- Žádný nový SDK/modelový tah; staré raw účtenky i uzavřený job beze změny.
+  Původní odhad 21,013 Standard kreditu zůstává historickou cenou dvou tahů.
+- REC-06 zůstává otevřená, nový protokol nemá živou modelovou přejímku.
+  Exact reference nedokazuje správnost tvrzení ani nastavení Macu/iPhonu.
+- Žádná změna produkčního klienta/runtime, role JSON, provozních TXT/kopií,
+  iCloudu, služeb, aktivace, push nebo nasazení.
+
+### Další krok
+- Připravit nový izolovaný anchor trial adapter a neplacenou kartu s novou
+  identitou, přepočtem tokenů/ceny včetně anchor/schema/synthesis režie.
+  Malou živou zkoušku předložit zvlášť; uzavřený v2 job se nesmí znovu spustit.
+
+### Navrhované další kroky
+- Will přezkoumá lokální pilotní diff a zachová svoji kalendářovou práci.
+- Neplacený live adapter/cenová karta, potom samostatně přijatý malý živý test.
+- Teprve po úspěchu případně nový úplný pilot a obsahový Mac/iPhone dossier.
+- Přijetí kopií/upload/iPhone a týdenní aktivace zůstávají samostatné kroky.
+
+### Technický důkaz
+- recovery_guide_anchors_20261107.md a recovery_guide_anchors_offline_20261107.json.
+- Katalog ceb6dbe4…ac238dc, snapshot 90e85eb7…27ab8ad; 6 290 890 zdrojových B.
+- 14 inspect payloadů 8 742 382 B + schémata 47 756 B; není to cena ani
+  tokenový odhad. max 996 zdrojů/schema, prázdné zdroje nepodporovány.
+- 24 cílených testů OK; plná brána 2 642 testů OK / 5 skipped (620,921 s).
+  Finální statická brána a git diff --check OK.

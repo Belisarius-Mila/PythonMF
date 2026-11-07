@@ -1326,3 +1326,40 @@ závislosti bez konkrétní potřeby. Nejde o rozšíření e-mailové business 
 - Účtenky zůstávají v soukromé .venv. Git-safe důkaz
   recovery_guide_rec06_full_result_20261107.json a report recovery_guide_rec06_run_20261107.md.
   Starý run/refresh i známé pokračování jsou uzavřené; znovu je nespouštět.
+
+## 2026-11-07 22:53 CET — REC-06: offline source/anchor protokol hotov
+
+### Hotovo
+- Nový neměnný katalog a inspect/synthesis protokol: model vybírá ID,
+  přesné citace dodává program ze zmrazeného textu. Původní quality gate zůstává.
+- 24 nových testů OK. Čtecí audit historického v2 zachoval celý original
+  a 530 dokumentů; 14 úplných requestů, 81 612 neprázdných anchorů.
+- Offline fixture pro 101 dokumentů včetně dvou známých kapitalizačních
+  případů prošly; neúplná syntéza byla odmítnuta. Fixture nejsou nový modelový výsledek.
+
+### Rozhodnutí
+- Žádný nový SDK/modelový tah; staré raw účtenky i uzavřený job beze změny.
+  Původní odhad 21,013 Standard kreditu zůstává historickou cenou dvou tahů.
+- REC-06 zůstává otevřená, nový protokol nemá živou modelovou přejímku.
+  Exact reference nedokazuje správnost tvrzení ani nastavení Macu/iPhonu.
+- Žádná změna produkčního klienta/runtime, role JSON, provozních TXT/kopií,
+  iCloudu, služeb, aktivace, push nebo nasazení.
+
+### Další krok
+- Připravit nový izolovaný anchor trial adapter a neplacenou kartu s novou
+  identitou, přepočtem tokenů/ceny včetně anchor/schema/synthesis režie.
+  Malou živou zkoušku předložit zvlášť; uzavřený v2 job se nesmí znovu spustit.
+
+### Navrhované další kroky
+- Will přezkoumá lokální pilotní diff a zachová svoji kalendářovou práci.
+- Neplacený live adapter/cenová karta, potom samostatně přijatý malý živý test.
+- Teprve po úspěchu případně nový úplný pilot a obsahový Mac/iPhone dossier.
+- Přijetí kopií/upload/iPhone a týdenní aktivace zůstávají samostatné kroky.
+
+### Technický důkaz
+- recovery_guide_anchors_20261107.md a recovery_guide_anchors_offline_20261107.json.
+- Katalog ceb6dbe4…ac238dc, snapshot 90e85eb7…27ab8ad; 6 290 890 zdrojových B.
+- 14 inspect payloadů 8 742 382 B + schémata 47 756 B; není to cena ani
+  tokenový odhad. max 996 zdrojů/schema, prázdné zdroje nepodporovány.
+- 24 cílených testů OK; plná brána 2 642 testů OK / 5 skipped (620,921 s).
+  Finální statická brána a git diff --check OK.

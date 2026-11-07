@@ -1718,3 +1718,15 @@ Doplnění 17102026 k LL-071: Nativní modelový pomocník navíc zdvojuje roli,
   neodeslat. Dvě konkrétní kapitalizace doložené v REC-06, 2 SDK tahy,
   21,013 Standard kreditu bez retry. Návrh serverových source/anchor ID je
   další neplacený vývoj, nikoli už ověřené řešení nebo přijatý modelový výstup.
+
+### LL-113 — Přesný text může dodat resolver, model jen vybrat odkaz
+
+- Problém: model věcně správnou citaci při přepisu kapitalizuje; přesný kontrakt selže.
+- Typ: zobecnitelné
+- Řešení nalezeno: 07112026
+- Řešení: v novém protokolu nabídnout ID neměnného zdroje a úseku, vázat je
+  SHA katalogu/requestu a doslovnou citaci načíst programem. Scope, úplnost
+  a původní obsahový gate zachovat i v syntéze. Ověřeno 24 offline testy,
+  úplným historickým korpusem a 101 fixture; není ověřena živá modelová volba
+  ID ani věcná správnost. Starý neúspěšný běh zůstává uzavřený; nový formát
+  vyžaduje nové nacenění a zvláštní přijetí placené zkoušky.
