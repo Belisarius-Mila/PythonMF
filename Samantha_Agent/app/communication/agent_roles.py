@@ -16,8 +16,7 @@ ROUTINE_ROLE = "routine_reviewer"
 DEVELOPMENT_ROLE = "simple_developer"
 EMAIL_ROLE = "continuous_email"
 INTERIOR_ROLE = "interior_architect"
-VOICE_ROLE = "read_only_voice"
-KNOWN_ROLES = frozenset({ROLE, ROUTINE_ROLE, DEVELOPMENT_ROLE, EMAIL_ROLE, INTERIOR_ROLE, VOICE_ROLE})
+KNOWN_ROLES = frozenset({ROLE, ROUTINE_ROLE, DEVELOPMENT_ROLE, EMAIL_ROLE, INTERIOR_ROLE})
 CONFIG_PATH = Path(__file__).resolve().parents[2] / "config/agent_roles.json"
 MODEL_ID = re.compile(r"[a-zA-Z0-9][a-zA-Z0-9._:-]{0,95}")
 EFFORTS = frozenset({"low", "medium", "high", "xhigh", "max", "ultra"})
@@ -39,7 +38,7 @@ def load_role(path: Path = CONFIG_PATH, *, role: str = ROLE) -> dict[str, Any]:
         document = json.loads(raw)
         if set(document) != {"schema", "roles"} or document["schema"] != 1:
             raise ValueError("schema")
-        if (role == VOICE_ROLE or role not in KNOWN_ROLES or role not in document["roles"]
+        if (role not in KNOWN_ROLES or role not in document["roles"]
                 or not set(document["roles"]).issubset(KNOWN_ROLES)):
             raise ValueError("roles")
         binding = document["roles"][role]

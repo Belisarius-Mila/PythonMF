@@ -883,3 +883,28 @@ Navrhované další kroky: Vybraný skutečný e-mail a bod 4 kolizí samostatn�
 Technický důkaz: logs/calendar_draft_full_gate_20261107.log; společné vydání
 dle logs/calendar_draft_retirement_release_20261107.log a *_verified_*.log.
 Tento zápis nepředstírá dokončené nasazení. Soukromé účtenky zůstávají private.
+
+## 2026-11-07 — Will: společný balíček kalendáře 3 a zrušení hlasového pilotu
+
+Míla výslovně schválil p+n včetně Datova rušícího `b4b72ab0`. Will jej
+začlenil nad kalendářový `afb7c9cf`; starší hlasové opravy se samostatně
+nenasazují. Bod 15/P2 je definitivně ukončen, historické přejímky E/F/G
+ani iPhone Start již nejsou dalšími kroky. Data má dál vlastní worktree.
+
+Při řešení konfliktů zůstaly všechny kalendářové a Ateliérové cesty i pět
+ostatních rolí; odstraněná je pouze role read_only_voice a zapojení placeného
+pilota. Na main se přebírá přesných 14 verzovaných odstranění; Datových deset
+generovaných souborů se týkalo jen jeho worktree. Soukromé důkazy a audio se
+nemažou. Běžné předčítání, nahrávání pokynů a audio Camina zůstávají zachované.
+203 integračních testů PASS; po opravě zastaralého testu zakázané hlasové role
+samostatně 10/10 PASS. Rychlá statická a plná publikační brána jsou podmínkou
+vydání. Kalendářový vývoj před integrací: 2726 testů OK, 31 SKIP; jedno
+syntetické živé modelové ověření PASS. Skutečný e-mail ani kalendář se neměnil.
+
+P+n provede jediný registrovaný vykonavatel Terra pro project-email-cases
+(společný Cockpit). Tento zápis vzniká před publikací; konečný provozní stav
+určuje přesná účtenka a logs/calendar_draft_retirement_release_20261107.log,
+čerstvé ověření logs/calendar_draft_retirement_verified_20261107.log.
+Po dokončení ověřit 404 bývalého panelu/API, nové e-mailové UI a běžné audio.
+Fyzická Mac/iPhone přejímka nového kalendářového editoru a oprávnění aktuálního
+EventKit buildu zůstávají oddělené; bod 3 nevytváří kalendářové události.

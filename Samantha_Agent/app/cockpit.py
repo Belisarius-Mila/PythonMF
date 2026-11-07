@@ -168,7 +168,6 @@ from app.communication.simple_main_deploy import (
     load_simple_main_deployment_receipt,
 )
 from app.communication.human_adam_ui import HUMAN_ADAM_HTML
-from app.communication.voice_conversation_cockpit import CockpitVoiceRoutes, PREFIX as VOICE_API_PREFIX
 from app.communication.janicka_r2_chat import (
     R2_ADAM_CHAT_HTML,
     R2_ADAM_DOCUMENT_READER_HTML,
@@ -9621,7 +9620,6 @@ class CockpitServer:
         cockpit_port = self.port
         interior_routes = InteriorRoutes()
         calendar_routes = CalendarOverviewRoutes()
-        voice_routes = CockpitVoiceRoutes(HUMAN_ADAM)
         health_recovery_status_dispatch = build_health_recovery_status_dispatch(
             status_loader=lambda: cockpit_status(),
             live_status_loader=lambda: cockpit_live_status(),
@@ -9820,20 +9818,6 @@ class CockpitServer:
                     return
                 if parsed.path == "/":
                     self.respond_html(COCKPIT_HTML)
-                    return
-                if parsed.path == "/human-adam/voice/":
-                    page, cookie = voice_routes.page(self.headers)
-                    self.respond_html(page, extra_headers=(("Set-Cookie", cookie),))
-                    return
-                voice_asset = voice_routes.asset(parsed.path)
-                if voice_asset is not None:
-                    data = voice_asset.encode("utf-8")
-                    self.send_response(HTTPStatus.OK)
-                    self.send_header("Content-Type", "text/javascript; charset=utf-8")
-                    self.send_header("Cache-Control", "no-store")
-                    self.send_header("Content-Length", str(len(data)))
-                    self.end_headers()
-                    self.wfile.write(data)
                     return
                 if parsed.path == "/human-adam/":
                     self.respond_html(HUMAN_ADAM_HTML)
@@ -10133,26 +10117,6 @@ class CockpitServer:
                     return
                 if parsed.path == "/api/email-agent/pushcut/test":
                     self.respond_json(email_agent_pushcut_test_action(self.read_json()))
-                    return
-                if parsed.path.startswith(VOICE_API_PREFIX):
-                    # Shared Cockpit Host/Origin and release-job guards run first.
-                    if (self.headers.get("Transfer-Encoding") or
-                            len(self.headers.get_all("Content-Length") or []) != 1):
-                        self.respond_json({"error": "invalid_voice_body"}, status=HTTPStatus.BAD_REQUEST)
-                        self.close_connection = True
-                        return
-                    try:
-                        length = int(self.headers["Content-Length"])
-                    except ValueError:
-                        length = -1
-                    if not 0 < length <= 65536:
-                        self.respond_json({"error": "invalid_voice_body"}, status=HTTPStatus.BAD_REQUEST)
-                        self.close_connection = True
-                        return
-                    code, result = voice_routes.post(parsed.path, self.headers, self.rfile.read(length))
-                    cookie = result.pop("_voice_cookie", None)
-                    self.respond_json(result, status=HTTPStatus(code),
-                                      extra_headers=(("Set-Cookie", cookie),) if cookie else ())
                     return
                 if parsed.path == "/api/email-agent/remember-importance":
                     self.respond_json(email_agent_remember_importance_action(self.read_json()))
@@ -10981,11 +10945,9 @@ class CockpitServer:
             def log_message(self, format: str, *args: Any) -> None:
                 return
 
-            def respond_html(self, html: str, status: HTTPStatus = HTTPStatus.OK, *, extra_headers=()) -> None:
+            def respond_html(self, html: str, status: HTTPStatus = HTTPStatus.OK) -> None:
                 data = html.encode("utf-8")
                 self.send_response(status)
-                for name, value in extra_headers:
-                    self.send_header(name, value)
                 self.send_header("Content-Type", "text/html; charset=utf-8")
                 self.send_header("Cache-Control", "no-store, max-age=0")
                 self.send_header("Pragma", "no-cache")
@@ -10993,11 +10955,9 @@ class CockpitServer:
                 self.end_headers()
                 self.wfile.write(data)
 
-            def respond_json(self, payload: dict[str, Any], status: HTTPStatus = HTTPStatus.OK, *, extra_headers=()) -> None:
+            def respond_json(self, payload: dict[str, Any], status: HTTPStatus = HTTPStatus.OK) -> None:
                 data = json.dumps(payload, ensure_ascii=False, indent=2).encode("utf-8")
                 self.send_response(status)
-                for name, value in extra_headers:
-                    self.send_header(name, value)
                 self.send_header("Content-Type", "application/json; charset=utf-8")
                 self.send_header("Cache-Control", "no-store, max-age=0")
                 self.send_header("Content-Length", str(len(data)))

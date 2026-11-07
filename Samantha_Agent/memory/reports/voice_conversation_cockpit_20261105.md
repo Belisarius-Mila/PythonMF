@@ -1,6 +1,14 @@
 # 15/P2-D — Čtecí hlas připojený ke zdrojům Cockpitu
 
-## Aktuální stav — 2026-11-05 22:06 CET, Datův čtecí hlas v Cockpitu
+> **ARCHIV — ZRUŠENO rozhodnutím Míly 2026-11-07.** Placený hlasový rozhovor
+> není pro Agenta SDK Samantha relevantní. Níže je historický průběh, nikoli
+> aktuální plán nebo povolení ke spuštění, adopci či nasazení. Aktuální stav:
+> paid_voice_retirement_20261107.md a kanonický handoff Human–Adam.
+
+
+Stav: lokální implementace v Data worktree, nikoli nasazená služba.
+
+## Historický stav — 2026-11-05 22:06 CET, Datův čtecí hlas v Cockpitu
 
 ### Hotovo
 - Datova větev a5e401e6 je pravidelným merge zachovaná v main 11b4ce64; vlastní Datův worktree zůstává čistý na původním headu. Novější e-mail, Ateliér a původní App Server klient zůstaly zachované. 05/P1 je uzavřená 17/17; SDK neadoptované.
@@ -18,7 +26,7 @@
 - Technický důkaz: logs/data_voice_code_release_20261105.log, data_voice_email_compat_upgrade_20261105.log, data_voice_role_activation_20261105.log, data_voice_role_targeted_20261105.log, data_voice_live_precommit_20261105.log. Závěrečný provozní audit: logs/data_voice_final_verified_20261105.log; GitHub CI obou přesných headů v data_voice_code_ci_20261105.log a data_voice_role_ci_20261105.log. Žádný nový TVBCP.
 
 
-Historický výchozí stav: lokální implementace v Data worktree. Aktuální provozní stav je v integračním záznamu výše.
+Historický výchozí stav: lokální implementace v Data worktree. Aktuální stav určuje rušící report 7. 11. 2026.
 Proud: `layer-human-adam-development`. Větev: `data/parallel-20261104`.
 Pokyn Míly: „Připoj čtecí hlas do cockpitu...“
 

@@ -1,36 +1,20 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
-## Aktuální stav — 2026-11-07 00:18 CET, společná integrace Willa a Daty
+## Aktuální stav — kalendář 3 hotový, placený hlasový pilot zrušen
 
-### Hotovo
-- Do novějšího main s Willovým čtecím EventKit pilotem c0963d6b jsou převzaté
-  Datovy commity 4bf110fd, 73fdc08e a 975f0900. Browserové assety a Node kontrakt
-  jsou byteově shodné s Datovým 975f0900; jeho vlastní worktree se nemění.
-- Hlasový panel rozlišuje HTTP/API/WebRTC, bezpečně vysvětluje čekání a chyby
-  mikrofonu a opravuje receiver výchozích setTimeout/clearTimeout přes globalThis.
-- E-mailová zdvořilostní politika, Ateliér, modelové role a samostatná hodinová
-  služba zůstávají zachované. Kalendářový pilot je nadále pouze čtecí.
-
-### Rozhodnutí
-- Míla výslovně autorizoval převzetí a Terra p+n Willových i Datových commitů.
-  Společné vydání přes registrované submit_release(wait=True), připnuté k Terře
-  a výslednému schválenému merge headu; bez dalšího mikrofonu či placeného probe.
-- Původní 47s hlasový probe je spotřebovaný a neopakuje se. Žádný restart
-  sdíleného App Serveru, změna sítí nebo update vlastní e-mailové kopie.
-
-### Další krok
-Dokončit registrované společné p+n; autoritou jsou přesná účtenka a následné
-živé ověření v logs/calendar_voice_release_20261107.log a
-calendar_voice_verified_20261107.log. Potom Mílův samostatný iPhone Start a
-poslech; fyzická přejímka mikrofonu/WebRTC/ceny se tímto kódem nepředstírá.
-
-### Navrhované další kroky
-Kalendářový bod 2 (výběr kalendářů a čtecí přehled) až jako další vývojový krok.
-
-### Technický důkaz
-Node browserový kontrakt a 114 cílených testů PASS, statická brána PASS dle
-logs/calendar_voice_integration_targeted_20261107.log a
-calendar_voice_integration_static_20261107.log. Plnou publikační bránu provede
-vykonavatel. Soukromá data, žádosti o oprávnění a původní e-mail nepatří do Gitu.
+- Míla schválil společné Terra p+n kalendářového afb7c9cf a Datova rušícího
+  b4b72ab0. Will integruje na main, Data zůstává ve vlastním worktree.
+- Bod 15/P2 je ukončen bez náhrady. Přesná globální brzda pro Datovo odstranění
+  byla potvrzená; 14 verzovaných souborů se přebírá, soukromé důkazy zůstávají.
+  Žádné další placené hlasové pokusy ani nasazování oprav E/F/G.
+- Běžné nahrávání pokynů, předčítání a Camino audio jsou zachované. Ostatních
+  pět rolí, Ateliér, kalendář 1/2 a hodinový e-mailový agent zůstávají zachované.
+- Cílená integrace 203 testů PASS; kalendář před integrací 2726 OK / 31 SKIP,
+  Data samostatně 2377 OK / 5 SKIP. Vydání vyžaduje plnou společnou bránu.
+- Autoritou výsledku nasazení jsou přesná účtenka a runtime logy
+  logs/calendar_draft_retirement_release_20261107.log a
+  logs/calendar_draft_retirement_verified_20261107.log. Tento zápis je před vydáním.
+- Další krok: ověřit nové UI a odstranění bývalého panelu/API. Skutečný e-mail,
+  fyzická Mac/iPhone přejímka a OS oprávnění EventKit zůstávají samostatné.
 <!-- SAMANTHA_CURRENT_STATUS_END -->
 
 Nazev: Human–Adam / vyvojove prostredi - zalozeni pracovniho proudu Layer
@@ -3127,3 +3111,77 @@ Node browserový kontrakt a 114 cílených testů PASS, statická brána PASS dl
 logs/calendar_voice_integration_targeted_20261107.log a
 calendar_voice_integration_static_20261107.log. Plnou publikační bránu provede
 vykonavatel. Soukromá data, žádosti o oprávnění a původní e-mail nepatří do Gitu.
+
+## 2026-11-07 08:55 CET — zrušení placeného hlasového rozhovoru
+
+### Hotovo
+Připravený přesný návrh vyřazení celého placeného pilotu 15/P2 včetně
+frontendového panelu, brokeru/probe, role, API, capability a vlastních testů.
+
+### Rozhodnutí
+Míla projekt kompletně ruší: „není pro Agenta SDK Samantha relevantní“.
+Starší kroky A–G jsou historické, nejsou pokynem pokračovat nebo je nasadit.
+
+### Další krok
+Po přesném potvrzení globální brzdy odstranit vymezené soubory a projít
+skutečné cílené testy i plnou bránu. Zatím jde o ověřený návrh, ne hotové smazání.
+
+### Navrhované další kroky
+Později samostatně autorizované převzetí/nasazení odstranění do aktuálního
+main; zachovat jeho novější role a Willovu práci. Bez další hlasové přejímky.
+
+### Technický důkaz
+14 verzovaných souborů a 10 generovaných souborů vymezených manifestem;
+8 návazných souborů v návrhu upravených. 26 overlay testů a statické kontroly
+návrhu PASS. Žádná změna živého runtime, placený start nebo mazání zdrojů.
+
+## 2026-11-07 09:22 CET — placený hlasový rozhovor odstraněn po potvrzení
+
+### Hotovo
+Placený panel, jeho API, broker/probe, role a vlastní testy jsou odstraněné.
+Odstraněno přesně 14 verzovaných a 10 generovaných souborů, prázdný adresář
+panelu a osm navazujících úprav. Ostatní hlasové funkce a Camino zachované.
+
+### Rozhodnutí
+Placený hlasový rozhovor není pro Agenta SDK Samantha relevantní. Míla zrušil
+projekt bez náhrady a přesnou globální brzdu pro tento rozsah potvrdil.
+Historické A–G nejsou pokynem k pokračování, adopci nebo vydání.
+
+### Další krok
+Will převezme pouze rušící commit do aktuálního main se zachováním novějších
+rolí a e-mailové práce; publikování/nasazení podléhá samostatnému oprávnění.
+
+### Navrhované další kroky
+Po povoleném nasazení neplaceně ověřit nedostupnost panelu/API a zachování
+běžného Human–Adam, nahrávání pokynů a předčítání. Žádný další placený probe.
+
+### Technický důkaz
+113 cílených testů PASS, plná brána 2377 testů za 429,882 s OK (skipped=5).
+Importy pěti modulů nedostupné; 5/5 bývalých GET/POST cest v Handler testu
+vrací 404 bez akčního payloadu. Whitelist mazání shodný, App Server, lokální
+runtime, e-mail, Camino a původní JSON důkazu P2-C beze změny. Bez push/deploy.
+
+## 2026-11-07 — Will: společný balíček kalendáře 3 a zrušení hlasového pilotu
+
+Míla výslovně schválil p+n včetně Datova rušícího `b4b72ab0`. Will jej
+začlenil nad kalendářový `afb7c9cf`; starší hlasové opravy se samostatně
+nenasazují. Bod 15/P2 je definitivně ukončen, historické přejímky E/F/G
+ani iPhone Start již nejsou dalšími kroky. Data má dál vlastní worktree.
+
+Při řešení konfliktů zůstaly všechny kalendářové a Ateliérové cesty i pět
+ostatních rolí; odstraněná je pouze role read_only_voice a zapojení placeného
+pilota. Na main se přebírá přesných 14 verzovaných odstranění; Datových deset
+generovaných souborů se týkalo jen jeho worktree. Soukromé důkazy a audio se
+nemažou. Běžné předčítání, nahrávání pokynů a audio Camina zůstávají zachované.
+203 integračních testů PASS; po opravě zastaralého testu zakázané hlasové role
+samostatně 10/10 PASS. Rychlá statická a plná publikační brána jsou podmínkou
+vydání. Kalendářový vývoj před integrací: 2726 testů OK, 31 SKIP; jedno
+syntetické živé modelové ověření PASS. Skutečný e-mail ani kalendář se neměnil.
+
+P+n provede jediný registrovaný vykonavatel Terra pro project-email-cases
+(společný Cockpit). Tento zápis vzniká před publikací; konečný provozní stav
+určuje přesná účtenka a logs/calendar_draft_retirement_release_20261107.log,
+čerstvé ověření logs/calendar_draft_retirement_verified_20261107.log.
+Po dokončení ověřit 404 bývalého panelu/API, nové e-mailové UI a běžné audio.
+Fyzická Mac/iPhone přejímka nového kalendářového editoru a oprávnění aktuálního
+EventKit buildu zůstávají oddělené; bod 3 nevytváří kalendářové události.

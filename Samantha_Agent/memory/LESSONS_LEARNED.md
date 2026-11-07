@@ -31,6 +31,8 @@ nebo jejichž princip lze znovu použít v jiné části projektu.
 
 ### LL-104 — Ukončení hlasu není konec úlohy ani potvrzení ceny
 
+- Stav 2026-11-07: placený pilot 15/P2 Míla kompletně zrušil jako nerelevantní pro Agenta SDK Samantha. Níže uvedené zkušenosti jsou historické obecné poznatky, nejsou pokynem projekt obnovit. Provedený rozsah odstranění je v paid_voice_retirement_20261107.md.
+
 - Problém: spojení hlasu, přepis a backendová práce mají odlišný životní cyklus. Výpadek může zanechat nepotvrzenou spotřebu a opakování vytvoření může založit další placenou relaci.
 - Typ: opakující se
 - Řešení nalezeno: 05112026
