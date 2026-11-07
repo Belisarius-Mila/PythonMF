@@ -1,40 +1,49 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
-## 2026-11-07 16:19 CET — REC-06: skutečná syntetická kalibrace Solem prošla
+## 2026-11-07 19:09 CET — REC-06: připraven celý čtecí pilot s konkrétní cenovou kartou
 
 ### Hotovo
-- Jedna schválená živá zkouška Sol/medium se Standardem pro jediný tah prošla.
-  Všech pět klasifikací i přesných citací sedí: dokumentace, historie, návrh,
-  zrušený placený hlas jako irrelevant a neověřené nastavení iPhonu.
-- Potvrzeno jedno doručení, žádný zaznamenaný nástrojový typ, žádné opakování.
-  Skutečná spotřeba 5 436 tokenů; odhad 0,3094 Standard kreditu proti rezervě 1,6.
+- Připraven celý neměnný manifest z committed main bez přepnutí či změny
+  Willovy pracovní kopie: 529 dokumentů, 6 281 401 bajtů včetně původního TXT.
+  Historické doklady jsou oddělené od dokumentovaných nastavení.
+- Samostatný spustitelný kandidátní pilot: 14 čtecích dávek a syntéza,
+  per-turn Standard, ověřené pořadí/payload, trvalý job a účtenky bez retry.
+  Opakování po výpadku ani v jiném týdnu nevytvoří další modelovou akci.
+- Konkrétní plán s marží 193,61315 Standard kreditu, navržená přijímací mez
+  200; žádný tvrdý fakturační strop. Žádný další placený tah nebyl spuštěn.
 
 ### Rozhodnutí
-- Míla výslovně schválil přesnou naceněnou zkoušku a oznámil nasazení balíčku.
-  Použita původní karta/digest, žádné přegenerování ani druhý request.
-- Souhlas nepokrývá další placené čtení celého korpusu, publikaci TXT nebo
-  aktivaci týdenní služby. Tyto kroky touto zkouškou neproběhly.
-- REC-06 zůstává otevřená do skutečného návrhu, obou kopií, uploadu/iPhonu
-  a zvlášť povoleného spuštění automatizace. Celý REC-02 pilot není uzavřený.
+- Mílův pokyn k pokračování REC-06 pokrývá přípravu úplné přejímky. Konkrétní
+  rozsah a cena úplného pilotu se ještě přijímají; starý souhlas s jednou
+  syntetickou zkouškou není souhlas se všemi 15 tahy a publikací.
+- Plný návrh zahrnuje připojenou dokumentaci PythonMF/MatysekANJ/iOS.
+  Mílovi je nabízena volba tohoto rozsahu nebo jen Samanthy/Camina.
+  Bez jiné volby zůstává připravený plný návrh, nikoli povolený modelový běh.
+- Přesný tokenizer Solu, číselný runtime kontext a úplná Mac/iPhone aplikační
+  přejímka zůstávají nedoložené. Marže 1,25 textového počtu + 8 000 tokenů
+  na tah není prokázaný horní odhad. Výsledkem smí být jen privátní kandidát.
 
 ### Další krok
-- Připravit aktuální manifest nad převzatým main, bezpečné Mac/iPhone
-  doklady a konkrétní rozpočet úplného čtecího pilotu; dosavadní odhad
-  o200k_base nepovažovat za přesný Sol prompt ani univerzální násobek ceny.
+- Míla přijme přesnou kartu rozsahu a ceny; potom Data může jednou spustit
+  konkrétní full pilot. I neúspěšný či částečný placený výsledek se neopakuje.
 
 ### Navrhované další kroky
-- Will převezme tento výsledkový zápis, zachová své role a souběžnou práci.
-- Po obsahové a cenové přejímce provést skutečný čtecí pilot a přijmout celý TXT.
-- Autorizovaný produkční adapter, dvě kopie, skutečný upload a iPhone přejímka.
-- Samostatně povolená centrální role, termín/limity, launchd/auth a plánovaný slot.
+- Will má předání; tuto kartu provést před dalším main, nebo po převzetí
+  připravit nový manifest. Pro izolovaný pilot není potřeba nasazení.
+- Po skutečném čtení posoudit celý návrh a skutečnou spotřebu; doplnit Mac/iPhone důkazy.
+- Autorizovaný produkční adapter, oba pevné TXT cíle, upload a fyzická iPhone přejímka.
+- Zvlášť schválit centrální roli, týdenní termín/rozpočet, launchd/auth a plánovaný slot.
 
 ### Technický důkaz
-- Původní approval digest d613768b…0a4329a; jedna trvalá účtenka trial_passed.
-  Input 5 248, cache 0, output 188 (reasoning 0); čas 6 646 ms; 51 skills vypnuto.
-- Git-safe numerický a syntetický výsledek v recovery_guide_rec06_result_20261107.json.
-  Projekce porovnána s původní účtenkou; závěrečná statická brána OK.
-  Soukromá původní karta/účtenka zůstávají ve vlastní .venv, mimo Git.
-- Produkční klient, role, závislosti ani provozní TXT se neměnily. V tomto
-  kroku žádný deploy/restart/push; nasazení bylo oznámeno Mílou, neprovedeno Datou.
+- Main 2909ea5ace2e; snapshot 7b08aba8…adec0072b; karta 9a532089…38ba0133.
+  Referenční základ 144,8141, s explicitní marží 193,61315 Standard kreditu.
+- 28 nových neplacených testů OK; plná brána: 2 599 testů OK, 5 skipped; závěrečná statická brána OK.
+  Skutečný socket peer .163.0, účet chatgpt a přesný Sol/medium znovu čtecími RPC.
+- Zdraví stávajícího Cockpitu ok a 12 katalogových položek nejsou úplná
+  aplikační inventura ani důkaz nasazení každého Git blobu či nastavení iPhonu.
+- Karta/report: recovery_guide_rec06_full_card_20261107.json a
+  recovery_guide_rec06_full_pilot_20261107.md. Privátní snapshot/účtenky jen ve vlastní .venv.
+  Žádná změna produkčního klienta/runtime, role JSON, závislostí, služeb,
+  provozních TXT, žádný další model, push/nasazení či integrace do main.
 <!-- SAMANTHA_CURRENT_STATUS_END -->
 
 ### Předchozí stav infrastruktury
@@ -895,3 +904,49 @@ souborů / 5 002 170 B. Stávající rutinní pilot není obecný writer/schedul
   Soukromá původní karta/účtenka zůstávají ve vlastní .venv, mimo Git.
 - Produkční klient, role, závislosti ani provozní TXT se neměnily. V tomto
   kroku žádný deploy/restart/push; nasazení bylo oznámeno Mílou, neprovedeno Datou.
+
+## 2026-11-07 19:09 CET — REC-06: připraven celý čtecí pilot s konkrétní cenovou kartou
+
+### Hotovo
+- Připraven celý neměnný manifest z committed main bez přepnutí či změny
+  Willovy pracovní kopie: 529 dokumentů, 6 281 401 bajtů včetně původního TXT.
+  Historické doklady jsou oddělené od dokumentovaných nastavení.
+- Samostatný spustitelný kandidátní pilot: 14 čtecích dávek a syntéza,
+  per-turn Standard, ověřené pořadí/payload, trvalý job a účtenky bez retry.
+  Opakování po výpadku ani v jiném týdnu nevytvoří další modelovou akci.
+- Konkrétní plán s marží 193,61315 Standard kreditu, navržená přijímací mez
+  200; žádný tvrdý fakturační strop. Žádný další placený tah nebyl spuštěn.
+
+### Rozhodnutí
+- Mílův pokyn k pokračování REC-06 pokrývá přípravu úplné přejímky. Konkrétní
+  rozsah a cena úplného pilotu se ještě přijímají; starý souhlas s jednou
+  syntetickou zkouškou není souhlas se všemi 15 tahy a publikací.
+- Plný návrh zahrnuje připojenou dokumentaci PythonMF/MatysekANJ/iOS.
+  Mílovi je nabízena volba tohoto rozsahu nebo jen Samanthy/Camina.
+  Bez jiné volby zůstává připravený plný návrh, nikoli povolený modelový běh.
+- Přesný tokenizer Solu, číselný runtime kontext a úplná Mac/iPhone aplikační
+  přejímka zůstávají nedoložené. Marže 1,25 textového počtu + 8 000 tokenů
+  na tah není prokázaný horní odhad. Výsledkem smí být jen privátní kandidát.
+
+### Další krok
+- Míla přijme přesnou kartu rozsahu a ceny; potom Data může jednou spustit
+  konkrétní full pilot. I neúspěšný či částečný placený výsledek se neopakuje.
+
+### Navrhované další kroky
+- Will má předání; tuto kartu provést před dalším main, nebo po převzetí
+  připravit nový manifest. Pro izolovaný pilot není potřeba nasazení.
+- Po skutečném čtení posoudit celý návrh a skutečnou spotřebu; doplnit Mac/iPhone důkazy.
+- Autorizovaný produkční adapter, oba pevné TXT cíle, upload a fyzická iPhone přejímka.
+- Zvlášť schválit centrální roli, týdenní termín/rozpočet, launchd/auth a plánovaný slot.
+
+### Technický důkaz
+- Main 2909ea5ace2e; snapshot 7b08aba8…adec0072b; karta 9a532089…38ba0133.
+  Referenční základ 144,8141, s explicitní marží 193,61315 Standard kreditu.
+- 28 nových neplacených testů OK; plná brána: 2 599 testů OK, 5 skipped; závěrečná statická brána OK.
+  Skutečný socket peer .163.0, účet chatgpt a přesný Sol/medium znovu čtecími RPC.
+- Zdraví stávajícího Cockpitu ok a 12 katalogových položek nejsou úplná
+  aplikační inventura ani důkaz nasazení každého Git blobu či nastavení iPhonu.
+- Karta/report: recovery_guide_rec06_full_card_20261107.json a
+  recovery_guide_rec06_full_pilot_20261107.md. Privátní snapshot/účtenky jen ve vlastní .venv.
+  Žádná změna produkčního klienta/runtime, role JSON, závislostí, služeb,
+  provozních TXT, žádný další model, push/nasazení či integrace do main.

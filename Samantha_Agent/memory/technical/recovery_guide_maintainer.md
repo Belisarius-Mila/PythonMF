@@ -171,6 +171,21 @@ REC-02 ani o publikaci/aktivaci. Původní trvalá účtenka brání dalšímu p
 Referenční počet 500 tokenů nevystihuje skutečný input a nenahrazuje přesný
 tokenizer; samotný poměr není spolehlivá extrapolace ceny celého korpusu.
 
+Navazující úplný čtecí pilot má nový oddělený vstup
+`app.recovery_guide_full_pilot.prepare/run`. Příprava čte přímo Git bloby
+připnutého main bez přepínání pracovních kopií; celá plná varianta má 529
+dokumentů a 15 tahů. Marže 1,25 textového počtu a 8 000 tokenů na tah dává
+plán 193,61315 Standard kreditu, navržená přijímací mez 200. Marže není
+prokázaný horní odhad ani tvrdý fakturační strop; přesné Sol mapování a
+skutečný kontext serveru zůstávají nedoložené. Tato karta se musí přijmout
+samostatně; původní souhlas s jedinou syntetickou kalibrací ji nepovoluje.
+
+Úloha má vlastní pevný request, trvalou rezervaci a známé turn účtenky;
+opakovaný vstup po výpadku nebo v dalším týdnu nevolá model. Kandidát je
+pouze ve vlastní .venv, bez writeru, změn centrální role či plánovače.
+Mac/iPhone důkazy a úplná aplikační přejímka nejsou tvrzené jako hotové.
+Podrobnosti a konkrétní manifest v REC-06 full pilot reportu a cenové kartě.
+
 `app.recovery_guide_trial.prepare()` vytvoří pevnou neplacenou kartu pro
 jeden Sol/medium tah se Standardem připnutým pouze na tento tah. Nečte
 obnovovací TXT ani projektový korpus, neaktivuje centrální roli a nepublikuje.
