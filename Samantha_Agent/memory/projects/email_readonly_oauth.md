@@ -9,13 +9,16 @@ Samostatný create-only EventKit writer zapisuje až po kliknutí Zapsat do
 kalendáře. Nové kolize či změna cíle vyžadují další kliknutí na aktualizovanou
 kartu. Ověřuje uložené údaje i alarmy; nejistý výsledek dovoluje pouze čtecí
 obnovu původního zápisu, nikoli druhý create. Původní read-only Swift/bundle a
-jeho OS souhlas zůstávají beze změny. Writer vyžaduje vlastní OS souhlas na Macu.
+jeho OS souhlas zůstávají beze změny. Vlastní OS souhlas writeru již potvrzený
+a první konkrétně schválená událost skutečně uložená a ověřená (jeden create,
+čtecí recover, dva alarmy). Přehled Cockpitu obnovený; viz poslední záznam.
 Tento vývoj zatím není pushnutý ani nasazený; poslední nasazený základ je
-2909ea5a. Žádná skutečná událost ani nový placený modelový tah při vývoji.
+2909ea5a. Vývoj nepoužil placený modelový tah; následná nativní přejímka
+vytvořila právě jednu Mílou potvrzenou testovací událost.
 Plná brána 2874 testů PASS (31 SKIP), posledních 128 cílených PASS a statická
-brána PASS. Nativní build + šest syntetických kontrol PASS; fyzická přejímka nového
-writeru a Safari/iPhonu je otevřená. Safari QA blokuje cgWindowNotFound a
-nedostupný browser host. Podrobnosti reports/calendar_simple_20261107.md a
+brána PASS. Nativní build + šest syntetických kontrol PASS; skutečná nativní
+přejímka writeru PASS. Vizuální přejímka Safari/Mac/iPhone zůstává otevřená.
+Poslední Safari QA skončila cgWindowNotFound a nedostupným browser hostem. Podrobnosti reports/calendar_simple_20261107.md a
 logs/calendar_simple_gate_20261107.log. Samostatný e-mailový TVBCP není domluvený.
 
 Aktuální stav 6. 11.: Terra p+n e82a5d47 dokončené, nový editor živě ověřený.
@@ -1354,3 +1357,28 @@ logs/calendar_simple_gate_20261107.log a nativní build
 logs/calendar_simple_native_20261107.log. Skutečný EventKit zápis ani nový
 modelový tah nebyly spuštěny. Browser QA blokuje nedostupné okno/host; neprošla
 fyzická přejímka. Hodinový e-mailový runtime, placený hlas a Data worktree se nemění.
+
+## 2026-11-07 21:47 CET — první skutečný zápis do kalendáře macOS
+
+Hotovo: Mílou konkrétně potvrzený test uložen do nastaveného cílového
+kalendáře; začátek/konec, Praha i alarmy 24 h/60 min ověřené novým nativním
+čtením. Jeden create, jeden čistě čtecí recover. Přehled Cockpitu obnovený,
+obsahuje právě jednu odpovídající událost. Potvrzovací karta vyčištěná.
+
+Rozhodnutí: Výslovné „ano“ potvrdilo dříve zobrazený test 8. 11. 2026
+10–11. Událost zůstává uložená. Nejde o souhlas s dalším zápisem ani p+n.
+
+Další krok: samostatně schválené p+n nové jednoduché karty; její kód je stále
+pouze lokálně. Pro zobrazení uloženého testu stačí obnovit Kalendář v Cockpitu.
+
+Navrhované další kroky: vizuální přejímka na Macu/iPhonu a kontrola přenosu
+na druhé zařízení. Nový TVBCP není domluvený a nevzniká.
+
+Technický důkaz: logs/calendar_writer_macos_acceptance_20261107.log.
+GUI grant přesného writeru full_access; oba native požadavky parent_pid=1.
+První read-back měl všechny potvrzené údaje i alarmy, ale prázdné event_id;
+Python správně ponechal unknown. Původní identita následně dohledána čtecím
+recover s neprázdným ID a stejnými údaji, bez druhého create. Privátní žádosti,
+ID i kalendáře zůstávají mimo Git. Žádný modelový tah ani reálný e-mail,
+změna hodinové kopie nebo Data worktree. Příčina přechodně prázdného ID nebyla
+určena; samotné místní uložení není důkaz synchronizace na druhé zařízení.

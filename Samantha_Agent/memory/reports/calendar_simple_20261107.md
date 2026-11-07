@@ -48,8 +48,9 @@ nové výslovné potvrzení. Neznámý výsledek může vyžadovat ruční kontr
 
 Zápis vyžaduje vlastní plný OS přístup přes tlačítko „Povolit zápis na Macu“.
 Žádost se eviduje pro přesný binární otisk a automaticky se neopakuje.
-Přístup nebyl během vývoje udělen ani resetován. Nový trvalý LaunchAgent se
-neinstaluje, existující služby se nespouštějí znovu.
+Během původního vývoje přístup udělen nebyl; při navazující přejímce už
+macOS potvrdil full_access přesného sestavení. Žádný reset oprávnění.
+Nový trvalý LaunchAgent se neinstaluje, existující služby se nespouštějí znovu.
 
 ## Ověření a omezení
 
@@ -68,12 +69,39 @@ neinstaluje, existující služby se nespouštějí znovu.
 - Safari přejímka připravena výhradně nad syntetickým serverem, ale CUA vrací
   `cgWindowNotFound`; browser access host nedostupný. Server zastaven, žádný
   skutečný kalendář ani schránka pro QA nepoužity. Vizuální přejímka Mac/iPhone
-  a skutečný EventKit zápis jsou otevřené. Syntetický JS test není fyzická QA.
+  zůstává otevřená. Navazující skutečný EventKit zápis a čtecí obnova již
+  PASS; podrobnosti níže. Syntetický JS test není fyzická QA.
 - EventKit read-back dokládá místní uložení, nikoli dokončení synchronizace
   iCloudu na jiném zařízení. Souběžné změny jiného zařízení nelze zamknout.
 - Tento krok je lokální, bez nového push/nasazení. Dosavadní nasazený základ
-  `2909ea5a` se tím nemění. Před prvním reálným zápisem bude třeba samostatné
-  p+n, povolení přesného writeru na Macu a potvrzení konkrétní karty.
+  `2909ea5a` se tím nemění. Nová jednoduchá karta vyžaduje samostatné p+n.
+  Nativní přejímka mezitím proběhla terminálově nad izolovanou syntetickou
+  fixture a konkrétně potvrzeným zadáním, bez nasazení nového UI.
 - Kanonický proud `project-email-cases`, handoff a projektová paměť aktualizované;
   nový TVBCP nebyl dohodnutý a nevzniká. Produkční e-mailová kopie a centrální
   role zůstávají zachované. Žádný nový placený modelový tah při vývoji.
+
+## 2026-11-07 21:47 CET — první skutečný zápis do kalendáře macOS
+
+Hotovo: Mílou konkrétně potvrzený test uložen do nastaveného cílového
+kalendáře; začátek/konec, Praha i alarmy 24 h/60 min ověřené novým nativním
+čtením. Jeden create, jeden čistě čtecí recover. Přehled Cockpitu obnovený,
+obsahuje právě jednu odpovídající událost. Potvrzovací karta vyčištěná.
+
+Rozhodnutí: Výslovné „ano“ potvrdilo dříve zobrazený test 8. 11. 2026
+10–11. Událost zůstává uložená. Nejde o souhlas s dalším zápisem ani p+n.
+
+Další krok: samostatně schválené p+n nové jednoduché karty; její kód je stále
+pouze lokálně. Pro zobrazení uloženého testu stačí obnovit Kalendář v Cockpitu.
+
+Navrhované další kroky: vizuální přejímka na Macu/iPhonu a kontrola přenosu
+na druhé zařízení. Nový TVBCP není domluvený a nevzniká.
+
+Technický důkaz: logs/calendar_writer_macos_acceptance_20261107.log.
+GUI grant přesného writeru full_access; oba native požadavky parent_pid=1.
+První read-back měl všechny potvrzené údaje i alarmy, ale prázdné event_id;
+Python správně ponechal unknown. Původní identita následně dohledána čtecím
+recover s neprázdným ID a stejnými údaji, bez druhého create. Privátní žádosti,
+ID i kalendáře zůstávají mimo Git. Žádný modelový tah ani reálný e-mail,
+změna hodinové kopie nebo Data worktree. Příčina přechodně prázdného ID nebyla
+určena; samotné místní uložení není důkaz synchronizace na druhé zařízení.

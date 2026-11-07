@@ -1727,6 +1727,8 @@ Doplnění 17102026 k LL-071: Nativní modelový pomocník navíc zdvojuje roli,
 
 - Doplnění 07112026: novou schopnost zápisu lze sestavit jako samostatný podepsaný helper a ponechat čtecí Swift/bundle/OS grant beze změny. Sdílet jen parametrizovanou stavební infrastrukturu. Ověřeno shodou původního zdrojového/binárního otisku a sestavením nového create-only writeru; jeho vlastní OS grant a živý zápis tím nejsou přejaté. Report calendar_simple_20261107.md.
 
+- Doplnění 07112026, živý writer: první read-back měl přesně uložené údaje, marker i alarmy, ale prázdné eventIdentifier. Python jej správně nepřijal jako konečné ověření. Jediné následné read-only recover původní identity už mělo neprázdné ID; native log prokázal právě jeden create, obnovu bez save a Cockpit jednu odpovídající událost. Příčinu dočasně chybějícího ID neodhadovat a nezaměňovat neúplnou účtenku za svolení vytvořit druhou událost. Důkaz logs/calendar_writer_macos_acceptance_20261107.log.
+
 ### LL-106 — Metadata iCloud aliasu ověřuj na připnutém skutečném cíli
 
 - Problém: NSURL na systémovém aliasu CloudDocs/Documents hlásí neubiquitous,
