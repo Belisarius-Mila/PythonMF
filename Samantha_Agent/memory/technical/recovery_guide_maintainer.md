@@ -362,3 +362,23 @@ max 996 zdrojů/schema. Chybí živý adapter a nové tokenové/cenové posouzen
 trial a konkrétní neplacená karta, poté samostatně přijatý malý živý test.
 Doklad a přesný návrh: reports/recovery_guide_anchors_20261107.md a
 reports/recovery_guide_anchors_offline_20261107.json. REC-06 zůstává otevřená.
+
+## 2026-11-07 — malý živý adapter připraven, zatím nespouštěn
+
+Nové `recovery_guide_anchor_trial.prepare/run`, `recovery_guide_anchor_transport`
+a `recovery_guide_anchor_costing`: oddělený pevný job pro dva malé modelové
+kroky (inspect + synthesis), nikoli pokračování uzavřeného v2 či celý korpus.
+Celý původní TXT + dva známé citační dokumenty, 75 100 bytů. Karta
+566899e7…ddd8cb3 připíná main 0850e6f3, kód, manifest, peer/socket, konkrétní
+inspect schema a pravidlo deterministické syntézy ze skutečné odpovědi.
+
+Plán 14,72415 Standard kreditu; návrh přijímací meze 15 za oba tahy. Reference
+není přesné Sol mapování a meze nejsou tvrdý účetní/output/časový strop.
+Podrobnosti v reports/recovery_guide_anchor_trial_20261107.md a samostatné
+card/offline JSON. Přesný nový lidský souhlas zatím chybí: žádný placený tah.
+26 nových testů, 50 cílených OK; zdrojová fixture prošla inspect i synthesis,
+není však skutečným modelovým výsledkem. Původní job/raw účtenky beze změny.
+Při driftu před jakýmkoli pokusem lze neplaceně připravit explicitní revizi;
+po rezervaci zůstává jen původní receipt, žádný retry ani reset. Další kroky:
+malá samostatně přijatá živá zkouška, pak nová karta celého korpusu; žádná
+produkční aktivace rolí, služeb, zápis TXT/iCloud nebo publikování v této etapě.

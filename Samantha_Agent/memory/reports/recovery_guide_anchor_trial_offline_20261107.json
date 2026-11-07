@@ -1,0 +1,22 @@
+{
+  "state": "offline_small_adapter_fixture_passed",
+  "fixture_not_model_result": true,
+  "approval_digest": "566899e7663e4599f17fa462404ca609ef77e12566721c2ba88eafdbcddd8cb3",
+  "snapshot_sha256": "7e0e6b6fce5f23ed10e954562d3d190bcfc6ffcc97867813dbf673f3c90fb738",
+  "catalogue_sha256": "6b10518275ead927371da24287f91f27bc980b9e0552bd16ec6f2258dcabb79a",
+  "inspect_request_sha256": "2738dfa79f4445abebf94f1a05d411345ffbbd9f4e8c96e0fd3354c30a88632c",
+  "synthesis_fixture_request_sha256": "0c68cc3245f954334a4c0bc9ea255b703e1d7345b57dc5c6d9f1ef2d98e7b407",
+  "candidate_fixture_sha256": "e57c873206f98a88010dbb01c796292273a3e3b228b6a5295bdda6240638756b",
+  "whole_original_and_two_sources_preserved": true,
+  "old_closed_job_unchanged": true,
+  "model_calls": 0,
+  "thread_starts": 0,
+  "production_writes": false,
+  "paid_trial_started": false,
+  "live_source_ref_current": true,
+  "final_verified_at": "2026-11-07T22:11:00.737943+00:00",
+  "targeted_tests": 50,
+  "full_gate_tests": 2668,
+  "full_gate_skipped": 5,
+  "static_gate_passed": true
+}

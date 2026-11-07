@@ -1363,3 +1363,44 @@ závislosti bez konkrétní potřeby. Nejde o rozšíření e-mailové business 
   tokenový odhad. max 996 zdrojů/schema, prázdné zdroje nepodporovány.
 - 24 cílených testů OK; plná brána 2 642 testů OK / 5 skipped (620,921 s).
   Finální statická brána a git diff --check OK.
+
+## 2026-11-07 23:11 CET — REC-06: malý anchor adapter a cenová karta připravené
+
+### Hotovo
+- Nový izolovaný adapter pro inspect + synthesis nad celým původním návodem
+  a dvěma známými citačními dokumenty. Bez změny produkčního klienta/runtime.
+- Připraven konkrétní neplacený manifest/karta: 75 100 zdrojových bytů,
+  explicitní Sol/medium Standard kandidát, nejvýše dva tahy. Plán 14,72415
+  Standard kreditu, navržená přijímací mez 15; není tvrdým fakturačním capem.
+- 26 nových testů a cílená sada 50 OK; skutečné zdroje prošly neplacenou
+  fixture kontrolou inspect i synthesis včetně původního quality gate.
+
+### Rozhodnutí
+- Pokyn pokračovat provedl přípravu, nikoli nový placený pokus. Žádný nový
+  model/SDK tah, žádný attempt marker nového pilotu. Karta čeká na přesný souhlas.
+- Původní v2 job a raw účtenky zůstávají uzavřené a beze změny; jeho 21,013
+  Standard kreditu se nepoužívá jako souhlas ani rozpočet nového testu.
+- Malý test neznamená celý korpus ani hotový návod/Mac/iPhone přejímku.
+  REC-06, obě provozní kopie a týdenní aktivace zůstávají otevřené.
+
+### Další krok
+- Po uzavření testovací brány předložit kartu 566899e7…ddd8cb3 k samostatnému
+  přijetí dvou placených tahů s přijímací mezí 15 Standard kreditů; před run
+  znovu ověřit main/TXT/kód/socket/peer a nikdy neopakovat nejistý výsledek.
+
+### Navrhované další kroky
+- Will přezkoumá nový izolovaný adapter a zachová svoji souběžnou práci.
+- Přesný souhlas s kartou, potom jediný malý živý kompatibilitní test.
+- Teprve po úspěchu nová cenová karta pro celý korpus a skutečný obsahový návrh.
+- Později Mac/iPhone dossier, dvě kopie/upload/iPhone a samostatná týdenní aktivace.
+
+### Technický důkaz
+- recovery_guide_anchor_trial_20261107.md, *_card_20261107.json a *_offline_20261107.json.
+- Main 0850e6f3, snapshot 7e0e6b6f…90fb738, katalog 6b105182…cabb79a.
+- Čtecí runtime: server 0.163.0 / místní CLI 0.166.0; Sol/medium v katalogu.
+  Žádné vlákno, tah ani služba při přípravě. Standard se vynucuje per-turn.
+- Reference o200k_base/tiktoken 0.14.0 není přesné Sol mapování; syntéza je
+  vázaná na skutečný první receipt a před druhým tahem se celý vstup přepočítá.
+- Plná projektová brána 2 668 testů OK / 5 skipped; finální statická brána OK.
+  Žádný push/deploy, změna rolí,
+  společné .venv, globálního CLI, provozního TXT ani iCloudu.
