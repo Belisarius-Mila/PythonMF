@@ -11,6 +11,7 @@ from datetime import datetime, timezone
 import json
 import os
 from pathlib import Path
+import re
 import subprocess
 
 from app import recovery_guide_maintainer as m
@@ -32,7 +33,7 @@ def _guard():
     STATE.mkdir(mode=0o700, parents=True, exist_ok=True)
     if STATE.stat().st_uid != os.getuid() or STATE.stat().st_mode & 0o077:
         raise ValueError('full_pilot_state_not_private')
-    for name in ('packet.json', 'attempt.json', 'job.lock', 'context', 'controller', 'turns'):
+    for name in ('packet.json', 'attempt.json', 'job.lock', 'context', 'controller', 'turns', 'revisions'):
         if (STATE / name).is_symlink():
             raise ValueError('full_pilot_artifact_alias')
 
@@ -86,19 +87,32 @@ def _calibration():
             'input_tokens': record['usage']['input_tokens'], 'output_tokens': record['usage']['output_tokens']}
 
 
-def prepare(*, project_only=False):
+def prepare(*, project_only=False, refresh=False):
     """Read committed main + original, freeze a packet. No threads or turns."""
     _guard()
     with exclusive_file_lock(STATE / 'job', timeout=0):
         path = STATE / 'packet.json'
+        previous = None
         if path.exists():
             envelope = json.loads(path.read_text())
             if envelope['packet']['project_only'] != project_only:
                 raise ValueError('full_pilot_existing_scope_differs')
-            return public_card(envelope)
+            if not refresh:
+                return public_card(envelope)
+            if (STATE / 'attempt.json').exists() or (STATE / 'controller').exists() or (STATE / 'turns').exists():
+                raise ValueError('full_pilot_refresh_after_attempt_refused')
+            previous = envelope
+        elif refresh:
+            raise ValueError('full_pilot_refresh_requires_original')
         head = _head()
         snapshot = collect_revision(ORIGINAL, head, ROOT, project_only=project_only)
         measured = _measure(snapshot)
+        if previous:
+            prior_limits = previous['packet']['measurements']['limits']
+            if measured['planning_standard_credits_with_margin'] > prior_limits['run_credits']:
+                raise ValueError('full_pilot_refresh_exceeds_previous_budget')
+            measured['limits']['run_credits'] = prior_limits['run_credits']
+            measured['limits']['month_credits'] = prior_limits['month_credits']
         with calibration._client() as client:
             runtime = calibration._runtime(client)
         if _head() != head or digest(ORIGINAL.read_bytes()) != snapshot.original.sha256:
@@ -110,9 +124,25 @@ def prepare(*, project_only=False):
             'serviceTierForTurn': 'default', 'candidate_only': True, 'publication': False,
             'automatic_retry': False, 'weekly_activation': False, 'central_role_activation': False,
             'phone_settings_manually_verified': False, 'application_scope_approved': False}
+        if previous:
+            packet['supersedes_approval_digest'] = previous['approval_digest']
         envelope = {'packet': packet, 'approval_digest': digest(canonical_json(packet))}
+        if previous:
+            path = STATE / 'revisions' / (envelope['approval_digest'] + '.json')
         atomic_create_text(path, canonical_json(envelope))
         return public_card(envelope)
+
+
+def _approved_packet(approved_digest):
+    if not isinstance(approved_digest, str) or not re.fullmatch(r'[0-9a-f]{64}', approved_digest):
+        raise ValueError('full_pilot_exact_approval_required')
+    original = json.loads((STATE / 'packet.json').read_text())
+    if original.get('approval_digest') == approved_digest:
+        return original
+    path = STATE / 'revisions' / (approved_digest + '.json')
+    if path.is_symlink() or not path.is_file():
+        raise ValueError('full_pilot_unknown_approved_packet')
+    return json.loads(path.read_text())
 
 
 def public_card(envelope):
@@ -255,7 +285,7 @@ def run(*, approved_digest: str, now=None, client_factory=None):
     """
     _guard()
     with exclusive_file_lock(STATE / 'job', timeout=0):
-        envelope = json.loads((STATE / 'packet.json').read_text())
+        envelope = _approved_packet(approved_digest)
         packet = envelope['packet']
         if (approved_digest != envelope['approval_digest']
                 or approved_digest != digest(canonical_json(packet))):
@@ -263,6 +293,8 @@ def run(*, approved_digest: str, now=None, client_factory=None):
         attempt = STATE / 'attempt.json'
         if attempt.exists():
             old = json.loads(attempt.read_text())
+            if old['approval_digest'] != approved_digest:
+                raise ValueError('full_pilot_job_already_reserved')
             status = m.status(STATE / 'controller', old['slot'])
             return {**(status if status['state'] != 'not_started' else old), 'replayed_receipt': True}
         if not _current(packet) or calibration._protocol() != packet['protocol']:

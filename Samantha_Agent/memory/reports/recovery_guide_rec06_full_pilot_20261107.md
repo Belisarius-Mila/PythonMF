@@ -1,5 +1,11 @@
 # REC-06 — úplný zdrojový manifest a připravený čtecí pilot
 
+Navazující stav: Míla tuto cenovou kartu schválil. Před prvním modelem ale
+nový kalendářový main zneplatnil konkrétní zdroje; žádný paid turn neproběhl.
+Aktuální podklad je `recovery_guide_rec06_source_refresh_20261107.md` a
+`recovery_guide_rec06_full_card_20261107_v2.json`. Následující původní
+manifest/cena se zachovávají jako historie schválené staré karty.
+
 2026-11-07, Data, vlastní větev `data/parallel-20261104`.
 Stav: **připraveno k přijetí konkrétního rozsahu a ceny, žádný další placený tah**.
 REC-06 jako celek pokračuje; tento krok nepovoluje publikaci ani týdenní provoz.

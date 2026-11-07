@@ -1207,3 +1207,41 @@ závislosti bez konkrétní potřeby. Nejde o rozšíření e-mailové business 
   recovery_guide_rec06_full_pilot_20261107.md. Privátní snapshot/účtenky jen ve vlastní .venv.
   Žádná změna produkčního klienta/runtime, role JSON, závislostí, služeb,
   provozních TXT, žádný další model, push/nasazení či integrace do main.
+
+## 2026-11-07 19:58 CET — REC-06: schválený běh zastaven před modelem, nový manifest v2
+
+### Hotovo
+- Výslovný souhlas s úplnou revizí byl zpracován. Zdrojová kontrola ale
+  zastavila původní kartu ještě před rezervací, připojením a placeným tahem:
+  Will mezitím přidal kalendářový main 4a33af2a místo původního 2909ea5a.
+- Připraven nový plný manifest: 530 dokumentů, 6 290 890 bajtů včetně TXT;
+  přidán jeden dokument a změněno pět dříve vybraných dokumentů, nic vynecháno.
+- Nová neměnná karta v2 zachovává 15 tahů a schválenou mez 200 kreditů;
+  plán s marží 193,79845 Standard kreditu. Počet placených tahů tohoto běhu 0.
+
+### Rozhodnutí
+- Míla schválil model, jednorázové celé čtení a přijímací mez 200 bez tvrdého
+  fakturačního stropu. Tento cenový souhlas se zachovává; čeká pouze přijetí
+  nového konkrétního zdrojového manifestu včetně kalendáře.
+- Starý packet se nepřepisuje. Neplacený refresh smí vzniknout jen bez
+  attempt/controller/turns; všechny verze mají jeden job a nesmějí navýšit limit.
+  Po rezervaci, nejistém či částečném pokusu žádný refresh ani modelový retry.
+
+### Další krok
+- Míla potvrdí nový manifest v2; potom jednou spustit stejnou schválenou
+  revizi nad jeho digestem. Do spuštění/běhu zachovat zdrojový main a TXT.
+
+### Navrhované další kroky
+- Pro tento pilot není třeba nasazení; další main znamená znovu kontrolu zdrojů.
+- Po skutečném čtení posoudit stejný kandidát a spotřebu bez opakování modelu.
+- Mac/iPhone důkazy, celý přijatý návrh a obě povolené kopie s upload/iPhone přejímkou.
+- Zvlášť autorizovaná centrální role, plánovač, launchd/auth a první týdenní slot.
+
+### Technický důkaz
+- Starý digest 9a532089…38ba0133, nový 09a6ed5b…999f4e0b; snapshot
+  90e85eb7…f27ab8ad; source main 4a33af2a1e57. Attempt/controller/turns nevznikly.
+- Šest nových regresí, cílená sada 34 OK; plná brána 2 605 testů OK, 5 skipped; závěrečná statická brána OK.
+- Původní TXT, syntetická kalibrace a stará karta zachované; produkční kód,
+  kalendář, role JSON, závislosti, služby a provozní TXT se neměnily.
+- Report recovery_guide_rec06_source_refresh_20261107.md; nová veřejná karta
+  recovery_guide_rec06_full_card_20261107_v2.json. Žádný paid turn, push či deploy.

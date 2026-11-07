@@ -1,49 +1,41 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
-## 2026-11-07 19:09 CET — REC-06: připraven celý čtecí pilot s konkrétní cenovou kartou
+## 2026-11-07 19:58 CET — REC-06: schválený běh zastaven před modelem, nový manifest v2
 
 ### Hotovo
-- Připraven celý neměnný manifest z committed main bez přepnutí či změny
-  Willovy pracovní kopie: 529 dokumentů, 6 281 401 bajtů včetně původního TXT.
-  Historické doklady jsou oddělené od dokumentovaných nastavení.
-- Samostatný spustitelný kandidátní pilot: 14 čtecích dávek a syntéza,
-  per-turn Standard, ověřené pořadí/payload, trvalý job a účtenky bez retry.
-  Opakování po výpadku ani v jiném týdnu nevytvoří další modelovou akci.
-- Konkrétní plán s marží 193,61315 Standard kreditu, navržená přijímací mez
-  200; žádný tvrdý fakturační strop. Žádný další placený tah nebyl spuštěn.
+- Výslovný souhlas s úplnou revizí byl zpracován. Zdrojová kontrola ale
+  zastavila původní kartu ještě před rezervací, připojením a placeným tahem:
+  Will mezitím přidal kalendářový main 4a33af2a místo původního 2909ea5a.
+- Připraven nový plný manifest: 530 dokumentů, 6 290 890 bajtů včetně TXT;
+  přidán jeden dokument a změněno pět dříve vybraných dokumentů, nic vynecháno.
+- Nová neměnná karta v2 zachovává 15 tahů a schválenou mez 200 kreditů;
+  plán s marží 193,79845 Standard kreditu. Počet placených tahů tohoto běhu 0.
 
 ### Rozhodnutí
-- Mílův pokyn k pokračování REC-06 pokrývá přípravu úplné přejímky. Konkrétní
-  rozsah a cena úplného pilotu se ještě přijímají; starý souhlas s jednou
-  syntetickou zkouškou není souhlas se všemi 15 tahy a publikací.
-- Plný návrh zahrnuje připojenou dokumentaci PythonMF/MatysekANJ/iOS.
-  Mílovi je nabízena volba tohoto rozsahu nebo jen Samanthy/Camina.
-  Bez jiné volby zůstává připravený plný návrh, nikoli povolený modelový běh.
-- Přesný tokenizer Solu, číselný runtime kontext a úplná Mac/iPhone aplikační
-  přejímka zůstávají nedoložené. Marže 1,25 textového počtu + 8 000 tokenů
-  na tah není prokázaný horní odhad. Výsledkem smí být jen privátní kandidát.
+- Míla schválil model, jednorázové celé čtení a přijímací mez 200 bez tvrdého
+  fakturačního stropu. Tento cenový souhlas se zachovává; čeká pouze přijetí
+  nového konkrétního zdrojového manifestu včetně kalendáře.
+- Starý packet se nepřepisuje. Neplacený refresh smí vzniknout jen bez
+  attempt/controller/turns; všechny verze mají jeden job a nesmějí navýšit limit.
+  Po rezervaci, nejistém či částečném pokusu žádný refresh ani modelový retry.
 
 ### Další krok
-- Míla přijme přesnou kartu rozsahu a ceny; potom Data může jednou spustit
-  konkrétní full pilot. I neúspěšný či částečný placený výsledek se neopakuje.
+- Míla potvrdí nový manifest v2; potom jednou spustit stejnou schválenou
+  revizi nad jeho digestem. Do spuštění/běhu zachovat zdrojový main a TXT.
 
 ### Navrhované další kroky
-- Will má předání; tuto kartu provést před dalším main, nebo po převzetí
-  připravit nový manifest. Pro izolovaný pilot není potřeba nasazení.
-- Po skutečném čtení posoudit celý návrh a skutečnou spotřebu; doplnit Mac/iPhone důkazy.
-- Autorizovaný produkční adapter, oba pevné TXT cíle, upload a fyzická iPhone přejímka.
-- Zvlášť schválit centrální roli, týdenní termín/rozpočet, launchd/auth a plánovaný slot.
+- Pro tento pilot není třeba nasazení; další main znamená znovu kontrolu zdrojů.
+- Po skutečném čtení posoudit stejný kandidát a spotřebu bez opakování modelu.
+- Mac/iPhone důkazy, celý přijatý návrh a obě povolené kopie s upload/iPhone přejímkou.
+- Zvlášť autorizovaná centrální role, plánovač, launchd/auth a první týdenní slot.
 
 ### Technický důkaz
-- Main 2909ea5ace2e; snapshot 7b08aba8…adec0072b; karta 9a532089…38ba0133.
-  Referenční základ 144,8141, s explicitní marží 193,61315 Standard kreditu.
-- 28 nových neplacených testů OK; plná brána: 2 599 testů OK, 5 skipped; závěrečná statická brána OK.
-  Skutečný socket peer .163.0, účet chatgpt a přesný Sol/medium znovu čtecími RPC.
-- Zdraví stávajícího Cockpitu ok a 12 katalogových položek nejsou úplná
-  aplikační inventura ani důkaz nasazení každého Git blobu či nastavení iPhonu.
-- Karta/report: recovery_guide_rec06_full_card_20261107.json a
-  recovery_guide_rec06_full_pilot_20261107.md. Privátní snapshot/účtenky jen ve vlastní .venv.
-  Žádná změna produkčního klienta/runtime, role JSON, závislostí, služeb,
-  provozních TXT, žádný další model, push/nasazení či integrace do main.
+- Starý digest 9a532089…38ba0133, nový 09a6ed5b…999f4e0b; snapshot
+  90e85eb7…f27ab8ad; source main 4a33af2a1e57. Attempt/controller/turns nevznikly.
+- Šest nových regresí, cílená sada 34 OK; plná brána 2 605 testů OK, 5 skipped; závěrečná statická brána OK.
+- Původní TXT, syntetická kalibrace a stará karta zachované; produkční kód,
+  kalendář, role JSON, závislosti, služby a provozní TXT se neměnily.
+- Report recovery_guide_rec06_source_refresh_20261107.md; nová veřejná karta
+  recovery_guide_rec06_full_card_20261107_v2.json. Žádný paid turn, push či deploy.
 <!-- SAMANTHA_CURRENT_STATUS_END -->
 
 ### Předchozí stav infrastruktury
@@ -823,3 +815,41 @@ souborů / 5 002 170 B. Stávající rutinní pilot není obecný writer/schedul
   recovery_guide_rec06_full_pilot_20261107.md. Privátní snapshot/účtenky jen ve vlastní .venv.
   Žádná změna produkčního klienta/runtime, role JSON, závislostí, služeb,
   provozních TXT, žádný další model, push/nasazení či integrace do main.
+
+## 2026-11-07 19:58 CET — REC-06: schválený běh zastaven před modelem, nový manifest v2
+
+### Hotovo
+- Výslovný souhlas s úplnou revizí byl zpracován. Zdrojová kontrola ale
+  zastavila původní kartu ještě před rezervací, připojením a placeným tahem:
+  Will mezitím přidal kalendářový main 4a33af2a místo původního 2909ea5a.
+- Připraven nový plný manifest: 530 dokumentů, 6 290 890 bajtů včetně TXT;
+  přidán jeden dokument a změněno pět dříve vybraných dokumentů, nic vynecháno.
+- Nová neměnná karta v2 zachovává 15 tahů a schválenou mez 200 kreditů;
+  plán s marží 193,79845 Standard kreditu. Počet placených tahů tohoto běhu 0.
+
+### Rozhodnutí
+- Míla schválil model, jednorázové celé čtení a přijímací mez 200 bez tvrdého
+  fakturačního stropu. Tento cenový souhlas se zachovává; čeká pouze přijetí
+  nového konkrétního zdrojového manifestu včetně kalendáře.
+- Starý packet se nepřepisuje. Neplacený refresh smí vzniknout jen bez
+  attempt/controller/turns; všechny verze mají jeden job a nesmějí navýšit limit.
+  Po rezervaci, nejistém či částečném pokusu žádný refresh ani modelový retry.
+
+### Další krok
+- Míla potvrdí nový manifest v2; potom jednou spustit stejnou schválenou
+  revizi nad jeho digestem. Do spuštění/běhu zachovat zdrojový main a TXT.
+
+### Navrhované další kroky
+- Pro tento pilot není třeba nasazení; další main znamená znovu kontrolu zdrojů.
+- Po skutečném čtení posoudit stejný kandidát a spotřebu bez opakování modelu.
+- Mac/iPhone důkazy, celý přijatý návrh a obě povolené kopie s upload/iPhone přejímkou.
+- Zvlášť autorizovaná centrální role, plánovač, launchd/auth a první týdenní slot.
+
+### Technický důkaz
+- Starý digest 9a532089…38ba0133, nový 09a6ed5b…999f4e0b; snapshot
+  90e85eb7…f27ab8ad; source main 4a33af2a1e57. Attempt/controller/turns nevznikly.
+- Šest nových regresí, cílená sada 34 OK; plná brána 2 605 testů OK, 5 skipped; závěrečná statická brána OK.
+- Původní TXT, syntetická kalibrace a stará karta zachované; produkční kód,
+  kalendář, role JSON, závislosti, služby a provozní TXT se neměnily.
+- Report recovery_guide_rec06_source_refresh_20261107.md; nová veřejná karta
+  recovery_guide_rec06_full_card_20261107_v2.json. Žádný paid turn, push či deploy.

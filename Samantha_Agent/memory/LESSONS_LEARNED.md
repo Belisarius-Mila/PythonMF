@@ -1693,3 +1693,16 @@ Doplnění 17102026 k LL-071: Nativní modelový pomocník navíc zdvojuje roli,
   další týdny; obnovuje se známá účtenka, nikoli model. No-change větev
   znovu ověří kopie na konci revize. Ověřeno synteticky i s REC-04 writerem;
   nejedná se o živou modelovou/launchd přejímku.
+
+### LL-111 — Nový zdrojový manifest není opakování placeného pokusu
+
+- Problém: souběžný nový main zneplatnil už přijatou kartu před prvním modelem;
+  přepsání packetu by skrylo změnu zdrojů a nový adresář by obešel deduplikaci.
+- Typ: zobecnitelné
+- Řešení nalezeno: 07112026
+- Řešení: neplacený refresh povolit jen bez attempt/controller/turns, původní
+  kartu zachovat a nový manifest přijmout pod vlastním digestem. Starý limit
+  se nenavyšuje a všechny verze drží stejný job/marker. Po rezervaci nebo
+  nejistotě refresh odmítnout, nikoli resetovat. Ověřeno šesti regresními
+  případy a skutečným zastavením před placeným tahem. Číslo navazuje na
+  aktuální main LL-110; jeho obsah se do Data worktree nekopíroval.

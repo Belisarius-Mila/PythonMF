@@ -186,6 +186,15 @@ pouze ve vlastní .venv, bez writeru, změn centrální role či plánovače.
 Mac/iPhone důkazy a úplná aplikační přejímka nejsou tvrzené jako hotové.
 Podrobnosti a konkrétní manifest v REC-06 full pilot reportu a cenové kartě.
 
+Po výslovném souhlasu Míly bylo původní spuštění zastaveno ještě před
+attempt markerem: Willův main nově obsahoval kalendářový krok 4a33af2a.
+Úplná revize proto zatím neprovedla žádný placený tah. Explicitní neplacené
+`prepare(refresh=True)` smí zachovat starou kartu a připravit nový manifest
+pouze před jakýmkoli attempt/controller/turns. Nezvyšuje starý limit a všechny
+verze sdílejí jediný job. Nový konkrétní manifest vyžaduje přijetí; dosavadní
+schválený model/limit se zachovávají. Nejde o obnovení po nejistém placeném tahu.
+Detaily v recovery_guide_rec06_source_refresh_20261107.md a kartě v2.
+
 `app.recovery_guide_trial.prepare()` vytvoří pevnou neplacenou kartu pro
 jeden Sol/medium tah se Standardem připnutým pouze na tento tah. Nečte
 obnovovací TXT ani projektový korpus, neaktivuje centrální roli a nepublikuje.

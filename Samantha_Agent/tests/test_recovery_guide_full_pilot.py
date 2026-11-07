@@ -40,7 +40,8 @@ class FullPilotTests(unittest.TestCase):
         self.enterContext(patch.object(f.calibration, '_runtime', return_value={'server_version':'0.163.0','socket':'test'}))
         self.factory = self.enterContext(patch.object(f.calibration, '_client', side_effect=Client))
         self.enterContext(patch.object(f, '_tokenizer', side_effect=lambda script,data,**kw:len(data)))
-        self.measurement = {'reference_counts':{}, 'limits':dict(input_tokens=100000,
+        self.measurement = {'reference_counts':{}, 'planning_standard_credits_with_margin':1.0,
+            'limits':dict(input_tokens=100000,
             output_tokens=1000,inspection_output_tokens=1000,max_calls=8,run_credits=50,month_credits=50,seconds=60)}
         self.enterContext(patch.object(f, '_measure', return_value=self.measurement))
         self.reviewer = self.enterContext(patch.object(f, 'Reviewer', return_value=self.call))
@@ -144,6 +145,55 @@ class FullPilotTests(unittest.TestCase):
         r=self.run_trial()
         self.assertEqual(r['state'],'attention')
         self.assertEqual(r['model_calls'],1)
+
+    def test_refresh_preserves_original_and_budget_without_any_paid_attempt(self):
+        card=self.prepare();before=(f.STATE/'packet.json').read_bytes()
+        self.measurement['limits']['run_credits']=100
+        updated=f.prepare(refresh=True)
+        self.assertEqual((f.STATE/'packet.json').read_bytes(),before)
+        self.assertEqual(updated['supersedes_approval_digest'],card['approval_digest'])
+        self.assertEqual(updated['measurements']['limits']['run_credits'],50)
+        self.assertTrue((f.STATE/'revisions'/(updated['approval_digest']+'.json')).is_file())
+        self.assertFalse((f.STATE/'attempt.json').exists())
+        self.assertFalse(self.calls)
+
+    def test_refreshed_packet_needs_its_own_approval_and_shares_one_job(self):
+        card=self.prepare();updated=f.prepare(refresh=True)
+        with self.assertRaises(ValueError):f.run(approved_digest='0'*64)
+        r=self.run_trial(updated)
+        self.assertEqual(r['state'],'review')
+        self.assertTrue(self.run_trial(updated)['replayed_receipt'])
+        with self.assertRaisesRegex(ValueError,'already_reserved'):
+            self.run_trial(card)
+        self.assertEqual(self.calls,['inspect','synthesize'])
+
+    def test_refresh_after_reserved_attempt_is_refused_without_connection(self):
+        self.prepare();before=self.factory.call_count
+        (f.STATE/'attempt.json').write_text('{"state":"reserved"}')
+        with self.assertRaisesRegex(ValueError,'refresh_after_attempt'):
+            f.prepare(refresh=True)
+        self.assertEqual(self.factory.call_count,before)
+
+    def test_refresh_also_refuses_orphaned_controller_marker(self):
+        self.prepare()
+        (f.STATE/'controller').mkdir()
+        with self.assertRaisesRegex(ValueError,'refresh_after_attempt'):
+            f.prepare(refresh=True)
+        self.assertFalse(self.calls)
+
+    def test_refresh_cannot_silently_expand_previous_budget(self):
+        self.prepare();self.measurement['planning_standard_credits_with_margin']=51
+        with self.assertRaisesRegex(ValueError,'previous_budget'):
+            f.prepare(refresh=True)
+        self.assertFalse((f.STATE/'revisions').exists())
+        self.assertFalse(self.calls)
+
+    def test_revision_symlink_cannot_substitute_an_approved_packet(self):
+        self.prepare();folder=f.STATE/'revisions';folder.mkdir()
+        (folder/('0'*64+'.json')).symlink_to(f.STATE/'packet.json')
+        with self.assertRaisesRegex(ValueError,'unknown_approved_packet'):
+            f.run(approved_digest='0'*64)
+        self.assertFalse(self.calls)
 
 
 class Wire:
