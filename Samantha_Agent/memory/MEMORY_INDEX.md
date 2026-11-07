@@ -62,6 +62,8 @@ Tento soubor je rozcestnik dlouhodobe pameti pro Samantha Agent.
 
 ## Projects
 
+- `reports/calendar_recovery_release_20261107.md`; `reports/recovery_guide_rec05_20261107.md` — 7. 11.: první balíček 135f46e7 potvrzeně nasazený (2781 testů, smoke 5/5). Will přebírá následně dokončený REC-05 aa18a6e7 pro úplné Mílovo p+n; stále bez produkční aktivace. Konečný stav logs/calendar_recovery_rec05_release_20261107.log a calendar_recovery_verified_20261107.log.
+
 - `reports/calendar_recovery_release_20261107.md` — 7. 11.: Will přebírá všech pět Datových hotových REC-01 až REC-04 commitů do kalendáře 9f7ce93e; společné Terra p+n výslovně schválené. REC-05 WIP zachovaný, produkční REC role/plánovač/TXT publikace vypnuté. První brána odhalila nepřenositelný test .venv; opraven vlastní fixture. Aktuální výsledek podle logs/calendar_recovery_release_v2_20261107.log a calendar_recovery_verified_20261107.log.
 
 - `reports/email_calendar_review_20261107.md`; `handoffs/continuous_personal_agent_2026_11_04.md`; `projects/email_readonly_oauth.md` — 7. 11.: bod 4 lokálně: odvozené koncové datum/délka, dva výchozí alarmy 24 h/60 min, čerstvé kolize a konečný potvrzovaný náhled. Skutečné omezené čtení čtyř vybraných kalendářů PASS; budoucí zápis až bod 5. Bez nového p+n; místní brána/commit dle logs/calendar_review_verified_20261107.log.
@@ -114,7 +116,7 @@ Tento soubor je rozcestnik dlouhodobe pameti pro Samantha Agent.
 
 ## Infrastructure Recovery
 
-- `projects/samantha_external_backup.md`; `technical/recovery_guide_maintainer.md`; `reports/recovery_guide_rec04_20261107.md`; `handoffs/workstreams/project-samantha-infrastructure.md`; `tvbcp/workstreams/project-samantha-infrastructure.md` — 2026-11-07: REC-04 přijetí kandidáta a přenos dvou kopií ověřené pouze v sandboxu. Neměnný binding, rollback, verze, souběh, ruční změny a pending iCloud; bez modelu či skutečného cloudového zápisu. Dále REC-05 příprava plánovače a samostatná REC-06 aktivace; REC-02 pilot stále neproveden.
+- `projects/samantha_external_backup.md`; `technical/recovery_guide_maintainer.md`; `reports/recovery_guide_rec05_20261107.md`; `handoffs/workstreams/project-samantha-infrastructure.md`; `tvbcp/workstreams/project-samantha-infrastructure.md` — 2026-11-07: REC-05 sandboxový plánovač/dohled připravené. ISO dedupe, restart/catch-up, přednost doručení bez nového modelu, známá účtenka místo retry. Plist bez instalace, minimální CLI PATH ověřený; skutečný launchd/auth a REC-02 pilot čekají. Dále REC-06 přejímka/podmíněná aktivace, žádná automatická produkce.
 
 - `infrastructure/operating_model.md`; `handoffs/workstreams/project-samantha-infrastructure.md`; `tvbcp/workstreams/project-samantha-infrastructure.md` — 24. 10. úklid SSD dokončen: skutečně +30,20 GiB, volno 49,28 GiB. Systémová cache zachovaná; čekající instalační kopie a sestavovací/testovací zbytky uklizené s ověřenou záchranou potřebných dat. Camino/Cockpit/autosave shodné. Další krok: praktická přejímka střižny Camino.
 

@@ -365,6 +365,7 @@ class Inventory(unittest.TestCase):
             for path in (python, script):
                 path.parent.mkdir(parents=True, exist_ok=True)
                 path.write_text("synthetic fixture, never executed")
+            python.chmod(0o700)
             before = {str(path.relative_to(project)): path.read_bytes() for path in project.rglob('*') if path.is_file()}
             spec = launch_agent(project)
             self.assertEqual(spec["ProgramArguments"], [str(python), str(script), "tick"])
@@ -372,13 +373,18 @@ class Inventory(unittest.TestCase):
             self.assertEqual(spec["StartInterval"], 900)
             self.assertEqual({str(path.relative_to(project)): path.read_bytes() for path in project.rglob('*') if path.is_file()}, before)
 
-    def test_plist_rejects_missing_interpreter_or_script(self):
+    def test_plist_rejects_missing_or_nonexecutable_inputs(self):
         with tempfile.TemporaryDirectory() as directory:
             project = Path(directory).resolve()
             with self.assertRaises(ValueError): launch_agent(project)
             python = project / ".venv/bin/python"
             python.parent.mkdir(parents=True); python.write_text("not executed")
             with self.assertRaises(ValueError): launch_agent(project)
+            script = project / "scripts/recovery_guide.py"
+            script.parent.mkdir();script.write_text("not executed")
+            with self.assertRaises(ValueError): launch_agent(project)
+            python.chmod(0o700)
+            self.assertEqual(launch_agent(project)["ProgramArguments"][0],str(python))
 
 
 if __name__ == "__main__":

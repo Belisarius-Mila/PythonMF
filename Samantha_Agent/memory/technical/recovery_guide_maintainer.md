@@ -244,3 +244,21 @@ Tento veřejný vstup je zatím pouze sandboxový: vlastní .venv/temp podadres�
 žádný produkční režim či implicitní cíle. Testovací uploaded je simulované,
 nikoli skutečný cloudový důkaz. CLI run/tick a role zůstávají neaktivované.
 Další REC-05 připraví trvalý plánovač; produkční aktivace zůstává REC-06.
+
+## 2026-11-07 14:16 CET — REC-05, plánovač a dohled
+
+WeeklyScheduler má trvalý týdenní záznam a oddělené fáze analysis/acceptance/
+delivery. Rozpracované doručení řeší před novým týdnem. Nejistá analýza se
+neopakuje ani příští týden; lze připojit jen skutečně známou místní účtenku.
+No-change větev znovu ověřuje aktuální kopie po celé revizi.
+
+Registrované schedule-preview/status a launchd/environment preview.
+Připravený plist se pouze vypisuje, neinstaluje; bootstrap CLI s minimálním
+PATH prošel, skutečný launchd/auth kontext ještě není ověřený. Den/čas a
+rozpočty zůstávají neschválené, run/tick a centrální role neaktivované.
+
+Vývojový plánovač pracuje výhradně se sandboxovými neplacenými callbacky.
+Produkční adapter musí při REC-06 převzít přesné společné slot/request ID,
+aktuální centrální roli a autentizovanou úzkou autoritu, ne používat druhý
+odvozený týden nebo modelové potvrzení. Podrobnosti a otevřené předpoklady
+jsou v REC-05 reportu. Skutečný REC-02 pilot i iPhone přejímka stále čekají.

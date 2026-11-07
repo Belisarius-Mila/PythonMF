@@ -1767,3 +1767,15 @@ Doplnění 17102026 k LL-071: Nativní modelový pomocník navíc zdvojuje roli,
 - Typ: zobecnitelné
 - Řešení nalezeno: 07112026
 - Řešení: metadata planneru ověřit na vlastním dočasném projektu s fixture interpretu a skriptu; nic nespouštět ani neinstalovat. Produkční is_file validaci ponechat a přidat negativní kontrolu chybějících souborů. 125 cílených REC testů PASS; plnou izolovanou bránu ověří nové přesné vydání.
+
+### LL-110 — Po výpadku nejdřív dokonči doručení, nevytvářej další analýzu
+
+- Problém: nový týden nebo ruční spuštění může obejít rozpracovanou úlohu,
+  zopakovat placenou analýzu či začít novou před dokončením známých kopií.
+- Typ: opakující se
+- Řešení nalezeno: 07112026
+- Řešení: jeden trvalý ISO slot pro ruční/timer vstup, marker před analýzou
+  a přednost nedokončeného přenosu. Nejistá analýza zůstane attention přes
+  další týdny; obnovuje se známá účtenka, nikoli model. No-change větev
+  znovu ověří kopie na konci revize. Ověřeno synteticky i s REC-04 writerem;
+  nejedná se o živou modelovou/launchd přejímku.

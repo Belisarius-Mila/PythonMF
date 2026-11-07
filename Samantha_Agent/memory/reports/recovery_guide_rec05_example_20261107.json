@@ -1,0 +1,97 @@
+{
+  "stage": "REC-05",
+  "synthetic_only": true,
+  "real_model_calls": 0,
+  "real_icloud_audit": false,
+  "service_installed": false,
+  "schedule_approved_for_production": false,
+  "budgets_are_test_only": true,
+  "first": {
+    "state": "pending_icloud",
+    "slot": "2026-W45",
+    "request_id": "recovery-2026-W45",
+    "action": "delivery_reconciled",
+    "source_count": 2,
+    "coverage": 2,
+    "credits": 0.01,
+    "reported_model_turns": 2,
+    "delivery": {
+      "state": "pending_icloud",
+      "copies": {
+        "local": "candidate",
+        "icloud": "candidate"
+      },
+      "physical_iphone_acceptance": "not_verified"
+    },
+    "model_calls": 0,
+    "scope": "sandbox_only",
+    "credits_are_simulated": true
+  },
+  "finish_pending_first": {
+    "state": "completed",
+    "slot": "2026-W45",
+    "request_id": "recovery-2026-W45",
+    "action": "delivery_reconciled",
+    "source_count": 2,
+    "coverage": 2,
+    "credits": 0.01,
+    "reported_model_turns": 2,
+    "delivery": {
+      "state": "uploaded",
+      "copies": {
+        "local": "candidate",
+        "icloud": "candidate"
+      },
+      "physical_iphone_acceptance": "not_verified"
+    },
+    "model_calls": 0,
+    "scope": "sandbox_only",
+    "credits_are_simulated": true
+  },
+  "one_latest_week_after_outage": {
+    "state": "completed",
+    "slot": "2026-W47",
+    "request_id": "recovery-2026-W47",
+    "action": "delivery_reconciled",
+    "source_count": 2,
+    "coverage": 2,
+    "credits": 0.01,
+    "reported_model_turns": 2,
+    "delivery": {
+      "state": "uploaded",
+      "copies": {
+        "local": "candidate",
+        "icloud": "candidate"
+      },
+      "physical_iphone_acceptance": "not_verified"
+    },
+    "model_calls": 0,
+    "scope": "sandbox_only",
+    "credits_are_simulated": true
+  },
+  "manual_same_week": {
+    "state": "completed",
+    "slot": "2026-W47",
+    "request_id": "recovery-2026-W47",
+    "action": "replayed_receipt",
+    "source_count": 2,
+    "coverage": 2,
+    "credits": 0.01,
+    "reported_model_turns": 2,
+    "delivery": {
+      "state": "uploaded",
+      "copies": {
+        "local": "candidate",
+        "icloud": "candidate"
+      },
+      "physical_iphone_acceptance": "not_verified"
+    },
+    "model_calls": 0,
+    "scope": "sandbox_only",
+    "credits_are_simulated": true
+  },
+  "analysis_invocations": 2,
+  "delivery_invocations": 3,
+  "skipped_backlog_not_created": true,
+  "job_count": 2
+}
