@@ -1,10 +1,13 @@
 # Průběžný osobní agent — e-mailový provoz a Pushcut
 
-Kalendářový bod 2 (7. 11.): čtecí přehled v Cockpitu → Kalendář (/calendar/),
-výběr čtených kalendářů a oddělený budoucí cíl zápisu. Nové nativní sestavení
-vyžaduje nový macOS souhlas; výběr zůstává prázdný pro Mílu. Skutečná přejímka
-Mac/iPhone je otevřená. Report calendar_overview_20261107.md; výsledek schváleného
-Terra p+n dle logs/calendar_overview_release_20261107.log a *_verified_*.log.
+Kalendářový bod 3 (7. 11.): lokálně připravené Navrhnout událost na vybrané
+e-mailové kartě, citace zdroje, upravitelný soukromý koncept a programová validace
+časů. Jeden skutečný modelový tah nad umělou zprávou PASS; skutečný e-mail
+a vizuální Mac/iPhone přejímka otevřené. Výsledek brány/commitu podle
+logs/calendar_draft_full_gate_20261107.log a calendar_draft_verified_20261107.log.
+Míla nyní schválil společné Terra p+n s Datovým rušícím b4b72ab0. Bod 2 je
+nasazený jako 158b0383; jeho nový OS souhlas
+a výběr kalendářů nejsou tímto krokem nahrazené.
 
 Aktuální stav 6. 11.: Terra p+n e82a5d47 dokončené, nový editor živě ověřený.
 Potvrzený upgrade na f2d6ef79 aktivoval zdvořilostní pravidlo i v hodinovém
@@ -835,3 +838,48 @@ nebyl automaticky spuštěn nový OS dialog. Staré binární sestavení, původ
 oprávnění a žádosti jsou zachované. Plná brána: logs/calendar_overview_full_gate_20261107.log;
 publikační autorita: calendar_overview_release_20261107.log a calendar_overview_verified_20261107.log.
 Živé názvy, ID a události zůstávají soukromě; nový TVBCP nebyl domluvený.
+
+## 2026-11-07 09:05 CET — Bod 3: návrhy událostí z vybraných e-mailů (lokálně)
+
+Hotovo: Na vybrané důležité e-mailové kartě je v lokálním kódu Navrhnout událost.
+Editor se otevře bez modelového tahu. Samostatné potvrzené tlačítko pošle jen
+tuto zprávu schválenému e-mailovému modelu; odpověď obsahuje citace a navržené
+položky. Uživatel může uložit i neúplný koncept, uvidí co chybí a co upravil.
+Program kontroluje data, pásmo, délku, půlnoc, DST a nesoulad normalizace s
+výslovným datem/časem v citaci. Termín úkolu není automaticky schůzka.
+Formální ICS a rozpoznané opakování mají ruční zpracování bez placeného tahu.
+
+Rozhodnutí: Míla zadal pokračování bodem 3. Will řeší jádro, validace a integraci;
+vymezený editor připravila Luna registrovanou cestou, převzatý přesným digestem.
+P+n bodu 3 není zadané. Žádné kalendářové zápisy, odesílání, zpětný průchod
+pošty ani rozšíření hodinové služby. Modelové role a Datův worktree beze změny.
+
+Další krok: Po lokálním dokončení samostatně rozhodnout o p+n a vybrat jeden
+skutečný e-mail pro přejímku. Ranní OS souhlas bodu 2 stále není potvrzený;
+přípravu návrhů neblokuje, budoucí kontrolu kolizí a zápis ano.
+
+Navrhované další kroky: Bod 4 — kolize a konečné potvrzení, až po samostatném
+zadání. Diagnostika dřívějšího selhání Human–Adam zůstává zachovaná.
+
+Technický důkaz: Cílené testy viz calendar_draft_targeted_20261107.log, plná
+brána calendar_draft_full_gate_20261107.log, finální stav calendar_draft_verified_20261107.log.
+Jeden skutečný Terra tah nad umělým e-mailem PASS, 7171 vstupních / 214 výstupních
+tokenů; správné datum, 10:00–11:00, Europe/Prague, místo a odkaz, žádný retry
+a žádná skutečná pošta. Pojmenovaný omezený profil ověřen také prázdným vláknem
+bez modelového tahu. Browserový kontrakt ověřuje rozepsané změny, opožděný GET,
+revizi, nejistý POST a zákaz nového pokusu. Safari vrací cgWindowNotFound, takže
+vizuální přejímka zůstává otevřená. Soukromé vstupy/účtenky nejsou v Gitu;
+nový TVBCP nebyl domluvený a nevzniká.
+
+## 2026-11-07 09:27 CET — Kalendářový vývoj ověřen a společné p+n schválené
+
+Hotovo: Vývojová plná brána bodu 3 prošla: 2726 testů, 31 SKIP, bez selhání
+(441,869 s unit část). Bodový čas termínu úkolu nevyžaduje konec ani délku
+schůzky. Statická brána a cílené kontroly PASS.
+Rozhodnutí: Míla nyní výslovně zadal p+n včetně Datova b4b72ab0, který ruší
+placený hlasový pilot. Starší hlasové opravy A–G se samostatně nenasazují.
+Další krok: Převzít přesný rušící commit a předat společný merge head Terře.
+Navrhované další kroky: Vybraný skutečný e-mail a bod 4 kolizí samostatně.
+Technický důkaz: logs/calendar_draft_full_gate_20261107.log; společné vydání
+dle logs/calendar_draft_retirement_release_20261107.log a *_verified_*.log.
+Tento zápis nepředstírá dokončené nasazení. Soukromé účtenky zůstávají private.

@@ -12,6 +12,27 @@ from app.capabilities.models import (
 
 CAPABILITIES: tuple[CapabilityRecord, ...] = (
     CapabilityRecord(
+        capability_id="email_calendar_draft_status", label="Read a selected email's calendar draft",
+        risk=RiskLevel.READ_ONLY, reads=("selected private draft and original request status",), writes=(),
+        tool="app.email.calendar_draft.CalendarDraftService.status", audit=AuditPolicy.REDACTED,
+        notes="No mailbox or model call. Private body, thread IDs and raw model receipt are not exposed.",
+    ),
+    CapabilityRecord(
+        capability_id="email_calendar_draft_prepare", label="Suggest a calendar item from one selected email",
+        risk=RiskLevel.EXTERNAL_SEND, reads=("one explicitly selected full email with matching content digest", "approved continuous_email role",),
+        writes=("private single-attempt journal and editable draft",),
+        tool="app.email.calendar_draft.CalendarDraftService.prepare", requires_confirmation=True,
+        confirmation_policy=ConfirmationPolicy.EXACT_CURRENT_MESSAGE, audit=AuditPolicy.REDACTED,
+        notes="Dedicated model button after disclosure. One attempt per source mail; no calendar data, calendar mutation, mail send, automatic retry or hourly integration. ICS/recognized recurrence is handled locally as manual-required.",
+    ),
+    CapabilityRecord(
+        capability_id="email_calendar_draft_save", label="Save human changes to a private calendar suggestion",
+        risk=RiskLevel.LOCAL_WRITE, reads=("current private draft revision and user edits",),
+        writes=("private draft only",), tool="app.email.calendar_draft.CalendarDraftService.save",
+        requires_confirmation=True, confirmation_policy=ConfirmationPolicy.SUMMARY_BEFORE_ACTION, audit=AuditPolicy.REDACTED,
+        notes="Explicit Save draft and revision check. Invalid/incomplete times remain visibly unresolved. No model or calendar write.",
+    ),
+    CapabilityRecord(
         capability_id="calendar_overview_status", label="Read private calendar overview snapshot",
         risk=RiskLevel.READ_ONLY, reads=("private selected calendars and last bounded snapshot",),
         writes=(), tool="app.calendar_overview.CalendarOverview.snapshot", audit=AuditPolicy.REDACTED,

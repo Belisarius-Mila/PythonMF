@@ -54,7 +54,8 @@ def _sources() -> dict[str, Any]:
             "documentation": path.read_text(encoding="utf-8")}
 
 
-def start_data_only_thread(client: Any, context: Path, model: str, instructions: str) -> dict[str, Any]:
+def start_data_only_thread(client: Any, context: Path, model: str, instructions: str,
+                           *, disabled_features: tuple[str, ...] = (), restrict_read_access: bool = False) -> dict[str, Any]:
     """One isolated context; only per-thread configuration, never global state."""
     context.mkdir(parents=True, exist_ok=True)
     if context.is_symlink() or any(context.iterdir()):
@@ -69,6 +70,9 @@ def start_data_only_thread(client: Any, context: Path, model: str, instructions:
                  "features.shell_tool": False, "features.apps": False,
                  "features.multi_agent": False, "features.hooks": False,
                  "features.memories": False}
+    if any(not isinstance(name, str) or not re.fullmatch(r"[a-z][a-z0-9_]*", name) for name in disabled_features):
+        raise ValueError("Neplatná omezení modelového kontextu.")
+    overrides.update({f"features.{name}": False for name in disabled_features})
     overrides.update({f"mcp_servers.{name}.enabled": False for name in servers})
     skill_roots = client.transport.request("skills/list", {"cwds": [str(context)]}).get("data")
     if not isinstance(skill_roots, list) or any(row.get("errors") for row in skill_roots):
@@ -76,11 +80,20 @@ def start_data_only_thread(client: Any, context: Path, model: str, instructions:
     skills = [Path(skill["path"]) for row in skill_roots for skill in row.get("skills", [])]
     overrides["skills.config"] = [{"path": str(path.parent if path.name == "SKILL.md" else path),
                                     "enabled": False} for path in skills]
+    profile = None
+    if restrict_read_access:
+        profile = "data-only-" + hashlib.sha256(str(context.resolve()).encode()).hexdigest()[:24]
+        existing = config.get("permissions") or {}
+        if not isinstance(existing, dict) or profile in existing:
+            raise ValueError("Omezený profil už existuje mimo tento požadavek.")
+        overrides["permissions"] = {profile: {"filesystem": {":minimal": "read", str(context.resolve()): "read"},
+                                              "network": {"enabled": False}}}
+    options = {"permission_profile": profile} if profile else {}
     thread = client.start_thread(cwd=context, ephemeral=True, developer_instructions=instructions,
                                  sandbox="read-only", approval_policy="never",
                                  model=model, config_overrides=overrides,
-                                 base_instructions=instructions)
-    return {"thread_id": thread, "disabled_skills": len(skills)}
+                                 base_instructions=instructions, **options)
+    return {"thread_id": thread, "disabled_skills": len(skills), "permission_profile": profile}
 
 
 def _review(sources: dict[str, Any], selected: dict[str, Any], client: Any) -> dict[str, Any]:

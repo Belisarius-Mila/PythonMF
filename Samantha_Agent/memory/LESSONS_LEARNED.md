@@ -62,6 +62,7 @@ nebo jejichž princip lze znovu použít v jiné části projektu.
 - Typ: opakující se
 - Řešení nalezeno: 05112026
 - Řešení: nejprve schéma konkrétního binárního serveru a neplacený command/exec preflight. Pro Ateliér pouze vlastní per-thread profil s minimálním systémovým čtením a jedním snapshot root, bez sítě/zápisu; žádná změna globální konfigurace nebo restart. Potvrdit přesný activePermissionProfile, cwd, model a never approval, bez širšího fallbacku. project_doc_max_bytes=0 je nutné znovu předat i při resume. Globální priority/Fast nepřebírat do Standard pilotu: explicitní serviceTierForTurn=default. Běžný textový klient zůstává bez opt-in a beze změny protokolu.
+- Ověřeno znovu 07112026 u kalendářového návrhu: stejný named profile potvrzen prázdným thread/start bez modelového tahu; skutečný syntetický e-mailový tah pak uspěl bez kalendářových dat a nástrojů. Vypnout také zděděné browser/computer use, pluginy a image generation podle skutečného experimentalFeature/list. K návrhu neposílat přehled kalendářů; celý původní EML svázat digestem, uložit jediný pokus a nejistý výsledek neopakovat.
 
 ### LL-101 — Unix socket nezaručuje shodný aplikační protokol
 

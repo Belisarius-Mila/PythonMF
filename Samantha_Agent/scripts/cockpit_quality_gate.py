@@ -24,6 +24,9 @@ NODE_FALLBACK_PATHS = (
 )
 
 COMPILE_PATHS = (
+    "app/email/calendar_proposal.py",
+    "app/email/calendar_draft.py",
+    "app/cockpit_email_calendar.py",
     "app/calendar_access_pilot.py",
     "app/calendar_overview.py",
     "app/cockpit_calendar.py",
@@ -448,6 +451,8 @@ TEST_MODULES = (
     "tests.test_email_work_repository",
     "tests.test_calendar_access_pilot",
     "tests.test_calendar_overview",
+    "tests.test_email_calendar_draft",
+    "tests.test_cockpit_email_calendar",
     "tests.test_cockpit_calendar",
     "tests.test_continuous_email_agent",
     "tests.test_email_visibility_preferences",
