@@ -1404,3 +1404,42 @@ závislosti bez konkrétní potřeby. Nejde o rozšíření e-mailové business 
 - Plná projektová brána 2 668 testů OK / 5 skipped; finální statická brána OK.
   Žádný push/deploy, změna rolí,
   společné .venv, globálního CLI, provozního TXT ani iCloudu.
+
+## 2026-11-07 23:28 CET — REC-06: malá živá zkouška dokončena, obsah/cena OK, čas překročen
+
+### Hotovo
+- Schválená karta 566899e7…ddd8cb3 provedena jedním run: dva jedinečné
+  completed/delivered tahy Sol/medium Standard, žádný retry ani třetí tah.
+- Inspect i již doručená syntéza prošly obsahovým kontraktem: oba správné
+  source/anchor odkazy, přesné citace, celý original doslovně zachovaný,
+  dva unverified dodatky. Syntéza byla ověřena neplaceně z raw účtenky.
+- Celkový odhad ze skutečné spotřeby 8,50485 Standard kreditu, pod mezí 15.
+  Input/output meze prošly; nebyly pozorované nežádoucí tool události.
+
+### Rozhodnutí
+- Celý test zůstává attention / accepted=false: syntéza trvala 400,240 s
+  proti schváleným 300 s. Žádná zpětná změna limitu či přijetí jobu.
+- Známé dokončené účtenky se zachovávají; samotné časové překročení není
+  důvodem k opakování modelových tahů. Starý v2 job/21,013 kreditu beze změny.
+- REC-06 a celý korpus/Mac/iPhone nejsou přijaté. Žádný provozní TXT/iCloud,
+  role, služba, push, nasazení nebo integrace do main.
+
+### Další krok
+- Neplaceně připravit úplný anchor pilot a novou cenovou kartu: aktuální
+  manifest, přepočet všech dávek/syntézy a samostatný časový plán fází podle
+  naměřených 400,240 s. Nejde o retry ani zvýšení limitu uzavřeného testu.
+
+### Navrhované další kroky
+- Will přezkoumá známý výsledek, oba splněné obsahové kontrakty a časový důvod nepřijetí.
+- Úplný anchor adapter/preflight bez modelu; nový konkrétní souhlas až s hotovou kartou.
+- Volitelně později programově skládat nezměněné části místo jejich modelového opisování.
+- Až po celém návrhu Mac/iPhone dossier, dvě kopie/upload a samostatná týdenní aktivace.
+
+### Technický důkaz
+- recovery_guide_anchor_trial_run_20261107.md a recovery_guide_anchor_trial_result_20261107.json.
+- Inspect 9,008 s / 1,9261; synthesis 400,240 s / 6,57875 Standard kreditu.
+  Celkem input 69 602, cached 0, output 20 099 (reasoning subset 132), total 89 701.
+- Raw 01 6f8b5922…4b6ae8, raw 02 bea9fa82…bffc4; přesně dva raw turn soubory.
+  Návod 62 778 B zachovaný přesně včetně vnějšího whitespace, nové dodatky 366 B.
+- Kód se neměnil; předchozí 50 cílených a 2 668 plných testů / 5 skipped platí.
+  Finální statická brána a git diff --check OK. Raw data zůstávají v soukromé .venv.

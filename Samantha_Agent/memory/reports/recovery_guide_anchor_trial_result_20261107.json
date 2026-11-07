@@ -1,0 +1,120 @@
+{
+  "job": {
+    "request_id": "rec06-anchors-small-01",
+    "approval_digest": "566899e7663e4599f17fa462404ca609ef77e12566721c2ba88eafdbcddd8cb3",
+    "state": "attention",
+    "started_at": "2026-11-07T22:17:38.209201+00:00",
+    "accepted": false,
+    "model_turn_attempts": 2,
+    "phase_attempts": 2,
+    "estimated_standard_credits": 8.50485,
+    "known_standard_credits": 8.50485,
+    "automatic_retry": false,
+    "publication_authorized": false,
+    "full_corpus_review": false,
+    "error_type": "ValueError",
+    "reason": "anchor_receipt_acceptance_failed",
+    "finished_at": "2026-11-07T22:24:32.007322+00:00"
+  },
+  "snapshot_sha256": "7e0e6b6fce5f23ed10e954562d3d190bcfc6ffcc97867813dbf673f3c90fb738",
+  "catalogue_sha256": "6b10518275ead927371da24287f91f27bc980b9e0552bd16ec6f2258dcabb79a",
+  "turns": [
+    {
+      "index": 1,
+      "phase": "inspect",
+      "state": "completed_unreviewed",
+      "receipt_sha256": "6f8b5922f091d29e4eccafdc0707f741cceb317e0721044a1f6ed0747d4b6ae8",
+      "request_sha256": "2738dfa79f4445abebf94f1a05d411345ffbbd9f4e8c96e0fd3354c30a88632c",
+      "thread_id": "01a1b816-bdae-7570-b9ee-abdaf52d9152",
+      "turn_id": "01a1b816-be53-7263-bf1a-c1dea63617ae",
+      "delivered": true,
+      "status": "completed",
+      "duration_ms": 9008,
+      "usage": {
+        "input_tokens": 37212,
+        "cached_input_tokens": 0,
+        "output_tokens": 262,
+        "reasoning_output_tokens": 40,
+        "total_tokens": 37474
+      },
+      "estimated_standard_credits": 1.9261,
+      "unexpected_item_types": [],
+      "acceptance": {
+        "input": true,
+        "output": true,
+        "duration": true
+      }
+    },
+    {
+      "index": 2,
+      "phase": "synthesize",
+      "state": "completed_unreviewed",
+      "receipt_sha256": "bea9fa82e7278d4ac584410146d41c81cbf9d32e1c51238a5facfb91c84bffc4",
+      "request_sha256": "4db07440dda5fba06e998a7a3b784e26972998a7de368ba499c1261da2a90f98",
+      "thread_id": "01a1b816-e8ae-7cc1-a4f3-3f7d93c04e3a",
+      "turn_id": "01a1b816-e9d2-7d43-bd00-2fe9f6d492e9",
+      "delivered": true,
+      "status": "completed",
+      "duration_ms": 400240,
+      "usage": {
+        "input_tokens": 32390,
+        "cached_input_tokens": 0,
+        "output_tokens": 19837,
+        "reasoning_output_tokens": 92,
+        "total_tokens": 52227
+      },
+      "estimated_standard_credits": 6.57875,
+      "unexpected_item_types": [],
+      "acceptance": {
+        "input": true,
+        "output": true,
+        "duration": false
+      }
+    }
+  ],
+  "checks": {
+    "inspect_offline_contract": "passed",
+    "candidate_sha256": "aed4ed7a46e4f00126e19a280e0c6e1cef24fe4f8f597fb822400207f1aa114e",
+    "synthesize_offline_contract": "passed",
+    "original_exact_including_outer_whitespace": true,
+    "original_equal_ignoring_outer_whitespace": true,
+    "paragraph_count": 3
+  },
+  "live_new_schema_exercised": true,
+  "automatic_retry": false,
+  "publication_authorized": false,
+  "full_corpus_review": false,
+  "application_scope_approved": false,
+  "model_role_changed": false,
+  "production_guide_written": false,
+  "old_closed_full_job_unchanged": true,
+  "raw_turn_files": [
+    "01.json",
+    "02.json"
+  ],
+  "source_main_at_approval": "0850e6f381fe359695e44c4381dbe388e7a86b00",
+  "model": "gpt-6.1-sol",
+  "effort": "medium",
+  "serviceTierForTurn": "default",
+  "total_usage": {
+    "input_tokens": 69602,
+    "cached_input_tokens": 0,
+    "output_tokens": 20099,
+    "reasoning_output_tokens": 132,
+    "total_tokens": 89701
+  },
+  "total_estimated_standard_credits": 8.50485,
+  "quality_validation": "offline_revalidated_without_new_model_call",
+  "unchanged_original_output_bytes": 62778,
+  "new_paragraph_output_bytes": 366,
+  "raw_receipts_rewritten": false,
+  "closed_job_reopened": false,
+  "automatic_time_limit_exception": false,
+  "failed_acceptance_criteria": [
+    "synthesize.duration"
+  ],
+  "cost_acceptance_passed": true,
+  "content_contracts_passed": true,
+  "whole_trial_accepted": false,
+  "final_static_gate_passed": true
+}

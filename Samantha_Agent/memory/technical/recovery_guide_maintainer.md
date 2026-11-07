@@ -382,3 +382,22 @@ Při driftu před jakýmkoli pokusem lze neplaceně připravit explicitní reviz
 po rezervaci zůstává jen původní receipt, žádný retry ani reset. Další kroky:
 malá samostatně přijatá živá zkouška, pak nová karta celého korpusu; žádná
 produkční aktivace rolí, služeb, zápis TXT/iCloud nebo publikování v této etapě.
+
+## 2026-11-07 — známý výsledek malé živé anchor zkoušky
+
+Karta 566899e7…ddd8cb3 výslovně přijata a run zavolán jednou. Dva doručené
+completed tahy; inspect 9,008 s a synthesis 400,240 s. Obsahově prošly oba
+kontrakty i původní quality gate, original zachován doslovně včetně vnějšího
+whitespace, obě přesné source/anchor evidence a dva unverified dodatky.
+Syntéza byla obsahově znovu ověřena offline z raw, bez nového modelu.
+
+Cena 8,50485 Standard kreditu je odhad ze skutečných tokenů; pod mezí 15.
+Přesto celý job zůstává attention / accepted=false kvůli času >300 s.
+Limit/state se nepřepisoval, žádný retry/reset/refresh/třetí tah. Starý úplný
+v2 job beze změny. Příští run tohoto slotu smí pouze vrátit známou účtenku.
+
+Důkaz: reports/recovery_guide_anchor_trial_run_20261107.md a *_result_20261107.json.
+Nejbližší návrh je samostatný úplný anchor pilot s neplacenou kartou, aktuálními
+zdroji a realistickým fázovým časovým plánem podle měření; nový celý modelový
+pokus musí být konkrétně přijat. Celý korpus ani Mac/iPhone nastavení zatím
+nebyly přezkoumané, žádný provozní návod či týdenní aktivace nevznikly.

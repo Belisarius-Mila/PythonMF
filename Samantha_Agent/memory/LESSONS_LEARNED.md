@@ -1730,3 +1730,11 @@ Doplnění 17102026 k LL-071: Nativní modelový pomocník navíc zdvojuje roli,
   úplným historickým korpusem a 101 fixture; není ověřena živá modelová volba
   ID ani věcná správnost. Starý neúspěšný běh zůstává uzavřený; nový formát
   vyžaduje nové nacenění a zvláštní přijetí placené zkoušky.
+
+Doplnění 07112026 k LL-113: skutečná malá dvoufázová zkouška potvrdila oba
+source/anchor kontrakty, přesné citace i doslovně zachovaný celý original.
+Cena 8,50485 Standard kreditu pod mezí 15; syntéza 400,240 s ale překročila
+schválených 300 s. Vyhodnocuj obsah, cenu a čas odděleně z raw účtenek:
+obsahová revalidace bez modelu není zpětné přijetí celého jobu. Zachovat
+attention a známé doručení, neopakovat SDK jen kvůli času ani zpětně neměnit
+limit. Nový fázový časový plán je další samostatná karta, ne oprava účtenky.
