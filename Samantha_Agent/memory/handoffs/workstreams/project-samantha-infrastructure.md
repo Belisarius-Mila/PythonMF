@@ -1,41 +1,43 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
-## 2026-11-07 19:58 CET — REC-06: schválený běh zastaven před modelem, nový manifest v2
+## 2026-11-07 21:44 CET — REC-06: živý pilot zastaven citačním kontraktem po dvou tazích
 
 ### Hotovo
-- Výslovný souhlas s úplnou revizí byl zpracován. Zdrojová kontrola ale
-  zastavila původní kartu ještě před rezervací, připojením a placeným tahem:
-  Will mezitím přidal kalendářový main 4a33af2a místo původního 2909ea5a.
-- Připraven nový plný manifest: 530 dokumentů, 6 290 890 bajtů včetně TXT;
-  přidán jeden dokument a změněno pět dříve vybraných dokumentů, nic vynecháno.
-- Nová neměnná karta v2 zachovává 15 tahů a schválenou mez 200 kreditů;
-  plán s marží 193,79845 Standard kreditu. Počet placených tahů tohoto běhu 0.
+- Schválená v2 revize proběhla kontrolovaně do druhé SDK dávky. Obě odpovědi
+  jsou completed/delivered; dva jedinečné turny, žádný SDK retry. První odpověď
+  byla v pokračování převzata lokálně, původní raw soubor zůstává beze změny.
+- Celkem 387 928 tokenů, odhad 21,013 Standard kreditu včetně první ceny jednou.
+  V doručených odpovědích je 101 dokumentů; 99 raw citací je doslovných.
+- Druhá dávka se zastavila na dvou změnách prvního písmena citace proti zdroji
+  (Restart/restart, Oddělit/oddělit). Celý návrh TXT ani syntéza nevznikly.
 
 ### Rozhodnutí
-- Míla schválil model, jednorázové celé čtení a přijímací mez 200 bez tvrdého
-  fakturačního stropu. Tento cenový souhlas se zachovává; čeká pouze přijetí
-  nového konkrétního zdrojového manifestu včetně kalendáře.
-- Starý packet se nepřepisuje. Neplacený refresh smí vzniknout jen bez
-  attempt/controller/turns; všechny verze mají jeden job a nesmějí navýšit limit.
-  Po rezervaci, nejistém či částečném pokusu žádný refresh ani modelový retry.
+- Dalších 13 plánovaných SDK tahů se neodesílá. Doslovný citační kontrakt
+  zůstává přísný; dvě nepřesné modelové citace se automaticky nenahradily
+  zdrojovým textem. Nejde o nejisté doručení, ale o doloženou chybu přesnosti.
+- REC-06 ani celý REC-02 nejsou přijaté; týdenní automatiku zatím neaktivovat.
+  Další placená zkouška vyžaduje nový konkrétní podklad, nikoli retry z této rezervy.
+- Produkční TXT/kopie, role JSON, služby a nasazení se v tomto kroku neměnily.
 
 ### Další krok
-- Míla potvrdí nový manifest v2; potom jednou spustit stejnou schválenou
-  revizi nad jeho digestem. Do spuštění/běhu zachovat zdrojový main a TXT.
+- Neplaceně připravit pilot source/anchor ID: model odkazuje na povolené
+  úseky, přesnou citaci vrací program ze zmrazených znaků zdroje. Ověřit
+  inspect i synthesis a stávající doslovný validátor zachovat.
 
 ### Navrhované další kroky
-- Pro tento pilot není třeba nasazení; další main znamená znovu kontrolu zdrojů.
-- Po skutečném čtení posoudit stejný kandidát a spotřebu bez opakování modelu.
-- Mac/iPhone důkazy, celý přijatý návrh a obě povolené kopie s upload/iPhone přejímkou.
-- Zvlášť autorizovaná centrální role, plánovač, launchd/auth a první týdenní slot.
+- Will převezme známý výsledek a izolovanou opravu s uchováním své kalendářové práce.
+- Po offline anchor testech znovu nacenit a výslovně přijmout případnou novou zkoušku.
+- Až po celém kandidátovi doplnit Mac/iPhone dossier a obsahovou přejímku.
+- Teprve potom povolené dvě kopie/upload/iPhone a samostatná týdenní aktivace.
 
 ### Technický důkaz
-- Starý digest 9a532089…38ba0133, nový 09a6ed5b…999f4e0b; snapshot
-  90e85eb7…f27ab8ad; source main 4a33af2a1e57. Attempt/controller/turns nevznikly.
-- Šest nových regresí, cílená sada 34 OK; plná brána 2 605 testů OK, 5 skipped; závěrečná statická brána OK.
-- Původní TXT, syntetická kalibrace a stará karta zachované; produkční kód,
-  kalendář, role JSON, závislosti, služby a provozní TXT se neměnily.
-- Report recovery_guide_rec06_source_refresh_20261107.md; nová veřejná karta
-  recovery_guide_rec06_full_card_20261107_v2.json. Žádný paid turn, push či deploy.
+- Celkem input 379 845, cached 0, output 8 083 (reasoning subset 109).
+  Ceny dvou SDK účtenek 10,44505 + 10,56795 = 21,013; historické ledgery nesčítat.
+- První 36-dokumentová dávka převzata; druhá 65-dokumentová dávka atomicky
+  odmítnuta kvůli 2 ze 65 citací. Žádný raw soubor třetího SDK tahu.
+- 47 cílených testů, plná brána 2 618 OK / 5 skipped; finální statická brána OK.
+- Účtenky zůstávají v soukromé .venv. Git-safe důkaz
+  recovery_guide_rec06_full_result_20261107.json a report recovery_guide_rec06_run_20261107.md.
+  Starý run/refresh i známé pokračování jsou uzavřené; znovu je nespouštět.
 <!-- SAMANTHA_CURRENT_STATUS_END -->
 
 ### Předchozí stav infrastruktury
@@ -853,3 +855,84 @@ souborů / 5 002 170 B. Stávající rutinní pilot není obecný writer/schedul
   kalendář, role JSON, závislosti, služby a provozní TXT se neměnily.
 - Report recovery_guide_rec06_source_refresh_20261107.md; nová veřejná karta
   recovery_guide_rec06_full_card_20261107_v2.json. Žádný paid turn, push či deploy.
+
+## 2026-11-07 21:26 CET — REC-06: první úplná dávka dorazila, známá účtenka bez opakování
+
+### Hotovo
+- Míla přijal manifest v2 včetně kalendáře a skutečný SDK běh se spustil.
+  První tah je jednoznačně completed/delivered: 36 přesných citací dokumentů
+  a jedna přesná citace original_guide navíc. Nejde o nejisté doručení.
+- Známá spotřeba 194 389 tokenů / 10,44505 Standard kreditu, čas 78 142 ms.
+  Controller zastavil další dávky kvůli délce covered 37 místo 36; žádný retry.
+- Opravena úzká interpretace pokrytí: přesný nadbytečný původní návod se
+  vyjme jen při úplné shodě všech očekávaných citací. Raw odpověď/notes se nemění.
+
+### Rozhodnutí
+- Pokračování dokončí jen zbývajících 14 původně schválených SDK kroků
+  nad stejným manifestem v2 a v celkové přijímací mezi 200. Nepřidává nový
+  placený pokus ani zdroje. První výsledek se převezme lokálně, nikoli SDK.
+- Povolena pouze prokázaná completed první účtenka a tento přesný případ.
+  Unknown delivery, neznámá spotřeba, další SDK tah, neúplné citace nebo
+  změněné vstupy jsou odmítnuté. Starý run/refresh zůstávají uzavřené.
+- Konečný TXT, Mac/iPhone důkazy, publikace a aktivace zůstávají oddělené.
+
+### Další krok
+- Pokračování s checkpointem 82e75dfd…ab613642 již bylo spuštěno. Číst
+  receipt-recovery-attempt.json a receipt-recovery-controller účtenku, čekat
+  na stejný běh. První SDK tah se nikdy neposílá znovu; žádný nový run/refresh.
+
+### Navrhované další kroky
+- Vyhodnotit jediný navazující výsledek a celkovou spotřebu s první cenou jen jednou.
+- Celý kandidát převzít obsahově, doplnit Mac/iPhone doklady a aplikační dossier.
+- Obě povolené kopie, upload a fyzická iPhone přejímka.
+- Zvlášť schválit centrální roli, týdenní službu a první plánovaný slot.
+
+### Technický důkaz
+- Raw první receipt SHA 1727d71f…c28b2e26, turn 01a1b7a6-1282-7f20-83d1-520c89973061.
+  Input 190 761, cached 0, output 3 628 (reasoning subset 49); 36 dokumentů přesně.
+- 13 nových regresí; cílená sada 47 OK; plná brána 2 618 testů OK, 5 skipped.
+- Nový explicitní continuation marker pod stejným job lockem, SDK reviewer
+  začíná indexem 2. Celkový limit 200, zbývající allowance 189,55495.
+- Report recovery_guide_rec06_run_20261107.md; checkpoint
+  recovery_guide_rec06_known_receipt_20261107.json. Žádná změna produkčního
+  klienta/runtime, role JSON, služeb, provozních TXT, žádný push/deploy.
+
+## 2026-11-07 21:44 CET — REC-06: živý pilot zastaven citačním kontraktem po dvou tazích
+
+### Hotovo
+- Schválená v2 revize proběhla kontrolovaně do druhé SDK dávky. Obě odpovědi
+  jsou completed/delivered; dva jedinečné turny, žádný SDK retry. První odpověď
+  byla v pokračování převzata lokálně, původní raw soubor zůstává beze změny.
+- Celkem 387 928 tokenů, odhad 21,013 Standard kreditu včetně první ceny jednou.
+  V doručených odpovědích je 101 dokumentů; 99 raw citací je doslovných.
+- Druhá dávka se zastavila na dvou změnách prvního písmena citace proti zdroji
+  (Restart/restart, Oddělit/oddělit). Celý návrh TXT ani syntéza nevznikly.
+
+### Rozhodnutí
+- Dalších 13 plánovaných SDK tahů se neodesílá. Doslovný citační kontrakt
+  zůstává přísný; dvě nepřesné modelové citace se automaticky nenahradily
+  zdrojovým textem. Nejde o nejisté doručení, ale o doloženou chybu přesnosti.
+- REC-06 ani celý REC-02 nejsou přijaté; týdenní automatiku zatím neaktivovat.
+  Další placená zkouška vyžaduje nový konkrétní podklad, nikoli retry z této rezervy.
+- Produkční TXT/kopie, role JSON, služby a nasazení se v tomto kroku neměnily.
+
+### Další krok
+- Neplaceně připravit pilot source/anchor ID: model odkazuje na povolené
+  úseky, přesnou citaci vrací program ze zmrazených znaků zdroje. Ověřit
+  inspect i synthesis a stávající doslovný validátor zachovat.
+
+### Navrhované další kroky
+- Will převezme známý výsledek a izolovanou opravu s uchováním své kalendářové práce.
+- Po offline anchor testech znovu nacenit a výslovně přijmout případnou novou zkoušku.
+- Až po celém kandidátovi doplnit Mac/iPhone dossier a obsahovou přejímku.
+- Teprve potom povolené dvě kopie/upload/iPhone a samostatná týdenní aktivace.
+
+### Technický důkaz
+- Celkem input 379 845, cached 0, output 8 083 (reasoning subset 109).
+  Ceny dvou SDK účtenek 10,44505 + 10,56795 = 21,013; historické ledgery nesčítat.
+- První 36-dokumentová dávka převzata; druhá 65-dokumentová dávka atomicky
+  odmítnuta kvůli 2 ze 65 citací. Žádný raw soubor třetího SDK tahu.
+- 47 cílených testů, plná brána 2 618 OK / 5 skipped; finální statická brána OK.
+- Účtenky zůstávají v soukromé .venv. Git-safe důkaz
+  recovery_guide_rec06_full_result_20261107.json a report recovery_guide_rec06_run_20261107.md.
+  Starý run/refresh i známé pokračování jsou uzavřené; znovu je nespouštět.

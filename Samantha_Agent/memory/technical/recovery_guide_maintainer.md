@@ -195,6 +195,19 @@ verze sdílejí jediný job. Nový konkrétní manifest vyžaduje přijetí; dos
 schválený model/limit se zachovávají. Nejde o obnovení po nejistém placeném tahu.
 Detaily v recovery_guide_rec06_source_refresh_20261107.md a kartě v2.
 
+Manifest v2 byl Mílou přijat. První skutečný SDK tah dorazil se všemi
+36 přesnými citacemi a jedním přesným original_guide navíc. Controller
+zastavil pokrytí na 0 kvůli očekávané délce pole; known receipt má jasné
+doručení a spotřebu 10,44505 Standard kreditu. Úzká normalizace původní řádek
+vyjme pouze při úplném přesném pokrytí a zachová raw odpověď i notes.
+
+`app.recovery_guide_receipt_recovery` pak může pod původním souhlasem v2
+převzít známý první výsledek lokálně a SDK pokračovat až další původně
+schválenou dávkou. Stejný job, jediný další marker, žádný reset/refresh,
+žádné opakování tahu 1; unknown delivery nebo neznámá spotřeba jsou odmítnuté.
+První známá cena se účtuje v navazujícím součtu jen jednou, celkový limit
+zůstává 200. Konkrétní důkaz/checkpoint v REC-06 run reportu a JSON.
+
 `app.recovery_guide_trial.prepare()` vytvoří pevnou neplacenou kartu pro
 jeden Sol/medium tah se Standardem připnutým pouze na tento tah. Nečte
 obnovovací TXT ani projektový korpus, neaktivuje centrální roli a nepublikuje.
@@ -315,3 +328,16 @@ Produkční adapter musí při REC-06 převzít přesné společné slot/request
 aktuální centrální roli a autentizovanou úzkou autoritu, ne používat druhý
 odvozený týden nebo modelové potvrzení. Podrobnosti a otevřené předpoklady
 jsou v REC-05 reportu. Skutečný REC-02 pilot i iPhone přejímka stále čekají.
+
+## 2026-11-07 21:44 CET — konečný výsledek živého v2 pilotu
+
+Druhý tah dorazil se všemi 65 zdroji, ale dva raw quote řetězce měnily první
+písmeno oproti doslovnému zdroji. Controller proto zastavil další SDK kroky.
+Celkem dva jedinečné tahy, 387 928 tokenů a odhad 21,013 Standard kreditu;
+první cena je v pokračování zahrnutá jednou, nesčítat historické ledgery.
+Žádný celý kandidát nevznikl, dalších 13 tahů/syntéza neprovedené.
+
+Zachovat raw citace a přísný gate; další návrh je programový source/anchor
+ID resolver pro inspect i synthesis. Není implementovaný ani modelově
+ověřený. Nový placený trial nevzniká automaticky z nevyužité rezervy tohoto
+uzavřeného běhu. Zdrojové/účetní důkazy v REC-06 run reportu a full_result JSON.

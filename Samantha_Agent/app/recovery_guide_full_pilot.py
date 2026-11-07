@@ -261,6 +261,11 @@ class Reviewer:
                 answer = None
             if guard.unexpected_items:
                 answer = None
+            if kind == 'inspect':
+                answer, normalization = normalize_inspection(answer, payload)
+                if normalization:
+                    record['normalization'] = normalization
+                    atomic_write_json(path, record)
             return {'answer': answer, 'usage': result.thread_token_usage}
         except Exception:
             if guard.turn_id:
@@ -269,6 +274,35 @@ class Reviewer:
             raise
         finally:
             self.client.transport = original
+
+
+def normalize_inspection(answer, payload):
+    """Only exclude one exact original-guide citation from document coverage.
+
+    Raw receipt stays intact. Missing/duplicate/unknown sources, changed quotes
+    and all other schema errors remain errors. No invented or repaired text.
+    """
+    if (not isinstance(answer, dict) or set(answer) != {'covered', 'notes'}
+            or not isinstance(answer['covered'], list) or not isinstance(answer['notes'], str)):
+        return answer, None
+    rows = answer['covered']
+    original = payload['original']
+    texts = {s['path']: s['text'] for s in payload['sources']}
+    if len(rows) != len(texts) + 1 or original['path'] in texts:
+        return answer, None
+    try:
+        extras = [r for r in rows if isinstance(r, dict) and r.get('source') == original['path']]
+        docs = [r for r in rows if r not in extras]
+        if len(extras) != 1 or len(docs) != len(texts) or {r['source'] for r in docs} != set(texts):
+            return answer, None
+        m.citation(extras[0], {original['path']: original['text']})
+        for row in docs:
+            m.citation(row, texts)
+    except (ValueError, TypeError, KeyError):
+        return answer, None
+    return {'covered': docs, 'notes': answer['notes']}, {
+        'kind': 'exclude_exact_original_from_document_coverage', 'kept_sources': len(docs),
+        'original_quote_sha256': digest(extras[0]['quote'])}
 
 
 def _current(packet):

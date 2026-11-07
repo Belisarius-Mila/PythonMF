@@ -1,0 +1,29 @@
+{
+  "request_id": "rec06-full-corpus-01",
+  "parent_approval_digest": "09a6ed5becbe07e8d2a5703e29639b5f30aff9c3a40db4af7f2220bf999f4e0b",
+  "slot": "2026-W44",
+  "original_now": "2026-11-07T20:14:36+00:00",
+  "known_receipt_sha256": "1727d71f99509e600ab5caa64f1b2b52da028f65206a610dead32853c28b2e26",
+  "known_turn_id": "01a1b7a6-1282-7f20-83d1-520c89973061",
+  "known_payload_sha256": "f09e054cccb638142620f75671cc84885e76e1eab85e3a092229cad4abb89d8c",
+  "correction": {
+    "kind": "exclude_exact_original_from_document_coverage",
+    "kept_sources": 36,
+    "original_quote_sha256": "d0cd2b78afce6843fdb2c9a02962d57a4f362a03f9c25d6dee3285b2f215d146"
+  },
+  "known_standard_credits": 10.44505,
+  "accepted_existing_sources": 36,
+  "remaining_sdk_turns": 14,
+  "total_credit_limit": 200,
+  "automatic_retry": false,
+  "publication": false,
+  "approval_digest": "82e75dfdf08573497d2a842682bca52009c9067da68399082becd91aab613642",
+  "state": "known_receipt_checkpoint_ready",
+  "source_count": 530,
+  "snapshot_sha256": "90e85eb7e83abdb9bf4a57940081756cc1edbcc35de1ee57e4b4aff5f27ab8ad",
+  "remaining_credit_allowance": 189.55495,
+  "model": "gpt-6.1-sol",
+  "effort": "medium",
+  "serviceTierForTurn": "default",
+  "hard_billing_cap": false
+}

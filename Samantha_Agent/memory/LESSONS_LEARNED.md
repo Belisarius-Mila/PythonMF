@@ -1706,3 +1706,15 @@ Doplnění 17102026 k LL-071: Nativní modelový pomocník navíc zdvojuje roli,
   nejistotě refresh odmítnout, nikoli resetovat. Ověřeno šesti regresními
   případy a skutečným zastavením před placeným tahem. Číslo navazuje na
   aktuální main LL-110; jeho obsah se do Data worktree nekopíroval.
+
+### LL-112 — Správný význam není doslovná citace
+
+- Problém: skutečný Sol/medium při přesných zdrojích změnil v citaci jen
+  první písmeno na velké; JSON i seznam dokumentů byly správné, exact match ne.
+- Typ: zobecnitelné
+- Řešení nalezeno: 07112026
+- Řešení: doslovný kontrakt ponechat fail-closed, zachovat raw odpověď,
+  určit skutečnou spotřebu z jedinečných turn účtenek a další SDK kroky
+  neodeslat. Dvě konkrétní kapitalizace doložené v REC-06, 2 SDK tahy,
+  21,013 Standard kreditu bez retry. Návrh serverových source/anchor ID je
+  další neplacený vývoj, nikoli už ověřené řešení nebo přijatý modelový výstup.
