@@ -160,3 +160,13 @@ probe_voice_candidate a create_voice_candidate_session jsou vyřazené z nabídk
 jejich zdrojový kód i registrace byly po přesném potvrzení odstraněné.
 Žádné další placené relace, testy nebo automatická náhrada. Běžné nahrávání
 pokynů, předčítání a audio Camina toto rozhodnutí nemění.
+
+## Návrh z e-mailu: kolize a konečný náhled (2026-11-07)
+
+`email_calendar_draft_review` a `email_calendar_draft_confirm` používají
+`app.email.calendar_review.CalendarReview.execute` přes explicitní tlačítka
+editoru. Čtou jen uložený návrh a vybrané kalendáře v jeho přesném omezeném
+intervalu; zapisují pouze soukromý náhled/potvrzení. Bez modelu a kalendářového
+zápisu. Revize, zdroj, cíl, upozornění, čerstvé kolize a platnost 5 minut jsou
+svázané; změna vyžaduje nový lidský souhlas. Samotné potvrzení není zápisem
+události ani oprávněním přeskočit kontroly v budoucím bodu 5.

@@ -6,6 +6,7 @@ import subprocess
 import tempfile
 import threading
 import unittest
+from datetime import datetime, timezone
 from unittest.mock import patch
 from http.server import ThreadingHTTPServer
 from urllib.error import HTTPError
@@ -74,3 +75,27 @@ class EmailCalendarHTTPTests(unittest.TestCase):
     def test_editor_browser_contract(self):
         result=subprocess.run([node_binary(),'tests/email_calendar_draft_frontend.test.cjs'],capture_output=True,text=True,timeout=25)
         self.assertEqual(result.returncode,0,result.stdout+result.stderr)
+
+    def test_explicit_calendar_review_and_confirmation_over_http_preserve_mail_state(self):
+        from app.calendar_overview import CalendarOverview
+        from tests.test_email_calendar_review import BoundedPilot
+        clock=lambda:datetime(2026,11,7,12,tzinfo=timezone.utc)
+        pilot=BoundedPilot(Path(self.temp.name)/'calendar',clock)
+        self.service.calendar=CalendarOverview(pilot,clock=clock);self.service.clock=clock
+        self.service.calendar.refresh(confirmed=True)
+        self.service.calendar.save_selection({'action':'save_selection','confirmed':True,'expected_revision':0,'read_calendar_ids':['a'],'target_calendar_id':'a'})
+        self.request('/api/email-agent/calendar-draft',{'action':'prepare','confirmed':True,'id':self.mail.item_id,'expected_content_digest':self.mail.content_digest,'request_id':'http-calendar-review-01'})
+        self.callbacks.pop(0)();before=self.worker.status()
+        payload={'action':'review','id':self.mail.item_id,'expected_revision':0,'confirmed':True}
+        reads=len(pilot.intervals)
+        self.assertEqual(self.request('/api/email-agent/calendar-draft',payload,origin='https://other.invalid')[0],403)
+        self.assertEqual(self.request('/api/email-agent/calendar-draft',{**payload,'confirmed':False})[0],400)
+        self.assertEqual(len(pilot.intervals),reads)
+        code,body,_=self.request('/api/email-agent/calendar-draft',payload)
+        self.assertEqual(code,200);view=json.loads(body)
+        self.assertEqual(view['draft']['reminders'],[1440,60]);self.assertEqual(len(view['review']['alerts']),2)
+        confirmation={'action':'confirm','id':self.mail.item_id,'expected_revision':0,'review_id':view['review']['review_id'],'acknowledged':True,'accept_conflicts':False}
+        self.assertEqual(self.request('/api/email-agent/calendar-draft',{**confirmation,'acknowledged':False})[0],400)
+        code,body,_=self.request('/api/email-agent/calendar-draft',confirmation)
+        self.assertEqual(code,200);self.assertIsNotNone(json.loads(body)['confirmation'])
+        self.assertEqual(self.worker.status(),before);self.assertEqual(self.driver.calls,1)

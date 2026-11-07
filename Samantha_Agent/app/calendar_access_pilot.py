@@ -191,7 +191,7 @@ class CalendarAccessPilot:
             self._run(["/usr/bin/open", "-n", "-a", app, "--args", request])
             return self._response(request, wait_seconds=3)
 
-    def read_overview(self, calendar_ids, *, confirmed=False):
+    def read_overview(self, calendar_ids, *, confirmed=False, start=None, end=None):
         """Private bounded inventory and selected events in the actual launchd context."""
         if confirmed is not True:
             raise CalendarPilotError("Načtení přehledu vyžaduje výslovný pokyn.")
@@ -199,8 +199,17 @@ class CalendarAccessPilot:
                 or any(not isinstance(value, str) or not 0 < len(value) <= 512 for value in calendar_ids)
                 or len(set(calendar_ids)) != len(calendar_ids)):
             raise CalendarPilotError("Neplatný výběr kalendářů.")
+        if start is not None or end is not None:
+            if (not isinstance(start, datetime) or not isinstance(end, datetime)
+                    or start.tzinfo is None or end.tzinfo is None
+                    or not 0 < (end-start).total_seconds() <= 31*86400):
+                raise CalendarPilotError("Neplatné omezené období kontroly.")
         _, _, binary = self._build_info()
         request = self._request("overview", calendar_ids=calendar_ids, days=30)
+        if start is not None:
+            value = json.loads(request.read_text())
+            value.update(start=start.isoformat(), end=end.isoformat())
+            self._write(request, value)
         label = "com.samantha.calendar-readonly-overview." + request.parent.name
         self._write(request.parent / "launchd_plan.json", {
             "label": label, "binary": str(binary), "request": str(request), "persistent_install": False})

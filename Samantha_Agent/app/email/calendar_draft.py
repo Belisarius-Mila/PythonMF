@@ -19,11 +19,13 @@ from app.communication.local_runtime import DEFAULT_SOCKET_PATH
 from app.file_persistence import exclusive_file_lock, atomic_write_json
 from app.routine_tasks import start_data_only_thread
 from app.work_repository import JsonWorkRepository, RepositoryMutation
+from app.calendar_overview import CalendarOverview
 from .continuous_agent import ContinuousEmailAgent
 from .continuous_source import IMAPAgentSource
 from .icloud_provider import _html_to_text
 from .calendar_proposal import (Candidate, Claim, FIELD_NAMES, INSTRUCTIONS,
-    evidence_issues, materialize, strict_schema, validate_fields)
+    derive_fields, evidence_issues, materialize, strict_schema, validate_fields, validate_reminders)
+from .calendar_review import CalendarReview
 
 ID = re.compile(r'[0-9a-f]{64}')
 REQUEST = re.compile(r'[A-Za-z0-9_-]{8,96}')
@@ -83,13 +85,16 @@ class CalendarDraftDriver:
 
 
 class CalendarDraftService:
-    def __init__(self, worker=None, *, source_factory=IMAPAgentSource, driver=None, launcher=None):
+    def __init__(self, worker=None, *, source_factory=IMAPAgentSource, driver=None, launcher=None, calendar=None, clock=None):
         self.worker=worker or ContinuousEmailAgent()
         self.root=self.worker.root/'calendar_drafts'
         self.repository=JsonWorkRepository(self.root/'state.json',default={'items':{}})
         self.source_factory,self.driver=source_factory,driver or CalendarDraftDriver()
         self.launcher=launcher or self._launch
         self.nonce=uuid4().hex
+        self.calendar=calendar or CalendarOverview()
+        self.clock=clock or (lambda: datetime.now(timezone.utc))
+        self.review=CalendarReview(self)
 
     @staticmethod
     def _launch(callback):
@@ -120,9 +125,11 @@ class CalendarDraftService:
             if job['status'] in {'queued','running'} and job.get('nonce')!=self.nonce:
                 job['status']='delivery_unknown'
             job={key:job.get(key) for key in ('status','request_id','message')}
+        draft=copy.deepcopy(entry.get('draft')) if entry else None
+        if draft: draft.setdefault('reminders', [1440, 60])  # Side-effect-free compatibility for existing concepts.
         return {'ok':True,'source':{'id':item_id,'subject':card['header']['subject'],'date':card['header']['date']},
             'model':entry['job'].get('selection',{}).get('model','') if entry else agent_roles.load_role(role=agent_roles.EMAIL_ROLE)['preferred_model'],
-            'job':job,'draft':copy.deepcopy(entry.get('draft')) if entry else None,'calendar_writes':False}
+            'job':job,'draft':draft,**self.review.status(entry), 'calendar_writes':False}
 
     def prepare(self,payload):
         if (set(payload)!={'action','id','request_id','expected_content_digest','confirmed'} or payload.get('confirmed') is not True
@@ -182,11 +189,15 @@ class CalendarDraftService:
         entry=self.repository.read()['items'][item_id]
         self._card(item_id,entry['content_digest'])
         fields,evidence,warnings=materialize(candidate,entry['job']['input'])
+        fields,calculated=derive_fields(fields)
+        for name in calculated:
+            evidence[name]={'source':'calculation','quote':'','origin':'calculated'}
         if any(len(warning)>1000 for warning in warnings):raise ValueError('Upozornění překročilo limit.')
         issues,normalized=validate_fields(fields)
         issues=list(dict.fromkeys([*warnings,*issues,*evidence_issues(fields,evidence)]))
         if issues: normalized=None
         draft={'revision':0,'fields':fields,'evidence':evidence,'issues':issues,'normalized':normalized,
+               'reminders':[1440,60],
                'source_item_id':item_id,'source_digest':entry['content_digest'],'calendar_writes':False}
         def complete(document):
             current=document['items'][item_id]
@@ -196,25 +207,32 @@ class CalendarDraftService:
         self._mutate(complete)
 
     def save(self,payload):
-        if set(payload)!={'action','id','expected_revision','fields'} or type(payload.get('expected_revision')) is not int:
+        if (set(payload) not in ({'action','id','expected_revision','fields'}, {'action','id','expected_revision','fields','reminders'})
+                or type(payload.get('expected_revision')) is not int):
             raise ValueError('Uložení potřebuje aktuální revizi návrhu.')
         item_id=payload['id'];card=self._card(item_id)
-        issues,normalized=validate_fields(payload['fields'])
+        validate_fields(payload['fields'])  # Validate untrusted shape before entering a transaction.
+        if 'reminders' in payload: validate_reminders(payload['reminders'])
         def save(document):
             entry=document['items'].get(item_id)
             if not entry or not entry.get('draft') or entry['content_digest']!=card['content_digest']:
                 raise ValueError('Původní návrh není dostupný.')
             draft=entry['draft']
             if draft['revision']!=payload['expected_revision']:raise ValueError('Návrh se mezitím změnil. Tvoje úpravy zůstávají v editoru; obnov stav.')
+            fields,calculated=derive_fields(payload['fields'],draft['fields'],draft['evidence'])
+            issues,normalized=validate_fields(fields)
             evidence=copy.deepcopy(entry['original_evidence'])
             for name in FIELD_NAMES:
-                if payload['fields'][name]!=entry['original_fields'][name]:
-                    evidence[name]['origin']='user' if payload['fields'][name] else 'missing'
+                if fields[name]!=entry['original_fields'][name]:
+                    evidence[name]['origin']='user' if fields[name] else 'missing'
+                if name in calculated: evidence[name]={'source':'calculation','quote':'','origin':'calculated'}
             warnings=list(entry['warnings'])
             if entry['job']['input']['manual_reason']:warnings.append(entry['job']['input']['manual_reason'])
-            current_issues=list(dict.fromkeys([*warnings,*issues,*evidence_issues(payload['fields'],evidence)]))
-            draft.update(revision=draft['revision']+1,fields=copy.deepcopy(payload['fields']),evidence=evidence,
+            current_issues=list(dict.fromkeys([*warnings,*issues,*evidence_issues(fields,evidence)]))
+            draft.update(revision=draft['revision']+1,fields=fields,evidence=evidence,
+                reminders=validate_reminders(payload.get('reminders',draft.get('reminders',[1440,60]))),
                 issues=current_issues,normalized=None if current_issues else normalized,updated_at=now())
+            entry.pop('review',None);entry.pop('confirmation',None)
         self._mutate(save)
         return self.status(item_id)
 
@@ -222,4 +240,5 @@ class CalendarDraftService:
         if not isinstance(payload,dict):raise ValueError('Neplatný požadavek.')
         if payload.get('action')=='prepare':return self.prepare(payload)
         if payload.get('action')=='save':return self.save(payload)
+        if payload.get('action') in {'review','confirm'}:return self.review.execute(payload)
         raise ValueError('Neznámá akce návrhu.')

@@ -98,12 +98,69 @@ def materialize(candidate, source):
     return fields, evidence, candidate.uncertainties
 
 
-def validate_fields(fields):
+def check_shape(fields):
     if (not isinstance(fields, dict) or set(fields) != set(empty_fields())
             or fields['kind'] not in {'meeting', 'task_deadline', 'manual_required', 'not_applicable'}
             or type(fields['all_day']) is not bool
             or any(not isinstance(fields[name], str) or len(fields[name]) > 1000 or '\x00' in fields[name] for name in FIELD_NAMES)):
         raise ValueError('Neplatné položky návrhu.')
+
+
+def derive_fields(fields, previous=None, evidence=None):
+    """User-approved defaults and arithmetic only; never invent an end time."""
+    check_shape(fields)
+    fields = dict(fields)
+    changed = set()
+    automatic_end = False
+    if fields['kind'] != 'meeting':
+        return fields, changed
+    try:
+        day = date.fromisoformat(fields['date'])
+        default = (day + timedelta(days=1) if fields['all_day'] else day).isoformat()
+        follows = bool(previous and evidence and evidence.get('end_date', {}).get('origin') == 'calculated'
+                       and fields['end_date'] == previous['end_date'])
+        if not fields['end_date'] or follows:
+            automatic_end = True
+            fields['end_date'] = default
+            changed.add('end_date')
+    except ValueError:
+        pass
+    if not fields['all_day'] and not fields['end_time'] and automatic_end:
+        try:
+            if re.fullmatch(r'[1-9]\d{0,4}', fields['duration_minutes']) and int(fields['duration_minutes']) <= 10080:
+                zone = ZoneInfo(fields['time_zone']); errors = []
+                start = resolve_local(date.fromisoformat(fields['date']), fields['start_time'], zone, errors)
+                if start and not errors:
+                    fields['end_date'] = (start+timedelta(minutes=int(fields['duration_minutes']))).astimezone(zone).date().isoformat()
+        except (ValueError, ZoneInfoNotFoundError, OverflowError):
+            pass
+    if not fields['all_day'] and fields['end_time']:
+        # A stale duration must not survive a changed/invalid interval.
+        fields['duration_minutes'] = ''
+        changed.add('duration_minutes')
+        try:
+            zone = ZoneInfo(fields['time_zone'])
+            errors = []
+            start = resolve_local(date.fromisoformat(fields['date']), fields['start_time'], zone, errors)
+            end = resolve_local(date.fromisoformat(fields['end_date']), fields['end_time'], zone, errors)
+            if start and end and not errors and 0 < (end-start).total_seconds() <= 10080*60:
+                minutes = (end-start).total_seconds()/60
+                if minutes.is_integer(): fields['duration_minutes'] = str(int(minutes))
+        except (ValueError, ZoneInfoNotFoundError, OverflowError):
+            pass
+    return fields, changed
+
+
+def validate_reminders(value):
+    if (not isinstance(value, list) or len(value) > 2
+            or any(type(item) is not int or item not in {1440, 60} for item in value)
+            or len(set(value)) != len(value)):
+        raise ValueError('Vyber upozornění den a/nebo hodinu před začátkem.')
+    return sorted(value, reverse=True)
+
+
+def validate_fields(fields):
+    check_shape(fields)
     issues, normalized = [], None
     if fields['kind'] in {'manual_required', 'not_applicable'}:
         return (['Pozvánka nebo opakování vyžadují ruční zpracování.'] if fields['kind']=='manual_required' else ['Zpráva nemá určenou konkrétní událost nebo termín.']), None
@@ -148,15 +205,21 @@ def validate_fields(fields):
         if not fields['end_date']: issues.append('Upřesni koncové datum celodenní události (konec je výlučný).')
         if fields['start_time'] or fields['end_time'] or fields['duration_minutes']: issues.append('Celodenní událost nemá současně hodiny nebo délku v minutách.')
         if 'date' in parsed and 'end_date' in parsed and parsed['end_date'] <= parsed['date']: issues.append('Konec musí být po začátku.')
+        if not issues and zone:
+            start = resolve_local(parsed['date'], '00:00', zone, issues)
+            end = resolve_local(parsed['end_date'], '00:00', zone, issues)
+            if start and end: normalized = {'start': start.isoformat(), 'end': end.isoformat()}
     else:
         if not fields['start_time']: issues.append('Doplň: Začátek.')
         if not fields['end_time'] and duration is None: issues.append('Doplň konec nebo délku; žádná výchozí délka se nepředpokládá.')
-        if fields['end_date'] and not fields['end_time']: issues.append('Koncové datum potřebuje také koncový čas.')
+        if fields['end_date'] and not fields['end_time'] and duration is None: issues.append('Koncové datum potřebuje také koncový čas nebo délku.')
         if not issues and zone and 'date' in parsed:
             start = resolve_local(parsed['date'],fields['start_time'],zone,issues)
             end = resolve_local(parsed.get('end_date',parsed['date']),fields['end_time'],zone,issues) if fields['end_time'] else start+timedelta(minutes=duration) if start else None
             if start and end:
                 if end <= start: issues.append('Konec musí být po začátku; přechod přes půlnoc vyžaduje koncové datum.')
+                elif (end-start).total_seconds() > 10080*60: issues.append('Návrh schůzky smí mít nejvýše sedm dní.')
+                elif not fields['end_time'] and parsed.get('end_date', parsed['date']) != end.astimezone(zone).date(): issues.append('Koncové datum a délka si odporují; doplň skutečný konec.')
                 elif duration and fields['end_time'] and (end-start).total_seconds()!=duration*60: issues.append('Koncový čas a délka si odporují.')
                 else: normalized = {'start':start.isoformat(),'end':end.isoformat()}
     return list(dict.fromkeys(issues)), normalized

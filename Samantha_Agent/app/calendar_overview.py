@@ -169,6 +169,29 @@ class CalendarOverview:
     def authorize(self, *, confirmed=False):
         return self.pilot.authorize_current(confirmed=confirmed)
 
+    def review_interval(self, start, end, *, confirmed=False):
+        """Fresh bounded read for an explicit proposal review, without changing the overview."""
+        if confirmed is not True:
+            raise CalendarOverviewError("Kontrola kolizí vyžaduje výslovný pokyn.")
+        with self._lock():
+            selection = self._load()
+            ids, target = selection['read_calendar_ids'], selection['target_calendar_id']
+            if not ids or not target:
+                raise CalendarOverviewError("V Kalendáři vyber čtené kalendáře i cílový kalendář a ulož výběr.")
+            result = self.pilot.read_overview(ids, confirmed=True, start=start, end=end)
+            if result.get('authorization') != 'full_access' or result.get('status') != 'overview_read':
+                raise CalendarOverviewError("Kalendáře nejsou dostupné; potvrzení není možné. Obnov přístup na Macu.")
+            inventory, events, missing = self._validated_read(result, ids)
+            if (instant(result['start']) != start or instant(result['end']) != end
+                    or missing or result['truncated']):
+                raise CalendarOverviewError("Kontrola nemá úplný výsledek pro přesné období a výběr kalendářů.")
+            destination = next((row for row in inventory if row['id'] == target and row['writable']), None)
+            if not destination:
+                raise CalendarOverviewError("Cílový kalendář chybí nebo není zapisovatelný.")
+            return {'selection_revision': selection['revision'], 'target': destination,
+                    'read_calendars': [row for row in inventory if row['id'] in ids],
+                    'events': events, 'observed_at': result['observed_at'], 'calendar_writes': False}
+
     def execute(self, payload):
         if not isinstance(payload, dict):
             raise CalendarOverviewError("Neplatný požadavek.")

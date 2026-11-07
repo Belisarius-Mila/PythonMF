@@ -11,6 +11,14 @@ from app.capabilities.models import (
 
 
 CAPABILITIES: tuple[CapabilityRecord, ...] = (
+    *(CapabilityRecord(
+        capability_id="email_calendar_draft_" + action, label="Review calendar conflicts and approve an exact suggestion: " + action,
+        risk=RiskLevel.LOCAL_WRITE, reads=("selected private email draft", "fresh bounded selected calendar intervals and writable destination"),
+        writes=("private expiring review and human confirmation only",),
+        tool="app.email.calendar_review.CalendarReview.execute", requires_confirmation=True,
+        confirmation_policy=ConfirmationPolicy.SUMMARY_BEFORE_ACTION, audit=AuditPolicy.REDACTED,
+        notes="Explicit review/confirm button. Local calendar read, no model or event write. Exact revision, target, alerts, five-minute expiry and re-read conflict digest; changed conflicts require fresh human acceptance.",
+    ) for action in ("review", "confirm")),
     CapabilityRecord(
         capability_id="email_calendar_draft_status", label="Read a selected email's calendar draft",
         risk=RiskLevel.READ_ONLY, reads=("selected private draft and original request status",), writes=(),

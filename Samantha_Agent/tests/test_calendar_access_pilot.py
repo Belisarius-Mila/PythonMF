@@ -5,6 +5,7 @@ from pathlib import Path
 import subprocess
 import tempfile
 import unittest
+from datetime import datetime, timedelta, timezone
 
 from app.calendar_access_pilot import BUNDLE_ID, CalendarAccessPilot, CalendarPilotError, SOURCE, _sha
 
@@ -179,6 +180,20 @@ class CalendarAccessPilotTests(unittest.TestCase):
         self.assertEqual(self.calls, [])
         self.parent_pid = 123
         with self.assertRaises(CalendarPilotError): self.pilot.read_overview([], confirmed=True)
+
+    def test_bounded_proposal_read_uses_exact_interval_without_rebuilding_native_helper(self):
+        start=datetime(2027,2,10,9,tzinfo=timezone.utc);end=start+timedelta(hours=1)
+        result=self.pilot.read_overview(['a'],confirmed=True,start=start,end=end)
+        self.assertEqual(datetime.fromisoformat(result['start']),start)
+        self.assertEqual(datetime.fromisoformat(result['end']),end)
+        self.assertEqual(result['calendar_ids'],['a'])
+        self.assertFalse(any('swiftc' in call or '/usr/bin/open' in call for call in self.calls))
+
+    def test_invalid_bounded_read_is_rejected_before_creating_any_request(self):
+        start=datetime(2027,2,10,9,tzinfo=timezone.utc)
+        for a,b in [(start,None),(start,start),(start,start+timedelta(days=32)),(start.replace(tzinfo=None),start)]:
+            with self.assertRaises(CalendarPilotError):self.pilot.read_overview(['a'],confirmed=True,start=a,end=b)
+        self.assertFalse((self.root/'requests').exists());self.assertEqual(self.calls,[])
 
     def test_authorization_for_current_binary_is_idempotent_and_usable_by_legacy_probe(self):
         self.fail_open = True
