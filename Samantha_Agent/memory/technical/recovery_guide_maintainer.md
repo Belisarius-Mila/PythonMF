@@ -227,3 +227,20 @@ publikace. Podrobná specifikace a známé meze jsou v REC-03 reportu.
 Cold-reader balíček byl čten novým izolovaným procesem bez projektové
 historie; lidská/modelová přejímka skutečného návrhu ještě neproběhla.
 Dosavadní REC-02 blokátory zůstávají, bez nového modelu/služby či zápisu TXT.
+
+## 2026-11-07 13:33 CET — REC-04, přijetí a převod na testovacích cílech
+
+Veřejná hranice je PublicationStore; nízkoúrovňový _publish_candidate je
+interní a váže žurnál na hash přijetí. Zmrazený paket propojuje kandidáta,
+kontext/checklist, kvalitativní doklady, validátor i identity obou cílů.
+Přijetí má neměnný manifest a vzniká poslední. Původní verze se nemažou.
+
+Přenos má společný zámek/aktivní marker, přesné stavy kopií a written flagy.
+Pád nevede k dalšímu modelu ani opakování hotové výměny. Metadata auditu se
+ověřují samostatně a po nich znovu oba hashe. Ruční změna/vrácení se nepřepíše.
+Podrobný kontrakt i omezení jsou v REC-04 reportu.
+
+Tento veřejný vstup je zatím pouze sandboxový: vlastní .venv/temp podadresář,
+žádný produkční režim či implicitní cíle. Testovací uploaded je simulované,
+nikoli skutečný cloudový důkaz. CLI run/tick a role zůstávají neaktivované.
+Další REC-05 připraví trvalý plánovač; produkční aktivace zůstává REC-06.

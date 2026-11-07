@@ -1014,3 +1014,38 @@ závislosti bez konkrétní potřeby. Nejde o rozšíření e-mailové business 
   bezpečný syntetický balíček v recovery_guide_rec03_example_20261107.json.
 - Chybná syntéza -> attention + quality_issue, bez kandidáta/retry.
   Bez změny produkčního klienta/runtime/Cockpitu/e-mailu, rolí a služeb.
+
+## 2026-11-07 13:45 CET — REC-04: přijatý kandidát a dvojí zápis na kopiích
+
+### Hotovo
+- Připraven PublicationStore: přesný kandidát, REC-03 účtenka/checklist,
+  úplné vstupy, verze validátoru a oba připnuté cíle mají jeden neměnný binding.
+  Výslovné sandboxové přijetí vzniká poslední; pouhý hash textu nestačí.
+- Převod uchová zdrojový TXT i staré verze obou cílů, včetně CRLF. Po pádu
+  pokračuje stejnými bajty bez modelu. Čekající upload neopakuje hotové výměny.
+- Zámek/aktivní marker chrání souběh a novější verze. Ruční změny včetně
+  návratu k původním bajtům se nepřepíšou. Selhání rollbacku je pozorovatelné.
+- Nový vstup povoluje pouze izolované testovací cíle v podadresáři vlastní
+  .venv nebo systémového temp. Produkční režim je výslovně vypnutý.
+
+### Rozhodnutí
+- Míla schválil REC-04 vývoj a ověření na kopiích. Testovací přijetí není
+  skutečná přejímka nového produkčního TXT ani souhlas se zápisem do iCloudu.
+- Živý REC-02 pilot, úplný produkční korpus/aplikace a fyzická přejímka na
+  iPhonu zůstávají otevřené; nic se nenasazovalo ani neaktivovalo.
+
+### Další krok
+- REC-05: připojit trvalý plánovač k registrovanému preview/run/status,
+  před novou analýzou řešit čekající přenos, připravit samostatnou aktivaci.
+
+### Navrhované další kroky
+- Will převezme lokální změny do aktuálního main bez přepsání svých rolí/práce.
+- Dořešit REC-02 runtime/Standard/tokenizer a konkrétní placený pilot.
+- Přijmout skutečný návrh a autoritativní seznam aplikací/nastavení.
+- REC-06 teprve povolí přesné provozní cíle, skutečný upload/iPhone a týdenní běh.
+
+### Technický důkaz
+- 38 nových REC-04 testů; cílená sada 152/152 OK. Závěrečná plná projektová brána nad poslední verzí writeru: 2 501 testů OK, 5 skipped. Dřívější mezibrána 2 498 OK; po zpřesnění written/manifest se plná brána opakovala..
+- Report recovery_guide_rec04_20261107.md a redigovaný syntetický JSON příklad.
+- Testované uploady jsou simulované; žádný skutečný iCloud zápis/audit v této
+  etapě, modelový tah, služba, push ani nasazení. Provozní TXT beze změny.

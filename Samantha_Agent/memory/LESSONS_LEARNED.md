@@ -1669,3 +1669,15 @@ Doplnění 17102026 k LL-071: Nativní modelový pomocník navíc zdvojuje roli,
   autoritu/stáří a kotvu ručního důkazu. Účtenku svázat s kandidátem,
   kontextem i checklistem. Strojový výsledek review není publikace.
   Ověřeno synteticky v REC-03; lidskou přejímku a skutečnou obnovu nepředstírat.
+
+### LL-099 — Původní hash nestačí jako povolení k opakování již dokončené kopie
+
+- Problém: stejný starý obsah může být očekávaná nedokončená kopie, ale také
+  pozdější ruční vrácení již dokončené verze. Samotná dvojice old/new hashů
+  tyto případy nerozliší a může přepsat lidský zásah.
+- Typ: opakující se
+- Řešení nalezeno: 07112026
+- Řešení: spojit schválený obsah a cíle s neměnným přijetím; v žurnálu
+  uchovat dokončení každé kopie i záměr rollbacku. Dokončená kopie smí při
+  obnovení zůstat pouze ve schváleném stavu. Aktivní marker dále odmítne
+  starou žádost po novějším vydání. Ověřeno syntetickým REC-04 přenosem.

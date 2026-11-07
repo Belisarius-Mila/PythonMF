@@ -239,10 +239,10 @@ class Publishing(unittest.TestCase):
         self.state = self.root / "state"
 
     def publish(self, **kw):
-        args = dict(validation_sha256=s.digest("new guide"), targets=self.targets, state_dir=self.state,
+        args = dict(validation_sha256=s.digest("new guide"), authorization_sha256="a" * 64, targets=self.targets, state_dir=self.state,
                     request_id="same-request", cloud_audit=lambda _: CLOUD)
         args.update(kw)
-        return p.publish("new guide", **args)
+        return p._publish_candidate("new guide", **args)
 
     def test_two_copies_archive_and_upload(self):
         self.assertEqual(self.publish()["state"], "uploaded")
@@ -311,7 +311,7 @@ class Publishing(unittest.TestCase):
         with self.assertRaises(ValueError):
             self.publish(request_id="../escape")
         with self.assertRaises(ValueError):
-            p.publish("different", validation_sha256=s.digest("different"), targets=self.targets,
+            p._publish_candidate("different", validation_sha256=s.digest("different"), authorization_sha256="a" * 64, targets=self.targets,
                       state_dir=self.state, request_id="same-request", cloud_audit=lambda _: CLOUD)
 
     def test_missing_metadata_is_never_upload_proof(self):

@@ -1,7 +1,7 @@
 """Two individually atomic copies, durable journal, never cloud success by path.
 
-Library only: no production targets, installation or publication on import.
-The caller must supply reviewed/pinned targets and a validated candidate.
+Internal byte writer. The public acceptance boundary is PublicationStore.
+No production targets, installation or publication on import.
 """
 from __future__ import annotations
 
@@ -27,6 +27,8 @@ class Target:
 
     @classmethod
     def pin(cls, path: Path) -> "Target":
+        if not path.is_absolute() or ".." in path.parts:
+            raise ValueError("Cíl musí mít přesnou absolutní cestu.")
         if path.is_symlink() or (path.exists() and not path.is_file()):
             raise ValueError("Cíl není běžný soubor.")
         parent = path.parent.resolve(strict=True)
@@ -90,7 +92,8 @@ def uploaded(metadata: dict) -> bool:
             and metadata.get("upload_error") is False)
 
 
-def publish(candidate: str, *, validation_sha256: str, targets: tuple[Target, Target],
+def _publish_candidate(candidate: str, *, validation_sha256: str, authorization_sha256: str,
+            targets: tuple[Target, Target],
             state_dir: Path, request_id: str, cloud_audit: Callable[[Path], dict] = icloud_metadata) -> dict:
     """Idempotently finish the SAME candidate. Never calls a model.
 
@@ -100,31 +103,66 @@ def publish(candidate: str, *, validation_sha256: str, targets: tuple[Target, Ta
     """
     if not re.fullmatch(r"[A-Za-z0-9_-]{1,80}", request_id):
         raise ValueError("Neplatné ID.")
+    if not re.fullmatch(r"[0-9a-f]{64}", authorization_sha256):
+        raise ValueError("Chybí vazba na přijetí.")
     reject_secrets(candidate)
     sha = digest(candidate)
     if not candidate.strip() or sha != validation_sha256:
         raise ValueError("Kandidát nemá shodnou validaci.")
-    if state_dir.is_symlink():
+    if any(p.is_symlink() for p in (state_dir, *state_dir.parents)):
         raise ValueError("Stav nesmí být alias.")
     state_dir.mkdir(parents=True, exist_ok=True, mode=0o700)
     paths = tuple(t.check() for t in targets)
     if paths[0].resolve() == paths[1].resolve():
         raise ValueError("Dva cíle musejí být odlišné soubory.")
     journal = state_dir / f"{request_id}.json"
-    identity = digest(canonical_json({"candidate": sha, "targets": [asdict(t) for t in targets]}))
+    identity = digest(canonical_json({"candidate": sha, "authorization": authorization_sha256,
+                                     "targets": [asdict(t) for t in targets]}))
+    if (state_dir / "writer.lock").is_symlink():
+        raise ValueError("Zámek nesmí být alias.")
     with exclusive_file_lock(state_dir / "writer", timeout=0):
         if journal.is_symlink():
             raise ValueError("Žurnál nesmí být alias.")
         record = json.loads(journal.read_text()) if journal.exists() else None
         if record and record.get("identity") != identity:
             raise ValueError("ID již patří jinému kandidátu nebo cílům.")
-        for target in targets:
+        for index, target in enumerate(targets):
             path = target.check()
-            if file_hash(path) not in {target.baseline, sha}:
+            observed = file_hash(path)
+            if observed not in {target.baseline, sha}:
                 raise ValueError("Cíl byl ručně změněn; nepřepisovat.")
-        meta = cloud_audit(paths[1] if paths[1].exists() else paths[1].parent)
+            if record:
+                written = record.get("written")
+                if not isinstance(written, list) or len(written) != 2 or any(type(v) is not bool for v in written):
+                    raise ValueError("Žurnál nemá jednoznačný stav kopií.")
+                if written[index] and observed != sha:
+                    raise ValueError("Již uložená kopie byla ručně vrácena; nepřepisovat.")
+                name = ("local", "icloud")[index]
+                if record.get("copies", {}).get(name) == "changed":
+                    raise ValueError("Ruční změna vyžaduje nové přijetí.")
+        def copies():
+            result = {}
+            for name, target in zip(("local", "icloud"), targets):
+                try:
+                    observed = file_hash(target.check())
+                    result[name] = "candidate" if observed == sha else "baseline" if observed == target.baseline else "changed"
+                except (OSError, ValueError):
+                    result[name] = "unavailable"
+            return result
+
+        def audit():
+            try:
+                return cloud_audit(paths[1] if paths[1].exists() else paths[1].parent)
+            except (OSError, ValueError):
+                return {"available": False}
+
+        meta = audit()
         if meta.get("available") is not True or meta.get("ubiquitous") is not True:
-            return {"state": "attention", "reason": "iCloud identita není ověřena", "sha256": sha}
+            state = "pending_icloud" if record and all(v == "candidate" for v in copies().values()) and meta.get("available") is not True else "attention"
+            result = {**(record or {}), "state": state, "reason": "iCloud identita není ověřena", "sha256": sha, "copies": copies()}
+            if record:
+                atomic_write_json(journal, result)
+            return result
         if record is None:
             # Preserve both originals before replacing either one. Content hashes
             # make the archives immutable and reusable after interrupted prepare.
@@ -134,7 +172,7 @@ def publish(candidate: str, *, validation_sha256: str, targets: tuple[Target, Ta
                     raise ValueError("Cíl se změnil před přípravou.")
                 if target.baseline is not None:
                     archive = state_dir / f"previous-{target.baseline}.txt"
-                    old = path.read_text(encoding="utf-8")
+                    old = path.read_bytes().decode("utf-8")
                     if digest(old) != target.baseline:
                         raise ValueError("Neshoda archivované verze.")
                     if not archive.exists():
@@ -146,8 +184,17 @@ def publish(candidate: str, *, validation_sha256: str, targets: tuple[Target, Ta
                 atomic_create_text(saved, candidate)
             elif saved.is_symlink() or file_hash(saved) != sha:
                 raise ValueError("Neshoda uloženého kandidáta.")
-            record = {"identity": identity, "sha256": sha, "state": "prepared", "request_id": request_id}
+            record = {"schema": 2, "identity": identity, "authorization_sha256": authorization_sha256,
+                      "sha256": sha, "state": "prepared", "request_id": request_id, "written": [False, False]}
             atomic_write_json(journal, record)
+        saved = state_dir / f"candidate-{sha}.txt"
+        if saved.is_symlink() or file_hash(saved) != sha:
+            raise ValueError("Poškozený uložený kandidát.")
+        for target in targets:
+            if target.baseline is not None:
+                archive = state_dir / f"previous-{target.baseline}.txt"
+                if archive.is_symlink() or file_hash(archive) != target.baseline:
+                    raise ValueError("Poškozený archiv předchozí verze.")
         try:
             for index, target in enumerate(targets):
                 path = target.check()
@@ -158,18 +205,34 @@ def publish(candidate: str, *, validation_sha256: str, targets: tuple[Target, Ta
                     atomic_replace_text_under_external_lock(path, candidate)
                 if file_hash(path) != sha:
                     raise ValueError("Zápis neodpovídá kandidátu.")
+                record["written"][index] = True
                 record["state"] = "local_saved" if index == 0 else "both_local_saved"
                 atomic_write_json(journal, record)
         except (OSError, ValueError):
-            first = targets[0].check()
-            if file_hash(first) == sha and targets[0].baseline is not None:
-                archive = state_dir / f"previous-{targets[0].baseline}.txt"
-                if not archive.is_symlink() and file_hash(archive) == targets[0].baseline:
-                    atomic_replace_text_under_external_lock(first, archive.read_text(encoding="utf-8"))
+            record["rollback"] = "not_safe_or_not_needed"
+            try:
+                first = targets[0].check()
+                current = copies()
+                if current["local"] == "candidate" and current["icloud"] != "candidate" and targets[0].baseline is not None:
+                    archive = state_dir / f"previous-{targets[0].baseline}.txt"
+                    if not archive.is_symlink() and file_hash(archive) == targets[0].baseline:
+                        record["rollback"] = "restoring_local"
+                        record["written"][0] = False
+                        atomic_write_json(journal, record)
+                        atomic_replace_text_under_external_lock(first, archive.read_bytes().decode("utf-8"))
+                        record["rollback"] = "restored_local"
+            except (OSError, ValueError):
+                record["rollback"] = "failed"
             record["state"] = "attention"
+            record["copies"] = copies()
             atomic_write_json(journal, record)
             return record
-        record["state"] = "uploaded" if uploaded(cloud_audit(paths[1])) else "pending_icloud"
+        metadata = audit()
+        record["copies"] = copies()
+        if any(value != "candidate" for value in record["copies"].values()):
+            record.update(state="attention", reason="post_audit_content_changed")
+        else:
+            record["state"] = "uploaded" if uploaded(metadata) else "pending_icloud"
         record["physical_iphone_acceptance"] = "not_verified"
         atomic_write_json(journal, record)
         return record
