@@ -1724,3 +1724,39 @@ Doplnění 17102026 k LL-071: Nativní modelový pomocník navíc zdvojuje roli,
 - Řešení nalezeno: 07112026
 - Řešení: samostatný podepsaný read-only .app helper ve vlastní aplikační složce, GUI žádost přes LaunchServices a skutečný krátký launchd probe s ověřeným rodičem PID 1. Tento kontext potvrdil full_access a omezené čtení. Kalendářové zápisy nejsou v pilotu vůbec implementované. Přímé CLI oprávnění není důkaz servisního oprávnění; po změně binárního podpisu provést novou přejímku. Do logů/Gitu jen agregované důkazy, názvy kalendářů a ID soukromě. Ověřeno znovu v bodě 2: nové ad-hoc sestavení má jiný cdhash a launchd kontext not_determined. Žádost evidovat samostatně pro přesný binární otisk, starou uchovat; GUI grant se automaticky nepřenáší ani neopakuje. Přehled má zůstat authorization_required do nové uživatelské přejímky.
 - Doplnění 07112026, bod 4: pro kontrolu návrhu stačí přesné omezené start/end v již podporovaném native overview požadavku. Pythonová změna období nevyžaduje nové Swift sestavení ani OS souhlas. Skutečný launchd read čtyř vybraných kalendářů PASS při nezměněném binárním otisku a nastavení; logy pouze agregované.
+
+### LL-106 — Metadata iCloud aliasu ověřuj na připnutém skutečném cíli
+
+- Problém: NSURL na systémovém aliasu CloudDocs/Documents hlásí neubiquitous,
+  přestože skutečná složka Dokumenty synchronizovaná je. Nepřemostěné JS pole
+  klíčů navíc může přes Foundation vrátit prázdný slovník.
+- Typ: opakující se
+- Řešení nalezeno: 07112026
+- Řešení: nejprve ověřit připnutou identitu a povolený alias, pro NSURL audit
+  použít resolve cíle. Pole klíčů v JXA přemostit na NSArray, NSNumber 0/1 na
+  bool a chybějící metadata nikdy nezaměnit za upload. Ověřeno čtecím auditem
+  skutečného iCloudu a syntetickým testem; dostupnost složky není upload TXT.
+
+### LL-107 — Přejímka návodu musí vázat přesný důkaz, ne jen správný JSON
+
+- Problém: platná citace někde v dlouhém souboru nebo zachované nadpisy
+  neprokazují nové nastavení, zachování kroků ani ověření telefonu.
+- Typ: opakující se
+- Řešení nalezeno: 07112026
+- Řešení: oddělit core validaci od obsahové přejímky. Kontrolovat každou
+  kapitolu, přesné technické literály v citaci, schválený seznam aplikací,
+  autoritu/stáří a kotvu ručního důkazu. Účtenku svázat s kandidátem,
+  kontextem i checklistem. Strojový výsledek review není publikace.
+  Ověřeno synteticky v REC-03; lidskou přejímku a skutečnou obnovu nepředstírat.
+
+### LL-108 — Původní hash nestačí jako povolení k opakování již dokončené kopie
+
+- Problém: stejný starý obsah může být očekávaná nedokončená kopie, ale také
+  pozdější ruční vrácení již dokončené verze. Samotná dvojice old/new hashů
+  tyto případy nerozliší a může přepsat lidský zásah.
+- Typ: opakující se
+- Řešení nalezeno: 07112026
+- Řešení: spojit schválený obsah a cíle s neměnným přijetím; v žurnálu
+  uchovat dokončení každé kopie i záměr rollbacku. Dokončená kopie smí při
+  obnovení zůstat pouze ve schváleném stavu. Aktivní marker dále odmítne
+  starou žádost po novějším vydání. Ověřeno syntetickým REC-04 přenosem.

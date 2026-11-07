@@ -69,7 +69,9 @@ def start_data_only_thread(client: Any, context: Path, model: str, instructions:
     overrides = {"project_doc_max_bytes": 0, "web_search": "disabled",
                  "features.shell_tool": False, "features.apps": False,
                  "features.multi_agent": False, "features.hooks": False,
-                 "features.memories": False}
+                 "features.memories": False, "features.plugins": False,
+                 "features.request_permissions_tool": False,
+                 "skills.bundled.enabled": False, "skills.include_instructions": False}
     if any(not isinstance(name, str) or not re.fullmatch(r"[a-z][a-z0-9_]*", name) for name in disabled_features):
         raise ValueError("Neplatná omezení modelového kontextu.")
     overrides.update({f"features.{name}": False for name in disabled_features})

@@ -1,0 +1,41 @@
+{
+  "stage": "REC-04",
+  "synthetic_only": true,
+  "production_authorized": false,
+  "real_icloud_audit": false,
+  "targets": "two files in a TemporaryDirectory, removed by test cleanup",
+  "preview_state": "confirmation_required",
+  "accepted_state": "accepted",
+  "waiting": {
+    "state": "pending_icloud",
+    "scope": "sandbox_only",
+    "model_calls": 0,
+    "copies": {
+      "local": "candidate",
+      "icloud": "candidate"
+    },
+    "physical_iphone_acceptance": "not_verified",
+    "live_status_audit": false,
+    "candidate_sha256": "2de13a0913ff026d9e43b201091dc1b5a39bf668bf2fb46e2ca52f08b0934a79"
+  },
+  "finished": {
+    "state": "uploaded",
+    "scope": "sandbox_only",
+    "model_calls": 0,
+    "copies": {
+      "local": "candidate",
+      "icloud": "candidate"
+    },
+    "physical_iphone_acceptance": "not_verified",
+    "live_status_audit": false,
+    "candidate_sha256": "2de13a0913ff026d9e43b201091dc1b5a39bf668bf2fb46e2ca52f08b0934a79"
+  },
+  "same_candidate_after_resume": true,
+  "resume_did_not_replace_files": true,
+  "two_copies_have_same_bytes": true,
+  "source_original_preserved": true,
+  "previous_versions_sha256": [
+    "327b727796ee3dfc6497c25f8206a56abcbc375d83e449cbcca1b2b9305402cc",
+    "f10478b1cf3f587cb9cec0fa760303fa713140bc3052dd5f7f186fde499da4f6"
+  ]
+}

@@ -4,6 +4,9 @@ on:
   workflow_dispatch:
   pull_request:
     paths:
+      - "Samantha_Agent/app/recovery_guide*.py"
+      - "Samantha_Agent/scripts/recovery_guide*.py"
+      - "Samantha_Agent/tests/test_recovery_guide*.py"
       - "Samantha_Agent/app/cockpit_email_calendar.py"
       - "Samantha_Agent/app/routine_tasks.py"
       - "Samantha_Agent/tests/test_email_calendar_draft.py"
@@ -102,6 +105,9 @@ on:
     branches:
       - main
     paths:
+      - "Samantha_Agent/app/recovery_guide*.py"
+      - "Samantha_Agent/scripts/recovery_guide*.py"
+      - "Samantha_Agent/tests/test_recovery_guide*.py"
       - "Samantha_Agent/app/cockpit_email_calendar.py"
       - "Samantha_Agent/app/routine_tasks.py"
       - "Samantha_Agent/tests/test_email_calendar_draft.py"

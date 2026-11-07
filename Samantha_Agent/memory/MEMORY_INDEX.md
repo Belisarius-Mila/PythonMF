@@ -62,6 +62,8 @@ Tento soubor je rozcestnik dlouhodobe pameti pro Samantha Agent.
 
 ## Projects
 
+- `reports/calendar_recovery_release_20261107.md` — 7. 11.: Will přebírá všech pět Datových hotových REC-01 až REC-04 commitů do kalendáře 9f7ce93e; společné Terra p+n výslovně schválené. REC-05 WIP zachovaný, produkční REC role/plánovač/TXT publikace vypnuté. Výsledek podle logs/calendar_recovery_release_20261107.log a *_verified_*.log.
+
 - `reports/email_calendar_review_20261107.md`; `handoffs/continuous_personal_agent_2026_11_04.md`; `projects/email_readonly_oauth.md` — 7. 11.: bod 4 lokálně: odvozené koncové datum/délka, dva výchozí alarmy 24 h/60 min, čerstvé kolize a konečný potvrzovaný náhled. Skutečné omezené čtení čtyř vybraných kalendářů PASS; budoucí zápis až bod 5. Bez nového p+n; místní brána/commit dle logs/calendar_review_verified_20261107.log.
 
 - `handoffs/continuous_personal_agent_2026_11_04.md`; `projects/email_readonly_oauth.md`; `reports/email_calendar_draft_20261107.md` — HISTORIE bodu 3, následně nasazeného v 9730a662; 7. 11.: návrh z vybraného e-mailu, citace, úpravy, validace času a jedna modelová operace na zdroj. Jeden skutečný syntetický Terra tah PASS; společné Terra p+n s rušícím Datovým b4b72ab0 nyní schválené, reálný e-mail a vizuální přejímka otevřené. Finální důkaz logs/calendar_draft_verified_20261107.log.
@@ -111,6 +113,8 @@ Tento soubor je rozcestnik dlouhodobe pameti pro Samantha Agent.
 - `../RECOVERY_FROM_BACKUP.md` - vstup pro kopii recovery návodu ve snapshotu a registrovanou cílenou obnovu; podrobnosti v TXT.
 
 ## Infrastructure Recovery
+
+- `projects/samantha_external_backup.md`; `technical/recovery_guide_maintainer.md`; `reports/recovery_guide_rec04_20261107.md`; `handoffs/workstreams/project-samantha-infrastructure.md`; `tvbcp/workstreams/project-samantha-infrastructure.md` — 2026-11-07: REC-04 přijetí kandidáta a přenos dvou kopií ověřené pouze v sandboxu. Neměnný binding, rollback, verze, souběh, ruční změny a pending iCloud; bez modelu či skutečného cloudového zápisu. Dále REC-05 příprava plánovače a samostatná REC-06 aktivace; REC-02 pilot stále neproveden.
 
 - `infrastructure/operating_model.md`; `handoffs/workstreams/project-samantha-infrastructure.md`; `tvbcp/workstreams/project-samantha-infrastructure.md` — 24. 10. úklid SSD dokončen: skutečně +30,20 GiB, volno 49,28 GiB. Systémová cache zachovaná; čekající instalační kopie a sestavovací/testovací zbytky uklizené s ověřenou záchranou potřebných dat. Camino/Cockpit/autosave shodné. Další krok: praktická přejímka střižny Camino.
 

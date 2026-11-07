@@ -381,6 +381,15 @@ WORKFLOW_COMMANDS: tuple[WorkflowCommand, ...] = (
         cwd=SAMANTHA_DIR, risk="private_model_processing", requires_confirmation=True,
         writes="Soukromé pozice, návrhy a počítadlo pokusů; bez SMTP, archivace a změn schránky.",
     ),
+    *(WorkflowCommand(
+        command_id="recovery_guide_" + action,
+        title="Obnovovací návod: " + action,
+        purpose="Neplacený náhled/stav; run zůstává blokovaný do samostatné aktivace pilotu.",
+        aliases=("obnovovací návod " + action,),
+        argv=(str(PYTHON_BIN), str(SAMANTHA_DIR / "scripts/recovery_guide.py"), action),
+        cwd=SAMANTHA_DIR, risk="read_only_preview",
+        writes="izolovaná cache tokenizeru v .venv/recovery_tokenizer; žádný modelový tah" if action == "preflight" else "nic; žádný modelový tah",
+    ) for action in ("preview", "preflight", "runtime", "status", "run")),
     WorkflowCommand(
         command_id="continuous_email_agent_status",
         title="Stav průběžného e-mailového agenta",

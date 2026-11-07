@@ -1,11 +1,44 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
-## Aktuální stav
+Will přebírá commitovaný REC-01 až REC-04 d5651110 do společného vydání
+s kalendářovým 9f7ce93e. Terra p+n výslovně schválené. Produkční REC aktivace
+zůstává vypnutá; REC-05 WIP je dál v Datově worktree. Provozní výsledek podle
+logs/calendar_recovery_release_20261107.log a calendar_recovery_verified_20261107.log.
 
-- 2026-10-25 14:53 CET: Nová schválená recovery záloha dokončená a ověřená. Projekt `20261025_142837`: 63 143 souborů, 17 050 kopírovaných, 46 092 hardlinků, 1 symlink, 0 skipped; 4 309 588 279 nových B. Skutečně připojený šifrovaný cíl ověřený před/po; starší snapshoty zachované.
-- Živé Camino `20261025_143650-abf7e7e5`: 1 647 souborů / 5 167 041 733 B, čtyři DB; 921 operací, 132 Momentů, 4 cesty a 316 originálů / 2379212189 B. Registrovaný běh ověřil úplné SHA, DB i mediální účtenky a shodný zmrazený zdroj.
-- Závěrečná kontrola PASS: čtyři projektové SHA a skutečná rekonstrukce do nové dočasné složky; čtyři DB quick_check; auth.json a nouzové autosave vyloučené. Soukromá .env shodná, bez výpisu citlivých dat. Camino owner HTTP/HTTPS zpět, config/Serve a Cockpit PID/stamp shodné.
-- backup_status nyní potvrzuje 25. 10. 2026; na šifrovaném cíli ~406 GiB volných. Zdrojový kód ani síť se neměnily, žádná starší data/záloha se nemazala. Není to obraz celého Macu; kompletní instalace a fyzická přejímka náhradního počítače zůstává samostatná.
-- Podrobnosti: memory/reports/backup_recovery_20261025.md; shodný souhrn na SSD v recovery_updates, soukromé důkazy v data/private/backup_recovery_20261025/. TXT 1.2 zachovává historické příklady; aktuální dvojici snapshotů určuje dnešní manifest. Další krok: pravidelná další záloha, k původnímu tématu upozornění se vrátit samostatně. Tento výsledkový zápis je jen lokální dokumentační checkpoint, bez push/deploy.
+
+## 2026-11-07 13:45 CET — REC-04: přijatý kandidát a dvojí zápis na kopiích
+
+### Hotovo
+- Připraven PublicationStore: přesný kandidát, REC-03 účtenka/checklist,
+  úplné vstupy, verze validátoru a oba připnuté cíle mají jeden neměnný binding.
+  Výslovné sandboxové přijetí vzniká poslední; pouhý hash textu nestačí.
+- Převod uchová zdrojový TXT i staré verze obou cílů, včetně CRLF. Po pádu
+  pokračuje stejnými bajty bez modelu. Čekající upload neopakuje hotové výměny.
+- Zámek/aktivní marker chrání souběh a novější verze. Ruční změny včetně
+  návratu k původním bajtům se nepřepíšou. Selhání rollbacku je pozorovatelné.
+- Nový vstup povoluje pouze izolované testovací cíle v podadresáři vlastní
+  .venv nebo systémového temp. Produkční režim je výslovně vypnutý.
+
+### Rozhodnutí
+- Míla schválil REC-04 vývoj a ověření na kopiích. Testovací přijetí není
+  skutečná přejímka nového produkčního TXT ani souhlas se zápisem do iCloudu.
+- Živý REC-02 pilot, úplný produkční korpus/aplikace a fyzická přejímka na
+  iPhonu zůstávají otevřené; nic se nenasazovalo ani neaktivovalo.
+
+### Další krok
+- REC-05: připojit trvalý plánovač k registrovanému preview/run/status,
+  před novou analýzou řešit čekající přenos, připravit samostatnou aktivaci.
+
+### Navrhované další kroky
+- Will převezme lokální změny do aktuálního main bez přepsání svých rolí/práce.
+- Dořešit REC-02 runtime/Standard/tokenizer a konkrétní placený pilot.
+- Přijmout skutečný návrh a autoritativní seznam aplikací/nastavení.
+- REC-06 teprve povolí přesné provozní cíle, skutečný upload/iPhone a týdenní běh.
+
+### Technický důkaz
+- 38 nových REC-04 testů; cílená sada 152/152 OK. Závěrečná plná projektová brána nad poslední verzí writeru: 2 501 testů OK, 5 skipped. Dřívější mezibrána 2 498 OK; po zpřesnění written/manifest se plná brána opakovala..
+- Report recovery_guide_rec04_20261107.md a redigovaný syntetický JSON příklad.
+- Testované uploady jsou simulované; žádný skutečný iCloud zápis/audit v této
+  etapě, modelový tah, služba, push ani nasazení. Provozní TXT beze změny.
 <!-- SAMANTHA_CURRENT_STATUS_END -->
 
 ### Předchozí stav infrastruktury
@@ -582,3 +615,204 @@ Technický důkaz:
 - Exit 0; 63 143 projektových souborů, 17 050 copied, 46 092 linked, 1 symlink, 0 skipped, 4 309 588 279 nových B; správná evidence 25. 10. 2026.
 - Camino 1 647 souborů / 5 167 041 733 B, 4 DB; 316 mediálních originálů SHA/účtenky PASS. Čtyři vybrané projektové SHA a jejich skutečná zkušební obnova PASS, čtyři DB quick_check PASS.
 - Šifrovaný mount před/po ověřený; auth.json/autosave vyloučené, HTTP/HTTPS i config/Serve/Cockpit shodné. Přesný souhrn backup_recovery_20261025.md je v projektu i v šifrovaném recovery_updates; soukromá evidence mimo Git. Zápis výsledku následný lokální checkpoint, bez push/deploy.
+
+## 2026-11-07 12:02 CET — plán vývoje týdenního správce obnovovacího TXT
+
+### Hotovo
+Připravený plán šesti etap od úplného čtení podkladů po dvě ověřené kopie
+návodu a týdenní provoz. Detail v projects/samantha_external_backup.md.
+
+### Rozhodnutí
+Míla požaduje model 6.1-Sol, jednou týdně celý návod a dokumentaci, aktualizace
+se zaměřením na aplikace/nastavení Macu a iPhonu. TXT vždy PythonMF a iCloud
+Dokumenty. Dnes schválené plánování, nikoli spuštění modelu nebo plánovače.
+
+### Další krok
+Po přijetí plánu REC-01: explicitní úplný manifest a identita obou cílů.
+
+### Navrhované další kroky
+Čtecí Sol pilot s nákladem, validátor, writer se shodnými hash/uploadem,
+týdenní plánovač a fyzická přejímka na iPhonu. Harmonogram/rozpočet dohodnout.
+
+### Technický důkaz
+Read-only ověřené současné kopie i chybějící cíle; dílčí dokumentace 409
+souborů / 5 002 170 B. Stávající rutinní pilot není obecný writer/scheduler.
+Žádné modelové volání, změna souboru obnovy, role, LaunchAgentu, push/deploy.
+
+## 2026-11-07 12:23 CET — vývojový základ týdenního správce obnovy
+
+### Hotovo
+- Po Mílově pokynu zahájen vývoj podle REC-01 až REC-06. Připraven neaktivní
+  izolovaný pilot: úplné soubory/manifest, dávky a syntéza, citace/kapitoly,
+  trvalý stav bez automatického opakování, rozpočty, dva jednotlivé atomické
+  zápisy s historií a kontrolou iCloud uploadu, návrh plánovače.
+- Registrované neplacené preview/status; run/tick zůstává activation_required.
+  Nový parser zná budoucí roli, centrální JSON ani modelové role se neměnily.
+- Nález: také sledovaný Samantha_Agent TXT je shodný s Plochou a kořenem
+  iCloudu. Oba nové cílové TXT stále chybějí. Foundation po rozřešení známého
+  aliasu Documents potvrzuje synchronizaci skutečné složky; nikoli nový TXT.
+
+### Rozhodnutí
+- Míla schválil zahájení vývoje. Placený pilot, provozní kopírování, aktivace
+  role/plánovače a p+n zůstávají samostatné kroky původního plánu.
+- Nejde o dokončený bezobslužný agent. Podrobný kontrakt a chybějící části
+  jsou v technical/recovery_guide_maintainer.md. Výstup syntézy vždy review.
+
+### Další krok
+- Will převezme lokální vývojový balíček do aktuálního main, sjednotí známé
+  role se svými novějšími rolemi a nad čistým main vytvoří neplacený manifest.
+  Potom dokončit rozsah zdrojů a přesný tokenizační preflight pro cenový pilot.
+
+### Navrhované další kroky
+- Doplnit registrované bezpečné důkazy nastavení Mac/iPhone a přijmout korpus.
+- Teprve nad konkrétním rozpočtem schválit jeden živý čtecí pilot Solem.
+- Přijmout celý návrh TXT, provést samostatně schválenou migraci, upload/iPhone.
+- Propojit přijatou účtenku s pevnými cíli a aktivovat týdenní běh až po přejímce.
+
+### Technický důkaz
+- Výchozí neplacená inventura před zápisem této etapy: 508 zdrojů,
+  5 899 527 B, 114 vynechaných textů; jde o návrh rozsahu, ne přijatý korpus.
+- Cílené ověření a plná brána: 65 cílených testů OK (37 nových); plná brána 2 413 testů OK, 5 skipped; po posledním zpřesnění metadat znovu cílené testy a statická brána OK..
+- Testy pouze syntetické/dočasné. Foundation audit čtecí; původní iCloud TXT
+  i skutečný cíl Documents: ubiquitous/uploaded true, uploading/error false.
+- Bez placeného tahu, zápisu provozních TXT, instalace, push či nasazení.
+
+## 2026-11-07 12:39 CET — REC-02: neplacený preflight, živý pilot dosud neproveden
+
+### Hotovo
+- Změřen celý zmrazený korpus 509 dokumentů a původní TXT; plán 10 dávek +
+  syntéza, úplné pokrytí bez zkrácení souborů. Referenčně 2 222 784 vstupních
+  a 112 000 rezervovaných výstupních tokenů, 139,1392 Standard kreditů bez
+  cache. Není to potvrzená cena Solu ani tvrdý fakturační strop.
+- Tiktoken 0.14.0 nainstalovaný jen do vlastního izolovaného prostředí.
+  Nový neplacený preflight/runtime workflow a oddělená rezerva inspekce
+  a syntézy; zachování známé ceny i po nadlimitním výstupu.
+- Redigovaný manifest/plán/audit je v reports/recovery_guide_rec02_20261107.json,
+  praktické vysvětlení v příslušném .md. Žádný placený tah ani nový thread.
+
+### Rozhodnutí
+- Míla schválil pokračování fází 2. Nezadaná cena/rozsah živého pilotu se
+  nepovažují za schválené utrácení; žádná aktivace rolí, služeb či writeru.
+- Fáze REC-02 není celá hotová: upstream tiktoken nezná mapování Solu,
+  reference o200k_base není náhradou modelu. Připojený server hlásí 0.163.0,
+  lokální CLI 0.166.0; preference runtime nevyhovuje Standard kontrole,
+  kontext a účinnost izolace zatím nejsou doložené. Nic se nepřepínalo.
+
+### Další krok
+- Will převezme vývoj do současného main a registrovaným read-only auditem
+  doloží skutečný kontrakt runtime a možnost izolovaného Standard tahu.
+  Případný release/restart potřebuje samostatné oprávnění; Data jej nespouští.
+
+### Navrhované další kroky
+- Uzavřít tokenizační důkaz nebo výslovně přijmout poctivý odhad + kalibraci.
+- Nad čistým cílovým HEAD přijmout úplný korpus a konkrétní cenový rozsah
+  jednoho pevného syntetického Sol/medium kandidátního tahu; bez retry.
+- Potom přijmout cenu čtení celého korpusu a konkrétní návrh TXT.
+- Migrace dvou kopií, iPhone přejímka a týdenní aktivace zůstávají samostatně.
+
+### Technický důkaz
+- Podrobná evidence, oba snapshot/plan otisky a oficiální zdroje v REC-02 reportu.
+- Plná projektová brána: 2 423 testů OK, 5 skipped; po doplnění Fast a měsíčního regresního případu znovu 76 cílených testů OK (11 nových v REC-02), závěrečná statická brána OK.
+- Bez změny config/agent_roles.json, společné .venv, globálního CLI,
+  provozních TXT, služeb, Gitu mimo vlastní větev, push či nasazení.
+
+## 2026-11-07 13:03 CET — REC-03: kontrola kvality a důkazů
+
+### Hotovo
+- Povinná kontrola syntézy nyní zachová kapitoly i jejich obsah/úvod, váže
+  nové cesty/role/příkazy na přesné citace a blokuje známý zrušený hlas,
+  skrytá tajemství, falešné aktuální ověření a změnu pouhého data.
+- Samostatná přejímka vyžaduje schválený úplný seznam aplikací, Mac/iPhone
+  checklist, zdrojové otisky, autoritu a stáří důkazů. Nový OS/rozpor blokuje.
+  Ani úspěšný strojový výsledek sám nepovoluje publikaci.
+- Připraven balíček bez soukromé historie a otestované čtení novým izolovaným
+  procesem pouze přes stdin. Nejde o lidskou/modelovou přejímku skutečného TXT.
+- Stávající TXT pouze čtecí kontrolou prošel a vrací se přesně 62 778 B;
+  žádné umělé přidání newline ani změna verze při běhu beze změn.
+
+### Rozhodnutí
+- Míla schválil třetí etapu REC-03. Rozsah nadále nezahrnuje placený pilot,
+  publikaci provozních TXT, aktivaci role/služby, push ani nasazení.
+- Checklist a důkazy smějí schválit pouze důvěryhodný řadič/operátor,
+  nikoli model. Úplný skutečný seznam aplikací zatím schválený není.
+
+### Další krok
+- REC-04: svázat konkrétně přijatou kvalitativní účtenku, checklist, kandidát
+  a oba pevné cíle s writerem; testovat přerušení a souběžné úpravy na kopiích.
+
+### Navrhované další kroky
+- Will převezme vývoj do aktuálního main s uchováním své práce/rolí.
+- Dořešit dosud otevřený REC-02 tokenizer/Standard/runtime kontrakt a cenový pilot.
+- Přijmout skutečný úplný korpus/aplikace a doložená nastavení včetně iPhonu.
+- Po skutečném návrhu provést lidskou přejímku čtenářem bez soukromé historie.
+
+### Technický důkaz
+- 38 nových REC-03 testů; závěrečná cílená sada 114/114 OK. Plná projektová brána: 2 459 testů OK, 5 skipped. Po závěrečných zpřesněních znovu cílená sada a statická brána OK; nezměněné testy se zbytečně neopakovaly..
+- Podrobný kontrakt/scénáře v reports/recovery_guide_rec03_20261107.md;
+  bezpečný syntetický balíček v recovery_guide_rec03_example_20261107.json.
+- Chybná syntéza -> attention + quality_issue, bez kandidáta/retry.
+  Bez změny produkčního klienta/runtime/Cockpitu/e-mailu, rolí a služeb.
+
+## 2026-11-07 13:45 CET — REC-04: přijatý kandidát a dvojí zápis na kopiích
+
+### Hotovo
+- Připraven PublicationStore: přesný kandidát, REC-03 účtenka/checklist,
+  úplné vstupy, verze validátoru a oba připnuté cíle mají jeden neměnný binding.
+  Výslovné sandboxové přijetí vzniká poslední; pouhý hash textu nestačí.
+- Převod uchová zdrojový TXT i staré verze obou cílů, včetně CRLF. Po pádu
+  pokračuje stejnými bajty bez modelu. Čekající upload neopakuje hotové výměny.
+- Zámek/aktivní marker chrání souběh a novější verze. Ruční změny včetně
+  návratu k původním bajtům se nepřepíšou. Selhání rollbacku je pozorovatelné.
+- Nový vstup povoluje pouze izolované testovací cíle v podadresáři vlastní
+  .venv nebo systémového temp. Produkční režim je výslovně vypnutý.
+
+### Rozhodnutí
+- Míla schválil REC-04 vývoj a ověření na kopiích. Testovací přijetí není
+  skutečná přejímka nového produkčního TXT ani souhlas se zápisem do iCloudu.
+- Živý REC-02 pilot, úplný produkční korpus/aplikace a fyzická přejímka na
+  iPhonu zůstávají otevřené; nic se nenasazovalo ani neaktivovalo.
+
+### Další krok
+- REC-05: připojit trvalý plánovač k registrovanému preview/run/status,
+  před novou analýzou řešit čekající přenos, připravit samostatnou aktivaci.
+
+### Navrhované další kroky
+- Will převezme lokální změny do aktuálního main bez přepsání svých rolí/práce.
+- Dořešit REC-02 runtime/Standard/tokenizer a konkrétní placený pilot.
+- Přijmout skutečný návrh a autoritativní seznam aplikací/nastavení.
+- REC-06 teprve povolí přesné provozní cíle, skutečný upload/iPhone a týdenní běh.
+
+### Technický důkaz
+- 38 nových REC-04 testů; cílená sada 152/152 OK. Závěrečná plná projektová brána nad poslední verzí writeru: 2 501 testů OK, 5 skipped. Dřívější mezibrána 2 498 OK; po zpřesnění written/manifest se plná brána opakovala..
+- Report recovery_guide_rec04_20261107.md a redigovaný syntetický JSON příklad.
+- Testované uploady jsou simulované; žádný skutečný iCloud zápis/audit v této
+  etapě, modelový tah, služba, push ani nasazení. Provozní TXT beze změny.
+
+## 2026-11-07 14:04 CET — Will: společné schválené Terra p+n
+
+Hotovo: Do hlavního checkoutu převzatý Datův commitovaný REC-01 až REC-04
+rozsah 29de7f05, dc528b45, d8b3d066, e8bb4b12, d5651110 nad kalendářovým
+9f7ce93e. Rozpracovaný REC-05 v Datově vlastním worktree zůstává zachovaný.
+Konflikty zachovávají všechny současné role (Email/Ateliér) i přidaný parser
+RECOVERY_ROLE, oba seznamy workflow a všechny testy. Centrální JSON beze změny:
+recovery_document_maintainer není aktivovaný. Sdílený helper zachovává named
+profile/disabled_features a doplňuje Datovo vypnutí plugins/skills. LL nového
+REC proudu přeznačené na 106–108, aby nepřekryly existující záznamy.
+
+Rozhodnutí: Míla výslovně zadal všechny hotové Willovy i Datovy commity pro
+Terra p+n. Jde o společný runtime Cockpitu, předání project-email-cases; nový
+plánovač, placený REC pilot, produkční TXT/iCloud publikace a nová role se
+neaktivují. REC-04 writer zůstává jen pro izolované testovací kopie.
+
+Další krok: jediný registrovaný submit_release(wait=True), zmrazený společný
+merge head a Terra z centrálního auditu. Výsledek publikace se neodvozuje z
+tohoto předběžného zápisu: autorita logs/calendar_recovery_release_20261107.log
+a logs/calendar_recovery_verified_20261107.log a přesná runtime účtenka.
+
+Navrhované další kroky: kalendářový bod 5 (jediný zápis včetně alarmů) až jako
+další vývoj; REC-05/06 v Datově samostatném proudu, původní přejímky zachované.
+
+Technický důkaz: 198 cílených integračních testů PASS. Plná společná brána,
+smoke, přesné nasazení a CI jsou podmínkou vydání; zajišťuje registrovaný worker
+a následná kontrola Willa. Žádná změna hodinové kopie, produkčního návodu,
+iCloud cílů, služeb Camina či autosave mimo standardní chráněné vydání Cockpitu.
