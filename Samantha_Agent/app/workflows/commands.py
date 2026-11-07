@@ -319,14 +319,22 @@ def _camino_service_commands() -> tuple[WorkflowCommand, ...]:
 
 WORKFLOW_COMMANDS: tuple[WorkflowCommand, ...] = (
     *(WorkflowCommand(
-        command_id="recovery_guide_" + action,
+        command_id="recovery_guide_" + action.replace("-", "_"),
         title="Obnovovací návod: " + action,
         purpose="Neplacený náhled/stav; run zůstává blokovaný do samostatné aktivace pilotu.",
         aliases=("obnovovací návod " + action,),
         argv=(str(PYTHON_BIN), str(SAMANTHA_DIR / "scripts/recovery_guide.py"), action),
         cwd=SAMANTHA_DIR, risk="read_only_preview",
         writes="izolovaná cache tokenizeru v .venv/recovery_tokenizer; žádný modelový tah" if action == "preflight" else "nic; žádný modelový tah",
-    ) for action in ("preview", "preflight", "runtime", "status", "run")),
+    ) for action in ("preview", "preflight", "runtime", "schedule-preview", "status", "run")),
+    *(WorkflowCommand(
+        command_id="recovery_guide_" + action,
+        title="Obnovovací plánovač: " + action,
+        purpose="Neaktivní návrh LaunchAgentu nebo čtecí ověření CLI s minimálním PATH; bez instalace a modelu.",
+        aliases=("obnovovací plánovač " + action,),
+        argv=(str(PYTHON_BIN), str(SAMANTHA_DIR / "scripts/recovery_guide_launchd.py"), *arguments),
+        cwd=SAMANTHA_DIR, risk="read_only_preview", writes="nic; žádná instalace, služba ani modelový tah",
+    ) for action,arguments in (("launchd_preview",()),("environment_preview",("--check-environment",)))),
     WorkflowCommand(
         command_id="continuous_email_agent_status",
         title="Stav průběžného e-mailového agenta",

@@ -1681,3 +1681,15 @@ Doplnění 17102026 k LL-071: Nativní modelový pomocník navíc zdvojuje roli,
   uchovat dokončení každé kopie i záměr rollbacku. Dokončená kopie smí při
   obnovení zůstat pouze ve schváleném stavu. Aktivní marker dále odmítne
   starou žádost po novějším vydání. Ověřeno syntetickým REC-04 přenosem.
+
+### LL-100 — Po výpadku nejdřív dokonči doručení, nevytvářej další analýzu
+
+- Problém: nový týden nebo ruční spuštění může obejít rozpracovanou úlohu,
+  zopakovat placenou analýzu či začít novou před dokončením známých kopií.
+- Typ: opakující se
+- Řešení nalezeno: 07112026
+- Řešení: jeden trvalý ISO slot pro ruční/timer vstup, marker před analýzou
+  a přednost nedokončeného přenosu. Nejistá analýza zůstane attention přes
+  další týdny; obnovuje se známá účtenka, nikoli model. No-change větev
+  znovu ověří kopie na konci revize. Ověřeno synteticky i s REC-04 writerem;
+  nejedná se o živou modelovou/launchd přejímku.

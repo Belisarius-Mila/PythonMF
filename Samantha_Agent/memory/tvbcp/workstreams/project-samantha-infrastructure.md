@@ -1,38 +1,41 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
-## 2026-11-07 13:45 CET — REC-04: přijatý kandidát a dvojí zápis na kopiích
+## 2026-11-07 14:21 CET — REC-05: trvalý plánovač a dohled bez aktivace
 
 ### Hotovo
-- Připraven PublicationStore: přesný kandidát, REC-03 účtenka/checklist,
-  úplné vstupy, verze validátoru a oba připnuté cíle mají jeden neměnný binding.
-  Výslovné sandboxové přijetí vzniká poslední; pouhý hash textu nestačí.
-- Převod uchová zdrojový TXT i staré verze obou cílů, včetně CRLF. Po pádu
-  pokračuje stejnými bajty bez modelu. Čekající upload neopakuje hotové výměny.
-- Zámek/aktivní marker chrání souběh a novější verze. Ruční změny včetně
-  návratu k původním bajtům se nepřepíšou. Selhání rollbacku je pozorovatelné.
-- Nový vstup povoluje pouze izolované testovací cíle v podadresáři vlastní
-  .venv nebo systémového temp. Produkční režim je výslovně vypnutý.
+- Připraven trvalý sandboxový plánovač: společný ISO týden pro ruční/timer
+  vstup, zámek, jeden poslední doháněný týden, DST/rok a restart. Nejasná
+  analýza zastaví i další týdny; známá místní účtenka se připojuje bez retry.
+- Přenos REC-04 má přednost před novou analýzou. Čekající cloud dokončí
+  stejné bajty bez dalšího modelu. Běh beze změn vyžaduje nové konečné
+  ověření kopií/snapshotu, nikoli jen starý předběžný údaj.
+- Registrované schedule-preview/status a launchd/environment preview;
+  neaktivní plist má absolutní cesty, minimální PATH a umask 077.
+  Čtecí CLI bootstrap pod minimálním prostředím prošel.
 
 ### Rozhodnutí
-- Míla schválil REC-04 vývoj a ověření na kopiích. Testovací přijetí není
-  skutečná přejímka nového produkčního TXT ani souhlas se zápisem do iCloudu.
-- Živý REC-02 pilot, úplný produkční korpus/aplikace a fyzická přejímka na
-  iPhonu zůstávají otevřené; nic se nenasazovalo ani neaktivovalo.
+- Míla schválil REC-05 vývoj, ne instalaci/aktivaci či placený modelový tah.
+  Neděle 09:00 Europe/Prague zůstává návrh, rozpočty nejsou schválené.
+- Běžná budoucí automatika má fungovat v jednorázově schváleném úzkém
+  rozsahu; současné syntetické callbacky tuto produkční autoritu nenahrazují.
+- Produkční CLI run/tick zůstávají activation_required. Centrální role,
+  globální Codex, společné služby i provozní TXT se neměnily.
 
 ### Další krok
-- REC-05: připojit trvalý plánovač k registrovanému preview/run/status,
-  před novou analýzou řešit čekající přenos, připravit samostatnou aktivaci.
+- REC-06 nejprve uzavře předpoklady živého REC-02 pilotu a konkrétní přejímku
+  skutečného TXT; potom teprve autorizovaný produkční adapter/role/cíle,
+  reálný iCloud/iPhone důkaz a samostatně povolenou aktivaci jednoho slotu.
 
 ### Navrhované další kroky
-- Will převezme lokální změny do aktuálního main bez přepsání svých rolí/práce.
-- Dořešit REC-02 runtime/Standard/tokenizer a konkrétní placený pilot.
-- Přijmout skutečný návrh a autoritativní seznam aplikací/nastavení.
-- REC-06 teprve povolí přesné provozní cíle, skutečný upload/iPhone a týdenní běh.
+- Will převezme balíček do aktuálního main s uchováním svých rolí/práce.
+- Fresh audit runtime/Standard/tokenizer, konkrétní cenový syntetický pilot.
+- Přijetí skutečného korpusu/aplikací, návrhu a omezené automatické politiky.
+- Po schválení dne/času a limitů ověřit launchd session/auth a bezpečný catch-up.
 
 ### Technický důkaz
-- 38 nových REC-04 testů; cílená sada 152/152 OK. Závěrečná plná projektová brána nad poslední verzí writeru: 2 501 testů OK, 5 skipped. Dřívější mezibrána 2 498 OK; po zpřesnění written/manifest se plná brána opakovala..
-- Report recovery_guide_rec04_20261107.md a redigovaný syntetický JSON příklad.
-- Testované uploady jsou simulované; žádný skutečný iCloud zápis/audit v této
-  etapě, modelový tah, služba, push ani nasazení. Provozní TXT beze změny.
+- 42 nových REC-05 scénářů; cílená sada 194/194 OK. Finální plná projektová brána nad posledním kódem: 2 543 testů OK, 5 skipped. Čtecí CLI bootstrap pod minimálním PATH OK; skutečná launchd/auth session a produkční model zůstávají neověřené..
+- Report recovery_guide_rec05_20261107.md a redigovaný syntetický JSON příklad.
+- Minimální CLI PATH ověřený; skutečný launchd/auth kontext neověřený,
+  služba neinstalovaná, žádný placený model, iCloud zápis, push či nasazení.
 <!-- SAMANTHA_CURRENT_STATUS_END -->
 
 ### Předchozí stav infrastruktury
@@ -781,3 +784,41 @@ souborů / 5 002 170 B. Stávající rutinní pilot není obecný writer/schedul
 - Report recovery_guide_rec04_20261107.md a redigovaný syntetický JSON příklad.
 - Testované uploady jsou simulované; žádný skutečný iCloud zápis/audit v této
   etapě, modelový tah, služba, push ani nasazení. Provozní TXT beze změny.
+
+## 2026-11-07 14:21 CET — REC-05: trvalý plánovač a dohled bez aktivace
+
+### Hotovo
+- Připraven trvalý sandboxový plánovač: společný ISO týden pro ruční/timer
+  vstup, zámek, jeden poslední doháněný týden, DST/rok a restart. Nejasná
+  analýza zastaví i další týdny; známá místní účtenka se připojuje bez retry.
+- Přenos REC-04 má přednost před novou analýzou. Čekající cloud dokončí
+  stejné bajty bez dalšího modelu. Běh beze změn vyžaduje nové konečné
+  ověření kopií/snapshotu, nikoli jen starý předběžný údaj.
+- Registrované schedule-preview/status a launchd/environment preview;
+  neaktivní plist má absolutní cesty, minimální PATH a umask 077.
+  Čtecí CLI bootstrap pod minimálním prostředím prošel.
+
+### Rozhodnutí
+- Míla schválil REC-05 vývoj, ne instalaci/aktivaci či placený modelový tah.
+  Neděle 09:00 Europe/Prague zůstává návrh, rozpočty nejsou schválené.
+- Běžná budoucí automatika má fungovat v jednorázově schváleném úzkém
+  rozsahu; současné syntetické callbacky tuto produkční autoritu nenahrazují.
+- Produkční CLI run/tick zůstávají activation_required. Centrální role,
+  globální Codex, společné služby i provozní TXT se neměnily.
+
+### Další krok
+- REC-06 nejprve uzavře předpoklady živého REC-02 pilotu a konkrétní přejímku
+  skutečného TXT; potom teprve autorizovaný produkční adapter/role/cíle,
+  reálný iCloud/iPhone důkaz a samostatně povolenou aktivaci jednoho slotu.
+
+### Navrhované další kroky
+- Will převezme balíček do aktuálního main s uchováním svých rolí/práce.
+- Fresh audit runtime/Standard/tokenizer, konkrétní cenový syntetický pilot.
+- Přijetí skutečného korpusu/aplikací, návrhu a omezené automatické politiky.
+- Po schválení dne/času a limitů ověřit launchd session/auth a bezpečný catch-up.
+
+### Technický důkaz
+- 42 nových REC-05 scénářů; cílená sada 194/194 OK. Finální plná projektová brána nad posledním kódem: 2 543 testů OK, 5 skipped. Čtecí CLI bootstrap pod minimálním PATH OK; skutečná launchd/auth session a produkční model zůstávají neověřené..
+- Report recovery_guide_rec05_20261107.md a redigovaný syntetický JSON příklad.
+- Minimální CLI PATH ověřený; skutečný launchd/auth kontext neověřený,
+  služba neinstalovaná, žádný placený model, iCloud zápis, push či nasazení.

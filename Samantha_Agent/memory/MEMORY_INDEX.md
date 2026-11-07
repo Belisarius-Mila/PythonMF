@@ -108,7 +108,7 @@ Tento soubor je rozcestnik dlouhodobe pameti pro Samantha Agent.
 
 ## Infrastructure Recovery
 
-- `projects/samantha_external_backup.md`; `technical/recovery_guide_maintainer.md`; `reports/recovery_guide_rec04_20261107.md`; `handoffs/workstreams/project-samantha-infrastructure.md`; `tvbcp/workstreams/project-samantha-infrastructure.md` — 2026-11-07: REC-04 přijetí kandidáta a přenos dvou kopií ověřené pouze v sandboxu. Neměnný binding, rollback, verze, souběh, ruční změny a pending iCloud; bez modelu či skutečného cloudového zápisu. Dále REC-05 příprava plánovače a samostatná REC-06 aktivace; REC-02 pilot stále neproveden.
+- `projects/samantha_external_backup.md`; `technical/recovery_guide_maintainer.md`; `reports/recovery_guide_rec05_20261107.md`; `handoffs/workstreams/project-samantha-infrastructure.md`; `tvbcp/workstreams/project-samantha-infrastructure.md` — 2026-11-07: REC-05 sandboxový plánovač/dohled připravené. ISO dedupe, restart/catch-up, přednost doručení bez nového modelu, známá účtenka místo retry. Plist bez instalace, minimální CLI PATH ověřený; skutečný launchd/auth a REC-02 pilot čekají. Dále REC-06 přejímka/podmíněná aktivace, žádná automatická produkce.
 
 - `infrastructure/operating_model.md`; `handoffs/workstreams/project-samantha-infrastructure.md`; `tvbcp/workstreams/project-samantha-infrastructure.md` — 24. 10. úklid SSD dokončen: skutečně +30,20 GiB, volno 49,28 GiB. Systémová cache zachovaná; čekající instalační kopie a sestavovací/testovací zbytky uklizené s ověřenou záchranou potřebných dat. Camino/Cockpit/autosave shodné. Další krok: praktická přejímka střižny Camino.
 

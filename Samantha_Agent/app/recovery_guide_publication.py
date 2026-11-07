@@ -219,13 +219,14 @@ class PublicationStore:
         directory = self._directory(request_id)
         if not (directory / "approval.json").exists():
             return {"state": "not_accepted", "request_id": request_id, "model_calls": 0}
-        manifest, _, _, approval_sha = self._load(request_id)
+        manifest, loaded, _, approval_sha = self._load(request_id)
         path = directory / "execution.json"
         result = json.loads(self._read(path)) if path.exists() else {"state": "accepted"}
         active = self.root / "active.json"
         if active.exists() and json.loads(self._read(active))["request_id"] != request_id:
             result = {**result, "state": "superseded_or_waiting", "observed_state": result["state"]}
         return {**result, "request_id": request_id, "approval_sha256": approval_sha,
+                "snapshot_sha256": loaded[4]["snapshot_sha256"], "quality_sha256": manifest["quality_sha256"],
                 "candidate_sha256": manifest["candidate_sha256"], "scope": "sandbox_only", "model_calls": 0,
                 "physical_iphone_acceptance": "not_verified", "live_status_audit": False}
 

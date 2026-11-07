@@ -1049,3 +1049,41 @@ závislosti bez konkrétní potřeby. Nejde o rozšíření e-mailové business 
 - Report recovery_guide_rec04_20261107.md a redigovaný syntetický JSON příklad.
 - Testované uploady jsou simulované; žádný skutečný iCloud zápis/audit v této
   etapě, modelový tah, služba, push ani nasazení. Provozní TXT beze změny.
+
+## 2026-11-07 14:21 CET — REC-05: trvalý plánovač a dohled bez aktivace
+
+### Hotovo
+- Připraven trvalý sandboxový plánovač: společný ISO týden pro ruční/timer
+  vstup, zámek, jeden poslední doháněný týden, DST/rok a restart. Nejasná
+  analýza zastaví i další týdny; známá místní účtenka se připojuje bez retry.
+- Přenos REC-04 má přednost před novou analýzou. Čekající cloud dokončí
+  stejné bajty bez dalšího modelu. Běh beze změn vyžaduje nové konečné
+  ověření kopií/snapshotu, nikoli jen starý předběžný údaj.
+- Registrované schedule-preview/status a launchd/environment preview;
+  neaktivní plist má absolutní cesty, minimální PATH a umask 077.
+  Čtecí CLI bootstrap pod minimálním prostředím prošel.
+
+### Rozhodnutí
+- Míla schválil REC-05 vývoj, ne instalaci/aktivaci či placený modelový tah.
+  Neděle 09:00 Europe/Prague zůstává návrh, rozpočty nejsou schválené.
+- Běžná budoucí automatika má fungovat v jednorázově schváleném úzkém
+  rozsahu; současné syntetické callbacky tuto produkční autoritu nenahrazují.
+- Produkční CLI run/tick zůstávají activation_required. Centrální role,
+  globální Codex, společné služby i provozní TXT se neměnily.
+
+### Další krok
+- REC-06 nejprve uzavře předpoklady živého REC-02 pilotu a konkrétní přejímku
+  skutečného TXT; potom teprve autorizovaný produkční adapter/role/cíle,
+  reálný iCloud/iPhone důkaz a samostatně povolenou aktivaci jednoho slotu.
+
+### Navrhované další kroky
+- Will převezme balíček do aktuálního main s uchováním svých rolí/práce.
+- Fresh audit runtime/Standard/tokenizer, konkrétní cenový syntetický pilot.
+- Přijetí skutečného korpusu/aplikací, návrhu a omezené automatické politiky.
+- Po schválení dne/času a limitů ověřit launchd session/auth a bezpečný catch-up.
+
+### Technický důkaz
+- 42 nových REC-05 scénářů; cílená sada 194/194 OK. Finální plná projektová brána nad posledním kódem: 2 543 testů OK, 5 skipped. Čtecí CLI bootstrap pod minimálním PATH OK; skutečná launchd/auth session a produkční model zůstávají neověřené..
+- Report recovery_guide_rec05_20261107.md a redigovaný syntetický JSON příklad.
+- Minimální CLI PATH ověřený; skutečný launchd/auth kontext neověřený,
+  služba neinstalovaná, žádný placený model, iCloud zápis, push či nasazení.
