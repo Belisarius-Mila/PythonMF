@@ -1,41 +1,40 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
-## 2026-11-07 14:21 CET — REC-05: trvalý plánovač a dohled bez aktivace
+## 2026-11-07 14:56 CET — REC-06: konkrétní jednorázová kalibrace před placeným pilotem
 
 ### Hotovo
-- Připraven trvalý sandboxový plánovač: společný ISO týden pro ruční/timer
-  vstup, zámek, jeden poslední doháněný týden, DST/rok a restart. Nejasná
-  analýza zastaví i další týdny; známá místní účtenka se připojuje bez retry.
-- Přenos REC-04 má přednost před novou analýzou. Čekající cloud dokončí
-  stejné bajty bez dalšího modelu. Běh beze změn vyžaduje nové konečné
-  ověření kopií/snapshotu, nikoli jen starý předběžný údaj.
-- Registrované schedule-preview/status a launchd/environment preview;
-  neaktivní plist má absolutní cesty, minimální PATH a umask 077.
-  Čtecí CLI bootstrap pod minimálním prostředím prošel.
+- Čtecí audit připojeného App Serveru, účtu a přesného Sol/medium. Standard
+  pro jeden tah doložen oficiální dokumentací a schématem přesného peeru .163.0.
+- Nový oddělený kandidátní vstup s pevným syntetickým podkladem, přesnou
+  kartou souhlasu, kontrolou oprávnění/socketu, trvalým slotem a bez retry.
+- Testy výpadků/souběhu, neznámé spotřeby a obsahu; konkrétní cenová karta
+  a reprodukční omezení jsou v recovery_guide_rec06_20261107.md.
 
 ### Rozhodnutí
-- Míla schválil REC-05 vývoj, ne instalaci/aktivaci či placený modelový tah.
-  Neděle 09:00 Europe/Prague zůstává návrh, rozpočty nejsou schválené.
-- Běžná budoucí automatika má fungovat v jednorázově schváleném úzkém
-  rozsahu; současné syntetické callbacky tuto produkční autoritu nenahrazují.
-- Produkční CLI run/tick zůstávají activation_required. Centrální role,
-  globální Codex, společné služby i provozní TXT se neměnily.
+- Pokyn k REC-06 autorizuje přípravu přejímky. Samostatný souhlas s konkrétní
+  placenou zkouškou podle schváleného plánu zatím chybí; živé modelové tahy 0.
+- Návrh první kalibrace: jeden Sol/medium Standard tah, pět syntetických
+  záznamů bez skutečného návodu; rezerva 1,6 Standard kreditu a přijímací
+  mez 2 kredity. Nejde o tvrdý fakturační/výstupní strop. Karta není souhlas.
+- Přesný tokenizer Solu zůstává nedoložený; referenčních 500 tokenů není
+  fallback pro celý korpus. Produkční run/tick, role a služba neaktivované.
 
 ### Další krok
-- REC-06 nejprve uzavře předpoklady živého REC-02 pilotu a konkrétní přejímku
-  skutečného TXT; potom teprve autorizovaný produkční adapter/role/cíle,
-  reálný iCloud/iPhone důkaz a samostatně povolenou aktivaci jednoho slotu.
+- Míla přijme přesnou kartu jediné syntetické kalibrace; poté ji Data může
+  jednou provést nad stejným digestem. Nejasný výsledek se neopakuje.
 
 ### Navrhované další kroky
-- Will převezme balíček do aktuálního main s uchováním svých rolí/práce.
-- Fresh audit runtime/Standard/tokenizer, konkrétní cenový syntetický pilot.
-- Přijetí skutečného korpusu/aplikací, návrhu a omezené automatické politiky.
-- Po schválení dne/času a limitů ověřit launchd session/auth a bezpečný catch-up.
+- Vyhodnotit skutečnou spotřebu a odděleně přijmout úplný korpus/cenový pilot TXT.
+- Will převezme nový modul/testy/zápis do aktuálního main, uchová své role/práci.
+- Přijmout celý návrh, povolený produkční adaptér a dvě kopie; upload/iPhone zvlášť.
+- Samostatně schválit p+n, centrální roli, den/čas/rozpočet a launchd/auth přejímku.
 
 ### Technický důkaz
-- 42 nových REC-05 scénářů; cílená sada 194/194 OK. Finální plná projektová brána nad posledním kódem: 2 543 testů OK, 5 skipped. Čtecí CLI bootstrap pod minimálním PATH OK; skutečná launchd/auth session a produkční model zůstávají neověřené..
-- Report recovery_guide_rec05_20261107.md a redigovaný syntetický JSON příklad.
-- Minimální CLI PATH ověřený; skutečný launchd/auth kontext neověřený,
-  služba neinstalovaná, žádný placený model, iCloud zápis, push či nasazení.
+- 28 nových testů; cílená sada 193/193 OK. Plná brána persistenčního vstupu: 2 570 testů OK, 5 skipped.
+  Po malé čtecí normalizaci peer verze dalších 28/28 cílených testů OK;
+  závěrečná statická brána OK.
+- Globální CLI .166.0, připojený peer .163.0; stará ownership sidecar není
+  důkaz současného listeneru. Žádná změna služby, globálního CLI, závislostí
+  projektu, modelových rolí či provozních TXT; žádný push/nasazení/integrace.
 <!-- SAMANTHA_CURRENT_STATUS_END -->
 
 ### Předchozí stav infrastruktury
@@ -822,3 +821,40 @@ souborů / 5 002 170 B. Stávající rutinní pilot není obecný writer/schedul
 - Report recovery_guide_rec05_20261107.md a redigovaný syntetický JSON příklad.
 - Minimální CLI PATH ověřený; skutečný launchd/auth kontext neověřený,
   služba neinstalovaná, žádný placený model, iCloud zápis, push či nasazení.
+
+## 2026-11-07 14:56 CET — REC-06: konkrétní jednorázová kalibrace před placeným pilotem
+
+### Hotovo
+- Čtecí audit připojeného App Serveru, účtu a přesného Sol/medium. Standard
+  pro jeden tah doložen oficiální dokumentací a schématem přesného peeru .163.0.
+- Nový oddělený kandidátní vstup s pevným syntetickým podkladem, přesnou
+  kartou souhlasu, kontrolou oprávnění/socketu, trvalým slotem a bez retry.
+- Testy výpadků/souběhu, neznámé spotřeby a obsahu; konkrétní cenová karta
+  a reprodukční omezení jsou v recovery_guide_rec06_20261107.md.
+
+### Rozhodnutí
+- Pokyn k REC-06 autorizuje přípravu přejímky. Samostatný souhlas s konkrétní
+  placenou zkouškou podle schváleného plánu zatím chybí; živé modelové tahy 0.
+- Návrh první kalibrace: jeden Sol/medium Standard tah, pět syntetických
+  záznamů bez skutečného návodu; rezerva 1,6 Standard kreditu a přijímací
+  mez 2 kredity. Nejde o tvrdý fakturační/výstupní strop. Karta není souhlas.
+- Přesný tokenizer Solu zůstává nedoložený; referenčních 500 tokenů není
+  fallback pro celý korpus. Produkční run/tick, role a služba neaktivované.
+
+### Další krok
+- Míla přijme přesnou kartu jediné syntetické kalibrace; poté ji Data může
+  jednou provést nad stejným digestem. Nejasný výsledek se neopakuje.
+
+### Navrhované další kroky
+- Vyhodnotit skutečnou spotřebu a odděleně přijmout úplný korpus/cenový pilot TXT.
+- Will převezme nový modul/testy/zápis do aktuálního main, uchová své role/práci.
+- Přijmout celý návrh, povolený produkční adaptér a dvě kopie; upload/iPhone zvlášť.
+- Samostatně schválit p+n, centrální roli, den/čas/rozpočet a launchd/auth přejímku.
+
+### Technický důkaz
+- 28 nových testů; cílená sada 193/193 OK. Plná brána persistenčního vstupu: 2 570 testů OK, 5 skipped.
+  Po malé čtecí normalizaci peer verze dalších 28/28 cílených testů OK;
+  závěrečná statická brána OK.
+- Globální CLI .166.0, připojený peer .163.0; stará ownership sidecar není
+  důkaz současného listeneru. Žádná změna služby, globálního CLI, závislostí
+  projektu, modelových rolí či provozních TXT; žádný push/nasazení/integrace.

@@ -1087,3 +1087,40 @@ závislosti bez konkrétní potřeby. Nejde o rozšíření e-mailové business 
 - Report recovery_guide_rec05_20261107.md a redigovaný syntetický JSON příklad.
 - Minimální CLI PATH ověřený; skutečný launchd/auth kontext neověřený,
   služba neinstalovaná, žádný placený model, iCloud zápis, push či nasazení.
+
+## 2026-11-07 14:56 CET — REC-06: konkrétní jednorázová kalibrace před placeným pilotem
+
+### Hotovo
+- Čtecí audit připojeného App Serveru, účtu a přesného Sol/medium. Standard
+  pro jeden tah doložen oficiální dokumentací a schématem přesného peeru .163.0.
+- Nový oddělený kandidátní vstup s pevným syntetickým podkladem, přesnou
+  kartou souhlasu, kontrolou oprávnění/socketu, trvalým slotem a bez retry.
+- Testy výpadků/souběhu, neznámé spotřeby a obsahu; konkrétní cenová karta
+  a reprodukční omezení jsou v recovery_guide_rec06_20261107.md.
+
+### Rozhodnutí
+- Pokyn k REC-06 autorizuje přípravu přejímky. Samostatný souhlas s konkrétní
+  placenou zkouškou podle schváleného plánu zatím chybí; živé modelové tahy 0.
+- Návrh první kalibrace: jeden Sol/medium Standard tah, pět syntetických
+  záznamů bez skutečného návodu; rezerva 1,6 Standard kreditu a přijímací
+  mez 2 kredity. Nejde o tvrdý fakturační/výstupní strop. Karta není souhlas.
+- Přesný tokenizer Solu zůstává nedoložený; referenčních 500 tokenů není
+  fallback pro celý korpus. Produkční run/tick, role a služba neaktivované.
+
+### Další krok
+- Míla přijme přesnou kartu jediné syntetické kalibrace; poté ji Data může
+  jednou provést nad stejným digestem. Nejasný výsledek se neopakuje.
+
+### Navrhované další kroky
+- Vyhodnotit skutečnou spotřebu a odděleně přijmout úplný korpus/cenový pilot TXT.
+- Will převezme nový modul/testy/zápis do aktuálního main, uchová své role/práci.
+- Přijmout celý návrh, povolený produkční adaptér a dvě kopie; upload/iPhone zvlášť.
+- Samostatně schválit p+n, centrální roli, den/čas/rozpočet a launchd/auth přejímku.
+
+### Technický důkaz
+- 28 nových testů; cílená sada 193/193 OK. Plná brána persistenčního vstupu: 2 570 testů OK, 5 skipped.
+  Po malé čtecí normalizaci peer verze dalších 28/28 cílených testů OK;
+  závěrečná statická brána OK.
+- Globální CLI .166.0, připojený peer .163.0; stará ownership sidecar není
+  důkaz současného listeneru. Žádná změna služby, globálního CLI, závislostí
+  projektu, modelových rolí či provozních TXT; žádný push/nasazení/integrace.
