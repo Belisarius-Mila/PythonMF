@@ -938,3 +938,42 @@ závislosti bez konkrétní potřeby. Nejde o rozšíření e-mailové business 
 - Testy pouze syntetické/dočasné. Foundation audit čtecí; původní iCloud TXT
   i skutečný cíl Documents: ubiquitous/uploaded true, uploading/error false.
 - Bez placeného tahu, zápisu provozních TXT, instalace, push či nasazení.
+
+## 2026-11-07 12:39 CET — REC-02: neplacený preflight, živý pilot dosud neproveden
+
+### Hotovo
+- Změřen celý zmrazený korpus 509 dokumentů a původní TXT; plán 10 dávek +
+  syntéza, úplné pokrytí bez zkrácení souborů. Referenčně 2 222 784 vstupních
+  a 112 000 rezervovaných výstupních tokenů, 139,1392 Standard kreditů bez
+  cache. Není to potvrzená cena Solu ani tvrdý fakturační strop.
+- Tiktoken 0.14.0 nainstalovaný jen do vlastního izolovaného prostředí.
+  Nový neplacený preflight/runtime workflow a oddělená rezerva inspekce
+  a syntézy; zachování známé ceny i po nadlimitním výstupu.
+- Redigovaný manifest/plán/audit je v reports/recovery_guide_rec02_20261107.json,
+  praktické vysvětlení v příslušném .md. Žádný placený tah ani nový thread.
+
+### Rozhodnutí
+- Míla schválil pokračování fází 2. Nezadaná cena/rozsah živého pilotu se
+  nepovažují za schválené utrácení; žádná aktivace rolí, služeb či writeru.
+- Fáze REC-02 není celá hotová: upstream tiktoken nezná mapování Solu,
+  reference o200k_base není náhradou modelu. Připojený server hlásí 0.163.0,
+  lokální CLI 0.166.0; preference runtime nevyhovuje Standard kontrole,
+  kontext a účinnost izolace zatím nejsou doložené. Nic se nepřepínalo.
+
+### Další krok
+- Will převezme vývoj do současného main a registrovaným read-only auditem
+  doloží skutečný kontrakt runtime a možnost izolovaného Standard tahu.
+  Případný release/restart potřebuje samostatné oprávnění; Data jej nespouští.
+
+### Navrhované další kroky
+- Uzavřít tokenizační důkaz nebo výslovně přijmout poctivý odhad + kalibraci.
+- Nad čistým cílovým HEAD přijmout úplný korpus a konkrétní cenový rozsah
+  jednoho pevného syntetického Sol/medium kandidátního tahu; bez retry.
+- Potom přijmout cenu čtení celého korpusu a konkrétní návrh TXT.
+- Migrace dvou kopií, iPhone přejímka a týdenní aktivace zůstávají samostatně.
+
+### Technický důkaz
+- Podrobná evidence, oba snapshot/plan otisky a oficiální zdroje v REC-02 reportu.
+- Plná projektová brána: 2 423 testů OK, 5 skipped; po doplnění Fast a měsíčního regresního případu znovu 76 cílených testů OK (11 nových v REC-02), závěrečná statická brána OK.
+- Bez změny config/agent_roles.json, společné .venv, globálního CLI,
+  provozních TXT, služeb, Gitu mimo vlastní větev, push či nasazení.

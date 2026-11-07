@@ -108,7 +108,7 @@ Tento soubor je rozcestnik dlouhodobe pameti pro Samantha Agent.
 
 ## Infrastructure Recovery
 
-- `projects/samantha_external_backup.md`; `technical/recovery_guide_maintainer.md`; `handoffs/workstreams/project-samantha-infrastructure.md`; `tvbcp/workstreams/project-samantha-infrastructure.md` — 2026-11-07: zahájen schválený vývoj týdenního správce obnovy. Neaktivní pilot, manifest/dávky, bezpečný writer a návrh plánovače; žádný placený tah ani aktivace. Další krok Willovo převzetí kódu, manifest na čistém main a tokenizační preflight. Nové provozní TXT zatím nejsou; známý Documents alias se audituje přes skutečný synchronizovaný cíl.
+- `projects/samantha_external_backup.md`; `technical/recovery_guide_maintainer.md`; `reports/recovery_guide_rec02_20261107.md`; `handoffs/workstreams/project-samantha-infrastructure.md`; `tvbcp/workstreams/project-samantha-infrastructure.md` — 2026-11-07: REC-02 preflight 509 dokumentů / 10 dávek + syntéza, reference 139,1392 Standard kreditů. Žádný placený tah. Sol tokenizer mapování neznámé, běžící server 0.163.0 a preference nevyhovuje Standard; dál Willovo doložení runtime a konkrétní cenový pilot. Nové TXT ani služba neaktivované.
 
 - `infrastructure/operating_model.md`; `handoffs/workstreams/project-samantha-infrastructure.md`; `tvbcp/workstreams/project-samantha-infrastructure.md` — 24. 10. úklid SSD dokončen: skutečně +30,20 GiB, volno 49,28 GiB. Systémová cache zachovaná; čekající instalační kopie a sestavovací/testovací zbytky uklizené s ověřenou záchranou potřebných dat. Camino/Cockpit/autosave shodné. Další krok: praktická přejímka střižny Camino.
 

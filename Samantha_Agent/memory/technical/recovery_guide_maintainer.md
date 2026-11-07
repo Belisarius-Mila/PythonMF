@@ -194,3 +194,18 @@ Upravené: `app/communication/agent_roles.py` (jen kompatibilita názvu role),
 `memory/ACTIVE_PROJECTS.md`, `memory/MEMORY_INDEX.md`, `memory/LESSONS_LEARNED.md`,
 `memory/projects/samantha_external_backup.md` a kanonický handoff/TVBCP
 `project-samantha-infrastructure.md`. Celkem 17 souborů.
+
+## 2026-11-07 12:39 CET — doplnění REC-02
+
+Přidané neplacené `preflight` a `runtime`, jejich workflow registry a
+samostatná rezerva inspekce/syntézy. Tiktoken je pouze v izolovaném prostředí,
+projektové závislosti ani role se neměnily. Kompletní zmrazený číselný plán
+viz `../reports/recovery_guide_rec02_20261107.json`, praktická interpretace
+viz `../reports/recovery_guide_rec02_20261107.md`.
+
+Korpus 509 dokumentů: 10 dávek + syntéza, referenčně 139,1392 Standard kreditů.
+Upstream mapování pro Sol chybí; běžící server 0.163.0 a nevyhovující
+Standard preference se nesmí zaměnit za nové provozní ověření. Živý pilot
+neproběhl, REC-02 není celá uzavřená. CLI run/tick i role stále neaktivované.
+Další krok je doložení izolovaného Standard kontraktu ve Willově aktuálním
+runtime a konkrétní přijetí kalibračního/cenového pilotu. Žádný restart zde.

@@ -55,10 +55,16 @@ class Limits:
     run_credits: float
     month_credits: float
     seconds: int
+    inspection_output_tokens: int | None = None
+
+    @property
+    def inspection_reserve(self) -> int:
+        return self.output_tokens if self.inspection_output_tokens is None else self.inspection_output_tokens
 
     def check(self) -> None:
         if (any(type(n) is not int or n <= 0 for n in
                 (self.input_tokens, self.output_tokens, self.max_calls, self.seconds))
+                or type(self.inspection_reserve) is not int or self.inspection_reserve <= 0
                 or self.max_calls < 2 or self.input_tokens > 450_000
                 or not all(math.isfinite(n) and n > 0 for n in (self.run_credits, self.month_credits))):
             raise ValueError("Neplatný rozpočet.")
@@ -130,16 +136,16 @@ def plan(snapshot: Snapshot, count_tokens: Callable[[str], int], limits: Limits)
     instruction_tokens = count_tokens(INSTRUCTIONS)
     available = limits.input_tokens - instruction_tokens - count_tokens(canonical_json(INSPECT_SCHEMA)) - 512
     shards = batches(snapshot, count_tokens, input_limit=available,
-                     output_reserve=limits.output_tokens, max_calls=limits.max_calls)
+                     output_reserve=limits.inspection_reserve, max_calls=limits.max_calls)
     # Final turn receives original plus all bounded findings. Reserve the full
     # output allowance for every inspection, with JSON/framing overhead.
-    synthesis_bound = (count_tokens(snapshot.original.text) + len(shards) * limits.output_tokens
+    synthesis_bound = (count_tokens(snapshot.original.text) + len(shards) * limits.inspection_reserve
                        + instruction_tokens + count_tokens(canonical_json(SYNTHESIS_SCHEMA)) + 2048)
     if synthesis_bound + limits.output_tokens > limits.input_tokens:
         raise ValueError("Syntéza se nevejde; potřebuje samostatně zkontrolovaný plán.")
     inputs = sum(count_tokens(canonical_json(s)) + instruction_tokens + 512
                  + count_tokens(canonical_json(INSPECT_SCHEMA)) for s in shards) + synthesis_bound
-    output = (len(shards) + 1) * limits.output_tokens
+    output = len(shards) * limits.inspection_reserve + limits.output_tokens
     reservation = (inputs * 50 + output * 250) / 1_000_000
     if reservation > limits.run_credits:
         raise ValueError("Předběžná rezervace překročila rozpočet; bez modelu.")
@@ -180,9 +186,9 @@ def run(snapshot: Snapshot, *, state_dir: Path, now: datetime, limits: Limits,
             return {**previous, "replayed_receipt": True}
         prepared = plan(snapshot, count_tokens, limits)
         month = now.astimezone(ZoneInfo("Europe/Prague")).strftime("%Y-%m")
-        used = sum(json.loads(p.read_text()).get("reserved_credits", 0)
-                   for p in state_dir.glob("????-W??.json")
-                   if json.loads(p.read_text()).get("month") == month)
+        previous_month = [json.loads(p.read_text()) for p in state_dir.glob("????-W??.json")]
+        used = sum(max(row.get("reserved_credits", 0), row.get("credits", 0))
+                   for row in previous_month if row.get("month") == month)
         if used + prepared["reserved_credits"] > limits.month_credits:
             return {"state": "budget_blocked", "model_calls": 0}
         if not assert_sources():
@@ -204,10 +210,11 @@ def run(snapshot: Snapshot, *, state_dir: Path, now: datetime, limits: Limits,
                 if payload is None:
                     payload = {"original": snapshot.original.text, "findings": findings}
                 schema = INSPECT_SCHEMA if kind == "inspect" else SYNTHESIS_SCHEMA
+                output_allowance = limits.inspection_reserve if kind == "inspect" else limits.output_tokens
                 actual_input = count_tokens(canonical_json(payload)) + count_tokens(INSTRUCTIONS) + count_tokens(canonical_json(schema)) + 512
-                if actual_input + limits.output_tokens > limits.input_tokens or time.monotonic() - started > limits.seconds:
+                if actual_input + output_allowance > limits.input_tokens or time.monotonic() - started > limits.seconds:
                     raise ValueError("Překročený předběžný rozsah nebo čas.")
-                next_bound = (actual_input * 50 + limits.output_tokens * 250) / 1_000_000
+                next_bound = (actual_input * 50 + output_allowance * 250) / 1_000_000
                 if record["credits"] + next_bound > min(limits.run_credits, prepared["reserved_credits"]):
                     raise ValueError("Další tah překročil rezervaci.")
                 if not assert_sources():
@@ -219,11 +226,13 @@ def run(snapshot: Snapshot, *, state_dir: Path, now: datetime, limits: Limits,
                 response = call(payload, kind)
                 usage = normalize_usage(response.get("usage"))
                 cost = estimate_standard_credits(MODEL, usage)
-                if usage is None or cost is None or usage["output_tokens"] > limits.output_tokens:
-                    raise ValueError("Neověřená nebo nadlimitní spotřeba; bez opakování.")
+                if usage is None or cost is None:
+                    raise ValueError("Neověřená spotřeba; bez opakování.")
                 record["credits"] += cost
                 record["completed_calls"] += 1
                 turn.update(state="received", usage=usage, credits=cost)
+                if usage["output_tokens"] > output_allowance:
+                    raise ValueError("Nadlimitní výstup; skutečnou známou spotřebu zachovat.")
                 if record["credits"] > limits.run_credits or time.monotonic() - started > limits.seconds:
                     raise ValueError("Překročená přijatelná spotřeba nebo čas.")
                 answer = response["answer"]
