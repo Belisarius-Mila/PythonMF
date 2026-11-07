@@ -1,6 +1,8 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
+- 2026-11-07 23:41 CET: Měsíční agenda lokálně hotová: pod připomenutími termíny z kalendářů a schůzky/ostatní události, okamžitá cache a čtení na pozadí, Typ pouze pro přehled. Plná brána 2896 OK (31 SKIP), finálních 347 cílených PASS, skutečné čtení a syntetická Safari přejímka PASS. Nový panel zatím bez p+n; report reports/calendar_agenda_20261107.md. Předchozí navigace a jednoduchá karta již nasazené v 0850e6f3 (CI 42418270872 success).
+
 - 2026-11-07 22:42 CET: Lokálně přesunutý vstup Kalendář z hlavní lišty do Komunikace vedle e-mailů. Jediný odkaz /calendar/, přístupné označení Otevřít kalendář; původní dialog a ovládací ID zachované. Cílené ověření logs/calendar_navigation_20261107.log, statická brána logs/calendar_navigation_static_20261107.log. Živý Cockpit zatím vrací původní menu; nové p+n neproběhlo.
 
 - 2026-10-24 09:52 CEST: Oprava startovacího souběhu p+n je publikovaná/nasazená v e11d949a. Účtenka e47cdb394ec5441c5d25632f11c8c995 má potvrzený push 4 commitů a nasazení Cockpitu, plnou bránu 2186 a smoke 5/5. Nativní účtenku ověřil hlavní Adam; nový místní vývoj pokračuje v project-camino. Předchozí attention c3aba030 je historie a neopakuje se.
@@ -2118,3 +2120,38 @@ calendar_navigation_static_20261107.log a calendar_navigation_verified_20261107.
 Lokální HTML má právě jeden /calendar/ odkaz uvnitř Komunikace a žádný v hlavičce.
 HTTP kontrola běžícího Cockpitu stále našla původní umístění; není vydávána za
 přejímku nové verze. Kód kalendářového zápisu, data a nastavení se nemění.
+
+## 2026-11-07 23:41 CET — Měsíční agenda pod připomenutími
+
+Hotovo: Lokální Cockpit pod důležitými připomenutími ukazuje nejprve úkoly
+a termíny z kalendářů, potom schůzky a další události na příštích 30 dní.
+Poslední načtený přehled se zobrazí ihned a čerstvé čtení běží na pozadí;
+obnovuje se při návratu a každé dvě minuty viditelné stránky. Nezpomaluje
+hlavní status. Datum aktualizace, tlačítko Obnovit, šest položek a rozbalení
+zbytku jsou součástí přehledu. Při chybě zůstanou starší údaje s upozorněním.
+
+Rozhodnutí: Míla upřesnil kalendářové termíny a povolil samostatný vývoj.
+Čteme pouze již vybrané kalendáře původním podepsaným helperem, bez změny
+macOS oprávnění, bez modelového volání a bez zápisu událostí. Typ přebíráme
+z ověřené účtenky Samanthy; starší událost lze přes Typ označit pouze pro
+tento přehled. Neznámý typ se nehádá podle názvu ani délky, zůstává mezi
+ostatními událostmi. Označení je vázané na přesný kalendář, název a čas;
+po jejich změně může být potřeba zopakovat. Stejné duplicitní položky
+nelze jednotlivě označit. Žádný nový TVBCP nevzniká.
+
+Další krok: samostatně schválené p+n měsíční agendy. Lokální vývoj hotový,
+běžící Cockpit tento nový panel ještě neobsahuje.
+
+Navrhované další kroky: po nasazení Mílova přejímka na Macu/iPhonu.
+
+Technický důkaz: plná brána 2896 testů OK (31 SKIP), finálních 347 cílených
+PASS včetně skutečných HTTP ochranných scénářů a Node UI kontraktu. Živé
+čtení čtyř vybraných kalendářů PASS, 7 událostí, žádný kalendářový zápis;
+původní čtečka i writer beze změny. Safari na syntetických datech ověřilo
+rozložení, změnu typu 1/8 → 2/7, zachování po obnově a rozbalení zbytku.
+Fyzický iPhone nebyl ověřený. Report reports/calendar_agenda_20261107.md;
+logs/calendar_agenda_gate_20261107.log, calendar_agenda_targeted_20261107.log,
+calendar_agenda_live_read_20261107.log a calendar_agenda_browser_20261107.log.
+Předchozí navigace i jednoduché zadávání již nasazené v 0850e6f3, účtenka
+1b8a9680c8b54bf7c48895a8267dc924, CI 42418270872 success; staré čekání
+na jejich p+n je historie. Nové p+n tímto povoleno není.

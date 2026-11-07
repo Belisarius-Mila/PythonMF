@@ -51,6 +51,13 @@
 		      </div>
 		      <div id="urgentReminderAlertList" class="urgent-alert-list"></div>
 		    </section>
+    <section id="calendarAgenda" class="calendar-agenda" aria-labelledby="calendarAgendaTitle">
+      <div class="calendar-agenda-heading"><h2 id="calendarAgendaTitle">Kalendář na příštích 30 dní</h2><div><a href="/calendar/">Otevřít kalendář</a><button id="calendarAgendaRefresh" class="secondary" type="button">Obnovit</button></div></div>
+      <p id="calendarAgendaStatus" class="status-line" role="status" aria-live="polite">Načítám přehled kalendáře…</p>
+      <section aria-labelledby="calendarAgendaDeadlineTitle"><h3 id="calendarAgendaDeadlineTitle">Úkoly a termíny <span id="calendarAgendaDeadlineCount"></span></h3><div id="calendarAgendaDeadlines"></div></section>
+      <section aria-labelledby="calendarAgendaMeetingTitle"><h3 id="calendarAgendaMeetingTitle">Schůzky a další události <span id="calendarAgendaMeetingCount"></span></h3><div id="calendarAgendaMeetings"></div></section>
+      <p class="calendar-agenda-help">Rozdělení vychází z uloženého typu událostí Samanthy a tvého označení. Typ můžeš upřesnit u jednotlivé položky.</p>
+    </section>
     <details id="overviewPanel" class="section-toggle" open>
       <summary>Přehled Cockpitu</summary>
 		    <section>

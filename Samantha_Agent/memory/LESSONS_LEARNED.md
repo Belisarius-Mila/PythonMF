@@ -1783,3 +1783,10 @@ Doplnění 17102026 k LL-071: Nativní modelový pomocník navíc zdvojuje roli,
   další týdny; obnovuje se známá účtenka, nikoli model. No-change větev
   znovu ověří kopie na konci revize. Ověřeno synteticky i s REC-04 writerem;
   nejedná se o živou modelovou/launchd přejímku.
+
+### LL-111 — Pod vlastním souborovým zámkem neopakuj zamykající writer
+
+- Problém: atomický JSON writer uvnitř již drženého exclusive_file_lock čekal na vlastní druhý flock a skončil timeoutem.
+- Typ: opakující se
+- Řešení nalezeno: 07112026
+- Řešení: pod existujícím stabilním zámkem použít atomic_replace_text_under_external_lock; celý read/modify/write dál patří pod původní zámek. Neoslabovat transakci oddělenými nezamčenými zápisy. Ověřeno agendou kalendáře: jediný background claim napříč instancemi, revizní kontrola soukromých typů a zachování po restartu; tests.test_calendar_agenda, report calendar_agenda_20261107.md.

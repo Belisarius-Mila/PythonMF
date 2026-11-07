@@ -20,7 +20,7 @@ Tento soubor je rozcestnik dlouhodobe pameti pro Samantha Agent.
 
 ## Reports
 
-- `handoffs/workstreams/project-cockpit.md`; `tvbcp/workstreams/project-cockpit.md`; `projects/email_readonly_oauth.md` — 7. 11.: lokální přesun Kalendáře z hlavní lišty do Komunikace vedle e-mailů. Odkaz zůstává jediný /calendar/; původní dialog/ID zachované. Cílené ověření logs/calendar_navigation_20261107.log, statická brána calendar_navigation_static_20261107.log. Běžící Cockpit ještě vrací původní menu, bez nového p+n.
+- `reports/calendar_agenda_20261107.md`; `handoffs/workstreams/project-cockpit.md`; `tvbcp/workstreams/project-cockpit.md`; `projects/email_readonly_oauth.md` — 7. 11.: lokálně hotová 30denní agenda pod připomenutími, termíny a schůzky/ostatní události, čtení na pozadí a soukromý Typ. Plná brána 2896 OK (31 SKIP), finálních 347 cílených PASS, živé čtení a syntetická Safari přejímka PASS. Nový panel bez p+n, iPhone otevřený. Předchozí jednoduchá karta i navigace již nasazené v 0850e6f3 (CI 42418270872 success).
 
 - `reports/python_315_assessment_2026_10_24.md` — 2026-10-24 09:49 CEST: Python 3.15.1 posouzen proti místnímu 3.12.0rc3, 18 metadat a úspěšný binární resolver pro Mac/arm64. Doporučený oddělený pilot, žádná instalace nebo změna provozu.
 
@@ -66,7 +66,7 @@ Tento soubor je rozcestnik dlouhodobe pameti pro Samantha Agent.
 
 - `reports/recovery_rec06_integration_release_20261107.md`; `reports/recovery_guide_rec06_20261107.md` — 7. 11.: Will přebírá zbývající 282c68b4 nad 51d88679 pro výslovně schválené Terra p+n infrastruktury. Publikace kódu bez placené kalibrace/role/plánovače. Výsledek logs/recovery_rec06_release_20261107.log a recovery_rec06_verified_20261107.log.
 
-- `reports/calendar_simple_20261107.md`; `handoffs/continuous_personal_agent_2026_11_04.md`; `projects/email_readonly_oauth.md` — 7. 11.: jednoduchá karta stále lokálně v 4a33af2a, bez nového p+n. Nativní writer už má full_access a první konkrétně schválený test skutečně uložený: 1 create + čtecí recover, údaje i alarmy 24 h/60 min PASS. Cockpit přehled obnovený, právě 1 shoda. První prázdné event_id správně ponechalo unknown do ověřené obnovy. Důkaz logs/calendar_writer_macos_acceptance_20261107.log. Vizuální Mac/iPhone QA a synchronizace na druhé zařízení otevřené.
+- `reports/calendar_simple_20261107.md`; `handoffs/continuous_personal_agent_2026_11_04.md`; `projects/email_readonly_oauth.md` — HISTORIE jednoduché karty, již nasazené v 0850e6f3. Nativní writer full_access, konkrétně schválený test zapsaný právě jednou, čtecí recover ověřil ID/údaje/alarmy 24 h/60 min. Nový lokální dashboard viz reports/calendar_agenda_20261107.md; nové p+n a fyzická iPhone přejímka otevřené.
 
 - `reports/calendar_recovery_release_20261107.md`; `reports/recovery_guide_rec05_20261107.md` — 7. 11.: první balíček 135f46e7 potvrzeně nasazený (2781 testů, smoke 5/5). Will přebírá následně dokončený REC-05 aa18a6e7 pro úplné Mílovo p+n; stále bez produkční aktivace. Konečný stav logs/calendar_recovery_rec05_release_20261107.log a calendar_recovery_verified_20261107.log.
 

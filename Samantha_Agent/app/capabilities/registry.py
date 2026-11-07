@@ -12,6 +12,26 @@ from app.capabilities.models import (
 
 CAPABILITIES: tuple[CapabilityRecord, ...] = (
     CapabilityRecord(
+        capability_id="calendar_agenda_status", label="Read private thirty-day agenda snapshot",
+        risk=RiskLevel.READ_ONLY, reads=("selected calendar snapshot and private display classifications",), writes=(),
+        tool="app.calendar_agenda.CalendarAgenda.snapshot", audit=AuditPolicy.REDACTED,
+        notes="No native query or model. Exact-content annotations and verified Samantha receipt hints; ambiguous duplicates stay unclassified.",
+    ),
+    CapabilityRecord(
+        capability_id="calendar_agenda_refresh", label="Background read of the configured calendars",
+        risk=RiskLevel.LOCAL_WRITE, reads=("previously selected calendars, bounded to thirty days",),
+        writes=("private read cache and bounded refresh claim",), tool="app.calendar_agenda.CalendarAgenda.request_refresh",
+        requires_confirmation=False, audit=AuditPolicy.REDACTED,
+        notes="User-authorized automatic dashboard read on open/return, active page only. Single flight and cooldown across processes; no calendar writes, model calls or permission prompts.",
+    ),
+    CapabilityRecord(
+        capability_id="calendar_agenda_set_kind", label="Classify one exact calendar item for the dashboard",
+        risk=RiskLevel.LOCAL_WRITE, reads=("current selected snapshot and private annotation revision",),
+        writes=("private display classification only",), tool="app.calendar_agenda.CalendarAgenda.set_kind",
+        requires_confirmation=True, confirmation_policy=ConfirmationPolicy.SUMMARY_BEFORE_ACTION, audit=AuditPolicy.REDACTED,
+        notes="Explicit type selector, selection/revision and unique exact-content check. Does not edit the macOS event or mark tasks completed.",
+    ),
+    CapabilityRecord(
         capability_id="email_calendar_draft_write", label="Create the exact human-confirmed calendar event",
         risk=RiskLevel.EXTERNAL_SEND, reads=("current four-field draft, fresh conflicts and configured writable target",),
         writes=("one new calendar event and two alarms", "private durable single-attempt journal"),

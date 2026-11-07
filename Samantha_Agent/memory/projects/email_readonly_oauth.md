@@ -1,11 +1,12 @@
 # E-mail read-only OAuth integrace
 
-Navigace (lokální změna 7. 11. 2026): Kalendář patří do Komunikace vedle
-e-mailů, samostatný odkaz v hlavní liště odstraněný. Běžící Cockpit zatím
-vrací původní menu; změna čeká na samostatné p+n. Kanonický UI zápis:
-`handoffs/workstreams/project-cockpit.md` a `tvbcp/workstreams/project-cockpit.md`.
+Navigace a jednoduchá karta již nasazené v 0850e6f3: Kalendář je
+v Komunikaci vedle e-mailů, v hlavní liště samostatný vstup není.
+Nová lokální měsíční agenda pod připomenutími čeká na vlastní p+n.
+Kanonický UI zápis: `handoffs/workstreams/project-cockpit.md` a
+`tvbcp/workstreams/project-cockpit.md`, report `reports/calendar_agenda_20261107.md`.
 
-Kalendář nově lokálně používá jednu kartu se čtyřmi poli: název, začátek,
+Kalendář používá jednu kartu se čtyřmi poli: název, začátek,
 typ a místo. Kliknutí Do kalendáře připraví návrh přes stávající Terra roli;
 úpravy i kontrola kolizí probíhají automaticky. Výchozí pásmo Europe/Prague,
 konec +1 hodina; výslovný konec/délka/pásmo mají přednost. Při posunu začátku
@@ -17,14 +18,15 @@ obnovu původního zápisu, nikoli druhý create. Původní read-only Swift/bund
 jeho OS souhlas zůstávají beze změny. Vlastní OS souhlas writeru již potvrzený
 a první konkrétně schválená událost skutečně uložená a ověřená (jeden create,
 čtecí recover, dva alarmy). Přehled Cockpitu obnovený; viz poslední záznam.
-Tento vývoj zatím není pushnutý ani nasazený; poslední nasazený základ je
-2909ea5a. Vývoj nepoužil placený modelový tah; následná nativní přejímka
-vytvořila právě jednu Mílou potvrzenou testovací událost.
-Plná brána 2874 testů PASS (31 SKIP), posledních 128 cílených PASS a statická
-brána PASS. Nativní build + šest syntetických kontrol PASS; skutečná nativní
-přejímka writeru PASS. Vizuální přejímka Safari/Mac/iPhone zůstává otevřená.
-Poslední Safari QA skončila cgWindowNotFound a nedostupným browser hostem. Podrobnosti reports/calendar_simple_20261107.md a
-logs/calendar_simple_gate_20261107.log. Samostatný e-mailový TVBCP není domluvený.
+Dřívější jednoduchá karta a její nativní přejímka jsou již zahrnuté
+v nasazeném 0850e6f3 (CI 42418270872 success). Původní report
+calendar_simple_20261107.md zůstává historickým důkazem této etapy.
+Současná lokální agenda čte jen vybrané kalendáře, bez modelu a změn
+helperů či oprávnění. Typ je přesný ověřený záznam Samanthy nebo soukromé
+označení přes Typ; původní neznámé události se nehádají. Plná brána 2896 OK
+(31 SKIP), posledních 347 cílených PASS, skutečné čtení čtyř kalendářů
+a syntetická Safari přejímka PASS. Nový panel není nasazený; fyzická
+přejímka iPhonu otevřená. Samostatný e-mailový TVBCP není domluvený.
 
 Aktuální stav 6. 11.: Terra p+n e82a5d47 dokončené, nový editor živě ověřený.
 Potvrzený upgrade na f2d6ef79 aktivoval zdvořilostní pravidlo i v hodinovém
@@ -1387,3 +1389,38 @@ recover s neprázdným ID a stejnými údaji, bez druhého create. Privátní ž
 ID i kalendáře zůstávají mimo Git. Žádný modelový tah ani reálný e-mail,
 změna hodinové kopie nebo Data worktree. Příčina přechodně prázdného ID nebyla
 určena; samotné místní uložení není důkaz synchronizace na druhé zařízení.
+
+## 2026-11-07 23:41 CET — Měsíční agenda pod připomenutími
+
+Hotovo: Lokální Cockpit pod důležitými připomenutími ukazuje nejprve úkoly
+a termíny z kalendářů, potom schůzky a další události na příštích 30 dní.
+Poslední načtený přehled se zobrazí ihned a čerstvé čtení běží na pozadí;
+obnovuje se při návratu a každé dvě minuty viditelné stránky. Nezpomaluje
+hlavní status. Datum aktualizace, tlačítko Obnovit, šest položek a rozbalení
+zbytku jsou součástí přehledu. Při chybě zůstanou starší údaje s upozorněním.
+
+Rozhodnutí: Míla upřesnil kalendářové termíny a povolil samostatný vývoj.
+Čteme pouze již vybrané kalendáře původním podepsaným helperem, bez změny
+macOS oprávnění, bez modelového volání a bez zápisu událostí. Typ přebíráme
+z ověřené účtenky Samanthy; starší událost lze přes Typ označit pouze pro
+tento přehled. Neznámý typ se nehádá podle názvu ani délky, zůstává mezi
+ostatními událostmi. Označení je vázané na přesný kalendář, název a čas;
+po jejich změně může být potřeba zopakovat. Stejné duplicitní položky
+nelze jednotlivě označit. Žádný nový TVBCP nevzniká.
+
+Další krok: samostatně schválené p+n měsíční agendy. Lokální vývoj hotový,
+běžící Cockpit tento nový panel ještě neobsahuje.
+
+Navrhované další kroky: po nasazení Mílova přejímka na Macu/iPhonu.
+
+Technický důkaz: plná brána 2896 testů OK (31 SKIP), finálních 347 cílených
+PASS včetně skutečných HTTP ochranných scénářů a Node UI kontraktu. Živé
+čtení čtyř vybraných kalendářů PASS, 7 událostí, žádný kalendářový zápis;
+původní čtečka i writer beze změny. Safari na syntetických datech ověřilo
+rozložení, změnu typu 1/8 → 2/7, zachování po obnově a rozbalení zbytku.
+Fyzický iPhone nebyl ověřený. Report reports/calendar_agenda_20261107.md;
+logs/calendar_agenda_gate_20261107.log, calendar_agenda_targeted_20261107.log,
+calendar_agenda_live_read_20261107.log a calendar_agenda_browser_20261107.log.
+Předchozí navigace i jednoduché zadávání již nasazené v 0850e6f3, účtenka
+1b8a9680c8b54bf7c48895a8267dc924, CI 42418270872 success; staré čekání
+na jejich p+n je historie. Nové p+n tímto povoleno není.
