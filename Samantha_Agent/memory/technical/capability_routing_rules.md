@@ -51,6 +51,8 @@ Aktualni registrovane reporty:
 
 | Zamer v bezne reci | Registrovana schopnost | Bezpecnostni rozsah |
 | --- | --- | --- |
+| Smazat jednu konkrétní událost z kalendáře | `app.calendar_delete.CalendarDeletion.execute` přes `/api/calendar/delete` | prepare jen čte, přesná časově omezená serverová identita; delete vyžaduje konkrétní potvrzení, scope/revizi a shodnou nativní identitu. Pouze jeden výskyt bez účastníků/organizátora, trvalý marker bez retry; status/recover nemazají. Nikdy hromadné mazání ani automatické mazání při testu. |
+| Jednou připravit a povolit samostatný mazací helper | `app.calendar_delete.CalendarDeleteHelper.build(confirmed=True)/authorize_current(confirmed=True)` | pouze výslovné tlačítko na Macu, nový oddělený podepsaný helper a OS souhlas. Původní reader/writer se nemění. Syntetický build/self-test v izolovaném adresáři nepřistupuje ke kalendářům. |
 | "Jaky je stav Samanthy?", "health check", "mame cisty stul?" | `samantha_health_check(mode="quick")` | cte memory index, aktivni projekty a git status; nezapisuje |
 | "Kvantitativni status", "kolik mame souboru/radku?", "objemovy rust" | `samantha_quantitative_status(save=False)` | cte agregovane souborove statistiky mimo soukroma data; bez `save=True` nezapisuje |
 | "Uloz kvantitativni snapshot" | `samantha_quantitative_status(save=True)` | ulozi jen agregovanou JSONL datovou vetu bez nazvu souboru a soukromeho obsahu |

@@ -12,7 +12,7 @@ ids.settings.append(ids.calendars,ids.target);
 const now='2026-11-07T12:00:00Z';
 const state={ok:true,revision:0,read_calendar_ids:[],target_calendar_id:'',calendars:[],events:[],ready:false,status:'selection_required',can_select:false,last_loaded_at:null};
 let queue=[state],calls=[];
-const scope={document:{getElementById:id=>ids[id],createElement:tag=>new Element(tag)},Intl,Date,Map,Array,String,setTimeout,clearTimeout,setInterval:()=>0,
+const scope={window:{},document:{getElementById:id=>ids[id],createElement:tag=>new Element(tag)},Intl,Date,Map,Array,String,setTimeout,clearTimeout,setInterval:()=>0,
  AbortController,fetch:async(path,options)=>{calls.push({path,options,body:options.body?JSON.parse(options.body):null});const value=queue.shift();assert(value,'unexpected fetch');return{ok:value.ok,json:async()=>value};}};
 vm.runInNewContext(fs.readFileSync('app/frontend/calendar_overview/app.js','utf8'),scope);
 const tick=()=>new Promise(resolve=>setImmediate(resolve));

@@ -24,6 +24,8 @@ NODE_FALLBACK_PATHS = (
 )
 
 COMPILE_PATHS = (
+    "app/calendar_delete.py",
+    "app/cockpit_calendar_delete.py",
     "app/email/calendar_proposal.py",
     "app/email/calendar_draft.py",
     "app/email/calendar_review.py",
@@ -309,6 +311,8 @@ SHELL_PATHS = (
 )
 
 TEST_MODULES = (
+    "tests.test_calendar_delete",
+    "tests.test_cockpit_calendar_delete",
     "tests.test_interior_atelier",
     "tests.test_interior_ai",
     "tests.test_interior_ai_activation",

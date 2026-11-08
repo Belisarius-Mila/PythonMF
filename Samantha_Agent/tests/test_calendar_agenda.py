@@ -41,6 +41,15 @@ class CalendarAgendaTests(unittest.TestCase):
         self.assertEqual(v['selected_count'],0);self.assertFalse(self.pilot.root.exists());self.assertEqual(self.pilot.calls,before)
         self.agenda.request_refresh();self.assertEqual(self.callbacks,[])
 
+    def test_delete_controls_require_fresh_unique_events_in_writable_calendars(self):
+        self.prepare();event=self.event();self.events([event])
+        self.assertTrue(self.agenda.snapshot()['meetings'][0]['can_delete'])
+        self.events([event,event]);self.assertFalse(any(e['can_delete'] for e in self.agenda.snapshot()['meetings']))
+        self.events([event]);value=self.overview._load();value['calendars'][0]['writable']=False;self.pilot._write(self.overview.path,value)
+        self.assertFalse(self.agenda.snapshot()['meetings'][0]['can_delete'])
+        value['calendars'][0]['writable']=True;value['last_error']='source_unavailable';self.pilot._write(self.overview.path,value)
+        self.assertFalse(self.agenda.snapshot()['meetings'][0]['can_delete'])
+
     def test_background_request_returns_cache_and_reuses_one_cross_instance_claim(self):
         self.prepare();calls=len(self.pilot.calls)
         v=self.agenda.request_refresh();self.assertTrue(v['refreshing']);self.assertEqual(len(self.pilot.calls),calls)

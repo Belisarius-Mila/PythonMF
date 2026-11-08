@@ -19,6 +19,7 @@
     fields.disabled=busy||Boolean(pending)||!context?.ready;
     $("taskSubmit").disabled=fields.disabled||storageBroken;recoverButton.disabled=busy||storageBroken;
     form.setAttribute("aria-busy",String(busy));
+    window.SamanthaCalendarDelete?.update(document);
   }
   function summary() {
     if(!year.value||!month.value||!day.value)return;
@@ -81,6 +82,10 @@
       const saved=value.task||pending.payload;
       clearPending();title.value="";
       message(`Zapsáno: ${saved.title} · ${formatter.format(new Date(saved.date+"T12:00:00Z"))} v ${saved.time}.`,"verified");
+      const actions=$("taskSavedActions");
+      if(actions&&value.event&&window.SamanthaCalendarDelete) {
+        actions.replaceChildren();window.SamanthaCalendarDelete.attach(actions,value.event,{disabled:()=>busy,onDeleted:()=>message("Úkol byl smazaný z kalendáře.","verified")});
+      }
     } else if(value.state==="blocked") {
       clearPending();message(value.message,"blocked");loadContext();
     } else {

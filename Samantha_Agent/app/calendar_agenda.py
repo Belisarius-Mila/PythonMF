@@ -112,6 +112,7 @@ class CalendarAgenda:
         except (OSError,ValueError,KeyError,TypeError): known={};partial=True
         events = [row for row in source['events'] if instant(row['end'])>now and instant(row['start'])<end]
         counts = Counter(event_key(row) for row in events)
+        writable = {row['id'] for row in source['calendars'] if row['writable']}
         deadlines, meetings = [], []
         for row in sorted(events,key=lambda e:(instant(e['start']),e['title'],e['calendar_id'])):
             key = event_key(row); unique = counts[key]==1
@@ -119,7 +120,8 @@ class CalendarAgenda:
             suggested = known.get(key) if unique else None
             kind = manual or suggested or 'event'
             item = {**row,'key':key,'kind':kind,'type_source':'display' if manual else 'samantha' if suggested else 'calendar',
-                    'display_kind':manual or 'auto','can_classify':unique and source['ready'] and not last_failed and not partial}
+                    'display_kind':manual or 'auto','can_classify':unique and source['ready'] and not last_failed and not partial,
+                    'can_delete':unique and source['ready'] and not last_failed and row['calendar_id'] in writable}
             (deadlines if kind=='task_deadline' else meetings).append(item)
         fresh = bool(source['ready'] and not last_failed)
         status = 'source_unavailable' if last_failed else source['status']

@@ -1,5 +1,11 @@
 # E-mail read-only OAuth integrace
 
+- 2026-11-08 14:56 CET: Lokálně doplněné Smazat z kalendáře u jednotlivé události a po uložení. Přesný nativní náhled, potvrzení, jeden výskyt, bez pozvánek s účastníky; trvalé markery bez opakování nejistého mazání. 112 cílených PASS, 15 nativních in-memory scénářů a podepsaný izolovaný self-test PASS. Plná brána 3174 testů OK (31 SKIP), logs/calendar_delete_full_gate_20261108.log. Původní reader/writer zachované; nový helper dosud bez OS grantu, bez p+n a bez skutečného mazání. Report reports/calendar_delete_20261108.md.
+
+Nasazený základ před tímto lokálním krokem: 96648c64. Opravu HTTP zadání
+úkolu 9c8584ee Míla potvrdil jako funkční; konečný důkaz předchozího vydání
+je logs/data_rec06_final_verified_20261108.log. Starší stavy níže jsou historie.
+
 Jednoduchá karta, navigace pod Komunikací a měsíční agenda jsou již
 nasazené v 6d5b576b (Terra a751897cb82760aa9704339547dd78f2, plná brána
 2896, smoke 5/5 a CI 42458143491 success; finální živý důkaz
@@ -1512,3 +1518,33 @@ calendar_task_storage_gate_20261108.log a calendar_task_storage_diagnosis_202611
 Žádný skutečný kalendářový zápis ani změna helperů/grantů/modelů.
 Čtecí inventář UI: žádné připojené browser tabs a žádné Safari okno;
 přímá přejímka Mílova prohlížeče nebyla dostupná.
+
+## 2026-11-08 14:56 CET — Mazání jednotlivé události z Cockpitu
+
+### Hotovo
+- Tlačítko Smazat z kalendáře v měsíční agendě a seznamu schůzek, i po
+  úspěšném uložení úkolu nebo události z e-mailu. Potvrzení ukazuje přesnou
+  událost; u opakování maže jen tento výskyt. Po ověření se přehled obnoví.
+- Nová oddělená mazací část zachovává původní reader/writer. Změněné nebo
+  nejednoznačné události a pozvánky s účastníky/organizátorem nemazá.
+
+### Rozhodnutí
+- Míla schválil vývoj navržené jednotlivé potvrzované operace. P+n nového
+  kroku dosud nezadal. Žádné skutečné události se při vývoji nemažou.
+- Nejistý pokus se neopakuje; serverová identita a nativní cílový zámek
+  přežijí timeout/pád. Jen čtecí obnova původní účtenky.
+
+### Další krok
+- Samostatné p+n; poté jednorázové Povolit mazání na Macu a Mílova přejímka
+  potvrzovacího okna, nejprve bezpečně přes Zrušit.
+
+### Navrhované další kroky
+- Přejímka vybraného odstranění na Macu/iPhonu. Pozvánky s účastníky řešit
+  dál v aplikaci Kalendář; hromadné nebo celé série se nenabízejí.
+
+### Technický důkaz
+- 112 cílených testů PASS, 15 scénářů produkční Swift transakce s fake
+  EventKit a reálný podpis/self-test v izolaci PASS. Plná brána dle
+  logs/calendar_delete_full_gate_20261108.log (3174 OK /31 SKIP); report calendar_delete_20261108.md.
+- Nový helper není provozně instalovaný/autorizovaný; původní instalované
+  helpery shodné. Skutečný kalendářový zápis/mazání: 0. Bez push/nasazení.

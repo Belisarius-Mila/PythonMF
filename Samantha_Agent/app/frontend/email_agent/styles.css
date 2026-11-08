@@ -4,3 +4,5 @@ input[type="checkbox"]{display:inline-block;width:auto;margin-right:8px;vertical
 .mail-hour{flex-wrap:wrap}.mail-hour>details{flex-basis:100%;margin-bottom:0}.mail-hour .actions{align-items:center}.mail-hour .actions span{flex:1;min-width:min(100%,16rem)}
 #calendarDraftEditor{width:min(500px,94vw);padding:20px}#calendarDraftEditor h2{margin:0 0 12px}#calendarDraftEditor label{margin:12px 0}#calendarDraftEditor p{font-size:.9rem;overflow-wrap:anywhere}#calendarDraftEditor select{display:block;width:100%;font:inherit;padding:12px;margin-top:6px;border:1px solid #a8baba;border-radius:7px;background:white}#calendarDraftEditor [role="status"]{color:#8a3a16}#calendarDraftEditor .actions{position:sticky;bottom:-20px;background:white;padding:12px 0;margin-bottom:0}
 #calendarDraftEditor [hidden]{display:none!important}
+
+.calendar-delete{display:flex;align-items:center;flex-wrap:wrap;gap:8px;margin-top:8px;min-width:0}.calendar-delete-button{width:auto;min-height:44px;padding:7px 10px;font-size:13px;white-space:normal;background:#fff5f3;color:#9c2c24;border:1px solid #e4bcb7}.calendar-delete [role=status]{font-size:13px;line-height:1.4;overflow-wrap:anywhere}

@@ -1880,3 +1880,17 @@ všech216 citací zachovaných, celý původní obsah a původní quality gate p
 Běžná lomítka v próze nejsou cesty a nezaškrtnutý přejímací bod není live claim;
 rozdíl doložit a redakčně vyjasnit, ne vypnout gate. Nové odvozené cesty bez
 přesné citace nepřijímat. Sémantická/provozní přejímka tím není automatická.
+
+### LL-116 — Nejistou mutaci zamykej podle cíle, nikoli jen požadavku
+
+- Problém: nová karta nebo změna provider metadat by vytvořila nové ID/hash
+  a mohla zopakovat nejasné smazání stejného výskytu.
+- Typ: zobecnitelné
+- Řešení nalezeno: 08112026
+- Řešení: před mutací fsync serverového claimu i nativního žurnálu pod
+  stabilním kalendářem/nativní identitou/výskytem; proměnlivý fingerprint
+  kontroluje shodu obsahu, neslouží jako nový retry slot. Recovery jen čte
+  původní účtenku, prázdný seznam sám není důkaz dokončení. Ověřeno skutečnou
+  Swift transakční logikou s in-memory EventKit (15 scénářů), včetně změny
+  poznámek po nejasném remove a nového UI requestu bez další mutace.
+  Není to skutečné smazání z osobního kalendáře ani přejímka iCloud sync.

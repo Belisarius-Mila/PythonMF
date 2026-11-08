@@ -1,5 +1,7 @@
 # Memory Index
 
+- `reports/calendar_delete_20261108.md`; `handoffs/workstreams/project-cockpit.md`; `tvbcp/workstreams/project-cockpit.md`; `projects/email_readonly_oauth.md` — 2026-11-08 14:56 CET: Lokálně doplněné Smazat z kalendáře u jednotlivé události a po uložení. Přesný nativní náhled, potvrzení, jeden výskyt, bez pozvánek s účastníky; trvalé markery bez opakování nejistého mazání. 112 cílených PASS, 15 nativních in-memory scénářů a podepsaný izolovaný self-test PASS. Plná brána 3174 testů OK (31 SKIP), logs/calendar_delete_full_gate_20261108.log. Původní reader/writer zachované; nový helper dosud bez OS grantu, bez p+n a bez skutečného mazání. Report reports/calendar_delete_20261108.md.
+
 - `handoffs/seznam_iphone_mail_2026_10_03.md` — 4. 10. příjem Seznamu na iPhonu uživatelsky potvrzen i s Wi-Fi a VPN; bez změny hesla či účtu, příčina nepotvrzena, další zásah neplánován.
 Tento soubor je rozcestnik dlouhodobe pameti pro Samantha Agent.
 

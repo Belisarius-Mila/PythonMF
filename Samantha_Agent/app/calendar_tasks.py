@@ -77,7 +77,9 @@ class CalendarTasks:
         return {'ok': True, 'request_id': request_id, 'state': record['write']['state'],
                 'message': record['write'].get('message', 'Zápis se ověřuje…'),
                 'task': {key: values[key] for key in ('title', 'date', 'time')},
-                'calendar_title': (record.get('target') or {}).get('title', '')}
+                'calendar_title': (record.get('target') or {}).get('title', ''),
+                'event': ({k: record['write']['verified_event'][k] for k in ('calendar_id','title','start','end','all_day')}
+                          if record['write'].get('state') == 'verified' and record['write'].get('verified_event') else None)}
 
     def status(self, request_id):
         return self._view(request_id, self._read(self._path(request_id)))

@@ -25,6 +25,7 @@
     ui.fields = el("section"); ui.fields.append(field("title", "Název"), field("start", "Začátek", "datetime-local"), field("kind", "Typ"), field("location", "Místo (nepovinné)"));
     form.append(ui.fields); ui.summary = el("p"); ui.conflicts = el("p"); form.append(ui.summary, ui.conflicts);
     ui.link = el("a", "Otevřít událost"); ui.link.hidden = true; form.append(ui.link);
+    ui.savedActions=el("div");form.append(ui.savedActions);
     const actions = el("div"); actions.className = "actions";
     ui.write = button("Zapsat do kalendáře", submit); ui.permission = button("Povolit zápis na Macu", authorize, true);
     ui.refresh = button("Obnovit stav", refresh, true); ui.refresh.hidden = true;
@@ -40,6 +41,7 @@
     ui.write.textContent = write && ["pending","unknown"].includes(write.state) ? "Ověřit původní zápis" : review?.conflicts?.length ? "Zapsat i přes kolizi" : "Zapsat do kalendáře";
     ui.close.disabled = busy; ui.close.textContent = write?.state === "verified" ? "Zavřít" : "Zrušit";
     ui.permission.disabled = busy; ui.refresh.disabled = busy;
+    window.SamanthaCalendarDelete?.update(dialog);
   }
   function render(data, setValues = false) {
     if (data.draft && (!dirty || setValues)) {
@@ -54,6 +56,10 @@
     ui.fields.hidden = !draft;
     ui.link.hidden = write?.state !== "verified";
     if (!ui.link.hidden) ui.link.href = `/calendar/?email=${encodeURIComponent(item.id)}`;
+    ui.savedActions.replaceChildren();
+    if(write?.state==="verified"&&write.verified_event&&window.SamanthaCalendarDelete) {
+      window.SamanthaCalendarDelete.attach(ui.savedActions,write.verified_event,{disabled:()=>busy,onDeleted:()=>{ui.status.textContent="Událost byla smazaná z kalendáře.";ui.link.hidden=true;}});
+    }
     const f = draft?.fields;
     const reminderText = (draft?.reminders || [1440,60]).map(n => n === 1440 ? "den" : "hodinu").join(" a ");
     ui.summary.textContent = f ? `${f.all_day ? "Celý den" : f.end_time ? `Konec ${f.end_date !== f.date ? f.end_date + " " : ""}${f.end_time}` : "Termín"} · ${f.time_zone || "Europe/Prague"} · ${reminderText ? "upozornění " + reminderText + " předem" : "bez upozornění"}${review?.target ? " · " + review.target.title : ""}` : "";

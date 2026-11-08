@@ -29,6 +29,7 @@
     $("refresh").disabled = busy; $("authorize").disabled = busy;
     $("save").disabled = busy || !state || !state.can_select;
     for (const input of $("settings").querySelectorAll("input,select")) input.disabled = busy;
+    window.SamanthaCalendarDelete?.update(document);
   }
   function render(value) {
     state = value;
@@ -43,6 +44,9 @@
     for (const event of value.events) {
       const card = element("article", "", "event");
       card.append(element("div",timing(event),"time"),element("h3",event.title || "Bez názvu"),element("div",names.get(event.calendar_id) || "Nedostupný kalendář","calendar-name"));
+      if(window.SamanthaCalendarDelete&&value.calendars.some(c=>c.id===event.calendar_id&&c.writable)) {
+        window.SamanthaCalendarDelete.attach(card,event,{disabled:()=>busy||!state?.ready,onDeleted:()=>run(async()=>render(await api({action:"refresh",confirmed:true})))});
+      }
       $("events").append(card);
     }
     if (!value.events.length) $("events").append(element("p", value.ready ? "Ve vybraných kalendářích nejsou v načteném období žádné události." : "Události se zobrazí po výběru kalendářů a úspěšném načtení. Prázdný přehled nepotvrzuje volný čas.","empty"));
@@ -108,6 +112,7 @@
       const event=data.write.verified_event;
       panel.replaceChildren(element("h2",event.title), element("p",dateFormat.format(new Date(event.start))+" – "+dateFormat.format(new Date(event.end))),
         element("p",event.location || ""), element("p","Upozornění: "+event.reminders.map(n => n===1440 ? "den předem" : "hodinu předem").join(", ")+". Zápis ověřen "+dateFormat.format(new Date(data.write.checked_at))+". Pozdější změny se projeví po obnovení přehledu."));
+      if(window.SamanthaCalendarDelete)window.SamanthaCalendarDelete.attach(panel,event,{onDeleted:()=>run(async()=>render(await api({action:"refresh",confirmed:true})))});
       if (event.join_url) { const link=element("a","Připojit se"); const url=new URL(event.join_url); if (["http:","https:"].includes(url.protocol) && !url.username && !url.password) { link.href=url.href; link.rel="noreferrer"; panel.append(link); } }
       panel.scrollIntoView?.({block:"start"});
     } catch(error) { panel.textContent=error.message || "Zápis není dostupný."; }
