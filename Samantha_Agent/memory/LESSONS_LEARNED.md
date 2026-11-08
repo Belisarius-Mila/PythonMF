@@ -1729,6 +1729,8 @@ Doplnění 17102026 k LL-071: Nativní modelový pomocník navíc zdvojuje roli,
 
 - Doplnění 07112026, živý writer: první read-back měl přesně uložené údaje, marker i alarmy, ale prázdné eventIdentifier. Python jej správně nepřijal jako konečné ověření. Jediné následné read-only recover původní identity už mělo neprázdné ID; native log prokázal právě jeden create, obnovu bez save a Cockpit jednu odpovídající událost. Příčinu dočasně chybějícího ID neodhadovat a nezaměňovat neúplnou účtenku za svolení vytvořit druhou událost. Důkaz logs/calendar_writer_macos_acceptance_20261107.log.
 
+- Doplnění 08112026: rychlé zadání úkolu může znovu použít stejný create-only writer bez rebuildu/grantu. Trvalá identita před native voláním; po write_unknown pouze jeden bounded read-only recover původní operation_id, pak uchovaný nejistý stav. Po ověření spouštět obnovu přehledu až mimo výběrový zámek a jen při nové verified účtence. Ověřeno syntetickým souběhem/restartem/timeoutem a živým pouze čtecím build/context auditem; skutečný zápis nové karty není touto zkouškou přejatý. Report calendar_task_entry_20261108.md.
+
 ### LL-106 — Metadata iCloud aliasu ověřuj na připnutém skutečném cíli
 
 - Problém: NSURL na systémovém aliasu CloudDocs/Documents hlásí neubiquitous,

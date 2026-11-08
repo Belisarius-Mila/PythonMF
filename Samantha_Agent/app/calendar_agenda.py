@@ -39,8 +39,10 @@ def save_locked(path,value):
 class WrittenKinds:
     """Hints from verified Samantha receipts, matched only to unique exact content."""
     def __init__(self, email_path=EMAIL_ROOT/'calendar_drafts/state.json',
-                 manual_root=PROJECT/'data/private/calendar_manual_requests'):
+                 manual_root=PROJECT/'data/private/calendar_manual_requests',
+                 task_root=PROJECT/'data/private/calendar_tasks'):
         self.email_path, self.manual_root = Path(email_path), Path(manual_root)
+        self.task_root = Path(task_root) if task_root is not None else None
 
     def __call__(self):
         found = defaultdict(set); partial = False
@@ -58,6 +60,12 @@ class WrittenKinds:
             try:
                 proposal = read_json(path.with_name('proposal.json'), {})
                 add(read_json(path, {}), proposal.get('fields', {}).get('kind'))
+            except (OSError, ValueError, KeyError, TypeError, AttributeError): partial = True
+        tasks = sorted(self.task_root.glob('*/state.json')) if self.task_root and self.task_root.is_dir() else []
+        if len(tasks) > 2000: partial = True
+        for path in tasks[-2000:]:
+            try:
+                add(read_json(path, {}).get('write', {}), 'task_deadline')
             except (OSError, ValueError, KeyError, TypeError, AttributeError): partial = True
         return {key:next(iter(kinds)) for key,kinds in found.items() if len(kinds)==1}, partial
 
@@ -120,7 +128,7 @@ class CalendarAgenda:
                 'classification_partial':partial,'deadlines':deadlines,'meetings':meetings,
                 'start':now.isoformat(),'end':end.isoformat(),'calendar_writes':False}
 
-    def request_refresh(self):
+    def request_refresh(self, *, force=False):
         with self.guard:
             selection = self.overview.snapshot()
             if self.running or not selection['read_calendar_ids']: return self.snapshot()
@@ -129,7 +137,7 @@ class CalendarAgenda:
                 with exclusive_file_lock(self.attempt_path,timeout=0):
                     previous = self._attempt(); now = self.clock(); scope = self._scope(selection)
                     age = (now-instant(previous['started_at'])).total_seconds() if previous.get('started_at') else None
-                    if (age is not None and 0 <= age < 90 and previous.get('state')=='running') or (previous.get('scope')==scope and age is not None and 0 <= age < self.cooldown):
+                    if (age is not None and 0 <= age < 90 and previous.get('state')=='running') or (not force and previous.get('scope')==scope and age is not None and 0 <= age < self.cooldown):
                         return self.snapshot()
                     attempt = {'id':uuid4().hex,'scope':scope,'started_at':now.isoformat(),'state':'running'}
                     save_locked(self.attempt_path,attempt)

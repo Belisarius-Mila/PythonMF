@@ -1,6 +1,8 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
+- 2026-11-08 11:54 CET: Lokálně hotové rychlé Zadání úkolu: jeden text, den/měsíc/rok a viditelně upravitelný čas 09:00, jeden potvrzený zápis. Přímá karta /calendar/task/ a ikona pro plochu. Bez AI a změny Swift helperů. 378 cílených PASS; plná brána 2923 testů OK (31 SKIP). Bez nového p+n, skutečná Mac/iPhone přejímka nové karty otevřená. Předchozí měsíční agenda již nasazená v 6d5b576b, CI 42458143491 success. Report reports/calendar_task_entry_20261108.md.
+
 - 2026-11-07 23:41 CET: Měsíční agenda lokálně hotová: pod připomenutími termíny z kalendářů a schůzky/ostatní události, okamžitá cache a čtení na pozadí, Typ pouze pro přehled. Plná brána 2896 OK (31 SKIP), finálních 347 cílených PASS, skutečné čtení a syntetická Safari přejímka PASS. Nový panel zatím bez p+n; report reports/calendar_agenda_20261107.md. Předchozí navigace a jednoduchá karta již nasazené v 0850e6f3 (CI 42418270872 success).
 
 - 2026-11-07 22:42 CET: Lokálně přesunutý vstup Kalendář z hlavní lišty do Komunikace vedle e-mailů. Jediný odkaz /calendar/, přístupné označení Otevřít kalendář; původní dialog a ovládací ID zachované. Cílené ověření logs/calendar_navigation_20261107.log, statická brána logs/calendar_navigation_static_20261107.log. Živý Cockpit zatím vrací původní menu; nové p+n neproběhlo.
@@ -2155,3 +2157,42 @@ calendar_agenda_live_read_20261107.log a calendar_agenda_browser_20261107.log.
 Předchozí navigace i jednoduché zadávání již nasazené v 0850e6f3, účtenka
 1b8a9680c8b54bf7c48895a8267dc924, CI 42418270872 success; staré čekání
 na jejich p+n je historie. Nové p+n tímto povoleno není.
+
+## 2026-11-08 11:54 CET — Rychlé Zadání úkolu s upravitelnou hodinou
+
+Hotovo: Lokální karta Komunikace → Kalendář → Zadání úkolu má jediné
+textové pole, tři volby den/měsíc/rok a viditelný čas předvyplněný na 09:00.
+Text lze zadat klávesnicí nebo systémovým diktováním iPhonu. Jedno stisknutí
+Zapsat úkol potvrzuje přesný text, datum, čas a zobrazený cílový kalendář.
+Po ověřeném uložení se text vyprázdní a přehled se obnoví i během cooldownu.
+Úkol se automaticky klasifikuje mezi termíny. Samostatný odkaz a manifest
+ikony míří přímo na tuto kartu; přidání na plochu provede Míla v Safari.
+
+Rozhodnutí: Míla přijal rychlý formulář a 09:00, výslovně doplnil možnost
+hodinu změnit. Pásmo Europe/Prague, typ task_deadline, alarmy 24 h/60 min.
+Celý text včetně popisu/místa se uloží do názvu; AI nic nerozděluje.
+Současný ověřený writer ukládá termín jako minutovou událost; nejde o
+nový zápis do Apple Připomínek. Kolize schůzek nejsou bránou úkolu.
+Zvolený kalendář se připne revizí/ID a jeho existence/zápisovatelnost se
+ověří nativně při zápisu. Žádný Swift rebuild, nový OS souhlas ani model.
+
+Další krok: samostatně schválené p+n lokálně ověřené nové karty.
+Živý Cockpit tuto novou kartu ještě neobsahuje.
+
+Navrhované další kroky: po nasazení Mílova přejímka na iPhonu a jednorázové
+Přidat na plochu. Skutečný testovací zápis touto kartou zatím nepotvrzený.
+
+Technický důkaz: 378 cílených testů PASS a posledních 5 HTTP/UI PASS; plná brána 2923 testů OK (31 SKIP).
+HTTP testy ověřují skutečné host/origin ochrany, formulář, start_url a PNG.
+Node scénáře ověřují 09:00, změnu hodiny, přestupný únor, jediný submit,
+ztracenou odpověď, restart, status/recover a stejnou identitu při explicitním
+opakování nedoručeného požadavku. Soukromá trvalá účtenka vzniká před
+nativní akcí; neznámý výsledek se nikdy nepřeklopí na nový create. Jeden
+automatický read-only recover řeší opožděné eventIdentifier v rámci téhož
+potvrzení; další obnova je ruční a pouze čtecí. Ověřený nativní reader/writer
+beze změny, pouze čtecí kontext nového formuláře PASS. Žádný skutečný event
+nebyl vytvořen. Browser host unavailable a Safari cgWindowNotFound: fyzická
+Mac/iPhone přejímka je otevřená. Ikona vizuálně zkontrolovaná; vlastní
+syntetický QA server ukončený, žádná karta prohlížeče nevznikla.
+Důkazy: logs/calendar_task_targeted_20261108.log, calendar_task_gate_20261108.log,
+calendar_task_live_read_20261108.log, calendar_task_ui_20261108.log.

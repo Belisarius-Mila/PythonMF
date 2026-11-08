@@ -12,15 +12,16 @@ obnovu původního zápisu, nikoli druhý create. Původní read-only Swift/bund
 jeho OS souhlas zůstávají beze změny. Vlastní OS souhlas writeru již potvrzený
 a první konkrétně schválená událost skutečně uložená a ověřená (jeden create,
 čtecí recover, dva alarmy). Přehled Cockpitu obnovený; viz poslední záznam.
-Jednoduchá karta i přesun do Komunikace již nasazené v 0850e6f3;
-účtenka 1b8a9680c8b54bf7c48895a8267dc924 a CI 42418270872 success.
-Nově lokálně hotová měsíční agenda pod důležitými připomenutími. Typy
-z ověřených účtenek nebo ručního označení v přehledu; neznámé položky
-zůstávají mezi schůzkami a dalšími událostmi. Živé čtení a syntetická Safari
-přejímka PASS, plná brána 2896 OK (31 SKIP), finálních 347 cílených PASS.
-Agenda zatím bez nového p+n, fyzická přejímka iPhonu otevřená. Kanonický
-UI handoff a TVBCP: workstreams/project-cockpit.md; podrobnosti
-reports/calendar_agenda_20261107.md. Samostatný e-mailový TVBCP není domluvený.
+Jednoduchá karta, přesun do Komunikace a měsíční agenda již nasazené
+v 6d5b576b (Terra a751897cb82760aa9704339547dd78f2, CI 42458143491 success).
+Nově lokálně hotová rychlá karta Zadání úkolu s jedním textem, datem
+a upravitelnou výchozí hodinou 09:00; jeden potvrzený create, dva alarmy.
+Bez AI, bez změny Swift helperů nebo OS grantů. Trvalá identita před
+zápisem, při nejistotě jen obnova původního eventu. Přímá karta/ikona
+je připravená; nové p+n zatím nepovoleno a fyzická Mac/iPhone přejímka
+ověřená není. 378 cílených PASS, plná brána 2923 testů OK (31 SKIP).
+Kanonický UI handoff a TVBCP workstreams/project-cockpit.md, report
+reports/calendar_task_entry_20261108.md. Samostatný e-mailový TVBCP není domluvený.
 
 Aktuální stav 6. 11.: Terra p+n e82a5d47 dokončené, nový editor živě ověřený.
 Potvrzený upgrade na f2d6ef79 aktivoval zdvořilostní pravidlo i v hodinovém
@@ -1132,3 +1133,42 @@ calendar_agenda_live_read_20261107.log a calendar_agenda_browser_20261107.log.
 Předchozí navigace i jednoduché zadávání již nasazené v 0850e6f3, účtenka
 1b8a9680c8b54bf7c48895a8267dc924, CI 42418270872 success; staré čekání
 na jejich p+n je historie. Nové p+n tímto povoleno není.
+
+## 2026-11-08 11:54 CET — Rychlé Zadání úkolu s upravitelnou hodinou
+
+Hotovo: Lokální karta Komunikace → Kalendář → Zadání úkolu má jediné
+textové pole, tři volby den/měsíc/rok a viditelný čas předvyplněný na 09:00.
+Text lze zadat klávesnicí nebo systémovým diktováním iPhonu. Jedno stisknutí
+Zapsat úkol potvrzuje přesný text, datum, čas a zobrazený cílový kalendář.
+Po ověřeném uložení se text vyprázdní a přehled se obnoví i během cooldownu.
+Úkol se automaticky klasifikuje mezi termíny. Samostatný odkaz a manifest
+ikony míří přímo na tuto kartu; přidání na plochu provede Míla v Safari.
+
+Rozhodnutí: Míla přijal rychlý formulář a 09:00, výslovně doplnil možnost
+hodinu změnit. Pásmo Europe/Prague, typ task_deadline, alarmy 24 h/60 min.
+Celý text včetně popisu/místa se uloží do názvu; AI nic nerozděluje.
+Současný ověřený writer ukládá termín jako minutovou událost; nejde o
+nový zápis do Apple Připomínek. Kolize schůzek nejsou bránou úkolu.
+Zvolený kalendář se připne revizí/ID a jeho existence/zápisovatelnost se
+ověří nativně při zápisu. Žádný Swift rebuild, nový OS souhlas ani model.
+
+Další krok: samostatně schválené p+n lokálně ověřené nové karty.
+Živý Cockpit tuto novou kartu ještě neobsahuje.
+
+Navrhované další kroky: po nasazení Mílova přejímka na iPhonu a jednorázové
+Přidat na plochu. Skutečný testovací zápis touto kartou zatím nepotvrzený.
+
+Technický důkaz: 378 cílených testů PASS a posledních 5 HTTP/UI PASS; plná brána 2923 testů OK (31 SKIP).
+HTTP testy ověřují skutečné host/origin ochrany, formulář, start_url a PNG.
+Node scénáře ověřují 09:00, změnu hodiny, přestupný únor, jediný submit,
+ztracenou odpověď, restart, status/recover a stejnou identitu při explicitním
+opakování nedoručeného požadavku. Soukromá trvalá účtenka vzniká před
+nativní akcí; neznámý výsledek se nikdy nepřeklopí na nový create. Jeden
+automatický read-only recover řeší opožděné eventIdentifier v rámci téhož
+potvrzení; další obnova je ruční a pouze čtecí. Ověřený nativní reader/writer
+beze změny, pouze čtecí kontext nového formuláře PASS. Žádný skutečný event
+nebyl vytvořen. Browser host unavailable a Safari cgWindowNotFound: fyzická
+Mac/iPhone přejímka je otevřená. Ikona vizuálně zkontrolovaná; vlastní
+syntetický QA server ukončený, žádná karta prohlížeče nevznikla.
+Důkazy: logs/calendar_task_targeted_20261108.log, calendar_task_gate_20261108.log,
+calendar_task_live_read_20261108.log, calendar_task_ui_20261108.log.

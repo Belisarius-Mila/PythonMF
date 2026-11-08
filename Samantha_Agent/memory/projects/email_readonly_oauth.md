@@ -1,10 +1,19 @@
 # E-mail read-only OAuth integrace
 
-Navigace a jednoduchá karta již nasazené v 0850e6f3: Kalendář je
-v Komunikaci vedle e-mailů, v hlavní liště samostatný vstup není.
-Nová lokální měsíční agenda pod připomenutími čeká na vlastní p+n.
-Kanonický UI zápis: `handoffs/workstreams/project-cockpit.md` a
-`tvbcp/workstreams/project-cockpit.md`, report `reports/calendar_agenda_20261107.md`.
+Jednoduchá karta, navigace pod Komunikací a měsíční agenda jsou již
+nasazené v 6d5b576b (Terra a751897cb82760aa9704339547dd78f2, plná brána
+2896, smoke 5/5 a CI 42458143491 success; finální živý důkaz
+logs/calendar_agenda_final_verified_20261108.log).
+
+Nově lokálně hotová karta Zadání úkolu: jeden celý text, den/měsíc/rok,
+čas 09:00 upravitelný přímo na kartě. Jedno potvrzené odeslání vytvoří
+termín ve stávajícím cíli, Europe/Prague, dva alarmy 24 h/60 min. Bez AI,
+nového oprávnění či rebuildu podepsaných helperů. Obsah se nerozděluje,
+celý zůstává v názvu (do 400 znaků podle limitu čtečky). Přímá karta
+/calendar/task/ má vlastní start_url i ikonu. Kód zatím bez nového p+n;
+živý zápis a fyzická iPhone přejímka této nové karty otevřené. Kanonický
+UI zápis: handoffs/workstreams/project-cockpit.md a
+tvbcp/workstreams/project-cockpit.md. Report reports/calendar_task_entry_20261108.md.
 
 Kalendář používá jednu kartu se čtyřmi poli: název, začátek,
 typ a místo. Kliknutí Do kalendáře připraví návrh přes stávající Terra roli;
@@ -21,11 +30,11 @@ a první konkrétně schválená událost skutečně uložená a ověřená (jed
 Dřívější jednoduchá karta a její nativní přejímka jsou již zahrnuté
 v nasazeném 0850e6f3 (CI 42418270872 success). Původní report
 calendar_simple_20261107.md zůstává historickým důkazem této etapy.
-Současná lokální agenda čte jen vybrané kalendáře, bez modelu a změn
+Nasazená měsíční agenda čte jen vybrané kalendáře, bez modelu a změn
 helperů či oprávnění. Typ je přesný ověřený záznam Samanthy nebo soukromé
 označení přes Typ; původní neznámé události se nehádají. Plná brána 2896 OK
 (31 SKIP), posledních 347 cílených PASS, skutečné čtení čtyř kalendářů
-a syntetická Safari přejímka PASS. Nový panel není nasazený; fyzická
+a syntetická Safari přejímka PASS. Měsíční panel již nasazený v 6d5b576b; fyzická
 přejímka iPhonu otevřená. Samostatný e-mailový TVBCP není domluvený.
 
 Aktuální stav 6. 11.: Terra p+n e82a5d47 dokončené, nový editor živě ověřený.
@@ -1424,3 +1433,42 @@ calendar_agenda_live_read_20261107.log a calendar_agenda_browser_20261107.log.
 Předchozí navigace i jednoduché zadávání již nasazené v 0850e6f3, účtenka
 1b8a9680c8b54bf7c48895a8267dc924, CI 42418270872 success; staré čekání
 na jejich p+n je historie. Nové p+n tímto povoleno není.
+
+## 2026-11-08 11:54 CET — Rychlé Zadání úkolu s upravitelnou hodinou
+
+Hotovo: Lokální karta Komunikace → Kalendář → Zadání úkolu má jediné
+textové pole, tři volby den/měsíc/rok a viditelný čas předvyplněný na 09:00.
+Text lze zadat klávesnicí nebo systémovým diktováním iPhonu. Jedno stisknutí
+Zapsat úkol potvrzuje přesný text, datum, čas a zobrazený cílový kalendář.
+Po ověřeném uložení se text vyprázdní a přehled se obnoví i během cooldownu.
+Úkol se automaticky klasifikuje mezi termíny. Samostatný odkaz a manifest
+ikony míří přímo na tuto kartu; přidání na plochu provede Míla v Safari.
+
+Rozhodnutí: Míla přijal rychlý formulář a 09:00, výslovně doplnil možnost
+hodinu změnit. Pásmo Europe/Prague, typ task_deadline, alarmy 24 h/60 min.
+Celý text včetně popisu/místa se uloží do názvu; AI nic nerozděluje.
+Současný ověřený writer ukládá termín jako minutovou událost; nejde o
+nový zápis do Apple Připomínek. Kolize schůzek nejsou bránou úkolu.
+Zvolený kalendář se připne revizí/ID a jeho existence/zápisovatelnost se
+ověří nativně při zápisu. Žádný Swift rebuild, nový OS souhlas ani model.
+
+Další krok: samostatně schválené p+n lokálně ověřené nové karty.
+Živý Cockpit tuto novou kartu ještě neobsahuje.
+
+Navrhované další kroky: po nasazení Mílova přejímka na iPhonu a jednorázové
+Přidat na plochu. Skutečný testovací zápis touto kartou zatím nepotvrzený.
+
+Technický důkaz: 378 cílených testů PASS a posledních 5 HTTP/UI PASS; plná brána 2923 testů OK (31 SKIP).
+HTTP testy ověřují skutečné host/origin ochrany, formulář, start_url a PNG.
+Node scénáře ověřují 09:00, změnu hodiny, přestupný únor, jediný submit,
+ztracenou odpověď, restart, status/recover a stejnou identitu při explicitním
+opakování nedoručeného požadavku. Soukromá trvalá účtenka vzniká před
+nativní akcí; neznámý výsledek se nikdy nepřeklopí na nový create. Jeden
+automatický read-only recover řeší opožděné eventIdentifier v rámci téhož
+potvrzení; další obnova je ruční a pouze čtecí. Ověřený nativní reader/writer
+beze změny, pouze čtecí kontext nového formuláře PASS. Žádný skutečný event
+nebyl vytvořen. Browser host unavailable a Safari cgWindowNotFound: fyzická
+Mac/iPhone přejímka je otevřená. Ikona vizuálně zkontrolovaná; vlastní
+syntetický QA server ukončený, žádná karta prohlížeče nevznikla.
+Důkazy: logs/calendar_task_targeted_20261108.log, calendar_task_gate_20261108.log,
+calendar_task_live_read_20261108.log, calendar_task_ui_20261108.log.

@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="cs">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#245ccd">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Nový úkol">
+<link rel="manifest" href="/calendar/task/manifest.webmanifest">
+<link rel="apple-touch-icon" href="/calendar/task/icon-180.png">
+<link rel="icon" href="/calendar/task/icon.svg" type="image/svg+xml">
+<title>Zadání úkolu · Samantha</title>
+<style>{{SAMANTHA_CSS}}</style>
+</head>
+<body>
+<main>
+<a class="back" href="/calendar/">← Kalendář</a>
+<h1>Zadání úkolu</h1>
+<p class="intro">Napiš nebo nadiktuj, co potřebuješ zařídit.</p>
+<form id="taskForm">
+<fieldset id="taskFields" disabled>
+<label for="taskTitle">Název, popis, místo</label>
+<textarea id="taskTitle" rows="3" maxlength="400" required autofocus placeholder="Například: Vyzvednout balík, pošta Vodičkova, vzít občanku"></textarea>
+<p class="hint">Celý text se uloží jako název úkolu. Nejvýše 400 znaků.</p>
+<div class="date-row">
+<label>Den<select id="taskDay" aria-label="Den" required></select></label>
+<label>Měsíc<select id="taskMonth" aria-label="Měsíc" required></select></label>
+<label>Rok<select id="taskYear" aria-label="Rok" required></select></label>
+</div>
+<label class="time-label" for="taskTime">Čas <span>Praha</span></label>
+<input id="taskTime" type="time" value="09:00" step="60" required>
+<p id="taskSummary" class="summary"></p>
+<p class="hint">Úkol · upozornění den a hodinu předem</p>
+<button id="taskSubmit" type="submit">Zapsat úkol</button>
+</fieldset>
+</form>
+<p id="taskNotice" role="status" aria-live="polite">Načítám kalendář…</p>
+<button id="taskRecover" type="button" class="secondary" hidden>Ověřit zápis</button>
+<p class="target" id="taskTarget"></p>
+<details class="home-help"><summary>Ikona na ploše iPhonu</summary><p>Otevři tuto stránku v Safari. V nabídce Sdílet zvol Přidat na plochu a název Nový úkol. Ikona příště otevře rovnou tento formulář.</p></details>
+</main>
+<script>{{SAMANTHA_JAVASCRIPT}}</script>
+</body>
+</html>

@@ -3,6 +3,7 @@ from __future__ import annotations
 from app.cockpit_interior import INTERIOR_HTML, InteriorRoutes, interior_atelier_action
 from app.cockpit_calendar import CalendarOverviewRoutes, calendar_overview_action
 from app.cockpit_calendar_agenda import calendar_agenda_status, calendar_agenda_action
+from app.cockpit_calendar_tasks import calendar_task_status, calendar_task_action, task_page_route
 from app.cockpit_email_calendar import email_calendar_draft_action, email_calendar_draft_status
 from app.interior_ai import interior_ai_start_action, interior_ai_recover_action
 
@@ -8665,6 +8666,9 @@ def shell_quote_for_applescript(value: str) -> str:
 
 
 COCKPIT_POST_ACTIONS: tuple[dict[str, str], ...] = (
+    {"path":"/api/calendar/tasks", "label":"Zapsat konkrétní úkol nebo ověřit původní zápis",
+     "risk":"external_send", "confirmation":"explicit_task_text_date_time_and_configured_target",
+     "handler_name":"calendar_task_action", "test_level":"direct"},
     {"path":"/api/calendar/agenda", "label":"Obnovit měsíční přehled nebo označit typ události",
      "risk":"private_write", "confirmation":"configured_calendar_read_or_explicit_display_type_change",
      "handler_name":"calendar_agenda_action", "test_level":"direct"},
@@ -9734,6 +9738,12 @@ class CockpitServer:
             def do_GET(self) -> None:  # noqa: N802
                 self.validate_request_access(require_origin=False)
                 parsed = urlparse(self.path)
+                if task_page_route(parsed, self):
+                    return
+                if parsed.path == "/api/calendar/tasks":
+                    result = calendar_task_status() if not parsed.query else {"ok":False,"message":"Neplatný požadavek."}
+                    self.respond_json(result,status=HTTPStatus.OK if result["ok"] else HTTPStatus.BAD_REQUEST)
+                    return
                 if parsed.path == "/api/calendar/agenda":
                     self.respond_json(calendar_agenda_status() if not parsed.query else {"ok":False,"message":"Neplatný požadavek."}, status=HTTPStatus.OK if not parsed.query else HTTPStatus.BAD_REQUEST)
                     return
@@ -10099,6 +10109,10 @@ class CockpitServer:
                         self.respond_json({"ok": False, "message": "Vykonavatel zpracovává přesný balíček; další změna počká na ověření."},
                                           status=HTTPStatus.CONFLICT)
                         return
+                if parsed.path == "/api/calendar/tasks":
+                    result = calendar_task_action(self.read_json()) if not parsed.query else {"ok":False,"message":"Neplatný požadavek."}
+                    self.respond_json(result,status=HTTPStatus.OK if result["ok"] else HTTPStatus.BAD_REQUEST)
+                    return
                 if parsed.path == "/api/calendar/agenda":
                     result = calendar_agenda_action(self.read_json()) if not parsed.query else {"ok":False,"message":"Neplatný požadavek."}
                     self.respond_json(result,status=HTTPStatus.OK if result["ok"] else HTTPStatus.BAD_REQUEST)

@@ -12,6 +12,33 @@ from app.capabilities.models import (
 
 CAPABILITIES: tuple[CapabilityRecord, ...] = (
     CapabilityRecord(
+        capability_id="calendar_task_context", label="Read configured task destination and defaults",
+        risk=RiskLevel.READ_ONLY, reads=("saved calendar selection",), writes=(),
+        tool="app.calendar_tasks.CalendarTasks.context", audit=AuditPolicy.REDACTED,
+        notes="No native query, permission prompt, model call or store initialization.",
+    ),
+    CapabilityRecord(
+        capability_id="calendar_task_status", label="Read one exact task receipt",
+        risk=RiskLevel.READ_ONLY, reads=("one private request receipt",), writes=(),
+        tool="app.calendar_tasks.CalendarTasks.status", audit=AuditPolicy.REDACTED,
+        notes="Stable request ID, no native query or calendar mutation.",
+    ),
+    CapabilityRecord(
+        capability_id="calendar_task_create", label="Create the exact human-entered calendar task",
+        risk=RiskLevel.EXTERNAL_SEND, reads=("explicit task text, date, time and configured target",),
+        writes=("private durable receipt", "one create-only calendar event with 24h/1h reminders"),
+        tool="app.calendar_tasks.CalendarTasks.create", requires_confirmation=True,
+        confirmation_policy=ConfirmationPolicy.EXACT_CURRENT_MESSAGE, audit=AuditPolicy.REDACTED,
+        notes="One form click confirms visible data and pinned target. One-minute deadline in Europe/Prague; one create at most. Uncertain native result allows only same-event read-only recovery, including one bounded verification within the original click. No AI or Swift rebuild.",
+    ),
+    CapabilityRecord(
+        capability_id="calendar_task_recover", label="Verify the original uncertain task write",
+        risk=RiskLevel.LOCAL_WRITE, reads=("original exact native event and journal",),
+        writes=("private verification receipt only",), tool="app.calendar_tasks.CalendarTasks.recover",
+        requires_confirmation=True, confirmation_policy=ConfirmationPolicy.SUMMARY_BEFORE_ACTION,
+        audit=AuditPolicy.REDACTED, notes="Explicit same-request recovery; native recover path cannot save, update or delete.",
+    ),
+    CapabilityRecord(
         capability_id="calendar_agenda_status", label="Read private thirty-day agenda snapshot",
         risk=RiskLevel.READ_ONLY, reads=("selected calendar snapshot and private display classifications",), writes=(),
         tool="app.calendar_agenda.CalendarAgenda.snapshot", audit=AuditPolicy.REDACTED,

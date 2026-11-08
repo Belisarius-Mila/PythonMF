@@ -20,7 +20,7 @@ Tento soubor je rozcestnik dlouhodobe pameti pro Samantha Agent.
 
 ## Reports
 
-- `reports/calendar_agenda_20261107.md`; `handoffs/workstreams/project-cockpit.md`; `tvbcp/workstreams/project-cockpit.md`; `projects/email_readonly_oauth.md` — 7. 11.: lokálně hotová 30denní agenda pod připomenutími, termíny a schůzky/ostatní události, čtení na pozadí a soukromý Typ. Plná brána 2896 OK (31 SKIP), finálních 347 cílených PASS, živé čtení a syntetická Safari přejímka PASS. Nový panel bez p+n, iPhone otevřený. Předchozí jednoduchá karta i navigace již nasazené v 0850e6f3 (CI 42418270872 success).
+- `reports/calendar_task_entry_20261108.md`; `handoffs/workstreams/project-cockpit.md`; `tvbcp/workstreams/project-cockpit.md`; `projects/email_readonly_oauth.md` — 8. 11.: rychlé Zadání úkolu lokálně hotové: celý text, den/měsíc/rok, upravitelných 09:00, jeden potvrzený create, 24 h/60 min. Přímá karta/ikona, trvalá účtenka a při nejistotě jen původní read-only recover. Bez AI/změny native helperů/nového grantu. 378 cílených PASS; plná brána 2923 testů OK (31 SKIP); bez nového p+n. Fyzická přejímka otevřená (browser host unavailable, Safari cgWindowNotFound). Měsíční agenda již nasazená v 6d5b576b, CI 42458143491 success; report calendar_agenda_20261107.md je historický lokální záznam před vydáním.
 
 - `reports/python_315_assessment_2026_10_24.md` — 2026-10-24 09:49 CEST: Python 3.15.1 posouzen proti místnímu 3.12.0rc3, 18 metadat a úspěšný binární resolver pro Mac/arm64. Doporučený oddělený pilot, žádná instalace nebo změna provozu.
 

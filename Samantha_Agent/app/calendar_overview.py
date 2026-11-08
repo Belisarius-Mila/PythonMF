@@ -72,9 +72,9 @@ class CalendarOverview:
                 "can_select": value.get("inventory_verified", False) and self._fresh(value.get("inventory_at")),
                 "authorization": value.get("authorization", "unknown")}
 
-    def _lock(self):
+    def _lock(self, *, timeout=0):
         self.pilot.root.mkdir(parents=True, exist_ok=True, mode=0o700)
-        return exclusive_file_lock(self.pilot._safe(self.pilot.root / "overview_operation"), timeout=0)
+        return exclusive_file_lock(self.pilot._safe(self.pilot.root / "overview_operation"), timeout=timeout)
 
     def save_selection(self, payload):
         if (set(payload) != {"action", "confirmed", "expected_revision", "read_calendar_ids", "target_calendar_id"}

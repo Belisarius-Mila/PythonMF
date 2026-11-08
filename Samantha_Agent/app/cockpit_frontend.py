@@ -7,6 +7,7 @@ FRONTEND_ROOT = Path(__file__).resolve().with_name("frontend")
 CSS_MARKER = "{{SAMANTHA_CSS}}"
 JAVASCRIPT_MARKER = "{{SAMANTHA_JAVASCRIPT}}"
 FRONTEND_PAGE_IDS = (
+    "calendar_task",
     "calendar_overview",
     "interior",
     "email_agent",
@@ -69,6 +70,7 @@ def _read_asset(path: Path) -> str:
 
 INTERIOR_HTML = load_frontend_page("interior")
 CALENDAR_OVERVIEW_HTML = load_frontend_page("calendar_overview")
+CALENDAR_TASK_HTML = load_frontend_page("calendar_task")
 EMAIL_ARCHIVE_HTML = load_frontend_page("email_archive")
 EMAIL_AGENT_HTML = load_frontend_page("email_agent")
 EMAIL_PROCESSING_HTML = load_frontend_page("email_processing")

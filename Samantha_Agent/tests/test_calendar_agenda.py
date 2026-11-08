@@ -55,6 +55,12 @@ class CalendarAgendaTests(unittest.TestCase):
         d=self.overview._load();d['revision']+=1;self.pilot._write(self.overview.path,d)
         self.agenda.request_refresh();self.assertEqual(len(self.callbacks),1)
 
+    def test_verified_calendar_write_can_refresh_cache_during_cooldown_but_keeps_single_flight(self):
+        self.prepare();self.agenda.request_refresh();self.callbacks.pop()()
+        self.agenda.request_refresh();self.assertEqual(self.callbacks,[])
+        self.agenda.request_refresh(force=True);self.assertEqual(len(self.callbacks),1)
+        self.agenda.request_refresh(force=True);self.assertEqual(len(self.callbacks),1)
+
     def test_failed_native_read_preserves_old_items_but_marks_them_unverified(self):
         old=self.prepare()['meetings'];self.pilot.fail=True
         self.agenda.request_refresh();self.callbacks.pop()()
@@ -122,7 +128,7 @@ class CalendarAgendaTests(unittest.TestCase):
         email=self.root/'email.json';manual=self.root/'manual';manual.mkdir()
         e=self.event();entry={'write':{'state':'verified','verified_event':e},'draft':{'fields':{'kind':'task_deadline'}}}
         email.write_text(json.dumps({'items':{'one':entry}}))
-        loader=WrittenKinds(email,manual);hints,partial=loader();self.assertEqual(hints[event_key(e)],'task_deadline');self.assertFalse(partial)
+        loader=WrittenKinds(email,manual,task_root=None);hints,partial=loader();self.assertEqual(hints[event_key(e)],'task_deadline');self.assertFalse(partial)
         d=manual/'one';d.mkdir();(d/'proposal.json').write_text(json.dumps({'fields':{'kind':'meeting'}}));(d/'write.json').write_text(json.dumps(entry['write']))
         self.assertEqual(loader()[0],{})
         email.write_text('broken');self.assertTrue(loader()[1])
