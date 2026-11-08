@@ -75,7 +75,7 @@ def measure(snapshot,module=None):
     price=round((total_in*50+total_out*250)/1e6,8)
     actual_schema_stats=exact.schema_stats(bundle.wire.schema)
     for k,v in actual_schema_stats.items():max_stats[k]=max(max_stats[k],v)
-    return {'protocol':exact.VERSION,'state':'offline_exact_plan_adapter_not_integrated',
+    return {'protocol':exact.VERSION,'state':'offline_exact_plan_ready_for_execution_card',
         'snapshot_sha256':snapshot.sha256,'catalogue_sha256':cat.sha256,
         'source_count':len(paths),'input_bytes':cat.stats()['source_text_bytes'],
         'tokenizer':baseline['tokenizer'],'batches':rows,'blocked_anchor_ids':blocked,
@@ -83,6 +83,7 @@ def measure(snapshot,module=None):
         'synthesis_fixture_schema_stats':actual_schema_stats,'synthesis_schema_groups_upper':groups,
         'synthesis_schema_reference_reservation':schema_reserve,'synthesis_payload_fixed_reference_tokens':fixed,
         'synthesis_reference_reservation':reference,'synthesis_input_acceptance_tokens':limit,
+        'synthesis_output_acceptance_tokens':old.OUTPUT['synthesize'],
         'synthesis_within_current_240000_limit':limit<=old.MAX_INPUT,
         'synthesis_fixture_actual_reference_tokens':exact.request_tokens(bundle,encoding),
         'synthesis_max_evidence_rows':pool,'synthesis_fixture_not_a_model_result':True,
@@ -93,7 +94,7 @@ def measure(snapshot,module=None):
         'credit_delta':round(price-baseline['planning_standard_credits_no_cache'],8),
         'phase_seconds':baseline['phase_seconds'],'run_seconds_acceptance':len(rows)*300+900,
         'integer_indices_are_request_local':True,'long_blank_and_foreign_references_excluded':True,
-        'all_source_texts_preserved':True,'execution_adapter_integrated':False,
+        'all_source_texts_preserved':True,'execution_adapter_integrated':True,
         'provider_acceptance_live_verified':False,'reference_is_exact_sol_tokenizer':False,
         'hard_billing_or_output_cap':False,'automatic_retry':False,
         'model_calls':0,'publication_authorized':False,'old_jobs_reopened':False,

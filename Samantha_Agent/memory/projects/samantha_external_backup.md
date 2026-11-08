@@ -2,11 +2,15 @@
 
 Projekt zalozen 2026-05-19.
 
-## Aktuální záměr 2026-11-07 12:02 CET
+## Aktuální stav 2026-11-08 12:07 CET
 
-Týdenní správce obnovovacího TXT modelem 6.1-Sol; výstup vždy PythonMF +
-iCloud Drive/Dokumenty. Podrobný plán REC-01 až REC-06 je na konci tohoto
-souboru. Zatím plán, žádný modelový běh, změna TXT, role nebo plánovače.
+Cílem zůstává týdenní správce obnovovacího TXT modelem 6.1-Sol se dvěma
+kopiemi PythonMF + iCloud Drive/Dokumenty. Technická integrace přesného
+číselného pilotu je hotová; karta 741e71da…492f570 nad 532 dokumenty +
+původním návodem, 20+1 fází, plán 237,88715 / návrh meze240 kreditů čeká
+na nový konkrétní souhlas. Předchozí neúspěšný pilot zůstává uzavřený.
+Žádný nový modelový tah ani změna provozního TXT, role či plánovače.
+Podrobnosti a aktuální důkazy na konci souboru a v execution reportu.
 Historické údaje o zálohách níže nejsou nový živý audit.
 
 ## Historický stav 2026-10-25 14:53 CET
@@ -1594,3 +1598,47 @@ závislosti bez konkrétní potřeby. Nejde o rozšíření e-mailové business 
 - Plán -6,071 proti dřívější rezervě, nejde o reálnou úsporu či hard billing cap.
 - Raw 6177159d…505b55a a pět starých jobů/plánů beze změny; counterexample je pouze fixture.
 - Plná brána 2 748 OK / 5 skipped; statická brána a git diff --check OK. Žádný push/deploy nebo integrace do main.
+
+## 2026-11-08 12:14 CET — REC-06: přesný číselný protokol integrován, technická část hotová
+
+### Hotovo
+- Samostatný executor/worker zapojují source_citation_index_v1 do všech
+  inspect a synthesis fází včetně původního resolveru a quality/budget gate.
+  Nový pevný job je oddělený od uzavřeného string-ID pilotu.
+- Připravená konkrétní karta 741e71da…492f570, plán 586cdf96…f3a3add:
+  celý původní návod + 532 dokumentů aktuálního main6c610287, 20+1 fází,
+  Sol/medium/Standard, plán 237,88715 / návrh přijímací meze240 kreditů.
+- 46 nových kontraktních testů OK. Úplná fixture přes nový executor/worker
+  přijala všech 20 dávek a syntézu, 532 dokumentů přesně jednou, celý original
+  v každé fázi a všech 20 findings. Jen syntetický wire, nula modelových volání.
+- Status zachoval všechny bajty i mtime; opětovné run/status bez připojení.
+  Plná kanonická brána OK: 2 794 testů, 5 přeskočeno (539,094 s).
+- Závěrečná statická brána a git diff --check OK; lokální commit,
+  bez push/deploy či integrace do main.
+
+### Rozhodnutí
+- Pokyn „zapoj a dokonči“ dokončuje technickou integraci; není novým
+  finančním souhlasem s náhradou uzavřeného neúspěšného modelového běhu.
+- Raw a všech 24 JSON v pěti starých stavech/plánech zůstaly beze změny;
+  job attention / 9,58995 / nula přijatých dávek se neobnovuje ani neopravuje.
+- Nový job not_started, nula modelových pokusů. Provozní TXT/iCloud,
+  role, služby, scheduler, push, deploy a main se tímto krokem nemění.
+
+### Další krok
+- Přijmout konkrétní novou kartu a jednou spustit hotový registrovaný
+  exact_pilot.run; nejde už o další vývoj adapteru. Bez souhlasu placený běh neodesílat.
+
+### Navrhované další kroky
+- Jeden placený celý pilot podle nové karty, pak obsahová přejímka kandidáta.
+- Will převezme tento handoff a přesný lokální commit, bez integrace či publikace nyní.
+- Mac/iPhone dossier a nové příkazy/live facts zůstávají samostatná doložená přejímka.
+- Dvě provozní kopie/upload a týdenní aktivace až podle odpovídajícího zvláštního souhlasu.
+
+### Technický důkaz
+- recovery_guide_anchor_exact_execution_20261108.md a execution_plan/card/offline JSON.
+- Exact executor/worker mají map/schema/wire SHA, kompletní raw historii,
+  marker před send, status/replay bez připojení, žádný reset/resume/retry.
+- Syntéza input235090/output32000, inspect300s/synthesis900s, run6900s;
+  přijímací meze nejsou tvrdé fakturační/output/časové stropy.
+- Provider nového formátu není živě ověřený; platná citace není obsahová pravda.
+  Nové příkazy bez allowlist a současné Mac/iPhone facts bez důkazů nepodporované.

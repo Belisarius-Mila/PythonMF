@@ -1755,3 +1755,11 @@ a nezávislý resolver zůstávají. Protipříklad 131111 při max21 odmítl ne
 JSON Schema validator; 21 schémat, 8683 probes a 99874 mapování. Je to lokální
 důkaz, nikoli modelově ověřený formát, souhlas s dalším pokusem nebo oprava
 starého jobu. Platná reference sama neprokazuje správnost tvrzení.
+
+Doplnění 08112026 k LL-113 (integrace): nový přesný wire formát patří do
+samostatného pevného jobu s novou konkrétní kartou, nikoli do resetovaného
+uzavřeného slotu. Worker reprodukuje wire/schema/map SHA a všechny raw dávky
+před syntézou; runtime decode nesmí měnit raw ani mít legacy fallback.
+Ověřeno 46 kontraktními testy a skutečným čerstvým korpusem 532 dokumentů
+přes celý executor/worker (20+1, syntetický wire, izolovaný skutečný tokenizer).
+Status/replay bez připojení; provider a věcná správnost zůstávají neověřené.

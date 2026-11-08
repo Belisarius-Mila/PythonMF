@@ -486,3 +486,33 @@ do běhového adapteru. Neexistuje nová exekuční karta či placený souhlas.
 Doklad reports/recovery_guide_anchor_exact_20261108.md a plan/offline JSON.
 Další krok samostatná integrace/dekodér/worker a nový konkrétní postup;
 žádný automatický model, retry, publikace či aktivace. Starý job neopakovat.
+
+## 2026-11-08 12:07 CET — přesný číselný protokol ve skutečném adapteru
+
+Nové recovery_guide_anchor_exact_pilot.prepare/run/status a exact_worker
+perform/dispatch jsou registrované. Worker vždy reprodukuje request-local
+mapu a ověřuje wire/schema/index SHA, celou historii i raw; do původního
+resolveru předává pouze nový interní decode. Staré raw ani job se nepřepisují.
+Executor používá vlastní pevný job, připojení ke sdílenému socketu, vlastní
+read-only ephemeral thread pro každou fázi a přesný Sol/medium/Standard.
+Původní produkční klient/runtime, role a služba zůstaly beze změny.
+
+Čerstvá karta 741e71da…492f570 / plán586cdf96…f3a3add, main6c610287:
+532 dokumentů + celý original, 20+1, plán237,88715 / návrh meze240,
+syntéza input235090/output32000, časy300/900s a run6900s. Nejde o tvrdý
+billing/output/wall-clock cap. Runtime preflight pouze čtecí, peer0.163.0,
+local CLI0.166.0; samotný nový wire není živě modelově ověřený.
+
+Nový job not_started / nula modelových pokusů. K novému placenému běhu je
+nutné přijetí této konkrétní karty; dřívější jediný souhlas nepřenášet.
+Bez reset/resume/retry; při nejistotě status, ne nový send. Status nic
+nevytváří a nepřipojuje. Výsledek pouze soukromý kandidát, publication false.
+Nové příkazy bez allowlist a živé Mac/iPhone facts bez důkazů nepodporované.
+Týdenní produkční agent a provozní kopie/upload nejsou tímto aktivované.
+Důkaz: reports/recovery_guide_anchor_exact_execution_20261108.md a JSON.
+
+Celokorpusová fixture přijata 20+1: všech 532 dokumentů přesně jednou,
+celý original v každé fázi, všech 20 findings v syntéze. Syntetický wire,
+skutečný izolovaný tokenizer, žádný model ani skutečné runtime spojení.
+Status/replay bez spojení, status zachoval bajty i mtime. 46 nových testů,
+plná kanonická brána 2794 testů / 5 skipped OK (539,094 s).

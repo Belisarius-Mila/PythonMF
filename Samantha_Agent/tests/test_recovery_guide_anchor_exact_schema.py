@@ -176,7 +176,8 @@ class ExactPlan(unittest.TestCase):
     def test_new_full_reservation_includes_new_schema_and_all_texts(self):
         with patch.object(p.old.reference,'tokenizer_identity',return_value={'fixture':True}):r=p.measure(snapshot(),MODULE)
         self.assertEqual(r['source_count'],2);self.assertEqual(r['planned_model_calls'],2)
-        self.assertTrue(r['all_source_texts_preserved']);self.assertFalse(r['execution_adapter_integrated'])
+        self.assertTrue(r['all_source_texts_preserved']);self.assertTrue(r['execution_adapter_integrated'])
+        self.assertEqual(r['synthesis_output_acceptance_tokens'],32000)
         self.assertFalse(r['provider_acceptance_live_verified']);self.assertEqual(r['model_calls'],0)
         self.assertGreaterEqual(r['synthesis_reference_reservation'],r['synthesis_fixture_actual_reference_tokens'])
         self.assertGreaterEqual(r['proposed_credit_acceptance'],r['planning_standard_credits_no_cache'])
