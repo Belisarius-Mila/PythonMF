@@ -2,23 +2,27 @@
 
 Projekt zalozen 2026-05-19.
 
-## Aktuální stav 2026-11-08 16:45 CET
+## Aktuální stav 2026-11-08 17:07 CET
 
-Míla požádal o aktivaci s interním PythonMF a iCloud Dokumenty. Předaktivační
-kontrola doplnila čtení aktuálního main bez checkoutu a návrh automatické
-publikační politiky; původní manuální režim zůstává dostupný. Opravená brána
-vynucuje Standard na jednotlivém tahu při zachování globálního Fast nastavení.
-Neověřená nastavení aplikací/iPhonu zůstávají neověřená; nový zdroj navíc
-popisuje deklarovanou konfiguraci tohoto agenta, nikoli fyzickou přejímku.
+Týdenní správce obnovovacího návodu je po aktuálním potvrzení Míly aktivní.
+Sol/medium Standard, neděle od09:00 Europe/Prague, poprvé15.11.2026.
+Přijatá rozpočtová kontrola200/běh1000/měsíc (přijímací mez, ne tvrdý billing cap).
+Jediný LaunchAgent načtený, přesné argumenty/exit0 ověřené, první tick not_due,
+model_calls0. Automatické kopie vznikají pouze po úspěšném gate.
 
-Návrh770a11bf…32cb6:547 zdrojů,15 tahů, rezerva193,42345; meze200/běh,
-1000/měsíc, první slot15.11.2026 od09:00 Europe/Prague. Rozpočty a automatická
-politika jsou k potvrzení. Aktivační balíček dosud není aplikovaný, žádný
-placený tah, role, služba ani provozní TXT nevznikly. Instalace LaunchAgentu
-výslovně vyžaduje aktuální globální brzdu z místního návodu; její starší
-potvrzení pro jiné akce neplatí. Vše nutné k přezkoumání je připravené.
-206 cílených testů PASS; plná brána 2 882 testů OK (5 skipped); závěrečná statická brána a git diff --check OK.
-Další krok: přesná fráze a přijetí balíčku, poté jeden registered activate.
+Interní PythonMF/OBNOVA_SAMANTHY_NOVY_MAC.txt a stejné jméno v iCloud
+Dokumentech mají75448B a shodný SHA f8c29729…605c4e. Foundation potvrzuje
+skutečný upload bez chyby; fyzické otevření na iPhonu zbývá. Staré kopie
+na Ploše/v kořeni iCloudu se neměnily. Globální Fast i jiné role zachované.
+
+Před prvním přenosem opraven false-positive outside_git v integrovaném gate;
+slovní obrat nezískáš .env, ignorovaná soukromá data je platné varování.
+Legacy kontrola beze změny. Auditovaná revize balíčku9a8fb9f9 proti770a11bf
+má totožné přijaté bajty/konfiguraci/rozpočet/cíle, žádný nový souhlas se
+nevyžadoval. Prokazatelně žádná publikace, bootstrap ani model před opravou.
+166 cílených testů PASS; statická brána a diff check OK, plný základ2882/5 skipped.
+Žádný placený tah dnes, push/deploy nebo změna Willova main.
+Další krok: otevření iCloud TXT na iPhonu a přejímka prvního slotu15.11.
 
 ## Historický stav 2026-10-25 14:53 CET
 
@@ -1867,3 +1871,46 @@ závislosti bez konkrétní potřeby. Nejde o rozšíření e-mailové business 
   Nejde o upload dosud neexistujícího cílového TXT nebo fyzickou přejímku iPhonu.
 - Oba cílové TXT, aktivační konfigurace a LaunchAgent zatím nevytvořené.
   Podrobnosti recovery_guide_activation_ready_20261108.md a .json.
+
+## 2026-11-08 17:07 CET — REC: týdenní správce aktivní, dvě kopie a upload ověřené
+
+### Hotovo
+- Po aktuální přesné globální brzdě aktivovaný Sol/medium Standard a jediný
+  LaunchAgent com.samantha.recovery-guide. První skutečný tick skončil
+  not_due/model_calls0, launchd last exit0 a přesné argumenty ověřené.
+- OBNOVA_SAMANTHY_NOVY_MAC.txt uložený v interním PythonMF i iCloud
+  Dokumentech. Obě kopie75448B/SHAf8c29729…605c4e, Foundation uploaded=true,
+  uploading=false, upload_error=false. Staré Desktop/root-iCloud kopie zachované.
+- První revize15.11.2026 od09:00 Europe/Prague, dále týdně. Rozpočtová
+  kontrola200/běh1000/měsíc, max20 tahů/2400s. Dnes nula placených tahů.
+
+### Rozhodnutí
+- Míla výslovně přijal konkrétní plán i aktuální globální brzdu pro tuto
+  aktivaci. Automatická politika po úspěšných kontrolách předává stejný
+  kandidát do obou kopií; nejistota nepovoluje další model ani přepsání ruční změny.
+- Při prvním uložení odhalen falešný missing_topic outside_git: původní text
+  výslovně uvádí, že GitHub clone nezíská .env a ignorovaná soukromá data.
+  Integrovaný gate nyní rozpozná i tuto přesnou formulaci; legacy gate beze změny.
+- Oprava proběhla prokazatelně před přijetím publikace/launch/modelu. Původní
+  balíček770a11bf zachovaný, nová revize9a8fb9f9 změnila pouze otisk opraveného
+  validatoru; obsah/SHA, konfigurace, termín, role, rozpočty a cíle stejné.
+- Jiné role se nezměnily, globální Fast zachovaný; žádný restart Codexu/Cockpitu,
+  push/deploy nebo zásah do Willovy pracovní kopie. Notifikační karta vyčištěná.
+
+### Další krok
+- Míla otevře OBNOVA_SAMANTHY_NOVY_MAC.txt v iCloud Drive → Dokumenty
+  na iPhonu; fyzická přejímka se nedovozuje z potvrzeného serverového uploadu.
+
+### Navrhované další kroky
+- Po prvním slotu15.11. ověřit modelovou účtenku, pokrytí zdrojů a nové dvě SHA.
+- Při attention zachovat původní slot a známé účtenky; nespouštět model znovu.
+- Při budoucím převzetí do main zachovat aktivní privátní stav a historii slotů.
+
+### Technický důkaz
+- recovery_guide_activation_live_20261108.md a .json; privátní post-activation
+  audit a immutable prelaunch-quality-repair ve vlastní .venv.
+- 166 cílených testů PASS včetně dvojice regresí pro nový slovní obrat a
+  skutečně chybějící varování; legacy očekávání zachované. Závěrečná statická
+  brána a git diff --check OK; plný základ převzatý2882 testů/5 skipped.
+- Všechny aktuální readiness závislosti true v čtecím auditu; nový provider
+  tah se dnes nekonal. Fyzický iPhone a první placený týdenní slot teprve přijdou.

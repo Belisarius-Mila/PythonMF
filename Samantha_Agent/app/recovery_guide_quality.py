@@ -250,8 +250,15 @@ def review(answer: dict, snapshot: Snapshot, dossier: dict, context: ReviewConte
             result["format_request_sha256"] = format_request.sha256
         result["candidate_sha256"] = digest(candidate)
         _fail(context.application_scope_approved is not True or not context.applications, "application_scope_unapproved")
+        normalized = " ".join(candidate.casefold().split())
         for name, alternatives in TOPICS.items():
-            if not any(word in candidate.casefold() for word in alternatives):
+            present = any(word in candidate.casefold() for word in alternatives)
+            if format_request is not None and name == "outside_git" and not present:
+                # Same required recovery warning, expressed as an explicit
+                # exclusion from a GitHub clone. Legacy receipts stay literal.
+                present = (bool(re.search(r"\bgithub\b", normalized))
+                    and "nezískáš .env, ignorovaná soukromá data" in normalized)
+            if not present:
                 result["issues"].append({"code": "missing_topic", "field": name})
         _fail(not context.macos_expected or not context.macos_observed, "macos_baseline_unverified")
         _fail(context.macos_expected != context.macos_observed, "new_macos_requires_review")

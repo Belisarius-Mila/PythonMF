@@ -182,6 +182,26 @@ class Acceptance(unittest.TestCase):
         self.assertTrue(result["semantic_review_required"])
         self.assertFalse(result["publication_authorized"])
 
+    def test_integrated_ignored_private_data_warning_does_not_require_literal_mimo_git(self):
+        from app import recovery_guide_consolidation as consolidation
+        from tests.test_recovery_guide import consolidated_answer
+        text=ORIGINAL.replace("data mimo Git","GitHub klonem nezískáš .env, ignorovaná soukromá\ndata")
+        source=replace(self.source,original=Source("original_guide",digest(text),text,"previous_version"))
+        ctx=context(source);request=consolidation.prepare(source,[],ctx.checked_on)
+        result=q.review(consolidated_answer(request.payload),source,dossier(ctx),ctx,format_request=request)
+        self.assertEqual(result["state"],"review")
+        legacy=q.review(answer(text),source,dossier(ctx),ctx)
+        self.assertIn({"code":"missing_topic","field":"outside_git"},legacy["issues"])
+
+    def test_integrated_absence_of_private_data_warning_still_blocks(self):
+        from app import recovery_guide_consolidation as consolidation
+        from tests.test_recovery_guide import consolidated_answer
+        text=ORIGINAL.replace("data mimo Git","lokální obsah")
+        source=replace(self.source,original=Source("original_guide",digest(text),text,"previous_version"))
+        ctx=context(source);request=consolidation.prepare(source,[],ctx.checked_on)
+        result=q.review(consolidated_answer(request.payload),source,dossier(ctx),ctx,format_request=request)
+        self.assertIn({"code":"missing_topic","field":"outside_git"},result["issues"])
+
     def test_production_application_inventory_has_no_guessed_approval(self):
         self.assert_issue("application_scope_unapproved",ctx=replace(self.ctx,application_scope_approved=False))
         self.assert_issue("application_scope_unapproved",ctx=replace(self.ctx,applications=()))

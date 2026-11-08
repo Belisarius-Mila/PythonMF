@@ -30,6 +30,18 @@
           "dry_run_evidence": "data/private/simple_development_probes/3a1b667eeb634603be866357921150f5/proof.json"
         }
       ]
+    },
+    "recovery_document_maintainer": {
+      "label": "Týdenní správce obnovovací dokumentace",
+      "preferred_model": "gpt-6.1-sol",
+      "approved_models": [
+        {
+          "model": "gpt-6.1-sol",
+          "reasoning_effort": "medium",
+          "cost_review": "Standard 50/2.5/250 per million; activation proposal 2026-11-08; no cache assumed.",
+          "dry_run_evidence": "REC-06 synthetic trial_passed 2026-11-07, same Sol/medium Standard peer, receipt 6b26bc63085803e4e83356b613c23462ad9f3a09a19ad32aa88d9b40694b2512"
+        }
+      ]
     }
   }
 }

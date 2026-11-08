@@ -4,6 +4,24 @@ Implementační etapa 2026-11-07, proud `project-samantha-infrastructure`.
 Schválený plán REC-01 až REC-06 je v `projects/samantha_external_backup.md`.
 Tento dokument popisuje vývojový základ, nikoli zapnutého týdenního agenta.
 
+## Provozní stav 2026-11-08 17:07 CET
+
+Aktivní samostatný LaunchAgent z Data worktree, nikoli instalace do main nebo
+restart společného Codexu/Cockpitu. Konfigurace a role recovery_document_maintainer
+jsou přijaté; model gpt-6.1-sol/medium, Standard per-turn, globální Fast se nemění.
+Dva provozní TXT jsou skutečně vytvořené a shodné, iCloud child uploaded true.
+Neděle od09:00 Europe/Prague, první15.11.2026, přijaté meze200/běh1000/měsíc.
+První neplacený launchd tick not_due/0 modelů, last exit0. Připomínka fyzické
+přejímky iPhonu a prvního modelového slotu zůstává otevřená.
+
+Původní balíček770a11bf měl falešné zamítnutí při samotné kontrole tématu
+outside_git. Všechny jeho externí akce byly prokazatelně neodeslané: žádná
+přijatá publikace, žádný launch, žádný model. Opravený validator uznává přesný
+obrat GitHub + nezískáš .env, ignorovaná soukromá data, pouze v integrovaném
+kontraktu. Chybějící varování zůstává blokované, legacy příjmy se nepřehodnocují.
+Nová auditovaná revize9a8fb9f9 zachovává všechny ostatní položky balíčku, včetně
+původního SHA kandidáta a celého configu. Nejde o reset nejistého placeného jobu.
+
 ## Čtenářská forma návodu — směr Míly 2026-11-08
 
 - Vždy jeden aktuální sjednocený text. Změny zapracovat do příslušných kapitol;
@@ -803,3 +821,46 @@ kopie se neřeší resetem a návratem ke starému originálu. Status je pouze �
   Nejde o upload dosud neexistujícího cílového TXT nebo fyzickou přejímku iPhonu.
 - Oba cílové TXT, aktivační konfigurace a LaunchAgent zatím nevytvořené.
   Podrobnosti recovery_guide_activation_ready_20261108.md a .json.
+
+## 2026-11-08 17:07 CET — REC: týdenní správce aktivní, dvě kopie a upload ověřené
+
+### Hotovo
+- Po aktuální přesné globální brzdě aktivovaný Sol/medium Standard a jediný
+  LaunchAgent com.samantha.recovery-guide. První skutečný tick skončil
+  not_due/model_calls0, launchd last exit0 a přesné argumenty ověřené.
+- OBNOVA_SAMANTHY_NOVY_MAC.txt uložený v interním PythonMF i iCloud
+  Dokumentech. Obě kopie75448B/SHAf8c29729…605c4e, Foundation uploaded=true,
+  uploading=false, upload_error=false. Staré Desktop/root-iCloud kopie zachované.
+- První revize15.11.2026 od09:00 Europe/Prague, dále týdně. Rozpočtová
+  kontrola200/běh1000/měsíc, max20 tahů/2400s. Dnes nula placených tahů.
+
+### Rozhodnutí
+- Míla výslovně přijal konkrétní plán i aktuální globální brzdu pro tuto
+  aktivaci. Automatická politika po úspěšných kontrolách předává stejný
+  kandidát do obou kopií; nejistota nepovoluje další model ani přepsání ruční změny.
+- Při prvním uložení odhalen falešný missing_topic outside_git: původní text
+  výslovně uvádí, že GitHub clone nezíská .env a ignorovaná soukromá data.
+  Integrovaný gate nyní rozpozná i tuto přesnou formulaci; legacy gate beze změny.
+- Oprava proběhla prokazatelně před přijetím publikace/launch/modelu. Původní
+  balíček770a11bf zachovaný, nová revize9a8fb9f9 změnila pouze otisk opraveného
+  validatoru; obsah/SHA, konfigurace, termín, role, rozpočty a cíle stejné.
+- Jiné role se nezměnily, globální Fast zachovaný; žádný restart Codexu/Cockpitu,
+  push/deploy nebo zásah do Willovy pracovní kopie. Notifikační karta vyčištěná.
+
+### Další krok
+- Míla otevře OBNOVA_SAMANTHY_NOVY_MAC.txt v iCloud Drive → Dokumenty
+  na iPhonu; fyzická přejímka se nedovozuje z potvrzeného serverového uploadu.
+
+### Navrhované další kroky
+- Po prvním slotu15.11. ověřit modelovou účtenku, pokrytí zdrojů a nové dvě SHA.
+- Při attention zachovat původní slot a známé účtenky; nespouštět model znovu.
+- Při budoucím převzetí do main zachovat aktivní privátní stav a historii slotů.
+
+### Technický důkaz
+- recovery_guide_activation_live_20261108.md a .json; privátní post-activation
+  audit a immutable prelaunch-quality-repair ve vlastní .venv.
+- 166 cílených testů PASS včetně dvojice regresí pro nový slovní obrat a
+  skutečně chybějící varování; legacy očekávání zachované. Závěrečná statická
+  brána a git diff --check OK; plný základ převzatý2882 testů/5 skipped.
+- Všechny aktuální readiness závislosti true v čtecím auditu; nový provider
+  tah se dnes nekonal. Fyzický iPhone a první placený týdenní slot teprve přijdou.

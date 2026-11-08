@@ -1813,3 +1813,13 @@ Standard per-turn se nemusí shodovat s globálním Fast; nezapisovat globální
 preference, ale vynutit podporovaný override. Účet API-key nesmí projít
 cenovým plánem ChatGPT kreditů. Deklarovaná konfigurace a datum čtení
 nejsou live/device proof. Nejistý launchctl bootstrap se neposílá podruhé.
+
+Doplnění 08112026 k LL-113 (skutečná aktivace): pokrytí tématu data mimo
+Git nesmí být závislé jen na doslovném řetězci mimo Git. Explicitní varování,
+že GitHub clone nezíská .env a ignorovaná soukromá data, vyjadřuje stejnou
+podmínku. Úzkou opravu omezit na nový integrovaný gate; legacy neoslabovat.
+Při odmítnutí před publikací/launch zachovat původní balíček, doložit nulové
+odeslání a pouze auditovaně přepnout otisk opraveného validatoru; neměnit
+přijaté bajty/role/rozpočet/cíle a nepožadovat znovu už udělený souhlas.
+Ověřeno:166 cílených testů, dvě skutečné kopie/upload, jeden bootstrap,
+launchd exit0/not_due/0 modelů. Není to důkaz prvního placeného týdenního tahu.
