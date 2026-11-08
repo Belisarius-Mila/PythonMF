@@ -447,3 +447,20 @@ bez modelu zachovala všechna findings, žádný starý job/plán nebyl přepsá
 Příprava nespustila žádný thread/turn. Souhlas s placením musí přijmout novou
 kartu zvlášť; neplatí dosavadní souhlas s malým testem ani návrh rozpočtu.
 Doklad reports/recovery_guide_anchor_full_pilot_20261108.md a card/offline JSON.
+
+## 2026-11-08 — celý pilot skončil na nevydaném coverage ID
+
+Schválený celý run karty 4b22ea9e…4cce1d1 byl zavolán jednou. První tah je
+completed/delivered; 27 dokumentů, 6 findings, 9,58995 Standard kreditu.
+Model zvolil covered.d0001 = l131111 pro AGENTS.md s 26 řádky. Toto ID není
+vydané; dalších 38 referencí platných. Scope, findings 721/1000 reference
+tokenů, evidence row meze, bezpečnost textů a input/output/time meze prošly.
+
+Resolver odmítl celou dávku: attention / accepted=false, 0 přijatých dávek,
+zbývajících 20 tahů ani syntéza neodeslané. Raw se neupravoval, žádný retry
+či přijetí notes. Schema zatím omezuje anchor pouze vzorem l + číslo, takže
+samo zabrání špatnému formátu, nikoli nevydanému číslu. Další návrh je čistě
+offline zpřísnění na skutečně vydaná ID se znovu ověřenou velikostí/cenou,
+nikoli oprava této odpovědi nebo pokračování původního uzavřeného slotu.
+Doklad reports/recovery_guide_anchor_full_pilot_run_20261108.md a result JSON.
+Staré joby/plán beze změny; žádný provozní návod, role, služba ani publikace.

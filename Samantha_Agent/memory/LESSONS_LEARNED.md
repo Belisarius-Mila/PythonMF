@@ -1738,3 +1738,11 @@ schválených 300 s. Vyhodnocuj obsah, cenu a čas odděleně z raw účtenek:
 obsahová revalidace bez modelu není zpětné přijetí celého jobu. Zachovat
 attention a známé doručení, neopakovat SDK jen kvůli času ani zpětně neměnit
 limit. Nový fázový časový plán je další samostatná karta, ne oprava účtenky.
+
+Doplnění 08112026 k LL-113: v prvním velkém anchor tahu model vrátil
+l131111 pro AGENTS.md s 26 řádky. Formát l+číslo prošel output schematem,
+přesný resolver správně zastavil celý job; 38 ostatních referencí platných,
+9,58995 Standard kreditu a žádný retry. ID protokol vyžaduje nejen runtime
+ověření, ale i další zpřesnění přípustných hodnot v output schema. Takové
+zpřesnění je zatím návrh k offline ověření, nikoli ověřené řešení či souhlas
+s dalším modelem. Raw/cenu/uzavřený slot zachovat, ID nehádat ani nenormalizovat.

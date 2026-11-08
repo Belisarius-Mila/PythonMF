@@ -1520,3 +1520,38 @@ závislosti bez konkrétní potřeby. Nejde o rozšíření e-mailové business 
   failed/interrupted a willRetry/timeout zachované bez resend. Částečná usage není finální účet.
 - 43 nových / 111 cílených testů OK. Plná brána 2 729 OK / 5 skipped; statická brána a git diff --check OK.
   Offline fixture není modelový výsledek. Žádný push/deploy či integrace do main.
+
+## 2026-11-08 11:12 CET — REC-06: celý pilot zastaven po jednom doručeném tahu na nevydané kotvě
+
+### Hotovo
+- Přijatá karta 4b22ea9e…4cce1d1 spuštěna jedním run; první tah completed/delivered,
+  27 dokumentů a 6 findings. Odhad ze skutečné spotřeby 9,58995 Standard kreditu.
+- Přesná diagnostika: covered.d0001 = l131111 pro kořenový AGENTS.md s 26 řádky.
+  Z 39 referencí je 38 vydaných; ostatní meze a scope prošly.
+- Raw účtenka zachovaná, další modelové tahy ani syntéza nebyly odeslané.
+
+### Rozhodnutí
+- Job zůstává attention / accepted=false, přijatých dávek 0. Není to nejisté
+  doručení, ale chybná modelová hodnota. Žádný retry, reset, oprava ID či přijetí notes.
+- Současné schema hlídá formát ID, nikoli množinu vydaných hodnot; přesný
+  resolver chybu odmítl. Malý test ani fixtures nejsou zárukou velké odpovědi.
+- Zbývajících 20 plánovaných tahů neodesílat automaticky. Staré joby i plán
+  beze změny, žádný kandidát, provozní TXT/iCloud, role, služba, push nebo nasazení.
+
+### Další krok
+- Neplaceně zpřísnit výstupní kontrakt na vydaná source/anchor ID, ověřit
+  upstream/schema limity a novou režii. Nevymýšlet náhradní řádek a nepřepisovat raw.
+
+### Navrhované další kroky
+- Will převezme známou příčinu a uzavřenou účtenku, nikoli pokyn k opakování.
+- Offline schema/regrese s touto vadnou odpovědí, přesný resolver nadále povinný.
+- Po novém přepočtu určit konkrétní další krok a případný samostatný souhlas.
+- Mac/iPhone dossier, celý přijatý návrh, dvě kopie/upload a týdenní aktivace později.
+
+### Technický důkaz
+- recovery_guide_anchor_full_pilot_run_20261108.md a *_result_20261108.json.
+- Raw 6177159d…505b55a; turn 01a1baa0-3849-7e43-8efe-0760d5fc1204.
+- Input 184 414, cached 0, output 1 477 (reasoning subset 189), total 185 891.
+  SDK délka 34,567 s, celý job 57,990 s. Findings JSON 721/1000 ref tokenů.
+- Kód se neměnil; 111 cílených a 2 729 plných testů / 5 skipped z předchozí etapy.
+  Aktuální statická brána a git diff --check OK. Žádný další modelový tah.

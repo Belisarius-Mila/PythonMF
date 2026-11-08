@@ -1,42 +1,38 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
-## 2026-11-08 10:13 CET — REC-06: celý běhový adapter a exekuční karta připravené
+## 2026-11-08 11:12 CET — REC-06: celý pilot zastaven po jednom doručeném tahu na nevydané kotvě
 
 ### Hotovo
-- Samostatný no-retry adapter propojuje přesný celý plán s 20 inspect + 1
-  synthesis přes existující sdílený socket; žádná změna produkčního klienta/runtime.
-- Čerstvá exekuční karta 4b22ea9e…4cce1d1: 531 dokumentů + original,
-  Sol/medium Standard, plán 243,50895 / mez 250 Standard kreditů (ne hard cap),
-  časy 300/900 s. Karta čeká na konkrétní souhlas, nikoli na další implementaci.
-- 43 nových / 111 cílených testů OK; úplná 20+1 offline fixture nad skutečným
-  korpusem prošla, všechna zjištění předaná a původní quality gate zachovaná.
+- Přijatá karta 4b22ea9e…4cce1d1 spuštěna jedním run; první tah completed/delivered,
+  27 dokumentů a 6 findings. Odhad ze skutečné spotřeby 9,58995 Standard kreditu.
+- Přesná diagnostika: covered.d0001 = l131111 pro kořenový AGENTS.md s 26 řádky.
+  Z 39 referencí je 38 vydaných; ostatní meze a scope prošly.
+- Raw účtenka zachovaná, další modelové tahy ani syntéza nebyly odeslané.
 
 ### Rozhodnutí
-- Pokyn k adapteru provedl vývoj a neplacenou přípravu. Žádný nový placený
-  tah ani attempt marker; žádná aktivace, publikace, zápis TXT/iCloud či role JSON.
-- Všechny staré placené joby i přípravný plán zůstávají beze změny. Další
-  volání spotřebovaného jobu smí jen vrátit jeho účtenku, nikdy obnovit model.
-- Bez nové command allowlist či live/manual dokladů zůstávají nové příkazy
-  a živá tvrzení nepodporované podle původního quality gate. Kandidát není přijatý provozní návod.
+- Job zůstává attention / accepted=false, přijatých dávek 0. Není to nejisté
+  doručení, ale chybná modelová hodnota. Žádný retry, reset, oprava ID či přijetí notes.
+- Současné schema hlídá formát ID, nikoli množinu vydaných hodnot; přesný
+  resolver chybu odmítl. Malý test ani fixtures nejsou zárukou velké odpovědi.
+- Zbývajících 20 plánovaných tahů neodesílat automaticky. Staré joby i plán
+  beze změny, žádný kandidát, provozní TXT/iCloud, role, služba, push nebo nasazení.
 
 ### Další krok
-- Po konečných branách přijmout přesnou novou kartu k jedinému celému pilotu
-  (nejvýše 21 tahů). Před run znovu čerstvost snapshot/kód/peer/socket/účet;
-  při driftu jen explicitní neplacená revize před pokusem a nový souhlas.
+- Neplaceně zpřísnit výstupní kontrakt na vydaná source/anchor ID, ověřit
+  upstream/schema limity a novou režii. Nevymýšlet náhradní řádek a nepřepisovat raw.
 
 ### Navrhované další kroky
-- Will přezkoumá izolovaný adapter a kartu, zachová svoji souběžnou práci.
-- Konkrétní souhlas s kartou, poté jediný programově řízený celý kandidátní pilot.
-- Vyhodnotit známé účtenky/spotřebu a obsah; nikdy neřešit nejistotu dalším turn/start.
-- Samostatně Mac/iPhone dossier, obsahová přejímka, dvě kopie/upload a týdenní aktivace.
+- Will převezme známou příčinu a uzavřenou účtenku, nikoli pokyn k opakování.
+- Offline schema/regrese s touto vadnou odpovědí, přesný resolver nadále povinný.
+- Po novém přepočtu určit konkrétní další krok a případný samostatný souhlas.
+- Mac/iPhone dossier, celý přijatý návrh, dvě kopie/upload a týdenní aktivace později.
 
 ### Technický důkaz
-- recovery_guide_anchor_full_pilot_20261108.md, *_card_20261108.json a *_offline_20261108.json.
-- Celý plán dcfb8b2a…c6f805d, main 6d5b576b, peer 0.163.0 / CLI 0.166.0,
-  chatgpt účet; aktuální pricing identity a živý kontext nejsou prokázané.
-- Trvalý záznam před thread/turn, raw před přejímkou; structured errors,
-  failed/interrupted a willRetry/timeout zachované bez resend. Částečná usage není finální účet.
-- 43 nových / 111 cílených testů OK. Plná brána 2 729 OK / 5 skipped; statická brána a git diff --check OK.
-  Offline fixture není modelový výsledek. Žádný push/deploy či integrace do main.
+- recovery_guide_anchor_full_pilot_run_20261108.md a *_result_20261108.json.
+- Raw 6177159d…505b55a; turn 01a1baa0-3849-7e43-8efe-0760d5fc1204.
+- Input 184 414, cached 0, output 1 477 (reasoning subset 189), total 185 891.
+  SDK délka 34,567 s, celý job 57,990 s. Findings JSON 721/1000 ref tokenů.
+- Kód se neměnil; 111 cílených a 2 729 plných testů / 5 skipped z předchozí etapy.
+  Aktuální statická brána a git diff --check OK. Žádný další modelový tah.
 <!-- SAMANTHA_CURRENT_STATUS_END -->
 
 ### Předchozí stav infrastruktury
@@ -1256,3 +1252,38 @@ souborů / 5 002 170 B. Stávající rutinní pilot není obecný writer/schedul
   failed/interrupted a willRetry/timeout zachované bez resend. Částečná usage není finální účet.
 - 43 nových / 111 cílených testů OK. Plná brána 2 729 OK / 5 skipped; statická brána a git diff --check OK.
   Offline fixture není modelový výsledek. Žádný push/deploy či integrace do main.
+
+## 2026-11-08 11:12 CET — REC-06: celý pilot zastaven po jednom doručeném tahu na nevydané kotvě
+
+### Hotovo
+- Přijatá karta 4b22ea9e…4cce1d1 spuštěna jedním run; první tah completed/delivered,
+  27 dokumentů a 6 findings. Odhad ze skutečné spotřeby 9,58995 Standard kreditu.
+- Přesná diagnostika: covered.d0001 = l131111 pro kořenový AGENTS.md s 26 řádky.
+  Z 39 referencí je 38 vydaných; ostatní meze a scope prošly.
+- Raw účtenka zachovaná, další modelové tahy ani syntéza nebyly odeslané.
+
+### Rozhodnutí
+- Job zůstává attention / accepted=false, přijatých dávek 0. Není to nejisté
+  doručení, ale chybná modelová hodnota. Žádný retry, reset, oprava ID či přijetí notes.
+- Současné schema hlídá formát ID, nikoli množinu vydaných hodnot; přesný
+  resolver chybu odmítl. Malý test ani fixtures nejsou zárukou velké odpovědi.
+- Zbývajících 20 plánovaných tahů neodesílat automaticky. Staré joby i plán
+  beze změny, žádný kandidát, provozní TXT/iCloud, role, služba, push nebo nasazení.
+
+### Další krok
+- Neplaceně zpřísnit výstupní kontrakt na vydaná source/anchor ID, ověřit
+  upstream/schema limity a novou režii. Nevymýšlet náhradní řádek a nepřepisovat raw.
+
+### Navrhované další kroky
+- Will převezme známou příčinu a uzavřenou účtenku, nikoli pokyn k opakování.
+- Offline schema/regrese s touto vadnou odpovědí, přesný resolver nadále povinný.
+- Po novém přepočtu určit konkrétní další krok a případný samostatný souhlas.
+- Mac/iPhone dossier, celý přijatý návrh, dvě kopie/upload a týdenní aktivace později.
+
+### Technický důkaz
+- recovery_guide_anchor_full_pilot_run_20261108.md a *_result_20261108.json.
+- Raw 6177159d…505b55a; turn 01a1baa0-3849-7e43-8efe-0760d5fc1204.
+- Input 184 414, cached 0, output 1 477 (reasoning subset 189), total 185 891.
+  SDK délka 34,567 s, celý job 57,990 s. Findings JSON 721/1000 ref tokenů.
+- Kód se neměnil; 111 cílených a 2 729 plných testů / 5 skipped z předchozí etapy.
+  Aktuální statická brána a git diff --check OK. Žádný další modelový tah.
