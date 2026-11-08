@@ -1794,3 +1794,13 @@ pokrytí, nepřepsání starého objemového pravidla. Zmrazené jednorázové a
 musejí původní wire formát zvolit výslovně, bez automatického fallbacku.
 Na17 kapitolách/340 blocích keep zachoval obsah přesně; to neprokazuje
 sémantickou správnost budoucích modelových rewrite a nenahrazuje přejímku.
+
+Doplnění 08112026 k LL-113 (běhová integrace): změna formátu musí projít
+přejímkou i její čerstvou kontrolou těsně před zápisem, nikoli pouze prvním
+renderem. Další přijatý týden nesmí být zaměněný za superseded jen proto,
+že active marker patří předchozímu dokončenému přenosu; pokračování dovolí
+jen shodné připnuté baselines obou kopií. Druhý vstup musí mít SHA prvního
+přijatého výstupu. Ověřeno přes skutečný plánovač/generátor/přejímku/writer
+s fake modelem a dočasnými soubory, včetně pádu mezi kopiemi bez dalšího tahu.
+Run/tick po integraci už nejsou principiálně read-only workflow; registr musí
+uvádět model/privátní zápisy a ruční potvrzení, i když je aktivace zatím vypnutá.

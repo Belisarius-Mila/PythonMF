@@ -33,10 +33,17 @@ Tento dokument popisuje vývojový základ, nikoli zapnutého týdenního agenta
 - Starý 75% retenční gate zůstává pro staré formáty. Jednorázové full_pilot
   a receipt_recovery předávají explicitně legacy_format=True; numerický
   exact pilot a jeho raw/uzavřené stavy se nemění. Žádný automatický fallback.
-- Sjednocený kontrakt není aktivovaný produkční plánovač. Stávající sandbox
-  scheduler/CLI ani produkční adapter s writerem tímto nejsou propojené či
-  spuštěné; při jejich integraci je nutné použít tento formát, trusted datum
-  a poslední přijatý návod. Stará placená karta se nesmí znovu použít.
+- Sjednocený kontrakt nyní používá propojený `RecoveryRuntime`. Produkční
+  plánovač i PublicationStore mají explicitní runtime režim s ověřenou privátní
+  aktivací; žádná aktivace se při importu, statusu nebo tomto vývoji nevytváří.
+- Run/tick vede přes runtime_live.entry. Samotné spuštění CLI nemá výchozí
+  rozpočet ani implicitní roli; bez platné aktivace vrací activation_required.
+- Další týden vezme poslední doručený přijatý návod z lokálního cíle a ověří
+  obě SHA kopií. Jen první běh může číst explicitně připnutý bootstrap.
+- Staré schválení číselného jednorázového pilotu se nepřenáší na nový týdenní
+  kontrakt. Ten nyní používá citace source/quote z výchozího maintaineru;
+  numerický pilot zůstává oddělený a uzavřený. Nejde o automatický fallback.
+  Nový skutečný běh vyžaduje aktuální cenový/tokenový plán a přejímku protokolu.
 
 ## Co je připravené
 
@@ -58,9 +65,19 @@ Tento dokument popisuje vývojový základ, nikoli zapnutého týdenního agenta
 - `app/recovery_guide_publish.py`: připnuté identity cílů včetně známých
   aliasů, původní verze, kandidát, žurnál, dva jednotlivé atomické zápisy,
   kontrola změny od převzetí a dokončení přesně stejných bajtů po přerušení.
-- `scripts/recovery_guide.py`: registrovaný náhled/stav a záměrně blokované
-  `run`/`tick`. `scripts/recovery_guide_launchd.py` pouze vypíše návrh plist.
-  Neobsahuje instalaci, bootstrap, restart, placený tah ani publikování TXT.
+- `app/recovery_guide_runtime.py`: propojení plánovače, generátoru a přejímky
+  přes stejný slot, snapshot a SHA. Samostatné privátní raw a transportní účtenky.
+- `app/recovery_guide_runtime_config.py`: pouze načte již přijatou privátní
+  konfiguraci; žádnou sám nevytvoří. Kontroluje vlastníka, oprávnění, změnu
+  obsahu, přesnou roli/politiku, rozsah, limity a důkazy kontextu/tokenizeru.
+- `app/recovery_guide_runtime_live.py`: společný existující socket, explicitní
+  Standard per-turn, ephemeral read-only vlákna bez nástrojů a opakování.
+  Dočasný izolovaný tokenizer nepíše závislosti ani společné prostředí.
+- `scripts/recovery_guide.py`: neplacené náhledy/status, propojené run/tick
+  vyžadující samostatnou aktivaci. Jejich ruční workflow má riziko modelu a
+  privátních zápisů a vyžaduje potvrzení; timer musí mít schválenou politiku.
+- `scripts/recovery_guide_launchd.py` dál pouze vypisuje návrh plist; nemá
+  instalaci, bootstrap, restart ani implicitní aktivaci.
 - Parser centrálních rolí zná nový název `recovery_document_maintainer`;
   v `config/agent_roles.json` role přidaná **není**.
 
@@ -638,3 +655,74 @@ Podrobnosti reports/recovery_guide_consolidated_20261108.md a .json.
   Jde o simulaci formátu, nikoli dva skutečné týdny/modelové čtení dokumentace.
 - Původních 24 finančních artefaktů SHA shodných, placený job nadále attention.
   Podrobnosti recovery_guide_weekly_consolidation_20261108.md a .json.
+
+## Běhová integrace a samostatná aktivace
+
+Kanonická konfigurace je data/private/recovery_guide_runtime/activation.json
+v provozním checkoutu. Nezakládat ji jen kvůli testu nebo statusu. Vyžaduje
+schválené enabled, approved_at, schedule, limits, scopes, bootstrap, tokenizer
+s explicitně přijatou referenční nejistotou a runtime_evidence s verzí serveru,
+SHA protokolového kontraktu a přijatým vstupním limitem. Tokenizer je nadále
+reference, nikoli přesné mapování modelu; rezerva není tvrdý fakturační limit.
+Aktivace musí přijmout skutečné hodnoty bez doplnění odhadovaných výchozích cen.
+Cíle nejsou z modelu ani z obecné libovolné konfigurace: vždy PythonMF a iCloud
+Dokumenty podle pevného lokálního hostitele. Target.pin znovu kontroluje aliasy.
+
+Vývojový základ nyní obsahuje oba produkční režimy, ale konkrétní aktivační
+konfigurace, centrální role a služba se tímto nezapnuly. Nepoužívat staré
+uzavřené karty jako oprávnění k novému týdennímu kontraktu source/quote.
+
+Věcná přejímka zůstává oddělená: runtime.prepare_acceptance vezme přesný
+snapshot/request/odpověď a callerem dodaný dossier/ReviewContext. Veřejné
+quality.review ověří aplikace, stáří faktů a macOS i u nového formátu.
+Runtime.accept vyžaduje konkrétní binding a identitu jobu od trusted operátora;
+připojí již přijatou publikaci k témuž slotu. Nenahrazuje chybějící fakta
+odhadem ani automaticky neprohlásí kandidáta za přijatý. Přejímka nevytváří tah.
+
+Další tick dokončí dvě kopie existujícím writerem. Při přerušení první/druhé
+kopie nebo pending iCloud používá stejný approval/candidate/request, bez modelu.
+Po neznámé analýze nepokračuje ani nový týden. Změněná aktivace či ručně změněné
+kopie se neřeší resetem a návratem ke starému originálu. Status je pouze čtecí.
+
+## 2026-11-08 15:35 CET — REC: sjednocený návod zapojený do běhové cesty
+
+### Hotovo
+- Generátor je propojený s plánovačem, obsahovou přejímkou a dvěma cílovými
+  kopiemi. Další týden čte poslední přijatý návod, ne původní historickou verzi.
+- Běhové run/tick používají tento řadič. Bez samostatné privátní aktivace
+  zůstávají inertní. Status nevytváří stav, tokenizer, socket ani modelový tah.
+- Neplacený průchod produkční větví kódu ve dvou týdnech skončil dvěma
+  shodnými kopiemi; SHA druhého vstupu je SHA prvního přijatého výsledku.
+
+### Rozhodnutí
+- Míla schválil integraci do běhu. Sjednocený formát je povinný také na
+  produkční přejímací hranici, bez legacy fallbacku. Zmrazené piloty zůstávají.
+- Přenos přijatých bajtů po výpadku pokračuje bez modelu i bez
+  dostupného App Serveru/tokenizeru. Neznámý výsledek
+  analýzy zastaví i další týdny; ruční změna kopií se nesmí přepsat návratem
+  ke starému originálu. Změněná aktivační politika zastaví nedokončený job.
+- Vývoj neaktivuje službu ani roli a není schválením nové ceny/modelového
+  běhu. Skutečná aktivační konfigurace ve worktree nevznikla, provozní TXT
+  ani Downloads se neměnily. Bez push, deploy nebo restartu.
+
+### Další krok
+- Will převezme lokální změnu; další provozní krok je samostatná aktivace
+  konkrétní role/plánu/rozpočtu a prvních přijatých bajtů, nikoli další psaní propojení.
+
+### Navrhované další kroky
+- Převzít čtenářský návrh z Downloads a konkrétní aplikační přejímací podklady.
+- Před aktivací změřit aktuální nový týdenní request/schema, potvrdit
+  cenovou rezervu, kontext, tokenizer a schválenou centrální roli.
+- Po odpovídajícím oprávnění provozně ověřit dvě cílové kopie a iCloud upload.
+- Týdenní službu a skutečný iPhone převzít odděleně od lokálních testů.
+
+### Technický důkaz
+- 42 nových testů včetně přidané kontrolní zkoušky registru oprávnění;
+  272 cílených testů před závěrečnou úpravou registru PASS.
+- plná brána 2 863 testů OK (5 skipped); závěrečná cílená regrese 161 testů OK.
+- Dva týdny přes skutečný plánovač/řadič/přejímku/writer, ale fake model a
+  dočasné cíle; čtyři stub volání, nula modelových tahů nebo provozních zápisů.
+- Testy výpadku mezi kopiemi, pending iCloud, restartu, neznámého doručení,
+  změny vstupů/konfigurace a explicitního Standard/read-only bez reuse vlákna.
+- Původních 48 JSON účtenek/plánů/raw čtecích pilotů SHA shodných.
+  Podrobnosti recovery_guide_runtime_integration_20261108.md a .json.

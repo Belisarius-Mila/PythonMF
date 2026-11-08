@@ -47,18 +47,17 @@ def main(argv: list[str] | None = None) -> int:
         elif args.action == "schedule-preview":
             result = {"state": "schedule_unapproved", **schedule_preview(datetime.now(ZoneInfo("Europe/Prague")))}
         elif args.action == "status":
+            from app.recovery_guide_runtime_live import entry
             result = status(ROOT / "data/private/recovery_guide", weekly_slot(datetime.now(ZoneInfo("Europe/Prague"))))
             result["scheduler"] = inspect_status(ROOT / ".venv/recovery_guide_scheduler")
-            result["activation_required"] = True
+            result["runtime"] = entry("status",project=ROOT)
+            result["activation_required"] = result["runtime"]["state"] == "activation_required"
         else:
-            # Intentionally no hidden fallback, default budget or implicit role
-            # activation. A later reviewed activation connects the live adapter.
-            result = {"state": "activation_required", "model_calls": 0, "writes": False,
-                      "scheduler": inspect_status(ROOT / ".venv/recovery_guide_scheduler"),
-                      "reason": "Pilot/rozpočet/tokenizer/role a provozní zapojení zatím nejsou aktivované."}
+            from app.recovery_guide_runtime_live import entry
+            result = entry(args.action,project=ROOT)
         print(json.dumps(result, ensure_ascii=False, indent=2))
         return 2 if result["state"] in {"activation_required", "blocked_for_live_pilot"} else 0
-    except (OSError, ValueError) as exc:
+    except (OSError, ValueError, TypeError, KeyError) as exc:
         print(json.dumps({"state": "attention", "model_calls": 0,
                           "reason": type(exc).__name__, "content_omitted": True}))
         return 2

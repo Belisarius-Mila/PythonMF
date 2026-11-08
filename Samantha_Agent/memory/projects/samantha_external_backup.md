@@ -2,24 +2,22 @@
 
 Projekt zalozen 2026-05-19.
 
-## Aktuální stav 2026-11-08 15:11 CET
+## Aktuální stav 2026-11-08 15:35 CET
 
-Výchozí týdenní generátor nyní vynucuje integrovaný formát: jeden aktuální
-návod s jediným programově vloženým datem ddmmyyyy, změny v kapitolách,
-žádné vrstvení doplnění. Staré bloky mají explicitní dispozici; pouze
-historický balast lze doloženě vyřadit. Citace, soukromí, potřebné příkazy,
-bezpečnostní pokyny a nezopakování nejistého kroku zůstávají kontrolované.
-Audit a historie jsou mimo čtenářský text. Dvě offline revize skutečného
-návodu zachovaly 17 kapitol / 340 bloků. Třicet nových testů, 153 cílených PASS;
-Plná projektová brána 2 824 testů OK, 5 skipped; závěrečná statická brána a git diff --check OK.
+Sjednocený týdenní návod je zapojený do běhové cesty: plánovač → generátor →
+obsahová přejímka → dvě kopie. Další týden čte poslední přijatý text.
+Run/tick používají propojený runtime a privátní explicitní aktivaci;
+bez ní žádný model ani zápis. Produkční writer nepřijme starý formát.
+Nejistý tah blokuje další týdny, dokončení přenosu nevytváří nový tah.
 
-Čtenářský návrh 75 415 B/SHA381963c3…82543c8 v Downloads zůstává beze změny
-k obsahové přejímce. Původní job attention/174,8297 ani24 finančních
-artefaktů nezměněné. Zmrazené jednorázové piloty mají explicitní původní
-formát. Žádné modelové volání, provozní kopie, role či služba.
-Další krok: Willova integrace tohoto formátu s týdenním adapterem a writerem;
-produkční aktivace a dvě provozní kopie/upload se tímto netvrdí.
-Historická evidence záloh níže není nový živý audit.
+Dva týdny produkční větví kódu ověřené pouze synteticky v dočasných složkách,
+SHA návaznost a shodné dvě kopie PASS. 42 nových testů včetně oprávnění;
+272 cílených PASS; plná brána 2 863 testů OK (5 skipped); závěrečná cílená regrese 161 testů OK.
+Skutečná aktivace/role/služba ani provozní kopie se neměnily. Původní placený
+job attention/174,8297 a 48 finančních/historických JSON artefaktů zachované.
+Čtenářský návrh v Downloads zůstává k obsahové přejímce. Dalším krokem je
+Willovo převzetí a samostatná provozní aktivace přesného plánu, ne další integrace.
+Historické údaje níže nejsou nový živý audit záloh.
 
 ## Historický stav 2026-10-25 14:53 CET
 
@@ -1779,3 +1777,46 @@ závislosti bez konkrétní potřeby. Nejde o rozšíření e-mailové business 
   Jde o simulaci formátu, nikoli dva skutečné týdny/modelové čtení dokumentace.
 - Původních 24 finančních artefaktů SHA shodných, placený job nadále attention.
   Podrobnosti recovery_guide_weekly_consolidation_20261108.md a .json.
+
+## 2026-11-08 15:35 CET — REC: sjednocený návod zapojený do běhové cesty
+
+### Hotovo
+- Generátor je propojený s plánovačem, obsahovou přejímkou a dvěma cílovými
+  kopiemi. Další týden čte poslední přijatý návod, ne původní historickou verzi.
+- Běhové run/tick používají tento řadič. Bez samostatné privátní aktivace
+  zůstávají inertní. Status nevytváří stav, tokenizer, socket ani modelový tah.
+- Neplacený průchod produkční větví kódu ve dvou týdnech skončil dvěma
+  shodnými kopiemi; SHA druhého vstupu je SHA prvního přijatého výsledku.
+
+### Rozhodnutí
+- Míla schválil integraci do běhu. Sjednocený formát je povinný také na
+  produkční přejímací hranici, bez legacy fallbacku. Zmrazené piloty zůstávají.
+- Přenos přijatých bajtů po výpadku pokračuje bez modelu i bez
+  dostupného App Serveru/tokenizeru. Neznámý výsledek
+  analýzy zastaví i další týdny; ruční změna kopií se nesmí přepsat návratem
+  ke starému originálu. Změněná aktivační politika zastaví nedokončený job.
+- Vývoj neaktivuje službu ani roli a není schválením nové ceny/modelového
+  běhu. Skutečná aktivační konfigurace ve worktree nevznikla, provozní TXT
+  ani Downloads se neměnily. Bez push, deploy nebo restartu.
+
+### Další krok
+- Will převezme lokální změnu; další provozní krok je samostatná aktivace
+  konkrétní role/plánu/rozpočtu a prvních přijatých bajtů, nikoli další psaní propojení.
+
+### Navrhované další kroky
+- Převzít čtenářský návrh z Downloads a konkrétní aplikační přejímací podklady.
+- Před aktivací změřit aktuální nový týdenní request/schema, potvrdit
+  cenovou rezervu, kontext, tokenizer a schválenou centrální roli.
+- Po odpovídajícím oprávnění provozně ověřit dvě cílové kopie a iCloud upload.
+- Týdenní službu a skutečný iPhone převzít odděleně od lokálních testů.
+
+### Technický důkaz
+- 42 nových testů včetně přidané kontrolní zkoušky registru oprávnění;
+  272 cílených testů před závěrečnou úpravou registru PASS.
+- plná brána 2 863 testů OK (5 skipped); závěrečná cílená regrese 161 testů OK.
+- Dva týdny přes skutečný plánovač/řadič/přejímku/writer, ale fake model a
+  dočasné cíle; čtyři stub volání, nula modelových tahů nebo provozních zápisů.
+- Testy výpadku mezi kopiemi, pending iCloud, restartu, neznámého doručení,
+  změny vstupů/konfigurace a explicitního Standard/read-only bez reuse vlákna.
+- Původních 48 JSON účtenek/plánů/raw čtecích pilotů SHA shodných.
+  Podrobnosti recovery_guide_runtime_integration_20261108.md a .json.

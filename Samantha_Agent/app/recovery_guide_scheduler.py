@@ -1,7 +1,7 @@
-"""REC-05 durable scheduler, sandbox callbacks only; no live model transport.
+"""Durable scheduler; production mode needs explicit private runtime activation.
 
-Public production CLI remains inactive until REC-06. No installation, daemon,
-external notification or model call occurs on import or preview/status.
+No installation, daemon, model transport or notification on import/status.
+Sandbox mode retains its original simulated contract.
 """
 from __future__ import annotations
 
@@ -99,14 +99,14 @@ def schedule_preview(now: datetime, policy: SchedulerPolicy = SchedulerPolicy())
         "missed_slots_policy":"one_latest_due_only","model_calls":0,"writes":False}
 
 
-def inspect_status(root: Path) -> dict:
+def inspect_status(root: Path, *, scope="sandbox_only") -> dict:
     """Read-only projection for CLI/Cockpit workflow receipt. Never mkdir/lock."""
     if any(p.is_symlink() for p in (root,*root.parents)):
         raise ValueError("state_alias_refused")
     jobs=[]
     if root.exists():
         for path in sorted(root.glob("recovery-????-W??.json")):
-            jobs.append(_read_job(path))
+            jobs.append(_read_job(path, simulation=scope=="sandbox_only"))
     pending=[j for j in jobs if j["state"] not in DONE]
     last=jobs[-1] if jobs else None
     fields=("request_id","slot","state","candidate_sha256","snapshot_sha256","source_count","coverage",
@@ -114,15 +114,15 @@ def inspect_status(root: Path) -> dict:
     project=lambda job:{key:job[key] for key in fields if key in job}
     return {"state":"not_configured" if not jobs else "attention" if pending else "idle",
             "last_run":project(last) if last else None,"pending":[project(j) for j in pending],
-            "job_count":len(jobs),"scope":"sandbox_only","model_calls":0,"credits_are_simulated":True,
+            "job_count":len(jobs),"scope":scope,"model_calls":0,"credits_are_simulated":scope=="sandbox_only",
             "live_status_audit":False,"writes":False}
 
 
-def _read_job(path):
+def _read_job(path, *, simulation=True):
     if path.is_symlink() or not path.is_file() or path.stat().st_size>128_000:raise ValueError("invalid_job_file")
     job=json.loads(path.read_text())
     if not isinstance(job,dict):raise ValueError("invalid_job")
-    if (job.get("schema")!=1 or job.get("simulation") is not True or not isinstance(job.get("request_id"),str) or not ID.fullmatch(job["request_id"])
+    if (job.get("schema")!=1 or job.get("simulation") is not simulation or not isinstance(job.get("request_id"),str) or not ID.fullmatch(job["request_id"])
             or path.name!=job["request_id"]+".json" or not isinstance(job.get("state"),str) or job["state"] not in STATES
             or type(job.get("source_count")) is not int or job["source_count"]<=0):raise ValueError("invalid_job")
     for key in ("snapshot_sha256","original_sha256","policy_sha256","identity_sha256"):
@@ -140,12 +140,20 @@ def _read_job(path):
 
 class WeeklyScheduler:
     def __init__(self, root: Path, *, sandbox_root: Path, policy: SchedulerPolicy,
-                 mode: str = "sandbox", clock: Callable[[],float] = monotonic_time.monotonic):
-        if mode != "sandbox":raise ValueError("production_scheduler_disabled")
+                 mode: str = "sandbox", activation=None, clock: Callable[[],float] = monotonic_time.monotonic):
+        self.activation=activation
+        if mode != "sandbox":
+            from app.recovery_guide_runtime_config import RuntimeConfig
+            if mode != "production" or not isinstance(activation,RuntimeConfig):raise ValueError("production_scheduler_disabled")
+            activation.permits(root)
+            if policy.sha256 != SchedulerPolicy(**activation.payload["schedule"]).sha256:
+                raise ValueError("runtime_schedule_outside_activation")
+        self.scope="production" if mode=="production" else "sandbox_only"
+        self.simulation=mode=="sandbox"
         policy.check()
         self.sandbox=sandbox_root.resolve(strict=True)
         allowed=(Path(__file__).resolve().parents[1]/".venv",Path(tempfile.gettempdir()).resolve())
-        if not sandbox_root.is_absolute() or sandbox_root.is_symlink() or not any(self.sandbox!=p and self.sandbox.is_relative_to(p) for p in allowed):
+        if not sandbox_root.is_absolute() or sandbox_root.is_symlink() or (mode=="sandbox" and not any(self.sandbox!=p and self.sandbox.is_relative_to(p) for p in allowed)):
             raise ValueError("sandbox_not_isolated")
         self.root=root.absolute();self.policy=policy;self.clock=clock
         if not self.root.resolve().is_relative_to(self.sandbox) or ".." in self.root.parts:
@@ -154,6 +162,7 @@ class WeeklyScheduler:
         self._guard()
 
     def _guard(self):
+        if self.activation is not None:self.activation.permits(self.root)
         stat=self.sandbox.stat()
         if (stat.st_dev,stat.st_ino)!=self.identity:raise ValueError("sandbox_changed")
         if any(p.is_symlink() for p in (self.root,*self.root.parents)) or (self.root/"scheduler.lock").is_symlink():
@@ -163,8 +172,12 @@ class WeeklyScheduler:
     def _jobs(self):
         self._guard();result=[]
         for path in sorted(self.root.glob("recovery-????-W??.json")):
-            result.append(_read_job(path))
+            result.append(_read_job(path,simulation=self.simulation))
         return result
+
+    def _same_policy(self,job):
+        return (job["policy_sha256"]==self.policy.sha256
+            and (self.activation is None or job.get("activation_sha256")==self.activation.sha256))
 
     def _save(self,job):
         atomic_write_json(self.root/(job["request_id"]+".json"),job)
@@ -177,14 +190,18 @@ class WeeklyScheduler:
         except Exception:
             return {}
 
-    @staticmethod
-    def _public(job,action):
-        return {**job,"action":action,"scope":"sandbox_only","model_calls":0,"credits_are_simulated":True}
+    def _public(self,job,action):
+        return {**job,"action":action,"scope":self.scope,"model_calls":0 if self.simulation else job.get("reported_model_turns"),"credits_are_simulated":self.simulation}
 
     def _result(self,job,result):
         allowed={"state","request_id","slot","snapshot_sha256","source_count","coverage","candidate_sha256",
-                 "executor","usage","reported_model_turns","publication","simulation"}
-        if not isinstance(result,dict) or result.get("simulation") is not True:
+                 "executor","usage","reported_model_turns","publication","simulation","usage_complete","format_contract"}
+        if self.scope == "production":
+            from app.recovery_guide_consolidation import VERSION
+            if not isinstance(result,dict) or result.get("format_contract") != VERSION:
+                raise ValueError("runtime_integrated_format_required")
+            job["format_contract"] = VERSION
+        if not isinstance(result,dict) or result.get("simulation") is not self.simulation:
             raise ValueError("invalid_analysis_receipt")
         if type(result.get("source_count")) is not int:raise ValueError("invalid_source_count")
         for key in ("request_id","slot","snapshot_sha256","source_count"):
@@ -195,9 +212,11 @@ class WeeklyScheduler:
         usage=normalize_usage(result.get("usage"));credits=estimate_standard_credits(MODEL,usage)
         if usage is None or credits is None:raise ValueError("unknown_usage")
         job.update(usage=usage,credits=credits)
+        job["credits_are_lower_bound"] = result.get("usage_complete",True) is not True
         calls=result.get("reported_model_turns")
         if type(calls) is not int or calls<1:raise ValueError("invalid_call_count")
         job["reported_model_turns"]=calls
+        if job["credits_are_lower_bound"]:raise ValueError("unknown_attempt_usage")
         if set(result)-allowed:raise ValueError("unexpected_analysis_payload")
         if calls>job["planned_calls"]:raise ValueError("call_limit")
         if credits>job["reserved_credits"] or credits>self.policy.run_credits:raise ValueError("cost_limit")
@@ -233,7 +252,7 @@ class WeeklyScheduler:
             return self._public(job,"waiting_delivery_dependencies")
         known=delivery_status(dict(job["publication"]))
         for key,expected in (("request_id",job["request_id"]),("approval_sha256",job["publication"]["approval_sha256"]),
-                             ("candidate_sha256",job["candidate_sha256"]),("snapshot_sha256",job["snapshot_sha256"]),("scope","sandbox_only")):
+                             ("candidate_sha256",job["candidate_sha256"]),("snapshot_sha256",job["snapshot_sha256"]),("scope",self.scope)):
             if known.get(key)!=expected:raise ValueError("delivery_binding_changed")
         if known.get("state") not in {"accepted","applying","pending_icloud","uploaded"}:
             raise ValueError("delivery_attention")
@@ -258,7 +277,8 @@ class WeeklyScheduler:
         job["final_copies_verified"]=True
 
     def tick(self,now:datetime,*,readiness:Callable,preflight:Callable,analyze:Callable,
-             delivery_status:Callable,deliver:Callable,trigger="timer",verify_unchanged:Callable|None=None) -> dict:
+             delivery_status:Callable,deliver:Callable,trigger="timer",verify_unchanged:Callable|None=None,
+             delivery_readiness:Callable|None=None) -> dict:
         self._guard()
         if trigger not in {"timer","manual"}:raise ValueError("invalid_trigger")
         slot,due=due_slot(now,self.policy)
@@ -270,11 +290,11 @@ class WeeklyScheduler:
                 if len(pending)>1:raise ValueError("multiple_pending_jobs")
                 if pending:
                     job=pending[0]
-                    if job["policy_sha256"]!=self.policy.sha256:return self._public(job,"policy_changed")
+                    if not self._same_policy(job):return self._public(job,"policy_changed")
                     if job["state"]=="analysis_in_flight":
                         job.update(state="attention",reason="analysis_outcome_unknown");self._save(job)
                     if job["state"] in DELIVERY:
-                        try:return self._deliver(job,now,readiness,delivery_status,deliver)
+                        try:return self._deliver(job,now,delivery_readiness or readiness,delivery_status,deliver)
                         except Exception:
                             job.update(state="attention",reason="delivery_not_verified");self._save(job)
                     return self._public(job,"operator_attention" if job["state"]=="attention" else "awaiting_acceptance")
@@ -298,13 +318,14 @@ class WeeklyScheduler:
                 month=now.astimezone(ZONE).strftime("%Y-%m")
                 spent=sum(max(j["reserved_credits"],j.get("credits",0)) for j in jobs if j["month"]==month)
                 if spent+reserve>self.policy.month_credits:return {"state":"budget_blocked","model_calls":0}
-                job={"schema":1,"simulation":True,"request_id":request_id,"slot":slot,"due_utc":due.isoformat(),"month":month,
+                job={"schema":1,"simulation":self.simulation,"request_id":request_id,"slot":slot,"due_utc":due.isoformat(),"month":month,
                      "policy_sha256":self.policy.sha256,"trigger":trigger,"state":"analysis_in_flight",
                      "executor":{"role":ROLE,"model":MODEL,"reasoning_effort":"medium","policy_digest":self.policy.role_policy_digest},
                      "snapshot_sha256":prepared["snapshot_sha256"],"original_sha256":prepared["original_sha256"],
                      "source_count":prepared["source_count"],"planned_calls":prepared["planned_calls"],
                      "copies_current":prepared["copies_current"],
                      "reserved_credits":reserve,"analysis_invocations":1,"updated_at":now.isoformat()}
+                if self.activation is not None:job["activation_sha256"]=self.activation.sha256
                 job["identity_sha256"]=digest(canonical_json(job));self._save(job)
                 start=self.clock()
                 try:
@@ -317,7 +338,7 @@ class WeeklyScheduler:
                     return self._public(job,"operator_attention")
                 self._save(job)
                 if job["state"] in DELIVERY:
-                    try:return self._deliver(job,now,readiness,delivery_status,deliver)
+                    try:return self._deliver(job,now,delivery_readiness or readiness,delivery_status,deliver)
                     except Exception:
                         job.update(state="attention",reason="delivery_not_verified");self._save(job)
                 return self._public(job,"analysis_recorded")
@@ -333,7 +354,7 @@ class WeeklyScheduler:
         if not self.root.exists():raise ValueError("unknown_job")
         with exclusive_file_lock(self.root/"scheduler",timeout=0):
             job=next((j for j in self._jobs() if j["request_id"]==request_id),None)
-            if job is None or self.policy.enabled is not True or job["policy_sha256"]!=self.policy.sha256:
+            if job is None or self.policy.enabled is not True or not self._same_policy(job):
                 raise ValueError("job_policy_not_authorized")
             if confirmed_identity!=job["identity_sha256"]:raise ValueError("attachment_not_confirmed")
             if job.get("publication")==reference and job["state"] in DELIVERY|DONE:
@@ -353,7 +374,7 @@ class WeeklyScheduler:
             job=next((j for j in self._jobs() if j["request_id"]==request_id),None)
             if job is None or self.policy.enabled is not True:raise ValueError("job_policy_not_authorized")
             if (confirmed is not True or confirmed_identity!=job["identity_sha256"]
-                    or job["policy_sha256"]!=self.policy.sha256
+                    or not self._same_policy(job)
                     or job["state"] not in {"attention","analysis_in_flight"}
                     or job.get("reason") not in {None,"analysis_not_verified","analysis_outcome_unknown"}):
                 raise ValueError("reconciliation_not_confirmed")

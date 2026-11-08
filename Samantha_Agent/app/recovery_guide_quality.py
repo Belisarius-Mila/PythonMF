@@ -226,7 +226,7 @@ def validate(answer: dict, snapshot: Snapshot, *, context: ReviewContext | None 
     return candidate
 
 
-def review(answer: dict, snapshot: Snapshot, dossier: dict, context: ReviewContext) -> dict:
+def review(answer: dict, snapshot: Snapshot, dossier: dict, context: ReviewContext, *, format_request=None) -> dict:
     """Complete REC-03 checklist; only returns review/blocked, never approval."""
     result: dict[str, Any] = {"schema_version": 1, "validator_version": VALIDATOR_VERSION,
         "state": "blocked", "snapshot_sha256": snapshot.sha256,
@@ -236,7 +236,18 @@ def review(answer: dict, snapshot: Snapshot, dossier: dict, context: ReviewConte
         _fail(context.snapshot_sha256 != snapshot.sha256, "review_snapshot_changed")
         _fail(type(context.max_age_days) is not int or context.max_age_days <= 0, "invalid_freshness_policy")
         _fail(bool(context.unresolved_conflicts), "unresolved_recovery_conflict")
-        candidate = validate(answer, snapshot, context=context)
+        if format_request is None:
+            candidate = validate(answer, snapshot, context=context)
+            evidence_rows = answer["paragraphs"]
+        else:
+            from app import recovery_guide_consolidation as consolidation
+            checked = consolidation.validate(answer, snapshot, format_request, context=context)
+            candidate = checked["candidate"]
+            evidence_rows = [*checked["resolved_paragraphs"]["paragraphs"],
+                *({"status":"unverified","evidence":row["evidence"]}
+                  for row in checked["change_audit"] if row["action"]=="retire")]
+            result["format_contract"] = consolidation.VERSION
+            result["format_request_sha256"] = format_request.sha256
         result["candidate_sha256"] = digest(candidate)
         _fail(context.application_scope_approved is not True or not context.applications, "application_scope_unapproved")
         for name, alternatives in TOPICS.items():
@@ -252,7 +263,7 @@ def review(answer: dict, snapshot: Snapshot, dossier: dict, context: ReviewConte
         _fail(any(not isinstance(n, str) for n in names) or len(set(names)) != len(names), "duplicate_application")
         _fail(set(names) != set(context.applications), "application_coverage")
         sources = _sources(snapshot)
-        for row in answer["paragraphs"]:
+        for row in evidence_rows:
             result["anchors"].extend(anchors(row["evidence"], sources))
             for evidence in row["evidence"]:
                 fact = _fact(evidence["source"], context, sources, evidence["quote"])

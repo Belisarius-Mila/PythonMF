@@ -146,7 +146,7 @@ def status(state_dir: Path, slot: str) -> dict:
 
 def run(snapshot: Snapshot, *, state_dir: Path, now: datetime, limits: Limits,
         count_tokens: Callable[[str], int], call: Callable[[dict, str], dict],
-        approved_snapshot: str, assert_sources: Callable[[], bool], confirmed: bool = False, legacy_format: bool = False) -> dict:
+        approved_snapshot: str, assert_sources: Callable[[], bool], confirmed: bool = False, legacy_format: bool = False, weekday: int = 6, hour: int = 9) -> dict:
     """One slot, frozen snapshot, persistent before-send marker, no retries.
 
     Injected transport returns {answer:dict, usage:normalized_usage}. Production
@@ -154,7 +154,7 @@ def run(snapshot: Snapshot, *, state_dir: Path, now: datetime, limits: Limits,
     """
     if confirmed is not True or approved_snapshot != snapshot.sha256:
         return {"state": "approval_required", "model_calls": 0}
-    slot = weekly_slot(now)
+    slot = weekly_slot(now, weekday=weekday, hour=hour)
     if state_dir.is_symlink():
         raise ValueError("Nepovolený alias stavu.")
     state_dir.mkdir(parents=True, exist_ok=True, mode=0o700)
@@ -197,6 +197,7 @@ def run(snapshot: Snapshot, *, state_dir: Path, now: datetime, limits: Limits,
                     else:
                         request = consolidation.prepare(snapshot, findings, now.astimezone(ZoneInfo("Europe/Prague")).date())
                         payload = request.payload
+                        atomic_create_text(state_dir / f"{slot}-request.json", request.envelope)
                 schema = INSPECT_SCHEMA if kind == "inspect" else SYNTHESIS_SCHEMA if legacy_format else consolidation.schema(payload)
                 output_allowance = limits.inspection_reserve if kind == "inspect" else limits.output_tokens
                 actual_input = count_tokens(canonical_json(payload)) + count_tokens(INSTRUCTIONS if legacy_format else REVIEW_INSTRUCTIONS) + count_tokens(canonical_json(schema)) + 512
