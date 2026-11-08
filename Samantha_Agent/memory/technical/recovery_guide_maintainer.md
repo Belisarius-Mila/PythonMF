@@ -401,3 +401,26 @@ Nejbližší návrh je samostatný úplný anchor pilot s neplacenou kartou, akt
 zdroji a realistickým fázovým časovým plánem podle měření; nový celý modelový
 pokus musí být konkrétně přijat. Celý korpus ani Mac/iPhone nastavení zatím
 nebyly přezkoumané, žádný provozní návod či týdenní aktivace nevznikly.
+
+## 2026-11-08 — celý neplacený anchor plán
+
+Nový samostatný `recovery_guide_anchor_full_plan.py` nabízí prepare/measure
+s offline inspection/validate_inspection/synthesis helpery, **nemá run**.
+Plán dcfb8b2a…c6f805d nad main 6d5b576b: 531 dokumentů + original, celé
+texty 6 314 979 B, 20 čtecích dávek + 1 syntéza, bez opakovaného čtení dokumentů.
+Návrh 243,50895 / přijímací mez 250 Standard kreditů; o200k_base není přesné
+Sol mapování, není to tvrdý billing/context/output cap ani schválená cena.
+
+Synthesis rezervuje až 771 evidence rows a všechna bounded findings; každý
+přesný evidence row <=160 reference tokenů, nejvýše 6 findings/dávku se dvěma
+odkazy a celkem <=1000 reference tokenů. 782 dlouhých řádků nelze citovat,
+ale plné texty se nekrátí. Žádný zdroj nebyl vynechán. Nová obálka ještě
+není modelově ověřená; aktuální stav je plán s explicitně chybějícím adapterem.
+
+Pro další kartu návrh 300 s inspect / 900 s synthesis (měření 400,240 s,
+output-scaled rezerva 807,058 s); starý malý job zůstává attention při 300 s.
+18 nových / 68 cílených testů OK a úplná offline zdrojová fixture, žádný model.
+Doklad reports/recovery_guide_anchor_full_plan_20261108.md/JSON a offline JSON.
+Příští vývoj musí připojit přesný plan digest k samostatnému trvalému běhovému
+jobu, ověřit peer/socket/účet/role, vynutit meze a no-retry a až potom vytvořit
+novou exekuční kartu. Souhlas s placením se v této plánovací etapě nežádá.

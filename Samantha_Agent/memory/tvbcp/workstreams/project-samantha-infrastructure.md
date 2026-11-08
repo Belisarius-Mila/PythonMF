@@ -1,42 +1,41 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
-## 2026-11-07 23:28 CET — REC-06: malá živá zkouška dokončena, obsah/cena OK, čas překročen
+## 2026-11-08 08:21 CET — REC-06: neplacený úplný anchor plán spočten
 
 ### Hotovo
-- Schválená karta 566899e7…ddd8cb3 provedena jedním run: dva jedinečné
-  completed/delivered tahy Sol/medium Standard, žádný retry ani třetí tah.
-- Inspect i již doručená syntéza prošly obsahovým kontraktem: oba správné
-  source/anchor odkazy, přesné citace, celý original doslovně zachovaný,
-  dva unverified dodatky. Syntéza byla ověřena neplaceně z raw účtenky.
-- Celkový odhad ze skutečné spotřeby 8,50485 Standard kreditu, pod mezí 15.
-  Input/output meze prošly; nebyly pozorované nežádoucí tool události.
+- Plán nad main 6d5b576b: 531 dokumentů + celý původní TXT, 6 314 979 B,
+  dvacet čtecích dávek a jedna syntéza. Plné texty zachované, každý dokument právě jednou.
+- Konzervativní rezerva bez cache 243,50895 Standard kreditu; návrh přijímací
+  meze 250. Čtení 300 s/dávku, syntéza 900 s podle skutečného měření malého testu.
+- Osmnáct nových testů / 68 cílených OK; úplná zdrojová fixture a request hashe
+  prošly. Syntézní rezerva je předem ohraničená, nesmí se krátit historie či zdroje.
 
 ### Rozhodnutí
-- Celý test zůstává attention / accepted=false: syntéza trvala 400,240 s
-  proti schváleným 300 s. Žádná zpětná změna limitu či přijetí jobu.
-- Známé dokončené účtenky se zachovávají; samotné časové překročení není
-  důvodem k opakování modelových tahů. Starý v2 job/21,013 kreditu beze změny.
-- REC-06 a celý korpus/Mac/iPhone nejsou přijaté. Žádný provozní TXT/iCloud,
-  role, služba, push, nasazení nebo integrace do main.
+- Jde o neplacený plán dcfb8b2a…c6f805d, nikoli exekuční kartu nebo souhlas
+  s placením. Žádný nový modelový tah. Placený run adapter není implementovaný.
+- 782 dlouhých řádků je nepodporovaných jako citace v omezené rezervě;
+  celé zdrojové texty zůstávají čitelné, žádný dokument se nevynechal.
+- Staré placené joby a jejich limity zůstávají uzavřené a beze změny. Nová
+  časová mez nezvyšuje zpětně 300 s nepřijatého malého testu.
 
 ### Další krok
-- Neplaceně připravit úplný anchor pilot a novou cenovou kartu: aktuální
-  manifest, přepočet všech dávek/syntézy a samostatný časový plán fází podle
-  naměřených 400,240 s. Nejde o retry ani zvýšení limitu uzavřeného testu.
+- Dokončit samostatný běhový adapter nad přesným plánem: zdrojová čerstvost,
+  peer/socket/účet/Standard, společný trvalý job bez retry, raw účtenky a skutečné
+  přepočty/fázové meze. Až pak vytvořit exekuční kartu k samostatnému přijetí.
 
 ### Navrhované další kroky
-- Will přezkoumá známý výsledek, oba splněné obsahové kontrakty a časový důvod nepřijetí.
-- Úplný anchor adapter/preflight bez modelu; nový konkrétní souhlas až s hotovou kartou.
-- Volitelně později programově skládat nezměněné části místo jejich modelového opisování.
-- Až po celém návrhu Mac/iPhone dossier, dvě kopie/upload a samostatná týdenní aktivace.
+- Will přezkoumá izolovaný plán a zachová svoji souběžnou práci.
+- Implementovat a neplaceně otestovat celý adapter; žádný další malý placený test automaticky.
+- Po čerstvé konkrétní kartě zvlášť přijmout jeden celý pilot.
+- Později úplný Mac/iPhone dossier, dvě kopie/upload a samostatná týdenní aktivace.
 
 ### Technický důkaz
-- recovery_guide_anchor_trial_run_20261107.md a recovery_guide_anchor_trial_result_20261107.json.
-- Inspect 9,008 s / 1,9261; synthesis 400,240 s / 6,57875 Standard kreditu.
-  Celkem input 69 602, cached 0, output 20 099 (reasoning subset 132), total 89 701.
-- Raw 01 6f8b5922…4b6ae8, raw 02 bea9fa82…bffc4; přesně dva raw turn soubory.
-  Návod 62 778 B zachovaný přesně včetně vnějšího whitespace, nové dodatky 366 B.
-- Kód se neměnil; předchozí 50 cílených a 2 668 plných testů / 5 skipped platí.
-  Finální statická brána a git diff --check OK. Raw data zůstávají v soukromé .venv.
+- recovery_guide_anchor_full_plan_20261108.md, stejnojmenný JSON a *_offline_20261108.json.
+- Referenční input s marží 4 300 579, output 113 920; synthesis input 236 458.
+  Encoding o200k_base / tiktoken 0.14.0 není přesné Sol mapování; meze nejsou billing cap.
+- Časový návrh 900 s vychází z 400,240 s / 19 837 output tokenů; při 32 000
+  a 25% marži 807,058 s. Součet přijímacích časů 115 minut není předpověď délky.
+- Čtecí runtime 0.163.0 / CLI 0.166.0; Sol/medium v katalogu, živý kontext/účetní základ neověřené.
+- Plná brána 2 686 testů OK / 5 skipped; statická brána a git diff --check OK. Žádný model/služba/role/push/deploy ani TXT/iCloud.
 <!-- SAMANTHA_CURRENT_STATUS_END -->
 
 ### Předchozí stav infrastruktury
@@ -1179,3 +1178,41 @@ souborů / 5 002 170 B. Stávající rutinní pilot není obecný writer/schedul
   Návod 62 778 B zachovaný přesně včetně vnějšího whitespace, nové dodatky 366 B.
 - Kód se neměnil; předchozí 50 cílených a 2 668 plných testů / 5 skipped platí.
   Finální statická brána a git diff --check OK. Raw data zůstávají v soukromé .venv.
+
+## 2026-11-08 08:21 CET — REC-06: neplacený úplný anchor plán spočten
+
+### Hotovo
+- Plán nad main 6d5b576b: 531 dokumentů + celý původní TXT, 6 314 979 B,
+  dvacet čtecích dávek a jedna syntéza. Plné texty zachované, každý dokument právě jednou.
+- Konzervativní rezerva bez cache 243,50895 Standard kreditu; návrh přijímací
+  meze 250. Čtení 300 s/dávku, syntéza 900 s podle skutečného měření malého testu.
+- Osmnáct nových testů / 68 cílených OK; úplná zdrojová fixture a request hashe
+  prošly. Syntézní rezerva je předem ohraničená, nesmí se krátit historie či zdroje.
+
+### Rozhodnutí
+- Jde o neplacený plán dcfb8b2a…c6f805d, nikoli exekuční kartu nebo souhlas
+  s placením. Žádný nový modelový tah. Placený run adapter není implementovaný.
+- 782 dlouhých řádků je nepodporovaných jako citace v omezené rezervě;
+  celé zdrojové texty zůstávají čitelné, žádný dokument se nevynechal.
+- Staré placené joby a jejich limity zůstávají uzavřené a beze změny. Nová
+  časová mez nezvyšuje zpětně 300 s nepřijatého malého testu.
+
+### Další krok
+- Dokončit samostatný běhový adapter nad přesným plánem: zdrojová čerstvost,
+  peer/socket/účet/Standard, společný trvalý job bez retry, raw účtenky a skutečné
+  přepočty/fázové meze. Až pak vytvořit exekuční kartu k samostatnému přijetí.
+
+### Navrhované další kroky
+- Will přezkoumá izolovaný plán a zachová svoji souběžnou práci.
+- Implementovat a neplaceně otestovat celý adapter; žádný další malý placený test automaticky.
+- Po čerstvé konkrétní kartě zvlášť přijmout jeden celý pilot.
+- Později úplný Mac/iPhone dossier, dvě kopie/upload a samostatná týdenní aktivace.
+
+### Technický důkaz
+- recovery_guide_anchor_full_plan_20261108.md, stejnojmenný JSON a *_offline_20261108.json.
+- Referenční input s marží 4 300 579, output 113 920; synthesis input 236 458.
+  Encoding o200k_base / tiktoken 0.14.0 není přesné Sol mapování; meze nejsou billing cap.
+- Časový návrh 900 s vychází z 400,240 s / 19 837 output tokenů; při 32 000
+  a 25% marži 807,058 s. Součet přijímacích časů 115 minut není předpověď délky.
+- Čtecí runtime 0.163.0 / CLI 0.166.0; Sol/medium v katalogu, živý kontext/účetní základ neověřené.
+- Plná brána 2 686 testů OK / 5 skipped; statická brána a git diff --check OK. Žádný model/služba/role/push/deploy ani TXT/iCloud.

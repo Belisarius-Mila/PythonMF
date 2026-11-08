@@ -1443,3 +1443,41 @@ závislosti bez konkrétní potřeby. Nejde o rozšíření e-mailové business 
   Návod 62 778 B zachovaný přesně včetně vnějšího whitespace, nové dodatky 366 B.
 - Kód se neměnil; předchozí 50 cílených a 2 668 plných testů / 5 skipped platí.
   Finální statická brána a git diff --check OK. Raw data zůstávají v soukromé .venv.
+
+## 2026-11-08 08:21 CET — REC-06: neplacený úplný anchor plán spočten
+
+### Hotovo
+- Plán nad main 6d5b576b: 531 dokumentů + celý původní TXT, 6 314 979 B,
+  dvacet čtecích dávek a jedna syntéza. Plné texty zachované, každý dokument právě jednou.
+- Konzervativní rezerva bez cache 243,50895 Standard kreditu; návrh přijímací
+  meze 250. Čtení 300 s/dávku, syntéza 900 s podle skutečného měření malého testu.
+- Osmnáct nových testů / 68 cílených OK; úplná zdrojová fixture a request hashe
+  prošly. Syntézní rezerva je předem ohraničená, nesmí se krátit historie či zdroje.
+
+### Rozhodnutí
+- Jde o neplacený plán dcfb8b2a…c6f805d, nikoli exekuční kartu nebo souhlas
+  s placením. Žádný nový modelový tah. Placený run adapter není implementovaný.
+- 782 dlouhých řádků je nepodporovaných jako citace v omezené rezervě;
+  celé zdrojové texty zůstávají čitelné, žádný dokument se nevynechal.
+- Staré placené joby a jejich limity zůstávají uzavřené a beze změny. Nová
+  časová mez nezvyšuje zpětně 300 s nepřijatého malého testu.
+
+### Další krok
+- Dokončit samostatný běhový adapter nad přesným plánem: zdrojová čerstvost,
+  peer/socket/účet/Standard, společný trvalý job bez retry, raw účtenky a skutečné
+  přepočty/fázové meze. Až pak vytvořit exekuční kartu k samostatnému přijetí.
+
+### Navrhované další kroky
+- Will přezkoumá izolovaný plán a zachová svoji souběžnou práci.
+- Implementovat a neplaceně otestovat celý adapter; žádný další malý placený test automaticky.
+- Po čerstvé konkrétní kartě zvlášť přijmout jeden celý pilot.
+- Později úplný Mac/iPhone dossier, dvě kopie/upload a samostatná týdenní aktivace.
+
+### Technický důkaz
+- recovery_guide_anchor_full_plan_20261108.md, stejnojmenný JSON a *_offline_20261108.json.
+- Referenční input s marží 4 300 579, output 113 920; synthesis input 236 458.
+  Encoding o200k_base / tiktoken 0.14.0 není přesné Sol mapování; meze nejsou billing cap.
+- Časový návrh 900 s vychází z 400,240 s / 19 837 output tokenů; při 32 000
+  a 25% marži 807,058 s. Součet přijímacích časů 115 minut není předpověď délky.
+- Čtecí runtime 0.163.0 / CLI 0.166.0; Sol/medium v katalogu, živý kontext/účetní základ neověřené.
+- Plná brána 2 686 testů OK / 5 skipped; statická brána a git diff --check OK. Žádný model/služba/role/push/deploy ani TXT/iCloud.
