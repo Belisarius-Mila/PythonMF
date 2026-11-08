@@ -169,6 +169,7 @@ class Configuration(unittest.TestCase):
             'schedule':asdict(SchedulerPolicy(True,True,True,not_before='2026-11-01T00:00:00+00:00',
                 role_policy_digest='a'*64,run_credits=50,month_credits=1000,max_calls=8,max_seconds=60)),
             'limits':asdict(m.Limits(40000,2000,8,50,1000,60)),
+            'source_ref':'refs/heads/main','publication_policy':{'mode':'manual'},
             'scopes':['docs/'],'bootstrap':{'path':str(self.root/'guide.txt'),'sha256':'b'*64},
             'tokenizer':{'package_version':'test','encoding':'o200k_base','margin':1.2,'reference_uncertainty_accepted':True},
             'runtime_evidence':{'server_version':'test','protocol_sha256':'c'*64,'input_tokens':40000,'reference':'accepted context test'}}
@@ -411,6 +412,100 @@ class DeliveryIndependence(unittest.TestCase):
         self.runtime.readiness=unavailable
         self.runtime.delivery_readiness=lambda:{k:True for k in ('mac_available','user_session','network','icloud_auth')}
         self.assertEqual(self.tick()['state'],'completed');self.assertEqual(len(self.calls),2)
+
+
+
+class AutomaticPublication(unittest.TestCase):
+    snapshot=Runtime.snapshot
+    factory=Runtime.factory
+    call=Runtime.call
+    make=Runtime.make
+    tick=Runtime.tick
+    accept=Runtime.accept
+    def setUp(self):
+        Runtime.setUp(self)
+        self.runtime.automatic_profile=lambda snap,day:(fixtures.dossier(fixtures.context(snap)),
+            replace(fixtures.context(snap),checked_on=day))
+
+    # Reuse the fixture, not the manual-acceptance expectations of Runtime.
+    def test_successful_tick_writes_both_copies_without_weekly_manual_action(self):
+        result=self.tick();self.assertEqual(result['state'],'completed')
+        self.assertEqual(len(self.calls),2);self.assertEqual(self.targets[0].read_bytes(),self.targets[1].read_bytes())
+        self.assertEqual(self.tick()['action'],'replayed_receipt');self.assertEqual(len(self.calls),2)
+
+    def test_invalid_dossier_keeps_old_copies_and_does_not_call_model_again(self):
+        def bad(snap,day):return {'applications':[]},replace(fixtures.context(snap),checked_on=day)
+        self.runtime.automatic_profile=bad
+        result=self.tick();self.assertEqual(result['automatic_publication'],'blocked')
+        self.assertFalse(any(p.exists() for p in self.targets));self.tick();self.assertEqual(len(self.calls),2)
+
+    def test_changed_macos_requires_attention_without_publishing(self):
+        def bad(snap,day):return fixtures.dossier(fixtures.context(snap)),replace(fixtures.context(snap),checked_on=day,macos_observed='Changed OS')
+        self.runtime.automatic_profile=bad
+        result=self.tick();self.assertEqual(result['automatic_publication'],'blocked')
+        self.assertFalse(any(p.exists() for p in self.targets))
+
+    def test_automatic_second_week_starts_from_last_published_guide(self):
+        self.assertEqual(self.tick()['state'],'completed');first=self.targets[0].read_text()
+        self.now+=timedelta(days=7);self.assertEqual(self.tick()['state'],'completed')
+        self.assertEqual(self.calls[2][0]['original']['text'],first);self.assertEqual(len(self.calls),4)
+
+    def test_crash_after_approval_before_scheduler_attachment_reuses_acceptance(self):
+        original=self.scheduler.attach_publication
+        with patch.object(self.scheduler,'attach_publication',side_effect=SystemExit()):
+            with self.assertRaises(SystemExit):self.tick()
+        self.scheduler.attach_publication=original
+        self.assertEqual(self.tick()['state'],'completed');self.assertEqual(len(self.calls),2)
+
+
+class SourceAndPolicy(unittest.TestCase):
+    setUp=Configuration.setUp
+    save=Configuration.save
+    # Reuse the private configuration fixture without inherited test cases.
+    def test_main_documents_are_read_from_git_objects_without_switching_worktree(self):
+        import subprocess
+        def git(*args):return subprocess.check_output(['git','-C',str(self.project),'-c','user.name=Fixture','-c','user.email=fixture@example.invalid',*args],text=True).strip()
+        git('init','-q','-b','main');(self.project/'docs').mkdir();doc=self.project/'docs/current.md'
+        doc.write_text('First public documentation.');git('add','docs/current.md');git('commit','-qm','first')
+        git('branch','data');doc.write_text('Current main documentation.');git('commit','-qam','second')
+        main=git('rev-parse','main');git('checkout','-q','data')
+        seed=self.root/'guide.txt';seed.write_text(fixtures.ORIGINAL)
+        cfg=self.save()
+        for path in cfg.destinations:path.parent.mkdir(parents=True,exist_ok=True)
+        runtime,counter=live.build(cfg);snap=runtime.snapshot_provider(seed)
+        self.assertEqual(snap.head,main);self.assertIn('Current main documentation.',snap.sources[0].text)
+        self.assertEqual(git('branch','--show-current'),'data');self.assertEqual(doc.read_text(),'First public documentation.')
+        self.assertTrue(runtime.assert_snapshot(snap,seed))
+        git('update-ref','refs/heads/main',git('rev-parse','data'))
+        self.assertFalse(runtime.assert_snapshot(snap,seed));self.assertIsNone(counter.child)
+
+    def test_automatic_profile_marks_settings_unverified_and_checks_macos_baseline(self):
+        from types import SimpleNamespace
+        self.value['publication_policy']={'mode':'validated_auto_v1','applications':['Python','Codex'],
+            'macos_baseline':'Test OS'}
+        cfg=self.save()
+        for path in cfg.destinations:path.parent.mkdir(parents=True,exist_ok=True)
+        runtime,_=live.build(cfg)
+        with patch.object(live.subprocess,'check_output',return_value='Test OS\n'):
+            dossier,context=runtime.automatic_profile(fixtures.snap(),datetime(2026,11,8).date())
+        self.assertTrue(context.application_scope_approved)
+        self.assertEqual(context.macos_expected,context.macos_observed)
+        self.assertTrue(all(v['status']=='unverified' for a in dossier['applications'] for v in a['fields'].values()))
+
+
+
+class BillingBasis(unittest.TestCase):
+    setUp=TransportBinding.setUp
+    client_factory=TransportBinding.client_factory
+    binding=TransportBinding.binding
+    def test_api_key_account_is_rejected_before_thread_or_turn(self):
+        original=self.wire.request
+        def request(method,params):
+            return {'account':{'type':'apiKey'}} if method=='account/read' else original(method,params)
+        self.wire.request=request
+        with self.assertRaisesRegex(ValueError,'subscription_account_required'):
+            with self.binding() as call:call({},'inspect')
+        self.assertFalse(any(name in {'thread/start','turn/start'} for name,_ in self.wire.calls))
 
 
 if __name__=='__main__':unittest.main()

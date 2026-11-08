@@ -58,7 +58,12 @@ def load(project=ROOT,home=None):
     raw=path.read_text()
     if len(raw.encode())>32000:raise ValueError('runtime_configuration_oversized')
     p=json.loads(raw)
-    required={'schema','enabled','approved_at','schedule','limits','scopes','bootstrap','tokenizer','runtime_evidence'}
+    validate_payload(p)
+    return RuntimeConfig(path,canonical_json(p),project,home)
+
+
+def validate_payload(p):
+    required={'schema','enabled','approved_at','schedule','limits','scopes','bootstrap','tokenizer','runtime_evidence','source_ref','publication_policy'}
     if not isinstance(p,dict) or set(p)!=required or type(p['schema']) is not int or p['schema']!=1 or type(p['enabled']) is not bool:
         raise ValueError('runtime_configuration_shape')
     from app.recovery_guide_scheduler import SchedulerPolicy
@@ -86,6 +91,17 @@ def load(project=ROOT,home=None):
         or not evidence['reference'].strip() or not re.fullmatch('[a-f0-9]{64}',evidence['protocol_sha256'])
         or type(evidence['input_tokens']) is not int or not 0<evidence['input_tokens']<=450000
         or p['limits']['input_tokens']>evidence['input_tokens']):raise ValueError('runtime_context_evidence_required')
+    if p['source_ref'] not in {'HEAD','refs/heads/main'}:raise ValueError('runtime_source_ref_not_approved')
+    publication=p['publication_policy']
+    if publication=={'mode':'manual'}:pass
+    elif (not isinstance(publication,dict) or set(publication)!={'mode','applications','macos_baseline'}
+        or publication['mode']!='validated_auto_v1' or not isinstance(publication['applications'],list)
+        or not publication['applications'] or any(not isinstance(a,str) or not a.strip() for a in publication['applications'])
+        or len(set(publication['applications']))!=len(publication['applications'])
+        or not isinstance(publication['macos_baseline'],str) or not publication['macos_baseline'].strip()):
+        raise ValueError('runtime_publication_policy_not_approved')
+    from app.recovery_guide_quality import safe_text
+    safe_text(canonical_json(publication))
     instant=datetime.fromisoformat(p['approved_at'])
     if instant.tzinfo is None:raise ValueError('runtime_approval_timezone_required')
-    return RuntimeConfig(path,canonical_json(p),project,home)
+    return p

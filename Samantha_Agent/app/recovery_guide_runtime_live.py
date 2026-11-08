@@ -17,7 +17,9 @@ from types import SimpleNamespace
 from app import recovery_guide_maintainer as m
 from app import recovery_guide_consolidation as c
 from app import recovery_guide_runtime_config as configuration
-from app.recovery_guide_sources import collect,canonical_json,digest
+from app.recovery_guide_sources import Source,canonical_json,digest
+from dataclasses import replace
+from app.recovery_guide_revision import collect_revision
 from app.recovery_guide_scheduler import SchedulerPolicy,WeeklyScheduler,inspect_status
 from app.recovery_guide_publication import PublicationStore
 from app.recovery_guide_publish import icloud_metadata
@@ -76,6 +78,8 @@ def live_calls(directory,executor,*,assert_current,client_factory=None):
     from app.routine_tasks import start_data_only_thread
     agent_roles.assert_current(executor,role=m.ROLE)
     with (client_factory or new_luna_client)() as client:
+        account=client.transport.request('account/read',{'refreshToken':False}).get('account')
+        if not isinstance(account,dict) or account.get('type')!='chatgpt':raise ValueError('runtime_subscription_account_required')
         selected=agent_roles.resolve_role(client.list_models(include_hidden=True),role=m.ROLE)
         if (any(selected[k]!=executor[k] for k in ('role','model','reasoning_effort','policy_digest'))
                 or selected.get('fallback') or selected['model']!=m.MODEL or selected['reasoning_effort']!='medium'):
@@ -123,6 +127,17 @@ def live_calls(directory,executor,*,assert_current,client_factory=None):
         yield call
 
 
+def configuration_source(p):
+    projection={'kind':'declared_configuration_not_live_audit','model':m.MODEL,'effort':'medium',
+        'speed':'Standard per turn','source_ref':p['source_ref'],
+        'schedule':{key:p['schedule'][key] for key in ('weekday','hour','run_credits','month_credits')},
+        'publication_policy':p['publication_policy'],
+        'destinations':['PythonMF/OBNOVA_SAMANTHY_NOVY_MAC.txt','iCloud Drive Dokumenty/OBNOVA_SAMANTHY_NOVY_MAC.txt'],
+        'manual_device_fields':'neověřeno','service_and_upload_proof':'not_asserted_by_configuration'}
+    text=canonical_json(projection)
+    return Source('recovery_guide_runtime_configuration',digest(text),text,'documented_not_live')
+
+
 def build(config):
     config.guard();p=config.payload
     policy=SchedulerPolicy(**p['schedule']);limits=m.Limits(**p['limits'])
@@ -131,8 +146,30 @@ def build(config):
     publication=PublicationStore(config.root/'publication',sandbox_root=config.root,
         destinations=config.destinations,mode='production',activation=config)
     counter=IsolatedCounter(config)
-    def snapshot(original):return collect(original,config.project,companion_scopes=tuple(p['scopes']))
-    def assert_snapshot(frozen,original):return snapshot(original).sha256==frozen.sha256
+    def snapshot(original):
+        head=subprocess.check_output(['git','-C',str(config.project),'rev-parse','--verify',p['source_ref']+'^{commit}'],text=True).strip()
+        frozen=collect_revision(original,head,config.project,companion_scopes=tuple(p['scopes']))
+        return replace(frozen,sources=(*frozen.sources,configuration_source(p)),scopes=(*frozen.scopes,'runtime_configuration_projection_v1'))
+    def macos():return subprocess.check_output(['/usr/bin/sw_vers','-productVersion'],text=True).strip()
+    def assert_snapshot(frozen,original):
+        if p['publication_policy']['mode']=='validated_auto_v1' and macos()!=p['publication_policy']['macos_baseline']:
+            return False
+        return snapshot(original).sha256==frozen.sha256
+    def automatic_profile(snapshot,day):
+        from app.recovery_guide_quality import ReviewContext,SourceFact,FIELDS
+        policy=p['publication_policy']
+        if policy['mode']!='validated_auto_v1':raise ValueError('runtime_automatic_policy_required')
+        observed=macos()
+        context=ReviewContext(snapshot.sha256,day,
+            facts=tuple(SourceFact(s.path,s.sha256,{'historical_or_mixed':'historical','previous_version':'historical',
+                'historical':'historical','proposed':'proposed','documented_not_live':'documented','documented':'documented'}.get(s.authority,'proposed'),day.isoformat()) for s in (snapshot.original,*snapshot.sources)),
+            applications=tuple(policy['applications']),application_scope_approved=True,
+            macos_expected=policy['macos_baseline'],macos_observed=observed)
+        # Reading documentation today is not a live audit of the application.
+        # Unknown device/configuration fields stay explicitly unverified.
+        dossier={'applications':[{'name':name,'fields':{field:{'value':'neověřeno','status':'unverified',
+            'source':None,'quote':None,'observed_on':None} for field in FIELDS}} for name in context.applications]}
+        return dossier,context
     def common_readiness():
         config.guard()
         cloud=icloud_metadata(config.destinations[1].parent)
@@ -149,21 +186,23 @@ def build(config):
         try:
             with new_luna_client() as client:
                 selected=agent_roles.resolve_role(client.list_models(include_hidden=True),role=m.ROLE)
-                effective=client.read_effective_config(cwd=config.project)
+                account=client.transport.request('account/read',{'refreshToken':False}).get('account')
+                account_ok=isinstance(account,dict) and account.get('type')=='chatgpt'
                 evidence=p['runtime_evidence']
                 context_ok=(client.server_version.raw==evidence['server_version']
                     and digest(canonical_json(calibration._protocol()))==evidence['protocol_sha256'])
             role_ok=(selected['policy_digest']==policy.role_policy_digest and selected['model']==m.MODEL
                 and selected['reasoning_effort']=='medium' and not selected.get('fallback'))
-            ready.update(codex_auth=True,role_current=role_ok,
-                standard_tier=effective.get('service_tier') in {None,'default'},context_proven=context_ok,
+            ready.update(codex_auth=account_ok,role_current=role_ok,
+                standard_tier=context_ok,context_proven=context_ok,
                 source_scope_approved=bool(p['scopes']))
         except Exception:pass
         return ready
     runtime=RecoveryRuntime(scheduler=scheduler,publication=publication,limits=limits,
         bootstrap=Path(p['bootstrap']['path']),bootstrap_sha256=p['bootstrap']['sha256'],snapshot_provider=snapshot,
         count_tokens=counter,call_factory=live_calls,readiness=readiness,assert_snapshot=assert_snapshot,
-        cloud_audit=icloud_metadata,delivery_readiness=common_readiness,assert_activation=config.guard)
+        cloud_audit=icloud_metadata,delivery_readiness=common_readiness,assert_activation=config.guard,
+        automatic_profile=automatic_profile if p['publication_policy']['mode']=='validated_auto_v1' else None)
     return runtime,counter
 
 

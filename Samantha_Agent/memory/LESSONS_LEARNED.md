@@ -1804,3 +1804,12 @@ přijatého výstupu. Ověřeno přes skutečný plánovač/generátor/přejímk
 s fake modelem a dočasnými soubory, včetně pádu mezi kopiemi bez dalšího tahu.
 Run/tick po integraci už nejsou principiálně read-only workflow; registr musí
 uvádět model/privátní zápisy a ruční potvrzení, i když je aktivace zatím vypnutá.
+
+Doplnění 08112026 k LL-113 (před aktivací): propojení callbacků není samo
+plně automatický provoz. Ověřit také pohyblivý zdroj dokumentace (Git main,
+ne dlouhodobě zaostávající HEAD vývojového worktree), přijatou automatickou
+přejímací politiku a každý přechod po pádu mezi přijetím a přenosem.
+Standard per-turn se nemusí shodovat s globálním Fast; nezapisovat globální
+preference, ale vynutit podporovaný override. Účet API-key nesmí projít
+cenovým plánem ChatGPT kreditů. Deklarovaná konfigurace a datum čtení
+nejsou live/device proof. Nejistý launchctl bootstrap se neposílá podruhé.

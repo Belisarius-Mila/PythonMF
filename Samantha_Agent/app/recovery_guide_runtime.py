@@ -22,13 +22,14 @@ from app.release_usage import TOKEN_KEYS
 class RecoveryRuntime:
     def __init__(self, *, scheduler, publication, limits, bootstrap:Path, bootstrap_sha256:str,
                  snapshot_provider, count_tokens, call_factory, readiness, assert_snapshot,
-                 cloud_audit, delivery_readiness=None, assert_activation=lambda:None):
+                 cloud_audit, delivery_readiness=None, assert_activation=lambda:None, automatic_profile=None):
         self.scheduler,self.publication,self.limits=scheduler,publication,limits
         self.bootstrap,self.bootstrap_sha256=bootstrap,bootstrap_sha256
         self.snapshot_provider,self.count=snapshot_provider,count_tokens
         self.call_factory,self.readiness,self.assert_snapshot=call_factory,readiness,assert_snapshot
         self.cloud_audit,self.assert_activation=cloud_audit,assert_activation
         self.delivery_readiness=delivery_readiness or readiness
+        self.automatic_profile=automatic_profile
         if scheduler.scope!=publication.scope:raise ValueError('runtime_scope_mismatch')
         if scheduler.activation is not None and asdict(limits)!=scheduler.activation.payload['limits']:
             raise ValueError('runtime_limits_outside_activation')
@@ -54,6 +55,9 @@ class RecoveryRuntime:
             return local
         if (self.bootstrap.is_symlink() or not self.bootstrap.is_file()
                 or digest(self.bootstrap.read_bytes())!=self.bootstrap_sha256):raise ValueError('runtime_bootstrap_changed')
+        if self.bootstrap.resolve()==local.resolve():
+            if not cloud.is_file() or cloud.is_symlink() or digest(cloud.read_bytes())!=self.bootstrap_sha256:
+                raise ValueError('runtime_bootstrap_copies_changed')
         return self.bootstrap
 
     def _preflight(self,job):
@@ -160,11 +164,36 @@ class RecoveryRuntime:
         return self.publication.execute(reference['request_id'],approval_sha256=reference['approval_sha256'],
             current_inputs=current,cloud_audit=self.cloud_audit,now=self.now)
 
+    def _automatic(self,result):
+        job,packet,snapshot,request,answer=self._load(result['request_id'])
+        known=self.publication.status(job['request_id'])
+        if known.get('state') in {'accepted','applying','pending_icloud','uploaded'}:
+            if (known.get('candidate_sha256')!=job['candidate_sha256']
+                or known.get('snapshot_sha256')!=job['snapshot_sha256']):raise ValueError('runtime_automatic_binding_changed')
+            return self.scheduler.attach_publication(job['request_id'],
+                {'request_id':job['request_id'],'approval_sha256':known['approval_sha256']},
+                confirmed_identity=job['identity_sha256'],confirmed=True)
+        dossier,context=self.automatic_profile(snapshot,self.now.astimezone(ZoneInfo('Europe/Prague')).date())
+        draft=self.prepare_acceptance(job['request_id'],dossier=dossier,context=context)
+        return self.accept(job['request_id'],draft,confirmed_binding=draft.sha256,
+            confirmed_identity=job['identity_sha256'],confirmed=True,now=self.now)
+
     def tick(self,now:datetime,*,trigger='timer'):
         if not self.lock.acquire(blocking=False):return {'state':'busy','model_calls':0}
         try:
             self.assert_activation();self.now=now;self.prepared=None
-            return self.scheduler.tick(now,readiness=self.readiness,preflight=self._preflight,analyze=self._analyze,
-                delivery_status=lambda r:self.publication.status(r['request_id']),deliver=self._deliver,trigger=trigger,
-                delivery_readiness=self.delivery_readiness)
+            def once():
+                return self.scheduler.tick(now,readiness=self.readiness,preflight=self._preflight,analyze=self._analyze,
+                    delivery_status=lambda r:self.publication.status(r['request_id']),deliver=self._deliver,trigger=trigger,
+                    delivery_readiness=self.delivery_readiness)
+            result=once()
+            if (self.automatic_profile is not None and result.get('state')=='awaiting_acceptance'
+                and result.get('action')!='policy_changed'):
+                try:
+                    self._automatic(result)
+                    return once()  # Only delivery/replay of this existing slot.
+                except Exception as exc:
+                    issue=exc.code if isinstance(exc,q.QualityError) else type(exc).__name__
+                    return {**result,'automatic_publication':'blocked','review_issue':issue}
+            return result
         finally:self.lock.release()

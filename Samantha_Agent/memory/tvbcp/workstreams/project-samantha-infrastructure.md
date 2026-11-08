@@ -1,46 +1,49 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
-## 2026-11-08 15:35 CET — REC: sjednocený návod zapojený do běhové cesty
+## 2026-11-08 16:45 CET — REC: aktivační balíček připraven, čeká přesná globální brzda
 
 ### Hotovo
-- Generátor je propojený s plánovačem, obsahovou přejímkou a dvěma cílovými
-  kopiemi. Další týden čte poslední přijatý návod, ne původní historickou verzi.
-- Běhové run/tick používají tento řadič. Bez samostatné privátní aktivace
-  zůstávají inertní. Status nevytváří stav, tokenizer, socket ani modelový tah.
-- Neplacený průchod produkční větví kódu ve dvou týdnech skončil dvěma
-  shodnými kopiemi; SHA druhého vstupu je SHA prvního přijatého výsledku.
+- Míla požádal o aktivaci a potvrdil dvě místa: interní PythonMF a iCloud
+  Dokumenty. Připraven konkrétní neměnný balíček770a11bf…32cb6: roli,
+  počáteční návod, cíle, politiku automatického ukládání a jediný LaunchAgent.
+- Opraveny mezery odhalené při předaktivační kontrole: dokumentace se čte
+  z aktuálního main přes Git objekty, po kontrolách může publikovat přijatá
+  automatická politika; globální Fast se nemění, každý tah má Standard.
+- Neplaceně změřeno547 zdrojů/15 tahů/rezerva193,42345 kreditu. Návrh meze
+  200 na běh a1000 měsíčně, první slot15.11.2026 od09:00 Europe/Prague.
 
 ### Rozhodnutí
-- Míla schválil integraci do běhu. Sjednocený formát je povinný také na
-  produkční přejímací hranici, bez legacy fallbacku. Zmrazené piloty zůstávají.
-- Přenos přijatých bajtů po výpadku pokračuje bez modelu i bez
-  dostupného App Serveru/tokenizeru. Neznámý výsledek
-  analýzy zastaví i další týdny; ruční změna kopií se nesmí přepsat návratem
-  ke starému originálu. Změněná aktivační politika zastaví nedokončený job.
-- Vývoj neaktivuje službu ani roli a není schválením nové ceny/modelového
-  běhu. Skutečná aktivační konfigurace ve worktree nevznikla, provozní TXT
-  ani Downloads se neměnily. Bez push, deploy nebo restartu.
+- Pokyn Aktivuj povoluje přípravu a dvě cílová místa. Rozpočtová/publikační
+  politika je nyní konkrétní návrh k potvrzení; nikdy nebyla automaticky
+  prohlášena za přijatou. Skutečná activation.json, role a služba se nemění.
+- Instalace LaunchAgentu je systémová konfigurace mimo projekt. Místní
+  global_safety_brake.md pro ni výslovně vyžaduje přesnou větu; staré souhlasy
+  k jiným akcím se nepřenášejí. Finální aktivace čeká na tuto větu pro tento balíček.
+- Základní návod se uloží bez modelu; další týdny automaticky po úspěšném
+  gate. Neověřená zařízení/nastavení se neprohlašují za ověřená. Při nejistotě
+  zůstanou staré kopie a pending job; žádné automatické opakování modelu.
 
 ### Další krok
-- Will převezme lokální změnu; další provozní krok je samostatná aktivace
-  konkrétní role/plánu/rozpočtu a prvních přijatých bajtů, nikoli další psaní propojení.
+- Míla potvrdí konkrétní návrh a přesnou globální brzdu; pak trusted
+  recovery_guide_activation.activate s otiskem balíčku jednou dokončí roli,
+  obě počáteční kopie/upload a načtení jediného LaunchAgentu. Žádný model dnes.
 
 ### Navrhované další kroky
-- Převzít čtenářský návrh z Downloads a konkrétní aplikační přejímací podklady.
-- Před aktivací změřit aktuální nový týdenní request/schema, potvrdit
-  cenovou rezervu, kontext, tokenizer a schválenou centrální roli.
-- Po odpovídajícím oprávnění provozně ověřit dvě cílové kopie a iCloud upload.
-- Týdenní službu a skutečný iPhone převzít odděleně od lokálních testů.
+- Po potvrzení ověřit dvě SHA a skutečný iCloud upload, potom stav LaunchAgentu.
+- První plánovanou revizi15.11. převzít podle účtenky a ověřit otevření TXT na iPhonu.
+- Při jiné potřebě rozpočtu/termínu upravit návrh před aktivací, ne potichu zvýšit limity.
+- Willovo případné pozdější převzetí do main zachová proběhlé sloty a privátní stav.
 
 ### Technický důkaz
-- 42 nových testů včetně přidané kontrolní zkoušky registru oprávnění;
-  272 cílených testů před závěrečnou úpravou registru PASS.
-- plná brána 2 863 testů OK (5 skipped); závěrečná cílená regrese 161 testů OK.
-- Dva týdny přes skutečný plánovač/řadič/přejímku/writer, ale fake model a
-  dočasné cíle; čtyři stub volání, nula modelových tahů nebo provozních zápisů.
-- Testy výpadku mezi kopiemi, pending iCloud, restartu, neznámého doručení,
-  změny vstupů/konfigurace a explicitního Standard/read-only bez reuse vlákna.
-- Původních 48 JSON účtenek/plánů/raw čtecích pilotů SHA shodných.
-  Podrobnosti recovery_guide_runtime_integration_20261108.md a .json.
+- 206 cílených testů PASS; plná brána 2 882 testů OK (5 skipped); závěrečná statická brána a git diff --check OK.
+- 8 nových testů aktivační hranice včetně chybné fráze, cizí změny souboru,
+  pending iCloud, opakovaného dokončení a nejistého launchctl bez druhého bootstrap.
+- Source/main a automatická politika mají další regrese v runtime sadě;
+  celkem50 runtime testů. Původní uzavřené piloty se neotevírají.
+- Živě pouze čtecí audit: peer0.163.0, CLI0.166.0, dostupný Sol/medium,
+  ChatGPT účet; macOS15.8.2; iCloud cílová složka ubiquitous/uploaded.
+  Nejde o upload dosud neexistujícího cílového TXT nebo fyzickou přejímku iPhonu.
+- Oba cílové TXT, aktivační konfigurace a LaunchAgent zatím nevytvořené.
+  Podrobnosti recovery_guide_activation_ready_20261108.md a .json.
 <!-- SAMANTHA_CURRENT_STATUS_END -->
 
 ### Předchozí stav infrastruktury
@@ -1550,3 +1553,49 @@ souborů / 5 002 170 B. Stávající rutinní pilot není obecný writer/schedul
   změny vstupů/konfigurace a explicitního Standard/read-only bez reuse vlákna.
 - Původních 48 JSON účtenek/plánů/raw čtecích pilotů SHA shodných.
   Podrobnosti recovery_guide_runtime_integration_20261108.md a .json.
+
+## 2026-11-08 16:45 CET — REC: aktivační balíček připraven, čeká přesná globální brzda
+
+### Hotovo
+- Míla požádal o aktivaci a potvrdil dvě místa: interní PythonMF a iCloud
+  Dokumenty. Připraven konkrétní neměnný balíček770a11bf…32cb6: roli,
+  počáteční návod, cíle, politiku automatického ukládání a jediný LaunchAgent.
+- Opraveny mezery odhalené při předaktivační kontrole: dokumentace se čte
+  z aktuálního main přes Git objekty, po kontrolách může publikovat přijatá
+  automatická politika; globální Fast se nemění, každý tah má Standard.
+- Neplaceně změřeno547 zdrojů/15 tahů/rezerva193,42345 kreditu. Návrh meze
+  200 na běh a1000 měsíčně, první slot15.11.2026 od09:00 Europe/Prague.
+
+### Rozhodnutí
+- Pokyn Aktivuj povoluje přípravu a dvě cílová místa. Rozpočtová/publikační
+  politika je nyní konkrétní návrh k potvrzení; nikdy nebyla automaticky
+  prohlášena za přijatou. Skutečná activation.json, role a služba se nemění.
+- Instalace LaunchAgentu je systémová konfigurace mimo projekt. Místní
+  global_safety_brake.md pro ni výslovně vyžaduje přesnou větu; staré souhlasy
+  k jiným akcím se nepřenášejí. Finální aktivace čeká na tuto větu pro tento balíček.
+- Základní návod se uloží bez modelu; další týdny automaticky po úspěšném
+  gate. Neověřená zařízení/nastavení se neprohlašují za ověřená. Při nejistotě
+  zůstanou staré kopie a pending job; žádné automatické opakování modelu.
+
+### Další krok
+- Míla potvrdí konkrétní návrh a přesnou globální brzdu; pak trusted
+  recovery_guide_activation.activate s otiskem balíčku jednou dokončí roli,
+  obě počáteční kopie/upload a načtení jediného LaunchAgentu. Žádný model dnes.
+
+### Navrhované další kroky
+- Po potvrzení ověřit dvě SHA a skutečný iCloud upload, potom stav LaunchAgentu.
+- První plánovanou revizi15.11. převzít podle účtenky a ověřit otevření TXT na iPhonu.
+- Při jiné potřebě rozpočtu/termínu upravit návrh před aktivací, ne potichu zvýšit limity.
+- Willovo případné pozdější převzetí do main zachová proběhlé sloty a privátní stav.
+
+### Technický důkaz
+- 206 cílených testů PASS; plná brána 2 882 testů OK (5 skipped); závěrečná statická brána a git diff --check OK.
+- 8 nových testů aktivační hranice včetně chybné fráze, cizí změny souboru,
+  pending iCloud, opakovaného dokončení a nejistého launchctl bez druhého bootstrap.
+- Source/main a automatická politika mají další regrese v runtime sadě;
+  celkem50 runtime testů. Původní uzavřené piloty se neotevírají.
+- Živě pouze čtecí audit: peer0.163.0, CLI0.166.0, dostupný Sol/medium,
+  ChatGPT účet; macOS15.8.2; iCloud cílová složka ubiquitous/uploaded.
+  Nejde o upload dosud neexistujícího cílového TXT nebo fyzickou přejímku iPhonu.
+- Oba cílové TXT, aktivační konfigurace a LaunchAgent zatím nevytvořené.
+  Podrobnosti recovery_guide_activation_ready_20261108.md a .json.
