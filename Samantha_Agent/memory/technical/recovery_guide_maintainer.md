@@ -4,6 +4,24 @@ Implementační etapa 2026-11-07, proud `project-samantha-infrastructure`.
 Schválený plán REC-01 až REC-06 je v `projects/samantha_external_backup.md`.
 Tento dokument popisuje vývojový základ, nikoli zapnutého týdenního agenta.
 
+## Čtenářská forma návodu — směr Míly 2026-11-08
+
+- Vždy jeden aktuální sjednocený text. Změny zapracovat do příslušných kapitol;
+  žádné řetězení DOPLNĚNÍ a soupeřících instrukcí.
+- V záhlaví jediný řádek Nejnovější update dokumentu z ddmmyyyy.
+- Z aktuálního návodu odstranit zastaralé zálohovací statistiky/ID, dřívější
+  přejímací chronologii a neplatné postupy. Technické důkazy, zdrojové mapy a
+  minulé verze patří do samostatného soukromého auditu a projektové historie.
+- Zachovat obnovovací kroky, datová umístění a bezpečnostní kontroly; chybějící
+  fakt označit OVĚŘIT s konkrétním způsobem zjištění. Datum redakce není záloha.
+- Výběr snapshotů musí vycházet z dokončených manifestů a jejich skutečné vazby,
+  ne z pevného data v textu. Implementovaný režim Camina ověřit proti kódu releasu.
+- Starý retenční požadavek kopírovat historický text není cílovou formou nové
+  revize. Tento krok nemění produkční validator ani uzavřené piloty. Budoucí
+  automatické přijímání musí doložit pokrytí potřebných obnovovacích kroků,
+  zdroje změn a odstraněné neplatné instrukce; nelze prostě prohlásit starý
+  gate za úspěšný nebo vypnout kontroly citací/soukromí.
+
 ## Co je připravené
 
 - `app/recovery_guide_sources.py`: nejprve celý původní TXT, potom celé
@@ -551,3 +569,13 @@ ne automatickou opravu uzavřeného slotu. Tato obsahová přejímka nepotřebuj
 opakovat model. Provozní publikace do obou cílů i týdenní aktivace zůstávají
 zvlášť autorizované. Kód beze změny; předchozí2794testů/5skipped platí,
 nový důkaz jsou skutečné účtenky a neplacená revize. Podrobnosti v run reportu.
+
+## 2026-11-08 14:38 CET — sjednocení čtenářského textu dokončeno lokálně
+
+Samostatný nový text75415B /17 kapitol /SHA381963c3…82543c8 je v Downloads.
+Původní editorial-candidate.txt ani finanční artefakty se nemění.47 podkladových
+částí má soukromé mapování na kapitoly. Bez DOPLNĚNÍ, starých snapshotID,
+statistik a starých soupeřících postupů; všechny potřebné oblasti zůstaly.
+31 cest existuje, vložený ověřovací Python má shodnou logiku a platné AST,
+heredoc správnou syntaxi. Bez placení, služeb, rolí, provozních kopií a p+n.
+Podrobnosti reports/recovery_guide_consolidated_20261108.md a .json.

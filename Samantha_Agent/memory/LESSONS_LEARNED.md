@@ -1774,3 +1774,12 @@ všech216 citací zachovaných, celý původní obsah a původní quality gate p
 Běžná lomítka v próze nejsou cesty a nezaškrtnutý přejímací bod není live claim;
 rozdíl doložit a redakčně vyjasnit, ne vypnout gate. Nové odvozené cesty bez
 přesné citace nepřijímat. Sémantická/provozní přejímka tím není automatická.
+
+Doplnění 08112026 k LL-113 (čtenářská forma): Míla požaduje jeden průběžně
+sjednocovaný návod s jediným datem aktualizace, bez řetězení dodatků. Historii,
+zdroje a staré verze uchovat mimo čtenářský text. Neměnná raw účtenka neznamená,
+že se v uživatelském návodu mají navždy kopírovat neplatná ID a postupy.
+Nový text ověřit pokrytím potřebných témat, zdrojovou mapou a kontrolou
+příkazů; netvrdit průchod starým objemovým gate, pokud odstraňuje historii.
+Vložený shellový heredoc musí mít neodsazený ukončovací delimiter a správné
+odsazení Pythonu; kontrolovat AST a shell -n bez vykonání obnovy.

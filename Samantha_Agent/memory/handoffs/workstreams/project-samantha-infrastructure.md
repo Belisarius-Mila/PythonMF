@@ -1,50 +1,44 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
-## 2026-11-08 12:57 CET — REC-06: 21 tahů doručeno; oddělený redakční návrh připraven
+## 2026-11-08 14:38 CET — REC: sjednocený aktuální návod místo vrstev doplnění
 
 ### Hotovo
-- Jediný nově schválený pilot karty741e71da dokončil 21/21 tahů,
-  všech 20 čtecích dávek přijato. 532 dokumentů přesně jednou, celý original
-  v každé fázi; 116 findings, inspect764 referencí, syntéza216 platných citací.
-- Odhad ze skutečné usage 174,8297 Standard kreditu / mez240.
-  Syntéza686,537s / mez900, ale output34115 / mez32000: formální attention.
-- Bez dalšího modelu připraven samostatný redakční návrh 93361B / 47 částí,
-  SHA72aaa17b…a9b658f. Nezměněný quality gate prošel, 19 původních bloků
-  a všech 216 citací beze změny. Rozpis25 redakčních operací je uložený.
+- Podle Mílova směru připraven jeden souvislý text17 kapitol,75415B,
+  SHA381963c3…82543c8; nový pracovní soubor je také v Downloads.
+- Změny jsou přímo v kapitolách, bez bloků DOPLNĚNÍ. Jediné datum v záhlaví:
+  Nejnovější update dokumentu z 08112026. Zastaralé ID/statistiky záloh,
+  chronologie testů, staré buildy a vzájemně přebíjející instrukce odstraněné.
+- Záloha se vybírá podle dokončených manifestů a správné vazby na Camino,
+  nikoli podle pevného starého ID. Epochu popisuje skutečný identical_recovery_v1.
 
 ### Rozhodnutí
-- Původní job zůstává accepted=false; raw, limit, packet ani attempt se
-  nepřepisují. Samostatný upravený pracovní návrh není přijetím původního jobu.
-- Další placený běh se neopakuje. Necitovaný disclaimer je jen v raw/review,
-  dvě nově odvozené absolutní cesty nejsou přijaté, historické části jsou
-  označené přísněji. Pravidla validátoru ani citace se neměnily.
-- Během posledního tahu vznikl main9c8584ee; schválený snapshot zůstává6c610287.
-  Čtecí přezkum rozdílu je oddělený. Návrh není tvrzení o nejnovějším celém main.
-- Provozní TXT/iCloud, role, služby, scheduler, push/deploy ani main Data neměnil.
+- Jeden aktuální čtenářský návod: další revize přepisují příslušný obsah,
+  nevrství dodatky. Historie změn, důkazy a staré verze patří mimo čtenářský text.
+- Datum aktualizace není datum zálohy ani důkaz aktuálního nasazení. Neznámé
+  nastavení označit konkrétně OVĚŘIT, ne hádat.
+- Původní soubory, raw, účtenky a redakční podklad zachované. Bez modelového
+  tahu, služby, role, push/deploy nebo zápisu do provozních cílů PythonMF/iCloud.
+- Starý75% retenční gate ani uzavřený pilot se nepřepisuje. Pro nový sjednocený
+  text se jeho průchod netvrdí; doloženy jsou obsahové oblasti a níže uvedené kontroly.
 
 ### Další krok
-- Míla a Will obsahově převezmou konkrétní redakční návrh a jeho změnový
-  záznam včetně zdrojového rozdílu. Tato přejímka nepotřebuje další model.
+- Míla čte soubor OBNOVA_SAMANTHY_NOVY_MAC_AKTUALIZOVANY_08112026.txt
+  v Downloads jako jedinou aktuální pracovní verzi k obsahové přejímce.
 
 ### Navrhované další kroky
-- Obsahová přejímka doplňků, zejména záloh, dat mimo Git a kompatibility Camina.
-- Příští offline kontrakt: evidence podle statusu, serverové zachování original,
-  posuzovat souběžné změny odděleně od neměnného čteného snapshotu.
-- Po přijetí přesných bajtů a příslušném oprávnění dvě kopie do PythonMF a iCloud Dokumentů.
-- Týdenní aktivace až po vlastní přejímce role, aplikací/Macu/iPhonu a rozpočtu.
+- Převzít obsah sjednocených kapitol, zejména výběr záloh a identickou obnovu Camina.
+- Budoucí automatický renderer/kontrakt upravit na tento formát s dohledatelnými zdroji.
+- Dvě provozní kopie a upload až po odpovídajícím přijetí a oprávnění.
+- Aktivace týdenního běhu zůstává samostatnou integrační přejímkou.
 
 ### Technický důkaz
-- recovery_guide_anchor_exact_run_20261108.md, *_run_result_20261108.json,
-  *_editorial_review_20261108.json; plný návod jen v soukromé .venv, mimo Git.
-- Všech 21 provider schémat nezávisle validních. Původní unverified odstavec
-  bez citace neprošel resolverem. Některé další texty vyžadovaly redakci
-  kvůli přesným literálům, historickému statusu a false-positive regexům.
-- 25 operací =21 textových úprav +3 přísnější stavy +1 přesunutý disclaimer.
-  Původní non-whitespace obsah zachovaný celý a ve stejném pořadí.
-- Usage input3207934/cached0/output57732, reasoning5290 je subset, total3265666.
-  Celý job1566,841s; finalraw6fdad250…c7664e, response df93d3a3…a08e6.
-- Pět starých stavů/plánů /24JSON beze změny; dalších24 původních finančních
-  artefaktů tohoto jobu má soukromý manifest. Kód beze změny, převzato ověření
-  bef32ad2:46 nových /2794 plných testů,5 skipped. Závěrečná statická brána a git diff --check OK.
+- recovery_guide_consolidated_20261108.md a .json; plný text a mapování47
+  podkladových částí jsou soukromé, mimo Git.
+- 17 kapitol v pořadí,31 odkazovaných projektových cest existuje, bez starých
+  snapshotID a vrstev doplnění. Zachovány klíčové datové a bezpečnostní oblasti.
+- Python kontrola zálohy beze změny logiky; opraveno jen prezentační odsazení
+  heredocu, AST i zsh -n PASS. Příkazy obnovy nebyly spouštěné.
+- Downloads kopie má shodný SHA;24 finančních artefaktů pilotu i předchozí
+  93361B redakční podklad beze změny. Závěrečná statická brána a git diff --check OK.
 <!-- SAMANTHA_CURRENT_STATUS_END -->
 
 ### Předchozí stav infrastruktury
@@ -1302,3 +1296,44 @@ souborů / 5 002 170 B. Stávající rutinní pilot není obecný writer/schedul
 - Pět starých stavů/plánů /24JSON beze změny; dalších24 původních finančních
   artefaktů tohoto jobu má soukromý manifest. Kód beze změny, převzato ověření
   bef32ad2:46 nových /2794 plných testů,5 skipped. Závěrečná statická brána a git diff --check OK.
+
+## 2026-11-08 14:38 CET — REC: sjednocený aktuální návod místo vrstev doplnění
+
+### Hotovo
+- Podle Mílova směru připraven jeden souvislý text17 kapitol,75415B,
+  SHA381963c3…82543c8; nový pracovní soubor je také v Downloads.
+- Změny jsou přímo v kapitolách, bez bloků DOPLNĚNÍ. Jediné datum v záhlaví:
+  Nejnovější update dokumentu z 08112026. Zastaralé ID/statistiky záloh,
+  chronologie testů, staré buildy a vzájemně přebíjející instrukce odstraněné.
+- Záloha se vybírá podle dokončených manifestů a správné vazby na Camino,
+  nikoli podle pevného starého ID. Epochu popisuje skutečný identical_recovery_v1.
+
+### Rozhodnutí
+- Jeden aktuální čtenářský návod: další revize přepisují příslušný obsah,
+  nevrství dodatky. Historie změn, důkazy a staré verze patří mimo čtenářský text.
+- Datum aktualizace není datum zálohy ani důkaz aktuálního nasazení. Neznámé
+  nastavení označit konkrétně OVĚŘIT, ne hádat.
+- Původní soubory, raw, účtenky a redakční podklad zachované. Bez modelového
+  tahu, služby, role, push/deploy nebo zápisu do provozních cílů PythonMF/iCloud.
+- Starý75% retenční gate ani uzavřený pilot se nepřepisuje. Pro nový sjednocený
+  text se jeho průchod netvrdí; doloženy jsou obsahové oblasti a níže uvedené kontroly.
+
+### Další krok
+- Míla čte soubor OBNOVA_SAMANTHY_NOVY_MAC_AKTUALIZOVANY_08112026.txt
+  v Downloads jako jedinou aktuální pracovní verzi k obsahové přejímce.
+
+### Navrhované další kroky
+- Převzít obsah sjednocených kapitol, zejména výběr záloh a identickou obnovu Camina.
+- Budoucí automatický renderer/kontrakt upravit na tento formát s dohledatelnými zdroji.
+- Dvě provozní kopie a upload až po odpovídajícím přijetí a oprávnění.
+- Aktivace týdenního běhu zůstává samostatnou integrační přejímkou.
+
+### Technický důkaz
+- recovery_guide_consolidated_20261108.md a .json; plný text a mapování47
+  podkladových částí jsou soukromé, mimo Git.
+- 17 kapitol v pořadí,31 odkazovaných projektových cest existuje, bez starých
+  snapshotID a vrstev doplnění. Zachovány klíčové datové a bezpečnostní oblasti.
+- Python kontrola zálohy beze změny logiky; opraveno jen prezentační odsazení
+  heredocu, AST i zsh -n PASS. Příkazy obnovy nebyly spouštěné.
+- Downloads kopie má shodný SHA;24 finančních artefaktů pilotu i předchozí
+  93361B redakční podklad beze změny. Závěrečná statická brána a git diff --check OK.

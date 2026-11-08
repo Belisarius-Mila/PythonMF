@@ -2,17 +2,19 @@
 
 Projekt zalozen 2026-05-19.
 
-## Aktuální stav 2026-11-08 12:57 CET
+## Aktuální stav 2026-11-08 14:38 CET
 
-Jediný schválený REC-06 číselný pilot dokončil21 tahů, 20 čtecích dávek
-přijato. Odhad174,8297 Standard kreditu pod mezí240; job attention, protože
-syntézaoutput34115 překročila32000. Bez dalšího modelu vznikl samostatný
-redakční návrh93361B, SHA72aaa17b…a9b658f, který prošel původním quality gate.
-Plný text je jen ve vlastní privátní .venv; surový modelový výstup ani job
-nebyly přepsané. Obsahová přejímka Mílou/Willem a rozdíl main6c610287→9c8584ee
-zůstávají výslovně oddělené od formálně nepřijatého původního jobu.
-Cíl PythonMF+iCloud Dokumenty a týdenní Sol zůstává, provozní kopie/role/
-plánovač nejsou tímto aktivované. Historické zálohy níže nejsou živý audit.
+Míla zvolil jediný průběžně sjednocovaný obnovovací návod. Změny se píší
+přímo do kapitol, stará ID/statistiky záloh a uzavřené pracovní poznámky
+se z aktuálního textu odstraňují. Historie a důkazy zůstávají oddělené.
+V záhlaví má být Nejnovější update dokumentu z ddmmyyyy.
+
+Nový sjednocený pracovní text17 kapitol /75415B /SHA381963c3…82543c8 je v
+Downloads jako OBNOVA_SAMANTHY_NOVY_MAC_AKTUALIZOVANY_08112026.txt a ve vlastní
+soukromé pracovní kopii. Vyžaduje obsahovou přejímku. Předchozí podklady a
+placený job attention/174,8297 zůstávají beze změny; žádný další model.
+Provozní kopie do PythonMF/iCloud ani role/plánovač tímto aktivované nejsou.
+Historická evidence záloh níže není nový živý audit.
 
 ## Historický stav 2026-10-25 14:53 CET
 
@@ -1690,3 +1692,44 @@ závislosti bez konkrétní potřeby. Nejde o rozšíření e-mailové business 
 - Pět starých stavů/plánů /24JSON beze změny; dalších24 původních finančních
   artefaktů tohoto jobu má soukromý manifest. Kód beze změny, převzato ověření
   bef32ad2:46 nových /2794 plných testů,5 skipped. Závěrečná statická brána a git diff --check OK.
+
+## 2026-11-08 14:38 CET — REC: sjednocený aktuální návod místo vrstev doplnění
+
+### Hotovo
+- Podle Mílova směru připraven jeden souvislý text17 kapitol,75415B,
+  SHA381963c3…82543c8; nový pracovní soubor je také v Downloads.
+- Změny jsou přímo v kapitolách, bez bloků DOPLNĚNÍ. Jediné datum v záhlaví:
+  Nejnovější update dokumentu z 08112026. Zastaralé ID/statistiky záloh,
+  chronologie testů, staré buildy a vzájemně přebíjející instrukce odstraněné.
+- Záloha se vybírá podle dokončených manifestů a správné vazby na Camino,
+  nikoli podle pevného starého ID. Epochu popisuje skutečný identical_recovery_v1.
+
+### Rozhodnutí
+- Jeden aktuální čtenářský návod: další revize přepisují příslušný obsah,
+  nevrství dodatky. Historie změn, důkazy a staré verze patří mimo čtenářský text.
+- Datum aktualizace není datum zálohy ani důkaz aktuálního nasazení. Neznámé
+  nastavení označit konkrétně OVĚŘIT, ne hádat.
+- Původní soubory, raw, účtenky a redakční podklad zachované. Bez modelového
+  tahu, služby, role, push/deploy nebo zápisu do provozních cílů PythonMF/iCloud.
+- Starý75% retenční gate ani uzavřený pilot se nepřepisuje. Pro nový sjednocený
+  text se jeho průchod netvrdí; doloženy jsou obsahové oblasti a níže uvedené kontroly.
+
+### Další krok
+- Míla čte soubor OBNOVA_SAMANTHY_NOVY_MAC_AKTUALIZOVANY_08112026.txt
+  v Downloads jako jedinou aktuální pracovní verzi k obsahové přejímce.
+
+### Navrhované další kroky
+- Převzít obsah sjednocených kapitol, zejména výběr záloh a identickou obnovu Camina.
+- Budoucí automatický renderer/kontrakt upravit na tento formát s dohledatelnými zdroji.
+- Dvě provozní kopie a upload až po odpovídajícím přijetí a oprávnění.
+- Aktivace týdenního běhu zůstává samostatnou integrační přejímkou.
+
+### Technický důkaz
+- recovery_guide_consolidated_20261108.md a .json; plný text a mapování47
+  podkladových částí jsou soukromé, mimo Git.
+- 17 kapitol v pořadí,31 odkazovaných projektových cest existuje, bez starých
+  snapshotID a vrstev doplnění. Zachovány klíčové datové a bezpečnostní oblasti.
+- Python kontrola zálohy beze změny logiky; opraveno jen prezentační odsazení
+  heredocu, AST i zsh -n PASS. Příkazy obnovy nebyly spouštěné.
+- Downloads kopie má shodný SHA;24 finančních artefaktů pilotu i předchozí
+  93361B redakční podklad beze změny. Závěrečná statická brána a git diff --check OK.
