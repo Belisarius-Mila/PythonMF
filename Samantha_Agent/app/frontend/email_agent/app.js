@@ -50,7 +50,10 @@
     const buttons = node("div", undefined, "actions");
     const enabled = item.status === "awaiting_confirmation";
     const archived = item.status === "archived";
-    if ((enabled || archived) && window.SamanthaCalendarDraft) buttons.append(action("Do kalendáře", () => window.SamanthaCalendarDraft.open(item), true));
+    if ((enabled || archived) && window.SamanthaCalendarDraft) {
+      if (item.calendar_suggestion?.status === "ready") card.append(node("p", "Návrh do kalendáře je připravený. Zkontroluj jej před zápisem.", "reason"));
+      buttons.append(action("Do kalendáře", () => window.SamanthaCalendarDraft.open(item), true));
+    }
     const replyStatus = (item.reply || {}).status;
     if (replyStatus === "smtp_sent") card.append(node("p", "Odpověď přijal odesílací server."));
     if (["sending", "delivery_unknown"].includes(replyStatus)) card.append(node("p", "Výsledek odeslání vyžaduje ověření. Odpověď znovu neposílej."));
@@ -123,7 +126,7 @@
       : `Upozornění ${pushcut.enabled ? "zapnutá" : "vypnutá"}. Čeká: ${counts.pending || 0}. Výsledek vyžaduje ověření: ${(counts.delivery_unknown || 0) + (counts.sending || 0) + (counts.rejected || 0)}.`;
     byId("status").textContent = last ? `Poslední dokončená kontrola: ${new Date(last).toLocaleString("cs-CZ")}.` : "Průběžná kontrola zatím nebyla spuštěna.";
     const sourceErrors = data.sources.some(source => source.health === "error");
-    if (sourceErrors || data.assessment_errors) byId("status").textContent += " Některé kontroly nebo návrhy vyžadují ověření.";
+    if (sourceErrors || data.assessment_errors || data.calendar_suggestion_errors) byId("status").textContent += " Některé kontroly nebo návrhy vyžadují ověření.";
     const cards = byId("cards"); cards.replaceChildren();
     data.cards.forEach(item => cards.append(renderCard(item)));
     if (!data.cards.length) cards.append(node("p", "Žádné důležité zprávy k řešení."));

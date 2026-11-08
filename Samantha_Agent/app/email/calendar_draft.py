@@ -3,8 +3,6 @@ from __future__ import annotations
 
 import copy
 from datetime import datetime, timezone
-from email import policy
-from email.parser import BytesParser
 from functools import partial
 import hashlib
 import json
@@ -22,7 +20,7 @@ from app.work_repository import JsonWorkRepository, RepositoryMutation
 from app.calendar_overview import CalendarOverview
 from .continuous_agent import ContinuousEmailAgent
 from .continuous_source import IMAPAgentSource
-from .icloud_provider import _html_to_text
+from .calendar_assessment import source_context
 from .calendar_proposal import (Candidate, Claim, FIELD_NAMES, INSTRUCTIONS,
     derive_fields, simple_defaults, edit_simple, evidence_issues, materialize, strict_schema, validate_fields, validate_reminders)
 from .calendar_review import CalendarReview
@@ -38,22 +36,6 @@ DISABLED_FEATURES=('image_generation','plugins','remote_plugin','view_image','sl
 
 def now(): return datetime.now(timezone.utc).isoformat()
 def digest(value): return hashlib.sha256(json.dumps(value, sort_keys=True, ensure_ascii=False).encode()).hexdigest()
-
-
-def source_context(observed):
-    source = observed.source
-    if not source.original_eml or len(source.original_eml) > 8*1024*1024:
-        raise ValueError('Zdrojový e-mail chybí nebo překročil limit návrhového pilotu.')
-    context = {'subject':source.subject, 'date':source.date, 'body':source.body_text, 'html':source.body_html}
-    if sum(len(value.encode()) for value in context.values()) > 256000:
-        raise ValueError('Text zprávy chybí nebo překročil limit; model nebyl spuštěn.')
-    mime = BytesParser(policy=policy.default).parsebytes(source.original_eml)
-    formal = any(part.get_content_type()=='text/calendar' or (part.get_filename() or '').lower().endswith('.ics') for part in mime.walk())
-    recurring = bool(re.search(r'\b(každ[ýéou]\s+(pondělí|úterý|střed[au]|čtvrtek|pátek|sobot[au]|neděli|týden|měsíc)|every\s+(monday|tuesday|wednesday|thursday|friday|week|month)|RRULE\s*:)',source.body_text+' '+_html_to_text(source.body_html),re.I))
-    context['manual_reason'] = 'Formální kalendářová pozvánka vyžaduje ruční zpracování.' if formal else 'Opakování vyžaduje ruční zpracování.' if recurring else ''
-    if not context['manual_reason'] and not (source.body_text or source.body_html):
-        raise ValueError('Text zprávy chybí; model nebyl spuštěn.')
-    return context
 
 
 class CalendarDraftDriver:
@@ -147,6 +129,10 @@ class CalendarDraftService:
         with exclusive_file_lock(self.root/('prepare-'+item_id),timeout=0):
             if item_id in self.repository.read()['items']:
                 return self.status(item_id)  # One model attempt per exact source, even with a different request ID.
+            suggestion = card.get('calendar_suggestion', {})
+            if suggestion.get('status') == 'ready':
+                self._import_assessment(item_id, card, suggestion, payload['request_id'])
+                return self.status(item_id)
             observed=self.source_factory(card['provider'],card['folder']).read_item(card)
             if observed.item_id!=item_id or observed.content_digest!=card['content_digest']:
                 raise ValueError('Původní zpráva neodpovídá kartě; model nebyl spuštěn.')
@@ -164,6 +150,26 @@ class CalendarDraftService:
             except Exception:
                 self._job_update(item_id,job_id,status='failed',message='Přípravu se nepodařilo spustit. Neopakuj ji; ověř původní požadavek.')
         return self.status(item_id)
+
+    def _import_assessment(self, item_id, card, suggestion, request_id):
+        """Create the existing editable draft atomically, without IMAP or another turn."""
+        if suggestion.get('version') != 1 or suggestion.get('source_digest') != card['content_digest']:
+            raise ValueError('Připravený návrh patří jinému zdroji; obnov kartu.')
+        job_id = digest([item_id, card['content_digest'], request_id])[:32]
+        job = {'id': job_id, 'request_id': request_id, 'status': 'completed',
+               'created_at': now(), 'completed_at': now(), 'send_started': False,
+               'selection': {'model': suggestion['model']}, 'input': suggestion['input'],
+               'origin': 'hourly_assessment', 'model_turns': 0,
+               'message': 'Návrh z e-mailového posouzení je připravený k lidské kontrole.'}
+        entry = {'content_digest': card['content_digest'], 'job': job}
+        draft, fields, evidence, warnings = self._draft(item_id, entry, suggestion['candidate'])
+        entry.update(draft=draft, original_fields=fields, original_evidence=evidence, warnings=warnings)
+        self._card(item_id, card['content_digest'])
+        def insert(document):
+            if item_id in document['items']:
+                raise ValueError('Návrh již existuje; obnov jeho stav.')
+            document['items'][item_id] = entry
+        self._mutate(insert)
 
     def _job_update(self,item_id,job_id,**fields):
         def update(document):
@@ -195,6 +201,16 @@ class CalendarDraftService:
     def _complete(self,item_id,job_id,candidate):
         entry=self.repository.read()['items'][item_id]
         self._card(item_id,entry['content_digest'])
+        draft,fields,evidence,warnings=self._draft(item_id,entry,candidate)
+        def complete(document):
+            current=document['items'][item_id]
+            if current['job']['id']!=job_id or current['job']['status']!='running':raise ValueError('Požadavek se změnil.')
+            current.update(draft=draft,original_fields=fields,original_evidence=evidence,warnings=warnings)
+            current['job'].update(status='completed',completed_at=now(),message='Návrh je připravený k lidskému posouzení.')
+        self._mutate(complete)
+
+    @staticmethod
+    def _draft(item_id,entry,candidate):
         fields,evidence,warnings=materialize(candidate,entry['job']['input'])
         fields,calculated=simple_defaults(fields)
         for name in calculated:
@@ -206,12 +222,7 @@ class CalendarDraftService:
         draft={'revision':0,'fields':fields,'evidence':evidence,'issues':issues,'normalized':normalized,
                'reminders':[1440,60],
                'source_item_id':item_id,'source_digest':entry['content_digest'],'calendar_writes':False}
-        def complete(document):
-            current=document['items'][item_id]
-            if current['job']['id']!=job_id or current['job']['status']!='running':raise ValueError('Požadavek se změnil.')
-            current.update(draft=draft,original_fields=fields,original_evidence=evidence,warnings=warnings)
-            current['job'].update(status='completed',completed_at=now(),message='Návrh je připravený k lidskému posouzení.')
-        self._mutate(complete)
+        return draft,fields,evidence,warnings
 
     def save(self,payload):
         if (set(payload) not in ({'action','id','expected_revision','fields'}, {'action','id','expected_revision','fields','reminders'})

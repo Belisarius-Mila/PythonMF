@@ -36,6 +36,7 @@ class ServiceSettings(BaseModel):
     max_assessments_per_day: int | None = Field(default=None, ge=1, le=1000)
     batch_size: int = Field(default=10, ge=1, le=100)
     max_batches: int = Field(default=2, ge=1, le=20)
+    calendar_suggestions: bool = False
 
 
 def load_settings(path: Path = SETTINGS_PATH) -> ServiceSettings:
@@ -79,6 +80,7 @@ def readiness(*, settings_path: Path = SETTINGS_PATH, worker=None,
             blockers.append(provider + "_configuration_unavailable")
     return {"ready": not blockers, "blockers": blockers, "sources": sources,
             "enabled": settings.enabled, "role": EMAIL_ROLE,
+            "calendar_suggestions": settings.calendar_suggestions,
             "hours": "07:00–22:00 Europe/Prague", "max_assessments_per_day": settings.max_assessments_per_day,
             "pushcut": pushcut_status(worker)}
 
@@ -144,13 +146,15 @@ def service_tick(*, settings_path: Path = SETTINGS_PATH, worker=None, now: datet
                 current = load_settings(settings_path)
                 used = worker.status().get("service", {}).get("daily_attempts", {}).get(day, 0)
                 return (not current.enabled or current.providers != settings.providers
+                        or current.calendar_suggestions != settings.calendar_suggestions
                         or (current.max_assessments_per_day is not None and used >= current.max_assessments_per_day))
 
             if paused():
                 return finish({"status": "paused", "proposals": 0})
             selected = select_model()
             selection_validator(selected, role=EMAIL_ROLE)
-            proposer = proposer_factory(selected["model"], effort=selected["reasoning_effort"])
+            options = {'calendar_suggestions': True} if settings.calendar_suggestions else {}
+            proposer = proposer_factory(selected["model"], effort=selected["reasoning_effort"], **options)
 
             def propose(observed):
                 selection_validator(selected, role=EMAIL_ROLE)

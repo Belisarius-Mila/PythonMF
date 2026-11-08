@@ -36,7 +36,7 @@ function find(element, label) {
         metadata, reply_subject: 'Re: Schůzka', reply_draft: 'Potvrzuji účast.'}}],
     hours: [{text: '18:00: Firma — Reklama', ids: ['low-1','low-2'], messages: [
       {id: 'low-1', text: 'Firma — Reklama'}, {id: 'low-2', text: '<script> — Jiné novinky'}]}]};
-  const calls = [], intervals = [];
+  const calls = [], intervals = [], calendarOpens = [];
   let confirmChoice = true;
   let preparationCount = 0;
   let preparationHold = null;
@@ -44,7 +44,8 @@ function find(element, label) {
   let visibilityHold = null;
   let savedHours = null;
   const context = {document: {getElementById: id => ids[id], createElement: tag => new Element(tag)},
-    window: {setInterval: fn => intervals.push(fn), confirm: () => confirmChoice},
+    window: {setInterval: fn => intervals.push(fn), confirm: () => confirmChoice,
+      SamanthaCalendarDraft: {isOpen: () => false, open: async item => calendarOpens.push(item.id)}},
     fetch: async (url, options) => {
       const payload = options?.body ? JSON.parse(options.body) : null;
       calls.push({url, payload});
@@ -91,6 +92,14 @@ function find(element, label) {
   await flush();
   assert.match(ids.cards.textContent, /CELÉ TĚLO A KONEC/);
   assert.match(ids.cards.textContent, /<img src=x onerror=alert\(1\)>/);
+  assert.doesNotMatch(ids.cards.textContent, /Návrh do kalendáře je připravený/);
+  data.cards[0].calendar_suggestion = {status: 'ready'};
+  await intervals[0]();
+  assert.match(ids.cards.textContent, /Návrh do kalendáře je připravený/);
+  await find(ids.cards, 'Do kalendáře').click();
+  assert.deepEqual(calendarOpens, ['important']);
+  assert.equal(calls.some(call => call.url.endsWith('/calendar-draft')), false,
+    'The existing calendar editor owns prepare/import; the email card starts no model itself');
   const initialProposal = {...data.cards[0].proposal};
   data.cards[0].proposal = {...initialProposal, reply_subject: '', reply_draft: ''};
   await intervals[0]();

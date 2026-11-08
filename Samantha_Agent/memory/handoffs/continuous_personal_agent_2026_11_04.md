@@ -1,5 +1,7 @@
 # Průběžný osobní agent — e-mailový provoz a Pushcut
 
+- 2026-11-08 18:22 CET: Lokálně doplněné volitelné kalendářové návrhy v jednom e-mailovém posouzení. Výchozí calendar_suggestions=false, běžící služba se nemění. Připravený návrh přebírá stejné Do kalendáře bez dalšího modelu/IMAP; existující návrhy, revize, zápisy a e-mailové koncepty se nepřepisují. 214 cílených testů PASS; závěrečná plná Cockpit brána 3199 testů OK (31 SKIP). Bez p+n/aktivace. Report reports/calendar_hourly_suggestions_20261108.md.
+
 Kalendář používá jednu kartu se čtyřmi poli: název, začátek,
 typ a místo. Kliknutí Do kalendáře připraví návrh přes stávající Terra roli;
 úpravy i kontrola kolizí probíhají automaticky. Výchozí pásmo Europe/Prague,
@@ -1210,3 +1212,43 @@ calendar_task_storage_gate_20261108.log a calendar_task_storage_diagnosis_202611
 Žádný skutečný kalendářový zápis ani změna helperů/grantů/modelů.
 Čtecí inventář UI: žádné připojené browser tabs a žádné Safari okno;
 přímá přejímka Mílova prohlížeče nebyla dostupná.
+
+
+## 2026-11-08 18:22 CET — Hodinové kalendářové návrhy se zachováním ručního průchodu
+
+### Hotovo
+- Volitelný doplněk nového e-mailového posouzení připraví schůzku nebo termín
+  s původním citačním kontraktem. Není potřeba druhý modelový průchod ani další
+  načtení pošty pro otevření připraveného návrhu.
+- Stejné tlačítko Do kalendáře předá výsledek do stejného čtyřpolového editoru.
+  Původní kolize, výslovný zápis, alarmy 24 h/60 min a čtecí obnova se používají dál.
+- Staré karty nemigrují a zůstávají na původní ruční cestě. Existující rozpracovaný,
+  nejistý nebo zapsaný návrh má před doplňkem přednost a nelze jej importem přepsat.
+- Chybná volitelná citace nezahodí e-mailový koncept; v přehledu zůstává viditelný
+  agregovaný problém. Formální pozvánky/opakování dál vyžadují ruční zpracování.
+
+### Rozhodnutí
+- Míla schválil navázání na bod 7 s podmínkou zachovat fungující implementaci.
+- Doplňující obálka je mimo EmailProposal i jeho potvrzovací digest; starý
+  e-mailový editor, archiv a odesílání zachovávají svůj dosavadní kontrakt.
+- Výchozí calendar_suggestions=false. Aktuální service.json, modelové role,
+  instalovaná hodinová kopie, pomocníci EventKit a jejich OS souhlasy beze změny.
+- Ikony c14f2524 jsou odložené, nejde o jejich nové p+n. Chráněný obnovovací TXT
+  ani Datův worktree se nemění. Poslední živě ověřený Cockpit je f51f3412.
+
+### Další krok
+- Převzít lokální změnu; před zapnutím zvlášť přijmout ruční Mac/iPhone
+  průchod a domluvit p+n/registrovaný upgrade vlastní hodinové kopie.
+
+### Navrhované další kroky
+- Po kompatibilním Cockpitu i službě teprve výslovně zapnout doplněk pro nové zprávy.
+- Na vybraném skutečném e-mailu ověřit správnost návrhu a cenu celého posouzení.
+- Změřením porovnat dobu/usage; jeden tah není důkaz stejné ani nižší ceny.
+
+### Technický důkaz
+- 214 cílených testů PASS, včetně 20 nových doménových/adapterových scénářů
+  a HTTP průchodu, import → kolize → potvrzení → jeden syntetický zápis.
+- Existující source_context přemístěný beze změny AST. Browser kontrakty e-mailu
+  a kalendářové karty PASS. Závěrečná plná brána 3199 testů OK (31 SKIP); logs/calendar_hourly_full_gate_v2_20261108.log.
+- Žádný skutečný modelový test, e-mailový send, kalendářový zápis/mazání, p+n
+  nebo servisní aktivace. Skutečná modelová kvalita, spotřeba a fyzická přejímka otevřené.

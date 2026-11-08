@@ -72,6 +72,27 @@ class EmailCalendarHTTPTests(unittest.TestCase):
             self.assertEqual(self.request('/api/email-agent/calendar-draft'+query)[0],400)
         self.assertEqual(self.driver.calls,0);self.assertEqual(self.callbacks,[])
 
+    def test_prepared_hourly_suggestion_uses_same_http_editor_without_new_model(self):
+        from app.email.calendar_assessment import calendar_suggestion
+        from tests.test_email_calendar_draft import candidate
+        self.worker._update(lambda d: d['items'][self.mail.item_id].update(
+            calendar_suggestion=calendar_suggestion(self.mail, candidate(), model='synthetic')))
+        before=self.worker.status()
+        self.assertIsNone(json.loads(self.request('/api/email-agent/calendar-draft?id='+self.mail.item_id)[1])['draft'])
+        body={'action':'prepare','confirmed':True,'id':self.mail.item_id,
+              'expected_content_digest':self.mail.content_digest,'request_id':'http-hourly-import-001'}
+        code,raw,_=self.request('/api/email-agent/calendar-draft',body)
+        self.assertEqual(code,200);view=json.loads(raw)
+        self.assertEqual(view['job']['status'],'completed')
+        self.assertEqual(view['draft']['fields']['location'],'Praha')
+        self.assertEqual(self.driver.calls,0);self.assertEqual(self.callbacks,[])
+        fields={**view['draft']['fields'],'location':'Moje úprava'}
+        code,raw,_=self.request('/api/email-agent/calendar-draft',{'action':'save','id':self.mail.item_id,'expected_revision':0,'fields':fields})
+        self.assertEqual(code,200);self.assertEqual(json.loads(raw)['draft']['revision'],1)
+        _,raw,_=self.request('/api/email-agent/calendar-draft',body)
+        self.assertEqual(json.loads(raw)['draft']['fields']['location'],'Moje úprava')
+        self.assertEqual(before,self.worker.status());self.assertEqual(self.driver.calls,0)
+
     def test_editor_browser_contract(self):
         result=subprocess.run([node_binary(),'tests/email_calendar_draft_frontend.test.cjs'],capture_output=True,text=True,timeout=25)
         self.assertEqual(result.returncode,0,result.stdout+result.stderr)

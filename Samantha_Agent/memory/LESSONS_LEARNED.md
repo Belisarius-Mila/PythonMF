@@ -1894,3 +1894,17 @@ přesné citace nepřijímat. Sémantická/provozní přejímka tím není autom
   Swift transakční logikou s in-memory EventKit (15 scénářů), včetně změny
   poznámek po nejasném remove a nového UI requestu bez další mutace.
   Není to skutečné smazání z osobního kalendáře ani přejímka iCloud sync.
+
+
+### LL-117 — Volitelný doplněk modelu nesmí zahodit původní platný výsledek
+
+- Problém: přidání kalendářového návrhu přímo do e-mailového kontraktu by
+  měnilo editaci/digest starých konceptů; chybná citace by zahodila i platnou odpověď.
+- Řešení: samostatná opt-in obálka, validace původního návrhu oddělená od doplňku,
+  uložený doplněk vedle původních dat a převzetí do existujícího editoru pod
+  stejnou zdrojovou identitou. Existující rozepsaný/nejistý návrh má vždy přednost.
+- Ověření: 214 cílených testů, včetně chybné volitelné citace, zachování konceptu,
+  restartu, souběžného importu a HTTP průchodu ke stejnému potvrzenému zápisu.
+  Zdroj: reports/calendar_hourly_suggestions_20261108.md.
+- Hranice: syntetické ověření kontraktu neprokazuje modelovou kvalitu ani
+  úsporu tokenů; zapnutí v samostatné službě až po kompatibilním upgradu.

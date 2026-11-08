@@ -9,7 +9,7 @@ from __future__ import annotations
 import hashlib
 import json
 import tempfile
-from dataclasses import replace
+from dataclasses import dataclass, replace
 from datetime import datetime, timezone
 from difflib import SequenceMatcher
 from email.utils import getaddresses
@@ -85,6 +85,13 @@ class EmailProposal(BaseModel):
     reply_subject: str = ""
 
 
+@dataclass(frozen=True)
+class EmailAssessment:
+    """Additive result; the saved/editable EmailProposal contract stays unchanged."""
+    proposal: EmailProposal
+    calendar_suggestion: dict
+
+
 def _now() -> str:
     return datetime.now(timezone.utc).isoformat()
 
@@ -154,7 +161,7 @@ class ContinuousEmailAgent:
         ]
         return tuple(matches[:5])
 
-    def cycle(self, source, propose: Callable[[ObservedEmail], EmailProposal], *, limit: int = 10,
+    def cycle(self, source, propose: Callable[[ObservedEmail], EmailProposal | EmailAssessment], *, limit: int = 10,
               cycle_at: datetime | None = None, should_stop: Callable[[], bool] = lambda: False) -> dict:
         """Process each identity once. First scan starts with oldest existing mail.
 
@@ -195,8 +202,12 @@ class ContinuousEmailAgent:
                     }
                     self._update(lambda d: d["items"].__setitem__(item_id, item))
                     try:
-                        proposal = EmailProposal.model_validate(propose(replace(
-                            observed, importance_preferences=hints))).model_dump()
+                        assessed = propose(replace(observed, importance_preferences=hints))
+                        suggestion = assessed.calendar_suggestion if isinstance(assessed, EmailAssessment) else None
+                        proposal = EmailProposal.model_validate(
+                            assessed.proposal if isinstance(assessed, EmailAssessment) else assessed).model_dump()
+                        if suggestion and suggestion['status'] == 'ready':
+                            proposal['important'] = True  # A proposed meeting/deadline must remain visible.
                     except Exception as exc:
                         self._update(lambda d: d["items"][item_id].update(
                             status="analysis_failed", error=type(exc).__name__))
@@ -207,6 +218,8 @@ class ContinuousEmailAgent:
                                 status="awaiting_confirmation" if proposal["important"] else "hourly_summary",
                                 message=visible_message, proposal=proposal,
                                 proposal_digest=proposal_digest(proposal))
+                            if suggestion is not None:
+                                document["items"][item_id]['calendar_suggestion'] = suggestion
                             if proposal["important"] and document.get("pushcut", {}).get("enabled"):
                                 event = document.setdefault("notification_hours", {}).setdefault(hour, {
                                     "status": "pending", "created_at": _now(), "item_ids": []})

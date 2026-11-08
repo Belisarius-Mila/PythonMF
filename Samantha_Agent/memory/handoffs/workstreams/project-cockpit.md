@@ -1,6 +1,8 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
+- 2026-11-08 18:22 CET: Lokálně doplněné volitelné kalendářové návrhy v jednom e-mailovém posouzení. Výchozí calendar_suggestions=false, běžící služba se nemění. Připravený návrh přebírá stejné Do kalendáře bez dalšího modelu/IMAP; existující návrhy, revize, zápisy a e-mailové koncepty se nepřepisují. 214 cílených testů PASS; závěrečná plná Cockpit brána 3199 testů OK (31 SKIP). Bez p+n/aktivace. Report reports/calendar_hourly_suggestions_20261108.md.
+
 - 2026-11-08 17:30 CET: Lokálně doplněná samostatná identita hlavního Cockpitu; i kalendář při instalaci hlavní ikony odkazuje na start /. Nový úkol dál vlastní id/start /calendar/task/. Žádný reset při návratu ani změna rozepsaných dat. 36 cílených + statická brána PASS. Bez nového p+n, fyzická iPhone přejímka otevřená; původní mazání f51f3412 už Mílou přijaté. Report reports/cockpit_home_icons_20261108.md.
 
 - 2026-11-08 14:56 CET: Lokálně doplněné Smazat z kalendáře u jednotlivé události a po uložení. Přesný nativní náhled, potvrzení, jeden výskyt, bez pozvánek s účastníky; trvalé markery bez opakování nejistého mazání. 112 cílených PASS, 15 nativních in-memory scénářů a podepsaný izolovaný self-test PASS. Plná brána 3174 testů OK (31 SKIP), logs/calendar_delete_full_gate_20261108.log. Původní reader/writer zachované; nový helper dosud bez OS grantu, bez p+n a bez skutečného mazání. Report reports/calendar_delete_20261108.md.
@@ -2297,3 +2299,43 @@ přímá přejímka Mílova prohlížeče nebyla dostupná.
   iOS resume není místně reprodukované; metadata nejsou zárukou resetu okna.
 - Předchozí f51f3412 nasazený, CI success a Míla potvrdil funkční mazání.
   Nesouvisející neversionovaný obnovovací TXT se nečte, nemění ani necommituje.
+
+
+## 2026-11-08 18:22 CET — Hodinové kalendářové návrhy se zachováním ručního průchodu
+
+### Hotovo
+- Volitelný doplněk nového e-mailového posouzení připraví schůzku nebo termín
+  s původním citačním kontraktem. Není potřeba druhý modelový průchod ani další
+  načtení pošty pro otevření připraveného návrhu.
+- Stejné tlačítko Do kalendáře předá výsledek do stejného čtyřpolového editoru.
+  Původní kolize, výslovný zápis, alarmy 24 h/60 min a čtecí obnova se používají dál.
+- Staré karty nemigrují a zůstávají na původní ruční cestě. Existující rozpracovaný,
+  nejistý nebo zapsaný návrh má před doplňkem přednost a nelze jej importem přepsat.
+- Chybná volitelná citace nezahodí e-mailový koncept; v přehledu zůstává viditelný
+  agregovaný problém. Formální pozvánky/opakování dál vyžadují ruční zpracování.
+
+### Rozhodnutí
+- Míla schválil navázání na bod 7 s podmínkou zachovat fungující implementaci.
+- Doplňující obálka je mimo EmailProposal i jeho potvrzovací digest; starý
+  e-mailový editor, archiv a odesílání zachovávají svůj dosavadní kontrakt.
+- Výchozí calendar_suggestions=false. Aktuální service.json, modelové role,
+  instalovaná hodinová kopie, pomocníci EventKit a jejich OS souhlasy beze změny.
+- Ikony c14f2524 jsou odložené, nejde o jejich nové p+n. Chráněný obnovovací TXT
+  ani Datův worktree se nemění. Poslední živě ověřený Cockpit je f51f3412.
+
+### Další krok
+- Převzít lokální změnu; před zapnutím zvlášť přijmout ruční Mac/iPhone
+  průchod a domluvit p+n/registrovaný upgrade vlastní hodinové kopie.
+
+### Navrhované další kroky
+- Po kompatibilním Cockpitu i službě teprve výslovně zapnout doplněk pro nové zprávy.
+- Na vybraném skutečném e-mailu ověřit správnost návrhu a cenu celého posouzení.
+- Změřením porovnat dobu/usage; jeden tah není důkaz stejné ani nižší ceny.
+
+### Technický důkaz
+- 214 cílených testů PASS, včetně 20 nových doménových/adapterových scénářů
+  a HTTP průchodu, import → kolize → potvrzení → jeden syntetický zápis.
+- Existující source_context přemístěný beze změny AST. Browser kontrakty e-mailu
+  a kalendářové karty PASS. Závěrečná plná brána 3199 testů OK (31 SKIP); logs/calendar_hourly_full_gate_v2_20261108.log.
+- Žádný skutečný modelový test, e-mailový send, kalendářový zápis/mazání, p+n
+  nebo servisní aktivace. Skutečná modelová kvalita, spotřeba a fyzická přejímka otevřené.

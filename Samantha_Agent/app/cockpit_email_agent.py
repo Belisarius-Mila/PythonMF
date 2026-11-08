@@ -27,6 +27,8 @@ def email_agent_overview(*, worker=None) -> dict:
             public = {"id": item_id, **item}
             public["reply"] = {key: value for key, value in reply.items()
                                if key not in {"confirmation_token", "message_b64", "confirmation_digest"}}
+            if 'calendar_suggestion' in item:
+                public['calendar_suggestion'] = {'status': item['calendar_suggestion'].get('status')}
             cards.append(public)
         elif status == "hourly_summary" and not hidden_low_importance(item, state.get("visibility_preferences", {})):
             hour = item["hour"]
@@ -59,6 +61,8 @@ def email_agent_overview(*, worker=None) -> dict:
             "sources": list(state["sources"].values()), "importance_preferences": preferences,
             "visibility_preferences": visibility,
             "assessment_errors": sum(counts[s] for s in ("analysis_failed", "analysis_interrupted", "analyzing")),
+            "calendar_suggestion_errors": sum(item.get('calendar_suggestion', {}).get('status') == 'invalid'
+                                              for item in state['items'].values()),
             "pushcut": pushcut_status(worker or ContinuousEmailAgent())}
 
 
