@@ -1,41 +1,42 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
-## 2026-11-08 08:21 CET — REC-06: neplacený úplný anchor plán spočten
+## 2026-11-08 10:13 CET — REC-06: celý běhový adapter a exekuční karta připravené
 
 ### Hotovo
-- Plán nad main 6d5b576b: 531 dokumentů + celý původní TXT, 6 314 979 B,
-  dvacet čtecích dávek a jedna syntéza. Plné texty zachované, každý dokument právě jednou.
-- Konzervativní rezerva bez cache 243,50895 Standard kreditu; návrh přijímací
-  meze 250. Čtení 300 s/dávku, syntéza 900 s podle skutečného měření malého testu.
-- Osmnáct nových testů / 68 cílených OK; úplná zdrojová fixture a request hashe
-  prošly. Syntézní rezerva je předem ohraničená, nesmí se krátit historie či zdroje.
+- Samostatný no-retry adapter propojuje přesný celý plán s 20 inspect + 1
+  synthesis přes existující sdílený socket; žádná změna produkčního klienta/runtime.
+- Čerstvá exekuční karta 4b22ea9e…4cce1d1: 531 dokumentů + original,
+  Sol/medium Standard, plán 243,50895 / mez 250 Standard kreditů (ne hard cap),
+  časy 300/900 s. Karta čeká na konkrétní souhlas, nikoli na další implementaci.
+- 43 nových / 111 cílených testů OK; úplná 20+1 offline fixture nad skutečným
+  korpusem prošla, všechna zjištění předaná a původní quality gate zachovaná.
 
 ### Rozhodnutí
-- Jde o neplacený plán dcfb8b2a…c6f805d, nikoli exekuční kartu nebo souhlas
-  s placením. Žádný nový modelový tah. Placený run adapter není implementovaný.
-- 782 dlouhých řádků je nepodporovaných jako citace v omezené rezervě;
-  celé zdrojové texty zůstávají čitelné, žádný dokument se nevynechal.
-- Staré placené joby a jejich limity zůstávají uzavřené a beze změny. Nová
-  časová mez nezvyšuje zpětně 300 s nepřijatého malého testu.
+- Pokyn k adapteru provedl vývoj a neplacenou přípravu. Žádný nový placený
+  tah ani attempt marker; žádná aktivace, publikace, zápis TXT/iCloud či role JSON.
+- Všechny staré placené joby i přípravný plán zůstávají beze změny. Další
+  volání spotřebovaného jobu smí jen vrátit jeho účtenku, nikdy obnovit model.
+- Bez nové command allowlist či live/manual dokladů zůstávají nové příkazy
+  a živá tvrzení nepodporované podle původního quality gate. Kandidát není přijatý provozní návod.
 
 ### Další krok
-- Dokončit samostatný běhový adapter nad přesným plánem: zdrojová čerstvost,
-  peer/socket/účet/Standard, společný trvalý job bez retry, raw účtenky a skutečné
-  přepočty/fázové meze. Až pak vytvořit exekuční kartu k samostatnému přijetí.
+- Po konečných branách přijmout přesnou novou kartu k jedinému celému pilotu
+  (nejvýše 21 tahů). Před run znovu čerstvost snapshot/kód/peer/socket/účet;
+  při driftu jen explicitní neplacená revize před pokusem a nový souhlas.
 
 ### Navrhované další kroky
-- Will přezkoumá izolovaný plán a zachová svoji souběžnou práci.
-- Implementovat a neplaceně otestovat celý adapter; žádný další malý placený test automaticky.
-- Po čerstvé konkrétní kartě zvlášť přijmout jeden celý pilot.
-- Později úplný Mac/iPhone dossier, dvě kopie/upload a samostatná týdenní aktivace.
+- Will přezkoumá izolovaný adapter a kartu, zachová svoji souběžnou práci.
+- Konkrétní souhlas s kartou, poté jediný programově řízený celý kandidátní pilot.
+- Vyhodnotit známé účtenky/spotřebu a obsah; nikdy neřešit nejistotu dalším turn/start.
+- Samostatně Mac/iPhone dossier, obsahová přejímka, dvě kopie/upload a týdenní aktivace.
 
 ### Technický důkaz
-- recovery_guide_anchor_full_plan_20261108.md, stejnojmenný JSON a *_offline_20261108.json.
-- Referenční input s marží 4 300 579, output 113 920; synthesis input 236 458.
-  Encoding o200k_base / tiktoken 0.14.0 není přesné Sol mapování; meze nejsou billing cap.
-- Časový návrh 900 s vychází z 400,240 s / 19 837 output tokenů; při 32 000
-  a 25% marži 807,058 s. Součet přijímacích časů 115 minut není předpověď délky.
-- Čtecí runtime 0.163.0 / CLI 0.166.0; Sol/medium v katalogu, živý kontext/účetní základ neověřené.
-- Plná brána 2 686 testů OK / 5 skipped; statická brána a git diff --check OK. Žádný model/služba/role/push/deploy ani TXT/iCloud.
+- recovery_guide_anchor_full_pilot_20261108.md, *_card_20261108.json a *_offline_20261108.json.
+- Celý plán dcfb8b2a…c6f805d, main 6d5b576b, peer 0.163.0 / CLI 0.166.0,
+  chatgpt účet; aktuální pricing identity a živý kontext nejsou prokázané.
+- Trvalý záznam před thread/turn, raw před přejímkou; structured errors,
+  failed/interrupted a willRetry/timeout zachované bez resend. Částečná usage není finální účet.
+- 43 nových / 111 cílených testů OK. Plná brána 2 729 OK / 5 skipped; statická brána a git diff --check OK.
+  Offline fixture není modelový výsledek. Žádný push/deploy či integrace do main.
 <!-- SAMANTHA_CURRENT_STATUS_END -->
 
 ### Předchozí stav infrastruktury
@@ -1216,3 +1217,42 @@ souborů / 5 002 170 B. Stávající rutinní pilot není obecný writer/schedul
   a 25% marži 807,058 s. Součet přijímacích časů 115 minut není předpověď délky.
 - Čtecí runtime 0.163.0 / CLI 0.166.0; Sol/medium v katalogu, živý kontext/účetní základ neověřené.
 - Plná brána 2 686 testů OK / 5 skipped; statická brána a git diff --check OK. Žádný model/služba/role/push/deploy ani TXT/iCloud.
+
+## 2026-11-08 10:13 CET — REC-06: celý běhový adapter a exekuční karta připravené
+
+### Hotovo
+- Samostatný no-retry adapter propojuje přesný celý plán s 20 inspect + 1
+  synthesis přes existující sdílený socket; žádná změna produkčního klienta/runtime.
+- Čerstvá exekuční karta 4b22ea9e…4cce1d1: 531 dokumentů + original,
+  Sol/medium Standard, plán 243,50895 / mez 250 Standard kreditů (ne hard cap),
+  časy 300/900 s. Karta čeká na konkrétní souhlas, nikoli na další implementaci.
+- 43 nových / 111 cílených testů OK; úplná 20+1 offline fixture nad skutečným
+  korpusem prošla, všechna zjištění předaná a původní quality gate zachovaná.
+
+### Rozhodnutí
+- Pokyn k adapteru provedl vývoj a neplacenou přípravu. Žádný nový placený
+  tah ani attempt marker; žádná aktivace, publikace, zápis TXT/iCloud či role JSON.
+- Všechny staré placené joby i přípravný plán zůstávají beze změny. Další
+  volání spotřebovaného jobu smí jen vrátit jeho účtenku, nikdy obnovit model.
+- Bez nové command allowlist či live/manual dokladů zůstávají nové příkazy
+  a živá tvrzení nepodporované podle původního quality gate. Kandidát není přijatý provozní návod.
+
+### Další krok
+- Po konečných branách přijmout přesnou novou kartu k jedinému celému pilotu
+  (nejvýše 21 tahů). Před run znovu čerstvost snapshot/kód/peer/socket/účet;
+  při driftu jen explicitní neplacená revize před pokusem a nový souhlas.
+
+### Navrhované další kroky
+- Will přezkoumá izolovaný adapter a kartu, zachová svoji souběžnou práci.
+- Konkrétní souhlas s kartou, poté jediný programově řízený celý kandidátní pilot.
+- Vyhodnotit známé účtenky/spotřebu a obsah; nikdy neřešit nejistotu dalším turn/start.
+- Samostatně Mac/iPhone dossier, obsahová přejímka, dvě kopie/upload a týdenní aktivace.
+
+### Technický důkaz
+- recovery_guide_anchor_full_pilot_20261108.md, *_card_20261108.json a *_offline_20261108.json.
+- Celý plán dcfb8b2a…c6f805d, main 6d5b576b, peer 0.163.0 / CLI 0.166.0,
+  chatgpt účet; aktuální pricing identity a živý kontext nejsou prokázané.
+- Trvalý záznam před thread/turn, raw před přejímkou; structured errors,
+  failed/interrupted a willRetry/timeout zachované bez resend. Částečná usage není finální účet.
+- 43 nových / 111 cílených testů OK. Plná brána 2 729 OK / 5 skipped; statická brána a git diff --check OK.
+  Offline fixture není modelový výsledek. Žádný push/deploy či integrace do main.

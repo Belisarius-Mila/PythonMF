@@ -424,3 +424,26 @@ Doklad reports/recovery_guide_anchor_full_plan_20261108.md/JSON a offline JSON.
 Příští vývoj musí připojit přesný plan digest k samostatnému trvalému běhovému
 jobu, ověřit peer/socket/účet/role, vynutit meze a no-retry a až potom vytvořit
 novou exekuční kartu. Souhlas s placením se v této plánovací etapě nežádá.
+
+## 2026-11-08 — celý běhový adapter dokončen, čeká přesný souhlas
+
+Nové `recovery_guide_anchor_full_pilot.prepare(plan_digest=...)/status/run` a
+čistý isolated `recovery_guide_anchor_full_worker` jsou registrované odděleně
+od starých jobů a produkčního CLI run/tick. Karta 4b22ea9e…4cce1d1 nad plánem
+dcfb8b2a…c6f805d: 531 dokumentů + original, nejvýše 21 Sol/medium Standard
+tahů, plán 243,50895 / přijímací mez 250 kreditů (ne hard cap), 300/900 s.
+
+Přesný peer/socket/účet/model, kód/tokenizer a zdroje se připínají a kontrolují
+před akcemi; trvalý marker před wire, raw receipts před přejímkou, jeden job
+napříč předběžnými kartami, žádný reset/resume/retry. `status` pouze čte receipt
+bez připojení. Structured error data zůstávají privátní, willRetry neopravňuje
+nový tah, usage bez terminální události zůstane pouze pozorovaná. Přijatý
+kandidát patří pouze do vlastní .venv; není to publication/activation grant.
+
+Původní quality gate se nemění: nové příkazy bez allowlist a živé Mac/iPhone
+claims bez důkazů jsou nepodporované. Celá aplikační inventura není prokázaná.
+43 nových / 111 cílených testů OK; úplná 20+1 skutečná zdrojová fixture
+bez modelu zachovala všechna findings, žádný starý job/plán nebyl přepsán.
+Příprava nespustila žádný thread/turn. Souhlas s placením musí přijmout novou
+kartu zvlášť; neplatí dosavadní souhlas s malým testem ani návrh rozpočtu.
+Doklad reports/recovery_guide_anchor_full_pilot_20261108.md a card/offline JSON.

@@ -1481,3 +1481,42 @@ závislosti bez konkrétní potřeby. Nejde o rozšíření e-mailové business 
   a 25% marži 807,058 s. Součet přijímacích časů 115 minut není předpověď délky.
 - Čtecí runtime 0.163.0 / CLI 0.166.0; Sol/medium v katalogu, živý kontext/účetní základ neověřené.
 - Plná brána 2 686 testů OK / 5 skipped; statická brána a git diff --check OK. Žádný model/služba/role/push/deploy ani TXT/iCloud.
+
+## 2026-11-08 10:13 CET — REC-06: celý běhový adapter a exekuční karta připravené
+
+### Hotovo
+- Samostatný no-retry adapter propojuje přesný celý plán s 20 inspect + 1
+  synthesis přes existující sdílený socket; žádná změna produkčního klienta/runtime.
+- Čerstvá exekuční karta 4b22ea9e…4cce1d1: 531 dokumentů + original,
+  Sol/medium Standard, plán 243,50895 / mez 250 Standard kreditů (ne hard cap),
+  časy 300/900 s. Karta čeká na konkrétní souhlas, nikoli na další implementaci.
+- 43 nových / 111 cílených testů OK; úplná 20+1 offline fixture nad skutečným
+  korpusem prošla, všechna zjištění předaná a původní quality gate zachovaná.
+
+### Rozhodnutí
+- Pokyn k adapteru provedl vývoj a neplacenou přípravu. Žádný nový placený
+  tah ani attempt marker; žádná aktivace, publikace, zápis TXT/iCloud či role JSON.
+- Všechny staré placené joby i přípravný plán zůstávají beze změny. Další
+  volání spotřebovaného jobu smí jen vrátit jeho účtenku, nikdy obnovit model.
+- Bez nové command allowlist či live/manual dokladů zůstávají nové příkazy
+  a živá tvrzení nepodporované podle původního quality gate. Kandidát není přijatý provozní návod.
+
+### Další krok
+- Po konečných branách přijmout přesnou novou kartu k jedinému celému pilotu
+  (nejvýše 21 tahů). Před run znovu čerstvost snapshot/kód/peer/socket/účet;
+  při driftu jen explicitní neplacená revize před pokusem a nový souhlas.
+
+### Navrhované další kroky
+- Will přezkoumá izolovaný adapter a kartu, zachová svoji souběžnou práci.
+- Konkrétní souhlas s kartou, poté jediný programově řízený celý kandidátní pilot.
+- Vyhodnotit známé účtenky/spotřebu a obsah; nikdy neřešit nejistotu dalším turn/start.
+- Samostatně Mac/iPhone dossier, obsahová přejímka, dvě kopie/upload a týdenní aktivace.
+
+### Technický důkaz
+- recovery_guide_anchor_full_pilot_20261108.md, *_card_20261108.json a *_offline_20261108.json.
+- Celý plán dcfb8b2a…c6f805d, main 6d5b576b, peer 0.163.0 / CLI 0.166.0,
+  chatgpt účet; aktuální pricing identity a živý kontext nejsou prokázané.
+- Trvalý záznam před thread/turn, raw před přejímkou; structured errors,
+  failed/interrupted a willRetry/timeout zachované bez resend. Částečná usage není finální účet.
+- 43 nových / 111 cílených testů OK. Plná brána 2 729 OK / 5 skipped; statická brána a git diff --check OK.
+  Offline fixture není modelový výsledek. Žádný push/deploy či integrace do main.
