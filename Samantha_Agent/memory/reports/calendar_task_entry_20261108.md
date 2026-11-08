@@ -1,6 +1,11 @@
 # Rychlé zadání kalendářového úkolu
 
-Stav 2026-11-08 11:54 CET: lokální vývoj hotový, bez push/nasazení nové karty.
+Aktualizace 8. 11.: skutečně nasazeno v 6c610287, Terra účtenka
+d7ac821490a17273e18be1de270b9ba8, CI 42474671842 success. První uživatelský
+pokus následně odhalil předodesílací chybu; lokální oprava a otevřené p+n
+v reports/calendar_task_storage_fix_20261108.md. Níže je původní etapa vývoje.
+
+Historický vývojový stav 2026-11-08 11:54 CET: lokálně hotové před samostatným p+n.
 Proud project-cockpit; stávající kanonický handoff/TVBCP aktualizované.
 Předchozí agenda je živě nasazená v 6d5b576b, nový vývoj se s ní nesměšuje.
 

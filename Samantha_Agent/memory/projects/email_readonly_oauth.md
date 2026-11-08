@@ -5,15 +5,19 @@ nasazené v 6d5b576b (Terra a751897cb82760aa9704339547dd78f2, plná brána
 2896, smoke 5/5 a CI 42458143491 success; finální živý důkaz
 logs/calendar_agenda_final_verified_20261108.log).
 
-Nově lokálně hotová karta Zadání úkolu: jeden celý text, den/měsíc/rok,
-čas 09:00 upravitelný přímo na kartě. Jedno potvrzené odeslání vytvoří
-termín ve stávajícím cíli, Europe/Prague, dva alarmy 24 h/60 min. Bez AI,
-nového oprávnění či rebuildu podepsaných helperů. Obsah se nerozděluje,
-celý zůstává v názvu (do 400 znaků podle limitu čtečky). Přímá karta
-/calendar/task/ má vlastní start_url i ikonu. Kód zatím bez nového p+n;
-živý zápis a fyzická iPhone přejímka této nové karty otevřené. Kanonický
-UI zápis: handoffs/workstreams/project-cockpit.md a
-tvbcp/workstreams/project-cockpit.md. Report reports/calendar_task_entry_20261108.md.
+Rychlé Zadání úkolu je nasazené v 6c610287 (Terra job
+d7ac821490a17273e18be1de270b9ba8, plná brána 2923, smoke 5/5,
+CI 42474671842 success). Míla při prvním zadání nahlásil předodesílací
+chybu uchování a zašednutí. Ta je reprodukovaná bez randomUUID;
+lokální oprava používá silné getRandomValues a zachovává editovatelný
+text při prokazatelném neodeslání. Částečně uložená identita se neopouští.
+Přesné schéma Mílovy adresy zatím nepotvrzené, server při prvním auditu
+neměl žádnou účtenku úkolu. Nové p+n opravy dosud nepovoleno; report
+reports/calendar_task_storage_fix_20261108.md. Samotný formulář nadále
+používá celý text, den/měsíc/rok, viditelně upravitelných 09:00,
+Europe/Prague a alarmy 24 h/60 min. Bez AI a změny původního writeru.
+Kanonický UI zápis: handoffs/workstreams/project-cockpit.md a
+tvbcp/workstreams/project-cockpit.md.
 
 Kalendář používá jednu kartu se čtyřmi poli: název, začátek,
 typ a místo. Kliknutí Do kalendáře připraví návrh přes stávající Terra roli;
@@ -1472,3 +1476,39 @@ Mac/iPhone přejímka je otevřená. Ikona vizuálně zkontrolovaná; vlastní
 syntetický QA server ukončený, žádná karta prohlížeče nevznikla.
 Důkazy: logs/calendar_task_targeted_20261108.log, calendar_task_gate_20261108.log,
 calendar_task_live_read_20261108.log, calendar_task_ui_20261108.log.
+
+## 2026-11-08 12:28 CET — Oprava chyby přípravy úkolu před odesláním
+
+Hotovo: Lokální oprava dovolí použít rychlé zadání také v prohlížeči, kde
+není dostupné crypto.randomUUID. Identita zadání vzniká přes silné
+crypto.getRandomValues. Při prokazatelném selhání před odesláním se pole
+neuzamknou, text/datum/čas zůstávají a lze zkusit odeslání znovu. Pokud
+se identita stihla uložit, zachová se původní payload a ověřuje pouze
+stejný ID. Při nedostupném či nejasném úložišti je blokované jen další
+odeslání; text je přístupný pro zkopírování. Kalendářový backend beze změn.
+
+Rozhodnutí: Míla ohlásil zašedlý formulář a zprávu Zadání se nepodařilo
+bezpečně uchovat, Neodesláno, Obnov stránku. Nejde o potvrzenou chybu
+macOS zápisu. Při prvním agregovaném serverovém auditu nebyla žádná
+účtenka zadání. Stejný stav byl reprodukovaný v profilu bez randomUUID
+s funkčním úložištěm. Konkrétní schéma adresy Mílova prohlížeče zatím
+nepotvrzené; stejný catch původně schovával také chyby zápisu úložiště.
+Předchozí obecná rada obnovit stránku mohla ztratit neuložený text; nová
+zpráva jej ponechává. Žádný slabý Math.random ani obcházení idempotence.
+
+Další krok: samostatně schválit p+n ověřeného nového opravného commitu. Současný živý základ 6c610287 byl skutečně
+Terrou nasazený (d7ac821490a17273e18be1de270b9ba8, 2923, smoke 5/5,
+CI 42474671842 success); neprohlašovat opravu za nasazenou.
+
+Navrhované další kroky: po nasazení Mílův retest na stejné adrese.
+
+Technický důkaz: red→green Node regrese HTTP bez randomUUID, test
+chyby setItem s editovatelným formulářem a následným jediným POST,
+částečného uložení s read-only status a stejným ID, absence silného RNG
+bez odeslání. 26 cílených PASS; plná brána 2923 testů OK (31 SKIP).
+Důkazy logs/calendar_task_storage_repro_before_20261108.log,
+calendar_task_storage_node_20261108.log, calendar_task_storage_targeted_20261108.log,
+calendar_task_storage_gate_20261108.log a calendar_task_storage_diagnosis_20261108.log.
+Žádný skutečný kalendářový zápis ani změna helperů/grantů/modelů.
+Čtecí inventář UI: žádné připojené browser tabs a žádné Safari okno;
+přímá přejímka Mílova prohlížeče nebyla dostupná.

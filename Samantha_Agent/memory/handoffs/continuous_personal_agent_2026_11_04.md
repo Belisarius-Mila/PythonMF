@@ -14,14 +14,16 @@ a první konkrétně schválená událost skutečně uložená a ověřená (jed
 čtecí recover, dva alarmy). Přehled Cockpitu obnovený; viz poslední záznam.
 Jednoduchá karta, přesun do Komunikace a měsíční agenda již nasazené
 v 6d5b576b (Terra a751897cb82760aa9704339547dd78f2, CI 42458143491 success).
-Nově lokálně hotová rychlá karta Zadání úkolu s jedním textem, datem
-a upravitelnou výchozí hodinou 09:00; jeden potvrzený create, dva alarmy.
-Bez AI, bez změny Swift helperů nebo OS grantů. Trvalá identita před
-zápisem, při nejistotě jen obnova původního eventu. Přímá karta/ikona
-je připravená; nové p+n zatím nepovoleno a fyzická Mac/iPhone přejímka
-ověřená není. 378 cílených PASS, plná brána 2923 testů OK (31 SKIP).
-Kanonický UI handoff a TVBCP workstreams/project-cockpit.md, report
-reports/calendar_task_entry_20261108.md. Samostatný e-mailový TVBCP není domluvený.
+Rychlá karta Zadání úkolu s jedním textem, datem a upravitelným časem
+09:00 je nasazená v 6c610287 (CI 42474671842 success). Uživatel nahlásil
+chybu před odesláním a zašedlý formulář. Lokální oprava reprodukovaného
+HTTP profilu bez randomUUID používá silné getRandomValues, odemyká
+text při známém neodeslání a při částečném uložení drží původní ID.
+Server při prvním auditu neměl žádnou účtenku úkolu; schéma skutečné
+Mílovy adresy zatím nepotvrzené. 26 cílených PASS, plná brána 2923 testů OK (31 SKIP).
+Oprava zatím bez nového p+n. Report reports/calendar_task_storage_fix_20261108.md;
+kanonický UI handoff/TVBCP workstreams/project-cockpit.md. Žádný
+skutečný event tímto vývojem nevznikl. Samostatný e-mailový TVBCP není domluvený.
 
 Aktuální stav 6. 11.: Terra p+n e82a5d47 dokončené, nový editor živě ověřený.
 Potvrzený upgrade na f2d6ef79 aktivoval zdvořilostní pravidlo i v hodinovém
@@ -1172,3 +1174,39 @@ Mac/iPhone přejímka je otevřená. Ikona vizuálně zkontrolovaná; vlastní
 syntetický QA server ukončený, žádná karta prohlížeče nevznikla.
 Důkazy: logs/calendar_task_targeted_20261108.log, calendar_task_gate_20261108.log,
 calendar_task_live_read_20261108.log, calendar_task_ui_20261108.log.
+
+## 2026-11-08 12:28 CET — Oprava chyby přípravy úkolu před odesláním
+
+Hotovo: Lokální oprava dovolí použít rychlé zadání také v prohlížeči, kde
+není dostupné crypto.randomUUID. Identita zadání vzniká přes silné
+crypto.getRandomValues. Při prokazatelném selhání před odesláním se pole
+neuzamknou, text/datum/čas zůstávají a lze zkusit odeslání znovu. Pokud
+se identita stihla uložit, zachová se původní payload a ověřuje pouze
+stejný ID. Při nedostupném či nejasném úložišti je blokované jen další
+odeslání; text je přístupný pro zkopírování. Kalendářový backend beze změn.
+
+Rozhodnutí: Míla ohlásil zašedlý formulář a zprávu Zadání se nepodařilo
+bezpečně uchovat, Neodesláno, Obnov stránku. Nejde o potvrzenou chybu
+macOS zápisu. Při prvním agregovaném serverovém auditu nebyla žádná
+účtenka zadání. Stejný stav byl reprodukovaný v profilu bez randomUUID
+s funkčním úložištěm. Konkrétní schéma adresy Mílova prohlížeče zatím
+nepotvrzené; stejný catch původně schovával také chyby zápisu úložiště.
+Předchozí obecná rada obnovit stránku mohla ztratit neuložený text; nová
+zpráva jej ponechává. Žádný slabý Math.random ani obcházení idempotence.
+
+Další krok: samostatně schválit p+n ověřeného nového opravného commitu. Současný živý základ 6c610287 byl skutečně
+Terrou nasazený (d7ac821490a17273e18be1de270b9ba8, 2923, smoke 5/5,
+CI 42474671842 success); neprohlašovat opravu za nasazenou.
+
+Navrhované další kroky: po nasazení Mílův retest na stejné adrese.
+
+Technický důkaz: red→green Node regrese HTTP bez randomUUID, test
+chyby setItem s editovatelným formulářem a následným jediným POST,
+částečného uložení s read-only status a stejným ID, absence silného RNG
+bez odeslání. 26 cílených PASS; plná brána 2923 testů OK (31 SKIP).
+Důkazy logs/calendar_task_storage_repro_before_20261108.log,
+calendar_task_storage_node_20261108.log, calendar_task_storage_targeted_20261108.log,
+calendar_task_storage_gate_20261108.log a calendar_task_storage_diagnosis_20261108.log.
+Žádný skutečný kalendářový zápis ani změna helperů/grantů/modelů.
+Čtecí inventář UI: žádné připojené browser tabs a žádné Safari okno;
+přímá přejímka Mílova prohlížeče nebyla dostupná.

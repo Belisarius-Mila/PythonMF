@@ -20,7 +20,7 @@ Tento soubor je rozcestnik dlouhodobe pameti pro Samantha Agent.
 
 ## Reports
 
-- `reports/calendar_task_entry_20261108.md`; `handoffs/workstreams/project-cockpit.md`; `tvbcp/workstreams/project-cockpit.md`; `projects/email_readonly_oauth.md` — 8. 11.: rychlé Zadání úkolu lokálně hotové: celý text, den/měsíc/rok, upravitelných 09:00, jeden potvrzený create, 24 h/60 min. Přímá karta/ikona, trvalá účtenka a při nejistotě jen původní read-only recover. Bez AI/změny native helperů/nového grantu. 378 cílených PASS; plná brána 2923 testů OK (31 SKIP); bez nového p+n. Fyzická přejímka otevřená (browser host unavailable, Safari cgWindowNotFound). Měsíční agenda již nasazená v 6d5b576b, CI 42458143491 success; report calendar_agenda_20261107.md je historický lokální záznam před vydáním.
+- `reports/calendar_task_storage_fix_20261108.md`; `handoffs/workstreams/project-cockpit.md`; `tvbcp/workstreams/project-cockpit.md`; `projects/email_readonly_oauth.md` — 8. 11.: nasazená rychlá karta 6c610287/CI success má uživatelem ohlášenou chybu před odesláním. Lokálně reprodukovaná absence randomUUID na HTTP, oprava přes getRandomValues a zachování editovatelného textu před POST; částečně uložené zadání používá jen stejné ID. 26 cílených PASS, plná brána 2923 testů OK (31 SKIP). Bez nového p+n. Žádná serverová účtenka při prvním auditu, konkrétní uživatelovo schéma adresy nepotvrzené. Žádný skutečný event ani změna helperů/modelů.
 
 - `reports/python_315_assessment_2026_10_24.md` — 2026-10-24 09:49 CEST: Python 3.15.1 posouzen proti místnímu 3.12.0rc3, 18 metadat a úspěšný binární resolver pro Mac/arm64. Doporučený oddělený pilot, žádná instalace nebo změna provozu.
 

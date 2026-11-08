@@ -1792,3 +1792,10 @@ Doplnění 17102026 k LL-071: Nativní modelový pomocník navíc zdvojuje roli,
 - Typ: opakující se
 - Řešení nalezeno: 07112026
 - Řešení: pod existujícím stabilním zámkem použít atomic_replace_text_under_external_lock; celý read/modify/write dál patří pod původní zámek. Neoslabovat transakci oddělenými nezamčenými zápisy. Ověřeno agendou kalendáře: jediný background claim napříč instancemi, revizní kontrola soukromých typů a zachování po restartu; tests.test_calendar_agenda, report calendar_agenda_20261107.md.
+
+### LL-112 — Browserová identita požadavku nesmí záviset jen na HTTPS-only API
+
+- Problém: randomUUID nebylo na HTTP dostupné; obecný catch to označil jako chybu úložiště a trvale zašedil dosud neodeslaný formulář.
+- Typ: opakující se
+- Řešení nalezeno: 08112026
+- Řešení: používat pro serverový 32hex ID silné getRandomValues (dostupné i mimo secure context), nikdy slabé Math.random. Oddělit známé selhání před POST od nejistého zápisu: prázdné úložiště dovolí editaci a nový explicitní pokus; částečně uložený payload musí zachovat původní ID a pouze status/recover. Testovat HTTP profil bez randomUUID i skutečné chyby setItem/read-back; nemockovat všechny kryptografické funkce jako vždy dostupné. Red→green regrese a 26 cílených PASS, report calendar_task_storage_fix_20261108.md.

@@ -6,12 +6,18 @@
   const months = ["leden","únor","březen","duben","květen","červen","červenec","srpen","září","říjen","listopad","prosinec"];
   let context = null, pending = null, busy = false, storageBroken = false, generation = 0, pollTimer = null, polls = 0;
   const pad = n => String(n).padStart(2,"0");
+  function requestId() {
+    // getRandomValues also works on trusted private-LAN HTTP pages. The ID is
+    // the same 128-bit random hex identity expected by the server, not a token.
+    const bytes=new Uint8Array(16);window.crypto.getRandomValues(bytes);
+    return Array.from(bytes,value=>value.toString(16).padStart(2,"0")).join("");
+  }
   const dateValue = () => `${year.value}-${pad(month.value)}-${pad(day.value)}`;
   const option = (value,text) => {const n=document.createElement("option");n.value=String(value);n.textContent=text;return n;};
   function message(text,state="error") {notice.textContent=text;notice.dataset.state=state;}
   function controls() {
-    fields.disabled=busy||Boolean(pending)||storageBroken||!context?.ready;
-    $("taskSubmit").disabled=fields.disabled;recoverButton.disabled=busy||storageBroken;
+    fields.disabled=busy||Boolean(pending)||!context?.ready;
+    $("taskSubmit").disabled=fields.disabled||storageBroken;recoverButton.disabled=busy||storageBroken;
     form.setAttribute("aria-busy",String(busy));
   }
   function summary() {
@@ -110,12 +116,27 @@
     let value;
     try {
       if(readStored()) {storageBroken=true;message("Nejdřív obnov stránku a ověř rozpracované zadání.");controls();return;}
-      const id=window.crypto.randomUUID().replaceAll("-","");
+      const id=requestId();
       value={id,payload:{action:"create",request_id:id,title:title.value.trim(),date:dateValue(),time:time.value,
         expected_selection_revision:context.selection_revision,expected_target_calendar_id:context.target.id,confirmed:true}};
       const raw=JSON.stringify(value);window.localStorage.setItem(storageKey,raw);
       if(window.localStorage.getItem(storageKey)!==raw)throw new Error("Zadání se nepodařilo bezpečně uchovat. Neodesláno.");
-    } catch(error){storageBroken=true;message("Zadání se nepodařilo bezpečně uchovat. Neodesláno. Obnov stránku.");controls();return;}
+    } catch(error){
+      // No POST has started. Do not freeze an editable form for an ID/API error
+      // or a proven empty store. A partially persisted identity is recovered
+      // as-is, never replaced by a new request.
+      let saved=null;
+      try {saved=readStored();}catch(storageError){storageBroken=true;}
+      if(value&&saved?.id===value.id&&JSON.stringify(saved.payload)===JSON.stringify(value.payload)) {
+        pending=value;recoverButton.hidden=false;recoverButton.textContent="Ověřit zápis";
+        message("Zadání je uchované. Ověř jeho stav před dalším odesláním.","pending");readStatus();
+      } else if(saved||storageBroken) {
+        storageBroken=true;message("Rozpracované zadání nelze ověřit. Text zůstává, před odesláním obnov stránku.");
+      } else {
+        message("Zadání se nepodařilo připravit. Neodesláno; text zůstává a můžeš to zkusit znovu.");
+      }
+      controls();return;
+    }
     pending=value;await write(value.payload);
   });
   recoverButton.addEventListener("click",()=>{

@@ -10,12 +10,15 @@ const key='samantha.calendarTask.pending.v1';
 const context={ok:true,ready:true,target:{id:'a',title:'Soukromý'},selection_revision:2,today:'2026-11-08',default_time:'09:00',time_zone:'Europe/Prague',reminders:[1440,60]};
 const id='a'.repeat(32), second='b'.repeat(32);
 const tick=()=>new Promise(resolve=>setImmediate(resolve));
-function app({stored=null,initial=context,storageFails=false}={}) {
+function app({stored=null,initial=context,storageFails=false,cryptoMode='https',storageWriteFailures=0,readbackFailure=false}={}) {
  const ids=Object.fromEntries(['taskForm','taskFields','taskTitle','taskDay','taskMonth','taskYear','taskTime','taskNotice','taskRecover','taskSummary','taskTarget','taskSubmit'].map(k=>[k,new Element()]));
- let queue=[initial],calls=[],timers=new Map(),counter=0,serial=0,storage=new Map(stored?[[key,JSON.stringify(stored)]]:[]);
+ let queue=[initial],calls=[],timers=new Map(),counter=0,serial=0,failNextRead=false,storage=new Map(stored?[[key,JSON.stringify(stored)]]:[]);
  const document={hidden:false,getElementById:id=>ids[id],createElement:()=>new Element(),createTextNode:text=>({textContent:text}),listeners:{},addEventListener(name,fn){this.listeners[name]=fn;}};
- const window={listeners:{},addEventListener(name,fn){this.listeners[name]=fn;},crypto:{randomUUID:()=>++serial===1?'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa':'bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb'},
-  localStorage:{getItem:k=>{if(storageFails)throw new Error('Storage unavailable');return storage.get(k)||null;},setItem:(k,v)=>{if(storageFails)throw new Error('Storage unavailable');storage.set(k,v);},removeItem:k=>storage.delete(k)}};
+ const crypto={getRandomValues:bytes=>{bytes.fill(++serial===1?0xaa:0xbb);return bytes;}};
+ if(cryptoMode==='https')crypto.randomUUID=()=>++serial===1?'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa':'bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb';
+ if(cryptoMode==='none')delete crypto.getRandomValues;
+ const window={listeners:{},addEventListener(name,fn){this.listeners[name]=fn;},crypto,
+  localStorage:{getItem:k=>{if(storageFails)throw new Error('Storage unavailable');if(failNextRead){failNextRead=false;throw new Error('Read-back unavailable');}return storage.get(k)||null;},setItem:(k,v)=>{if(storageFails||storageWriteFailures-->0)throw new Error('Storage unavailable');storage.set(k,v);if(readbackFailure){readbackFailure=false;failNextRead=true;}},removeItem:k=>storage.delete(k)}};
  const scope={window,document,Date,Intl,AbortController,setTimeout:(fn,ms)=>{const id=++counter;timers.set(id,{fn,ms});return id;},clearTimeout:id=>timers.delete(id),
   fetch:async(path,options)=>{const payload=options.body?JSON.parse(options.body):null;calls.push({path,payload,options});assert(queue.length,'Unexpected request '+JSON.stringify(payload));let next=queue.shift();if(next instanceof Error)throw next;next=await next;return {ok:next.ok!==false,json:async()=>next};}};
  vm.runInNewContext(source,scope);
@@ -25,6 +28,11 @@ function app({stored=null,initial=context,storageFails=false}={}) {
  return {ids,queue,calls,storage,window,document,send,result,poll};
 }
 (async()=>{
+ // HTTP/private-LAN browsers expose getRandomValues but not randomUUID.
+ let http=app({cryptoMode:'http'});await tick();http.ids.taskTitle.value='Úkol z HTTP';
+ http.queue.push(http.result('verified',{task:{title:'Úkol z HTTP',date:'2026-11-08',time:'09:00'}}));await http.send();
+ assert.equal(http.calls.filter(c=>c.payload?.action==='create').length,1,'HTTP must work without randomUUID');
+ assert.match(http.calls.at(-1).payload.request_id,/^[a-f0-9]{32}$/);assert.equal(http.ids.taskNotice.dataset.state,'verified');
  // Date/time defaults come from Prague on the server; day changes usually suffice.
  let a=app();await tick();assert.equal(a.ids.taskTime.value,'09:00');assert.equal(a.ids.taskDay.value,'8');assert.equal(a.ids.taskMonth.value,'11');
  assert.equal(a.ids.taskFields.disabled,false);a.ids.taskMonth.value='2';a.ids.taskYear.value='2028';a.ids.taskDay.value='31';a.ids.taskMonth.listeners.change();
@@ -56,9 +64,24 @@ function app({stored=null,initial=context,storageFails=false}={}) {
  assert.equal(a.ids.taskTitle.value,'Pozdější hodina');assert.equal(a.ids.taskFields.disabled,false);assert.equal(a.ids.taskNotice.dataset.state,'blocked');
  assert.equal(a.calls.filter(c=>c.payload?.action==='create').length,1);
  // Unavailable browser storage or an unconfigured target prevents any outgoing action.
- a=app({storageFails:true});await tick();a.ids.taskTitle.value='Neodeslat';await a.send();assert.equal(a.calls.length,1);assert(a.ids.taskFields.disabled);
+ a=app({storageFails:true});await tick();a.ids.taskTitle.value='Neodeslat';await a.send();assert.equal(a.calls.length,1);assert(a.ids.taskSubmit.disabled);assert(!a.ids.taskFields.disabled);
  assert(a.ids.taskNotice.textContent.includes('Uložené zadání'));assert(!a.ids.taskNotice.textContent.includes('Storage unavailable'));
  a=app({initial:{...context,ready:false,target:null}});await tick();assert(a.ids.taskFields.disabled);assert.equal(a.calls.length,1);
  a=app();await tick();a.ids.taskTitle.value='   ';await a.send();assert.equal(a.calls.length,1);assert(!a.storage.has(key));assert(!a.ids.taskFields.disabled);
+ // A failed pre-send write preserves editable text and permits a later explicit retry.
+ a=app({storageWriteFailures:1});await tick();a.ids.taskTitle.value='Uchovat text';await a.send();
+ assert.equal(a.calls.length,1);assert.equal(a.ids.taskTitle.value,'Uchovat text');assert(!a.ids.taskFields.disabled);assert(!a.ids.taskSubmit.disabled);assert(!a.storage.has(key));
+ a.queue.push({ok:true,request_id:second,state:'verified',task:{title:'Uchovat text',date:'2026-11-08',time:'09:00'}});await a.send();
+ assert.equal(a.calls.filter(c=>c.payload?.action==='create').length,1);assert.equal(a.ids.taskNotice.dataset.state,'verified');
+ // If the write persisted but read-back failed, only status and the same identity may continue.
+ a=app({readbackFailure:true});await tick();a.ids.taskTitle.value='Částečně uložené zadání';
+ a.queue.push({ok:true,request_id:id,state:'not_found',message:'Nenalezeno'});await a.send();await tick();
+ assert.equal(a.calls.filter(c=>c.payload?.action==='create').length,0);assert.equal(a.calls.at(-1).payload.action,'status');
+ assert(a.ids.taskFields.disabled);assert.equal(a.ids.taskRecover.textContent,'Zapsat stejné zadání');
+ const partial=JSON.parse(a.storage.get(key));a.queue.push({ok:true,request_id:id,state:'verified',task:{title:'Částečně uložené zadání',date:'2026-11-08',time:'09:00'}});await a.ids.taskRecover.listeners.click();
+ assert.deepEqual(a.calls.at(-1).payload,partial.payload);assert.equal(a.calls.filter(c=>c.payload?.action==='create').length,1);
+ // No weak fallback when the browser lacks a strong random generator.
+ a=app({cryptoMode:'none'});await tick();a.ids.taskTitle.value='Zachovat';await a.send();
+ assert.equal(a.calls.length,1);assert.equal(a.ids.taskTitle.value,'Zachovat');assert(!a.ids.taskFields.disabled);assert(!a.storage.has(key));
  console.log('Calendar task frontend: PASS');
 })().catch(error=>{console.error(error);process.exitCode=1;});
