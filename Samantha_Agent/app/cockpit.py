@@ -5,6 +5,7 @@ from app.cockpit_calendar import CalendarOverviewRoutes, calendar_overview_actio
 from app.cockpit_calendar_agenda import calendar_agenda_status, calendar_agenda_action
 from app.cockpit_calendar_delete import calendar_delete_action
 from app.cockpit_calendar_tasks import calendar_task_status, calendar_task_action, task_page_route
+from app.cockpit_pwa import cockpit_manifest_route
 from app.cockpit_email_calendar import email_calendar_draft_action, email_calendar_draft_status
 from app.interior_ai import interior_ai_start_action, interior_ai_recover_action
 
@@ -9742,6 +9743,8 @@ class CockpitServer:
             def do_GET(self) -> None:  # noqa: N802
                 self.validate_request_access(require_origin=False)
                 parsed = urlparse(self.path)
+                if cockpit_manifest_route(parsed, self):
+                    return
                 if task_page_route(parsed, self):
                     return
                 if parsed.path == "/api/calendar/tasks":

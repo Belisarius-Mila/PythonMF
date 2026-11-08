@@ -1,6 +1,8 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
+- 2026-11-08 17:30 CET: Lokálně doplněná samostatná identita hlavního Cockpitu; i kalendář při instalaci hlavní ikony odkazuje na start /. Nový úkol dál vlastní id/start /calendar/task/. Žádný reset při návratu ani změna rozepsaných dat. 36 cílených + statická brána PASS. Bez nového p+n, fyzická iPhone přejímka otevřená; původní mazání f51f3412 už Mílou přijaté. Report reports/cockpit_home_icons_20261108.md.
+
 - 2026-11-08 14:56 CET: Lokálně doplněné Smazat z kalendáře u jednotlivé události a po uložení. Přesný nativní náhled, potvrzení, jeden výskyt, bez pozvánek s účastníky; trvalé markery bez opakování nejistého mazání. 112 cílených PASS, 15 nativních in-memory scénářů a podepsaný izolovaný self-test PASS. Plná brána 3174 testů OK (31 SKIP), logs/calendar_delete_full_gate_20261108.log. Původní reader/writer zachované; nový helper dosud bez OS grantu, bez p+n a bez skutečného mazání. Report reports/calendar_delete_20261108.md.
 
 - 2026-11-08 12:28 CET: Oprava rychlého Zadání úkolu lokálně: reprodukovaná chyba při chybějícím randomUUID na HTTP, nově silné getRandomValues bez závislosti na HTTPS-only UUID API. Před odesláním zůstává text editovatelný, po částečném uložení se obnovuje stejná identita. 26 cílených PASS; plná brána 2923 testů OK (31 SKIP). Nasazený základ 6c610287/CI 42474671842 success má původní chybu; oprava zatím bez nového p+n. Report reports/calendar_task_storage_fix_20261108.md.
@@ -2266,3 +2268,32 @@ přímá přejímka Mílova prohlížeče nebyla dostupná.
   logs/calendar_delete_full_gate_20261108.log (3174 OK /31 SKIP); report calendar_delete_20261108.md.
 - Nový helper není provozně instalovaný/autorizovaný; původní instalované
   helpery shodné. Skutečný kalendářový zápis/mazání: 0. Bez push/nasazení.
+
+## 2026-11-08 17:30 CET — Oddělení ikon hlavního Cockpitu a rychlého úkolu
+
+### Hotovo
+- Hlavní Cockpit a kalendář mají nově společné instalační údaje se startem
+  v hlavním přehledu; Nový úkol zachovává vlastní identitu a start formuláře.
+  Doplněná nápověda přidání obou ikon zvlášť přes Safari.
+
+### Rozhodnutí
+- Míla ohlásil obnovování poslední stránky při přechodu mezi ikonami. Způsob
+  jejich vytvoření dosud nepotvrdil; pracovní předpoklad Safari.
+- Není přidaný automatický reset při návratu do aplikace, který by mohl
+  opustit rozepsaný formulář nebo aktivní operaci. Žádné mazání ikon/dat.
+
+### Další krok
+- Samostatné p+n a přejímka na iPhonu s novými odlišně pojmenovanými ikonami
+  z přesných stránek / a /calendar/task/. Staré ikony zatím zachovat.
+
+### Navrhované další kroky
+- Zopakovat Mílův scénář kalendář → Nový úkol a úkol → hlavní; rozlišit
+  novou instalaci, existující starou ikonu a obnovu již běžícího okna.
+
+### Technický důkaz
+- 36 cílených testů a statická brána PASS; žádná kalendářová mutace.
+  Report cockpit_home_icons_20261108.md a logs/cockpit_icons_*_20261108.log.
+- Živý audit: hlavní stránka i kalendář zatím bez manifestu, task s vlastním.
+  iOS resume není místně reprodukované; metadata nejsou zárukou resetu okna.
+- Předchozí f51f3412 nasazený, CI success a Míla potvrdil funkční mazání.
+  Nesouvisející neversionovaný obnovovací TXT se nečte, nemění ani necommituje.
