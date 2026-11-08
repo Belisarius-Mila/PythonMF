@@ -1763,3 +1763,14 @@ před syntézou; runtime decode nesmí měnit raw ani mít legacy fallback.
 Ověřeno 46 kontraktními testy a skutečným čerstvým korpusem 532 dokumentů
 přes celý executor/worker (20+1, syntetický wire, izolovaný skutečný tokenizer).
 Status/replay bez připojení; provider a věcná správnost zůstávají neověřené.
+
+Doplnění 08112026 k LL-113 (celý skutečný běh):21 číselných odpovědí splnilo
+odeslané schema,20 inspections přijato,532 dokumentů/116 findings. To nestačí
+pro aplikační přejímku: syntéza34115/32000 output a poslední unverified odstavec
+bez evidence. Zdrojová main větev navíc během syntézy postoupila. Job zachovat
+attention/174,8297 bez retry. Bez dalšího modelu lze udělat výslovně oddělený,
+auditovaný redakční derivát; raw/limit/job se nemění. Ověřeno25 operací,
+všech216 citací zachovaných, celý původní obsah a původní quality gate passed.
+Běžná lomítka v próze nejsou cesty a nezaškrtnutý přejímací bod není live claim;
+rozdíl doložit a redakčně vyjasnit, ne vypnout gate. Nové odvozené cesty bez
+přesné citace nepřijímat. Sémantická/provozní přejímka tím není automatická.

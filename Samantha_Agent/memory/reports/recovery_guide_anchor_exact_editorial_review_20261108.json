@@ -1,0 +1,196 @@
+{
+  "all_216_citations_unchanged": true,
+  "all_original_nonwhitespace_preserved_in_order": true,
+  "candidate_bytes": 93361,
+  "candidate_sha256": "72aaa17bba9985ef54471bc1bc593714b28d5fdcd4d3980e71ee24abba9b658f",
+  "changes": [
+    {
+      "after_sha256": "e6d15217c9e868556200fa6315607133cece5203ee5df96a2ec13c5f3c379526",
+      "before_sha256": "a5fad0b77484f3c513ad3c3d182dcec22ebe05e19d6c790b94be53415192e0e2",
+      "index": 2,
+      "kind": "text_edit",
+      "reason": "Explicitly negative statement reworded to avoid false positive live-claim matcher."
+    },
+    {
+      "after_sha256": "8bdfaca117d80018a8be1cabc4423f3f59d4a603afe408cf85b0a1dfef38d0df",
+      "before_sha256": "714a1e1f4e247dfd4df0a30890cd149df39a0e3176dbb9e644be3b334918e099",
+      "index": 5,
+      "kind": "text_edit",
+      "reason": "Use the exact file already present in the existing cited quote; do not infer a new path."
+    },
+    {
+      "after_sha256": "0f90167aa0351aae272ed49a645ca6add51f9a9ee9c6fbb55784144a229e795d",
+      "before_sha256": "8bdfaca117d80018a8be1cabc4423f3f59d4a603afe408cf85b0a1dfef38d0df",
+      "index": 5,
+      "kind": "text_edit",
+      "reason": "Ordinary noun separator is not a filesystem path."
+    },
+    {
+      "after_sha256": "daf7aa44eefc73776a4ce955d7516a172633f9dea6a8dd42bc81b5725023ffdd",
+      "before_sha256": "4a06ec91ec605abb9964cab98cd6882a11fdf47100919f823b028eabcf7aec6c",
+      "index": 6,
+      "kind": "text_edit",
+      "reason": "Same location verified in existing cited absolute home path; no new location asserted."
+    },
+    {
+      "after_sha256": "097b7f2093ebbf67ebc5600cb043cacbc0694c626c7cd1f750bbf8556b821c9e",
+      "before_sha256": "188c5ce1e68b392c3064064f3f389e1566022249a9a333847e3a96a9fd27bc8a",
+      "index": 8,
+      "kind": "text_edit",
+      "reason": "Use exact drive/folder relationship from existing evidence instead of an ambiguous slash shorthand."
+    },
+    {
+      "after_sha256": "5c6ca878332baf10e7d69fdee2be51e9d67b4b75dd272be1e000b42d0ae1ab0c",
+      "before_sha256": "d025e7bb8131cbcd152fcfe96b4f7aede15cfc1e70c12cf4b0ab8ef80406ecbc",
+      "index": 10,
+      "kind": "text_edit",
+      "reason": "Task/priority separator is not a filesystem path."
+    },
+    {
+      "after_sha256": "2a2d0f5b0e80aa553b8f005d165863f55d18fc7bcd3be5841592003855d17dd1",
+      "before_sha256": "ffe9df5e08c939aef46beb155eced495e445e852f6ac6b9ff90c482c2b677842",
+      "index": 13,
+      "kind": "text_edit",
+      "reason": "Remove an absolute path constructed by the model but not present literally in its citations; leave explicit operator verification."
+    },
+    {
+      "after_sha256": "cc4f41df22618cf35be8c1d6f22ba8bee09196fdc4da59925c56f709babaafc7",
+      "before_sha256": "1b33935a4dcbdf25d9ace7166b105fe44bc5899b91d78d81ea16a68bf9e61b17",
+      "index": 21,
+      "kind": "text_edit",
+      "reason": "Device name separator is not a filesystem path."
+    },
+    {
+      "after_sha256": "e3d975765c7be29680d09200256860cd63e76c79bb628f02bc8cff280ac6eb94",
+      "before_sha256": "4a4a303b25f3c2f2fe61f669a9d37e133a3433cb49a3f261bd094a106f6d2d1c",
+      "index": 27,
+      "kind": "text_edit",
+      "reason": "Product separator is not a filesystem path."
+    },
+    {
+      "after_sha256": "914844540149411045b81ba461b5c1bfbf9e108d2903a29a16c80827e9468b27",
+      "before_sha256": "0a20703e2f672e6c240f6718a1b96623fe26e9196711f3d7702ae74b58870a1b",
+      "index": 29,
+      "kind": "text_edit",
+      "reason": "Remove an uncited constructed absolute path and its new assignment/export; no new command allowlist is granted."
+    },
+    {
+      "after_sha256": "d16324a240788f3d25568ec5db2df32306dc3ae50d1b0915dbfe2097902d492c",
+      "before_sha256": "b9225f144cd873c9e3572581997baff850700c0010d41e33a21c35b2296c8ae6",
+      "index": 32,
+      "kind": "text_edit",
+      "reason": "Ordinary word/format separator is not a filesystem path; preserve meaning."
+    },
+    {
+      "after_sha256": "23ca60d9571f56e11346970943ff1461eeff065a5475273eeadb56c461c0995c",
+      "before_sha256": "25fb2c12838c214e09198a5fb591edf6be249bc134c88ef758eaf1c038ebf33d",
+      "index": 33,
+      "kind": "text_edit",
+      "reason": "Ordinary word/format separator is not a filesystem path; preserve meaning."
+    },
+    {
+      "after_sha256": "aba973b3d1c10b8f2b87bf2338a9a16cd268115610a1318a53e0a9257e2362c6",
+      "before_sha256": "4ee97533b9b21c4109f55f5d08f08c4b310fcaee12388b0290c071a442c1a0f1",
+      "index": 37,
+      "kind": "text_edit",
+      "reason": "Ordinary word/format separator is not a filesystem path; preserve meaning."
+    },
+    {
+      "after_sha256": "cd5a52d305299e0fd6e586a4a8dc8e52fe93ff7d3518bdaca497d97a593b3933",
+      "before_sha256": "b54eb5e4205155b6d7a08a1718a3565c9810ac4826dd47f8463cbd7cdeb24511",
+      "index": 38,
+      "kind": "text_edit",
+      "reason": "Ordinary word/format separator is not a filesystem path; preserve meaning."
+    },
+    {
+      "after_sha256": "93b3f1f527b25b0c91d7e0590277f92c0ec0cc9536b8ff1026c2d2d678b06818",
+      "before_sha256": "96bce1d28b55c983d43ca621e36a6462cc3045142d44c5b0e2de0403a1b44e24",
+      "index": 39,
+      "kind": "text_edit",
+      "reason": "Ordinary word/format separator is not a filesystem path; preserve meaning."
+    },
+    {
+      "after_sha256": "03b0d055d36744659299cf873a0ddc3ada91ba3b2b2c89d2e987f054dabbddd7",
+      "before_sha256": "ce83d7ca14b1d96fe50042bdcf0bc9b8f4a52a41b3fef0fda8c30a534bc524e4",
+      "index": 42,
+      "kind": "text_edit",
+      "reason": "Ordinary word/format separator is not a filesystem path; preserve meaning."
+    },
+    {
+      "after_sha256": "f797fe6912568df9d75481be62c4ac2e798d2e2937779996517332d9391464ca",
+      "before_sha256": "03b0d055d36744659299cf873a0ddc3ada91ba3b2b2c89d2e987f054dabbddd7",
+      "index": 42,
+      "kind": "text_edit",
+      "reason": "Ordinary word/format separator is not a filesystem path; preserve meaning."
+    },
+    {
+      "after_sha256": "2874cb5252e19465058685e6b0d3aacc1dc589db42a59ed1894a6154bdcb4bf8",
+      "before_sha256": "a5311eb444eca32ac894a5ba73be8a4b42f2eeea717704ad319b6cdd5d6da6eb",
+      "index": 46,
+      "kind": "text_edit",
+      "reason": "Name the existing canonical document without introducing a relative path absent from the selected quote."
+    },
+    {
+      "after_sha256": "2f30b2ee7a6fa03f78f7f921f1dc72dba6e8aabdc2590789b964eef97b6023fe",
+      "before_sha256": "2874cb5252e19465058685e6b0d3aacc1dc589db42a59ed1894a6154bdcb4bf8",
+      "index": 46,
+      "kind": "text_edit",
+      "reason": "Retain document identities and role; remove paths absent from the cited text, not citations."
+    },
+    {
+      "after_sha256": "2f2443b559a114a360944c012c17e5b86524e1d69102dc7feaef21750f6adccd",
+      "before_sha256": "9b1fcd7100fe7342b4547f5c73591b754aeaa0a156c3c8e82a3aeb7fe05e16d7",
+      "index": 47,
+      "kind": "text_edit",
+      "reason": "Clarify target folder relationship already described by cited evidence; no new target/copy is created."
+    },
+    {
+      "after_sha256": "ccd475abcdf8035159c8eb5bf1c34be1fd447141ba24e3a9ab064344cee49ab3",
+      "before_sha256": "f797fe6912568df9d75481be62c4ac2e798d2e2937779996517332d9391464ca",
+      "index": 42,
+      "kind": "text_edit",
+      "reason": "Unchecked future acceptance task restated explicitly as a task, never as a completed live fact."
+    },
+    {
+      "from": "documented",
+      "index": 10,
+      "kind": "status_change",
+      "reason": "All supporting sources are historical/mixed; no current-state claim is accepted.",
+      "to": "unverified"
+    },
+    {
+      "from": "documented",
+      "index": 13,
+      "kind": "status_change",
+      "reason": "All supporting sources are historical/mixed; no current-state claim is accepted.",
+      "to": "unverified"
+    },
+    {
+      "from": "documented",
+      "index": 15,
+      "kind": "status_change",
+      "reason": "All supporting sources are historical/mixed; no current-state claim is accepted.",
+      "to": "unverified"
+    },
+    {
+      "index": 48,
+      "kind": "omitted_from_derivative",
+      "reason": "Uncited provenance/limitation disclaimer retained in immutable raw and separate review documentation, not accepted as a cited guide paragraph.",
+      "text_sha256": "474c0bf057d20c0dc528ec8b3104a713ec85608c23abd2757409e1b94cd19f8f"
+    }
+  ],
+  "job_reopened": false,
+  "kind": "editorial_derivative_for_human_review_only",
+  "new_model_calls": 0,
+  "original_job_accepted": false,
+  "original_response_sha256": "df93d3a3cbf88d14e6110d73ffeff2d294d6c28309109064216f5c386b1a08e6",
+  "paragraphs": 47,
+  "publication_authorized": false,
+  "quality_gate": "passed_unchanged_policy",
+  "raw_rewritten": false,
+  "semantic_acceptance_required": true,
+  "source_plan_digest": "586cdf965f8b33dc2fb2340aac02b1cf07bf4f828f52350dfa7c9333cf3a3add",
+  "source_snapshot_sha256": "24b2f1a4d8e7b41e638c0e611c2754986b3e4376849ee227d6d9da97dc00a4e1",
+  "unchanged_original_blocks": 19,
+  "weekly_activation": false
+}

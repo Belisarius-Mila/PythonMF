@@ -2,16 +2,17 @@
 
 Projekt zalozen 2026-05-19.
 
-## Aktuální stav 2026-11-08 12:07 CET
+## Aktuální stav 2026-11-08 12:57 CET
 
-Cílem zůstává týdenní správce obnovovacího TXT modelem 6.1-Sol se dvěma
-kopiemi PythonMF + iCloud Drive/Dokumenty. Technická integrace přesného
-číselného pilotu je hotová; karta 741e71da…492f570 nad 532 dokumenty +
-původním návodem, 20+1 fází, plán 237,88715 / návrh meze240 kreditů čeká
-na nový konkrétní souhlas. Předchozí neúspěšný pilot zůstává uzavřený.
-Žádný nový modelový tah ani změna provozního TXT, role či plánovače.
-Podrobnosti a aktuální důkazy na konci souboru a v execution reportu.
-Historické údaje o zálohách níže nejsou nový živý audit.
+Jediný schválený REC-06 číselný pilot dokončil21 tahů, 20 čtecích dávek
+přijato. Odhad174,8297 Standard kreditu pod mezí240; job attention, protože
+syntézaoutput34115 překročila32000. Bez dalšího modelu vznikl samostatný
+redakční návrh93361B, SHA72aaa17b…a9b658f, který prošel původním quality gate.
+Plný text je jen ve vlastní privátní .venv; surový modelový výstup ani job
+nebyly přepsané. Obsahová přejímka Mílou/Willem a rozdíl main6c610287→9c8584ee
+zůstávají výslovně oddělené od formálně nepřijatého původního jobu.
+Cíl PythonMF+iCloud Dokumenty a týdenní Sol zůstává, provozní kopie/role/
+plánovač nejsou tímto aktivované. Historické zálohy níže nejsou živý audit.
 
 ## Historický stav 2026-10-25 14:53 CET
 
@@ -1642,3 +1643,50 @@ závislosti bez konkrétní potřeby. Nejde o rozšíření e-mailové business 
   přijímací meze nejsou tvrdé fakturační/output/časové stropy.
 - Provider nového formátu není živě ověřený; platná citace není obsahová pravda.
   Nové příkazy bez allowlist a současné Mac/iPhone facts bez důkazů nepodporované.
+
+## 2026-11-08 12:57 CET — REC-06: 21 tahů doručeno; oddělený redakční návrh připraven
+
+### Hotovo
+- Jediný nově schválený pilot karty741e71da dokončil 21/21 tahů,
+  všech 20 čtecích dávek přijato. 532 dokumentů přesně jednou, celý original
+  v každé fázi; 116 findings, inspect764 referencí, syntéza216 platných citací.
+- Odhad ze skutečné usage 174,8297 Standard kreditu / mez240.
+  Syntéza686,537s / mez900, ale output34115 / mez32000: formální attention.
+- Bez dalšího modelu připraven samostatný redakční návrh 93361B / 47 částí,
+  SHA72aaa17b…a9b658f. Nezměněný quality gate prošel, 19 původních bloků
+  a všech 216 citací beze změny. Rozpis25 redakčních operací je uložený.
+
+### Rozhodnutí
+- Původní job zůstává accepted=false; raw, limit, packet ani attempt se
+  nepřepisují. Samostatný upravený pracovní návrh není přijetím původního jobu.
+- Další placený běh se neopakuje. Necitovaný disclaimer je jen v raw/review,
+  dvě nově odvozené absolutní cesty nejsou přijaté, historické části jsou
+  označené přísněji. Pravidla validátoru ani citace se neměnily.
+- Během posledního tahu vznikl main9c8584ee; schválený snapshot zůstává6c610287.
+  Čtecí přezkum rozdílu je oddělený. Návrh není tvrzení o nejnovějším celém main.
+- Provozní TXT/iCloud, role, služby, scheduler, push/deploy ani main Data neměnil.
+
+### Další krok
+- Míla a Will obsahově převezmou konkrétní redakční návrh a jeho změnový
+  záznam včetně zdrojového rozdílu. Tato přejímka nepotřebuje další model.
+
+### Navrhované další kroky
+- Obsahová přejímka doplňků, zejména záloh, dat mimo Git a kompatibility Camina.
+- Příští offline kontrakt: evidence podle statusu, serverové zachování original,
+  posuzovat souběžné změny odděleně od neměnného čteného snapshotu.
+- Po přijetí přesných bajtů a příslušném oprávnění dvě kopie do PythonMF a iCloud Dokumentů.
+- Týdenní aktivace až po vlastní přejímce role, aplikací/Macu/iPhonu a rozpočtu.
+
+### Technický důkaz
+- recovery_guide_anchor_exact_run_20261108.md, *_run_result_20261108.json,
+  *_editorial_review_20261108.json; plný návod jen v soukromé .venv, mimo Git.
+- Všech 21 provider schémat nezávisle validních. Původní unverified odstavec
+  bez citace neprošel resolverem. Některé další texty vyžadovaly redakci
+  kvůli přesným literálům, historickému statusu a false-positive regexům.
+- 25 operací =21 textových úprav +3 přísnější stavy +1 přesunutý disclaimer.
+  Původní non-whitespace obsah zachovaný celý a ve stejném pořadí.
+- Usage input3207934/cached0/output57732, reasoning5290 je subset, total3265666.
+  Celý job1566,841s; finalraw6fdad250…c7664e, response df93d3a3…a08e6.
+- Pět starých stavů/plánů /24JSON beze změny; dalších24 původních finančních
+  artefaktů tohoto jobu má soukromý manifest. Kód beze změny, převzato ověření
+  bef32ad2:46 nových /2794 plných testů,5 skipped. Závěrečná statická brána a git diff --check OK.

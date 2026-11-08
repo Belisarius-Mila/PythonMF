@@ -516,3 +516,38 @@ celý original v každé fázi, všech 20 findings v syntéze. Syntetický wire,
 skutečný izolovaný tokenizer, žádný model ani skutečné runtime spojení.
 Status/replay bez spojení, status zachoval bajty i mtime. 46 nových testů,
 plná kanonická brána 2794 testů / 5 skipped OK (539,094 s).
+
+## 2026-11-08 12:57 CET — skutečný číselný pilot a oddělená redakční revize
+
+Karta741e71da byla výslovně přijata a run zavolán jednou:21 completed/delivered,
+20 accepted inspections,532 dokumentů,116 findings. Cena ze usage174,8297
+Standard kreditu pod240. Synthesis686,537s pod900, ale output34115 nad32000;
+job trvale attention/accepted=false, zbývající plánované tahy0. Neopakovat.
+Původní raw, packet, attempt a run-result jsou chráněné soukromým manifestem
+recovery_exact_closed_job_hashes_20261108.json; nové redakční artefakty nejsou
+jejich reset nebo přijetí. Starých5 profilů /24JSON také zůstalo shodných.
+
+Všech21 reálných odpovědí prošlo nezávislým JSON Schema validátorem. Původní
+resolver navíc vyžaduje evidence u každého ne-unchanged odstavce; poslední
+unverified metadata odstavec neměl žádnou, proto raw nebylo obsahově přijaté.
+Další lokální diagnostika odhalila lexikální false positives a skutečně
+nedoložené odvozené absolutní cesty. Validační pravidla se nezměnila.
+
+Oddělený editorial-candidate.txt,93361B,47 částí, SHA72aaa17b…a9b658f, má25
+popsaných redakčních operací a prošel stejným quality gate. Všech216 citací
+beze změny,19 original bloků doslovně a celý non-whitespace original ve stejném
+pořadí. Žádné nové zdroje, live fakta nebo příkazový allowlist. To je pouze
+pracovní derivát k sémantické přejímce, nikoli accepted původního jobu.
+
+Během syntézy main postoupil6c610287→9c8584ee. Rozdíl9 dokumentů byl přečten
+pouze přes Git: HTTP task submit/localStorage frontend, podle reportu bez
+změny backendů, instalací, OS grantů, rolí nebo sítě. Není součástí původního
+modelového snapshotu; při přejímce oddělit. Přísné _current tedy při review false.
+
+Příště bez placení sjednotit min evidence podle statusu v wire a resolveru,
+a návrh doplňků renderovat se serverově zachovaným original. Posun main
+během dlouhého čtení musí mít zvláštní posouzení proti neměnnému snapshotu,
+ne automatickou opravu uzavřeného slotu. Tato obsahová přejímka nepotřebuje
+opakovat model. Provozní publikace do obou cílů i týdenní aktivace zůstávají
+zvlášť autorizované. Kód beze změny; předchozí2794testů/5skipped platí,
+nový důkaz jsou skutečné účtenky a neplacená revize. Podrobnosti v run reportu.

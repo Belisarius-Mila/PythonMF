@@ -1,47 +1,50 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
-## 2026-11-08 12:14 CET — REC-06: přesný číselný protokol integrován, technická část hotová
+## 2026-11-08 12:57 CET — REC-06: 21 tahů doručeno; oddělený redakční návrh připraven
 
 ### Hotovo
-- Samostatný executor/worker zapojují source_citation_index_v1 do všech
-  inspect a synthesis fází včetně původního resolveru a quality/budget gate.
-  Nový pevný job je oddělený od uzavřeného string-ID pilotu.
-- Připravená konkrétní karta 741e71da…492f570, plán 586cdf96…f3a3add:
-  celý původní návod + 532 dokumentů aktuálního main6c610287, 20+1 fází,
-  Sol/medium/Standard, plán 237,88715 / návrh přijímací meze240 kreditů.
-- 46 nových kontraktních testů OK. Úplná fixture přes nový executor/worker
-  přijala všech 20 dávek a syntézu, 532 dokumentů přesně jednou, celý original
-  v každé fázi a všech 20 findings. Jen syntetický wire, nula modelových volání.
-- Status zachoval všechny bajty i mtime; opětovné run/status bez připojení.
-  Plná kanonická brána OK: 2 794 testů, 5 přeskočeno (539,094 s).
-- Závěrečná statická brána a git diff --check OK; lokální commit,
-  bez push/deploy či integrace do main.
+- Jediný nově schválený pilot karty741e71da dokončil 21/21 tahů,
+  všech 20 čtecích dávek přijato. 532 dokumentů přesně jednou, celý original
+  v každé fázi; 116 findings, inspect764 referencí, syntéza216 platných citací.
+- Odhad ze skutečné usage 174,8297 Standard kreditu / mez240.
+  Syntéza686,537s / mez900, ale output34115 / mez32000: formální attention.
+- Bez dalšího modelu připraven samostatný redakční návrh 93361B / 47 částí,
+  SHA72aaa17b…a9b658f. Nezměněný quality gate prošel, 19 původních bloků
+  a všech 216 citací beze změny. Rozpis25 redakčních operací je uložený.
 
 ### Rozhodnutí
-- Pokyn „zapoj a dokonči“ dokončuje technickou integraci; není novým
-  finančním souhlasem s náhradou uzavřeného neúspěšného modelového běhu.
-- Raw a všech 24 JSON v pěti starých stavech/plánech zůstaly beze změny;
-  job attention / 9,58995 / nula přijatých dávek se neobnovuje ani neopravuje.
-- Nový job not_started, nula modelových pokusů. Provozní TXT/iCloud,
-  role, služby, scheduler, push, deploy a main se tímto krokem nemění.
+- Původní job zůstává accepted=false; raw, limit, packet ani attempt se
+  nepřepisují. Samostatný upravený pracovní návrh není přijetím původního jobu.
+- Další placený běh se neopakuje. Necitovaný disclaimer je jen v raw/review,
+  dvě nově odvozené absolutní cesty nejsou přijaté, historické části jsou
+  označené přísněji. Pravidla validátoru ani citace se neměnily.
+- Během posledního tahu vznikl main9c8584ee; schválený snapshot zůstává6c610287.
+  Čtecí přezkum rozdílu je oddělený. Návrh není tvrzení o nejnovějším celém main.
+- Provozní TXT/iCloud, role, služby, scheduler, push/deploy ani main Data neměnil.
 
 ### Další krok
-- Přijmout konkrétní novou kartu a jednou spustit hotový registrovaný
-  exact_pilot.run; nejde už o další vývoj adapteru. Bez souhlasu placený běh neodesílat.
+- Míla a Will obsahově převezmou konkrétní redakční návrh a jeho změnový
+  záznam včetně zdrojového rozdílu. Tato přejímka nepotřebuje další model.
 
 ### Navrhované další kroky
-- Jeden placený celý pilot podle nové karty, pak obsahová přejímka kandidáta.
-- Will převezme tento handoff a přesný lokální commit, bez integrace či publikace nyní.
-- Mac/iPhone dossier a nové příkazy/live facts zůstávají samostatná doložená přejímka.
-- Dvě provozní kopie/upload a týdenní aktivace až podle odpovídajícího zvláštního souhlasu.
+- Obsahová přejímka doplňků, zejména záloh, dat mimo Git a kompatibility Camina.
+- Příští offline kontrakt: evidence podle statusu, serverové zachování original,
+  posuzovat souběžné změny odděleně od neměnného čteného snapshotu.
+- Po přijetí přesných bajtů a příslušném oprávnění dvě kopie do PythonMF a iCloud Dokumentů.
+- Týdenní aktivace až po vlastní přejímce role, aplikací/Macu/iPhonu a rozpočtu.
 
 ### Technický důkaz
-- recovery_guide_anchor_exact_execution_20261108.md a execution_plan/card/offline JSON.
-- Exact executor/worker mají map/schema/wire SHA, kompletní raw historii,
-  marker před send, status/replay bez připojení, žádný reset/resume/retry.
-- Syntéza input235090/output32000, inspect300s/synthesis900s, run6900s;
-  přijímací meze nejsou tvrdé fakturační/output/časové stropy.
-- Provider nového formátu není živě ověřený; platná citace není obsahová pravda.
-  Nové příkazy bez allowlist a současné Mac/iPhone facts bez důkazů nepodporované.
+- recovery_guide_anchor_exact_run_20261108.md, *_run_result_20261108.json,
+  *_editorial_review_20261108.json; plný návod jen v soukromé .venv, mimo Git.
+- Všech 21 provider schémat nezávisle validních. Původní unverified odstavec
+  bez citace neprošel resolverem. Některé další texty vyžadovaly redakci
+  kvůli přesným literálům, historickému statusu a false-positive regexům.
+- 25 operací =21 textových úprav +3 přísnější stavy +1 přesunutý disclaimer.
+  Původní non-whitespace obsah zachovaný celý a ve stejném pořadí.
+- Usage input3207934/cached0/output57732, reasoning5290 je subset, total3265666.
+  Celý job1566,841s; finalraw6fdad250…c7664e, response df93d3a3…a08e6.
+- Pět starých stavů/plánů /24JSON beze změny; dalších24 původních finančních
+  artefaktů tohoto jobu má soukromý manifest. Kód beze změny, převzato ověření
+  bef32ad2:46 nových /2794 plných testů,5 skipped. Závěrečná statická brána a git diff --check OK.
 <!-- SAMANTHA_CURRENT_STATUS_END -->
 
 ### Předchozí stav infrastruktury
@@ -1379,3 +1382,50 @@ souborů / 5 002 170 B. Stávající rutinní pilot není obecný writer/schedul
   přijímací meze nejsou tvrdé fakturační/output/časové stropy.
 - Provider nového formátu není živě ověřený; platná citace není obsahová pravda.
   Nové příkazy bez allowlist a současné Mac/iPhone facts bez důkazů nepodporované.
+
+## 2026-11-08 12:57 CET — REC-06: 21 tahů doručeno; oddělený redakční návrh připraven
+
+### Hotovo
+- Jediný nově schválený pilot karty741e71da dokončil 21/21 tahů,
+  všech 20 čtecích dávek přijato. 532 dokumentů přesně jednou, celý original
+  v každé fázi; 116 findings, inspect764 referencí, syntéza216 platných citací.
+- Odhad ze skutečné usage 174,8297 Standard kreditu / mez240.
+  Syntéza686,537s / mez900, ale output34115 / mez32000: formální attention.
+- Bez dalšího modelu připraven samostatný redakční návrh 93361B / 47 částí,
+  SHA72aaa17b…a9b658f. Nezměněný quality gate prošel, 19 původních bloků
+  a všech 216 citací beze změny. Rozpis25 redakčních operací je uložený.
+
+### Rozhodnutí
+- Původní job zůstává accepted=false; raw, limit, packet ani attempt se
+  nepřepisují. Samostatný upravený pracovní návrh není přijetím původního jobu.
+- Další placený běh se neopakuje. Necitovaný disclaimer je jen v raw/review,
+  dvě nově odvozené absolutní cesty nejsou přijaté, historické části jsou
+  označené přísněji. Pravidla validátoru ani citace se neměnily.
+- Během posledního tahu vznikl main9c8584ee; schválený snapshot zůstává6c610287.
+  Čtecí přezkum rozdílu je oddělený. Návrh není tvrzení o nejnovějším celém main.
+- Provozní TXT/iCloud, role, služby, scheduler, push/deploy ani main Data neměnil.
+
+### Další krok
+- Míla a Will obsahově převezmou konkrétní redakční návrh a jeho změnový
+  záznam včetně zdrojového rozdílu. Tato přejímka nepotřebuje další model.
+
+### Navrhované další kroky
+- Obsahová přejímka doplňků, zejména záloh, dat mimo Git a kompatibility Camina.
+- Příští offline kontrakt: evidence podle statusu, serverové zachování original,
+  posuzovat souběžné změny odděleně od neměnného čteného snapshotu.
+- Po přijetí přesných bajtů a příslušném oprávnění dvě kopie do PythonMF a iCloud Dokumentů.
+- Týdenní aktivace až po vlastní přejímce role, aplikací/Macu/iPhonu a rozpočtu.
+
+### Technický důkaz
+- recovery_guide_anchor_exact_run_20261108.md, *_run_result_20261108.json,
+  *_editorial_review_20261108.json; plný návod jen v soukromé .venv, mimo Git.
+- Všech 21 provider schémat nezávisle validních. Původní unverified odstavec
+  bez citace neprošel resolverem. Některé další texty vyžadovaly redakci
+  kvůli přesným literálům, historickému statusu a false-positive regexům.
+- 25 operací =21 textových úprav +3 přísnější stavy +1 přesunutý disclaimer.
+  Původní non-whitespace obsah zachovaný celý a ve stejném pořadí.
+- Usage input3207934/cached0/output57732, reasoning5290 je subset, total3265666.
+  Celý job1566,841s; finalraw6fdad250…c7664e, response df93d3a3…a08e6.
+- Pět starých stavů/plánů /24JSON beze změny; dalších24 původních finančních
+  artefaktů tohoto jobu má soukromý manifest. Kód beze změny, převzato ověření
+  bef32ad2:46 nových /2794 plných testů,5 skipped. Závěrečná statická brána a git diff --check OK.
