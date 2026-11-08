@@ -344,7 +344,7 @@ def run(*, approved_digest: str, now=None, client_factory=None):
                 result = m.run(hydrate(packet['snapshot']), state_dir=STATE / 'controller', now=now,
                     limits=m.Limits(**packet['measurements']['limits']), count_tokens=Counter(packet['measurements']),
                     call=Reviewer(client, packet), approved_snapshot=hydrate(packet['snapshot']).sha256,
-                    assert_sources=lambda: _current(packet), confirmed=True)
+                    assert_sources=lambda: _current(packet), confirmed=True, legacy_format=True)
         except Exception as exc:
             marker.update(state='attention', error_type=type(exc).__name__)
             result = marker

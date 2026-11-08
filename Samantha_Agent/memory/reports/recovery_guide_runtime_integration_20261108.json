@@ -1,0 +1,54 @@
+{
+  "kind": "runtime_integration_offline",
+  "runs": [
+    {
+      "slot": "2026-W45",
+      "state": "completed",
+      "format_contract": "integrated_guide_v1",
+      "source_original_sha256": "2de13a0913ff026d9e43b201091dc1b5a39bf668bf2fb46e2ca52f08b0934a79",
+      "candidate_sha256": "29558e6218c2746362d40145789eac6370090d0854eda1d2960aad0673a51cbd",
+      "header_count": 1,
+      "two_copies_match": true,
+      "semantic_acceptance": "synthetic_operator",
+      "scope": "production_code_branch_in_temporary_directories"
+    },
+    {
+      "slot": "2026-W46",
+      "state": "completed",
+      "format_contract": "integrated_guide_v1",
+      "source_original_sha256": "29558e6218c2746362d40145789eac6370090d0854eda1d2960aad0673a51cbd",
+      "candidate_sha256": "afb04770bad5781b67533c9753af501af6a26c5e762cb049c8c0740bd6d4166f",
+      "header_count": 1,
+      "two_copies_match": true,
+      "semantic_acceptance": "synthetic_operator",
+      "scope": "production_code_branch_in_temporary_directories"
+    }
+  ],
+  "stub_model_calls": 4,
+  "paid_model_calls": 0,
+  "actual_operating_writes": false,
+  "activation_created_in_worktree": false,
+  "service_started": false,
+  "new_tests": 42,
+  "targeted_tests": 272,
+  "closed_json_artifacts_unchanged": 48,
+  "provider_acceptance": "not_tested_for_new_weekly_contract",
+  "initial_targeted_tests": {
+    "run": 272,
+    "result": "OK"
+  },
+  "final_targeted_regression": {
+    "run": 161,
+    "result": "OK",
+    "new_tests_total": 42,
+    "covers_final_workflow_and_delivery_changes": true
+  },
+  "full_quality_gate": {
+    "run": 2863,
+    "skipped": 5,
+    "result": "OK",
+    "seconds": 416.833,
+    "new_tests_in_full_run": 39
+  },
+  "final_static_gate": "OK"
+}

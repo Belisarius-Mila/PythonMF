@@ -1,0 +1,72 @@
+{
+  "proposal_sha256": "770a11bf39d5880eeda4f3db12708d706518b9e74048b604c58a297bf8832cb6",
+  "state": "awaiting_safety_and_budget_confirmation",
+  "first_due": "2026-11-15T09:00:00+01:00",
+  "run_credits": 200,
+  "month_credits": 1000,
+  "planned_credits": 193.42345,
+  "planned_calls": 15,
+  "source_count": 547,
+  "candidate_sha256": "f8c2972994f34dc9dd904162667eae6c147980941e1178e7735759281a605c4e",
+  "candidate_bytes": 75448,
+  "paid_model_calls": 0,
+  "service_installed": false,
+  "targets": [
+    "PythonMF/OBNOVA_SAMANTHY_NOVY_MAC.txt",
+    "iCloud Drive/Dokumenty/OBNOVA_SAMANTHY_NOVY_MAC.txt"
+  ],
+  "current_role_changed": false,
+  "activation_file_created": false,
+  "target_files_created": false,
+  "global_safety_required": true,
+  "runtime": {
+    "server_version": "0.163.0",
+    "local_cli_version": "0.166.0",
+    "model": "gpt-6.1-sol",
+    "effort": "medium",
+    "account_type": "chatgpt",
+    "macos": "15.8.2"
+  },
+  "validation": {
+    "targeted": 206,
+    "result": "OK",
+    "full": {
+      "tests": 2882,
+      "skipped": 5,
+      "seconds": 426.299,
+      "result": "OK"
+    },
+    "static": "OK",
+    "minimal_path_status": "OK",
+    "launchd_session_verified": false
+  },
+  "prices": {
+    "input": 50,
+    "cached_input": 2.5,
+    "output": 250,
+    "unit": "credits_per_million",
+    "source": "https://learn.chatgpt.com/docs/pricing",
+    "checked": "2026-11-08"
+  },
+  "unknowns": [
+    "reference_is_not_exact_model_tokenization",
+    "no_hard_billing_or_output_cap",
+    "no_physical_iphone_acceptance",
+    "new_weekly_contract_not_provider_tested"
+  ],
+  "application_scope": [
+    "Python",
+    "Codex",
+    "Cockpit",
+    "Tailscale",
+    "Camino",
+    "Xcode",
+    "iCloud",
+    "VS Code",
+    "Homebrew",
+    "Git",
+    "Zkratky"
+  ],
+  "scope_note": "Approved-profile proposal; not a live inventory of every device application. Unknown application fields stay unverified.",
+  "closed_artifacts_unchanged": 48
+}

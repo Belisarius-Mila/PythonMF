@@ -33,6 +33,12 @@ def answer():
     return {"paragraphs": [{"text": ORIGINAL.strip(), "status": "unchanged", "evidence": []}]}
 
 
+def consolidated_answer(payload):
+    return {"request_id":payload["request_id"],"sections":{
+        section["id"]:[{"action":"keep","block":row["id"]} for row in section["blocks"]]
+        for section in payload["guide_layout"]["sections"]}}
+
+
 class Pilot(unittest.TestCase):
     def setUp(self):
         self.temp = tempfile.TemporaryDirectory()
@@ -40,7 +46,7 @@ class Pilot(unittest.TestCase):
         self.root = Path(self.temp.name).resolve()
         self.state = self.root / "state"
         self.snap = snapshot()
-        self.limits = m.Limits(10_000, 1000, 8, 50, 100, 60)
+        self.limits = m.Limits(30_000, 1000, 8, 50, 100, 60)
         self.now = datetime(2026, 11, 8, 10, tzinfo=ZoneInfo("Europe/Prague"))
         self.calls = []
 
@@ -48,7 +54,7 @@ class Pilot(unittest.TestCase):
         self.calls.append((payload, kind))
         value = ({"covered": [{"source": row["path"], "quote": row["text"]} for row in payload["sources"]],
                   "notes": "Pouze doložené nastavení; telefon ručně neověřen."}
-                 if kind == "inspect" else answer())
+                 if kind == "inspect" else consolidated_answer(payload))
         return {"answer": value, "usage": USAGE}
 
     def run_pilot(self, **kw):
@@ -131,7 +137,7 @@ class Pilot(unittest.TestCase):
         self.assertFalse(self.calls)
 
     def test_oversized_whole_file_never_truncated(self):
-        snap = replace(self.snap, sources=(replace(self.snap.sources[0], text="x" * 20_000),))
+        snap = replace(self.snap, sources=(replace(self.snap.sources[0], text="x" * 40_000),))
         with self.assertRaises(ValueError):
             m.plan(snap, len, self.limits)
 
@@ -177,8 +183,20 @@ class Pilot(unittest.TestCase):
 
     def test_role_compatibility_without_activation(self):
         self.assertIn(m.ROLE, agent_roles.KNOWN_ROLES)
-        roles = json.loads(agent_roles.CONFIG_PATH.read_text())["roles"]
-        self.assertNotIn(m.ROLE, roles)
+        original = agent_roles.CONFIG_PATH.read_bytes()
+        document = json.loads(original)
+        # Approval may already exist in the real checkout. Exercise the missing
+        # binding in an isolated fixture, without changing the approved policy.
+        document["roles"].pop(m.ROLE, None)
+        policy = self.root / "inactive-roles.json"
+        policy.write_text(json.dumps(document))
+        before = policy.read_bytes()
+        with self.assertRaises(agent_roles.AgentRoleError):
+            agent_roles.load_role(policy, role=m.ROLE)
+        self.assertEqual(policy.read_bytes(), before)
+        for role in json.loads(original)["roles"]:
+            self.assertEqual(agent_roles.load_role(role=role)["role"], role)
+        self.assertEqual(agent_roles.CONFIG_PATH.read_bytes(), original)
 
     def test_adapter_separate_threads_restrictions_and_exact_role(self):
         from tests.test_routine_tasks import FakeClient
@@ -186,7 +204,7 @@ class Pilot(unittest.TestCase):
         selected = {"role": m.ROLE, "model": m.MODEL, "reasoning_effort": "medium", "policy_digest": "0" * 64}
         reviewer = m.AppServerReviewer(client, selected, self.root / "empty", assert_role=lambda: None)
         reviewer({}, "inspect")
-        reviewer({}, "synthesize")
+        reviewer(m.consolidation.prepare(snapshot(), [], self.now.date()).payload, "synthesize")
         self.assertEqual(len(client.starts), 2)
         self.assertNotEqual(client.starts[0]["cwd"], client.starts[1]["cwd"])
         config = client.starts[0]["config_overrides"]

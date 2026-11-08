@@ -384,12 +384,15 @@ WORKFLOW_COMMANDS: tuple[WorkflowCommand, ...] = (
     *(WorkflowCommand(
         command_id="recovery_guide_" + action.replace("-", "_"),
         title="Obnovovací návod: " + action,
-        purpose="Neplacený náhled/stav; run zůstává blokovaný do samostatné aktivace pilotu.",
+        purpose="Běhový run/tick používá samostatně schválenou aktivaci; ostatní vstupy jsou neplacené náhledy/stav.",
         aliases=("obnovovací návod " + action,),
         argv=(str(PYTHON_BIN), str(SAMANTHA_DIR / "scripts/recovery_guide.py"), action),
-        cwd=SAMANTHA_DIR, risk="read_only_preview",
-        writes="izolovaná cache tokenizeru v .venv/recovery_tokenizer; žádný modelový tah" if action == "preflight" else "nic; žádný modelový tah",
-    ) for action in ("preview", "preflight", "runtime", "schedule-preview", "status", "run")),
+        cwd=SAMANTHA_DIR, risk="paid_model_and_private_write" if action in {"run","tick"} else "read_only_preview",
+        writes=("Po schválené aktivaci modelová revize, privátní účtenky a pouze přijaté kopie PythonMF/iCloud."
+                if action in {"run","tick"} else "izolovaná cache tokenizeru v .venv/recovery_tokenizer; žádný modelový tah"
+                if action == "preflight" else "nic; žádný modelový tah"),
+        requires_confirmation=action in {"run","tick"},
+    ) for action in ("preview", "preflight", "runtime", "schedule-preview", "status", "run", "tick")),
     *(WorkflowCommand(
         command_id="recovery_guide_" + action,
         title="Obnovovací plánovač: " + action,

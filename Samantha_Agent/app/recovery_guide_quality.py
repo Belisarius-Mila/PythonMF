@@ -149,8 +149,9 @@ def _technical(text: str, quotes: str, context: ReviewContext | None) -> None:
         _fail(command not in quotes, "uncited_command")
 
 
-def validate(answer: dict, snapshot: Snapshot, *, context: ReviewContext | None = None) -> str:
-    """Mandatory core gate used by the pilot, including unchanged sections.
+def validate_content(answer: dict, snapshot: Snapshot, *, context: ReviewContext | None = None,
+                     integrated: bool = False) -> str:
+    """Shared citation, privacy, provenance and command gate, without layout policy.
 
     Technical literals must be in the cited quote, not merely somewhere in a
     large document. Full semantic correctness still needs independent review.
@@ -184,7 +185,22 @@ def validate(answer: dict, snapshot: Snapshot, *, context: ReviewContext | None 
                     proven |= fact.authority in {"manual_verified", "deployed"} and text in e["quote"]
                 _fail(not proven, "unproven_live_claim")
     candidate = "\n\n".join(("[Neověřeno]\n" if r["status"] == "unverified" else "") + r["text"] for r in rows) + "\n"
-    _fail(bool(RETIRED.search(candidate)) or bool(re.search(r"(?:spusť|zapni|nasaď|povol).{0,40}placen[ýého\s]+hlasov", candidate, re.I)), "retired_voice_reference")
+    # The integrated contract distinguishes explicit positive actions from a
+    # prohibition such as "nepovoluje". Literal retired IDs remain forbidden.
+    action = (r"\b(?:spusť(?:te)?|spustit|zapni(?:te)?|zapnout|nasaď(?:te)?|nasadit|povol(?:it|te|uj(?:te)?)?)\b.{0,40}placen[ýého\s]+hlasov"
+              if integrated else r"(?:spusť|zapni|nasaď|povol).{0,40}placen[ýého\s]+hlasov")
+    _fail(bool(RETIRED.search(candidate)) or bool(re.search(action, candidate, re.I)), "retired_voice_reference")
+    return candidate
+
+
+def validate(answer: dict, snapshot: Snapshot, *, context: ReviewContext | None = None) -> str:
+    """Mandatory core gate used by the pilot, including unchanged sections.
+
+    Technical literals must be in the cited quote, not merely somewhere in a
+    large document. Full semantic correctness still needs independent review.
+    """
+    candidate = validate_content(answer, snapshot, context=context)
+    rows = answer["paragraphs"]
     original_heads, new_heads = _headings(snapshot.original.text), _headings(candidate)
     _fail(not original_heads, "missing_original_structure")
     _fail(len({m[1] for m in new_heads}) != len(new_heads), "duplicate_chapter")
@@ -210,7 +226,7 @@ def validate(answer: dict, snapshot: Snapshot, *, context: ReviewContext | None 
     return candidate
 
 
-def review(answer: dict, snapshot: Snapshot, dossier: dict, context: ReviewContext) -> dict:
+def review(answer: dict, snapshot: Snapshot, dossier: dict, context: ReviewContext, *, format_request=None) -> dict:
     """Complete REC-03 checklist; only returns review/blocked, never approval."""
     result: dict[str, Any] = {"schema_version": 1, "validator_version": VALIDATOR_VERSION,
         "state": "blocked", "snapshot_sha256": snapshot.sha256,
@@ -220,11 +236,29 @@ def review(answer: dict, snapshot: Snapshot, dossier: dict, context: ReviewConte
         _fail(context.snapshot_sha256 != snapshot.sha256, "review_snapshot_changed")
         _fail(type(context.max_age_days) is not int or context.max_age_days <= 0, "invalid_freshness_policy")
         _fail(bool(context.unresolved_conflicts), "unresolved_recovery_conflict")
-        candidate = validate(answer, snapshot, context=context)
+        if format_request is None:
+            candidate = validate(answer, snapshot, context=context)
+            evidence_rows = answer["paragraphs"]
+        else:
+            from app import recovery_guide_consolidation as consolidation
+            checked = consolidation.validate(answer, snapshot, format_request, context=context)
+            candidate = checked["candidate"]
+            evidence_rows = [*checked["resolved_paragraphs"]["paragraphs"],
+                *({"status":"unverified","evidence":row["evidence"]}
+                  for row in checked["change_audit"] if row["action"]=="retire")]
+            result["format_contract"] = consolidation.VERSION
+            result["format_request_sha256"] = format_request.sha256
         result["candidate_sha256"] = digest(candidate)
         _fail(context.application_scope_approved is not True or not context.applications, "application_scope_unapproved")
+        normalized = " ".join(candidate.casefold().split())
         for name, alternatives in TOPICS.items():
-            if not any(word in candidate.casefold() for word in alternatives):
+            present = any(word in candidate.casefold() for word in alternatives)
+            if format_request is not None and name == "outside_git" and not present:
+                # Same required recovery warning, expressed as an explicit
+                # exclusion from a GitHub clone. Legacy receipts stay literal.
+                present = (bool(re.search(r"\bgithub\b", normalized))
+                    and "nezískáš .env, ignorovaná soukromá data" in normalized)
+            if not present:
                 result["issues"].append({"code": "missing_topic", "field": name})
         _fail(not context.macos_expected or not context.macos_observed, "macos_baseline_unverified")
         _fail(context.macos_expected != context.macos_observed, "new_macos_requires_review")
@@ -236,7 +270,7 @@ def review(answer: dict, snapshot: Snapshot, dossier: dict, context: ReviewConte
         _fail(any(not isinstance(n, str) for n in names) or len(set(names)) != len(names), "duplicate_application")
         _fail(set(names) != set(context.applications), "application_coverage")
         sources = _sources(snapshot)
-        for row in answer["paragraphs"]:
+        for row in evidence_rows:
             result["anchors"].extend(anchors(row["evidence"], sources))
             for evidence in row["evidence"]:
                 fact = _fact(evidence["source"], context, sources, evidence["quote"])

@@ -1,4 +1,4 @@
-"""REC-04 acceptance boundary, currently restricted to explicit sandbox roots.
+"""REC-04 acceptance boundary; production requires private runtime activation.
 
 No model, service, Git, production-path default or installation. The trusted
 operator supplies ReviewContext and confirmation; neither is model authority.
@@ -51,25 +51,30 @@ def _hydrate(packet: dict):
 class PublicationStore:
     """One owner, fixed targets, shared lock and immutable acceptance manifests.
 
-    This release deliberately has no production mode. Real publication needs
-    separately approved fixed targets, runtime identity and authorization route.
+    Sandbox remains the default. Production requires a current private
+    activation, fixed destinations and the integrated format acceptance route.
     """
     def __init__(self, state_dir: Path, *, sandbox_root: Path,
-                 destinations: tuple[Path, Path], mode: str = "sandbox"):
+                 destinations: tuple[Path, Path], mode: str = "sandbox", activation=None):
+        self.activation = activation
         if mode != "sandbox":
-            raise ValueError("production_publication_disabled")
+            from app.recovery_guide_runtime_config import RuntimeConfig
+            if mode != "production" or not isinstance(activation, RuntimeConfig):
+                raise ValueError("production_publication_disabled")
+            activation.permits(state_dir, destinations)
+        self.scope = "production" if mode == "production" else "sandbox_only"
         if not sandbox_root.is_absolute() or sandbox_root.is_symlink():
             raise ValueError("invalid_sandbox")
         self.sandbox = sandbox_root.resolve(strict=True)
         allowed = (Path(__file__).resolve().parents[1] / ".venv", Path(tempfile.gettempdir()).resolve())
-        if not any(self.sandbox != base and self.sandbox.is_relative_to(base) for base in allowed):
+        if mode == "sandbox" and not any(self.sandbox != base and self.sandbox.is_relative_to(base) for base in allowed):
             raise ValueError("sandbox_root_not_isolated")
         self.root = state_dir.absolute()
         self.destinations = tuple(p.absolute() for p in destinations)
         if len(self.destinations) != 2 or self.destinations[0].resolve() == self.destinations[1].resolve():
             raise ValueError("two_distinct_destinations_required")
         for path in (self.root, *self.destinations):
-            if not path.resolve().is_relative_to(self.sandbox) or ".." in path.parts:
+            if (path == self.root or mode == "sandbox") and (not path.resolve().is_relative_to(self.sandbox) or ".." in path.parts):
                 raise ValueError("outside_sandbox")
         if any(p.resolve().is_relative_to(self.root.resolve()) for p in self.destinations):
             raise ValueError("destination_inside_state")
@@ -80,6 +85,7 @@ class PublicationStore:
         self._guard()
 
     def _guard(self):
+        if self.activation is not None:self.activation.permits(self.root, self.destinations)
         stat = self.sandbox.stat()
         if (stat.st_dev, stat.st_ino) != self.root_identity:
             raise ValueError("sandbox_identity_changed")
@@ -88,7 +94,7 @@ class PublicationStore:
         if self.root.exists() and self.root.stat().st_mode & 0o077:
             raise ValueError("state_directory_not_private")
         for path in self.destinations:
-            if not path.resolve().is_relative_to(self.sandbox):
+            if self.scope == "sandbox_only" and not path.resolve().is_relative_to(self.sandbox):
                 raise ValueError("destination_left_sandbox")
         for path in (self.root / "store.lock", self.root / "active.json", self.root / "requests", self.root / "writes"):
             if path.is_symlink():
@@ -120,35 +126,44 @@ class PublicationStore:
         if len(draft.packet_json.encode("utf-8")) > 32_000_000:
             raise ValueError("packet_too_large")
         packet = json.loads(draft.packet_json)
-        if (set(packet) != {"schema", "store_identity", "validator_version", "snapshot", "context", "targets", "answer", "dossier"}
-                or packet["schema"] != 1 or packet["store_identity"] != self.identity
+        required = {"schema", "store_identity", "validator_version", "snapshot", "context", "targets", "answer", "dossier"}
+        integrated = packet.get("schema") == 2
+        if (set(packet) != required | ({"format_request"} if integrated else set())
+                or packet["schema"] not in {1,2} or packet["store_identity"] != self.identity
                 or packet["validator_version"] != quality.VALIDATOR_VERSION):
             raise ValueError("publication_scope_or_validator_changed")
+        if self.scope == "production" and not integrated:
+            raise ValueError("runtime_integrated_format_required")
         snapshot, context, targets = _hydrate(packet)
         if len(targets) != 2 or tuple(t.path for t in targets) != tuple(str(p) for p in self.destinations):
             raise ValueError("destinations_changed")
         for target in targets:
             target.check()
-        receipt = quality.review(packet["answer"], snapshot, packet["dossier"], context)
+        from app import recovery_guide_consolidation as consolidation
+        request = consolidation.Request(packet["format_request"]) if integrated else None
+        receipt = quality.review(packet["answer"], snapshot, packet["dossier"], context, format_request=request)
         if receipt["state"] != "review" or receipt["publication_authorized"] is not False:
             raise ValueError("quality_gate_blocked")
-        candidate = quality.validate(packet["answer"], snapshot, context=context)
+        candidate = (consolidation.validate(packet["answer"], snapshot, request, context=context)["candidate"]
+                     if integrated else quality.validate(packet["answer"], snapshot, context=context))
         return packet, snapshot, context, targets, receipt, candidate
 
     def prepare(self, answer: dict, snapshot: Snapshot, dossier: dict,
-                context: quality.ReviewContext) -> PublicationDraft:
+                context: quality.ReviewContext, *, format_request=None) -> PublicationDraft:
         self._guard()
         raw_context = asdict(context) | {"checked_on": context.checked_on.isoformat()}
         packet = {"schema": 1, "store_identity": self.identity, "validator_version": quality.VALIDATOR_VERSION,
                   "snapshot": asdict(snapshot), "context": raw_context, "answer": answer, "dossier": dossier,
                   "targets": [asdict(Target.pin(p)) for p in self.destinations]}
+        if format_request is not None:
+            packet.update(schema=2, format_request=format_request.envelope)
         draft = PublicationDraft(canonical_json(packet))
         self._evaluate(draft)
         return draft
 
     def preview(self, draft: PublicationDraft) -> dict:
         _, snapshot, _, targets, receipt, candidate = self._evaluate(draft)
-        return {"state": "confirmation_required", "scope": "sandbox_only", "binding_sha256": draft.sha256,
+        return {"state": "confirmation_required", "scope": self.scope, "binding_sha256": draft.sha256,
                 "candidate_sha256": digest(candidate), "original_sha256": snapshot.original.sha256,
                 "quality_sha256": digest(canonical_json(receipt)), "targets": [asdict(t) for t in targets],
                 "model_calls": 0, "writes": False}
@@ -187,7 +202,7 @@ class PublicationStore:
             manifest = {"schema": 1, "store_identity": self.identity, "request_id": request_id,
                 "binding_sha256": draft.sha256, "candidate_sha256": digest(candidate),
                 "original_sha256": snapshot.original.sha256, "quality_sha256": digest(canonical_json(receipt)),
-                "targets": packet["targets"], "authority": "sandbox_confirmation", "accepted_at": now.isoformat()}
+                "targets": packet["targets"], "authority": "runtime_confirmation" if self.scope == "production" else "sandbox_confirmation", "accepted_at": now.isoformat()}
             # Approval commits last. Interrupted preparation can finish only with
             # the same immutable bytes; it is never mistaken for acceptance.
             self._once(directory / "approval.json", canonical_json(manifest))
@@ -201,7 +216,7 @@ class PublicationStore:
                     "original_sha256", "quality_sha256", "targets", "authority", "accepted_at"}
         if (set(manifest) != expected or raw_manifest != canonical_json(manifest).encode("utf-8")
                 or manifest.get("schema") != 1 or manifest.get("store_identity") != self.identity
-                or manifest.get("request_id") != request_id or manifest.get("authority") != "sandbox_confirmation"):
+                or manifest.get("request_id") != request_id or manifest.get("authority") != ("runtime_confirmation" if self.scope == "production" else "sandbox_confirmation")):
             raise ValueError("invalid_acceptance_manifest")
         draft = PublicationDraft(self._read(directory / "packet.json").decode("utf-8"))
         packet, snapshot, context, targets, receipt, candidate = self._evaluate(draft)
@@ -224,10 +239,19 @@ class PublicationStore:
         result = json.loads(self._read(path)) if path.exists() else {"state": "accepted"}
         active = self.root / "active.json"
         if active.exists() and json.loads(self._read(active))["request_id"] != request_id:
-            result = {**result, "state": "superseded_or_waiting", "observed_state": result["state"]}
+            previous_id = json.loads(self._read(active))["request_id"]
+            previous_path = self._directory(previous_id) / "execution.json"
+            # A newly accepted integrated week may follow a completed delivery.
+            # Its exact pinned baselines must still match both current copies.
+            from app.recovery_guide_publish import file_hash
+            forward = (loaded[0]["schema"] == 2 and not path.exists() and previous_path.exists()
+                and json.loads(self._read(previous_path)).get("state") == "uploaded"
+                and all(file_hash(t.check()) == t.baseline for t in loaded[3]))
+            if not forward:
+                result = {**result, "state": "superseded_or_waiting", "observed_state": result["state"]}
         return {**result, "request_id": request_id, "approval_sha256": approval_sha,
                 "snapshot_sha256": loaded[4]["snapshot_sha256"], "quality_sha256": manifest["quality_sha256"],
-                "candidate_sha256": manifest["candidate_sha256"], "scope": "sandbox_only", "model_calls": 0,
+                "candidate_sha256": manifest["candidate_sha256"], "scope": self.scope, "model_calls": 0,
                 "physical_iphone_acceptance": "not_verified", "live_status_audit": False}
 
     def execute(self, request_id: str, *, approval_sha256: str,
@@ -261,7 +285,10 @@ class PublicationStore:
                 now = now or datetime.now(timezone.utc)
                 if now.tzinfo is None:
                     raise ValueError("timezone_required")
-                fresh = quality.review(packet["answer"], snapshot, packet["dossier"], replace(context, checked_on=now.astimezone(ZoneInfo("Europe/Prague")).date()))
+                from app.recovery_guide_consolidation import Request
+                request = Request(packet["format_request"]) if packet["schema"] == 2 else None
+                fresh = quality.review(packet["answer"], snapshot, packet["dossier"],
+                    replace(context, checked_on=now.astimezone(ZoneInfo("Europe/Prague")).date()), format_request=request)
                 if fresh["state"] != "review" or current_inputs(manifest) is not True:
                     return {**self.status(request_id), "state": "inputs_changed_or_stale"}
             atomic_write_json(active, {"request_id": request_id})

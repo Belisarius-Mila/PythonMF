@@ -1,0 +1,20 @@
+{
+  "kind": "consolidated_reader_draft_checks",
+  "chapters": 17,
+  "utf8_bytes": 75415,
+  "sha256": "381963c3e2d24f2624caf4af1a79bb130f321fa5bc75d4ffb020f9fda82543c8",
+  "old_supplement_headers_removed": true,
+  "historical_snapshot_ids_removed": true,
+  "source_script_paths_checked": 31,
+  "missing_paths": [],
+  "python_verifier_ast": "passed",
+  "python_verifier_unchanged_except_indentation": true,
+  "heredoc_zsh_syntax": "passed",
+  "protected_financial_artifacts_unchanged": 24,
+  "previous_candidate_unchanged": true,
+  "downloads_copy_identical": true,
+  "new_model_calls": 0,
+  "production_targets_written": false,
+  "old_75_percent_retention_gate_not_claimed": true,
+  "semantic_acceptance_required": true
+}

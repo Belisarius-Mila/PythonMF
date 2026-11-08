@@ -1,0 +1,76 @@
+{
+  "state": "active",
+  "proposal_sha256": "9a8fb9f9aad082a3db54a33242ce5a3694bd4be45ec2095f2117b6c3d286c38d",
+  "approved_parent_proposal": "770a11bf39d5880eeda4f3db12708d706518b9e74048b604c58a297bf8832cb6",
+  "launchd": {
+    "loaded": true,
+    "arguments_verified": true,
+    "last_exit_code": 0,
+    "runs": 1,
+    "first_tick": {
+      "state": "not_due",
+      "model_calls": 0
+    }
+  },
+  "readiness": {
+    "mac_available": true,
+    "user_session": true,
+    "network": true,
+    "icloud_auth": true,
+    "codex_auth": true,
+    "role_current": true,
+    "standard_tier": true,
+    "context_proven": true,
+    "source_scope_approved": true
+  },
+  "copies": {
+    "same_sha256": "f8c2972994f34dc9dd904162667eae6c147980941e1178e7735759281a605c4e",
+    "bytes": 75448,
+    "icloud": {
+      "available": true,
+      "ubiquitous": true,
+      "uploaded": true,
+      "uploading": false,
+      "upload_error": false
+    }
+  },
+  "schedule": {
+    "budget_approved": true,
+    "enabled": true,
+    "hour": 9,
+    "max_calls": 20,
+    "max_seconds": 2400,
+    "month_credits": 1000,
+    "not_before": "2026-11-15T09:00:00+01:00",
+    "role_policy_digest": "a144a19b77ad62d8d97eed8a79df1f5a53db1cbaac2f50afbfb75d038c0aaece",
+    "run_credits": 200,
+    "schedule_approved": true,
+    "weekday": 6
+  },
+  "model_calls_today": 0,
+  "physical_iphone_acceptance": "not_verified",
+  "other_roles_preserved": true,
+  "global_fast_changed": false,
+  "global_safety_confirmed": true,
+  "validation": {
+    "targeted_tests": 166,
+    "result": "OK",
+    "static": "OK",
+    "prior_full_tests": 2882,
+    "prior_skipped": 5
+  },
+  "repair": {
+    "changed_code": [
+      "app/recovery_guide_quality.py"
+    ],
+    "configuration_unchanged": true,
+    "candidate_unchanged": true,
+    "before_repair_publication_accepted": false,
+    "before_repair_launch_attempted": false
+  },
+  "destinations": [
+    "PythonMF/OBNOVA_SAMANTHY_NOVY_MAC.txt",
+    "iCloud Drive/Dokumenty/OBNOVA_SAMANTHY_NOVY_MAC.txt"
+  ],
+  "old_artifacts_unchanged": 48
+}

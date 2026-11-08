@@ -1908,3 +1908,59 @@ přesné citace nepřijímat. Sémantická/provozní přejímka tím není autom
   Zdroj: reports/calendar_hourly_suggestions_20261108.md.
 - Hranice: syntetické ověření kontraktu neprokazuje modelovou kvalitu ani
   úsporu tokenů; zapnutí v samostatné službě až po kompatibilním upgradu.
+
+Doplnění 08112026 k LL-115 (čtenářská forma): Míla požaduje jeden průběžně
+sjednocovaný návod s jediným datem aktualizace, bez řetězení dodatků. Historii,
+zdroje a staré verze uchovat mimo čtenářský text. Neměnná raw účtenka neznamená,
+že se v uživatelském návodu mají navždy kopírovat neplatná ID a postupy.
+Nový text ověřit pokrytím potřebných témat, zdrojovou mapou a kontrolou
+příkazů; netvrdit průchod starým objemovým gate, pokud odstraňuje historii.
+Vložený shellový heredoc musí mít neodsazený ukončovací delimiter a správné
+odsazení Pythonu; kontrolovat AST a shell -n bez vykonání obnovy.
+
+Doplnění 08112026 k LL-115 (opakované týdenní revize, offline ověřeno):
+sjednocení musí být kontrakt generátoru, ne jen pokyn k jednorázové redakci.
+Model vydává dispozice bloků a doložené změny, server zachované bloky kopíruje
+přesně a vkládá jediné trusted datum. Historie dispozic/citací je mimo TXT.
+Dvě navazující revize musí začínat posledním přijatým textem; ověřit, že se
+nehromadí data, dodatky ani značky Neověřeno. Nový formát vyžaduje nový gate
+pokrytí, nepřepsání starého objemového pravidla. Zmrazené jednorázové adaptéry
+musejí původní wire formát zvolit výslovně, bez automatického fallbacku.
+Na17 kapitolách/340 blocích keep zachoval obsah přesně; to neprokazuje
+sémantickou správnost budoucích modelových rewrite a nenahrazuje přejímku.
+
+Doplnění 08112026 k LL-115 (běhová integrace): změna formátu musí projít
+přejímkou i její čerstvou kontrolou těsně před zápisem, nikoli pouze prvním
+renderem. Další přijatý týden nesmí být zaměněný za superseded jen proto,
+že active marker patří předchozímu dokončenému přenosu; pokračování dovolí
+jen shodné připnuté baselines obou kopií. Druhý vstup musí mít SHA prvního
+přijatého výstupu. Ověřeno přes skutečný plánovač/generátor/přejímku/writer
+s fake modelem a dočasnými soubory, včetně pádu mezi kopiemi bez dalšího tahu.
+Run/tick po integraci už nejsou principiálně read-only workflow; registr musí
+uvádět model/privátní zápisy a ruční potvrzení, i když je aktivace zatím vypnutá.
+
+Doplnění 08112026 k LL-115 (před aktivací): propojení callbacků není samo
+plně automatický provoz. Ověřit také pohyblivý zdroj dokumentace (Git main,
+ne dlouhodobě zaostávající HEAD vývojového worktree), přijatou automatickou
+přejímací politiku a každý přechod po pádu mezi přijetím a přenosem.
+Standard per-turn se nemusí shodovat s globálním Fast; nezapisovat globální
+preference, ale vynutit podporovaný override. Účet API-key nesmí projít
+cenovým plánem ChatGPT kreditů. Deklarovaná konfigurace a datum čtení
+nejsou live/device proof. Nejistý launchctl bootstrap se neposílá podruhé.
+
+Doplnění 08112026 k LL-115 (skutečná aktivace): pokrytí tématu data mimo
+Git nesmí být závislé jen na doslovném řetězci mimo Git. Explicitní varování,
+že GitHub clone nezíská .env a ignorovaná soukromá data, vyjadřuje stejnou
+podmínku. Úzkou opravu omezit na nový integrovaný gate; legacy neoslabovat.
+Při odmítnutí před publikací/launch zachovat původní balíček, doložit nulové
+odeslání a pouze auditovaně přepnout otisk opraveného validatoru; neměnit
+přijaté bajty/role/rozpočet/cíle a nepožadovat znovu už udělený souhlas.
+Ověřeno:166 cílených testů, dvě skutečné kopie/upload, jeden bootstrap,
+launchd exit0/not_due/0 modelů. Není to důkaz prvního placeného týdenního tahu.
+
+
+Doplnění 08112026 k LL-115 (integrační test): test neaktivní role nesmí
+předpokládat její trvalou nepřítomnost v reálném schváleném configu. Po
+pozdější přijaté aktivaci by tak blokoval jinak platnou integraci. Ověřit
+fail-closed chybějící binding na vlastní dočasné konfiguraci, její nezměněné
+bajty i platnost aktuálních schválených rolí bez jejich přepisování.

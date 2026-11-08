@@ -10,7 +10,7 @@ import math
 import re
 import time
 from dataclasses import dataclass
-from datetime import datetime, timedelta
+from datetime import date, datetime, timedelta
 from pathlib import Path
 from typing import Callable
 from zoneinfo import ZoneInfo
@@ -18,6 +18,7 @@ from zoneinfo import ZoneInfo
 from app.file_persistence import atomic_create_text, atomic_write_json, exclusive_file_lock
 from app.recovery_guide_sources import Snapshot, batches, canonical_json, digest, reject_secrets
 from app.release_usage import estimate_standard_credits, normalize_usage
+from app import recovery_guide_consolidation as consolidation
 
 TASK = "recovery_guide_review"
 MODEL = "gpt-6.1-sol"
@@ -34,6 +35,7 @@ Ve fázi synthesize zachovej celý samostatně použitelný návod a všechny p�
 nebo original_guide v evidence a status documented nebo unverified. Nové
 příkazy a cesty smějí být pouze přesně doložené. Nic nespouštěj. Aktualizace
 data sama o sobě není změna ani důkaz nového ověřeného stavu."""
+REVIEW_INSTRUCTIONS = INSTRUCTIONS + "\n" + consolidation.INSTRUCTIONS
 CITATION = {"type": "object", "properties": {"source": {"type": "string"}, "quote": {"type": "string"}},
             "required": ["source", "quote"], "additionalProperties": False}
 INSPECT_SCHEMA = {"type": "object", "properties": {
@@ -94,22 +96,32 @@ def citation(row: dict, texts: dict[str, str]) -> None:
         raise ValueError("Nedoložená citace.")
 
 
-def validate_candidate(answer: dict, snapshot: Snapshot) -> str:
+def validate_candidate(answer: dict, snapshot: Snapshot, *, request=None) -> str:
     """Mandatory REC-03 gate; independent acceptance still cannot publish."""
+    if request is not None:
+        return consolidation.validate(answer, snapshot, request)["candidate"]
     from app.recovery_guide_quality import validate
     return validate(answer, snapshot)
 
 
-def plan(snapshot: Snapshot, count_tokens: Callable[[str], int], limits: Limits) -> dict:
+def plan(snapshot: Snapshot, count_tokens: Callable[[str], int], limits: Limits, *, review_date: date | None = None, legacy_format: bool = False) -> dict:
     limits.check()
-    instruction_tokens = count_tokens(INSTRUCTIONS)
+    instruction_tokens = count_tokens(INSTRUCTIONS if legacy_format else REVIEW_INSTRUCTIONS)
     available = limits.input_tokens - instruction_tokens - count_tokens(canonical_json(INSPECT_SCHEMA)) - 512
     shards = batches(snapshot, count_tokens, input_limit=available,
                      output_reserve=limits.inspection_reserve, max_calls=limits.max_calls)
     # Final turn receives original plus all bounded findings. Reserve the full
     # output allowance for every inspection, with JSON/framing overhead.
-    synthesis_bound = (count_tokens(snapshot.original.text) + len(shards) * limits.inspection_reserve
-                       + instruction_tokens + count_tokens(canonical_json(SYNTHESIS_SCHEMA)) + 2048)
+    if legacy_format:
+        # Frozen one-off pilots retain their original wire contract and bounds.
+        synthesis_bound = (count_tokens(snapshot.original.text) + len(shards) * limits.inspection_reserve
+                           + instruction_tokens + count_tokens(canonical_json(SYNTHESIS_SCHEMA)) + 2048)
+    else:
+        synthesis_request = consolidation.prepare(snapshot, [], review_date or date(2000,1,1))
+        synthesis_schema = consolidation.schema(synthesis_request.payload)
+        synthesis_bound = (count_tokens(canonical_json(synthesis_request.payload))
+                           + len(shards) * limits.inspection_reserve + instruction_tokens
+                           + count_tokens(canonical_json(synthesis_schema)) + 2048)
     if synthesis_bound + limits.output_tokens > limits.input_tokens:
         raise ValueError("Syntéza se nevejde; potřebuje samostatně zkontrolovaný plán.")
     inputs = sum(count_tokens(canonical_json(s)) + instruction_tokens + 512
@@ -134,7 +146,7 @@ def status(state_dir: Path, slot: str) -> dict:
 
 def run(snapshot: Snapshot, *, state_dir: Path, now: datetime, limits: Limits,
         count_tokens: Callable[[str], int], call: Callable[[dict, str], dict],
-        approved_snapshot: str, assert_sources: Callable[[], bool], confirmed: bool = False) -> dict:
+        approved_snapshot: str, assert_sources: Callable[[], bool], confirmed: bool = False, legacy_format: bool = False, weekday: int = 6, hour: int = 9) -> dict:
     """One slot, frozen snapshot, persistent before-send marker, no retries.
 
     Injected transport returns {answer:dict, usage:normalized_usage}. Production
@@ -142,7 +154,7 @@ def run(snapshot: Snapshot, *, state_dir: Path, now: datetime, limits: Limits,
     """
     if confirmed is not True or approved_snapshot != snapshot.sha256:
         return {"state": "approval_required", "model_calls": 0}
-    slot = weekly_slot(now)
+    slot = weekly_slot(now, weekday=weekday, hour=hour)
     if state_dir.is_symlink():
         raise ValueError("Nepovolený alias stavu.")
     state_dir.mkdir(parents=True, exist_ok=True, mode=0o700)
@@ -153,7 +165,7 @@ def run(snapshot: Snapshot, *, state_dir: Path, now: datetime, limits: Limits,
             # Includes running after process death and attention after unknown
             # delivery. A tick never creates another call for this slot.
             return {**previous, "replayed_receipt": True}
-        prepared = plan(snapshot, count_tokens, limits)
+        prepared = plan(snapshot, count_tokens, limits, review_date=now.astimezone(ZoneInfo("Europe/Prague")).date(), legacy_format=legacy_format)
         month = now.astimezone(ZoneInfo("Europe/Prague")).strftime("%Y-%m")
         previous_month = [json.loads(p.read_text()) for p in state_dir.glob("????-W??.json")]
         used = sum(max(row.get("reserved_credits", 0), row.get("credits", 0))
@@ -165,7 +177,9 @@ def run(snapshot: Snapshot, *, state_dir: Path, now: datetime, limits: Limits,
         record = {"task": TASK, "slot": slot, "month": month, "state": "prepared",
                   "snapshot_sha256": snapshot.sha256, "reserved_credits": prepared["reserved_credits"],
                   "model_calls": 0, "completed_calls": 0, "retries": 0, "coverage": 0,
-                  "credits": 0.0, "model": MODEL, "reasoning_effort": "medium"}
+                  "credits": 0.0, "model": MODEL, "reasoning_effort": "medium",
+                  "format_contract": "legacy_paragraphs_v1" if legacy_format else consolidation.VERSION,
+                  "revision_date": now.astimezone(ZoneInfo("Europe/Prague")).date().isoformat()}
         record["turns"] = []
         atomic_create_text(state_dir / f"{slot}-manifest.json", canonical_json(snapshot.receipt()))
         atomic_create_text(state_dir / f"{slot}-original.txt", snapshot.original.text)
@@ -176,11 +190,17 @@ def run(snapshot: Snapshot, *, state_dir: Path, now: datetime, limits: Limits,
             payloads = [*prepared["shards"], None]
             for index, payload in enumerate(payloads):
                 kind = "inspect" if payload is not None else "synthesize"
+                request = None
                 if payload is None:
-                    payload = {"original": snapshot.original.text, "findings": findings}
-                schema = INSPECT_SCHEMA if kind == "inspect" else SYNTHESIS_SCHEMA
+                    if legacy_format:
+                        payload = {"original": snapshot.original.text, "findings": findings}
+                    else:
+                        request = consolidation.prepare(snapshot, findings, now.astimezone(ZoneInfo("Europe/Prague")).date())
+                        payload = request.payload
+                        atomic_create_text(state_dir / f"{slot}-request.json", request.envelope)
+                schema = INSPECT_SCHEMA if kind == "inspect" else SYNTHESIS_SCHEMA if legacy_format else consolidation.schema(payload)
                 output_allowance = limits.inspection_reserve if kind == "inspect" else limits.output_tokens
-                actual_input = count_tokens(canonical_json(payload)) + count_tokens(INSTRUCTIONS) + count_tokens(canonical_json(schema)) + 512
+                actual_input = count_tokens(canonical_json(payload)) + count_tokens(INSTRUCTIONS if legacy_format else REVIEW_INSTRUCTIONS) + count_tokens(canonical_json(schema)) + 512
                 if actual_input + output_allowance > limits.input_tokens or time.monotonic() - started > limits.seconds:
                     raise ValueError("Překročený předběžný rozsah nebo čas.")
                 next_bound = (actual_input * 50 + output_allowance * 250) / 1_000_000
@@ -220,12 +240,15 @@ def run(snapshot: Snapshot, *, state_dir: Path, now: datetime, limits: Limits,
                     atomic_create_text(state_dir / f"{slot}-batch-{index}.json", canonical_json(answer))
                     record["coverage"] += len(texts)
                 else:
-                    candidate = validate_candidate(answer, snapshot)
+                    checked = None if legacy_format else consolidation.validate(answer, snapshot, request)
+                    candidate = validate_candidate(answer, snapshot) if legacy_format else checked["candidate"]
                     if record["coverage"] != len(snapshot.sources) or not assert_sources():
                         raise ValueError("Neúplné nebo změněné podklady.")
                     saved = state_dir / f"{slot}-candidate.txt"
                     atomic_create_text(saved, candidate)
                     atomic_create_text(state_dir / f"{slot}-evidence.json", canonical_json(answer))
+                    if checked is not None:
+                        atomic_create_text(state_dir / f"{slot}-consolidation-audit.json", canonical_json({k:v for k,v in checked.items() if k != "candidate"}))
                     record.update(state="review", candidate_sha256=digest(candidate),
                                   semantic_acceptance="required", publication="not_authorized")
                 atomic_write_json(path, record)
@@ -253,6 +276,7 @@ class AppServerReviewer:
         from app.routine_tasks import start_data_only_thread
         if kind not in {"inspect", "synthesize"}:
             raise ValueError("Neznámá fáze.")
+        output_schema = INSPECT_SCHEMA if kind == "inspect" else consolidation.schema(payload)
         self.assert_role()
         # Existing transport cannot explicitly freeze serviceTier on turn/start.
         # Do not estimate Standard credits under an inherited Fast preference.
@@ -262,10 +286,10 @@ class AppServerReviewer:
         self.calls += 1
         # Each call gets a fresh thread: cumulative usage and old dialogue cannot
         # inflate the next batch or silently carry private project context.
-        isolated = start_data_only_thread(self.client, self.context / str(self.calls), MODEL, INSTRUCTIONS)
+        isolated = start_data_only_thread(self.client, self.context / str(self.calls), MODEL, REVIEW_INSTRUCTIONS)
         result = self.client.send_text(thread_id=isolated["thread_id"], text=canonical_json(payload),
             model=MODEL, effort="medium", approval_policy="never",
             sandbox_policy={"type": "readOnly", "networkAccess": False},
-            output_schema=INSPECT_SCHEMA if kind == "inspect" else SYNTHESIS_SCHEMA)
+            output_schema=output_schema)
         self.assert_role()
         return {"answer": json.loads(result.answer), "usage": result.thread_token_usage}
