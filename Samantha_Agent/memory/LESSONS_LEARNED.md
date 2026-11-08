@@ -1783,3 +1783,14 @@ Nový text ověřit pokrytím potřebných témat, zdrojovou mapou a kontrolou
 příkazů; netvrdit průchod starým objemovým gate, pokud odstraňuje historii.
 Vložený shellový heredoc musí mít neodsazený ukončovací delimiter a správné
 odsazení Pythonu; kontrolovat AST a shell -n bez vykonání obnovy.
+
+Doplnění 08112026 k LL-113 (opakované týdenní revize, offline ověřeno):
+sjednocení musí být kontrakt generátoru, ne jen pokyn k jednorázové redakci.
+Model vydává dispozice bloků a doložené změny, server zachované bloky kopíruje
+přesně a vkládá jediné trusted datum. Historie dispozic/citací je mimo TXT.
+Dvě navazující revize musí začínat posledním přijatým textem; ověřit, že se
+nehromadí data, dodatky ani značky Neověřeno. Nový formát vyžaduje nový gate
+pokrytí, nepřepsání starého objemového pravidla. Zmrazené jednorázové adaptéry
+musejí původní wire formát zvolit výslovně, bez automatického fallbacku.
+Na17 kapitolách/340 blocích keep zachoval obsah přesně; to neprokazuje
+sémantickou správnost budoucích modelových rewrite a nenahrazuje přejímku.

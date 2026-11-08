@@ -1,0 +1,50 @@
+{
+  "kind": "offline_two_week_format_contract",
+  "format_contract": "integrated_guide_v1",
+  "input_bytes": 75415,
+  "input_sha256": "381963c3e2d24f2624caf4af1a79bb130f321fa5bc75d4ffb020f9fda82543c8",
+  "runs": [
+    {
+      "revision_date": "2026-11-15",
+      "candidate_sha256": "cd96b32cba1718c27ef93b0a195cb0b6b0a4bfbea88c9ec90ba3e8e90a017096",
+      "bytes": 75448,
+      "chapters": 17,
+      "block_count": 340,
+      "header_count": 1,
+      "schema_valid": true,
+      "content_preserved": true
+    },
+    {
+      "revision_date": "2026-11-22",
+      "candidate_sha256": "437aeeb60666eef79275e98f3a6e44fb6f2e69e9054ce5f344e08433ab3aa289",
+      "bytes": 75448,
+      "chapters": 17,
+      "block_count": 340,
+      "header_count": 1,
+      "schema_valid": true,
+      "content_preserved": true
+    }
+  ],
+  "closed_financial_artifacts_unchanged": 24,
+  "model_calls": 0,
+  "operating_writes": false,
+  "service_activation": false,
+  "semantic_acceptance": "not_performed",
+  "older_closed_artifacts_unchanged": {
+    "jobs": 5,
+    "json_files": 24
+  },
+  "targeted_tests": {
+    "run": 153,
+    "result": "OK"
+  },
+  "new_contract_tests": 30,
+  "full_quality_gate": {
+    "run": 2824,
+    "skipped": 5,
+    "failures": 0,
+    "errors": 0,
+    "seconds": 549.936,
+    "result": "OK"
+  }
+}

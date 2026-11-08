@@ -2,18 +2,23 @@
 
 Projekt zalozen 2026-05-19.
 
-## Aktuální stav 2026-11-08 14:38 CET
+## Aktuální stav 2026-11-08 15:11 CET
 
-Míla zvolil jediný průběžně sjednocovaný obnovovací návod. Změny se píší
-přímo do kapitol, stará ID/statistiky záloh a uzavřené pracovní poznámky
-se z aktuálního textu odstraňují. Historie a důkazy zůstávají oddělené.
-V záhlaví má být Nejnovější update dokumentu z ddmmyyyy.
+Výchozí týdenní generátor nyní vynucuje integrovaný formát: jeden aktuální
+návod s jediným programově vloženým datem ddmmyyyy, změny v kapitolách,
+žádné vrstvení doplnění. Staré bloky mají explicitní dispozici; pouze
+historický balast lze doloženě vyřadit. Citace, soukromí, potřebné příkazy,
+bezpečnostní pokyny a nezopakování nejistého kroku zůstávají kontrolované.
+Audit a historie jsou mimo čtenářský text. Dvě offline revize skutečného
+návodu zachovaly 17 kapitol / 340 bloků. Třicet nových testů, 153 cílených PASS;
+Plná projektová brána 2 824 testů OK, 5 skipped; závěrečná statická brána a git diff --check OK.
 
-Nový sjednocený pracovní text17 kapitol /75415B /SHA381963c3…82543c8 je v
-Downloads jako OBNOVA_SAMANTHY_NOVY_MAC_AKTUALIZOVANY_08112026.txt a ve vlastní
-soukromé pracovní kopii. Vyžaduje obsahovou přejímku. Předchozí podklady a
-placený job attention/174,8297 zůstávají beze změny; žádný další model.
-Provozní kopie do PythonMF/iCloud ani role/plánovač tímto aktivované nejsou.
+Čtenářský návrh 75 415 B/SHA381963c3…82543c8 v Downloads zůstává beze změny
+k obsahové přejímce. Původní job attention/174,8297 ani24 finančních
+artefaktů nezměněné. Zmrazené jednorázové piloty mají explicitní původní
+formát. Žádné modelové volání, provozní kopie, role či služba.
+Další krok: Willova integrace tohoto formátu s týdenním adapterem a writerem;
+produkční aktivace a dvě provozní kopie/upload se tímto netvrdí.
 Historická evidence záloh níže není nový živý audit.
 
 ## Historický stav 2026-10-25 14:53 CET
@@ -1733,3 +1738,44 @@ závislosti bez konkrétní potřeby. Nejde o rozšíření e-mailové business 
   heredocu, AST i zsh -n PASS. Příkazy obnovy nebyly spouštěné.
 - Downloads kopie má shodný SHA;24 finančních artefaktů pilotu i předchozí
   93361B redakční podklad beze změny. Závěrečná statická brána a git diff --check OK.
+
+## 2026-11-08 15:11 CET — REC: sjednocená forma v každé týdenní revizi
+
+### Hotovo
+- Týdenní generátor nyní vyžaduje jediný průběžně aktualizovaný návod.
+  Změny patří přímo do kapitol, nikoli do připojovaných doplnění.
+- Datum Nejnovější update dokumentu z ddmmyyyy vkládá program; model je
+  neurčuje. Původní bloky se zachovají přesně, doloženě přepíší nebo se
+  doloženě odstraní pouze zastaralá historická poznámka. Audit je mimo návod.
+- Neúplné pokrytí, ztracená ochrana nebo potřebný příkaz, stará snapshot ID,
+  zálohovací statistiky a vrstvy dodatků návrh zastaví. Neplatný výsledek
+  zůstane attention bez automatického opakování.
+
+### Rozhodnutí
+- Mílův pokyn je výchozí kontrakt integrovaného týdenního generátoru,
+  nikoli pouze doporučení v dokumentaci. Úplné čtení bez obsahové změny
+  může ponechat bloky a aktualizovat datum revize; nejde o nový živý audit.
+- Zmrazené jednorázové piloty mají explicitní legacy formát. Žádná automatická
+  detekce či fallback na starý formát v týdenní větvi, žádné otevření starého jobu.
+- Obsahová přejímka zůstává nutná. Tento krok neaktivuje službu ani roli,
+  nepublikuje TXT do PythonMF/iCloud a nevolá model.
+
+### Další krok
+- Will převezme lokální změnu formátu do navazující integrace týdenního běhu;
+  propojení s produkčním adapterem a writerem musí zachovat tento kontrakt.
+
+### Navrhované další kroky
+- Převzít již dodaný sjednocený čtenářský návrh z Downloads.
+- Při integraci předat poslední přijatý návod, důkazy a trusted datum, nikoli
+  znovu původní historickou verzi; writer přijme přesné ověřené bajty.
+- Dvě provozní kopie a upload ověřit samostatně.
+- Týdenní aktivace, role a rozpočet zůstávají samostatnou přejímkou.
+
+### Technický důkaz
+- 30 nových kontraktních testů; cílená kompatibilní sada 153 PASS.
+- Plná projektová brána 2 824 testů OK, 5 skipped; závěrečná statická brána a git diff --check OK.
+- Skutečný návod 75 415 B: dvě offline revize 15./22.11., 17 kapitol a všech 340
+  bloků zachovaných, jediné nové datum, nezávislá JSON Schema validace PASS.
+  Jde o simulaci formátu, nikoli dva skutečné týdny/modelové čtení dokumentace.
+- Původních 24 finančních artefaktů SHA shodných, placený job nadále attention.
+  Podrobnosti recovery_guide_weekly_consolidation_20261108.md a .json.

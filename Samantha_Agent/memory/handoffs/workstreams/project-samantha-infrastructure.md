@@ -1,44 +1,44 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
-## 2026-11-08 14:38 CET — REC: sjednocený aktuální návod místo vrstev doplnění
+## 2026-11-08 15:11 CET — REC: sjednocená forma v každé týdenní revizi
 
 ### Hotovo
-- Podle Mílova směru připraven jeden souvislý text17 kapitol,75415B,
-  SHA381963c3…82543c8; nový pracovní soubor je také v Downloads.
-- Změny jsou přímo v kapitolách, bez bloků DOPLNĚNÍ. Jediné datum v záhlaví:
-  Nejnovější update dokumentu z 08112026. Zastaralé ID/statistiky záloh,
-  chronologie testů, staré buildy a vzájemně přebíjející instrukce odstraněné.
-- Záloha se vybírá podle dokončených manifestů a správné vazby na Camino,
-  nikoli podle pevného starého ID. Epochu popisuje skutečný identical_recovery_v1.
+- Týdenní generátor nyní vyžaduje jediný průběžně aktualizovaný návod.
+  Změny patří přímo do kapitol, nikoli do připojovaných doplnění.
+- Datum Nejnovější update dokumentu z ddmmyyyy vkládá program; model je
+  neurčuje. Původní bloky se zachovají přesně, doloženě přepíší nebo se
+  doloženě odstraní pouze zastaralá historická poznámka. Audit je mimo návod.
+- Neúplné pokrytí, ztracená ochrana nebo potřebný příkaz, stará snapshot ID,
+  zálohovací statistiky a vrstvy dodatků návrh zastaví. Neplatný výsledek
+  zůstane attention bez automatického opakování.
 
 ### Rozhodnutí
-- Jeden aktuální čtenářský návod: další revize přepisují příslušný obsah,
-  nevrství dodatky. Historie změn, důkazy a staré verze patří mimo čtenářský text.
-- Datum aktualizace není datum zálohy ani důkaz aktuálního nasazení. Neznámé
-  nastavení označit konkrétně OVĚŘIT, ne hádat.
-- Původní soubory, raw, účtenky a redakční podklad zachované. Bez modelového
-  tahu, služby, role, push/deploy nebo zápisu do provozních cílů PythonMF/iCloud.
-- Starý75% retenční gate ani uzavřený pilot se nepřepisuje. Pro nový sjednocený
-  text se jeho průchod netvrdí; doloženy jsou obsahové oblasti a níže uvedené kontroly.
+- Mílův pokyn je výchozí kontrakt integrovaného týdenního generátoru,
+  nikoli pouze doporučení v dokumentaci. Úplné čtení bez obsahové změny
+  může ponechat bloky a aktualizovat datum revize; nejde o nový živý audit.
+- Zmrazené jednorázové piloty mají explicitní legacy formát. Žádná automatická
+  detekce či fallback na starý formát v týdenní větvi, žádné otevření starého jobu.
+- Obsahová přejímka zůstává nutná. Tento krok neaktivuje službu ani roli,
+  nepublikuje TXT do PythonMF/iCloud a nevolá model.
 
 ### Další krok
-- Míla čte soubor OBNOVA_SAMANTHY_NOVY_MAC_AKTUALIZOVANY_08112026.txt
-  v Downloads jako jedinou aktuální pracovní verzi k obsahové přejímce.
+- Will převezme lokální změnu formátu do navazující integrace týdenního běhu;
+  propojení s produkčním adapterem a writerem musí zachovat tento kontrakt.
 
 ### Navrhované další kroky
-- Převzít obsah sjednocených kapitol, zejména výběr záloh a identickou obnovu Camina.
-- Budoucí automatický renderer/kontrakt upravit na tento formát s dohledatelnými zdroji.
-- Dvě provozní kopie a upload až po odpovídajícím přijetí a oprávnění.
-- Aktivace týdenního běhu zůstává samostatnou integrační přejímkou.
+- Převzít již dodaný sjednocený čtenářský návrh z Downloads.
+- Při integraci předat poslední přijatý návod, důkazy a trusted datum, nikoli
+  znovu původní historickou verzi; writer přijme přesné ověřené bajty.
+- Dvě provozní kopie a upload ověřit samostatně.
+- Týdenní aktivace, role a rozpočet zůstávají samostatnou přejímkou.
 
 ### Technický důkaz
-- recovery_guide_consolidated_20261108.md a .json; plný text a mapování47
-  podkladových částí jsou soukromé, mimo Git.
-- 17 kapitol v pořadí,31 odkazovaných projektových cest existuje, bez starých
-  snapshotID a vrstev doplnění. Zachovány klíčové datové a bezpečnostní oblasti.
-- Python kontrola zálohy beze změny logiky; opraveno jen prezentační odsazení
-  heredocu, AST i zsh -n PASS. Příkazy obnovy nebyly spouštěné.
-- Downloads kopie má shodný SHA;24 finančních artefaktů pilotu i předchozí
-  93361B redakční podklad beze změny. Závěrečná statická brána a git diff --check OK.
+- 30 nových kontraktních testů; cílená kompatibilní sada 153 PASS.
+- Plná projektová brána 2 824 testů OK, 5 skipped; závěrečná statická brána a git diff --check OK.
+- Skutečný návod 75 415 B: dvě offline revize 15./22.11., 17 kapitol a všech 340
+  bloků zachovaných, jediné nové datum, nezávislá JSON Schema validace PASS.
+  Jde o simulaci formátu, nikoli dva skutečné týdny/modelové čtení dokumentace.
+- Původních 24 finančních artefaktů SHA shodných, placený job nadále attention.
+  Podrobnosti recovery_guide_weekly_consolidation_20261108.md a .json.
 <!-- SAMANTHA_CURRENT_STATUS_END -->
 
 ### Předchozí stav infrastruktury
@@ -1337,3 +1337,44 @@ souborů / 5 002 170 B. Stávající rutinní pilot není obecný writer/schedul
   heredocu, AST i zsh -n PASS. Příkazy obnovy nebyly spouštěné.
 - Downloads kopie má shodný SHA;24 finančních artefaktů pilotu i předchozí
   93361B redakční podklad beze změny. Závěrečná statická brána a git diff --check OK.
+
+## 2026-11-08 15:11 CET — REC: sjednocená forma v každé týdenní revizi
+
+### Hotovo
+- Týdenní generátor nyní vyžaduje jediný průběžně aktualizovaný návod.
+  Změny patří přímo do kapitol, nikoli do připojovaných doplnění.
+- Datum Nejnovější update dokumentu z ddmmyyyy vkládá program; model je
+  neurčuje. Původní bloky se zachovají přesně, doloženě přepíší nebo se
+  doloženě odstraní pouze zastaralá historická poznámka. Audit je mimo návod.
+- Neúplné pokrytí, ztracená ochrana nebo potřebný příkaz, stará snapshot ID,
+  zálohovací statistiky a vrstvy dodatků návrh zastaví. Neplatný výsledek
+  zůstane attention bez automatického opakování.
+
+### Rozhodnutí
+- Mílův pokyn je výchozí kontrakt integrovaného týdenního generátoru,
+  nikoli pouze doporučení v dokumentaci. Úplné čtení bez obsahové změny
+  může ponechat bloky a aktualizovat datum revize; nejde o nový živý audit.
+- Zmrazené jednorázové piloty mají explicitní legacy formát. Žádná automatická
+  detekce či fallback na starý formát v týdenní větvi, žádné otevření starého jobu.
+- Obsahová přejímka zůstává nutná. Tento krok neaktivuje službu ani roli,
+  nepublikuje TXT do PythonMF/iCloud a nevolá model.
+
+### Další krok
+- Will převezme lokální změnu formátu do navazující integrace týdenního běhu;
+  propojení s produkčním adapterem a writerem musí zachovat tento kontrakt.
+
+### Navrhované další kroky
+- Převzít již dodaný sjednocený čtenářský návrh z Downloads.
+- Při integraci předat poslední přijatý návod, důkazy a trusted datum, nikoli
+  znovu původní historickou verzi; writer přijme přesné ověřené bajty.
+- Dvě provozní kopie a upload ověřit samostatně.
+- Týdenní aktivace, role a rozpočet zůstávají samostatnou přejímkou.
+
+### Technický důkaz
+- 30 nových kontraktních testů; cílená kompatibilní sada 153 PASS.
+- Plná projektová brána 2 824 testů OK, 5 skipped; závěrečná statická brána a git diff --check OK.
+- Skutečný návod 75 415 B: dvě offline revize 15./22.11., 17 kapitol a všech 340
+  bloků zachovaných, jediné nové datum, nezávislá JSON Schema validace PASS.
+  Jde o simulaci formátu, nikoli dva skutečné týdny/modelové čtení dokumentace.
+- Původních 24 finančních artefaktů SHA shodných, placený job nadále attention.
+  Podrobnosti recovery_guide_weekly_consolidation_20261108.md a .json.

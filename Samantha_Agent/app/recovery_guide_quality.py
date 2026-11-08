@@ -149,8 +149,9 @@ def _technical(text: str, quotes: str, context: ReviewContext | None) -> None:
         _fail(command not in quotes, "uncited_command")
 
 
-def validate(answer: dict, snapshot: Snapshot, *, context: ReviewContext | None = None) -> str:
-    """Mandatory core gate used by the pilot, including unchanged sections.
+def validate_content(answer: dict, snapshot: Snapshot, *, context: ReviewContext | None = None,
+                     integrated: bool = False) -> str:
+    """Shared citation, privacy, provenance and command gate, without layout policy.
 
     Technical literals must be in the cited quote, not merely somewhere in a
     large document. Full semantic correctness still needs independent review.
@@ -184,7 +185,22 @@ def validate(answer: dict, snapshot: Snapshot, *, context: ReviewContext | None 
                     proven |= fact.authority in {"manual_verified", "deployed"} and text in e["quote"]
                 _fail(not proven, "unproven_live_claim")
     candidate = "\n\n".join(("[Neověřeno]\n" if r["status"] == "unverified" else "") + r["text"] for r in rows) + "\n"
-    _fail(bool(RETIRED.search(candidate)) or bool(re.search(r"(?:spusť|zapni|nasaď|povol).{0,40}placen[ýého\s]+hlasov", candidate, re.I)), "retired_voice_reference")
+    # The integrated contract distinguishes explicit positive actions from a
+    # prohibition such as "nepovoluje". Literal retired IDs remain forbidden.
+    action = (r"\b(?:spusť(?:te)?|spustit|zapni(?:te)?|zapnout|nasaď(?:te)?|nasadit|povol(?:it|te|uj(?:te)?)?)\b.{0,40}placen[ýého\s]+hlasov"
+              if integrated else r"(?:spusť|zapni|nasaď|povol).{0,40}placen[ýého\s]+hlasov")
+    _fail(bool(RETIRED.search(candidate)) or bool(re.search(action, candidate, re.I)), "retired_voice_reference")
+    return candidate
+
+
+def validate(answer: dict, snapshot: Snapshot, *, context: ReviewContext | None = None) -> str:
+    """Mandatory core gate used by the pilot, including unchanged sections.
+
+    Technical literals must be in the cited quote, not merely somewhere in a
+    large document. Full semantic correctness still needs independent review.
+    """
+    candidate = validate_content(answer, snapshot, context=context)
+    rows = answer["paragraphs"]
     original_heads, new_heads = _headings(snapshot.original.text), _headings(candidate)
     _fail(not original_heads, "missing_original_structure")
     _fail(len({m[1] for m in new_heads}) != len(new_heads), "duplicate_chapter")

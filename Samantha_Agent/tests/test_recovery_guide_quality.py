@@ -295,11 +295,11 @@ class Pipeline(unittest.TestCase):
         original=self.call
         def call(payload,kind):
             response=original(payload,kind)
-            if kind=="synthesize":response["answer"]["paragraphs"][0]["text"] += "\nmade up"
+            if kind=="synthesize":response["answer"]["sections"]["c01"][0]["block"]=9999
             return response
         result=self.run_pilot(call=call)
         self.assertEqual(result["state"],"attention")
-        self.assertEqual(result["quality_issue"],"false_unchanged")
+        self.assertEqual(result["quality_issue"],"consolidation_unknown_block")
         self.assertFalse((self.state/"2026-W45-candidate.txt").exists())
         self.run_pilot(call=call)
         self.assertEqual(len(self.calls),2)

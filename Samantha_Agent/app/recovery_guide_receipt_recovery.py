@@ -172,7 +172,7 @@ def resume(*, approved_digest: str, client_factory=None):
                     limits=m.Limits(**repair['packet']['measurements']['limits']),
                     count_tokens=f.Counter(repair['packet']['measurements']), call=call,
                     approved_snapshot=f.hydrate(repair['packet']['snapshot']).sha256,
-                    assert_sources=lambda: _current(repair), confirmed=True)
+                    assert_sources=lambda: _current(repair), confirmed=True, legacy_format=True)
         except Exception as exc:
             marker.update(state='attention', error_type=type(exc).__name__)
             result = marker

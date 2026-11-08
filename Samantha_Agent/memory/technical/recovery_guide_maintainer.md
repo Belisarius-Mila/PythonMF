@@ -16,11 +16,27 @@ Tento dokument popisuje vývojový základ, nikoli zapnutého týdenního agenta
   fakt označit OVĚŘIT s konkrétním způsobem zjištění. Datum redakce není záloha.
 - Výběr snapshotů musí vycházet z dokončených manifestů a jejich skutečné vazby,
   ne z pevného data v textu. Implementovaný režim Camina ověřit proti kódu releasu.
-- Starý retenční požadavek kopírovat historický text není cílovou formou nové
-  revize. Tento krok nemění produkční validator ani uzavřené piloty. Budoucí
-  automatické přijímání musí doložit pokrytí potřebných obnovovacích kroků,
-  zdroje změn a odstraněné neplatné instrukce; nelze prostě prohlásit starý
-  gate za úspěšný nebo vypnout kontroly citací/soukromí.
+- Výchozí `maintainer.run` i `plan` nyní používají `integrated_guide_v1`.
+  `AppServerReviewer` dostává stejný kontrakt a uzavřené dynamické schéma.
+  Server zpracuje keep/rewrite/insert/retire přímo v pevných kapitolách.
+- Každý původní blok musí mít právě jednu dispozici. Potřebné příkazy,
+  chráněné procedury a bezpečnostní pokyny nelze prostě vyřadit. Vyřazení
+  historické poznámky i nový text vyžadují neprázdné přesné zdrojové citace.
+- Jediné datum určuje server v Europe/Prague podle data revize. Při úplném
+  čtení bez obsahových změn lze vrátit keep; datum není důkaz nového živého stavu.
+- Nový renderer odmítá chybějící/duplicitní bloky, změněné pořadí či kapitoly,
+  vrstvy dodatků, pevná snapshot ID a staré zálohovací statistiky. Sdílí
+  obsahové kontroly citací, soukromí, příkazů a autority zdrojů.
+- Přesný audit dispozic a citací je soukromé `*-consolidation-audit.json`,
+  mimo čtenářský TXT. Návrh zůstává review/semantic_acceptance required;
+  automatické ověření nenahrazuje věcnou přejímku důležitých obnovovacích kroků.
+- Starý 75% retenční gate zůstává pro staré formáty. Jednorázové full_pilot
+  a receipt_recovery předávají explicitně legacy_format=True; numerický
+  exact pilot a jeho raw/uzavřené stavy se nemění. Žádný automatický fallback.
+- Sjednocený kontrakt není aktivovaný produkční plánovač. Stávající sandbox
+  scheduler/CLI ani produkční adapter s writerem tímto nejsou propojené či
+  spuštěné; při jejich integraci je nutné použít tento formát, trusted datum
+  a poslední přijatý návod. Stará placená karta se nesmí znovu použít.
 
 ## Co je připravené
 
@@ -28,6 +44,8 @@ Tento dokument popisuje vývojový základ, nikoli zapnutého týdenního agenta
   vybrané dokumenty; zmrazený Git HEAD, SHA-256, explicitní rozsah a počty
   vynechaných textů. Žádné zkracování souborů. Pracovní změna dokumentu
   inventuru zastaví. Nové necommitované soubory nejsou součástí manifestu.
+- `app/recovery_guide_consolidation.py`: čisté prepare/schema/validate,
+  jediný čtenářský text a samostatný audit bez transportu či zápisu.
 - `app/recovery_guide_maintainer.py`: dávky celých souborů a syntéza,
   vkládaný tokenizer a transport, kontrola citací, kapitol a rozsahu,
   rezervace rozpočtu bez slibované cache, měsíční součet rezervací,
@@ -579,3 +597,44 @@ statistik a starých soupeřících postupů; všechny potřebné oblasti zůsta
 31 cest existuje, vložený ověřovací Python má shodnou logiku a platné AST,
 heredoc správnou syntaxi. Bez placení, služeb, rolí, provozních kopií a p+n.
 Podrobnosti reports/recovery_guide_consolidated_20261108.md a .json.
+
+## 2026-11-08 15:11 CET — REC: sjednocená forma v každé týdenní revizi
+
+### Hotovo
+- Týdenní generátor nyní vyžaduje jediný průběžně aktualizovaný návod.
+  Změny patří přímo do kapitol, nikoli do připojovaných doplnění.
+- Datum Nejnovější update dokumentu z ddmmyyyy vkládá program; model je
+  neurčuje. Původní bloky se zachovají přesně, doloženě přepíší nebo se
+  doloženě odstraní pouze zastaralá historická poznámka. Audit je mimo návod.
+- Neúplné pokrytí, ztracená ochrana nebo potřebný příkaz, stará snapshot ID,
+  zálohovací statistiky a vrstvy dodatků návrh zastaví. Neplatný výsledek
+  zůstane attention bez automatického opakování.
+
+### Rozhodnutí
+- Mílův pokyn je výchozí kontrakt integrovaného týdenního generátoru,
+  nikoli pouze doporučení v dokumentaci. Úplné čtení bez obsahové změny
+  může ponechat bloky a aktualizovat datum revize; nejde o nový živý audit.
+- Zmrazené jednorázové piloty mají explicitní legacy formát. Žádná automatická
+  detekce či fallback na starý formát v týdenní větvi, žádné otevření starého jobu.
+- Obsahová přejímka zůstává nutná. Tento krok neaktivuje službu ani roli,
+  nepublikuje TXT do PythonMF/iCloud a nevolá model.
+
+### Další krok
+- Will převezme lokální změnu formátu do navazující integrace týdenního běhu;
+  propojení s produkčním adapterem a writerem musí zachovat tento kontrakt.
+
+### Navrhované další kroky
+- Převzít již dodaný sjednocený čtenářský návrh z Downloads.
+- Při integraci předat poslední přijatý návod, důkazy a trusted datum, nikoli
+  znovu původní historickou verzi; writer přijme přesné ověřené bajty.
+- Dvě provozní kopie a upload ověřit samostatně.
+- Týdenní aktivace, role a rozpočet zůstávají samostatnou přejímkou.
+
+### Technický důkaz
+- 30 nových kontraktních testů; cílená kompatibilní sada 153 PASS.
+- Plná projektová brána 2 824 testů OK, 5 skipped; závěrečná statická brána a git diff --check OK.
+- Skutečný návod 75 415 B: dvě offline revize 15./22.11., 17 kapitol a všech 340
+  bloků zachovaných, jediné nové datum, nezávislá JSON Schema validace PASS.
+  Jde o simulaci formátu, nikoli dva skutečné týdny/modelové čtení dokumentace.
+- Původních 24 finančních artefaktů SHA shodných, placený job nadále attention.
+  Podrobnosti recovery_guide_weekly_consolidation_20261108.md a .json.

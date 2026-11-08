@@ -49,7 +49,7 @@ class Preflight(unittest.TestCase):
 
     def test_reference_count_is_blocked_not_a_live_approval(self):
         module = Tokenizers()
-        result = f.reference_preflight(snapshot(), limits=m.Limits(10_000,1000,8,50,100,60), module=module)
+        result = f.reference_preflight(snapshot(), limits=m.Limits(30_000,1000,8,50,100,60), module=module)
         self.assertEqual(result["state"], "blocked_for_live_pilot")
         self.assertFalse(result["reference_is_model_mapping"])
         self.assertEqual(result["coverage_planned"]["ratio"], 1)
@@ -60,12 +60,12 @@ class Preflight(unittest.TestCase):
         self.assertNotIn("1. OBNOVA MACU", json.dumps(result))
 
     def test_reference_diagnostic_still_does_not_activate_with_known_text_map(self):
-        result = f.reference_preflight(snapshot(), limits=m.Limits(10_000,1000,8,50,100,60), module=Tokenizers(True))
+        result = f.reference_preflight(snapshot(), limits=m.Limits(30_000,1000,8,50,100,60), module=Tokenizers(True))
         self.assertEqual(result["state"], "blocked_for_live_pilot")
         self.assertFalse(result["reference_is_model_mapping"])
 
     def test_separate_inspection_and_synthesis_reservations(self):
-        limits = m.Limits(10_000,1000,8,50,100,60)
+        limits = m.Limits(30_000,1000,8,50,100,60)
         original = m.plan(snapshot(), len, limits)
         split = m.plan(snapshot(), len, replace(limits,inspection_output_tokens=100))
         self.assertEqual(split["output_bound"], 1100)
