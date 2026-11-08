@@ -1,0 +1,47 @@
+{
+  "state": "offline_anchor_regression_passed",
+  "catalogue_sha256": "ceb6dbe4f2b893d5931f9b91363858c7f83ec57f8784f74a60f90b5afac238dc",
+  "snapshot_sha256": "90e85eb7e83abdb9bf4a57940081756cc1edbcc35de1ee57e4b4aff5f27ab8ad",
+  "document_count": 530,
+  "anchor_count": 81612,
+  "source_text_bytes": 6290890,
+  "model_calls": 0,
+  "semantic_correctness_proven": false,
+  "saved_receipts_checked": 2,
+  "fixture_documents": 101,
+  "case_regression_fixtures": 2,
+  "checks": [
+    {
+      "batch": 1,
+      "sources": 36,
+      "case_regression_fixtures": 0,
+      "original_excluded_from_coverage_fixture": 1,
+      "old_payload_bytes": 598940,
+      "anchored_payload_bytes": 678005,
+      "response_schema_bytes": 3283,
+      "all_resolved_quotes_exact": true,
+      "fixture_not_a_model_response": true
+    },
+    {
+      "batch": 2,
+      "sources": 65,
+      "case_regression_fixtures": 2,
+      "original_excluded_from_coverage_fixture": 0,
+      "old_payload_bytes": 584211,
+      "anchored_payload_bytes": 687691,
+      "response_schema_bytes": 5284,
+      "all_resolved_quotes_exact": true,
+      "fixture_not_a_model_response": true
+    }
+  ],
+  "full_inspection_requests_built": 14,
+  "full_manifest_documents": 530,
+  "all_inspection_payload_bytes": 8742382,
+  "all_inspection_schema_bytes": 47756,
+  "old_paid_job_unchanged": true,
+  "old_notes_reaccepted": false,
+  "partial_history_synthesis_refused": true,
+  "live_anchor_model_tested": false,
+  "publication_authorized": false,
+  "new_trial_pricing_required": true
+}

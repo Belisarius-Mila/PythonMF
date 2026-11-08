@@ -1,0 +1,3368 @@
+{
+  "request_id": "rec06-full-corpus-01",
+  "prepared_at": "2026-11-07T18:56:57.691339+00:00",
+  "project_only": false,
+  "protocol": {
+    "version": "0.163.0",
+    "disabled_features_sha256": "63da59bfe232870cebf507a084c33a20c6a3c82c85dd83a29a070ce2af12f78b",
+    "turn_schema_sha256": "835e0d4ca1a0ddc4fb6db1e2b3249dd67f07c50ac2506092ba81543efc92829b",
+    "thread_schema_sha256": "7247cd531d3f78174444f8262fd3090d5acf8ab74084547b4e0a831d74e77c9a"
+  },
+  "calibration": {
+    "sha256": "31397f40200d52f8a69d58da72181e3f79164c044b650d7c972c8db106a6d44f",
+    "credits": 0.3094,
+    "input_tokens": 5248,
+    "output_tokens": 188
+  },
+  "model": "gpt-6.1-sol",
+  "effort": "medium",
+  "serviceTierForTurn": "default",
+  "candidate_only": true,
+  "publication": false,
+  "automatic_retry": false,
+  "weekly_activation": false,
+  "central_role_activation": false,
+  "phone_settings_manually_verified": false,
+  "application_scope_approved": false,
+  "supersedes_approval_digest": "9a532089fab4299bbebfa9f7c2bf8a84b95253d5bf8456672ec1fdcb38ba0133",
+  "approval_digest": "09a6ed5becbe07e8d2a5703e29639b5f30aff9c3a40db4af7f2220bf999f4e0b",
+  "state": "awaiting_exact_scope_and_cost_approval",
+  "snapshot": {
+    "head": "4a33af2a1e570a3cb781f2253df440d82b25defb",
+    "snapshot_sha256": "90e85eb7e83abdb9bf4a57940081756cc1edbcc35de1ee57e4b4aff5f27ab8ad",
+    "original_sha256": "a3659d9cf61ccd9d1c04737060f215ec4b6547da1eb877aa92b793f97e936935",
+    "source_count": 530,
+    "input_bytes": 6290890,
+    "sources": [
+      {
+        "path": "AGENTS.md",
+        "sha256": "da5cfee3fccb6d05d0611bf934b1759c7f679dc950cc0f0853996e3813fae2e8",
+        "authority": "documented_not_live"
+      },
+      {
+        "path": "MatysekANJ/web_mmtx/scene02_sunnys_lost_nuts/README.md",
+        "sha256": "6d56d6def12a258bea19818098a1ac8ceadc458684982df7d7dce6b38fd01084",
+        "authority": "documented_not_live"
+      },
+      {
+        "path": "MatysekANJ/web_mmtx/scene02_sunnys_lost_nuts/audio/README.md",
+        "sha256": "988298affd8171e0905edb2e7a48005fddca2fd6952f63f6710c33885a22a26e",
+        "authority": "documented_not_live"
+      },
+      {
+        "path": "MatysekANJ/web_mmtx/scene03_journey_to_the_lake/README.md",
+        "sha256": "a2c139d631a9960cf628bb2f5db1b46d7561738d1594ace0836f60c28882b200",
+        "authority": "documented_not_live"
+      },
+      {
+        "path": "MatysekANJ/web_mmtx/scene_jane_birthday/README.md",
+        "sha256": "90ac0f06d51369d29f2ccf7310619c63faafab10b25d830aaea176afbc8cb11e",
+        "authority": "documented_not_live"
+      },
+      {
+        "path": "MatysekANJ/web_mmtx/scene_kate_birthday/README.md",
+        "sha256": "be63e7635e78eb42b2c1af5a3ae4e2c758818dc05b9b8ef1c372f67f3487210f",
+        "authority": "documented_not_live"
+      },
+      {
+        "path": "PythonSeSamanthou/README.md",
+        "sha256": "ab6c6e87f374a2652c3bb67bbdcbe4694c763636d81e26d761b51a3be7453564",
+        "authority": "documented_not_live"
+      },
+      {
+        "path": "PythonSeSamanthou/kurzy/python_dalsi_kroky/README.md",
+        "sha256": "c250b04a73476fa8482f85297ef0a72c66b1b948c306577174a9b96263400ed8",
+        "authority": "documented_not_live"
+      },
+      {
+        "path": "PythonSeSamanthou/kurzy/python_prakticke_ulohy/README.md",
+        "sha256": "0854c386dc88862a03a1bbdc8ba01977894f4a8e6d8fa021c9c9efae2d4472d1",
+        "authority": "documented_not_live"
+      },
+      {
+        "path": "Samantha_Agent/AGENTS.md",
+        "sha256": "81e93b3b9daf4077ab0444cd628d194e7acee6cfe7076a9445f5623e2de88ff0",
+        "authority": "documented_not_live"
+      },
+      {
+        "path": "Samantha_Agent/README.md",
+        "sha256": "7b38cfa5523f5224bedebe855fcb8436bcaaf768e4e14abc06fb40445eb7a7ea",
+        "authority": "documented_not_live"
+      },
+      {
+        "path": "Samantha_Agent/camino/AGENTS.md",
+        "sha256": "ab8d65959b7d98ce4288624ff8f77c34f891b1f6e41ea74a1d10bed633af93fb",
+        "authority": "documented_not_live"
+      },
+      {
+        "path": "Samantha_Agent/camino/CAMINO_podklady_v0.4/AGENTS.md",
+        "sha256": "e8ac76fc0beaafc87fe578a0fa6d9f541f8321f1456f4ffb84d9b6dd1b2d194c",
+        "authority": "documented_not_live"
+      },
+      {
+        "path": "Samantha_Agent/camino/CAMINO_podklady_v0.4/CAMINO_Codex_v0.4.md",
+        "sha256": "322b07ad8ddafb31ae9e8d938ffce435909a78dc1122f9d0c6b74ad0dad901e5",
+        "authority": "documented_not_live"
+      },
+      {
+        "path": "Samantha_Agent/camino/CAMINO_podklady_v0.4/CAMINO_akceptacni_testy_v0.4.md",
+        "sha256": "a0d1d81074def7ee0b9651d0f3082bb7b1dd93b8bce795f2c16eb8340e7766c7",
+        "authority": "documented_not_live"
+      },
+      {
+        "path": "Samantha_Agent/camino/CAMINO_podklady_v0.4/CAMINO_funkcni_specifikace_v0.4.md",
+        "sha256": "72135b32361c679dfde27b6638bd59b02809958abcc9cd65528a466636bcc196",
+        "authority": "documented_not_live"
+      },
+      {
+        "path": "Samantha_Agent/camino/CAMINO_podklady_v0.4/CAMINO_zmeny_v0.4.md",
+        "sha256": "04713f9b1f30b6d0aaef7f558521e131f41de602cbb1faa071fd000f0e5e58a1",
+        "authority": "documented_not_live"
+      },
+      {
+        "path": "Samantha_Agent/camino/CAMINO_podklady_v0.4/README_v0.4.md",
+        "sha256": "bc9a6cca55a55a9d5bef1e62ecf2345b814f98988bf553614e88b17957a5991f",
+        "authority": "documented_not_live"
+      },
+      {
+        "path": "Samantha_Agent/camino/CAMINO_podklady_v0.4/historie/CAMINO_pracovni_navrh_v0.2-DRAFT.md",
+        "sha256": "b6b3bfc93894684700a328588059c962ae20667411d50b648d06632485721911",
+        "authority": "documented_not_live"
+      },
+      {
+        "path": "Samantha_Agent/camino/CAMINO_podklady_v0.4/historie/v0.3/CAMINO_navrh_v0.3.md",
+        "sha256": "cb85de592c86ba65a0c2f4f6ee9caa6535905b12df7699ff3b8fc1c521d87867",
+        "authority": "documented_not_live"
+      },
+      {
+        "path": "Samantha_Agent/camino/CAMINO_podklady_v0.4/historie/v0.3/CAMINO_plan_Codex_v0.3.md",
+        "sha256": "a3ccc9f54eec3835a8e5d200bee3171ebcdbb64055e8a9e41a81b6db6eb7bcfe",
+        "authority": "documented_not_live"
+      },
+      {
+        "path": "Samantha_Agent/camino/CAMINO_podklady_v0.5/AGENTS.md",
+        "sha256": "6700644d0a3c4a4ac158d6207952330b33340f67194dd6a4ac4da73f1dc926f9",
+        "authority": "documented_not_live"
+      },
+      {
+        "path": "Samantha_Agent/camino/CAMINO_podklady_v0.5/CAMINO_Codex_v0.5.md",
+        "sha256": "843bc3ff098cf11dc7621e88839520a74fd03f79c43d254fba949fa0300be8b0",
+        "authority": "documented_not_live"
+      },
+      {
+        "path": "Samantha_Agent/camino/CAMINO_podklady_v0.5/CAMINO_akceptacni_testy_v0.5.md",
+        "sha256": "00416e06e6c718f1924b94f5f1393742f1bc9244a8043b054df984a51937335d",
+        "authority": "documented_not_live"
+      },
+      {
+        "path": "Samantha_Agent/camino/CAMINO_podklady_v0.5/CAMINO_funkcni_specifikace_v0.5.md",
+        "sha256": "2d11c996868603e90ff87d613491306794adf64a915be9642feb0faffde8bf8a",
+        "authority": "documented_not_live"
+      },
+      {
+        "path": "Samantha_Agent/camino/CAMINO_podklady_v0.5/CAMINO_zmeny_v0.5.md",
+        "sha256": "07e2c4399ed851ed5aa45313e1b15c5029a8d20dad656ab668c08623cc98b44b",
+        "authority": "documented_not_live"
+      },
+      {
+        "path": "Samantha_Agent/camino/CAMINO_podklady_v0.5/README_v0.5.md",
+        "sha256": "09a8556b86703467c2640a76d28004bc5ce902d9b161466f3f17465210ff7645",
+        "authority": "documented_not_live"
+      },
+      {
+        "path": "Samantha_Agent/camino/README.md",
+        "sha256": "bb65e831ffc0766877601ad7bbf171d7aca3537365dfd053d2f99b882b410823",
+        "authority": "documented_not_live"
+      },
+      {
+        "path": "Samantha_Agent/camino/app/C04b_IPHONE_TEST_PLAN.md",
+        "sha256": "f8c2bca2c8b2ee11db6759e2815dacac19cec1baf447dba50b6a7eacd2cb9c28",
+        "authority": "documented_not_live"
+      },
+      {
+        "path": "Samantha_Agent/camino/app/C04d_IPHONE_TEST_PLAN.md",
+        "sha256": "5c8aa38d50511eb3ca02a98cca144a2cff045deaa2ca614db26371581138d70f",
+        "authority": "documented_not_live"
+      },
+      {
+        "path": "Samantha_Agent/camino/app/C05b_IPHONE_TEST_PLAN.md",
+        "sha256": "fcf266bee0e0215e7b5bec00141bd81acce09554a6163703c06954f9933b5f89",
+        "authority": "documented_not_live"
+      },
+      {
+        "path": "Samantha_Agent/camino/app/C05c_IPHONE_TEST_PLAN.md",
+        "sha256": "94d7a7e0fd5269a993249cb9346d1878b622fb5f18eae5124b318aa8c5c1e52c",
+        "authority": "documented_not_live"
+      },
+      {
+        "path": "Samantha_Agent/camino/app/README.md",
+        "sha256": "222b4e2006f12de69c3d1029f7a0ef154905c7f1c5e71d9ba8a7dfdf796256cf",
+        "authority": "documented_not_live"
+      },
+      {
+        "path": "Samantha_Agent/camino/docs/AUDIO_LAYOUT_REJECTION_INCIDENT_20261015.md",
+        "sha256": "109757690acaeec8e567398bbb4cebbf648c7f0784f2dd43404c0e98e77d9ed8",
+        "authority": "documented_not_live"
+      },
+      {
+        "path": "Samantha_Agent/camino/docs/C01a_AUDIO_PROTOTYPE_REPORT.md",
+        "sha256": "e03ec3bd744b030bc842163a53954a67b984ee8dad40f369bfeed2f469288b8e",
+        "authority": "documented_not_live"
+      },
+      {
+        "path": "Samantha_Agent/camino/docs/C01b_BACKGROUND_AUDIO_REPORT.md",
+        "sha256": "5a6c9b4875727266be89078f60320a83be51c9a977141c53dc181b02408a6748",
+        "authority": "documented_not_live"
+      },
+      {
+        "path": "Samantha_Agent/camino/docs/C01c_RECOVERABLE_AUDIO_REPORT.md",
+        "sha256": "872986f9ebe05a6dc05351ba95eb0fd3947d405b1c40ea87bde15f707df79583",
+        "authority": "documented_not_live"
+      },
+      {
+        "path": "Samantha_Agent/camino/docs/C02a_SYNTHETIC_RECEIVER_REPORT.md",
+        "sha256": "6df60ece9eb241e927c498a66dabc1f2ee3a7fc3a3ba980eef7160a226614324",
+        "authority": "documented_not_live"
+      },
+      {
+        "path": "Samantha_Agent/camino/docs/C02b_CHUNK_TRANSFER_REPORT.md",
+        "sha256": "bbd3cf837d91af404703e04ec0df73671c0313bc6211805e381b7b39abddfc03",
+        "authority": "documented_not_live"
+      },
+      {
+        "path": "Samantha_Agent/camino/docs/C03a_DOMAIN_CONTRACT.md",
+        "sha256": "de8d350dcd6d55009b2b7735ebab559781b99527444776bd6a5ff40b37a20124",
+        "authority": "documented_not_live"
+      },
+      {
+        "path": "Samantha_Agent/camino/docs/C03b_API_CONTRACT.md",
+        "sha256": "bc6da470dcb20f9c6d15042c8c1b828cc7df1c2d92970ca925529502b72015dd",
+        "authority": "documented_not_live"
+      },
+      {
+        "path": "Samantha_Agent/camino/docs/C05a_PRODUCTION_RECEIVER_REPORT.md",
+        "sha256": "6f4bf7ca93163f0439821738d806920a8773239fa764277162a58d8e16b8c137",
+        "authority": "documented_not_live"
+      },
+      {
+        "path": "Samantha_Agent/camino/docs/C05b_IOS_SYNC_REPORT.md",
+        "sha256": "2da3d8d13badbb83e8e251aa3e9ce1173753dc4c10a1a4eacb53d0d5e9c419e8",
+        "authority": "documented_not_live"
+      },
+      {
+        "path": "Samantha_Agent/camino/docs/C05c_STATUS_UX_REPORT.md",
+        "sha256": "fc51da702e90f4b4461441782b1dea3ac5fc36bd54d513a5098da45360d4a8e4",
+        "authority": "documented_not_live"
+      },
+      {
+        "path": "Samantha_Agent/camino/docs/CAMERA_ZOOM_REPORT.md",
+        "sha256": "c08fd32f93a427aae109519d0a2c4747eaa31a63906fb8281676cbcbec1f95ce",
+        "authority": "documented_not_live"
+      },
+      {
+        "path": "Samantha_Agent/camino/docs/CLIENT_21_SERVICE_UPGRADE_REPORT.md",
+        "sha256": "d596ba842b93b287fdb55d606cf95372c70c0f2ee39e8e5d3e9d20751a8cfe31",
+        "authority": "documented_not_live"
+      },
+      {
+        "path": "Samantha_Agent/camino/docs/COMMENTARY_WORKFLOW_REPORT.md",
+        "sha256": "87d425178ddb8ecac6b8f7ec0c5fc25818bccb6122350f347365e64f6aec600a",
+        "authority": "documented_not_live"
+      },
+      {
+        "path": "Samantha_Agent/camino/docs/DECISIONS.md",
+        "sha256": "3c632cd7c1363b2ed30acd3da19814dae373d785faf666dcaa774c3a8cd089c0",
+        "authority": "documented_not_live"
+      },
+      {
+        "path": "Samantha_Agent/camino/docs/ENVIRONMENT_AUDIT.md",
+        "sha256": "6ea1d699c189cb4a95484cb42219a16af3262c0979cb3eac566061ad7392c2f3",
+        "authority": "documented_not_live"
+      },
+      {
+        "path": "Samantha_Agent/camino/docs/FILM_TEXT_AUDIO_REPORT.md",
+        "sha256": "6c4dbf592fca73f4b13410700e95071e033b93b1e67b28c78d689537cbd6bf46",
+        "authority": "documented_not_live"
+      },
+      {
+        "path": "Samantha_Agent/camino/docs/GPS_CAPTURE_REPORT.md",
+        "sha256": "b54b7dd63ddfca2be85ae844f7c5520678d8de7de85302e223d7fc5c32eded0e",
+        "authority": "documented_not_live"
+      },
+      {
+        "path": "Samantha_Agent/camino/docs/LARGE_PHOTO_REPORT.md",
+        "sha256": "0a34089e0c47b7445a89de3d5b7d0cea4bf6f03589899b0d13c083850a2daceb",
+        "authority": "documented_not_live"
+      },
+      {
+        "path": "Samantha_Agent/camino/docs/M1_VIEWER_REPORT.md",
+        "sha256": "5350f0785a9b9acb56c850ab9869728b03cdecaa4a8f8dff28ba12ce3fa2b907",
+        "authority": "documented_not_live"
+      },
+      {
+        "path": "Samantha_Agent/camino/docs/M2_RECOVERY_REPORT.md",
+        "sha256": "a210e4b9a4d0cf6f4a839a504e8af70a75887f92d0b6f70e181e9fc6157b7d0b",
+        "authority": "documented_not_live"
+      },
+      {
+        "path": "Samantha_Agent/camino/docs/M2_RUNTIME_REPORT.md",
+        "sha256": "be124191d9991c79c907f580ca9265e904bf0003e3c00678daf5ab32c8c65a2d",
+        "authority": "documented_not_live"
+      },
+      {
+        "path": "Samantha_Agent/camino/docs/M2b_AUDIO_LAYOUT_REPORT.md",
+        "sha256": "a4de34126274921d3f939dafefcae6b1459577d0da09879f553de3fc8078e9cc",
+        "authority": "documented_not_live"
+      },
+      {
+        "path": "Samantha_Agent/camino/docs/M2c_SERVICE_REPORT.md",
+        "sha256": "35b791d9045b1059b68e4cffc800af65db0c0417eb994b63592650b45b98e5a8",
+        "authority": "documented_not_live"
+      },
+      {
+        "path": "Samantha_Agent/camino/docs/METADATA_REJECTION_INCIDENT_20261014.md",
+        "sha256": "94e6a04e43ba280a567ff61100e2e7dea5fa778387a7c4cb19eaa4f771bbab63",
+        "authority": "documented_not_live"
+      },
+      {
+        "path": "Samantha_Agent/camino/docs/MULTI_PROJECT_ACCESS_REPORT.md",
+        "sha256": "6c2168aea62fc2bf6a10dc4e89a144d29c2b40a35a4f049eff2cd7c119cfd17c",
+        "authority": "documented_not_live"
+      },
+      {
+        "path": "Samantha_Agent/camino/docs/MULTI_PROJECT_FOUNDATION.md",
+        "sha256": "f32f1c8882a31feb20911894274019981455d56a392471fecff9d92fb8b6ffa2",
+        "authority": "documented_not_live"
+      },
+      {
+        "path": "Samantha_Agent/camino/docs/P2A_FILM_REPORT.md",
+        "sha256": "2894133f454e240efe894c0b66f3967602263c49ec6accc6bf33fba234da0f8e",
+        "authority": "documented_not_live"
+      },
+      {
+        "path": "Samantha_Agent/camino/docs/P2B_CLOSED_DAY_REPORT.md",
+        "sha256": "26ee8c1841b9be323b236b6bf50bab0cb54a93cc912a6b7db30dfa9b00ab9639",
+        "authority": "documented_not_live"
+      },
+      {
+        "path": "Samantha_Agent/camino/docs/P2CD_EDITOR_MP4_REPORT.md",
+        "sha256": "0f911c9e8cdc62e4d2ad8a2d14ae3dd12236c94baf1a4e70afb2517275319d99",
+        "authority": "documented_not_live"
+      },
+      {
+        "path": "Samantha_Agent/camino/docs/PENDING_MEDIA_REVIEW_REPORT.md",
+        "sha256": "b02206f6bd059ac4c2ed6bf68589d27484da09cc18ff7834659fddb9e043667d",
+        "authority": "documented_not_live"
+      },
+      {
+        "path": "Samantha_Agent/camino/docs/PHOTO_LIBRARY_IMPORT.md",
+        "sha256": "2d20f17160d650f5c9d6e7237603a78fc1104e0cd4ea0c1a43e936ff101d3644",
+        "authority": "documented_not_live"
+      },
+      {
+        "path": "Samantha_Agent/camino/docs/PHOTO_TEXT_COMMENT_REPORT.md",
+        "sha256": "8d66fc5c70dd30086dc0cc841971ad2cf01c70cec4527b667b4f0f200e6cf5b3",
+        "authority": "documented_not_live"
+      },
+      {
+        "path": "Samantha_Agent/camino/docs/PROJECT_MANAGEMENT_UI_REPORT.md",
+        "sha256": "bcba4d4407126a8e47cc7dde9b78c2f1c812791dfd43a0249cd09f06692b65b7",
+        "authority": "documented_not_live"
+      },
+      {
+        "path": "Samantha_Agent/camino/docs/PROJECT_TRASH_CONTRACT.md",
+        "sha256": "4a97641f6d824b60e29abd1062ce74e1d4800e9f49be315483f5a1939216caf7",
+        "authority": "documented_not_live"
+      },
+      {
+        "path": "Samantha_Agent/camino/docs/PROJECT_TRASH_NAVIGATION_REPORT.md",
+        "sha256": "4bdc426c84bfc54d87783387ee55d2509f1a778a517ed1c1db2fd291a424805b",
+        "authority": "documented_not_live"
+      },
+      {
+        "path": "Samantha_Agent/camino/docs/PROJECT_TRASH_REPORT.md",
+        "sha256": "bd5636ec9aad4c7d8a2f1f7697a85e387e2b0e237d97e43644842aa8cc44b043",
+        "authority": "documented_not_live"
+      },
+      {
+        "path": "Samantha_Agent/camino/docs/TITLES_AND_TRANSFER_STATUS_REPORT.md",
+        "sha256": "151da2dbc0cb3fa362ef4d15e3ea43bab4bb5ca88d509b987e9c9ad09a725086",
+        "authority": "documented_not_live"
+      },
+      {
+        "path": "Samantha_Agent/camino/docs/TRAVEL_MVP_PLAN.md",
+        "sha256": "b8704746806d4e5433e046b82613e793928c1fc35ae4f87241e068305bb5b0d0",
+        "authority": "documented_not_live"
+      },
+      {
+        "path": "Samantha_Agent/camino/docs/TRIP_TITLES.md",
+        "sha256": "8f9c9f84d6b6d8b7041ef767a0416e94095cea308b7ec6178f58f2f5bccfacc0",
+        "authority": "documented_not_live"
+      },
+      {
+        "path": "Samantha_Agent/camino/docs/V05_PRIVACY_AMENDMENT.md",
+        "sha256": "03c76682d265205b9cc2177ed3da0a7b0b88ffc492fb3ec506976723490af8bd",
+        "authority": "documented_not_live"
+      },
+      {
+        "path": "Samantha_Agent/camino/docs/VIDEO_AUDIO_INCIDENT_20261013.md",
+        "sha256": "cef41d072edee39e719c416d6d2a8ad0c10c1754a02936839429bcc97b9fc997",
+        "authority": "documented_not_live"
+      },
+      {
+        "path": "Samantha_Agent/camino/docs/VIEWER_MAP_REPORT.md",
+        "sha256": "e5b2acb917720c0a3a42b8b6495ea381d7f2f1feab857a1d0e39d7f31fed399b",
+        "authority": "documented_not_live"
+      },
+      {
+        "path": "Samantha_Agent/camino/docs/VIEWER_READINESS.md",
+        "sha256": "900312c902e293db2c98ce360197ff849c002b09ccaabf67975cedc9c0f627ef",
+        "authority": "documented_not_live"
+      },
+      {
+        "path": "Samantha_Agent/camino/docs/VIEWER_ROUTE_MAP_REPORT.md",
+        "sha256": "cebbe96c7754794abd87ab954f8ac5abfe8a1d1eaec3814e06bbb9aa39aee009",
+        "authority": "documented_not_live"
+      },
+      {
+        "path": "Samantha_Agent/camino/docs/XCODE_INSTALLATION.md",
+        "sha256": "3718ca924d483aaf7ba9f8fc19f8cb9d0b55d2aa68e95831aeb5d5088dd0916c",
+        "authority": "documented_not_live"
+      },
+      {
+        "path": "Samantha_Agent/camino/film/README.md",
+        "sha256": "81766963f82e2e2ae41b0a47e80839423b8657589e9f1fae6f636ce6e7ea5d1b",
+        "authority": "documented_not_live"
+      },
+      {
+        "path": "Samantha_Agent/camino/prototypes/audio/README.md",
+        "sha256": "19d731f169ba9c620ab5c32ca962579a960807437b8127106ad2d6b3007ff92b",
+        "authority": "documented_not_live"
+      },
+      {
+        "path": "Samantha_Agent/camino/prototypes/transfer/README.md",
+        "sha256": "988699017ae0a9e55ed147348382ba4d9bdcaa1f9d6703fc3e00ebd1071b2e83",
+        "authority": "documented_not_live"
+      },
+      {
+        "path": "Samantha_Agent/camino/server/README.md",
+        "sha256": "f45068445cdcf4a08f853c67a0c6a0c84aca4c6f024a697c63528daf91283334",
+        "authority": "documented_not_live"
+      },
+      {
+        "path": "Samantha_Agent/camino/server/map_assets/LICENSE.txt",
+        "sha256": "bbc959aaef7488b38942e7f05cfd1244351f8bce54261951ea17dd7cf60f894b",
+        "authority": "documented_not_live"
+      },
+      {
+        "path": "Samantha_Agent/camino/server/map_assets/README.md",
+        "sha256": "ea49bd15d8089bc399258b9885fa1d25d2bcfd44c3cc6df12bda0473c78b3226",
+        "authority": "documented_not_live"
+      },
+      {
+        "path": "Samantha_Agent/camino/server/requirements.txt",
+        "sha256": "2f8ccbe8eb8695ce3b1207075feff9ba006169a1ff0314333fbfadc161680128",
+        "authority": "documented_not_live"
+      },
+      {
+        "path": "Samantha_Agent/camino/tasks/C01a_AUDIO_PROTOTYPE.md",
+        "sha256": "83b5e397f55e98166aaaef69c18251f7f243c7ebb98291fd1c40924ea8bf1cfe",
+        "authority": "documented_not_live"
+      },
+      {
+        "path": "Samantha_Agent/camino/tasks/C01b_BACKGROUND_AUDIO.md",
+        "sha256": "48f0b4ec5ab3d223e79f53b008ceb2801b1eb4756a7fba7cc42f6218ceae45a5",
+        "authority": "documented_not_live"
+      },
+      {
+        "path": "Samantha_Agent/camino/tasks/C01c_RECOVERABLE_AUDIO.md",
+        "sha256": "6b9662d72f9544bb5a7861b86e13538eb5c4d7c2206deeeff9af2d550ec65024",
+        "authority": "documented_not_live"
+      },
+      {
+        "path": "Samantha_Agent/camino/tasks/C02a_SYNTHETIC_RECEIVER.md",
+        "sha256": "0ef28edce90d4f415b46fe336775c055c10be9b17322fd9dcadba1afd93d5e83",
+        "authority": "documented_not_live"
+      },
+      {
+        "path": "Samantha_Agent/camino/tasks/C02b_BUILD4_FIRST_START_FIELD_PLAN.md",
+        "sha256": "e5fabafd523bca06a3d2a972214c8c86e445541b8a44d3f3fdcbd664e104a306",
+        "authority": "documented_not_live"
+      },
+      {
+        "path": "Samantha_Agent/camino/tasks/C02b_CHUNK_TRANSFER_EXPERIMENT.md",
+        "sha256": "a433fe81ca1fe84eb7814a86ff6ad674c250839d5c3f87b6fdb682f6278c90e4",
+        "authority": "documented_not_live"
+      },
+      {
+        "path": "Samantha_Agent/camino/tasks/C02b_T048_T049_FIELD_PLAN.md",
+        "sha256": "33bc060c68392edc37350468c61a55fd396a96cc417bb1a3044a00e41526eb50",
+        "authority": "documented_not_live"
+      },
+      {
+        "path": "Samantha_Agent/camino/tasks/C02b_T050_FIELD_PLAN.md",
+        "sha256": "ae6dc911055157ab37f4966d1398ae94e6ed8f08f84ddc1d752e417fc8b79bc4",
+        "authority": "documented_not_live"
+      },
+      {
+        "path": "Samantha_Agent/camino/tasks/C05a_PRODUCTION_RECEIVER.md",
+        "sha256": "9a1bfd84d5be423141e32bcc7aa017799365ce230cdc2ae72b6029ff41ae8712",
+        "authority": "documented_not_live"
+      },
+      {
+        "path": "Samantha_Agent/camino/tasks/C05b_IOS_SYNC_QUEUE.md",
+        "sha256": "a74825d4c7cc5cea484c9ed17341728e04a1a2c670f7b41bcbb867de70168532",
+        "authority": "documented_not_live"
+      },
+      {
+        "path": "Samantha_Agent/camino/tasks/C05c_STATUS_AXES.md",
+        "sha256": "bbfc123d49bdaf14bb154ad6d5840dd25bb842b3c2b3bd405947911abb7997dc",
+        "authority": "documented_not_live"
+      },
+      {
+        "path": "Samantha_Agent/data/matysek_english/scene_proposals_20260530_forest_journey/README.md",
+        "sha256": "3e4268bcda0aa6e522dc4e448d55c4248c4a2709c6e8254bd9c5d5e9d017bdf9",
+        "authority": "documented_not_live"
+      },
+      {
+        "path": "Samantha_Agent/data/matysek_english/voice_casting_20260601_scene01/README.md",
+        "sha256": "1a857b17144f70db2ac9597a19e364b2324a3379d805548e5bc8fbd6d86ede5a",
+        "authority": "documented_not_live"
+      },
+      {
+        "path": "Samantha_Agent/data/matysek_english/voice_casting_20260601_scene01_recast/README.md",
+        "sha256": "5b4b16a0c3a9bff610f099d4767098ddfa3bfe22f19a1e3e125b07d1c95afbd3",
+        "authority": "documented_not_live"
+      },
+      {
+        "path": "Samantha_Agent/docs/daily_3am.md",
+        "sha256": "22303821b1da52516f55000ae5a0369d7dee56e3c0c928010a38bd2cbec02188",
+        "authority": "documented_not_live"
+      },
+      {
+        "path": "Samantha_Agent/memory/ACTIVE_PROJECTS.md",
+        "sha256": "d5888f1b366ed304d96994935f9982014d8c2e29a6973b73094c930502f97473",
+        "authority": "documented_not_live"
+      },
+      {
+        "path": "Samantha_Agent/memory/LESSONS_LEARNED.md",
+        "sha256": "d565a3e1ace062e6e831b16a274823ae4c5b9a3c4b0017026a989e4ce5e7c8fb",
+        "authority": "documented_not_live"
+      },
+      {
+        "path": "Samantha_Agent/memory/MEMORY_INDEX.md",
+        "sha256": "194eea374499e2cc1bc9f14e8aebe2d4ad8aab8b126693225d9ada62179d889f",
+        "authority": "documented_not_live"
+      },
+      {
+        "path": "Samantha_Agent/memory/WORKSTREAMS.md",
+        "sha256": "055476f8fbcad3253364826ca059a31e65cab96c144a6f37c7636e9db97c6e00",
+        "authority": "documented_not_live"
+      },
+      {
+        "path": "Samantha_Agent/memory/contacts.md",
+        "sha256": "eff2aad7ae48145b6e2f905592b7cec0738fa626ef837a2dca89f66822b82064",
+        "authority": "documented_not_live"
+      },
+      {
+        "path": "Samantha_Agent/memory/handoffs/adam_voice_bridge_cleanup_and_cockpit_controls_2026_06_12.md",
+        "sha256": "32bbae717af0827219feed3ad57041ee075a3266cb90d91f0fcac9c138a6c309",
+        "authority": "historical_or_mixed"
+      },
+      {
+        "path": "Samantha_Agent/memory/handoffs/adam_voice_bridge_end_to_end_checkpoint_2026_06_05.md",
+        "sha256": "d2f0c7187e5e62bb3615c55d96a6874d3f8d3d98e191e16bfa141a762f92b3db",
+        "authority": "historical_or_mixed"
+      },
+      {
+        "path": "Samantha_Agent/memory/handoffs/adam_voice_bridge_freeze_email_return_2026_06_12.md",
+        "sha256": "35d4fd32cd79264bce4c6c0595b3d729e6d9b19c045f8d3ceadb8319c3dae1f0",
+        "authority": "historical_or_mixed"
+      },
+      {
+        "path": "Samantha_Agent/memory/handoffs/adam_voice_bridge_iphone_text_fallback_checkpoint_2026_06_06.md",
+        "sha256": "0644aa3494979cb4ce26964b0c9bdda54e93c3a665e88e3a960b484dde6098ff",
+        "authority": "historical_or_mixed"
+      },
+      {
+        "path": "Samantha_Agent/memory/handoffs/adam_voice_bridge_target_tty_checkpoint_2026_06_05.md",
+        "sha256": "75cbd3e49f83ac191da422bfa0ff5557ca93aefbd9d7d7b3a860ff16101f33b3",
+        "authority": "historical_or_mixed"
+      },
+      {
+        "path": "Samantha_Agent/memory/handoffs/adam_voice_bridge_tty_switcher_2026_06_10.md",
+        "sha256": "df359ff49f9f0820abc81a805ab3cc53a701cbaadff706af8cd3d52d52090d51",
+        "authority": "historical_or_mixed"
+      },
+      {
+        "path": "Samantha_Agent/memory/handoffs/adam_voice_cockpit_dev_runner_checkpoint_2026_06_12.md",
+        "sha256": "c2bf5978a8db7fd72dca0993ebcbc1a157e36caea6b7d77999f6e375f7909a3b",
+        "authority": "historical_or_mixed"
+      },
+      {
+        "path": "Samantha_Agent/memory/handoffs/adam_voice_cockpit_readonly_capabilities_next_2026_06_06.md",
+        "sha256": "63614049c57e469053e1fc116f29dbfa3d5d027fd8a7216b728b9a8c7bdf1c4e",
+        "authority": "historical_or_mixed"
+      },
+      {
+        "path": "Samantha_Agent/memory/handoffs/adam_voice_global_safety_brake_2026_06_09.md",
+        "sha256": "1f0b47b5137cc0758e020b4647536aea63b146f9fae47804b8632606ab8a369e",
+        "authority": "historical_or_mixed"
+      },
+      {
+        "path": "Samantha_Agent/memory/handoffs/adam_voice_iphone_audio_bridge_checkpoint_2026_06_11.md",
+        "sha256": "89c867af5e5393af5daec45bacc9c13dbd56ea47b48683ea32caa01472d88a9b",
+        "authority": "historical_or_mixed"
+      },
+      {
+        "path": "Samantha_Agent/memory/handoffs/adam_voice_iphone_autoread_confirmed_2026_06_29.md",
+        "sha256": "15f75deef5d8052e9a5f113373cf16bea63c8a70c4f4b339658c699307d38024",
+        "authority": "historical_or_mixed"
+      },
+      {
+        "path": "Samantha_Agent/memory/handoffs/adam_voice_remote_cockpit_next_step_2026_06_06.md",
+        "sha256": "79df7ed815693fe174f2011c8620436cc3b7728b4f38cb2a17bca5322730345a",
+        "authority": "historical_or_mixed"
+      },
+      {
+        "path": "Samantha_Agent/memory/handoffs/adam_voice_terminal_bridge_checkpoint_2026_06_05.md",
+        "sha256": "5635e666e51898920f05385bf147479a70c1c50de45c1168283fee95a76c9373",
+        "authority": "historical_or_mixed"
+      },
+      {
+        "path": "Samantha_Agent/memory/handoffs/adam_voice_ttys001_readiness_blocker_2026_06_07.md",
+        "sha256": "384c33ad205e41e052379699d7455be6b5512b40a5730b57f57191867970504e",
+        "authority": "historical_or_mixed"
+      },
+      {
+        "path": "Samantha_Agent/memory/handoffs/apple_music_project_audio_cleanup_2026_09_05.md",
+        "sha256": "f2a3d98bd73875bb393efc4f4648daabc126dacde09e4abca3b4471b606a4e27",
+        "authority": "historical_or_mixed"
+      },
+      {
+        "path": "Samantha_Agent/memory/handoffs/appserver_human_adam_text_remote_verified_restart_backup_2026_07_14.md",
+        "sha256": "bd344c403733c0979f4c1f3a36ad45d796378019848f603be8dca6ac54ba3d27",
+        "authority": "historical_or_mixed"
+      },
+      {
+        "path": "Samantha_Agent/memory/handoffs/appserver_lab_lifecycle_verified_2026_07_13.md",
+        "sha256": "38e8b38ea4311b1fcb93731ce55d4db5e489a19b2895f1dbb383993d1502d73e",
+        "authority": "historical_or_mixed"
+      },
+      {
+        "path": "Samantha_Agent/memory/handoffs/appserver_lab_thread_registry_context_capsule_2026_07_13.md",
+        "sha256": "babfebebc70c7facc5d3b9cb764e878bc3d84b9b4b68b4f28336ce19cdb4a653",
+        "authority": "historical_or_mixed"
+      },
+      {
+        "path": "Samantha_Agent/memory/handoffs/appserver_remote_work_cell_v0_2026_07_13.md",
+        "sha256": "137f4906bb39122f858cd54cd27cd771ee40a9cdceb73f98eadf3d9998a0fd19",
+        "authority": "historical_or_mixed"
+      },
+      {
+        "path": "Samantha_Agent/memory/handoffs/article_archive_cockpit_library_2026_06_10.md",
+        "sha256": "1b54fcd32a2e6639c4fa6b5e56d98854dff1783011e5c77ffc35077148b15039",
+        "authority": "historical_or_mixed"
+      },
+      {
+        "path": "Samantha_Agent/memory/handoffs/automated_recurring_tasks_cloud_2026_05_20.md",
+        "sha256": "0f71f4f72b0f2ba4af3f96d73d6e6c2b4ab04f56d737afb80fa48f19dcaa2a9b",
+        "authority": "historical_or_mixed"
+      },
+      {
+        "path": "Samantha_Agent/memory/handoffs/autosave_cleanup_ssd_space_recovery_2026_08_15.md",
+        "sha256": "083cb7ab3951d0e47841cd3fbd4e33f287ef66cdeefbc41bda6b303214d0bcbb",
+        "authority": "historical_or_mixed"
+      },
+      {
+        "path": "Samantha_Agent/memory/handoffs/autosave_status_and_voice_triage_fix_2026_06_12.md",
+        "sha256": "f6ba8ad96642389cb316da234e73842daee9fc4d51751b66cc0af147b031aed9",
+        "authority": "historical_or_mixed"
+      },
+      {
+        "path": "Samantha_Agent/memory/handoffs/backup_usb_hub_restart_checkpoint_2026_06_03.md",
+        "sha256": "d1581da14289a14f3796e6b7c1d8f750172f2fbff796064f69fdece71922cdfe",
+        "authority": "historical_or_mixed"
+      },
+      {
+        "path": "Samantha_Agent/memory/handoffs/capability_registry_complete_2026_06_27.md",
+        "sha256": "84bfd11ef4afbbce6106384d07cae933210709014ee0b58d949ef180d2216001",
+        "authority": "historical_or_mixed"
+      },
+      {
+        "path": "Samantha_Agent/memory/handoffs/capability_registry_next_checkpoint_2026_06_26.md",
+        "sha256": "787d3cdacc7f9b1d211a2726e47f9dbe4aca852a219d5f1fc6f7eb87457090dd",
+        "authority": "historical_or_mixed"
+      },
+      {
+        "path": "Samantha_Agent/memory/handoffs/capability_registry_priority_gaps_closed_2026_06_26.md",
+        "sha256": "83384c8c8b9942dd5490b47733ddc0bb7f664ae985195f8a0910b4c6c3ef2271",
+        "authority": "historical_or_mixed"
+      },
+      {
+        "path": "Samantha_Agent/memory/handoffs/chatgpt_export_knowledge_import_checkpoint_2026_06_19.md",
+        "sha256": "1998d7c7b4c36e8dd31feccca6d3c398ea8f413dc5c5b27a8480c9d7a7a1904c",
+        "authority": "historical_or_mixed"
+      },
+      {
+        "path": "Samantha_Agent/memory/handoffs/chatgpt_handoff_2026_05_14.md",
+        "sha256": "20b2742b6ef9df4300f97e331e1407517896d46f1a88fd32bc2e372f3e9e6c51",
+        "authority": "historical_or_mixed"
+      },
+      {
+        "path": "Samantha_Agent/memory/handoffs/chatgpt_travel_places_library_checkpoint_2026_06_26.md",
+        "sha256": "27abc17b2795dfdb3ed8051bbd461f0fe38fa713b270a1d8acd7ac1e0cf0ded4",
+        "authority": "historical_or_mixed"
+      },
+      {
+        "path": "Samantha_Agent/memory/handoffs/cockpit_action_queue_2026_06_04.md",
+        "sha256": "f134d835ab3d2d503f60c786daca70e95fc0b8dcf7e855d3a2c485058972dd7c",
+        "authority": "historical_or_mixed"
+      },
+      {
+        "path": "Samantha_Agent/memory/handoffs/cockpit_architecture_current_2026_07_10.md",
+        "sha256": "363fa6a17bfc3d413713fb0c59af816ab3e2ee28df08320a983c49e18e6fae59",
+        "authority": "historical_or_mixed"
+      },
+      {
+        "path": "Samantha_Agent/memory/handoffs/cockpit_audit_live_2026_06_28.md",
+        "sha256": "14f946c3d192fcac6b217ae4c759a6dddcc009fb31df9e30a1698c85447ddecd",
+        "authority": "historical_or_mixed"
+      },
+      {
+        "path": "Samantha_Agent/memory/handoffs/cockpit_codex_session_false_duplicate_fix_2026_06_17.md",
+        "sha256": "819d76962b916d6c68e9eae620f2ba96899b2cce0cab506531e2bdb186bf54ae",
+        "authority": "historical_or_mixed"
+      },
+      {
+        "path": "Samantha_Agent/memory/handoffs/cockpit_command_cheatsheet_2026_07_18.md",
+        "sha256": "c096877c2043ceaedd969af37326f83c924579aee56e97958e189fd6f1c12d89",
+        "authority": "historical_or_mixed"
+      },
+      {
+        "path": "Samantha_Agent/memory/handoffs/cockpit_dashboard_terminal_launch_checkpoint_2026_05_29.md",
+        "sha256": "dfd09e0b0f36a99aae1e839a2e2276c6343a1362443e3e3eeb233e9379a4ef88",
+        "authority": "historical_or_mixed"
+      },
+      {
+        "path": "Samantha_Agent/memory/handoffs/cockpit_development_priorities_2026_06_03.md",
+        "sha256": "40e32a069ef61f8d45735cd07cf53da8ff7a685bd245723cd0ba57e2df0dbbd1",
+        "authority": "historical_or_mixed"
+      },
+      {
+        "path": "Samantha_Agent/memory/handoffs/cockpit_diagnostics_modal_2026_06_04.md",
+        "sha256": "c0c2ff7fb9e7552b766375035de8ca0f783d56784c3333cf44579e996539c41a",
+        "authority": "historical_or_mixed"
+      },
+      {
+        "path": "Samantha_Agent/memory/handoffs/cockpit_doladeni_navrhy_2026_06_05.txt",
+        "sha256": "bc4b93bde3beb17fcf363d90a3a4c51f97a5e91595137d425381afa73ea1fe07",
+        "authority": "historical_or_mixed"
+      },
+      {
+        "path": "Samantha_Agent/memory/handoffs/cockpit_email_archive_browser_2026_07_09.md",
+        "sha256": "005c3ac404c9a4cdb98f1be7f8961d85a013d3a417ac0b85159edb701e23a5ef",
+        "authority": "historical_or_mixed"
+      },
+      {
+        "path": "Samantha_Agent/memory/handoffs/cockpit_email_intake_cache_fix_2026_06_08.md",
+        "sha256": "595bddeea36de8c36a1095e9bfdf865f65d6b5b8891bcff5d6ade7914b5832ba",
+        "authority": "historical_or_mixed"
+      },
+      {
+        "path": "Samantha_Agent/memory/handoffs/cockpit_global_hotkey_agent_2026_06_01.md",
+        "sha256": "28519e31b3dee01fdaec39757cf039b441337760e676e3f9da3df79895e24886",
+        "authority": "historical_or_mixed"
+      },
+      {
+        "path": "Samantha_Agent/memory/handoffs/cockpit_health_status_buttons_2026_06_04.md",
+        "sha256": "efdcc292a8d5ea8e27ad8ead50c593fc544aac4d5fb6b1303bbde71215ccf075",
+        "authority": "historical_or_mixed"
+      },
+      {
+        "path": "Samantha_Agent/memory/handoffs/cockpit_hotkey_fallback_port_2026_07_07.md",
+        "sha256": "fbe71c057592889ae94f8f984ae4a7b7ba54b8ad1fea8a45f2ad1873de1d5724",
+        "authority": "historical_or_mixed"
+      },
+      {
+        "path": "Samantha_Agent/memory/handoffs/cockpit_iphone_tailscale_shortcut_2026_06_05.md",
+        "sha256": "b5eec98e98f4b85a451f6855f26269f79c87fde920c3d576ab21049277253e43",
+        "authority": "historical_or_mixed"
+      },
+      {
+        "path": "Samantha_Agent/memory/handoffs/cockpit_main_screen_phase2_cleanup_2026_06_11.md",
+        "sha256": "197c766d23d5ff01e52e2f7bcc183e214f4731c5769320ff74c2411a1d0b07b5",
+        "authority": "historical_or_mixed"
+      },
+      {
+        "path": "Samantha_Agent/memory/handoffs/cockpit_managed_codex_sessions_2026_07_03.md",
+        "sha256": "7e45d23cae3905801eaa5a607ef9cb647c4445f236abb4c9e86c944d9005c56a",
+        "authority": "historical_or_mixed"
+      },
+      {
+        "path": "Samantha_Agent/memory/handoffs/cockpit_purchase_pdf_and_library_export_email_filter_2026_06_22.md",
+        "sha256": "9e01e845545cbd3439152cb15be3c6a6bdb8880a1eca24443a6316c3b362572e",
+        "authority": "historical_or_mixed"
+      },
+      {
+        "path": "Samantha_Agent/memory/handoffs/cockpit_recovery_center_priority_2026_06_03.md",
+        "sha256": "c9c08890603952944db14ff720a2d7b731ce46f2af099a6d0de04df93e70c1d3",
+        "authority": "historical_or_mixed"
+      },
+      {
+        "path": "Samantha_Agent/memory/handoffs/cockpit_remote_exact_confirmation_cards_2026_06_27.md",
+        "sha256": "3b58474832854d58c5798909032e114365901d32da49322b817cacb05afa0898",
+        "authority": "historical_or_mixed"
+      },
+      {
+        "path": "Samantha_Agent/memory/handoffs/cockpit_restart_button_and_voice_audio_cleanup_2026_06_23.md",
+        "sha256": "39dc5112e9512ec758eb8ab545e732afd69bf2fee726437dee811dcb6ed8d9fd",
+        "authority": "historical_or_mixed"
+      },
+      {
+        "path": "Samantha_Agent/memory/handoffs/cockpit_robustness_smoke_backup_bridge_2026_06_09.md",
+        "sha256": "999d7e528f4bfd76fbe7b70594373f11fa2145f3f664c285d5f016844905202c",
+        "authority": "historical_or_mixed"
+      },
+      {
+        "path": "Samantha_Agent/memory/handoffs/cockpit_safe_restart_2026_06_04.md",
+        "sha256": "ed4614e8e209089d68af303cbf58680c43dfd483f41e9e7960d0fd8a8650532c",
+        "authority": "historical_or_mixed"
+      },
+      {
+        "path": "Samantha_Agent/memory/handoffs/cockpit_session_autosave_cleanup_2026_06_30.md",
+        "sha256": "6a81e3bc01e47d3e6bf8fd85914fa3097d3e5d20c97565cd76ccd9690161749a",
+        "authority": "historical_or_mixed"
+      },
+      {
+        "path": "Samantha_Agent/memory/handoffs/cockpit_startup_health_voicebridge_verified_2026_07_09.md",
+        "sha256": "0968d309541d6e1c51ef16a2aaa2c1fafe37541a6cdb363272973ae187d36343",
+        "authority": "historical_or_mixed"
+      },
+      {
+        "path": "Samantha_Agent/memory/handoffs/cockpit_ui_cleanup_experiment_checkpoint_2026_06_11.md",
+        "sha256": "966336b221cf1826c90594d0dce44928063b0c5187e9dec24f2645e9983e193a",
+        "authority": "historical_or_mixed"
+      },
+      {
+        "path": "Samantha_Agent/memory/handoffs/cockpit_voice_input_auto_inbox_2026_06_05.md",
+        "sha256": "987626df8fc16149276a5491c581b2ca15e4835a8278d115827bff781eb4cec3",
+        "authority": "historical_or_mixed"
+      },
+      {
+        "path": "Samantha_Agent/memory/handoffs/cockpit_voice_janicka_stability_checkpoint_2026_07_09.md",
+        "sha256": "850630845da1850a09dabff0c512dc96e17aa8b73f41201c0446c11b554919c7",
+        "authority": "historical_or_mixed"
+      },
+      {
+        "path": "Samantha_Agent/memory/handoffs/cockpit_web_apps_checkpoint_2026_05_29.md",
+        "sha256": "8d3048e7c5017ce53e62198be0a0455a67c5d4d7f37c830971ae42ca296e662b",
+        "authority": "historical_or_mixed"
+      },
+      {
+        "path": "Samantha_Agent/memory/handoffs/codex_full_access_voicebridge_guard_next_2026_06_29.md",
+        "sha256": "ab88cb3fafb89777cac076b14698c201e77fc7b6e20150e89818fe857a05539d",
+        "authority": "historical_or_mixed"
+      },
+      {
+        "path": "Samantha_Agent/memory/handoffs/colors_numbers_owl_pages_artifact_checkpoint_2026_07_27.md",
+        "sha256": "7316a41012f1aa2edc69579f14cbd2d250e9510f17aadd04d118eff19b316f2f",
+        "authority": "historical_or_mixed"
+      },
+      {
+        "path": "Samantha_Agent/memory/handoffs/colors_numbers_owl_tts_startup_prompt_2026_05_22.md",
+        "sha256": "712da04d1be3ee2b4eb0e76a426f36849e31d1a0edb9dd79cd782d08b3acb1e2",
+        "authority": "historical_or_mixed"
+      },
+      {
+        "path": "Samantha_Agent/memory/handoffs/colors_numbers_private_photo_gallery_proposal_2026_07_13.md",
+        "sha256": "8f15957751b5c69f8ce5738e5b32a91e4f954dc1e8112d6c83dbc7a750792f39",
+        "authority": "historical_or_mixed"
+      },
+      {
+        "path": "Samantha_Agent/memory/handoffs/continuous_personal_agent_2026_11_04.md",
+        "sha256": "5b0831b69ab47ea871ba7a5eae94077d1f3de7bf21b48727a0d883ee88b1718e",
+        "authority": "historical_or_mixed"
+      },
+      {
+        "path": "Samantha_Agent/memory/handoffs/data_05_appserver_sdk_pilot_20261104.md",
+        "sha256": "21822f73525a2b968ac3bbbfd84021712b1706de79ed6dad746111ab60a47928",
+        "authority": "historical_or_mixed"
+      },
+      {
+        "path": "Samantha_Agent/memory/handoffs/data_15_voice_conversation_pilot_20261105.md",
+        "sha256": "646641769921d767df8965a2154aa2bab450fd052a229bca04c305b3ca3f5f1d",
+        "authority": "historical_or_mixed"
+      },
+      {
+        "path": "Samantha_Agent/memory/handoffs/development_branch_lifecycle_phase1_wip_2026_07_19.md",
+        "sha256": "68ebb83468229880ca92555ac79f86cd2ef7441b79cd96d0e7aed1281ea77bce",
+        "authority": "historical_or_mixed"
+      },
+      {
+        "path": "Samantha_Agent/memory/handoffs/dnesni_checkpoint_lekarna_pictnew_git_2026_05_20.md",
+        "sha256": "cdd48f894e307f43bc649960369227ba938f62f99364be6aed86503351f7e80d",
+        "authority": "historical_or_mixed"
+      },
+      {
+        "path": "Samantha_Agent/memory/handoffs/document_email_attachments_scandocu_metadata_checkpoint_2026_06_16.md",
+        "sha256": "73bf7389bf7f66304b3264a90edfa19933f7b33cd165f036f0f73cb8652f561c",
+        "authority": "historical_or_mixed"
+      },
+      {
+        "path": "Samantha_Agent/memory/handoffs/document_management_cockpit_case_health_checkpoint_2026_06_04.md",
+        "sha256": "ef776c38c4f097a0b0636e0cfaefc89560e1cb253861ec54d3a265423fd0a2c7",
+        "authority": "historical_or_mixed"
+      },
+      {
+        "path": "Samantha_Agent/memory/handoffs/document_management_cockpit_voice_command_inbox_2026_05_29.md",
+        "sha256": "694bcf964c64752cc8da652599c766135c2897840e7371d112f8aa6bc3565881",
+        "authority": "historical_or_mixed"
+      },
+      {
+        "path": "Samantha_Agent/memory/handoffs/document_management_morning_action_plan_2026_06_04.md",
+        "sha256": "15c91b2e7f8e4005e0af6e1ad90d2b9ca79a38892dacfb626b81894b8f804fbe",
+        "authority": "historical_or_mixed"
+      },
+      {
+        "path": "Samantha_Agent/memory/handoffs/document_management_private_vault_cleanup_done_2026_05_22.md",
+        "sha256": "42be89db820de047d104d2a030a0015f47971b662f3f5314603dd37f66bcda31",
+        "authority": "historical_or_mixed"
+      },
+      {
+        "path": "Samantha_Agent/memory/handoffs/document_management_private_vault_start_2026_05_21.md",
+        "sha256": "a5721eefe51c6f9c7ff09bef6919fa1e356c12a596ba79f9a017faae60425ff0",
+        "authority": "historical_or_mixed"
+      },
+      {
+        "path": "Samantha_Agent/memory/handoffs/document_management_private_vault_status_done_next_steps_2026_05_22.md",
+        "sha256": "b96db1b40039b7c7d8bcd2a70e5435186d9543ad350538854591616bfdacfb32",
+        "authority": "historical_or_mixed"
+      },
+      {
+        "path": "Samantha_Agent/memory/handoffs/document_management_private_vault_tax_import_2026_05_22.md",
+        "sha256": "04ab2751c83fa8359297ab8d49fd9a1c46693559473a70265798aa2107279ce8",
+        "authority": "historical_or_mixed"
+      },
+      {
+        "path": "Samantha_Agent/memory/handoffs/document_management_scandocu_reimport_checkpoint_2026_05_28.md",
+        "sha256": "eb95be44c867356ece5a4cb8613ebdc94461d876ebc93797eaf952a9881b665b",
+        "authority": "historical_or_mixed"
+      },
+      {
+        "path": "Samantha_Agent/memory/handoffs/document_management_tax_generali_import_2026_05_22.md",
+        "sha256": "2811ed7060bfe045f35186e398b2628e742cfec345b326b56e576e416612a252",
+        "authority": "historical_or_mixed"
+      },
+      {
+        "path": "Samantha_Agent/memory/handoffs/document_metadata_and_tts_audio_checkpoint_2026_06_14.md",
+        "sha256": "7234811630ce8e63c7b59e654b244ab348c528acdfe9ed18f02414f0c6b2dd80",
+        "authority": "historical_or_mixed"
+      },
+      {
+        "path": "Samantha_Agent/memory/handoffs/document_vault_email_pdf_review_metadata_fix_2026_06_13.md",
+        "sha256": "bf12a9f3ae2dba4bad18042f0d5ae94e39a75cf182f324900924312d8947de2d",
+        "authority": "historical_or_mixed"
+      },
+      {
+        "path": "Samantha_Agent/memory/handoffs/document_vault_next_physical_print_and_downloads_intake_2026_05_22.md",
+        "sha256": "319bf2b1b74b405f67af75ad4884af476d2acfb3ed759c7e66c532d65b04adfc",
+        "authority": "historical_or_mixed"
+      },
+      {
+        "path": "Samantha_Agent/memory/handoffs/document_vault_print_workflow_2026_05_22.md",
+        "sha256": "68ec2786e74943f0b749843a647268d09bfc61f812998787ce82a48a74df73f8",
+        "authority": "historical_or_mixed"
+      },
+      {
+        "path": "Samantha_Agent/memory/handoffs/email_action_case_phase2_core_done_2026_05_19.md",
+        "sha256": "22ae411fb5b97b072d4e54d37bc6c6cc158ffbb006a853059bdbe6a4bf3ae92a",
+        "authority": "historical_or_mixed"
+      },
+      {
+        "path": "Samantha_Agent/memory/handoffs/email_action_case_phase2_proposed_2026_05_19.md",
+        "sha256": "f54af63fbec57ad7128bc8202d17999586f1fc49cc56d748699119a62d4dd936",
+        "authority": "historical_or_mixed"
+      },
+      {
+        "path": "Samantha_Agent/memory/handoffs/email_activity_state_done_2026_05_19.md",
+        "sha256": "b69bf09a6142b7f2cee64d35273c385a60e08b56e3f9d6791d07e203ffc3ce47",
+        "authority": "historical_or_mixed"
+      },
+      {
+        "path": "Samantha_Agent/memory/handoffs/email_archive_vault_core_done_2026_05_19.md",
+        "sha256": "88fa840cdcb78d20ab1046dfd1567d76b034c0a2a3c7f474ac053a213342e0a7",
+        "authority": "historical_or_mixed"
+      },
+      {
+        "path": "Samantha_Agent/memory/handoffs/email_archive_vault_no_urls_after_archive_2026_05_19.md",
+        "sha256": "b05f2a05b6ccf0395f453d50ffa18a71c326bb4da83ef23eda28baab907942c5",
+        "authority": "historical_or_mixed"
+      },
+      {
+        "path": "Samantha_Agent/memory/handoffs/email_archive_vault_proposed_2026_05_19.md",
+        "sha256": "7021414e23ac0c13f5c3b28666fb459fad71210102fd8f8325bc4a210b2659b9",
+        "authority": "historical_or_mixed"
+      },
+      {
+        "path": "Samantha_Agent/memory/handoffs/email_archive_vault_tool_done_2026_05_19.md",
+        "sha256": "c0023e727cb8545894333b8a262f383e3b2085c0bdb9307b3dfaeaf834fe4dac",
+        "authority": "historical_or_mixed"
+      },
+      {
+        "path": "Samantha_Agent/memory/handoffs/email_case_vault_save_tool_done_2026_05_19.md",
+        "sha256": "be52da0fabbdaaa174ad4c87ec8560b5686126626858eef2fd7bcf79b92bd530",
+        "authority": "historical_or_mixed"
+      },
+      {
+        "path": "Samantha_Agent/memory/handoffs/email_case_workflow_ready_2026_05_19.md",
+        "sha256": "d9ece5606d2713b910639be4674936b3a5ebbf28dd95b9e45ca02ade7e2de4e5",
+        "authority": "historical_or_mixed"
+      },
+      {
+        "path": "Samantha_Agent/memory/handoffs/email_fulltext_search_tool_2026_05_21.md",
+        "sha256": "6677d1ceb93271e5016768e320b2fa59edcac4b46c7e4356926aeb7db01ad3e1",
+        "authority": "historical_or_mixed"
+      },
+      {
+        "path": "Samantha_Agent/memory/handoffs/email_icloud_app_email_layer_2026_05_18.md",
+        "sha256": "e1db8459c112a90a4e5e213c67f6496042893e6b3d0162561939eeedad59858b",
+        "authority": "historical_or_mixed"
+      },
+      {
+        "path": "Samantha_Agent/memory/handoffs/email_icloud_pdf_metadata_review_fix_2026_06_12.md",
+        "sha256": "33f8d8aabeab2884e444d4ab0e3ab64602ef54f00d8bc9fad290a198bad003e5",
+        "authority": "historical_or_mixed"
+      },
+      {
+        "path": "Samantha_Agent/memory/handoffs/email_icloud_readonly_test_ok_2026_05_18.md",
+        "sha256": "30a5515c9061ae641f4fbe1fff63496262e1e2b1660be2bddbda726c0e63e71d",
+        "authority": "historical_or_mixed"
+      },
+      {
+        "path": "Samantha_Agent/memory/handoffs/email_icloud_setup_conversation_2026_05_18.txt",
+        "sha256": "dbf187a59296e72b5f4832f09ae84fba017337f2e0228ca554d98ca7feb23591",
+        "authority": "historical_or_mixed"
+      },
+      {
+        "path": "Samantha_Agent/memory/handoffs/email_mail_permissions_2026_05_17.txt",
+        "sha256": "83beb78db0b68822d4d9b228c156d4122515ba92721f228bb6aff4adf5832236",
+        "authority": "historical_or_mixed"
+      },
+      {
+        "path": "Samantha_Agent/memory/handoffs/email_outbound_sms_triage_next_2026_05_28.md",
+        "sha256": "ef941d94f80d690efcec23c7c7b70f61122ba1de733e402df85fda276e848f72",
+        "authority": "historical_or_mixed"
+      },
+      {
+        "path": "Samantha_Agent/memory/handoffs/email_processing_cleanup_and_documents_next_2026_06_03.md",
+        "sha256": "14f691c5cb13683e75c8c35cde14ca0fd301a02cfee63acaad7c3c954a0f0ed8",
+        "authority": "historical_or_mixed"
+      },
+      {
+        "path": "Samantha_Agent/memory/handoffs/email_processing_cockpit_decision_ui_2026_06_01.md",
+        "sha256": "ce9fa007a862c84383e9bbb25bb8ea22e306663e77c6ad318365f049b85dc6de",
+        "authority": "historical_or_mixed"
+      },
+      {
+        "path": "Samantha_Agent/memory/handoffs/email_project_frozen_human_handoff_2026_05_19.md",
+        "sha256": "473cad8fb0d6dd900d16df8915362dae1209bdbbacd87b3334ea9d4787b5870e",
+        "authority": "historical_or_mixed"
+      },
+      {
+        "path": "Samantha_Agent/memory/handoffs/email_read_uid_test_ok_2026_05_18.md",
+        "sha256": "3df41cce71d68e94998caf659de544bdca378402e7caf1022d5c007df2fbc7a7",
+        "authority": "historical_or_mixed"
+      },
+      {
+        "path": "Samantha_Agent/memory/handoffs/email_readonly_workflow_handoff_2026_05_18.md",
+        "sha256": "e2568b21eac59efbf8fecb15316aa2197282a83f1d33ce08eb08e03218f79fc6",
+        "authority": "historical_or_mixed"
+      },
+      {
+        "path": "Samantha_Agent/memory/handoffs/email_reminders_phase3b_done_2026_05_19.md",
+        "sha256": "06b8a287a00150981f0e40427dcd0012346b30f8cf8d4df62756b53824a03cda",
+        "authority": "historical_or_mixed"
+      },
+      {
+        "path": "Samantha_Agent/memory/handoffs/email_rixo_insurance_phase1_implemented_2026_05_19.md",
+        "sha256": "4056ecb6824551b004dabcfa23d589d253d789aec97242ed310c979019cb953c",
+        "authority": "historical_or_mixed"
+      },
+      {
+        "path": "Samantha_Agent/memory/handoffs/email_rixo_insurance_phase1_ready_2026_05_19.md",
+        "sha256": "4c42fbd0b79708c39becaec37360ed5c3934eb3251495b2a8cb22ca48c666a84",
+        "authority": "historical_or_mixed"
+      },
+      {
+        "path": "Samantha_Agent/memory/handoffs/email_safe_workflow_confirmed_2026_05_18.md",
+        "sha256": "39533785467a053eee1d25f7d0b00156c8eb086e4d52b6cce683906b7ec4af2f",
+        "authority": "historical_or_mixed"
+      },
+      {
+        "path": "Samantha_Agent/memory/handoffs/email_samantha_e2e_headers_ok_2026_05_18.md",
+        "sha256": "4f19e0e27de48a9f72318a4a044a639b90ca56f90836d826b8cc3264faa8a73d",
+        "authority": "historical_or_mixed"
+      },
+      {
+        "path": "Samantha_Agent/memory/handoffs/email_samantha_headers_redacted_waiting_uid_2026_05_19.md",
+        "sha256": "fb75069d59756199b8bf062fd3714ebdefd28af198b5c4f8da65685af30f4aa0",
+        "authority": "historical_or_mixed"
+      },
+      {
+        "path": "Samantha_Agent/memory/handoffs/email_samantha_read_body_tool_ok_2026_05_18.md",
+        "sha256": "72f92fd245330d4825ce17848478cc05cabae144dc3e600fba55d551753e21c1",
+        "authority": "historical_or_mixed"
+      },
+      {
+        "path": "Samantha_Agent/memory/handoffs/email_samantha_tool_headers_2026_05_18.md",
+        "sha256": "16edcfd2fe45523618a3465065baf971b5be79b67128cffef4e398fd6999a267",
+        "authority": "historical_or_mixed"
+      },
+      {
+        "path": "Samantha_Agent/memory/handoffs/email_search_headers_ready_2026_05_18.md",
+        "sha256": "dad1a16f484cf536a94dfe1646183bd814a8f63f37f64a3097a639d9404cc5d9",
+        "authority": "historical_or_mixed"
+      },
+      {
+        "path": "Samantha_Agent/memory/handoffs/email_seznam_pojisteni_prilohy_2026_05_21.md",
+        "sha256": "7b5b136ec24729e1dc7aeab34c0c262e2f21eda5d7fee0aae50f10762fd4dd62",
+        "authority": "historical_or_mixed"
+      },
+      {
+        "path": "Samantha_Agent/memory/handoffs/email_seznam_readonly_provider_2026_05_22.md",
+        "sha256": "fd4d7ad8ded672c8835cd8116d1c2c50619485542bba2a3079ebb3a94c8c8977",
+        "authority": "historical_or_mixed"
+      },
+      {
+        "path": "Samantha_Agent/memory/handoffs/email_triage_session_tool_done_2026_05_19.md",
+        "sha256": "68c258a42e8d0974ff4c62f6ac31c169fce728535f689104a007662a88d8a3a7",
+        "authority": "historical_or_mixed"
+      },
+      {
+        "path": "Samantha_Agent/memory/handoffs/email_triage_work_mode_core_done_2026_05_19.md",
+        "sha256": "23ee2a90c167755558f3fe297fdd498ff00007c91372915620b904c0033849ab",
+        "authority": "historical_or_mixed"
+      },
+      {
+        "path": "Samantha_Agent/memory/handoffs/email_triage_work_mode_proposed_2026_05_19.md",
+        "sha256": "b072b1098f9e1f8a5fa2c31e3813e55019b9700f834f8e8787db4e9a1a25a156",
+        "authority": "historical_or_mixed"
+      },
+      {
+        "path": "Samantha_Agent/memory/handoffs/email_unified_triage_scoring_report_checkpoint_2026_05_28.md",
+        "sha256": "2174c050b8fff07cd8fcd6335ba5edc17aca378bb2fff712ebdd930b79f2cb62",
+        "authority": "historical_or_mixed"
+      },
+      {
+        "path": "Samantha_Agent/memory/handoffs/email_url_tool_e2e_ok_2026_05_19.md",
+        "sha256": "58e22ad458765a193a3bd0ca49f3e52a19fc3a5bf102efc2faab1b409987782a",
+        "authority": "historical_or_mixed"
+      },
+      {
+        "path": "Samantha_Agent/memory/handoffs/email_weekly_overview_resume_2026_06_01.md",
+        "sha256": "60dcef01df49ec3787751ab95053e9e8a3c5e2fe5bc15a5c0f65c00d5867803f",
+        "authority": "historical_or_mixed"
+      },
+      {
+        "path": "Samantha_Agent/memory/handoffs/email_work_queue_batch_filters_2026_06_14.md",
+        "sha256": "e88b875185f76cdc70fec623ce8fce71fcb9f3371428905a6cfc9105adad2b39",
+        "authority": "historical_or_mixed"
+      },
+      {
+        "path": "Samantha_Agent/memory/handoffs/email_work_queue_batch_tomorrow_2026_06_01.md",
+        "sha256": "9231d7d1932cefbc51341ff2e8ba1ab43b4e05490e2f4dd32ac23c58f98a84ed",
+        "authority": "historical_or_mixed"
+      },
+      {
+        "path": "Samantha_Agent/memory/handoffs/email_work_queue_detail_checkpoint_2026_06_01.md",
+        "sha256": "8b9c4c8c3e3c47a7dbb24d2920bc446d150100fff731b3a5e0042a216254fd64",
+        "authority": "historical_or_mixed"
+      },
+      {
+        "path": "Samantha_Agent/memory/handoffs/email_work_session_proposed_2026_05_19.md",
+        "sha256": "d8191f3f46c258a9bb0002b3a0e4579a6eb963da1d9f7b488fe9630e9431d758",
+        "authority": "historical_or_mixed"
+      },
+      {
+        "path": "Samantha_Agent/memory/handoffs/external_backup_disk_usb_not_detected_2026_07_14.md",
+        "sha256": "d7a3afa1114066831b0be09190ee28e678b9a7658a4d56fbb16c1ca1aa86669b",
+        "authority": "historical_or_mixed"
+      },
+      {
+        "path": "Samantha_Agent/memory/handoffs/family_memory_usa_2019_review_recovery_2026_06_04.md",
+        "sha256": "8a2d4f3b089fbda3e6741b7147934ce2fe422f11f0db4a5c8766e13b0aef84c4",
+        "authority": "historical_or_mixed"
+      },
+      {
+        "path": "Samantha_Agent/memory/handoffs/family_memory_usa_2019_tomik2_overview_checkpoint_2026_06_05.md",
+        "sha256": "72dd1a96a03f3d2f6b2b1ac9c16a1b27f88ae01acfac9e8619e7c437549efc63",
+        "authority": "historical_or_mixed"
+      },
+      {
+        "path": "Samantha_Agent/memory/handoffs/family_video_organizer_package_ready_2026_05_29.md",
+        "sha256": "a63bafdd9f1318acb76f4dbbf38b44a70024c50b71099210a5fee03824e56756",
+        "authority": "historical_or_mixed"
+      },
+      {
+        "path": "Samantha_Agent/memory/handoffs/family_video_organizer_ui_prototype_2026_05_22.md",
+        "sha256": "846d7b32595b4e0c5e94196fdd7549b09195bc6d26dfecd2f6dfd8c4d0801f0d",
+        "authority": "historical_or_mixed"
+      },
+      {
+        "path": "Samantha_Agent/memory/handoffs/git_commit_cleanup_a1_2026_05_23.md",
+        "sha256": "437325ddb72236891be37ae6b80de4a476eb171d9afa9fd679b7ca5b205a33a0",
+        "authority": "historical_or_mixed"
+      },
+      {
+        "path": "Samantha_Agent/memory/handoffs/global_development_semaphore_wip_2026_07_19.md",
+        "sha256": "2fb76599c5aadb07c05e577fc5be9ce2a50a0d417ec0792934e87915db773b2a",
+        "authority": "historical_or_mixed"
+      },
+      {
+        "path": "Samantha_Agent/memory/handoffs/human_adam_knihovna_profile_2026_07_17.md",
+        "sha256": "1c0feefd3924923e825179865521b7c690d20526deb7e08a58d4ad9be4178c34",
+        "authority": "historical_or_mixed"
+      },
+      {
+        "path": "Samantha_Agent/memory/handoffs/human_adam_layer_workstream_start_2026_07_20.md",
+        "sha256": "de0282b1f51b1b2fbf6daeed389373dd1c514a54fe83eef2ab92cf31af5fc851",
+        "authority": "historical_or_mixed"
+      },
+      {
+        "path": "Samantha_Agent/memory/handoffs/human_adam_plan_help_and_adoption_2026_07_19.md",
+        "sha256": "13947fcd5a1c7ce063299aad48b2b90dd6d9a070862fd3d1c314577e392efb07",
+        "authority": "historical_or_mixed"
+      },
+      {
+        "path": "Samantha_Agent/memory/handoffs/human_adam_preserved_wip_visibility_2026_07_18.md",
+        "sha256": "6befee6992ef4f98cb13e05998a185624aee0f70f06315efd4433e66887fd15f",
+        "authority": "historical_or_mixed"
+      },
+      {
+        "path": "Samantha_Agent/memory/handoffs/human_adam_profile_switch_recovery_2026_07_18.md",
+        "sha256": "aed575b9d1273ba7e26cbafab12e69cd9d94fab29071935bffdcf940319a2df4",
+        "authority": "historical_or_mixed"
+      },
+      {
+        "path": "Samantha_Agent/memory/handoffs/human_adam_revision_failure_history_2026_07_17.md",
+        "sha256": "8be684fe12c7dbedcd804d860c92c6c462044a17026496254216737bbb39bbad",
+        "authority": "historical_or_mixed"
+      },
+      {
+        "path": "Samantha_Agent/memory/handoffs/human_adam_thread_rotation_backend_wip_2026_07_19.md",
+        "sha256": "f0fe9d9840564bad47a7a9e7d33b531eefafaed0023578c0d3833204d84c767d",
+        "authority": "historical_or_mixed"
+      },
+      {
+        "path": "Samantha_Agent/memory/handoffs/human_adam_work_help_and_wip_lifecycle_2026_07_19.md",
+        "sha256": "f957c85fb0e93a95f30e622242b28d692e75907b1ccf73e95e5640f9f19e50f6",
+        "authority": "historical_or_mixed"
+      },
+      {
+        "path": "Samantha_Agent/memory/handoffs/iphone_shortcuts_freeze_infrastructure_layer_2026_05_25.md",
+        "sha256": "c128db2ecb2445ca157bbfb3eb3006f5484e8a851b7adf4d53aeddb912f86251",
+        "authority": "historical_or_mixed"
+      },
+      {
+        "path": "Samantha_Agent/memory/handoffs/iphone_shortcuts_najit_auto_done_2026_05_23.md",
+        "sha256": "dd068fb67c9ef28b1afd8be456a53168f0dc5b91fe16eb46a192d197af16d1cd",
+        "authority": "historical_or_mixed"
+      },
+      {
+        "path": "Samantha_Agent/memory/handoffs/iphone_shortcuts_quick_notes_continue_2026_05_23.md",
+        "sha256": "c02c4966844013c66b73891b2e5ccc933528390ed0964d38ac407015a7e1ea86",
+        "authority": "historical_or_mixed"
+      },
+      {
+        "path": "Samantha_Agent/memory/handoffs/janicka_adam_text_bridge_functional_checkpoint_2026_06_07.md",
+        "sha256": "c45532be952e48e0259601cfc0a7183e45249bd0436c52209c925996075e5625",
+        "authority": "historical_or_mixed"
+      },
+      {
+        "path": "Samantha_Agent/memory/handoffs/janicka_chat_ui_fallback_simplification_2026_07_03.md",
+        "sha256": "98a457eae4b4b3cf5921067f897c0c14137c0ed637e1bcba7a70089bb861c628",
+        "authority": "historical_or_mixed"
+      },
+      {
+        "path": "Samantha_Agent/memory/handoffs/janicka_cockpit_family_projects_modal_2026_06_26.md",
+        "sha256": "2fe714559704bb59abb59c0da8292445e7e2da68321c206ed38d14ae52884b4a",
+        "authority": "historical_or_mixed"
+      },
+      {
+        "path": "Samantha_Agent/memory/handoffs/janicka_cockpit_takeover_project_start_2026_06_06.md",
+        "sha256": "80e12bbf4a006e5ef77786acc44aaf69a7e44cdc8b3e645bd728d7b89fa5b170",
+        "authority": "historical_or_mixed"
+      },
+      {
+        "path": "Samantha_Agent/memory/handoffs/janicka_full_adam_cockpit_recovery_ios_card_2026_07_09.md",
+        "sha256": "b61c0ed8c5154f1c2d2e326340abf94f9d0241f7b21f1e77ac438f597aea2167",
+        "authority": "historical_or_mixed"
+      },
+      {
+        "path": "Samantha_Agent/memory/handoffs/janicka_light_samantha_bridge_checkpoint_2026_07_03.md",
+        "sha256": "4f59aba5a25fffd4f5993ff880aea7a02770a0bddf897f6d32654bf5dbdeaa64",
+        "authority": "historical_or_mixed"
+      },
+      {
+        "path": "Samantha_Agent/memory/handoffs/janicka_ra2_private_context_proposal_2026_07_15.md",
+        "sha256": "2bc910e3ac8029c405331c74af0bdd965437f33e1bd192f6885081ebcec8ad1f",
+        "authority": "historical_or_mixed"
+      },
+      {
+        "path": "Samantha_Agent/memory/handoffs/knowledge_database_library_pdf_export_cleanup_2026_06_22.md",
+        "sha256": "6173d98cb4c604ea5a123ec0b8bcd6af858c075205fb7bdc556ebee6f38e5745",
+        "authority": "historical_or_mixed"
+      },
+      {
+        "path": "Samantha_Agent/memory/handoffs/knowledge_database_library_safe_delete_2026_06_19.md",
+        "sha256": "c62f1bd0e3fdaaf4ac5227ad38b5e80f555f93a3a5a1d61d494324fe4e4ae338",
+        "authority": "historical_or_mixed"
+      },
+      {
+        "path": "Samantha_Agent/memory/handoffs/knowledge_database_recipe_attachments_cockpit_checkpoint_2026_06_11.md",
+        "sha256": "ee45d02d2114f2a3fb65e150c5bcdc1fb798b5c202766cf94bbb57f11bd4be8d",
+        "authority": "historical_or_mixed"
+      },
+      {
+        "path": "Samantha_Agent/memory/handoffs/knowledge_database_text_input_and_system_audit_2026_06_11.md",
+        "sha256": "068adaecc35d8bca14c205275d877174b0542450896d062465610e0a686248cc",
+        "authority": "historical_or_mixed"
+      },
+      {
+        "path": "Samantha_Agent/memory/handoffs/knowledge_library_article_editing_2026_07_16.md",
+        "sha256": "0b22f2c8dfe942ce0a19bad46d5a2400d75a5bfae45266eb1c891505093990e5",
+        "authority": "historical_or_mixed"
+      },
+      {
+        "path": "Samantha_Agent/memory/handoffs/knowledge_library_encoding_and_backup_cleanup_2026_07_01.md",
+        "sha256": "c23b8326973bd9f59295186c358383acc481c2955215d06f74380a2ba45a2518",
+        "authority": "historical_or_mixed"
+      },
+      {
+        "path": "Samantha_Agent/memory/handoffs/knowledge_library_open_source_url_button_2026_06_23.md",
+        "sha256": "3fd8fb4e948a2f9601555dabd16ce6a7174cc1c3f00ed67ea4033c8397df935f",
+        "authority": "historical_or_mixed"
+      },
+      {
+        "path": "Samantha_Agent/memory/handoffs/knowledge_library_read_state_to_read_2026_06_23.md",
+        "sha256": "f0e1d9fdbdb78b656da0b410157284d1e8c8120cae41e19bb2c7a5d8607f62a1",
+        "authority": "historical_or_mixed"
+      },
+      {
+        "path": "Samantha_Agent/memory/handoffs/lekarna_audit_tool_done_2026_05_19.md",
+        "sha256": "928da9bc98e316ed3d63c667068f499e12ec5888e63161ff91ca7bfc8b914c4f",
+        "authority": "historical_or_mixed"
+      },
+      {
+        "path": "Samantha_Agent/memory/handoffs/lekarna_cockpit_auto_import_openai_checkpoint_2026_06_23.md",
+        "sha256": "7541f36c1edc1cb22509303152bed84f9aac3e23045d07aaa8e5445039da3193",
+        "authority": "historical_or_mixed"
+      },
+      {
+        "path": "Samantha_Agent/memory/handoffs/lekarna_dodatecny_import_2026_05_21.md",
+        "sha256": "c25e6c6c73da912e77c66aa5fbfd1fdc77c2b022830d72c0825eb1930f54902b",
+        "authority": "historical_or_mixed"
+      },
+      {
+        "path": "Samantha_Agent/memory/handoffs/lekarna_import_manifest_editor_checkpoint_2026_07_06.md",
+        "sha256": "80ddf481c866c23adedf07495e96dd40564c7e781792beda56dc115a6adfe674",
+        "authority": "historical_or_mixed"
+      },
+      {
+        "path": "Samantha_Agent/memory/handoffs/lekarna_import_vyrazeni_resize_done_2026_05_20.md",
+        "sha256": "e433181391d516a7d84787bd71f59c922c1b6eabdfbf79d12c7317d11c6d914c",
+        "authority": "historical_or_mixed"
+      },
+      {
+        "path": "Samantha_Agent/memory/handoffs/lekarna_photo_import_pil_publish_retire_verified_2026_07_09.md",
+        "sha256": "7b10a0739cc6d9dd142ad2bf28258babd1fa9e89d1e55d5806be6417d5e9b439",
+        "authority": "historical_or_mixed"
+      },
+      {
+        "path": "Samantha_Agent/memory/handoffs/lekarna_photo_staging_tool_2026_06_12.md",
+        "sha256": "b6bf2ad025723435eade2590f8021b720af4f5e39b1c8202a75329fbecbd2d44",
+        "authority": "historical_or_mixed"
+      },
+      {
+        "path": "Samantha_Agent/memory/handoffs/lekarna_pil_short_done_web_app_start_2026_05_20.md",
+        "sha256": "a9db712e5dff2a5873029a0dff0101aebbeb080d4b67eebb09d8e06dbd28b6f3",
+        "authority": "historical_or_mixed"
+      },
+      {
+        "path": "Samantha_Agent/memory/handoffs/lekarna_readonly_tool_done_2026_05_19.md",
+        "sha256": "a4a9aacb1ba65d3e201f69394d26c34b43d977a06f887253bb0e9a694206da2a",
+        "authority": "historical_or_mixed"
+      },
+      {
+        "path": "Samantha_Agent/memory/handoffs/lekarna_status_po_doplneni_vitaminu_2026_05_21.md",
+        "sha256": "e3448d47f7096f54c1a479ecc7086a6d2020f1510c06024c9ec74babc7789ca3",
+        "authority": "historical_or_mixed"
+      },
+      {
+        "path": "Samantha_Agent/memory/handoffs/lekarna_vitaminy_import_done_2026_05_21.md",
+        "sha256": "ca2b992dd5b5bbb710fb2567d8ab2419358cdbd006f10b2be53ff6c245b38c3f",
+        "authority": "historical_or_mixed"
+      },
+      {
+        "path": "Samantha_Agent/memory/handoffs/lekarna_web_app_cockpit_prototype_2026_05_20.md",
+        "sha256": "d57af75b9df994cf2ea5cc8f5c4fa432400be061eb8415380e537bb4ed73eaf5",
+        "authority": "historical_or_mixed"
+      },
+      {
+        "path": "Samantha_Agent/memory/handoffs/lekarna_web_app_hotovo_2026_05_20.md",
+        "sha256": "d24b15f25198951e7a6e6080467895dffd9f818ecda444f181b41c45bc56d0ab",
+        "authority": "historical_or_mixed"
+      },
+      {
+        "path": "Samantha_Agent/memory/handoffs/matysek_f5tts_bunny_voice_tool_checkpoint_2026_06_02.md",
+        "sha256": "f72c3303ce9ad96ff57f194db248f1995242e33f73b4e24770a8acaf781dba6c",
+        "authority": "historical_or_mixed"
+      },
+      {
+        "path": "Samantha_Agent/memory/handoffs/matysek_forest_journey_voice_strategy_2026_06_01.md",
+        "sha256": "36231ceeaf3a158bf433162f5f5aafefe2f589813b4d30fbece001d187324208",
+        "authority": "historical_or_mixed"
+      },
+      {
+        "path": "Samantha_Agent/memory/handoffs/matysek_forest_school_checkpoint_2026_05_26.md",
+        "sha256": "26a03e5f1edd4571b2c54a0ced8d476d473e67169660cc3a99277b641a66cf22",
+        "authority": "historical_or_mixed"
+      },
+      {
+        "path": "Samantha_Agent/memory/handoffs/matysek_forest_school_lessons_voices_checkpoint_2026_05_27.md",
+        "sha256": "66a691079de4600927b8e8967e1c2560f72122b84ca44a6b8c6857e9f7718aff",
+        "authority": "historical_or_mixed"
+      },
+      {
+        "path": "Samantha_Agent/memory/handoffs/matysek_forest_school_portal_resize_checkpoint_2026_05_27.md",
+        "sha256": "80dcd2eea4b0c2ff4f5cc171da7f1535909e9d2ae4f3051e36dae7bdbe50dc9b",
+        "authority": "historical_or_mixed"
+      },
+      {
+        "path": "Samantha_Agent/memory/handoffs/matysek_forest_school_post_commit_checkpoint_2026_05_26.md",
+        "sha256": "1657efb9ada5368144b1e4f83badd2043d25fba44bd6b4744177e18be0fc7c43",
+        "authority": "historical_or_mixed"
+      },
+      {
+        "path": "Samantha_Agent/memory/handoffs/matysek_forest_school_scene_navrh_2026_05_26.md",
+        "sha256": "f0a4878d94114292c8928a745175fa8912909bc4354bf7aebfc4f21328d0ccdc",
+        "authority": "historical_or_mixed"
+      },
+      {
+        "path": "Samantha_Agent/memory/handoffs/matysek_scene_01_clearing_meeting_review_2026_06_01.md",
+        "sha256": "fbe5c42bbbbb6072c0c5fffcab1845b30942a62290b81f0a85a54b17285aef1b",
+        "authority": "historical_or_mixed"
+      },
+      {
+        "path": "Samantha_Agent/memory/handoffs/matysek_scene_01_sunny_voice_and_ending_2026_06_03.md",
+        "sha256": "973d4523a1641bda45c6d01bba6cd823bb2f34ced8dd3ff066865d2a20cc5dbc",
+        "authority": "historical_or_mixed"
+      },
+      {
+        "path": "Samantha_Agent/memory/handoffs/media_image_resize_utility_done_2026_05_20.md",
+        "sha256": "3205c3b976bf31fcd61bc849d7316c50d7ca0187d3144acc621d0b00666c8a6b",
+        "authority": "historical_or_mixed"
+      },
+      {
+        "path": "Samantha_Agent/memory/handoffs/memory_cleanup_commit_afternoon_checkpoint_2026_05_23.md",
+        "sha256": "5b6861d81218149b34ff8d6246af8958d7cc673f4462c29e5f3e416b23f8f220",
+        "authority": "historical_or_mixed"
+      },
+      {
+        "path": "Samantha_Agent/memory/handoffs/mmtx_scene02_start_help_cleanup_2026_06_26.md",
+        "sha256": "8c49d8a61d98e3437d4f2b01ceaca3c877161f7b0854ffb9f5eae3d53548ba49",
+        "authority": "historical_or_mixed"
+      },
+      {
+        "path": "Samantha_Agent/memory/handoffs/mmtx_scene03_journey_to_lake_publish_2026_07_01.md",
+        "sha256": "d4ff1649141b111fb853537ea78fb5c5d69654a684389bf7e7ee3bc31f30e724",
+        "authority": "historical_or_mixed"
+      },
+      {
+        "path": "Samantha_Agent/memory/handoffs/mmtx_web_handoff_2026_05_14.md",
+        "sha256": "2d6381fe52eb40163ed2f6eb451096f78cfc0057a4b2bfc4388436e0a382271a",
+        "authority": "historical_or_mixed"
+      },
+      {
+        "path": "Samantha_Agent/memory/handoffs/mobile_document_processing_raw_bw_classification_2026_05_27.md",
+        "sha256": "4d529c3a439b0cfcd238f1ddef2f4ae5351b3c0c07d9f939d0e93ffdd46839f0",
+        "authority": "historical_or_mixed"
+      },
+      {
+        "path": "Samantha_Agent/memory/handoffs/mobile_document_scan_shortcuts_and_processing_2026_05_26.md",
+        "sha256": "6bc9095688760c502e76a300a04f70e6250cbb97f6bf5488d96a8fe36db4ffe4",
+        "authority": "historical_or_mixed"
+      },
+      {
+        "path": "Samantha_Agent/memory/handoffs/network_domaci_wifi_router_vs_mac_2026_05_21.md",
+        "sha256": "e720987795769a41fa5dd63a8df017aa7b2f78f6acd105ff6b6db892c73c347a",
+        "authority": "historical_or_mixed"
+      },
+      {
+        "path": "Samantha_Agent/memory/handoffs/network_https_reconnect_diagnostic_2026_05_21.md",
+        "sha256": "1d494a5d058a15d0c51b4ed4e00b074f43a567b0eb93880a5128cbebcc4459d5",
+        "authority": "historical_or_mixed"
+      },
+      {
+        "path": "Samantha_Agent/memory/handoffs/neuberk_interier_design_start_2026_05_31.md",
+        "sha256": "cd731e6c81e261a3a23fb4c76d254a2cac6794953decbdbb8170dee26f7fd6be",
+        "authority": "historical_or_mixed"
+      },
+      {
+        "path": "Samantha_Agent/memory/handoffs/neuberk_kacenka_library_concept_pause_2026_06_04.md",
+        "sha256": "5ab0507b97456546d9441895fdd42d362d46d8edd56ec8633789ac4b96fcc2e4",
+        "authority": "historical_or_mixed"
+      },
+      {
+        "path": "Samantha_Agent/memory/handoffs/neuberk_kacenka_south_wall_v6_geometry_checkpoint_2026_06_07.md",
+        "sha256": "569739cfeba46b1961c236b10e12f6d4effd597260e7aedd675d2487e40fbf61",
+        "authority": "historical_or_mixed"
+      },
+      {
+        "path": "Samantha_Agent/memory/handoffs/neuberk_kacenka_zapadni_stena_prekres_2026_06_03.md",
+        "sha256": "32bea3c9a6ad830787c47855bab26120e3a48ef6f1a268f98ef1bd7b40173778",
+        "authority": "historical_or_mixed"
+      },
+      {
+        "path": "Samantha_Agent/memory/handoffs/payment_sms_reminder_tool_done_2026_05_21.md",
+        "sha256": "35b0c1d8e94df76f82bbb2f6bea8872232a17782448d35aa2a2dbac858bc6789",
+        "authority": "historical_or_mixed"
+      },
+      {
+        "path": "Samantha_Agent/memory/handoffs/pictnew_next_image_generation_phase_2026_05_20.md",
+        "sha256": "5b7dbd31baabfb02a38996cd2c7e44f9a6b96f70f69833c8af1aca24bbf77b3e",
+        "authority": "historical_or_mixed"
+      },
+      {
+        "path": "Samantha_Agent/memory/handoffs/pozustalost_start_2026_05_30.md",
+        "sha256": "38af952b6f6bf0ebaca4230f66ca6d7d49b1f3e56b701cab5c3d02154c3562dc",
+        "authority": "historical_or_mixed"
+      },
+      {
+        "path": "Samantha_Agent/memory/handoffs/python_se_samanthou_course_package_2026_09_06.md",
+        "sha256": "9863ba5eca8dd59bd68a16a1788c8c2814333d3c65326c77884321fce740aa23",
+        "authority": "historical_or_mixed"
+      },
+      {
+        "path": "Samantha_Agent/memory/handoffs/quick_notes_action_inbox_preclassification_2026_06_19.md",
+        "sha256": "d38c6071237d99031190c46a5c74f57b6d86f7edef400231d2a5c6fa1ce9dd16",
+        "authority": "historical_or_mixed"
+      },
+      {
+        "path": "Samantha_Agent/memory/handoffs/quick_notes_infsystem_top3_feedback_2026_05_24.md",
+        "sha256": "1f42eeeb01fc931843af33999d6481cc47bde4d3879d91f6c857fa9dfd3ad931",
+        "authority": "historical_or_mixed"
+      },
+      {
+        "path": "Samantha_Agent/memory/handoffs/quick_notes_triage_no_unclassified_2026_06_23.md",
+        "sha256": "48c99e77808c64adeb3ad87249e55a1aa2c0ceb66c022b2ce543e51703629534",
+        "authority": "historical_or_mixed"
+      },
+      {
+        "path": "Samantha_Agent/memory/handoffs/samantha_agent_rag_memory_store_2026_05_19.md",
+        "sha256": "240b8f11490d89b28966581d30e4c05138e3ed4c8f1beafa164a9bd642a9d6c7",
+        "authority": "historical_or_mixed"
+      },
+      {
+        "path": "Samantha_Agent/memory/handoffs/samantha_agent_rag_search_memory_ranking_2026_05_19.md",
+        "sha256": "80041b0c097e145626f1f44f76375835ad587e4bdba8481106ea9aa45af9496d",
+        "authority": "historical_or_mixed"
+      },
+      {
+        "path": "Samantha_Agent/memory/handoffs/samantha_communication_architecture_checkpoint_2026_07_13.md",
+        "sha256": "f065ad034ad8da09a90e2a600e5117653fdb51616a2c7a66105928b5aece6cd6",
+        "authority": "historical_or_mixed"
+      },
+      {
+        "path": "Samantha_Agent/memory/handoffs/samantha_screen_scrollback_fix_2026_06_18.md",
+        "sha256": "ecfec850dacca51b2a2a6a7c907038710c11cf618a275537492311ee09ee385e",
+        "authority": "historical_or_mixed"
+      },
+      {
+        "path": "Samantha_Agent/memory/handoffs/scandocu_email_workqueue_owl_checkpoint_2026_06_15.md",
+        "sha256": "37ec8b621703630c1e6ef272124fb41b2052f7273b6bf36d136cdf8bcbc1b90d",
+        "authority": "historical_or_mixed"
+      },
+      {
+        "path": "Samantha_Agent/memory/handoffs/scandocu_kanta_nonpdf_review_checkpoint_2026_06_15.md",
+        "sha256": "1b9cb57f0ad718b5f0b23acbf676d7227a932edc7625290630424d085d4227d8",
+        "authority": "historical_or_mixed"
+      },
+      {
+        "path": "Samantha_Agent/memory/handoffs/session_recovery_autosave_2026_05_18.txt",
+        "sha256": "33b9d6d9c65e724effcd9f45768c1439110a8dbfbbd9f8d0bbdf38d941fb7eb6",
+        "authority": "historical_or_mixed"
+      },
+      {
+        "path": "Samantha_Agent/memory/handoffs/seznam_iphone_mail_2026_10_03.md",
+        "sha256": "f7288e23f01464d657fe650614a1723e577e3499f5fba78b61359eb940bef28c",
+        "authority": "historical_or_mixed"
+      },
+      {
+        "path": "Samantha_Agent/memory/handoffs/spojeni_problemy_2026_05_17.txt",
+        "sha256": "5f49276df76a58b94f6ca13cfae9debdb5425051f677d245e61e2d422f52cc18",
+        "authority": "historical_or_mixed"
+      },
+      {
+        "path": "Samantha_Agent/memory/handoffs/stories_batch_2026_05_14.md",
+        "sha256": "fac9108c500b8942d944939203dee0a43adac793221298400b923ac5ac27acf3",
+        "authority": "historical_or_mixed"
+      },
+      {
+        "path": "Samantha_Agent/memory/handoffs/system_project_audit_generator_done_2026_06_23.md",
+        "sha256": "81069373f4d8d468b24374399f31d9876a6284fb044cb7e8d90a91317ce9ccc5",
+        "authority": "historical_or_mixed"
+      },
+      {
+        "path": "Samantha_Agent/memory/handoffs/system_quick_check_git_safety_2026_06_09.md",
+        "sha256": "0d9f50cb3cb6b4c51029e6aa6873642473bfe8c96cef8a1334dc31a1daa01a1c",
+        "authority": "historical_or_mixed"
+      },
+      {
+        "path": "Samantha_Agent/memory/handoffs/test_kratky_handoff_2026_05_18.md",
+        "sha256": "dd55a4641debaf0a41113c1cf1bc4e3447075770478c95ec9def06c8e74909c1",
+        "authority": "historical_or_mixed"
+      },
+      {
+        "path": "Samantha_Agent/memory/handoffs/tomik_video_imovie_audit_hotov_navrh_pokracovani_2026_05_21.md",
+        "sha256": "13777fbb05bdab922c1135ac24fb66418109841b23cd7aa4259b692af098b3cb",
+        "authority": "historical_or_mixed"
+      },
+      {
+        "path": "Samantha_Agent/memory/handoffs/tomik_video_imovie_pause_waiting_daughter_2026_05_21.md",
+        "sha256": "85c3f773ccc9f7feb810a435d05ad8b325fd3a5c4c4ec8600bf0016ac1e99649",
+        "authority": "historical_or_mixed"
+      },
+      {
+        "path": "Samantha_Agent/memory/handoffs/tomik_video_imovie_selection_ready_2026_05_21.md",
+        "sha256": "87cf3b85e00e47285f8ff288bbe68eec2c4c8ada859f9a72ba0f994c96297e68",
+        "authority": "historical_or_mixed"
+      },
+      {
+        "path": "Samantha_Agent/memory/handoffs/tomik_video_imovie_start_2026_05_21.md",
+        "sha256": "fa08835a22fa74c6d4fab0ec63ba592dc4c18d758c3b9cc1c7ba2717c46c432a",
+        "authority": "historical_or_mixed"
+      },
+      {
+        "path": "Samantha_Agent/memory/handoffs/tomik_video_review_pdfs_done_editable_next_2026_05_22.md",
+        "sha256": "d42057e64e441b9796bcd4446514f4d7d94b76f0155d73e2d0d4301700f8f7b3",
+        "authority": "historical_or_mixed"
+      },
+      {
+        "path": "Samantha_Agent/memory/handoffs/vocabulary_en_49_images_review_2026_09_06.md",
+        "sha256": "59866622601f0e4275353eb3d10ae86b5c4a992038c463f995da3885a52da620",
+        "authority": "historical_or_mixed"
+      },
+      {
+        "path": "Samantha_Agent/memory/handoffs/vocabularyfr_jana_images_archive_2026_06_07.md",
+        "sha256": "4f77a908d7e7f16acb533949b7359456d44d3911401f25e1b2ce426a1941c6ab",
+        "authority": "historical_or_mixed"
+      },
+      {
+        "path": "Samantha_Agent/memory/handoffs/vocabularyfr_web_trainer_checkpoint_2026_06_04.md",
+        "sha256": "3ad6efb477449f82263d397c432e17c7277b64c06074f3576b5482b103561d1d",
+        "authority": "historical_or_mixed"
+      },
+      {
+        "path": "Samantha_Agent/memory/handoffs/vocabularyit_batches_005_011_generated_2026_05_20.md",
+        "sha256": "a24ff58e1f9717ebf706cec0599fa1a82d88e3efe36d5e7e8696b46ed21c3c55",
+        "authority": "historical_or_mixed"
+      },
+      {
+        "path": "Samantha_Agent/memory/handoffs/vocabularyit_batches_012_013_generated_2026_05_20.md",
+        "sha256": "fdf57bc333c95e2603e5dd70b72743cd87e9a673861e9981dc2a10bdd95f32b0",
+        "authority": "historical_or_mixed"
+      },
+      {
+        "path": "Samantha_Agent/memory/handoffs/vocabularyit_mapping_applied_2026_05_20.md",
+        "sha256": "da922c61d33516c147847e85d77581c122f19fb23d89c628a42a0b6ce5f91d5a",
+        "authority": "historical_or_mixed"
+      },
+      {
+        "path": "Samantha_Agent/memory/handoffs/vocabularyit_pict_csv_audit_2026_05_20.md",
+        "sha256": "ed0f99f76a6ae3d5bb5945dbf054e70f83310a614463df0e413e0a04eb6ec988",
+        "authority": "historical_or_mixed"
+      },
+      {
+        "path": "Samantha_Agent/memory/handoffs/voicebridge_full_access_email_confirmation_closed_2026_06_29.md",
+        "sha256": "45b79c3b5ad7825185fd2cc7761e2538ba39de1f7db91743ab5016dfa7632851",
+        "authority": "historical_or_mixed"
+      },
+      {
+        "path": "Samantha_Agent/memory/handoffs/voicebridge_operational_contract_2026_06_30.md",
+        "sha256": "d98dcda64bc99eca939d5b613ecfaf65c4857a3ef5a58195b7c97f590268bc44",
+        "authority": "historical_or_mixed"
+      },
+      {
+        "path": "Samantha_Agent/memory/handoffs/workstreams/project-camino.md",
+        "sha256": "7678fffa99d1867d97125e8f4d1fc9598ab7fa8f88d0dae431daf3f987ada4fd",
+        "authority": "historical_or_mixed"
+      },
+      {
+        "path": "Samantha_Agent/memory/handoffs/workstreams/project-cockpit.md",
+        "sha256": "255f1dc4416a03e1a3af9dbb6f388da8e1469f43653742cbbb54e26c28ca3207",
+        "authority": "historical_or_mixed"
+      },
+      {
+        "path": "Samantha_Agent/memory/handoffs/workstreams/project-family-calendar.md",
+        "sha256": "b05204ca1afb26ba4404e373181a7f6b8f9071a8aae7b96d254e49e9c6f8f590",
+        "authority": "historical_or_mixed"
+      },
+      {
+        "path": "Samantha_Agent/memory/handoffs/workstreams/project-linux-workstation.md",
+        "sha256": "e1cea53113b8835859a30be7b77a2d7288090cfd737a3909a12dc8214a686bda",
+        "authority": "historical_or_mixed"
+      },
+      {
+        "path": "Samantha_Agent/memory/handoffs/workstreams/project-mmtx.md",
+        "sha256": "7982e6f4992c189cdec1bbd18310471d8382869ca3fe4ebf6c320f7a810fc8d0",
+        "authority": "historical_or_mixed"
+      },
+      {
+        "path": "Samantha_Agent/memory/handoffs/workstreams/project-neuberk-kacenka.md",
+        "sha256": "917f366785cf212830b12c125d905170572e3d586d975af419d2e3c710599a4d",
+        "authority": "historical_or_mixed"
+      },
+      {
+        "path": "Samantha_Agent/memory/handoffs/workstreams/project-r2-adam-janicka.md",
+        "sha256": "34aaf7bcdd1f657876410139c4f2ef4c8b9316b8ea8de502790ff73303d06c11",
+        "authority": "historical_or_mixed"
+      },
+      {
+        "path": "Samantha_Agent/memory/handoffs/workstreams/project-samantha-agent-rag.md",
+        "sha256": "b40862b92a16112318bfcaa3cecf17d853f32f7ba7b67092967d3a79e976fa32",
+        "authority": "historical_or_mixed"
+      },
+      {
+        "path": "Samantha_Agent/memory/handoffs/workstreams/project-samantha-infrastructure.md",
+        "sha256": "27433486b65e59c0f6b23b09c5cb52109ccad4ee58dfd3a3078360f2dbe57cb9",
+        "authority": "historical_or_mixed"
+      },
+      {
+        "path": "Samantha_Agent/memory/handoffs/workstreams/project-to-be-to-have.md",
+        "sha256": "1c693081c10719f95ce582cf159feb1b6207270da9ca71341924a44a4184c9bd",
+        "authority": "historical_or_mixed"
+      },
+      {
+        "path": "Samantha_Agent/memory/handoffs/workstreams/project-vocabulary-fr.md",
+        "sha256": "0474b5737b6938b31ac377c50e55122ba0bbe6d46988a722319c3a6ef8262fe8",
+        "authority": "historical_or_mixed"
+      },
+      {
+        "path": "Samantha_Agent/memory/handoffs/workstreams/project-vocabulary-it.md",
+        "sha256": "202e512a6e0d074a6c63046669adb772ce9b5627e5413a9b977207c05595e777",
+        "authority": "historical_or_mixed"
+      },
+      {
+        "path": "Samantha_Agent/memory/infrastructure/codex_reconnect_recovery.md",
+        "sha256": "b6aec189db6e85404e4182137a94190adc1c467b659bb385f60e5dd786e59dcd",
+        "authority": "documented_not_live"
+      },
+      {
+        "path": "Samantha_Agent/memory/infrastructure/git_branch_archive.md",
+        "sha256": "f77c9b7a556bfaead12ef02016c75b7609f3f3012f88b116e2350f406622cadb",
+        "authority": "documented_not_live"
+      },
+      {
+        "path": "Samantha_Agent/memory/infrastructure/git_checkpoint_protocol.md",
+        "sha256": "e6dbaf79c1bae827094974dac7114c2651bc2954e359b87eba6406038455864b",
+        "authority": "documented_not_live"
+      },
+      {
+        "path": "Samantha_Agent/memory/infrastructure/klicove_prikazy_pamatovacek.md",
+        "sha256": "046d58bfb3afc32e75ba67ef9fb705c6e221364e8582ded3d6c37a1c097a67c7",
+        "authority": "documented_not_live"
+      },
+      {
+        "path": "Samantha_Agent/memory/infrastructure/macos_network_recovery.md",
+        "sha256": "d62469b3ab3b7a1db4e662f41fa7bcc6c6bfcac312f73fb4e5935d963743a04d",
+        "authority": "documented_not_live"
+      },
+      {
+        "path": "Samantha_Agent/memory/infrastructure/operating_model.md",
+        "sha256": "cdacf15b14a67cba0f0577ccc86cafa7a339de724d7ca5ca56a7a2a747c258ac",
+        "authority": "documented_not_live"
+      },
+      {
+        "path": "Samantha_Agent/memory/infrastructure/ssh_setup.md",
+        "sha256": "84f822e4884c7aae148af41f93ec191cc662896ada48e7c564d0bb36f30fe118",
+        "authority": "documented_not_live"
+      },
+      {
+        "path": "Samantha_Agent/memory/infrastructure/tailscale_setup.md",
+        "sha256": "da53717e35deec4f2ac3d550a84349884958241c61cfe2b5a0f300ab56357343",
+        "authority": "documented_not_live"
+      },
+      {
+        "path": "Samantha_Agent/memory/projects/automated_recurring_tasks.md",
+        "sha256": "4d34e7e21ebd2e5892333ddbb5943793fc1b93129a9f5b62b11aeb23d6d48435",
+        "authority": "documented_not_live"
+      },
+      {
+        "path": "Samantha_Agent/memory/projects/camino.md",
+        "sha256": "e724d49077f53beee895a5ad7e8bb385e51ecbf2c67bd266b68ad8749d163a46",
+        "authority": "documented_not_live"
+      },
+      {
+        "path": "Samantha_Agent/memory/projects/document_management_private_vault.md",
+        "sha256": "1e4e9e05c1458016022b2f8c5d9844cbabd255720618fb877c643607e8ea6592",
+        "authority": "documented_not_live"
+      },
+      {
+        "path": "Samantha_Agent/memory/projects/email_readonly_oauth.md",
+        "sha256": "7111e44b7ac22e14db58eb06fc040b15fabea6958b1e976c557fc99aa485bd68",
+        "authority": "documented_not_live"
+      },
+      {
+        "path": "Samantha_Agent/memory/projects/family_calendar.md",
+        "sha256": "938ba2ee727dadfdac2ae3c83fe1a11e1e2c1e2f53d8f464cc87e52a783fc227",
+        "authority": "documented_not_live"
+      },
+      {
+        "path": "Samantha_Agent/memory/projects/family_memory_films.md",
+        "sha256": "7fc67de380b2c977ca3b66c79714547a02d6b155ea27092e31ceb041b8fcf8a3",
+        "authority": "documented_not_live"
+      },
+      {
+        "path": "Samantha_Agent/memory/projects/fraška_dante_esa_concept.md",
+        "sha256": "a8cf60928d59e7c014fc36363ea11b07f0336288a243688c1c0fa7bd0faed69b",
+        "authority": "documented_not_live"
+      },
+      {
+        "path": "Samantha_Agent/memory/projects/janicka_cockpit_kucharka.md",
+        "sha256": "06e2d5faa06a4e5a35cfb50efdde3ce57c13634f085f244c07cd4d0e38857e77",
+        "authority": "documented_not_live"
+      },
+      {
+        "path": "Samantha_Agent/memory/projects/janicka_cockpit_takeover.md",
+        "sha256": "abf0a3a8c0035eccf94387c5f1b8105dd1f1a70cbb46da380ca486be1c3f2360",
+        "authority": "documented_not_live"
+      },
+      {
+        "path": "Samantha_Agent/memory/projects/janicka_r2_adam.md",
+        "sha256": "0fe7cbeeeeda3ecdd7bce6b4a46ee5918dcd5ebd8f5ef2e721e6ef60c058d143",
+        "authority": "documented_not_live"
+      },
+      {
+        "path": "Samantha_Agent/memory/projects/lekarna_domaci_leky.md",
+        "sha256": "d4485313e642d71081bc77ef961478a53903e7f9d0eb56e6bcf89c49e833f95c",
+        "authority": "documented_not_live"
+      },
+      {
+        "path": "Samantha_Agent/memory/projects/lekarna_web_app.md",
+        "sha256": "cb313239e5c22b731a233685eacb01196eecca389c2774489e269256bf03422f",
+        "authority": "documented_not_live"
+      },
+      {
+        "path": "Samantha_Agent/memory/projects/linux_workstation.md",
+        "sha256": "f789f97d32282dea350571bcda5f26dacac4f97e0553eb11186a3c585d3d28bf",
+        "authority": "documented_not_live"
+      },
+      {
+        "path": "Samantha_Agent/memory/projects/matysek_english_game_concept.md",
+        "sha256": "3b436bacb61fb81a7dee50ac7167f1a3239d571d0242991f7478c7bf17c76865",
+        "authority": "documented_not_live"
+      },
+      {
+        "path": "Samantha_Agent/memory/projects/media_image_resize_utility.md",
+        "sha256": "97bc2cd0868d399abb9f33ced92a5a4043667e88637207f49b5b04bc46ca656b",
+        "authority": "documented_not_live"
+      },
+      {
+        "path": "Samantha_Agent/memory/projects/mmtx_story_hotspot_app.md",
+        "sha256": "60cac3b3004964d6f5f0939405e09674ebc9ca79f0180f219259a81db4e63fe8",
+        "authority": "documented_not_live"
+      },
+      {
+        "path": "Samantha_Agent/memory/projects/multilo_stabilization_cleanup.md",
+        "sha256": "db693be3f09af0e85c970faab0447156ac17a7735afc0d9933d82829c37c9131",
+        "authority": "documented_not_live"
+      },
+      {
+        "path": "Samantha_Agent/memory/projects/neuberk_interier_design.md",
+        "sha256": "c579113848eb5d75bd11b2557dbfe5b306a8f881b06587f9bd3db8aa4e68ee99",
+        "authority": "documented_not_live"
+      },
+      {
+        "path": "Samantha_Agent/memory/projects/pictnew_vocabulary_image_pipeline.md",
+        "sha256": "a823c982e626a88bea8f24e8c2a56e21993ab3e1b92e99247dd9b5a2f881c2ec",
+        "authority": "documented_not_live"
+      },
+      {
+        "path": "Samantha_Agent/memory/projects/pohadkova_knizka_gpt_canva.md",
+        "sha256": "2220e3c4f358401da54b667e6418601fa8f13d2f960a5281ae4fd477d7a04bf5",
+        "authority": "documented_not_live"
+      },
+      {
+        "path": "Samantha_Agent/memory/projects/pozustalost_rodinny_plan_2026_05_30.txt",
+        "sha256": "6ecd2874c8e09f3bf9074c037f70738a509a98d02ef3fa4e7c7540f847a7395d",
+        "authority": "documented_not_live"
+      },
+      {
+        "path": "Samantha_Agent/memory/projects/python_se_samanthou.md",
+        "sha256": "2ace5e8a907ce75b4211fd987a2cee07ffc3c11c89f7e8408f4556805a40885c",
+        "authority": "documented_not_live"
+      },
+      {
+        "path": "Samantha_Agent/memory/projects/samantha_external_backup.md",
+        "sha256": "1429c0e38fb1b3004d462bad261fb32b77a5a4da8939f63492b94d99e1bc5189",
+        "authority": "documented_not_live"
+      },
+      {
+        "path": "Samantha_Agent/memory/projects/tax_priznani_2025.md",
+        "sha256": "2868cf32f6cc8b12433fa873e83f9d350a00f0832157edebda514141aedd5a86",
+        "authority": "documented_not_live"
+      },
+      {
+        "path": "Samantha_Agent/memory/projects/to_be_to_have.md",
+        "sha256": "ed308551b04d0f6f6ba2f6b00d8f1d4d2874ec8f830a700125a0745c4a2f5455",
+        "authority": "documented_not_live"
+      },
+      {
+        "path": "Samantha_Agent/memory/projects/tomik_video_imovie.md",
+        "sha256": "0ccf1d92f053e7a6ba81be1f3039abe48bbaa972769c46385e634bad7443dddc",
+        "authority": "documented_not_live"
+      },
+      {
+        "path": "Samantha_Agent/memory/projects/tts_edge_audio_tools.md",
+        "sha256": "862496e2c259320ec4da4d315eda90f82fd211f777f26ff1d18bdec2fc04225a",
+        "authority": "documented_not_live"
+      },
+      {
+        "path": "Samantha_Agent/memory/projects/vedecke_clanky.md",
+        "sha256": "4ff0eb64cce52ea27f42d9e7bf4b7a5cfb256ca68e43d8356c6003c1752702b4",
+        "authority": "documented_not_live"
+      },
+      {
+        "path": "Samantha_Agent/memory/projects/vocabulary_en_web_cards.md",
+        "sha256": "1828907d831a9f6fea8300c12fdc0fb13cf667520b134897c7aa009f57282ca2",
+        "authority": "documented_not_live"
+      },
+      {
+        "path": "Samantha_Agent/memory/projects/vocabularyfr_web_trainer.md",
+        "sha256": "a16e9730b854267a7d48113bed3ddac4fffab2036733d45c02c578e83b81d900",
+        "authority": "documented_not_live"
+      },
+      {
+        "path": "Samantha_Agent/memory/reports/backup_recovery_20261025.md",
+        "sha256": "917ab1d0871a988663646958c24609381bf41f1ae6465d000df480b2f5f8c720",
+        "authority": "historical_or_mixed"
+      },
+      {
+        "path": "Samantha_Agent/memory/reports/calendar_access_pilot_20261107.md",
+        "sha256": "81986f106c7627c54169357825b8a47949b50d229f6901334033fed9f07240ee",
+        "authority": "historical_or_mixed"
+      },
+      {
+        "path": "Samantha_Agent/memory/reports/calendar_overview_20261107.md",
+        "sha256": "0e0fbc27eb85a0ef8d5ef21cd8743b0d5b680f229d71cc0abe1762c4d35a7623",
+        "authority": "historical_or_mixed"
+      },
+      {
+        "path": "Samantha_Agent/memory/reports/calendar_recovery_release_20261107.md",
+        "sha256": "fca286d5447021d5259ad433b5a31beca619692b2e10043f72894e1d960dc272",
+        "authority": "historical_or_mixed"
+      },
+      {
+        "path": "Samantha_Agent/memory/reports/calendar_simple_20261107.md",
+        "sha256": "62b23645ac332fbe0e54f998a3c6a2bd262559e41847bd53612647cd4f2b3ed2",
+        "authority": "historical_or_mixed"
+      },
+      {
+        "path": "Samantha_Agent/memory/reports/camino_export_created_time_20261028.md",
+        "sha256": "04d3e71e6dce0bafbb51063ce3cde19c8743bf31d4b68f5836aa9c72d2dc70b2",
+        "authority": "historical_or_mixed"
+      },
+      {
+        "path": "Samantha_Agent/memory/reports/camino_film_loading_20261026.md",
+        "sha256": "4995a58e671056e40df1278050a70368d5b494932e377563f7d3bb49f78c86fe",
+        "authority": "historical_or_mixed"
+      },
+      {
+        "path": "Samantha_Agent/memory/reports/camino_film_navigation_height_20261028.md",
+        "sha256": "91e133b20962fdf37b5ab2f1aec25c8eedb1b17d370ef9813a56168d71558af1",
+        "authority": "historical_or_mixed"
+      },
+      {
+        "path": "Samantha_Agent/memory/reports/camino_film_photo_dialog_20261026.md",
+        "sha256": "d20f75a284ed1131d08cf521f32ff5a357f2bd0a6ff06d7192fd026475cab4c9",
+        "authority": "historical_or_mixed"
+      },
+      {
+        "path": "Samantha_Agent/memory/reports/camino_film_resume_latest_20261028.md",
+        "sha256": "ae3bde0ef03ff723feaa82e3a372b1fbb93c3b2803b1ff84ff46e1a13d7370e5",
+        "authority": "historical_or_mixed"
+      },
+      {
+        "path": "Samantha_Agent/memory/reports/camino_film_ui_feedback_20261025.md",
+        "sha256": "abcf4b2afe8d52d90677ca67443262494a37cb5df4fa69760f10a14ed982f1dd",
+        "authority": "historical_or_mixed"
+      },
+      {
+        "path": "Samantha_Agent/memory/reports/camino_film_window_20261028.md",
+        "sha256": "69fe6e98dc5dfd0454c6a31600d589fb9d756b207e74c7ceb4a462ca6be0c447",
+        "authority": "historical_or_mixed"
+      },
+      {
+        "path": "Samantha_Agent/memory/reports/camino_film_workspace_20261026.md",
+        "sha256": "2a4d4ebabccf38261ebbcb1886e320ade3850ae404307a1fa03cb8013ca4fd98",
+        "authority": "historical_or_mixed"
+      },
+      {
+        "path": "Samantha_Agent/memory/reports/camino_orus_integration_20261027.md",
+        "sha256": "136fe20a452c2bb78e283d028644f833e50fa064fe5c526bc5b29009fe5b1a33",
+        "authority": "historical_or_mixed"
+      },
+      {
+        "path": "Samantha_Agent/memory/reports/camino_registration_2026_09_14.md",
+        "sha256": "e2e1e6065170f0feffd67049a93cc489511e6980c71ca76ca19d8cce3094089d",
+        "authority": "historical_or_mixed"
+      },
+      {
+        "path": "Samantha_Agent/memory/reports/camino_text_voice_ui_proposal_20261028.md",
+        "sha256": "6b1bc578ca7307c9f47dc3c0d58ecca5a72afa332a5737b9c59f9c1f1ee105e5",
+        "authority": "historical_or_mixed"
+      },
+      {
+        "path": "Samantha_Agent/memory/reports/camino_voice_audition_20261026.md",
+        "sha256": "f3421cdbeaeb8b7e7cb6838689350607b353b7d451f35713d1f8af21b7214c70",
+        "authority": "historical_or_mixed"
+      },
+      {
+        "path": "Samantha_Agent/memory/reports/cockpit_dead_legacy_code_inventory_2026_07_10.md",
+        "sha256": "f2d4a3dc172321796db2a78f42bb6c4e905f52477eddda24837679b5b99f8b40",
+        "authority": "historical_or_mixed"
+      },
+      {
+        "path": "Samantha_Agent/memory/reports/cockpit_deploy_fixture_pilot_2026_09_13.md",
+        "sha256": "5c0e7ec360e7c10ad82d46a0da9df4d5a6180153e8e39101e5eb6355d5a9cf06",
+        "authority": "historical_or_mixed"
+      },
+      {
+        "path": "Samantha_Agent/memory/reports/cockpit_dieta_d0_2026_07_29.md",
+        "sha256": "15f335509779fddd1bdb9e92d929d97a55cfc0ef014270e8288a97cf18cb7894",
+        "authority": "historical_or_mixed"
+      },
+      {
+        "path": "Samantha_Agent/memory/reports/cockpit_document_routes_2026_09_14.md",
+        "sha256": "d6435b89f6f588caa0546e09a5dcedd1ec3bf69050a712305cea547dfc4fb19a",
+        "authority": "historical_or_mixed"
+      },
+      {
+        "path": "Samantha_Agent/memory/reports/cockpit_email_archive_routes_2026_09_14.md",
+        "sha256": "6b9acfc316b8a06d0dd5a9888e06e39b2fd8532773665b60f756f9927388dc70",
+        "authority": "historical_or_mixed"
+      },
+      {
+        "path": "Samantha_Agent/memory/reports/cockpit_email_archive_scroll_2026_09_14.md",
+        "sha256": "0f34a423d6ccf16b18ebec30ff2b1b5fc9050f81a8425dcc8c2e0ecaa83ffc29",
+        "authority": "historical_or_mixed"
+      },
+      {
+        "path": "Samantha_Agent/memory/reports/cockpit_function_inventory_audit_2026_06_27.md",
+        "sha256": "84ec8ceeca242b8714a21e7f509c830681da8f49a41f7b93da93cfa079fe2bb8",
+        "authority": "historical_or_mixed"
+      },
+      {
+        "path": "Samantha_Agent/memory/reports/cockpit_git_launcher_2026_09_13.md",
+        "sha256": "da049dc296690c343decd3f26b9a696ddbabb95d67106dbdeab4b83cbaa6eeff",
+        "authority": "historical_or_mixed"
+      },
+      {
+        "path": "Samantha_Agent/memory/reports/cockpit_http_routes_release_2026_09_14.md",
+        "sha256": "9fbfaf96f8caa3a5fb8763eb069c38c0081e1f5bb294a285e4e8054beb3f5765",
+        "authority": "historical_or_mixed"
+      },
+      {
+        "path": "Samantha_Agent/memory/reports/cockpit_main_screen_daily_audit_2026_06_11.md",
+        "sha256": "44b8685caf46f9f9207cc499c04c8ffa1af1b48c816b0db357fa2ebce1f9cde5",
+        "authority": "historical_or_mixed"
+      },
+      {
+        "path": "Samantha_Agent/memory/reports/cockpit_persistence_write_map_2026_07_10.md",
+        "sha256": "b0162c4e074a4953cd71df711fe956e093d45923f01e341981d62637d7cf9bce",
+        "authority": "historical_or_mixed"
+      },
+      {
+        "path": "Samantha_Agent/memory/reports/cockpit_post_action_risk_matrix_2026_06_27.md",
+        "sha256": "2100e808ea08e7a33cbf3babef9f2c2ef40322b7171f1340892abc4af74fc1df",
+        "authority": "historical_or_mixed"
+      },
+      {
+        "path": "Samantha_Agent/memory/reports/cockpit_quality_gate_2026_07_10.md",
+        "sha256": "9c726050f6a9799f32390cb49f83c2a0b954401a33c94c5c359ee5ad5926dcc6",
+        "authority": "historical_or_mixed"
+      },
+      {
+        "path": "Samantha_Agent/memory/reports/cockpit_shared_git_2026_09_14.md",
+        "sha256": "7fcc6557d9877fb7fd59870bb791bdc348fb9ae228b68ae7061c78f4e9fea10d",
+        "authority": "historical_or_mixed"
+      },
+      {
+        "path": "Samantha_Agent/memory/reports/cockpit_test_timings_2026_09_13.md",
+        "sha256": "2d8ab937d70efa4db42e0bcc0e1675aa05559b8d421ad5f5fb77baa089862395",
+        "authority": "historical_or_mixed"
+      },
+      {
+        "path": "Samantha_Agent/memory/reports/cockpit_ui_content_audit_2026_06_11.md",
+        "sha256": "28d5de7ee45ef9655ee850953e60fc9be3556770c1e6925864c27711ca497605",
+        "authority": "historical_or_mixed"
+      },
+      {
+        "path": "Samantha_Agent/memory/reports/cockpit_ui_release_2026_09_14.md",
+        "sha256": "9c65fbe132b1a4af501c39d5995d9c4ebeb4d9305aeae8a15b00437a98bff4ee",
+        "authority": "historical_or_mixed"
+      },
+      {
+        "path": "Samantha_Agent/memory/reports/codex_appserver_p1b_20261104.md",
+        "sha256": "0b605c66b9d7afbd27a0a15966bbe242558927e0039c58805da172ff1c11f0f4",
+        "authority": "historical_or_mixed"
+      },
+      {
+        "path": "Samantha_Agent/memory/reports/codex_p1_reconnect_20261105.md",
+        "sha256": "20803db6d6effa51fef0fb10999fada76ad9a830ac05d96b2f1d0bb1d13bbaac",
+        "authority": "historical_or_mixed"
+      },
+      {
+        "path": "Samantha_Agent/memory/reports/codex_sdk_p1c_20261105.md",
+        "sha256": "c6e317c0ed89afdabb3391f6efdbea8aa413287ea9bafdb3e2d32406d6845714",
+        "authority": "historical_or_mixed"
+      },
+      {
+        "path": "Samantha_Agent/memory/reports/codex_sdk_pilot_20261104.md",
+        "sha256": "c8aaa944051875b346257d2f8909715d3ab6ce4b3b7ff2c58bfcf1ed770e9d08",
+        "authority": "historical_or_mixed"
+      },
+      {
+        "path": "Samantha_Agent/memory/reports/continuous_email_service_installation_20261105.md",
+        "sha256": "cd88073cef020f4e234ba97c268666245bb1add767cc89a9b48f3aa00492cffa",
+        "authority": "historical_or_mixed"
+      },
+      {
+        "path": "Samantha_Agent/memory/reports/continuous_email_service_preparation_20261104.md",
+        "sha256": "e8470b7102cbfc081c749aac1d78e1b1fcb87788e2a0f25dd559d6d5cdcd51e6",
+        "authority": "historical_or_mixed"
+      },
+      {
+        "path": "Samantha_Agent/memory/reports/email_calendar_draft_20261107.md",
+        "sha256": "2c5597097fca9942221008332bddde1103e4a461ca00177c983c22b88748d82e",
+        "authority": "historical_or_mixed"
+      },
+      {
+        "path": "Samantha_Agent/memory/reports/email_calendar_review_20261107.md",
+        "sha256": "320fb9b9605763dcbded482fe6731963125d68954e3748f3cc3e219a9c3d42b1",
+        "authority": "historical_or_mixed"
+      },
+      {
+        "path": "Samantha_Agent/memory/reports/email_pushcut_20261104.md",
+        "sha256": "78261b0278b311399c805042df058ff29bc49332b5e2ae2156a29b9e46ffa776",
+        "authority": "historical_or_mixed"
+      },
+      {
+        "path": "Samantha_Agent/memory/reports/email_visibility_20261105.md",
+        "sha256": "847ba7ba2d53c3b031e8b25d40813aa0ca8d74108ed202eb07decb0cff7459ab",
+        "authority": "historical_or_mixed"
+      },
+      {
+        "path": "Samantha_Agent/memory/reports/git_branch_audit_cursor_matysek_scene02_2026_06_26.md",
+        "sha256": "fb77fdc062be5b0c2987c25409abf7939a7be5787355c123e8154187d8174202",
+        "authority": "historical_or_mixed"
+      },
+      {
+        "path": "Samantha_Agent/memory/reports/human_adam_iphone_send_failure_20261105.md",
+        "sha256": "a87fc1f713549b2b615ffe5108d0274be9ace48ba609e9d82c8b355d52bac357",
+        "authority": "historical_or_mixed"
+      },
+      {
+        "path": "Samantha_Agent/memory/reports/human_adam_workstream_pn_fix_2026_10_23.md",
+        "sha256": "a859960007fb3ea335cb3f9f512a077e3cb560512ecdea0fc22f7f16cd0c7407",
+        "authority": "historical_or_mixed"
+      },
+      {
+        "path": "Samantha_Agent/memory/reports/interior_ai_integration_20261105.md",
+        "sha256": "e74c92a568ee8eeff0edbd7b9f0b3fc69de9273d4077ee4ea3214d79a3e0059e",
+        "authority": "historical_or_mixed"
+      },
+      {
+        "path": "Samantha_Agent/memory/reports/interior_atelier_p1_20261105.md",
+        "sha256": "b9e1100395305aff18ba01b63f8ca1bc2cd77df09adcf36d9f1826cc7db13fa2",
+        "authority": "historical_or_mixed"
+      },
+      {
+        "path": "Samantha_Agent/memory/reports/interior_iphone_jpeg_mpo_20261105.md",
+        "sha256": "35ce81f46e8c6f1abc5faa6304c9018db3c4f4f1e941a85495fc213c33e968a4",
+        "authority": "historical_or_mixed"
+      },
+      {
+        "path": "Samantha_Agent/memory/reports/mmtx_scene05_artfix_2026_09_12.md",
+        "sha256": "ea62d6cc893ff6d26c020a2f343c5d0a05ac624a8964298c6c7cede869432a91",
+        "authority": "historical_or_mixed"
+      },
+      {
+        "path": "Samantha_Agent/memory/reports/mmtx_scene06_azure_complete_20261101.md",
+        "sha256": "0033d3df0bfafff9b4b908c521bef09ec1e05f08d37478d9a29df9b8c76e91a8",
+        "authority": "historical_or_mixed"
+      },
+      {
+        "path": "Samantha_Agent/memory/reports/mmtx_scene06_azure_preview_20261101.md",
+        "sha256": "f71fdc502109072b1862d7817dfbdf0b68c6a7a4e6f42f2401c7aa3cb0ad81a4",
+        "authority": "historical_or_mixed"
+      },
+      {
+        "path": "Samantha_Agent/memory/reports/mmtx_scene06_lake_arrival_20261028.md",
+        "sha256": "5cd976131c20d78e0a88195e1ca22398ba5d2c3429d137fe1f2243dc8676653d",
+        "authority": "historical_or_mixed"
+      },
+      {
+        "path": "Samantha_Agent/memory/reports/paid_voice_retirement_20261107.md",
+        "sha256": "88ff9fe81f9930f3cf76d13eec7d4de5c760ac23fcb6d929e6b1202298108f4d",
+        "authority": "historical_or_mixed"
+      },
+      {
+        "path": "Samantha_Agent/memory/reports/python_315_assessment_2026_10_24.md",
+        "sha256": "b4eaa5549ea61bc27d8ed1fc501ea73a198dbf32af255b3b7d3316cdcf84c2bd",
+        "authority": "historical_or_mixed"
+      },
+      {
+        "path": "Samantha_Agent/memory/reports/recovery_guide_rec02_20261107.md",
+        "sha256": "a3911d6d9754654d56d0632181ecb069d8836415487e73f68972c5b3a79e71b6",
+        "authority": "historical_or_mixed"
+      },
+      {
+        "path": "Samantha_Agent/memory/reports/recovery_guide_rec03_20261107.md",
+        "sha256": "bf11acc9afe61ca080b335e51766840bdedf77a472667e883123d80dc0fcdd14",
+        "authority": "historical_or_mixed"
+      },
+      {
+        "path": "Samantha_Agent/memory/reports/recovery_guide_rec04_20261107.md",
+        "sha256": "ed5f3cfbfbcad6ac19ffa5b786da6fd732f34a40985a01e2bac5ac8373452306",
+        "authority": "historical_or_mixed"
+      },
+      {
+        "path": "Samantha_Agent/memory/reports/recovery_guide_rec05_20261107.md",
+        "sha256": "9b0127eb6acc0fd531f13074c3179170e4e6c1eb6d14235d9a56ce8ff58b5b75",
+        "authority": "historical_or_mixed"
+      },
+      {
+        "path": "Samantha_Agent/memory/reports/recovery_guide_rec06_20261107.md",
+        "sha256": "1b070c0119b60cd57dc7e75433047eec1cd78540381e2eba2d9382f48bd9759f",
+        "authority": "historical_or_mixed"
+      },
+      {
+        "path": "Samantha_Agent/memory/reports/recovery_rec06_integration_release_20261107.md",
+        "sha256": "3e4c6b05dd71ced5cd236e42bedb8a39b38c8e7b550c703126ba4f3f62c79968",
+        "authority": "historical_or_mixed"
+      },
+      {
+        "path": "Samantha_Agent/memory/reports/systemovy_audit_projekty_tooly_vrstvy_2026_06_11.txt",
+        "sha256": "7bb9ec3e14cb03ada93c63299493133b60c5b8556c824da0fff15029f0d40afe",
+        "authority": "historical_or_mixed"
+      },
+      {
+        "path": "Samantha_Agent/memory/reports/systemovy_audit_projekty_tooly_vrstvy_2026_06_23.txt",
+        "sha256": "0051c905f6b9d0b12f7f25dcd5986bb54a2329554eae2ed80f9900546e70de1c",
+        "authority": "historical_or_mixed"
+      },
+      {
+        "path": "Samantha_Agent/memory/reports/systemovy_audit_projekty_tooly_vrstvy_2026_06_23_180157.txt",
+        "sha256": "1d642d52ef561fdfc1b2cf51e346c8de4f032215c436d9ef612f1c6cdb82c952",
+        "authority": "historical_or_mixed"
+      },
+      {
+        "path": "Samantha_Agent/memory/reports/systemovy_audit_projekty_tooly_vrstvy_2026_06_30.txt",
+        "sha256": "657ef8d0b950e15a0d2d53f8684aa64cae864595cb418964dde68b4875efb48e",
+        "authority": "historical_or_mixed"
+      },
+      {
+        "path": "Samantha_Agent/memory/reports/systemovy_audit_projekty_tooly_vrstvy_2026_06_30_133949.txt",
+        "sha256": "7267ee53274c2ca6d3c12bf9c777ff868784b30b84b0f6c54bfe5cbcc14a0d97",
+        "authority": "historical_or_mixed"
+      },
+      {
+        "path": "Samantha_Agent/memory/reports/systemovy_audit_projekty_tooly_vrstvy_2026_06_30_151433.txt",
+        "sha256": "b5af31d143b9d157ddf3f0b0eeec61ef06f94eca188112a557646211a153f9ac",
+        "authority": "historical_or_mixed"
+      },
+      {
+        "path": "Samantha_Agent/memory/reports/systemovy_audit_projekty_tooly_vrstvy_2026_06_30_151531.txt",
+        "sha256": "44e036598fe5ec0d3ae9f06a14484a10a7e27dd75155dbed823217e3f9055d73",
+        "authority": "historical_or_mixed"
+      },
+      {
+        "path": "Samantha_Agent/memory/reports/systemovy_audit_projekty_tooly_vrstvy_2026_06_30_161548.txt",
+        "sha256": "90d69e4d6ddf64f582962e5899c01cf780764048eb42ccb348cd8c12bda055c1",
+        "authority": "historical_or_mixed"
+      },
+      {
+        "path": "Samantha_Agent/memory/reports/systemovy_audit_projekty_tooly_vrstvy_2026_07_01.txt",
+        "sha256": "c3d6be48e22fac3b62307ccebec56be2251e53272f697bc368247e20b4584ea5",
+        "authority": "historical_or_mixed"
+      },
+      {
+        "path": "Samantha_Agent/memory/reports/systemovy_audit_projekty_tooly_vrstvy_2026_07_09.txt",
+        "sha256": "94dc2e616ffd2e5fd40133b642a3aac71209065e1f317b0808cc93c6f01ac2c8",
+        "authority": "historical_or_mixed"
+      },
+      {
+        "path": "Samantha_Agent/memory/reports/systemovy_audit_projekty_tooly_vrstvy_2026_07_29.txt",
+        "sha256": "0fd8c9365bbb87f06c5e59e3a8e1ab53cbf220e960eb95cc443a1005d3913453",
+        "authority": "historical_or_mixed"
+      },
+      {
+        "path": "Samantha_Agent/memory/reports/systemovy_audit_projekty_tooly_vrstvy_2026_08_07.txt",
+        "sha256": "2dd4050198cab37d2b1bfdc970cb747e6bdf7cf1131f47269ad2879d3ff984d8",
+        "authority": "historical_or_mixed"
+      },
+      {
+        "path": "Samantha_Agent/memory/reports/systemovy_audit_projekty_tooly_vrstvy_2026_08_07_141352.txt",
+        "sha256": "6f3217d5f2a3fa3d267e07f03540db3cff0cdc7fd953e7be03bf130f5d5b81a1",
+        "authority": "historical_or_mixed"
+      },
+      {
+        "path": "Samantha_Agent/memory/reports/systemovy_audit_projekty_tooly_vrstvy_2026_09_10.txt",
+        "sha256": "50bb63f95b38b46cbb0cae9bf8695a05027377cd78c4bb705a147c886c2aca05",
+        "authority": "historical_or_mixed"
+      },
+      {
+        "path": "Samantha_Agent/memory/reports/systemovy_audit_projekty_tooly_vrstvy_2026_09_13.txt",
+        "sha256": "8a496fbe2036fde7d54efbacfb86367a9b523520bf553454754c54f8bd107e39",
+        "authority": "historical_or_mixed"
+      },
+      {
+        "path": "Samantha_Agent/memory/reports/terra_release_trial_20261028.md",
+        "sha256": "61335567558158fdb3a6e99257ce7f5dec00739cb4e8063751710b34d4e9ecf7",
+        "authority": "historical_or_mixed"
+      },
+      {
+        "path": "Samantha_Agent/memory/reports/to_be_web_release_2026_09_14.md",
+        "sha256": "438fcfde77f15745cac7314759d8a9fff8c9cb7a3b55024d96caf9b389e4c9bf",
+        "authority": "historical_or_mixed"
+      },
+      {
+        "path": "Samantha_Agent/memory/reports/vocabulary_en_mmtx_audit_2026_09_05.md",
+        "sha256": "b75956bdfc134d86386eabe2ff19c709a60d228ef22f0d15ef05c291e715788b",
+        "authority": "historical_or_mixed"
+      },
+      {
+        "path": "Samantha_Agent/memory/reports/vocabulary_fr_it_refresh_2026_09_13.md",
+        "sha256": "17c94c574830ee60f2a4867f0b8fef4d75ad210694f3e75739541abd44845b5e",
+        "authority": "historical_or_mixed"
+      },
+      {
+        "path": "Samantha_Agent/memory/reports/voice_conversation_cockpit_20261105.md",
+        "sha256": "e4e7db3d5836319877178f910850fe0a4a5b343962304c3b691d4e8c16d74533",
+        "authority": "historical_or_mixed"
+      },
+      {
+        "path": "Samantha_Agent/memory/reports/voice_conversation_p2a_20261105.md",
+        "sha256": "2eccc371fcc63960c1ed1f67e0a6fa350118f08a5cfa4622f379d8c38117aea9",
+        "authority": "historical_or_mixed"
+      },
+      {
+        "path": "Samantha_Agent/memory/reports/voice_conversation_p2b_20261105.md",
+        "sha256": "591124dd28bfbc2326461d1f1dc2edd912d9656724f3e7d03484d9a7265ca0b5",
+        "authority": "historical_or_mixed"
+      },
+      {
+        "path": "Samantha_Agent/memory/reports/voice_conversation_probe_20261105.md",
+        "sha256": "b07809bd6a010a20e2f506d0299c97034b729bee3b7bcd46564dea490fac1f3c",
+        "authority": "historical_or_mixed"
+      },
+      {
+        "path": "Samantha_Agent/memory/samantha_core.md",
+        "sha256": "aaa2fe98e3266f7a66924f80a84d8c7bb446bee1cace370f7744eafc23502a80",
+        "authority": "documented_not_live"
+      },
+      {
+        "path": "Samantha_Agent/memory/stories/pohadka_lunaris_misto_kde_se_uci_naslouchat_tichu_2026_05_14.md",
+        "sha256": "c8a5e90336a7e80d11f9843c3536066781dc8f96ae15ce79a9b11503ddfeb5d6",
+        "authority": "documented_not_live"
+      },
+      {
+        "path": "Samantha_Agent/memory/stories/pohadka_o_akvapolis_meste_pod_morem_2026_05_14.md",
+        "sha256": "db9d2d7a8eadc2567234bca4ed59ac70c5322883567927fccde9a8b4e6ae07a9",
+        "authority": "documented_not_live"
+      },
+      {
+        "path": "Samantha_Agent/memory/stories/pohadka_o_ceste_na_arkturion_modrou_planetu_ledu_2026_05_14.md",
+        "sha256": "f38fdc4388b82ea00c40ff912fb8d8febfaade81a9600cf86f15bf36d6158c9e",
+        "authority": "documented_not_live"
+      },
+      {
+        "path": "Samantha_Agent/memory/stories/pohadka_o_matyskovi_martince_a_piskotovi_na_planete_tisice_zazraku_2026_05_14.md",
+        "sha256": "793446630ba5db1ff5c550219aad6319000ecd0f077be853629e0d28360325af",
+        "authority": "documented_not_live"
+      },
+      {
+        "path": "Samantha_Agent/memory/stories/pohadka_o_saffronii_planete_zpivajiciho_pisku_2026_05_14.md",
+        "sha256": "1013038c654121b58ccf1484b5c6851344c2e06a8e718c3a5bc09b996efed880",
+        "authority": "documented_not_live"
+      },
+      {
+        "path": "Samantha_Agent/memory/stories/pohadka_o_silvanoru_planete_kde_mluvi_stromy_2026_05_14.md",
+        "sha256": "a5bdba710f0d3a653d0b99c12532fb7bb8ba9afe3bac1e0598a89d592e1e730b",
+        "authority": "documented_not_live"
+      },
+      {
+        "path": "Samantha_Agent/memory/stories/pohadka_o_velke_vyprave_na_mars_2026_05_14.md",
+        "sha256": "16e131ff967928050a0954677a7b6ddc4f332b0cc041831b6ae7dd6c5405d2d3",
+        "authority": "documented_not_live"
+      },
+      {
+        "path": "Samantha_Agent/memory/stories/pohadka_robot_piskot_pribeh_kamarada_z_budoucnosti_2026_05_14.md",
+        "sha256": "7e00f5654f22df64f078c6ef0d4a8812e4810f548eb957b90f1a2a36a5a3308a",
+        "authority": "documented_not_live"
+      },
+      {
+        "path": "Samantha_Agent/memory/stories/pohadka_viridana_2026_05_14.md",
+        "sha256": "4aa4d53df3cf5cf53f7e97bdc9ec068010c955f24dbf9025db8bd1cbdf5930bc",
+        "authority": "documented_not_live"
+      },
+      {
+        "path": "Samantha_Agent/memory/technical/capability_routing_rules.md",
+        "sha256": "226b2658055471459365abc82034b24920f8c4694a2d8b30db7a34f7f78e5e81",
+        "authority": "documented_not_live"
+      },
+      {
+        "path": "Samantha_Agent/memory/technical/codex_permissions_preferences.md",
+        "sha256": "32f65fefaf61785da8527a03d81d867033d6f44b7d7d98415221e2af3bafb176",
+        "authority": "documented_not_live"
+      },
+      {
+        "path": "Samantha_Agent/memory/technical/codex_remote_approval_notice.md",
+        "sha256": "b99d0857b7606e736ff333f09f75356fd131b9575a181cf6002253cb7de820f4",
+        "authority": "documented_not_live"
+      },
+      {
+        "path": "Samantha_Agent/memory/technical/general_reminders_workflow.md",
+        "sha256": "3afccfc879dfbe85dfe49095c1c60a68f0a22a8e02e81af94a143966c3670789",
+        "authority": "documented_not_live"
+      },
+      {
+        "path": "Samantha_Agent/memory/technical/global_safety_brake.md",
+        "sha256": "0f7fd71eb277aa2117dc4c481de856dae8ccfaefee84ac9daf9f500c7de4947b",
+        "authority": "documented_not_live"
+      },
+      {
+        "path": "Samantha_Agent/memory/technical/iphone_shortcuts_playground.md",
+        "sha256": "721230299c539bba801bc65c44ca596f57583f32be0ced05ca888fd17919b1dd",
+        "authority": "documented_not_live"
+      },
+      {
+        "path": "Samantha_Agent/memory/technical/large_context_intake.md",
+        "sha256": "e7ca46740fff17820c3ce3f1d49551fdbcc000ece207eb09f4ed7b20d979e8b0",
+        "authority": "documented_not_live"
+      },
+      {
+        "path": "Samantha_Agent/memory/technical/lekarna_photo_import_intake.md",
+        "sha256": "4835597ba2df9a64d63ec323eaaff95ac8dee1c7b6fcc2cc008a9e349df346e9",
+        "authority": "documented_not_live"
+      },
+      {
+        "path": "Samantha_Agent/memory/technical/lekarna_pil_short_workflow.md",
+        "sha256": "ea4e1269db41a5763494e041cc6318274503bafb6eb2651fa569ac3239ead99f",
+        "authority": "documented_not_live"
+      },
+      {
+        "path": "Samantha_Agent/memory/technical/luna_release_orchestration.md",
+        "sha256": "2e07ba8b5cb033d04dbaab961c5b26dc38e254f0b7506e91a90dd8fd22f42ff2",
+        "authority": "documented_not_live"
+      },
+      {
+        "path": "Samantha_Agent/memory/technical/macos_wifi_vpn_tailscale_recovery.md",
+        "sha256": "27527bd174f1c363b76ce37c5bdcf03d410996b0dbcf8e15d27169dae3036407",
+        "authority": "documented_not_live"
+      },
+      {
+        "path": "Samantha_Agent/memory/technical/matysek_f5tts_voice_workflow.md",
+        "sha256": "914753df821e54a60f793bf45464d5db0e5c1fce9009dff4a675b051272c1c99",
+        "authority": "documented_not_live"
+      },
+      {
+        "path": "Samantha_Agent/memory/technical/media_review_form_workflow.md",
+        "sha256": "0c18265917da8a5c80365904acd9c19031eb3510535f13e62f794d09c0a49ff3",
+        "authority": "documented_not_live"
+      },
+      {
+        "path": "Samantha_Agent/memory/technical/naming_conventions.md",
+        "sha256": "12353f74d9b7390894a42ba31c05d4dc9d1c89d98403eedcf110f25898c012da",
+        "authority": "documented_not_live"
+      },
+      {
+        "path": "Samantha_Agent/memory/technical/private_document_vault_workflow.md",
+        "sha256": "7dc71f3015b742e9483d41d9f341108000aa78e8f66165846c4133a3cd07d16c",
+        "authority": "documented_not_live"
+      },
+      {
+        "path": "Samantha_Agent/memory/technical/project_capability_map.md",
+        "sha256": "9089a56d6e828318c0dcad456503bb685adb5852362e8a34b597860399f730f9",
+        "authority": "documented_not_live"
+      },
+      {
+        "path": "Samantha_Agent/memory/technical/project_tvbcp_rules.md",
+        "sha256": "cc19052eb236a615a13313203ddf137ec3c398d6d344b3f90aacafdca1329b9d",
+        "authority": "documented_not_live"
+      },
+      {
+        "path": "Samantha_Agent/memory/technical/recovery_guide_maintainer.md",
+        "sha256": "86c5b1db3e18bdb8dffb2c280e3eab5e525bc96ea520fa8f8893a41c99f157fa",
+        "authority": "documented_not_live"
+      },
+      {
+        "path": "Samantha_Agent/memory/technical/samantha_cultural_metaphors.md",
+        "sha256": "71db86423c523617dce1b357366bf00584def4d0542740e843fd7e7d30bc9441",
+        "authority": "documented_not_live"
+      },
+      {
+        "path": "Samantha_Agent/memory/technical/samantha_growth_rules.md",
+        "sha256": "b195fbcbe90c4f401dfd48c42d8902b146d248e64f2da8a0b020cbf848c3ec9c",
+        "authority": "documented_not_live"
+      },
+      {
+        "path": "Samantha_Agent/memory/technical/session_recovery_rules.md",
+        "sha256": "e20c4cf946485c491264ca0384b33c7961cde3eaf98f590c4f8eb6368f90321b",
+        "authority": "documented_not_live"
+      },
+      {
+        "path": "Samantha_Agent/memory/technical/shopping_research_and_purchase_archive.md",
+        "sha256": "43dff3d014f36f10f8fa6b3469ede8074203499a1692abe63fbe33b42f2ba408",
+        "authority": "documented_not_live"
+      },
+      {
+        "path": "Samantha_Agent/memory/technical/story_memory_rules.md",
+        "sha256": "ec5c09d49c5a57dac0e10f3dcf26c9559ca3dc6a22019e776fc891aef974013d",
+        "authority": "documented_not_live"
+      },
+      {
+        "path": "Samantha_Agent/memory/technical/system_project_audit_generator_design.md",
+        "sha256": "93b317177be57f878c9438eafd4fb1f75ae776de3754c6592ef3e391e14fdd04",
+        "authority": "documented_not_live"
+      },
+      {
+        "path": "Samantha_Agent/memory/technical/system_reports.md",
+        "sha256": "9999d1fac4d39e9403115f64ad113949d5f42b2f900a9c6978e8b3c5665197c6",
+        "authority": "documented_not_live"
+      },
+      {
+        "path": "Samantha_Agent/memory/technical/vocabulary_image_generation_workflow.md",
+        "sha256": "07dbf67d37f495b7ff52d54aa5ee29c25dfae1b732adbb063e1c0fe461563718",
+        "authority": "documented_not_live"
+      },
+      {
+        "path": "Samantha_Agent/memory/technical/workflow_command_registry.md",
+        "sha256": "eae4a41dea36b685ec09f920706541ef218376b720f3b3141b8d37243b225365",
+        "authority": "documented_not_live"
+      },
+      {
+        "path": "Samantha_Agent/memory/tvbcp/architektura_komunikace_samantha.txt",
+        "sha256": "173190b6906d656b5a481d104641681f5121a280a7226637a781a80fea187448",
+        "authority": "historical_or_mixed"
+      },
+      {
+        "path": "Samantha_Agent/memory/tvbcp/knihovna_cockpit.txt",
+        "sha256": "82246aec89760cd004a4de31eae8a66a545ed6ce10b00a665a16f049831bd99d",
+        "authority": "historical_or_mixed"
+      },
+      {
+        "path": "Samantha_Agent/memory/tvbcp/workstreams/project-camino.md",
+        "sha256": "e9d91eac671ccbae8bc1a59a43be5c80ecaa898318b9564560d18c229a88183b",
+        "authority": "historical_or_mixed"
+      },
+      {
+        "path": "Samantha_Agent/memory/tvbcp/workstreams/project-cockpit.md",
+        "sha256": "da75aac2ab47c98262a729af556796dfa6d80bbeca20250040333d485cebfda3",
+        "authority": "historical_or_mixed"
+      },
+      {
+        "path": "Samantha_Agent/memory/tvbcp/workstreams/project-family-calendar.md",
+        "sha256": "69beed144e015b23c445a630a983f0348646f6d8cb3875933dda8f4a06d3ec6a",
+        "authority": "historical_or_mixed"
+      },
+      {
+        "path": "Samantha_Agent/memory/tvbcp/workstreams/project-linux-workstation.md",
+        "sha256": "f80323bd730385d8ad8db462b21f5bc54575e47f6b37933f326bcbb25a12341e",
+        "authority": "historical_or_mixed"
+      },
+      {
+        "path": "Samantha_Agent/memory/tvbcp/workstreams/project-mmtx.md",
+        "sha256": "cc1019a80a6462f556fd78fd0a5857f30a55c698d70dc8f51cad5892b35744b3",
+        "authority": "historical_or_mixed"
+      },
+      {
+        "path": "Samantha_Agent/memory/tvbcp/workstreams/project-r2-adam-janicka.md",
+        "sha256": "3aa12dde43a9667ee8542ef85ce7f04453182baa08b37cfbdb94386d13ad964d",
+        "authority": "historical_or_mixed"
+      },
+      {
+        "path": "Samantha_Agent/memory/tvbcp/workstreams/project-samantha-agent-rag.md",
+        "sha256": "1ae13d4439422b63940105a09f0a352e15a80da00dd7df6a03b7a4c2adc40fe6",
+        "authority": "historical_or_mixed"
+      },
+      {
+        "path": "Samantha_Agent/memory/tvbcp/workstreams/project-samantha-infrastructure.md",
+        "sha256": "59821136c1434de4be7fc171e2d67be217a4a02de039c0972078aa1cccd6590f",
+        "authority": "historical_or_mixed"
+      },
+      {
+        "path": "Samantha_Agent/memory/tvbcp/workstreams/project-to-be-to-have.md",
+        "sha256": "06cb9d8e63feb882ca785cb3fb0d6ceaa488fd85ea1727509d13b8005610db31",
+        "authority": "historical_or_mixed"
+      },
+      {
+        "path": "Samantha_Agent/memory/tvbcp/workstreams/project-vocabulary-fr.md",
+        "sha256": "280cb5e0eec315d8f9267f5c4f29350ad1cfc63cf4e8cc9e1b859d28ffa6731f",
+        "authority": "historical_or_mixed"
+      },
+      {
+        "path": "Samantha_Agent/memory/tvbcp/workstreams/project-vocabulary-it.md",
+        "sha256": "93319d448b29484bf1a7c83d90b7785f65e719f44a0808097f69609ab35a6f41",
+        "authority": "historical_or_mixed"
+      },
+      {
+        "path": "Samantha_Agent/tools/vscode-screen-recovery/README.md",
+        "sha256": "030e7b4dd66768f2f4b8d3ee1294dc2061bb70adc4632e1664406c1a7ac54063",
+        "authority": "documented_not_live"
+      },
+      {
+        "path": "docs/README_GITHUB_PAGES.md",
+        "sha256": "312eda8ff09113ea38b52d370aebad62fbceeb407a1f9b8a5900319c4feece55",
+        "authority": "documented_not_live"
+      },
+      {
+        "path": "docs/audio/README_AUDIO.txt",
+        "sha256": "d61876d7da6796d58c7848df7591d04a85a41856a3f5fcecf5285cdcca2ef6c9",
+        "authority": "documented_not_live"
+      },
+      {
+        "path": "docs/restaurace-ptkl/assets/NavstevaRestaurace.txt",
+        "sha256": "314ec3a6594d9790ee305f1ab2f816e07924195044aa283277ee1009fa50fcf9",
+        "authority": "documented_not_live"
+      },
+      {
+        "path": "docs/scene02_sunnys_lost_nuts/README.md",
+        "sha256": "6d56d6def12a258bea19818098a1ac8ceadc458684982df7d7dce6b38fd01084",
+        "authority": "documented_not_live"
+      },
+      {
+        "path": "docs/scene02_sunnys_lost_nuts/audio/README.md",
+        "sha256": "988298affd8171e0905edb2e7a48005fddca2fd6952f63f6710c33885a22a26e",
+        "authority": "documented_not_live"
+      },
+      {
+        "path": "docs/scene03_journey_to_the_lake/README.md",
+        "sha256": "a2c139d631a9960cf628bb2f5db1b46d7561738d1594ace0836f60c28882b200",
+        "authority": "documented_not_live"
+      },
+      {
+        "path": "docs/scene06_lake_arrival/README.txt",
+        "sha256": "09b7f49ede1de342970e9dcd748a166560e38a739390987f9a7e46784a9fe7c9",
+        "authority": "documented_not_live"
+      },
+      {
+        "path": "docs/scene06_lake_arrival/image_prompts.txt",
+        "sha256": "afc349248f85a2f05d793c56d51755035c057b87da78d5b130c7603ff1f2f33f",
+        "authority": "documented_not_live"
+      },
+      {
+        "path": "docs/scene_jane_birthday/README.md",
+        "sha256": "90ac0f06d51369d29f2ccf7310619c63faafab10b25d830aaea176afbc8cb11e",
+        "authority": "documented_not_live"
+      },
+      {
+        "path": "docs/scene_kate_birthday/README.md",
+        "sha256": "be63e7635e78eb42b2c1af5a3ae4e2c758818dc05b9b8ef1c372f67f3487210f",
+        "authority": "documented_not_live"
+      },
+      {
+        "path": "iOS/VocabFRLockscreen/InfoPlistAdditions.md",
+        "sha256": "e21215c2f5f56d0955c5155bb24a56b3fe22664d6c1ca9e1594f96542a339288",
+        "authority": "documented_not_live"
+      },
+      {
+        "path": "iOS/VocabFRLockscreen/README.md",
+        "sha256": "d98731c7521794b1c97f2d89bdc8abac5d63153d0dd9e8fdd4b65721e5dd1c19",
+        "authority": "documented_not_live"
+      }
+    ],
+    "scopes": [
+      "Samantha_Agent/{memory,docs,camino}/",
+      "**/{AGENTS,README}.md",
+      "docs/",
+      "MatysekANJ/docs/",
+      "iOS/"
+    ],
+    "excluded_text_files": 114,
+    "coverage": "inventory_only",
+    "approval_required": true
+  },
+  "measurements": {
+    "reference_encoding": "o200k_base",
+    "tokenizer": {
+      "model": "gpt-6.1-sol",
+      "package": "tiktoken",
+      "version": "0.14.0",
+      "exact_model_mapping": false,
+      "fallback": false,
+      "state": "model_mapping_unknown"
+    },
+    "model_tokenization_verified": false,
+    "reference_multiplier": 1.25,
+    "overhead_allowance_per_turn": 8000,
+    "margin_is_proven_upper_bound": false,
+    "baseline_reference_credits": 144.9623,
+    "planning_standard_credits_with_margin": 193.79845,
+    "input_planning_tokens_with_margin": 3155969,
+    "output_acceptance_tokens": 144000,
+    "planned_calls": 15,
+    "limits": {
+      "input_tokens": 250000,
+      "output_tokens": 32000,
+      "max_calls": 20,
+      "run_credits": 200,
+      "month_credits": 200,
+      "seconds": 1800,
+      "inspection_output_tokens": 8000
+    },
+    "hard_billing_cap": false,
+    "cache_assumed": false,
+    "shards": [
+      {
+        "index": 0,
+        "source_count": 36,
+        "source_paths": [
+          "AGENTS.md",
+          "MatysekANJ/web_mmtx/scene02_sunnys_lost_nuts/README.md",
+          "MatysekANJ/web_mmtx/scene02_sunnys_lost_nuts/audio/README.md",
+          "MatysekANJ/web_mmtx/scene03_journey_to_the_lake/README.md",
+          "MatysekANJ/web_mmtx/scene_jane_birthday/README.md",
+          "MatysekANJ/web_mmtx/scene_kate_birthday/README.md",
+          "PythonSeSamanthou/README.md",
+          "PythonSeSamanthou/kurzy/python_dalsi_kroky/README.md",
+          "PythonSeSamanthou/kurzy/python_prakticke_ulohy/README.md",
+          "Samantha_Agent/AGENTS.md",
+          "Samantha_Agent/README.md",
+          "Samantha_Agent/camino/AGENTS.md",
+          "Samantha_Agent/camino/CAMINO_podklady_v0.4/AGENTS.md",
+          "Samantha_Agent/camino/CAMINO_podklady_v0.4/CAMINO_Codex_v0.4.md",
+          "Samantha_Agent/camino/CAMINO_podklady_v0.4/CAMINO_akceptacni_testy_v0.4.md",
+          "Samantha_Agent/camino/CAMINO_podklady_v0.4/CAMINO_funkcni_specifikace_v0.4.md",
+          "Samantha_Agent/camino/CAMINO_podklady_v0.4/CAMINO_zmeny_v0.4.md",
+          "Samantha_Agent/camino/CAMINO_podklady_v0.4/README_v0.4.md",
+          "Samantha_Agent/camino/CAMINO_podklady_v0.4/historie/CAMINO_pracovni_navrh_v0.2-DRAFT.md",
+          "Samantha_Agent/camino/CAMINO_podklady_v0.4/historie/v0.3/CAMINO_navrh_v0.3.md",
+          "Samantha_Agent/camino/CAMINO_podklady_v0.4/historie/v0.3/CAMINO_plan_Codex_v0.3.md",
+          "Samantha_Agent/camino/CAMINO_podklady_v0.5/AGENTS.md",
+          "Samantha_Agent/camino/CAMINO_podklady_v0.5/CAMINO_Codex_v0.5.md",
+          "Samantha_Agent/camino/CAMINO_podklady_v0.5/CAMINO_akceptacni_testy_v0.5.md",
+          "Samantha_Agent/camino/CAMINO_podklady_v0.5/CAMINO_funkcni_specifikace_v0.5.md",
+          "Samantha_Agent/camino/CAMINO_podklady_v0.5/CAMINO_zmeny_v0.5.md",
+          "Samantha_Agent/camino/CAMINO_podklady_v0.5/README_v0.5.md",
+          "Samantha_Agent/camino/README.md",
+          "Samantha_Agent/camino/app/C04b_IPHONE_TEST_PLAN.md",
+          "Samantha_Agent/camino/app/C04d_IPHONE_TEST_PLAN.md",
+          "Samantha_Agent/camino/app/C05b_IPHONE_TEST_PLAN.md",
+          "Samantha_Agent/camino/app/C05c_IPHONE_TEST_PLAN.md",
+          "Samantha_Agent/camino/app/README.md",
+          "Samantha_Agent/camino/docs/AUDIO_LAYOUT_REJECTION_INCIDENT_20261015.md",
+          "Samantha_Agent/camino/docs/C01a_AUDIO_PROTOTYPE_REPORT.md",
+          "Samantha_Agent/camino/docs/C01b_BACKGROUND_AUDIO_REPORT.md"
+        ],
+        "payload_sha256": "f09e054cccb638142620f75671cc84885e76e1eab85e3a092229cad4abb89d8c"
+      },
+      {
+        "index": 1,
+        "source_count": 65,
+        "source_paths": [
+          "Samantha_Agent/camino/docs/C01c_RECOVERABLE_AUDIO_REPORT.md",
+          "Samantha_Agent/camino/docs/C02a_SYNTHETIC_RECEIVER_REPORT.md",
+          "Samantha_Agent/camino/docs/C02b_CHUNK_TRANSFER_REPORT.md",
+          "Samantha_Agent/camino/docs/C03a_DOMAIN_CONTRACT.md",
+          "Samantha_Agent/camino/docs/C03b_API_CONTRACT.md",
+          "Samantha_Agent/camino/docs/C05a_PRODUCTION_RECEIVER_REPORT.md",
+          "Samantha_Agent/camino/docs/C05b_IOS_SYNC_REPORT.md",
+          "Samantha_Agent/camino/docs/C05c_STATUS_UX_REPORT.md",
+          "Samantha_Agent/camino/docs/CAMERA_ZOOM_REPORT.md",
+          "Samantha_Agent/camino/docs/CLIENT_21_SERVICE_UPGRADE_REPORT.md",
+          "Samantha_Agent/camino/docs/COMMENTARY_WORKFLOW_REPORT.md",
+          "Samantha_Agent/camino/docs/DECISIONS.md",
+          "Samantha_Agent/camino/docs/ENVIRONMENT_AUDIT.md",
+          "Samantha_Agent/camino/docs/FILM_TEXT_AUDIO_REPORT.md",
+          "Samantha_Agent/camino/docs/GPS_CAPTURE_REPORT.md",
+          "Samantha_Agent/camino/docs/LARGE_PHOTO_REPORT.md",
+          "Samantha_Agent/camino/docs/M1_VIEWER_REPORT.md",
+          "Samantha_Agent/camino/docs/M2_RECOVERY_REPORT.md",
+          "Samantha_Agent/camino/docs/M2_RUNTIME_REPORT.md",
+          "Samantha_Agent/camino/docs/M2b_AUDIO_LAYOUT_REPORT.md",
+          "Samantha_Agent/camino/docs/M2c_SERVICE_REPORT.md",
+          "Samantha_Agent/camino/docs/METADATA_REJECTION_INCIDENT_20261014.md",
+          "Samantha_Agent/camino/docs/MULTI_PROJECT_ACCESS_REPORT.md",
+          "Samantha_Agent/camino/docs/MULTI_PROJECT_FOUNDATION.md",
+          "Samantha_Agent/camino/docs/P2A_FILM_REPORT.md",
+          "Samantha_Agent/camino/docs/P2B_CLOSED_DAY_REPORT.md",
+          "Samantha_Agent/camino/docs/P2CD_EDITOR_MP4_REPORT.md",
+          "Samantha_Agent/camino/docs/PENDING_MEDIA_REVIEW_REPORT.md",
+          "Samantha_Agent/camino/docs/PHOTO_LIBRARY_IMPORT.md",
+          "Samantha_Agent/camino/docs/PHOTO_TEXT_COMMENT_REPORT.md",
+          "Samantha_Agent/camino/docs/PROJECT_MANAGEMENT_UI_REPORT.md",
+          "Samantha_Agent/camino/docs/PROJECT_TRASH_CONTRACT.md",
+          "Samantha_Agent/camino/docs/PROJECT_TRASH_NAVIGATION_REPORT.md",
+          "Samantha_Agent/camino/docs/PROJECT_TRASH_REPORT.md",
+          "Samantha_Agent/camino/docs/TITLES_AND_TRANSFER_STATUS_REPORT.md",
+          "Samantha_Agent/camino/docs/TRAVEL_MVP_PLAN.md",
+          "Samantha_Agent/camino/docs/TRIP_TITLES.md",
+          "Samantha_Agent/camino/docs/V05_PRIVACY_AMENDMENT.md",
+          "Samantha_Agent/camino/docs/VIDEO_AUDIO_INCIDENT_20261013.md",
+          "Samantha_Agent/camino/docs/VIEWER_MAP_REPORT.md",
+          "Samantha_Agent/camino/docs/VIEWER_READINESS.md",
+          "Samantha_Agent/camino/docs/VIEWER_ROUTE_MAP_REPORT.md",
+          "Samantha_Agent/camino/docs/XCODE_INSTALLATION.md",
+          "Samantha_Agent/camino/film/README.md",
+          "Samantha_Agent/camino/prototypes/audio/README.md",
+          "Samantha_Agent/camino/prototypes/transfer/README.md",
+          "Samantha_Agent/camino/server/README.md",
+          "Samantha_Agent/camino/server/map_assets/LICENSE.txt",
+          "Samantha_Agent/camino/server/map_assets/README.md",
+          "Samantha_Agent/camino/server/requirements.txt",
+          "Samantha_Agent/camino/tasks/C01a_AUDIO_PROTOTYPE.md",
+          "Samantha_Agent/camino/tasks/C01b_BACKGROUND_AUDIO.md",
+          "Samantha_Agent/camino/tasks/C01c_RECOVERABLE_AUDIO.md",
+          "Samantha_Agent/camino/tasks/C02a_SYNTHETIC_RECEIVER.md",
+          "Samantha_Agent/camino/tasks/C02b_BUILD4_FIRST_START_FIELD_PLAN.md",
+          "Samantha_Agent/camino/tasks/C02b_CHUNK_TRANSFER_EXPERIMENT.md",
+          "Samantha_Agent/camino/tasks/C02b_T048_T049_FIELD_PLAN.md",
+          "Samantha_Agent/camino/tasks/C02b_T050_FIELD_PLAN.md",
+          "Samantha_Agent/camino/tasks/C05a_PRODUCTION_RECEIVER.md",
+          "Samantha_Agent/camino/tasks/C05b_IOS_SYNC_QUEUE.md",
+          "Samantha_Agent/camino/tasks/C05c_STATUS_AXES.md",
+          "Samantha_Agent/data/matysek_english/scene_proposals_20260530_forest_journey/README.md",
+          "Samantha_Agent/data/matysek_english/voice_casting_20260601_scene01/README.md",
+          "Samantha_Agent/data/matysek_english/voice_casting_20260601_scene01_recast/README.md",
+          "Samantha_Agent/docs/daily_3am.md"
+        ],
+        "payload_sha256": "46be8df58448d41a0f835fbf86d12ccb7ac3f9054d676f1b8b152caa514534f1"
+      },
+      {
+        "index": 2,
+        "source_count": 46,
+        "source_paths": [
+          "Samantha_Agent/memory/ACTIVE_PROJECTS.md",
+          "Samantha_Agent/memory/LESSONS_LEARNED.md",
+          "Samantha_Agent/memory/MEMORY_INDEX.md",
+          "Samantha_Agent/memory/WORKSTREAMS.md",
+          "Samantha_Agent/memory/contacts.md",
+          "Samantha_Agent/memory/handoffs/adam_voice_bridge_cleanup_and_cockpit_controls_2026_06_12.md",
+          "Samantha_Agent/memory/handoffs/adam_voice_bridge_end_to_end_checkpoint_2026_06_05.md",
+          "Samantha_Agent/memory/handoffs/adam_voice_bridge_freeze_email_return_2026_06_12.md",
+          "Samantha_Agent/memory/handoffs/adam_voice_bridge_iphone_text_fallback_checkpoint_2026_06_06.md",
+          "Samantha_Agent/memory/handoffs/adam_voice_bridge_target_tty_checkpoint_2026_06_05.md",
+          "Samantha_Agent/memory/handoffs/adam_voice_bridge_tty_switcher_2026_06_10.md",
+          "Samantha_Agent/memory/handoffs/adam_voice_cockpit_dev_runner_checkpoint_2026_06_12.md",
+          "Samantha_Agent/memory/handoffs/adam_voice_cockpit_readonly_capabilities_next_2026_06_06.md",
+          "Samantha_Agent/memory/handoffs/adam_voice_global_safety_brake_2026_06_09.md",
+          "Samantha_Agent/memory/handoffs/adam_voice_iphone_audio_bridge_checkpoint_2026_06_11.md",
+          "Samantha_Agent/memory/handoffs/adam_voice_iphone_autoread_confirmed_2026_06_29.md",
+          "Samantha_Agent/memory/handoffs/adam_voice_remote_cockpit_next_step_2026_06_06.md",
+          "Samantha_Agent/memory/handoffs/adam_voice_terminal_bridge_checkpoint_2026_06_05.md",
+          "Samantha_Agent/memory/handoffs/adam_voice_ttys001_readiness_blocker_2026_06_07.md",
+          "Samantha_Agent/memory/handoffs/apple_music_project_audio_cleanup_2026_09_05.md",
+          "Samantha_Agent/memory/handoffs/appserver_human_adam_text_remote_verified_restart_backup_2026_07_14.md",
+          "Samantha_Agent/memory/handoffs/appserver_lab_lifecycle_verified_2026_07_13.md",
+          "Samantha_Agent/memory/handoffs/appserver_lab_thread_registry_context_capsule_2026_07_13.md",
+          "Samantha_Agent/memory/handoffs/appserver_remote_work_cell_v0_2026_07_13.md",
+          "Samantha_Agent/memory/handoffs/article_archive_cockpit_library_2026_06_10.md",
+          "Samantha_Agent/memory/handoffs/automated_recurring_tasks_cloud_2026_05_20.md",
+          "Samantha_Agent/memory/handoffs/autosave_cleanup_ssd_space_recovery_2026_08_15.md",
+          "Samantha_Agent/memory/handoffs/autosave_status_and_voice_triage_fix_2026_06_12.md",
+          "Samantha_Agent/memory/handoffs/backup_usb_hub_restart_checkpoint_2026_06_03.md",
+          "Samantha_Agent/memory/handoffs/capability_registry_complete_2026_06_27.md",
+          "Samantha_Agent/memory/handoffs/capability_registry_next_checkpoint_2026_06_26.md",
+          "Samantha_Agent/memory/handoffs/capability_registry_priority_gaps_closed_2026_06_26.md",
+          "Samantha_Agent/memory/handoffs/chatgpt_export_knowledge_import_checkpoint_2026_06_19.md",
+          "Samantha_Agent/memory/handoffs/chatgpt_handoff_2026_05_14.md",
+          "Samantha_Agent/memory/handoffs/chatgpt_travel_places_library_checkpoint_2026_06_26.md",
+          "Samantha_Agent/memory/handoffs/cockpit_action_queue_2026_06_04.md",
+          "Samantha_Agent/memory/handoffs/cockpit_architecture_current_2026_07_10.md",
+          "Samantha_Agent/memory/handoffs/cockpit_audit_live_2026_06_28.md",
+          "Samantha_Agent/memory/handoffs/cockpit_codex_session_false_duplicate_fix_2026_06_17.md",
+          "Samantha_Agent/memory/handoffs/cockpit_command_cheatsheet_2026_07_18.md",
+          "Samantha_Agent/memory/handoffs/cockpit_dashboard_terminal_launch_checkpoint_2026_05_29.md",
+          "Samantha_Agent/memory/handoffs/cockpit_development_priorities_2026_06_03.md",
+          "Samantha_Agent/memory/handoffs/cockpit_diagnostics_modal_2026_06_04.md",
+          "Samantha_Agent/memory/handoffs/cockpit_doladeni_navrhy_2026_06_05.txt",
+          "Samantha_Agent/memory/handoffs/cockpit_email_archive_browser_2026_07_09.md",
+          "Samantha_Agent/memory/handoffs/cockpit_email_intake_cache_fix_2026_06_08.md"
+        ],
+        "payload_sha256": "fe57ce468900e2fdfbefccf34ed8ef665149df331bc0887e75ed94f8ae5cf1b2"
+      },
+      {
+        "index": 3,
+        "source_count": 91,
+        "source_paths": [
+          "Samantha_Agent/memory/handoffs/cockpit_global_hotkey_agent_2026_06_01.md",
+          "Samantha_Agent/memory/handoffs/cockpit_health_status_buttons_2026_06_04.md",
+          "Samantha_Agent/memory/handoffs/cockpit_hotkey_fallback_port_2026_07_07.md",
+          "Samantha_Agent/memory/handoffs/cockpit_iphone_tailscale_shortcut_2026_06_05.md",
+          "Samantha_Agent/memory/handoffs/cockpit_main_screen_phase2_cleanup_2026_06_11.md",
+          "Samantha_Agent/memory/handoffs/cockpit_managed_codex_sessions_2026_07_03.md",
+          "Samantha_Agent/memory/handoffs/cockpit_purchase_pdf_and_library_export_email_filter_2026_06_22.md",
+          "Samantha_Agent/memory/handoffs/cockpit_recovery_center_priority_2026_06_03.md",
+          "Samantha_Agent/memory/handoffs/cockpit_remote_exact_confirmation_cards_2026_06_27.md",
+          "Samantha_Agent/memory/handoffs/cockpit_restart_button_and_voice_audio_cleanup_2026_06_23.md",
+          "Samantha_Agent/memory/handoffs/cockpit_robustness_smoke_backup_bridge_2026_06_09.md",
+          "Samantha_Agent/memory/handoffs/cockpit_safe_restart_2026_06_04.md",
+          "Samantha_Agent/memory/handoffs/cockpit_session_autosave_cleanup_2026_06_30.md",
+          "Samantha_Agent/memory/handoffs/cockpit_startup_health_voicebridge_verified_2026_07_09.md",
+          "Samantha_Agent/memory/handoffs/cockpit_ui_cleanup_experiment_checkpoint_2026_06_11.md",
+          "Samantha_Agent/memory/handoffs/cockpit_voice_input_auto_inbox_2026_06_05.md",
+          "Samantha_Agent/memory/handoffs/cockpit_voice_janicka_stability_checkpoint_2026_07_09.md",
+          "Samantha_Agent/memory/handoffs/cockpit_web_apps_checkpoint_2026_05_29.md",
+          "Samantha_Agent/memory/handoffs/codex_full_access_voicebridge_guard_next_2026_06_29.md",
+          "Samantha_Agent/memory/handoffs/colors_numbers_owl_pages_artifact_checkpoint_2026_07_27.md",
+          "Samantha_Agent/memory/handoffs/colors_numbers_owl_tts_startup_prompt_2026_05_22.md",
+          "Samantha_Agent/memory/handoffs/colors_numbers_private_photo_gallery_proposal_2026_07_13.md",
+          "Samantha_Agent/memory/handoffs/continuous_personal_agent_2026_11_04.md",
+          "Samantha_Agent/memory/handoffs/data_05_appserver_sdk_pilot_20261104.md",
+          "Samantha_Agent/memory/handoffs/data_15_voice_conversation_pilot_20261105.md",
+          "Samantha_Agent/memory/handoffs/development_branch_lifecycle_phase1_wip_2026_07_19.md",
+          "Samantha_Agent/memory/handoffs/dnesni_checkpoint_lekarna_pictnew_git_2026_05_20.md",
+          "Samantha_Agent/memory/handoffs/document_email_attachments_scandocu_metadata_checkpoint_2026_06_16.md",
+          "Samantha_Agent/memory/handoffs/document_management_cockpit_case_health_checkpoint_2026_06_04.md",
+          "Samantha_Agent/memory/handoffs/document_management_cockpit_voice_command_inbox_2026_05_29.md",
+          "Samantha_Agent/memory/handoffs/document_management_morning_action_plan_2026_06_04.md",
+          "Samantha_Agent/memory/handoffs/document_management_private_vault_cleanup_done_2026_05_22.md",
+          "Samantha_Agent/memory/handoffs/document_management_private_vault_start_2026_05_21.md",
+          "Samantha_Agent/memory/handoffs/document_management_private_vault_status_done_next_steps_2026_05_22.md",
+          "Samantha_Agent/memory/handoffs/document_management_private_vault_tax_import_2026_05_22.md",
+          "Samantha_Agent/memory/handoffs/document_management_scandocu_reimport_checkpoint_2026_05_28.md",
+          "Samantha_Agent/memory/handoffs/document_management_tax_generali_import_2026_05_22.md",
+          "Samantha_Agent/memory/handoffs/document_metadata_and_tts_audio_checkpoint_2026_06_14.md",
+          "Samantha_Agent/memory/handoffs/document_vault_email_pdf_review_metadata_fix_2026_06_13.md",
+          "Samantha_Agent/memory/handoffs/document_vault_next_physical_print_and_downloads_intake_2026_05_22.md",
+          "Samantha_Agent/memory/handoffs/document_vault_print_workflow_2026_05_22.md",
+          "Samantha_Agent/memory/handoffs/email_action_case_phase2_core_done_2026_05_19.md",
+          "Samantha_Agent/memory/handoffs/email_action_case_phase2_proposed_2026_05_19.md",
+          "Samantha_Agent/memory/handoffs/email_activity_state_done_2026_05_19.md",
+          "Samantha_Agent/memory/handoffs/email_archive_vault_core_done_2026_05_19.md",
+          "Samantha_Agent/memory/handoffs/email_archive_vault_no_urls_after_archive_2026_05_19.md",
+          "Samantha_Agent/memory/handoffs/email_archive_vault_proposed_2026_05_19.md",
+          "Samantha_Agent/memory/handoffs/email_archive_vault_tool_done_2026_05_19.md",
+          "Samantha_Agent/memory/handoffs/email_case_vault_save_tool_done_2026_05_19.md",
+          "Samantha_Agent/memory/handoffs/email_case_workflow_ready_2026_05_19.md",
+          "Samantha_Agent/memory/handoffs/email_fulltext_search_tool_2026_05_21.md",
+          "Samantha_Agent/memory/handoffs/email_icloud_app_email_layer_2026_05_18.md",
+          "Samantha_Agent/memory/handoffs/email_icloud_pdf_metadata_review_fix_2026_06_12.md",
+          "Samantha_Agent/memory/handoffs/email_icloud_readonly_test_ok_2026_05_18.md",
+          "Samantha_Agent/memory/handoffs/email_icloud_setup_conversation_2026_05_18.txt",
+          "Samantha_Agent/memory/handoffs/email_mail_permissions_2026_05_17.txt",
+          "Samantha_Agent/memory/handoffs/email_outbound_sms_triage_next_2026_05_28.md",
+          "Samantha_Agent/memory/handoffs/email_processing_cleanup_and_documents_next_2026_06_03.md",
+          "Samantha_Agent/memory/handoffs/email_processing_cockpit_decision_ui_2026_06_01.md",
+          "Samantha_Agent/memory/handoffs/email_project_frozen_human_handoff_2026_05_19.md",
+          "Samantha_Agent/memory/handoffs/email_read_uid_test_ok_2026_05_18.md",
+          "Samantha_Agent/memory/handoffs/email_readonly_workflow_handoff_2026_05_18.md",
+          "Samantha_Agent/memory/handoffs/email_reminders_phase3b_done_2026_05_19.md",
+          "Samantha_Agent/memory/handoffs/email_rixo_insurance_phase1_implemented_2026_05_19.md",
+          "Samantha_Agent/memory/handoffs/email_rixo_insurance_phase1_ready_2026_05_19.md",
+          "Samantha_Agent/memory/handoffs/email_safe_workflow_confirmed_2026_05_18.md",
+          "Samantha_Agent/memory/handoffs/email_samantha_e2e_headers_ok_2026_05_18.md",
+          "Samantha_Agent/memory/handoffs/email_samantha_headers_redacted_waiting_uid_2026_05_19.md",
+          "Samantha_Agent/memory/handoffs/email_samantha_read_body_tool_ok_2026_05_18.md",
+          "Samantha_Agent/memory/handoffs/email_samantha_tool_headers_2026_05_18.md",
+          "Samantha_Agent/memory/handoffs/email_search_headers_ready_2026_05_18.md",
+          "Samantha_Agent/memory/handoffs/email_seznam_pojisteni_prilohy_2026_05_21.md",
+          "Samantha_Agent/memory/handoffs/email_seznam_readonly_provider_2026_05_22.md",
+          "Samantha_Agent/memory/handoffs/email_triage_session_tool_done_2026_05_19.md",
+          "Samantha_Agent/memory/handoffs/email_triage_work_mode_core_done_2026_05_19.md",
+          "Samantha_Agent/memory/handoffs/email_triage_work_mode_proposed_2026_05_19.md",
+          "Samantha_Agent/memory/handoffs/email_unified_triage_scoring_report_checkpoint_2026_05_28.md",
+          "Samantha_Agent/memory/handoffs/email_url_tool_e2e_ok_2026_05_19.md",
+          "Samantha_Agent/memory/handoffs/email_weekly_overview_resume_2026_06_01.md",
+          "Samantha_Agent/memory/handoffs/email_work_queue_batch_filters_2026_06_14.md",
+          "Samantha_Agent/memory/handoffs/email_work_queue_batch_tomorrow_2026_06_01.md",
+          "Samantha_Agent/memory/handoffs/email_work_queue_detail_checkpoint_2026_06_01.md",
+          "Samantha_Agent/memory/handoffs/email_work_session_proposed_2026_05_19.md",
+          "Samantha_Agent/memory/handoffs/external_backup_disk_usb_not_detected_2026_07_14.md",
+          "Samantha_Agent/memory/handoffs/family_memory_usa_2019_review_recovery_2026_06_04.md",
+          "Samantha_Agent/memory/handoffs/family_memory_usa_2019_tomik2_overview_checkpoint_2026_06_05.md",
+          "Samantha_Agent/memory/handoffs/family_video_organizer_package_ready_2026_05_29.md",
+          "Samantha_Agent/memory/handoffs/family_video_organizer_ui_prototype_2026_05_22.md",
+          "Samantha_Agent/memory/handoffs/git_commit_cleanup_a1_2026_05_23.md",
+          "Samantha_Agent/memory/handoffs/global_development_semaphore_wip_2026_07_19.md",
+          "Samantha_Agent/memory/handoffs/human_adam_knihovna_profile_2026_07_17.md"
+        ],
+        "payload_sha256": "15e1603b27d4dc345b814276b85d80caea1ab7b8272535fe676c9c8627c910fc"
+      },
+      {
+        "index": 4,
+        "source_count": 72,
+        "source_paths": [
+          "Samantha_Agent/memory/handoffs/human_adam_layer_workstream_start_2026_07_20.md",
+          "Samantha_Agent/memory/handoffs/human_adam_plan_help_and_adoption_2026_07_19.md",
+          "Samantha_Agent/memory/handoffs/human_adam_preserved_wip_visibility_2026_07_18.md",
+          "Samantha_Agent/memory/handoffs/human_adam_profile_switch_recovery_2026_07_18.md",
+          "Samantha_Agent/memory/handoffs/human_adam_revision_failure_history_2026_07_17.md",
+          "Samantha_Agent/memory/handoffs/human_adam_thread_rotation_backend_wip_2026_07_19.md",
+          "Samantha_Agent/memory/handoffs/human_adam_work_help_and_wip_lifecycle_2026_07_19.md",
+          "Samantha_Agent/memory/handoffs/iphone_shortcuts_freeze_infrastructure_layer_2026_05_25.md",
+          "Samantha_Agent/memory/handoffs/iphone_shortcuts_najit_auto_done_2026_05_23.md",
+          "Samantha_Agent/memory/handoffs/iphone_shortcuts_quick_notes_continue_2026_05_23.md",
+          "Samantha_Agent/memory/handoffs/janicka_adam_text_bridge_functional_checkpoint_2026_06_07.md",
+          "Samantha_Agent/memory/handoffs/janicka_chat_ui_fallback_simplification_2026_07_03.md",
+          "Samantha_Agent/memory/handoffs/janicka_cockpit_family_projects_modal_2026_06_26.md",
+          "Samantha_Agent/memory/handoffs/janicka_cockpit_takeover_project_start_2026_06_06.md",
+          "Samantha_Agent/memory/handoffs/janicka_full_adam_cockpit_recovery_ios_card_2026_07_09.md",
+          "Samantha_Agent/memory/handoffs/janicka_light_samantha_bridge_checkpoint_2026_07_03.md",
+          "Samantha_Agent/memory/handoffs/janicka_ra2_private_context_proposal_2026_07_15.md",
+          "Samantha_Agent/memory/handoffs/knowledge_database_library_pdf_export_cleanup_2026_06_22.md",
+          "Samantha_Agent/memory/handoffs/knowledge_database_library_safe_delete_2026_06_19.md",
+          "Samantha_Agent/memory/handoffs/knowledge_database_recipe_attachments_cockpit_checkpoint_2026_06_11.md",
+          "Samantha_Agent/memory/handoffs/knowledge_database_text_input_and_system_audit_2026_06_11.md",
+          "Samantha_Agent/memory/handoffs/knowledge_library_article_editing_2026_07_16.md",
+          "Samantha_Agent/memory/handoffs/knowledge_library_encoding_and_backup_cleanup_2026_07_01.md",
+          "Samantha_Agent/memory/handoffs/knowledge_library_open_source_url_button_2026_06_23.md",
+          "Samantha_Agent/memory/handoffs/knowledge_library_read_state_to_read_2026_06_23.md",
+          "Samantha_Agent/memory/handoffs/lekarna_audit_tool_done_2026_05_19.md",
+          "Samantha_Agent/memory/handoffs/lekarna_cockpit_auto_import_openai_checkpoint_2026_06_23.md",
+          "Samantha_Agent/memory/handoffs/lekarna_dodatecny_import_2026_05_21.md",
+          "Samantha_Agent/memory/handoffs/lekarna_import_manifest_editor_checkpoint_2026_07_06.md",
+          "Samantha_Agent/memory/handoffs/lekarna_import_vyrazeni_resize_done_2026_05_20.md",
+          "Samantha_Agent/memory/handoffs/lekarna_photo_import_pil_publish_retire_verified_2026_07_09.md",
+          "Samantha_Agent/memory/handoffs/lekarna_photo_staging_tool_2026_06_12.md",
+          "Samantha_Agent/memory/handoffs/lekarna_pil_short_done_web_app_start_2026_05_20.md",
+          "Samantha_Agent/memory/handoffs/lekarna_readonly_tool_done_2026_05_19.md",
+          "Samantha_Agent/memory/handoffs/lekarna_status_po_doplneni_vitaminu_2026_05_21.md",
+          "Samantha_Agent/memory/handoffs/lekarna_vitaminy_import_done_2026_05_21.md",
+          "Samantha_Agent/memory/handoffs/lekarna_web_app_cockpit_prototype_2026_05_20.md",
+          "Samantha_Agent/memory/handoffs/lekarna_web_app_hotovo_2026_05_20.md",
+          "Samantha_Agent/memory/handoffs/matysek_f5tts_bunny_voice_tool_checkpoint_2026_06_02.md",
+          "Samantha_Agent/memory/handoffs/matysek_forest_journey_voice_strategy_2026_06_01.md",
+          "Samantha_Agent/memory/handoffs/matysek_forest_school_checkpoint_2026_05_26.md",
+          "Samantha_Agent/memory/handoffs/matysek_forest_school_lessons_voices_checkpoint_2026_05_27.md",
+          "Samantha_Agent/memory/handoffs/matysek_forest_school_portal_resize_checkpoint_2026_05_27.md",
+          "Samantha_Agent/memory/handoffs/matysek_forest_school_post_commit_checkpoint_2026_05_26.md",
+          "Samantha_Agent/memory/handoffs/matysek_forest_school_scene_navrh_2026_05_26.md",
+          "Samantha_Agent/memory/handoffs/matysek_scene_01_clearing_meeting_review_2026_06_01.md",
+          "Samantha_Agent/memory/handoffs/matysek_scene_01_sunny_voice_and_ending_2026_06_03.md",
+          "Samantha_Agent/memory/handoffs/media_image_resize_utility_done_2026_05_20.md",
+          "Samantha_Agent/memory/handoffs/memory_cleanup_commit_afternoon_checkpoint_2026_05_23.md",
+          "Samantha_Agent/memory/handoffs/mmtx_scene02_start_help_cleanup_2026_06_26.md",
+          "Samantha_Agent/memory/handoffs/mmtx_scene03_journey_to_lake_publish_2026_07_01.md",
+          "Samantha_Agent/memory/handoffs/mmtx_web_handoff_2026_05_14.md",
+          "Samantha_Agent/memory/handoffs/mobile_document_processing_raw_bw_classification_2026_05_27.md",
+          "Samantha_Agent/memory/handoffs/mobile_document_scan_shortcuts_and_processing_2026_05_26.md",
+          "Samantha_Agent/memory/handoffs/network_domaci_wifi_router_vs_mac_2026_05_21.md",
+          "Samantha_Agent/memory/handoffs/network_https_reconnect_diagnostic_2026_05_21.md",
+          "Samantha_Agent/memory/handoffs/neuberk_interier_design_start_2026_05_31.md",
+          "Samantha_Agent/memory/handoffs/neuberk_kacenka_library_concept_pause_2026_06_04.md",
+          "Samantha_Agent/memory/handoffs/neuberk_kacenka_south_wall_v6_geometry_checkpoint_2026_06_07.md",
+          "Samantha_Agent/memory/handoffs/neuberk_kacenka_zapadni_stena_prekres_2026_06_03.md",
+          "Samantha_Agent/memory/handoffs/payment_sms_reminder_tool_done_2026_05_21.md",
+          "Samantha_Agent/memory/handoffs/pictnew_next_image_generation_phase_2026_05_20.md",
+          "Samantha_Agent/memory/handoffs/pozustalost_start_2026_05_30.md",
+          "Samantha_Agent/memory/handoffs/python_se_samanthou_course_package_2026_09_06.md",
+          "Samantha_Agent/memory/handoffs/quick_notes_action_inbox_preclassification_2026_06_19.md",
+          "Samantha_Agent/memory/handoffs/quick_notes_infsystem_top3_feedback_2026_05_24.md",
+          "Samantha_Agent/memory/handoffs/quick_notes_triage_no_unclassified_2026_06_23.md",
+          "Samantha_Agent/memory/handoffs/samantha_agent_rag_memory_store_2026_05_19.md",
+          "Samantha_Agent/memory/handoffs/samantha_agent_rag_search_memory_ranking_2026_05_19.md",
+          "Samantha_Agent/memory/handoffs/samantha_communication_architecture_checkpoint_2026_07_13.md",
+          "Samantha_Agent/memory/handoffs/samantha_screen_scrollback_fix_2026_06_18.md",
+          "Samantha_Agent/memory/handoffs/scandocu_email_workqueue_owl_checkpoint_2026_06_15.md"
+        ],
+        "payload_sha256": "110b6c1a8767ee9cf6743e9d7307ab145648664c5be463db5448b31a013a674a"
+      },
+      {
+        "index": 5,
+        "source_count": 24,
+        "source_paths": [
+          "Samantha_Agent/memory/handoffs/scandocu_kanta_nonpdf_review_checkpoint_2026_06_15.md",
+          "Samantha_Agent/memory/handoffs/session_recovery_autosave_2026_05_18.txt",
+          "Samantha_Agent/memory/handoffs/seznam_iphone_mail_2026_10_03.md",
+          "Samantha_Agent/memory/handoffs/spojeni_problemy_2026_05_17.txt",
+          "Samantha_Agent/memory/handoffs/stories_batch_2026_05_14.md",
+          "Samantha_Agent/memory/handoffs/system_project_audit_generator_done_2026_06_23.md",
+          "Samantha_Agent/memory/handoffs/system_quick_check_git_safety_2026_06_09.md",
+          "Samantha_Agent/memory/handoffs/test_kratky_handoff_2026_05_18.md",
+          "Samantha_Agent/memory/handoffs/tomik_video_imovie_audit_hotov_navrh_pokracovani_2026_05_21.md",
+          "Samantha_Agent/memory/handoffs/tomik_video_imovie_pause_waiting_daughter_2026_05_21.md",
+          "Samantha_Agent/memory/handoffs/tomik_video_imovie_selection_ready_2026_05_21.md",
+          "Samantha_Agent/memory/handoffs/tomik_video_imovie_start_2026_05_21.md",
+          "Samantha_Agent/memory/handoffs/tomik_video_review_pdfs_done_editable_next_2026_05_22.md",
+          "Samantha_Agent/memory/handoffs/vocabulary_en_49_images_review_2026_09_06.md",
+          "Samantha_Agent/memory/handoffs/vocabularyfr_jana_images_archive_2026_06_07.md",
+          "Samantha_Agent/memory/handoffs/vocabularyfr_web_trainer_checkpoint_2026_06_04.md",
+          "Samantha_Agent/memory/handoffs/vocabularyit_batches_005_011_generated_2026_05_20.md",
+          "Samantha_Agent/memory/handoffs/vocabularyit_batches_012_013_generated_2026_05_20.md",
+          "Samantha_Agent/memory/handoffs/vocabularyit_mapping_applied_2026_05_20.md",
+          "Samantha_Agent/memory/handoffs/vocabularyit_pict_csv_audit_2026_05_20.md",
+          "Samantha_Agent/memory/handoffs/voicebridge_full_access_email_confirmation_closed_2026_06_29.md",
+          "Samantha_Agent/memory/handoffs/voicebridge_operational_contract_2026_06_30.md",
+          "Samantha_Agent/memory/handoffs/workstreams/project-camino.md",
+          "Samantha_Agent/memory/handoffs/workstreams/project-cockpit.md"
+        ],
+        "payload_sha256": "38ae42101434106b917a4f46450abbea77976459b7b3c81f0e1f32d4de5e41fd"
+      },
+      {
+        "index": 6,
+        "source_count": 19,
+        "source_paths": [
+          "Samantha_Agent/memory/handoffs/workstreams/project-family-calendar.md",
+          "Samantha_Agent/memory/handoffs/workstreams/project-linux-workstation.md",
+          "Samantha_Agent/memory/handoffs/workstreams/project-mmtx.md",
+          "Samantha_Agent/memory/handoffs/workstreams/project-neuberk-kacenka.md",
+          "Samantha_Agent/memory/handoffs/workstreams/project-r2-adam-janicka.md",
+          "Samantha_Agent/memory/handoffs/workstreams/project-samantha-agent-rag.md",
+          "Samantha_Agent/memory/handoffs/workstreams/project-samantha-infrastructure.md",
+          "Samantha_Agent/memory/handoffs/workstreams/project-to-be-to-have.md",
+          "Samantha_Agent/memory/handoffs/workstreams/project-vocabulary-fr.md",
+          "Samantha_Agent/memory/handoffs/workstreams/project-vocabulary-it.md",
+          "Samantha_Agent/memory/infrastructure/codex_reconnect_recovery.md",
+          "Samantha_Agent/memory/infrastructure/git_branch_archive.md",
+          "Samantha_Agent/memory/infrastructure/git_checkpoint_protocol.md",
+          "Samantha_Agent/memory/infrastructure/klicove_prikazy_pamatovacek.md",
+          "Samantha_Agent/memory/infrastructure/macos_network_recovery.md",
+          "Samantha_Agent/memory/infrastructure/operating_model.md",
+          "Samantha_Agent/memory/infrastructure/ssh_setup.md",
+          "Samantha_Agent/memory/infrastructure/tailscale_setup.md",
+          "Samantha_Agent/memory/projects/automated_recurring_tasks.md"
+        ],
+        "payload_sha256": "f433daf43c10130005cab2b16e0c2b54837c45970b722205270139b4a8ab5077"
+      },
+      {
+        "index": 7,
+        "source_count": 14,
+        "source_paths": [
+          "Samantha_Agent/memory/projects/camino.md",
+          "Samantha_Agent/memory/projects/document_management_private_vault.md",
+          "Samantha_Agent/memory/projects/email_readonly_oauth.md",
+          "Samantha_Agent/memory/projects/family_calendar.md",
+          "Samantha_Agent/memory/projects/family_memory_films.md",
+          "Samantha_Agent/memory/projects/fraška_dante_esa_concept.md",
+          "Samantha_Agent/memory/projects/janicka_cockpit_kucharka.md",
+          "Samantha_Agent/memory/projects/janicka_cockpit_takeover.md",
+          "Samantha_Agent/memory/projects/janicka_r2_adam.md",
+          "Samantha_Agent/memory/projects/lekarna_domaci_leky.md",
+          "Samantha_Agent/memory/projects/lekarna_web_app.md",
+          "Samantha_Agent/memory/projects/linux_workstation.md",
+          "Samantha_Agent/memory/projects/matysek_english_game_concept.md",
+          "Samantha_Agent/memory/projects/media_image_resize_utility.md"
+        ],
+        "payload_sha256": "c0470a2cefc1e0f6639a75f976ff2d283b63f8d04371a1f40909d3a42bead0ff"
+      },
+      {
+        "index": 8,
+        "source_count": 51,
+        "source_paths": [
+          "Samantha_Agent/memory/projects/mmtx_story_hotspot_app.md",
+          "Samantha_Agent/memory/projects/multilo_stabilization_cleanup.md",
+          "Samantha_Agent/memory/projects/neuberk_interier_design.md",
+          "Samantha_Agent/memory/projects/pictnew_vocabulary_image_pipeline.md",
+          "Samantha_Agent/memory/projects/pohadkova_knizka_gpt_canva.md",
+          "Samantha_Agent/memory/projects/pozustalost_rodinny_plan_2026_05_30.txt",
+          "Samantha_Agent/memory/projects/python_se_samanthou.md",
+          "Samantha_Agent/memory/projects/samantha_external_backup.md",
+          "Samantha_Agent/memory/projects/tax_priznani_2025.md",
+          "Samantha_Agent/memory/projects/to_be_to_have.md",
+          "Samantha_Agent/memory/projects/tomik_video_imovie.md",
+          "Samantha_Agent/memory/projects/tts_edge_audio_tools.md",
+          "Samantha_Agent/memory/projects/vedecke_clanky.md",
+          "Samantha_Agent/memory/projects/vocabulary_en_web_cards.md",
+          "Samantha_Agent/memory/projects/vocabularyfr_web_trainer.md",
+          "Samantha_Agent/memory/reports/backup_recovery_20261025.md",
+          "Samantha_Agent/memory/reports/calendar_access_pilot_20261107.md",
+          "Samantha_Agent/memory/reports/calendar_overview_20261107.md",
+          "Samantha_Agent/memory/reports/calendar_recovery_release_20261107.md",
+          "Samantha_Agent/memory/reports/calendar_simple_20261107.md",
+          "Samantha_Agent/memory/reports/camino_export_created_time_20261028.md",
+          "Samantha_Agent/memory/reports/camino_film_loading_20261026.md",
+          "Samantha_Agent/memory/reports/camino_film_navigation_height_20261028.md",
+          "Samantha_Agent/memory/reports/camino_film_photo_dialog_20261026.md",
+          "Samantha_Agent/memory/reports/camino_film_resume_latest_20261028.md",
+          "Samantha_Agent/memory/reports/camino_film_ui_feedback_20261025.md",
+          "Samantha_Agent/memory/reports/camino_film_window_20261028.md",
+          "Samantha_Agent/memory/reports/camino_film_workspace_20261026.md",
+          "Samantha_Agent/memory/reports/camino_orus_integration_20261027.md",
+          "Samantha_Agent/memory/reports/camino_registration_2026_09_14.md",
+          "Samantha_Agent/memory/reports/camino_text_voice_ui_proposal_20261028.md",
+          "Samantha_Agent/memory/reports/camino_voice_audition_20261026.md",
+          "Samantha_Agent/memory/reports/cockpit_dead_legacy_code_inventory_2026_07_10.md",
+          "Samantha_Agent/memory/reports/cockpit_deploy_fixture_pilot_2026_09_13.md",
+          "Samantha_Agent/memory/reports/cockpit_dieta_d0_2026_07_29.md",
+          "Samantha_Agent/memory/reports/cockpit_document_routes_2026_09_14.md",
+          "Samantha_Agent/memory/reports/cockpit_email_archive_routes_2026_09_14.md",
+          "Samantha_Agent/memory/reports/cockpit_email_archive_scroll_2026_09_14.md",
+          "Samantha_Agent/memory/reports/cockpit_function_inventory_audit_2026_06_27.md",
+          "Samantha_Agent/memory/reports/cockpit_git_launcher_2026_09_13.md",
+          "Samantha_Agent/memory/reports/cockpit_http_routes_release_2026_09_14.md",
+          "Samantha_Agent/memory/reports/cockpit_main_screen_daily_audit_2026_06_11.md",
+          "Samantha_Agent/memory/reports/cockpit_persistence_write_map_2026_07_10.md",
+          "Samantha_Agent/memory/reports/cockpit_post_action_risk_matrix_2026_06_27.md",
+          "Samantha_Agent/memory/reports/cockpit_quality_gate_2026_07_10.md",
+          "Samantha_Agent/memory/reports/cockpit_shared_git_2026_09_14.md",
+          "Samantha_Agent/memory/reports/cockpit_test_timings_2026_09_13.md",
+          "Samantha_Agent/memory/reports/cockpit_ui_content_audit_2026_06_11.md",
+          "Samantha_Agent/memory/reports/cockpit_ui_release_2026_09_14.md",
+          "Samantha_Agent/memory/reports/codex_appserver_p1b_20261104.md",
+          "Samantha_Agent/memory/reports/codex_p1_reconnect_20261105.md"
+        ],
+        "payload_sha256": "14aad1ce782436c3184ce479029aff960f05c834e0c9d9b9d668794c6f1d1351"
+      },
+      {
+        "index": 9,
+        "source_count": 40,
+        "source_paths": [
+          "Samantha_Agent/memory/reports/codex_sdk_p1c_20261105.md",
+          "Samantha_Agent/memory/reports/codex_sdk_pilot_20261104.md",
+          "Samantha_Agent/memory/reports/continuous_email_service_installation_20261105.md",
+          "Samantha_Agent/memory/reports/continuous_email_service_preparation_20261104.md",
+          "Samantha_Agent/memory/reports/email_calendar_draft_20261107.md",
+          "Samantha_Agent/memory/reports/email_calendar_review_20261107.md",
+          "Samantha_Agent/memory/reports/email_pushcut_20261104.md",
+          "Samantha_Agent/memory/reports/email_visibility_20261105.md",
+          "Samantha_Agent/memory/reports/git_branch_audit_cursor_matysek_scene02_2026_06_26.md",
+          "Samantha_Agent/memory/reports/human_adam_iphone_send_failure_20261105.md",
+          "Samantha_Agent/memory/reports/human_adam_workstream_pn_fix_2026_10_23.md",
+          "Samantha_Agent/memory/reports/interior_ai_integration_20261105.md",
+          "Samantha_Agent/memory/reports/interior_atelier_p1_20261105.md",
+          "Samantha_Agent/memory/reports/interior_iphone_jpeg_mpo_20261105.md",
+          "Samantha_Agent/memory/reports/mmtx_scene05_artfix_2026_09_12.md",
+          "Samantha_Agent/memory/reports/mmtx_scene06_azure_complete_20261101.md",
+          "Samantha_Agent/memory/reports/mmtx_scene06_azure_preview_20261101.md",
+          "Samantha_Agent/memory/reports/mmtx_scene06_lake_arrival_20261028.md",
+          "Samantha_Agent/memory/reports/paid_voice_retirement_20261107.md",
+          "Samantha_Agent/memory/reports/python_315_assessment_2026_10_24.md",
+          "Samantha_Agent/memory/reports/recovery_guide_rec02_20261107.md",
+          "Samantha_Agent/memory/reports/recovery_guide_rec03_20261107.md",
+          "Samantha_Agent/memory/reports/recovery_guide_rec04_20261107.md",
+          "Samantha_Agent/memory/reports/recovery_guide_rec05_20261107.md",
+          "Samantha_Agent/memory/reports/recovery_guide_rec06_20261107.md",
+          "Samantha_Agent/memory/reports/recovery_rec06_integration_release_20261107.md",
+          "Samantha_Agent/memory/reports/systemovy_audit_projekty_tooly_vrstvy_2026_06_11.txt",
+          "Samantha_Agent/memory/reports/systemovy_audit_projekty_tooly_vrstvy_2026_06_23.txt",
+          "Samantha_Agent/memory/reports/systemovy_audit_projekty_tooly_vrstvy_2026_06_23_180157.txt",
+          "Samantha_Agent/memory/reports/systemovy_audit_projekty_tooly_vrstvy_2026_06_30.txt",
+          "Samantha_Agent/memory/reports/systemovy_audit_projekty_tooly_vrstvy_2026_06_30_133949.txt",
+          "Samantha_Agent/memory/reports/systemovy_audit_projekty_tooly_vrstvy_2026_06_30_151433.txt",
+          "Samantha_Agent/memory/reports/systemovy_audit_projekty_tooly_vrstvy_2026_06_30_151531.txt",
+          "Samantha_Agent/memory/reports/systemovy_audit_projekty_tooly_vrstvy_2026_06_30_161548.txt",
+          "Samantha_Agent/memory/reports/systemovy_audit_projekty_tooly_vrstvy_2026_07_01.txt",
+          "Samantha_Agent/memory/reports/systemovy_audit_projekty_tooly_vrstvy_2026_07_09.txt",
+          "Samantha_Agent/memory/reports/systemovy_audit_projekty_tooly_vrstvy_2026_07_29.txt",
+          "Samantha_Agent/memory/reports/systemovy_audit_projekty_tooly_vrstvy_2026_08_07.txt",
+          "Samantha_Agent/memory/reports/systemovy_audit_projekty_tooly_vrstvy_2026_08_07_141352.txt",
+          "Samantha_Agent/memory/reports/systemovy_audit_projekty_tooly_vrstvy_2026_09_10.txt"
+        ],
+        "payload_sha256": "aed7d86a261af3f7957addfef570a7d40566c901b539a1f8d8d1d051e74fdf17"
+      },
+      {
+        "index": 10,
+        "source_count": 46,
+        "source_paths": [
+          "Samantha_Agent/memory/reports/systemovy_audit_projekty_tooly_vrstvy_2026_09_13.txt",
+          "Samantha_Agent/memory/reports/terra_release_trial_20261028.md",
+          "Samantha_Agent/memory/reports/to_be_web_release_2026_09_14.md",
+          "Samantha_Agent/memory/reports/vocabulary_en_mmtx_audit_2026_09_05.md",
+          "Samantha_Agent/memory/reports/vocabulary_fr_it_refresh_2026_09_13.md",
+          "Samantha_Agent/memory/reports/voice_conversation_cockpit_20261105.md",
+          "Samantha_Agent/memory/reports/voice_conversation_p2a_20261105.md",
+          "Samantha_Agent/memory/reports/voice_conversation_p2b_20261105.md",
+          "Samantha_Agent/memory/reports/voice_conversation_probe_20261105.md",
+          "Samantha_Agent/memory/samantha_core.md",
+          "Samantha_Agent/memory/stories/pohadka_lunaris_misto_kde_se_uci_naslouchat_tichu_2026_05_14.md",
+          "Samantha_Agent/memory/stories/pohadka_o_akvapolis_meste_pod_morem_2026_05_14.md",
+          "Samantha_Agent/memory/stories/pohadka_o_ceste_na_arkturion_modrou_planetu_ledu_2026_05_14.md",
+          "Samantha_Agent/memory/stories/pohadka_o_matyskovi_martince_a_piskotovi_na_planete_tisice_zazraku_2026_05_14.md",
+          "Samantha_Agent/memory/stories/pohadka_o_saffronii_planete_zpivajiciho_pisku_2026_05_14.md",
+          "Samantha_Agent/memory/stories/pohadka_o_silvanoru_planete_kde_mluvi_stromy_2026_05_14.md",
+          "Samantha_Agent/memory/stories/pohadka_o_velke_vyprave_na_mars_2026_05_14.md",
+          "Samantha_Agent/memory/stories/pohadka_robot_piskot_pribeh_kamarada_z_budoucnosti_2026_05_14.md",
+          "Samantha_Agent/memory/stories/pohadka_viridana_2026_05_14.md",
+          "Samantha_Agent/memory/technical/capability_routing_rules.md",
+          "Samantha_Agent/memory/technical/codex_permissions_preferences.md",
+          "Samantha_Agent/memory/technical/codex_remote_approval_notice.md",
+          "Samantha_Agent/memory/technical/general_reminders_workflow.md",
+          "Samantha_Agent/memory/technical/global_safety_brake.md",
+          "Samantha_Agent/memory/technical/iphone_shortcuts_playground.md",
+          "Samantha_Agent/memory/technical/large_context_intake.md",
+          "Samantha_Agent/memory/technical/lekarna_photo_import_intake.md",
+          "Samantha_Agent/memory/technical/lekarna_pil_short_workflow.md",
+          "Samantha_Agent/memory/technical/luna_release_orchestration.md",
+          "Samantha_Agent/memory/technical/macos_wifi_vpn_tailscale_recovery.md",
+          "Samantha_Agent/memory/technical/matysek_f5tts_voice_workflow.md",
+          "Samantha_Agent/memory/technical/media_review_form_workflow.md",
+          "Samantha_Agent/memory/technical/naming_conventions.md",
+          "Samantha_Agent/memory/technical/private_document_vault_workflow.md",
+          "Samantha_Agent/memory/technical/project_capability_map.md",
+          "Samantha_Agent/memory/technical/project_tvbcp_rules.md",
+          "Samantha_Agent/memory/technical/recovery_guide_maintainer.md",
+          "Samantha_Agent/memory/technical/samantha_cultural_metaphors.md",
+          "Samantha_Agent/memory/technical/samantha_growth_rules.md",
+          "Samantha_Agent/memory/technical/session_recovery_rules.md",
+          "Samantha_Agent/memory/technical/shopping_research_and_purchase_archive.md",
+          "Samantha_Agent/memory/technical/story_memory_rules.md",
+          "Samantha_Agent/memory/technical/system_project_audit_generator_design.md",
+          "Samantha_Agent/memory/technical/system_reports.md",
+          "Samantha_Agent/memory/technical/vocabulary_image_generation_workflow.md",
+          "Samantha_Agent/memory/technical/workflow_command_registry.md"
+        ],
+        "payload_sha256": "030326a37eaf68e9d6c3717fe290d2e539abc2b054a114bcf5f1399a2c00d3af"
+      },
+      {
+        "index": 11,
+        "source_count": 2,
+        "source_paths": [
+          "Samantha_Agent/memory/tvbcp/architektura_komunikace_samantha.txt",
+          "Samantha_Agent/memory/tvbcp/knihovna_cockpit.txt"
+        ],
+        "payload_sha256": "f183ce9b4c4b581264f65e411448deab50081ff6a3eb54554bea0dc0b071506b"
+      },
+      {
+        "index": 12,
+        "source_count": 2,
+        "source_paths": [
+          "Samantha_Agent/memory/tvbcp/workstreams/project-camino.md",
+          "Samantha_Agent/memory/tvbcp/workstreams/project-cockpit.md"
+        ],
+        "payload_sha256": "9ce46ead7c73f199881452b044bfa2aede7538c84fd1dc0a9fdbe94908df950a"
+      },
+      {
+        "index": 13,
+        "source_count": 22,
+        "source_paths": [
+          "Samantha_Agent/memory/tvbcp/workstreams/project-family-calendar.md",
+          "Samantha_Agent/memory/tvbcp/workstreams/project-linux-workstation.md",
+          "Samantha_Agent/memory/tvbcp/workstreams/project-mmtx.md",
+          "Samantha_Agent/memory/tvbcp/workstreams/project-r2-adam-janicka.md",
+          "Samantha_Agent/memory/tvbcp/workstreams/project-samantha-agent-rag.md",
+          "Samantha_Agent/memory/tvbcp/workstreams/project-samantha-infrastructure.md",
+          "Samantha_Agent/memory/tvbcp/workstreams/project-to-be-to-have.md",
+          "Samantha_Agent/memory/tvbcp/workstreams/project-vocabulary-fr.md",
+          "Samantha_Agent/memory/tvbcp/workstreams/project-vocabulary-it.md",
+          "Samantha_Agent/tools/vscode-screen-recovery/README.md",
+          "docs/README_GITHUB_PAGES.md",
+          "docs/audio/README_AUDIO.txt",
+          "docs/restaurace-ptkl/assets/NavstevaRestaurace.txt",
+          "docs/scene02_sunnys_lost_nuts/README.md",
+          "docs/scene02_sunnys_lost_nuts/audio/README.md",
+          "docs/scene03_journey_to_the_lake/README.md",
+          "docs/scene06_lake_arrival/README.txt",
+          "docs/scene06_lake_arrival/image_prompts.txt",
+          "docs/scene_jane_birthday/README.md",
+          "docs/scene_kate_birthday/README.md",
+          "iOS/VocabFRLockscreen/InfoPlistAdditions.md",
+          "iOS/VocabFRLockscreen/README.md"
+        ],
+        "payload_sha256": "3937d472de6fbd2911b68586c20ca6502522fee43d35d27e62bf78d7a991b681"
+      }
+    ]
+  },
+  "runtime": {
+    "server_version": "0.163.0",
+    "account_type": "chatgpt"
+  },
+  "model_turns_started": 0,
+  "production_writes": false,
+  "live_server_context_limit_verified": false,
+  "whole_application_inventory_complete": false
+}

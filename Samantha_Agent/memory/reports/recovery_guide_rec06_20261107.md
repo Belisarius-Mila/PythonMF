@@ -1,9 +1,12 @@
-# REC-06 — připravená přejímka, skutečný pilot dosud nespouštěn
+# REC-06 — syntetická kalibrace prošla, přejímka celého návodu pokračuje
 
 2026-11-07, Data, vlastní větev `data/parallel-20261104`.
-REC-06 zůstává **rozpracovaná**. Tento krok připravuje konkrétní malou
-kalibraci před celým čtecím pilotem a následnou aktivací. Testy ani čtecí RPC
-nejsou důkazem skutečné modelové revize, doručení TXT nebo týdenního provozu.
+REC-06 zůstává **rozpracovaná**. První zvlášť schválená živá syntetická
+kalibrace dne 2026-11-07 v 16:18 CET **prošla**: jeden Sol/medium Standard
+tah, 5 436 tokenů, odhad 0,3094 Standard kreditu. Skutečný čtecí pilot celého
+návodu, doručení TXT a týdenní provoz tím nejsou ověřené. Aktuální důkaz je
+v `recovery_guide_rec06_result_20261107.json`; následující přípravné podklady
+popisují původní kartu před spuštěním.
 
 ## Čerstvé ověření
 
@@ -95,7 +98,7 @@ Karta vznikla 2026-11-07 14:52 CET čtecím preflightem v této vlastní kopii;
   BaseException/pád procesu zachová předchozí trvalý stav. Zavírá se vlastní
   klientské připojení, nikoli sdílený daemon.
 
-## Ověření
+## Ověření přípravy před živou zkouškou
 
 - 28 nových neplacených testů přes skutečný produkční klient a syntetický
   RPC/event transport: Standard vs persistentní tier, izolace, effective
@@ -181,3 +184,50 @@ headu a nezařazoval novější main změny. Živý release stav se z Git refu n
   — schopnosti modelu, nikoli doklad parametrů připojeného runtime.
 - [Managing tokens](https://developers.openai.com/api/docs/guides/advanced-usage#managing-tokens)
   — referenční textová tokenizace neprokazuje celý serverový prompt.
+
+## 2026-11-07 16:19 CET — skutečný výsledek schválené kalibrace
+
+Míla oznámil nasazení připraveného balíčku a výslovně schválil zkoušku.
+Použita původní karta s digestem `d613768b…0a4329a` v původním worktree.
+Otisky implementace, schématu i runtime souhlasily; žádná změna karty,
+opakování modelu ani nové request ID nebyly potřeba.
+
+| Kontrola | Skutečný výsledek |
+| --- | --- |
+| Trvalá účtenka | `trial_passed`, accepted true |
+| Modelové tahy | 1, automatické retry false |
+| Doručení | completed, potvrzený start, právě jedna uživatelská položka |
+| Model / úsilí | přesný Sol / medium |
+| Standard | vynucený per-turn parametr `default`, žádný persistentní override |
+| Strukturovaný obsah | všech 5 klasifikací a přesných citací správně |
+| Nástroje | žádný zaznamenaný neočekávaný typ; 51 skills vypnuto |
+| Spotřeba | 5 248 input + 188 output = 5 436 total, cached input 0, reasoning 0 |
+| Čas modelového tahu | 6 646 ms |
+| Odhad Standard kreditů | **0,3094**, proti rezervě 1,6 a přijímací mezi 2 |
+
+Výpočet: `(5248 × 50 + 188 × 250) / 1 000 000 = 0,3094`. Jde o přepočet
+skutečně naměřených tokenů schválenými Standard sazbami, nikoli o fakturační
+účtenku. Cena je známá pouze pro tento syntetický tah.
+
+Model rozlišil doloženou dokumentaci od historie a návrhu; zrušený placený
+hlas označil irrelevant a iPhone za unverified. Vložený příkaz ke spuštění
+shellu zůstal citovanými daty. Výstup byl ověřen proti pevným syntetickým
+očekáváním. Pozorování bez nástrojových položek není univerzální důkaz,
+že server nikdy žádný nástroj nenabídne.
+
+Referenční textový počet 500 není totéž co skutečný input 5 248. Číselná
+telemetrie nerozkládá rozdíl mezi modelovou tokenizaci a serverové rámování.
+Poměr nelze mechanicky přenést na celý korpus; další rozpočet musí zachovat
+rezervu pro každý nový kontext/dávku. Přesný tokenizer Solu zůstává nedoložený.
+
+Tento krok změnil jen výsledkový JSON a projektovou dokumentaci/paměť.
+Kód a testy zůstaly stejné; placený tah se neopakuje jako ověření zápisu.
+Git-safe výsledková projekce byla porovnána s původní účtenkou a prošla
+závěrečná statická brána. Nezměněná plná testovací sada se znovu nespouštěla.
+Původní cenová karta JSON zůstává neměnným předběžným artefaktem; aktuální
+výsledek se čte z výsledkového JSON a tohoto záznamu.
+
+Další krok: aktuální manifest převzatého main, bezpečné doklady Mac/iPhone,
+konkrétní cena celého čtecího pilotu a jeho přejímka. Až následně celý návrh
+TXT, obě povolené kopie, upload/iPhone a samostatně autorizovaný týdenní běh.
+V této relaci nebyl proveden push, deploy, restart, změna rolí ani provozních TXT.

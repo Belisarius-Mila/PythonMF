@@ -1,0 +1,101 @@
+{
+  "state": "stopped_by_literal_citation_contract",
+  "request_id": "rec06-full-corpus-01",
+  "approved_manifest_digest": "09a6ed5becbe07e8d2a5703e29639b5f30aff9c3a40db4af7f2220bf999f4e0b",
+  "snapshot_sha256": "90e85eb7e83abdb9bf4a57940081756cc1edbcc35de1ee57e4b4aff5f27ab8ad",
+  "source_head": "4a33af2a1e570a3cb781f2253df440d82b25defb",
+  "planned_sources": 530,
+  "documents_present_in_completed_responses": 101,
+  "raw_exact_document_citations": 99,
+  "controller_accepted_documents": 36,
+  "actual_sdk_turns": 2,
+  "planned_sdk_turns": 15,
+  "not_started_sdk_turns": 13,
+  "sdk_turn_retries": 0,
+  "first_turn_reused_locally_not_resent": true,
+  "usage": {
+    "input_tokens": 379845,
+    "cached_input_tokens": 0,
+    "output_tokens": 8083,
+    "reasoning_output_tokens": 109,
+    "total_tokens": 387928
+  },
+  "estimated_standard_credits": 21.013,
+  "total_credit_acceptance_limit": 200,
+  "billing_receipt": false,
+  "hard_billing_cap": false,
+  "candidate_created": false,
+  "synthesis_started": false,
+  "production_txt_writes": 0,
+  "weekly_activation_performed": false,
+  "turns": [
+    {
+      "index": 1,
+      "thread_id": "01a1b7a6-1204-7df1-8005-9f305747f0d5",
+      "turn_id": "01a1b7a6-1282-7f20-83d1-520c89973061",
+      "client_message_id": "rec06-full-corpus-01-1",
+      "payload_sha256": "f09e054cccb638142620f75671cc84885e76e1eab85e3a092229cad4abb89d8c",
+      "receipt_sha256": "1727d71f99509e600ab5caa64f1b2b52da028f65206a610dead32853c28b2e26",
+      "delivered": true,
+      "status": "completed",
+      "duration_ms": 78142,
+      "usage": {
+        "input_tokens": 190761,
+        "cached_input_tokens": 0,
+        "output_tokens": 3628,
+        "reasoning_output_tokens": 49,
+        "total_tokens": 194389
+      },
+      "estimated_standard_credits": 10.44505,
+      "planned_documents": 36,
+      "raw_citations": 37,
+      "unexpected_item_types": []
+    },
+    {
+      "index": 2,
+      "thread_id": "01a1b7b6-d284-7512-a1b3-868d21fabfa7",
+      "turn_id": "01a1b7b6-d334-7011-9ee5-2b6108c2074a",
+      "client_message_id": "rec06-full-corpus-01-2",
+      "payload_sha256": "46be8df58448d41a0f835fbf86d12ccb7ac3f9054d676f1b8b152caa514534f1",
+      "receipt_sha256": "752a29e1ea72dc7c10266f932eaa693514514abe0e317349c0d572e7a9399996",
+      "delivered": true,
+      "status": "completed",
+      "duration_ms": 93959,
+      "usage": {
+        "input_tokens": 189084,
+        "cached_input_tokens": 0,
+        "output_tokens": 4455,
+        "reasoning_output_tokens": 60,
+        "total_tokens": 193539
+      },
+      "estimated_standard_credits": 10.56795,
+      "planned_documents": 65,
+      "raw_citations": 65,
+      "unexpected_item_types": []
+    }
+  ],
+  "citation_issues": [
+    {
+      "source": "Samantha_Agent/camino/tasks/C01c_RECOVERABLE_AUDIO.md",
+      "source_sha256": "6b9662d72f9544bb5a7861b86e13538eb5c4d7c2206deeeff9af2d550ec65024",
+      "model_quote": "Restart aplikace nikdy sám nezapne mikrofon;",
+      "source_quote": "restart aplikace nikdy sám nezapne mikrofon;",
+      "source_line": 20,
+      "difference": "first_character_capitalized_by_model",
+      "review_only": true,
+      "applied_to_raw_receipt": false
+    },
+    {
+      "source": "Samantha_Agent/camino/tasks/C02b_CHUNK_TRANSFER_EXPERIMENT.md",
+      "source_sha256": "a433fe81ca1fe84eb7814a86ff6ad674c250839d5c3f87b6fdb682f6278c90e4",
+      "model_quote": "Oddělit 100 % odeslaných bytů od serverového `verified`;",
+      "source_quote": "oddělit 100 % odeslaných bytů od serverového `verified`;",
+      "source_line": 17,
+      "difference": "first_character_capitalized_by_model",
+      "review_only": true,
+      "applied_to_raw_receipt": false
+    }
+  ],
+  "remaining_steps_automatically_stopped": true,
+  "no_more_paid_calls_in_this_pilot": true
+}

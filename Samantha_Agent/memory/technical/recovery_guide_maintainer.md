@@ -162,6 +162,52 @@ teprve z konkrétního náhledu požadovat souhlas s cenovým pilotem.
 
 ## REC-06: samostatná syntetická kalibrace
 
+Aktuálně 2026-11-07 16:18 CET: Míla schválil přesnou původní kartu a jediná
+skutečná zkouška **prošla**. Jeden dokončený tah, všech pět klasifikací/citací
+správně, bez zaznamenaných nástrojových položek. Input 5 248, output 188,
+total 5 436 tokenů, čas 6 646 ms; odhad **0,3094 Standard kreditu**. Doklad:
+`reports/recovery_guide_rec06_result_20261107.json`. Nejde o celý čtecí pilot
+REC-02 ani o publikaci/aktivaci. Původní trvalá účtenka brání dalšímu pokusu.
+Referenční počet 500 tokenů nevystihuje skutečný input a nenahrazuje přesný
+tokenizer; samotný poměr není spolehlivá extrapolace ceny celého korpusu.
+
+Navazující úplný čtecí pilot má nový oddělený vstup
+`app.recovery_guide_full_pilot.prepare/run`. Příprava čte přímo Git bloby
+připnutého main bez přepínání pracovních kopií; celá plná varianta má 529
+dokumentů a 15 tahů. Marže 1,25 textového počtu a 8 000 tokenů na tah dává
+plán 193,61315 Standard kreditu, navržená přijímací mez 200. Marže není
+prokázaný horní odhad ani tvrdý fakturační strop; přesné Sol mapování a
+skutečný kontext serveru zůstávají nedoložené. Tato karta se musí přijmout
+samostatně; původní souhlas s jedinou syntetickou kalibrací ji nepovoluje.
+
+Úloha má vlastní pevný request, trvalou rezervaci a známé turn účtenky;
+opakovaný vstup po výpadku nebo v dalším týdnu nevolá model. Kandidát je
+pouze ve vlastní .venv, bez writeru, změn centrální role či plánovače.
+Mac/iPhone důkazy a úplná aplikační přejímka nejsou tvrzené jako hotové.
+Podrobnosti a konkrétní manifest v REC-06 full pilot reportu a cenové kartě.
+
+Po výslovném souhlasu Míly bylo původní spuštění zastaveno ještě před
+attempt markerem: Willův main nově obsahoval kalendářový krok 4a33af2a.
+Úplná revize proto zatím neprovedla žádný placený tah. Explicitní neplacené
+`prepare(refresh=True)` smí zachovat starou kartu a připravit nový manifest
+pouze před jakýmkoli attempt/controller/turns. Nezvyšuje starý limit a všechny
+verze sdílejí jediný job. Nový konkrétní manifest vyžaduje přijetí; dosavadní
+schválený model/limit se zachovávají. Nejde o obnovení po nejistém placeném tahu.
+Detaily v recovery_guide_rec06_source_refresh_20261107.md a kartě v2.
+
+Manifest v2 byl Mílou přijat. První skutečný SDK tah dorazil se všemi
+36 přesnými citacemi a jedním přesným original_guide navíc. Controller
+zastavil pokrytí na 0 kvůli očekávané délce pole; known receipt má jasné
+doručení a spotřebu 10,44505 Standard kreditu. Úzká normalizace původní řádek
+vyjme pouze při úplném přesném pokrytí a zachová raw odpověď i notes.
+
+`app.recovery_guide_receipt_recovery` pak může pod původním souhlasem v2
+převzít známý první výsledek lokálně a SDK pokračovat až další původně
+schválenou dávkou. Stejný job, jediný další marker, žádný reset/refresh,
+žádné opakování tahu 1; unknown delivery nebo neznámá spotřeba jsou odmítnuté.
+První známá cena se účtuje v navazujícím součtu jen jednou, celkový limit
+zůstává 200. Konkrétní důkaz/checkpoint v REC-06 run reportu a JSON.
+
 `app.recovery_guide_trial.prepare()` vytvoří pevnou neplacenou kartu pro
 jeden Sol/medium tah se Standardem připnutým pouze na tento tah. Nečte
 obnovovací TXT ani projektový korpus, neaktivuje centrální roli a nepublikuje.
@@ -282,3 +328,226 @@ Produkční adapter musí při REC-06 převzít přesné společné slot/request
 aktuální centrální roli a autentizovanou úzkou autoritu, ne používat druhý
 odvozený týden nebo modelové potvrzení. Podrobnosti a otevřené předpoklady
 jsou v REC-05 reportu. Skutečný REC-02 pilot i iPhone přejímka stále čekají.
+
+## 2026-11-07 21:44 CET — konečný výsledek živého v2 pilotu
+
+Druhý tah dorazil se všemi 65 zdroji, ale dva raw quote řetězce měnily první
+písmeno oproti doslovnému zdroji. Controller proto zastavil další SDK kroky.
+Celkem dva jedinečné tahy, 387 928 tokenů a odhad 21,013 Standard kreditu;
+první cena je v pokračování zahrnutá jednou, nesčítat historické ledgery.
+Žádný celý kandidát nevznikl, dalších 13 tahů/syntéza neprovedené.
+
+Zachovat raw citace a přísný gate; další návrh je programový source/anchor
+ID resolver pro inspect i synthesis. Není implementovaný ani modelově
+ověřený. Nový placený trial nevzniká automaticky z nevyužité rezervy tohoto
+uzavřeného běhu. Zdrojové/účetní důkazy v REC-06 run reportu a full_result JSON.
+
+## 2026-11-07 — offline source/anchor protokol
+
+Nové samostatné `recovery_guide_anchors.py`, `recovery_guide_anchor_protocol.py`
+a čtecí `recovery_guide_anchor_audit.py` nevolají SDK. Modelový kontrakt vybírá
+source/anchor ID; přesný text vrací program z katalogu celého snapshotu.
+Inspect vyžaduje pevné pokrytí všech dokumentů, synthesis všechny dávky právě
+jednou a pouze předané evidence (plus celý original). Nezměněný quality gate
+nadále kontroluje přesné citace, historii i neschválené příkazy.
+
+Offline regrese: 24 testů, 530 dokumentů + original zachovaných beze zkrácení,
+14 requestů, 101 fixture dokumentů včetně dvou doložených kapitalizací.
+Není to živá modelová přejímka ani nové přijetí starých notes. Uzavřený v2 job,
+raw účtenky a původních 21,013 Standard kreditu se nemění; žádný placený tah.
+
+Katalog/request hashe nejsou autorizace. Prázdné zdroje nejsou podporované,
+max 996 zdrojů/schema. Chybí živý adapter a nové tokenové/cenové posouzení
+(včetně celých řádků, metadat, schémat a syntézy). Další krok je nový izolovaný
+trial a konkrétní neplacená karta, poté samostatně přijatý malý živý test.
+Doklad a přesný návrh: reports/recovery_guide_anchors_20261107.md a
+reports/recovery_guide_anchors_offline_20261107.json. REC-06 zůstává otevřená.
+
+## 2026-11-07 — malý živý adapter připraven, zatím nespouštěn
+
+Nové `recovery_guide_anchor_trial.prepare/run`, `recovery_guide_anchor_transport`
+a `recovery_guide_anchor_costing`: oddělený pevný job pro dva malé modelové
+kroky (inspect + synthesis), nikoli pokračování uzavřeného v2 či celý korpus.
+Celý původní TXT + dva známé citační dokumenty, 75 100 bytů. Karta
+566899e7…ddd8cb3 připíná main 0850e6f3, kód, manifest, peer/socket, konkrétní
+inspect schema a pravidlo deterministické syntézy ze skutečné odpovědi.
+
+Plán 14,72415 Standard kreditu; návrh přijímací meze 15 za oba tahy. Reference
+není přesné Sol mapování a meze nejsou tvrdý účetní/output/časový strop.
+Podrobnosti v reports/recovery_guide_anchor_trial_20261107.md a samostatné
+card/offline JSON. Přesný nový lidský souhlas zatím chybí: žádný placený tah.
+26 nových testů, 50 cílených OK; zdrojová fixture prošla inspect i synthesis,
+není však skutečným modelovým výsledkem. Původní job/raw účtenky beze změny.
+Při driftu před jakýmkoli pokusem lze neplaceně připravit explicitní revizi;
+po rezervaci zůstává jen původní receipt, žádný retry ani reset. Další kroky:
+malá samostatně přijatá živá zkouška, pak nová karta celého korpusu; žádná
+produkční aktivace rolí, služeb, zápis TXT/iCloud nebo publikování v této etapě.
+
+## 2026-11-07 — známý výsledek malé živé anchor zkoušky
+
+Karta 566899e7…ddd8cb3 výslovně přijata a run zavolán jednou. Dva doručené
+completed tahy; inspect 9,008 s a synthesis 400,240 s. Obsahově prošly oba
+kontrakty i původní quality gate, original zachován doslovně včetně vnějšího
+whitespace, obě přesné source/anchor evidence a dva unverified dodatky.
+Syntéza byla obsahově znovu ověřena offline z raw, bez nového modelu.
+
+Cena 8,50485 Standard kreditu je odhad ze skutečných tokenů; pod mezí 15.
+Přesto celý job zůstává attention / accepted=false kvůli času >300 s.
+Limit/state se nepřepisoval, žádný retry/reset/refresh/třetí tah. Starý úplný
+v2 job beze změny. Příští run tohoto slotu smí pouze vrátit známou účtenku.
+
+Důkaz: reports/recovery_guide_anchor_trial_run_20261107.md a *_result_20261107.json.
+Nejbližší návrh je samostatný úplný anchor pilot s neplacenou kartou, aktuálními
+zdroji a realistickým fázovým časovým plánem podle měření; nový celý modelový
+pokus musí být konkrétně přijat. Celý korpus ani Mac/iPhone nastavení zatím
+nebyly přezkoumané, žádný provozní návod či týdenní aktivace nevznikly.
+
+## 2026-11-08 — celý neplacený anchor plán
+
+Nový samostatný `recovery_guide_anchor_full_plan.py` nabízí prepare/measure
+s offline inspection/validate_inspection/synthesis helpery, **nemá run**.
+Plán dcfb8b2a…c6f805d nad main 6d5b576b: 531 dokumentů + original, celé
+texty 6 314 979 B, 20 čtecích dávek + 1 syntéza, bez opakovaného čtení dokumentů.
+Návrh 243,50895 / přijímací mez 250 Standard kreditů; o200k_base není přesné
+Sol mapování, není to tvrdý billing/context/output cap ani schválená cena.
+
+Synthesis rezervuje až 771 evidence rows a všechna bounded findings; každý
+přesný evidence row <=160 reference tokenů, nejvýše 6 findings/dávku se dvěma
+odkazy a celkem <=1000 reference tokenů. 782 dlouhých řádků nelze citovat,
+ale plné texty se nekrátí. Žádný zdroj nebyl vynechán. Nová obálka ještě
+není modelově ověřená; aktuální stav je plán s explicitně chybějícím adapterem.
+
+Pro další kartu návrh 300 s inspect / 900 s synthesis (měření 400,240 s,
+output-scaled rezerva 807,058 s); starý malý job zůstává attention při 300 s.
+18 nových / 68 cílených testů OK a úplná offline zdrojová fixture, žádný model.
+Doklad reports/recovery_guide_anchor_full_plan_20261108.md/JSON a offline JSON.
+Příští vývoj musí připojit přesný plan digest k samostatnému trvalému běhovému
+jobu, ověřit peer/socket/účet/role, vynutit meze a no-retry a až potom vytvořit
+novou exekuční kartu. Souhlas s placením se v této plánovací etapě nežádá.
+
+## 2026-11-08 — celý běhový adapter dokončen, čeká přesný souhlas
+
+Nové `recovery_guide_anchor_full_pilot.prepare(plan_digest=...)/status/run` a
+čistý isolated `recovery_guide_anchor_full_worker` jsou registrované odděleně
+od starých jobů a produkčního CLI run/tick. Karta 4b22ea9e…4cce1d1 nad plánem
+dcfb8b2a…c6f805d: 531 dokumentů + original, nejvýše 21 Sol/medium Standard
+tahů, plán 243,50895 / přijímací mez 250 kreditů (ne hard cap), 300/900 s.
+
+Přesný peer/socket/účet/model, kód/tokenizer a zdroje se připínají a kontrolují
+před akcemi; trvalý marker před wire, raw receipts před přejímkou, jeden job
+napříč předběžnými kartami, žádný reset/resume/retry. `status` pouze čte receipt
+bez připojení. Structured error data zůstávají privátní, willRetry neopravňuje
+nový tah, usage bez terminální události zůstane pouze pozorovaná. Přijatý
+kandidát patří pouze do vlastní .venv; není to publication/activation grant.
+
+Původní quality gate se nemění: nové příkazy bez allowlist a živé Mac/iPhone
+claims bez důkazů jsou nepodporované. Celá aplikační inventura není prokázaná.
+43 nových / 111 cílených testů OK; úplná 20+1 skutečná zdrojová fixture
+bez modelu zachovala všechna findings, žádný starý job/plán nebyl přepsán.
+Příprava nespustila žádný thread/turn. Souhlas s placením musí přijmout novou
+kartu zvlášť; neplatí dosavadní souhlas s malým testem ani návrh rozpočtu.
+Doklad reports/recovery_guide_anchor_full_pilot_20261108.md a card/offline JSON.
+
+## 2026-11-08 — celý pilot skončil na nevydaném coverage ID
+
+Schválený celý run karty 4b22ea9e…4cce1d1 byl zavolán jednou. První tah je
+completed/delivered; 27 dokumentů, 6 findings, 9,58995 Standard kreditu.
+Model zvolil covered.d0001 = l131111 pro AGENTS.md s 26 řádky. Toto ID není
+vydané; dalších 38 referencí platných. Scope, findings 721/1000 reference
+tokenů, evidence row meze, bezpečnost textů a input/output/time meze prošly.
+
+Resolver odmítl celou dávku: attention / accepted=false, 0 přijatých dávek,
+zbývajících 20 tahů ani syntéza neodeslané. Raw se neupravoval, žádný retry
+či přijetí notes. Schema zatím omezuje anchor pouze vzorem l + číslo, takže
+samo zabrání špatnému formátu, nikoli nevydanému číslu. Další návrh je čistě
+offline zpřísnění na skutečně vydaná ID se znovu ověřenou velikostí/cenou,
+nikoli oprava této odpovědi nebo pokračování původního uzavřeného slotu.
+Doklad reports/recovery_guide_anchor_full_pilot_run_20261108.md a result JSON.
+Staré joby/plán beze změny; žádný provozní návod, role, služba ani publikace.
+
+## 2026-11-08 — offline přesný číselný index citací
+
+Nové samostatné exact_schema/exact_plan nemění uzavřený executor ani staré
+raw. Source_citation_index_v1 vydává pro každý request/zdroj právě 1…N
+povolených referencí. Integer bounds a skupiny anyOf vážou source/domain;
+internal decoder mapuje do původních lN a používá stejný resolver/quality gate.
+Vstupní text se nekrátí, prázdné/nadlimitní řádky mají null index. Numeric
+index není fyzický řádek a nesmí se přenášet mezi requesty.
+
+21 schémat a 8683 probes nezávislým Draft202012Validator, 99874 mapování,
+19 nových / 130 cílených testů OK. Protipříklad 131111 pro AGENTS.md odmítnut
+max21; fixture není opravená modelová odpověď ani přijetí starého jobu.
+Původní raw 6177159d…505b55a / job attention / 9,58995 zachovaný beze změny.
+
+Plán a59c80c4…516c070 nad main6d5b576b: 531 dokumentů + original, 20+1,
+237,43795 Standard kreditu, návrh meze240 (ne billing cap), syntéza234859
+input. Nová reprezentace je offline, nebyla modelově ověřena a není zapojená
+do běhového adapteru. Neexistuje nová exekuční karta či placený souhlas.
+Doklad reports/recovery_guide_anchor_exact_20261108.md a plan/offline JSON.
+Další krok samostatná integrace/dekodér/worker a nový konkrétní postup;
+žádný automatický model, retry, publikace či aktivace. Starý job neopakovat.
+
+## 2026-11-08 12:07 CET — přesný číselný protokol ve skutečném adapteru
+
+Nové recovery_guide_anchor_exact_pilot.prepare/run/status a exact_worker
+perform/dispatch jsou registrované. Worker vždy reprodukuje request-local
+mapu a ověřuje wire/schema/index SHA, celou historii i raw; do původního
+resolveru předává pouze nový interní decode. Staré raw ani job se nepřepisují.
+Executor používá vlastní pevný job, připojení ke sdílenému socketu, vlastní
+read-only ephemeral thread pro každou fázi a přesný Sol/medium/Standard.
+Původní produkční klient/runtime, role a služba zůstaly beze změny.
+
+Čerstvá karta 741e71da…492f570 / plán586cdf96…f3a3add, main6c610287:
+532 dokumentů + celý original, 20+1, plán237,88715 / návrh meze240,
+syntéza input235090/output32000, časy300/900s a run6900s. Nejde o tvrdý
+billing/output/wall-clock cap. Runtime preflight pouze čtecí, peer0.163.0,
+local CLI0.166.0; samotný nový wire není živě modelově ověřený.
+
+Nový job not_started / nula modelových pokusů. K novému placenému běhu je
+nutné přijetí této konkrétní karty; dřívější jediný souhlas nepřenášet.
+Bez reset/resume/retry; při nejistotě status, ne nový send. Status nic
+nevytváří a nepřipojuje. Výsledek pouze soukromý kandidát, publication false.
+Nové příkazy bez allowlist a živé Mac/iPhone facts bez důkazů nepodporované.
+Týdenní produkční agent a provozní kopie/upload nejsou tímto aktivované.
+Důkaz: reports/recovery_guide_anchor_exact_execution_20261108.md a JSON.
+
+Celokorpusová fixture přijata 20+1: všech 532 dokumentů přesně jednou,
+celý original v každé fázi, všech 20 findings v syntéze. Syntetický wire,
+skutečný izolovaný tokenizer, žádný model ani skutečné runtime spojení.
+Status/replay bez spojení, status zachoval bajty i mtime. 46 nových testů,
+plná kanonická brána 2794 testů / 5 skipped OK (539,094 s).
+
+## 2026-11-08 12:57 CET — skutečný číselný pilot a oddělená redakční revize
+
+Karta741e71da byla výslovně přijata a run zavolán jednou:21 completed/delivered,
+20 accepted inspections,532 dokumentů,116 findings. Cena ze usage174,8297
+Standard kreditu pod240. Synthesis686,537s pod900, ale output34115 nad32000;
+job trvale attention/accepted=false, zbývající plánované tahy0. Neopakovat.
+Původní raw, packet, attempt a run-result jsou chráněné soukromým manifestem
+recovery_exact_closed_job_hashes_20261108.json; nové redakční artefakty nejsou
+jejich reset nebo přijetí. Starých5 profilů /24JSON také zůstalo shodných.
+
+Všech21 reálných odpovědí prošlo nezávislým JSON Schema validátorem. Původní
+resolver navíc vyžaduje evidence u každého ne-unchanged odstavce; poslední
+unverified metadata odstavec neměl žádnou, proto raw nebylo obsahově přijaté.
+Další lokální diagnostika odhalila lexikální false positives a skutečně
+nedoložené odvozené absolutní cesty. Validační pravidla se nezměnila.
+
+Oddělený editorial-candidate.txt,93361B,47 částí, SHA72aaa17b…a9b658f, má25
+popsaných redakčních operací a prošel stejným quality gate. Všech216 citací
+beze změny,19 original bloků doslovně a celý non-whitespace original ve stejném
+pořadí. Žádné nové zdroje, live fakta nebo příkazový allowlist. To je pouze
+pracovní derivát k sémantické přejímce, nikoli accepted původního jobu.
+
+Během syntézy main postoupil6c610287→9c8584ee. Rozdíl9 dokumentů byl přečten
+pouze přes Git: HTTP task submit/localStorage frontend, podle reportu bez
+změny backendů, instalací, OS grantů, rolí nebo sítě. Není součástí původního
+modelového snapshotu; při přejímce oddělit. Přísné _current tedy při review false.
+
+Příště bez placení sjednotit min evidence podle statusu v wire a resolveru,
+a návrh doplňků renderovat se serverově zachovaným original. Posun main
+během dlouhého čtení musí mít zvláštní posouzení proti neměnnému snapshotu,
+ne automatickou opravu uzavřeného slotu. Tato obsahová přejímka nepotřebuje
+opakovat model. Provozní publikace do obou cílů i týdenní aktivace zůstávají
+zvlášť autorizované. Kód beze změny; předchozí2794testů/5skipped platí,
+nový důkaz jsou skutečné účtenky a neplacená revize. Podrobnosti v run reportu.

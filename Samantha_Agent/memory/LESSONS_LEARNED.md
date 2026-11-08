@@ -1799,3 +1799,84 @@ Doplnění 17102026 k LL-071: Nativní modelový pomocník navíc zdvojuje roli,
 - Typ: opakující se
 - Řešení nalezeno: 08112026
 - Řešení: používat pro serverový 32hex ID silné getRandomValues (dostupné i mimo secure context), nikdy slabé Math.random. Oddělit známé selhání před POST od nejistého zápisu: prázdné úložiště dovolí editaci a nový explicitní pokus; částečně uložený payload musí zachovat původní ID a pouze status/recover. Testovat HTTP profil bez randomUUID i skutečné chyby setItem/read-back; nemockovat všechny kryptografické funkce jako vždy dostupné. Red→green regrese a 26 cílených PASS, report calendar_task_storage_fix_20261108.md.
+
+### LL-113 — Nový zdrojový manifest není opakování placeného pokusu
+
+- Problém: souběžný nový main zneplatnil už přijatou kartu před prvním modelem;
+  přepsání packetu by skrylo změnu zdrojů a nový adresář by obešel deduplikaci.
+- Typ: zobecnitelné
+- Řešení nalezeno: 07112026
+- Řešení: neplacený refresh povolit jen bez attempt/controller/turns, původní
+  kartu zachovat a nový manifest přijmout pod vlastním digestem. Starý limit
+  se nenavyšuje a všechny verze drží stejný job/marker. Po rezervaci nebo
+  nejistotě refresh odmítnout, nikoli resetovat. Ověřeno šesti regresními
+  případy a skutečným zastavením před placeným tahem. Původní Datova čísla LL-111 až LL-113 jsou při integraci
+  posunuta na LL-113 až LL-115, aby zůstaly zachované kalendářové LL-111/112.
+
+### LL-114 — Správný význam není doslovná citace
+
+- Problém: skutečný Sol/medium při přesných zdrojích změnil v citaci jen
+  první písmeno na velké; JSON i seznam dokumentů byly správné, exact match ne.
+- Typ: zobecnitelné
+- Řešení nalezeno: 07112026
+- Řešení: doslovný kontrakt ponechat fail-closed, zachovat raw odpověď,
+  určit skutečnou spotřebu z jedinečných turn účtenek a další SDK kroky
+  neodeslat. Dvě konkrétní kapitalizace doložené v REC-06, 2 SDK tahy,
+  21,013 Standard kreditu bez retry. Návrh serverových source/anchor ID je
+  další neplacený vývoj, nikoli už ověřené řešení nebo přijatý modelový výstup.
+
+### LL-115 — Přesný text může dodat resolver, model jen vybrat odkaz
+
+- Problém: model věcně správnou citaci při přepisu kapitalizuje; přesný kontrakt selže.
+- Typ: zobecnitelné
+- Řešení nalezeno: 07112026
+- Řešení: v novém protokolu nabídnout ID neměnného zdroje a úseku, vázat je
+  SHA katalogu/requestu a doslovnou citaci načíst programem. Scope, úplnost
+  a původní obsahový gate zachovat i v syntéze. Ověřeno 24 offline testy,
+  úplným historickým korpusem a 101 fixture; není ověřena živá modelová volba
+  ID ani věcná správnost. Starý neúspěšný běh zůstává uzavřený; nový formát
+  vyžaduje nové nacenění a zvláštní přijetí placené zkoušky.
+
+Doplnění 07112026 k LL-115: skutečná malá dvoufázová zkouška potvrdila oba
+source/anchor kontrakty, přesné citace i doslovně zachovaný celý original.
+Cena 8,50485 Standard kreditu pod mezí 15; syntéza 400,240 s ale překročila
+schválených 300 s. Vyhodnocuj obsah, cenu a čas odděleně z raw účtenek:
+obsahová revalidace bez modelu není zpětné přijetí celého jobu. Zachovat
+attention a známé doručení, neopakovat SDK jen kvůli času ani zpětně neměnit
+limit. Nový fázový časový plán je další samostatná karta, ne oprava účtenky.
+
+Doplnění 08112026 k LL-115: v prvním velkém anchor tahu model vrátil
+l131111 pro AGENTS.md s 26 řádky. Formát l+číslo prošel output schematem,
+přesný resolver správně zastavil celý job; 38 ostatních referencí platných,
+9,58995 Standard kreditu a žádný retry. ID protokol vyžaduje nejen runtime
+ověření, ale i další zpřesnění přípustných hodnot v output schema. Takové
+zpřesnění je zatím návrh k offline ověření, nikoli ověřené řešení či souhlas
+s dalším modelem. Raw/cenu/uzavřený slot zachovat, ID nehádat ani nenormalizovat.
+
+Doplnění 08112026 k LL-115 (offline ověřeno): samostatný nový formát může
+vydávat pro každý zdroj hustý číselný index 1…N; integer minimum/maximum a
+source-specific anyOf pak reprezentují přesně vydané povolené dvojice bez
+desítek tisíc enum values či regex aproximace. Immutable mapa/request hash
+a nezávislý resolver zůstávají. Protipříklad 131111 při max21 odmítl nezávislý
+JSON Schema validator; 21 schémat, 8683 probes a 99874 mapování. Je to lokální
+důkaz, nikoli modelově ověřený formát, souhlas s dalším pokusem nebo oprava
+starého jobu. Platná reference sama neprokazuje správnost tvrzení.
+
+Doplnění 08112026 k LL-115 (integrace): nový přesný wire formát patří do
+samostatného pevného jobu s novou konkrétní kartou, nikoli do resetovaného
+uzavřeného slotu. Worker reprodukuje wire/schema/map SHA a všechny raw dávky
+před syntézou; runtime decode nesmí měnit raw ani mít legacy fallback.
+Ověřeno 46 kontraktními testy a skutečným čerstvým korpusem 532 dokumentů
+přes celý executor/worker (20+1, syntetický wire, izolovaný skutečný tokenizer).
+Status/replay bez připojení; provider a věcná správnost zůstávají neověřené.
+
+Doplnění 08112026 k LL-115 (celý skutečný běh):21 číselných odpovědí splnilo
+odeslané schema,20 inspections přijato,532 dokumentů/116 findings. To nestačí
+pro aplikační přejímku: syntéza34115/32000 output a poslední unverified odstavec
+bez evidence. Zdrojová main větev navíc během syntézy postoupila. Job zachovat
+attention/174,8297 bez retry. Bez dalšího modelu lze udělat výslovně oddělený,
+auditovaný redakční derivát; raw/limit/job se nemění. Ověřeno25 operací,
+všech216 citací zachovaných, celý původní obsah a původní quality gate passed.
+Běžná lomítka v próze nejsou cesty a nezaškrtnutý přejímací bod není live claim;
+rozdíl doložit a redakčně vyjasnit, ne vypnout gate. Nové odvozené cesty bez
+přesné citace nepřijímat. Sémantická/provozní přejímka tím není automatická.
