@@ -464,3 +464,25 @@ offline zpřísnění na skutečně vydaná ID se znovu ověřenou velikostí/ce
 nikoli oprava této odpovědi nebo pokračování původního uzavřeného slotu.
 Doklad reports/recovery_guide_anchor_full_pilot_run_20261108.md a result JSON.
 Staré joby/plán beze změny; žádný provozní návod, role, služba ani publikace.
+
+## 2026-11-08 — offline přesný číselný index citací
+
+Nové samostatné exact_schema/exact_plan nemění uzavřený executor ani staré
+raw. Source_citation_index_v1 vydává pro každý request/zdroj právě 1…N
+povolených referencí. Integer bounds a skupiny anyOf vážou source/domain;
+internal decoder mapuje do původních lN a používá stejný resolver/quality gate.
+Vstupní text se nekrátí, prázdné/nadlimitní řádky mají null index. Numeric
+index není fyzický řádek a nesmí se přenášet mezi requesty.
+
+21 schémat a 8683 probes nezávislým Draft202012Validator, 99874 mapování,
+19 nových / 130 cílených testů OK. Protipříklad 131111 pro AGENTS.md odmítnut
+max21; fixture není opravená modelová odpověď ani přijetí starého jobu.
+Původní raw 6177159d…505b55a / job attention / 9,58995 zachovaný beze změny.
+
+Plán a59c80c4…516c070 nad main6d5b576b: 531 dokumentů + original, 20+1,
+237,43795 Standard kreditu, návrh meze240 (ne billing cap), syntéza234859
+input. Nová reprezentace je offline, nebyla modelově ověřena a není zapojená
+do běhového adapteru. Neexistuje nová exekuční karta či placený souhlas.
+Doklad reports/recovery_guide_anchor_exact_20261108.md a plan/offline JSON.
+Další krok samostatná integrace/dekodér/worker a nový konkrétní postup;
+žádný automatický model, retry, publikace či aktivace. Starý job neopakovat.

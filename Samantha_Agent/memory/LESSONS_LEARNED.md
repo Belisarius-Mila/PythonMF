@@ -1746,3 +1746,12 @@ přesný resolver správně zastavil celý job; 38 ostatních referencí platný
 ověření, ale i další zpřesnění přípustných hodnot v output schema. Takové
 zpřesnění je zatím návrh k offline ověření, nikoli ověřené řešení či souhlas
 s dalším modelem. Raw/cenu/uzavřený slot zachovat, ID nehádat ani nenormalizovat.
+
+Doplnění 08112026 k LL-113 (offline ověřeno): samostatný nový formát může
+vydávat pro každý zdroj hustý číselný index 1…N; integer minimum/maximum a
+source-specific anyOf pak reprezentují přesně vydané povolené dvojice bez
+desítek tisíc enum values či regex aproximace. Immutable mapa/request hash
+a nezávislý resolver zůstávají. Protipříklad 131111 při max21 odmítl nezávislý
+JSON Schema validator; 21 schémat, 8683 probes a 99874 mapování. Je to lokální
+důkaz, nikoli modelově ověřený formát, souhlas s dalším pokusem nebo oprava
+starého jobu. Platná reference sama neprokazuje správnost tvrzení.

@@ -1555,3 +1555,42 @@ závislosti bez konkrétní potřeby. Nejde o rozšíření e-mailové business 
   SDK délka 34,567 s, celý job 57,990 s. Findings JSON 721/1000 ref tokenů.
 - Kód se neměnil; 111 cílených a 2 729 plných testů / 5 skipped z předchozí etapy.
   Aktuální statická brána a git diff --check OK. Žádný další modelový tah.
+
+## 2026-11-08 11:42 CET — REC-06: přesná doména citací offline ověřena a přepočtena
+
+### Hotovo
+- Nový source_citation_index_v1 používá pro každý zdroj hustý index 1…N
+  s přesnou immutable vazbou na vydané a povolené lN. Schema váže source_id
+  a integer range; celý text včetně necitovatelných řádků zůstává zachovaný.
+- Regresní protipříklad 131111 pro AGENTS.md odmítnut už schematem (max21).
+  Nezávislý JSON Schema validator ověřil 21 schémat / 8683 doménových probes,
+  program 99 874 mapování. 19 nových / 130 cílených testů OK.
+- Nový plán a59c80c4…516c070: 531 dokumentů + original, 20+1 fází,
+  rezerva 237,43795 / návrh meze 240 Standard kreditů; synthesis input 234859.
+
+### Rozhodnutí
+- Jde o offline novou reprezentaci, nikoli opravu raw či přijetí původní
+  dávky. Starý job zůstává attention / 9,58995, žádný reset či nový model.
+- Přesný resolver, původní quality/budget gate a blokace neschválených
+  příkazů/live claims se nemění. Platné ID není záruka věcné správnosti.
+- Nový formát není živě ověřený ani zapojený do executor/worker. Neexistuje
+  nová exekuční karta či žádost o placení. Provozní TXT/iCloud/role/služby bez změny.
+
+### Další krok
+- Explicitně integrovat nový dekodér do samostatného adapteru/workeru,
+  připnout novou kartu a po čerstvém přepočtu určit další postup. Původní
+  uzavřený slot ani chybný raw výstup nepoužít k automatickému pokračování.
+
+### Navrhované další kroky
+- Will přezkoumá izolovaný offline diff, limity a novou reprezentaci.
+- Integrace dekodéru a čerstvá exekuční karta, zatím bez modelu.
+- Před případným dalším placením posoudit kompatibilitu a využití validních částí známé účtenky.
+- Mac/iPhone dossier, celý obsahový návrh, dvě kopie/upload a týdenní aktivace později.
+
+### Technický důkaz
+- recovery_guide_anchor_exact_20261108.md, *_plan_20261108.json a *_offline_20261108.json.
+- Max schema: 195 properties / 536 enum values / 2846 znaků jmen / depth6 / 17290 B.
+- Nové integer bounds/anyOf jsou v dokumentovaném subsetu; skutečný model/peer dosud netestován.
+- Plán -6,071 proti dřívější rezervě, nejde o reálnou úsporu či hard billing cap.
+- Raw 6177159d…505b55a a pět starých jobů/plánů beze změny; counterexample je pouze fixture.
+- Plná brána 2 748 OK / 5 skipped; statická brána a git diff --check OK. Žádný push/deploy nebo integrace do main.
