@@ -1837,3 +1837,13 @@ launchd exit0/not_due/0 modelů. Není to důkaz prvního placeného týdenního
   nevolá model ani aktivační bránu a nevyřizuje zprávu. HTTP 403 není důkaz
   zákazu překladu; práva, úplnost zdroje a aktivace jsou samostatné podmínky.
   Ověřeno 73 cílenými testy včetně 12 Node případů, fyzická přejímka ještě chybí.
+
+
+Doplnění 09112026 k LL-114 (skutečný překladový pilot): jedinečný Sol/medium
+Standard tah vrátil celý zkontrolovaný překlad za 0,5995 kreditu (usage
+6980 input / 1002 output). Vstupní UTF-8 byte proxy 3507 nezahrnovala celou režii
+runtime a není horní mez účtovaných vstupních tokenů; cenu odvozovat od jedinečné
+usage účtenky. Raw receipt a schválenou přípravnou kartu nepřepisovat dodatečnou
+kontrolou. Samostatně rozlišit programovou přejímku, Datovo porovnání významu,
+Mílovu četbu a pozdější připojení výsledku do UI. Pro opětovné zobrazení nebo
+přenos již hotového překladu nepouštět další modelový tah.

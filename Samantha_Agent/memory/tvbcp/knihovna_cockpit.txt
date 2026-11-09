@@ -1,23 +1,26 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
-- Aktualizováno: 2026-11-09 23:25 CET; proud `project-knowledge-library`, Data / `data/parallel-20261104`.
-- Míla potvrdil nasazení ScienceNews a částečnou UI přejímku. Na jeho výslovný pokyn
-  vloženy tři pilotní zprávy jedním idempotentním importem. Poslední čtecí kontrola
-  ukázala jednu zbývající CRISPR zprávu; vyřízené položky se znovu nevkládají.
-- Překladač není aktivovaný: chybí centrální role a soukromá aktivace. NIH při přímém
-  stažení vrací 403, položka nemá celý zdroj. Nejde o důkaz zákazu překladu.
-- Lokální oprava tlačítko při neaktivním překladači znepřístupní a vysvětlí důvod;
-  již hotový překlad lze dál otevřít. Tato oprava zatím není nasazená.
-- Připraven oddělený zdroj a přesný JSON vstup pro jeden překlad tiskové zprávy NIH,
-  nikoli celé studie Nature. Návrh Sol/medium Standard, plánovací byte proxy
-  4,17535 kreditu s 16k výstupem, přijímací mez 5 kreditů. Nic z toho není schválený
-  placený pokus ani tvrdý upstream billing cap. Report `reports/science_news_translation_preflight_20261109.json`.
-- Ověření opravy: 74 cílených testů PASS (včetně 12 Node případů); finální plná brána 2940 testů OK (5 SKIP), syntaxe a whitespace OK.
-  Fyzická přejímka opravy je otevřená.
-- Další krok: zkontrolovat a integrovat UI opravu; pro placenou zkoušku nejprve získat
-  přesný souhlas s připraveným jednorázovým kandidátním vstupem a provést jediný tah.
-  Produkční role, živá fronta/archiv, páteční služba a aktivace se v tomto kroku neměnily.
+- Aktualizováno: 2026-11-09 23:32 CET; proud `project-knowledge-library`, Data / `data/parallel-20261104`.
+- Míla schválil přesný jeden překladový pilot. Sol/medium Standard na účtu ChatGPT
+  dokončil jediný pokus: 6980 vstupních + 1002 výstupních tokenů, cena podle usage
+  0,5995 Standard kreditu pod schválenou přijímací mezí 5. Žádný retry.
+- Technická přejímka i Datova věcná kontrola tohoto jediného vzorku PASS:
+  všech devět odstavců tiskové zprávy NIH, datum, reference, grant a čísla zachované;
+  lidská buněčná linie není vydávána za léčeného pacienta a AAV testy jsou budoucí plán.
+- Mílova čtenářská přejímka je otevřená. Český text je v ignorovaném
+  `data/private/science_news_trial_20261109/crispr-preklad-cs.txt`, raw účtenka i samostatný
+  Datův review zůstávají private. Výsledek `reports/science_news_translation_trial_20261109.json`.
+- Přípravná karta zůstává beze změny kvůli schválenému otisku; její historický stav
+  prepared/0 paid je překryt novou výsledkovou účtenkou, nikoli přepsán.
+- UI oprava je v lokálním commitu `9abeb797`: neaktivní tlačítko má vysvětlení,
+  hotové překlady zůstávají čitelné. Dřívější testy: 74 cílených a 12 Node scénářů PASS;
+  plná brána 2940 testů OK (5 SKIP). V tomto provedení se kód neměnil.
+- Provozní fronta, archiv, centrální role a páteční automatika se tímto pilotem nemění.
+  NIH automatický fetch/ověření úplného textu a kvalita týdenního editoru zůstávají otevřené.
+- Další krok: Míla přečte hotový překlad; Will převezme pouze konkrétní Datovy commity
+  do aktuálního main a samostatně autorizovaně nasadí UI. Pro tuto zprávu lze potom
+  připojit již hotový ověřený překlad k existující položce bez nového modelového tahu.
 <!-- SAMANTHA_CURRENT_STATUS_END -->
 
 TVBCP: Knihovna v Samantha Cockpitu
@@ -1045,3 +1048,44 @@ Doplnění dokončení 2026-11-09 23:25 CET:
   konflikty a cíleně ověřit integraci. Žádný merge/rebase/push/nasazení se neprovádí.
 - Přijímací karta v reportu je hotová, včetně změněných souborů, ceny, otisků,
   read-only metadata proof a testů. K samotnému jedinému placenému pokusu chybí souhlas.
+
+
+## 2026-11-09 23:32 CET — ScienceNews: schválený překladový pilot dokončen
+
+Hotovo:
+- Je připraven skutečný český překlad celého dodaného těla tiskové zprávy NIH o CRISPR,
+  včetně nadpisu, data, podtitulku, všech devíti odstavců, grantu a reference.
+- Jeden schválený pokus Sol/medium Standard prošel technickou i Datovou věcnou kontrolou.
+  Cena podle vykázaných tokenů je 0,5995 kreditu, pod přijímací mezí 5 kreditů.
+- Čtenářský soubor `crispr-preklad-cs.txt` a nezměněná raw účtenka jsou private;
+  Git-safe výsledkový report `reports/science_news_translation_trial_20261109.json`.
+
+Rozhodnutí:
+- Mílovo „Schvaluji.“ se vztahuje na přesný jeden připravený placený překladový test.
+  Je tím spotřebován tento jediný pokus; nejde o aktivaci role, týdenního editoru,
+  zápis do živé fronty/archivu ani p+n. Neproběhl žádný další modelový tah.
+- Přípravná karta i programová raw účtenka se nepřepisují; Datova následná kontrola
+  má samostatný záznam. Datova věcná kontrola není Mílova čtenářská přejímka.
+
+Další krok:
+- Míla přečte hotový český text; Will může převzít konkrétní lokální commity
+  a po samostatném oprávnění propojit hotový překlad s existující pilotní zprávou.
+
+Navrhované další kroky:
+- Pro tuto zprávu nepřekládat znovu; bezpečně připojit již ověřený výsledek bez modelu.
+- Aktivaci centrální role/rozpočtu, úplné texty a páteční automatiku převzít samostatně;
+  jedna tisková zpráva neprokazuje kvalitu týdenního výběru ani obecné získávání zdrojů.
+
+Technický důkaz:
+- Raw účtenka: state=review, attempts=1, účet ChatGPT, gpt-6.1-sol/medium Standard;
+  6980 input, 1002 output, total 7982, 0 cached. Z ověřeného usage vychází 0,5995 kreditu;
+  nejde o nezávisle ověřenou fakturu poskytovatele.
+- Strict JSON complete=true, 2953 znaků zdroje / 3012 znaků překladu, oba mají 12 bloků;
+  Datovo porovnání ověřilo všech devět obsahových odstavců, čísla a jejich nerovnosti,
+  názvy Al3Cas12f/RKK, grant R35GM138348, DOI, buněčný experiment a budoucí plán AAV.
+- SHA-256 zdroje, zmrazeného reportu/paketu, raw účtenky a překladu jsou ve výsledkovém
+  reportu. Nezměněné zdroje a instrukce byly znovu ověřeny čtecím preview, nikoli run.
+- Vstupních 6980 účtovaných tokenů ukazuje režii nad proxy 3507 UTF-8 bajtů; proxy není
+  horní mez účtovaného vstupu. Plán 4,17535 využíval 16000 výstupních tokenů a nebyl fakturou.
+- Žádné změny kódu, modelových rolí, živé fronty či archivu, služby, push nebo nasazení.
+  Dříve prošlo 74 cílených testů a 12 Node scénářů, plná brána 2940 OK (5 SKIP).

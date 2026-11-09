@@ -187,8 +187,29 @@ Není přidána plošná automatická public-domain výjimka pro doménu.
 Návrh jediné placené zkoušky: gpt-6.1-sol / medium / Standard, 90s timeout každého transportního čekání (nikoli celkový běhový strop), 3507 vstupních bajtů v plánovací proxy + 16000 přijatelných
 výstupních tokenů => 4,17535 kreditu, navržená přijímací mez 5 kreditů.
 Proxy není tokenizace, faktura ani tvrdý provider limit. Neurčitý timeout
-blokuje druhý pokus i při neznámém účtování. Skutečný souhlas dosud chybí.
+blokuje druhý pokus i při neznámém účtování. Míla následně schválil tento přesný jeden pokus; provedení je oddělené od zmrazené přípravné karty.
 
 Kreditový pilot před vytvořením vlákna ověří `account/read` bez refreshToken:
 jen `type=chatgpt`; API klíč a neznámý účet blokují placený tah. Celý účet,
 e-mail ani jiné identifikační údaje se do podkladů nebo účtenky nekopírují.
+
+
+### Výsledek skutečné zkoušky 2026-11-09 23:32 CET
+
+`reports/science_news_translation_trial_20261109.json`: jediný pokus dokončen,
+state=review, usage 6980/1002 (input/output), 0,5995 Standard kreditu pod mezí 5.
+Programová raw účtenka se nepřepisuje, Datovo následné porovnání je v samostatném
+private `semantic_review.json` a text v `crispr-preklad-cs.txt` v témže adresáři.
+Všech devět odstavců, reference, grant a numerické/klinické nejistoty prošly Datovou
+kontrolou; Mílova čtenářská přejímka ještě chybí. Receipt review není samo aktivací.
+
+Přípravný report se po běhu nemění: jeho hash je součástí konkrétního souhlasu i
+účtenky a jeho pole prepared/0 paid zůstávají historickým plánem. Aktuální výsledek
+vždy číst z výsledkového reportu/účtenky. Neměnit request ID, nezaložit nový pokus
+ani při potřebě znovu zobrazit výsledek. Kód ani produkční data se při provedení
+neměnily. Přenos hotového překladu do existující položky potřebuje vlastní omezenou
+registrovanou operaci a oprávnění; model pro stejný zdroj se znovu nevolá.
+
+6980 skutečných vstupních tokenů zahrnuje runtime/protokolovou režii; vstupní
+byte proxy 3507 nebyla horní mez účtovaného vstupu. Cenu vyhodnocovat z jedinečné
+usage účtenky a nebrat plánovací 4,17535 za fakturu či upstream billing limit.

@@ -7,6 +7,21 @@ hlídání změn webových stránek. Základní implementaci Míla potvrdil jako
 zprávách. Překlad ani automatický redaktor ještě nejsou aktivované. Vývoj zůstává v Datově worktree na
 `data/parallel-20261104`; e-mailový a kalendářový agent patří Willovi.
 
+### Schválený pilot překladu — 2026-11-09 23:32 CET
+
+Míla schválil jediný připravený tah Sol/medium Standard. Zkouška na účtu ChatGPT
+prošla: 6980 input + 1002 output tokenů, 0,5995 kreditu podle usage pod přijímací
+mezí 5. Jediný pokus bez retry; celý český text je private jako
+`data/private/science_news_trial_20261109/crispr-preklad-cs.txt`.
+Datova věcná kontrola PASS: všech devět odstavců, čísla, grant/DOI i rozlišení
+buněčné linie a plánovaného AAV. Mílova čtenářská přejímka ještě chybí.
+
+Výsledkový report `reports/science_news_translation_trial_20261109.json` má otisky,
+usage a přesné hranice. Přípravný report zůstává zmrazenou historickou kartou.
+Vzorek neprokazuje týdenní výběr, automatické získání celého zdroje ani plošné
+licence. Živá fronta/archiv, role a automatika se nezměnily. Pro tuto zprávu již
+nevolat model; po převzetí a samostatném oprávnění připojit hotový výsledek.
+
 ### Přejímka překladu — 2026-11-09 23:10 CET
 
 Po schváleném jednorázovém importu tří pilotních zpráv Míla nahlásil nefunkční
