@@ -55,3 +55,14 @@ class CalendarAgendaHTTPTests(unittest.TestCase):
     def test_frontend_contract(self):
         result=subprocess.run([node_binary(),'tests/calendar_agenda_frontend.test.cjs'],capture_output=True,text=True,timeout=25)
         self.assertEqual(result.returncode,0,result.stdout+result.stderr)
+
+    def test_completion_over_http_hides_only_cockpit_views_and_rejects_replay(self):
+        view=self.prepare();row=view['meetings'][0]
+        body={'action':'set_completed','key':row['key'],'completed':True,'confirmed':True,
+              'expected_selection_revision':view['selection_revision'],'expected_labels_revision':view['labels_revision']}
+        before=self.overview.path.read_bytes();code,raw,_=self.request(body=body)
+        self.assertEqual(code,200);self.assertNotIn(row['key'],[r['key'] for r in json.loads(raw)['meetings']])
+        with patch('app.cockpit_calendar.CalendarOverview',return_value=self.overview):
+            code,raw,_=self.request('/api/calendar/overview')
+            self.assertEqual(code,200);self.assertNotIn(row['key'],[r['key'] for r in json.loads(raw)['events']])
+        self.assertEqual(before,self.overview.path.read_bytes());self.assertEqual(self.request(body=body)[0],400)

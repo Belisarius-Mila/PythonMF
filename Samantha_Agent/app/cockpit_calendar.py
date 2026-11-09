@@ -3,6 +3,7 @@ from http import HTTPStatus
 import subprocess
 
 from app.calendar_access_pilot import CalendarPilotError
+from app.calendar_agenda import CalendarAgenda
 from app.calendar_overview import CalendarOverview, CalendarOverviewError, CalendarSelectionConflict
 from app.cockpit_frontend import CALENDAR_OVERVIEW_HTML
 from app.file_persistence import FilePersistenceError
@@ -10,7 +11,9 @@ from app.file_persistence import FilePersistenceError
 
 def calendar_overview_action(payload, *, store=None):
     try:
-        return (store or CalendarOverview()).execute(payload)
+        overview = store or CalendarOverview()
+        value = overview.execute(payload)
+        return CalendarAgenda(overview).display_overview(value)
     except CalendarSelectionConflict as exc:
         return {"ok": False, "error": "conflict", "message": str(exc)}
     except CalendarOverviewError as exc:
@@ -29,7 +32,8 @@ class CalendarOverviewRoutes:
             responder.respond_html(CALENDAR_OVERVIEW_HTML)
         else:
             try:
-                responder.respond_json(CalendarOverview().snapshot())
+                overview = CalendarOverview()
+                responder.respond_json(CalendarAgenda(overview).display_overview(overview.snapshot()))
             except (OSError, ValueError, CalendarPilotError):
                 responder.respond_json({"ok": False, "message": "Uložený přehled není dostupný. Kolize nejsou ověřené."}, status=HTTPStatus.CONFLICT)
         return True

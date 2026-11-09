@@ -26,6 +26,7 @@
     const li=element("li",undefined,"calendar-agenda-row"), text=element("div",undefined,"calendar-agenda-content");
     text.append(element("span",timing(item),"calendar-agenda-time"),element("strong",item.title||"Bez názvu"));
     li.append(text);
+    window.SamanthaCalendarActions?.attach(text,item,{disabled:()=>busy||!state?.fresh,context:()=>state,onChanged:()=>refresh(true)});
     if(item.can_delete&&window.SamanthaCalendarDelete)window.SamanthaCalendarDelete.attach(text,item,{disabled:()=>busy||!state?.fresh,onDeleted:()=>refresh(true)});
     const types=element("details",undefined,"calendar-agenda-type");types.append(element("summary","Typ"));
     const label=element("label","Typ pro tento přehled"), select=element("select");select.setAttribute("aria-label","Typ události "+item.title);
@@ -49,7 +50,7 @@
     state=value;
     let message=value.selected_count===0?"Vyber kalendáře v Komunikace → Kalendář.":value.refreshing?"Načítám aktuální kalendáře…":value.fresh?"Aktuální přehled na příštích 30 dní.":"Přehled není aktuálně ověřený. Zobrazené dřívější údaje mohou být zastaralé.";
     if(value.loaded_at)message+=" Aktualizováno "+date.format(new Date(value.loaded_at))+" v "+time.format(new Date(value.loaded_at))+".";
-    if(value.classification_partial)message+=" Část označení typů nelze načíst; položky zůstávají mezi ostatními událostmi.";
+    if(value.classification_partial)message+=" Část označení typů a splnění nelze načíst; položky zůstávají mezi ostatními událostmi.";
     notice.textContent=message;notice.dataset.fresh=String(value.fresh);panel.setAttribute("aria-busy",String(value.refreshing));
     list("calendarAgendaDeadlines",value.deadlines,"V příštích 30 dnech nejsou označené termíny.");
     list("calendarAgendaMeetings",value.meetings,"V příštích 30 dnech nejsou schůzky ani další události.");
@@ -58,7 +59,7 @@
     if(value.refreshing)schedulePoll();
   }
   function error(err) {panel.setAttribute("aria-busy","false");if(state)state={...state,fresh:false};notice.textContent=(err.name==="AbortError"?"Načítání trvá déle. Přehled nyní není ověřený.":err.message)+ (state?.loaded_at?" Poslední načtené údaje zůstávají zobrazené.":"");notice.dataset.fresh="false";controls();}
-  function controls() {refreshButton.disabled=busy;for(const select of panel.querySelectorAll("select"))select.disabled=busy||!state?.fresh||state.classification_partial||select.dataset.classify!=="true";window.SamanthaCalendarDelete?.update(panel);}
+  function controls() {refreshButton.disabled=busy;for(const select of panel.querySelectorAll("select"))select.disabled=busy||!state?.fresh||state.classification_partial||select.dataset.classify!=="true";window.SamanthaCalendarDelete?.update(panel);window.SamanthaCalendarActions?.update(panel);}
   function schedulePoll() {
     if(pollTimer||polls>=30||document.hidden)return;
     pollTimer=setTimeout(async()=>{
@@ -85,6 +86,7 @@
     catch(err){if(token===generation)error(err);}
     finally {if(token===generation){busy=false;controls();}}
   }
+  window.addEventListener("calendarChanged",()=>refresh(true));
   refreshButton.addEventListener("click",()=>refresh(true));
   window.addEventListener("focus",()=>refresh());window.addEventListener("pageshow",()=>refresh());
   document.addEventListener("visibilitychange",()=>{if(document.hidden){clearTimeout(pollTimer);pollTimer=null;}else refresh();});

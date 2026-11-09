@@ -18,8 +18,8 @@ FRONTEND_PAGE_IDS = (
 FRONTEND_JAVASCRIPT_MODULES = {
     "email_agent": ("../shared/calendar_delete.js", "calendar_draft.js"),
     "calendar_task": ("../shared/calendar_delete.js",),
-    "calendar_overview": ("../shared/calendar_delete.js",),
-    "cockpit": ("../shared/calendar_delete.js", "calendar_agenda.js", "navigation.js", "health_recovery_autosave.js", "codex_sessions.js", "library_photos.js", "document_review.js", "document_search.js", "film_feedback.js", "film_editor.js", "film_library.js"),
+    "calendar_overview": ("../shared/calendar_delete.js", "../shared/calendar_actions.js",),
+    "cockpit": ("../shared/calendar_delete.js", "../shared/calendar_actions.js", "calendar_agenda.js", "navigation.js", "health_recovery_autosave.js", "codex_sessions.js", "library_photos.js", "document_review.js", "document_search.js", "film_feedback.js", "film_editor.js", "film_library.js"),
 }
 
 

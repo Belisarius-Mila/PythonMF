@@ -143,6 +143,13 @@ class CalendarDeletion:
         return self._view(value)
 
     def execute(self, payload):
+        if isinstance(payload,dict) and payload.get('action') in {'prepare','delete','recover'}:
+            from app.calendar_mutation_guard import mutation_guard
+            with mutation_guard(self.root.parent,operation='delete',recover=payload.get('action')=='recover'):
+                return self._execute(payload)
+        return self._execute(payload)
+
+    def _execute(self, payload):
         if not isinstance(payload,dict): raise ValueError('Neplatná mazací akce.')
         action = payload.get('action')
         if action == 'prepare' and set(payload)=={'action','event'}: return self.prepare(payload['event'])

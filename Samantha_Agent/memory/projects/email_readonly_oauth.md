@@ -1,5 +1,8 @@
 # E-mail read-only OAuth integrace
 
+- 2026-11-09 20:46 CET: Lokálně doplněné Splněno a Editovat v kalendáři i úvodní agendě. Splnění pouze skryje konkrétní položku v Cockpitu, kalendář a kolize se nemění. Editace mění název/datum/čas původního výskytu, ostatní údaje zachová. Python/HTTP/JS a nativní in-memory scénáře PASS; nový izolovaný podepsaný helper má 7 self-test kontrol. Mobilní headless Edge 390×844: náhled, Zrušit/znovu otevřít, editace a skrytí PASS. Plná brána 3320 testů OK (31 SKIP). Bez p+n, OS grantu a skutečné kalendářové mutace; další krok autorizovat p+n a jednou povolit úpravy na Macu. Report reports/calendar_complete_edit_20261109.md.
+
+
 - 2026-11-09 14:03 CET: Lokálně propojený Archiv s potvrzenými archivacemi hodinového agenta. Společný seznam/hledání, detail, text, originál a vložené PDF fungují bez přesunu nebo přepisu uložených zpráv. Původní odkazy stabilní; agent má oddělené reference, nejednoznačná ID a úniky přes symlinky se odmítají. 30 cílených testů PASS; plná brána 3296 testů OK (31 SKIP). Skutečné uložené vyúčtování nalezené, PDF čitelné, souborové otisky před/po shodné. Bez p+n; další krok samostatně schválit nasazení a ověřit Archiv na Macu/iPhonu. Report reports/email_archive_bridge_20261109.md.
 
 

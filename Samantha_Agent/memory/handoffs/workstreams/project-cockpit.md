@@ -1,6 +1,10 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
+- 2026-11-09 20:46 CET: Lokálně doplněné Splněno a Editovat v kalendáři i úvodní agendě. Splnění pouze skryje konkrétní položku v Cockpitu, kalendář a kolize se nemění. Editace mění název/datum/čas původního výskytu, ostatní údaje zachová. Python/HTTP/JS a nativní in-memory scénáře PASS; nový izolovaný podepsaný helper má 7 self-test kontrol. Mobilní headless Edge 390×844: náhled, Zrušit/znovu otevřít, editace a skrytí PASS. Plná brána 3320 testů OK (31 SKIP). Bez p+n, OS grantu a skutečné kalendářové mutace; další krok autorizovat p+n a jednou povolit úpravy na Macu. Report reports/calendar_complete_edit_20261109.md.
+
+- 2026-11-09: Předchozí propojení Archivu je již nasazené v 163ad9cb. Účtenka 5500919b2c2d624e692750bab27e70f4 completed, brána3296/smoke5/5/CI42628013345 success; živá zpráva/PDF a nezměněné otisky ověřené, Míla potvrdil funkčnost. Níže uvedený lokální stav14:03 je historický checkpoint před tímto vydáním.
+
 - 2026-11-09 14:03 CET: Lokálně propojený Archiv s potvrzenými archivacemi hodinového agenta. Společný seznam/hledání, detail, text, originál a vložené PDF fungují bez přesunu nebo přepisu uložených zpráv. Původní odkazy stabilní; agent má oddělené reference, nejednoznačná ID a úniky přes symlinky se odmítají. 30 cílených testů PASS; plná brána 3296 testů OK (31 SKIP). Skutečné uložené vyúčtování nalezené, PDF čitelné, souborové otisky před/po shodné. Bez p+n; další krok samostatně schválit nasazení a ověřit Archiv na Macu/iPhonu. Report reports/email_archive_bridge_20261109.md.
 
 - 2026-11-08 18:22 CET: Lokálně doplněné volitelné kalendářové návrhy v jednom e-mailovém posouzení. Výchozí calendar_suggestions=false, běžící služba se nemění. Připravený návrh přebírá stejné Do kalendáře bez dalšího modelu/IMAP; existující návrhy, revize, zápisy a e-mailové koncepty se nepřepisují. 214 cílených testů PASS; závěrečná plná Cockpit brána 3199 testů OK (31 SKIP). Bez p+n/aktivace. Report reports/calendar_hourly_suggestions_20261108.md.
@@ -2353,3 +2357,15 @@ přímá přejímka Mílova prohlížeče nebyla dostupná.
 **Navrhované další kroky:** Žádné další změny; doručení Pushcut na telefon zůstává samostatné pozorování.
 
 **Technický důkaz:** 30 cílených testů PASS, syntetické HTTP přes skutečné routy, nalezené skutečné uložené vyúčtování, vložené PDF čitelné a stejné otisky souborů před/po. Plná brána 3296 testů OK (31 SKIP). Report `reports/email_archive_bridge_20261109.md`. Riziko/hranice: změna je lokální, živý Cockpit zatím používá starý reader; fyzická přejímka dosud neproběhla.
+
+## 2026-11-09 20:46 CET — Splnění a editace položek kalendáře
+
+**Hotovo:** V místním kalendáři a agendě jsou Splněno a Editovat. Splněná položka zmizí pouze z Cockpitu a zůstane započítaná při kontrole kolizí. Předvyplněný formulář změní původní název, datum a čas; Zrušit nic nezapisuje.
+
+**Rozhodnutí:** Splnění se pamatuje soukromě podle konkrétního obsahu/výskytu. Editace použije nový samostatný podepsaný helper, stávající reader/create-only writer/delete binárky zůstanou zachované. Jen tento výskyt, bez pozvánek s účastníky nebo organizátorem; poznámky, místo, pásmo a alarmy se nemění. Nejasný výsledek lze pouze ověřit, jiná editace/smazání počká.
+
+**Další krok:** Samostatně autorizovat p+n; po nasazení jednou zvolit Povolit úpravy na Macu a potvrdit OS přístup.
+
+**Navrhované další kroky:** Potom provést Mílou určenou skutečnou editaci a přejímku na Macu/iPhonu včetně iCloud synchronizace.
+
+**Technický důkaz:** Cílené Python/HTTP/JS testy PASS, skutečná Swift transakční logika proti in-memory EventKit a izolovaný podepsaný build/7 self-test kontrol PASS. Mobilní headless Edge prošel předvyplněním, stornem a novým otevřením, editací a skrytím; šířka 390 px bez přetékání. Plná brána 3320 testů OK (31 SKIP). Report `reports/calendar_complete_edit_20261109.md`. Rizika: dosud bez nového OS oprávnění a bez skutečné kalendářové mutace; fyzická přejímka/iCloud otevřené. Nativní nejasný zápis bez ověřitelných ID vyžaduje ruční servis, neopakuje se.

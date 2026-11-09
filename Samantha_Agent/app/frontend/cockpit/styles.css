@@ -565,3 +565,15 @@
 .calendar-agenda .calendar-agenda-heading h2{padding:0;border:0;background:transparent}.calendar-agenda>section{margin:0;border:0;border-radius:0;overflow:visible}.calendar-agenda>section h3{padding:0;border:0;background:transparent}
 
 .calendar-delete{display:flex;align-items:center;flex-wrap:wrap;gap:8px;margin-top:8px;min-width:0}.calendar-delete-button{width:auto;min-height:44px;padding:7px 10px;font-size:13px;white-space:normal;background:#fff5f3;color:#9c2c24;border:1px solid #e4bcb7}.calendar-delete [role=status]{font-size:13px;line-height:1.4;overflow-wrap:anywhere}
+
+.calendar-actions {display:flex;flex-wrap:wrap;gap:.5rem;align-items:center;margin-top:.6rem}
+.calendar-actions button {min-height:44px;padding:.5rem .8rem}
+.calendar-edit-dialog {width:min(92vw,36rem);max-height:90vh;overflow:auto;border:1px solid #cbd5e1;border-radius:14px;padding:1.2rem;background:#fff;color:#182230}
+.calendar-edit-dialog::backdrop {background:#15223788}
+.calendar-edit-dialog fieldset {border:0;padding:0;display:grid;gap:.7rem}
+.calendar-edit-dialog label {display:grid;gap:.3rem}
+.calendar-edit-dialog textarea,.calendar-edit-dialog select,.calendar-edit-dialog input {font:inherit;padding:.65rem;max-width:100%;box-sizing:border-box}
+.calendar-edit-dialog textarea {width:100%}
+.calendar-edit-date {display:flex;gap:.7rem;flex-wrap:wrap}
+.calendar-edit-dialog button {min-height:44px;margin:.4rem .5rem 0 0;padding:.65rem 1rem}
+.calendar-edit-recovery {padding:1rem;background:#fff5db;color:#182230}

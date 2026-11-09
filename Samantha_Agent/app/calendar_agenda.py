@@ -91,7 +91,54 @@ class CalendarAgenda:
         if (not isinstance(value,dict) or type(value.get('revision')) is not int or not isinstance(value.get('items'),dict)
                 or any(not isinstance(k,str) or len(k)!=64 or v not in KINDS for k,v in value['items'].items())):
             raise ValueError('Označení typů nyní nelze načíst.')
+        completed = value.get('completed', {})
+        if (not isinstance(completed, dict) or any(not isinstance(k, str) or len(k)!=64 or v is not True for k,v in completed.items())):
+            raise ValueError('Označení splnění nyní nelze načíst.')
         return value
+
+    def display_overview(self, source):
+        # Presentation only: the underlying overview still includes busy events.
+        try:
+            labels = self._labels(); partial = False
+        except (OSError, ValueError):
+            labels = {'revision': 0, 'items': {}}; partial = True
+        counts = Counter(event_key(row) for row in source['events'])
+        writable = {c['id'] for c in source['calendars'] if c['writable']}
+        rows = []
+        for row in source['events']:
+            key = event_key(row); unique = counts[key]==1
+            if unique and labels.get('completed', {}).get(key): continue
+            rows.append({**row, 'key':key, 'can_complete':unique and source['ready'] and not partial,
+                         'can_edit':unique and source['ready'] and row['calendar_id'] in writable})
+        return {**source, 'events':rows, 'labels_revision':labels['revision'], 'completion_partial':partial}
+
+    def set_completed(self, payload):
+        expected = {'action','key','completed','expected_selection_revision','expected_labels_revision','confirmed'}
+        if (set(payload)!=expected or payload['confirmed'] is not True or type(payload['completed']) is not bool
+                or type(payload['expected_selection_revision']) is not int or type(payload['expected_labels_revision']) is not int):
+            raise ValueError('Potvrď splnění aktuální položky.')
+        with exclusive_file_lock(self.labels_path, timeout=0):
+            source = self.overview.snapshot(); labels = self._labels()
+            matches = [row for row in source['events'] if event_key(row)==payload['key']]
+            if (not source['ready'] or len(matches)!=1 or source['revision']!=payload['expected_selection_revision']
+                    or labels['revision']!=payload['expected_labels_revision']):
+                raise ValueError('Přehled se změnil. Obnov jej a označ splnění znovu.')
+            completed = labels.setdefault('completed', {})
+            if payload['completed']: completed[payload['key']] = True
+            else: completed.pop(payload['key'], None)
+            labels['revision'] += 1
+            save_locked(self.labels_path, labels)
+        return self.snapshot()
+
+    def follow_edit(self, before, after):
+        with exclusive_file_lock(self.labels_path, timeout=0):
+            labels = self._labels(); known, _ = self.written_kinds()
+            old, new = event_key(before), event_key(after)
+            kind = labels['items'].get(old) or known.get(old)
+            if kind in KINDS: labels['items'][new] = kind
+            if labels.get('completed', {}).get(old): labels['completed'][new] = True
+            labels['revision'] += 1
+            save_locked(self.labels_path, labels)
 
     def _attempt(self):
         try: return read_json(self.attempt_path, {})
@@ -116,11 +163,14 @@ class CalendarAgenda:
         deadlines, meetings = [], []
         for row in sorted(events,key=lambda e:(instant(e['start']),e['title'],e['calendar_id'])):
             key = event_key(row); unique = counts[key]==1
+            if unique and labels.get('completed', {}).get(key): continue
             manual = labels['items'].get(key) if unique else None
             suggested = known.get(key) if unique else None
             kind = manual or suggested or 'event'
             item = {**row,'key':key,'kind':kind,'type_source':'display' if manual else 'samantha' if suggested else 'calendar',
                     'display_kind':manual or 'auto','can_classify':unique and source['ready'] and not last_failed and not partial,
+                    'can_complete':unique and source['ready'] and not last_failed and not partial,
+                    'can_edit':unique and source['ready'] and not last_failed and row['calendar_id'] in writable,
                     'can_delete':unique and source['ready'] and not last_failed and row['calendar_id'] in writable}
             (deadlines if kind=='task_deadline' else meetings).append(item)
         fresh = bool(source['ready'] and not last_failed)
@@ -188,5 +238,6 @@ class CalendarAgenda:
     def execute(self,payload):
         if not isinstance(payload,dict): raise ValueError('Neplatný požadavek.')
         if payload=={'action':'refresh'}: return self.request_refresh()
+        if payload.get('action')=='set_completed': return self.set_completed(payload)
         if payload.get('action')=='set_kind': return self.set_kind(payload)
         raise ValueError('Neznámá akce přehledu.')

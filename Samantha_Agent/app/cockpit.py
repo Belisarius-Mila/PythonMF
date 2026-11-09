@@ -4,6 +4,7 @@ from app.cockpit_interior import INTERIOR_HTML, InteriorRoutes, interior_atelier
 from app.cockpit_calendar import CalendarOverviewRoutes, calendar_overview_action
 from app.cockpit_calendar_agenda import calendar_agenda_status, calendar_agenda_action
 from app.cockpit_calendar_delete import calendar_delete_action
+from app.cockpit_calendar_edit import calendar_edit_action
 from app.cockpit_calendar_tasks import calendar_task_status, calendar_task_action, task_page_route
 from app.cockpit_pwa import cockpit_manifest_route
 from app.cockpit_email_calendar import email_calendar_draft_action, email_calendar_draft_status
@@ -8668,14 +8669,17 @@ def shell_quote_for_applescript(value: str) -> str:
 
 
 COCKPIT_POST_ACTIONS: tuple[dict[str, str], ...] = (
+    {"path":"/api/calendar/edit", "label":"Upravit název, datum a čas jedné původní události",
+     "risk":"external_send", "confirmation":"explicit_existing_event_title_date_time_single_occurrence",
+     "handler_name":"calendar_edit_action", "test_level":"direct"},
     {"path":"/api/calendar/delete", "label":"Potvrdit smazání jednoho přesného výskytu události",
      "risk":"external_send", "confirmation":"explicit_exact_event_preview_single_occurrence_without_attendees",
      "handler_name":"calendar_delete_action", "test_level":"direct"},
     {"path":"/api/calendar/tasks", "label":"Zapsat konkrétní úkol nebo ověřit původní zápis",
      "risk":"external_send", "confirmation":"explicit_task_text_date_time_and_configured_target",
      "handler_name":"calendar_task_action", "test_level":"direct"},
-    {"path":"/api/calendar/agenda", "label":"Obnovit měsíční přehled nebo označit typ události",
-     "risk":"private_write", "confirmation":"configured_calendar_read_or_explicit_display_type_change",
+    {"path":"/api/calendar/agenda", "label":"Obnovit měsíční přehled nebo označit typ či splnění položky",
+     "risk":"private_write", "confirmation":"configured_calendar_read_or_explicit_display_annotation",
      "handler_name":"calendar_agenda_action", "test_level":"direct"},
     {"path": "/api/email-agent/calendar-draft", "label": "Připravit nebo upravit návrh události z vybraného e-mailu",
      "risk": "external_ai", "confirmation": "explicit_selected_mail_model_button_or_local_draft_save",
@@ -10116,6 +10120,10 @@ class CockpitServer:
                         self.respond_json({"ok": False, "message": "Vykonavatel zpracovává přesný balíček; další změna počká na ověření."},
                                           status=HTTPStatus.CONFLICT)
                         return
+                if parsed.path == "/api/calendar/edit":
+                    result = calendar_edit_action(self.read_json()) if not parsed.query else {"ok":False,"message":"Neplatný požadavek."}
+                    self.respond_json(result, status=HTTPStatus.OK if result.get("ok") else HTTPStatus.BAD_REQUEST)
+                    return
                 if parsed.path == "/api/calendar/delete":
                     result = calendar_delete_action(self.read_json()) if not parsed.query else {"ok":False,"message":"Neplatný požadavek."}
                     self.respond_json(result,status=HTTPStatus.OK if result["ok"] else HTTPStatus.BAD_REQUEST)

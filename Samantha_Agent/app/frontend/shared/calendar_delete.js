@@ -16,7 +16,7 @@
     notice.setAttribute("role","status");notice.setAttribute("aria-live","polite");wrap.append(button,notice);host.append(wrap);
     const event=Object.fromEntries(["calendar_id","title","start","end","all_day"].map(k=>[k,row[k]]));
     let pending=null, setup=false, deleted=false, uncertain=false;
-    button.calendarDeleteUpdate=()=>{button.disabled=active||(!uncertain&&disabled())||deleted;};
+    button.calendarDeleteUpdate=()=>{button.disabled=active||Boolean(window.SamanthaCalendarActions?.isBusy())||(!uncertain&&disabled())||deleted;};
     function apply(value) {
       notice.textContent=value.message||"";
       if(value.state==="deleted") {deleted=true;uncertain=false;button.textContent="Smazáno";try{onDeleted();}catch(error){/* known deletion stays final even if refresh fails */}}
@@ -24,7 +24,7 @@
       else if(["changed","blocked"].includes(value.state)) {deleted=true;button.textContent="Obnov přehled";}
     }
     button.addEventListener("click",async()=>{
-      if(active||(!uncertain&&disabled())||deleted)return;
+      if(active||window.SamanthaCalendarActions?.isBusy()||(!uncertain&&disabled())||deleted)return;
       active=true;update(document);notice.textContent=setup?"Připravuji povolení na Macu…":"Ověřuji událost…";
       try {
         if(setup) {

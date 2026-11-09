@@ -29,11 +29,12 @@
     $("refresh").disabled = busy; $("authorize").disabled = busy;
     $("save").disabled = busy || !state || !state.can_select;
     for (const input of $("settings").querySelectorAll("input,select")) input.disabled = busy;
-    window.SamanthaCalendarDelete?.update(document);
+    window.SamanthaCalendarDelete?.update(document);window.SamanthaCalendarActions?.update(document);
   }
   function render(value) {
     state = value;
     $("notice").textContent = messages[value.status] || messages.source_unavailable;
+    if(value.completion_partial)$("notice").textContent+=" Označení splnění nyní nelze ověřit.";
     $("notice").dataset.ready = String(value.ready);
     $("permission").hidden = value.status !== "authorization_required";
     $("loaded").textContent = value.last_loaded_at ? "Poslední načtení: " + dateFormat.format(new Date(value.last_loaded_at)) : "Zatím nenačteno.";
@@ -44,6 +45,7 @@
     for (const event of value.events) {
       const card = element("article", "", "event");
       card.append(element("div",timing(event),"time"),element("h3",event.title || "Bez názvu"),element("div",names.get(event.calendar_id) || "Nedostupný kalendář","calendar-name"));
+      window.SamanthaCalendarActions?.attach(card,event,{disabled:()=>busy||!state?.ready,context:()=>state,onChanged:()=>refreshAfterChange()});
       if(window.SamanthaCalendarDelete&&value.calendars.some(c=>c.id===event.calendar_id&&c.writable)) {
         window.SamanthaCalendarDelete.attach(card,event,{disabled:()=>busy||!state?.ready,onDeleted:()=>run(async()=>render(await api({action:"refresh",confirmed:true})))});
       }
@@ -117,6 +119,18 @@
       panel.scrollIntoView?.({block:"start"});
     } catch(error) { panel.textContent=error.message || "Zápis není dostupný."; }
   }
+  async function refreshAfterChange() {
+    return run(async()=>{
+      for(let n=0;n<30;n++) {
+        const response=await fetch("/api/calendar/agenda",{cache:"no-store"});
+        const value=await response.json();
+        if(!response.ok||!value.ok||!value.refreshing)break;
+        await new Promise(resolve=>setTimeout(resolve,1000));
+      }
+      render(await api());
+    });
+  }
+  window.addEventListener("calendarChanged",()=>refreshAfterChange());
   run(async () => { render(await api()); await showSavedEvent(); });
   // A returning page must not keep a previously "ready" banner indefinitely.
   setInterval(() => { if (state && !busy && state.ready && Date.now()-Date.parse(state.last_loaded_at)>900000) { state={...state,ready:false,status:"refresh_required"}; render(state); } },30000);

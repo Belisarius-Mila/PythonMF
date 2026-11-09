@@ -1982,3 +1982,11 @@ ve všech skutečných čtenářích před zpřístupněním sdílené konfigura
 - Příčina: writer a reader používaly jiné kořeny; účtenka dokazovala uložení, nikoli dostupnost přes uživatelský přehled.
 - Řešení: společný read-only reader nad oběma pevnými kořeny, stabilní původní odkazy, oddělené identity nového zdroje a odmítnutí nejednoznačných ID. UID není globální identita mezi schránkami.
 - Ověření: hledání → detail → originál/PDF přes skutečné HTTP routy, symlink/path úniky odmítnuté; skutečný uložený dokument dostupný a otisky souborů před/po shodné. Report `reports/email_archive_bridge_20261109.md`.
+
+
+### LL-119 — Uvolnění formuláře nesmí záviset pouze na dialog.close
+
+- Kontext: po Zrušit nebyla editace v reálném prohlížeči ihned znovu dostupná, ačkoli synchronní testovací close prošlo.
+- Příčina: nativní close event je asynchronní; odstranění dialogu a další klik mohou předběhnout jeho doručení.
+- Řešení: uvolnit sdílený busy stav výslovně při zavření před odstraněním DOM. Během odesílání formulář dál nelze znovu odeslat ani zavřít.
+- Ověření: regresní JS test nezávislý na synchronním close callbacku a headless Edge na skutečném DOM: Zrušit → znovu Editovat → úprava → Splněno PASS; `reports/calendar_complete_edit_20261109.md`.

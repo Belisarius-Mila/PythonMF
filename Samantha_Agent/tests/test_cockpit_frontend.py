@@ -32,9 +32,9 @@ EXPECTED_PAGES = {
     ),
     "email_agent": (
         EMAIL_AGENT_HTML,
-        38030,
+        38123,
         554,
-        "4f636b8bd2d3b0786136c1def5f3de2e43ef80fcd2316aab8f51117685282c3d",
+        "eb257b43dfa390ef49ac37bfb57984253007de0962af3a06bc3814757aeb3a99",
     ),
     "email_archive": (
         EMAIL_ARCHIVE_HTML,
@@ -50,9 +50,9 @@ EXPECTED_PAGES = {
     ),
     "cockpit": (
         COCKPIT_HTML,
-        652254,
-        12127,
-        "72210d961861c329395f95dc310e44ee7f687a91d20d781e059f8a71654ce3bc",
+        663147,
+        12269,
+        "2f4ca5b04390d89370041b62fd04e54fbf1dc4ec95565b6e8080fd25dfe17300",
     ),
 }
 
@@ -319,7 +319,7 @@ const disabled = {...active, state:"disabled", message:"Automatika vypnutá"};
 
         self.assertEqual(
             FRONTEND_JAVASCRIPT_MODULES["cockpit"],
-            ("../shared/calendar_delete.js", "calendar_agenda.js", "navigation.js", "health_recovery_autosave.js", "codex_sessions.js", "library_photos.js", "document_review.js", "document_search.js", "film_feedback.js", "film_editor.js", "film_library.js"),
+            ("../shared/calendar_delete.js", "../shared/calendar_actions.js", "calendar_agenda.js", "navigation.js", "health_recovery_autosave.js", "codex_sessions.js", "library_photos.js", "document_review.js", "document_search.js", "film_feedback.js", "film_editor.js", "film_library.js"),
         )
         self.assertIn("createHealthRecoveryAutosaveFrontend", module_source)
         self.assertIn("async function runFrontendHealthCheck()", module_source)

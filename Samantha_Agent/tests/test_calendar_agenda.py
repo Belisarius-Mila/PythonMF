@@ -146,3 +146,41 @@ class CalendarAgendaTests(unittest.TestCase):
         e=self.event();offset={**e,'start':'2026-11-08T13:00:00+01:00','end':'2026-11-08T14:00:00+01:00'}
         self.assertEqual(event_key(e),event_key(offset))
         self.assertNotEqual(event_key(e),event_key({**e,'calendar_id':'b'}))
+
+    def complete(self, event, **changes):
+        view=self.agenda.snapshot()
+        return self.agenda.execute({'action':'set_completed','key':event_key(event),'completed':True,
+            'expected_selection_revision':view['selection_revision'],'expected_labels_revision':view['labels_revision'],
+            'confirmed':True,**changes})
+
+    def test_completion_hides_both_views_persists_restart_without_calendar_changes(self):
+        self.prepare();event=self.event();self.events([event]);before=self.overview.path.read_bytes();calls=list(self.pilot.calls)
+        view=self.complete(event);self.assertEqual(view['meetings'],[])
+        self.assertEqual(self.agenda.display_overview(self.overview.snapshot())['events'],[])
+        other=CalendarAgenda(self.overview,written_kinds=lambda:({},False))
+        self.assertEqual(other.snapshot()['meetings'],[])
+        self.assertEqual(len(self.overview.snapshot()['events']),1) # still busy for conflict checks
+        self.assertEqual(self.overview.path.read_bytes(),before);self.assertEqual(self.pilot.calls,calls)
+
+    def test_completion_follows_only_exact_occurrence_and_is_reversible(self):
+        self.prepare();e=self.event();other=self.event(start='2026-11-09T12:00:00+00:00',end='2026-11-09T13:00:00+00:00');self.events([e,other])
+        self.complete(e);self.assertEqual(len(self.agenda.snapshot()['meetings']),1)
+        self.complete(e,completed=False);self.assertEqual(len(self.agenda.snapshot()['meetings']),2)
+
+    def test_completion_stale_revision_ambiguous_and_unconfirmed_stop_without_write(self):
+        self.prepare();e=self.event();self.events([e])
+        for changes in [{'confirmed':False},{'expected_selection_revision':-1},{'expected_labels_revision':-1}]:
+            with self.assertRaises(ValueError):self.complete(e,**changes)
+        self.assertFalse(self.agenda.labels_path.exists())
+        self.events([e,e])
+        with self.assertRaises(ValueError):self.complete(e)
+        self.events([e]);self.now+=timedelta(minutes=16)
+        with self.assertRaises(ValueError):self.complete(e)
+
+    def test_edit_follows_task_kind_and_display_annotation(self):
+        self.prepare();e=self.event();self.events([e]);self.hints[event_key(e)]='task_deadline'
+        new={**e,'title':'Jiný název'};self.agenda.follow_edit(e,new);self.events([new])
+        self.assertEqual(self.agenda.snapshot()['deadlines'][0]['title'],'Jiný název')
+        self.complete(new);self.assertEqual(self.agenda.snapshot()['deadlines'],[])
+        changed={**new,'title':'Změna'};self.agenda.follow_edit(new,changed);self.events([changed])
+        self.assertEqual(self.agenda.snapshot()['deadlines'],[])
