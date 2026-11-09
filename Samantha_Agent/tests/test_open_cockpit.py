@@ -181,6 +181,67 @@ class OpenCockpitTests(unittest.TestCase):
         opened_url = run.call_args.args[0][1]
         self.assertTrue(opened_url.startswith("http://127.0.0.1:8770?cockpit_launch="))
 
+    def test_stale_server_during_release_opens_without_restart_or_wait_for_new_code(self):
+        with (
+            patch.object(open_cockpit,"cockpit_code_stamp",return_value="new"),
+            patch.object(open_cockpit,"current_status_payload",return_value={"server":{"code_stamp":"old"}}),
+            patch.object(open_cockpit,"listening_cockpit_pid",return_value=123),
+            patch.object(open_cockpit,"release_is_active",return_value=True),
+            patch.object(open_cockpit,"restart_cockpit_pid") as restart,
+            patch.object(open_cockpit,"wait_until_current") as wait,
+        ):
+            self.assertTrue(open_cockpit.ensure_current_server("127.0.0.1",8770))
+        restart.assert_not_called();wait.assert_not_called()
+
+    def test_unknown_release_state_blocks_automatic_restart(self):
+        with (
+            patch.object(open_cockpit,"cockpit_code_stamp",return_value="new"),
+            patch.object(open_cockpit,"current_status_payload",return_value={"server":{"code_stamp":"old"}}),
+            patch.object(open_cockpit,"listening_cockpit_pid",return_value=123),
+            patch.object(open_cockpit,"release_is_active",return_value=None),
+            patch.object(open_cockpit,"restart_cockpit_pid") as restart,
+        ):
+            self.assertFalse(open_cockpit.ensure_current_server("127.0.0.1",8770))
+        restart.assert_not_called()
+
+    def test_idle_release_keeps_existing_verified_restart_path(self):
+        with (
+            patch.object(open_cockpit,"cockpit_code_stamp",return_value="new"),
+            patch.object(open_cockpit,"current_status_payload",return_value={"server":{"code_stamp":"old"}}),
+            patch.object(open_cockpit,"listening_cockpit_pid",return_value=123),
+            patch.object(open_cockpit,"release_is_active",return_value=False),
+            patch.object(open_cockpit,"restart_cockpit_pid",return_value=True) as restart,
+            patch.object(open_cockpit,"wait_until_current",return_value=True),
+        ):
+            self.assertTrue(open_cockpit.ensure_current_server("127.0.0.1",8770))
+        restart.assert_called_once_with(123,"127.0.0.1",8770)
+
+    def test_current_server_does_not_need_release_probe(self):
+        with (
+            patch.object(open_cockpit,"cockpit_code_stamp",return_value="same"),
+            patch.object(open_cockpit,"current_status_payload",return_value={"server":{"code_stamp":"same"}}),
+            patch.object(open_cockpit,"release_is_active") as probe,
+            patch.object(open_cockpit,"restart_cockpit_pid") as restart,
+        ):
+            self.assertTrue(open_cockpit.ensure_current_server("127.0.0.1",8770))
+        probe.assert_not_called();restart.assert_not_called()
+
+    def test_release_probe_requires_verified_public_status(self):
+        from unittest.mock import MagicMock
+        import json
+        for payload,expected in [({"ok":True,"job":None},False),({"ok":True,"job":{"active":True}},True),
+                                 ({"ok":True,"job":{"active":False,"state":"completed"}},False),({},None),
+                                 ({"ok":True},None),({"ok":True,"job":{"active":False}},None),
+                                 ({"ok":True,"job":{"active":False,"state":"running"}},None),
+                                 ({"ok":True,"job":{"active":"false"}},None),([],None)]:
+            with self.subTest(payload=payload):
+                response=MagicMock();response.status=200;response.read.return_value=json.dumps(payload).encode()
+                response.__enter__.return_value=response
+                with patch.object(open_cockpit.urllib.request,"urlopen",return_value=response):
+                    self.assertIs(open_cockpit.release_is_active("127.0.0.1",8770),expected)
+        with patch.object(open_cockpit.urllib.request,"urlopen",side_effect=TimeoutError()):
+            self.assertIsNone(open_cockpit.release_is_active("127.0.0.1",8770))
+
 
 if __name__ == "__main__":
     unittest.main()

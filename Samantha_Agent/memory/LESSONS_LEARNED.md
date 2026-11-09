@@ -1990,3 +1990,11 @@ ve všech skutečných čtenářích před zpřístupněním sdílené konfigura
 - Příčina: nativní close event je asynchronní; odstranění dialogu a další klik mohou předběhnout jeho doručení.
 - Řešení: uvolnit sdílený busy stav výslovně při zavření před odstraněním DOM. Během odesílání formulář dál nelze znovu odeslat ani zavřít.
 - Ověření: regresní JS test nezávislý na synchronním close callbacku a headless Edge na skutečném DOM: Zrušit → znovu Editovat → úprava → Splněno PASS; `reports/calendar_complete_edit_20261109.md`.
+
+
+### LL-120 — Otevření staršího Cockpitu nesmí restartem přerušit p+n
+
+- Kontext: schválený ScienceNews balíček prošel lokální branou; během publikační brány hotkey launcher rozpoznal starší otisk a ukončil server, který bránu obsluhoval.
+- Důkaz: job bd828212 push_requested→attention ve 22:00:13, hotkey.out.log ukončil PID 48189 a ve 22:00:26 hlásí nový server; supervisor spustil PID 64718 ve 22:00:20. GitHub zůstal 5ea9af40, dítě quality gate pokračovalo osiřelé; nový HTML odpovídal lokálnímu 1395956d bez řízené účtenky.
+- Řešení: před automatickým launcher restartem ověřit veřejný status p+n. Aktivní vydání dovolí otevřít dosavadní server bez restartu; neověřený/malformed/timeout stav restart nepovolí. Vlastní autorizovaný restart publisheru se nemění. Zelená lokální brána není potvrzený push/deploy.
+- Ověření: mockovaná hranice restartu a skutečné veřejné status schema, active/idle/unknown/malformed/timeout i zachování současné cesty restartu; 77 cílených testů PASS; plná brána 3370 testů OK / 31 SKIP. Původní nejisté vydání se neopakuje automaticky. `reports/science_news_release_interruption_20261109.md`.

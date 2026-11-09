@@ -1,5 +1,7 @@
 # Memory Index
 
+- `reports/science_news_release_interruption_20261109.md` — Terra převzala balíček 1395956d, ale launcher restart přerušil gate/request; účtenka bd828212 attention/push_uncertain. GitHub 5ea9af40, živý Cockpit znovu načetl lokální ScienceNews bez řízeného vydání. Připravená ochrana spouštěče, žádný automatický nový placený pokus; další p+n vyžaduje nový pokyn.
+
 - `reports/science_news_integration_20261109.md`; `handoffs/knowledge_library_article_editing_2026_07_16.md`; `tvbcp/knihovna_cockpit.txt` — Will přebírá fb708be9 do společného main, 161 cílených a mobilní headless browser PASS, plná brána3365 testů OK (31 SKIP). Převzetí i Terra p+n schválené, model/scheduler/import zůstávají neaktivní; konečná runtime účtenka v logs/science_news_integration_release_20261109.log.
 
 - `reports/calendar_complete_edit_20261109.md`; `handoffs/workstreams/project-cockpit.md`; `tvbcp/workstreams/project-cockpit.md` — lokální Splněno jen pro Cockpit a editace původního výskytu; cílené/native/izolovaný build i mobilní headless browser PASS; plná brána3320 OK (31 SKIP). Bez p+n, OS grantu a skutečné kalendářové mutace.

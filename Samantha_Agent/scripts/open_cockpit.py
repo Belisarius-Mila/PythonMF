@@ -180,22 +180,58 @@ def wait_until_current(host: str, port: int, *, attempts: int = 40, delay: float
     return False
 
 
+def release_is_active(host: str, port: int) -> bool | None:
+    """Read the publication lease before an automatic launcher restart.
+
+    Unknown is not idle: a missing response must never interrupt publication.
+    The registered deployment worker owns its separate, authorized restart.
+    """
+    try:
+        with urllib.request.urlopen(
+            f"http://{host}:{port}/api/human-adam/luna-release/status",
+            timeout=STATUS_TIMEOUT_SECONDS,
+        ) as response:
+            if not 200 <= response.status < 300:
+                return None
+            payload = json.loads(response.read().decode("utf-8"))
+    except (OSError, ValueError, urllib.error.URLError):
+        return None
+    if not isinstance(payload, dict) or payload.get("ok") is not True or "job" not in payload:
+        return None
+    job = payload.get("job")
+    if job is None:
+        return False
+    if not isinstance(job, dict) or type(job.get("active")) is not bool:
+        return None
+    if job["active"]:
+        return True
+    return False if job.get("state") in {"completed", "attention", "dry_run_completed"} else None
+
+
 def ensure_current_server(host: str, port: int) -> bool:
     expected_stamp = cockpit_code_stamp()
     payload = current_status_payload(host, port, expected_stamp=expected_stamp)
     if server_is_current(payload, expected_stamp):
         return True
 
+    pid = listening_cockpit_pid(host, port)
+    if pid is None:
+        print(f"Port {port} odpovídá, ale nenašel jsem ověřený cockpit_server.py proces; neotvírám neověřený server.", file=sys.stderr)
+        return False
+    # Check immediately before the mutating launcher call. Opening the existing
+    # server remains allowed during p+n, even while its code stamp is older.
+    active = release_is_active(host, port)
+    if active is True:
+        print("Probíhá p+n; otevírám běžící Cockpit bez automatického restartu.", flush=True)
+        return True
+    if active is None:
+        print("Stav p+n nelze ověřit; automatický restart Cockpitu neprovádím.", file=sys.stderr)
+        return False
     current_stamp = server_code_stamp(payload)
     if current_stamp:
         print(f"Cockpit na portu {port} běží se starším kódem; restartuji ho před otevřením.", flush=True)
     else:
         print(f"Cockpit na portu {port} nehlásí otisk kódu; restartuji ho před otevřením.", flush=True)
-
-    pid = listening_cockpit_pid(host, port)
-    if pid is None:
-        print(f"Port {port} odpovídá, ale nenašel jsem ověřený cockpit_server.py proces; neotvírám neověřený server.", file=sys.stderr)
-        return False
     if not restart_cockpit_pid(pid, host, port):
         return False
     return wait_until_current(host, port)

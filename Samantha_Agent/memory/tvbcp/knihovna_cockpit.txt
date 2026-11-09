@@ -1,6 +1,8 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
+- 2026-11-09 22:09 CET: Původní Terra p+n bd828212650df86ee5737f30a0d7a752 skončilo attention/push_uncertain po restartu Cockpitu během brány. GitHub ověřeně zůstává 5ea9af40; proces 64718 automaticky načetl lokální 1395956d, nejde o potvrzené řízené vydání. Spouštěč při otevření ukončil PID 48189 (hotkey.out.log 22:00:26). Lokální oprava automatického restartu prošla plnou bránou a je připravená k checkpointu; při aktivním p+n otevře dosavadní server, při neověřeném stavu nerestartuje. 77 cílených testů PASS; plná brána opravy PASS: 3370 testů / 31 SKIP (546,298 s). Nový placený pokus nebyl spuštěn; po checkpointu je nutný nový výslovný pokyn podle AGENTS.md. Report reports/science_news_release_interruption_20261109.md.
+
 - 2026-11-09 21:46 CET: Will přebírá jediný nový Datův commit fb708be93760a064b804dc845e8602fd1378c4df (ScienceNews) do main nad již nasazeným5ea9af40. Datův čistý worktree a aktivní recovery runtime zůstávají na původním místě.
 - Sjednocené registry frontend modulů, workflow příkazů a plné brány; parser zachovává všechny dosavadní role a navíc zná science_news_editor. Bindingy v config/agent_roles.json jsou byte-identické; silnější main test recovery role zachován. Kalendář/Archiv z main zachované.
 - 161 cílených testů PASS. Izolovaný mobilní headless Edge 390×844: zelená ikona → Knihovna, Uložit/Sledovat/Nezařazovat, překlad bez vyřízení, dvě sledovaná témata a poslední šedá po reload PASS. Žádný produkční import, archivace ani modelový tah.
@@ -993,3 +995,15 @@ Technický důkaz:
 **Navrhované další kroky:** Přejímka skutečného UI/API; případný provozní UI import až po jeho samostatném schválení. Potom samostatná volba modelu/ceny a malá živá QA, kompatibilita všech runtime parserů, rozpočet a teprve povolená aktivace služby.
 
 **Technický důkaz:** 161 cílených testů PASS; izolovaný headless Edge 390×844 PASS, bez modelu a bez produkční fronty/archivu. Plná integrační brána 3365 testů OK (31 SKIP). Bindingy rolí shodné s5ea9af40, šest konfliktů vyřešených zachováním obou funkcí a silnějších main kontrol. Rizika: zdroje mají omezené pokrytí; placený editor a jeho odborná QA nejsou aktivované. Report `reports/science_news_integration_20261109.md`.
+
+## 2026-11-09 22:09 CET — Přerušené vydání a ochrana spouštěče
+
+**Hotovo:** Datův commit je zachovaný v merge1395956d. Lokálně opravený spouštěč už při aktivním p+n neukončí starší běžící Cockpit; nejistý stav restart blokuje. Otevření existující verze zůstává možné, autorizovaný restart publikačního workeru se nemění.
+
+**Rozhodnutí:** Nevydávat restartem načtený kód za potvrzený push/deploy. Původní účtenku nepřepisovat a po nejasném výsledku automaticky nespouštět nové předání. ScienceNews role/model/plánovač i provozní import zůstávají bez aktivace.
+
+**Další krok:** Dokončit bránu/checkpoint ochrany a předložit Mílovi přesný nový balíček k novému potvrzení p+n.
+
+**Navrhované další kroky:** Po potvrzeném vydání teprve samostatná provozní UI/modelová přejímka podle science_news.md.
+
+**Technický důkaz:** Původní integrační brána 3365 OK/31 SKIP, 161 cílených a izolovaný mobilní browser PASS. Oprava spouštěče 77 cílených PASS; její plná brána PASS: 3370 testů / 31 SKIP (546,298 s). GitHub 5ea9af40, veřejný nový HTML/API i lokální 1395956d shodné, ScienceNews initialized=false/activated=false. Logy a přesná časová osa v reports/science_news_release_interruption_20261109.md. Riziko: původní vydání nemá dokončenou publikační/protection účtenku; žádný nový placený pokus nesmí vzniknout bez dalšího pokynu.

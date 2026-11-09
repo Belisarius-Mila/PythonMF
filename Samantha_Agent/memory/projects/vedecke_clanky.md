@@ -1,5 +1,7 @@
 # Znalostní databáze / Knihovna článků
 
+Aktualizace vydání: Terra p+n bd828212 skončilo attention po launcher restartu během brány; GitHub stále 5ea9af40. Automaticky načtený lokální 1395956d není potvrzené vydání. Oprava launcher guardu 77 cílených PASS, plná brána PASS: 3370 testů / 31 SKIP (546,298 s); po checkpointu čekat nový výslovný pokyn. Model/plánovač/import neaktivní. Report `reports/science_news_release_interruption_20261109.md`.
+
 Aktuální integrační stav 2026-11-09 21:46 CET: fb708be9 přebíraný do main nad5ea9af40, 161 cílených a izolovaný mobilní browser PASS; plná brána3365 testů OK (31 SKIP). Terra p+n výslovně schválené pro kód/UI, nikoli aktivaci modelu/plánovače nebo provozní import. Report `reports/science_news_integration_20261109.md`.
 
 ## 03/K4 — vědecký zpravodaj: zadání 2026-11-08, kalibrace přijata 2026-11-09

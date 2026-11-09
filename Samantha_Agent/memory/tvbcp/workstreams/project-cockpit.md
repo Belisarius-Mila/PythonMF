@@ -1,6 +1,8 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
+- 2026-11-09 22:09 CET: Původní Terra p+n bd828212650df86ee5737f30a0d7a752 skončilo attention/push_uncertain po restartu Cockpitu během brány. GitHub ověřeně zůstává 5ea9af40; proces 64718 automaticky načetl lokální 1395956d, nejde o potvrzené řízené vydání. Spouštěč při otevření ukončil PID 48189 (hotkey.out.log 22:00:26). Lokální oprava automatického restartu prošla plnou bránou a je připravená k checkpointu; při aktivním p+n otevře dosavadní server, při neověřeném stavu nerestartuje. 77 cílených testů PASS; plná brána opravy PASS: 3370 testů / 31 SKIP (546,298 s). Nový placený pokus nebyl spuštěn; po checkpointu je nutný nový výslovný pokyn podle AGENTS.md. Report reports/science_news_release_interruption_20261109.md.
+
 - 2026-11-09: Kalendářové Splněno/Editovat již nasazené v5ea9af40 (účtenka6905f62e16cde524469b4994ea74844f, brána3320/smoke5/5/CI42689510073 success). Míla potvrdil funkčnost. Následující stav20:46 je historický checkpoint před vydáním; vlastní live audit jen čtecí, grant/konkrétní nativní editace nebyly agentem provedeny.
 
 - 2026-11-09 20:46 CET: Lokálně doplněné Splněno a Editovat v kalendáři i úvodní agendě. Splnění pouze skryje konkrétní položku v Cockpitu, kalendář a kolize se nemění. Editace mění název/datum/čas původního výskytu, ostatní údaje zachová. Python/HTTP/JS a nativní in-memory scénáře PASS; nový izolovaný podepsaný helper má 7 self-test kontrol. Mobilní headless Edge 390×844: náhled, Zrušit/znovu otevřít, editace a skrytí PASS. Plná brána 3320 testů OK (31 SKIP). Bez p+n, OS grantu a skutečné kalendářové mutace; další krok autorizovat p+n a jednou povolit úpravy na Macu. Report reports/calendar_complete_edit_20261109.md.
@@ -2436,3 +2438,15 @@ přímá přejímka Mílova prohlížeče nebyla dostupná.
 **Navrhované další kroky:** Potom provést Mílou určenou skutečnou editaci a přejímku na Macu/iPhonu včetně iCloud synchronizace.
 
 **Technický důkaz:** Cílené Python/HTTP/JS testy PASS, skutečná Swift transakční logika proti in-memory EventKit a izolovaný podepsaný build/7 self-test kontrol PASS. Mobilní headless Edge prošel předvyplněním, stornem a novým otevřením, editací a skrytím; šířka 390 px bez přetékání. Plná brána 3320 testů OK (31 SKIP). Report `reports/calendar_complete_edit_20261109.md`. Rizika: dosud bez nového OS oprávnění a bez skutečné kalendářové mutace; fyzická přejímka/iCloud otevřené. Nativní nejasný zápis bez ověřitelných ID vyžaduje ruční servis, neopakuje se.
+
+## 2026-11-09 22:09 CET — Přerušené vydání a ochrana spouštěče
+
+**Hotovo:** Datův commit je zachovaný v merge1395956d. Lokálně opravený spouštěč už při aktivním p+n neukončí starší běžící Cockpit; nejistý stav restart blokuje. Otevření existující verze zůstává možné, autorizovaný restart publikačního workeru se nemění.
+
+**Rozhodnutí:** Nevydávat restartem načtený kód za potvrzený push/deploy. Původní účtenku nepřepisovat a po nejasném výsledku automaticky nespouštět nové předání. ScienceNews role/model/plánovač i provozní import zůstávají bez aktivace.
+
+**Další krok:** Dokončit bránu/checkpoint ochrany a předložit Mílovi přesný nový balíček k novému potvrzení p+n.
+
+**Navrhované další kroky:** Po potvrzeném vydání teprve samostatná provozní UI/modelová přejímka podle science_news.md.
+
+**Technický důkaz:** Původní integrační brána 3365 OK/31 SKIP, 161 cílených a izolovaný mobilní browser PASS. Oprava spouštěče 77 cílených PASS; její plná brána PASS: 3370 testů / 31 SKIP (546,298 s). GitHub 5ea9af40, veřejný nový HTML/API i lokální 1395956d shodné, ScienceNews initialized=false/activated=false. Logy a přesná časová osa v reports/science_news_release_interruption_20261109.md. Riziko: původní vydání nemá dokončenou publikační/protection účtenku; žádný nový placený pokus nesmí vzniknout bez dalšího pokynu.
