@@ -1964,3 +1964,13 @@ předpokládat její trvalou nepřítomnost v reálném schváleném configu. Po
 pozdější přijaté aktivaci by tak blokoval jinak platnou integraci. Ověřit
 fail-closed chybějící binding na vlastní dočasné konfiguraci, její nezměněné
 bajty i platnost aktuálních schválených rolí bez jejich přepisování.
+
+
+Doplnění 09112026 k LL-070: main617f3e0d přidal recovery roli do sdíleného
+JSON, ale skutečná hodinová kopie f2d6ef79 ji odmítala. Test hlavního parseru
+neodhalí selhání jiného runtime přes symlink stejného configu. Reprodukce
+musí proběhnout skutečným instalovaným parserem, bez IMAP/modelu. Po přesné
+globální brzdě registrovaný pause/prepare/upgrade na617f3e0d zachoval při
+přepnutí celý business stav/nastavení/politiky; první reálný slot11:00
+completed,7 zpráv a všechny původní položky beze změny. Novou roli ověřit
+ve všech skutečných čtenářích před zpřístupněním sdílené konfigurace.

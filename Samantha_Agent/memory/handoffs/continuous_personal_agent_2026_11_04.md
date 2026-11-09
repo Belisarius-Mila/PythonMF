@@ -1,5 +1,16 @@
 # Průběžný osobní agent — e-mailový provoz a Pushcut
 
+Aktuální provozní stav 2026-11-09 11:30 CET: hodinová služba obnovena registrovaným
+upgradem f2d6ef79→617f3e0d. První kontrola9.11.11:00 completed v11:28:47,
+7 nových zpráv (3 karty+4 přehled); HTTP3+3 viditelné,1 skrytá platným pravidlem.
+Při přepnutí business stav/nastavení/role zachované; všechny původní položky
+po dočtení beze změny. Terra/high, calendar_suggestions=false. Příčina byla
+starý instalovaný parser proti nové recovery roli ve sdíleném JSON.
+P+n dokončovacího provozního záznamu výslovně schválené; konečná účtenka
+v logs/email_role_compat_release_20261109.log. Samostatný e-mailový TVBCP
+není domluvený a nevzniká. Report reports/email_hourly_role_compat_20261109.md.
+
+
 - 2026-11-08 18:22 CET: Lokálně doplněné volitelné kalendářové návrhy v jednom e-mailovém posouzení. Výchozí calendar_suggestions=false, běžící služba se nemění. Připravený návrh přebírá stejné Do kalendáře bez dalšího modelu/IMAP; existující návrhy, revize, zápisy a e-mailové koncepty se nepřepisují. 214 cílených testů PASS; závěrečná plná Cockpit brána 3199 testů OK (31 SKIP). Bez p+n/aktivace. Report reports/calendar_hourly_suggestions_20261108.md.
 
 Kalendář používá jednu kartu se čtyřmi poli: název, začátek,
@@ -1252,3 +1263,48 @@ přímá přejímka Mílova prohlížeče nebyla dostupná.
   a kalendářové karty PASS. Závěrečná plná brána 3199 testů OK (31 SKIP); logs/calendar_hourly_full_gate_v2_20261108.log.
 - Žádný skutečný modelový test, e-mailový send, kalendářový zápis/mazání, p+n
   nebo servisní aktivace. Skutečná modelová kvalita, spotřeba a fyzická přejímka otevřené.
+
+
+## 2026-11-09 11:30 CET — Obnovený hodinový e-mailový agent po nekompatibilní roli
+
+### Hotovo
+- Vlastní hodinová kopie je registrovaně upgradovaná z f2d6ef79 na již
+  publikovaný617f3e0d. Installed/owned/loaded/enabled a skutečný parser PASS.
+- První skutečná kontrola dnešního slotu11:00 dokončena v11:28:47 CET:
+  7 nových zpráv,3 karty k potvrzení a4 zprávy hodinového přehledu. Živé
+  Cockpit overview API ověřilo3 karty a3 přehledové zprávy; poslední nedůležitá
+  zpráva je skrytá již existující visibility předvolbou. Všech7 položek je ve
+  stavu zachovaných, soukromý obsah se neopisuje.
+- Při systémovém přepnutí celý business stav, nastavení a všechny role
+  shodné s předchozím snapshotem. Po běžném dočtení jsou všechny původní
+  položky beze změny; zdrojové pozice se posunuly až zpracováním nových zpráv.
+
+### Rozhodnutí
+- Míla potvrdil přesnou globální brzdu i následné p+n. Použity pouze
+  registrované pause/prepare/upgrade; starý release a servisní záloha zachované.
+- Příčina: sdílený agent_roles.json již obsahoval recovery_document_maintainer,
+  ale parser instalované f2d6ef79 ji neznal. AgentRoleError byl reprodukovaný
+  právě v instalované kopii, před IMAP a modelem. Poslední dokončený slot
+  před opravou8.11.20:00. Runtime nezačal zpracovávat dnešní poštu až do opravy.
+- Terra/high, oba poskytovatelé, bez denního stropu a calendar_suggestions=false
+  zachované. Žádná změna přístupů ke schránkám nebo recovery služby.
+- Nový kód nebyl potřeba. Dokončovací commit obsahuje pouze Git-safe provozní
+  záznam; Python služby se po něm nemění a nevyžaduje druhé přepnutí runtime.
+
+### Další krok
+- Dokončit výslovně schválené registrované p+n tohoto záznamu v project-email-cases.
+  Autorita výsledku je původní účtenka a logs/email_role_compat_release_20261109.log.
+
+### Navrhované další kroky
+- Míla obnoví přehled Cockpitu a převezme3 nové karty.
+- Při další nové roli předem ověřit všechny skutečné runtime parsery sdíleného JSON,
+  včetně hodinové služby; samotný kompatibilní main nestačí.
+
+### Technický důkaz
+- reports/email_hourly_role_compat_20261109.md; logs/email_role_compat_upgrade_20261109.log.
+- Soukromé důkazy jen v service_audits/role_compat_upgrade_20261109_1127:
+  baseline, připravený plán, switch_checks, verified, první dokončený běh a HTTP projekce.
+- Všechny kontroly přepnutí true; aktuální7 modelových posouzení jsou běžný
+  již schválený příjem čekající pošty, ne opakování nejistého starého pokusu.
+- První health completed, chybové posouzení0, zdrojové pozice posunuté;
+  všechny původní položky shodné. Fyzická Mac/iPhone přejímka nepředstíraná.
