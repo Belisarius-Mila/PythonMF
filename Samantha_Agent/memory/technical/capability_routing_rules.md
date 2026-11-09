@@ -1,5 +1,20 @@
 # Capability routing rules
 
+## ScienceNews — 03/K4 (2026-11-09)
+
+Proud `project-knowledge-library`, pravidla `science_news.md`. Čtení fronty:
+`app.cockpit_science_news.science_news_overview`; vyřízení zprávy:
+`science_news_decision_action` s explicitní akcí save/follow/dismiss a stabilním
+request_id; vypnutí sledování: `science_news_unfollow_action`; překlad celého
+ověřeně oprávněného textu: `science_news_translate_action`. Čtení stavu překladu
+nikdy nespouští nový modelový tah. Trasy jsou registrované v COCKPIT_POST_ACTIONS.
+
+Shell registr má přesné `science_news_status`, `science_news_preview`,
+`science_news_service_preview` a samostatně potvrzovaný `science_news_tick`.
+Preview nevolá model a náhled služby ji neinstaluje. Scheduled tick lze spouštět
+až po samostatné aktivaci role, ceny, zkoušky, rozpočtu a plánovače. Vývoj ani
+kalibrační souhlas tyto brány nenahrazují; nejisté joby se neopakují.
+
 Zalozeno 2026-05-19.
 
 ## Smysl

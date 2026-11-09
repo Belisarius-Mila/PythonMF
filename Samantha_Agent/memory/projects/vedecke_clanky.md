@@ -1,5 +1,158 @@
 # Znalostní databáze / Knihovna článků
 
+Aktuální integrační stav 2026-11-09 21:46 CET: fb708be9 přebíraný do main nad5ea9af40, 161 cílených a izolovaný mobilní browser PASS; plná brána3365 testů OK (31 SKIP). Terra p+n výslovně schválené pro kód/UI, nikoli aktivaci modelu/plánovače nebo provozní import. Report `reports/science_news_integration_20261109.md`.
+
+## 03/K4 — vědecký zpravodaj: zadání 2026-11-08, kalibrace přijata 2026-11-09
+
+Míla upřesnil a schválil směr osobního vědeckého zpravodaje namísto obecného
+hlídání změn webových stránek. Zadání je nyní lokálně implementované a ověřované; nejde
+o doklad nasazení nebo aktivace. Vývoj zůstává v Datově worktree na
+`data/parallel-20261104`; e-mailový a kalendářový agent patří Willovi.
+
+### Potvrzené zájmy a výběr
+
+- Astrofyzika, částicová fyzika, evoluce, paleontologie, antropologie, genetika,
+  lékařské vědy a AI.
+- U AI pouze nové technologie a podstatně nové principy; vyřadit pouhé škálování,
+  ladění, nové verze a lepší výsledky modelů založených na téže technologii.
+- Hledat kandidáty na průlomové objevy: změna dosavadního vysvětlení, zásadní
+  nový mechanismus nebo otevření významné nové možnosti. Dílčí taxonomické
+  doplnění samo nestačí; nález s širším dopadem na evoluční výklad může projít.
+- Významnost a sílu důkazů posuzovat odděleně. Recenzování není záruka pravdy;
+  preprint nebo nepotvrzené tvrzení označit jako předběžné. Nerozhodovat jen
+  podle titulku, prestiže vydavatele, počtu mediálních zpráv či modelového skóre.
+- U lékařských věd rozlišit laboratorní, zvířecí a lidská data a doložený
+  klinický přínos. Zachovat nejistotu a rozdíl mezi korelací a příčinou.
+- Každý kandidát má původní zdroj, datum publikace/oznámení, odkaz na studii
+  nebo DOI, pokud existuje, vysvětlení novosti, důkazů, omezení a relevance.
+  Nedohledaný primární zdroj se přizná. Opravy a vyvrácení dřívějších kandidátů
+  se mají znovu předložit; mediální kopie jednoho objevu sloučit.
+
+### Potvrzené ukládání
+
+Teprve po dohodě s Mílou o důležitosti konkrétní zprávy připravit český překlad
+zprávy a uložit jej spolu s původním odkazem do existující Knihovny. Použít
+`science` / Vědecké články, pro zdravotně zaměřené zprávy `health_info` /
+Zdravotní informace; případné přesahy řešit tematickými tagy. Nesměrovat nové
+vědecké technologie AI automaticky do provozní kategorie Samantha / AI nástroje.
+
+Překlad zachovává původní tvrzení a nejistoty, vlastní komentář je oddělený.
+Rozsah zdrojového textu, dostupnost a oprávnění k jeho překladu se ověří před
+plným převodem; nedostupný plný text se nevymýšlí a shrnutí se nevydává za
+překlad. Pokud plný překlad není možný, navrhnout jasně označené vlastní české
+zpracování s odkazem. Původní studii nepovažovat automaticky za text zprávy,
+kterou Míla chtěl přeložit. Obsah a přílohy patří do soukromého archivu mimo Git.
+
+Uložení má vlastní trvalou identitu objevu/operace. Dvojklik ani ztracená odpověď
+nesmějí vytvořit druhou kartu či přepsat starší ruční poznámky; nejistý výsledek
+nejdříve dohledat. Ověření současného archive_text_entry ukázalo použitelný
+vstup pro český text, ale nezaručuje samo splnění těchto transakčních požadavků.
+
+### Navržený malý pilot
+
+1. Připravit omezený seznam kvalitních zdrojů napříč všemi osmi oblastmi,
+   upřednostnit oficiální API/kanály a dohledání původních studií. Automatické
+   načítání respektuje podmínky konkrétního zdroje, licencování a limity.
+2. Ručně posoudit malou kalibrační sadu, orientačně 10–15 kandidátů včetně
+   senzačního titulku, dílčího nálezu, preprintu a duplicitních zpráv. S Mílou
+   označit přijmout/odmítnout a proč; teprve potom odvodit filtr pro automatiku.
+3. Týdenní přehled nejvýše pěti zpráv celkem, bez povinných kvót na obor a bez
+   výplně, pokud žádná zpráva neprojde. U každé stručně co zjistili, proč je to
+   významné, jaké jsou důkazy a co zatím nevíme. Týdenní četnost a limit pěti
+   zpráv navazují na návrh, se kterým Míla souhlasil.
+4. Po schválení jedné položky ověřit celý průchod český překlad/zpracování →
+   jedna karta ve správné kategorii → čtení a původní odkaz v Knihovně.
+   Přejímka zahrne opakované potvrzení a ztracenou odpověď bez druhého zápisu.
+5. Až po kalibraci navrhnout konkrétní běhovou roli, měření a limit nákladů,
+   plánování a ovládání zastavení. V tomto kroku bez placených modelových tahů,
+   změn rolí, plánovaných služeb, zápisu článků do živé Knihovny či nasazení.
+
+Technický podklad ověřen 2026-11-08 v lokálním kódu i Git objektu main:
+`app/article_archive.py` má obě kategorie a `archive_text_entry`. Nejde o živý
+audit služby ani fyzickou přejímku. Referenční dokumentace zdrojů:
+https://github.com/arXiv/arxiv-docs/blob/develop/source/help/api/user-manual.md
+a https://pmc.ncbi.nlm.nih.gov/tools/openftlist/ (oprávnění se liší podle článku).
+
+Kalibrační sada v1 byla na Mílův pokyn připravena 2026-11-08:
+`memory/reports/science_news_calibration_20261108.json`. Obsahuje 12 skutečných
+případů z března až listopadu 2026 napříč všemi osmi oblastmi; širší časové
+okno je záměrná kalibrace, nikoli týdenní přehled. Každá položka odděluje
+vlastní české shrnutí, význam, omezení, dostupný rozsah primárního podkladu
+a Datův návrh přijmout/sledovat/vynechat. Tři výslovně syntetické kontroly
+navíc ověřují duplicitu, zavádějící titulek a záměnu buněčného experimentu za
+klinickou léčbu. Nejde o další skutečné zprávy.
+
+Zdroje ověřeny webovou rešerší: experimentální spolupráce, původní publikace
+a abstrakty v PubMed/arXiv. U K03/K04 nebyl dohledán jednoznačný aktuální paper,
+u části Nature/NIH selhalo přímé otevření; přesný rozsah opory a nejistota jsou
+uvedeny po položkách. Žádná položka tím nezískává statut potvrzeného průlomu.
+Při přípravě byly všechny Mílovy verdikty a důvody `null`; přijetí filtru
+2026-11-09 je zaznamenané níže. Archivace konkrétních položek není schválená.
+Veřejné podklady a vlastní krátká shrnutí jsou Git-safe; bez úplných textů,
+soukromého obsahu, placených API tahů, služeb a zápisů do živé Knihovny.
+
+### Přijatá kalibrace a doručování — 2026-11-09
+
+Míla přijal Datův filtr bez změny. Zapsané user_verdict:
+- Přijmout: K01, K02, K05, K06, K08.
+- Sledovat, čekat na silnější výsledek: K03, K09, K11.
+- Vynechat: K04, K07, K10, K12.
+
+Požadovaný termín je každý pátek v 09:00 v `Europe/Prague`, s přepočtem letního
+a zimního času. Přehled má být v tento čas připravený, sběr a posouzení tedy
+začnou dříve. Nejbližší kalendářní pátek je 2026-11-13; není to příslib vydání
+před dokončením a samostatnou aktivací. Limit zůstává nejvýše pět zpráv celkem,
+bez výplně a bez automatického překladu/archivace kalibračních položek.
+
+Míla upřesnil konkrétní ovládání: ikona `ScienceNews` v pravém horním rohu
+Cockpitu vedle stávajících tlačítek otevře novinky v Knihovně. Původní návrh
+karty na hlavní stránce tím nahrazuje. Dokud existuje nevyřízená zpráva, ikona
+je zelená a pulzuje; po vyřízení všech zešedne a přestane pulzovat. Pouhé
+přečtení nebo otevření překladu položku nevyřizuje. Při omezení pohybu zachovat
+význam stavu bez animace; chyba načtení nesmí předstírat prázdný seznam.
+
+Každá zpráva se zobrazí jako český abstrakt s funkčním odkazem na původní zdroj,
+datem, oborem, významem a nejistotami. Tlačítka a jejich význam:
+- `Přeložit celou zprávu`: překlad v samostatném okně; sám nic neukládá,
+  nezapíná sledování a neodebírá zprávu ze seznamu. Platí dříve stanovené
+  ověření dostupnosti textu a oprávnění, žádná tichá záměna překladu za shrnutí.
+- `Uložit zprávu`: uložit do `science` / `health_info` a implicitně sledovat.
+- `Sledovat`: zapnout sledování příslušného objevu/tématu bez archivace článku.
+- `Nezařazovat`: vyřídit tuto zprávu bez archivace a sledování; nejde o zákaz
+  celého oboru ani jiných budoucích objevů.
+
+Poslední tři akce po úspěšném dokončení odstraní položku z nevyřízeného seznamu.
+Uložený článek zůstane v běžné Knihovně. Překlad je volitelný, ne podmínka
+uložení; uložit lze český abstrakt se zdrojovým odkazem a případný hotový
+oprávněný překlad uchovat u stejné položky. Sledování má předkládat podstatné
+navazující výsledky, potvrzení, vyvrácení a opravy, nikoli mediální duplicity.
+Sledované položky musí být dohledatelné pro kontrolu a pozdější vypnutí.
+
+Vyřízení je trvalé a musí přežít refresh i iPhone reconnect. Chyba nebo nejistý
+výsledek položku neschová; ověří se stejná operace bez druhého zápisu. Uložit
+je dokončeno až po ověření archivace i implicitního sledování. Nulový výběr
+nenahrazovat výplní; odlišit jej od neúspěšného sběru zdrojů. Externí notifikace
+ani e-mail se tímto nezadávají. Jde o schválený návrh budoucího ovládání,
+nikoli o provedení rozhodovacích akcí nad 12 kalibračními položkami.
+
+Předimplementační ověření 2026-11-09: lokální `page.html` měl Knihovnu a obě
+kategorie, ale tehdejší vyhledání `science_news` / Vědecké novinky v app/scripts/config
+ještě nedoložilo implementaci zpravodaje. Následný vývoj je popsaný níže.
+Nejde o živý audit; nový plánovač, placený modelový tah, centrální binding role
+ani zápis do provozní knihovny v tomto kroku neproběhly.
+Strukturovaný návrh a potvrzení jsou v kalibračním JSON jako
+`calibration_acceptance`, `delivery_plan` a `interaction_spec`.
+
+Lokální implementace 2026-11-09: fronta, idempotentní volby a archiv, sledování,
+ScienceNews UI a čtecí překladové okno, RSS sběr a týdenní adapter jsou hotové.
+115 cílených testů PASS; osm kanálů ověřeno čtením. Plná brána 2929 testů OK (5 SKIP), syntaxe a whitespace OK.
+Podrobnosti `technical/science_news.md`, report `reports/science_news_implementation_20261109.md`.
+Modelová role je pouze podporovaná parserem, centrální binding/aktivace neexistují;
+provozní role JSON se nezměnil. Bez placených tahů, zásahu do živé Knihovny nebo služeb.
+Další krok: Willova integrace přesného commitu, samostatné p+n a fyzická Mac/iPhone
+přejímka; konkrétní model, cenové posouzení a malá živá zkouška před aktivací.
+Kalibrační souhlas není provedením akcí nad 12 kalibračními položkami.
+
 ## Cíl
 
 Projekt slouží jako širší osobní znalostní databáze. První hotový vstup je

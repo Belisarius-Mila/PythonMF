@@ -1,0 +1,30 @@
+{
+  "state": "awaiting_model_trial_and_budget_approval",
+  "candidate_model": "gpt-6.1-sol",
+  "reasoning_effort": "medium",
+  "speed": "Standard per turn",
+  "pricing_checked_on": "2026-11-09",
+  "official_pricing_url": "https://learn.chatgpt.com/docs/pricing#token-rates",
+  "standard_credits_per_million": {
+    "input": 50,
+    "cached_input": 2.5,
+    "output": 250
+  },
+  "sample_packet_sha256": "9598510ce14836c139b78d98488d1753bb4fa4dadee835255482637cc9e2047e",
+  "sample_candidate_count": 60,
+  "sample_all_sources_available": true,
+  "payload_utf8_bytes": 40066,
+  "adapter_byte_proxy": 42113,
+  "accepted_output_tokens": 16000,
+  "sample_body_proxy_credits": 6.10565,
+  "proxy_is_not_tokenizer_or_invoice": true,
+  "protocol_overhead_and_model_reasoning_need_real_trial": true,
+  "proposed_reservation_per_job": 15,
+  "proposed_reservation_per_calendar_month": 100,
+  "includes": "weekly editor and explicitly requested translations",
+  "not_a_hard_upstream_billing_cap": true,
+  "paid_model_calls": 0,
+  "role_binding_changed": false,
+  "service_activated": false,
+  "private_packet_path": "data/private/science_news_preflight/packet_20261109.json"
+}

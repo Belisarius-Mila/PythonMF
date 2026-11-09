@@ -1,6 +1,8 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
+- 2026-11-09: Kalendářové Splněno/Editovat již nasazené v5ea9af40 (účtenka6905f62e16cde524469b4994ea74844f, brána3320/smoke5/5/CI42689510073 success). Míla potvrdil funkčnost. Následující stav20:46 je historický checkpoint před vydáním; vlastní live audit jen čtecí, grant/konkrétní nativní editace nebyly agentem provedeny.
+
 - 2026-11-09 20:46 CET: Lokálně doplněné Splněno a Editovat v kalendáři i úvodní agendě. Splnění pouze skryje konkrétní položku v Cockpitu, kalendář a kolize se nemění. Editace mění název/datum/čas původního výskytu, ostatní údaje zachová. Python/HTTP/JS a nativní in-memory scénáře PASS; nový izolovaný podepsaný helper má 7 self-test kontrol. Mobilní headless Edge 390×844: náhled, Zrušit/znovu otevřít, editace a skrytí PASS. Plná brána 3320 testů OK (31 SKIP). Bez p+n, OS grantu a skutečné kalendářové mutace; další krok autorizovat p+n a jednou povolit úpravy na Macu. Report reports/calendar_complete_edit_20261109.md.
 
 - 2026-11-09: Předchozí propojení Archivu je již nasazené v 163ad9cb. Účtenka 5500919b2c2d624e692750bab27e70f4 completed, brána3296/smoke5/5/CI42628013345 success; živá zpráva/PDF a nezměněné otisky ověřené, Míla potvrdil funkčnost. Níže uvedený lokální stav14:03 je historický checkpoint před tímto vydáním.

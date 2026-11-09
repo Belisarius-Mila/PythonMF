@@ -1,0 +1,8 @@
+{
+  "enabled": false,
+  "approval_ref": "",
+  "activated_at": null,
+  "max_job_credits": 15,
+  "max_month_credits": 100,
+  "note": "NEAKTIVNI NAVRH: rezervace a prijimaci meze, nikoli tvrdy billing cap. Pred aktivaci schvalit model v centralni roli science_news_editor, cenu a skutecnou malou zkousku. Nepouziva se automaticky."
+}

@@ -319,6 +319,22 @@ def _camino_service_commands() -> tuple[WorkflowCommand, ...]:
 
 WORKFLOW_COMMANDS: tuple[WorkflowCommand, ...] = (
     *(WorkflowCommand(
+        command_id="science_news_" + action.replace("-", "_"), title=f"ScienceNews: {action}",
+        purpose="Stav, čtecí náhled zdrojů nebo neinstalovaný náhled plánovače vědeckých novinek.",
+        aliases=(f"science news {action}",),
+        argv=(str(PYTHON_BIN), str(SAMANTHA_DIR / "scripts/science_news.py"), action),
+        cwd=SAMANTHA_DIR, risk="read_only_preview", writes="nic; žádný model ani aktivace služby",
+    ) for action in ("status", "preview", "service-preview")),
+    WorkflowCommand(
+        command_id="science_news_tick", title="ScienceNews: schválený týdenní běh",
+        purpose="Jeden běh podle samostatně aktivované role a rozpočtu; bez automatického opakování nejistého výsledku.",
+        aliases=("science news tick",),
+        argv=(str(PYTHON_BIN), str(SAMANTHA_DIR / "scripts/science_news.py"), "tick"),
+        cwd=SAMANTHA_DIR, risk="paid_model_and_private_write", requires_confirmation=True,
+        confirmation_phrase="POTVRZUJI SCHVALENY BEH SCIENCENEWS",
+        writes="pouze soukromá fronta a rozpočet; bez aktivace se model nespustí",
+    ),
+    *(WorkflowCommand(
         command_id="calendar_overview_" + action,
         title="Čtecí přehled kalendářů: " + action,
         purpose="Stav nebo explicitní načtení vybraných kalendářů; žádné změny událostí.",

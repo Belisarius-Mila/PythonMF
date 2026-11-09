@@ -65,6 +65,11 @@ from app.cockpit_awake_mode import (
     cockpit_awake_mode_action,
     cockpit_awake_mode_status_action,
 )
+from app.cockpit_science_news import (
+    science_news_overview, science_news_decision_action, science_news_unfollow_action,
+    science_news_translate_action, science_news_translation_status,
+)
+from app.science_news_translation_page import PAGE as SCIENCE_NEWS_TRANSLATION_HTML
 from app.communication import luna_release
 from app.codex_sessions import CodexSessionController
 from app.screen_sessions import ScreenSessionController
@@ -9263,6 +9268,9 @@ COCKPIT_POST_ACTIONS: tuple[dict[str, str], ...] = (
         "handler_name": "set_document_reading_status_action",
         "test_level": "direct",
     },
+    {"path": "/api/science-news/decision", "label": "ScienceNews — vyřídit zprávu", "risk": "private_write", "confirmation": "explicit_science_news_button", "handler_name": "science_news_decision_action", "test_level": "direct"},
+    {"path": "/api/science-news/unfollow", "label": "ScienceNews — přestat sledovat", "risk": "private_write", "confirmation": "explicit_science_news_button", "handler_name": "science_news_unfollow_action", "test_level": "direct"},
+    {"path": "/api/science-news/translate", "label": "ScienceNews — přeložit celou zprávu", "risk": "external_ai", "confirmation": "explicit_science_news_button", "handler_name": "science_news_translate_action", "test_level": "direct"},
     {
         "path": "/api/library/archive",
         "label": "Ulozit URL do knihovny",
@@ -10034,6 +10042,15 @@ class CockpitServer:
                         limit = 25
                     self.respond_json(lekarna_search_action(query=query, limit=limit))
                     return
+                if parsed.path == "/api/science-news":
+                    self.respond_json(science_news_overview())
+                    return
+                if parsed.path == "/api/science-news/translation":
+                    self.respond_json(science_news_translation_status(parse_qs(parsed.query).get("id", [""])[0]))
+                    return
+                if parsed.path == "/science-news/translation":
+                    self.respond_html(SCIENCE_NEWS_TRANSLATION_HTML)
+                    return
                 if parsed.path == "/api/library/item":
                     params = parse_qs(parsed.query)
                     article_id = params.get("id", [""])[0]
@@ -10579,6 +10596,15 @@ class CockpitServer:
                             note=str(payload.get("note", "")),
                         )
                     )
+                    return
+                if parsed.path == "/api/science-news/decision":
+                    self.respond_json(science_news_decision_action(self.read_json()))
+                    return
+                if parsed.path == "/api/science-news/unfollow":
+                    self.respond_json(science_news_unfollow_action(self.read_json()))
+                    return
+                if parsed.path == "/api/science-news/translate":
+                    self.respond_json(science_news_translate_action(self.read_json()))
                     return
                 if parsed.path == "/api/library/archive":
                     payload = self.read_json()
