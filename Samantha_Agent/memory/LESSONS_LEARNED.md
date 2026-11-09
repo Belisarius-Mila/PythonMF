@@ -1998,3 +1998,27 @@ ve všech skutečných čtenářích před zpřístupněním sdílené konfigura
 - Důkaz: job bd828212 push_requested→attention ve 22:00:13, hotkey.out.log ukončil PID 48189 a ve 22:00:26 hlásí nový server; supervisor spustil PID 64718 ve 22:00:20. GitHub zůstal 5ea9af40, dítě quality gate pokračovalo osiřelé; nový HTML odpovídal lokálnímu 1395956d bez řízené účtenky.
 - Řešení: před automatickým launcher restartem ověřit veřejný status p+n. Aktivní vydání dovolí otevřít dosavadní server bez restartu; neověřený/malformed/timeout stav restart nepovolí. Vlastní autorizovaný restart publisheru se nemění. Zelená lokální brána není potvrzený push/deploy.
 - Ověření: mockovaná hranice restartu a skutečné veřejné status schema, active/idle/unknown/malformed/timeout i zachování současné cesty restartu; 77 cílených testů PASS; plná brána 3370 testů OK / 31 SKIP. Původní nejisté vydání se neopakuje automaticky. `reports/science_news_release_interruption_20261109.md`.
+
+
+### LL-121 — Neaktivní placenou schopnost vysvětli před kliknutím
+
+- Problém: ScienceNews zobrazoval aktivní tlačítko překladu, přestože role a
+  provozní aktivace chyběly; pilotní abstrakt navíc nebyl celý zdrojový text.
+- Typ: zobecnitelné
+- Řešení nalezeno: 09112026
+- Řešení: použít stav serveru pro vypnutí tlačítka a viditelné vysvětlení.
+  Hotový uložený výsledek má zůstat dostupný i bez aktivního modelu. Ověřit,
+  že neaktivní kliknutí neotevře okno/nepošle POST, čtení hotového výsledku
+  nevolá model ani aktivační bránu a nevyřizuje zprávu. HTTP 403 není důkaz
+  zákazu překladu; práva, úplnost zdroje a aktivace jsou samostatné podmínky.
+  Ověřeno 73 cílenými testy včetně 12 Node případů, fyzická přejímka ještě chybí.
+
+
+Doplnění 09112026 k LL-121 (skutečný překladový pilot): jedinečný Sol/medium
+Standard tah vrátil celý zkontrolovaný překlad za 0,5995 kreditu (usage
+6980 input / 1002 output). Vstupní UTF-8 byte proxy 3507 nezahrnovala celou režii
+runtime a není horní mez účtovaných vstupních tokenů; cenu odvozovat od jedinečné
+usage účtenky. Raw receipt a schválenou přípravnou kartu nepřepisovat dodatečnou
+kontrolou. Samostatně rozlišit programovou přejímku, Datovo porovnání významu,
+Mílovu četbu a pozdější připojení výsledku do UI. Pro opětovné zobrazení nebo
+přenos již hotového překladu nepouštět další modelový tah.

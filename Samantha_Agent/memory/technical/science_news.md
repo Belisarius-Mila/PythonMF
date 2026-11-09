@@ -12,7 +12,8 @@ Schválený filtr a UI: `projects/vedecke_clanky.md`, strukturovaná kalibrace
   šedá znamená žádnou nevyřízenou zprávu. Omezení pohybu vypíná animaci.
 - Každá zpráva obsahuje český abstrakt, funkční původní HTTPS odkaz, datum,
   obor, význam a nejistoty. Cizí obsah se vykresluje jako text, nikoli HTML.
-- `Přeložit celou zprávu` otevře samostatné okno. Samotné čtení ani překlad
+- `Přeložit celou zprávu` otevře samostatné okno. Při neaktivním překladači je
+  tlačítko vypnuté s viditelným vysvětlením; již hotový překlad lze dál otevřít. Samotné čtení ani překlad
   nevyřizují zprávu. Obnovení okna pouze čte stav a nespouští nový modelový tah.
 - `Uložit zprávu` vytvoří jednu kartu science/health_info a zapne sledování.
   Uloží abstrakt, odkaz a již dokončený překlad, pokud existuje. Běžící překlad
@@ -170,3 +171,65 @@ vložit pomocí `import --input ... --editor-reviewed`; neukládá články do K
 
 V této etapě bez p+n, role bindingu, placených tahů, bootstrapu/restartu služby,
 zápisu do živé Knihovny a bez provedení rozhodnutí nad kalibrační sadou.
+
+
+## Jediný překladový kandidátní pilot (2026-11-09)
+
+Přesná karta: `reports/science_news_translation_preflight_20261109.json`.
+`app.science_news_trial.preview()` je neplacená kontrola otisků včetně kódu a
+kritických závislostí; nečte živou frontu ani nezakládá pokus.
+`run` vyžaduje confirmed, přesné report/packet SHA-256 a approval_ref skutečného
+souhlasu. Před vytvořením klienta atomicky uloží jediný pevný pokus; po unknown
+ani attention neexistuje nový request ID či automatický retry. Katalog se čte
+před tahem, bez náhrady modelu. Existující OneTurn vynutí jediný read-only
+thread/turn, vypnuté nástroje a per-turn Standard; globální preference nemění.
+Raw odpověď i usage se uloží před kontrolou doručení, formátu a ceny. Stav review
+vyžaduje ještě lidské ověření úplnosti/významu; délka a complete=true nejsou důkaz
+sémantické správnosti. Do živé zprávy nic nepřenáší a centrální roli neaktivuje.
+
+Zdroj je vlastní redakční tělo tiskové zprávy NIH včetně nadpisu, data, podtitulku,
+grantu a reference; mimo rozsah jsou institucionální boilerplate, navigace,
+obrázky a samotný článek Nature. Přímé HTTP 403 není obcházeno; znění dodal
+veřejný index oficiálního NIH webu a pravidla opětovného užití byla čtena na NIH FAQ.
+Není přidána plošná automatická public-domain výjimka pro doménu.
+
+Návrh jediné placené zkoušky: gpt-6.1-sol / medium / Standard, 90s timeout každého transportního čekání (nikoli celkový běhový strop), 3507 vstupních bajtů v plánovací proxy + 16000 přijatelných
+výstupních tokenů => 4,17535 kreditu, navržená přijímací mez 5 kreditů.
+Proxy není tokenizace, faktura ani tvrdý provider limit. Neurčitý timeout
+blokuje druhý pokus i při neznámém účtování. Míla následně schválil tento přesný jeden pokus; provedení je oddělené od zmrazené přípravné karty.
+
+Kreditový pilot před vytvořením vlákna ověří `account/read` bez refreshToken:
+jen `type=chatgpt`; API klíč a neznámý účet blokují placený tah. Celý účet,
+e-mail ani jiné identifikační údaje se do podkladů nebo účtenky nekopírují.
+
+
+### Výsledek skutečné zkoušky 2026-11-09 23:32 CET
+
+`reports/science_news_translation_trial_20261109.json`: jediný pokus dokončen,
+state=review, usage 6980/1002 (input/output), 0,5995 Standard kreditu pod mezí 5.
+Programová raw účtenka se nepřepisuje, Datovo následné porovnání je v samostatném
+private `semantic_review.json` a text v `crispr-preklad-cs.txt` v témže adresáři.
+Všech devět odstavců, reference, grant a numerické/klinické nejistoty prošly Datovou
+kontrolou; Mílova čtenářská přejímka ještě chybí. Receipt review není samo aktivací.
+
+Přípravný report se po běhu nemění: jeho hash je součástí konkrétního souhlasu i
+účtenky a jeho pole prepared/0 paid zůstávají historickým plánem. Aktuální výsledek
+vždy číst z výsledkového reportu/účtenky. Neměnit request ID, nezaložit nový pokus
+ani při potřebě znovu zobrazit výsledek. Kód ani produkční data se při provedení
+neměnily. Přenos hotového překladu do existující položky potřebuje vlastní omezenou
+registrovanou operaci a oprávnění; model pro stejný zdroj se znovu nevolá.
+
+6980 skutečných vstupních tokenů zahrnuje runtime/protokolovou režii; vstupní
+byte proxy 3507 nebyla horní mez účtovaného vstupu. Cenu vyhodnocovat z jedinečné
+usage účtenky a nebrat plánovací 4,17535 za fakturu či upstream billing limit.
+
+
+### Převzetí pilotu do současného main (Will, 2026-11-09)
+
+Převzaté 9abeb797 + 3ba4d063 jsou kód/UI a historický důkaz jediného hotového
+pokusu. Převzetí ani p+n neopakují překlad a nepřipojují text do provozní karty.
+Zmrazený report, jeho původní závislosti a private zdroje zůstávají u Data;
+nezměněné otisky se nepřepočítávají pro nový main ani se nekopírují private
+podklady. Čtecí preview na jiném kontextu může správně odmítnout chybějící
+zdroje či odlišné závislosti; není to pokyn vytvořit nový placený pokus.
+Přejímka a předání: `reports/science_news_two_commits_integration_20261109.md`.

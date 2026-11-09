@@ -1,5 +1,7 @@
 # Znalostní databáze / Knihovna článků
 
+Aktuální převzetí: 2026-11-09 23:38 CET: Will převzal oba Datovy commity `9abeb797` a `3ba4d063` nad vydaný `32c4ed20`. UI vysvětluje neaktivní překlad, již hotový překlad zůstává dostupný; zmrazená příprava a výsledkový report pilotu zachované. 116 cílených testů PASS, plná brána PASS: 3381 testů / 31 SKIP; následné Terra p+n výslovně schválené. Report `reports/science_news_two_commits_integration_20261109.md`. Níže uvedené starší attention není aktuální stav vydání 32c4ed20 (completed/CI success).
+
 Aktualizace vydání: Terra p+n bd828212 skončilo attention po launcher restartu během brány; GitHub stále 5ea9af40. Automaticky načtený lokální 1395956d není potvrzené vydání. Oprava launcher guardu 77 cílených PASS, plná brána PASS: 3370 testů / 31 SKIP (546,298 s); po checkpointu čekat nový výslovný pokyn. Model/plánovač/import neaktivní. Report `reports/science_news_release_interruption_20261109.md`.
 
 Aktuální integrační stav 2026-11-09 21:46 CET: fb708be9 přebíraný do main nad5ea9af40, 161 cílených a izolovaný mobilní browser PASS; plná brána3365 testů OK (31 SKIP). Terra p+n výslovně schválené pro kód/UI, nikoli aktivaci modelu/plánovače nebo provozní import. Report `reports/science_news_integration_20261109.md`.
@@ -7,9 +9,41 @@ Aktuální integrační stav 2026-11-09 21:46 CET: fb708be9 přebíraný do main
 ## 03/K4 — vědecký zpravodaj: zadání 2026-11-08, kalibrace přijata 2026-11-09
 
 Míla upřesnil a schválil směr osobního vědeckého zpravodaje namísto obecného
-hlídání změn webových stránek. Zadání je nyní lokálně implementované a ověřované; nejde
-o doklad nasazení nebo aktivace. Vývoj zůstává v Datově worktree na
+hlídání změn webových stránek. Základní implementaci Míla potvrdil jako nasazenou a částečně převzal na pilotních
+zprávách. Překlad ani automatický redaktor ještě nejsou aktivované. Vývoj zůstává v Datově worktree na
 `data/parallel-20261104`; e-mailový a kalendářový agent patří Willovi.
+
+### Schválený pilot překladu — 2026-11-09 23:32 CET
+
+Míla schválil jediný připravený tah Sol/medium Standard. Zkouška na účtu ChatGPT
+prošla: 6980 input + 1002 output tokenů, 0,5995 kreditu podle usage pod přijímací
+mezí 5. Jediný pokus bez retry; celý český text je private jako
+`data/private/science_news_trial_20261109/crispr-preklad-cs.txt`.
+Datova věcná kontrola PASS: všech devět odstavců, čísla, grant/DOI i rozlišení
+buněčné linie a plánovaného AAV. Mílova čtenářská přejímka ještě chybí.
+
+Výsledkový report `reports/science_news_translation_trial_20261109.json` má otisky,
+usage a přesné hranice. Přípravný report zůstává zmrazenou historickou kartou.
+Vzorek neprokazuje týdenní výběr, automatické získání celého zdroje ani plošné
+licence. Živá fronta/archiv, role a automatika se nezměnily. Pro tuto zprávu již
+nevolat model; po převzetí a samostatném oprávnění připojit hotový výsledek.
+
+### Přejímka překladu — 2026-11-09 23:10 CET
+
+Po schváleném jednorázovém importu tří pilotních zpráv Míla nahlásil nefunkční
+překlad. Čtecí kontrola ukázala jednu zbývající CRISPR zprávu bez plného textu,
+neaktivovanou roli i aktivaci; nevyřízené rozhodnutí ani archiv se nyní nemění.
+Lokální UI vypíná tlačítko s vysvětlením, zatímco hotový překlad zůstává čitelný.
+74 cílených testů (včetně 12 Node případů) PASS; finální plná brána 2940 testů OK (5 SKIP), syntaxe a whitespace OK.
+
+Připraven zmrazený podklad celé vlastní tiskové zprávy NIH (bez boilerplate),
+nikoli studie Nature. Ověřeno veřejné oficiální znění a NIH FAQ; přímý fetch 403
+se neobchází a doménová licence se automaticky nepředpokládá. Cenový návrh
+jediné zkoušky: Sol/medium Standard, byte proxy 4,17535, přijímací mez 5 kreditů,
+nikoli tvrdý upstream cap. Report `reports/science_news_translation_preflight_20261109.json`.
+Jednorázový kandidátní vstup je připraven; před pokusem zbývá přesný souhlas;
+placené tahy, binding a aktivace v tomto kroku nula. Podrobnosti a další krok
+jsou v kanonickém handoffu a TVBCP.
 
 ### Potvrzené zájmy a výběr
 

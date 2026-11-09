@@ -1,0 +1,53 @@
+{
+  "state": "single_sample_pass_user_reading_pending",
+  "request_id": "science-news-crispr-translation-20261109-01",
+  "approved_report_sha256": "ba77be905f3663a0304c7c5cc216ddc0b4db5c3398405626757fa48439cfedfe",
+  "approved_packet_sha256": "c1f5798ae1b7d0d86a34d3b0a43becdf5bf4b8d17b11c864c179b4cd8e67edce",
+  "source_sha256": "6f2a184e7ffde98c977b69213d17b9ec1fa8d2b1b85d860c47d2f194f8b67493",
+  "raw_receipt_sha256": "975ff51d16f2f5bb4cce31af47d73b7cbe703e1cbe75dca820987c5b33d6e1f2",
+  "translation_sha256": "a3f839f3929c31370d51958a358ca7fb397b7c926bd4acba4bf9fd0997e7a2b1",
+  "completed_on": "2026-11-09",
+  "approval": "Mila explicitly approved the prepared single paid translation trial in chat.",
+  "model": "gpt-6.1-sol",
+  "reasoning_effort": "medium",
+  "speed": "Standard",
+  "account_type": "chatgpt",
+  "attempts": 1,
+  "completed_turns": 1,
+  "automatic_retries": 0,
+  "token_usage": {
+    "input_tokens": 6980,
+    "cached_input_tokens": 0,
+    "output_tokens": 1002,
+    "reasoning_output_tokens": 0,
+    "total_tokens": 7982
+  },
+  "standard_credits_from_reported_usage": 0.5995,
+  "provider_invoice_verified": false,
+  "acceptance_credits": 5,
+  "within_acceptance": true,
+  "source_characters": 2953,
+  "translation_characters": 3012,
+  "assistant_semantic_review": {
+    "all_nine_body_paragraphs": true,
+    "title_date_subtitle_and_reference": true,
+    "numbers_and_comparisons": true,
+    "gene_and_variant_names": true,
+    "grant_and_doi": true,
+    "cell_line_not_patient_treatment": true,
+    "aav_delivery_future_plan": true
+  },
+  "user_reading_acceptance": "pending",
+  "private_receipt_path": "data/private/science_news_trial_20261109/receipt.json",
+  "private_translation_path": "data/private/science_news_trial_20261109/crispr-preklad-cs.txt",
+  "production_role_changed": false,
+  "live_queue_changed": false,
+  "service_activated": false,
+  "remaining": [
+    "User reading acceptance of this one translation.",
+    "Will integrates only the selected local commits into current main, tests the target and obtains separate publication/deployment authorization.",
+    "Attach a reviewed source/translation to the existing pilot news item through a bounded registered operation after authorization; no second model turn for this source.",
+    "Weekly editor quality, production role/budget activation and reliable full-text acquisition are separate unaccepted steps."
+  ],
+  "measurement_note": "6980 reported input tokens include runtime/protocol overhead. 3507 input UTF-8 byte proxy was not an upper bound on billed input. The 4.17535 planning figure used 16000 accepted output tokens, not a forecast or billing cap."
+}
