@@ -24,6 +24,13 @@ NODE_FALLBACK_PATHS = (
 )
 
 COMPILE_PATHS = (
+    "app/science_news.py",
+    "app/science_news_sources.py",
+    "app/science_news_runner.py",
+    "app/science_news_model.py",
+    "app/cockpit_science_news.py",
+    "app/science_news_translation_page.py",
+    "scripts/science_news.py",
     "app/recovery_guide_sources.py",
     "app/recovery_guide_maintainer.py",
     "app/recovery_guide_preflight.py",
@@ -288,6 +295,10 @@ SHELL_PATHS = (
 )
 
 TEST_MODULES = (
+    "tests.test_science_news",
+    "tests.test_science_news_model",
+    "tests.test_science_news_frontend",
+    "tests.test_science_news_http",
     "tests.test_recovery_guide",
     "tests.test_recovery_guide_preflight",
     "tests.test_recovery_guide_trial",

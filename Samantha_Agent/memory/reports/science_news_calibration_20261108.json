@@ -1,0 +1,470 @@
+{
+  "schema_version": 1,
+  "calibration_id": "science-news-20261108-v1",
+  "created_on": "2026-11-08",
+  "workstream": "project-knowledge-library",
+  "related_proposal": "03/K4",
+  "purpose_cs": "Ruční kalibrace významnosti, důkazů a osobního zájmu. Nejde o automatický týdenní výběr ani schválení archivace.",
+  "scope_cs": "12 skutečných zpráv/studií z 2026-03 až 2026-11; širší období zvoleno pro kalibraci všech osmi oblastí.",
+  "verdict_options": {
+    "include": "Chci dostávat tento typ zpráv.",
+    "watch": "Zajímá mě směr, ale chci další ověření nebo významnější výsledek.",
+    "exclude": "Tento typ ve výběru nechci."
+  },
+  "rules_cs": [
+    "data_recommendation zachovává Datův původní návrh; user_verdict obsahuje Mílův výslovně přijatý filtr z 2026-11-09. Nejde o potvrzení průlomovosti všech položek.",
+    "Přijmout typ zprávy v kalibraci neznamená schválit překlad a uložení konkrétní karty.",
+    "Všechny user_verdict a user_reason zůstávají do Mílovy odpovědi prázdné.",
+    "Položky bez dohledaného aktuálního paperu mají primary_url a doi null; tisková zpráva to nenahrazuje.",
+    "Uvedené shrnutí je vlastní české zpracování, nikoli úplný překlad.",
+    "Výsledek webového vyhledávání ověřuje jen uvedený rozsah textu, nikoli celý článek, experiment nebo vědecký konsenzus.",
+    "Žádná placená modelová API volání, zápis do živé knihovny ani aktivace automatické služby."
+  ],
+  "candidates": [
+    {
+      "id": "K01",
+      "areas": [
+        "astrofyzika"
+      ],
+      "title_cs": "Temná energie: nová data DESI komplikují jednoduchý příběh",
+      "date": "2026-07-30",
+      "date_kind": "official_announcement",
+      "study_title": "DESI DR2 Results IV: Alcock-Paczyński Measurements from the Lyman Alpha Forest and Cosmological Constraints",
+      "doi": "10.48550/arXiv.2607.27410",
+      "primary_url": "https://arxiv.org/abs/2607.27410v3",
+      "announcement_url": "https://www.desi.lbl.gov/2026/07/30/new-desi-dr2-lyman-alpha-results-shed-light-on-dark-energy/",
+      "finding_cs": "Přesnější měření rozložení mezigalaktického vodíku zpřesňuje historii rozpínání vesmíru. Nový dílčí výsledek se přibližuje standardnímu kosmologickému modelu, zatímco některé kombinace dat stále upřednostňují proměnnou temnou energii.",
+      "significance_cs": "Mohlo by jít o zásah do základního popisu vesmíru; stejně důležité je sledovat oslabování dřívějšího náznaku.",
+      "limitations_cs": "Nejde o potvrzený objev proměnné temné energie. Preference závisí na modelu a kombinaci dat; abstrakt uvádí 2,7 sigma pro DESI+CMB a 3,2 sigma po přidání supernov.",
+      "evidence_level": "observational_cosmology_preprint",
+      "access_scope": "Abstrakt arXiv v3 z 2026-08-04 a oficiální oznámení DESI; plný rozbor metod neproveden.",
+      "suggested_category": "science",
+      "data_recommendation": "include",
+      "recommendation_reason": "Velký věcný dosah, ale vždy předložit jako neuzavřenou otázku; kalibruje zájem o korekce dřívějších tvrzení.",
+      "user_verdict": "include",
+      "user_reason": "2026-11-09: Míla výslovně přijal Datův filtr bez změn.",
+      "archive_approved": false,
+      "library_operation_id": null
+    },
+    {
+      "id": "K02",
+      "areas": [
+        "astrofyzika"
+      ],
+      "title_cs": "Černá díra ukrytá v hustém plynu v mladém vesmíru",
+      "date": "2026-08-12",
+      "date_kind": "online_publication",
+      "study_title": "A gas-enshrouded and gas-reddened black hole at cosmic dawn",
+      "doi": "10.1038/s41586-026-10846-4",
+      "primary_url": "https://www.nature.com/articles/s41586-026-10846-4",
+      "accessible_primary_url": "https://pubmed.ncbi.nlm.nih.gov/42587117/",
+      "finding_cs": "Spektrum objektu MoM-BH*-1 z doby asi 660 milionů let po velkém třesku autoři vysvětlují černou dírou v obálce extrémně hustého plynu.",
+      "significance_cs": "Možná stopa mechanismu rychlého růstu prvních černých děr a vysvětlení části záhadných malých červených objektů JWST.",
+      "limitations_cs": "Pozorování spektra je oddělené od modelové interpretace obálky. Výsledek není přímým a definitivním důkazem nové třídy hvězd.",
+      "evidence_level": "peer_reviewed_observation_with_model_interpretation",
+      "access_scope": "Abstrakt původní studie v PubMed, metadata vydavatele; Nature přímé otevření blokoval cookie redirect.",
+      "suggested_category": "science",
+      "data_recommendation": "include",
+      "recommendation_reason": "Možné nové vysvětlení významného kosmologického problému; nejistota patří do titulku i textu.",
+      "user_verdict": "include",
+      "user_reason": "2026-11-09: Míla výslovně přijal Datův filtr bez změn.",
+      "archive_approved": false,
+      "library_operation_id": null
+    },
+    {
+      "id": "K03",
+      "areas": [
+        "částicová fyzika"
+      ],
+      "title_cs": "LHCb: náznak mimořádně vzácného rozpadu B_d na dva miony",
+      "date": "2026-11-03",
+      "date_kind": "official_announcement",
+      "study_title": null,
+      "doi": null,
+      "primary_url": null,
+      "announcement_url": "https://home.cern/lhcb-finds-evidence-of-one-in-ten-billion-particle-decay/",
+      "finding_cs": "CERN oznámil evidenci rozpadu B_d na pár mionů, v kombinovaných datech na úrovni 3,2 sigma. Naměřený výsledek je slučitelný s předpovědí standardního modelu.",
+      "significance_cs": "Vzácné rozpady mohou citlivě testovat vliv dosud neznámých částic.",
+      "limitations_cs": "Není to objev nové síly ani částice za standardním modelem; zatím nebyla dosažena hranice 5 sigma. V této rešerši nebyla dohledána jednoznačná aktuální původní studie; starší práce z roku 2015 ji nesmí zastoupit.",
+      "evidence_level": "official_experiment_announcement_3_2_sigma",
+      "access_scope": "Úplné veřejné oznámení CERN; současný paper/DOI neověřen.",
+      "suggested_category": "science",
+      "data_recommendation": "watch",
+      "recommendation_reason": "Důležitý experimentální mezník, ale pro přísný průlomový výběr chybí zásadní změna výkladu a potvrzení.",
+      "user_verdict": "watch",
+      "user_reason": "2026-11-09: Míla výslovně přijal Datův filtr bez změn.",
+      "archive_approved": false,
+      "library_operation_id": null
+    },
+    {
+      "id": "K04",
+      "areas": [
+        "částicová fyzika"
+      ],
+      "title_cs": "Nový baryon se dvěma půvabnými kvarky",
+      "date": "2026-03-17",
+      "date_kind": "official_announcement",
+      "study_title": null,
+      "doi": null,
+      "primary_url": null,
+      "announcement_url": "https://home.cern/lhcb-collaboration-discovers-new-proton-particle",
+      "finding_cs": "LHCb oznámil baryon tvořený dvěma charm kvarky a jedním down kvarkem, se statistickou významností 7 sigma.",
+      "significance_cs": "Testuje popis silné interakce a vlastnosti hadronů.",
+      "limitations_cs": "Jde o novou složenou částici ze známých kvarků; podobný baryon s up kvarkem byl pozorován už v roce 2017. Není to nový základní stavební kámen hmoty. Paper/DOI nebyl v této rešerši ověřen.",
+      "evidence_level": "official_experiment_announcement_7_sigma",
+      "access_scope": "Úplné oznámení CERN včetně srovnání se známým baryonem; prezentace ani původní paper neanalyzovány.",
+      "suggested_category": "science",
+      "data_recommendation": "exclude",
+      "recommendation_reason": "Kontrolní případ: vysoká jistota existence neznamená automaticky průlom podle Mílova zadání.",
+      "user_verdict": "exclude",
+      "user_reason": "2026-11-09: Míla výslovně přijal Datův filtr bez změn.",
+      "archive_approved": false,
+      "library_operation_id": null
+    },
+    {
+      "id": "K05",
+      "areas": [
+        "evoluce",
+        "genetika"
+      ],
+      "title_cs": "Genetické změny lidské kostry a možná evoluční cena v chrupavce",
+      "date": "2026-09-23",
+      "date_kind": "online_publication",
+      "study_title": "The gene-regulatory evolution of the human skeleton",
+      "doi": "10.1038/s41586-026-11053-x",
+      "primary_url": "https://www.nature.com/articles/s41586-026-11053-x",
+      "accessible_primary_url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC13668659/",
+      "finding_cs": "Experimenty s regulačními variantami a lidsko-lidoopími hybridními buňkami mapují změny řízení genů lidské kostry; studie nachází výraznou změnu tvorby složek mezibuněčné hmoty chrupavky.",
+      "significance_cs": "Propojuje evoluci lidského těla s konkrétními regulačními změnami a možnou náchylností k degenerativním onemocněním skeletu.",
+      "limitations_cs": "Nejde o úplné vysvětlení vzniku vzpřímené chůze ani prokázání příčiny každé artrózy. Funkční buněčné experimenty a mezidruhové srovnání neznamenají klinickou léčbu.",
+      "evidence_level": "peer_reviewed_functional_cell_and_comparative_study",
+      "access_scope": "Abstrakt a vybrané výsledky původního článku v indexovaném textu Nature; přímé otevření Nature selhalo, PMC dohledáno. Kompletní metodický audit neproveden.",
+      "suggested_category": "science",
+      "data_recommendation": "include",
+      "recommendation_reason": "Široký mechanistický přínos přesahující popis jediné varianty.",
+      "user_verdict": "include",
+      "user_reason": "2026-11-09: Míla výslovně přijal Datův filtr bez změn.",
+      "archive_approved": false,
+      "library_operation_id": null
+    },
+    {
+      "id": "K06",
+      "areas": [
+        "antropologie",
+        "paleontologie",
+        "evoluce"
+      ],
+      "title_cs": "Bílkoviny pomáhají přiřadit významné čínské fosilie k denisovanům",
+      "date": "2026-10-21",
+      "date_kind": "online_publication",
+      "study_title": "The proteome of Middle Pleistocene Xujiayao and common Denisovan morphology",
+      "doi": "10.1038/s41586-026-11132-z",
+      "primary_url": "https://www.nature.com/articles/s41586-026-11132-z",
+      "accessible_primary_url": "https://pubmed.ncbi.nlm.nih.gov/42907507/",
+      "announcement_url": "https://english.ivpp.cas.cn/rh/rp/202610/t20261019_1208614.html",
+      "finding_cs": "Analýza starých bílkovin ze dvou exemplářů Xujiayao podporuje jejich denisovanské zařazení; srovnání tvaru rozšiřuje obraz možné morfologie této lidské linie.",
+      "significance_cs": "Pomáhá propojit dříve obtížně zařaditelné asijské fosilie s molekulárně známou linií člověka.",
+      "limitations_cs": "Přímá molekulární opora pochází z konkrétních zkoumaných vzorků. Přiřazení dalších fosilií podle podobnosti tvaru má jinou sílu důkazů a taxonomie zůstává diskutovaná.",
+      "evidence_level": "peer_reviewed_palaeoproteomics_and_morphology",
+      "access_scope": "Abstrakt původní studie v PubMed a indexovaném Nature; institucionální zpráva dohledána. Přímé otevření Nature blokoval cookie redirect.",
+      "suggested_category": "science",
+      "data_recommendation": "include",
+      "recommendation_reason": "Zásah do širšího obrazu lidské evoluce, nikoli jen další jméno druhu.",
+      "user_verdict": "include",
+      "user_reason": "2026-11-09: Míla výslovně přijal Datův filtr bez změn.",
+      "archive_approved": false,
+      "library_operation_id": null
+    },
+    {
+      "id": "K07",
+      "areas": [
+        "paleontologie"
+      ],
+      "title_cs": "První evropský megaraptor v britské muzejní sbírce",
+      "date": "2026-10-14",
+      "date_kind": "official_announcement",
+      "study_title": "A new megaraptoran dinosaur from the Lower Cretaceous Wessex Formation, UK, and its implications for theropod evolution and biogeography",
+      "doi": "10.1098/rsos.260937",
+      "primary_url": "https://doi.org/10.1098/rsos.260937",
+      "announcement_url": "https://www.nhm.ac.uk/press-office/press-releases/uk-dinosaur-fossil-identified-as-new-long-clawed-predator.html",
+      "finding_cs": "Z části lebky je popsán Invictibellatrix amberina, první evropský zástupce megaraptorů. Nález podporuje rekonstrukci jejich dávného šíření.",
+      "significance_cs": "Ukazuje, že i nový druh může být přínosný pro širší biogeografický výklad.",
+      "limitations_cs": "Hlavní materiál je fragmentární a výklad migrace závisí na příbuzenských a biogeografických modelech. Podle přísného filtru nemusí jít o dostatečně zásadní objev.",
+      "evidence_level": "peer_reviewed_palaeontology_reported_by_research_institution",
+      "access_scope": "Úplná zpráva Natural History Museum s odkazem na paper; přímé otevření DOI v rešerši vrátilo 403.",
+      "suggested_category": "science",
+      "data_recommendation": "exclude",
+      "recommendation_reason": "Hraniční kontrola proti plošnému pravidlu nový druh = bez významu; pro tento přehled zatím vynechat.",
+      "user_verdict": "exclude",
+      "user_reason": "2026-11-09: Míla výslovně přijal Datův filtr bez změn.",
+      "archive_approved": false,
+      "library_operation_id": null
+    },
+    {
+      "id": "K08",
+      "areas": [
+        "genetika",
+        "lékařské vědy"
+      ],
+      "title_cs": "Malý účinný CRISPR jako krok k doručování genových editorů do těla",
+      "date": "2026-04-13",
+      "date_kind": "online_publication",
+      "study_title": "Comparative characterization of Cas12f orthologs reveals mechanistic features underlying enhanced genome editing efficiency",
+      "doi": "10.1038/s41594-026-01788-6",
+      "primary_url": "https://www.nature.com/articles/s41594-026-01788-6",
+      "accessible_primary_url": "https://pubmed.ncbi.nlm.nih.gov/41975095/",
+      "announcement_url": "https://www.nih.gov/news-events/news-releases/nih-funded-breakthrough-shrinks-crispr-precision-delivery-body",
+      "finding_cs": "Strukturní rozbor malého enzymu Al3Cas12f umožnil připravit variantu RKK s vysokou aktivitou v testovaných lidských buňkách.",
+      "significance_cs": "Kompaktní genový editor může pomoci překonat omezení velikosti pro doručování pomocí AAV.",
+      "limitations_cs": "Jde o buněčné a biochemické výsledky, ne o úspěšnou léčbu pacientů. NIH výslovně uvádí zkoušení po zabalení do AAV jako další plánovaný krok.",
+      "evidence_level": "peer_reviewed_preclinical_cell_and_biochemical_study",
+      "access_scope": "Abstrakt původní studie v PubMed, indexované výsledky PMC a plná tisková zpráva NIH. Celý paper neauditován.",
+      "suggested_category": "science",
+      "data_recommendation": "include",
+      "recommendation_reason": "Možné odstranění významné technologické překážky; musí být zřetelně označeno jako předklinické.",
+      "user_verdict": "include",
+      "user_reason": "2026-11-09: Míla výslovně přijal Datův filtr bez změn.",
+      "archive_approved": false,
+      "library_operation_id": null
+    },
+    {
+      "id": "K09",
+      "areas": [
+        "lékařské vědy"
+      ],
+      "title_cs": "Nový způsob aktivace T-lymfocytů vykazuje účinek u části odolných nádorů",
+      "date": "2026-10-23",
+      "date_kind": "online_publication",
+      "study_title": "Bispecific dual T cell agonist invikafusp alfa in solid tumors: the phase 1/2 START-001 trial",
+      "doi": "10.1038/s41591-026-04711-0",
+      "primary_url": "https://www.nature.com/articles/s41591-026-04711-0",
+      "accessible_primary_url": "https://pubmed.ncbi.nlm.nih.gov/42919963/",
+      "announcement_url": "https://www.nih.gov/news-events/news-releases/precision-t-cell-therapy-stalls-treatment-resistant-cancers-clinical-trial",
+      "finding_cs": "Invikafusp alfa selektivně stimuluje podskupiny T-lymfocytů. V souboru 27 pacientů na zvolených biologických dávkách vykázali čtyři objektivní odpověď nádoru.",
+      "significance_cs": "Možný nový léčebný mechanismus u pacientů, kterým předchozí imunoterapie nepomohla.",
+      "limitations_cs": "Časná fáze 1/2, malý soubor; objektivní odpověď není vyléčení ani doklad prodloužení života. Zastavení progrese se nesmí zaměnit za zmenšení nádoru. Ve studii se vyskytovaly nežádoucí účinky včetně syndromu uvolnění cytokinů.",
+      "evidence_level": "peer_reviewed_early_phase_1_2_human_trial",
+      "access_scope": "Indexovaný abstrakt původní studie v PubMed včetně 4/27 a nežádoucích účinků; NIH oznámení dohledáno, přímé otevření vrátilo 403. Kontrolované srovnání přínosu nebylo doloženo.",
+      "suggested_category": "health_info",
+      "data_recommendation": "watch",
+      "recommendation_reason": "Důležitý směr, ale kalibruje, zda Míla chce už první klinické signály, nebo až přesvědčivější klinické potvrzení.",
+      "user_verdict": "watch",
+      "user_reason": "2026-11-09: Míla výslovně přijal Datův filtr bez změn.",
+      "archive_approved": false,
+      "library_operation_id": null
+    },
+    {
+      "id": "K10",
+      "areas": [
+        "lékařské vědy"
+      ],
+      "title_cs": "PFAS a agresivní typ rakoviny prsu: souvislost, nikoli důkaz příčiny",
+      "date": "2026-11-05",
+      "date_kind": "official_announcement",
+      "study_title": "Per- and Polyfluoroalkyl Substance Exposure and Breast Cancer Incidence in the Sister Study",
+      "doi": "10.1200/JCO-26-00318",
+      "primary_url": "https://doi.org/10.1200/JCO-26-00318",
+      "announcement_url": "https://www.nih.gov/news-events/news-releases/two-forever-chemicals-associated-higher-risk-aggressive-breast-cancer-nih-analysis",
+      "finding_cs": "Studie spojuje vyšší předdiagnostické krevní hladiny PFOA a PFOS s vyšším výskytem ER-negativního karcinomu prsu. Jasná souvislost s rakovinou prsu celkově nalezena nebyla.",
+      "significance_cs": "Potenciálně důležité pro porozumění rizikům běžných environmentálních expozic.",
+      "limitations_cs": "Pozorovací asociace neprokazuje příčinný mechanismus. Relativní rozdíl rizik není absolutní pravděpodobnost pro jednotlivce; výběr Sister Study ovlivňuje přenositelnost.",
+      "evidence_level": "observational_human_study_reported_by_funding_institution",
+      "access_scope": "Úplná zpráva NIH s bibliografickou citací; primární metody a plný JCO text samostatně neanalyzovány.",
+      "suggested_category": "health_info",
+      "data_recommendation": "exclude",
+      "recommendation_reason": "Důležitá zdravotní zpráva, ale sama o sobě zatím nemusí splnit práh průlomovosti; kalibruje zájem o prakticky významné epidemiologické poznatky.",
+      "user_verdict": "exclude",
+      "user_reason": "2026-11-09: Míla výslovně přijal Datův filtr bez změn.",
+      "archive_approved": false,
+      "library_operation_id": null
+    },
+    {
+      "id": "K11",
+      "areas": [
+        "AI"
+      ],
+      "title_cs": "Trénování optoelektronické sítě pomocí fyzikální dynamiky",
+      "date": "2026-11-05",
+      "date_kind": "online_publication",
+      "study_title": "Scalable physical deep learning using optical dynamics with state-skipping training and single-map architecture",
+      "doi": "10.1038/s43588-026-01075-w",
+      "primary_url": "https://www.nature.com/articles/s43588-026-01075-w",
+      "preprint_url": "https://www.researchsquare.com/article/rs-8145052/v1",
+      "author_url": "https://www.kohei-nakajima.com/publications",
+      "finding_cs": "Autoři popisují způsob učení fyzikální sítě, který nemusí přistupovat k mezilehlým stavům systému, a ověřují jej na optoelektronické platformě.",
+      "significance_cs": "Kandidát na technologický směr AI přesahující pouhé větší modely: propojuje fyzikální výpočetní platformu a způsob jejího učení.",
+      "limitations_cs": "Fyzické neuronové sítě ani optické počítání nejsou nové samy o sobě. Novost konkrétní metody je třeba porovnat s předchůdci; laboratorní demonstrace neprokazuje náhradu dnešních LLM ani univerzální energetickou výhodu.",
+      "evidence_level": "peer_reviewed_record_with_author_preprint_abstract",
+      "access_scope": "Datum a bibliografie recenzované práce ověřeny u Nature; technické tvrzení omezeno na indexovaný abstrakt autorova preprintu stejného týmu. Přímé načtení finálního textu Nature i preprint PDF selhalo; shoda podrobností finální verze neauditována.",
+      "suggested_category": "science",
+      "data_recommendation": "watch",
+      "recommendation_reason": "Tematicky odpovídá; před přijetím průlomovosti doplnit finální výsledky a rozdíl proti starším fyzikálním sítím. Kalibruje, zda Míla zahrnuje i nové výpočetní platformy.",
+      "user_verdict": "watch",
+      "user_reason": "2026-11-09: Míla výslovně přijal Datův filtr bez změn.",
+      "archive_approved": false,
+      "library_operation_id": null
+    },
+    {
+      "id": "K12",
+      "areas": [
+        "AI"
+      ],
+      "title_cs": "iLLaDA: lepší výsledky již existujícího difuzního jazykového modelu",
+      "date": "2026-06-24",
+      "date_kind": "preprint_first_submission",
+      "study_title": "Improved Large Language Diffusion Models",
+      "doi": "10.48550/arXiv.2606.25331",
+      "primary_url": "https://arxiv.org/abs/2606.25331v1",
+      "finding_cs": "Autoři trénují osmi-miliardový maskovaný difuzní model na větším objemu dat a uvádějí zlepšení proti LLaDA v řadě benchmarků.",
+      "significance_cs": "Difuzní generování je jiný přístup než běžné autoregresivní generování, ale tato práce rozvíjí již existující difuzní technologii.",
+      "limitations_cs": "Nejde o první zavedení difuzního jazykového modelování; lepší skóre a škálování samy nesplňují Mílovo kritérium nového technologického principu. Zde ověřen preprint, recenzovaný status nedoložen.",
+      "evidence_level": "preprint_model_benchmark_report",
+      "access_scope": "Abstrakt a metadata arXiv v1; plné experimenty a reprodukce neprovedeny.",
+      "suggested_category": "science",
+      "data_recommendation": "exclude",
+      "recommendation_reason": "Kontrolní příklad výslovně vyloučeného typu AI zprávy.",
+      "user_verdict": "exclude",
+      "user_reason": "2026-11-09: Míla výslovně přijal Datův filtr bez změn.",
+      "archive_approved": false,
+      "library_operation_id": null
+    }
+  ],
+  "synthetic_checks": [
+    {
+      "id": "T01",
+      "kind": "duplicate",
+      "input": "K06 a druhá mediální zpráva se stejným DOI 10.1038/s41586-026-11132-z.",
+      "expected": "Jedna událost objevu; mediální kopie není nezávislá vědecká replikace.",
+      "synthetic": true
+    },
+    {
+      "id": "T02",
+      "kind": "misleading_headline",
+      "input": "Záměrně chybný titulek: DESI definitivně prokázalo, že temná energie slábne.",
+      "expected": "Odmítnout tvrzení o definitivním důkazu; uvést neuzavřenost a směrově odlišný nový dílčí výsledek K01.",
+      "synthetic": true
+    },
+    {
+      "id": "T03",
+      "kind": "medical_overclaim",
+      "input": "Záměrně chybný titulek: Nový CRISPR už léčí ALS přímo v těle.",
+      "expected": "Odmítnout extrapolaci buněčných dat K08 na léčbu pacientů; předložit skutečně dosaženou fázi.",
+      "synthetic": true
+    }
+  ],
+  "calibration_acceptance": {
+    "accepted_on": "2026-11-09",
+    "scope": "selection_filter_only",
+    "user_statement": "V tvém filtru bych nic neměnil. Takto bych to nastavil.",
+    "archive_approval": false
+  },
+  "delivery_plan": {
+    "status": "implemented_locally_not_activated",
+    "timezone": "Europe/Prague",
+    "iso_weekday": 5,
+    "ready_by_local_time": "09:00",
+    "frequency": "weekly",
+    "max_items_per_issue": 5,
+    "first_possible_slot_after_activation": "2026-11-13T09:00:00+01:00",
+    "first_slot_is_not_promised": true,
+    "schedule_note_cs": "Přehled má být připraven k páteční 09:00, tedy sběr a zpracování začnou dříve. Termín je zadání, nikoli aktivovaná služba.",
+    "library_section_proposal_cs": "Vědecké novinky v Knihovně: seznam nevyřízených zpráv, každá s českým abstraktem a funkčním odkazem na zdroj. Tři rozhodovací akce položku po potvrzeném dokončení odeberou ze seznamu.",
+    "cockpit_entry_proposal_cs": "Potvrzená podoba: ikona ScienceNews vpravo nahoře vedle stávajících tlačítek Cockpitu; zelená a pulzující při nevyřízených zprávách, šedá bez pulzování při prázdném seznamu. Nahradí původní návrh karty na hlavní stránce.",
+    "publication_is_separate_from_archive": true,
+    "archive_flow_cs": "Uložit zprávu uloží položku s českým textem a původním odkazem do science nebo health_info a současně zapne sledování tématu/objevu. Překlad celé zprávy je samostatná volitelná akce; jeho otevření není podmínkou uložení a samo nic nevyřizuje.",
+    "empty_issue_cs": "Nevytvářet výplň ani upozornění na nové články, pokud nic nesplní filtr; zaznamenat úspěšné dokončení odlišně od selhání sběru.",
+    "external_notifications_authorized": false,
+    "production_writes_performed": false,
+    "paid_model_calls_performed": false
+  },
+  "interaction_spec": {
+    "accepted_on": "2026-11-09",
+    "status": "implemented_locally_not_deployed",
+    "approval_scope": "prospective_ui_and_workflow_not_activation_or_existing_item_actions",
+    "entry": {
+      "label": "ScienceNews",
+      "position": "cockpit_header_top_right_next_to_existing_buttons",
+      "opens": "library_science_news_pending_list",
+      "pending_items": {
+        "color": "green",
+        "pulse": true
+      },
+      "no_pending_items": {
+        "color": "gray",
+        "pulse": false
+      },
+      "pending_definition": "Zpráva bez úspěšně dokončené volby Uložit zprávu, Sledovat nebo Nezařazovat; pouhé přečtení nerozhoduje.",
+      "unknown_state": "Chyba načtení není důkaz prázdného seznamu; nehlásit vše vyřízeno.",
+      "accessibility": "Při omezení pohybu zachovat zelený stav a textové označení novinek bez animace; ovládání použitelné na iPhonu."
+    },
+    "item": {
+      "content": [
+        "český abstrakt",
+        "původní funkční odkaz na zdroj",
+        "datum",
+        "obor",
+        "význam",
+        "důkazy a nejistoty"
+      ],
+      "translation": {
+        "label": "Přeložit celou zprávu",
+        "presentation": "separate_window",
+        "resolves_item": false,
+        "archives_item": false,
+        "follows_item": false,
+        "scope": "Text zdrojové zprávy; ne automaticky celá původní odborná studie. Dostupnost a oprávnění k překladu se ověří; překlad se nezamění za shrnutí."
+      },
+      "decisions": [
+        {
+          "label": "Uložit zprávu",
+          "action": "save",
+          "archive": true,
+          "follow": true,
+          "remove_from_pending_after_verified_success": true
+        },
+        {
+          "label": "Sledovat",
+          "action": "follow",
+          "archive": false,
+          "follow": true,
+          "remove_from_pending_after_verified_success": true
+        },
+        {
+          "label": "Nezařazovat",
+          "action": "dismiss",
+          "archive": false,
+          "follow": false,
+          "remove_from_pending_after_verified_success": true
+        }
+      ],
+      "decision_controls": "Tlačítka pro tři vzájemně se vylučující rozhodovací akce; bez dalšího povinného checkboxu přečteno.",
+      "save_without_translation": "Uložení je možné z českého abstraktu a odkazu; pokud už existuje oprávněný překlad, uchovat jej u stejné položky.",
+      "archive_categories": [
+        "science",
+        "health_info"
+      ],
+      "archive_visibility": "Uložený článek zůstává dohledatelný v běžné Knihovně; zmizí jen z nevyřízených novinek.",
+      "follow_scope": "Významné nové výsledky k danému objevu/tématu, včetně potvrzení, vyvrácení, oprav nebo podstatného klinického pokračování; ne mediální kopie stejné zprávy.",
+      "dismiss_scope": "Vyřídit konkrétní zprávu; nezakazuje celý obor ani budoucí samostatné objevy.",
+      "follow_management": "Sledované položky musejí být dohledatelné pro pozdější kontrolu a vypnutí sledování.",
+      "failure_behavior": "Položka nezmizí při chybě či nejistém výsledku; nejprve dohledat tutéž operaci. Dvojklik, refresh a reconnect nesmějí duplikovat archivaci ani sledování.",
+      "save_follow_consistency": "Uložit zprávu je dokončeno až po ověření archivace i implicitního sledování; přerušení mezi kroky se dokončuje podle téže trvalé operace."
+    },
+    "existing_calibration_items_acted_on": false,
+    "production_ui_modified": false,
+    "paid_model_calls_performed": false
+  },
+  "implementation": {
+    "on": "2026-11-09",
+    "state": "locally_verified_ready_for_integration",
+    "paid_model_calls": 0,
+    "production_library_writes": 0,
+    "service_activated": false,
+    "role_binding_changed": false,
+    "calibration_items_imported_into_live_queue": false,
+    "technical_document": "memory/technical/science_news.md",
+    "source_probe": "memory/reports/science_news_sources_20261109.json",
+    "full_gate_tests": 2929,
+    "targeted_tests": 115
+  }
+}

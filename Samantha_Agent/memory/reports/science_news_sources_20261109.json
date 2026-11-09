@@ -1,0 +1,67 @@
+{
+  "checked_at": "2026-11-09T19:32:21.459976+00:00",
+  "read_only": true,
+  "paid_calls": 0,
+  "sources": [
+    {
+      "source": "nature",
+      "url": "https://www.nature.com/nature.rss",
+      "state": "ok",
+      "entries": 75,
+      "newest": "2026-11-09T00:00:00+00:00"
+    },
+    {
+      "source": "nature_evolution",
+      "url": "https://www.nature.com/natecolevol.rss",
+      "state": "ok",
+      "entries": 8,
+      "newest": "2026-11-04T00:00:00+00:00"
+    },
+    {
+      "source": "nature_genetics",
+      "url": "https://www.nature.com/ng.rss",
+      "state": "ok",
+      "entries": 8,
+      "newest": "2026-11-09T00:00:00+00:00"
+    },
+    {
+      "source": "nature_medicine",
+      "url": "https://www.nature.com/nm.rss",
+      "state": "ok",
+      "entries": 8,
+      "newest": "2026-11-09T00:00:00+00:00"
+    },
+    {
+      "source": "nature_computational",
+      "url": "https://www.nature.com/natcomputsci.rss",
+      "state": "ok",
+      "entries": 8,
+      "newest": "2026-11-06T00:00:00+00:00"
+    },
+    {
+      "source": "nasa",
+      "url": "https://www.nasa.gov/feed/",
+      "state": "ok",
+      "entries": 10,
+      "newest": "2026-11-09T19:27:20+00:00"
+    },
+    {
+      "source": "nature_physics",
+      "url": "https://www.nature.com/nphys.rss",
+      "state": "ok",
+      "entries": 8,
+      "newest": "2026-11-09T00:00:00+00:00"
+    },
+    {
+      "source": "nature_astronomy",
+      "url": "https://www.nature.com/natastron.rss",
+      "state": "ok",
+      "entries": 8,
+      "newest": "2026-11-06T00:00:00+00:00"
+    }
+  ],
+  "unselected_sources": {
+    "cern": "Root feed 404; old api feed 404. Not silently included as a healthy source.",
+    "nih": "Current feed returned 403 in this environment. No bypass attempted."
+  }
+}

@@ -36,6 +36,7 @@
         <button class="secondary" id="serviceBtn">Servis</button>
         <button class="secondary" id="refreshBtn">Obnovit</button>
       </div>
+      <button class="science-news-entry science-empty" id="scienceNewsBtn" type="button" aria-label="ScienceNews: načítám stav"><span aria-hidden="true">⚛</span> ScienceNews</button>
     </nav>
   </header>
   <main>
@@ -663,6 +664,7 @@
       </div>
       <div class="modal-body">
         <div class="library-tabs" aria-label="Kategorie knihovny">
+          <button class="secondary" id="scienceNewsLibraryBtn" type="button">Vědecké novinky</button>
           <button class="secondary library-tab" type="button" data-library-category="all">Všechny</button>
           <button class="secondary library-tab active" type="button" data-library-category="recipes">Recepty</button>
           <button class="secondary library-tab" type="button" data-library-category="science">Vědecké články</button>
@@ -673,6 +675,13 @@
           <button class="secondary library-tab" type="button" data-library-category="other">Ostatní</button>
           <button class="secondary library-tab read-queue" type="button" data-library-category="all" data-library-read-state="to_read">K přečtení</button>
         </div>
+        <section id="scienceNewsSection" class="hidden" aria-labelledby="scienceNewsTitle">
+          <h3 id="scienceNewsTitle">Vědecké novinky</h3>
+          <p>Páteční výběr v 09:00 českého času. Uložením zprávy zároveň zapneš sledování.</p>
+          <p id="scienceNewsStatus" role="status">Načítám novinky…</p>
+          <div id="scienceNewsList"></div>
+          <details><summary>Sledované objevy</summary><div id="scienceNewsFollows"></div></details>
+        </section>
         <div class="library-controls">
           <label class="library-field">
             <span class="library-field-label">Hledat ve vybrané kategorii</span>

@@ -1,40 +1,21 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
-- Aktualizováno: 2026-09-12 23:09 CEST; pracovní proud `project-knowledge-library`.
-
-### Hotovo
-- Vývoj je pushnutý a nasazený: funkční commit `2f5cf1f9`, plná brána 1622 testů a smoke 5/5 prošly; Knihovna je připojená, oba profily čisté a zarovnané.
-- Nové ilustrace mají společný rozpočet 305 KiB: hlavní JPEG nejvýše 285 KiB a náhled nejvýše 20 KiB. Původní/readable varianta odkazují na tentýž soubor; tři fotografie mají nejvýše 0,894 MiB.
-- Limit vynucuje browser i backend, podporované jsou i starší camera JPEG/MPO. Text a fotografie se dál ukládají nezávisle na pozadí, retry zachovává identitu přílohy.
-- Dočasné OCR/ISBN/rozpoznávání obálky používá oddělenou přípravu do 1 MiB / 2400 px. Ukládané ilustrace používají nejvýše 1600 px.
-- Registrovaný převod existujících příloh má oddělenou přípravu, potvrzené použití a ověřenou obnovu. Nemění text článku, PDF, identifikátory, popisky ani poznámky.
-
-### Rozhodnutí
-- Míla schválil nový rozpočet i c+p+n. U ilustrací se neuchovává druhá velká obrazová kopie.
-- Míla potvrdil přesnou větu globální brzdy pro připravených 22 obrázků; registrovaný převod byl proveden a ověřen.
-- Míla navazujícím výslovným pokynem nařídil smazání konkrétní zálohy 59,35 MiB. Operace je dokončená; jiné zálohy ani aktivní knihovnu nemění a není zaveden časovaný úklid.
-
-### Otevřeno a rizika
-- Převod 22 obrázků v 11 kartách je dokončený: 66 původních souborů → 44 kompaktních, 59,117 → 5,962 MiB. Jednorázová záloha 59,350 MiB byla na výslovný pokyn odstraněna.
-- Návrat k původním velkým obrázkům z této odstraněné zálohy už není dostupný. Kompaktní obrázky i doklady převodu zůstaly zachované.
-- Rozpracovaný přenos nadále vyžaduje otevřenou stránku. Skutečné Safari na iPhonu má být ověřeno při běžném použití.
-
-### Další krok
-- Převod i požadované odstranění zálohy jsou uzavřené; pokračovat běžným používáním Knihovny.
-
-### Navrhované další kroky
-- Automatický úklid nezavádět; žádný další vývoj není pro tento převod potřeba.
-
-### Technický důkaz
-- Odstraněna pouze záloha tohoto převodu: 188 souborů / 62 233 053 B; adresář backup neexistuje. Všech 357 současných souborů aktivního archivu a 50 ostatních souborů přípravy/dokladů má shodné SHA-256 před/po. Soukromý doklad: `data/private/library_compact_20260912/backup_cleanup_verified.json`. Jde o odstraněný logický objem souborů, nikoli měření volných bloků APFS.
-- Reálný převod: 61 988 739 → 6 251 688 B; největší fotografie s náhledem 310 875 B, všechny v limitu 305 KiB. 299 ostatních souborů beze změny podle SHA-256; mimo plánovaná obrazová pole nezměněná metadata a registr 121/121 konzistentní. Všech 44 JPEGů dekódováno, bez EXIF a v rozměrových limitech; záloha byla před pozdějším potvrzeným smazáním ověřena po souborech. Soukromý doklad `post_apply_verification.json` je u plánu odkazovaného přes `latest_prepared.json`.
-- Nasazení funkční změny ověřeno 2026-09-12 22:33 CEST; code stamp `f57dfb8454ac938f`, smoke 5/5, přesná serverová stránka/worker a HTTP příprava obou rozpočtů. Navazující commit pouze uchovává tento doklad.
-- 388 cílených testů prošlo; po doplnění konzistence registru a HTTP účelu přípravy prošlo dalších 26 testů. Plná Cockpit brána prošla: 1622 testů bez chyb, unit testy 491,112 s; syntaxe a whitespace OK.
-- Browser na syntetickém archivu: PNG 12 980 174 B, HEIC, dvě karty, retry po ztrátě odpovědi, editor, kniha s obálkou; vše OK, 0 JS chyb. Uložení textu při pozastavené přípravě 0,153 s; každý skutečně uložený snímek má jen dva soubory a nejvýše 305 KiB.
-- Oddělené rozpočty v browseru: stejný zkušební snímek ilustrace 279 826 B / rozpoznávání 994 293 B; bez spuštění AI.
-- Všech 22 připravených JPEGů i náhledů prošlo dekódováním, rozměrovým/velikostním limitem a kontrolou odstranění EXIF. Vizuálně ověřeny tři receptové přílohy (včetně čitelnosti textu), vybraná obálka a největší cestovatelský snímek.
-- Soukromý plán a vizuální doklad: `data/private/library_photo_compaction/latest_prepared.json`; integrační browserové důkazy: `data/private/library_compact_20260912/`.
+- Aktualizováno: 2026-11-09 20:45 CET; proud `project-knowledge-library`, Data / `data/parallel-20261104`.
+- Lokálně implementovaný ScienceNews: horní zelená/pulzující ikona, české abstrakty,
+  zdrojové odkazy, samostatný překlad a volby Uložit zprávu / Sledovat / Nezařazovat.
+  Uložení implicitně sleduje, ověřené rozhodnutí skryje kartu, poslední karta zešedne ikonu.
+- Trvalá fronta a idempotentní archivace zachovají stejnou operaci po reconnectu;
+  nejisté modelové výsledky se neopakují ani další týden. Rozhraní umožňuje vypnout sledování.
+- 115 cílených Python testů PASS, včetně 10 JavaScript případů; osm zdrojů prošlo živou
+  čtecí zkouškou. Plná brána: 2929 testů OK (5 SKIP), syntaxe a whitespace OK. Report `reports/science_news_implementation_20261109.md`.
+- Bez placených tahů, centrálního role bindingu, provozní fronty/archivace, služby a p+n.
+  Rozpočet 15/job,100/měsíc je jen neaktivní návrh, nikoli schválení ani tvrdý billing cap.
+- Zbývá Willova integrace konkrétního commitu, samostatné p+n, Mac/iPhone přejímka a
+  schválená modelová zkouška/role/rozpočet před aktivací pátek 09:00 Europe/Prague.
+  Čistě syntetický transport není živý důkaz kvality editoru ani kompatibility nové role.
+- Detail a přesný integrační postup: `technical/science_news.md`; kalibrace a UI rozhodnutí
+  `reports/science_news_calibration_20261108.json`. Starší ilustrace a soukromý archiv zachované.
 <!-- SAMANTHA_CURRENT_STATUS_END -->
 
 Nazev: Knihovna v Cockpitu – editace článku a příloh
@@ -561,3 +542,40 @@ Technický důkaz:
 - Následný audit: backup neexistuje, 357 souborů aktivního archivu a 50 ostatních souborů přípravy/dokladů beze změny podle SHA-256. Odstraněný logický objem 62 233 053 B neudává změnu volných bloků APFS.
 - 39 cílených testů prošlo včetně odmítnutí cizích souborů/odkazů, zachování pozdější jiné karty, kontroly převáděných karet a pokračování po přerušení. Plná sada dokončila 1629 testů (441,205 s); 1628 prošlo, jediná chyba byl zastaralý očekávaný počet rizikových registrací 18 místo 19. Upraven pouze tento testový údaj; následný retest všech dotčených modulů prošel: 40 testů / 6,584 s. Produkční kód se po plné sadě nezměnil; plná sada nebyla znovu opakována.
 - Soukromé účtenky: `data/private/library_compact_20260912/backup_cleanup_before.json`, `backup_cleanup_verified.json`; dokončení je i v původním `receipt.json`.
+
+
+## 2026-11-09 20:45 CET — ScienceNews / 03-K4, lokální implementace
+
+Hotovo:
+- Míla má připravené nové ovládání vědeckých novinek v Knihovně a ikonu ScienceNews
+  v horní liště. Zelená/pulzující znamená nevyřízené zprávy, šedá znamená vyřízeno.
+- Tři rozhodnutí jsou trvalá; Uložit současně sleduje. Překlad se otevře samostatně
+  a nevyřizuje položku. Oprávněný plný text není nahrazován abstraktem.
+- Páteční příprava od 08:00 / publikace od 09:00 používá přijatý filtr všech osmi oborů,
+  nejvýše pět zpráv a osm konkrétních čtecích kanálů; prázdná/známá dávka model nevolá.
+
+Rozhodnutí:
+- Míla přijal všech 12 kalibračních verdiktů beze změny a přesné ovládání popsané
+  v projektové paměti; zadal implementaci. Neudělil tím souhlas s placenou zkouškou,
+  novým modelovým bindingem, aktivací služby, pushem nebo nasazením.
+- Sdílené modelové role, e-mail, kalendář, App Server klient a živé služby se nemění.
+
+Další krok:
+- Will převezme konkrétní Datův commit a po samostatném p+n ověří UI/API s Mílou
+  na Macu a iPhonu. Model/effort/cena a malá zkouška mají vlastní schválení před aktivací.
+
+Navrhované další kroky:
+- Po přejímce navázat novou centrální roli až v kompatibilním runtime a aktivovat
+  schválenou soukromou konfiguraci a LaunchAgent v provozním checkoutu.
+- Zpětnou vazbou doladit kvalitu výběru a pokrytí zdrojů; počáteční seznam je omezený
+  a převažuje Nature. Automatické mazání ani notifikace mimo Cockpit nejsou zavedené.
+
+Technický důkaz:
+- 115 cílených testů PASS včetně skutečných syntetických HTTP tras a 10 Node případů.
+  Plná brána 2929 testů OK (5 SKIP), syntaxe a whitespace OK; log `logs/science_news_full_gate_20261109.log`.
+- Čtecí zkouška osmi RSS PASS; CERN staré adresy 404, NIH 403 se nepovažují za fungující
+  kanály. Doklad `reports/science_news_sources_20261109.json`.
+- Role JSON byte-identický s výchozím commitem; ScienceNews provozní adresář ani
+  activation.json nevznikly. Neproběhl modelový tah, živá archivace, instalace ani restart.
+- Skutečný browser host nebyl dostupný; vizuální a fyzická iPhone přejímka je otevřená.
+  Detaily a seznam souborů v `reports/science_news_implementation_20261109.md`.

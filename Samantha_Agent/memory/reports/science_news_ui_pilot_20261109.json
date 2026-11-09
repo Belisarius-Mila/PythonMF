@@ -1,0 +1,61 @@
+{
+  "issue_id": "ui_pilot_20261109",
+  "available_at": "2026-11-09T19:55:42.918935+00:00",
+  "items": [
+    {
+      "title": "Černá díra ukrytá v hustém plynu v mladém vesmíru",
+      "abstract_cs": "Spektrum objektu MoM-BH*-1 z doby asi 660 milionů let po velkém třesku autoři vysvětlují černou dírou v obálce extrémně hustého plynu.",
+      "significance_cs": "Možná stopa mechanismu rychlého růstu prvních černých děr a vysvětlení části záhadných malých červených objektů JWST.",
+      "uncertainty_cs": "Pozorování spektra je oddělené od modelové interpretace obálky. Výsledek není přímým a definitivním důkazem nové třídy hvězd.",
+      "area": "Astrofyzika",
+      "category": "science",
+      "doi": "10.1038/s41586-026-10846-4",
+      "source_url": "https://www.nature.com/articles/s41586-026-10846-4",
+      "study_url": "https://www.nature.com/articles/s41586-026-10846-4",
+      "published_at": "2026-08-12T00:00:00+00:00",
+      "pilot_calibration_id": "K02",
+      "id": "sn_7954fe76865f2fdf95220d7b980d1345",
+      "topic_id": "sn_7954fe76865f2fdf95220d7b980d1345"
+    },
+    {
+      "title": "Genetické změny lidské kostry a možná evoluční cena v chrupavce",
+      "abstract_cs": "Experimenty s regulačními variantami a lidsko-lidoopími hybridními buňkami mapují změny řízení genů lidské kostry; studie nachází výraznou změnu tvorby složek mezibuněčné hmoty chrupavky.",
+      "significance_cs": "Propojuje evoluci lidského těla s konkrétními regulačními změnami a možnou náchylností k degenerativním onemocněním skeletu.",
+      "uncertainty_cs": "Nejde o úplné vysvětlení vzniku vzpřímené chůze ani prokázání příčiny každé artrózy. Funkční buněčné experimenty a mezidruhové srovnání neznamenají klinickou léčbu.",
+      "area": "Evoluce",
+      "category": "science",
+      "doi": "10.1038/s41586-026-11053-x",
+      "source_url": "https://www.nature.com/articles/s41586-026-11053-x",
+      "study_url": "https://www.nature.com/articles/s41586-026-11053-x",
+      "published_at": "2026-09-23T00:00:00+00:00",
+      "pilot_calibration_id": "K05",
+      "id": "sn_cb7c83dc4251822ca1328037e060c43c",
+      "topic_id": "sn_cb7c83dc4251822ca1328037e060c43c"
+    },
+    {
+      "title": "Malý účinný CRISPR jako krok k doručování genových editorů do těla",
+      "abstract_cs": "Strukturní rozbor malého enzymu Al3Cas12f umožnil připravit variantu RKK s vysokou aktivitou v testovaných lidských buňkách.",
+      "significance_cs": "Kompaktní genový editor může pomoci překonat omezení velikosti pro doručování pomocí AAV.",
+      "uncertainty_cs": "Jde o buněčné a biochemické výsledky, ne o úspěšnou léčbu pacientů. NIH výslovně uvádí zkoušení po zabalení do AAV jako další plánovaný krok.",
+      "area": "Genetika",
+      "category": "science",
+      "doi": "10.1038/s41594-026-01788-6",
+      "source_url": "https://www.nih.gov/news-events/news-releases/nih-funded-breakthrough-shrinks-crispr-precision-delivery-body",
+      "study_url": "https://www.nature.com/articles/s41594-026-01788-6",
+      "published_at": "2026-04-13T00:00:00+00:00",
+      "pilot_calibration_id": "K08",
+      "id": "sn_1a1d049b92372ad4c54ed8cd91bcbf45",
+      "topic_id": "sn_1a1d049b92372ad4c54ed8cd91bcbf45"
+    }
+  ],
+  "source_health": [
+    {
+      "source_id": "manual_calibration_pilot",
+      "state": "ok"
+    }
+  ],
+  "purpose_cs": "Neplacený UI pilot nad třemi skutečnými dříve kalibrovanými zprávami. Nejde o nové týdenní vydání ani souhlas s jejich archivací.",
+  "requires_explicit_approval_before_live_import": true,
+  "paid_model_calls": 0,
+  "imported": false
+}

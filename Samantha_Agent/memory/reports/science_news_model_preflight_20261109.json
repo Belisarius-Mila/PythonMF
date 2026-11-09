@@ -1,0 +1,13 @@
+{
+  "checked_at": "2026-11-09T19:48:30.311560+00:00",
+  "paid_model_calls": 0,
+  "client": "existing_shared_socket_only",
+  "candidate": {
+    "model": "gpt-6.1-sol",
+    "reasoning_effort": "medium"
+  },
+  "global_or_role_configuration_changed": false,
+  "catalog_read": true,
+  "model_present": true,
+  "medium_supported": true
+}

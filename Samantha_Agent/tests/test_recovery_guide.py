@@ -183,8 +183,12 @@ class Pilot(unittest.TestCase):
 
     def test_role_compatibility_without_activation(self):
         self.assertIn(m.ROLE, agent_roles.KNOWN_ROLES)
-        roles = json.loads(agent_roles.CONFIG_PATH.read_text())["roles"]
-        self.assertNotIn(m.ROLE, roles)
+        # The deployed guide may already be activated. Exercise the missing
+        # binding contract in isolation; never require changing the live JSON.
+        path = self.root / "roles_without_recovery.json"
+        path.write_text(json.dumps({"schema": 1, "roles": {}}))
+        with self.assertRaises(agent_roles.AgentRoleError):
+            agent_roles.load_role(path, role=m.ROLE)
 
     def test_adapter_separate_threads_restrictions_and_exact_role(self):
         from tests.test_routine_tasks import FakeClient
