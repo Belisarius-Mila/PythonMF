@@ -12,7 +12,8 @@ Schválený filtr a UI: `projects/vedecke_clanky.md`, strukturovaná kalibrace
   šedá znamená žádnou nevyřízenou zprávu. Omezení pohybu vypíná animaci.
 - Každá zpráva obsahuje český abstrakt, funkční původní HTTPS odkaz, datum,
   obor, význam a nejistoty. Cizí obsah se vykresluje jako text, nikoli HTML.
-- `Přeložit celou zprávu` otevře samostatné okno. Samotné čtení ani překlad
+- `Přeložit celou zprávu` otevře samostatné okno. Při neaktivním překladači je
+  tlačítko vypnuté s viditelným vysvětlením; již hotový překlad lze dál otevřít. Samotné čtení ani překlad
   nevyřizují zprávu. Obnovení okna pouze čte stav a nespouští nový modelový tah.
 - `Uložit zprávu` vytvoří jednu kartu science/health_info a zapne sledování.
   Uloží abstrakt, odkaz a již dokončený překlad, pokud existuje. Běžící překlad
@@ -161,3 +162,33 @@ vložit pomocí `import --input ... --editor-reviewed`; neukládá články do K
 
 V této etapě bez p+n, role bindingu, placených tahů, bootstrapu/restartu služby,
 zápisu do živé Knihovny a bez provedení rozhodnutí nad kalibrační sadou.
+
+
+## Jediný překladový kandidátní pilot (2026-11-09)
+
+Přesná karta: `reports/science_news_translation_preflight_20261109.json`.
+`app.science_news_trial.preview()` je neplacená kontrola otisků včetně kódu a
+kritických závislostí; nečte živou frontu ani nezakládá pokus.
+`run` vyžaduje confirmed, přesné report/packet SHA-256 a approval_ref skutečného
+souhlasu. Před vytvořením klienta atomicky uloží jediný pevný pokus; po unknown
+ani attention neexistuje nový request ID či automatický retry. Katalog se čte
+před tahem, bez náhrady modelu. Existující OneTurn vynutí jediný read-only
+thread/turn, vypnuté nástroje a per-turn Standard; globální preference nemění.
+Raw odpověď i usage se uloží před kontrolou doručení, formátu a ceny. Stav review
+vyžaduje ještě lidské ověření úplnosti/významu; délka a complete=true nejsou důkaz
+sémantické správnosti. Do živé zprávy nic nepřenáší a centrální roli neaktivuje.
+
+Zdroj je vlastní redakční tělo tiskové zprávy NIH včetně nadpisu, data, podtitulku,
+grantu a reference; mimo rozsah jsou institucionální boilerplate, navigace,
+obrázky a samotný článek Nature. Přímé HTTP 403 není obcházeno; znění dodal
+veřejný index oficiálního NIH webu a pravidla opětovného užití byla čtena na NIH FAQ.
+Není přidána plošná automatická public-domain výjimka pro doménu.
+
+Návrh jediné placené zkoušky: gpt-6.1-sol / medium / Standard, 90s timeout každého transportního čekání (nikoli celkový běhový strop), 3507 vstupních bajtů v plánovací proxy + 16000 přijatelných
+výstupních tokenů => 4,17535 kreditu, navržená přijímací mez 5 kreditů.
+Proxy není tokenizace, faktura ani tvrdý provider limit. Neurčitý timeout
+blokuje druhý pokus i při neznámém účtování. Skutečný souhlas dosud chybí.
+
+Kreditový pilot před vytvořením vlákna ověří `account/read` bez refreshToken:
+jen `type=chatgpt`; API klíč a neznámý účet blokují placený tah. Celý účet,
+e-mail ani jiné identifikační údaje se do podkladů nebo účtenky nekopírují.

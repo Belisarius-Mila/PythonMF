@@ -1823,3 +1823,17 @@ odeslání a pouze auditovaně přepnout otisk opraveného validatoru; neměnit
 přijaté bajty/role/rozpočet/cíle a nepožadovat znovu už udělený souhlas.
 Ověřeno:166 cílených testů, dvě skutečné kopie/upload, jeden bootstrap,
 launchd exit0/not_due/0 modelů. Není to důkaz prvního placeného týdenního tahu.
+
+
+### LL-114 — Neaktivní placenou schopnost vysvětli před kliknutím
+
+- Problém: ScienceNews zobrazoval aktivní tlačítko překladu, přestože role a
+  provozní aktivace chyběly; pilotní abstrakt navíc nebyl celý zdrojový text.
+- Typ: zobecnitelné
+- Řešení nalezeno: 09112026
+- Řešení: použít stav serveru pro vypnutí tlačítka a viditelné vysvětlení.
+  Hotový uložený výsledek má zůstat dostupný i bez aktivního modelu. Ověřit,
+  že neaktivní kliknutí neotevře okno/nepošle POST, čtení hotového výsledku
+  nevolá model ani aktivační bránu a nevyřizuje zprávu. HTTP 403 není důkaz
+  zákazu překladu; práva, úplnost zdroje a aktivace jsou samostatné podmínky.
+  Ověřeno 73 cílenými testy včetně 12 Node případů, fyzická přejímka ještě chybí.

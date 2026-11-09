@@ -3,9 +3,26 @@
 ## 03/K4 — vědecký zpravodaj: zadání 2026-11-08, kalibrace přijata 2026-11-09
 
 Míla upřesnil a schválil směr osobního vědeckého zpravodaje namísto obecného
-hlídání změn webových stránek. Zadání je nyní lokálně implementované a ověřované; nejde
-o doklad nasazení nebo aktivace. Vývoj zůstává v Datově worktree na
+hlídání změn webových stránek. Základní implementaci Míla potvrdil jako nasazenou a částečně převzal na pilotních
+zprávách. Překlad ani automatický redaktor ještě nejsou aktivované. Vývoj zůstává v Datově worktree na
 `data/parallel-20261104`; e-mailový a kalendářový agent patří Willovi.
+
+### Přejímka překladu — 2026-11-09 23:10 CET
+
+Po schváleném jednorázovém importu tří pilotních zpráv Míla nahlásil nefunkční
+překlad. Čtecí kontrola ukázala jednu zbývající CRISPR zprávu bez plného textu,
+neaktivovanou roli i aktivaci; nevyřízené rozhodnutí ani archiv se nyní nemění.
+Lokální UI vypíná tlačítko s vysvětlením, zatímco hotový překlad zůstává čitelný.
+74 cílených testů (včetně 12 Node případů) PASS; finální plná brána 2940 testů OK (5 SKIP), syntaxe a whitespace OK.
+
+Připraven zmrazený podklad celé vlastní tiskové zprávy NIH (bez boilerplate),
+nikoli studie Nature. Ověřeno veřejné oficiální znění a NIH FAQ; přímý fetch 403
+se neobchází a doménová licence se automaticky nepředpokládá. Cenový návrh
+jediné zkoušky: Sol/medium Standard, byte proxy 4,17535, přijímací mez 5 kreditů,
+nikoli tvrdý upstream cap. Report `reports/science_news_translation_preflight_20261109.json`.
+Jednorázový kandidátní vstup je připraven; před pokusem zbývá přesný souhlas;
+placené tahy, binding a aktivace v tomto kroku nula. Podrobnosti a další krok
+jsou v kanonickém handoffu a TVBCP.
 
 ### Potvrzené zájmy a výběr
 

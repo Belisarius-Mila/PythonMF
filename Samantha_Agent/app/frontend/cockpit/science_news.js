@@ -88,6 +88,12 @@
         const actions = element(doc, "div", undefined, "science-news-actions");
         const translation = element(doc, "button", "Přeložit celou zprávu", "secondary");
         translation.type = "button";
+        translation.disabled = !data.activated && !item.translation_available;
+        if (translation.disabled) {
+          const explanation = "Překlad zatím není aktivovaný. Původní zprávu můžeš otevřít odkazem výše.";
+          translation.title = explanation;
+          card.appendChild(element(doc, "p", explanation, "project-meta"));
+        }
         translation.addEventListener("click", () => translate(item));
         actions.appendChild(translation);
         const buttons = [];

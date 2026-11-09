@@ -28,6 +28,7 @@ COMPILE_PATHS = (
     "app/science_news_sources.py",
     "app/science_news_runner.py",
     "app/science_news_model.py",
+    "app/science_news_trial.py",
     "app/cockpit_science_news.py",
     "app/science_news_translation_page.py",
     "scripts/science_news.py",
@@ -297,6 +298,7 @@ SHELL_PATHS = (
 TEST_MODULES = (
     "tests.test_science_news",
     "tests.test_science_news_model",
+    "tests.test_science_news_trial",
     "tests.test_science_news_frontend",
     "tests.test_science_news_http",
     "tests.test_recovery_guide",

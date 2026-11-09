@@ -76,11 +76,26 @@ test('unavailable storage prevents mutation before request',async()=>{
  assert.equal(f.calls.length,1);assert.equal(f.elements.list.children.length,1);
 });
 test('translation opens separate window synchronously and never resolves inbox',async()=>{
- const f=setup(async()=>response(data()));await f.api.refresh();f.events.length=0;
+ const f=setup(async()=>response({...data(),activated:true}));await f.api.refresh();f.events.length=0;
  await f.button('Přeložit celou zprávu').click();
  assert.equal(f.events[0],'window');assert.match(f.opened[0][0],/translation\?id=sn_fixture/);
  assert.equal(f.opened[0][2],'noopener');assert.equal(f.elements.list.children.length,1);
  assert.equal(f.calls[1].path,'/api/science-news/translate');
+});
+test('inactive translation is explained and sends no request or popup',async()=>{
+ const f=setup(async()=>response(data()));await f.api.refresh();
+ assert.equal(f.button('Přeložit celou zprávu').disabled,true);
+ assert(nodes(f.elements.list).some(i=>i.textContent.startsWith('Překlad zatím není aktivovaný.')));
+ await f.button('Přeložit celou zprávu').click();
+ assert.equal(f.calls.length,1);assert.equal(f.opened.length,0);
+ assert.equal(f.button('Sledovat').disabled,false);
+});
+test('cached translation remains readable while translator is inactive',async()=>{
+ const f=setup(async()=>response(data([{...fixtureItem,translation_available:true}])));await f.api.refresh();
+ assert.equal(f.button('Přeložit celou zprávu').disabled,false);
+ await f.button('Přeložit celou zprávu').click();
+ assert.equal(f.opened.length,1);assert.equal(f.calls[1].path,'/api/science-news/translate');
+ assert.equal(f.elements.list.children.length,1);
 });
 test('refresh failure retains pending state and cards; later success clears unknown',async()=>{
  let failure=false;

@@ -1,21 +1,23 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
-- Aktualizováno: 2026-11-09 20:45 CET; proud `project-knowledge-library`, Data / `data/parallel-20261104`.
-- Lokálně implementovaný ScienceNews: horní zelená/pulzující ikona, české abstrakty,
-  zdrojové odkazy, samostatný překlad a volby Uložit zprávu / Sledovat / Nezařazovat.
-  Uložení implicitně sleduje, ověřené rozhodnutí skryje kartu, poslední karta zešedne ikonu.
-- Trvalá fronta a idempotentní archivace zachovají stejnou operaci po reconnectu;
-  nejisté modelové výsledky se neopakují ani další týden. Rozhraní umožňuje vypnout sledování.
-- 115 cílených Python testů PASS, včetně 10 JavaScript případů; osm zdrojů prošlo živou
-  čtecí zkouškou. Plná brána: 2929 testů OK (5 SKIP), syntaxe a whitespace OK. Report `reports/science_news_implementation_20261109.md`.
-- Bez placených tahů, centrálního role bindingu, provozní fronty/archivace, služby a p+n.
-  Rozpočet 15/job,100/měsíc je jen neaktivní návrh, nikoli schválení ani tvrdý billing cap.
-- Zbývá Willova integrace konkrétního commitu, samostatné p+n, Mac/iPhone přejímka a
-  schválená modelová zkouška/role/rozpočet před aktivací pátek 09:00 Europe/Prague.
-  Čistě syntetický transport není živý důkaz kvality editoru ani kompatibility nové role.
-- Detail a přesný integrační postup: `technical/science_news.md`; kalibrace a UI rozhodnutí
-  `reports/science_news_calibration_20261108.json`. Starší ilustrace a soukromý archiv zachované.
+- Aktualizováno: 2026-11-09 23:25 CET; proud `project-knowledge-library`, Data / `data/parallel-20261104`.
+- Míla potvrdil nasazení ScienceNews a částečnou UI přejímku. Na jeho výslovný pokyn
+  vloženy tři pilotní zprávy jedním idempotentním importem. Poslední čtecí kontrola
+  ukázala jednu zbývající CRISPR zprávu; vyřízené položky se znovu nevkládají.
+- Překladač není aktivovaný: chybí centrální role a soukromá aktivace. NIH při přímém
+  stažení vrací 403, položka nemá celý zdroj. Nejde o důkaz zákazu překladu.
+- Lokální oprava tlačítko při neaktivním překladači znepřístupní a vysvětlí důvod;
+  již hotový překlad lze dál otevřít. Tato oprava zatím není nasazená.
+- Připraven oddělený zdroj a přesný JSON vstup pro jeden překlad tiskové zprávy NIH,
+  nikoli celé studie Nature. Návrh Sol/medium Standard, plánovací byte proxy
+  4,17535 kreditu s 16k výstupem, přijímací mez 5 kreditů. Nic z toho není schválený
+  placený pokus ani tvrdý upstream billing cap. Report `reports/science_news_translation_preflight_20261109.json`.
+- Ověření opravy: 74 cílených testů PASS (včetně 12 Node případů); finální plná brána 2940 testů OK (5 SKIP), syntaxe a whitespace OK.
+  Fyzická přejímka opravy je otevřená.
+- Další krok: zkontrolovat a integrovat UI opravu; pro placenou zkoušku nejprve získat
+  přesný souhlas s připraveným jednorázovým kandidátním vstupem a provést jediný tah.
+  Produkční role, živá fronta/archiv, páteční služba a aktivace se v tomto kroku neměnily.
 <!-- SAMANTHA_CURRENT_STATUS_END -->
 
 TVBCP: Knihovna v Samantha Cockpitu
@@ -990,3 +992,56 @@ Technický důkaz:
   activation.json nevznikly. Neproběhl modelový tah, živá archivace, instalace ani restart.
 - Skutečný browser host nebyl dostupný; vizuální a fyzická iPhone přejímka je otevřená.
   Detaily a seznam souborů v `reports/science_news_implementation_20261109.md`.
+
+
+## 2026-11-09 23:10 CET — ScienceNews: neaktivní překlad a konkrétní podklady zkoušky
+
+Hotovo:
+- Lokálně je neaktivní překlad jasně vysvětlený a tlačítko vypnuté; již hotové překlady
+  zůstávají dostupné. Uložit / Sledovat / Nezařazovat fungují dál samostatně.
+- Připraven kandidátní `science_news_trial.preview/run`: otisky zdroje, vstupu, kódu
+  a kritických závislostí; konkrétní souhlas, sdílený socket, jediný read-only tah
+  Standard, trvalá účtenka před spojením, kontrola účtu ChatGPT (API-key/unknown stop),
+  raw odpověď před přejímkou. Timeout,
+  ztracená odpověď, chybějící usage i vadný výstup blokují další pokus. Výsledek
+  čeká lidskou sémantickou kontrolu; nic nepřenáší do živé fronty ani archivu.
+- Pro zbývající CRISPR zprávu připraveno celé vlastní sdělení NIH (2953 znaků),
+  nadpis, datum, podtitulek, všech devět odstavců, grant a reference; bez institucionálního
+  boilerplate, obrázků a navigace. Není nahrazeno abstraktem ani plným článkem Nature.
+
+Rozhodnutí:
+- Míla povolil pokračovat přípravou jediné placené zkoušky a opravy matoucího UI;
+  dosud nepovolil samotný modelový tah, nový role binding ani aktivaci ScienceNews.
+- Dříve výslovně schválený import tří pilotních zpráv proběhl jednou; dvě mezitím
+  vyřízené zprávy se neobnovují. Mílovo potvrzení nasazení je odděleno od přejímky opravy.
+
+Další krok:
+- Předat lokální UI opravu Willovi; před placenou zkouškou schválit přesnou
+  kartu kandidáta; jednorázový vstup je připraven bez změny centrální role.
+
+Navrhované další kroky:
+- Jediný tah gpt-6.1-sol / medium / Standard, návrh přijímací meze 5 kreditů;
+  zmrazený vstup, trvalá účtenka před odesláním a žádné opakování nejistého výsledku.
+- Po přijaté zkoušce samostatně řešit binding, rozpočet, provozní text a páteční aktivaci.
+
+Technický důkaz:
+- 74 cílených testů PASS / 3,070 s včetně 12 Node případů; finální plná brána 2940 testů OK (5 SKIP).
+  Logy `logs/science_news_translation_targeted_20261109.log` a `logs/science_news_translation_final_full_gate_20261109.log`.
+- NIH přímé HTTP 403, veřejný index oficiální stránky poskytl tělo zprávy; whitespace
+  normalizován. NIH FAQ ověřeno 2026-11-09, public-domain posouzení jen pro tento
+  redakční text, žádné automatické oprávnění pro celou doménu, cizí obrázky či studii.
+- Zdroj a přesný paket jsou ignorované pod `data/private/science_news_preflight/`;
+  veřejný report uvádí SHA-256, rozsah, provenance, cenu a zbývající exekuční bránu.
+- 3507 vstupních UTF-8 bajtů v proxy + 16000 přijatelných výstupních tokenů při
+  Standard 50/250 kreditů za milion = 4,17535 kreditu. Není to tokenizace, faktura ani
+  upstream limit. Placené tahy 0; centrální role, provozní data a služby beze změny.
+
+Doplnění dokončení 2026-11-09 23:25 CET:
+- Finální plná brána nad konečným kódem: 2940 testů / 422,860 s OK (5 SKIP).
+  Čtecí živé ověření 23:23 CET: účet ChatGPT a přesný kandidát Sol/medium dostupný;
+  žádný thread/start ani turn/start. Živá fronta nadále ukazuje 1 CRISPR zprávu bez překladu.
+- `origin/main` je před vytvořením nového commitu o 56 commitů napřed. Will má
+  převzít pouze tento konkrétní nový commit do aktuálního main, zkontrolovat případné
+  konflikty a cíleně ověřit integraci. Žádný merge/rebase/push/nasazení se neprovádí.
+- Přijímací karta v reportu je hotová, včetně změněných souborů, ceny, otisků,
+  read-only metadata proof a testů. K samotnému jedinému placenému pokusu chybí souhlas.

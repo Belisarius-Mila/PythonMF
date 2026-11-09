@@ -203,6 +203,19 @@ class StoreTests(unittest.TestCase):
         self.assertTrue(self.store.item(news)["translation"])
         self.assertFalse(self.store.overview()["follows"])
 
+    def test_cached_translation_is_readable_without_activation_or_new_model_attempt(self):
+        news = self.publish()
+        with self.store.transaction() as state:
+            state["items"][news]["translation"] = "Dříve ověřený český překlad."
+        with patch("app.cockpit_science_news.policy", side_effect=AssertionError("No activation needed")), \
+                patch("app.cockpit_science_news.translate") as model:
+            result = science_news_translate_action({"item_id": news}, store=self.store)
+        self.assertEqual(result, {"ok": True, "state": "completed"})
+        model.assert_not_called()
+        self.assertTrue(self.store.overview()["items"][0]["translation_available"])
+        self.assertEqual(self.store.overview()["pending_count"], 1)
+        self.assertEqual(self.store._read()["jobs"], {})
+
     def test_incomplete_translation_does_not_become_full_translation(self):
         news = self.publish([item(source_text="Original full message" * 10)])
         with self.assertRaises(ValueError): translate(self.store, self.store.item(news), model=Mock(return_value={"complete": False, "translation": "krátce"}))

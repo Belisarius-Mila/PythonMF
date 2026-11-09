@@ -9,6 +9,21 @@ request_id; vypnutí sledování: `science_news_unfollow_action`; překlad celé
 ověřeně oprávněného textu: `science_news_translate_action`. Čtení stavu překladu
 nikdy nespouští nový modelový tah. Trasy jsou registrované v COCKPIT_POST_ACTIONS.
 
+Samostatný jednorázový kandidátní pilot: `app.science_news_trial.preview()` je
+neplacené čtení zmrazeného zdroje, vstupu, kódu, cen a jejich SHA-256.
+`app.science_news_trial.run(confirmed=True, approved_report_sha256=...,
+approved_packet_sha256=..., approval_ref=...)` vyžaduje výslovný souhlas s touto
+konkrétní zkouškou. Použije jen gpt-6.1-sol/medium Standard, sdílený socket,
+prázdný ephemeral read-only kontext bez nástrojů. Před spojením zapíše jedinou
+trvalou účtenku. Neznámý/vadný/opožděný výsledek neopakuje, hotový pouze vrátí.
+Přijímací mez 5 kreditů není provider billing cap. Nemění role JSON, neaktivuje
+editor ani plánovač, nečte historii a nepíše do živé fronty ani archivu.
+Podklady a účtenka zůstávají v Datově private worktree; nejde o veřejný Cockpit endpoint.
+
+Kreditový pilot před vytvořením vlákna ověří `account/read` bez refreshToken:
+jen `type=chatgpt`; API klíč a neznámý účet blokují placený tah. Celý účet,
+e-mail ani jiné identifikační údaje se do podkladů nebo účtenky nekopírují.
+
 Shell registr má přesné `science_news_status`, `science_news_preview`,
 `science_news_service_preview` a samostatně potvrzovaný `science_news_tick`.
 Preview nevolá model a náhled služby ji neinstaluje. Scheduled tick lze spouštět
