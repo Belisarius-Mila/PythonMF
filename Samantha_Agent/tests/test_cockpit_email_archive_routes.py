@@ -150,6 +150,45 @@ class CockpitEmailArchiveRouteTests(unittest.TestCase):
                     self.assertNotIn(b"SYNTHETIC_PRIVATE_DETAIL", body)
                     self.assert_private_headers(headers)
 
+    def test_default_archive_routes_include_agent_message_body_original_and_pdf(self):
+        with tempfile.TemporaryDirectory() as temp:
+            root = Path(temp)
+            classic, agent = root / "classic", root / "agent"
+            for base, name in ((classic, "legacy"), (agent, "a" * 64)):
+                folder = base / name
+                folder.mkdir(parents=True)
+                (folder / "metadata.json").write_text(json.dumps({
+                    "archive_id": name, "subject": "Synthetic bill", "uid": "42",
+                }))
+                (folder / "body.txt").write_text("Synthetic invoice body")
+                message = EmailMessage()
+                message.set_content("Synthetic invoice body")
+                message.add_attachment(b"%PDF-synthetic", maintype="application", subtype="pdf", filename="bill.pdf")
+                (folder / "original.eml").write_bytes(message.as_bytes())
+            with patch("app.email.archive_browser.DEFAULT_EMAIL_ARCHIVE_DIR", classic), patch("app.email.archive_browser.DEFAULT_AGENT_EMAIL_ARCHIVE_DIR", agent), running_cockpit_server() as (host, port, _):
+                status, headers, body = request(host, port, "/api/email-archive/list?q=Synthetic+bill")
+                self.assertEqual(status, 200)
+                self.assert_private_headers(headers)
+                rows = json.loads(body)["items"]
+                self.assertEqual(len(rows), 2)
+                row = next(row for row in rows if row["archive_id"] == "a" * 64)
+                ref = row["archive_ref"]
+                status, headers, body = request(host, port, f"/api/email-archive/detail?archive_id={ref}")
+                detail = json.loads(body)
+                self.assertEqual(status, 200)
+                self.assert_private_headers(headers)
+                self.assertIn("Synthetic invoice body", detail["body_text"])
+                status, headers, body = request(host, port, detail["attachments"][0]["url"])
+                self.assertEqual(status, 200)
+                self.assertEqual(body, b"%PDF-synthetic")
+                self.assertEqual(headers["Content-Type"], "application/pdf")
+                self.assert_private_headers(headers)
+                original = next(item for item in detail["files"] if item["key"] == "original_eml")
+                status, headers, body = request(host, port, original["url"])
+                self.assertEqual(status, 200)
+                self.assertEqual(body, (agent / ("a" * 64) / "original.eml").read_bytes())
+                self.assert_private_headers(headers)
+
     def test_real_resolvers_reject_escaping_paths_and_serve_only_referenced_eml_attachment(self):
         file_resolver = cockpit.resolve_email_archive_file
         incoming_resolver = cockpit.resolve_email_archive_incoming_file

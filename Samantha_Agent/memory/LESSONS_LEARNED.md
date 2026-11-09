@@ -1974,3 +1974,11 @@ globální brzdě registrovaný pause/prepare/upgrade na617f3e0d zachoval při
 přepnutí celý business stav/nastavení/politiky; první reálný slot11:00
 completed,7 zpráv a všechny původní položky beze změny. Novou roli ověřit
 ve všech skutečných čtenářích před zpřístupněním sdílené konfigurace.
+
+
+### LL-118 — Úspěšné uložení ještě nedokazuje viditelnost ve společném Archivu
+
+- Kontext: potvrzená archivace hodinového agenta uchovala originál a PDF, ale stránka Archiv četla pouze staré úložiště.
+- Příčina: writer a reader používaly jiné kořeny; účtenka dokazovala uložení, nikoli dostupnost přes uživatelský přehled.
+- Řešení: společný read-only reader nad oběma pevnými kořeny, stabilní původní odkazy, oddělené identity nového zdroje a odmítnutí nejednoznačných ID. UID není globální identita mezi schránkami.
+- Ověření: hledání → detail → originál/PDF přes skutečné HTTP routy, symlink/path úniky odmítnuté; skutečný uložený dokument dostupný a otisky souborů před/po shodné. Report `reports/email_archive_bridge_20261109.md`.

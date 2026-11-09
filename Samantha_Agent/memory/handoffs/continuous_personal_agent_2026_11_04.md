@@ -1,5 +1,8 @@
 # Průběžný osobní agent — e-mailový provoz a Pushcut
 
+- 2026-11-09 14:03 CET: Lokálně propojený Archiv s potvrzenými archivacemi hodinového agenta. Společný seznam/hledání, detail, text, originál a vložené PDF fungují bez přesunu nebo přepisu uložených zpráv. Původní odkazy stabilní; agent má oddělené reference, nejednoznačná ID a úniky přes symlinky se odmítají. 30 cílených testů PASS; plná brána 3296 testů OK (31 SKIP). Skutečné uložené vyúčtování nalezené, PDF čitelné, souborové otisky před/po shodné. Bez p+n; další krok samostatně schválit nasazení a ověřit Archiv na Macu/iPhonu. Report reports/email_archive_bridge_20261109.md.
+
+
 Aktuální provozní stav 2026-11-09 11:30 CET: hodinová služba obnovena registrovaným
 upgradem f2d6ef79→617f3e0d. První kontrola9.11.11:00 completed v11:28:47,
 7 nových zpráv (3 karty+4 přehled); HTTP3+3 viditelné,1 skrytá platným pravidlem.

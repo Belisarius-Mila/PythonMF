@@ -1,10 +1,13 @@
 from __future__ import annotations
 
+import hashlib
 import json
 import os
 import tempfile
 import unittest
+from email.message import EmailMessage
 from pathlib import Path
+from unittest.mock import patch
 
 from app.email.archive_browser import (
     EMAIL_ARCHIVE_OPENABLE_FILES,
@@ -17,6 +20,7 @@ from app.email.archive_browser import (
     read_email_archive_embedded_attachments,
     read_email_archive_body_text,
     resolve_email_archive_embedded_attachment,
+    resolve_email_archive_dir,
     resolve_email_archive_file,
     resolve_email_archive_incoming_file,
 )
@@ -693,6 +697,122 @@ class EmailArchiveBrowserTests(unittest.TestCase):
             captured["current_metadata"]["document_type"],
             "email-attachment",
         )
+
+
+
+class CombinedEmailArchiveTests(unittest.TestCase):
+    def setUp(self):
+        temporary = tempfile.TemporaryDirectory()
+        self.addCleanup(temporary.cleanup)
+        self.root = Path(temporary.name).resolve()
+        self.classic = self.root / "classic"
+        self.agent = self.root / "agent"
+        for name, value in (("DEFAULT_EMAIL_ARCHIVE_DIR", self.classic),
+                            ("DEFAULT_AGENT_EMAIL_ARCHIVE_DIR", self.agent)):
+            patcher = patch(f"app.email.archive_browser.{name}", value)
+            patcher.start()
+            self.addCleanup(patcher.stop)
+
+    def make_archive(self, root, name, *, date="2026-11-09T10:00:00+00:00"):
+        folder = root / name
+        (folder / "attachments").mkdir(parents=True)
+        (folder / "metadata.json").write_text(json.dumps({
+            "archive_id": "email-42-bill", "uid": "42", "subject": "Synthetic bill",
+            "archived_at": date, "attachments_count": 1,
+        }))
+        (folder / "attachments/attachments.json").write_text('{"attachments": []}')
+        (folder / "body.txt").write_text("Synthetic invoice body")
+        message = EmailMessage()
+        message.set_content("Synthetic invoice body")
+        message.add_attachment(b"%PDF-synthetic", maintype="application", subtype="pdf", filename="bill.pdf")
+        (folder / "original.eml").write_bytes(message.as_bytes())
+        return folder
+
+    def snapshot(self):
+        return {str(p.relative_to(self.root)): hashlib.sha256(p.read_bytes()).hexdigest()
+                for p in self.root.rglob("*") if p.is_file()}
+
+    def test_combined_search_sorted_limit_legacy_links_and_no_writes(self):
+        legacy = self.make_archive(self.classic, "legacy", date="2026-11-08T10:00:00+00:00")
+        saved = self.make_archive(self.agent, "a" * 64)
+        before = self.snapshot()
+        listing = email_archive_list_status("synthetic BILL")
+        self.assertEqual(listing["count"], 2)
+        agent_ref, classic_ref = [row["archive_ref"] for row in listing["items"]]
+        self.assertEqual(classic_ref, email_archive_reference(legacy.name))
+        self.assertNotEqual(agent_ref, email_archive_reference(saved.name))
+        self.assertEqual(email_archive_list_status(limit=1)["items"], listing["items"][:1])
+        self.assertEqual(email_archive_list_status("missing")["count"], 0)
+        detail = email_archive_detail_status(agent_ref, documents_dir=self.root / "docs")
+        self.assertTrue(detail["ok"])
+        self.assertIn("Synthetic invoice body", detail["body_text"])
+        self.assertEqual(detail["archive_ref"], agent_ref)
+        attachment = detail["attachments"][0]
+        self.assertIn(agent_ref, attachment["url"])
+        resolved = resolve_email_archive_embedded_attachment(agent_ref, attachment["attachment_ref"])
+        self.assertEqual(resolved["data"], b"%PDF-synthetic")
+        original = resolve_email_archive_file(agent_ref, "original_eml")
+        self.assertEqual(original["path"], saved / "original.eml")
+        self.assertEqual(before, self.snapshot())
+
+    def test_agent_available_without_classic_root_and_custom_roots_isolated(self):
+        self.make_archive(self.agent, "a" * 64)
+        self.assertEqual(email_archive_list_status()["count"], 1)
+        self.assertEqual(email_archive_list_status(archive_directory=self.root / "other")["count"], 0)
+        self.assertEqual(email_archive_list_status(archive_directory=self.classic)["count"], 1)
+
+    def test_equal_names_and_ids_use_distinct_references_and_ambiguous_id_fails(self):
+        self.make_archive(self.classic, "same")
+        self.make_archive(self.agent, "same")
+        rows = email_archive_list_status()["items"]
+        self.assertEqual(len({row["archive_ref"] for row in rows}), 2)
+        for row in rows:
+            self.assertTrue(email_archive_detail_status(
+                row["archive_ref"], documents_dir=self.root / "docs",
+            )["ok"])
+        for ambiguous in ("same", "email-42-bill"):
+            self.assertFalse(resolve_email_archive_dir(ambiguous)["ok"])
+
+    def test_agent_does_not_link_external_documents_by_uid_alone(self):
+        self.make_archive(self.agent, "a" * 64)
+        docs = self.root / "docs"
+        incoming = docs / "inbox/incoming"
+        incoming.mkdir(parents=True)
+        (incoming / "icloud_uid_42_wrong.pdf").write_bytes(b"WRONG")
+        (docs / "index").mkdir()
+        (docs / "index/documents_index.jsonl").write_text(json.dumps({
+            "document_id": "icloud_uid_42_wrong", "title": "Wrong account",
+        }) + "\n")
+        ref = email_archive_list_status()["items"][0]["archive_ref"]
+        detail = email_archive_detail_status(ref, documents_dir=docs)
+        self.assertEqual(detail["downloaded_attachments"], [])
+        self.assertEqual(detail["vault_attachments"], [])
+        self.assertEqual(detail["attachments"][0]["filename"], "bill.pdf")
+        self.assertEqual(email_archive_reference_for_document_id(
+            "icloud_uid_42_wrong", documents_dir=docs,
+        ), "")
+
+    def test_metadata_and_directory_symlinks_never_list_or_resolve(self):
+        outside = self.make_archive(self.root / "outside", "secret")
+        self.agent.mkdir()
+        (self.agent / "linked-dir").symlink_to(outside, target_is_directory=True)
+        linked = self.agent / "linked-metadata"
+        linked.mkdir()
+        (linked / "metadata.json").symlink_to(outside / "metadata.json")
+        self.assertEqual(email_archive_list_status()["count"], 0)
+        for name in ("linked-dir", "linked-metadata", "email-42-bill", "../outside", "secret"):
+            self.assertFalse(resolve_email_archive_dir(name)["ok"])
+
+    def test_agent_file_escape_and_foreign_attachment_ref_rejected(self):
+        folder = self.make_archive(self.agent, "a" * 64)
+        secret = self.root / "secret.txt"
+        secret.write_bytes(b"SECRET")
+        (folder / "body.html").symlink_to(secret)
+        (folder / "attachments/attachments.json").write_text('{"attachments": []}')
+        ref = email_archive_list_status()["items"][0]["archive_ref"]
+        self.assertFalse(resolve_email_archive_file(ref, "body_html")["ok"])
+        self.assertFalse(resolve_email_archive_file(ref, "../secret.txt")["ok"])
+        self.assertFalse(resolve_email_archive_embedded_attachment(ref, "email-attachment-ref-0000000000000000")["ok"])
 
 
 if __name__ == "__main__":

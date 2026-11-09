@@ -1,6 +1,8 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
+- 2026-11-09 14:03 CET: Lokálně propojený Archiv s potvrzenými archivacemi hodinového agenta. Společný seznam/hledání, detail, text, originál a vložené PDF fungují bez přesunu nebo přepisu uložených zpráv. Původní odkazy stabilní; agent má oddělené reference, nejednoznačná ID a úniky přes symlinky se odmítají. 30 cílených testů PASS; plná brána 3296 testů OK (31 SKIP). Skutečné uložené vyúčtování nalezené, PDF čitelné, souborové otisky před/po shodné. Bez p+n; další krok samostatně schválit nasazení a ověřit Archiv na Macu/iPhonu. Report reports/email_archive_bridge_20261109.md.
+
 - 2026-11-08 18:22 CET: Lokálně doplněné volitelné kalendářové návrhy v jednom e-mailovém posouzení. Výchozí calendar_suggestions=false, běžící služba se nemění. Připravený návrh přebírá stejné Do kalendáře bez dalšího modelu/IMAP; existující návrhy, revize, zápisy a e-mailové koncepty se nepřepisují. 214 cílených testů PASS; závěrečná plná Cockpit brána 3199 testů OK (31 SKIP). Bez p+n/aktivace. Report reports/calendar_hourly_suggestions_20261108.md.
 
 - 2026-11-08 17:30 CET: Lokálně doplněná samostatná identita hlavního Cockpitu; i kalendář při instalaci hlavní ikony odkazuje na start /. Nový úkol dál vlastní id/start /calendar/task/. Žádný reset při návratu ani změna rozepsaných dat. 36 cílených + statická brána PASS. Bez nového p+n, fyzická iPhone přejímka otevřená; původní mazání f51f3412 už Mílou přijaté. Report reports/cockpit_home_icons_20261108.md.
@@ -2339,3 +2341,15 @@ přímá přejímka Mílova prohlížeče nebyla dostupná.
   a kalendářové karty PASS. Závěrečná plná brána 3199 testů OK (31 SKIP); logs/calendar_hourly_full_gate_v2_20261108.log.
 - Žádný skutečný modelový test, e-mailový send, kalendářový zápis/mazání, p+n
   nebo servisní aktivace. Skutečná modelová kvalita, spotřeba a fyzická přejímka otevřené.
+
+## 2026-11-09 14:03 CET — Archiv hodinového agenta v Cockpitu
+
+**Hotovo:** Lokální Archiv nyní zobrazí i zprávy dříve uložené po potvrzení karty hodinového agenta; funguje hledání, detail a otevření vloženého PDF.
+
+**Rozhodnutí:** Číst obě stávající úložiště společně, bez migrace a opakovaného ukládání. Původní odkazy zůstanou stabilní. Agentovy přílohy číst z originálu; nepropojovat cizí dokument jen podle UID.
+
+**Další krok:** Samostatně autorizovat p+n a pak ověřit skutečný Archiv na Macu/iPhonu.
+
+**Navrhované další kroky:** Žádné další změny; doručení Pushcut na telefon zůstává samostatné pozorování.
+
+**Technický důkaz:** 30 cílených testů PASS, syntetické HTTP přes skutečné routy, nalezené skutečné uložené vyúčtování, vložené PDF čitelné a stejné otisky souborů před/po. Plná brána 3296 testů OK (31 SKIP). Report `reports/email_archive_bridge_20261109.md`. Riziko/hranice: změna je lokální, živý Cockpit zatím používá starý reader; fyzická přejímka dosud neproběhla.

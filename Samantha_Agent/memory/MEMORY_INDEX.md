@@ -1,5 +1,7 @@
 # Memory Index
 
+- `reports/email_archive_bridge_20261109.md` — lokální propojení Archivu s potvrzenými archivacemi hodinového agenta; bez migrace, 30 cílených PASS a plná brána 3296 OK (31 SKIP), skutečná zpráva/PDF ověřené beze změny souborů. P+n a fyzická přejímka otevřené.
+
 - `reports/email_hourly_role_compat_20261109.md`; `handoffs/continuous_personal_agent_2026_11_04.md`; `projects/email_readonly_oauth.md` — 9.11.: vlastní hodinová služba po AgentRoleError obnovena registrovaným upgradem f2d6ef79→617f3e0d, všechny role/nastavení/business stav při přepnutí shodné. Skutečný slot11:00 completed v11:28:47,7 nových zpráv (3 karty+4 přehled), HTTP ověřené. Terra/high a calendar_suggestions=false. Dokončovací p+n schválené; přesná účtenka v logs/email_role_compat_release_20261109.log.
 
 - `reports/data_weekly_recovery_integration_20261108.md`; `handoffs/workstreams/project-samantha-infrastructure.md`; `tvbcp/workstreams/project-samantha-infrastructure.md`; `projects/samantha_external_backup.md` — 2026-11-08: pět dokončených Datových commitů lokálně integrováno; plná brána3289 OK/31 skipped. Aktivní správce a soukromý stav zůstávají v Data worktree, bez p+n nebo nového modelu.

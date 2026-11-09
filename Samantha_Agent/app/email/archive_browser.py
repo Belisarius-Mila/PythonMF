@@ -4,6 +4,7 @@ import hashlib
 import json
 import re
 import tempfile
+from collections.abc import Iterator
 from datetime import datetime, timezone
 from email import policy
 from email.parser import BytesParser
@@ -37,6 +38,9 @@ from app.email.archive_service import DEFAULT_EMAIL_ARCHIVE_DIR
 from app.email.redaction import redact_email_addresses
 
 
+DEFAULT_AGENT_EMAIL_ARCHIVE_DIR = PROJECT_ROOT / "data/private/continuous_agent/archive"
+
+
 EMAIL_ARCHIVE_OPENABLE_FILES: dict[str, tuple[Path, str]] = {
     "body_html": (Path("body.html"), "text/html; charset=utf-8"),
     "body_txt": (Path("body.txt"), "text/plain; charset=utf-8"),
@@ -55,6 +59,44 @@ EMAIL_ARCHIVE_ORIGINAL_MAX_BYTES = 25 * 1024 * 1024
 def email_archive_reference(archive_directory_name: str) -> str:
     digest = hashlib.sha256(archive_directory_name.encode("utf-8")).hexdigest()[:16]
     return f"archive-ref-{digest}"
+
+
+def _email_archive_roots(archive_directory: Path | None) -> tuple[Path, ...]:
+    """Custom roots stay isolated; the Archive page reads both trusted stores."""
+    if archive_directory is None or archive_directory == DEFAULT_EMAIL_ARCHIVE_DIR:
+        return (DEFAULT_EMAIL_ARCHIVE_DIR, DEFAULT_AGENT_EMAIL_ARCHIVE_DIR)
+    return (archive_directory,)
+
+
+def _is_agent_archive(archive_dir: Path) -> bool:
+    return archive_dir.parent.resolve() == DEFAULT_AGENT_EMAIL_ARCHIVE_DIR.resolve()
+
+
+def _archive_reference_for_dir(archive_dir: Path) -> str:
+    # Keep existing vault links stable and distinguish equal names in both stores.
+    name = f"agent:{archive_dir.name}" if _is_agent_archive(archive_dir) else archive_dir.name
+    return email_archive_reference(name)
+
+
+def _archive_metadata_paths(archive_directory: Path | None) -> Iterator[Path]:
+    seen: set[Path] = set()
+    for directory in _email_archive_roots(archive_directory):
+        try:
+            root = directory.resolve(strict=True)
+        except (OSError, RuntimeError):
+            continue
+        for metadata_path in root.glob("*/metadata.json"):
+            # Validate before reading private metadata, including list/search.
+            if metadata_path.parent.is_symlink() or metadata_path.is_symlink():
+                continue
+            try:
+                resolved = metadata_path.resolve(strict=True)
+            except (OSError, RuntimeError):
+                continue
+            if root not in resolved.parents or not resolved.is_file() or resolved in seen:
+                continue
+            seen.add(resolved)
+            yield resolved
 
 
 def _email_archive_attachment_reference(
@@ -84,12 +126,12 @@ def email_archive_list_status(
     query: str = "",
     *,
     limit: int = 120,
-    archive_directory: Path = DEFAULT_EMAIL_ARCHIVE_DIR,
+    archive_directory: Path | None = None,
 ) -> dict[str, Any]:
     safe_query = safe_text(query).casefold().strip()
     safe_limit = min(max(1, int(limit)), 500)
     archives: list[dict[str, Any]] = []
-    if not archive_directory.exists():
+    if not any(root.exists() for root in _email_archive_roots(archive_directory)):
         return {
             "ok": True,
             "count": 0,
@@ -97,10 +139,12 @@ def email_archive_list_status(
             "message": "EmailArchiveVault zatím neexistuje.",
         }
 
-    for metadata_path in archive_directory.glob("*/metadata.json"):
+    for metadata_path in _archive_metadata_paths(archive_directory):
         try:
             metadata = read_json_file(metadata_path)
         except (OSError, ValueError, json.JSONDecodeError):
+            continue
+        if not isinstance(metadata, dict):
             continue
         archive_dir = metadata_path.parent
         archive_id = safe_text(str(metadata.get("archive_id") or archive_dir.name)).strip()
@@ -117,7 +161,7 @@ def email_archive_list_status(
         archives.append(
             {
                 "archive_id": archive_id,
-                "archive_ref": email_archive_reference(archive_dir.name),
+                "archive_ref": _archive_reference_for_dir(archive_dir),
                 "uid": uid,
                 "subject": subject,
                 "sender": sender,
@@ -153,7 +197,7 @@ def email_archive_list_status(
 def email_archive_detail_status(
     archive_id: str,
     *,
-    archive_directory: Path = DEFAULT_EMAIL_ARCHIVE_DIR,
+    archive_directory: Path | None = None,
     documents_dir: Path = DEFAULT_DOCUMENTS_DIR,
 ) -> dict[str, Any]:
     resolved = resolve_email_archive_dir(archive_id, archive_directory=archive_directory)
@@ -166,8 +210,11 @@ def email_archive_detail_status(
     except (OSError, ValueError, json.JSONDecodeError):
         return {"ok": False, "message": "Archiv nemá čitelná metadata."}
 
+    if not isinstance(metadata, dict):
+        return {"ok": False, "message": "Archiv nemá čitelná metadata."}
+
     safe_archive_id = safe_text(str(metadata.get("archive_id") or archive_dir.name))
-    archive_ref = email_archive_reference(archive_dir.name)
+    archive_ref = _archive_reference_for_dir(archive_dir)
     uid = email_archive_uid(metadata, archive_dir.name)
     files = []
     for key, (relative, content_type) in EMAIL_ARCHIVE_OPENABLE_FILES.items():
@@ -219,9 +266,11 @@ def email_archive_detail_status(
         if _normalized_attachment_name(str(embedded.get("filename", "")))
         not in known_attachment_names
     )
-    downloaded = downloaded_email_archive_attachments(uid=uid, documents_dir=documents_dir)
+    # Agent UIDs are account-scoped; UID alone cannot identify legacy imports.
+    legacy_uid = "" if _is_agent_archive(archive_dir) else uid
+    downloaded = downloaded_email_archive_attachments(uid=legacy_uid, documents_dir=documents_dir)
     vault_attachments = vault_email_archive_attachments(
-        uid=uid,
+        uid=legacy_uid,
         documents_dir=documents_dir,
     )
     body_text, body_truncated = read_email_archive_body_text(
@@ -253,7 +302,7 @@ def email_archive_ai_metadata_suggestion(
     archive_id: str,
     attachment_ref: str = "",
     *,
-    archive_directory: Path = DEFAULT_EMAIL_ARCHIVE_DIR,
+    archive_directory: Path | None = None,
     analyzer=request_codex_metadata_suggestion,
     extractor=extract_text,
 ) -> dict[str, Any]:
@@ -268,7 +317,7 @@ def email_archive_ai_metadata_suggestion(
     except (OSError, ValueError, json.JSONDecodeError) as exc:
         raise AIMetadataError("Vybraný e-mail nemá čitelná metadata.") from exc
 
-    archive_ref = email_archive_reference(archive_dir.name)
+    archive_ref = _archive_reference_for_dir(archive_dir)
     body_text, body_truncated = read_email_archive_body_text(
         archive_ref,
         archive_directory=archive_directory,
@@ -360,7 +409,7 @@ def email_archive_ai_metadata_suggestion(
 def email_archive_reference_for_document_id(
     document_id: str,
     *,
-    archive_directory: Path = DEFAULT_EMAIL_ARCHIVE_DIR,
+    archive_directory: Path | None = None,
     documents_dir: Path = DEFAULT_DOCUMENTS_DIR,
 ) -> str:
     """Resolve one vault document to exactly one source email using stored UID evidence."""
@@ -403,7 +452,9 @@ def email_archive_reference_for_document_id(
             and EMAIL_ARCHIVE_REFERENCE_PATTERN.fullmatch(archive_ref)
             and re.search(rf"(?<!\d){re.escape(uid)}(?!\d)", source_coordinates)
         ):
-            matches.append(archive_ref)
+            resolved = resolve_email_archive_dir(archive_ref, archive_directory=archive_directory)
+            if resolved.get("ok") and not _is_agent_archive(resolved["path"]):
+                matches.append(archive_ref)
     unique_matches = tuple(dict.fromkeys(matches))
     return unique_matches[0] if len(unique_matches) == 1 else ""
 
@@ -411,7 +462,7 @@ def email_archive_reference_for_document_id(
 def read_email_archive_body_text(
     archive_id: str,
     *,
-    archive_directory: Path = DEFAULT_EMAIL_ARCHIVE_DIR,
+    archive_directory: Path | None = None,
     max_bytes: int = EMAIL_ARCHIVE_BODY_TEXT_MAX_BYTES,
 ) -> tuple[str, bool]:
     """Read one local plain-text body for the mailbox view without side effects."""
@@ -445,7 +496,7 @@ def read_email_archive_body_text(
 def read_email_archive_original_body_text(
     archive_id: str,
     *,
-    archive_directory: Path = DEFAULT_EMAIL_ARCHIVE_DIR,
+    archive_directory: Path | None = None,
 ) -> str:
     """Extract the fullest safe readable alternative from the immutable EML."""
 
@@ -496,7 +547,7 @@ def read_email_archive_original_body_text(
 def read_email_archive_embedded_attachments(
     archive_id: str,
     *,
-    archive_directory: Path = DEFAULT_EMAIL_ARCHIVE_DIR,
+    archive_directory: Path | None = None,
 ) -> list[dict[str, Any]]:
     """List attachment parts from one immutable original EML without writing files."""
 
@@ -518,7 +569,7 @@ def read_email_archive_embedded_attachments(
     except (TypeError, ValueError):
         return []
 
-    archive_ref = email_archive_reference(resolved["path"].parent.name)
+    archive_ref = _archive_reference_for_dir(resolved["path"].parent)
     result: list[dict[str, Any]] = []
     for index, part in enumerate(message.walk()):
         if part.is_multipart():
@@ -567,7 +618,7 @@ def resolve_email_archive_embedded_attachment(
     archive_id: str,
     attachment_ref: str,
     *,
-    archive_directory: Path = DEFAULT_EMAIL_ARCHIVE_DIR,
+    archive_directory: Path | None = None,
 ) -> dict[str, Any]:
     """Resolve one opaque EML attachment reference to read-only response bytes."""
 
@@ -744,11 +795,17 @@ def email_archive_file_label(key: str) -> str:
 
 def read_email_archive_attachment_metadata(archive_dir: Path) -> list[dict[str, Any]]:
     attachments_path = archive_dir / "attachments" / "attachments.json"
-    if not attachments_path.is_file():
+    try:
+        resolved = attachments_path.resolve(strict=True)
+    except (OSError, RuntimeError):
+        return []
+    if archive_dir not in resolved.parents or not resolved.is_file():
         return []
     try:
         payload = read_json_file(attachments_path)
     except (OSError, ValueError, json.JSONDecodeError):
+        return []
+    if not isinstance(payload, dict):
         return []
     raw_attachments = payload.get("attachments", [])
     if not isinstance(raw_attachments, list):
@@ -901,7 +958,7 @@ def _resolve_vault_document_path(
 def resolve_email_archive_dir(
     archive_id: str,
     *,
-    archive_directory: Path = DEFAULT_EMAIL_ARCHIVE_DIR,
+    archive_directory: Path | None = None,
 ) -> dict[str, Any]:
     safe_archive_id = str(archive_id or "").strip()
     if (
@@ -911,48 +968,36 @@ def resolve_email_archive_dir(
         or safe_archive_id.startswith(".")
     ):
         return {"ok": False, "message": "Neplatné ID archivu."}
-    archive_dir = archive_directory / safe_archive_id
-    if EMAIL_ARCHIVE_REFERENCE_PATTERN.fullmatch(safe_archive_id):
-        matches = [
-            path
-            for path in archive_directory.glob("*/metadata.json")
-            if email_archive_reference(path.parent.name) == safe_archive_id
-        ]
-        if len(matches) != 1:
-            return {"ok": False, "message": "Archiv nebyl nalezen."}
-        archive_dir = matches[0].parent
-    elif not archive_dir.is_dir():
-        matches = []
-        for metadata_path in archive_directory.glob("*/metadata.json"):
-            try:
-                metadata = read_json_file(metadata_path)
-            except (OSError, ValueError, json.JSONDecodeError):
-                continue
-            display_id = safe_text(
-                str(metadata.get("archive_id") or metadata_path.parent.name)
-            ).strip()
-            if display_id == safe_archive_id:
-                matches.append(metadata_path)
-        if len(matches) != 1:
-            return {"ok": False, "message": "Archiv nebyl nalezen."}
-        archive_dir = matches[0].parent
-    try:
-        root = archive_directory.resolve(strict=True)
-        resolved = archive_dir.resolve(strict=True)
-    except OSError:
-        return {"ok": False, "message": "Archiv nebyl nalezen."}
-    if root != resolved and root not in resolved.parents:
-        return {"ok": False, "message": "Archiv je mimo povolenou složku."}
-    if not (resolved / "metadata.json").is_file():
-        return {"ok": False, "message": "Archiv nemá metadata."}
-    return {"ok": True, "path": resolved}
+    matches: set[Path] = set()
+    is_reference = bool(EMAIL_ARCHIVE_REFERENCE_PATTERN.fullmatch(safe_archive_id))
+    for metadata_path in _archive_metadata_paths(archive_directory):
+        archive_dir = metadata_path.parent
+        if is_reference:
+            if _archive_reference_for_dir(archive_dir) == safe_archive_id:
+                matches.add(archive_dir)
+            continue
+        if archive_dir.name == safe_archive_id:
+            matches.add(archive_dir)
+        try:
+            metadata = read_json_file(metadata_path)
+        except (OSError, ValueError, json.JSONDecodeError):
+            continue
+        if not isinstance(metadata, dict):
+            continue
+        display_id = safe_text(str(metadata.get("archive_id") or archive_dir.name)).strip()
+        if safe_archive_id in (archive_dir.name, display_id):
+            matches.add(archive_dir)
+    # Legacy display IDs can coincide between accounts or stores. Never guess.
+    if len(matches) != 1:
+        return {"ok": False, "message": "Archiv nebyl jednoznačně nalezen."}
+    return {"ok": True, "path": matches.pop()}
 
 
 def resolve_email_archive_file(
     archive_id: str,
     file_key: str,
     *,
-    archive_directory: Path = DEFAULT_EMAIL_ARCHIVE_DIR,
+    archive_directory: Path | None = None,
 ) -> dict[str, Any]:
     if file_key not in EMAIL_ARCHIVE_OPENABLE_FILES:
         return {"ok": False, "message": "Soubor archivu není povolený."}
