@@ -1,0 +1,121 @@
+{
+  "state": "czech_crispr_saved_activation_prepared_not_enabled",
+  "checked_on": "2026-11-10",
+  "user_request": "Activate Friday ScienceNews and save the specific CRISPR news as a complete Czech translation.",
+  "crispr_save": {
+    "state": "completed",
+    "category": "science",
+    "title": "Malý účinný CRISPR jako krok k doručování genových editorů do těla",
+    "translation_sha256": "a3f839f3929c31370d51958a358ca7fb397b7c926bd4acba4bf9fd0997e7a2b1",
+    "archive_text_sha256": "8c1813dca246e345a02ad6f26d7af2d555d8e0de6f0f1e9419e3f6b45d64b4ce",
+    "full_czech_translation_verified": true,
+    "english_full_source_in_archive": false,
+    "follow_active": true,
+    "model_calls": 0,
+    "model_jobs_unchanged": true
+  },
+  "activation": {
+    "proposal_sha256": "e6e8eb06770426631ba1f0c85caf6e083be0f6c1ef1fbf87f5e4cdea784d375b",
+    "first_due": "2026-11-13T09:00:00+01:00",
+    "max_job_credits": 15,
+    "max_month_credits": 100,
+    "installation_performed": false,
+    "paid_model_calls": 0,
+    "code_ready": false,
+    "role_ready": false,
+    "served_save_guard": false,
+    "model": "gpt-6.1-sol",
+    "reasoning_effort": "medium",
+    "speed": "Standard",
+    "timezone": "Europe/Prague",
+    "preparation_time": "Friday 08:00",
+    "publication_time": "Friday 09:00",
+    "maximum_news_per_issue": 5,
+    "budget_approval": "pending",
+    "safety_confirmation": "pending",
+    "runtime_role_config_modified_by_Data": false
+  },
+  "guards": [
+    "Whole Czech translation required before Cockpit Save; follow/dismiss remain available.",
+    "Unknown save acknowledgement retains its request ID; only explicit unstarted validation releases it.",
+    "ChatGPT account required before thread/start; no API-key fallback.",
+    "Completed model jobs charge measured Standard estimate; incomplete/unknown jobs keep their full reservation.",
+    "Activation checks deployed role, pinned scientific runtime and actual served save guard.",
+    "Private config and single LaunchAgent only after exact safety phrase; attempted bootstrap is never repeated."
+  ],
+  "pricing": {
+    "checked_on": "2026-11-10",
+    "source": "https://learn.chatgpt.com/docs/pricing#token-rates",
+    "credits_per_million": {
+      "input": 50,
+      "cached_input": 2.5,
+      "output": 250
+    },
+    "limits_are_not_upstream_billing_caps": true
+  },
+  "verification": {
+    "targeted_python_tests": 112,
+    "javascript_scenarios": 16,
+    "targeted_seconds": 8.347,
+    "targeted_result": "PASS",
+    "full_gate": "PASS",
+    "full_gate_log": "logs/science_news_activation_final_gate_20261110.log",
+    "physical_ui_acceptance": "pending after deployment",
+    "full_python_tests": 2964,
+    "full_skips": 5,
+    "full_seconds": 547.271
+  },
+  "new_paid_model_calls": 0,
+  "live_services_started_or_restarted": false,
+  "push_or_deploy_performed": false,
+  "next_steps": [
+    "Will integrates this exact new commit into current main, preserving all existing role entries, then separately authorizes deployment.",
+    "Recheck activation proposal readiness against the deployed runtime; refresh the free proposal only if its pinned dependencies changed.",
+    "Mila confirms 15/job and 100/month and the exact global safety phrase for installation.",
+    "Activate the one LaunchAgent with the exact prepared proposal; verify the same launch receipt and not_due/zero paid catch-up before Friday."
+  ],
+  "runtime_role_compatibility": {
+    "science_policy_digest": "ba557f66794d071e185cd87008d01684c733f31eece0fbdb4074155ba73f529f",
+    "other_roles_unchanged": true,
+    "model_calls": 0
+  },
+  "connection_preflight": {
+    "checked_at": "2026-11-10T08:23:44.508027+00:00",
+    "account_type": "chatgpt",
+    "model": "gpt-6.1-sol",
+    "reasoning_effort": "medium",
+    "compatible": true,
+    "thread_starts": 0,
+    "model_turns": 0
+  },
+  "service_preflight": {
+    "service_registered": false,
+    "launchagent_file_exists": false,
+    "inspection_only": true
+  },
+  "changed_files": [
+    "app/cockpit_science_news.py",
+    "app/frontend/cockpit/science_news.js",
+    "app/science_news_activation.py",
+    "app/science_news_cached_translation.py",
+    "app/science_news_model.py",
+    "config/agent_roles.json",
+    "memory/ACTIVE_PROJECTS.md",
+    "memory/LESSONS_LEARNED.md",
+    "memory/MEMORY_INDEX.md",
+    "memory/handoffs/knowledge_library_article_editing_2026_07_16.md",
+    "memory/projects/vedecke_clanky.md",
+    "memory/reports/science_news_activation_20261110.json",
+    "memory/technical/capability_routing_rules.md",
+    "memory/technical/science_news.md",
+    "memory/tvbcp/knihovna_cockpit.txt",
+    "scripts/cockpit_quality_gate.py",
+    "tests/science_news_frontend.test.cjs",
+    "tests/test_cockpit_frontend.py",
+    "tests/test_science_news.py",
+    "tests/test_science_news_activation.py",
+    "tests/test_science_news_cached_translation.py",
+    "tests/test_science_news_http.py",
+    "tests/test_science_news_model.py"
+  ]
+}

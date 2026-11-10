@@ -36,6 +36,8 @@ class ScienceHTTPTests(unittest.TestCase):
         response=conn.getresponse();result=(response.status,response.read().decode());conn.close();return result
 
     def test_science_news_decision_http_and_reconnect_receipt(self):
+        with self.store.transaction() as state:
+            state['items'][identity(item())]['translation']='Úplný český překlad zkušební zdrojové zprávy.'
         status,body=self.request('/api/science-news')
         self.assertEqual(status,200);self.assertEqual(json.loads(body)['pending_count'],1)
         payload={'item_id':identity(item()),'action':'save','request_id':'same_request'}
@@ -44,6 +46,28 @@ class ScienceHTTPTests(unittest.TestCase):
             self.assertEqual(status,200);self.assertTrue(json.loads(body)['ok'])
         self.assertEqual(json.loads(self.request('/api/science-news')[1])['pending_count'],0)
         self.assertEqual(len(list((self.store.archive_root/'articles').iterdir())),1)
+
+    def test_save_without_full_translation_cannot_archive_only_an_abstract(self):
+        status,body=self.request('/api/science-news/decision',{'item_id':identity(item()),'action':'save','request_id':'unstarted_save'})
+        result=json.loads(body)
+        self.assertEqual(status,200)
+        self.assertFalse(result['ok'])
+        self.assertEqual(result['state'],'translation_required')
+        self.assertIs(result['operation_started'],False)
+        self.assertEqual(self.store._read()['operations'],{})
+        self.assertEqual(self.store.overview()['pending_count'],1)
+        self.assertFalse(self.store.archive_root.exists())
+
+    def test_legacy_uncertain_save_is_not_reported_as_unstarted(self):
+        with self.store.transaction() as state:
+            state['items'][identity(item())]['operation']='existing_save'
+            state['operations']['existing_save']={'state':'started','command':{'item_id':identity(item()),'action':'save'}}
+        before=self.store.path.read_bytes()
+        _,body=self.request('/api/science-news/decision',{'item_id':identity(item()),'action':'save','request_id':'existing_save'})
+        result=json.loads(body)
+        self.assertFalse(result['ok']);self.assertEqual(result['state'],'attention')
+        self.assertIs(result['operation_started'],True)
+        self.assertEqual(self.store.path.read_bytes(),before)
 
     def test_foreign_origin_cannot_decide(self):
         self.assertEqual(self.request('/api/science-news/decision',{'item_id':identity(item()),'action':'dismiss','request_id':'one'},origin='https://other.example.org')[0],403)

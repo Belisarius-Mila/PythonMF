@@ -7,6 +7,23 @@ hlídání změn webových stránek. Základní implementaci Míla potvrdil jako
 zprávách. Překlad ani automatický redaktor ještě nejsou aktivované. Vývoj zůstává v Datově worktree na
 `data/parallel-20261104`; e-mailový a kalendářový agent patří Willovi.
 
+### Uložení v češtině a páteční aktivace — 2026-11-10 09:20 CET
+
+Míla zadal páteční aktivaci a uložení konkrétního CRISPR článku v češtině.
+Článek je skutečně uložen ve Vědeckých článcích s celým českým překladem a odkazem;
+sledování zapnuté, fronta pilotů prázdná, žádný nový modelový tah. Budoucí Uložit
+v UI i API vyžaduje celý dokončený český překlad; abstrakt sám nestačí.
+
+Připraven `science_news_activation.prepare/activate`: první návrh 13. 11. 09:00
+Europe/Prague, příprava 08:00, Sol/medium Standard, 15 kreditů/job a 100/měsíc.
+Potvrzení mezí a globální věty pro systémový LaunchAgent ještě chybí. Vlastní
+role binding je pouze lokální návrh; Will musí nasadit nový commit do aktuálního
+main se zachováním dalších jeho rolí. Installer před zápisem ověří role/kód/servírované UI,
+nejistý bootstrap neopakuje. Účet musí být ChatGPT, dokončené úlohy se započtou
+skutečnou vykázanou spotřebou, neukončené drží plné rezervy.
+112 cílených testů PASS (16 Node scénářů); Finální plná brána: 2964 testů OK (5 SKIP), 547,271 s, syntaxe a whitespace OK.
+Důkaz `reports/science_news_activation_20261110.json`, kanonický handoff a TVBCP.
+
 ### Schválený pilot překladu — 2026-11-09 23:32 CET
 
 Míla schválil jediný připravený tah Sol/medium Standard. Zkouška na účtu ChatGPT

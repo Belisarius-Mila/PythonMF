@@ -87,7 +87,7 @@ class StoreTests(unittest.TestCase):
             with self.assertRaises(ValueError): self.store.decide(news, "dismiss", request)
 
     def test_interrupted_archive_stays_pending_and_same_request_reconciles(self):
-        news = self.publish()
+        news = self.publish([item(translation="Úplný český překlad pro zkoušku přerušeného uložení.")])
         real = archive_item
         def interrupted(item, root):
             real(item, root)

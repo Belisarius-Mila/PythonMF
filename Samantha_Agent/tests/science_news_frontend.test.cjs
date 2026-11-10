@@ -21,7 +21,7 @@ class Element {
 }
 function nodes(el){return [el,...el.children.flatMap(nodes)];}
 const fixtureItem={id:'sn_fixture',title:'<img onerror=alert(1)>',area:'Genetika',published_at:'2026-11-01T09:00:00Z',
- abstract_cs:'Český abstrakt',significance_cs:'Význam',uncertainty_cs:'Nejistota',source_url:'https://www.nature.com/test'};
+ abstract_cs:'Český abstrakt',significance_cs:'Význam',uncertainty_cs:'Nejistota',source_url:'https://www.nature.com/test',translation_available:true};
 const data=(items=[fixtureItem])=>({ok:true,items,pending_count:items.length,follows:[],issues:[],activated:false});
 const response=payload=>({ok:true,json:async()=>payload});
 function setup(fetch, sharedStorage) {
@@ -83,7 +83,7 @@ test('translation opens separate window synchronously and never resolves inbox',
  assert.equal(f.calls[1].path,'/api/science-news/translate');
 });
 test('inactive translation is explained and sends no request or popup',async()=>{
- const f=setup(async()=>response(data()));await f.api.refresh();
+ const f=setup(async()=>response(data([{...fixtureItem,translation_available:false}])));await f.api.refresh();
  assert.equal(f.button('Přeložit celou zprávu').disabled,true);
  assert(nodes(f.elements.list).some(i=>i.textContent.startsWith('Překlad zatím není aktivovaný.')));
  await f.button('Přeložit celou zprávu').click();
@@ -114,4 +114,37 @@ test('stale refresh cannot resurrect already resolved cards',async()=>{
 test('unsafe source is never rendered as a link',async()=>{
  const f=setup(async()=>response(data([{...fixtureItem,source_url:'javascript:alert(1)'}])));
  await f.api.refresh();assert(!nodes(f.elements.list).some(i=>i.tagName==='a'));
+});
+test('save waits for complete Czech translation while follow and dismiss remain available',async()=>{
+ const f=setup(async()=>response({...data([{...fixtureItem,translation_available:false}]),activated:true}));
+ await f.api.refresh();assert.equal(f.button('Uložit zprávu').disabled,true);
+ assert.equal(f.button('Sledovat').disabled,false);assert.equal(f.button('Nezařazovat').disabled,false);
+ await f.button('Uložit zprávu').listeners.click();
+ assert.equal(f.calls.length,1);assert.equal(f.saved.size,0);
+});
+test('definite translation-required rejection releases only the unstarted request',async()=>{
+ let translated=true,pending=true;
+ const f=setup(async(path,options)=>{
+  if(path.endsWith('/decision')){
+   if(JSON.parse(options.body).action==='save'){
+    translated=false;return response({ok:false,state:'translation_required',operation_started:false,message:'Nejprve český překlad.'});
+   }
+   pending=false;return response({ok:true});
+  }
+  return response(data(pending?[{...fixtureItem,translation_available:translated}]:[]));
+ });
+ await f.api.refresh();await f.button('Uložit zprávu').click();
+ assert.equal(f.saved.size,0);assert.equal(f.button('Uložit zprávu').disabled,true);
+ await f.button('Sledovat').click();assert.equal(f.elements.list.children.length,0);
+});
+test('failed follow does not enable untranslated save',async()=>{
+ const f=setup(async(path)=>{if(path.endsWith('/decision'))throw Error('offline');return response(data([{...fixtureItem,translation_available:false}]));});
+ await f.api.refresh();await f.button('Sledovat').click();
+ assert.equal(f.button('Uložit zprávu').disabled,true);
+});
+test('server attention response never releases a possibly started request',async()=>{
+ const f=setup(async(path)=>path.endsWith('/decision')?response({ok:false,state:'attention',operation_started:true,message:'Ověřit původní operaci.'}):response(data()));
+ await f.api.refresh();await f.button('Uložit zprávu').click();
+ assert.equal(f.saved.size,1);const count=f.calls.length;
+ await f.button('Nezařazovat').click();assert.equal(f.calls.length,count);
 });

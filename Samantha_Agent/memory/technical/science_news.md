@@ -87,10 +87,12 @@ Standard je vynucen per turn bez změny globálního Fast. Shell, web, apps, MCP
 skills a další agenti jsou vypnuté. Neočekávané nástrojové události neprojdou.
 Nejistota, neplatný výstup nebo chybějící usage nesmějí vyvolat další tah.
 
-Parser zná nový název role `science_news_editor`; `config/agent_roles.json`
-zůstává nezměněný a nová role není navázána na žádný model. Vyžaduje vlastní
-cenové posouzení a skutečnou schválenou malou zkoušku. Dřívější souhlasy s
-recovery správcem nebo vývojovou rolí se nepřenášejí.
+Parser zná `science_news_editor`. Od 2026-11-10 je v Datově vlastním
+`config/agent_roles.json` připravené navázání na Sol/medium, s cenovou kontrolou
+10. 11. a skutečnou zkouškou 9. 11. V provozu tato role dosud chybí; Will musí
+přenést pouze nový science_news_editor záznam a zachovat všechny další role main.
+Samotné nasazení role není aktivace: soukromý schválený rozpočet a LaunchAgent
+se instalují odděleně. Souhlasy s jinými rolemi se na tuto aktivaci nepřenášejí.
 
 `config/science_news_activation.example.json` je pouze vypnutý návrh:
 15 kreditů rezervace na job a 100 za místní kalendářní měsíc pro výběry i
@@ -213,3 +215,58 @@ registrovanou operaci a oprávnění; model pro stejný zdroj se znovu nevolá.
 6980 skutečných vstupních tokenů zahrnuje runtime/protokolovou režii; vstupní
 byte proxy 3507 nebyla horní mez účtovaného vstupu. Cenu vyhodnocovat z jedinečné
 usage účtenky a nebrat plánovací 4,17535 za fakturu či upstream billing limit.
+
+
+## Uložení celého českého článku a aktivace — 2026-11-10
+
+Míla zadal páteční spuštění a konkrétní uložení CRISPR. Článek je již v živé
+Knihovně / Vědecké články s celým hotovým českým překladem, původním odkazem
+a zapnutým sledováním. Zpětně ověřeno celé tělo, jobs modelu beze změny, fronta 0.
+Neplacená registrovaná operace `science_news_cached_translation.attach_and_save`
+kontroluje oba otisky, URL, rozhodnutí a rozpracované/nejisté operace. Po přenosu
+použije původní durable save s archivním zámkem. Neexistuje nový placený pokus.
+
+Nové uživatelské Uložit v UI i serverovém API vyžaduje dokončený český překlad.
+Nejprve Přeložit celou zprávu, potom Uložit zprávu. Sledovat/Nezařazovat zůstávají
+použitelné. Překlad sám nic nearchivuje. UI obnoví dostupnost po návratu do okna
+nebo pravidelném čtení stavu. Jen explicitní translation_required a
+operation_started=false uvolní UUID nezahájeného požadavku; jakákoli nejistota ho drží.
+
+`science_news_model` před vláknem ověří účet ChatGPT. Měsíční kontrola počítá
+skutečný odhad již dokončené spotřeby a plné rezervy nedokončených/nejistých úloh.
+Návrh 15/job a 100/měsíc proto není omezením na šest dokončených úloh. Zůstává
+rezervační/přejímací kontrolou, nikoli tvrdým provider billing cap.
+
+### Přesné předání Willovi a spuštění
+
+1. Převzít pouze nový Datův commit. V config/agent_roles.json doplnit pouze objekt
+   science_news_editor; nepřevzít celý Datův soubor a neztratit další role main.
+   Provozní parser tuto kombinaci již přijal v oddělené čtecí zkoušce.
+2. Cíleně ověřit změnu v aktuálním main a samostatně autorizovaně nasadit. Musejí
+   být nasazené science_news_model.py (účet/rozpočet), cockpit_science_news.py
+   a science_news.js (české Uložit). Installer kontroluje i skutečně servírovaný
+   guard z běžícího Cockpitu se správným cwd; samotné soubory nestačí.
+3. V Data worktree neplaceně ověřit `science_news_activation.prepare(runtime_root=...)`
+   pro doložený provozní cwd. Aktuální návrh je private pod science_news_activation,
+   první vydání 13. 11. 2026 v 09:00 Europe/Prague, příprava od 08:00, max 5 zpráv.
+   Pokud se změnily jinak schválené nasazené závislosti, obnovit pouze neplacený návrh
+   po kontrole změn. Neopakovat jednorázový modelový pilot.
+4. Míla výslovně potvrdí 15 kreditů/job, 100/měsíc a přesnou globální větu z
+   global_safety_brake.md pro instalaci LaunchAgentu mimo projekt.
+5. `science_news_activation.activate(proposal_sha256=..., confirmation=...)` nejprve
+   ověří roli, otisky a servírované UI. Nepíše modelové role. Vytvoří jen privátní
+   activation.json a jediný ~/Library/LaunchAgents/com.samantha.science-news.plist,
+   s intervalem 60 sekund a RunAtLoad. Spouští provozní Python a science_news.py tick.
+6. Před bootstrap zapíše trvalou účtenku; po nejistotě ověří stejnou službu a args,
+   bootstrap znovu neposílá. Cizí konfigurace se nepřepisuje. Před prvním pátkem
+   aktuální activated_at blokuje staré sloty; ověřit not_due a žádný placený catch-up.
+
+Starý jednorázový pilot i jeho manifest zůstávají zmrazené. Po změně produkčního
+adapteru může jeho preview právem odmítnout změněný kód: nepřepisovat staré otisky
+kvůli opakování pokusu. Pro čtení/přenos použít immutable raw účtenku, výsledkový
+report a jejich uložené hashované zdroje, jak provedl dnešní přenos.
+
+Ověření: 112 cílených Python testů, 16 Node scénářů PASS; finální plná brána
+2964 testů OK (5 SKIP), 547,271 s. Detaily a omezení v
+reports/science_news_activation_20261110.json. První skutečné týdenní vydání
+ani fyzická iPhone přejímka nové ochrany ještě neproběhly.

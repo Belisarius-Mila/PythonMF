@@ -27,7 +27,15 @@ def science_news_overview(*, store=None):
 
 def science_news_decision_action(payload, *, store=None):
     try:
-        return (store or ScienceNews()).decide(payload.get("item_id"), payload.get("action"), payload.get("request_id"))
+        store = store or ScienceNews()
+        if payload.get("action") == "save":
+            item = store.item(payload.get("item_id"))
+            if not item.get("translation"):
+                started = bool(item.get("operation"))
+                return {"ok": False, "state": "attention" if started else "translation_required",
+                    "operation_started": started,
+                    "message": "Pro uložení celé zprávy nejprve dokonči český překlad tlačítkem Přeložit celou zprávu. Samotný abstrakt neukládám."}
+        return store.decide(payload.get("item_id"), payload.get("action"), payload.get("request_id"))
     except (OSError, ValueError, TypeError, KeyError):
         return {"ok": False, "message": "Rozhodnutí nebylo ověřeno. Zpráva zůstává ve frontě; ověř stejný požadavek."}
 

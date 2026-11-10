@@ -1847,3 +1847,15 @@ usage účtenky. Raw receipt a schválenou přípravnou kartu nepřepisovat doda
 kontrolou. Samostatně rozlišit programovou přejímku, Datovo porovnání významu,
 Mílovu četbu a pozdější připojení výsledku do UI. Pro opětovné zobrazení nebo
 přenos již hotového překladu nepouštět další modelový tah.
+
+
+Doplnění 10112026 k LL-114 (uložení a aktivace): domluvené ukládání celého českého
+článku musí chránit UI i server, nestačí možnost uložit abstrakt a překlad někdy
+později. Čerstvá validace bez zahájení akce smí uvolnit UUID, ztracená odpověď nebo
+attention ne. Hotový hashovaný překlad přenášet bez dalšího modelu; starý zmrazený
+pilot po adopci kódu nepřipínat znovu. Měsíční rozpočet má u dokončených započítat
+vykázané náklady a držet plné rezervy jen neukončených/nejistých. Installer má
+ověřit skutečně servírovaný kód i roli a zapsat launch intent před bootstrap.
+Pro společnou operaci použít odlišný vnější zámek od atomic_write_json účtenky,
+aby se write uvnitř nezablokoval vlastním sidecarem. Ověřeno 112 cílenými a
+2964 plnými testy (5 SKIP); jeden živý cached save, nula modelů či spuštěných služeb.

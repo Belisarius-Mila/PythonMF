@@ -42,6 +42,18 @@
           "dry_run_evidence": "REC-06 synthetic trial_passed 2026-11-07, same Sol/medium Standard peer, receipt 6b26bc63085803e4e83356b613c23462ad9f3a09a19ad32aa88d9b40694b2512"
         }
       ]
+    },
+    "science_news_editor": {
+      "label": "Redaktor vědeckých novinek a překladů",
+      "preferred_model": "gpt-6.1-sol",
+      "approved_models": [
+        {
+          "model": "gpt-6.1-sol",
+          "reasoning_effort": "medium",
+          "cost_review": "Mila 2026-11-10 requested activation; Standard 50/2.5/250 credits per million checked 2026-11-10. Runtime budget requires separate approval.",
+          "dry_run_evidence": "memory/reports/science_news_translation_trial_20261109.json: one delivered Sol/medium Standard translation, 0.5995 credits, Data review PASS"
+        }
+      ]
     }
   }
 }

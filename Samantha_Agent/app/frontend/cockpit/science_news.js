@@ -21,7 +21,11 @@
         method: "POST", headers: {"Content-Type": "application/json"}, body: JSON.stringify(payload)
       });
       const data = await response.json();
-      if (!response.ok || data.ok !== true) throw new Error(data.message || "Výsledek nelze ověřit.");
+      if (!response.ok || data.ok !== true) {
+        const error = new Error(data.message || "Výsledek nelze ověřit.");
+        error.noActionStarted = data.state === "translation_required" && data.operation_started === false;
+        throw error;
+      }
       return data;
     }
     function message(text) { elements.status.textContent = text; }
@@ -47,17 +51,27 @@
     }
     async function decide(item, action, buttons) {
       if (working.has(item.id)) return;
+      if (action === "save" && !item.translation_available) {
+        message("Pro uložení celé zprávy nejprve dokonči český překlad tlačítkem Přeložit celou zprávu.");
+        return;
+      }
       working.add(item.id);
+      const disabledBefore = buttons.map(button => button.disabled);
       buttons.forEach(button => { button.disabled = true; });
       try {
         await api("/api/science-news/decision", {item_id: item.id, action, request_id: operation(item.id, action)});
         storage.removeItem(`science-news-operation:${item.id}`);
         await refresh();
       } catch (error) {
-        message(`${error.message} Zpráva zůstává k ověření; stejnou volbu můžeš ověřit znovu.`);
+        if (error.noActionStarted) {
+          try { storage.removeItem(`science-news-operation:${item.id}`); } catch (_) { /* Retain safely if storage fails. */ }
+          await refresh(); message(error.message);
+        } else {
+          message(`${error.message} Zpráva zůstává k ověření; stejnou volbu můžeš ověřit znovu.`);
+        }
       } finally {
         working.delete(item.id);
-        buttons.forEach(button => { button.disabled = false; });
+        buttons.forEach((button, index) => { button.disabled = disabledBefore[index]; });
       }
     }
     async function translate(item) {
@@ -96,10 +110,14 @@
         }
         translation.addEventListener("click", () => translate(item));
         actions.appendChild(translation);
+        if (!item.translation_available) {
+          card.appendChild(element(doc, "p", "Pro uložení celé zprávy nejprve dokonči český překlad.", "project-meta"));
+        }
         const buttons = [];
         for (const [action, label] of Object.entries(labels)) {
           const button = element(doc, "button", label, action === "save" ? "primary" : "secondary");
           button.type = "button"; buttons.push(button);
+          button.disabled = action === "save" && !item.translation_available;
           button.addEventListener("click", () => decide(item, action, buttons));
           actions.appendChild(button);
         }
