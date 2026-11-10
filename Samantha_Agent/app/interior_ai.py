@@ -18,6 +18,8 @@ from app.communication.local_runtime import DEFAULT_SOCKET_PATH
 from app.file_persistence import FilePersistenceError, atomic_write_json
 from app.interior_atelier import AtelierConflict, AtelierError, InteriorAtelier, REQUEST_RE, _now, _safe_path
 from app.work_repository import RepositoryMutation, WorkRepositoryError
+from app.interior_brief import (BRIEF_PROTOCOL, CHAT_RESPONSE_SCHEMA, CHAT_BRIEF_INSTRUCTIONS,
+    IMAGE_BRIEF_INSTRUCTIONS, brief_basis, brief_view, parse_chat_answer)
 
 PROTOCOL = "interior-ai-v1"
 ACTIVE = {"queued", "running"}
@@ -91,8 +93,11 @@ class CodexInteriorDriver:
                     "features": {"apps": False, "memories": False, "multi_agent": False, "remote_plugin": False,
                         "shell_tool": False, "view_image": False, "sleep_tool": False, "tool_suggest": False,
                         "image_generation": job["mode"] == "image"}}
-            options = dict(cwd=home, model=selected["model"], developer_instructions=INSTRUCTIONS,
-                base_instructions=INSTRUCTIONS, config_overrides=overrides,
+            instructions = INSTRUCTIONS
+            if job.get("brief_protocol") == BRIEF_PROTOCOL:
+                instructions += CHAT_BRIEF_INSTRUCTIONS if job["mode"] == "chat" else IMAGE_BRIEF_INSTRUCTIONS
+            options = dict(cwd=home, model=selected["model"], developer_instructions=instructions,
+                base_instructions=instructions, config_overrides=overrides,
                 permission_profile=profile, approval_policy="never")
             if self.resume_empty_thread:
                 thread = client.resume_thread(self.resume_empty_thread, **options)
@@ -100,10 +105,11 @@ class CodexInteriorDriver:
             else:
                 thread = client.start_thread(ephemeral=False, **options)
             on_thread(thread)
+            response_options = {"output_schema": CHAT_RESPONSE_SCHEMA} if job.get("brief_protocol") == BRIEF_PROTOCOL and job["mode"] == "chat" else {}
             receipt = client.send_text(thread_id=thread, text=json.dumps(job["context"], ensure_ascii=False),
                 client_message_id="atelier-" + job["id"], model=selected["model"], effort=selected["reasoning_effort"],
                 local_image_paths=tuple(images), approval_policy="never", permission_profile=profile,
-                service_tier_for_turn="default")
+                service_tier_for_turn="default", **response_options)
         if not receipt.delivered:
             raise AtelierError("Odpověď architekta nemá potvrzený konečný výsledek.")
         return {"answer": receipt.answer, "images": list(receipt.generated_images),
@@ -149,7 +155,7 @@ class InteriorAI:
             image_generation = proof.get("image_passed") is True
         except (agent_roles.AgentRoleError, OSError, ValueError, KeyError):
             enabled, model = False, ""
-        return {"ok": True, "protocol": PROTOCOL, "role": agent_roles.INTERIOR_ROLE,
+        return {"ok": True, "protocol": PROTOCOL, "brief_protocol": BRIEF_PROTOCOL, "role": agent_roles.INTERIOR_ROLE,
                 "role_schema": 1, "enabled": enabled, "model": model,
                 "image_generation": image_generation if enabled else False,
                 "message": "" if enabled else "AI architekt ještě nemá aktivované schválené nastavení modelu."}
@@ -157,7 +163,7 @@ class InteriorAI:
     def status(self, project_id, room_id, base_id="base"):
         state = self.store._read()
         _, room = self.store._room(state, project_id, room_id)
-        self.store._draft(room, base_id)
+        draft = self.store._draft(room, base_id)
         jobs = []
         for job in room.get("ai_requests", {}).values():
             origin = room["variants"].get(base_id, {}).get("ai_request_id")
@@ -167,8 +173,10 @@ class InteriorAI:
             if status in ACTIVE and (job.get("run_nonce") != self.nonce or job["id"] not in self._running):
                 status = "delivery_unknown"
             jobs.append({k: copy.deepcopy(job[k]) for k in ("id", "mode", "message", "created_at",
-                "answer", "variant_id", "variant_ids", "output_count", "image_count", "client_request_id") if k in job} | {"status": status})
-        return {**self.capabilities(), "jobs": sorted(jobs, key=lambda j: j["created_at"])}
+                "answer", "variant_id", "variant_ids", "output_count", "image_count", "client_request_id",
+                "applied_revision", "brief_error") if k in job} | {"status": status})
+        return {**self.capabilities(), "jobs": sorted(jobs, key=lambda j: j["created_at"]),
+                "brief": brief_view(room, base_id, draft, project_id, room_id)}
 
     def _update_job(self, project_id, room_id, job_id, **changes):
         def mutate(state):
@@ -184,6 +192,11 @@ class InteriorAI:
 
     def _start(self, payload):
         fields = {"project_id", "room_id", "base_id", "expected_revision", "request_id", "message", "mode"}
+        new_protocol = isinstance(payload, dict) and payload.get("brief_protocol") == BRIEF_PROTOCOL
+        if new_protocol:
+            fields |= {"brief_protocol"}
+            if payload.get("mode") == "image":
+                fields |= {"brief_token"}
         if not isinstance(payload, dict) or set(payload) != fields:
             raise AtelierError("Požadavek architektovi nemá platný kontext.")
         if (payload["mode"] not in {"chat", "image"} or not isinstance(payload["message"], str)
@@ -202,9 +215,17 @@ class InteriorAI:
                 if existing["fingerprint"] != fingerprint:
                     raise AtelierConflict("Stejný požadavek už patří jinému zadání.")
                 return {"ok": True, "request_id": job_id, "replayed": True}
+            if self.require_activation and not new_protocol:
+                raise AtelierError("Obnov stránku Ateliéru. Obrázek nyní vyžaduje potvrzený souhrn zadání.")
             draft = self.store._draft(room, base_id)
             if type(payload["expected_revision"]) is not int or draft["revision"] != payload["expected_revision"]:
                 raise AtelierConflict("Zadání se změnilo. Nejprve načti a ulož aktuální verzi.")
+            summary = brief_view(room, base_id, draft, project_id, room_id) if new_protocol else None
+            if new_protocol and payload["mode"] == "image":
+                if payload["brief_token"] != summary["token"]:
+                    raise AtelierConflict("Souhrn nebo podklady se změnily. Znovu je zkontroluj před vytvořením obrázku.")
+                if not summary["can_generate"]:
+                    raise AtelierError(summary["reason"])
             selected = list(dict.fromkeys([draft["image_source_id"], *draft["source_ids"]]))
             selected = [item for item in selected if item]
             if not selected or len(selected) > 6:
@@ -251,6 +272,13 @@ class InteriorAI:
                 "notes": [n["text"] for n in room["notes"] if n["base_id"] == base_id],
                 "images": [{"number": i + 1, "kind": room["sources"][source_id]["kind"],
                     "working_image": source_id == draft["image_source_id"]} for i, (source_id, _) in enumerate(inputs)]}
+            if new_protocol:
+                value = {k: copy.deepcopy(summary[k]) for k in ("changes", "preserve", "unresolved")}
+                if payload["mode"] == "chat":
+                    context.update(current_brief=value, brief_stale=summary["stale"])
+                else:
+                    # Only the explicitly reviewed summary can instruct the image tool.
+                    context.update(question=value["changes"], approved_brief=value, history=[], notes=[])
             if len(json.dumps(context, ensure_ascii=False)) > 64000:
                 raise AtelierError("Kontext je příliš dlouhý. Připrav kratší zadání nebo novou variantu.")
             job = {"id": job_id, "base_id": base_id, "fingerprint": fingerprint, "mode": payload["mode"],
@@ -259,10 +287,17 @@ class InteriorAI:
                 "image_hashes": [hashlib.sha256(raw).hexdigest() for _, raw in inputs],
                 "image_count": len(inputs), "status": "queued", "run_nonce": self.nonce,
                 "created_at": _now(), "answer": "", "variant_id": ""}
+            if new_protocol:
+                job.update(brief_protocol=BRIEF_PROTOCOL, brief_basis=brief_basis(room, base_id, draft))
+                if payload["mode"] == "image":
+                    job["message"] = "Vytvořit podle schváleného zadání."
             def claim(current):
                 _, target = self.store._room(current, project_id, room_id)
                 if self.store._draft(target, base_id) != draft:
                     raise AtelierConflict("Zadání se během přípravy změnilo; nic se neposlalo.")
+                if new_protocol and payload["mode"] == "image" and brief_view(
+                        target, base_id, draft, project_id, room_id)["token"] != payload["brief_token"]:
+                    raise AtelierConflict("Souhrn se během přípravy změnil; nic se neposlalo.")
                 jobs = target.setdefault("ai_requests", {})
                 if job_id in jobs or any(j["base_id"] == base_id and j["status"] in BLOCKING for j in jobs.values()):
                     raise AtelierConflict("Požadavek už běží; ověř jeho původní stav.")
@@ -323,6 +358,13 @@ class InteriorAI:
         answer, images = result["answer"], result.get("images", [])
         if not isinstance(answer, str) or not answer.strip() or len(answer) > 100000 or not isinstance(images, list):
             raise AtelierError("Uložená odpověď architekta nemá platný obsah.")
+        proposal, brief_error = None, False
+        if job.get("brief_protocol") == BRIEF_PROTOCOL and job["mode"] == "chat":
+            try:
+                answer, proposal = parse_chat_answer(answer)
+            except AtelierError:
+                brief_error = True
+                answer = "Architekt nepředal ověřený souhrn zadání. Upřesni požadavek v rozhovoru; nic se nevytvořilo."
         if job["mode"] == "image" and not images:
             self._update_job(project_id, room_id, job_id, status="no_image", answer=answer,
                              receipt=result.get("receipt", {}))
@@ -340,6 +382,15 @@ class InteriorAI:
                 return RepositoryMutation(state)
             variant_id = ""
             variant_ids = []
+            if job.get("brief_protocol") == BRIEF_PROTOCOL and job["mode"] == "chat":
+                target.update(brief_proposal=proposal, brief_error=brief_error)
+                current_draft = self.store._draft(room, job["base_id"])
+                if proposal and brief_basis(room, job["base_id"], current_draft) == job["brief_basis"]:
+                    updated = {**current_draft, "prompt": proposal["changes"], "fixed_elements": proposal["preserve"],
+                               "revision": current_draft["revision"] + 1}
+                    room["drafts"][job["base_id"]] = updated
+                    target.update(applied_revision=updated["revision"],
+                                  applied_basis=brief_basis(room, job["base_id"], updated))
             if job["mode"] == "image":
                 if len(room["variants"]) + len(images) > 200:
                     raise AtelierError("Místnost už obsahuje maximální počet variant. Výsledek AI zůstává zachovaný.")
@@ -358,6 +409,8 @@ class InteriorAI:
                         "image_source_id": source["asset_id"],
                         "source_ids": list(dict.fromkeys([source["asset_id"], *draft["source_ids"]])),
                         "annotations": [], "ai_request_id": job_id}
+                    if "approved_brief" in job["context"]:
+                        room["variants"][variant_id]["brief_unresolved"] = copy.deepcopy(job["context"]["approved_brief"]["unresolved"])
             visible_answer = answer
             if job["mode"] == "image":
                 visible_answer = ("Ateliér uložil ověřený obrazový návrh." if len(images) == 1 else

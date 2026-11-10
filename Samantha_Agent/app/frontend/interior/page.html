@@ -26,13 +26,20 @@
 <button id="editVariant" type="button">Upravit návrh</button></div></div>
 <div id="visual" class="visual"></div>
 <p id="visualCaption" class="muted"></p>
+<section class="brief-card" aria-labelledby="briefTitle"><h2 id="briefTitle">Zadání pro příští obrázek</h2>
+<p class="muted">Změny domluv s architektem v rozhovoru. Zde zkontroluj jeho souhrn před vytvořením obrázku.</p>
+<p id="briefContext" class="muted"></p>
+<details><summary>Zkontrolovat pracovní obrázek a kresbu</summary><div id="briefVisual"></div></details><h3>Požadované změny</h3><p id="briefChanges" class="brief-text"></p>
+<h3>Co zůstane zachované</h3><p id="briefPreserve" class="brief-text"></p>
+<h3>Dosud nerozhodnuto</h3><p id="briefUnresolved" class="brief-text"></p>
+<p id="briefStatus" role="status" class="stage-note"></p>
+<button id="generateProposal" type="button" disabled>Vytvořit podle tohoto zadání</button>
+<p class="muted">Kliknutím potvrdíš zobrazené zadání, pracovní obrázek, vybrané reference a kresbu. Vytvoření obrázku využije placený model.</p></section>
 <section id="editor" hidden aria-label="Úprava návrhu"><div class="draw-tools">
 <button id="draw" type="button" aria-pressed="false">Kreslit poznámky</button>
 <button id="undo" type="button" class="secondary">Zpět poslední tah</button>
 <span class="muted">Kresba označuje požadovanou změnu.</span></div>
 <form id="draftForm"><label>Název návrhu<input id="draftTitle" maxlength="120" autocomplete="off"></label>
-<label>Co se má změnit?<textarea id="draftPrompt" maxlength="12000" rows="4"></textarea></label>
-<label>Co zachovat?<textarea id="draftFixed" maxlength="2000" rows="2" placeholder="Například okno, dveře a komín."></textarea></label>
 <details id="serverComparison" hidden><summary>Porovnat s posledním uloženým zadáním</summary>
 <pre id="serverDraftPreview"></pre><button id="takeServerDraft" type="button" class="secondary">Načíst uložené zadání</button></details>
 <p id="draftStatus" class="muted" role="status"></p><div class="actions">
@@ -45,9 +52,8 @@
 <div id="aiConversation" aria-live="polite"></div>
 <form id="aiForm"><label>Otázka nebo požadovaná změna<textarea id="aiText" maxlength="12000" rows="4" placeholder="Například: Co bys v této místnosti změnil a proč?"></textarea></label>
 <div class="actions"><button id="askArchitect" type="submit" disabled>Zeptat se architekta</button>
-<button id="generateProposal" type="button" disabled>Vytvořit AI návrh</button>
 <button id="checkAISend" type="button" class="secondary" hidden>Ověřit odeslání</button></div></form>
-<p class="muted">AI uvidí vybrané podklady, uložené zadání, rozhovor a poznámky k této variantě. Každé odeslání využije model; obrazový návrh navíc generování obrázku. Návrh je koncepční vizualizace, rozměry je třeba ověřit.</p>
+<p class="muted">Architekt používá rozhovor, vybrané podklady a poznámky k této variantě a připravuje souhrn. Obrázek se tvoří až potvrzením souhrnu pod pracovním obrázkem. Každé odeslání využije model. Návrh je koncepční vizualizace, rozměry je třeba ověřit.</p>
 <details><summary>Moje poznámky</summary><div id="notes"></div><form id="noteForm"><label>Poznámka k vybranému návrhu<textarea id="noteText" maxlength="12000" rows="3" required></textarea></label>
 <button type="submit" class="secondary">Uložit poznámku</button></form></details></aside></div>
 <main id="sourcesView" class="sources-view" hidden><div class="workspace-heading"><div><h2>Podklady místnosti</h2>

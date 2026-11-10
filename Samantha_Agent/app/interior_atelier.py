@@ -354,6 +354,9 @@ class InteriorAtelier:
                             room["variants"][variant_id] = {**{k: copy.deepcopy(draft[k]) for k in DRAFT_FIELDS},
                                 "id": variant_id, "parent_id": None if base_id == "base" else base_id,
                                 "created_at": now, "kind": "human_proposal"}
+                            from app.interior_brief import brief_view
+                            room["variants"][variant_id]["brief_unresolved"] = copy.deepcopy(brief_view(
+                                room, base_id, draft, payload["project_id"], payload["room_id"])["unresolved"])
                             result["variant_id"] = variant_id
                 room["updated_at"] = now
             return RepositoryMutation(data, result)

@@ -1,5 +1,6 @@
 (function (root) {
   "use strict";
+  const BRIEF_PROTOCOL = "interior-brief-v1";
   const emptyDraft = () => ({title: "", prompt: "", fixed_elements: "", source_ids: [], image_source_id: "", annotations: []});
   const escape = value => String(value ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
   const scopeKey = scope => [scope.project, scope.room, scope.base || "base"].join(":");
@@ -60,7 +61,7 @@
   function remember() {
     try { localStorage.setItem("samantha-interior-selection-v1", JSON.stringify(scope)); } catch (_) { /* Server saves remain available. */ }
   }
-  function changed() { dirty = true; stash(); $("serverComparison").hidden = false; $("draftStatus").textContent = "Neuložené změny" + (cacheWarning ? " · ulož je před zavřením" : " · rozepsané zadání uchovává i tento prohlížeč"); }
+  function changed() { dirty = true; renderAI(); stash(); $("serverComparison").hidden = false; $("draftStatus").textContent = "Neuložené změny" + (cacheWarning ? " · ulož je před zavřením" : " · rozepsané zadání uchovává i tento prohlížeč"); }
   function sourceUrl(id, size = "preview") {
     return "/api/interior/asset?" + new URLSearchParams({project_id: scope.project, room_id: scope.room, asset_id: id, view: size});
   }
@@ -195,8 +196,6 @@
       "AI koncepční vizualizace · rozměry a proveditelnost je třeba ověřit" :
       "Pracovní podklad a kreslené poznámky · nejde o rozměrový výkres";
     $("draftTitle").value = draft.title || "";
-    $("draftPrompt").value = draft.prompt || "";
-    $("draftFixed").value = draft.fixed_elements || "";
     $("draftStatus").textContent = dirty ? "Neuložené změny" : "Rozpracováno uložené · verze " + revision;
     $("serverComparison").hidden = !dirty;
     $("serverDraftPreview").textContent = serverDraft ? "Název: " + serverDraft.title + "\n\nCo změnit:\n" + serverDraft.prompt +
@@ -218,7 +217,19 @@
     const pending = pendingAI();
     const locked = !aiState.enabled || !count || busy || loading || aiSending || aiBlocked() || Boolean(pending);
     $("askArchitect").disabled = locked;
-    $("generateProposal").disabled = locked || !draft.image_source_id || aiState.image_generation === false;
+    const brief = aiState.brief;
+    const unsent = Boolean($("aiText").value.trim());
+    const reviewable = brief && brief.revision === revision && !dirty;
+    $("briefContext").textContent = brief ? `Pracovní obrázek: ${brief.working_image || "nevybraný"} · podkladů: ${brief.source_count} · tahů kresby: ${brief.drawing_count}. Reference: ${(brief.references || []).join(", ") || "žádné další"}` : "Načítám souhrn…";
+    $("briefVisual").innerHTML = picture(draft);
+    $("briefChanges").textContent = brief?.changes || "Zatím není zadání. Napiš architektovi, co chceš upravit.";
+    $("briefPreserve").textContent = brief?.preserve || "Bez dalších podmínek zachování.";
+    $("briefUnresolved").textContent = brief?.unresolved?.length ? brief.unresolved.join("\n") : "Žádné otevřené otázky.";
+    $("briefStatus").textContent = dirty ? "Nejprve ulož rozpracované podklady nebo kresbu. Původní souhrn může vyžadovat upřesnění s architektem." :
+      unsent ? "Máš rozepsanou zprávu. Nejdříve ji prober s architektem, nebo ji odstraň." :
+      !reviewable ? "Ověřuji aktuální verzi zadání…" : brief.reason ||
+      (brief.fixed_changed ? "Architekt navrhl změnu podmínek zachování. Před vytvořením ji zkontroluj." : "Návrh zadání je připravený ke kontrole.");
+    $("generateProposal").disabled = locked || !reviewable || !brief.can_generate || unsent || aiState.image_generation === false;
     $("checkAISend").hidden = !pending;
     $("checkAISend").disabled = aiSending;
     const conversation = $("aiConversation"); conversation.replaceChildren();
@@ -263,6 +274,10 @@
       aiState = state;
       const pending = pendingAI();
       if (pending && state.jobs.some(job => job.client_request_id === pending.request_id)) localStorage.removeItem(pendingAIKey());
+      if (state.brief && state.brief.revision !== serverDraft?.revision) {
+        await load(captured);
+        return;
+      }
       renderAI();
     } catch (_) {
       if (scopeKey(captured) === scopeKey(scope)) { aiState = {enabled:false,jobs:aiState.jobs || [],message:"Stav architekta se nepodařilo ověřit. Obnov stav před dalším odesláním."}; renderAI(); }
@@ -273,18 +288,24 @@
     aiSending = true; setBusy(true); renderAI();
     const captured = context();
     let payload = previous;
+    const sentText = $("aiText").value;
     try {
       if (!payload) {
-        const message = $("aiText").value.trim() || (mode === "image" ? draft.prompt.trim() : "");
+        const brief = aiState.brief;
+        if (mode === "image" && (dirty || $("aiText").value.trim() || !brief?.can_generate || brief.revision !== revision))
+          throw new Error("Nejprve ověř zobrazený souhrn a dokonči rozhovor s architektem.");
+        const message = mode === "image" ? "Vytvořit podle schváleného zadání." : $("aiText").value.trim();
         if (!message) throw new Error("Napiš otázku nebo požadovanou změnu pro architekta.");
-        await save();
+        if (mode === "chat") await save();
         payload = {project_id:captured.project,room_id:captured.room,base_id:captured.base,expected_revision:revision,
-          request_id:crypto.randomUUID(),message,mode};
+          request_id:crypto.randomUUID(),message,mode,brief_protocol:BRIEF_PROTOCOL};
+        if (mode === "image") payload.brief_token = brief.token;
         localStorage.setItem(pendingAIKey(captured), JSON.stringify(payload));
       }
       await api("/api/interior/ai/start", payload);
       if (scopeKey(captured) === scopeKey(scope)) {
-        $("aiText").value = ""; stash(); await refreshAI();
+        if (mode === "chat" && $("aiText").value === sentText) $("aiText").value = "";
+        stash(); await refreshAI();
       }
     } catch (error) {
       if (error.code === "request_rejected") localStorage.removeItem(pendingAIKey(captured));
@@ -444,9 +465,9 @@
     draft = restored.draft; revision = restored.revision; dirty = false; drawing = false; stash(); render();
     status("Načtené poslední uložené zadání.");
   });
-  [["draftTitle","title"],["draftPrompt","prompt"],["draftFixed","fixed_elements"]].forEach(([id,key]) => $(id).addEventListener("input", () => { draft[key] = $(id).value; changed(); }));
-  $("draftForm").addEventListener("submit", event => { event.preventDefault(); perform(async () => { await save(); status("Rozpracované zadání je uložené."); }); });
-  $("saveSourceSelection").addEventListener("click", () => perform(async () => { await save(); status("Výběr podkladů je uložený."); }));
+  [["draftTitle","title"]].forEach(([id,key]) => $(id).addEventListener("input", () => { draft[key] = $(id).value; changed(); }));
+  $("draftForm").addEventListener("submit", event => { event.preventDefault(); perform(async () => { await save(); await refreshAI(); status("Rozpracované zadání je uložené."); }); });
+  $("saveSourceSelection").addEventListener("click", () => perform(async () => { await save(); await refreshAI(); status("Výběr podkladů je uložený."); }));
   $("saveVariant").addEventListener("click", () => perform(async () => {
     if (!draft.title.trim()) throw new Error("Nejprve návrh pojmenuj.");
     await save();
@@ -459,7 +480,7 @@
     await mutate("add_note", {base_id: scope.base, text}); $("noteText").value = ""; await load(); status("Poznámka je uložená.");
   }); });
   $("noteText").addEventListener("input", stash);
-  $("aiText").addEventListener("input", stash);
+  $("aiText").addEventListener("input", () => { stash(); renderAI(); });
   $("aiForm").addEventListener("submit", event => { event.preventDefault(); submitAI("chat"); });
   $("generateProposal").addEventListener("click", () => submitAI("image"));
   $("checkAISend").addEventListener("click", () => { const pending = pendingAI(); if (pending) submitAI(pending.mode, pending); });

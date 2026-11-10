@@ -63,7 +63,9 @@ function fixture({variants = {}, initial = null, cachedDraft = null} = {}) {
         const selected=new URLSearchParams(url.split('?')[1]).get('room_id');
         const captured=clone(jobs[selected]);
         if (selected==='A' && holdStatusA) await holdStatusA;
-        result={ok:true,enabled:true,image_generation:true,model:'approved-model',jobs:captured};
+        result={ok:true,enabled:true,image_generation:true,model:'approved-model',jobs:captured,
+          brief:{changes:draft.prompt,preserve:draft.fixed_elements,unresolved:[],revision:draft.revision,
+            working_image:'Private photo',source_count:1,drawing_count:0,can_generate:true,token:'review-'+draft.revision}};
       } else if (url==='/api/interior/action') {
         if (payload.action==='delete_source') {
           assert.equal(payload.confirmation,confirmation);
@@ -81,7 +83,7 @@ function fixture({variants = {}, initial = null, cachedDraft = null} = {}) {
           result={ok:true,deleted_bytes:12345};
         } else {
           assert.equal(payload.action,'save_draft');
-          draft.revision++;
+          Object.assign(draft,clone(payload.draft));draft.revision++;
           result={ok:true,revision:draft.revision};
         }
       } else if (url==='/api/interior/ai/start') {
@@ -97,7 +99,7 @@ function fixture({variants = {}, initial = null, cachedDraft = null} = {}) {
       return {ok:true,json:async()=>clone(result)};
     }};
   vm.runInNewContext(fs.readFileSync(path.join(__dirname,'../app/frontend/interior/app.js'),'utf8'),context);
-  return {ids,calls,cache,jobs,intervals,paid,deletedRequests,confirmation,variants,
+  return {ids,calls,cache,jobs,intervals,paid,deletedRequests,confirmation,variants,draft,
     setHoldDelete:p=>holdDelete=p,setThrowDelete:()=>throwDelete=true,
     setHoldStart:p=>holdStart=p,setHoldStatusA:p=>holdStatusA=p,setThrowStart:()=>throwStart=true};
 }
@@ -114,12 +116,12 @@ test('double AI submission produces one request; completed text stays plain and 
   assert.equal(f.calls.filter(c=>c.url.endsWith('/ai/start')).length,1);
   release();await flush();f.setHoldStart(null);
   assert.equal(f.ids.askArchitect.disabled,true,'Queued request blocks another paid send');
-  f.ids.draftPrompt.value='My newer unfinished draft';f.ids.draftPrompt.listeners.input();
+  f.ids.draftTitle.value='My newer unfinished draft';f.ids.draftTitle.listeners.input();
   f.jobs.A[0].status='completed';f.jobs.A[0].answer='<img src=x onerror=evil()> Architect answer';
   f.intervals[0]();await flush();
   assert.match(f.ids.aiConversation.textContent,/<img src=x onerror=evil\(\)> Architect answer/);
   assert.equal(f.ids.aiConversation.children[0].children[1].tag,'p');
-  assert.equal(f.ids.draftPrompt.value,'My newer unfinished draft');
+  assert.equal(f.ids.draftTitle.value,'My newer unfinished draft');
   assert.equal(f.ids.askArchitect.disabled,false);
   assert.equal(f.paid.size,1);
 });
@@ -174,7 +176,7 @@ test('opening and cancelling source deletion is read-only and renders the privat
 
 test('exact confirmation is required; double submit deletes once and preserves unsaved text',async()=>{
   const f=fixture();await flush();
-  f.ids.draftPrompt.value='My unfinished text';f.ids.draftPrompt.listeners.input();
+  f.ids.draftTitle.value='My unfinished text';f.ids.draftTitle.listeners.input();
   await f.ids.sourceList.querySelectorAll('[data-delete-source]')[0].click();await flush();
   await f.ids.deleteForm.listeners.submit({preventDefault(){}});
   assert.equal(f.deletedRequests.size,0);
@@ -187,7 +189,7 @@ test('exact confirmation is required; double submit deletes once and preserves u
   assert.equal(f.ids.cancelDelete.disabled,true);
   release();await flush();
   assert.equal(f.ids.deleteDialog.open,false);
-  assert.equal(f.ids.draftPrompt.value,'My unfinished text');
+  assert.equal(f.ids.draftTitle.value,'My unfinished text');
   assert.equal(f.ids.sourceList.querySelectorAll('[data-delete-source]').length,0);
   assert.equal(f.paid.size,0);
 });
@@ -260,4 +262,36 @@ test('surviving AI child stays usable but cannot compare against its deleted par
   assert.match(f.ids.visual.innerHTML,/<img/);
   assert.doesNotMatch(f.ids.visual.innerHTML,/compare-grid/);
   assert.equal(JSON.parse(f.cache.get('samantha-interior-selection-v1')).base,'child');
+});
+
+
+test('image approval pins displayed brief without saving again and excludes an unsent conversation',async()=>{
+  const f=fixture();await flush();
+  assert.equal(f.ids.draftPrompt,undefined);assert.equal(f.ids.draftFixed,undefined);
+  assert.equal(f.ids.briefChanges.textContent,'Keep the room');
+  assert.equal(f.ids.generateProposal.disabled,false);
+  f.ids.aiText.value='What if we moved the door?';f.ids.aiText.listeners.input();
+  assert.equal(f.ids.generateProposal.disabled,true);
+  await f.ids.generateProposal.click();assert.equal(f.paid.size,0);
+  f.ids.aiText.value='';f.ids.aiText.listeners.input();
+  await f.ids.generateProposal.click();await flush();
+  const sends=f.calls.filter(c=>c.url==='/api/interior/ai/start');
+  assert.equal(sends.length,1);assert.equal(sends[0].payload.brief_protocol,'interior-brief-v1');
+  assert.equal(sends[0].payload.brief_token,'review-2');
+  assert.equal(sends[0].payload.expected_revision,2);
+  assert.equal(f.calls.filter(c=>c.payload?.action==='save_draft').length,0);
+});
+
+test('architect revision refresh preserves an unsent question and does not overwrite dirty local edits',async()=>{
+  const f=fixture();await flush();
+  f.ids.aiText.value='Unsent question';f.ids.aiText.listeners.input();
+  f.draft.prompt='Architect summary';f.draft.revision++;
+  f.intervals[0]();await flush();
+  assert.equal(f.ids.briefChanges.textContent,'Architect summary');
+  assert.equal(f.ids.aiText.value,'Unsent question');
+  f.ids.draftTitle.value='Local title';f.ids.draftTitle.listeners.input();
+  f.draft.title='Server title';f.draft.revision++;
+  f.intervals[0]();await flush();
+  assert.equal(f.ids.draftTitle.value,'Local title');
+  assert.equal(f.ids.generateProposal.disabled,true);
 });

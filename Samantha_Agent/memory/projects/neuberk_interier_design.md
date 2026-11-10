@@ -316,3 +316,16 @@ data/private/neuberk_interier_design/rooms/kacenka/04_navrhy/library_corner_conc
 Navazani: nejdrive rucne zkontrolovat posledni v6 proti realnym fotkam. Pokud je
 geometrie dost dobra, prejit z generovani obrazku na jednoduchy pudorysovy check
 rohu mistnosti.
+
+
+## 2026-11-10 19:50 CET — Jedno zadání z rozhovoru s architektem
+
+Hotovo: Místně připravené jedno čitelné „Zadání pro příští obrázek“ místo dvou duplicitních editovatelných polí. Změny se domlouvají v rozhovoru; odpověď architekta navrhuje souhrn změn, zachovávaných prvků a nerozhodnutých otázek. Samostatné tlačítko „Vytvořit podle tohoto zadání“ potvrzuje přesně zobrazený souhrn a podklady. K dispozici je náhled potvrzovaného pracovního obrázku a kresby. Dřívější galerie, poznámky, kreslení, mazání a oprava prázdných miniatur zůstávají zachované.
+
+Rozhodnutí: Míla schválil rozhovor jako jediné místo pro formulaci změn a souhrn ke kontrole. Pouhé „co kdyby“ má architekt ponechat v nerozhodnutých otázkách. Změna podmínek zachování se zvýrazní. Generování dostává schválený souhrn bez staré historie a volných poznámek; rozepsaná nová zpráva generování blokuje. Starší uložená zadání se zobrazí jako počáteční souhrn, bez migrace či mazání dat.
+
+Další krok: Samostatně autorizované p+n tohoto kroku společně s předchozí lokální opravou galerie. Do té doby změna není v běžícím Ateliéru.
+
+Navrhované další kroky: Po vydání lidská přejímka na skutečné místnosti a iPhonu; nový placený pilot ani nový TVBCP nebyly dohodnuté.
+
+Technický důkaz: 118 cílených Python/HTTP/frontend kontrol včetně 24 Node scénářů PASS. Nativní Safari na syntetické místnosti ověřilo blokování rozepsanou zprávou, nový souhrn, zvýraznění zachování, náhled, výslovné potvrzení a otevření výsledku s přenesenými nejasnostmi. Pouze fake driver: 1 chat + 1 obrazový výstup, 0 placených volání. Plná brána PASS: 3453 testů, 0 chyb, 31 SKIP, 639,2 s. Přesný token zahrnuje variantu, revizi, souhrn, poznámky, reference a kresbu; pozdní odpověď nepřepíše novější uloženou práci. Staré request ID se jen vracejí; nejisté výsledky se neopakují. Skutečné podklady ani Data se neměnily. Report `reports/interior_conversation_brief_20261110.md`, soukromé důkazy `data/private/interior_conversation_brief_20261110/`. Kanonický handoff a projektová paměť aktualizované; vazba TVBCP pro budoucí Human–Adam zůstává výslovně otevřená.

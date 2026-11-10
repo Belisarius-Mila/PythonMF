@@ -26,9 +26,9 @@ from scripts.cockpit_quality_gate import node_binary
 EXPECTED_PAGES = {
     "interior": (
         INTERIOR_HTML,
-        49232,
-        612,
-        "72cdf1a81248213d94911411c7b822dcf31fd9190ed89ddb5473eb44a4942b53",
+        51958,
+        641,
+        "8c7f37f809e6a899885f0e260f1be3ad075d9543909888b0850b70e7ececad84",
     ),
     "email_agent": (
         EMAIL_AGENT_HTML,

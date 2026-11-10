@@ -2083,3 +2083,10 @@ prostředí PASS, produkční kód beze změny.
 - Kontext: MMTX potřebuje postupně zapnout překlad jako text a pak i čtení, bez změn schválené angličtiny.
 - Řešení: explicitní tři režimy, samostatný překlad svázaný s anglickou větou a MP3, sekvence EN→CS s jedním aktivním Audio a tokenem. Čistě textový režim nepřehrává český zvuk; vypnutí za běhu češtinu zastaví a zneplatní callbacky. Chybu angličtiny nelze obejít přepínačem. Optional localStorage nesmí blokovat přehrávač.
 - Ověření: 58 cílených testů, všech 67 dvojic a ticho, změny režimu během řeči i v klidu, chyby a Repeat, historie, uložená volba i zablokované úložiště. Původních 98 podkladů a 9 účtenek beze změny; nové CZ MP3 oddělené a jednorázové.
+
+
+### 2026-11-10 — Rozhovor a obrazové zadání potřebují jedno potvrzované shrnutí
+
+- Problém: samostatná pole změnit/zachovat a historie rozhovoru mohou současně instruovat obrazový model a vzájemně si odporovat.
+- Řešení: architekt navrhuje jeden strukturovaný souhrn; nerozhodnuté úvahy drží zvlášť. Člověk potvrdí právě zobrazenou verzi i podklady, server ověří jejich token a do obrazu neposílá staré volné poznámky/historii. Pozdní odpověď nesmí přepsat novější uloženou práci.
+- Ověření: syntetické serverové/UI testy změněných podkladů, revize, poznámek, nerozhodnutých otázek, nejistého výsledku a idempotence; Safari potvrdilo celý tok bez placeného modelu. Report `reports/interior_conversation_brief_20261110.md`.
