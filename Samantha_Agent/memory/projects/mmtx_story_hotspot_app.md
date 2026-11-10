@@ -2,6 +2,10 @@
 
 ## Aktuální stav
 
+- 2026-11-10 21:36 CET: Benjiho opravy 01/02/03/031/04 jsou vydané na Pages ab123bb6. Terra job 27d6be4c4435a3fa50f12a059ddf0d8e completed, push/deploy confirmed, gate3457 PASS / 597,8 s; Pages run 42896378127 / deployment 7693545647. Veřejných 327/327 aktuálních souborů byte/SHA přesných (10 529 491 B), pět nových WebP použitých, deset starých odstraněno z obou zdrojových složek. Čtyři staré URL HTTP404; staré freddie_jump.webp vrací HTTP503, jeho 404 není potvrzené a p+n se kvůli tomu neopakuje. Main/origin aligned, čistý, 0 čekajících commitů; oba profily aligned/čisté, chráněné služby beze změny. Pět PNG nahrazených v Downloads. Závěrečný Data receipt je pouze místní pro další balíček.
+
+- 2026-11-10 21:20 CET: Main převzal přesný obrazový balíček Data e903dc7a nad čistým 19703fdb. Deset původních WebP odstraněno, deset nových v obou složkách; katalog/HTML/cache verze a dvě stávající testové reference aktualizované. Jeden předchozí interiérový receipt commit zůstává v čekajícím GitHub balíčku. Výslovně schválené Terra p+n bude jediné submit_release(wait=True), request data-mmtx-benji-upright-e903dc7a-20261110-v1, project-mmtx → GitHub Pages; tento přípravný zápis ještě nepotvrzuje skutečný job, push ani deployment.
+
 - 2026-11-10 21:19 CET: Na Mílův výslovný pokyn opraven Benji v obrazech 01/02/03/031/04: vzpřímený postoj, dvě přední a dvě zadní končetiny. Pět image_gen editací vizuálně ověřených, nové _benji_v2.webp v obou složkách; deset původních WebP smazáno, pět PNG nahrazeno v Downloads. 319 ostatních veřejných souborů včetně 288 MP3 beze změny; 40 cílených testů a statická brána OK, HTTP8/8 přesné, Safari ukázalo opravenou čtyřku. P+n Terrou současně výslovně schválené, dosud v tomto checkpointu neprovedené. Reporty mmtx_scene06_benji_upright_20261110.md, assets JSON a prompts MD.
 
 - 2026-11-10 20:35 CET: Slovníček i rozcestník 1–6 jsou vydané na GitHub Pages: main e867c165, Terra job 2394a9c62db8603de3108a4bfee600a4 completed, push/deployment confirmed. Plná publikační brána 3457 PASS / 576,2 s, Pages run 42886285641 / deployment 7692193075. Nezávislá veřejná kontrola 330/330 souborů přesná, 10 851 277 B; skutečné Safari otevřelo veřejnou nabídku všech šesti scén. Main čistý a aligned s origin, 0 čekajících commitů; oba profily čisté a aligned. Chráněné služby beze změny. Závěrečný zápis je pouze místní Data receipt pro další balíček, žádné opakování p+n.
@@ -910,3 +914,27 @@ Další krok: Uložit Data checkpoint a integrovat přesný věcný rozsah do č
 Navrhované další kroky: Veřejné potvrzení nových obrázků a odstranění starých; fyzická iPhone přejímka zůstává otevřená.
 
 Technický důkaz: Pět samostatných vestavěných image_gen editací, čtyři končetiny vizuálně ověřené v každém úplném obrázku. 40 cílených testů OK / 24,849 s, rychlá statická brána OK, obě kopie shodné, 319 ostatních podkladů včetně 288 MP3 zachované a HTTP8/8 přesné. Safari screenshot opravované čtyřky. Assets JSON eviduje původní a nové SHA-256; prompty a výstupy mají vlastní report.
+
+### 2026-11-10 21:20 CET — Integrované opravené Benjiho ilustrace pro Terra p+n
+
+Hotovo: Main má pět vizuálně ověřených oprav Benjiho a obě stejné webové kopie. Původních deset WebP cest je odstraněných. Datova vývojová větev a všechny jiné hotové změny zůstávají zachované.
+
+Rozhodnutí: Mílou výslovně schválené p+n směřuje na project-mmtx / GitHub Pages. Jediný request data-mmtx-benji-upright-e903dc7a-20261110-v1, bez nových obrazových nebo TTS pokusů.
+
+Další krok: Po místních kontrolách uložit main commit, zarovnat pouze čisté profily, registrovaně zvolit MMTX a jednou předat Terře.
+
+Navrhované další kroky: Veřejné porovnání nových obrázků a HTTP404 starých cest; fyzický iPhone později převezme Míla.
+
+Technický důkaz: Data e903dc7a, main před integrací 19703fdb čistý, žádná divergence. Data 40 cílených OK a statická brána OK; 319 nedotčených veřejných souborů včetně 288 MP3 shodných. Main 40 cílených testů OK / 31,873 s a rychlá statická brána OK; plná publikace je povinnou částí workeru.
+
+### 2026-11-10 21:36 CET — Opravené Benjiho ilustrace publikované Terrou
+
+Hotovo: Obrazy 01, 02, 03, 031 a 04 veřejně používají opraveného Benjiho na zadních se dvěma předními a dvěma zadními končetinami. Pět PNG nahradilo původní v Downloads. Ve vydaném zdroji jsou všechny staré WebP smazané a aplikace načítá nové názvy.
+
+Rozhodnutí: Mílou schválené p+n proběhlo jednou přes registrované submit_release(wait=True), request data-mmtx-benji-upright-e903dc7a-20261110-v1. Žádný další obrazový/TTS pokus ani opakované vydání. Před předáním se pouze obnovilo připojení existujícího pracovního kontextu nad již reachable App Serverem, nikoli restart služby.
+
+Další krok: Mílova vizuální přejímka veřejné opravené šestky.
+
+Navrhované další kroky: Při příští potřebě ověřit HTTP404 původního freddie_jump.webp, nyní po omezených čtecích kontrolách vrací HTTP503. Fyzická iPhone přejímka zůstává otevřená.
+
+Technický důkaz: Terra 6.1/high, job 27d6be4c4435a3fa50f12a059ddf0d8e completed, push/deployment confirmed, dva commity do ab123bb6, plná brána 3457 PASS / 597,8 s. Pages run 42896378127 / deployment 7693545647, HTTP smoke200 a protected_services_unchanged=true. Všech 327 aktuálních veřejných souborů přesných, 10 529 491 B, 319 ostatních materiálů včetně 288 MP3 zachované. Ze starých URL čtyři potvrzené 404, jedna neověřená kvůli503; v Git tree a obou složkách deset starých cest neexistuje. Místní Safari před vydáním obraz04 správně zobrazilo; po vydání Safari GUI nebylo dostupné (cgWindowNotFound), nepředstírat produkční proklik. Main/origin aligned a oba profily čisté/aligned, 0 pending main commitů. Native caller účtenku převzal jednou, returned_to_adam=false není retry.
