@@ -2,13 +2,13 @@
 
 ## Aktuální stav
 
-- 2026-11-10: Celá nová šestka má 10 obrazů, 11 ilustrací (03/031), 67 EN + 67 CS MP3 a český překlad každé repliky. CZ: vypnuto → CZ: text → CZ: text + hlas, při čtení pořadí EN→CS a Next až po dočtení. Devátý obraz je tichý ve všech režimech. Závěr používá opravenou mapu s potokem do jezera.
-- Obrázek, dialog a ovládání se vejdou do výšky okna; při češtině platí toto rozložení pro všechny obrazy. Volba češtiny se pamatuje, při odmítnutém úložišti funguje EN výchozí stav. Přímý #picture=4 zachovává zvukovou bránu. Přepnutí za běhu bezpečně zastaví české čtení, nemůže obejít chybu angličtiny.
-- Míla nově výslovně zadal velké průhledné tlačítko vlevo dole na posledním obrazu pětky a poté p+n všeho Terrou. Roh 24 % × 28 %, min. 44 px, vede na šestku až při dokončeném friends-farewell, bez řeči/animace a se zavřeným slovníčkem. Běžný dokončovací odkaz zůstává. Český přepínač řeší právě dokončenou šestku.
-- 67 nových CS požadavků / 3977 SSML znaků z limitu 4000, Vlasta −10 %, bez retry. 98 původních podkladů a 9 raw EN účtenek beze změny. Dekódování 134/134 a HTTP 170/170 přesné. Celá cílená sada s rohem 70 PASS; plná místní brána češtiny 2984 OK (5 SKIP), 570,813 s unit. Publikační worker znovu ověří přesný integrovaný main včetně rohu.
-- Skutečné Safari ukázalo obě jazykové vrstvy i režim s hlasem, protokol doložil CS MP3 v živém průchodu. Fyzická iPhone, kvalita překladu/hlasu a tajný roh čekají na Mílovu přejímku. Poslední UI ovládání se nepřerušuje reloadem.
-- Vývojový balíček navazuje na 3cdc5c26, 99e59145, dca70ad9 a fe01d527. Main před integrací čistý na a459920b; GitHub audit ready, existuje jeden čekající Willův dokumentační commit a459920b nad origin 748cec00. Oba profilové workspaces připravené. Integrace převezme pouze MMTX a spojí historii obou checkoutů; servisní 06c34051 NEPŘEBÍRAT podruhé, Willovo zaparkované WIP zachovat.
-- Další krok: uložit Data checkpoint, integrovat do main, zarovnat čisté profily a jednou předat registrované submit_release(wait=True) pro project-mmtx. Nový balíček má samostatný request ID; původní neúspěšný Pages job 4b261f77c13a77e845684bbbd90cc876 se nepřepisuje ani automaticky neopakuje. Report `reports/mmtx_scene06_czech_20261110.md`.
+- 2026-11-10: Celá nová šestka je publikovaná na GitHub Pages v přesném main f7a4ab58dbc4480ba88604a89593d5e92b2a2cd1. Terra job 0de6f2870dbe4d325b61522f6510e6d1 completed, push confirmed, deployment confirmed. Main/GitHub aligned a čistý, 0 čekajících commitů; 2 profily ready a zarovnané.
+- Terra 6.1/high, centrální role beze změny. Publikační plná brána 3441 testů PASS / 634,3 s. Pages workflow 42869959321, deployment 7689928869, smoke HTTP 200 a chráněné služby beze změny. Jediné předání request data-mmtx-full-51af4d56-20261110-v1, žádné opakování starého jobu.
+- Nezávislé veřejné ověření 173/173 souborů, HTTP 200, přesné bajty a SHA-256 proti f7a4ab58 (9 012 903 B): 170 souborů šestky a HTML/JS/CSS pětky. Důkaz `reports/mmtx_scene06_public_verification_20261110.json`; konečná redigovaná účtenka `reports/mmtx_scene06_full_release_20261110.json`.
+- Na dokončeném posledním rozlučkovém obrazu pětky je velké průhledné pole vlevo dole (24 % × 28 %, min. 44 px). Vede do šestky. Před dokončením, během řeči/animace a při otevřeném slovníčku je nepřístupné. Běžný dokončovací odkaz zůstává.
+- Šestka má 10 obrazů, 11 schválených ilustrací, 67 EN + 67 CS MP3. CZ vypnuto / text / text + hlas, při čtení EN→CS a Next po dočtení; volba se pamatuje, nedostupné úložiště neblokuje. Ticho 9 zůstává tiché, 03→031 navazuje od 4/8, závěrečná mapa má potok do jezera. Všechny dvojjazyčné obrazy mají ovládání uvnitř výšky okna.
+- Data vývojový checkpoint 51af4d56 byl věcně integrovaný v main f7a4ab58 se zachováním Willových historických MMTX zápisů i ostatních projektů. Servisní 06c34051 se nepřebíral podruhé. Willovo zaparkované WIP zůstalo zachované. Původní neúspěšný job 4b261f77c13a77e845684bbbd90cc876 má stále vlastní historickou účtenku, není aktuálním stavem tohoto vydání.
+- Další krok: Mílova fyzická přejímka tajného rohu, překladů a hlasu na jeho zařízeních včetně iPhonu. Nový vývoj ani další p+n není tímto záznamem automaticky spuštěné. Závěrečná účtenka se ukládá lokálně do Datovy větve, vydaný main se po potvrzení nemění.
 
 ## Stav
 
@@ -562,6 +562,30 @@ Technický důkaz:
 - První běh přidal sedm stop, potom EN 007 → ClientConnectorDNSError/gaierror. Čtecí DNS kontrola domény služby i microsoft.com prošla; obnovení zachovalo stav pětic a přidalo EN 007/CZ 007. Následně EN 008 → HTTP 429 bez Retry-After, další dávka se nespustila.
 - Průběh a kurzor v logs/mmtx_scene06_batches_20261030_154314_state.log a logs/mmtx_scene06_batches_20261030_155259_state.log. Bez push/nasazení; fyzický poslech/proklik NEOVĚŘENO.
 
+### 2026-11-10 13:35 CET – Boční perspektiva prvního obrázku u jezera
+
+Hotovo: Připravený samostatný obrazový návrh s rozpoznatelnými pěti přáteli z boku a pohledem přes vodu k mrakům.
+
+Rozhodnutí: Na Mílův pokyn zkusit obrázek znovu zůstává zachovaná identita postav a motiv uší tvořených mraky; mění se perspektiva a směr pohledů. Původní publikovaný obrázek se nenahrazuje automaticky.
+
+Další krok: Posoudit návrh; případná výměna aktivního obrázku a nové publikování jsou samostatný další krok.
+
+Navrhované další kroky: Žádné nové.
+
+Technický důkaz: Vestavěný image_gen, jedna varianta 1672 × 941, PNG 2948769 B. Vizuálně ověřen počet pěti postav, jejich boční natočení, pohled k jezeru a mrakům; původní arrival.webp má nadále původní SHA-256. PNG, prompt a účtenka jsou v místním private imagegen adresáři mimo Git.
+
+### 2026-11-10 15:22 CET – Čekající úklid původního obrázku publikovaný
+
+Hotovo: Starý první obrázek u jezera už není veřejně dostupný. Scény 1–5 a Logan zůstávají zachované; nový boční návrh zůstává bezpečně uložený mimo produkční průchod.
+
+Rozhodnutí: Míla po čtecí obnově výslovně zadal p+n a schválil dočasné odložení přesně tří nesouvisejících source změn s následným vrácením. Provedeno jediné registrované vydání čtyř čekajících commitů přes centrálně schválenou Terru 6.1/high.
+
+Další krok: Navazovat na souběžný Data vývoj samostatně; tuto větev automaticky neintegrovat ani nepřepisovat.
+
+Navrhované další kroky: Žádné nové.
+
+Technický důkaz: Účtenka `19622ad4cec58c0ce7762c8afa311ea6`, head `51a2cabe`, Pages run `42832718423` / deployment `7684562278`, push/deployment confirmed. Plná brána 3402 testů PASS / 49 SKIP; veřejně 158 URL HTTP 404 a 54 zachovaných souborů s přesnými bajty. Source WIP vrácený včetně shodných otisků obou draftů; tři nové PNG shodné. Data head `c87f6064` zachovaný, jeho souběžně změněný WIP touto relací nedotčený. Doklady mimo Git v `data/private/mmtx/release_51a2cabe_20261110/`; výsledkový zápis místně pro příští balíček, bez opakování p+n. Fyzická přejímka neověřená.
+
 
 ### 2026-11-10 15:17 CET — Nová šestka, první obraz a anglické MP3
 
@@ -597,6 +621,24 @@ Navrhované další kroky:
 
 Technický důkaz:
 - 37 cílených testů PASS; nově i skutečný cíl odkazu, jeho umístění až v původně skrytém dokončení a shoda HTML/CSS obou mirrorů. Plná místní brána 2960 OK (5 SKIP) zůstává důkazem nezměněné infrastruktury; nová markup změna byla ověřená cíleně. Žádné nové modelové/audio volání a žádná publikace této šestky. Registrovaný deploy audit: source main není čistý; batch audit: pracovní prostředí není připravené.
+
+
+### 2026-11-10 15:43 CET — Data přebírá integraci a první p+n
+
+Hotovo:
+- Oba hotové vývojové kroky se integrují do kanonického main se zachováním Willovy i Datovy historie. První obraz má všech sedm EN MP3, přijatý boční pohled a napojení po dokončení mostu.
+
+Rozhodnutí:
+- Míla oznámil, že Will nepracuje, a výslovně zadal předat p+n nyní Terře a vyčistit repo; potom připojit obraz 2. Nesouvisející WIP se zachovává, nikoli zahazuje: 3 přesné změny ve stashi `550024e17da59eb258556f5d3f0979650d5a4d30`, scénáře navíc v soukromé záloze s otisky.
+
+Další krok:
+- Cíleně ověřit integrovaný kód, dokončit převzetí a bezpečné zarovnání čistých profilů; spustit jedno registrované p+n s plnou bránou a přesným headem.
+
+Navrhované další kroky:
+- Ověřit veřejné soubory nové šestky a vstup z pětky. Poté připojit Ollieho, druhý obraz a jeho EN dialogy.
+
+Technický důkaz:
+- Převzetí řeší očekávané modify/delete konflikty pouze nových HTML/JS/CSS a zachovává obě historie paměti. Vybrané WIP má ověřené přesné bajty ve stashi i privátní záloze. Žádné další TTS nebo modelové volání zatím neproběhlo. Samostatné testy prvního obrazu a propojení jsou přidané do trvalé plné brány. Publikační výsledek bude mít novou vlastní účtenku.
 
 
 ### 2026-11-10 16:05 CET — Ollieho obraz připojený lokálně
@@ -741,3 +783,57 @@ Navrhované další kroky:
 
 Technický důkaz:
 - Plná místní brána českého rozšíření 2984 OK (5 SKIP), 570,813 s unit; poslední cílená sada 70 PASS včetně rohu a pětky. Publikační worker ověří celý přesný main znovu. 134 MP3 decode, 170 HTTP souborů přesné, 98 původních podkladů a 9 EN účtenek beze změny. Kanonický živý audit main a459920b / origin 748cec00, ready a 2 připravené profily.
+
+
+### 2026-11-10 18:42 CET — Integrovaná celá nová šestka a skrytý roh před Terra p+n
+
+Hotovo:
+- Main obsahuje celou šestku, 67 EN + 67 CS MP3, třípolohovou češtinu a skrytý přechod z posledního obrazu pětky. Převzaté jsou jen cesty MMTX a jeho zápisy; původní Willovy chronologické záznamy zůstaly celé zachované.
+
+Rozhodnutí:
+- Míla výslovně zadal p+n celého balíčku Terrou. Zdroj Data 51af4d56 se integruje věcně do jednoho main commitu; servisní 06c34051 se nepřebírá podruhé. Balíček zahrne i jeden dříve čekající dokumentační commit a459920b.
+
+Další krok:
+- Zarovnat čisté profily, přepnout registrovaný kontext na project-mmtx a jednou spustit submit_release(wait=True) pro přesný integrovaný head.
+
+Navrhované další kroky:
+- Převzít konečnou účtenku a ověřit veřejné soubory; fyzická přejímka zůstává Mílovi.
+
+Technický důkaz:
+- Přímo nad integrovaným main 70 cílených testů PASS a rychlá statická brána PASS. Dřívější Data plná brána češtiny 2984 OK (5 SKIP); publikační worker ověří přesný main znovu. Před zápisem 346 konkrétních MMTX cest, žádná nová smazání ani nesouvisející kód. Report `reports/mmtx_scene06_full_release_20261110.md`.
+
+
+### 2026-11-10 18:45 CET — Terra převzala přesný integrovaný balíček
+
+Hotovo:
+- Data vývoj je uložený v 51af4d56, celý věcný MMTX balíček integrovaný do main f7a4ab58. Oba čisté profily jsou zarovnané. Registrovaný kontext byl obnoven a přepnut na project-mmtx; jediný předaný job má ID 0de6f2870dbe4d325b61522f6510e6d1.
+
+Rozhodnutí:
+- Výslovně schválené p+n běží přes submit_release(wait=True), request data-mmtx-full-51af4d56-20261110-v1. Audit zmrazil main f7a4ab58, origin 748cec00, 2 commity, GitHub Pages, Terra 6.1/high a schválený otisk centrální politiky. Původní job se nepřepisuje ani neopakuje.
+
+Další krok:
+- Programově převzít konečnou účtenku stejného jobu.
+
+Navrhované další kroky:
+- Ověřit veřejné soubory přesného headu a Mílovu fyzickou přejímku.
+
+Technický důkaz:
+- Main 70 cílených a statická brána PASS; Data plná brána 2984 OK (5 SKIP). Registrovaný audit ready a oba profily aligned na f7a4ab58. Vydání je nyní předané, push a deployment zatím nejsou tímto zápisem potvrzené.
+
+
+### 2026-11-10 18:59 CET — Terra p+n dokončené, veřejné soubory přesně ověřené
+
+Hotovo:
+- Pětka je propojená tajným velkým polem na posledním obrazu s celou šestkou. Všech deset obrazů, 11 ilustrací a 67 EN + 67 CS MP3 včetně tří českých režimů je veřejně dostupných. Ověřeno 173/173 přesných veřejných souborů.
+
+Rozhodnutí:
+- Schválené předání proběhlo jednou Terrou přes registrované submit_release(wait=True). Main po vydání zůstává f7a4ab58 a čistý; závěrečný zápis je místní Data receipt, bez nového publikování či změny vydaného headu.
+
+Další krok:
+- Mílova přejímka hry na jeho zařízeních.
+
+Navrhované další kroky:
+- Fyzicky vyzkoušet tajný roh po dokončení pětky, přepínač text/čtení i iPhone. Další vývoj podle Míly.
+
+Technický důkaz:
+- Job 0de6f2870dbe4d325b61522f6510e6d1 completed; push a deployment confirmed. Terra 6.1/high, plná brána 3441 PASS / 634,3 s. Pages run 42869959321, deployment 7689928869, exact head f7a4ab58, HTTP 200, chráněné služby beze změny. Nezávislých 173/173 HTTP souborů byte/SHA shodných (9 012 903 B). GitHub audit aligned, main 0 čekajících commitů a 2 profily ready. Reporty mmtx_scene06_full_release_20261110.md/json a mmtx_scene06_public_verification_20261110.json.
