@@ -1,28 +1,27 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
-- Aktualizováno: 2026-11-10 09:20 CET; proud `project-knowledge-library`, Data / `data/parallel-20261104`.
-- Míla výslovně požádal zapnout páteční zpravodaj a uložit CRISPR v češtině.
-  Celý hotový český překlad byl jednou uložen do Vědeckých článků s původním odkazem;
-  sledování zapnuté, živá fronta pilotů prázdná. Žádný nový placený tah.
-- Zpětná kontrola skutečné archivní karty potvrdila celý český text; anglický plný zdroj
-  se do těla karty neukládal. Jobs modelu beze změny. Private účtenka
-  `data/private/science_news_activation/crispr_save_receipt_20261110.json`.
-- Nové Uložit v UI i serverovém API čeká na hotový český překlad; samotný abstrakt
-  nestačí. Jen prokazatelně nezahájená validace uvolní browser request_id; nejistý save ne.
-- Páteční aktivace je připravená, nikoli zapnutá: první návrh 13. 11. 2026 v 09:00
-  Europe/Prague, příprava od 08:00, max 5 novinek. Sol/medium Standard,
-  návrh 15 kreditů/job a 100/měsíc. Rozpočet a instalace LaunchAgentu čekají potvrzení.
-- Guard účtu ChatGPT zastaví API-key/unknown před vláknem. Měsíční evidence započte
-  doložené dokončené náklady a drží rezervy neukončených/nejistých úloh.
-- Modelová role je připravená jen ve vlastním config/agent_roles.json. Provozní role,
-  systémové LaunchAgents a služby Data neměnil. Will musí převzít nový commit do main,
-  zachovat jeho další role a samostatně nasadit i serverovou/UI ochranu českého uložení.
-- Ověření: 112 cílených Python testů PASS, včetně 16 Node scénářů.
-  Finální plná brána: 2964 testů OK (5 SKIP), 547,271 s, syntaxe a whitespace OK.
-- Detail a konkrétní předání: `reports/science_news_activation_20261110.json`.
-  Po nasazení znovu ověřit návrh, pak s výslovným rozpočtem a přesnou globální větou
-  aktivovat jediný LaunchAgent. Žádný automatický druhý bootstrap ani modelový pokus.
+- Aktualizováno: 2026-11-10 11:32 CET; proud `project-knowledge-library`, Data / `data/parallel-20261104`.
+- ScienceNews je skutečně aktivované: nasazený kód, role i servírovaná ochrana
+  celého českého uložení byly před spuštěním ověřené. Míla výslovně zapnul službu
+  přesnou globální větou pro předložený rozsah Sol/medium Standard, 15 kreditů/job,
+  100/měsíc. Jde o přejímací/rezervační meze, nikoli tvrdý provider billing cap.
+- Jediný LaunchAgent com.samantha.science-news byl instalován a bootstrap vrací 0.
+  Stejná trvalá účtenka má active, launch_attempted=true. Žádný opakovaný bootstrap.
+- První skutečný tick: ok=true, state=not_due, last exit code=0, stderr=0 B,
+  production jobs=0; žádný placený modelový tah ani dohánění minulého pátku.
+  Cockpit API activated=true, pending_count=0.
+- První příprava pátek 13. 11. 2026 od 08:00 Europe/Prague, publikace od 09:00,
+  nejvýše 5 novinek. Služba kontroluje čas po 60 sekundách; mezi tick běhy proces neběží.
+- CRISPR je již uložený jako celý český překlad s odkazem a sledováním. Původní
+  jednorázový překlad se neopakuje; nové Uložit v UI/API vyžaduje hotový český text.
+- Aktivační provedení neměnilo kód, živý JSON modelových rolí, starší archiv ani
+  jiné služby; vytvořilo pouze schválenou privátní aktivaci a jediný systémový plist.
+- Důkaz `reports/science_news_activation_20261110.json`; private launch receipt
+  a live_activation_check_20261110.json pod science_news_activation. Předchozí
+  kódová brána 2964 OK (5 SKIP), 112 cílených a 16 Node scénářů PASS; kód beze změny.
+- Další krok: přejímka prvního pátečního vydání a fyzická kontrola na Mílově zařízení.
+  Nejistý běh ověřit podle stejné účtenky, nevytvářet druhý pokus.
 <!-- SAMANTHA_CURRENT_STATUS_END -->
 
 TVBCP: Knihovna v Samantha Cockpitu
@@ -1150,3 +1149,39 @@ Doplnění dokončení 2026-11-10 09:24 CET:
   zůstávají false do nového nasazení; původní nasazení tuto doplňující ochranu neobsahuje.
 - Will při převzetí doplní do provozního config/agent_roles.json pouze science_news_editor;
   celý Datův JSON nepřebírat, protože aktuální main má další role. Ostatní role zachovat.
+
+
+## 2026-11-10 11:32 CET — ScienceNews: služba aktivována
+
+Hotovo:
+- Páteční zpravodaj je skutečně zapnutý. První příprava je plánovaná na pátek
+  13. 11. od 08:00 a vydání od 09:00 Europe/Prague; nejvýše pět zpráv.
+- Služba byla jednou nahrána do launchd, první tick úspěšně počkal na termín.
+  Cockpit už hlásí aktivaci. Dnes nevznikl placený modelový tah ani nové vydání.
+
+Rozhodnutí:
+- Míla zadal „Zapni službu“ a dodal přesnou globální potvrzovací větu pro předložený
+  balíček. Potvrzení zahrnuje Sol/medium Standard, 15 kreditů na úlohu a 100 za měsíc.
+- Rozpočet zůstává kontrolou dokončené usage a rezerv nedokončených úloh, nikoli
+  tvrdým provider limitem. Nejasné modelové výsledky ani bootstrap se neopakují.
+
+Další krok:
+- V pátek 13. 11. převzít první vydání a jeho kvalitu; Míla ověří UI na svém zařízení.
+
+Navrhované další kroky:
+- Pokrytí dalších primárních zdrojů nebo zpřesnění filtru řešit podle skutečné zpětné vazby.
+- Případnou chybu ověřit nad stejným weekly job/launch receipt, ne novým pokusem.
+
+Technický důkaz:
+- Před zápisem všechny readiness true: code_ready, role_ready, served_save_guard;
+  runtime soubory beze změny proti přesnému schválenému návrhu e6e8eb06770426631ba1f0c85caf6e083be0f6c1ef1fbf87f5e4cdea784d375b.
+- activate vrací active, launch_attempted=true, launch_returncode=0. launchctl potvrdil
+  1 run, last exit code=0; periodická služba mezi běhy správně hlásí not running.
+- První stdout {"ok":true,"state":"not_due"}, stderr 0 B, production job_count=0,
+  API activated=true, pending_count=0. Žádný restart ostatních služeb nebo změna rolí.
+- Provedení vytvořilo pouze privátní activation.json a jeden LaunchAgent. Kód se neměnil;
+  předchozí plná brána 2964 OK (5 SKIP) zůstává relevantní, nyní přibylo živé ověření.
+
+- Doplňující neplacená kontrola v cestě PATH služby a minimálním servisním prostředí:
+  codex-cli 0.167.0 dostupné, sdílený App Server účet ChatGPT a Sol/medium kompatibilní.
+  Nula thread/start a turn/start; žádná změna prostředí nebo restart služby.

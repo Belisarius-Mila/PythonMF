@@ -78,7 +78,7 @@ Nejistý či přerušený modelový výsledek se automaticky neopakuje ani dalš
 nejprve vyžaduje ověření stejné účtenky. Pokud žádný zdroj nefunguje, nevznikne
 úspěšný prázdný přehled. Částečný výpadek je vidět u vydání.
 
-## Model a překlad: připravené, dosud neaktivní
+## Model a překlad: aktivní od 2026-11-10
 
 `science_news_model` používá existující sdílený App Server socket, jedno nové
 ephemeral vlákno a nejvýše jeden tah pro konkrétní job. Transport kontroluje
@@ -89,8 +89,8 @@ Nejistota, neplatný výstup nebo chybějící usage nesmějí vyvolat další t
 
 Parser zná `science_news_editor`. Od 2026-11-10 je v Datově vlastním
 `config/agent_roles.json` připravené navázání na Sol/medium, s cenovou kontrolou
-10. 11. a skutečnou zkouškou 9. 11. V provozu tato role dosud chybí; Will musí
-přenést pouze nový science_news_editor záznam a zachovat všechny další role main.
+10. 11. a skutečnou zkouškou 9. 11. Provozní role, kód i servírovaný guard byly 2026-11-10 ověřené před aktivací;
+ostatní role main zůstaly zachované.
 Samotné nasazení role není aktivace: soukromý schválený rozpočet a LaunchAgent
 se instalují odděleně. Souhlasy s jinými rolemi se na tuto aktivaci nepřenášejí.
 
@@ -102,7 +102,7 @@ i při nejistotě a ověřuje skutečnou usage po dokončení. Limity nejsou tvr
 upstream billing/output cap. Bez centrální role a privátní schválené aktivace
 se klient ani modelový tah nespustí.
 
-Připravený kandidát pro další schválení je `gpt-6.1-sol / medium / Standard`.
+Schválený a nasazený model je `gpt-6.1-sol / medium / Standard`.
 Čtecí dotaz na existující socket potvrdil přítomnost modelu i podporu medium,
 bez vlákna nebo modelového tahu; důkaz `reports/science_news_model_preflight_20261109.json`.
 Oficiální sazby byly znovu načteny 2026-11-09:
@@ -112,8 +112,8 @@ subscription limitu ani účetní doklad. Korpus 60 aktuálních kandidátů mě
 40 066 UTF-8 B; jednoduchý byte proxy adapteru s přijímací mezí 16 000 výstupních
 tokenů vychází 6,10565 kreditu. Není to skutečná tokenizace, součástí není
 zaručený odhad protokolové režie a žádné modelové volání tento odhad neověřilo.
-Návrh 15/job a 100/měsíc proto zůstává rezervací pro samostatné schválení,
-nikoli slibem skutečné ceny. Konkrétní návrh a hash podkladů:
+Míla meze 15/job a 100/měsíc schválil při aktivaci 2026-11-10;
+původní přípravná kalkulace není slibem skutečné ceny. Konkrétní návrh a hash podkladů:
 `reports/science_news_budget_proposal_20261109.json`; veřejné RSS podklady jsou
 jen v soukromém preflight adresáři. Role binding zůstává nezměněný.
 
@@ -270,3 +270,23 @@ Ověření: 112 cílených Python testů, 16 Node scénářů PASS; finální pl
 2964 testů OK (5 SKIP), 547,271 s. Detaily a omezení v
 reports/science_news_activation_20261110.json. První skutečné týdenní vydání
 ani fyzická iPhone přejímka nové ochrany ještě neproběhly.
+
+
+### Skutečné zapnutí 2026-11-10
+
+Po Mílově přesné globální větě splnil původní návrh e6e8eb06770426631ba1f0c85caf6e083be0f6c1ef1fbf87f5e4cdea784d375b
+všechny readiness bez obnovy/změny otisků. activate jednou instaloval privátní
+aktivaci a jediný com.samantha.science-news LaunchAgent. Bootstrap vrací0, stejná
+účtenka active/launch_attempted=true. První reálný tick je not_due a exit0, stderr0 B,
+production jobs0. API hlásí activated=true. Žádný ruční druhý tick či placený catch-up.
+
+Schválené nastavení: Sol/medium Standard, 15/job a100/měsíc; první příprava pátek
+13. 11. 2026 od08:00, publikace od09:00 Europe/Prague, max5 novinek. StartInterval60
+znamená periodickou kontrolu; not running mezi úspěšnými tick běhy není vypnutí služby.
+Aktivace neměnila role, kód ani jiné služby. První skutečný placený editor/jeho kvalita
+bude převzat v pátek, fyzická UI přejímka zůstává otevřená. Aktuální důkaz je v
+reports/science_news_activation_20261110.json; raw launch receipt a live check jsou private.
+
+Neplacený servisní preflight navíc ověřil dostupnost codex-cli 0.167.0 pod PATH
+služby a spojení se sdíleným App Serverem v minimálním servisním prostředí:
+účet ChatGPT, Sol/medium kompatibilní, žádný thread/start ani turn/start.
