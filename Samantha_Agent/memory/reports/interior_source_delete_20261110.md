@@ -1,6 +1,6 @@
 # Ateliér — potvrzené trvalé mazání podkladů
 
-Místní implementace vznikla v izolovaném pracovním stromu nad `fee535e5`, bez zásahu do souběžného Data vývoje. Neproběhlo p+n, restart Cockpitu, skutečné mazání rodinných podkladů ani placený AI tah.
+Implementace vznikla v izolovaném pracovním stromu nad `fee535e5`, bez zásahu do souběžného Data vývoje. Výslovně schválené p+n nyní potvrdilo push a nasazení `748cec00` do Cockpitu přes Terru. Skutečné rodinné podklady se nemazaly; nevolal se AI architekt ani generování obrázků.
 
 ## Výsledek
 
@@ -21,6 +21,14 @@ Místní implementace vznikla v izolovaném pracovním stromu nad `fee535e5`, be
 
 ## Hranice a další krok
 
-Lokální krok je ověřený; do main patří pouze bezpečný fast-forward při čistém zdroji. Samostatné p+n nebylo zadané. Nasazený runtime a fyzická iPhone přejímka zůstávají neověřené pro tuto funkci.
+Výslovné p+n je dokončené; nasazený runtime je ověřený. Další krok je obnova stránky v prohlížeči a lidská Mac/iPhone přejímka. Výsledkový paměťový checkpoint zůstává místní pro příští balíček a sám nespouští další vydání.
 
 Ateliér dosud nemá výslovně dohodnutý nový TVBCP. Na volbu byla položená otázka; bez odpovědi se nezakládá. Pro tento terminálový krok se aktualizují stávající handoff, projektová paměť a registry; budoucí vývoj přes Human–Adam musí vazbu dořešit.
+
+## 2026-11-10 16:41 CET — Mazání podkladů nasazené
+
+Na Mílovo výslovné „ok, p+n“ je `748cec00c3ab4e4f873b911c5ceb3547e6659caf` odeslaný na GitHub a nasazený do běžícího Cockpitu v proudu `project-neuberk-kacenka`. Jediné registrované předání přes Terru 6.1/high: `3eddf9c73d866c2a196b447b09762bd7`, completed, push/deployment confirmed. Publikační brána 3426 testů PASS, 655,5 s, smoke 5/5; code_stamp `76ec558a9e3b0742`, chráněné služby beze změny.
+
+Živá stránka HTTP 200 je byte-identická s vydaným rozhraním (SHA-256 `9b781db4341853eb01074c8dbe4c7ad3d81a95e1f3d8f2bdcabf3b0fb563d2ff`) a obsahuje nové tlačítko. Čtecí `/api/interior/delete-preview` je dostupné a vrací přesný rozsah i potvrzení. Před/po shodný otisk manifestu: všech 27 podkladů a 25 variant zachovaných. Nevolala se mazací akce ani požadavek AI architektovi, do Data se nezapisovalo.
+
+Další krok: obnovit stránku Ateliéru v prohlížeči a provést lidskou přejímku ovládání na Macu/iPhonu. Tato přejímka není nahrazená HTTP ani dřívější syntetickou zkouškou dialogu. Skutečné smazání bude vždy samostatná explicitní uživatelská akce. Výsledkový paměťový zápis zůstává místní pro další balíček; další p+n se kvůli němu neopakuje. TVBCP se bez nové dohody nezakládá. Důkazy: `data/private/interior_source_delete_20261110/release/`.

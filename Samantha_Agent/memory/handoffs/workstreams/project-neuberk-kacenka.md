@@ -6,6 +6,14 @@ Stav: rozpracovane
 Pripomenout pri startu: ne
 Datum: 2026-11-10
 
+## 2026-11-10 16:41 CET — Mazání podkladů nasazené
+
+Na Mílovo výslovné „ok, p+n“ je `748cec00c3ab4e4f873b911c5ceb3547e6659caf` odeslaný na GitHub a nasazený do běžícího Cockpitu v proudu `project-neuberk-kacenka`. Jediné registrované předání přes Terru 6.1/high: `3eddf9c73d866c2a196b447b09762bd7`, completed, push/deployment confirmed. Publikační brána 3426 testů PASS, 655,5 s, smoke 5/5; code_stamp `76ec558a9e3b0742`, chráněné služby beze změny.
+
+Živá stránka HTTP 200 je byte-identická s vydaným rozhraním (SHA-256 `9b781db4341853eb01074c8dbe4c7ad3d81a95e1f3d8f2bdcabf3b0fb563d2ff`) a obsahuje nové tlačítko. Čtecí `/api/interior/delete-preview` je dostupné a vrací přesný rozsah i potvrzení. Před/po shodný otisk manifestu: všech 27 podkladů a 25 variant zachovaných. Nevolala se mazací akce ani požadavek AI architektovi, do Data se nezapisovalo.
+
+Další krok: obnovit stránku Ateliéru v prohlížeči a provést lidskou přejímku ovládání na Macu/iPhonu. Tato přejímka není nahrazená HTTP ani dřívější syntetickou zkouškou dialogu. Skutečné smazání bude vždy samostatná explicitní uživatelská akce. Výsledkový paměťový zápis zůstává místní pro další balíček; další p+n se kvůli němu neopakuje. TVBCP se bez nové dohody nezakládá. Důkazy: `data/private/interior_source_delete_20261110/release/`.
+
 ## 2026-11-10 15:59 CET — Mazání podkladů připravené místně
 
 U každého podkladu je tlačítko Smazat. Čtecí náhled ukáže název, velikost a počet souborů, sdílení i dopad na uložené návrhy a rozpracovaná zadání. Trvalé smazání vyžaduje přesnou větu globální brzdy. Odstraní příslušné originály, náhledy a nepotřebné AI snapshoty včetně výsledkového JSON s obrazovými daty; nezakládá další obrazovou zálohu. Soubory sdílené jiným podkladem zůstávají zachované a náhled to vysvětlí. Kopie stažené mimo Ateliér, starší soukromé podklady a zálohy nejsou součástí této operace.
