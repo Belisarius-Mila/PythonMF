@@ -2,11 +2,11 @@
 
 ## Aktuální stav
 
-- 2026-11-10 13:44 CET: Míla výslovně potvrdil globální brzdu pro odstranění přesně deseti původních WebP kopií. Místní úklid `arrival.webp` je dokončený podle zmrazeného seznamu se SHA-256 `038d273ff95d3077fe26d142ad32ca6fc32d0e9b5c6997ea53c161964fedcf65`; součet 3801340 B (asi 3,8 MB). Všech deset původních WebP souborů je odstraněných; jejich nepřítomnost a otisky tří nových PNG byly ověřené. Původní zdrojový PNG zůstal zachovaný, protože aktuální pokyn se týká pouze deseti WebP souborů.
-- Nová přijatá boční varianta `arrival_side_view_20261110_v1.png` zůstává ve třech známých kopiích (Downloads, projektové private imagegen a původní výstup generátoru), všechny SHA-256 `3b028eef9065528262c788b2d34e2369ea4800c5e7fe46a4c29b64dd9e649bbc`, 1672 × 941. V Downloads žádná stará kopie nalezena nebyla. Nový obrázek nebyl vložený do produkčního průchodu.
-- Scény 1–5 včetně mostu s Loganem zůstávají zachované. Předchozí odstranění celé šestky bylo publikované v `359007b9` přes Terra job `27d91d1047e66647a4e71d99a6279ae1` (Pages run 42804962744 / deployment 7680433197); tehdejší důkaz byl 3402 testů PASS, 157 odstraněných URL HTTP 404 a 55 zachovaných URL přesné bajty. Tato historická publikace původní první obrázek ještě obsahovala. Dnešní místní odstranění dalších deseti WebP se nepushuje ani nenasazuje bez samostatného pokynu.
-- Nesouvisející source změny (smazaný requirements.txt a dva necommitované scénáře) zachovat. Datův vlastní commit a jeho předchozí WIP úklid zachovat; nově přibyly dvě související WebP deletions, žádný merge/rebase. Historie Gitu a zálohy se nepřepisují ani nemažou.
-- Další krok po /new: přečíst konečnou místní účtenku `data/private/mmtx/original_arrival_removal_20261110/webp_deletion_receipt.json` a tento handoff. V nové relaci nejdřív jen obnovit kontext a ověřit Git; žádnou další publikaci ani mazání automaticky nespouštět.
+- 2026-11-10 15:22 CET: Na nový výslovný pokyn k p+n jsou všechny čtyři čekající commity do `51a2cabeb587ca5a9db8ed5d9f591dec5c1947cd` odeslané na GitHub a přesně nasazené na Pages. Jediné registrované předání `19622ad4cec58c0ce7762c8afa311ea6`, Terra 6.1/high, skončilo `completed`; push i deployment mají stav `confirmed`. Pages run `42832718423`, deployment `7684562278`, smoke HTTP 200, chráněné služby beze změny.
+- Plná publikační brána: 3402 testů, 0 chyb, 49 přeskočených, 517,8 s. Jedna závěrečná veřejná kontrola potvrzuje 158 odstraněných URL HTTP 404 (nově i původní `arrival.webp`) a 54 zachovaných souborů HTTP 200 s přesnými SHA-256, včetně scén 1–5 a médií Logana. Místní čtecí audit před vydáním ověřil 3738 zachovaných souborů bez rozdílů; proti předchozí publikaci se z webu odstranil pouze starý obrázek.
+- Nový boční `arrival_side_view_20261110_v1.png` zůstává ve třech shodných kopiích, SHA-256 `3b028eef9065528262c788b2d34e2369ea4800c5e7fe46a4c29b64dd9e649bbc`. Do produkčního průchodu se nevkládal. Původní zdrojový PNG, historie a zálohy zůstávají zachované.
+- Po výslovném souhlasu byly pouze tři nesouvisející změny na source main dočasně odložené; smazání `requirements.txt` i oba scénářové drafty jsou přesně vrácené, ověřen stav i otisky. Stash a soukromá záloha zůstávají pro obnovu. Data má stále vlastní head `c87f6064`; během čekání v jeho worktree přibyla souběžná práce na novém úvodu šestky. Tato relace do Data nezapisovala, neslučovala jej ani nepřepisovala; nová Data práce není součástí vydaného checkpointu.
+- Další krok: ponechat souběžný Data vývoj oddělený a navázat jeho vlastním handoffem. Výsledkový paměťový checkpoint je pouze místní pro příští balíček; samotný zápis nespouští další p+n. Fyzický proklik na Macu/iPhonu zůstává neověřený. Soukromé důkazy jsou v `data/private/mmtx/release_51a2cabe_20261110/`.
 
 ## Stav
 
@@ -571,3 +571,15 @@ Další krok: Posoudit návrh; případná výměna aktivního obrázku a nové 
 Navrhované další kroky: Žádné nové.
 
 Technický důkaz: Vestavěný image_gen, jedna varianta 1672 × 941, PNG 2948769 B. Vizuálně ověřen počet pěti postav, jejich boční natočení, pohled k jezeru a mrakům; původní arrival.webp má nadále původní SHA-256. PNG, prompt a účtenka jsou v místním private imagegen adresáři mimo Git.
+
+### 2026-11-10 15:22 CET – Čekající úklid původního obrázku publikovaný
+
+Hotovo: Starý první obrázek u jezera už není veřejně dostupný. Scény 1–5 a Logan zůstávají zachované; nový boční návrh zůstává bezpečně uložený mimo produkční průchod.
+
+Rozhodnutí: Míla po čtecí obnově výslovně zadal p+n a schválil dočasné odložení přesně tří nesouvisejících source změn s následným vrácením. Provedeno jediné registrované vydání čtyř čekajících commitů přes centrálně schválenou Terru 6.1/high.
+
+Další krok: Navazovat na souběžný Data vývoj samostatně; tuto větev automaticky neintegrovat ani nepřepisovat.
+
+Navrhované další kroky: Žádné nové.
+
+Technický důkaz: Účtenka `19622ad4cec58c0ce7762c8afa311ea6`, head `51a2cabe`, Pages run `42832718423` / deployment `7684562278`, push/deployment confirmed. Plná brána 3402 testů PASS / 49 SKIP; veřejně 158 URL HTTP 404 a 54 zachovaných souborů s přesnými bajty. Source WIP vrácený včetně shodných otisků obou draftů; tři nové PNG shodné. Data head `c87f6064` zachovaný, jeho souběžně změněný WIP touto relací nedotčený. Doklady mimo Git v `data/private/mmtx/release_51a2cabe_20261110/`; výsledkový zápis místně pro příští balíček, bez opakování p+n. Fyzická přejímka neověřená.
