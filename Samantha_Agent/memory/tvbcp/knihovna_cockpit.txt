@@ -1,6 +1,11 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
+- 2026-11-10 10:58 CET: Systémové potvrzení přijato a blokátor nové role je uzavřený: registrovaný upgrade pošty 617f3e0d→8c83e93b ověřen,95 položek i business digest/nastavení/role identické. Skutečný nový parser načítá live science binding.
+- Teprve potom main převzal připravený 31a59e0c s Datovým aad367c7. Žádný další ScienceNews save, překlad nebo instalace plánovače se neprováděly.
+- Míla následně prioritně nahlásil kalendářový bug. Původní editace byla dočtena bez druhého save; problém pořadí alarmů lokálně opraven a společná plná brána PASS: 3406 testů / 31 SKIP (620,186 s). Převzetí a nasazení pokračují jedním runtime balíčkem.
+- Další krok: finální checkpoint a zadané Terra p+n; účtenka `logs/science_calendar_release_20261110.log`. Páteční ScienceNews služba/rozpočet zůstávají samostatné. Reporty `reports/email_science_role_upgrade_20261110.md` a `reports/calendar_edit_alarm_order_recovery_20261110.md`.
+
 - 2026-11-10 10:09 CET: Datův `aad367c7` je převzatý a testovaný pouze na izolované větvi `will/science-news-20261110`; živý main/pošta/role zůstávají beze změny.
 - 134 cílených testů PASS, plná izolovaná brána PASS: 3405 testů / 31 SKIP (641,430 s). UI i API vyžadují celý český překlad před uložením; žádný modelový tah nebo opakování již hotového save.
 - Blokátor skutečně ověřen: vlastněná hodinová pošta 617f3e0d čte hlavní role přes symlink a kandidátní science_news_editor odmítá AgentRoleError. Nový binding se nesmí objevit na main dřív než kompatibilní runtime.
@@ -1205,3 +1210,16 @@ Doplnění dokončení 2026-11-10 09:24 CET:
 **Navrhované další kroky:** Po kompatibilním upgradu zpřístupnit nový binding a nasadit připravený balíček; páteční aktivaci řešit odděleně po dohodě rozpočtu.
 
 **Technický důkaz:** Skutečný instalovaný parser odmítl dočasný kandidátní JSON (AgentRoleError, science_known=false), přímo ověřen sdílený symlink; main se nezměnil. 134 cílených testů PASS, plná izolovaná brána PASS: 3405 testů / 31 SKIP (641,430 s). Report reports/science_news_aad367c7_integration_20261110.md. Riziko přímého merge: opakovaný výpadek pošty.
+
+
+## 2026-11-10 10:58 CET — Kompatibilita nové role potvrzena, navazuje společné vydání
+
+**Hotovo:** Kompatibilní vlastní poštovní runtime je skutečně nainstalovaný a čte nový live binding. Všech95 položek, business digest, nastavení i původní modelové role byly při přepnutí zachované. Datův commit je teprve poté převzatý do main.
+
+**Rozhodnutí:** Míla dodal přesnou globální větu a prioritně nahlásil kalendářový bug. Již zadané nasazení pokračuje se související opravou; žádný nový ScienceNews modelový pokus, save ani instalace páteční služby.
+
+**Další krok:** Dokončit společný kalendářový checkpoint a zadané Terra p+n.
+
+**Navrhované další kroky:** Páteční rozpočet/instalace a fyzická přejímka samostatně.
+
+**Technický důkaz:** Registered pause/prepare/upgrade617f3e0d→8c83e93b, všechny checks true, health already_completed. Následný instalovaný parser načetl skutečný main config včetně nové role. Původní kalendářová transakce ověřena read-only bez druhého update. Reporty reports/email_science_role_upgrade_20261110.md a reports/calendar_edit_alarm_order_recovery_20261110.md; budoucí výsledek publikace v logs/science_calendar_release_20261110.log.

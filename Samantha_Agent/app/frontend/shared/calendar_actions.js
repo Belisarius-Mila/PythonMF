@@ -46,19 +46,19 @@
       if(!title.value.trim()){status.textContent="Vyplň název.";return;}
       const changes={title:title.value,date:`${year.value}-${pad(month.value)}-${pad(day.value)}`,time:time.value};
       try {remember(prepared.request_id);}catch(error){status.textContent=error.message;return;}
-      sending=true;let keepOpen=false;fields.disabled=true;save.disabled=true;cancel.disabled=true;status.textContent="Ukládám změny…";
+      sending=true;let keepOpen=false,recoveryResult=null;fields.disabled=true;save.disabled=true;cancel.disabled=true;status.textContent="Ukládám změny…";
       try {
         const value=await api({action:"update",request_id:prepared.request_id,changes,confirmed:true});
         if(value.state==="prepared"&&value.validation_error) {
           forget();keepOpen=true;status.textContent=value.validation_error;
         } else if(value.state==="verified") {forget();notice.textContent=value.message;onChanged(value);}
         else if(["changed","blocked"].includes(value.state)) {forget();notice.textContent=value.message;}
-        else {pending=value.request_id;notice.textContent="Výsledek není potvrzený. Zvol Ověřit původní úpravu.";}
+        else {pending=value.request_id;recoveryResult=value;notice.textContent=value.message||"Výsledek není potvrzený. Zvol Ověřit původní úpravu.";}
       } catch(error) {notice.textContent="Výsledek není potvrzený. Zvol Ověřit původní úpravu.";}
       finally {
         sending=false;
         if(keepOpen){fields.disabled=false;time.disabled=prepared.event.all_day;save.disabled=false;cancel.disabled=false;}
-        else {close();active=false;update();showRecovery();}
+        else {close();active=false;update();showRecovery(recoveryResult||{});}
       }
     });
     modal.addEventListener("close",()=>{if(!sending){active=false;update();}});
@@ -95,33 +95,42 @@
           if(wrap.isConnected===false)return;
           if(value.state==="setup_required") {setup=true;edit.textContent="Povolit úpravy na Macu";notice.textContent=value.message;}
           else if(value.state==="prepared") {dialog(value,onChanged,notice);opened=true;}
-          else {pending=value.request_id;notice.textContent=value.message;showRecovery();}
+          else {pending=value.request_id;notice.textContent=value.message;showRecovery(value);}
         } catch(error) {notice.textContent=error.message;}
         finally {if(!opened){active=false;update();}}
       });wrap.append(edit);
     }
     wrap.append(notice);host.append(wrap);update();return wrap;
   }
-  let recovery=null;
-  function showRecovery() {
+  let recovery=null,recoveryNeedsAuthorization=false;
+  function showRecovery(value={}) {
     if(!pending)return;
+    if(typeof value.needs_authorization==="boolean")recoveryNeedsAuthorization=value.needs_authorization;
     if(!recovery) {
       recovery=el("div");recovery.className="calendar-actions calendar-edit-recovery";
       const button=el("button","Ověřit původní úpravu"),notice=el("span");button.type="button";notice.setAttribute("role","status");recovery.append(button,notice);document.body.append(recovery);
       button.addEventListener("click",async()=>{
-        if(active||!pending)return;active=true;button.disabled=true;update();
+        if(active||!pending)return;
+        if(recoveryNeedsAuthorization&&!window.confirm("Povolit opravenému kalendářovému helperu přístup na tomto Macu? macOS může zobrazit systémový dialog."))return;
+        active=true;button.disabled=true;update();
         try {
+          if(recoveryNeedsAuthorization){
+            const value=await api({action:"authorize",confirmed:true});notice.textContent=value.message;
+            recoveryNeedsAuthorization=false;return;
+          }
           const value=await api({action:"recover",request_id:pending,confirmed:true});notice.textContent=value.message;
-          if(["verified","changed","blocked","prepared"].includes(value.state)) {forget();button.disabled=true;window.dispatchEvent(new Event("calendarChanged"));}
+          recoveryNeedsAuthorization=value.needs_authorization===true;
+          if(["verified","changed","blocked","prepared"].includes(value.state)) {forget();button.disabled=true;recovery.hidden=true;window.dispatchEvent(new Event("calendarChanged"));}
         } catch(error) {notice.textContent="Původní úpravu zatím nelze ověřit.";}
-        finally {active=false;button.disabled=!pending;update();}
+        finally {active=false;button.disabled=!pending;button.textContent=recoveryNeedsAuthorization?"Povolit přístup na Macu":"Ověřit původní úpravu";update();}
       });
     }
-    recovery.hidden=false;recovery.children[0].disabled=false;
+    recovery.hidden=false;recovery.children[0].disabled=false;recovery.children[0].textContent=recoveryNeedsAuthorization?"Povolit přístup na Macu":"Ověřit původní úpravu";
+    recovery.children[1].textContent=value.message||(recoveryNeedsAuthorization?"Pro ověření původní úpravy povol přístup ke kalendářům na Macu.":"Kalendář čeká na ověření původní úpravy. Zápis znovu neposílej.");
   }
   window.SamanthaCalendarActions={attach,update,isBusy:()=>active};
   // Both browser receipt and server journal survive navigation/restart. No
   // mutation is replayed on startup or after a network timeout.
   try {const saved=JSON.parse(window.localStorage.getItem(storageKey)||"null");if(saved&&/^[a-f0-9]{32}$/.test(saved.request_id))pending=saved.request_id;}catch(error){/* server check below */}
-  api({action:"current"}).then(value=>{if(value.request_id)pending=value.request_id;showRecovery();}).catch(()=>showRecovery());
+  api({action:"current"}).then(value=>{if(value.request_id)pending=value.request_id;showRecovery(value);}).catch(()=>showRecovery());
 })();

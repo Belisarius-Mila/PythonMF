@@ -31,3 +31,8 @@ Převzetí nové role přímo na main by proto zopakovalo doložený výpadek ho
 `EmailServiceController.upgrade` výslovně vyžaduje přesnou globální větu, protože mění vlastněný systémový LaunchAgent mimo projekt. Předchozí potvrzení pro dřívější opravu pošty nebylo paušální povolení tohoto nového přepnutí. Zdroj: `memory/technical/global_safety_brake.md` (systémová konfigurace/LaunchAgents) a `app/email/service_control.py`.
 
 Před žádostí bude viditelná karta podle `codex_remote_approval_notice.md`. Do té doby zůstává živá pošta zapnutá na původní kompatibilní konfiguraci a nasazení aad367c7 není tvrzené.
+
+
+## Aktualizace 2026-11-10 10:58 CET
+
+Systémové potvrzení přijato, registrovaný upgrade pošty 617f3e0d→8c83e93b dokončen a živě ověřen. Teprve potom main převzal 31a59e0c a nový binding. Původní blokátor výše je vyřešený. Navazuje společné vydání s prioritní kalendářovou opravou; páteční automatika se nezapíná. Důkazy reports/email_science_role_upgrade_20261110.md a reports/calendar_edit_alarm_order_recovery_20261110.md.

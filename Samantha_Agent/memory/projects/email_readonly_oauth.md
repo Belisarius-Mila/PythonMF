@@ -1683,3 +1683,16 @@ přímá přejímka Mílova prohlížeče nebyla dostupná.
   již schválený příjem čekající pošty, ne opakování nejistého starého pokusu.
 - První health completed, chybové posouzení0, zdrojové pozice posunuté;
   všechny původní položky shodné. Fyzická Mac/iPhone přejímka nepředstíraná.
+
+
+## 2026-11-10 10:58 CET — Potvrzení kalendářové úpravy po návratu upozornění v jiném pořadí
+
+**Hotovo:** Původní reálná úprava je ověřená a bezpečnostní blokace se uvolnila bez dalšího zápisu. Oprava porovnává stejná upozornění bez závislosti na jejich pořadí, skutečnou změnu dál odmítá. Rozhraní umožní obnovit systémový přístup a ověřovací lišta je viditelná i po scrollu.
+
+**Rozhodnutí:** Míla prioritně nahlásil bug při potvrzení původního systémového upgradu. Původní nejasný save se neopakuje. Již zadané nasazení Datova commitu pokračuje spolu s opravou kalendáře; páteční aktivace a rozpočet zůstávají oddělené.
+
+**Další krok:** Dokončit společnou plnou bránu, lokální checkpoint a registrované Terra p+n.
+
+**Navrhované další kroky:** Mílova přejímka editace další jím vybrané položky na používaném zařízení; automatiku ScienceNews povolit až samostatnou dohodou.
+
+**Technický důkaz:** Native reálný recover: edited_verified, calendar_writes=false, jediná shoda obou ID, všechna zachovávaná pole stejná, alarm_order_normalized=true. Původní update byl jediný. Swift FAIL→PASS, 87 cílených a mobilní headless fixture PASS; společná plná brána PASS: 3406 testů / 31 SKIP (620,186 s). Pošta už kompatibilně upgradovaná s identickým business digestem a 95 položkami. Důkazy v reports/calendar_edit_alarm_order_recovery_20261110.md a reports/email_science_role_upgrade_20261110.md.

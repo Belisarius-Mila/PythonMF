@@ -1,5 +1,7 @@
 # Znalostní databáze / Knihovna článků
 
+Aktuální stav: 2026-11-10 10:58 CET: Systémové potvrzení přijato a blokátor nové role je uzavřený: registrovaný upgrade pošty 617f3e0d→8c83e93b ověřen,95 položek i business digest/nastavení/role identické. Skutečný nový parser načítá live science binding. Zadané nasazení pokračuje se související kalendářovou opravou; páteční automatika vypnutá.
+
 Aktuální integrační stav: 2026-11-10 10:09 CET: Datův `aad367c7` je převzatý a testovaný pouze na izolované větvi `will/science-news-20261110`; živý main/pošta/role zůstávají beze změny. 134 cílených testů PASS; před nasazením nutný kompatibilní upgrade hodinové pošty a jeho systémové potvrzení. Podrobnosti `reports/science_news_aad367c7_integration_20261110.md`.
 
 Aktuální převzetí: 2026-11-09 23:38 CET: Will převzal oba Datovy commity `9abeb797` a `3ba4d063` nad vydaný `32c4ed20`. UI vysvětluje neaktivní překlad, již hotový překlad zůstává dostupný; zmrazená příprava a výsledkový report pilotu zachované. 116 cílených testů PASS, plná brána PASS: 3381 testů / 31 SKIP; následné Terra p+n výslovně schválené. Report `reports/science_news_two_commits_integration_20261109.md`. Níže uvedené starší attention není aktuální stav vydání 32c4ed20 (completed/CI success).

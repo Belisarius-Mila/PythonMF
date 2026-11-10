@@ -84,6 +84,20 @@ class CalendarEditTests(unittest.TestCase):
                 elif change=='duplicate':self.selection['events'].append(deepcopy(EVENT))
                 self.assertEqual(self.update(p)['state'],'changed');self.assertEqual([c[0] for c in self.calls],['inspect'])
 
+    def test_unknown_recovery_exposes_permission_repair_without_repeating_update(self):
+        p=self.prepare();self.result='edit_unknown';self.update(p)
+        self.result='authorization_required'
+        response=self.action('recover',p['request_id'])
+        self.assertEqual(response['state'],'unknown')
+        self.assertTrue(response['needs_authorization'])
+        self.assertTrue(self.service.execute({'action':'current'})['needs_authorization'])
+        self.service.execute({'action':'authorize','confirmed':True})
+        self.result='edited_verified'
+        response=self.action('recover',p['request_id'])
+        self.assertEqual(response['state'],'verified')
+        self.assertFalse(response['needs_authorization'])
+        self.assertEqual([c[0] for c in self.calls].count('update'),1)
+
     def test_invalid_changes_and_dst_fail_before_update(self):
         p=self.prepare()
         for changes in [CHANGES|{'title':''},CHANGES|{'date':'2026-02-30'},CHANGES|{'time':'25:00'},

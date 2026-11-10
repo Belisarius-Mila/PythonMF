@@ -1,6 +1,12 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
+- 2026-11-10 10:58 CET: Prioritní kalendářový bug je lokálně opravený a původní reálná úprava ověřená bez druhého zápisu. Příčinou bylo opačné pořadí dvou stejných alarmů; oba nativní identifikátory a všechny zachovávané hodnoty sedí, pending 0.
+- Nový native helper SDK/self-test 7 PASS, macOS full_access potvrzen. 87 cílených testů a izolovaný mobilní headless browser s dvěma dalšími fixture editacemi PASS; společná plná brána PASS: 3406 testů / 31 SKIP (620,186 s).
+- Ztráta oprávnění zachová request_id, lišta nabízí povolení a read-only dočtení přímo ve viewportu. Opravdová změna alarmu/poznámek či nejistota pořád blokuje další mutace.
+- Potvrzený kompatibilní upgrade pošty 617f3e0d→8c83e93b dokončen, všech 95 položek/nastavení/role zachované. Main teprve potom převzal Datův 31a59e0c; nový binding skutečný instalovaný parser přijímá.
+- Další krok: dokončit checkpoint a společné zadané Terra p+n; skutečný výsledek `logs/science_calendar_release_20261110.log`. Páteční automatika neaktivovaná. Report `reports/calendar_edit_alarm_order_recovery_20261110.md`.
+
 - 2026-11-09 22:09 CET: Původní Terra p+n bd828212650df86ee5737f30a0d7a752 skončilo attention/push_uncertain po restartu Cockpitu během brány. GitHub ověřeně zůstává 5ea9af40; proces 64718 automaticky načetl lokální 1395956d, nejde o potvrzené řízené vydání. Spouštěč při otevření ukončil PID 48189 (hotkey.out.log 22:00:26). Lokální oprava automatického restartu prošla plnou bránou a je připravená k checkpointu; při aktivním p+n otevře dosavadní server, při neověřeném stavu nerestartuje. 77 cílených testů PASS; plná brána opravy PASS: 3370 testů / 31 SKIP (546,298 s). Nový placený pokus nebyl spuštěn; po checkpointu je nutný nový výslovný pokyn podle AGENTS.md. Report reports/science_news_release_interruption_20261109.md.
 
 - 2026-11-09: Kalendářové Splněno/Editovat již nasazené v5ea9af40 (účtenka6905f62e16cde524469b4994ea74844f, brána3320/smoke5/5/CI42689510073 success). Míla potvrdil funkčnost. Následující stav20:46 je historický checkpoint před vydáním; vlastní live audit jen čtecí, grant/konkrétní nativní editace nebyly agentem provedeny.
@@ -2385,3 +2391,16 @@ přímá přejímka Mílova prohlížeče nebyla dostupná.
 **Navrhované další kroky:** Po potvrzeném vydání teprve samostatná provozní UI/modelová přejímka podle science_news.md.
 
 **Technický důkaz:** Původní integrační brána 3365 OK/31 SKIP, 161 cílených a izolovaný mobilní browser PASS. Oprava spouštěče 77 cílených PASS; její plná brána PASS: 3370 testů / 31 SKIP (546,298 s). GitHub 5ea9af40, veřejný nový HTML/API i lokální 1395956d shodné, ScienceNews initialized=false/activated=false. Logy a přesná časová osa v reports/science_news_release_interruption_20261109.md. Riziko: původní vydání nemá dokončenou publikační/protection účtenku; žádný nový placený pokus nesmí vzniknout bez dalšího pokynu.
+
+
+## 2026-11-10 10:58 CET — Potvrzení kalendářové úpravy po návratu upozornění v jiném pořadí
+
+**Hotovo:** Původní reálná úprava je ověřená a bezpečnostní blokace se uvolnila bez dalšího zápisu. Oprava porovnává stejná upozornění bez závislosti na jejich pořadí, skutečnou změnu dál odmítá. Rozhraní umožní obnovit systémový přístup a ověřovací lišta je viditelná i po scrollu.
+
+**Rozhodnutí:** Míla prioritně nahlásil bug při potvrzení původního systémového upgradu. Původní nejasný save se neopakuje. Již zadané nasazení Datova commitu pokračuje spolu s opravou kalendáře; páteční aktivace a rozpočet zůstávají oddělené.
+
+**Další krok:** Dokončit společnou plnou bránu, lokální checkpoint a registrované Terra p+n.
+
+**Navrhované další kroky:** Mílova přejímka editace další jím vybrané položky na používaném zařízení; automatiku ScienceNews povolit až samostatnou dohodou.
+
+**Technický důkaz:** Native reálný recover: edited_verified, calendar_writes=false, jediná shoda obou ID, všechna zachovávaná pole stejná, alarm_order_normalized=true. Původní update byl jediný. Swift FAIL→PASS, 87 cílených a mobilní headless fixture PASS; společná plná brána PASS: 3406 testů / 31 SKIP (620,186 s). Pošta už kompatibilně upgradovaná s identickým business digestem a 95 položkami. Důkazy v reports/calendar_edit_alarm_order_recovery_20261110.md a reports/email_science_role_upgrade_20261110.md.

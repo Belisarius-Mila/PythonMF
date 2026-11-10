@@ -1,9 +1,11 @@
-var editSaves=0,editFail=false,changeID=false
+var editSaves=0,editFail=false,changeID=false,reverseAlarms=false,changeAlarm=false
 extension EKEventStore {
     func save(_ event: EKEvent,span: EKSpan,commit: Bool) throws {
         editSaves+=1;Self.spans.append(span)
         if editFail { throw FakeError.fail }
         if changeID { event.eventIdentifier="new-detached-id";event.calendarItemIdentifier="new-detached-item" }
+        if reverseAlarms { event.alarms=Array((event.alarms ?? []).reversed()) }
+        if changeAlarm { event.alarms?.first?.relativeOffset = -90 }
     }
 }
 func runCalendarEditHarness(_ root: URL) throws {
@@ -14,7 +16,7 @@ func runCalendarEditHarness(_ root: URL) throws {
     }
     func setup(_ n: String) throws -> (EKEvent,URL,[String: Any],[String: Any]) {
         let event=EKEvent();event.notes="Keep notes";event.location="Keep place";event.alarms=[EKAlarm()]
-        EKEventStore.pool=[event];EKEventStore.spans=[];editSaves=0;editFail=false;changeID=false
+        EKEventStore.pool=[event];EKEventStore.spans=[];editSaves=0;editFail=false;changeID=false;reverseAlarms=false;changeAlarm=false
         let directory=root.appendingPathComponent(n);try FileManager.default.createDirectory(at:directory,withIntermediateDirectories:true)
         let old=summary(event);var target=old;target["title"]="Changed";target["start"]=iso.string(from:event.startDate.addingTimeInterval(86400));target["end"]=iso.string(from:event.endDate.addingTimeInterval(86400))
         return (event,directory.resolvingSymlinksInPath(),old,target)
@@ -35,6 +37,23 @@ func runCalendarEditHarness(_ root: URL) throws {
         let v2=try transact(request("update",old2,target2,try identity(e),String(repeating:"b",count:32)),dir)
         try check(v2["status"] as? String=="edited_verified" && editSaves==2)
         let recovered=try transact(request("recover_update",old,target,id,operation),dir);try check(recovered["status"] as? String=="edited_verified" && editSaves==2)
+    }
+    // Provider alarm ordering is not a change to either reminder.
+    do {
+        let (e,dir,old,target)=try setup("alarm-order");let other=EKAlarm();other.relativeOffset = -7200
+        e.alarms?.append(other);let id=try identity(e);reverseAlarms=true
+        let v=try transact(request("update",old,target,id,operation),dir)
+        try check(v["status"] as? String=="edited_verified" && editSaves==1)
+        let r=try transact(request("recover_update",old,target,id,operation),dir)
+        try check(r["status"] as? String=="edited_verified" && editSaves==1 && r["calendar_writes"] as? Bool==false)
+    }
+    // An actual changed reminder remains uncertain, with no second save.
+    do {
+        let (e,dir,old,target)=try setup("alarm-changed");let id=try identity(e);changeAlarm=true
+        let v=try transact(request("update",old,target,id,operation),dir)
+        try check(v["status"] as? String=="edit_unknown" && editSaves==1)
+        let r=try transact(request("recover_update",old,target,id,operation),dir)
+        try check(r["status"] as? String=="edit_unknown" && editSaves==1)
     }
     // Changed provider fields between preview and apply are never overwritten.
     do {

@@ -587,4 +587,5 @@
 .calendar-edit-dialog textarea {width:100%}
 .calendar-edit-date {display:flex;gap:.7rem;flex-wrap:wrap}
 .calendar-edit-dialog button {min-height:44px;margin:.4rem .5rem 0 0;padding:.65rem 1rem}
-.calendar-edit-recovery {padding:1rem;background:#fff5db;color:#182230}
+.calendar-edit-recovery {position:fixed;bottom:max(12px,env(safe-area-inset-bottom));left:12px;right:12px;z-index:5000;max-width:48rem;margin:0 auto;padding:1rem;background:#fff5db;color:#182230;border:1px solid #d8b75a;border-radius:12px;box-shadow:0 4px 18px #0003}
+.calendar-edit-recovery[hidden] {display:none}

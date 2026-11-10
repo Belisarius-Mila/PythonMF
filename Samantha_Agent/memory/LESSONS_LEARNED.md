@@ -2050,3 +2050,11 @@ Guard správně vrací state_alias_refused. Izolovaná kopie má vlastní skute�
 `.venv` adresář a sdílí jen interpret/knihovny; recovery stav ani jeho aktivační
 konfiguraci nepřenášet a guard neoslabovat. Čtyři bootstrap testy po úpravě
 prostředí PASS, produkční kód beze změny.
+
+
+### LL-122 — Ověřování zachovaných upozornění nesmí záviset na pořadí pole
+
+- Kontext: jediný skutečný save proběhl za 0,32 s, ale stejné dva alarmy se z EventKit vrátily obráceně. Pořadový JSON comparison vrátil edit_unknown a bezpečnostní zámek správně blokoval další úpravy.
+- Řešení: porovnávat multimnožinu přesných časových hodnot alarmů, zachovat počet/duplicity a přesnou rovnost všech ostatních polí i obou nativních ID. Historický žurnál normalizovat při read-backu; nikdy znovu save.
+- Důkaz: Swift FAIL→PASS pro alarm reorder, skutečně změněný alarm dál unknown. Reálný read-only recover potvrdil jediný match obou ID, žádné odlišné pole, alarm_order_normalized=true a calendar_writes=false.
+- Při novém podpisu helperu může macOS vyžádat nový grant. Nezapomenout původní request_id; UI musí nabídnout povolení a následné read-only ověření. Viditelná lišta zůstává ve viewportu. Report reports/calendar_edit_alarm_order_recovery_20261110.md.

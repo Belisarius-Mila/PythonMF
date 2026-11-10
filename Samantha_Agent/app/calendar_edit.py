@@ -57,10 +57,13 @@ class CalendarEditing:
                     'verified':'Změny uloženy do původní události.',
                     'changed':'Událost nebo výběr se změnily. Obnov přehled.',
                     'blocked':'Úprava neproběhla. Obnov přehled nebo povol úpravy na Macu.'}
+        needs_authorization = row.get('needs_authorization') is True
+        message = ('Pro ověření původní úpravy nejprve povol přístup ke kalendářům na Macu.'
+                   if needs_authorization else messages[row['state']])
         return {'ok':True,'state':row['state'],'request_id':row['request_id'],
                 'event':row.get('replacement',row['event']), 'original':row['event'], 'form':row['form'],
                 'calendar_title':row['calendar_title'],'recurring':row['identity']['recurring'],
-                'message':messages[row['state']]}
+                'message':message,'needs_authorization':needs_authorization}
 
     def _replacement(self, row, values):
         if (not isinstance(values,dict) or set(values)!={'title','date','time'}
@@ -156,6 +159,7 @@ class CalendarEditing:
             try:
                 result = self.helper.transact('update' if action=='update' else 'recover_update',row['event'],
                     operation_id=row['request_id'],identity=row['identity'],replacement=row['replacement'])
+                row['needs_authorization'] = result['status']=='authorization_required'
                 if result['status']=='edited_verified': row['state']='verified';notify=True
                 elif action=='update' and result['status'] in {'changed','unsupported','calendar_unavailable','authorization_required'}:
                     row['state']='changed' if result['status']=='changed' else 'blocked'

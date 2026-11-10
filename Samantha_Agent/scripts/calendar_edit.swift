@@ -86,6 +86,22 @@ func preserved(_ event: EKEvent) throws -> Data {
         "zone":event.timeZone?.identifier ?? "",
         "alarms":(event.alarms ?? []).map { "\($0.relativeOffset):\($0.absoluteDate?.timeIntervalSince1970 ?? -1)" }])
 }
+// Reminder firing times are preserved as a multiset. EventKit may return the
+// same reminders in another array order after saving a recurring occurrence.
+// Normalize both sides so already-started operations from older builds can be
+// verified read-only too; every other preserved field remains an exact check.
+func verifyPreserved(_ event: EKEvent, _ recorded: String) throws -> [String: Any] {
+    guard var before=try JSONSerialization.jsonObject(with:Data(recorded.utf8)) as? [String: Any],
+          var after=try JSONSerialization.jsonObject(with:preserved(event)) as? [String: Any],
+          Set(before.keys)==Set(after.keys),
+          let oldAlarms=before["alarms"] as? [String],let newAlarms=after["alarms"] as? [String] else { throw EditError.invalid }
+    before["alarms"]=oldAlarms.sorted();after["alarms"]=newAlarms.sorted()
+    let mismatches=try before.keys.sorted().filter {
+        try encode(["value":before[$0]!]) != encode(["value":after[$0]!])
+    }
+    return ["preserved_fields_match":mismatches.isEmpty,"mismatch_fields":mismatches,
+            "alarm_order_normalized":oldAlarms != newAlarms && oldAlarms.sorted()==newAlarms.sorted()]
+}
 func transact(_ request: [String: Any], _ root: URL) throws -> [String: Any] {
     let op=request["operation"] as! String, expected=request["event"] as! [String: Any]
     let replacement=request["replacement"] as! [String: Any]
@@ -163,9 +179,17 @@ func transact(_ request: [String: Any], _ root: URL) throws -> [String: Any] {
     // No content-only guessing: verify the exact identifiers returned by save.
     guard let eventID=record["updated_event_id"] as? String,let itemID=record["updated_item_id"] as? String else { result["status"]="edit_unknown";return result }
     let fresh=EKEventStore()
-    guard let freshCalendar=fresh.calendar(withIdentifier:expected["calendar_id"] as! String) else { result["status"]="edit_unknown";return result }
-    let matches=try candidates(fresh,freshCalendar,replacement).filter { $0.eventIdentifier==eventID && $0.calendarItemIdentifier==itemID }
-    guard matches.count==1,String(decoding:try preserved(matches[0]),as:UTF8.self)==record["preserved"] as? String else { result["status"]="edit_unknown";return result }
+    guard let freshCalendar=fresh.calendar(withIdentifier:expected["calendar_id"] as! String) else {
+        result["verification"]=["readback_calendar_available":false];result["status"]="edit_unknown";return result
+    }
+    let observed=try candidates(fresh,freshCalendar,replacement)
+    let matches=observed.filter { $0.eventIdentifier==eventID && $0.calendarItemIdentifier==itemID }
+    var verification: [String: Any]=["readback_calendar_available":true,"replacement_matches":observed.count,"identity_matches":matches.count]
+    result["verification"]=verification
+    guard matches.count==1,let recorded=record["preserved"] as? String else { result["status"]="edit_unknown";return result }
+    verification.merge(try verifyPreserved(matches[0],recorded),uniquingKeysWith:{_,new in new})
+    result["verification"]=verification
+    guard verification["preserved_fields_match"] as? Bool==true else { result["status"]="edit_unknown";return result }
     record["state"]="edited_verified";try persist(record,journal,first:true);try persist(record,current,first:false)
     result["status"]="edited_verified";result["event"]=replacement;return result
 }

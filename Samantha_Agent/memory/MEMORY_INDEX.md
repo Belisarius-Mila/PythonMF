@@ -1,5 +1,7 @@
 # Memory Index
 
+- `reports/calendar_edit_alarm_order_recovery_20261110.md`; `reports/email_science_role_upgrade_20261110.md` — původní kalendářová úprava read-only ověřená; stejné alarmy v jiném pořadí už neblokují další změny. 87 cílených/native/mobile fixture PASS, plná brána PASS: 3406 testů / 31 SKIP. Potvrzený poštovní upgrade617f3e0d→8c83e93b zachoval95 položek/businessdigest, nový science binding načten skutečným parserem; zadané společné p+n navazuje.
+
 - `reports/science_news_aad367c7_integration_20261110.md` — izolované převzetí nového Datova commitu a ochrany českého save; 134 cílených PASS. Nová role by zastavila skutečnou hodinovou 617f3e0d; před main/p+n nutný řízený upgrade na vydaný 8c83e93b s přesnou globální brzdou. Živá pošta ani role zatím nezměněné.
 
 - `reports/science_news_two_commits_integration_20261109.md` — Willovo převzetí 9abeb797 + 3ba4d063 nad vydaný 32c4ed20, oprava neaktivního UI a report jednorázového pilotu. 116 cílených PASS; plná brána 3381 testů OK / 31 SKIP, schválené Terra p+n navazuje. Žádný nový překlad, připojení textu ani aktivace.
