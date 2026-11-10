@@ -208,6 +208,8 @@ class InteriorAtelier:
             result["room"] = copy.deepcopy(room)
             result["room"].pop("drafts")
             result["room"].pop("ai_requests", None)
+            from app.interior_room_basis import room_basis
+            result["room"]["room_basis"] = room_basis(room)
             result["draft"] = self._draft(room, base_id)
             from app.interior_cleanup import pending_source_deletions
             result["pending_deletions"] = pending_source_deletions(data, project_id, room_id)
@@ -276,6 +278,7 @@ class InteriorAtelier:
             "create_project": {"title", "room_title"},
             "create_room": {"project_id", "title"},
             "add_source": {"project_id", "room_id", "title", "kind", "data"},
+            "save_room_basis": {"project_id", "room_id", "expected_basis_revision", "plan_source_id", "measurements"},
             "save_draft": {"project_id", "room_id", "base_id", "expected_revision", "draft"},
             "create_variant": {"project_id", "room_id", "base_id", "expected_revision"},
             "add_note": {"project_id", "room_id", "base_id", "text"},
@@ -327,6 +330,9 @@ class InteriorAtelier:
                 _, room = self._room(data, payload["project_id"], payload["room_id"])
                 if action == "add_source":
                     result.update(self._add_source(room, payload, now))
+                elif action == "save_room_basis":
+                    from app.interior_room_basis import save_room_basis
+                    result["basis_revision"] = save_room_basis(room, payload)
                 else:
                     base_id = payload["base_id"]
                     draft = self._draft(room, base_id)

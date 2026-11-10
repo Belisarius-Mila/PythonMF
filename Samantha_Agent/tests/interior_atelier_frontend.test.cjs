@@ -78,3 +78,13 @@ test("normalized drawing survives image resizing and rejects markup injection", 
   assert.equal(paths([[[0,0],[Infinity,1]]]),"");
   assert.equal(paths([[[0,0],[2,1]]]),"");
 });
+
+
+test("room basis restores local dimensions but cannot resurrect a deleted plan", () => {
+  const {restoreRoomBasis}=require('../app/frontend/interior/app.js');
+  const cached={plan_source_id:'gone',measurements:'Local 300 cm',revision:1,dirty:true};
+  const result=restoreRoomBasis({plan_source_id:'new',measurements:'Server',revision:2},cached,{new:{kind:'plan'}});
+  assert.equal(result.measurements,'Local 300 cm');assert.equal(result.plan_source_id,'');
+  assert.equal(result.revision,1);assert.equal(result.conflict,true);
+  assert.equal(cached.plan_source_id,'gone');
+});

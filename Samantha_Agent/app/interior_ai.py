@@ -18,6 +18,7 @@ from app.communication.local_runtime import DEFAULT_SOCKET_PATH
 from app.file_persistence import FilePersistenceError, atomic_write_json
 from app.interior_atelier import AtelierConflict, AtelierError, InteriorAtelier, REQUEST_RE, _now, _safe_path
 from app.work_repository import RepositoryMutation, WorkRepositoryError
+from app.interior_room_basis import room_basis, effective_sources
 from app.interior_brief import (BRIEF_PROTOCOL, CHAT_RESPONSE_SCHEMA, CHAT_BRIEF_INSTRUCTIONS,
     IMAGE_BRIEF_INSTRUCTIONS, brief_basis, brief_view, parse_chat_answer)
 
@@ -31,8 +32,13 @@ náčrt a inspiraci. Bez ověřených rozměrů nepředstírej přesný půdorys
 průchodů a kolizí. Zachovávej výslovně uvedené pevné prvky. Pokud něco chybí,
 jasně pojmenuj nejistotu nebo polož konkrétní otázku. Nikam nic nepublikuj,
 nepoužívej konektory, web, shell ani soubory mimo přiložené podklady.
-Při určení pevných stavebních prvků mají skutečné fotografie přednost před
-dřívější AI vizualizací a stylovou inspirací.
+Společný půdorys a uživatelem ověřené míry v room_basis platí pro všechny
+varianty místnosti. Pro rozměry a polohu pevných bodů z nich vycházej;
+starší AI obrázky ani další reference je nesmějí přepisovat. Fotografie určuje
+skutečný vzhled a pracovní obrázek úhel pohledu. Rozpor mezi podklady pojmenuj,
+nikdy si míry nedomýšlej. Míry v room_basis sám neměň. Půdorys je vodítko,
+nikoli záruka geometricky přesného obrazového výstupu. Bez společného základu
+mají skutečné fotografie přednost před dřívější AI vizualizací a inspirací.
 Režim chat: jen poraď a odpověz na otázku; nevytvářej obrázky.
 Režim image: vytvoř právě jeden obrazový návrh pomocí generování obrázků podle
 přiložených fotografií a zadání. Hlavní pracovní obrázek definuje prostor a úhel
@@ -226,8 +232,7 @@ class InteriorAI:
                     raise AtelierConflict("Souhrn nebo podklady se změnily. Znovu je zkontroluj před vytvořením obrázku.")
                 if not summary["can_generate"]:
                     raise AtelierError(summary["reason"])
-            selected = list(dict.fromkeys([draft["image_source_id"], *draft["source_ids"]]))
-            selected = [item for item in selected if item]
+            selected = effective_sources(room, draft)
             if not selected or len(selected) > 6:
                 raise AtelierError("Vyber jeden až šest podkladů pro architekta v Podkladech.")
             if payload["mode"] == "image" and not draft["image_source_id"]:
@@ -271,7 +276,12 @@ class InteriorAI:
                 "question": payload["message"].strip(), "draft": copy.deepcopy(draft), "history": history,
                 "notes": [n["text"] for n in room["notes"] if n["base_id"] == base_id],
                 "images": [{"number": i + 1, "kind": room["sources"][source_id]["kind"],
-                    "working_image": source_id == draft["image_source_id"]} for i, (source_id, _) in enumerate(inputs)]}
+                    "working_image": source_id == draft["image_source_id"],
+                    "room_plan": source_id == room_basis(room)["plan_source_id"]} for i, (source_id, _) in enumerate(inputs)]}
+            basis = room_basis(room)
+            if basis["revision"]:
+                context["room_basis"] = {**basis, "plan_image_number":
+                    selected.index(basis["plan_source_id"]) + 1 if basis["plan_source_id"] else None}
             if new_protocol:
                 value = {k: copy.deepcopy(summary[k]) for k in ("changes", "preserve", "unresolved")}
                 if payload["mode"] == "chat":
