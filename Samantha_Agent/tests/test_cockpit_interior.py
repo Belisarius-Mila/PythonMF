@@ -205,6 +205,20 @@ class CockpitInteriorTests(unittest.TestCase):
             _, body, _ = self.request("/api/interior/state?" + urlencode({"project_id":project,"room_id":room}))
             self.assertNotIn("ai_requests", json.loads(body)["room"])
 
+    def test_http_room_basis_is_shared_and_rejects_stale_revision(self):
+        project, room = self.project()
+        _, body, _ = self.command("add_source", project_id=project, room_id=room, title="Room plan", kind="plan",
+                                  data=base64.b64encode(image_bytes()).decode())
+        plan = json.loads(body)["asset_id"]
+        _, body, _ = self.command("save_room_basis", project_id=project, room_id=room,
+                                  expected_basis_revision=0, plan_source_id=plan, measurements="300 x 220 cm")
+        self.assertEqual(json.loads(body)["basis_revision"], 1)
+        _, body, _ = self.request("/api/interior/state?" + urlencode({"project_id":project,"room_id":room}))
+        self.assertEqual(json.loads(body)["room"]["room_basis"]["measurements"], "300 x 220 cm")
+        _, body, _ = self.command("save_room_basis", project_id=project, room_id=room,
+                                  expected_basis_revision=0, plan_source_id=plan, measurements="400 cm")
+        self.assertEqual(json.loads(body)["error"], "conflict")
+
     def test_frontend_has_unique_controls_and_fullscreen_source_edit_views(self):
         from html.parser import HTMLParser
         class IDs(HTMLParser):

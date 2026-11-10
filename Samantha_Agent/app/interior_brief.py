@@ -4,6 +4,7 @@ from __future__ import annotations
 import json
 
 from app.interior_atelier import AtelierError, _fingerprint, _text
+from app.interior_room_basis import room_basis, effective_sources
 
 BRIEF_PROTOCOL = "interior-brief-v1"
 BLOCKING = {"queued", "running", "delivery_unknown", "result_ready"}
@@ -30,7 +31,7 @@ zadání nic nevymýšlej; prázdné changes a konkrétní unresolved jsou v po�
 Jde o návrh ke kontrole, nikoli o schválení generování. Obrázek nevytvářej.
 """
 IMAGE_BRIEF_INSTRUCTIONS = """
-Obrázek vytvářej výhradně ze schváleného approved_brief, pracovního obrázku,
+Obrázek vytvářej ze schváleného approved_brief, společného room_basis, pracovního obrázku,
 vybraných referencí a kreslených poznámek. Historie diskuse není obrazové zadání.
 changes jsou schválené změny a preserve podmínky zachování. unresolved nejsou
 nová rozhodnutí: příslušné části ponech podle výchozího obrázku a neprezentuj
@@ -59,8 +60,11 @@ def parse_chat_answer(answer):
 
 
 def brief_basis(room, base_id, draft):
-    return _fingerprint({"draft": {k: v for k, v in draft.items() if k != "revision"},
-                         "notes": [n for n in room["notes"] if n["base_id"] == base_id]})
+    basis = {"draft": {k: v for k, v in draft.items() if k != "revision"},
+             "notes": [n for n in room["notes"] if n["base_id"] == base_id]}
+    if "room_basis" in room:
+        basis["room_basis"] = room_basis(room)
+    return _fingerprint(basis)
 
 
 def brief_view(room, base_id, draft, project_id, room_id):
@@ -86,8 +90,8 @@ def brief_view(room, base_id, draft, project_id, room_id):
                       "Poslední zpráva nemá ověřený souhrn. Upřesni zadání v rozhovoru.")
         elif stale:
             reason = "Podklady nebo rozpracovaná úprava se změnily. Nech architekta zadání upřesnit."
-    selected = list(dict.fromkeys([draft["image_source_id"], *draft["source_ids"]]))
-    selected = [i for i in selected if i]
+    selected = effective_sources(room, draft)
+    basis = room_basis(room)
     source = room["sources"].get(draft["image_source_id"])
     pending = any(j["base_id"] == base_id and j["status"] in BLOCKING for j in jobs)
     if not reason:
@@ -98,7 +102,7 @@ def brief_view(room, base_id, draft, project_id, room_id):
         elif not summary["changes"].strip():
             reason = "Popiš architektovi požadované změny; připraví souhrn zadání."
         elif len(selected) > 6:
-            reason = "Vyber nejvýše šest obrazových podkladů."
+            reason = "Vyber nejvýše šest obrazových podkladů včetně společného půdorysu."
     token = _fingerprint({"protocol": BRIEF_PROTOCOL, "project_id": project_id, "room_id": room_id,
         "base_id": base_id, "draft": draft, "brief": summary,
         "proposal_id": latest["id"] if latest else "", "proposal_status": latest["status"] if latest else "",
@@ -110,4 +114,5 @@ def brief_view(room, base_id, draft, project_id, room_id):
             "working_image": source["title"] if source else "",
             "references": [room["sources"][i]["title"] for i in selected if i in room["sources"] and i != draft["image_source_id"]],
             "source_count": len(selected),
-            "drawing_count": len(draft["annotations"])}
+            "drawing_count": len(draft["annotations"]),
+            "room_basis": {**basis, "plan_title": room["sources"].get(basis["plan_source_id"], {}).get("title", "")}}

@@ -342,3 +342,16 @@ Další krok: Obnovit stránku a provést lidskou přejímku rozhovoru a souhrnu
 Navrhované další kroky: Žádné nové. Výsledkový zápis zůstává místní pro další balíček; druhé p+n se kvůli němu nespouští. Nový TVBCP bez dohody nevzniká.
 
 Technický důkaz: Účtenka 81e34ae6bd5c3f646d93706a115796e1, completed; release_executor gpt-6.1-terra/high, push_state=already_aligned, deployment_state=confirmed. Plná publikační brána 3457 testů PASS / 674,4 s, smoke 5/5, protected_services_unchanged=true. Nasazený head e867c165d97c5b09a4c06c609af820db2d1965a4, code_stamp 3a11cc681db9bcac. Adam jednou ověřil HTTP 200 a byte-identickou živou stránku (SHA-256 8c7f37f809e6a899885f0e260f1be3ad075d9543909888b0850b70e7ececad84), nový brief_protocol=interior-brief-v1 a aktivní chat/image capabilities. Shodný manifest před/po, všech 7 podkladů a 25 variant zachovaných. Soukromé důkazy data/private/interior_conversation_brief_20261110/release/. Fyzická uživatelská přejímka ani sémantický placený test nového souhrnu nejsou tímto HTTP ověřením nahrazené. Vazba TVBCP pro budoucí Human–Adam zůstává otevřená.
+
+
+## 2026-11-10 21:29 CET — Společný půdorys a míry místnosti
+
+Hotovo: V Podkladech je „Společný základ místnosti“: jeden vybraný půdorys a samostatně uložené uživatelem ověřené míry/pevné body. Automaticky se přikládají k rozhovoru i vytváření obrázků u všech variant místnosti. Půdorys už nemá zaškrtávátko pro jednotlivý návrh; pracovní fotografie a volitelné reference zůstávají samostatné. Před potvrzením je dostupný náhled společného půdorysu a měr.
+
+Rozhodnutí: Míla schválil jeden společný půdorys pro navrhovaný prostor, v současném modelu tedy pro každou místnost projektu. Základ upravuje výslovně člověk, architekt jej nepřepisuje. Půdorys a míry mají v instrukcích přednost před dřívějšími AI obrázky; fotografie dál určuje pohled a vzhled. Rozměrová přesnost vizualizace není garantovaná. Změna základu zneplatní staré potvrzení a připravený souhrn; rozpracované neuložené míry blokují obě AI akce. Starší místnosti fungují beze změny a bez pasivní migrace.
+
+Další krok: Samostatně autorizované p+n; do té doby funkce není v běžícím Ateliéru.
+
+Navrhované další kroky: Po vydání lidská přejímka s vlastním půdorysem a mírami. Žádný placený test architekta ani nový TVBCP nebyly dohodnuté.
+
+Technický důkaz: 130 cílených Python/HTTP/frontend kontrol včetně 28 Node scénářů PASS; 12 nových backend/HTTP regresí. Nativní Safari na syntetické místnosti: jediné uložení půdorysu a měr, společný náhled, automatické předání stejných podkladů do chatu i potvrzeného obrazu, přítomnost u nové varianty. Fake driver chat1/image1/paid0. Plná brána PASS: 3469 testů, 0 chyb, 31 SKIP, 531,0 s. Ukládání chrání samostatná revize a idempotentní request_id; změna základu je při neukončeném AI požadavku blokovaná. Výměna/odebrání vazby nemaže soubory. Potvrzené trvalé smazání ukáže globální dopad, odpojí půdorys a odstraní i automaticky vytvořené AI snapshoty; zadané míry zachová. Skutečné soukromé podklady a Data se neměnily, souběžné MMTX změny zůstaly mimo vlastní vývojovou větev. Report reports/interior_room_basis_20261110.md, důkazy data/private/interior_room_basis_20261110/. Kanonický handoff a projektová paměť aktualizované; TVBCP pro budoucí Human–Adam zůstává výslovně nedohodnutý.

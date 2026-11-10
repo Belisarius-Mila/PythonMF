@@ -2,6 +2,13 @@
   "use strict";
   const BRIEF_PROTOCOL = "interior-brief-v1";
   const emptyDraft = () => ({title: "", prompt: "", fixed_elements: "", source_ids: [], image_source_id: "", annotations: []});
+  const emptyRoomBasis = () => ({plan_source_id:"", measurements:"", revision:0});
+  function restoreRoomBasis(server, cached, sources) {
+    if (!cached?.dirty || typeof cached.plan_source_id !== "string" || typeof cached.measurements !== "string" || !Number.isInteger(cached.revision))
+      return {...server, dirty:false, conflict:false};
+    return {...cached, plan_source_id:sources[cached.plan_source_id]?.kind === "plan" ? cached.plan_source_id : "",
+      dirty:true, conflict:cached.revision !== server.revision};
+  }
   const escape = value => String(value ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
   const scopeKey = scope => [scope.project, scope.room, scope.base || "base"].join(":");
   function gate() {
@@ -33,14 +40,14 @@
     }
     return {draft: pruneDraftSources(cached.draft, sources), revision: cached.revision, dirty: true, conflict: cached.revision !== server.revision};
   }
-  const core = {emptyDraft, escape, scopeKey, gate, paths, restoreDraft, pruneDraftSources, availableVariant};
+  const core = {emptyDraft, escape, scopeKey, gate, paths, restoreDraft, pruneDraftSources, availableVariant, emptyRoomBasis, restoreRoomBasis};
   if (typeof module !== "undefined" && module.exports) module.exports = core;
   if (!root.document) return;
   const $ = id => document.getElementById(id);
   const loader = gate();
   let scope = {project: "", room: "", base: "base"}, data = {projects: [], room: null}, draft = emptyDraft();
   let revision = 0, dirty = false, busy = false, loading = false, view = "gallery", returnView = "gallery", notesOpen = true, drawing = false, comparing = false;
-  let serverDraft = null;
+  let serverDraft = null, basisDraft = emptyRoomBasis(), basisDirty = false;
   let selectedFiles = [], createMode = "project", cacheWarning = false;
   const aiLoader = gate();
   let aiState = {enabled:false, jobs:[]}, aiSending = false;
@@ -53,9 +60,13 @@
   }
   function cacheKey() { return "samantha-interior-draft-v1:" + scopeKey(scope); }
   function cacheRead(key) { try { return JSON.parse(localStorage.getItem(key) || "null"); } catch (_) { return null; } }
+  function basisCacheKey() { return "samantha-interior-room-basis-v1:" + scope.project + ":" + scope.room; }
   function stash() {
     if (!scope.room) return;
-    try { localStorage.setItem(cacheKey(), JSON.stringify({draft, revision, dirty, note: $("noteText").value, aiText: $("aiText").value})); }
+    try {
+      localStorage.setItem(cacheKey(), JSON.stringify({draft, revision, dirty, note: $("noteText").value, aiText: $("aiText").value}));
+      localStorage.setItem(basisCacheKey(), JSON.stringify({...basisDraft, dirty:basisDirty}));
+    }
     catch (_) { cacheWarning = true; status("Prohlížeč neuchová rozpracované změny. Použij Uložit rozpracováno.", true); }
   }
   function remember() {
@@ -79,7 +90,7 @@
   function setBusy(value) {
     busy = value;
     const locked = value || loading;
-    ["projectSelect","roomSelect","newProject","newRoom","firstProject","refresh","uploadSources","confirmCreate","saveDraft","saveVariant","saveSourceSelection","noteText"].forEach(id => $(id).disabled = locked);
+    ["projectSelect","roomSelect","newProject","newRoom","firstProject","refresh","uploadSources","confirmCreate","saveDraft","saveVariant","saveSourceSelection","noteText","roomPlanSelect","roomMeasurements","saveRoomBasis","takeSavedRoomBasis"].forEach(id => $(id).disabled = locked);
     $("noteForm").querySelector("button").disabled = locked;
     $("draftForm").querySelectorAll("input,textarea").forEach(el => el.disabled = locked);
     $("sourceFiles").disabled = locked;
@@ -127,6 +138,10 @@
     }
     scope = wanted;
     if (response.draft) {
+      data.room.room_basis ||= emptyRoomBasis();
+      const restoredBasis = restoreRoomBasis(data.room.room_basis, cacheRead(basisCacheKey()), data.room.sources);
+      basisDraft = {plan_source_id:restoredBasis.plan_source_id, measurements:restoredBasis.measurements, revision:restoredBasis.revision};
+      basisDirty = restoredBasis.dirty;
       serverDraft = response.draft;
       const cached = cacheRead(cacheKey());
       const restored = restoreDraft(response.draft, cached, data.room.sources);
@@ -202,30 +217,37 @@
       "\n\nCo zachovat:\n" + serverDraft.fixed_elements + "\n\nVybrané podklady: " + serverDraft.source_ids.length : "";
     $("notesContext").textContent = "K návrhu: " + name;
     $("notes").innerHTML = data.room.notes.filter(n => n.base_id === scope.base).map(n => '<div class="note">' + escape(n.text) + '</div>').join("");
-    renderPicture(); renderSources(); renderAI();
+    renderPicture(); renderSources(); renderRoomBasis(); renderAI();
   }
   function pendingAIKey(captured = scope) { return "samantha-interior-ai-send-v1:" + scopeKey(captured); }
   function pendingAI() { return cacheRead(pendingAIKey()); }
   function aiBlocked() { return (aiState.jobs || []).some(job => ["queued","running","delivery_unknown","result_ready"].includes(job.status)); }
   function renderAI() {
     if (!data.room) return;
-    const count = new Set([draft.image_source_id, ...draft.source_ids].filter(Boolean)).size;
+    const savedBasis = data.room.room_basis || emptyRoomBasis();
+    const count = new Set([draft.image_source_id, savedBasis.plan_source_id, ...draft.source_ids].filter(Boolean)).size;
     $("aiStatus").textContent = aiState.enabled ? `AI architekt · ${aiState.model}` : aiState.message || "AI architekt zatím není aktivovaný.";
     $("aiSources").textContent = count ? `Pro architekta vybráno podkladů: ${count}. Výběr změníš v Podkladech.` : "Nejprve vyber podklady pro architekta.";
     $("useRoomSources").hidden = count > 0 || !Object.keys(data.room.sources).length;
     $("useRoomSources").disabled = busy || loading || aiSending;
     const pending = pendingAI();
     const locked = !aiState.enabled || !count || busy || loading || aiSending || aiBlocked() || Boolean(pending);
-    $("askArchitect").disabled = locked;
+    $("askArchitect").disabled = locked || basisDirty;
     const brief = aiState.brief;
     const unsent = Boolean($("aiText").value.trim());
-    const reviewable = brief && brief.revision === revision && !dirty;
+    const reviewable = brief && brief.revision === revision && !dirty && !basisDirty && (brief.room_basis?.revision || 0) === savedBasis.revision;
     $("briefContext").textContent = brief ? `Pracovní obrázek: ${brief.working_image || "nevybraný"} · podkladů: ${brief.source_count} · tahů kresby: ${brief.drawing_count}. Reference: ${(brief.references || []).join(", ") || "žádné další"}` : "Načítám souhrn…";
-    $("briefVisual").innerHTML = picture(draft);
+    const basis = brief?.room_basis || savedBasis;
+    $("briefRoomBasis").textContent = "Půdorys: " + (basis.plan_title || data.room.sources[basis.plan_source_id]?.title || "nenastavený") +
+      "\nMíry: " + (basis.measurements || "zatím nezadané");
+    const planPreview = basis.plan_source_id ? picture({image_source_id:basis.plan_source_id,annotations:[]}) : "";
+    if ($("briefPlanVisual").innerHTML !== planPreview) $("briefPlanVisual").innerHTML = planPreview;
+    const workPreview = picture(draft);
+    if ($("briefVisual").innerHTML !== workPreview) $("briefVisual").innerHTML = workPreview;
     $("briefChanges").textContent = brief?.changes || "Zatím není zadání. Napiš architektovi, co chceš upravit.";
     $("briefPreserve").textContent = brief?.preserve || "Bez dalších podmínek zachování.";
     $("briefUnresolved").textContent = brief?.unresolved?.length ? brief.unresolved.join("\n") : "Žádné otevřené otázky.";
-    $("briefStatus").textContent = dirty ? "Nejprve ulož rozpracované podklady nebo kresbu. Původní souhrn může vyžadovat upřesnění s architektem." :
+    $("briefStatus").textContent = basisDirty ? "Nejprve ulož společný půdorys a míry místnosti. Rozpracované změny se ještě nepřikládají." : dirty ? "Nejprve ulož rozpracované podklady nebo kresbu. Původní souhrn může vyžadovat upřesnění s architektem." :
       unsent ? "Máš rozepsanou zprávu. Nejdříve ji prober s architektem, nebo ji odstraň." :
       !reviewable ? "Ověřuji aktuální verzi zadání…" : brief.reason ||
       (brief.fixed_changed ? "Architekt navrhl změnu podmínek zachování. Před vytvořením ji zkontroluj." : "Návrh zadání je připravený ke kontrole.");
@@ -274,7 +296,8 @@
       aiState = state;
       const pending = pendingAI();
       if (pending && state.jobs.some(job => job.client_request_id === pending.request_id)) localStorage.removeItem(pendingAIKey());
-      if (state.brief && state.brief.revision !== serverDraft?.revision) {
+      if (state.brief && (state.brief.revision !== serverDraft?.revision ||
+          (state.brief.room_basis?.revision || 0) !== (data.room.room_basis?.revision || 0))) {
         await load(captured);
         return;
       }
@@ -291,8 +314,9 @@
     const sentText = $("aiText").value;
     try {
       if (!payload) {
+        if (basisDirty) throw new Error("Nejprve ulož společný půdorys a míry místnosti.");
         const brief = aiState.brief;
-        if (mode === "image" && (dirty || $("aiText").value.trim() || !brief?.can_generate || brief.revision !== revision))
+        if (mode === "image" && (dirty || basisDirty || $("aiText").value.trim() || !brief?.can_generate || brief.revision !== revision))
           throw new Error("Nejprve ověř zobrazený souhrn a dokonči rozhovor s architektem.");
         const message = mode === "image" ? "Vytvořit podle schváleného zadání." : $("aiText").value.trim();
         if (!message) throw new Error("Napiš otázku nebo požadovanou změnu pro architekta.");
@@ -315,8 +339,9 @@
   function renderSources() {
     $("sourceList").innerHTML = Object.values(data.room.sources).map(source => '<article class="source-card"><img src="' +
       escape(sourceUrl(source.id, "thumbnail")) + '" alt="' + escape(source.title) + '"><h3>' + escape(source.title) +
-      '</h3><p class="muted">' + kindName[source.kind] + '</p><label><input type="checkbox" data-source="' + source.id + '"' +
-      (draft.source_ids.includes(source.id) ? " checked" : "") + '>Použít pro tento návrh</label><label><input type="radio" name="workingImage" data-working="' + source.id + '"' +
+      '</h3><p class="muted">' + kindName[source.kind] + '</p>' + (source.id === data.room.room_basis?.plan_source_id ?
+      '<p class="stage-note">Společný půdorys · přikládá se automaticky ke všem variantám</p>' : '<label><input type="checkbox" data-source="' + source.id + '"' +
+      (draft.source_ids.includes(source.id) ? " checked" : "") + '>Použít pro tento návrh</label>') + '<label><input type="radio" name="workingImage" data-working="' + source.id + '"' +
       (draft.image_source_id === source.id ? " checked" : "") + '>Pracovní obrázek</label><a target="_blank" rel="noopener" href="' +
       escape(sourceUrl(source.id, "original")) + '">Otevřít originál</a><button type="button" class="danger" data-delete-source="' +
       source.id + '">Smazat</button></article>').join("") ||
@@ -343,6 +368,40 @@
       changed(); renderSources();
     }));
   }
+  function renderRoomBasis() {
+    if (!data.room) return;
+    $("roomPlanSelect").innerHTML = '<option value="">Bez společného půdorysu</option>' + Object.values(data.room.sources)
+      .filter(source => source.kind === "plan").map(source => '<option value="' + source.id + '">' + escape(source.title) + '</option>').join("");
+    $("roomPlanSelect").value = basisDraft.plan_source_id;
+    $("roomMeasurements").value = basisDraft.measurements;
+    $("roomBasisComparison").hidden = !basisDirty;
+    const saved = data.room.room_basis;
+    $("roomBasisSavedPreview").textContent = "Půdorys: " + (data.room.sources[saved.plan_source_id]?.title || "nenastavený") + "\nMíry: " + (saved.measurements || "nezadané");
+    $("roomBasisStatus").textContent = basisDirty ? (basisDraft.revision !== saved.revision ?
+      "Společný základ změnil jiný klient. Tvoje rozepsané hodnoty zůstaly; porovnej je s uloženým stavem." : "Neuložená změna společného základu.") :
+      "Uložený společný základ · platí pro všechny varianty této místnosti.";
+  }
+  function changedBasis() {
+    basisDraft.plan_source_id = $("roomPlanSelect").value;
+    basisDraft.measurements = $("roomMeasurements").value;
+    basisDirty = true; stash();
+    $("roomBasisStatus").textContent = "Neuložená změna společného základu. Nejprve ji ulož.";
+    $("roomBasisComparison").hidden = false; renderAI();
+  }
+  $("roomPlanSelect").addEventListener("change", changedBasis);
+  $("roomMeasurements").addEventListener("input", changedBasis);
+  $("takeSavedRoomBasis").addEventListener("click", () => {
+    if (busy || !confirm("Nahradit rozepsaný půdorys a míry posledním uloženým základem?")) return;
+    basisDraft = {...data.room.room_basis}; basisDirty = false; stash(); renderRoomBasis(); renderAI();
+  });
+  $("roomBasisForm").addEventListener("submit", event => { event.preventDefault(); perform(async () => {
+    const captured = context(), sent = {...basisDraft};
+    const result = await mutate("save_room_basis", {expected_basis_revision:sent.revision,
+      plan_source_id:sent.plan_source_id, measurements:sent.measurements}, captured);
+    basisDirty = sent.plan_source_id !== basisDraft.plan_source_id || sent.measurements !== basisDraft.measurements;
+    basisDraft.revision = result.basis_revision; stash();
+    await load(captured); status("Společný půdorys a míry jsou uložené pro všechny varianty místnosti.");
+  }); });
   async function openDeletion(asset, pending = null) {
     if (busy || loading || aiSending) return;
     const captured = context(); setBusy(true);
@@ -360,6 +419,7 @@
       $("deleteImpact").textContent = pending ? "Původní potvrzený rozsah zůstává zachovaný." :
         "Odebere obrázek z " + plan.variant_count + " uložených návrhů a " + plan.draft_count +
         " rozepsaných úprav. Textová zadání zůstanou, kresba vázaná na tento obrázek se odstraní." +
+        (plan.room_plan ? " Jde o společný půdorys: jeho automatické přikládání se zruší pro celou místnost. Zadané míry zůstanou." : "") +
         (plan.shared_file_count ? " Společné soubory zůstanou pro jiné podklady; lze uvolnit jen výše uvedenou velikost." : "");
       $("deletePhrase").textContent = plan.confirmation_text;
       $("deleteConfirmation").value = ""; $("deleteError").textContent = "";
@@ -485,7 +545,7 @@
   $("generateProposal").addEventListener("click", () => submitAI("image"));
   $("checkAISend").addEventListener("click", () => { const pending = pendingAI(); if (pending) submitAI(pending.mode, pending); });
   $("useRoomSources").addEventListener("click", () => perform(async () => {
-    const ids = Object.keys(data.room.sources);
+    const ids = Object.keys(data.room.sources).filter(id => data.room.sources[id].kind !== "plan");
     if (!ids.length || ids.length > 6) throw new Error("V Podkladech vyber nejvýše šest obrázků.");
     draft.source_ids = ids;
     if (!draft.image_source_id) draft.image_source_id = ids.find(id => data.room.sources[id].kind === "photo") || ids[0];

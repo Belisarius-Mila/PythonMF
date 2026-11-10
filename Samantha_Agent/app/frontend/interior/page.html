@@ -29,12 +29,13 @@
 <section class="brief-card" aria-labelledby="briefTitle"><h2 id="briefTitle">Zadání pro příští obrázek</h2>
 <p class="muted">Změny domluv s architektem v rozhovoru. Zde zkontroluj jeho souhrn před vytvořením obrázku.</p>
 <p id="briefContext" class="muted"></p>
+<details><summary>Společný půdorys a míry místnosti</summary><p id="briefRoomBasis" class="brief-text"></p><div id="briefPlanVisual"></div></details>
 <details><summary>Zkontrolovat pracovní obrázek a kresbu</summary><div id="briefVisual"></div></details><h3>Požadované změny</h3><p id="briefChanges" class="brief-text"></p>
 <h3>Co zůstane zachované</h3><p id="briefPreserve" class="brief-text"></p>
 <h3>Dosud nerozhodnuto</h3><p id="briefUnresolved" class="brief-text"></p>
 <p id="briefStatus" role="status" class="stage-note"></p>
 <button id="generateProposal" type="button" disabled>Vytvořit podle tohoto zadání</button>
-<p class="muted">Kliknutím potvrdíš zobrazené zadání, pracovní obrázek, vybrané reference a kresbu. Vytvoření obrázku využije placený model.</p></section>
+<p class="muted">Kliknutím potvrdíš zobrazené zadání, společný půdorys a míry, pracovní obrázek, vybrané reference a kresbu. Vytvoření obrázku využije placený model.</p></section>
 <section id="editor" hidden aria-label="Úprava návrhu"><div class="draw-tools">
 <button id="draw" type="button" aria-pressed="false">Kreslit poznámky</button>
 <button id="undo" type="button" class="secondary">Zpět poslední tah</button>
@@ -59,6 +60,14 @@
 <main id="sourcesView" class="sources-view" hidden><div class="workspace-heading"><div><h2>Podklady místnosti</h2>
 <p class="muted">Vyber reference a jeden pracovní obrázek. Nepotřebné podklady můžeš trvale smazat s potvrzením.</p></div>
 <button id="closeSources" type="button">← Zpět k návrhu</button></div>
+<section class="brief-card" aria-labelledby="roomBasisTitle"><h2 id="roomBasisTitle">Společný základ místnosti</h2>
+<p class="muted">Jeden půdorys a skutečné míry pro všechny varianty. Automaticky se přikládají k rozhovoru i vytváření obrázků. Nahraj půdorys níže jako „Náčrt nebo rozměry“ a vyber ho zde.</p>
+<form id="roomBasisForm"><label>Platný půdorys<select id="roomPlanSelect"></select></label>
+<label>Ověřené míry a pevné body<textarea id="roomMeasurements" maxlength="6000" rows="4" placeholder="Například délka a šířka místnosti, výška stropu, rozměry a poloha dveří či oken. Vždy uveď jednotky."></textarea></label>
+<p class="muted">Míry zadáváš a kontroluješ ty; architekt je sám nemění. Výměna půdorysu nepřepisuje ani nemaže soubory. Vizualizace stále nezaručuje rozměrovou přesnost.</p>
+<details id="roomBasisComparison" hidden><summary>Poslední uložený základ</summary><pre id="roomBasisSavedPreview" class="brief-text"></pre>
+<button id="takeSavedRoomBasis" type="button" class="secondary">Načíst uložený základ</button></details>
+<p id="roomBasisStatus" class="muted" role="status"></p><button id="saveRoomBasis" type="submit">Uložit společný základ</button></form></section>
 <form id="uploadForm" class="upload"><label>Význam nových podkladů<select id="sourceKind"><option value="photo">Skutečný stav</option><option value="plan">Náčrt nebo rozměry</option><option value="inspiration">Inspirace</option></select></label>
 <label class="dropzone" id="dropzone">Přetáhni fotografie nebo náčrty, případně vyber soubory
 <input id="sourceFiles" type="file" multiple accept="image/png,image/jpeg,image/webp"></label>

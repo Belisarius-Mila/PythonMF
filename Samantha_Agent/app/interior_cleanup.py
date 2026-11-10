@@ -11,6 +11,7 @@ from app.interior_atelier import (
     AtelierConflict, AtelierError, REQUEST_RE, _fingerprint, _hash, _identifier, _now, _safe_path,
 )
 from app.work_repository import RepositoryMutation
+from app.interior_room_basis import room_basis, detach_room_plan
 
 DELETE_CONFIRMATION = "Potvrzuji globální brzdu: rozumím riziku a chci pokračovat."
 BLOCKING = {"queued", "running", "delivery_unknown", "result_ready"}
@@ -21,7 +22,8 @@ def _jobs(room, asset_id):
     for job_id, job in room.get("ai_requests", {}).items():
         draft = job.get("context", {}).get("draft", {})
         outputs = job.get("variant_ids", []) or [job.get("variant_id", "")]
-        if (asset_id in draft.get("source_ids", []) or draft.get("image_source_id") == asset_id
+        if (job.get("context", {}).get("room_basis", {}).get("plan_source_id") == asset_id
+                or asset_id in draft.get("source_ids", []) or draft.get("image_source_id") == asset_id
                 or any(room["variants"].get(v, {}).get("image_source_id") == asset_id for v in outputs)):
             if job["status"] in BLOCKING:
                 raise AtelierConflict("Podklad používá neukončený AI požadavek. Nejprve ověř jeho původní výsledek.")
@@ -96,6 +98,7 @@ def _plan(store, data, project_id, room_id, asset_id):
                           "project_id": project_id, "room_id": room_id})
     affected = lambda item: asset_id in item.get("source_ids", []) or item.get("image_source_id") == asset_id
     return {"plan_token": token, "asset_id": asset_id, "project_id": project_id, "room_id": room_id,
+            "room_plan": room_basis(room)["plan_source_id"] == asset_id,
             "title": source["title"], "bytes": sum(f["bytes"] for f in files), "file_count": len(files),
             "shared_file_count": shared_count, "variant_count": sum(affected(v) for v in room["variants"].values()),
             "draft_count": sum(affected(d) for d in room["drafts"].values()), "files": files, "jobs": jobs}
@@ -153,12 +156,16 @@ def _delete_source_locked(store, payload):
         _, room = store._room(data, payload["project_id"], payload["room_id"])
         asset_id = payload["asset_id"]
         del room["sources"][asset_id]
+        detach_room_plan(room, asset_id)
         for record in (*room["variants"].values(), *room["drafts"].values()):
             _detach(record, asset_id)
         for job_id in plan["jobs"]:
             job = room["ai_requests"][job_id]
             job["source_cleanup"] = True
             _detach(job.get("context", {}).get("draft", {}), asset_id)
+            basis = job.get("context", {}).get("room_basis", {})
+            if basis.get("plan_source_id") == asset_id:
+                basis.update(plan_source_id="", plan_image_number=None)
         room["updated_at"] = _now()
         # Durable intent precedes unlink. No image copy is kept in this receipt.
         data.setdefault("source_deletions", {})[request_id] = {

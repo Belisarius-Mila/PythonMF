@@ -32,18 +32,19 @@ class Element {
 
 const clone = value => JSON.parse(JSON.stringify(value));
 const flush = async () => { for (let i=0;i<10;i++) await new Promise(resolve => setImmediate(resolve)); };
-function fixture({variants = {}, initial = null, cachedDraft = null} = {}) {
+function fixture({variants = {}, initial = null, cachedDraft = null, roomBasis = null} = {}) {
   const page = fs.readFileSync(path.join(__dirname, '../app/frontend/interior/page.html'),'utf8');
   const ids = Object.fromEntries([...page.matchAll(/id="([^"]+)"/g)].map(m => [m[1], new Element(m[1])]));
   const cache = new Map(), intervals = [], calls = [], paid = new Set();
   if (initial) cache.set('samantha-interior-selection-v1',JSON.stringify(initial));
   if (cachedDraft) cache.set('samantha-interior-draft-v1:project:A:dead',JSON.stringify(cachedDraft));
   const jobs = {A:[],B:[]};
+  const basis = roomBasis || {plan_source_id:"",measurements:"",revision:0};
   const draft = {title:'Saved title',prompt:'Keep the room',fixed_elements:'Door',source_ids:['photo'],image_source_id:'photo',annotations:[],revision:2};
   let sequence = 0, holdStart = null, holdStatusA = null, throwStart = false, holdDelete = null, throwDelete = false, deleted = false;
   const deletedRequests = new Set();
   const confirmation = 'Potvrzuji globální brzdu: rozumím riziku a chci pokračovat.';
-  function room(id) { return {id,title:'Room '+id,sources:deleted?{}:{photo:{id:'photo',title:'Private photo',kind:'photo'}},variants,notes:[]}; }
+  function room(id) { return {id,title:'Room '+id,sources:deleted?{}:{photo:{id:'photo',title:'Private photo',kind:'photo'},...(roomBasis?{plan:{id:'plan',title:'Verified floor plan',kind:'plan'}}:{})},variants,notes:[],room_basis:clone(basis)}; }
   const projects = [{id:'project',title:'Private project',rooms:[{id:'A',title:'A'},{id:'B',title:'B'}]}];
   const context = {document:{getElementById:id=>ids[id],createElement:tag=>new Element(tag)},
     localStorage:{getItem:k=>cache.get(k)??null,setItem:(k,v)=>cache.set(k,v),removeItem:k=>cache.delete(k)},
@@ -65,9 +66,12 @@ function fixture({variants = {}, initial = null, cachedDraft = null} = {}) {
         if (selected==='A' && holdStatusA) await holdStatusA;
         result={ok:true,enabled:true,image_generation:true,model:'approved-model',jobs:captured,
           brief:{changes:draft.prompt,preserve:draft.fixed_elements,unresolved:[],revision:draft.revision,
-            working_image:'Private photo',source_count:1,drawing_count:0,can_generate:true,token:'review-'+draft.revision}};
+            working_image:'Private photo',source_count:basis.plan_source_id?2:1,drawing_count:0,can_generate:true,token:'review-'+draft.revision,room_basis:clone(basis)}};
       } else if (url==='/api/interior/action') {
-        if (payload.action==='delete_source') {
+        if (payload.action==='save_room_basis') {
+          if (payload.expected_basis_revision!==basis.revision) result={ok:false,error:'conflict',message:'Spolecny zaklad se zmenil.'};
+          else { Object.assign(basis,{plan_source_id:payload.plan_source_id,measurements:payload.measurements,revision:basis.revision+1});result={ok:true,basis_revision:basis.revision}; }
+        } else if (payload.action==='delete_source') {
           assert.equal(payload.confirmation,confirmation);
           assert.equal(payload.plan_token,'d'.repeat(64));
           if (!deletedRequests.has(payload.request_id)) {
@@ -99,7 +103,7 @@ function fixture({variants = {}, initial = null, cachedDraft = null} = {}) {
       return {ok:true,json:async()=>clone(result)};
     }};
   vm.runInNewContext(fs.readFileSync(path.join(__dirname,'../app/frontend/interior/app.js'),'utf8'),context);
-  return {ids,calls,cache,jobs,intervals,paid,deletedRequests,confirmation,variants,draft,
+  return {ids,calls,cache,jobs,intervals,paid,deletedRequests,confirmation,variants,draft,basis,
     setHoldDelete:p=>holdDelete=p,setThrowDelete:()=>throwDelete=true,
     setHoldStart:p=>holdStart=p,setHoldStatusA:p=>holdStatusA=p,setThrowStart:()=>throwStart=true};
 }
@@ -294,4 +298,47 @@ test('architect revision refresh preserves an unsent question and does not overw
   f.intervals[0]();await flush();
   assert.equal(f.ids.draftTitle.value,'Local title');
   assert.equal(f.ids.generateProposal.disabled,true);
+});
+
+
+test('shared plan is automatic and unsaved room measurements block both paid actions',async()=>{
+  const f=fixture({roomBasis:{plan_source_id:'plan',measurements:'300 x 220 cm',revision:1}});await flush();
+  assert.match(f.ids.briefRoomBasis.textContent,/Verified floor plan/);
+  assert.match(f.ids.briefRoomBasis.textContent,/300 x 220 cm/);
+  assert.match(f.ids.aiSources.textContent,/2/);
+  assert.match(f.ids.sourceList.innerHTML,/přikládá se automaticky/);
+  assert.doesNotMatch(f.ids.sourceList.innerHTML,/data-source="plan"/);
+  f.ids.roomMeasurements.value='310 x 220 cm';f.ids.roomMeasurements.listeners.input();
+  assert.equal(f.ids.askArchitect.disabled,true);assert.equal(f.ids.generateProposal.disabled,true);
+  assert.match(f.ids.briefRoomBasis.textContent,/300 x 220 cm/,'Unconfirmed measurements do not replace the reviewed basis');
+  await f.ids.roomBasisForm.listeners.submit({preventDefault(){}});await flush();
+  assert.equal(f.basis.measurements,'310 x 220 cm');
+  assert.match(f.ids.briefRoomBasis.textContent,/310 x 220 cm/);
+  assert.equal(f.ids.askArchitect.disabled,false);assert.equal(f.paid.size,0);
+  assert.equal(f.calls.filter(c=>c.payload?.action==='save_room_basis').length,1);
+});
+
+test('late shared-basis revision preserves local measurements and rejects stale save without overwriting server',async()=>{
+  const f=fixture({roomBasis:{plan_source_id:'plan',measurements:'300 cm',revision:1}});await flush();
+  f.ids.roomMeasurements.value='Local unfinished dimension';f.ids.roomMeasurements.listeners.input();
+  f.basis.measurements='New server dimension';f.basis.revision=2;
+  f.intervals[0]();await flush();
+  assert.equal(f.ids.roomMeasurements.value,'Local unfinished dimension');
+  assert.match(f.ids.roomBasisSavedPreview.textContent,/New server dimension/);
+  assert.equal(f.ids.generateProposal.disabled,true);
+  await f.ids.roomBasisForm.listeners.submit({preventDefault(){}});await flush();
+  assert.equal(f.basis.measurements,'New server dimension');
+  assert.equal(f.ids.roomMeasurements.value,'Local unfinished dimension');
+  assert.equal(f.paid.size,0);
+});
+
+test('room basis cache is shared across variants while unsent questions remain scoped',async()=>{
+  const f=fixture({roomBasis:{plan_source_id:'plan',measurements:'300 cm',revision:1}});await flush();
+  f.ids.roomMeasurements.value='Unfinished room measure';f.ids.roomMeasurements.listeners.input();
+  f.ids.aiText.value='Only base question';f.ids.aiText.listeners.input();
+  f.jobs.A.push({id:'output',message:'Earlier',answer:'Saved',status:'completed',variant_ids:['child'],created_at:'now'});
+  f.intervals[0]();await flush();
+  const button=f.ids.aiConversation.children[0].children.find(c=>c.tag==='button');await button.click();await flush();
+  assert.equal(f.ids.roomMeasurements.value,'Unfinished room measure');
+  assert.equal(f.ids.aiText.value,'');assert.equal(f.paid.size,0);
 });
