@@ -1,12 +1,13 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
-- 2026-11-02 08:18 CET: kompletní audio scény 6 je publikované na GitHub Pages, 144/144 stop (72 EN + 72 CZ). Původních 16 MP3 zachovaných; nových 128 Azure MP3 a izolace rozpočtového testu vydané do b0b4e172ab8b2fe69216af9d7520a23e22e2f624.
-- Terra 6.1/high dokončila jediné nové registrované p+n osmi commitů. Účtenka 81db27cc7794d9ba88dcd888156b35b6: completed, push_state/deployment_state=confirmed. Pages workflow 41405199009, deployment 7486464591, HTTP smoke 200; chráněné služby beze změny.
-- Plná publikační brána prošla: 2273 testů, 0 chyb, 18 přeskočených, 342,3 s celkem (unit 332,552 s). Rozpočtový test je izolovaný od skutečného FFmpeg; cílená Azure/builder sada 11 PASS v běžném i službovém PATH. Produkční generátor a službové prostředí se neměnily.
-- Jedna Adamova kontrola: GitHub/main přesně na vydaném headu; veřejná šestka má HTML, story.json, audio_bindings.json a všech 144 MP3 HTTP 200 a přesné bajty včetně otisků audio vazeb (147/147). Důkaz logs/mmtx_scene06_terra_public_verification_20261102.json. Cockpit zdravý se stejným PID a code_stamp ae3b321d9492092a.
-- Caller převzal konečnou účtenku; returned_to_adam=false je portálový příznak, ne důvod k retry. Původní neúspěšná účtenka zachovaná. Tento výsledkový zápis je místní checkpoint pro další balíček; další p+n se nespouští.
-- Další krok: prakticky projít a poslechnout celou scénu Mac/iPhone. Hlasové ukázky přijaté; fyzická přejímka celé scény nadále NEOVĚŘENO.
+- 2026-11-10 11:42 CET: Míla výslovně schválil odstranění šesté scény u jezera a potvrdil globální brzdu. V kanonických `docs/scene06_lake_arrival/` i `MatysekANJ/web_mmtx/scene06_lake_arrival/` zůstal pouze první obrázek `arrival.webp` (380134 B, SHA-256 `038d273ff95d3077fe26d142ad32ca6fc32d0e9b5c6997ea53c161964fedcf65`).
+- Ostatní média a kód šestky jsou místně odstraněné: 144 MP3 a tři další obrázky v každé kopii, scénářová data, generátor a jeho dva testové moduly. Oba Azure workflow příkazy a odkazy z páté scény jsou odstraněné; dokončení mostu zůstává jako neklikací stavová zpráva. Sdílené TTS moduly se nemění.
+- Scény 1–5, jejich média, Logan i obrázek loučení zůstávají zachované. Ze starších scén se mění pouze HTML konce páté scény a CSS zrušené zkratky v obou mirrorech; všechny ostatní soubory odpovídají předchozím otiskům. Cílená sada most/registry: 51 PASS; plná brána 3402 testů, 0 chyb, 31 přeskočených (700,764 s unit; 707,1 s brána).
+- Datova větev má novější vlastní commit; ten byl zachovaný beze změny. V jejím stávajícím worktree jsou pouze související WIP změny odstranění šestky (321 cest), bez merge/rebase a bez přepsání jiné práce.
+- Rozsah úklidu pěti známých pracovních prostředí a oddělených hlasových ukázek je 1584 souborů / 35524901 logických bajtů. Další kopie budou srovnány po kanonickém commitu; celkové místo skutečně uvolněné na APFS se může lišit. Historie Gitu a zálohy nejsou přepisované ani promazávané.
+- Nesouvisející změny zdrojového checkoutu jsou dočasně bezpečně odložené pro čisté vydání a poté se vrátí. Nově přidaný necommitovaný scénář šestky je mimo schválený mazací seznam a zůstává zachovaný. Soukromý kontrolní manifest, otisky a návrh změn jsou mimo Git.
+- Další krok: místní checkpoint, zarovnání známých kopií a jediné registrované p+n `project-mmtx` / GitHub Pages. Veřejné odstranění zatím tímto zápisem není potvrzené.
 <!-- SAMANTHA_CURRENT_STATUS_END -->
 
 # TVBCP: MMTX
@@ -1458,3 +1459,15 @@ Technický důkaz:
 - Účtenka 81db27cc7794d9ba88dcd888156b35b6 completed, push_state/deployment_state=confirmed; osm commitů do b0b4e172ab8b2fe69216af9d7520a23e22e2f624. Plná brána 2273 testů / 0 chyb / 18 přeskočených, 342,3 s (unit 332,552 s), protected_services_unchanged=true.
 - Pages workflow 41405199009, deployment 7486464591, smoke HTTP 200. Jedna Adamova kontrola: skutečný GitHub head shodný; veřejných 147/147 souborů (HTML, dva JSON, 144 MP3) HTTP 200 a byte/SHA-256 shoda s vydanými zdroji. Důkaz logs/mmtx_scene06_terra_public_verification_20261102.json.
 - Cockpit health OK, stejný PID 1866 a code_stamp ae3b321d9492092a. Caller účtenku převzal; returned_to_adam=false nepředstavuje portálové doručení a není důvodem retry. Bez dalšího vydání nebo restartu Cockpitu; následný výsledkový zápis místně pro další balíček. Fyzický poslech/proklik celé scény NEOVĚŘENO.
+
+### 2026-11-10 11:42 CET – Odstranění šesté scény u jezera
+
+Hotovo: Kanonická šestka obsahuje pouze zachovaný první obrázek. Předchozí scény včetně mostu a Logana zůstávají funkčně zachované; přechod k odstraněné šestce je zrušený.
+
+Rozhodnutí: Míla schválil odstranění z aktivní produkce a známých místních kopií přesnou globální brzdou. Historie, zálohy a nově přidaný necommitovaný scénář nejsou součástí mazání.
+
+Další krok: Publikovat přes registrované p+n; po publikaci ověřit odstraněné URL i zachované scény.
+
+Navrhované další kroky: Žádné nové.
+
+Technický důkaz: Cílených 51 testů PASS a plná brána 3402 testů / 0 chyb / 31 přeskočených; předchozí média a první obrázek mají nezměněné SHA-256. Celkový soukromý manifest vymezuje 1584 souborů / 35524901 B, bez symlinků.
