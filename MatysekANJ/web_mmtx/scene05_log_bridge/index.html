@@ -15,7 +15,7 @@
     <link rel="preload" href="scene05_lamp_rescued_smooth_q90.webp" as="image" type="image/webp">
     <link rel="preload" href="scene05_friends_farewell_smooth_q90.webp?v=20260912artfix1" as="image" type="image/webp">
     <link rel="stylesheet" href="styles.css?v=20260912artfix1">
-    <link rel="stylesheet" href="interaction.css?v=20261028scene6corner">
+    <link rel="stylesheet" href="interaction.css?v=20261110lakeopening1">
   </head>
   <body>
     <main class="app-shell">
@@ -62,8 +62,6 @@
             <button class="log-piece log-three" type="button" data-log="3" aria-label="Třetí kláda"><img class="log-sprite" src="scene05_log_sprite_a.webp" alt="" draggable="false"></button>
           </div>
 
-          <a class="scene-quick-skip" href="../scene06_lake_arrival/index.html" aria-label="Rychle přejít ke scéně 6"></a>
-
           <div class="character-targets" aria-label="Postavy, kterým můžeš pomoci přejít most">
             <button class="character-target benji-target hidden" id="benjiTarget" type="button" aria-label="Pomoz Benjimu přejít most"><span>Benji</span></button>
             <button class="character-target sunny-target hidden" id="sunnyTarget" type="button" aria-label="Pomoz Sunny přeskákat most"><span>Sunny</span></button>
@@ -74,10 +72,11 @@
 
           <button class="next-button hidden" id="nextButton" type="button" aria-label="Přehrát další větu" disabled><span>Next</span><span aria-hidden="true">▶</span></button>
 
-          <a class="complete-banner hidden" id="completeBanner" href="../scene06_lake_arrival/index.html" aria-label="Pokračovat k jezeru">
-            <span aria-hidden="true">🚪</span>
-            <span><strong>Bridge crossing complete!</strong><small>Přechod přes most je dokončený! Pokračuj k jezeru.</small></span>
-          </a>
+          <div class="complete-banner hidden" id="completeBanner" role="status">
+            <span aria-hidden="true">✓</span>
+            <span><strong>Bridge crossing complete!</strong><small>Přechod přes most je dokončený!</small></span>
+            <a class="continue-link" href="../scene06_lake_arrival/index.html" aria-label="Pokračovat k jezeru — scéna 6">To the lake! ➜</a>
+          </div>
 
           <section class="dictionary-panel hidden" id="dictionaryPanel" aria-label="Slovníček nových slov">
             <div class="dictionary-title">

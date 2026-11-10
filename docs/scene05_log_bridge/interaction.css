@@ -288,21 +288,7 @@ button { font: inherit; }
   .character-target { animation: none; }
 }
 
-/* Adult shortcut, matching the lower-left corner in preceding scenes. */
-.scene-quick-skip {
-  position: absolute;
-  left: 0;
-  bottom: 0;
-  width: 16%;
-  height: 24%;
-  min-width: 44px;
-  min-height: 44px;
-  z-index: 22;
-  background: transparent;
-  cursor: pointer;
-}
-.scene-quick-skip:focus-visible {
-  outline: 3px solid rgba(255, 216, 107, 0.82);
-  outline-offset: -6px;
-}
-.scene:has(.dictionary-panel:not(.hidden)) .scene-quick-skip { display: none; }
+/* Continue only after the complete bridge dialogue. */
+.complete-banner { flex-wrap: wrap; max-width: calc(100% - 24px); border-radius: 24px; }
+.continue-link { display: inline-flex; min-height: 44px; align-items: center; justify-content: center; padding: 6px 14px; border: 2px solid #5d9b68; border-radius: 18px; color: #213d30; background: #fff8d7; font-weight: 900; text-decoration: none; }
+.continue-link:focus-visible { outline: 3px solid #1b68a3; outline-offset: 2px; }
