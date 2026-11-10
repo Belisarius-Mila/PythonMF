@@ -1,13 +1,13 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
-- 2026-11-10 16:12 CET: Lokálně hotové obrazy 1+2 nové šestky, 17 přesných EN replik / pevných MP3. Po 7/7 nabídne Next picture Ollieho a jeho 10 vět; Repeat, Again, chyby zvuku a návrat přes historii ověřené. Další obrazy se neimplementují.
-- Nových 10 Azure požadavků / 635 znaků, −10 %, Ollie Andrew podle původního hlasového ID. Prvních 7 MP3, první JSON/manifest i první obrázek zůstávají byte-identické; žádný první požadavek se neopakoval.
-- Ověření druhého obrazu: 57 cílených testů PASS, plná brána 2972 testů OK (5 SKIP), 665,420 s unit. Dekódování 17/17, mirrory shodné, lokální HTTP 27/27 přesné. Skutečné Safari ukázalo Bunny 10/10, Again a dokončení; desktopové rozložení zkontrolované. Fyzický iPhone a výslovná hlasová přejímka zůstávají otevřené.
-- První p+n proběhlo JEDNOU Terrou 6.1/high pro main `fee535e5b4b89fca3fb2b9150d4742e65472818e`, job `4b261f77c13a77e845684bbbd90cc876`: brána 3412 PASS / 650,6 s a push confirmed. Pages run `42839271179`: build success, deploy failure po 600000 ms při syncing_files a zrušení deploymentu. Konečná účtenka attention / deployment uncertain. Po zrušení první HTML stále HTTP 404 (16:10 CET); produkční zkouška zatím není možná. Žádný nový pokus se neodeslal.
-- Míla dostal konkrétní otázku, zda schvaluje jeden nový pokus přesně stejného prvního balíčku; čeká se na odpověď, nikoli na další modelový polling. Main zůstává čistý a zarovnaný s GitHubem na fee535e5, oba profily také. Willovy 3 WIP změny jsou zachované ve stashi `550024e17da59eb258556f5d3f0979650d5a4d30` a ověřené privátní záloze.
-- Data servisní commit `06c34051` zaznamenal již dříve provedený WIP úklid staré šestky: 311 absencí a staré workflow/registrace; žádné další soubory se nyní z disku neodstranily. Tento commit do main NEPŘEBÍRAT, úklid tam už je. Samostatný následující commit obsahuje jen nový druhý obraz.
-- Druhý obraz NENÍ v prvním vydaném balíčku ani na produkci. Další krok: dokončit jeho checkpoint a čistý Data stav; podle Mílova rozhodnutí buď jeden nový registrovaný pokus prvního p+n, nebo jen lokální přejímka obrazu 2. Report `reports/mmtx_scene06_picture2_20261110.md`.
+- 2026-11-10: Lokálně hotové části 1–3 nové šestky, čtyři ilustrace a 25 přesných EN replik / pevných MP3. Druhý obraz navazuje na třetí část Jumping Practice. Obraz 03 zobrazuje první tři věty; od Bunnyho otázky (4/8) přechází na obraz 031 s Freddiem ve vodě. Repeat zachová obraz, Again vrací začátek šestky.
+- Třetí část přidává 8 unikátních Azure požadavků / 458 SSML znaků, limit 500, tempo −10 %. Freddie Guy a Dotty Jenny podle původní hlasové mapy. Všech 23 původních podkladů a obě dřívější raw účtenky zůstaly byte-identické; žádný starší požadavek se neopakoval.
+- Ověření třetí části: 59 cílených kontrol PASS, po posledním CSS doplnění 21 relevantních testů PASS; dekódování 25/25, mirrory shodné, lokální HTTP 39/39 přesné. Plná brána třetí části: 2974 testů OK (5 SKIP), 620,446 s unit. Ruční přejímka obou nových obrazů a hlasů na Mílově zařízení včetně fyzického iPhonu zůstává otevřená.
+- První p+n proběhlo JEDNOU Terrou pro main fee535e5, job `4b261f77c13a77e845684bbbd90cc876`: brána 3412 PASS, push confirmed, Pages run `42839271179` build success / deploy failure po 600000 ms při syncing_files. Historická účtenka attention / deployment uncertain, HTML po zrušení HTTP 404 v 16:10 CET. Není to aktuální veřejná přejímka. Nový pokus nebyl spuštěný ani schválený pokračováním třetí částí.
+- Druhá část je uložená v `3cdc5c26`; třetí je uložená ve vlastním místním checkpointu. Obě jsou mimo zmrazený první balíček. Do main se nyní nezasahuje. Willovo WIP zůstává zaparkované ve stashi `550024e17da59eb258556f5d3f0979650d5a4d30` a ověřené privátní záloze; při zahájení tohoto vývoje byly oba checkouty čisté.
+- Data servisní commit `06c34051` pouze zaznamenal již dříve provedený úklid původní šestky; do main NEPŘEBÍRAT podruhé. Neprovádět reset, pop/drop Willova stashe ani nové nasazení bez odpovídajícího pokynu.
+- Další krok: místní přejímka třetí části; další vývoj nebo samostatně autorizované vydání podle Mílova pokynu. Report `reports/mmtx_scene06_picture3_20261110.md`; původní release report se nepřepisuje.
 <!-- SAMANTHA_CURRENT_STATUS_END -->
 
 # Handoff pracovního proudu: MMTX
@@ -981,3 +981,19 @@ Navrhované další kroky:
 
 Technický důkaz:
 - Plná místní brána 2972 OK (5 SKIP), 665,420 s unit; 57 cílených kontrol PASS, 17/17 MP3 decode, 27 HTTP souborů přesné. Skutečné Safari: obraz Ollie, Bunny 10/10, Again, viditelné postavy a podběrák. První Azure podklady beze změny. První Terra receipt `4b261f77c13a77e845684bbbd90cc876`: gate 3412 PASS, push confirmed, deployment uncertain; GitHub Pages run `42839271179` po 600000 ms syncing_files deployment zrušil. Po zrušení HTML 404. Výsledkový report zachovává první neúspěšný běh bez přepisu.
+
+
+### 2026-11-10 16:33 CET — Třetí část: Freddieho skok a rozhovor ve vodě
+
+Hotovo:
+- Po Olliem pokračuje třetí část s osmi přesnými replikami, dvěma schválenými ilustracemi 03/031 a osmi novými anglickými MP3. Obraz se mění před Bunnyho otázkou 4/8; čítač pokračuje do 8/8, Repeat zachová aktuální ilustraci.
+
+Rozhodnutí:
+- Míla zadal pokračovat třetí částí. Nejde o schválení nového pokusu nasazení. Vývoj zůstává v Datově worktree; Willův main a zaparkované WIP se nemění. Historická první release účtenka zůstává beze změny. Další části se nyní neimplementují.
+
+Technický důkaz:
+- 59 cílených kontrol PASS a po finálním CSS 21 relevantních PASS. Přechod 2 → 3, 03 → 031, Repeat po chybě, pozdní callbacky a restart ověřené v Node VM. Dekódování 25/25, shodné mirrory a 39 HTTP souborů s přesnými bajty. Plná brána třetí části: 2974 testů OK (5 SKIP), 620,446 s unit.
+- 8 unikátních Azure požadavků, 458 SSML znaků z limitu 500, −10 %, Freddie Guy / Dotty Jenny. 23 starších podkladů a dvě původní raw účtenky SHA-256 beze změny. Žádné opakování placeného požadavku. Report `reports/mmtx_scene06_picture3_20261110.md`.
+
+Rizika a další krok:
+- Obě nové ilustrace a hlasy čekají na místní přejímku na Mílově zařízení včetně fyzického iPhonu. Obrazy 2+3 nejsou publikované tímto krokem; případné vydání vyžaduje samostatné zadání. Další krok je přejímka nebo další vývoj podle Míly.

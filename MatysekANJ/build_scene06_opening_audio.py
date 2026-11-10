@@ -41,18 +41,18 @@ def write_new(path, data):
 
 
 def names(picture):
-    if picture not in (1, 2):
+    if picture not in (1, 2, 3):
         raise RuntimeError("Nepovolený obraz nové šestky.")
-    return ("dialogue.json", "audio_manifest.json") if picture == 1 else ("dialogue_02.json", "audio_manifest_02.json")
+    return ("dialogue.json", "audio_manifest.json") if picture == 1 else (f"dialogue_{picture:02d}.json", f"audio_manifest_{picture:02d}.json")
 
 
 def dialogue(root=DOCS, picture=1):
     data = json.loads((root / names(picture)[0]).read_text(encoding="utf-8"))
     if (data.get("schema_version") != 1 or data.get("picture") != picture
-            or len(data.get("lines", [])) != (7 if picture == 1 else 10)):
+            or len(data.get("lines", [])) != {1: 7, 2: 10, 3: 8}[picture]):
         raise RuntimeError("Neplatný dialog nové šestky.")
     for number, line in enumerate(data["lines"], 1):
-        prefix = "" if picture == 1 else "p02_"
+        prefix = "" if picture == 1 else f"p{picture:02d}_"
         expected = f"audio/en/{prefix}{number:02d}_{line['speaker'].lower()}.mp3"
         if line.get("audio") != expected:
             raise RuntimeError("Neplatná cesta audia.")
@@ -87,7 +87,7 @@ def receipt_lock(path):
 def build(*, env_path=ENV_PATH, receipt=None, limit=1000, docs=DOCS, picture=1,
           mirror=MIRROR, synthesizer=synthesize_azure_tts_mp3_sync, validator=validate_mp3):
     data = dialogue(docs, picture)
-    receipt = receipt or (RECEIPT if picture == 1 else RECEIPT.with_name("audio_receipt_picture_02.json"))
+    receipt = receipt or (RECEIPT if picture == 1 else RECEIPT.with_name(f"audio_receipt_picture_{picture:02d}.json"))
     signature = digest(json.dumps(data, ensure_ascii=False, sort_keys=True).encode())
     with receipt_lock(receipt):
         state = json.loads(receipt.read_text()) if receipt.exists() else {
@@ -168,7 +168,7 @@ def main():
     mode.add_argument("--apply", action="store_true")
     mode.add_argument("--check", action="store_true")
     parser.add_argument("--provider", choices=("azure",))
-    parser.add_argument("--picture", type=int, choices=(1, 2), default=1)
+    parser.add_argument("--picture", type=int, choices=(1, 2, 3), default=1)
     parser.add_argument("--env-path", type=Path, default=ENV_PATH)
     parser.add_argument("--max-characters", type=int, default=1000)
     args = parser.parse_args()

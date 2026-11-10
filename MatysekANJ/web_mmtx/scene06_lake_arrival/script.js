@@ -24,7 +24,8 @@ function updateControls() {
   nextButton.hidden = index < 0 || index >= lines.length - 1;
   restartButton.hidden = index < 0 || index !== lines.length - 1 || playing || failed;
   const nextPicture = lines[index] && lines[index + 1] &&
-    lines[index].picture.id !== lines[index + 1].picture.id;
+    (lines[index].picture.id !== lines[index + 1].picture.id ||
+      lines[index].frame.image !== lines[index + 1].frame.image);
   nextButton.textContent = nextPicture ? "Next picture ▶" : "Next ▶";
 }
 
@@ -45,12 +46,14 @@ function playLine(newIndex) {
   index = newIndex;
   const line = lines[index];
   const picture = line.picture;
+  const frame = line.frame;
   scene.dataset.picture = String(picture.id);
+  scene.dataset.image = frame.image;
   scene.setAttribute("aria-label", `Scene 6 — ${picture.title}`);
-  sceneImage.src = picture.image;
-  sceneImage.alt = picture.alt;
-  sceneImage.width = picture.width;
-  sceneImage.height = picture.height;
+  sceneImage.src = frame.image;
+  sceneImage.alt = frame.alt;
+  sceneImage.width = frame.width;
+  sceneImage.height = frame.height;
   const token = generation;
   speakerName.textContent = line.speaker;
   speechText.textContent = line.text;
@@ -99,24 +102,39 @@ function readJson(path) {
   });
 }
 
-readJson("pictures.json?v=20261110picture2a")
+function validImage(frame) {
+  return frame && /^[a-z0-9_]+\.webp$/.test(frame.image) && typeof frame.alt === "string" &&
+    Number.isInteger(frame.width) && frame.width > 0 && Number.isInteger(frame.height) && frame.height > 0;
+}
+
+readJson("pictures.json?v=20261110picture3a")
   .then((catalog) => {
-    if (catalog.schema_version !== 1 || !Array.isArray(catalog.pictures) || catalog.pictures.length !== 2 ||
+    const lineCounts = [7, 10, 8];
+    if (catalog.schema_version !== 1 || !Array.isArray(catalog.pictures) || catalog.pictures.length !== 3 ||
         !catalog.pictures.every((picture, n) => picture.id === n + 1 &&
-          picture.dialogue === (n === 0 ? "dialogue.json" : "dialogue_02.json") &&
-          picture.line_count === (n === 0 ? 7 : 10) && /^[a-z0-9_]+\.webp$/.test(picture.image) &&
-          typeof picture.title === "string" && typeof picture.alt === "string" &&
-          Number.isInteger(picture.width) && Number.isInteger(picture.height))) throw new Error("pictures");
+          picture.dialogue === (n === 0 ? "dialogue.json" : `dialogue_${String(picture.id).padStart(2, "0")}.json`) &&
+          picture.line_count === lineCounts[n] && typeof picture.title === "string" && validImage(picture) &&
+          (picture.image_changes === undefined || (Array.isArray(picture.image_changes) &&
+            picture.image_changes.every((frame, i, frames) => validImage(frame) && Number.isInteger(frame.from_line) &&
+              frame.from_line > 1 && frame.from_line <= picture.line_count &&
+              (i === 0 || frame.from_line > frames[i - 1].from_line)))))) throw new Error("pictures");
     return Promise.all(catalog.pictures.map((picture) =>
-      readJson(`${picture.dialogue}?v=20261110picture2a`).then((data) => {
+      readJson(`${picture.dialogue}?v=20261110picture3a`).then((data) => {
         const audioPattern = picture.id === 1 ? /^audio\/en\/[0-9]{2}_[a-z]+\.mp3$/ :
-          /^audio\/en\/p02_[0-9]{2}_[a-z]+\.mp3$/;
+          new RegExp(`^audio/en/p${String(picture.id).padStart(2, "0")}_[0-9]{2}_[a-z]+\\.mp3$`);
         if (data.schema_version !== 1 || data.picture !== picture.id || !Array.isArray(data.lines) ||
             data.lines.length !== picture.line_count || !data.lines.every((line) =>
               typeof line.speaker === "string" && typeof line.text === "string" && audioPattern.test(line.audio))) {
           throw new Error("dialogue");
         }
-        return data.lines.map((line, n) => ({...line, picture, pictureLine: n + 1}));
+        return data.lines.map((line, n) => {
+          let frame = picture;
+          for (const change of picture.image_changes || []) {
+            if (n + 1 < change.from_line) break;
+            frame = change;
+          }
+          return {...line, picture, pictureLine: n + 1, frame};
+        });
       })));
   })
   .then((pictures) => {

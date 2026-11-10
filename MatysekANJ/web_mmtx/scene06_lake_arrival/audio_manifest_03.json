@@ -1,0 +1,71 @@
+{
+  "schema_version": 1,
+  "provider": "azure",
+  "rate": "-10%",
+  "assets": [
+    {
+      "speaker": "Dotty",
+      "voice": "en-US-JennyNeural",
+      "text": "A beautiful jump, Freddie!",
+      "audio": "audio/en/p03_01_dotty.mp3",
+      "sha256": "79392e27e0d402d5bcd649035752fac5e838c3053df8fae3b07c161d72fe6c21",
+      "bytes": 16992
+    },
+    {
+      "speaker": "Freddie",
+      "voice": "en-US-GuyNeural",
+      "text": "And a big splash!",
+      "audio": "audio/en/p03_02_freddie.mp3",
+      "sha256": "55c9d93dbb4c496abb2c728fb00fb9c877e5129576dd2df313cc2abc9439c245",
+      "bytes": 14544
+    },
+    {
+      "speaker": "Dotty",
+      "voice": "en-US-JennyNeural",
+      "text": "Too big! Try a smaller splash next time.",
+      "audio": "audio/en/p03_03_dotty.mp3",
+      "sha256": "c856be24faf25f7658ff76d07a162e2490ebe4394711e6aa1f52cd7e4154a41f",
+      "bytes": 29376
+    },
+    {
+      "speaker": "Bunny",
+      "voice": "en-US-AnaNeural",
+      "text": "Why are you practising?",
+      "audio": "audio/en/p03_04_bunny.mp3",
+      "sha256": "7d5f088c3da9960b65e325c3c000c8619cae5a420a50d0d3c5c63f891cc132ec",
+      "bytes": 15552
+    },
+    {
+      "speaker": "Freddie",
+      "voice": "en-US-GuyNeural",
+      "text": "For the frog-jumping race!",
+      "audio": "audio/en/p03_05_freddie.mp3",
+      "sha256": "6972f56555a8ddbff87d61153baff66b645bdb64961b26d77878ec8a5906f01d",
+      "bytes": 16416
+    },
+    {
+      "speaker": "Fiona",
+      "voice": "en-US-JennyNeural",
+      "text": "We’re here for the meeting.",
+      "audio": "audio/en/p03_06_fiona.mp3",
+      "sha256": "7b337975e4f184bc8de7ccc9a4a6d3ad28bd3d19110030832dc23b1f17b8393c",
+      "bytes": 14400
+    },
+    {
+      "speaker": "Dotty",
+      "voice": "en-US-JennyNeural",
+      "text": "We’re coming too. See you there!",
+      "audio": "audio/en/p03_07_dotty.mp3",
+      "sha256": "3c4a0c2659e73940369c96a2996b245ba2504093f330500c965e69dc089a15f4",
+      "bytes": 23904
+    },
+    {
+      "speaker": "Freddie",
+      "voice": "en-US-GuyNeural",
+      "text": "Just one more jump!",
+      "audio": "audio/en/p03_08_freddie.mp3",
+      "sha256": "cc2e8c37fcf8f46bcb4a82bca63625173a4a1b156201dfd0724c121189f6ec5c",
+      "bytes": 14832
+    }
+  ]
+}
