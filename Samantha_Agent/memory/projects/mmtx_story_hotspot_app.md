@@ -11,6 +11,7 @@
 - Datův vlastní commit `c87f6064967aa21b9a998279c6fa874f908cd4c8` zůstal zachovaný. V jeho stávajícím worktree je úklid šestky jako 321 souvisejících WIP změn; jeho větev se neslučovala, nerebasovala ani nepřepisovala. Čisté profily Human–Adam/Knihovna a pomocný Willův checkout byly srovnané s main servisním fast-forwardem po výslovné globální brzdě; automatický limit hromadného mazání zůstal zachovaný.
 - Nesouvisející zdrojové změny a oba nově přidané necommitované scénáře jsou zachované mimo vydaný balíček. Závěrečný paměťový checkpoint je místní a patří do příštího GitHub balíčku; další p+n se pro samotný zápis neopakuje.
 - Další krok: při další práci s Datovou větví zohlednit její výše popsaný WIP úklid a vlastní commit. Fyzický proklik na Macu/iPhonu po změně se neprováděl; serverové odstranění a zachované bajty jsou ověřené.
+- 2026-11-10 13:35 CET: vznikla nová samostatná boční varianta prvního obrázku šestky, `data/private/mmtx/imagegen/arrival_side_view_20261110_v1.png` (1672 × 941, SHA-256 `3b028eef9065528262c788b2d34e2369ea4800c5e7fe46a4c29b64dd9e649bbc`). Pět původních postav je více z boku/zezadu a dívá se přes jezero na mraky ve tvaru králičích uší. Vytvořeno vestavěným image_gen; přesný prompt a kontrolní účtenka jsou vedle PNG. Jde o soukromý návrh k posouzení; původní arrival.webp, předchozí scény i produkce zůstávají beze změny.
 
 ## Stav
 
@@ -563,3 +564,15 @@ Technický důkaz:
 - 4 cílené testy scény 6 PASS; offline --check ověřil 16/144 a očekávaný exit 1 kvůli neúplnému audiu. Předchozích sedm MP3 zachovaných; obě kopie stejné. Generátor ani společná speech vrstva se neměnily.
 - První běh přidal sedm stop, potom EN 007 → ClientConnectorDNSError/gaierror. Čtecí DNS kontrola domény služby i microsoft.com prošla; obnovení zachovalo stav pětic a přidalo EN 007/CZ 007. Následně EN 008 → HTTP 429 bez Retry-After, další dávka se nespustila.
 - Průběh a kurzor v logs/mmtx_scene06_batches_20261030_154314_state.log a logs/mmtx_scene06_batches_20261030_155259_state.log. Bez push/nasazení; fyzický poslech/proklik NEOVĚŘENO.
+
+### 2026-11-10 13:35 CET – Boční perspektiva prvního obrázku u jezera
+
+Hotovo: Připravený samostatný obrazový návrh s rozpoznatelnými pěti přáteli z boku a pohledem přes vodu k mrakům.
+
+Rozhodnutí: Na Mílův pokyn zkusit obrázek znovu zůstává zachovaná identita postav a motiv uší tvořených mraky; mění se perspektiva a směr pohledů. Původní publikovaný obrázek se nenahrazuje automaticky.
+
+Další krok: Posoudit návrh; případná výměna aktivního obrázku a nové publikování jsou samostatný další krok.
+
+Navrhované další kroky: Žádné nové.
+
+Technický důkaz: Vestavěný image_gen, jedna varianta 1672 × 941, PNG 2948769 B. Vizuálně ověřen počet pěti postav, jejich boční natočení, pohled k jezeru a mrakům; původní arrival.webp má nadále původní SHA-256. PNG, prompt a účtenka jsou v místním private imagegen adresáři mimo Git.

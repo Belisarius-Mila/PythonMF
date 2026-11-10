@@ -10,6 +10,8 @@
 - Datův vlastní commit `c87f6064967aa21b9a998279c6fa874f908cd4c8` zůstal zachovaný. V jeho stávajícím worktree je úklid šestky jako 321 souvisejících WIP změn; jeho větev se neslučovala, nerebasovala ani nepřepisovala. Čisté profily Human–Adam/Knihovna a pomocný Willův checkout byly srovnané s main servisním fast-forwardem po výslovné globální brzdě; automatický limit hromadného mazání zůstal zachovaný.
 - Nesouvisející zdrojové změny a oba nově přidané necommitované scénáře jsou zachované mimo vydaný balíček. Závěrečný paměťový checkpoint je místní a patří do příštího GitHub balíčku; další p+n se pro samotný zápis neopakuje.
 - Další krok: při další práci s Datovou větví zohlednit její výše popsaný WIP úklid a vlastní commit. Fyzický proklik na Macu/iPhonu po změně se neprováděl; serverové odstranění a zachované bajty jsou ověřené.
+- 2026-11-10 13:35 CET: vznikla nová samostatná boční varianta prvního obrázku šestky, `data/private/mmtx/imagegen/arrival_side_view_20261110_v1.png` (1672 × 941, SHA-256 `3b028eef9065528262c788b2d34e2369ea4800c5e7fe46a4c29b64dd9e649bbc`). Pět původních postav je více z boku/zezadu a dívá se přes jezero na mraky ve tvaru králičích uší. Vytvořeno vestavěným image_gen; přesný prompt a kontrolní účtenka jsou vedle PNG. Jde o soukromý návrh k posouzení; původní arrival.webp, předchozí scény i produkce zůstávají beze změny.
+- Aktuální obrazový další krok: posoudit soukromý boční návrh; předchozí poznámka k Datově WIP větvi nadále platí.
 <!-- SAMANTHA_CURRENT_STATUS_END -->
 
 # Handoff pracovního proudu: MMTX
@@ -917,3 +919,15 @@ Další krok: Při další práci s Datovou větví zohlednit 321 souvisejícíc
 Navrhované další kroky: Žádné nové.
 
 Technický důkaz: Jediné p+n 27d91d1047e66647a4e71d99a6279ae1 potvrdilo přesný head 359007b9 a Pages deployment 7680433197. 3402 testů PASS; veřejně 157 URL HTTP 404 a 55 zachovaných souborů HTTP 200 + přesné SHA-256. Celkem odstraněno asi 35,7 MB logických souborů; skutečné APFS bloky se neměřily.
+
+### 2026-11-10 13:35 CET – Boční perspektiva prvního obrázku u jezera
+
+Hotovo: Připravený samostatný obrazový návrh s rozpoznatelnými pěti přáteli z boku a pohledem přes vodu k mrakům.
+
+Rozhodnutí: Na Mílův pokyn zkusit obrázek znovu zůstává zachovaná identita postav a motiv uší tvořených mraky; mění se perspektiva a směr pohledů. Původní publikovaný obrázek se nenahrazuje automaticky.
+
+Další krok: Posoudit návrh; případná výměna aktivního obrázku a nové publikování jsou samostatný další krok.
+
+Navrhované další kroky: Žádné nové.
+
+Technický důkaz: Vestavěný image_gen, jedna varianta 1672 × 941, PNG 2948769 B. Vizuálně ověřen počet pěti postav, jejich boční natočení, pohled k jezeru a mrakům; původní arrival.webp má nadále původní SHA-256. PNG, prompt a účtenka jsou v místním private imagegen adresáři mimo Git.
