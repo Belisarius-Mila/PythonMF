@@ -2,6 +2,8 @@
 
 ## Aktuální stav
 
+- 2026-11-10: Tlačítko Cesta k jezeru nyní otevírá modální výběr scén 1–6. Jednička spouští původní mýtinu přímo, 2–6 vedou na vlastní stránky scén; křížek/Escape zavře nabídku. Lokální změna navazuje na slovníček b62c4aa8, obě rozšíření dosud bez nového p+n. 49 cílených testů a rychlá statická brána OK; Safari: čitelná nabídka, proklik 1 a 6, návrat a Escape. Všech pět cílových HTML i tři vstupní soubory přesné přes lokální HTTP a mirror. Fyzický iPhone zatím neověřený.
+
 - 2026-11-10: Lokálně doplněný závěrečný slovníček nové šestky: ikona knihy až po poslední replice desátého obrazu, v režimu s češtinou až po EN i CS. 77 nových hesel a spojení, dvousloupcové posuvné karty, stejné tři režimy češtiny jako příběh. Zavření/Escape zastaví řeč a vrátí příběh, Again ikonu znovu skryje.
 - Novost se ověřuje proti dialogům, anglickým pokynům a slovníčkům scén 1–5: 450 úseků, 191 známých lemmat, deset souborů bajtově shodných s publikovaným f7a4ab58. Výslovné mapování tvarů (trees→tree, coming→come, better→good), bez vlastních jmen a osobních/přivlastňovacích zájmen. Každé heslo má doložený výskyt v šestce; JSON audit je `reports/mmtx_scene06_dictionary_audit_20261110.json`.
 - 154 slovníčkových MP3 (77 EN Andrew + 77 CS Vlasta, −10 %), z toho 20 přesně shodných CS převzatých z VocabularyEN a 134 nových Azure požadavků / 4964 SSML znaků z limitu 5000. Žádný retry ani změna starých podkladů. Šestka nyní má 288 MP3. 167 dřívějších materiálů a deset dřívějších účtenek beze změny, lokální HTTP 327/327 přesné.
@@ -854,3 +856,15 @@ Navrhované další kroky:
 
 Technický důkaz:
 - 74 cílených kontrol PASS, nové izolované JS kontroly také PASS. Deset zdrojů předchozích scén ověřených proti f7a4ab58, 450 úseků a 191 lemmat; každé nové heslo doložené v šestce. 154 MP3 dekódovaných, 134 nových unikátních požadavků / 4964 SSML znaků a 20 převzatých přesných CS nahrávek. 167 starých materiálů a deset účtenek beze změny; HTTP 327/327 přesné. Plná místní brána slovníčku: 2989 testů OK (5 SKIP), 625,637 s; rychlá statická brána také OK. Reporty mmtx_scene06_dictionary_20261110.md a mmtx_scene06_dictionary_audit_20261110.json.
+
+### 2026-11-10 20:14 CET — Výběr šesti scén Cesty k jezeru
+
+Hotovo: Tlačítko Cesta k jezeru otevírá přehledné okno s čísly 1–6. Každé číslo vede do odpovídající scény; okno lze zavřít křížkem nebo Escape. Nabídka zůstala otevřená v místním Safari pro Mílu.
+
+Rozhodnutí: Zachovaná struktura příběhu: první scéna běží přímo v úvodní stránce, další mají vlastní stránky. Jde o místní vývoj, nové p+n nebylo zadané ani spuštěné.
+
+Další krok: Mílova přejímka rozcestníku a slovníčku; případné společné vydání až podle samostatného pokynu.
+
+Navrhované další kroky: Žádné nové.
+
+Technický důkaz: 49 cílených testů OK / 16,975 s, rychlá statická brána OK. Safari zobrazilo všech šest čísel a prošlo spuštění první i šesté scény, návrat a zavření Escape. Tři vstupní HTML/JS/CSS a všech pět cílových HTML přesné přes lokální HTTP a mirror. Verze CSS/JS aktualizované proti cache. Žádné nové TTS ani jiné placené volání; hlavní checkout nedotčený. Fyzický iPhone otevřený.
