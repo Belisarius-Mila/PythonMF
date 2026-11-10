@@ -1,13 +1,12 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
-- 2026-11-10: Celá nová šestka je publikovaná na GitHub Pages v přesném main f7a4ab58dbc4480ba88604a89593d5e92b2a2cd1. Terra job 0de6f2870dbe4d325b61522f6510e6d1 completed, push confirmed, deployment confirmed. Main/GitHub aligned a čistý, 0 čekajících commitů; 2 profily ready a zarovnané.
-- Terra 6.1/high, centrální role beze změny. Publikační plná brána 3441 testů PASS / 634,3 s. Pages workflow 42869959321, deployment 7689928869, smoke HTTP 200 a chráněné služby beze změny. Jediné předání request data-mmtx-full-51af4d56-20261110-v1, žádné opakování starého jobu.
-- Nezávislé veřejné ověření 173/173 souborů, HTTP 200, přesné bajty a SHA-256 proti f7a4ab58 (9 012 903 B): 170 souborů šestky a HTML/JS/CSS pětky. Důkaz `reports/mmtx_scene06_public_verification_20261110.json`; konečná redigovaná účtenka `reports/mmtx_scene06_full_release_20261110.json`.
-- Na dokončeném posledním rozlučkovém obrazu pětky je velké průhledné pole vlevo dole (24 % × 28 %, min. 44 px). Vede do šestky. Před dokončením, během řeči/animace a při otevřeném slovníčku je nepřístupné. Běžný dokončovací odkaz zůstává.
-- Šestka má 10 obrazů, 11 schválených ilustrací, 67 EN + 67 CS MP3. CZ vypnuto / text / text + hlas, při čtení EN→CS a Next po dočtení; volba se pamatuje, nedostupné úložiště neblokuje. Ticho 9 zůstává tiché, 03→031 navazuje od 4/8, závěrečná mapa má potok do jezera. Všechny dvojjazyčné obrazy mají ovládání uvnitř výšky okna.
-- Data vývojový checkpoint 51af4d56 byl věcně integrovaný v main f7a4ab58 se zachováním Willových historických MMTX zápisů i ostatních projektů. Servisní 06c34051 se nepřebíral podruhé. Willovo zaparkované WIP zůstalo zachované. Původní neúspěšný job 4b261f77c13a77e845684bbbd90cc876 má stále vlastní historickou účtenku, není aktuálním stavem tohoto vydání.
-- Další krok: Mílova fyzická přejímka tajného rohu, překladů a hlasu na jeho zařízeních včetně iPhonu. Nový vývoj ani další p+n není tímto záznamem automaticky spuštěné. Závěrečná účtenka se ukládá lokálně do Datovy větve, vydaný main se po potvrzení nemění.
+- 2026-11-10: Lokálně doplněný závěrečný slovníček nové šestky: ikona knihy až po poslední replice desátého obrazu, v režimu s češtinou až po EN i CS. 77 nových hesel a spojení, dvousloupcové posuvné karty, stejné tři režimy češtiny jako příběh. Zavření/Escape zastaví řeč a vrátí příběh, Again ikonu znovu skryje.
+- Novost se ověřuje proti dialogům, anglickým pokynům a slovníčkům scén 1–5: 450 úseků, 191 známých lemmat, deset souborů bajtově shodných s publikovaným f7a4ab58. Výslovné mapování tvarů (trees→tree, coming→come, better→good), bez vlastních jmen a osobních/přivlastňovacích zájmen. Každé heslo má doložený výskyt v šestce; JSON audit je `reports/mmtx_scene06_dictionary_audit_20261110.json`.
+- 154 slovníčkových MP3 (77 EN Andrew + 77 CS Vlasta, −10 %), z toho 20 přesně shodných CS převzatých z VocabularyEN a 134 nových Azure požadavků / 4964 SSML znaků z limitu 5000. Žádný retry ani změna starých podkladů. Šestka nyní má 288 MP3. 167 dřívějších materiálů a deset dřívějších účtenek beze změny, lokální HTTP 327/327 přesné.
+- 74 cílených testů PASS; samostatné JS kontroly nových přístupných názvů a chyby anglického slovíčka také PASS. Celý příběh, 77 EN→CS karet, hranice odemknutí, textové režimy, chyby/nový klik, stop, Escape, historie a Again ověřené. Plná místní brána slovníčku: 2989 testů OK (5 SKIP), 625,637 s; rychlá statická brána také OK. Skutečné Safari dokončilo obraz 10 / 6/6, zobrazilo ikonu knihy a otevřelo čitelný posuvný dvousloupcový seznam. Kliknutí na beautiful načetlo EN i CS MP3 (HTTP 200 ve správném pořadí). Fyzický iPhone a Mílova jazyková/hlasová přejímka zůstávají otevřené.
+- Poslední doložené publikované MMTX je f7a4ab58 bez tohoto nového slovníčku: Terra job 0de6f2870dbe4d325b61522f6510e6d1 completed, push+deployment confirmed, publikační gate 3441 PASS, dřívější veřejná kontrola 173/173 přesná. Tento vývoj hlavní checkout ani produkci nemění; nové p+n nebylo zadané.
+- Data zůstává na data/parallel-20261104, současný slovníček tvoří vlastní lokální checkpoint navazující na cd37aa9a. Willovo WIP i historie zachované, servisní 06c34051 nepřebírat podruhé. Další krok: Mílova přejímka a případné nové vydání podle samostatného pokynu. Report `reports/mmtx_scene06_dictionary_20261110.md`.
 <!-- SAMANTHA_CURRENT_STATUS_END -->
 
 # TVBCP: MMTX
@@ -1783,3 +1782,21 @@ Navrhované další kroky:
 
 Technický důkaz:
 - Job 0de6f2870dbe4d325b61522f6510e6d1 completed; push a deployment confirmed. Terra 6.1/high, plná brána 3441 PASS / 634,3 s. Pages run 42869959321, deployment 7689928869, exact head f7a4ab58, HTTP 200, chráněné služby beze změny. Nezávislých 173/173 HTTP souborů byte/SHA shodných (9 012 903 B). GitHub audit aligned, main 0 čekajících commitů a 2 profily ready. Reporty mmtx_scene06_full_release_20261110.md/json a mmtx_scene06_public_verification_20261110.json.
+
+
+### 2026-11-10 19:41 CET — Slovníček nových slov na konci desátého obrazu
+
+Hotovo:
+- Na konci šestky je lokálně ikona knihy s 77 novými hesly a spojeními. Karty mají EN/CZ zvuk a respektují všechny tři české režimy. Odemknutí nastává až po poslední větě, včetně její češtiny; ticho devítky, příběh i vazba z pětky zůstávají zachované.
+
+Rozhodnutí:
+- Míla zadal analog slovníčku pětky pouze pro slova dosud nepoužitá v předchozích pěti scénách. Audit zahrnuje dialogy, pokyny i slovníčky a explicitně mapuje tvary, nikoli pouze rozdíl hotových seznamů. Nové p+n nezadal; změna zůstává lokální v Data.
+
+Další krok:
+- Převzít Mílovo hodnocení místního slovníčku; případné nové p+n pouze podle samostatného pokynu.
+
+Navrhované další kroky:
+- Mílova přejímka hesel a hlasů; po samostatném pokynu integrovat a předat p+n.
+
+Technický důkaz:
+- 74 cílených kontrol PASS, nové izolované JS kontroly také PASS. Deset zdrojů předchozích scén ověřených proti f7a4ab58, 450 úseků a 191 lemmat; každé nové heslo doložené v šestce. 154 MP3 dekódovaných, 134 nových unikátních požadavků / 4964 SSML znaků a 20 převzatých přesných CS nahrávek. 167 starých materiálů a deset účtenek beze změny; HTTP 327/327 přesné. Plná místní brána slovníčku: 2989 testů OK (5 SKIP), 625,637 s; rychlá statická brána také OK. Reporty mmtx_scene06_dictionary_20261110.md a mmtx_scene06_dictionary_audit_20261110.json.

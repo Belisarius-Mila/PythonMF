@@ -1,0 +1,1615 @@
+{
+  "schema_version": 1,
+  "provider": "azure",
+  "rate": "-10%",
+  "assets": [
+    {
+      "id": "v01",
+      "language": "en",
+      "text": "beautiful",
+      "voice": "en-US-AndrewNeural",
+      "audio": "audio/vocabulary/en/v01.mp3",
+      "origin": {
+        "type": "azure"
+      },
+      "sha256": "74015917563701c204e5e1481323f0de6ea43203d2b5613b065754670a078b4e",
+      "bytes": 11232
+    },
+    {
+      "id": "v02",
+      "language": "en",
+      "text": "blue",
+      "voice": "en-US-AndrewNeural",
+      "audio": "audio/vocabulary/en/v02.mp3",
+      "origin": {
+        "type": "azure"
+      },
+      "sha256": "94140d9c1d31eaf8fe8fa7cb61b160c7eacffdc6b946851153fc5c08f3289f33",
+      "bytes": 4752
+    },
+    {
+      "id": "v03",
+      "language": "en",
+      "text": "cloud",
+      "voice": "en-US-AndrewNeural",
+      "audio": "audio/vocabulary/en/v03.mp3",
+      "origin": {
+        "type": "azure"
+      },
+      "sha256": "13b55836b73af7e042e74f7ea59ee2bef69c47194337504f4f95c5069f58c623",
+      "bytes": 11232
+    },
+    {
+      "id": "v04",
+      "language": "en",
+      "text": "ear",
+      "voice": "en-US-AndrewNeural",
+      "audio": "audio/vocabulary/en/v04.mp3",
+      "origin": {
+        "type": "azure"
+      },
+      "sha256": "ef123792ebd290a209d3a9ac4839742fd7ddbc7876faacf03048c22b1a52daf2",
+      "bytes": 4896
+    },
+    {
+      "id": "v04",
+      "language": "cs",
+      "text": "ucho",
+      "voice": "cs-CZ-VlastaNeural",
+      "audio": "audio/vocabulary/cs/v04.mp3",
+      "origin": {
+        "type": "azure"
+      },
+      "sha256": "3504d42f837087226cfade5087f5e6578efd7e62f133038744719bea101ee9fd",
+      "bytes": 9216
+    },
+    {
+      "id": "v05",
+      "language": "en",
+      "text": "sky",
+      "voice": "en-US-AndrewNeural",
+      "audio": "audio/vocabulary/en/v05.mp3",
+      "origin": {
+        "type": "azure"
+      },
+      "sha256": "3bcdf750f3d5dae4f29e91195f626951e64f2da8ad3beee3d8549a5568436acf",
+      "bytes": 11232
+    },
+    {
+      "id": "v05",
+      "language": "cs",
+      "text": "obloha",
+      "voice": "cs-CZ-VlastaNeural",
+      "audio": "audio/vocabulary/cs/v05.mp3",
+      "origin": {
+        "type": "azure"
+      },
+      "sha256": "25f12783f79d7f0fd604a9598f26f2b0ab5463b5e040bde02b06a2cfd56e70e9",
+      "bytes": 11232
+    },
+    {
+      "id": "v06",
+      "language": "en",
+      "text": "four",
+      "voice": "en-US-AndrewNeural",
+      "audio": "audio/vocabulary/en/v06.mp3",
+      "origin": {
+        "type": "azure"
+      },
+      "sha256": "b302ad1a8728313db48f7d282e67e7eace321fd7d286f149e6e845ff819c6975",
+      "bytes": 11232
+    },
+    {
+      "id": "v07",
+      "language": "en",
+      "text": "hear",
+      "voice": "en-US-AndrewNeural",
+      "audio": "audio/vocabulary/en/v07.mp3",
+      "origin": {
+        "type": "azure"
+      },
+      "sha256": "12572c360e489a5418b77688051f155a4c150317fae228299a47ef6b1abe17b9",
+      "bytes": 5040
+    },
+    {
+      "id": "v08",
+      "language": "en",
+      "text": "look like",
+      "voice": "en-US-AndrewNeural",
+      "audio": "audio/vocabulary/en/v08.mp3",
+      "origin": {
+        "type": "azure"
+      },
+      "sha256": "4145ec5a2e25edd138a3480c35015171c0c469530c1f49e3e52facf390b3f4d8",
+      "bytes": 11232
+    },
+    {
+      "id": "v08",
+      "language": "cs",
+      "text": "vypadat jako",
+      "voice": "cs-CZ-VlastaNeural",
+      "audio": "audio/vocabulary/cs/v08.mp3",
+      "origin": {
+        "type": "azure"
+      },
+      "sha256": "54606521fd51389856dc088011cb581f3a9d84cdee6eb6c4d4e1d27ef3afa297",
+      "bytes": 13248
+    },
+    {
+      "id": "v09",
+      "language": "en",
+      "text": "shout",
+      "voice": "en-US-AndrewNeural",
+      "audio": "audio/vocabulary/en/v09.mp3",
+      "origin": {
+        "type": "azure"
+      },
+      "sha256": "66aa46a596d1eeb31cf4b4e796c5113fcfa4ebf2a1b9e2b394a33b1ed3deb3b2",
+      "bytes": 11232
+    },
+    {
+      "id": "v09",
+      "language": "cs",
+      "text": "křičet",
+      "voice": "cs-CZ-VlastaNeural",
+      "audio": "audio/vocabulary/cs/v09.mp3",
+      "origin": {
+        "type": "azure"
+      },
+      "sha256": "8dc701fd92e0817da92769364a9c9190b31c65f6d407aae04f855f472dcb0f18",
+      "bytes": 11232
+    },
+    {
+      "id": "v10",
+      "language": "en",
+      "text": "fish",
+      "voice": "en-US-AndrewNeural",
+      "audio": "audio/vocabulary/en/v10.mp3",
+      "origin": {
+        "type": "azure"
+      },
+      "sha256": "5591090266e61631e89f16cef701ca0c7187e6a497dd9d8dd9ac0e57e5af1692",
+      "bytes": 11232
+    },
+    {
+      "id": "v11",
+      "language": "en",
+      "text": "net",
+      "voice": "en-US-AndrewNeural",
+      "audio": "audio/vocabulary/en/v11.mp3",
+      "origin": {
+        "type": "azure"
+      },
+      "sha256": "b5e6ca357fa3d59cfa81470530b6a1e5eb6d15b7fb2bfecae966950b283b19c5",
+      "bytes": 5040
+    },
+    {
+      "id": "v11",
+      "language": "cs",
+      "text": "podběrák",
+      "voice": "cs-CZ-VlastaNeural",
+      "audio": "audio/vocabulary/cs/v11.mp3",
+      "origin": {
+        "type": "azure"
+      },
+      "sha256": "60f001faa2d0e3a34b1dd196a59c4c50da11526bd56c5920c2b30bb0fef6561c",
+      "bytes": 12672
+    },
+    {
+      "id": "v12",
+      "language": "en",
+      "text": "dinner",
+      "voice": "en-US-AndrewNeural",
+      "audio": "audio/vocabulary/en/v12.mp3",
+      "origin": {
+        "type": "azure"
+      },
+      "sha256": "714b629fd8ffecc8703bfa2428d72e3b8eb68172e89777b8b60712af1a11c057",
+      "bytes": 5040
+    },
+    {
+      "id": "v12",
+      "language": "cs",
+      "text": "večeře",
+      "voice": "cs-CZ-VlastaNeural",
+      "audio": "audio/vocabulary/cs/v12.mp3",
+      "origin": {
+        "type": "azure"
+      },
+      "sha256": "c164c3d9aaaaa83d4812531dbf1e559e784a5e47c77c8ec42ebd054e1972b8b6",
+      "bytes": 11232
+    },
+    {
+      "id": "v13",
+      "language": "en",
+      "text": "food",
+      "voice": "en-US-AndrewNeural",
+      "audio": "audio/vocabulary/en/v13.mp3",
+      "origin": {
+        "type": "azure"
+      },
+      "sha256": "2fe7ce85de3e719f0e42f0813d4e51da92122f67570cf528242ff5d40b2b5f1e",
+      "bytes": 11232
+    },
+    {
+      "id": "v14",
+      "language": "en",
+      "text": "meeting",
+      "voice": "en-US-AndrewNeural",
+      "audio": "audio/vocabulary/en/v14.mp3",
+      "origin": {
+        "type": "azure"
+      },
+      "sha256": "1a7ff2c40bf5c8c619f986f610c158fac732f49375a0e58fc8a0ee8bdf2930d3",
+      "bytes": 11232
+    },
+    {
+      "id": "v14",
+      "language": "cs",
+      "text": "sněm",
+      "voice": "cs-CZ-VlastaNeural",
+      "audio": "audio/vocabulary/cs/v14.mp3",
+      "origin": {
+        "type": "azure"
+      },
+      "sha256": "8e7d1a07df9a90752c06deba0e8197f2654b806069b7f9df6ece5c5a34e19b7c",
+      "bytes": 11232
+    },
+    {
+      "id": "v15",
+      "language": "en",
+      "text": "where",
+      "voice": "en-US-AndrewNeural",
+      "audio": "audio/vocabulary/en/v15.mp3",
+      "origin": {
+        "type": "azure"
+      },
+      "sha256": "4a22a0a726f6733b8a24a8513fe9f7cf564628ab378acde1adb723fe10fec61f",
+      "bytes": 5040
+    },
+    {
+      "id": "v15",
+      "language": "cs",
+      "text": "kde",
+      "voice": "cs-CZ-VlastaNeural",
+      "audio": "audio/vocabulary/cs/v15.mp3",
+      "origin": {
+        "type": "azure"
+      },
+      "sha256": "f8503ff2fbf5180f1beaa96cd857cc41ebd22a27ca80818cfb7860c6e3dd8503",
+      "bytes": 9072
+    },
+    {
+      "id": "v16",
+      "language": "en",
+      "text": "other side",
+      "voice": "en-US-AndrewNeural",
+      "audio": "audio/vocabulary/en/v16.mp3",
+      "origin": {
+        "type": "azure"
+      },
+      "sha256": "b9b1211c9bcff373366af8cbe256cc2ad3f1761b140d152940e579aeaec1e907",
+      "bytes": 11232
+    },
+    {
+      "id": "v16",
+      "language": "cs",
+      "text": "druhá strana",
+      "voice": "cs-CZ-VlastaNeural",
+      "audio": "audio/vocabulary/cs/v16.mp3",
+      "origin": {
+        "type": "azure"
+      },
+      "sha256": "2f611992c444783d0db124b83dcb43c765e18d77599b1d7dfbeb86b8391cd8ae",
+      "bytes": 13248
+    },
+    {
+      "id": "v17",
+      "language": "en",
+      "text": "morning",
+      "voice": "en-US-AndrewNeural",
+      "audio": "audio/vocabulary/en/v17.mp3",
+      "origin": {
+        "type": "azure"
+      },
+      "sha256": "5b39ee8839aa2d1a44828e9969cf443170665b68bf27b5a1d73eefd6830ca252",
+      "bytes": 11232
+    },
+    {
+      "id": "v17",
+      "language": "cs",
+      "text": "ráno",
+      "voice": "cs-CZ-VlastaNeural",
+      "audio": "audio/vocabulary/cs/v17.mp3",
+      "origin": {
+        "type": "azure"
+      },
+      "sha256": "beb616ea06946797f4aeae77286194677ded5ed53d09eac568a8cac0e3176b0a",
+      "bytes": 11232
+    },
+    {
+      "id": "v18",
+      "language": "en",
+      "text": "boat",
+      "voice": "en-US-AndrewNeural",
+      "audio": "audio/vocabulary/en/v18.mp3",
+      "origin": {
+        "type": "azure"
+      },
+      "sha256": "f9ec1d57c813a6fe3f5f73901db551aae3c945d871d9020b8cb7e038eb18aec8",
+      "bytes": 5040
+    },
+    {
+      "id": "v19",
+      "language": "en",
+      "text": "fishing hut",
+      "voice": "en-US-AndrewNeural",
+      "audio": "audio/vocabulary/en/v19.mp3",
+      "origin": {
+        "type": "azure"
+      },
+      "sha256": "604d02a67457b7b2ffc84c18720ed8473132d8c2104d4c586a0afc3c357bdea2",
+      "bytes": 11232
+    },
+    {
+      "id": "v19",
+      "language": "cs",
+      "text": "rybářská chatrč",
+      "voice": "cs-CZ-VlastaNeural",
+      "audio": "audio/vocabulary/cs/v19.mp3",
+      "origin": {
+        "type": "azure"
+      },
+      "sha256": "91969fab8f4caed8d003d7e3209a9fe46de9598f046707f14ab2bc7b1be6801e",
+      "bytes": 15408
+    },
+    {
+      "id": "v20",
+      "language": "en",
+      "text": "beside",
+      "voice": "en-US-AndrewNeural",
+      "audio": "audio/vocabulary/en/v20.mp3",
+      "origin": {
+        "type": "azure"
+      },
+      "sha256": "29bc3116b022e1c3d015f692795567776d454ffbaf363cbfb96ec4ac05d3a01e",
+      "bytes": 11232
+    },
+    {
+      "id": "v20",
+      "language": "cs",
+      "text": "vedle",
+      "voice": "cs-CZ-VlastaNeural",
+      "audio": "audio/vocabulary/cs/v20.mp3",
+      "origin": {
+        "type": "azure"
+      },
+      "sha256": "abb401bd1b9320240c83cd8105b483a4cc4ee56a896d90ea5982c0d4dea9adf6",
+      "bytes": 11232
+    },
+    {
+      "id": "v21",
+      "language": "en",
+      "text": "follow",
+      "voice": "en-US-AndrewNeural",
+      "audio": "audio/vocabulary/en/v21.mp3",
+      "origin": {
+        "type": "azure"
+      },
+      "sha256": "15e568dcbcd319a2b6ac3664748a451d6c015dac023e9f8dca2c92d6efd0b7dc",
+      "bytes": 11232
+    },
+    {
+      "id": "v21",
+      "language": "cs",
+      "text": "následovat",
+      "voice": "cs-CZ-VlastaNeural",
+      "audio": "audio/vocabulary/cs/v21.mp3",
+      "origin": {
+        "type": "azure"
+      },
+      "sha256": "9b3a3c9808e5220a4ef81f1cf5dee06d707a1942b1f5a9fd8004fd4f70a039fa",
+      "bytes": 12528
+    },
+    {
+      "id": "v22",
+      "language": "en",
+      "text": "enjoy",
+      "voice": "en-US-AndrewNeural",
+      "audio": "audio/vocabulary/en/v22.mp3",
+      "origin": {
+        "type": "azure"
+      },
+      "sha256": "df972c1f3da8bd71bbf3d1a75f6ee289c57d803df2d6b1e8b68e1c514ec4ed06",
+      "bytes": 11232
+    },
+    {
+      "id": "v23",
+      "language": "en",
+      "text": "splash",
+      "voice": "en-US-AndrewNeural",
+      "audio": "audio/vocabulary/en/v23.mp3",
+      "origin": {
+        "type": "azure"
+      },
+      "sha256": "bc1d4d944f51f2138908e788c8f72dbd4deae7c37ff92b30205625eea6244bf5",
+      "bytes": 11232
+    },
+    {
+      "id": "v23",
+      "language": "cs",
+      "text": "šplouchnutí",
+      "voice": "cs-CZ-VlastaNeural",
+      "audio": "audio/vocabulary/cs/v23.mp3",
+      "origin": {
+        "type": "azure"
+      },
+      "sha256": "238c622ce0ddcedc0ceef27a417cd0aed1145c2cb663dea0ad9cf4e68af7d86f",
+      "bytes": 13392
+    },
+    {
+      "id": "v24",
+      "language": "en",
+      "text": "smaller",
+      "voice": "en-US-AndrewNeural",
+      "audio": "audio/vocabulary/en/v24.mp3",
+      "origin": {
+        "type": "azure"
+      },
+      "sha256": "36bf810e218b030423a8c8a43fd10654e10691995f6fc9e21bed1bc0bfa732a5",
+      "bytes": 11232
+    },
+    {
+      "id": "v24",
+      "language": "cs",
+      "text": "menší",
+      "voice": "cs-CZ-VlastaNeural",
+      "audio": "audio/vocabulary/cs/v24.mp3",
+      "origin": {
+        "type": "azure"
+      },
+      "sha256": "3d118dd9ae44cac32d6793b78e30f0ed83f78e423b6688043e43666b121fc4fa",
+      "bytes": 11376
+    },
+    {
+      "id": "v25",
+      "language": "en",
+      "text": "practise",
+      "voice": "en-US-AndrewNeural",
+      "audio": "audio/vocabulary/en/v25.mp3",
+      "origin": {
+        "type": "azure"
+      },
+      "sha256": "adf4201373eca910b94326128ec2a7d35a71bc976dd09c43c6cf5024347a9d91",
+      "bytes": 11232
+    },
+    {
+      "id": "v25",
+      "language": "cs",
+      "text": "trénovat",
+      "voice": "cs-CZ-VlastaNeural",
+      "audio": "audio/vocabulary/cs/v25.mp3",
+      "origin": {
+        "type": "azure"
+      },
+      "sha256": "a8012d8b45ee0c2f1415a46fc995b45903c1246e0e9a278041914def726a5383",
+      "bytes": 11808
+    },
+    {
+      "id": "v26",
+      "language": "en",
+      "text": "frog",
+      "voice": "en-US-AndrewNeural",
+      "audio": "audio/vocabulary/en/v26.mp3",
+      "origin": {
+        "type": "azure"
+      },
+      "sha256": "d15c1a02539e6fe3399c722322bcb2d49cbf57d6dfcf03eb0de17726cf51dd46",
+      "bytes": 11232
+    },
+    {
+      "id": "v26",
+      "language": "cs",
+      "text": "žabák",
+      "voice": "cs-CZ-VlastaNeural",
+      "audio": "audio/vocabulary/cs/v26.mp3",
+      "origin": {
+        "type": "azure"
+      },
+      "sha256": "e6e0bebe2f0a4f2bd5e809de247ec8b5acc8dfadd7be20a34b9e7febc2577fc8",
+      "bytes": 11376
+    },
+    {
+      "id": "v27",
+      "language": "en",
+      "text": "race",
+      "voice": "en-US-AndrewNeural",
+      "audio": "audio/vocabulary/en/v27.mp3",
+      "origin": {
+        "type": "azure"
+      },
+      "sha256": "f932ac4d7e7a5851e81054a93f0daca1bbd7ea25db841f3191ab9f11bbdb696a",
+      "bytes": 11232
+    },
+    {
+      "id": "v27",
+      "language": "cs",
+      "text": "závod",
+      "voice": "cs-CZ-VlastaNeural",
+      "audio": "audio/vocabulary/cs/v27.mp3",
+      "origin": {
+        "type": "azure"
+      },
+      "sha256": "b77e301073235c3dde4d52112566d12f0da6f6acbbdff616c540d07f3dbad3fb",
+      "bytes": 11232
+    },
+    {
+      "id": "v28",
+      "language": "en",
+      "text": "dry",
+      "voice": "en-US-AndrewNeural",
+      "audio": "audio/vocabulary/en/v28.mp3",
+      "origin": {
+        "type": "azure"
+      },
+      "sha256": "1b054dcf75b8171c5bc3e6a0d4e61efb677ff5c732f089dfe45840a6afdaa675",
+      "bytes": 5040
+    },
+    {
+      "id": "v28",
+      "language": "cs",
+      "text": "suchý",
+      "voice": "cs-CZ-VlastaNeural",
+      "audio": "audio/vocabulary/cs/v28.mp3",
+      "origin": {
+        "type": "azure"
+      },
+      "sha256": "2adcb9059c5d154aee0470690171d881290274d6068302f1700a026219ec3784",
+      "bytes": 11232
+    },
+    {
+      "id": "v29",
+      "language": "en",
+      "text": "sleep",
+      "voice": "en-US-AndrewNeural",
+      "audio": "audio/vocabulary/en/v29.mp3",
+      "origin": {
+        "type": "azure"
+      },
+      "sha256": "22f6a91b70b19333076f6fde7759d27cb7e91f1e10bffab62b264c8e6ba9cd1d",
+      "bytes": 11232
+    },
+    {
+      "id": "v29",
+      "language": "cs",
+      "text": "spát",
+      "voice": "cs-CZ-VlastaNeural",
+      "audio": "audio/vocabulary/cs/v29.mp3",
+      "origin": {
+        "type": "azure"
+      },
+      "sha256": "e5617f1e7455ec7826933c2837f12bce1d4b56465cc558c7d0518c7739e139a2",
+      "bytes": 11232
+    },
+    {
+      "id": "v30",
+      "language": "en",
+      "text": "tonight",
+      "voice": "en-US-AndrewNeural",
+      "audio": "audio/vocabulary/en/v30.mp3",
+      "origin": {
+        "type": "azure"
+      },
+      "sha256": "6b833623b546b75fcbd9f34e6a8a20be0efe0230cbd4cf606d1420f5fba44b63",
+      "bytes": 11232
+    },
+    {
+      "id": "v30",
+      "language": "cs",
+      "text": "dnes v noci",
+      "voice": "cs-CZ-VlastaNeural",
+      "audio": "audio/vocabulary/cs/v30.mp3",
+      "origin": {
+        "type": "azure"
+      },
+      "sha256": "9ae04301a85191a0a220ae4e13cc7a98b97f5dd17411808e6e8e021e7e0bc580",
+      "bytes": 12528
+    },
+    {
+      "id": "v31",
+      "language": "en",
+      "text": "before",
+      "voice": "en-US-AndrewNeural",
+      "audio": "audio/vocabulary/en/v31.mp3",
+      "origin": {
+        "type": "azure"
+      },
+      "sha256": "7dd9b3360b75fa3476c19eb0d7e5be56a649a0c9cb9d3848870b4e220796482e",
+      "bytes": 11232
+    },
+    {
+      "id": "v31",
+      "language": "cs",
+      "text": "před",
+      "voice": "cs-CZ-VlastaNeural",
+      "audio": "audio/vocabulary/cs/v31.mp3",
+      "origin": {
+        "type": "azure"
+      },
+      "sha256": "24cca4831df871639a42bf3311aceac9939e4492e478c7e0b7084b95ff0a5d3e",
+      "bytes": 11232
+    },
+    {
+      "id": "v32",
+      "language": "en",
+      "text": "warm",
+      "voice": "en-US-AndrewNeural",
+      "audio": "audio/vocabulary/en/v32.mp3",
+      "origin": {
+        "type": "azure"
+      },
+      "sha256": "58fbaa83760acbd00736cb106e0736ae03172225900570abe6747a0aaea410c4",
+      "bytes": 4896
+    },
+    {
+      "id": "v33",
+      "language": "en",
+      "text": "fire",
+      "voice": "en-US-AndrewNeural",
+      "audio": "audio/vocabulary/en/v33.mp3",
+      "origin": {
+        "type": "azure"
+      },
+      "sha256": "7e7f1dd4edbf35eb82798644c8ddc3db00079032a06f2e123356929d4854c506",
+      "bytes": 11232
+    },
+    {
+      "id": "v33",
+      "language": "cs",
+      "text": "oheň",
+      "voice": "cs-CZ-VlastaNeural",
+      "audio": "audio/vocabulary/cs/v33.mp3",
+      "origin": {
+        "type": "azure"
+      },
+      "sha256": "ba0179ebc1d6d0371b7d856d26860a22e93af3a58581bd3392a5eb7cbc2f8511",
+      "bytes": 11232
+    },
+    {
+      "id": "v34",
+      "language": "en",
+      "text": "like",
+      "voice": "en-US-AndrewNeural",
+      "audio": "audio/vocabulary/en/v34.mp3",
+      "origin": {
+        "type": "azure"
+      },
+      "sha256": "e22c87398b20e0da25846be657fef7e7b33054dcbaa57d7c537168699c577ec4",
+      "bytes": 4896
+    },
+    {
+      "id": "v34",
+      "language": "cs",
+      "text": "líbit se",
+      "voice": "cs-CZ-VlastaNeural",
+      "audio": "audio/vocabulary/cs/v34.mp3",
+      "origin": {
+        "type": "azure"
+      },
+      "sha256": "d2cad12a2e0a1960601a49d43ff53d74eb89b76ab9746820d588811b5fcf5dbd",
+      "bytes": 11664
+    },
+    {
+      "id": "v35",
+      "language": "en",
+      "text": "call",
+      "voice": "en-US-AndrewNeural",
+      "audio": "audio/vocabulary/en/v35.mp3",
+      "origin": {
+        "type": "azure"
+      },
+      "sha256": "ee617d8f7c7acc42db63ac52da9deb0c30f927066e05faf6b8a9a896d6c9c100",
+      "bytes": 5040
+    },
+    {
+      "id": "v35",
+      "language": "cs",
+      "text": "svolat",
+      "voice": "cs-CZ-VlastaNeural",
+      "audio": "audio/vocabulary/cs/v35.mp3",
+      "origin": {
+        "type": "azure"
+      },
+      "sha256": "b197bbddeade22b42379008a39f0f501262c0deef62e875450132b4b2cc8a68c",
+      "bytes": 11232
+    },
+    {
+      "id": "v36",
+      "language": "en",
+      "text": "stag",
+      "voice": "en-US-AndrewNeural",
+      "audio": "audio/vocabulary/en/v36.mp3",
+      "origin": {
+        "type": "azure"
+      },
+      "sha256": "d33633b3f8c50277f9022477ca1f359f92515f0b599879c6dd089a0e5c4c7846",
+      "bytes": 11232
+    },
+    {
+      "id": "v37",
+      "language": "en",
+      "text": "party",
+      "voice": "en-US-AndrewNeural",
+      "audio": "audio/vocabulary/en/v37.mp3",
+      "origin": {
+        "type": "azure"
+      },
+      "sha256": "205dd8aba81a0bc8dca45940a673a1dfb760fbc77ae232d8389c68b8ef2b873f",
+      "bytes": 5040
+    },
+    {
+      "id": "v37",
+      "language": "cs",
+      "text": "oslava",
+      "voice": "cs-CZ-VlastaNeural",
+      "audio": "audio/vocabulary/cs/v37.mp3",
+      "origin": {
+        "type": "azure"
+      },
+      "sha256": "ec3f83035e5363b8ea62b03d38e04fa3e516f45861865a214369bb7a500801a0",
+      "bytes": 11232
+    },
+    {
+      "id": "v38",
+      "language": "en",
+      "text": "bring",
+      "voice": "en-US-AndrewNeural",
+      "audio": "audio/vocabulary/en/v38.mp3",
+      "origin": {
+        "type": "azure"
+      },
+      "sha256": "680d43424779c00a3249ebfe4d8285b9df8481ce0eccdbcc0820e09376a9de49",
+      "bytes": 4896
+    },
+    {
+      "id": "v38",
+      "language": "cs",
+      "text": "přinést",
+      "voice": "cs-CZ-VlastaNeural",
+      "audio": "audio/vocabulary/cs/v38.mp3",
+      "origin": {
+        "type": "azure"
+      },
+      "sha256": "9a1c47b39fc8b0ff61cae1a5b436567362a545a035bf521287abeba09a8df48f",
+      "bytes": 12240
+    },
+    {
+      "id": "v39",
+      "language": "en",
+      "text": "every",
+      "voice": "en-US-AndrewNeural",
+      "audio": "audio/vocabulary/en/v39.mp3",
+      "origin": {
+        "type": "azure"
+      },
+      "sha256": "526f3514926e9374da00cb7a14b4f3796030cc83e448f3e00f3c337f0cb98aa5",
+      "bytes": 5040
+    },
+    {
+      "id": "v39",
+      "language": "cs",
+      "text": "každý",
+      "voice": "cs-CZ-VlastaNeural",
+      "audio": "audio/vocabulary/cs/v39.mp3",
+      "origin": {
+        "type": "azure"
+      },
+      "sha256": "883e4dbac357eda7de704639bf3ec63f61e1262b0b6fe7a9846f98227ed5ff8d",
+      "bytes": 11232
+    },
+    {
+      "id": "v40",
+      "language": "en",
+      "text": "animal",
+      "voice": "en-US-AndrewNeural",
+      "audio": "audio/vocabulary/en/v40.mp3",
+      "origin": {
+        "type": "azure"
+      },
+      "sha256": "27c4c78c4603c014678045d08979f6b85e08c6ce694e886ad6794fb06e083df2",
+      "bytes": 11232
+    },
+    {
+      "id": "v41",
+      "language": "en",
+      "text": "ask",
+      "voice": "en-US-AndrewNeural",
+      "audio": "audio/vocabulary/en/v41.mp3",
+      "origin": {
+        "type": "azure"
+      },
+      "sha256": "7067383326d88c95d404dbc123ef93f59aa52dcce77cf508459ceee3fbec2111",
+      "bytes": 11232
+    },
+    {
+      "id": "v41",
+      "language": "cs",
+      "text": "požádat",
+      "voice": "cs-CZ-VlastaNeural",
+      "audio": "audio/vocabulary/cs/v41.mp3",
+      "origin": {
+        "type": "azure"
+      },
+      "sha256": "924a7a260ce6fbd68bb7ef08254d41445cd6ab816708a1e267ddd810d272bc04",
+      "bytes": 12096
+    },
+    {
+      "id": "v42",
+      "language": "en",
+      "text": "something",
+      "voice": "en-US-AndrewNeural",
+      "audio": "audio/vocabulary/en/v42.mp3",
+      "origin": {
+        "type": "azure"
+      },
+      "sha256": "8f11e9d92513ec92c3cea1f94ceafe90b13f076aa9fc1402a1141939e6374dec",
+      "bytes": 11232
+    },
+    {
+      "id": "v43",
+      "language": "en",
+      "text": "think",
+      "voice": "en-US-AndrewNeural",
+      "audio": "audio/vocabulary/en/v43.mp3",
+      "origin": {
+        "type": "azure"
+      },
+      "sha256": "6377462a51c4b86a6a5ac57357af473df6f8e208d3a9e9972feb3b60d73c2b5c",
+      "bytes": 4896
+    },
+    {
+      "id": "v43",
+      "language": "cs",
+      "text": "myslet si",
+      "voice": "cs-CZ-VlastaNeural",
+      "audio": "audio/vocabulary/cs/v43.mp3",
+      "origin": {
+        "type": "azure"
+      },
+      "sha256": "d7da0363f76d92dfd82258f8fdf421edd9ef76e01096071430e81f3b1ae377cf",
+      "bytes": 11664
+    },
+    {
+      "id": "v44",
+      "language": "en",
+      "text": "wrong",
+      "voice": "en-US-AndrewNeural",
+      "audio": "audio/vocabulary/en/v44.mp3",
+      "origin": {
+        "type": "azure"
+      },
+      "sha256": "5498ec5f5d11bf49583495873662d50fd2b7b35ae3838e39c999e862857a7c68",
+      "bytes": 11232
+    },
+    {
+      "id": "v44",
+      "language": "cs",
+      "text": "špatně",
+      "voice": "cs-CZ-VlastaNeural",
+      "audio": "audio/vocabulary/cs/v44.mp3",
+      "origin": {
+        "type": "azure"
+      },
+      "sha256": "cad1726d61713e2754cafb5f3fc65c33358772f3ac64857bc887bd2d056f29de",
+      "bytes": 11232
+    },
+    {
+      "id": "v45",
+      "language": "en",
+      "text": "soon",
+      "voice": "en-US-AndrewNeural",
+      "audio": "audio/vocabulary/en/v45.mp3",
+      "origin": {
+        "type": "azure"
+      },
+      "sha256": "b5be00f47b1314c76203a0f8a8f5d82d0ad657e07e7d3092cb2a7d0543d3a64f",
+      "bytes": 11232
+    },
+    {
+      "id": "v45",
+      "language": "cs",
+      "text": "brzy",
+      "voice": "cs-CZ-VlastaNeural",
+      "audio": "audio/vocabulary/cs/v45.mp3",
+      "origin": {
+        "type": "azure"
+      },
+      "sha256": "285ed82b942e02457b35560460e094ca63de85237a4b1834f13e9dade775db5e",
+      "bytes": 11232
+    },
+    {
+      "id": "v46",
+      "language": "en",
+      "text": "find out",
+      "voice": "en-US-AndrewNeural",
+      "audio": "audio/vocabulary/en/v46.mp3",
+      "origin": {
+        "type": "azure"
+      },
+      "sha256": "49aa41f2520731a4e56142ae8ea90f235fd9a6e06d399d5e9fa3e1101249e31d",
+      "bytes": 11232
+    },
+    {
+      "id": "v46",
+      "language": "cs",
+      "text": "zjistit",
+      "voice": "cs-CZ-VlastaNeural",
+      "audio": "audio/vocabulary/cs/v46.mp3",
+      "origin": {
+        "type": "azure"
+      },
+      "sha256": "1cf5df60d78b02414014fd0bb01e5104994b1ab382f3009949d14ebe285884b7",
+      "bytes": 11232
+    },
+    {
+      "id": "v47",
+      "language": "en",
+      "text": "sick",
+      "voice": "en-US-AndrewNeural",
+      "audio": "audio/vocabulary/en/v47.mp3",
+      "origin": {
+        "type": "azure"
+      },
+      "sha256": "8c6bea041179822a7463d698de136c1c6984f225619679bec832647457e2e8fd",
+      "bytes": 5040
+    },
+    {
+      "id": "v47",
+      "language": "cs",
+      "text": "nemocný",
+      "voice": "cs-CZ-VlastaNeural",
+      "audio": "audio/vocabulary/cs/v47.mp3",
+      "origin": {
+        "type": "azure"
+      },
+      "sha256": "4aa45489dda54290526aed0ee10bd4cba4346b3410b84b62b238bded6de06ea3",
+      "bytes": 11664
+    },
+    {
+      "id": "v48",
+      "language": "en",
+      "text": "people",
+      "voice": "en-US-AndrewNeural",
+      "audio": "audio/vocabulary/en/v48.mp3",
+      "origin": {
+        "type": "azure"
+      },
+      "sha256": "137b8babcf32f5f8f73289bf793295a912ff4e96968d9e8dc0ce6eab15ee46d1",
+      "bytes": 11232
+    },
+    {
+      "id": "v48",
+      "language": "cs",
+      "text": "lidé",
+      "voice": "cs-CZ-VlastaNeural",
+      "audio": "audio/vocabulary/cs/v48.mp3",
+      "origin": {
+        "type": "azure"
+      },
+      "sha256": "fe8d2746925563a00680eb4e73999d6224838d3dc722f271abd753ecb94d17db",
+      "bytes": 11232
+    },
+    {
+      "id": "v49",
+      "language": "en",
+      "text": "cut down",
+      "voice": "en-US-AndrewNeural",
+      "audio": "audio/vocabulary/en/v49.mp3",
+      "origin": {
+        "type": "azure"
+      },
+      "sha256": "b9a9fe541825062f91aa6816da23f9c2994c1d6eae1c165a748fb2e0060ed2c7",
+      "bytes": 11232
+    },
+    {
+      "id": "v49",
+      "language": "cs",
+      "text": "pokácet",
+      "voice": "cs-CZ-VlastaNeural",
+      "audio": "audio/vocabulary/cs/v49.mp3",
+      "origin": {
+        "type": "azure"
+      },
+      "sha256": "2e0670b180b77c7c0ce6e9a6015fa7929327a22c379f06c94d1ce2da0659f5e9",
+      "bytes": 12384
+    },
+    {
+      "id": "v50",
+      "language": "en",
+      "text": "whole",
+      "voice": "en-US-AndrewNeural",
+      "audio": "audio/vocabulary/en/v50.mp3",
+      "origin": {
+        "type": "azure"
+      },
+      "sha256": "581c9fde4407e07856bb2fe705a8beaf79a5c4170e2191188075e1e6a5776c5d",
+      "bytes": 5040
+    },
+    {
+      "id": "v51",
+      "language": "en",
+      "text": "healthy",
+      "voice": "en-US-AndrewNeural",
+      "audio": "audio/vocabulary/en/v51.mp3",
+      "origin": {
+        "type": "azure"
+      },
+      "sha256": "bc075a700b9436a2c32c336fa9d610155558f8610f4e858b225235b00d5af433",
+      "bytes": 11232
+    },
+    {
+      "id": "v51",
+      "language": "cs",
+      "text": "zdravý",
+      "voice": "cs-CZ-VlastaNeural",
+      "audio": "audio/vocabulary/cs/v51.mp3",
+      "origin": {
+        "type": "azure"
+      },
+      "sha256": "f56fc18dac6146d765aa194561880ae30d012315e5cb4866e63c5b826f34c858",
+      "bytes": 11232
+    },
+    {
+      "id": "v52",
+      "language": "en",
+      "text": "home",
+      "voice": "en-US-AndrewNeural",
+      "audio": "audio/vocabulary/en/v52.mp3",
+      "origin": {
+        "type": "azure"
+      },
+      "sha256": "9c93a90855862d682f16a99b38a9a98b24d0ef76c95e854a3812a310c8c60433",
+      "bytes": 5040
+    },
+    {
+      "id": "v53",
+      "language": "en",
+      "text": "anyone",
+      "voice": "en-US-AndrewNeural",
+      "audio": "audio/vocabulary/en/v53.mp3",
+      "origin": {
+        "type": "azure"
+      },
+      "sha256": "44ac0b78af2eaf222b6ea514fca32fc0bc3d5fa5e5ad1c2e945e7ae6361735ca",
+      "bytes": 11232
+    },
+    {
+      "id": "v54",
+      "language": "en",
+      "text": "idea",
+      "voice": "en-US-AndrewNeural",
+      "audio": "audio/vocabulary/en/v54.mp3",
+      "origin": {
+        "type": "azure"
+      },
+      "sha256": "ee0c79ae0dd26adc39e9bed67941e662093fa01fd40445a0de61e96971a2f98e",
+      "bytes": 11232
+    },
+    {
+      "id": "v54",
+      "language": "cs",
+      "text": "nápad",
+      "voice": "cs-CZ-VlastaNeural",
+      "audio": "audio/vocabulary/cs/v54.mp3",
+      "origin": {
+        "type": "azure"
+      },
+      "sha256": "c722e5b66bbc8cc331772a8f7fff5352fe0f88917deaf12fa68b2d9a01ce87f9",
+      "bytes": 11232
+    },
+    {
+      "id": "v55",
+      "language": "en",
+      "text": "woodpecker",
+      "voice": "en-US-AndrewNeural",
+      "audio": "audio/vocabulary/en/v55.mp3",
+      "origin": {
+        "type": "azure"
+      },
+      "sha256": "9249ed987c784d8b723c00e0d3ade775e8b591f8497e2e24b2034a5ad7fa7dd9",
+      "bytes": 11232
+    },
+    {
+      "id": "v55",
+      "language": "cs",
+      "text": "datel",
+      "voice": "cs-CZ-VlastaNeural",
+      "audio": "audio/vocabulary/cs/v55.mp3",
+      "origin": {
+        "type": "azure"
+      },
+      "sha256": "0b0075746c23c8affedb99e7583731b51bd5c3fd2546d0c1cc91c0baadd9b9be",
+      "bytes": 11232
+    },
+    {
+      "id": "v56",
+      "language": "en",
+      "text": "check",
+      "voice": "en-US-AndrewNeural",
+      "audio": "audio/vocabulary/en/v56.mp3",
+      "origin": {
+        "type": "azure"
+      },
+      "sha256": "53e4ca52b535ece76aedf5eca845c0e01f7d0b60d5ab741880313c854a2c91d6",
+      "bytes": 11232
+    },
+    {
+      "id": "v56",
+      "language": "cs",
+      "text": "prohlédnout",
+      "voice": "cs-CZ-VlastaNeural",
+      "audio": "audio/vocabulary/cs/v56.mp3",
+      "origin": {
+        "type": "azure"
+      },
+      "sha256": "6a9eb170780ec6f47ec2254508d8cf18793c2fff6d5974e20b5080e5ef6c0c76",
+      "bytes": 12960
+    },
+    {
+      "id": "v57",
+      "language": "en",
+      "text": "beaver",
+      "voice": "en-US-AndrewNeural",
+      "audio": "audio/vocabulary/en/v57.mp3",
+      "origin": {
+        "type": "azure"
+      },
+      "sha256": "87c1f94cebef04aee74021cd28bb3c7c3d7d8f81a020ce6b6b1d70bc655cff56",
+      "bytes": 11232
+    },
+    {
+      "id": "v57",
+      "language": "cs",
+      "text": "bobr",
+      "voice": "cs-CZ-VlastaNeural",
+      "audio": "audio/vocabulary/cs/v57.mp3",
+      "origin": {
+        "type": "azure"
+      },
+      "sha256": "ef3482e36bef0e6d71fdc09c60c6ce54c4a75e323cd46a2b83eb5bebeed0f4c0",
+      "bytes": 11232
+    },
+    {
+      "id": "v58",
+      "language": "en",
+      "text": "leave",
+      "voice": "en-US-AndrewNeural",
+      "audio": "audio/vocabulary/en/v58.mp3",
+      "origin": {
+        "type": "azure"
+      },
+      "sha256": "efc88d77b0edb5908a9934d2631c4af46404d0876e57b54cf02b862a6f1bfb17",
+      "bytes": 11232
+    },
+    {
+      "id": "v58",
+      "language": "cs",
+      "text": "nechat",
+      "voice": "cs-CZ-VlastaNeural",
+      "audio": "audio/vocabulary/cs/v58.mp3",
+      "origin": {
+        "type": "azure"
+      },
+      "sha256": "fdf0ac330405b6acdd9abecc26f1da010c978b793f65ee2120462965a4227347",
+      "bytes": 11232
+    },
+    {
+      "id": "v59",
+      "language": "en",
+      "text": "must",
+      "voice": "en-US-AndrewNeural",
+      "audio": "audio/vocabulary/en/v59.mp3",
+      "origin": {
+        "type": "azure"
+      },
+      "sha256": "195ac83c2ec8721315d9d75bda9bc001d1455394a66137e43c7d141f071ba147",
+      "bytes": 11232
+    },
+    {
+      "id": "v59",
+      "language": "cs",
+      "text": "muset",
+      "voice": "cs-CZ-VlastaNeural",
+      "audio": "audio/vocabulary/cs/v59.mp3",
+      "origin": {
+        "type": "azure"
+      },
+      "sha256": "97ac63d3faac62e188fc1aee59c41160e4ac3738e46dd9101e7d68dd5d75784f",
+      "bytes": 11232
+    },
+    {
+      "id": "v60",
+      "language": "en",
+      "text": "take away",
+      "voice": "en-US-AndrewNeural",
+      "audio": "audio/vocabulary/en/v60.mp3",
+      "origin": {
+        "type": "azure"
+      },
+      "sha256": "1dd2249e6ac02b553ba244633d161f26cd3140a127113e8ee3b3ac578c8f2435",
+      "bytes": 11232
+    },
+    {
+      "id": "v60",
+      "language": "cs",
+      "text": "odvézt",
+      "voice": "cs-CZ-VlastaNeural",
+      "audio": "audio/vocabulary/cs/v60.mp3",
+      "origin": {
+        "type": "azure"
+      },
+      "sha256": "009d8a332352031114fb7394dd3abd69c42414be6db636655571d0e5ea1917ac",
+      "bytes": 11520
+    },
+    {
+      "id": "v61",
+      "language": "en",
+      "text": "shore",
+      "voice": "en-US-AndrewNeural",
+      "audio": "audio/vocabulary/en/v61.mp3",
+      "origin": {
+        "type": "azure"
+      },
+      "sha256": "becd251fd87eba0b60f9b3f783b1ebd6ac5bf5fbc6a094d521e436514414b07f",
+      "bytes": 11232
+    },
+    {
+      "id": "v61",
+      "language": "cs",
+      "text": "břeh",
+      "voice": "cs-CZ-VlastaNeural",
+      "audio": "audio/vocabulary/cs/v61.mp3",
+      "origin": {
+        "type": "azure"
+      },
+      "sha256": "b50898eda47de2b53a89f163232165b0bed901709c81888ad625df7bac9a18be",
+      "bytes": 11232
+    },
+    {
+      "id": "v62",
+      "language": "en",
+      "text": "everyone",
+      "voice": "en-US-AndrewNeural",
+      "audio": "audio/vocabulary/en/v62.mp3",
+      "origin": {
+        "type": "azure"
+      },
+      "sha256": "2b97c1844f0871cda4cdc23a79e97f3030f8ba051158478136a66d78f654fd97",
+      "bytes": 11232
+    },
+    {
+      "id": "v62",
+      "language": "cs",
+      "text": "všichni",
+      "voice": "cs-CZ-VlastaNeural",
+      "audio": "audio/vocabulary/cs/v62.mp3",
+      "origin": {
+        "type": "azure"
+      },
+      "sha256": "9c2d668de6dd13fc5df29ac40662c514e089f111d9ae0019a9cb03236427dbcf",
+      "bytes": 11232
+    },
+    {
+      "id": "v63",
+      "language": "en",
+      "text": "hard work",
+      "voice": "en-US-AndrewNeural",
+      "audio": "audio/vocabulary/en/v63.mp3",
+      "origin": {
+        "type": "azure"
+      },
+      "sha256": "a46ae4c7af1fd24ae77c51a8f9b97335dbd2e6732284d2532299d8712eb080ab",
+      "bytes": 11232
+    },
+    {
+      "id": "v63",
+      "language": "cs",
+      "text": "těžká práce",
+      "voice": "cs-CZ-VlastaNeural",
+      "audio": "audio/vocabulary/cs/v63.mp3",
+      "origin": {
+        "type": "azure"
+      },
+      "sha256": "b7c68039de89389a1235780c21eeba85c50fb8b76b40ab8222a486dadca6cdb3",
+      "bytes": 13680
+    },
+    {
+      "id": "v64",
+      "language": "en",
+      "text": "lead our team",
+      "voice": "en-US-AndrewNeural",
+      "audio": "audio/vocabulary/en/v64.mp3",
+      "origin": {
+        "type": "azure"
+      },
+      "sha256": "50ef9dcce51dd62f029f50981395a507cb619a8d4fdf361919b20aba565c265e",
+      "bytes": 11232
+    },
+    {
+      "id": "v64",
+      "language": "cs",
+      "text": "vést náš tým",
+      "voice": "cs-CZ-VlastaNeural",
+      "audio": "audio/vocabulary/cs/v64.mp3",
+      "origin": {
+        "type": "azure"
+      },
+      "sha256": "f8fa01fdeb09d25e671effceb04baae1c943222713b55910e063d9228574e6ba",
+      "bytes": 14832
+    },
+    {
+      "id": "v65",
+      "language": "en",
+      "text": "team",
+      "voice": "en-US-AndrewNeural",
+      "audio": "audio/vocabulary/en/v65.mp3",
+      "origin": {
+        "type": "azure"
+      },
+      "sha256": "c0415e6de40445550ed364953a97d6b219c298e922eeb980e8a7c74be6cdef9b",
+      "bytes": 5040
+    },
+    {
+      "id": "v65",
+      "language": "cs",
+      "text": "tým",
+      "voice": "cs-CZ-VlastaNeural",
+      "audio": "audio/vocabulary/cs/v65.mp3",
+      "origin": {
+        "type": "azure"
+      },
+      "sha256": "c2bdf82d55d9960598feaaf4b4c08ef1b36e6711260a2cb2fdbe5b1e941dbc35",
+      "bytes": 11232
+    },
+    {
+      "id": "v66",
+      "language": "en",
+      "text": "plan",
+      "voice": "en-US-AndrewNeural",
+      "audio": "audio/vocabulary/en/v66.mp3",
+      "origin": {
+        "type": "azure"
+      },
+      "sha256": "274eee1ce416b710210379c1313dbc42f9e5a135cf0ae18276867f9d55b982a7",
+      "bytes": 5040
+    },
+    {
+      "id": "v66",
+      "language": "cs",
+      "text": "plán",
+      "voice": "cs-CZ-VlastaNeural",
+      "audio": "audio/vocabulary/cs/v66.mp3",
+      "origin": {
+        "type": "azure"
+      },
+      "sha256": "4023ab064cd5fb4320deab4e9dcf1b0bf15acdaa2a31b7a9dd9f2cdf8e730345",
+      "bytes": 11232
+    },
+    {
+      "id": "v67",
+      "language": "en",
+      "text": "show",
+      "voice": "en-US-AndrewNeural",
+      "audio": "audio/vocabulary/en/v67.mp3",
+      "origin": {
+        "type": "azure"
+      },
+      "sha256": "9e590d711f0766b053282c5d18348a55e22b63e596182b3b460f9b7b35e41afb",
+      "bytes": 4896
+    },
+    {
+      "id": "v67",
+      "language": "cs",
+      "text": "ukázat",
+      "voice": "cs-CZ-VlastaNeural",
+      "audio": "audio/vocabulary/cs/v67.mp3",
+      "origin": {
+        "type": "azure"
+      },
+      "sha256": "44492de7977a6eac42985039028a57342fa4e3b060053c5fa2a5999246a7d8a3",
+      "bytes": 11808
+    },
+    {
+      "id": "v68",
+      "language": "en",
+      "text": "start",
+      "voice": "en-US-AndrewNeural",
+      "audio": "audio/vocabulary/en/v68.mp3",
+      "origin": {
+        "type": "azure"
+      },
+      "sha256": "615bd43eacfb5a7872e69717797a0e8ed109f5d57a6bb16c050900cfd2d5ed0e",
+      "bytes": 11232
+    },
+    {
+      "id": "v68",
+      "language": "cs",
+      "text": "začít",
+      "voice": "cs-CZ-VlastaNeural",
+      "audio": "audio/vocabulary/cs/v68.mp3",
+      "origin": {
+        "type": "azure"
+      },
+      "sha256": "ff3318499d5485fd1c40fb254f820fbcce4465e33ee5ee5655a99c1b06655a6e",
+      "bytes": 11520
+    },
+    {
+      "id": "v69",
+      "language": "en",
+      "text": "see you there",
+      "voice": "en-US-AndrewNeural",
+      "audio": "audio/vocabulary/en/v69.mp3",
+      "origin": {
+        "type": "azure"
+      },
+      "sha256": "861515fb80c801b279d2faa9ea708c7712041d9deaa2b588be0d4d3fe98bf67c",
+      "bytes": 11232
+    },
+    {
+      "id": "v69",
+      "language": "cs",
+      "text": "uvidíme se tam",
+      "voice": "cs-CZ-VlastaNeural",
+      "audio": "audio/vocabulary/cs/v69.mp3",
+      "origin": {
+        "type": "azure"
+      },
+      "sha256": "558d018607b88aeb957b8a58c58d62ca80b9eef585c66df078b2f87390c68eef",
+      "bytes": 14832
+    },
+    {
+      "id": "v70",
+      "language": "en",
+      "text": "many",
+      "voice": "en-US-AndrewNeural",
+      "audio": "audio/vocabulary/en/v70.mp3",
+      "origin": {
+        "type": "azure"
+      },
+      "sha256": "6f8466eebc1c7df84891b5d93555db9fb82f51395eb145d850911bbba36eb1fd",
+      "bytes": 4752
+    },
+    {
+      "id": "v71",
+      "language": "en",
+      "text": "may",
+      "voice": "en-US-AndrewNeural",
+      "audio": "audio/vocabulary/en/v71.mp3",
+      "origin": {
+        "type": "azure"
+      },
+      "sha256": "8580455cee0fe4a7481c326446579cb14fb7e3075abe2c41c783cc0beef609fd",
+      "bytes": 4896
+    },
+    {
+      "id": "v72",
+      "language": "en",
+      "text": "please",
+      "voice": "en-US-AndrewNeural",
+      "audio": "audio/vocabulary/en/v72.mp3",
+      "origin": {
+        "type": "azure"
+      },
+      "sha256": "b9297d4fa9bc831724303a5133631e8a26feb788994a4499e7f1e12547182531",
+      "bytes": 11232
+    },
+    {
+      "id": "v73",
+      "language": "en",
+      "text": "just",
+      "voice": "en-US-AndrewNeural",
+      "audio": "audio/vocabulary/en/v73.mp3",
+      "origin": {
+        "type": "azure"
+      },
+      "sha256": "039cf49a736e16b1073def3fde74c9bbd10fbe1c52791c186052152cfb108533",
+      "bytes": 11232
+    },
+    {
+      "id": "v73",
+      "language": "cs",
+      "text": "jen",
+      "voice": "cs-CZ-VlastaNeural",
+      "audio": "audio/vocabulary/cs/v73.mp3",
+      "origin": {
+        "type": "azure"
+      },
+      "sha256": "921661bf3f8dec4f4039b21877100a9b5cc4b55a1110aeeb1657ff3e36dc018e",
+      "bytes": 11232
+    },
+    {
+      "id": "v74",
+      "language": "en",
+      "text": "even",
+      "voice": "en-US-AndrewNeural",
+      "audio": "audio/vocabulary/en/v74.mp3",
+      "origin": {
+        "type": "azure"
+      },
+      "sha256": "7567cabb52b1b9ed50808f76b9881548f535ce6f1ba698147f976bddf8239e01",
+      "bytes": 4896
+    },
+    {
+      "id": "v74",
+      "language": "cs",
+      "text": "dokonce",
+      "voice": "cs-CZ-VlastaNeural",
+      "audio": "audio/vocabulary/cs/v74.mp3",
+      "origin": {
+        "type": "azure"
+      },
+      "sha256": "d8ac9b2fd98e0dc6ef9c2da19f690ef58bb87c9e01d4dd14dfa0f63eeb41e2c2",
+      "bytes": 11232
+    },
+    {
+      "id": "v75",
+      "language": "en",
+      "text": "place",
+      "voice": "en-US-AndrewNeural",
+      "audio": "audio/vocabulary/en/v75.mp3",
+      "origin": {
+        "type": "azure"
+      },
+      "sha256": "c933b30fdfaa178a6e4b58e198361809922bc1138bac5a2aeac37073f5ee9df7",
+      "bytes": 11232
+    },
+    {
+      "id": "v75",
+      "language": "cs",
+      "text": "místo",
+      "voice": "cs-CZ-VlastaNeural",
+      "audio": "audio/vocabulary/cs/v75.mp3",
+      "origin": {
+        "type": "azure"
+      },
+      "sha256": "49f17db82f20c36bbe34f1bf8adc12d8e4f7880dd105ab66c43bbe992d37214c",
+      "bytes": 11232
+    },
+    {
+      "id": "v76",
+      "language": "en",
+      "text": "find",
+      "voice": "en-US-AndrewNeural",
+      "audio": "audio/vocabulary/en/v76.mp3",
+      "origin": {
+        "type": "azure"
+      },
+      "sha256": "60c9a44a9f12afd62c3a8d8bb216129883ab6b4a98f17c55b522557b2c43fccb",
+      "bytes": 11232
+    },
+    {
+      "id": "v76",
+      "language": "cs",
+      "text": "najít",
+      "voice": "cs-CZ-VlastaNeural",
+      "audio": "audio/vocabulary/cs/v76.mp3",
+      "origin": {
+        "type": "azure"
+      },
+      "sha256": "7b80b51fa76456c65a4f0fc56d8252028f6765b025992dbfbc84b2b65078dda5",
+      "bytes": 11232
+    },
+    {
+      "id": "v77",
+      "language": "en",
+      "text": "next time",
+      "voice": "en-US-AndrewNeural",
+      "audio": "audio/vocabulary/en/v77.mp3",
+      "origin": {
+        "type": "azure"
+      },
+      "sha256": "bc89d0795d8d4c5f126419115803fc68da405a13df94e2f7c1b0ed013bee1105",
+      "bytes": 11232
+    }
+  ]
+}

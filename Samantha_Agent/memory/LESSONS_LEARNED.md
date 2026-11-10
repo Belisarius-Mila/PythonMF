@@ -1880,3 +1880,10 @@ aby se write uvnitř nezablokoval vlastním sidecarem. Ověřeno 112 cílenými 
 - Kontext: MMTX potřebuje postupně zapnout překlad jako text a pak i čtení, bez změn schválené angličtiny.
 - Řešení: explicitní tři režimy, samostatný překlad svázaný s anglickou větou a MP3, sekvence EN→CS s jedním aktivním Audio a tokenem. Čistě textový režim nepřehrává český zvuk; vypnutí za běhu češtinu zastaví a zneplatní callbacky. Chybu angličtiny nelze obejít přepínačem. Optional localStorage nesmí blokovat přehrávač.
 - Ověření: 58 cílených testů, všech 67 dvojic a ticho, změny režimu během řeči i v klidu, chyby a Repeat, historie, uložená volba i zablokované úložiště. Původních 98 podkladů a 9 účtenek beze změny; nové CZ MP3 oddělené a jednorázové.
+
+
+### 2026-11-10 — Novost slovníčku se ověřuje proti skutečně použitým větám
+
+- Kontext: MMTX šestka potřebuje jen hesla nepoužitá v předchozích pěti scénách.
+- Řešení: číst audio manifesty i deklarované EN dialogy/pokyny/slovníčky; u sdíleného skriptu omezit správnou scénu. Mapovat tvary explicitně a evidovat výskyt nové položky v novém příběhu. Trees není nové po tree, nová významová spojení se porovnávají jako celek. Existující audio převzít jen při shodě textu, hlasu, tempa a otisku.
+- Ověření: deset zdrojů shodných s vydaným f7a4ab58, 450 úseků / 191 lemmat; 77 nových doložených hesel. Test vloženého starého hesla zablokoval generování před transportem. 20 přesných CS nahrávek převzatých, 74 cílených testů PASS. Viz mmtx_scene06_dictionary_audit_20261110.json.

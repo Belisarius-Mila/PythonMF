@@ -1,0 +1,1434 @@
+{
+  "schema_version": 1,
+  "title": "New words",
+  "entries": [
+    {
+      "id": "v01",
+      "en": "beautiful",
+      "cz": "krásný",
+      "emoji": "✨",
+      "lemma": "beautiful",
+      "forms": [
+        "beautiful"
+      ],
+      "origins": {
+        "en": {
+          "type": "azure"
+        },
+        "cs": {
+          "type": "reused",
+          "source": "assets/vocabulary-en-audio/cs-cz-vlasta-neural/d5b33691bc66c575a008.mp3",
+          "sha256": "e675fd06b62fd08406cf2461a2e9586b9d5497eeb4f90e196c7f5a970213c91e"
+        }
+      }
+    },
+    {
+      "id": "v02",
+      "en": "blue",
+      "cz": "modrý",
+      "emoji": "🔵",
+      "lemma": "blue",
+      "forms": [
+        "blue"
+      ],
+      "origins": {
+        "en": {
+          "type": "azure"
+        },
+        "cs": {
+          "type": "reused",
+          "source": "assets/vocabulary-en-audio/cs-cz-vlasta-neural/fbe07f366118aa8e21b0.mp3",
+          "sha256": "a39057f618c6b3dd434d65044625f20f5dac8840d13b119af192e23faef83386"
+        }
+      }
+    },
+    {
+      "id": "v03",
+      "en": "cloud",
+      "cz": "mrak",
+      "emoji": "☁️",
+      "lemma": "cloud",
+      "forms": [
+        "clouds"
+      ],
+      "origins": {
+        "en": {
+          "type": "azure"
+        },
+        "cs": {
+          "type": "reused",
+          "source": "assets/vocabulary-en-audio/cs-cz-vlasta-neural/d9016bc2d614f53b9ee5.mp3",
+          "sha256": "869c7ae3b171d4c311c21d32bef8bbed35f563159ff1dcfea2ad7a90130b44a1"
+        }
+      }
+    },
+    {
+      "id": "v04",
+      "en": "ear",
+      "cz": "ucho",
+      "emoji": "👂",
+      "lemma": "ear",
+      "forms": [
+        "ears"
+      ],
+      "origins": {
+        "en": {
+          "type": "azure"
+        },
+        "cs": {
+          "type": "azure"
+        }
+      }
+    },
+    {
+      "id": "v05",
+      "en": "sky",
+      "cz": "obloha",
+      "emoji": "🌤️",
+      "lemma": "sky",
+      "forms": [
+        "sky"
+      ],
+      "origins": {
+        "en": {
+          "type": "azure"
+        },
+        "cs": {
+          "type": "azure"
+        }
+      }
+    },
+    {
+      "id": "v06",
+      "en": "four",
+      "cz": "čtyři",
+      "emoji": "4️⃣",
+      "lemma": "four",
+      "forms": [
+        "four"
+      ],
+      "origins": {
+        "en": {
+          "type": "azure"
+        },
+        "cs": {
+          "type": "reused",
+          "source": "assets/vocabulary-en-audio/cs-cz-vlasta-neural/c023bacde4075ef51fac.mp3",
+          "sha256": "05ca045d9474fd04b6efb415df31c376d18850ba288ae309ca4d930d5c8a3341"
+        }
+      }
+    },
+    {
+      "id": "v07",
+      "en": "hear",
+      "cz": "slyšet",
+      "emoji": "👂",
+      "lemma": "hear",
+      "forms": [
+        "hear"
+      ],
+      "origins": {
+        "en": {
+          "type": "azure"
+        },
+        "cs": {
+          "type": "reused",
+          "source": "assets/vocabulary-en-audio/cs-cz-vlasta-neural/3d01db950eb7fbe64de8.mp3",
+          "sha256": "d5f60ea95943dc5af813f5b11a29d30f9b85c216ddb20b0dec41da9d896c46d9"
+        }
+      }
+    },
+    {
+      "id": "v08",
+      "en": "look like",
+      "cz": "vypadat jako",
+      "emoji": "👀",
+      "lemma": "look like",
+      "forms": [
+        "look like"
+      ],
+      "origins": {
+        "en": {
+          "type": "azure"
+        },
+        "cs": {
+          "type": "azure"
+        }
+      }
+    },
+    {
+      "id": "v09",
+      "en": "shout",
+      "cz": "křičet",
+      "emoji": "📣",
+      "lemma": "shout",
+      "forms": [
+        "shout"
+      ],
+      "origins": {
+        "en": {
+          "type": "azure"
+        },
+        "cs": {
+          "type": "azure"
+        }
+      }
+    },
+    {
+      "id": "v10",
+      "en": "fish",
+      "cz": "ryba",
+      "emoji": "🐟",
+      "lemma": "fish",
+      "forms": [
+        "fish"
+      ],
+      "origins": {
+        "en": {
+          "type": "azure"
+        },
+        "cs": {
+          "type": "reused",
+          "source": "assets/vocabulary-en-audio/cs-cz-vlasta-neural/55bad61075d045dce3e0.mp3",
+          "sha256": "9b36085fbc4dc696c713e7853e0dd4534a525a6991be1eed2b4123a6bd94dd79"
+        }
+      }
+    },
+    {
+      "id": "v11",
+      "en": "net",
+      "cz": "podběrák",
+      "emoji": "🥅",
+      "lemma": "net",
+      "forms": [
+        "net"
+      ],
+      "origins": {
+        "en": {
+          "type": "azure"
+        },
+        "cs": {
+          "type": "azure"
+        }
+      }
+    },
+    {
+      "id": "v12",
+      "en": "dinner",
+      "cz": "večeře",
+      "emoji": "🍲",
+      "lemma": "dinner",
+      "forms": [
+        "dinner"
+      ],
+      "origins": {
+        "en": {
+          "type": "azure"
+        },
+        "cs": {
+          "type": "azure"
+        }
+      }
+    },
+    {
+      "id": "v13",
+      "en": "food",
+      "cz": "jídlo",
+      "emoji": "🥕",
+      "lemma": "food",
+      "forms": [
+        "food"
+      ],
+      "origins": {
+        "en": {
+          "type": "azure"
+        },
+        "cs": {
+          "type": "reused",
+          "source": "assets/vocabulary-en-audio/cs-cz-vlasta-neural/1dff99bc4f345cac45eb.mp3",
+          "sha256": "4542e1e278b07b7696c28a99c08be9bcef609f12e3e9155c12a75ab8a50c3cd1"
+        }
+      }
+    },
+    {
+      "id": "v14",
+      "en": "meeting",
+      "cz": "sněm",
+      "emoji": "🦌",
+      "lemma": "meeting",
+      "forms": [
+        "meeting"
+      ],
+      "origins": {
+        "en": {
+          "type": "azure"
+        },
+        "cs": {
+          "type": "azure"
+        }
+      }
+    },
+    {
+      "id": "v15",
+      "en": "where",
+      "cz": "kde",
+      "emoji": "❓",
+      "lemma": "where",
+      "forms": [
+        "where"
+      ],
+      "origins": {
+        "en": {
+          "type": "azure"
+        },
+        "cs": {
+          "type": "azure"
+        }
+      }
+    },
+    {
+      "id": "v16",
+      "en": "other side",
+      "cz": "druhá strana",
+      "emoji": "↔️",
+      "lemma": "other side",
+      "forms": [
+        "other side"
+      ],
+      "origins": {
+        "en": {
+          "type": "azure"
+        },
+        "cs": {
+          "type": "azure"
+        }
+      }
+    },
+    {
+      "id": "v17",
+      "en": "morning",
+      "cz": "ráno",
+      "emoji": "🌅",
+      "lemma": "morning",
+      "forms": [
+        "morning"
+      ],
+      "origins": {
+        "en": {
+          "type": "azure"
+        },
+        "cs": {
+          "type": "azure"
+        }
+      }
+    },
+    {
+      "id": "v18",
+      "en": "boat",
+      "cz": "loď",
+      "emoji": "🛶",
+      "lemma": "boat",
+      "forms": [
+        "boat"
+      ],
+      "origins": {
+        "en": {
+          "type": "azure"
+        },
+        "cs": {
+          "type": "reused",
+          "source": "assets/vocabulary-en-audio/cs-cz-vlasta-neural/1498a0307280d133be14.mp3",
+          "sha256": "512a3ad0338b01c6c4256c939fef4198a60df20316757c8a715cdc2ad808bdf0"
+        }
+      }
+    },
+    {
+      "id": "v19",
+      "en": "fishing hut",
+      "cz": "rybářská chatrč",
+      "emoji": "🛖",
+      "lemma": "fishing hut",
+      "forms": [
+        "fishing hut"
+      ],
+      "origins": {
+        "en": {
+          "type": "azure"
+        },
+        "cs": {
+          "type": "azure"
+        }
+      }
+    },
+    {
+      "id": "v20",
+      "en": "beside",
+      "cz": "vedle",
+      "emoji": "↔️",
+      "lemma": "beside",
+      "forms": [
+        "beside"
+      ],
+      "origins": {
+        "en": {
+          "type": "azure"
+        },
+        "cs": {
+          "type": "azure"
+        }
+      }
+    },
+    {
+      "id": "v21",
+      "en": "follow",
+      "cz": "následovat",
+      "emoji": "👣",
+      "lemma": "follow",
+      "forms": [
+        "follow"
+      ],
+      "origins": {
+        "en": {
+          "type": "azure"
+        },
+        "cs": {
+          "type": "azure"
+        }
+      }
+    },
+    {
+      "id": "v22",
+      "en": "enjoy",
+      "cz": "užít si",
+      "emoji": "😊",
+      "lemma": "enjoy",
+      "forms": [
+        "enjoy"
+      ],
+      "origins": {
+        "en": {
+          "type": "azure"
+        },
+        "cs": {
+          "type": "reused",
+          "source": "assets/vocabulary-en-audio/cs-cz-vlasta-neural/fb4e295301b6e0e9d60f.mp3",
+          "sha256": "f39959a35cc0595f804d21655554309488de20d3130338f5a20ff6733af84ca0"
+        }
+      }
+    },
+    {
+      "id": "v23",
+      "en": "splash",
+      "cz": "šplouchnutí",
+      "emoji": "💦",
+      "lemma": "splash",
+      "forms": [
+        "splash"
+      ],
+      "origins": {
+        "en": {
+          "type": "azure"
+        },
+        "cs": {
+          "type": "azure"
+        }
+      }
+    },
+    {
+      "id": "v24",
+      "en": "smaller",
+      "cz": "menší",
+      "emoji": "🤏",
+      "lemma": "small",
+      "forms": [
+        "smaller"
+      ],
+      "origins": {
+        "en": {
+          "type": "azure"
+        },
+        "cs": {
+          "type": "azure"
+        }
+      }
+    },
+    {
+      "id": "v25",
+      "en": "practise",
+      "cz": "trénovat",
+      "emoji": "🎯",
+      "lemma": "practise",
+      "forms": [
+        "practising"
+      ],
+      "origins": {
+        "en": {
+          "type": "azure"
+        },
+        "cs": {
+          "type": "azure"
+        }
+      }
+    },
+    {
+      "id": "v26",
+      "en": "frog",
+      "cz": "žabák",
+      "emoji": "🐸",
+      "lemma": "frog",
+      "forms": [
+        "frog"
+      ],
+      "origins": {
+        "en": {
+          "type": "azure"
+        },
+        "cs": {
+          "type": "azure"
+        }
+      }
+    },
+    {
+      "id": "v27",
+      "en": "race",
+      "cz": "závod",
+      "emoji": "🏁",
+      "lemma": "race",
+      "forms": [
+        "race"
+      ],
+      "origins": {
+        "en": {
+          "type": "azure"
+        },
+        "cs": {
+          "type": "azure"
+        }
+      }
+    },
+    {
+      "id": "v28",
+      "en": "dry",
+      "cz": "suchý",
+      "emoji": "☀️",
+      "lemma": "dry",
+      "forms": [
+        "dry"
+      ],
+      "origins": {
+        "en": {
+          "type": "azure"
+        },
+        "cs": {
+          "type": "azure"
+        }
+      }
+    },
+    {
+      "id": "v29",
+      "en": "sleep",
+      "cz": "spát",
+      "emoji": "😴",
+      "lemma": "sleep",
+      "forms": [
+        "sleep"
+      ],
+      "origins": {
+        "en": {
+          "type": "azure"
+        },
+        "cs": {
+          "type": "azure"
+        }
+      }
+    },
+    {
+      "id": "v30",
+      "en": "tonight",
+      "cz": "dnes v noci",
+      "emoji": "🌙",
+      "lemma": "tonight",
+      "forms": [
+        "tonight"
+      ],
+      "origins": {
+        "en": {
+          "type": "azure"
+        },
+        "cs": {
+          "type": "azure"
+        }
+      }
+    },
+    {
+      "id": "v31",
+      "en": "before",
+      "cz": "před",
+      "emoji": "⏮️",
+      "lemma": "before",
+      "forms": [
+        "before"
+      ],
+      "origins": {
+        "en": {
+          "type": "azure"
+        },
+        "cs": {
+          "type": "azure"
+        }
+      }
+    },
+    {
+      "id": "v32",
+      "en": "warm",
+      "cz": "teplý",
+      "emoji": "🔥",
+      "lemma": "warm",
+      "forms": [
+        "warm"
+      ],
+      "origins": {
+        "en": {
+          "type": "azure"
+        },
+        "cs": {
+          "type": "reused",
+          "source": "assets/vocabulary-en-audio/cs-cz-vlasta-neural/51662e9141bab6d49e1d.mp3",
+          "sha256": "74e6204155b79cb42938e9e66811bc8a963b498d8de1a07454328ea525c24173"
+        }
+      }
+    },
+    {
+      "id": "v33",
+      "en": "fire",
+      "cz": "oheň",
+      "emoji": "🔥",
+      "lemma": "fire",
+      "forms": [
+        "fire"
+      ],
+      "origins": {
+        "en": {
+          "type": "azure"
+        },
+        "cs": {
+          "type": "azure"
+        }
+      }
+    },
+    {
+      "id": "v34",
+      "en": "like",
+      "cz": "líbit se",
+      "emoji": "💚",
+      "lemma": "like",
+      "forms": [
+        "like"
+      ],
+      "origins": {
+        "en": {
+          "type": "azure"
+        },
+        "cs": {
+          "type": "azure"
+        }
+      }
+    },
+    {
+      "id": "v35",
+      "en": "call",
+      "cz": "svolat",
+      "emoji": "📣",
+      "lemma": "call",
+      "forms": [
+        "call",
+        "called"
+      ],
+      "origins": {
+        "en": {
+          "type": "azure"
+        },
+        "cs": {
+          "type": "azure"
+        }
+      }
+    },
+    {
+      "id": "v36",
+      "en": "stag",
+      "cz": "jelen",
+      "emoji": "🦌",
+      "lemma": "stag",
+      "forms": [
+        "stag"
+      ],
+      "origins": {
+        "en": {
+          "type": "azure"
+        },
+        "cs": {
+          "type": "reused",
+          "source": "assets/vocabulary-en-audio/cs-cz-vlasta-neural/e03ee1ab026ee3fbc302.mp3",
+          "sha256": "f4dd9851a472ca8ae7304b94edf048857aedfdd36d3d0deaeb0dc017fbca32b3"
+        }
+      }
+    },
+    {
+      "id": "v37",
+      "en": "party",
+      "cz": "oslava",
+      "emoji": "🎉",
+      "lemma": "party",
+      "forms": [
+        "party"
+      ],
+      "origins": {
+        "en": {
+          "type": "azure"
+        },
+        "cs": {
+          "type": "azure"
+        }
+      }
+    },
+    {
+      "id": "v38",
+      "en": "bring",
+      "cz": "přinést",
+      "emoji": "🎁",
+      "lemma": "bring",
+      "forms": [
+        "bring"
+      ],
+      "origins": {
+        "en": {
+          "type": "azure"
+        },
+        "cs": {
+          "type": "azure"
+        }
+      }
+    },
+    {
+      "id": "v39",
+      "en": "every",
+      "cz": "každý",
+      "emoji": "🐾",
+      "lemma": "every",
+      "forms": [
+        "every"
+      ],
+      "origins": {
+        "en": {
+          "type": "azure"
+        },
+        "cs": {
+          "type": "azure"
+        }
+      }
+    },
+    {
+      "id": "v40",
+      "en": "animal",
+      "cz": "zvíře",
+      "emoji": "🐾",
+      "lemma": "animal",
+      "forms": [
+        "animal"
+      ],
+      "origins": {
+        "en": {
+          "type": "azure"
+        },
+        "cs": {
+          "type": "reused",
+          "source": "assets/vocabulary-en-audio/cs-cz-vlasta-neural/669415f5b0c3c6f90c88.mp3",
+          "sha256": "01d737c983558ff6c57d488fb765ee9d1c2748fb8b23dbf20c9a05b76732be15"
+        }
+      }
+    },
+    {
+      "id": "v41",
+      "en": "ask",
+      "cz": "požádat",
+      "emoji": "🙏",
+      "lemma": "ask",
+      "forms": [
+        "asked"
+      ],
+      "origins": {
+        "en": {
+          "type": "azure"
+        },
+        "cs": {
+          "type": "azure"
+        }
+      }
+    },
+    {
+      "id": "v42",
+      "en": "something",
+      "cz": "něco",
+      "emoji": "❔",
+      "lemma": "something",
+      "forms": [
+        "something"
+      ],
+      "origins": {
+        "en": {
+          "type": "azure"
+        },
+        "cs": {
+          "type": "reused",
+          "source": "assets/vocabulary-en-audio/cs-cz-vlasta-neural/7400fca70a0cde00aa40.mp3",
+          "sha256": "beee913c7cffc60272b8bc47972deb915d157ee912f67a6cb1091aacceb5b47a"
+        }
+      }
+    },
+    {
+      "id": "v43",
+      "en": "think",
+      "cz": "myslet si",
+      "emoji": "🤔",
+      "lemma": "think",
+      "forms": [
+        "think"
+      ],
+      "origins": {
+        "en": {
+          "type": "azure"
+        },
+        "cs": {
+          "type": "azure"
+        }
+      }
+    },
+    {
+      "id": "v44",
+      "en": "wrong",
+      "cz": "špatně",
+      "emoji": "❌",
+      "lemma": "wrong",
+      "forms": [
+        "wrong"
+      ],
+      "origins": {
+        "en": {
+          "type": "azure"
+        },
+        "cs": {
+          "type": "azure"
+        }
+      }
+    },
+    {
+      "id": "v45",
+      "en": "soon",
+      "cz": "brzy",
+      "emoji": "⏳",
+      "lemma": "soon",
+      "forms": [
+        "soon"
+      ],
+      "origins": {
+        "en": {
+          "type": "azure"
+        },
+        "cs": {
+          "type": "azure"
+        }
+      }
+    },
+    {
+      "id": "v46",
+      "en": "find out",
+      "cz": "zjistit",
+      "emoji": "💡",
+      "lemma": "find out",
+      "forms": [
+        "find out"
+      ],
+      "origins": {
+        "en": {
+          "type": "azure"
+        },
+        "cs": {
+          "type": "azure"
+        }
+      }
+    },
+    {
+      "id": "v47",
+      "en": "sick",
+      "cz": "nemocný",
+      "emoji": "🤒",
+      "lemma": "sick",
+      "forms": [
+        "sick"
+      ],
+      "origins": {
+        "en": {
+          "type": "azure"
+        },
+        "cs": {
+          "type": "azure"
+        }
+      }
+    },
+    {
+      "id": "v48",
+      "en": "people",
+      "cz": "lidé",
+      "emoji": "👥",
+      "lemma": "people",
+      "forms": [
+        "people"
+      ],
+      "origins": {
+        "en": {
+          "type": "azure"
+        },
+        "cs": {
+          "type": "azure"
+        }
+      }
+    },
+    {
+      "id": "v49",
+      "en": "cut down",
+      "cz": "pokácet",
+      "emoji": "🪓",
+      "lemma": "cut down",
+      "forms": [
+        "cut down"
+      ],
+      "origins": {
+        "en": {
+          "type": "azure"
+        },
+        "cs": {
+          "type": "azure"
+        }
+      }
+    },
+    {
+      "id": "v50",
+      "en": "whole",
+      "cz": "celý",
+      "emoji": "🌳",
+      "lemma": "whole",
+      "forms": [
+        "whole"
+      ],
+      "origins": {
+        "en": {
+          "type": "azure"
+        },
+        "cs": {
+          "type": "reused",
+          "source": "assets/vocabulary-en-audio/cs-cz-vlasta-neural/99ad4c167819d4ff4b8c.mp3",
+          "sha256": "0ef78ce54f22ec980e703a1c137c2c56e605af482ae4bf606629bcafda1f85e8"
+        }
+      }
+    },
+    {
+      "id": "v51",
+      "en": "healthy",
+      "cz": "zdravý",
+      "emoji": "💚",
+      "lemma": "healthy",
+      "forms": [
+        "healthy"
+      ],
+      "origins": {
+        "en": {
+          "type": "azure"
+        },
+        "cs": {
+          "type": "azure"
+        }
+      }
+    },
+    {
+      "id": "v52",
+      "en": "home",
+      "cz": "domov",
+      "emoji": "🏡",
+      "lemma": "home",
+      "forms": [
+        "home"
+      ],
+      "origins": {
+        "en": {
+          "type": "azure"
+        },
+        "cs": {
+          "type": "reused",
+          "source": "assets/vocabulary-en-audio/cs-cz-vlasta-neural/11e36c599db4caed5ca0.mp3",
+          "sha256": "de67a309a8642800ca05ac63b909538f3573a804fa2d48c2ad559d37abd2a3e4"
+        }
+      }
+    },
+    {
+      "id": "v53",
+      "en": "anyone",
+      "cz": "někdo",
+      "emoji": "🙋",
+      "lemma": "anyone",
+      "forms": [
+        "anyone"
+      ],
+      "origins": {
+        "en": {
+          "type": "azure"
+        },
+        "cs": {
+          "type": "reused",
+          "source": "assets/vocabulary-en-audio/cs-cz-vlasta-neural/70c5c7db913a8739781f.mp3",
+          "sha256": "01cc7890444f235f140eb69339bccab39c51eb50437899c59cdde08c5da9e9c4"
+        }
+      }
+    },
+    {
+      "id": "v54",
+      "en": "idea",
+      "cz": "nápad",
+      "emoji": "💡",
+      "lemma": "idea",
+      "forms": [
+        "idea"
+      ],
+      "origins": {
+        "en": {
+          "type": "azure"
+        },
+        "cs": {
+          "type": "azure"
+        }
+      }
+    },
+    {
+      "id": "v55",
+      "en": "woodpecker",
+      "cz": "datel",
+      "emoji": "🐦",
+      "lemma": "woodpecker",
+      "forms": [
+        "woodpecker"
+      ],
+      "origins": {
+        "en": {
+          "type": "azure"
+        },
+        "cs": {
+          "type": "azure"
+        }
+      }
+    },
+    {
+      "id": "v56",
+      "en": "check",
+      "cz": "prohlédnout",
+      "emoji": "🔎",
+      "lemma": "check",
+      "forms": [
+        "check"
+      ],
+      "origins": {
+        "en": {
+          "type": "azure"
+        },
+        "cs": {
+          "type": "azure"
+        }
+      }
+    },
+    {
+      "id": "v57",
+      "en": "beaver",
+      "cz": "bobr",
+      "emoji": "🦫",
+      "lemma": "beaver",
+      "forms": [
+        "beaver",
+        "beavers"
+      ],
+      "origins": {
+        "en": {
+          "type": "azure"
+        },
+        "cs": {
+          "type": "azure"
+        }
+      }
+    },
+    {
+      "id": "v58",
+      "en": "leave",
+      "cz": "nechat",
+      "emoji": "🌳",
+      "lemma": "leave",
+      "forms": [
+        "leave"
+      ],
+      "origins": {
+        "en": {
+          "type": "azure"
+        },
+        "cs": {
+          "type": "azure"
+        }
+      }
+    },
+    {
+      "id": "v59",
+      "en": "must",
+      "cz": "muset",
+      "emoji": "💪",
+      "lemma": "must",
+      "forms": [
+        "must"
+      ],
+      "origins": {
+        "en": {
+          "type": "azure"
+        },
+        "cs": {
+          "type": "azure"
+        }
+      }
+    },
+    {
+      "id": "v60",
+      "en": "take away",
+      "cz": "odvézt",
+      "emoji": "🚚",
+      "lemma": "take away",
+      "forms": [
+        "take them away"
+      ],
+      "origins": {
+        "en": {
+          "type": "azure"
+        },
+        "cs": {
+          "type": "azure"
+        }
+      }
+    },
+    {
+      "id": "v61",
+      "en": "shore",
+      "cz": "břeh",
+      "emoji": "🏞️",
+      "lemma": "shore",
+      "forms": [
+        "shore"
+      ],
+      "origins": {
+        "en": {
+          "type": "azure"
+        },
+        "cs": {
+          "type": "azure"
+        }
+      }
+    },
+    {
+      "id": "v62",
+      "en": "everyone",
+      "cz": "všichni",
+      "emoji": "👥",
+      "lemma": "everyone",
+      "forms": [
+        "everyone"
+      ],
+      "origins": {
+        "en": {
+          "type": "azure"
+        },
+        "cs": {
+          "type": "azure"
+        }
+      }
+    },
+    {
+      "id": "v63",
+      "en": "hard work",
+      "cz": "těžká práce",
+      "emoji": "💪",
+      "lemma": "hard work",
+      "forms": [
+        "hard work"
+      ],
+      "origins": {
+        "en": {
+          "type": "azure"
+        },
+        "cs": {
+          "type": "azure"
+        }
+      }
+    },
+    {
+      "id": "v64",
+      "en": "lead our team",
+      "cz": "vést náš tým",
+      "emoji": "🧭",
+      "lemma": "lead",
+      "forms": [
+        "lead our team"
+      ],
+      "origins": {
+        "en": {
+          "type": "azure"
+        },
+        "cs": {
+          "type": "azure"
+        }
+      }
+    },
+    {
+      "id": "v65",
+      "en": "team",
+      "cz": "tým",
+      "emoji": "🤝",
+      "lemma": "team",
+      "forms": [
+        "team"
+      ],
+      "origins": {
+        "en": {
+          "type": "azure"
+        },
+        "cs": {
+          "type": "azure"
+        }
+      }
+    },
+    {
+      "id": "v66",
+      "en": "plan",
+      "cz": "plán",
+      "emoji": "🗺️",
+      "lemma": "plan",
+      "forms": [
+        "plan"
+      ],
+      "origins": {
+        "en": {
+          "type": "azure"
+        },
+        "cs": {
+          "type": "azure"
+        }
+      }
+    },
+    {
+      "id": "v67",
+      "en": "show",
+      "cz": "ukázat",
+      "emoji": "👉",
+      "lemma": "show",
+      "forms": [
+        "show"
+      ],
+      "origins": {
+        "en": {
+          "type": "azure"
+        },
+        "cs": {
+          "type": "azure"
+        }
+      }
+    },
+    {
+      "id": "v68",
+      "en": "start",
+      "cz": "začít",
+      "emoji": "▶️",
+      "lemma": "start",
+      "forms": [
+        "start"
+      ],
+      "origins": {
+        "en": {
+          "type": "azure"
+        },
+        "cs": {
+          "type": "azure"
+        }
+      }
+    },
+    {
+      "id": "v69",
+      "en": "see you there",
+      "cz": "uvidíme se tam",
+      "emoji": "👋",
+      "lemma": "see you there",
+      "forms": [
+        "see you there"
+      ],
+      "origins": {
+        "en": {
+          "type": "azure"
+        },
+        "cs": {
+          "type": "azure"
+        }
+      }
+    },
+    {
+      "id": "v70",
+      "en": "many",
+      "cz": "mnoho",
+      "emoji": "🌳",
+      "lemma": "many",
+      "forms": [
+        "many"
+      ],
+      "origins": {
+        "en": {
+          "type": "azure"
+        },
+        "cs": {
+          "type": "reused",
+          "source": "assets/vocabulary-en-audio/cs-cz-vlasta-neural/7c9ed98e988a456a1ea0.mp3",
+          "sha256": "ff13b66126e76bd704d5ff77243e56937d33072d69688a30463f8ff992af25ae"
+        }
+      }
+    },
+    {
+      "id": "v71",
+      "en": "may",
+      "cz": "možná",
+      "emoji": "🤔",
+      "lemma": "may",
+      "forms": [
+        "may"
+      ],
+      "origins": {
+        "en": {
+          "type": "azure"
+        },
+        "cs": {
+          "type": "reused",
+          "source": "assets/vocabulary-en-audio/cs-cz-vlasta-neural/cb3bb18cb9e8a9e85467.mp3",
+          "sha256": "b1c50c18c7e0a7adb11e8f2dc4ce738b68f7c784807ae721d53c53f36d97c37c"
+        }
+      }
+    },
+    {
+      "id": "v72",
+      "en": "please",
+      "cz": "prosím",
+      "emoji": "🙏",
+      "lemma": "please",
+      "forms": [
+        "please"
+      ],
+      "origins": {
+        "en": {
+          "type": "azure"
+        },
+        "cs": {
+          "type": "reused",
+          "source": "assets/vocabulary-en-audio/cs-cz-vlasta-neural/a66cbd25cfc962006bd1.mp3",
+          "sha256": "6d27815493e5d35f6871f24978bf8e841dc890a5f94b94dbfc342c4540d43f85"
+        }
+      }
+    },
+    {
+      "id": "v73",
+      "en": "just",
+      "cz": "jen",
+      "emoji": "☝️",
+      "lemma": "just",
+      "forms": [
+        "just"
+      ],
+      "origins": {
+        "en": {
+          "type": "azure"
+        },
+        "cs": {
+          "type": "azure"
+        }
+      }
+    },
+    {
+      "id": "v74",
+      "en": "even",
+      "cz": "dokonce",
+      "emoji": "❗",
+      "lemma": "even",
+      "forms": [
+        "even"
+      ],
+      "origins": {
+        "en": {
+          "type": "azure"
+        },
+        "cs": {
+          "type": "azure"
+        }
+      }
+    },
+    {
+      "id": "v75",
+      "en": "place",
+      "cz": "místo",
+      "emoji": "📍",
+      "lemma": "place",
+      "forms": [
+        "place"
+      ],
+      "origins": {
+        "en": {
+          "type": "azure"
+        },
+        "cs": {
+          "type": "azure"
+        }
+      }
+    },
+    {
+      "id": "v76",
+      "en": "find",
+      "cz": "najít",
+      "emoji": "🔎",
+      "lemma": "find",
+      "forms": [
+        "find"
+      ],
+      "origins": {
+        "en": {
+          "type": "azure"
+        },
+        "cs": {
+          "type": "azure"
+        }
+      }
+    },
+    {
+      "id": "v77",
+      "en": "next time",
+      "cz": "příště",
+      "emoji": "⏭️",
+      "lemma": "next time",
+      "forms": [
+        "next time"
+      ],
+      "origins": {
+        "en": {
+          "type": "azure"
+        },
+        "cs": {
+          "type": "reused",
+          "source": "assets/vocabulary-en-audio/cs-cz-vlasta-neural/9ffd0a2bae08e86c0847.mp3",
+          "sha256": "98a8437ed6129e4e2e1507c1ed062fb0b2d7fc575706a065ca48f85fb017b717"
+        }
+      }
+    }
+  ]
+}
