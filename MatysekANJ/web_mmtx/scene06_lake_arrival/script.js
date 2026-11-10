@@ -17,6 +17,7 @@ let activeAudio = null;
 let generation = 0;
 let playing = false;
 let failed = false;
+let openingIndex = 0;
 
 function updateControls() {
   repeatButton.disabled = index < 0 || playing || Boolean(lines[index]?.silent);
@@ -40,11 +41,7 @@ function stopAudio() {
   playing = false;
 }
 
-function playLine(newIndex) {
-  if (!Number.isInteger(newIndex) || !lines[newIndex]) return;
-  stopAudio();
-  index = newIndex;
-  const line = lines[index];
+function showFrame(line) {
   const picture = line.picture;
   const frame = line.frame;
   scene.dataset.picture = String(picture.id);
@@ -55,6 +52,15 @@ function playLine(newIndex) {
   sceneImage.alt = frame.alt;
   sceneImage.width = frame.width;
   sceneImage.height = frame.height;
+}
+
+function playLine(newIndex) {
+  if (!Number.isInteger(newIndex) || !lines[newIndex]) return;
+  stopAudio();
+  index = newIndex;
+  const line = lines[index];
+  const picture = line.picture;
+  showFrame(line);
   startButton.hidden = true;
   status.classList.remove("error");
   failed = false;
@@ -98,7 +104,7 @@ function playLine(newIndex) {
   } catch (_error) { settle(true); }
 }
 
-startButton.addEventListener("click", () => { if (index < 0 && lines.length) playLine(0); });
+startButton.addEventListener("click", () => { if (index < 0 && lines.length) playLine(openingIndex); });
 nextButton.addEventListener("click", () => { if (!playing && !failed) playLine(index + 1); });
 repeatButton.addEventListener("click", () => { if (!playing) playLine(index); });
 restartButton.addEventListener("click", () => { if (!playing) playLine(0); });
@@ -117,7 +123,7 @@ function validImage(frame) {
     Number.isInteger(frame.width) && frame.width > 0 && Number.isInteger(frame.height) && frame.height > 0;
 }
 
-readJson("pictures.json?v=20261110complete1")
+readJson("pictures.json?v=20261110viewport2")
   .then((catalog) => {
     const lineCounts = [7, 10, 8, 7, 7, 8, 8, 6, 0, 6];
     if (catalog.schema_version !== 1 || !Array.isArray(catalog.pictures) || catalog.pictures.length !== 10 ||
@@ -130,7 +136,7 @@ readJson("pictures.json?v=20261110complete1")
               frame.from_line > 1 && frame.from_line <= picture.line_count &&
               (i === 0 || frame.from_line > frames[i - 1].from_line)))))) throw new Error("pictures");
     return Promise.all(catalog.pictures.map((picture) =>
-      readJson(`${picture.dialogue}?v=20261110complete1`).then((data) => {
+      readJson(`${picture.dialogue}?v=20261110viewport2`).then((data) => {
         const audioPattern = picture.id === 1 ? /^audio\/en\/[0-9]{2}_[a-z]+\.mp3$/ :
           new RegExp(`^audio/en/p${String(picture.id).padStart(2, "0")}_[0-9]{2}_[a-z_]+\\.mp3$`);
         if (data.schema_version !== 1 || data.picture !== picture.id || !Array.isArray(data.lines) ||
@@ -152,6 +158,10 @@ readJson("pictures.json?v=20261110complete1")
   })
   .then((pictures) => {
     lines = pictures.flat();
+    const requested = Number(window.location?.hash?.match(/^#picture=(\d+)$/)?.[1] || 1);
+    const requestedIndex = lines.findIndex((line) => line.picture.id === requested);
+    openingIndex = requestedIndex >= 0 ? requestedIndex : 0;
+    showFrame(lines[openingIndex]);
     updateControls();
     status.textContent = "";
     startButton.disabled = false;

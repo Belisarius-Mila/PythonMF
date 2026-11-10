@@ -52,5 +52,7 @@ button, a { -webkit-tap-highlight-color: transparent; touch-action: manipulation
 }
 
 /* Later gatherings and Benji's map need the full illustration unobscured. */
-.scene[data-layout="below"] .speech { position: relative; inset: auto; width: auto; margin: 12px 3%; }
-.scene[data-layout="below"] .footer-controls { position: relative; inset: auto; max-width: none; margin: 12px 3% 0; padding-bottom: 12px; }
+.scene[data-layout="below"] { height: 100svh; display: grid; grid-template-rows: minmax(0, 1fr) auto auto; }
+.scene[data-layout="below"] .scene-image { grid-row: 1; width: 100%; height: 100%; min-height: 0; object-fit: contain; }
+.scene[data-layout="below"] .speech { grid-row: 2; position: relative; inset: auto; width: auto; margin: 12px 3% 0; }
+.scene[data-layout="below"] .footer-controls { grid-row: 3; position: relative; inset: auto; max-width: none; margin: 12px 3% 0; padding-bottom: max(12px, env(safe-area-inset-bottom)); }

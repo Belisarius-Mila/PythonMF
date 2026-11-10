@@ -1,6 +1,9 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
+- 2026-11-10 18:19 CET: Opravené rozložení od části 4: obraz, dialog a Next se vejdou do výšky okna (100svh, tři řádky, celý obraz bez ořezu). Přímý odkaz #picture=4 zachovává zvukovou bránu. 53 cílených testů PASS; skutečné Safari po opravě dosáhlo části 5 / Bruno 5/7. Nová statická brána PASS. Žádné nové MP3 ani p+n. Navazující opravu přebrat při integraci po dca70ad9; report `reports/mmtx_scene06_viewport_fix_20261110.md`.
+
+
 - 2026-11-10: Celá nová šestá scéna je lokálně hotová: části 1–10, 11 schválených ilustrací a 67 přesných EN replik / pevných MP3. Po Olliem a Freddiem následuje chatrč, večeře, sněm, Loganův návrh, dobrovolníci, ticho a Benjiho plán. Závěr má opravenou mapu s potokem ústícím do jezera; sedmá scéna se nyní nevytváří.
 - Část 9 je explicitně tichá, bez řečové bubliny, Audio, MP3, účtenky či placeného požadavku. Repeat je vypnuté, Next picture ručně pokračuje k Benjimu. Again vrací začátek až po poslední větě části 10. Přechod 03 → 031 od Bunnyho 4/8 i původní části 1–3 zůstávají zachované.
 - Nových 42 Azure požadavků / 2570 SSML znaků, předem zmrazený limit 4000, −10 %, 784368 B nových MP3. Stávající hlasy zachované, Logan Christopher podle původní mapy; nové vazby Old Stag Guy, Woodpecker Andrew, Animals Andrew. Žádné opakování požadavků. 35 dřívějších podkladů a 3 raw účtenky zůstaly byte-identické.
@@ -1584,3 +1587,21 @@ Navrhované další kroky:
 Technický důkaz:
 - 52 cílených kontrol PASS, přesné otisky schválených dialogů, všech 67 MP3 dekódovatelných, shodné mirrory a 101 HTTP souborů s přesnými bajty. Plná brána dokončené šestky: 2978 testů OK (5 SKIP), 444,963 s unit. Node VM ověřil celý příběh, nulové Audio během ticha, Repeat/chyby, historii i závěrečný Again.
 - 42 jednorázových Azure požadavků / 2570 SSML znaků z limitu 4000; 35 starších podkladů a 3 raw účtenky SHA-256 beze změny. Safari vizuální testy produkčního HTML/CSS prošly pro mapu, ticho a 390px rozložení; fyzický iPhone a hlasová přejímka otevřené. Report `reports/mmtx_scene06_complete_20261110.md`.
+
+
+### 2026-11-10 18:19 CET — Viditelné pokračování od čtvrtého obrazu
+
+Hotovo:
+- Obrázek, dialog a Next od části 4 sdílejí výšku okna; ovládání zůstává viditelné. Přímý odkaz #picture=4 umožní místní přejímku od chatrče při zachování zvukové brány. Safari živý průchod už dosáhl večeře, Bruno 5/7.
+
+Rozhodnutí:
+- Oprava řeší Mílovo skutečné hlášení o zastavení na začátku čtvrtého obrazu. Dosavadní headless návaznost nebyla důkaz viditelnosti ovládání. Média a texty zůstávají zachované; žádná nová syntéza ani p+n.
+
+Další krok:
+- Mílova přejímka dalšího průchodu v otevřeném náhledu.
+
+Navrhované další kroky:
+- Při samostatně zadané integraci přebrat tento opravný commit navíc po dca70ad9, pak registrované p+n. Fyzický iPhone zůstává k ověření.
+
+Technický důkaz:
+- 53 cílených testů PASS: všech 67 replik, ticho, historie, callbacky, přímé vstupy a bezpečné fallbacky bez automatického zvuku. Skutečné Safari: obraz 4 / 1/7 se všemi ovládacími prvky viditelnými, následně obraz 5 / 5/7. Statická brána PASS; dřívější plná 2978 OK není opakovaná přejímka této opravy. Report `reports/mmtx_scene06_viewport_fix_20261110.md`.

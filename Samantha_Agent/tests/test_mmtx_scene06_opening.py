@@ -268,6 +268,43 @@ class Scene06OpeningTests(unittest.TestCase):
             self.assertEqual(path.read_bytes(), b"preserve")
 
     @unittest.skipUnless(shutil.which("node"), "Node is required")
+    def test_direct_picture_entry_keeps_audio_gate_and_falls_back_safely(self):
+        script = r'''
+const fs=require('fs'),vm=require('vm'),assert=require('assert'),path=require('path');
+const folder=process.argv[1],source=fs.readFileSync(path.join(folder,'script.js'),'utf8');
+const catalog=JSON.parse(fs.readFileSync(path.join(folder,'pictures.json'),'utf8')).pictures;
+async function check(hash,expected){
+ const nodes=new Map(),audios=[];
+ function node(id){
+  if(!nodes.has(id)) nodes.set(id,{hidden:false,disabled:true,textContent:'',dataset:{},listeners:{},
+   setAttribute(k,v){this[k]=v;},classList:{remove(){},add(){},toggle(){}},
+   addEventListener(k,f){this.listeners[k]=f;},click(){if(!this.disabled)this.listeners.click?.();}});
+  return nodes.get(id);
+ }
+ class Audio{constructor(src){this.src=src;audios.push(this);}play(){return Promise.resolve();}pause(){}}
+ const context=vm.createContext({document:{getElementById:node},window:{location:{hash},addEventListener(){}},Audio,
+  fetch:async(url)=>({ok:true,json:async()=>JSON.parse(fs.readFileSync(path.join(folder,url.split('?')[0]),'utf8'))})});
+ vm.runInContext(source,context);await new Promise(resolve=>setImmediate(resolve));
+ assert.equal(audios.length,0);assert.equal(node('startButton').disabled,false);
+ assert.equal(node('sceneImage').src,catalog[expected-1].image);
+ assert.equal(node('nextButton').hidden,true);
+ node('startButton').click();assert.equal(node('scene').dataset.picture,String(expected));
+ if(expected===9){assert.equal(audios.length,0);assert.equal(node('speechBubble').hidden,true);assert.equal(node('repeatButton').disabled,true);}
+ else{
+  const data=JSON.parse(fs.readFileSync(path.join(folder,catalog[expected-1].dialogue),'utf8'));
+  assert.equal(audios.length,1);assert.equal(audios[0].src,data.lines[0].audio);
+  assert.equal(node('nextButton').disabled,true);audios[0].onended();
+  node('nextButton').click();assert.equal(audios[1].src,data.lines[1].audio);
+ }
+}
+(async()=>{for(const [hash,target] of [['#picture=4',4],['#picture=10',10],['#picture=9',9],['#picture=999',1],['#picture=foo',1],['',1]])await check(hash,target);})()
+.catch(e=>{console.error(e);process.exitCode=1;});
+'''
+        result = subprocess.run([shutil.which("node"), "-e", script, str(DOCS)],
+                                text=True, capture_output=True, timeout=20)
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+
+    @unittest.skipUnless(shutil.which("node"), "Node is required")
     def test_player_sequence_errors_repeat_and_late_callbacks(self):
         script = r'''
 const fs = require('fs'), vm = require('vm'), assert = require('assert'), path = require('path');
