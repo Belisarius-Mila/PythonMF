@@ -1,0 +1,63 @@
+{
+  "schema_version": 1,
+  "provider": "azure",
+  "rate": "-10%",
+  "assets": [
+    {
+      "speaker": "Benji",
+      "voice": "en-US-AndrewNeural",
+      "text": "Look! The lake!",
+      "audio": "audio/en/01_benji.mp3",
+      "sha256": "6aa73e1b593d3c1907d960c6aff5cf914d488650f8750f3ccd0348823fac807e",
+      "bytes": 11232
+    },
+    {
+      "speaker": "Fiona",
+      "voice": "en-US-JennyNeural",
+      "text": "It’s beautiful. Look at the blue water.",
+      "audio": "audio/en/02_fiona.mp3",
+      "sha256": "3323bfc014425aa9ce7829b3b0f3581de452d4cf9d803d58ddb73eff55cfe510",
+      "bytes": 25776
+    },
+    {
+      "speaker": "Sunny",
+      "voice": "en-US-MichelleNeural",
+      "text": "And look at those clouds!",
+      "audio": "audio/en/03_sunny.mp3",
+      "sha256": "9c119126212daff29e404eae2a655524d06c57081349334ec71937ac410b1f71",
+      "bytes": 15984
+    },
+    {
+      "speaker": "Bunny",
+      "voice": "en-US-AnaNeural",
+      "text": "They look like my ears!",
+      "audio": "audio/en/04_bunny.mp3",
+      "sha256": "57d2ea349007a4730eefd5a636b16e7467910fb64d7f51247d73f80a51f017c9",
+      "bytes": 16848
+    },
+    {
+      "speaker": "Bruno",
+      "voice": "en-US-GuyNeural",
+      "text": "Two ears here. Two in the sky.",
+      "audio": "audio/en/05_bruno.mp3",
+      "sha256": "8ba1e35ac9e7f2a0ab2829b4e85ea83cf22d604b58014a697acc156374fcf4a3",
+      "bytes": 26208
+    },
+    {
+      "speaker": "Sunny",
+      "voice": "en-US-MichelleNeural",
+      "text": "Four ears! Can you hear us better?",
+      "audio": "audio/en/06_sunny.mp3",
+      "sha256": "aa4715f97fa96e0696e9d71e6d9c170a55c585b72affb1491f3ee422e43808f0",
+      "bytes": 25200
+    },
+    {
+      "speaker": "Bunny",
+      "voice": "en-US-AnaNeural",
+      "text": "Yes. So please don’t shout!",
+      "audio": "audio/en/07_bunny.mp3",
+      "sha256": "23fe53dc227f5b87abb597ee9f2f5da20dad9be9288afb519f0e6696a5aab54c",
+      "bytes": 26064
+    }
+  ]
+}

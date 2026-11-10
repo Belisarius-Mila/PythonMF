@@ -1,11 +1,12 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
-- 2026-11-10 15:22 CET: Na nový výslovný pokyn k p+n jsou všechny čtyři čekající commity do `51a2cabeb587ca5a9db8ed5d9f591dec5c1947cd` odeslané na GitHub a přesně nasazené na Pages. Jediné registrované předání `19622ad4cec58c0ce7762c8afa311ea6`, Terra 6.1/high, skončilo `completed`; push i deployment mají stav `confirmed`. Pages run `42832718423`, deployment `7684562278`, smoke HTTP 200, chráněné služby beze změny.
-- Plná publikační brána: 3402 testů, 0 chyb, 49 přeskočených, 517,8 s. Jedna závěrečná veřejná kontrola potvrzuje 158 odstraněných URL HTTP 404 (nově i původní `arrival.webp`) a 54 zachovaných souborů HTTP 200 s přesnými SHA-256, včetně scén 1–5 a médií Logana. Místní čtecí audit před vydáním ověřil 3738 zachovaných souborů bez rozdílů; proti předchozí publikaci se z webu odstranil pouze starý obrázek.
-- Nový boční `arrival_side_view_20261110_v1.png` zůstává ve třech shodných kopiích, SHA-256 `3b028eef9065528262c788b2d34e2369ea4800c5e7fe46a4c29b64dd9e649bbc`. Do produkčního průchodu se nevkládal. Původní zdrojový PNG, historie a zálohy zůstávají zachované.
-- Po výslovném souhlasu byly pouze tři nesouvisející změny na source main dočasně odložené; smazání `requirements.txt` i oba scénářové drafty jsou přesně vrácené, ověřen stav i otisky. Stash a soukromá záloha zůstávají pro obnovu. Data má stále vlastní head `c87f6064`; během čekání v jeho worktree přibyla souběžná práce na novém úvodu šestky. Tato relace do Data nezapisovala, neslučovala jej ani nepřepisovala; nová Data práce není součástí vydaného checkpointu.
-- Další krok: ponechat souběžný Data vývoj oddělený a navázat jeho vlastním handoffem. Výsledkový paměťový checkpoint je pouze místní pro příští balíček; samotný zápis nespouští další p+n. Fyzický proklik na Macu/iPhonu zůstává neověřený. Soukromé důkazy jsou v `data/private/mmtx/release_51a2cabe_20261110/`.
+- 2026-11-10 15:17 CET: Data v `data/parallel-20261104` připravil první obraz NOVÉ šesté scény, The Lake. Přijatá boční varianta, všech sedm přesných anglických replik, Next / Repeat / Again a návrat k mostu. Další obrazy se zatím neimplementují.
+- Sedm pevných Azure MP3, stejná hlasová ID jako scéna 5, tempo −10 %, 410 účtovaných znaků / 7 požadavků. Dekódování, text/hlas/hash a oba mirrory ověřené; nic se znovu negeneruje.
+- 35 cílených testů PASS a rychlá statická brána PASS; plná místní brána 2960 testů OK (5 SKIP). Skutečné lokální Safari ukázalo první větu i konečný stav 7/7, desktop vizuálně zkontrolovaný; fyzický iPhone a hlasová přejímka zůstávají otevřené.
+- Míla výslovně zadal Terra p+n a následné napojení scény 5 pro produkční zkoušku. Nová šestka dosud není publikovaná. Předchozí samostatné vydání MMTX do `51a2cabe` skončilo potvrzeně; není důkazem nové šestky. Kanonický main má Willovy neuzavřené změny (requirements a dva scénáře); zachovat je.
+- Datova větev má dřívější Willův WIP úklid staré šestky; ten se zachovává a do nového commitu se nevezme. Historické záznamy o staré šestce nejsou aktuální stav nové implementace.
+- Další krok: konkrétní lokální commit a převzetí do uvolněného kanonického main; poté registrované p+n a samostatný vstup ze scény 5. Report `reports/mmtx_scene06_opening_20261110.md`.
 <!-- SAMANTHA_CURRENT_STATUS_END -->
 
 # TVBCP: MMTX
@@ -1529,3 +1530,21 @@ Další krok: Navazovat na souběžný Data vývoj samostatně; tuto větev auto
 Navrhované další kroky: Žádné nové.
 
 Technický důkaz: Účtenka `19622ad4cec58c0ce7762c8afa311ea6`, head `51a2cabe`, Pages run `42832718423` / deployment `7684562278`, push/deployment confirmed. Plná brána 3402 testů PASS / 49 SKIP; veřejně 158 URL HTTP 404 a 54 zachovaných souborů s přesnými bajty. Source WIP vrácený včetně shodných otisků obou draftů; tři nové PNG shodné. Data head `c87f6064` zachovaný, jeho souběžně změněný WIP touto relací nedotčený. Doklady mimo Git v `data/private/mmtx/release_51a2cabe_20261110/`; výsledkový zápis místně pro příští balíček, bez opakování p+n. Fyzická přejímka neověřená.
+
+
+### 2026-11-10 15:17 CET — Nová šestka, první obraz a anglické MP3
+
+Hotovo:
+- První obraz The Lake má přijatý boční pohled a sedm schválených replik s pevným anglickým zvukem. Next, Repeat, Again, čitelné bubliny nad vodou a návrat k mostu.
+
+Rozhodnutí:
+- Míla zadal vývoj pouze prvního obrazu, anglické MP3, Terra p+n a následné napojení z pětky pro produkční zkoušku. Další hotové ilustrace tím nejsou implementované.
+
+Další krok:
+- Převzít konkrétní ověřený commit do uvolněného kanonického main a provést autorizované p+n.
+
+Navrhované další kroky:
+- Po vydání připojit konec pětky a fyzicky ověřit přechod a hlasy na Mílově zařízení.
+
+Technický důkaz:
+- 35 cílených testů PASS, syntaxe/statická brána PASS, 7/7 MP3 dekódovaných, oba mirrory a 13 HTTP souborů přesné. Azure 7 unikátních požadavků / 410 znaků, bez retry. Lokální Safari: první věta i stav 7/7. Plná brána 2960 testů OK (5 SKIP); publikace nové šestky dosud neprovedena. Podrobnosti a otisky v `reports/mmtx_scene06_opening_20261110.md`.
