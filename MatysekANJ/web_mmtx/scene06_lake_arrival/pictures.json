@@ -1,0 +1,25 @@
+{
+  "schema_version": 1,
+  "pictures": [
+    {
+      "id": 1,
+      "title": "The Lake",
+      "dialogue": "dialogue.json",
+      "line_count": 7,
+      "image": "arrival_side_view.webp",
+      "width": 1672,
+      "height": 941,
+      "alt": "Benji, Bunny, Bruno, Fiona and Sunny look across the lake at clouds shaped like rabbit ears."
+    },
+    {
+      "id": 2,
+      "title": "Ollie’s Dinner",
+      "dialogue": "dialogue_02.json",
+      "line_count": 10,
+      "image": "ollie_dinner.webp",
+      "width": 1671,
+      "height": 941,
+      "alt": "The five friends face Ollie the otter, who offers them a large fish in his landing net beside the lake."
+    }
+  ]
+}

@@ -42,6 +42,43 @@ class Scene06OpeningTests(unittest.TestCase):
     def test_audio_integrity_and_decode(self):
         self.assertEqual(builder.check()["english_mp3"], 7)
 
+    def test_picture_two_exact_dialogue_and_audio_integrity(self):
+        rows = builder.dialogue(picture=2)["lines"]
+        self.assertEqual([(x["speaker"], x["text"]) for x in rows], [
+            ("Ollie", "Look! A big fish in my net!"), ("Bruno", "That’s a big dinner!"),
+            ("Ollie", "Will you eat with me?"), ("Benji", "Thank you, but we have our own food."),
+            ("Fiona", "We’re here for the meeting. Where is it?"),
+            ("Ollie", "On the other side of the lake, next morning."),
+            ("Sunny", "How will we find the place?"),
+            ("Ollie", "Look for an old boat beside an old fishing hut."),
+            ("Ollie", "Follow the path by the water."), ("Bunny", "Thank you, Ollie. Enjoy your fish!"),
+        ])
+        self.assertEqual({x["voice"] for x in rows if x["speaker"] == "Ollie"}, {"en-US-AndrewNeural"})
+        self.assertEqual(builder.check(picture=2)["english_mp3"], 10)
+
+    def test_picture_two_build_preserves_first_picture_and_its_receipt(self):
+        with tempfile.TemporaryDirectory() as folder:
+            docs, mirror, receipt = self.fixture(folder)
+            (docs / "dialogue_02.json").write_bytes((DOCS / "dialogue_02.json").read_bytes())
+            calls = []
+            def synth(text, **kwargs):
+                calls.append(text)
+                kwargs["budget"].reserve(builder.ssml_parts(text, kwargs["voice"])[1])
+                return b"ID3" + text.encode() * 100
+            builder.build(docs=docs, mirror=mirror, receipt=receipt, synthesizer=synth, validator=lambda x: None)
+            before = {p.relative_to(docs): p.read_bytes() for p in docs.rglob("*") if p.is_file()}
+            original_receipt = receipt.read_bytes()
+            second_receipt = receipt.with_name("second.json")
+            result = builder.build(docs=docs, mirror=mirror, receipt=second_receipt, picture=2,
+                                   synthesizer=synth, validator=lambda x: None)
+            self.assertEqual((result["new_requests"], len(calls)), (10, 17))
+            self.assertEqual(receipt.read_bytes(), original_receipt)
+            for path, content in before.items():
+                self.assertEqual((docs / path).read_bytes(), content, str(path))
+            again = builder.build(docs=docs, mirror=mirror, receipt=second_receipt, picture=2,
+                                  synthesizer=synth, validator=lambda x: None)
+            self.assertEqual((again["new_requests"], len(calls)), (0, 17))
+
     def fixture(self, folder):
         root = Path(folder)
         docs, mirror = root / "docs", root / "mirror"
@@ -104,10 +141,11 @@ class Scene06OpeningTests(unittest.TestCase):
     @unittest.skipUnless(shutil.which("node"), "Node is required")
     def test_player_sequence_errors_repeat_and_late_callbacks(self):
         script = r'''
-const fs = require('fs'), vm = require('vm'), assert = require('assert');
+const fs = require('fs'), vm = require('vm'), assert = require('assert'), path = require('path');
 const nodes = new Map();
 function node(id) {
-  if (!nodes.has(id)) nodes.set(id, {hidden: false, disabled: true, textContent: '',
+  if (!nodes.has(id)) nodes.set(id, {hidden: false, disabled: true, textContent: '', dataset:{},
+    setAttribute(name,value){this[name]=value;},
     classList: {remove(){}, add(){}, toggle(){}}, listeners: {},
     addEventListener(type, fn) {this.listeners[type] = fn;},
     click(){if(!this.disabled && this.listeners.click) this.listeners.click();}});
@@ -120,8 +158,9 @@ class Audio {
   pause() {this.paused = true;}
 }
 const data = JSON.parse(fs.readFileSync(process.argv[2], 'utf8'));
+const second = JSON.parse(fs.readFileSync(path.join(path.dirname(process.argv[2]),'dialogue_02.json'),'utf8'));
 const context = vm.createContext({document:{getElementById:node}, window:{addEventListener(t,f){events[t]=f;}},
-  Audio, fetch:async()=>({ok:true,json:async()=>data}), console});
+  Audio, fetch:async(url)=>({ok:true,json:async()=>JSON.parse(fs.readFileSync(path.join(path.dirname(process.argv[2]),url.split('?')[0]),'utf8'))}), console});
 vm.runInContext(fs.readFileSync(process.argv[1], 'utf8'),context);
 events.pageshow();assert.equal(node('restartButton').hidden,true);
 const flush = ()=>new Promise(resolve=>setImmediate(resolve));
@@ -139,9 +178,20 @@ const flush = ()=>new Promise(resolve=>setImmediate(resolve));
  node('repeatButton').click(); assert.equal(audios[2].src,data.lines[1].audio);
  audios[2].onended();
  for(let n=2;n<7;n++) {node('nextButton').click();assert.equal(node('speechText').textContent,data.lines[n].text);audios.at(-1).onended();}
+ assert.equal(node('nextButton').hidden,false);assert.equal(node('restartButton').hidden,true);
+ assert.equal(node('nextButton').textContent,'Next picture ▶');
+ assert.equal(node('scene').dataset.picture,'1');
+ node('nextButton').click();
+ assert.equal(node('speakerName').textContent,'Ollie');assert.equal(node('lineNumber').textContent,'1 / 10');
+ assert.equal(node('sceneImage').src,'ollie_dinner.webp');assert.equal(node('scene').dataset.picture,'2');
+ assert.equal(node('nextButton').disabled,true);
+ audios.at(-1).onerror();assert.equal(node('nextButton').disabled,true);
+ node('repeatButton').click();assert.equal(audios.at(-1).src,second.lines[0].audio);audios.at(-1).onended();
+ for(let n=1;n<10;n++){node('nextButton').click();assert.equal(node('speechText').textContent,second.lines[n].text);audios.at(-1).onended();}
  assert.equal(node('nextButton').hidden,true);assert.equal(node('restartButton').hidden,false);
  node('restartButton').disabled=false;node('restartButton').click();
  assert.equal(node('speakerName').textContent,'Benji');
+ assert.equal(node('sceneImage').src,'arrival_side_view.webp');
  events.pagehide();assert.equal(audios.at(-1).paused,true);
  events.pageshow();assert.equal(node('repeatButton').disabled,false);
  node('repeatButton').click();assert.equal(audios.at(-1).src,data.lines[0].audio);

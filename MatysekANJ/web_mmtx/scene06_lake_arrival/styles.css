@@ -28,6 +28,13 @@ button, a { -webkit-tap-highlight-color: transparent; touch-action: manipulation
 .status { background: #fffbeaf2; border-radius: 12px; padding: 6px 10px; font-size: clamp(12px, 1.3vw, 18px); }
 .status:empty { display: none; }
 .status.error { color: #8d241a; }
+/* Ollie and his net occupy the right shore; put the dialogue above them. */
+.scene[data-picture="2"] .speech { top: 10px; bottom: auto; left: 33%; right: auto; width: 35%; }
+@media (max-width: 700px) {
+  .scene[data-picture="2"] { padding-bottom: 145px; }
+  .scene[data-picture="2"] .speech { top: auto; bottom: 62px; left: 3%; right: 3%; width: 94%; padding: 8px 12px; }
+  .scene[data-picture="2"] .footer-controls { bottom: 8px; }
+}
 @media (max-width: 600px) {
   .hud { inset: 5px 5px auto; }
   .control { padding: 5px 9px; border-radius: 14px; font-size: 13px; }

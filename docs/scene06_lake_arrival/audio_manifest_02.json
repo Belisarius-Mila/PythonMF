@@ -1,0 +1,87 @@
+{
+  "schema_version": 1,
+  "provider": "azure",
+  "rate": "-10%",
+  "assets": [
+    {
+      "speaker": "Ollie",
+      "voice": "en-US-AndrewNeural",
+      "text": "Look! A big fish in my net!",
+      "audio": "audio/en/p02_01_ollie.mp3",
+      "sha256": "b01b8fff9c01411a8b71b1f0e5c976e1e1f5b13b760d1e1eb1266da427533bc1",
+      "bytes": 14976
+    },
+    {
+      "speaker": "Bruno",
+      "voice": "en-US-GuyNeural",
+      "text": "That’s a big dinner!",
+      "audio": "audio/en/p02_02_bruno.mp3",
+      "sha256": "1e3b695d40da8622e2d168db63a3d50718d984b871d78f00dc45e35b7e836224",
+      "bytes": 13968
+    },
+    {
+      "speaker": "Ollie",
+      "voice": "en-US-AndrewNeural",
+      "text": "Will you eat with me?",
+      "audio": "audio/en/p02_03_ollie.mp3",
+      "sha256": "c331ca97ca7b34b4e3799185db0be17b1f10d6c1fd47a975967261ec1b1b47d5",
+      "bytes": 11232
+    },
+    {
+      "speaker": "Benji",
+      "voice": "en-US-AndrewNeural",
+      "text": "Thank you, but we have our own food.",
+      "audio": "audio/en/p02_04_benji.mp3",
+      "sha256": "21a29890e6fba202c52a34a8cbf138ede5ab3bf52cf8f334e62c5389a583e9ae",
+      "bytes": 14976
+    },
+    {
+      "speaker": "Fiona",
+      "voice": "en-US-JennyNeural",
+      "text": "We’re here for the meeting. Where is it?",
+      "audio": "audio/en/p02_05_fiona.mp3",
+      "sha256": "8759a1f0c98522484f722af9555acb69ce63f2e21f08f74d3f8368dd2e2ddebd",
+      "bytes": 25200
+    },
+    {
+      "speaker": "Ollie",
+      "voice": "en-US-AndrewNeural",
+      "text": "On the other side of the lake, next morning.",
+      "audio": "audio/en/p02_06_ollie.mp3",
+      "sha256": "48c45bedde04e580137957a9f8d8f25cd20dd7a07344866c8e411922bde1452a",
+      "bytes": 16848
+    },
+    {
+      "speaker": "Sunny",
+      "voice": "en-US-MichelleNeural",
+      "text": "How will we find the place?",
+      "audio": "audio/en/p02_07_sunny.mp3",
+      "sha256": "c29cb8d06a1a92e196311f1da2f76659a665bdf5b66a07ed2153d75ef61560ae",
+      "bytes": 15408
+    },
+    {
+      "speaker": "Ollie",
+      "voice": "en-US-AndrewNeural",
+      "text": "Look for an old boat beside an old fishing hut.",
+      "audio": "audio/en/p02_08_ollie.mp3",
+      "sha256": "886cc5d6b0c8b37e0aa01e16c6cb6cb4c7eca160c4d9a56689816ddeb7042d3d",
+      "bytes": 20736
+    },
+    {
+      "speaker": "Ollie",
+      "voice": "en-US-AndrewNeural",
+      "text": "Follow the path by the water.",
+      "audio": "audio/en/p02_09_ollie.mp3",
+      "sha256": "18b7c96b3697e19f23cd558687cbff94ad5d5b5e828b54fdca67c5a3f3643358",
+      "bytes": 12672
+    },
+    {
+      "speaker": "Bunny",
+      "voice": "en-US-AnaNeural",
+      "text": "Thank you, Ollie. Enjoy your fish!",
+      "audio": "audio/en/p02_10_bunny.mp3",
+      "sha256": "b89e926a33cb6301840dd99d3ac26503be88d8f14320e78c85f88e282cc4e4c0",
+      "bytes": 28512
+    }
+  ]
+}

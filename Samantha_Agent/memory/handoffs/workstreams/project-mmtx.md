@@ -1,13 +1,13 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
-- 2026-11-10 15:24 CET: Data dokončil první obraz NOVÉ šesté scény The Lake, přijatý boční obrázek a všech 7 přesných EN replik / pevných Azure MP3. První vývojový commit `1c40b6db`; další obrazy se neimplementují.
-- Anglický zvuk: stejná hlasová ID jako pětka, tempo −10 %, 7 unikátních požadavků / 410 znaků. Next / Repeat / Again, návrat k mostu, bezpečné obnovení ovládání po Back/Forward. Žádné nové TTS při přehrávání.
-- Lokálně je připravený navazující viditelný odkaz To the lake! až po dokončení dialogů pětky; neviditelná stará zkratka se nevrací. Oba mirrory shodné. Tento krok má samostatný commit pro vydání po první etapě.
-- Ověření: 37 cílených testů PASS (včetně skutečných syntetických JS průchodů), plná místní brána 2960 testů OK (5 SKIP), statická brána PASS, 7/7 MP3 dekódovaných. Skutečné místní Safari ukázalo první repliku a finální stav 7/7; desktop vizuálně zkontrolovaný, fyzický iPhone a hlasová přejímka zůstávají otevřené.
-- Nová šestka NENÍ publikovaná. Míla autorizoval Terra p+n a následné napojení pro produkční zkoušku, ale hlavní checkout vlastní Will: má neuzavřený requirements a dva scénáře; registrované audity hlásí source main není čistý a pracovní prostředí není připravené. Žádný nový submit_release nebyl spuštěný a původní Willova práce nebyla změněná.
-- Předchozí Willovo vydání do `51a2cabe`, účtenka `19622ad4cec58c0ce7762c8afa311ea6`, je potvrzené; patří odstranění původního WebP, nikoli nové šestce. Nezaměňovat za důkaz nové publikace.
-- Další krok: vyjasnit s Mílou, zda integraci do kanonického main přebírá Will, nebo Data; potom zachovat cizí práci, převzít přesné commity a vydat registrovanou cestou. Zatím se čeká na odpověď k rozdělení práce. Podrobnosti `reports/mmtx_scene06_opening_20261110.md`.
+- 2026-11-10 16:12 CET: Lokálně hotové obrazy 1+2 nové šestky, 17 přesných EN replik / pevných MP3. Po 7/7 nabídne Next picture Ollieho a jeho 10 vět; Repeat, Again, chyby zvuku a návrat přes historii ověřené. Další obrazy se neimplementují.
+- Nových 10 Azure požadavků / 635 znaků, −10 %, Ollie Andrew podle původního hlasového ID. Prvních 7 MP3, první JSON/manifest i první obrázek zůstávají byte-identické; žádný první požadavek se neopakoval.
+- Ověření druhého obrazu: 57 cílených testů PASS, plná brána 2972 testů OK (5 SKIP), 665,420 s unit. Dekódování 17/17, mirrory shodné, lokální HTTP 27/27 přesné. Skutečné Safari ukázalo Bunny 10/10, Again a dokončení; desktopové rozložení zkontrolované. Fyzický iPhone a výslovná hlasová přejímka zůstávají otevřené.
+- První p+n proběhlo JEDNOU Terrou 6.1/high pro main `fee535e5b4b89fca3fb2b9150d4742e65472818e`, job `4b261f77c13a77e845684bbbd90cc876`: brána 3412 PASS / 650,6 s a push confirmed. Pages run `42839271179`: build success, deploy failure po 600000 ms při syncing_files a zrušení deploymentu. Konečná účtenka attention / deployment uncertain. Po zrušení první HTML stále HTTP 404 (16:10 CET); produkční zkouška zatím není možná. Žádný nový pokus se neodeslal.
+- Míla dostal konkrétní otázku, zda schvaluje jeden nový pokus přesně stejného prvního balíčku; čeká se na odpověď, nikoli na další modelový polling. Main zůstává čistý a zarovnaný s GitHubem na fee535e5, oba profily také. Willovy 3 WIP změny jsou zachované ve stashi `550024e17da59eb258556f5d3f0979650d5a4d30` a ověřené privátní záloze.
+- Data servisní commit `06c34051` zaznamenal již dříve provedený WIP úklid staré šestky: 311 absencí a staré workflow/registrace; žádné další soubory se nyní z disku neodstranily. Tento commit do main NEPŘEBÍRAT, úklid tam už je. Samostatný následující commit obsahuje jen nový druhý obraz.
+- Druhý obraz NENÍ v prvním vydaném balíčku ani na produkci. Další krok: dokončit jeho checkpoint a čistý Data stav; podle Mílova rozhodnutí buď jeden nový registrovaný pokus prvního p+n, nebo jen lokální přejímka obrazu 2. Report `reports/mmtx_scene06_picture2_20261110.md`.
 <!-- SAMANTHA_CURRENT_STATUS_END -->
 
 # Handoff pracovního proudu: MMTX
@@ -929,6 +929,24 @@ Technický důkaz:
 - 37 cílených testů PASS; nově i skutečný cíl odkazu, jeho umístění až v původně skrytém dokončení a shoda HTML/CSS obou mirrorů. Plná místní brána 2960 OK (5 SKIP) zůstává důkazem nezměněné infrastruktury; nová markup změna byla ověřená cíleně. Žádné nové modelové/audio volání a žádná publikace této šestky. Registrovaný deploy audit: source main není čistý; batch audit: pracovní prostředí není připravené.
 
 
+### 2026-11-10 16:05 CET — Ollieho obraz připojený lokálně
+
+Hotovo:
+- První a druhý obraz propojuje Next picture. Ollie nabízí rybu a deset anglických replik odkáže přátele ke staré lodi a chatrči. Čitelné dialogy nekrývají postavy ani podběrák; na úzkém displeji jsou pod obrazem.
+
+Rozhodnutí:
+- Míla výslovně zadal druhý obraz po předání prvního p+n. Aby se dlouhé čekání na Pages nepřeneslo do vývoje, druhý obraz vzniká odděleně v Datově worktree; zmrazený první main ani balíček se nemění. Žádné nové p+n pro druhý obraz se bez dalšího pokynu neodesílá.
+
+Další krok:
+- Dokončit plnou místní bránu druhého obrazu a konkrétní commit; programově převzít stejnou účtenku prvního vydání.
+
+Navrhované další kroky:
+- Po potvrzení prvního vydání zkontrolovat veřejné soubory a vstup z mostu. Druhý obraz pak samostatně převzít s Mílou a případně vydat na jeho pokyn.
+
+Technický důkaz:
+- 57 cílených kontrol PASS, všech 17 MP3 dekódovaných, 27 HTTP souborů přesné; Safari druhý obraz a Bunny 10/10 + Again. Nových 10 Azure požadavků / 635 znaků, původní první audio/data/obraz i raw účtenka zachované. Plná místní brána zatím běží. První release job `4b261f77c13a77e845684bbbd90cc876`: gate 3412 PASS, push confirmed, deploy requested; Pages run `42839271179` zatím běží. Viz nový report.
+
+
 ### 2026-11-10 16:11 CET — Uložený dřívější WIP úklid staré šestky v Datově větvi
 
 Hotovo:
@@ -945,3 +963,21 @@ Navrhované další kroky:
 
 Technický důkaz:
 - Přesně 311 absencí mimo nové názvy médií, všechny v rozsahu staré šestky a již nepřítomné na main. Konkrétní místní plán má seznam cest a původní head; plná brána aktuálního pracovního stavu 2972 testů OK (5 SKIP), 57 cílených kontrol PASS. Žádný reset, mazání dalších dat ani přepis historie.
+
+
+### 2026-11-10 16:12 CET — Druhý obraz ověřený, první nasazení Pages zrušené po timeoutu
+
+Hotovo:
+- Lokálně funguje příběhové spojení prvních dvou obrazů a všech 17 anglických MP3. Druhý obraz má schválený obrázek, přesných 10 replik a vlastní neměnné audio podklady.
+
+Rozhodnutí:
+- Druhý obraz je oddělený následující vývoj, není součástí prvního zmrazeného p+n. První p+n se neopakuje automaticky; Míla má konkrétní otázku na jediný nový pokus stejného fee535e5. Starý WIP Data je zaznamenaný samostatně v `06c34051` a do main se znovu nepřebírá. Willovo nesouvisející WIP zůstává zachované.
+
+Další krok:
+- Uložit konkrétní nový commit druhého obrazu a potvrdit čisté pracovní kopie; poté počkat na Mílovo rozhodnutí o novém pokusu nasazení.
+
+Navrhované další kroky:
+- Druhý obraz samostatně projít na Mílově zařízení a případně vydat po jeho pokynu. Produkční Pages po zrušeném nasazení zatím není přejímka nové šestky.
+
+Technický důkaz:
+- Plná místní brána 2972 OK (5 SKIP), 665,420 s unit; 57 cílených kontrol PASS, 17/17 MP3 decode, 27 HTTP souborů přesné. Skutečné Safari: obraz Ollie, Bunny 10/10, Again, viditelné postavy a podběrák. První Azure podklady beze změny. První Terra receipt `4b261f77c13a77e845684bbbd90cc876`: gate 3412 PASS, push confirmed, deployment uncertain; GitHub Pages run `42839271179` po 600000 ms syncing_files deployment zrušil. Po zrušení HTML 404. Výsledkový report zachovává první neúspěšný běh bez přepisu.
