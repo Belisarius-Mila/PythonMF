@@ -2,6 +2,10 @@
 
 ## Aktuální stav
 
+- 2026-11-10 20:35 CET: Slovníček i rozcestník 1–6 jsou vydané na GitHub Pages: main e867c165, Terra job 2394a9c62db8603de3108a4bfee600a4 completed, push/deployment confirmed. Plná publikační brána 3457 PASS / 576,2 s, Pages run 42886285641 / deployment 7692193075. Nezávislá veřejná kontrola 330/330 souborů přesná, 10 851 277 B; skutečné Safari otevřelo veřejnou nabídku všech šesti scén. Main čistý a aligned s origin, 0 čekajících commitů; oba profily čisté a aligned. Chráněné služby beze změny. Závěrečný zápis je pouze místní Data receipt pro další balíček, žádné opakování p+n.
+
+- 2026-11-10 20:21 CET: Míla výslovně zadal vše předat k p+n Terře. Main převzal pouze slovníček b62c4aa8 a rozcestník 376ae421 z Datovy oddělené větve; dva již hotové commity interiéru  ba2f9bbc a 448d2902 zůstávají součástí celého čekajícího GitHub balíčku. Cíl je project-mmtx → GitHub Pages, centrální Terra 6.1/high. Nová účtenka vznikne jedním submit_release(wait=True), request data-mmtx-dictionary-selector-376ae421-20261110-v1; tento přípravný zápis ještě nepotvrzuje předání, push ani deployment.
+
 - 2026-11-10: Tlačítko Cesta k jezeru nyní otevírá modální výběr scén 1–6. Jednička spouští původní mýtinu přímo, 2–6 vedou na vlastní stránky scén; křížek/Escape zavře nabídku. Lokální změna navazuje na slovníček b62c4aa8, obě rozšíření dosud bez nového p+n. 49 cílených testů a rychlá statická brána OK; Safari: čitelná nabídka, proklik 1 a 6, návrat a Escape. Všech pět cílových HTML i tři vstupní soubory přesné přes lokální HTTP a mirror. Fyzický iPhone zatím neověřený.
 
 - 2026-11-10: Lokálně doplněný závěrečný slovníček nové šestky: ikona knihy až po poslední replice desátého obrazu, v režimu s češtinou až po EN i CS. 77 nových hesel a spojení, dvousloupcové posuvné karty, stejné tři režimy češtiny jako příběh. Zavření/Escape zastaví řeč a vrátí příběh, Again ikonu znovu skryje.
@@ -868,3 +872,27 @@ Další krok: Mílova přejímka rozcestníku a slovníčku; případné společ
 Navrhované další kroky: Žádné nové.
 
 Technický důkaz: 49 cílených testů OK / 16,975 s, rychlá statická brána OK. Safari zobrazilo všech šest čísel a prošlo spuštění první i šesté scény, návrat a zavření Escape. Tři vstupní HTML/JS/CSS a všech pět cílových HTML přesné přes lokální HTTP a mirror. Verze CSS/JS aktualizované proti cache. Žádné nové TTS ani jiné placené volání; hlavní checkout nedotčený. Fyzický iPhone otevřený.
+
+### 2026-11-10 20:21 CET — Připravené společné vydání slovníčku a rozcestníku
+
+Hotovo: Do main je převzatý slovníček 77 nových hesel se 154 MP3 a nabídka scén 1–6. Obě webové kopie jsou shodné s ověřenou Datovou větví. Historie MMTX a nesouvisející práce na main zůstaly zachované.
+
+Rozhodnutí: Míla výslovně autorizoval vše předat k p+n Terře. Jediná registrovaná cesta submit_release(wait=True), project-mmtx → GitHub Pages; dva čekající interiérové commity se zachovají v celém GitHub balíčku. Běžící Cockpit se tímto vydáním nerestartuje.
+
+Další krok: Po kontrolách uložit integrovaný main, zarovnat pouze čisté profily a jednou předat přesný commit; převzít konečnou účtenku téhož jobu a ověřit veřejné bajty.
+
+Navrhované další kroky: Mílovo proklikání veřejné nabídky a slovníčku; fyzická přejímka iPhonu zůstává otevřená.
+
+Technický důkaz: Data 376ae421 a b62c4aa8 zachované v odděleném worktree, main výchozí 448d2902 čistý a bez divergence. Dřívější plná místní brána slovníčku 2989 OK (5 SKIP); rychlá integrační brána OK. Nové audio ani placené pokusy se nespouštějí. Request data-mmtx-dictionary-selector-376ae421-20261110-v1 je nový; staré účtenky se nepřepisují.
+
+### 2026-11-10 20:35 CET — Slovníček a rozcestník vydané Terrou
+
+Hotovo: Veřejná Cesta k jezeru nabízí scény 1–6 a na konci šestky slovníček 77 nových hesel s EN/CZ zvukem. Safari na skutečné produkční URL otevřelo nabídku; zůstala připravená pro Mílu.
+
+Rozhodnutí: Schválené předání proběhlo jednou přes submit_release(wait=True), request data-mmtx-dictionary-selector-376ae421-20261110-v1. Terra 6.1/high převzala tři commity do e867c165 včetně dřívějšího interiérového balíčku. P+n cílilo na Pages, bez restartu Cockpitu nebo nových TTS/modelových pokusů mimo jediné převzetí Terrou.
+
+Další krok: Mílova přejímka veřejné nabídky a slovníčku.
+
+Navrhované další kroky: Fyzický iPhone a výslovná jazyková/hlasová přejímka zůstávají otevřené.
+
+Technický důkaz: Účtenka 2394a9c62db8603de3108a4bfee600a4 completed, push a deployment confirmed, plná publikační brána 3457 PASS / 576,2 s. Pages run 42886285641, deployment 7692193075, HTTP 200 a exact main e867c165; chráněné služby beze změny. Nezávisle 330 veřejných souborů bajtově i SHA-256 shodných (10 851 277 B). Main/origin aligned, 0 čekajících commitů, dva profily aligned a čisté. Returned_to_adam=false je portálový příznak; nativní Adam účtenku převzal jednou zde, nejde o důvod retry. Reporty mmtx_dictionary_selector_release_20261110.md/json a mmtx_dictionary_selector_public_20261110.json.

@@ -1,0 +1,1988 @@
+{
+  "ok": true,
+  "head": "e867c165d97c5b09a4c06c609af820db2d1965a4",
+  "count": 330,
+  "bytes": 10851277,
+  "files": [
+    {
+      "path": "docs/scene06_lake_arrival/arrival_side_view.webp",
+      "status": 200,
+      "bytes": 470730,
+      "sha256": "232225a745973b186995bd1693abd0689563984c7a7d84ddf7874b6e60f2a8c3"
+    },
+    {
+      "path": "docs/scene06_lake_arrival/audio/cs/p01_01_benji.mp3",
+      "status": 200,
+      "bytes": 21888,
+      "sha256": "81902598fbcb1f23148f83e3a7f23b5f4307794f2da907724a4752ed1783dfe8"
+    },
+    {
+      "path": "docs/scene06_lake_arrival/audio/cs/p01_02_fiona.mp3",
+      "status": 200,
+      "bytes": 30384,
+      "sha256": "6083379ca5ab8be0e1940955fdb25c35928ab587199752c9e23b198c5ee9be7f"
+    },
+    {
+      "path": "docs/scene06_lake_arrival/audio/cs/p01_03_sunny.mp3",
+      "status": 200,
+      "bytes": 16560,
+      "sha256": "86bb5ffdbc4e7be969a80f0e0207f19538edb16a9481116e03d77845e5c2e7b7"
+    },
+    {
+      "path": "docs/scene06_lake_arrival/audio/cs/p01_04_bunny.mp3",
+      "status": 200,
+      "bytes": 17280,
+      "sha256": "fa8130276a95d600058190077d83180e0561a1ca8686db74b96f34ff1962d2ac"
+    },
+    {
+      "path": "docs/scene06_lake_arrival/audio/cs/p01_05_bruno.mp3",
+      "status": 200,
+      "bytes": 26640,
+      "sha256": "b7032033d69ac16ae83c5268673c06b2791789a78b69103f294a5dc6e9e4fe37"
+    },
+    {
+      "path": "docs/scene06_lake_arrival/audio/cs/p01_06_sunny.mp3",
+      "status": 200,
+      "bytes": 29088,
+      "sha256": "f2f9718c741c514282ffc7db35036b05c4572472bad89b9f053a769effac2b72"
+    },
+    {
+      "path": "docs/scene06_lake_arrival/audio/cs/p01_07_bunny.mp3",
+      "status": 200,
+      "bytes": 24336,
+      "sha256": "59056c0873dc6efcd0e59adbd10b689905a3c088444d3bd926d1812d8ad0b5fa"
+    },
+    {
+      "path": "docs/scene06_lake_arrival/audio/cs/p02_01_ollie.mp3",
+      "status": 200,
+      "bytes": 30816,
+      "sha256": "daa4d719a77c6f2f90c81fa4c2fb902186640cf1042c16a7919e567169d2c1fe"
+    },
+    {
+      "path": "docs/scene06_lake_arrival/audio/cs/p02_02_bruno.mp3",
+      "status": 200,
+      "bytes": 16848,
+      "sha256": "ddbded08b0a729ec3c357e7a001b16f82dc2f999b903fa5b00141a29aa973b19"
+    },
+    {
+      "path": "docs/scene06_lake_arrival/audio/cs/p02_03_ollie.mp3",
+      "status": 200,
+      "bytes": 13968,
+      "sha256": "9c569a88f3124d86b93e12b3feb6339bfbd758da1396b8b797b1187b58037aa0"
+    },
+    {
+      "path": "docs/scene06_lake_arrival/audio/cs/p02_04_benji.mp3",
+      "status": 200,
+      "bytes": 23904,
+      "sha256": "236dbc4457e7a8dfb4ba2e2f2c4a6c5512a1e03566a87ab3caf9947973de7102"
+    },
+    {
+      "path": "docs/scene06_lake_arrival/audio/cs/p02_05_fiona.mp3",
+      "status": 200,
+      "bytes": 25488,
+      "sha256": "842d2a94ddae5d5ed33a941351d18ea26eec8b63c884e216e62ac7048f7ddca5"
+    },
+    {
+      "path": "docs/scene06_lake_arrival/audio/cs/p02_06_ollie.mp3",
+      "status": 200,
+      "bytes": 25632,
+      "sha256": "be464adb8c2773336c494555280ec0a4a7dfecc39012d1a2cd1e49965c5e42bb"
+    },
+    {
+      "path": "docs/scene06_lake_arrival/audio/cs/p02_07_sunny.mp3",
+      "status": 200,
+      "bytes": 15408,
+      "sha256": "c16423c5a362b55fc7ce3dcb9f91837907f1fa47cf1d0258bdd0f5913c5b76a2"
+    },
+    {
+      "path": "docs/scene06_lake_arrival/audio/cs/p02_08_ollie.mp3",
+      "status": 200,
+      "bytes": 27648,
+      "sha256": "5c94e228945f037c7b219db7b899a4095d6eaee0153cbfe3bcc519f5c540b3f3"
+    },
+    {
+      "path": "docs/scene06_lake_arrival/audio/cs/p02_09_ollie.mp3",
+      "status": 200,
+      "bytes": 18000,
+      "sha256": "d4338e07aec1c649e1ec04690334e62946b78b310dca000360bfaf67ed9e00f8"
+    },
+    {
+      "path": "docs/scene06_lake_arrival/audio/cs/p02_10_bunny.mp3",
+      "status": 200,
+      "bytes": 27792,
+      "sha256": "ceee0a83cadf71518e491dc9271da293a7fc83ff0e30b924d3212667b4722308"
+    },
+    {
+      "path": "docs/scene06_lake_arrival/audio/cs/p03_01_dotty.mp3",
+      "status": 200,
+      "bytes": 18288,
+      "sha256": "771f30a16344e768f051ec13a7e51f5571603d4dfd9e72fc7af5f370bad18ea6"
+    },
+    {
+      "path": "docs/scene06_lake_arrival/audio/cs/p03_02_freddie.mp3",
+      "status": 200,
+      "bytes": 17424,
+      "sha256": "213494b12573ea0006a53abb53f27cff5efb91edcd22ab7881be1ca8a2709398"
+    },
+    {
+      "path": "docs/scene06_lake_arrival/audio/cs/p03_03_dotty.mp3",
+      "status": 200,
+      "bytes": 32976,
+      "sha256": "385f6c6eb6bb2947461bf5b922517237daa7355892624689140237e0aead9f35"
+    },
+    {
+      "path": "docs/scene06_lake_arrival/audio/cs/p03_04_bunny.mp3",
+      "status": 200,
+      "bytes": 14256,
+      "sha256": "eba4edb6e0d28f9c580ff7ed15e37f4b25b329093f361f841f1d849595ee7a04"
+    },
+    {
+      "path": "docs/scene06_lake_arrival/audio/cs/p03_05_freddie.mp3",
+      "status": 200,
+      "bytes": 19728,
+      "sha256": "42fa4d40fee56accfc1872f58da83f400e9a0193498240069032327ccd01f97d"
+    },
+    {
+      "path": "docs/scene06_lake_arrival/audio/cs/p03_06_fiona.mp3",
+      "status": 200,
+      "bytes": 15552,
+      "sha256": "0940fa87a6be58d2bac039aff17bc9013ea6fe79ca167a1e66a53fe6eac60f97"
+    },
+    {
+      "path": "docs/scene06_lake_arrival/audio/cs/p03_07_dotty.mp3",
+      "status": 200,
+      "bytes": 28800,
+      "sha256": "0593e69f5718cbe1782c95708477f2e77682fb289679ec3964cd18a160688f3c"
+    },
+    {
+      "path": "docs/scene06_lake_arrival/audio/cs/p03_08_freddie.mp3",
+      "status": 200,
+      "bytes": 14976,
+      "sha256": "cad0c781b7a5582c755041525a858da1b2869b9b4e08fd1d7aaca7c38c3d73fe"
+    },
+    {
+      "path": "docs/scene06_lake_arrival/audio/cs/p04_01_benji.mp3",
+      "status": 200,
+      "bytes": 27504,
+      "sha256": "4f6f809403d5a1db4f2084d0ef58acb1e55566f0159d6155a82d16d2ec99408e"
+    },
+    {
+      "path": "docs/scene06_lake_arrival/audio/cs/p04_02_fiona.mp3",
+      "status": 200,
+      "bytes": 15984,
+      "sha256": "8f2b59906bc3fbef688ff8efd5a6578e0ede619d73f7c0102553f28bed4b6eaf"
+    },
+    {
+      "path": "docs/scene06_lake_arrival/audio/cs/p04_03_sunny.mp3",
+      "status": 200,
+      "bytes": 16416,
+      "sha256": "1683abb7cfe7aed54a8adbdb952560324a958235c7ee4f47a28d388046b88ed9"
+    },
+    {
+      "path": "docs/scene06_lake_arrival/audio/cs/p04_04_bruno.mp3",
+      "status": 200,
+      "bytes": 22608,
+      "sha256": "53e1891676c6b727adf2d38f2011b647adcf6bcc1a77bec24e62cf065e1e107a"
+    },
+    {
+      "path": "docs/scene06_lake_arrival/audio/cs/p04_05_benji.mp3",
+      "status": 200,
+      "bytes": 19296,
+      "sha256": "b1b6e8b33634540cf206d801d9f2198be94f654aeb6e75fb006c33cc7d9b7690"
+    },
+    {
+      "path": "docs/scene06_lake_arrival/audio/cs/p04_06_bunny.mp3",
+      "status": 200,
+      "bytes": 18720,
+      "sha256": "91f3aab48e5141b24357a7787d808ac70046cb742349ca8e31a7b8a9a6e3d162"
+    },
+    {
+      "path": "docs/scene06_lake_arrival/audio/cs/p04_07_fiona.mp3",
+      "status": 200,
+      "bytes": 26208,
+      "sha256": "eabdc67d3d8d4fd7e6561c1e442c91cca4e8211155ab2291a2495db863120883"
+    },
+    {
+      "path": "docs/scene06_lake_arrival/audio/cs/p05_01_bunny.mp3",
+      "status": 200,
+      "bytes": 33120,
+      "sha256": "e6292aae2b60bc15c4c935e72ea84886c517830bfef0fe6053a1e003c02e6d4f"
+    },
+    {
+      "path": "docs/scene06_lake_arrival/audio/cs/p05_02_fiona.mp3",
+      "status": 200,
+      "bytes": 22176,
+      "sha256": "c964dce53ba17a646351b02391cfa37e6b15964c7d9e4fcc4b4134fbaa13a37c"
+    },
+    {
+      "path": "docs/scene06_lake_arrival/audio/cs/p05_03_sunny.mp3",
+      "status": 200,
+      "bytes": 20592,
+      "sha256": "d457c8fd046d2c03a03ce365c4adb3c968ab104be9409f0f1e64306b0d7374dd"
+    },
+    {
+      "path": "docs/scene06_lake_arrival/audio/cs/p05_04_bunny.mp3",
+      "status": 200,
+      "bytes": 20304,
+      "sha256": "83bbc58e0550825e2c97500e58f5f6be2200cf061982ded92c37f6b4c617b7f2"
+    },
+    {
+      "path": "docs/scene06_lake_arrival/audio/cs/p05_05_bruno.mp3",
+      "status": 200,
+      "bytes": 41472,
+      "sha256": "709c8267a94583ef500d15f91467d0c1aef2c1c1d83d200cb2f84d020db31192"
+    },
+    {
+      "path": "docs/scene06_lake_arrival/audio/cs/p05_06_fiona.mp3",
+      "status": 200,
+      "bytes": 17424,
+      "sha256": "a2808e2684313ba13d3fbb5e932998b92c2e5145e2b329bf0a0e0b457ebe77ff"
+    },
+    {
+      "path": "docs/scene06_lake_arrival/audio/cs/p05_07_benji.mp3",
+      "status": 200,
+      "bytes": 26496,
+      "sha256": "6cf45777a20d1ff728e2926038fdb313a0e453524bac5cb76085d350df6dae25"
+    },
+    {
+      "path": "docs/scene06_lake_arrival/audio/cs/p06_01_old_stag.mp3",
+      "status": 200,
+      "bytes": 28656,
+      "sha256": "b94253ce03312d4191db79e9022450d2fcf6e6fb84ccf52a53bd39f144ff9f5b"
+    },
+    {
+      "path": "docs/scene06_lake_arrival/audio/cs/p06_02_animals.mp3",
+      "status": 200,
+      "bytes": 30240,
+      "sha256": "05338d9d1e4b98043d685f98bea8e621eb71825a2fafd2cbd6e81c29edcaa562"
+    },
+    {
+      "path": "docs/scene06_lake_arrival/audio/cs/p06_03_old_stag.mp3",
+      "status": 200,
+      "bytes": 33552,
+      "sha256": "3e0dfcef8d3ba963677a211aaf37786ac292cf69c905ef2d6717d7365d24e232"
+    },
+    {
+      "path": "docs/scene06_lake_arrival/audio/cs/p06_04_fiona.mp3",
+      "status": 200,
+      "bytes": 14544,
+      "sha256": "e50e9eb6ad450592e687de52e4181b403a4bee5e0420ab51ac7c465a216b2792"
+    },
+    {
+      "path": "docs/scene06_lake_arrival/audio/cs/p06_05_old_stag.mp3",
+      "status": 200,
+      "bytes": 27360,
+      "sha256": "4b8c245a7ea8c95bfde31cef800c42a99aba3d473ac545b589a1d89ffa0fd6d9"
+    },
+    {
+      "path": "docs/scene06_lake_arrival/audio/cs/p06_06_bunny.mp3",
+      "status": 200,
+      "bytes": 13392,
+      "sha256": "c83c25ce4030aadc0fca6e18a88bf596ab584c23b6b61e0942bcc9f1673a7e49"
+    },
+    {
+      "path": "docs/scene06_lake_arrival/audio/cs/p06_07_old_stag.mp3",
+      "status": 200,
+      "bytes": 28800,
+      "sha256": "d162f0f17bbdc6c6e013ea71ddd67760b6537019c68a2c86d64d938f00040d34"
+    },
+    {
+      "path": "docs/scene06_lake_arrival/audio/cs/p06_08_old_stag.mp3",
+      "status": 200,
+      "bytes": 17424,
+      "sha256": "781954b55adbf2fb0a103d7c4c3efd5b31afc163d2b608f1747bac27921825eb"
+    },
+    {
+      "path": "docs/scene06_lake_arrival/audio/cs/p07_01_logan.mp3",
+      "status": 200,
+      "bytes": 32112,
+      "sha256": "c0f335c9de8e1c8c88aef419dbd60135ec44a32e9476cd3b0cd241197cf00a08"
+    },
+    {
+      "path": "docs/scene06_lake_arrival/audio/cs/p07_02_woodpecker.mp3",
+      "status": 200,
+      "bytes": 20304,
+      "sha256": "d65b9be52181269f826207f55e368f67b952af24932b71162a1cda0f74013763"
+    },
+    {
+      "path": "docs/scene06_lake_arrival/audio/cs/p07_03_logan.mp3",
+      "status": 200,
+      "bytes": 32400,
+      "sha256": "fd2d3050d672d091154523bdd7f554aab33510d380bf665640bc6c7bf39cf5d8"
+    },
+    {
+      "path": "docs/scene06_lake_arrival/audio/cs/p07_04_fiona.mp3",
+      "status": 200,
+      "bytes": 18432,
+      "sha256": "19b655ff8c3479ef5bba4e93c0bc3ebbc8bfff09d1b803d52a68442791a0ebc3"
+    },
+    {
+      "path": "docs/scene06_lake_arrival/audio/cs/p07_05_logan.mp3",
+      "status": 200,
+      "bytes": 40608,
+      "sha256": "6836b5a6ae258b3bb208956fadedfc08db9e5ddb57546c5d8cb4a8e52d543fae"
+    },
+    {
+      "path": "docs/scene06_lake_arrival/audio/cs/p07_06_bruno.mp3",
+      "status": 200,
+      "bytes": 16992,
+      "sha256": "0cb0d1ee487af65a8aba2225669ab1bc45f9b01ca2b1297d6e94e0303b138ee6"
+    },
+    {
+      "path": "docs/scene06_lake_arrival/audio/cs/p07_07_logan.mp3",
+      "status": 200,
+      "bytes": 38880,
+      "sha256": "012614b8d38dc1358b8d2d9fca89ef4e557eed83d3e8a368fc5235e94a92bc65"
+    },
+    {
+      "path": "docs/scene06_lake_arrival/audio/cs/p07_08_old_stag.mp3",
+      "status": 200,
+      "bytes": 15264,
+      "sha256": "a4aca10b1ad32fe2f31a8498056de2aa970244e8557c380276f9c5a2672e2920"
+    },
+    {
+      "path": "docs/scene06_lake_arrival/audio/cs/p08_01_animals.mp3",
+      "status": 200,
+      "bytes": 28800,
+      "sha256": "aebe344a25fb95acc7a4128b7edd84021d6b17e35cbc5fd33a35730915e39f12"
+    },
+    {
+      "path": "docs/scene06_lake_arrival/audio/cs/p08_02_freddie.mp3",
+      "status": 200,
+      "bytes": 11664,
+      "sha256": "cc047a66d8b92b2d05076835d15d7ee45c4b94a8c39894cece019f87b13f0d85"
+    },
+    {
+      "path": "docs/scene06_lake_arrival/audio/cs/p08_03_dotty.mp3",
+      "status": 200,
+      "bytes": 11232,
+      "sha256": "4e0fa6e6189b016bb0e1d95e7fb5d61f5af1f5482aac4a289d606ea4b6563485"
+    },
+    {
+      "path": "docs/scene06_lake_arrival/audio/cs/p08_04_ollie.mp3",
+      "status": 200,
+      "bytes": 20880,
+      "sha256": "a5323058ea6e9ab8b083e5c72191c9dad3a876c3c6d2176d7da479b68da7bab7"
+    },
+    {
+      "path": "docs/scene06_lake_arrival/audio/cs/p08_05_old_stag.mp3",
+      "status": 200,
+      "bytes": 31248,
+      "sha256": "fc994528d5aaa86c6b95e9eb13b4cf0a9f96684621a7dff8c1fa892e42747a8b"
+    },
+    {
+      "path": "docs/scene06_lake_arrival/audio/cs/p08_06_old_stag.mp3",
+      "status": 200,
+      "bytes": 15552,
+      "sha256": "63e07931d43501c7fc55857154bd448d7a34e0eeb837a25f2f57ccc45881023c"
+    },
+    {
+      "path": "docs/scene06_lake_arrival/audio/cs/p10_01_benji.mp3",
+      "status": 200,
+      "bytes": 20736,
+      "sha256": "8e6cead4028cacce5bf2fd8fdfc3f925fa1e6af5341d7be6988fd1a1458bedbc"
+    },
+    {
+      "path": "docs/scene06_lake_arrival/audio/cs/p10_02_old_stag.mp3",
+      "status": 200,
+      "bytes": 18432,
+      "sha256": "7b98052619fd6d301e2ab1dd7359ddf662f97d3a8a2ad49cf7d702b51177c32b"
+    },
+    {
+      "path": "docs/scene06_lake_arrival/audio/cs/p10_03_benji.mp3",
+      "status": 200,
+      "bytes": 13680,
+      "sha256": "a9c5fcafca5cbd04ff3af08bad46ed682925ec5dddea9ee5b88ac5152da69c8c"
+    },
+    {
+      "path": "docs/scene06_lake_arrival/audio/cs/p10_04_benji.mp3",
+      "status": 200,
+      "bytes": 24768,
+      "sha256": "7ded4c1740ae7579c61584821165ddf9a00dfc7057cc809d9dbf6b20672b5a9e"
+    },
+    {
+      "path": "docs/scene06_lake_arrival/audio/cs/p10_05_benji.mp3",
+      "status": 200,
+      "bytes": 16416,
+      "sha256": "6e5ea5930feccc231c8af9fa3adc1cb6cd60be21e41967fbd551ce02611aefe2"
+    },
+    {
+      "path": "docs/scene06_lake_arrival/audio/cs/p10_06_animals.mp3",
+      "status": 200,
+      "bytes": 36000,
+      "sha256": "a3027a3cd034c568b42d5927fde9aed701bb57e798e78c2372e362b102381383"
+    },
+    {
+      "path": "docs/scene06_lake_arrival/audio/en/01_benji.mp3",
+      "status": 200,
+      "bytes": 11232,
+      "sha256": "6aa73e1b593d3c1907d960c6aff5cf914d488650f8750f3ccd0348823fac807e"
+    },
+    {
+      "path": "docs/scene06_lake_arrival/audio/en/02_fiona.mp3",
+      "status": 200,
+      "bytes": 25776,
+      "sha256": "3323bfc014425aa9ce7829b3b0f3581de452d4cf9d803d58ddb73eff55cfe510"
+    },
+    {
+      "path": "docs/scene06_lake_arrival/audio/en/03_sunny.mp3",
+      "status": 200,
+      "bytes": 15984,
+      "sha256": "9c119126212daff29e404eae2a655524d06c57081349334ec71937ac410b1f71"
+    },
+    {
+      "path": "docs/scene06_lake_arrival/audio/en/04_bunny.mp3",
+      "status": 200,
+      "bytes": 16848,
+      "sha256": "57d2ea349007a4730eefd5a636b16e7467910fb64d7f51247d73f80a51f017c9"
+    },
+    {
+      "path": "docs/scene06_lake_arrival/audio/en/05_bruno.mp3",
+      "status": 200,
+      "bytes": 26208,
+      "sha256": "8ba1e35ac9e7f2a0ab2829b4e85ea83cf22d604b58014a697acc156374fcf4a3"
+    },
+    {
+      "path": "docs/scene06_lake_arrival/audio/en/06_sunny.mp3",
+      "status": 200,
+      "bytes": 25200,
+      "sha256": "aa4715f97fa96e0696e9d71e6d9c170a55c585b72affb1491f3ee422e43808f0"
+    },
+    {
+      "path": "docs/scene06_lake_arrival/audio/en/07_bunny.mp3",
+      "status": 200,
+      "bytes": 26064,
+      "sha256": "23fe53dc227f5b87abb597ee9f2f5da20dad9be9288afb519f0e6696a5aab54c"
+    },
+    {
+      "path": "docs/scene06_lake_arrival/audio/en/p02_01_ollie.mp3",
+      "status": 200,
+      "bytes": 14976,
+      "sha256": "b01b8fff9c01411a8b71b1f0e5c976e1e1f5b13b760d1e1eb1266da427533bc1"
+    },
+    {
+      "path": "docs/scene06_lake_arrival/audio/en/p02_02_bruno.mp3",
+      "status": 200,
+      "bytes": 13968,
+      "sha256": "1e3b695d40da8622e2d168db63a3d50718d984b871d78f00dc45e35b7e836224"
+    },
+    {
+      "path": "docs/scene06_lake_arrival/audio/en/p02_03_ollie.mp3",
+      "status": 200,
+      "bytes": 11232,
+      "sha256": "c331ca97ca7b34b4e3799185db0be17b1f10d6c1fd47a975967261ec1b1b47d5"
+    },
+    {
+      "path": "docs/scene06_lake_arrival/audio/en/p02_04_benji.mp3",
+      "status": 200,
+      "bytes": 14976,
+      "sha256": "21a29890e6fba202c52a34a8cbf138ede5ab3bf52cf8f334e62c5389a583e9ae"
+    },
+    {
+      "path": "docs/scene06_lake_arrival/audio/en/p02_05_fiona.mp3",
+      "status": 200,
+      "bytes": 25200,
+      "sha256": "8759a1f0c98522484f722af9555acb69ce63f2e21f08f74d3f8368dd2e2ddebd"
+    },
+    {
+      "path": "docs/scene06_lake_arrival/audio/en/p02_06_ollie.mp3",
+      "status": 200,
+      "bytes": 16848,
+      "sha256": "48c45bedde04e580137957a9f8d8f25cd20dd7a07344866c8e411922bde1452a"
+    },
+    {
+      "path": "docs/scene06_lake_arrival/audio/en/p02_07_sunny.mp3",
+      "status": 200,
+      "bytes": 15408,
+      "sha256": "c29cb8d06a1a92e196311f1da2f76659a665bdf5b66a07ed2153d75ef61560ae"
+    },
+    {
+      "path": "docs/scene06_lake_arrival/audio/en/p02_08_ollie.mp3",
+      "status": 200,
+      "bytes": 20736,
+      "sha256": "886cc5d6b0c8b37e0aa01e16c6cb6cb4c7eca160c4d9a56689816ddeb7042d3d"
+    },
+    {
+      "path": "docs/scene06_lake_arrival/audio/en/p02_09_ollie.mp3",
+      "status": 200,
+      "bytes": 12672,
+      "sha256": "18b7c96b3697e19f23cd558687cbff94ad5d5b5e828b54fdca67c5a3f3643358"
+    },
+    {
+      "path": "docs/scene06_lake_arrival/audio/en/p02_10_bunny.mp3",
+      "status": 200,
+      "bytes": 28512,
+      "sha256": "b89e926a33cb6301840dd99d3ac26503be88d8f14320e78c85f88e282cc4e4c0"
+    },
+    {
+      "path": "docs/scene06_lake_arrival/audio/en/p03_01_dotty.mp3",
+      "status": 200,
+      "bytes": 16992,
+      "sha256": "79392e27e0d402d5bcd649035752fac5e838c3053df8fae3b07c161d72fe6c21"
+    },
+    {
+      "path": "docs/scene06_lake_arrival/audio/en/p03_02_freddie.mp3",
+      "status": 200,
+      "bytes": 14544,
+      "sha256": "55c9d93dbb4c496abb2c728fb00fb9c877e5129576dd2df313cc2abc9439c245"
+    },
+    {
+      "path": "docs/scene06_lake_arrival/audio/en/p03_03_dotty.mp3",
+      "status": 200,
+      "bytes": 29376,
+      "sha256": "c856be24faf25f7658ff76d07a162e2490ebe4394711e6aa1f52cd7e4154a41f"
+    },
+    {
+      "path": "docs/scene06_lake_arrival/audio/en/p03_04_bunny.mp3",
+      "status": 200,
+      "bytes": 15552,
+      "sha256": "7d5f088c3da9960b65e325c3c000c8619cae5a420a50d0d3c5c63f891cc132ec"
+    },
+    {
+      "path": "docs/scene06_lake_arrival/audio/en/p03_05_freddie.mp3",
+      "status": 200,
+      "bytes": 16416,
+      "sha256": "6972f56555a8ddbff87d61153baff66b645bdb64961b26d77878ec8a5906f01d"
+    },
+    {
+      "path": "docs/scene06_lake_arrival/audio/en/p03_06_fiona.mp3",
+      "status": 200,
+      "bytes": 14400,
+      "sha256": "7b337975e4f184bc8de7ccc9a4a6d3ad28bd3d19110030832dc23b1f17b8393c"
+    },
+    {
+      "path": "docs/scene06_lake_arrival/audio/en/p03_07_dotty.mp3",
+      "status": 200,
+      "bytes": 23904,
+      "sha256": "3c4a0c2659e73940369c96a2996b245ba2504093f330500c965e69dc089a15f4"
+    },
+    {
+      "path": "docs/scene06_lake_arrival/audio/en/p03_08_freddie.mp3",
+      "status": 200,
+      "bytes": 14832,
+      "sha256": "cc2e8c37fcf8f46bcb4a82bca63625173a4a1b156201dfd0724c121189f6ec5c"
+    },
+    {
+      "path": "docs/scene06_lake_arrival/audio/en/p04_01_benji.mp3",
+      "status": 200,
+      "bytes": 15264,
+      "sha256": "19ed9f96c074835c1accb25338ee70bd7be7f42fabd065d884f670afdcbe74dc"
+    },
+    {
+      "path": "docs/scene06_lake_arrival/audio/en/p04_02_fiona.mp3",
+      "status": 200,
+      "bytes": 14400,
+      "sha256": "cbc1021d452bbbf051650f7c8bd7466ca5cf9610a3f4e46bcfd8163fc3cc8560"
+    },
+    {
+      "path": "docs/scene06_lake_arrival/audio/en/p04_03_sunny.mp3",
+      "status": 200,
+      "bytes": 15840,
+      "sha256": "7de309eb00b10212189cb8c1d516292a2042ac1cee2f47cfc2d20a847d59a0c9"
+    },
+    {
+      "path": "docs/scene06_lake_arrival/audio/en/p04_04_bruno.mp3",
+      "status": 200,
+      "bytes": 18720,
+      "sha256": "8b10a161c20329ceabeaff943699775dee8541f7400a3e2728302955fd2a9071"
+    },
+    {
+      "path": "docs/scene06_lake_arrival/audio/en/p04_05_benji.mp3",
+      "status": 200,
+      "bytes": 11232,
+      "sha256": "1bf7523e5470543d152fef6a813e8d20eb4e4e0fa8075e82ab85dcab1c7012d3"
+    },
+    {
+      "path": "docs/scene06_lake_arrival/audio/en/p04_06_bunny.mp3",
+      "status": 200,
+      "bytes": 14832,
+      "sha256": "26b3b0456d6f87ce151f326d7c9b2e80d081a71fd7c298752260745162c6d3b0"
+    },
+    {
+      "path": "docs/scene06_lake_arrival/audio/en/p04_07_fiona.mp3",
+      "status": 200,
+      "bytes": 25200,
+      "sha256": "1f0421e4e5aedcc220e3633a688242590486304ff6544ee99e7141ef53d6605d"
+    },
+    {
+      "path": "docs/scene06_lake_arrival/audio/en/p05_01_bunny.mp3",
+      "status": 200,
+      "bytes": 31680,
+      "sha256": "3f4e3905bd786da3f7c13b50c59a1262a6d876f11668b2d743f128bf2e7739df"
+    },
+    {
+      "path": "docs/scene06_lake_arrival/audio/en/p05_02_fiona.mp3",
+      "status": 200,
+      "bytes": 19152,
+      "sha256": "ae0c26a876e59c6913bc26b7193910d035835aafe301becbab9cde27af475d35"
+    },
+    {
+      "path": "docs/scene06_lake_arrival/audio/en/p05_03_sunny.mp3",
+      "status": 200,
+      "bytes": 14544,
+      "sha256": "34c832cfa4922f568e658e65bed6d72c525af097c8e621612307a9bc3ef70e06"
+    },
+    {
+      "path": "docs/scene06_lake_arrival/audio/en/p05_04_bunny.mp3",
+      "status": 200,
+      "bytes": 18288,
+      "sha256": "806946f4d1712a1fc4e7a88048f0d3be649d82bae84c7192dfa6857ceb118d64"
+    },
+    {
+      "path": "docs/scene06_lake_arrival/audio/en/p05_05_bruno.mp3",
+      "status": 200,
+      "bytes": 31824,
+      "sha256": "40ecfc931a6e27cc1eca09f54291e19b7c7ffa2e88c68638b3d40f2c3e59dfb9"
+    },
+    {
+      "path": "docs/scene06_lake_arrival/audio/en/p05_06_fiona.mp3",
+      "status": 200,
+      "bytes": 15408,
+      "sha256": "cdd5361c1e69f569ae230b03cfa5d444d5629817e655e3444cf413f9785ab459"
+    },
+    {
+      "path": "docs/scene06_lake_arrival/audio/en/p05_07_benji.mp3",
+      "status": 200,
+      "bytes": 13824,
+      "sha256": "9caff8ac3759c5bd1ba2d8c7e1d9a7213a36fb9f04b340540ed122245cc2e346"
+    },
+    {
+      "path": "docs/scene06_lake_arrival/audio/en/p06_01_old_stag.mp3",
+      "status": 200,
+      "bytes": 20448,
+      "sha256": "c0574d57b13b3a3308fbaf09a77107b6873b847cad77a46701f6f965104a665e"
+    },
+    {
+      "path": "docs/scene06_lake_arrival/audio/en/p06_02_animals.mp3",
+      "status": 200,
+      "bytes": 16848,
+      "sha256": "90e2e6fd6cae5b1eb7f78a4cc81d0116a317277c201299a3dcc61d29e795cb8e"
+    },
+    {
+      "path": "docs/scene06_lake_arrival/audio/en/p06_03_old_stag.mp3",
+      "status": 200,
+      "bytes": 30240,
+      "sha256": "ec3c5a5baf6185d7402445a660769c7176a17b2e539183d42fb7806bafddee73"
+    },
+    {
+      "path": "docs/scene06_lake_arrival/audio/en/p06_04_fiona.mp3",
+      "status": 200,
+      "bytes": 11952,
+      "sha256": "846ddff8afc94a8c2890c1c88e675a56a09464752aaa203c172e543acc9ad02c"
+    },
+    {
+      "path": "docs/scene06_lake_arrival/audio/en/p06_05_old_stag.mp3",
+      "status": 200,
+      "bytes": 21888,
+      "sha256": "f11e643b7932a39e16718b83229fd330b4be520ced04ccd469cfc4e478dccab6"
+    },
+    {
+      "path": "docs/scene06_lake_arrival/audio/en/p06_06_bunny.mp3",
+      "status": 200,
+      "bytes": 15840,
+      "sha256": "7630ae39098aa944fbd635ea94bbb07dea3e31b8ab7b7e3f8073ea66dca214bd"
+    },
+    {
+      "path": "docs/scene06_lake_arrival/audio/en/p06_07_old_stag.mp3",
+      "status": 200,
+      "bytes": 25776,
+      "sha256": "9d3965376e193a8173d7afa7cdcb565e448cbc79e88cda4bb51e4e1e47b73d42"
+    },
+    {
+      "path": "docs/scene06_lake_arrival/audio/en/p06_08_old_stag.mp3",
+      "status": 200,
+      "bytes": 16560,
+      "sha256": "67e380a5faa388bd5e88acc2292dad3f646a2785ed898f2e03ca6cad9770055d"
+    },
+    {
+      "path": "docs/scene06_lake_arrival/audio/en/p07_01_logan.mp3",
+      "status": 200,
+      "bytes": 31104,
+      "sha256": "2c36bd97c4e73f13e71161323d8f287886b35f3925dbfd0ffa621baaffd46f24"
+    },
+    {
+      "path": "docs/scene06_lake_arrival/audio/en/p07_02_woodpecker.mp3",
+      "status": 200,
+      "bytes": 11232,
+      "sha256": "c1499d51e1c98ba63d0f848d7e09c94bd7c133bd2852c0486b28d10eeb813d5b"
+    },
+    {
+      "path": "docs/scene06_lake_arrival/audio/en/p07_03_logan.mp3",
+      "status": 200,
+      "bytes": 26352,
+      "sha256": "a99bcac151aaaba03fc085818b8c196aee124e534844ae138489dcbf54f31c75"
+    },
+    {
+      "path": "docs/scene06_lake_arrival/audio/en/p07_04_fiona.mp3",
+      "status": 200,
+      "bytes": 15408,
+      "sha256": "b7091607a002c77abb7a780ff30e84cf699f6e08cc5c1a4a5550ecc2988c1ad3"
+    },
+    {
+      "path": "docs/scene06_lake_arrival/audio/en/p07_05_logan.mp3",
+      "status": 200,
+      "bytes": 37296,
+      "sha256": "f4032e65429c31578b20fb6842345f3ec350083f604a33b8f861d1bc966b8a6c"
+    },
+    {
+      "path": "docs/scene06_lake_arrival/audio/en/p07_06_bruno.mp3",
+      "status": 200,
+      "bytes": 14832,
+      "sha256": "7c8dcb38cf8e108800c79d9b489471b8fe255bc3cddbe7811d3425e68288c7f0"
+    },
+    {
+      "path": "docs/scene06_lake_arrival/audio/en/p07_07_logan.mp3",
+      "status": 200,
+      "bytes": 35856,
+      "sha256": "c1d67958336b40511ff8fff6c0d91e3f8f8d41bc2c83fdfa424601810e7a0513"
+    },
+    {
+      "path": "docs/scene06_lake_arrival/audio/en/p07_08_old_stag.mp3",
+      "status": 200,
+      "bytes": 14976,
+      "sha256": "a538c551e7a2beba476f878fec0a0ecba958c53d79d40a0667483ae14b1c0a77"
+    },
+    {
+      "path": "docs/scene06_lake_arrival/audio/en/p08_01_animals.mp3",
+      "status": 200,
+      "bytes": 14832,
+      "sha256": "d5bee676a1c3efa27ca75dfb6d89b28f58d49d8ac1b6a9f903b98b4c0402bf47"
+    },
+    {
+      "path": "docs/scene06_lake_arrival/audio/en/p08_02_freddie.mp3",
+      "status": 200,
+      "bytes": 11376,
+      "sha256": "0f188d30636150f1c30425a654efb65eab5382572a097312337bc37b85e897e9"
+    },
+    {
+      "path": "docs/scene06_lake_arrival/audio/en/p08_03_dotty.mp3",
+      "status": 200,
+      "bytes": 11232,
+      "sha256": "3607906a5170c2905ca81c2e23be5f688be4d93e669c9a7255084172e3b262e0"
+    },
+    {
+      "path": "docs/scene06_lake_arrival/audio/en/p08_04_ollie.mp3",
+      "status": 200,
+      "bytes": 11232,
+      "sha256": "03da23a83f5baa048f49b2bbc141af2aa4a6b62178ae08eeb8ceee1509ad005a"
+    },
+    {
+      "path": "docs/scene06_lake_arrival/audio/en/p08_05_old_stag.mp3",
+      "status": 200,
+      "bytes": 29088,
+      "sha256": "4bce132e25eb8c9163193b5d62a335f8d74d8cd8a9a79e90e5b1ce19f752b6d3"
+    },
+    {
+      "path": "docs/scene06_lake_arrival/audio/en/p08_06_old_stag.mp3",
+      "status": 200,
+      "bytes": 14400,
+      "sha256": "d793f75ec1486938d81c0568b400426e6348d1ee43e9e4abd6c208075f923a50"
+    },
+    {
+      "path": "docs/scene06_lake_arrival/audio/en/p10_01_benji.mp3",
+      "status": 200,
+      "bytes": 12672,
+      "sha256": "273a102cbae0aef153569475a71953933eee25c0fa96b2bf62006be4b2868b6f"
+    },
+    {
+      "path": "docs/scene06_lake_arrival/audio/en/p10_02_old_stag.mp3",
+      "status": 200,
+      "bytes": 15264,
+      "sha256": "ae6792886f5348271cc1033d4cd8d7974d27741756335ce574f3c796af67f57a"
+    },
+    {
+      "path": "docs/scene06_lake_arrival/audio/en/p10_03_benji.mp3",
+      "status": 200,
+      "bytes": 11376,
+      "sha256": "eba14cc9c97437403104e44357f6b3364dce61e97b4dc1096960a57b777d6e65"
+    },
+    {
+      "path": "docs/scene06_lake_arrival/audio/en/p10_04_benji.mp3",
+      "status": 200,
+      "bytes": 16128,
+      "sha256": "ca4c1c3d0bc35dbd89a8da3a7e6301bb2f540bbcfe0655a1d171ad75dde08d23"
+    },
+    {
+      "path": "docs/scene06_lake_arrival/audio/en/p10_05_benji.mp3",
+      "status": 200,
+      "bytes": 11232,
+      "sha256": "185d1c0ad14e2e774313d601f68e801d0c30b14957b274b4cf3fffd3174bd214"
+    },
+    {
+      "path": "docs/scene06_lake_arrival/audio/en/p10_06_animals.mp3",
+      "status": 200,
+      "bytes": 18720,
+      "sha256": "e986383b368612e939369ce8a871250da43d6495d740b560be838c4a81f21d97"
+    },
+    {
+      "path": "docs/scene06_lake_arrival/audio/vocabulary/cs/v01.mp3",
+      "status": 200,
+      "bytes": 11808,
+      "sha256": "e675fd06b62fd08406cf2461a2e9586b9d5497eeb4f90e196c7f5a970213c91e"
+    },
+    {
+      "path": "docs/scene06_lake_arrival/audio/vocabulary/cs/v02.mp3",
+      "status": 200,
+      "bytes": 10512,
+      "sha256": "a39057f618c6b3dd434d65044625f20f5dac8840d13b119af192e23faef83386"
+    },
+    {
+      "path": "docs/scene06_lake_arrival/audio/vocabulary/cs/v03.mp3",
+      "status": 200,
+      "bytes": 9504,
+      "sha256": "869c7ae3b171d4c311c21d32bef8bbed35f563159ff1dcfea2ad7a90130b44a1"
+    },
+    {
+      "path": "docs/scene06_lake_arrival/audio/vocabulary/cs/v04.mp3",
+      "status": 200,
+      "bytes": 9216,
+      "sha256": "3504d42f837087226cfade5087f5e6578efd7e62f133038744719bea101ee9fd"
+    },
+    {
+      "path": "docs/scene06_lake_arrival/audio/vocabulary/cs/v05.mp3",
+      "status": 200,
+      "bytes": 11232,
+      "sha256": "25f12783f79d7f0fd604a9598f26f2b0ab5463b5e040bde02b06a2cfd56e70e9"
+    },
+    {
+      "path": "docs/scene06_lake_arrival/audio/vocabulary/cs/v06.mp3",
+      "status": 200,
+      "bytes": 10656,
+      "sha256": "05ca045d9474fd04b6efb415df31c376d18850ba288ae309ca4d930d5c8a3341"
+    },
+    {
+      "path": "docs/scene06_lake_arrival/audio/vocabulary/cs/v07.mp3",
+      "status": 200,
+      "bytes": 11232,
+      "sha256": "d5f60ea95943dc5af813f5b11a29d30f9b85c216ddb20b0dec41da9d896c46d9"
+    },
+    {
+      "path": "docs/scene06_lake_arrival/audio/vocabulary/cs/v08.mp3",
+      "status": 200,
+      "bytes": 13248,
+      "sha256": "54606521fd51389856dc088011cb581f3a9d84cdee6eb6c4d4e1d27ef3afa297"
+    },
+    {
+      "path": "docs/scene06_lake_arrival/audio/vocabulary/cs/v09.mp3",
+      "status": 200,
+      "bytes": 11232,
+      "sha256": "8dc701fd92e0817da92769364a9c9190b31c65f6d407aae04f855f472dcb0f18"
+    },
+    {
+      "path": "docs/scene06_lake_arrival/audio/vocabulary/cs/v10.mp3",
+      "status": 200,
+      "bytes": 10656,
+      "sha256": "9b36085fbc4dc696c713e7853e0dd4534a525a6991be1eed2b4123a6bd94dd79"
+    },
+    {
+      "path": "docs/scene06_lake_arrival/audio/vocabulary/cs/v11.mp3",
+      "status": 200,
+      "bytes": 12672,
+      "sha256": "60f001faa2d0e3a34b1dd196a59c4c50da11526bd56c5920c2b30bb0fef6561c"
+    },
+    {
+      "path": "docs/scene06_lake_arrival/audio/vocabulary/cs/v12.mp3",
+      "status": 200,
+      "bytes": 11232,
+      "sha256": "c164c3d9aaaaa83d4812531dbf1e559e784a5e47c77c8ec42ebd054e1972b8b6"
+    },
+    {
+      "path": "docs/scene06_lake_arrival/audio/vocabulary/cs/v13.mp3",
+      "status": 200,
+      "bytes": 10224,
+      "sha256": "4542e1e278b07b7696c28a99c08be9bcef609f12e3e9155c12a75ab8a50c3cd1"
+    },
+    {
+      "path": "docs/scene06_lake_arrival/audio/vocabulary/cs/v14.mp3",
+      "status": 200,
+      "bytes": 11232,
+      "sha256": "8e7d1a07df9a90752c06deba0e8197f2654b806069b7f9df6ece5c5a34e19b7c"
+    },
+    {
+      "path": "docs/scene06_lake_arrival/audio/vocabulary/cs/v15.mp3",
+      "status": 200,
+      "bytes": 9072,
+      "sha256": "f8503ff2fbf5180f1beaa96cd857cc41ebd22a27ca80818cfb7860c6e3dd8503"
+    },
+    {
+      "path": "docs/scene06_lake_arrival/audio/vocabulary/cs/v16.mp3",
+      "status": 200,
+      "bytes": 13248,
+      "sha256": "2f611992c444783d0db124b83dcb43c765e18d77599b1d7dfbeb86b8391cd8ae"
+    },
+    {
+      "path": "docs/scene06_lake_arrival/audio/vocabulary/cs/v17.mp3",
+      "status": 200,
+      "bytes": 11232,
+      "sha256": "beb616ea06946797f4aeae77286194677ded5ed53d09eac568a8cac0e3176b0a"
+    },
+    {
+      "path": "docs/scene06_lake_arrival/audio/vocabulary/cs/v18.mp3",
+      "status": 200,
+      "bytes": 10656,
+      "sha256": "512a3ad0338b01c6c4256c939fef4198a60df20316757c8a715cdc2ad808bdf0"
+    },
+    {
+      "path": "docs/scene06_lake_arrival/audio/vocabulary/cs/v19.mp3",
+      "status": 200,
+      "bytes": 15408,
+      "sha256": "91969fab8f4caed8d003d7e3209a9fe46de9598f046707f14ab2bc7b1be6801e"
+    },
+    {
+      "path": "docs/scene06_lake_arrival/audio/vocabulary/cs/v20.mp3",
+      "status": 200,
+      "bytes": 11232,
+      "sha256": "abb401bd1b9320240c83cd8105b483a4cc4ee56a896d90ea5982c0d4dea9adf6"
+    },
+    {
+      "path": "docs/scene06_lake_arrival/audio/vocabulary/cs/v21.mp3",
+      "status": 200,
+      "bytes": 12528,
+      "sha256": "9b3a3c9808e5220a4ef81f1cf5dee06d707a1942b1f5a9fd8004fd4f70a039fa"
+    },
+    {
+      "path": "docs/scene06_lake_arrival/audio/vocabulary/cs/v22.mp3",
+      "status": 200,
+      "bytes": 11232,
+      "sha256": "f39959a35cc0595f804d21655554309488de20d3130338f5a20ff6733af84ca0"
+    },
+    {
+      "path": "docs/scene06_lake_arrival/audio/vocabulary/cs/v23.mp3",
+      "status": 200,
+      "bytes": 13392,
+      "sha256": "238c622ce0ddcedc0ceef27a417cd0aed1145c2cb663dea0ad9cf4e68af7d86f"
+    },
+    {
+      "path": "docs/scene06_lake_arrival/audio/vocabulary/cs/v24.mp3",
+      "status": 200,
+      "bytes": 11376,
+      "sha256": "3d118dd9ae44cac32d6793b78e30f0ed83f78e423b6688043e43666b121fc4fa"
+    },
+    {
+      "path": "docs/scene06_lake_arrival/audio/vocabulary/cs/v25.mp3",
+      "status": 200,
+      "bytes": 11808,
+      "sha256": "a8012d8b45ee0c2f1415a46fc995b45903c1246e0e9a278041914def726a5383"
+    },
+    {
+      "path": "docs/scene06_lake_arrival/audio/vocabulary/cs/v26.mp3",
+      "status": 200,
+      "bytes": 11376,
+      "sha256": "e6e0bebe2f0a4f2bd5e809de247ec8b5acc8dfadd7be20a34b9e7febc2577fc8"
+    },
+    {
+      "path": "docs/scene06_lake_arrival/audio/vocabulary/cs/v27.mp3",
+      "status": 200,
+      "bytes": 11232,
+      "sha256": "b77e301073235c3dde4d52112566d12f0da6f6acbbdff616c540d07f3dbad3fb"
+    },
+    {
+      "path": "docs/scene06_lake_arrival/audio/vocabulary/cs/v28.mp3",
+      "status": 200,
+      "bytes": 11232,
+      "sha256": "2adcb9059c5d154aee0470690171d881290274d6068302f1700a026219ec3784"
+    },
+    {
+      "path": "docs/scene06_lake_arrival/audio/vocabulary/cs/v29.mp3",
+      "status": 200,
+      "bytes": 11232,
+      "sha256": "e5617f1e7455ec7826933c2837f12bce1d4b56465cc558c7d0518c7739e139a2"
+    },
+    {
+      "path": "docs/scene06_lake_arrival/audio/vocabulary/cs/v30.mp3",
+      "status": 200,
+      "bytes": 12528,
+      "sha256": "9ae04301a85191a0a220ae4e13cc7a98b97f5dd17411808e6e8e021e7e0bc580"
+    },
+    {
+      "path": "docs/scene06_lake_arrival/audio/vocabulary/cs/v31.mp3",
+      "status": 200,
+      "bytes": 11232,
+      "sha256": "24cca4831df871639a42bf3311aceac9939e4492e478c7e0b7084b95ff0a5d3e"
+    },
+    {
+      "path": "docs/scene06_lake_arrival/audio/vocabulary/cs/v32.mp3",
+      "status": 200,
+      "bytes": 10656,
+      "sha256": "74e6204155b79cb42938e9e66811bc8a963b498d8de1a07454328ea525c24173"
+    },
+    {
+      "path": "docs/scene06_lake_arrival/audio/vocabulary/cs/v33.mp3",
+      "status": 200,
+      "bytes": 11232,
+      "sha256": "ba0179ebc1d6d0371b7d856d26860a22e93af3a58581bd3392a5eb7cbc2f8511"
+    },
+    {
+      "path": "docs/scene06_lake_arrival/audio/vocabulary/cs/v34.mp3",
+      "status": 200,
+      "bytes": 11664,
+      "sha256": "d2cad12a2e0a1960601a49d43ff53d74eb89b76ab9746820d588811b5fcf5dbd"
+    },
+    {
+      "path": "docs/scene06_lake_arrival/audio/vocabulary/cs/v35.mp3",
+      "status": 200,
+      "bytes": 11232,
+      "sha256": "b197bbddeade22b42379008a39f0f501262c0deef62e875450132b4b2cc8a68c"
+    },
+    {
+      "path": "docs/scene06_lake_arrival/audio/vocabulary/cs/v36.mp3",
+      "status": 200,
+      "bytes": 10800,
+      "sha256": "f4dd9851a472ca8ae7304b94edf048857aedfdd36d3d0deaeb0dc017fbca32b3"
+    },
+    {
+      "path": "docs/scene06_lake_arrival/audio/vocabulary/cs/v37.mp3",
+      "status": 200,
+      "bytes": 11232,
+      "sha256": "ec3f83035e5363b8ea62b03d38e04fa3e516f45861865a214369bb7a500801a0"
+    },
+    {
+      "path": "docs/scene06_lake_arrival/audio/vocabulary/cs/v38.mp3",
+      "status": 200,
+      "bytes": 12240,
+      "sha256": "9a1c47b39fc8b0ff61cae1a5b436567362a545a035bf521287abeba09a8df48f"
+    },
+    {
+      "path": "docs/scene06_lake_arrival/audio/vocabulary/cs/v39.mp3",
+      "status": 200,
+      "bytes": 11232,
+      "sha256": "883e4dbac357eda7de704639bf3ec63f61e1262b0b6fe7a9846f98227ed5ff8d"
+    },
+    {
+      "path": "docs/scene06_lake_arrival/audio/vocabulary/cs/v40.mp3",
+      "status": 200,
+      "bytes": 10944,
+      "sha256": "01d737c983558ff6c57d488fb765ee9d1c2748fb8b23dbf20c9a05b76732be15"
+    },
+    {
+      "path": "docs/scene06_lake_arrival/audio/vocabulary/cs/v41.mp3",
+      "status": 200,
+      "bytes": 12096,
+      "sha256": "924a7a260ce6fbd68bb7ef08254d41445cd6ab816708a1e267ddd810d272bc04"
+    },
+    {
+      "path": "docs/scene06_lake_arrival/audio/vocabulary/cs/v42.mp3",
+      "status": 200,
+      "bytes": 10656,
+      "sha256": "beee913c7cffc60272b8bc47972deb915d157ee912f67a6cb1091aacceb5b47a"
+    },
+    {
+      "path": "docs/scene06_lake_arrival/audio/vocabulary/cs/v43.mp3",
+      "status": 200,
+      "bytes": 11664,
+      "sha256": "d7da0363f76d92dfd82258f8fdf421edd9ef76e01096071430e81f3b1ae377cf"
+    },
+    {
+      "path": "docs/scene06_lake_arrival/audio/vocabulary/cs/v44.mp3",
+      "status": 200,
+      "bytes": 11232,
+      "sha256": "cad1726d61713e2754cafb5f3fc65c33358772f3ac64857bc887bd2d056f29de"
+    },
+    {
+      "path": "docs/scene06_lake_arrival/audio/vocabulary/cs/v45.mp3",
+      "status": 200,
+      "bytes": 11232,
+      "sha256": "285ed82b942e02457b35560460e094ca63de85237a4b1834f13e9dade775db5e"
+    },
+    {
+      "path": "docs/scene06_lake_arrival/audio/vocabulary/cs/v46.mp3",
+      "status": 200,
+      "bytes": 11232,
+      "sha256": "1cf5df60d78b02414014fd0bb01e5104994b1ab382f3009949d14ebe285884b7"
+    },
+    {
+      "path": "docs/scene06_lake_arrival/audio/vocabulary/cs/v47.mp3",
+      "status": 200,
+      "bytes": 11664,
+      "sha256": "4aa45489dda54290526aed0ee10bd4cba4346b3410b84b62b238bded6de06ea3"
+    },
+    {
+      "path": "docs/scene06_lake_arrival/audio/vocabulary/cs/v48.mp3",
+      "status": 200,
+      "bytes": 11232,
+      "sha256": "fe8d2746925563a00680eb4e73999d6224838d3dc722f271abd753ecb94d17db"
+    },
+    {
+      "path": "docs/scene06_lake_arrival/audio/vocabulary/cs/v49.mp3",
+      "status": 200,
+      "bytes": 12384,
+      "sha256": "2e0670b180b77c7c0ce6e9a6015fa7929327a22c379f06c94d1ce2da0659f5e9"
+    },
+    {
+      "path": "docs/scene06_lake_arrival/audio/vocabulary/cs/v50.mp3",
+      "status": 200,
+      "bytes": 10656,
+      "sha256": "0ef78ce54f22ec980e703a1c137c2c56e605af482ae4bf606629bcafda1f85e8"
+    },
+    {
+      "path": "docs/scene06_lake_arrival/audio/vocabulary/cs/v51.mp3",
+      "status": 200,
+      "bytes": 11232,
+      "sha256": "f56fc18dac6146d765aa194561880ae30d012315e5cb4866e63c5b826f34c858"
+    },
+    {
+      "path": "docs/scene06_lake_arrival/audio/vocabulary/cs/v52.mp3",
+      "status": 200,
+      "bytes": 10656,
+      "sha256": "de67a309a8642800ca05ac63b909538f3573a804fa2d48c2ad559d37abd2a3e4"
+    },
+    {
+      "path": "docs/scene06_lake_arrival/audio/vocabulary/cs/v53.mp3",
+      "status": 200,
+      "bytes": 10080,
+      "sha256": "01cc7890444f235f140eb69339bccab39c51eb50437899c59cdde08c5da9e9c4"
+    },
+    {
+      "path": "docs/scene06_lake_arrival/audio/vocabulary/cs/v54.mp3",
+      "status": 200,
+      "bytes": 11232,
+      "sha256": "c722e5b66bbc8cc331772a8f7fff5352fe0f88917deaf12fa68b2d9a01ce87f9"
+    },
+    {
+      "path": "docs/scene06_lake_arrival/audio/vocabulary/cs/v55.mp3",
+      "status": 200,
+      "bytes": 11232,
+      "sha256": "0b0075746c23c8affedb99e7583731b51bd5c3fd2546d0c1cc91c0baadd9b9be"
+    },
+    {
+      "path": "docs/scene06_lake_arrival/audio/vocabulary/cs/v56.mp3",
+      "status": 200,
+      "bytes": 12960,
+      "sha256": "6a9eb170780ec6f47ec2254508d8cf18793c2fff6d5974e20b5080e5ef6c0c76"
+    },
+    {
+      "path": "docs/scene06_lake_arrival/audio/vocabulary/cs/v57.mp3",
+      "status": 200,
+      "bytes": 11232,
+      "sha256": "ef3482e36bef0e6d71fdc09c60c6ce54c4a75e323cd46a2b83eb5bebeed0f4c0"
+    },
+    {
+      "path": "docs/scene06_lake_arrival/audio/vocabulary/cs/v58.mp3",
+      "status": 200,
+      "bytes": 11232,
+      "sha256": "fdf0ac330405b6acdd9abecc26f1da010c978b793f65ee2120462965a4227347"
+    },
+    {
+      "path": "docs/scene06_lake_arrival/audio/vocabulary/cs/v59.mp3",
+      "status": 200,
+      "bytes": 11232,
+      "sha256": "97ac63d3faac62e188fc1aee59c41160e4ac3738e46dd9101e7d68dd5d75784f"
+    },
+    {
+      "path": "docs/scene06_lake_arrival/audio/vocabulary/cs/v60.mp3",
+      "status": 200,
+      "bytes": 11520,
+      "sha256": "009d8a332352031114fb7394dd3abd69c42414be6db636655571d0e5ea1917ac"
+    },
+    {
+      "path": "docs/scene06_lake_arrival/audio/vocabulary/cs/v61.mp3",
+      "status": 200,
+      "bytes": 11232,
+      "sha256": "b50898eda47de2b53a89f163232165b0bed901709c81888ad625df7bac9a18be"
+    },
+    {
+      "path": "docs/scene06_lake_arrival/audio/vocabulary/cs/v62.mp3",
+      "status": 200,
+      "bytes": 11232,
+      "sha256": "9c2d668de6dd13fc5df29ac40662c514e089f111d9ae0019a9cb03236427dbcf"
+    },
+    {
+      "path": "docs/scene06_lake_arrival/audio/vocabulary/cs/v63.mp3",
+      "status": 200,
+      "bytes": 13680,
+      "sha256": "b7c68039de89389a1235780c21eeba85c50fb8b76b40ab8222a486dadca6cdb3"
+    },
+    {
+      "path": "docs/scene06_lake_arrival/audio/vocabulary/cs/v64.mp3",
+      "status": 200,
+      "bytes": 14832,
+      "sha256": "f8fa01fdeb09d25e671effceb04baae1c943222713b55910e063d9228574e6ba"
+    },
+    {
+      "path": "docs/scene06_lake_arrival/audio/vocabulary/cs/v65.mp3",
+      "status": 200,
+      "bytes": 11232,
+      "sha256": "c2bdf82d55d9960598feaaf4b4c08ef1b36e6711260a2cb2fdbe5b1e941dbc35"
+    },
+    {
+      "path": "docs/scene06_lake_arrival/audio/vocabulary/cs/v66.mp3",
+      "status": 200,
+      "bytes": 11232,
+      "sha256": "4023ab064cd5fb4320deab4e9dcf1b0bf15acdaa2a31b7a9dd9f2cdf8e730345"
+    },
+    {
+      "path": "docs/scene06_lake_arrival/audio/vocabulary/cs/v67.mp3",
+      "status": 200,
+      "bytes": 11808,
+      "sha256": "44492de7977a6eac42985039028a57342fa4e3b060053c5fa2a5999246a7d8a3"
+    },
+    {
+      "path": "docs/scene06_lake_arrival/audio/vocabulary/cs/v68.mp3",
+      "status": 200,
+      "bytes": 11520,
+      "sha256": "ff3318499d5485fd1c40fb254f820fbcce4465e33ee5ee5655a99c1b06655a6e"
+    },
+    {
+      "path": "docs/scene06_lake_arrival/audio/vocabulary/cs/v69.mp3",
+      "status": 200,
+      "bytes": 14832,
+      "sha256": "558d018607b88aeb957b8a58c58d62ca80b9eef585c66df078b2f87390c68eef"
+    },
+    {
+      "path": "docs/scene06_lake_arrival/audio/vocabulary/cs/v70.mp3",
+      "status": 200,
+      "bytes": 10080,
+      "sha256": "ff13b66126e76bd704d5ff77243e56937d33072d69688a30463f8ff992af25ae"
+    },
+    {
+      "path": "docs/scene06_lake_arrival/audio/vocabulary/cs/v71.mp3",
+      "status": 200,
+      "bytes": 11232,
+      "sha256": "b1c50c18c7e0a7adb11e8f2dc4ce738b68f7c784807ae721d53c53f36d97c37c"
+    },
+    {
+      "path": "docs/scene06_lake_arrival/audio/vocabulary/cs/v72.mp3",
+      "status": 200,
+      "bytes": 11808,
+      "sha256": "6d27815493e5d35f6871f24978bf8e841dc890a5f94b94dbfc342c4540d43f85"
+    },
+    {
+      "path": "docs/scene06_lake_arrival/audio/vocabulary/cs/v73.mp3",
+      "status": 200,
+      "bytes": 11232,
+      "sha256": "921661bf3f8dec4f4039b21877100a9b5cc4b55a1110aeeb1657ff3e36dc018e"
+    },
+    {
+      "path": "docs/scene06_lake_arrival/audio/vocabulary/cs/v74.mp3",
+      "status": 200,
+      "bytes": 11232,
+      "sha256": "d8ac9b2fd98e0dc6ef9c2da19f690ef58bb87c9e01d4dd14dfa0f63eeb41e2c2"
+    },
+    {
+      "path": "docs/scene06_lake_arrival/audio/vocabulary/cs/v75.mp3",
+      "status": 200,
+      "bytes": 11232,
+      "sha256": "49f17db82f20c36bbe34f1bf8adc12d8e4f7880dd105ab66c43bbe992d37214c"
+    },
+    {
+      "path": "docs/scene06_lake_arrival/audio/vocabulary/cs/v76.mp3",
+      "status": 200,
+      "bytes": 11232,
+      "sha256": "7b80b51fa76456c65a4f0fc56d8252028f6765b025992dbfbc84b2b65078dda5"
+    },
+    {
+      "path": "docs/scene06_lake_arrival/audio/vocabulary/cs/v77.mp3",
+      "status": 200,
+      "bytes": 11088,
+      "sha256": "98a8437ed6129e4e2e1507c1ed062fb0b2d7fc575706a065ca48f85fb017b717"
+    },
+    {
+      "path": "docs/scene06_lake_arrival/audio/vocabulary/en/v01.mp3",
+      "status": 200,
+      "bytes": 11232,
+      "sha256": "74015917563701c204e5e1481323f0de6ea43203d2b5613b065754670a078b4e"
+    },
+    {
+      "path": "docs/scene06_lake_arrival/audio/vocabulary/en/v02.mp3",
+      "status": 200,
+      "bytes": 4752,
+      "sha256": "94140d9c1d31eaf8fe8fa7cb61b160c7eacffdc6b946851153fc5c08f3289f33"
+    },
+    {
+      "path": "docs/scene06_lake_arrival/audio/vocabulary/en/v03.mp3",
+      "status": 200,
+      "bytes": 11232,
+      "sha256": "13b55836b73af7e042e74f7ea59ee2bef69c47194337504f4f95c5069f58c623"
+    },
+    {
+      "path": "docs/scene06_lake_arrival/audio/vocabulary/en/v04.mp3",
+      "status": 200,
+      "bytes": 4896,
+      "sha256": "ef123792ebd290a209d3a9ac4839742fd7ddbc7876faacf03048c22b1a52daf2"
+    },
+    {
+      "path": "docs/scene06_lake_arrival/audio/vocabulary/en/v05.mp3",
+      "status": 200,
+      "bytes": 11232,
+      "sha256": "3bcdf750f3d5dae4f29e91195f626951e64f2da8ad3beee3d8549a5568436acf"
+    },
+    {
+      "path": "docs/scene06_lake_arrival/audio/vocabulary/en/v06.mp3",
+      "status": 200,
+      "bytes": 11232,
+      "sha256": "b302ad1a8728313db48f7d282e67e7eace321fd7d286f149e6e845ff819c6975"
+    },
+    {
+      "path": "docs/scene06_lake_arrival/audio/vocabulary/en/v07.mp3",
+      "status": 200,
+      "bytes": 5040,
+      "sha256": "12572c360e489a5418b77688051f155a4c150317fae228299a47ef6b1abe17b9"
+    },
+    {
+      "path": "docs/scene06_lake_arrival/audio/vocabulary/en/v08.mp3",
+      "status": 200,
+      "bytes": 11232,
+      "sha256": "4145ec5a2e25edd138a3480c35015171c0c469530c1f49e3e52facf390b3f4d8"
+    },
+    {
+      "path": "docs/scene06_lake_arrival/audio/vocabulary/en/v09.mp3",
+      "status": 200,
+      "bytes": 11232,
+      "sha256": "66aa46a596d1eeb31cf4b4e796c5113fcfa4ebf2a1b9e2b394a33b1ed3deb3b2"
+    },
+    {
+      "path": "docs/scene06_lake_arrival/audio/vocabulary/en/v10.mp3",
+      "status": 200,
+      "bytes": 11232,
+      "sha256": "5591090266e61631e89f16cef701ca0c7187e6a497dd9d8dd9ac0e57e5af1692"
+    },
+    {
+      "path": "docs/scene06_lake_arrival/audio/vocabulary/en/v11.mp3",
+      "status": 200,
+      "bytes": 5040,
+      "sha256": "b5e6ca357fa3d59cfa81470530b6a1e5eb6d15b7fb2bfecae966950b283b19c5"
+    },
+    {
+      "path": "docs/scene06_lake_arrival/audio/vocabulary/en/v12.mp3",
+      "status": 200,
+      "bytes": 5040,
+      "sha256": "714b629fd8ffecc8703bfa2428d72e3b8eb68172e89777b8b60712af1a11c057"
+    },
+    {
+      "path": "docs/scene06_lake_arrival/audio/vocabulary/en/v13.mp3",
+      "status": 200,
+      "bytes": 11232,
+      "sha256": "2fe7ce85de3e719f0e42f0813d4e51da92122f67570cf528242ff5d40b2b5f1e"
+    },
+    {
+      "path": "docs/scene06_lake_arrival/audio/vocabulary/en/v14.mp3",
+      "status": 200,
+      "bytes": 11232,
+      "sha256": "1a7ff2c40bf5c8c619f986f610c158fac732f49375a0e58fc8a0ee8bdf2930d3"
+    },
+    {
+      "path": "docs/scene06_lake_arrival/audio/vocabulary/en/v15.mp3",
+      "status": 200,
+      "bytes": 5040,
+      "sha256": "4a22a0a726f6733b8a24a8513fe9f7cf564628ab378acde1adb723fe10fec61f"
+    },
+    {
+      "path": "docs/scene06_lake_arrival/audio/vocabulary/en/v16.mp3",
+      "status": 200,
+      "bytes": 11232,
+      "sha256": "b9b1211c9bcff373366af8cbe256cc2ad3f1761b140d152940e579aeaec1e907"
+    },
+    {
+      "path": "docs/scene06_lake_arrival/audio/vocabulary/en/v17.mp3",
+      "status": 200,
+      "bytes": 11232,
+      "sha256": "5b39ee8839aa2d1a44828e9969cf443170665b68bf27b5a1d73eefd6830ca252"
+    },
+    {
+      "path": "docs/scene06_lake_arrival/audio/vocabulary/en/v18.mp3",
+      "status": 200,
+      "bytes": 5040,
+      "sha256": "f9ec1d57c813a6fe3f5f73901db551aae3c945d871d9020b8cb7e038eb18aec8"
+    },
+    {
+      "path": "docs/scene06_lake_arrival/audio/vocabulary/en/v19.mp3",
+      "status": 200,
+      "bytes": 11232,
+      "sha256": "604d02a67457b7b2ffc84c18720ed8473132d8c2104d4c586a0afc3c357bdea2"
+    },
+    {
+      "path": "docs/scene06_lake_arrival/audio/vocabulary/en/v20.mp3",
+      "status": 200,
+      "bytes": 11232,
+      "sha256": "29bc3116b022e1c3d015f692795567776d454ffbaf363cbfb96ec4ac05d3a01e"
+    },
+    {
+      "path": "docs/scene06_lake_arrival/audio/vocabulary/en/v21.mp3",
+      "status": 200,
+      "bytes": 11232,
+      "sha256": "15e568dcbcd319a2b6ac3664748a451d6c015dac023e9f8dca2c92d6efd0b7dc"
+    },
+    {
+      "path": "docs/scene06_lake_arrival/audio/vocabulary/en/v22.mp3",
+      "status": 200,
+      "bytes": 11232,
+      "sha256": "df972c1f3da8bd71bbf3d1a75f6ee289c57d803df2d6b1e8b68e1c514ec4ed06"
+    },
+    {
+      "path": "docs/scene06_lake_arrival/audio/vocabulary/en/v23.mp3",
+      "status": 200,
+      "bytes": 11232,
+      "sha256": "bc1d4d944f51f2138908e788c8f72dbd4deae7c37ff92b30205625eea6244bf5"
+    },
+    {
+      "path": "docs/scene06_lake_arrival/audio/vocabulary/en/v24.mp3",
+      "status": 200,
+      "bytes": 11232,
+      "sha256": "36bf810e218b030423a8c8a43fd10654e10691995f6fc9e21bed1bc0bfa732a5"
+    },
+    {
+      "path": "docs/scene06_lake_arrival/audio/vocabulary/en/v25.mp3",
+      "status": 200,
+      "bytes": 11232,
+      "sha256": "adf4201373eca910b94326128ec2a7d35a71bc976dd09c43c6cf5024347a9d91"
+    },
+    {
+      "path": "docs/scene06_lake_arrival/audio/vocabulary/en/v26.mp3",
+      "status": 200,
+      "bytes": 11232,
+      "sha256": "d15c1a02539e6fe3399c722322bcb2d49cbf57d6dfcf03eb0de17726cf51dd46"
+    },
+    {
+      "path": "docs/scene06_lake_arrival/audio/vocabulary/en/v27.mp3",
+      "status": 200,
+      "bytes": 11232,
+      "sha256": "f932ac4d7e7a5851e81054a93f0daca1bbd7ea25db841f3191ab9f11bbdb696a"
+    },
+    {
+      "path": "docs/scene06_lake_arrival/audio/vocabulary/en/v28.mp3",
+      "status": 200,
+      "bytes": 5040,
+      "sha256": "1b054dcf75b8171c5bc3e6a0d4e61efb677ff5c732f089dfe45840a6afdaa675"
+    },
+    {
+      "path": "docs/scene06_lake_arrival/audio/vocabulary/en/v29.mp3",
+      "status": 200,
+      "bytes": 11232,
+      "sha256": "22f6a91b70b19333076f6fde7759d27cb7e91f1e10bffab62b264c8e6ba9cd1d"
+    },
+    {
+      "path": "docs/scene06_lake_arrival/audio/vocabulary/en/v30.mp3",
+      "status": 200,
+      "bytes": 11232,
+      "sha256": "6b833623b546b75fcbd9f34e6a8a20be0efe0230cbd4cf606d1420f5fba44b63"
+    },
+    {
+      "path": "docs/scene06_lake_arrival/audio/vocabulary/en/v31.mp3",
+      "status": 200,
+      "bytes": 11232,
+      "sha256": "7dd9b3360b75fa3476c19eb0d7e5be56a649a0c9cb9d3848870b4e220796482e"
+    },
+    {
+      "path": "docs/scene06_lake_arrival/audio/vocabulary/en/v32.mp3",
+      "status": 200,
+      "bytes": 4896,
+      "sha256": "58fbaa83760acbd00736cb106e0736ae03172225900570abe6747a0aaea410c4"
+    },
+    {
+      "path": "docs/scene06_lake_arrival/audio/vocabulary/en/v33.mp3",
+      "status": 200,
+      "bytes": 11232,
+      "sha256": "7e7f1dd4edbf35eb82798644c8ddc3db00079032a06f2e123356929d4854c506"
+    },
+    {
+      "path": "docs/scene06_lake_arrival/audio/vocabulary/en/v34.mp3",
+      "status": 200,
+      "bytes": 4896,
+      "sha256": "e22c87398b20e0da25846be657fef7e7b33054dcbaa57d7c537168699c577ec4"
+    },
+    {
+      "path": "docs/scene06_lake_arrival/audio/vocabulary/en/v35.mp3",
+      "status": 200,
+      "bytes": 5040,
+      "sha256": "ee617d8f7c7acc42db63ac52da9deb0c30f927066e05faf6b8a9a896d6c9c100"
+    },
+    {
+      "path": "docs/scene06_lake_arrival/audio/vocabulary/en/v36.mp3",
+      "status": 200,
+      "bytes": 11232,
+      "sha256": "d33633b3f8c50277f9022477ca1f359f92515f0b599879c6dd089a0e5c4c7846"
+    },
+    {
+      "path": "docs/scene06_lake_arrival/audio/vocabulary/en/v37.mp3",
+      "status": 200,
+      "bytes": 5040,
+      "sha256": "205dd8aba81a0bc8dca45940a673a1dfb760fbc77ae232d8389c68b8ef2b873f"
+    },
+    {
+      "path": "docs/scene06_lake_arrival/audio/vocabulary/en/v38.mp3",
+      "status": 200,
+      "bytes": 4896,
+      "sha256": "680d43424779c00a3249ebfe4d8285b9df8481ce0eccdbcc0820e09376a9de49"
+    },
+    {
+      "path": "docs/scene06_lake_arrival/audio/vocabulary/en/v39.mp3",
+      "status": 200,
+      "bytes": 5040,
+      "sha256": "526f3514926e9374da00cb7a14b4f3796030cc83e448f3e00f3c337f0cb98aa5"
+    },
+    {
+      "path": "docs/scene06_lake_arrival/audio/vocabulary/en/v40.mp3",
+      "status": 200,
+      "bytes": 11232,
+      "sha256": "27c4c78c4603c014678045d08979f6b85e08c6ce694e886ad6794fb06e083df2"
+    },
+    {
+      "path": "docs/scene06_lake_arrival/audio/vocabulary/en/v41.mp3",
+      "status": 200,
+      "bytes": 11232,
+      "sha256": "7067383326d88c95d404dbc123ef93f59aa52dcce77cf508459ceee3fbec2111"
+    },
+    {
+      "path": "docs/scene06_lake_arrival/audio/vocabulary/en/v42.mp3",
+      "status": 200,
+      "bytes": 11232,
+      "sha256": "8f11e9d92513ec92c3cea1f94ceafe90b13f076aa9fc1402a1141939e6374dec"
+    },
+    {
+      "path": "docs/scene06_lake_arrival/audio/vocabulary/en/v43.mp3",
+      "status": 200,
+      "bytes": 4896,
+      "sha256": "6377462a51c4b86a6a5ac57357af473df6f8e208d3a9e9972feb3b60d73c2b5c"
+    },
+    {
+      "path": "docs/scene06_lake_arrival/audio/vocabulary/en/v44.mp3",
+      "status": 200,
+      "bytes": 11232,
+      "sha256": "5498ec5f5d11bf49583495873662d50fd2b7b35ae3838e39c999e862857a7c68"
+    },
+    {
+      "path": "docs/scene06_lake_arrival/audio/vocabulary/en/v45.mp3",
+      "status": 200,
+      "bytes": 11232,
+      "sha256": "b5be00f47b1314c76203a0f8a8f5d82d0ad657e07e7d3092cb2a7d0543d3a64f"
+    },
+    {
+      "path": "docs/scene06_lake_arrival/audio/vocabulary/en/v46.mp3",
+      "status": 200,
+      "bytes": 11232,
+      "sha256": "49aa41f2520731a4e56142ae8ea90f235fd9a6e06d399d5e9fa3e1101249e31d"
+    },
+    {
+      "path": "docs/scene06_lake_arrival/audio/vocabulary/en/v47.mp3",
+      "status": 200,
+      "bytes": 5040,
+      "sha256": "8c6bea041179822a7463d698de136c1c6984f225619679bec832647457e2e8fd"
+    },
+    {
+      "path": "docs/scene06_lake_arrival/audio/vocabulary/en/v48.mp3",
+      "status": 200,
+      "bytes": 11232,
+      "sha256": "137b8babcf32f5f8f73289bf793295a912ff4e96968d9e8dc0ce6eab15ee46d1"
+    },
+    {
+      "path": "docs/scene06_lake_arrival/audio/vocabulary/en/v49.mp3",
+      "status": 200,
+      "bytes": 11232,
+      "sha256": "b9a9fe541825062f91aa6816da23f9c2994c1d6eae1c165a748fb2e0060ed2c7"
+    },
+    {
+      "path": "docs/scene06_lake_arrival/audio/vocabulary/en/v50.mp3",
+      "status": 200,
+      "bytes": 5040,
+      "sha256": "581c9fde4407e07856bb2fe705a8beaf79a5c4170e2191188075e1e6a5776c5d"
+    },
+    {
+      "path": "docs/scene06_lake_arrival/audio/vocabulary/en/v51.mp3",
+      "status": 200,
+      "bytes": 11232,
+      "sha256": "bc075a700b9436a2c32c336fa9d610155558f8610f4e858b225235b00d5af433"
+    },
+    {
+      "path": "docs/scene06_lake_arrival/audio/vocabulary/en/v52.mp3",
+      "status": 200,
+      "bytes": 5040,
+      "sha256": "9c93a90855862d682f16a99b38a9a98b24d0ef76c95e854a3812a310c8c60433"
+    },
+    {
+      "path": "docs/scene06_lake_arrival/audio/vocabulary/en/v53.mp3",
+      "status": 200,
+      "bytes": 11232,
+      "sha256": "44ac0b78af2eaf222b6ea514fca32fc0bc3d5fa5e5ad1c2e945e7ae6361735ca"
+    },
+    {
+      "path": "docs/scene06_lake_arrival/audio/vocabulary/en/v54.mp3",
+      "status": 200,
+      "bytes": 11232,
+      "sha256": "ee0c79ae0dd26adc39e9bed67941e662093fa01fd40445a0de61e96971a2f98e"
+    },
+    {
+      "path": "docs/scene06_lake_arrival/audio/vocabulary/en/v55.mp3",
+      "status": 200,
+      "bytes": 11232,
+      "sha256": "9249ed987c784d8b723c00e0d3ade775e8b591f8497e2e24b2034a5ad7fa7dd9"
+    },
+    {
+      "path": "docs/scene06_lake_arrival/audio/vocabulary/en/v56.mp3",
+      "status": 200,
+      "bytes": 11232,
+      "sha256": "53e4ca52b535ece76aedf5eca845c0e01f7d0b60d5ab741880313c854a2c91d6"
+    },
+    {
+      "path": "docs/scene06_lake_arrival/audio/vocabulary/en/v57.mp3",
+      "status": 200,
+      "bytes": 11232,
+      "sha256": "87c1f94cebef04aee74021cd28bb3c7c3d7d8f81a020ce6b6b1d70bc655cff56"
+    },
+    {
+      "path": "docs/scene06_lake_arrival/audio/vocabulary/en/v58.mp3",
+      "status": 200,
+      "bytes": 11232,
+      "sha256": "efc88d77b0edb5908a9934d2631c4af46404d0876e57b54cf02b862a6f1bfb17"
+    },
+    {
+      "path": "docs/scene06_lake_arrival/audio/vocabulary/en/v59.mp3",
+      "status": 200,
+      "bytes": 11232,
+      "sha256": "195ac83c2ec8721315d9d75bda9bc001d1455394a66137e43c7d141f071ba147"
+    },
+    {
+      "path": "docs/scene06_lake_arrival/audio/vocabulary/en/v60.mp3",
+      "status": 200,
+      "bytes": 11232,
+      "sha256": "1dd2249e6ac02b553ba244633d161f26cd3140a127113e8ee3b3ac578c8f2435"
+    },
+    {
+      "path": "docs/scene06_lake_arrival/audio/vocabulary/en/v61.mp3",
+      "status": 200,
+      "bytes": 11232,
+      "sha256": "becd251fd87eba0b60f9b3f783b1ebd6ac5bf5fbc6a094d521e436514414b07f"
+    },
+    {
+      "path": "docs/scene06_lake_arrival/audio/vocabulary/en/v62.mp3",
+      "status": 200,
+      "bytes": 11232,
+      "sha256": "2b97c1844f0871cda4cdc23a79e97f3030f8ba051158478136a66d78f654fd97"
+    },
+    {
+      "path": "docs/scene06_lake_arrival/audio/vocabulary/en/v63.mp3",
+      "status": 200,
+      "bytes": 11232,
+      "sha256": "a46ae4c7af1fd24ae77c51a8f9b97335dbd2e6732284d2532299d8712eb080ab"
+    },
+    {
+      "path": "docs/scene06_lake_arrival/audio/vocabulary/en/v64.mp3",
+      "status": 200,
+      "bytes": 11232,
+      "sha256": "50ef9dcce51dd62f029f50981395a507cb619a8d4fdf361919b20aba565c265e"
+    },
+    {
+      "path": "docs/scene06_lake_arrival/audio/vocabulary/en/v65.mp3",
+      "status": 200,
+      "bytes": 5040,
+      "sha256": "c0415e6de40445550ed364953a97d6b219c298e922eeb980e8a7c74be6cdef9b"
+    },
+    {
+      "path": "docs/scene06_lake_arrival/audio/vocabulary/en/v66.mp3",
+      "status": 200,
+      "bytes": 5040,
+      "sha256": "274eee1ce416b710210379c1313dbc42f9e5a135cf0ae18276867f9d55b982a7"
+    },
+    {
+      "path": "docs/scene06_lake_arrival/audio/vocabulary/en/v67.mp3",
+      "status": 200,
+      "bytes": 4896,
+      "sha256": "9e590d711f0766b053282c5d18348a55e22b63e596182b3b460f9b7b35e41afb"
+    },
+    {
+      "path": "docs/scene06_lake_arrival/audio/vocabulary/en/v68.mp3",
+      "status": 200,
+      "bytes": 11232,
+      "sha256": "615bd43eacfb5a7872e69717797a0e8ed109f5d57a6bb16c050900cfd2d5ed0e"
+    },
+    {
+      "path": "docs/scene06_lake_arrival/audio/vocabulary/en/v69.mp3",
+      "status": 200,
+      "bytes": 11232,
+      "sha256": "861515fb80c801b279d2faa9ea708c7712041d9deaa2b588be0d4d3fe98bf67c"
+    },
+    {
+      "path": "docs/scene06_lake_arrival/audio/vocabulary/en/v70.mp3",
+      "status": 200,
+      "bytes": 4752,
+      "sha256": "6f8466eebc1c7df84891b5d93555db9fb82f51395eb145d850911bbba36eb1fd"
+    },
+    {
+      "path": "docs/scene06_lake_arrival/audio/vocabulary/en/v71.mp3",
+      "status": 200,
+      "bytes": 4896,
+      "sha256": "8580455cee0fe4a7481c326446579cb14fb7e3075abe2c41c783cc0beef609fd"
+    },
+    {
+      "path": "docs/scene06_lake_arrival/audio/vocabulary/en/v72.mp3",
+      "status": 200,
+      "bytes": 11232,
+      "sha256": "b9297d4fa9bc831724303a5133631e8a26feb788994a4499e7f1e12547182531"
+    },
+    {
+      "path": "docs/scene06_lake_arrival/audio/vocabulary/en/v73.mp3",
+      "status": 200,
+      "bytes": 11232,
+      "sha256": "039cf49a736e16b1073def3fde74c9bbd10fbe1c52791c186052152cfb108533"
+    },
+    {
+      "path": "docs/scene06_lake_arrival/audio/vocabulary/en/v74.mp3",
+      "status": 200,
+      "bytes": 4896,
+      "sha256": "7567cabb52b1b9ed50808f76b9881548f535ce6f1ba698147f976bddf8239e01"
+    },
+    {
+      "path": "docs/scene06_lake_arrival/audio/vocabulary/en/v75.mp3",
+      "status": 200,
+      "bytes": 11232,
+      "sha256": "c933b30fdfaa178a6e4b58e198361809922bc1138bac5a2aeac37073f5ee9df7"
+    },
+    {
+      "path": "docs/scene06_lake_arrival/audio/vocabulary/en/v76.mp3",
+      "status": 200,
+      "bytes": 11232,
+      "sha256": "60c9a44a9f12afd62c3a8d8bb216129883ab6b4a98f17c55b522557b2c43fccb"
+    },
+    {
+      "path": "docs/scene06_lake_arrival/audio/vocabulary/en/v77.mp3",
+      "status": 200,
+      "bytes": 11232,
+      "sha256": "bc89d0795d8d4c5f126419115803fc68da405a13df94e2f7c1b0ed013bee1105"
+    },
+    {
+      "path": "docs/scene06_lake_arrival/audio_manifest.json",
+      "status": 200,
+      "bytes": 1949,
+      "sha256": "cc1970dfd7cad02098bda5f11d8a58f4876b6d700cc70c994420912945ceb670"
+    },
+    {
+      "path": "docs/scene06_lake_arrival/audio_manifest_02.json",
+      "status": 200,
+      "bytes": 2839,
+      "sha256": "fb8aa44f6c0a4432b7392c2eb49f43a1b1a7b78d3f90e7b9dfb82f452484760e"
+    },
+    {
+      "path": "docs/scene06_lake_arrival/audio_manifest_03.json",
+      "status": 200,
+      "bytes": 2239,
+      "sha256": "f98cf3e1543870db7c1547d4040bf459c125d89a2325fcc40cd9d7d7b452d812"
+    },
+    {
+      "path": "docs/scene06_lake_arrival/audio_manifest_04.json",
+      "status": 200,
+      "bytes": 1972,
+      "sha256": "01b01e89b5d31a2f96bd920820564b37a0bda3d0adc14fa2915f0320aa57a84b"
+    },
+    {
+      "path": "docs/scene06_lake_arrival/audio_manifest_05.json",
+      "status": 200,
+      "bytes": 2026,
+      "sha256": "62146deaf50ed31e5674662f63a5889d8cfbf4b2432958bcb337a7d995e54b0d"
+    },
+    {
+      "path": "docs/scene06_lake_arrival/audio_manifest_06.json",
+      "status": 200,
+      "bytes": 2285,
+      "sha256": "c2814ac024d6faae88b2cc25355845c991830f740fdff1d789e76c5823660a9b"
+    },
+    {
+      "path": "docs/scene06_lake_arrival/audio_manifest_07.json",
+      "status": 200,
+      "bytes": 2370,
+      "sha256": "e78db73e36d9e3f8eead9bdbf9b82c2ba859080dec8857d95622b7d6c1c9c425"
+    },
+    {
+      "path": "docs/scene06_lake_arrival/audio_manifest_08.json",
+      "status": 200,
+      "bytes": 1680,
+      "sha256": "892673b6dd3dc58116b21f12aab4ad98e41b231d1d177ee34fcf82039368eaa5"
+    },
+    {
+      "path": "docs/scene06_lake_arrival/audio_manifest_10.json",
+      "status": 200,
+      "bytes": 1713,
+      "sha256": "242c45ca628a4f07e3a3ca9a0a6183bb7145a22979663f328961a4a2146f940e"
+    },
+    {
+      "path": "docs/scene06_lake_arrival/audio_manifest_cs.json",
+      "status": 200,
+      "bytes": 27823,
+      "sha256": "fc40df532f3b11597fd21d040e440e1d8baf78b28e7908df86813f3ae4ce12fb"
+    },
+    {
+      "path": "docs/scene06_lake_arrival/benji_plan.webp",
+      "status": 200,
+      "bytes": 556394,
+      "sha256": "49e2e1ba1a04f5defac772b5876ce5f32cf664c02679793f3651414edf974e22"
+    },
+    {
+      "path": "docs/scene06_lake_arrival/dialogue.json",
+      "status": 200,
+      "bytes": 1026,
+      "sha256": "35cb85112fd8009ef19f17bd44a85ff21c19f0ad54a1699068791ba6e6259263"
+    },
+    {
+      "path": "docs/scene06_lake_arrival/dialogue_02.json",
+      "status": 200,
+      "bytes": 1516,
+      "sha256": "d30c6c333612ec166119456712b762e04cbbdf19bb3dc8db040b19fa2ced7403"
+    },
+    {
+      "path": "docs/scene06_lake_arrival/dialogue_03.json",
+      "status": 200,
+      "bytes": 1188,
+      "sha256": "4e8f66a3c5a91b73343d7ebf233963c58ccccea308bfe38993cf5f8905f3fb31"
+    },
+    {
+      "path": "docs/scene06_lake_arrival/dialogue_04.json",
+      "status": 200,
+      "bytes": 1248,
+      "sha256": "68041850fcd4f9ff250a828180c5372f08c9aac6523c80909d45b6f166d86013"
+    },
+    {
+      "path": "docs/scene06_lake_arrival/dialogue_05.json",
+      "status": 200,
+      "bytes": 1309,
+      "sha256": "e36fc7e544f04b80ae64922caafe233c6b47d2ebbb52a14c6e173c268554fe4a"
+    },
+    {
+      "path": "docs/scene06_lake_arrival/dialogue_06.json",
+      "status": 200,
+      "bytes": 1462,
+      "sha256": "99b2669f01317811d417d5edd362cb1a4c1704b8f6125bcd41dc934b9fbc1794"
+    },
+    {
+      "path": "docs/scene06_lake_arrival/dialogue_07.json",
+      "status": 200,
+      "bytes": 1543,
+      "sha256": "a12398051b11dbfbb26bc4d1e8a2bbcd17433409200235b7f648d5afa82cb984"
+    },
+    {
+      "path": "docs/scene06_lake_arrival/dialogue_08.json",
+      "status": 200,
+      "bytes": 1073,
+      "sha256": "8adaace7549f8067baeb7548c55c59f4be279ab498b88727facb565bd037aba2"
+    },
+    {
+      "path": "docs/scene06_lake_arrival/dialogue_09.json",
+      "status": 200,
+      "bytes": 189,
+      "sha256": "a50979ab4585ba626bc571b914be9a11930155724876fbc91d76acf26541699f"
+    },
+    {
+      "path": "docs/scene06_lake_arrival/dialogue_10.json",
+      "status": 200,
+      "bytes": 1099,
+      "sha256": "1de538145e19f478ac367550bb23847fdad7f7b9869fe3967d0453159aa178b9"
+    },
+    {
+      "path": "docs/scene06_lake_arrival/dictionary_audio_manifest.json",
+      "status": 200,
+      "bytes": 52830,
+      "sha256": "095342aeb3de45cbae311eb10a1681df6a4fe5fc2008387746163352c26a3586"
+    },
+    {
+      "path": "docs/scene06_lake_arrival/dictionary_generated_audio.json",
+      "status": 200,
+      "bytes": 42871,
+      "sha256": "d36bfe0499e4767cc7c039748ce5c7a00eb413bfa7b04e63ac823a6fa3f1776d"
+    },
+    {
+      "path": "docs/scene06_lake_arrival/dinner_fire.webp",
+      "status": 200,
+      "bytes": 528130,
+      "sha256": "467fe6cb6cfa91731040b76c8b768ce2ef6a026da86c00be6544004f0d254ad2"
+    },
+    {
+      "path": "docs/scene06_lake_arrival/everyone_helps.webp",
+      "status": 200,
+      "bytes": 616574,
+      "sha256": "aa2387b3a44b1e57e9dde2ed0406057e5e312e4cb882508c993677c3fd49d2bd"
+    },
+    {
+      "path": "docs/scene06_lake_arrival/freddie_conversation.webp",
+      "status": 200,
+      "bytes": 458912,
+      "sha256": "41c72db7ec82950206a0f9da2431d88400762c36e14e2c9c91bd339a58bc7ebb"
+    },
+    {
+      "path": "docs/scene06_lake_arrival/freddie_jump.webp",
+      "status": 200,
+      "bytes": 487350,
+      "sha256": "8b00ffe515a1cae62c515647a831cc9bf2f07193226ed1d7d7dcb2b147bbce25"
+    },
+    {
+      "path": "docs/scene06_lake_arrival/index.html",
+      "status": 200,
+      "bytes": 2915,
+      "sha256": "60a0579efaf5da7134ad53a00cec3c59ff039336ffb6ac33feaa00d9003d2a10"
+    },
+    {
+      "path": "docs/scene06_lake_arrival/logan_idea.webp",
+      "status": 200,
+      "bytes": 600612,
+      "sha256": "8d08ecd8427f3ff0d9a3526c53e2b1537490cc8b0fda21116195002a47313882"
+    },
+    {
+      "path": "docs/scene06_lake_arrival/meeting_begins.webp",
+      "status": 200,
+      "bytes": 663540,
+      "sha256": "3818fd13d3e1eb424d32ab09f842e387def6f949d4dadd7224efb4e158484ed7"
+    },
+    {
+      "path": "docs/scene06_lake_arrival/old_hut.webp",
+      "status": 200,
+      "bytes": 588338,
+      "sha256": "043ef54172f518ff750b7ea6a33e8736fbcc9d48a4049a0ce31c80dd791f6a3d"
+    },
+    {
+      "path": "docs/scene06_lake_arrival/ollie_dinner.webp",
+      "status": 200,
+      "bytes": 503084,
+      "sha256": "0004f9f6eed0ab7b0798c8006f21d1d27b95e257c08c129478d136c0b86404c8"
+    },
+    {
+      "path": "docs/scene06_lake_arrival/pictures.json",
+      "status": 200,
+      "bytes": 3609,
+      "sha256": "acf702b1fd9ddc68517a7883bfba16003cfd892063d85eb5cad025cfaafce140"
+    },
+    {
+      "path": "docs/scene06_lake_arrival/script.js",
+      "status": 200,
+      "bytes": 15309,
+      "sha256": "031734d044c8fa54d285edcd3f2e833473319a6a4fc970c09946e68c0e680db9"
+    },
+    {
+      "path": "docs/scene06_lake_arrival/silence.webp",
+      "status": 200,
+      "bytes": 601852,
+      "sha256": "2cd5a34fae281fdc142eb6d7f6497eca79cc6ce7331fe4fb23205f193e723166"
+    },
+    {
+      "path": "docs/scene06_lake_arrival/styles.css",
+      "status": 200,
+      "bytes": 6742,
+      "sha256": "a9e3c932ca868f702d23ea068c491e9a37e1aa96575d3c4f023c6e664fbdc6fc"
+    },
+    {
+      "path": "docs/scene06_lake_arrival/translations_cs.json",
+      "status": 200,
+      "bytes": 20717,
+      "sha256": "896fe055ce99243e8ed7d275054d4cf36a4cf44530d51b1833c891fa7a7050bb"
+    },
+    {
+      "path": "docs/scene06_lake_arrival/vocabulary.json",
+      "status": 200,
+      "bytes": 26848,
+      "sha256": "c73a26dad56ca9f5a2054ff084fa3f0c4db2eaad5d36235a6619ededf91def57"
+    },
+    {
+      "path": "docs/index.html",
+      "status": 200,
+      "bytes": 6683,
+      "sha256": "df8a8b2ea9eb47a841789fca84b9e2e29d049b3198d16d5ae42a5cc96eea32b8"
+    },
+    {
+      "path": "docs/script_intro_v2.js",
+      "status": 200,
+      "bytes": 115136,
+      "sha256": "e3c0505a1e746b27e6d5701cb1508d7ca7fc7b6ac9c61c8b94c72197099dec98"
+    },
+    {
+      "path": "docs/styles_intro_v2.css",
+      "status": 200,
+      "bytes": 33136,
+      "sha256": "52b8db5205027cca4d840a4c7e235ad785ee4bf59f98cad6691ad1bb12bccc0d"
+    }
+  ]
+}
