@@ -7,6 +7,8 @@ const restartButton = document.getElementById("restartButton");
 const speechBubble = document.getElementById("speechBubble");
 const speakerName = document.getElementById("speakerName");
 const speechText = document.getElementById("speechText");
+const czechText = document.getElementById("czechText");
+const languageButton = document.getElementById("languageButton");
 const lineNumber = document.getElementById("lineNumber");
 const status = document.getElementById("status");
 const scene = document.getElementById("scene");
@@ -18,6 +20,30 @@ let generation = 0;
 let playing = false;
 let failed = false;
 let openingIndex = 0;
+let audioLanguage = "";
+let failedLanguage = "";
+const LANGUAGE_KEY = "mmtx_scene06_czech_mode";
+let languageMode = loadLanguageMode();
+
+function loadLanguageMode() {
+  try {
+    const value = window.localStorage.getItem(LANGUAGE_KEY);
+    return ["0", "1", "2"].includes(value) ? Number(value) : 0;
+  } catch (_error) { return 0; }
+}
+
+function updateLanguageUi() {
+  const labels = ["CZ: vypnuto", "CZ: text", "CZ: text + hlas"];
+  const actions = ["Zobrazit český překlad", "Zapnout české čtení", "Vypnout češtinu"];
+  languageButton.textContent = labels[languageMode];
+  languageButton.setAttribute("aria-pressed", String(languageMode > 0));
+  languageButton.setAttribute("aria-label", `${labels[languageMode]}. ${actions[languageMode]}`);
+  languageButton.title = actions[languageMode];
+  const line = lines[index];
+  czechText.textContent = languageMode > 0 && line && !line.silent ? line.translation.text : "";
+  czechText.hidden = !czechText.textContent;
+  if (lines.length) showFrame(lines[index >= 0 ? index : openingIndex]);
+}
 
 function updateControls() {
   repeatButton.disabled = index < 0 || playing || Boolean(lines[index]?.silent);
@@ -39,6 +65,7 @@ function stopAudio() {
     activeAudio = null;
   }
   playing = false;
+  audioLanguage = "";
 }
 
 function showFrame(line) {
@@ -46,7 +73,7 @@ function showFrame(line) {
   const frame = line.frame;
   scene.dataset.picture = String(picture.id);
   scene.dataset.image = frame.image;
-  scene.dataset.layout = picture.layout || "overlay";
+  scene.dataset.layout = languageMode > 0 ? "below" : (picture.layout || "overlay");
   scene.setAttribute("aria-label", `Scene 6 — ${picture.title}`);
   sceneImage.src = frame.image;
   sceneImage.alt = frame.alt;
@@ -64,6 +91,8 @@ function playLine(newIndex) {
   startButton.hidden = true;
   status.classList.remove("error");
   failed = false;
+  failedLanguage = "";
+  updateLanguageUi();
   if (line.silent) {
     speakerName.textContent = "";
     speechText.textContent = "";
@@ -73,15 +102,34 @@ function playLine(newIndex) {
     updateControls();
     return;
   }
-  const token = generation;
   speakerName.textContent = line.speaker;
   speechText.textContent = line.text;
   lineNumber.textContent = `${line.pictureLine} / ${picture.line_count}`;
   speechBubble.hidden = false;
   status.textContent = "";
-  playing = true;
+  playClip(line.audio, "en", () => {
+    if (languageMode === 2) playCzech();
+    else finishLine(false);
+  });
+}
+
+function finishLine(error, language = "") {
+  playing = false;
+  failed = error;
+  failedLanguage = error ? language : "";
+  status.classList.toggle("error", error);
+  const line = lines[index];
+  status.textContent = error ? `${language === "cs" ? "Czech audio" : "Audio"} unavailable. Tap Repeat.` :
+    (line.pictureLine === line.picture.line_count ? `${line.picture.title} · Picture ${line.picture.id} complete` : "");
   updateControls();
-  const audio = new Audio(line.audio);
+}
+
+function playClip(path, language, onDone) {
+  const token = generation;
+  playing = true;
+  audioLanguage = language;
+  updateControls();
+  const audio = new Audio(path);
   activeAudio = audio;
   const settle = (error) => {
     if (token !== generation || activeAudio !== audio) return;
@@ -90,11 +138,9 @@ function playLine(newIndex) {
     audio.pause();
     activeAudio = null;
     playing = false;
-    failed = error;
-    status.classList.toggle("error", error);
-    status.textContent = error ? "Audio unavailable. Tap Repeat." :
-      (line.pictureLine === picture.line_count ? `${picture.title} · Picture ${picture.id} complete` : "");
-    updateControls();
+    audioLanguage = "";
+    if (error) finishLine(true, language);
+    else onDone();
   };
   audio.onended = () => settle(false);
   audio.onerror = () => settle(true);
@@ -103,6 +149,27 @@ function playLine(newIndex) {
     if (promise) promise.catch(() => settle(true));
   } catch (_error) { settle(true); }
 }
+
+function playCzech() {
+  status.textContent = "";
+  status.classList.remove("error");
+  failed = false;
+  failedLanguage = "";
+  playClip(lines[index].translation.audio, "cs", () => finishLine(false));
+}
+
+languageButton.addEventListener("click", () => {
+  const stopCzech = audioLanguage === "cs" || (failed && failedLanguage === "cs");
+  languageMode = (languageMode + 1) % 3;
+  try { window.localStorage.setItem(LANGUAGE_KEY, String(languageMode)); } catch (_error) { /* Optional storage. */ }
+  updateLanguageUi();
+  if (languageMode !== 2 && stopCzech) {
+    stopAudio();
+    finishLine(false);
+  } else if (languageMode === 2 && index >= 0 && !lines[index].silent && !playing && !failed) {
+    playCzech();
+  }
+});
 
 startButton.addEventListener("click", () => { if (index < 0 && lines.length) playLine(openingIndex); });
 nextButton.addEventListener("click", () => { if (!playing && !failed) playLine(index + 1); });
@@ -123,7 +190,7 @@ function validImage(frame) {
     Number.isInteger(frame.width) && frame.width > 0 && Number.isInteger(frame.height) && frame.height > 0;
 }
 
-readJson("pictures.json?v=20261110viewport2")
+readJson("pictures.json?v=20261110czech1")
   .then((catalog) => {
     const lineCounts = [7, 10, 8, 7, 7, 8, 8, 6, 0, 6];
     if (catalog.schema_version !== 1 || !Array.isArray(catalog.pictures) || catalog.pictures.length !== 10 ||
@@ -136,7 +203,7 @@ readJson("pictures.json?v=20261110viewport2")
               frame.from_line > 1 && frame.from_line <= picture.line_count &&
               (i === 0 || frame.from_line > frames[i - 1].from_line)))))) throw new Error("pictures");
     return Promise.all(catalog.pictures.map((picture) =>
-      readJson(`${picture.dialogue}?v=20261110viewport2`).then((data) => {
+      readJson(`${picture.dialogue}?v=20261110czech1`).then((data) => {
         const audioPattern = picture.id === 1 ? /^audio\/en\/[0-9]{2}_[a-z]+\.mp3$/ :
           new RegExp(`^audio/en/p${String(picture.id).padStart(2, "0")}_[0-9]{2}_[a-z_]+\\.mp3$`);
         if (data.schema_version !== 1 || data.picture !== picture.id || !Array.isArray(data.lines) ||
@@ -158,10 +225,27 @@ readJson("pictures.json?v=20261110viewport2")
   })
   .then((pictures) => {
     lines = pictures.flat();
+    return readJson("translations_cs.json?v=20261110czech1").then((data) => {
+      const spoken = lines.filter((line) => !line.silent);
+      if (data.schema_version !== 1 || data.language !== "cs" || !Array.isArray(data.lines) ||
+          data.lines.length !== spoken.length) throw new Error("translations");
+      spoken.forEach((line, n) => {
+        const row = data.lines[n];
+        const prefix = `p${String(line.picture.id).padStart(2, "0")}_${String(line.pictureLine).padStart(2, "0")}`;
+        if (row.audio_en !== line.audio || row.english !== line.text || row.speaker !== line.speaker ||
+            row.picture !== line.picture.id || row.number !== line.pictureLine ||
+            typeof row.text !== "string" || !row.text.trim() || row.voice !== "cs-CZ-VlastaNeural" ||
+            row.audio !== `audio/cs/${prefix}_${line.speaker.toLowerCase().replace(/ /g, "_")}.mp3`) throw new Error("translation");
+        line.translation = row;
+      });
+    });
+  })
+  .then(() => {
     const requested = Number(window.location?.hash?.match(/^#picture=(\d+)$/)?.[1] || 1);
     const requestedIndex = lines.findIndex((line) => line.picture.id === requested);
     openingIndex = requestedIndex >= 0 ? requestedIndex : 0;
-    showFrame(lines[openingIndex]);
+    updateLanguageUi();
+    languageButton.disabled = false;
     updateControls();
     status.textContent = "";
     startButton.disabled = false;

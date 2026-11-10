@@ -95,6 +95,14 @@ def build(*, env_path=ENV_PATH, receipt=None, limit=1000, docs=DOCS, picture=1,
         check(docs=docs, mirror=mirror, picture=picture)
         return {"ok": True, "picture": picture, "assets": 0, "new_requests": 0, "reserved_characters": 0}
     receipt = receipt or (RECEIPT if picture == 1 else RECEIPT.with_name(f"audio_receipt_picture_{picture:02d}.json"))
+    return build_assets(data, receipt=receipt, manifest_name=names(picture)[1],
+                        env_path=env_path, limit=limit, docs=docs, mirror=mirror,
+                        synthesizer=synthesizer, validator=validator, picture=picture)
+
+
+def build_assets(data, *, receipt, manifest_name, env_path=ENV_PATH, limit=1000,
+                 docs=DOCS, mirror=MIRROR, synthesizer=synthesize_azure_tts_mp3_sync,
+                 validator=validate_mp3, picture=None):
     signature = digest(json.dumps(data, ensure_ascii=False, sort_keys=True).encode())
     with receipt_lock(receipt):
         state = json.loads(receipt.read_text()) if receipt.exists() else {
@@ -142,7 +150,7 @@ def build(*, env_path=ENV_PATH, receipt=None, limit=1000, docs=DOCS, picture=1,
             assets.append({**line, "sha256": digest(audio), "bytes": len(audio)})
         manifest = {"schema_version": 1, "provider": "azure", "rate": data["rate"], "assets": assets}
         for root in (docs, mirror):
-            atomic_write_json(root / names(picture)[1], manifest)
+            atomic_write_json(root / manifest_name, manifest)
         return {"ok": True, "picture": picture, "assets": len(assets), "new_requests": len(pending),
                 "reserved_characters": budget.reserved}
 

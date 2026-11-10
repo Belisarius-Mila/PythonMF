@@ -15,6 +15,9 @@ MIRROR = REPO / "MatysekANJ/web_mmtx/scene06_lake_arrival"
 spec = importlib.util.spec_from_file_location("mmtx_opening_builder", REPO / "MatysekANJ/build_scene06_opening_audio.py")
 builder = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(builder)
+cs_spec = importlib.util.spec_from_file_location("mmtx_czech_builder", REPO / "MatysekANJ/build_scene06_czech_audio.py")
+czech = importlib.util.module_from_spec(cs_spec)
+cs_spec.loader.exec_module(czech)
 
 
 class Scene06OpeningTests(unittest.TestCase):
@@ -215,6 +218,69 @@ class Scene06OpeningTests(unittest.TestCase):
         (docs / "dialogue.json").write_bytes((DOCS / "dialogue.json").read_bytes())
         return docs, mirror, root / "private/receipt.json"
 
+    def czech_fixture(self, folder):
+        docs, mirror, receipt = self.fixture(folder)
+        mirror.mkdir()
+        for name in [builder.names(n)[0] for n in range(1, 11)] + [czech.INPUT]:
+            for root in (docs, mirror):
+                (root / name).write_bytes((DOCS / name).read_bytes())
+        (docs / "old_english.mp3").write_bytes(b"preserve approved English")
+        return docs, mirror, receipt
+
+    def test_czech_transcript_binding_and_audio(self):
+        data = czech.translations()
+        self.assertEqual(len(data["lines"]), 67)
+        self.assertNotIn(9, {row["picture"] for row in data["lines"]})
+        payload = json.dumps([(x["english"], x["text"]) for x in data["lines"]], ensure_ascii=False, separators=(",", ":"))
+        self.assertEqual(hashlib.sha256(payload.encode()).hexdigest(), "e85c3255a59d7cdff930dc76eea6b56405dfe393c041523e4d95fb288f05a219")
+        self.assertEqual(czech.check()["czech_mp3"], 67)
+
+    def test_czech_build_is_bounded_reusable_and_preserves_english(self):
+        with tempfile.TemporaryDirectory() as folder:
+            docs, mirror, receipt = self.czech_fixture(folder)
+            before = {p.relative_to(docs): p.read_bytes() for p in docs.rglob("*") if p.is_file()}
+            calls = []
+            def synth(text, **kwargs):
+                calls.append(text)
+                kwargs["budget"].reserve(czech.english.ssml_parts(text, kwargs["voice"])[1])
+                return b"ID3" + text.encode() * 100
+            with self.assertRaisesRegex(RuntimeError, "rozpočet"):
+                czech.build(docs=docs, mirror=mirror, receipt=receipt, limit=1, synthesizer=synth, validator=lambda x: None)
+            self.assertEqual(calls, [])
+            result = czech.build(docs=docs, mirror=mirror, receipt=receipt, synthesizer=synth, validator=lambda x: None)
+            self.assertEqual((result["new_requests"], result["reserved_characters"]), (67, 3977))
+            again = czech.build(docs=docs, mirror=mirror, receipt=receipt, synthesizer=synth, validator=lambda x: None)
+            self.assertEqual((again["new_requests"], len(calls)), (0, 67))
+            for name, content in before.items():
+                self.assertEqual((docs / name).read_bytes(), content)
+
+    def test_czech_lost_response_is_reserved_and_not_retried(self):
+        with tempfile.TemporaryDirectory() as folder:
+            docs, mirror, receipt = self.czech_fixture(folder)
+            calls = []
+            def lost(*args, **kwargs):
+                calls.append(args)
+                self.assertEqual(json.loads(receipt.read_text())["assets"]["audio/cs/p01_01_benji.mp3"]["state"], "attempted")
+                raise RuntimeError("lost")
+            with self.assertRaisesRegex(RuntimeError, "lost"):
+                czech.build(docs=docs, mirror=mirror, receipt=receipt, synthesizer=lost, validator=lambda x: None)
+            with self.assertRaisesRegex(RuntimeError, "Nejistý"):
+                czech.build(docs=docs, mirror=mirror, receipt=receipt, synthesizer=lost, validator=lambda x: None)
+            self.assertEqual(len(calls), 1)
+
+    def test_changed_english_binding_blocks_czech_before_transport(self):
+        with tempfile.TemporaryDirectory() as folder:
+            docs, mirror, receipt = self.czech_fixture(folder)
+            data = json.loads((docs / czech.INPUT).read_text())
+            data["lines"][0]["english"] = "different text"
+            (docs / czech.INPUT).write_text(json.dumps(data))
+            calls = []
+            with self.assertRaisesRegex(RuntimeError, "neodpovídá"):
+                czech.build(docs=docs, mirror=mirror, receipt=receipt,
+                            synthesizer=lambda *a, **k: calls.append(a), validator=lambda x: None)
+            self.assertEqual(calls, [])
+            self.assertFalse(receipt.exists())
+
     def test_budget_is_checked_before_transport(self):
         with tempfile.TemporaryDirectory() as folder:
             docs, mirror, receipt = self.fixture(folder)
@@ -266,6 +332,12 @@ class Scene06OpeningTests(unittest.TestCase):
                               synthesizer=lambda *a, **k: calls.append(a), validator=lambda x: None)
             self.assertEqual(calls, [])
             self.assertEqual(path.read_bytes(), b"preserve")
+
+    @unittest.skipUnless(shutil.which("node"), "Node is required")
+    def test_czech_player_all_lines_modes_errors_and_live_switching(self):
+        result = subprocess.run([shutil.which("node"), str(Path(__file__).with_name("mmtx_scene06_czech_player.js")), str(DOCS)],
+                                text=True, capture_output=True, timeout=20)
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
 
     @unittest.skipUnless(shutil.which("node"), "Node is required")
     def test_direct_picture_entry_keeps_audio_gate_and_falls_back_safely(self):

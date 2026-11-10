@@ -1,0 +1,677 @@
+{
+  "schema_version": 1,
+  "language": "cs",
+  "rate": "-10%",
+  "lines": [
+    {
+      "picture": 1,
+      "number": 1,
+      "speaker": "Benji",
+      "english": "Look! The lake!",
+      "audio_en": "audio/en/01_benji.mp3",
+      "text": "Podívejte! Jezero!",
+      "voice": "cs-CZ-VlastaNeural",
+      "audio": "audio/cs/p01_01_benji.mp3"
+    },
+    {
+      "picture": 1,
+      "number": 2,
+      "speaker": "Fiona",
+      "english": "It’s beautiful. Look at the blue water.",
+      "audio_en": "audio/en/02_fiona.mp3",
+      "text": "Je krásné. Podívejte na tu modrou vodu.",
+      "voice": "cs-CZ-VlastaNeural",
+      "audio": "audio/cs/p01_02_fiona.mp3"
+    },
+    {
+      "picture": 1,
+      "number": 3,
+      "speaker": "Sunny",
+      "english": "And look at those clouds!",
+      "audio_en": "audio/en/03_sunny.mp3",
+      "text": "A podívejte na ty mraky!",
+      "voice": "cs-CZ-VlastaNeural",
+      "audio": "audio/cs/p01_03_sunny.mp3"
+    },
+    {
+      "picture": 1,
+      "number": 4,
+      "speaker": "Bunny",
+      "english": "They look like my ears!",
+      "audio_en": "audio/en/04_bunny.mp3",
+      "text": "Vypadají jako moje uši!",
+      "voice": "cs-CZ-VlastaNeural",
+      "audio": "audio/cs/p01_04_bunny.mp3"
+    },
+    {
+      "picture": 1,
+      "number": 5,
+      "speaker": "Bruno",
+      "english": "Two ears here. Two in the sky.",
+      "audio_en": "audio/en/05_bruno.mp3",
+      "text": "Dvě uši tady. Dvě na obloze.",
+      "voice": "cs-CZ-VlastaNeural",
+      "audio": "audio/cs/p01_05_bruno.mp3"
+    },
+    {
+      "picture": 1,
+      "number": 6,
+      "speaker": "Sunny",
+      "english": "Four ears! Can you hear us better?",
+      "audio_en": "audio/en/06_sunny.mp3",
+      "text": "Čtyři uši! Slyšíš nás teď lépe?",
+      "voice": "cs-CZ-VlastaNeural",
+      "audio": "audio/cs/p01_06_sunny.mp3"
+    },
+    {
+      "picture": 1,
+      "number": 7,
+      "speaker": "Bunny",
+      "english": "Yes. So please don’t shout!",
+      "audio_en": "audio/en/07_bunny.mp3",
+      "text": "Ano. Tak prosím nekřičte!",
+      "voice": "cs-CZ-VlastaNeural",
+      "audio": "audio/cs/p01_07_bunny.mp3"
+    },
+    {
+      "picture": 2,
+      "number": 1,
+      "speaker": "Ollie",
+      "english": "Look! A big fish in my net!",
+      "audio_en": "audio/en/p02_01_ollie.mp3",
+      "text": "Podívejte! Velká ryba v mém podběráku!",
+      "voice": "cs-CZ-VlastaNeural",
+      "audio": "audio/cs/p02_01_ollie.mp3"
+    },
+    {
+      "picture": 2,
+      "number": 2,
+      "speaker": "Bruno",
+      "english": "That’s a big dinner!",
+      "audio_en": "audio/en/p02_02_bruno.mp3",
+      "text": "To je pořádná večeře!",
+      "voice": "cs-CZ-VlastaNeural",
+      "audio": "audio/cs/p02_02_bruno.mp3"
+    },
+    {
+      "picture": 2,
+      "number": 3,
+      "speaker": "Ollie",
+      "english": "Will you eat with me?",
+      "audio_en": "audio/en/p02_03_ollie.mp3",
+      "text": "Dáte si se mnou?",
+      "voice": "cs-CZ-VlastaNeural",
+      "audio": "audio/cs/p02_03_ollie.mp3"
+    },
+    {
+      "picture": 2,
+      "number": 4,
+      "speaker": "Benji",
+      "english": "Thank you, but we have our own food.",
+      "audio_en": "audio/en/p02_04_benji.mp3",
+      "text": "Děkujeme, ale máme vlastní jídlo.",
+      "voice": "cs-CZ-VlastaNeural",
+      "audio": "audio/cs/p02_04_benji.mp3"
+    },
+    {
+      "picture": 2,
+      "number": 5,
+      "speaker": "Fiona",
+      "english": "We’re here for the meeting. Where is it?",
+      "audio_en": "audio/en/p02_05_fiona.mp3",
+      "text": "Přišli jsme na sněm. Kde bude?",
+      "voice": "cs-CZ-VlastaNeural",
+      "audio": "audio/cs/p02_05_fiona.mp3"
+    },
+    {
+      "picture": 2,
+      "number": 6,
+      "speaker": "Ollie",
+      "english": "On the other side of the lake, next morning.",
+      "audio_en": "audio/en/p02_06_ollie.mp3",
+      "text": "Na druhé straně jezera, zítra ráno.",
+      "voice": "cs-CZ-VlastaNeural",
+      "audio": "audio/cs/p02_06_ollie.mp3"
+    },
+    {
+      "picture": 2,
+      "number": 7,
+      "speaker": "Sunny",
+      "english": "How will we find the place?",
+      "audio_en": "audio/en/p02_07_sunny.mp3",
+      "text": "Jak to místo najdeme?",
+      "voice": "cs-CZ-VlastaNeural",
+      "audio": "audio/cs/p02_07_sunny.mp3"
+    },
+    {
+      "picture": 2,
+      "number": 8,
+      "speaker": "Ollie",
+      "english": "Look for an old boat beside an old fishing hut.",
+      "audio_en": "audio/en/p02_08_ollie.mp3",
+      "text": "Hledejte starou loď vedle staré rybářské chatrče.",
+      "voice": "cs-CZ-VlastaNeural",
+      "audio": "audio/cs/p02_08_ollie.mp3"
+    },
+    {
+      "picture": 2,
+      "number": 9,
+      "speaker": "Ollie",
+      "english": "Follow the path by the water.",
+      "audio_en": "audio/en/p02_09_ollie.mp3",
+      "text": "Jděte po cestě podél vody.",
+      "voice": "cs-CZ-VlastaNeural",
+      "audio": "audio/cs/p02_09_ollie.mp3"
+    },
+    {
+      "picture": 2,
+      "number": 10,
+      "speaker": "Bunny",
+      "english": "Thank you, Ollie. Enjoy your fish!",
+      "audio_en": "audio/en/p02_10_bunny.mp3",
+      "text": "Děkujeme, Ollie. Dobrou chuť!",
+      "voice": "cs-CZ-VlastaNeural",
+      "audio": "audio/cs/p02_10_bunny.mp3"
+    },
+    {
+      "picture": 3,
+      "number": 1,
+      "speaker": "Dotty",
+      "english": "A beautiful jump, Freddie!",
+      "audio_en": "audio/en/p03_01_dotty.mp3",
+      "text": "Krásný skok, Freddie!",
+      "voice": "cs-CZ-VlastaNeural",
+      "audio": "audio/cs/p03_01_dotty.mp3"
+    },
+    {
+      "picture": 3,
+      "number": 2,
+      "speaker": "Freddie",
+      "english": "And a big splash!",
+      "audio_en": "audio/en/p03_02_freddie.mp3",
+      "text": "A pořádné šplouchnutí!",
+      "voice": "cs-CZ-VlastaNeural",
+      "audio": "audio/cs/p03_02_freddie.mp3"
+    },
+    {
+      "picture": 3,
+      "number": 3,
+      "speaker": "Dotty",
+      "english": "Too big! Try a smaller splash next time.",
+      "audio_en": "audio/en/p03_03_dotty.mp3",
+      "text": "Až moc velké! Příště zkus šplouchnout méně.",
+      "voice": "cs-CZ-VlastaNeural",
+      "audio": "audio/cs/p03_03_dotty.mp3"
+    },
+    {
+      "picture": 3,
+      "number": 4,
+      "speaker": "Bunny",
+      "english": "Why are you practising?",
+      "audio_en": "audio/en/p03_04_bunny.mp3",
+      "text": "Proč trénuješ?",
+      "voice": "cs-CZ-VlastaNeural",
+      "audio": "audio/cs/p03_04_bunny.mp3"
+    },
+    {
+      "picture": 3,
+      "number": 5,
+      "speaker": "Freddie",
+      "english": "For the frog-jumping race!",
+      "audio_en": "audio/en/p03_05_freddie.mp3",
+      "text": "Na závod ve skoku žabáků!",
+      "voice": "cs-CZ-VlastaNeural",
+      "audio": "audio/cs/p03_05_freddie.mp3"
+    },
+    {
+      "picture": 3,
+      "number": 6,
+      "speaker": "Fiona",
+      "english": "We’re here for the meeting.",
+      "audio_en": "audio/en/p03_06_fiona.mp3",
+      "text": "Přišli jsme na sněm.",
+      "voice": "cs-CZ-VlastaNeural",
+      "audio": "audio/cs/p03_06_fiona.mp3"
+    },
+    {
+      "picture": 3,
+      "number": 7,
+      "speaker": "Dotty",
+      "english": "We’re coming too. See you there!",
+      "audio_en": "audio/en/p03_07_dotty.mp3",
+      "text": "My přijdeme také. Uvidíme se tam!",
+      "voice": "cs-CZ-VlastaNeural",
+      "audio": "audio/cs/p03_07_dotty.mp3"
+    },
+    {
+      "picture": 3,
+      "number": 8,
+      "speaker": "Freddie",
+      "english": "Just one more jump!",
+      "audio_en": "audio/en/p03_08_freddie.mp3",
+      "text": "Ještě jeden skok!",
+      "voice": "cs-CZ-VlastaNeural",
+      "audio": "audio/cs/p03_08_freddie.mp3"
+    },
+    {
+      "picture": 4,
+      "number": 1,
+      "speaker": "Benji",
+      "english": "There’s the boat. And the old hut.",
+      "audio_en": "audio/en/p04_01_benji.mp3",
+      "text": "Tamhle je ta loď. A stará chatrč.",
+      "voice": "cs-CZ-VlastaNeural",
+      "audio": "audio/cs/p04_01_benji.mp3"
+    },
+    {
+      "picture": 4,
+      "number": 2,
+      "speaker": "Fiona",
+      "english": "No one is here yet.",
+      "audio_en": "audio/en/p04_02_fiona.mp3",
+      "text": "Ještě tu nikdo není.",
+      "voice": "cs-CZ-VlastaNeural",
+      "audio": "audio/cs/p04_02_fiona.mp3"
+    },
+    {
+      "picture": 4,
+      "number": 3,
+      "speaker": "Sunny",
+      "english": "The hut is empty too.",
+      "audio_en": "audio/en/p04_03_sunny.mp3",
+      "text": "I chatrč je prázdná.",
+      "voice": "cs-CZ-VlastaNeural",
+      "audio": "audio/cs/p04_03_sunny.mp3"
+    },
+    {
+      "picture": 4,
+      "number": 4,
+      "speaker": "Bruno",
+      "english": "It’s old, but it’s dry inside.",
+      "audio_en": "audio/en/p04_04_bruno.mp3",
+      "text": "Je stará, ale uvnitř je sucho.",
+      "voice": "cs-CZ-VlastaNeural",
+      "audio": "audio/cs/p04_04_bruno.mp3"
+    },
+    {
+      "picture": 4,
+      "number": 5,
+      "speaker": "Benji",
+      "english": "We can sleep here tonight.",
+      "audio_en": "audio/en/p04_05_benji.mp3",
+      "text": "Dnes v noci tu můžeme přespat.",
+      "voice": "cs-CZ-VlastaNeural",
+      "audio": "audio/cs/p04_05_benji.mp3"
+    },
+    {
+      "picture": 4,
+      "number": 6,
+      "speaker": "Bunny",
+      "english": "Can we eat here too?",
+      "audio_en": "audio/en/p04_06_bunny.mp3",
+      "text": "A můžeme se tu také najíst?",
+      "voice": "cs-CZ-VlastaNeural",
+      "audio": "audio/cs/p04_06_bunny.mp3"
+    },
+    {
+      "picture": 4,
+      "number": 7,
+      "speaker": "Fiona",
+      "english": "Yes. Let’s eat before the meeting.",
+      "audio_en": "audio/en/p04_07_fiona.mp3",
+      "text": "Ano. Najezme se před sněmem.",
+      "voice": "cs-CZ-VlastaNeural",
+      "audio": "audio/cs/p04_07_fiona.mp3"
+    },
+    {
+      "picture": 5,
+      "number": 1,
+      "speaker": "Bunny",
+      "english": "Good food and a warm fire. I like it here.",
+      "audio_en": "audio/en/p05_01_bunny.mp3",
+      "text": "Dobré jídlo a teplý oheň. Líbí se mi tu.",
+      "voice": "cs-CZ-VlastaNeural",
+      "audio": "audio/cs/p05_01_bunny.mp3"
+    },
+    {
+      "picture": 5,
+      "number": 2,
+      "speaker": "Fiona",
+      "english": "But why did the old stag call us here?",
+      "audio_en": "audio/en/p05_02_fiona.mp3",
+      "text": "Ale proč nás sem starý jelen svolal?",
+      "voice": "cs-CZ-VlastaNeural",
+      "audio": "audio/cs/p05_02_fiona.mp3"
+    },
+    {
+      "picture": 5,
+      "number": 3,
+      "speaker": "Sunny",
+      "english": "Maybe he wants a party.",
+      "audio_en": "audio/en/p05_03_sunny.mp3",
+      "text": "Možná chce uspořádat oslavu.",
+      "voice": "cs-CZ-VlastaNeural",
+      "audio": "audio/cs/p05_03_sunny.mp3"
+    },
+    {
+      "picture": 5,
+      "number": 4,
+      "speaker": "Bunny",
+      "english": "Then we can bring some food!",
+      "audio_en": "audio/en/p05_04_bunny.mp3",
+      "text": "Tak můžeme přinést něco k jídlu!",
+      "voice": "cs-CZ-VlastaNeural",
+      "audio": "audio/cs/p05_04_bunny.mp3"
+    },
+    {
+      "picture": 5,
+      "number": 5,
+      "speaker": "Bruno",
+      "english": "He asked every animal to come. Maybe he needs help.",
+      "audio_en": "audio/en/p05_05_bruno.mp3",
+      "text": "Požádal všechna zvířata, aby přišla. Možná potřebuje pomoc.",
+      "voice": "cs-CZ-VlastaNeural",
+      "audio": "audio/cs/p05_05_bruno.mp3"
+    },
+    {
+      "picture": 5,
+      "number": 6,
+      "speaker": "Fiona",
+      "english": "Do you think something is wrong?",
+      "audio_en": "audio/en/p05_06_fiona.mp3",
+      "text": "Myslíš, že se něco děje?",
+      "voice": "cs-CZ-VlastaNeural",
+      "audio": "audio/cs/p05_06_fiona.mp3"
+    },
+    {
+      "picture": 5,
+      "number": 7,
+      "speaker": "Benji",
+      "english": "Let’s eat. We’ll soon find out.",
+      "audio_en": "audio/en/p05_07_benji.mp3",
+      "text": "Najezme se. Brzy to zjistíme.",
+      "voice": "cs-CZ-VlastaNeural",
+      "audio": "audio/cs/p05_07_benji.mp3"
+    },
+    {
+      "picture": 6,
+      "number": 1,
+      "speaker": "Old Stag",
+      "english": "You all want to know why I called you here.",
+      "audio_en": "audio/en/p06_01_old_stag.mp3",
+      "text": "Všichni chcete vědět, proč jsem vás sem svolal.",
+      "voice": "cs-CZ-VlastaNeural",
+      "audio": "audio/cs/p06_01_old_stag.mp3"
+    },
+    {
+      "picture": 6,
+      "number": 2,
+      "speaker": "Animals",
+      "english": "Yes! Yes! Tell us!",
+      "audio_en": "audio/en/p06_02_animals.mp3",
+      "text": "Ano! Ano! Pověz nám to!",
+      "voice": "cs-CZ-VlastaNeural",
+      "audio": "audio/cs/p06_02_animals.mp3"
+    },
+    {
+      "picture": 6,
+      "number": 3,
+      "speaker": "Old Stag",
+      "english": "Our forest is old. Many trees are sick.",
+      "audio_en": "audio/en/p06_03_old_stag.mp3",
+      "text": "Náš les je starý. Mnoho stromů je nemocných.",
+      "voice": "cs-CZ-VlastaNeural",
+      "audio": "audio/cs/p06_03_old_stag.mp3"
+    },
+    {
+      "picture": 6,
+      "number": 4,
+      "speaker": "Fiona",
+      "english": "Can we help them?",
+      "audio_en": "audio/en/p06_04_fiona.mp3",
+      "text": "Můžeme jim pomoci?",
+      "voice": "cs-CZ-VlastaNeural",
+      "audio": "audio/cs/p06_04_fiona.mp3"
+    },
+    {
+      "picture": 6,
+      "number": 5,
+      "speaker": "Old Stag",
+      "english": "People may come and cut down the whole forest.",
+      "audio_en": "audio/en/p06_05_old_stag.mp3",
+      "text": "Možná přijdou lidé a pokácejí celý les.",
+      "voice": "cs-CZ-VlastaNeural",
+      "audio": "audio/cs/p06_05_old_stag.mp3"
+    },
+    {
+      "picture": 6,
+      "number": 6,
+      "speaker": "Bunny",
+      "english": "Even the healthy trees?",
+      "audio_en": "audio/en/p06_06_bunny.mp3",
+      "text": "I zdravé stromy?",
+      "voice": "cs-CZ-VlastaNeural",
+      "audio": "audio/cs/p06_06_bunny.mp3"
+    },
+    {
+      "picture": 6,
+      "number": 7,
+      "speaker": "Old Stag",
+      "english": "Yes. We need to save our home.",
+      "audio_en": "audio/en/p06_07_old_stag.mp3",
+      "text": "Ano. Musíme zachránit náš domov.",
+      "voice": "cs-CZ-VlastaNeural",
+      "audio": "audio/cs/p06_07_old_stag.mp3"
+    },
+    {
+      "picture": 6,
+      "number": 8,
+      "speaker": "Old Stag",
+      "english": "Does anyone have an idea?",
+      "audio_en": "audio/en/p06_08_old_stag.mp3",
+      "text": "Má někdo nějaký nápad?",
+      "voice": "cs-CZ-VlastaNeural",
+      "audio": "audio/cs/p06_08_old_stag.mp3"
+    },
+    {
+      "picture": 7,
+      "number": 1,
+      "speaker": "Logan",
+      "english": "I do. The woodpecker can find the sick trees.",
+      "audio_en": "audio/en/p07_01_logan.mp3",
+      "text": "Já ano. Datel může najít nemocné stromy.",
+      "voice": "cs-CZ-VlastaNeural",
+      "audio": "audio/cs/p07_01_logan.mp3"
+    },
+    {
+      "picture": 7,
+      "number": 2,
+      "speaker": "Woodpecker",
+      "english": "I can check every tree.",
+      "audio_en": "audio/en/p07_02_woodpecker.mp3",
+      "text": "Mohu prohlédnout každý strom.",
+      "voice": "cs-CZ-VlastaNeural",
+      "audio": "audio/cs/p07_02_woodpecker.mp3"
+    },
+    {
+      "picture": 7,
+      "number": 3,
+      "speaker": "Logan",
+      "english": "Then my beaver friends and I can cut the sick ones down.",
+      "audio_en": "audio/en/p07_03_logan.mp3",
+      "text": "Pak moji bobří přátelé a já můžeme ty nemocné pokácet.",
+      "voice": "cs-CZ-VlastaNeural",
+      "audio": "audio/cs/p07_03_logan.mp3"
+    },
+    {
+      "picture": 7,
+      "number": 4,
+      "speaker": "Fiona",
+      "english": "And leave the healthy trees?",
+      "audio_en": "audio/en/p07_04_fiona.mp3",
+      "text": "A zdravé stromy nechat stát?",
+      "voice": "cs-CZ-VlastaNeural",
+      "audio": "audio/cs/p07_04_fiona.mp3"
+    },
+    {
+      "picture": 7,
+      "number": 5,
+      "speaker": "Logan",
+      "english": "Yes. But we need help. Those trees are heavy.",
+      "audio_en": "audio/en/p07_05_logan.mp3",
+      "text": "Ano. Ale potřebujeme pomoc. Ty stromy jsou těžké.",
+      "voice": "cs-CZ-VlastaNeural",
+      "audio": "audio/cs/p07_05_logan.mp3"
+    },
+    {
+      "picture": 7,
+      "number": 6,
+      "speaker": "Bruno",
+      "english": "Where must we take them?",
+      "audio_en": "audio/en/p07_06_bruno.mp3",
+      "text": "Kam je musíme dopravit?",
+      "voice": "cs-CZ-VlastaNeural",
+      "audio": "audio/cs/p07_06_bruno.mp3"
+    },
+    {
+      "picture": 7,
+      "number": 7,
+      "speaker": "Logan",
+      "english": "Here, to the shore. People can find them here and take them away.",
+      "audio_en": "audio/en/p07_07_logan.mp3",
+      "text": "Sem, na břeh. Tady je lidé mohou najít a odvézt.",
+      "voice": "cs-CZ-VlastaNeural",
+      "audio": "audio/cs/p07_07_logan.mp3"
+    },
+    {
+      "picture": 7,
+      "number": 8,
+      "speaker": "Old Stag",
+      "english": "Who will help the beavers?",
+      "audio_en": "audio/en/p07_08_old_stag.mp3",
+      "text": "Kdo pomůže bobrům?",
+      "voice": "cs-CZ-VlastaNeural",
+      "audio": "audio/cs/p07_08_old_stag.mp3"
+    },
+    {
+      "picture": 8,
+      "number": 1,
+      "speaker": "Animals",
+      "english": "Me! Me! I’ll help!",
+      "audio_en": "audio/en/p08_01_animals.mp3",
+      "text": "Já! Já! Já pomůžu!",
+      "voice": "cs-CZ-VlastaNeural",
+      "audio": "audio/cs/p08_01_animals.mp3"
+    },
+    {
+      "picture": 8,
+      "number": 2,
+      "speaker": "Freddie",
+      "english": "Me too!",
+      "audio_en": "audio/en/p08_02_freddie.mp3",
+      "text": "Já také!",
+      "voice": "cs-CZ-VlastaNeural",
+      "audio": "audio/cs/p08_02_freddie.mp3"
+    },
+    {
+      "picture": 8,
+      "number": 3,
+      "speaker": "Dotty",
+      "english": "And me!",
+      "audio_en": "audio/en/p08_03_dotty.mp3",
+      "text": "A já!",
+      "voice": "cs-CZ-VlastaNeural",
+      "audio": "audio/cs/p08_03_dotty.mp3"
+    },
+    {
+      "picture": 8,
+      "number": 4,
+      "speaker": "Ollie",
+      "english": "We can all do something.",
+      "audio_en": "audio/en/p08_04_ollie.mp3",
+      "text": "Každý z nás může něco udělat.",
+      "voice": "cs-CZ-VlastaNeural",
+      "audio": "audio/cs/p08_04_ollie.mp3"
+    },
+    {
+      "picture": 8,
+      "number": 5,
+      "speaker": "Old Stag",
+      "english": "Good. But this will be hard work for everyone.",
+      "audio_en": "audio/en/p08_05_old_stag.mp3",
+      "text": "Dobře. Ale bude to těžká práce pro všechny.",
+      "voice": "cs-CZ-VlastaNeural",
+      "audio": "audio/cs/p08_05_old_stag.mp3"
+    },
+    {
+      "picture": 8,
+      "number": 6,
+      "speaker": "Old Stag",
+      "english": "Who will lead our team?",
+      "audio_en": "audio/en/p08_06_old_stag.mp3",
+      "text": "Kdo povede náš tým?",
+      "voice": "cs-CZ-VlastaNeural",
+      "audio": "audio/cs/p08_06_old_stag.mp3"
+    },
+    {
+      "picture": 10,
+      "number": 1,
+      "speaker": "Benji",
+      "english": "I will. I have a plan.",
+      "audio_en": "audio/en/p10_01_benji.mp3",
+      "text": "Já. Mám plán.",
+      "voice": "cs-CZ-VlastaNeural",
+      "audio": "audio/cs/p10_01_benji.mp3"
+    },
+    {
+      "picture": 10,
+      "number": 2,
+      "speaker": "Old Stag",
+      "english": "Tell us, Benji.",
+      "audio_en": "audio/en/p10_02_old_stag.mp3",
+      "text": "Pověz nám ho, Benji.",
+      "voice": "cs-CZ-VlastaNeural",
+      "audio": "audio/cs/p10_02_old_stag.mp3"
+    },
+    {
+      "picture": 10,
+      "number": 3,
+      "speaker": "Benji",
+      "english": "I have a map of the forest.",
+      "audio_en": "audio/en/p10_03_benji.mp3",
+      "text": "Mám mapu lesa.",
+      "voice": "cs-CZ-VlastaNeural",
+      "audio": "audio/cs/p10_03_benji.mp3"
+    },
+    {
+      "picture": 10,
+      "number": 4,
+      "speaker": "Benji",
+      "english": "I’ll show you where to start and what to do.",
+      "audio_en": "audio/en/p10_04_benji.mp3",
+      "text": "Ukážu vám, kde začít a co dělat.",
+      "voice": "cs-CZ-VlastaNeural",
+      "audio": "audio/cs/p10_04_benji.mp3"
+    },
+    {
+      "picture": 10,
+      "number": 5,
+      "speaker": "Benji",
+      "english": "We can do this together.",
+      "audio_en": "audio/en/p10_05_benji.mp3",
+      "text": "Společně to zvládneme.",
+      "voice": "cs-CZ-VlastaNeural",
+      "audio": "audio/cs/p10_05_benji.mp3"
+    },
+    {
+      "picture": 10,
+      "number": 6,
+      "speaker": "Animals",
+      "english": "Yes! Great! Thank you, Benji!",
+      "audio_en": "audio/en/p10_06_animals.mp3",
+      "text": "Ano! Výborně! Děkujeme, Benji!",
+      "voice": "cs-CZ-VlastaNeural",
+      "audio": "audio/cs/p10_06_animals.mp3"
+    }
+  ]
+}

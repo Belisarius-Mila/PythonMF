@@ -1873,3 +1873,10 @@ aby se write uvnitř nezablokoval vlastním sidecarem. Ověřeno 112 cílenými 
 - Problém: od čtvrtého obrazu nové šestky tvořily široký obrázek a dialog vyšší obsah než okno; Next byl pod viditelnou plochou. Testovaný stavový automat byl funkční, skutečný uživatel přesto nemohl běžně pokračovat.
 - Řešení: pro dialog pod obrazem vyhradit viewport grid 100svh se zmenšitelným řádkem obrázku (minmax(0,1fr), object-fit:contain) a samostatnými auto řádky dialogu a ovládání. Kontrolovat celý Next ve skutečném okně, nejen v AX stromu, HTTP či mocku Audio.
 - Ověření: screenshot skutečného přehrávače 4 / 1/7 ukázal obraz, text a celé Next v okně; následné živé pozorování dosáhlo 5 / 5/7. 53 cílených testů PASS. Přímý odkaz #picture=4 umožňuje opakovat ruční přejímku bez přeskakování zvukové brány.
+
+
+### 2026-11-10 — Český text a české čtení mají odlišný režim i frontu
+
+- Kontext: MMTX potřebuje postupně zapnout překlad jako text a pak i čtení, bez změn schválené angličtiny.
+- Řešení: explicitní tři režimy, samostatný překlad svázaný s anglickou větou a MP3, sekvence EN→CS s jedním aktivním Audio a tokenem. Čistě textový režim nepřehrává český zvuk; vypnutí za běhu češtinu zastaví a zneplatní callbacky. Chybu angličtiny nelze obejít přepínačem. Optional localStorage nesmí blokovat přehrávač.
+- Ověření: 58 cílených testů, všech 67 dvojic a ticho, změny režimu během řeči i v klidu, chyby a Repeat, historie, uložená volba i zablokované úložiště. Původních 98 podkladů a 9 účtenek beze změny; nové CZ MP3 oddělené a jednorázové.

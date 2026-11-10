@@ -2,16 +2,13 @@
 
 ## Aktuální stav
 
-- 2026-11-10 18:19 CET: Opravené rozložení od části 4: obraz, dialog a Next se vejdou do výšky okna (100svh, tři řádky, celý obraz bez ořezu). Přímý odkaz #picture=4 zachovává zvukovou bránu. 53 cílených testů PASS; skutečné Safari po opravě dosáhlo části 5 / Bruno 5/7. Nová statická brána PASS. Žádné nové MP3 ani p+n. Navazující opravu přebrat při integraci po dca70ad9; report `reports/mmtx_scene06_viewport_fix_20261110.md`.
-
-
-- 2026-11-10: Celá nová šestá scéna je lokálně hotová: části 1–10, 11 schválených ilustrací a 67 přesných EN replik / pevných MP3. Po Olliem a Freddiem následuje chatrč, večeře, sněm, Loganův návrh, dobrovolníci, ticho a Benjiho plán. Závěr má opravenou mapu s potokem ústícím do jezera; sedmá scéna se nyní nevytváří.
-- Část 9 je explicitně tichá, bez řečové bubliny, Audio, MP3, účtenky či placeného požadavku. Repeat je vypnuté, Next picture ručně pokračuje k Benjimu. Again vrací začátek až po poslední větě části 10. Přechod 03 → 031 od Bunnyho 4/8 i původní části 1–3 zůstávají zachované.
-- Nových 42 Azure požadavků / 2570 SSML znaků, předem zmrazený limit 4000, −10 %, 784368 B nových MP3. Stávající hlasy zachované, Logan Christopher podle původní mapy; nové vazby Old Stag Guy, Woodpecker Andrew, Animals Andrew. Žádné opakování požadavků. 35 dřívějších podkladů a 3 raw účtenky zůstaly byte-identické.
-- Ověření: 52 cílených testů PASS, dekódování 67/67, shodné mirrory a HTTP 101/101 přesné. Plná brána dokončené šestky: 2978 testů OK (5 SKIP), 444,963 s unit. Safari statické vizuální testy produkčního HTML/CSS potvrdily mapu na desktopu, tichý obraz a mapu i nejdelší Loganovu repliku v 390px iframe. Nejde o fyzický iPhone ani živý hlasový průchod; tyto přejímky zůstávají otevřené.
-- Dokončení částí 4–10 je uložené ve vlastním lokálním checkpointu po `3cdc5c26` (část 2) a `99e59145` (část 3). Vývoj zůstává v Datově worktree; Willův main a jeho zaparkované WIP se tímto krokem nemění. Servisní `06c34051` NEPŘEBÍRAT do main podruhé.
-- Nové p+n ani opakování prvního nasazení nebylo spuštěné. Historický první Terra job `4b261f77c13a77e845684bbbd90cc876` / fee535e5: gate 3412 PASS, push confirmed, Pages deploy zrušený po 600000 ms syncing_files, receipt attention / deployment uncertain. Není to aktuální veřejná přejímka. Původní report zůstává beze změny.
-- Další krok: místní přejímka celé šestky; případná integrace a p+n podle samostatného Mílova pokynu. Report `reports/mmtx_scene06_complete_20261110.md` obsahuje hlasy, rozpočet, otisky všech nových ilustrací, důkazy a rozsah následné integrace.
+- 2026-11-10: Celá nová šestka má 10 obrazů, 11 ilustrací (03/031), 67 EN + 67 CS MP3 a český překlad každé repliky. CZ: vypnuto → CZ: text → CZ: text + hlas, při čtení pořadí EN→CS a Next až po dočtení. Devátý obraz je tichý ve všech režimech. Závěr používá opravenou mapu s potokem do jezera.
+- Obrázek, dialog a ovládání se vejdou do výšky okna; při češtině platí toto rozložení pro všechny obrazy. Volba češtiny se pamatuje, při odmítnutém úložišti funguje EN výchozí stav. Přímý #picture=4 zachovává zvukovou bránu. Přepnutí za běhu bezpečně zastaví české čtení, nemůže obejít chybu angličtiny.
+- Míla nově výslovně zadal velké průhledné tlačítko vlevo dole na posledním obrazu pětky a poté p+n všeho Terrou. Roh 24 % × 28 %, min. 44 px, vede na šestku až při dokončeném friends-farewell, bez řeči/animace a se zavřeným slovníčkem. Běžný dokončovací odkaz zůstává. Český přepínač řeší právě dokončenou šestku.
+- 67 nových CS požadavků / 3977 SSML znaků z limitu 4000, Vlasta −10 %, bez retry. 98 původních podkladů a 9 raw EN účtenek beze změny. Dekódování 134/134 a HTTP 170/170 přesné. Celá cílená sada s rohem 70 PASS; plná místní brána češtiny 2984 OK (5 SKIP), 570,813 s unit. Publikační worker znovu ověří přesný integrovaný main včetně rohu.
+- Skutečné Safari ukázalo obě jazykové vrstvy i režim s hlasem, protokol doložil CS MP3 v živém průchodu. Fyzická iPhone, kvalita překladu/hlasu a tajný roh čekají na Mílovu přejímku. Poslední UI ovládání se nepřerušuje reloadem.
+- Vývojový balíček navazuje na 3cdc5c26, 99e59145, dca70ad9 a fe01d527. Main před integrací čistý na a459920b; GitHub audit ready, existuje jeden čekající Willův dokumentační commit a459920b nad origin 748cec00. Oba profilové workspaces připravené. Integrace převezme pouze MMTX a spojí historii obou checkoutů; servisní 06c34051 NEPŘEBÍRAT podruhé, Willovo zaparkované WIP zachovat.
+- Další krok: uložit Data checkpoint, integrovat do main, zarovnat čisté profily a jednou předat registrované submit_release(wait=True) pro project-mmtx. Nový balíček má samostatný request ID; původní neúspěšný Pages job 4b261f77c13a77e845684bbbd90cc876 se nepřepisuje ani automaticky neopakuje. Report `reports/mmtx_scene06_czech_20261110.md`.
 
 ## Stav
 
@@ -707,3 +704,40 @@ Navrhované další kroky:
 
 Technický důkaz:
 - 53 cílených testů PASS: všech 67 replik, ticho, historie, callbacky, přímé vstupy a bezpečné fallbacky bez automatického zvuku. Skutečné Safari: obraz 4 / 1/7 se všemi ovládacími prvky viditelnými, následně obraz 5 / 5/7. Statická brána PASS; dřívější plná 2978 OK není opakovaná přejímka této opravy. Report `reports/mmtx_scene06_viewport_fix_20261110.md`.
+
+
+### 2026-11-10 18:32 CET — Volitelný český text a čtení v celé nové šestce
+
+Hotovo:
+- Všech 67 vět ve všech deseti obrazech šestky má český překlad a samostatnou českou MP3. Přepínač nabízí vypnuto, text a text + hlas; čeština zní po angličtině a ovládání zůstává uvnitř okna. Devátý obraz zůstává tichý ve všech režimech.
+
+Rozhodnutí:
+- Míla zadal postupné zapnutí českého textu a pak i čtení. Rozsah tohoto checkpointu je deset obrazů právě dokončené šestky; doplňující otázka na starší hlavní scény zůstala bez odpovědi. České nahrávky používají stávající Azure hlas Vlasta a −10 %. Nové p+n tímto krokem neproběhlo.
+
+Další krok:
+- Mílova přejímka českých překladů, hlasu a přepínače v otevřeném náhledu.
+
+Navrhované další kroky:
+- Po samostatném zadání integrovat věcné commity včetně tohoto českého rozšíření a předat registrované p+n. Podle odpovědi případně sjednotit i starší hlavní scény 1–5.
+
+Technický důkaz:
+- 58 cílených testů PASS, Node VM 67 EN→CS dvojic a ticho, přepínání za běhu, chyby, stop, historie a úložiště. Dekódování 134/134, shodné mirrory, lokální HTTP 170/170 přesné. Plná místní brána českého rozšíření 2984 OK (5 SKIP), 570,813 s unit.
+- 67 jednorázových CS požadavků / 3977 SSML znaků z limitu 4000. 98 původních podkladů a 9 raw EN účtenek SHA-256 beze změny. Safari ukázalo čitelný dvojjazyčný text a režim s hlasem, protokol doložil české MP3 v živém průchodu. Fyzický iPhone a výslovné jazykové/hlasové hodnocení otevřené. Report `reports/mmtx_scene06_czech_20261110.md`.
+
+
+### 2026-11-10 18:40 CET — Skrytý přechod z posledního obrazu pětky a schválené p+n
+
+Hotovo:
+- Velké průhledné pole vlevo dole na dokončeném rozlučkovém obrazu pětky vede do celé nové šestky. Před závěrem, během řeči/animace a při slovníčku je nepřístupné. České režimy všech deseti obrazů jsou hotové.
+
+Rozhodnutí:
+- Míla výslovně autorizoval propojení a následné p+n celého balíčku Terrou. Integrovat jen MMTX, zachovat Willovo WIP i jeho historické projektové zápisy. Existující jeden čekající main commit a459920b je dokumentace dřívějšího vydaného úklidu interiéru, bez nové změny soukromých podkladů.
+
+Další krok:
+- Integrovat ověřený lokální balíček do čistého main a zavolat jediný registrovaný submit_release(wait=True).
+
+Navrhované další kroky:
+- Převzít přesnou účtenku jobu a veřejně ověřit nový head, šestku i odkaz z pětky. Fyzickou přejímku provede Míla.
+
+Technický důkaz:
+- Plná místní brána českého rozšíření 2984 OK (5 SKIP), 570,813 s unit; poslední cílená sada 70 PASS včetně rohu a pětky. Publikační worker ověří celý přesný main znovu. 134 MP3 decode, 170 HTTP souborů přesné, 98 původních podkladů a 9 EN účtenek beze změny. Kanonický živý audit main a459920b / origin 748cec00, ready a 2 připravené profily.

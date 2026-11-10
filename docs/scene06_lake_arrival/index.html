@@ -7,8 +7,8 @@
     <link rel="preload" href="ollie_dinner.webp" as="image" type="image/webp">
     <link rel="prefetch" href="freddie_jump.webp" as="image" type="image/webp">
     <link rel="prefetch" href="freddie_conversation.webp" as="image" type="image/webp">
-    <link rel="stylesheet" href="styles.css?v=20261110viewport2">
-    <script src="script.js?v=20261110viewport2" defer></script>
+    <link rel="stylesheet" href="styles.css?v=20261110czech1">
+    <script src="script.js?v=20261110czech1" defer></script>
   </head>
   <body>
     <main>
@@ -17,6 +17,7 @@
         <nav class="hud" aria-label="Scene controls">
           <a class="control back" href="../scene05_log_bridge/index.html" aria-label="Zpět k mostu">↩</a>
           <div class="actions">
+            <button class="control" id="languageButton" type="button" aria-pressed="false" disabled>CZ: vypnuto</button>
             <button class="control" id="repeatButton" type="button" disabled>↻ Repeat</button>
             <button class="control" id="restartButton" type="button" hidden>↺ Again</button>
           </div>
@@ -27,6 +28,7 @@
         <section class="speech" id="speechBubble" aria-live="polite" hidden>
           <div class="speech-heading"><strong id="speakerName"></strong><span id="lineNumber"></span></div>
           <p id="speechText"></p>
+          <p class="translation" id="czechText" lang="cs" hidden></p>
         </section>
         <div class="footer-controls">
           <span class="status" id="status" role="status">Loading…</span>
