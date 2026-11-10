@@ -1,12 +1,35 @@
 <!doctype html>
-<html lang="cs"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="theme-color" content="#27483c"><title>Scene 6 — Arrival at the Lake</title><link rel="stylesheet" href="styles.css"></head>
-<body><main class="shell"><section class="scene" aria-label="Scéna 6: příchod k jezeru">
-<img id="picture" class="picture" src="../scene05_log_bridge/scene05_friends_farewell_smooth_q90.webp" alt="Kamarádi se loučí s Loganem" draggable="false">
-<div class="hud"><a class="control" id="back" href="../scene05_log_bridge/index.html" aria-label="Zpět ke scéně s mostem">↩</a><div><button class="control" id="language" type="button" aria-label="Změnit jazykový režim">EN + CZ</button> <button class="control" id="repeat" type="button" disabled aria-label="Zopakovat aktuální větu">🔁 Repeat</button></div></div>
-<div class="bubble hidden" id="speech" aria-live="polite"><strong id="speaker"></strong><span id="en"></span><span id="cz"></span></div>
-<div class="notes" id="notes" aria-label="Zvuky jezerní písničky"></div>
-<button class="hotspot hidden" id="hotspot" type="button"></button>
-<button class="next hidden" id="next" type="button" aria-label="Další věta">Next ▶</button>
-<button class="song hidden" id="song" type="button" aria-label="Znovu přehrát jezerní písničku">♪</button>
-<button class="gate" id="gate" type="button"><strong>Klepni a poslouchej</strong><span>Tap and listen</span></button>
-</section></main><script src="story.js"></script><script src="audio_manifest.js"></script><script src="script.js"></script></body></html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+    <title>MMTX — The Lake</title>
+    <link rel="stylesheet" href="styles.css?v=20261110opening1">
+    <script src="script.js?v=20261110opening1" defer></script>
+  </head>
+  <body>
+    <main>
+      <section class="scene" aria-label="Scene 6 — The Lake">
+        <img class="scene-image" src="arrival_side_view.webp" width="1672" height="941" alt="Benji, Bunny, Bruno, Fiona and Sunny look across the lake at clouds shaped like rabbit ears." draggable="false">
+        <nav class="hud" aria-label="Scene controls">
+          <a class="control back" href="../scene05_log_bridge/index.html" aria-label="Zpět k mostu">↩</a>
+          <div class="actions">
+            <button class="control" id="repeatButton" type="button" disabled>↻ Repeat</button>
+            <button class="control" id="restartButton" type="button" hidden>↺ Again</button>
+          </div>
+        </nav>
+        <button class="audio-gate" id="startButton" type="button" disabled>
+          <span class="start-card"><strong>Tap and listen</strong><small>Klepni a poslouchej</small></span>
+        </button>
+        <section class="speech" id="speechBubble" aria-live="polite" hidden>
+          <div class="speech-heading"><strong id="speakerName"></strong><span id="lineNumber"></span></div>
+          <p id="speechText"></p>
+        </section>
+        <div class="footer-controls">
+          <span class="status" id="status" role="status">Loading…</span>
+          <button class="control next" id="nextButton" type="button" hidden disabled>Next ▶</button>
+        </div>
+      </section>
+    </main>
+  </body>
+</html>

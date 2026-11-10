@@ -1,12 +1,12 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
-- 2026-11-02 08:18 CET: kompletní audio scény 6 je publikované na GitHub Pages, 144/144 stop (72 EN + 72 CZ). Původních 16 MP3 zachovaných; nových 128 Azure MP3 a izolace rozpočtového testu vydané do b0b4e172ab8b2fe69216af9d7520a23e22e2f624.
-- Terra 6.1/high dokončila jediné nové registrované p+n osmi commitů. Účtenka 81db27cc7794d9ba88dcd888156b35b6: completed, push_state/deployment_state=confirmed. Pages workflow 41405199009, deployment 7486464591, HTTP smoke 200; chráněné služby beze změny.
-- Plná publikační brána prošla: 2273 testů, 0 chyb, 18 přeskočených, 342,3 s celkem (unit 332,552 s). Rozpočtový test je izolovaný od skutečného FFmpeg; cílená Azure/builder sada 11 PASS v běžném i službovém PATH. Produkční generátor a službové prostředí se neměnily.
-- Jedna Adamova kontrola: GitHub/main přesně na vydaném headu; veřejná šestka má HTML, story.json, audio_bindings.json a všech 144 MP3 HTTP 200 a přesné bajty včetně otisků audio vazeb (147/147). Důkaz logs/mmtx_scene06_terra_public_verification_20261102.json. Cockpit zdravý se stejným PID a code_stamp ae3b321d9492092a.
-- Caller převzal konečnou účtenku; returned_to_adam=false je portálový příznak, ne důvod k retry. Původní neúspěšná účtenka zachovaná. Tento výsledkový zápis je místní checkpoint pro další balíček; další p+n se nespouští.
-- Další krok: prakticky projít a poslechnout celou scénu Mac/iPhone. Hlasové ukázky přijaté; fyzická přejímka celé scény nadále NEOVĚŘENO.
+- 2026-11-10 15:17 CET: Data v `data/parallel-20261104` připravil první obraz NOVÉ šesté scény, The Lake. Přijatá boční varianta, všech sedm přesných anglických replik, Next / Repeat / Again a návrat k mostu. Další obrazy se zatím neimplementují.
+- Sedm pevných Azure MP3, stejná hlasová ID jako scéna 5, tempo −10 %, 410 účtovaných znaků / 7 požadavků. Dekódování, text/hlas/hash a oba mirrory ověřené; nic se znovu negeneruje.
+- 35 cílených testů PASS a rychlá statická brána PASS; plná místní brána 2960 testů OK (5 SKIP). Skutečné lokální Safari ukázalo první větu i konečný stav 7/7, desktop vizuálně zkontrolovaný; fyzický iPhone a hlasová přejímka zůstávají otevřené.
+- Míla výslovně zadal Terra p+n a následné napojení scény 5 pro produkční zkoušku. Nová šestka dosud není publikovaná. Předchozí samostatné vydání MMTX do `51a2cabe` skončilo potvrzeně; není důkazem nové šestky. Kanonický main má Willovy neuzavřené změny (requirements a dva scénáře); zachovat je.
+- Datova větev má dřívější Willův WIP úklid staré šestky; ten se zachovává a do nového commitu se nevezme. Historické záznamy o staré šestce nejsou aktuální stav nové implementace.
+- Další krok: konkrétní lokální commit a převzetí do uvolněného kanonického main; poté registrované p+n a samostatný vstup ze scény 5. Report `reports/mmtx_scene06_opening_20261110.md`.
 <!-- SAMANTHA_CURRENT_STATUS_END -->
 
 # Handoff pracovního proudu: MMTX
@@ -890,3 +890,21 @@ Technický důkaz:
 - Účtenka 81db27cc7794d9ba88dcd888156b35b6 completed, push_state/deployment_state=confirmed; osm commitů do b0b4e172ab8b2fe69216af9d7520a23e22e2f624. Plná brána 2273 testů / 0 chyb / 18 přeskočených, 342,3 s (unit 332,552 s), protected_services_unchanged=true.
 - Pages workflow 41405199009, deployment 7486464591, smoke HTTP 200. Jedna Adamova kontrola: skutečný GitHub head shodný; veřejných 147/147 souborů (HTML, dva JSON, 144 MP3) HTTP 200 a byte/SHA-256 shoda s vydanými zdroji. Důkaz logs/mmtx_scene06_terra_public_verification_20261102.json.
 - Cockpit health OK, stejný PID 1866 a code_stamp ae3b321d9492092a. Caller účtenku převzal; returned_to_adam=false nepředstavuje portálové doručení a není důvodem retry. Bez dalšího vydání nebo restartu Cockpitu; následný výsledkový zápis místně pro další balíček. Fyzický poslech/proklik celé scény NEOVĚŘENO.
+
+
+### 2026-11-10 15:17 CET — Nová šestka, první obraz a anglické MP3
+
+Hotovo:
+- První obraz The Lake má přijatý boční pohled a sedm schválených replik s pevným anglickým zvukem. Next, Repeat, Again, čitelné bubliny nad vodou a návrat k mostu.
+
+Rozhodnutí:
+- Míla zadal vývoj pouze prvního obrazu, anglické MP3, Terra p+n a následné napojení z pětky pro produkční zkoušku. Další hotové ilustrace tím nejsou implementované.
+
+Další krok:
+- Převzít konkrétní ověřený commit do uvolněného kanonického main a provést autorizované p+n.
+
+Navrhované další kroky:
+- Po vydání připojit konec pětky a fyzicky ověřit přechod a hlasy na Mílově zařízení.
+
+Technický důkaz:
+- 35 cílených testů PASS, syntaxe/statická brána PASS, 7/7 MP3 dekódovaných, oba mirrory a 13 HTTP souborů přesné. Azure 7 unikátních požadavků / 410 znaků, bez retry. Lokální Safari: první věta i stav 7/7. Plná brána 2960 testů OK (5 SKIP); publikace nové šestky dosud neprovedena. Podrobnosti a otisky v `reports/mmtx_scene06_opening_20261110.md`.

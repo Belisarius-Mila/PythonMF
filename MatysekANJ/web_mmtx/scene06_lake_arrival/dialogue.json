@@ -1,0 +1,16 @@
+{
+  "schema_version": 1,
+  "scene": 6,
+  "picture": 1,
+  "title": "The Lake",
+  "rate": "-10%",
+  "lines": [
+    {"speaker": "Benji", "voice": "en-US-AndrewNeural", "text": "Look! The lake!", "audio": "audio/en/01_benji.mp3"},
+    {"speaker": "Fiona", "voice": "en-US-JennyNeural", "text": "It’s beautiful. Look at the blue water.", "audio": "audio/en/02_fiona.mp3"},
+    {"speaker": "Sunny", "voice": "en-US-MichelleNeural", "text": "And look at those clouds!", "audio": "audio/en/03_sunny.mp3"},
+    {"speaker": "Bunny", "voice": "en-US-AnaNeural", "text": "They look like my ears!", "audio": "audio/en/04_bunny.mp3"},
+    {"speaker": "Bruno", "voice": "en-US-GuyNeural", "text": "Two ears here. Two in the sky.", "audio": "audio/en/05_bruno.mp3"},
+    {"speaker": "Sunny", "voice": "en-US-MichelleNeural", "text": "Four ears! Can you hear us better?", "audio": "audio/en/06_sunny.mp3"},
+    {"speaker": "Bunny", "voice": "en-US-AnaNeural", "text": "Yes. So please don’t shout!", "audio": "audio/en/07_bunny.mp3"}
+  ]
+}
