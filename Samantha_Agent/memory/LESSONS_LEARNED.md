@@ -1859,3 +1859,10 @@ ověřit skutečně servírovaný kód i roli a zapsat launch intent před boots
 Pro společnou operaci použít odlišný vnější zámek od atomic_write_json účtenky,
 aby se write uvnitř nezablokoval vlastním sidecarem. Ověřeno 112 cílenými a
 2964 plnými testy (5 SKIP); jeden živý cached save, nula modelů či spuštěných služeb.
+
+
+### 2026-11-10 — Tichý příběhový obraz není audio replika
+
+- Kontext: nová šestá scéna MMTX, část 9 má podle schváleného scénáře jen mlčení.
+- Řešení: explicitní tichý krok v katalogu/dialogu, nulové repliky, žádné vytvoření Audio ani placené syntézy; schovat a vyprázdnit předchozí bublinu, vypnout Repeat a ponechat ruční Next picture. Vizuální přechod oddělit od počtu vyslovených vět.
+- Ověření: Node VM prošel 67 mluvených replik i tichý krok, pozdní callback a Back/Forward v tichu nevytvořily Audio; syntetický builder ticha nezaložil účtenku, MP3 ani požadavek. Safari ověřilo viditelný obraz bez bubliny. Celkem 52 cílených kontrol PASS; fyzická přejímka je samostatná.

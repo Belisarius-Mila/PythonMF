@@ -19,7 +19,7 @@ let playing = false;
 let failed = false;
 
 function updateControls() {
-  repeatButton.disabled = index < 0 || playing;
+  repeatButton.disabled = index < 0 || playing || Boolean(lines[index]?.silent);
   nextButton.disabled = playing || failed || index >= lines.length - 1;
   nextButton.hidden = index < 0 || index >= lines.length - 1;
   restartButton.hidden = index < 0 || index !== lines.length - 1 || playing || failed;
@@ -49,20 +49,30 @@ function playLine(newIndex) {
   const frame = line.frame;
   scene.dataset.picture = String(picture.id);
   scene.dataset.image = frame.image;
+  scene.dataset.layout = picture.layout || "overlay";
   scene.setAttribute("aria-label", `Scene 6 — ${picture.title}`);
   sceneImage.src = frame.image;
   sceneImage.alt = frame.alt;
   sceneImage.width = frame.width;
   sceneImage.height = frame.height;
+  startButton.hidden = true;
+  status.classList.remove("error");
+  failed = false;
+  if (line.silent) {
+    speakerName.textContent = "";
+    speechText.textContent = "";
+    lineNumber.textContent = "";
+    speechBubble.hidden = true;
+    status.textContent = picture.title;
+    updateControls();
+    return;
+  }
   const token = generation;
   speakerName.textContent = line.speaker;
   speechText.textContent = line.text;
   lineNumber.textContent = `${line.pictureLine} / ${picture.line_count}`;
   speechBubble.hidden = false;
-  startButton.hidden = true;
   status.textContent = "";
-  status.classList.remove("error");
-  failed = false;
   playing = true;
   updateControls();
   const audio = new Audio(line.audio);
@@ -107,26 +117,29 @@ function validImage(frame) {
     Number.isInteger(frame.width) && frame.width > 0 && Number.isInteger(frame.height) && frame.height > 0;
 }
 
-readJson("pictures.json?v=20261110picture3a")
+readJson("pictures.json?v=20261110complete1")
   .then((catalog) => {
-    const lineCounts = [7, 10, 8];
-    if (catalog.schema_version !== 1 || !Array.isArray(catalog.pictures) || catalog.pictures.length !== 3 ||
+    const lineCounts = [7, 10, 8, 7, 7, 8, 8, 6, 0, 6];
+    if (catalog.schema_version !== 1 || !Array.isArray(catalog.pictures) || catalog.pictures.length !== 10 ||
         !catalog.pictures.every((picture, n) => picture.id === n + 1 &&
           picture.dialogue === (n === 0 ? "dialogue.json" : `dialogue_${String(picture.id).padStart(2, "0")}.json`) &&
           picture.line_count === lineCounts[n] && typeof picture.title === "string" && validImage(picture) &&
+          (picture.layout === undefined || picture.layout === "below") &&
           (picture.image_changes === undefined || (Array.isArray(picture.image_changes) &&
             picture.image_changes.every((frame, i, frames) => validImage(frame) && Number.isInteger(frame.from_line) &&
               frame.from_line > 1 && frame.from_line <= picture.line_count &&
               (i === 0 || frame.from_line > frames[i - 1].from_line)))))) throw new Error("pictures");
     return Promise.all(catalog.pictures.map((picture) =>
-      readJson(`${picture.dialogue}?v=20261110picture3a`).then((data) => {
+      readJson(`${picture.dialogue}?v=20261110complete1`).then((data) => {
         const audioPattern = picture.id === 1 ? /^audio\/en\/[0-9]{2}_[a-z]+\.mp3$/ :
-          new RegExp(`^audio/en/p${String(picture.id).padStart(2, "0")}_[0-9]{2}_[a-z]+\\.mp3$`);
+          new RegExp(`^audio/en/p${String(picture.id).padStart(2, "0")}_[0-9]{2}_[a-z_]+\\.mp3$`);
         if (data.schema_version !== 1 || data.picture !== picture.id || !Array.isArray(data.lines) ||
+            (picture.id === 9) !== (data.silent === true) ||
             data.lines.length !== picture.line_count || !data.lines.every((line) =>
               typeof line.speaker === "string" && typeof line.text === "string" && audioPattern.test(line.audio))) {
           throw new Error("dialogue");
         }
+        if (data.silent) return [{picture, frame: picture, silent: true, pictureLine: 0}];
         return data.lines.map((line, n) => {
           let frame = picture;
           for (const change of picture.image_changes || []) {

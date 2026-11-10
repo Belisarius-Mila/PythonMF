@@ -1,0 +1,50 @@
+{
+  "schema_version": 1,
+  "picture": 5,
+  "title": "Dinner by the Fire",
+  "rate": "-10%",
+  "lines": [
+    {
+      "speaker": "Bunny",
+      "voice": "en-US-AnaNeural",
+      "text": "Good food and a warm fire. I like it here.",
+      "audio": "audio/en/p05_01_bunny.mp3"
+    },
+    {
+      "speaker": "Fiona",
+      "voice": "en-US-JennyNeural",
+      "text": "But why did the old stag call us here?",
+      "audio": "audio/en/p05_02_fiona.mp3"
+    },
+    {
+      "speaker": "Sunny",
+      "voice": "en-US-MichelleNeural",
+      "text": "Maybe he wants a party.",
+      "audio": "audio/en/p05_03_sunny.mp3"
+    },
+    {
+      "speaker": "Bunny",
+      "voice": "en-US-AnaNeural",
+      "text": "Then we can bring some food!",
+      "audio": "audio/en/p05_04_bunny.mp3"
+    },
+    {
+      "speaker": "Bruno",
+      "voice": "en-US-GuyNeural",
+      "text": "He asked every animal to come. Maybe he needs help.",
+      "audio": "audio/en/p05_05_bruno.mp3"
+    },
+    {
+      "speaker": "Fiona",
+      "voice": "en-US-JennyNeural",
+      "text": "Do you think something is wrong?",
+      "audio": "audio/en/p05_06_fiona.mp3"
+    },
+    {
+      "speaker": "Benji",
+      "voice": "en-US-AndrewNeural",
+      "text": "Let’s eat. We’ll soon find out.",
+      "audio": "audio/en/p05_07_benji.mp3"
+    }
+  ]
+}

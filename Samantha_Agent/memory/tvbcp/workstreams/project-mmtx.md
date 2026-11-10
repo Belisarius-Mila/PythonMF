@@ -1,13 +1,13 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
-- 2026-11-10: Lokálně hotové části 1–3 nové šestky, čtyři ilustrace a 25 přesných EN replik / pevných MP3. Druhý obraz navazuje na třetí část Jumping Practice. Obraz 03 zobrazuje první tři věty; od Bunnyho otázky (4/8) přechází na obraz 031 s Freddiem ve vodě. Repeat zachová obraz, Again vrací začátek šestky.
-- Třetí část přidává 8 unikátních Azure požadavků / 458 SSML znaků, limit 500, tempo −10 %. Freddie Guy a Dotty Jenny podle původní hlasové mapy. Všech 23 původních podkladů a obě dřívější raw účtenky zůstaly byte-identické; žádný starší požadavek se neopakoval.
-- Ověření třetí části: 59 cílených kontrol PASS, po posledním CSS doplnění 21 relevantních testů PASS; dekódování 25/25, mirrory shodné, lokální HTTP 39/39 přesné. Plná brána třetí části: 2974 testů OK (5 SKIP), 620,446 s unit. Ruční přejímka obou nových obrazů a hlasů na Mílově zařízení včetně fyzického iPhonu zůstává otevřená.
-- První p+n proběhlo JEDNOU Terrou pro main fee535e5, job `4b261f77c13a77e845684bbbd90cc876`: brána 3412 PASS, push confirmed, Pages run `42839271179` build success / deploy failure po 600000 ms při syncing_files. Historická účtenka attention / deployment uncertain, HTML po zrušení HTTP 404 v 16:10 CET. Není to aktuální veřejná přejímka. Nový pokus nebyl spuštěný ani schválený pokračováním třetí částí.
-- Druhá část je uložená v `3cdc5c26`; třetí je uložená ve vlastním místním checkpointu. Obě jsou mimo zmrazený první balíček. Do main se nyní nezasahuje. Willovo WIP zůstává zaparkované ve stashi `550024e17da59eb258556f5d3f0979650d5a4d30` a ověřené privátní záloze; při zahájení tohoto vývoje byly oba checkouty čisté.
-- Data servisní commit `06c34051` pouze zaznamenal již dříve provedený úklid původní šestky; do main NEPŘEBÍRAT podruhé. Neprovádět reset, pop/drop Willova stashe ani nové nasazení bez odpovídajícího pokynu.
-- Další krok: místní přejímka třetí části; další vývoj nebo samostatně autorizované vydání podle Mílova pokynu. Report `reports/mmtx_scene06_picture3_20261110.md`; původní release report se nepřepisuje.
+- 2026-11-10: Celá nová šestá scéna je lokálně hotová: části 1–10, 11 schválených ilustrací a 67 přesných EN replik / pevných MP3. Po Olliem a Freddiem následuje chatrč, večeře, sněm, Loganův návrh, dobrovolníci, ticho a Benjiho plán. Závěr má opravenou mapu s potokem ústícím do jezera; sedmá scéna se nyní nevytváří.
+- Část 9 je explicitně tichá, bez řečové bubliny, Audio, MP3, účtenky či placeného požadavku. Repeat je vypnuté, Next picture ručně pokračuje k Benjimu. Again vrací začátek až po poslední větě části 10. Přechod 03 → 031 od Bunnyho 4/8 i původní části 1–3 zůstávají zachované.
+- Nových 42 Azure požadavků / 2570 SSML znaků, předem zmrazený limit 4000, −10 %, 784368 B nových MP3. Stávající hlasy zachované, Logan Christopher podle původní mapy; nové vazby Old Stag Guy, Woodpecker Andrew, Animals Andrew. Žádné opakování požadavků. 35 dřívějších podkladů a 3 raw účtenky zůstaly byte-identické.
+- Ověření: 52 cílených testů PASS, dekódování 67/67, shodné mirrory a HTTP 101/101 přesné. Plná brána dokončené šestky: 2978 testů OK (5 SKIP), 444,963 s unit. Safari statické vizuální testy produkčního HTML/CSS potvrdily mapu na desktopu, tichý obraz a mapu i nejdelší Loganovu repliku v 390px iframe. Nejde o fyzický iPhone ani živý hlasový průchod; tyto přejímky zůstávají otevřené.
+- Dokončení částí 4–10 je uložené ve vlastním lokálním checkpointu po `3cdc5c26` (část 2) a `99e59145` (část 3). Vývoj zůstává v Datově worktree; Willův main a jeho zaparkované WIP se tímto krokem nemění. Servisní `06c34051` NEPŘEBÍRAT do main podruhé.
+- Nové p+n ani opakování prvního nasazení nebylo spuštěné. Historický první Terra job `4b261f77c13a77e845684bbbd90cc876` / fee535e5: gate 3412 PASS, push confirmed, Pages deploy zrušený po 600000 ms syncing_files, receipt attention / deployment uncertain. Není to aktuální veřejná přejímka. Původní report zůstává beze změny.
+- Další krok: místní přejímka celé šestky; případná integrace a p+n podle samostatného Mílova pokynu. Report `reports/mmtx_scene06_complete_20261110.md` obsahuje hlasy, rozpočet, otisky všech nových ilustrací, důkazy a rozsah následné integrace.
 <!-- SAMANTHA_CURRENT_STATUS_END -->
 
 # TVBCP: MMTX
@@ -1565,3 +1565,22 @@ Technický důkaz:
 
 Rizika a další krok:
 - Obě nové ilustrace a hlasy čekají na místní přejímku na Mílově zařízení včetně fyzického iPhonu. Obrazy 2+3 nejsou publikované tímto krokem; případné vydání vyžaduje samostatné zadání. Další krok je přejímka nebo další vývoj podle Míly.
+
+
+### 2026-11-10 16:52 CET — Dokončená šestá scéna až k Benjiho plánu
+
+Hotovo:
+- Nová šestka má celý průchod částmi 1–10, 11 schválených ilustrací a 67 anglických MP3. Tichý devátý obraz je samostatný ručně ovládaný krok bez řeči; závěr používá opravenou mapu. Dialogy nových částí jsou pod obrázkem, takže nezakrývají postavy ani mapu.
+
+Rozhodnutí:
+- Míla výslovně zadal pokračovat až do konce všemi zbývajícími částmi šestky. Scéna 7 není součástí tohoto zadání. Jde o místní dokončení; nové p+n ani opakování nejistého prvního nasazení tímto krokem neproběhlo.
+
+Další krok:
+- Místně převzít celý příběh a nové hlasy na Mílově zařízení.
+
+Navrhované další kroky:
+- Po samostatném pokynu integrovat věcné commity částí 2, 3 a dokončení 4–10 a předat registrované p+n. Servisní úklid 06c34051 nepřebírat podruhé; Willovo WIP ponechat zachované.
+
+Technický důkaz:
+- 52 cílených kontrol PASS, přesné otisky schválených dialogů, všech 67 MP3 dekódovatelných, shodné mirrory a 101 HTTP souborů s přesnými bajty. Plná brána dokončené šestky: 2978 testů OK (5 SKIP), 444,963 s unit. Node VM ověřil celý příběh, nulové Audio během ticha, Repeat/chyby, historii i závěrečný Again.
+- 42 jednorázových Azure požadavků / 2570 SSML znaků z limitu 4000; 35 starších podkladů a 3 raw účtenky SHA-256 beze změny. Safari vizuální testy produkčního HTML/CSS prošly pro mapu, ticho a 390px rozložení; fyzický iPhone a hlasová přejímka otevřené. Report `reports/mmtx_scene06_complete_20261110.md`.

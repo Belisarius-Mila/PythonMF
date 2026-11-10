@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import importlib.util
+import hashlib
 import json
 from pathlib import Path
 import shutil
@@ -119,6 +120,94 @@ class Scene06OpeningTests(unittest.TestCase):
                                   synthesizer=synth, validator=lambda x: None)
             self.assertEqual((again["new_requests"], len(calls)), (0, 25))
 
+    def test_remaining_approved_transcript_voices_images_and_audio(self):
+        # Frozen from the approved scenario, independently of the player data.
+        transcripts = {
+            4: "37be37a35779be865cd53a5b64b781447b059c489c6b4fdcf1cb9e5602daf212",
+            5: "21268b60e92cdc16dcad53582d6c42d8a0d0a5decbfa8da9056d5f4ece9b4129",
+            6: "aded26ea3b3fe87c12dd5e4e52a0a63cf99dc509173fdacc1f6a2672617300f9",
+            7: "f46a687d32f693aef7b4790c1d0f73c1e19e52e5df9dc92a8974532173d15484",
+            8: "d9200e6ac653a638cf124efc85086aa34432f7ccd125fd57e64bda36c8779af0",
+            9: "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+            10: "dd957f20ccdb8269a45af54d6d1449f5aecd5ce48f057a066dc75a33f00ddab7",
+        }
+        voices = {"Benji": "Andrew", "Bunny": "Ana", "Bruno": "Guy", "Fiona": "Jenny",
+                  "Sunny": "Michelle", "Logan": "Christopher", "Old Stag": "Guy",
+                  "Animals": "Andrew", "Woodpecker": "Andrew", "Freddie": "Guy",
+                  "Dotty": "Jenny", "Ollie": "Andrew"}
+        total = 0
+        for picture, expected in transcripts.items():
+            rows = builder.dialogue(picture=picture)["lines"]
+            text = json.dumps([(x["speaker"], x["text"]) for x in rows], ensure_ascii=False, separators=(",", ":"))
+            self.assertEqual(hashlib.sha256(text.encode()).hexdigest(), expected)
+            for row in rows:
+                self.assertEqual(row["voice"], f'en-US-{voices[row["speaker"]]}Neural')
+            total += builder.check(picture=picture)["english_mp3"]
+        self.assertEqual(total, 42)
+        pictures = json.loads((DOCS / "pictures.json").read_text())["pictures"]
+        self.assertEqual([p["line_count"] for p in pictures], [7, 10, 8, 7, 7, 8, 8, 6, 0, 6])
+        for picture in pictures[3:]:
+            self.assertEqual(picture["layout"], "below")
+            self.assertTrue((DOCS / picture["image"]).is_file())
+
+    def test_silence_requires_no_transport_receipt_or_audio(self):
+        with tempfile.TemporaryDirectory() as folder:
+            docs, mirror, receipt = self.fixture(folder)
+            mirror.mkdir()
+            for root in (docs, mirror):
+                (root / "dialogue_09.json").write_bytes((DOCS / "dialogue_09.json").read_bytes())
+            calls = []
+            result = builder.build(docs=docs, mirror=mirror, receipt=receipt, picture=9,
+                                   synthesizer=lambda *a, **k: calls.append(a))
+            self.assertEqual((result["assets"], result["new_requests"], result["reserved_characters"]), (0, 0, 0))
+            self.assertEqual(calls, [])
+            self.assertFalse(receipt.exists())
+            self.assertFalse((docs / "audio").exists())
+            self.assertFalse((docs / "audio_manifest_09.json").exists())
+
+    def test_silence_cannot_accidentally_become_a_spoken_line(self):
+        with tempfile.TemporaryDirectory() as folder:
+            docs, mirror, receipt = self.fixture(folder)
+            data = builder.dialogue(picture=9)
+            data["lines"] = [{"speaker": "Animals", "voice": "en-US-AndrewNeural",
+                              "text": "Everyone looks down.", "audio": "audio/en/p09_01_animals.mp3"}]
+            (docs / "dialogue_09.json").write_text(json.dumps(data))
+            calls = []
+            with self.assertRaisesRegex(RuntimeError, "Neplatný dialog"):
+                builder.build(docs=docs, mirror=mirror, receipt=receipt, picture=9,
+                              synthesizer=lambda *a, **k: calls.append(a))
+            self.assertEqual(calls, [])
+            self.assertFalse(receipt.exists())
+
+    def test_final_audio_build_preserves_all_three_previous_pictures(self):
+        with tempfile.TemporaryDirectory() as folder:
+            docs, mirror, first_receipt = self.fixture(folder)
+            for picture in range(2, 11):
+                name = builder.names(picture)[0]
+                (docs / name).write_bytes((DOCS / name).read_bytes())
+            calls = []
+            def synth(text, **kwargs):
+                calls.append(text)
+                kwargs["budget"].reserve(builder.ssml_parts(text, kwargs["voice"])[1])
+                return b"ID3" + text.encode() * 100
+            receipts = [first_receipt.with_name(f"receipt_{n}.json") for n in range(1, 11)]
+            for picture in range(1, 4):
+                builder.build(docs=docs, mirror=mirror, receipt=receipts[picture-1], picture=picture,
+                              synthesizer=synth, validator=lambda x: None)
+            before = {p.relative_to(docs): p.read_bytes() for p in docs.rglob("*") if p.is_file()}
+            old_receipts = [p.read_bytes() for p in receipts[:3]]
+            for picture in (4, 5, 6, 7, 8, 10):
+                result = builder.build(docs=docs, mirror=mirror, receipt=receipts[picture-1], picture=picture,
+                                       synthesizer=synth, validator=lambda x: None)
+                self.assertEqual(result["new_requests"], builder.LINE_COUNTS[picture])
+                again = builder.build(docs=docs, mirror=mirror, receipt=receipts[picture-1], picture=picture,
+                                      synthesizer=synth, validator=lambda x: None)
+                self.assertEqual(again["new_requests"], 0)
+            self.assertEqual(len(calls), 67)
+            self.assertEqual([p.read_bytes() for p in receipts[:3]], old_receipts)
+            for path, content in before.items():
+                self.assertEqual((docs / path).read_bytes(), content, str(path))
+
     def fixture(self, folder):
         root = Path(folder)
         docs, mirror = root / "docs", root / "mirror"
@@ -200,6 +289,7 @@ class Audio {
 const data = JSON.parse(fs.readFileSync(process.argv[2], 'utf8'));
 const second = JSON.parse(fs.readFileSync(path.join(path.dirname(process.argv[2]),'dialogue_02.json'),'utf8'));
 const third = JSON.parse(fs.readFileSync(path.join(path.dirname(process.argv[2]),'dialogue_03.json'),'utf8'));
+const catalog = JSON.parse(fs.readFileSync(path.join(path.dirname(process.argv[2]),'pictures.json'),'utf8'));
 const context = vm.createContext({document:{getElementById:node}, window:{addEventListener(t,f){events[t]=f;}},
   Audio, fetch:async(url)=>({ok:true,json:async()=>JSON.parse(fs.readFileSync(path.join(path.dirname(process.argv[2]),url.split('?')[0]),'utf8'))}), console});
 vm.runInContext(fs.readFileSync(process.argv[1], 'utf8'),context);
@@ -247,6 +337,39 @@ const flush = ()=>new Promise(resolve=>setImmediate(resolve));
  node('repeatButton').click();assert.equal(node('sceneImage').src,'freddie_conversation.webp');
  assert.equal(audios.at(-1).src,third.lines[3].audio);audios.at(-1).onended();
  for(let n=4;n<8;n++){node('nextButton').click();assert.equal(node('speechText').textContent,third.lines[n].text);assert.equal(node('sceneImage').src,'freddie_conversation.webp');audios.at(-1).onended();}
+ let lastEnded;
+ for(let p=4;p<=8;p++){
+  const picture=catalog.pictures[p-1];
+  const rows=JSON.parse(fs.readFileSync(path.join(path.dirname(process.argv[2]),picture.dialogue),'utf8')).lines;
+  assert.equal(node('nextButton').textContent,'Next picture ▶');assert.equal(node('restartButton').hidden,true);
+  for(let n=0;n<rows.length;n++){
+   node('nextButton').click();assert.equal(node('scene').dataset.picture,String(p));
+   assert.equal(node('scene').dataset.layout,'below');assert.equal(node('sceneImage').src,picture.image);
+   assert.equal(node('speechBubble').hidden,false);assert.equal(node('speakerName').textContent,rows[n].speaker);
+   assert.equal(node('speechText').textContent,rows[n].text);assert.equal(audios.at(-1).src,rows[n].audio);
+   assert.equal(node('lineNumber').textContent,`${n+1} / ${rows.length}`);
+   if(p===6 && n===0){audios.at(-1).onerror();assert.equal(node('nextButton').disabled,true);node('repeatButton').click();assert.equal(audios.at(-1).src,rows[n].audio);}
+   lastEnded=audios.at(-1).onended;lastEnded();
+  }
+ }
+ const beforeSilence=audios.length;
+ node('nextButton').click();assert.equal(node('sceneImage').src,'silence.webp');
+ assert.equal(node('scene').dataset.picture,'9');assert.equal(node('speechBubble').hidden,true);
+ assert.equal(node('speechText').textContent,'');assert.equal(node('speakerName').textContent,'');
+ assert.equal(node('lineNumber').textContent,'');assert.equal(node('status').textContent,'Silence');
+ assert.equal(node('repeatButton').disabled,true);assert.equal(node('nextButton').disabled,false);
+ assert.equal(node('nextButton').textContent,'Next picture ▶');assert.equal(node('restartButton').hidden,true);
+ lastEnded();events.pagehide();events.pageshow();node('repeatButton').click();
+ assert.equal(audios.length,beforeSilence);assert.equal(node('repeatButton').disabled,true);
+ assert.equal(node('speechBubble').hidden,true);assert.equal(node('nextButton').disabled,false);
+ const finalRows=JSON.parse(fs.readFileSync(path.join(path.dirname(process.argv[2]),'dialogue_10.json'),'utf8')).lines;
+ for(let n=0;n<finalRows.length;n++){
+  node('nextButton').click();assert.equal(node('scene').dataset.picture,'10');
+  assert.equal(node('sceneImage').src,'benji_plan.webp');assert.equal(node('speechBubble').hidden,false);
+  assert.equal(node('speechText').textContent,finalRows[n].text);assert.equal(audios.at(-1).src,finalRows[n].audio);
+  assert.equal(node('lineNumber').textContent,`${n+1} / 6`);audios.at(-1).onended();
+ }
+ assert.equal(new Set(audios.map(a=>a.src)).size,67);
  assert.equal(node('nextButton').hidden,true);assert.equal(node('restartButton').hidden,false);
  node('restartButton').disabled=false;node('restartButton').click();
  assert.equal(node('speakerName').textContent,'Benji');

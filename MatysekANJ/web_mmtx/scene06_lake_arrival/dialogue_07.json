@@ -1,0 +1,56 @@
+{
+  "schema_version": 1,
+  "picture": 7,
+  "title": "Logan’s Idea",
+  "rate": "-10%",
+  "lines": [
+    {
+      "speaker": "Logan",
+      "voice": "en-US-ChristopherNeural",
+      "text": "I do. The woodpecker can find the sick trees.",
+      "audio": "audio/en/p07_01_logan.mp3"
+    },
+    {
+      "speaker": "Woodpecker",
+      "voice": "en-US-AndrewNeural",
+      "text": "I can check every tree.",
+      "audio": "audio/en/p07_02_woodpecker.mp3"
+    },
+    {
+      "speaker": "Logan",
+      "voice": "en-US-ChristopherNeural",
+      "text": "Then my beaver friends and I can cut the sick ones down.",
+      "audio": "audio/en/p07_03_logan.mp3"
+    },
+    {
+      "speaker": "Fiona",
+      "voice": "en-US-JennyNeural",
+      "text": "And leave the healthy trees?",
+      "audio": "audio/en/p07_04_fiona.mp3"
+    },
+    {
+      "speaker": "Logan",
+      "voice": "en-US-ChristopherNeural",
+      "text": "Yes. But we need help. Those trees are heavy.",
+      "audio": "audio/en/p07_05_logan.mp3"
+    },
+    {
+      "speaker": "Bruno",
+      "voice": "en-US-GuyNeural",
+      "text": "Where must we take them?",
+      "audio": "audio/en/p07_06_bruno.mp3"
+    },
+    {
+      "speaker": "Logan",
+      "voice": "en-US-ChristopherNeural",
+      "text": "Here, to the shore. People can find them here and take them away.",
+      "audio": "audio/en/p07_07_logan.mp3"
+    },
+    {
+      "speaker": "Old Stag",
+      "voice": "en-US-GuyNeural",
+      "text": "Who will help the beavers?",
+      "audio": "audio/en/p07_08_old_stag.mp3"
+    }
+  ]
+}

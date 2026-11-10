@@ -1,0 +1,55 @@
+{
+  "schema_version": 1,
+  "provider": "azure",
+  "rate": "-10%",
+  "assets": [
+    {
+      "speaker": "Benji",
+      "voice": "en-US-AndrewNeural",
+      "text": "I will. I have a plan.",
+      "audio": "audio/en/p10_01_benji.mp3",
+      "sha256": "273a102cbae0aef153569475a71953933eee25c0fa96b2bf62006be4b2868b6f",
+      "bytes": 12672
+    },
+    {
+      "speaker": "Old Stag",
+      "voice": "en-US-GuyNeural",
+      "text": "Tell us, Benji.",
+      "audio": "audio/en/p10_02_old_stag.mp3",
+      "sha256": "ae6792886f5348271cc1033d4cd8d7974d27741756335ce574f3c796af67f57a",
+      "bytes": 15264
+    },
+    {
+      "speaker": "Benji",
+      "voice": "en-US-AndrewNeural",
+      "text": "I have a map of the forest.",
+      "audio": "audio/en/p10_03_benji.mp3",
+      "sha256": "eba14cc9c97437403104e44357f6b3364dce61e97b4dc1096960a57b777d6e65",
+      "bytes": 11376
+    },
+    {
+      "speaker": "Benji",
+      "voice": "en-US-AndrewNeural",
+      "text": "I’ll show you where to start and what to do.",
+      "audio": "audio/en/p10_04_benji.mp3",
+      "sha256": "ca4c1c3d0bc35dbd89a8da3a7e6301bb2f540bbcfe0655a1d171ad75dde08d23",
+      "bytes": 16128
+    },
+    {
+      "speaker": "Benji",
+      "voice": "en-US-AndrewNeural",
+      "text": "We can do this together.",
+      "audio": "audio/en/p10_05_benji.mp3",
+      "sha256": "185d1c0ad14e2e774313d601f68e801d0c30b14957b274b4cf3fffd3174bd214",
+      "bytes": 11232
+    },
+    {
+      "speaker": "Animals",
+      "voice": "en-US-AndrewNeural",
+      "text": "Yes! Great! Thank you, Benji!",
+      "audio": "audio/en/p10_06_animals.mp3",
+      "sha256": "e986383b368612e939369ce8a871250da43d6495d740b560be838c4a81f21d97",
+      "bytes": 18720
+    }
+  ]
+}

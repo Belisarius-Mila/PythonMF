@@ -1,0 +1,63 @@
+{
+  "schema_version": 1,
+  "provider": "azure",
+  "rate": "-10%",
+  "assets": [
+    {
+      "speaker": "Benji",
+      "voice": "en-US-AndrewNeural",
+      "text": "There’s the boat. And the old hut.",
+      "audio": "audio/en/p04_01_benji.mp3",
+      "sha256": "19ed9f96c074835c1accb25338ee70bd7be7f42fabd065d884f670afdcbe74dc",
+      "bytes": 15264
+    },
+    {
+      "speaker": "Fiona",
+      "voice": "en-US-JennyNeural",
+      "text": "No one is here yet.",
+      "audio": "audio/en/p04_02_fiona.mp3",
+      "sha256": "cbc1021d452bbbf051650f7c8bd7466ca5cf9610a3f4e46bcfd8163fc3cc8560",
+      "bytes": 14400
+    },
+    {
+      "speaker": "Sunny",
+      "voice": "en-US-MichelleNeural",
+      "text": "The hut is empty too.",
+      "audio": "audio/en/p04_03_sunny.mp3",
+      "sha256": "7de309eb00b10212189cb8c1d516292a2042ac1cee2f47cfc2d20a847d59a0c9",
+      "bytes": 15840
+    },
+    {
+      "speaker": "Bruno",
+      "voice": "en-US-GuyNeural",
+      "text": "It’s old, but it’s dry inside.",
+      "audio": "audio/en/p04_04_bruno.mp3",
+      "sha256": "8b10a161c20329ceabeaff943699775dee8541f7400a3e2728302955fd2a9071",
+      "bytes": 18720
+    },
+    {
+      "speaker": "Benji",
+      "voice": "en-US-AndrewNeural",
+      "text": "We can sleep here tonight.",
+      "audio": "audio/en/p04_05_benji.mp3",
+      "sha256": "1bf7523e5470543d152fef6a813e8d20eb4e4e0fa8075e82ab85dcab1c7012d3",
+      "bytes": 11232
+    },
+    {
+      "speaker": "Bunny",
+      "voice": "en-US-AnaNeural",
+      "text": "Can we eat here too?",
+      "audio": "audio/en/p04_06_bunny.mp3",
+      "sha256": "26b3b0456d6f87ce151f326d7c9b2e80d081a71fd7c298752260745162c6d3b0",
+      "bytes": 14832
+    },
+    {
+      "speaker": "Fiona",
+      "voice": "en-US-JennyNeural",
+      "text": "Yes. Let’s eat before the meeting.",
+      "audio": "audio/en/p04_07_fiona.mp3",
+      "sha256": "1f0421e4e5aedcc220e3633a688242590486304ff6544ee99e7141ef53d6605d",
+      "bytes": 25200
+    }
+  ]
+}

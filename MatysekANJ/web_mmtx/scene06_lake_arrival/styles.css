@@ -50,3 +50,7 @@ button, a { -webkit-tap-highlight-color: transparent; touch-action: manipulation
   .status { padding: 4px 6px; font-size: 11px; }
   .start-card { padding: 10px 17px; border-width: 2px; }
 }
+
+/* Later gatherings and Benji's map need the full illustration unobscured. */
+.scene[data-layout="below"] .speech { position: relative; inset: auto; width: auto; margin: 12px 3%; }
+.scene[data-layout="below"] .footer-controls { position: relative; inset: auto; max-width: none; margin: 12px 3% 0; padding-bottom: 12px; }

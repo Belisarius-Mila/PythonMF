@@ -1,0 +1,44 @@
+{
+  "schema_version": 1,
+  "picture": 10,
+  "title": "Benji’s Plan",
+  "rate": "-10%",
+  "lines": [
+    {
+      "speaker": "Benji",
+      "voice": "en-US-AndrewNeural",
+      "text": "I will. I have a plan.",
+      "audio": "audio/en/p10_01_benji.mp3"
+    },
+    {
+      "speaker": "Old Stag",
+      "voice": "en-US-GuyNeural",
+      "text": "Tell us, Benji.",
+      "audio": "audio/en/p10_02_old_stag.mp3"
+    },
+    {
+      "speaker": "Benji",
+      "voice": "en-US-AndrewNeural",
+      "text": "I have a map of the forest.",
+      "audio": "audio/en/p10_03_benji.mp3"
+    },
+    {
+      "speaker": "Benji",
+      "voice": "en-US-AndrewNeural",
+      "text": "I’ll show you where to start and what to do.",
+      "audio": "audio/en/p10_04_benji.mp3"
+    },
+    {
+      "speaker": "Benji",
+      "voice": "en-US-AndrewNeural",
+      "text": "We can do this together.",
+      "audio": "audio/en/p10_05_benji.mp3"
+    },
+    {
+      "speaker": "Animals",
+      "voice": "en-US-AndrewNeural",
+      "text": "Yes! Great! Thank you, Benji!",
+      "audio": "audio/en/p10_06_animals.mp3"
+    }
+  ]
+}

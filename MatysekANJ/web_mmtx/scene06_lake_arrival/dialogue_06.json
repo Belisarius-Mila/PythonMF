@@ -1,0 +1,56 @@
+{
+  "schema_version": 1,
+  "picture": 6,
+  "title": "The Meeting Begins",
+  "rate": "-10%",
+  "lines": [
+    {
+      "speaker": "Old Stag",
+      "voice": "en-US-GuyNeural",
+      "text": "You all want to know why I called you here.",
+      "audio": "audio/en/p06_01_old_stag.mp3"
+    },
+    {
+      "speaker": "Animals",
+      "voice": "en-US-AndrewNeural",
+      "text": "Yes! Yes! Tell us!",
+      "audio": "audio/en/p06_02_animals.mp3"
+    },
+    {
+      "speaker": "Old Stag",
+      "voice": "en-US-GuyNeural",
+      "text": "Our forest is old. Many trees are sick.",
+      "audio": "audio/en/p06_03_old_stag.mp3"
+    },
+    {
+      "speaker": "Fiona",
+      "voice": "en-US-JennyNeural",
+      "text": "Can we help them?",
+      "audio": "audio/en/p06_04_fiona.mp3"
+    },
+    {
+      "speaker": "Old Stag",
+      "voice": "en-US-GuyNeural",
+      "text": "People may come and cut down the whole forest.",
+      "audio": "audio/en/p06_05_old_stag.mp3"
+    },
+    {
+      "speaker": "Bunny",
+      "voice": "en-US-AnaNeural",
+      "text": "Even the healthy trees?",
+      "audio": "audio/en/p06_06_bunny.mp3"
+    },
+    {
+      "speaker": "Old Stag",
+      "voice": "en-US-GuyNeural",
+      "text": "Yes. We need to save our home.",
+      "audio": "audio/en/p06_07_old_stag.mp3"
+    },
+    {
+      "speaker": "Old Stag",
+      "voice": "en-US-GuyNeural",
+      "text": "Does anyone have an idea?",
+      "audio": "audio/en/p06_08_old_stag.mp3"
+    }
+  ]
+}
