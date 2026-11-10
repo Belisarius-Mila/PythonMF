@@ -37,7 +37,7 @@ class Scene06OpeningLinkTests(unittest.TestCase):
             self.assertEqual(parser.links, ["../scene06_lake_arrival/index.html"])
             target = (scene / parser.links[0]).resolve()
             self.assertTrue(target.is_file())
-            self.assertIn("arrival_side_view.webp", target.read_text())
+            self.assertIn("arrival_side_view_benji_v2.webp", target.read_text())
             # Removed invisible early shortcut stays removed; only completed bridge leads on.
             self.assertNotIn('class="scene-quick-skip"', (scene / "index.html").read_text())
 

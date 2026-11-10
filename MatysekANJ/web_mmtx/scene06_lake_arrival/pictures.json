@@ -6,7 +6,7 @@
       "title": "The Lake",
       "dialogue": "dialogue.json",
       "line_count": 7,
-      "image": "arrival_side_view.webp",
+      "image": "arrival_side_view_benji_v2.webp",
       "width": 1672,
       "height": 941,
       "alt": "Benji, Bunny, Bruno, Fiona and Sunny look across the lake at clouds shaped like rabbit ears."
@@ -16,8 +16,8 @@
       "title": "Ollie’s Dinner",
       "dialogue": "dialogue_02.json",
       "line_count": 10,
-      "image": "ollie_dinner.webp",
-      "width": 1671,
+      "image": "ollie_dinner_benji_v2.webp",
+      "width": 1670,
       "height": 941,
       "alt": "The five friends face Ollie the otter, who offers them a large fish in his landing net beside the lake."
     },
@@ -26,14 +26,14 @@
       "title": "Jumping Practice",
       "dialogue": "dialogue_03.json",
       "line_count": 8,
-      "image": "freddie_jump.webp",
+      "image": "freddie_jump_benji_v2.webp",
       "width": 1672,
       "height": 941,
       "alt": "The five friends watch Freddie leap from a shore rock into the lake while Dotty coaches him in the air.",
       "image_changes": [
         {
           "from_line": 4,
-          "image": "freddie_conversation.webp",
+          "image": "freddie_conversation_benji_v2.webp",
           "width": 1672,
           "height": 941,
           "alt": "Freddie is half submerged in the lake, facing the five friends, with Dotty hovering and facing them too."
@@ -45,7 +45,7 @@
       "title": "The Old Hut",
       "dialogue": "dialogue_04.json",
       "line_count": 7,
-      "image": "old_hut.webp",
+      "image": "old_hut_benji_v2.webp",
       "width": 1672,
       "height": 941,
       "alt": "The five friends arrive at an empty old fishing hut and a boat on the lakeshore at sunset.",
