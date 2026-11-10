@@ -1,19 +1,11 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
-- 2026-11-10 13:40 CET – handoff před /new: Míla přijal novou boční variantu a má její přesnou PNG kopii v Downloads (`arrival_side_view_20261110_v1.png`, SHA-256 `3b028eef9065528262c788b2d34e2369ea4800c5e7fe46a4c29b64dd9e649bbc`). Nový obrázek zachovat ve všech třech známých kopiích (projektové private, Downloads, generátor). Požádal odstranit původní obrázek; připraveno 11 místních kopií / 6563953 B (10 WebP + zdrojový PNG). V Downloads žádná původní kopie nalezena nebyla. Mazání zatím NEPROVEDENO: vyžaduje novou přesnou globální brzdu, neboť minulý souhlas první obrázek výslovně chránil. Kontrolní manifest: `data/private/mmtx/original_arrival_removal_20261110/dry_run.json`. Historie Gitu a zálohy se nemažou; nový push/nasazení není tímto místním úklidem povolený.
-
-- 2026-11-10 12:12 CET: šestá scéna u jezera je odstraněná z aktivní produkce i všech pěti známých místních pracovních prostředí. Vývojový commit `359007b95eb1aad652fa0d4b9e50fc371994f29e` je na GitHub main a přesně nasazený na Pages. Z šestky zůstal jen první obrázek `arrival.webp` (380134 B, SHA-256 `038d273ff95d3077fe26d142ad32ca6fc32d0e9b5c6997ea53c161964fedcf65`) na dosavadních veřejných i místních adresách.
-- Odstraněná jsou ostatní média a kód šestky, generátor, jeho dva testové moduly, oba Azure workflow příkazy a přechody ze scény s mostem. Dokončení mostu zůstává jako neklikací stavová zpráva. Scény 1–5, Logan, obrázek loučení i sdílené TTS moduly jsou zachované.
-- Úklid: 1584 plánovaných souborů / 35524901 logických bajtů plus 11 souborů bytecode šestky / 171605 B; celkem 35696506 B (asi 35,7 MB). Skutečné uvolnění APFS bloků není tímto součtem měřené. Historie Gitu, zálohy a neidentifikované obecné cache se nepromazávaly.
-- Ověření: 51 cílených testů PASS; místní plná brána 3402 testů / 0 chyb / 31 přeskočených (700,764 s unit), plná publikační brána 3402 testů PASS (603,5 s). Předchozích 5910 souborů v pěti prostředích odpovídá původním otiskům s výjimkou 20 očekávaných změn HTML/CSS zakončení mostu; předchozí média beze změny.
-- Jediné registrované p+n `project-mmtx` / GitHub Pages: Terra 6.1/high, účtenka `27d91d1047e66647a4e71d99a6279ae1`, completed; push_state/deployment_state=confirmed. Pages run `42804962744`, deployment `7680433197`, HTTP smoke 200; chráněné služby beze změny. Caller účtenku převzal; returned_to_adam=false je portálový příznak, žádný další pokus se neposílá.
-- Jedna závěrečná veřejná kontrola: 156 odstraněných souborů + URL celé šestky vracejí HTTP 404; zachovaných 55 veřejných souborů má HTTP 200 a přesné SHA-256, včetně prvního obrázku, vstupů scén 1–5 a Loganova audia/obrázků. GitHub main přesně odpovídá nasazenému commitu. Důkazy a úplný seznam jsou soukromě v `data/private/mmtx/scene06_retirement_review_20261110/`.
-- Datův vlastní commit `c87f6064967aa21b9a998279c6fa874f908cd4c8` zůstal zachovaný. V jeho stávajícím worktree je úklid šestky jako 321 souvisejících WIP změn; jeho větev se neslučovala, nerebasovala ani nepřepisovala. Čisté profily Human–Adam/Knihovna a pomocný Willův checkout byly srovnané s main servisním fast-forwardem po výslovné globální brzdě; automatický limit hromadného mazání zůstal zachovaný.
-- Nesouvisející zdrojové změny a oba nově přidané necommitované scénáře jsou zachované mimo vydaný balíček. Závěrečný paměťový checkpoint je místní a patří do příštího GitHub balíčku; další p+n se pro samotný zápis neopakuje.
-- Další krok: při další práci s Datovou větví zohlednit její výše popsaný WIP úklid a vlastní commit. Fyzický proklik na Macu/iPhonu po změně se neprováděl; serverové odstranění a zachované bajty jsou ověřené.
-- 2026-11-10 13:35 CET: vznikla nová samostatná boční varianta prvního obrázku šestky, `data/private/mmtx/imagegen/arrival_side_view_20261110_v1.png` (1672 × 941, SHA-256 `3b028eef9065528262c788b2d34e2369ea4800c5e7fe46a4c29b64dd9e649bbc`). Pět původních postav je více z boku/zezadu a dívá se přes jezero na mraky ve tvaru králičích uší. Vytvořeno vestavěným image_gen; přesný prompt a kontrolní účtenka jsou vedle PNG. Jde o soukromý návrh k posouzení; původní arrival.webp, předchozí scény i produkce zůstávají beze změny.
-- Aktuální další krok: vyřídit nové potvrzení místního úklidu původního obrázku; přijatý boční obrázek zachovat. Poznámka k Datově WIP větvi nadále platí.
+- 2026-11-10 13:44 CET: Míla výslovně potvrdil globální brzdu pro odstranění přesně deseti původních WebP kopií. Místní úklid `arrival.webp` je dokončený podle zmrazeného seznamu se SHA-256 `038d273ff95d3077fe26d142ad32ca6fc32d0e9b5c6997ea53c161964fedcf65`; součet 3801340 B (asi 3,8 MB). Všech deset původních WebP souborů je odstraněných; jejich nepřítomnost a otisky tří nových PNG byly ověřené. Původní zdrojový PNG zůstal zachovaný, protože aktuální pokyn se týká pouze deseti WebP souborů.
+- Nová přijatá boční varianta `arrival_side_view_20261110_v1.png` zůstává ve třech známých kopiích (Downloads, projektové private imagegen a původní výstup generátoru), všechny SHA-256 `3b028eef9065528262c788b2d34e2369ea4800c5e7fe46a4c29b64dd9e649bbc`, 1672 × 941. V Downloads žádná stará kopie nalezena nebyla. Nový obrázek nebyl vložený do produkčního průchodu.
+- Scény 1–5 včetně mostu s Loganem zůstávají zachované. Předchozí odstranění celé šestky bylo publikované v `359007b9` přes Terra job `27d91d1047e66647a4e71d99a6279ae1` (Pages run 42804962744 / deployment 7680433197); tehdejší důkaz byl 3402 testů PASS, 157 odstraněných URL HTTP 404 a 55 zachovaných URL přesné bajty. Tato historická publikace původní první obrázek ještě obsahovala. Dnešní místní odstranění dalších deseti WebP se nepushuje ani nenasazuje bez samostatného pokynu.
+- Nesouvisející source změny (smazaný requirements.txt a dva necommitované scénáře) zachovat. Datův vlastní commit a jeho předchozí WIP úklid zachovat; nově přibyly dvě související WebP deletions, žádný merge/rebase. Historie Gitu a zálohy se nepřepisují ani nemažou.
+- Další krok po /new: přečíst konečnou místní účtenku `data/private/mmtx/original_arrival_removal_20261110/webp_deletion_receipt.json` a tento handoff. V nové relaci nejdřív jen obnovit kontext a ověřit Git; žádnou další publikaci ani mazání automaticky nespouštět.
 <!-- SAMANTHA_CURRENT_STATUS_END -->
 
 # Handoff pracovního proudu: MMTX
@@ -22,7 +14,7 @@ Nazev: MMTX
 Pracovni proud: project-mmtx
 Typ: Project
 Priorita: 1
-Stav: ceka na rozhodnuti
+Stav: rozpracovane
 Pripomenout pri startu: ano
 
 Co se resilo:
@@ -949,3 +941,31 @@ Dalsi krok: Vyžádat přesnou globální brzdu pro tento nový konkrétní sezn
 Navrhovane dalsi kroky: Žádné nové.
 Zmenene nebo relevantni soubory: Tento handoff, project-mmtx TVBCP, mmtx_story_hotspot_app.md, ACTIVE_PROJECTS.md, MEMORY_INDEX.md; soukromý kontrolní seznam a nový PNG uvedené výše.
 Bezpecnost / neukladat: Nekopírovat obsah scénářových draftů ani autosave. Source main má původní nesouvisející smazání requirements.txt a dva necommitované scénáře; nevydávat a nezahazovat. Data vlastní c87f6064 + 321 WIP cest úklidu; neslučovat, nerebasovat ani nepřepisovat automaticky. Profily Human–Adam/Knihovna byly zarovnané na a0841055; stav po novém checkpointu znovu ověřit.
+
+### 2026-11-10 13:44 CET – Potvrzené odstranění deseti původních WebP kopií
+
+Hotovo: Po přesném potvrzení globální brzdy je odstraněných všech deset původních arrival.webp z pěti pracovních prostředí. Nový boční PNG v Downloads i projektu je zachovaný; předchozí scény a Logan beze změny.
+
+Rozhodnutí: Aktuální pokyn Míly výslovně omezuje mazání na deset WebP souborů. Jeden původní zdrojový PNG se nemaže. Nová publikace tímto místním úklidem není povolená.
+
+Další krok: Přečíst konečnou místní účtenku. Po /new nejdřív jen obnovit tento handoff a TVBCP a ověřit Git, nic automaticky nepublikovat.
+
+Navrhované další kroky: Žádné nové.
+
+Technický důkaz: Přesný seznam deseti WebP se shodným SHA-256, součet 3801340 B. Před odstraněním ověřeny tři nové PNG a původní zdrojový PNG. Konečný stav a otisky jsou uložené mimo Git v data/private/mmtx/original_arrival_removal_20261110/webp_deletion_receipt.json.
+
+### 2026-11-10 13:45 CET – Konečný ruční handoff před /new
+
+Nazev: MMTX – dokončený místní úklid starých WebP
+Priorita: 1
+Stav: hotovo
+Pripomenout pri startu: ano
+Datum: 2026-11-10 13:45 CET
+
+Co se resilo: Po publikovaném odstranění šesté scény vznikl nový boční obrázek a Míla následně potvrdil odstranění přesně deseti původních WebP kopií.
+Co je hotove: Všech deset místních arrival.webp je odstraněných, ověřeno předchozí SHA-256 a nepřítomnost souborů; součet 3801340 B. Nová boční varianta je zachovaná ve třech kopiích včetně Downloads, všechny stejné SHA-256. Zdrojový původní PNG se podle užšího aktuálního pokynu nemaže. Scény 1–5 i Logan zachované.
+Co neni hotove: Toto místní odstranění není publikované; poslední publikace 359007b9 (Terra27d91d10) původní arrival.webp ještě obsahovala. Nový PNG také není nasazený. Žádné další p+n nebylo povolené.
+Dalsi krok: Po /new nejdřív jen obnovit kontext z tohoto handoffu a TVBCP, přečíst konečnou soukromou účtenku a ověřit aktuální Git. Na další zadání čekat bez automatické publikace.
+Navrhovane dalsi kroky: Žádné nové.
+Zmenene nebo relevantni soubory: Dvě kanonické arrival.webp deletions; tento handoff, TVBCP, mmtx_story_hotspot_app.md, ACTIVE_PROJECTS.md, MEMORY_INDEX.md. Nový PNG je v data/private/mmtx/imagegen/arrival_side_view_20261110_v1.png a v Downloads pod stejným názvem.
+Bezpecnost / neukladat: Zachovat smazání requirements.txt a dva necommitované scénáře na source main; nesouvisejí s vydáním. Data vlastní c87f6064 a nyní 323 WIP cest úklidu; žádný automatický merge/rebase/push. Historii, zálohy, původní zdrojový PNG ani další obrázky nemazat.
