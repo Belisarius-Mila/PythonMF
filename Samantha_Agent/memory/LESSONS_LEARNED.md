@@ -177,6 +177,8 @@ nebo jejichž princip lze znovu použít v jiné části projektu.
 
 - Doplnění 10. 11. pro Ateliér: zrušení kartičky nestačí, obrazová data jsou i v AI input snapshotech a výsledkovém JSON. Mazací rozsah musí zahrnout tyto kopie, zachovat obsahově sdílené objekty a zablokovat pozdější recover původních obrázků. Před unlink uchovat jen neobrazovou účtenku; přerušené mazání dokončit pod stejným ID. Regrese ověřují skutečné unlink, chybějící finální JSON commit, sdílení, AI souběh a zachování textu.
 
+- Doplnění 10. 11. pro galerii Ateliéru: po fyzickém smazání zachovaná textová metadata nejsou dostupným obrazovým návrhem. Filtr galerie, odkazy historie, uložený výběr a porovnání musí zohlednit existenci obrázku; lidské textové zadání se vykreslí bez prázdného rámečku. Neznámé právě dokončené AI výstupy ale neskrývat jen kvůli staršímu snímku místnosti. Regrese zahrnuje smazání právě vybraného návrhu i nový výstup před obnovou snímku.
+
 ### LL-076 — TTS může vracet prázdný zvuk i po aktualizaci knihovny
 
 - Problém: původní endpoint denní sovy vracel HTTP 403 s edge-tts 7.2.8 a `NoAudioReceived` také s 7.3.1; selhal i skutečný cloudový běh.

@@ -32,16 +32,18 @@ class Element {
 
 const clone = value => JSON.parse(JSON.stringify(value));
 const flush = async () => { for (let i=0;i<10;i++) await new Promise(resolve => setImmediate(resolve)); };
-function fixture() {
+function fixture({variants = {}, initial = null, cachedDraft = null} = {}) {
   const page = fs.readFileSync(path.join(__dirname, '../app/frontend/interior/page.html'),'utf8');
   const ids = Object.fromEntries([...page.matchAll(/id="([^"]+)"/g)].map(m => [m[1], new Element(m[1])]));
   const cache = new Map(), intervals = [], calls = [], paid = new Set();
+  if (initial) cache.set('samantha-interior-selection-v1',JSON.stringify(initial));
+  if (cachedDraft) cache.set('samantha-interior-draft-v1:project:A:dead',JSON.stringify(cachedDraft));
   const jobs = {A:[],B:[]};
   const draft = {title:'Saved title',prompt:'Keep the room',fixed_elements:'Door',source_ids:['photo'],image_source_id:'photo',annotations:[],revision:2};
   let sequence = 0, holdStart = null, holdStatusA = null, throwStart = false, holdDelete = null, throwDelete = false, deleted = false;
   const deletedRequests = new Set();
   const confirmation = 'Potvrzuji globální brzdu: rozumím riziku a chci pokračovat.';
-  function room(id) { return {id,title:'Room '+id,sources:deleted?{}:{photo:{id:'photo',title:'Private photo',kind:'photo'}},variants:{},notes:[]}; }
+  function room(id) { return {id,title:'Room '+id,sources:deleted?{}:{photo:{id:'photo',title:'Private photo',kind:'photo'}},variants,notes:[]}; }
   const projects = [{id:'project',title:'Private project',rooms:[{id:'A',title:'A'},{id:'B',title:'B'}]}];
   const context = {document:{getElementById:id=>ids[id],createElement:tag=>new Element(tag)},
     localStorage:{getItem:k=>cache.get(k)??null,setItem:(k,v)=>cache.set(k,v),removeItem:k=>cache.delete(k)},
@@ -69,6 +71,10 @@ function fixture() {
           if (!deletedRequests.has(payload.request_id)) {
             deletedRequests.add(payload.request_id); deleted=true;
             draft.source_ids=[];draft.image_source_id='';draft.annotations=[];draft.revision++;
+            for (const variant of Object.values(variants)) {
+              variant.source_ids = (variant.source_ids || []).filter(id => id !== 'photo');
+              if (variant.image_source_id === 'photo') { variant.image_source_id = ''; variant.annotations = []; }
+            }
           }
           if (holdDelete) await holdDelete;
           if (throwDelete) { throwDelete=false;throw new Error('Network outcome unknown'); }
@@ -91,7 +97,7 @@ function fixture() {
       return {ok:true,json:async()=>clone(result)};
     }};
   vm.runInNewContext(fs.readFileSync(path.join(__dirname,'../app/frontend/interior/app.js'),'utf8'),context);
-  return {ids,calls,cache,jobs,intervals,paid,deletedRequests,confirmation,
+  return {ids,calls,cache,jobs,intervals,paid,deletedRequests,confirmation,variants,
     setHoldDelete:p=>holdDelete=p,setThrowDelete:()=>throwDelete=true,
     setHoldStart:p=>holdStart=p,setHoldStatusA:p=>holdStatusA=p,setThrowStart:()=>throwStart=true};
 }
@@ -201,4 +207,57 @@ test('uncertain delete response never automatically retries and explicit complet
   assert.equal(f.deletedRequests.size,1);
   assert.equal(f.ids.deleteDialog.open,false);
   assert.equal(f.paid.size,0);
+});
+
+const proposal = (id,image,kind='ai_proposal',parent=null) => ({id,title:id,kind,parent_id:parent,
+  image_source_id:image,source_ids:image?[image]:[],annotations:[],prompt:'Retained text'});
+
+test('deleted AI thumbnails and conversation links disappear while text-only human proposals and new outputs remain',async()=>{
+  const f=fixture({variants:{dead:proposal('dead',''),live:proposal('live','photo'),human:proposal('human','','human_proposal')}});
+  await flush();
+  assert.doesNotMatch(f.ids.variants.innerHTML,/data-variant="dead"/);
+  assert.match(f.ids.variants.innerHTML,/data-variant="live"/);
+  assert.match(f.ids.variants.innerHTML,/data-variant="human"/);
+  assert.doesNotMatch(f.ids.variants.innerHTML,/class="placeholder"/,'Text-only human proposals have a label without an empty image frame');
+  f.jobs.A.push({id:'history',message:'Earlier outputs',status:'completed',answer:'Saved',variant_ids:['dead','live','fresh'],created_at:'now'});
+  f.intervals[0]();await flush();
+  const buttons=f.ids.aiConversation.children[0].children.filter(c=>c.tag==='button');
+  assert.equal(buttons.length,2);
+  await buttons[1].click();await flush();
+  assert.ok(f.calls.some(c=>c.url.includes('base_id=fresh')),'New outputs absent from an older room snapshot still open');
+  assert.equal(f.variants.dead.prompt,'Retained text');
+  assert.equal(f.paid.size,0);
+});
+
+test('remembered deleted AI selection falls back to the base without removing its cached unfinished text',async()=>{
+  const orphanCache={draft:{title:'Unfinished',prompt:'Keep my text',fixed_elements:'',image_source_id:'',source_ids:[],annotations:[]},revision:3,dirty:true};
+  const f=fixture({variants:{dead:proposal('dead','')},initial:{project:'project',room:'A',base:'dead'},cachedDraft:orphanCache});
+  await flush();
+  assert.equal(JSON.parse(f.cache.get('samantha-interior-selection-v1')).base,'base');
+  assert.match(f.ids.variantTitle.textContent,/Saved title/);
+  assert.doesNotMatch(f.ids.variants.innerHTML,/data-variant="dead"/);
+  assert.equal(JSON.parse(f.cache.get('samantha-interior-draft-v1:project:A:dead')).draft.prompt,'Keep my text');
+  assert.equal(f.calls.filter(c=>c.payload).length,0);
+});
+
+test('deleting the selected AI image immediately removes its thumbnail and selection',async()=>{
+  const f=fixture({variants:{live:proposal('live','photo')},initial:{project:'project',room:'A',base:'live'}});
+  await flush();
+  await f.ids.sourceList.querySelectorAll('[data-delete-source]')[0].click();
+  f.ids.deleteConfirmation.value=f.confirmation;f.ids.deleteConfirmation.listeners.input();
+  await f.ids.deleteForm.listeners.submit({preventDefault(){}});await flush();
+  assert.doesNotMatch(f.ids.variants.innerHTML,/data-variant="live"/);
+  assert.equal(JSON.parse(f.cache.get('samantha-interior-selection-v1')).base,'base');
+  assert.equal(f.variants.live.prompt,'Retained text');
+  assert.equal(f.deletedRequests.size,1);
+  assert.equal(f.paid.size,0);
+});
+
+test('surviving AI child stays usable but cannot compare against its deleted parent image',async()=>{
+  const f=fixture({variants:{dead:proposal('dead',''),child:proposal('child','photo','ai_proposal','dead')},initial:{project:'project',room:'A',base:'child'}});
+  await flush();
+  assert.equal(f.ids.compare.disabled,true);
+  assert.match(f.ids.visual.innerHTML,/<img/);
+  assert.doesNotMatch(f.ids.visual.innerHTML,/compare-grid/);
+  assert.equal(JSON.parse(f.cache.get('samantha-interior-selection-v1')).base,'child');
 });

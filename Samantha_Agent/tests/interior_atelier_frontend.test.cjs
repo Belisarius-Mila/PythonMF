@@ -1,6 +1,6 @@
 const test = require("node:test");
 const assert = require("node:assert/strict");
-const {emptyDraft, escape, scopeKey, gate, paths, restoreDraft, pruneDraftSources} = require("../app/frontend/interior/app.js");
+const {emptyDraft, escape, scopeKey, gate, paths, restoreDraft, pruneDraftSources, availableVariant} = require("../app/frontend/interior/app.js");
 
 test("late server response cannot replace a newer project or variant context", () => {
   const clock = gate();
@@ -57,6 +57,14 @@ test("removing a reference preserves the drawing over a different working image"
   const result=pruneDraftSources({...emptyDraft(),source_ids:["old","working"],image_source_id:"working",annotations:drawing},{working:{}});
   assert.deepEqual(result.source_ids,["working"]);
   assert.deepEqual(result.annotations,drawing);
+});
+test("only AI proposals with missing images disappear; textual human proposals remain valid", () => {
+  const sources={kept:{}};
+  assert.equal(availableVariant({kind:'ai_proposal',image_source_id:'kept'},sources),true);
+  assert.equal(availableVariant({kind:'ai_proposal',image_source_id:''},sources),false);
+  assert.equal(availableVariant({kind:'ai_proposal',image_source_id:'deleted'},sources),false);
+  assert.equal(availableVariant({kind:'human_proposal',image_source_id:''},sources),true);
+  assert.equal(availableVariant(null,sources),false);
 });
 test("private titles, prompts and filenames render as text", () => {
   const result = escape('<img src=x onerror="evil()"> & \'test\'');

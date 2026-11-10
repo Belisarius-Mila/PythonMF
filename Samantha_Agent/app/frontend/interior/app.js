@@ -21,6 +21,9 @@
     return {...record, source_ids: record.source_ids.filter(id => sources[id]), image_source_id: image,
       annotations: image ? record.annotations : []};
   }
+  function availableVariant(variant, sources) {
+    return Boolean(variant && (variant.kind !== "ai_proposal" || sources[variant.image_source_id]));
+  }
   function restoreDraft(server, cached, sources) {
     const valid = value => value && ["title","prompt","fixed_elements","image_source_id"].every(k => typeof value[k] === "string") &&
       Array.isArray(value.source_ids) && value.source_ids.every(id => typeof id === "string") && Array.isArray(value.annotations);
@@ -29,7 +32,7 @@
     }
     return {draft: pruneDraftSources(cached.draft, sources), revision: cached.revision, dirty: true, conflict: cached.revision !== server.revision};
   }
-  const core = {emptyDraft, escape, scopeKey, gate, paths, restoreDraft, pruneDraftSources};
+  const core = {emptyDraft, escape, scopeKey, gate, paths, restoreDraft, pruneDraftSources, availableVariant};
   if (typeof module !== "undefined" && module.exports) module.exports = core;
   if (!root.document) return;
   const $ = id => document.getElementById(id);
@@ -116,6 +119,11 @@
       const project = data.projects.find(p => p.id === wanted.project) || data.projects[0];
       return load({project: project.id, room: project.rooms[0].id, base: "base"});
     }
+    const selected = data.room && data.room.variants[wanted.base];
+    if (selected && !availableVariant(selected, data.room.sources)) {
+      view = "gallery"; comparing = false; drawing = false;
+      return load({...wanted, base: "base"});
+    }
     scope = wanted;
     if (response.draft) {
       serverDraft = response.draft;
@@ -130,14 +138,14 @@
     remember(); render(); loading = false; setBusy(busy); refreshAI();
   }
   function picture(record, thumbnail = false) {
-    if (!record || !record.image_source_id || !data.room.sources[record.image_source_id]) return '<div class="placeholder">Vyber pracovní obrázek v Podkladech.</div>';
+    if (!record || !record.image_source_id || !data.room.sources[record.image_source_id]) return thumbnail ? "" : '<div class="placeholder">Vyber pracovní obrázek v Podkladech.</div>';
     const source = data.room.sources[record.image_source_id];
     return '<div class="picture"><img alt="' + escape(source.title) + '" src="' + escape(sourceUrl(source.id, thumbnail ? "thumbnail" : "preview")) + '"><svg viewBox="0 0 1000 1000" preserveAspectRatio="none" aria-hidden="true">' + paths(record.annotations) + '</svg></div>';
   }
   function renderPicture() {
     const variant = data.room.variants[scope.base];
-    if (comparing && variant && variant.parent_id) {
-      const parent = data.room.variants[variant.parent_id];
+    const parent = variant && data.room.variants[variant.parent_id];
+    if (comparing && availableVariant(parent, data.room.sources)) {
       $("visual").innerHTML = '<div class="compare-grid"><figure>' + picture(parent) + '<figcaption>' + escape(parent.title) +
         '</figcaption></figure><figure>' + picture(variant) + '<figcaption>' + escape(variant.title) + '</figcaption></figure></div>';
     } else $("visual").innerHTML = picture(view === "edit" || scope.base === "base" ? draft : variant);
@@ -166,20 +174,22 @@
     $("workbench").classList.toggle("editing", view === "edit");
     if (!data.room) return;
     const current = data.room.variants[scope.base];
+    const parent = current && data.room.variants[current.parent_id];
+    if (!availableVariant(parent, data.room.sources)) comparing = false;
     const name = current ? current.title : draft.title || "Nové zadání";
     $("contextLabel").textContent = p.title + " / " + data.room.title;
     $("variantTitle").textContent = (view === "edit" ? "Úprava: " : "") + name;
-    $("variantOrigin").textContent = current && current.parent_id ? "Vychází z: " + data.room.variants[current.parent_id].title : "Samostatné zadání";
-    $("variants").innerHTML = Object.values(data.room.variants).map(v => '<button type="button" class="thumb ' + (v.id === scope.base ? "selected" : "") + '" data-variant="' + v.id + '">' +
+    $("variantOrigin").textContent = parent ? "Vychází z: " + parent.title : "Samostatné zadání";
+    $("variants").innerHTML = Object.values(data.room.variants).filter(v => availableVariant(v, data.room.sources)).map(v => '<button type="button" class="thumb ' + (v.id === scope.base ? "selected" : "") + '" data-variant="' + v.id + '">' +
       picture(v, true) + '<span class="thumb-label">' + escape(v.title) + '<span class="muted">' + (v.kind === "ai_proposal" ? "AI vizualizace" : "Uložené zadání s poznámkami") + '</span></span></button>').join("") ||
-      '<p class="muted">Zatím bez uložených variant. Přidej podklady a připrav první zadání.</p>';
+      '<p class="muted">Žádné dostupné návrhy. Přidej podklady nebo připrav nové zadání.</p>';
     $("variants").querySelectorAll("[data-variant]").forEach(button => button.addEventListener("click", () => {
       if (busy) return; view = "gallery"; comparing = false; drawing = false; load({...scope, base: button.dataset.variant});
     }));
     $("editor").hidden = view !== "edit";
     $("editVariant").hidden = view === "edit";
     $("compare").hidden = view === "edit";
-    $("compare").disabled = !current || !current.parent_id;
+    $("compare").disabled = !availableVariant(parent, data.room.sources);
     $("compare").setAttribute("aria-pressed", String(comparing));
     $("visualCaption").textContent = current && current.kind === "ai_proposal" && view !== "edit" ?
       "AI koncepční vizualizace · rozměry a proveditelnost je třeba ověřit" :
@@ -232,7 +242,9 @@
           await refreshAI();
         })); article.append(button);
       }
-      const variants = Array.isArray(job.variant_ids) ? job.variant_ids : job.variant_id ? [job.variant_id] : [];
+      const outputs = Array.isArray(job.variant_ids) ? job.variant_ids : job.variant_id ? [job.variant_id] : [];
+      // A newly completed output may not be in the loaded room snapshot yet.
+      const variants = outputs.filter(id => !data.room.variants[id] || availableVariant(data.room.variants[id], data.room.sources));
       for (const [index, id] of variants.entries()) {
         const button = document.createElement("button"); button.type = "button";
         button.textContent = "Otevřít AI návrh" + (variants.length > 1 ? ` ${index + 1}` : "");

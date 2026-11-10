@@ -1,6 +1,18 @@
 # Neuberk interier design
 
 
+## 2026-11-10 19:02 CET — Oprava prázdných AI miniatur po smazání
+
+Hotovo: Místně opravený výběr vlevo i odkazy v rozhovoru: AI návrhy s již smazaným obrázkem se nenabízejí. Oprava funguje i pro dříve vzniklé prázdné položky bez migrace dat. Pokud si prohlížeč pamatuje smazaný návrh, přejde na nové zadání; rozepsaný text původní varianty zůstává v cache. Lidská textová zadání zůstávají jako textové položky bez prázdného obrazového rámečku.
+
+Rozhodnutí: Jde o zobrazení, ne o další mazání dat. Serverové záznamy/texty/poznámky i nové AI výsledky zůstávají zachované; výsledek, který ještě není v aktuálně načteném snímku místnosti, se nesmí omylem skrýt. Ponechaný návrh nelze porovnávat s již smazaným AI rodičem.
+
+Další krok: Samostatně autorizované p+n; tato oprava zatím není nasazená.
+
+Navrhované další kroky: Žádné nové.
+
+Technický důkaz: Čtecí audit potvrdil 20 prázdných AI záznamů. 36 Python/HTTP/frontend kontraktů PASS včetně 22 Node scénářů a pěti nových regresí; nativní Safari na umělé místnosti ověřilo nepřítomnost prázdné položky, návrat z uloženého smazaného výběru, zachování textové položky a otevření ponechaného AI obrázku. Rychlá statická brána před checkpointem; backend/persistence se nemění, plná publikační brána až při p+n. Bez smazání skutečných podkladů, placeného modelu nebo zápisu do Data. Pracovní větev `adam/interior-empty-thumbnails-20261110`, podklad `f7a4ab58`. Důkazy `data/private/interior_empty_thumbnails_20261110/`. Nový TVBCP se bez dohody nezakládá.
+
 ## 2026-11-10 16:41 CET — Mazání podkladů nasazené
 
 Na Mílovo výslovné „ok, p+n“ je `748cec00c3ab4e4f873b911c5ceb3547e6659caf` odeslaný na GitHub a nasazený do běžícího Cockpitu v proudu `project-neuberk-kacenka`. Jediné registrované předání přes Terru 6.1/high: `3eddf9c73d866c2a196b447b09762bd7`, completed, push/deployment confirmed. Publikační brána 3426 testů PASS, 655,5 s, smoke 5/5; code_stamp `76ec558a9e3b0742`, chráněné služby beze změny.
