@@ -1,6 +1,6 @@
 # Ateliér — společný půdorys a míry
 
-Stav: místní vývoj, 2026-11-10 21:29 CET; bez p+n. Proud project-neuberk-kacenka, vlastní větev adam/interior-room-plan-20261110 z19703fdb. Na main souběžně probíhala cizí práce MMTX; její soubory a Data worktree se neměnily.
+Stav: implementace58a18e68 ověřená místně; Míla 2026-11-10 21:45 CET autorizoval závěrečné zarovnání a Terra p+n celého balíčku. Konečný provozní výsledek je v soukromé účtence f27ad3247565ee066e853a7e50ab4a42 a release/verification.json, nikoli v tomto předávacím zápisu.
 
 ## Výsledek a hranice
 
@@ -30,3 +30,16 @@ Důkazy: data/private/interior_room_basis_20261110/ (qa.json, full_gate.log, cha
 ## Další krok
 
 Samostatně autorizované p+n a následně výběr vlastního půdorysu a zadání ověřených měr v Podkladech. Žádná skutečná data se tímto vývojem neměnila.
+
+
+## 2026-11-10 21:45 CET — Závěrečné zarovnání a předání Terře na p+n
+
+Hotovo: Společný půdorys a míry jsou implementované v58a18e68; cílené kontroly, plná vývojová brána a syntetická Safari přejímka prošly. Repo je připravené k vydání společně s tímto předávacím zápisem.
+
+Rozhodnutí: Míla výslovně zadal „zarovnej repo … zašli vše terra pro p+n“. Celý hotový balíček převezme jediný registrovaný submit_release pro project-neuberk-kacenka, centrální release_executor gpt-6.1-terra/high. Role se nemění a nejisté kroky se neopakují. Tento zápis vzniká před zmrazením balíčku; konečný provozní výsledek se uloží mimo Git do přesné účtenky a jednorázového ověření. Po vydání se kvůli výsledkovému zápisu nevytváří další čekající commit.
+
+Další krok: Po potvrzeném nasazení obnovit Ateliér, v Podkladech nastavit vlastní společný půdorys a ověřené míry a provést lidskou přejímku. Rozměrová přesnost obrázků není zaručená.
+
+Navrhované další kroky: Žádné nové; Data, MMTX a existující média zachovat. Nový TVBCP bez dohody nevzniká.
+
+Technický důkaz: Vývojová brána3469 PASS/31 SKIP, cílené130/28 Node PASS a syntetické Safari. Stabilní request_id=interior-room-plan-final-pn-58a18e68-20261110-v1, job_id=f27ad3247565ee066e853a7e50ab4a42. Autorita skutečného push/nasazení: registrovaná soukromá účtenka tohoto job ID a data/private/interior_room_basis_20261110/release/receipt.json; poslední jednorázové ověření verification.json, zarovnání repa alignment.json. Při navázání je načti a použij registrovaný živý audit, nikoli pouze tento index či předávací záznam. Předání samo není potvrzení nasazení. Žádný skutečný AI tah architekta ani změna soukromého půdorysu/měr není součástí p+n. TVBCP vazba pro budoucí Human–Adam zůstává výslovně otevřená.

@@ -355,3 +355,16 @@ Další krok: Samostatně autorizované p+n; do té doby funkce není v běžíc
 Navrhované další kroky: Po vydání lidská přejímka s vlastním půdorysem a mírami. Žádný placený test architekta ani nový TVBCP nebyly dohodnuté.
 
 Technický důkaz: 130 cílených Python/HTTP/frontend kontrol včetně 28 Node scénářů PASS; 12 nových backend/HTTP regresí. Nativní Safari na syntetické místnosti: jediné uložení půdorysu a měr, společný náhled, automatické předání stejných podkladů do chatu i potvrzeného obrazu, přítomnost u nové varianty. Fake driver chat1/image1/paid0. Plná brána PASS: 3469 testů, 0 chyb, 31 SKIP, 531,0 s. Ukládání chrání samostatná revize a idempotentní request_id; změna základu je při neukončeném AI požadavku blokovaná. Výměna/odebrání vazby nemaže soubory. Potvrzené trvalé smazání ukáže globální dopad, odpojí půdorys a odstraní i automaticky vytvořené AI snapshoty; zadané míry zachová. Skutečné soukromé podklady a Data se neměnily, souběžné MMTX změny zůstaly mimo vlastní vývojovou větev. Report reports/interior_room_basis_20261110.md, důkazy data/private/interior_room_basis_20261110/. Kanonický handoff a projektová paměť aktualizované; TVBCP pro budoucí Human–Adam zůstává výslovně nedohodnutý.
+
+
+## 2026-11-10 21:45 CET — Závěrečné zarovnání a předání Terře na p+n
+
+Hotovo: Společný půdorys a míry jsou implementované v58a18e68; cílené kontroly, plná vývojová brána a syntetická Safari přejímka prošly. Repo je připravené k vydání společně s tímto předávacím zápisem.
+
+Rozhodnutí: Míla výslovně zadal „zarovnej repo … zašli vše terra pro p+n“. Celý hotový balíček převezme jediný registrovaný submit_release pro project-neuberk-kacenka, centrální release_executor gpt-6.1-terra/high. Role se nemění a nejisté kroky se neopakují. Tento zápis vzniká před zmrazením balíčku; konečný provozní výsledek se uloží mimo Git do přesné účtenky a jednorázového ověření. Po vydání se kvůli výsledkovému zápisu nevytváří další čekající commit.
+
+Další krok: Po potvrzeném nasazení obnovit Ateliér, v Podkladech nastavit vlastní společný půdorys a ověřené míry a provést lidskou přejímku. Rozměrová přesnost obrázků není zaručená.
+
+Navrhované další kroky: Žádné nové; Data, MMTX a existující média zachovat. Nový TVBCP bez dohody nevzniká.
+
+Technický důkaz: Vývojová brána3469 PASS/31 SKIP, cílené130/28 Node PASS a syntetické Safari. Stabilní request_id=interior-room-plan-final-pn-58a18e68-20261110-v1, job_id=f27ad3247565ee066e853a7e50ab4a42. Autorita skutečného push/nasazení: registrovaná soukromá účtenka tohoto job ID a data/private/interior_room_basis_20261110/release/receipt.json; poslední jednorázové ověření verification.json, zarovnání repa alignment.json. Při navázání je načti a použij registrovaný živý audit, nikoli pouze tento index či předávací záznam. Předání samo není potvrzení nasazení. Žádný skutečný AI tah architekta ani změna soukromého půdorysu/měr není součástí p+n. TVBCP vazba pro budoucí Human–Adam zůstává výslovně otevřená.
