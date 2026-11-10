@@ -9,6 +9,23 @@ request_id; vypnutí sledování: `science_news_unfollow_action`; překlad celé
 ověřeně oprávněného textu: `science_news_translate_action`. Čtení stavu překladu
 nikdy nespouští nový modelový tah. Trasy jsou registrované v COCKPIT_POST_ACTIONS.
 
+`app.science_news_cached_translation.attach_and_save` je neplacený přenos jednoho
+předem ověřeného celého českého překladu a výslovně zadané uložení. Volající
+předá konkrétní store (fronta i archiv), item_id, původní URL, ověřené zdrojové
+znění a překlad, oba SHA-256, oprávnění, stabilní request_id a confirmed=True.
+Kontroluje existující rozhodnutí/operace a nejisté překlady; nepřepisuje cizí
+kartu ani text. Použije sdílený archivní zámek a stávající idempotentní save,
+který zapne sledování. Nespouští model, nic nemaže a neaktivuje plánovač.
+
+`app.science_news_activation.prepare(runtime_root=...)` zapisuje pouze neplacený
+soukromý návrh v pracovním stromu. `activate(proposal_sha256=..., confirmation=...)`
+vyžaduje přesnou větu z global_safety_brake.md a schválení navržených 15 kreditů/job,
+100/měsíc (dokončená usage + rezervy nedokončených, nikoli upstream billing cap).
+Předem musí být nasazená přesná role, cenová kontrola účtu a skutečně servírovaná
+UI ochrana ukládání celého českého překladu. Instalace jediného LaunchAgentu
+má trvalou účtenku před bootstrap; nejistý bootstrap se podruhé neodesílá.
+Není to oprávnění k push/deploy ani k přepisování cizích modelových rolí.
+
 Samostatný jednorázový kandidátní pilot: `app.science_news_trial.preview()` je
 neplacené čtení zmrazeného zdroje, vstupu, kódu, cen a jejich SHA-256.
 `app.science_news_trial.run(confirmed=True, approved_report_sha256=...,

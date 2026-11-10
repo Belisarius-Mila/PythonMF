@@ -2022,3 +2022,31 @@ usage účtenky. Raw receipt a schválenou přípravnou kartu nepřepisovat doda
 kontrolou. Samostatně rozlišit programovou přejímku, Datovo porovnání významu,
 Mílovu četbu a pozdější připojení výsledku do UI. Pro opětovné zobrazení nebo
 přenos již hotového překladu nepouštět další modelový tah.
+
+
+Doplnění 10112026 k LL-121 (uložení a aktivace): domluvené ukládání celého českého
+článku musí chránit UI i server, nestačí možnost uložit abstrakt a překlad někdy
+později. Čerstvá validace bez zahájení akce smí uvolnit UUID, ztracená odpověď nebo
+attention ne. Hotový hashovaný překlad přenášet bez dalšího modelu; starý zmrazený
+pilot po adopci kódu nepřipínat znovu. Měsíční rozpočet má u dokončených započítat
+vykázané náklady a držet plné rezervy jen neukončených/nejistých. Installer má
+ověřit skutečně servírovaný kód i roli a zapsat launch intent před bootstrap.
+Pro společnou operaci použít odlišný vnější zámek od atomic_write_json účtenky,
+aby se write uvnitř nezablokoval vlastním sidecarem. Ověřeno 112 cílenými a
+2964 plnými testy (5 SKIP); jeden živý cached save, nula modelů či spuštěných služeb.
+
+
+Doplnění 10112026 k LL-070 (ScienceNews): skutečný instalovaný617f3e0d
+prokazatelně odmítá science_news_editor v dočasném kandidátním JSON. Jeho role
+jsou symlinkem na main. Proto nový config připravit a testovat izolovaně,
+nejdřív registrovaně upgradovat kompatibilní runtime a až potom zveřejnit binding.
+Test main parseru ani úspěšná lokální brána nezastupují tento čtecí audit.
+Zdroj reports/science_news_aad367c7_integration_20261110.md.
+
+
+Doplnění 10112026 k LL-070 (izolovaná přejímka): celý `.venv` nesdílet
+přes symlink, pokud read-only runtime status ověřuje i rodiče stavového rootu.
+Guard správně vrací state_alias_refused. Izolovaná kopie má vlastní skutečný
+`.venv` adresář a sdílí jen interpret/knihovny; recovery stav ani jeho aktivační
+konfiguraci nepřenášet a guard neoslabovat. Čtyři bootstrap testy po úpravě
+prostředí PASS, produkční kód beze změny.

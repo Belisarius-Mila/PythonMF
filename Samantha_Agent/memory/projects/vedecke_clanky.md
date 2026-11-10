@@ -1,5 +1,7 @@
 # Znalostní databáze / Knihovna článků
 
+Aktuální integrační stav: 2026-11-10 10:09 CET: Datův `aad367c7` je převzatý a testovaný pouze na izolované větvi `will/science-news-20261110`; živý main/pošta/role zůstávají beze změny. 134 cílených testů PASS; před nasazením nutný kompatibilní upgrade hodinové pošty a jeho systémové potvrzení. Podrobnosti `reports/science_news_aad367c7_integration_20261110.md`.
+
 Aktuální převzetí: 2026-11-09 23:38 CET: Will převzal oba Datovy commity `9abeb797` a `3ba4d063` nad vydaný `32c4ed20`. UI vysvětluje neaktivní překlad, již hotový překlad zůstává dostupný; zmrazená příprava a výsledkový report pilotu zachované. 116 cílených testů PASS, plná brána PASS: 3381 testů / 31 SKIP; následné Terra p+n výslovně schválené. Report `reports/science_news_two_commits_integration_20261109.md`. Níže uvedené starší attention není aktuální stav vydání 32c4ed20 (completed/CI success).
 
 Aktualizace vydání: Terra p+n bd828212 skončilo attention po launcher restartu během brány; GitHub stále 5ea9af40. Automaticky načtený lokální 1395956d není potvrzené vydání. Oprava launcher guardu 77 cílených PASS, plná brána PASS: 3370 testů / 31 SKIP (546,298 s); po checkpointu čekat nový výslovný pokyn. Model/plánovač/import neaktivní. Report `reports/science_news_release_interruption_20261109.md`.
@@ -12,6 +14,23 @@ Míla upřesnil a schválil směr osobního vědeckého zpravodaje namísto obec
 hlídání změn webových stránek. Základní implementaci Míla potvrdil jako nasazenou a částečně převzal na pilotních
 zprávách. Překlad ani automatický redaktor ještě nejsou aktivované. Vývoj zůstává v Datově worktree na
 `data/parallel-20261104`; e-mailový a kalendářový agent patří Willovi.
+
+### Uložení v češtině a páteční aktivace — 2026-11-10 09:20 CET
+
+Míla zadal páteční aktivaci a uložení konkrétního CRISPR článku v češtině.
+Článek je skutečně uložen ve Vědeckých článcích s celým českým překladem a odkazem;
+sledování zapnuté, fronta pilotů prázdná, žádný nový modelový tah. Budoucí Uložit
+v UI i API vyžaduje celý dokončený český překlad; abstrakt sám nestačí.
+
+Připraven `science_news_activation.prepare/activate`: první návrh 13. 11. 09:00
+Europe/Prague, příprava 08:00, Sol/medium Standard, 15 kreditů/job a 100/měsíc.
+Potvrzení mezí a globální věty pro systémový LaunchAgent ještě chybí. Vlastní
+role binding je pouze lokální návrh; Will musí nasadit nový commit do aktuálního
+main se zachováním dalších jeho rolí. Installer před zápisem ověří role/kód/servírované UI,
+nejistý bootstrap neopakuje. Účet musí být ChatGPT, dokončené úlohy se započtou
+skutečnou vykázanou spotřebou, neukončené drží plné rezervy.
+112 cílených testů PASS (16 Node scénářů); Finální plná brána: 2964 testů OK (5 SKIP), 547,271 s, syntaxe a whitespace OK.
+Důkaz `reports/science_news_activation_20261110.json`, kanonický handoff a TVBCP.
 
 ### Schválený pilot překladu — 2026-11-09 23:32 CET
 

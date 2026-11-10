@@ -124,13 +124,22 @@ def call_model(store, key, payload, instructions, schema, *, client_factory=new_
             if old.get("fingerprint") == fingerprint and old["state"] == "completed":
                 return old["answer"]
             raise ValueError("Původní modelový pokus vyžaduje ověření; neopakuji jej.")
-        used = sum(j.get("reserved_credits", 0) for j in state["jobs"].values() if j.get("month") == month)
+        def charged(job):
+            actual = job.get("estimated_credits")
+            if (job.get("state") == "completed" and type(actual) in (int, float)
+                    and math.isfinite(actual) and actual >= 0):
+                return actual
+            return job.get("reserved_credits", 0)
+        used = sum(charged(j) for j in state["jobs"].values() if j.get("month") == month)
         if used + approved["max_job_credits"] > approved["max_month_credits"]:
             raise ValueError("Měsíční rozpočet nemá volnou rezervu.")
         state["jobs"][key] = {"state": "delivery_unknown", "fingerprint": fingerprint,
             "reserved_credits": approved["max_job_credits"], "month": month, "started_at": utc_now()}
     # No catch/retry: caller keeps the unknown persistent marker on any failure.
     with client_factory() as client:
+        account = client.transport.request("account/read", {"refreshToken": False}).get("account")
+        if not isinstance(account, dict) or account.get("type") != "chatgpt":
+            raise ValueError("Kreditový zpravodaj vyžaduje přihlášení přes ChatGPT.")
         selected = agent_roles.resolve_role(client.list_models(include_hidden=True), role=ROLE)
         if selected["policy_digest"] != binding["policy_digest"]:
             raise ValueError("Role se od přípravy změnila.")

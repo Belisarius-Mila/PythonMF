@@ -1,32 +1,34 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
-- 2026-11-09 23:38 CET: Will převzal oba Datovy commity `9abeb797` a `3ba4d063` nad vydaný `32c4ed20`. UI vysvětluje neaktivní překlad, již hotový překlad zůstává dostupný; zmrazená příprava a výsledkový report pilotu zachované.
-- 116 cílených testů PASS; plná integrační brána PASS: 3381 testů / 31 SKIP (492,622 s). Pět konfliktů vyřešených zachováním dosavadních funkcí a obou historií; nová lekce má nekolidující LL-121.
-- Míla výslovně povolil převzetí a následné Terra p+n. Po checkpointu následuje registrované předání; nové potvrzení pro tento balíček není potřeba. Skutečný výsledek v `logs/science_news_two_commits_release_20261109.log`.
-- Předchozí `32c4ed20` je potvrzeně pushed/deployed (účtenka 243f9c9c, smoke5/5, CI 42705522900 success); dřívější attention bd828212 je historie.
-- Překladový model se při integraci znovu nevolá, výsledek se nepřipojuje do živé karty, role/plánovač se neaktivují. Private podklady zůstávají u Data. Mílova četba a fyzická UI přejímka zůstávají otevřené. Report `reports/science_news_two_commits_integration_20261109.md`.
+- 2026-11-10 10:09 CET: Datův `aad367c7` je převzatý a testovaný pouze na izolované větvi `will/science-news-20261110`; živý main/pošta/role zůstávají beze změny.
+- 134 cílených testů PASS, plná izolovaná brána PASS: 3405 testů / 31 SKIP (641,430 s). UI i API vyžadují celý český překlad před uložením; žádný modelový tah nebo opakování již hotového save.
+- Blokátor skutečně ověřen: vlastněná hodinová pošta 617f3e0d čte hlavní role přes symlink a kandidátní science_news_editor odmítá AgentRoleError. Nový binding se nesmí objevit na main dřív než kompatibilní runtime.
+- Připravené pořadí: s přesnou globální brzdou upgrade pošty 617f3e0d→již publikovaný 8c83e93b, jeho živé ověření; potom fast-forward připraveného checkpointu a registrované Terra p+n. Mílovo zadání k nasazení platí, systémové přepnutí potřebuje vlastní přesnou větu.
+- Páteční ScienceNews plánovač se tímto nezapíná a nový rozpočet se neschvaluje. Report `reports/science_news_aad367c7_integration_20261110.md`.
 
-- Aktualizováno: 2026-11-09 23:32 CET; proud `project-knowledge-library`, Data / `data/parallel-20261104`.
-- Míla schválil přesný jeden překladový pilot. Sol/medium Standard na účtu ChatGPT
-  dokončil jediný pokus: 6980 vstupních + 1002 výstupních tokenů, cena podle usage
-  0,5995 Standard kreditu pod schválenou přijímací mezí 5. Žádný retry.
-- Technická přejímka i Datova věcná kontrola tohoto jediného vzorku PASS:
-  všech devět odstavců tiskové zprávy NIH, datum, reference, grant a čísla zachované;
-  lidská buněčná linie není vydávána za léčeného pacienta a AAV testy jsou budoucí plán.
-- Mílova čtenářská přejímka je otevřená. Český text je v ignorovaném
-  `data/private/science_news_trial_20261109/crispr-preklad-cs.txt`, raw účtenka i samostatný
-  Datův review zůstávají private. Výsledek `reports/science_news_translation_trial_20261109.json`.
-- Přípravná karta zůstává beze změny kvůli schválenému otisku; její historický stav
-  prepared/0 paid je překryt novou výsledkovou účtenkou, nikoli přepsán.
-- UI oprava je v lokálním commitu `9abeb797`: neaktivní tlačítko má vysvětlení,
-  hotové překlady zůstávají čitelné. Dřívější testy: 74 cílených a 12 Node scénářů PASS;
-  plná brána 2940 testů OK (5 SKIP). V tomto provedení se kód neměnil.
-- Provozní fronta, archiv, centrální role a páteční automatika se tímto pilotem nemění.
-  NIH automatický fetch/ověření úplného textu a kvalita týdenního editoru zůstávají otevřené.
-- Další krok: Míla přečte hotový překlad; Will převezme pouze konkrétní Datovy commity
-  do aktuálního main a samostatně autorizovaně nasadí UI. Pro tuto zprávu lze potom
-  připojit již hotový ověřený překlad k existující položce bez nového modelového tahu.
+- Aktualizováno: 2026-11-10 09:20 CET; proud `project-knowledge-library`, Data / `data/parallel-20261104`.
+- Míla výslovně požádal zapnout páteční zpravodaj a uložit CRISPR v češtině.
+  Celý hotový český překlad byl jednou uložen do Vědeckých článků s původním odkazem;
+  sledování zapnuté, živá fronta pilotů prázdná. Žádný nový placený tah.
+- Zpětná kontrola skutečné archivní karty potvrdila celý český text; anglický plný zdroj
+  se do těla karty neukládal. Jobs modelu beze změny. Private účtenka
+  `data/private/science_news_activation/crispr_save_receipt_20261110.json`.
+- Nové Uložit v UI i serverovém API čeká na hotový český překlad; samotný abstrakt
+  nestačí. Jen prokazatelně nezahájená validace uvolní browser request_id; nejistý save ne.
+- Páteční aktivace je připravená, nikoli zapnutá: první návrh 13. 11. 2026 v 09:00
+  Europe/Prague, příprava od 08:00, max 5 novinek. Sol/medium Standard,
+  návrh 15 kreditů/job a 100/měsíc. Rozpočet a instalace LaunchAgentu čekají potvrzení.
+- Guard účtu ChatGPT zastaví API-key/unknown před vláknem. Měsíční evidence započte
+  doložené dokončené náklady a drží rezervy neukončených/nejistých úloh.
+- Modelová role je připravená jen ve vlastním config/agent_roles.json. Provozní role,
+  systémové LaunchAgents a služby Data neměnil. Will musí převzít nový commit do main,
+  zachovat jeho další role a samostatně nasadit i serverovou/UI ochranu českého uložení.
+- Ověření: 112 cílených Python testů PASS, včetně 16 Node scénářů.
+  Finální plná brána: 2964 testů OK (5 SKIP), 547,271 s, syntaxe a whitespace OK.
+- Detail a konkrétní předání: `reports/science_news_activation_20261110.json`.
+  Po nasazení znovu ověřit návrh, pak s výslovným rozpočtem a přesnou globální větou
+  aktivovat jediný LaunchAgent. Žádný automatický druhý bootstrap ani modelový pokus.
 <!-- SAMANTHA_CURRENT_STATUS_END -->
 
 Nazev: Knihovna v Cockpitu – editace článku a příloh
@@ -721,3 +723,74 @@ Technický důkaz:
 **Navrhované další kroky:** Mílova četba a fyzická přejímka; připojení hotového překladu ke kartě vlastní omezenou operací bez druhého modelového tahu, případná služba samostatně.
 
 **Technický důkaz:** 116 cílených testů PASS; plná integrační brána PASS: 3381 testů / 31 SKIP (492,622 s). Žádný placený překlad ani zápis do živé fronty/archivu. Pět konfliktů vyřešeno v dokumentaci a snapshotu, LL-121 místo kolidujícího LL-114. Report reports/science_news_two_commits_integration_20261109.md; předchozí vydání 32c4ed20/účtenka 243f9c9c a CI 42705522900 potvrzené.
+
+## 2026-11-10 09:20 CET — ScienceNews: CRISPR uložen česky, páteční aktivace připravená
+
+Hotovo:
+- Míla má CRISPR uložený ve Vědeckých článcích jako celý český překlad s původním
+  odkazem, sledování je zapnuté. Zpráva opustila frontu, ostatní vyřízené piloty
+  se neobnovily. Přenos použil už schválený překlad za nula dalších modelových tahů.
+- Uložit zprávu nově vyžaduje hotový český překlad, v UI i serverovém API.
+  Před překladem zůstávají Sledovat a Nezařazovat použitelné. Po jednoznačné validaci
+  bez zahájené operace může uživatel změnit volbu; nejistý výsledek stále drží request ID.
+- Připraven testovaný installer jediné služby com.samantha.science-news, s otisky,
+  kontrolou nasazené role/kódu i skutečně servírovaného UI. Spuštění má trvalou
+  účtenku před bootstrap; ztracenou odpověď jen ověří, bootstrap podruhé neposílá.
+
+Rozhodnutí:
+- Míla výslovně zadal uložit tuto konkrétní zprávu a aktivovat páteční zpravodaj.
+  Uložení již proběhlo. Navržené meze 15/job a 100/měsíc ještě samostatně nepotvrdil;
+  nedal ani přesnou globální větu potřebnou k instalaci LaunchAgentu.
+- Dřívější jednorázový modelový pilot se neopakuje. Jeho raw účtenka a přípravná
+  karta zůstávají historicky zmrazené; přenos ověřuje uložené hashované výsledky.
+
+Další krok:
+- Will převezme nový lokální commit do aktuálního main, zachová všechny jeho modelové
+  role a samostatně nasadí. Potom ověřit aktivační návrh a s rozpočtem/global potvrzením
+  zapnout páteční službu. Konkrétní postup `technical/science_news.md`.
+
+Navrhované další kroky:
+- První připravený termín pátek 13. 11. 2026 v 09:00 Europe/Prague, příprava 08:00.
+- Po instalaci ověřit stejnou launch účtenku a dnešní not_due/0 placených doháněcích tahů.
+- První skutečné vydání hodnotit podle přijatého filtru; samostatně zůstává omezené
+  pokrytí vydavatelů a ověřování dostupnosti/licence celých zdrojů.
+
+Technický důkaz:
+- 112 cílených Python testů PASS / 8,347 s, včetně 16 Node případů.
+  Finální plná brána: 2964 testů OK (5 SKIP), 547,271 s, syntaxe a whitespace OK.
+- Registrace: `science_news_cached_translation.attach_and_save` a
+  `science_news_activation.prepare/activate`. Cíleně ověřeny hash/URL/rozhodnutí,
+  ztracená save odpověď, cizí editace, nejistý placený job, účet API-key, skutečné
+  měsíční náklady, chybějící deploy, cizí agent a nejistý/selhaný bootstrap bez retry.
+- Živý Cockpit readback: pending_count=0, CRISPR follow active. Archivní tělo končí
+  přesným celým českým překladem; source URL zachované, jobs modelu nezměněné.
+- Sazby Sol Standard ověřeny v oficiální dokumentaci 2026-11-10: 50/2,5/250 kreditů
+  za milion input/cached/output. 15/100 jsou přijímací/rezervační meze, ne provider cap.
+- Návrh je pouze private JSON, žádný LaunchAgent ani aktivace služby nevznikly.
+  Aktuální provoz zatím nesplňuje code_ready/role_ready/served_save_guard;
+  je nutné převzetí nového commitu Willem, nikoli opakování původního pilotu.
+
+Doplnění dokončení 2026-11-10 09:24 CET:
+- Finální plná brána 2964 testů OK (5 SKIP), 547,271 s; žádný nový modelový tah.
+- Čtecí live proof: účet ChatGPT, Sol/medium dostupný, bez thread/start nebo turn/start.
+  Aktuální runtime parser navrženou novou roli přijal v odděleném souboru a politiky
+  všech jeho stávajících rolí zachoval. Živá role konfigurace se tím nezměnila.
+- Služba com.samantha.science-news ani její systémový plist zatím neexistují.
+  Konečný neplacený návrh e6e8eb06770426631ba1f0c85caf6e083be0f6c1ef1fbf87f5e4cdea784d375b
+  má první vydání 2026-11-13T09:00:00+01:00, 15/job a 100/měsíc. Code/role/served guard
+  zůstávají false do nového nasazení; původní nasazení tuto doplňující ochranu neobsahuje.
+- Will při převzetí doplní do provozního config/agent_roles.json pouze science_news_editor;
+  celý Datův JSON nepřebírat, protože aktuální main má další role. Ostatní role zachovat.
+
+
+## 2026-11-10 10:09 CET — Izolované převzetí a kompatibilita hodinové pošty
+
+**Hotovo:** Ochrana celého českého uložení a příprava páteční služby jsou integrované v oddělené kopii; 134 cílených testů PASS. Živá pošta i její dosavadní konfigurace zůstávají zachované.
+
+**Rozhodnutí:** Míla požádal nasadit nový Datův commit. Nutný krok kompatibility nesmí zpřístupnit neznámou roli staršímu hodinovému parseru. Instalace páteční služby a její rozpočet zůstávají samostatné.
+
+**Další krok:** Dokončit izolovanou plnou bránu/checkpoint a předložit přesný upgrade pošty 617f3e0d→vydaný 8c83e93b k potvrzení globální brzdou; poté lze dokončit již zadané p+n.
+
+**Navrhované další kroky:** Po kompatibilním upgradu zpřístupnit nový binding a nasadit připravený balíček; páteční aktivaci řešit odděleně po dohodě rozpočtu.
+
+**Technický důkaz:** Skutečný instalovaný parser odmítl dočasný kandidátní JSON (AgentRoleError, science_known=false), přímo ověřen sdílený symlink; main se nezměnil. 134 cílených testů PASS, plná izolovaná brána PASS: 3405 testů / 31 SKIP (641,430 s). Report reports/science_news_aad367c7_integration_20261110.md. Riziko přímého merge: opakovaný výpadek pošty.

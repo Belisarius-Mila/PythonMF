@@ -16,6 +16,7 @@ class Inner:
     def __init__(self):self.calls=[]
     def request(self,method,params):
         self.calls.append((method,params))
+        if method=='account/read':return {'account':{'type':'chatgpt'}}
         if method=='skills/list':return {'data':[{'skills':[],'errors':[]}]}
         if method=='thread/start':return {'thread':{'id':'thread'},'model':SELECTED['model'],'cwd':params['cwd'],
             'approvalPolicy':'never','sandbox':{'type':'readOnly','networkAccess':False}}
@@ -96,6 +97,36 @@ class ModelTests(unittest.TestCase):
         with self.assertRaises(ValueError):call_model(self.store,'fixture',{},'instructions',{},client_factory=Mock(return_value=client))
         job=self.store._read()['jobs']['fixture']
         self.assertEqual(job['state'],'delivery_unknown');self.assertEqual(job['raw_answer'],'{"items":[]}')
+
+    def test_completed_job_charges_actual_usage_and_releases_unused_reservation(self):
+        from datetime import datetime
+        from zoneinfo import ZoneInfo
+        with self.store.transaction() as state:
+            state['jobs']['old']={'state':'completed','month':datetime.now(ZoneInfo('Europe/Prague')).strftime('%Y-%m'),
+                'reserved_credits':200,'estimated_credits':10}
+        factory=Mock(return_value=Client())
+        self.assertEqual(call_model(self.store,'new',{},'instructions',{},client_factory=factory),{'items':[]})
+        self.assertEqual(factory.call_count,1)
+
+    def test_invalid_completed_usage_keeps_full_reservation(self):
+        from datetime import datetime
+        from zoneinfo import ZoneInfo
+        with self.store.transaction() as state:
+            state['jobs']['old']={'state':'completed','month':datetime.now(ZoneInfo('Europe/Prague')).strftime('%Y-%m'),
+                'reserved_credits':200,'estimated_credits':-1}
+        factory=Mock()
+        with self.assertRaises(ValueError):call_model(self.store,'new',{},'instructions',{},client_factory=factory)
+        factory.assert_not_called()
+
+    def test_api_key_account_stops_before_thread_and_does_not_retry(self):
+        client=Client()
+        client.inner.request=Mock(return_value={'account':{'type':'apiKey'}})
+        factory=Mock(return_value=client)
+        with self.assertRaises(ValueError):call_model(self.store,'new',{},'instructions',{},client_factory=factory)
+        self.assertEqual(client.inner.request.call_count,1)
+        self.assertEqual(client.inner.request.call_args.args[0],'account/read')
+        with self.assertRaises(ValueError):call_model(self.store,'new',{},'instructions',{},client_factory=factory)
+        self.assertEqual(factory.call_count,1)
 
     def test_transport_rejects_second_turn_broader_permissions_and_tools(self):
         context=Path(self.temp.name).resolve();inner=Inner()
