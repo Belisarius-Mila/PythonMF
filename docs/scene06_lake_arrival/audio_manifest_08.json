@@ -1,0 +1,55 @@
+{
+  "schema_version": 1,
+  "provider": "azure",
+  "rate": "-10%",
+  "assets": [
+    {
+      "speaker": "Animals",
+      "voice": "en-US-AndrewNeural",
+      "text": "Me! Me! I’ll help!",
+      "audio": "audio/en/p08_01_animals.mp3",
+      "sha256": "d5bee676a1c3efa27ca75dfb6d89b28f58d49d8ac1b6a9f903b98b4c0402bf47",
+      "bytes": 14832
+    },
+    {
+      "speaker": "Freddie",
+      "voice": "en-US-GuyNeural",
+      "text": "Me too!",
+      "audio": "audio/en/p08_02_freddie.mp3",
+      "sha256": "0f188d30636150f1c30425a654efb65eab5382572a097312337bc37b85e897e9",
+      "bytes": 11376
+    },
+    {
+      "speaker": "Dotty",
+      "voice": "en-US-JennyNeural",
+      "text": "And me!",
+      "audio": "audio/en/p08_03_dotty.mp3",
+      "sha256": "3607906a5170c2905ca81c2e23be5f688be4d93e669c9a7255084172e3b262e0",
+      "bytes": 11232
+    },
+    {
+      "speaker": "Ollie",
+      "voice": "en-US-AndrewNeural",
+      "text": "We can all do something.",
+      "audio": "audio/en/p08_04_ollie.mp3",
+      "sha256": "03da23a83f5baa048f49b2bbc141af2aa4a6b62178ae08eeb8ceee1509ad005a",
+      "bytes": 11232
+    },
+    {
+      "speaker": "Old Stag",
+      "voice": "en-US-GuyNeural",
+      "text": "Good. But this will be hard work for everyone.",
+      "audio": "audio/en/p08_05_old_stag.mp3",
+      "sha256": "4bce132e25eb8c9163193b5d62a335f8d74d8cd8a9a79e90e5b1ce19f752b6d3",
+      "bytes": 29088
+    },
+    {
+      "speaker": "Old Stag",
+      "voice": "en-US-GuyNeural",
+      "text": "Who will lead our team?",
+      "audio": "audio/en/p08_06_old_stag.mp3",
+      "sha256": "d793f75ec1486938d81c0568b400426e6348d1ee43e9e4abd6c208075f923a50",
+      "bytes": 14400
+    }
+  ]
+}

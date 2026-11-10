@@ -1,0 +1,121 @@
+{
+  "schema_version": 1,
+  "pictures": [
+    {
+      "id": 1,
+      "title": "The Lake",
+      "dialogue": "dialogue.json",
+      "line_count": 7,
+      "image": "arrival_side_view.webp",
+      "width": 1672,
+      "height": 941,
+      "alt": "Benji, Bunny, Bruno, Fiona and Sunny look across the lake at clouds shaped like rabbit ears."
+    },
+    {
+      "id": 2,
+      "title": "Ollie’s Dinner",
+      "dialogue": "dialogue_02.json",
+      "line_count": 10,
+      "image": "ollie_dinner.webp",
+      "width": 1671,
+      "height": 941,
+      "alt": "The five friends face Ollie the otter, who offers them a large fish in his landing net beside the lake."
+    },
+    {
+      "id": 3,
+      "title": "Jumping Practice",
+      "dialogue": "dialogue_03.json",
+      "line_count": 8,
+      "image": "freddie_jump.webp",
+      "width": 1672,
+      "height": 941,
+      "alt": "The five friends watch Freddie leap from a shore rock into the lake while Dotty coaches him in the air.",
+      "image_changes": [
+        {
+          "from_line": 4,
+          "image": "freddie_conversation.webp",
+          "width": 1672,
+          "height": 941,
+          "alt": "Freddie is half submerged in the lake, facing the five friends, with Dotty hovering and facing them too."
+        }
+      ]
+    },
+    {
+      "id": 4,
+      "title": "The Old Hut",
+      "dialogue": "dialogue_04.json",
+      "line_count": 7,
+      "image": "old_hut.webp",
+      "width": 1672,
+      "height": 941,
+      "alt": "The five friends arrive at an empty old fishing hut and a boat on the lakeshore at sunset.",
+      "layout": "below"
+    },
+    {
+      "id": 5,
+      "title": "Dinner by the Fire",
+      "dialogue": "dialogue_05.json",
+      "line_count": 7,
+      "image": "dinner_fire.webp",
+      "width": 1672,
+      "height": 941,
+      "alt": "The five friends share dinner around a wooden table beside a warm fire inside the old hut.",
+      "layout": "below"
+    },
+    {
+      "id": 6,
+      "title": "The Meeting Begins",
+      "dialogue": "dialogue_06.json",
+      "line_count": 8,
+      "image": "meeting_begins.webp",
+      "width": 1672,
+      "height": 941,
+      "alt": "The old stag addresses a large gathering of forest animals beside the lake and the old hut.",
+      "layout": "below"
+    },
+    {
+      "id": 7,
+      "title": "Logan’s Idea",
+      "dialogue": "dialogue_07.json",
+      "line_count": 8,
+      "image": "logan_idea.webp",
+      "width": 1672,
+      "height": 941,
+      "alt": "Logan the beaver raises his paw to offer an idea while the old stag and forest animals listen.",
+      "layout": "below"
+    },
+    {
+      "id": 8,
+      "title": "Everyone Wants to Help",
+      "dialogue": "dialogue_08.json",
+      "line_count": 6,
+      "image": "everyone_helps.webp",
+      "width": 1671,
+      "height": 941,
+      "alt": "The forest animals raise their paws and wings to volunteer to help the old stag.",
+      "layout": "below"
+    },
+    {
+      "id": 9,
+      "title": "Silence",
+      "dialogue": "dialogue_09.json",
+      "line_count": 0,
+      "image": "silence.webp",
+      "width": 1670,
+      "height": 941,
+      "alt": "The forest animals lower their heads and look at the ground in silence beside the old stag.",
+      "layout": "below"
+    },
+    {
+      "id": 10,
+      "title": "Benji’s Plan",
+      "dialogue": "dialogue_10.json",
+      "line_count": 6,
+      "image": "benji_plan.webp",
+      "width": 1670,
+      "height": 942,
+      "alt": "Benji presents a forest map to the gathered animals. The stream on the map flows into the lake.",
+      "layout": "below"
+    }
+  ]
+}

@@ -32,6 +32,7 @@ const fionaTarget = document.getElementById("fionaTarget");
 const brunoTarget = document.getElementById("brunoTarget");
 const loganTarget = document.getElementById("loganTarget");
 const completeBanner = document.getElementById("completeBanner");
+const lakeShortcut = document.getElementById("lakeShortcut");
 
 const LANGUAGE_MODES = Object.freeze({ english: "en", bilingual: "en-cz" });
 const LANGUAGE_STORAGE_KEY = "mmtx-language-mode";
@@ -229,6 +230,12 @@ function updateControls() {
   fionaTarget.disabled = state.stage !== "wait-fiona" || state.isPlaying || state.isAnimating;
   brunoTarget.disabled = state.stage !== "wait-bruno" || state.isPlaying || state.isAnimating;
   loganTarget.disabled = state.stage !== "wait-logan" || state.isPlaying || state.isAnimating;
+  updateLakeShortcut();
+}
+
+function updateLakeShortcut() {
+  lakeShortcut.hidden = state.stage !== "complete" || scene.dataset.sceneState !== "friends-farewell" ||
+    state.isPlaying || state.isAnimating || !dictionaryPanel.classList.contains("hidden");
 }
 
 function closeDictionary() {
@@ -243,6 +250,7 @@ function toggleDictionary() {
   dictionaryPanel.classList.toggle("hidden", !willOpen);
   dictionaryButton.classList.toggle("active-panel", willOpen);
   dictionaryButton.setAttribute("aria-expanded", willOpen ? "true" : "false");
+  updateLakeShortcut();
 }
 
 function renderDictionary() {

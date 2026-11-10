@@ -1,0 +1,71 @@
+{
+  "schema_version": 1,
+  "provider": "azure",
+  "rate": "-10%",
+  "assets": [
+    {
+      "speaker": "Logan",
+      "voice": "en-US-ChristopherNeural",
+      "text": "I do. The woodpecker can find the sick trees.",
+      "audio": "audio/en/p07_01_logan.mp3",
+      "sha256": "2c36bd97c4e73f13e71161323d8f287886b35f3925dbfd0ffa621baaffd46f24",
+      "bytes": 31104
+    },
+    {
+      "speaker": "Woodpecker",
+      "voice": "en-US-AndrewNeural",
+      "text": "I can check every tree.",
+      "audio": "audio/en/p07_02_woodpecker.mp3",
+      "sha256": "c1499d51e1c98ba63d0f848d7e09c94bd7c133bd2852c0486b28d10eeb813d5b",
+      "bytes": 11232
+    },
+    {
+      "speaker": "Logan",
+      "voice": "en-US-ChristopherNeural",
+      "text": "Then my beaver friends and I can cut the sick ones down.",
+      "audio": "audio/en/p07_03_logan.mp3",
+      "sha256": "a99bcac151aaaba03fc085818b8c196aee124e534844ae138489dcbf54f31c75",
+      "bytes": 26352
+    },
+    {
+      "speaker": "Fiona",
+      "voice": "en-US-JennyNeural",
+      "text": "And leave the healthy trees?",
+      "audio": "audio/en/p07_04_fiona.mp3",
+      "sha256": "b7091607a002c77abb7a780ff30e84cf699f6e08cc5c1a4a5550ecc2988c1ad3",
+      "bytes": 15408
+    },
+    {
+      "speaker": "Logan",
+      "voice": "en-US-ChristopherNeural",
+      "text": "Yes. But we need help. Those trees are heavy.",
+      "audio": "audio/en/p07_05_logan.mp3",
+      "sha256": "f4032e65429c31578b20fb6842345f3ec350083f604a33b8f861d1bc966b8a6c",
+      "bytes": 37296
+    },
+    {
+      "speaker": "Bruno",
+      "voice": "en-US-GuyNeural",
+      "text": "Where must we take them?",
+      "audio": "audio/en/p07_06_bruno.mp3",
+      "sha256": "7c8dcb38cf8e108800c79d9b489471b8fe255bc3cddbe7811d3425e68288c7f0",
+      "bytes": 14832
+    },
+    {
+      "speaker": "Logan",
+      "voice": "en-US-ChristopherNeural",
+      "text": "Here, to the shore. People can find them here and take them away.",
+      "audio": "audio/en/p07_07_logan.mp3",
+      "sha256": "c1d67958336b40511ff8fff6c0d91e3f8f8d41bc2c83fdfa424601810e7a0513",
+      "bytes": 35856
+    },
+    {
+      "speaker": "Old Stag",
+      "voice": "en-US-GuyNeural",
+      "text": "Who will help the beavers?",
+      "audio": "audio/en/p07_08_old_stag.mp3",
+      "sha256": "a538c551e7a2beba476f878fec0a0ecba958c53d79d40a0667483ae14b1c0a77",
+      "bytes": 14976
+    }
+  ]
+}

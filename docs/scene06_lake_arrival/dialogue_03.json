@@ -1,0 +1,17 @@
+{
+  "schema_version": 1,
+  "scene": 6,
+  "picture": 3,
+  "title": "Jumping Practice",
+  "rate": "-10%",
+  "lines": [
+    {"speaker": "Dotty", "voice": "en-US-JennyNeural", "text": "A beautiful jump, Freddie!", "audio": "audio/en/p03_01_dotty.mp3"},
+    {"speaker": "Freddie", "voice": "en-US-GuyNeural", "text": "And a big splash!", "audio": "audio/en/p03_02_freddie.mp3"},
+    {"speaker": "Dotty", "voice": "en-US-JennyNeural", "text": "Too big! Try a smaller splash next time.", "audio": "audio/en/p03_03_dotty.mp3"},
+    {"speaker": "Bunny", "voice": "en-US-AnaNeural", "text": "Why are you practising?", "audio": "audio/en/p03_04_bunny.mp3"},
+    {"speaker": "Freddie", "voice": "en-US-GuyNeural", "text": "For the frog-jumping race!", "audio": "audio/en/p03_05_freddie.mp3"},
+    {"speaker": "Fiona", "voice": "en-US-JennyNeural", "text": "We’re here for the meeting.", "audio": "audio/en/p03_06_fiona.mp3"},
+    {"speaker": "Dotty", "voice": "en-US-JennyNeural", "text": "We’re coming too. See you there!", "audio": "audio/en/p03_07_dotty.mp3"},
+    {"speaker": "Freddie", "voice": "en-US-GuyNeural", "text": "Just one more jump!", "audio": "audio/en/p03_08_freddie.mp3"}
+  ]
+}

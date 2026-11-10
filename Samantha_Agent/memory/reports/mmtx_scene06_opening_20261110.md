@@ -86,19 +86,19 @@ Technický důkaz:
 - 37 cílených testů PASS; nově i skutečný cíl odkazu, jeho umístění až v původně skrytém dokončení a shoda HTML/CSS obou mirrorů. Plná místní brána 2960 OK (5 SKIP) zůstává důkazem nezměněné infrastruktury; nová markup změna byla ověřená cíleně. Žádné nové modelové/audio volání a žádná publikace této šestky. Registrovaný deploy audit: source main není čistý; batch audit: pracovní prostředí není připravené.
 
 
-### 2026-11-10 15:43 CET — Data přebírá integraci a první p+n
+### 2026-11-10 16:12 CET — Druhý obraz ověřený, první nasazení Pages zrušené po timeoutu
 
 Hotovo:
-- Oba hotové vývojové kroky se integrují do kanonického main se zachováním Willovy i Datovy historie. První obraz má všech sedm EN MP3, přijatý boční pohled a napojení po dokončení mostu.
+- Lokálně funguje příběhové spojení prvních dvou obrazů a všech 17 anglických MP3. Druhý obraz má schválený obrázek, přesných 10 replik a vlastní neměnné audio podklady.
 
 Rozhodnutí:
-- Míla oznámil, že Will nepracuje, a výslovně zadal předat p+n nyní Terře a vyčistit repo; potom připojit obraz 2. Nesouvisející WIP se zachovává, nikoli zahazuje: 3 přesné změny ve stashi `550024e17da59eb258556f5d3f0979650d5a4d30`, scénáře navíc v soukromé záloze s otisky.
+- Druhý obraz je oddělený následující vývoj, není součástí prvního zmrazeného p+n. První p+n se neopakuje automaticky; Míla má konkrétní otázku na jediný nový pokus stejného fee535e5. Starý WIP Data je zaznamenaný samostatně v `06c34051` a do main se znovu nepřebírá. Willovo nesouvisející WIP zůstává zachované.
 
 Další krok:
-- Cíleně ověřit integrovaný kód, dokončit převzetí a bezpečné zarovnání čistých profilů; spustit jedno registrované p+n s plnou bránou a přesným headem.
+- Uložit konkrétní nový commit druhého obrazu a potvrdit čisté pracovní kopie; poté počkat na Mílovo rozhodnutí o novém pokusu nasazení.
 
 Navrhované další kroky:
-- Ověřit veřejné soubory nové šestky a vstup z pětky. Poté připojit Ollieho, druhý obraz a jeho EN dialogy.
+- Druhý obraz samostatně projít na Mílově zařízení a případně vydat po jeho pokynu. Produkční Pages po zrušeném nasazení zatím není přejímka nové šestky.
 
 Technický důkaz:
-- Převzetí řeší očekávané modify/delete konflikty pouze nových HTML/JS/CSS a zachovává obě historie paměti. Vybrané WIP má ověřené přesné bajty ve stashi i privátní záloze. Žádné další TTS nebo modelové volání zatím neproběhlo. Samostatné testy prvního obrazu a propojení jsou přidané do trvalé plné brány. Publikační výsledek bude mít novou vlastní účtenku.
+- Plná místní brána 2972 OK (5 SKIP), 665,420 s unit; 57 cílených kontrol PASS, 17/17 MP3 decode, 27 HTTP souborů přesné. Skutečné Safari: obraz Ollie, Bunny 10/10, Again, viditelné postavy a podběrák. První Azure podklady beze změny. První Terra receipt `4b261f77c13a77e845684bbbd90cc876`: gate 3412 PASS, push confirmed, deployment uncertain; GitHub Pages run `42839271179` po 600000 ms syncing_files deployment zrušil. Po zrušení HTML 404. Výsledkový report zachovává první neúspěšný běh bez přepisu.

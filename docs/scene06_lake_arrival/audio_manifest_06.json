@@ -1,0 +1,71 @@
+{
+  "schema_version": 1,
+  "provider": "azure",
+  "rate": "-10%",
+  "assets": [
+    {
+      "speaker": "Old Stag",
+      "voice": "en-US-GuyNeural",
+      "text": "You all want to know why I called you here.",
+      "audio": "audio/en/p06_01_old_stag.mp3",
+      "sha256": "c0574d57b13b3a3308fbaf09a77107b6873b847cad77a46701f6f965104a665e",
+      "bytes": 20448
+    },
+    {
+      "speaker": "Animals",
+      "voice": "en-US-AndrewNeural",
+      "text": "Yes! Yes! Tell us!",
+      "audio": "audio/en/p06_02_animals.mp3",
+      "sha256": "90e2e6fd6cae5b1eb7f78a4cc81d0116a317277c201299a3dcc61d29e795cb8e",
+      "bytes": 16848
+    },
+    {
+      "speaker": "Old Stag",
+      "voice": "en-US-GuyNeural",
+      "text": "Our forest is old. Many trees are sick.",
+      "audio": "audio/en/p06_03_old_stag.mp3",
+      "sha256": "ec3c5a5baf6185d7402445a660769c7176a17b2e539183d42fb7806bafddee73",
+      "bytes": 30240
+    },
+    {
+      "speaker": "Fiona",
+      "voice": "en-US-JennyNeural",
+      "text": "Can we help them?",
+      "audio": "audio/en/p06_04_fiona.mp3",
+      "sha256": "846ddff8afc94a8c2890c1c88e675a56a09464752aaa203c172e543acc9ad02c",
+      "bytes": 11952
+    },
+    {
+      "speaker": "Old Stag",
+      "voice": "en-US-GuyNeural",
+      "text": "People may come and cut down the whole forest.",
+      "audio": "audio/en/p06_05_old_stag.mp3",
+      "sha256": "f11e643b7932a39e16718b83229fd330b4be520ced04ccd469cfc4e478dccab6",
+      "bytes": 21888
+    },
+    {
+      "speaker": "Bunny",
+      "voice": "en-US-AnaNeural",
+      "text": "Even the healthy trees?",
+      "audio": "audio/en/p06_06_bunny.mp3",
+      "sha256": "7630ae39098aa944fbd635ea94bbb07dea3e31b8ab7b7e3f8073ea66dca214bd",
+      "bytes": 15840
+    },
+    {
+      "speaker": "Old Stag",
+      "voice": "en-US-GuyNeural",
+      "text": "Yes. We need to save our home.",
+      "audio": "audio/en/p06_07_old_stag.mp3",
+      "sha256": "9d3965376e193a8173d7afa7cdcb565e448cbc79e88cda4bb51e4e1e47b73d42",
+      "bytes": 25776
+    },
+    {
+      "speaker": "Old Stag",
+      "voice": "en-US-GuyNeural",
+      "text": "Does anyone have an idea?",
+      "audio": "audio/en/p06_08_old_stag.mp3",
+      "sha256": "67e380a5faa388bd5e88acc2292dad3f646a2785ed898f2e03ca6cad9770055d",
+      "bytes": 16560
+    }
+  ]
+}

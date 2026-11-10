@@ -8,7 +8,8 @@ button, a { -webkit-tap-highlight-color: transparent; touch-action: manipulation
 .scene-image { width: 100%; height: auto; display: block; }
 .hud { position: absolute; z-index: 4; inset: 12px 12px auto; display: flex; justify-content: space-between; gap: 8px; pointer-events: none; }
 .hud > *, .actions > * { pointer-events: auto; }
-.actions { display: flex; gap: 8px; }
+.actions { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 8px; }
+.back { flex-shrink: 0; }
 .control { min-height: 44px; min-width: 44px; padding: 9px 16px; border: 2px solid #567a5e; border-radius: 20px; background: #fffbeaef; color: #213d30; font: inherit; font-weight: 800; text-decoration: none; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; }
 .control:hover:not(:disabled) { background: #fff0ac; }
 .control:focus-visible, .audio-gate:focus-visible { outline: 4px solid #1b68a3; outline-offset: -4px; }
@@ -28,6 +29,17 @@ button, a { -webkit-tap-highlight-color: transparent; touch-action: manipulation
 .status { background: #fffbeaf2; border-radius: 12px; padding: 6px 10px; font-size: clamp(12px, 1.3vw, 18px); }
 .status:empty { display: none; }
 .status.error { color: #8d241a; }
+/* Ollie and his net occupy the right shore; put the dialogue above them. */
+.scene[data-picture="2"] .speech,
+.scene[data-image="freddie_conversation.webp"] .speech { top: 10px; bottom: auto; left: 33%; right: auto; width: 35%; }
+@media (max-width: 700px) {
+  .scene[data-picture="2"],
+  .scene[data-picture="3"] { padding-bottom: 145px; }
+  .scene[data-picture="2"] .speech,
+  .scene[data-picture="3"] .speech { top: auto; bottom: 62px; left: 3%; right: 3%; width: 94%; padding: 8px 12px; }
+  .scene[data-picture="2"] .footer-controls,
+  .scene[data-picture="3"] .footer-controls { bottom: 8px; }
+}
 @media (max-width: 600px) {
   .hud { inset: 5px 5px auto; }
   .control { padding: 5px 9px; border-radius: 14px; font-size: 13px; }
@@ -39,3 +51,12 @@ button, a { -webkit-tap-highlight-color: transparent; touch-action: manipulation
   .status { padding: 4px 6px; font-size: 11px; }
   .start-card { padding: 10px 17px; border-width: 2px; }
 }
+
+/* Later gatherings and Benji's map need the full illustration unobscured. */
+.scene[data-layout="below"] { height: 100svh; padding-bottom: 0; display: grid; grid-template-rows: minmax(0, 1fr) auto auto; }
+.scene[data-layout="below"] .scene-image { grid-row: 1; width: 100%; height: 100%; min-height: 0; object-fit: contain; }
+.scene[data-layout="below"] .speech { grid-row: 2; position: relative; inset: auto; width: auto; margin: 12px 3% 0; }
+.scene[data-layout="below"] .footer-controls { grid-row: 3; position: relative; inset: auto; max-width: none; margin: 12px 3% 0; padding-bottom: max(12px, env(safe-area-inset-bottom)); }
+
+.speech p.translation { border-top: 1px solid #b6c9ac; padding-top: 7px; margin-top: 8px; color: #3b5b45; font-size: clamp(15px, 1.9vw, 26px); font-weight: 500; }
+@media (max-width: 600px) { .speech p.translation { font-size: 14px; padding-top: 5px; margin-top: 5px; } }

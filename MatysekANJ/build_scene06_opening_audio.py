@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Build the seven English lines of the NEW Scene 6 opening, without retries."""
+"""Build one picture's fixed English MP3 in the NEW Scene 6, without retries."""
 from __future__ import annotations
 
 import argparse
@@ -24,6 +24,7 @@ DOCS = REPO / "docs/scene06_lake_arrival"
 MIRROR = REPO / "MatysekANJ/web_mmtx/scene06_lake_arrival"
 RECEIPT = ROOT / "data/private/mmtx/scene06_opening_20261110/audio_receipt.json"
 CAPABILITY_ID = "generate_project_azure_audio_asset"
+LINE_COUNTS = {1: 7, 2: 10, 3: 8, 4: 7, 5: 7, 6: 8, 7: 8, 8: 6, 9: 0, 10: 6}
 
 
 def digest(data):
@@ -40,12 +41,23 @@ def write_new(path, data):
         output.write(data)
 
 
-def dialogue(root=DOCS):
-    data = json.loads((root / "dialogue.json").read_text(encoding="utf-8"))
-    if data.get("schema_version") != 1 or len(data.get("lines", [])) != 7:
-        raise RuntimeError("Neplatný první dialog nové šestky.")
+def names(picture):
+    if picture not in LINE_COUNTS:
+        raise RuntimeError("Nepovolený obraz nové šestky.")
+    return ("dialogue.json", "audio_manifest.json") if picture == 1 else (f"dialogue_{picture:02d}.json", f"audio_manifest_{picture:02d}.json")
+
+
+def dialogue(root=DOCS, picture=1):
+    data = json.loads((root / names(picture)[0]).read_text(encoding="utf-8"))
+    if (data.get("schema_version") != 1 or data.get("picture") != picture
+            or not isinstance(data.get("lines"), list)
+            or len(data["lines"]) != LINE_COUNTS[picture]
+            or (picture == 9) != (data.get("silent") is True)):
+        raise RuntimeError("Neplatný dialog nové šestky.")
     for number, line in enumerate(data["lines"], 1):
-        expected = f"audio/en/{number:02d}_{line['speaker'].lower()}.mp3"
+        prefix = "" if picture == 1 else f"p{picture:02d}_"
+        speaker = line['speaker'].lower().replace(' ', '_')
+        expected = f"audio/en/{prefix}{number:02d}_{speaker}.mp3"
         if line.get("audio") != expected:
             raise RuntimeError("Neplatná cesta audia.")
         ssml_parts(line["text"], line["voice"], data["rate"])
@@ -76,9 +88,21 @@ def receipt_lock(path):
         yield
 
 
-def build(*, env_path=ENV_PATH, receipt=RECEIPT, limit=1000, docs=DOCS,
+def build(*, env_path=ENV_PATH, receipt=None, limit=1000, docs=DOCS, picture=1,
           mirror=MIRROR, synthesizer=synthesize_azure_tts_mp3_sync, validator=validate_mp3):
-    data = dialogue(docs)
+    data = dialogue(docs, picture)
+    if picture == 9:
+        check(docs=docs, mirror=mirror, picture=picture)
+        return {"ok": True, "picture": picture, "assets": 0, "new_requests": 0, "reserved_characters": 0}
+    receipt = receipt or (RECEIPT if picture == 1 else RECEIPT.with_name(f"audio_receipt_picture_{picture:02d}.json"))
+    return build_assets(data, receipt=receipt, manifest_name=names(picture)[1],
+                        env_path=env_path, limit=limit, docs=docs, mirror=mirror,
+                        synthesizer=synthesizer, validator=validator, picture=picture)
+
+
+def build_assets(data, *, receipt, manifest_name, env_path=ENV_PATH, limit=1000,
+                 docs=DOCS, mirror=MIRROR, synthesizer=synthesize_azure_tts_mp3_sync,
+                 validator=validate_mp3, picture=None):
     signature = digest(json.dumps(data, ensure_ascii=False, sort_keys=True).encode())
     with receipt_lock(receipt):
         state = json.loads(receipt.read_text()) if receipt.exists() else {
@@ -126,14 +150,18 @@ def build(*, env_path=ENV_PATH, receipt=RECEIPT, limit=1000, docs=DOCS,
             assets.append({**line, "sha256": digest(audio), "bytes": len(audio)})
         manifest = {"schema_version": 1, "provider": "azure", "rate": data["rate"], "assets": assets}
         for root in (docs, mirror):
-            atomic_write_json(root / "audio_manifest.json", manifest)
-        return {"ok": True, "assets": len(assets), "new_requests": len(pending),
+            atomic_write_json(root / manifest_name, manifest)
+        return {"ok": True, "picture": picture, "assets": len(assets), "new_requests": len(pending),
                 "reserved_characters": budget.reserved}
 
 
-def check(docs=DOCS, mirror=MIRROR):
-    data = dialogue(docs)
-    manifest = json.loads((docs / "audio_manifest.json").read_text())
+def check(docs=DOCS, mirror=MIRROR, picture=1):
+    data = dialogue(docs, picture)
+    if picture == 9:
+        if (docs / names(picture)[0]).read_bytes() != (mirror / names(picture)[0]).read_bytes():
+            raise RuntimeError("Data tichého obrazu v mirroru se liší.")
+        return {"ok": True, "english_mp3": 0, "missing": 0}
+    manifest = json.loads((docs / names(picture)[1]).read_text())
     if manifest.get("provider") != "azure" or manifest.get("rate") != data["rate"]:
         raise RuntimeError("Nesprávný provider nebo tempo.")
     if len(manifest.get("assets", [])) != len(data["lines"]):
@@ -147,7 +175,7 @@ def check(docs=DOCS, mirror=MIRROR):
             raise RuntimeError("MP3 neodpovídá ověřenému otisku.")
         if (mirror / line["audio"]).read_bytes() != audio:
             raise RuntimeError("Mirror se liší.")
-    for name in ("dialogue.json", "audio_manifest.json"):
+    for name in names(picture):
         if (docs / name).read_bytes() != (mirror / name).read_bytes():
             raise RuntimeError("Data mirroru se liší.")
     return {"ok": True, "english_mp3": len(data["lines"]), "missing": 0}
@@ -159,13 +187,14 @@ def main():
     mode.add_argument("--apply", action="store_true")
     mode.add_argument("--check", action="store_true")
     parser.add_argument("--provider", choices=("azure",))
+    parser.add_argument("--picture", type=int, choices=tuple(LINE_COUNTS), default=1)
     parser.add_argument("--env-path", type=Path, default=ENV_PATH)
     parser.add_argument("--max-characters", type=int, default=1000)
     args = parser.parse_args()
     if args.apply and args.provider != "azure":
         parser.error("Generování vyžaduje výslovné --provider azure.")
     try:
-        result = build(env_path=args.env_path, limit=args.max_characters) if args.apply else check()
+        result = build(env_path=args.env_path, limit=args.max_characters, picture=args.picture) if args.apply else check(picture=args.picture)
     except Exception as error:
         # Registered transport exceptions are already secret-safe; never print settings.
         print(f"Zastaveno bez opakování: {error}", file=sys.stderr)

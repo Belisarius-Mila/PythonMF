@@ -1,0 +1,63 @@
+{
+  "schema_version": 1,
+  "provider": "azure",
+  "rate": "-10%",
+  "assets": [
+    {
+      "speaker": "Bunny",
+      "voice": "en-US-AnaNeural",
+      "text": "Good food and a warm fire. I like it here.",
+      "audio": "audio/en/p05_01_bunny.mp3",
+      "sha256": "3f4e3905bd786da3f7c13b50c59a1262a6d876f11668b2d743f128bf2e7739df",
+      "bytes": 31680
+    },
+    {
+      "speaker": "Fiona",
+      "voice": "en-US-JennyNeural",
+      "text": "But why did the old stag call us here?",
+      "audio": "audio/en/p05_02_fiona.mp3",
+      "sha256": "ae0c26a876e59c6913bc26b7193910d035835aafe301becbab9cde27af475d35",
+      "bytes": 19152
+    },
+    {
+      "speaker": "Sunny",
+      "voice": "en-US-MichelleNeural",
+      "text": "Maybe he wants a party.",
+      "audio": "audio/en/p05_03_sunny.mp3",
+      "sha256": "34c832cfa4922f568e658e65bed6d72c525af097c8e621612307a9bc3ef70e06",
+      "bytes": 14544
+    },
+    {
+      "speaker": "Bunny",
+      "voice": "en-US-AnaNeural",
+      "text": "Then we can bring some food!",
+      "audio": "audio/en/p05_04_bunny.mp3",
+      "sha256": "806946f4d1712a1fc4e7a88048f0d3be649d82bae84c7192dfa6857ceb118d64",
+      "bytes": 18288
+    },
+    {
+      "speaker": "Bruno",
+      "voice": "en-US-GuyNeural",
+      "text": "He asked every animal to come. Maybe he needs help.",
+      "audio": "audio/en/p05_05_bruno.mp3",
+      "sha256": "40ecfc931a6e27cc1eca09f54291e19b7c7ffa2e88c68638b3d40f2c3e59dfb9",
+      "bytes": 31824
+    },
+    {
+      "speaker": "Fiona",
+      "voice": "en-US-JennyNeural",
+      "text": "Do you think something is wrong?",
+      "audio": "audio/en/p05_06_fiona.mp3",
+      "sha256": "cdd5361c1e69f569ae230b03cfa5d444d5629817e655e3444cf413f9785ab459",
+      "bytes": 15408
+    },
+    {
+      "speaker": "Benji",
+      "voice": "en-US-AndrewNeural",
+      "text": "Let’s eat. We’ll soon find out.",
+      "audio": "audio/en/p05_07_benji.mp3",
+      "sha256": "9caff8ac3759c5bd1ba2d8c7e1d9a7213a36fb9f04b340540ed122245cc2e346",
+      "bytes": 13824
+    }
+  ]
+}

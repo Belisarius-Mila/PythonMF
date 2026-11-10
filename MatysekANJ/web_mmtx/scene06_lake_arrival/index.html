@@ -4,16 +4,20 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
     <title>MMTX — The Lake</title>
-    <link rel="stylesheet" href="styles.css?v=20261110opening1">
-    <script src="script.js?v=20261110opening1" defer></script>
+    <link rel="preload" href="ollie_dinner.webp" as="image" type="image/webp">
+    <link rel="prefetch" href="freddie_jump.webp" as="image" type="image/webp">
+    <link rel="prefetch" href="freddie_conversation.webp" as="image" type="image/webp">
+    <link rel="stylesheet" href="styles.css?v=20261110czech1">
+    <script src="script.js?v=20261110czech1" defer></script>
   </head>
   <body>
     <main>
-      <section class="scene" aria-label="Scene 6 — The Lake">
-        <img class="scene-image" src="arrival_side_view.webp" width="1672" height="941" alt="Benji, Bunny, Bruno, Fiona and Sunny look across the lake at clouds shaped like rabbit ears." draggable="false">
+      <section class="scene" id="scene" data-picture="1" aria-label="Scene 6 — The Lake">
+        <img class="scene-image" id="sceneImage" src="arrival_side_view.webp" width="1672" height="941" alt="Benji, Bunny, Bruno, Fiona and Sunny look across the lake at clouds shaped like rabbit ears." draggable="false">
         <nav class="hud" aria-label="Scene controls">
           <a class="control back" href="../scene05_log_bridge/index.html" aria-label="Zpět k mostu">↩</a>
           <div class="actions">
+            <button class="control" id="languageButton" type="button" aria-pressed="false" disabled>CZ: vypnuto</button>
             <button class="control" id="repeatButton" type="button" disabled>↻ Repeat</button>
             <button class="control" id="restartButton" type="button" hidden>↺ Again</button>
           </div>
@@ -24,6 +28,7 @@
         <section class="speech" id="speechBubble" aria-live="polite" hidden>
           <div class="speech-heading"><strong id="speakerName"></strong><span id="lineNumber"></span></div>
           <p id="speechText"></p>
+          <p class="translation" id="czechText" lang="cs" hidden></p>
         </section>
         <div class="footer-controls">
           <span class="status" id="status" role="status">Loading…</span>

@@ -2060,3 +2060,24 @@ prostředí PASS, produkční kód beze změny.
 - Řešení: porovnávat multimnožinu přesných časových hodnot alarmů, zachovat počet/duplicity a přesnou rovnost všech ostatních polí i obou nativních ID. Historický žurnál normalizovat při read-backu; nikdy znovu save.
 - Důkaz: Swift FAIL→PASS pro alarm reorder, skutečně změněný alarm dál unknown. Reálný read-only recover potvrdil jediný match obou ID, žádné odlišné pole, alarm_order_normalized=true a calendar_writes=false.
 - Při novém podpisu helperu může macOS vyžádat nový grant. Nezapomenout původní request_id; UI musí nabídnout povolení a následné read-only ověření. Viditelná lišta zůstává ve viewportu. Report reports/calendar_edit_alarm_order_recovery_20261110.md.
+
+
+### 2026-11-10 — Tichý příběhový obraz není audio replika
+
+- Kontext: nová šestá scéna MMTX, část 9 má podle schváleného scénáře jen mlčení.
+- Řešení: explicitní tichý krok v katalogu/dialogu, nulové repliky, žádné vytvoření Audio ani placené syntézy; schovat a vyprázdnit předchozí bublinu, vypnout Repeat a ponechat ruční Next picture. Vizuální přechod oddělit od počtu vyslovených vět.
+- Ověření: Node VM prošel 67 mluvených replik i tichý krok, pozdní callback a Back/Forward v tichu nevytvořily Audio; syntetický builder ticha nezaložil účtenku, MP3 ani požadavek. Safari ověřilo viditelný obraz bez bubliny. Celkem 52 cílených kontrol PASS; fyzická přejímka je samostatná.
+
+
+### 2026-11-10 — Návaznost MMTX není důkaz viditelného Next
+
+- Problém: od čtvrtého obrazu nové šestky tvořily široký obrázek a dialog vyšší obsah než okno; Next byl pod viditelnou plochou. Testovaný stavový automat byl funkční, skutečný uživatel přesto nemohl běžně pokračovat.
+- Řešení: pro dialog pod obrazem vyhradit viewport grid 100svh se zmenšitelným řádkem obrázku (minmax(0,1fr), object-fit:contain) a samostatnými auto řádky dialogu a ovládání. Kontrolovat celý Next ve skutečném okně, nejen v AX stromu, HTTP či mocku Audio.
+- Ověření: screenshot skutečného přehrávače 4 / 1/7 ukázal obraz, text a celé Next v okně; následné živé pozorování dosáhlo 5 / 5/7. 53 cílených testů PASS. Přímý odkaz #picture=4 umožňuje opakovat ruční přejímku bez přeskakování zvukové brány.
+
+
+### 2026-11-10 — Český text a české čtení mají odlišný režim i frontu
+
+- Kontext: MMTX potřebuje postupně zapnout překlad jako text a pak i čtení, bez změn schválené angličtiny.
+- Řešení: explicitní tři režimy, samostatný překlad svázaný s anglickou větou a MP3, sekvence EN→CS s jedním aktivním Audio a tokenem. Čistě textový režim nepřehrává český zvuk; vypnutí za běhu češtinu zastaví a zneplatní callbacky. Chybu angličtiny nelze obejít přepínačem. Optional localStorage nesmí blokovat přehrávač.
+- Ověření: 58 cílených testů, všech 67 dvojic a ticho, změny režimu během řeči i v klidu, chyby a Repeat, historie, uložená volba i zablokované úložiště. Původních 98 podkladů a 9 účtenek beze změny; nové CZ MP3 oddělené a jednorázové.

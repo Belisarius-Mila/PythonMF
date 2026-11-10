@@ -1,0 +1,44 @@
+{
+  "schema_version": 1,
+  "picture": 8,
+  "title": "Everyone Wants to Help",
+  "rate": "-10%",
+  "lines": [
+    {
+      "speaker": "Animals",
+      "voice": "en-US-AndrewNeural",
+      "text": "Me! Me! I’ll help!",
+      "audio": "audio/en/p08_01_animals.mp3"
+    },
+    {
+      "speaker": "Freddie",
+      "voice": "en-US-GuyNeural",
+      "text": "Me too!",
+      "audio": "audio/en/p08_02_freddie.mp3"
+    },
+    {
+      "speaker": "Dotty",
+      "voice": "en-US-JennyNeural",
+      "text": "And me!",
+      "audio": "audio/en/p08_03_dotty.mp3"
+    },
+    {
+      "speaker": "Ollie",
+      "voice": "en-US-AndrewNeural",
+      "text": "We can all do something.",
+      "audio": "audio/en/p08_04_ollie.mp3"
+    },
+    {
+      "speaker": "Old Stag",
+      "voice": "en-US-GuyNeural",
+      "text": "Good. But this will be hard work for everyone.",
+      "audio": "audio/en/p08_05_old_stag.mp3"
+    },
+    {
+      "speaker": "Old Stag",
+      "voice": "en-US-GuyNeural",
+      "text": "Who will lead our team?",
+      "audio": "audio/en/p08_06_old_stag.mp3"
+    }
+  ]
+}

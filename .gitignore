@@ -44,3 +44,7 @@ docs/lekarna/private-data/
 
 # Local one-off source dumps shared with Codex during mobile/Pythonista debugging
 Samantha_Agent/JanaFRMobil*.txt
+
+/docs/scene06_lake_arrival/*.json.lock
+
+/MatysekANJ/web_mmtx/scene06_lake_arrival/*.json.lock

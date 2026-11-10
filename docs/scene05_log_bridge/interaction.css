@@ -292,3 +292,8 @@ button { font: inherit; }
 .complete-banner { flex-wrap: wrap; max-width: calc(100% - 24px); border-radius: 24px; }
 .continue-link { display: inline-flex; min-height: 44px; align-items: center; justify-content: center; padding: 6px 14px; border: 2px solid #5d9b68; border-radius: 18px; color: #213d30; background: #fff8d7; font-weight: 900; text-decoration: none; }
 .continue-link:focus-visible { outline: 3px solid #1b68a3; outline-offset: 2px; }
+
+/* Invisible large shortcut, available only on the completed farewell picture. */
+.lake-secret-corner { position: absolute; z-index: 30; left: 0; bottom: 0; width: 24%; height: 28%; min-width: 44px; min-height: 44px; background: transparent; text-decoration: none; }
+.lake-secret-corner[hidden] { display: none; }
+.lake-secret-corner:focus-visible { outline: 3px solid #1b68a3; outline-offset: -3px; border-radius: 12px; }

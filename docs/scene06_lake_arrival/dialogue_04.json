@@ -1,0 +1,50 @@
+{
+  "schema_version": 1,
+  "picture": 4,
+  "title": "The Old Hut",
+  "rate": "-10%",
+  "lines": [
+    {
+      "speaker": "Benji",
+      "voice": "en-US-AndrewNeural",
+      "text": "There’s the boat. And the old hut.",
+      "audio": "audio/en/p04_01_benji.mp3"
+    },
+    {
+      "speaker": "Fiona",
+      "voice": "en-US-JennyNeural",
+      "text": "No one is here yet.",
+      "audio": "audio/en/p04_02_fiona.mp3"
+    },
+    {
+      "speaker": "Sunny",
+      "voice": "en-US-MichelleNeural",
+      "text": "The hut is empty too.",
+      "audio": "audio/en/p04_03_sunny.mp3"
+    },
+    {
+      "speaker": "Bruno",
+      "voice": "en-US-GuyNeural",
+      "text": "It’s old, but it’s dry inside.",
+      "audio": "audio/en/p04_04_bruno.mp3"
+    },
+    {
+      "speaker": "Benji",
+      "voice": "en-US-AndrewNeural",
+      "text": "We can sleep here tonight.",
+      "audio": "audio/en/p04_05_benji.mp3"
+    },
+    {
+      "speaker": "Bunny",
+      "voice": "en-US-AnaNeural",
+      "text": "Can we eat here too?",
+      "audio": "audio/en/p04_06_bunny.mp3"
+    },
+    {
+      "speaker": "Fiona",
+      "voice": "en-US-JennyNeural",
+      "text": "Yes. Let’s eat before the meeting.",
+      "audio": "audio/en/p04_07_fiona.mp3"
+    }
+  ]
+}

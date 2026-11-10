@@ -1,0 +1,19 @@
+{
+  "schema_version": 1,
+  "scene": 6,
+  "picture": 2,
+  "title": "Ollie’s Dinner",
+  "rate": "-10%",
+  "lines": [
+    {"speaker": "Ollie", "voice": "en-US-AndrewNeural", "text": "Look! A big fish in my net!", "audio": "audio/en/p02_01_ollie.mp3"},
+    {"speaker": "Bruno", "voice": "en-US-GuyNeural", "text": "That’s a big dinner!", "audio": "audio/en/p02_02_bruno.mp3"},
+    {"speaker": "Ollie", "voice": "en-US-AndrewNeural", "text": "Will you eat with me?", "audio": "audio/en/p02_03_ollie.mp3"},
+    {"speaker": "Benji", "voice": "en-US-AndrewNeural", "text": "Thank you, but we have our own food.", "audio": "audio/en/p02_04_benji.mp3"},
+    {"speaker": "Fiona", "voice": "en-US-JennyNeural", "text": "We’re here for the meeting. Where is it?", "audio": "audio/en/p02_05_fiona.mp3"},
+    {"speaker": "Ollie", "voice": "en-US-AndrewNeural", "text": "On the other side of the lake, next morning.", "audio": "audio/en/p02_06_ollie.mp3"},
+    {"speaker": "Sunny", "voice": "en-US-MichelleNeural", "text": "How will we find the place?", "audio": "audio/en/p02_07_sunny.mp3"},
+    {"speaker": "Ollie", "voice": "en-US-AndrewNeural", "text": "Look for an old boat beside an old fishing hut.", "audio": "audio/en/p02_08_ollie.mp3"},
+    {"speaker": "Ollie", "voice": "en-US-AndrewNeural", "text": "Follow the path by the water.", "audio": "audio/en/p02_09_ollie.mp3"},
+    {"speaker": "Bunny", "voice": "en-US-AnaNeural", "text": "Thank you, Ollie. Enjoy your fish!", "audio": "audio/en/p02_10_bunny.mp3"}
+  ]
+}
