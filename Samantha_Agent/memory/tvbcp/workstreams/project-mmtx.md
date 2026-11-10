@@ -1,12 +1,11 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
-- 2026-11-10 15:17 CET: Data v `data/parallel-20261104` připravil první obraz NOVÉ šesté scény, The Lake. Přijatá boční varianta, všech sedm přesných anglických replik, Next / Repeat / Again a návrat k mostu. Další obrazy se zatím neimplementují.
-- Sedm pevných Azure MP3, stejná hlasová ID jako scéna 5, tempo −10 %, 410 účtovaných znaků / 7 požadavků. Dekódování, text/hlas/hash a oba mirrory ověřené; nic se znovu negeneruje.
-- 35 cílených testů PASS a rychlá statická brána PASS; plná místní brána 2960 testů OK (5 SKIP). Skutečné lokální Safari ukázalo první větu i konečný stav 7/7, desktop vizuálně zkontrolovaný; fyzický iPhone a hlasová přejímka zůstávají otevřené.
-- Míla výslovně zadal Terra p+n a následné napojení scény 5 pro produkční zkoušku. Nová šestka dosud není publikovaná. Předchozí samostatné vydání MMTX do `51a2cabe` skončilo potvrzeně; není důkazem nové šestky. Kanonický main má Willovy neuzavřené změny (requirements a dva scénáře); zachovat je.
-- Datova větev má dřívější Willův WIP úklid staré šestky; ten se zachovává a do nového commitu se nevezme. Historické záznamy o staré šestce nejsou aktuální stav nové implementace.
-- Další krok: konkrétní lokální commit a převzetí do uvolněného kanonického main; poté registrované p+n a samostatný vstup ze scény 5. Report `reports/mmtx_scene06_opening_20261110.md`.
+- 2026-11-10 15:43 CET: Míla výslovně předal integraci a p+n Datovi, protože Will nepracuje. Nová šestka zatím obsahuje první obraz The Lake, sedm přesných EN replik a pevných Azure MP3 a viditelný vstup po dokončení pětky. Obraz 2 je nově autorizovaný až po tomto prvním vydání.
+- Datovy commity `1c40b6db` a `ca15b0b6` se přebírají do kanonického main. Nové UI po dříve odstraněné šestce je záměrně obnovené; staré obrázky, číselné MP3, český zvuk a neviditelná zkratka se nevracejí. Při paměťové integraci zůstaly obě chronologické historie.
+- Tři nesouvisející Willovy změny jsou bezpečně odložené v pojmenovaném stashi `550024e17da59eb258556f5d3f0979650d5a4d30` a ověřené soukromé záloze `data/private/mmtx/data_opening_release_20261110/source_wip/`. requirements má zachovanou původní rozpracovanou změnu smazání a oba scénáře přesné bajty/otisky. Stash se nemaže a po vydání se automaticky nevrací, aby source main zůstal čistý.
+- První obraz: 7 Azure požadavků / 410 znaků, −10 %, hlasy jako pětka; MP3 a oba mirrory ověřené. Datova předchozí plná brána 2960 OK (5 SKIP), 37 cílených kontrol PASS a místní Safari první věta / konec 7/7. Do trvalé publikační brány se doplňují oba nové regresní moduly.
+- Publikace nové šestky dosud není potvrzená; předchozí účtenka do `51a2cabe` patří starému odstranění. Další krok: cílené ověření integrace, čisté zarovnání profilů, audit a jediné registrované Terra submit_release(wait=True) pro přesný nový main.
 <!-- SAMANTHA_CURRENT_STATUS_END -->
 
 # TVBCP: MMTX
@@ -1548,3 +1547,39 @@ Navrhované další kroky:
 
 Technický důkaz:
 - 35 cílených testů PASS, syntaxe/statická brána PASS, 7/7 MP3 dekódovaných, oba mirrory a 13 HTTP souborů přesné. Azure 7 unikátních požadavků / 410 znaků, bez retry. Lokální Safari: první věta i stav 7/7. Plná brána 2960 testů OK (5 SKIP); publikace nové šestky dosud neprovedena. Podrobnosti a otisky v `reports/mmtx_scene06_opening_20261110.md`.
+
+
+### 2026-11-10 15:24 CET — Připravené napojení pětky a publikační blokátor
+
+Hotovo:
+- Po dokončení pětky je v Datově pracovní kopii viditelný vstup To the lake! do prvního obrazu nové šestky. Úprava vychází z Willova již schváleného ukončení staré šestky a zachovává odstranění neviditelné zkratky; obě kopie stejné.
+
+Rozhodnutí:
+- Mílovo zadání zahrnuje Terra p+n i produkční propojení. První obraz je ve vývojovém commitu `1c40b6db`; samotné propojení má samostatný následný commit, aby šlo dodržet pořadí živého vydání.
+
+Další krok:
+- Míla upřesní, zda hotové commity do kanonického main převezme Will, nebo Data. Zdrojové neuzavřené změny vlastníka ani profilový stav se neobcházejí.
+
+Navrhované další kroky:
+- Po převzetí: registrované Terra submit_release(wait=True), přesné potvrzení Pages, potom vydat propojení a zkontrolovat skutečné veřejné bajty a vstup z pětky. Fyzický iPhone a hlasy převezme Míla.
+
+Technický důkaz:
+- 37 cílených testů PASS; nově i skutečný cíl odkazu, jeho umístění až v původně skrytém dokončení a shoda HTML/CSS obou mirrorů. Plná místní brána 2960 OK (5 SKIP) zůstává důkazem nezměněné infrastruktury; nová markup změna byla ověřená cíleně. Žádné nové modelové/audio volání a žádná publikace této šestky. Registrovaný deploy audit: source main není čistý; batch audit: pracovní prostředí není připravené.
+
+
+### 2026-11-10 15:43 CET — Data přebírá integraci a první p+n
+
+Hotovo:
+- Oba hotové vývojové kroky se integrují do kanonického main se zachováním Willovy i Datovy historie. První obraz má všech sedm EN MP3, přijatý boční pohled a napojení po dokončení mostu.
+
+Rozhodnutí:
+- Míla oznámil, že Will nepracuje, a výslovně zadal předat p+n nyní Terře a vyčistit repo; potom připojit obraz 2. Nesouvisející WIP se zachovává, nikoli zahazuje: 3 přesné změny ve stashi `550024e17da59eb258556f5d3f0979650d5a4d30`, scénáře navíc v soukromé záloze s otisky.
+
+Další krok:
+- Cíleně ověřit integrovaný kód, dokončit převzetí a bezpečné zarovnání čistých profilů; spustit jedno registrované p+n s plnou bránou a přesným headem.
+
+Navrhované další kroky:
+- Ověřit veřejné soubory nové šestky a vstup z pětky. Poté připojit Ollieho, druhý obraz a jeho EN dialogy.
+
+Technický důkaz:
+- Převzetí řeší očekávané modify/delete konflikty pouze nových HTML/JS/CSS a zachovává obě historie paměti. Vybrané WIP má ověřené přesné bajty ve stashi i privátní záloze. Žádné další TTS nebo modelové volání zatím neproběhlo. Samostatné testy prvního obrazu a propojení jsou přidané do trvalé plné brány. Publikační výsledek bude mít novou vlastní účtenku.

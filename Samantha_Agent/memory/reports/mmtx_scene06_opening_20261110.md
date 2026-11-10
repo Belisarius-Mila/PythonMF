@@ -66,3 +66,39 @@ konkrétního hotového commitu do kanonického main a jeho vlastní účtenku p
 
 Bezprostřední další krok: převzít konkrétní ověřený commit; pak ověřit
 uvolněný kanonický main a registrované předání pro `project-mmtx` / GitHub Pages.
+
+
+### 2026-11-10 15:24 CET — Připravené napojení pětky a publikační blokátor
+
+Hotovo:
+- Po dokončení pětky je v Datově pracovní kopii viditelný vstup To the lake! do prvního obrazu nové šestky. Úprava vychází z Willova již schváleného ukončení staré šestky a zachovává odstranění neviditelné zkratky; obě kopie stejné.
+
+Rozhodnutí:
+- Mílovo zadání zahrnuje Terra p+n i produkční propojení. První obraz je ve vývojovém commitu `1c40b6db`; samotné propojení má samostatný následný commit, aby šlo dodržet pořadí živého vydání.
+
+Další krok:
+- Míla upřesní, zda hotové commity do kanonického main převezme Will, nebo Data. Zdrojové neuzavřené změny vlastníka ani profilový stav se neobcházejí.
+
+Navrhované další kroky:
+- Po převzetí: registrované Terra submit_release(wait=True), přesné potvrzení Pages, potom vydat propojení a zkontrolovat skutečné veřejné bajty a vstup z pětky. Fyzický iPhone a hlasy převezme Míla.
+
+Technický důkaz:
+- 37 cílených testů PASS; nově i skutečný cíl odkazu, jeho umístění až v původně skrytém dokončení a shoda HTML/CSS obou mirrorů. Plná místní brána 2960 OK (5 SKIP) zůstává důkazem nezměněné infrastruktury; nová markup změna byla ověřená cíleně. Žádné nové modelové/audio volání a žádná publikace této šestky. Registrovaný deploy audit: source main není čistý; batch audit: pracovní prostředí není připravené.
+
+
+### 2026-11-10 15:43 CET — Data přebírá integraci a první p+n
+
+Hotovo:
+- Oba hotové vývojové kroky se integrují do kanonického main se zachováním Willovy i Datovy historie. První obraz má všech sedm EN MP3, přijatý boční pohled a napojení po dokončení mostu.
+
+Rozhodnutí:
+- Míla oznámil, že Will nepracuje, a výslovně zadal předat p+n nyní Terře a vyčistit repo; potom připojit obraz 2. Nesouvisející WIP se zachovává, nikoli zahazuje: 3 přesné změny ve stashi `550024e17da59eb258556f5d3f0979650d5a4d30`, scénáře navíc v soukromé záloze s otisky.
+
+Další krok:
+- Cíleně ověřit integrovaný kód, dokončit převzetí a bezpečné zarovnání čistých profilů; spustit jedno registrované p+n s plnou bránou a přesným headem.
+
+Navrhované další kroky:
+- Ověřit veřejné soubory nové šestky a vstup z pětky. Poté připojit Ollieho, druhý obraz a jeho EN dialogy.
+
+Technický důkaz:
+- Převzetí řeší očekávané modify/delete konflikty pouze nových HTML/JS/CSS a zachovává obě historie paměti. Vybrané WIP má ověřené přesné bajty ve stashi i privátní záloze. Žádné další TTS nebo modelové volání zatím neproběhlo. Samostatné testy prvního obrazu a propojení jsou přidané do trvalé plné brány. Publikační výsledek bude mít novou vlastní účtenku.
