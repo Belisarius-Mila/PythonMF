@@ -1,6 +1,8 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
+- 2026-11-10 21:19 CET: Na Mílův výslovný pokyn opraven Benji v obrazech 01/02/03/031/04: vzpřímený postoj, dvě přední a dvě zadní končetiny. Pět image_gen editací vizuálně ověřených, nové _benji_v2.webp v obou složkách; deset původních WebP smazáno, pět PNG nahrazeno v Downloads. 319 ostatních veřejných souborů včetně 288 MP3 beze změny; 40 cílených testů a statická brána OK, HTTP8/8 přesné, Safari ukázalo opravenou čtyřku. P+n Terrou současně výslovně schválené, dosud v tomto checkpointu neprovedené. Reporty mmtx_scene06_benji_upright_20261110.md, assets JSON a prompts MD.
+
 - 2026-11-10 20:35 CET: Slovníček i rozcestník 1–6 jsou vydané na GitHub Pages: main e867c165, Terra job 2394a9c62db8603de3108a4bfee600a4 completed, push/deployment confirmed. Plná publikační brána 3457 PASS / 576,2 s, Pages run 42886285641 / deployment 7692193075. Nezávislá veřejná kontrola 330/330 souborů přesná, 10 851 277 B; skutečné Safari otevřelo veřejnou nabídku všech šesti scén. Main čistý a aligned s origin, 0 čekajících commitů; oba profily čisté a aligned. Chráněné služby beze změny. Závěrečný zápis je pouze místní Data receipt pro další balíček, žádné opakování p+n.
 
 - 2026-11-10 20:21 CET: Míla výslovně zadal vše předat k p+n Terře. Main převzal pouze slovníček b62c4aa8 a rozcestník 376ae421 z Datovy oddělené větve; dva již hotové commity interiéru  ba2f9bbc a 448d2902 zůstávají součástí celého čekajícího GitHub balíčku. Cíl je project-mmtx → GitHub Pages, centrální Terra 6.1/high. Nová účtenka vznikne jedním submit_release(wait=True), request data-mmtx-dictionary-selector-376ae421-20261110-v1; tento přípravný zápis ještě nepotvrzuje předání, push ani deployment.
@@ -1294,3 +1296,15 @@ Další krok: Mílova přejímka veřejné nabídky a slovníčku.
 Navrhované další kroky: Fyzický iPhone a výslovná jazyková/hlasová přejímka zůstávají otevřené.
 
 Technický důkaz: Účtenka 2394a9c62db8603de3108a4bfee600a4 completed, push a deployment confirmed, plná publikační brána 3457 PASS / 576,2 s. Pages run 42886285641, deployment 7692193075, HTTP 200 a exact main e867c165; chráněné služby beze změny. Nezávisle 330 veřejných souborů bajtově i SHA-256 shodných (10 851 277 B). Main/origin aligned, 0 čekajících commitů, dva profily aligned a čisté. Returned_to_adam=false je portálový příznak; nativní Adam účtenku převzal jednou zde, nejde o důvod retry. Reporty mmtx_dictionary_selector_release_20261110.md/json a mmtx_dictionary_selector_public_20261110.json.
+
+### 2026-11-10 21:19 CET — Benji správně na zadních v pěti prvních ilustracích
+
+Hotovo: Benji v obrazech 01, 02, 03, 031 a 04 stojí vzpřímeně se dvěma předními a dvěma zadními končetinami. Ve dvojce jsou odstraněné přebytečné nohy. Zachované pohledy i děj, včetně skoku a samostatného rozhovoru ve vodě. Původní obrázky jsou nahrazené v aplikaci i Downloads.
+
+Rozhodnutí: Míla výslovně zadal překreslit pět obrázků, staré smazat a vše poslat Terře k p+n. Nové soubory mají verzi v názvu proti cache; žádná změna dialogů nebo audií.
+
+Další krok: Uložit Data checkpoint a integrovat přesný věcný rozsah do čistého main, poté jedno autorizované registrované Terra p+n.
+
+Navrhované další kroky: Veřejné potvrzení nových obrázků a odstranění starých; fyzická iPhone přejímka zůstává otevřená.
+
+Technický důkaz: Pět samostatných vestavěných image_gen editací, čtyři končetiny vizuálně ověřené v každém úplném obrázku. 40 cílených testů OK / 24,849 s, rychlá statická brána OK, obě kopie shodné, 319 ostatních podkladů včetně 288 MP3 zachované a HTTP8/8 přesné. Safari screenshot opravované čtyřky. Assets JSON eviduje původní a nové SHA-256; prompty a výstupy mají vlastní report.

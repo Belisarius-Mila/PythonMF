@@ -1,0 +1,11 @@
+# Zadání pěti oprav — vestavěný image_gen
+
+Use case: precise-object-edit. Each first input is the existing full scene illustration and the only edit target. The second input supports only Benji identity and upright anatomy. Correct ONLY Benji the golden floppy-eared dog: fully upright anthropomorphic torso, exactly TWO forelegs used as arms attached at symmetrical shoulders, exactly TWO hind legs and matching feet attached at symmetrical hips, FOUR limbs total. No extra or detached paws, no front leg on the ground. Keep golden/white fur, floppy ears, green neckerchief, brown satchel/backpack, white-tipped tail. Keep his original position and appropriate eyeline. Preserve all other characters, their outfits and story actions, landscape, warm 3D storybook style and wide 16:9 crop. No text or collage. Deliver one corrected full illustration.
+
+1. **01 arrival_side_view**: edit the far-left dog, both arms bent at chest/shoulder straps, standing on two feet and looking right across the lake. Keep fox pointing and rabbit-ear clouds. Supporting reference: upright Benji in benji_plan; this output then defines Benji for later edits.
+2. **02 ollie_dinner**: far-left dog has erroneous extra feet. Show exactly two feet, one forepaw gesturing toward Ollie and the other at chest/strap. Preserve Ollie with fish in landing net and the five friends. Supporting reference: corrected 01.
+3. **03 freddie_jump**: far-left dog upright with both arms near straps, watching the airborne frog. Preserve Freddie jumping, his frog limbs and splash, Dotty hovering. Supporting reference: corrected 01.
+4. **031 freddie_conversation**: far-left dog exactly matches corrected 03 posture, looking toward Freddie. Preserve conversation state: Freddie's lower half submerged, two gesturing forepaws above water, facing friends; Dotty turned toward them too. Do not copy the airborne frog from the supporting 03 reference.
+5. **04 old_hut**: dog on the right of the group stands on two feet, one hand gestures toward open hut door, other hand at chest/strap. Preserve four friends, open door, boat, roof/chimney and sunset. Supporting reference: corrected 01.
+
+Five separate built-in calls, transparent_background=false. Outputs reviewed before replacing project files. No fallback model/API and no additional attempt was needed.

@@ -1,0 +1,79 @@
+{
+  "tool": "built-in image_gen",
+  "edits": 5,
+  "webp_encoding": "cwebp q90 method6, original generated dimensions; no crop or resize",
+  "assets": [
+    {
+      "picture": "01",
+      "old_file": "arrival_side_view.webp",
+      "old_sha256": "232225a745973b186995bd1693abd0689563984c7a7d84ddf7874b6e60f2a8c3",
+      "new_file": "arrival_side_view_benji_v2.webp",
+      "width": 1672,
+      "height": 941,
+      "png_sha256": "1e102dd18bba92bcec4068dd4ec87929854fe7acc57646218864c5b362f07466",
+      "webp_sha256": "9f5c23acb983583a534647b03e1967797973172e97973a6ddfbf9a16db8bc3cc",
+      "webp_bytes": 448474,
+      "download": "arrival_side_view_20261110_v1.png",
+      "old_download_sha256": "3b028eef9065528262c788b2d34e2369ea4800c5e7fe46a4c29b64dd9e649bbc",
+      "visual_review": "Benji upright; two forelimbs and two hindlimbs; scene action preserved"
+    },
+    {
+      "picture": "02",
+      "old_file": "ollie_dinner.webp",
+      "old_sha256": "0004f9f6eed0ab7b0798c8006f21d1d27b95e257c08c129478d136c0b86404c8",
+      "new_file": "ollie_dinner_benji_v2.webp",
+      "width": 1670,
+      "height": 941,
+      "png_sha256": "a7ea913ba196021620c765a72aeedef0b57b626c686f1a1b1936a4056e81a4c0",
+      "webp_sha256": "fab84852665720803936323469da4ad9c34603febd5f89d21a3a1d391e50d7dc",
+      "webp_bytes": 473936,
+      "download": "MMTX_Cesta_k_jezeru_6_obrazek_02_Ollie.png",
+      "old_download_sha256": "e934ef302bb2d65449665938779c2ef77b0a841065a83235bc37445afc9c678f",
+      "visual_review": "Benji upright; two forelimbs and two hindlimbs; scene action preserved"
+    },
+    {
+      "picture": "03",
+      "old_file": "freddie_jump.webp",
+      "old_sha256": "8b00ffe515a1cae62c515647a831cc9bf2f07193226ed1d7d7dcb2b147bbce25",
+      "new_file": "freddie_jump_benji_v2.webp",
+      "width": 1672,
+      "height": 941,
+      "png_sha256": "84ca717afa35e47699475857112eae459066426dedb6c4c474c6e9c9d53acce1",
+      "webp_sha256": "c2e886e7faca2379b4ba672a7b37ab13b63960093d4549aadfc120bc18114181",
+      "webp_bytes": 465812,
+      "download": "MMTX_Cesta_k_jezeru_6_obrazek_03_Freddie_a_Dotty.png",
+      "old_download_sha256": "b89b33732946d632ff85cfe9db91fddaafdd6fb02291acf8befc2cb23e4c0501",
+      "visual_review": "Benji upright; two forelimbs and two hindlimbs; scene action preserved"
+    },
+    {
+      "picture": "031",
+      "old_file": "freddie_conversation.webp",
+      "old_sha256": "41c72db7ec82950206a0f9da2431d88400762c36e14e2c9c91bd339a58bc7ebb",
+      "new_file": "freddie_conversation_benji_v2.webp",
+      "width": 1672,
+      "height": 941,
+      "png_sha256": "a1afaf35b15d0373e50f0524d4cf2a8dec6477c85b689312529bc982454e44ab",
+      "webp_sha256": "ac943fe88cd59895f14c7af9ef589e850d3e95c84a1b490fc6af6045ae479d8d",
+      "webp_bytes": 444686,
+      "download": "MMTX_Cesta_k_jezeru_6_obrazek_031_Freddie_a_Dotty.png",
+      "old_download_sha256": "423750c04aca6c1f45e05b9d19b6b46ab5b407355035c44511b95858126dbda8",
+      "visual_review": "Benji upright; two forelimbs and two hindlimbs; scene action preserved"
+    },
+    {
+      "picture": "04",
+      "old_file": "old_hut.webp",
+      "old_sha256": "043ef54172f518ff750b7ea6a33e8736fbcc9d48a4049a0ce31c80dd791f6a3d",
+      "new_file": "old_hut_benji_v2.webp",
+      "width": 1672,
+      "height": 941,
+      "png_sha256": "6f53f4283ed0995316a8682482ad5ad2fadea35f7082fd8516db84f8e77f903d",
+      "webp_sha256": "7a4e199f992820ea4ce66b3ed2ce3f717ac2f86ac9d102312b26540e120f7f12",
+      "webp_bytes": 508624,
+      "download": "MMTX_Cesta_k_jezeru_6_obrazek_04_Stara_lod_a_chatrc.png",
+      "old_download_sha256": "f7a5ff33bd9cbe20f9db6e83d233028d39082397075915be639099b64ee5f8ba",
+      "visual_review": "Benji upright; two forelimbs and two hindlimbs; scene action preserved"
+    }
+  ],
+  "unchanged_public_files": 319,
+  "unchanged_mp3": 288
+}
