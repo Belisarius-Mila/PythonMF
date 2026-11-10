@@ -8693,7 +8693,7 @@ COCKPIT_POST_ACTIONS: tuple[dict[str, str], ...] = (
      "risk": "private_write", "confirmation": "explicit_calendar_read_selection_or_permission_button",
      "handler_name": "calendar_overview_action", "test_level": "direct"},
     {"path": "/api/interior/action", "label": "Uložit vlastní práci v interiérovém Ateliéru",
-     "risk": "private_write", "confirmation": "explicit_project_source_or_variant_action",
+     "risk": "private_write", "confirmation": "explicit_edit_or_exact_global_phrase_and_source_plan",
      "handler_name": "interior_atelier_action", "test_level": "direct"},
     {"path": "/api/interior/ai/start", "label": "Zeptat se architekta nebo vytvořit jednu AI variantu",
      "risk": "external_ai", "confirmation": "explicit_ai_button_with_selected_private_sources",

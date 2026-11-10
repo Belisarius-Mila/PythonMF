@@ -179,6 +179,10 @@ class InteriorAI:
         self.store.repository.transact(mutate)
 
     def start(self, payload):
+        with self.store.media_lock():
+            return self._start(payload)
+
+    def _start(self, payload):
         fields = {"project_id", "room_id", "base_id", "expected_revision", "request_id", "message", "mode"}
         if not isinstance(payload, dict) or set(payload) != fields:
             raise AtelierError("Požadavek architektovi nemá platný kontext.")
@@ -330,6 +334,8 @@ class InteriorAI:
         def complete(state):
             _, room = self.store._room(state, project_id, room_id)
             target = room["ai_requests"][job_id]
+            if target.get("source_cleanup"):
+                raise AtelierConflict("Podklady tohoto požadavku byly smazané. Původní obrázky se neobnovují.")
             if target["status"] == "completed":
                 return RepositoryMutation(state)
             variant_id = ""
@@ -364,10 +370,16 @@ class InteriorAI:
         self.store.repository.transact(complete)
 
     def recover(self, project_id, room_id, request_id):
+        with self.store.media_lock():
+            return self._recover(project_id, room_id, request_id)
+
+    def _recover(self, project_id, room_id, request_id):
         _, room = self.store._room(self.store._read(), project_id, room_id)
         job = room.get("ai_requests", {}).get(request_id)
         if job is None:
             raise AtelierError("Požadavek v této místnosti nebyl nalezen.")
+        if job.get("source_cleanup"):
+            return {"ok": True, "verified": True, "source_deleted": True}
         if job["status"] == "completed" or request_id in self._running:
             return {"ok": True}
         home = _safe_path(self.store.root / "ai_inputs" / request_id)

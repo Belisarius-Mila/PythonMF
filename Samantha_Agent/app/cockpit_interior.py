@@ -23,7 +23,8 @@ def interior_atelier_action(payload, *, store=None):
 
 
 class InteriorRoutes:
-    paths = ("/interior/", "/api/interior/state", "/api/interior/asset", "/api/interior/ai/status")
+    paths = ("/interior/", "/api/interior/state", "/api/interior/asset", "/api/interior/ai/status",
+             "/api/interior/delete-preview")
 
     def __init__(self, store_factory=None):
         self.store_factory = store_factory or InteriorAtelier
@@ -32,12 +33,14 @@ class InteriorRoutes:
         if parsed.path == "/interior/":
             responder.respond_html(INTERIOR_HTML)
             return True
-        if parsed.path not in {"/api/interior/state", "/api/interior/asset", "/api/interior/ai/status"}:
+        if parsed.path not in self.paths:
             return False
         try:
             params = parse_qs(parsed.query, keep_blank_values=True, strict_parsing=True)
             allowed = {"project_id", "room_id", "base_id"} if parsed.path.endswith(("/state", "/ai/status")) else {
-                "project_id", "room_id", "asset_id", "view"}
+                "project_id", "room_id", "asset_id"}
+            if parsed.path.endswith("/asset"):
+                allowed.add("view")
             if set(params) - allowed or any(len(v) != 1 for v in params.values()):
                 raise AtelierError("Neplatný výběr místnosti nebo podkladu.")
             args = {k: v[0] for k, v in params.items()}
@@ -47,6 +50,8 @@ class InteriorRoutes:
             store = self.store_factory()
             if parsed.path.endswith("/state"):
                 responder.respond_json(store.state(**args))
+            elif parsed.path.endswith("/delete-preview"):
+                responder.respond_json(store.deletion_preview(**args))
             else:
                 raw, mime = store.asset(**args)
                 responder.send_response(HTTPStatus.OK)
@@ -56,7 +61,13 @@ class InteriorRoutes:
                 responder.send_header("Content-Disposition", "inline")
                 responder.end_headers()
                 responder.wfile.write(raw)
-        except (AtelierError, TypeError, ValueError):
+        except AtelierConflict as exc:
+            responder.respond_json({"ok": False, "error": "conflict", "message": str(exc)},
+                                   status=HTTPStatus.CONFLICT)
+        except AtelierError as exc:
+            message = str(exc) if parsed.path.endswith("/delete-preview") else "Požadovaná místnost nebo podklad nejsou dostupné."
+            responder.respond_json({"ok": False, "message": message}, status=HTTPStatus.BAD_REQUEST)
+        except (TypeError, ValueError):
             responder.respond_json({"ok": False, "message": "Požadovaná místnost nebo podklad nejsou dostupné."},
                                    status=HTTPStatus.BAD_REQUEST)
         except (OSError, FilePersistenceError, WorkRepositoryError):

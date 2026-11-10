@@ -306,3 +306,175 @@ class InteriorAtelierTests(unittest.TestCase):
 
 def copy_json(value):
     return json.loads(json.dumps(value))
+
+
+class InteriorSourceDeletionTests(unittest.TestCase):
+    setUp = InteriorAtelierTests.setUp
+    command = InteriorAtelierTests.command
+    project = InteriorAtelierTests.project
+    source = InteriorAtelierTests.source
+    draft = InteriorAtelierTests.draft
+    save = InteriorAtelierTests.save
+
+    def deletion(self, project, room, asset):
+        from app.interior_cleanup import DELETE_CONFIRMATION
+        plan = self.store.deletion_preview(project, room, asset)
+        return {"action": "delete_source", "request_id": uuid.uuid4().hex, "project_id": project,
+                "room_id": room, "asset_id": asset, "plan_token": plan["plan_token"],
+                "confirmation": DELETE_CONFIRMATION}, plan
+
+    def test_preview_is_readonly_and_does_not_materialize_an_unknown_store(self):
+        with self.assertRaises(AtelierError):
+            self.store.deletion_preview("a" * 32, "b" * 32, "c" * 32)
+        self.assertFalse(self.root.exists())
+        p, r = self.project(); a = self.source(p, r)
+        before = {str(f.relative_to(self.root)): (f.read_bytes(), f.stat().st_mtime_ns)
+                  for f in self.root.rglob("*") if f.is_file()}
+        _, plan = self.deletion(p, r, a)
+        self.assertEqual(plan["file_count"], 3)
+        self.assertGreater(plan["bytes"], 0)
+        self.assertNotIn("files", plan)
+        self.assertEqual(before, {str(f.relative_to(self.root)): (f.read_bytes(), f.stat().st_mtime_ns)
+                                  for f in self.root.rglob("*") if f.is_file()})
+
+    def test_permanent_delete_removes_image_bytes_but_retains_text_and_notes(self):
+        p, r = self.project(); a = self.source(p, r)
+        draft = self.draft(p, r); draft.pop("revision")
+        draft.update(title="Retained text", prompt="Keep this text", source_ids=[a], image_source_id=a,
+                     annotations=[[[0, 0], [1, 1]]])
+        self.save(p, r, draft)
+        variant = self.command("create_variant", project_id=p, room_id=r, base_id="base", expected_revision=1)["variant_id"]
+        self.command("add_note", project_id=p, room_id=r, base_id=variant, text="Retained note")
+        payload, plan = self.deletion(p, r, a)
+        self.assertEqual((plan["variant_count"], plan["draft_count"]), (1, 1))
+        outcome = self.store.execute(payload)
+        self.assertEqual(outcome["deleted_bytes"], plan["bytes"])
+        self.assertEqual(list((self.root / "objects").iterdir()), [])
+        current = self.store.state(p, r)
+        self.assertEqual(current["room"]["sources"], {})
+        self.assertEqual(current["draft"]["prompt"], "Keep this text")
+        self.assertEqual(current["draft"]["revision"], 2)
+        self.assertEqual(current["draft"]["annotations"], [])
+        self.assertEqual(current["room"]["variants"][variant]["image_source_id"], "")
+        self.assertEqual(current["room"]["notes"][0]["text"], "Retained note")
+        with self.assertRaises(AtelierError): self.store.asset(p, r, a)
+        self.assertTrue(InteriorAtelier(self.root).execute(payload)["already_deleted"])
+
+    def test_confirmation_and_stale_manifest_never_delete_bytes(self):
+        p, r = self.project(); a = self.source(p, r)
+        payload, _ = self.deletion(p, r, a)
+        for replacement in ("", "ano", True):
+            with self.assertRaises(AtelierError): self.store.execute({**payload, "confirmation": replacement})
+        self.command("add_note", project_id=p, room_id=r, base_id="base", text="Concurrent note")
+        with self.assertRaises(AtelierConflict): self.store.execute(payload)
+        self.assertTrue(self.store.asset(p, r, a)[0])
+        self.assertNotIn("source_deletions", self.store._read())
+
+    def test_shared_objects_remain_until_last_source_is_deleted(self):
+        p, r = self.project(); a = self.source(p, r)
+        other = self.command("create_room", project_id=p, title="Other")["room_id"]
+        b = self.source(p, other)
+        payload, plan = self.deletion(p, r, a)
+        self.assertEqual((plan["bytes"], plan["shared_file_count"]), (0, 3))
+        self.store.execute(payload)
+        self.assertEqual(self.store.asset(p, other, b, "original")[0], image_bytes())
+        self.store.execute(self.deletion(p, other, b)[0])
+        self.assertEqual(list((self.root / "objects").iterdir()), [])
+
+    def test_other_room_and_path_input_cannot_redirect_deletion(self):
+        p, r = self.project(); a = self.source(p, r)
+        other = self.command("create_room", project_id=p, title="Other")["room_id"]
+        with self.assertRaises(AtelierError): self.store.deletion_preview(p, other, a)
+        payload, _ = self.deletion(p, r, a)
+        with self.assertRaises(AtelierError): self.store.execute({**payload, "path": "../outside"})
+        with self.assertRaises(AtelierError): self.store.execute({**payload, "room_id": "../outside"})
+        self.assertTrue(self.store.asset(p, r, a)[0])
+
+    def test_symlink_and_hardlink_are_rejected_without_touching_external_bytes(self):
+        p, r = self.project(); a = self.source(p, r)
+        original = self.root / "objects" / self.store.state(p, r)["room"]["sources"][a]["files"]["original"]["name"]
+        external = Path(self.temp.name) / "outside.png"
+        original.rename(external); original.symlink_to(external)
+        with self.assertRaises(AtelierError): self.store.deletion_preview(p, r, a)
+        original.unlink(); os.link(external, original)
+        with self.assertRaises(AtelierError): self.store.deletion_preview(p, r, a)
+        self.assertEqual(external.read_bytes(), image_bytes())
+
+    def test_partial_unlink_is_durable_and_same_request_finishes_only_remaining_files(self):
+        p, r = self.project(); a = self.source(p, r)
+        payload, plan = self.deletion(p, r, a)
+        unlink = os.unlink; calls = []
+        def fail_second(name, **kwargs):
+            if "dir_fd" in kwargs:
+                calls.append(name)
+                if len(calls) == 2: raise OSError("synthetic disk failure")
+            return unlink(name, **kwargs)
+        with patch("app.interior_cleanup.os.unlink", side_effect=fail_second), self.assertRaises(OSError):
+            self.store.execute(payload)
+        self.assertEqual(len(list((self.root / "objects").iterdir())), 2)
+        self.assertEqual(self.store.state(p, r)["pending_deletions"][0]["request_id"], payload["request_id"])
+        with self.assertRaises(AtelierError): self.store.asset(p, r, a)
+        with self.assertRaises(AtelierConflict): self.store.execute({**payload, "asset_id": "a" * 32})
+        resumed = InteriorAtelier(self.root).execute(payload)
+        self.assertEqual(resumed["deleted_bytes"], plan["bytes"])
+        self.assertEqual(resumed["deleted_files"], 3)
+        self.assertEqual(self.store.state(p, r)["pending_deletions"], [])
+
+    def test_failed_final_metadata_commit_does_not_lose_deletion_intent(self):
+        from app import work_repository
+        p, r = self.project(); a = self.source(p, r)
+        payload, plan = self.deletion(p, r, a)
+        writer = work_repository._write_repository_document_under_lock
+        calls = []
+        def fail_second(*args):
+            calls.append(1)
+            if len(calls) == 2: raise OSError("synthetic final commit failure")
+            return writer(*args)
+        with patch("app.work_repository._write_repository_document_under_lock", side_effect=fail_second), self.assertRaises(OSError):
+            self.store.execute(payload)
+        self.assertEqual(list((self.root / "objects").iterdir()), [])
+        self.assertEqual(self.store.state(p, r)["pending_deletions"][0]["status"], "pending")
+        self.assertEqual(self.store.execute(payload)["deleted_bytes"], plan["bytes"])
+
+    def test_modified_bytes_between_preview_and_confirm_are_preserved(self):
+        p, r = self.project(); a = self.source(p, r)
+        payload, _ = self.deletion(p, r, a)
+        original = self.root / "objects" / self.store.state(p, r)["room"]["sources"][a]["files"]["original"]["name"]
+        original.write_bytes(b"changed")
+        with self.assertRaises(AtelierConflict): self.store.execute(payload)
+        self.assertEqual(len(list((self.root / "objects").iterdir())), 3)
+
+    def test_unfinished_ai_blocks_removal_but_completed_ai_copies_are_purged(self):
+        from app.work_repository import RepositoryMutation
+        p, r = self.project(); a = self.source(p, r)
+        job_id = "b" * 32
+        def add_job(status):
+            def update(data):
+                room = self.store._room(data, p, r)[1]
+                room["ai_requests"] = {job_id: {"status": status, "context": {"draft": {"source_ids": [a]}}, "variant_ids": []}}
+                return RepositoryMutation(data)
+            self.store.repository.transact(update)
+        for status in ("queued", "running", "delivery_unknown", "result_ready"):
+            add_job(status)
+            with self.assertRaises(AtelierConflict): self.store.deletion_preview(p, r, a)
+        add_job("completed")
+        home = self.root / "ai_inputs" / job_id; home.mkdir(parents=True)
+        for name in ("input_1.png", "result.json", "result.json.lock"): (home / name).write_bytes(b"synthetic copy")
+        payload, plan = self.deletion(p, r, a)
+        self.assertEqual(plan["file_count"], 6)
+        self.store.execute(payload)
+        self.assertFalse(home.exists())
+        self.assertTrue(self.store._read()["projects"][p]["rooms"][r]["ai_requests"][job_id]["source_cleanup"])
+
+    def test_unknown_ai_cache_files_are_not_deleted(self):
+        from app.work_repository import RepositoryMutation
+        p, r = self.project(); a = self.source(p, r)
+        job_id = "b" * 32
+        def update(data):
+            self.store._room(data, p, r)[1]["ai_requests"] = {job_id: {"status": "completed", "context": {"draft": {"source_ids": [a]}}}}
+            return RepositoryMutation(data)
+        self.store.repository.transact(update)
+        home = self.root / "ai_inputs" / job_id; home.mkdir(parents=True)
+        (home / "unexpected.txt").write_text("preserve")
+        with self.assertRaises(AtelierError): self.store.deletion_preview(p, r, a)
+        self.assertEqual((home / "unexpected.txt").read_text(), "preserve")

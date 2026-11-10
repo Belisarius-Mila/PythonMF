@@ -51,7 +51,7 @@
 <details><summary>Moje poznámky</summary><div id="notes"></div><form id="noteForm"><label>Poznámka k vybranému návrhu<textarea id="noteText" maxlength="12000" rows="3" required></textarea></label>
 <button type="submit" class="secondary">Uložit poznámku</button></form></details></aside></div>
 <main id="sourcesView" class="sources-view" hidden><div class="workspace-heading"><div><h2>Podklady místnosti</h2>
-<p class="muted">Vyber reference a jeden pracovní obrázek. Originály zůstávají zachované.</p></div>
+<p class="muted">Vyber reference a jeden pracovní obrázek. Nepotřebné podklady můžeš trvale smazat s potvrzením.</p></div>
 <button id="closeSources" type="button">← Zpět k návrhu</button></div>
 <form id="uploadForm" class="upload"><label>Význam nových podkladů<select id="sourceKind"><option value="photo">Skutečný stav</option><option value="plan">Náčrt nebo rozměry</option><option value="inspiration">Inspirace</option></select></label>
 <label class="dropzone" id="dropzone">Přetáhni fotografie nebo náčrty, případně vyber soubory
@@ -63,4 +63,10 @@
 <label id="projectNameLabel">Název projektu<input id="projectName" maxlength="120" value="Neuberk"></label>
 <label>Název místnosti<input id="roomName" maxlength="120" value="Kačenka" required></label>
 <div class="actions"><button id="confirmCreate" type="submit">Vytvořit</button><button id="cancelCreate" type="button" class="secondary">Zrušit</button></div></form></dialog>
+<dialog id="deleteDialog" aria-labelledby="deleteTitle"><form id="deleteForm">
+<h2 id="deleteTitle">Smazat podklad?</h2><p id="deleteSize"></p><p id="deleteImpact"></p>
+<p>Smaže originál, náhledy a související pracovní kopie Ateliéru. Smazání nelze vrátit. Kopie stažené mimo Ateliér a zálohy zůstanou zachované.</p>
+<label>Pro potvrzení zadej tuto větu:<span id="deletePhrase"></span><input id="deleteConfirmation" autocomplete="off" spellcheck="false"></label>
+<p id="deleteError" role="alert"></p><div class="actions"><button id="confirmDelete" type="submit" class="danger" disabled>Smazat navždy</button>
+<button id="cancelDelete" type="button" class="secondary">Zrušit</button></div></form></dialog>
 </div><script>{{SAMANTHA_JAVASCRIPT}}</script></body></html>

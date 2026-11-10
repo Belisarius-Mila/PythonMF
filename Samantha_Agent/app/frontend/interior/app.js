@@ -15,15 +15,21 @@
       return '<path d="' + stroke.map((p,i) => (i ? "L" : "M") + p.map(n => Math.round(n * 1000)).join(" ")).join(" ") + '"/>';
     }).join("");
   }
-  function restoreDraft(server, cached) {
+  function pruneDraftSources(record, sources) {
+    if (!sources) return record;
+    const image = sources[record.image_source_id] ? record.image_source_id : "";
+    return {...record, source_ids: record.source_ids.filter(id => sources[id]), image_source_id: image,
+      annotations: image ? record.annotations : []};
+  }
+  function restoreDraft(server, cached, sources) {
     const valid = value => value && ["title","prompt","fixed_elements","image_source_id"].every(k => typeof value[k] === "string") &&
       Array.isArray(value.source_ids) && value.source_ids.every(id => typeof id === "string") && Array.isArray(value.annotations);
     if (!cached || cached.dirty !== true || !valid(cached.draft) || !Number.isInteger(cached.revision)) {
       return {draft: Object.fromEntries(Object.keys(emptyDraft()).map(k => [k, server[k]])), revision: server.revision, dirty: false, conflict: false};
     }
-    return {draft: cached.draft, revision: cached.revision, dirty: true, conflict: cached.revision !== server.revision};
+    return {draft: pruneDraftSources(cached.draft, sources), revision: cached.revision, dirty: true, conflict: cached.revision !== server.revision};
   }
-  const core = {emptyDraft, escape, scopeKey, gate, paths, restoreDraft};
+  const core = {emptyDraft, escape, scopeKey, gate, paths, restoreDraft, pruneDraftSources};
   if (typeof module !== "undefined" && module.exports) module.exports = core;
   if (!root.document) return;
   const $ = id => document.getElementById(id);
@@ -34,6 +40,7 @@
   let selectedFiles = [], createMode = "project", cacheWarning = false;
   const aiLoader = gate();
   let aiState = {enabled:false, jobs:[]}, aiSending = false;
+  let deletion = null, deleting = false;
   const kindName = {photo: "Skutečný stav", plan: "Náčrt nebo rozměry", inspiration: "Inspirace"};
 
   function status(message, error = false) {
@@ -74,7 +81,7 @@
     $("sourceFiles").disabled = locked;
     $("sourceKind").disabled = locked;
     $("newRoom").disabled = locked || !scope.project;
-    $("sourceList").querySelectorAll("input").forEach(el => el.disabled = locked);
+    $("sourceList").querySelectorAll("input,button").forEach(el => el.disabled = locked);
     if (data.room) renderAI();
   }
   async function mutate(action, details, captured = context()) {
@@ -113,7 +120,7 @@
     if (response.draft) {
       serverDraft = response.draft;
       const cached = cacheRead(cacheKey());
-      const restored = restoreDraft(response.draft, cached);
+      const restored = restoreDraft(response.draft, cached, data.room.sources);
       draft = restored.draft; revision = restored.revision; dirty = restored.dirty;
       $("noteText").value = cached && typeof cached.note === "string" ? cached.note : "";
       $("aiText").value = cached && typeof cached.aiText === "string" ? cached.aiText : "";
@@ -278,8 +285,16 @@
       '</h3><p class="muted">' + kindName[source.kind] + '</p><label><input type="checkbox" data-source="' + source.id + '"' +
       (draft.source_ids.includes(source.id) ? " checked" : "") + '>Použít pro tento návrh</label><label><input type="radio" name="workingImage" data-working="' + source.id + '"' +
       (draft.image_source_id === source.id ? " checked" : "") + '>Pracovní obrázek</label><a target="_blank" rel="noopener" href="' +
-      escape(sourceUrl(source.id, "original")) + '">Otevřít originál</a></article>').join("") ||
+      escape(sourceUrl(source.id, "original")) + '">Otevřít originál</a><button type="button" class="danger" data-delete-source="' +
+      source.id + '">Smazat</button></article>').join("") ||
       '<p class="muted">Přidej fotografie skutečného stavu, náčrt nebo inspiraci.</p>';
+    $("sourceList").querySelectorAll("[data-delete-source]").forEach(button => button.addEventListener("click", () => openDeletion(button.dataset.deleteSource)));
+    for (const pending of data.pending_deletions || []) {
+      const button = document.createElement("button"); button.type = "button"; button.className = "danger";
+      button.textContent = "Dokončit smazání: " + pending.title;
+      button.addEventListener("click", () => openDeletion(pending.asset_id, pending));
+      $("sourceList").append(button);
+    }
     $("sourceList").querySelectorAll("[data-source]").forEach(el => el.addEventListener("change", () => {
       if (busy) { renderSources(); return; }
       if (el.dataset.source === draft.image_source_id && !el.checked) { el.checked = true; status("Nejprve zvol jiný pracovní obrázek.", true); return; }
@@ -295,6 +310,64 @@
       changed(); renderSources();
     }));
   }
+  async function openDeletion(asset, pending = null) {
+    if (busy || loading || aiSending) return;
+    const captured = context(); setBusy(true);
+    try {
+      const plan = pending || await api("/api/interior/delete-preview?" + new URLSearchParams({
+        project_id: captured.project, room_id: captured.room, asset_id: asset}));
+      if (scopeKey(captured) !== scopeKey(scope)) { setBusy(false); return; }
+      deletion = {captured, plan, payload: pending ? {action:"delete_source",request_id:pending.request_id,
+        project_id:captured.project,room_id:captured.room,asset_id:asset,plan_token:pending.plan_token,
+        confirmation:pending.confirmation_text} : null};
+      $("deleteTitle").textContent = "Smazat „" + plan.title + "“?";
+      $("deleteSize").textContent = (pending ? "Dokončení dříve potvrzeného smazání. " : "") +
+        "Soubory Ateliéru: " + (plan.bytes / (1024 * 1024)).toLocaleString("cs-CZ", {maximumFractionDigits:2}) + " MiB" +
+        (Number.isInteger(plan.file_count) ? " · " + plan.file_count + " souborů." : ".");
+      $("deleteImpact").textContent = pending ? "Původní potvrzený rozsah zůstává zachovaný." :
+        "Odebere obrázek z " + plan.variant_count + " uložených návrhů a " + plan.draft_count +
+        " rozepsaných úprav. Textová zadání zůstanou, kresba vázaná na tento obrázek se odstraní." +
+        (plan.shared_file_count ? " Společné soubory zůstanou pro jiné podklady; lze uvolnit jen výše uvedenou velikost." : "");
+      $("deletePhrase").textContent = plan.confirmation_text;
+      $("deleteConfirmation").value = ""; $("deleteError").textContent = "";
+      $("confirmDelete").textContent = pending ? "Dokončit smazání" : "Smazat navždy";
+      $("confirmDelete").disabled = true; $("cancelDelete").disabled = false;
+      $("deleteDialog").showModal();
+    } catch (error) { deletion = null; setBusy(false); status(error.message, true); }
+  }
+  function closeDeletion() {
+    if (deleting) return;
+    deletion = null; $("deleteDialog").close(); setBusy(false);
+  }
+  $("deleteConfirmation").addEventListener("input", () => {
+    $("confirmDelete").disabled = deleting || !deletion || $("deleteConfirmation").value !== deletion.plan.confirmation_text;
+  });
+  $("cancelDelete").addEventListener("click", closeDeletion);
+  $("deleteDialog").addEventListener("cancel", event => { event.preventDefault(); closeDeletion(); });
+  $("deleteForm").addEventListener("submit", async event => {
+    event.preventDefault();
+    if (deleting || !deletion || $("deleteConfirmation").value !== deletion.plan.confirmation_text) return;
+    const selected = deletion;
+    selected.payload ||= {action:"delete_source",request_id:crypto.randomUUID(),project_id:selected.captured.project,
+      room_id:selected.captured.room,asset_id:selected.plan.asset_id,plan_token:selected.plan.plan_token,
+      confirmation:$("deleteConfirmation").value};
+    deleting = true; $("confirmDelete").disabled = true; $("cancelDelete").disabled = true;
+    try {
+      const result = await api("/api/interior/action", selected.payload);
+      deleting = false; closeDeletion();
+      await load(selected.captured);
+      status("Smazáno. Z Ateliéru odstraněno " + (result.deleted_bytes / (1024 * 1024)).toLocaleString("cs-CZ", {maximumFractionDigits:2}) + " MiB.");
+    } catch (error) {
+      if (error.code === "conflict") {
+        deleting = false; closeDeletion(); await load(selected.captured); status(error.message, true); return;
+      }
+      $("deleteError").textContent = "Smazání není potvrzené jako dokončené. Můžeš bezpečně dokončit stejný požadavek nebo zavřít dialog a obnovit přehled.";
+      $("confirmDelete").textContent = "Dokončit stejné smazání";
+    } finally {
+      deleting = false; $("cancelDelete").disabled = false;
+      $("confirmDelete").disabled = !deletion || $("deleteConfirmation").value !== deletion.plan.confirmation_text;
+    }
+  });
   function bindDrawing(area) {
     let stroke = null, path = null;
     const point = event => { const b = area.getBoundingClientRect(); return [Math.max(0,Math.min(1,(event.clientX-b.left)/b.width)), Math.max(0,Math.min(1,(event.clientY-b.top)/b.height))]; };

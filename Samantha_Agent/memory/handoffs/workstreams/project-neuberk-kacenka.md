@@ -4,7 +4,19 @@ Pracovni proud: project-neuberk-kacenka
 Priorita: 2
 Stav: rozpracovane
 Pripomenout pri startu: ne
-Datum: 2026-11-05
+Datum: 2026-11-10
+
+## 2026-11-10 15:59 CET — Mazání podkladů připravené místně
+
+U každého podkladu je tlačítko Smazat. Čtecí náhled ukáže název, velikost a počet souborů, sdílení i dopad na uložené návrhy a rozpracovaná zadání. Trvalé smazání vyžaduje přesnou větu globální brzdy. Odstraní příslušné originály, náhledy a nepotřebné AI snapshoty včetně výsledkového JSON s obrazovými daty; nezakládá další obrazovou zálohu. Soubory sdílené jiným podkladem zůstávají zachované a náhled to vysvětlí. Kopie stažené mimo Ateliér, starší soukromé podklady a zálohy nejsou součástí této operace.
+
+Obrázek a na něj vázaná kresba se odeberou z návrhů a rozepsaných úprav, texty a poznámky zůstanou. Revize změněných draftů se zvýší; starý browserový draft nedokáže vrátit smazané reference. Neukončené nebo nejisté AI požadavky mazání blokují. Durable metadata předcházejí prvnímu unlink; přerušenou operaci lze výslovně dokončit pod stejnou identitou i po restartu. Obnova původního AI výsledku už smazané obrázky nevrací.
+
+Ověření: 129 cílených Python/HTTP kontrol včetně Node scénářů PASS. Safari na odděleném syntetickém HTTP serveru: tlačítko, náhled rozsahu, blokované nepotvrzené smazání, vizuální dialog a zrušení Escape ověřené; finální mazání v browseru neprovedené. Skutečné soukromé podklady se nemazaly a žádný placený AI tah se nespustil. Plná brána PASS: 3426 testů, 0 chyb, 31 SKIP, 688,4 s; konečný výsledek je v `reports/interior_source_delete_20261110.md`.
+
+Vývoj je oddělený od Data/MMTX ve vlastní větvi. Bez p+n a restartu živého Cockpitu. Nový TVBCP dosud nebyl dohodnutý; bez odpovědi se nezakládá, tento terminálový krok má stávající handoff, projektovou paměť a report. Pro další vývoj přes Human–Adam zůstává vazba TVBCP otevřená.
+
+Další krok: samostatně autorizované p+n; lokální vývoj je ověřený, skutečné soukromé podklady se dosud nemazaly. Nasazení a iPhone přejímka jsou samostatné.
 
 ## 2026-11-05 21:44 CET — AI Ateliér dokončený a živě ověřený
 

@@ -99,6 +99,27 @@ class CockpitInteriorTests(unittest.TestCase):
         self.assertEqual(status, 200)
         self.assertIn(json.loads(body)["variant_id"], self.store.state(project, room)["room"]["variants"])
 
+    def test_http_source_delete_requires_exact_confirmation_and_removes_owned_bytes(self):
+        project, room = self.project()
+        _, body, _ = self.command("add_source", project_id=project, room_id=room,
+            title="Synthetic source", kind="photo", data=base64.b64encode(image_bytes()).decode())
+        asset = json.loads(body)["asset_id"]
+        query = urlencode({"project_id":project,"room_id":room,"asset_id":asset})
+        status, body, _ = self.request("/api/interior/delete-preview?" + query)
+        self.assertEqual(status, 200)
+        plan = json.loads(body)
+        self.assertNotIn("files", plan)
+        payload = {"action":"delete_source","request_id":uuid.uuid4().hex,"project_id":project,
+            "room_id":room,"asset_id":asset,"plan_token":plan["plan_token"],"confirmation":"ano"}
+        self.assertEqual(self.request("/api/interior/action",payload)[0], 400)
+        payload["confirmation"] = plan["confirmation_text"]
+        self.assertEqual(self.request("/api/interior/action",payload,origin="https://evil.example")[0], 403)
+        status, body, _ = self.request("/api/interior/action",payload)
+        self.assertEqual(status, 200)
+        self.assertEqual(json.loads(body)["deleted_bytes"], plan["bytes"])
+        self.assertEqual(list((self.root/"objects").iterdir()), [])
+        self.assertEqual(self.request("/api/interior/asset?"+query)[0], 400)
+
     def test_stale_save_returns_conflict_and_keeps_newer_text(self):
         project, room = self.project()
         draft = self.store.state(project, room)["draft"]

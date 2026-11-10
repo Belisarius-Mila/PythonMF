@@ -175,6 +175,8 @@ nebo jejichž princip lze znovu použít v jiné části projektu.
 
 - Doplnění 20. 10.: skutečný renderer zveřejňuje MP4 přes interní hardlink z pracovního MP4. Zákaz všech hardlinků blokoval každé hotové video; zjednodušený fake tento rozdíl skryl. Inventář musí ověřit, že všechny názvy stejného inode leží uvnitř jedné potvrzené varianty; před každým unlink kontrolovat zbývající počet a po přerušení ho nově odvodit. Pracovní podadresáře procházet pouze přes ověřené deskriptory s limity. Skutečný render → smazání, cizí třetí odkaz a přerušení uprostřed interní dvojice jsou povinné regrese.
 
+- Doplnění 10. 11. pro Ateliér: zrušení kartičky nestačí, obrazová data jsou i v AI input snapshotech a výsledkovém JSON. Mazací rozsah musí zahrnout tyto kopie, zachovat obsahově sdílené objekty a zablokovat pozdější recover původních obrázků. Před unlink uchovat jen neobrazovou účtenku; přerušené mazání dokončit pod stejným ID. Regrese ověřují skutečné unlink, chybějící finální JSON commit, sdílení, AI souběh a zachování textu.
+
 ### LL-076 — TTS může vracet prázdný zvuk i po aktualizaci knihovny
 
 - Problém: původní endpoint denní sovy vracel HTTP 403 s edge-tts 7.2.8 a `NoAudioReceived` také s 7.3.1; selhal i skutečný cloudový běh.

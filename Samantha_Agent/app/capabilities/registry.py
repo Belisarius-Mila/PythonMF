@@ -213,6 +213,21 @@ CAPABILITIES: tuple[CapabilityRecord, ...] = (
         notes="Opaque project/room/asset IDs, no path input, symlink rejection and no-store response.",
     ),
     CapabilityRecord(
+        capability_id="interior_source_delete_preview", label="Preview permanent deletion of one interior source",
+        risk=RiskLevel.READ_ONLY, reads=("selected source references and bounded app-owned image copies",),
+        writes=(), tool="app.interior_atelier.InteriorAtelier.deletion_preview",
+        notes="Read-only size, impact and exact manifest/file token; no deletion or model call.",
+    ),
+    CapabilityRecord(
+        capability_id="interior_source_delete", label="Permanently remove one confirmed interior source and working copies",
+        risk=RiskLevel.DESTRUCTIVE, reads=("exact selected source deletion plan and unchanged app-owned files",),
+        writes=("remove unshared source images and AI snapshots", "detach image references and retain textual proposals",
+                "durable deletion receipt without image copies"),
+        tool="app.interior_cleanup.delete_source", requires_confirmation=True,
+        confirmation_policy=ConfirmationPolicy.EXACT_PHRASE, voice_allowed=VoicePolicy.BLOCKED,
+        notes="Exact global safety phrase and plan token. Blocks unfinished AI, preserves shared files and external copies. Same request can finish interrupted removal; no model or publication.",
+    ),
+    CapabilityRecord(
         capability_id="interior_atelier_edit", label="Save interior projects, selected images and human proposal versions",
         risk=RiskLevel.LOCAL_WRITE, reads=("explicitly selected image upload or room-scoped proposal and expected revision",),
         writes=("private immutable image objects", "transactional private atelier metadata"),

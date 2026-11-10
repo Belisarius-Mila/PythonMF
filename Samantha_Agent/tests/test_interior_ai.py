@@ -269,5 +269,64 @@ class InteriorAITests(unittest.TestCase):
         self.assertEqual(self.queue, [])
 
 
+class InteriorAIDeletionTests(unittest.TestCase):
+    setUp = InteriorAITests.setUp
+    action = InteriorAITests.action
+    payload = InteriorAITests.payload
+
+    def deletion(self, asset):
+        from app.interior_cleanup import DELETE_CONFIRMATION
+        plan = self.store.deletion_preview(self.project, self.room, asset)
+        return {"action":"delete_source", "request_id":uuid.uuid4().hex, "project_id":self.project,
+                "room_id":self.room, "asset_id":asset, "plan_token":plan["plan_token"], "confirmation":DELETE_CONFIRMATION}
+
+    def test_completed_generated_image_and_snapshot_cannot_be_resurrected_by_recover(self):
+        output = io.BytesIO(); Image.new("RGB", (40, 40), "red").save(output, format="PNG")
+        self.driver.outputs = [{"result":base64.b64encode(output.getvalue()).decode()}]
+        job_id = self.ai.start(self.payload(mode="image"))["request_id"]
+        self.queue.pop()()
+        state = self.store.state(self.project, self.room)
+        variant = next(iter(state["room"]["variants"].values()))
+        generated = variant["image_source_id"]
+        self.store.execute(self.deletion(generated))
+        self.assertFalse((self.store.root / "ai_inputs" / job_id).exists())
+        self.assertTrue(self.ai.recover(self.project, self.room, job_id)["source_deleted"])
+        with self.assertRaises(AtelierConflict):
+            self.ai._complete_result(self.project, self.room, job_id,
+                {"answer":"Old result", "images":self.driver.outputs, "receipt":{}})
+        self.assertEqual(len(self.driver.calls), 1)
+        self.assertNotIn(generated, self.store.state(self.project, self.room)["room"]["sources"])
+        self.assertEqual(self.store.asset(self.project, self.room, self.asset, "original")[0], image_bytes())
+
+    def test_snapshot_preparation_serializes_with_deletion_and_queued_job_is_preserved(self):
+        import threading
+        selected = self.deletion(self.asset)
+        entered, release = threading.Event(), threading.Event()
+        real_asset = self.store.asset
+        def pause(*args):
+            entered.set()
+            if not release.wait(4): raise RuntimeError("test release missing")
+            return real_asset(*args)
+        results = []
+        def start():
+            try: results.append(self.ai.start(self.payload()))
+            except Exception as error: results.append(error)
+        with patch.object(self.store, "asset", side_effect=pause):
+            thread = threading.Thread(target=start); thread.start()
+            self.assertTrue(entered.wait(3))
+            removal = []
+            def remove():
+                try: removal.append(self.store.execute(selected))
+                except Exception as error: removal.append(error)
+            deleter = threading.Thread(target=remove); deleter.start()
+            release.set(); thread.join(4); deleter.join(4)
+        self.assertFalse(thread.is_alive()); self.assertFalse(deleter.is_alive())
+        self.assertTrue(results[0]["ok"])
+        self.assertIsInstance(removal[0], AtelierConflict)
+        self.assertEqual(self.driver.calls, [])
+        self.assertEqual(len(self.queue), 1)
+        self.assertTrue(self.store.asset(self.project, self.room, self.asset)[0])
+
+
 if __name__ == "__main__":
     unittest.main()

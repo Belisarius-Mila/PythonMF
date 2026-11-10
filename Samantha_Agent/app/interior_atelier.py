@@ -1,6 +1,6 @@
 """Local interior workbench: explicit image intake and versioned human proposals.
 
-No model, network operation, deletion, legacy import or App Server side effect.
+No model, network operation, legacy import or App Server side effect.
 Constructors and reads never materialize storage.
 """
 from __future__ import annotations
@@ -17,11 +17,13 @@ import re
 import stat
 import uuid
 import warnings
+from contextlib import contextmanager
 from datetime import datetime, timezone
 from pathlib import Path
 
 from PIL import Image, ImageOps, UnidentifiedImageError
 
+from app.file_persistence import exclusive_file_lock
 from app.work_repository import JsonWorkRepository, RepositoryMutation
 
 DEFAULT_ROOT = Path(__file__).resolve().parents[1] / "data/private/neuberk_interier_design/atelier"
@@ -152,8 +154,16 @@ class InteriorAtelier:
         self.repository = JsonWorkRepository(self.path, default={"schema_version": 1, "projects": {}})
 
     def _check(self):
-        for path in (self.path, self.path.with_name(self.path.name + ".lock"), self.root / "objects"):
+        for path in (self.path, self.path.with_name(self.path.name + ".lock"), self.root / "objects",
+                     self.root / "media.lock", self.root / "ai_inputs"):
             _safe_path(path)
+
+    @contextmanager
+    def media_lock(self):
+        """Serialize image writes, AI snapshot preparation and confirmed removal."""
+        self._check()
+        with exclusive_file_lock(self.root / "media"):
+            yield
 
     def _read(self):
         self._check()
@@ -199,7 +209,13 @@ class InteriorAtelier:
             result["room"].pop("drafts")
             result["room"].pop("ai_requests", None)
             result["draft"] = self._draft(room, base_id)
+            from app.interior_cleanup import pending_source_deletions
+            result["pending_deletions"] = pending_source_deletions(data, project_id, room_id)
         return result
+
+    def deletion_preview(self, project_id, room_id, asset_id):
+        from app.interior_cleanup import preview_source_deletion
+        return preview_source_deletion(self, project_id, room_id, asset_id)
 
     def _blob_read(self, filename, digest):
         if not re.fullmatch(r"[0-9a-f]{64}\.(original|preview|thumbnail)", filename):
@@ -242,6 +258,17 @@ class InteriorAtelier:
             os.close(directory)
 
     def execute(self, payload):
+        deleting = isinstance(payload, dict) and payload.get("action") == "delete_source"
+        if deleting:
+            from app.interior_cleanup import delete_source
+            return delete_source(self, payload)
+        else:
+            self._validate_command(payload)
+        with self.media_lock():
+            return self._execute(payload)
+
+    @staticmethod
+    def _validate_command(payload):
         if not isinstance(payload, dict):
             raise AtelierError("Neplatný požadavek Ateliéru.")
         action = payload.get("action")
@@ -262,6 +289,10 @@ class InteriorAtelier:
             fingerprint = _fingerprint(payload)
         except (ValueError, TypeError) as exc:
             raise AtelierError("Požadavek obsahuje neplatnou hodnotu.") from exc
+        return action, request_id, fingerprint
+
+    def _execute(self, payload):
+        action, request_id, fingerprint = self._validate_command(payload)
         self._check()
         # Directory creation belongs exclusively to explicit writes.
         self.root.mkdir(parents=True, exist_ok=True, mode=0o700)
