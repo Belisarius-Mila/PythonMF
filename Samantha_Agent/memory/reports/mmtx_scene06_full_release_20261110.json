@@ -1,0 +1,41 @@
+{
+  "schema_version": 1,
+  "target_head": "f7a4ab58dbc4480ba88604a89593d5e92b2a2cd1",
+  "request_id": "data-mmtx-full-51af4d56-20261110-v1",
+  "receipt": {
+    "job_id": "0de6f2870dbe4d325b61522f6510e6d1",
+    "state": "completed",
+    "workstream_id": "project-mmtx",
+    "commit_count": 2,
+    "push_state": "confirmed",
+    "deployment_state": "confirmed",
+    "executor": {
+      "role": "release_executor",
+      "model": "gpt-6.1-terra",
+      "reasoning_effort": "high",
+      "policy_digest": "2658fc0b796051bbbfe1bd957bd1c62c0977bd081fe5f37561bf4ec873c0540d"
+    },
+    "gate": {
+      "passed": true,
+      "mode": "full",
+      "test_count": 3441,
+      "duration_seconds": 634.3
+    },
+    "verification": {
+      "state": "deployed",
+      "main_head": "f7a4ab58dbc4480ba88604a89593d5e92b2a2cd1",
+      "protected_services_unchanged": true,
+      "deployment_target": "github_pages",
+      "deployment_id": 7689928869,
+      "workflow_run_id": 42869959321,
+      "smoke_http_status": 200,
+      "smoke_path": ""
+    }
+  },
+  "public_verification": {
+    "base_url": "https://belisarius-mila.github.io/PythonMF/",
+    "checked": 173,
+    "matched": 173,
+    "total_bytes": 9012903
+  }
+}

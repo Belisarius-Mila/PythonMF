@@ -1,3 +1,26 @@
+# MMTX — celé vydání dokončené Terrou
+
+Potvrzený výsledek: main f7a4ab58, job 0de6f2870dbe4d325b61522f6510e6d1 completed,
+push confirmed, deployment confirmed. Terra 6.1/high, plná publikační brána
+3441 PASS / 634,3 s. Pages workflow 42869959321 a deployment 7689928869
+odpovídají přesnému f7a4ab58; HTTP smoke 200, chráněné služby beze změny.
+
+Nezávislá následná kontrola stáhla a porovnala všech 173 veřejných souborů:
+170 ze šestky a HTML/JS/interaction.css z pětky. Všech 173 HTTP 200 a přesné
+bajty i SHA-256 proti Git objektům f7a4ab58, celkem 9 012 903 B. Výsledky jsou
+v mmtx_scene06_public_verification_20261110.json, účtenka v
+mmtx_scene06_full_release_20261110.json. Žádný nový modelový či publikační
+pokus nebyl kvůli ověření spuštěný.
+
+Produkce: https://belisarius-mila.github.io/PythonMF/scene05_log_bridge/
+a https://belisarius-mila.github.io/PythonMF/scene06_lake_arrival/.
+Main je čistý a aligned s GitHubem, 0 čekajících commitů, 2 profily ready.
+Závěrečné dokumentační uložení se provádí pouze v Datově odděleném worktree.
+Fyzické proklikání tajného rohu, jazyková a hlasová přejímka i iPhone zůstávají
+Mílovi. Webová kontrola není fyzická přejímka zařízení.
+
+## Přípravný záznam zachovaný z vydaného main (historický)
+
 # MMTX — integrovaný balíček celé nové šestky před Terra p+n
 
 Míla výslovně zadal skrytý velký roh vlevo dole na posledním obrazu pětky,

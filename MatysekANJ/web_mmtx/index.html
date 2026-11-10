@@ -7,7 +7,7 @@
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
-    <link rel="stylesheet" href="styles_intro_v2.css?v=20260825jane1">
+    <link rel="stylesheet" href="styles_intro_v2.css?v=20261110selector1">
   </head>
   <body>
     <main class="app-shell">
@@ -37,7 +37,7 @@
             <span class="forest-school-portal-tree">🌲</span>
             <span class="forest-school-portal-label">ForestSchool</span>
           </button>
-          <button class="forest-journey-portal hidden" id="forestJourneyPortalButton" type="button" aria-label="Forest journey to the lake">
+          <button class="forest-journey-portal hidden" id="forestJourneyPortalButton" type="button" aria-label="Cesta k jezeru" aria-haspopup="dialog" aria-controls="forestJourneyDialog">
             <span class="forest-journey-portal-icon">🌲</span>
             <span class="forest-journey-portal-path">➜</span>
             <span class="forest-journey-portal-label">Lake</span>
@@ -80,10 +80,25 @@
           <div class="owl-garden-done hidden" id="owlGardenDoneBadge" aria-hidden="true">✓</div>
         </div>
       </section>
+      <dialog class="journey-dialog" id="forestJourneyDialog" aria-labelledby="forestJourneyTitle">
+        <form method="dialog" class="journey-dialog-heading">
+          <h1 id="forestJourneyTitle">Cesta k jezeru</h1>
+          <button class="journey-close" aria-label="Zavřít výběr scén" autofocus>×</button>
+        </form>
+        <p>Vyber scénu</p>
+        <nav class="journey-scenes" aria-label="Scény Cesty k jezeru">
+          <button id="forestJourneySceneOne" type="button" aria-label="Scéna 1">1</button>
+          <a href="scene02_sunnys_lost_nuts/index.html" aria-label="Scéna 2">2</a>
+          <a href="scene03_journey_to_the_lake/index.html" aria-label="Scéna 3">3</a>
+          <a href="scene04_harry_guard_prototype/index.html" aria-label="Scéna 4">4</a>
+          <a href="scene05_log_bridge/index.html" aria-label="Scéna 5">5</a>
+          <a href="scene06_lake_arrival/index.html" aria-label="Scéna 6">6</a>
+        </nav>
+      </dialog>
     </main>
 
     <script src="scene01_audio_manifest.js?v=20260829fixed1"></script>
     <script src="forest_school_audio_manifest.js?v=20260830fixed1"></script>
-    <script src="script_intro_v2.js?v=20260830fixed1"></script>
+    <script src="script_intro_v2.js?v=20261110selector1"></script>
   </body>
 </html>

@@ -1,16 +1,16 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
-- 2026-11-10 18:42 CET: Main má integrovaný celý věcný balíček z Data 51af4d56, včetně českých režimů a tajného rohu pětky. Willovy historické MMTX zápisy i ostatní projekty zachované. Nad main 70 cílených a statická brána PASS. Následuje zarovnání profilů a jediný autorizovaný Terra submit_release(wait=True), request `data-mmtx-full-51af4d56-20261110-v1`; nový job dosud není tímto zápisem doložený.
+- 2026-11-10 20:21 CET: Míla výslovně zadal vše předat k p+n Terře. Main převzal pouze slovníček b62c4aa8 a rozcestník 376ae421 z Datovy oddělené větve; dva již hotové commity interiéru  ba2f9bbc a 448d2902 zůstávají součástí celého čekajícího GitHub balíčku. Cíl je project-mmtx → GitHub Pages, centrální Terra 6.1/high. Nová účtenka vznikne jedním submit_release(wait=True), request data-mmtx-dictionary-selector-376ae421-20261110-v1; tento přípravný zápis ještě nepotvrzuje předání, push ani deployment.
 
+- 2026-11-10: Tlačítko Cesta k jezeru nyní otevírá modální výběr scén 1–6. Jednička spouští původní mýtinu přímo, 2–6 vedou na vlastní stránky scén; křížek/Escape zavře nabídku. Lokální změna navazuje na slovníček b62c4aa8, obě rozšíření dosud bez nového p+n. 49 cílených testů a rychlá statická brána OK; Safari: čitelná nabídka, proklik 1 a 6, návrat a Escape. Všech pět cílových HTML i tři vstupní soubory přesné přes lokální HTTP a mirror. Fyzický iPhone zatím neověřený.
 
-- 2026-11-10: Celá nová šestka má 10 obrazů, 11 ilustrací (03/031), 67 EN + 67 CS MP3 a český překlad každé repliky. CZ: vypnuto → CZ: text → CZ: text + hlas, při čtení pořadí EN→CS a Next až po dočtení. Devátý obraz je tichý ve všech režimech. Závěr používá opravenou mapu s potokem do jezera.
-- Obrázek, dialog a ovládání se vejdou do výšky okna; při češtině platí toto rozložení pro všechny obrazy. Volba češtiny se pamatuje, při odmítnutém úložišti funguje EN výchozí stav. Přímý #picture=4 zachovává zvukovou bránu. Přepnutí za běhu bezpečně zastaví české čtení, nemůže obejít chybu angličtiny.
-- Míla nově výslovně zadal velké průhledné tlačítko vlevo dole na posledním obrazu pětky a poté p+n všeho Terrou. Roh 24 % × 28 %, min. 44 px, vede na šestku až při dokončeném friends-farewell, bez řeči/animace a se zavřeným slovníčkem. Běžný dokončovací odkaz zůstává. Český přepínač řeší právě dokončenou šestku.
-- 67 nových CS požadavků / 3977 SSML znaků z limitu 4000, Vlasta −10 %, bez retry. 98 původních podkladů a 9 raw EN účtenek beze změny. Dekódování 134/134 a HTTP 170/170 přesné. Celá cílená sada s rohem 70 PASS; plná místní brána češtiny 2984 OK (5 SKIP), 570,813 s unit. Publikační worker znovu ověří přesný integrovaný main včetně rohu.
-- Skutečné Safari ukázalo obě jazykové vrstvy i režim s hlasem, protokol doložil CS MP3 v živém průchodu. Fyzická iPhone, kvalita překladu/hlasu a tajný roh čekají na Mílovu přejímku. Poslední UI ovládání se nepřerušuje reloadem.
-- Vývojový balíček navazuje na 3cdc5c26, 99e59145, dca70ad9 a fe01d527. Main před integrací čistý na a459920b; GitHub audit ready, existuje jeden čekající Willův dokumentační commit a459920b nad origin 748cec00. Oba profilové workspaces připravené. Integrace převezme pouze MMTX a spojí historii obou checkoutů; servisní 06c34051 NEPŘEBÍRAT podruhé, Willovo zaparkované WIP zachovat.
-- Další krok: uložit Data checkpoint, integrovat do main, zarovnat čisté profily a jednou předat registrované submit_release(wait=True) pro project-mmtx. Nový balíček má samostatný request ID; původní neúspěšný Pages job 4b261f77c13a77e845684bbbd90cc876 se nepřepisuje ani automaticky neopakuje. Report `reports/mmtx_scene06_czech_20261110.md`.
+- 2026-11-10: Lokálně doplněný závěrečný slovníček nové šestky: ikona knihy až po poslední replice desátého obrazu, v režimu s češtinou až po EN i CS. 77 nových hesel a spojení, dvousloupcové posuvné karty, stejné tři režimy češtiny jako příběh. Zavření/Escape zastaví řeč a vrátí příběh, Again ikonu znovu skryje.
+- Novost se ověřuje proti dialogům, anglickým pokynům a slovníčkům scén 1–5: 450 úseků, 191 známých lemmat, deset souborů bajtově shodných s publikovaným f7a4ab58. Výslovné mapování tvarů (trees→tree, coming→come, better→good), bez vlastních jmen a osobních/přivlastňovacích zájmen. Každé heslo má doložený výskyt v šestce; JSON audit je `reports/mmtx_scene06_dictionary_audit_20261110.json`.
+- 154 slovníčkových MP3 (77 EN Andrew + 77 CS Vlasta, −10 %), z toho 20 přesně shodných CS převzatých z VocabularyEN a 134 nových Azure požadavků / 4964 SSML znaků z limitu 5000. Žádný retry ani změna starých podkladů. Šestka nyní má 288 MP3. 167 dřívějších materiálů a deset dřívějších účtenek beze změny, lokální HTTP 327/327 přesné.
+- 74 cílených testů PASS; samostatné JS kontroly nových přístupných názvů a chyby anglického slovíčka také PASS. Celý příběh, 77 EN→CS karet, hranice odemknutí, textové režimy, chyby/nový klik, stop, Escape, historie a Again ověřené. Plná místní brána slovníčku: 2989 testů OK (5 SKIP), 625,637 s; rychlá statická brána také OK. Skutečné Safari dokončilo obraz 10 / 6/6, zobrazilo ikonu knihy a otevřelo čitelný posuvný dvousloupcový seznam. Kliknutí na beautiful načetlo EN i CS MP3 (HTTP 200 ve správném pořadí). Fyzický iPhone a Mílova jazyková/hlasová přejímka zůstávají otevřené.
+- Poslední doložené publikované MMTX je f7a4ab58 bez tohoto nového slovníčku: Terra job 0de6f2870dbe4d325b61522f6510e6d1 completed, push+deployment confirmed, publikační gate 3441 PASS, dřívější veřejná kontrola 173/173 přesná. Tento vývoj hlavní checkout ani produkci nemění; nové p+n nebylo zadané.
+- Data zůstává na data/parallel-20261104, současný slovníček tvoří vlastní lokální checkpoint navazující na cd37aa9a. Willovo WIP i historie zachované, servisní 06c34051 nepřebírat podruhé. Další krok: Mílova přejímka a případné nové vydání podle samostatného pokynu. Report `reports/mmtx_scene06_dictionary_20261110.md`.
 <!-- SAMANTHA_CURRENT_STATUS_END -->
 
 # Handoff pracovního proudu: MMTX
@@ -1202,3 +1202,81 @@ Navrhované další kroky:
 
 Technický důkaz:
 - Přímo nad integrovaným main 70 cílených testů PASS a rychlá statická brána PASS. Dřívější Data plná brána češtiny 2984 OK (5 SKIP); publikační worker ověří přesný main znovu. Před zápisem 346 konkrétních MMTX cest, žádná nová smazání ani nesouvisející kód. Report `reports/mmtx_scene06_full_release_20261110.md`.
+
+
+### 2026-11-10 18:45 CET — Terra převzala přesný integrovaný balíček
+
+Hotovo:
+- Data vývoj je uložený v 51af4d56, celý věcný MMTX balíček integrovaný do main f7a4ab58. Oba čisté profily jsou zarovnané. Registrovaný kontext byl obnoven a přepnut na project-mmtx; jediný předaný job má ID 0de6f2870dbe4d325b61522f6510e6d1.
+
+Rozhodnutí:
+- Výslovně schválené p+n běží přes submit_release(wait=True), request data-mmtx-full-51af4d56-20261110-v1. Audit zmrazil main f7a4ab58, origin 748cec00, 2 commity, GitHub Pages, Terra 6.1/high a schválený otisk centrální politiky. Původní job se nepřepisuje ani neopakuje.
+
+Další krok:
+- Programově převzít konečnou účtenku stejného jobu.
+
+Navrhované další kroky:
+- Ověřit veřejné soubory přesného headu a Mílovu fyzickou přejímku.
+
+Technický důkaz:
+- Main 70 cílených a statická brána PASS; Data plná brána 2984 OK (5 SKIP). Registrovaný audit ready a oba profily aligned na f7a4ab58. Vydání je nyní předané, push a deployment zatím nejsou tímto zápisem potvrzené.
+
+
+### 2026-11-10 18:59 CET — Terra p+n dokončené, veřejné soubory přesně ověřené
+
+Hotovo:
+- Pětka je propojená tajným velkým polem na posledním obrazu s celou šestkou. Všech deset obrazů, 11 ilustrací a 67 EN + 67 CS MP3 včetně tří českých režimů je veřejně dostupných. Ověřeno 173/173 přesných veřejných souborů.
+
+Rozhodnutí:
+- Schválené předání proběhlo jednou Terrou přes registrované submit_release(wait=True). Main po vydání zůstává f7a4ab58 a čistý; závěrečný zápis je místní Data receipt, bez nového publikování či změny vydaného headu.
+
+Další krok:
+- Mílova přejímka hry na jeho zařízeních.
+
+Navrhované další kroky:
+- Fyzicky vyzkoušet tajný roh po dokončení pětky, přepínač text/čtení i iPhone. Další vývoj podle Míly.
+
+Technický důkaz:
+- Job 0de6f2870dbe4d325b61522f6510e6d1 completed; push a deployment confirmed. Terra 6.1/high, plná brána 3441 PASS / 634,3 s. Pages run 42869959321, deployment 7689928869, exact head f7a4ab58, HTTP 200, chráněné služby beze změny. Nezávislých 173/173 HTTP souborů byte/SHA shodných (9 012 903 B). GitHub audit aligned, main 0 čekajících commitů a 2 profily ready. Reporty mmtx_scene06_full_release_20261110.md/json a mmtx_scene06_public_verification_20261110.json.
+
+
+### 2026-11-10 19:41 CET — Slovníček nových slov na konci desátého obrazu
+
+Hotovo:
+- Na konci šestky je lokálně ikona knihy s 77 novými hesly a spojeními. Karty mají EN/CZ zvuk a respektují všechny tři české režimy. Odemknutí nastává až po poslední větě, včetně její češtiny; ticho devítky, příběh i vazba z pětky zůstávají zachované.
+
+Rozhodnutí:
+- Míla zadal analog slovníčku pětky pouze pro slova dosud nepoužitá v předchozích pěti scénách. Audit zahrnuje dialogy, pokyny i slovníčky a explicitně mapuje tvary, nikoli pouze rozdíl hotových seznamů. Nové p+n nezadal; změna zůstává lokální v Data.
+
+Další krok:
+- Převzít Mílovo hodnocení místního slovníčku; případné nové p+n pouze podle samostatného pokynu.
+
+Navrhované další kroky:
+- Mílova přejímka hesel a hlasů; po samostatném pokynu integrovat a předat p+n.
+
+Technický důkaz:
+- 74 cílených kontrol PASS, nové izolované JS kontroly také PASS. Deset zdrojů předchozích scén ověřených proti f7a4ab58, 450 úseků a 191 lemmat; každé nové heslo doložené v šestce. 154 MP3 dekódovaných, 134 nových unikátních požadavků / 4964 SSML znaků a 20 převzatých přesných CS nahrávek. 167 starých materiálů a deset účtenek beze změny; HTTP 327/327 přesné. Plná místní brána slovníčku: 2989 testů OK (5 SKIP), 625,637 s; rychlá statická brána také OK. Reporty mmtx_scene06_dictionary_20261110.md a mmtx_scene06_dictionary_audit_20261110.json.
+
+### 2026-11-10 20:14 CET — Výběr šesti scén Cesty k jezeru
+
+Hotovo: Tlačítko Cesta k jezeru otevírá přehledné okno s čísly 1–6. Každé číslo vede do odpovídající scény; okno lze zavřít křížkem nebo Escape. Nabídka zůstala otevřená v místním Safari pro Mílu.
+
+Rozhodnutí: Zachovaná struktura příběhu: první scéna běží přímo v úvodní stránce, další mají vlastní stránky. Jde o místní vývoj, nové p+n nebylo zadané ani spuštěné.
+
+Další krok: Mílova přejímka rozcestníku a slovníčku; případné společné vydání až podle samostatného pokynu.
+
+Navrhované další kroky: Žádné nové.
+
+Technický důkaz: 49 cílených testů OK / 16,975 s, rychlá statická brána OK. Safari zobrazilo všech šest čísel a prošlo spuštění první i šesté scény, návrat a zavření Escape. Tři vstupní HTML/JS/CSS a všech pět cílových HTML přesné přes lokální HTTP a mirror. Verze CSS/JS aktualizované proti cache. Žádné nové TTS ani jiné placené volání; hlavní checkout nedotčený. Fyzický iPhone otevřený.
+
+### 2026-11-10 20:21 CET — Připravené společné vydání slovníčku a rozcestníku
+
+Hotovo: Do main je převzatý slovníček 77 nových hesel se 154 MP3 a nabídka scén 1–6. Obě webové kopie jsou shodné s ověřenou Datovou větví. Historie MMTX a nesouvisející práce na main zůstaly zachované.
+
+Rozhodnutí: Míla výslovně autorizoval vše předat k p+n Terře. Jediná registrovaná cesta submit_release(wait=True), project-mmtx → GitHub Pages; dva čekající interiérové commity se zachovají v celém GitHub balíčku. Běžící Cockpit se tímto vydáním nerestartuje.
+
+Další krok: Po kontrolách uložit integrovaný main, zarovnat pouze čisté profily a jednou předat přesný commit; převzít konečnou účtenku téhož jobu a ověřit veřejné bajty.
+
+Navrhované další kroky: Mílovo proklikání veřejné nabídky a slovníčku; fyzická přejímka iPhonu zůstává otevřená.
+
+Technický důkaz: Data 376ae421 a b62c4aa8 zachované v odděleném worktree, main výchozí 448d2902 čistý a bez divergence. Dřívější plná místní brána slovníčku 2989 OK (5 SKIP); rychlá integrační brána OK. Nové audio ani placené pokusy se nespouštějí. Request data-mmtx-dictionary-selector-376ae421-20261110-v1 je nový; staré účtenky se nepřepisují.

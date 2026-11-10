@@ -7,7 +7,7 @@ const source = fs.readFileSync(path.join(folder, "script.js"), "utf8");
 async function harness(mode = "0", hash = "", blocked = false, badTranslation = false) {
   const nodes = new Map(), audios = [], events = {}, saved = [];
   function node(id) {
-    if (!nodes.has(id)) nodes.set(id, {hidden: false, disabled: id !== "restartButton", textContent: "", dataset: {}, listeners: {},
+    if (!nodes.has(id)) nodes.set(id, {hidden: id === "dictionaryPanel", disabled: !["restartButton", "dictionaryClose"].includes(id), textContent: "", dataset: {}, listeners: {}, children: [], append(...children) { this.children.push(...children); }, replaceChildren() { this.children = []; },
       setAttribute(k, v) { this[k] = v; }, classList: {remove() {}, add() {}, toggle() {}},
       addEventListener(k, f) { this.listeners[k] = f; }, click() { if (!this.disabled) this.listeners.click?.(); }});
     return nodes.get(id);
@@ -17,7 +17,7 @@ async function harness(mode = "0", hash = "", blocked = false, badTranslation = 
     play() { return Promise.resolve(); }
     pause() { this.paused = true; }
   }
-  const context = vm.createContext({document: {getElementById: node}, Audio,
+  const context = vm.createContext({document: {getElementById: node, createElement: () => node(Symbol())}, Audio,
     window: {location: {hash}, addEventListener(k, f) { events[k] = f; }, localStorage: {
       getItem() { if (blocked) throw Error("blocked"); return mode; },
       setItem(k, v) { if (blocked) throw Error("blocked"); saved.push([k, v]); }
@@ -67,6 +67,53 @@ async function harness(mode = "0", hash = "", blocked = false, badTranslation = 
   h.end(); assert.equal(h.audios.at(-1).src, translations.at(-1).audio); h.end();
   h.click("restartButton"); assert.equal(h.audios.at(-1).src, translations[0].audio_en);
   h.end(); assert.equal(h.audios.at(-1).src, translations[0].audio); h.end();
+
+  // The dictionary is gated by the last complete EN+CS sentence, not just the picture.
+  const d = await harness("2", "#picture=10"), vocabulary = read("vocabulary.json").entries;
+  assert.equal(d.node("dictionaryButton").hidden, true); d.click("dictionaryButton");
+  assert.equal(d.node("dictionaryPanel").hidden, true); d.click("startButton");
+  for (let n = 0; n < 6; n++) {
+    if (n) d.click("nextButton"); d.end();
+    assert.equal(d.node("dictionaryButton").hidden, true); d.end();
+  }
+  assert.equal(d.node("dictionaryButton").hidden, false);
+  d.click("dictionaryButton"); assert.equal(d.node("dictionaryPanel").hidden, false);
+  assert.equal(d.node("dictionaryButton")["aria-expanded"], "true");
+  const cards = d.node("dictionaryList").children; assert.equal(cards.length, vocabulary.length);
+  const beforeWords = d.audios.length;
+  for (let n = 0; n < cards.length; n++) {
+    assert.equal(cards[n].children[1].textContent, vocabulary[n].en);
+    assert.equal(cards[n]["aria-label"], `${vocabulary[n].en} — ${vocabulary[n].cz}`);
+    assert.equal(cards[n].children[2].hidden, false); cards[n].click();
+    assert.equal(d.audios.at(-1).src, `audio/vocabulary/en/${vocabulary[n].id}.mp3`);
+    assert.equal(cards[n].disabled, true); d.end();
+    assert.equal(d.audios.at(-1).src, `audio/vocabulary/cs/${vocabulary[n].id}.mp3`); d.end();
+  }
+  assert.equal(d.audios.length - beforeWords, vocabulary.length * 2);
+  cards[0].click(); const oldWordEnded = d.audios.at(-1).onended;
+  d.click("dictionaryClose"); assert.equal(d.audios.at(-1).paused, true);
+  const closedCount = d.audios.length; oldWordEnded(); assert.equal(d.audios.length, closedCount);
+  assert.equal(d.node("dictionaryPanel").hidden, true); assert.equal(d.node("restartButton").hidden, false);
+  d.click("dictionaryButton"); cards[0].click(); d.end(); d.audios.at(-1).onerror();
+  assert.ok(d.node("dictionaryStatus").textContent.includes("Zvuk")); assert.equal(cards[0].disabled, false);
+  cards[0].click(); d.end(); d.end(); assert.equal(d.node("dictionaryStatus").textContent, "");
+  // A failed English word cannot be bypassed by switching on Czech reading.
+  d.click("languageButton"); cards[0].click(); d.audios.at(-1).onerror();
+  const failedWordCount = d.audios.length;
+  d.click("languageButton"); d.click("languageButton");
+  assert.equal(d.audios.length, failedWordCount);
+  cards[0].click(); d.end(); d.end();
+  d.click("languageButton"); assert.equal(cards[0].children[2].hidden, true);
+  const englishOnlyCount = d.audios.length; cards[1].click(); d.end();
+  assert.equal(d.audios.length, englishOnlyCount + 1);
+  d.click("languageButton"); assert.equal(cards[1].children[2].hidden, false);
+  assert.equal(d.audios.length, englishOnlyCount + 1);
+  d.click("languageButton"); assert.equal(d.audios.at(-1).src, `audio/vocabulary/cs/${vocabulary[1].id}.mp3`);
+  const staleWordCs = d.audios.at(-1).onended; d.events.pagehide(); d.events.pageshow();
+  const pausedWords = d.audios.length; staleWordCs(); assert.equal(d.audios.length, pausedWords);
+  d.events.keydown({key:"Escape"}); assert.equal(d.node("dictionaryPanel").hidden, true);
+  d.click("restartButton"); assert.equal(d.node("dictionaryButton").hidden, true);
+  assert.equal(d.node("scene").dataset.picture, "1");
 
   // Live switching: text-only does not play Czech; reading an idle line does.
   const a = await harness(); a.click("startButton"); a.click("languageButton");

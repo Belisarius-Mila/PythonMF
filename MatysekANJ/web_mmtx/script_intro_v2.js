@@ -6,6 +6,8 @@ const mushroomPortalButton = document.getElementById("mushroomPortalButton");
 const bunnyPortalButton = document.getElementById("bunnyPortalButton");
 const forestSchoolPortalButton = document.getElementById("forestSchoolPortalButton");
 const forestJourneyPortalButton = document.getElementById("forestJourneyPortalButton");
+const forestJourneyDialog = document.getElementById("forestJourneyDialog");
+const forestJourneySceneOne = document.getElementById("forestJourneySceneOne");
 const kateBirthdayPortalButton = document.getElementById("kateBirthdayPortalButton");
 const janeBirthdayPortalButton = document.getElementById("janeBirthdayPortalButton");
 const adultQuickSkipButton = document.getElementById("adultQuickSkipButton");
@@ -2442,8 +2444,7 @@ storyStage.addEventListener("click", async (event) => {
     return;
   }
   if (state.currentScene === "intro4" && event.target === forestJourneyPortalButton) {
-    resetClearingMeeting();
-    setScene("clearingMeeting");
+    forestJourneyDialog.showModal();
     return;
   }
   if (state.currentScene === "intro4" && event.target === kateBirthdayPortalButton) {
@@ -2501,13 +2502,16 @@ forestSchoolPortalButton.addEventListener("click", async (event) => {
   }
 });
 
-forestJourneyPortalButton.addEventListener("click", async (event) => {
+forestJourneyPortalButton.addEventListener("click", (event) => {
   event.stopPropagation();
+  if (state.currentScene === "intro4") forestJourneyDialog.showModal();
+});
+
+forestJourneySceneOne.addEventListener("click", async () => {
+  forestJourneyDialog.close();
   await primeAudio();
-  if (state.currentScene === "intro4") {
-    resetClearingMeeting();
-    setScene("clearingMeeting");
-  }
+  resetClearingMeeting();
+  setScene("clearingMeeting");
 });
 
 kateBirthdayPortalButton.addEventListener("click", async (event) => {

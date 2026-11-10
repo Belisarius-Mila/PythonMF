@@ -60,3 +60,20 @@ button, a { -webkit-tap-highlight-color: transparent; touch-action: manipulation
 
 .speech p.translation { border-top: 1px solid #b6c9ac; padding-top: 7px; margin-top: 8px; color: #3b5b45; font-size: clamp(15px, 1.9vw, 26px); font-weight: 500; }
 @media (max-width: 600px) { .speech p.translation { font-size: 14px; padding-top: 5px; margin-top: 5px; } }
+
+.dictionary-panel { position: absolute; z-index: 6; top: 74px; bottom: 12px; right: 12px; width: min(640px, calc(100% - 24px)); max-height: 720px; display: flex; flex-direction: column; padding: 12px; border: 3px solid #567a5e; border-radius: 22px; background: #fffbea; box-shadow: 0 4px 20px #182c2666; }
+.dictionary-heading { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 8px; }
+.dictionary-heading strong, .dictionary-heading small { display: block; }
+.dictionary-heading strong { font-size: 20px; }
+.dictionary-heading small { color: #5b685e; }
+#dictionaryStatus { margin: 0 0 6px; color: #8d241a; }
+#dictionaryStatus:empty { display: none; }
+.dictionary-list { min-height: 0; overflow-y: auto; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; overscroll-behavior: contain; }
+.dictionary-item { min-height: 48px; min-width: 0; display: grid; grid-template-columns: auto minmax(0, 1fr); column-gap: 8px; row-gap: 2px; align-items: center; padding: 8px 10px; border: 2px solid #8daa8f; border-radius: 14px; color: #213d30; background: #fff; cursor: pointer; text-align: left; font: inherit; }
+.dictionary-item:hover, .dictionary-item[aria-current="true"] { background: #fff0ac; }
+.dictionary-item:focus-visible { outline: 3px solid #1b68a3; outline-offset: -3px; }
+.dictionary-item:disabled { cursor: default; opacity: .65; }
+.dictionary-emoji { grid-row: span 2; font-size: 24px; }
+.dictionary-word { font-weight: 800; overflow-wrap: anywhere; }
+.dictionary-translation { color: #5b685e; font-size: 14px; overflow-wrap: anywhere; }
+@media (max-width: 600px) { .dictionary-panel { top: 60px; right: 6px; bottom: max(8px, env(safe-area-inset-bottom)); width: calc(100% - 12px); padding: 8px; } .dictionary-list { gap: 5px; } .dictionary-item { padding: 6px; font-size: 14px; column-gap: 5px; } .dictionary-translation { font-size: 12px; } }

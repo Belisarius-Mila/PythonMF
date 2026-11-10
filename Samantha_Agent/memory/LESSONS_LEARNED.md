@@ -2090,3 +2090,9 @@ prostředí PASS, produkční kód beze změny.
 - Problém: samostatná pole změnit/zachovat a historie rozhovoru mohou současně instruovat obrazový model a vzájemně si odporovat.
 - Řešení: architekt navrhuje jeden strukturovaný souhrn; nerozhodnuté úvahy drží zvlášť. Člověk potvrdí právě zobrazenou verzi i podklady, server ověří jejich token a do obrazu neposílá staré volné poznámky/historii. Pozdní odpověď nesmí přepsat novější uloženou práci.
 - Ověření: syntetické serverové/UI testy změněných podkladů, revize, poznámek, nerozhodnutých otázek, nejistého výsledku a idempotence; Safari potvrdilo celý tok bez placeného modelu. Report `reports/interior_conversation_brief_20261110.md`.
+
+### 2026-11-10 — Novost slovníčku se ověřuje proti skutečně použitým větám
+
+- Kontext: MMTX šestka potřebuje jen hesla nepoužitá v předchozích pěti scénách.
+- Řešení: číst audio manifesty i deklarované EN dialogy/pokyny/slovníčky; u sdíleného skriptu omezit správnou scénu. Mapovat tvary explicitně a evidovat výskyt nové položky v novém příběhu. Trees není nové po tree, nová významová spojení se porovnávají jako celek. Existující audio převzít jen při shodě textu, hlasu, tempa a otisku.
+- Ověření: deset zdrojů shodných s vydaným f7a4ab58, 450 úseků / 191 lemmat; 77 nových doložených hesel. Test vloženého starého hesla zablokoval generování před transportem. 20 přesných CS nahrávek převzatých, 74 cílených testů PASS. Viz mmtx_scene06_dictionary_audit_20261110.json.

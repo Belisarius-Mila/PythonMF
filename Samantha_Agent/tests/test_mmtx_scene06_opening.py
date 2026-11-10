@@ -18,6 +18,9 @@ spec.loader.exec_module(builder)
 cs_spec = importlib.util.spec_from_file_location("mmtx_czech_builder", REPO / "MatysekANJ/build_scene06_czech_audio.py")
 czech = importlib.util.module_from_spec(cs_spec)
 cs_spec.loader.exec_module(czech)
+dict_spec = importlib.util.spec_from_file_location("mmtx_dictionary_builder", REPO / "MatysekANJ/build_scene06_dictionary_audio.py")
+dictionary = importlib.util.module_from_spec(dict_spec)
+dict_spec.loader.exec_module(dictionary)
 
 
 class Scene06OpeningTests(unittest.TestCase):
@@ -227,6 +230,69 @@ class Scene06OpeningTests(unittest.TestCase):
         (docs / "old_english.mp3").write_bytes(b"preserve approved English")
         return docs, mirror, receipt
 
+    def dictionary_fixture(self, folder):
+        root = Path(folder)
+        docs, mirror = root / "docs/scene06_lake_arrival", root / "mirror"
+        docs.mkdir(parents=True); mirror.mkdir()
+        for name in dictionary.PRIOR + dictionary.SCRIPTS:
+            dest = docs.parent / name; dest.parent.mkdir(parents=True, exist_ok=True)
+            dest.write_bytes((DOCS.parent / name).read_bytes())
+        for n in range(1, 11):
+            name = builder.names(n)[0]; (docs / name).write_bytes((DOCS / name).read_bytes())
+        data = dictionary.vocabulary()
+        for item in data["entries"]:
+            item["origins"] = {"en": {"type": "azure"}, "cs": {"type": "azure"}}
+        for dest in (docs, mirror): (dest / dictionary.INPUT).write_text(json.dumps(data))
+        return docs, mirror, root / "private/dictionary_receipt.json"
+
+    def test_dictionary_novelty_and_audio_integrity(self):
+        data = dictionary.vocabulary()
+        self.assertEqual(len(data["entries"]), 77)
+        self.assertFalse({"tree", "come", "good", "benji", "freddie"} & {x["lemma"] for x in data["entries"]})
+        self.assertTrue({"cut down", "find out", "woodpecker", "meeting"} <= {x["en"] for x in data["entries"]})
+        self.assertEqual(dictionary.check()["audio_assets"], 154)
+
+    def test_dictionary_rejects_prior_word_before_transport(self):
+        with tempfile.TemporaryDirectory() as folder:
+            docs, mirror, receipt = self.dictionary_fixture(folder)
+            data = json.loads((docs / dictionary.INPUT).read_text())
+            data["entries"][0].update(en="trees", lemma="tree", forms=["trees"])
+            (docs / dictionary.INPUT).write_text(json.dumps(data))
+            calls = []
+            with self.assertRaisesRegex(RuntimeError, "již bylo"):
+                dictionary.build(docs=docs, mirror=mirror, receipt=receipt,
+                                 synthesizer=lambda *a, **k: calls.append(a), validator=lambda x: None)
+            self.assertEqual(calls, []); self.assertFalse(receipt.exists())
+
+    def test_dictionary_build_budget_reuse_and_prior_data_preservation(self):
+        with tempfile.TemporaryDirectory() as folder:
+            docs, mirror, receipt = self.dictionary_fixture(folder)
+            before = {p.relative_to(docs): p.read_bytes() for p in docs.rglob("*") if p.is_file()}
+            calls = []
+            def synth(text, **kwargs):
+                calls.append(text); kwargs["budget"].reserve(builder.ssml_parts(text, kwargs["voice"])[1])
+                return b"ID3" + text.encode() * 100
+            with self.assertRaisesRegex(RuntimeError, "rozpočet"):
+                dictionary.build(docs=docs, mirror=mirror, receipt=receipt, limit=1, synthesizer=synth, validator=lambda x: None)
+            self.assertEqual(calls, [])
+            result = dictionary.build(docs=docs, mirror=mirror, receipt=receipt, synthesizer=synth, validator=lambda x: None)
+            self.assertEqual(result["new_requests"], 154)
+            result = dictionary.build(docs=docs, mirror=mirror, receipt=receipt, synthesizer=synth, validator=lambda x: None)
+            self.assertEqual((result["new_requests"], len(calls)), (0, 154))
+            for name, content in before.items(): self.assertEqual((docs / name).read_bytes(), content)
+
+    def test_dictionary_reused_audio_is_bound_to_exact_voice_text_and_hash(self):
+        import copy
+        row = next(x for x in dictionary.assets(dictionary.vocabulary()) if x["origin"]["type"] == "reused")
+        raw = dictionary.reused_bytes(row, DOCS)
+        self.assertEqual(builder.digest(raw), row["origin"]["sha256"])
+        wrong = copy.deepcopy(row); wrong["text"] += " changed"
+        with self.assertRaisesRegex(RuntimeError, "hlas, tempo nebo text"):
+            dictionary.reused_bytes(wrong, DOCS)
+        wrong = copy.deepcopy(row); wrong["origin"]["sha256"] = "0" * 64
+        with self.assertRaisesRegex(RuntimeError, "otisk"):
+            dictionary.reused_bytes(wrong, DOCS)
+
     def test_czech_transcript_binding_and_audio(self):
         data = czech.translations()
         self.assertEqual(len(data["lines"]), 67)
@@ -348,13 +414,13 @@ const catalog=JSON.parse(fs.readFileSync(path.join(folder,'pictures.json'),'utf8
 async function check(hash,expected){
  const nodes=new Map(),audios=[];
  function node(id){
-  if(!nodes.has(id)) nodes.set(id,{hidden:false,disabled:true,textContent:'',dataset:{},listeners:{},
+  if(!nodes.has(id)) nodes.set(id,{hidden:false,disabled:true,textContent:'',dataset:{},listeners:{},append(){},replaceChildren(){},
    setAttribute(k,v){this[k]=v;},classList:{remove(){},add(){},toggle(){}},
    addEventListener(k,f){this.listeners[k]=f;},click(){if(!this.disabled)this.listeners.click?.();}});
   return nodes.get(id);
  }
  class Audio{constructor(src){this.src=src;audios.push(this);}play(){return Promise.resolve();}pause(){}}
- const context=vm.createContext({document:{getElementById:node},window:{location:{hash},addEventListener(){}},Audio,
+ const context=vm.createContext({document:{getElementById:node,createElement:()=>node(Symbol())},window:{location:{hash},addEventListener(){}},Audio,
   fetch:async(url)=>({ok:true,json:async()=>JSON.parse(fs.readFileSync(path.join(folder,url.split('?')[0]),'utf8'))})});
  vm.runInContext(source,context);await new Promise(resolve=>setImmediate(resolve));
  assert.equal(audios.length,0);assert.equal(node('startButton').disabled,false);
@@ -382,7 +448,7 @@ async function check(hash,expected){
 const fs = require('fs'), vm = require('vm'), assert = require('assert'), path = require('path');
 const nodes = new Map();
 function node(id) {
-  if (!nodes.has(id)) nodes.set(id, {hidden: false, disabled: true, textContent: '', dataset:{},
+  if (!nodes.has(id)) nodes.set(id, {hidden: false, disabled: true, textContent: '', dataset:{}, append(){},replaceChildren(){},
     setAttribute(name,value){this[name]=value;},
     classList: {remove(){}, add(){}, toggle(){}}, listeners: {},
     addEventListener(type, fn) {this.listeners[type] = fn;},
@@ -399,7 +465,7 @@ const data = JSON.parse(fs.readFileSync(process.argv[2], 'utf8'));
 const second = JSON.parse(fs.readFileSync(path.join(path.dirname(process.argv[2]),'dialogue_02.json'),'utf8'));
 const third = JSON.parse(fs.readFileSync(path.join(path.dirname(process.argv[2]),'dialogue_03.json'),'utf8'));
 const catalog = JSON.parse(fs.readFileSync(path.join(path.dirname(process.argv[2]),'pictures.json'),'utf8'));
-const context = vm.createContext({document:{getElementById:node}, window:{addEventListener(t,f){events[t]=f;}},
+const context = vm.createContext({document:{getElementById:node,createElement:()=>node(Symbol())}, window:{addEventListener(t,f){events[t]=f;}},
   Audio, fetch:async(url)=>({ok:true,json:async()=>JSON.parse(fs.readFileSync(path.join(path.dirname(process.argv[2]),url.split('?')[0]),'utf8'))}), console});
 vm.runInContext(fs.readFileSync(process.argv[1], 'utf8'),context);
 events.pageshow();assert.equal(node('restartButton').hidden,true);

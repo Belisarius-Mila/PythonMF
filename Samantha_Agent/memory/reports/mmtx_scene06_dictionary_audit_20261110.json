@@ -1,0 +1,2150 @@
+{
+  "schema_version": 1,
+  "baseline_commit": "f7a4ab58dbc4480ba88604a89593d5e92b2a2cd1",
+  "scope": "Spoken dialogue, English prompts and dictionaries of Forest Journey scenes 1-5; scene 1 clearing section only. Proper names, articles, personal/possessive pronouns and contractions are not glossary headwords.",
+  "prior_text_fragments": 450,
+  "prior_unique_lemmas": 191,
+  "sources": {
+    "scene01_audio_manifest.js": "f96587191f1822568a325060650e636a4415029763d495e25b20d8be230fa1be",
+    "scene02_sunnys_lost_nuts/audio_manifest.js": "155aaa8e0786e032c0c78a8f6cab54c2c8853be7ca96770fa00f7286079b0eae",
+    "scene03_journey_to_the_lake/audio_manifest.js": "af69172e15ea8644c58049b684fa0a85c32929750909cc8d33c477d3404b5f4a",
+    "scene04_harry_guard_prototype/audio_manifest.js": "64026bf8fc5932584234cc6ac8c3299f69ca01e54cd3b2ad671886230cc85f9f",
+    "scene05_log_bridge/audio_manifest.js": "e7c7a7e98761314bbfbb2e057d9a9767b36996f8ab7cb26d40d3d8af5242f142",
+    "script_intro_v2.js": "4caf5193779e7519db116a1f9ffbaae13e0455e12904c06893b1beeacb643224",
+    "scene02_sunnys_lost_nuts/script.js": "8ee374aea30e13c1e84d5fa0e2d41832bc3e79ce3af460f8a77bd5184c854667",
+    "scene03_journey_to_the_lake/script.js": "2eea57ad75c16ec65ace9027730d114096dbbefcc6b844604621991a4cd5b9a1",
+    "scene04_harry_guard_prototype/script.js": "df78d83aea48f888e47b3a963603bf9c091e39a57ae8dfca75260c6d8d45ec21",
+    "scene05_log_bridge/script.js": "8020f360b3d5b17b48cd9a4cdb30973d030acaeb484359bbd4acc4e58d0d5083"
+  },
+  "normalization": {
+    "clouds": "cloud",
+    "ears": "ear",
+    "trees": "tree",
+    "beavers": "beaver",
+    "asked": "ask",
+    "called": "call",
+    "coming": "come",
+    "practising": "practise",
+    "practicing": "practise",
+    "smaller": "small",
+    "better": "good",
+    "ones": "one",
+    "wants": "want",
+    "needs": "need",
+    "friends": "friend",
+    "logs": "log",
+    "crossed": "cross",
+    "is": "be",
+    "are": "be",
+    "am": "be",
+    "was": "be",
+    "were": "be",
+    "has": "have",
+    "does": "do",
+    "did": "do",
+    "going": "go",
+    "helped": "help",
+    "helps": "help",
+    "jumps": "jump",
+    "jumping": "jump",
+    "looks": "look"
+  },
+  "excluded_known_examples": [
+    "tree / trees",
+    "good / better",
+    "come / coming",
+    "jump",
+    "lake",
+    "map",
+    "help"
+  ],
+  "entries": [
+    {
+      "id": "v01",
+      "en": "beautiful",
+      "cz": "krásný",
+      "lemma": "beautiful",
+      "forms": [
+        "beautiful"
+      ],
+      "seen_in_prior_scenes": false,
+      "evidence": [
+        {
+          "picture": 1,
+          "line": 2,
+          "text": "It’s beautiful. Look at the blue water."
+        },
+        {
+          "picture": 3,
+          "line": 1,
+          "text": "A beautiful jump, Freddie!"
+        }
+      ],
+      "origins": {
+        "en": {
+          "type": "azure"
+        },
+        "cs": {
+          "type": "reused",
+          "source": "assets/vocabulary-en-audio/cs-cz-vlasta-neural/d5b33691bc66c575a008.mp3",
+          "sha256": "e675fd06b62fd08406cf2461a2e9586b9d5497eeb4f90e196c7f5a970213c91e"
+        }
+      }
+    },
+    {
+      "id": "v02",
+      "en": "blue",
+      "cz": "modrý",
+      "lemma": "blue",
+      "forms": [
+        "blue"
+      ],
+      "seen_in_prior_scenes": false,
+      "evidence": [
+        {
+          "picture": 1,
+          "line": 2,
+          "text": "It’s beautiful. Look at the blue water."
+        }
+      ],
+      "origins": {
+        "en": {
+          "type": "azure"
+        },
+        "cs": {
+          "type": "reused",
+          "source": "assets/vocabulary-en-audio/cs-cz-vlasta-neural/fbe07f366118aa8e21b0.mp3",
+          "sha256": "a39057f618c6b3dd434d65044625f20f5dac8840d13b119af192e23faef83386"
+        }
+      }
+    },
+    {
+      "id": "v03",
+      "en": "cloud",
+      "cz": "mrak",
+      "lemma": "cloud",
+      "forms": [
+        "clouds"
+      ],
+      "seen_in_prior_scenes": false,
+      "evidence": [
+        {
+          "picture": 1,
+          "line": 3,
+          "text": "And look at those clouds!"
+        }
+      ],
+      "origins": {
+        "en": {
+          "type": "azure"
+        },
+        "cs": {
+          "type": "reused",
+          "source": "assets/vocabulary-en-audio/cs-cz-vlasta-neural/d9016bc2d614f53b9ee5.mp3",
+          "sha256": "869c7ae3b171d4c311c21d32bef8bbed35f563159ff1dcfea2ad7a90130b44a1"
+        }
+      }
+    },
+    {
+      "id": "v04",
+      "en": "ear",
+      "cz": "ucho",
+      "lemma": "ear",
+      "forms": [
+        "ears"
+      ],
+      "seen_in_prior_scenes": false,
+      "evidence": [
+        {
+          "picture": 1,
+          "line": 4,
+          "text": "They look like my ears!"
+        },
+        {
+          "picture": 1,
+          "line": 5,
+          "text": "Two ears here. Two in the sky."
+        },
+        {
+          "picture": 1,
+          "line": 6,
+          "text": "Four ears! Can you hear us better?"
+        }
+      ],
+      "origins": {
+        "en": {
+          "type": "azure"
+        },
+        "cs": {
+          "type": "azure"
+        }
+      }
+    },
+    {
+      "id": "v05",
+      "en": "sky",
+      "cz": "obloha",
+      "lemma": "sky",
+      "forms": [
+        "sky"
+      ],
+      "seen_in_prior_scenes": false,
+      "evidence": [
+        {
+          "picture": 1,
+          "line": 5,
+          "text": "Two ears here. Two in the sky."
+        }
+      ],
+      "origins": {
+        "en": {
+          "type": "azure"
+        },
+        "cs": {
+          "type": "azure"
+        }
+      }
+    },
+    {
+      "id": "v06",
+      "en": "four",
+      "cz": "čtyři",
+      "lemma": "four",
+      "forms": [
+        "four"
+      ],
+      "seen_in_prior_scenes": false,
+      "evidence": [
+        {
+          "picture": 1,
+          "line": 6,
+          "text": "Four ears! Can you hear us better?"
+        }
+      ],
+      "origins": {
+        "en": {
+          "type": "azure"
+        },
+        "cs": {
+          "type": "reused",
+          "source": "assets/vocabulary-en-audio/cs-cz-vlasta-neural/c023bacde4075ef51fac.mp3",
+          "sha256": "05ca045d9474fd04b6efb415df31c376d18850ba288ae309ca4d930d5c8a3341"
+        }
+      }
+    },
+    {
+      "id": "v07",
+      "en": "hear",
+      "cz": "slyšet",
+      "lemma": "hear",
+      "forms": [
+        "hear"
+      ],
+      "seen_in_prior_scenes": false,
+      "evidence": [
+        {
+          "picture": 1,
+          "line": 6,
+          "text": "Four ears! Can you hear us better?"
+        }
+      ],
+      "origins": {
+        "en": {
+          "type": "azure"
+        },
+        "cs": {
+          "type": "reused",
+          "source": "assets/vocabulary-en-audio/cs-cz-vlasta-neural/3d01db950eb7fbe64de8.mp3",
+          "sha256": "d5f60ea95943dc5af813f5b11a29d30f9b85c216ddb20b0dec41da9d896c46d9"
+        }
+      }
+    },
+    {
+      "id": "v08",
+      "en": "look like",
+      "cz": "vypadat jako",
+      "lemma": "look like",
+      "forms": [
+        "look like"
+      ],
+      "seen_in_prior_scenes": false,
+      "evidence": [
+        {
+          "picture": 1,
+          "line": 4,
+          "text": "They look like my ears!"
+        }
+      ],
+      "origins": {
+        "en": {
+          "type": "azure"
+        },
+        "cs": {
+          "type": "azure"
+        }
+      }
+    },
+    {
+      "id": "v09",
+      "en": "shout",
+      "cz": "křičet",
+      "lemma": "shout",
+      "forms": [
+        "shout"
+      ],
+      "seen_in_prior_scenes": false,
+      "evidence": [
+        {
+          "picture": 1,
+          "line": 7,
+          "text": "Yes. So please don’t shout!"
+        }
+      ],
+      "origins": {
+        "en": {
+          "type": "azure"
+        },
+        "cs": {
+          "type": "azure"
+        }
+      }
+    },
+    {
+      "id": "v10",
+      "en": "fish",
+      "cz": "ryba",
+      "lemma": "fish",
+      "forms": [
+        "fish"
+      ],
+      "seen_in_prior_scenes": false,
+      "evidence": [
+        {
+          "picture": 2,
+          "line": 1,
+          "text": "Look! A big fish in my net!"
+        },
+        {
+          "picture": 2,
+          "line": 10,
+          "text": "Thank you, Ollie. Enjoy your fish!"
+        }
+      ],
+      "origins": {
+        "en": {
+          "type": "azure"
+        },
+        "cs": {
+          "type": "reused",
+          "source": "assets/vocabulary-en-audio/cs-cz-vlasta-neural/55bad61075d045dce3e0.mp3",
+          "sha256": "9b36085fbc4dc696c713e7853e0dd4534a525a6991be1eed2b4123a6bd94dd79"
+        }
+      }
+    },
+    {
+      "id": "v11",
+      "en": "net",
+      "cz": "podběrák",
+      "lemma": "net",
+      "forms": [
+        "net"
+      ],
+      "seen_in_prior_scenes": false,
+      "evidence": [
+        {
+          "picture": 2,
+          "line": 1,
+          "text": "Look! A big fish in my net!"
+        }
+      ],
+      "origins": {
+        "en": {
+          "type": "azure"
+        },
+        "cs": {
+          "type": "azure"
+        }
+      }
+    },
+    {
+      "id": "v12",
+      "en": "dinner",
+      "cz": "večeře",
+      "lemma": "dinner",
+      "forms": [
+        "dinner"
+      ],
+      "seen_in_prior_scenes": false,
+      "evidence": [
+        {
+          "picture": 2,
+          "line": 2,
+          "text": "That’s a big dinner!"
+        }
+      ],
+      "origins": {
+        "en": {
+          "type": "azure"
+        },
+        "cs": {
+          "type": "azure"
+        }
+      }
+    },
+    {
+      "id": "v13",
+      "en": "food",
+      "cz": "jídlo",
+      "lemma": "food",
+      "forms": [
+        "food"
+      ],
+      "seen_in_prior_scenes": false,
+      "evidence": [
+        {
+          "picture": 2,
+          "line": 4,
+          "text": "Thank you, but we have our own food."
+        },
+        {
+          "picture": 5,
+          "line": 1,
+          "text": "Good food and a warm fire. I like it here."
+        },
+        {
+          "picture": 5,
+          "line": 4,
+          "text": "Then we can bring some food!"
+        }
+      ],
+      "origins": {
+        "en": {
+          "type": "azure"
+        },
+        "cs": {
+          "type": "reused",
+          "source": "assets/vocabulary-en-audio/cs-cz-vlasta-neural/1dff99bc4f345cac45eb.mp3",
+          "sha256": "4542e1e278b07b7696c28a99c08be9bcef609f12e3e9155c12a75ab8a50c3cd1"
+        }
+      }
+    },
+    {
+      "id": "v14",
+      "en": "meeting",
+      "cz": "sněm",
+      "lemma": "meeting",
+      "forms": [
+        "meeting"
+      ],
+      "seen_in_prior_scenes": false,
+      "evidence": [
+        {
+          "picture": 2,
+          "line": 5,
+          "text": "We’re here for the meeting. Where is it?"
+        },
+        {
+          "picture": 3,
+          "line": 6,
+          "text": "We’re here for the meeting."
+        },
+        {
+          "picture": 4,
+          "line": 7,
+          "text": "Yes. Let’s eat before the meeting."
+        }
+      ],
+      "origins": {
+        "en": {
+          "type": "azure"
+        },
+        "cs": {
+          "type": "azure"
+        }
+      }
+    },
+    {
+      "id": "v15",
+      "en": "where",
+      "cz": "kde",
+      "lemma": "where",
+      "forms": [
+        "where"
+      ],
+      "seen_in_prior_scenes": false,
+      "evidence": [
+        {
+          "picture": 2,
+          "line": 5,
+          "text": "We’re here for the meeting. Where is it?"
+        },
+        {
+          "picture": 7,
+          "line": 6,
+          "text": "Where must we take them?"
+        },
+        {
+          "picture": 10,
+          "line": 4,
+          "text": "I’ll show you where to start and what to do."
+        }
+      ],
+      "origins": {
+        "en": {
+          "type": "azure"
+        },
+        "cs": {
+          "type": "azure"
+        }
+      }
+    },
+    {
+      "id": "v16",
+      "en": "other side",
+      "cz": "druhá strana",
+      "lemma": "other side",
+      "forms": [
+        "other side"
+      ],
+      "seen_in_prior_scenes": false,
+      "evidence": [
+        {
+          "picture": 2,
+          "line": 6,
+          "text": "On the other side of the lake, next morning."
+        }
+      ],
+      "origins": {
+        "en": {
+          "type": "azure"
+        },
+        "cs": {
+          "type": "azure"
+        }
+      }
+    },
+    {
+      "id": "v17",
+      "en": "morning",
+      "cz": "ráno",
+      "lemma": "morning",
+      "forms": [
+        "morning"
+      ],
+      "seen_in_prior_scenes": false,
+      "evidence": [
+        {
+          "picture": 2,
+          "line": 6,
+          "text": "On the other side of the lake, next morning."
+        }
+      ],
+      "origins": {
+        "en": {
+          "type": "azure"
+        },
+        "cs": {
+          "type": "azure"
+        }
+      }
+    },
+    {
+      "id": "v18",
+      "en": "boat",
+      "cz": "loď",
+      "lemma": "boat",
+      "forms": [
+        "boat"
+      ],
+      "seen_in_prior_scenes": false,
+      "evidence": [
+        {
+          "picture": 2,
+          "line": 8,
+          "text": "Look for an old boat beside an old fishing hut."
+        },
+        {
+          "picture": 4,
+          "line": 1,
+          "text": "There’s the boat. And the old hut."
+        }
+      ],
+      "origins": {
+        "en": {
+          "type": "azure"
+        },
+        "cs": {
+          "type": "reused",
+          "source": "assets/vocabulary-en-audio/cs-cz-vlasta-neural/1498a0307280d133be14.mp3",
+          "sha256": "512a3ad0338b01c6c4256c939fef4198a60df20316757c8a715cdc2ad808bdf0"
+        }
+      }
+    },
+    {
+      "id": "v19",
+      "en": "fishing hut",
+      "cz": "rybářská chatrč",
+      "lemma": "fishing hut",
+      "forms": [
+        "fishing hut"
+      ],
+      "seen_in_prior_scenes": false,
+      "evidence": [
+        {
+          "picture": 2,
+          "line": 8,
+          "text": "Look for an old boat beside an old fishing hut."
+        }
+      ],
+      "origins": {
+        "en": {
+          "type": "azure"
+        },
+        "cs": {
+          "type": "azure"
+        }
+      }
+    },
+    {
+      "id": "v20",
+      "en": "beside",
+      "cz": "vedle",
+      "lemma": "beside",
+      "forms": [
+        "beside"
+      ],
+      "seen_in_prior_scenes": false,
+      "evidence": [
+        {
+          "picture": 2,
+          "line": 8,
+          "text": "Look for an old boat beside an old fishing hut."
+        }
+      ],
+      "origins": {
+        "en": {
+          "type": "azure"
+        },
+        "cs": {
+          "type": "azure"
+        }
+      }
+    },
+    {
+      "id": "v21",
+      "en": "follow",
+      "cz": "následovat",
+      "lemma": "follow",
+      "forms": [
+        "follow"
+      ],
+      "seen_in_prior_scenes": false,
+      "evidence": [
+        {
+          "picture": 2,
+          "line": 9,
+          "text": "Follow the path by the water."
+        }
+      ],
+      "origins": {
+        "en": {
+          "type": "azure"
+        },
+        "cs": {
+          "type": "azure"
+        }
+      }
+    },
+    {
+      "id": "v22",
+      "en": "enjoy",
+      "cz": "užít si",
+      "lemma": "enjoy",
+      "forms": [
+        "enjoy"
+      ],
+      "seen_in_prior_scenes": false,
+      "evidence": [
+        {
+          "picture": 2,
+          "line": 10,
+          "text": "Thank you, Ollie. Enjoy your fish!"
+        }
+      ],
+      "origins": {
+        "en": {
+          "type": "azure"
+        },
+        "cs": {
+          "type": "reused",
+          "source": "assets/vocabulary-en-audio/cs-cz-vlasta-neural/fb4e295301b6e0e9d60f.mp3",
+          "sha256": "f39959a35cc0595f804d21655554309488de20d3130338f5a20ff6733af84ca0"
+        }
+      }
+    },
+    {
+      "id": "v23",
+      "en": "splash",
+      "cz": "šplouchnutí",
+      "lemma": "splash",
+      "forms": [
+        "splash"
+      ],
+      "seen_in_prior_scenes": false,
+      "evidence": [
+        {
+          "picture": 3,
+          "line": 2,
+          "text": "And a big splash!"
+        },
+        {
+          "picture": 3,
+          "line": 3,
+          "text": "Too big! Try a smaller splash next time."
+        }
+      ],
+      "origins": {
+        "en": {
+          "type": "azure"
+        },
+        "cs": {
+          "type": "azure"
+        }
+      }
+    },
+    {
+      "id": "v24",
+      "en": "smaller",
+      "cz": "menší",
+      "lemma": "small",
+      "forms": [
+        "smaller"
+      ],
+      "seen_in_prior_scenes": false,
+      "evidence": [
+        {
+          "picture": 3,
+          "line": 3,
+          "text": "Too big! Try a smaller splash next time."
+        }
+      ],
+      "origins": {
+        "en": {
+          "type": "azure"
+        },
+        "cs": {
+          "type": "azure"
+        }
+      }
+    },
+    {
+      "id": "v25",
+      "en": "practise",
+      "cz": "trénovat",
+      "lemma": "practise",
+      "forms": [
+        "practising"
+      ],
+      "seen_in_prior_scenes": false,
+      "evidence": [
+        {
+          "picture": 3,
+          "line": 4,
+          "text": "Why are you practising?"
+        }
+      ],
+      "origins": {
+        "en": {
+          "type": "azure"
+        },
+        "cs": {
+          "type": "azure"
+        }
+      }
+    },
+    {
+      "id": "v26",
+      "en": "frog",
+      "cz": "žabák",
+      "lemma": "frog",
+      "forms": [
+        "frog"
+      ],
+      "seen_in_prior_scenes": false,
+      "evidence": [
+        {
+          "picture": 3,
+          "line": 5,
+          "text": "For the frog-jumping race!"
+        }
+      ],
+      "origins": {
+        "en": {
+          "type": "azure"
+        },
+        "cs": {
+          "type": "azure"
+        }
+      }
+    },
+    {
+      "id": "v27",
+      "en": "race",
+      "cz": "závod",
+      "lemma": "race",
+      "forms": [
+        "race"
+      ],
+      "seen_in_prior_scenes": false,
+      "evidence": [
+        {
+          "picture": 3,
+          "line": 5,
+          "text": "For the frog-jumping race!"
+        }
+      ],
+      "origins": {
+        "en": {
+          "type": "azure"
+        },
+        "cs": {
+          "type": "azure"
+        }
+      }
+    },
+    {
+      "id": "v28",
+      "en": "dry",
+      "cz": "suchý",
+      "lemma": "dry",
+      "forms": [
+        "dry"
+      ],
+      "seen_in_prior_scenes": false,
+      "evidence": [
+        {
+          "picture": 4,
+          "line": 4,
+          "text": "It’s old, but it’s dry inside."
+        }
+      ],
+      "origins": {
+        "en": {
+          "type": "azure"
+        },
+        "cs": {
+          "type": "azure"
+        }
+      }
+    },
+    {
+      "id": "v29",
+      "en": "sleep",
+      "cz": "spát",
+      "lemma": "sleep",
+      "forms": [
+        "sleep"
+      ],
+      "seen_in_prior_scenes": false,
+      "evidence": [
+        {
+          "picture": 4,
+          "line": 5,
+          "text": "We can sleep here tonight."
+        }
+      ],
+      "origins": {
+        "en": {
+          "type": "azure"
+        },
+        "cs": {
+          "type": "azure"
+        }
+      }
+    },
+    {
+      "id": "v30",
+      "en": "tonight",
+      "cz": "dnes v noci",
+      "lemma": "tonight",
+      "forms": [
+        "tonight"
+      ],
+      "seen_in_prior_scenes": false,
+      "evidence": [
+        {
+          "picture": 4,
+          "line": 5,
+          "text": "We can sleep here tonight."
+        }
+      ],
+      "origins": {
+        "en": {
+          "type": "azure"
+        },
+        "cs": {
+          "type": "azure"
+        }
+      }
+    },
+    {
+      "id": "v31",
+      "en": "before",
+      "cz": "před",
+      "lemma": "before",
+      "forms": [
+        "before"
+      ],
+      "seen_in_prior_scenes": false,
+      "evidence": [
+        {
+          "picture": 4,
+          "line": 7,
+          "text": "Yes. Let’s eat before the meeting."
+        }
+      ],
+      "origins": {
+        "en": {
+          "type": "azure"
+        },
+        "cs": {
+          "type": "azure"
+        }
+      }
+    },
+    {
+      "id": "v32",
+      "en": "warm",
+      "cz": "teplý",
+      "lemma": "warm",
+      "forms": [
+        "warm"
+      ],
+      "seen_in_prior_scenes": false,
+      "evidence": [
+        {
+          "picture": 5,
+          "line": 1,
+          "text": "Good food and a warm fire. I like it here."
+        }
+      ],
+      "origins": {
+        "en": {
+          "type": "azure"
+        },
+        "cs": {
+          "type": "reused",
+          "source": "assets/vocabulary-en-audio/cs-cz-vlasta-neural/51662e9141bab6d49e1d.mp3",
+          "sha256": "74e6204155b79cb42938e9e66811bc8a963b498d8de1a07454328ea525c24173"
+        }
+      }
+    },
+    {
+      "id": "v33",
+      "en": "fire",
+      "cz": "oheň",
+      "lemma": "fire",
+      "forms": [
+        "fire"
+      ],
+      "seen_in_prior_scenes": false,
+      "evidence": [
+        {
+          "picture": 5,
+          "line": 1,
+          "text": "Good food and a warm fire. I like it here."
+        }
+      ],
+      "origins": {
+        "en": {
+          "type": "azure"
+        },
+        "cs": {
+          "type": "azure"
+        }
+      }
+    },
+    {
+      "id": "v34",
+      "en": "like",
+      "cz": "líbit se",
+      "lemma": "like",
+      "forms": [
+        "like"
+      ],
+      "seen_in_prior_scenes": false,
+      "evidence": [
+        {
+          "picture": 1,
+          "line": 4,
+          "text": "They look like my ears!"
+        },
+        {
+          "picture": 5,
+          "line": 1,
+          "text": "Good food and a warm fire. I like it here."
+        }
+      ],
+      "origins": {
+        "en": {
+          "type": "azure"
+        },
+        "cs": {
+          "type": "azure"
+        }
+      }
+    },
+    {
+      "id": "v35",
+      "en": "call",
+      "cz": "svolat",
+      "lemma": "call",
+      "forms": [
+        "call",
+        "called"
+      ],
+      "seen_in_prior_scenes": false,
+      "evidence": [
+        {
+          "picture": 5,
+          "line": 2,
+          "text": "But why did the old stag call us here?"
+        },
+        {
+          "picture": 6,
+          "line": 1,
+          "text": "You all want to know why I called you here."
+        }
+      ],
+      "origins": {
+        "en": {
+          "type": "azure"
+        },
+        "cs": {
+          "type": "azure"
+        }
+      }
+    },
+    {
+      "id": "v36",
+      "en": "stag",
+      "cz": "jelen",
+      "lemma": "stag",
+      "forms": [
+        "stag"
+      ],
+      "seen_in_prior_scenes": false,
+      "evidence": [
+        {
+          "picture": 5,
+          "line": 2,
+          "text": "But why did the old stag call us here?"
+        }
+      ],
+      "origins": {
+        "en": {
+          "type": "azure"
+        },
+        "cs": {
+          "type": "reused",
+          "source": "assets/vocabulary-en-audio/cs-cz-vlasta-neural/e03ee1ab026ee3fbc302.mp3",
+          "sha256": "f4dd9851a472ca8ae7304b94edf048857aedfdd36d3d0deaeb0dc017fbca32b3"
+        }
+      }
+    },
+    {
+      "id": "v37",
+      "en": "party",
+      "cz": "oslava",
+      "lemma": "party",
+      "forms": [
+        "party"
+      ],
+      "seen_in_prior_scenes": false,
+      "evidence": [
+        {
+          "picture": 5,
+          "line": 3,
+          "text": "Maybe he wants a party."
+        }
+      ],
+      "origins": {
+        "en": {
+          "type": "azure"
+        },
+        "cs": {
+          "type": "azure"
+        }
+      }
+    },
+    {
+      "id": "v38",
+      "en": "bring",
+      "cz": "přinést",
+      "lemma": "bring",
+      "forms": [
+        "bring"
+      ],
+      "seen_in_prior_scenes": false,
+      "evidence": [
+        {
+          "picture": 5,
+          "line": 4,
+          "text": "Then we can bring some food!"
+        }
+      ],
+      "origins": {
+        "en": {
+          "type": "azure"
+        },
+        "cs": {
+          "type": "azure"
+        }
+      }
+    },
+    {
+      "id": "v39",
+      "en": "every",
+      "cz": "každý",
+      "lemma": "every",
+      "forms": [
+        "every"
+      ],
+      "seen_in_prior_scenes": false,
+      "evidence": [
+        {
+          "picture": 5,
+          "line": 5,
+          "text": "He asked every animal to come. Maybe he needs help."
+        },
+        {
+          "picture": 7,
+          "line": 2,
+          "text": "I can check every tree."
+        }
+      ],
+      "origins": {
+        "en": {
+          "type": "azure"
+        },
+        "cs": {
+          "type": "azure"
+        }
+      }
+    },
+    {
+      "id": "v40",
+      "en": "animal",
+      "cz": "zvíře",
+      "lemma": "animal",
+      "forms": [
+        "animal"
+      ],
+      "seen_in_prior_scenes": false,
+      "evidence": [
+        {
+          "picture": 5,
+          "line": 5,
+          "text": "He asked every animal to come. Maybe he needs help."
+        }
+      ],
+      "origins": {
+        "en": {
+          "type": "azure"
+        },
+        "cs": {
+          "type": "reused",
+          "source": "assets/vocabulary-en-audio/cs-cz-vlasta-neural/669415f5b0c3c6f90c88.mp3",
+          "sha256": "01d737c983558ff6c57d488fb765ee9d1c2748fb8b23dbf20c9a05b76732be15"
+        }
+      }
+    },
+    {
+      "id": "v41",
+      "en": "ask",
+      "cz": "požádat",
+      "lemma": "ask",
+      "forms": [
+        "asked"
+      ],
+      "seen_in_prior_scenes": false,
+      "evidence": [
+        {
+          "picture": 5,
+          "line": 5,
+          "text": "He asked every animal to come. Maybe he needs help."
+        }
+      ],
+      "origins": {
+        "en": {
+          "type": "azure"
+        },
+        "cs": {
+          "type": "azure"
+        }
+      }
+    },
+    {
+      "id": "v42",
+      "en": "something",
+      "cz": "něco",
+      "lemma": "something",
+      "forms": [
+        "something"
+      ],
+      "seen_in_prior_scenes": false,
+      "evidence": [
+        {
+          "picture": 5,
+          "line": 6,
+          "text": "Do you think something is wrong?"
+        },
+        {
+          "picture": 8,
+          "line": 4,
+          "text": "We can all do something."
+        }
+      ],
+      "origins": {
+        "en": {
+          "type": "azure"
+        },
+        "cs": {
+          "type": "reused",
+          "source": "assets/vocabulary-en-audio/cs-cz-vlasta-neural/7400fca70a0cde00aa40.mp3",
+          "sha256": "beee913c7cffc60272b8bc47972deb915d157ee912f67a6cb1091aacceb5b47a"
+        }
+      }
+    },
+    {
+      "id": "v43",
+      "en": "think",
+      "cz": "myslet si",
+      "lemma": "think",
+      "forms": [
+        "think"
+      ],
+      "seen_in_prior_scenes": false,
+      "evidence": [
+        {
+          "picture": 5,
+          "line": 6,
+          "text": "Do you think something is wrong?"
+        }
+      ],
+      "origins": {
+        "en": {
+          "type": "azure"
+        },
+        "cs": {
+          "type": "azure"
+        }
+      }
+    },
+    {
+      "id": "v44",
+      "en": "wrong",
+      "cz": "špatně",
+      "lemma": "wrong",
+      "forms": [
+        "wrong"
+      ],
+      "seen_in_prior_scenes": false,
+      "evidence": [
+        {
+          "picture": 5,
+          "line": 6,
+          "text": "Do you think something is wrong?"
+        }
+      ],
+      "origins": {
+        "en": {
+          "type": "azure"
+        },
+        "cs": {
+          "type": "azure"
+        }
+      }
+    },
+    {
+      "id": "v45",
+      "en": "soon",
+      "cz": "brzy",
+      "lemma": "soon",
+      "forms": [
+        "soon"
+      ],
+      "seen_in_prior_scenes": false,
+      "evidence": [
+        {
+          "picture": 5,
+          "line": 7,
+          "text": "Let’s eat. We’ll soon find out."
+        }
+      ],
+      "origins": {
+        "en": {
+          "type": "azure"
+        },
+        "cs": {
+          "type": "azure"
+        }
+      }
+    },
+    {
+      "id": "v46",
+      "en": "find out",
+      "cz": "zjistit",
+      "lemma": "find out",
+      "forms": [
+        "find out"
+      ],
+      "seen_in_prior_scenes": false,
+      "evidence": [
+        {
+          "picture": 5,
+          "line": 7,
+          "text": "Let’s eat. We’ll soon find out."
+        }
+      ],
+      "origins": {
+        "en": {
+          "type": "azure"
+        },
+        "cs": {
+          "type": "azure"
+        }
+      }
+    },
+    {
+      "id": "v47",
+      "en": "sick",
+      "cz": "nemocný",
+      "lemma": "sick",
+      "forms": [
+        "sick"
+      ],
+      "seen_in_prior_scenes": false,
+      "evidence": [
+        {
+          "picture": 6,
+          "line": 3,
+          "text": "Our forest is old. Many trees are sick."
+        },
+        {
+          "picture": 7,
+          "line": 1,
+          "text": "I do. The woodpecker can find the sick trees."
+        },
+        {
+          "picture": 7,
+          "line": 3,
+          "text": "Then my beaver friends and I can cut the sick ones down."
+        }
+      ],
+      "origins": {
+        "en": {
+          "type": "azure"
+        },
+        "cs": {
+          "type": "azure"
+        }
+      }
+    },
+    {
+      "id": "v48",
+      "en": "people",
+      "cz": "lidé",
+      "lemma": "people",
+      "forms": [
+        "people"
+      ],
+      "seen_in_prior_scenes": false,
+      "evidence": [
+        {
+          "picture": 6,
+          "line": 5,
+          "text": "People may come and cut down the whole forest."
+        },
+        {
+          "picture": 7,
+          "line": 7,
+          "text": "Here, to the shore. People can find them here and take them away."
+        }
+      ],
+      "origins": {
+        "en": {
+          "type": "azure"
+        },
+        "cs": {
+          "type": "azure"
+        }
+      }
+    },
+    {
+      "id": "v49",
+      "en": "cut down",
+      "cz": "pokácet",
+      "lemma": "cut down",
+      "forms": [
+        "cut down"
+      ],
+      "seen_in_prior_scenes": false,
+      "evidence": [
+        {
+          "picture": 6,
+          "line": 5,
+          "text": "People may come and cut down the whole forest."
+        }
+      ],
+      "origins": {
+        "en": {
+          "type": "azure"
+        },
+        "cs": {
+          "type": "azure"
+        }
+      }
+    },
+    {
+      "id": "v50",
+      "en": "whole",
+      "cz": "celý",
+      "lemma": "whole",
+      "forms": [
+        "whole"
+      ],
+      "seen_in_prior_scenes": false,
+      "evidence": [
+        {
+          "picture": 6,
+          "line": 5,
+          "text": "People may come and cut down the whole forest."
+        }
+      ],
+      "origins": {
+        "en": {
+          "type": "azure"
+        },
+        "cs": {
+          "type": "reused",
+          "source": "assets/vocabulary-en-audio/cs-cz-vlasta-neural/99ad4c167819d4ff4b8c.mp3",
+          "sha256": "0ef78ce54f22ec980e703a1c137c2c56e605af482ae4bf606629bcafda1f85e8"
+        }
+      }
+    },
+    {
+      "id": "v51",
+      "en": "healthy",
+      "cz": "zdravý",
+      "lemma": "healthy",
+      "forms": [
+        "healthy"
+      ],
+      "seen_in_prior_scenes": false,
+      "evidence": [
+        {
+          "picture": 6,
+          "line": 6,
+          "text": "Even the healthy trees?"
+        },
+        {
+          "picture": 7,
+          "line": 4,
+          "text": "And leave the healthy trees?"
+        }
+      ],
+      "origins": {
+        "en": {
+          "type": "azure"
+        },
+        "cs": {
+          "type": "azure"
+        }
+      }
+    },
+    {
+      "id": "v52",
+      "en": "home",
+      "cz": "domov",
+      "lemma": "home",
+      "forms": [
+        "home"
+      ],
+      "seen_in_prior_scenes": false,
+      "evidence": [
+        {
+          "picture": 6,
+          "line": 7,
+          "text": "Yes. We need to save our home."
+        }
+      ],
+      "origins": {
+        "en": {
+          "type": "azure"
+        },
+        "cs": {
+          "type": "reused",
+          "source": "assets/vocabulary-en-audio/cs-cz-vlasta-neural/11e36c599db4caed5ca0.mp3",
+          "sha256": "de67a309a8642800ca05ac63b909538f3573a804fa2d48c2ad559d37abd2a3e4"
+        }
+      }
+    },
+    {
+      "id": "v53",
+      "en": "anyone",
+      "cz": "někdo",
+      "lemma": "anyone",
+      "forms": [
+        "anyone"
+      ],
+      "seen_in_prior_scenes": false,
+      "evidence": [
+        {
+          "picture": 6,
+          "line": 8,
+          "text": "Does anyone have an idea?"
+        }
+      ],
+      "origins": {
+        "en": {
+          "type": "azure"
+        },
+        "cs": {
+          "type": "reused",
+          "source": "assets/vocabulary-en-audio/cs-cz-vlasta-neural/70c5c7db913a8739781f.mp3",
+          "sha256": "01cc7890444f235f140eb69339bccab39c51eb50437899c59cdde08c5da9e9c4"
+        }
+      }
+    },
+    {
+      "id": "v54",
+      "en": "idea",
+      "cz": "nápad",
+      "lemma": "idea",
+      "forms": [
+        "idea"
+      ],
+      "seen_in_prior_scenes": false,
+      "evidence": [
+        {
+          "picture": 6,
+          "line": 8,
+          "text": "Does anyone have an idea?"
+        }
+      ],
+      "origins": {
+        "en": {
+          "type": "azure"
+        },
+        "cs": {
+          "type": "azure"
+        }
+      }
+    },
+    {
+      "id": "v55",
+      "en": "woodpecker",
+      "cz": "datel",
+      "lemma": "woodpecker",
+      "forms": [
+        "woodpecker"
+      ],
+      "seen_in_prior_scenes": false,
+      "evidence": [
+        {
+          "picture": 7,
+          "line": 1,
+          "text": "I do. The woodpecker can find the sick trees."
+        }
+      ],
+      "origins": {
+        "en": {
+          "type": "azure"
+        },
+        "cs": {
+          "type": "azure"
+        }
+      }
+    },
+    {
+      "id": "v56",
+      "en": "check",
+      "cz": "prohlédnout",
+      "lemma": "check",
+      "forms": [
+        "check"
+      ],
+      "seen_in_prior_scenes": false,
+      "evidence": [
+        {
+          "picture": 7,
+          "line": 2,
+          "text": "I can check every tree."
+        }
+      ],
+      "origins": {
+        "en": {
+          "type": "azure"
+        },
+        "cs": {
+          "type": "azure"
+        }
+      }
+    },
+    {
+      "id": "v57",
+      "en": "beaver",
+      "cz": "bobr",
+      "lemma": "beaver",
+      "forms": [
+        "beaver",
+        "beavers"
+      ],
+      "seen_in_prior_scenes": false,
+      "evidence": [
+        {
+          "picture": 7,
+          "line": 3,
+          "text": "Then my beaver friends and I can cut the sick ones down."
+        },
+        {
+          "picture": 7,
+          "line": 8,
+          "text": "Who will help the beavers?"
+        }
+      ],
+      "origins": {
+        "en": {
+          "type": "azure"
+        },
+        "cs": {
+          "type": "azure"
+        }
+      }
+    },
+    {
+      "id": "v58",
+      "en": "leave",
+      "cz": "nechat",
+      "lemma": "leave",
+      "forms": [
+        "leave"
+      ],
+      "seen_in_prior_scenes": false,
+      "evidence": [
+        {
+          "picture": 7,
+          "line": 4,
+          "text": "And leave the healthy trees?"
+        }
+      ],
+      "origins": {
+        "en": {
+          "type": "azure"
+        },
+        "cs": {
+          "type": "azure"
+        }
+      }
+    },
+    {
+      "id": "v59",
+      "en": "must",
+      "cz": "muset",
+      "lemma": "must",
+      "forms": [
+        "must"
+      ],
+      "seen_in_prior_scenes": false,
+      "evidence": [
+        {
+          "picture": 7,
+          "line": 6,
+          "text": "Where must we take them?"
+        }
+      ],
+      "origins": {
+        "en": {
+          "type": "azure"
+        },
+        "cs": {
+          "type": "azure"
+        }
+      }
+    },
+    {
+      "id": "v60",
+      "en": "take away",
+      "cz": "odvézt",
+      "lemma": "take away",
+      "forms": [
+        "take them away"
+      ],
+      "seen_in_prior_scenes": false,
+      "evidence": [
+        {
+          "picture": 7,
+          "line": 7,
+          "text": "Here, to the shore. People can find them here and take them away."
+        }
+      ],
+      "origins": {
+        "en": {
+          "type": "azure"
+        },
+        "cs": {
+          "type": "azure"
+        }
+      }
+    },
+    {
+      "id": "v61",
+      "en": "shore",
+      "cz": "břeh",
+      "lemma": "shore",
+      "forms": [
+        "shore"
+      ],
+      "seen_in_prior_scenes": false,
+      "evidence": [
+        {
+          "picture": 7,
+          "line": 7,
+          "text": "Here, to the shore. People can find them here and take them away."
+        }
+      ],
+      "origins": {
+        "en": {
+          "type": "azure"
+        },
+        "cs": {
+          "type": "azure"
+        }
+      }
+    },
+    {
+      "id": "v62",
+      "en": "everyone",
+      "cz": "všichni",
+      "lemma": "everyone",
+      "forms": [
+        "everyone"
+      ],
+      "seen_in_prior_scenes": false,
+      "evidence": [
+        {
+          "picture": 8,
+          "line": 5,
+          "text": "Good. But this will be hard work for everyone."
+        }
+      ],
+      "origins": {
+        "en": {
+          "type": "azure"
+        },
+        "cs": {
+          "type": "azure"
+        }
+      }
+    },
+    {
+      "id": "v63",
+      "en": "hard work",
+      "cz": "těžká práce",
+      "lemma": "hard work",
+      "forms": [
+        "hard work"
+      ],
+      "seen_in_prior_scenes": false,
+      "evidence": [
+        {
+          "picture": 8,
+          "line": 5,
+          "text": "Good. But this will be hard work for everyone."
+        }
+      ],
+      "origins": {
+        "en": {
+          "type": "azure"
+        },
+        "cs": {
+          "type": "azure"
+        }
+      }
+    },
+    {
+      "id": "v64",
+      "en": "lead our team",
+      "cz": "vést náš tým",
+      "lemma": "lead",
+      "forms": [
+        "lead our team"
+      ],
+      "seen_in_prior_scenes": false,
+      "evidence": [
+        {
+          "picture": 8,
+          "line": 6,
+          "text": "Who will lead our team?"
+        }
+      ],
+      "origins": {
+        "en": {
+          "type": "azure"
+        },
+        "cs": {
+          "type": "azure"
+        }
+      }
+    },
+    {
+      "id": "v65",
+      "en": "team",
+      "cz": "tým",
+      "lemma": "team",
+      "forms": [
+        "team"
+      ],
+      "seen_in_prior_scenes": false,
+      "evidence": [
+        {
+          "picture": 8,
+          "line": 6,
+          "text": "Who will lead our team?"
+        }
+      ],
+      "origins": {
+        "en": {
+          "type": "azure"
+        },
+        "cs": {
+          "type": "azure"
+        }
+      }
+    },
+    {
+      "id": "v66",
+      "en": "plan",
+      "cz": "plán",
+      "lemma": "plan",
+      "forms": [
+        "plan"
+      ],
+      "seen_in_prior_scenes": false,
+      "evidence": [
+        {
+          "picture": 10,
+          "line": 1,
+          "text": "I will. I have a plan."
+        }
+      ],
+      "origins": {
+        "en": {
+          "type": "azure"
+        },
+        "cs": {
+          "type": "azure"
+        }
+      }
+    },
+    {
+      "id": "v67",
+      "en": "show",
+      "cz": "ukázat",
+      "lemma": "show",
+      "forms": [
+        "show"
+      ],
+      "seen_in_prior_scenes": false,
+      "evidence": [
+        {
+          "picture": 10,
+          "line": 4,
+          "text": "I’ll show you where to start and what to do."
+        }
+      ],
+      "origins": {
+        "en": {
+          "type": "azure"
+        },
+        "cs": {
+          "type": "azure"
+        }
+      }
+    },
+    {
+      "id": "v68",
+      "en": "start",
+      "cz": "začít",
+      "lemma": "start",
+      "forms": [
+        "start"
+      ],
+      "seen_in_prior_scenes": false,
+      "evidence": [
+        {
+          "picture": 10,
+          "line": 4,
+          "text": "I’ll show you where to start and what to do."
+        }
+      ],
+      "origins": {
+        "en": {
+          "type": "azure"
+        },
+        "cs": {
+          "type": "azure"
+        }
+      }
+    },
+    {
+      "id": "v69",
+      "en": "see you there",
+      "cz": "uvidíme se tam",
+      "lemma": "see you there",
+      "forms": [
+        "see you there"
+      ],
+      "seen_in_prior_scenes": false,
+      "evidence": [
+        {
+          "picture": 3,
+          "line": 7,
+          "text": "We’re coming too. See you there!"
+        }
+      ],
+      "origins": {
+        "en": {
+          "type": "azure"
+        },
+        "cs": {
+          "type": "azure"
+        }
+      }
+    },
+    {
+      "id": "v70",
+      "en": "many",
+      "cz": "mnoho",
+      "lemma": "many",
+      "forms": [
+        "many"
+      ],
+      "seen_in_prior_scenes": false,
+      "evidence": [
+        {
+          "picture": 6,
+          "line": 3,
+          "text": "Our forest is old. Many trees are sick."
+        }
+      ],
+      "origins": {
+        "en": {
+          "type": "azure"
+        },
+        "cs": {
+          "type": "reused",
+          "source": "assets/vocabulary-en-audio/cs-cz-vlasta-neural/7c9ed98e988a456a1ea0.mp3",
+          "sha256": "ff13b66126e76bd704d5ff77243e56937d33072d69688a30463f8ff992af25ae"
+        }
+      }
+    },
+    {
+      "id": "v71",
+      "en": "may",
+      "cz": "možná",
+      "lemma": "may",
+      "forms": [
+        "may"
+      ],
+      "seen_in_prior_scenes": false,
+      "evidence": [
+        {
+          "picture": 6,
+          "line": 5,
+          "text": "People may come and cut down the whole forest."
+        }
+      ],
+      "origins": {
+        "en": {
+          "type": "azure"
+        },
+        "cs": {
+          "type": "reused",
+          "source": "assets/vocabulary-en-audio/cs-cz-vlasta-neural/cb3bb18cb9e8a9e85467.mp3",
+          "sha256": "b1c50c18c7e0a7adb11e8f2dc4ce738b68f7c784807ae721d53c53f36d97c37c"
+        }
+      }
+    },
+    {
+      "id": "v72",
+      "en": "please",
+      "cz": "prosím",
+      "lemma": "please",
+      "forms": [
+        "please"
+      ],
+      "seen_in_prior_scenes": false,
+      "evidence": [
+        {
+          "picture": 1,
+          "line": 7,
+          "text": "Yes. So please don’t shout!"
+        }
+      ],
+      "origins": {
+        "en": {
+          "type": "azure"
+        },
+        "cs": {
+          "type": "reused",
+          "source": "assets/vocabulary-en-audio/cs-cz-vlasta-neural/a66cbd25cfc962006bd1.mp3",
+          "sha256": "6d27815493e5d35f6871f24978bf8e841dc890a5f94b94dbfc342c4540d43f85"
+        }
+      }
+    },
+    {
+      "id": "v73",
+      "en": "just",
+      "cz": "jen",
+      "lemma": "just",
+      "forms": [
+        "just"
+      ],
+      "seen_in_prior_scenes": false,
+      "evidence": [
+        {
+          "picture": 3,
+          "line": 8,
+          "text": "Just one more jump!"
+        }
+      ],
+      "origins": {
+        "en": {
+          "type": "azure"
+        },
+        "cs": {
+          "type": "azure"
+        }
+      }
+    },
+    {
+      "id": "v74",
+      "en": "even",
+      "cz": "dokonce",
+      "lemma": "even",
+      "forms": [
+        "even"
+      ],
+      "seen_in_prior_scenes": false,
+      "evidence": [
+        {
+          "picture": 6,
+          "line": 6,
+          "text": "Even the healthy trees?"
+        }
+      ],
+      "origins": {
+        "en": {
+          "type": "azure"
+        },
+        "cs": {
+          "type": "azure"
+        }
+      }
+    },
+    {
+      "id": "v75",
+      "en": "place",
+      "cz": "místo",
+      "lemma": "place",
+      "forms": [
+        "place"
+      ],
+      "seen_in_prior_scenes": false,
+      "evidence": [
+        {
+          "picture": 2,
+          "line": 7,
+          "text": "How will we find the place?"
+        }
+      ],
+      "origins": {
+        "en": {
+          "type": "azure"
+        },
+        "cs": {
+          "type": "azure"
+        }
+      }
+    },
+    {
+      "id": "v76",
+      "en": "find",
+      "cz": "najít",
+      "lemma": "find",
+      "forms": [
+        "find"
+      ],
+      "seen_in_prior_scenes": false,
+      "evidence": [
+        {
+          "picture": 2,
+          "line": 7,
+          "text": "How will we find the place?"
+        },
+        {
+          "picture": 5,
+          "line": 7,
+          "text": "Let’s eat. We’ll soon find out."
+        },
+        {
+          "picture": 7,
+          "line": 1,
+          "text": "I do. The woodpecker can find the sick trees."
+        },
+        {
+          "picture": 7,
+          "line": 7,
+          "text": "Here, to the shore. People can find them here and take them away."
+        }
+      ],
+      "origins": {
+        "en": {
+          "type": "azure"
+        },
+        "cs": {
+          "type": "azure"
+        }
+      }
+    },
+    {
+      "id": "v77",
+      "en": "next time",
+      "cz": "příště",
+      "lemma": "next time",
+      "forms": [
+        "next time"
+      ],
+      "seen_in_prior_scenes": false,
+      "evidence": [
+        {
+          "picture": 3,
+          "line": 3,
+          "text": "Too big! Try a smaller splash next time."
+        }
+      ],
+      "origins": {
+        "en": {
+          "type": "azure"
+        },
+        "cs": {
+          "type": "reused",
+          "source": "assets/vocabulary-en-audio/cs-cz-vlasta-neural/9ffd0a2bae08e86c0847.mp3",
+          "sha256": "98a8437ed6129e4e2e1507c1ed062fb0b2d7fc575706a065ca48f85fb017b717"
+        }
+      }
+    }
+  ]
+}
