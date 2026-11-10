@@ -329,3 +329,16 @@ Další krok: Samostatně autorizované p+n tohoto kroku společně s předchoz�
 Navrhované další kroky: Po vydání lidská přejímka na skutečné místnosti a iPhonu; nový placený pilot ani nový TVBCP nebyly dohodnuté.
 
 Technický důkaz: 118 cílených Python/HTTP/frontend kontrol včetně 24 Node scénářů PASS. Nativní Safari na syntetické místnosti ověřilo blokování rozepsanou zprávou, nový souhrn, zvýraznění zachování, náhled, výslovné potvrzení a otevření výsledku s přenesenými nejasnostmi. Pouze fake driver: 1 chat + 1 obrazový výstup, 0 placených volání. Plná brána PASS: 3453 testů, 0 chyb, 31 SKIP, 639,2 s. Přesný token zahrnuje variantu, revizi, souhrn, poznámky, reference a kresbu; pozdní odpověď nepřepíše novější uloženou práci. Staré request ID se jen vracejí; nejisté výsledky se neopakují. Skutečné podklady ani Data se neměnily. Report `reports/interior_conversation_brief_20261110.md`, soukromé důkazy `data/private/interior_conversation_brief_20261110/`. Kanonický handoff a projektová paměť aktualizované; vazba TVBCP pro budoucí Human–Adam zůstává výslovně otevřená.
+
+
+## 2026-11-10 21:03 CET — Souhrn zadání a oprava galerie nasazené
+
+Hotovo: Běžící Ateliér obsahuje jedno zadání z rozhovoru s tlačítkem „Vytvořit podle tohoto zadání“ i opravu prázdných miniatur. Živá stránka zobrazuje nové rozhraní bez původních dvou vstupních polí. Stačí obnovit stránku Ateliéru.
+
+Rozhodnutí: Mílovo výslovné „OK, předej na p+n“ se provedlo jediným registrovaným submit_release pro project-neuberk-kacenka. Oba vývojové commity 448d2902/ba2f9bbc už byly na GitHubu v následném společném balíčku MMTX; tento běh ověřil zarovnaný e867c165 a nasadil Cockpit. Runtime app/config/scripts je shodný se schváleným 448d2902. Žádný nový push, placený tah architekta ani zásah do Data.
+
+Další krok: Obnovit stránku a provést lidskou přejímku rozhovoru a souhrnu na skutečné místnosti; iPhone zůstává samostatný.
+
+Navrhované další kroky: Žádné nové. Výsledkový zápis zůstává místní pro další balíček; druhé p+n se kvůli němu nespouští. Nový TVBCP bez dohody nevzniká.
+
+Technický důkaz: Účtenka 81e34ae6bd5c3f646d93706a115796e1, completed; release_executor gpt-6.1-terra/high, push_state=already_aligned, deployment_state=confirmed. Plná publikační brána 3457 testů PASS / 674,4 s, smoke 5/5, protected_services_unchanged=true. Nasazený head e867c165d97c5b09a4c06c609af820db2d1965a4, code_stamp 3a11cc681db9bcac. Adam jednou ověřil HTTP 200 a byte-identickou živou stránku (SHA-256 8c7f37f809e6a899885f0e260f1be3ad075d9543909888b0850b70e7ececad84), nový brief_protocol=interior-brief-v1 a aktivní chat/image capabilities. Shodný manifest před/po, všech 7 podkladů a 25 variant zachovaných. Soukromé důkazy data/private/interior_conversation_brief_20261110/release/. Fyzická uživatelská přejímka ani sémantický placený test nového souhrnu nejsou tímto HTTP ověřením nahrazené. Vazba TVBCP pro budoucí Human–Adam zůstává otevřená.
