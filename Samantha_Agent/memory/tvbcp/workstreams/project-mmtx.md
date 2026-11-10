@@ -1,6 +1,8 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
+- 2026-11-10 13:40 CET – handoff před /new: Míla přijal novou boční variantu a má její přesnou PNG kopii v Downloads (`arrival_side_view_20261110_v1.png`, SHA-256 `3b028eef9065528262c788b2d34e2369ea4800c5e7fe46a4c29b64dd9e649bbc`). Nový obrázek zachovat ve všech třech známých kopiích (projektové private, Downloads, generátor). Požádal odstranit původní obrázek; připraveno 11 místních kopií / 6563953 B (10 WebP + zdrojový PNG). V Downloads žádná původní kopie nalezena nebyla. Mazání zatím NEPROVEDENO: vyžaduje novou přesnou globální brzdu, neboť minulý souhlas první obrázek výslovně chránil. Kontrolní manifest: `data/private/mmtx/original_arrival_removal_20261110/dry_run.json`. Historie Gitu a zálohy se nemažou; nový push/nasazení není tímto místním úklidem povolený.
+
 - 2026-11-10 12:12 CET: šestá scéna u jezera je odstraněná z aktivní produkce i všech pěti známých místních pracovních prostředí. Vývojový commit `359007b95eb1aad652fa0d4b9e50fc371994f29e` je na GitHub main a přesně nasazený na Pages. Z šestky zůstal jen první obrázek `arrival.webp` (380134 B, SHA-256 `038d273ff95d3077fe26d142ad32ca6fc32d0e9b5c6997ea53c161964fedcf65`) na dosavadních veřejných i místních adresách.
 - Odstraněná jsou ostatní média a kód šestky, generátor, jeho dva testové moduly, oba Azure workflow příkazy a přechody ze scény s mostem. Dokončení mostu zůstává jako neklikací stavová zpráva. Scény 1–5, Logan, obrázek loučení i sdílené TTS moduly jsou zachované.
 - Úklid: 1584 plánovaných souborů / 35524901 logických bajtů plus 11 souborů bytecode šestky / 171605 B; celkem 35696506 B (asi 35,7 MB). Skutečné uvolnění APFS bloků není tímto součtem měřené. Historie Gitu, zálohy a neidentifikované obecné cache se nepromazávaly.
@@ -11,7 +13,7 @@
 - Nesouvisející zdrojové změny a oba nově přidané necommitované scénáře jsou zachované mimo vydaný balíček. Závěrečný paměťový checkpoint je místní a patří do příštího GitHub balíčku; další p+n se pro samotný zápis neopakuje.
 - Další krok: při další práci s Datovou větví zohlednit její výše popsaný WIP úklid a vlastní commit. Fyzický proklik na Macu/iPhonu po změně se neprováděl; serverové odstranění a zachované bajty jsou ověřené.
 - 2026-11-10 13:35 CET: vznikla nová samostatná boční varianta prvního obrázku šestky, `data/private/mmtx/imagegen/arrival_side_view_20261110_v1.png` (1672 × 941, SHA-256 `3b028eef9065528262c788b2d34e2369ea4800c5e7fe46a4c29b64dd9e649bbc`). Pět původních postav je více z boku/zezadu a dívá se přes jezero na mraky ve tvaru králičích uší. Vytvořeno vestavěným image_gen; přesný prompt a kontrolní účtenka jsou vedle PNG. Jde o soukromý návrh k posouzení; původní arrival.webp, předchozí scény i produkce zůstávají beze změny.
-- Aktuální obrazový další krok: posoudit soukromý boční návrh; předchozí poznámka k Datově WIP větvi nadále platí.
+- Aktuální další krok: vyřídit nové potvrzení místního úklidu původního obrázku; přijatý boční obrázek zachovat. Poznámka k Datově WIP větvi nadále platí.
 <!-- SAMANTHA_CURRENT_STATUS_END -->
 
 # TVBCP: MMTX
@@ -1499,3 +1501,15 @@ Další krok: Posoudit návrh; případná výměna aktivního obrázku a nové 
 Navrhované další kroky: Žádné nové.
 
 Technický důkaz: Vestavěný image_gen, jedna varianta 1672 × 941, PNG 2948769 B. Vizuálně ověřen počet pěti postav, jejich boční natočení, pohled k jezeru a mrakům; původní arrival.webp má nadále původní SHA-256. PNG, prompt a účtenka jsou v místním private imagegen adresáři mimo Git.
+
+### 2026-11-10 13:40 CET – Pokyn odstranit také původní první obrázek
+
+Hotovo: Nový boční obrázek byl přijatý a uložený do Downloads. Původní obraz je identifikovaný v jedenácti místních souborech; připravený soukromý seznam s otisky.
+
+Rozhodnutí: Míla požádal původní obrázek smazat a připravit přechod na /new. Dosavadní globální brzda jej chránila; před smazáním je nutné nové přesné potvrzení. Nová boční varianta a předchozí scény zůstávají chráněné.
+
+Další krok: Po novém potvrzení odstranit původní místní kopie přesně podle manifestu. Bez něj nic nemazat; bez nového publikačního pokynu neprovádět p+n.
+
+Navrhované další kroky: Žádné nové.
+
+Technický důkaz: 10 shodných WebP otisků a vizuálně ověřený původní PNG, celkem 6563953 B; tři nové PNG mají shodný otisk. Provedena pouze inventarizace a handoff.
