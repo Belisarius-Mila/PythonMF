@@ -1,0 +1,34 @@
+{
+  "ok": true,
+  "head": "a445cb4338a88df4858e3d8a7ea524e73b3d57c2",
+  "count": 3,
+  "bytes": 156887,
+  "friends_parts": [
+    1,
+    2,
+    3,
+    4
+  ],
+  "school_own_portal": true,
+  "layout": "2x2",
+  "files": [
+    {
+      "path": "docs/index.html",
+      "status": 200,
+      "bytes": 7737,
+      "sha256": "8290dc388d798e90ec7b65f83884017341469ae3b901a3c71869e12b85bb6c1d"
+    },
+    {
+      "path": "docs/script_intro_v2.js",
+      "status": 200,
+      "bytes": 115943,
+      "sha256": "6bc9a4fe5b6915d5ef842d87757ea16fa2e819505d36ad20b9a81fd36d1dbb49"
+    },
+    {
+      "path": "docs/styles_intro_v2.css",
+      "status": 200,
+      "bytes": 33207,
+      "sha256": "e8f0704d79b5bd0af9fa608f1d4b2ac0bd58288edfdb5812510a6112b6d31596"
+    }
+  ]
+}

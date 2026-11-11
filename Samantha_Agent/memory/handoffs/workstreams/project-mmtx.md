@@ -1,6 +1,10 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
+- 2026-11-11 16:26 CET: Přátelé1–4 jsou publikované na Pages a445cb43, Lesní škola má vlastní ikonu. Terra job aad89ff92930ad5b96ddc677e44fb736 completed, push/deploy confirmed, plná brána3482 PASS / 531,1 s, Pages run43048031652 / deployment7714069369. Veřejné HTML/JS/CSS3/3 byte/SHA exact (156 887 B), čísla1–4, škola mimo nabídku a mřížka2×2 potvrzené. Místní Safari ověřilo čtyři čísla i samostatnou školu; produkční GUI po vydání nedostupné (cgWindowNotFound), fyzický iPhone nepřevzatý. Main/origin jsou aligned, main je čistý a nemá čekající commity; oba profily jsou čisté a aligned na a445cb43. Závěrečný Data zápis je místní, bez opakování p+n.
+
+- 2026-11-11 16:14 CET: Main bezpečně převzal hotové Přátele 1–4 z Data 07488254 nad čistým a s origin zarovnaným 8255ff9c. Lesní škola zůstává vlastní ikonou, rozložení Přátel2×2, dvě webové kopie shodné. Původní odhad pěti kapitol se nepublikuje. Připravené jediné autorizované Terra p+n: request data-mmtx-friends-four-07488254-20261111-v1, project-mmtx→GitHub Pages; aktuální zápis ještě nepotvrzuje předání/push/deployment.
+
 - 2026-11-11 16:13 CET: Míla upřesnil, že Přátelé mají přesně čtyři části a Lesní škola vlastní ikonu. Nabídka opravená na 1–4 v mřížce 2×2; páté tlačítko i jeho handler odstraněné, samostatná ikona Lesní školy zachovaná. Safari ověřilo čtyři čísla, zavření i vstup do Lesní školy přes její vlastní ikonu. 20 cílených testů a statická brána OK. Míla výslovně schválil commit a p+n Terrou; připravuje se přesný nový balíček, tento zápis publikaci ještě nepotvrzuje.
 
 - 2026-11-11 12:16 CET: Lokálně přidaná nabídka Přátelé 1–5: seznámení Benji/Bunny, počítání se sovou, rozhovor u sovy, barvy u terče, Lesní škola. Pět kapitol je pracovní rozdělení podle Mílova odhadu 1–5; upřesňující otázka k pětce/šesti obrazům dosud bez odpovědi. Tři fáze HouseBunny zůstávají uvnitř čtvrté kapitoly. Safari přes místní file URL skutečně otevřelo všech pět vstupů a návraty, Escape i opětovné otevření. 20 cílených testů a rychlá statická brána OK, oba mirrory shodné. Nové p+n nezadané, main a služby bez zásahu.
@@ -1364,3 +1368,27 @@ Další krok: Uložit opravu v Datově větvi, integrovat hotovou nabídku 1–4
 Navrhované další kroky: Mílovo veřejné proklikání po vydání.
 
 Technický důkaz: 20 cílených testů OK a rychlá statická brána OK. Skutečné místní Safari ukázalo čtyři tlačítka 2×2, křížek a funkční samostatnou ikonu Lesní školy. Předchozí přejímka 1–4 vstupů zůstává platná; mapping se nemění. HTML/JS/CSS mirrored, cache friends2, stávající testové reference aktualizované. Žádné nové audio, obrázky ani placené vývojové volání.
+
+### 2026-11-11 16:14 CET — Integrovaní čtyřdílní Přátelé před Terra p+n
+
+Hotovo: Main obsahuje finální nabídku Přátelé1–4 s přímými vstupy do všech čtyř částí a samostatnou ikonou Lesní školy. Data větev zůstává oddělená, nesouvisející main práce zachovaná.
+
+Rozhodnutí: Mílovo upřesnění čtyř částí je závazné. Výslovné p+n proběhne jednou přes submit_release(wait=True), request data-mmtx-friends-four-07488254-20261111-v1, cíl project-mmtx/Pages a centrální Terra6.1/high.
+
+Další krok: Dokončit main cílenou/statickou kontrolu, commit, zarovnání pouze čistých profilů a jedno předání přesného headu.
+
+Navrhované další kroky: Potvrdit konečnou účtenku a veřejné bajty HTML/JS/CSS, následně Mílovo proklikání.
+
+Technický důkaz: Data07488254, main před integrací8255ff9c čistý a origin aligned; předchozí p+n dokončené a neaktivní. Data20 cílených a statická brána OK, Safari1–4 / 2×2 i samostatná škola ověřené. Main20 cílených testů a rychlá statická brána OK; plnou publikační bránu vynutí worker. Žádné nové obrázky/audio ani další placené vývojové volání.
+
+### 2026-11-11 16:26 CET — Čtyři části Přátel publikované Terrou
+
+Hotovo: Tlačítko Přátelé na produkci nabízí pouze čtyři části1–4 v mřížce2×2. Lesní škola zůstává pod vlastní ikonou. Přímé vstupy, včetně rozhovoru po počítání, jsou součástí vydaného skriptu.
+
+Rozhodnutí: Mílovo upřesnění čtyř částí a schválené p+n splněné jednou registrovanou cestou submit_release(wait=True). Request data-mmtx-friends-four-07488254-20261111-v1, Data07488254 integrované do main a445cb43; žádné opakování vydání ani placené vývojové/audio/obrazové pokusy.
+
+Další krok: Mílovo proklikání veřejných Přátel1–4.
+
+Navrhované další kroky: Fyzická přejímka iPhonu zůstává otevřená.
+
+Technický důkaz: Job aad89ff92930ad5b96ddc677e44fb736 completed, push/deployment confirmed, Terra6.1/high, jeden commit do a445cb43. Gate3482 PASS / 531,1 s; Pages run43048031652 / deployment7714069369, HTTP200 a protected_services_unchanged=true. Nezávisle3/3 veřejných HTML/JS/CSS přesné (156 887 B), HTML čísla1–4 a samostatná škola, CSS2×2. Main20 cílených testů a statická brána OK. Místní Safari vizuálně ověřené před vydáním, produkční GUI poté nedostupné(cgWindowNotFound), nelze tvrdit produkční fyzický proklik. Native Adam převzal účtenku zde; returned_to_adam=false není důvod retry. Reporty mmtx_friends_selector_20261111.md, mmtx_friends_four_release_20261111.json a mmtx_friends_four_public_20261111.json.
