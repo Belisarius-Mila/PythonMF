@@ -1,0 +1,64 @@
+{
+  "main_head": "2106beadf0d10afdc53993c7f40a7868da9b34be",
+  "files": [
+    {
+      "path": "index.html",
+      "url": "https://belisarius-mila.github.io/PythonMF/index.html?verify=2106beadf0d1",
+      "http_status": 200,
+      "bytes": 8557,
+      "sha256": "0743dc5d8649ecb05f7a61dd7104be18a5b53500fe9f2e2f1af34af127608249",
+      "exact": true
+    },
+    {
+      "path": "script_intro_v2.js",
+      "url": "https://belisarius-mila.github.io/PythonMF/script_intro_v2.js?verify=2106beadf0d1",
+      "http_status": 200,
+      "bytes": 116987,
+      "sha256": "5fd0fb875fedf7c494dfdca032023118ebf87454019c2ca33159439b51bbdae4",
+      "exact": true
+    },
+    {
+      "path": "styles_intro_v2.css",
+      "url": "https://belisarius-mila.github.io/PythonMF/styles_intro_v2.css?verify=2106beadf0d1",
+      "http_status": 200,
+      "bytes": 34879,
+      "sha256": "16706f41dc9102dd439cef176f13d44a3c0599562c1dff91ec948f3cc6dcf64b",
+      "exact": true
+    },
+    {
+      "path": "friends_player.js",
+      "url": "https://belisarius-mila.github.io/PythonMF/friends_player.js?verify=2106beadf0d1",
+      "http_status": 200,
+      "bytes": 7592,
+      "sha256": "c6652d508a885d7adb71789fe5b7a742fae0cad2b0b8d2ed67d393987dd80297",
+      "exact": true
+    }
+  ],
+  "all_exact": true,
+  "total_bytes": 168015,
+  "verified_at": "2026-11-11T19:46:23.924919+00:00",
+  "outcome": "deployed_verified_independently",
+  "release_job_id": "ae8ee1749c0399f64e2941459ca4bda3",
+  "release_receipt_state": "attention",
+  "push_state": "confirmed",
+  "receipt_deployment_state": "uncertain",
+  "workflow": {
+    "conclusion": "success",
+    "databaseId": 43090037585,
+    "headSha": "2106beadf0d10afdc53993c7f40a7868da9b34be",
+    "status": "completed",
+    "url": "https://github.com/Belisarius-Mila/PythonMF/actions/runs/43090037585"
+  },
+  "deployment": {
+    "id": 7719962425,
+    "sha": "2106beadf0d10afdc53993c7f40a7868da9b34be",
+    "state": "success",
+    "environment_url": "https://belisarius-mila.github.io/PythonMF/",
+    "updated_at": "2026-11-11T19:45:38Z"
+  },
+  "republication_performed": false,
+  "main_origin_aligned": true,
+  "main_pending_commits": 0,
+  "profiles_aligned": true,
+  "physical_audio_iphone_acceptance": false
+}
