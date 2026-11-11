@@ -340,3 +340,16 @@ Další krok: Samostatně autorizované p+n; tato změna zatím není nasazená.
 Navrhované další kroky: Po vydání lidská přejímka skutečného názvu od architekta. Nový placený pilot ani nový TVBCP nebyly dohodnuté.
 
 Technický důkaz: 143 cílených Python/HTTP/frontend kontrol včetně30 Node scénářů PASS, po drobném sjednocení nadpisu po ručním uložení navíc38 frontend/HTTP kontrol PASS. Nově12 serverových kontraktů, 1 HTTP a2 Node regrese. Nativní Safari synteticky ověřilo nabídnutý název, ruční změnu bez dalšího chatu, dva uložené obrazy se shodným základním názvem a číslováním i oba názvy v galerii. Fake chat1/image2/paid0. Plná brána PASS: 3482 testů, 0 chyb, 31 SKIP, 496,6 s. Číslování probíhá při dokončení v transakci, včetně souběžných výstupů; recover používá původní schválený název a nepřidá variantu ani nový modelový tah. Staré deníky zachovají starý formát/názvy; JSON má samostatný title_protocol a nové striktní schéma. Skutečná data ani Data/MMTX se neměnily. Report reports/interior_proposal_titles_20261111.md, private důkazy data/private/interior_proposal_titles_20261111/. Kanonický handoff a projektová paměť aktualizované; TVBCP vazba pro budoucí Human–Adam zůstává otevřená.
+
+
+## 2026-11-11 15:25 CET — Závěrečné předání názvů Terře na p+n
+
+Hotovo: Popisné názvy nových AI návrhů jsou implementované v c7efd566 a ověřené místně: brána3482 PASS/31 SKIP, cílené143/30Node a syntetické Safari. Existující názvy/podklady zůstaly zachované.
+
+Rozhodnutí: Míla výslovně zadal „ukliď repo, všechny commity p+n Terra“. Celý připravený balíček včetně tohoto zápisu převezme jediný registrovaný submit_release pro project-neuberk-kacenka. Vykonavatel musí odpovídat centrální roli gpt-6.1-terra/high; role se nemění a jiný model se tiše nepoužije. Rozpracované větve, Data ani média se nemažou. Tento zápis vzniká před zmrazením balíčku; konečný provozní výsledek je mimo Git v přesné účtence. Po vydání kvůli výsledkovému zápisu nevznikne další čekající commit.
+
+Další krok: Po potvrzeném vydání obnovit Ateliér a při příštím běžném rozhovoru ověřit navržený název. Žádný skutečný placený test architekta není součástí p+n.
+
+Navrhované další kroky: Žádné nové; TVBCP bez nové dohody nevzniká.
+
+Technický důkaz: Stabilní request_id=interior-proposal-titles-final-pn-c7efd566-20261111-v1, job_id=7c39e3b6bc3779200de7a3355028d00f. Autorita skutečného push/nasazení: registrovaná soukromá účtenka tohoto job ID a data/private/interior_proposal_titles_20261111/release/receipt.json. Jednorázové závěrečné ověření je verification.json; čistota a zarovnání repa/profilů alignment.json. Při navázání načíst tuto konkrétní účtenku a použít registrovaný živý audit. Samotný tento předávací zápis nasazení nepotvrzuje. TVBCP vazba pro budoucí Human–Adam zůstává otevřená.
