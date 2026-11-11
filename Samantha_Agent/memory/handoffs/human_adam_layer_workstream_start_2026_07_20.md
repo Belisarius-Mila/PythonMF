@@ -1,20 +1,21 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
-## Aktuální stav — kalendář 3 hotový, placený hlasový pilot zrušen
+## Aktuální stav — oprava nástrojů Human–Adama, 2026-11-11
 
-- Míla schválil společné Terra p+n kalendářového afb7c9cf a Datova rušícího
-  b4b72ab0. Will integruje na main, Data zůstává ve vlastním worktree.
-- Bod 15/P2 je ukončen bez náhrady. Přesná globální brzda pro Datovo odstranění
-  byla potvrzená; 14 verzovaných souborů se přebírá, soukromé důkazy zůstávají.
-  Žádné další placené hlasové pokusy ani nasazování oprav E/F/G.
-- Běžné nahrávání pokynů, předčítání a Camino audio jsou zachované. Ostatních
-  pět rolí, Ateliér, kalendář 1/2 a hodinový e-mailový agent zůstávají zachované.
-- Cílená integrace 203 testů PASS; kalendář před integrací 2726 OK / 31 SKIP,
-  Data samostatně 2377 OK / 5 SKIP. Vydání vyžaduje plnou společnou bránu.
-- Autoritou výsledku nasazení jsou přesná účtenka a runtime logy
-  logs/calendar_draft_retirement_release_20261107.log a
-  logs/calendar_draft_retirement_verified_20261107.log. Tento zápis je před vydáním.
-- Další krok: ověřit nové UI a odstranění bývalého panelu/API. Skutečný e-mail,
-  fyzická Mac/iPhone přejímka a OS oprávnění EventKit zůstávají samostatné.
+- Pozorované selhání čtení způsobil Code Mode IPC (`result_buffered_for_ns`),
+  nikoli práva adresáře. Nainstalované CLI 0.167.0, připojený server 0.163.0.
+- Human–Adam má připravené přímé nástroje: per-thread features.code_mode=false
+  a features.code_mode_host=false při startu, reconnectu a výslovné rotaci.
+  Sandbox, síť, instrukce, model, historie i pravidla zápisu se nemění.
+- Živému nečinnému vláknu infrastruktury předané jen tyto dva přepínače;
+  shodná ostatní nastavení i session JSON, žádný nový thread/turn ani restart.
+  Čtecí command/exec potvrdil AGENTS.md v izolované i hlavní kopii.
+- Ověření: 89 cílených testů PASS; plná brána 3485 testů OK (31 SKIP). Důkazy mimo Git:
+  data/private/human_adam_tool_compat_20261111/.
+- Míla samostatně schválil navazující Terra p+n. Tento zápis je před vydáním;
+  autoritou jsou release_receipt.json a release_verification.json ve stejné
+  soukromé složce, job 444fe9352557c64a4082aed426d9dd0c. Modelová přejímka
+  čtení zůstává otevřená. Data, ostatní vlákna a globální config zachované.
+- Dříve zrušený placený hlasový pilot zůstává zrušený; ostatní audio beze změny.
 <!-- SAMANTHA_CURRENT_STATUS_END -->
 
 Nazev: Human–Adam / vyvojove prostredi - zalozeni pracovniho proudu Layer
@@ -3185,3 +3186,29 @@ určuje přesná účtenka a logs/calendar_draft_retirement_release_20261107.log
 Po dokončení ověřit 404 bývalého panelu/API, nové e-mailové UI a běžné audio.
 Fyzická Mac/iPhone přejímka nového kalendářového editoru a oprávnění aktuálního
 EventKit buildu zůstávají oddělené; bod 3 nevytváří kalendářové události.
+
+### 2026-11-11 19:19 CET — čtení souborů a kompatibilita nástrojů Human–Adama
+
+Hotovo: Zjištěna skutečná chyba nástrojového IPC místo předpokládaného zákazu
+složky. Připravené přímé nástroje pro běžný profil, Knihovnu i lazy proudy.
+V aktuálním nečinném vlákně infrastruktury server přijal oba přepínače;
+bezplatný command/exec ověřil čtení, původní nastavení i session JSON shodné.
+
+Rozhodnutí: Opravit nástroje uvnitř Human–Adama. Zachovat izolovaný vývoj,
+DEVELOPMENT_CONTROL, sandbox i společný server. Instalace/restart, změna modelu,
+rozšíření oprávnění ani opakování původního placeného požadavku nejsou součástí.
+Míla následně výslovně schválil Terra p+n této hotové opravy.
+
+Další krok: Vytvořit lokální commit a předat Terře schválené
+p+n přes registrovaný submit_release(wait=True). Přesná účtenka jobu
+444fe9352557c64a4082aed426d9dd0c a release_verification.json v soukromé složce
+jsou autoritou vydání; tento zdrojový zápis úspěch vydání nepředjímá.
+
+Navrhované další kroky: Po schváleném vydání ověřit čtení i po reconnectu.
+
+Technický důkaz: 89 cílených testů PASS; plná brána 3485 testů OK (31 SKIP). Lifecycle testy
+pokrývají zachování historie, nulový replay při reconnectu/rotaci, kopírování
+konfigurace a nezměněný sandbox. Soukromá účtenka a gate log jsou v
+`data/private/human_adam_tool_compat_20261111/`. Nula modelových tahů, žádný
+dosavadní push/deploy této opravy, změna globální konfigurace ani zásah do Data. Modelová přejímka
+přímých nástrojů zůstává otevřená; RPC čtení samo ji nenahrazuje.

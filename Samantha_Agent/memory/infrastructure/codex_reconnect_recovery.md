@@ -146,3 +146,24 @@ operace nad soubory.
 ## Bezpecnost
 
 Autosave v `data/session_autosave/` je nouzovy log a nesmi se commitovat.
+
+## 2026-11-11 19:19 CET — příkazy selhávají ještě před čtením souboru
+
+Chyba `failed to decode code-mode IPC frame: unknown field result_buffered_for_ns`
+není doklad chybějících souborových práv. Nejprve ověřit konkrétní poslední
+nástrojový výsledek, živý serverInfo.version (nejen codex --version) a neplacené
+čtení přes command/exec. Na serveru 0.163.0 při CLI 0.167.0 přímé čtení prošlo.
+
+HumanAdamService předává jen svým hubům config_overrides s vypnutým code_mode
+a code_mode_host. Hub je kopíruje při startu, resume i výslovné rotaci; jiné
+klienty ani globální config nemění. Tyto přepínače nepovolují přístup, zápis,
+síť, nový modelový tah ani retry. Při živé opravě nečinného vlákna se přesná
+nastavení před/po porovnají; historie a soukromá session zůstávají zachované.
+
+2026-11-11: lokální kód a živá mitigace původního vlákna jsou oddělené.
+Míla navazující Terra p+n samostatně schválil; konečný výsledek určuje přesná
+soukromá účtenka jobu 444fe9352557c64a4082aed426d9dd0c. Skutečné použití
+nástroje modelem musí potvrdit další uživatelský tah. Důkazy: kanonický handoff Human–Adam a
+`data/private/human_adam_tool_compat_20261111/`.
+
+Protokol per-thread config: [oficiální OpenAI dokumentace App Serveru](https://learn.chatgpt.com/docs/app-server).

@@ -59,6 +59,7 @@ class CanonicalSessionHub:
         approval_policy: str,
         reasoning_effort: str,
         model: str | None = None,
+        config_overrides: dict[str, Any] | None = None,
         delivery_recovery_reader: Callable[[str, str], TurnReceipt | None] | None = None,
     ):
         self.state_path = Path(state_path)
@@ -70,6 +71,7 @@ class CanonicalSessionHub:
         self.approval_policy = str(approval_policy).strip()
         self.reasoning_effort = str(reasoning_effort).strip()
         self.model = str(model).strip() if model else None
+        self.config_overrides = copy.deepcopy(config_overrides)
         self.delivery_recovery_reader = delivery_recovery_reader
         self._state_lock = threading.RLock()
         self._turn_lock = threading.Lock()
@@ -138,6 +140,12 @@ class CanonicalSessionHub:
                 return True
         return False
 
+    def _thread_config(self) -> dict[str, Any]:
+        # Copy for every lifecycle operation: clients must not mutate the policy
+        # used for the next reconnect or explicit rotation.
+        return ({"config_overrides": copy.deepcopy(self.config_overrides)}
+                if self.config_overrides is not None else {})
+
     def _new_client_locked(self) -> CodexAppServerClient:
         client: CodexAppServerClient | None = None
         try:
@@ -152,6 +160,7 @@ class CanonicalSessionHub:
                         sandbox=self.sandbox,
                         approval_policy=self.approval_policy,
                         model=self.model,
+                        **self._thread_config(),
                     )
                 except AppServerError:
                     if self._thread_message_count_locked(thread_id):
@@ -167,6 +176,7 @@ class CanonicalSessionHub:
                     sandbox=self.sandbox,
                     approval_policy=self.approval_policy,
                     model=self.model,
+                    **self._thread_config(),
                 )
                 self._state["thread_id"] = thread_id
                 self._state["thread_created_at"] = utc_now()
@@ -253,6 +263,7 @@ class CanonicalSessionHub:
                     sandbox=self.sandbox,
                     approval_policy=self.approval_policy,
                     model=self.model,
+                    **self._thread_config(),
                 )
                 if new_thread_id == current_thread_id:
                     raise SessionHubError("App-server při rotaci nevrátil nové vlákno.")

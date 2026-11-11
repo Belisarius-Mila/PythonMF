@@ -142,6 +142,45 @@ class CanonicalSessionHubTests(unittest.TestCase):
         self.assertEqual(FakeClient.instances[1].resumed_thread_id, "canonical-thread")
         self.assertEqual(resumed["connection_generation"], 2)
 
+    def test_thread_tool_config_survives_reconnect_and_rotation_without_replaying_turns(self) -> None:
+        FakeClient.next_thread_ids = ["first-thread", "second-thread"]
+        policy = {"features": {"code_mode": False, "code_mode_host": False}}
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            first = self.make_hub(root)
+            first.config_overrides = policy
+            first.send(text="Read one file", client_message_id="read-file-0001")
+            started = FakeClient.instances[-1]
+            self.assertEqual(started.started_kwargs["config_overrides"], policy)
+            # A consumer mutating one payload must not affect a later reconnect.
+            started.started_kwargs["config_overrides"]["features"]["code_mode_host"] = True
+            first.close()
+            second = self.make_hub(root)
+            second.config_overrides = policy
+            before = second.connect()
+            resumed = FakeClient.instances[-1]
+            self.assertEqual(resumed.resumed_thread_id, "first-thread")
+            self.assertEqual(resumed.resumed_kwargs["config_overrides"], policy)
+            self.assertEqual(resumed.sent, 0)
+            self.assertEqual(before["thread_message_count"], 1)
+            second.rotate_thread(expected_thread_id="first-thread")
+            rotated = FakeClient.instances[-1]
+            self.assertEqual(rotated.started_kwargs["config_overrides"], policy)
+            self.assertEqual(rotated.sent, 0)
+            for kwargs in [started.started_kwargs, resumed.resumed_kwargs, rotated.started_kwargs]:
+                self.assertEqual(kwargs["sandbox"], "read-only")
+                self.assertEqual(kwargs["approval_policy"], "never")
+                self.assertEqual(kwargs["developer_instructions"], "Canonical Adam")
+
+    def test_default_hub_does_not_override_tool_features(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            hub = self.make_hub(Path(directory))
+            hub.connect()
+            self.assertNotIn("config_overrides", FakeClient.instances[-1].started_kwargs)
+            hub.close()
+            hub.connect()
+            self.assertNotIn("config_overrides", FakeClient.instances[-1].resumed_kwargs)
+
     def test_completed_client_message_is_idempotent(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
             hub = self.make_hub(Path(temp_dir))

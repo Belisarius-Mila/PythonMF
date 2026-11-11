@@ -252,6 +252,8 @@ Tento soubor je rozcestnik dlouhodobe pameti pro Samantha Agent.
 
 - `reports/codex_appserver_p1b_20261104.md`; `handoffs/data_05_appserver_sdk_pilot_20261104.md` — 2026-11-05: Will po Mílově výslovném pokynu převzal oba Datovy commity jako 1b6fd61e/ccece787; původní klient modernizovaný, SDK stále offline. 192 cílených testů: 172 PASS, 20 volitelných SDK SKIP, živý handshake/katalog serveru 0.163.0 úspěšné. Plná společná brána 2462 testů: 2442 PASS, 20 SDK SKIP. Společné p+n b6375a33 potvrzené, smoke 5/5 a CI 41938993126 success. Kanonický proud layer-human-adam-development, aktuální nasazení ověřit živým auditem.
 
+- `infrastructure/codex_reconnect_recovery.md`; `handoffs/human_adam_layer_workstream_start_2026_07_20.md`; `tvbcp/architektura_komunikace_samantha.txt` — 2026-11-11: selhání čtení způsobilo Code Mode IPC, ne práva složky. Per-thread přímé nástroje připravené, 89 cílených + plná brána3485 OK/31 SKIP; živá mitigace bez restartu/nového tahu. Navazující Terra p+n výslovně schválené; výsledek dle soukromé účtenky444fe9352557c64a4082aed426d9dd0c. Modelová přejímka otevřená.
+
 - `handoffs/human_adam_layer_workstream_start_2026_07_20.md` - kanonický aktuální
   handoff Human–Adam. Dokončovací stav je autoritativně perzistentní,
   samoobnovitelný po restartu a potvrzený checkpoint synchronizuje handoff,

@@ -259,6 +259,26 @@ class HumanAdamServiceTests(unittest.TestCase):
 
         self.assertIsNotNone(detached.delivery_recovery_reader)
 
+    def test_human_and_lazy_hubs_use_direct_tools_without_widening_permissions(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            service, _runtime, _workspace, _hub = self.make_service(root)
+            hubs = [service.detached_session_hub(
+                state_path=root / f"{name}.json", developer_instructions="Test",
+                workspace=root / name,
+                sandbox_policy={"type": "workspaceWrite", "networkAccess": False,
+                                "writableRoots": [str(root / "owned-private")]},
+            ) for name in ("human", "lazy")]
+            for hub in hubs:
+                self.assertEqual(hub.config_overrides,
+                                 {"features": {"code_mode": False, "code_mode_host": False}})
+                self.assertEqual(hub.sandbox_policy["networkAccess"], False)
+                self.assertEqual(hub.sandbox_policy["writableRoots"], [str(root / "owned-private")])
+                self.assertEqual(hub.approval_policy, "never")
+                self.assertFalse(hub.state_path.exists())
+            hubs[0].config_overrides["features"]["code_mode_host"] = True
+            self.assertFalse(hubs[1].config_overrides["features"]["code_mode_host"])
+
     def test_status_exposes_preserved_checkpoint_without_claiming_it_is_auditable(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
             service, _runtime, workspace, _hub = self.make_service(Path(temp_dir))

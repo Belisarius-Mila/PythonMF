@@ -210,6 +210,10 @@ class HumanAdamService:
             ),
             approval_policy=HUMAN_ADAM_APPROVAL_POLICY,
             reasoning_effort=HUMAN_ADAM_REASONING_EFFORT,
+            # The shared 0.163 server cannot decode the code-mode host's newer
+            # result_buffered_for_ns envelope. Keep native tools available via
+            # direct calls, without changing sandbox, global config or daemon.
+            config_overrides={"features": {"code_mode": False, "code_mode_host": False}},
             delivery_recovery_reader=self._local_delivery_receipt,
         )
 
