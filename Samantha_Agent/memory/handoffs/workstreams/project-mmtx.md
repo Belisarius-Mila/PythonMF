@@ -1,6 +1,8 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
+- 2026-11-11 20:33 CET: Terra p+n první balíček d35e81a6 zastavilo v plné bráně3487 testů (1 FAIL: Node mimo servisní PATH). GitHub read-only stále f6770814, žádný push/deployment; starý job504e3635 uzavřený a neopakovat. Test opraven společným node_binary() s vynucením systémového PATH; nový přesný audit a request data-mmtx-friends-playback-44bfbb5f-20261111-v2 po kontrolách. Kód přehrávače/MP3 beze změny.
+
 - 2026-11-11 19:41 CET: Lokálně sjednocené ovládání Přátel1–4: CZ vypnuto / text / text+hlas, společné Next/Repeat a jedna replika v popředí. Příběhové dialogy a návody čekají na Next; hry počítání a barev zůstávají interaktivní a jejich hlášky respektují stejný režim. Sdílený přehrávač má ochranu pozdních callbacků, řeší chyby a návraty, souřadnice hotspotů zůstávají ve stejném poměru obrazu. 40 cílených testů a statická brána OK, plná místní brána 2991 OK (5 SKIP). Safari ukázalo ovládání v okně, EN1/9, český text a stav5/9; lidský poslech všech režimů/iPhone nepřevzatý. Žádné nové placené audio, původní MP3/obrázky beze změny. Nové p+n nezadané, main ani služby se nemění.
 
 - 2026-11-11 16:26 CET: Přátelé1–4 jsou publikované na Pages a445cb43, Lesní škola má vlastní ikonu. Terra job aad89ff92930ad5b96ddc677e44fb736 completed, push/deploy confirmed, plná brána3482 PASS / 531,1 s, Pages run43048031652 / deployment7714069369. Veřejné HTML/JS/CSS3/3 byte/SHA exact (156 887 B), čísla1–4, škola mimo nabídku a mřížka2×2 potvrzené. Místní Safari ověřilo čtyři čísla i samostatnou školu; produkční GUI po vydání nedostupné (cgWindowNotFound), fyzický iPhone nepřevzatý. Main/origin jsou aligned, main je čistý a nemá čekající commity; oba profily jsou čisté a aligned na a445cb43. Závěrečný Data zápis je místní, bez opakování p+n.
@@ -1406,3 +1408,15 @@ Další krok: Převzít Mílovo hodnocení místního ovládání a hlasů; př�
 Navrhované další kroky: Případné nové vydání až podle samostatného pokynu; fyzická iPhone přejímka samostatná.
 
 Technický důkaz: 40 cílených testů OK / 4,798 s a statická brána OK. Node provedl tři jazykové režimy, vypnutí CZ za řeči, chyby EN/CS, Repeat, stale callback, návrat, blokované localStorage, celý průchod všemi čtyřmi částmi, počítání a správnou/chybnou barvu. Ověřených 27 pevných existujících audio vazeb a jejich mirrory. Nové dva unittesty jsou přidané do plné brány. Safari screenshot1/9 ukázal celý obraz, EN a všechna tlačítka v okně; následně textový CZ režim a stav5/9. Plná místní brána 2991 OK (5 SKIP) / 618,242 s testů; poslední drobnou pojistku souběhu vítězné fanfáry a zachování původního slovníčku mimo Přátele znovu pokrývá finálních 40 cílených testů a statická brána.
+
+### 2026-11-11 20:33 CET — Oprava testu před novým přesným Terra p+n
+
+Hotovo: První účtenka 504e36351eba4bb2b6f6b53e90977f22 skončila attention / push_state=uncertain / deployment_state=not_started. Read-only git ls-remote potvrdilo GitHub f6770814, main d35e81a6 zůstal čistý a neodeslaný.
+
+Rozhodnutí: Plná servisní brána3487 testů /607,383 s měla právě jednu chybu: nový Friends test hledal Node jen v PATH služby. Používá nyní existující scripts.cockpit_quality_gate.node_binary() a sám vynucuje systémový PATH. Žádná instalace, restart, změna přehrávače ani vyřazení testu. Původní job/účtenka se neopakuje; po opravě a přesném novém auditu bude nové předání se suffixem v2 v již schváleném rozsahu p+n.
+
+Další krok: Dokončit cílenou kontrolu se servisním PATH a statickou bránu, uložit opravu, zarovnat čisté profily a předat nový přesný balíček jednou přes submit_release(wait=True).
+
+Navrhované další kroky: Po nové konečné účtence ověřit GitHub/Pages a veřejné bajty; fyzická hlasová a iPhone přejímka samostatně.
+
+Technický důkaz: Po opravě 40 cílených testů se systémovým PATH OK /5,417 s, Data2/2 OK /0,366 s, obě statické brány OK. Původní soukromý gate log zachovaný; veřejná bezpečná účtenka v mmtx_friends_playback_release_attempt1_20261111.json. MMTX zdroje a původní MP3/obrázky se opravou testu nemění.

@@ -28,3 +28,15 @@ Skutečné místní Safari ukázalo první repliku1/9 v EN-only režimu a potom 
 Plná místní brána: 2991 testů OK (5 SKIP), testy 618,242 s / jednotkový krok 624,1 s. Po zahájení této brány byla doplněna izolovaná pojistka Repeat/jazykového přepínače během vítězné fanfáry a zachován původní slovníček Cesty k jezeru; po těchto drobnostech znovu prošlo všech 40 cílených testů a rychlá statická brána. Všechny čtyři webové soubory (HTML, hlavní JS, nový player, CSS) mají bajtově shodný mirror. Původní obrázky a audio beze změny.
 
 Změna zůstává pouze v Datově worktree data/parallel-20261104. Main a služby nedotčené, nové p+n nezadané. Další krok po místním checkpointu: Mílova přejímka ovládání/hlasů a případná samostatně schválená publikace.
+
+## Servisní brána a oprava testu
+
+První účtenka 504e36351eba4bb2b6f6b53e90977f22 skončila attention / push_state=uncertain / deployment_state=not_started. Read-only git ls-remote potvrdilo GitHub f6770814, main d35e81a6 zůstal čistý a neodeslaný.
+
+Rozhodnutí: Plná servisní brána3487 testů /607,383 s měla právě jednu chybu: nový Friends test hledal Node jen v PATH služby. Používá nyní existující scripts.cockpit_quality_gate.node_binary() a sám vynucuje systémový PATH. Žádná instalace, restart, změna přehrávače ani vyřazení testu. Původní job/účtenka se neopakuje; po opravě a přesném novém auditu bude nové předání se suffixem v2 v již schváleném rozsahu p+n.
+
+Další krok: Dokončit cílenou kontrolu se servisním PATH a statickou bránu, uložit opravu, zarovnat čisté profily a předat nový přesný balíček jednou přes submit_release(wait=True).
+
+Navrhované další kroky: Po nové konečné účtence ověřit GitHub/Pages a veřejné bajty; fyzická hlasová a iPhone přejímka samostatně.
+
+Technický důkaz: Po opravě 40 cílených testů se systémovým PATH OK /5,417 s, Data2/2 OK /0,366 s, obě statické brány OK. Původní soukromý gate log zachovaný; veřejná bezpečná účtenka v mmtx_friends_playback_release_attempt1_20261111.json. MMTX zdroje a původní MP3/obrázky se opravou testu nemění.

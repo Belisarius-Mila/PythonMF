@@ -1,9 +1,12 @@
 from __future__ import annotations
 
-import shutil
+import os
 import subprocess
 import unittest
 from pathlib import Path
+from unittest import mock
+
+from scripts.cockpit_quality_gate import node_binary
 
 ROOT = Path(__file__).resolve().parents[2]
 DOCS = ROOT / "docs"
@@ -12,9 +15,9 @@ MIRROR = ROOT / "MatysekANJ" / "web_mmtx"
 
 class MmtxFriendsControlsTests(unittest.TestCase):
     def test_sentence_player_modes_cancellation_and_full_game_flow(self):
-        node = shutil.which("node")
-        if node is None:
-            self.fail("Node is required for the Friends playback regression.")
+        # Exercise the same restricted PATH as the release service.
+        with mock.patch.dict(os.environ, {"PATH": "/usr/bin:/bin:/usr/sbin:/sbin"}):
+            node = node_binary()
         result = subprocess.run(
             [node, str(Path(__file__).with_name("mmtx_friends_controls.js"))],
             capture_output=True, text=True, timeout=30, check=False,

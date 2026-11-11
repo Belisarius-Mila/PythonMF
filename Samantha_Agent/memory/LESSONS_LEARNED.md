@@ -1541,6 +1541,7 @@ Doplnění 17102026 k LL-071: Nativní modelový pomocník navíc zdvojuje roli,
 - Řešení: testovat skutečnou sekci s dlouhým textem, místní chybou a následným kliknutím, uložením, reloadem a přesunem fotografie. Textová karta mezi obrazy není vrstva přes fotografii. Čtení musí zachovat celý zvolený text a mít změřenou délku; chatový TTS helper s krácením pro film nepoužívat. Ověřeno syntetickým 3022znakovým vstupem, skutečnými MP4 a místním TTS.
 
 - Doplnění LL-080 (24. 10.): Node test spouštěný z Pythonu musí použít společný `scripts.cockpit_quality_gate.node_binary()`, ne mediální `binary("node")`. Regrese sama vynucuje `/usr/bin:/bin:/usr/sbin:/sbin`; terminálový PATH přítomnost Node ve službě neprokazuje.
+- Doplnění LL-080 (11. 11., Přátelé): také nová MMTX JS regrese používá tento resolver a systémový PATH. Samotné shutil.which("node") v nové povinné kontrole zastavilo servisní bránu3487; opravovat dohledání, ne skipovat test ani měnit službu.
 
 
 - Doplnění LL-080 (27. 10., Orus): cloudový limit ověřuj v UTF-8 bajtech, cenu v Unicode znacích; celý text a mezery musí po spojení částí souhlasit. Souhlas navazuj na přesný uložený text, hlas, tempo a cenu, při editaci jej zruš a před každým přenosem znovu ověř povolení. Nejasný placený požadavek nikdy automaticky neopakuj; zvolených 90 % tempa ověř místním atempo a skutečnou délkou. Ověřeno 6000 emoji, full decode, HTTP/DOM regresí; camino_orus_integration_20261027.md.
