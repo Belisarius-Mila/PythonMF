@@ -245,3 +245,14 @@ intervalu; zapisují pouze soukromý náhled/potvrzení. Bez modelu a kalendář
 zápisu. Revize, zdroj, cíl, upozornění, čerstvé kolize a platnost 5 minut jsou
 svázané; změna vyžaduje nový lidský souhlas. Samotné potvrzení není zápisem
 události ani oprávněním přeskočit kontroly v budoucím bodu 5.
+
+## 2026-11-11 21:41 CET — ruční evidence hlídaných e-mailových záležitostí
+
+Registrované schopnosti email_followups_read a email_followups_write používají
+app.email.followups.EmailFollowups.overview/execute. Cockpit má GET/POST
+/api/email-agent/followups a evidovanou private_write akci s výslovným uložením
+nebo přepnutím lifecycle. Kořen úložiště vlastní server; payload ho neurčuje.
+Příkaz vyžaduje stabilní operation_id a pro změnu očekávanou revizi. Replay
+kontroluje totožný otisk a vrací aktuální revizi. Jen ruční metadata a historie;
+žádný IMAP, model, monitor, send či kalendářový zápis. API hlásí automatické
+monitorování jako nepřipojené. Nasazení/aktivace v této etapě nebyly provedené.

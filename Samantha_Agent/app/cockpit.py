@@ -61,6 +61,9 @@ from app.cockpit_email_agent import (
     email_agent_remember_visibility_action, email_agent_forget_visibility_action,
     email_agent_pushcut_configure_action, email_agent_pushcut_test_action,
 )
+from app.cockpit_email_followups import (
+    email_followups_action, email_followups_overview, email_followups_http_status,
+)
 from app.cockpit_awake_mode import (
     cockpit_awake_mode_action,
     cockpit_awake_mode_status_action,
@@ -8725,6 +8728,9 @@ COCKPIT_POST_ACTIONS: tuple[dict[str, str], ...] = (
     {"path": "/api/email-agent/edit", "label": "Uložit upravený koncept odpovědi",
      "risk": "private_write", "confirmation": "explicit_save_draft_button",
      "handler_name": "email_agent_edit_action", "test_level": "direct"},
+    {"path": "/api/email-agent/followups", "label": "Uložit nebo změnit ruční hlídání záležitosti",
+     "risk": "private_write", "confirmation": "explicit_followup_save_or_lifecycle_button",
+     "handler_name": "email_followups_action", "test_level": "direct"},
     {"path": "/api/email-agent/archive", "label": "Uložit e-mail podle potvrzeného návrhu agenta",
      "risk": "private_write", "confirmation": "confirmed_current_proposal_digest",
      "handler_name": "email_agent_archive_action", "test_level": "direct"},
@@ -9873,6 +9879,14 @@ class CockpitServer:
                 if parsed.path == "/api/email-agent/overview":
                     self.respond_json(email_agent_overview())
                     return
+                if parsed.path == "/api/email-agent/followups":
+                    params = parse_qs(parsed.query, keep_blank_values=True)
+                    if set(params) - {"id"} or any(len(v) != 1 for v in params.values()):
+                        result = {"ok": False, "error": "invalid_request", "message": "Vyber jednu záležitost."}
+                    else:
+                        result = email_followups_overview({k: v[0] for k, v in params.items()})
+                    self.respond_json(result, status=email_followups_http_status(result))
+                    return
                 if email_archive_read_routes.dispatch(parsed=parsed, responder=self):
                     return
                 if parsed.path == "/janicka-kucharka/":
@@ -10196,6 +10210,11 @@ class CockpitServer:
                     return
                 if parsed.path == "/api/email-agent/edit":
                     self.respond_json(email_agent_edit_action(self.read_json()))
+                    return
+                if parsed.path == "/api/email-agent/followups":
+                    result = email_followups_action(self.read_json()) if not parsed.query else {
+                        "ok": False, "error": "invalid_request", "message": "Neplatný požadavek hlídání."}
+                    self.respond_json(result, status=email_followups_http_status(result))
                     return
                 if parsed.path == "/api/email-agent/archive":
                     self.respond_json(email_agent_archive_action(self.read_json()))

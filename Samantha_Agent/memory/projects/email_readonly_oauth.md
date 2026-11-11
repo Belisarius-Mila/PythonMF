@@ -1,5 +1,20 @@
 # E-mail read-only OAuth integrace
 
+## Hlídání záležitostí — lokální etapa 1, 2026-11-11
+
+Hlídání záležitostí — etapa 1 je lokálně implementovaná jako ruční backend.
+Založení, čtení/detail, úprava, Hlídání/Vyřízeno a obnovení používají stejnou
+identitu, revize, generaci a trvalou doménovou účtenku. Žádný automatický monitor
+ani UI nejsou připojené; API výslovně vrací automatic_monitoring=false.
+Zdrojové karty, kurzory, přílohy, modelové role a běžící služba zachované.
+Ověření: 22 doménových + 5 HTTP scénářů; cílené běhy 89/51/54 testů PASS.
+Plná povinná brána: 3514 testů OK (31 SKIP), 504,079 s. Důkazy mimo Git: data/private/email_followups_step1_20261111/.
+Další krok: etapa 2 — formulář, přepínač a přehled nad tímto kontraktem.
+Dokumentační blokátor uzavření celého proudu: samostatný e-mailový TVBCP není
+výslovně dohodnutý. Nevznikl nový ani náhradní obecný TVBCP. P+n této etapy
+ani aktivace sledování nebyly zadány. Datův worktree zůstává nedotčený.
+
+
 - 2026-11-09 20:46 CET: Lokálně doplněné Splněno a Editovat v kalendáři i úvodní agendě. Splnění pouze skryje konkrétní položku v Cockpitu, kalendář a kolize se nemění. Editace mění název/datum/čas původního výskytu, ostatní údaje zachová. Python/HTTP/JS a nativní in-memory scénáře PASS; nový izolovaný podepsaný helper má 7 self-test kontrol. Mobilní headless Edge 390×844: náhled, Zrušit/znovu otevřít, editace a skrytí PASS. Plná brána 3320 testů OK (31 SKIP). Bez p+n, OS grantu a skutečné kalendářové mutace; další krok autorizovat p+n a jednou povolit úpravy na Macu. Report reports/calendar_complete_edit_20261109.md.
 
 

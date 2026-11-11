@@ -1,5 +1,7 @@
 # Memory Index
 
+- `handoffs/continuous_personal_agent_2026_11_04.md`; `projects/email_readonly_oauth.md` — 2026-11-11: lokální první etapa hlídání, trvalý ruční lifecycle + GET/POST followups. 22 doménových/5 HTTP a související regrese PASS, plná brána3514 OK/31 SKIP. UI a automatický monitor nepřipojené; další etapa formulář/přepínač. Samostatný TVBCP není dohodnutý — viditelný blokátor uzavření proudu, nový nevzniká. Bez p+n/aktivace; důkazy data/private/email_followups_step1_20261111/.
+
 - `reports/calendar_edit_alarm_order_recovery_20261110.md`; `reports/email_science_role_upgrade_20261110.md` — původní kalendářová úprava read-only ověřená; stejné alarmy v jiném pořadí už neblokují další změny. 87 cílených/native/mobile fixture PASS, plná brána PASS: 3406 testů / 31 SKIP. Potvrzený poštovní upgrade617f3e0d→8c83e93b zachoval95 položek/businessdigest, nový science binding načten skutečným parserem; zadané společné p+n navazuje.
 
 - `reports/science_news_aad367c7_integration_20261110.md` — izolované převzetí nového Datova commitu a ochrany českého save; 134 cílených PASS. Nová role by zastavila skutečnou hodinovou 617f3e0d; před main/p+n nutný řízený upgrade na vydaný 8c83e93b s přesnou globální brzdou. Živá pošta ani role zatím nezměněné.

@@ -94,6 +94,20 @@ CAPABILITIES: tuple[CapabilityRecord, ...] = (
         notes="Explicit review/confirm button. Local calendar read, no model or event write. Exact revision, target, alerts, five-minute expiry and re-read conflict digest; changed conflicts require fresh human acceptance.",
     ) for action in ("review", "confirm")),
     CapabilityRecord(
+        capability_id="email_followups_read", label="Read manually tracked email matters",
+        risk=RiskLevel.READ_ONLY, reads=("private follow-up metadata and manual history",), writes=(),
+        tool="app.email.followups.EmailFollowups.overview", audit=AuditPolicy.REDACTED,
+        notes="No IMAP, model or monitor. Returns automatic_monitoring=false for the manual foundation.",
+    ),
+    CapabilityRecord(
+        capability_id="email_followups_write", label="Create or update one manually tracked email matter",
+        risk=RiskLevel.LOCAL_WRITE, reads=("selected assessed email identity and expected follow-up revision",),
+        writes=("private follow-up lifecycle, history and durable operation receipt",),
+        tool="app.email.followups.EmailFollowups.execute", requires_confirmation=True,
+        confirmation_policy=ConfirmationPolicy.SUMMARY_BEFORE_ACTION, audit=AuditPolicy.REDACTED,
+        notes="Explicit save/lifecycle action with fixed payload, operation ID and revision. No mailbox change, send, model, calendar or automatic monitoring.",
+    ),
+    CapabilityRecord(
         capability_id="email_calendar_draft_status", label="Read a selected email's calendar draft",
         risk=RiskLevel.READ_ONLY, reads=("selected private draft and original request status",), writes=(),
         tool="app.email.calendar_draft.CalendarDraftService.status", audit=AuditPolicy.REDACTED,

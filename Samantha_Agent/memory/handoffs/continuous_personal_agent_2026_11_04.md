@@ -1,5 +1,20 @@
 # Průběžný osobní agent — e-mailový provoz a Pushcut
 
+## Aktuální vývoj hlídání — 2026-11-11
+
+Hlídání záležitostí — etapa 1 je lokálně implementovaná jako ruční backend.
+Založení, čtení/detail, úprava, Hlídání/Vyřízeno a obnovení používají stejnou
+identitu, revize, generaci a trvalou doménovou účtenku. Žádný automatický monitor
+ani UI nejsou připojené; API výslovně vrací automatic_monitoring=false.
+Zdrojové karty, kurzory, přílohy, modelové role a běžící služba zachované.
+Ověření: 22 doménových + 5 HTTP scénářů; cílené běhy 89/51/54 testů PASS.
+Plná povinná brána: 3514 testů OK (31 SKIP), 504,079 s. Důkazy mimo Git: data/private/email_followups_step1_20261111/.
+Další krok: etapa 2 — formulář, přepínač a přehled nad tímto kontraktem.
+Dokumentační blokátor uzavření celého proudu: samostatný e-mailový TVBCP není
+výslovně dohodnutý. Nevznikl nový ani náhradní obecný TVBCP. P+n této etapy
+ani aktivace sledování nebyly zadány. Datův worktree zůstává nedotčený.
+
+
 - 2026-11-09 14:03 CET: Lokálně propojený Archiv s potvrzenými archivacemi hodinového agenta. Společný seznam/hledání, detail, text, originál a vložené PDF fungují bez přesunu nebo přepisu uložených zpráv. Původní odkazy stabilní; agent má oddělené reference, nejednoznačná ID a úniky přes symlinky se odmítají. 30 cílených testů PASS; plná brána 3296 testů OK (31 SKIP). Skutečné uložené vyúčtování nalezené, PDF čitelné, souborové otisky před/po shodné. Bez p+n; další krok samostatně schválit nasazení a ověřit Archiv na Macu/iPhonu. Report reports/email_archive_bridge_20261109.md.
 
 
@@ -1311,3 +1326,52 @@ přímá přejímka Mílova prohlížeče nebyla dostupná.
   již schválený příjem čekající pošty, ne opakování nejistého starého pokusu.
 - První health completed, chybové posouzení0, zdrojové pozice posunuté;
   všechny původní položky shodné. Fyzická Mac/iPhone přejímka nepředstíraná.
+
+## 2026-11-11 21:41 CET — Hlídání záležitostí, první implementační krok
+
+### Hotovo
+Hlídání záležitostí — etapa 1 je lokálně implementovaná jako ruční backend.
+Založení, čtení/detail, úprava, Hlídání/Vyřízeno a obnovení používají stejnou
+identitu, revize, generaci a trvalou doménovou účtenku. Žádný automatický monitor
+ani UI nejsou připojené; API výslovně vrací automatic_monitoring=false.
+Zdrojové karty, kurzory, přílohy, modelové role a běžící služba zachované.
+Ověření: 22 doménových + 5 HTTP scénářů; cílené běhy 89/51/54 testů PASS.
+Plná povinná brána: 3514 testů OK (31 SKIP), 504,079 s. Důkazy mimo Git: data/private/email_followups_step1_20261111/.
+Další krok: etapa 2 — formulář, přepínač a přehled nad tímto kontraktem.
+Dokumentační blokátor uzavření celého proudu: samostatný e-mailový TVBCP není
+výslovně dohodnutý. Nevznikl nový ani náhradní obecný TVBCP. P+n této etapy
+ani aktivace sledování nebyly zadány. Datův worktree zůstává nedotčený.
+
+### Rozhodnutí
+Míla schválil zahájení prvního kroku podle návrhu v Downloads
+Samantha_hlidani_zalezitosti_navrh_vyvoje_2026-11-11.txt. Jde o doménu a HTTP,
+bez rozšíření na následující UI, IMAP vazby či automatické kontroly. Vývoj dělá
+Will v izolované větvi nad2106bead; není spuštěná Luna ani placený pilot.
+
+### Kontrakt pro návazné UI
+- GET /api/email-agent/followups vrací active/completed; volitelné jediné id
+  vrátí detail. GET nevytváří úložiště a neposílá modelový požadavek.
+- POST na stejnou cestu má action=create/update/set_state a stabilní operation_id.
+- create: source_item_id a fields s title, goal, next_step, waiting_on, check_at.
+  Zdroj se bere z uložené důležité karty, nikoli z klientem dodané cesty či těla.
+- update: id, expected_revision a úplné fields. waiting_on je me/other/review/unknown.
+- set_state: id, expected_revision, state=active/completed; při obnovení lze
+  dodat nový check_at. Propadlý čas vyžaduje nový budoucí čas, bez tichého posunu.
+- Časy vyžadují pásmo a ukládají se v UTC. Chybějící follow-up znamená nesledováno.
+- API kódy: 400 neplatné údaje, 404 neznámý zdroj/záležitost, 409 konflikt,
+  503 nedostupné/poškozené úložiště. Změny zachovávají originální e-mailový stav.
+- Každá odpověď obsahuje monitoring=not_connected; frontend zatím nesmí slibovat,
+  že automatické hlídání běží. Žádný nový model, IMAP, send ani kalendářový zápis.
+
+### Ověření a rizika
+Testy ověřily dvojklik, dvě instance, restart, souběžné editace, starou revizi,
+ztracenou odpověď, poškozený/novější formát, neplatné časy, CSRF, zachování
+při archivaci/skrytí a retry i po vyřazení obecné cache operation_id.
+Doménový journal ověřuje otisk celého příkazu a při replay vrací aktuální stav,
+nikoli starou projekci. Hlavičkové párování vlákna je teprve etapa 3;
+source.thread_binding=pending není důkaz souvislosti s další zprávou.
+
+### Další krok
+Navázat etapou 2 podle dohodnutého návrhu; přesný lokální commit a zarovnání
+profilů doloží integration.json v uvedené soukromé složce; veřejné vydání a servisní aktivace jsou samostatné.
+Samostatný TVBCP zůstává výslovně označený dokumentační blokátor uzavření proudu.

@@ -2110,3 +2110,12 @@ prostředí PASS, produkční kód beze změny.
 - Kontext: ruční krokování čtyř částí Přátel používá async dialogy i interaktivní hry.
 - Řešení: oddělit dokončení zvuku od potvrzení Next, tokenovat všechny Audio/TTS callbacky a při návratu vyřešit pending čekání jako false. Pokračující dialog/herní handler musí kontrolovat také sequenceId, nejen stejné jméno scény. Vypnutí českého čtení dokončí pouze již úspěšně vyslovenou angličtinu; EN chyba zůstává chybou.
 - Ověření: Node test prošel návrat za řeči, stale callback, přepínání jazyků, chyby a Repeat i celý příběh s herními úkoly. 40 cílených testů a statická brána OK.
+
+
+### LL-123 — Trvalá idempotence domény nesmí záviset na krátké obecné cache
+
+- Problém: obecná repository cache posledních operation_id se ořezává; dlouhodobá záležitost nesmí po jejím vyřazení přijmout stejný požadavek jako novou akci ani vrátit starší stav.
+- Typ: opakující se
+- Řešení nalezeno: 11112026
+- Řešení: v doménové transakci držet malé trvalé operation_id + otisk celého normalizovaného příkazu + identitu/revizi výsledku. Před opakováním ověřit otisk; vrátit aktuální projekci a revizi původní operace. Nová změna dál kontroluje expected_revision. Uzavření/obnovení mění generaci pro pozdní výsledky; úložiště ani nejistý požadavek neopravovat založením druhé identity.
+- Ověření: syntetické hlídání přestálo restart, dvojklik, dvě souběžné instance, konflikt revizí, chybu atomického zápisu i vyřazení 258 obecných idempotentních operací; žádný živý model nebo e-mailový úkon.
