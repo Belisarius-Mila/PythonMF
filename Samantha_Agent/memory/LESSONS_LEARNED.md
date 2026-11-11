@@ -2103,3 +2103,9 @@ prostředí PASS, produkční kód beze změny.
 - Kontext: Přátelé obsahují několik ilustrací jedné hry a samostatný rozhovor uvnitř owlGarden.
 - Řešení: čísla mapovat na skutečné kapitoly a jejich vstupní fáze; při přímém vstupu do rozhovoru zachovat cleanup, nový sequenceId, reset a původní dialog/pokračování. Samotné přepsání src nespustí odpovídající dialog ani interakci. Více animačních fází terče nečíslovat jako samostatné hry bez výslovné dohody.
 - Ověření: skutečné místní Safari prokliklo všech pět vstupů, odpovídající obrazy, návraty a Escape; 20 cílených testů a statická brána OK. Původní pracovní předpoklad pětky Míla následně opravil: Přátelé jsou čtyři části, Lesní škola má vlastní ikonu. Nabídka 1–4 / 2×2 a samostatná ikona ověřené v Safari, 20 cílených testů a statická brána OK.
+
+### 2026-11-11 — Zrušená replika nesmí uvolnit čekající Next jako úspěch
+
+- Kontext: ruční krokování čtyř částí Přátel používá async dialogy i interaktivní hry.
+- Řešení: oddělit dokončení zvuku od potvrzení Next, tokenovat všechny Audio/TTS callbacky a při návratu vyřešit pending čekání jako false. Pokračující dialog/herní handler musí kontrolovat také sequenceId, nejen stejné jméno scény. Vypnutí českého čtení dokončí pouze již úspěšně vyslovenou angličtinu; EN chyba zůstává chybou.
+- Ověření: Node test prošel návrat za řeči, stale callback, přepínání jazyků, chyby a Repeat i celý příběh s herními úkoly. 40 cílených testů a statická brána OK.

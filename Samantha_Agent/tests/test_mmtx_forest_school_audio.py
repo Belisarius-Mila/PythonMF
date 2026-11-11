@@ -37,7 +37,7 @@ class MmtxForestSchoolAudioTests(unittest.TestCase):
         script = (DOCS_ROOT / "script_intro_v2.js").read_text(encoding="utf-8")
 
         self.assertIn('forest_school_audio_manifest.js?v=20260830fixed1', html)
-        self.assertIn('script_intro_v2.js?v=20261111friends2', html)
+        self.assertIn('script_intro_v2.js?v=20261111controls1', html)
         self.assertLess(html.index("forest_school_audio_manifest.js"), html.index("script_intro_v2.js"))
         self.assertIn("window.FOREST_SCHOOL_AUDIO_MANIFEST", script)
         self.assertIn("function forestSchoolAudioSource", script)

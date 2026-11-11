@@ -591,6 +591,52 @@ const houseBunnyIntroAudio = [
   "audio/czech/house_bunny_02_intro_excellent_try_again_cz.mp3?v=20260527tryagain",
 ];
 
+const friendsPlayer = new window.MMTXFriendsPlayer({
+  panel: document.getElementById("friendsPlayer"), language: document.getElementById("friendsLanguage"),
+  repeat: document.getElementById("friendsRepeat"), next: document.getElementById("friendsNext"),
+  speaker: document.getElementById("friendsSpeaker"), text: document.getElementById("friendsText"),
+  czech: document.getElementById("friendsCzech"), count: document.getElementById("friendsCount"),
+  status: document.getElementById("friendsStatus"),
+});
+friendsPlayer.onChange = syncFriendsControls;
+const friendsBenjiCzech = ["Ahoj.", "Ahoj.", "Já jsem Benji.", "Já jsem Bunny.", "Můžeme být kamarádi.", "Ano, můžeme.", "Kam půjdeme?", "Půjdeme ke mně domů. Platí?", "Platí. Jdeme."];
+const friendsOwlIntro = [
+  {speaker:"Owl", textEn:"Hello Benji and Bunny.", textCz:"Ahoj Benji a Bunny.", audioCz:"audio/czech/owl_garden_01_owl_hello_benji_bunny_cz.mp3?v=20260527czvoice", preferredVoiceName:"ash"},
+  {speaker:"Owl", textEn:"I have presents for you.", textCz:"Mám pro vás dárečky.", audioCz:"audio/czech/owl_garden_02_owl_i_have_presents_cz.mp3?v=20260527czvoice", preferredVoiceName:"ash"},
+  {speaker:"Owl", textEn:"Count purple apples, yellow sunflowers and pink pigs in my garden.", textCz:"Počítej v mojí zahradě fialová jablka, žluté slunečnice a růžová prasátka.", audioCz:"audio/czech/owl_garden_03_owl_count_apples_sunflowers_pigs_cz.mp3?v=20260527czvoice", preferredVoiceName:"ash"},
+];
+const friendsHouseIntro = [
+  {speaker:"Bunny", textEn:"Now we will practise colours. Listen to the English word and click the correct colour.", textCz:"Teď budeme trénovat barvy. Poslouchej anglické slovo a klikni na správnou barvu.", audioCz:houseBunnyIntroAudio[0]},
+  {speaker:"Bunny", textEn:"When you choose the correct colour, you will hear Excellent. If you make a mistake, you will hear Try again.", textCz:"Když trefíš správnou barvu, uslyšíš Excellent. Když se spleteš, uslyšíš Try again.", audioCz:houseBunnyIntroAudio[1]},
+];
+const friendsColourCzech = {yellow:"žlutá",red:"červená",white:"bílá",blue:"modrá",grey:"šedá",purple:"fialová",brown:"hnědá",orange:"oranžová",pink:"růžová",green:"zelená",black:"černá"};
+function syncFriendsControls() {
+  if (!friendsPlayer.active) return;
+  for (const panel of [dialoguePanel, owlGardenOverlay]) panel.querySelectorAll("button").forEach(button => { button.disabled = friendsPlayer.locked; });
+  for (const button of [dialogueHelpButton, dialogueDoorButton, owlGardenHelpButton, owlGardenDoorButton, owlGardenThumbButton]) button.disabled = friendsPlayer.locked;
+  for (const panel of [dialoguePanel, owlGardenOverlay]) panel.querySelectorAll(".clearing-dictionary-item").forEach(button => {
+    if (button.dataset.en) { button.textContent = friendsPlayer.mode ? `${button.dataset.en} — ${button.dataset.cz}` : button.dataset.en; }
+  });
+}
+function friendsRestoreAction() {
+  if (state.currentScene === "benjiBunny" && state.dialoguePhase === "practice") friendsPlayer.setAction("Next picture ▶", () => setScene("owlGarden"));
+  else if (state.currentScene === "owlGarden" && state.owlGardenPhase === "review") friendsPlayer.setAction("Next picture ▶", () => continueFromOwlGardenReview());
+}
+async function friendsSequence(lines, sceneName, sequenceId, lastLabel = "Next ▶") {
+  for (let index = 0; index < lines.length; index += 1) {
+    if (!isSceneActive(sceneName, sequenceId)) return false;
+    const ok = await friendsPlayer.present(lines[index], {count:`${index + 1} / ${lines.length}`, nextLabel:index === lines.length - 1 ? lastLabel : "Next ▶"});
+    if (!ok || !isSceneActive(sceneName, sequenceId)) return false;
+  }
+  return true;
+}
+function friendsOwlLine(group, number) {
+  const words = {1:"jedna",2:"dvě",3:"tři",4:"čtyři",5:"pět",6:"šest",7:"sedm",8:"osm"};
+  const forms = {apples:["jedno fialové jablko", "fialová jablka", "fialových jablek"], sunflowers:["jedna žlutá slunečnice", "žluté slunečnice", "žlutých slunečnic"], pigs:["jedno růžové prasátko", "růžová prasátka", "růžových prasátek"]};
+  const f = forms[group.id];
+  return {speaker:"Owl", textEn:owlGardenPhrase(group, number), textCz:number === 1 ? f[0] : `${words[number]} ${f[number < 5 ? 1 : 2]}`, preferredVoiceName:"ash"};
+}
+
 function clearSceneTimers() {
   state.timeouts.forEach((timeoutId) => window.clearTimeout(timeoutId));
   state.timeouts = [];
@@ -1010,9 +1056,13 @@ function renderScene() {
   } else {
     owlGardenOverlay.innerHTML = "";
   }
+  const friendsActive = ["benjiBunny", "owlGarden", "houseBunny"].includes(state.currentScene);
+  document.body.classList.toggle("friends-active", friendsActive);
+  friendsPlayer.setActive(friendsActive);
 }
 
 function cleanupCurrentScene() {
+  friendsPlayer.stop();
   clearSceneTimers();
   clearMushroomResetTimeout();
   cancelSpeech();
@@ -1274,90 +1324,12 @@ function resetForestSchool(options = {}) {
 function renderBenjiBunnyDialogue() {
   dialoguePanel.classList.remove("clearing-panel");
   dialoguePanel.innerHTML = "";
-  dialoguePanel.appendChild(createBenjiBunnyDebugSkipButton());
-  let benjiIndex = 0;
-  let bunnyIndex = 0;
-  benjiBunnyDialogue.slice(0, state.visibleDialogueCount).forEach((item) => {
-    const button = document.createElement("button");
-    button.type = "button";
-    button.className = `dialogue-card ${item.cssClass}`;
-    if (state.dialogueClickedIds.has(item.id)) {
-      button.classList.add("done");
-    }
-
-    if (item.speaker === "Benji") {
-      button.style.left = "22px";
-      button.style.top = `${104 + benjiIndex * 58}px`;
-      benjiIndex += 1;
-    } else {
-      button.style.right = "22px";
-      button.style.top = `${104 + bunnyIndex * 58}px`;
-      bunnyIndex += 1;
-    }
-
-    const speaker = document.createElement("span");
-    speaker.className = "dialogue-speaker";
-    speaker.textContent = `${item.speaker}:`;
-
-    const line = document.createElement("span");
-    line.className = "dialogue-line";
-    const indexBadge = document.createElement("span");
-    indexBadge.className = "dialogue-index";
-    indexBadge.textContent = String(item.id);
-
-    const text = document.createElement("span");
-    text.className = "dialogue-text";
-    text.textContent = item.textEn;
-
-    line.appendChild(indexBadge);
-    line.appendChild(text);
-
-    button.appendChild(speaker);
-    button.appendChild(line);
-    button.addEventListener("click", async (event) => {
-      event.stopPropagation();
-      if (state.dialoguePhase === "intro") {
-        return;
-      }
-      await primeAudio();
-      if (state.currentScene !== "benjiBunny") {
-        return;
-      }
-      state.dialogueClickedIds.add(item.id);
-      renderScene();
-      await playAudioFile(item.audioEn);
-      if (state.currentScene !== "benjiBunny") {
-        return;
-      }
-      await playAudioFile(item.audioCz);
-      if (state.currentScene !== "benjiBunny") {
-        return;
-      }
-      if (state.dialogueClickedIds.size === benjiBunnyDialogue.length) {
-        state.dialogueDoorState = "green";
-        renderScene();
-      }
-    });
-    dialoguePanel.appendChild(button);
-  });
-
-  if (state.dialoguePhase !== "intro") {
-    const bookButton = document.createElement("button");
-    bookButton.type = "button";
-    bookButton.className = "benji-bunny-book-button";
-    bookButton.textContent = "📖";
-    bookButton.setAttribute("aria-label", "Slovnicek");
-    bookButton.addEventListener("click", (event) => {
-      event.stopPropagation();
-      state.benjiBunnyDictionaryOpen = !state.benjiBunnyDictionaryOpen;
-      renderScene();
-    });
-    dialoguePanel.appendChild(bookButton);
-  }
-
-  if (state.dialoguePhase !== "intro" && state.benjiBunnyDictionaryOpen) {
-    dialoguePanel.appendChild(createBenjiBunnyDictionaryPanel());
-  }
+  if (state.dialoguePhase !== "practice") return;
+  const book = document.createElement("button");
+  book.type = "button"; book.className = "benji-bunny-book-button"; book.textContent = "📖"; book.setAttribute("aria-label", "Slovníček");
+  book.addEventListener("click", event => { event.stopPropagation(); if (friendsPlayer.locked) return; state.benjiBunnyDictionaryOpen = !state.benjiBunnyDictionaryOpen; renderScene(); });
+  dialoguePanel.appendChild(book);
+  if (state.benjiBunnyDictionaryOpen) dialoguePanel.appendChild(createBenjiBunnyDictionaryPanel());
 }
 
 function createBenjiBunnyDictionaryPanel() {
@@ -1372,12 +1344,14 @@ function createBenjiBunnyDictionaryPanel() {
     const button = document.createElement("button");
     button.type = "button";
     button.className = "clearing-dictionary-item";
-    button.textContent = `${entry.en} - ${entry.cz}`;
+    button.dataset.en = entry.en; button.dataset.cz = entry.cz;
+    button.textContent = friendsPlayer.mode ? `${entry.en} — ${entry.cz}` : entry.en;
     button.addEventListener("click", async (event) => {
       event.stopPropagation();
       await primeAudio();
-      await speakEnglishLine(entry.en, { rate: 0.82 });
-      await speakCzechLine(entry.cz, { rate: 0.9 });
+      if (friendsPlayer.locked) return;
+      await friendsPlayer.speak({speaker:"", textEn:entry.en, textCz:entry.cz});
+      friendsRestoreAction();
     });
     panel.appendChild(button);
   });
@@ -1405,39 +1379,12 @@ function createBenjiBunnyDebugSkipButton() {
 }
 
 async function runBenjiBunny(sequenceId) {
-  if (!isSceneActive("benjiBunny", sequenceId)) {
-    return;
-  }
-  state.visibleDialogueCount = 0;
-  state.dialoguePhase = "intro";
-  state.dialogueDoorState = "hidden";
-  state.benjiBunnyDictionaryOpen = false;
-  renderScene();
-
-  for (let index = 0; index < benjiBunnyDialogue.length; index += 1) {
-    if (!isSceneActive("benjiBunny", sequenceId)) {
-      return;
-    }
-    state.visibleDialogueCount = index + 1;
-    renderScene();
-    await playAudioFile(benjiBunnyDialogue[index].audioEn);
-    if (!isSceneActive("benjiBunny", sequenceId)) {
-      return;
-    }
-    await playAudioFile(benjiBunnyDialogue[index].audioCz);
-    if (!isSceneActive("benjiBunny", sequenceId)) {
-      return;
-    }
-    await pauseMs(220);
-  }
-
-  if (!isSceneActive("benjiBunny", sequenceId)) {
-    return;
-  }
-  state.dialoguePhase = "practice";
-  renderScene();
+  if (!isSceneActive("benjiBunny", sequenceId)) return;
+  resetBenjiBunnyDialogue(); state.benjiBunnyDictionaryOpen = false; renderScene();
+  const lines = benjiBunnyDialogue.map((line, n) => ({...line, textCz:friendsBenjiCzech[n]}));
+  if (!await friendsSequence(lines, "benjiBunny", sequenceId, "Review ▶")) return;
+  state.dialoguePhase = "practice"; state.dialogueDoorState = "green"; renderScene(); friendsRestoreAction();
 }
-
 
 function currentClearingItem() {
   return clearingDialogue[state.clearingActiveIndex] ?? clearingDialogue[0];
@@ -1773,100 +1720,25 @@ async function runClearingMeeting(sequenceId) {
 }
 
 async function runOwlGarden(sequenceId) {
-  if (!isSceneActive("owlGarden", sequenceId)) {
-    return;
-  }
-  resetOwlGarden();
-  renderScene();
-
-  await pauseMs(420);
-  if (!isSceneActive("owlGarden", sequenceId)) {
-    return;
-  }
-
-  await speakEnglishLine("Hello Benji and Bunny.", { preferredVoiceName: "ash", rate: 0.84, pitch: 0.92 });
-  if (!isSceneActive("owlGarden", sequenceId)) {
-    return;
-  }
-  await playAudioFile("audio/czech/owl_garden_01_owl_hello_benji_bunny_cz.mp3?v=20260527czvoice");
-  if (!isSceneActive("owlGarden", sequenceId)) {
-    return;
-  }
-
-  await speakEnglishLine("I have presents for you.", { preferredVoiceName: "ash", rate: 0.84, pitch: 0.92 });
-  if (!isSceneActive("owlGarden", sequenceId)) {
-    return;
-  }
-  await playAudioFile("audio/czech/owl_garden_02_owl_i_have_presents_cz.mp3?v=20260527czvoice");
-  if (!isSceneActive("owlGarden", sequenceId)) {
-    return;
-  }
-
-  await speakEnglishLine("Count purple apples, yellow sunflowers and pink pigs in my garden.", { preferredVoiceName: "ash", rate: 0.84, pitch: 0.92 });
-  if (!isSceneActive("owlGarden", sequenceId)) {
-    return;
-  }
-  await playAudioFile("audio/czech/owl_garden_03_owl_count_apples_sunflowers_pigs_cz.mp3?v=20260527czvoice");
-  if (!isSceneActive("owlGarden", sequenceId)) {
-    return;
-  }
-
-  state.owlGardenPhase = "play";
-  renderScene();
+  if (!isSceneActive("owlGarden", sequenceId)) return;
+  resetOwlGarden(); renderScene();
+  if (!await friendsSequence(friendsOwlIntro, "owlGarden", sequenceId, "Start game ▶")) return;
+  state.owlGardenPhase = "play"; renderScene();
 }
 
 async function playOwlGardenOutro(sequenceId) {
-  if (!isSceneActive("owlGarden", sequenceId)) {
-    return;
-  }
-
-  state.owlGardenPhase = "outro";
-  state.owlGardenActiveId = "";
-  state.owlGardenOutroVisibleCount = 0;
-  renderScene();
-
-  await pauseMs(420);
-  if (!isSceneActive("owlGarden", sequenceId)) {
-    return;
-  }
-
-  for (const item of owlGardenOutroDialogue) {
-    state.owlGardenOutroVisibleCount = item.id;
-    renderScene();
-    const playedEnglish = await playAudioFileIfAvailable(item.audioEn);
-    if (!playedEnglish) {
-      await speakEnglishLine(item.textEn, { preferredVoiceName: item.preferredVoiceName, rate: 0.84, pitch: 0.94 });
-    }
-    if (!isSceneActive("owlGarden", sequenceId)) {
-      return;
-    }
-    await playAudioFile(item.audioCz);
-    if (!isSceneActive("owlGarden", sequenceId)) {
-      return;
-    }
-    await pauseMs(220);
-    if (!isSceneActive("owlGarden", sequenceId)) {
-      return;
-    }
-  }
-
-  await pauseMs(380);
-  if (!isSceneActive("owlGarden", sequenceId)) {
-    return;
-  }
-  setScene("houseBunny");
+  if (!isSceneActive("owlGarden", sequenceId)) return;
+  state.owlGardenPhase = "outro"; state.owlGardenActiveId = ""; state.owlGardenOutroVisibleCount = 0; renderScene();
+  const cz = ["Bunny, pamatuješ si barvy? Žlutá, fialová, růžová…", "Ano. Ale všechny barvy můžeme trénovat u mě doma. Pojďme."];
+  const lines = owlGardenOutroDialogue.map((line,n) => ({...line,textCz:cz[n]}));
+  if (await friendsSequence(lines, "owlGarden", sequenceId, "Next picture ▶")) setScene("houseBunny");
 }
 
 async function completeOwlGardenCounting(sequenceId) {
-  if (!isSceneActive("owlGarden", sequenceId)) {
-    return;
-  }
-  state.owlGardenPhase = "review";
-  state.owlGardenActiveId = "";
-  state.owlGardenHelpPlayed = true;
-  state.owlGardenDictionaryOpen = false;
-  renderScene();
-  await speakCzechLine(owlGardenReviewHelpText, { rate: 0.88 });
+  if (!isSceneActive("owlGarden", sequenceId)) return;
+  state.owlGardenPhase = "review"; state.owlGardenActiveId = ""; state.owlGardenHelpPlayed = true; state.owlGardenDictionaryOpen = false; renderScene();
+  const ok = await friendsPlayer.present({speaker:"Owl", textEn:"Open the book to practise words, or press the door to continue with your friends.", textCz:"Otevři knihu a procvičuj slovíčka, nebo stiskni dveře a pokračuj s kamarády."}, {nextLabel:"Review ▶"});
+  if (ok && isSceneActive("owlGarden", sequenceId)) friendsRestoreAction();
 }
 
 function shuffledHouseBunnyColorIds() {
@@ -1899,8 +1771,9 @@ function nextHouseBunnyColorId() {
   return state.houseBunnyTargetId;
 }
 
-async function speakHouseBunnyLine(text) {
-  await speakEnglishLine(text, { preferredVoiceName: "samantha|ava|victoria|karen", rate: 0.9, pitch: 1.02 });
+async function speakHouseBunnyLine(text, manual = false) {
+  const cz = friendsColourCzech[text] || {"Try again.":"Zkus to znovu.","Excellent.":"Výborně.","Great job. Let's play again.":"Skvělá práce. Zahrajeme si znovu."}[text];
+  return friendsPlayer.present({speaker:"Bunny",textEn:text,textCz:cz,preferredVoiceName:"samantha|ava|victoria|karen"}, {manual,nextLabel:"Next ▶"});
 }
 
 async function playHouseBunnyCurrentColor() {
@@ -1934,18 +1807,9 @@ async function queueNextHouseBunnyColor(sequenceId, delayMs = 500) {
 }
 
 async function runHouseBunny(sequenceId) {
-  if (!isSceneActive("houseBunny", sequenceId)) {
-    return;
-  }
-  resetHouseBunny();
-  renderScene();
-  for (const audioSrc of houseBunnyIntroAudio) {
-    await playAudioFile(audioSrc);
-    if (!isSceneActive("houseBunny", sequenceId)) {
-      return;
-    }
-  }
-  await queueNextHouseBunnyColor(sequenceId, 420);
+  if (!isSceneActive("houseBunny", sequenceId)) return;
+  resetHouseBunny(); renderScene();
+  if (await friendsSequence(friendsHouseIntro, "houseBunny", sequenceId, "Start game ▶")) await queueNextHouseBunnyColor(sequenceId, 0);
 }
 
 async function speakForestSchoolOwlLine(text) {
@@ -2252,45 +2116,22 @@ async function runForestSchoolReview(sequenceId) {
 }
 
 async function playBenjiBunnyHelp() {
-  await playAudioFile(benjiBunnyHelpAudio.intro);
-  if (state.currentScene !== "benjiBunny") {
-    return;
-  }
-  await speakCzechLine("Ikona knihy otevírá slovníček. Klikni na slovo ve slovníčku a uslyšíš ho anglicky i česky.", { rate: 0.88 });
+  if (friendsPlayer.locked) return;
+  await friendsPlayer.present({speaker:"", textEn:"Use Next to continue one line at a time. Open the book to practise words.", textCz:"Tlačítkem Next postupuj po jedné replice. Otevři knihu a procvičuj slovíčka."});
+  friendsRestoreAction();
 }
 
 async function playOwlGardenHelp() {
-  if (state.currentScene !== "owlGarden" || state.owlGardenPhase !== "play") {
-    return;
-  }
-
-  state.owlGardenHelpPlayed = true;
-  renderScene();
-  await playAudioFile("audio/czech/owl_garden_04_help_click_words_cz.mp3?v=20260527czvoice");
-  if (state.currentScene !== "owlGarden") {
-    return;
-  }
-  await playAudioFile("audio/czech/owl_garden_05_help_thumbs_up_cz.mp3?v=20260527czvoice");
-  if (state.currentScene !== "owlGarden") {
-    return;
-  }
-  await playAudioFile("audio/czech/owl_garden_06_help_green_light_cz.mp3?v=20260527czvoice");
-  if (state.currentScene !== "owlGarden") {
-    return;
-  }
-  await playAudioFile("audio/czech/owl_garden_07_help_all_done_cz.mp3?v=20260527czvoice");
-  if (state.currentScene !== "owlGarden") {
-    return;
-  }
-  await speakEnglishLine("Listen to the colours: yellow, purple and pink.", { preferredVoiceName: "ash", rate: 0.84, pitch: 0.94 });
-  if (state.currentScene !== "owlGarden") {
-    return;
-  }
-  await speakCzechLine("Ikona knihy otevírá slovníček pro čísla, barvy a věci v zahradě.", { rate: 0.88 });
+  if (state.currentScene !== "owlGarden" || state.owlGardenPhase !== "play" || friendsPlayer.locked) return;
+  state.owlGardenHelpPlayed = true; renderScene();
+  const en = ["Click a group of pictures and listen to the English count.","Thumbs up means it is correct.","The green light means you can continue.","When everything is finished, a new path will appear."];
+  const cz = ["Klikni na skupinu obrázků a poslouchej anglické počítání.","Palec nahoru znamená, že je to správně.","Zelené světlo znamená, že můžeš pokračovat dál.","Až bude všechno hotové, objeví se další cesta."];
+  const names = ["click_words","thumbs_up","green_light","all_done"];
+  await friendsSequence(en.map((textEn,n) => ({speaker:"Owl",textEn,textCz:cz[n],audioCz:`audio/czech/owl_garden_0${n+4}_help_${names[n]}_cz.mp3?v=20260527czvoice`})), "owlGarden", state.sequenceId, "Start game ▶");
 }
 
 async function continueFromOwlGardenReview() {
-  if (state.currentScene !== "owlGarden" || state.owlGardenPhase !== "review") {
+  if (state.currentScene !== "owlGarden" || state.owlGardenPhase !== "review" || friendsPlayer.locked) {
     return;
   }
   state.sequenceId += 1;
@@ -2594,7 +2435,7 @@ dialogueHelpButton.addEventListener("click", async (event) => {
 dialogueDoorButton.addEventListener("click", async (event) => {
   event.stopPropagation();
   await primeAudio();
-  if (state.currentScene === "benjiBunny" && state.dialogueDoorState === "green") {
+  if (state.currentScene === "benjiBunny" && state.dialogueDoorState === "green" && !friendsPlayer.locked) {
     setScene("owlGarden");
   } else if (state.currentScene === "clearingMeeting" && state.clearingPhase === "complete") {
     window.location.href = "scene02_sunnys_lost_nuts/index.html";
@@ -2652,10 +2493,7 @@ function renderOwlGarden() {
   }
 
   if (state.owlGardenPhase === "outro") {
-    owlGardenOutroDialogue.slice(0, state.owlGardenOutroVisibleCount).forEach((item, index) => {
-      owlGardenOverlay.appendChild(createOwlGardenOutroBubble(item, index));
-    });
-    return;
+    return; // The shared player displays one conversation line at a time.
   }
 
   const activeGroup = owlGardenGroups.find((group) => group.id === state.owlGardenActiveId);
@@ -2704,12 +2542,14 @@ function createOwlGardenDictionaryPanel() {
     const button = document.createElement("button");
     button.type = "button";
     button.className = "clearing-dictionary-item";
-    button.textContent = `${entry.en} - ${entry.cz}`;
+    button.dataset.en = entry.en; button.dataset.cz = entry.cz;
+    button.textContent = friendsPlayer.mode ? `${entry.en} — ${entry.cz}` : entry.en;
     button.addEventListener("click", async (event) => {
       event.stopPropagation();
       await primeAudio();
-      await speakEnglishLine(entry.en, { preferredVoiceName: "ash", rate: 0.82, pitch: 0.94 });
-      await speakCzechLine(entry.cz, { rate: 0.9 });
+      if (friendsPlayer.locked) return;
+      await friendsPlayer.speak({speaker:"Owl",textEn:entry.en,textCz:entry.cz,preferredVoiceName:"ash"});
+      friendsRestoreAction();
     });
     panel.appendChild(button);
   });
@@ -3195,7 +3035,7 @@ function nextOwlGardenNumber(groupId) {
 }
 
 async function selectOwlGardenGroup(group) {
-  if (state.currentScene !== "owlGarden" || state.owlGardenPhase !== "play") {
+  if (state.currentScene !== "owlGarden" || state.owlGardenPhase !== "play" || friendsPlayer.locked) {
     return;
   }
 
@@ -3206,7 +3046,7 @@ async function selectOwlGardenGroup(group) {
   if (state.owlGardenCompletedIds.has(group.id)) {
     state.owlGardenActiveId = "";
     renderScene();
-    await speakEnglishLine(owlGardenPhrase(group, group.correctCount), { preferredVoiceName: "ash", rate: 0.86, pitch: 0.94 });
+    await friendsPlayer.speak(friendsOwlLine(group, group.correctCount));
     return;
   }
 
@@ -3214,14 +3054,15 @@ async function selectOwlGardenGroup(group) {
   const numberValue = nextOwlGardenNumber(group.id);
   renderScene();
 
-  await speakEnglishLine(owlGardenPhrase(group, numberValue), { preferredVoiceName: "ash", rate: 0.86, pitch: 0.94 });
+  await friendsPlayer.speak(friendsOwlLine(group, numberValue));
 }
 
 async function confirmOwlGardenCurrentGroup() {
-  if (state.currentScene !== "owlGarden" || state.owlGardenPhase !== "play" || !state.owlGardenActiveId) {
+  if (state.currentScene !== "owlGarden" || state.owlGardenPhase !== "play" || !state.owlGardenActiveId || friendsPlayer.locked) {
     return;
   }
 
+  const sequenceId = state.sequenceId;
   const group = owlGardenGroups.find((item) => item.id === state.owlGardenActiveId);
   if (!group) {
     return;
@@ -3232,14 +3073,18 @@ async function confirmOwlGardenCurrentGroup() {
     state.owlGardenCompletedIds.add(group.id);
     state.owlGardenLockedNumbers[group.id] = shownNumber;
     renderScene();
-    await speakEnglishLine(owlGardenPhrase(group, shownNumber), { preferredVoiceName: "ash", rate: 0.86, pitch: 0.94 });
-    if (state.currentScene !== "owlGarden" || state.owlGardenPhase !== "play") {
+    if (!await friendsPlayer.speak(friendsOwlLine(group, shownNumber))) return;
+    if (!isSceneActive("owlGarden", sequenceId) || state.owlGardenPhase !== "play") {
       return;
     }
 
     if (state.owlGardenCompletedIds.size === owlGardenGroups.length) {
+      // Keep repeat, language-triggered speech and game input serialized with the effect.
+      friendsPlayer.busy = true;
+      friendsPlayer.render();
       await playAudioFile("audio/effects/owl_garden_fanfare.mp3");
-      if (state.currentScene === "owlGarden" && state.owlGardenPhase === "play") {
+      if (isSceneActive("owlGarden", sequenceId) && state.owlGardenPhase === "play") {
+        friendsPlayer.busy = false;
         await completeOwlGardenCounting(state.sequenceId);
       }
       return;
@@ -3253,33 +3098,33 @@ async function confirmOwlGardenCurrentGroup() {
   const nextNumber = nextOwlGardenNumber(group.id);
   renderScene();
   await pauseMs(260);
-  if (state.currentScene !== "owlGarden" || state.owlGardenPhase !== "play" || state.owlGardenActiveId !== group.id) {
+  if (!isSceneActive("owlGarden", sequenceId) || state.owlGardenPhase !== "play" || state.owlGardenActiveId !== group.id) {
     return;
   }
-  await speakEnglishLine(owlGardenPhrase(group, nextNumber), { preferredVoiceName: "ash", rate: 0.86, pitch: 0.94 });
+  await friendsPlayer.speak(friendsOwlLine(group, nextNumber));
 }
 
 async function handleHouseBunnySelection(colorId) {
-  if (state.currentScene !== "houseBunny" || state.houseBunnyPhase !== "waiting") {
+  if (state.currentScene !== "houseBunny" || state.houseBunnyPhase !== "waiting" || friendsPlayer.locked) {
     return;
   }
 
+  const sequenceId = state.sequenceId;
   if (colorId !== state.houseBunnyTargetId) {
     state.houseBunnyPhase = "retry";
     renderScene();
-    await speakHouseBunnyLine("Try again.");
-    if (state.currentScene === "houseBunny") {
+    const ok = await speakHouseBunnyLine("Try again.");
+    if (ok && isSceneActive("houseBunny", sequenceId)) {
       state.houseBunnyPhase = "waiting";
       renderScene();
     }
     return;
   }
 
-  const sequenceId = state.sequenceId;
   state.houseBunnyPhase = "result";
   state.houseBunnyScore += 1;
   renderScene();
-  await speakHouseBunnyLine("Excellent.");
+  if (!await speakHouseBunnyLine("Excellent.", true)) return;
   if (!isSceneActive("houseBunny", sequenceId)) {
     return;
   }
@@ -3300,7 +3145,7 @@ async function handleHouseBunnySelection(colorId) {
   }
 
   if (state.houseBunnyScore >= houseBunnyWinCount) {
-    await speakHouseBunnyLine("Great job. Let's play again.");
+    if (!await speakHouseBunnyLine("Great job. Let's play again.", true)) return;
     if (!isSceneActive("houseBunny", sequenceId)) {
       return;
     }
