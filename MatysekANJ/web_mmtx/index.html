@@ -7,7 +7,7 @@
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
-    <link rel="stylesheet" href="styles_intro_v2.css?v=20261110selector1">
+    <link rel="stylesheet" href="styles_intro_v2.css?v=20261111friends1">
   </head>
   <body>
     <main class="app-shell">
@@ -28,7 +28,7 @@
               <span class="portal-dot portal-orange"></span>
             </span>
           </button>
-          <button class="bunny-portal hidden" id="bunnyPortalButton" type="button" aria-label="Benji a Bunny">
+          <button class="bunny-portal hidden" id="bunnyPortalButton" type="button" aria-label="Přátelé" aria-haspopup="dialog" aria-controls="friendsDialog">
             <span class="bunny-portal-icon">🐰</span>
             <span class="bunny-portal-label">Friends</span>
           </button>
@@ -80,6 +80,20 @@
           <div class="owl-garden-done hidden" id="owlGardenDoneBadge" aria-hidden="true">✓</div>
         </div>
       </section>
+      <dialog class="journey-dialog" id="friendsDialog" aria-labelledby="friendsTitle">
+        <form method="dialog" class="journey-dialog-heading">
+          <h1 id="friendsTitle">Přátelé</h1>
+          <button class="journey-close" aria-label="Zavřít výběr Přátel" autofocus>×</button>
+        </form>
+        <p>Vyber scénu</p>
+        <nav class="journey-scenes" id="friendsScenes" aria-label="Scény Přátel">
+          <button type="button" data-friends-scene="1" aria-label="Scéna 1 – Benji a Bunny" title="Benji a Bunny">1</button>
+          <button type="button" data-friends-scene="2" aria-label="Scéna 2 – Počítání se sovou" title="Počítání se sovou">2</button>
+          <button type="button" data-friends-scene="3" aria-label="Scéna 3 – Rozhovor u sovy" title="Rozhovor u sovy">3</button>
+          <button type="button" data-friends-scene="4" aria-label="Scéna 4 – Hra s barvami" title="Hra s barvami">4</button>
+          <button type="button" data-friends-scene="5" aria-label="Scéna 5 – Lesní škola" title="Lesní škola">5</button>
+        </nav>
+      </dialog>
       <dialog class="journey-dialog" id="forestJourneyDialog" aria-labelledby="forestJourneyTitle">
         <form method="dialog" class="journey-dialog-heading">
           <h1 id="forestJourneyTitle">Cesta k jezeru</h1>
@@ -99,6 +113,6 @@
 
     <script src="scene01_audio_manifest.js?v=20260829fixed1"></script>
     <script src="forest_school_audio_manifest.js?v=20260830fixed1"></script>
-    <script src="script_intro_v2.js?v=20261110selector1"></script>
+    <script src="script_intro_v2.js?v=20261111friends1"></script>
   </body>
 </html>

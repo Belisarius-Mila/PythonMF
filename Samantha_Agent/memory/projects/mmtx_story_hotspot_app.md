@@ -2,6 +2,8 @@
 
 ## Aktuální stav
 
+- 2026-11-11 12:16 CET: Lokálně přidaná nabídka Přátelé 1–5: seznámení Benji/Bunny, počítání se sovou, rozhovor u sovy, barvy u terče, Lesní škola. Pět kapitol je pracovní rozdělení podle Mílova odhadu 1–5; upřesňující otázka k pětce/šesti obrazům dosud bez odpovědi. Tři fáze HouseBunny zůstávají uvnitř čtvrté kapitoly. Safari přes místní file URL skutečně otevřelo všech pět vstupů a návraty, Escape i opětovné otevření. 20 cílených testů a rychlá statická brána OK, oba mirrory shodné. Nové p+n nezadané, main a služby bez zásahu.
+
 - 2026-11-10 21:36 CET: Benjiho opravy 01/02/03/031/04 jsou vydané na Pages ab123bb6. Terra job 27d6be4c4435a3fa50f12a059ddf0d8e completed, push/deploy confirmed, gate3457 PASS / 597,8 s; Pages run 42896378127 / deployment 7693545647. Veřejných 327/327 aktuálních souborů byte/SHA přesných (10 529 491 B), pět nových WebP použitých, deset starých odstraněno z obou zdrojových složek. Čtyři staré URL HTTP404; staré freddie_jump.webp vrací HTTP503, jeho 404 není potvrzené a p+n se kvůli tomu neopakuje. Main/origin aligned, čistý, 0 čekajících commitů; oba profily aligned/čisté, chráněné služby beze změny. Pět PNG nahrazených v Downloads. Závěrečný Data receipt je pouze místní pro další balíček.
 
 - 2026-11-10 21:20 CET: Main převzal přesný obrazový balíček Data e903dc7a nad čistým 19703fdb. Deset původních WebP odstraněno, deset nových v obou složkách; katalog/HTML/cache verze a dvě stávající testové reference aktualizované. Jeden předchozí interiérový receipt commit zůstává v čekajícím GitHub balíčku. Výslovně schválené Terra p+n bude jediné submit_release(wait=True), request data-mmtx-benji-upright-e903dc7a-20261110-v1, project-mmtx → GitHub Pages; tento přípravný zápis ještě nepotvrzuje skutečný job, push ani deployment.
@@ -938,3 +940,15 @@ Další krok: Mílova vizuální přejímka veřejné opravené šestky.
 Navrhované další kroky: Při příští potřebě ověřit HTTP404 původního freddie_jump.webp, nyní po omezených čtecích kontrolách vrací HTTP503. Fyzická iPhone přejímka zůstává otevřená.
 
 Technický důkaz: Terra 6.1/high, job 27d6be4c4435a3fa50f12a059ddf0d8e completed, push/deployment confirmed, dva commity do ab123bb6, plná brána 3457 PASS / 597,8 s. Pages run 42896378127 / deployment 7693545647, HTTP smoke200 a protected_services_unchanged=true. Všech 327 aktuálních veřejných souborů přesných, 10 529 491 B, 319 ostatních materiálů včetně 288 MP3 zachované. Ze starých URL čtyři potvrzené 404, jedna neověřená kvůli503; v Git tree a obou složkách deset starých cest neexistuje. Místní Safari před vydáním obraz04 správně zobrazilo; po vydání Safari GUI nebylo dostupné (cgWindowNotFound), nepředstírat produkční proklik. Main/origin aligned a oba profily čisté/aligned, 0 pending main commitů. Native caller účtenku převzal jednou, returned_to_adam=false není retry.
+
+### 2026-11-11 12:16 CET — Číselný výběr kapitol Přátelé
+
+Hotovo: Tlačítko Friends / Přátelé otevírá okno s čísly 1–5 ve stejném stylu jako Cesta k jezeru. Každé číslo spustí příslušnou kapitolu. Trojka vstoupí přímo do rozhovoru po počítání a dál pokračuje do hry s barvami. Návraty, zavření Escape a opětovné otevření fungují.
+
+Rozhodnutí: Míla zadal přímou navigaci s nejistým odhadem pěti scén. Pracovní rozdělení: 1 Benji a Bunny, 2 počítání se sovou, 3 rozhovor u sovy, 4 hra s barvami, 5 Lesní škola. Tři obrázky hry s barvami nejsou samostatné kapitoly. Otázka k rozdělení dosud nemá odpověď; pětka je výslovně popsaný předpoklad, nikoli nové potvrzené obsahové rozhodnutí Míly.
+
+Další krok: Mílova přejímka místní nabídky a členění; případné p+n až podle samostatného pokynu.
+
+Navrhované další kroky: Žádné nové.
+
+Technický důkaz: 20 cílených testů OK / 0,498 s, rychlá statická brána OK, HTML/JS/CSS obou webových kořenů byte exact. Safari skutečně prokliklo všech pět čísel, návraty a Escape, čitelný modal s fokusovaným křížkem; místní soubor bez spouštění nového serveru. Původní obrázky/audio/CSS nezměněné, stávající testy jen aktualizují cache verzi. Bez nových placených volání, změny služeb, main nebo produkce.
