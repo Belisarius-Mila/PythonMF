@@ -1725,3 +1725,22 @@ body {
 @media (max-height: 380px) { .journey-dialog { padding: 12px; } .journey-dialog p { margin: 6px 0; } .journey-scenes { gap: 8px; } .journey-scenes > * { min-height: 48px; } }
 
 .friends-scenes { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+
+/* Fit the unchanged hotspot coordinate box above the shared Friends captions. */
+.friends-player[hidden] { display: none; }
+.friends-player { padding: 10px; font-family: system-ui, sans-serif; color: #213d30; background: #fffbea; border-radius: 18px; }
+.friends-toolbar { display: flex; align-items: center; flex-wrap: wrap; gap: 8px; }
+.friends-toolbar button { font: 700 16px system-ui, sans-serif; color: #213d30; background: #fff; border: 2px solid #8daa8f; border-radius: 12px; min-height: 44px; padding: 8px 12px; cursor: pointer; }
+.friends-toolbar button:disabled { opacity: .55; cursor: default; }
+.friends-toolbar button:focus-visible { outline: 3px solid #1b68a3; outline-offset: 2px; }
+#friendsCount { margin-left: auto; }
+.friends-caption p { margin: 4px 0; font-size: clamp(16px, 2vw, 23px); }
+#friendsCzech { color: #3b5b45; border-top: 1px solid #b6c9ac; padding-top: 4px; }
+#friendsStatus { flex: 1; color: #8d241a; }
+#friendsNext { margin-left: auto; }
+.friends-active .app-shell { height: 100svh; min-height: 0; padding: 8px; }
+.friends-active .stage-card { height: 100%; width: min(100%, 1400px); min-height: 0; display: grid; grid-template-rows: minmax(0, 1fr) auto; gap: 6px; padding: 6px; }
+.friends-active .story-viewport { min-height: 0; display: grid; place-items: center; container-type: size; }
+.friends-active .story-stage { width: min(100cqw, calc(100cqh * 1407 / 768)); }
+.friends-active .owl-garden-outro-bubble, .friends-active .owl-garden-debug-skip { display: none; }
+@media (max-width: 600px) { .friends-player { padding: 8px; } .friends-caption p { font-size: 16px; } .friends-toolbar button { font-size: 14px; padding: 6px 9px; } }

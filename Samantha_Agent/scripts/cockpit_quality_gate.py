@@ -411,6 +411,7 @@ TEST_MODULES = (
     "tests.test_mmtx_pages_deploy",
     "tests.test_mmtx_scene06_opening",
     "tests.test_mmtx_scene06_opening_link",
+    "tests.test_mmtx_friends_controls",
     "tests.test_development_semaphore",
     "tests.test_development_branch_lifecycle",
     "tests.test_project_continuity",

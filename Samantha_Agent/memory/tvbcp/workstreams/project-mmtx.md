@@ -1,6 +1,8 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
+- 2026-11-11 19:41 CET: Lokálně sjednocené ovládání Přátel1–4: CZ vypnuto / text / text+hlas, společné Next/Repeat a jedna replika v popředí. Příběhové dialogy a návody čekají na Next; hry počítání a barev zůstávají interaktivní a jejich hlášky respektují stejný režim. Sdílený přehrávač má ochranu pozdních callbacků, řeší chyby a návraty, souřadnice hotspotů zůstávají ve stejném poměru obrazu. 40 cílených testů a statická brána OK, plná místní brána 2991 OK (5 SKIP). Safari ukázalo ovládání v okně, EN1/9, český text a stav5/9; lidský poslech všech režimů/iPhone nepřevzatý. Žádné nové placené audio, původní MP3/obrázky beze změny. Nové p+n nezadané, main ani služby se nemění.
+
 - 2026-11-11 16:26 CET: Přátelé1–4 jsou publikované na Pages a445cb43, Lesní škola má vlastní ikonu. Terra job aad89ff92930ad5b96ddc677e44fb736 completed, push/deploy confirmed, plná brána3482 PASS / 531,1 s, Pages run43048031652 / deployment7714069369. Veřejné HTML/JS/CSS3/3 byte/SHA exact (156 887 B), čísla1–4, škola mimo nabídku a mřížka2×2 potvrzené. Místní Safari ověřilo čtyři čísla i samostatnou školu; produkční GUI po vydání nedostupné (cgWindowNotFound), fyzický iPhone nepřevzatý. Main/origin jsou aligned, main je čistý a nemá čekající commity; oba profily jsou čisté a aligned na a445cb43. Závěrečný Data zápis je místní, bez opakování p+n.
 
 - 2026-11-11 16:14 CET: Main bezpečně převzal hotové Přátele 1–4 z Data 07488254 nad čistým a s origin zarovnaným 8255ff9c. Lesní škola zůstává vlastní ikonou, rozložení Přátel2×2, dvě webové kopie shodné. Původní odhad pěti kapitol se nepublikuje. Připravené jediné autorizované Terra p+n: request data-mmtx-friends-four-07488254-20261111-v1, project-mmtx→GitHub Pages; aktuální zápis ještě nepotvrzuje předání/push/deployment.
@@ -1940,3 +1942,15 @@ Další krok: Mílovo proklikání veřejných Přátel1–4.
 Navrhované další kroky: Fyzická přejímka iPhonu zůstává otevřená.
 
 Technický důkaz: Job aad89ff92930ad5b96ddc677e44fb736 completed, push/deployment confirmed, Terra6.1/high, jeden commit do a445cb43. Gate3482 PASS / 531,1 s; Pages run43048031652 / deployment7714069369, HTTP200 a protected_services_unchanged=true. Nezávisle3/3 veřejných HTML/JS/CSS přesné (156 887 B), HTML čísla1–4 a samostatná škola, CSS2×2. Main20 cílených testů a statická brána OK. Místní Safari vizuálně ověřené před vydáním, produkční GUI poté nedostupné(cgWindowNotFound), nelze tvrdit produkční fyzický proklik. Native Adam převzal účtenku zde; returned_to_adam=false není důvod retry. Reporty mmtx_friends_selector_20261111.md, mmtx_friends_four_release_20261111.json a mmtx_friends_four_public_20261111.json.
+
+### 2026-11-11 19:41 CET — Jednotné jazykové režimy a ruční repliky v Přátelích
+
+Hotovo: Všechny čtyři části Přátel mají společný přehrávač s angličtinou, volitelným českým textem a volitelným českým čtením, tlačítky Next/Repeat a pořadím replik. Příběh se bez stisku Next neposouvá. Počítání, slovníčky a barvy zůstávají klikacími hrami; vyslovené úkoly a zpětná vazba dodržují jazykový režim. Titulky a ovládání jsou pod obrazem v rámci výšky okna.
+
+Rozhodnutí: Míla zadal sjednotit ovládání podle Cesty k jezeru a postupovat repliku po replice. Hotové EN/CS nahrávky se přebírají beze změny; kde už existovalo čtení prohlížečem nebo pevná stopa chybí, používá se systémová speechSynthesis s odpovídajícím jazykem. Žádné nové placené cloudové generování. Lesní škola i Cesta k jezeru zůstávají mimo nový Friends player. Nové p+n nebylo zadané.
+
+Další krok: Převzít Mílovo hodnocení místního ovládání a hlasů; případné p+n až podle samostatného pokynu.
+
+Navrhované další kroky: Případné nové vydání až podle samostatného pokynu; fyzická iPhone přejímka samostatná.
+
+Technický důkaz: 40 cílených testů OK / 4,798 s a statická brána OK. Node provedl tři jazykové režimy, vypnutí CZ za řeči, chyby EN/CS, Repeat, stale callback, návrat, blokované localStorage, celý průchod všemi čtyřmi částmi, počítání a správnou/chybnou barvu. Ověřených 27 pevných existujících audio vazeb a jejich mirrory. Nové dva unittesty jsou přidané do plné brány. Safari screenshot1/9 ukázal celý obraz, EN a všechna tlačítka v okně; následně textový CZ režim a stav5/9. Plná místní brána 2991 OK (5 SKIP) / 618,242 s testů; poslední drobnou pojistku souběhu vítězné fanfáry a zachování původního slovníčku mimo Přátele znovu pokrývá finálních 40 cílených testů a statická brána.

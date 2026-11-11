@@ -7,11 +7,12 @@
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
-    <link rel="stylesheet" href="styles_intro_v2.css?v=20261111friends2">
+    <link rel="stylesheet" href="styles_intro_v2.css?v=20261111controls1">
   </head>
   <body>
     <main class="app-shell">
       <section class="stage-card">
+        <div class="story-viewport">
         <div class="story-stage" id="storyStage">
           <img class="story-image" id="sceneImage" src="intro1.png?v=20260402b" alt="Benziho pribeh">
           <div class="stage-vignette"></div>
@@ -79,6 +80,16 @@
           </button>
           <div class="owl-garden-done hidden" id="owlGardenDoneBadge" aria-hidden="true">✓</div>
         </div>
+        </div>
+        <section class="friends-player" id="friendsPlayer" aria-label="Friends dialogue controls" hidden>
+          <div class="friends-toolbar">
+            <button type="button" id="friendsLanguage">CZ: vypnuto</button>
+            <button type="button" id="friendsRepeat" disabled>↻ Repeat</button>
+            <span id="friendsCount"></span>
+          </div>
+          <div class="friends-caption"><strong id="friendsSpeaker"></strong><p id="friendsText" lang="en"></p><p id="friendsCzech" lang="cs" hidden></p></div>
+          <div class="friends-toolbar"><span id="friendsStatus" role="status"></span><button type="button" id="friendsNext" disabled>Next ▶</button></div>
+        </section>
       </section>
       <dialog class="journey-dialog" id="friendsDialog" aria-labelledby="friendsTitle">
         <form method="dialog" class="journey-dialog-heading">
@@ -112,6 +123,7 @@
 
     <script src="scene01_audio_manifest.js?v=20260829fixed1"></script>
     <script src="forest_school_audio_manifest.js?v=20260830fixed1"></script>
-    <script src="script_intro_v2.js?v=20261111friends2"></script>
+    <script src="friends_player.js?v=20261111controls1"></script>
+    <script src="script_intro_v2.js?v=20261111controls1"></script>
   </body>
 </html>
