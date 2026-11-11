@@ -1,0 +1,53 @@
+{
+  "ok": true,
+  "job": {
+    "job_id": "27d6be4c4435a3fa50f12a059ddf0d8e",
+    "state": "completed",
+    "phase": "done",
+    "message": "Účtenka je připravená pro původního Adama ve stejné relaci.",
+    "dry_run": false,
+    "commit_count": 2,
+    "pushed": true,
+    "deployed": true,
+    "returned_to_adam": false,
+    "created_at": "2026-11-10T20:22:38+00:00",
+    "updated_at": "2026-11-10T20:34:02+00:00",
+    "push_state": "confirmed",
+    "deployment_state": "confirmed",
+    "failure_phase": null,
+    "failure_message": null,
+    "workstream_id": "project-mmtx",
+    "deployment_target": "github_pages",
+    "executor": {
+      "role": "release_executor",
+      "model": "gpt-6.1-terra",
+      "reasoning_effort": "high",
+      "policy_digest": "2658fc0b796051bbbfe1bd957bd1c62c0977bd081fe5f37561bf4ec873c0540d"
+    },
+    "active": false,
+    "target_short": "ab123bb672ef",
+    "model_usage": {
+      "input_tokens": 26433,
+      "cached_input_tokens": 0,
+      "output_tokens": 79,
+      "reasoning_output_tokens": 14,
+      "total_tokens": 26512
+    },
+    "gate": {
+      "passed": true,
+      "mode": "full",
+      "test_count": 3457,
+      "duration_seconds": 597.8
+    },
+    "verification": {
+      "state": "deployed",
+      "main_head": "ab123bb672ef6df71a95ef292078e9d01113fbfa",
+      "protected_services_unchanged": true,
+      "deployment_target": "github_pages",
+      "deployment_id": 7693545647,
+      "workflow_run_id": 42896378127,
+      "smoke_http_status": 200,
+      "smoke_path": ""
+    }
+  }
+}

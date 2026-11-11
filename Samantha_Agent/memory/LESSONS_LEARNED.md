@@ -2096,3 +2096,9 @@ prostředí PASS, produkční kód beze změny.
 - Kontext: MMTX šestka potřebuje jen hesla nepoužitá v předchozích pěti scénách.
 - Řešení: číst audio manifesty i deklarované EN dialogy/pokyny/slovníčky; u sdíleného skriptu omezit správnou scénu. Mapovat tvary explicitně a evidovat výskyt nové položky v novém příběhu. Trees není nové po tree, nová významová spojení se porovnávají jako celek. Existující audio převzít jen při shodě textu, hlasu, tempa a otisku.
 - Ověření: deset zdrojů shodných s vydaným f7a4ab58, 450 úseků / 191 lemmat; 77 nových doložených hesel. Test vloženého starého hesla zablokoval generování před transportem. 20 přesných CS nahrávek převzatých, 74 cílených testů PASS. Viz mmtx_scene06_dictionary_audit_20261110.json.
+
+### 2026-11-11 — Číslované kapitoly MMTX musí spouštět stav, ne pouze obrázek
+
+- Kontext: Přátelé obsahují několik ilustrací jedné hry a samostatný rozhovor uvnitř owlGarden.
+- Řešení: čísla mapovat na skutečné kapitoly a jejich vstupní fáze; při přímém vstupu do rozhovoru zachovat cleanup, nový sequenceId, reset a původní dialog/pokračování. Samotné přepsání src nespustí odpovídající dialog ani interakci. Více animačních fází terče nečíslovat jako samostatné hry bez výslovné dohody.
+- Ověření: skutečné místní Safari prokliklo všech pět vstupů, odpovídající obrazy, návraty a Escape; 20 cílených testů a statická brána OK. Původní pracovní předpoklad pětky Míla následně opravil: Přátelé jsou čtyři části, Lesní škola má vlastní ikonu. Nabídka 1–4 / 2×2 a samostatná ikona ověřené v Safari, 20 cílených testů a statická brána OK.
