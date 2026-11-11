@@ -1,21 +1,16 @@
-# MMTX — číselná nabídka Přátelé
+# MMTX — Přátelé: čtyři číslované části
 
-Tlačítko Friends / Přátelé otevírá modální okno ve stejném stylu jako Cesta k jezeru. Čísla spouštějí:
+Míla výslovně upřesnil, že Přátelé mají jen čtyři části. Tlačítko Friends / Přátelé otevře okno s čísly 1–4 v mřížce 2×2. Lesní škola zůstává pod vlastní ikonou a v nabídce Přátel není. Toto rozhodnutí nahrazuje původní pracovní odhad pěti kapitol z cff31d75.
 
-| Číslo | Kapitola | Původní obraz / runtime |
+| Číslo | Část | Obraz / runtime |
 | --- | --- | --- |
 | 1 | Benji a Bunny | BenjiBunnyScene.png / benjiBunny |
 | 2 | Počítání se sovou | MeetingOul1.PNG / owlGarden |
 | 3 | Rozhovor u sovy | MeetingOul2.PNG / owlGarden outro |
 | 4 | Hra s barvami | HouseBunny1–3.PNG / houseBunny |
-| 5 | Lesní škola | ForestSchool1.PNG / forestSchool (12 lekcí) |
 
-Míla odhadoval pět scén, ve skutečnosti existuje více jednotlivých obrázků a některé jsou přechodové fáze jedné hry. Proto jde o pět smysluplných kapitol; pátá navazuje na Lesní školu, která zůstává dostupná i vlastním tlačítkem. Odeslaná upřesňující otázka zůstala bez odpovědi a po přiměřeném čekání byl tento předpoklad výslovně oznámen. Nejde o potvrzené nové obsahové rozhodnutí.
+Trojka má přímý vstup do původního rozhovoru a pokračování do barev bez opakování počítání. Používá cleanup a sequenceId. Tři fáze terče tvoří jedinou čtvrtou část. Dialog má nativní fokus, křížek a Escape. Odstraněn pátý button i jeho přepínání, čísla mimo1–4 se odmítnou. CSS používá vlastní dvousloupcový friends-scenes bez změny rozložení nabídky Cesta k jezeru1–6.
 
-Trojka používá volitelný parametr owlOutro v existujícím setScene, zachovává cleanup/sequenceId a spustí původní rozhovor s jeho pokračováním do barev; nezačne znovu počítání. Ostatní vstupy používají původní reset a start funkce. Čísla fungují jen nad otevřeným dialogem a rozcestím, takže opakovaný klik ani pozdní odemčení audia nepřepne jinou právě otevřenou scénu. Dialog má nativní fokus, zavírací křížek a Escape.
+Ověření: 20 cílených testů a rychlá statická brána OK. Oba HTML/JS/CSS kořeny shodné, git diff --check OK. Skutečné místní Safari zobrazilo čtyři tlačítka2×2, zavření a funkční samostatnou ikonu Lesní školy. Předchozí přejímka všech čtyř vstupů zůstává platná; mapování1–4 se opravou neměnilo. Obrázky/audio/texty příběhu zachované, existující testy jen aktualizují cache verzi. Bez nových obrazových/TTS či placených vývojových volání.
 
-Změněny jen index.html/script_intro_v2.js v docs a shodném mirroru; využívá se původní CSS. Aktualizovaná cache verze HTML/JS a odpovídající tři starší testové reference. Žádný přepis obrázků, audia, textů příběhu nebo systémových služeb. Hlavní checkout se nemění.
-
-Ověření: 20 cílených testů OK / 0,498 s; rychlá statická brána OK a git diff --check OK. Skutečné Safari přes místní file URL zobrazilo čitelnou nabídku a prokliklo všech pět odpovídajících obrazů, všechny návraty, Escape a znovuotevření. Nabídka zůstala otevřená pro Mílu. Místní HTTP server nebyl dostupný a nebyl znovu spouštěn; toto není HTTP/produkční ani iPhone přejímka. Žádné modelové, audio ani jiné placené volání.
-
-Toto je místní vývojový checkpoint Data na data/parallel-20261104. Nové p+n nebylo zadané ani spuštěné. Další krok: Mílova přejímka rozdělení a nabídky; případná publikace samostatně.
+Míla výslovně autorizoval commit a p+n Terrou. Tento přípravný Data checkpoint ještě nedokládá publikaci; následuje bezpečná integrace do čistého main a jedno registrované submit_release(wait=True), project-mmtx→GitHub Pages. Žádný restart Cockpitu v cíli Pages. Fyzická iPhone a veřejná přejímka po vydání zůstávají samostatné.

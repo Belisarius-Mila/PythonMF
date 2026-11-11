@@ -2,6 +2,8 @@
 
 ## Aktuální stav
 
+- 2026-11-11 16:13 CET: Míla upřesnil, že Přátelé mají přesně čtyři části a Lesní škola vlastní ikonu. Nabídka opravená na 1–4 v mřížce 2×2; páté tlačítko i jeho handler odstraněné, samostatná ikona Lesní školy zachovaná. Safari ověřilo čtyři čísla, zavření i vstup do Lesní školy přes její vlastní ikonu. 20 cílených testů a statická brána OK. Míla výslovně schválil commit a p+n Terrou; připravuje se přesný nový balíček, tento zápis publikaci ještě nepotvrzuje.
+
 - 2026-11-11 12:16 CET: Lokálně přidaná nabídka Přátelé 1–5: seznámení Benji/Bunny, počítání se sovou, rozhovor u sovy, barvy u terče, Lesní škola. Pět kapitol je pracovní rozdělení podle Mílova odhadu 1–5; upřesňující otázka k pětce/šesti obrazům dosud bez odpovědi. Tři fáze HouseBunny zůstávají uvnitř čtvrté kapitoly. Safari přes místní file URL skutečně otevřelo všech pět vstupů a návraty, Escape i opětovné otevření. 20 cílených testů a rychlá statická brána OK, oba mirrory shodné. Nové p+n nezadané, main a služby bez zásahu.
 
 - 2026-11-10 21:36 CET: Benjiho opravy 01/02/03/031/04 jsou vydané na Pages ab123bb6. Terra job 27d6be4c4435a3fa50f12a059ddf0d8e completed, push/deploy confirmed, gate3457 PASS / 597,8 s; Pages run 42896378127 / deployment 7693545647. Veřejných 327/327 aktuálních souborů byte/SHA přesných (10 529 491 B), pět nových WebP použitých, deset starých odstraněno z obou zdrojových složek. Čtyři staré URL HTTP404; staré freddie_jump.webp vrací HTTP503, jeho 404 není potvrzené a p+n se kvůli tomu neopakuje. Main/origin aligned, čistý, 0 čekajících commitů; oba profily aligned/čisté, chráněné služby beze změny. Pět PNG nahrazených v Downloads. Závěrečný Data receipt je pouze místní pro další balíček.
@@ -952,3 +954,15 @@ Další krok: Mílova přejímka místní nabídky a členění; případné p+n
 Navrhované další kroky: Žádné nové.
 
 Technický důkaz: 20 cílených testů OK / 0,498 s, rychlá statická brána OK, HTML/JS/CSS obou webových kořenů byte exact. Safari skutečně prokliklo všech pět čísel, návraty a Escape, čitelný modal s fokusovaným křížkem; místní soubor bez spouštění nového serveru. Původní obrázky/audio/CSS nezměněné, stávající testy jen aktualizují cache verzi. Bez nových placených volání, změny služeb, main nebo produkce.
+
+### 2026-11-11 16:13 CET — Přátelé mají čtyři části, Lesní škola samostatně
+
+Hotovo: Nabídka Přátelé má čísla 1–4 ve dvou řádcích po dvou. Čtyři části: Benji a Bunny, počítání se sovou, rozhovor u sovy, hra s barvami. Lesní škola se otevírá pouze svou vlastní ikonou na rozcestí.
+
+Rozhodnutí: Míla výslovně opravil původní odhad pěti částí na čtyři a zadal commit předat Terře k p+n. Toto upřesnění nahrazuje předchozí pracovní předpoklad pětky.
+
+Další krok: Uložit opravu v Datově větvi, integrovat hotovou nabídku 1–4 do čistého main a jednou předat registrované Terra p+n pro project-mmtx / Pages.
+
+Navrhované další kroky: Mílovo veřejné proklikání po vydání.
+
+Technický důkaz: 20 cílených testů OK a rychlá statická brána OK. Skutečné místní Safari ukázalo čtyři tlačítka 2×2, křížek a funkční samostatnou ikonu Lesní školy. Předchozí přejímka 1–4 vstupů zůstává platná; mapping se nemění. HTML/JS/CSS mirrored, cache friends2, stávající testové reference aktualizované. Žádné nové audio, obrázky ani placené vývojové volání.

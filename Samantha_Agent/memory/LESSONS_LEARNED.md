@@ -1892,4 +1892,4 @@ aby se write uvnitř nezablokoval vlastním sidecarem. Ověřeno 112 cílenými 
 
 - Kontext: Přátelé obsahují několik ilustrací jedné hry a samostatný rozhovor uvnitř owlGarden.
 - Řešení: čísla mapovat na skutečné kapitoly a jejich vstupní fáze; při přímém vstupu do rozhovoru zachovat cleanup, nový sequenceId, reset a původní dialog/pokračování. Samotné přepsání src nespustí odpovídající dialog ani interakci. Více animačních fází terče nečíslovat jako samostatné hry bez výslovné dohody.
-- Ověření: skutečné místní Safari prokliklo všech pět vstupů, odpovídající obrazy, návraty a Escape; 20 cílených testů a statická brána OK. Členění včetně Lesní školy je viditelně označený pracovní předpoklad.
+- Ověření: skutečné místní Safari prokliklo všech pět vstupů, odpovídající obrazy, návraty a Escape; 20 cílených testů a statická brána OK. Původní pracovní předpoklad pětky Míla následně opravil: Přátelé jsou čtyři části, Lesní škola má vlastní ikonu. Nabídka 1–4 / 2×2 a samostatná ikona ověřené v Safari, 20 cílených testů a statická brána OK.

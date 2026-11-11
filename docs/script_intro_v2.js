@@ -2498,7 +2498,7 @@ bunnyPortalButton.addEventListener("click", (event) => {
 
 friendsScenes.addEventListener("click", async (event) => {
   const number = event.target.closest("button[data-friends-scene]")?.dataset.friendsScene;
-  if (!friendsDialog.open || state.currentScene !== "intro4" || !["1", "2", "3", "4", "5"].includes(number)) return;
+  if (!friendsDialog.open || state.currentScene !== "intro4" || !["1", "2", "3", "4"].includes(number)) return;
   friendsDialog.close();
   await primeAudio();
   if (state.currentScene !== "intro4") return;
@@ -2511,8 +2511,6 @@ friendsScenes.addEventListener("click", async (event) => {
     setScene("owlGarden", { owlOutro: true });
   } else if (number === "4") {
     setScene("houseBunny");
-  } else if (number === "5") {
-    setScene("forestSchool");
   }
 });
 
