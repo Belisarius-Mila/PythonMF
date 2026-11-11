@@ -85,6 +85,7 @@
       await request("/api/email-agent/archive", {id: item.id, proposal_digest: item.proposal_digest, confirmed: true});
     }));
     card.append(buttons);
+    window.SamanthaEmailFollowups?.attach(card, item);
     return card;
   }
   function resetConfirmation() {
@@ -112,8 +113,13 @@
     editing = {...current, proposal, proposal_digest: result.proposal_digest};
   }
   async function refresh() {
-    if (editor.open || window.SamanthaCalendarDraft?.isOpen()) return;
+    const editingNow = () => editor.open || window.SamanthaCalendarDraft?.isOpen()
+      || window.SamanthaEmailFollowups?.isOpen();
+    if (editingNow()) return;
     const data = await request("/api/email-agent/overview");
+    if (editingNow()) return;
+    await window.SamanthaEmailFollowups?.refresh();
+    if (editingNow()) return;
     const last = data.schedule.completed_at;
     const pushcut = data.pushcut || {};
     if (!pushcutDirty && !pushcutBusy) {
