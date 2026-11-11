@@ -65,7 +65,7 @@ function fixture({variants = {}, initial = null, cachedDraft = null, roomBasis =
         const captured=clone(jobs[selected]);
         if (selected==='A' && holdStatusA) await holdStatusA;
         result={ok:true,enabled:true,image_generation:true,model:'approved-model',jobs:captured,
-          brief:{changes:draft.prompt,preserve:draft.fixed_elements,unresolved:[],revision:draft.revision,
+          brief:{title:draft.title,changes:draft.prompt,preserve:draft.fixed_elements,unresolved:[],revision:draft.revision,
             working_image:'Private photo',source_count:basis.plan_source_id?2:1,drawing_count:0,can_generate:true,token:'review-'+draft.revision,room_basis:clone(basis)}};
       } else if (url==='/api/interior/action') {
         if (payload.action==='save_room_basis') {
@@ -341,4 +341,33 @@ test('room basis cache is shared across variants while unsent questions remain s
   const button=f.ids.aiConversation.children[0].children.find(c=>c.tag==='button');await button.click();await flush();
   assert.equal(f.ids.roomMeasurements.value,'Unfinished room measure');
   assert.equal(f.ids.aiText.value,'');assert.equal(f.paid.size,0);
+});
+
+
+test('architect title is visible before generating and can be saved without another chat',async()=>{
+  const f=fixture();await flush();
+  f.draft.title='Koupelna – vana v rohu u okna';f.draft.revision++;
+  f.intervals[0]();await flush();
+  assert.equal(f.ids.draftTitle.value,'Koupelna – vana v rohu u okna');
+  assert.match(f.ids.proposalTitlePreview.textContent,/Koupelna – vana v rohu u okna/);
+  f.ids.draftTitle.value='Koupelna – moje rohová vana';f.ids.draftTitle.listeners.input();
+  assert.equal(f.ids.generateProposal.disabled,true);
+  await f.ids.proposalTitleForm.listeners.submit({preventDefault(){}});await flush();
+  assert.equal(f.draft.title,'Koupelna – moje rohová vana');
+  assert.match(f.ids.variantTitle.textContent,/Koupelna – moje rohová vana/);
+  assert.match(f.ids.notesContext.textContent,/Koupelna – moje rohová vana/);
+  assert.match(f.ids.proposalTitlePreview.textContent,/Koupelna – moje rohová vana/);
+  assert.equal(f.ids.generateProposal.disabled,false);
+  assert.equal(f.calls.filter(c=>c.url==='/api/interior/ai/start').length,0);
+  await f.ids.generateProposal.click();await flush();
+  const sends=f.calls.filter(c=>c.url==='/api/interior/ai/start');assert.equal(sends.length,1);
+  assert.equal(sends[0].payload.mode,'image');assert.equal(f.paid.size,1);
+});
+
+test('private proposed title is rendered as text and changing it never submits a paid turn',async()=>{
+  const f=fixture();await flush();
+  f.draft.title='<img src=x onerror=evil()> – návrh';f.draft.revision++;
+  f.intervals[0]();await flush();
+  assert.match(f.ids.proposalTitlePreview.textContent,/<img src=x onerror=evil\(\)>/);
+  assert.equal(f.ids.proposalTitlePreview.innerHTML,'');assert.equal(f.paid.size,0);
 });

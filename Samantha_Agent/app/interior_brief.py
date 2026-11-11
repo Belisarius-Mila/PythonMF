@@ -2,9 +2,11 @@
 from __future__ import annotations
 
 import json
+import copy
 
 from app.interior_atelier import AtelierError, _fingerprint, _text
 from app.interior_room_basis import room_basis, effective_sources
+from app.interior_titles import TITLE_PROTOCOL, proposal_title, fallback_title, unique_proposal_title
 
 BRIEF_PROTOCOL = "interior-brief-v1"
 BLOCKING = {"queued", "running", "delivery_unknown", "result_ready"}
@@ -18,6 +20,22 @@ CHAT_RESPONSE_SCHEMA = {
                       "unresolved": {"type": "array", "items": {"type": "string"}}}},
     },
 }
+NAMED_CHAT_RESPONSE_SCHEMA = copy.deepcopy(CHAT_RESPONSE_SCHEMA)
+NAMED_CHAT_RESPONSE_SCHEMA["properties"]["brief"]["required"].append("title")
+NAMED_CHAT_RESPONSE_SCHEMA["properties"]["brief"]["properties"]["title"] = {"type": "string"}
+TITLE_BRIEF_INSTRUCTIONS = """
+Souhrn brief navíc obsahuje title: krátký český název ve tvaru
+„Typ místnosti – hlavní schválená změna“, například „Koupelna – vana v rohu u okna“.
+Vycházej z brief.changes, ne z nevyřešených úvah. Typ místnosti určuj z podkladů
+nebo zadání; osobní pojmenování místnosti nemusí být její funkční typ.
+Zpravidla 5–10 slov, nejvýše 80 znaků, bez marketingu a bez číslování variant.
+Neopisuj celý prompt, neslibuj rozměrovou proveditelnost. Pouhá otázka nebo
+„co kdyby“ nemění záměr ani dosavadní current_title, pokud už existuje.
+Je-li current_title prázdný a changes už obsahuje zadání, připrav název z něj.
+Při nové dohodnuté změně
+uprav i název podle aktuálního souhrnu. Pokud ještě není zadání, může být title
+prázdný. Jde pouze o název pro galerii, ne text, který se má kreslit do obrázku.
+"""
 CHAT_BRIEF_INSTRUCTIONS = """
 Rozhovor současně připravuje jeden návrh zadání pro příští obrázek. Vrať pouze
 JSON podle schématu: answer je přirozená česká odpověď; brief.changes shrnuje
@@ -36,35 +54,50 @@ vybraných referencí a kreslených poznámek. Historie diskuse není obrazové 
 changes jsou schválené změny a preserve podmínky zachování. unresolved nejsou
 nová rozhodnutí: příslušné části ponech podle výchozího obrázku a neprezentuj
 neověřené rozměry jako jisté. Nevymýšlej dodatečné změny z dřívějších úvah.
+proposal_title je pouze název v galerii, nevkládej jej jako text do obrázku.
 """
 
 
-def validate_brief(value):
-    if not isinstance(value, dict) or set(value) != {"changes", "preserve", "unresolved"}:
+def validate_brief(value, *, named=False):
+    fields = {"changes", "preserve", "unresolved"} | ({"title"} if named else set())
+    if not isinstance(value, dict) or set(value) != fields:
         raise AtelierError("Souhrn architekta nemá úplný formát.")
     unresolved = value["unresolved"]
     if not isinstance(unresolved, list) or len(unresolved) > 20:
         raise AtelierError("Souhrn obsahuje nepovolený seznam nejasností.")
-    return {"changes": _text(value["changes"], 12000), "preserve": _text(value["preserve"], 2000),
-            "unresolved": [_text(item, 500, required=True) for item in unresolved]}
+    brief = {"changes": _text(value["changes"], 12000), "preserve": _text(value["preserve"], 2000),
+             "unresolved": [_text(item, 500, required=True) for item in unresolved]}
+    if named:
+        brief["title"] = proposal_title(value["title"], required=bool(brief["changes"]))
+    return brief
 
 
-def parse_chat_answer(answer):
+def parse_chat_answer(answer, *, named=False):
     try:
         value = json.loads(answer)
         if not isinstance(value, dict) or set(value) != {"answer", "brief"}:
             raise ValueError("shape")
-        return _text(value["answer"], 100000, required=True), validate_brief(value["brief"])
+        return _text(value["answer"], 100000, required=True), validate_brief(value["brief"], named=named)
     except (ValueError, TypeError) as error:
         raise AtelierError("Architekt nepředal ověřený souhrn zadání.") from error
 
 
-def brief_basis(room, base_id, draft):
-    basis = {"draft": {k: v for k, v in draft.items() if k != "revision"},
+def brief_basis(room, base_id, draft, *, include_title=True):
+    excluded = {"revision"} | (set() if include_title else {"title"})
+    basis = {"draft": {k: v for k, v in draft.items() if k not in excluded},
              "notes": [n for n in room["notes"] if n["base_id"] == base_id]}
     if "room_basis" in room:
         basis["room_basis"] = room_basis(room)
     return _fingerprint(basis)
+
+
+def applied_brief_matches(job, room, base_id, draft):
+    if job.get("title_protocol") == TITLE_PROTOCOL:
+        return job.get("applied_basis") == brief_basis(room, base_id, draft, include_title=False)
+    # Historical proposals pinned the title together with content. Permit a later
+    # name-only edit by comparing their original title; all content stays pinned.
+    original_title = job.get("context", {}).get("draft", {}).get("title", draft["title"])
+    return job.get("applied_basis") == brief_basis(room, base_id, {**draft, "title": original_title})
 
 
 def brief_view(room, base_id, draft, project_id, room_id):
@@ -82,7 +115,7 @@ def brief_view(room, base_id, draft, project_id, room_id):
         if candidate:
             summary = candidate
             origin = "architect"
-            stale = latest.get("applied_basis") != brief_basis(room, base_id, draft)
+            stale = not applied_brief_matches(latest, room, base_id, draft)
             fixed_changed = candidate["preserve"] != latest["context"].get("current_brief", {}).get("preserve", "")
         if latest["status"] != "completed" or not candidate:
             stale = True
@@ -103,12 +136,13 @@ def brief_view(room, base_id, draft, project_id, room_id):
             reason = "Popiš architektovi požadované změny; připraví souhrn zadání."
         elif len(selected) > 6:
             reason = "Vyber nejvýše šest obrazových podkladů včetně společného půdorysu."
+    title = unique_proposal_title(room, draft["title"] or fallback_title(room, summary["changes"]))
     token = _fingerprint({"protocol": BRIEF_PROTOCOL, "project_id": project_id, "room_id": room_id,
-        "base_id": base_id, "draft": draft, "brief": summary,
+        "base_id": base_id, "draft": draft, "brief": summary, "title": title,
         "proposal_id": latest["id"] if latest else "", "proposal_status": latest["status"] if latest else "",
         "files": {i: room["sources"][i]["files"] for i in selected if i in room["sources"]},
         "basis": brief_basis(room, base_id, draft)})
-    return {**summary, "token": token, "revision": draft["revision"], "stale": stale,
+    return {**summary, "title": title, "token": token, "revision": draft["revision"], "stale": stale,
             "can_generate": not bool(reason), "reason": reason, "origin": origin,
             "proposal_id": latest["id"] if latest else "", "fixed_changed": fixed_changed,
             "working_image": source["title"] if source else "",

@@ -26,7 +26,7 @@ class InteriorBriefTests(unittest.TestCase):
         return self.payload(expected_revision=self.brief()['revision'], brief_protocol=BRIEF_PROTOCOL, **values)
 
     def propose(self, **values):
-        brief = {'changes': 'Vyměň obklad', 'preserve': 'Dveře', 'unresolved': ['Přesun vany zatím nerozhodnutý.'], **values}
+        brief = {'title':'Koupelna – světlý obklad', 'changes': 'Vyměň obklad', 'preserve': 'Dveře', 'unresolved': ['Přesun vany zatím nerozhodnutý.'], **values}
         self.driver.answer = json.dumps({'answer': 'Připravil jsem souhrn ke kontrole.', 'brief': brief})
         payload = self.request()
         self.ai.start(payload)
@@ -49,7 +49,7 @@ class InteriorBriefTests(unittest.TestCase):
         self.ai.start(payload)
         self.queue.pop()()
         job = self.driver.calls[-1][0]
-        self.assertEqual(job['context']['approved_brief'], proposed)
+        self.assertEqual(job['context']['approved_brief'], {k:v for k,v in proposed.items() if k!='title'})
         self.assertEqual(job['context']['question'], proposed['changes'])
         self.assertEqual(job['context']['history'], [])
         self.assertEqual(job['context']['notes'], [])
@@ -95,14 +95,14 @@ class InteriorBriefTests(unittest.TestCase):
         self.assertEqual(len(self.queue), 1)
 
     def test_late_chat_cannot_overwrite_a_newer_saved_draft(self):
-        self.driver.answer = json.dumps({'answer':'Návrh.', 'brief':{'changes':'AI změna','preserve':'Dveře','unresolved':[]}})
+        self.driver.answer = json.dumps({'answer':'Návrh.', 'brief':{'title':'Koupelna – změna obkladu','changes':'AI změna','preserve':'Dveře','unresolved':[]}})
         self.ai.start(self.request())
-        draft = copy.deepcopy(self.draft); draft['title'] = 'Novější místní práce'
+        draft = copy.deepcopy(self.draft); draft.update(title='Novější místní práce',prompt='Novější vlastní zadání')
         self.action('save_draft', project_id=self.project, room_id=self.room, base_id='base', expected_revision=1, draft=draft)
         self.queue.pop()()
         actual = self.store.state(self.project, self.room)['draft']
         self.assertEqual(actual['title'], 'Novější místní práce')
-        self.assertEqual(actual['prompt'], self.draft['prompt'])
+        self.assertEqual(actual['prompt'], 'Novější vlastní zadání')
         self.assertTrue(self.brief()['stale'])
         self.assertFalse(self.brief()['can_generate'])
 

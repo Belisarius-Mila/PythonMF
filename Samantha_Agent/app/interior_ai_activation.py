@@ -60,7 +60,7 @@ def role_consumer_readiness(controller=None):
 
 
 def source_digest():
-    paths = ("app/interior_room_basis.py", "app/interior_brief.py", "app/interior_ai.py", "app/interior_ai_activation.py", "app/codex_appserver.py", "app/communication/agent_roles.py", "app/interior_atelier.py")
+    paths = ("app/interior_titles.py", "app/interior_room_basis.py", "app/interior_brief.py", "app/interior_ai.py", "app/interior_ai_activation.py", "app/codex_appserver.py", "app/communication/agent_roles.py", "app/interior_atelier.py")
     return digest({path: hashlib.sha256((PROJECT / path).read_bytes()).hexdigest() for path in paths})
 
 
@@ -76,7 +76,7 @@ def execution_digest():
                 or getattr(node, "name", None) in {"new_client", "selected_role", "CodexInteriorDriver"}
                 or isinstance(node, ast.Assign) and any(isinstance(t, ast.Name) and t.id == "INSTRUCTIONS" for t in node.targets)):
             selected.append(ast.dump(node, include_attributes=False))
-    return digest({"room_basis": hashlib.sha256((PROJECT / "app/interior_room_basis.py").read_bytes()).hexdigest(), "brief": hashlib.sha256((PROJECT / "app/interior_brief.py").read_bytes()).hexdigest(), "client": hashlib.sha256((PROJECT / "app/codex_appserver.py").read_bytes()).hexdigest(),
+    return digest({"titles": hashlib.sha256((PROJECT / "app/interior_titles.py").read_bytes()).hexdigest(), "room_basis": hashlib.sha256((PROJECT / "app/interior_room_basis.py").read_bytes()).hexdigest(), "brief": hashlib.sha256((PROJECT / "app/interior_brief.py").read_bytes()).hexdigest(), "client": hashlib.sha256((PROJECT / "app/codex_appserver.py").read_bytes()).hexdigest(),
         "roles": hashlib.sha256((PROJECT / "app/communication/agent_roles.py").read_bytes()).hexdigest(), "driver": selected})
 
 

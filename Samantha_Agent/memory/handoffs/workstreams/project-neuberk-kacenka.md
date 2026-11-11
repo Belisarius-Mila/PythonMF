@@ -327,3 +327,16 @@ Další krok: Po potvrzeném nasazení obnovit Ateliér, v Podkladech nastavit v
 Navrhované další kroky: Žádné nové; Data, MMTX a existující média zachovat. Nový TVBCP bez dohody nevzniká.
 
 Technický důkaz: Vývojová brána3469 PASS/31 SKIP, cílené130/28 Node PASS a syntetické Safari. Stabilní request_id=interior-room-plan-final-pn-58a18e68-20261110-v1, job_id=f27ad3247565ee066e853a7e50ab4a42. Autorita skutečného push/nasazení: registrovaná soukromá účtenka tohoto job ID a data/private/interior_room_basis_20261110/release/receipt.json; poslední jednorázové ověření verification.json, zarovnání repa alignment.json. Při navázání je načti a použij registrovaný živý audit, nikoli pouze tento index či předávací záznam. Předání samo není potvrzení nasazení. Žádný skutečný AI tah architekta ani změna soukromého půdorysu/měr není součástí p+n. TVBCP vazba pro budoucí Human–Adam zůstává výslovně otevřená.
+
+
+## 2026-11-11 12:25 CET — Popisné názvy nových AI návrhů
+
+Hotovo: Nové AI návrhy mají krátký název ve stylu „Koupelna – vana v rohu u okna“, připravený současně se souhrnem zadání. Před vytvořením je název vidět a lze jej ručně upravit/uložit bez dalšího rozhovoru. Při shodě se přidá číslo, například „· 2“. Existující uložené názvy a podklady se nepřejmenovávají.
+
+Rozhodnutí: Míla schválil název podle typu místnosti a hlavní schválené změny, nikoli podle poslední nerozhodnuté otázky. Název vzniká v téže odpovědi architekta bez samostatného AI volání. Samotná změna názvu nezneplatní obsahový souhrn ani nevyžaduje placený chat, ale mění token potvrzení obrázku. Název je metadata galerie, nemá se kreslit do výsledného obrazu. Pokud ještě není pojmenovaný souhrn, lze předem zkontrolovat a upravit místní název z uloženého zadání; žádný nový placený pokus se kvůli názvu nespouští.
+
+Další krok: Samostatně autorizované p+n; tato změna zatím není nasazená.
+
+Navrhované další kroky: Po vydání lidská přejímka skutečného názvu od architekta. Nový placený pilot ani nový TVBCP nebyly dohodnuté.
+
+Technický důkaz: 143 cílených Python/HTTP/frontend kontrol včetně30 Node scénářů PASS, po drobném sjednocení nadpisu po ručním uložení navíc38 frontend/HTTP kontrol PASS. Nově12 serverových kontraktů, 1 HTTP a2 Node regrese. Nativní Safari synteticky ověřilo nabídnutý název, ruční změnu bez dalšího chatu, dva uložené obrazy se shodným základním názvem a číslováním i oba názvy v galerii. Fake chat1/image2/paid0. Plná brána PASS: 3482 testů, 0 chyb, 31 SKIP, 496,6 s. Číslování probíhá při dokončení v transakci, včetně souběžných výstupů; recover používá původní schválený název a nepřidá variantu ani nový modelový tah. Staré deníky zachovají starý formát/názvy; JSON má samostatný title_protocol a nové striktní schéma. Skutečná data ani Data/MMTX se neměnily. Report reports/interior_proposal_titles_20261111.md, private důkazy data/private/interior_proposal_titles_20261111/. Kanonický handoff a projektová paměť aktualizované; TVBCP vazba pro budoucí Human–Adam zůstává otevřená.

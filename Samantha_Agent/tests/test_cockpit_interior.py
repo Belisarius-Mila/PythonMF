@@ -205,6 +205,26 @@ class CockpitInteriorTests(unittest.TestCase):
             _, body, _ = self.request("/api/interior/state?" + urlencode({"project_id":project,"room_id":room}))
             self.assertNotIn("ai_requests", json.loads(body)["room"])
 
+    def test_named_chat_title_reaches_public_review_with_one_http_request(self):
+        project, room = self.project()
+        _, body, _ = self.command("add_source",project_id=project,room_id=room,title="Photo",kind="photo",data=base64.b64encode(image_bytes()).decode())
+        source=json.loads(body)["asset_id"]
+        draft=self.store.state(project,room)["draft"];draft.pop("revision")
+        self.command("save_draft",project_id=project,room_id=room,base_id="base",expected_revision=0,
+                     draft={**draft,"source_ids":[source],"image_source_id":source,"prompt":"Vana u okna"})
+        driver=FakeDriver();queue=[]
+        driver.answer=json.dumps({"answer":"Připraveno.","brief":{"title":"Koupelna – vana u okna","changes":"Vana u okna","preserve":"Dveře","unresolved":[]}})
+        service=InteriorAI(self.store,driver=driver,launcher=queue.append,require_activation=False)
+        payload={"project_id":project,"room_id":room,"base_id":"base","expected_revision":1,
+                 "request_id":uuid.uuid4().hex,"message":"Připrav zadání.","mode":"chat","brief_protocol":"interior-brief-v1"}
+        with patch("app.cockpit_interior.INTERIOR_AI",service),patch("app.interior_ai.INTERIOR_AI",service):
+            for _ in range(2):
+                _,body,_=self.request("/api/interior/ai/start",payload);self.assertTrue(json.loads(body)["ok"])
+            self.assertEqual(len(queue),1);queue.pop()()
+            _,body,_=self.request("/api/interior/ai/status?"+urlencode({"project_id":project,"room_id":room}))
+            self.assertEqual(json.loads(body)["brief"]["title"],"Koupelna – vana u okna")
+            self.assertEqual(len(driver.calls),1)
+
     def test_http_room_basis_is_shared_and_rejects_stale_revision(self):
         project, room = self.project()
         _, body, _ = self.command("add_source", project_id=project, room_id=room, title="Room plan", kind="plan",

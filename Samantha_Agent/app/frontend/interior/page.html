@@ -28,6 +28,8 @@
 <p id="visualCaption" class="muted"></p>
 <section class="brief-card" aria-labelledby="briefTitle"><h2 id="briefTitle">Zadání pro příští obrázek</h2>
 <p class="muted">Změny domluv s architektem v rozhovoru. Zde zkontroluj jeho souhrn před vytvořením obrázku.</p>
+<form id="proposalTitleForm"><label>Název nového návrhu<input id="draftTitle" maxlength="120" autocomplete="off" placeholder="Například Koupelna – vana v rohu u okna"></label>
+<button id="saveProposalTitle" type="submit" class="secondary">Uložit název</button></form><p id="proposalTitlePreview" class="muted" role="status"></p>
 <p id="briefContext" class="muted"></p>
 <details><summary>Společný půdorys a míry místnosti</summary><p id="briefRoomBasis" class="brief-text"></p><div id="briefPlanVisual"></div></details>
 <details><summary>Zkontrolovat pracovní obrázek a kresbu</summary><div id="briefVisual"></div></details><h3>Požadované změny</h3><p id="briefChanges" class="brief-text"></p>
@@ -40,7 +42,7 @@
 <button id="draw" type="button" aria-pressed="false">Kreslit poznámky</button>
 <button id="undo" type="button" class="secondary">Zpět poslední tah</button>
 <span class="muted">Kresba označuje požadovanou změnu.</span></div>
-<form id="draftForm"><label>Název návrhu<input id="draftTitle" maxlength="120" autocomplete="off"></label>
+<form id="draftForm">
 <details id="serverComparison" hidden><summary>Porovnat s posledním uloženým zadáním</summary>
 <pre id="serverDraftPreview"></pre><button id="takeServerDraft" type="button" class="secondary">Načíst uložené zadání</button></details>
 <p id="draftStatus" class="muted" role="status"></p><div class="actions">

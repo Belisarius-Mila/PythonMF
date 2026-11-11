@@ -41,3 +41,5 @@ dialog{width:min(480px,calc(100% - 28px));border:1px solid var(--line);border-ra
 .brief-card{padding:16px;margin:16px 0;border:1px solid var(--line);border-radius:8px;background:var(--panel)}.brief-card h3{font-size:14px;margin:16px 0 5px}.brief-text{white-space:pre-wrap;overflow-wrap:anywhere;margin:0}.brief-card button{margin-top:8px}
 
 #roomBasisForm{display:grid;gap:12px;margin-top:12px}#briefPlanVisual .picture{max-width:600px}
+
+#proposalTitleForm{display:flex;align-items:end;flex-wrap:wrap;gap:10px;margin:12px 0}#proposalTitleForm label{flex:1;min-width:220px}

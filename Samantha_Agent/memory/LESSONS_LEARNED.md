@@ -2088,7 +2088,7 @@ prostředí PASS, produkční kód beze změny.
 ### 2026-11-10 — Rozhovor a obrazové zadání potřebují jedno potvrzované shrnutí
 
 - Problém: samostatná pole změnit/zachovat a historie rozhovoru mohou současně instruovat obrazový model a vzájemně si odporovat.
-- Řešení: architekt navrhuje jeden strukturovaný souhrn; nerozhodnuté úvahy drží zvlášť. Člověk potvrdí právě zobrazenou verzi i podklady, server ověří jejich token a do obrazu neposílá staré volné poznámky/historii. Pozdní odpověď nesmí přepsat novější uloženou práci. Společný půdorys a míry patří celé místnosti, automaticky se přikládají a jejich revize váže souhrn i obrazové potvrzení; trvalé mazání musí zohlednit i automatické reference mimo variantový výběr.
+- Řešení: architekt navrhuje jeden strukturovaný souhrn; nerozhodnuté úvahy drží zvlášť. Člověk potvrdí právě zobrazenou verzi i podklady, server ověří jejich token a do obrazu neposílá staré volné poznámky/historii. Pozdní odpověď nesmí přepsat novější uloženou práci. Společný půdorys a míry patří celé místnosti, automaticky se přikládají a jejich revize váže souhrn i obrazové potvrzení; trvalé mazání musí zohlednit i automatické reference mimo variantový výběr. Název nového výsledku je samostatná metadata ze schválených změn; ruční přejmenování nemá vyžadovat placenou obnovu souhrnu. Číslování shod musí být transakční a obnova zachovat původně schválený název.
 - Ověření: syntetické serverové/UI testy změněných podkladů, revize, poznámek, nerozhodnutých otázek, nejistého výsledku a idempotence; Safari potvrdilo celý tok bez placeného modelu. Report `reports/interior_conversation_brief_20261110.md`.
 
 ### 2026-11-10 — Novost slovníčku se ověřuje proti skutečně použitým větám

@@ -19,8 +19,9 @@ from app.file_persistence import FilePersistenceError, atomic_write_json
 from app.interior_atelier import AtelierConflict, AtelierError, InteriorAtelier, REQUEST_RE, _now, _safe_path
 from app.work_repository import RepositoryMutation, WorkRepositoryError
 from app.interior_room_basis import room_basis, effective_sources
+from app.interior_titles import TITLE_PROTOCOL, unique_proposal_title
 from app.interior_brief import (BRIEF_PROTOCOL, CHAT_RESPONSE_SCHEMA, CHAT_BRIEF_INSTRUCTIONS,
-    IMAGE_BRIEF_INSTRUCTIONS, brief_basis, brief_view, parse_chat_answer)
+    IMAGE_BRIEF_INSTRUCTIONS, NAMED_CHAT_RESPONSE_SCHEMA, TITLE_BRIEF_INSTRUCTIONS, brief_basis, brief_view, parse_chat_answer)
 
 PROTOCOL = "interior-ai-v1"
 ACTIVE = {"queued", "running"}
@@ -102,6 +103,8 @@ class CodexInteriorDriver:
             instructions = INSTRUCTIONS
             if job.get("brief_protocol") == BRIEF_PROTOCOL:
                 instructions += CHAT_BRIEF_INSTRUCTIONS if job["mode"] == "chat" else IMAGE_BRIEF_INSTRUCTIONS
+                if job["mode"] == "chat" and job.get("title_protocol") == TITLE_PROTOCOL:
+                    instructions += TITLE_BRIEF_INSTRUCTIONS
             options = dict(cwd=home, model=selected["model"], developer_instructions=instructions,
                 base_instructions=instructions, config_overrides=overrides,
                 permission_profile=profile, approval_policy="never")
@@ -111,7 +114,10 @@ class CodexInteriorDriver:
             else:
                 thread = client.start_thread(ephemeral=False, **options)
             on_thread(thread)
-            response_options = {"output_schema": CHAT_RESPONSE_SCHEMA} if job.get("brief_protocol") == BRIEF_PROTOCOL and job["mode"] == "chat" else {}
+            response_options = {}
+            if job.get("brief_protocol") == BRIEF_PROTOCOL and job["mode"] == "chat":
+                response_options["output_schema"] = (
+                    NAMED_CHAT_RESPONSE_SCHEMA if job.get("title_protocol") == TITLE_PROTOCOL else CHAT_RESPONSE_SCHEMA)
             receipt = client.send_text(thread_id=thread, text=json.dumps(job["context"], ensure_ascii=False),
                 client_message_id="atelier-" + job["id"], model=selected["model"], effort=selected["reasoning_effort"],
                 local_image_paths=tuple(images), approval_policy="never", permission_profile=profile,
@@ -285,10 +291,10 @@ class InteriorAI:
             if new_protocol:
                 value = {k: copy.deepcopy(summary[k]) for k in ("changes", "preserve", "unresolved")}
                 if payload["mode"] == "chat":
-                    context.update(current_brief=value, brief_stale=summary["stale"])
+                    context.update(current_brief=value, current_title=draft["title"], brief_stale=summary["stale"])
                 else:
                     # Only the explicitly reviewed summary can instruct the image tool.
-                    context.update(question=value["changes"], approved_brief=value, history=[], notes=[])
+                    context.update(question=value["changes"], approved_brief=value, proposal_title=summary["title"], history=[], notes=[])
             if len(json.dumps(context, ensure_ascii=False)) > 64000:
                 raise AtelierError("Kontext je příliš dlouhý. Připrav kratší zadání nebo novou variantu.")
             job = {"id": job_id, "base_id": base_id, "fingerprint": fingerprint, "mode": payload["mode"],
@@ -298,7 +304,8 @@ class InteriorAI:
                 "image_count": len(inputs), "status": "queued", "run_nonce": self.nonce,
                 "created_at": _now(), "answer": "", "variant_id": ""}
             if new_protocol:
-                job.update(brief_protocol=BRIEF_PROTOCOL, brief_basis=brief_basis(room, base_id, draft))
+                job.update(brief_protocol=BRIEF_PROTOCOL, title_protocol=TITLE_PROTOCOL,
+                           brief_basis=brief_basis(room, base_id, draft, include_title=False))
                 if payload["mode"] == "image":
                     job["message"] = "Vytvořit podle schváleného zadání."
             def claim(current):
@@ -371,7 +378,7 @@ class InteriorAI:
         proposal, brief_error = None, False
         if job.get("brief_protocol") == BRIEF_PROTOCOL and job["mode"] == "chat":
             try:
-                answer, proposal = parse_chat_answer(answer)
+                answer, proposal = parse_chat_answer(answer, named=job.get("title_protocol") == TITLE_PROTOCOL)
             except AtelierError:
                 brief_error = True
                 answer = "Architekt nepředal ověřený souhrn zadání. Upřesni požadavek v rozhovoru; nic se nevytvořilo."
@@ -395,24 +402,31 @@ class InteriorAI:
             if job.get("brief_protocol") == BRIEF_PROTOCOL and job["mode"] == "chat":
                 target.update(brief_proposal=proposal, brief_error=brief_error)
                 current_draft = self.store._draft(room, job["base_id"])
-                if proposal and brief_basis(room, job["base_id"], current_draft) == job["brief_basis"]:
+                named = job.get("title_protocol") == TITLE_PROTOCOL
+                if proposal and brief_basis(room, job["base_id"], current_draft, include_title=not named) == job["brief_basis"]:
                     updated = {**current_draft, "prompt": proposal["changes"], "fixed_elements": proposal["preserve"],
                                "revision": current_draft["revision"] + 1}
+                    if named and current_draft["title"] == job["context"]["draft"]["title"]:
+                        updated["title"] = proposal["title"]
                     room["drafts"][job["base_id"]] = updated
                     target.update(applied_revision=updated["revision"],
-                                  applied_basis=brief_basis(room, job["base_id"], updated))
+                                  applied_basis=brief_basis(room, job["base_id"], updated, include_title=not named))
             if job["mode"] == "image":
                 if len(room["variants"]) + len(images) > 200:
                     raise AtelierError("Místnost už obsahuje maximální počet variant. Výsledek AI zůstává zachovaný.")
                 for index, image in enumerate(images, 1):
-                    source = self.store._add_source(room, {"title": "AI návrh", "kind": "inspiration",
+                    draft = job["context"]["draft"]
+                    if job.get("title_protocol") == TITLE_PROTOCOL:
+                        title = unique_proposal_title(room, job["context"]["proposal_title"])
+                    else:
+                        title = draft["title"] or "AI návrh"
+                        if len(images) > 1:
+                            title += f" · varianta {index}"
+                    source_title = title if job.get("title_protocol") == TITLE_PROTOCOL else "AI návrh"
+                    source = self.store._add_source(room, {"title": source_title, "kind": "inspiration",
                         "data": image["result"]}, _now())
                     variant_id = uuid.uuid4().hex
                     variant_ids.append(variant_id)
-                    draft = job["context"]["draft"]
-                    title = draft["title"] or "AI návrh"
-                    if len(images) > 1:
-                        title += f" · varianta {index}"
                     room["variants"][variant_id] = {k: copy.deepcopy(v) for k, v in draft.items() if k != "revision"} | {
                         "id": variant_id, "parent_id": None if job["base_id"] == "base" else job["base_id"],
                         "title": title, "kind": "ai_proposal", "created_at": _now(),

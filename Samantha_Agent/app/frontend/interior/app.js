@@ -90,7 +90,7 @@
   function setBusy(value) {
     busy = value;
     const locked = value || loading;
-    ["projectSelect","roomSelect","newProject","newRoom","firstProject","refresh","uploadSources","confirmCreate","saveDraft","saveVariant","saveSourceSelection","noteText","roomPlanSelect","roomMeasurements","saveRoomBasis","takeSavedRoomBasis"].forEach(id => $(id).disabled = locked);
+    ["projectSelect","roomSelect","newProject","newRoom","firstProject","refresh","uploadSources","confirmCreate","saveDraft","saveVariant","saveSourceSelection","noteText","draftTitle","saveProposalTitle","roomPlanSelect","roomMeasurements","saveRoomBasis","takeSavedRoomBasis"].forEach(id => $(id).disabled = locked);
     $("noteForm").querySelector("button").disabled = locked;
     $("draftForm").querySelectorAll("input,textarea").forEach(el => el.disabled = locked);
     $("sourceFiles").disabled = locked;
@@ -234,6 +234,9 @@
     const locked = !aiState.enabled || !count || busy || loading || aiSending || aiBlocked() || Boolean(pending);
     $("askArchitect").disabled = locked || basisDirty;
     const brief = aiState.brief;
+    $("proposalTitlePreview").textContent = dirty ? "Neuložené úpravy. Po uložení se ověří výsledný název." :
+      "Uloží se jako: " + (brief?.title || draft.title || "název podle zadání");
+    $("saveProposalTitle").disabled = busy || loading || aiSending || !dirty;
     const unsent = Boolean($("aiText").value.trim());
     const reviewable = brief && brief.revision === revision && !dirty && !basisDirty && (brief.room_basis?.revision || 0) === savedBasis.revision;
     $("briefContext").textContent = brief ? `Pracovní obrázek: ${brief.working_image || "nevybraný"} · podkladů: ${brief.source_count} · tahů kresby: ${brief.drawing_count}. Reference: ${(brief.references || []).join(", ") || "žádné další"}` : "Načítám souhrn…";
@@ -247,7 +250,7 @@
     $("briefChanges").textContent = brief?.changes || "Zatím není zadání. Napiš architektovi, co chceš upravit.";
     $("briefPreserve").textContent = brief?.preserve || "Bez dalších podmínek zachování.";
     $("briefUnresolved").textContent = brief?.unresolved?.length ? brief.unresolved.join("\n") : "Žádné otevřené otázky.";
-    $("briefStatus").textContent = basisDirty ? "Nejprve ulož společný půdorys a míry místnosti. Rozpracované změny se ještě nepřikládají." : dirty ? "Nejprve ulož rozpracované podklady nebo kresbu. Původní souhrn může vyžadovat upřesnění s architektem." :
+    $("briefStatus").textContent = basisDirty ? "Nejprve ulož společný půdorys a míry místnosti. Rozpracované změny se ještě nepřikládají." : dirty ? "Nejprve ulož název nebo rozpracované úpravy. Změna podkladů či kresby může vyžadovat upřesnění s architektem." :
       unsent ? "Máš rozepsanou zprávu. Nejdříve ji prober s architektem, nebo ji odstraň." :
       !reviewable ? "Ověřuji aktuální verzi zadání…" : brief.reason ||
       (brief.fixed_changed ? "Architekt navrhl změnu podmínek zachování. Před vytvořením ji zkontroluj." : "Návrh zadání je připravený ke kontrole.");
@@ -526,6 +529,9 @@
     status("Načtené poslední uložené zadání.");
   });
   [["draftTitle","title"]].forEach(([id,key]) => $(id).addEventListener("input", () => { draft[key] = $(id).value; changed(); }));
+  $("proposalTitleForm").addEventListener("submit", event => { event.preventDefault(); perform(async () => {
+    await save(); render(); await refreshAI(); status("Název dalšího návrhu je uložený.");
+  }); });
   $("draftForm").addEventListener("submit", event => { event.preventDefault(); perform(async () => { await save(); await refreshAI(); status("Rozpracované zadání je uložené."); }); });
   $("saveSourceSelection").addEventListener("click", () => perform(async () => { await save(); await refreshAI(); status("Výběr podkladů je uložený."); }));
   $("saveVariant").addEventListener("click", () => perform(async () => {
