@@ -34,3 +34,15 @@ Změna zůstává pouze v Datově worktree data/parallel-20261104. Main a služb
 2026-11-11 20:18 CET: Míla zadal Terra p+n. Data44bfbb5f integrována do čistého main po f6770814, původní změny zachované. Request data-mmtx-friends-playback-44bfbb5f-20261111-v1; jeden submit_release(wait=True) až po commitu a kontrolách. Tato sekce ještě není účtenkou push/nasazení.
 
 Main integrační kontrola: 40 cílených testů OK / 6,460 s a rychlá statická brána OK. Přesné 8 webových souborů z Data44bfbb5f, přidání jediného testového modulu do současné main brány zachovalo všechny její ostatní moduly.
+
+## Servisní brána a oprava testu
+
+První účtenka 504e36351eba4bb2b6f6b53e90977f22 skončila attention / push_state=uncertain / deployment_state=not_started. Read-only git ls-remote potvrdilo GitHub f6770814, main d35e81a6 zůstal čistý a neodeslaný.
+
+Rozhodnutí: Plná servisní brána3487 testů /607,383 s měla právě jednu chybu: nový Friends test hledal Node jen v PATH služby. Používá nyní existující scripts.cockpit_quality_gate.node_binary() a sám vynucuje systémový PATH. Žádná instalace, restart, změna přehrávače ani vyřazení testu. Původní job/účtenka se neopakuje; po opravě a přesném novém auditu bude nové předání se suffixem v2 v již schváleném rozsahu p+n.
+
+Další krok: Dokončit cílenou kontrolu se servisním PATH a statickou bránu, uložit opravu, zarovnat čisté profily a předat nový přesný balíček jednou přes submit_release(wait=True).
+
+Navrhované další kroky: Po nové konečné účtence ověřit GitHub/Pages a veřejné bajty; fyzická hlasová a iPhone přejímka samostatně.
+
+Technický důkaz: Po opravě 40 cílených testů se systémovým PATH OK /5,417 s, Data2/2 OK /0,366 s, obě statické brány OK. Původní soukromý gate log zachovaný; veřejná bezpečná účtenka v mmtx_friends_playback_release_attempt1_20261111.json. MMTX zdroje a původní MP3/obrázky se opravou testu nemění.
