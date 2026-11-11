@@ -11,3 +11,8 @@ class EmailFollowupsFrontendTests(unittest.TestCase):
         result = subprocess.run([node_binary(), str(Path(__file__).with_name("email_followups_frontend.test.cjs"))],
                                 capture_output=True, text=True, timeout=30)
         self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+
+    def test_existing_email_editor_and_calendar_controls(self):
+        result = subprocess.run([node_binary(), str(Path(__file__).with_name("email_agent_frontend.test.cjs"))],
+                                capture_output=True, text=True, timeout=30)
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
