@@ -645,4 +645,4 @@ Tento soubor je rozcestnik dlouhodobe pameti pro Samantha Agent.
 2. Postavit prvni verzi agenta nad OpenAI Agents SDK.
 3. Pozdeji pridat RAG nad exporty z ChatGPT.
 
-- `projects/automated_recurring_tasks.md`; `handoffs/colors_numbers_owl_pages_artifact_checkpoint_2026_07_27.md` — 12.11.: jednorázová promluva pro pátek13.11. připravená, owl_131126.mp3 /228672 B /38,112 s,25 cílených PASS. Automatika živě ověřená vypnutá; veřejné nasazení zatím čeká na účtenku.
+- `projects/automated_recurring_tasks.md`; `handoffs/colors_numbers_owl_pages_artifact_checkpoint_2026_07_27.md` — 12.11.: jednorázová promluva pro pátek13.11. veřejně nasazená9e60a4f3/Terra8b4a47aa,3730 PASS. Pages43275566977 a veřejná shoda MP3 /228672 B /38,112 s ověřené; automatika zůstává vypnutá. Poslech nepotvrzený, e-mailový proud obnoven.

@@ -604,3 +604,25 @@ Technický důkaz: SHA-256 MP3
 10c11f98143a5bcdf82debf851b6dbb6fb7110e4e4e5bf6e4ae40bb90e7d85d5;
 logs/owl_20261113_targeted.log a logs/owl_20261113_static_gate.log.
 Text promluvy se do paměťového zápisu nekopíruje.
+
+
+## 2026-11-12 19:03 CET — Pátek třináctého veřejně nasazený
+
+Hotovo: Jednorázová promluva pro 13. listopadu je veřejně dostupná v přehrávači
+ColorsAndNumbers. Veřejná MP3 má 228 672 B / 38,112 s, HTTP 200 / audio/mp3,
+přesnou shodu s připraveným souborem a úplné dekódování FFmpeg PASS.
+
+Rozhodnutí: Automatika zůstává vypnutá. Živé Pages workflow bez cronu/TTS, místní
+rutina sovu nevolá. Žádná aktivace, mazání ani vypínání jiných služeb.
+
+Další krok: Technické nasazení je hotové; uživatelský poslech není potvrzený.
+Navrhované další kroky: Navázat původní e-mailovou přejímkou A+C. Aktivní proud
+project-email-cases byl po Pages vydání registrovaně obnoven.
+
+Technický důkaz: Vydaný zdroj9e60a4f35b58a21cd790575b01851ab4203ca307,
+Terra job8b4a47aa42685fef8b653d289fe8c8d9 completed/push+deploy confirmed,
+3730 testů PASS /727,4 s, protected_services_unchanged=true. Pages43275566977
+success nad stejným headem, deployment7745438794. Veřejný app.js?v=dc601cb59910eefd
+vybírá owl_131126.mp3?v=20261113a-10c11f98143a. Účtenka mimo Git:
+data/daily_3am/receipts/20261113_publication.json. Tento výsledkový zápis je
+lokální checkpoint a neopakuje publikaci.
