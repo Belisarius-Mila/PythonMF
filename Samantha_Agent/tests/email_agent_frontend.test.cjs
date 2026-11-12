@@ -45,8 +45,13 @@ function find(element, label) {
   let visibilityHold = null;
   let visibilityFailure = null;
   let savedHours = null;
+  let followupsOpen = false, followupsRefreshes = 0, followupsHold = null;
+  const followupAttachments = [];
   const context = {document: {getElementById: id => ids[id], createElement: tag => new Element(tag)},
     window: {setInterval: fn => intervals.push(fn), confirm: () => confirmChoice,
+      SamanthaEmailFollowups: {isOpen: () => followupsOpen,
+        refresh: async () => {followupsRefreshes++; if (followupsHold) await followupsHold;},
+        attach: (card, item) => followupAttachments.push(item.id), syncCards() {}},
       SamanthaCalendarDraft: {isOpen: () => false, open: async item => calendarOpens.push(item.id)}},
     fetch: async (url, options) => {
       const payload = options?.body ? JSON.parse(options.body) : null;
@@ -96,6 +101,20 @@ function find(element, label) {
   await flush();
   assert.match(ids.cards.textContent, /CELÉ TĚLO A KONEC/);
   assert.match(ids.cards.textContent, /<img src=x onerror=alert\(1\)>/);
+  assert.equal(followupsRefreshes, 1);
+  assert.deepEqual(followupAttachments, ['important']);
+  followupsOpen = true;
+  const callsBeforeFollowupEdit = calls.length;
+  await intervals[0]();
+  assert.equal(calls.length, callsBeforeFollowupEdit, 'The shared timer preserves an open follow-up form');
+  followupsOpen = false;
+  let releaseFollowupRead;
+  followupsHold = new Promise(resolve => {releaseFollowupRead = resolve;});
+  const beforeFollowupCard = ids.cards.children[0];
+  const duringFollowupRefresh = intervals[0]();await flush();
+  followupsOpen = true;releaseFollowupRead();await duringFollowupRefresh;
+  assert.equal(ids.cards.children[0], beforeFollowupCard, 'Opening the form during a read prevents late page replacement');
+  followupsOpen = false;followupsHold = null;
   assert.doesNotMatch(ids.cards.textContent, /Návrh do kalendáře je připravený/);
   data.cards[0].calendar_suggestion = {status: 'ready'};
   await intervals[0]();

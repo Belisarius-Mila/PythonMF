@@ -104,6 +104,17 @@ class EmailFollowupsHTTPTests(unittest.TestCase):
         code, _, _ = self.request("/api/email-agent/followups?id=" + "f" * 32)
         self.assertEqual(code, 404)
 
+    def test_explicit_http_detail_shows_cached_source_after_card_is_dismissed(self):
+        _, result, _ = self.request(payload=self.command())
+        value = result["followup"]
+        self.worker.dismiss([self.message.item_id], action="dismiss")
+        before = self.worker.repository.path.read_bytes()
+        code, detail, headers = self.request("/api/email-agent/followups?id=" + value["id"])
+        self.assertEqual(code, 200)
+        self.assertEqual(detail["source_message"]["body_text"].strip(), "Celá zpráva.")
+        self.assertIn("no-store", headers["Cache-Control"])
+        self.assertEqual(self.worker.repository.path.read_bytes(), before)
+
     def test_bad_queries_payloads_and_foreign_origin_never_write(self):
         before = self.worker.repository.path.read_bytes()
         for path in ["/api/email-agent/followups?root=/tmp", "/api/email-agent/followups?id=x&id=y",

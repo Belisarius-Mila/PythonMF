@@ -269,3 +269,13 @@ ani modelový tah. Status/readiness jsou nadále bez zápisu a bez připojení.
 Příprava navíc ověří místní podmínky před startem závislosti. Automatické
 e-mailové posuzování zůstává pouze součástí původně aktivovaného hodinového
 provozu se stejnými rezervami, kurzory a ochranou nejistého výsledku.
+
+
+## 2026-11-12 — Výslovné zobrazení uloženého zdroje hlídání
+
+Stejná čtecí schopnost email_followups_read při GET /api/email-agent/followups?id=
+vrací navíc source_message (jen sender/subject/date/body_text). Čte jediný
+snapshot existující cache, ověří účet/provider/složku/UIDVALIDITY/UID/content_digest
+proti původní vazbě; chybějící či jiný zdroj vrací null. Žádný IMAP, cesta od
+klienta, model ani souborový zápis. Obecný přehled těla neobsahuje, žádná kopie
+těla nevzniká v evidenci followups. Frontend používá pouze textContent.

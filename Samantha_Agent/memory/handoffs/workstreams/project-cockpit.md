@@ -1,4 +1,29 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
+## Hlídání záležitostí — ruční UI etapy 2, 2026-11-12 10:37 CET
+
+Lokálně dokončený formulář Hlídat tuto záležitost, přepínač Hlídání/Vyřízeno,
+úprava cíle/kroku/času, obnovení stejné identity a přehled Aktivní/Vyřízené.
+Historie i zdrojový text zůstávají dostupné po skrytí původní e-mailové karty.
+Detail čte výhradně uložený zdroj se shodnou identitou a content_digest,
+bez IMAP a další kopie těla v evidenci hlídání. Nejasný/chybějící zdroj se nenahrazuje.
+
+Ruční evidence není automatický monitor: automatic_monitoring=false a thread_binding=pending.
+Datum se zadává výslovně v Praze; žádný tichý výchozí termín. Formulář zachová
+rozepsané údaje při konfliktu. Nejistý zápis blokuje opakování, po reloadu se
+ověřuje čtením původního operation_id v historii. SessionStorage obsahuje jen
+identitu pokusu a zdroje/záležitosti, ne text e-mailu ani formulář.
+Použitý stávající třicetisekundový refresh, bez dalšího timeru.
+
+Ověřené Node průchody a30 doménových/HTTP testů PASS. Skutečný headless Edge:
+390×844 formulář bez horizontálního přetékání;1280×1000 založení, vyřízení,
+obnovení stejného ID/generace3, skrytí karty a čtení původního zdroje PASS.
+Fyzická iPhone přejímka otevřená. Plná brána PASS: 3529 testů /31 SKIP (516,847 s).
+Pouze lokální vývoj; nové p+n ani aktivace nejsou součástí tohoto kroku.
+Samostatný e-mailový TVBCP dál není dohodnutý; je viditelným dokumentačním
+blokátorem uzavření celého proudu. UI zapsané v existujícím Cockpit handoffu/TVBCP.
+Další vývoj: etapa3 — přesné vazby odpovědí a časové kontroly i bez nové pošty.
+Report: reports/email_followups_ui_20261112.md.
+
 ## Příště nezobrazovat — vývojový snapshot před p+n, 2026-11-12 09:33 CET
 
 Opravená chybně rozdělená hlavička s čárkou v dekódovaném zobrazovaném jménu.
@@ -2441,3 +2466,31 @@ přímá přejímka Mílova prohlížeče nebyla dostupná.
 **Navrhované další kroky:** Fyzická iPhone přejímka lokální hlášky.
 
 **Technický důkaz:** 121 cílených PASS: reálný HTTP kontrakt a Node chyby serveru/sítě vedle akce, dvojklik, restart, vrácení skrytých zpráv, zachování důležité karty, účtu a přesné adresy; skutečné víceadresové a skupinové hlavičky se odmítají. Čtecí náhled konkrétní uložené karty PASS beze změny stavu. Report reports/email_visibility_sender_20261112.md; plná brána a následná publikace doložené odděleně.
+
+
+## 2026-11-12 10:37 CET — Ruční ovládání hlídaných e-mailových záležitostí
+
+**Hotovo:** Lokální formulář, přepínač Hlídání/Vyřízeno, úprava a obnovení téže
+záležitosti, oddělený přehled a historie. Zdrojový e-mail lze výslovně zobrazit
+z uložené cache i po skrytí karty; předem se ověří jeho původní identita.
+
+**Rozhodnutí:** Míla zadal další krok po auditu nedokončeného hlídání. Adam
+převzal zachované kontrakty a doplnil UI přímo; neobnovoval neúspěšný placený
+vývojový pokus. Nové datum se vyplňuje výslovně. Jde pouze o ruční evidenci,
+automatické párování/kontroly a nové p+n tímto krokem nespouští.
+
+**Další krok:** Etapa3 — přiřazování doložených odpovědí a hodinové kontroly
+termínů i bez nové pošty.
+
+**Navrhované další kroky:** Obsahové návrhy dalšího kroku; následné samostatně
+schválené vydání a servisní integrace; fyzická přejímka na Macu/iPhonu.
+Samostatný e-mailový TVBCP nadále vyžaduje dohodu; nevznikl nový obecný dokument.
+
+**Technický důkaz:** Node kontrakt původně FAIL kvůli chybějícímu UI, nyní PASS:
+dvojklik, konflikt, starý GET, ztracená odpověď, reload bez druhého POST,
+503, chybějící sessionStorage, bezpečný text a pražské DST.30 doménových/HTTP
+scénářů PASS; reálný headless Edge390×844 a1280×1000 PASS, včetně celé lifecycle
+a zdroje po skrytí. Plná brána PASS: 3529 testů /31 SKIP (516,847 s).
+Přesné důkazy data/private/email_followups_ui_20261112/, redigovaný report
+reports/email_followups_ui_20261112.md. Žádná skutečná pošta, SMTP, IMAP,
+kalendářový zápis, modelová role, služba ani Data worktree se neměnily.

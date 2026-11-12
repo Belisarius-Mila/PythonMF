@@ -16,6 +16,10 @@ Do <strong>Default Action → URL</strong> vlož níže uvedený odkaz na Cockpi
 </form><p id="pushcutStatus" role="status"></p><p id="pushcutTestStatus" role="status"></p>
 <p>Jedno upozornění na nové důležité zprávy z kontrolní hodiny. Staré karty znovu nezvoní. Test lze poslat i s vypnutou hodinovou službou.</p></details>
 <section aria-labelledby="importantTitle"><h2 id="importantTitle">Důležité zprávy</h2><div id="cards"></div></section>
+<section aria-labelledby="followupsTitle"><h2 id="followupsTitle">Hlídané záležitosti</h2>
+<p id="followupsStatus" role="status">Načítám ruční evidenci…</p>
+<h3>Aktivní</h3><div id="followupsActive"></div>
+<details><summary>Vyřízené</summary><div id="followupsCompleted"></div></details></section>
 <section aria-labelledby="hoursTitle"><h2 id="hoursTitle">Ostatní pošta po hodinách</h2><div id="hours"></div></section>
 <details><summary>Předvolby důležitosti</summary>
 <p>Podobné zprávy od uvedeného odesílatele preferuješ jako nedůležité. Agent dál čte celý obsah a posoudí nové důležité okolnosti.</p>
@@ -24,7 +28,21 @@ Do <strong>Default Action → URL</strong> vlož níže uvedený odkaz na Cockpi
 <p>Pro stejný účet, přesného odesílatele a podobný předmět. Skryje i odpovídající zprávy v dosavadním hodinovém přehledu. Agent dál posuzuje celý e-mail; důležité zprávy se zobrazí. Zrušením pravidla se přehled obnoví.</p>
 <div id="visibilityPreferences"></div></details>
 <details><summary>Uložené zprávy</summary><div id="archived"></div></details>
-</main><dialog id="replyEditor"><form id="replyForm"><h2>Koncept odpovědi</h2><p id="replyRecipient"></p>
+</main><dialog id="followupEditor" aria-labelledby="followupHeading"><form id="followupForm">
+<h2 id="followupHeading">Hlídání záležitosti</h2>
+<p>Zatím jde o ruční evidenci. Automatická kontrola odpovědí ani termínů neběží.</p>
+<label>Záležitost<input id="followupTitle" maxlength="160" required></label>
+<label>Co má být výsledkem<textarea id="followupGoal" rows="3" maxlength="2000" required></textarea></label>
+<label>Další krok<textarea id="followupNextStep" rows="3" maxlength="1000" required></textarea></label>
+<label>Kdo je na řadě<select id="followupWaitingOn"><option value="unknown">Zatím nevíme</option>
+<option value="me">Já</option><option value="other">Druhá strana</option><option value="review">Ke kontrole</option></select></label>
+<label>Čas kontroly · Praha<input id="followupCheckAt" type="datetime-local" required></label>
+<p>Čas je záznam pro budoucí kontrolu, nevytváří kalendářovou událost ani upozornění.</p>
+<p id="followupError" role="status"></p>
+<div class="actions"><button id="followupSave" type="submit">Uložit hlídání</button>
+<button id="followupVerify" type="button" class="secondary" hidden>Ověřit stav</button>
+<button id="followupCancel" type="button" class="secondary">Zrušit</button></div>
+</form></dialog><dialog id="replyEditor"><form id="replyForm"><h2>Koncept odpovědi</h2><p id="replyRecipient"></p>
 <label>Předmět<input id="replySubject" maxlength="998" required></label>
 <label>Odpověď<textarea id="replyBody" rows="12"></textarea></label>
 <p id="replyStatus" role="status"></p>

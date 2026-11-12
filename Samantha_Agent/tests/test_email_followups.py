@@ -85,6 +85,34 @@ class EmailFollowupsTests(unittest.TestCase):
         self.assertEqual(reopened["completed_at"], "")
         self.assertEqual([e["action"] for e in reopened["history"]], ["create", "update", "set_state", "set_state"])
 
+    def test_explicit_source_detail_reads_hidden_cached_message_without_writes(self):
+        value = self.create()
+        self.worker.dismiss([self.message.item_id], action="dismiss")
+        before = self.worker.repository.path.read_bytes()
+        with patch("app.email.continuous_source.IMAPAgentSource.scan", side_effect=AssertionError("IMAP")):
+            detail = self.service.overview({"id": value["id"]})
+        self.assertEqual(detail["source_message"]["header"]["subject"], "Podklady ke schůzce")
+        self.assertIn("PRIVATE BODY", detail["source_message"]["body_text"])
+        self.assertEqual(set(detail["source_message"]), {"header", "body_text"})
+        self.assertNotIn("PRIVATE BODY", str(self.service.overview()))
+        self.assertNotIn("PRIVATE BODY", str(self.worker.status()["followups"]))
+        self.assertEqual(self.worker.repository.path.read_bytes(), before)
+
+    def test_source_detail_rejects_replaced_identity_or_missing_original(self):
+        value = self.create()
+        original = self.worker.repository.read()
+        for key in ("account", "provider", "folder", "uidvalidity", "uid", "content_digest"):
+            document = copy.deepcopy(original)
+            document["items"][self.message.item_id][key] = "different"
+            with patch.object(self.service.repository, "read", return_value=document):
+                self.assertIsNone(self.service.overview({"id": value["id"]})["source_message"])
+        document = copy.deepcopy(original)
+        document["items"].pop(self.message.item_id)
+        with patch.object(self.service.repository, "read", return_value=document):
+            detail = self.service.overview({"id": value["id"]})
+            self.assertIsNone(detail["source_message"])
+            self.assertEqual(detail["followup"]["id"], value["id"])
+
     def test_expired_reopen_requires_new_date_and_failed_command_leaves_no_write(self):
         first = self.create()
         done = self.service.execute(self.state_command(first, "completed"))["followup"]

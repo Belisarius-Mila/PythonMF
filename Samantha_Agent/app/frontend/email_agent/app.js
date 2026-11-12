@@ -7,6 +7,7 @@
   let replyOutcomeLocked = false;
   let pushcutDirty = false;
   let pushcutBusy = false;
+  let refreshGeneration = 0;
   function node(tag, text, className) {
     const element = document.createElement(tag);
     if (text !== undefined) element.textContent = text;
@@ -89,6 +90,8 @@
       await request("/api/email-agent/archive", {id: item.id, proposal_digest: item.proposal_digest, confirmed: true});
     }));
     card.append(buttons);
+    card.id = `email-${item.id}`;
+    window.SamanthaEmailFollowups?.attach(card, item);
     return card;
   }
   function resetConfirmation() {
@@ -116,8 +119,14 @@
     editing = {...current, proposal, proposal_digest: result.proposal_digest};
   }
   async function refresh() {
-    if (editor.open || window.SamanthaCalendarDraft?.isOpen()) return;
+    const editingNow = () => editor.open || window.SamanthaCalendarDraft?.isOpen()
+      || window.SamanthaEmailFollowups?.isOpen();
+    if (editingNow()) return;
+    const generation = ++refreshGeneration;
     const data = await request("/api/email-agent/overview");
+    if (generation !== refreshGeneration || editingNow()) return;
+    await window.SamanthaEmailFollowups?.refresh();
+    if (generation !== refreshGeneration || editingNow()) return;
     const last = data.schedule.completed_at;
     const pushcut = data.pushcut || {};
     if (!pushcutDirty && !pushcutBusy) {
@@ -133,6 +142,7 @@
     if (sourceErrors || data.assessment_errors || data.calendar_suggestion_errors) byId("status").textContent += " Některé kontroly nebo návrhy vyžadují ověření.";
     const cards = byId("cards"); cards.replaceChildren();
     data.cards.forEach(item => cards.append(renderCard(item)));
+    window.SamanthaEmailFollowups?.syncCards();
     if (!data.cards.length) cards.append(node("p", "Žádné důležité zprávy k řešení."));
     const hours = byId("hours"); hours.replaceChildren();
     for (const hour of data.hours) {

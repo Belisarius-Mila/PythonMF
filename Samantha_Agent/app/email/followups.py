@@ -125,19 +125,35 @@ class EmailFollowups:
         query = {} if query is None else query
         if not isinstance(query, dict) or set(query) - {"id"}:
             raise FollowupError("Neplatný dotaz na hlídání.")
-        space = _space(self.repository.read())
+        document = self.repository.read()
+        space = _space(document)
         base = {"ok": True, "version": VERSION,
                 "capabilities": {"manual_lifecycle": True, "automatic_monitoring": False}}
         if "id" in query:
             identity = query["id"]
             if not isinstance(identity, str) or not FOLLOWUP_ID.fullmatch(identity):
                 raise FollowupError("Neplatná identita záležitosti.")
-            return {**base, "followup": _view(_record(space, identity))}
+            value = _record(space, identity)
+            return {**base, "followup": _view(value), "source_message": self._source_message(document, value)}
         values = [_view(_record(space, key)) for key in space["items"]]
         return {**base, "active": sorted((v for v in values if v["state"] == "active"),
                                         key=lambda v: (v["check_at"], v["id"])),
                 "completed": sorted((v for v in values if v["state"] == "completed"),
                                     key=lambda v: (v["completed_at"], v["id"]), reverse=True)}
+
+    @staticmethod
+    def _source_message(document, value):
+        """Read the bound cached source on explicit detail access, never refetch it."""
+        items = document.get("items", {})
+        item = items.get(value["source"]["item_id"]) if isinstance(items, dict) else None
+        keys = ("account", "provider", "folder", "uidvalidity", "uid", "content_digest")
+        if not isinstance(item, dict) or any(item.get(key) != value["source"].get(key) for key in keys):
+            return None
+        header, message = item.get("header"), item.get("message")
+        if not isinstance(header, dict) or not isinstance(message, dict) or not isinstance(message.get("body_text"), str):
+            return None
+        return {"header": {key: header[key] if isinstance(header.get(key), str) else ""
+                           for key in ("sender", "subject", "date")}, "body_text": message["body_text"]}
 
     def execute(self, payload):
         if not isinstance(payload, dict):

@@ -556,6 +556,7 @@ TEST_MODULES = (
     "tests.test_continuous_email_agent",
     "tests.test_email_followups",
     "tests.test_cockpit_email_followups",
+    "tests.test_email_followups_frontend",
     "tests.test_email_visibility_preferences",
     "tests.test_email_proposal_policy",
     "tests.test_email_agent_service",

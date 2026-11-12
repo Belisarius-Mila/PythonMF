@@ -2139,6 +2139,8 @@ prostředí PASS, produkční kód beze změny.
 - Řešení: v doménové transakci držet malé trvalé operation_id + otisk celého normalizovaného příkazu + identitu/revizi výsledku. Před opakováním ověřit otisk; vrátit aktuální projekci a revizi původní operace. Nová změna dál kontroluje expected_revision. Uzavření/obnovení mění generaci pro pozdní výsledky; úložiště ani nejistý požadavek neopravovat založením druhé identity.
 - Ověření: syntetické hlídání přestálo restart, dvojklik, dvě souběžné instance, konflikt revizí, chybu atomického zápisu i vyřazení 258 obecných idempotentních operací; žádný živý model nebo e-mailový úkon.
 
+- Doplnění12.11.: UI musí před POST uchovat pouze malé ID původního pokusu. Po ztracené odpovědi nebo503 čte původní stav/historii, nevytváří nové operation_id ani druhý POST. Chyba tab storage zabrání odeslání;409 uchová draft a vyžaduje vědomé otevření čerstvé revize. Ověřeno Node regresí a skutečným syntetickým UI průchodem.
+
 ### LL-124 — Plánovaná služba musí zajistit svou runtime závislost i bez otevřeného chatu
 
 - Problém: po restartu Macu běžel e-mailový LaunchAgent, ale sdílený App Server
