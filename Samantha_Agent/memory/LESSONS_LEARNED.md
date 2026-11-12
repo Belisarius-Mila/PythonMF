@@ -2157,3 +2157,12 @@ prostředí PASS, produkční kód beze změny.
   sdílený server se stejným business otiskem, nastavením a rolí. Trvalý fix
   vyžaduje i upgrade vlastní instalované kopie; reboot/wake po nasazení je
   samostatná přejímka. Důkaz `reports/email_runtime_boot_20261112.md`.
+
+
+Doplnění12112026 k LL-124 po aktivaci: přesný registrovaný upgrade zachoval
+celý business otisk, nastavení i JSON rolí. Nová instalace7f47a41f má311
+souborů přesně podle manifestu a readiness bez blokátorů. Její vlastní
+approved_selection na izolovaném socketu skutečně spustil nový server
+a při druhém volání převzal stejné PID, Terra/high,0 thread/start a turn/start.
+První produkční check již dokončený slot správně přeskočil (already_completed,0).
+Tento důkaz nenahrazuje skutečný reboot/wake po upgradu.

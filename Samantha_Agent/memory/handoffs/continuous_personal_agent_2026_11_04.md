@@ -1,5 +1,25 @@
 # Průběžný osobní agent — e-mailový provoz a Pushcut
 
+## Aktuální provoz — 2026-11-12 09:14 CET
+
+Oprava7f47a41f je publikovaná a nasazená v Cockpitu; původní p+n
+cfc1c1b1375eb5c46143c98eed93bc38 completed, push/deploy confirmed,
+3520 testů PASS, smoke5/5 a protected_services_unchanged=true.
+Po Mílově přesné globální větě je vlastní hodinová služba registrovaně
+upgradovaná8c83e93b→7f47a41f, installed/owned/loaded/enabled. První
+kontrola09:12:45 CET již dokončený slot správně neopakovala: already_completed,
+0 nových posouzení. Celý business otisk, nastavení a modelové role shodné,
+stará kopie i servisní záloha zachované.
+
+Skutečná instalovaná kopie:311 souborů přesně podle manifestu, readiness bez
+blokátorů. Na izolovaném socketu ověřen nový start a převzetí stejného PID
+přímo přes instalovaný approved_selection, Terra/high, bez thread/start
+a turn/start a bez zásahu do produkčního socketu.
+Skutečný reboot/wake po upgradu neprovedený; dál běžný hodinový provoz.
+Podrobnosti reports/email_runtime_boot_20261112.md, soukromé bezpečné
+účtenky data/private/email_runtime_boot_20261112/.
+
+
 ## Start hodinového agenta po restartu — vývojový snapshot před p+n, 2026-11-12
 
 Po restartu Macu01:16 se obnovil e-mailový LaunchAgent, ale chyběl sdílený
@@ -1417,3 +1437,21 @@ Samostatný TVBCP zůstává výslovně označený dokumentační blokátor uzav
 **Technický důkaz:** 166 cílených testů PASS; plná brána3520 testů OK /31 SKIP (585,445s). Skutečný izolovaný CLI bootstrap/reuse/catalog bez vlákna a modelového tahu. Dnešní registrovaný resume zachoval otisk business stavu, nastavení i roli a obnovil socket; instalovaná kopie zůstává8c83e93b. Dnešní přirozený slot08:00 completed v08:32:01 CET,4 nové zprávy. Report reports/email_runtime_boot_20261112.md rozlišuje místní důkaz, provozní obnovu a dosud neprovedený servisní upgrade.
 
 Předání p+n: request `email-runtime-boot-20261112-v1`, job `cfc1c1b1375eb5c46143c98eed93bc38`; konečný výsledek ověřit z původní účtenky a `logs/email_runtime_boot_release_20261112.json`, nikoli z tohoto předávacího snapshotu.
+
+
+## 2026-11-12 09:14 CET — Oprava nasazená i do vlastní hodinové služby
+
+**Hotovo:** Hlídač nové pošty má ve vlastní běžící instalaci opravu automatického startu chybějícího sdíleného serveru. P+n nasadilo7f47a41f do Cockpitu; po přesné globální větě registrovaný upgrade přepnul také vlastní hodinovou kopii8c83e93b→7f47a41f.
+
+**Rozhodnutí:** Míla výslovně schválil p+n a následně dodal přesnou větu pro připravený servisní upgrade. Model, hodinový režim, business stav a nastavení zůstávají stejné. Žádný nový testovací modelový tah, e-mailové odeslání ani kalendářový zápis.
+
+**Další krok:** Běžný hodinový provoz; při příštím skutečném reboot/wake ověřit samostatné obnovení bez otevření chatu.
+
+**Navrhované další kroky:** Pokračovat původní samostatnou etapou UI hlídání záležitostí; její automatický monitor se tímto neaktivoval.
+
+**Technický důkaz:** P+n cfc1c1b1375eb5c46143c98eed93bc38 completed,25 commitů, publikační brána3520 PASS/642,8s, smoke5/5, code stamp bfe18afa86e45de4, chráněné služby při vydání shodné. Následný upgrade installed/owned/loaded/enabled, první check09:12:45 CET already_completed/0. Úplný business digest, všechny dosavadní položky, hodnoty nastavení a celý JSON rolí shodné.311 instalovaných souborů přesně podle manifestu; izolovaný test nové instalace skutečně spustil a znovu použil stejný server bez thread/start nebo turn/start. Report reports/email_runtime_boot_20261112.md; důkazy upgrade_result.json a installed_verification.json jen ve jmenované private složce. Fyzický reboot/wake po aktivaci nebyl proveden.
+
+Doplňující ověření: start a převzetí stejného App Serveru prošly také v přesném
+PATH a omezeném prostředí nainstalovaného LaunchAgentu. Instalovaná Terra/high,
+0 thread/start a turn/start, produkční socket beze změny; důkaz
+service_environment_verification.json ve stejné soukromé složce.
