@@ -1,4 +1,22 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
+## Předání Will → Data před /new — 2026-11-12 17:56 CET
+
+HA-05 b9ed2ad6 je integrovaný a nasazený v main614abe8b. E-mailové etapy3+4
+jsou vydané, hodinová služba73edf4c8 a monitor zapnuté; pokračuje živá přejímka.
+Žádná nová změna rolí/modelů. Aktuální hlavní práce je test A+C podle TXT v Downloads.
+
+Data vlastní data/parallel-20261104 ve worktree ebbd: HEADb9ed2ad6,26 nezapsaných
+položek HA-06 zachovaných, nejsou v main. Jeho kanonický handoff stále uvádí
+PROBIHA_HA06_FULL; existující ha06_full_gate_final_20261112.log končí
+3669 testů /585,097s OK,5 SKIP. Před checkpointem doložit shodu tohoto důkazu
+s finálním zdrojem a dorovnat vlastní handoff/TVBCP, bez zbytečného opakování
+nezměněných testů. Převzetí HA-06 nesmí přepsat nové e-mailové registrace,
+společný gate ani paměťové zápisy. Neprovádět reset či čištění aktivního worktree.
+HA-07 neodvozovat automaticky z tohoto předání. Živý modelový/telefonní pilot
+má samostatný rozsah. Tento text je uložený v hlavním projektu; cizí vlákno
+ani Datovy soubory nebyly tímto předáním měněné.
+
+
 ## Společné vydání všech dokončených commitů, 2026-11-12
 
 Míla výslovně zadal p+n a úklid. E-mailové etapy3+4 a Datův HA-05 jsou

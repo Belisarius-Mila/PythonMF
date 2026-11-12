@@ -1,3 +1,60 @@
+## Předání před /new — 2026-11-12 17:56 CET
+
+Nazev: Živá přejímka hlídání e-mailových záležitostí
+Priorita: 1
+Stav: ceka na retest
+Pripomenout pri startu: ano
+Datum: 2026-11-12 17:56 CET
+
+Co se resilo:
+Dokončení vývoje etap1–4, upgrade vlastní hodinové kopie, vědomé zapnutí
+monitoru a návrh konkrétní živé přejímky. Míla přechází do nového chatu.
+
+Co je hotove:
+- Vydání614abe8bd37794b42f0152e4a45edd07474fa301 potvrzené: Terra,
+  job4365c4ba67f01d3cf4eb3dde9ae1eaec completed, push/deploy confirmed,
+  plná brána3730 testů, smoke5/5; přesná finální účtenka a readback
+  v data/private/email_followups_activation_20261112/.
+- Hodinová kopie73edf4c8,322 souborů podle manifestu, owned/loaded/enabled;
+  vědomý opt-in a skutečný nový launchd heartbeat/živé API potvrzené.
+  Upgrade zachoval162 původních položek, ruční údaje, kurzory, nastavení i role.
+- Čtecí audit při předání: monitor configured/worker_recent=true. Dvě aktivní
+  záležitosti: waiting a source_binding_unverified. Jde o aktuální snímek,
+  budoucí stav vždy znovu ověřit registrovaným auditem; žádné soukromé texty zde.
+- Podrobný scénář uložen UTF-8 do Downloads:
+  Samantha_hlidani_emailu_testovaci_scenar_2026-11-12.txt,243 řádků,
+  ověřen zpětným načtením. Soubor zůstává mimo Git.
+
+Co neni hotove:
+- Živá uživatelská přejímka skutečné úplné/částečné odpovědi, termínu bez odpovědi,
+  ručního rozhodnutí, znovuotevření a Mac/iPhone. Scénář není doklad provedení.
+- Jedna aktuální aktivní záležitost čeká na ověření zdrojové vazby; případné
+  přesné verify_source použít až v potvrzeném kontextu této položky.
+- Samostatný e-mailový TVBCP není dohodnutý; Cockpit handoff/TVBCP kryjí své
+  UI/workflow, nikoli uzavření celého e-mailového projektu.
+
+Dalsi krok:
+[PRIPOMENOUT] Navázat živou přejímkou A+C podle TXT: úplná odpověď a ruční
+vyřízení + termín bez odpovědi, tři testovací e-maily. Nejprve čtecí audit
+běhu a vazeb; neodhadovat přiřazení podle předmětu. Zkoušky zatím nejsou
+provedené ani zprávy odeslané Adamem. Původní completed release/aktivaci neopakovat.
+
+Navrhovane dalsi kroky:
+Rozšířit na částečnou odpověď B, ruční souvislost D a obnovu po uspání/restartu.
+[PRIPOMENOUT] SSD28,7 GiB volných, autosave warning pod30 GiB; samostatný
+bezpečný audit úklidu, žádné mazání jako součást tohoto předání.
+
+Zmenene nebo relevantni soubory:
+Tento kanonický handoff; projects/email_readonly_oauth.md;
+reports/email_followups_activation_20261112.md; Downloads TXT;
+handoffs/workstreams/project-cockpit.md; tvbcp/workstreams/project-cockpit.md.
+
+Bezpecnost / neukladat:
+Žádné celé e-maily, adresy, klíče, tokeny či autosave obsah do Gitu. Kalendářové
+návrhy jsou vypnuté, žádný automatický send/kalendářový zápis. Další skutečný
+placený pilot vyžaduje konkrétní rozsah/rozpočet; UI akce nevytvářejí další
+modelový pokus. Zachovat Datův aktivní worktree a všechny soukromé podklady.
+
 ## Aktivováno a skutečně ověřeno — 2026-11-12 16:37 CET
 
 Vlastní hodinová služba registrovaně upgradovaná7f47a41f→73edf4c8,

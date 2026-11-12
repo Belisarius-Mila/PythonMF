@@ -1,4 +1,16 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
+## Obnova po /new — 2026-11-12 17:56 CET
+
+E-mailové etapy1–4 vydané v614abe8b; Terra job4365c4ba67f01d3cf4eb3dde9ae1eaec
+completed,3730 testů, smoke5/5. Hodinová73edf4c8 a monitor aktivované/ověřené.
+Předání: handoffs/continuous_personal_agent_2026_11_04.md. Aktuální čtecí snímek:
+dvě aktivní záležitosti (waiting, source_binding_unverified), jedna vazba potřebuje
+přesné ověření v potvrzeném kontextu. Další živá přejímka A+C podle TXT v Downloads:
+Samantha_hlidani_emailu_testovaci_scenar_2026-11-12.txt. Neopakovat vydání/aktivaci.
+Autosave čerstvý, jeden watcher, bez poslední chyby; SSD28,7 GiB vyžaduje budoucí
+samostatný bezpečný úklid. Soukromá data a Datův HA-06 zachované.
+
+
 ## Aktivováno a skutečně ověřeno — 2026-11-12 16:37 CET
 
 Vlastní hodinová služba registrovaně upgradovaná7f47a41f→73edf4c8,
