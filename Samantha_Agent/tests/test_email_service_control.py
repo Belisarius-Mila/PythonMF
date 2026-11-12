@@ -7,6 +7,7 @@ import subprocess
 import sys
 import tempfile
 import unittest
+from unittest.mock import Mock
 
 from app.communication.agent_roles import EMAIL_ROLE, load_role
 from app.email.continuous_source import MailboxEpochChanged
@@ -94,6 +95,14 @@ class ServiceControlTests(unittest.TestCase):
     def install(self, verifier=None):
         return self.control.install(confirmation=CONFIRMATION, plan_digest=self.plan["plan_digest"],
             verifier=verifier or (lambda started: {"started_at": started, "status": "outside_hours"}))
+
+    def test_enabled_service_is_rejected_before_bootstrapping_runtime(self):
+        self.control.settings_path.write_text(json.dumps({"enabled": True}))
+        self.control.selector = Mock()
+        with self.assertRaisesRegex(ValueError, "pozastav"):
+            self.control.prepare()
+        self.control.selector.assert_not_called()
+        self.assertFalse(self.control.plan_path.exists())
 
     def test_prepare_is_project_only_and_does_not_copy_credentials(self):
         self.prepare()

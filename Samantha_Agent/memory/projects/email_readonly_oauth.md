@@ -1,5 +1,32 @@
 # E-mail read-only OAuth integrace
 
+## Start hodinového agenta po restartu — vývojový snapshot před p+n, 2026-11-12
+
+Po restartu Macu01:16 se obnovil e-mailový LaunchAgent, ale chyběl sdílený
+App Server. `approved_selection` nyní po ověření role zajistí sdílený runtime;
+start stejným Unix socketem serializuje společný souborový zámek s Cockpitem.
+Funkční server se znovu použije; neodpovídající existující socket se automaticky
+nemaže ani jeho proces neukončuje. Status/readiness zůstávají pouze čtecí,
+připravený/noční/zakázaný nebo hotový slot modelový výběr nespouští.
+
+166 cílených testů PASS. Skutečný izolovaný CLI/socket: dva souběžní vlastníci,
+jeden start + jedno převzetí, stejný PID, oddělená procesní skupina a katalog10;
+0 thread/start a0 turn/start. Plná brána PASS:3520 testů /31 SKIP,585,445s; výsledek v
+`logs/email_runtime_boot_full_gate_20261112.log` a reportu
+`reports/email_runtime_boot_20261112.md`.
+
+Dnešní sdílený server obnoven registrovaným resume, bez změny business stavu,
+obsahu nastavení a schválené role; stará vlastní kopie8c83e93b zachovaná.
+Neplacený výběr Terra/high prošel v nové i původní instalaci. Běžný slot08:00 dokončil
+v08:32:01 CET4 nová posouzení, bez chyby; nejde o další testovací modelový tah. Žádný ruční tick, SMTP, kalendářový zápis,
+push, instalace/upgrade LaunchAgentu ani nasazení Cockpitu.
+
+Míla následně výslovně schválil p+n po dokončení commitu. Trvalá aktivace
+hodinové kopie ještě vyžaduje registrovaný servisní upgrade s přesnou globální větou. Samostatný e-mailový TVBCP nadále není
+dohodnutý; nový se nezakládá. Sdílený runtime je evidovaný v existujícím
+handoffu/TVBCP Human–Adam.
+
+
 ## Hlídání záležitostí — lokální etapa 1, 2026-11-11
 
 Hlídání záležitostí — etapa 1 je lokálně implementovaná jako ruční backend.
@@ -1711,3 +1738,18 @@ přímá přejímka Mílova prohlížeče nebyla dostupná.
 **Navrhované další kroky:** Mílova přejímka editace další jím vybrané položky na používaném zařízení; automatiku ScienceNews povolit až samostatnou dohodou.
 
 **Technický důkaz:** Native reálný recover: edited_verified, calendar_writes=false, jediná shoda obou ID, všechna zachovávaná pole stejná, alarm_order_normalized=true. Původní update byl jediný. Swift FAIL→PASS, 87 cílených a mobilní headless fixture PASS; společná plná brána PASS: 3406 testů / 31 SKIP (620,186 s). Pošta už kompatibilně upgradovaná s identickým business digestem a 95 položkami. Důkazy v reports/calendar_edit_alarm_order_recovery_20261110.md a reports/email_science_role_upgrade_20261110.md.
+
+
+## 2026-11-12 08:32 CET — Spolehlivý start závislosti hodinové pošty
+
+**Hotovo:** Lokální oprava obnoví chybějící sdílený App Server před plánovanou kontrolou pošty i bez otevření Human–Adama. Souběžné starty používají jeden souborový zámek a jeden server.
+
+**Rozhodnutí:** Spouštění patří do ověřeného modelového výběru již aktivované služby, až po kontrole role a platnosti běhu. Zachováváme stávající Unix socket, model, hodinový režim, limity, business stav a idempotenci. Cizí/neodpovídající socket se automaticky neodstraňuje ani server nerestartuje.
+
+**Další krok:** Provést Mílou výslovně schválené p+n; vlastní hodinovou kopii přepnout až přesným upgradem po globální větě. Systémový plist bez ní neměnit.
+
+**Navrhované další kroky:** Po upgradu ověřit přirozený hodinový běh a následně skutečný reboot/wake bez otevření chatu.
+
+**Technický důkaz:** 166 cílených testů PASS; plná brána3520 testů OK /31 SKIP (585,445s). Skutečný izolovaný CLI bootstrap/reuse/catalog bez vlákna a modelového tahu. Dnešní registrovaný resume zachoval otisk business stavu, nastavení i roli a obnovil socket; instalovaná kopie zůstává8c83e93b. Dnešní přirozený slot08:00 completed v08:32:01 CET,4 nové zprávy. Report reports/email_runtime_boot_20261112.md rozlišuje místní důkaz, provozní obnovu a dosud neprovedený servisní upgrade.
+
+Předání p+n: request `email-runtime-boot-20261112-v1`, job `cfc1c1b1375eb5c46143c98eed93bc38`; konečný výsledek ověřit z původní účtenky a `logs/email_runtime_boot_release_20261112.json`, nikoli z tohoto předávacího snapshotu.

@@ -85,9 +85,6 @@ class EmailServiceController:
             raise ValueError("Příprava vyžaduje čistý commitnutý main.")
         head = self._git("rev-parse", "HEAD")
         role = self._role()
-        selected = self.selector()
-        if selected["policy_digest"] != role["policy_digest"] or selected.get("fallback"):
-            raise ValueError("Provozní model neodpovídá schválené roli.")
         push = pushcut_status(self.worker)
         if not (push["configured"] and push["enabled"] and push["last_test_status"] == "accepted"):
             raise ValueError("Nejprve připoj a otestuj Pushcut.")
@@ -96,6 +93,11 @@ class EmailServiceController:
             raise ValueError("Před přípravou instalace službu pozastav.")
         if not os.access(self.project / ".venv/bin/python", os.X_OK):
             raise ValueError("Projektový Python není spustitelný.")
+        # Model selection may bootstrap the shared server. Reject invalid
+        # local preparation before that operational side effect.
+        selected = self.selector()
+        if selected["policy_digest"] != role["policy_digest"] or selected.get("fallback"):
+            raise ValueError("Provozní model neodpovídá schválené roli.")
         source = self.runner(["git", "-C", str(self.project), "archive", head, "app", "scripts/continuous_email_agent.py"],
                              capture_output=True, timeout=60)
         if source.returncode:

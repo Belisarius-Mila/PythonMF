@@ -2137,3 +2137,23 @@ prostředí PASS, produkční kód beze změny.
 - Řešení nalezeno: 11112026
 - Řešení: v doménové transakci držet malé trvalé operation_id + otisk celého normalizovaného příkazu + identitu/revizi výsledku. Před opakováním ověřit otisk; vrátit aktuální projekci a revizi původní operace. Nová změna dál kontroluje expected_revision. Uzavření/obnovení mění generaci pro pozdní výsledky; úložiště ani nejistý požadavek neopravovat založením druhé identity.
 - Ověření: syntetické hlídání přestálo restart, dvojklik, dvě souběžné instance, konflikt revizí, chybu atomického zápisu i vyřazení 258 obecných idempotentních operací; žádný živý model nebo e-mailový úkon.
+
+### LL-124 — Plánovaná služba musí zajistit svou runtime závislost i bez otevřeného chatu
+
+- Problém: po restartu Macu běžel e-mailový LaunchAgent, ale sdílený App Server
+  startoval až připojením Human–Adama. Chybějící socket blokoval i ranní běhy
+  po probuzení; loaded/enabled samo nedokládá dokončené kontroly pošty.
+- Typ: opakující se
+- Řešení nalezeno: 12112026
+- Řešení: po ověření role zajistit sdílený server před katalogem a běžným
+  modelovým posouzením. Start napříč Cockpitem a službou serializovat stabilním
+  souborovým zámkem; zdravý server převzít. Existující nedostupný socket není
+  oprávnění ke kill/unlink ani k opakování nejistého modelového tahu. Status,
+  readiness a hotový/noční/zakázaný běh zůstávají bez startovacího účinku.
+- Ověření: 166 cílených testů a plná brána3520 testů OK /31 SKIP,
+  včetně zámku drženého jiným procesem.
+  Skutečný izolovaný CLI při souběhu provedl jeden start a jedno převzetí;
+  katalog10 bez thread/start a turn/start. Dnešní registrovaný resume obnovil
+  sdílený server se stejným business otiskem, nastavením a rolí. Trvalý fix
+  vyžaduje i upgrade vlastní instalované kopie; reboot/wake po nasazení je
+  samostatná přejímka. Důkaz `reports/email_runtime_boot_20261112.md`.

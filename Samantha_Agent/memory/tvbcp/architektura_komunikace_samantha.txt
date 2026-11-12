@@ -4770,3 +4770,18 @@ konfigurace a nezměněný sandbox. Soukromá účtenka a gate log jsou v
 `data/private/human_adam_tool_compat_20261111/`. Nula modelových tahů, žádný
 dosavadní push/deploy této opravy, změna globální konfigurace ani zásah do Data. Modelová přejímka
 přímých nástrojů zůstává otevřená; RPC čtení samo ji nenahrazuje.
+
+
+## 2026-11-12 08:32 CET — Spolehlivý start závislosti hodinové pošty
+
+**Hotovo:** Lokální oprava obnoví chybějící sdílený App Server před plánovanou kontrolou pošty i bez otevření Human–Adama. Souběžné starty používají jeden souborový zámek a jeden server.
+
+**Rozhodnutí:** Spouštění patří do ověřeného modelového výběru již aktivované služby, až po kontrole role a platnosti běhu. Zachováváme stávající Unix socket, model, hodinový režim, limity, business stav a idempotenci. Cizí/neodpovídající socket se automaticky neodstraňuje ani server nerestartuje.
+
+**Další krok:** Provést Mílou výslovně schválené p+n; vlastní hodinovou kopii přepnout až přesným upgradem po globální větě. Systémový plist bez ní neměnit.
+
+**Navrhované další kroky:** Po upgradu ověřit přirozený hodinový běh a následně skutečný reboot/wake bez otevření chatu.
+
+**Technický důkaz:** 166 cílených testů PASS; plná brána3520 testů OK /31 SKIP (585,445s). Skutečný izolovaný CLI bootstrap/reuse/catalog bez vlákna a modelového tahu. Dnešní registrovaný resume zachoval otisk business stavu, nastavení i roli a obnovil socket; instalovaná kopie zůstává8c83e93b. Dnešní přirozený slot08:00 completed v08:32:01 CET,4 nové zprávy. Report reports/email_runtime_boot_20261112.md rozlišuje místní důkaz, provozní obnovu a dosud neprovedený servisní upgrade.
+
+Předání p+n: request `email-runtime-boot-20261112-v1`, job `cfc1c1b1375eb5c46143c98eed93bc38`; konečný výsledek ověřit z původní účtenky a `logs/email_runtime_boot_release_20261112.json`, nikoli z tohoto předávacího snapshotu.

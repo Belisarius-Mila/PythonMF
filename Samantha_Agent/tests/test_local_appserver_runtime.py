@@ -3,14 +3,82 @@ from __future__ import annotations
 import tempfile
 import unittest
 import json
+import threading
+import subprocess
+import sys
+from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 from unittest.mock import Mock, patch
 
 from app.codex_appserver import AppServerError
 from app.communication.local_runtime import LocalAppServerProcessController
+from app.file_persistence import exclusive_file_lock, FileLockTimeoutError
 
 
 class LocalAppServerProcessControllerTests(unittest.TestCase):
+    def test_another_process_holding_startup_lock_blocks_spawn_without_touching_socket(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            socket_path = Path(temp_dir) / "server.sock"
+            lock_target = socket_path.with_name(socket_path.name + ".startup")
+            child = subprocess.Popen(
+                [sys.executable, "-B", "-c",
+                 "import sys; from pathlib import Path; from app.file_persistence import exclusive_file_lock; "
+                 "lock = exclusive_file_lock(Path(sys.argv[1])); lock.__enter__(); "
+                 "print('locked', flush=True); sys.stdin.read(1); lock.__exit__(None, None, None)",
+                 str(lock_target)],
+                stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True,
+            )
+            try:
+                self.assertEqual(child.stdout.readline().strip(), "locked")
+                controller = LocalAppServerProcessController(socket_path=socket_path, startup_timeout=0)
+                with patch("app.communication.local_runtime.subprocess.Popen") as popen:
+                    with self.assertRaises(FileLockTimeoutError): controller.start()
+                popen.assert_not_called()
+                self.assertFalse(socket_path.exists())
+            finally:
+                child.communicate("x", timeout=5)
+            self.assertEqual(child.returncode, 0)
+
+    def test_independent_controllers_serialize_startup_and_reuse_one_server(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            socket_path = Path(temp_dir) / "server.sock"
+            first = LocalAppServerProcessController(socket_path=socket_path)
+            second = LocalAppServerProcessController(socket_path=socket_path)
+            starting, second_waiting, release, ready = (threading.Event() for _ in range(4))
+            calls = []
+            process = Mock(pid=4321)
+            process.poll.return_value = None
+
+            def shared_lock(path, **kwargs):
+                calls.append(path)
+                if len(calls) == 2:
+                    second_waiting.set()
+                return exclusive_file_lock(path, **kwargs)
+
+            def spawn(*args, **kwargs):
+                starting.set()
+                if not release.wait(3):
+                    raise TimeoutError("test did not release startup")
+                ready.set()
+                return process
+
+            with patch("app.communication.local_runtime.exclusive_file_lock", side_effect=shared_lock), patch.object(
+                LocalAppServerProcessController, "_socket_reachable", side_effect=lambda: ready.is_set()
+            ), patch.object(LocalAppServerProcessController, "_persisted_owner_state", return_value=("unknown", {})), patch.object(
+                LocalAppServerProcessController, "_write_ownership"
+            ), patch.object(LocalAppServerProcessController, "_adopt_reachable_owner"), patch(
+                "app.communication.local_runtime.subprocess.Popen", side_effect=spawn
+            ) as popen, ThreadPoolExecutor(max_workers=2) as pool:
+                a = pool.submit(first.start)
+                self.assertTrue(starting.wait(3))
+                b = pool.submit(second.start)
+                self.assertTrue(second_waiting.wait(3))
+                release.set()
+                results = [a.result(timeout=3), b.result(timeout=3)]
+            self.assertEqual([r["started"] for r in results], [True, False])
+            self.assertTrue(all(r["reachable"] for r in results))
+            popen.assert_called_once()
+
     def test_existing_reachable_socket_is_reused_without_spawning(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
             socket_path = Path(temp_dir) / "server.sock"

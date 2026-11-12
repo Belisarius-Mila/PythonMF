@@ -190,9 +190,50 @@ class EmailServiceTests(unittest.TestCase):
     def test_missing_role_blocks_even_catalog_connection(self):
         with patch("app.email.service.load_role", side_effect=AgentRoleError("not approved")), patch(
             "app.email.service.CodexAppServerClient"
-        ) as client:
+        ) as client, patch("app.email.service.LocalAppServerProcessController") as runtime:
             with self.assertRaises(AgentRoleError): approved_selection()
         client.assert_not_called()
+        runtime.assert_not_called()
+
+    def test_approved_selection_starts_dependency_before_catalog_without_chat_turn(self):
+        order = Mock()
+        with patch("app.email.service.load_role"), patch(
+            "app.email.service.LocalAppServerProcessController"
+        ) as runtime, patch("app.email.service.CodexAppServerClient") as client, patch(
+            "app.email.service.resolve_role", return_value={**self.selection, "fallback": False}
+        ):
+            order.attach_mock(runtime.return_value.start, "start")
+            order.attach_mock(client, "client")
+            result = approved_selection()
+        runtime.return_value.start.assert_called_once_with()
+        self.assertEqual(order.mock_calls[0][0], "start")
+        self.assertEqual(result["model"], "synthetic-model")
+        peer = client.return_value.__enter__.return_value
+        peer.list_models.assert_called_once_with()
+        peer.start_thread.assert_not_called()
+        peer.start_turn.assert_not_called()
+
+    def test_unavailable_dependency_fails_before_catalog_and_is_not_restarted(self):
+        from app.codex_appserver import AppServerError
+        with patch("app.email.service.load_role"), patch(
+            "app.email.service.LocalAppServerProcessController"
+        ) as runtime, patch("app.email.service.CodexAppServerClient") as client:
+            runtime.return_value.start.side_effect = AppServerError("existing socket unavailable")
+            with self.assertRaises(AppServerError): approved_selection()
+        runtime.return_value.start.assert_called_once_with()
+        client.assert_not_called()
+
+    def test_catalog_failure_does_not_restart_dependency_or_retry_catalog(self):
+        from app.codex_appserver import AppServerError
+        with patch("app.email.service.load_role"), patch(
+            "app.email.service.LocalAppServerProcessController"
+        ) as runtime, patch("app.email.service.CodexAppServerClient") as client:
+            peer = client.return_value.__enter__.return_value
+            peer.list_models.side_effect = AppServerError("catalog unavailable")
+            with self.assertRaises(AppServerError): approved_selection()
+        runtime.return_value.start.assert_called_once_with()
+        peer.list_models.assert_called_once_with()
+        peer.start_turn.assert_not_called()
 
     def test_reserved_attempt_is_on_disk_before_model_and_does_not_disappear_on_error(self):
         self.configure(max_assessments_per_day=1)

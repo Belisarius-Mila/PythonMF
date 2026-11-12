@@ -12,7 +12,7 @@ from pathlib import Path
 from typing import Any
 
 from app.codex_appserver import AppServerError, DEFAULT_CODEX_BIN, codex_environment
-from app.file_persistence import FilePersistenceError, atomic_write_json
+from app.file_persistence import FilePersistenceError, atomic_write_json, exclusive_file_lock
 
 
 DEFAULT_RUNTIME_DIR = Path.home() / ".codex" / "samantha-communication"
@@ -260,6 +260,18 @@ class LocalAppServerProcessController:
             }
 
     def start(self, *, recover_unreachable_owned: bool = False) -> dict[str, Any]:
+        with self._lock:
+            # Cockpit and scheduled one-shot workers share this socket. Their
+            # in-memory RLocks cannot serialize startup across process owners.
+            self.socket_path.parent.mkdir(parents=True, exist_ok=True, mode=0o700)
+            with exclusive_file_lock(
+                self.socket_path.with_name(self.socket_path.name + ".startup"),
+                timeout=self.startup_timeout,
+            ):
+                return self._start_locked(recover_unreachable_owned=recover_unreachable_owned)
+
+    def _start_locked(self, *, recover_unreachable_owned: bool) -> dict[str, Any]:
+        """Start while both the instance lock and shared startup lock are held."""
         with self._lock:
             current = self.status()
             if current["reachable"]:

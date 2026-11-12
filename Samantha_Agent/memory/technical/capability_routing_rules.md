@@ -256,3 +256,16 @@ Příkaz vyžaduje stabilní operation_id a pro změnu očekávanou revizi. Repl
 kontroluje totožný otisk a vrací aktuální revizi. Jen ruční metadata a historie;
 žádný IMAP, model, monitor, send či kalendářový zápis. API hlásí automatické
 monitorování jako nepřipojené. Nasazení/aktivace v této etapě nebyly provedené.
+
+
+## 2026-11-12 08:32 CET — Závislost hodinové pošty na sdíleném App Serveru
+
+Registrované tick/prepare/upgrade/resume používají schválený modelový výběr.
+Po ověření e-mailové role může nově spustit pouze chybějící sdílený Unix runtime
+přes LocalAppServerProcessController; start serializuje společný souborový zámek
+s Human–Adamem. Funkční server se pouze převezme, nereagující/cizí socket se
+bez samostatného zotavení nemění. Samotný start a katalog nevytvářejí vlákno
+ani modelový tah. Status/readiness jsou nadále bez zápisu a bez připojení.
+Příprava navíc ověří místní podmínky před startem závislosti. Automatické
+e-mailové posuzování zůstává pouze součástí původně aktivovaného hodinového
+provozu se stejnými rezervami, kurzory a ochranou nejistého výsledku.

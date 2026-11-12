@@ -13,7 +13,7 @@ from typing import Literal
 from pydantic import BaseModel, ConfigDict, Field
 
 from app.communication.agent_roles import EMAIL_ROLE, AgentRoleError, load_role, resolve_role, assert_current
-from app.communication.local_runtime import DEFAULT_SOCKET_PATH
+from app.communication.local_runtime import DEFAULT_SOCKET_PATH, LocalAppServerProcessController
 from app.codex_appserver import CodexAppServerClient, UnixSocketAppServerTransport
 from app.file_persistence import FileLockTimeoutError, exclusive_file_lock
 from app.work_repository import JsonWorkRepository, RepositoryMutation
@@ -106,8 +106,12 @@ def launch_agent_xml() -> str:
 
 
 def approved_selection() -> dict:
-    # Fail before connecting if the dedicated role is not yet approved.
+    # Fail before starting or connecting if the dedicated role is not approved.
     load_role(role=EMAIL_ROLE)
+    # The hourly job must also work after reboot, before any Human–Adam chat.
+    # Reuse the shared server or start only a missing one; never kill/retry an
+    # unresponsive existing server or an uncertain model turn here.
+    LocalAppServerProcessController().start()
     factory = partial(UnixSocketAppServerTransport, socket_path=DEFAULT_SOCKET_PATH)
     with CodexAppServerClient(transport_factory=factory) as client:
         selected = resolve_role(client.list_models(), role=EMAIL_ROLE)

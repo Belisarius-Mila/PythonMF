@@ -1,5 +1,7 @@
 # Memory Index
 
+- `reports/email_runtime_boot_20261112.md`; `handoffs/continuous_personal_agent_2026_11_04.md`; `projects/email_readonly_oauth.md` — 12.11.: lokální automatický start chybějícího sdíleného App Serveru před hodinovou poštou, společný zámek s Cockpitem. 166 cílených PASS + skutečný izolovaný bootstrap/reuse/catalog bez modelu. Dnešní slot08:00 completed v08:32,4 zprávy; plná brána3520 OK/31 SKIP. P+n po commitu výslovně schválené, přesný request/job a výsledkový log v reportu. Vlastní služba8c83e93b dosud bez upgradu; globální věta samostatně.
+
 - `reports/data_repository_integration_20261112.md` — 12.11.: lokální dokumentační integrace Data3035fc14 a předchozí hotové historie. Kód/testy/role/workflow/média proti c22bc3af beze změny; aktivace ScienceNews a vydání MMTX jsou historické doklady, ne nový živý audit. Původní nejisté účtenky zachované, žádný nový push/nasazení.
 
 - `handoffs/continuous_personal_agent_2026_11_04.md`; `projects/email_readonly_oauth.md` — 2026-11-11: lokální první etapa hlídání, trvalý ruční lifecycle + GET/POST followups. 22 doménových/5 HTTP a související regrese PASS, plná brána3514 OK/31 SKIP. UI a automatický monitor nepřipojené; další etapa formulář/přepínač. Samostatný TVBCP není dohodnutý — viditelný blokátor uzavření proudu, nový nevzniká. Bez p+n/aktivace; důkazy data/private/email_followups_step1_20261111/.
