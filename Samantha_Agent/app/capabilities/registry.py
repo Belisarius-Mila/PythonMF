@@ -12,6 +12,21 @@ from app.capabilities.models import (
 
 CAPABILITIES: tuple[CapabilityRecord, ...] = (
     CapabilityRecord(
+        capability_id="human_adam_work_steer", label="Append an exact instruction to one owned active turn",
+        risk=RiskLevel.EXTERNAL_SEND, reads=("explicit confirmed text and exact original work/turn/authorization",),
+        writes=("private durable command receipt", "one turn/steer on the existing connection"),
+        tool="app.communication.human_adam_work.WorkController.steer",
+        requires_confirmation=True, confirmation_policy=ConfirmationPolicy.EXACT_CURRENT_MESSAGE,
+        audit=AuditPolicy.REDACTED,
+        notes="No turn/start, reconnect, permission/model override or uncertain replay. Expected turn and original owner remain mandatory.",
+    ),
+    CapabilityRecord(
+        capability_id="human_adam_work_command_read", label="Read an exact append receipt",
+        risk=RiskLevel.READ_ONLY, reads=("private scoped user command receipt",), writes=(),
+        tool="app.communication.human_adam_work.WorkController.read_command", audit=AuditPolicy.REDACTED,
+        notes="No resend, recovery mutation or model call; absent evidence never authorizes repetition.",
+    ),
+    CapabilityRecord(
         capability_id="human_adam_work_start", label="Accept one scoped Human–Adam request",
         risk=RiskLevel.EXTERNAL_SEND, reads=("explicit user message and unchanged profile authorization",),
         writes=("private durable admission", "one existing canonical model turn and its authorized completion"),
@@ -24,7 +39,7 @@ CAPABILITIES: tuple[CapabilityRecord, ...] = (
         capability_id="human_adam_work_read", label="Read existing work snapshot and bounded events",
         risk=RiskLevel.READ_ONLY, reads=("private scoped work projection and cursor",), writes=(),
         tool="app.communication.human_adam_work.WorkController.view", audit=AuditPolicy.REDACTED,
-        notes="No payload text, reasoning, tool arguments, Git audit, model, worker launch or receipt recovery mutation.",
+        notes="Only scoped public progress and explicit command receipts; no raw reasoning/tool arguments, Git audit, model, worker launch or recovery mutation.",
     ),
     CapabilityRecord(
         capability_id="human_adam_work_recover", label="Reconcile only the original work evidence",

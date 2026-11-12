@@ -4,7 +4,7 @@ from __future__ import annotations
 import threading
 from contextlib import contextmanager
 
-from app.codex_appserver import AppServerError
+from app.codex_appserver import AppServerError, AppServerSteerRejected
 from app.communication.human_adam_work import WorkConflict
 from app.communication.human_adam_public_progress import public_event, merge_public_progress
 
@@ -21,6 +21,9 @@ class WorkObserver:
         self._closed = False
         self._gap = False
         self._terminal_seen = threading.Event()
+        self._client = None
+        self._guard = None
+        self._started = False
 
     def dispatching(self) -> None:
         """Durable barrier before the only permitted turn/start call."""
@@ -40,8 +43,10 @@ class WorkObserver:
             self._buffer.clear()
 
     @contextmanager
-    def attach(self, client, thread_id: str):
+    def attach(self, client, thread_id: str, *, guard=None):
         self.assert_thread(thread_id)
+        with self._lock:
+            self._client, self._guard = client, guard
         try:
             self._subscription = client.subscribe_events(methods=METHODS, thread_id=thread_id,
                                                           max_events=128, max_bytes=4 * 1024 * 1024,
@@ -53,6 +58,29 @@ class WorkObserver:
             yield self.accepted
         finally:
             self.close()
+
+    def can_steer(self, expected_turn_id: str) -> bool:
+        with self._lock:
+            client, guard = self._client, self._guard
+            ready = not self._closed and self._started and not self._terminal_seen.is_set() and self._turn_id == expected_turn_id
+        check = getattr(client, "can_steer_turn", None)
+        try:
+            return bool(ready and callable(guard) and guard() is True and callable(check)
+                        and check(self.store.load(self.identity)["thread_id"], expected_turn_id) is True)
+        except Exception:
+            return False
+
+    def steer(self, *, expected_turn_id: str, command_id: str, text: str):
+        if not self.can_steer(expected_turn_id):
+            raise AppServerSteerRejected("work_not_running")
+        with self._lock:
+            client = self._client
+        if client is None:
+            raise AppServerSteerRejected("connection_unavailable")
+        # No observer lock across RPC; terminal callbacks and the original
+        # receive/delivery guard must remain able to finish independently.
+        return client.steer_text(thread_id=self.store.load(self.identity)["thread_id"],
+                                 expected_turn_id=expected_turn_id, command_id=command_id, text=text)
 
     def _event(self, event) -> None:
         params = event.params
@@ -91,9 +119,11 @@ class WorkObserver:
         fields = {}
         if "public_progress_update" in event:
             fields["public_progress"] = merge_public_progress(record.get("public_progress"), event["public_progress_update"])
-        self.store.change(self.identity, self.owner, event["kind"], fields=fields,
-                          wire=(event["generation"], event["sequence"]))
-        if event["kind"] == "turn_completed":
+        _, changed = self.store.change(self.identity, self.owner, event["kind"], fields=fields,
+                                       wire=(event["generation"], event["sequence"]), with_effect=True)
+        if changed and event["kind"] == "turn_started":
+            self._started = True
+        if changed and event["kind"] == "turn_completed":
             self._terminal_seen.set()
 
     def close(self) -> None:
@@ -105,6 +135,7 @@ class WorkObserver:
             if self._closed:
                 return
             self._closed = True
+            self._client, self._guard = None, None
             if self._subscription is not None:
                 diagnostic = self._subscription.diagnostics()
                 self._gap |= not caught_up or bool(diagnostic.get("closed")) or bool(diagnostic.get("queued"))

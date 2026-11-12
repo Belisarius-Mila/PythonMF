@@ -12,7 +12,7 @@ from datetime import datetime
 from pathlib import Path
 from typing import Any, Callable
 
-from app.codex_appserver import AppServerError, utc_now
+from app.codex_appserver import AppServerError, AppServerSteerRejected, utc_now
 from app.file_persistence import exclusive_file_lock, FileLockTimeoutError
 from app.work_repository import JsonWorkRepository, RepositoryMutation, WorkRepositoryError
 from app.communication.session_hub import SessionBusyError, SessionDeliveryUnknownError
@@ -106,6 +106,7 @@ class WorkStore:
                     or not re.fullmatch(r"[a-f0-9]{64}", value["request_digest"])
                     or not isinstance(value["completion"], dict)
                     or type(value["event_gap"]) is not bool
+                    or type(value.get("_commands_journal", False)) is not bool
                     or value["failure_code"] not in {"", "execution_unverified", "preflight_failed", "owner_unavailable",
                                                      "stopped_before_dispatch", "completion_source_unavailable"}
                     or len(value["events"]) > MAX_EVENTS):
@@ -257,16 +258,81 @@ class _Handle:
         self.response: dict | None = None
         self.error: BaseException | None = None
         self.thread: threading.Thread | None = None
+        self.observer = None
+        self.scope = None
 
 
 class WorkController:
-    def __init__(self, root: Path, *, completion_reader: Callable[[dict], dict | None] | None = None):
+    def __init__(self, root: Path, *, completion_reader: Callable[[dict], dict | None] | None = None,
+                 command_scope_guard: Callable[[dict], bool] | None = None):
         self.store = WorkStore(root)
         self.owner = uuid.uuid4().hex
         self.completion_reader = completion_reader or (lambda _: None)
         self._lock = threading.RLock()
         self._handles: dict[str, _Handle] = {}
         self._closing = threading.Event()
+        self._command_scope_guard = command_scope_guard
+        from app.communication.human_adam_work_commands import WorkCommands
+        self.commands = WorkCommands(self.store.root / "commands", self.owner, resolve=self._resolve_command,
+            before_dispatch=self._mark_command_dispatch, journal_required=lambda identity:
+                (self.store.load(identity) or {}).get("_commands_journal") is True)
+
+    def _command_parent(self, workstream_id, identity):
+        value = self.store.load(identity)
+        if value is None or value["scope"]["workstream_id"] != workstream_id:
+            raise AppServerSteerRejected("scope_changed")
+        return value
+
+    def _command_target(self, value, expected_turn_id, *, check_scope=True):
+        if check_scope:
+            try:
+                valid = callable(self._command_scope_guard) and self._command_scope_guard(value) is True
+            except Exception:
+                valid = False
+            if not valid:
+                raise AppServerSteerRejected("scope_changed")
+        with self._lock:
+            handle = self._handles.get(value["operation_id"])
+            if (not self._owned(value["operation_id"]) or value["owner_generation"] != self.owner
+                    or not handle or value["scope"] != handle.scope):
+                raise AppServerSteerRejected("owner_unavailable")
+            if value["lifecycle_state"] != "running":
+                raise AppServerSteerRejected("work_not_running")
+            if not expected_turn_id or value["turn_id"] != expected_turn_id:
+                raise AppServerSteerRejected("turn_changed")
+            observer = handle.observer
+        if observer is None or not observer.can_steer(expected_turn_id):
+            raise AppServerSteerRejected("work_not_running")
+        return observer
+
+    def _resolve_command(self, request):
+        def perform():
+            value = self._command_parent(request["workstream_id"], request["operation_id"])
+            observer = self._command_target(value, request["expectedTurnId"])
+            return observer.steer(expected_turn_id=request["expectedTurnId"], command_id=request["command_id"], text=request["text"])
+        value = self._command_parent(request["workstream_id"], request["operation_id"])
+        self._command_target(value, request["expectedTurnId"])
+        return perform
+
+    def _mark_command_dispatch(self, request):
+        value = self._command_parent(request["workstream_id"], request["operation_id"])
+        self._command_target(value, request["expectedTurnId"])
+        record = self.store.change(value["operation_id"], self.owner, "command_dispatching", fields={"_commands_journal": True})
+        if record.get("_commands_journal") is not True:
+            raise AppServerSteerRejected("work_not_running")
+
+    def steer(self, workstream_id, payload):
+        from app.communication.human_adam_work_commands import normalize_command
+        request = normalize_command(workstream_id, payload)
+        try:
+            self._command_parent(workstream_id, request["operation_id"])
+        except AppServerSteerRejected as exc:
+            return self.commands.rejected(request, exc.reason)
+        return self.commands.submit(workstream_id, payload)
+
+    def read_command(self, workstream_id, identity, command_id):
+        self._command_parent(workstream_id, identity)
+        return self.commands.read(workstream_id, identity, command_id)
 
     def _completion(self, record: dict) -> dict | None:
         value = self.completion_reader(record)
@@ -290,9 +356,19 @@ class WorkController:
                 raise WorkError("Práce nebyla nalezena; absence není povolení znovu odeslat.")
             if any(v["scope"]["workstream_id"] != workstream_id for v in values):
                 raise WorkConflict("Práce patří jinému projektu.")
+            operations = []
+            for value in values:
+                public = self.store.public(value, cursor=cursor, owned=self._owned(value["operation_id"]))
+                try:
+                    self._command_target(value, value["turn_id"], check_scope=False)
+                    public["capabilities"]["steer"] = not self.commands.blocked(workstream_id, value["operation_id"])
+                except AppServerSteerRejected:
+                    pass
+                public["recent_commands"] = self.commands.recent(workstream_id, value["operation_id"])
+                operations.append(public)
             return {"ok": True, "schema_version": 1, "read_only": True, "writes_performed": False,
                     "server_generation": self.owner,
-                    "operations": [self.store.public(v, cursor=cursor, owned=self._owned(v["operation_id"])) for v in values]}
+                    "operations": operations}
 
     def _owned(self, identity: str) -> bool:
         handle = self._handles.get(identity)
@@ -350,6 +426,7 @@ class WorkController:
                     if not created:
                         raise WorkConflict("Stejnou práci mezitím přijal jiný vlastník.")
                     handle = _Handle()
+                    handle.scope = copy.deepcopy(reservation.scope)
                     self._handles[identity] = handle
                     handle.thread = threading.Thread(target=self._run, args=(identity, handle, reservation, lease),
                                                      name="human-adam-owned-work", daemon=True)
@@ -383,6 +460,7 @@ class WorkController:
     def _run(self, identity: str, handle: _Handle, reservation: WorkReservation, lease) -> None:
         from app.communication.human_adam_work_observer import WorkObserver
         observer = WorkObserver(self.store, identity, self.owner)
+        handle.observer = observer
         confirmed = False
         try:
             original = self.store.load(identity)

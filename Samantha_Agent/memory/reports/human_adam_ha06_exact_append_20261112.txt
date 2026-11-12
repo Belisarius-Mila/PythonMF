@@ -1,0 +1,186 @@
+HA-06 — DOPLNĚNÍ POKYNU DO PŘESNÉ BĚŽÍCÍ PRÁCE
+Datum: 12. listopadu 2026. Autor: Data.
+Větev: data/parallel-20261104 nad HA-05 b9ed2ad6.
+Rozsah: lokální backend, UI, cílené a syntetické přejímky. Bez push/nasazení,
+skutečného App Server spojení, placeného modelového pokusu či restartu služby.
+Willův checkout ani jeho samostatné vydání nejsou měněné.
+
+UŽIVATELSKÝ VÝSLEDEK
+Práce / Probíhá / Doplnit pokyn do této práce obsahuje samostatný editor,
+tlačítko Doplnit tento tah, stav účtenky a Pouze ověřit doplnění. Hlavní editor
+nového zadání zůstává oddělený; nedochází k automatickému předání draftu do něj.
+UI rozlišuje přijetí do původního tahu, odmítnutí a neověřené doručení. Přijetí
+není Hotovo, dokončený výsledek ani nová autorizace. Historie má posledních
+16 účtenek. Text/HTML se vykresluje jen jako text, ne jako aktivní obsah.
+
+Při odmítnutí, nejistotě nebo doběhnutí tahu se text zachová. Přijatý text se
+vyčistí jen tehdy, pokud uživatel mezitím nenapsal jiný. Při přepnutí kontextu
+zůstane draft označený jako text jiné práce a nejde bez úpravy automaticky
+odeslat do nového cíle. Polling zachová fokus, výběr, hlavní draft, starší chat
+i předčítání. Accepted/pending/unverified práce se nezaměňují za skončený tah.
+
+KONTRAKT A VLASTNICTVÍ
+Backendový command_id je ha06-<operation_id>-<32 hex nonce>. Je tak trvale
+svázaný i se svým rodičem; nejde zkopírovat ID a zaměnit cíl. Příkaz obsahuje
+jen operation_id, command_id, expectedTurnId, text a serverem ověřený workstream.
+HTTP navíc vyžaduje confirmed=true. Neznámá pole včetně write_intent/model/
+sandboxPolicy/cwd jsou odmítnutá. Text je nejvýše 4000 znaků.
+
+Před odesláním se znovu ověří aktivní projekt, vlastník controlleru/workeru,
+neměnný původní scope uložený v handle, přesný turn ID, běžící modelový stav,
+platný turn/started a živé původní spojení. Hub guard ověří identitu klienta,
+thread, connection_generation, původní aktivní client_message_id i nezměněný
+model/effort/sandbox/approval kontext. Původní profilový operation lock zůstává
+držený původním workerem; doplnění nezískává jiný profil nebo nový workspace.
+Stale/cizí wire event nezmění ani interní příznak turn_started/turn_completed,
+pokud jej původní store skutečně nepřijal. Guard se znovu provede před RPC.
+
+Jediný wire krok je turn/steer na původním klientovi s threadId, expectedTurnId,
+clientUserMessageId a jedním textovým input. Není modelový/sandboxový override,
+turn/start, nové vlákno, reconnect nebo náhradní klient. Text připomíná původní
+DEVELOPMENT_CONTROL a nevydává se za souhlas s publikací nebo širšími právy.
+Přijetí vyžaduje RPC result.turnId shodné s očekávaným tahem. Strukturovaná RPC
+chyba je odmítnutí; chybné/cizí ACK, timeout nebo výpadek zůstává neověřený.
+Raw zprávy serveru ani soukromé chyby se do účtenky/logu/UI nepřebírají.
+
+POTVRZENÍ PŮVODNÍHO ZADÁNÍ
+Nový connection-local ledger je pro append výslovně opt-in. Před RPC rezervuje
+jen přesné autorizované command IDs; nejde o důkaz jejich přijetí. Původní
+send_text stále vyžaduje právě jednu původní userMessage, turn/started,
+konečnou odpověď a completed. Další user položky smějí patřit jen rezervovaným
+doplněním a nesmějí se zdvojit. Chybějící/zdvojený původní input nebo cizí ID
+nedostane kladnou účtenku. Po skončení/selhání se kontext uzavře ve finally.
+Bez opt-in nejde append rezervovat. ScienceNews/ostatní one-turn guardy
+zůstávají v cestě a nedostávají obecnou výjimku na více uživatelských vstupů.
+
+Původní práce může mít potvrzený výsledek, zatímco jednotlivé doplnění zůstane
+neověřené: rezervovaný ID znamená autorizovaný vstup, ne potvrzené RPC. Tyto
+dvě účtenky se neslévají a rodičovské dokončení nezmění unknown na accepted.
+Závod doběhnutí modelu a odpovědi steer řeší přesný serverový expectedTurnId;
+pozdní výsledek doplnění se ukládá odděleně bez přepsání terminálního rodiče.
+
+TRVALÝ JOURNAL A BEZ REPLAY
+Před jediným RPC vznikne atomický pending command v private journalu. V rodiči
+se trvale označí jeho inicializace před dispatch; pozdější chybějící/prázdný
+journal je nedostupný zdroj, nikoli nový požadavek. Otisk zahrnuje celý přesný
+normalizovaný příkaz a workstream. Stejné ID se stejným otiskem vrací původní
+účtenku bez RPC a zápisu; jiný text/tah/rodič pod stejným ID je konflikt.
+
+64 identit na rodiče, 16 posledních textů; starší accepted/rejected účtenky
+zůstanou jako malé identity/otisky bez duplicitního textu. Nevyužívá se krátká
+obecná cache repository. Při pending/unverified je další doplnění blokované.
+Accepted/rejected dovolí další až po novém výslovném stisku uživatele a s novým
+ID; žádné z toho není automatický retry. Reader nevytváří journal ani worker.
+
+Živý pending má vlastníka v původním HTTP request vláknu. Při pádu/změně
+serveru nebo ztrátě volajícího bez hotové účtenky se čte jako unverified, ne jako
+nově odeslatelný příkaz. HTTP disconnect nezruší již prováděné RPC; druhý klient
+může pouze číst stejnou účtenku. Modelový RPC neprobíhá pod controller/journal
+zámkem; původní delivery reader, terminal callback a ostatní čtení mohou doběhnout.
+Selhání uložení odpovědi po RPC nepovolí další provedení, ani při stejné identitě.
+
+API A UI ČTENÍ
+POST /api/human-adam/work/steer vrací doménovou účtenku; HTTP200/ok samo o sobě
+neznamená accepted. Rozhoduje command.state a accepted_into_turn. Známé odmítnutí
+před RPC je výslovně dispatch_performed=false. GET /api/human-adam/work/command
+čte jedinou účtenku podle workstream/operation/command ID a má no-store.
+Duplicitní query, cizí origin, chybějící potvrzení a přidané override jsou odmítnuté.
+Obě operace jsou v capability registry; mutační cesta i v Cockpit action inventáři.
+
+UI se zapne jen z výslovné work_protocol command_protocol=1 a pevných místních
+cest. Referenci ID/expectedTurn ukládá před POST, ne text draftu. POST deadline
+10 s při ztrátě odpovědi přejde pouze na GET stejného ID; čtení má deadline 5 s,
+omezený backoff a žádný souběžný fetch. Chybějící účtenka není důkaz neodeslání.
+Accepted/rejected/unverified automatické čtení ukončí; pending se dál dohledává.
+Ověřit doplnění je jen GET. Změna scope/command generace zruší staré čtení;
+jeho pozdní odpověď ani chyba nepřebije novější příkaz. Pageshow/reload může
+obnovit pouze čtení. Text z odmítnuté/neověřené již odeslané účtenky lze obnovit
+jako draft; neodeslaný draft se na server nově neukládá.
+
+VERZE A OTEVŘENÉ HRANICE
+Primární reference OpenAI Docs:
+https://learn.chatgpt.com/docs/app-server#steer-an-active-turn
+Offline existující CLI0.167.0 schema TurnSteerParams/Response potvrzuje
+clientUserMessageId, expectedTurnId a result.turnId. Append klient používá
+konzervativní místní korelační mez peer>=0.167.0; není to tvrzení o vendorové
+nedostupnosti turn/steer ve starších verzích. Základní minimum0.163.0 ostatních
+funkcí se nemění. Starší/neznámý peer nedostane spekulativní RPC ani fallback.
+Živá podpora metody, reálné user-item echo a fyzická přejímka nebyly sondovány.
+
+Dosavadní striktní lokální fallback codex_delivery_recovery pro vícenásobné
+user_message není rozvolněný. Při výpadku skutečného spojení po steerech může
+rodič zůstat delivery_unknown, i když se později ukáže finální lokální záznam.
+Neznámý výsledek se tím nepřemění na další start. Rozšíření takové přejímky by
+muselo doložit přesné původní a autorizované command ID; není nahrazené odhadem.
+Browserový reload při běžícím serverovém workeru dál sleduje stejnou práci.
+
+OVĚŘENÍ
+479 finálních cílených testů OK / 28,096 s. Statická brána OK.
+16 nových backendových scénářů a 4 HTTP testy využívají produkční klient,
+dispatcher, Hub, observer, WorkController, private repository a skutečný
+testovací ThreadingHTTPServer. Spojení a modelové odpovědi jsou syntetické;
+fixture dědí produkční send/steer a nepouští CLI, handshake ani runtime.
+Klientská, integrační a HTTP série deseti doplnění mají vždy jediný turn/start,
+shodný turn/thread a původní model/sandbox. Ověřeno explicitní odmítnutí,
+cizí ACK/scope/generace, nejasný disconnect, pád volajícího/restart, retence,
+storage failure, chybějící inicializovaný journal, ztracené HTTP ACK, dvě stránky
+a souběh dokončení s doplněním bez změny rodičovského výsledku.
+
+15 Node VM scénářů ověřuje přesné command/turn/permission vazby, jeden POST,
+čtecí dohledání, reload/bfcache, stale odpovědi minulého příkazu, odmítnutí,
+neověřenost a zachování draftu. Skutečný izolovaný Edge přes CDP pipe:
+390x844,430x932,1280x900,390x480,430x500; každá velikost 26 kontrol, celkem 130 PASS.
+Deset formulářových doplnění, ztracené ACK jen GET, závod konce tahu, stálý
+editor/fokus/selection/starý chat/řeč, přesné payloady, no unsafe HTML a nulové
+browser chyby. Aktivní formulář na mobilu i desktopu zkontrolovaný vizuálně.
+Všechna fetch ve browseru syntetická; není to fyzická/live přejímka ani účet API.
+
+První celá sada: 3669 testů / 579,197 s, jediná chyba pořadí nové položky
+v COCKPIT_POST_ACTIONS proti do_POST; 5 přeskočených. Pořadí srovnané bez změny
+routování či oprávnění; oba cílené testy action inventáře OK.
+Plná regresní brána po opravě: PASS: 3669 testů / 585,097 s, 5 SKIP.
+Otisky finálních zdrojů/testů a schema reference jsou mimo Git:
+data/private/ha06_ui_qa_20261112/ha06_source_receipt.json;
+logs/ha06_targeted_final_20261112.log, ha06_static_final_20261112.log,
+ha06_full_gate_final_20261112.log; browser JSON/snímky/fixture/runner ve stejném
+ignorovaném private adresáři. Žádná soukromá zpráva ani klíč nejsou v commitu.
+
+DALŠÍ KROK
+HA-07 — zastavení s přesným výsledkem, na další zadání. Nejde o součást HA-06;
+interrupt/replay zůstávají vypnuté. Publikace a živý modelový/Mac/iPhone pilot
+vyžadují samostatný rozsah; tento vývoj nespouští žádné placené sondy/služby.
+Kanonický proud layer-human-adam-development, handoff
+human_adam_layer_workstream_start_2026_07_20.md a TVBCP architektura_komunikace_samantha.txt.
+
+
+UZAVŘENÍ A MANIFEST FINÁLNÍCH ZDROJŮ
+Ověřeno: 2026-11-12 18:03 CET; 18/18 SHA-256 shodných s uloženou účtenkou.
+Zelená brána: logs/ha06_full_gate_final_20261112.log
+SHA-256 logu: cb63848c66c03a030904599816ee665bab7d31fa69b4a5616e2bb654a9d4d393
+Zdrojový HEAD: b9ed2ad61b664e625578cdb981e6e964ee738121
+SHA-256 | relativní cesta
+dd498a476c9394874a867da247baac00c2590b3033542b3aaec98547523af661 | app/capabilities/registry.py
+5ffa97bba50d3b81703ef3107495d432cc270128ab0bc9668f018ea5a3db2390 | app/cockpit.py
+48cb998d81889db514244b91832b48aed8d3b9738bac55f7dfaf12fe3abe0a3d | app/codex_appserver.py
+3c07853d979c16b149e45f00282a78b1ed6368822590c6e7a02c355c07a2a35c | app/codex_appserver_inputs.py
+d0834316812276c9619c2f4596398ac885c890043188a872bef2d11bf8ead8c0 | app/communication/human_adam_profiles.py
+7c377faff2429526b71a6d0f4d47530414dbeb50c6ecc9960ad164104d84bd6d | app/communication/human_adam_steer_ui.py
+1e5edbda5b70da54cd79f841e8c95e8ee50e441210f0b13f9e66bcb54edbc47a | app/communication/human_adam_ui.py
+787d3e58aa4328aff019b69db5951631a1e7f1677f070f0876b8305ea71fe96c | app/communication/human_adam_work.py
+7f70c5b651cca2cbce65ee6d8ab9a61c229f66a39f386312d68f04166d355803 | app/communication/human_adam_work_commands.py
+38e4bb9111696ab5dc522be0a6ec7d4b141a20464ce20a06ee3841379f58f9d1 | app/communication/human_adam_work_observer.py
+13bffe591304f869cb73040bfc8799f765f9c0b11f3481c6ade0bb887db5f13e | app/communication/human_adam_work_routes.py
+791212b30d1716af9b8f7fc17e0ba10faba56305e4d3284f8ef609d848fc5b90 | app/communication/session_hub.py
+8a4c5067f42f31ed7d1a88b97c667c64d92952f1f4b7094ad99ebe6706b25720 | scripts/cockpit_quality_gate.py
+43e5a3c27a0eea0ece97329ced548834e0ed21f57a6bcd827767bb75da938cd0 | tests/human_adam_ha06_frontend.test.cjs
+8999a3893b91368260e88cb065ac75dcd57ebfb2628ab6c8942cac2f03220b70 | tests/test_capability_audit.py
+bd171e45658ef98b2b20ff515a1dda6fb3859283881fcd3a1a141eca48c15334 | tests/test_human_adam_steer.py
+bc7eb65c7e99e2157ad598a4b29f2a0f4853aeb7deb17bdcc3f5f886674895a1 | tests/test_human_adam_steer_http.py
+e3bac769544f43a5b438002bdce97e05df157e319289c38ba78c6d8cf914faf8 | tests/test_human_adam_ui.py
+
+Po zelené bráně při uzavření změněny pouze projektové zápisy. Checkpoint
+obsahuje HA-06 v Datově větvi; HA-05 dle Mílova vzkazu již nasazený.
+Bez push, integrace do main, nasazení HA-06 či placeného modelového pokusu.
+Další krok: předat checkpoint k samostatnému rozhodnutí o integraci/vydání.
+Rychlá předcheckpointová statická brána po zápisech: PASS;
+logs/ha06_checkpoint_static_20261112.log.

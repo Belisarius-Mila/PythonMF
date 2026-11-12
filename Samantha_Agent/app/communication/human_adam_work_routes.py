@@ -63,6 +63,25 @@ def work_recover_action(payload, *, service):
     return _call(recover)
 
 
+def work_steer_action(payload, *, service):
+    def steer():
+        if (not isinstance(payload, dict)
+                or set(payload) != {"workstream_id", "operation_id", "command_id", "expectedTurnId", "text", "confirmed"}
+                or payload["confirmed"] is not True):
+            raise WorkError("Doplnění vyžaduje přesný potvrzený text a původní identitu.")
+        return service.work_controller.steer(_scope(payload["workstream_id"]),
+            {key: payload[key] for key in ("operation_id", "command_id", "expectedTurnId", "text")})
+    return _call(steer)
+
+
+def work_command_read_action(query, *, service):
+    def read():
+        if not isinstance(query, dict) or set(query) != {"workstream_id", "operation_id", "command_id"}:
+            raise WorkError("Vyber přesnou účtenku doplnění.")
+        return service.work_controller.read_command(_scope(query["workstream_id"]), query["operation_id"], query["command_id"])
+    return _call(read)
+
+
 def work_http_status(result, *, accepting=False):
     if result.get("ok"):
         return 202 if accepting else 200

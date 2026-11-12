@@ -318,3 +318,39 @@ Navrhované další kroky: Případné vydání HA-05 a fyzickou Mac/iPhone/živ
 Technický důkaz: 417 cílených testů OK / 17,214 s. Skutečný HA-04 public producer, observer a wire dispatcher ověřily plán před ACK, cizí turn/generaci, commentary-only a nezměněné doručení; retence kompaktního veřejného obsahu zachová trvalý ID soubor a idempotenci. 18 Node scénářů, 11 veřejných testů, 140 skutečných browser kontrol na pěti velikostech; ustálené popředí 723–733 ms ve fixtures, aktivní mobilní/desktop karta vizuálně zkontrolovaná. Plná brána 3648 testů OK / 534,548 s, 5 SKIP. Report human_adam_ha05_live_ui_20261112.txt. První plný UI běh ukončen při přijetí HA-04; závěrečná brána ověřuje celou spojenou verzi. Žádný skutečný App Server/model/služba ani p+n.
 
 Doplnění ověření téhož kroku: po plné bráně už jen frontendová preflight blokace odeslání před připojením; 417 cílených / 17,214 s a finální statická brána OK, finální browser QA zopakované. Backend/payload/persistence proti plné bráně nezměněné.
+
+### 2026-11-12 13:45 CET — HA-06: doplnění pokynu do původní práce bez nového tahu
+
+Hotovo: V Práce / Probíhá je samostatné doplnění pokynu se stavem přijetí, odmítnutí či neověřeného doručení. Při konci tahu nebo chybě zůstává text rozepsaný. Hlavní draft, starší chat, fokus/výběr a řeč zůstávají stabilní. Deset doplnění míří do stejné práce; nevyvolá nový start.
+
+Rozhodnutí: Míla výslovně zadal HA-06. Doplnění dědí pouze původní autoritu běžícího tahu. Trvalá identita a otisk před RPC, přesný expectedTurnId a owner/scope/connection/policy guard; žádný override ani automatický retry. Klientský proof dál vyžaduje právě jeden původní user item, výjimka je jen pro přesně evidované opt-in command IDs. Starší peer bez ověřeného korelačního schématu nedostane spekulativní RPC. Nová oprávnění ani souhlas s p+n nevznikají.
+
+Další krok: HA-07 — zastavení s přesným výsledkem na další zadání.
+
+Navrhované další kroky: HA-05 je podle Mílova vzkazu nasazený. Vydání HA-06 a skutečnou modelovou/Mac/iPhone přejímku samostatně schválit. U peer>=0.167 je ještě otevřené živé ověření metody/echo client ID; starší fallback recovery zůstává striktní a může ponechat delivery_unknown. Tento stav nepovolí další start.
+
+Technický důkaz: 479 finálních cílených OK / 28,096 s; statická brána OK. 16 backendových a 4 HTTP scénáře s produkčním klientem/dispatcherem/Hubem/observerem/repository a syntetickým wire. Klientská, integrační a HTTP série deseti doplnění vždy jeden turn/start, původní sandbox/model; duplicitní příkaz, cizí tah/scope/generace, storage/caller/HTTP failure, restart, retence a závod dokončení bez replay. 15 Node scénářů a 130 skutečných browser kontrol na pěti velikostech PASS, mobilní/desktop formulář vizuálně zkontrolovaný. Plná brána PASS: 3669 testů / 585,097 s, 5 SKIP. Report human_adam_ha06_exact_append_20261112.txt; schéma/důkazní otisky mimo Git. Bez skutečné App Server relace, služby, placeného modelu nebo změny Willova checkoutu.
+
+
+### 2026-11-12 18:03 CET — HA-06: uzavření ověření a lokální předání
+
+Hotovo: Doplnění přesné běžící práce je lokálně dokončené a ověřené, připravené
+k předání z Datovy větve. HA-05 je podle Mílova dnešního vzkazu již nasazený.
+
+Rozhodnutí: Míla zadal porovnat finální zdroje s existující zelenou branou
+a dokončit vlastní handoff, TVBCP i lokální checkpoint. Produkční zdroje ani
+testy se při uzavření neměnily; shodná plná sada se neopakovala.
+
+Další krok: Předat lokální checkpoint HA-06 k samostatnému rozhodnutí o integraci
+a vydání; tento pokyn sám neschvaluje push ani nasazení HA-06.
+
+Navrhované další kroky: HA-07 pouze na další zadání. Živá metoda/echo klientského
+ID a fyzická Mac/iPhone přejímka zůstávají otevřené v samostatném rozsahu.
+Striktní fallback po výpadku dál může ponechat delivery_unknown a neopravňuje retry.
+
+Technický důkaz: Finální zelená logs/ha06_full_gate_final_20261112.log má
+3669 testů / 585,097 s, 5 SKIP a Cockpit quality gate: OK. Všech 18 finálních
+zdrojů/testů v ha06_source_receipt.json má shodné SHA-256; jejich poslední změny
+předcházejí finálnímu běhu včetně opravy pořadí action inventáře. Bez dalších
+změn kódu, nového modelového tahu, zásahu do main, Willova checkoutu či služeb.
+Bezpečný manifest a otisk zeleného logu jsou v human_adam_ha06_exact_append_20261112.txt.

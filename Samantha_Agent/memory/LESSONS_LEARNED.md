@@ -2201,3 +2201,9 @@ Tento důkaz nenahrazuje skutečný reboot/wake po upgradu.
 - Kontext: HA-05 převádí browser z čekajícího send na HA-04 přijetí a samostatné čtení práce; HTTP odpověď může přijít pozdě nebo se ztratit.
 - Řešení: před jediným POST držet stejnou klientskou referenci, po nejistotě pouze GET podle původní identity. Cursor/revision nesmí jít zpět, staré scope/generation se neuplatní a finální stav se neoživí opožděným snímkem. Čtecí obnova nesmí kopírovat původní text do nového send. Oddělit poslední změnu od času úspěšného čtení.
 - Ověření: vykonávané Node scénáře skutečné cesty odeslání prošly dvojklik, ztrátu ACK, opožděné ACK po novějším čtení a přípravnou chybu bez druhého POST. Browserový polling zachová draft/selection/starší chat/řeč a po finálním dokladu skončí. Žádný skutečný modelový tah.
+
+### 2026-11-12 — Append do tahu nesmí zrušit ani rozvolnit důkaz původního zadání
+
+- Kontext: turn/steer může přidat další userMessage do stejného tahu; dosavadní kontrola všech user items jako jediné by po platném doplnění zneplatnila výsledek, obecné povolení více vstupů by zase obešlo guard.
+- Řešení: opt-in ledger odděluje právě jeden původní client ID od přesných command IDs rezervovaných před RPC. Původní started/final/completed důkazy zůstávají; cizí/duplicitní vstup neprojde. Samostatná trvalá command účtenka rozliší přijetí, odmítnutí a nejistotu. Ztráta ACK, journalu nebo volajícího nikdy neznamená nový start; rodičovská journal bariéra a doménový otisk přežijí kompakci.
+- Ověření: produkční client/dispatcher/Hub a HTTP fixture provedly série deseti doplnění do jediného turnu se stejným oprávněním. Selhání ukládání/HTTP/calleru, cizí ACK/generace, změna kontextu a dokončení během doplnění nevyvolaly druhý RPC ani nepřepsaly rodičovský výsledek. Žádný skutečný modelový pokus.

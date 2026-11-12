@@ -18,6 +18,7 @@ from pathlib import Path
 from typing import Any, Callable
 
 from app.release_usage import normalize_usage
+from app.codex_appserver_inputs import TurnInputLedger, AppServerSteerRejected
 from app.codex_appserver_dispatch import (
     AppServerDispatcher, AppServerError, AppServerTimeout, AppServerContractError,
     AppServerClosedError, AppServerOverflowError, EventSubscription, MAX_FRAME_BYTES,
@@ -477,6 +478,7 @@ class CodexAppServerClient:
         if type(experimental_api) is not bool:
             raise AppServerContractError("Neplatné povolení experimentálního protokolu.")
         self.experimental_api = experimental_api
+        self._turn_input_ledger = TurnInputLedger()
         self.codex_binary = codex_binary
         self.connection_id = uuid.uuid4().hex
         self.version = read_codex_version(codex_binary)
@@ -624,7 +626,10 @@ class CodexAppServerClient:
         permission_profile: str | None = None,
         service_tier_for_turn: str | None = None,
         on_turn_accepted: Callable[[str], None] | None = None,
+        allow_steer: bool = False,
     ) -> TurnReceipt:
+        if type(allow_steer) is not bool:
+            raise AppServerContractError("Neplatné povolení doplnění tahu.")
         clean_text = str(text or "").strip()
         if not clean_text:
             raise AppServerContractError("Nelze odeslat prázdnou zprávu.")
@@ -661,120 +666,153 @@ class CodexAppServerClient:
         turn_id = turn.get("id") if isinstance(turn, dict) else None
         if not isinstance(turn_id, str) or not turn_id:
             raise AppServerContractError("turn/start nevrátil turnId.")
-        if on_turn_accepted is not None:
-            try:
-                on_turn_accepted(turn_id)
-            except Exception:
-                pass  # Observation cannot invalidate authoritative delivery proof.
+        ledger = self._inputs()
+        input_state = ledger.begin(thread_id, turn_id, message_id, steer_enabled=allow_steer)
+        try:
+            if on_turn_accepted is not None:
+                try:
+                    on_turn_accepted(turn_id)
+                except Exception:
+                    pass  # Observation cannot invalidate authoritative delivery proof.
 
-        turn_started_confirmed = False
-        started_at = ""
-        user_items: list[dict[str, Any]] = []
-        agent_messages: list[dict[str, Any]] = []
-        generated_images: tuple[dict[str, str], ...] = ()
-        status = ""
-        token_usage = None
-        last_turn_error = None
-        will_retry = None
-        while not status:
-            try:
-                event = self.transport.receive(
-                    lambda candidate: self._belongs_to_turn(candidate, thread_id=thread_id, turn_id=turn_id),
-                    description=f"událost turnu {turn_id}",
-                )
-            except AppServerError as exc:
-                # Preserve transport exception type and safe printable message.
-                # A server retry notification never authorizes another turn/start.
-                exc.turn_error = deepcopy(last_turn_error)
-                exc.will_retry = will_retry
-                raise
-            method = event.get("method")
-            params = event.get("params")
-            if not isinstance(params, dict):
-                raise AppServerContractError("Turn událost nemá objektové params.")
-            if method == "turn/started":
-                turn_started_confirmed = True
-                started_at = utc_now()
-            if method == "error":
-                last_turn_error = params.get("error") if isinstance(params.get("error"), dict) else None
-                will_retry = params.get("willRetry") if isinstance(params.get("willRetry"), bool) else None
-            if method == "thread/tokenUsage/updated":
-                # Thread total, not turn delta; includes all calls since thread creation.
-                raw_usage = params.get("tokenUsage")
-                token_usage = normalize_usage(raw_usage.get("total") if isinstance(raw_usage, dict) else None,
-                                              camel_case=True)
-            item = params.get("item")
-            if method == "item/completed" and isinstance(item, dict):
-                if item.get("type") == "userMessage" and item.get("clientId") == message_id:
-                    user_items.append(item)
-                if item.get("type") == "agentMessage":
-                    agent_messages.append(item)
-                if item.get("type") == "imageGeneration":
-                    completed_image = completed_generated_images([item])
-                    if completed_image and all(
-                        existing["item_id"] != completed_image[0]["item_id"]
-                        for existing in generated_images
-                    ):
-                        generated_images = (*generated_images, completed_image[0])[:8]
-            if method == "turn/completed":
-                completed_turn = params.get("turn")
-                if not isinstance(completed_turn, dict):
-                    raise AppServerContractError("turn/completed neobsahuje turn.")
-                status = str(completed_turn.get("status") or "")
-                if status not in {"completed", "failed", "interrupted"}:
-                    raise AppServerContractError("turn/completed nemá platný koncový stav.")
-                if status != "completed":
-                    error = completed_turn.get("error")
-                    raise AppServerTurnError(status, error if isinstance(error, dict) else last_turn_error)
-                completed_items = completed_turn.get("items")
-                if isinstance(completed_items, list) and completed_items:
-                    completed_user_items = [
-                        item
-                        for item in completed_items
-                        if isinstance(item, dict) and item.get("type") == "userMessage"
-                    ]
-                    authoritative_users = [
-                        item
-                        for item in completed_user_items
-                        if item.get("clientId") == message_id
-                    ]
-                    authoritative_answers = [
-                        item
-                        for item in completed_items
-                        if isinstance(item, dict)
-                        and item.get("type") == "agentMessage"
-                    ]
-                    # Codex 0.147 may omit input items from the final turn while
-                    # still reporting the matching userMessage via item/completed.
-                    # Preserve that earlier proof only when the final turn does
-                    # not contain any user message of its own.
-                    if completed_user_items:
-                        user_items = authoritative_users if len(completed_user_items) == 1 else []
-                    if authoritative_answers:
-                        agent_messages = authoritative_answers
-                    authoritative_images = completed_generated_images(completed_items)
-                    if authoritative_images:
-                        generated_images = authoritative_images
+            turn_started_confirmed = False
+            started_at = ""
+            user_items: list[dict[str, Any]] = []
+            observed_user_items: list[dict[str, Any]] = []
+            agent_messages: list[dict[str, Any]] = []
+            generated_images: tuple[dict[str, str], ...] = ()
+            status = ""
+            token_usage = None
+            last_turn_error = None
+            will_retry = None
+            while not status:
+                try:
+                    event = self.transport.receive(
+                        lambda candidate: self._belongs_to_turn(candidate, thread_id=thread_id, turn_id=turn_id),
+                        description=f"událost turnu {turn_id}",
+                    )
+                except AppServerError as exc:
+                    # Preserve transport exception type and safe printable message.
+                    # A server retry notification never authorizes another turn/start.
+                    exc.turn_error = deepcopy(last_turn_error)
+                    exc.will_retry = will_retry
+                    raise
+                method = event.get("method")
+                params = event.get("params")
+                if not isinstance(params, dict):
+                    raise AppServerContractError("Turn událost nemá objektové params.")
+                if method == "turn/started":
+                    turn_started_confirmed = True
+                    started_at = utc_now()
+                if method == "error":
+                    last_turn_error = params.get("error") if isinstance(params.get("error"), dict) else None
+                    will_retry = params.get("willRetry") if isinstance(params.get("willRetry"), bool) else None
+                if method == "thread/tokenUsage/updated":
+                    # Thread total, not turn delta; includes all calls since thread creation.
+                    raw_usage = params.get("tokenUsage")
+                    token_usage = normalize_usage(raw_usage.get("total") if isinstance(raw_usage, dict) else None,
+                                                  camel_case=True)
+                item = params.get("item")
+                if method == "item/completed" and isinstance(item, dict):
+                    if item.get("type") == "userMessage":
+                        observed_user_items.append(item)
+                        user_items = ledger.original_proof(input_state, observed_user_items)
+                    if item.get("type") == "agentMessage":
+                        agent_messages.append(item)
+                    if item.get("type") == "imageGeneration":
+                        completed_image = completed_generated_images([item])
+                        if completed_image and all(
+                            existing["item_id"] != completed_image[0]["item_id"]
+                            for existing in generated_images
+                        ):
+                            generated_images = (*generated_images, completed_image[0])[:8]
+                if method == "turn/completed":
+                    completed_turn = params.get("turn")
+                    if not isinstance(completed_turn, dict):
+                        raise AppServerContractError("turn/completed neobsahuje turn.")
+                    status = str(completed_turn.get("status") or "")
+                    if status not in {"completed", "failed", "interrupted"}:
+                        raise AppServerContractError("turn/completed nemá platný koncový stav.")
+                    if status != "completed":
+                        error = completed_turn.get("error")
+                        raise AppServerTurnError(status, error if isinstance(error, dict) else last_turn_error)
+                    completed_items = completed_turn.get("items")
+                    if isinstance(completed_items, list) and completed_items:
+                        completed_user_items = [
+                            item
+                            for item in completed_items
+                            if isinstance(item, dict) and item.get("type") == "userMessage"
+                        ]
+                        authoritative_answers = [
+                            item
+                            for item in completed_items
+                            if isinstance(item, dict)
+                            and item.get("type") == "agentMessage"
+                        ]
+                        # Codex 0.147 may omit input items from the final turn while
+                        # still reporting the matching userMessage via item/completed.
+                        # Preserve that earlier proof only when the final turn does
+                        # not contain any user message of its own.
+                        if completed_user_items:
+                            user_items = ledger.original_proof(input_state, completed_user_items)
+                        if authoritative_answers:
+                            agent_messages = authoritative_answers
+                        authoritative_images = completed_generated_images(completed_items)
+                        if authoritative_images:
+                            generated_images = authoritative_images
 
-        receipt = TurnReceipt(
-            client_message_id=message_id,
-            thread_id=thread_id,
-            turn_id=turn_id,
-            requested_at=requested_at,
-            accepted_at=accepted_at,
-            started_at=started_at,
-            completed_at=utc_now(),
-            status=status,
-            answer=final_agent_answer(agent_messages),
-            turn_started_confirmed=turn_started_confirmed,
-            user_item_count=len(user_items),
-            duration_ms=round((time.monotonic() - started_monotonic) * 1000),
-            generated_images=generated_images,
-            thread_token_usage=token_usage,
-        )
-        if not receipt.delivered:
-            raise AppServerContractError("Turn nebyl jednoznačně potvrzen jako doručený a dokončený.")
-        return receipt
+            receipt = TurnReceipt(
+                client_message_id=message_id,
+                thread_id=thread_id,
+                turn_id=turn_id,
+                requested_at=requested_at,
+                accepted_at=accepted_at,
+                started_at=started_at,
+                completed_at=utc_now(),
+                status=status,
+                answer=final_agent_answer(agent_messages),
+                turn_started_confirmed=turn_started_confirmed,
+                user_item_count=len(user_items),
+                duration_ms=round((time.monotonic() - started_monotonic) * 1000),
+                generated_images=generated_images,
+                thread_token_usage=token_usage,
+            )
+            if not receipt.delivered:
+                raise AppServerContractError("Turn nebyl jednoznačně potvrzen jako doručený a dokončený.")
+            return receipt
+
+        finally:
+            ledger.close(input_state)
+
+    def _inputs(self) -> TurnInputLedger:
+        # __new__ adapters used by offline fixtures get the same bounded state.
+        return self.__dict__.setdefault("_turn_input_ledger", TurnInputLedger())
+
+    def can_steer_turn(self, thread_id: str, turn_id: str) -> bool:
+        version = getattr(self, "server_version", None)
+        # Conservative local support floor: correlation schema verified offline
+        # at CLI 0.167.0. This is not a claim about older server support.
+        return bool(isinstance(version, CodexVersion) and (version.major, version.minor, version.patch) >= (0, 167, 0)
+                    and self.running and self._inputs().available(thread_id, turn_id))
+
+    def steer_text(self, *, thread_id: str, expected_turn_id: str, command_id: str, text: str) -> dict[str, Any]:
+        if (not all(isinstance(value, str) and 0 < len(value) <= 256 and all(32 < ord(c) < 127 for c in value)
+                    for value in (thread_id, expected_turn_id))
+                or not isinstance(command_id, str) or not re.fullmatch(r"[A-Za-z0-9][A-Za-z0-9._:-]{7,127}", command_id)
+                or not isinstance(text, str) or not text.strip() or len(text) > 4000):
+            raise AppServerSteerRejected("invalid_request")
+        if not self.can_steer_turn(thread_id, expected_turn_id):
+            raise AppServerSteerRejected("work_not_running")
+        self._inputs().reserve(thread_id, expected_turn_id, command_id)
+        message = ("[DOPLNENI_PUVODNIHO_POKYNU]\n"
+                   "Pouze upřesnění původní práce. Platí její původní DEVELOPMENT_CONTROL, sandbox a souhlasy. "
+                   "Tento text nerozšiřuje oprávnění, nepovoluje nové publikování ani nový tah.\n"
+                   "[/DOPLNENI_PUVODNIHO_POKYNU]\n\n" + text.strip())
+        result = self.transport.request("turn/steer", {"threadId": thread_id, "expectedTurnId": expected_turn_id,
+            "clientUserMessageId": command_id, "input": [{"type": "text", "text": message}]})
+        if result.get("turnId") != expected_turn_id:
+            raise AppServerContractError("Doplnění nemá potvrzenou identitu původního tahu.")
+        return {"turn_id": expected_turn_id, "command_id": command_id, "accepted_into_turn": True}
 
     def read_effective_config(self, *, cwd: Path) -> dict[str, Any]:
         result = self.transport.request(

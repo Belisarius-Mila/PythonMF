@@ -13,6 +13,13 @@ from scripts.cockpit_quality_gate import node_binary
 
 
 class HumanAdamUiTests(unittest.TestCase):
+    def test_ha06_exact_append_in_node_vm(self) -> None:
+        result = subprocess.run(
+            [node_binary(), str(Path(__file__).with_name("human_adam_ha06_frontend.test.cjs"))],
+            input=json.dumps(HUMAN_ADAM_HTML), text=True, capture_output=True, timeout=30, check=False,
+        )
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+
     def test_send_failure_behaviour_in_node_vm(self) -> None:
         result = subprocess.run(
             [node_binary(), str(Path(__file__).with_name("human_adam_send_frontend.test.cjs"))],

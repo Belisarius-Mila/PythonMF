@@ -502,9 +502,21 @@ class CanonicalSessionHub:
 
             recovered_after_transport_failure = False
             try:
-                observing = work_observer.attach(client, str(self._state["thread_id"])) if work_observer else nullcontext(None)
+                with self._state_lock:
+                    bound_thread = str(self._state["thread_id"])
+                    bound_generation = self._state.get("connection_generation", 0)
+                    bound_policy = copy.deepcopy((self.model, self.reasoning_effort, self.sandbox_policy, self.approval_policy))
+                def original_steer_guard():
+                    with self._state_lock:
+                        active = self._state.get("active_turn") or {}
+                        return bool(self._client is client and client.running
+                                    and self._state.get("thread_id") == bound_thread
+                                    and self._state.get("connection_generation", 0) == bound_generation
+                                    and active.get("client_message_id") == clean_id
+                                    and (self.model, self.reasoning_effort, self.sandbox_policy, self.approval_policy) == bound_policy)
+                observing = work_observer.attach(client, bound_thread, guard=original_steer_guard) if work_observer else nullcontext(None)
                 with observing as accepted:
-                    options = {"on_turn_accepted": accepted} if accepted else {}
+                    options = {"on_turn_accepted": accepted, "allow_steer": True} if accepted else {}
                     receipt: TurnReceipt = client.send_text(
                         thread_id=str(self._state["thread_id"]),
                         text=clean_model_input,

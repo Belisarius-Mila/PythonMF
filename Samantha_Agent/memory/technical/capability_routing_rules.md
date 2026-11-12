@@ -300,3 +300,16 @@ projektem/operation_id a confirmed=true. Aktualizuje pouze projekci podle
 původních cached důkazů a hlásí writes_performed pravdivě. Nevolá nový model,
 reconnect ani původní operaci. Chybějící doklad zůstává neověřený. Placené
 pilotní tahy, steer/interrupt, fyzická přejímka a p+n mají vlastní oprávnění.
+
+### 2026-11-12 13:45 CET — HA-06 přesné doplnění a čtení účtenky
+
+- `human_adam_work_steer` → `app.communication.human_adam_work.WorkController.steer`,
+  HTTP POST `/api/human-adam/work/steer`; external_send a potvrzený přesný text.
+  Kořen i původní klient patří serveru. Povinný operation/command/expectedTurnId,
+  aktuální vlastník/projekt/scope a původní oprávnění; žádný model/sandbox override.
+- `human_adam_work_command_read` → `WorkController.read_command`,
+  GET `/api/human-adam/work/command`; read-only scoped účtenka s no-store.
+  Ověření nepřidává model, reconnect, recovery mutaci ani další odeslání.
+- Doménová účtenka rozhoduje podle command.state, nikoli jen HTTP200/ok.
+  Pending/unverified se neprovádí znovu; známé odmítnutí ponechá text jako draft.
+  Role, nové modely a publikace nejsou součástí této schopnosti.
