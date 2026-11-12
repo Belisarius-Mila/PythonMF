@@ -646,3 +646,5 @@ Tento soubor je rozcestnik dlouhodobe pameti pro Samantha Agent.
 3. Pozdeji pridat RAG nad exporty z ChatGPT.
 
 - `projects/automated_recurring_tasks.md`; `handoffs/colors_numbers_owl_pages_artifact_checkpoint_2026_07_27.md` — 12.11.: jednorázová promluva pro pátek13.11. veřejně nasazená9e60a4f3/Terra8b4a47aa,3730 PASS. Pages43275566977 a veřejná shoda MP3 /228672 B /38,112 s ověřené; automatika zůstává vypnutá. Poslech nepotvrzený, e-mailový proud obnoven.
+
+- `projects/automated_recurring_tasks.md`; `handoffs/colors_numbers_owl_pages_artifact_checkpoint_2026_07_27.md` — 12.11.: na Mílův pokyn přesně upravená promluva pro13.11., verze2 owl_131126_v2.mp3 /283968 B /47,328 s. Dekódování a shoda zdrojů ověřené; nové Pages nasazení čeká na účtenku, automatika beze změny vypnutá.

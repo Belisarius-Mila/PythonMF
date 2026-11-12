@@ -319,3 +319,23 @@ success nad stejným headem, deployment7745438794. Veřejný app.js?v=dc601cb599
 vybírá owl_131126.mp3?v=20261113a-10c11f98143a. Účtenka mimo Git:
 data/daily_3am/receipts/20261113_publication.json. Tento výsledkový zápis je
 lokální checkpoint a neopakuje publikaci.
+
+
+## 2026-11-12 19:17 CET — Upravená promluva pro pátek 13., verze2
+
+Hotovo: Přesně upravený text včetně odstavce je v jediném řádku 2026-11-13.
+Nová MP3 owl_131126_v2.mp3 má283968 B /47,328 s, úplné dekódování FFmpeg PASS.
+Obě kopie přehrávače mají nový odkaz i cache otisky; předchozí MP3 zachované.
+Přesná shoda ostatních CSV záznamů a dodaného textu ověřená.
+
+Rozhodnutí: Míla výslovně zadal vytvoření a nasazení upravené řeči. Hlas Antonin
+a rychlost -10 % zachované. Nový soubor odděluje opravený obsah od staré cache.
+Živé Pages workflow stále bez cronu/TTS, automatika se neobnovuje.
+
+Další krok: Dokončit registrované Pages vydání verze2 a ověřit veřejné JS/MP3.
+Nové nasazení ani uživatelský poslech verze2 zatím nejsou doložené.
+Navrhované další kroky: Vrátit se k e-mailové přejímce A+C.
+
+Technický důkaz: MP3 SHA-256 f193a1227880f4bd7ce6d80480efb64a5ad3ab2a352fc1c754b690598a2f7e9b;
+app.js?v=d15adc4379d3de42; soukromé podklady data/daily_3am/revisions/20261113_v2/.
+Statická brána logs/owl_20261113_v2_static_gate.log; publikační plná brána následuje.
