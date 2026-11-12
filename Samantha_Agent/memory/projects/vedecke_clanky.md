@@ -17,6 +17,18 @@ hlídání změn webových stránek. Základní implementaci Míla potvrdil jako
 zprávách. Překlad ani automatický redaktor ještě nejsou aktivované. Vývoj zůstává v Datově worktree na
 `data/parallel-20261104`; e-mailový a kalendářový agent patří Willovi.
 
+### Aktivní páteční služba — 2026-11-10 11:32 CET
+
+Míla výslovně zapnul službu a dodal přesnou globální větu pro předložené nastavení
+Sol/medium Standard, 15 kreditů/job a 100/měsíc. Nasazená role/kód i skutečně
+servírované české Uložit byly před aktivací ověřené. Jediný LaunchAgent je nahraný,
+bootstrap0, první tick not_due/exit0, stderr0 B, production jobs0. Cockpit activated=true.
+
+První příprava 13. 11. 2026 od 08:00 a vydání od 09:00 Europe/Prague, max5 novinek.
+Kód, ostatní služby a modelové role se při aktivaci neměnily; žádné placené dohánění.
+CRISPR již zůstává uložený česky se zdrojem a sledováním. Příští krok je přejímka
+prvního skutečného vydání a fyzického UI. Důkaz reports/science_news_activation_20261110.json.
+
 ### Uložení v češtině a páteční aktivace — 2026-11-10 09:20 CET
 
 Míla zadal páteční aktivaci a uložení konkrétního CRISPR článku v češtině.
@@ -523,3 +535,12 @@ symlinky, uchovává účtenku a dovoluje bezpečně dokončit přerušené maz�
 Kontrola registru se vztahuje na převáděné karty, aby následné změny jiných karet
 neblokovaly úklid. Automatický úklid není zaveden. Důkazy a aktuální stav patří
 do kanonického handoffu a TVBCP.
+
+
+### 2026-11-12 08:02 CET — Dokumentační integrace hotové Datovy větve
+
+Hotovo: Do main převzatý závěr Data3035fc14 a jeho dosud nesloučená historie; kód, testy, konfigurace, workflow, média a služby se proti main c22bc3af nemění. Doplněné dříve chybějící aktivační a publikační doklady ScienceNews/MMTX, zachované novější main zápisy včetně kompatibility pošty, e-mailového backendu a obnovy terminálu.
+
+Důkaz: Report `data_repository_integration_20261112.md` popisuje rozsah a ověření. Původní účtenky jsou historické důkazy z10.–11.11., nikoli nový provozní audit. Žádná nová aktivace, modelový tah, push ani nasazení.
+
+Rizika a další krok: Přejímky na zařízení a procesní nejistota původního Pages publisheru zůstávají otevřené. Hotové lokální commity čekají na samostatný pokyn k publikaci. Datův vlastní worktree a rozpracovaná UI větev se nemění.

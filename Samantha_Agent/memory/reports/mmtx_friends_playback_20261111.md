@@ -46,3 +46,19 @@ Další krok: Dokončit cílenou kontrolu se servisním PATH a statickou bránu,
 Navrhované další kroky: Po nové konečné účtence ověřit GitHub/Pages a veřejné bajty; fyzická hlasová a iPhone přejímka samostatně.
 
 Technický důkaz: Po opravě 40 cílených testů se systémovým PATH OK /5,417 s, Data2/2 OK /0,366 s, obě statické brány OK. Původní soukromý gate log zachovaný; veřejná bezpečná účtenka v mmtx_friends_playback_release_attempt1_20261111.json. MMTX zdroje a původní MP3/obrázky se opravou testu nemění.
+
+## Konečný veřejný výsledek
+
+### 2026-11-11 20:46 CET — Veřejné vydání ověřené po neurčité účtence
+
+Hotovo: Dva main commity d35e81a6 a2106bead jsou odeslané; Přátelé1–4 se třemi režimy a ručním Next/Repeat jsou veřejně nasazené. Původní hry, MP3 i ilustrace zachované, oba webové kořeny shodné.
+
+Rozhodnutí: Původní job504e3635 skončil na servisním Node/PATH testu před pushem; po přesné opravě a novém auditu vznikl nový request data-mmtx-friends-playback-44bfbb5f-20261111-v2, jobae8ee1749c0399f64e2941459ca4bda3. Ten potvrdil push a plnou bránu, ale uzavřel se attention s deployment_state=uncertain ještě za běžícího Pages workflow. Žádný další release/push/dispatch se nespouštěl. Adam pouze read-only počkal na přesný běh43090037585 a ověřil jeho úspěch, deployment a veřejné bajty. Původní strojové účtenky se nepřepisují ani nevydávají za completed.
+
+Další krok: Mílova přejímka veřejného ovládání a hlasů ve čtyřech částech Přátel.
+
+Navrhované další kroky: Fyzický iPhone samostatně. Předčasný návrat Pages publisheru zůstává procesním rizikem pro budoucí vydání; tato změna ho neopravuje ani neprovádí nové vydání.
+
+Technický důkaz: Centrální Terra6.1/high, 2 commity, push_state=confirmed, plná publikační brána3487 PASS /639,7 s. Přesný workflow43090037585 completed/success, head2106beadf0d10afdc53993c7f40a7868da9b34be; deployment7719962425 success v19:45:38Z. HTTP4/4 exact: HTML8557 B, hlavní JS116987 B, CSS34879 B, player7592 B; celkem168015 B. HTTPS kontrola s ověřovaným certifi CA; žádné vypínání TLS ověřování. Registrované GitHub/deploy audity potvrdily main/origin aligned, 0 čekajících commitů, oba profily aligned a čisté. Main zůstává čistý, konečný doklad se ukládá jen v Data. Žádný restart Cockpitu ani nový placený obrazový/TTS/vývojový pokus. Před/po snapshot chráněných služeb v dokončené účtence chybí, netvrdit tuto formální přejímku. Safari fyzický proklik po vydání ani hlasová/iPhone přejímka nebyly provedené. Reporty mmtx_friends_playback_release_attempt1_20261111.json, mmtx_friends_playback_release_v2_20261111.json a mmtx_friends_playback_public_20261111.json.
+
+Veřejná verze: https://belisarius-mila.github.io/PythonMF/index.html?scene=intro4&release=2106bead

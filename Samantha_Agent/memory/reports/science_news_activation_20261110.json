@@ -1,5 +1,5 @@
 {
-  "state": "czech_crispr_saved_activation_prepared_not_enabled",
+  "state": "service_active_waiting_first_friday",
   "checked_on": "2026-11-10",
   "user_request": "Activate Friday ScienceNews and save the specific CRISPR news as a complete Czech translation.",
   "crispr_save": {
@@ -19,11 +19,11 @@
     "first_due": "2026-11-13T09:00:00+01:00",
     "max_job_credits": 15,
     "max_month_credits": 100,
-    "installation_performed": false,
+    "installation_performed": true,
     "paid_model_calls": 0,
-    "code_ready": false,
-    "role_ready": false,
-    "served_save_guard": false,
+    "code_ready": true,
+    "role_ready": true,
+    "served_save_guard": true,
     "model": "gpt-6.1-sol",
     "reasoning_effort": "medium",
     "speed": "Standard",
@@ -31,9 +31,10 @@
     "preparation_time": "Friday 08:00",
     "publication_time": "Friday 09:00",
     "maximum_news_per_issue": 5,
-    "budget_approval": "pending",
-    "safety_confirmation": "pending",
-    "runtime_role_config_modified_by_Data": false
+    "budget_approval": "approved_by_Mila_20261110",
+    "safety_confirmation": "exact_phrase_received_20261110",
+    "runtime_role_config_modified_by_Data": false,
+    "service_state": "active"
   },
   "guards": [
     "Whole Czech translation required before Cockpit Save; follow/dismiss remain available.",
@@ -60,19 +61,18 @@
     "targeted_result": "PASS",
     "full_gate": "PASS",
     "full_gate_log": "logs/science_news_activation_final_gate_20261110.log",
-    "physical_ui_acceptance": "pending after deployment",
+    "physical_ui_acceptance": "pending on Mila device; deployment and activation already verified",
     "full_python_tests": 2964,
     "full_skips": 5,
     "full_seconds": 547.271
   },
   "new_paid_model_calls": 0,
-  "live_services_started_or_restarted": false,
+  "live_services_started_or_restarted": true,
   "push_or_deploy_performed": false,
   "next_steps": [
-    "Will integrates this exact new commit into current main, preserving all existing role entries, then separately authorizes deployment.",
-    "Recheck activation proposal readiness against the deployed runtime; refresh the free proposal only if its pinned dependencies changed.",
-    "Mila confirms 15/job and 100/month and the exact global safety phrase for installation.",
-    "Activate the one LaunchAgent with the exact prepared proposal; verify the same launch receipt and not_due/zero paid catch-up before Friday."
+    "Verify first actual weekly editorial preparation Friday 2026-11-13 at 08:00 Europe/Prague and publication at 09:00.",
+    "Mila reviews the first issue and the new Czech-only Save flow on his device.",
+    "Unknown or interrupted runs use the same receipt; no repeated bootstrap or model turn."
   ],
   "runtime_role_compatibility": {
     "science_policy_digest": "ba557f66794d071e185cd87008d01684c733f31eece0fbdb4074155ba73f529f",
@@ -117,5 +117,46 @@
     "tests/test_science_news_cached_translation.py",
     "tests/test_science_news_http.py",
     "tests/test_science_news_model.py"
-  ]
+  ],
+  "activated_at": "2026-11-10T10:30:03.722203+00:00",
+  "activation_execution": {
+    "proposal_sha256": "e6e8eb06770426631ba1f0c85caf6e083be0f6c1ef1fbf87f5e4cdea784d375b",
+    "state": "active",
+    "launch_attempted": true,
+    "launch_returncode": 0,
+    "first_due": "2026-11-13T09:00:00+01:00",
+    "paid_model_calls": 0,
+    "receipt_sha256": "5738fe03af2d7583093c96f92ee8336311b5cc7510f76a96ea763113245dd56f"
+  },
+  "service_live_check": {
+    "service_registered": true,
+    "launch_state": {
+      "state": "not running",
+      "runs": "1",
+      "last exit code": "0"
+    },
+    "initial_ticks": [
+      {
+        "ok": true,
+        "state": "not_due"
+      }
+    ],
+    "scheduler_stderr_bytes": 0,
+    "production_job_count": 0,
+    "api_activated": true,
+    "pending_count": 0
+  },
+  "service_scope": "Only com.samantha.science-news installed and bootstrapped once; existing Cockpit/App Server and other agents were not restarted.",
+  "launchd_cli_preflight": {
+    "launchd_path_cli_preflight_ok": true,
+    "version": "codex-cli 0.167.0",
+    "model_calls": 0
+  },
+  "service_connection_preflight": {
+    "account_type": "chatgpt",
+    "compatible": true,
+    "thread_starts": 0,
+    "model_turns": 0,
+    "service_path_and_minimal_environment": true
+  }
 }

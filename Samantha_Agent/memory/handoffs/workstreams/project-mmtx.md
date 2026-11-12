@@ -1,6 +1,8 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
+- 2026-11-11 20:46 CET: Přátelé1–4 s jednotným ovládáním jsou na Pages2106bead nezávisle potvrzené: workflow43090037585 success, deployment7719962425 success, veřejné HTML/JS/CSS/player4/4 HTTP200 a byte/SHA exact (168015 B). Terra jobae8ee174 potvrdil push a plnou bránu3487 PASS /639,7 s, ale předčasně skončil attention s deployment_state=uncertain; účtenka zůstává nezměněná. Žádná další publikace, pouze čtecí dokončení již spuštěného workflow. Main/origin čisté/aligned, 0 pending, oba profily aligned. Data závěrečný receipt je místní; hlasová a iPhone přejímka otevřená.
+
 - 2026-11-11 20:33 CET: Terra p+n první balíček d35e81a6 zastavilo v plné bráně3487 testů (1 FAIL: Node mimo servisní PATH). GitHub read-only stále f6770814, žádný push/deployment; starý job504e3635 uzavřený a neopakovat. Test opraven společným node_binary() s vynucením systémového PATH; nový přesný audit a request data-mmtx-friends-playback-44bfbb5f-20261111-v2 po kontrolách. Kód přehrávače/MP3 beze změny.
 
 - 2026-11-11 20:18 CET: Míla výslovně zadal p+n Terrou. Main převzal Data 44bfbb5f nad čistým, s origin zarovnaným f6770814; jednotné režimy a Next/Repeat všech čtyř částí, původní hry/audio zachované. Připravené jediné předání project-mmtx → GitHub Pages, request data-mmtx-friends-playback-44bfbb5f-20261111-v1. Tento přípravný stav ještě nepotvrzuje spuštění jobu, push ani deployment.
@@ -1434,3 +1436,24 @@ Další krok: Dokončit cílenou kontrolu se servisním PATH a statickou bránu,
 Navrhované další kroky: Po nové konečné účtence ověřit GitHub/Pages a veřejné bajty; fyzická hlasová a iPhone přejímka samostatně.
 
 Technický důkaz: Po opravě 40 cílených testů se systémovým PATH OK /5,417 s, Data2/2 OK /0,366 s, obě statické brány OK. Původní soukromý gate log zachovaný; veřejná bezpečná účtenka v mmtx_friends_playback_release_attempt1_20261111.json. MMTX zdroje a původní MP3/obrázky se opravou testu nemění.
+
+### 2026-11-11 20:46 CET — Veřejné vydání ověřené po neurčité účtence
+
+Hotovo: Dva main commity d35e81a6 a2106bead jsou odeslané; Přátelé1–4 se třemi režimy a ručním Next/Repeat jsou veřejně nasazené. Původní hry, MP3 i ilustrace zachované, oba webové kořeny shodné.
+
+Rozhodnutí: Původní job504e3635 skončil na servisním Node/PATH testu před pushem; po přesné opravě a novém auditu vznikl nový request data-mmtx-friends-playback-44bfbb5f-20261111-v2, jobae8ee1749c0399f64e2941459ca4bda3. Ten potvrdil push a plnou bránu, ale uzavřel se attention s deployment_state=uncertain ještě za běžícího Pages workflow. Žádný další release/push/dispatch se nespouštěl. Adam pouze read-only počkal na přesný běh43090037585 a ověřil jeho úspěch, deployment a veřejné bajty. Původní strojové účtenky se nepřepisují ani nevydávají za completed.
+
+Další krok: Mílova přejímka veřejného ovládání a hlasů ve čtyřech částech Přátel.
+
+Navrhované další kroky: Fyzický iPhone samostatně. Předčasný návrat Pages publisheru zůstává procesním rizikem pro budoucí vydání; tato změna ho neopravuje ani neprovádí nové vydání.
+
+Technický důkaz: Centrální Terra6.1/high, 2 commity, push_state=confirmed, plná publikační brána3487 PASS /639,7 s. Přesný workflow43090037585 completed/success, head2106beadf0d10afdc53993c7f40a7868da9b34be; deployment7719962425 success v19:45:38Z. HTTP4/4 exact: HTML8557 B, hlavní JS116987 B, CSS34879 B, player7592 B; celkem168015 B. HTTPS kontrola s ověřovaným certifi CA; žádné vypínání TLS ověřování. Registrované GitHub/deploy audity potvrdily main/origin aligned, 0 čekajících commitů, oba profily aligned a čisté. Main zůstává čistý, konečný doklad se ukládá jen v Data. Žádný restart Cockpitu ani nový placený obrazový/TTS/vývojový pokus. Před/po snapshot chráněných služeb v dokončené účtence chybí, netvrdit tuto formální přejímku. Safari fyzický proklik po vydání ani hlasová/iPhone přejímka nebyly provedené. Reporty mmtx_friends_playback_release_attempt1_20261111.json, mmtx_friends_playback_release_v2_20261111.json a mmtx_friends_playback_public_20261111.json.
+
+
+### 2026-11-12 08:02 CET — Dokumentační integrace hotové Datovy větve
+
+Hotovo: Do main převzatý závěr Data3035fc14 a jeho dosud nesloučená historie; kód, testy, konfigurace, workflow, média a služby se proti main c22bc3af nemění. Doplněné dříve chybějící aktivační a publikační doklady ScienceNews/MMTX, zachované novější main zápisy včetně kompatibility pošty, e-mailového backendu a obnovy terminálu.
+
+Důkaz: Report `data_repository_integration_20261112.md` popisuje rozsah a ověření. Původní účtenky jsou historické důkazy z10.–11.11., nikoli nový provozní audit. Žádná nová aktivace, modelový tah, push ani nasazení.
+
+Rizika a další krok: Přejímky na zařízení a procesní nejistota původního Pages publisheru zůstávají otevřené. Hotové lokální commity čekají na samostatný pokyn k publikaci. Datův vlastní worktree a rozpracovaná UI větev se nemění.
