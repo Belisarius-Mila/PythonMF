@@ -2195,3 +2195,9 @@ Tento důkaz nenahrazuje skutečný reboot/wake po upgradu.
 - Problém: ztracená HTTP odpověď ani chybějící browserový stav neprokazují, že se modelový požadavek neprovedl. Nové ID při obnově by vytvořilo druhý tah; pozdější job stejného projektu nesmí nahradit původní child-job vazbu.
 - Řešení: trvalé přijetí a otisk přesného zadání/oprávnění, serverově vlastněný worker s původním profile lockem a file lease, durable dispatch bariéra před RPC. Reload čte stejné ID. Restart obnovuje jen původní canonical/completion důkaz; bez něj neověřeno. Identitní doklady se nevyřazují s krátkou historií. Child job ID je po prvním navázání pevné. HTTP wait není vlastník provedení.
 - Ověření: HA-04 fixture se skutečným pádem vlastního Python procesu po dispatch, legacy HTTP disconnectem, dvěma klienty, selháním persist/startu, retencí/cursorem a odmítnutou náhradou dokončovacího jobu; bez modelu. Report human_adam_ha04_server_work_20261112.md.
+
+### 2026-11-12 — Ztracené přijetí dlouhé práce řeší dohledání identity, ne druhé odeslání
+
+- Kontext: HA-05 převádí browser z čekajícího send na HA-04 přijetí a samostatné čtení práce; HTTP odpověď může přijít pozdě nebo se ztratit.
+- Řešení: před jediným POST držet stejnou klientskou referenci, po nejistotě pouze GET podle původní identity. Cursor/revision nesmí jít zpět, staré scope/generation se neuplatní a finální stav se neoživí opožděným snímkem. Čtecí obnova nesmí kopírovat původní text do nového send. Oddělit poslední změnu od času úspěšného čtení.
+- Ověření: vykonávané Node scénáře skutečné cesty odeslání prošly dvojklik, ztrátu ACK, opožděné ACK po novějším čtení a přípravnou chybu bez druhého POST. Browserový polling zachová draft/selection/starší chat/řeč a po finálním dokladu skončí. Žádný skutečný modelový tah.

@@ -1,87 +1,29 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
-## HA-04 — serverově vlastněná práce, 2026-11-12 12:07 CET
+## Aktuální stav — HA-05, živá karta nad HA-04
 
-Lokálně implementované trvalé přijetí jedné modelové práce, operation_id,
-serverový worker a čtecí snímek/omezená historie s cursorem. Staré /send čeká
-nad stejnou serverovou prací; nový /work/start vrací202. GET /work dohledává
-práci podle scope a operation_id/client_message_id, včetně nového server_generation.
-
-Reload nebo ztracená HTTP odpověď nevytvářejí další turn/start. Worker používá
-původní profilový lock a cross-process lease; nemění model/sandbox/oprávnění.
-Trvalá dispatch bariéra předchází RPC, scope vlákna se znovu ověří před send.
-Po restartu se nic automaticky nespouští. Výslovný recover ověří pouze původní
-cached session/completion doklad, jinak vrátí neověřenost. Child job ID je pevné;
-modelová odpověď může být potvrzená, zatímco checkpoint ještě běží či je neověřený.
-
-Metadata observer využívá HA-03, před přesným ACK bufferuje jen bezpečné typy
-událostí, nikdy raw text/nástrojové argumenty/reasoning.128 událostí na práci,
-64 položek přehledu,64 metadat před ACK, nejvýše8 workerů a2 staré RAM odpovědi.
-Staré identitní soubory zůstávají jako idempotentní doklady. Cursor mezera
-vyžaduje jednorázový resync; terminální stav ani cizí generace se nepřepisují.
-
-325 cílených testů PASS, statická brána PASS. Ověřen skutečný pád vlastního
-syntetického procesu po dispatch a HTTP odpojení/dva klienti, bez druhého
-provedení. Finální plná lokální brána PASS: 3635 testů / 573,186 s, 31 SKIP; finální zdroj včetně child-job ochrany a oprav registrů.
-Finální zpevnění přesné child-job vazby je součástí325 cílených kontrol;
-povinná publikační plná brána znovu ověří celý přesný finální commit.
-Žádný placený vývojový pilot, živý modelový HA-04 test, skutečná mutace
-uživatelského workspace, změna rolí, instalace služby či nový daemon.
-
-Míla schválil i bezprostřední Terra p+n. Request `human-adam-ha04-20261112-v1`,
-job `832a2e708b8016039f5547df141d8fe4`; autorita výsledku v původní účtence a
-`data/private/ha04_20261112/release_receipt.json`. Tento snapshot je před vydáním.
-HA-05 zůstává živá karta/UI kanál; současný klient zachovává starý čekající
-protokol a nepřidává ukládání rozepsaných draftů. Steer/interrupt/usage a
-rozšířené adaptéry dalších jobů zůstávají HA-06 ažHA-09. Fyzická Mac/iPhone
-přejímka a skutečný živý reconnect dlouhé modelové práce zůstávají otevřené.
-Report `reports/human_adam_ha04_server_work_20261112.md`.
-
-## Společné vydání připravené — 2026-11-12 10:58 CET
-
-E-mailové UI a Datovy HA-01/02/03 jsou integrované. Terra p+n celého balíčku výslovně schválené; job4242cf7f5bdb6b88724e635cde31b443 ještě není doklad úspěchu. Finální celková brána/checkpoint a jediné registrované vydání následují. Staré Ateliér/UI větve propojené pouze historicky, dnešní kód zachovaný. Přesný výsledek v reports/combined_finished_work_release_20261112.md a původní privátní účtence.
-
-## Aktuální stav — HA-03, dispatcher App Serveru
-
-- 2026-11-12: Na Mílův pokyn lokálně implementovaný HA-03 nad HA-02 7b77aba2.
-  Jediný wire reader; oddělené RPC odpovědi a nezávislé odběry notifikací.
-  Konkrétní validace, omezené fronty, scope/generation, probuzení při close.
-- Zachovaný důkaz jediného user itemu, turn/started a konečného výsledku;
-  item/started i neznámé item události dál procházejí existujícím guardem.
-  Výpadek nevyvolá druhý turn/start; delivery_unknown blokuje opakovaný send.
-- Plán čeká na doložený scope; thread-only usage se nepřičítá aktuálnímu tahu.
-  Vadné měření výslovně zneplatní staré číslo bez vyvrácení doručení.
-  Pomalý callback nezablokuje čtenář; overflow odběru je explicitní mezera.
-- Čtecí protocol diagnostika mimo perzistentní session: handshake/CLI/schéma,
-  generace a počty front, bez privátních payloadů; runtime features not_probed.
-  Minimum serveru 0.163.0 zachované, offline referenční schéma CLI 0.167.0.
-- Finální cílená sada 287 testů OK / 4,783 s; statická brána OK.
-  Plná regresní brána: 3587 testů OK / 532,005 s, 5 SKIP.
-- Data: data/parallel-20261104. Main, skutečné služby, modely, role a oprávnění
-  nedotčené; bez integrace/p+n, skutečného App Server spojení a placených pokusů.
-- Report reports/human_adam_ha03_dispatcher_20261112.txt. Syntetický Unix
-  WebSocket A/B/A a stdio nejsou živá přejímka upraveného klienta.
-- Další krok: HA-04 — serverově vlastněná dlouhá práce a obnova, na další zadání.
-  Nové události ještě nejsou živou kartou v UI (HA-05). Integrace, vydání
-  a fyzická Mac/iPhone přejímka zůstávají samostatné.
-## Aktuální provoz — 2026-11-12 09:14 CET
-
-Oprava7f47a41f je publikovaná a nasazená v Cockpitu; původní p+n
-cfc1c1b1375eb5c46143c98eed93bc38 completed, push/deploy confirmed,
-3520 testů PASS, smoke5/5 a protected_services_unchanged=true.
-Po Mílově přesné globální větě je vlastní hodinová služba registrovaně
-upgradovaná8c83e93b→7f47a41f, installed/owned/loaded/enabled. První
-kontrola09:12:45 CET již dokončený slot správně neopakovala: already_completed,
-0 nových posouzení. Celý business otisk, nastavení a modelové role shodné,
-stará kopie i servisní záloha zachované.
-
-Skutečná instalovaná kopie:311 souborů přesně podle manifestu, readiness bez
-blokátorů. Na izolovaném socketu ověřen nový start a převzetí stejného PID
-přímo přes instalovaný approved_selection, Terra/high, bez thread/start
-a turn/start a bez zásahu do produkčního socketu.
-Skutečný reboot/wake po upgradu neprovedený; dál běžný hodinový provoz.
-Podrobnosti reports/email_runtime_boot_20261112.md, soukromé bezpečné
-účtenky data/private/email_runtime_boot_20261112/.
-
+- 2026-11-12: Na Mílův pokyn implementováno lokálně v Data. Dokončený HA-04
+  72e1015c přijat fast-forwardem jen do data/parallel-20261104; Willův checkout
+  a jeho publikace nedotčené. Veřejná projekce je napojená za scope/owner guardem.
+- Hlavička ukazuje aktuální práci; Práce / Probíhá živý plán, veřejné komentáře,
+  doloženou aktivitu, čas od přijetí, poslední změnu a poslední úspěšné čtení.
+  Chybějící plán, zkrácení a gap jsou výslovné; žádné smyšlené procento.
+- Automatický GET s cursorem, bounded history/backoff/deadline, resync a obnova
+  stejné reference po načtení. Konečný/neověřený stav sledování ukončí.
+  Jeden POST /work/start; ztracené ACK vyvolá pouze dohledání původní identity.
+- Editor/fokus/selection, starší chat a běžící řeč zůstávají stabilní. Návrat
+  z bfcache zachová rozepsaný text. Raw reasoning/tool args se nezobrazují.
+- Veřejný filtr propouští jen typované kroky plánu a hotové commentary zprávy;
+  nejvýše 32×1000 znaků / 16×2000 znaků. Staré terminalní veřejné detaily se
+  kompaktně vyřazují, trvalá identita nadále brání opakovanému provedení.
+- 417 finálních cílených testů OK / 17,214 s, včetně skutečného HA-04 producenta,
+  observeru, wire scope a retence. 18 Node scénářů, 11 testů veřejné projekce;
+  140 skutečných browser kontrol PASS na pěti velikostech. Viditelná změna
+  v lokálních fixtures 723–733 ms; aktivní karta vizuálně zkontrolovaná.
+- Plná regresní brána: 3648 testů OK / 534,548 s, 5 SKIP. Report reports/human_adam_ha05_live_ui_20261112.txt.
+  Žádné skutečné App Server spojení, placené/modelové pokusy, služby/role
+  ani p+n touto prací. Živá Mac/iPhone přejímka zůstává samostatná.
+- Další krok: HA-06 na další zadání; případné společné vydání a živou přejímku
+  řídit samostatně. HA-04 p+n má vlastní Willovu účtenku, není vydáním HA-05.
 <!-- SAMANTHA_CURRENT_STATUS_END -->
 
 Nazev: Human–Adam / vyvojove prostredi - zalozeni pracovniho proudu Layer
@@ -3447,3 +3389,17 @@ Finální plná lokální brána PASS: 3635 testů / 573,186 s, 31 SKIP; fináln
 Důkazy `data/private/ha04_20261112/`, bezpečný report
 `reports/human_adam_ha04_server_work_20261112.md`. Bez skutečného modelového
 tahu HA-04, živé UI přejímky nebo aktualizace vlastní hodinové poštovní kopie.
+
+### 2026-11-12 12:29 CET — HA-05: živá karta a automatické čtecí sledování
+
+Hotovo: Human–Adam lokálně zobrazuje aktuální práci v hlavičce a živý plán, veřejné komentáře, doloženou aktivitu a časy pod Práce / Probíhá. Čtecí sledování s cursorem obnoví stejnou práci po načtení, vypořádá gap/resync a zastaví se na konci. Editor, fokus/selection, starší chat i řeč zůstávají stabilní. Ztracené přijetí řeší pouze GET původní identity, nikoli další odeslání.
+
+Rozhodnutí: Míla zadal HA-04 Willovi a Data pokračuje HA-05. Po stabilním 72e1015c byl jen Datův checkout fast-forwardován na HA-04, vlastní změny bezpečně uchované a vrácené. Veřejný filtr je nyní napojený za dosavadní thread/turn/owner/generation guard; důkaz doručení ani jednorázové oprávnění se nemění. Nové rozhraní nepřijímá raw reasoning ani tool args. Willovy soubory, procesy a jeho samostatné vydání nejsou měněné.
+
+Další krok: HA-06 — doplnění pokynu do přesné práce na další zadání.
+
+Navrhované další kroky: Případné vydání HA-05 a fyzickou Mac/iPhone/živou modelovou přejímku samostatně schválit. Pozdější HA-07/08 jsou zastavení a spotřeba celého průchodu; nejsou předstíranou součástí tohoto kroku.
+
+Technický důkaz: 417 cílených testů OK / 17,214 s. Skutečný HA-04 public producer, observer a wire dispatcher ověřily plán před ACK, cizí turn/generaci, commentary-only a nezměněné doručení; retence kompaktního veřejného obsahu zachová trvalý ID soubor a idempotenci. 18 Node scénářů, 11 veřejných testů, 140 skutečných browser kontrol na pěti velikostech; ustálené popředí 723–733 ms ve fixtures, aktivní mobilní/desktop karta vizuálně zkontrolovaná. Plná brána 3648 testů OK / 534,548 s, 5 SKIP. Report human_adam_ha05_live_ui_20261112.txt. První plný UI běh ukončen při přijetí HA-04; závěrečná brána ověřuje celou spojenou verzi. Žádný skutečný App Server/model/služba ani p+n.
+
+Doplnění ověření téhož kroku: po plné bráně už jen frontendová preflight blokace odeslání před připojením; 417 cílených / 17,214 s a finální statická brána OK, finální browser QA zopakované. Backend/payload/persistence proti plné bráně nezměněné.

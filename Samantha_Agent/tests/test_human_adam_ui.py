@@ -1,12 +1,14 @@
 from __future__ import annotations
 
 import json
+import importlib.util
 import subprocess
 import tempfile
 import unittest
 from pathlib import Path
 
 from app.communication.human_adam_ui import HUMAN_ADAM_HTML
+from app.communication.human_adam_live_ui import HUMAN_ADAM_LIVE_SCRIPT
 from scripts.cockpit_quality_gate import node_binary
 
 
@@ -18,6 +20,58 @@ class HumanAdamUiTests(unittest.TestCase):
             timeout=30, check=False,
         )
         self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+
+    def test_ha05_read_monitor_in_node_vm(self) -> None:
+        result = subprocess.run(
+            [node_binary(), str(Path(__file__).with_name("human_adam_ha05_frontend.test.cjs"))],
+            input=json.dumps(HUMAN_ADAM_HTML), text=True, capture_output=True,
+            timeout=30, check=False,
+        )
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+
+    def test_ha05_matches_actual_ha04_read_projection(self) -> None:
+        if importlib.util.find_spec("app.communication.human_adam_work") is None:
+            self.skipTest("HA-04 is not integrated in this checkout; verify after Will's checkpoint")
+        from app.communication.human_adam_work import WorkStore, normalized_request
+
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            store = WorkStore(root / "work")
+            scope = {"workstream_id": "project-current", "profile_id": "human-adam",
+                     "thread_id": "thread-current", "connection_generation": 3}
+            request = normalized_request({"text": "Synthetic public contract", "client_message_id": "human-adam-request-1"})
+            value, _ = store.admit(request, scope, "fixture-owner", session_path=root / "session.json")
+            value = store.change(value["operation_id"], "fixture-owner", "turn_started",
+                                 fields={"lifecycle_state": "running", "delivery_state": "pending"})
+            running = store.public(value, owned=True)
+            value = store.change(value["operation_id"], "fixture-owner", "execution_finished",
+                                 fields={"lifecycle_state": "completed", "delivery_state": "confirmed"})
+            completed = store.public(value, cursor=running["cursor"], owned=True)
+            def envelope(operation):
+                return {"ok": True, "schema_version": 1, "read_only": True, "writes_performed": False,
+                        "server_generation": "fixture-owner", "operations": [operation]}
+            script = HUMAN_ADAM_LIVE_SCRIPT + r'''
+const assert=require('node:assert/strict');
+const input=JSON.parse(require('node:fs').readFileSync(0,'utf8'));
+let payload=input.running;
+const monitor=createHumanAdamWorkMonitor({now:()=>Date.now(),visible:()=>true,
+ setTimeout,clearTimeout,storage:{getItem(){},setItem(){}},onChange(){},onTerminal(){},read:async()=>payload});
+const wait=async predicate=>{for(let n=0;n<100;n++){if(predicate())return;await new Promise(r=>setTimeout(r,10));}throw Error('contract timeout');};
+(async()=>{
+ monitor.configure({schema_version:1,server_owned:true,replays_on_restart:false,
+  read_path:'/api/human-adam/work',start_path:'/api/human-adam/work/start'},input.scope);
+ await wait(()=>monitor.snapshot().operation);
+ assert.equal(monitor.snapshot().operation.lifecycle_state,'running');
+ assert.equal(monitor.snapshot().cursor,input.running.operations[0].cursor);
+ payload=input.completed;monitor.refresh();await wait(()=>monitor.snapshot().operation.lifecycle_state==='completed');
+ assert.equal(monitor.snapshot().error,'');assert.equal(monitor.snapshot().watching,false);
+ monitor.pause();console.log('Actual HA-04 producer / HA-05 consumer contract PASS');
+})().catch(error=>{monitor.pause();console.error(error);process.exitCode=1;});
+'''
+            result = subprocess.run([node_binary(), "-e", script],
+                                    input=json.dumps({"scope": scope, "running": envelope(running), "completed": envelope(completed)}),
+                                    text=True, capture_output=True, timeout=10, check=False)
+            self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
 
     def test_ha02_projection_chat_and_read_generation_in_node_vm(self) -> None:
         result = subprocess.run(
@@ -207,14 +261,14 @@ class HumanAdamUiTests(unittest.TestCase):
         self.assertIn('!lastSession || !String(lastSession.thread_id || "")', HUMAN_ADAM_HTML)
         self.assertIn("setWriteIntentArmed(false);", HUMAN_ADAM_HTML)
         self.assertIn("input.disabled = lunaReleaseBusy;", HUMAN_ADAM_HTML)
-        self.assertIn("sendBtn.disabled = busy || sendInFlight || sessionTurnBusy || Boolean(pendingSubmission) || voiceStarting || voiceRecording || voiceTranscribing || lunaReleaseBusy;", HUMAN_ADAM_HTML)
+        self.assertIn("sendBtn.disabled = busy || sendInFlight || sessionTurnBusy || liveBlocked || Boolean(pendingSubmission) || voiceStarting || voiceRecording || voiceTranscribing || lunaReleaseBusy || ownedSendUnavailable;", HUMAN_ADAM_HTML)
         self.assertIn("|| !lunaReleaseStatusLoaded", HUMAN_ADAM_HTML)
         self.assertIn('String(audit.workstream_id || "") !== activeWorkstreamId', HUMAN_ADAM_HTML)
         self.assertIn('if (!dryRun) {\n        const pendingMessage', HUMAN_ADAM_HTML)
         self.assertIn('uncertain:"nejisté, ověřuje Adam"', HUMAN_ADAM_HTML)
         self.assertIn("lunaReleaseJobActive() || !lunaReleaseStatusLoaded", HUMAN_ADAM_HTML)
         self.assertIn("loadLunaReleaseStatus();\n    if (sessionTurnBusy", HUMAN_ADAM_HTML)
-        self.assertIn('window.addEventListener("pagehide", () => {\n    stopResultWatch();\n    stopLunaReleasePoll();', HUMAN_ADAM_HTML)
+        self.assertIn('window.addEventListener("pagehide", () => {\n    workMonitor.pause();\n    stopResultWatch();\n    stopLunaReleasePoll();', HUMAN_ADAM_HTML)
 
     def test_luna_release_frontend_behavior_in_node_vm(self) -> None:
         result = subprocess.run(
@@ -1659,7 +1713,7 @@ class HumanAdamUiTests(unittest.TestCase):
         )
         self.assertIn('<form class="composer" id="composer" autocomplete="off">', HUMAN_ADAM_HTML)
         self.assertIn('id="messageInput" maxlength="12000" autocomplete="off"', HUMAN_ADAM_HTML)
-        self.assertIn('window.addEventListener("pageshow", clearMessageInput);', HUMAN_ADAM_HTML)
+        self.assertIn('window.addEventListener("pageshow", restoreComposerOnPageShow);', HUMAN_ADAM_HTML)
 
     def test_submit_listener_is_registered_before_auxiliary_control_listeners(self) -> None:
         submit_listener = HUMAN_ADAM_HTML.index(

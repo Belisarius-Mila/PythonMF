@@ -16,6 +16,7 @@ from app.codex_appserver import AppServerError, utc_now
 from app.file_persistence import exclusive_file_lock, FileLockTimeoutError
 from app.work_repository import JsonWorkRepository, RepositoryMutation, WorkRepositoryError
 from app.communication.session_hub import SessionBusyError, SessionDeliveryUnknownError
+from app.communication.human_adam_public_progress import public_projection
 
 ID = re.compile(r"[a-f0-9]{32}\Z")
 CLIENT = re.compile(r"[A-Za-z0-9][A-Za-z0-9._:-]{7,127}\Z")
@@ -179,6 +180,7 @@ class WorkStore:
                     def compact(old):
                         if old.get("lifecycle_state") in TERMINAL:
                             old.pop("_accepted_input", None)
+                            old.pop("public_progress", None)
                             old["events"] = old["events"][-1:]
                         return RepositoryMutation(old, {})
                     self.repository(key).transact(compact)
@@ -225,6 +227,9 @@ class WorkStore:
                 "completion", "failure_code", "event_gap")
         view = {k: copy.deepcopy(value[k]) for k in keys}
         view["completion"] = {key: value["completion"][key] for key in ("kind", "job_id", "state") if key in value["completion"]}
+        progress = public_projection(value.get("public_progress"))
+        if progress is not None:
+            view["public_progress"] = progress
         if value["lifecycle_state"] not in TERMINAL and not owned:
             view["lifecycle_state"] = "unverified"
         first = value["events"][0]["cursor"] if value["events"] else value["revision"]
