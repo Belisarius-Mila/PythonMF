@@ -1,4 +1,8 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
+## Společné vydání připravené — 2026-11-12 10:58 CET
+
+E-mailové UI a Datovy HA-01/02/03 jsou integrované. Terra p+n celého balíčku výslovně schválené; job4242cf7f5bdb6b88724e635cde31b443 ještě není doklad úspěchu. Finální celková brána/checkpoint a jediné registrované vydání následují. Staré Ateliér/UI větve propojené pouze historicky, dnešní kód zachovaný. Přesný výsledek v reports/combined_finished_work_release_20261112.md a původní privátní účtence.
+
 ## Hlídání záležitostí — ruční UI etapy 2, 2026-11-12 10:37 CET
 
 Lokálně dokončený formulář Hlídat tuto záležitost, přepínač Hlídání/Vyřízeno,
@@ -2494,3 +2498,39 @@ a zdroje po skrytí. Plná brána PASS: 3529 testů /31 SKIP (516,847 s).
 Přesné důkazy data/private/email_followups_ui_20261112/, redigovaný report
 reports/email_followups_ui_20261112.md. Žádná skutečná pošta, SMTP, IMAP,
 kalendářový zápis, modelová role, služba ani Data worktree se neměnily.
+
+
+## 2026-11-12 10:58 CET — Finální společný balíček pro jedno Terra p+n
+
+**Hotovo:** Funkčně nové ruční e-mailové UI aae687fb a Datovy HA-01/02/03
+5d9c1497,7b77aba2,045936f9 jsou společně na main. Zbývající staré větve
+jsou propojené pouze historicky: půdorys4ea5b01e má přesně stejný stable
+patch-id jako již převzatý58a18e68 (c13a5067bd2855a44a068dc7e249c8981335f2d8).
+Současné názvy návrhů, bezpečnostní úpravy a ostatní novější kód Ateliéru
+zůstávají zachované. Přípravné commity8f64dca7/9d89446b mají dokončenou
+náhradu v aae687fb: všechny kontrakty přešly do kanonického UI, které navíc
+nemá nepotvrzený automatický výchozí termín. Historické propojení nepřenáší
+žádný starší zdroj ani nepřepisuje dnešní implementaci.
+
+**Rozhodnutí:** Výslovné Mílovo p+n všech hotových commitů se provede jednou
+registrovaným submit_release(wait=True), v aktuálním project-email-cases,
+společný cíl Cockpit Samanthy. Request combined-finished-work-20261112-v1,
+job4242cf7f5bdb6b88724e635cde31b443. Schválený head se doplní až po finálním
+lokálním merge commitu a zarovnání čistých profilů. Žádná změna modelové
+politiky, automatického monitoru, systémové služby nebo placený vývojový pilot.
+
+**Další krok:** Dokončit finální celkovou bránu, lokální checkpoint a jediné
+p+n; výsledek jednou ověřit z původní účtenky a živého HTTP.
+
+**Navrhované další kroky:** Lidská Mac/iPhone přejímka; e-mailová etapa3 a
+Human–Adam HA-04 až jako další vývoj. Samostatný e-mailový TVBCP zůstává
+nedohodnutý; aktualizují se existující správné handoffy a Cockpit/Layer TVBCP.
+
+**Technický důkaz:**201 integračních testů PASS; zvlášť shodná bezpečnostní
+regrese v Python3.11 PASS. Nový dispatcher ověřen skutečným initialize a
+model/list na sdíleném serveru0.167.0 bez nového thread/start/turn/start.
+Historické merge ponechávají app/scripts/tests bytewise stejné proti8d05aac2.
+Finální plná lokální brána PASS: 3602 testů,31 SKIP, 507.039 s.
+Výsledková autorita: reports/combined_finished_work_release_20261112.md a
+původní privátní job/receipt. Zápis vzniká před publikací, není účtenkou
+nasazení. Při nejistotě se původní job dohledá, nepodává se nový požadavek.

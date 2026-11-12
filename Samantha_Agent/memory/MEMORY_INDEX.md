@@ -1,5 +1,7 @@
 # Memory Index
 
+- `reports/combined_finished_work_release_20261112.md` — 12.11.: finální společný balíček e-mailového UI + DatovyHA01/02/03. Odložený Ateliér je prokazatelně již převzatý, jeho větev i starý UI scaffold se uzavírají jen historií bez změny finálního kódu.201 integračních a živý read-only transport PASS. Finální plná lokální brána PASS: 3602 testů,31 SKIP, 507.039 s. Schválené jediné Terra p+n; request/job v reportu, neplést přípravu s výsledkem.
+
 - `reports/combined_finished_work_release_20261112.md`; `handoffs/human_adam_layer_workstream_start_2026_07_20.md`; `tvbcp/architektura_komunikace_samantha.txt` — 12.11.: Will přebírá3 hotové Datovy HA-01/02/03 nad aae687fb pro Mílovo společné p+n všech hotových commitů, včetně odloženého Ateliéru4ea5b01e.201 cílených PASS a skutečný read-only handshake/katalog přes nový dispatcher PASS bez vlákna/tahu. Finální plná brána a jedno Terra p+n následují; původní služby/role zachované.
 
 - `reports/email_followups_ui_20261112.md`; `handoffs/continuous_personal_agent_2026_11_04.md`; `projects/email_readonly_oauth.md`; `handoffs/workstreams/project-cockpit.md`; `tvbcp/workstreams/project-cockpit.md` — 12.11.: lokálně dokončená etapa2 ručního hlídání: formulář, přepínač, Aktivní/Vyřízené a zdroj po skrytí karty. Automatický monitor nepřipojený. Node/30 doménových+HTTP a skutečný mobilní/desktop headless průchod PASS; Plná brána PASS: 3529 testů /31 SKIP (516,847 s). Bez nového p+n/aktivace; další etapa3 vazby a termíny. Samostatný e-mailový TVBCP nedohodnutý.
