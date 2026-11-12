@@ -148,6 +148,7 @@ from app.communication.workstream_live_status import (
     build_workstream_live_status,
     workstream_live_status_model_block,
 )
+from app.communication.human_adam_work_state import build_human_adam_work_state
 from app.file_persistence import atomic_write_json
 from app.project_continuity import ProjectContinuityError, ProjectContinuityService
 
@@ -1593,17 +1594,69 @@ class HumanAdamProfileManager:
                 "updated_at": "",
             }
 
+    def _project_work_state(self, payload: dict[str, Any], workstream_id: str,
+                            service: HumanAdamService) -> dict[str, Any]:
+        """HA-01 reads receipts only; never invoke release status recovery."""
+        from app.communication.luna_release import LunaReleaseStore, public_job
+
+        errors: list[str] = []
+        completion = dict(payload.get("last_step_completion") or {})
+        job_snapshot = None
+        try:
+            record = self.completion_status_store.load(workstream_id=workstream_id)
+            if record is not None:
+                if (record.updated_at != completion.get("updated_at")
+                        or record.workstream_id != completion.get("workstream_id")):
+                    errors.append("completion")
+                    completion = {}
+                else:
+                    completion["client_message_id"] = record.client_message_id
+            job = self.completion_job_store.load()
+            if job is not None:
+                job_snapshot = {key: getattr(job, key) for key in (
+                    "workstream_id", "client_message_id", "state", "updated_at",
+                )}
+        except (AppServerError, HumanAdamCompletionJobError, HumanAdamCompletionStatusError,
+                OSError, TypeError, ValueError):
+            errors.append("completion")
+            completion = {}
+        release = None
+        try:
+            release = public_job(LunaReleaseStore(self.state_path.parent / "luna_release").load())
+        except (AppServerError, OSError, TypeError, ValueError):
+            errors.append("publication")
+        active = (payload.get("workstream_selection") or {}).get("active") or {}
+        session = payload.get("session") or {}
+        current_session = service.hub.snapshot()
+        consistent = (workstream_id == active.get("workstream_id")
+                      and workstream_id == self.active_workstream_id
+                      and service is self.active_service
+                      and session.get("thread_id") == current_session.get("thread_id")
+                      and session.get("connection_generation", 0) == current_session.get("connection_generation", 0)
+                      and session == current_session)
+        if not isinstance(payload.get("session"), dict):
+            errors.append("session")
+        return build_human_adam_work_state(
+            workstream_id=workstream_id, observed_at=datetime.now(timezone.utc).isoformat(),
+            session_snapshot=payload.get("session"), runtime_snapshot=payload.get("runtime"),
+            completion_snapshot=completion, completion_job_snapshot=job_snapshot,
+            release_snapshot=release, snapshot_consistent=consistent,
+            source_errors=tuple(errors),
+        )
+
     def status(self) -> dict[str, Any]:
         try:
             selection = self.grouped_workstream_status()
-            payload = self.active_service.status()
+            service = self.active_service
+            workstream_id = self.active_workstream_id
+            payload = service.status()
             last_deployment = load_completed_simple_main_deployment(
                 self.simple_main_deployment_receipt_path,
             )
             recent_deployment = load_recent_simple_main_deployment(
                 self.simple_main_deployment_receipt_path,
             )
-            return {
+            result = {
                 **payload,
                 "workstream_selection": selection,
                 "workstream_capabilities": self._workstream_capabilities(),
@@ -1614,10 +1667,16 @@ class HumanAdamProfileManager:
                 "recent_simple_main_deployment": recent_deployment,
                 "last_step_completion": self.last_step_completion_status(),
             }
+            result["work_state"] = self._project_work_state(result, workstream_id, service)
+            return result
         except (AppServerError, SessionHubError, OSError, ValueError) as exc:
             return {
                 "ok": False,
                 "status": "human_adam_profile_status_failed",
+                "work_state": build_human_adam_work_state(
+                    workstream_id="", observed_at=datetime.now(timezone.utc).isoformat(),
+                    snapshot_consistent=False, source_errors=("session",),
+                ),
                 "message": str(exc),
                 "workstream_selection": {
                     "ok": False,

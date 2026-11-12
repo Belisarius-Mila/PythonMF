@@ -167,3 +167,72 @@ nástroje modelem musí potvrdit další uživatelský tah. Důkazy: kanonický 
 `data/private/human_adam_tool_compat_20261111/`.
 
 Protokol per-thread config: [oficiální OpenAI dokumentace App Serveru](https://learn.chatgpt.com/docs/app-server).
+
+### 2026-11-12 08:37 CET — HA-01: společná čtecí projekce stavu
+
+Hotovo: Human–Adam má místní přídavný stavový kontrakt pro budoucí přehledné UI. Spojení, probíhající model, navazující kontrola, publikace a starší incidenty mají vlastní význam a rozsah. Starý nebo cizí doklad se nevydává za aktuální tah.
+
+Rozhodnutí: Míla zadal HA-01 podle plánu z 11.11. Používá se nová čistá Python projekce nad existujícími zdroji, bez jejich nahrazení a bez nových mutací. ID jsou stabilní čtecí reference, revision je obsahový otisk, nikoli pořadový event cursor. Vlastníci provedení a doménové účtenky zůstávají autoritou.
+
+Další krok: Po dokončení HA-01 navázat HA-02 — přehlednější rozhraní nad společnou projekcí.
+
+Navrhované další kroky: HA-03 ažHA-05 pro skutečné události, serverově vlastněnou práci a živou kartu; poté doplnění/zastavení. Žádné p+n nebylo zadáno.
+
+Technický důkaz: 29 nových HA-01 testů OK / 2,411 s. Závěrečná plná brána 3543 testů OK / 620,369 s, 5 SKIP; statické a syntaktické kontroly OK. Ověřené nezměněné bajty/mtime zdrojů, korelace a pozdní snímky, přesný head/target/smoke při dodatečném důkazu. Main a služby nedotčené. Report human_adam_ha01_work_state_20261112.txt.
+
+
+### 2026-11-12 09:36 CET — HA-02: čitelný chat a tři pohledy Práce
+
+Stav: Lokálně implementováno na data/parallel-20261104 nad HA-01 5d9c1497; bez integrace, push nebo nasazení. Celková brána 3544 testů OK / 584,986 s, 5 SKIP; finální prezentační úpravy ověřené cíleně a v prohlížeči, statická brána OK.
+
+Rozhodnutí: Míla zadal HA-02 podle auditního plánu. Společná projekce HA-01 je zdrojem aktuálního souhrnu; Práce odděluje probíhání, výsledky/publikaci a servis. Dosavadní mutační brány zůstaly. Nový stream, worker, App Server protokol, steer/interrupt a účtování celé úlohy se neimplementují v tomto kroku.
+
+Další krok: Posoudit balíček HA-01/02 a fyzickou přejímku až po samostatném vydání; případně HA-03 na další zadání.
+
+Rizika: Browser QA je syntetické a neprokazuje iPhone/Safari, reálnou klávesnici nebo živou relaci. UI používá dnešní snímky a dosavadní obnovu, ne nový event cursor. Omezený Markdown není úplný renderer.
+
+Technický důkaz: 271 cílených testů OK / 9,976 s; 200 browser PASS na skutečných viewports 390x844, 430x932, 1280x900, 390x480 a 430x500. Vizuálně zkontrolované snímky hlavního okna i pohledů Práce. Čtecí generace/scopes, bezpečné odkazy, zachování DOM/fokusu/předčítání/scrollu, celý sbalený text a nulový POST v browser fixture. Rozpracované běhy ukončené před posledními opravami odolnosti; celková brána 3544 testů OK / 584,986 s, 5 SKIP. Následné prezentační úpravy návratu fokusu z Další a neověřených os zdrojů ověřené finální cílenou sadou (271 / 9,976 s), browser QA (200) a statickou bránou. Důkazy logs/ha02_*.log a data/private/ha02_ui_qa_20261112/. Report human_adam_ha02_ui_20261112.txt.
+
+### 2026-11-12 10:36 CET — HA-03: oddělené RPC a události App Serveru
+
+Stav: Lokálně implementováno na data/parallel-20261104 nad HA-02 7b77aba2. Finální cílená sada 287 testů OK / 4,783 s; statická brána OK. Plná regresní brána: 3587 testů OK / 532,005 s, 5 SKIP. Bez integrace, push, nasazení, skutečného App Server spojení či placeného pokusu.
+
+Rozhodnutí: Míla zadal HA-03 podle plánu z 11.11. Jeden wire reader předává data bounded dispatcheru: RPC má vlastní slot podle ID, odběry samostatné fronty a scope/generation. Konkrétní validátory, explicitní kompatibilní plan/usage varianty, přesné vazby a close všech čekajících operací. Dosavadní receive guard zůstává v cestě včetně item/started a neznámých item payloadů. Chybné usage zneplatní staré měření, ne jinak potvrzené doručení. Read-only protocol diagnostika je mimo perzistentní session; sama nepřipojuje runtime ani neověřuje živou podporu features.
+
+Další krok: HA-04 — trvalá serverová identita dlouhé práce, snímek/historie/cursor a obnova po reloadu, až na další zadání. UI živé karty je HA-05. Samostatně posoudit integraci/vydání balíčku a následnou živou Mac/iPhone přejímku.
+
+Rizika: Testy jsou syntetické a nepřipojily skutečný sdílený App Server; historický 05/P1 není nové živé ověření změněného klienta. Validation pokrývá spotřebované core fields, nikoli všechna pole schématu. Již běžící callback nelze násilně zastavit; pozdější použití jeho výsledku musí ověřit generation. sequence je pořadí publikace a received_sequence původní wire pořadí, nikoli trvalý cursor. Nové odběry zatím nejsou napojené do živé UI karty. Main, služby, role a mutační oprávnění zachované.
+
+Technický důkaz: Širší průběžná sada 475 testů OK / 62,471 s; finální jádro 287 OK / 4,783 s. Testy skutečného klienta nad vlastním Unix WebSocket listenerem a stdio Python fixture: RPC/event souběhy, plan před ACK, thread-only usage, cizí/stará generace, count/byte/callback limity, výpadek před/po ACK bez replay, jeden přijatý user item/start/final, CanonicalSessionHub delivery_unknown a ScienceNews guard. Offline CLI 0.167.0/schema; původní minimum serveru 0.163.0. Report human_adam_ha03_dispatcher_20261112.txt, logy ha03_* a ignorované otisky zdrojů; žádné soukromé payloady v Git-safe zápisu.
+
+
+## 2026-11-12 10:55 CET — Will přebírá HA-01 až HA-03 do společného vydání
+
+**Hotovo:** Lokálně převzaté Datovy tři hotové commity5d9c1497,7b77aba2 a045936f9
+nad e-mailové UI aae687fb. Kód se spojil bez konfliktů; paměť zachovává obě
+historie v časovém pořadí. Oprava startu pošty, její zámek i modelové role
+jsou přesně zachované. Jedinou integrační úpravou je přenositelnost diagnostické
+asertace hlubokého neobjektového JSON mezi Python3.11/3.12; obě cesty stále
+odmítnou rámec, uzavřou spojení a probudí čekající RPC. Produkční dispatcher
+zůstává Datovou verzí.
+
+**Rozhodnutí:** Míla výslovně zadal společné p+n všech hotových Willových i
+Datových commitů. Balíček zahrne také odložený hotový Ateliér4ea5b01e. Jediné
+registrované vydání má request `combined-finished-work-20261112-v1`, job `4242cf7f5bdb6b88724e635cde31b443`,
+project-email-cases→společný Cockpit. Vykonavatele určí centrální Terra role.
+Nejde o aktivaci dalších služeb ani placený vývojový/modelový pilot.
+
+**Další krok:** Převzít Ateliér, dokončit celkovou bránu a zmrazit přesný
+commit pro jediné registrované p+n.
+
+**Navrhované další kroky:** Po vydání fyzická přejímka Human–Adam na Macu/iPhonu;
+HA-04 až po samostatném zadání. E-mailový automatický monitor zůstává další etapa.
+
+**Technický důkaz:**201 cílených testů PASS, samostatný test také v Datově
+Python3.11 PASS. Skutečný nový klient přes stávající Unix WebSocket: initialize
+amodel/list,10 modelů, CLI/server0.167.0, žádný thread/start ani turn/start;
+uzavřené jen vlastní spojení, sdílený socket zachovaný. Toto není důkaz
+modelového tahu, reconnectu dlouhé práce ani fyzické přejímky. Plná brána
+poběží nad finálním společným balíčkem; meziběh před rozšířením na Ateliér
+se nevydává za úspěšnou závěrečnou kontrolu. Soukromé důkazy
+`data/private/combined_release_20261112/`.

@@ -19,6 +19,14 @@ class HumanAdamUiTests(unittest.TestCase):
         )
         self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
 
+    def test_ha02_projection_chat_and_read_generation_in_node_vm(self) -> None:
+        result = subprocess.run(
+            [node_binary(), str(Path(__file__).with_name("human_adam_ha02_frontend.test.cjs"))],
+            input=json.dumps(HUMAN_ADAM_HTML), text=True, capture_output=True,
+            timeout=30, check=False,
+        )
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+
     def test_ui_exposes_explicit_connection_send_time_and_delivery_evidence(self) -> None:
         for element_id in (
             "connectBtn",
@@ -414,39 +422,33 @@ class HumanAdamUiTests(unittest.TestCase):
         )
 
     def test_compact_header_keeps_receipts_in_scrollable_work_panel(self) -> None:
-        header = HUMAN_ADAM_HTML.index("<header>")
-        summary = HUMAN_ADAM_HTML.index('id="mobileStatusSummary"', header)
-        header_end = HUMAN_ADAM_HTML.index("</header>", summary)
+        header_end = HUMAN_ADAM_HTML.index("</header>")
         work_panel = HUMAN_ADAM_HTML.index('id="workPanel"', header_end)
-        details = HUMAN_ADAM_HTML.index('id="statusDetails"', work_panel)
-        badges = HUMAN_ADAM_HTML.index('<div class="statusline">', details)
-        turn = HUMAN_ADAM_HTML.index('id="turnActivity"', badges)
-        step_receipt = HUMAN_ADAM_HTML.index('id="stepCompletionReceipt"', turn)
-        deployment_receipt = HUMAN_ADAM_HTML.index('id="deploymentReceipt"', step_receipt)
-        details_end = HUMAN_ADAM_HTML.index("    </section>", deployment_receipt)
-
-        self.assertLess(summary, header_end)
-        self.assertLess(header_end, work_panel)
-        self.assertLess(details, badges)
-        self.assertLess(badges, turn)
-        self.assertLess(turn, step_receipt)
-        self.assertLess(step_receipt, deployment_receipt)
-        self.assertLess(deployment_receipt, details_end)
-        self.assertIn('aria-expanded="false" aria-controls="workPanel"', HUMAN_ADAM_HTML)
-        self.assertIn("#mobileStatusSummary { display:flex;", HUMAN_ADAM_HTML)
+        current = HUMAN_ADAM_HTML.index('id="workViewCurrent"', work_panel)
+        results = HUMAN_ADAM_HTML.index('id="workViewResults"', current)
+        receipt = HUMAN_ADAM_HTML.index('id="deploymentReceipt"', results)
+        service = HUMAN_ADAM_HTML.index('id="workViewService"', receipt)
+        details = HUMAN_ADAM_HTML.index('id="statusDetails"', service)
+        self.assertLess(header_end, current)
+        self.assertLess(current, results)
+        self.assertLess(results, receipt)
+        self.assertLess(receipt, service)
+        self.assertLess(service, details)
+        for name in ("Current", "Results", "Service"):
+            self.assertIn(f'aria-controls="workView{name}"', HUMAN_ADAM_HTML)
+            self.assertIn(f'aria-labelledby="workTab{name}"', HUMAN_ADAM_HTML)
+        self.assertIn('id="currentProjectName"', HUMAN_ADAM_HTML[:header_end])
+        self.assertIn('id="mobileStatusSummary"', HUMAN_ADAM_HTML[:header_end])
+        self.assertIn('role="dialog" aria-modal="true"', HUMAN_ADAM_HTML)
         self.assertIn(".work-panel-body { flex:1; min-height:0; overflow:auto;", HUMAN_ADAM_HTML)
-
-        summary_start = HUMAN_ADAM_HTML.index("function updateMobileStatusSummary()")
-        summary_end = HUMAN_ADAM_HTML.index("function elapsedClock", summary_start)
-        summary_source = HUMAN_ADAM_HTML[summary_start:summary_end]
-        self.assertIn('text = turnActivity.textContent || "Adam pracuje', summary_source)
-        self.assertIn('text = "Stav doručení je nejistý · obnov stav · pokyn neposílej znovu";', summary_source)
-        self.assertIn('const adamText = sessionConnected ? "Adam čeká" : "Adam není připojen";', summary_source)
-        self.assertNotIn("lunaReleaseStatus.textContent", summary_source)
-        self.assertIn('text = `${connectionText} · ${adamText}${workspaceNote}`;', summary_source)
-        self.assertIn('mobileStatusSummary.setAttribute("aria-expanded"', HUMAN_ADAM_HTML)
-        self.assertIn("if (expanded) return openWork();", HUMAN_ADAM_HTML)
-        self.assertIn('mobileStatusSummary.addEventListener("click"', HUMAN_ADAM_HTML)
+        start = HUMAN_ADAM_HTML.index("function updateMobileStatusSummary()")
+        end = HUMAN_ADAM_HTML.index("function elapsedClock", start)
+        summary = HUMAN_ADAM_HTML[start:end]
+        self.assertIn("const state = currentWorkState;", summary)
+        self.assertIn("workStateSummary()[0]", summary)
+        self.assertIn("if (deliveryUncertain)", summary)
+        self.assertNotIn("lunaReleaseJobActive()", summary)
+        self.assertNotIn("lunaReleaseStatus.textContent", summary)
         self.assertIn("updateMobileStatusSummary();\n    turnTimerId", HUMAN_ADAM_HTML)
 
     def test_diverged_workspace_keeps_preserved_wip_visible_but_blocks_audit(self) -> None:
@@ -584,7 +586,7 @@ class HumanAdamUiTests(unittest.TestCase):
         load_source = HUMAN_ADAM_HTML[load_start:open_start]
         open_source = HUMAN_ADAM_HTML[open_start:open_end]
 
-        self.assertIn('<button id="workOpenBtn" type="button">Práce: stav</button>', HUMAN_ADAM_HTML)
+        self.assertIn('<button id="workOpenBtn" type="button" aria-expanded="false" aria-controls="workPanel">Práce</button>', HUMAN_ADAM_HTML)
         self.assertIn("#workOpenBtn.work-clean", HUMAN_ADAM_HTML)
         self.assertIn("#workOpenBtn.work-attention", HUMAN_ADAM_HTML)
         for marker in (
@@ -601,13 +603,10 @@ class HumanAdamUiTests(unittest.TestCase):
             'relation !== "aligned"',
         ):
             self.assertIn(marker, compact_source)
-        self.assertIn('workOpenBtn.textContent = "Práce: čistá";', compact_source)
-        self.assertIn('workOpenBtn.textContent = "Práce: kontrola";', compact_source)
-        self.assertIn('workOpenBtn.textContent = "Práce: nasazení";', compact_source)
-        self.assertIn('workOpenBtn.textContent = "Práce: nasazeno ✓";', compact_source)
+        self.assertIn('workOpenBtn.textContent = "Práce";', compact_source)
         self.assertIn("activeWorkstreamLiveDeployment()", compact_source)
-        self.assertIn("`Práce: ${changeCount} změn`", compact_source)
-        self.assertIn('workOpenBtn.setAttribute("aria-label", workOpenBtn.title);', compact_source)
+        self.assertIn("${changeCount} rozpracovaných změn", compact_source)
+        self.assertIn('workOpenBtn.setAttribute("aria-label", `Práce · ${workOpenBtn.title}`);', compact_source)
         self.assertGreaterEqual(HUMAN_ADAM_HTML.count("renderCompactWorkStatus("), 3)
         self.assertIn("return payload;", load_source)
         self.assertIn("return null;", load_source)
@@ -615,10 +614,10 @@ class HumanAdamUiTests(unittest.TestCase):
         self.assertNotIn("const showDetail =", open_source)
         self.assertNotIn("if (!showDetail)", open_source)
         self.assertNotIn("Detail není potřeba", open_source)
-        self.assertIn("workPanel.hidden = false;", open_source)
+        self.assertIn("showPanel(workPanel, workCloseBtn);", open_source)
         self.assertLess(
-            open_source.index("const payload = await loadWork();"),
-            open_source.index("workPanel.hidden = false;"),
+            open_source.index("showPanel(workPanel, workCloseBtn);"),
+            open_source.index("await loadWork();"),
         )
         self.assertNotIn('method:"POST"', open_source)
 
@@ -941,9 +940,10 @@ class HumanAdamUiTests(unittest.TestCase):
 
         self.assertIn('id="chatEnd" aria-hidden="true"', HUMAN_ADAM_HTML)
         self.assertIn('const chatEnd = document.getElementById("chatEnd");', HUMAN_ADAM_HTML)
-        self.assertIn("distance <= 180", render_source)
+        self.assertIn("chat.scrollHeight - chat.scrollTop - chat.clientHeight <= 120", render_source)
         self.assertIn("Boolean(options.forceScrollToEnd) || isChatNearEnd()", render_source)
-        self.assertIn('chatEnd.scrollIntoView({block:"end",inline:"nearest",behavior:"auto"});', render_source)
+        self.assertIn("chat.scrollTop = chat.scrollHeight;", render_source)
+        self.assertIn("old && old.fingerprint === fingerprint ? old.node : null", render_source)
         self.assertGreaterEqual(render_source.count("requestAnimationFrame"), 2)
         self.assertIn("window.setTimeout(applyEndPosition, 120);", render_source)
         self.assertIn('image.addEventListener("load", scrollChatToEnd, {once:true});', render_source)
@@ -1095,19 +1095,13 @@ class HumanAdamUiTests(unittest.TestCase):
         self.assertNotIn("payload.deployment_diagnostic", HUMAN_ADAM_HTML)
 
     def test_deployment_confirmation_is_outside_sticky_header(self) -> None:
-        header = HUMAN_ADAM_HTML.index("<header>")
-        header_end = HUMAN_ADAM_HTML.index("</header>", header)
-        badges = HUMAN_ADAM_HTML.index('<div class="statusline">', header)
-        receipt = HUMAN_ADAM_HTML.index('id="deploymentReceipt"', badges)
-        notice = HUMAN_ADAM_HTML.index('id="notice"', header_end)
-
-        self.assertLess(header, badges)
-        self.assertLess(badges, receipt)
+        header_end = HUMAN_ADAM_HTML.index("</header>")
+        receipt = HUMAN_ADAM_HTML.index('id="deploymentReceipt"', header_end)
+        service = HUMAN_ADAM_HTML.index('id="workViewService"', receipt)
         self.assertLess(header_end, receipt)
-        self.assertLess(header_end, notice)
-        self.assertIn("header { position:sticky;", HUMAN_ADAM_HTML)
-        self.assertIn("#deploymentReceipt { margin:8px 0 0; padding:6px 10px;", HUMAN_ADAM_HTML)
+        self.assertLess(receipt, service)
         self.assertIn("#deploymentReceipt.stale { color:var(--warn);", HUMAN_ADAM_HTML)
+        self.assertNotIn('id="deploymentReceipt"', HUMAN_ADAM_HTML[:header_end])
 
     def test_ui_has_no_legacy_deployment_diagnostic_surface(self) -> None:
         self.assertNotIn('id="deploymentDiagnostic"', HUMAN_ADAM_HTML)
@@ -1505,7 +1499,7 @@ class HumanAdamUiTests(unittest.TestCase):
         self.assertIn("stopResultWatch();", watch_source)
         self.assertIn("if (sessionTurnBusy || deliveryUncertain || sendInFlight) startResultWatch();", watch_source)
         self.assertIn('refreshBtn.addEventListener("click", handleRefreshStatus);', HUMAN_ADAM_HTML)
-        self.assertIn('refreshBtn.textContent = resultWatchActive ? "Čekám na výsledek…" : "Stav";', controls_source)
+        self.assertIn('refreshBtn.textContent = resultWatchActive ? "Čekám na výsledek…" : "Obnovit stav";', controls_source)
         self.assertIn("refreshBtn.disabled = busy || resultWatchActive;", controls_source)
         self.assertNotIn("setInterval", watch_source)
 

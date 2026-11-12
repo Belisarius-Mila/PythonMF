@@ -1,0 +1,140 @@
+HA-03 — ROBUSTNÍ DISPATCHER APP SERVERU
+Datum: 12. listopadu 2026. Autor: Data.
+Stav: lokální vývoj na data/parallel-20261104 nad HA-02 7b77aba2.
+Bez integrace do main, push, nasazení, skutečného App Server spojení,
+restartu služby nebo placeného/modelového pokusu. Willův checkout oddělený.
+
+ROZSAH A KONTRAKT
+Míla zadal HA-03 podle plánu Human_Adam_hluboka_analyza_a_plan_monitoringu
+z 11. listopadu. Jediný čtenář každého spojení předává rámce dispatcheru.
+RPC odpověď je přiřazena výhradně rezervovanému ID; čekající RPC nespotřebuje
+notifikaci. Odběry mají vlastní fronty a mohou filtrovat metodu, thread a turn.
+Callback běží ve vlastním omezeném worker vláknu, nikdy ve čtenáři socketu.
+Zápisy jsou serializované; registrace čekajícího RPC předchází zápisu.
+
+Veřejné interní rozhraní: transport.subscribe()/client.subscribe_events(),
+EventSubscription.get(timeout=...), close() a volitelný callback.
+AppServerEvent nese method, kind, thread_id, turn_id, generation, sequence,
+received_sequence a compatibility. params/as_message vracejí samostatnou
+kopii soukromého protokolového obsahu. Tyto payloady nejsou bezpečnou projekcí
+pro UI. Raw reasoning, argumenty nástrojů ani celý rámec se automaticky
+nezobrazují, neukládají do projektové paměti a nevypisují do diagnostiky.
+
+sequence označuje pořadí publikování odběrům. received_sequence uchovává pořadí
+přijetí na drátu; plán čekající na doložení scope může být publikován později.
+Ani jedno není trvalý cursor, replay log nebo identita celé dlouhé práce.
+
+VALIDACE A KORELACE
+Konkrétní validátory pokrývají start/konec tahu, start/konec položky, plán,
+usage, textové a nástrojové delty, turn error a thread status/lifecycle.
+Validují spotřebovávaná jádrová pole; tolerují aditivní pole a starší základní
+podobu položek. Nejde o úplnou validaci všech polí celého referenčního schématu.
+Neznámá metoda jde pouze odběru s include_unknown; není ověřeným pokrokem.
+Legacy kanál navíc zachovává položky potřebné pro stávající bezpečnostní guard.
+Neplatný kritický důkaz či payload položek uzavře spojení jako neověřené.
+Neplatná nepovinná událost se izoluje a započítá do diagnostiky.
+
+Plán bez threadId má příznak compatible_turn_only. Čeká na přesnou vazbu
+turnId/threadId z odpovědi turn/start nebo validované scoped události; nepoužije
+právě aktivní turn jako domněnku. Thread-level usage bez turnId je výslovně
+compatible_thread_only a není přičtené aktuálnímu tahu. Neplatné měření total
+má kind telemetry_unavailable: nezůstane staré číslo označené jako aktuální,
+ale samotný chybějící údaj nevyvrátí jinak prokázané doručení.
+
+Každé spojení má vlastní náhodnou generation. Cizí generace je odmítnutá;
+scoped odběr nedostane cizí thread/turn. Turn s rozpornou vazbou na thread
+spojení zneplatní. Odložené scope jsou omezené; dokončené vazby se vyřazují
+před aktivními. Serverový request vyžadující nepodporovanou klientskou akci
+není automaticky potvrzen.
+
+LIMITY A UKONČENÍ
+Výchozí konečné rozpočty na jedno spojení:
+- rámec 64 MiB (dosavadní mediální WebSocket limit zachovaný);
+- 32 čekajících RPC, souhrn odpovědí 128 MiB;
+- legacy důkazy 512 událostí / 128 MiB;
+- 32 odběrů, každý výchozích 128 událostí / 4 MiB;
+  součet rezervovaných rozpočtů aktivních odběrů nejvýše 128 MiB;
+- 256 vazeb tahů, 64 nevyřešených scope / 4 MiB.
+
+Přetečení odběru uzavře tento odběr s explicitní chybou mezery, bez tichého
+pokračování. Přetečení důkazů/RPC/vazeb zneplatní spojení. Telemetrie se
+slučuje pouze v legacy kanálu, kde zůstává poslední hodnota stejného scope;
+samostatný odběr dostává jednotlivé události do svého konečného limitu.
+Pomalý nebo chybující callback nezablokuje wire reader ani jiné odběry.
+Již běžící callback nelze násilně zastavit; spotřebitel musí při pozdější
+aplikaci výsledku ověřit generation. Nedokončený callback po odhlášení stále
+zabírá limit workerů až do návratu. Uzavřený odběr zahodí čekající události.
+
+EOF/close/chyba probudí všechna RPC i event čekání. Již přijatá RPC odpověď
+a legacy důkazy se při běžném EOF mohou dočíst; protokolová nejednoznačnost
+či přetečení je zahodí. Duplicitní shodná RPC odpověď není další výsledek,
+rozporná duplicita uzavře spojení a pozdní osiřelá odpověď se nepřiřadí jinému
+požadavku. JSON odmítá duplicitní klíče, NaN/Infinity, chybnou UTF-8 a příliš
+hluboké či nadlimitní rámce. Neplatný časový limit nevytvoří nekonečnou smyčku.
+
+Unix transport dál používá WebSocket přes původní Unix socket. Close zavře
+pouze klientské spojení. Stdio uklízí pouze vlastní podproces a pipe.
+Nikde nevzniká automatický resend, reconnect, nové vlákno ani druhý turn/start.
+Stávající send_text dál prochází receive guardem: přesně jeden přijatý user
+item, shodný turn/started a finální odpověď s dokončeným tahem. item/started
+ani neznámá metoda s item payloadem nesmí obcházet ScienceNews one-turn guard.
+delivery_unknown a zákaz opakovaného send při nejistotě zůstávají zachované.
+
+VERZE A DIAGNOSTIKA
+Referenční primární dokumentace: https://learn.chatgpt.com/docs/app-server
+Offline místní codex-cli 0.167.0 a jeho app-server generate-json-schema.
+Generování schématu nezaložilo listener ani modelový tah. Aktuální schéma
+vyžaduje plný scope plánu/usage, zatímco dokumentace a starší provozní podoby
+mají i redukovaný scope; výše uvedené kompatibilní varianty jsou explicitní.
+Minimum připojeného serveru zůstává 0.163.0. Runtime podpory jednotlivých
+událostí nebyly živě sondovány; přítomnost pole není doklad podpory feature.
+
+client.protocol_diagnostics a samostatné hub.protocol_diagnostics poskytují
+jen bezpečné verze, generaci, obsazení/počty front a důvod uzavření. GET status
+má aditivní protocol pole, jeho selhání nesrazí hlavní stav. Diagnostika
+nezahajuje připojení, model, reconnect ani zápis session. Proměnlivé čítače
+nejsou součástí perzistentního snapshotu. Nezobrazuje se raw zpráva, identita
+vlákna/tahu, text uživatele ani soukromá chyba callbacku. Připojená verze,
+lokální CLI a schéma jsou odlišné údaje; novější peer je výslovně označený.
+
+OVĚŘENÍ
+Širší průběžná sada: 475 testů OK / 62,471 s.
+Finální cílená sada po posledních úpravách: 287 testů OK / 4,783 s.
+Finální statická brána včetně Python/JavaScript/shell syntaxe: OK.
+Plná regresní brána: 3587 testů OK / 532,005 s, 5 SKIP.
+Celý testový krok s režií 535,6 s; Cockpit quality gate OK. Otisky potvrzují,
+že ověřený kód/testy odpovídají konečné zmrazené verzi. Po plné bráně
+se doplnily pouze výsledky do dokumentace. Služby ani Willovy procesy
+se nezastavovaly a nespouštěl se skutečný App Server.
+
+Syntetické testy ověřují souběh RPC/notifikací, plán před ACK, thread-only
+usage, cizí scope/generace, uzavření čekajících operací, callback reentry,
+selhání/overflow/budget, limity bytů/počtů, duplicity a poškozené JSON.
+Stejný produkční client prokáže jediný turn/start i při výpadku před/po ACK,
+odmítne chybějící/zdvojený user item či start a zachová strukturované chyby.
+Skutečný CanonicalSessionHub uloží delivery_unknown a zablokuje nový send.
+ScienceNews guard zůstává v cestě pro item/started i neznámé item události.
+
+Vlastní syntetický Unix WebSocket listener projde A/B/A a výpadkem před/po
+ACK bez ukončení sdíleného testovacího listeneru či druhého startu.
+Stdio test používá vlastní Python fixture, nikoli Codex App Server.
+Čtení diagnostiky nemění bytes/mtime session ani wire zápisy.
+Testový modul je přidaný do povinného manifestu plné brány.
+
+Důkazy mimo Git: logs/ha03_targeted_final_20261112.log,
+logs/ha03_core_final_20261112.log, logs/ha03_static_final_20261112.log,
+logs/ha03_full_gate_20261112.log a data/private/ha03_protocol_20261112/
+(offline schéma a ha03_environment_20261112.json s otisky zdrojů).
+
+HRANICE A DALŠÍ KROK
+Žádný skutečný sdílený App Server nebyl připojen. Syntetická socketová
+přejímka není živý reconnect a nenahrazuje Mac/iPhone ověření. Historický
+živý důkaz 05/P1 se tímto krokem nevydává za nové ověření upraveného klienta.
+Nezměněné UI zatím nové odběry nespotřebovává. Serverová trvalá operation_id,
+obnova stejné práce po reloadu, cursor/resync patří HA-04; živá karta HA-05.
+Doplnění pokynu/zastavení a úplná spotřeba celé práce jsou HA-06 až HA-08.
+Následuje HA-04 na další zadání; integrace a p+n vyžadují samostatný pokyn.
+
+Kanonický proud: layer-human-adam-development; handoff
+human_adam_layer_workstream_start_2026_07_20.md a TVBCP
+architektura_komunikace_samantha.txt. Projektová paměť: codex_reconnect_recovery.md.

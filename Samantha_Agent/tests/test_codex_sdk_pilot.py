@@ -184,9 +184,10 @@ class CurrentClientRegressionTests(unittest.TestCase):
 
     def test_current_rpc_exception_preserves_error_code_and_data(self):
         transport = StdioAppServerTransport.__new__(StdioAppServerTransport)
-        transport._next_request_id = 1
-        transport._send = Mock()
-        transport.receive = Mock(return_value={"id": 1, "error": {"code": -32001, "message": "synthetic", "data": {"reason": "busy"}}})
+        transport._init_dispatcher(timeout=1)
+        transport._send = Mock(side_effect=lambda message: transport._dispatcher.feed(
+            {"id": message["id"], "error": {"code": -32001, "message": "synthetic", "data": {"reason": "busy"}}},
+            generation=transport._dispatcher.generation))
         with self.assertRaises(AppServerContractError) as raised:
             transport.request("turn/start", {})
         self.assertEqual(raised.exception.code, -32001)

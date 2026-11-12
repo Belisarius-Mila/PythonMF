@@ -12,15 +12,15 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
   <style>
     :root { color-scheme: light; --ink:#172033; --muted:#64748b; --line:#dbe3ee; --blue:#2563eb; --soft:#f3f6fb; --ok:#16803c; --warn:#b45309; }
     * { box-sizing:border-box; }
-    body { margin:0; min-height:100vh; background:#eef2f7; color:var(--ink); font:16px/1.45 -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif; }
-    main { width:min(920px,100%); min-height:100vh; margin:0 auto; background:#fff; display:flex; flex-direction:column; }
-    header { position:sticky; top:0; z-index:2; padding:14px max(16px,env(safe-area-inset-left)); border-bottom:1px solid var(--line); background:rgba(255,255,255,.96); }
+    body { margin:0; height:100dvh; overflow:hidden; background:#eef2f7; color:var(--ink); font:16px/1.45 -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif; }
+    main { width:min(1040px,100%); height:var(--ha-viewport-height,100dvh); min-height:0; position:relative; top:var(--ha-viewport-top,0px); margin:0 auto; background:#fff; display:flex; flex-direction:column; }
+    header { flex:0 0 auto; position:relative; z-index:2; padding:10px max(16px,env(safe-area-inset-left)); border-bottom:1px solid var(--line); background:rgba(255,255,255,.96); }
     .head { display:flex; align-items:center; gap:10px; }
     .head-tools { display:flex; align-items:center; gap:10px; }
     .profile-tools { display:flex; align-items:center; gap:8px; margin-top:10px; }
     .profile-tools label { color:var(--muted); font-size:13px; font-weight:700; }
     .profile-tools select { min-width:170px; border:1px solid #bac7d8; border-radius:10px; padding:8px 10px; background:#fff; color:var(--ink); font:inherit; }
-    h1 { margin:0; font-size:21px; flex:1; }
+    h1 { margin:0; font-size:18px; flex:1; }
     button,.back { border:1px solid var(--line); border-radius:11px; padding:10px 13px; background:#fff; color:var(--ink); font:inherit; font-weight:700; text-decoration:none; cursor:pointer; }
     button.primary { background:var(--blue); color:#fff; border-color:var(--blue); }
     button.audit-action { background:#fbbf24; color:#422006; border-color:#d97706; }
@@ -33,7 +33,7 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
     #mobileStatusSummary { display:flex; width:100%; margin-top:10px; padding:8px 10px; align-items:center; justify-content:space-between; gap:10px; text-align:left; color:var(--muted); background:var(--soft); }
     #mobileStatusSummary.warn { color:var(--warn); background:#fff7ed; }
     #mobileStatusSummary.ok { color:var(--ok); background:#ecfdf3; }
-    #mobileStatusText { min-width:0; overflow:hidden; white-space:nowrap; text-overflow:ellipsis; }
+    #mobileStatusText { min-width:0; overflow-wrap:anywhere; }
     #mobileStatusToggleText { flex:0 0 auto; font-size:12px; font-weight:600; }
     .status-details { flex:0 0 auto; padding:0 16px 14px; border-bottom:1px solid var(--line); }
     .header-menu { position:relative; }
@@ -45,7 +45,7 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
     .badge.warn { color:var(--warn); background:#fff7ed; }
     #turnActivity { margin:8px 0 0; padding:6px 10px; border-radius:10px; color:var(--warn); background:#fff7ed; font-size:13px; font-weight:700; }
     #turnActivity[hidden] { display:none; }
-    #notice { min-height:24px; padding:8px 18px 0; color:var(--muted); font-size:14px; }
+    #notice { min-width:0; padding:0; color:var(--muted); font-size:14px; }
     #deploymentReceipt { margin:8px 0 0; padding:6px 10px; border-radius:10px; color:var(--ok); background:#ecfdf3; font-size:13px; }
     #deploymentReceipt.stale { color:var(--warn); background:#fff7ed; }
     #deploymentReceipt[hidden] { display:none; }
@@ -59,7 +59,7 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
     #stepCompletionReceipt.running { color:#1d4ed8; background:#eff6ff; }
     #stepCompletionReceipt.warn { color:var(--warn); background:#fff7ed; }
     #stepCompletionReceipt[hidden] { display:none; }
-    #chat { flex:1; padding:14px 18px 180px; display:flex; flex-direction:column; gap:14px; }
+    #chat { flex:1; min-height:0; overflow:auto; overscroll-behavior:contain; padding:14px 18px 24px; display:flex; flex-direction:column; gap:14px; }
     .exchange { display:grid; gap:8px; }
     .bubble { max-width:86%; padding:12px 14px; border-radius:16px; white-space:pre-wrap; overflow-wrap:anywhere; }
     .human { justify-self:end; background:#dbeafe; border-bottom-right-radius:5px; }
@@ -81,15 +81,15 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
     .image-candidate-actions button,.image-candidate-actions a { padding:7px 10px; font-size:12px; }
     .image-candidate-actions .approve { color:var(--ok); border-color:#86efac; background:#ecfdf3; }
     .image-candidate-actions .reject { color:#991b1b; border-color:#fca5a5; background:#fef2f2; }
-    .composer { position:fixed; bottom:0; left:50%; transform:translateX(-50%); width:min(920px,100%); padding:12px max(16px,env(safe-area-inset-right)) calc(12px + env(safe-area-inset-bottom)) max(16px,env(safe-area-inset-left)); border-top:1px solid var(--line); background:rgba(255,255,255,.98); }
-    textarea { width:100%; min-height:86px; max-height:230px; resize:vertical; border:1px solid #bac7d8; border-radius:13px; padding:12px; font:inherit; color:var(--ink); }
+    .composer { flex:0 0 auto; position:relative; width:100%; padding:12px max(16px,env(safe-area-inset-right)) calc(12px + env(safe-area-inset-bottom)) max(16px,env(safe-area-inset-left)); border-top:1px solid var(--line); background:rgba(255,255,255,.98); }
+    textarea { width:100%; min-height:64px; max-height:220px; resize:none; display:block; border:1px solid #bac7d8; border-radius:13px; padding:12px; font:inherit; color:var(--ink); }
     .voice-controls { display:flex; align-items:center; gap:8px; min-width:0; }
     #voiceRecordBtn.recording { color:#991b1b; border-color:#ef4444; background:#fef2f2; }
     #voiceStatus { min-width:0; overflow:hidden; color:var(--muted); font-size:12px; text-align:center; text-overflow:ellipsis; white-space:nowrap; }
     .compose-actions { display:grid; grid-template-columns:auto minmax(0,1fr) auto; align-items:center; gap:10px; margin-top:8px; }
     .send-controls { display:flex; align-items:center; gap:8px; }
     #writeIntentBtn.armed { color:#fff; border-color:#b45309; background:#b45309; }
-    .tvbcp-panel { position:fixed; z-index:5; inset:0 0 0 auto; width:min(680px,100%); display:flex; flex-direction:column; background:#fff; border-left:1px solid var(--line); box-shadow:-12px 0 40px rgba(15,23,42,.18); }
+    .tvbcp-panel { position:fixed; z-index:5; top:var(--ha-viewport-top,0px); right:0; height:var(--ha-viewport-height,100dvh); width:min(680px,100%); display:flex; flex-direction:column; background:#fff; border-left:1px solid var(--line); box-shadow:-12px 0 40px rgba(15,23,42,.18); }
     .tvbcp-panel[hidden] { display:none; }
     .tvbcp-head { display:flex; align-items:center; gap:8px; padding:14px max(16px,env(safe-area-inset-right)) 14px 16px; border-bottom:1px solid var(--line); }
     .tvbcp-head h2 { flex:1; margin:0; font-size:18px; }
@@ -185,6 +185,62 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
       .workflow-help-head { align-items:flex-start; }
       .work-help-panel { margin:10px 12px; }
     }
+    [hidden] { display:none !important; }
+    :focus-visible { outline:3px solid #1d4ed8; outline-offset:3px; }
+    .project-picker { margin-top:6px; }
+    .project-picker > summary { display:flex; gap:8px; align-items:baseline; cursor:pointer; list-style:none; padding:4px 0; }
+    .project-picker > summary::-webkit-details-marker { display:none; }
+    .project-picker strong { flex:1; min-width:0; overflow-wrap:anywhere; font-size:15px; }
+    .project-eyebrow,.project-change { color:var(--muted); font-size:12px; }
+    .project-change { text-decoration:underline; }
+    .profile-tools { padding:6px 0; margin-top:0; }
+    .conversation-tools { display:flex; flex:0 0 auto; align-items:center; gap:8px; min-height:32px; padding:4px 16px; }
+    .conversation-tools #notice { flex:1; font-size:12px; }
+    #latestAnswerBtn { margin-left:auto; padding:4px 8px; font-size:12px; white-space:nowrap; }
+    #chatEnd { height:0; flex:0 0 auto; }
+    .bubble { min-width:0; }
+    .answer-content { white-space:normal; }
+    .answer-content p { margin:0 0 .65em; }
+    .answer-content > :last-child { margin-bottom:0; }
+    .answer-content h3,.answer-content h4 { margin:.7em 0 .35em; font-size:1.05em; }
+    .answer-content h3:first-child,.answer-content h4:first-child { margin-top:0; }
+    .answer-content ul,.answer-content ol { margin:.4em 0 .8em; padding-left:1.4em; }
+    .answer-content li { margin:.25em 0; }
+    .answer-content a { color:#1d4ed8; text-decoration:underline; overflow-wrap:anywhere; }
+    .answer-content code { padding:1px 4px; border-radius:4px; background:#e2e8f0; font: .9em ui-monospace,SFMono-Regular,Menlo,monospace; }
+    .answer-content pre { max-width:100%; overflow:auto; padding:10px; border-radius:8px; background:#e2e8f0; white-space:pre; }
+    .answer-content pre code { padding:0; }
+    .message-details { white-space:normal; }
+    .message-details > summary { cursor:pointer; font-weight:600; overflow-wrap:anywhere; }
+    .message-details .prompt-content { margin:8px 0 0; white-space:pre-wrap; }
+    .composer-mode { margin:0 0 5px; color:var(--muted); font-size:12px; }
+    .composer-mode.armed { color:#92400e; font-weight:700; }
+    .work-tabs { display:grid; grid-template-columns:.8fr 1.7fr .7fr; gap:4px; padding:8px 12px; border-bottom:1px solid var(--line); }
+    .work-tabs button { padding:9px 5px; font-size:13px; }
+    .work-tabs [aria-selected="true"] { color:#1d4ed8; background:#eff6ff; border-color:#93c5fd; }
+    .work-view { flex:0 0 auto; min-width:0; }
+    .work-view > h3 { margin:14px 16px 8px; font-size:16px; }
+    .work-state-box { margin:14px 16px; padding:14px; border:1px solid var(--line); border-radius:12px; background:var(--soft); }
+    .work-state-box h3 { margin:0 0 6px; font-size:17px; }
+    .work-state-box p { margin:6px 0; overflow-wrap:anywhere; }
+    .work-state-box ul { padding-left:20px; font-size:14px; }
+    .work-state-box .meta { font-size:12px; }
+    .work-state-box[data-state="running"],.work-state-box[data-state="verifying"] { background:#eff6ff; border-color:#93c5fd; }
+    .work-state-box[data-state="unverified"] { background:#fff7ed; border-color:#fdba74; }
+    .work-receipts { margin:0 16px 14px; }
+    .service-group { margin:12px 16px; border:1px solid var(--line); border-radius:12px; overflow:hidden; }
+    .service-group > summary { cursor:pointer; padding:12px; font-weight:700; }
+    .service-group .live-work-status-box { margin:0 12px 12px; }
+    .service-group .status-details { padding:0 12px 12px; }
+    .work-panel-body > * { flex-shrink:0; }
+    @media (max-height:550px) {
+      header { padding-top:5px; padding-bottom:5px; }
+      #mobileStatusSummary { margin-top:3px; padding:4px 8px; }
+      .composer { padding-top:6px; padding-bottom:calc(6px + env(safe-area-inset-bottom)); }
+      .composer textarea { min-height:48px; }
+      .project-picker { margin-top:2px; }
+      #voiceStatus { position:absolute; width:1px; height:1px; clip-path:inset(50%); overflow:hidden; }
+    }
   </style>
 </head>
 <body>
@@ -194,32 +250,39 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
       <button class="primary" id="connectBtn" type="button">Připojit</button>
       <h1>Human–Adam</h1>
       <div class="head-tools">
-        <button id="workOpenBtn" type="button">Práce: stav</button>
+        <button id="workOpenBtn" type="button" aria-expanded="false" aria-controls="workPanel">Práce</button>
         <details class="header-menu" id="headerMenu">
           <summary>Další</summary>
           <div class="header-menu-actions">
+            <a class="back" href="/">← Cockpit</a>
             <button id="threadRotationOpenBtn" type="button">Vlákno</button>
             <button id="tvbcpOpenBtn" type="button">TVBCP</button>
             <button id="refreshBtn" type="button">Obnovit stav</button>
           </div>
         </details>
       </div>
-      <a class="back" href="/">← Cockpit</a>
     </div>
+    <details class="project-picker" id="projectPicker">
+      <summary><span class="project-eyebrow">Projekt</span><strong id="currentProjectName">Human–Adam</strong><span class="project-change">Změnit ▾</span></summary>
     <div class="profile-tools">
       <label for="profileSelect">Pracovní proud</label>
       <select id="profileSelect" aria-label="Pracovní proud Human–Adam"></select>
       <button id="profileSwitchBtn" type="button" disabled>Přepnout</button>
     </div>
+    </details>
     <button id="mobileStatusSummary" type="button" aria-expanded="false" aria-controls="workPanel">
       <span id="mobileStatusText" role="status" aria-live="polite">Odpojeno · Adam není připojen</span>
       <span id="mobileStatusToggleText">Podrobnosti</span>
     </button>
   </header>
-  <div id="notice" role="status" aria-live="polite"></div>
+  <div class="conversation-tools">
+    <div id="notice" role="status" aria-live="polite"></div>
+    <button id="latestAnswerBtn" type="button" hidden>Poslední odpověď ↓</button>
+  </div>
   <section id="chat" aria-label="Konverzace Human–Adam"></section>
   <div id="chatEnd" aria-hidden="true"></div>
   <form class="composer" id="composer" autocomplete="off">
+    <p class="composer-mode" id="composerMode" role="status">Konzultace · změny souborů nejsou povolené</p>
     <textarea id="messageInput" maxlength="12000" autocomplete="off" placeholder="Napiš Adamovi…" aria-label="Zpráva pro Adama"></textarea>
     <div class="compose-actions">
       <div class="voice-controls">
@@ -237,7 +300,7 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
       <blockquote id="sendFailureDraft" hidden style="white-space:pre-wrap;max-height:6em;overflow:auto;margin:8px 0 0"></blockquote>
     </section>
   </form>
-  <aside class="tvbcp-panel" id="tvbcpPanel" hidden aria-label="Projektový TVBCP">
+  <aside class="tvbcp-panel" id="tvbcpPanel" hidden role="dialog" aria-modal="true" aria-label="Projektový TVBCP">
     <div class="tvbcp-head">
       <h2 id="tvbcpTitle">Projektový TVBCP</h2>
       <button id="tvbcpRefreshBtn" type="button">Obnovit</button>
@@ -249,7 +312,7 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
       <div id="tvbcpEnd" aria-hidden="true"></div>
     </div>
   </aside>
-  <aside class="tvbcp-panel" id="threadRotationPanel" hidden aria-label="Bezpečná rotace profilového vlákna">
+  <aside class="tvbcp-panel" id="threadRotationPanel" hidden role="dialog" aria-modal="true" aria-label="Bezpečná rotace profilového vlákna">
     <div class="tvbcp-head">
       <h2>Nové profilové vlákno</h2>
       <button id="threadRotationCloseBtn" type="button">Zavřít</button>
@@ -266,30 +329,19 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
       </section>
     </div>
   </aside>
-  <aside class="tvbcp-panel" id="workPanel" hidden aria-label="Pracovní změny">
+  <aside class="tvbcp-panel" id="workPanel" hidden role="dialog" aria-modal="true" aria-labelledby="workTitle">
     <div class="tvbcp-head">
-      <h2>Pracovní změny</h2>
+      <h2 id="workTitle">Práce</h2>
       <button class="workflow-help-trigger" id="workHelpBtn" type="button" aria-label="Nápověda k jednoduchému vývoji a nasazení" aria-expanded="false" aria-controls="workHelpPanel" title="Jak pracovat a nasazovat">?</button>
       <button id="workRefreshBtn" type="button">Obnovit</button>
       <button id="workCloseBtn" type="button">Zavřít</button>
     </div>
+    <div class="work-tabs" role="tablist" aria-label="Pohledy Práce">
+      <button id="workTabCurrent" type="button" role="tab" aria-selected="true" aria-controls="workViewCurrent" tabindex="0">Probíhá</button>
+      <button id="workTabResults" type="button" role="tab" aria-selected="false" aria-controls="workViewResults" tabindex="-1">Výsledky a publikace</button>
+      <button id="workTabService" type="button" role="tab" aria-selected="false" aria-controls="workViewService" tabindex="-1">Servis</button>
+    </div>
     <div class="work-panel-body">
-    <section class="status-details" id="statusDetails" aria-label="Stav a technické účtenky">
-      <div class="statusline">
-        <span class="badge warn" id="connectionBadge">Odpojeno</span>
-        <span class="badge" id="profileBadge">Proud: Human–Adam</span>
-        <span class="badge" id="threadBadge">Relace: —</span>
-        <span class="badge" id="workspaceBadge">Izolovaný workspace</span>
-        <span class="badge warn legacy-work-control" id="developmentBadge">Vývoj: neověřen</span>
-        <button class="badge sound-badge warn" id="mediaSoundTestBtn" type="button">Zvuk odpovědi: vyzkoušet</button>
-        <audio id="completionMediaAudio" preload="auto" playsinline hidden></audio>
-        <audio id="answerSpeechAudio" preload="none" playsinline hidden></audio>
-      </div>
-      <div id="turnActivity" role="status" aria-live="polite" hidden></div>
-      <div id="stepCompletionReceipt" role="status" aria-live="polite" hidden></div>
-      <div id="deploymentReceipt" role="status" aria-live="polite" hidden></div>
-      <div id="lunaReleaseStatus" role="status" aria-live="polite" hidden></div>
-    </section>
     <section class="workflow-help-panel work-help-panel" id="workHelpPanel" aria-labelledby="workHelpTitle" tabindex="-1" hidden>
       <div class="workflow-help-head">
         <h3 id="workHelpTitle">Jak pracovat a nasazovat</h3>
@@ -333,6 +385,24 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
         <p class="workflow-help-safety"><strong>Nouzový postup:</strong> nic nemaž, nepoužívej reset, rebase ani force push. Požádej Adama o read-only kontrolu.</p>
       </div>
     </section>
+    <section class="work-view" id="workViewCurrent" role="tabpanel" aria-labelledby="workTabCurrent" tabindex="0">
+      <section class="work-state-box" id="workStateBox" data-state="unverified" aria-label="Aktuální práce">
+        <h3 id="workStateTitle" role="status" aria-live="polite">Stav práce není ověřen</h3>
+        <p id="workStateDescription">Obnov stav pro aktuální projekt.</p>
+        <p id="workStateElapsed" aria-live="off" hidden></p>
+        <ul id="workStateAxes"></ul>
+        <p class="meta" id="workStateObserved"></p>
+      </section>
+    </section>
+    <section class="work-view" id="workViewResults" role="tabpanel" aria-labelledby="workTabResults" tabindex="0" hidden>
+      <h3>Výsledky a publikace</h3>
+      <p class="meta" style="margin:0 16px 12px">Doklady výsledků mají vlastní čas a cíl. Neoznačují právě běžící práci.</p>
+      <div class="work-receipts">
+        <ul id="workStateEvidence" aria-label="Historie a doklady aktuálního projektu"></ul>
+      <div id="stepCompletionReceipt" role="status" aria-live="polite" hidden></div>
+      <div id="deploymentReceipt" role="status" aria-live="polite" hidden></div>
+      <div id="lunaReleaseStatus" role="status" aria-live="polite" hidden></div>
+      </div>
     <section class="batch-workflow-box" id="batchWorkflowBox" aria-label="Dnešní jednoduchý vývojový režim" hidden>
       <h3>Dnešní jednoduchý režim</h3>
       <p id="batchWorkflowNext" role="status">Načítám doporučený další krok.</p>
@@ -341,46 +411,6 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
         <li id="batchWorkflowDeploy">Cockpit: stav se načítá.</li>
         <li id="batchWorkflowGithub">GitHub: stav se načítá.</li>
       </ol>
-    </section>
-    <section class="development-semaphore-box legacy-work-control" aria-label="Historický globální vývojový semafor">
-      <h3>Vývojový semafor</h3>
-      <p id="developmentSemaphoreMeta">Stav vlastníka vývoje se načte společně s pracovním stavem.</p>
-      <div class="development-binding-fields">
-        <label>Projekt
-          <select id="developmentProject" aria-label="Projekt vývoje"><option value="">Načítám projekty…</option></select>
-        </label>
-        <label>Aktuální handoff
-          <select id="developmentHandoff" aria-label="Aktuální handoff projektu" disabled><option value="">Nejdřív vyber projekt</option></select>
-        </label>
-      </div>
-      <input id="developmentTopic" maxlength="120" autocomplete="off" placeholder="Krátké téma vývoje">
-      <div class="development-semaphore-actions">
-        <button class="primary" id="developmentAcquireProfileBtn" type="button">Převzít pro tento profil</button>
-        <button id="developmentAcquireTerminalBtn" type="button">Převzít pro terminál</button>
-        <button id="developmentPauseBtn" type="button" hidden>Pozastavit</button>
-        <button id="developmentResumeBtn" type="button" hidden>Obnovit</button>
-        <button id="developmentReleaseBtn" type="button" hidden>Uvolnit</button>
-      </div>
-    </section>
-    <section class="project-continuity-box legacy-work-control" aria-label="Historická aktuálnost projektového handoffu">
-      <div class="project-continuity-head">
-        <h3>Kontinuita projektu</h3>
-        <button id="projectContinuityAuditBtn" type="button">Prověřit handoff</button>
-      </div>
-      <p id="projectContinuityMeta">Audit je pouze read-only a zatím nic neblokuje.</p>
-      <ul id="projectContinuityReasons" hidden></ul>
-    </section>
-    <section class="live-work-status-box" id="liveWorkStatusBox" data-state="unverified" aria-label="Read-only živý stav pracovního proudu">
-      <h3>Živý stav</h3>
-      <p id="liveWorkStatusMeta" role="status">Stav se načte až po otevření panelu Práce.</p>
-      <ul id="liveWorkStatusAxes"></ul>
-    </section>
-    <section class="live-work-status-box" id="trustedExternalGenerationBox" data-state="unverified" aria-label="Trvalý souhlas s externím generováním">
-      <h3>Externí generování</h3>
-      <p id="trustedExternalGenerationMeta" role="status">Stav trvalého souhlasu se načítá.</p>
-      <p id="trustedExternalGenerationConfirmation"></p>
-      <input id="trustedExternalGenerationInput" maxlength="700" autocomplete="off" spellcheck="false" placeholder="Vlož přesnou potvrzovací větu">
-      <button id="trustedExternalGenerationBtn" type="button" disabled>Načítám…</button>
     </section>
     <div id="workMeta">Stav se načte až po otevření.</div>
     <ul id="workChanges"></ul>
@@ -441,6 +471,70 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
         </section>
       </section>
     </div>
+    </section>
+    <section class="work-view" id="workViewService" role="tabpanel" aria-labelledby="workTabService" tabindex="0" hidden>
+      <h3>Servis a souhlasy</h3>
+      <details class="service-group">
+        <summary>Připojení, pracovní kopie a technické doklady</summary>
+    <section class="status-details" id="statusDetails" aria-label="Stav a technické účtenky">
+      <div id="turnActivity" aria-live="off" hidden></div>
+
+      <div class="statusline">
+        <span class="badge warn" id="connectionBadge">Odpojeno</span>
+        <span class="badge" id="profileBadge">Proud: Human–Adam</span>
+        <span class="badge" id="threadBadge">Relace: —</span>
+        <span class="badge" id="workspaceBadge">Izolovaný workspace</span>
+        <span class="badge warn legacy-work-control" id="developmentBadge">Vývoj: neověřen</span>
+        <button class="badge sound-badge warn" id="mediaSoundTestBtn" type="button">Zvuk odpovědi: vyzkoušet</button>
+        <audio id="completionMediaAudio" preload="auto" playsinline hidden></audio>
+        <audio id="answerSpeechAudio" preload="none" playsinline hidden></audio>
+      </div>
+    </section>
+    <section class="live-work-status-box" id="liveWorkStatusBox" data-state="unverified" aria-label="Read-only živý stav pracovního proudu">
+      <h3>Živý stav</h3>
+      <p id="liveWorkStatusMeta" role="status">Stav se načte až po otevření panelu Práce.</p>
+      <ul id="liveWorkStatusAxes"></ul>
+    </section>
+      </details>
+      <details class="service-group">
+        <summary>Souhlasy s externím generováním</summary>
+    <section class="live-work-status-box" id="trustedExternalGenerationBox" data-state="unverified" aria-label="Trvalý souhlas s externím generováním">
+      <h3>Externí generování</h3>
+      <p id="trustedExternalGenerationMeta" role="status">Stav trvalého souhlasu se načítá.</p>
+      <p id="trustedExternalGenerationConfirmation"></p>
+      <input id="trustedExternalGenerationInput" maxlength="700" autocomplete="off" spellcheck="false" placeholder="Vlož přesnou potvrzovací větu">
+      <button id="trustedExternalGenerationBtn" type="button" disabled>Načítám…</button>
+    </section>
+      </details>
+    <section class="development-semaphore-box legacy-work-control" aria-label="Historický globální vývojový semafor">
+      <h3>Vývojový semafor</h3>
+      <p id="developmentSemaphoreMeta">Stav vlastníka vývoje se načte společně s pracovním stavem.</p>
+      <div class="development-binding-fields">
+        <label>Projekt
+          <select id="developmentProject" aria-label="Projekt vývoje"><option value="">Načítám projekty…</option></select>
+        </label>
+        <label>Aktuální handoff
+          <select id="developmentHandoff" aria-label="Aktuální handoff projektu" disabled><option value="">Nejdřív vyber projekt</option></select>
+        </label>
+      </div>
+      <input id="developmentTopic" maxlength="120" autocomplete="off" placeholder="Krátké téma vývoje">
+      <div class="development-semaphore-actions">
+        <button class="primary" id="developmentAcquireProfileBtn" type="button">Převzít pro tento profil</button>
+        <button id="developmentAcquireTerminalBtn" type="button">Převzít pro terminál</button>
+        <button id="developmentPauseBtn" type="button" hidden>Pozastavit</button>
+        <button id="developmentResumeBtn" type="button" hidden>Obnovit</button>
+        <button id="developmentReleaseBtn" type="button" hidden>Uvolnit</button>
+      </div>
+    </section>
+    <section class="project-continuity-box legacy-work-control" aria-label="Historická aktuálnost projektového handoffu">
+      <div class="project-continuity-head">
+        <h3>Kontinuita projektu</h3>
+        <button id="projectContinuityAuditBtn" type="button">Prověřit handoff</button>
+      </div>
+      <p id="projectContinuityMeta">Audit je pouze read-only a zatím nic neblokuje.</p>
+      <ul id="projectContinuityReasons" hidden></ul>
+    </section>
+    </section>
     </div>
   </aside>
 </main>
@@ -562,6 +656,25 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
   const deployAuditBtn = document.getElementById("deployAuditBtn");
   const deployConfirmation = document.getElementById("deployConfirmation");
   const deployBtn = document.getElementById("deployBtn");
+  const currentProjectName = document.getElementById("currentProjectName");
+  const projectPicker = document.getElementById("projectPicker");
+  const composerMode = document.getElementById("composerMode");
+  const latestAnswerBtn = document.getElementById("latestAnswerBtn");
+  const workStateBox = document.getElementById("workStateBox");
+  const workStateTitle = document.getElementById("workStateTitle");
+  const workStateDescription = document.getElementById("workStateDescription");
+  const workStateElapsed = document.getElementById("workStateElapsed");
+  const workStateAxes = document.getElementById("workStateAxes");
+  const workStateObserved = document.getElementById("workStateObserved");
+  const workStateEvidence = document.getElementById("workStateEvidence");
+  let currentWorkState = null;
+  let statusReadSequence = 0;
+  let workReadSequence = 0;
+  let chatRenderKey = "";
+  let chatRenderedThread = "";
+  let renderedExchanges = new Map();
+  let activeWorkView = "Current";
+  let panelReturnFocus = null;
   let busy = false;
   let sendInFlight = false;
   let pendingSubmission = null;
@@ -785,10 +898,14 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
     profileSwitchBtn.disabled = profileSelect.disabled || !profileSelect.value || profileSelect.value === activeWorkstreamId;
     refreshBtn.disabled = busy || resultWatchActive;
     workOpenBtn.disabled = busy;
-    refreshBtn.textContent = resultWatchActive ? "Čekám na výsledek…" : "Stav";
+    refreshBtn.textContent = resultWatchActive ? "Čekám na výsledek…" : "Obnovit stav";
     sendBtn.disabled = busy || sendInFlight || sessionTurnBusy || Boolean(pendingSubmission) || voiceStarting || voiceRecording || voiceTranscribing || lunaReleaseBusy;
     input.disabled = lunaReleaseBusy;
     writeIntentBtn.disabled = busy || sendInFlight || sessionTurnBusy || voiceStarting || voiceRecording || voiceTranscribing || lunaReleaseBusy || !sessionConnected || !workstreamDevelopmentEnabled;
+    composerMode.textContent = writeIntentArmed
+      ? "Vývoj povolen pro jeden následující pokyn"
+      : "Konzultace · změny souborů nejsou povolené";
+    composerMode.classList.toggle("armed", writeIntentArmed);
     writeIntentBtn.classList.toggle("armed", writeIntentArmed);
     writeIntentBtn.setAttribute("aria-pressed", writeIntentArmed ? "true" : "false");
     writeIntentBtn.textContent = writeIntentArmed ? "Vývoj připraven" : "Zahájit vývoj";
@@ -922,32 +1039,105 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
     closeWork();
   }
 
+  function publicationTargetLabel(target) {
+    return ({cockpit:"Cockpit Samanthy", github_pages:"Web projektu (GitHub Pages)"})[String(target || "")] || "Cíl nasazení neověřen";
+  }
+
+  function workStateSummary(state=currentWorkState) {
+    const value = state && state.summary ? String(state.summary.state || "") : "unverified";
+    return ({
+      running:["Adam pracuje", "Čekáme na potvrzený výsledek modelového tahu."],
+      verifying:["Ověřuji výsledek", "Model odpověděl. Server dokončuje kontrolu a uložení výsledku."],
+      publication_reported:["Publikace je vedená jako aktivní", "Jde o stav účtenky; živý běh vykonavatele se tímto snímkem neověřuje."],
+      ready:["Adam čeká na zadání", "Můžeš napsat další pokyn. Doklady předchozích výsledků najdeš ve Výsledcích a publikaci."],
+      disconnected:["Adam není připojen", "Použij Připojit. Odpojení samo nepopírá dříve potvrzené výsledky."],
+      unavailable:["Spojení není dostupné", "Obnov stav a zkontroluj připojení v Servisu."],
+      unverified:["Stav práce není ověřen", "Obnov stav. Při nejistém doručení neposílej původní pokyn znovu."],
+    })[value] || ["Stav práce není ověřen", "Obnov stav pro aktuální projekt."];
+  }
+
+  function renderWorkState(state, session) {
+    const scope = state && state.scope || {};
+    const valid = Boolean(state && state.schema_version === 1 && state.read_only === true
+      && state.writes_performed === false && state.consistent === true
+      && scope.workstream_id === activeWorkstreamId
+      && String(scope.thread_id || "") === String(session && session.thread_id || "")
+      && Number(scope.connection_generation || 0) === Number(session && session.connection_generation || 0));
+    currentWorkState = valid ? state : null;
+    let [title, description] = workStateSummary();
+    if (sendInFlight && (!valid || state.summary && state.summary.state === "ready")) {
+      title = "Čekám na potvrzený výsledek pokynu";
+      description = "Pokyn se znovu neodesílá. Dostupný serverový stav můžeš ověřit tlačítkem Obnovit.";
+    }
+    workStateTitle.textContent = title;
+    workStateDescription.textContent = description;
+    workStateBox.dataset.state = valid ? String(state.summary && state.summary.state || "unverified") : "unverified";
+    workStateObserved.textContent = valid
+      ? `${activeWorkstreamLabel} · snímek ${formatTime(state.observed_at)}`
+      : `${activeWorkstreamLabel} · aktuální snímek není k dispozici`;
+    workStateAxes.replaceChildren();
+    const labels = {
+      connection:{connected:"připojeno", disconnected:"odpojeno", unreachable:"nedostupné", unverified:"neověřeno"},
+      model:{idle:"neběží", running:"probíhá", unverified:"neověřeno"},
+      completion:{none:"neprobíhá", verifying:"probíhá ověřování", unverified:"neověřeno"},
+      publication:{none:"bez aktuální účtenky", recorded:"doklad ve výsledcích", reported_active:"účtenka hlásí aktivní práci", unverified:"neověřeno"},
+    };
+    for (const [key, title] of [["connection","Spojení s Adamem"],["model","Modelový tah"],["completion","Dokončování"],["publication","Publikace"]]) {
+      const row = document.createElement("li");
+      const source = ["connection","model"].includes(key) ? "session" : key;
+      const unavailable = valid && Array.isArray(state.incidents)
+        && state.incidents.some(item => item.source === source && item.code === "source_unavailable");
+      const value = valid && !unavailable && state[key] ? String(state[key].state || "") : "unverified";
+      row.textContent = `${title}: ${labels[key][value] || "neověřeno"}`;
+      workStateAxes.appendChild(row);
+    }
+    const operation = valid && state.model && state.model.operation;
+    workStateElapsed.hidden = !operation || !operation.started_at;
+    workStateElapsed.textContent = operation && operation.started_at ? `Doba od zahájení: ${elapsedClock(operation.started_at)}` : "";
+    workStateEvidence.replaceChildren();
+    const kinds = {model:"Modelový tah", completion:"Dokončení", publication:"Publikace"};
+    const states = {completed:"dokončeno", checkpoint_completed:"lokálně uloženo", no_changes_completed:"dokončeno bez změn",
+      attention:"vyžaduje kontrolu", running:"účtenka hlásí běh", queued:"účtenka čeká", unverified:"neověřeno", dry_run_completed:"zkouška bez publikování"};
+    for (const item of valid && Array.isArray(state.history) ? state.history : []) {
+      const row = document.createElement("li");
+      const target = item.kind === "publication" ? ` · ${publicationTargetLabel(item.deployment_target)}` : "";
+      row.textContent = `${kinds[item.kind] || "Doklad"}: ${states[item.state] || "zaznamenáno"}${target} · ${formatTime(item.updated_at)}`;
+      workStateEvidence.appendChild(row);
+    }
+    if (valid && state.publication && state.publication.outcome === "deployment_verified") {
+      const row = document.createElement("li");
+      row.textContent = `Nasazení dodatečně ověřeno · ${publicationTargetLabel(state.publication.operation && state.publication.operation.deployment_target)} · ${String(state.publication.verified_head || "").slice(0,12)}. Původní účtenka zůstává zachovaná.`;
+      workStateEvidence.appendChild(row);
+    }
+    const incidentLabels = {receipt_attention:"Publikační účtenka vyžaduje kontrolu.", receipt_attention_verified_deployment:"Původní účtenka nebyla dokončená; nasazení je doloženo dodatečně.",
+      source_unavailable:"Některý zdroj stavu není dostupný.", completion_attention:"Doklad dokončení vyžaduje kontrolu.",
+      completion_unverified:"Doklad dokončení není ověřen.", publication_not_current:"Starší aktivní publikační doklad neoznačuje aktuální práci.",
+      publication_evidence_missing:"K publikaci chybí ověřovací důkaz."};
+    for (const item of valid && Array.isArray(state.incidents) ? state.incidents : []) {
+      const text = incidentLabels[item.code];
+      if (text) { const row = document.createElement("li"); row.textContent = text; workStateEvidence.appendChild(row); }
+    }
+    if (!workStateEvidence.children.length) {
+      const row = document.createElement("li"); row.textContent = "Pro tento snímek nejsou další doklady k zobrazení."; workStateEvidence.appendChild(row);
+    }
+    updateMobileStatusSummary();
+  }
+
   function updateMobileStatusSummary() {
     let text = "";
-    let tone = "";
+    let tone = "warn";
     if (deliveryUncertain) {
       text = "Stav doručení je nejistý · obnov stav · pokyn neposílej znovu";
-      tone = "warn";
-    } else if (sessionTurnBusy) {
-      text = turnActivity.textContent || "Adam pracuje · čas neznámý · pokyn neposílej znovu";
-      tone = "warn";
-    } else if (lunaReleaseJobActive()) {
-      text = "Probíhá publikování · podrobnosti v Práci";
-      tone = "warn";
-    } else if (lunaReleaseJob && String(lunaReleaseJob.state || "") === "attention") {
-      text = "Publikování vyžaduje kontrolu · otevři Práci";
-      tone = "warn";
-    } else if (!lunaReleaseStatusLoaded) {
-      text = "Stav publikování se ověřuje · podrobnosti v Práci";
-      tone = "warn";
+    } else if (sendInFlight) {
+      text = "Čekám na potvrzený výsledek pokynu";
     } else {
-      const connectionText = connectionBadge.textContent || "Odpojeno";
-      const adamText = sessionConnected ? "Adam čeká" : "Adam není připojen";
-      const workspaceNote = workspaceBadge.classList.contains("warn") ? " · workspace vyžaduje kontrolu" : "";
-      text = `${connectionText} · ${adamText}${workspaceNote}`;
-      tone = sessionConnected && !workspaceBadge.classList.contains("warn") ? "ok" : "warn";
+      const state = currentWorkState;
+      const connection = state && state.connection ? state.connection.state : "unverified";
+      const connectionText = ({connected:"Připojeno", disconnected:"Odpojeno", unreachable:"Spojení nedostupné"})[connection] || "Spojení neověřeno";
+      text = `${connectionText} · ${workStateSummary()[0]}`;
+      tone = state && state.summary && state.summary.state === "ready" ? "ok" : "warn";
     }
-    mobileStatusText.textContent = text;
+    if (mobileStatusText.textContent !== text) mobileStatusText.textContent = text;
     mobileStatusSummary.classList.toggle("ok", tone === "ok");
     mobileStatusSummary.classList.toggle("warn", tone === "warn");
   }
@@ -970,6 +1160,7 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
   function updateTurnTimer() {
     if (!activeTurnStartedAt) return;
     turnActivity.textContent = `Adam pracuje · ${elapsedClock(activeTurnStartedAt)} · pokyn neposílej znovu`;
+    workStateElapsed.textContent = `Doba od zahájení: ${elapsedClock(activeTurnStartedAt)}`;
     updateMobileStatusSummary();
     turnTimerId = window.setTimeout(updateTurnTimer, 1000);
   }
@@ -1013,6 +1204,7 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
   function clearMessageInput() {
     input.value = "";
     input.defaultValue = "";
+    if (input.style) input.style.height = "";
   }
 
   function showSendFailure(message, originalText="") {
@@ -1088,6 +1280,7 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
       throw new Error("Přepis se nevejde do textového pole; zkrať rozepsaný text.");
     }
     input.value = combined;
+    runSendUiBestEffort(() => updateComposerLayout());
     input.focus();
   }
 
@@ -1449,6 +1642,7 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
   async function loadImageCandidates() {
     const options = arguments.length > 0 && arguments[0] ? arguments[0] : {};
     const forceChatEnd = Boolean(options.forceChatEnd);
+    statusReadSequence += 1;
     if (!imageGenerationEnabled) {
       imageCandidatesByMessage = new Map();
       if (lastSession) renderSession(lastSession, {forceScrollToEnd:forceChatEnd});
@@ -1551,7 +1745,12 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
     const prompt = document.createElement("p");
     prompt.className = "image-candidate-prompt";
     prompt.textContent = String(candidate.prompt || "");
-    card.appendChild(prompt);
+    const promptDetails = document.createElement("details");
+    promptDetails.className = "message-details";
+    const promptSummary = document.createElement("summary");
+    promptSummary.textContent = "Zadání obrázku";
+    promptDetails.append(promptSummary, prompt);
+    card.appendChild(promptDetails);
     const parameters = candidate.parameters || {};
     const meta = document.createElement("p");
     meta.className = "image-candidate-meta";
@@ -1613,10 +1812,97 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
     }
   }
 
+  function safeAnswerLink(value) {
+    const text = String(value || "").trim();
+    if (!/^(https?:\/\/|\/(?!\/))/.test(text) || /[\u0000-\u0020\u007f]/.test(text)) return "";
+    try {
+      const url = new URL(text, window.location.href);
+      return ["https:","http:"].includes(url.protocol) && !url.username && !url.password ? url.href : "";
+    } catch (_error) { return ""; }
+  }
+
+  function appendAnswerInline(parent, value) {
+    const text = String(value || "");
+    const pattern = /(`[^`\n]+`|\*\*[^*\n]+\*\*|\[[^\]\n]+\]\([^\s)]+\)|https?:\/\/[^\s<>]+)/g;
+    let offset = 0;
+    for (const match of text.matchAll(pattern)) {
+      parent.appendChild(document.createTextNode(text.slice(offset, match.index)));
+      const token = match[0];
+      let node = null;
+      if (token.startsWith("`")) {
+        node = document.createElement("code"); node.textContent = token.slice(1,-1);
+      } else if (token.startsWith("**")) {
+        node = document.createElement("strong"); node.textContent = token.slice(2,-2);
+      } else {
+        const markdown = /^\[([^\]]+)\]\(([^)]+)\)$/.exec(token);
+        const address = markdown ? markdown[2] : token.replace(/[.,;!?]+$/, "");
+        const safe = safeAnswerLink(address);
+        if (safe) {
+          node = document.createElement("a"); node.href = safe;
+          node.textContent = markdown ? markdown[1] : address;
+          node.target = "_blank"; node.rel = "noopener noreferrer";
+        }
+        if (node && !markdown) {
+          parent.appendChild(node);
+          parent.appendChild(document.createTextNode(token.slice(address.length)));
+          node = null;
+        } else if (!node) node = document.createTextNode(token);
+      }
+      if (node) parent.appendChild(node);
+      offset = match.index + token.length;
+    }
+    parent.appendChild(document.createTextNode(text.slice(offset)));
+  }
+
+  function answerContent(text) {
+    const content = document.createElement("div");
+    content.className = "answer-content";
+    let paragraph = null, list = null, code = null;
+    for (const line of String(text || "").split("\n")) {
+      if (line.trim().startsWith("```")) {
+        paragraph = null; list = null;
+        if (code) code = null;
+        else {
+          const pre = document.createElement("pre"); code = document.createElement("code");
+          pre.appendChild(code); content.appendChild(pre);
+        }
+        continue;
+      }
+      if (code) { code.textContent += `${line}\n`; continue; }
+      if (!line.trim()) { paragraph = null; list = null; continue; }
+      const heading = /^(#{1,4})\s+(.+)$/.exec(line);
+      const item = /^\s*(?:([-*])|\d+[.)])\s+(.+)$/.exec(line);
+      if (heading) {
+        paragraph = null; list = null;
+        const node = document.createElement(heading[1].length < 3 ? "h3" : "h4");
+        appendAnswerInline(node, heading[2]); content.appendChild(node);
+      } else if (item) {
+        paragraph = null;
+        const tag = item[1] ? "UL" : "OL";
+        if (!list || list.tagName !== tag) { list = document.createElement(tag.toLowerCase()); content.appendChild(list); }
+        const node = document.createElement("li"); appendAnswerInline(node, item[2]); list.appendChild(node);
+      } else {
+        list = null;
+        if (!paragraph) { paragraph = document.createElement("p"); content.appendChild(paragraph); }
+        else paragraph.appendChild(document.createElement("br"));
+        appendAnswerInline(paragraph, line);
+      }
+    }
+    return content;
+  }
+
   function bubble(text, className, meta, spokenText="", imageCandidates=[]) {
     const node = document.createElement("article");
     node.className = `bubble ${className}`;
-    node.textContent = text;
+    node.tabIndex = -1;
+    if (className === "adam" && spokenText) node.appendChild(answerContent(text));
+    else if (className === "human" && (text.length > 600 || text.split("\n").length > 8)) {
+      const details = document.createElement("details"); details.className = "message-details";
+      const summary = document.createElement("summary");
+      summary.textContent = `Zadání · ${text.replace(/\s+/g," ").slice(0,100)}…`;
+      const full = document.createElement("div"); full.className = "prompt-content"; full.textContent = text;
+      details.append(summary, full); node.appendChild(details);
+    } else node.textContent = text;
     const small = document.createElement("span");
     small.className = "meta";
     small.textContent = meta;
@@ -1635,44 +1921,61 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
   }
 
   function isChatNearEnd() {
-    const root = document.documentElement;
-    const distance = root.scrollHeight - (window.scrollY + window.innerHeight);
-    return distance <= 180;
+    return chat.scrollHeight - chat.scrollTop - chat.clientHeight <= 120;
   }
 
   function scrollChatToEnd() {
-    const applyEndPosition = () => {
-      chatEnd.scrollIntoView({block:"end",inline:"nearest",behavior:"auto"});
-    };
-    requestAnimationFrame(() => {
-      requestAnimationFrame(applyEndPosition);
-    });
+    const applyEndPosition = () => { chat.scrollTop = chat.scrollHeight; };
+    requestAnimationFrame(() => { requestAnimationFrame(applyEndPosition); });
     window.setTimeout(applyEndPosition, 120);
   }
 
   function renderSession(session) {
     const options = arguments.length > 1 && arguments[1] ? arguments[1] : {};
     const keepAtEnd = Boolean(options.forceScrollToEnd) || isChatNearEnd();
-    stopAnswerSpeech(false);
     reconcilePendingSubmission(session);
+    if (session !== lastSession) renderWorkState(null, session);
     lastSession = session || null;
-    chat.replaceChildren();
     const messages = session && Array.isArray(session.messages) ? session.messages : [];
-    for (const item of messages) {
-      const exchange = document.createElement("div");
-      exchange.className = "exchange";
-      exchange.appendChild(bubble(item.user_text || "", "human", `Odesláno ${formatTime(item.client_sent_at || item.received_at)}`));
-      const confirmed = item.delivery_confirmed ? "Doručení potvrzeno" : (item.status === "delivery_unknown" ? "Doručení nejisté – neposílat automaticky znovu" : "Zpracování nedokončeno");
-      if (item.answer) exchange.appendChild(bubble(item.answer, "adam", `Adam · ${formatTime(item.completed_at)} · ${confirmed}`, item.answer, imageCandidatesByMessage.get(String(item.client_message_id || "")) || []));
-      else exchange.appendChild(bubble(item.status === "pending" ? "Adam pracuje…" : confirmed, "adam", formatTime(item.received_at)));
-      chat.appendChild(exchange);
+    const thread = String(session && session.thread_id || "");
+    if (thread !== chatRenderedThread) {
+      stopAnswerSpeech(false);
+      renderedExchanges = new Map(); chatRenderKey = ""; chatRenderedThread = thread;
+      chat.replaceChildren();
     }
+    const renderKey = JSON.stringify([messages, Array.from(imageCandidatesByMessage.entries())]);
+    if (renderKey === chatRenderKey) { if (keepAtEnd) scrollChatToEnd(); return; }
+    chatRenderKey = renderKey;
+    const next = new Map();
+    for (const [index, item] of messages.entries()) {
+      const id = String(item.client_message_id || `row-${index}`);
+      const fingerprint = JSON.stringify([item, imageCandidatesByMessage.get(id) || []]);
+      const old = renderedExchanges.get(id);
+      let exchange = old && old.fingerprint === fingerprint ? old.node : null;
+      if (!exchange) {
+        if (old && activeSpeechButton && old.node.contains(activeSpeechButton)) stopAnswerSpeech(false);
+        exchange = document.createElement("div");
+        exchange.className = "exchange";
+        exchange.appendChild(bubble(item.user_text || "", "human", `Odesláno ${formatTime(item.client_sent_at || item.received_at)}`));
+        const confirmed = item.delivery_confirmed ? "Doručení potvrzeno" : (item.status === "delivery_unknown" ? "Doručení nejisté – neposílat automaticky znovu" : "Zpracování nedokončeno");
+        if (item.answer) exchange.appendChild(bubble(item.answer, "adam", `Adam · ${formatTime(item.completed_at)} · ${confirmed}`, item.answer, imageCandidatesByMessage.get(String(item.client_message_id || "")) || []));
+        else exchange.appendChild(bubble(item.status === "pending" ? "Adam pracuje…" : confirmed, "adam", formatTime(item.received_at)));
+      }
+      next.set(id, {node:exchange, fingerprint});
+      if (chat.children[index] !== exchange) chat.insertBefore(exchange, chat.children[index] || null);
+    }
+    for (const child of Array.from(chat.children).slice(messages.length)) {
+      if (activeSpeechButton && child.contains(activeSpeechButton)) stopAnswerSpeech(false);
+      child.remove();
+    }
+    renderedExchanges = next;
     if (!messages.length) {
       const empty = document.createElement("p");
       empty.textContent = "Zatím tu není žádná výměna. Připoj relaci a pošli první zprávu.";
       empty.style.color = "var(--muted)";
       chat.appendChild(empty);
     }
+    latestAnswerBtn.hidden = !messages.some(item => Boolean(item.answer));
     if (keepAtEnd) {
       scrollChatToEnd();
       for (const image of chat.querySelectorAll("img")) {
@@ -1712,22 +2015,22 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
     );
     workOpenBtn.classList.toggle("work-attention", needsAttention);
     if (workspace && workspace.dirty) {
-      workOpenBtn.textContent = `Práce: ${changeCount} změn`;
-      workOpenBtn.title = "Workspace obsahuje rozpracované změny; otevři detail.";
+      workOpenBtn.textContent = "Práce";
+      workOpenBtn.title = `Workspace obsahuje ${changeCount} rozpracovaných změn; otevři detail.`;
     } else if (needsAttention) {
-      workOpenBtn.textContent = "Práce: kontrola";
+      workOpenBtn.textContent = "Práce";
       workOpenBtn.title = "Pracovní stav vyžaduje kontrolu; otevři detail.";
     } else if (workstreamDeploymentEnabled && deploymentCurrent) {
-      workOpenBtn.textContent = "Práce: nasazeno ✓";
+      workOpenBtn.textContent = "Práce";
       workOpenBtn.title = `Cockpit běží na aktuálním main${deployedMain ? ` ${deployedMain}` : ""} · smoke ${deployedSmokeCount}/5.`;
     } else if (workstreamDeploymentEnabled) {
-      workOpenBtn.textContent = "Práce: nasazení";
+      workOpenBtn.textContent = "Práce";
       workOpenBtn.title = "Workspace je čistý a tento pracovní proud podporuje nasazení.";
     } else {
-      workOpenBtn.textContent = "Práce: čistá";
+      workOpenBtn.textContent = "Práce";
       workOpenBtn.title = "Workspace je čistý a synchronní s main; velký detail není potřeba.";
     }
-    workOpenBtn.setAttribute("aria-label", workOpenBtn.title);
+    workOpenBtn.setAttribute("aria-label", `Práce · ${workOpenBtn.title}`);
   }
 
   function activeWorkstreamLiveDeployment() {
@@ -1850,6 +2153,7 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
     deploymentReceipt.hidden = !deployment;
     renderTurnState(session);
     renderSession(session, {forceScrollToEnd:forceChatEnd});
+    renderWorkState(payload && payload.work_state, session);
     void loadImageCandidates({forceChatEnd});
   }
 
@@ -1878,8 +2182,10 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
     const nextWorkstreamId = String(activeWorkstream.workstream_id || "");
     if (activeWorkstreamId && nextWorkstreamId !== activeWorkstreamId) {
       writeIntentArmed = false;
+      workReadSequence += 1;
     }
     activeWorkstreamLabel = String(activeWorkstream.workstream_name || "Pracovní proud");
+    currentProjectName.textContent = activeWorkstreamLabel;
     workstreamDevelopmentEnabled = capabilities.development !== false;
     workstreamDeploymentEnabled = capabilities.deployment !== false;
     workstreamProductionTarget = String(capabilities.production_deployment_target || "");
@@ -2012,6 +2318,7 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
       if (!payload.ok) throw new Error(payload.message || "Přepnutí profilu selhalo.");
       resetThreadRotationState();
       renderStatus(payload, {forceChatEnd:true});
+      projectPicker.open = false;
       notice.textContent = `Aktivní pracovní proud: ${activeWorkstreamLabel}.`;
     } catch (error) {
       showProfileSwitchFailure(`Pracovní proud nebyl přepnut: ${error.message}`);
@@ -2020,8 +2327,36 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
   }
 
   async function api(path, options={}) {
-    const response = await fetch(path, {headers:{"Content-Type":"application/json"}, ...options});
-    const payload = await response.json();
+    // A content hash cannot order responses. Use local read generation + scope.
+    if (options.method && options.method !== "GET") {
+      statusReadSequence += 1;
+      workReadSequence += 1;
+    }
+    const read = path === "/api/human-adam/status"
+      ? {sequence:++statusReadSequence, workstream:activeWorkstreamId} : null;
+    const workRead = path === "/api/human-adam/workspace"
+      ? {sequence:++workReadSequence, workstream:activeWorkstreamId} : null;
+    const rejectStaleRead = () => {
+      if (read && (read.sequence !== statusReadSequence || read.workstream !== activeWorkstreamId)) {
+        const error = new Error("Opožděný stav byl zahozen, protože se mezitím změnila práce nebo projekt.");
+        error.staleStatus = true;
+        throw error;
+      }
+      if (workRead && (workRead.sequence !== workReadSequence || workRead.workstream !== activeWorkstreamId)) {
+        const error = new Error("Opožděný pracovní stav byl zahozen po změně projektu nebo práce.");
+        error.staleWork = true;
+        throw error;
+      }
+    };
+    let response, payload;
+    try {
+      response = await fetch(path, {headers:{"Content-Type":"application/json"}, ...options});
+      payload = await response.json();
+    } catch (error) {
+      rejectStaleRead();
+      throw error;
+    }
+    rejectStaleRead();
     if (!response.ok) throw new Error(payload.message || "HTTP požadavek selhal.");
     return payload;
   }
@@ -2035,6 +2370,8 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
       notice.textContent = payload.ok ? "" : (payload.message || "Human–Adam zatím není připravený.");
       return payload;
     } catch (error) {
+      if (error.staleStatus) return null;
+      renderWorkState(null, lastSession);
       notice.textContent = `Stav nelze načíst: ${error.message}`;
       return null;
     }
@@ -2099,6 +2436,7 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
       }
       lastSession = session || lastSession;
       renderTurnState(session);
+      renderWorkState(payload && payload.work_state, session);
       if (resultWatchAttempt >= RESULT_WATCH_MAX_ATTEMPTS) {
         stopResultWatch();
         notice.textContent = "Výsledek zatím nebyl potvrzen. Pokyn neposílej znovu; stav můžeš zkontrolovat znovu.";
@@ -2107,6 +2445,7 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
       notice.textContent = "Čekám na výsledek a pouze ověřuji stav; pokyn znovu neposílám.";
       scheduleResultWatch();
     } catch (error) {
+      if (error.staleStatus) { stopResultWatch(); return; }
       if (resultWatchAttempt >= RESULT_WATCH_MAX_ATTEMPTS) {
         stopResultWatch();
         notice.textContent = `Výsledek se nepodařilo ověřit: ${error.message} Pokyn neposílej znovu.`;
@@ -2147,9 +2486,18 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
       const payload = await api("/api/human-adam/connect", {method:"POST", body:"{}"});
       if (!payload.ok) throw new Error(payload.message || "Připojení selhalo.");
       renderStatus(payload, {forceChatEnd:true});
+      let projectionUnavailable = false;
+      if (!payload.work_state) {
+        try {
+          const status = await api("/api/human-adam/status");
+          renderStatus(status, {forceChatEnd:true});
+          projectionUnavailable = !status.work_state;
+        } catch (_error) { projectionUnavailable = true; }
+      }
       notice.textContent = payload.workspace_synced
         ? "Workspace byl bezpečně aktualizovaný z main a kanonická relace je připravená."
         : "Kanonická relace je připravená.";
+      if (projectionUnavailable) notice.textContent += " Aktuální stav práce se nepodařilo ověřit; obnov stav.";
       input.focus();
     } catch (error) { notice.textContent = `Připojení selhalo: ${error.message}`; }
     finally { setBusy(false); }
@@ -2181,11 +2529,12 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
     tvbcpPanel.hidden = true;
     workPanel.hidden = true;
     mobileStatusSummary.setAttribute("aria-expanded", "false");
-    threadRotationPanel.hidden = false;
+    showPanel(threadRotationPanel, threadRotationCloseBtn);
   }
 
   function closeThreadRotation() {
-    threadRotationPanel.hidden = true;
+    hidePanel(threadRotationPanel);
+    (panelReturnFocus || threadRotationOpenBtn).focus();
   }
 
   function renderThreadRotationAudit(payload) {
@@ -2281,12 +2630,13 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
     threadRotationPanel.hidden = true;
     workPanel.hidden = true;
     mobileStatusSummary.setAttribute("aria-expanded", "false");
-    tvbcpPanel.hidden = false;
+    showPanel(tvbcpPanel, tvbcpCloseBtn);
     loadTvbcp();
   }
 
   function closeTvbcp() {
-    tvbcpPanel.hidden = true;
+    hidePanel(tvbcpPanel);
+    (panelReturnFocus || tvbcpOpenBtn).focus();
   }
 
   function renderPendingIntegrationAudit(audit) {
@@ -2746,6 +3096,7 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
       const option = Array.from(profileSelect.options || []).find(item => item.value === receiptWorkstream);
       label = `Účtenka: ${option?.textContent || (receiptWorkstream === activeWorkstreamId ? activeWorkstreamLabel : "jiný pracovní proud")} · ${label}`;
     }
+    label += ` · ${publicationTargetLabel(lunaReleaseJob.deployment_target)} · ${formatTime(lunaReleaseJob.updated_at)}`;
     lunaReleaseStatus.textContent = label;
     lunaReleaseStatus.hidden = false;
     if (state === "attention") lunaReleaseStatus.classList.add("attention");
@@ -3163,6 +3514,7 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
       if (githubBatchModeEnabled && !workPanel.hidden) await auditGithubBatch();
       return payload;
     } catch (error) {
+      if (error.staleWork) return null;
       workChanges.replaceChildren();
       workMeta.textContent = `Pracovní stav nelze načíst: ${error.message}`;
       renderWorkstreamLiveStatus(null);
@@ -3209,7 +3561,7 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
       option.textContent = `${item.label || "Projekt"}${item.priority ? ` · priorita ${item.priority}` : ""}`;
       developmentProject.appendChild(option);
     }
-    const wantedProject = String(binding.project_id || previousProject || projectContinuity.default_project_id || "");
+    const wantedProject = String(binding.project_id || previousProject || (projectContinuity && projectContinuity.default_project_id) || "");
     developmentProject.value = [...developmentProject.options].some((item) => item.value === wantedProject) ? wantedProject : "";
     updateDevelopmentHandoffs(String(binding.handoff_path || ""));
     const audit = valid && projectContinuity.audit && typeof projectContinuity.audit === "object" ? projectContinuity.audit : null;
@@ -3239,17 +3591,61 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
     }
   }
 
+  function updateComposerLayout() {
+    const viewport = window.visualViewport;
+    const height = viewport ? viewport.height : window.innerHeight;
+    const top = viewport ? viewport.offsetTop : 0;
+    document.documentElement.style.setProperty("--ha-viewport-height", `${Math.round(height)}px`);
+    document.documentElement.style.setProperty("--ha-viewport-top", `${Math.round(top)}px`);
+    const keepAtEnd = isChatNearEnd();
+    input.style.height = "auto";
+    const maxHeight = Math.max(48, Math.min(220, Math.floor(height * .25)));
+    input.style.height = `${Math.min(input.scrollHeight, maxHeight)}px`;
+    if (keepAtEnd) chat.scrollTop = chat.scrollHeight;
+  }
+
+  function setWorkView(view, focus=false) {
+    const selected = ["Current","Results","Service"].includes(view) ? view : "Current";
+    activeWorkView = selected;
+    for (const name of ["Current","Results","Service"]) {
+      const tab = document.getElementById(`workTab${name}`);
+      const panel = document.getElementById(`workView${name}`);
+      tab.setAttribute("aria-selected", name === selected ? "true" : "false");
+      tab.tabIndex = name === selected ? 0 : -1;
+      panel.hidden = name !== selected;
+      if (focus && name === selected) tab.focus();
+    }
+  }
+
+  function showPanel(panel, focusTarget) {
+    const origin = document.activeElement;
+    panelReturnFocus = origin && origin.closest("#headerMenu")
+      ? document.querySelector("#headerMenu > summary") : origin;
+    for (const other of [workPanel, tvbcpPanel, threadRotationPanel]) other.hidden = other !== panel;
+    for (const child of document.querySelector("main").children) child.inert = child !== panel;
+    panel.hidden = false;
+    workOpenBtn.setAttribute("aria-expanded", panel === workPanel ? "true" : "false");
+    focusTarget.focus();
+  }
+
+  function hidePanel(panel) {
+    panel.hidden = true;
+    workOpenBtn.setAttribute("aria-expanded", "false");
+    for (const child of document.querySelector("main").children) child.inert = false;
+  }
+
   async function openWork() {
     if (workOpenBtn.disabled) return;
     workOpenBtn.disabled = true;
-    const payload = await loadWork();
+    setWorkView("Current");
+    showPanel(workPanel, workCloseBtn);
+    await loadWork();
     workOpenBtn.disabled = busy;
+    if (workPanel.hidden) return;
     threadRotationPanel.hidden = true;
     tvbcpPanel.hidden = true;
-    workPanel.hidden = false;
     mobileStatusSummary.setAttribute("aria-expanded", "true");
-    workCloseBtn.focus();
-    if (payload && payload.github_batch_mode === true) await auditGithubBatch();
+    if (!workPanel.hidden) workCloseBtn.focus();
   }
 
   function setWorkHelpOpen(open) {
@@ -3261,9 +3657,9 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
 
   function closeWork() {
     setWorkHelpOpen(false);
-    workPanel.hidden = true;
+    hidePanel(workPanel);
     mobileStatusSummary.setAttribute("aria-expanded", "false");
-    mobileStatusSummary.focus();
+    (panelReturnFocus || mobileStatusSummary).focus();
   }
 
   async function createCheckpoint() {
@@ -3719,6 +4115,46 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
   }
 
   composer.addEventListener("submit", sendMessage);
+  latestAnswerBtn.addEventListener("click", () => {
+    const answers = chat.querySelectorAll(".adam");
+    if (answers.length) answers[answers.length - 1].focus({preventScroll:true});
+    scrollChatToEnd();
+  });
+  for (const [index, name] of ["Current","Results","Service"].entries()) {
+    const tab = document.getElementById(`workTab${name}`);
+    tab.addEventListener("click", () => setWorkView(name));
+    tab.addEventListener("keydown", event => {
+      const names = ["Current","Results","Service"];
+      const offsets = {ArrowRight:1,ArrowLeft:-1,Home:-index,End:2-index};
+      if (!(event.key in offsets)) return;
+      event.preventDefault();
+      setWorkView(names[(index + offsets[event.key] + names.length) % names.length], true);
+    });
+  }
+  document.addEventListener("keydown", event => {
+    const panel = [workPanel, tvbcpPanel, threadRotationPanel].find(item => !item.hidden);
+    if (!panel) return;
+    if (event.key === "Escape") {
+      event.preventDefault();
+      if (panel === workPanel && !workHelpPanel.hidden) { setWorkHelpOpen(false); workHelpBtn.focus(); }
+      else if (panel === workPanel) closeWork();
+      else if (panel === tvbcpPanel) closeTvbcp();
+      else closeThreadRotation();
+    } else if (event.key === "Tab") {
+      const nodes = Array.from(panel.querySelectorAll('button, a[href], input, select, textarea, summary, [tabindex="0"]'))
+        .filter(node => !node.disabled && !node.inert && node.tabIndex >= 0 && node.getClientRects().length);
+      if (!nodes.length) return;
+      const first = nodes[0], last = nodes[nodes.length - 1];
+      if (event.shiftKey && document.activeElement === first) { event.preventDefault(); last.focus(); }
+      else if (!event.shiftKey && document.activeElement === last) { event.preventDefault(); first.focus(); }
+    }
+  });
+  input.addEventListener("input", updateComposerLayout);
+  window.addEventListener("resize", updateComposerLayout);
+  if (window.visualViewport) {
+    window.visualViewport.addEventListener("resize", updateComposerLayout);
+    window.visualViewport.addEventListener("scroll", updateComposerLayout);
+  }
   connectBtn.addEventListener("click", connect);
   writeIntentBtn.addEventListener("click", armWriteIntent);
   profileSelect.addEventListener("change", syncControls);
@@ -3752,7 +4188,7 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
     setWorkHelpOpen(false);
     workHelpBtn.focus();
   });
-  workRefreshBtn.addEventListener("click", loadWork);
+  workRefreshBtn.addEventListener("click", async () => { await loadStatus(); await loadWork(); });
   githubBatchConfirmation.addEventListener("input", () => {
     const required = githubBatchAudit ? String(githubBatchAudit.confirmation_text || "") : "";
     githubBatchBtn.disabled = !required || githubBatchConfirmation.value.trim() !== required;
@@ -3796,6 +4232,7 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
     if (event.key === "Enter" && (event.metaKey || event.ctrlKey)) sendMessage(event);
   });
   clearMessageInput();
+  runSendUiBestEffort(() => updateComposerLayout());
   window.addEventListener("pageshow", clearMessageInput);
   restoreVerifiedDeploymentResult();
   restoreLunaReleaseState();

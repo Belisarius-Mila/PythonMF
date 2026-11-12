@@ -272,6 +272,17 @@ class HumanAdamService:
             raise AppServerError("Izolovaný workspace čeká na bezpečnou aktualizaci z main.")
         return status
 
+    def _protocol_diagnostics(self) -> dict[str, Any]:
+        reader = getattr(self.hub, "protocol_diagnostics", None)
+        if callable(reader):
+            try:
+                result = reader()
+                if isinstance(result, dict):
+                    return copy.deepcopy(result)
+            except Exception:
+                pass  # Optional diagnostics cannot break the authoritative status.
+        return {"available": False, "status": "unverified"}
+
     def status(self) -> dict[str, Any]:
         try:
             workspace = self.workspace.status()
@@ -305,6 +316,7 @@ class HumanAdamService:
                 },
                 "profile": dict(self._profile),
                 "session": session,
+                "protocol": self._protocol_diagnostics(),
             }
         except (AppServerError, SessionHubError, OSError, ValueError) as exc:
             return {"ok": False, "status": "human_adam_status_failed", "message": str(exc)}

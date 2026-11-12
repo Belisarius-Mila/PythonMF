@@ -16,6 +16,7 @@ const source = [
   'const LUNA_RELEASE_POLL_INTERVAL_MS = 2500;',
   sourceBetween("function syncControls() {", "function lunaReleaseJobActive"),
   sourceBetween("function lunaReleaseJobActive", "function setBusy("),
+  sourceBetween("function publicationTargetLabel", "function renderWorkState"),
   sourceBetween("function updateMobileStatusSummary()", "function elapsedClock"),
   sourceBetween("function setMobileStatusDetails(expanded)", "function updateMobileStatusSummary()"),
   sourceBetween("async function openWork()", "function setWorkHelpOpen("),
@@ -66,7 +67,7 @@ function harness(apiHandler, confirmResult=true) {
   });
   const names = [
     "connectBtn", "profileSelect", "profileSwitchBtn", "refreshBtn", "workOpenBtn",
-    "sendBtn", "input", "writeIntentBtn", "voiceRecordBtn", "voiceStopBtn",
+    "sendBtn", "input", "writeIntentBtn", "composerMode", "voiceRecordBtn", "voiceStopBtn",
     "lunaReleaseStartBtn", "lunaReleaseDryRunBtn", "threadRotationAuditBtn",
     "threadRotationConfirmation", "threadRotationBtn", "developmentTopic",
     "developmentProject", "developmentHandoff", "developmentAcquireProfileBtn",
@@ -106,6 +107,8 @@ function harness(apiHandler, confirmResult=true) {
   scope.lunaReleaseStatusLoaded = true;
   scope.lunaReleasePollTimerId = null;
   scope.currentWorkstreamLiveStatus = null;
+  scope.currentWorkState = null;
+  scope.panelReturnFocus = null;
   scope.workstreamProductionTarget = "";
   scope.githubBatchAudit = {ok:true,read_only:true,writes_performed:false,state:"aligned",local_head:"b".repeat(40),origin_head:"b".repeat(40)};
   scope.notice = {textContent:""};
@@ -139,6 +142,9 @@ function harness(apiHandler, confirmResult=true) {
   scope.markVerifiedDeploymentSeen = () => {};
   scope.loadWork = async () => null;
   scope.setWorkHelpOpen = () => {};
+  scope.setWorkView = () => {};
+  scope.showPanel = panel => { panel.hidden = false; scope.workCloseBtn.focus(); };
+  scope.hidePanel = panel => { panel.hidden = true; };
   scope.setBusy = (value) => {
     scope.busy = value;
     scope.syncControls();
@@ -386,27 +392,34 @@ async function main() {
   const compact = harness(async () => emptyStatus);
   compact.scope.lunaReleaseJob = {state:"completed", active:false};
   compact.scope.lunaReleaseStatus.textContent = "Dlouhá historická účtenka ".repeat(80);
+  compact.scope.currentWorkState = {summary:{state:"ready"},connection:{state:"connected"}};
   compact.test.updateMobileStatusSummary();
-  assert.equal(compact.scope.mobileStatusText.textContent, "Připojeno · Adam čeká");
+  assert.equal(compact.scope.mobileStatusText.textContent, "Připojeno · Adam čeká na zadání");
   compact.scope.sessionTurnBusy = true;
+  compact.scope.currentWorkState.summary.state = "running";
   compact.scope.turnActivity.textContent = "Adam pracuje · 02:15";
   compact.test.updateMobileStatusSummary();
-  assert.equal(compact.scope.mobileStatusText.textContent, "Adam pracuje · 02:15");
+  assert.equal(compact.scope.mobileStatusText.textContent, "Připojeno · Adam pracuje");
   compact.scope.deliveryUncertain = true;
   compact.scope.lunaReleaseJob = {state:"running", active:true};
   compact.test.updateMobileStatusSummary();
   assert.match(compact.scope.mobileStatusText.textContent, /Stav doručení je nejistý/);
   compact.scope.deliveryUncertain = false;
   compact.scope.sessionTurnBusy = false;
+  compact.scope.currentWorkState.summary.state = "ready";
   compact.test.updateMobileStatusSummary();
-  assert.equal(compact.scope.mobileStatusText.textContent, "Probíhá publikování · podrobnosti v Práci");
+  assert.equal(compact.scope.mobileStatusText.textContent, "Připojeno · Adam čeká na zadání", "unscoped release cannot replace current work");
+  compact.scope.currentWorkState.summary.state = "publication_reported";
+  compact.test.updateMobileStatusSummary();
+  assert.match(compact.scope.mobileStatusText.textContent, /Publikace je vedená jako aktivní/);
   compact.scope.lunaReleaseJob = {state:"attention", active:false};
   compact.test.updateMobileStatusSummary();
-  assert.match(compact.scope.mobileStatusText.textContent, /vyžaduje kontrolu/);
+  assert.match(compact.scope.mobileStatusText.textContent, /Publikace je vedená jako aktivní/, "raw attention cannot replace scoped projection");
   compact.scope.lunaReleaseStatusLoaded = false;
   compact.scope.lunaReleaseJob = null;
+  compact.scope.currentWorkState = null;
   compact.test.updateMobileStatusSummary();
-  assert.match(compact.scope.mobileStatusText.textContent, /Stav publikování se ověřuje/);
+  assert.match(compact.scope.mobileStatusText.textContent, /Stav práce není ověřen/);
   await compact.test.setMobileStatusDetails(true);
   assert.equal(compact.scope.workPanel.hidden, false);
   assert.equal(compact.scope.mobileStatusSummary.attributes["aria-expanded"], "true");
