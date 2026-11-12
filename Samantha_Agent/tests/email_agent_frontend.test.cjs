@@ -11,6 +11,7 @@ class Element {
   append(...children) { this.children.push(...children); }
   replaceChildren(...children) { this.children = [...children]; this._text = ''; }
   addEventListener(name, callback) { this.listeners[name] = callback; }
+  setAttribute(name, value) { (this.attributes ||= {})[name] = String(value); }
   showModal() { this.open = true; }
   close() { this.open = false; }
   async click() { if (!this.disabled) await this.listeners.click?.({target: this}); }
@@ -42,6 +43,7 @@ function find(element, label) {
   let preparationHold = null;
   let pushcutHold = null;
   let visibilityHold = null;
+  let visibilityFailure = null;
   let savedHours = null;
   const context = {document: {getElementById: id => ids[id], createElement: tag => new Element(tag)},
     window: {setInterval: fn => intervals.push(fn), confirm: () => confirmChoice,
@@ -71,6 +73,8 @@ function find(element, label) {
         sender: 'sender@example.test', subject: data.cards[0].header.subject}];
       if (url.endsWith('/forget-importance')) data.importance_preferences = [];
       if (url.endsWith('/remember-visibility')) {
+        if (visibilityFailure === 'network') throw new Error('Síť není dostupná.');
+        if (visibilityFailure) return {ok: true, json: async () => ({ok: false, message: visibilityFailure})};
         if (visibilityHold) await visibilityHold;
         savedHours = JSON.parse(JSON.stringify(data.hours));
         data.visibility_preferences = [{id: 'visibility-1', sender: '<script>@example.test', subject: 'Reklama'}];
@@ -147,6 +151,18 @@ function find(element, label) {
   assert.match(ids.hours.textContent, /Příště nezobrazovat…/);
   assert.doesNotMatch(ids.hours.textContent, /Příště nedůležité/);
   assert.match(ids.hours.textContent, /<script> — Jiné novinky/);
+  for (const failure of ['Nelze uložit <script> pravidlo.', 'network']) {
+    visibilityFailure = failure;
+    const failedButton = find(ids.hours, 'Příště nezobrazovat');
+    await failedButton.click();
+    assert.equal(JSON.stringify(data.hours), hourBefore, 'A failed save preserves the hour');
+    const expected = failure === 'network' ? 'Síť není dostupná.' : failure;
+    assert.ok(ids.hours.textContent.includes(expected), 'The error must be visible next to the action');
+    assert.equal(failedButton.disabled, false, 'Failure permits a deliberate retry');
+    await intervals[0]();
+  }
+  visibilityFailure = null;
+  calls.length = 0;
   let releaseVisibility;
   visibilityHold = new Promise(resolve => { releaseVisibility = resolve; });
   const hideButton = find(ids.hours, 'Příště nezobrazovat');

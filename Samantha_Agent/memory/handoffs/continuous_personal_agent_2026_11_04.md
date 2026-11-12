@@ -1,5 +1,30 @@
 # Průběžný osobní agent — e-mailový provoz a Pushcut
 
+## Příště nezobrazovat — vývojový snapshot před p+n, 2026-11-12 09:33 CET
+
+Opravená chybně rozdělená hlavička s čárkou v dekódovaném zobrazovaném jménu.
+Fallback přijme pouze jednu koncovou adresu v úhlových závorkách a odmítne
+skutečnou druhou adresu i skupinovou/nejasnou syntaxi. Stejná kanonická adresa
+slouží novým i existujícím pravidlům; žádná migrace, mazání pošty ani změna
+kurzorů, konceptů, klasifikace či dosavadních pravidel.
+Chyba u tlačítka Příště nezobrazovat se nově ukáže přímo v jeho řádku,
+přes textContent a role=status; původní horní notice zůstává.
+
+121 cílených testů PASS, včetně HTTP a Node. Nové regrese před opravou FAIL,
+po opravě PASS. Konkrétní uložená karta čtecím náhledem prošla: jediná správná
+adresa a filtr by ji skryl; stav beze změny, žádné skutečné pravidlo nevzniklo.
+Plný lokální běh3524 testů /31 SKIP odhalil jediný starý asset kontrakt;
+po jeho aktualizaci121 cílených testů včetně celého frontend modulu PASS.
+Log původního běhu: logs/email_visibility_sender_full_gate_20261112.log.
+Povinná plná publikační brána ověří finální commit před pushem.
+Míla výslovně schválil commit+p+n. Request `email-visibility-sender-20261112-v1`,
+job `f3f981a426a7ec06eae6efb6e879bdc4`; výsledková autorita původní účtenka a
+`data/private/email_visibility_sender_20261112/release_receipt.json`.
+Hodinová instalovaná služba7f47a41f se nemění; výběr tlačítka a následný
+filtr uloženého přehledu obsluhuje Cockpit. Skutečný klik na iPhonu po vydání
+zůstává uživatelskou přejímkou.
+
+
 ## Aktuální provoz — 2026-11-12 09:14 CET
 
 Oprava7f47a41f je publikovaná a nasazená v Cockpitu; původní p+n
@@ -1455,3 +1480,16 @@ Doplňující ověření: start a převzetí stejného App Serveru prošly také
 PATH a omezeném prostředí nainstalovaného LaunchAgentu. Instalovaná Terra/high,
 0 thread/start a turn/start, produkční socket beze změny; důkaz
 service_environment_verification.json ve stejné soukromé složce.
+
+
+### 2026-11-12 09:33 CET — Příště nezobrazovat: čárka ve jménu odesílatele
+
+**Hotovo:** Lokálně opravené uložení a filtrování pravidla pro jednoho odesílatele s čárkou ve zobrazovaném jménu. Chyba u této volby je viditelná přímo u tlačítka; další vědomý pokus zůstává možný.
+
+**Rozhodnutí:** Míla zadal vývoj a rovnou p+n. Přijímá se jen jednoznačná koncová mailbox adresa, nikoli první položka z více skutečných adres. Živé pravidlo se bez nového kliknutí nevytváří; žádné označení/mazání ve schránce, změna modelu ani další e-mailové posouzení.
+
+**Další krok:** Dokončit statickou bránu, commit a jedno registrované p+n s plnou publikační bránou project-email-cases→Cockpit; po vydání obnovit stránku a uživatelsky vyzkoušet původní tlačítko.
+
+**Navrhované další kroky:** Fyzická iPhone přejímka lokální hlášky.
+
+**Technický důkaz:** 121 cílených PASS: reálný HTTP kontrakt a Node chyby serveru/sítě vedle akce, dvojklik, restart, vrácení skrytých zpráv, zachování důležité karty, účtu a přesné adresy; skutečné víceadresové a skupinové hlavičky se odmítají. Čtecí náhled konkrétní uložené karty PASS beze změny stavu. Report reports/email_visibility_sender_20261112.md; plná brána a následná publikace doložené odděleně.

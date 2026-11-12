@@ -47,6 +47,15 @@ def importance_subject_key(subject: str) -> str:
 def _importance_sender(header: str) -> str:
     addresses = getaddresses([header])
     if len(addresses) != 1:
+        # Decoding an RFC 2047 display name can expose its comma without
+        # quotes. Recover only one final <mailbox>, with no other address or
+        # group syntax in the display prefix; never discard a second sender.
+        single = re.fullmatch(r'([^<>@:\r\n;"\\]+)<([^<>\r\n]+)>[ \t]*', header)
+        if single and "," in single[1] and single[1].strip():
+            mailbox = single[2].strip()
+            if mailbox.count("@") == 1 and not any(c.isspace() for c in mailbox):
+                addresses = getaddresses([mailbox])
+    if len(addresses) != 1:
         raise ValueError("Preference vyžaduje jednoznačného odesílatele.")
     address = addresses[0][1].casefold()
     if address.count("@") != 1 or any(c.isspace() for c in address) or not all(address.split("@")):

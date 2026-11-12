@@ -136,6 +136,18 @@ class EmailAgentHTTPTests(unittest.TestCase):
         self.assertFalse(email_agent_forget_visibility_action({"id": "missing"}, worker=self.worker)["ok"])
         self.assertNotIn("visibility_preferences", self.worker.status())
 
+    def test_visibility_http_accepts_a_decoded_comma_display_name(self):
+        low = observed("2", sender="Jan Novák, Klub dětí <news@example.test>")
+        self.worker.cycle(FakeSource([low]), lambda _: proposal().model_copy(update={"important": False}))
+        with patch("app.cockpit.email_agent_remember_visibility_action", side_effect=lambda data: email_agent_remember_visibility_action(data, worker=self.worker)):
+            status, raw, _ = self.request("/api/email-agent/remember-visibility", {"id": low.item_id})
+        self.assertEqual(status, 200)
+        self.assertTrue(json.loads(raw)["ok"])
+        view = email_agent_overview(worker=self.worker)
+        self.assertEqual(view["hours"], [])
+        self.assertEqual(len(view["cards"]), 1)
+        self.assertEqual(view["visibility_preferences"][0]["sender"], "news@example.test")
+
     def test_invalid_preference_item_is_rejected_without_creating_a_rule(self):
         self.assertFalse(email_agent_remember_importance_action({"id": "missing"}, worker=self.worker)["ok"])
         self.assertFalse(email_agent_forget_importance_action({"id": "missing"}, worker=self.worker)["ok"])

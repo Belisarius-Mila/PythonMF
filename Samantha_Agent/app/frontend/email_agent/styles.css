@@ -6,3 +6,5 @@ input[type="checkbox"]{display:inline-block;width:auto;margin-right:8px;vertical
 #calendarDraftEditor [hidden]{display:none!important}
 
 .calendar-delete{display:flex;align-items:center;flex-wrap:wrap;gap:8px;margin-top:8px;min-width:0}.calendar-delete-button{width:auto;min-height:44px;padding:7px 10px;font-size:13px;white-space:normal;background:#fff5f3;color:#9c2c24;border:1px solid #e4bcb7}.calendar-delete [role=status]{font-size:13px;line-height:1.4;overflow-wrap:anywhere}
+
+.actions .action-feedback{flex:0 0 100%;margin:4px 0 0;color:#8a3a16}.action-feedback:empty{display:none}

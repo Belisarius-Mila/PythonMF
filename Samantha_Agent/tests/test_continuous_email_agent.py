@@ -261,6 +261,18 @@ class ImportancePreferenceTests(unittest.TestCase):
         self.assertEqual(after["importance_preferences"][key]["sender"], "sender@example.test")
         self.assertEqual(len(restarted.matching_importance_preferences(self.message)), 1)
 
+    def test_comma_display_name_is_one_address_for_soft_preferences_too(self):
+        message = observed("2", sender="Jan Novák, Klub dětí <news@example.test>")
+        self.worker.cycle(FakeSource([message]), lambda _: proposal())
+        before = self.worker.status()
+        key = self.worker.remember_low_importance(message.item_id)
+        after = self.worker.status()
+        self.assertEqual(after["importance_preferences"][key]["sender"], "news@example.test")
+        self.assertEqual(before["items"], after["items"])
+        self.assertEqual(before["sources"], after["sources"])
+        future = observed("3", sender='"Jan Novák, Klub dětí" <NEWS@example.test>')
+        self.assertEqual(len(self.worker.matching_importance_preferences(future)), 1)
+
     def test_matching_is_scoped_to_account_sender_and_similar_subject(self):
         self.worker.remember_low_importance(self.message.item_id)
         for account, sender, subject, expected in (

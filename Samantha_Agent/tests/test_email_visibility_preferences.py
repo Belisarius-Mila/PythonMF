@@ -44,6 +44,40 @@ class EmailVisibilityTests(unittest.TestCase):
         self.assertEqual(self.rules.remember(self.message.item_id), key)
         self.assertEqual(self.worker.status()["visibility_preferences"][key]["created_at"], created)
 
+    def test_decoded_display_name_comma_hides_existing_mail_and_cancel_restores_it(self):
+        message = observed("2", sender="Jan Novák, Klub dětí <news@example.test>", subject="Klubové novinky")
+        self.worker.cycle(FakeSource([message]), lambda _: self.low)
+        before = self.worker.status()
+        key = self.rules.remember(message.item_id)
+        state = self.worker.status()
+        rules = state.pop("visibility_preferences")
+        self.assertEqual(state, before)
+        self.assertEqual(rules[key]["sender"], "news@example.test")
+        quoted = copy.deepcopy(before["items"][message.item_id])
+        quoted["header"]["sender"] = '"Jan Novák, Klub dětí" <NEWS@example.test>'
+        self.assertTrue(hidden_low_importance(quoted, rules))
+        view = email_agent_overview(worker=ContinuousEmailAgent(self.worker.root))
+        self.assertNotIn(message.item_id, [i for h in view["hours"] for i in h["ids"]])
+        self.assertIn(self.message.item_id, [i for h in view["hours"] for i in h["ids"]])
+        self.rules.forget(key)
+        self.assertIn(message.item_id, [i for h in email_agent_overview(worker=self.worker)["hours"] for i in h["ids"]])
+
+    def test_comma_display_name_does_not_hide_a_second_real_mailbox(self):
+        senders = (
+            "other@example.test, Jan Novák, Klub dětí <news@example.test>",
+            "Jiný <other@example.test>, Jan Novák, Klub dětí <news@example.test>",
+            "Jan Novák, Klub dětí <news@example.test>, other@example.test",
+            "Skupina: Jan Novák, Klub dětí <news@example.test>;",
+            'Jan Novák, Klub dětí <news@example.test> trailing',
+            'Jan Novák, Klub dětí <news@example.test, other@example.test>',
+            'Jan Novák, Klub dětí <news@example.test>\nBcc: other@example.test',
+        )
+        for sender in senders:
+            self.worker._update(lambda d: d["items"][self.message.item_id]["header"].update(sender=sender))
+            with self.subTest(sender=sender), self.assertRaises(ValueError):
+                self.rules.remember(self.message.item_id)
+        self.assertNotIn("visibility_preferences", self.worker.status())
+
     def test_scope_is_exact_account_and_address_with_similar_subject(self):
         self.rules.remember(self.message.item_id)
         state = self.worker.status()

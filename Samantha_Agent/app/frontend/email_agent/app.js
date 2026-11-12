@@ -21,13 +21,17 @@
     if (!response.ok || !result.ok) throw new Error(result.message || "Operaci se nepodařilo dokončit.");
     return result;
   }
-  function action(label, callback, secondary = false) {
+  function action(label, callback, secondary = false, feedback = null) {
     const button = node("button", label, secondary ? "secondary" : "");
     button.type = "button";
     button.addEventListener("click", async () => {
       button.disabled = true;
+      if (feedback) feedback.textContent = "";
       try { await callback(); await refresh(); }
-      catch (error) { byId("notice").textContent = error.message; }
+      catch (error) {
+        byId("notice").textContent = error.message;
+        if (feedback) feedback.textContent = error.message;
+      }
       finally { button.disabled = false; }
     });
     return button;
@@ -138,10 +142,12 @@
       choices.append(node("summary", "Příště nezobrazovat…"));
       for (const message of hour.messages || []) {
         const choice = node("div", undefined, "actions");
+        const feedback = node("p", "", "action-feedback");
+        feedback.setAttribute("role", "status");
         choice.append(node("span", message.text), action("Příště nezobrazovat", async () => {
           await request("/api/email-agent/remember-visibility", {id: message.id});
           byId("notice").textContent = "Podobné nedůležité zprávy od tohoto odesílatele se nezobrazují ani v dosavadním přehledu. Důležité zprávy se dál zobrazí.";
-        }, true));
+        }, true, feedback), feedback);
         choices.append(choice);
       }
       if ((hour.messages || []).length) row.append(choices);
