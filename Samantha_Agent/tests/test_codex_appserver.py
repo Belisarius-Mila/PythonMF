@@ -25,6 +25,22 @@ from app.codex_appserver import (
 
 
 class CodexContractTests(unittest.TestCase):
+    def test_turn_ack_observer_is_correlated_and_cannot_weaken_delivery_guard(self):
+        for fail_observer in (False, True):
+            with self.subTest(fail_observer=fail_observer):
+                transport = _ScriptedTransport(completed_items=[])
+                observed = []
+                def observer(turn_id):
+                    observed.append(turn_id)
+                    if fail_observer:
+                        raise OSError("PRIVATE metadata unavailable")
+                with patch.object(transport, "request", wraps=transport.request) as request:
+                    receipt = self.client(transport).send_text(thread_id="thread-1", text="synthetic",
+                        client_message_id="message-1", on_turn_accepted=observer)
+                self.assertTrue(receipt.delivered)
+                self.assertEqual(observed, ["turn-1"])
+                self.assertEqual([call.args[0] for call in request.call_args_list].count("turn/start"), 1)
+
     def test_named_permission_profile_is_explicit_and_keeps_legacy_defaults(self):
         transport = _ScriptedTransport(completed_items=[])
         with patch("app.codex_appserver.read_codex_version", return_value=CodexVersion.parse("codex-cli 0.163.0")), patch.object(transport, "request", wraps=transport.request) as request:

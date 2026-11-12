@@ -2187,3 +2187,11 @@ Tento důkaz nenahrazuje skutečný reboot/wake po upgradu.
 - Kontext: HA-03 odděluje RPC, typované odběry a legacy důkazy tahu; ScienceNews guard kontroluje také item/started a neznámé události s item payloadem.
 - Řešení: kompatibilní receive cesta musí zachovat všechny položky, které původní guard vyhodnocuje, nejen dokončené nebo známé typy. Neplatný kritický payload zneplatní spojení, nezmizí jako nepovinná telemetrie. Vadné novější usage naopak musí označit měření jako nedostupné, aby nezůstalo staré číslo aktuální; nesmí samo zrušit jinak potvrzené doručení.
 - Ověření: regresní testy volají skutečný ScienceNews one-turn guard přes produkční dispatcher a klienta; odmítnuté item/started i neznámé item payloady. Neplatný poslední total odstraní předchozí platnou hodnotu, ale jeden user item/start/final dál potvrdí doručení. Bez modelového volání.
+
+
+### LL-125 — Přijetí požadavku musí přežít jeho čekající HTTP spojení
+
+- Typ: opakující se. Řešení nalezeno: 12112026.
+- Problém: ztracená HTTP odpověď ani chybějící browserový stav neprokazují, že se modelový požadavek neprovedl. Nové ID při obnově by vytvořilo druhý tah; pozdější job stejného projektu nesmí nahradit původní child-job vazbu.
+- Řešení: trvalé přijetí a otisk přesného zadání/oprávnění, serverově vlastněný worker s původním profile lockem a file lease, durable dispatch bariéra před RPC. Reload čte stejné ID. Restart obnovuje jen původní canonical/completion důkaz; bez něj neověřeno. Identitní doklady se nevyřazují s krátkou historií. Child job ID je po prvním navázání pevné. HTTP wait není vlastník provedení.
+- Ověření: HA-04 fixture se skutečným pádem vlastního Python procesu po dispatch, legacy HTTP disconnectem, dvěma klienty, selháním persist/startu, retencí/cursorem a odmítnutou náhradou dokončovacího jobu; bez modelu. Report human_adam_ha04_server_work_20261112.md.

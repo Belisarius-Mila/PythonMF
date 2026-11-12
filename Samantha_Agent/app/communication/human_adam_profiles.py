@@ -123,6 +123,7 @@ from app.communication.main_remote_sync import (
 from app.communication.session_hub import (
     CanonicalSessionHub,
     SessionBusyError,
+    SessionDeliveryUnknownError,
     SessionHubError,
 )
 from app.communication.simple_main_checkpoint import (
@@ -510,6 +511,7 @@ class HumanAdamProfileManager:
         self._completion_worker: threading.Thread | None = None
         self._completion_rendered_answers: dict[str, str] = {}
         self._closing = threading.Event()
+        self._work_controller = None
         self._state_error = ""
         self._active_profile_id, self._active_workstream_id = self._load_active_state()
         if self.background_completion:
@@ -1668,6 +1670,10 @@ class HumanAdamProfileManager:
                 "last_step_completion": self.last_step_completion_status(),
             }
             result["work_state"] = self._project_work_state(result, workstream_id, service)
+            result["work_protocol"] = {"schema_version": 1, "server_owned": True,
+                                       "start_path": "/api/human-adam/work/start",
+                                       "read_path": "/api/human-adam/work",
+                                       "replays_on_restart": False, "legacy_send_waits": True}
             return result
         except (AppServerError, SessionHubError, OSError, ValueError) as exc:
             return {
@@ -1720,271 +1726,331 @@ class HumanAdamProfileManager:
             "workspace_synced": workspace_synced,
         }
 
+    @property
+    def work_controller(self):
+        from app.communication.human_adam_work import WorkController
+        with self._state_lock:
+            if self._work_controller is None:
+                self._work_controller = WorkController(self.state_path.parent / "owned_work",
+                                                       completion_reader=self._work_completion)
+            return self._work_controller
+
+    def _work_completion(self, record: dict) -> dict | None:
+        """Read exact completion receipts, without Git audit or restarting a job."""
+        job = self.completion_job_store.load()
+        scope, client_id = record["scope"], record["client_request_id"]
+        if job and job.workstream_id == scope["workstream_id"] and job.client_message_id == client_id:
+            return {"kind": "completion", "job_id": job.idempotency_key,
+                    "state": job.state if job.state in {"completed", "failed"} else "running"}
+        status = self.completion_status_store.load(workstream_id=scope["workstream_id"])
+        if record.get("completion") and status and status.client_message_id == client_id:
+            if status.state in {CHECKPOINT_COMPLETED, NO_CHANGES_COMPLETED}:
+                state = "completed"
+            elif status.state in {CHECKPOINT_FAILED, TURN_FAILED, RECEIPT_INVALID, RECEIPT_MISSING, INTEGRATION_DEFERRED}:
+                state = "failed"
+            else:
+                return None
+            return {**record["completion"], "state": state}
+        return None
+
+    def submit_work(self, *, wait: bool = False, expected_workstream_id: str = "", **kwargs: Any) -> dict[str, Any]:
+        from app.communication.human_adam_work import WorkReservation, normalized_request
+        payload = normalized_request(kwargs)
+        expected_workstream = expected_workstream_id or self.active_workstream_id
+        def reserve():
+            context = self.profile_operation()
+            service = context.__enter__()
+            try:
+                if self.active_workstream_id != expected_workstream:
+                    raise SessionBusyError("Projekt se před přijetím práce změnil.")
+                session = service.hub.snapshot()
+                if not session.get("connected") or not session.get("thread_id"):
+                    raise AppServerError("Nejdřív výslovně připoj Human–Adam.")
+                if session.get("turn_busy") or session.get("active_turn"):
+                    raise SessionBusyError("Původní tah ještě běží.")
+                if self._has_uncertain_delivery(session):
+                    raise SessionDeliveryUnknownError("Nejdřív ověř původní nejisté doručení.")
+                return WorkReservation(
+                    scope={"workstream_id": expected_workstream, "profile_id": self.work_profile_id,
+                           "thread_id": session["thread_id"],
+                           "connection_generation": session.get("connection_generation", 0)},
+                    session_path=service.hub.state_path,
+                    execute=lambda observer: self._send_reserved(service, **payload, work_observer=observer),
+                    release=lambda: context.__exit__(None, None, None),
+                )
+            except BaseException:
+                context.__exit__(None, None, None)
+                raise
+        return self.work_controller.submit(expected_workstream, payload, reserve, wait=wait)
+
     def send(self, **kwargs: Any) -> dict[str, Any]:
         with self.profile_operation() as service:
-            workspace_synced = self._sync_clean_active_workspace_from_main(
+            return self._send_reserved(service, **kwargs)
+
+    def _send_reserved(self, service: HumanAdamService, **kwargs: Any) -> dict[str, Any]:
+        workspace_synced = self._sync_clean_active_workspace_from_main(
+            service=service,
+        )
+        observed_code_stamp = str(
+            kwargs.pop("observed_code_stamp", "") or ""
+        )
+        active_id = self.work_profile_id
+        lazy_id = self.active_lazy_workstream_id
+        write_intent = kwargs.pop("write_intent", False) is True
+        writable = False
+        state = "not_requested"
+        control_source = "one_turn_direct_main_authorization"
+        control_owner = "none"
+        integration_deferred = False
+        if write_intent:
+            integration_deferred = self._assert_one_turn_write_ready(
                 service=service,
+                active_id=active_id,
+                lazy_id=lazy_id,
             )
-            observed_code_stamp = str(
-                kwargs.pop("observed_code_stamp", "") or ""
+            writable = True
+            state = (
+                "authorized_isolated_source_wip"
+                if integration_deferred
+                else "authorized_once"
             )
-            active_id = self.work_profile_id
-            lazy_id = self.active_lazy_workstream_id
-            write_intent = kwargs.pop("write_intent", False) is True
-            writable = False
-            state = "not_requested"
-            control_source = "one_turn_direct_main_authorization"
-            control_owner = "none"
-            integration_deferred = False
-            if write_intent:
-                integration_deferred = self._assert_one_turn_write_ready(
-                    service=service,
-                    active_id=active_id,
-                    lazy_id=lazy_id,
+            if integration_deferred:
+                control_source = "one_turn_isolated_source_wip_authorization"
+            control_owner = active_id
+        control_lines = [
+            "[DEVELOPMENT_CONTROL]",
+            f"source={control_source}",
+            f"profile_id={active_id}",
+            f"lease_state={state}",
+            f"lease_owner_id={control_owner}",
+            f"writable={'true' if writable else 'false'}",
+            f"integration_deferred={'true' if integration_deferred else 'false'}",
+        ]
+        control_lines.extend(
+            self.trusted_external_generation_consent.development_control_lines(
+                registered_capability_ids=tuple(
+                    record.capability_id
+                    for record in all_capabilities()
+                    if record.risk == RiskLevel.EXTERNAL_GENERATION
                 )
-                writable = True
-                state = (
-                    "authorized_isolated_source_wip"
-                    if integration_deferred
-                    else "authorized_once"
-                )
-                if integration_deferred:
-                    control_source = "one_turn_isolated_source_wip_authorization"
-                control_owner = active_id
-            control_lines = [
-                "[DEVELOPMENT_CONTROL]",
-                f"source={control_source}",
-                f"profile_id={active_id}",
-                f"lease_state={state}",
-                f"lease_owner_id={control_owner}",
-                f"writable={'true' if writable else 'false'}",
-                f"integration_deferred={'true' if integration_deferred else 'false'}",
-            ]
+            )
+        )
+        capability_metadata = self.workstream_backends.binding(
+            self.active_workstream_id
+        ).record.capabilities
+        archive_root = private_archive_root(
+            capability_metadata,
+            project_root=service.workspace.canonical_project_root,
+        )
+        if archive_root is not None:
             control_lines.extend(
-                self.trusted_external_generation_consent.development_control_lines(
-                    registered_capability_ids=tuple(
-                        record.capability_id
-                        for record in all_capabilities()
-                        if record.risk == RiskLevel.EXTERNAL_GENERATION
-                    )
+                (
+                    f"workspace_writable={'true' if writable else 'false'}",
+                    "private_archive_access=read_diagnose_and_explicit_single_edit",
+                    f"private_archive_root={archive_root}",
+                    "private_archive_confirmation_required="
+                    + ",".join(
+                        capability_metadata.private_archive_confirmation_required
+                    ),
+                    "rule=When workspace_writable=false, do not change workspace files "
+                    "or Git. The only write exception is one explicitly requested, "
+                    "non-destructive card edit under private_archive_root through "
+                    "app.article_archive. Never bypass confirmation gates.",
                 )
             )
-            capability_metadata = self.workstream_backends.binding(
-                self.active_workstream_id
-            ).record.capabilities
-            archive_root = private_archive_root(
-                capability_metadata,
-                project_root=service.workspace.canonical_project_root,
-            )
-            if archive_root is not None:
+        else:
+            canonical_private_root = service.workspace.canonical_private_root
+            if capability_metadata.source_data_read_only:
                 control_lines.extend(
                     (
                         f"workspace_writable={'true' if writable else 'false'}",
-                        "private_archive_access=read_diagnose_and_explicit_single_edit",
-                        f"private_archive_root={archive_root}",
-                        "private_archive_confirmation_required="
-                        + ",".join(
-                            capability_metadata.private_archive_confirmation_required
-                        ),
+                        "canonical_private_access=read_only",
+                        f"canonical_private_root={canonical_private_root}",
+                        "canonical_private_confirmation_required=none",
+                        "rule=Development authorization applies only to project code, "
+                        "tests, Git-safe memory and Git. Never change or delete source "
+                        "user data under canonical_private_root, even when "
+                        "workspace_writable=true. Never copy private content into Git, "
+                        "logs, handoff or TVBCP.",
+                    )
+                )
+                private_backend = service.private_capability_backend
+                if isinstance(private_backend, JanickaR2Backend):
+                    control_lines.extend(
+                        private_backend.development_control_lines()
+                    )
+            else:
+                control_lines.extend(
+                    (
+                        f"workspace_writable={'true' if writable else 'false'}",
+                        "canonical_private_access=read_diagnose_and_explicit_single_edit",
+                        f"canonical_private_root={canonical_private_root}",
+                        "canonical_private_confirmation_required="
+                        "delete,bulk_change,external_send,secret_operation,system_change",
                         "rule=When workspace_writable=false, do not change workspace files "
-                        "or Git. The only write exception is one explicitly requested, "
-                        "non-destructive card edit under private_archive_root through "
-                        "app.article_archive. Never bypass confirmation gates.",
+                        "or Git. One clearly requested, non-destructive private edit under "
+                        "canonical_private_root remains allowed. Read and diagnose this "
+                        "canonical root directly; never infer its absence from the isolated "
+                        "workspace. Never copy private content into Git, logs, handoff or TVBCP.",
+                    )
+                )
+            if integration_deferred:
+                control_lines.extend(
+                    (
+                        "rule=You may edit and test only inside the isolated workspace.",
+                        "rule=The source main has terminal WIP. Do not run git add, "
+                        "commit, checkpoint, push, merge, rebase, reset or deployment. "
+                        "Leave successful changes uncommitted for a later conflict audit.",
                     )
                 )
             else:
-                canonical_private_root = service.workspace.canonical_private_root
-                if capability_metadata.source_data_read_only:
-                    control_lines.extend(
-                        (
-                            f"workspace_writable={'true' if writable else 'false'}",
-                            "canonical_private_access=read_only",
-                            f"canonical_private_root={canonical_private_root}",
-                            "canonical_private_confirmation_required=none",
-                            "rule=Development authorization applies only to project code, "
-                            "tests, Git-safe memory and Git. Never change or delete source "
-                            "user data under canonical_private_root, even when "
-                            "workspace_writable=true. Never copy private content into Git, "
-                            "logs, handoff or TVBCP.",
-                        )
-                    )
-                    private_backend = service.private_capability_backend
-                    if isinstance(private_backend, JanickaR2Backend):
-                        control_lines.extend(
-                            private_backend.development_control_lines()
-                        )
-                else:
-                    control_lines.extend(
-                        (
-                            f"workspace_writable={'true' if writable else 'false'}",
-                            "canonical_private_access=read_diagnose_and_explicit_single_edit",
-                            f"canonical_private_root={canonical_private_root}",
-                            "canonical_private_confirmation_required="
-                            "delete,bulk_change,external_send,secret_operation,system_change",
-                            "rule=When workspace_writable=false, do not change workspace files "
-                            "or Git. One clearly requested, non-destructive private edit under "
-                            "canonical_private_root remains allowed. Read and diagnose this "
-                            "canonical root directly; never infer its absence from the isolated "
-                            "workspace. Never copy private content into Git, logs, handoff or TVBCP.",
-                        )
-                    )
-                if integration_deferred:
-                    control_lines.extend(
-                        (
-                            "rule=You may edit and test only inside the isolated workspace.",
-                            "rule=The source main has terminal WIP. Do not run git add, "
-                            "commit, checkpoint, push, merge, rebase, reset or deployment. "
-                            "Leave successful changes uncommitted for a later conflict audit.",
-                        )
-                    )
-                else:
-                    control_lines.append(
-                        "rule=When writable=false, remain read-only and do not change files or Git."
-                    )
-            control_lines.append("[/DEVELOPMENT_CONTROL]")
-            live_status_block = workstream_live_status_model_block(
-                self.workstream_live_status(
-                    observed_code_stamp=observed_code_stamp
+                control_lines.append(
+                    "rule=When writable=false, remain read-only and do not change files or Git."
                 )
+        control_lines.append("[/DEVELOPMENT_CONTROL]")
+        live_status_block = workstream_live_status_model_block(
+            self.workstream_live_status(
+                observed_code_stamp=observed_code_stamp
             )
-            completion_status_block = completion_status_model_block(
-                self.last_step_completion_status()
-            )
+        )
+        completion_status_block = completion_status_model_block(
+            self.last_step_completion_status()
+        )
+        development_control_block = (
+            live_status_block
+            + "\n\n"
+            + completion_status_block
+            + "\n\n"
+            + "\n".join(control_lines)
+        )
+        completion_instruction = automatic_completion_instruction(
+            writable=writable,
+            integration_deferred=integration_deferred,
+        )
+        if completion_instruction:
             development_control_block = (
-                live_status_block
-                + "\n\n"
-                + completion_status_block
-                + "\n\n"
-                + "\n".join(control_lines)
+                development_control_block + "\n\n" + completion_instruction
             )
-            completion_instruction = automatic_completion_instruction(
-                writable=writable,
+        user_text = str(kwargs.get("text") or "")
+        publication_authorized = explicit_publish_and_deploy_command(user_text)
+        operation_instruction = automatic_operation_instruction(
+            workstream_id=self.active_workstream_id,
+            production_deployment_target=(
+                capability_metadata.production_deployment_target
+            ),
+            publication_authorized=publication_authorized,
+        )
+        if operation_instruction:
+            development_control_block = (
+                development_control_block + "\n\n" + operation_instruction
+            )
+        client_message_id = str(kwargs.get("client_message_id") or "").strip()
+        if writable:
+            workspace_before_turn = service.workspace.status()
+            self.completion_status_store.begin(
+                workstream_id=self.active_workstream_id,
+                client_message_id=client_message_id,
+                base_head=str(workspace_before_turn.get("head") or ""),
+            )
+        ownership_started = bool(
+            write_intent
+            and (
+                active_id == "human_adam"
+                or (bool(lazy_id) and active_id == lazy_id)
+            )
+        )
+        if ownership_started:
+            self.deferred_integration_store.begin(
+                workstream_id=self.active_workstream_id,
+                client_message_id=client_message_id,
+                workspace_status=service.workspace.status(),
                 integration_deferred=integration_deferred,
             )
-            if completion_instruction:
-                development_control_block = (
-                    development_control_block + "\n\n" + completion_instruction
-                )
-            user_text = str(kwargs.get("text") or "")
-            publication_authorized = explicit_publish_and_deploy_command(user_text)
-            operation_instruction = automatic_operation_instruction(
-                workstream_id=self.active_workstream_id,
-                production_deployment_target=(
-                    capability_metadata.production_deployment_target
-                ),
-                publication_authorized=publication_authorized,
+        from app.simple_development_portal import control_block
+        delegation_token = self.simple_development_portal.issue(
+            manager=self, service=service, workstream_id=self.active_workstream_id,
+            client_message_id=client_message_id, writable=writable,
+        )
+        development_control_block += control_block(delegation_token)
+        try:
+            result = service.send(
+                **kwargs,
+                development_control_block=development_control_block,
             )
-            if operation_instruction:
-                development_control_block = (
-                    development_control_block + "\n\n" + operation_instruction
-                )
-            client_message_id = str(kwargs.get("client_message_id") or "").strip()
+        except Exception:
             if writable:
-                workspace_before_turn = service.workspace.status()
-                self.completion_status_store.begin(
-                    workstream_id=self.active_workstream_id,
-                    client_message_id=client_message_id,
-                    base_head=str(workspace_before_turn.get("head") or ""),
-                )
-            ownership_started = bool(
-                write_intent
-                and (
-                    active_id == "human_adam"
-                    or (bool(lazy_id) and active_id == lazy_id)
-                )
-            )
+                try:
+                    session = service.hub.snapshot()
+                    uncertain = self._has_uncertain_delivery(session)
+                    self.completion_status_store.update(
+                        workstream_id=self.active_workstream_id,
+                        client_message_id=client_message_id,
+                        state=(
+                            COMPLETION_DELIVERY_UNCERTAIN
+                            if uncertain
+                            else TURN_FAILED
+                        ),
+                        failure_code=(
+                            "delivery_uncertain"
+                            if uncertain
+                            else "turn_failed"
+                        ),
+                    )
+                except (
+                    HumanAdamCompletionStatusError,
+                    OSError,
+                    TypeError,
+                    ValueError,
+                ):
+                    pass
             if ownership_started:
-                self.deferred_integration_store.begin(
-                    workstream_id=self.active_workstream_id,
-                    client_message_id=client_message_id,
-                    workspace_status=service.workspace.status(),
-                    integration_deferred=integration_deferred,
-                )
-            from app.simple_development_portal import control_block
-            delegation_token = self.simple_development_portal.issue(
-                manager=self, service=service, workstream_id=self.active_workstream_id,
-                client_message_id=client_message_id, writable=writable,
-            )
-            development_control_block += control_block(delegation_token)
-            try:
-                result = service.send(
-                    **kwargs,
-                    development_control_block=development_control_block,
-                )
-            except Exception:
-                if writable:
-                    try:
-                        session = service.hub.snapshot()
-                        uncertain = self._has_uncertain_delivery(session)
-                        self.completion_status_store.update(
+                try:
+                    session = service.hub.snapshot()
+                    if self._has_uncertain_delivery(session):
+                        self.deferred_integration_store.mark_delivery_unknown(
                             workstream_id=self.active_workstream_id,
                             client_message_id=client_message_id,
-                            state=(
-                                COMPLETION_DELIVERY_UNCERTAIN
-                                if uncertain
-                                else TURN_FAILED
-                            ),
-                            failure_code=(
-                                "delivery_uncertain"
-                                if uncertain
-                                else "turn_failed"
-                            ),
+                            workspace_status=service.workspace.status(),
                         )
-                    except (
-                        HumanAdamCompletionStatusError,
-                        OSError,
-                        TypeError,
-                        ValueError,
-                    ):
-                        pass
-                if ownership_started:
-                    try:
-                        session = service.hub.snapshot()
-                        if self._has_uncertain_delivery(session):
-                            self.deferred_integration_store.mark_delivery_unknown(
-                                workstream_id=self.active_workstream_id,
-                                client_message_id=client_message_id,
-                                workspace_status=service.workspace.status(),
-                            )
-                        else:
-                            self.deferred_integration_store.clear(
-                                client_message_id=client_message_id,
-                            )
-                    except (DeferredIntegrationError, OSError, TypeError, ValueError):
-                        pass
-                raise
-            finally:
-                self.simple_development_portal.revoke(delegation_token)
-            transient_images = result.pop("_generated_images", [])
-            delivered_entry = result.get("entry")
-            image_import = import_completed_generated_images(
-                service=self,
-                client_message_id=client_message_id,
-                request_text=(
-                    str(delivered_entry.get("user_text") or "")
-                    if isinstance(delivered_entry, dict)
-                    else ""
-                ),
-                generated_images=transient_images,
-            )
-            completed = self._complete_successful_turn(
-                service=service,
-                active_id=active_id,
-                writable=writable,
-                integration_deferred=integration_deferred,
-                ownership_started=ownership_started,
-                client_message_id=client_message_id,
-                publication_authorized=publication_authorized,
-                production_deployment_target=(
-                    capability_metadata.production_deployment_target
-                ),
-                result=result,
-            )
-            return {
-                **completed,
-                "workspace_synced": workspace_synced,
-                "image_import": image_import,
-            }
+                    else:
+                        self.deferred_integration_store.clear(
+                            client_message_id=client_message_id,
+                        )
+                except (DeferredIntegrationError, OSError, TypeError, ValueError):
+                    pass
+            raise
+        finally:
+            self.simple_development_portal.revoke(delegation_token)
+        transient_images = result.pop("_generated_images", [])
+        delivered_entry = result.get("entry")
+        image_import = import_completed_generated_images(
+            service=self,
+            client_message_id=client_message_id,
+            request_text=(
+                str(delivered_entry.get("user_text") or "")
+                if isinstance(delivered_entry, dict)
+                else ""
+            ),
+            generated_images=transient_images,
+        )
+        completed = self._complete_successful_turn(
+            service=service,
+            active_id=active_id,
+            writable=writable,
+            integration_deferred=integration_deferred,
+            ownership_started=ownership_started,
+            client_message_id=client_message_id,
+            publication_authorized=publication_authorized,
+            production_deployment_target=(
+                capability_metadata.production_deployment_target
+            ),
+            result=result,
+        )
+        return {
+            **completed,
+            "workspace_synced": workspace_synced,
+            "image_import": image_import,
+        }
 
     def _sync_clean_active_workspace_from_main(
         self,
@@ -4575,6 +4641,8 @@ class HumanAdamProfileManager:
             self._operation_lock.release()
 
     def close(self) -> None:
+        if self._work_controller is not None:
+            self._work_controller.close()
         self._closing.set()
         if self.workstream_threads is not None:
             self.workstream_threads.close()

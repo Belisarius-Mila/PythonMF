@@ -1,4 +1,41 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
+## HA-04 — serverově vlastněná práce, 2026-11-12 12:07 CET
+
+Lokálně implementované trvalé přijetí jedné modelové práce, operation_id,
+serverový worker a čtecí snímek/omezená historie s cursorem. Staré /send čeká
+nad stejnou serverovou prací; nový /work/start vrací202. GET /work dohledává
+práci podle scope a operation_id/client_message_id, včetně nového server_generation.
+
+Reload nebo ztracená HTTP odpověď nevytvářejí další turn/start. Worker používá
+původní profilový lock a cross-process lease; nemění model/sandbox/oprávnění.
+Trvalá dispatch bariéra předchází RPC, scope vlákna se znovu ověří před send.
+Po restartu se nic automaticky nespouští. Výslovný recover ověří pouze původní
+cached session/completion doklad, jinak vrátí neověřenost. Child job ID je pevné;
+modelová odpověď může být potvrzená, zatímco checkpoint ještě běží či je neověřený.
+
+Metadata observer využívá HA-03, před přesným ACK bufferuje jen bezpečné typy
+událostí, nikdy raw text/nástrojové argumenty/reasoning.128 událostí na práci,
+64 položek přehledu,64 metadat před ACK, nejvýše8 workerů a2 staré RAM odpovědi.
+Staré identitní soubory zůstávají jako idempotentní doklady. Cursor mezera
+vyžaduje jednorázový resync; terminální stav ani cizí generace se nepřepisují.
+
+325 cílených testů PASS, statická brána PASS. Ověřen skutečný pád vlastního
+syntetického procesu po dispatch a HTTP odpojení/dva klienti, bez druhého
+provedení. Finální plná lokální brána PASS: 3635 testů / 573,186 s, 31 SKIP; finální zdroj včetně child-job ochrany a oprav registrů.
+Finální zpevnění přesné child-job vazby je součástí325 cílených kontrol;
+povinná publikační plná brána znovu ověří celý přesný finální commit.
+Žádný placený vývojový pilot, živý modelový HA-04 test, skutečná mutace
+uživatelského workspace, změna rolí, instalace služby či nový daemon.
+
+Míla schválil i bezprostřední Terra p+n. Request `human-adam-ha04-20261112-v1`,
+job `832a2e708b8016039f5547df141d8fe4`; autorita výsledku v původní účtence a
+`data/private/ha04_20261112/release_receipt.json`. Tento snapshot je před vydáním.
+HA-05 zůstává živá karta/UI kanál; současný klient zachovává starý čekající
+protokol a nepřidává ukládání rozepsaných draftů. Steer/interrupt/usage a
+rozšířené adaptéry dalších jobů zůstávají HA-06 ažHA-09. Fyzická Mac/iPhone
+přejímka a skutečný živý reconnect dlouhé modelové práce zůstávají otevřené.
+Report `reports/human_adam_ha04_server_work_20261112.md`.
+
 ## Společné vydání připravené — 2026-11-12 10:58 CET
 
 E-mailové UI a Datovy HA-01/02/03 jsou integrované. Terra p+n celého balíčku výslovně schválené; job4242cf7f5bdb6b88724e635cde31b443 ještě není doklad úspěchu. Finální celková brána/checkpoint a jediné registrované vydání následují. Staré Ateliér/UI větve propojené pouze historicky, dnešní kód zachovaný. Přesný výsledek v reports/combined_finished_work_release_20261112.md a původní privátní účtence.
@@ -3378,3 +3415,35 @@ Finální plná lokální brána PASS: 3602 testů,31 SKIP, 507.039 s.
 Výsledková autorita: reports/combined_finished_work_release_20261112.md a
 původní privátní job/receipt. Zápis vzniká před publikací, není účtenkou
 nasazení. Při nejistotě se původní job dohledá, nepodává se nový požadavek.
+
+
+## 2026-11-12 12:07 CET — HA-04: trvalé serverové přijetí a návrat ke stejné práci
+
+**Hotovo:** Backend ukládá přijetí a stejnou identitu práce před samostatným
+prováděním. Nový start vrací rychle202, staré send zachovává čekající odpověď.
+Práci lze dohledat i po ztraceném HTTP spojení; opakování stejného požadavku
+nezakládá druhý modelový tah. Snímek a omezené události mají cursor/resync.
+Po pádu backendu se obnovuje pouze původní důkaz, nikoli provedení.
+
+**Rozhodnutí:** Míla výslovně zadal HA-04 a následně rovnou p+n. Kritickou
+implementaci provedl Adam přímo. Původní oprávnění/dokončovací kód zůstávají
+autoritou; model/hodnoty role se nemění. Ukládá se pouze již přijaté zadání
+v private server cache, žádné nové browserové drafty. Živá karta je HA-05.
+
+**Další krok:** Dokončit plnou lokální kontrolu, jeden commit a jediné Terra
+p+n podle registrovaného postupu. Původní request/job viz report.
+
+**Navrhované další kroky:** HA-05 — propojit živou kartu a automatické čtecí
+sledování s tímto backendem. Pak skutečný omezený modelový pilot a fyzická
+Mac/iPhone přejímka, až ve vlastním schváleném rozsahu.
+
+**Technický důkaz:**325 cílených PASS: identity/fingerprint, dvojklik/dva klienti,
+čtení/reload, cursor/gap/retence, generační a terminální ochrana, poškozený
+zdroj, selhání zápisu/startu workeru, wake při shutdown, skutečný syntetický
+process crash a legacy HTTP disconnect; RPC probe jen fake. Původní tělo
+ProfileManager.send je po extrakci AST-shodné, včetně oprávnění/dokončení.
+Pevná child-job vazba odmítne pozdější cizí doklad bez falešného Hotovo.
+Finální plná lokální brána PASS: 3635 testů / 573,186 s, 31 SKIP; finální zdroj včetně child-job ochrany a oprav registrů.
+Důkazy `data/private/ha04_20261112/`, bezpečný report
+`reports/human_adam_ha04_server_work_20261112.md`. Bez skutečného modelového
+tahu HA-04, živé UI přejímky nebo aktualizace vlastní hodinové poštovní kopie.

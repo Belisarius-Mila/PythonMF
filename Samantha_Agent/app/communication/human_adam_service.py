@@ -354,6 +354,7 @@ class HumanAdamService:
         development_control_block: str = "",
         write_intent: bool = False,
         observed_code_stamp: str = "",
+        work_observer: Any = None,
     ) -> dict[str, Any]:
         del observed_code_stamp
         if write_intent:
@@ -377,6 +378,7 @@ class HumanAdamService:
                 workspace,
                 development_control_block=development_control_block,
             ),
+            **({"work_observer": work_observer} if work_observer is not None else {}),
         )
         return {
             **result,
@@ -676,7 +678,9 @@ def human_adam_send_action(
     observed_code_stamp: str = "",
 ) -> dict[str, Any]:
     try:
-        return service.send(
+        submit = getattr(type(service), "submit_work", None)
+        sender = (lambda **kwargs: service.submit_work(wait=True, **kwargs)) if callable(submit) else service.send
+        return sender(
             text=str(payload.get("message") or ""),
             client_message_id=str(payload.get("client_message_id") or ""),
             client_sent_at=str(payload.get("client_sent_at") or ""),

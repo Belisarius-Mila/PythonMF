@@ -279,3 +279,24 @@ snapshot existující cache, ověří účet/provider/složku/UIDVALIDITY/UID/co
 proti původní vazbě; chybějící či jiný zdroj vrací null. Žádný IMAP, cesta od
 klienta, model ani souborový zápis. Obecný přehled těla neobsahuje, žádná kopie
 těla nevzniká v evidenci followups. Frontend používá pouze textContent.
+
+
+## 2026-11-12 — Serverově vlastněná práce Human–Adam (HA-04)
+
+`human_adam_work_start` používá `HumanAdamProfileManager.submit_work`: POST
+/api/human-adam/work/start, explicitní message/client_message_id/workstream_id,
+confirmed=true a původní write_intent. Nepřijímá root, model ani sandbox od
+klienta. Rychlé202 je doklad přijetí, nikoli modelového doručení. Stávající
+/api/human-adam/send je kompatibilní wait nad stejným vlastněným workerem.
+
+`human_adam_work_read` používá WorkController.view přes GET /api/human-adam/work:
+projekt a jediné operation_id/client_message_id, nezáporný cursor. Jen malé
+metadata, bez Git auditu, raw payloadů, modelu či změny receipt. Mezery vyžadují
+resync; odpověď má server_generation. Read při chybě úložiště nesmí předstírat
+prázdný přehled. Nový běh se nikdy neodvozuje od absence ve snímku.
+
+`human_adam_work_recover` je výslovné POST /api/human-adam/work/recover s přesným
+projektem/operation_id a confirmed=true. Aktualizuje pouze projekci podle
+původních cached důkazů a hlásí writes_performed pravdivě. Nevolá nový model,
+reconnect ani původní operaci. Chybějící doklad zůstává neověřený. Placené
+pilotní tahy, steer/interrupt, fyzická přejímka a p+n mají vlastní oprávnění.

@@ -623,6 +623,7 @@ class CodexAppServerClient:
         local_image_paths: tuple[Path, ...] = (),
         permission_profile: str | None = None,
         service_tier_for_turn: str | None = None,
+        on_turn_accepted: Callable[[str], None] | None = None,
     ) -> TurnReceipt:
         clean_text = str(text or "").strip()
         if not clean_text:
@@ -660,6 +661,11 @@ class CodexAppServerClient:
         turn_id = turn.get("id") if isinstance(turn, dict) else None
         if not isinstance(turn_id, str) or not turn_id:
             raise AppServerContractError("turn/start nevrátil turnId.")
+        if on_turn_accepted is not None:
+            try:
+                on_turn_accepted(turn_id)
+            except Exception:
+                pass  # Observation cannot invalidate authoritative delivery proof.
 
         turn_started_confirmed = False
         started_at = ""

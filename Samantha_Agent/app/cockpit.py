@@ -154,6 +154,9 @@ from app.communication.human_adam_service import (
     human_adam_tvbcp_action,
     human_adam_work_review_action,
 )
+from app.communication.human_adam_work_routes import (
+    work_start_action, work_read_action, work_recover_action, work_http_status,
+)
 from app.communication.human_adam_images import (
     HUMAN_ADAM_IMAGE_STORE,
     human_adam_image_candidates_action,
@@ -9034,6 +9037,12 @@ COCKPIT_POST_ACTIONS: tuple[dict[str, str], ...] = (
         "handler_name": "human_adam_thread_rotation_action",
         "test_level": "direct",
     },
+    {"path": "/api/human-adam/work/start", "label": "Přijmout přesnou práci Human–Adam",
+     "risk": "workspace_write", "confirmation": "protocol_ids_required",
+     "handler_name": "work_start_action", "test_level": "direct"},
+    {"path": "/api/human-adam/work/recover", "label": "Ověřit původní práci bez nového zadání",
+     "risk": "private_write", "confirmation": "explicit_confirmation",
+     "handler_name": "work_recover_action", "test_level": "direct"},
     {
         "path": "/api/human-adam/send",
         "label": "Odeslat zapisujici tah Human-Adam",
@@ -9934,6 +9943,14 @@ class CockpitServer:
                     params = parse_qs(parsed.query)
                     self.respond_human_adam_image(params.get("id", [""])[0])
                     return
+                if parsed.path == "/api/human-adam/work":
+                    query = parse_qs(parsed.query, keep_blank_values=True)
+                    if any(len(v) != 1 for v in query.values()):
+                        result = {"ok": False, "error": "invalid_request", "message": "Vyber jednu práci a cursor."}
+                    else:
+                        result = work_read_action({k: v[0] for k, v in query.items()}, service=HUMAN_ADAM)
+                    self.respond_json(result, status=work_http_status(result))
+                    return
                 if parsed.path == "/api/human-adam/status":
                     self.respond_json(human_adam_status_action(service=HUMAN_ADAM))
                     return
@@ -10424,6 +10441,14 @@ class CockpitServer:
                 if parsed.path == "/api/human-adam/thread-rotation":
                     payload = self.read_json()
                     self.respond_json(human_adam_thread_rotation_action(payload, service=HUMAN_ADAM))
+                    return
+                if parsed.path == "/api/human-adam/work/start":
+                    result = work_start_action(self.read_json(), service=HUMAN_ADAM, observed_code_stamp=COCKPIT_CODE_STAMP)
+                    self.respond_json(result, status=work_http_status(result, accepting=True))
+                    return
+                if parsed.path == "/api/human-adam/work/recover":
+                    result = work_recover_action(self.read_json(), service=HUMAN_ADAM)
+                    self.respond_json(result, status=work_http_status(result))
                     return
                 if parsed.path == "/api/human-adam/send":
                     payload = self.read_json()

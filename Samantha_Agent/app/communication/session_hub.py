@@ -6,6 +6,7 @@ import copy
 import json
 import re
 import threading
+from contextlib import nullcontext
 from pathlib import Path
 from typing import Any, Callable
 
@@ -443,6 +444,7 @@ class CanonicalSessionHub:
         client_sent_at: str = "",
         model_input_text: str | None = None,
         read_only: bool = False,
+        work_observer: Any = None,
     ) -> dict[str, Any]:
         clean_text = str(text or "").strip()
         clean_model_input = str(model_input_text if model_input_text is not None else clean_text).strip()
@@ -475,6 +477,8 @@ class CanonicalSessionHub:
                         "Tato zpráva už byla přijata bez konečného důkazu; automaticky ji neposílám znovu."
                     )
                 client = self._client if self._client and self._client.running else self._new_client_locked()
+                if work_observer is not None:
+                    work_observer.assert_thread(str(self._state["thread_id"]))
                 pending = {
                     "client_message_id": clean_id,
                     "client_sent_at": str(client_sent_at or "").strip(),
@@ -498,16 +502,20 @@ class CanonicalSessionHub:
 
             recovered_after_transport_failure = False
             try:
-                receipt: TurnReceipt = client.send_text(
-                    thread_id=str(self._state["thread_id"]),
-                    text=clean_model_input,
-                    client_message_id=clean_id,
-                    effort=self.reasoning_effort,
-                    sandbox_policy=({"type": "readOnly", "networkAccess": False}
-                                    if read_only else self.sandbox_policy),
-                    approval_policy=self.approval_policy,
-                    model=self.model,
-                )
+                observing = work_observer.attach(client, str(self._state["thread_id"])) if work_observer else nullcontext(None)
+                with observing as accepted:
+                    options = {"on_turn_accepted": accepted} if accepted else {}
+                    receipt: TurnReceipt = client.send_text(
+                        thread_id=str(self._state["thread_id"]),
+                        text=clean_model_input,
+                        client_message_id=clean_id,
+                        effort=self.reasoning_effort,
+                        sandbox_policy=({"type": "readOnly", "networkAccess": False}
+                                        if read_only else self.sandbox_policy),
+                        approval_policy=self.approval_policy,
+                        model=self.model,
+                        **options,
+                    )
             except Exception as exc:
                 recovered_receipt = self._recovery_receipt_after_failure(
                     thread_id=str(self._state["thread_id"]),

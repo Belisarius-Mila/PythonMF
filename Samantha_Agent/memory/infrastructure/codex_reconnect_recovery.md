@@ -272,3 +272,35 @@ Finální plná lokální brána PASS: 3602 testů,31 SKIP, 507.039 s.
 Výsledková autorita: reports/combined_finished_work_release_20261112.md a
 původní privátní job/receipt. Zápis vzniká před publikací, není účtenkou
 nasazení. Při nejistotě se původní job dohledá, nepodává se nový požadavek.
+
+
+## 2026-11-12 12:07 CET — HA-04: trvalé serverové přijetí a návrat ke stejné práci
+
+**Hotovo:** Backend ukládá přijetí a stejnou identitu práce před samostatným
+prováděním. Nový start vrací rychle202, staré send zachovává čekající odpověď.
+Práci lze dohledat i po ztraceném HTTP spojení; opakování stejného požadavku
+nezakládá druhý modelový tah. Snímek a omezené události mají cursor/resync.
+Po pádu backendu se obnovuje pouze původní důkaz, nikoli provedení.
+
+**Rozhodnutí:** Míla výslovně zadal HA-04 a následně rovnou p+n. Kritickou
+implementaci provedl Adam přímo. Původní oprávnění/dokončovací kód zůstávají
+autoritou; model/hodnoty role se nemění. Ukládá se pouze již přijaté zadání
+v private server cache, žádné nové browserové drafty. Živá karta je HA-05.
+
+**Další krok:** Dokončit plnou lokální kontrolu, jeden commit a jediné Terra
+p+n podle registrovaného postupu. Původní request/job viz report.
+
+**Navrhované další kroky:** HA-05 — propojit živou kartu a automatické čtecí
+sledování s tímto backendem. Pak skutečný omezený modelový pilot a fyzická
+Mac/iPhone přejímka, až ve vlastním schváleném rozsahu.
+
+**Technický důkaz:**325 cílených PASS: identity/fingerprint, dvojklik/dva klienti,
+čtení/reload, cursor/gap/retence, generační a terminální ochrana, poškozený
+zdroj, selhání zápisu/startu workeru, wake při shutdown, skutečný syntetický
+process crash a legacy HTTP disconnect; RPC probe jen fake. Původní tělo
+ProfileManager.send je po extrakci AST-shodné, včetně oprávnění/dokončení.
+Pevná child-job vazba odmítne pozdější cizí doklad bez falešného Hotovo.
+Finální plná lokální brána PASS: 3635 testů / 573,186 s, 31 SKIP; finální zdroj včetně child-job ochrany a oprav registrů.
+Důkazy `data/private/ha04_20261112/`, bezpečný report
+`reports/human_adam_ha04_server_work_20261112.md`. Bez skutečného modelového
+tahu HA-04, živé UI přejímky nebo aktualizace vlastní hodinové poštovní kopie.

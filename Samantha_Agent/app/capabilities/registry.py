@@ -12,6 +12,29 @@ from app.capabilities.models import (
 
 CAPABILITIES: tuple[CapabilityRecord, ...] = (
     CapabilityRecord(
+        capability_id="human_adam_work_start", label="Accept one scoped Human–Adam request",
+        risk=RiskLevel.EXTERNAL_SEND, reads=("explicit user message and unchanged profile authorization",),
+        writes=("private durable admission", "one existing canonical model turn and its authorized completion"),
+        tool="app.communication.human_adam_profiles.HumanAdamProfileManager.submit_work",
+        requires_confirmation=True, confirmation_policy=ConfirmationPolicy.EXACT_CURRENT_MESSAGE,
+        audit=AuditPolicy.REDACTED,
+        notes="Stable client request identity and exact workstream; original write_intent gates remain. No restart/reload resend or new model policy.",
+    ),
+    CapabilityRecord(
+        capability_id="human_adam_work_read", label="Read existing work snapshot and bounded events",
+        risk=RiskLevel.READ_ONLY, reads=("private scoped work projection and cursor",), writes=(),
+        tool="app.communication.human_adam_work.WorkController.view", audit=AuditPolicy.REDACTED,
+        notes="No payload text, reasoning, tool arguments, Git audit, model, worker launch or receipt recovery mutation.",
+    ),
+    CapabilityRecord(
+        capability_id="human_adam_work_recover", label="Reconcile only the original work evidence",
+        risk=RiskLevel.LOCAL_WRITE, reads=("original admission and exact cached canonical delivery/completion proof",),
+        writes=("private work projection only",), tool="app.communication.human_adam_work.WorkController.recover",
+        requires_confirmation=True, confirmation_policy=ConfirmationPolicy.EXACT_CURRENT_MESSAGE,
+        audit=AuditPolicy.REDACTED,
+        notes="No model, worker replay, reconnect or new send. Absent evidence remains unverified; terminal results are preserved.",
+    ),
+    CapabilityRecord(
         capability_id="calendar_task_context", label="Read configured task destination and defaults",
         risk=RiskLevel.READ_ONLY, reads=("saved calendar selection",), writes=(),
         tool="app.calendar_tasks.CalendarTasks.context", audit=AuditPolicy.REDACTED,
