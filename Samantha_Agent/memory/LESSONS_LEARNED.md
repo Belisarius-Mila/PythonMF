@@ -2137,3 +2137,9 @@ prostředí PASS, produkční kód beze změny.
 - Řešení nalezeno: 11112026
 - Řešení: v doménové transakci držet malé trvalé operation_id + otisk celého normalizovaného příkazu + identitu/revizi výsledku. Před opakováním ověřit otisk; vrátit aktuální projekci a revizi původní operace. Nová změna dál kontroluje expected_revision. Uzavření/obnovení mění generaci pro pozdní výsledky; úložiště ani nejistý požadavek neopravovat založením druhé identity.
 - Ověření: syntetické hlídání přestálo restart, dvojklik, dvě souběžné instance, konflikt revizí, chybu atomického zápisu i vyřazení 258 obecných idempotentních operací; žádný živý model nebo e-mailový úkon.
+
+### 2026-11-12 — Čtecí projekce nesmí zavolat obnovu stavu jako vedlejší účinek
+
+- Kontext: HA-01 skládá modelový tah, dokončování a publikování pro budoucí UI.
+- Řešení: mapovat jen povolená pole zdrojových snímků. LunaReleaseStore.status() může při opuštěném workeru změnit účtenku; v čisté projekci použít pouze load/public_job. Původní doklad nepřepisovat ani při pozdějším přesném důkazu deploymentu. Při změně scope/session během sběru vrátit neověřený snímek.
+- Ověření: integrační kontrola odmítá volání status recovery, před/po má shodné soubory i mtime; testy staré/cizí účtenky, nového požadavku, rotace a dodatečné verifikace procházejí.

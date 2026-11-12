@@ -167,3 +167,15 @@ nástroje modelem musí potvrdit další uživatelský tah. Důkazy: kanonický 
 `data/private/human_adam_tool_compat_20261111/`.
 
 Protokol per-thread config: [oficiální OpenAI dokumentace App Serveru](https://learn.chatgpt.com/docs/app-server).
+
+### 2026-11-12 08:37 CET — HA-01: společná čtecí projekce stavu
+
+Hotovo: Human–Adam má místní přídavný stavový kontrakt pro budoucí přehledné UI. Spojení, probíhající model, navazující kontrola, publikace a starší incidenty mají vlastní význam a rozsah. Starý nebo cizí doklad se nevydává za aktuální tah.
+
+Rozhodnutí: Míla zadal HA-01 podle plánu z 11.11. Používá se nová čistá Python projekce nad existujícími zdroji, bez jejich nahrazení a bez nových mutací. ID jsou stabilní čtecí reference, revision je obsahový otisk, nikoli pořadový event cursor. Vlastníci provedení a doménové účtenky zůstávají autoritou.
+
+Další krok: Po dokončení HA-01 navázat HA-02 — přehlednější rozhraní nad společnou projekcí.
+
+Navrhované další kroky: HA-03 ažHA-05 pro skutečné události, serverově vlastněnou práci a živou kartu; poté doplnění/zastavení. Žádné p+n nebylo zadáno.
+
+Technický důkaz: 29 nových HA-01 testů OK / 2,411 s. Závěrečná plná brána 3543 testů OK / 620,369 s, 5 SKIP; statické a syntaktické kontroly OK. Ověřené nezměněné bajty/mtime zdrojů, korelace a pozdní snímky, přesný head/target/smoke při dodatečném důkazu. Main a služby nedotčené. Report human_adam_ha01_work_state_20261112.txt.

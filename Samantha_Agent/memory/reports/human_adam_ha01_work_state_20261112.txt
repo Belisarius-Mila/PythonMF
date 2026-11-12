@@ -1,0 +1,76 @@
+HA-01 — SPOLEČNÁ ČTECÍ PROJEKCE HUMAN–ADAM
+Datum: 12. listopadu 2026. Autor: Data.
+Stav: lokální vývoj, bez integrace do main, push/nasazení nebo změny UI.
+
+ZADÁNÍ A ROZSAH
+Míla zadal HA-01 podle Human_Adam_hluboka_analyza_a_plan_monitoringu_2026-11-11.txt.
+Čistý Datův worktree byl bezpečně fast-forwardován z 3035fc14 na již integrovaný
+main 12ce214d. Práce pokračuje na data/parallel-20261104, Willův checkout se nemění.
+
+IMPLEMENTACE
+Nový app/communication/human_adam_work_state.py je čistý deterministický výpočet
+nad snímky. V GET /api/human-adam/status se objeví přídavné pole work_state.
+Dosavadní pole i jejich konzumenti zůstávají zachovaní. UI ho začne používat až HA-02.
+
+Kontrakt:
+- schema_version=1, read_only=true, writes_performed=false;
+- scope: projekt, vlákno a generace připojení;
+- observed_at: čas sestavení, source_versions: aktualizace zdrojů;
+- revision: SHA256 obsahu bez observed_at; neprůhledný otisk, ne pořadové číslo;
+- connection: připojeno/odpojeno/nedostupné/neověřené;
+- model, completion, publication: oddělené osy s původním stavem a čtecími referencemi;
+- history: poslední relevantní doklady, ne úplná nová databáze úloh;
+- incidents: pevné bezpečné kódy, bez raw chyb, textů nebo nástrojových argumentů;
+- summary: současný doložitelný krok, nikoli agregát všech historických varování;
+- actions: pouze refresh_status/inspect_work, steer/interrupt výslovně false.
+
+Reference operation_id je odvozená z identity zdroje/projektu/vlákna. Nevytváří
+nový job. Completion se může navázat na rodičovský modelový požadavek jen při
+shodě projektu, request ID a časové návaznosti. Publication má job_id; z něj
+se nevymýšlí chybějící původní client_request_id.
+
+Aktivní model vyžaduje shodný poslední pending požadavek a session.turn_busy.
+Dokončování vyžaduje potvrzený výsledek téhož požadavku a aktuální zdroj.
+Staré a cizí doklady se nestávají právě běžícím modelem. Neověřené doručení
+nezmizí tím, že se podařilo spojení znovu navázat.
+
+Publikace může být reported_active: jde o stav účtenky, liveness=not_checked.
+HA-01 nezkouší lease, nehlídá worker a netvrdí živou přejímku procesu.
+Doklad starší než aktuální požadavek se do tohoto souhrnu nepromítne jako běžící.
+
+Pozdější verification z téže účtenky lze zobrazit vedle původního attention:
+přesný head, target a cílové smoke údaje; u Pages také platné deployment ID.
+To nic nepřepisuje a nespouští opakované p+n. Volný globální Cockpit deployment
+se nevydává za důkaz Pages. Nový reader čte pouze load/public_job; existující
+status() s obnovou osiřelé účtenky se nevolá.
+
+SBĚR A SOUBĚHY
+ProfileManager kontroluje scope, service, vlákno/generaci a úplnou session
+před návratem projekce. Změněný session snímek vrací consistent=false bez
+aktivní operace. U změny recordu během jeho dvou existujících čtení se
+zdroj completion označí nedostupný. Vadná publikační účtenka neshodí původní
+GET status, ale nový souhrn nezamění nedostupný zdroj za absenci práce.
+Tato revize neposkytuje event cursor ani klientský reducer; ty patří do
+navazujících etap. HA-02 musí zahazovat opožděné odpovědi podle scope a
+čtecí generace; samotný hash revision neurčuje jejich pořadí.
+
+OVĚŘENÍ
+29 nových testů HA-01 OK / 2,411 s. Závěrečná plná brána: 3543 testů
+OK / 620,369 s, 5 SKIP; statické, Python/JavaScript a shell syntax kontroly OK.
+Celkový čas testového kroku včetně režie 625,0 s. Důkaz mimo Git:
+logs/ha01_full_gate_20261112.log. Předchozí širší cílená sada 308 testů OK.
+Testy pokrývají identitu, stáří, historii, přepnutí scope, rotaci, změnu
+session během sběru, přesný pozdější deployment, dry-run, poruchu zdrojů,
+telemetrické redigování, determinismus a neměnné soubory/mtime.
+Nový modul a jeho test jsou v kanonické kompilační/testové bráně.
+
+HRANICE A DALŠÍ KROK
+Žádný nový modelový tah, App Server, worker, scheduler, restart, změna
+soukromých dat, modelové role, oprávnění ani publikace. Hlavní checkout se
+nemění. Nový vzhled, skutečné události, živá obnova, steer a interrupt
+nevznikly. Nejde o fyzickou iPhone přejímku ani o nasazený endpoint.
+Další krok je HA-02, čitelnější UI nad tímto kontraktem.
+
+Kanonické záznamy: handoffs/human_adam_layer_workstream_start_2026_07_20.md,
+tvbcp/architektura_komunikace_samantha.txt, infrastructure/codex_reconnect_recovery.md.
+Projekt Human–Adam: layer-human-adam-development. Nový TVBCP nevzniká.

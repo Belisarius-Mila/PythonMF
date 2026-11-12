@@ -1,5 +1,23 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
-## Aktuální stav — oprava nástrojů Human–Adama, 2026-11-11
+## Aktuální stav — HA-01, společná čtecí projekce
+
+- 2026-11-12: Míla zadal HA-01 podle auditního plánu z 11.11. Lokálně přidané
+  work_state do stávajícího GET status Human–Adam: scope, revize obsahu, čas
+  pozorování, oddělené spojení/model/dokončování/publikace, historie a incidenty.
+- Čistá funkce nepouští starou/cizí účtenku do právě běžícího modelového tahu.
+  Změna projektu, vlákna nebo session během sběru vede k neověřenému snímku.
+  Dodatečný přesný důkaz deploymentu nemění původní attention účtenku.
+- Publikace čte jen load/public_job; nevolá status(), který může opravovat
+  opuštěný job. Žádný worker, nový turn, model ani mutační oprávnění.
+- 29 nových HA-01 testů OK; plná brána 3543 testů OK / 620,369 s, 5 SKIP.
+- Vývoj je v Datově worktree data/parallel-20261104 nad 12ce214d; čistá větev
+  byla fast-forwardována na Willův již integrovaný základ, main nedotčený.
+  Vzhled, soukromá data, běžící služby a App Server beze změny; bez p+n.
+- Další krok HA-02: přijmout projekci jako zdroj UI a zpřehlednit chat/Práci.
+  Steer, interrupt, trvalá identita vykonávání a event cursor jsou pozdější etapy.
+- Technický report: reports/human_adam_ha01_work_state_20261112.txt.
+
+### Zachovaný předchozí kontext — oprava nástrojů Human–Adama, 2026-11-11
 
 - Pozorované selhání čtení způsobil Code Mode IPC (`result_buffered_for_ns`),
   nikoli práva adresáře. Nainstalované CLI 0.167.0, připojený server 0.163.0.
@@ -3212,3 +3230,15 @@ konfigurace a nezměněný sandbox. Soukromá účtenka a gate log jsou v
 `data/private/human_adam_tool_compat_20261111/`. Nula modelových tahů, žádný
 dosavadní push/deploy této opravy, změna globální konfigurace ani zásah do Data. Modelová přejímka
 přímých nástrojů zůstává otevřená; RPC čtení samo ji nenahrazuje.
+
+### 2026-11-12 08:37 CET — HA-01: společná čtecí projekce stavu
+
+Hotovo: Human–Adam má místní přídavný stavový kontrakt pro budoucí přehledné UI. Spojení, probíhající model, navazující kontrola, publikace a starší incidenty mají vlastní význam a rozsah. Starý nebo cizí doklad se nevydává za aktuální tah.
+
+Rozhodnutí: Míla zadal HA-01 podle plánu z 11.11. Používá se nová čistá Python projekce nad existujícími zdroji, bez jejich nahrazení a bez nových mutací. ID jsou stabilní čtecí reference, revision je obsahový otisk, nikoli pořadový event cursor. Vlastníci provedení a doménové účtenky zůstávají autoritou.
+
+Další krok: Po dokončení HA-01 navázat HA-02 — přehlednější rozhraní nad společnou projekcí.
+
+Navrhované další kroky: HA-03 ažHA-05 pro skutečné události, serverově vlastněnou práci a živou kartu; poté doplnění/zastavení. Žádné p+n nebylo zadáno.
+
+Technický důkaz: 29 nových HA-01 testů OK / 2,411 s. Závěrečná plná brána 3543 testů OK / 620,369 s, 5 SKIP; statické a syntaktické kontroly OK. Ověřené nezměněné bajty/mtime zdrojů, korelace a pozdní snímky, přesný head/target/smoke při dodatečném důkazu. Main a služby nedotčené. Report human_adam_ha01_work_state_20261112.txt.

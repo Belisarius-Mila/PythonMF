@@ -258,6 +258,8 @@ Tento soubor je rozcestnik dlouhodobe pameti pro Samantha Agent.
 
 - `infrastructure/codex_reconnect_recovery.md`; `handoffs/human_adam_layer_workstream_start_2026_07_20.md`; `tvbcp/architektura_komunikace_samantha.txt` — 2026-11-11: selhání čtení způsobilo Code Mode IPC, ne práva složky. Per-thread přímé nástroje připravené, 89 cílených + plná brána3485 OK/31 SKIP; živá mitigace bez restartu/nového tahu. Navazující Terra p+n výslovně schválené; výsledek dle soukromé účtenky444fe9352557c64a4082aed426d9dd0c. Modelová přejímka otevřená.
 
+- `reports/human_adam_ha01_work_state_20261112.txt`; `handoffs/human_adam_layer_workstream_start_2026_07_20.md`; `tvbcp/architektura_komunikace_samantha.txt` — 12.11.: HA-01 lokálně přidává work_state do GET status; scope/revision/čas, oddělené modelové a provozní stavy, historie a incidenty. Čtecí projekce bez workerů/mutací; 29 nových testů OK; plná brána 3543 OK / 5 SKIP. Data nad 12ce214d, main/služby/UI beze změny, bez p+n. Další HA-02.
+
 - `handoffs/human_adam_layer_workstream_start_2026_07_20.md` - kanonický aktuální
   handoff Human–Adam. Dokončovací stav je autoritativně perzistentní,
   samoobnovitelný po restartu a potvrzený checkpoint synchronizuje handoff,
