@@ -1,0 +1,140 @@
+HA-05 — ŽIVÁ KARTA A AUTOMATICKÉ ČTECÍ SLEDOVÁNÍ
+Datum: 12. listopadu 2026. Autor: Data.
+Pracovní větev: data/parallel-20261104, základ HA-04 72e1015c.
+Stav: lokálně implementované UI a napojená bezpečná veřejná projekce.
+Samostatné nasazení ani fyzická přejímka nejsou součástí tohoto kroku.
+
+ROZDĚLENÍ PRÁCE
+Míla omylem zadal HA-04 Willovi a Data výslovně pokračuje HA-05.
+Hlavní checkout byl pouze čten. HA-04 byl nejprve rozpracovaný nad 5e3ae99f;
+po jeho dokončeném commitu 72e1015c se pouze větev Data posunula fast-forwardem
+na tento přesný bod. Vlastní UI/testy byly uchované ve stash a ignorované kopii,
+vrácené bez přepsání HA-04. Willův checkout, procesy a jeho p+n nejsou měněné.
+UI využívá skutečný work_protocol a GET /work kontrakt dokončeného HA-04,
+nikoli nad vymyšlenou náhradou serverové autority. Izolovaný snímek producenta
+se kontroluje mimo Git. Backend HA-04, jeho publikace i účtenka patří Willovi.
+
+UŽIVATELSKÉ CHOVÁNÍ
+Hlavička ukáže doložený aktuální stav. Pod Práce / Probíhá je živá karta:
+stav přijetí/běhu/dokončování, poslední doložený druh aktivity, čas od přijetí,
+čas poslední změny a zvlášť posledního úspěšného čtení. Není fiktivní procento
+ani tvrzení, že čtecí odpověď je modelový heartbeat. Poslední dokončená práce
+je označená jako poslední práce; nevytlačí současný souhrn v hlavičce.
+Starý HA-01 snímek Připraveno se při nově doložené aktivní práci nezobrazuje
+jako souběžný protichůdný aktuální stav. Historické doklady zůstávají dostupné.
+
+Plán, veřejné komentáře a poslední zaznamenané kroky jsou rozbalovací.
+Obsah se vykresluje výhradně přes textContent a whitelist; žádné raw reasoning,
+argumenty nástrojů, výstupy příkazů nebo obecné params se nepoužijí jako fallback.
+Chybějící obsah plánu je výslovně nedostupný. Zkrácení i mezera historie mají
+vlastní popis. Při neověřeném stavu se dřívější text nevydává za aktuální plán.
+
+ČTENÍ A OBNOVA
+Monitor se zapne jen při serverem inzerovaném HA-04 work_protocol schema 1,
+server_owned=true a přesných místních start/read cestách. Starší backend
+zůstane na dosavadním send protokolu; nevzniká spekulativní POST či nový runtime.
+První GET dohledá původní práci pro aktuální projekt, thread a generaci.
+sessionStorage uchovává jen malou referenci klientského/operation ID a thread,
+nikoli text pokynu, rozepsaný draft nebo payload událostí. Server je autorita;
+nedostupné browserové úložiště nebrání dohledání serverové práce.
+
+Popředí čte po 750 ms od konce předchozího čtení, skrytá stránka po 5 s.
+Jeden požadavek má deadline 5 s; dotazy se nepřekrývají. Chyby používají čtecí
+backoff 1/2/4/8/10 s. Visibility/online probudí sledování; pagehide zruší
+časovač a odběr a pageshow obnoví čtení. Návrat z bfcache při HA-04 zachová
+editor; nové otevření nadále respektuje původní ochranu proti obnovenému textu.
+Konečný completed/failed/not_dispatched ukončí polling. Unverified také zastaví
+automatické sledování s jasnou neověřeností a blokací nového zadání; explicitní
+Ověřit průběh provádí pouze GET. Není automatický recover, steer nebo interrupt.
+
+Cursor/revision jsou celočíselné a nemohou jít zpět. Změna projektu/threadu/
+generace zruší staré čtení; jeho pozdější odpověď ani chyba se neuplatní.
+Resync použije celý aktuální snímek a zahodí neúplnou místní historii.
+Rozporná událost pod stejným cursorem ani oživení terminální práce se nepřijme.
+Historie klienta je omezená na 128 metadat, viditelný výřez na osm kroků.
+
+ODESLÁNÍ A VÝSLEDEK
+Při inzerovaném HA-04 se původní přesné zadání jednou předá /work/start:
+message, client_message_id, client_sent_at, původní write_intent, workstream_id,
+confirmed=true. Původní p+n interception a jednorázové oprávnění se zachovávají.
+Reference se zapíše před HTTP; průběh se může dohledat i před opožděným ACK.
+Před připojením relace UI nepřipraví referenci ani POST a text zůstane v editoru.
+POST má deadline 10 s. Ztráta/nejistota potvrzení pouze zahájí GET podle původního
+klientského ID. Není fallback POST do starého send, druhý start ani nový client ID.
+Příprava, dvojklik, síťová chyba a opožděné potvrzení jsou testované.
+
+Při terminálním dokladu se jednou načte canonical status/odpověď. Polling
+nepřekresluje chat, nepřesouvá fokus a nevolá předčítání. Finální status využije
+HA-02 přírůstkové vykreslování; starší odpovědi, jejich DOM a řeč zůstávají.
+Completion sound/návrh obrázku jsou zachované jen při čerstvém potvrzeném výsledku
+vlastního zadání, ne při obnovení dávno skončené práce. Případné selhání načtení
+odpovědi po finálním dokladu je výslovné a vede k ručnímu čtení stavu, ne resend.
+
+VEŘEJNÁ PROJEKCE — NAPOJENO NA HA-04
+human_adam_public_progress.py má oddělené public_event, merge_public_progress
+a public_projection. Propustí jen turn/plan/updated a item/completed typu
+agentMessage s výslovnou phase=commentary. Ostatní fáze, reasoning, nástrojové
+položky i delty se ignorují. Nejvýše 32 kroků po 1000 znacích a 16 komentářů
+po 2000 znacích, deduplikace podle položky, explicitní truncated příznaky.
+Export vždy znovu sestaví whitelist schema_version/source/plan/comments/flags.
+UI přijímá jen public_progress schema 1 se source=validated_public_progress.
+
+Provedené napojení ve větvi Data nad dokončeným HA-04:
+1. Observer._event uloží jen výsledek public_event(method, params) do malého
+   bezpečného pre-ACK metadatového bufferu; nikoli původní params nebo item.
+2. Observer._apply až po dosavadní přesné kontrole thread/turn/owner/generation
+   sloučí public_progress do téhož store.change s původním wire cursorem.
+   Čtecí projekce nesmí změnit důkaz doručení ani objednat další model.
+3. WorkStore.public přidá jen public_projection(record.get('public_progress')),
+   pokud je validní. Žádný privátní interní záznam se neexportuje hromadně.
+4. Skutečný observer/store ověřen pro plán před ACK, cizí turn/generaci,
+   commentary-only a nezměněný důkaz doručení. Dosavadní HA-04 gap/overflow
+   testy se zachovávají. Při vyřazení terminální práce ze 64 položek přehledu
+   se zkompaktní i public_progress; trvalá identita a idempotence zůstávají.
+   Nové testy prokazují, že zmizí duplicitní veřejný obsah, nikoli identita/file.
+
+OVĚŘENÍ
+Finální spojená cílená sada: 417 testů OK / 17,214 s.
+Po plné bráně doplněná pouze frontendová preflight blokace odpojeného send:
+regresní reprodukce nejprve prokázala chybu, oprava následně prošla celou
+stejnou 417 cílenou sadou / 17,214 s a finální statickou bránou. Backend,
+HTTP payload, observer, retence a persistence proti plné bráně beze změny.
+Finální browserové kontroly jsou níže; nejde o další backendovou změnu.
+Před integrací: 152 testů OK / 7,321 s, 1 SKIP (chyběl HA-04 v Data).
+Po přijetí skutečného HA-04 už producent/konzument kontrakt neběží jako SKIP.
+Samostatné první ověření skutečného WIP producenta bylo 1 OK / 0,182 s;
+nenahrazuje finální ověření nad 72e1015c. Integrované UI/public/HA-04 jádro
+115 testů OK / 6,161 s. Node VM má 18 scénářů; veřejný whitelist/observer/
+retence 11 testů. Skutečná cesta odeslání a HA-04 scope/owner fence zůstávají
+v testech, žádný skutečný model se nepoužije.
+
+Izolovaný skutečný Edge přes CDP pipe, všechny fetch syntetické:
+390x844, 430x932, 1280x900, 390x480, 430x500; každé 28 kontrol, celkem 140 PASS.
+Ověřený aktuální stav, skutečný obsah karty, plain-text komentáře, žádný viditelný
+raw reasoning, bfcache draft, fokus/selection/chat/řeč, resync, konečný výsledek,
+ukončený polling, nulové mutace a chyby browseru. Změna v popředí pod 2 s
+v těchto lokálních fixtures (723–733 ms po ustálení předchozího čtení);
+není to záruka latence produkčního spojení.
+Mobilní a desktopový aktivní stav s plánem byly navíc vizuálně zkontrolované.
+Nejde o fyzickou iPhone/Mac uživatelskou přejímku živé práce.
+
+Statická kontrola finálního sestaveného HTML a nových modulů je součástí
+spojené plné brány: 3648 testů OK / 534,548 s, 5 SKIP (testový krok
+s režií 538,8 s). Výsledná frontendová preflight úprava má vlastní finální
+cílené/statické ověření výše. První plný běh nad samotným UI byl
+ukončen při přijetí nové závislosti HA-04; není závěrečným důkazem. Druhý běh
+ověřuje celý finální základ a napojení. Zastavený byl jen přes cwd ověřený
+Datův testovací proces a jeho dítě; Willovy ani publikační procesy nedotčené.
+Důkazy mimo Git: logs/ha05_*_20261112.log a data/private/ha05_ui_qa_20261112/
+(fixture/runner, JSON výsledky, snímky, zdrojové otisky, HA-04 WIP snímek).
+Žádná skutečná App Server relace/model/placený pokus, služba, nasazení ani
+Willův proces nebyly touto prací spuštěné nebo změněné. Žádná změna rolí.
+
+DALŠÍ KROK A HRANICE
+HA-05 je lokálně napojené na HA-04: skutečné typované plány a veřejné commentary
+se přenášejí přes omezený scoped journal. Živá karta není fyzická přejímka skutečné
+modelové relace. Následuje HA-06 na další zadání, případně samostatně schválené
+vydání a Mac/iPhone ověření. Veřejný vývojový filtr nemění oprávnění modelu.
+P+n není tímto zadáním autorizované. HA-06/07/08 (doplnění, stop, úplná spotřeba)
+zůstávají další etapy. Kanonický proud layer-human-adam-development; handoff
+human_adam_layer_workstream_start_2026_07_20.md, TVBCP architektura_komunikace_samantha.txt.

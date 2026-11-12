@@ -6,6 +6,7 @@ from contextlib import contextmanager
 
 from app.codex_appserver import AppServerError
 from app.communication.human_adam_work import WorkConflict
+from app.communication.human_adam_public_progress import public_event, merge_public_progress
 
 METHODS = ("turn/started", "turn/completed", "turn/plan/updated", "item/started", "item/completed")
 
@@ -55,8 +56,9 @@ class WorkObserver:
 
     def _event(self, event) -> None:
         params = event.params
-        # Only validated type/scope and counters are retained. No plan text,
-        # message content, reasoning, command arguments or paths enter this store.
+        # Raw protocol payloads never enter the store. Public plan/commentary
+        # text is rebuilt separately by a bounded whitelist, then applied only
+        # after the exact turn/scope binding below.
         item = params.get("item") or {}
         kinds = {"commandExecution": "tool", "fileChange": "tool", "mcpToolCall": "tool",
                  "webSearch": "tool", "imageGeneration": "tool", "agentMessage": "message"}
@@ -68,6 +70,9 @@ class WorkObserver:
             kind = category + ("_started" if event.method == "item/started" else "_finished")
         safe = {"thread_id": event.thread_id, "turn_id": event.turn_id, "kind": kind,
                 "generation": event.generation, "sequence": event.received_sequence}
+        progress = public_event(event.method, params)
+        if progress is not None:
+            safe["public_progress_update"] = progress
         with self._lock:
             if self._closed:
                 return
@@ -83,7 +88,10 @@ class WorkObserver:
         record = self.store.load(self.identity)
         if event["thread_id"] != record["thread_id"] or event["turn_id"] != self._turn_id:
             return
-        self.store.change(self.identity, self.owner, event["kind"],
+        fields = {}
+        if "public_progress_update" in event:
+            fields["public_progress"] = merge_public_progress(record.get("public_progress"), event["public_progress_update"])
+        self.store.change(self.identity, self.owner, event["kind"], fields=fields,
                           wire=(event["generation"], event["sequence"]))
         if event["kind"] == "turn_completed":
             self._terminal_seen.set()

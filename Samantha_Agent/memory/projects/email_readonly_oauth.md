@@ -1,3 +1,14 @@
+## Společné vydání všech dokončených commitů, 2026-11-12
+
+Míla výslovně zadal p+n a úklid. E-mailové etapy3+4 a Datův HA-05 jsou
+integrované;192 integračních PASS.39 starých plně převzatých větví uklizeno
+se zálohou a zachováním všech souborů. Datův nezapsaný HA-06 ve vlastním
+worktree zůstává nedotčený. Jediné registrované p+n, request `email-ha-all-finished-20261112-v1`;
+přesný výsledek pouze v původní účtence job `b794e9f91e021059c97a7851827e6160` a
+reports/all_finished_email_ha_release_20261112.md. Vývojový checkpoint není
+doklad vydání. Další krok: dokončit zadané p+n a živou kontrolu. Hodinová
+kopie7f47a41f/monitoroff zachované, upgrade/aktivace a skutečná přejímka zvlášť.
+
 # E-mail read-only OAuth integrace
 
 ## Hlídání e-mailů — lokální etapa 4, 2026-11-12 14:27 CET

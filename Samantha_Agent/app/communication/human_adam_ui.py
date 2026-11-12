@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from app.communication.human_adam_live_ui import HUMAN_ADAM_LIVE_SCRIPT
+
 
 HUMAN_ADAM_HTML = r"""<!doctype html>
 <html lang="cs">
@@ -228,6 +230,10 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
     .work-state-box[data-state="running"],.work-state-box[data-state="verifying"] { background:#eff6ff; border-color:#93c5fd; }
     .work-state-box[data-state="unverified"] { background:#fff7ed; border-color:#fdba74; }
     .work-receipts { margin:0 16px 14px; }
+    #liveWorkCard details { margin-top:8px; }
+    #liveWorkCard summary { cursor:pointer; font-weight:600; }
+    #liveWorkCard li { overflow-wrap:anywhere; white-space:pre-wrap; }
+    #liveWorkReadState,#liveWorkGap { color:var(--warn); }
     .service-group { margin:12px 16px; border:1px solid var(--line); border-radius:12px; overflow:hidden; }
     .service-group > summary { cursor:pointer; padding:12px; font-weight:700; }
     .service-group .live-work-status-box { margin:0 12px 12px; }
@@ -392,6 +398,19 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
         <p id="workStateElapsed" aria-live="off" hidden></p>
         <ul id="workStateAxes"></ul>
         <p class="meta" id="workStateObserved"></p>
+      </section>
+      <section class="work-state-box" id="liveWorkCard" data-state="unverified" aria-label="Živý průběh práce" hidden>
+        <h3 id="liveWorkTitle" role="status" aria-live="polite"></h3>
+        <p id="liveWorkActivity"></p>
+        <p class="meta"><span id="liveWorkDuration"></span> · <span id="liveWorkUpdated"></span></p>
+        <p class="meta" id="liveWorkObserved"></p>
+        <p class="meta" id="liveWorkReadState"></p>
+        <p class="meta" id="liveWorkGap"></p>
+        <details id="liveWorkPlanDetails"><summary>Plán a průběžné zprávy</summary>
+          <p id="liveWorkPlanEmpty"></p><p class="meta" id="liveWorkTruncated"></p><ol id="liveWorkPlan"></ol><ul id="liveWorkComments"></ul>
+        </details>
+        <details><summary>Poslední zaznamenané kroky</summary><ul id="liveWorkEvents"></ul></details>
+        <button id="liveWorkRefreshBtn" type="button">Ověřit průběh</button>
       </section>
     </section>
     <section class="work-view" id="workViewResults" role="tabpanel" aria-labelledby="workTabResults" tabindex="0" hidden>
@@ -668,6 +687,7 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
   const workStateObserved = document.getElementById("workStateObserved");
   const workStateEvidence = document.getElementById("workStateEvidence");
   let currentWorkState = null;
+  let workMonitor = null;
   let statusReadSequence = 0;
   let workReadSequence = 0;
   let chatRenderKey = "";
@@ -892,16 +912,18 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
 
   function syncControls() {
     const lunaReleaseBusy = lunaReleaseStarting || lunaReleaseJobActive() || !lunaReleaseStatusLoaded;
-    const rotationBlocked = busy || sendInFlight || sessionTurnBusy || lunaReleaseBusy;
+    const liveBlocked = Boolean(typeof workMonitor !== "undefined" && workMonitor && workMonitor.snapshot().blocked);
+    const rotationBlocked = busy || sendInFlight || sessionTurnBusy || liveBlocked || lunaReleaseBusy;
+    const ownedSendUnavailable = Boolean(typeof workMonitor !== "undefined" && workMonitor && workMonitor.snapshot().enabled && !sessionConnected);
     connectBtn.disabled = busy || lunaReleaseBusy;
-    profileSelect.disabled = busy || sendInFlight || sessionTurnBusy || voiceStarting || voiceRecording || voiceTranscribing || lunaReleaseBusy;
+    profileSelect.disabled = busy || sendInFlight || sessionTurnBusy || liveBlocked || voiceStarting || voiceRecording || voiceTranscribing || lunaReleaseBusy;
     profileSwitchBtn.disabled = profileSelect.disabled || !profileSelect.value || profileSelect.value === activeWorkstreamId;
     refreshBtn.disabled = busy || resultWatchActive;
     workOpenBtn.disabled = busy;
     refreshBtn.textContent = resultWatchActive ? "Čekám na výsledek…" : "Obnovit stav";
-    sendBtn.disabled = busy || sendInFlight || sessionTurnBusy || Boolean(pendingSubmission) || voiceStarting || voiceRecording || voiceTranscribing || lunaReleaseBusy;
+    sendBtn.disabled = busy || sendInFlight || sessionTurnBusy || liveBlocked || Boolean(pendingSubmission) || voiceStarting || voiceRecording || voiceTranscribing || lunaReleaseBusy || ownedSendUnavailable;
     input.disabled = lunaReleaseBusy;
-    writeIntentBtn.disabled = busy || sendInFlight || sessionTurnBusy || voiceStarting || voiceRecording || voiceTranscribing || lunaReleaseBusy || !sessionConnected || !workstreamDevelopmentEnabled;
+    writeIntentBtn.disabled = busy || sendInFlight || sessionTurnBusy || liveBlocked || voiceStarting || voiceRecording || voiceTranscribing || lunaReleaseBusy || !sessionConnected || !workstreamDevelopmentEnabled;
     composerMode.textContent = writeIntentArmed
       ? "Vývoj povolen pro jeden následující pokyn"
       : "Konzultace · změny souborů nejsou povolené";
@@ -1126,7 +1148,10 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
   function updateMobileStatusSummary() {
     let text = "";
     let tone = "warn";
-    if (deliveryUncertain) {
+    const liveView = typeof workMonitor !== "undefined" && workMonitor ? workMonitor.snapshot() : null;
+    if (liveView && liveView.enabled && (liveView.active || liveView.blocked || liveView.error)) {
+      text = humanAdamLiveSummary(liveView);
+    } else if (deliveryUncertain) {
       text = "Stav doručení je nejistý · obnov stav · pokyn neposílej znovu";
     } else if (sendInFlight) {
       text = "Čekám na potvrzený výsledek pokynu";
@@ -1243,6 +1268,11 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
     input.value = String(text || "").slice(0, Number(input.maxLength) || 12000);
     input.defaultValue = "";
     input.focus();
+  }
+
+  function restoreComposerOnPageShow(event) {
+    if (event.persisted && typeof workMonitor !== "undefined" && workMonitor && workMonitor.snapshot().enabled) return;
+    clearMessageInput();
   }
 
   function preferredVoiceMimeType() {
@@ -2155,6 +2185,10 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
     renderSession(session, {forceScrollToEnd:forceChatEnd});
     renderWorkState(payload && payload.work_state, session);
     void loadImageCandidates({forceChatEnd});
+    if (typeof workMonitor !== "undefined" && workMonitor) workMonitor.configure(payload && payload.work_protocol, {
+      workstream_id:activeWorkstreamId, thread_id:String(session && session.thread_id || ""),
+      connection_generation:Number(session && session.connection_generation || 0),
+    });
   }
 
   function renderDevelopmentBadge(semaphore) {
@@ -2472,6 +2506,9 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
   }
 
   function handleRefreshStatus() {
+    if (typeof workMonitor !== "undefined" && workMonitor && workMonitor.snapshot().enabled) {
+      workMonitor.refresh(); void loadStatus(); return;
+    }
     loadLunaReleaseStatus();
     if (sessionTurnBusy || deliveryUncertain || sendInFlight) startResultWatch();
     else {
@@ -4031,8 +4068,53 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
     }
   }
 
+  /* HA05_LIVE_SCRIPT */
+
+  async function sendOwnedWork() {
+    if (!sessionConnected) { notice.textContent="Nejdřív připoj relaci. Text zůstal v editoru; nic nebylo odesláno."; return; }
+    if (busy || sendInFlight || sessionTurnBusy || pendingSubmission || workMonitor.snapshot().blocked
+      || voiceStarting || voiceRecording || voiceTranscribing || !lunaReleaseStatusLoaded) return;
+    const text = input.value.trim();
+    if (!text) { notice.textContent="Napiš nejdřív zprávu."; return; }
+    if (shouldInterceptLunaReleaseCommand(text)) {
+      setWriteIntentArmed(false); await startLunaRelease({userText:text}); return;
+    }
+    let clientId, sentAt, body;
+    const workstream=activeWorkstreamId, threadId=String(lastSession && lastSession.thread_id || "");
+    const connectionGeneration=Number(lastSession && lastSession.connection_generation || 0);
+    const sameContext=()=>activeWorkstreamId === workstream && String(lastSession && lastSession.thread_id || "") === threadId
+      && Number(lastSession && lastSession.connection_generation || 0) === connectionGeneration;
+    try {
+      clientId=messageId(); sentAt=new Date().toISOString();
+      body=JSON.stringify({message:text,client_message_id:clientId,client_sent_at:sentAt,
+        write_intent:writeIntentArmed,workstream_id:workstream,confirmed:true});
+      workMonitor.expect(clientId);
+    } catch (_) { showSendFailure("Pokyn se nepodařilo připravit. Text zůstal v editoru."); return; }
+    writeIntentArmed=false; sendInFlight=true; clearMessageInput(); syncControls();
+    runSendUiBestEffort(() => { primeCompletionMediaSound().catch(() => {}); });
+    const pending={client_message_id:clientId,user_text:text,client_sent_at:sentAt,received_at:sentAt,status:"pending",answer:""};
+    runSendUiBestEffort(() => renderSession({...lastSession,messages:[...(lastSession && lastSession.messages || []),pending]}));
+    document.getElementById("sendFailure").hidden=true;
+    const controller=new AbortController();
+    const admissionTimeout=window.setTimeout(()=>controller.abort(),10000);
+    try {
+      const payload=await api("/api/human-adam/work/start", {method:"POST",body,signal:controller.signal});
+      if (!sameContext()) return;
+      if (!workMonitor.accepted(payload)) throw new Error("Přijetí nelze ověřit.");
+      notice.textContent="Pokyn přijat. Průběh se sleduje automaticky.";
+    } catch (_) {
+      if (!sameContext()) return;
+      pendingSubmission={clientId,threadId}; deliveryUncertain=true;
+      workMonitor.uncertain();
+      showSendFailure("Přijetí není ověřené. Hledám původní práci bez opakovaného odeslání.",text);
+    } finally { window.clearTimeout(admissionTimeout); sendInFlight=false; syncControls(); updateMobileStatusSummary(); }
+  }
+
   async function sendMessage(event) {
     event.preventDefault();
+    if (typeof workMonitor !== "undefined" && workMonitor && workMonitor.snapshot().enabled) {
+      await sendOwnedWork(); return;
+    }
     if (busy || sendInFlight || sessionTurnBusy || pendingSubmission || voiceStarting || voiceRecording || voiceTranscribing || !lunaReleaseStatusLoaded) return;
     const text = input.value.trim();
     if (!text) { notice.textContent = "Napiš nejdřív zprávu."; return; }
@@ -4115,6 +4197,44 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
   }
 
   composer.addEventListener("submit", sendMessage);
+  workMonitor=createHumanAdamWorkMonitor({
+    now:()=>Date.now(), visible:()=>document.visibilityState !== "hidden",
+    setTimeout:(fn,delay)=>window.setTimeout(fn,delay), clearTimeout:id=>window.clearTimeout(id),
+    storage:{getItem:key=>window.sessionStorage.getItem(key),setItem:(key,value)=>window.sessionStorage.setItem(key,value)},
+    read:(query,signal)=>api(`/api/human-adam/work?${new URLSearchParams(query)}`,{signal}),
+    onChange:view=>{
+      renderHumanAdamLiveCard(document,view);
+      workStateBox.hidden=Boolean(view.enabled && (view.active || view.blocked || view.error));
+      syncControls(); updateMobileStatusSummary();
+    },
+    onTerminal:async (operation,{notify})=>{
+      const scope=operation.scope, workstream=activeWorkstreamId;
+      if (scope.workstream_id !== workstream) return;
+      try {
+        const payload=await api("/api/human-adam/status");
+        if (activeWorkstreamId !== workstream || String(payload.session && payload.session.thread_id || "") !== scope.thread_id) return;
+        renderStatus(payload);
+        if (operation.lifecycle_state === "not_dispatched" && operation.delivery_state === "not_started"
+          && pendingSubmission && pendingSubmission.clientId === operation.client_request_id && pendingSubmission.threadId === scope.thread_id) {
+          pendingSubmission=null; deliveryUncertain=false;
+          showSendFailure("Server potvrdil, že původní pokyn nebyl spuštěn. Text zůstává k dispozici v detailu.");
+          syncControls(); updateMobileStatusSummary();
+        }
+        if (notify && operation.lifecycle_state === "completed" && operation.delivery_state === "confirmed") {
+          const entry=(payload.session && payload.session.messages || []).find(item=>item.client_message_id === operation.client_request_id
+            && item.delivery_confirmed === true && item.status === "completed");
+          if (entry) { playCompletionMediaSound(); await prepareImageCandidate(entry.user_text || "",entry.client_message_id); }
+        }
+      } catch (_) { notice.textContent="Konečný stav práce je uložený; odpověď se nepodařilo načíst. Použij Obnovit stav."; }
+    },
+  });
+  document.getElementById("liveWorkRefreshBtn").addEventListener("click",()=>workMonitor.refresh());
+  document.addEventListener("visibilitychange",()=>workMonitor.wake());
+  window.addEventListener("online",()=>workMonitor.wake());
+  window.addEventListener("pageshow",()=>workMonitor.resume());
+
+
+
   latestAnswerBtn.addEventListener("click", () => {
     const answers = chat.querySelectorAll(".adam");
     if (answers.length) answers[answers.length - 1].focus({preventScroll:true});
@@ -4167,6 +4287,7 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
   });
   mediaSoundTestBtn.addEventListener("click", testCompletionMediaSound);
   window.addEventListener("pagehide", () => {
+    workMonitor.pause();
     stopResultWatch();
     stopLunaReleasePoll();
     stopAnswerSpeech(false);
@@ -4233,10 +4354,10 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
   });
   clearMessageInput();
   runSendUiBestEffort(() => updateComposerLayout());
-  window.addEventListener("pageshow", clearMessageInput);
+  window.addEventListener("pageshow", restoreComposerOnPageShow);
   restoreVerifiedDeploymentResult();
   restoreLunaReleaseState();
 </script>
 </body>
 </html>
-"""
+""".replace("/* HA05_LIVE_SCRIPT */", HUMAN_ADAM_LIVE_SCRIPT)

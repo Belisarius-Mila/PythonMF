@@ -1,3 +1,14 @@
+## Společné vydání všech dokončených commitů, 2026-11-12
+
+Míla výslovně zadal p+n a úklid. E-mailové etapy3+4 a Datův HA-05 jsou
+integrované;192 integračních PASS.39 starých plně převzatých větví uklizeno
+se zálohou a zachováním všech souborů. Datův nezapsaný HA-06 ve vlastním
+worktree zůstává nedotčený. Jediné registrované p+n, request `email-ha-all-finished-20261112-v1`;
+přesný výsledek pouze v původní účtence job `b794e9f91e021059c97a7851827e6160` a
+reports/all_finished_email_ha_release_20261112.md. Vývojový checkpoint není
+doklad vydání. Další krok: dokončit zadané p+n a živou kontrolu. Hodinová
+kopie7f47a41f/monitoroff zachované, upgrade/aktivace a skutečná přejímka zvlášť.
+
 # Codex Reconnect Recovery
 
 Priorita: 1
@@ -304,3 +315,17 @@ Finální plná lokální brána PASS: 3635 testů / 573,186 s, 31 SKIP; fináln
 Důkazy `data/private/ha04_20261112/`, bezpečný report
 `reports/human_adam_ha04_server_work_20261112.md`. Bez skutečného modelového
 tahu HA-04, živé UI přejímky nebo aktualizace vlastní hodinové poštovní kopie.
+
+### 2026-11-12 12:29 CET — HA-05: živá karta a automatické čtecí sledování
+
+Hotovo: Human–Adam lokálně zobrazuje aktuální práci v hlavičce a živý plán, veřejné komentáře, doloženou aktivitu a časy pod Práce / Probíhá. Čtecí sledování s cursorem obnoví stejnou práci po načtení, vypořádá gap/resync a zastaví se na konci. Editor, fokus/selection, starší chat i řeč zůstávají stabilní. Ztracené přijetí řeší pouze GET původní identity, nikoli další odeslání.
+
+Rozhodnutí: Míla zadal HA-04 Willovi a Data pokračuje HA-05. Po stabilním 72e1015c byl jen Datův checkout fast-forwardován na HA-04, vlastní změny bezpečně uchované a vrácené. Veřejný filtr je nyní napojený za dosavadní thread/turn/owner/generation guard; důkaz doručení ani jednorázové oprávnění se nemění. Nové rozhraní nepřijímá raw reasoning ani tool args. Willovy soubory, procesy a jeho samostatné vydání nejsou měněné.
+
+Další krok: HA-06 — doplnění pokynu do přesné práce na další zadání.
+
+Navrhované další kroky: Případné vydání HA-05 a fyzickou Mac/iPhone/živou modelovou přejímku samostatně schválit. Pozdější HA-07/08 jsou zastavení a spotřeba celého průchodu; nejsou předstíranou součástí tohoto kroku.
+
+Technický důkaz: 417 cílených testů OK / 17,214 s. Skutečný HA-04 public producer, observer a wire dispatcher ověřily plán před ACK, cizí turn/generaci, commentary-only a nezměněné doručení; retence kompaktního veřejného obsahu zachová trvalý ID soubor a idempotenci. 18 Node scénářů, 11 veřejných testů, 140 skutečných browser kontrol na pěti velikostech; ustálené popředí 723–733 ms ve fixtures, aktivní mobilní/desktop karta vizuálně zkontrolovaná. Plná brána 3648 testů OK / 534,548 s, 5 SKIP. Report human_adam_ha05_live_ui_20261112.txt. První plný UI běh ukončen při přijetí HA-04; závěrečná brána ověřuje celou spojenou verzi. Žádný skutečný App Server/model/služba ani p+n.
+
+Doplnění ověření téhož kroku: po plné bráně už jen frontendová preflight blokace odeslání před připojením; 417 cílených / 17,214 s a finální statická brána OK, finální browser QA zopakované. Backend/payload/persistence proti plné bráně nezměněné.
