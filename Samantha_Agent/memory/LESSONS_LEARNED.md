@@ -2203,3 +2203,11 @@ Tento důkaz nenahrazuje skutečný reboot/wake po upgradu.
 - Problém: completed_slot nebo nulová dávka přeskočí nově splatnou kontrolu. Zdraví poslední dávky není důkaz úplnosti zdroje; pozdní model nesmí posunout starý zdrojový snapshot za slíbený termín.
 - Řešení: samostatný deterministický průchod ve finish původní služby, bez opakování mailového posouzení. Oddělit as_of od dokončení scanu; při každém novém scanu zneplatnit starou úplnost. Negativní podnět jen pro úplný čerstvý zdroj ve stejné epoše a snapshot od termínu dál. Pauza, backlog, chyba, nejasná vazba či starý worker znamenají neověřenost. Jedna identita aktuálního podnětu na věc/generaci/termín/novou zprávu.
 - Ověření: syntetické dva monitory a restart, prázdný i dokončený mailový slot bez nového modelu, pomalé posouzení přes deadline, chyba/epocha/backlog a starý heartbeat bez falešného Běží. Report email_followups_monitor_20261112.md.
+
+
+### LL-127 — Návrh drží uživatelský základ, nikoli každou technickou revizi
+
+- Typ: opakující se. Řešení nalezeno: 12112026.
+- Problém: background kontrola zvyšuje revizi během modelového posouzení. Nemá zahodit návrh nad nezměněným cílem; naopak ruční změna, vyřízení nebo jiné podklady nesmějí přijmout starý výsledek.
+- Řešení: před jediným běžným tahem atomicky zmrazit konkrétní source_digest, ID pokusu, generaci a otisk uživatelských polí včetně poslední ruční revize. Technické kontroly otisk nemění; ruční úpravy, nová generace, zdrojový drift či vypnutí dovolí jen neaktuální původní účtenku. Přijetí do UI navíc kontroluje aktuální celkovou revizi a původní citovaný podklad. Mění jen navržený další krok a kdo je na řadě; Vyřízeno je zvláštní uživatelský úkon. Ruční přiřazení po posouzení nikdy nespouští nový placený průchod.
+- Ověření: simulované posouzení souběžně s technickou kontrolou zůstane přijatelné; ruční editace/uzavření/znovuotevření/vypnutí/výměna zdroje výsledek zneplatní. Node/HTTP a vlastní headless browser ověřily původní účtenku, žádné dvojí přijetí/tah a zachovaný cíl/lifecycle. Report email_followups_assessment_20261112.md.

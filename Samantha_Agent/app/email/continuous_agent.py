@@ -7,6 +7,7 @@ The business archive is created solely by accept_archive(). No email is sent.
 from __future__ import annotations
 
 import hashlib
+import copy
 import json
 import tempfile
 from dataclasses import dataclass, replace
@@ -99,7 +100,8 @@ class EmailProposal(BaseModel):
 class EmailAssessment:
     """Additive result; the saved/editable EmailProposal contract stays unchanged."""
     proposal: EmailProposal
-    calendar_suggestion: dict
+    calendar_suggestion: dict | None
+    followup_assessment: dict | None = None
 
 
 def _now() -> str:
@@ -220,32 +222,41 @@ class ContinuousEmailAgent:
                     }
                     def admit(document):
                         from .followup_monitor import admit_observation
+                        from .followup_assessment import reserve_context
                         document["items"][item_id] = item
                         admit_observation(document, item_id, at=item["created_at"])
                         if any(item_id in v.get("observations", {}).get(bucket, {})
                                for v in document.get("followups", {}).get("items", {}).values()
                                for bucket in ("items", "reviews")):
                             item["message"] = {"body_text": observed.source.body_text}
+                        reserve_context(document, item_id)
                     self._update(admit)
                     try:
-                        assessed = propose(replace(observed, importance_preferences=hints))
+                        assessed = propose(replace(observed, importance_preferences=hints,
+                            followup_context=copy.deepcopy(item.get("followup_attempt", {}).get("context"))))
                         suggestion = assessed.calendar_suggestion if isinstance(assessed, EmailAssessment) else None
+                        followup = assessed.followup_assessment if isinstance(assessed, EmailAssessment) else None
                         proposal = EmailProposal.model_validate(
                             assessed.proposal if isinstance(assessed, EmailAssessment) else assessed).model_dump()
                         if suggestion and suggestion['status'] == 'ready':
                             proposal['important'] = True  # A proposed meeting/deadline must remain visible.
                     except Exception as exc:
-                        self._update(lambda d: d["items"][item_id].update(
-                            status="analysis_failed", error=type(exc).__name__))
+                        def fail(document):
+                            from .followup_assessment import finish_assessment
+                            document["items"][item_id].update(status="analysis_failed", error=type(exc).__name__)
+                            finish_assessment(document, observed, None, at=_now(), failed=True)
+                        self._update(fail)
                     else:
                         visible_message = {"body_text": observed.source.body_text} if proposal["important"] else item.get("message", {})
                         def save_assessment(document):
+                            from .followup_assessment import finish_assessment
                             document["items"][item_id].update(
                                 status="awaiting_confirmation" if proposal["important"] else "hourly_summary",
                                 message=visible_message, proposal=proposal,
                                 proposal_digest=proposal_digest(proposal))
                             if suggestion is not None:
                                 document["items"][item_id]['calendar_suggestion'] = suggestion
+                            finish_assessment(document, observed, followup, at=_now())
                             if proposal["important"] and document.get("pushcut", {}).get("enabled"):
                                 event = document.setdefault("notification_hours", {}).setdefault(hour, {
                                     "status": "pending", "created_at": _now(), "item_ids": []})
@@ -253,7 +264,11 @@ class ContinuousEmailAgent:
                         self._update(save_assessment)
                         created += 1
                 elif existing["status"] == "analyzing":
-                    self._update(lambda d: d["items"][item_id].update(status="analysis_interrupted"))
+                    def interrupted(document):
+                        from .followup_assessment import finish_assessment
+                        document["items"][item_id].update(status="analysis_interrupted")
+                        finish_assessment(document, observed, None, at=_now(), failed=True)
+                    self._update(interrupted)
                 self._update(lambda d: d["sources"].__setitem__(source.key, {
                     "uidvalidity": scan.uidvalidity, "after_uid": int(observed.source.uid),
                     "health": "ok", "checked_at": _now(),

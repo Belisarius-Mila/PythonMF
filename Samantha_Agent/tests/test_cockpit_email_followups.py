@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from datetime import datetime, timedelta, timezone
 from http.server import ThreadingHTTPServer
+import copy
 import json
 from pathlib import Path
 import tempfile
@@ -77,6 +78,61 @@ class EmailFollowupsHTTPTests(unittest.TestCase):
         self.assertEqual(self.worker.repository.path.read_bytes(), before)
         self.assertEqual(self.request(path.replace(response.item_id, "f"*64))[0], 404)
         self.assertEqual(self.request(path + "&item_id=" + response.item_id)[0], 400)
+
+    def prepare_suggestion(self, *, new_sender=False):
+        from app.email.continuous_agent import EmailAssessment
+        from app.email.followup_assessment import assess
+        from tests.test_email_followup_monitor import mail
+        from tests.test_email_followup_assessment import candidate
+        _, first, _ = self.request(payload=self.command())
+        self.worker._update(lambda d:d["followups"].update(monitor={"version":1,"enabled":True}))
+        response=mail("2","reply@example.test","test@example.test",
+            sender="new@example.test" if new_sender else "sender@example.test",
+            recipient="recipient@example.test",body="Prosím doplňte míry.")
+        def propose(observed):
+            if not observed.followup_context:return proposal()
+            return EmailAssessment(proposal(),None,assess(observed,candidate(observed),model="synthetic"))
+        self.worker.cycle(FakeSource([response]),propose)
+        return self.service.overview({"id":first["followup"]["id"]})["followup"],response
+
+    def test_review_proposal_through_http_has_exact_confirmation_and_keeps_lifecycle(self):
+        value,_=self.prepare_suggestion()
+        command={"action":"accept_suggestion","id":value["id"],"expected_revision":value["revision"],
+                 "suggestion_id":value["suggestion"]["attempt_id"],"confirmed":False,"operation_id":"accept-http-0001"}
+        before=self.worker.repository.path.read_bytes()
+        self.assertEqual(self.request(payload=command)[0],400)
+        self.assertEqual(self.worker.repository.path.read_bytes(),before)
+        command["confirmed"]=True
+        code,result,_=self.request(payload=command)
+        self.assertEqual(code,200);self.assertEqual(result["followup"]["state"],"active")
+        self.assertEqual(result["followup"]["goal"],value["goal"])
+        self.assertEqual(result["followup"]["next_step"],"Změřit a dodat míry.")
+        self.assertTrue(self.request(payload=command)[1]["idempotent_replay"])
+
+    def test_http_binding_resolution_is_local_scoped_and_does_not_reassess(self):
+        value,message=self.prepare_suggestion(new_sender=True)
+        command={"action":"resolve_binding","id":value["id"],"expected_revision":value["revision"],
+            "item_id":message.item_id,"source_digest":message.content_digest,"decision":"accept",
+            "confirmed":True,"operation_id":"bind-http-0001"}
+        before=copy.deepcopy(self.worker.status()["sources"])
+        with patch("app.email.codex_proposer.CodexEmailProposer.__call__",side_effect=AssertionError("No new model")), \
+             patch("app.email.continuous_source.IMAPAgentSource.scan",side_effect=AssertionError("No IMAP")):
+            code,result,_=self.request(payload=command)
+        self.assertEqual(code,200);self.assertEqual(result["followup"]["state"],"active")
+        self.assertIn(message.item_id,result["followup"]["observations"]["items"])
+        self.assertEqual(before,self.worker.status()["sources"])
+        self.assertNotIn("followup_attempt",self.worker.status()["items"][message.item_id])
+
+    def test_http_decision_foreign_origin_stale_revision_and_extra_root_are_rejected(self):
+        value,_=self.prepare_suggestion()
+        command={"action":"reject_suggestion","id":value["id"],"expected_revision":value["revision"],
+                 "suggestion_id":value["suggestion"]["attempt_id"],"confirmed":True,"operation_id":"reject-http-0001"}
+        before=self.worker.repository.path.read_bytes()
+        self.assertEqual(self.request(payload=command,origin="https://foreign.invalid")[0],403)
+        self.assertEqual(self.request(payload={**command,"root":"/tmp"})[0],400)
+        self.assertEqual(self.request(payload={**command,"action":[]})[0],400)
+        self.assertEqual(self.request(payload={**command,"expected_revision":1})[0],409)
+        self.assertEqual(self.worker.repository.path.read_bytes(),before)
 
     def request(self, path="/api/email-agent/followups", payload=None, *, origin=None):
         data = None if payload is None else json.dumps(payload).encode()

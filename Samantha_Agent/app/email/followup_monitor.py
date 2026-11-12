@@ -161,7 +161,7 @@ class EmailFollowupMonitor:
                 current_items = [key for key, event in observations.get("items", {}).items()
                                  if event["generation"] == value["generation"]]
                 current_reviews = [key for key, event in observations.get("reviews", {}).items()
-                                   if event["generation"] == value["generation"]]
+                                   if event["generation"] == value["generation"] and not event.get("resolution")]
                 if not bound:
                     kind = "source_binding_unverified"
                 elif current_reviews:

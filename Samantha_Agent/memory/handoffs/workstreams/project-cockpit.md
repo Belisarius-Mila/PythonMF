@@ -1,4 +1,16 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
+## E-mailové návrhy a potvrzení vazeb, 2026-11-12 14:27 CET
+
+Lokálně integrované citované návrhy dalšího kroku, převzetí/úprava/odmítnutí
+a přesné ruční rozhodnutí o nejasné zprávě. API drží operation_id/revizi/digest,
+reload jen ověřuje původní účtenku. Zastaralý návrh nelze převzít. Uživatel
+zvlášť potvrzuje Vyřízeno, cíl a termín se automaticky nemění. Bez nového timeru.
+587 cílených a skutečný headless mobil/desktop PASS. Finální plná brána PASS:3709 testů /538,314s,31 SKIP.
+P+n všech dokončených commitů a úklid výslovně zadané; výsledek až v přesné účtence. Aktivace/upgradu služby se tento krok netýká.
+Kanonický handoff continuous_personal_agent_2026_11_04.md, report
+reports/email_followups_assessment_20261112.md. Tento Cockpit dokument kryje své
+UI/workflow, nenahrazuje nedohodnutý TVBCP celého e-mailového proudu.
+
 ## E-mailová etapa 3 — UI a workflow, 2026-11-12 13:26 CET
 
 Lokálně zobrazené časy kontrol, stav zdrojového důkazu a související zprávy.
@@ -2573,3 +2585,30 @@ kurzorem, generic-cache eviction, chybná epocha/backlog, žádné druhé posouz
 absence bez zdrojového důkazu odmítnutá a starý worker/rollback bez falešného Běží.
 Plná regrese PASS:3670 testů /572,074s,31 SKIP; finální čtecí zpřesnění následně478 cílených PASS /32,772s, viz report. Důkazy mimo Git: data/private/email_followups_step3_20261112/.
 Bez skutečného IMAP/SMTP/modelu, kalendáře, aktivace a změn Datovy kopie.
+
+
+## 2026-11-12 14:27 CET — Doložený další krok a ruční rozhodnutí o souvislosti
+
+**Hotovo:** Lokálně hotová etapa4 nad předchozími vazbami/termíny. Návrh ukazuje
+citaci a nejistoty, lze jej převzít, upravit či odmítnout. Převzetí neuzavírá
+záležitost. Nejasnou zprávu lze přesně přiřadit nebo odmítnout; nové přiřazení
+neopakuje posouzení a neprovede skryté sloučení dvou věcí.
+
+**Rozhodnutí:** Míla schválil pokračování vývoje před publikací. Jedno běžné
+posouzení s volitelným rozšířením; žádná nová role, nastavení služby, další tah,
+placený pilot ani automatická odchozí akce. HA-05 je Datův proud.
+
+**Další krok:** Dokončit výslovně zadané registrované p+n všech dokončených commitů včetně Datových a bezpečný úklid repa.
+
+**Navrhované další kroky:** Registrovaný upgrade kompatibilní hodinové kopie
+se zachováním stavu, vědomé zapnutí monitoru a malý skutečný případ;
+syntetický živý modelový pilot až s konkrétním rozpočtem; fyzická Mac/iPhone přejímka.
+Samostatný e-mailový TVBCP dál není dohodnutý a nevzniká náhradní dokument.
+
+**Technický důkaz:**587 cílených PASS, Node/HTTP, citace/strict schema/jeden turn,
+stará revize a source/basis/generation drift, pause uprostřed posouzení, neplatný
+volitelný výstup bez ztráty EmailProposal, restart/uncertainty bez retry,
+atomické rozhodnutí více věcí, generic-cache eviction a CSRF PASS. Skutečný
+headless Edge390×844 a1280×1000, bezpečný text a šířky tlačítek PASS.
+Finální plná brána PASS:3709 testů /538,314s,31 SKIP. Syntetické bytes/turns měření není důkaz stejné ceny.
+Bez skutečného IMAP/SMTP/modelového pilotu, změny rolí, upgradu, aktivace nebo Datovy kopie.

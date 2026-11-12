@@ -137,7 +137,9 @@ def binding_candidates(document: dict, item_id: str, followups: list[dict]) -> t
     if (evidence["message_id"] in known or len(evidence["in_reply_to"]) > 1
             or evidence["in_reply_to"] and not set(evidence["in_reply_to"]) <= known):
         return identities, "conflicting_parent"
-    if (evidence["sender"] != anchor["sender"]
-            or not set(evidence["participants"]) <= set(anchor["participants"])):
+    approved = value.get("observations", {})
+    senders = {anchor["sender"]} | set(approved.get("approved_senders", []))
+    participants = set(anchor["participants"]) | set(approved.get("approved_participants", []))
+    if (evidence["sender"] not in senders or not set(evidence["participants"]) <= participants):
         return identities, "participants_changed"
     return identities, "linked"

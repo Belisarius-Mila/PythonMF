@@ -120,6 +120,29 @@ def _record(space, identity):
                             or not isinstance(event.get("decision"), str)):
                         raise FollowupError("Neplatný doklad související zprávy.")
                     _instant(event["observed_at"])
+                    if "resolution" in event:
+                        resolution = event["resolution"]
+                        if not isinstance(resolution, dict) or resolution.get("decision") not in {"accept", "reject", "assigned_elsewhere"}:
+                            raise FollowupError("Neplatné rozhodnutí o vazbě.")
+                        _instant(resolution["at"])
+            for key in ("approved_senders", "approved_participants"):
+                if key in observations and (not isinstance(observations[key], list)
+                        or not all(isinstance(v, str) for v in observations[key])):
+                    raise FollowupError("Neplatní schválení účastníci.")
+        if "suggestion" in value:
+            from .followup_assessment import FollowupCandidate
+            suggestion = value["suggestion"]
+            if (not isinstance(suggestion, dict) or suggestion.get("status") not in {"pending", "accepted", "rejected", "superseded", "stale"}
+                    or any(not isinstance(suggestion.get(k), str) or not ITEM_ID.fullmatch(suggestion[k])
+                           for k in ("attempt_id", "source_item_id", "source_digest", "basis_digest"))
+                    or type(suggestion.get("generation")) is not int or not 1 <= suggestion["generation"] <= value["generation"]):
+                raise FollowupError("Neplatný obsahový návrh.")
+            try:
+                candidate = FollowupCandidate.model_validate(suggestion["candidate"])
+                if candidate.followup_id != identity:
+                    raise ValueError()
+            except ValueError:
+                raise FollowupError("Neplatný obsahový návrh.") from None
         if "tracking" in value:
             tracking = value["tracking"]
             if (not isinstance(tracking, dict) or tracking.get("version") != 1
@@ -136,10 +159,14 @@ def _record(space, identity):
 
 
 def _view(value, runtime=None):
+    from .followup_assessment import suggestion_view
     monitoring = "not_connected"
     if runtime and runtime["configured"]:
         monitoring = "running" if runtime["worker_recent"] else "worker_unverified"
-    return {**copy.deepcopy(value), "monitoring": monitoring}
+    view = {**copy.deepcopy(value), "monitoring": monitoring}
+    if "suggestion" in view:
+        view["suggestion"] = suggestion_view(value)
+    return view
 
 
 class EmailFollowups:
@@ -203,6 +230,11 @@ class EmailFollowups:
             raise FollowupError("Neplatný požadavek hlídání.")
         command = copy.deepcopy(payload)
         action = command.get("action")
+        if not isinstance(action, str):
+            raise FollowupError("Neplatná operace hlídání.")
+        if action in {"resolve_binding", "accept_suggestion", "reject_suggestion"}:
+            from .followup_review import execute_review
+            return execute_review(self, command)
         if action == "verify_source":
             return self._verify_source(command)
         common = {"action", "operation_id"}

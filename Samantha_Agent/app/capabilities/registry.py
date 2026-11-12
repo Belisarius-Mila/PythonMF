@@ -139,6 +139,21 @@ CAPABILITIES: tuple[CapabilityRecord, ...] = (
         notes="Explicit verify_source action with confirmation, revision and operation ID. No history baseline, cursor change, IMAP flags, send or model. Late completion cannot reopen a matter.",
     ),
     CapabilityRecord(
+        capability_id="email_followups_review", label="Confirm a scoped message binding or a proposed next step",
+        risk=RiskLevel.LOCAL_WRITE, reads=("exact private matter revision, source digest and frozen suggestion evidence",),
+        writes=("private binding decisions or explicitly accepted next_step/waiting_on and durable receipt",),
+        tool="app.email.followup_review.execute_review", requires_confirmation=True,
+        confirmation_policy=ConfirmationPolicy.SUMMARY_BEFORE_ACTION, audit=AuditPolicy.REDACTED,
+        notes="Exact confirmed action, stable operation ID and CAS. No model retry, send, calendar, goal/deadline overwrite or automatic completion. One source cannot silently merge two matters.",
+    ),
+    CapabilityRecord(
+        capability_id="email_followups_assessment", label="Validate one frozen follow-up assessment receipt",
+        risk=RiskLevel.LOCAL_WRITE, reads=("accepted message digest, active user goal and cited optional result from the existing email turn",),
+        writes=("private immutable attempt status and pending advisory proposal only",),
+        tool="app.email.followup_assessment.finish_assessment", audit=AuditPolicy.REDACTED,
+        notes="Internal registered email workflow only; the function starts no model. Context is reserved before the single existing assessment, while the monitor is enabled. Source/basis/generation drift or disabling prevents a new proposal. No retry, lifecycle change, send, calendar, new role or service activation.",
+    ),
+    CapabilityRecord(
         capability_id="email_followups_monitor", label="Check enabled email matters without a model",
         risk=RiskLevel.LOCAL_WRITE, reads=("accepted incoming header evidence and complete source scan receipts",),
         writes=("private linked-message facts and one current Cockpit notice per matter",),

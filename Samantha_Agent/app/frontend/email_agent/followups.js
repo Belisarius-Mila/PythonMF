@@ -63,14 +63,14 @@
     dialog.close(); editing = null; epoch++;
     return refresh();
   }
-  function open(mode, source) {
+  function open(mode, source, overrides = {}) {
     if (busy || pending || storageFault || !ready) return;
     epoch++;
     editing = {mode, source};
     const initial = mode === "create" ? {
       title: source.proposal?.metadata?.title || source.header?.subject || "",
       goal: source.proposal?.summary || "", next_step: "", waiting_on: "unknown", check_at: "",
-    } : source;
+    } : {...source, ...overrides};
     for (const [key, input] of Object.entries(fields)) {
       input.value = key === "check_at" && initial[key]
         ? window.SamanthaFollowupTime.toInput(initial[key]) : initial[key] || "";
@@ -98,6 +98,39 @@
     }
     entry.holder.append(node("p", "Archivace nebo skrytí e-mailové karty neukončí evidovanou záležitost.", "meta"));
   }
+  function suggestionPanel(value, showSource) {
+    const root = node("section", undefined, "followup-suggestion"), suggestion = value.suggestion;
+    if (suggestion?.status === "pending" && value.state === "active") {
+      const candidate = suggestion.candidate, actions = node("div", undefined, "actions");
+      root.append(node("h4", candidate.kind === "review_completion" ? "Návrh posoudit vyřízení" : "Návrh dalšího kroku"),
+        node("p", candidate.next_step), node("p", waitingText[candidate.waiting_on]), node("p", candidate.reason));
+      for (const claim of candidate.evidence) root.append(node("blockquote", claim.quote));
+      for (const uncertainty of candidate.uncertainties) root.append(node("p", `Nejistota: ${uncertainty}`, "meta"));
+      root.append(node("p", "Jde o návrh. Převzetí změní jen další krok a kdo je na řadě. Vyřízení potvrzuješ zvlášť.", "meta"));
+      actions.append(button("Zobrazit podklad návrhu", () => showSource(suggestion.source_item_id)));
+      if (candidate.next_step.trim() && candidate.evidence.length) {
+        actions.append(button("Převzít další krok", () => mutate({action: "accept_suggestion", id: value.id,
+          expected_revision: value.revision, suggestion_id: suggestion.attempt_id, confirmed: true})),
+          button("Upravit navržený krok", () => open("update", value,
+            {next_step: candidate.next_step, waiting_on: candidate.waiting_on})));
+      }
+      actions.append(button("Odmítnout návrh", () => mutate({action: "reject_suggestion", id: value.id,
+        expected_revision: value.revision, suggestion_id: suggestion.attempt_id, confirmed: true})));
+      root.append(actions);
+    } else if (suggestion) {
+      const labels = {accepted: "Navržený krok byl převzatý.", rejected: "Návrh byl odmítnutý.",
+        stale: "Návrh je ze starších podkladů a nelze jej převzít.", superseded: "Starší návrh už není aktuální."};
+      root.append(node("p", labels[suggestion.status] || "Obsahový návrh není ověřený.", "meta"));
+    }
+    if (value.assessment && suggestion?.status !== "pending") {
+      const labels = {unverified: "Výsledek obsahového posouzení není ověřený. Neopakuje se automaticky.",
+        invalid: "Obsahový návrh nemá platné doložení. Posuď zprávu ručně.",
+        not_applicable: "Z posouzení se nepřevzal doložený další krok. Zpráva zůstává k ručnímu posouzení.",
+        manual_review: "Zpráva byla přiřazená ručně. Modelové posouzení se kvůli tomu neopakovalo."};
+      if (labels[value.assessment.status]) root.append(node("p", labels[value.assessment.status], "meta"));
+    }
+    return root;
+  }
   function paint() {
     for (const state of ["active", "completed"]) {
       const root = byId(state === "active" ? "followupsActive" : "followupsCompleted");
@@ -109,7 +142,8 @@
         card.append(node("h3", value.title), node("p", value.goal),
           node("p", `Další krok: ${value.next_step}`), node("p", waitingText[value.waiting_on]),
           node("p", `Zapsaný čas kontroly: ${dateText(value.check_at)} · Praha`, "meta"),
-          node("p", value.tracking ? checkText[value.tracking.status] || "Stav kontroly není ověřený."
+          node("p", value.tracking ? value.tracking.reason === "binding_changed" ? "Přiřazení je aktualizované; čeká na další kontrolu."
+            : checkText[value.tracking.status] || "Stav kontroly není ověřený."
             : "Automatická kontrola dosud neproběhla.", "meta"), transitions(value));
         if (value.tracking) {
           card.append(node("p", `Poslední kontrola: ${dateText(value.tracking.last_checked_at)}`, "meta"));
@@ -133,6 +167,7 @@
               node("p", `${message.header.sender} · ${message.header.date}`, "meta"), node("pre", message.body_text));
           } catch (_) { source.textContent = "Uložený zdroj nelze načíst. Záležitost zůstává zachovaná."; }
         };
+        card.append(suggestionPanel(value, showSource));
         detail.append(button("Zobrazit zdrojový e-mail", () => showSource()));
         if (value.state === "active" && value.source.thread_binding !== "verified_headers") {
           detail.append(node("p", "Ověření načte jen přesný původní e-mail, pokud jeho hlavičky nejsou uložené. Nemění schránku.", "meta"),
@@ -141,14 +176,29 @@
         }
         for (const bucket of ["items", "reviews"]) {
           for (const [itemId, event] of Object.entries(value.observations?.[bucket] || {})) {
-            detail.append(button(`${bucket === "items" ? "Související zpráva" : "Zpráva k ověření vazby"} · ${dateText(event.observed_at)}`,
-              () => showSource(itemId)));
+            if (bucket === "reviews" && event.resolution?.decision === "accept") continue;
+            const row = node("section", undefined, "followup-binding-review"), resolved = Boolean(event.resolution);
+            const label = bucket === "items" ? "Související zpráva" : resolved ? "Rozhodnutá vazba zprávy" : "Zpráva k ověření vazby";
+            row.append(button(`${label} · ${dateText(event.observed_at)}`, () => showSource(itemId)));
+            if (bucket === "reviews" && !resolved && event.generation === value.generation && value.state === "active") {
+              row.append(node("p", "Potvrď pouze souvislost této zprávy s cílem záležitosti. Cíl ani stav se nezmění.", "meta"));
+              const actions = node("div", undefined, "actions");
+              for (const [label, decision] of [["Patří k této záležitosti", "accept"], ["Nesouvisí", "reject"]]) {
+                actions.append(button(label, () => mutate({action: "resolve_binding", id: value.id,
+                  expected_revision: value.revision, item_id: itemId, source_digest: event.content_digest,
+                  decision, confirmed: true})));
+              }
+              row.append(actions);
+            }
+            detail.append(row);
           }
         }
         detail.append(source);
         for (const event of value.history || []) {
           const labels = {source_verified: "Ověření původního e-mailu", related_message: "Příchod související zprávy",
-            binding_review: "Vazba zprávy k ověření", monitor_check: "Kontrola hlídání"};
+            binding_review: "Vazba zprávy k ověření", monitor_check: "Kontrola hlídání",
+            binding_decision: "Rozhodnutí o přiřazení", suggestion_decision: "Rozhodnutí o návrhu",
+            assessment_proposed: "Návrh dalšího kroku", assessment_unverified: "Obsahové posouzení k ověření"};
           const label = labels[event.action] || (event.action === "create" ? "Založení" : event.action === "update" ? "Úprava údajů"
             : event.changes?.state === "completed" ? "Vyřízeno" : "Obnovení hlídání");
           detail.append(node("p", `${dateText(event.at || value.updated_at)} · ${label}`, "meta"));
@@ -245,7 +295,9 @@
         throw new Error();
       }
       if (!result.followup?.id) throw new Error();
-      remember(result.followup); clearPending();
+      remember(result.followup);
+      for (const value of result.related_followups || []) remember(value);
+      clearPending();
       dialog.close(); editing = null;
       status.textContent = "Stav záležitosti uložený. Běh automatických kontrol ověřuje přehled.";
     } catch (_) {

@@ -18,6 +18,7 @@ class ObservedEmail:
     uidvalidity: str
     source: EmailArchiveSource
     importance_preferences: tuple[dict[str, str], ...] = ()
+    followup_context: dict | None = None
 
     @property
     def item_id(self) -> str:

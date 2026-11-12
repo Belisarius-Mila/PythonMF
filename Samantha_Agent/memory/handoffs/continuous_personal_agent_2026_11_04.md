@@ -1,5 +1,34 @@
 # Průběžný osobní agent — e-mailový provoz a Pushcut
 
+## Hlídání e-mailů — lokální etapa 4, 2026-11-12 14:27 CET
+
+Na Mílův pokyn pokračoval Adam po checkpointu10555d48; HA-05 zůstává Datovi.
+Lokálně hotové doložené návrhy dalšího kroku v jediném běžném posouzení zprávy
+a výslovné potvrzení/odmítnutí nejasných vazeb. Před posouzením se atomicky
+zmrazí konkrétní zdroj, cíl, uživatelský základ, generace a identita pokusu.
+Výsledek po ruční změně, vyřízení/znovuotevření, výměně zdroje či vypnutí doplňku
+zůstane u původního pokusu jako neaktuální; nová záležitost se nepřepíše.
+
+Citace musejí odpovídat skutečnému textu/předmětu/HTML. Neplatný volitelný
+výstup nesmaže běžný e-mailový návrh. Převzetí mění jen next_step/waiting_on;
+cíl, čas kontroly a active/completed mění dál uživatel zvlášť. Ruční přiřazení
+po posouzení nevytváří druhý modelový tah; existující dvě věci se neslučují.
+Jeden společný tah podporuje současně kalendář i hlídání, bez změny EmailProposal,
+rolí, ServiceSettings a režimu odesílání. Výchozí monitor zůstává vypnutý.
+
+587 cílených PASS /34,988s, statická brána PASS. Skutečný headless Edge:
+390×844 náhled/úprava a1280×1000 převzetí/vazba PASS, bez přetékání a opakovaného
+POST/modelu; mobilní tlačítka po vizuální opravě zkontrolovaná. Finální plná brána PASS:3709 testů /538,314s,31 SKIP.
+Syntetický vstup358→981B, instrukce3192→4555B, schéma1181→2548B; tah1→1.
+Skutečné tokeny, cena, kvalita odpovědí živého modelu a fyzický iPhone nejsou ověřené.
+Další: samostatně schválené p+n etapy3+4, registrovaný upgrade hodinové kopie,
+vědomé zapnutí a omezený test. Placený pilot vyžaduje konkrétní rozsah/rozpočet.
+Míla následně výslovně zadal p+n všech dokončených commitů včetně Datových a úklid repa. Servisní upgrade ani aktivace doplňku tím nejsou provedené.
+Samostatný e-mailový TVBCP není dohodnutý; existující Cockpit TVBCP kryje své UI/workflow.
+Report reports/email_followups_assessment_20261112.md, důkazy mimo Git
+v data/private/email_followups_step4_20261112/.
+
+
 ## Hlídání e-mailů — lokální etapa 3, 2026-11-12 13:26 CET
 
 Etapy1/2 včetně ručního UI jsou vydané v původním balíčku4242cf7f5bdb6b88724e635cde31b443.
@@ -1635,3 +1664,30 @@ kurzorem, generic-cache eviction, chybná epocha/backlog, žádné druhé posouz
 absence bez zdrojového důkazu odmítnutá a starý worker/rollback bez falešného Běží.
 Plná regrese PASS:3670 testů /572,074s,31 SKIP; finální čtecí zpřesnění následně478 cílených PASS /32,772s, viz report. Důkazy mimo Git: data/private/email_followups_step3_20261112/.
 Bez skutečného IMAP/SMTP/modelu, kalendáře, aktivace a změn Datovy kopie.
+
+
+## 2026-11-12 14:27 CET — Doložený další krok a ruční rozhodnutí o souvislosti
+
+**Hotovo:** Lokálně hotová etapa4 nad předchozími vazbami/termíny. Návrh ukazuje
+citaci a nejistoty, lze jej převzít, upravit či odmítnout. Převzetí neuzavírá
+záležitost. Nejasnou zprávu lze přesně přiřadit nebo odmítnout; nové přiřazení
+neopakuje posouzení a neprovede skryté sloučení dvou věcí.
+
+**Rozhodnutí:** Míla schválil pokračování vývoje před publikací. Jedno běžné
+posouzení s volitelným rozšířením; žádná nová role, nastavení služby, další tah,
+placený pilot ani automatická odchozí akce. HA-05 je Datův proud.
+
+**Další krok:** Dokončit výslovně zadané registrované p+n všech dokončených commitů včetně Datových a bezpečný úklid repa.
+
+**Navrhované další kroky:** Registrovaný upgrade kompatibilní hodinové kopie
+se zachováním stavu, vědomé zapnutí monitoru a malý skutečný případ;
+syntetický živý modelový pilot až s konkrétním rozpočtem; fyzická Mac/iPhone přejímka.
+Samostatný e-mailový TVBCP dál není dohodnutý a nevzniká náhradní dokument.
+
+**Technický důkaz:**587 cílených PASS, Node/HTTP, citace/strict schema/jeden turn,
+stará revize a source/basis/generation drift, pause uprostřed posouzení, neplatný
+volitelný výstup bez ztráty EmailProposal, restart/uncertainty bez retry,
+atomické rozhodnutí více věcí, generic-cache eviction a CSRF PASS. Skutečný
+headless Edge390×844 a1280×1000, bezpečný text a šířky tlačítek PASS.
+Finální plná brána PASS:3709 testů /538,314s,31 SKIP. Syntetické bytes/turns měření není důkaz stejné ceny.
+Bez skutečného IMAP/SMTP/modelového pilotu, změny rolí, upgradu, aktivace nebo Datovy kopie.

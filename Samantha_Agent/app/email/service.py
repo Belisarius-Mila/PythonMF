@@ -83,7 +83,7 @@ def readiness(*, settings_path: Path = SETTINGS_PATH, worker=None,
     return {"ready": not blockers, "blockers": blockers, "sources": sources,
             "enabled": settings.enabled, "role": EMAIL_ROLE,
             "calendar_suggestions": settings.calendar_suggestions,
-            "followup_monitor": {"supported_version": 1, "configured": followup_config["enabled"]},
+            "followup_monitor": {"supported_version": 1, "assessment_supported_version": 1, "configured": followup_config["enabled"]},
             "hours": "07:00–22:00 Europe/Prague", "max_assessments_per_day": settings.max_assessments_per_day,
             "pushcut": pushcut_status(worker)}
 
@@ -205,7 +205,7 @@ def run_service_check(*, worker=None, tick=service_tick, **kwargs) -> dict:
     try:
         with exclusive_file_lock(worker.root / "service_check", timeout=0):
             marker = {"check_id": uuid4().hex, "pid": os.getpid(), "started_at": datetime.now(timezone.utc).isoformat(),
-                      "status": "running", "followup_monitor_version": 1}
+                      "status": "running", "followup_monitor_version": 1, "followup_assessment_version": 1}
             health.transact(lambda _: RepositoryMutation(marker))
             try:
                 outcome = tick(worker=worker, **kwargs)

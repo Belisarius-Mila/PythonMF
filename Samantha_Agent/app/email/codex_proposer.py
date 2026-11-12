@@ -12,11 +12,20 @@ from app.communication.local_runtime import DEFAULT_SOCKET_PATH
 from .continuous_agent import EmailAssessment, EmailProposal, IMPORTANCE_PREFERENCE_INSTRUCTIONS
 from .calendar_assessment import calendar_suggestion
 from .calendar_proposal import Candidate, INSTRUCTIONS as CALENDAR_INSTRUCTIONS
+from .followup_assessment import FollowupCandidate, INSTRUCTIONS as FOLLOWUP_INSTRUCTIONS, validate_context, assess, metrics
 from .proposal_policy import PROPOSAL_INSTRUCTIONS, load_reply_name, proposal_payload, signed_draft
 
 
 class CalendarEmailProposal(EmailProposal):
     calendar_candidate: Candidate | None = None
+
+
+class FollowupEmailProposal(EmailProposal):
+    followup_candidate: FollowupCandidate | None = None
+
+
+class CombinedEmailProposal(CalendarEmailProposal):
+    followup_candidate: FollowupCandidate | None = None
 
 
 def _require_all(schema):
@@ -46,11 +55,19 @@ class CodexEmailProposer:
 
     def __call__(self, observed) -> EmailProposal | EmailAssessment:
         source = proposal_payload(observed, self.reply_name)
-        output_schema = (CalendarEmailProposal if self.calendar_suggestions else EmailProposal).model_json_schema()
+        baseline_bytes = len(json.dumps(source, ensure_ascii=False).encode())
+        contextual = bool(getattr(observed, 'followup_context', None))
+        if contextual:
+            source['followup_context'] = validate_context(observed)
+        schema_type = (CombinedEmailProposal if self.calendar_suggestions else FollowupEmailProposal) if contextual else (
+            CalendarEmailProposal if self.calendar_suggestions else EmailProposal)
+        output_schema = schema_type.model_json_schema()
         # Structured output requires every property, including fields whose
         # local Pydantic defaults keep historical saved proposals compatible.
         _require_all(output_schema)
         instructions = PROPOSAL_INSTRUCTIONS + " " + IMPORTANCE_PREFERENCE_INSTRUCTIONS
+        if contextual:
+            instructions += " " + FOLLOWUP_INSTRUCTIONS
         if self.calendar_suggestions:
             instructions += (' Současně vyplň calendar_candidate podle následujících pravidel. '
                 'Bez konkrétní schůzky nebo termínu vrať null. Pro citace body znamená body_text, '
@@ -69,11 +86,20 @@ class CodexEmailProposer:
             raise ValueError("Modelové posouzení nemá potvrzený konečný výsledek.")
         raw = json.loads(receipt.answer)
         candidate = raw.pop('calendar_candidate', None) if self.calendar_suggestions else None
+        followup_candidate = raw.pop('followup_candidate', None) if contextual else None
         proposal = EmailProposal.model_validate(raw)
         proposal.reply_draft = signed_draft(proposal.reply_draft, self.reply_name)
+        suggestion = None
+        followup = None
         if self.calendar_suggestions:
             suggestion = calendar_suggestion(observed, candidate, model=self.model)
             suggestion['assessment_usage'] = getattr(receipt, 'thread_token_usage', None)
             suggestion['assessment_duration_ms'] = getattr(receipt, 'duration_ms', None)
-            return EmailAssessment(proposal, suggestion)
+        if contextual:
+            followup = assess(observed, followup_candidate, model=self.model)
+            followup.update(metrics({'assessment_usage':getattr(receipt, 'thread_token_usage', None),
+                'assessment_duration_ms':getattr(receipt, 'duration_ms', None),
+                'baseline_utf8_bytes':baseline_bytes, 'input_utf8_bytes':len(json.dumps(source, ensure_ascii=False).encode())}))
+        if self.calendar_suggestions or contextual:
+            return EmailAssessment(proposal, suggestion, followup)
         return proposal

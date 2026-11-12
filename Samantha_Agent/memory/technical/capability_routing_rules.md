@@ -315,3 +315,21 @@ je vypnutý bez followups.monitor.version=1/enabled=true. Tento krok nevystavuje
 aktivaci ani neinstaluje službu. Verzi dokládá kompatibilní service_health,
 ne index nebo samotný configured flag. Služba, modelové/systémové brány a
 p+n dál mají samostatný registrovaný postup. Report email_followups_monitor_20261112.md.
+
+
+## 2026-11-12 14:27 CET — Obsahový návrh a potvrzení vazby
+
+email_followups_assessment validuje a ukládá zmrazený volitelný výsledek
+v rámci existujícího e-mailového posouzení; funkce sama model nespouští.
+Požadavek do téhož CodexEmailProposer přidá jen konkrétní aktivní cíl/krok;
+beze změny centrální role, ServiceSettings a počtu tahů. Větší vstup není důkaz
+stejné ceny. Nejistý/invalidní výsledek se automaticky neopakuje.
+email_followups_review používá stejné POST /api/email-agent/followups:
+resolve_binding s item_id/source_digest/decision, nebo accept_suggestion /
+reject_suggestion s přesným suggestion_id; vždy id, expected_revision,
+operation_id a confirmed=true. Kontroluje uložený zdroj a uživatelský základ.
+Přiřazení nepřepíše cíl ani lifecycle a nesloučí dvě existující věci. Převzetí
+obsahového návrhu mění pouze next_step/waiting_on. Žádný SMTP/kalendář/model,
+aktivace či systémový zásah. API readback používá původní doménovou účtenku.
+Readiness/heartbeat odděleně dokládají followup_assessment_version1. Nejde o
+živou modelovou/publikační/fyzickou přejímku. Report email_followups_assessment_20261112.md.

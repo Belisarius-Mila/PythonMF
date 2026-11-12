@@ -98,6 +98,20 @@ function server(initial=null) {
       } else if(payload.action==='verify_source') {
         assert.equal(payload.confirmed,true);
         s.value.source.thread_binding='verified_headers';
+      } else if(payload.action==='resolve_binding') {
+        assert.equal(payload.confirmed,true);
+        const event=s.value.observations.reviews[payload.item_id];
+        assert.equal(payload.source_digest,event.content_digest);
+        event.resolution={decision:payload.decision};
+        if(payload.decision==='accept') s.value.observations.items[payload.item_id]={...clone(event),decision:'human_linked'};
+        s.value.assessment={status:'manual_review'};
+      } else if(['accept_suggestion','reject_suggestion'].includes(payload.action)) {
+        assert.equal(payload.confirmed,true);assert.equal(payload.suggestion_id,s.value.suggestion.attempt_id);
+        if(payload.action==='accept_suggestion') {
+          s.value.next_step=s.value.suggestion.candidate.next_step;
+          s.value.waiting_on=s.value.suggestion.candidate.waiting_on;
+        }
+        s.value.suggestion.status=payload.action==='accept_suggestion'?'accepted':'rejected';
       } else {
         assert.equal(payload.action,'set_state');
         s.value.state=payload.state;s.value.generation++;
@@ -290,5 +304,42 @@ async function submit(b) {await b.ids.followupForm.fire('submit',{submitter:b.id
   b.s.running=true;b.s.monitorVersion=99;await b.api.refresh();
   assert.match(b.ids.followupsStatus.textContent,/nelze ověřit/);
   assert.equal(find(b.ids.followupsActive,'Vyřízeno').disabled,true,'Unknown running protocol cannot authorize writes');
+
+  const suggestion={attempt_id:'d'.repeat(64),status:'pending',source_item_id:relatedID,generation:1,
+    candidate:{kind:'review_completion',next_step:'Posoudit nabídku a případné vyřízení.',waiting_on:'review',
+      reason:'<script>Reason</script>',evidence:[{source:'body',quote:'<img src=x> Doložený podklad'}],uncertainties:['Ověřit přílohu.']}};
+  const proposed=stored({suggestion,observations:{items:{[relatedID]:{observed_at:'2026-11-12T09:00:00Z'}},reviews:{}}});
+  b=await boot(server(proposed));const originalGoal=b.s.value.goal, originalCheck=b.s.value.check_at;
+  assert.match(b.ids.followupsActive.textContent,/Návrh posoudit vyřízení/);
+  assert.match(b.ids.followupsActive.textContent,/<script>Reason<\/script>/);
+  assert.equal(posts(b.s).length,0,'Rendering a model suggestion performs no action');
+  await find(b.ids.followupsActive,'Převzít další krok').click();
+  assert.equal(b.s.value.state,'active','Accepting the next step cannot complete a matter');
+  assert.equal(b.s.value.goal,originalGoal);assert.equal(b.s.value.check_at,originalCheck);
+  assert.equal(b.s.value.next_step,suggestion.candidate.next_step);
+  assert.equal(posts(b.s)[0].payload.action,'accept_suggestion');
+
+  b=await boot(server(proposed));await find(b.ids.followupsActive,'Upravit navržený krok').click();
+  assert.equal(b.ids.followupNextStep.value,suggestion.candidate.next_step);
+  b.ids.followupNextStep.value='Můj ručně upřesněný krok';await submit(b);
+  assert.equal(posts(b.s)[0].payload.action,'update');assert.equal(b.s.value.next_step,'Můj ručně upřesněný krok');
+
+  b=await boot(server(proposed));b.s.mode='unknown_committed';await find(b.ids.followupsActive,'Odmítnout návrh').click();
+  await b.ids.followupVerify.click();assert.equal(posts(b.s).length,1,'Lost suggestion decision is only read back');
+  assert.equal(b.s.value.suggestion.status,'rejected');assert.equal(b.s.value.next_step,proposed.next_step);
+
+  const event={generation:1,content_digest:'e'.repeat(64),observed_at:'2026-11-12T09:00:00Z'};
+  const review=stored({observations:{items:{},reviews:{[relatedID]:event}}});
+  b=await boot(server(review));await find(b.ids.followupsActive,'Patří k této záležitosti').click();
+  assert.equal(posts(b.s)[0].payload.action,'resolve_binding');assert.equal(posts(b.s)[0].payload.decision,'accept');
+  assert.equal(b.s.value.goal,review.goal);assert.equal(b.s.value.state,'active');
+  assert.equal(find(b.ids.followupsActive,'Patří k této záležitosti'),null);
+  b=await boot(server(review));b.s.mode='unknown_committed';await find(b.ids.followupsActive,'Nesouvisí').click();
+  await b.ids.followupVerify.click();assert.equal(posts(b.s).length,1);
+  assert.equal(b.s.value.observations.reviews[relatedID].resolution.decision,'reject');
+
+  b=await boot(server({...proposed,suggestion:{...suggestion,status:'stale'}}));
+  assert.equal(find(b.ids.followupsActive,'Převzít další krok'),null);
+  assert.match(b.ids.followupsActive.textContent,/starších podkladů/);
   console.log('Follow-up UI: lifecycle/recovery, source binding, related read, truthful worker state and no second timer OK');
 })().catch(error=>{console.error(error);process.exitCode=1;});
