@@ -1131,6 +1131,24 @@ Doplnění 17102026 k LL-071: Nativní modelový pomocník navíc zdvojuje roli,
 - Ověřené řešení: Rozlišit obnovu od ukončení a od `codex resume`; ověřený screen spustit přímo jako terminál VS Code přes `screen -d -r <socket>`. Připojený stav vyžaduje potvrzení převzetí. PID/start a ochrany ověřit znovu při jednorázovém převzetí.
 - Ověření: Vývojové okno skutečného VS Code připojilo vlastní testovací screen a zachovalo PID screenu i vnitřních procesů. UI test používá náhradní DOM; skutečný první klik z Cockpitu zůstává samostatným ověřením.
 
+Doplnění 12112026 — obnova Data po restartu ve druhém okně VS Code:
+- Nejdřív `screen -ls` a kontrola běžících Codex procesů. Existující vlastní
+  screen pouze připojit; po restartu Macu může zůstat jen obnovená historie
+  terminálu, nikoli živá relace. Druhé okno vybrat přes nabídku Okno;
+  Adamův terminál nenahrazovat ani nerozdělovat místo samostatného okna.
+- Pokud `data_codex` chybí, určit poslední Datovu relaci podle `session_meta.cwd`
+  v uložených JSONL a posledního tématu. Staré ID z paměti ani popisek TTY nejsou
+  autoritativní: Data mezitím použil `/new`. Ověřit správný worktree a větev.
+- Ve volném shellu druhého okna spustit
+  `/usr/bin/screen -U -S data_codex /usr/local/bin/codex -C <Datův-worktree> resume <ověřené-session-id>`.
+  Pro již běžící screen použít `screen -d -r data_codex`, nevytvářet druhý Codex.
+  Volitelnou nabídku aktualizace při obnově přeskočit volbou Skip; neposílat
+  nový pracovní pokyn jen kvůli otevření uložené konverzace.
+- Prakticky ověřeno: obě samostatná okna VS Code, oba screeny Attached,
+  Datův proces se správným ID a worktree na `data/parallel-20261104` a viditelná
+  poslední odpověď s plánem Human–Adam i připravený vstup. Oba checkouty čisté;
+  kód a služby nezměněné. Screen přežije odpojení terminálu, nikoli restart Macu.
+
 ### 2026-09-13 – Viditelná šipka může být zakrytá úvodním audio panelem
 
 - Problém: návrat ve scénách MMTX 4 a 5 byl vidět, ale úvodní audio překryv zachytával kliknutí. Samotná kontrola href ani viditelnosti chybu neodhalila.
