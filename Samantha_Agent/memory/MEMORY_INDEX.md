@@ -1,4 +1,6 @@
 # Memory Index
+- `reports/email_followups_activation_20261112.md`; `handoffs/continuous_personal_agent_2026_11_04.md`; `projects/email_readonly_oauth.md` — 12.11.: upgrade a vědomé zapnutí výslovně zadané. Registrovaný setter kontroluje přesnou instalaci, idempotenci/zámky,67 cílených PASS; finální brána a provozní výsledek v reportu/privátních účtenkách. Starý worker7f47a41f se přepne až registrovaně; nový heartbeat není odvozen z configured flagu.
+
 - `reports/all_finished_email_ha_release_20261112.md` — 12.11.: zadané jediné společné p+n e-mailových etap3+4 a Datova HA-05;192 integračních PASS,39 starých větví uklizeno se zálohou. Datův nezapsaný HA-06 zachován. Request email-ha-all-finished-20261112-v1, výsledek až v původní účtence; služba/monitor bez upgradu/aktivace.
 
 

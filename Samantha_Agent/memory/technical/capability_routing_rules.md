@@ -333,3 +333,16 @@ obsahového návrhu mění pouze next_step/waiting_on. Žádný SMTP/kalendář/
 aktivace či systémový zásah. API readback používá původní doménovou účtenku.
 Readiness/heartbeat odděleně dokládají followup_assessment_version1. Nejde o
 živou modelovou/publikační/fyzickou přejímku. Report email_followups_assessment_20261112.md.
+
+## 2026-11-12 — Vědomá aktivace hlídání po upgradu
+
+email_followups_configure používá pouze
+app.email.service_control.EmailServiceController.configure_followups:
+enabled jako bool, confirmed=true, expected_source_head jako přesný SHA.
+Zapnutí ověřuje vlastněnou načtenou aktivní instalaci a bytewise kritické
+moduly proti commitu, zámky installation/service_check a atomický privátní
+namespace. Žádný model, scan, systémový zápis ani kick. Běžná povolená hodinová
+služba pokračuje původním oknem/kurzory. Aktivace zneplatní technický slot/čas,
+nový heartbeat se musí doložit. Stejná volba je idempotentní; vypnutí nevyžaduje
+zdravou instalaci. Systémový upgrade zůstává samostatné pause/prepare/upgrade
+s globální brzdou, plným manifestem a zachováním staré kopie.

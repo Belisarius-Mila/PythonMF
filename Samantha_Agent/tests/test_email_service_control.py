@@ -306,3 +306,103 @@ class ServiceControlTests(unittest.TestCase):
         self.prepare()
         with self.assertRaises(ValueError): self.upgrade()
         self.assertTrue(self.control.status()["owned"])
+
+    def followup_install(self):
+        for name in ("service.py", "followup_monitor.py", "followup_assessment.py", "codex_proposer.py"):
+            path = self.project / "app/email" / name
+            path.parent.mkdir(parents=True, exist_ok=True)
+            path.write_text("SYNTHETIC_FEATURE_VERSION = 1\n")
+        self.git("add", "app/email")
+        self.git("commit", "-m", "synthetic follow-up support")
+        self.prepare()
+        self.install()
+        return self.plan["source_head"]
+
+    def test_followup_enable_preserves_business_state_and_is_idempotent(self):
+        head = self.followup_install()
+        before = self.control.worker.status()
+        settings = self.control.settings_path.read_bytes()
+        self.control.selector = Mock(side_effect=AssertionError("must not start a model"))
+        calls = len(self.system_calls)
+        result = self.control.configure_followups(enabled=True, confirmed=True, expected_source_head=head)
+        after = self.control.worker.status()
+        for key in before:
+            if key != "_repository": self.assertEqual(before[key], after[key])
+        self.assertTrue(after["followups"]["monitor"]["enabled"])
+        self.assertEqual(after["followups"]["monitor"]["last_run_at"], "")
+        self.assertFalse(result["worker_verified"] or result["model_started"])
+        self.assertEqual(self.control.settings_path.read_bytes(), settings)
+        self.assertEqual(self.system_calls[calls:], [["print", self.control.job]])
+        snapshot = self.control.worker.repository.path.read_bytes()
+        self.assertFalse(self.control.configure_followups(enabled=True, confirmed=True, expected_source_head=head)["changed"])
+        self.assertEqual(snapshot, self.control.worker.repository.path.read_bytes())
+        self.control.selector.assert_not_called()
+
+    def test_followup_enable_requires_exact_confirmation_and_head(self):
+        head = self.followup_install()
+        before = self.control.worker.repository.path.read_bytes()
+        for args in ({"enabled": True, "confirmed": False, "expected_source_head": head},
+                     {"enabled": 1, "confirmed": True, "expected_source_head": head},
+                     {"enabled": True, "confirmed": True, "expected_source_head": "0" * 40}):
+            with self.subTest(args=args), self.assertRaises(ValueError):
+                self.control.configure_followups(**args)
+        self.assertEqual(before, self.control.worker.repository.path.read_bytes())
+
+    def test_followup_enable_refuses_old_runtime_without_support(self):
+        self.prepare(); self.install()
+        before = self.control.worker.repository.path.read_bytes()
+        with self.assertRaises((ValueError, OSError)):
+            self.control.configure_followups(enabled=True, confirmed=True, expected_source_head=self.plan["source_head"])
+        self.assertEqual(before, self.control.worker.repository.path.read_bytes())
+
+    def test_followup_enable_refuses_changed_runtime_or_foreign_job(self):
+        head = self.followup_install()
+        path = Path(self.plan["runtime"]) / "app/email/service.py"
+        original = path.read_bytes(); path.write_text("foreign code")
+        with self.assertRaises(ValueError):
+            self.control.configure_followups(enabled=True, confirmed=True, expected_source_head=head)
+        path.write_bytes(original)
+        self.control.target.write_text("foreign plist")
+        with self.assertRaises(ValueError):
+            self.control.configure_followups(enabled=True, confirmed=True, expected_source_head=head)
+        self.assertNotIn("followups", self.control.worker.status())
+
+    def test_followup_enable_refuses_paused_or_unloaded_service(self):
+        head = self.followup_install()
+        self.control.pause(confirmed=True)
+        with self.assertRaises(ValueError):
+            self.control.configure_followups(enabled=True, confirmed=True, expected_source_head=head)
+        self.control.resume(confirmed=True)
+        self.loaded = False
+        with self.assertRaises(ValueError):
+            self.control.configure_followups(enabled=True, confirmed=True, expected_source_head=head)
+
+    def test_followup_change_refuses_busy_worker_without_writing(self):
+        head = self.followup_install()
+        before = self.control.worker.repository.path.read_bytes()
+        with exclusive_file_lock(self.control.root / "service_check", timeout=0):
+            with self.assertRaises(FileLockTimeoutError):
+                self.control.configure_followups(enabled=True, confirmed=True, expected_source_head=head)
+        self.assertEqual(before, self.control.worker.repository.path.read_bytes())
+
+    def test_followup_disable_available_when_runtime_needs_repair(self):
+        head = self.followup_install()
+        self.control.configure_followups(enabled=True, confirmed=True, expected_source_head=head)
+        self.control.target.write_text("foreign plist")
+        self.loaded = False
+        self.assertTrue(self.control.configure_followups(enabled=False, confirmed=True, expected_source_head=head)["changed"])
+        self.assertFalse(self.control.worker.status()["followups"]["monitor"]["enabled"])
+
+    def test_followup_reenable_same_hour_waits_for_and_records_a_new_worker_check(self):
+        from datetime import datetime, timezone
+        from app.email.followup_monitor import EmailFollowupMonitor
+        head = self.followup_install()
+        now = datetime(2026, 11, 12, 13, 30, tzinfo=timezone.utc)
+        self.control.configure_followups(enabled=True, confirmed=True, expected_source_head=head)
+        monitor = EmailFollowupMonitor(self.control.worker)
+        monitor.check(now=now)
+        self.control.configure_followups(enabled=False, confirmed=True, expected_source_head=head)
+        self.control.configure_followups(enabled=True, confirmed=True, expected_source_head=head)
+        self.assertEqual(self.control.worker.status()["followups"]["monitor"]["last_run_at"], "")
+        monitor.check(now=now)
+        self.assertEqual(self.control.worker.status()["followups"]["monitor"]["last_run_at"], now.isoformat())

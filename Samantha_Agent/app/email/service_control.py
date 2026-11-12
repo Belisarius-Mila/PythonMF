@@ -9,6 +9,7 @@ import json
 import os
 from pathlib import Path, PurePosixPath
 import plistlib
+import re
 import shutil
 import subprocess
 import tarfile
@@ -17,7 +18,7 @@ from uuid import uuid4
 
 from app.communication.agent_roles import EMAIL_ROLE, load_role
 from app.file_persistence import atomic_write_text, exclusive_file_lock, FileLockTimeoutError
-from app.work_repository import JsonWorkRepository
+from app.work_repository import JsonWorkRepository, RepositoryMutation
 from .continuous_agent import ContinuousEmailAgent
 from .continuous_source import IMAPAgentSource, MailboxEpochChanged
 from .pushcut import pushcut_status
@@ -309,6 +310,48 @@ class EmailServiceController:
             settings = load_settings(self.settings_path)
             _write(self.settings_path, {**settings.model_dump(), "enabled": False})
         return {"ok": True, "paused": True, "current_assessment_may_finish": True}
+
+    def configure_followups(self, *, enabled: bool, confirmed: bool, expected_source_head: str) -> dict:
+        """Explicit local opt-in; never scans mail, starts a model or kicks the job."""
+        from .followup_monitor import configuration, VERSION
+        from .followups import _space
+        if (confirmed is not True or type(enabled) is not bool
+                or not isinstance(expected_source_head, str)
+                or not re.fullmatch(r"[0-9a-f]{40}", expected_source_head)):
+            raise ValueError("Změna hlídání vyžaduje výslovné potvrzení a přesný schválený zdroj.")
+        with exclusive_file_lock(self.root / "installation", timeout=0):
+            with exclusive_file_lock(self.root / "service_check", timeout=0):
+                status = self.status()
+                if enabled:
+                    receipt = JsonWorkRepository(self.receipt_path).read()
+                    runtime = self.support / "releases" / expected_source_head
+                    if (not all(status.get(k) for k in ("owned", "loaded", "enabled"))
+                            or status["source_head"] != expected_source_head
+                            or receipt.get("status") != "installed"
+                            or receipt.get("runtime") != str(runtime)
+                            or runtime.is_symlink() or self.support.is_symlink()
+                            or runtime.parent.is_symlink()):
+                        raise ValueError("Zapnutí vyžaduje vlastní aktivní kompatibilní instalaci.")
+                    prefix = self._git("rev-parse", "--show-prefix")
+                    for name in ("app/email/service.py", "app/email/followup_monitor.py",
+                                 "app/email/followup_assessment.py", "app/email/codex_proposer.py"):
+                        path = runtime / name
+                        source = self.runner(["git", "-C", str(self.project), "show",
+                            expected_source_head + ":" + prefix + name], capture_output=True, timeout=30)
+                        if source.returncode or path.is_symlink() or path.read_bytes() != source.stdout:
+                            raise ValueError("Instalovaná podpora hlídání neodpovídá schválenému zdroji.")
+                def mutate(document):
+                    old = configuration(document)
+                    result = {"ok": True, "enabled": enabled, "source_head": expected_source_head,
+                              "worker_verified": False, "model_started": False}
+                    if old["enabled"] == enabled:
+                        return RepositoryMutation(document, {**result, "changed": False}, changed=False)
+                    _space(document, create=True)["monitor"] = {**old, "version": VERSION,
+                        "enabled": enabled, "changed_at": _stamp(), "source_head": expected_source_head,
+                        "previous_last_run_at": old.get("last_run_at", ""), "last_run_at": "", "last_slot": "",
+                        "last_run_status": "awaiting_worker" if enabled else "disabled"}
+                    return RepositoryMutation(document, {**result, "changed": True})
+                return self.worker.repository.transact(mutate).result
 
     def resume(self, *, confirmed: bool) -> dict:
         if confirmed is not True:

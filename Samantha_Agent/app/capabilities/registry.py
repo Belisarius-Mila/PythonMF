@@ -158,7 +158,15 @@ CAPABILITIES: tuple[CapabilityRecord, ...] = (
         risk=RiskLevel.LOCAL_WRITE, reads=("accepted incoming header evidence and complete source scan receipts",),
         writes=("private linked-message facts and one current Cockpit notice per matter",),
         tool="app.email.followup_monitor.EmailFollowupMonitor.check", audit=AuditPolicy.REDACTED,
-        notes="Requires existing private version=1 enabled monitor configuration; disabled by default, no activation setter. Existing service window/permissions only. No model, send, calendar, Pushcut or service installation.",
+        notes="Requires existing private version=1 enabled monitor configuration; disabled by default. Existing service window/permissions only. No model, send, calendar, Pushcut or service installation.",
+    ),
+    CapabilityRecord(
+        capability_id="email_followups_configure", label="Explicitly enable or disable follow-up monitoring",
+        risk=RiskLevel.LOCAL_WRITE, reads=("owned hourly installation and exact approved runtime source",),
+        writes=("private follow-up opt-in and activation receipt only",),
+        tool="app.email.service_control.EmailServiceController.configure_followups", requires_confirmation=True,
+        confirmation_policy=ConfirmationPolicy.SUMMARY_BEFORE_ACTION, audit=AuditPolicy.REDACTED,
+        notes="Confirmed boolean and exact source head. Enable requires owned loaded enabled installation and exact committed feature bytes. Serializes against install and worker. No scan, cursor reset, model, notification, lifecycle mutation, service kick or system write. Regular authorized hourly operation handles subsequent mail.",
     ),
     CapabilityRecord(
         capability_id="email_calendar_draft_status", label="Read a selected email's calendar draft",
