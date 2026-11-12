@@ -1,0 +1,110 @@
+HA-02 — PŘEHLEDNĚJŠÍ ROZHRANÍ HUMAN–ADAM
+Datum: 12. listopadu 2026. Autor: Data.
+Stav: lokální vývoj na data/parallel-20261104 nad HA-01 5d9c1497.
+Bez integrace do main, push, nasazení, restartu nebo placeného/modelového pokusu.
+
+ROZSAH
+Míla zadal pokračovat HA-02 podle schváleného auditního plánu z 11. listopadu.
+Willův hlavní checkout zůstává oddělený a beze změny touto prací.
+Změna je v human_adam_ui.py a UI testech. Doménové účtenky, backend, oprávnění,
+modelové role ani připojení k App Serveru se nemění.
+
+HLAVNÍ OBRAZOVKA
+Kompaktní hlavička obsahuje Human–Adam, Práci, Další, jméno aktivního projektu
+a stručný stav. Výběr projektu je v rozbalovacím prvku Změnit. Pouhý výběr
+v selectu nepřepíná projekt; zůstává samostatné Přepnout a dosavadní potvrzení.
+Návrat do Cockpitu, vlákno, TVBCP a obnova jsou dostupné přes Další.
+Tlačítko Práce má stálý název; podrobný stav workspace je v jeho popisu.
+
+Souhrn čte HA-01 work_state s ověřením schématu, read-only příznaků, projektu,
+vlákna a generace. Rozlišuje běh modelu, dokončování, záznam publikace a čekání
+na zadání. Neověřený nebo chybějící snímek není falešné Hotovo či Adam pracuje.
+Nejisté doručení a právě odeslaný čekající pokyn mají přednost. Starý samostatný
+release job ani starý turn_busy nepřebíjí aktuální projekci. Účtenka hlásící
+aktivní publikaci se nevydává za živý heartbeat workeru.
+
+PRÁCE — TŘI POHLEDY
+1. Probíhá: doložený aktuální krok, vysvětlení, oddělené osy spojení/modelu/
+   dokončování/publikace a čas snímku. Doba se ukazuje jen při známém začátku.
+2. Výsledky a publikace: historie projektové projekce, původní dokončovací
+   a publikační doklady, pracovní změny, integrace a existující publikační
+   ovládání. Dodatečný přesný důkaz deploymentu je vedle původní účtenky.
+3. Servis: rozbalovací technické podklady a zvlášť souhlasy s externím
+   generováním. Zachovaná je jejich původní potvrzovací brána.
+
+Taby mají aria vazby, roving tabindex, šipky, Home a End. Panel drží fokus,
+Escape jej zavře a vrátí fokus k původnímu prvku. Pozadí je během otevření inert.
+Stejné zavření a fokus platí pro TVBCP a vlákno. Panel lze zavřít i během
+načítání; pozdní odpověď ho znovu neotevře. Duplicitní audit GitHubu při
+okamžitém otevření panelu nevzniká.
+
+Cíle se označují Cockpit Samanthy a Web projektu (GitHub Pages); neznámý cíl
+se neodhaduje. Toto je pouze prezentace; nezměnila se směrovací/publikační brána.
+
+CHAT A EDITOR
+Odpovědi mají bezpečnou omezenou podporu nadpisů, odstavců, seznamů, tučného
+textu, kódu a odkazů. Obsah vzniká přes DOM/textContent bez vkládání HTML.
+Odkazy dovolují HTTP(S) a kořenové odkazy téže stránky; blokují javascript,
+data, file, přihlašovací údaje, řídicí znaky a protokolově relativní URL.
+HTML v odpovědi zůstane textem. Kód se nelinkuje. Odkazy mají noopener/noreferrer.
+Nejde o úplný Markdown renderer; nepodporované značky zůstávají textové.
+
+Zadání delší než 600 znaků nebo osm řádků je rozbalovací a celý text zůstává
+zachovaný. Obrazový prompt je v detailu karty. Kopírování a předčítání dál
+používají původní přesný text a spouštějí se výslovně. Nezměněné výměny drží
+DOM, fokus, otevřené zadání i běžící předčítání. Přidání odpovědi netahá čtenáře
+od staršího textu; tlačítko Poslední odpověď jej vrátí na nejnovější výsledek.
+
+Chat má vlastní scroll a editor je součástí rozložení. Výška editoru roste
+s textem do omezené části dostupného viewportu. visualViewport a safe area
+pomáhají u klávesnice. Režim Konzultace / vývoj pro jeden následující pokyn je
+před odesláním výslovný. Jednorázové oprávnění se spotřebovává jako dosud.
+
+ČTECÍ SOUBĚHY A ODOLNOST
+Čtení status a workspace mají oddělené místní generace a projektový rozsah.
+Starší souběžná odpověď, odpověď před mutací nebo odpověď pro opuštěný projekt
+se nezobrazí jako současný stav. Hash revision se nepoužívá k řazení odpovědí.
+Jde o ochranu prezentace, nikoli nový event cursor, trvalou identitu práce
+nebo změnu App Server protokolu. Nevyvolává se opakovaný send ani publikace.
+Po připojení, jehož původní odpověď nemá work_state, následuje jediné čtení
+statusu. Jeho selhání se neoznačuje za selhání již potvrzeného připojení.
+Chybějící legacy projektová kontinuita nezastaví vykreslení zbývajících výsledků.
+
+OVĚŘENÍ
+Cílená sada: 271 testů OK / 9,976 s. Obsahuje UI, HA-01, profily, službu,
+HTTP bezpečnost a souhlasy. Nový Node VM scénář ověřuje scope, nejistotu,
+bezpečné formátování/odkazy, celé sbalené texty, DOM/fokus/předčítání/scroll,
+viewport, taby, pozdní čtení, chybějící kontinuitu a jediné připojení.
+
+Skutečný izolovaný Edge přes CDP pipe, bez serveru a se syntetickým fetch:
+390x844, 430x932, 1280x900, 390x480 a 430x500 px. Každá velikost 40 kontrol,
+celkem 200 PASS. Kontroly porovnávají skutečnou šířku/výšku, geometrii,
+žádné překrytí chat/editor, dostupnost fokusu, přepínání projektu až na pokyn,
+skutečné dokončení renderWork, klávesnicovou obsluhu a absenci POST požadavků.
+Zmenšené výšky simulují prostor klávesnice, nejsou fyzickou iPhone přejímkou.
+Snímky hlavního okna i tří pohledů Práce zkontrolované vizuálně.
+
+Celková brána 3544 testů OK / 584,986 s, 5 SKIP; finální prezentační úpravy ověřené cíleně a v prohlížeči, statická brána OK.
+Rozpracované běhy byly ukončené před posledními opravami odolnosti;
+celková brána ověřila změny čtení včetně pozdních chyb. Dvě následné
+prezentační úpravy — návrat fokusu z Další a Neověřeno v ose nedostupného
+zdroje — ověřené finální cílenou sadou (271 / 9,976 s), browser QA (200)
+a statickou bránou. Čas celkového testového kroku s režií 589,0 s. Žádný Willův proces se neukončoval.
+
+Důkazy mimo Git:
+- logs/ha02_targeted_final_20261112.log
+- data/private/ha02_ui_qa_20261112/ha02_browser_qa_20261112.json a ha02_*_qa_20261112.json
+- data/private/ha02_ui_qa_20261112/ha02_*_20261112.png (hlavní okno, Current/Results/Service)
+- data/private/ha02_ui_qa_20261112/ha02_browser_fixture_20261112.py a ha02_browser_qa_20261112.cjs (spouštět z kořene Samanthy)
+- logs/ha02_full_verified_gate_20261112.log
+
+HRANICE A DALŠÍ KROK
+Zůstává dosavadní čtení snímků. Nový živý stream, automatická serverová obnova
+stejné dlouhé práce po reloadu, spotřeba celé úlohy, steer a interrupt patří
+HA-03 až HA-09. Nevznikly nové worker procesy ani oprávnění. Není provedeno
+p+n, integrace do main ani živá přejímka na Macu/iPhonu se skutečnou relací.
+
+Následuje posouzení balíčku HA-01/02 a fyzická přejímka po samostatně schváleném
+vydání, případně HA-03 — robustní dispatcher App Serveru po dalším zadání.
+Kanonický projekt: layer-human-adam-development; handoff
+human_adam_layer_workstream_start_2026_07_20.md a TVBCP architektura_komunikace_samantha.txt.

@@ -1,39 +1,26 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
-## Aktuální stav — HA-01, společná čtecí projekce
+## Aktuální stav — HA-02, přehlednější Human–Adam
 
-- 2026-11-12: Míla zadal HA-01 podle auditního plánu z 11.11. Lokálně přidané
-  work_state do stávajícího GET status Human–Adam: scope, revize obsahu, čas
-  pozorování, oddělené spojení/model/dokončování/publikace, historie a incidenty.
-- Čistá funkce nepouští starou/cizí účtenku do právě běžícího modelového tahu.
-  Změna projektu, vlákna nebo session během sběru vede k neověřenému snímku.
-  Dodatečný přesný důkaz deploymentu nemění původní attention účtenku.
-- Publikace čte jen load/public_job; nevolá status(), který může opravovat
-  opuštěný job. Žádný worker, nový turn, model ani mutační oprávnění.
-- 29 nových HA-01 testů OK; plná brána 3543 testů OK / 620,369 s, 5 SKIP.
-- Vývoj je v Datově worktree data/parallel-20261104 nad 12ce214d; čistá větev
-  byla fast-forwardována na Willův již integrovaný základ, main nedotčený.
-  Vzhled, soukromá data, běžící služby a App Server beze změny; bez p+n.
-- Další krok HA-02: přijmout projekci jako zdroj UI a zpřehlednit chat/Práci.
-  Steer, interrupt, trvalá identita vykonávání a event cursor jsou pozdější etapy.
-- Technický report: reports/human_adam_ha01_work_state_20261112.txt.
-
-### Zachovaný předchozí kontext — oprava nástrojů Human–Adama, 2026-11-11
-
-- Pozorované selhání čtení způsobil Code Mode IPC (`result_buffered_for_ns`),
-  nikoli práva adresáře. Nainstalované CLI 0.167.0, připojený server 0.163.0.
-- Human–Adam má připravené přímé nástroje: per-thread features.code_mode=false
-  a features.code_mode_host=false při startu, reconnectu a výslovné rotaci.
-  Sandbox, síť, instrukce, model, historie i pravidla zápisu se nemění.
-- Živému nečinnému vláknu infrastruktury předané jen tyto dva přepínače;
-  shodná ostatní nastavení i session JSON, žádný nový thread/turn ani restart.
-  Čtecí command/exec potvrdil AGENTS.md v izolované i hlavní kopii.
-- Ověření: 89 cílených testů PASS; plná brána 3485 testů OK (31 SKIP). Důkazy mimo Git:
-  data/private/human_adam_tool_compat_20261111/.
-- Míla samostatně schválil navazující Terra p+n. Tento zápis je před vydáním;
-  autoritou jsou release_receipt.json a release_verification.json ve stejné
-  soukromé složce, job 444fe9352557c64a4082aed426d9dd0c. Modelová přejímka
-  čtení zůstává otevřená. Data, ostatní vlákna a globální config zachované.
-- Dříve zrušený placený hlasový pilot zůstává zrušený; ostatní audio beze změny.
+- 2026-11-12: Na Mílův pokyn dokončený lokální HA-02 nad HA-01 5d9c1497.
+  Kompaktní hlavička s projektem a doloženým aktuálním stavem; přepnutí je
+  samostatné a potvrzované. Práce: Probíhá / Výsledky a publikace / Servis.
+- UI čte scoped work_state. Staré účtenky, starý busy a opožděné status/workspace
+  odpovědi nepřebíjejí současnou práci. Neověřený zdroj zůstává neověřený.
+- Bezpečné strukturování odpovědí a HTTP(S) odkazů, sbalení dlouhých zadání
+  a obrazových promptů; přesný původní text pro kopii a předčítání.
+  Nezměněný chat drží DOM/fokus/scroll; editor se přizpůsobuje viewportu.
+- Klávesnicové taby, fokus v panelu, Escape a návrat; souhlasy v detailu.
+  Null legacy kontinuita už nezastaví vykreslení výsledků.
+- 271 cílených testů OK / 9,976 s; 200 skutečných browser kontrol PASS
+  na 390/430/1280 px a zmenšených výškách; snímky vizuálně zkontrolované.
+  Celková brána 3544 testů OK / 584,986 s, 5 SKIP; finální prezentační úpravy ověřené cíleně a v prohlížeči, statická brána OK.
+- Data: data/parallel-20261104. Willův main, služby, App Server, role,
+  soukromá data a mutační oprávnění beze změny; bez integrace/p+n.
+- Report reports/human_adam_ha02_ui_20261112.txt. Živá Mac/iPhone přejímka
+  je otevřená; syntetický prohlížeč není fyzická přejímka. Nové události,
+  trvalé vykonávání, usage, steer/interrupt jsou další etapy.
+- Další krok: posoudit vydání a přejímku balíčku HA-01/02 po samostatném
+  pokynu, případně pokračovat HA-03 na další zadání.
 <!-- SAMANTHA_CURRENT_STATUS_END -->
 
 # TVBCP – Architektura komunikace Samantha
@@ -4800,3 +4787,16 @@ Další krok: Po dokončení HA-01 navázat HA-02 — přehlednější rozhraní
 Navrhované další kroky: HA-03 ažHA-05 pro skutečné události, serverově vlastněnou práci a živou kartu; poté doplnění/zastavení. Žádné p+n nebylo zadáno.
 
 Technický důkaz: 29 nových HA-01 testů OK / 2,411 s. Závěrečná plná brána 3543 testů OK / 620,369 s, 5 SKIP; statické a syntaktické kontroly OK. Ověřené nezměněné bajty/mtime zdrojů, korelace a pozdní snímky, přesný head/target/smoke při dodatečném důkazu. Main a služby nedotčené. Report human_adam_ha01_work_state_20261112.txt.
+
+
+### 2026-11-12 09:36 CET — HA-02: čitelný chat a tři pohledy Práce
+
+Stav: Lokálně implementováno na data/parallel-20261104 nad HA-01 5d9c1497; bez integrace, push nebo nasazení. Celková brána 3544 testů OK / 584,986 s, 5 SKIP; finální prezentační úpravy ověřené cíleně a v prohlížeči, statická brána OK.
+
+Rozhodnutí: Míla zadal HA-02 podle auditního plánu. Společná projekce HA-01 je zdrojem aktuálního souhrnu; Práce odděluje probíhání, výsledky/publikaci a servis. Dosavadní mutační brány zůstaly. Nový stream, worker, App Server protokol, steer/interrupt a účtování celé úlohy se neimplementují v tomto kroku.
+
+Další krok: Posoudit balíček HA-01/02 a fyzickou přejímku až po samostatném vydání; případně HA-03 na další zadání.
+
+Rizika: Browser QA je syntetické a neprokazuje iPhone/Safari, reálnou klávesnici nebo živou relaci. UI používá dnešní snímky a dosavadní obnovu, ne nový event cursor. Omezený Markdown není úplný renderer.
+
+Technický důkaz: 271 cílených testů OK / 9,976 s; 200 browser PASS na skutečných viewports 390x844, 430x932, 1280x900, 390x480 a 430x500. Vizuálně zkontrolované snímky hlavního okna i pohledů Práce. Čtecí generace/scopes, bezpečné odkazy, zachování DOM/fokusu/předčítání/scrollu, celý sbalený text a nulový POST v browser fixture. Rozpracované běhy ukončené před posledními opravami odolnosti; celková brána 3544 testů OK / 584,986 s, 5 SKIP. Následné prezentační úpravy návratu fokusu z Další a neověřených os zdrojů ověřené finální cílenou sadou (271 / 9,976 s), browser QA (200) a statickou bránou. Důkazy logs/ha02_*.log a data/private/ha02_ui_qa_20261112/. Report human_adam_ha02_ui_20261112.txt.

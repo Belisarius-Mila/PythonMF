@@ -179,3 +179,16 @@ Další krok: Po dokončení HA-01 navázat HA-02 — přehlednější rozhraní
 Navrhované další kroky: HA-03 ažHA-05 pro skutečné události, serverově vlastněnou práci a živou kartu; poté doplnění/zastavení. Žádné p+n nebylo zadáno.
 
 Technický důkaz: 29 nových HA-01 testů OK / 2,411 s. Závěrečná plná brána 3543 testů OK / 620,369 s, 5 SKIP; statické a syntaktické kontroly OK. Ověřené nezměněné bajty/mtime zdrojů, korelace a pozdní snímky, přesný head/target/smoke při dodatečném důkazu. Main a služby nedotčené. Report human_adam_ha01_work_state_20261112.txt.
+
+
+### 2026-11-12 09:36 CET — HA-02: čitelný chat a tři pohledy Práce
+
+Stav: Lokálně implementováno na data/parallel-20261104 nad HA-01 5d9c1497; bez integrace, push nebo nasazení. Celková brána 3544 testů OK / 584,986 s, 5 SKIP; finální prezentační úpravy ověřené cíleně a v prohlížeči, statická brána OK.
+
+Rozhodnutí: Míla zadal HA-02 podle auditního plánu. Společná projekce HA-01 je zdrojem aktuálního souhrnu; Práce odděluje probíhání, výsledky/publikaci a servis. Dosavadní mutační brány zůstaly. Nový stream, worker, App Server protokol, steer/interrupt a účtování celé úlohy se neimplementují v tomto kroku.
+
+Další krok: Posoudit balíček HA-01/02 a fyzickou přejímku až po samostatném vydání; případně HA-03 na další zadání.
+
+Rizika: Browser QA je syntetické a neprokazuje iPhone/Safari, reálnou klávesnici nebo živou relaci. UI používá dnešní snímky a dosavadní obnovu, ne nový event cursor. Omezený Markdown není úplný renderer.
+
+Technický důkaz: 271 cílených testů OK / 9,976 s; 200 browser PASS na skutečných viewports 390x844, 430x932, 1280x900, 390x480 a 430x500. Vizuálně zkontrolované snímky hlavního okna i pohledů Práce. Čtecí generace/scopes, bezpečné odkazy, zachování DOM/fokusu/předčítání/scrollu, celý sbalený text a nulový POST v browser fixture. Rozpracované běhy ukončené před posledními opravami odolnosti; celková brána 3544 testů OK / 584,986 s, 5 SKIP. Následné prezentační úpravy návratu fokusu z Další a neověřených os zdrojů ověřené finální cílenou sadou (271 / 9,976 s), browser QA (200) a statickou bránou. Důkazy logs/ha02_*.log a data/private/ha02_ui_qa_20261112/. Report human_adam_ha02_ui_20261112.txt.

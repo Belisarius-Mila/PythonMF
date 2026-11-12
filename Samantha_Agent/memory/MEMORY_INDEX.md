@@ -260,6 +260,8 @@ Tento soubor je rozcestnik dlouhodobe pameti pro Samantha Agent.
 
 - `reports/human_adam_ha01_work_state_20261112.txt`; `handoffs/human_adam_layer_workstream_start_2026_07_20.md`; `tvbcp/architektura_komunikace_samantha.txt` — 12.11.: HA-01 lokálně přidává work_state do GET status; scope/revision/čas, oddělené modelové a provozní stavy, historie a incidenty. Čtecí projekce bez workerů/mutací; 29 nových testů OK; plná brána 3543 OK / 5 SKIP. Data nad 12ce214d, main/služby/UI beze změny, bez p+n. Další HA-02.
 
+- `reports/human_adam_ha02_ui_20261112.txt`; `handoffs/human_adam_layer_workstream_start_2026_07_20.md`; `tvbcp/architektura_komunikace_samantha.txt` — 12.11.: HA-02 lokálně: projekt/stav v hlavičce, Probíhá / Výsledky a publikace / Servis, bezpečné odpovědi/odkazy, sbalení zadání/promptů, viewport editor, fokus/klávesnice a čtecí generace. 271 cílených OK, 200 browser PASS; celková brána 3544 OK / 5 SKIP; finální prezentační úpravy cíleně a v prohlížeči, statická brána OK. Main/služby/role/oprávnění beze změny, bez p+n. Živá přejímka otevřená.
+
 - `handoffs/human_adam_layer_workstream_start_2026_07_20.md` - kanonický aktuální
   handoff Human–Adam. Dokončovací stav je autoritativně perzistentní,
   samoobnovitelný po restartu a potvrzený checkpoint synchronizuje handoff,

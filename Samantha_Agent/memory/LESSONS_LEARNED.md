@@ -2143,3 +2143,9 @@ prostředí PASS, produkční kód beze změny.
 - Kontext: HA-01 skládá modelový tah, dokončování a publikování pro budoucí UI.
 - Řešení: mapovat jen povolená pole zdrojových snímků. LunaReleaseStore.status() může při opuštěném workeru změnit účtenku; v čisté projekci použít pouze load/public_job. Původní doklad nepřepisovat ani při pozdějším přesném důkazu deploymentu. Při změně scope/session během sběru vrátit neověřený snímek.
 - Ověření: integrační kontrola odmítá volání status recovery, před/po má shodné soubory i mtime; testy staré/cizí účtenky, nového požadavku, rotace a dodatečné verifikace procházejí.
+
+### 2026-11-12 — Otevřený panel není důkaz dokončeného vykreslení
+
+- Kontext: HA-02 procházel základními DOM aserty, ale vizuální snímek výsledků odhalil přerušení renderWork kvůli chybějící legacy projektové kontinuitě.
+- Řešení: tolerovat null v nepovinném kontinuitním zdroji a ověřovat výsledný obsah workMeta i dostupné akce podle jejich skutečných bran. Kombinovat vykonávané DOM scénáře, geometrii a vizuální kontrolu; přesná šířka viewportu musí být změřená, ne odhadnutá z velikosti okna.
+- Ověření: regresní Node VM null scénář, 271 cílených testů OK a 200 skutečných browser kontrol PASS včetně vykreslených výsledků, tabů, souhlasů a nula POST požadavků.
