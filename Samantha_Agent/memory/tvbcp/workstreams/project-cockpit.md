@@ -1,4 +1,35 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
+## Aktivováno a skutečně ověřeno — 2026-11-12 16:37 CET
+
+Vlastní hodinová služba registrovaně upgradovaná7f47a41f→73edf4c8,
+installed/owned/loaded/enabled. Všech322 instalovaných souborů přesně podle
+manifestu, readiness přímo z instalované kopie bez blokátorů; obě verze1.
+Starý runtime i servisní záloha zachované. Vědomé configure_followups enabled=true
+provedené po přesné kontrole instalace; živé API configured=true,
+worker_recent=true, automatic_monitoring=true.
+
+Nový přirozený launchd heartbeat16:37:20 CET:already_completed,0 proposals,
+followups.checked=1. Dokončený slot16:00 se neopakoval. Přesné otisky všech162
+původních položek, ručních polí, zdrojových kurzorů, nastavení i rolí zachované.
+Jediný aktivní původní zdroj ověřený přes exact UID/epoch/digest bez historického
+scanu/modelu. Aktivace ještě nedokládá nový úplný zdrojový scan: záležitost
+správně source_unverified, první další řádný slot17:00 CET. Netvrdit 'bez odpovědi'
+bez tohoto zdrojového důkazu; skutečná odpověď a Mac/iPhone jsou další přejímka.
+
+Důkazy mimo Git: data/private/email_followups_activation_20261112/,
+upgrade_result.json, installed_verification.json, source_verification_result.json,
+activation_result.json, verification.json a post_activation_audit.json.
+Kód73edf4c8 má67 cílených PASS /16,235s, finální plnou bránu3730 /525,585s,
+31 SKIP. Dokončení původně zadaného p+n všech nových commitů má vlastní request
+`email-followup-activation-20261112-v1`, očekávaný job `4365c4ba67f01d3cf4eb3dde9ae1eaec`. Přesný schválený finální main a
+výsledek v release_plan.json/release_receipt.json/release_verification.json
+v téže privátní složce; předchozí úspěšný jobb794e9f9 se neopakuje.
+Další krok: dokončit toto nové p+n, pak přejímka prvního přirozeného scanu a
+následného skutečného e-mailového průchodu. Placený pilot, SMTP/kalendář,
+reboot/wake či fyzická telefonní přejímka nebyly touto aktivací provedené.
+Samostatný e-mailový TVBCP není dohodnutý, Cockpit dokumenty kryjí své UI/workflow.
+
+
 ## Příprava zapnutí hlídání a upgradu služby — 2026-11-12
 
 Míla výslovně schválil upgrade vlastní hodinové služby i vědomé zapnutí

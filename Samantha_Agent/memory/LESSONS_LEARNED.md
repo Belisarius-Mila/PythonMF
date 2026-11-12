@@ -2216,3 +2216,10 @@ Tento důkaz nenahrazuje skutečný reboot/wake po upgradu.
 - Kontext: HA-05 převádí browser z čekajícího send na HA-04 přijetí a samostatné čtení práce; HTTP odpověď může přijít pozdě nebo se ztratit.
 - Řešení: před jediným POST držet stejnou klientskou referenci, po nejistotě pouze GET podle původní identity. Cursor/revision nesmí jít zpět, staré scope/generation se neuplatní a finální stav se neoživí opožděným snímkem. Čtecí obnova nesmí kopírovat původní text do nového send. Oddělit poslední změnu od času úspěšného čtení.
 - Ověření: vykonávané Node scénáře skutečné cesty odeslání prošly dvojklik, ztrátu ACK, opožděné ACK po novějším čtení a přípravnou chybu bez druhého POST. Browserový polling zachová draft/selection/starší chat/řeč a po finálním dokladu skončí. Žádný skutečný modelový tah.
+
+### LL-128 — Zapnutý příznak není důkaz nové kontroly služby
+
+- Typ: opakující se. Řešení nalezeno: 12112026.
+- Problém: kompatibilní kód v main není instalovaná hodinová kopie; starý heartbeat po zapnutí nebo stejný slot po reaktivaci nesmějí dokazovat nový běh. Chybějící úplný scan není důkaz absence odpovědi.
+- Řešení: registrované pause/prepare/upgrade, přesný manifest a readiness skutečné kopie, potvrzený opt-in s kontrolou vlastní instalace/commitu a zámkem workeru. Aktivace zneplatní technický čas/slot, ne kurzory či obchodní evidenci. Čekat na skutečný nový launchd heartbeat; source_unverified ponechat do přirozeného dalšího scanu.
+- Ověření:67 cílených a3730 plná sada PASS; upgrade322 souborů zachoval162 položek i ruční údaje/kurzory/nastavení/role. Nový heartbeat1 věc/0 proposals a živé API true; source_verified přesný původní zdroj, bez historického scanu či modelu. Report email_followups_activation_20261112.md.
