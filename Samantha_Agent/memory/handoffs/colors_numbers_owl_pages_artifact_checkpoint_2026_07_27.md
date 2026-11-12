@@ -339,3 +339,30 @@ Navrhované další kroky: Vrátit se k e-mailové přejímce A+C.
 Technický důkaz: MP3 SHA-256 f193a1227880f4bd7ce6d80480efb64a5ad3ab2a352fc1c754b690598a2f7e9b;
 app.js?v=d15adc4379d3de42; soukromé podklady data/daily_3am/revisions/20261113_v2/.
 Statická brána logs/owl_20261113_v2_static_gate.log; publikační plná brána následuje.
+
+
+## 2026-11-12 19:33 CET — Upravená verze2 veřejně ověřená
+
+Hotovo: Přehrávač ColorsAndNumbers veřejně vybírá upravenou řeč. MP3
+owl_131126_v2.mp3 má283968 B /47,328 s; HTTP200/audio/mp3, přesný SHA-256
+a úplné dekódování staženého souboru FFmpeg PASS. Text obsahuje zadaný úvod,
+přesný odstavec i závěrečné přání, bez stylistických úprav.
+
+Rozhodnutí: Jediné zadané vydání, žádné opakování publikace nebo TTS.
+Soví automatika zůstává vypnutá; původní audio zachované.
+
+Další krok: Technicky hotovo, poslech nové verze Mílou zatím nepotvrzený.
+Navrhované další kroky: Návrat k e-mailové přejímce A+C.
+
+Technický důkaz: Zdroj2bc7c191a9df7a457163ed380d326c859fa2d166;
+3730 testů PASS /770,3 s, push confirmed. Původní Terra job
+ef0552b01b95e08afb312298873ee394 zůstává attention/deployment uncertain
+beze změny: publisher nedoložil výsledek v okamžiku návratu, ale již spustil
+Pages43280728739. Adam jen vyčkal přesného původního běhu; success nad
+týmž SHA, deployment7746149433 a veřejné JS/MP3 jsou potvrzené zvlášť.
+Žádný další dispatch. Čtecí výsledková účtenka mimo Git:
+data/daily_3am/receipts/20261113_v2_publication.json. Raw původní účtenka
+v data/daily_3am/revisions/20261113_v2/release_receipt.json.
+Veřejný app.js?v=d15adc4379d3de42 a audio
+owl_131126_v2.mp3?v=20261113b-f193a1227880. Tento místní dokumentační
+checkpoint neopakuje publikaci; původní nejistá účtenka se nepřepisuje.
