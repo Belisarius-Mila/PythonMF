@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import queue
 import tempfile
 import unittest
 from pathlib import Path
@@ -213,10 +214,10 @@ class CodexContractTests(unittest.TestCase):
 
     def test_rpc_errors_preserve_structured_details_without_printing_private_data(self):
         transport = StdioAppServerTransport.__new__(StdioAppServerTransport)
-        transport._next_request_id = 1
-        transport._send = Mock()
+        transport._init_dispatcher(timeout=1)
         error = {"code": -32001, "message": "PRIVATE_MESSAGE", "data": {"codexErrorInfo": "server_overloaded", "private": "PRIVATE_DATA"}}
-        transport.receive = Mock(return_value={"id": 1, "error": error})
+        transport._send = Mock(side_effect=lambda message: transport._dispatcher.feed(
+            {"id": message["id"], "error": error}, generation=transport._dispatcher.generation))
         with self.assertRaises(AppServerRpcError) as raised:
             transport.request("turn/start", {})
         exc = raised.exception
@@ -231,9 +232,9 @@ class CodexContractTests(unittest.TestCase):
 
     def test_malformed_rpc_error_remains_a_safe_contract_failure(self):
         transport = StdioAppServerTransport.__new__(StdioAppServerTransport)
-        transport._next_request_id = 1
-        transport._send = Mock()
-        transport.receive = Mock(return_value={"id": 1, "error": "PRIVATE"})
+        transport._init_dispatcher(timeout=1)
+        transport._send = Mock(side_effect=lambda message: transport._dispatcher.feed(
+            {"id": message["id"], "error": "PRIVATE"}, generation=transport._dispatcher.generation))
         with self.assertRaises(AppServerContractError) as raised:
             transport.request("turn/start", {})
         self.assertNotIn("PRIVATE", str(raised.exception))
@@ -519,12 +520,12 @@ class CodexContractTests(unittest.TestCase):
                 socket_path=Path("/private/tmp/samantha-app-server.sock"),
                 timeout=1,
             )
-            received = transport.receive(
-                lambda payload: payload.get("id") == 1,
-                description="velký thread/resume výsledek",
-            )
+            try:
+                received = transport.request("thread/resume", {"threadId": "thread-large-resume"})
+            finally:
+                transport.close()
 
-        self.assertEqual(received["result"]["thread"]["id"], "thread-large-resume")
+        self.assertEqual(received["thread"]["id"], "thread-large-resume")
         self.assertEqual(UNIX_APP_SERVER_MAX_MESSAGE_BYTES, 64 * 1024 * 1024)
         self.assertGreater(UNIX_APP_SERVER_MAX_MESSAGE_BYTES, 46_323_050)
         self.assertEqual(
@@ -568,15 +569,23 @@ class _FakeUnixConnection:
     def __init__(self, messages: list[str]) -> None:
         self.messages = list(messages)
         self.closed = False
+        self.incoming = queue.Queue()
 
     def __iter__(self):
-        return iter(self.messages)
+        while True:
+            value = self.incoming.get()
+            if value is None:
+                return
+            yield value
 
     def send(self, _message: str) -> None:
-        return None
+        for value in self.messages:
+            self.incoming.put(value)
+        self.messages.clear()
 
     def close(self) -> None:
         self.closed = True
+        self.incoming.put(None)
 
 
 class _ScriptedTransport:

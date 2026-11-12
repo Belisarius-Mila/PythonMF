@@ -3,8 +3,8 @@
 from __future__ import annotations
 
 import json
+import math
 import os
-import queue
 import re
 import shutil
 import subprocess
@@ -18,6 +18,10 @@ from pathlib import Path
 from typing import Any, Callable
 
 from app.release_usage import normalize_usage
+from app.codex_appserver_dispatch import (
+    AppServerDispatcher, AppServerError, AppServerTimeout, AppServerContractError,
+    AppServerClosedError, AppServerOverflowError, EventSubscription, MAX_FRAME_BYTES,
+)
 
 
 DEFAULT_CODEX_BIN = os.environ.get("CODEX_BIN") or shutil.which("codex") or "/usr/local/bin/codex"
@@ -37,31 +41,13 @@ CODEX_PATH_PREFIXES = (
 # Resuming a persistent thread may return its accumulated media items in one
 # local WebSocket frame.  Keep a finite limit, but leave enough headroom for a
 # conversation containing generated images (observed resume frame: about 44.2 MiB).
-UNIX_APP_SERVER_MAX_MESSAGE_BYTES = 64 * 1024 * 1024
+UNIX_APP_SERVER_MAX_MESSAGE_BYTES = MAX_FRAME_BYTES
 # Conservative protocol baseline verified by the 05/P1 schemas and contracts.
 MIN_APP_SERVER_VERSION = (0, 163, 0)
 
 
 def utc_now() -> str:
     return datetime.now(timezone.utc).replace(microsecond=0).isoformat()
-
-
-class AppServerError(RuntimeError):
-    """Base error for an app-server contract or transport failure."""
-
-    def __init__(self, message: str):
-        super().__init__(message)
-        # Explicit inspection only: callers log str(exc), never private payloads.
-        self.turn_error: dict[str, Any] | None = None
-        self.will_retry: bool | None = None
-
-
-class AppServerTimeout(AppServerError):
-    """Raised when required protocol evidence does not arrive in time."""
-
-
-class AppServerContractError(AppServerError):
-    """Raised when the server response violates the expected protocol contract."""
 
 
 class AppServerRpcError(AppServerContractError):
@@ -245,77 +231,125 @@ def read_codex_version(
 
 
 class StdioAppServerTransport:
-    """One JSON-lines stdio connection to ``codex app-server``."""
+    """One wire reader with independent RPC slots and bounded event fanout."""
 
-    def __init__(self, *, codex_binary: str = "codex", timeout: float = 120.0):
+    def _init_dispatcher(self, *, timeout: float) -> None:
+        if type(timeout) not in (int, float) or not math.isfinite(timeout) or timeout <= 0:
+            raise ValueError("Neplatný časový limit transportu.")
         self.timeout = timeout
         self._next_request_id = 1
-        self._messages: queue.Queue[dict[str, Any] | BaseException] = queue.Queue()
-        self._deferred: list[dict[str, Any]] = []
+        self._request_lock = threading.Lock()
+        self._send_lock = threading.Lock()
+        self._close_lock = threading.Lock()
+        self._wire_closed = False
+        self._dispatcher = AppServerDispatcher()
+
+    def __init__(self, *, codex_binary: str = "codex", timeout: float = 120.0):
+        self._init_dispatcher(timeout=timeout)
         try:
             self._process = subprocess.Popen(
                 [codex_binary, "app-server", "--stdio"],
-                stdin=subprocess.PIPE,
-                stdout=subprocess.PIPE,
-                stderr=subprocess.DEVNULL,
-                text=True,
-                encoding="utf-8",
-                bufsize=1,
-                env=codex_environment(),
+                stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.DEVNULL,
+                text=True, encoding="utf-8", bufsize=1, env=codex_environment(),
             )
         except OSError as exc:
-            raise AppServerError(f"Codex app-server nelze spustit: {exc}") from exc
+            self._dispatcher.close(reason="launch_failed")
+            raise AppServerError("Codex app-server nelze spustit.") from exc
         if self._process.stdin is None or self._process.stdout is None:
             self.close()
             raise AppServerError("Codex app-server neposkytl stdio transport.")
-        self._reader = threading.Thread(target=self._read_stdout, daemon=True)
+        generation = self._dispatcher.generation
+        self._reader = threading.Thread(target=self._read_stdout, args=(generation,), name="appserver-stdio-reader", daemon=True)
         self._reader.start()
 
     @property
     def running(self) -> bool:
-        return self._process.poll() is None
+        return self._dispatcher.running and self._process.poll() is None
 
     @property
     def process_id(self) -> int:
         return int(self._process.pid)
 
-    def _read_stdout(self) -> None:
+    def _accept_frame(self, raw: str | bytes, generation: str) -> bool:
+        try:
+            if isinstance(raw, bytes):
+                raw = raw.decode("utf-8")
+            size = len(raw.encode("utf-8"))
+            if size > MAX_FRAME_BYTES:
+                raise ValueError("frame_size")
+            def reject_constant(_value):
+                raise ValueError("non_json_number")
+            def unique_object(pairs):
+                result = {}
+                for key, value in pairs:
+                    if key in result:
+                        raise ValueError("duplicate_json_key")
+                    result[key] = value
+                return result
+            parsed = json.loads(raw, parse_constant=reject_constant, object_pairs_hook=unique_object)
+        except (UnicodeError, ValueError, TypeError, RecursionError):
+            self._dispatcher.close(AppServerContractError("App-server vrátil neplatný rámec."), reason="invalid_frame", discard=True)
+            return False
+        return self._dispatcher.feed(parsed, generation=generation, size=size)
+
+    def _read_stdout(self, generation: str) -> None:
         assert self._process.stdout is not None
         try:
-            for raw_line in self._process.stdout:
-                line = raw_line.strip()
-                if line:
-                    parsed = json.loads(line)
-                    if not isinstance(parsed, dict):
-                        raise AppServerContractError("App-server vrátil neobjektovou JSON zprávu.")
-                    self._messages.put(parsed)
-        except BaseException as exc:
-            self._messages.put(exc)
+            while self._dispatcher.running:
+                line = self._process.stdout.readline(MAX_FRAME_BYTES + 1)
+                if not line:
+                    break
+                if not line.strip():
+                    if len(line.encode("utf-8")) > MAX_FRAME_BYTES:
+                        self._accept_frame(line, generation)
+                        break
+                    continue
+                if not self._accept_frame(line, generation):
+                    break
+        except (OSError, ValueError, UnicodeError):
+            self._dispatcher.close(AppServerClosedError("Čtení app-server spojení skončilo."), reason="connection_lost")
+        finally:
+            self._dispatcher.close(reason="eof")
+            self.close()
 
     def _send(self, message: dict[str, Any]) -> None:
-        if not self.running:
-            raise AppServerError(f"Codex app-server skončil s kódem {self._process.returncode}.")
-        assert self._process.stdin is not None
-        try:
-            self._process.stdin.write(json.dumps(message, ensure_ascii=False) + "\n")
-            self._process.stdin.flush()
-        except (BrokenPipeError, OSError) as exc:
-            raise AppServerError(f"Zápis do app-serveru selhal: {exc}") from exc
+        encoded = json.dumps(message, ensure_ascii=False) + "\n"
+        with self._send_lock:
+            if not self.running:
+                raise AppServerClosedError("Spojení s app-serverem je uzavřené.")
+            assert self._process.stdin is not None
+            try:
+                self._process.stdin.write(encoded)
+                self._process.stdin.flush()
+            except (BrokenPipeError, OSError, ValueError) as exc:
+                raise AppServerError("Zápis do app-serveru selhal.") from exc
 
     def notify(self, method: str, params: dict[str, Any] | None = None) -> None:
         message: dict[str, Any] = {"method": method}
         if params is not None:
             message["params"] = params
-        self._send(message)
+        try:
+            self._send(message)
+        except AppServerError:
+            self._dispatcher.close(reason="send_failed", discard=True)
+            raise
 
     def request(self, method: str, params: dict[str, Any]) -> dict[str, Any]:
-        request_id = self._next_request_id
-        self._next_request_id += 1
-        self._send({"id": request_id, "method": method, "params": params})
-        response = self.receive(
-            lambda message: message.get("id") == request_id,
-            description=f"odpověď na {method}",
-        )
+        # Reserve before writing: a fast reader may receive an immediate response.
+        with self._request_lock:
+            request_id = self._next_request_id
+            self._next_request_id += 1
+            self._dispatcher.register(request_id, method, params)
+        started = time.monotonic()
+        try:
+            try:
+                self._send({"id": request_id, "method": method, "params": params})
+            except AppServerError:
+                self._dispatcher.close(reason="send_failed", discard=True)
+                raise
+            response = self._dispatcher.wait(request_id, timeout=max(0, self.timeout - (time.monotonic() - started)))
+        finally:
+            self._dispatcher.forget(request_id)
         if "error" in response:
             error = response["error"]
             if not isinstance(error, dict):
@@ -326,53 +360,45 @@ class StdioAppServerTransport:
             raise AppServerContractError(f"App-server neposkytl objektový výsledek pro {method}.")
         return result
 
-    def receive(
-        self,
-        predicate: Callable[[dict[str, Any]], bool],
-        *,
-        description: str,
-    ) -> dict[str, Any]:
-        deadline = time.monotonic() + self.timeout
-        while True:
-            for index, message in enumerate(self._deferred):
-                if predicate(message):
-                    return self._deferred.pop(index)
-            remaining = deadline - time.monotonic()
-            if remaining <= 0:
-                raise AppServerTimeout(f"Vypršel čas při čekání na {description}.")
-            try:
-                incoming = self._messages.get(timeout=remaining)
-            except queue.Empty as exc:
-                raise AppServerTimeout(f"Vypršel čas při čekání na {description}.") from exc
-            if isinstance(incoming, BaseException):
-                raise AppServerContractError("App-server vrátil neplatný výstup.") from incoming
-            if predicate(incoming):
-                return incoming
-            self._deferred.append(incoming)
+    def receive(self, predicate: Callable[[dict[str, Any]], bool], *, description: str) -> dict[str, Any]:
+        del description  # Keep private IDs out of timeout messages.
+        return self._dispatcher.receive(predicate, timeout=self.timeout)
+
+    def subscribe(self, **kwargs: Any) -> EventSubscription:
+        return self._dispatcher.subscribe(**kwargs)
+
+    def diagnostics(self) -> dict[str, Any]:
+        return self._dispatcher.diagnostics()
+
+    def _join_reader(self) -> None:
+        reader = getattr(self, "_reader", None)
+        if reader is not None and reader is not threading.current_thread():
+            reader.join(timeout=1)
 
     def close(self) -> None:
-        process = getattr(self, "_process", None)
-        if process is None or process.poll() is not None:
-            return
-        process.terminate()
-        try:
-            process.wait(timeout=5)
-        except subprocess.TimeoutExpired:
-            process.kill()
-            process.wait(timeout=5)
+        self._dispatcher.close()
+        with self._close_lock:
+            if not self._wire_closed:
+                self._wire_closed = True
+                process = getattr(self, "_process", None)
+                if process is not None:
+                    if process.poll() is None:
+                        process.terminate()
+                        try:
+                            process.wait(timeout=5)
+                        except subprocess.TimeoutExpired:
+                            process.kill(); process.wait(timeout=5)
+                    for stream in (process.stdin, process.stdout):
+                        if stream is not None:
+                            stream.close()
+        self._join_reader()
 
 
 class UnixSocketAppServerTransport(StdioAppServerTransport):
-    """Direct WebSocket client connection over a local Unix domain socket."""
+    """WebSocket over the existing Unix socket. Closing never stops its server."""
 
-    def __init__(
-        self,
-        *,
-        socket_path: Path,
-        codex_binary: str = "codex",
-        timeout: float = 120.0,
-    ):
-        del codex_binary  # The external app-server process owns its executable.
+    def __init__(self, *, socket_path: Path, codex_binary: str = "codex", timeout: float = 120.0):
+        del codex_binary
         target = Path(socket_path).expanduser()
         if not target.is_absolute():
             raise AppServerContractError("Cesta k app-server socketu musí být absolutní.")
@@ -381,68 +407,60 @@ class UnixSocketAppServerTransport(StdioAppServerTransport):
             from websockets.exceptions import WebSocketException
         except ImportError as exc:
             raise AppServerError("Pro Unix app-server transport chybí knihovna websockets.") from exc
-
         self.socket_path = target
-        self.timeout = timeout
-        self._next_request_id = 1
-        self._messages: queue.Queue[dict[str, Any] | BaseException] = queue.Queue()
-        self._deferred: list[dict[str, Any]] = []
-        self._send_lock = threading.Lock()
-        self._closed = False
+        self._init_dispatcher(timeout=timeout)
         try:
             self._connection = unix_connect(
-                path=str(target),
-                uri="ws://localhost/rpc",
-                open_timeout=timeout,
-                close_timeout=5,
-                compression=None,
-                max_size=UNIX_APP_SERVER_MAX_MESSAGE_BYTES,
+                path=str(target), uri="ws://localhost/rpc", open_timeout=timeout,
+                close_timeout=5, compression=None, max_size=UNIX_APP_SERVER_MAX_MESSAGE_BYTES,
             )
         except (OSError, TimeoutError, WebSocketException) as exc:
-            raise AppServerError(f"K Unix app-server socketu se nelze připojit: {exc}") from exc
-        self._reader = threading.Thread(target=self._read_websocket, daemon=True)
+            self._dispatcher.close(reason="connect_failed")
+            raise AppServerError("K Unix app-server socketu se nelze připojit.") from exc
+        generation = self._dispatcher.generation
+        self._reader = threading.Thread(target=self._read_websocket, args=(generation,), name="appserver-unix-reader", daemon=True)
         self._reader.start()
 
     @property
     def running(self) -> bool:
-        return not self._closed
+        return self._dispatcher.running
 
     @property
     def process_id(self) -> int:
         return 0
 
-    def _read_websocket(self) -> None:
+    def _read_websocket(self, generation: str) -> None:
         try:
-            for raw_message in self._connection:
-                if isinstance(raw_message, bytes):
-                    raw_message = raw_message.decode("utf-8")
-                parsed = json.loads(raw_message)
-                if not isinstance(parsed, dict):
-                    raise AppServerContractError("App-server vrátil neobjektovou JSON zprávu.")
-                self._messages.put(parsed)
-        except BaseException as exc:
-            if not self._closed:
-                self._messages.put(exc)
+            for raw in self._connection:
+                if not self._accept_frame(raw, generation):
+                    break
+        except Exception:
+            self._dispatcher.close(AppServerClosedError("Unix app-server spojení skončilo."), reason="connection_lost")
         finally:
-            self._closed = True
+            self._dispatcher.close(reason="eof")
+            self.close()
 
     def _send(self, message: dict[str, Any]) -> None:
-        if not self.running:
-            raise AppServerError("Unix app-server spojení je uzavřené.")
-        try:
-            with self._send_lock:
+        with self._send_lock:
+            if not self.running:
+                raise AppServerClosedError("Unix app-server spojení je uzavřené.")
+            try:
                 self._connection.send(json.dumps(message, ensure_ascii=False))
-        except Exception as exc:
-            raise AppServerError(f"Zápis do Unix app-serveru selhal: {exc}") from exc
+            except Exception as exc:
+                raise AppServerError("Zápis do Unix app-serveru selhal.") from exc
 
     def close(self) -> None:
-        if self._closed:
-            return
-        self._closed = True
-        try:
-            self._connection.close()
-        except OSError:
-            pass
+        self._dispatcher.close()
+        with self._close_lock:
+            if not self._wire_closed:
+                self._wire_closed = True
+                connection = getattr(self, "_connection", None)
+                if connection is not None:
+                    try:
+                        connection.close()
+                    except OSError:
+                        pass
+        self._join_reader()
 
 
 class CodexAppServerClient:
@@ -781,6 +799,8 @@ class CodexAppServerClient:
 
     @staticmethod
     def _belongs_to_turn(message: dict[str, Any], *, thread_id: str, turn_id: str) -> bool:
+        if "id" in message or not isinstance(message.get("method"), str):
+            return False
         params = message.get("params")
         if not isinstance(params, dict) or params.get("threadId") != thread_id:
             return False
@@ -788,6 +808,23 @@ class CodexAppServerClient:
             return True
         turn = params.get("turn")
         return isinstance(turn, dict) and turn.get("id") == turn_id
+
+    def subscribe_events(self, **kwargs: Any) -> EventSubscription:
+        subscribe = getattr(self.transport, "subscribe", None)
+        if not callable(subscribe):
+            raise AppServerContractError("Tento adaptér nepodporuje odběr událostí.")
+        return subscribe(**kwargs)
+
+    def protocol_diagnostics(self) -> dict[str, Any]:
+        diagnostics = getattr(self.transport, "diagnostics", None)
+        return {"client_connection_id": self.connection_id, "connected": self.running,
+                "runtime_feature_support": "not_probed",
+                "connected_server_version": self.server_version.raw,
+                "local_cli_version": self.version.raw,
+                "minimum_server_version": "0.163.0", "local_schema_reference": "0.167.0",
+                "server_newer_than_reference": (self.server_version.major, self.server_version.minor, self.server_version.patch) > (0, 167, 0),
+                "support_evidence": "handshake_and_core_validation",
+                "dispatcher": diagnostics() if callable(diagnostics) else None}
 
     def close(self) -> None:
         transport = getattr(self, "transport", None)

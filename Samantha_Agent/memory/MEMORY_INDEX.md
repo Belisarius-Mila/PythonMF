@@ -262,6 +262,8 @@ Tento soubor je rozcestnik dlouhodobe pameti pro Samantha Agent.
 
 - `reports/human_adam_ha02_ui_20261112.txt`; `handoffs/human_adam_layer_workstream_start_2026_07_20.md`; `tvbcp/architektura_komunikace_samantha.txt` — 12.11.: HA-02 lokálně: projekt/stav v hlavičce, Probíhá / Výsledky a publikace / Servis, bezpečné odpovědi/odkazy, sbalení zadání/promptů, viewport editor, fokus/klávesnice a čtecí generace. 271 cílených OK, 200 browser PASS; celková brána 3544 OK / 5 SKIP; finální prezentační úpravy cíleně a v prohlížeči, statická brána OK. Main/služby/role/oprávnění beze změny, bez p+n. Živá přejímka otevřená.
 
+- `reports/human_adam_ha03_dispatcher_20261112.txt`; `handoffs/human_adam_layer_workstream_start_2026_07_20.md`; `tvbcp/architektura_komunikace_samantha.txt` — 12.11.: HA-03 lokálně: jeden reader, oddělené RPC/odběry, konkrétní validace, bounded queues, přesný scope/generation a close čekání. Zachovaný jeden user item/start/final a delivery_unknown bez replay; read-only protocol diagnostika. 287 finálních cílených OK, statická brána OK; plná brána 3587 testů OK / 532,005 s, 5 SKIP. Data nad 7b77aba2; bez integrace/p+n/živého App Server spojení/modelového pokusu. Další HA-04.
+
 - `handoffs/human_adam_layer_workstream_start_2026_07_20.md` - kanonický aktuální
   handoff Human–Adam. Dokončovací stav je autoritativně perzistentní,
   samoobnovitelný po restartu a potvrzený checkpoint synchronizuje handoff,

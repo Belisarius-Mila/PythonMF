@@ -2149,3 +2149,9 @@ prostředí PASS, produkční kód beze změny.
 - Kontext: HA-02 procházel základními DOM aserty, ale vizuální snímek výsledků odhalil přerušení renderWork kvůli chybějící legacy projektové kontinuitě.
 - Řešení: tolerovat null v nepovinném kontinuitním zdroji a ověřovat výsledný obsah workMeta i dostupné akce podle jejich skutečných bran. Kombinovat vykonávané DOM scénáře, geometrii a vizuální kontrolu; přesná šířka viewportu musí být změřená, ne odhadnutá z velikosti okna.
 - Ověření: regresní Node VM null scénář, 271 cílených testů OK a 200 skutečných browser kontrol PASS včetně vykreslených výsledků, tabů, souhlasů a nula POST požadavků.
+
+### 2026-11-12 — Rozdělení front nesmí obejít stávající bezpečnostní guard
+
+- Kontext: HA-03 odděluje RPC, typované odběry a legacy důkazy tahu; ScienceNews guard kontroluje také item/started a neznámé události s item payloadem.
+- Řešení: kompatibilní receive cesta musí zachovat všechny položky, které původní guard vyhodnocuje, nejen dokončené nebo známé typy. Neplatný kritický payload zneplatní spojení, nezmizí jako nepovinná telemetrie. Vadné novější usage naopak musí označit měření jako nedostupné, aby nezůstalo staré číslo aktuální; nesmí samo zrušit jinak potvrzené doručení.
+- Ověření: regresní testy volají skutečný ScienceNews one-turn guard přes produkční dispatcher a klienta; odmítnuté item/started i neznámé item payloady. Neplatný poslední total odstraní předchozí platnou hodnotu, ale jeden user item/start/final dál potvrdí doručení. Bez modelového volání.

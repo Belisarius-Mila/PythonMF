@@ -124,6 +124,21 @@ class CanonicalSessionHub:
             payload["rotation_count"] = len(self._state["previous_threads"])
             return payload
 
+    def protocol_diagnostics(self) -> dict[str, Any]:
+        """Read volatile connection facts separately from the persisted session."""
+        with self._state_lock:
+            client = self._client
+            generation = int(self._state.get("connection_generation", 0))
+            if client is None:
+                return {"available": False, "connection_generation": generation, "status": "not_attached"}
+            reader = getattr(client, "protocol_diagnostics", None)
+            if not callable(reader):
+                return {"available": False, "connection_generation": generation, "status": "unsupported_adapter"}
+            details = reader()
+            if not isinstance(details, dict):
+                return {"available": False, "connection_generation": generation, "status": "unverified"}
+            return {"available": True, "connection_generation": generation, "details": copy.deepcopy(details)}
+
     def _thread_message_count_locked(self, thread_id: str) -> int:
         target = str(thread_id or "").strip()
         if not target:

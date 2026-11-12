@@ -240,6 +240,24 @@ class HumanAdamServiceTests(unittest.TestCase):
         )
         return service, runtime, workspace, hub
 
+    def test_status_protocol_diagnostics_is_additive_read_only_and_optional(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            service, runtime, _workspace, hub = self.make_service(Path(directory))
+            before = hub.snapshot()
+            hub.protocol_diagnostics = lambda: {"available": True, "details": {"connected_server_version": "synthetic"}}
+            result = service.status()
+            self.assertTrue(result["protocol"]["available"])
+            self.assertEqual(result["session"], before)
+            self.assertEqual(runtime.started, 0)
+            def fail():
+                raise ValueError("PRIVATE_DIAGNOSTIC")
+            hub.protocol_diagnostics = fail
+            failure = service.status()
+            self.assertTrue(failure["ok"])
+            self.assertFalse(failure["protocol"]["available"])
+            self.assertNotIn("PRIVATE", str(failure))
+            self.assertEqual(hub.snapshot(), before)
+
     def test_status_omits_legacy_deployment_readers(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
             service, _runtime, _workspace, _hub = self.make_service(Path(temp_dir))
