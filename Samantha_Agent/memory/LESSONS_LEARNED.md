@@ -2195,3 +2195,11 @@ Tento důkaz nenahrazuje skutečný reboot/wake po upgradu.
 - Problém: ztracená HTTP odpověď ani chybějící browserový stav neprokazují, že se modelový požadavek neprovedl. Nové ID při obnově by vytvořilo druhý tah; pozdější job stejného projektu nesmí nahradit původní child-job vazbu.
 - Řešení: trvalé přijetí a otisk přesného zadání/oprávnění, serverově vlastněný worker s původním profile lockem a file lease, durable dispatch bariéra před RPC. Reload čte stejné ID. Restart obnovuje jen původní canonical/completion důkaz; bez něj neověřeno. Identitní doklady se nevyřazují s krátkou historií. Child job ID je po prvním navázání pevné. HTTP wait není vlastník provedení.
 - Ověření: HA-04 fixture se skutečným pádem vlastního Python procesu po dispatch, legacy HTTP disconnectem, dvěma klienty, selháním persist/startu, retencí/cursorem a odmítnutou náhradou dokončovacího jobu; bez modelu. Report human_adam_ha04_server_work_20261112.md.
+
+
+### LL-126 — Hotový mailový slot není důkaz kontroly hlídané záležitosti
+
+- Typ: opakující se. Řešení nalezeno: 12112026.
+- Problém: completed_slot nebo nulová dávka přeskočí nově splatnou kontrolu. Zdraví poslední dávky není důkaz úplnosti zdroje; pozdní model nesmí posunout starý zdrojový snapshot za slíbený termín.
+- Řešení: samostatný deterministický průchod ve finish původní služby, bez opakování mailového posouzení. Oddělit as_of od dokončení scanu; při každém novém scanu zneplatnit starou úplnost. Negativní podnět jen pro úplný čerstvý zdroj ve stejné epoše a snapshot od termínu dál. Pauza, backlog, chyba, nejasná vazba či starý worker znamenají neověřenost. Jedna identita aktuálního podnětu na věc/generaci/termín/novou zprávu.
+- Ověření: syntetické dva monitory a restart, prázdný i dokončený mailový slot bez nového modelu, pomalé posouzení přes deadline, chyba/epocha/backlog a starý heartbeat bez falešného Běží. Report email_followups_monitor_20261112.md.

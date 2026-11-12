@@ -56,6 +56,7 @@ class HourlyEmailScheduler:
                 running_slot=slot, started_at=now.isoformat(), status="running"))
             total, complete = 0, True
             for source in sources:
+                drained = False
                 for _ in range(max_batches):
                     try:
                         result = self.worker.cycle(source, propose, limit=batch_size,
@@ -68,9 +69,18 @@ class HourlyEmailScheduler:
                         complete = False
                         break
                     if result["fetched"] < batch_size:
+                        drained = True
                         break
                 else:
                     complete = False
+                if "followups" in self.worker.status():
+                    def source_proof(document):
+                        document["sources"].setdefault(source.key, {})["followup_scan"] = {
+                            "status": "complete" if drained else "incomplete",
+                            "uidvalidity": document["sources"][source.key].get("uidvalidity", ""),
+                            "as_of": result.get("scan_started_at", "") if drained else "",
+                            "verified_at": result.get("scan_finished_at", "") if drained else "", "slot": slot}
+                    self.worker._update(source_proof)
             def finish(document):
                 schedule = document["schedule"]
                 schedule.update(status="completed" if complete else "incomplete", running_slot="")

@@ -65,6 +65,8 @@ def readiness(*, settings_path: Path = SETTINGS_PATH, worker=None,
     if not socket_path.is_socket():
         blockers.append("appserver_socket_unavailable")
     state = (worker or ContinuousEmailAgent()).status()
+    from .followup_monitor import configuration
+    followup_config = configuration(state)
     for provider in settings.providers:
         try:
             source = source_factory(provider)
@@ -81,6 +83,7 @@ def readiness(*, settings_path: Path = SETTINGS_PATH, worker=None,
     return {"ready": not blockers, "blockers": blockers, "sources": sources,
             "enabled": settings.enabled, "role": EMAIL_ROLE,
             "calendar_suggestions": settings.calendar_suggestions,
+            "followup_monitor": {"supported_version": 1, "configured": followup_config["enabled"]},
             "hours": "07:00–22:00 Europe/Prague", "max_assessments_per_day": settings.max_assessments_per_day,
             "pushcut": pushcut_status(worker)}
 
@@ -125,21 +128,38 @@ def service_tick(*, settings_path: Path = SETTINGS_PATH, worker=None, now: datet
                  selection_validator=assert_current, proposer_factory=CodexEmailProposer) -> dict:
     """One bounded pass. Attempts are reserved durably before each model call."""
     settings = load_settings(settings_path)
-    if not settings.enabled:
-        return {"status": "disabled", "proposals": 0}
+    worker = worker or ContinuousEmailAgent()
+    fixed_now = now is not None
     now = now or datetime.now(timezone.utc)
+    def followups(reason="", accounts=None):
+        from .followup_monitor import EmailFollowupMonitor
+        return EmailFollowupMonitor(worker).check(now=now if fixed_now else datetime.now(timezone.utc), unavailable_reason=reason,
+                                                  allowed_accounts=accounts)
+    if not settings.enabled:
+        followups("service_disabled")
+        return {"status": "disabled", "proposals": 0}
     if hourly_slot(now) is None:
         return {"status": "outside_hours", "proposals": 0}
-    worker = worker or ContinuousEmailAgent()
     def finish(result):
+        current = load_settings(settings_path)
+        reason = "service_paused" if (result["status"] == "paused" or not current.enabled
+                                      or current.providers != settings.providers) else ""
+        monitor = followups(reason, {source.key for source in sources})
+        if monitor["status"] != "not_connected":
+            result = {**result, "followups": monitor}
         return {**result, "notifications": PushcutNotifier(worker).drain()}
     try:
         with exclusive_file_lock(worker.root / "service", timeout=0):
-            sources = [source_factory(provider) for provider in settings.providers]
+            try:
+                sources = [source_factory(provider) for provider in settings.providers]
+            except Exception:
+                followups("source_unavailable", set())
+                raise
             state = worker.status()
             if any(not state["sources"].get(source.key, {}).get("uidvalidity")
                    or type(state["sources"][source.key].get("after_uid")) is not int
                    or state["sources"][source.key]["after_uid"] < 0 for source in sources):
+                followups("needs_initialization", {source.key for source in sources})
                 return {"status": "needs_initialization", "proposals": 0}
             slot = hourly_slot(now)
             if state.get("schedule", {}).get("completed_slot") == slot:
@@ -155,8 +175,12 @@ def service_tick(*, settings_path: Path = SETTINGS_PATH, worker=None, now: datet
 
             if paused():
                 return finish({"status": "paused", "proposals": 0})
-            selected = select_model()
-            selection_validator(selected, role=EMAIL_ROLE)
+            try:
+                selected = select_model()
+                selection_validator(selected, role=EMAIL_ROLE)
+            except Exception:
+                followups("model_unavailable", {source.key for source in sources})
+                raise
             options = {'calendar_suggestions': True} if settings.calendar_suggestions else {}
             proposer = proposer_factory(selected["model"], effort=selected["reasoning_effort"], **options)
 
@@ -181,7 +205,7 @@ def run_service_check(*, worker=None, tick=service_tick, **kwargs) -> dict:
     try:
         with exclusive_file_lock(worker.root / "service_check", timeout=0):
             marker = {"check_id": uuid4().hex, "pid": os.getpid(), "started_at": datetime.now(timezone.utc).isoformat(),
-                      "status": "running"}
+                      "status": "running", "followup_monitor_version": 1}
             health.transact(lambda _: RepositoryMutation(marker))
             try:
                 outcome = tick(worker=worker, **kwargs)

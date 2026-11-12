@@ -1,4 +1,16 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
+## E-mailová etapa 3 — UI a workflow, 2026-11-12 13:26 CET
+
+Lokálně zobrazené časy kontrol, stav zdrojového důkazu a související zprávy.
+Přesná ruční verifikace staršího zdroje má původní operation_id/CAS/readback;
+čtení související zprávy je omezené na doloženou vazbu. Žádný nový timer.
+Aktivní monitor vyžaduje čerstvý kompatibilní worker; běžící kopie7f47a41f se
+nemění a automatický doplněk není aktivovaný.454 cílených PASS.
+Plná regrese PASS:3670 testů /572,074s,31 SKIP; finální čtecí zpřesnění následně478 cílených PASS /32,772s, viz report. Bez nového p+n; další etapa4 obsahové návrhy.
+Kanonický e-mailový handoff continuous_personal_agent_2026_11_04.md, report
+reports/email_followups_monitor_20261112.md. Tento existující Cockpit TVBCP
+kryje své UI/workflow, nenahrazuje nedohodnutý TVBCP celého e-mailového proudu.
+
 ## Společné vydání připravené — 2026-11-12 10:58 CET
 
 E-mailové UI a Datovy HA-01/02/03 jsou integrované. Terra p+n celého balíčku výslovně schválené; job4242cf7f5bdb6b88724e635cde31b443 ještě není doklad úspěchu. Finální celková brána/checkpoint a jediné registrované vydání následují. Staré Ateliér/UI větve propojené pouze historicky, dnešní kód zachovaný. Přesný výsledek v reports/combined_finished_work_release_20261112.md a původní privátní účtence.
@@ -2599,3 +2611,30 @@ Finální plná lokální brána PASS: 3602 testů,31 SKIP, 507.039 s.
 Výsledková autorita: reports/combined_finished_work_release_20261112.md a
 původní privátní job/receipt. Zápis vzniká před publikací, není účtenkou
 nasazení. Při nejistotě se původní job dohledá, nepodává se nový požadavek.
+
+
+## 2026-11-12 13:26 CET — Vazby odpovědí a kontrolní časy bez opakování posouzení
+
+**Hotovo:** Lokálně dokončená etapa3. Správné zprávy mají doloženou vazbu;
+nejasné zůstávají k ruční kontrole. Záležitost uchová podnět i při chybě modelu,
+vyřízení zastaví další podněty a znovuotevření nepřehraje starou generaci.
+Kontrola termínu funguje bez nové pošty i nad dokončeným mailovým slotem.
+UI rozlišuje ověření zdroje, neověřenost a běh kompatibilního workeru.
+
+**Rozhodnutí:** Míla vrátil Adama k e-mailům; HA-05 patří Datovi. Tento krok
+nepovoluje nové publikování, aktivaci doplňku ani upgrade vlastní hodinové kopie.
+Využívá se původní služba/okno07–22, bez nové role, modelového volání či timeru.
+Samostatný e-mailový TVBCP zůstává nedohodnutý, nezaložený.
+
+**Další krok:** Etapa4 — validovaný obsahový návrh hlídání v témže běžném posouzení.
+
+**Navrhované další kroky:** Integrační vydání a registrovaný servisní upgrade
+se samostatným schválením; potom malé skutečné případy a fyzická Mac/iPhone přejímka.
+Placený pilot vyžaduje konkrétní rozsah a rozpočet.
+
+**Technický důkaz:**454 cílených PASS včetně skutečného HTTP a Node DOM kontraktů.
+Přesný zdrojový readback/CAS, dvojí monitor, simulované selhání přijetí, atomická vazba před
+kurzorem, generic-cache eviction, chybná epocha/backlog, žádné druhé posouzení,
+absence bez zdrojového důkazu odmítnutá a starý worker/rollback bez falešného Běží.
+Plná regrese PASS:3670 testů /572,074s,31 SKIP; finální čtecí zpřesnění následně478 cílených PASS /32,772s, viz report. Důkazy mimo Git: data/private/email_followups_step3_20261112/.
+Bez skutečného IMAP/SMTP/modelu, kalendáře, aktivace a změn Datovy kopie.

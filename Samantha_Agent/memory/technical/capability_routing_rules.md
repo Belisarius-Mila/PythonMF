@@ -300,3 +300,18 @@ projektem/operation_id a confirmed=true. Aktualizuje pouze projekci podle
 původních cached důkazů a hlásí writes_performed pravdivě. Nevolá nový model,
 reconnect ani původní operaci. Chybějící doklad zůstává neověřený. Placené
 pilotní tahy, steer/interrupt, fyzická přejímka a p+n mají vlastní oprávnění.
+
+
+## 2026-11-12 13:26 CET — E-mailové vazby a termíny, etapa3
+
+Registrované email_followups_verify_source ověřuje jediný potvrzený původní
+zdroj přes stávající POST /api/email-agent/followups action=verify_source:
+přesná revize/operation_id, účet/UIDVALIDITY/UID/digest, cached header nebo jeden
+readonly PEEK read. Žádná změna kurzoru ani automatický historický scan.
+GET followups?id=...&item_id=... čte pouze doloženou související nebo nejasnou
+zprávu dané záležitosti, nikdy obecný čtecí root.
+email_followups_monitor je deterministický lokální zápis v service_tick.finish;
+je vypnutý bez followups.monitor.version=1/enabled=true. Tento krok nevystavuje
+aktivaci ani neinstaluje službu. Verzi dokládá kompatibilní service_health,
+ne index nebo samotný configured flag. Služba, modelové/systémové brány a
+p+n dál mají samostatný registrovaný postup. Report email_followups_monitor_20261112.md.

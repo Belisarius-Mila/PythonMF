@@ -20,6 +20,12 @@
   const dateText = instant => new Date(instant).toLocaleString("cs-CZ", {timeZone: "Europe/Prague"});
   const waitingText = {me: "Je řada na mně", other: "Čekáme na druhou stranu",
     review: "Zpráva ke kontrole", unknown: "Další postup není určený"};
+  const checkText = {source_binding_unverified: "Vazbu původního e-mailu je potřeba ověřit.",
+    binding_review: "Přišla možná související zpráva. Přiřazení vyžaduje ruční kontrolu.",
+    source_unverified: "Kontrolu nelze dokončit. Zdroj není úplně dočtený nebo dostatečně čerstvý.",
+    related_message: "Je dostupná doložená související zpráva. Posuď další krok.",
+    due_no_observed_reply: "Čas kontroly nastal. Ve sledovaném dočteném zdroji nebyla nalezena doložená odpověď.",
+    waiting: "Zdroj ověřený. Čas plánované kontroly ještě nenastal."};
   try {
     const saved = window.sessionStorage.getItem(storageKey);
     if (saved) {
@@ -82,7 +88,8 @@
     return actions;
   }
   function paintCard(entry) {
-    const value = [...records.values()].find(value => value.source.item_id === entry.item.id);
+    const value = [...records.values()].find(value => value.source.item_id === entry.item.id
+      || Object.hasOwn(value.observations?.items || {}, entry.item.id));
     entry.holder.replaceChildren();
     if (value) {
       entry.holder.append(node("p", `Záležitost: ${value.title}`), transitions(value));
@@ -102,14 +109,21 @@
         card.append(node("h3", value.title), node("p", value.goal),
           node("p", `Další krok: ${value.next_step}`), node("p", waitingText[value.waiting_on]),
           node("p", `Zapsaný čas kontroly: ${dateText(value.check_at)} · Praha`, "meta"),
-          node("p", "Automatická kontrola dosud neproběhla.", "meta"), transitions(value));
+          node("p", value.tracking ? checkText[value.tracking.status] || "Stav kontroly není ověřený."
+            : "Automatická kontrola dosud neproběhla.", "meta"), transitions(value));
+        if (value.tracking) {
+          card.append(node("p", `Poslední kontrola: ${dateText(value.tracking.last_checked_at)}`, "meta"));
+          if (value.tracking.last_verified_at) card.append(node("p", `Poslední ověření zdroje: ${dateText(value.tracking.last_verified_at)}`, "meta"));
+          if (value.state === "active") card.append(node("p", `Nejdřívější další hodinový slot: ${dateText(value.tracking.next_check_slot)}`, "meta"));
+        }
         const detail = node("details"), source = node("div");
         detail.append(node("summary", "Podrobnosti a historie"),
           node("p", `Poslední změna: ${dateText(value.updated_at)}`));
-        detail.append(button("Zobrazit zdrojový e-mail", async () => {
+        const showSource = async (itemId = "") => {
           source.textContent = "Načítám uložený zdroj…";
           try {
-            const response = await fetch(endpoint + "?id=" + encodeURIComponent(value.id), {cache: "no-store"});
+            const response = await fetch(endpoint + "?id=" + encodeURIComponent(value.id)
+              + (itemId ? "&item_id=" + encodeURIComponent(itemId) : ""), {cache: "no-store"});
             const result = await response.json();
             if (!response.ok || !result.ok || result.followup?.id !== value.id) throw new Error();
             const message = result.source_message;
@@ -118,10 +132,25 @@
             source.append(node("h4", message.header.subject || "(bez předmětu)"),
               node("p", `${message.header.sender} · ${message.header.date}`, "meta"), node("pre", message.body_text));
           } catch (_) { source.textContent = "Uložený zdroj nelze načíst. Záležitost zůstává zachovaná."; }
-        }), source);
+        };
+        detail.append(button("Zobrazit zdrojový e-mail", () => showSource()));
+        if (value.state === "active" && value.source.thread_binding !== "verified_headers") {
+          detail.append(node("p", "Ověření načte jen přesný původní e-mail, pokud jeho hlavičky nejsou uložené. Nemění schránku.", "meta"),
+            button("Ověřit původní e-mail pro párování", () => mutate({action: "verify_source", id: value.id,
+              expected_revision: value.revision, confirmed: true})));
+        }
+        for (const bucket of ["items", "reviews"]) {
+          for (const [itemId, event] of Object.entries(value.observations?.[bucket] || {})) {
+            detail.append(button(`${bucket === "items" ? "Související zpráva" : "Zpráva k ověření vazby"} · ${dateText(event.observed_at)}`,
+              () => showSource(itemId)));
+          }
+        }
+        detail.append(source);
         for (const event of value.history || []) {
-          const label = event.action === "create" ? "Založení" : event.action === "update" ? "Úprava údajů"
-            : event.changes?.state === "completed" ? "Vyřízeno" : "Obnovení hlídání";
+          const labels = {source_verified: "Ověření původního e-mailu", related_message: "Příchod související zprávy",
+            binding_review: "Vazba zprávy k ověření", monitor_check: "Kontrola hlídání"};
+          const label = labels[event.action] || (event.action === "create" ? "Založení" : event.action === "update" ? "Úprava údajů"
+            : event.changes?.state === "completed" ? "Vyřízeno" : "Obnovení hlídání");
           detail.append(node("p", `${dateText(event.at || value.updated_at)} · ${label}`, "meta"));
         }
         card.append(detail); root.append(card);
@@ -146,7 +175,8 @@
     const response = await fetch(endpoint, {cache: "no-store"});
     const data = await response.json();
     if (!response.ok || !data.ok || !Array.isArray(data.active) || !Array.isArray(data.completed)
-        || data.capabilities?.manual_lifecycle !== true || data.capabilities?.automatic_monitoring !== false)
+        || data.capabilities?.manual_lifecycle !== true || typeof data.capabilities?.automatic_monitoring !== "boolean"
+        || data.capabilities.automatic_monitoring && data.capabilities.monitor_version !== 1)
       throw new Error("Ruční evidenci nelze ověřit. Poslední známý přehled zůstává zobrazený.");
     return data;
   }
@@ -158,7 +188,10 @@
       if (ticket !== sequence || started !== epoch) return;
       for (const value of [...data.active, ...data.completed]) remember(value);
       ready = true;
-      status.textContent = "Ruční evidence. Automatické sledování odpovědí ani kontrola termínů zatím neběží.";
+      status.textContent = data.capabilities.automatic_monitoring
+        ? "Hodinová kontrola běží. Výsledek a poslední ověření zdroje jsou u každé záležitosti."
+        : data.monitor?.configured ? "Hlídání je nastavené, ale běh kontrol není čerstvě ověřený."
+        : "Ruční evidence. Automatické sledování odpovědí ani kontrola termínů zatím neběží.";
       if (pending) {
         const found = [...records.values()].find(value =>
           (pending.id ? value.id === pending.id : value.source.item_id === pending.source_item_id)
@@ -214,7 +247,7 @@
       if (!result.followup?.id) throw new Error();
       remember(result.followup); clearPending();
       dialog.close(); editing = null;
-      status.textContent = "Ruční stav uložený. Automatická kontrola odpovědí ani termínů zatím neběží.";
+      status.textContent = "Stav záležitosti uložený. Běh automatických kontrol ověřuje přehled.";
     } catch (_) {
       error.textContent = status.textContent = "Výsledek uložení není potvrzený. Použij Ověřit stav; požadavek se automaticky neopakuje.";
       if (!dialog.open) dialog.showModal();

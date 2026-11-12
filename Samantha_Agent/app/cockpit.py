@@ -9890,7 +9890,7 @@ class CockpitServer:
                     return
                 if parsed.path == "/api/email-agent/followups":
                     params = parse_qs(parsed.query, keep_blank_values=True)
-                    if set(params) - {"id"} or any(len(v) != 1 for v in params.values()):
+                    if set(params) - {"id", "item_id"} or any(len(v) != 1 for v in params.values()):
                         result = {"ok": False, "error": "invalid_request", "message": "Vyber jednu záležitost."}
                     else:
                         result = email_followups_overview({k: v[0] for k, v in params.items()})

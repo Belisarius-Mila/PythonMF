@@ -120,7 +120,7 @@ CAPABILITIES: tuple[CapabilityRecord, ...] = (
         capability_id="email_followups_read", label="Read manually tracked email matters",
         risk=RiskLevel.READ_ONLY, reads=("private follow-up metadata and manual history",), writes=(),
         tool="app.email.followups.EmailFollowups.overview", audit=AuditPolicy.REDACTED,
-        notes="No IMAP, model or monitor. Returns automatic_monitoring=false for the manual foundation.",
+        notes="Read only. No IMAP/model/worker launch. Monitor version and fresh private worker proof determine running status; disabled by default.",
     ),
     CapabilityRecord(
         capability_id="email_followups_write", label="Create or update one manually tracked email matter",
@@ -129,6 +129,21 @@ CAPABILITIES: tuple[CapabilityRecord, ...] = (
         tool="app.email.followups.EmailFollowups.execute", requires_confirmation=True,
         confirmation_policy=ConfirmationPolicy.SUMMARY_BEFORE_ACTION, audit=AuditPolicy.REDACTED,
         notes="Explicit save/lifecycle action with fixed payload, operation ID and revision. No mailbox change, send, model, calendar or automatic monitoring.",
+    ),
+    CapabilityRecord(
+        capability_id="email_followups_verify_source", label="Verify the original email for one tracked matter",
+        risk=RiskLevel.LOCAL_WRITE, reads=("exact cached source or one confirmed read-only original UID/epoch/digest",),
+        writes=("private header index and revisioned binding receipt",),
+        tool="app.email.followups.EmailFollowups._verify_source", requires_confirmation=True,
+        confirmation_policy=ConfirmationPolicy.SUMMARY_BEFORE_ACTION, audit=AuditPolicy.REDACTED,
+        notes="Explicit verify_source action with confirmation, revision and operation ID. No history baseline, cursor change, IMAP flags, send or model. Late completion cannot reopen a matter.",
+    ),
+    CapabilityRecord(
+        capability_id="email_followups_monitor", label="Check enabled email matters without a model",
+        risk=RiskLevel.LOCAL_WRITE, reads=("accepted incoming header evidence and complete source scan receipts",),
+        writes=("private linked-message facts and one current Cockpit notice per matter",),
+        tool="app.email.followup_monitor.EmailFollowupMonitor.check", audit=AuditPolicy.REDACTED,
+        notes="Requires existing private version=1 enabled monitor configuration; disabled by default, no activation setter. Existing service window/permissions only. No model, send, calendar, Pushcut or service installation.",
     ),
     CapabilityRecord(
         capability_id="email_calendar_draft_status", label="Read a selected email's calendar draft",

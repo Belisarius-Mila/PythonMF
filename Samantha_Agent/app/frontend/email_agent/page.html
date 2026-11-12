@@ -30,14 +30,14 @@ Do <strong>Default Action → URL</strong> vlož níže uvedený odkaz na Cockpi
 <details><summary>Uložené zprávy</summary><div id="archived"></div></details>
 </main><dialog id="followupEditor" aria-labelledby="followupHeading"><form id="followupForm">
 <h2 id="followupHeading">Hlídání záležitosti</h2>
-<p>Zatím jde o ruční evidenci. Automatická kontrola odpovědí ani termínů neběží.</p>
+<p>Běh hodinových kontrol a poslední ověření zdroje ukazuje přehled záležitostí. Vyřízení vždy potvrzuješ ty.</p>
 <label>Záležitost<input id="followupTitle" maxlength="160" required></label>
 <label>Co má být výsledkem<textarea id="followupGoal" rows="3" maxlength="2000" required></textarea></label>
 <label>Další krok<textarea id="followupNextStep" rows="3" maxlength="1000" required></textarea></label>
 <label>Kdo je na řadě<select id="followupWaitingOn"><option value="unknown">Zatím nevíme</option>
 <option value="me">Já</option><option value="other">Druhá strana</option><option value="review">Ke kontrole</option></select></label>
 <label>Čas kontroly · Praha<input id="followupCheckAt" type="datetime-local" required></label>
-<p>Čas je záznam pro budoucí kontrolu, nevytváří kalendářovou událost ani upozornění.</p>
+<p>Čas je požadavek na kontrolu při dostupném hodinovém běhu, nikoli zaručený čas upozornění. Nevytváří kalendářovou událost.</p>
 <p id="followupError" role="status"></p>
 <div class="actions"><button id="followupSave" type="submit">Uložit hlídání</button>
 <button id="followupVerify" type="button" class="secondary" hidden>Ověřit stav</button>

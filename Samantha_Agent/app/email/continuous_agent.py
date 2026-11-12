@@ -26,6 +26,7 @@ from app.file_persistence import atomic_write_text, exclusive_file_lock
 from app.work_repository import JsonWorkRepository, RepositoryMutation
 from .archive_service import save_email_archive
 from .continuous_source import ObservedEmail
+from .followup_matching import header_evidence
 from .proposal_policy import PROPOSAL_INSTRUCTIONS, load_reply_name, proposal_payload, signed_draft
 
 
@@ -182,8 +183,15 @@ class ContinuousEmailAgent:
                 return {"health": "paused", "proposals": 0, "fetched": 0}
             state = self.status()
             cursor = state["sources"].get(source.key, {})
+            if "followups" in state:
+                # Any new scan invalidates the prior claim of a fully drained
+                # source, including a crash, pause or failed first batch.
+                self._update(lambda d: d["sources"].setdefault(source.key, {}).update(
+                    followup_scan={"status": "checking"}))
             try:
+                scan_started_at = _now()
                 scan = source.scan(cursor, limit=limit)
+                scan_finished_at = _now()
             except Exception as exc:
                 self._update(lambda d: d["sources"].setdefault(source.key, {}).update(
                     checked_at=_now(), health="error", error=type(exc).__name__))
@@ -206,10 +214,19 @@ class ContinuousEmailAgent:
                         "header": {"sender": observed.source.sender, "subject": observed.source.subject,
                                    "date": observed.source.date, "provider": observed.source.provider},
                         "content_digest": observed.content_digest,
+                        "thread_evidence": header_evidence(observed.source.original_eml),
                         "importance_preference_ids": [hint["id"] for hint in hints],
                         "status": "analyzing", "created_at": _now(),
                     }
-                    self._update(lambda d: d["items"].__setitem__(item_id, item))
+                    def admit(document):
+                        from .followup_monitor import admit_observation
+                        document["items"][item_id] = item
+                        admit_observation(document, item_id, at=item["created_at"])
+                        if any(item_id in v.get("observations", {}).get(bucket, {})
+                               for v in document.get("followups", {}).get("items", {}).values()
+                               for bucket in ("items", "reviews")):
+                            item["message"] = {"body_text": observed.source.body_text}
+                    self._update(admit)
                     try:
                         assessed = propose(replace(observed, importance_preferences=hints))
                         suggestion = assessed.calendar_suggestion if isinstance(assessed, EmailAssessment) else None
@@ -221,7 +238,7 @@ class ContinuousEmailAgent:
                         self._update(lambda d: d["items"][item_id].update(
                             status="analysis_failed", error=type(exc).__name__))
                     else:
-                        visible_message = {"body_text": observed.source.body_text} if proposal["important"] else {}
+                        visible_message = {"body_text": observed.source.body_text} if proposal["important"] else item.get("message", {})
                         def save_assessment(document):
                             document["items"][item_id].update(
                                 status="awaiting_confirmation" if proposal["important"] else "hourly_summary",
@@ -243,7 +260,8 @@ class ContinuousEmailAgent:
                 }))
             self._update(lambda d: d["sources"].setdefault(source.key, {}).update(
                 health="ok", checked_at=_now(), error=""))
-            return {"health": "ok", "proposals": created, "fetched": len(scan.messages)}
+            return {"health": "ok", "proposals": created, "fetched": len(scan.messages),
+                    "scan_started_at": scan_started_at, "scan_finished_at": scan_finished_at}
 
     def dismiss(self, item_ids: list[str], *, action: str) -> None:
         """Hide reviewed cards/summary rows locally; no mailbox operation exists here."""

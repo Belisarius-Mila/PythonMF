@@ -66,7 +66,8 @@ function server(initial=null) {
     s.calls.push({url,payload:payload?clone(payload):null});
     const response=(status,value)=>({ok:status===200,status,json:async()=>clone(value)});
     if (!payload) {
-      const snapshot={ok:true,version:1,capabilities:{manual_lifecycle:true,automatic_monitoring:false},
+      const snapshot={ok:true,version:1,capabilities:{manual_lifecycle:true,automatic_monitoring:!!s.running,monitor_version:s.monitorVersion??1},
+        monitor:{configured:!!s.configured},
         active:s.value?.state==='active'?[clone(s.value)]:[],completed:s.value?.state==='completed'?[clone(s.value)]:[]};
       if(s.getHold) await s.getHold;
       if(s.mode==='unavailable') return response(503,{ok:false,error:'unavailable',message:'Zdroj není dostupný.'});
@@ -94,6 +95,9 @@ function server(initial=null) {
       if(payload.action==='update') {
         assert.deepEqual(Object.keys(payload).sort(),['action','expected_revision','fields','id','operation_id']);
         Object.assign(s.value,payload.fields);
+      } else if(payload.action==='verify_source') {
+        assert.equal(payload.confirmed,true);
+        s.value.source.thread_binding='verified_headers';
       } else {
         assert.equal(payload.action,'set_state');
         s.value.state=payload.state;s.value.generation++;
@@ -259,5 +263,32 @@ async function submit(b) {await b.ids.followupForm.fire('submit',{submitter:b.id
   const corrupted=new Map([['samantha.email.followup.intent.v1','not json']]);
   b=await boot(server(),corrupted);await find(b.card,'Hlídat tuto záležitost').click();
   assert.equal(b.ids.followupEditor.open,false);assert.equal(posts(b.s).length,0,'Malformed recovery state is not discarded to allow a second intent');
-  console.log('Follow-up UI: create/edit/lifecycle, Prague time, recovery, concurrency and inert monitoring OK');
+  b=await boot(server(stored({tracking:{status:'source_unverified',last_checked_at:'2026-11-12T09:00:00Z',
+    last_verified_at:'2026-11-12T08:00:00Z',next_check_slot:'2026-11-12T10:00:00Z'}})));
+  assert.match(b.ids.followupsActive.textContent,/nelze dokončit/);
+  b.s.running=true;b.s.configured=true;await b.api.refresh();
+  assert.match(b.ids.followupsStatus.textContent,/Hodinová kontrola běží/);
+  assert.match(b.ids.followupsActive.textContent,/Poslední ověření zdroje/);
+  const verify=find(b.ids.followupsActive,'Ověřit původní e-mail pro párování');assert.ok(verify);
+  b.s.mode='unknown_committed';await verify.click();
+  assert.equal(posts(b.s).length,1);assert.equal(posts(b.s)[0].payload.action,'verify_source');
+  assert.equal(b.ids.followupEditor.open,true);await b.ids.followupVerify.click();
+  assert.equal(posts(b.s).length,1,'Recovery reads the original verification receipt without a second source operation');
+  assert.equal(b.ids.followupEditor.open,false);assert.equal(b.storage.size,0);
+
+  const relatedID='c'.repeat(64);
+  b=await boot(server(stored({source:{item_id:itemID,thread_binding:'verified_headers'},
+    observations:{items:{[relatedID]:{observed_at:'2026-11-12T09:00:00Z'}},reviews:{}}})));
+  const relatedCard=new Element('article');b.c.document.body.append(relatedCard);
+  b.api.attach(relatedCard,{id:relatedID,status:'awaiting_confirmation'});
+  assert.equal(find(relatedCard,'Hlídat tuto záležitost'),null,'Bound reply opens the existing matter');
+  assert.match(relatedCard.textContent,/Záležitost/);
+  const sourceButton=b.ids.followupsActive.querySelectorAll('button').find(x=>x.textContent.startsWith('Související zpráva'));
+  await sourceButton.click();assert.ok(b.s.calls.at(-1).url.includes('&item_id='+relatedID));
+  assert.match(b.ids.followupsActive.textContent,/<img src=x>/);
+
+  b.s.running=true;b.s.monitorVersion=99;await b.api.refresh();
+  assert.match(b.ids.followupsStatus.textContent,/nelze ověřit/);
+  assert.equal(find(b.ids.followupsActive,'Vyřízeno').disabled,true,'Unknown running protocol cannot authorize writes');
+  console.log('Follow-up UI: lifecycle/recovery, source binding, related read, truthful worker state and no second timer OK');
 })().catch(error=>{console.error(error);process.exitCode=1;});

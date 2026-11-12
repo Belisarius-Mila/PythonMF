@@ -46,6 +46,38 @@ class EmailFollowupsHTTPTests(unittest.TestCase):
         self.server.server_close()
         self.thread.join(timeout=3)
 
+    def test_explicit_source_verification_requires_confirmation_and_reads_back_same_operation(self):
+        _, first, _ = self.request(payload=self.command())
+        value = first["followup"]
+        command = {"action":"verify_source", "id":value["id"], "expected_revision":value["revision"],
+                   "operation_id":"verify-source-http-0001", "confirmed":False}
+        before = self.worker.repository.path.read_bytes()
+        self.assertEqual(self.request(payload=command)[0], 400)
+        self.assertEqual(self.worker.repository.path.read_bytes(), before)
+        command["confirmed"] = True
+        with patch("app.email.continuous_source.IMAPAgentSource.read_item", side_effect=AssertionError("Cached headers suffice")):
+            code, result, _ = self.request(payload=command)
+            self.assertEqual(code, 200)
+            self.assertEqual(result["followup"]["source"]["thread_binding"], "verified_headers")
+            self.assertTrue(self.request(payload=command)[1]["idempotent_replay"])
+
+    def test_related_detail_is_scoped_cached_and_not_a_general_item_reader(self):
+        from tests.test_email_followup_monitor import mail
+        _, first, _ = self.request(payload=self.command())
+        value = first["followup"]
+        self.worker._update(lambda d:d["followups"].update(monitor={"version":1,"enabled":True}))
+        response = mail("2", "reply@example.test", "test@example.test", sender="sender@example.test",
+                        recipient="recipient@example.test")
+        self.worker.cycle(FakeSource([response]), lambda _: proposal().model_copy(update={"important":False}))
+        before = self.worker.repository.path.read_bytes()
+        path = "/api/email-agent/followups?id=" + value["id"] + "&item_id=" + response.item_id
+        code, detail, _ = self.request(path)
+        self.assertEqual(code, 200)
+        self.assertIn("PRIVATE FULL BODY", detail["source_message"]["body_text"])
+        self.assertEqual(self.worker.repository.path.read_bytes(), before)
+        self.assertEqual(self.request(path.replace(response.item_id, "f"*64))[0], 404)
+        self.assertEqual(self.request(path + "&item_id=" + response.item_id)[0], 400)
+
     def request(self, path="/api/email-agent/followups", payload=None, *, origin=None):
         data = None if payload is None else json.dumps(payload).encode()
         headers = {"Origin": self.base if origin is None else origin}
