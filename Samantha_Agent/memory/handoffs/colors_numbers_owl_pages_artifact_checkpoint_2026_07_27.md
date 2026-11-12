@@ -275,3 +275,25 @@ owl_061126.mp3?v=20261106a-f24c1e0639c5. Účtenka v ignorovaném
 data/daily_3am/receipts/20261106_publication.json. Původní aktivní Human–Adam
 obnovený; vlastní worktree Data zachovaný. Tento výsledkový dokumentační
 checkpoint je lokální a neprovádí nové nasazení.
+
+
+## 2026-11-12 18:47 CET — Jednorázová soví řeč pro pátek 13. listopadu
+
+Hotovo: Doslovně dodaný text je v jediném řádku 2026-11-13. MP3 owl_131126.mp3
+má 228 672 B / 38,112 s a úplné dekódování FFmpeg PASS. Obě statické kopie
+přehrávače vybírají stejnou MP3 s novým otiskem audia a app.js. 25 cílených testů PASS.
+
+Rozhodnutí: Míla výslovně zadal jednorázové nasazení a zachování vypnuté noční
+soví automatiky. Živé GitHub workflow i obě místní kopie mají pouze ruční dispatch,
+bez cronu/TTS; místní run_daily_tasks sovu nevolá. Žádný soví LaunchAgent ani
+crontab nenalezen. Automatika se neobnovuje, ostatní služby se nevypínají.
+Hlas Antonin a rychlost -10 % zachované, text bez stylistických úprav.
+
+Další krok: Dokončit registrované Pages vydání a ověřit veřejný JS/MP3 proti
+přesnému místnímu souboru. Nasazení ani fyzický poslech zatím nejsou doložené.
+Navrhované další kroky: Vrátit se k rozpracované e-mailové přejímce A+C.
+
+Technický důkaz: SHA-256 MP3
+10c11f98143a5bcdf82debf851b6dbb6fb7110e4e4e5bf6e4ae40bb90e7d85d5;
+logs/owl_20261113_targeted.log a logs/owl_20261113_static_gate.log.
+Text promluvy se do paměťového zápisu nekopíruje.
