@@ -60,6 +60,12 @@
     const record=manifest?.items?.[String(item?.id)];
     return record && record.sourceEn===item.en && record.sourceCz===item.cz ? record : null;
   }
+  function sentenceAudioRecord(item, manifest) {
+    const record=manifest?.kind==="sentences" ? manifest.items?.[item?.uid] : null;
+    return record && record.uid===item.uid && record.sourceEn===item.en && record.sourceCz===item.cz
+      && record.sourceSentenceEn===item.sentenceEn && record.sourceSentenceCz===item.sentenceCz
+      && [item.sentenceEn,item.sentenceCz,record.en,record.cz].every(value=>typeof value==="string" && value.trim()) ? record : null;
+  }
   function studyPrompt(item, context = {}) {
     const english = context.direction === "enToCz";
     if (context.practice !== "sentences") return {
@@ -74,7 +80,7 @@
       language: available ? (english ? "en" : "cs") : "cs", available,
     };
   }
-  const api = {normalize,key,select,buckets,ordered,shuffle,restoreSequence,audioRecord,studyPrompt,posLabels,levelLabels,countLabel,groupInfo};
+  const api = {normalize,key,select,buckets,ordered,shuffle,restoreSequence,audioRecord,sentenceAudioRecord,studyPrompt,posLabels,levelLabels,countLabel,groupInfo};
   if (typeof module !== "undefined" && module.exports) module.exports=api;
   else root.VocabularyModel=api;
 })(globalThis);

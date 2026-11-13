@@ -50,6 +50,10 @@ fieldset {border:1px solid var(--line);border-radius:12px;margin:0;padding:14px}
 /* Keep the first pictures in view; detailed controls are optional. */
 .page-shell{padding-top:26px}.hero{padding-bottom:18px}.hero h1{font-size:clamp(1.8rem,3.3vw,2.7rem);margin-bottom:8px}.hero .eyebrow{margin-bottom:5px}.hero .intro{font-size:.95rem}.hero-count strong{font-size:2.6rem}.gallery-toolbar{margin-top:18px;margin-bottom:12px}.layout-options>summary{padding:8px 0;width:max-content;font-size:.94rem;color:var(--green)}.layout-options .gallery-options{padding:15px 0 8px}.gallery-actions{margin:12px 0}.section-nav{margin-top:17px;padding-top:14px}.vocab-section{margin-top:26px}
 .study-controls{display:flex;flex-wrap:wrap;gap:10px;font-size:.9rem;max-width:100%}
+.gallery-mode-bar{position:sticky;top:0;z-index:5;display:flex;align-items:center;justify-content:space-between;gap:12px;min-height:72px;margin-top:14px;padding:10px 12px;border:1px solid var(--line);border-radius:14px;background:var(--paper);box-shadow:var(--shadow)}
+.gallery-mode-bar .segmented{flex-shrink:0}.gallery-mode-bar .segmented button{min-height:44px}
+.gallery-mode-bar p{margin:0;min-width:0;max-width:260px;overflow-wrap:anywhere;font-size:.85rem;line-height:1.35;color:var(--muted)}
+.vocab-section{scroll-margin-top:96px}
 .sentence-practice .study-panel h2{font-size:clamp(1.5rem,3vw,2.35rem);line-height:1.35;letter-spacing:-.015em}
 .sentence-practice .answer-card{display:flex;flex-direction:column;gap:12px}
 .sentence-practice #sentenceBox{order:-1;border-top:0;padding-top:0;font-size:1.3rem;line-height:1.5}

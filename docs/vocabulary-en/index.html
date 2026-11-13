@@ -17,6 +17,10 @@
         <div><p class="eyebrow">Vocabulary EN</p><h1>Slovíčka v obrázcích</h1><p class="intro">Vyber si obrázek. Uč se vlastním tempem.</p></div>
         <div class="hero-count"><strong id="totalCount">…</strong><span id="totalLabel">slovíček ve výběru</span></div>
       </header>
+      <div class="gallery-mode-bar">
+        <div class="segmented" role="group" aria-label="Kliknutí na obrázek"><button type="button" data-gallery-mode="learn" aria-pressed="true">Učení</button><button type="button" data-gallery-mode="listen" aria-pressed="false">Poslech</button></div>
+        <p id="galleryModeHint" role="status" aria-live="polite">Kliknutí otevře kartu.</p>
+      </div>
       <div class="gallery-toolbar">
         <label class="search-field"><span>Hledat slovíčko</span><input id="searchInput" type="search" placeholder="Anglicky nebo česky…" autocomplete="off"></label>
         <details class="topic-picker" id="topicPicker"><summary id="topicSummary">Všechna témata</summary><fieldset id="topicFilters"><legend>Vyber jedno nebo více témat</legend></fieldset><button type="button" id="clearTopicsButton">Všechna témata</button></details>
@@ -36,7 +40,7 @@
       <p id="galleryNotice" class="notice" role="status" aria-live="polite"></p>
       <div id="galleryGroups" aria-busy="true"><p class="loading">Připravujeme obrázky…</p></div>
       <div id="emptyState" class="empty-state" hidden><h2>Tady zatím žádné slovíčko není.</h2><p>Zkus jiné téma nebo zruš některý filtr.</p><button id="emptyResetButton" type="button">Zobrazit všechna slovíčka</button></div>
-      <footer id="galleryFooter" class="gallery-footer" hidden>To jsou všechna slovíčka v tomto výběru. Obrázky tě vezmou zpět k učení.</footer>
+      <footer id="galleryFooter" class="gallery-footer" hidden>To jsou všechna slovíčka v tomto výběru.</footer>
     </section>
 
     <section id="studyView" class="study-view" aria-label="Učení slovíčka" hidden>

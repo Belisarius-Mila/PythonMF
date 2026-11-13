@@ -2396,3 +2396,31 @@ s mock video-only kamerou, stop tracků a dekódováním WASM.
   či projektového Gitu. S touto env prošla celá dotčená sada30 testů.
 - Ověření: library_thumbnail_email_fixture_retry_20261113.log; kompletní
   opakovaná brána ve library_thumbnail_full_gate_verified_20261113.log.
+
+
+### 2026-11-13 — Větné audio má vlastní textovou identitu a normalizaci
+
+- Kontext: slovíčkový generátor převádí čárky a středníky na tečky a má
+  výjimku hlasu pro izolované cat. Přímé převzetí těchto pravidel do celých
+  vět by měnilo interpunkci a mohlo přehrát jiný text po redakční úpravě.
+- Řešení: samostatný větný manifest/namespace, přesný text obou vět a UID
+  vedle EN/CZ. Zachovat interpunkci, soubor určit hlasem/tempem/textem.
+  Před syntézou uložit privátní požadavek; při nejistotě bez uloženého MP3
+  nic automaticky neopakovat. Manifest publikovat do výstupu až při úplné
+  sadě. Cílový překlad přehrát pouze po odhalení odpovědi.
+- Ověření: 850 skutečných MP3 dekódovaných; všech845 slovíčkových MP3
+  a původní obsah beze změny. 29 cílených Python testů včetně27Node PASS,
+  obě jazykové verze ověřené v nativním Safari.
+
+
+### 2026-11-13 — Datové atributy dlaždic nesmí kolidovat s ovládacími prvky
+
+- Kontext: Poslech galerie potřeboval původní text popisku. Použití
+  data-label na dlaždici ji přidalo mezi globálně vybírané jazykové
+  ovladače [data-label], včetně nesprávného aria-pressed.
+- Řešení: Pro popisek dlaždice data-caption, pro ovládací prvky ponechat
+  jejich vyhrazený atribut. Změnu poslechu provést nad existujícími uzly,
+  ne přerenderem; aktualizaci galerijních ARIA nespouštět při každé další
+  velké kartě.
+- Ověření: Původní FAIL→PASS pro CZ popisky a EN poslech; finálně30
+  cílených Python včetně34Node PASS /14,959s, Safari desktop.

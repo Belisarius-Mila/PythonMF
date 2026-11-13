@@ -108,6 +108,48 @@ Volba se zachová při Další/Předchozí, návratu do galerie, pokračování,
 i historii prohlížeče. Nemění pořadí, filtry, UID ani audio ID. Staré odkazy
 bez volby practice se otevřou ve slovíčkovém režimu.
 
-MP3 stále přehrávají pouze slovíčko. V režimu Věta je toto výslovně napsané
-u tlačítka pod obrázkem; tlačítko zvuku odpovědi je skryté. Nové audio ani
-syntéza nevznikají. Režim zatím nehodnotí výslovnost ani správnost odpovědi.
+Slovíčkový režim používá původní MP3. Režim Věta má od navazujícího kroku
+samostatné nahrávky celých vět, popsané v části 7. Režim nehodnotí
+výslovnost ani správnost odpovědi.
+
+7. Nahrávky celých vět (2026-11-13)
+
+Samostatný generátor: build_vocabulary_en_sentence_audio.py.
+Samostatný manifest: docs/data/vocabulary-en-sentence-audio.json.
+Samostatné MP3: docs/assets/vocabulary-en-sentences/. Původní slovíčkový
+manifest i jeho nahrávky zůstávají zachované. Aria EN, Vlasta CZ, tempo -10 %.
+Věty zachovají slova a interpunkci; nevstupují do normalizace slovních hesel.
+
+Místní audit bez externích volání:
+  python VocabularyEN/build_vocabulary_en_sentence_audio.py
+
+Výslovně schválená syntéza vyžaduje privátní účtenku; příklad:
+  python VocabularyEN/build_vocabulary_en_sentence_audio.py --apply --receipt Samantha_Agent/data/private/vocabulary_en_sentences/generation.json --workers 3
+Ukázku omezí --uids ven-0020 ven-0259; --limit omezuje počet nových požadavků.
+Pro generování je potřeba edge-tts. Vývoj 13.11. používal 7.3.1 v oddělené
+privátní složce, bez změny společných závislostí nebo běžícího Cockpitu.
+
+Nahrávky jsou určené hlasem, tempem a přesným textem. Stejné věty mohou
+sdílet MP3, ale zůstanou samostatnými UID. Hotové soubory se nepřegenerují,
+změněné bajty se nepřepisují. Nejistý požadavek bez uloženého audia blokuje
+nový běh; opakování vyžaduje samostatné vyhodnocení, nevynucovat je mazáním
+účtenky. Kompletní manifest se zapíše až při úplné sadě.
+
+Ve Větě tlačítko pod obrázkem i kliknutí na obrázek přečtou celé zadání.
+Po odhalení tlačítko Přehrát překlad přečte jen cílovou jazykovou verzi.
+Před odhalením se překlad nepřehraje. Při chybějícím nebo neshodném
+větném manifestu se ukáže vysvětlení, slovíčková MP3 se za větu nevydává.
+Každá vazba se ověřuje proti UID, EN/CZ i oběma aktuálním větám.
+
+8. Poslech slovíček přímo v galerii (2026-11-13)
+
+Přepínač Učení / Poslech je přichycený nahoře při posouvání přehledu.
+Výchozí Učení zachovává otevření velké karty. Poslech přehraje vždy EN
+slovíčkovou MP3 a neotevře kartu, nezmění URL, historii ani učební bookmark.
+Opakovaný klik začne od začátku; další obrázek zastaví předchozí.
+Popisky EN/CZ a nastavení Slovíčko/Věta jsou nezávislé na tomto poslechu.
+
+Poslech je přechodná volba otevřené stránky; reload vrací Učení. Přepnutí
+režimu zachová stejné dlaždice i scroll. Filtrace/překreslení, otevření
+učení a opuštění stránky zvuk zastaví. Při neshodném nebo chybějícím
+audiu se chyba objeví ve stále viditelné liště. Nevznikají nové MP3.
