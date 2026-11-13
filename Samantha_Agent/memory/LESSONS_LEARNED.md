@@ -2247,3 +2247,18 @@ Tento důkaz nenahrazuje skutečný reboot/wake po upgradu.
 
 - Finální ověření: plná kanonická brána 3685 testů / 566,387 s, 5 SKIP, OK;
   zmrazené SDK zdroje jsou po běhu shodné.
+
+
+### 2026-11-13 — Nový Pages projekt musí projít až skutečným publisherem
+
+- Kontext: Vocabulary EN potřebuje vlastní publikační identitu a HTTP cestu.
+  Samotná registrace v katalogu a PAGES_PROJECT_PATHS nestačí: publisher má
+  samostatný seznam povolených smoke cest. Mock celé serverové odpovědi by
+  chybějící vnitřní povolení neodhalil.
+- Řešení: zkontrolovat katalog, mapu i vnitřní whitelist; cíleně projít skutečnou
+  funkci publisheru s injektovaným runnerem a HTTP fetcherem. Ověřit přesnou
+  URL se zmrazeným SHA pro nové i již hotové nasazení. Zachovat odmítnutí
+  neregistrovaných cest před jakýmkoli příkazem.
+- Ověření: 67 cílených publikačních kontrol PASS / 6,026 s, bez GitHubu/modelu.
+  Celková brána: PASS — 3688 testů / 631,512 s, 5 SKIP, 0 failures/errors. Registrace musí být před ostrým
+  předáním načtená v serverovém runtime; místní test není veřejné vydání.

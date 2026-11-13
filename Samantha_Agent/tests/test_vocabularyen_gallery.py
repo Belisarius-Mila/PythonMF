@@ -92,6 +92,17 @@ class VocabularyGalleryTests(unittest.TestCase):
         self.assertEqual(yard['image'],'assets/vocabulary-en/courtyard.webp')
         self.assertEqual(self.manifest['stats']['uniqueImageFiles'],384)
 
+    def test_every_sentence_and_translation_stays_with_its_source_meaning(self):
+        source={(row['EN'],row['CZ']):row for row in self.rows}
+        self.assertEqual(len(self.manifest['items']),425)
+        for item in self.manifest['items']:
+            with self.subTest(uid=item['uid']):
+                row=source[(item['en'],item['cz'])]
+                self.assertTrue(item['sentenceEn'])
+                self.assertTrue(item['sentenceCz'])
+                self.assertEqual(item['sentenceEn'],row['Sentence'])
+                self.assertEqual(item['sentenceCz'],row['SentenceT'])
+
     def test_thumbnails_preserve_originals_and_repeat_export_without_changing_content(self):
         from PIL import Image
         with tempfile.TemporaryDirectory() as directory:

@@ -1,5 +1,26 @@
 # VocabularyEN web: obrazové kartičky pro opakování slovíček
 
+## Publikační vazba a věty — 2026-11-13 12:58 CET
+
+- Míla zadal další krok. Místně doplněný projekt `project-vocabulary-en`
+  s deklarovaným cílem github_pages a cestou `vocabulary-en/`. Používá
+  stávající publisher; žádný fallback přes MMTX ani Cockpit restart.
+- Katalog má 34 proudů. Nový záznam sám neotevírá soukromé vlákno, nevytváří
+  workspace ani TVBCP. Nový kanonický handoff je
+  `handoffs/workstreams/project-vocabulary-en.md`; podrobná historie galerie
+  zůstává v původním handoffu v1. TVBCP není založený a Cockpit checkpoint
+  tohoto nového proudu zatím není připravený.
+- Každá z 425 karet má Sentence i SentenceT, přesně převzaté do sentenceEn
+  a sentenceCz. Zobrazí se po odhalení odpovědi. Existujících 845 MP3
+  obsahuje slovíčka/překlady, nikoli celé věty. Nové nahrávky nevznikly.
+- Cílené ověření: 244 testů PASS / 24,880 s, včetně 18 Node scénářů. Plná brána:
+  PASS — 3688 testů / 631,512 s, 5 SKIP, 0 failures/errors. Slovníček ani galerie se tímto krokem nemění.
+- Main má 18 jiných commitů a Data tři vlastní před tímto krokem. Cizí změny
+  zůstávají zachované; integraci musí převzít vlastník main se servisním
+  rozhodnutím. Novou vazbu musí před Pages p+n znát i serverový runtime.
+- Další krok: servisní rozhodnutí pro integraci divergentní větve podle
+  předání; pak ověřit spojený kód, načíst serverovou vazbu a samostatné p+n.
+
 ## Mílova přejímka místní galerie — 2026-11-13
 
 - 2026-11-13 12:41 CET: po odkazu na místní Mac náhled a pěti bodech přejímky Míla
@@ -424,3 +445,16 @@ python3 VocabularyEN/sync_vocabulary_en_to_docs.py --preserve-extra-assets
 ## Zdroj
 
 Souhrn ChatGPT/Codex konverzace k převodu části `vocab_trainer_en.py` do jednoduché webové learner aplikace pro mentálně postižené studenty, vytvoření sync skriptu `VocabularyEN -> docs`, prvního webového MVP, zmenšení hlavičky a přípravě seznamu chybějících obrázků v `Pict/`.
+
+Doplnění ověření: povolená cesta vocabulary-en/ je zapsaná také přímo
+v publisheru mmtx_pages_deploy.py. Cílený průchod používá skutečný publisher
+s injektovaným fake runnerem a HTTP fetcherem, pro nové i již hotové nasazení.
+První rozběhnutá plná brána byla kvůli tomuto doplnění zastavená; není
+vydávána za finální výsledek. Finální log má příponu full_gate_final.
+
+Finální ověření: PASS — 3688 testů / 631,512 s, 5 SKIP, 0 failures/errors. Všech 12 zmrazených
+zdrojů/testů je po bráně shodných. Z původního galerijního manifestu se změnily
+pouze dva záměrně rozšířené testy; zbývajících 10 zdrojů, všech 384 náhledů,
+CSV a audio manifest zůstávají shodné. Přímý publisher: 67 testů PASS / 6,026 s.
+Log: vocabulary_en_publication_binding_full_gate_final_20261113.log
+SHA-256: 57d9997b4d3b863a7b7c36fac7c96ced8e7c51185b893ae31fbf5897f09292c6

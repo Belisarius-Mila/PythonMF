@@ -3,7 +3,7 @@
 Rozhodnutí Míly 2026-10-17: hlavní Adam dokončí vývoj a commity; po samostatném
 p+n převezme Luna celý schválený balíček. Výsledek se vrací do stejné konverzace
 hlavního Adama. Rozšíření téhož dne platí pro všechny kanonické vývojové
-proudy portálu (aktuálně 33), včetně přímé terminálové relace.
+proudy portálu (aktuálně 34), včetně přímé terminálové relace.
 
 ## Technologie a rozsah
 
@@ -118,9 +118,11 @@ Podrobnosti: [report opravy](../reports/human_adam_workstream_pn_fix_2026_10_23.
 
 - Běžné proudy používají stávající společné nasazení runtime Samanthy/Cockpitu.
   To zahrnuje například infrastrukturu, Human–Adam, Knihovnu i editor filmu.
-- `project-mmtx`, `project-to-be-to-have` a `project-colors-and-numbers`
-  používají společný existující PythonMF Pages publisher. Poslední dva mají
-  vlastní HTTP smoke cesty `to-be-to-have/` a `colors-numbers/`.
+- `project-mmtx`, `project-to-be-to-have`, `project-colors-and-numbers` a
+  `project-vocabulary-en` používají společný existující PythonMF Pages publisher.
+  Vedle MMTX mají vlastní HTTP smoke cesty `to-be-to-have/`, `colors-numbers/`
+  a `vocabulary-en/`. Nová vazba Vocabulary EN je od 13. 11. připravená místně;
+  před použitím musí být integrována a načtena i serverovým runtime.
 - Zdrojem jsou serverový katalog a registrované vazby `PAGES_PROJECT_PATHS`.
   Nový běžný proud nepotřebuje zvláštní seznam povolených ID; nový druh
   produkčního cíle musí mít registrovaný adapter. Neznámý cíl se zastaví.

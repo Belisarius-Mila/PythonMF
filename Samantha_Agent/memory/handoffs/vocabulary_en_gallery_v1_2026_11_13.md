@@ -4,6 +4,11 @@ Stav: ceka na rozhodnuti
 Pripomenout pri startu: ne
 Datum: 2026-11-13 12:52 CET
 
+Aktualizace 2026-11-13: Navazující publikační registrace má kanonický handoff
+handoffs/workstreams/project-vocabulary-en.md. Tento soubor zachovává detail
+místní galerie a její přejímky. Vocabulary EN je nově místně katalogově
+registrovaný proud, bez soukromého vlákna a bez založeného TVBCP.
+
 Co se resilo:
 Míla schválil výchozí galerii, Téma/stručné české ovládání, sousední Další,
 náhodně jen explicitně, mobil 2 sloupce a přílohu 425 karet / 18 skupin.
@@ -87,3 +92,30 @@ V syntetických testech oddělené fáze: standardní start 3 s, vlastní operac
 beze změny 0,5/0,6 s. Produkční zdroje beze změny, žádný retry ani živý model.
 71 cílených testů PASS / 22,124 s. Plná brána: PASS — 3685 testů / 566,387 s, 5 SKIP, 0 failures/errors.
 Kanonický SDK zápis je zároveň v handoffu/TVBCP layer-human-adam-development.
+
+
+### 2026-11-13 12:58 CET — Vocabulary EN: přesná vazba na Pages publisher
+
+Hotovo: Vocabulary EN má vlastní katalogovou identitu project-vocabulary-en
+a přesnou Pages kontrolní cestu vocabulary-en/. Veřejná aplikace zůstává
+beze změny do samostatného vydání. Všech 425 karet obsahuje větu EN a český
+překlad; po odhalení jsou viditelné. Dosavadní audio přehrává pouze slovíčka.
+
+Rozhodnutí: Míla zadal pokračovat dalším krokem po přijetí místní v1.
+Používá se existující Pages publisher. Žádný nový runtime, modelová role
+ani TTS syntéza; registrace sama nezakládá soukromé vlákno ani TVBCP.
+
+Další krok: Servisní rozhodnutí o integraci do novějšího main podle
+připraveného předání. Místní registrace je uzavřená zelenou branou; merge,
+push ani nasazení zatím neproběhly.
+
+Navrhované další kroky: Po servisně schválené integraci načíst novou vazbu
+i serverovým runtime a samostatně vydat galerii, potom fyzický iPhone.
+TVBCP Vocabulary EN vytvořit jen po výslovné dohodě, před jeho Cockpit
+checkpointem. Případné nahrávky vět jsou samostatný navazující rozsah.
+
+Technický důkaz: Targeted 244 testů PASS / 24,880 s, včetně 18 Node scénářů. Plná brána
+PASS — 3688 testů / 631,512 s, 5 SKIP, 0 failures/errors. Testy kontrolují správnou Pages cestu bez deploy
+Cockpitu a nové přesměrování neumožňují odvodit z jiného proudu. Regresní
+kontroly hlídají přesnou vazbu všech 425 Sentence/SentenceT a oba významy
+orange v controlleru. Handoff: handoffs/workstreams/project-vocabulary-en.md.

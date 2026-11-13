@@ -3474,3 +3474,43 @@ Logy vocabulary_en_sdk_phase_targeted_final_20261113.log a
 vocabulary_en_sdk_phase_full_gate_20261113.log; zdrojové otisky a měření
 v ignorovaném data/private/vocabulary_en_sdk_phase_20261113/. Bez živého
 App Serveru, modelové inference, nového vlákna, restartu, změny role či p+n.
+
+
+### 2026-11-13 12:58 CET — Vocabulary EN: přesná vazba na Pages publisher
+
+Hotovo: Vocabulary EN má vlastní katalogovou identitu project-vocabulary-en
+a přesnou Pages kontrolní cestu vocabulary-en/. Veřejná aplikace zůstává
+beze změny do samostatného vydání. Všech 425 karet obsahuje větu EN a český
+překlad; po odhalení jsou viditelné. Dosavadní audio přehrává pouze slovíčka.
+
+Rozhodnutí: Míla zadal pokračovat dalším krokem po přijetí místní v1.
+Používá se existující Pages publisher. Žádný nový runtime, modelová role
+ani TTS syntéza; registrace sama nezakládá soukromé vlákno ani TVBCP.
+
+Další krok: Servisní rozhodnutí o integraci do novějšího main podle
+připraveného předání. Místní registrace je uzavřená zelenou branou; merge,
+push ani nasazení zatím neproběhly.
+
+Navrhované další kroky: Po servisně schválené integraci načíst novou vazbu
+i serverovým runtime a samostatně vydat galerii, potom fyzický iPhone.
+TVBCP Vocabulary EN vytvořit jen po výslovné dohodě, před jeho Cockpit
+checkpointem. Případné nahrávky vět jsou samostatný navazující rozsah.
+
+Technický důkaz: Targeted 244 testů PASS / 24,880 s, včetně 18 Node scénářů. Plná brána
+PASS — 3688 testů / 631,512 s, 5 SKIP, 0 failures/errors. Testy kontrolují správnou Pages cestu bez deploy
+Cockpitu a nové přesměrování neumožňují odvodit z jiného proudu. Regresní
+kontroly hlídají přesnou vazbu všech 425 Sentence/SentenceT a oba významy
+orange v controlleru. Handoff: handoffs/workstreams/project-vocabulary-en.md.
+
+Doplnění ověření: povolená cesta vocabulary-en/ je zapsaná také přímo
+v publisheru mmtx_pages_deploy.py. Cílený průchod používá skutečný publisher
+s injektovaným fake runnerem a HTTP fetcherem, pro nové i již hotové nasazení.
+První rozběhnutá plná brána byla kvůli tomuto doplnění zastavená; není
+vydávána za finální výsledek. Finální log má příponu full_gate_final.
+
+Finální ověření: PASS — 3688 testů / 631,512 s, 5 SKIP, 0 failures/errors. Všech 12 zmrazených
+zdrojů/testů je po bráně shodných. Z původního galerijního manifestu se změnily
+pouze dva záměrně rozšířené testy; zbývajících 10 zdrojů, všech 384 náhledů,
+CSV a audio manifest zůstávají shodné. Přímý publisher: 67 testů PASS / 6,026 s.
+Log: vocabulary_en_publication_binding_full_gate_final_20261113.log
+SHA-256: 57d9997b4d3b863a7b7c36fac7c96ced8e7c51185b893ae31fbf5897f09292c6

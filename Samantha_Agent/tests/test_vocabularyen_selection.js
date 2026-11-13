@@ -98,6 +98,24 @@ test("study navigation stops audio, resets revealed answer, and preserves focus 
 test("audio identity must match BOTH texts; missing audio does not block the gallery",async()=>{
   const cat=vocabulary.items.find(i=>i.en==="cat");const wrong={items:{[cat.id]:{sourceEn:"cat",sourceCz:"špatně",en:"wrong.mp3"}}};assert.equal(model.audioRecord(cat,wrong),null);const view=await app({manifest:null});assert.equal(view.element("galleryGroups").querySelectorAll(".vocab-tile").length,425);view.openStudy(cat.uid);view.speakPrompt();assert.match(view.element("messageStrip").textContent,/neni pripraveny/);
 });
+test("revealing and changing a card keeps both sentences attached to the studied meaning",async()=>{
+  const view=await app();view.openStudy("ven-0118");
+  assert.equal(view.element("answerCard").classList.contains("hidden"),true);
+  view.element("revealButton").click();
+  assert.equal(view.element("answerCard").classList.contains("hidden"),false);
+  for(const uid of ["ven-0118","ven-0170"]){
+    view.openStudy(uid);view.element("revealButton").click();
+    const item=vocabulary.items.find(item=>item.uid===uid);
+    assert.equal(view.element("sentenceBox").hidden,false);
+    assert.equal(view.element("sentenceEn").textContent,item.sentenceEn);
+    assert.equal(view.element("sentenceCz").textContent,item.sentenceCz);
+    view.directions[1].click();
+    assert.equal(view.element("sentenceEn").textContent,item.sentenceEn);
+  }
+  view.moveStudy(1);
+  assert.equal(view.element("answerCard").classList.contains("hidden"),true);
+  assert.equal(view.element("sentenceEn").textContent,view.state.currentItem.sentenceEn);
+});
 test("ordinal numbers and related meanings stay distinct; natural cardinal order precedes other quantities",()=>{
   const numbers=model.ordered(vocabulary.items,{topics:["topic-11"],sort:"recommended"},vocabulary.catalog);assert.deepEqual(numbers.slice(0,12).map(i=>i.en),["one","two","three","four","five","six","seven","eight","nine","ten","eleven","twelve"]);assert.ok(!numbers.some(i=>i.en==="second"));assert.equal(new Set(vocabulary.items.map(model.key)).size,425);
 });

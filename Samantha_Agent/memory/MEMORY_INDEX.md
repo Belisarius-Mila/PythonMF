@@ -1,4 +1,6 @@
 # Memory Index
+- `handoffs/workstreams/project-vocabulary-en.md`; `projects/vocabulary_en_web_cards.md`; `technical/luna_release_orchestration.md` — 13. 11.: místně připravený vlastní Pages projekt Vocabulary EN → vocabulary-en/, katalog 34 proudů. Všech 425 vět EN/CZ zachovaných, audio je slovníčkové. 244 testů PASS / 24,880 s, včetně 18 Node scénářů; PASS — 3688 testů / 631,512 s, 5 SKIP, 0 failures/errors. Bez nového TVBCP, soukromého vlákna a publikace; další servisní rozhodnutí pro integraci podle připraveného TXT.
+
 - `projects/vocabulary_en_web_cards.md`; `handoffs/vocabulary_en_gallery_v1_2026_11_13.md`; `handoffs/human_adam_layer_workstream_start_2026_07_20.md` - 13. 11.: Míla přijal místní Mac galerii. SDK testová oprava odděluje standardní inicializaci od původního 0,5/0,6s RPC limitu; 71 cílených PASS, plná brána PASS — 3685 testů / 566,387 s, 5 SKIP, 0 failures/errors. Jen syntetické sockety, produkční zdroje/role/služby beze změny; bez p+n.
 
 
