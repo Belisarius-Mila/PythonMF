@@ -100,3 +100,11 @@ a malá hashově ověřená obnova syntetických testů jsou v soukromé evidenc
 Camino/Cockpit/autosave před/po shodné. Podrobnosti jsou v kanonickém
 handoffu a TVBCP `project-samantha-infrastructure`; další krok je návrat
 k praktické přejímce střižny Camino. Cache se při práci mohou znovu vytvářet.
+
+## Místní dohled nad agenty — 2026-11-13
+
+Čtecí stav: `.venv/bin/python scripts/agent_supervisor.py status`. Nepouští
+sondy ani model; starý snímek označí za neověřený. Jednorázový potvrzený
+`check --confirmed` ukládá vlastní redigovaný snímek bez oznámení. Plánovač
+a Pushcut jsou samostatný opt-in; vývoj je neaktivuje. Kanonický postup:
+`memory/technical/agent_supervisor.md`, proud Samantha Infrastructure.

@@ -24,6 +24,11 @@ NODE_FALLBACK_PATHS = (
 )
 
 COMPILE_PATHS = (
+    "app/agent_supervisor.py",
+    "app/agent_supervisor_probes.py",
+    "app/agent_supervisor_service.py",
+    "app/cockpit_agent_supervisor.py",
+    "scripts/agent_supervisor.py",
     "app/cockpit_pwa.py",
     "app/calendar_edit.py",
     "app/calendar_edit_helper.py",
@@ -551,6 +556,7 @@ TEST_MODULES = (
     "tests.test_cockpit_scandocu_proxy",
     "tests.test_safety_quick_checks",
     "tests.test_autosave_continuity",
+    "tests.test_agent_supervisor",
     "tests.test_speech_transcribe",
     "tests.test_email_outbound_tools",
     "tests.test_email_work_outbox",

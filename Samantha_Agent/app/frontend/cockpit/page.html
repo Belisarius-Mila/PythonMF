@@ -195,6 +195,15 @@
       <details id="serviceOperationsPanel" class="service-group">
         <summary><h2>Provoz</h2><span class="service-group-hint">Aktuální stav, dokumenty, záloha a dočasné bdění Macu</span></summary>
         <div class="service-group-body">
+          <section aria-labelledby="agentSupervisorTitle">
+            <h3 id="agentSupervisorTitle">Dohled nad agenty</h3>
+            <div class="body">
+              <p id="agentSupervisorStatus" class="status-line" role="status" aria-live="polite">Načítám poslední ověřený stav dohledu…</p>
+              <div id="agentSupervisorList" class="dashboard-list"></div>
+              <button id="agentSupervisorRefreshBtn" type="button" class="secondary">Obnovit přehled</button>
+              <p class="project-meta">Přehled pouze čte. Žádného agenta nespouští, neopakuje jeho práci ani jej nerestartuje.</p>
+            </div>
+          </section>
           <section>
             <h3>Aktuální stav</h3>
             <div class="body dashboard-list">

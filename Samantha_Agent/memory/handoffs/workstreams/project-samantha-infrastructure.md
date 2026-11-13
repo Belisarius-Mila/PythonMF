@@ -1,7 +1,9 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
-Pět dokončených Datových commitů lokálně integrováno; plná brána 3289 testů OK (31 skipped).
-Aktivní správce dál používá Data worktree, služba ani soukromý stav se nemigrují.
-Push/nasazení neprovedené; fyzický iPhone a první slot15.11. otevřené.
+První místní dohlížitel pošty, Cockpitu/AppServeru, autosave a SSD dokončený.
+Finální plná brána3760 OK (31 skip); cílené a headless390/1280 ověření PASS.
+Bez p+n, systémové instalace, aktivace či ostrých oznámení. Vnější hlídač
+nenastavený; další je samostatně schválené vydání a aktivace.
+Recovery správce a Data worktree se nemigrují.
 <!-- SAMANTHA_CURRENT_STATUS_END -->
 
 ### Předchozí stav infrastruktury
@@ -1693,3 +1695,53 @@ role a ověří nezměněné bajty konfigurace. Produkční kód ani role se tou
 opravou nemění. Důkaz původního selhání zůstává v
 logs/data_weekly_recovery_full_gate_20261108.log; cílená oprava v
 logs/data_weekly_recovery_targeted_fix_20261108.log. Druhá plná brána 3289 testů OK (31 skipped), 479,781 s. Data head/worktree, 16 runtime souborů i plist na konci shodné s počátečními otisky.
+
+
+## 2026-11-13 09:28 CET — Místní dohled nad agenty
+
+Hotovo: Lokálně připravený deterministický dohlížitel pošty, Cockpitu,
+App Serveru, autosave a SSD, s přehledem Servis → Provoz. Čerstvý heartbeat
+nepředstírá úplný poštovní scan; starý snímek je neověřený. Trvalé incidenty,
+sdružená oznámení, rezervace před send a žádné automatické opakování nejistoty.
+
+Rozhodnutí: Míla výslovně zadal vývoj navrženého dohlížitele. Adam vyvíjí
+a ověřuje jádro s persistencí a oznámeními. Pravidelná služba i upozornění
+zůstávají vypnuté; systémová aktivace, p+n a vnější hlídač jsou zvlášť.
+Žádný restart či opakování sledované práce, žádná změna modelových rolí.
+
+Další krok: Dokončit plnou bránu a lokální checkpoint. Následně předložit
+konkrétní vydání/aktivaci; potřebná jsou dvě vlastní Pushcut oznámení.
+Navrhované další kroky: Později ScienceNews a další plánované agenty, poté
+nezávislý vnější provozní signál Macu. Nepřebírat soukromý stav Data worktree.
+
+Technický důkaz:63 integračních a65 frontend/HTTP PASS, překrývající se sady;
+jednorázový živý vzorek v oddělené privátní složce pošta/Cockpit/AppServer/
+autosave ok, SSD warning. configured=false/notifications=false, bez modelu
+a ostrého send. Plná brána ještě probíhá. Podrobnosti
+reports/agent_supervisor_20261113.md a technical/agent_supervisor.md.
+
+
+## 2026-11-13 09:42 CET — První dohlížitel lokálně dokončený
+
+Hotovo: Místní dohled pěti provozních oblastí a čtecí přehled v Servisu jsou
+připravené k samostatnému vydání. Čerstvý heartbeat neznamená hotový scan;
+rozběhnutí práce neuzavírá incident před skutečným úspěchem. Trvalé sdružené
+Pushcut rezervace nevytvářejí resend po nejistotě, pádu nebo chybě persist.
+
+Rozhodnutí: Žádná změna rozsahu původního výslovného vývoje. Bez p+n,
+instalace do LaunchAgents, aktivace dohledu nebo ostrého Pushcutu. Produkční
+namespace ani plist dohlížitele nevznikly. Externí hlídač Macu nenastavený.
+
+Další krok: Samostatně odsouhlasené p+n a následně schválení konkrétní
+instalace přes globální brzdu a dvou vlastních Pushcut oznámení.
+Navrhované další kroky: Ostrý výpadek/obnova a iPhone přejímka; později
+ScienceNews, další plánované agenty a nezávislý vnější dohled nad Macem.
+
+Technický důkaz: Finální plná brána3760 testů OK (31 skip), samotné testy
+521,429 s; logs/agent_supervisor_full_gate_final_20261113.log. Finální
+cílená sada65 PASS; původní frontend/HTTP65 PASS, následná plná brána
+kryje i dva doplněné regresní scénáře. Skutečný headless viewport390/1280
+bez vodorovného přetékání, vždy5 řádků. Jednorázové živé sondy bez modelu
+a oznámení: pošta/Cockpit/AppServer/autosave ok, SSD warning. Sedm finálních
+otisků zdrojů shodných s přejímací sadou. Podrobná účtenka reportu a návod:
+reports/agent_supervisor_20261113.md, technical/agent_supervisor.md.

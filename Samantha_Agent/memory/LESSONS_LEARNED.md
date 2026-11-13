@@ -2223,3 +2223,9 @@ Tento důkaz nenahrazuje skutečný reboot/wake po upgradu.
 - Problém: kompatibilní kód v main není instalovaná hodinová kopie; starý heartbeat po zapnutí nebo stejný slot po reaktivaci nesmějí dokazovat nový běh. Chybějící úplný scan není důkaz absence odpovědi.
 - Řešení: registrované pause/prepare/upgrade, přesný manifest a readiness skutečné kopie, potvrzený opt-in s kontrolou vlastní instalace/commitu a zámkem workeru. Aktivace zneplatní technický čas/slot, ne kurzory či obchodní evidenci. Čekat na skutečný nový launchd heartbeat; source_unverified ponechat do přirozeného dalšího scanu.
 - Ověření:67 cílených a3730 plná sada PASS; upgrade322 souborů zachoval162 položek i ruční údaje/kurzory/nastavení/role. Nový heartbeat1 věc/0 proposals a živé API true; source_verified přesný původní zdroj, bez historického scanu či modelu. Report email_followups_activation_20261112.md.
+
+Doplnění13112026 k LL-128: samostatný dohlížitel odděluje vlastní čerstvost,
+heartbeat sledované služby, skutečnou úplnost všech zdrojů a ověřeně běžící
+delší práci. Současné výpadky sdružuje; před POST rezervuje doručení a
+nejistotu po pádu neopakuje. Souběh, restart a disková chyba po send ověřené
+izolovanými testy. Ostré zapnutí a externí watchdog jsou zvlášť.

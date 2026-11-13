@@ -50,9 +50,9 @@ EXPECTED_PAGES = {
     ),
     "cockpit": (
         COCKPIT_HTML,
-        676268,
-        12495,
-        "1fcc1348aa890ce74f04cc8efe29e62dec79878cc3a901e3733897a70789ef88",
+        680004,
+        12566,
+        "2800ddb7385a1915ceecc03132a0bd73177b14efb95acfddc0c639880ff5aa4e",
     ),
 }
 
@@ -319,7 +319,7 @@ const disabled = {...active, state:"disabled", message:"Automatika vypnutá"};
 
         self.assertEqual(
             FRONTEND_JAVASCRIPT_MODULES["cockpit"],
-            ("../shared/calendar_delete.js", "../shared/calendar_actions.js", "calendar_agenda.js", "navigation.js", "health_recovery_autosave.js", "codex_sessions.js", "library_photos.js", "document_review.js", "document_search.js", "film_feedback.js", "film_editor.js", "film_library.js", "science_news.js"),
+            ("../shared/calendar_delete.js", "../shared/calendar_actions.js", "calendar_agenda.js", "navigation.js", "health_recovery_autosave.js", "agent_supervisor.js", "codex_sessions.js", "library_photos.js", "document_review.js", "document_search.js", "film_feedback.js", "film_editor.js", "film_library.js", "science_news.js"),
         )
         self.assertIn("createHealthRecoveryAutosaveFrontend", module_source)
         self.assertIn("async function runFrontendHealthCheck()", module_source)

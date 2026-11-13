@@ -37,3 +37,10 @@ Samantha pouzit tool `samantha_system_reports`.
   Samantha se ma zeptat: "Udelame z toho novy systemovy report?"
 - Novy systemovy report pridej nejdriv do `app/system_reports.py`, potom do
   tohoto dokumentu a podle potreby do testu.
+
+## Dohled nad agenty — 2026-11-13
+
+Registrovaný status `.venv/bin/python scripts/agent_supervisor.py status`
+čte pouze vlastní soukromý snímek. Uvádí zdrojový čas, stáří, stav sond
+a agregované stavy oznámení, bez obsahu schránek nebo webhooků. Nespouští
+práci, model, síťovou sondu, aktivaci ani opravu. Podrobně agent_supervisor.md.

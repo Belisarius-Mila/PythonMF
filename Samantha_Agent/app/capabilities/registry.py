@@ -12,6 +12,42 @@ from app.capabilities.models import (
 
 CAPABILITIES: tuple[CapabilityRecord, ...] = (
     CapabilityRecord(
+        capability_id="agent_supervisor_read", label="Read cached agent supervision",
+        risk=RiskLevel.READ_ONLY, reads=("bounded private supervisor snapshot",), writes=(),
+        tool="app.cockpit_agent_supervisor.agent_supervisor_overview", audit=AuditPolicy.REDACTED,
+        notes="GET only. No probes, mailbox content, secrets, model, service start or retry; stale snapshots are unverified.",
+    ),
+    CapabilityRecord(
+        capability_id="agent_supervisor_check", label="Sample agent health once without notifications",
+        risk=RiskLevel.LOCAL_WRITE, reads=("read-only registered status probes",),
+        writes=("redacted private snapshot only",), tool="app.agent_supervisor.AgentSupervisor.check",
+        requires_confirmation=True, confirmation_policy=ConfirmationPolicy.EXACT_CURRENT_MESSAGE,
+        audit=AuditPolicy.REDACTED, notes="Manual confirmed check never sends and never repairs a watched agent.",
+    ),
+    CapabilityRecord(
+        capability_id="agent_supervisor_tick", label="Opt-in independent supervisor worker",
+        risk=RiskLevel.EXTERNAL_SEND, reads=("prior explicit local supervision and notification opt-in",),
+        writes=("private incidents and durable notification reservations", "configured Pushcut alert/recovery only"),
+        tool="app.agent_supervisor.AgentSupervisor.check", requires_confirmation=True,
+        confirmation_policy=ConfirmationPolicy.EXACT_CURRENT_MESSAGE, audit=AuditPolicy.REDACTED,
+        notes="Scheduled worker uses prior opt-in. Manual mode never sends; unknown delivery is never retried. No model or watched-service mutations.",
+    ),
+    CapabilityRecord(
+        capability_id="agent_supervisor_configure", label="Configure local supervisor opt-in",
+        risk=RiskLevel.LOCAL_WRITE, reads=("explicit configuration and private Pushcut hooks",),
+        writes=("private supervisor configuration",), tool="app.agent_supervisor.AgentSupervisor.configure",
+        requires_confirmation=True, confirmation_policy=ConfirmationPolicy.EXACT_CURRENT_MESSAGE,
+        audit=AuditPolicy.REDACTED, notes="Separate failure/recovery hooks, never serialized in GET or reports; no send or install.",
+    ),
+    CapabilityRecord(
+        capability_id="agent_supervisor_install", label="Install the exact owned supervisor LaunchAgent",
+        risk=RiskLevel.SYSTEM_CHANGE, reads=("exact reviewed code/definition digest",),
+        writes=("own LaunchAgent and durable installation receipt only",),
+        tool="app.agent_supervisor_service.SupervisorService.install", requires_confirmation=True,
+        confirmation_policy=ConfirmationPolicy.EXACT_PHRASE, audit=AuditPolicy.REDACTED,
+        notes="Global safety phrase required; no foreign plist overwrite or bootstrap retry. Notifications stay off; external watchdog not activated.",
+    ),
+    CapabilityRecord(
         capability_id="human_adam_work_start", label="Accept one scoped Human–Adam request",
         risk=RiskLevel.EXTERNAL_SEND, reads=("explicit user message and unchanged profile authorization",),
         writes=("private durable admission", "one existing canonical model turn and its authorized completion"),

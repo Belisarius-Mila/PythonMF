@@ -952,6 +952,7 @@
     }
 
     function refreshSecondaryStatus() {
+      window.SamanthaAgentSupervisor.refresh();
       refreshAutosaveStatus();
       refreshDecisionCockpit();
       refreshProjectsSummary();
@@ -6801,6 +6802,7 @@ ${item.context || ""}`);
     codexApprovalClearBtn.addEventListener("click", clearCodexApprovalCard);
 			    webAppsBtn.addEventListener("click", openWebAppsModal);
     libraryBtn.addEventListener("click", openLibraryModal);
+    document.getElementById("agentSupervisorRefreshBtn").addEventListener("click", window.SamanthaAgentSupervisor.refresh);
     familyCalendarBtn.addEventListener("click", openFamilyCalendarModal);
     projectsBtn.addEventListener("click", openProjectsModal);
     reviewReportBtn.addEventListener("click", loadDocumentReviewReport);
@@ -7152,7 +7154,7 @@ ${item.context || ""}`);
 	    });
 	    runFrontendHealthCheck();
 	    window.setInterval(runFrontendHealthCheck, 60000);
-      window.setInterval(refreshAutosaveStatus, 60000);
+      window.setInterval(() => { refreshAutosaveStatus(); window.SamanthaAgentSupervisor.refresh(); }, 60000);
 	    window.setInterval(() => refresh({silent: true, includeSecondary: false}), FULL_STATUS_MONITOR_MS);
       window.setInterval(refreshAwakeMode, AWAKE_MODE_MONITOR_MS);
       window.setInterval(tickAwakeModeCountdown, 1000);

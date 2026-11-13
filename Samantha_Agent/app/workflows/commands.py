@@ -372,6 +372,17 @@ WORKFLOW_COMMANDS: tuple[WorkflowCommand, ...] = (
         confirmation_phrase="Potvrzuji globální brzdu: rozumím riziku a chci pokračovat."
             if action in {"install", "upgrade", "verify-restart"} else "",
     ) for action in ("status", "prepare", "install", "upgrade", "pause", "resume", "verify-restart")),
+    *(WorkflowCommand(
+        command_id="agent_supervisor_" + action.replace("-", "_"),
+        title="Dohled nad agenty: " + action,
+        purpose="Čte ověřené stavy nebo provede potvrzený lokální vzorek; nikoho nerestartuje.",
+        aliases=("dohlížitel " + action,),
+        argv=(str(PYTHON_BIN), str(SAMANTHA_DIR / "scripts/agent_supervisor.py"), action)
+             + (("--confirmed",) if action == "check" else ()),
+        cwd=SAMANTHA_DIR, risk="read_only" if action in {"status", "service-preview"} else "private_service_write",
+        writes="nic" if action in {"status", "service-preview"} else "Soukromý stav dohledu; tick odesílá jen po předchozím opt-in.",
+        requires_confirmation=action in {"check", "tick"},
+    ) for action in ("status", "check", "tick", "service-preview")),
     WorkflowCommand(
         command_id="continuous_email_agent_readiness",
         title="Připravenost hodinové e-mailové služby",

@@ -15,6 +15,12 @@ class SystemReport:
 
 SYSTEM_REPORTS = (
     SystemReport(
+        name="Dohled nad agenty", when_to_use="živost a skutečná poslední práce místních agentů",
+        output="poslední redigovaný snímek, termíny, čerstvost dohledu a stav oznámení",
+        command=".venv/bin/python scripts/agent_supervisor.py status",
+        samantha_tool="app.cockpit_agent_supervisor.agent_supervisor_overview()", saves_data="ne",
+    ),
+    SystemReport(
         name="Health check",
         when_to_use="rychla kontrola rozpracovanosti, git stavu, pending bodu a varovani",
         output="kratky operacni status; `--mode full` ukaze detailnejsi audit",

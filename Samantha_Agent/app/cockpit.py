@@ -7,6 +7,7 @@ from app.cockpit_calendar_delete import calendar_delete_action
 from app.cockpit_calendar_edit import calendar_edit_action
 from app.cockpit_calendar_tasks import calendar_task_status, calendar_task_action, task_page_route
 from app.cockpit_pwa import cockpit_manifest_route
+from app.cockpit_agent_supervisor import agent_supervisor_overview
 from app.cockpit_email_calendar import email_calendar_draft_action, email_calendar_draft_status
 from app.interior_ai import interior_ai_start_action, interior_ai_recover_action
 
@@ -9884,6 +9885,13 @@ class CockpitServer:
                     return
                 if parsed.path == "/emails-to-resolve/":
                     self.respond_html(EMAIL_AGENT_HTML)
+                    return
+                if parsed.path == "/api/agent-supervisor/status":
+                    if parsed.query:
+                        self.respond_json({"ok": False, "message": "Neplatný dotaz na dohled."}, status=400)
+                    else:
+                        result = agent_supervisor_overview()
+                        self.respond_json(result, status=200 if result.get("ok") else 503)
                     return
                 if parsed.path == "/api/email-agent/overview":
                     self.respond_json(email_agent_overview())

@@ -346,3 +346,16 @@ služba pokračuje původním oknem/kurzory. Aktivace zneplatní technický slot
 nový heartbeat se musí doložit. Stejná volba je idempotentní; vypnutí nevyžaduje
 zdravou instalaci. Systémový upgrade zůstává samostatné pause/prepare/upgrade
 s globální brzdou, plným manifestem a zachováním staré kopie.
+
+## 2026-11-13 — Místní dohled nad agenty
+
+`agent_supervisor_read` používá pouze uložený redigovaný snímek; GET
+`/api/agent-supervisor/status` neprovádí sondy ani zápis. `agent_supervisor_check`
+je potvrzený jednorázový lokální vzorek bez oznámení. `agent_supervisor_tick`
+vyžaduje předchozí opt-in dohledu a zvlášť dvou konkrétních Pushcut oznámení;
+před POST trvalé sending, nejistota bez retry. Konfigurace je pouze soukromá.
+`agent_supervisor_install` vyžaduje globální větu a přesný digest náhledu;
+žádný cizí plist a žádné opakování nejistého bootstrapu. Sledované služby,
+pošta, modelové tahy a vnější hlídač se těmito vstupy neobnovují.
+Shellové status/check/tick/service-preview jsou v registru workflow.
+Podrobně `agent_supervisor.md`.
