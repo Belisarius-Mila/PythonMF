@@ -152,3 +152,27 @@ Samostatná žádost manual_problem_repeat_after_dismiss_01.json accepted,
 obsahuje rezervaci před send; není druhým automatickým incidentem.
 Privátní iphone_acceptance.json obsahuje jen redigované příznaky přejímky.
 Obnova dosud neodeslaná; vnější hlídač nenastavený. Závěrečný zápis je lokální.
+
+
+## 2026-11-13 11:09 CET — Místní test oznámení obnovy potvrzený
+
+Hotovo: Míla potvrdil funkční Test Notification u oznámení obnovy po
+výzvě ověřit zvuk a otevření Servisu. Doručení skutečného varování a cesta
+k přehledu jsou také potvrzené. První místní dohled je zapnutý pro běžný provoz.
+
+Rozhodnutí: Žádné nové provozní změny; potvrzená přejímka se pouze zapisuje.
+Dohlížitel a dvě oznámení zůstávají aktivní. Lokální test na telefonu není
+HTTP doručení obnovy ze služby ani skutečný přechod incidentu do zdravého stavu.
+
+Další krok: Při skutečné nápravě incidentu ověřit jediné automatické
+obnovovací oznámení; předchozí problém se znovu neodesílá.
+Navrhované další kroky: Nezávislý vnější hlídač celého Macu. Nedostatek SSD
+řešit samostatně, žádný úklid není schválený.
+
+Technický důkaz: Uživatelské potvrzení místního testu po pokynech
+SamanthaDohledObnova → Test Notification, zvuk a otevření Servisu.
+Živý GET HTTP200, configured/notifications_enabled/worker_recent=true,
+last_run_at 2026-11-13T10:09:18.053211+00:00; automatické počty {"pending": 0, "accepted": 1, "rejected": 0, "delivery_unknown": 0, "superseded": 0}.
+Privátní iphone_acceptance.json a final_runtime_acceptance.json obsahují
+jen příznaky a redigovaný stav. Skutečná automatická obnova a vnější hlídač
+zůstávají otevřené. Žádný další POST, restart, instalace ani p+n neproběhly.

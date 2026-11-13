@@ -10,8 +10,9 @@ P+n potvrzuje účtenka f414b8d3c33e18033b65f00375a40559; živý panel a GET200 
 Aktuální provoz13.11.: vlastní služba je nainstalovaná, načtená a aktivní po
 přesné globální větě. Dvě vlastní Pushcut oznámení jsou připojená a zapnutá;
 první skutečné SSD varování09:32 UTC accepted1. Míla potvrdil doručení
-varování na iPhone a přístup do přehledu Servis → Provoz. Zvuk a oznámení
-obnovy zatím nejsou výslovně potvrzené; skutečná obnova dosud nenastala.
+varování na iPhone, přístup do přehledu Servis → Provoz a místní test
+obnovy včetně zvuku/odkazu. Automatický přechod incidentu do obnovy a
+HTTP doručení obnovy ze služby ještě nebyly skutečně ověřené.
 Pravidelná služba i oznámení jsou výchozím stavem vypnuté. Vývoj nepovoluje
 nasazení, instalaci LaunchAgentu, zapnutí oznámení ani externího hlídače.
 Soví automatika, ScienceNews, recovery správce a ostatní služby se nemění.

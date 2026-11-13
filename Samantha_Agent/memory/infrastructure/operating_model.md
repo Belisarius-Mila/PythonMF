@@ -130,3 +130,8 @@ přehledu Dohled nad agenty v Servis → Provoz. Automatický incident zůstal
 accepted1 bez dalšího opakování; jeden výslovný test po Dismiss má vlastní
 účtenku. Otevřené jsou místní test obnovy, skutečná obnova, zvuk a vnější
 hlídač. Žádný úklid SSD nebyl schválený.
+
+Finální přejímka13.11.: Míla potvrdil iPhone varování a místní test obnovy
+včetně zvuku/odkazu do Servisu. Dvouminutová služba i dvě oznámení aktivní.
+Skutečný automatický přechod do obnovy a její doručení ze služby ještě
+neověřené; nezávislý vnější hlídač chybí. Žádný další POST či p+n.
