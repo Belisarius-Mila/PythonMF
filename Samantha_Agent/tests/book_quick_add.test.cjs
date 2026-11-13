@@ -161,12 +161,36 @@ async function run() {
   answer({ok: true, found: true, book: {title: "Old ISBN"}}); await loading2;
   assert.equal(e("quickBookTitle").value, "");
 
-  global.fetch = async () => ({ok: true, json: async () => ({ok: true, state: "done", item: {id: "one"}})});
+  const loading3 = e("quickBookLookup").dispatch("click");
+  e("quickBookCategories").value = "Moje kategorie"; e("quickBookCategories").dispatch("input");
+  answer({ok: true, found: true, book: {title: "Late", categories: ["román"]}}); await loading3;
+  assert.equal(e("quickBookCategories").value, "Moje kategorie", "late catalog never overwrites a category edit");
+  const loading4 = e("quickBookLookup").dispatch("click");
+  answer({ok: true, found: true, book: {title: "Book", categories: ["české příběhy", "humoristické příběhy"]}}); await loading4;
+  assert.equal(e("quickBookCategories").value, "české příběhy, humoristické příběhy");
+  let savedPayload;
+  global.fetch = async (_url, options) => {
+    savedPayload = JSON.parse(options.body);
+    return {ok: true, json: async () => ({ok: true, state: "done", item: {id: "one", book_cover_attachment_id: "catalog-cover"}})};
+  };
   e("quickBookTitle").value = "Saved book"; e("quickBookSave").dispatch("click"); await tick(); await tick();
+  assert.deepEqual(savedPayload.categories, ["české příběhy", "humoristické příběhy"]);
+  assert.equal(savedPayload.store_cover, true);
+  assert.match(e("quickBookCover").src, /^\/api\/library\/attachment\?id=one&attachment_id=catalog-cover&variant=thumb$/);
+  assert.equal(e("quickBookCoverNote").textContent, "Miniatura uložená na Macu");
   assert.equal(e("quickBookSave").disabled, true, "successful write cannot be repeated as another copy");
   assert.equal(e("quickBookNext").hidden, false);
   e("quickBookNext").dispatch("click"); assert.equal(e("quickBookSave").disabled, false);
   assert.equal(e("quickBookTitle").value, "");
+  assert.equal(e("quickBookCategories").value, "");
+  assert.equal(e("quickBookCover").hidden, true);
+  // A catalog genre outside the shared defaults remains selected in the full editor.
+  const source = fs.readFileSync("app/frontend/cockpit/app.js", "utf8");
+  const start = source.indexOf("    function renderLibraryBookCategoryChoices(");
+  const end = source.indexOf("    function renderLibraryBookLocationOptions(", start);
+  const render = new Function("document", source.slice(start, end) + ";return renderLibraryBookCategoryChoices;")(doc);
+  const choices = new Element(); render(choices, ["román"], ["humoristické příběhy"]);
+  assert.equal(choices.children.find(x => x.children[0].value === "humoristické příběhy").children[0].checked, true);
   ui.setAvailable(false); assert.equal(e("quickBookPanel").hidden, true); assert.equal(e("quickBookOpen").hidden, true);
   global.fetch = originalFetch;
   console.log("Quick book frontend: ISBN, durable writes/reload, double click, unavailable storage, camera cancellation, stale lookup and explicit next: OK");

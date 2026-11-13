@@ -384,3 +384,14 @@ lokální; umístění až na Macu. Detaily technical/book_quick_inventory.md.
 - Doménová účtenka rozhoduje podle command.state, nikoli jen HTTP200/ok.
   Pending/unverified se neprovádí znovu; známé odmítnutí ponechá text jako draft.
   Role, nové modely a publikace nejsou součástí této schopnosti.
+
+
+### Rychlé ISBN — potvrzené místní miniatury (2026-11-13)
+
+`book_inventory_save` / `app.cockpit_book_inventory.inventory_action` smí
+na výslovné uložení nového klienta převzít nepovinné kategorie a store_cover.
+Pevný covers.openlibrary.org ISBN endpoint, max2 MiB/8 Mpx/3 s, výstup
+JPEG240×320/64 KiB, přesměrování jen na týž HTTPS host. Pouze místní příloha
+v existujícím archivu; před zápisem rezervace bajtů a hash, resume bez sítě.
+Chyba poskytovatele neblokuje knihu. Preview/status nemění archiv. Žádné
+hromadné doplnění starých knih, registrace Obálkyknih.cz ani odchozí zpráva.

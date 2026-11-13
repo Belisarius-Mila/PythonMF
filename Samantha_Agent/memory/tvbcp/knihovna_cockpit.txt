@@ -1401,3 +1401,31 @@ o ISBN nahlášené Mílou. Logy library_year_czech_catalog_*_20261113.log.
 Výchozí API roku neposílalo; explicitní field[] jej poskytuje. Zdroj schématu:
 https://github.com/vufind-org/vufind/blob/dev/config/vufind/SearchApiRecordFields.yaml .
 Tato nová metadata změna je pouze lokální; soukromé knihy se nepřepisovaly.
+
+
+## 2026-11-13 20:17 CET — Kategorie z katalogu a skutečné místní miniatury
+
+Hotovo: Nepovinné kategorie z katalogového genre/form, bez odhadu; pokud
+chybí, Bez kategorie. Při Uložit dostupná místní JPEG miniatura do existující
+přílohy na Macu. Seznam a detail čtou soubor. Nedostupnost neblokuje knihu.
+
+Rozhodnutí: Explicitní Save, bez hromadného přepisování starých knih;
+rezervované bajty a původní ID zachovají obnovu po výpadku i staré klienty.
+Vlastní fotografie má přednost. Soubory se nemažou.
+
+Technický důkaz:49+83 cílených PASS, Node a browser390/1280 s externími
+obálkami blokovanými; lokální obrázek funguje, reload bez duplikátu.
+Plná brána: 3850 testů OK/31 skip, 642.1 s; statická i plná brána PASS. Podrobnosti book_quick_inventory.md.
+Předchozí rokbb05bf8f už vydaný (3fef2e2d678aeb969918e5f9902ac33c).
+
+Další krok: Nové samostatně schválené p+n a iPhone pilot. U9788024932460
+katalog2016/dvě kategorie, Open Library obálka404. Obálkyknih.cz čekají
+na odpověď; doplnit dotaz o souhlas s trvalými miniaturami. Nový krok je
+zatím pouze lokální, fyzická přejímka otevřená. E-mailový A+C odložený.
+
+Ověřovací prostředí: První plná brána měla pouze7 chyb pomocného Git commitu
+v email_service_control (Author identity unknown); žádná funkční chyba
+nové změny. Bez změny skutečného Gitu prošla s procesní syntetickou Git
+identitou celá dotčená sada30 testů a potom znovu i úplná brána.
+Konečný log: library_thumbnail_full_gate_verified_20261113.log;
+podrobná měření: library_thumbnail_unit_timings_20261113.log.

@@ -1,6 +1,7 @@
 """Quick inventory cards in the existing archive, with durable request identities."""
 from __future__ import annotations
 
+import base64
 import hashlib
 import json
 from pathlib import Path
@@ -13,7 +14,8 @@ from urllib.parse import urlsplit
 
 from app import article_archive as archive
 from app.book_isbn_lookup import isbn10_to_isbn13, lookup_book_preview
-from app.file_persistence import atomic_create_text, atomic_write_json
+from app.book_thumbnail import fetch_thumbnail, MAX_THUMBNAIL_BYTES
+from app.file_persistence import atomic_create_bytes, atomic_create_text, atomic_write_json
 
 
 REQUEST = re.compile(r"[A-Za-z0-9_-]{12,96}")
@@ -87,7 +89,8 @@ def _metadata(root, item):
 
 def _summary(root, item):
     raw = _metadata(root, item)
-    return {**archive.article_item_from_raw(raw).to_summary(), "revision": fingerprint(raw)}
+    return {**archive.article_item_from_raw(raw).to_summary(), "revision": fingerprint(raw),
+            **({"book_cover_status": raw["book_cover_status"]} if "book_cover_status" in raw else {})}
 
 
 def inventory_books(*, archive_root=archive.DEFAULT_ARCHIVE_ROOT):
@@ -123,6 +126,18 @@ def _finish(root, operation):
         if any(p.is_symlink() for p in (root / "articles", folder)):
             raise ValueError("Neověřená cesta knihy.")
         folder.mkdir(parents=True, exist_ok=True)
+        if "cover_bytes" in operation:
+            image = base64.b64decode(operation["cover_bytes"], validate=True)
+            if not image or len(image) > MAX_THUMBNAIL_BYTES or hashlib.sha256(image).hexdigest() != operation.get("cover_sha256"):
+                raise ValueError("Neověřená miniatura rozepsané knihy.")
+            image_path = folder / "book_cover.jpg"
+            if image_path.is_symlink():
+                raise ValueError("Neověřená cesta miniatury.")
+            if image_path.exists():
+                if image_path.read_bytes() != image:
+                    raise ValueError("Rozepsanou miniaturu změnil jiný zápis.")
+            else:
+                atomic_create_bytes(image_path, image)
         text = folder / "article.txt"
         metadata = folder / "metadata.json"
         if text.exists():
@@ -136,8 +151,7 @@ def _finish(root, operation):
         else:
             atomic_create_text(metadata, json.dumps(raw, ensure_ascii=False) + "\n")
         archive.update_registry(root / "registry.jsonl", raw)
-        return {"ok": True, "state": "done", "item": {**archive.article_item_from_raw(raw).to_summary(),
-                                                        "revision": fingerprint(raw)}}
+        return {"ok": True, "state": "done", "item": _summary(root, archive.article_item_from_raw(raw))}
     changes = operation["changes"]
     # Check every version before writing any remaining changes.
     for change in changes:
@@ -155,7 +169,7 @@ def _finish(root, operation):
 
 @archive._serialized_archive_write
 def save_inventory_book(payload, *, archive_root=archive.DEFAULT_ARCHIVE_ROOT):
-    if not isinstance(payload, dict) or set(payload) - {"request_id", "isbn", "title", "author", "publication_year", "additional_copy"}:
+    if not isinstance(payload, dict) or set(payload) - {"request_id", "isbn", "title", "author", "publication_year", "additional_copy", "categories", "store_cover"}:
         raise ValueError("Neplatný požadavek knihy.")
     identity = _request(payload.get("request_id"))
     isbn = canonical_isbn(payload.get("isbn"))
@@ -167,6 +181,18 @@ def save_inventory_book(payload, *, archive_root=archive.DEFAULT_ARCHIVE_ROOT):
         raise ValueError("Vyplň název knihy.")
     content = {"kind": "create", "isbn": isbn, "title": title, "author": author,
                "publication_year": year, "additional_copy": additional}
+    categories = payload.get("categories", [])
+    if not isinstance(categories, list) or len(categories) > 10 or any(not isinstance(x, str) for x in categories):
+        raise ValueError("Zadej nejvýše deset kategorií knihy.")
+    categories = archive.merge_book_option_values([], [archive.normalize_book_option_value(x) for x in categories if x.strip()])
+    store_cover = payload.get("store_cover", False)
+    if type(store_cover) is not bool:
+        raise ValueError("Neplatný požadavek miniatury.")
+    # Preserve the fingerprint of pending requests created by older clients.
+    if "categories" in payload:
+        content["categories"] = categories
+    if "store_cover" in payload:
+        content["store_cover"] = store_cover
     root = Path(archive_root)
     _validate_registry(root)
     document = _operations(root)
@@ -187,17 +213,30 @@ def save_inventory_book(payload, *, archive_root=archive.DEFAULT_ARCHIVE_ROOT):
         if (root / "articles" / item_id).exists():
             raise ValueError("Identita rozepsané knihy není ověřená.")
         raw = {"id": item_id, "title": title, "one_line_title": archive.compact_title(title), "category": "books",
-               "tags": [], "source_type": "manual_text", "source_label": "Domácí knihovna", "source_note": "",
+               "tags": categories, "source_type": "manual_text", "source_label": "Domácí knihovna", "source_note": "",
                "book_author": author, "book_location": "", "book_isbn": isbn, "book_publication_year": year,
                "book_record_state": "basic", "book_cover_url": cover_url(isbn), "source_url": "", "canonical_url": "",
                "archived_at": datetime.now(timezone.utc).isoformat(), "text_file": f"articles/{item_id}/article.txt",
                "html_file": "", "text_chars": "0", "read_state": "normal", "read_note": "",
                "read_state_updated_at": "", "attachments": []}
         operation = {"kind": "create", "fingerprint": fingerprint(content), "state": "prepared", "metadata": raw}
+        if store_cover:
+            image, status = fetch_thumbnail(isbn)
+            raw["book_cover_status"] = status
+            if image:
+                relative = f"articles/{item_id}/book_cover.jpg"
+                raw["attachments"] = [{"id": "catalog-cover", "label": "Obálka knihy — Open Library",
+                    "kind": "image", "role": "book_cover", "mime_type": "image/jpeg",
+                    "original_file": relative, "readable_file": relative, "thumb_file": relative,
+                    "size_bytes": len(image), "stored_size_bytes": len(image),
+                    "note": cover_url(isbn), "created_at": raw["archived_at"]}]
+                operation["cover_bytes"] = base64.b64encode(image).decode("ascii")
+                operation["cover_sha256"] = hashlib.sha256(image).hexdigest()
         document["operations"][identity] = operation
         atomic_write_json(root / "inventory_operations.json", document)
     result = _finish(root, operation)
     operation["state"] = "done"
+    operation.pop("cover_bytes", None)
     operation["result"] = result
     atomic_write_json(root / "inventory_operations.json", document)
     return result

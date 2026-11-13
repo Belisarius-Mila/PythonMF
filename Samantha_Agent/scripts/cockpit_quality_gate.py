@@ -24,6 +24,7 @@ NODE_FALLBACK_PATHS = (
 )
 
 COMPILE_PATHS = (
+    "app/book_thumbnail.py",
     "app/book_inventory.py",
     "app/cockpit_book_inventory.py",
     "app/agent_supervisor.py",
@@ -566,6 +567,8 @@ TEST_MODULES = (
     "tests.test_safety_quick_checks",
     "tests.test_autosave_continuity",
     "tests.test_book_inventory",
+    "tests.test_book_thumbnail",
+    "tests.test_book_isbn_lookup",
     "tests.test_agent_supervisor",
     "tests.test_speech_transcribe",
     "tests.test_email_outbound_tools",

@@ -3734,8 +3734,10 @@ Soubor nebude trvale smazán.`);
 
     function renderLibraryBookCategoryChoices(container, values, selectedValues = []) {
       const selected = new Set(selectedValues.map((value) => String(value || "").toLocaleLowerCase("cs")));
+      const choices = [...values];
+      selectedValues.forEach(value => { if (!choices.some(x => String(x).toLocaleLowerCase("cs") === String(value).toLocaleLowerCase("cs"))) choices.push(value); });
       container.replaceChildren();
-      values.forEach((value) => {
+      choices.forEach((value) => {
         const label = document.createElement("label");
         label.className = "library-book-category-choice";
         const input = document.createElement("input");
@@ -5220,11 +5222,12 @@ ${confirmation}`, "");
       row.dataset.articleId = item.id || "";
       row.classList.toggle("active", currentLibrarySelectedId === item.id);
       row.classList.toggle("to-read", item.read_state === "to_read");
-      if (item.category === "books" && window.SamanthaBookQuick && window.SamanthaBookQuick.safeCover(item.book_cover_url)
-          && !(item.attachment_roles || []).includes("book_cover")) {
+      if (item.category === "books" && (item.book_cover_attachment_id || (window.SamanthaBookQuick && window.SamanthaBookQuick.safeCover(item.book_cover_url)
+          && !(item.attachment_roles || []).includes("book_cover")))) {
         const cover = document.createElement("img");
         cover.className = "library-catalog-cover"; cover.alt = ""; cover.loading = "lazy"; cover.referrerPolicy = "no-referrer";
-        cover.src = item.book_cover_url; cover.addEventListener("error", () => cover.remove()); row.appendChild(cover);
+        cover.src = item.book_cover_attachment_id ? libraryAttachmentUrl(item.id, item.book_cover_attachment_id, "thumb") : item.book_cover_url;
+        cover.addEventListener("error", () => cover.remove()); row.appendChild(cover);
       }
       const title = document.createElement("div");
       title.className = "library-title";

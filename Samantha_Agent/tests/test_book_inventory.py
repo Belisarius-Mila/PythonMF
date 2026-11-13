@@ -30,6 +30,65 @@ class InventoryTests(unittest.TestCase):
     def save(self, **changes):
         return books.save_inventory_book({**self.payload, **changes}, archive_root=self.root)
 
+    def test_local_cover_categories_survive_replay_and_serve_offline(self):
+        from tests.test_book_thumbnail import jpeg
+        image = jpeg()
+        with patch.object(books, "fetch_thumbnail", return_value=(image, "stored")) as fetch:
+            result = self.save(categories=["humoristické příběhy", "Humoristické příběhy"], store_cover=True)
+            replay = self.save(categories=["humoristické příběhy", "Humoristické příběhy"], store_cover=True)
+        fetch.assert_called_once_with("9780385472579")
+        self.assertEqual(result, replay)
+        item = result["item"]
+        self.assertEqual(item["tags"], ["humoristické příběhy"])
+        self.assertEqual(item["book_cover_attachment_id"], "catalog-cover")
+        local = archive.get_article_attachment(article_id=item["id"], attachment_id="catalog-cover", variant="thumb", archive_root=self.root)
+        self.assertEqual(local["path"].read_bytes(), image)
+        self.assertEqual(local["path"].stat().st_mode & 0o777, 0o600)
+        self.assertNotIn("cover_bytes", books._operations(self.root)["operations"][self.payload["request_id"]])
+        self.assertEqual(len(archive.load_article_registry(self.root)), 1)
+        archive.update_article(article_id=item["id"], title="Other edition", text="", category="books", book_isbn="9788025229033", archive_root=self.root)
+        self.assertNotIn("book_cover_attachment_id", books.inventory_books(archive_root=self.root)["items"][0])
+        self.assertTrue(local["path"].is_file(), "changing edition never deletes the old image")
+
+    def test_cover_failure_saves_uncategorized_book_without_attachment(self):
+        with patch.object(books, "fetch_thumbnail", return_value=(None, "not_found")):
+            item = self.save(categories=[], store_cover=True)["item"]
+        self.assertEqual(item["tags"], [])
+        self.assertEqual(item["attachment_count"], 0)
+        self.assertEqual(item["book_cover_status"], "not_found")
+
+    def test_interrupted_cover_save_resumes_reserved_bytes_without_download(self):
+        from tests.test_book_thumbnail import jpeg
+        with patch.object(books, "fetch_thumbnail", return_value=(jpeg(), "stored")), patch.object(archive, "update_registry", side_effect=OSError("interrupted")):
+            with self.assertRaises(OSError): self.save(categories=[], store_cover=True)
+        before = (self.root / "inventory_operations.json").read_bytes()
+        self.assertEqual(books.inventory_operation(self.payload["request_id"], archive_root=self.root)["state"], "pending")
+        self.assertEqual(before, (self.root / "inventory_operations.json").read_bytes())
+        with patch.object(books, "fetch_thumbnail", side_effect=AssertionError("must use reserved bytes")):
+            result = self.save(categories=[], store_cover=True)
+        self.assertEqual(result["state"], "done")
+        self.assertEqual(len(list(self.root.glob("articles/*/book_cover.jpg"))), 1)
+
+    def test_changed_reserved_cover_is_never_overwritten(self):
+        from tests.test_book_thumbnail import jpeg
+        with patch.object(books, "fetch_thumbnail", return_value=(jpeg(), "stored")), patch.object(archive, "update_registry", side_effect=OSError("interrupted")):
+            with self.assertRaises(OSError): self.save(store_cover=True)
+        path = next(self.root.glob("articles/*/book_cover.jpg")); path.write_bytes(b"foreign edit")
+        with self.assertRaisesRegex(ValueError, "miniaturu"): self.save(store_cover=True)
+        self.assertEqual(path.read_bytes(), b"foreign edit")
+
+    def test_legacy_pending_request_preserves_fingerprint_without_fetch(self):
+        with patch.object(archive, "update_registry", side_effect=OSError("interrupted")), self.assertRaises(OSError): self.save()
+        with patch.object(books, "fetch_thumbnail", side_effect=AssertionError("legacy request")):
+            self.assertEqual(self.save()["state"], "done")
+
+    def test_invalid_categories_and_cover_options_never_write_or_fetch(self):
+        with patch.object(books, "fetch_thumbnail") as fetch:
+            for changes in [{"categories": "román"}, {"categories": [1]}, {"categories": ["a"] * 11}, {"categories": ["x" * 81]}, {"store_cover": "yes"}]:
+                with self.subTest(changes=changes), self.assertRaises(ValueError): self.save(**changes)
+        fetch.assert_not_called()
+        self.assertFalse((self.root / "inventory_operations.json").exists())
+
     def locations(self, rows, location="Shelf 1", identity="location_inventory_test_001"):
         return books.assign_inventory_locations({"request_id": identity, "items": [{"id": r["id"], "revision": r["revision"]} for r in rows], "location": location}, archive_root=self.root)
 

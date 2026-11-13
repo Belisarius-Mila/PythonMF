@@ -100,6 +100,12 @@ def atomic_create_text(
 ) -> None:
     """Atomically create a complete file, refusing every existing target."""
 
+    atomic_create_bytes(path, str(text).encode(encoding), mode=mode)
+
+
+def atomic_create_bytes(path: Path, payload: bytes, *, mode: int = 0o600) -> None:
+    """Create complete binary content exclusively, using the same durable protocol."""
+
     target = Path(path)
     target.parent.mkdir(parents=True, exist_ok=True)
     file_descriptor, temp_name = tempfile.mkstemp(
@@ -112,7 +118,7 @@ def atomic_create_text(
         os.fchmod(file_descriptor, mode)
         with os.fdopen(file_descriptor, "wb") as handle:
             file_descriptor = -1
-            handle.write(str(text).encode(encoding))
+            handle.write(payload)
             handle.flush()
             os.fsync(handle.fileno())
         try:

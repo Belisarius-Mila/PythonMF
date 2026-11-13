@@ -8,7 +8,7 @@ Proud `project-knowledge-library`; kanonický handoff
 
 Knihovna → Knihy → Naskenovat / přidat ISBN. Zadní kamera nebo lokální
 fotografie čárového kódu, případně ruční ISBN-10/13. Náhled názvu, autora,
-roku a obálky; údaje lze opravit. Uložit do knihovny je samostatné potvrzení.
+roku, dostupných kategorií a obálky; údaje lze opravit. Uložit do knihovny je samostatné potvrzení.
 Další kniha začíná nový záměr, dokončené uložení nejde dvojklikem opakovat.
 
 Umístění se při načítání knih na telefonu nezadává. Základní karta může
@@ -36,9 +36,10 @@ Kamera a fotografie kódu se zpracují v telefonu. Do veřejného katalogu
 odchází jen ISBN. Přístup kamery vyžaduje HTTPS/povolení uživatele.
 Fyzické ostření/čitelnost na Mílově iPhonu ještě nebyly ověřené.
 
-Miniatura je známá Open Library URL odvozená z ISBN. Při chybě obrázku se
-zobrazí Bez obálky a uložení není blokované. Neprovádí se stahování libovolné
-URL ani modelové OCR. Vlastní fotografie obálky zůstává podporovaná;
+Náhled používá pevnou Open Library URL odvozenou z ISBN. Nový formulář při
+potvrzeném uložení navíc uloží dostupnou malou miniaturu jako místní přílohu;
+podrobnosti a pravidla obnovy jsou v posledním zápisu níže. Chybějící obálka
+uložení neblokuje. Libovolné URL ani modelové OCR se nepoužívají. Vlastní fotografie obálky zůstává podporovaná;
 seznam ji upřednostní před katalogovým náhledem. Změna ISBN v editoru
 odstraní starý katalogový odkaz, aby neukazoval obálku jiného vydání.
 Obálkyknih.cz zatím nejsou integrovány; registrace a vhodnost podmínek pro
@@ -197,3 +198,62 @@ o ISBN nahlášené Mílou. Logy library_year_czech_catalog_*_20261113.log.
 Výchozí API roku neposílalo; explicitní field[] jej poskytuje. Zdroj schématu:
 https://github.com/vufind-org/vufind/blob/dev/config/vufind/SearchApiRecordFields.yaml .
 Tato nová metadata změna je pouze lokální; soukromé knihy se nepřepisovaly.
+
+
+## 2026-11-13 20:17 CET — Kategorie z katalogu a skutečné místní miniatury
+
+Hotovo: Na výslovné upřesnění Míly je kategorie nepovinná; přebírá se pouze
+žánr/formát označený katalogem jako genre/form, bez odhadu podle témat.
+Při chybějícím údaji zůstávají tags prázdné a přehled ukáže Bez kategorie.
+Rychlý formulář umožní převzaté kategorie opravit. Nová katalogová kategorie
+zůstane vybraná i při následné podrobné editaci.
+
+Rozhodnutí: Po potvrzení Uložit do knihovny se dostupná miniatura z pevné
+Open Library URL skutečně uloží jako soukromý JPEG na Macu. Náhled ani sken
+samy soubor nebo knihu neukládají. Limit vstupu2 MiB/8 Mpx, timeout3 s, JPEG
+nejvýše240×320 a64 KiB, bez EXIF; přesměrování jen na tentýž HTTPS host.
+V registru je stávající příloha book_cover; seznam i detail čtou místní API.
+Nedostupná miniatura neblokuje knihu a UI výslovně oznámí uložení bez obálky.
+Staré knihy se hromadně nemění a nejsou znovu stahované.
+
+Technický důkaz:49 cílených testů ISBN/uložení/stahování PASS; dalších83
+frontend/archive/photo/persistence PASS. Node ověřuje převzetí kategorií,
+pozdní ruční editaci, skutečný nový payload a návrat na místní obrázek.
+Mobilní/desktopový headless browser390/1280 PASS: místní příloha i obrázek
+v seznamu mají naturalWidth>0 při zablokovaném covers.openlibrary.org;
+ztracená odpověď a reload nezaloží duplikát. Lokální logy
+library_thumbnail_browser_qa_20261113.log a library_thumbnail_live_catalog_20261113.log.
+Plná brána: 3850 testů OK/31 skip, 642.1 s; statická i plná brána PASS.
+
+Obnova: Nové volitelné categories/store_cover vstupují do otisku jen pokud
+jsou ve vstupu. Staré čekající požadavky mají původní otisk i chování.
+Zápis nejdřív rezervuje přesný JPEG a SHA-256, potom vytvoří výhradně nový
+soubor, metadata a registr. Opakování používá původní bajty, nikoli síť;
+cizí soubor nepřepíše. Po úspěchu rezervace obsahuje již jen otisk a metadata.
+Změna ISBN ponechá všechny soubory, ale katalogový obrázek jiného vydání
+přestane nabízet jako obálku. Vlastní fotografie má přednost.
+
+Zdrojové vazby: Předchozí oprava roku bb05bf8f byla samostatně vydaná
+účtenkou3fef2e2d678aeb969918e5f9902ac33c, push1/deploy confirmed,
+3823 testů a smoke5/5. Tento nový krok zatím nemá p+n. Veřejný katalog
+pro ISBN9788024932460 živě vrací2016 a dvě žánrové kategorie; Open Library
+obálku nemá (404). Veřejný kontrolní vzorek9780385472579 vrací JPEG1459 B.
+Živá knihovna se těmito testy neměnila.
+
+Rizika: Fyzická přejímka nového formuláře na iPhonu zůstává po nasazení.
+Obálkyknih.cz nejsou integrované. Jejich podmínky trvalé ukládání zakazují;
+předchozí registrační dotaz trvalé stahování nepožadoval. Míla musí doplnit
+dotaz výslovně i na malé soukromé trvalé miniatury a získat jejich souhlas.
+Zdroj: https://www.obalkyknih.cz/about ; Open Library postup:
+https://openlibrary.org/dev/docs/api/covers . Žádná zpráva se nyní neposílala.
+
+Další krok: Samostatně schválené p+n této konkrétní změny; pak telefonní
+pilot a umístění na Macu. Poskytovatele českých obálek doplnit až podle
+odpovědi a dohodnutých podmínek. E-mailový A+C test zůstává odložený.
+
+Ověřovací prostředí: První plná brána měla pouze7 chyb pomocného Git commitu
+v email_service_control (Author identity unknown); žádná funkční chyba
+nové změny. Bez změny skutečného Gitu prošla s procesní syntetickou Git
+identitou celá dotčená sada30 testů a potom znovu i úplná brána.
+Konečný log: library_thumbnail_full_gate_verified_20261113.log;
+podrobná měření: library_thumbnail_unit_timings_20261113.log.

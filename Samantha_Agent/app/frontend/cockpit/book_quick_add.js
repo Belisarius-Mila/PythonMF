@@ -120,6 +120,7 @@
     const el = id => doc.getElementById(id);
     const panel = el("quickBookPanel"); if (!panel) return null;
     const status = el("quickBookStatus"), isbn = el("quickBookISBN"), title = el("quickBookTitle"), author = el("quickBookAuthor"), year = el("quickBookYear");
+    const categories = el("quickBookCategories");
     const open = el("quickBookOpen"), save = el("quickBookSave"), scan = el("quickBookScan"), video = el("quickBookVideo");
     const image = el("quickBookCover"), coverNote = el("quickBookCoverNote"), duplicate = el("quickBookDuplicate");
     let generation = 0, edits = 0, additional = false, available = false, rows = [], listGeneration = 0, opened = false, completed = false, startingCamera = false;
@@ -131,7 +132,7 @@
     const pending = () => { try { return ledger && ledger.pending(); } catch (_) { return true; } };
     function controls() {
       const p = pending(), busy = ledger && ledger.busy;
-      [isbn, title, author, year, scan, el("quickBookLookup"), el("quickBookImage"), el("quickBookLocationsOpen"), el("quickBookAdditional")].forEach(x => { x.disabled = !!p || !!busy || !ledger; });
+      [isbn, title, author, year, categories, scan, el("quickBookLookup"), el("quickBookImage"), el("quickBookLocationsOpen"), el("quickBookAdditional")].forEach(x => { x.disabled = !!p || !!busy || !ledger; });
       scan.disabled = scan.disabled || startingCamera; scan.textContent = startingCamera ? "Otevírám kameru…" : "Skenovat kamerou";
       save.disabled = !!busy || !ledger || completed; save.textContent = p ? "Dokončit původní zápis" : "Uložit do knihovny";
       el("quickBookRecover").hidden = !p; el("quickBookNext").hidden = !!p || !el("quickBookNext").dataset.ready;
@@ -152,7 +153,7 @@
       });
     function stop() { camera.stop(); startingCamera = false; video.hidden = true; el("quickBookStop").hidden = true; controls(); }
     function close() { opened = false; generation++; listGeneration++; stop(); panel.hidden = true; open.setAttribute("aria-expanded", "false"); }
-    function changedISBN() { stop(); generation++; additional = false; completed = false; duplicate.replaceChildren(); title.value = ""; author.value = ""; year.value = ""; setCover(""); el("quickBookAdditional").hidden = true; controls(); }
+    function changedISBN() { stop(); generation++; additional = false; completed = false; duplicate.replaceChildren(); title.value = ""; author.value = ""; year.value = ""; categories.value = ""; setCover(""); el("quickBookAdditional").hidden = true; controls(); }
     async function lookup() {
       if (pending()) return;
       stop(); let code;
@@ -165,6 +166,7 @@
         if (!data.ok) { notice(data.message || "Knihu nelze dohledat."); return; }
         if (edits !== edit) { notice("Náhled přišel po tvé úpravě; ruční údaje zůstaly zachované."); return; }
         const b = data.book || {}; title.value = b.title || ""; author.value = b.author || ""; year.value = b.publication_year || ""; setCover(b.cover_url);
+        categories.value = Array.isArray(b.categories) ? b.categories.join(", ") : "";
         notice(data.found ? "Zkontroluj knihu a ulož ji. Umístění doplníš později na Macu." : data.message); title.focus();
       } catch (_) { if (token === generation && opened) notice("Katalog neodpověděl. Doplň název a knihu ulož ručně."); }
     }
@@ -172,6 +174,14 @@
       if (!data.ok || data.state !== "done") return false;
       notice(kind === "locations" ? "Umístění vybraných knih bylo uloženo." : "Kniha je uložená na Macu. Umístění doplníš později.");
       if (kind !== "locations") { completed = true; el("quickBookNext").dataset.ready = "1"; el("quickBookNext").hidden = false; }
+      if (kind !== "locations" && data.item) {
+        if (data.item.book_cover_attachment_id) {
+          image.src = "/api/library/attachment?id=" + encodeURIComponent(data.item.id) + "&attachment_id=" + encodeURIComponent(data.item.book_cover_attachment_id) + "&variant=thumb";
+          image.hidden = false; coverNote.textContent = "Miniatura uložená na Macu";
+        } else if (data.item.book_cover_status) {
+          setCover(""); coverNote.textContent = "Kniha uložena bez obálky — miniatura nebyla dostupná.";
+        }
+      }
       doc.dispatchEvent(new CustomEvent("library-inventory-saved", {detail: data.item || {}}));
       return true;
     }
@@ -233,7 +243,7 @@
     });
     el("quickBookClose").addEventListener("click", close);
     isbn.addEventListener("input", changedISBN);
-    [title, author, year].forEach(x => x.addEventListener("input", () => { edits++; }));
+    [title, author, year, categories].forEach(x => x.addEventListener("input", () => { edits++; }));
     el("quickBookLookup").addEventListener("click", lookup);
     scan.addEventListener("click", async () => {
       if (pending() || startingCamera) return;
@@ -265,7 +275,8 @@
     save.addEventListener("click", () => {
       if (pending()) { perform("create", {}); return; }
       try { const code = normalizeISBN(isbn.value); if (!title.value.trim()) { notice("Doplň název knihy."); title.focus(); return; }
-        perform("create", {isbn: code, title: title.value.trim(), author: author.value.trim(), publication_year: year.value.trim(), additional_copy: additional});
+        perform("create", {isbn: code, title: title.value.trim(), author: author.value.trim(), publication_year: year.value.trim(), additional_copy: additional,
+          categories: categories.value.split(",").map(x => x.trim()).filter(Boolean), store_cover: true});
       } catch (e) { notice(e.message); }
     });
     el("quickBookAdditional").addEventListener("click", () => { additional = true; el("quickBookAdditional").hidden = true; notice("Dalším uložením přidáš další fyzický exemplář této knihy."); });

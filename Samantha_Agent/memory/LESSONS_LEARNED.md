@@ -2370,3 +2370,29 @@ s mock video-only kamerou, stop tracků a dekódováním WASM.
 - Ověření: dva regresní FAIL→PASS,36 cílených testů a statická brána PASS.
   Veřejný vzorek9788025229033 přinesl2018 za0,384s. Konkrétní uživatelova
   obálka vyžaduje jeho ISBN; dostupnost jiného vzorku ji nepotvrzuje.
+
+
+### 2026-11-13 — Katalogový náhled není uložená miniatura
+
+- Kontext: fungující ISBN metadata a sestavená URL nedokazují dostupnost
+  obálky ani její místní uložení. Téma katalogu navíc nemusí být žánr knihy.
+- Řešení: převzít pouze typed genre/form; bez něj žádný odhad. Na explicitní
+  Save uložit malý ověřený JPEG do stávající přílohy, rezervovat přesné bajty
+  před publikací a při replay nepoužívat síť. V editoru zachovat vybrané
+  kategorie mimo výchozí nabídku. Oprávnění poskytovatele ověřit také pro
+  trvalé miniatury, nestačí souhlas jen se vzdáleným zobrazením.
+- Ověření:49+83 cílených PASS, Node late-edit/replay a browser390/1280
+  s blokovaným externím hostem; lokální příloha i seznam mají skutečný obrázek.
+
+
+### 2026-11-13 — Git identita v pomocných testovacích repozitářích
+
+- Kontext: plná brána měla pouze7 chyb email_service_control: followup_install
+  vytváří další pomocný commit bez lokální Git identity; identita zdrojového
+  repozitáře se do nového dočasného repozitáře nepřenese. stderr potvrdil
+  Author identity unknown. Nešlo o chybu miniatur ani o stav skutečné pošty.
+- Řešení: pouze pro testovací proces nastavit GIT_AUTHOR_NAME/EMAIL a
+  GIT_COMMITTER_NAME/EMAIL na syntetickou identitu, bez změny globálního
+  či projektového Gitu. S touto env prošla celá dotčená sada30 testů.
+- Ověření: library_thumbnail_email_fixture_retry_20261113.log; kompletní
+  opakovaná brána ve library_thumbnail_full_gate_verified_20261113.log.

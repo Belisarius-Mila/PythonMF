@@ -19,11 +19,11 @@ CAPABILITIES: tuple[CapabilityRecord, ...] = (
     ),
     CapabilityRecord(
         capability_id="book_inventory_save", label="Save a confirmed basic book or assign selected locations",
-        risk=RiskLevel.LOCAL_WRITE, reads=("explicit book fields and revisions",),
+        risk=RiskLevel.LOCAL_WRITE, reads=("explicit book fields and revisions", "fixed Open Library cover endpoint on confirmed save"),
         writes=("private existing book archive", "durable request identity"),
         tool="app.cockpit_book_inventory.inventory_action", audit=AuditPolicy.REDACTED,
         requires_confirmation=True, confirmation_policy=ConfirmationPolicy.EXACT_CURRENT_MESSAGE,
-        notes="Only explicit save/selected location buttons; repeated identities never create another copy or overwrite later edits. No deletion, AI, email or service changes.",
+        notes="Only explicit save/selected location buttons; optional bounded local JPEG cover from covers.openlibrary.org, catalog genre labels without inference. Repeated identities never create another copy or overwrite later edits. No deletion, AI, email or service changes.",
     ),
     CapabilityRecord(
         capability_id="agent_supervisor_read", label="Read cached agent supervision",

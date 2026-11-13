@@ -168,6 +168,8 @@ class ArticleArchiveItem:
     def to_summary(self, snippet: str = "", include_attachments: bool = False) -> dict[str, Any]:
         attachment_types = sorted({attachment.kind for attachment in self.attachments if attachment.kind})
         attachment_roles = sorted({attachment.role for attachment in self.attachments if attachment.role})
+        covers = [a for a in self.attachments if a.role == "book_cover" and (a.thumb_file or a.readable_file or a.original_file)]
+        preferred_cover = next((a for a in covers if a.id != "catalog-cover"), covers[0] if covers else None)
         return {
             "id": self.id,
             "title": self.title,
@@ -188,6 +190,7 @@ class ArticleArchiveItem:
             "book_publication_year": self.book_publication_year,
             "book_record_state": self.book_record_state,
             "book_cover_url": self.book_cover_url,
+            **({"book_cover_attachment_id": preferred_cover.id} if preferred_cover else {}),
             "snippet": snippet,
             "read_state": self.read_state,
             "read_state_label": self.read_state_label,
@@ -871,8 +874,13 @@ def update_article(
     raw["book_author"] = clean_book_author
     raw["book_location"] = clean_book_location
     raw["book_isbn"] = clean_book_isbn
-    if clean_book_isbn != existing_book_isbn and raw.get("book_cover_url"):
+    if clean_book_isbn != existing_book_isbn:
         raw["book_cover_url"] = ""
+        raw.pop("book_cover_status", None)
+        # Keep every file, but do not present a different edition's catalog image as its cover.
+        for attachment in raw.get("attachments", []):
+            if attachment.get("id") == "catalog-cover" and attachment.get("role") == "book_cover":
+                attachment["role"] = "supporting_image"
     raw["book_publication_year"] = clean_book_publication_year
     if item.book_record_state == "basic" and clean_text and clean_book_author and clean_book_location:
         raw["book_record_state"] = ""
