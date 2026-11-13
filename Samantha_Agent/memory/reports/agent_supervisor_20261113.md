@@ -45,3 +45,28 @@ Syntetická komponentová QA není fyzický iPhone ani důkaz nasazení Cockpitu
 Produkční namespace a vlastní systémový plist dohlížitele neexistují.
 Finální instalační preview aktualizované po opravě obnovy; starý digest
 se nemá použít. Upozornění ani vnější heartbeat nebyly skutečně odeslané.
+
+
+## 2026-11-13 10:01 CET — Dohlížitel vydaný, aktivace otevřená
+
+Hotovo: Přehled dohlížitele je nasazený v Cockpitu; živá stránka přesně
+odpovídá schválenému zdroji a nový čtecí endpoint vrací HTTP200.
+
+Rozhodnutí: Míla výslovně schválil p+n. Registrovaný vykonavatel dokončil
+vydání dvou čekajících commitů. Instalace pravidelné služby, její aktivace
+a ostrá oznámení tím nebyly schválené ani provedené.
+
+Další krok: Schválit konkrétní instalaci přes globální brzdu a připravit
+dvě vlastní Pushcut oznámení pro problém a obnovu.
+Navrhované další kroky: Skutečný výpadek/obnova, fyzická iPhone přejímka
+a nezávislý vnější dohled nad Macem.
+
+Technický důkaz: Účtenka f414b8d3c33e18033b65f00375a40559 completed,
+push/deploy confirmed, head fb062e342651348ed9c5f0b66bc8cdb5a5641cee,
+code stamp c229748ea6bbfc98. Plná publikační brána3760 testů PASS/594,7s,
+smoke5/5, protected_services_unchanged=true. Nativní Adam jednou ověřil
+živé health200, HTML SHA2562800ddb7385a1915ceecc03132a0bd73177b14efb95acfddc0c639880ff5aa4e
+shodné se zdrojem a status200 configured=false/notifications_enabled=false.
+Produkční namespace a vlastní plist neexistují; vnější hlídač nenastavený.
+returned_to_adam=false označuje portálový příznak; nativní převzetí dokončené,
+není důvodem opakování. Tento závěrečný zápis je lokální pro příští balíček.

@@ -108,3 +108,8 @@ sondy ani model; starý snímek označí za neověřený. Jednorázový potvrzen
 `check --confirmed` ukládá vlastní redigovaný snímek bez oznámení. Plánovač
 a Pushcut jsou samostatný opt-in; vývoj je neaktivuje. Kanonický postup:
 `memory/technical/agent_supervisor.md`, proud Samantha Infrastructure.
+
+Dohlížitel je od13.11. nasazený v Cockpitu (fb062e34, účtenka
+f414b8d3c33e18033b65f00375a40559, smoke5/5). Pravidelná služba není
+instalovaná, configured=false a oznámení vypnutá. Další je konkrétní
+schválení instalace a dvou vlastních Pushcut notifikací; vnější hlídač chybí.
