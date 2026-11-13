@@ -135,3 +135,9 @@ Finální přejímka13.11.: Míla potvrdil iPhone varování a místní test obn
 včetně zvuku/odkazu do Servisu. Dvouminutová služba i dvě oznámení aktivní.
 Skutečný automatický přechod do obnovy a její doručení ze služby ještě
 neověřené; nezávislý vnější hlídač chybí. Žádný další POST či p+n.
+
+Skutečná automatická přejímka13.11.: po uživatelově uvolnění SSD naměřeno
+přibližně30,12 GiB. Dohlížitel automaticky uzavřel původní incident a poslal
+jednu obnovu (accepted, Míla potvrdil iPhone). Celý cyklus varování/náprava/
+obnova přijatý. Míla další úklid odložil; žádné mazání Adamem. Vnější hlídač
+Macu zůstává samostatný budoucí úkol.

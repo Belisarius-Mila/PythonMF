@@ -176,3 +176,26 @@ last_run_at 2026-11-13T10:09:18.053211+00:00; automatické počty {"pending": 0,
 Privátní iphone_acceptance.json a final_runtime_acceptance.json obsahují
 jen příznaky a redigovaný stav. Skutečná automatická obnova a vnější hlídač
 zůstávají otevřené. Žádný další POST, restart, instalace ani p+n neproběhly.
+
+
+## 2026-11-13 12:04 CET — Skutečná automatická obnova přijatá i na iPhonu
+
+Hotovo: Po uživatelem provedeném uvolnění SSD dohlížitel automaticky
+uzavřel skutečný incident a poslal právě jedno oznámení obnovy. Pushcut ho
+přijal a Míla potvrdil doručení na telefon. Celý skutečný cyklus varování
+→ náprava → automatická obnova je tím přijatý.
+
+Rozhodnutí: Míla další úklid výslovně odložil; Adam nic nemaže ani
+nepřesouvá. Pravidelný dohled a obě oznámení zůstávají aktivní, bez nového p+n.
+
+Další krok: Běžný provoz místního dohlížitele.
+Navrhované další kroky: Nezávislé vnější hlídání výpadku celého Macu je
+samostatný budoucí úkol. Další úklid SSD se nyní neprovádí.
+
+Technický důkaz: Jediný skutečný storage incident otevřen09:09:00 UTC,
+varování accepted09:32:01 UTC, uzavřen a obnova accepted10:32:58 UTC.
+Obě události mají stejnou incidentní identitu, automatické accepted2,
+pending/rejected/delivery_unknown0. Po uvolnění skutečně změřeno přibližně
+30,12 GiB volných; původně26,44 GiB. Privátní automatic_recovery_acceptance.json
+obsahuje obě API účtenky a potvrzení iPhonu. Žádná simulace zdravého stavu,
+ruční recovery POST, restart nebo změna prahu. Vnější hlídač nenastavený.

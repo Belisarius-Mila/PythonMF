@@ -9,10 +9,9 @@ Implementováno a 13.11. vydáno v fb062e34: pošta, Cockpit, sdílený App Serv
 P+n potvrzuje účtenka f414b8d3c33e18033b65f00375a40559; živý panel a GET200 ověřené.
 Aktuální provoz13.11.: vlastní služba je nainstalovaná, načtená a aktivní po
 přesné globální větě. Dvě vlastní Pushcut oznámení jsou připojená a zapnutá;
-první skutečné SSD varování09:32 UTC accepted1. Míla potvrdil doručení
-varování na iPhone, přístup do přehledu Servis → Provoz a místní test
-obnovy včetně zvuku/odkazu. Automatický přechod incidentu do obnovy a
-HTTP doručení obnovy ze služby ještě nebyly skutečně ověřené.
+skutečné SSD varování09:32 UTC a automatická obnova10:32:58 UTC mají obě
+API accepted a Míla potvrdil doručení na iPhone. Celý skutečný cyklus je
+přijatý. Přehled i odkazy ověřené; další úklid Míla odložil. Vnější hlídač chybí.
 Pravidelná služba i oznámení jsou výchozím stavem vypnuté. Vývoj nepovoluje
 nasazení, instalaci LaunchAgentu, zapnutí oznámení ani externího hlídače.
 Soví automatika, ScienceNews, recovery správce a ostatní služby se nemění.
@@ -119,3 +118,8 @@ Druhá URL může být při stejném účtu sestavená z již soukromě získan�
 URL a přesného názvu podle dokumentace Pushcutu; nepřenášet secret do chatu
 ani žádat znovu Copy URL kvůli rozdílným schránkám zařízení. Samotná syntaxe
 URL neprokazuje HTTP přijetí nebo fyzické doručení obnoveného oznámení.
+
+Skutečná automatická přejímka13.11.: SSD26,44 → přibližně30,12 GiB po
+uživatelem provedeném uvolnění. Původní incident automaticky uzavřený,
+jedna obnova přijatá API a uživatelem potvrzená na iPhonu. Žádná simulace,
+změna prahu ani ruční recovery POST. Další úklid se nyní neprovádí.
