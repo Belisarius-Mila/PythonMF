@@ -1,14 +1,15 @@
 # VocabularyEN web: obrazové kartičky pro opakování slovíček
 
 
-## Aktuální stav — 2026-11-13 18:39 CET
+## Aktuální stav — 2026-11-13 20:54 CET
 
-Galerie i režim Slovíčko / Věta jsou na produkčních Pages z9c6cc825,
-živá účtenka a šest HTTP/SHA kontrol potvrzené. Nově Míla schválil
-425 EN +425 CZ MP3 vět ve stejných hlasech. Generátor a přehrávač hotové,
-29 cílených Python (včetně27Node) PASS; všech850 MP3 hotových a dekódovaných, plná brána3831 /646,379s, 5 SKIP, OK. Soukromý náhled vydaný. Původní slovíčkové nahrávky se nemění.
+Produkční galerie a textový režim vět jsou vydané z9c6cc825. Vlastní
+větné audio je hotové v3ca7bf0d a v soukromém náhledu, zatím bez Pages p+n.
+Nově Míla schválil Učení / Poslech dlaždic: jeden klik přehraje EN a zůstane
+v galerii. Cílená sada30 Python včetně34Node PASS, Safari desktop potvrzené.
+Soukromý náhled vydaný, vlastní checkpoint s předáním; fyzický iPhone čeká.
 Kanonický handoff: handoffs/workstreams/project-vocabulary-en.md.
-Následující starší oddíly zachovávají tehdejší stav.
+Následující oddíly zachovávají historii jednotlivých etap.
 
 ## Publikační vazba a věty — 2026-11-13 12:58 CET
 
@@ -697,3 +698,64 @@ Log: vocabulary_en_sentence_audio_full_gate_20261113.log
 SHA-256:7a55c1ad64af68f438134840913d5fcc12db6917aa1171dd26679e3754baed42
 Privátní důkazy: data/private/vocabulary_en_sentence_audio_20261113/.
 Scénář v Downloads: Vocabulary_EN_vetne_audio_2026-11-13.txt.
+
+
+## 2026-11-13 20:54 CET — Poslech anglických slovíček přímo z galerie
+
+Hotovo: Galerie má přepínač Učení / Poslech dostupný i při posouvání.
+V Učení klik otevře kartu, v Poslechu přehraje existující anglickou MP3
+a zůstane v galerii. Opakovaný klik zvuk zopakuje, jiná dlaždice zastaví
+předchozí zvuk. České popisky ani režim vět jazyk poslechu neovlivní.
+
+Rozhodnutí: Míla odsouhlasil návrh jedním klikem v explicitním režimu;
+dvojklik se nepoužívá. Výchozí Učení, Poslech platí pro otevřenou stránku
+a nepřepisuje uložený učební kontext. Mód se přepíná bez překreslení
+dlaždic, posunu, změny filtrů nebo poslední učené karty.
+
+Další krok: Aktualizovat stejný soukromý náhled a dokončit vlastní checkpoint.
+Navrhované další kroky: Mílova iPhone přejímka; potom samostatné Pages p+n
+obou vlastních kroků, větného audia a poslechu dlaždic.
+
+Technický důkaz: 30 cílených Python testů včetně 34 Node scénářů PASS
+/ 14,959 s. Pokrytý EN poslech s CZ popisky a režimem vět, opakování,
+zastavení, neměnná historie/scroll/storage/bookmark, chybějící či neshodné
+audio, pozdní chyba a návrat k učení. Safari desktop potvrdilo cat/cow
+bez otevření karty, CZ popisky a stále dostupný přepínač ve středu galerie.
+Pokus o úzké okno skončil noWindowsAvailable; fyzický iPhone není doložený.
+Původní CSV, data karet a oba audio manifesty jsou shodné; nové TTS volání
+nevzniklo. Nový krok mění pouze UI, bez nové persistence nebo workflow;
+ověřuje se cílenou sadou a statickou branou. Předchozí plná brána 3831
+patří checkpointu větného audia 3ca7bf0d, nikoli tomuto novému UI.
+
+
+## 2026-11-13 20:58 CET — Poslech dlaždic dokončený v soukromém náhledu
+
+Hotovo: Přepínač Učení / Poslech je dostupný i uprostřed dlouhé galerie.
+Kliknutí v Poslechu přehraje existující EN slovíčko, v Učení otevře kartu.
+Opakování, vystřídání zvuku a neměnný učební bookmark jsou ověřené.
+Soukromý náhled obsahuje i předchozí větné audio; původní publikum zachované.
+
+Rozhodnutí: Hotový vlastní terminálový krok, bez nových MP3, modelových
+volání, persistence, TVBCP a PythonMF p+n. Cizí main/Will beze změny.
+
+Další krok: Mílova iPhone přejímka přepínače a poslechu v soukromém náhledu.
+Navrhované další kroky: Samostatné schválené Pages p+n obou vlastních kroků.
+
+Technický důkaz: 30 cílených Python testů včetně 34 Node scénářů PASS
+/14,959s. Safari desktop: cat/cow, opakování, CZ popisky a přepínač při
+posunu; žádné otevření velké karty. Úzké okno nebylo dokončené po
+noWindowsAvailable, fyzický iPhone čeká. Všechny čtyři zmrazené zdroje/testy
+jsou shodné; CSV, data425 karet a oba audio manifesty jsou beze změny.
+Log vocabulary_en_gallery_listen_targeted_final_20261113.log
+SHA-256:d0f373de623d554609758e7533f62664e4c49fb7c48a1af12ec9e41e63d58b1f
+
+Sites zdroj6592f7771f0f0004163cafd508e20843e63879ca, deployment
+appgdep_6af76cd6193081918923335752327ec6 succeeded. Přesně tři změněné
+frontend soubory, archiv bajtově shodný, audio se neměnilo.
+https://vocabulary-en-layout-20261113.fairfly9.chatgpt.site
+Scénář v Downloads: Vocabulary_EN_poslech_dlazdic_2026-11-13.txt.
+
+Závěrečné doladění: hláška v přepínači má min-width:0 a zalamování dlouhých
+slov, aby na úzkém displeji nevynucovala vodorovný posuv. Finální Node retest:
+34/34 PASS /14,441s. Finální statická brána PASS, soukromá verze obsahuje
+tuto stejnou CSS.

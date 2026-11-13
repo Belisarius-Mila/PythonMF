@@ -140,3 +140,16 @@ Po odhalení tlačítko Přehrát překlad přečte jen cílovou jazykovou verzi
 Před odhalením se překlad nepřehraje. Při chybějícím nebo neshodném
 větném manifestu se ukáže vysvětlení, slovíčková MP3 se za větu nevydává.
 Každá vazba se ověřuje proti UID, EN/CZ i oběma aktuálním větám.
+
+8. Poslech slovíček přímo v galerii (2026-11-13)
+
+Přepínač Učení / Poslech je přichycený nahoře při posouvání přehledu.
+Výchozí Učení zachovává otevření velké karty. Poslech přehraje vždy EN
+slovíčkovou MP3 a neotevře kartu, nezmění URL, historii ani učební bookmark.
+Opakovaný klik začne od začátku; další obrázek zastaví předchozí.
+Popisky EN/CZ a nastavení Slovíčko/Věta jsou nezávislé na tomto poslechu.
+
+Poslech je přechodná volba otevřené stránky; reload vrací Učení. Přepnutí
+režimu zachová stejné dlaždice i scroll. Filtrace/překreslení, otevření
+učení a opuštění stránky zvuk zastaví. Při neshodném nebo chybějícím
+audiu se chyba objeví ve stále viditelné liště. Nevznikají nové MP3.

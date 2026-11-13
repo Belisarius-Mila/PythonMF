@@ -21,7 +21,7 @@ class Element {
   emit(name,extra={}){for(const fn of this.listeners[name]||[])fn({target:this,preventDefault(){},...extra});}
   click(){this.emit("click");} setAttribute(name,value){this.attributes[name]=String(value);}getAttribute(name){return this.attributes[name];}removeAttribute(name){delete this.attributes[name];}
   descendants(){return this.children.flatMap(child=>[child,...child.descendants()]);}
-  matches(selector){if(selector.startsWith("."))return this.classList.contains(selector.slice(1));if(selector.startsWith("[data-"))return selector.slice(6,-1) in this.dataset;return this.tagName===selector;}
+  matches(selector){if(selector.startsWith("."))return this.classList.contains(selector.slice(1));if(selector.startsWith("[data-"))return selector.slice(6,-1).replace(/-([a-z])/g,(_,c)=>c.toUpperCase()) in this.dataset;return this.tagName===selector;}
   querySelectorAll(selector){return this.descendants().filter(node=>node.matches(selector));}querySelector(selector){return this.querySelectorAll(selector)[0]||null;}
   getBoundingClientRect(){return {top:160,width:140,height:180};} focus(){this.doc.activeElement=this;}scrollIntoView(){this.doc.scrolled=this.id;}
 }
@@ -32,7 +32,7 @@ async function app({items=vocabulary.items,url="https://example.test/PythonMF/vo
   doc.createElement=tag=>new Element(tag,doc);doc.createDocumentFragment=()=>new Element("fragment",doc);
   const appRoot=new Element("main",doc);appRoot.dataset={jsonUrl:"../data/vocabulary-en.json",audioUrl:"../data/vocabulary-en-audio.json"};doc.append(appRoot);
   for(const [,id] of html.matchAll(/\bid="([^"]+)"/g)){const node=new Element("div",doc);node.id=id;appRoot.append(node);}
-  for(const [data,values] of [["direction",["czToEn","enToCz"]],["label",["en","cz"]],["practice",["words","sentences"]]])for(const value of values){const button=new Element("button",doc);button.dataset[data]=value;appRoot.append(button);}
+  for(const [data,values] of [["direction",["czToEn","enToCz"]],["label",["en","cz"]],["practice",["words","sentences"]],["galleryMode",["learn","listen"]]])for(const value of values){const button=new Element("button",doc);button.dataset[data]=value;appRoot.append(button);}
   const listeners={};let scroll=0;const location={href:url};const historyEntries=[{url,state:null}];let historyIndex=0;
   const win={location,innerHeight:844,addEventListener:(name,fn)=>(listeners[name]??=[]).push(fn),scrollTo:value=>{scroll=value.top||0;},get scrollY(){return scroll;},requestAnimationFrame:fn=>fn()};
   const emit=(name,extra={})=>{for(const fn of listeners[name]||[])fn(extra);};
@@ -45,9 +45,55 @@ async function app({items=vocabulary.items,url="https://example.test/PythonMF/vo
   vm.runInContext(fs.readFileSync(path.join(root,"vocabulary-en/model.js"),"utf8"),ctx);
   vm.runInContext(source.replace('void init();','globalThis.ready=init();')+'\nglobalThis.api={state,context,buildSelection,orderedSelection,openStudy,moveStudy,newRandomRound,returnToGallery,renderGallery,selectionChanged,applyRoute,speakPrompt,speakAnswer,stopAudioPlayback,setPracticeMode};',ctx);
   await ctx.ready;
-  return {...ctx.api,doc,win,emit,players,session,local,historyEntries,element:id=>doc.getElementById(id),directions:doc.querySelectorAll("[data-direction]"),labels:doc.querySelectorAll("[data-label]"),practices:doc.querySelectorAll("[data-practice]")};
+  return {...ctx.api,doc,win,emit,players,session,local,historyEntries,element:id=>doc.getElementById(id),directions:doc.querySelectorAll("[data-direction]"),labels:doc.querySelectorAll("[data-label]"),practices:doc.querySelectorAll("[data-practice]"),galleryModes:doc.querySelectorAll("[data-gallery-mode]")};
 }
 const sample=vocabulary.items.slice(0,4);
+test("gallery listening plays the English WORD with Czech labels and sentence practice without opening or changing navigation",async()=>{
+  const view=await app();view.labels[1].click();view.state.practice='sentences';view.win.scrollTo({top:1250});
+  const before={url:view.win.location.href,history:view.historyEntries.length,last:view.state.lastUid,local:[...view.local.map],session:[...view.session.map]};
+  view.galleryModes[1].click();const tile=view.element('tile-ven-0020');tile.click();
+  assert.equal(view.state.view,'gallery');assert.equal(view.state.currentItem,null);assert.equal(view.win.scrollY,1250);
+  assert.equal(view.win.location.href,before.url);assert.equal(view.historyEntries.length,before.history);assert.equal(view.state.lastUid,before.last);
+  assert.deepEqual([...view.local.map],before.local);assert.deepEqual([...view.session.map],before.session);
+  assert.equal(tile.getAttribute('aria-label'),'Přehrát anglicky: cat');assert.equal(view.element('galleryModeHint').textContent,'Anglicky: cat');
+  assert.equal(view.players.filter(p=>p.played).length,1);assert.ok(view.players.find(p=>p.played).url.endsWith(audio.items['20'].en));
+});
+test("repeating a tile restarts its audio, and another tile stops the previous word",async()=>{
+  const view=await app();view.galleryModes[1].click();view.element('tile-ven-0020').click();const cat=view.players.find(p=>p.played);cat.currentTime=1;
+  view.element('tile-ven-0020').click();assert.equal(cat.playCount,2);assert.equal(cat.currentTime,0);
+  view.element('tile-ven-0024').click();assert.equal(cat.paused,true);assert.ok(view.players.some(p=>p.played && p.url.endsWith(audio.items['24'].en)));
+});
+test("mode switch keeps the same tiles, scroll and filters, stops sound and restores learning click",async()=>{
+  const view=await app();view.state.topics=['topic-06'];view.selectionChanged();view.galleryModes[1].click();const cat=view.element('tile-ven-0020');view.win.scrollTo({top:650});cat.click();
+  view.galleryModes[0].click();assert.equal(view.element('tile-ven-0020'),cat);assert.equal(view.win.scrollY,650);assert.deepEqual([...view.state.topics],['topic-06']);
+  assert.ok(view.players.filter(p=>p.played).every(p=>p.paused));assert.equal(cat.getAttribute('aria-label'),'Učit se: cat');
+  assert.equal(view.galleryModes[0].getAttribute('aria-pressed'),'true');assert.equal(view.galleryModes[1].getAttribute('aria-pressed'),'false');
+  cat.click();assert.equal(view.state.view,'study');assert.equal(view.state.currentItem.uid,'ven-0020');
+});
+test("missing or mismatched word audio leaves gallery accessible and reports the problem in its visible mode bar",async()=>{
+  for(const manifest of [null,{items:{20:{sourceEn:'cat',sourceCz:'wrong',en:'wrong.mp3'}}}]){
+    const view=await app({manifest});view.galleryModes[1].click();view.element('tile-ven-0020').click();
+    assert.equal(view.state.view,'gallery');assert.ok(view.players.every(p=>!p.played));assert.match(view.element('galleryModeHint').textContent,/Zvuk zatím není/);
+    view.galleryModes[0].click();view.element('tile-ven-0020').click();assert.equal(view.state.view,'study');
+  }
+});
+test("filtering, explicit study and leaving the page stop gallery speech; the last studied card stays unchanged",async()=>{
+  const view=await app();view.openStudy('ven-0118');view.returnToGallery();const last=view.state.lastUid;view.galleryModes[1].click();view.element('tile-ven-0020').click();
+  view.state.query='cow';view.selectionChanged();assert.ok(view.players.filter(p=>p.played).every(p=>p.paused));assert.equal(view.state.galleryMode,'listen');assert.equal(view.state.lastUid,last);
+  view.element('tile-ven-0024').click();view.element('shuffleButton').click();assert.equal(view.state.view,'study');assert.ok(view.players.filter(p=>p.played).every(p=>p.paused));
+  view.returnToGallery();view.element('tile-ven-0024').click();view.emit('pagehide');assert.ok(view.players.filter(p=>p.played).every(p=>p.paused));
+});
+test("a late gallery playback failure cannot overwrite the next mode hint",async()=>{
+  const view=await app();view.galleryModes[1].click();view.element('tile-ven-0020').click();const player=view.players.find(p=>p.played);const error=player.handlers.error;
+  error();view.galleryModes[0].click();await Promise.resolve();await Promise.resolve();
+  assert.equal(view.element('galleryModeHint').textContent,'Kliknutí otevře kartu.');
+});
+test("listening mode lasts only for the open page and does not change stored study context",async()=>{
+  const before=await app();before.galleryModes[1].click();before.element('tile-ven-0020').click();
+  const after=await app({url:before.win.location.href,session:before.session,local:before.local});
+  assert.equal(after.state.galleryMode,'learn');assert.equal('galleryMode' in after.context(),false);
+  after.element('tile-ven-0020').click();assert.equal(after.state.view,'study');
+});
 test("switching translation direction preserves current card and the ordered selection",async()=>{
   const view=await app({items:sample});view.openStudy(sample[0].uid);const first=view.state.currentItem.uid;const sequence=[...view.state.sequence];view.directions[1].click();assert.equal(view.state.currentItem.uid,first);assert.deepEqual([...view.state.sequence],sequence);view.moveStudy(1);assert.notEqual(view.state.currentItem.uid,first);assert.equal(view.state.revealed,false);
 });

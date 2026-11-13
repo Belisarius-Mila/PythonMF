@@ -4,9 +4,10 @@ const appRoot = document.querySelector("[data-json-url]");
 const DATA_URL = appRoot?.dataset.jsonUrl || "../data/vocabulary-en.json";
 const AUDIO_DATA_URL = appRoot?.dataset.audioUrl || "../data/vocabulary-en-audio.json";
 const SENTENCE_AUDIO_URL = "../data/vocabulary-en-sentence-audio.json";
+const galleryModeHint=document.getElementById("galleryModeHint");
 const ui = Object.fromEntries(["galleryView","studyView","totalCount","totalLabel","searchInput","topicPicker","topicFilters","topicSummary","clearTopicsButton","filterSelect","groupSelect","sortSelect","sizeButton","partFilters","levelFilters","sourceFilters","continueButton","shuffleButton","resetButton","emptyResetButton","sectionNav","galleryNotice","galleryGroups","emptyState","galleryFooter","backButton","backBottomButton","studyPosition","wordImage","pictureFallback","speakPromptButton","promptLabel","promptText","messageStrip","revealButton","answerCard","answerEn","answerCz","sentenceBox","sentenceEn","sentenceCz","speakAnswerButton","roundStatus","previousButton","nextButton","newRoundButton"].map(id => [id,document.getElementById(id)]));
 const defaults = () => ({filter:"all",query:"",topics:[],sources:[],parts:[],levels:[],groupBy:"topic",sort:"recommended",labelLanguage:"en",direction:"czToEn",practice:"words",large:false});
-const state = {data:null,audioManifest:null,sentenceAudioManifest:null,items:[],...defaults(),currentItem:null,revealed:false,view:"gallery",sequence:[],index:0,mode:"ordered",lastUid:"",visitId:"",fromGallery:false,anchorOffset:120};
+const state = {data:null,audioManifest:null,sentenceAudioManifest:null,items:[],...defaults(),galleryMode:"learn",currentItem:null,revealed:false,view:"gallery",sequence:[],index:0,mode:"ordered",lastUid:"",visitId:"",fromGallery:false,anchorOffset:120};
 const STORAGE_KEY="vocabulary-en.navigation.v1", LAST_KEY="vocabulary-en.last-card.v1";
 function context() { return Object.fromEntries(Object.keys(defaults()).map(key => [key,Array.isArray(state[key]) ? [...state[key]] : state[key]])); }
 function sanitizeContext(value={}) {
@@ -61,6 +62,25 @@ function syncControls(){
   const labels=state.topics.map(id=>state.data?.catalog?.groups.find(group=>group.id===id)?.label).filter(Boolean);
   ui.topicSummary.textContent=labels.length ? labels.join(" + ") : "Všechna témata";
 }
+function syncGalleryMode(){
+  document.querySelectorAll("[data-gallery-mode]").forEach(button=>button.setAttribute("aria-pressed",String(button.dataset.galleryMode===state.galleryMode)));
+  galleryModeHint.textContent=state.galleryMode==="listen" ? "Kliknutí přehraje EN." : "Kliknutí otevře kartu.";
+  ui.galleryGroups.querySelectorAll(".vocab-tile").forEach(tile=>tile.setAttribute("aria-label",state.galleryMode==="listen" ? `Přehrát anglicky: ${tile.dataset.en}` : `Učit se: ${tile.dataset.caption}`));
+}
+function setGalleryMode(mode){
+  if(state.view!=="gallery" || !["learn","listen"].includes(mode))return;
+  stopAudioPlayback();state.galleryMode=mode;syncGalleryMode();
+}
+async function speakGalleryItem(item){
+  if(state.view!=="gallery" || state.galleryMode!=="listen")return;
+  stopAudioPlayback();const token=playbackToken;
+  const record=M.audioRecord(item,state.audioManifest);
+  if(!record?.en){galleryModeHint.textContent="Zvuk zatím není připravený. Zkus to za chvíli.";return;}
+  galleryModeHint.textContent=`Anglicky: ${item.en}`;
+  try{await playOneAudio(record.en,token);}catch(error){
+    if(token===playbackToken && state.view==="gallery" && state.galleryMode==="listen")galleryModeHint.textContent=error.message;
+  }
+}
 function makeCheckOptions(target,options,key){
   for(const option of options){
     const label=document.createElement("label");label.className="check-option";
@@ -85,6 +105,7 @@ function markLast(){
   ui.continueButton.hidden=!state.lastUid || !orderedSelection().some(item=>M.key(item)===state.lastUid);
 }
 function renderGallery(){
+  stopAudioPlayback();
   const groups=M.buckets(buildSelection(),context(),state.data?.catalog),fragment=document.createDocumentFragment();
   const firstForParent=new Map();let imageIndex=0;
   for(const group of groups){
@@ -96,6 +117,7 @@ function renderGallery(){
     for(const item of group.items){
       const tile=document.createElement("button");tile.className="vocab-tile";tile.type="button";tile.dataset.uid=M.key(item);tile.id=`tile-${M.key(item)}`;
       const labelText=state.labelLanguage==="cz" ? item.cz : item.en;
+      tile.dataset.en=item.en;tile.dataset.caption=labelText;
       tile.setAttribute("aria-label",`Učit se: ${labelText}`);
       const picture=document.createElement("span");picture.className="tile-picture";
       if(item.thumbnail || item.image){
@@ -104,7 +126,7 @@ function renderGallery(){
         image.addEventListener("error",()=>{image.hidden=true;picture.textContent="Bez obrázku";},{once:true});picture.append(image);
       }else picture.textContent="Bez obrázku";
       const caption=document.createElement("span");caption.className="tile-label";caption.textContent=labelText;
-      tile.append(picture,caption);tile.addEventListener("click",()=>openStudy(M.key(item),"ordered",tile));grid.append(tile);
+      tile.append(picture,caption);tile.addEventListener("click",()=>{if(state.galleryMode==="listen")void speakGalleryItem(item);else openStudy(M.key(item),"ordered",tile);});grid.append(tile);
     }
     section.append(heading,grid);fragment.append(section);
   }
@@ -115,7 +137,7 @@ function renderGallery(){
     link.addEventListener("click",event=>{event.preventDefault();document.getElementById(first)?.scrollIntoView({block:"start"});});ui.sectionNav.append(link);
   }
   ui.emptyState.hidden=groups.length>0;ui.galleryFooter.hidden=!groups.length;ui.shuffleButton.disabled=!groups.length;
-  syncControls();updateCounts();markLast();
+  syncControls();syncGalleryMode();updateCounts();markLast();
 }
 function selectionChanged(){
   if(state.view!=="gallery")return;
@@ -363,6 +385,7 @@ function speakAnswer() {
 }
 
 function bindEvents(){
+  document.querySelectorAll("[data-gallery-mode]").forEach(button=>button.addEventListener("click",()=>setGalleryMode(button.dataset.galleryMode)));
   document.querySelectorAll("[data-label]").forEach(button=>button.addEventListener("click",()=>{state.labelLanguage=button.dataset.label;renderGallery();writeHistory("gallery");persist();}));
   document.querySelectorAll("[data-direction]").forEach(button=>button.addEventListener("click",()=>{state.direction=button.dataset.direction;stopAudioPlayback();renderCurrentItem();if(state.currentItem && state.view==="study")writeHistory("study");persist();}));
   document.querySelectorAll("[data-practice]").forEach(button=>button.addEventListener("click",()=>setPracticeMode(button.dataset.practice)));
