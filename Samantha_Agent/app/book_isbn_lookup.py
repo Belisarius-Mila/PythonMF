@@ -168,7 +168,9 @@ def _lookup_book_in_knihovny(
                 "lookfor": candidate,
                 "type": "ISN",
                 "limit": 10,
-            }
+                "field[]": ["id", "title", "authors", "publicationDates", "publishers"],
+            },
+            doseq=True,
         )
         payload = _request_json(
             f"{KNIHOVNY_SEARCH_API}?{query}",
@@ -194,14 +196,17 @@ def _lookup_book_in_knihovny(
             if record_id:
                 safe_record_id = urllib.parse.quote(record_id, safe="._-")
                 source_url = f"https://www.knihovny.cz/Record/{safe_record_id}"
+            dates = record.get("publicationDates")
+            dates = [_clean_text(value, 100) for value in dates if isinstance(value, str)] if isinstance(dates, list) else []
+            years = {year for value in dates for year in re.findall(r"(?<![0-9])([12][0-9]{3})(?![0-9])", value)}
             return {
                 "isbn": normalized_isbn,
                 "matched_isbn": candidate,
                 "title": title,
                 "author": author,
-                "publisher": "",
-                "publish_date": "",
-                "publication_year": "",
+                "publisher": _join_catalog_values(record.get("publishers"), 300),
+                "publish_date": "; ".join(dates)[:100],
+                "publication_year": next(iter(years)) if len(years) == 1 else "",
                 "number_of_pages": 0,
                 "source_name": KNIHOVNY_SOURCE_NAME,
                 "source_url": source_url,

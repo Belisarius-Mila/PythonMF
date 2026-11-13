@@ -2357,3 +2357,16 @@ s mock video-only kamerou, stop tracků a dekódováním WASM.
   mobilní celé HTML se skutečnými hlavičkami: kamera před pozdrženým JS,
   reálný WASM a jeho blokovaná varianta s ukončením stop PASS. Fyzický iPhone
   je samostatná přejímka po vlastním p+n.
+
+
+### 2026-11-13 — Výchozí katalogová odpověď nemusí obsahovat rok vydání
+
+- Kontext: rychlé načtení Knihovny.cz používalo výchozí pole a vynechávalo
+  další doplnění z Open Library. Výchozí odpověď neobsahovala publicationDates,
+  přestože je API pro stejné ISBN poskytuje na výslovný field[] dotaz.
+- Řešení: vyžádat potřebná pole v témže dotazu, zpracovat pouze řádný seznam
+  dat a vyplnit rok jen při jediné odlišné hodnotě. Zachovat rychlou větev
+  bez dalších sítí a neslibovat obálku jen z konstrukce její URL.
+- Ověření: dva regresní FAIL→PASS,36 cílených testů a statická brána PASS.
+  Veřejný vzorek9788025229033 přinesl2018 za0,384s. Konkrétní uživatelova
+  obálka vyžaduje jeho ISBN; dostupnost jiného vzorku ji nepotvrzuje.

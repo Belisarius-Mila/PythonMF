@@ -93,10 +93,42 @@ class BookIsbnLookupTests(unittest.TestCase):
                 "lookfor": ["9781234567897"],
                 "type": ["ISN"],
                 "limit": ["10"],
+                "field[]": ["id", "title", "authors", "publicationDates", "publishers"],
             },
         )
         self.assertEqual(timeout, 8.0)
         self.assertIsInstance(context, ssl.SSLContext)
+
+    def test_fast_lookup_requests_and_uses_czech_publication_metadata_without_enrichment(self) -> None:
+        calls = []
+
+        def opener(request, **_kwargs):
+            calls.append(request.full_url)
+            self.assertEqual(urllib.parse.urlparse(request.full_url).netloc, "www.knihovny.cz")
+            return FakeResponse(json.dumps({"status": "OK", "records": [{
+                "id": "synthetic.edition", "title": "České vydání", "authors": {},
+                "publicationDates": ["[2024]"], "publishers": ["Český nakladatel"],
+            }]}).encode())
+
+        result = lookup_book_by_isbn(isbn="9781234567897", opener=opener, enrich=False)
+        self.assertEqual(result["publication_year"], "2024")
+        self.assertEqual(result["publish_date"], "[2024]")
+        self.assertEqual(result["publisher"], "Český nakladatel")
+        self.assertEqual(len(calls), 1, "fast lookup must not wait for Open Library")
+        self.assertIn("publicationDates", urllib.parse.parse_qs(urllib.parse.urlparse(calls[0]).query)["field[]"])
+
+    def test_missing_malformed_and_ambiguous_czech_dates_are_not_guessed(self) -> None:
+        for dates, expected in [(None, ""), ({"year": "2024"}, ""), ([], ""),
+                                ([2024], ""), (["unknown"], ""), (["2001", "2024"], ""),
+                                (["2001–2024"], ""), (["©2024", "2024"], "2024")]:
+            def opener(_request, **_kwargs):
+                return FakeResponse(json.dumps({"status": "OK", "records": [{
+                    "title": "Testovací kniha", "publicationDates": dates,
+                }]}).encode())
+
+            with self.subTest(dates=dates):
+                result = lookup_book_by_isbn(isbn="9781234567897", opener=opener, enrich=False)
+                self.assertEqual(result["publication_year"], expected)
 
     def test_tls_context_uses_declared_certifi_ca_bundle(self) -> None:
         synthetic_context = object()

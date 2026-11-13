@@ -129,3 +129,32 @@ zobrazí chybu, ukončí stopy a znovu zpřístupní tlačítko.0 zápisů archi
 Nová oprava je pouze lokální, bez p+n a bez potvrzené fyzické iPhone přejímky.
 Logy library_camera_start_browser_20261113.log a library_camera_start_static_20261113.log;
 privátní doklad camera_start_fix_browser_qa/result.json.
+
+
+## 2026-11-13 17:35 CET — Doplnění roku z českého katalogu, obálka čeká na ISBN
+
+Hotovo: Po otevření přes HTTPS Míla potvrdil načtení knihy na iPhonu.
+Následně nahlásil chybějící rok a miniaturu. Rok je lokálně opravený:
+českému API se výslovně vyžádají publicationDates/publishers a z odpovědi
+se převezme jednoznačný rok, bez dalšího dotazu a čekání na Open Library.
+Neplatné a víceznačné roky se neodhadují.
+
+Rozhodnutí: Rozsah zůstává rychlá ISBN inventura. Obálky se nadále zkoušejí
+přes Open Library; konkrétní případ zatím není ověřený, protože chybí ISBN.
+Žádná registrace další služby ani její oprávnění se nepředpokládají.
+HTTPS lze uložit jako novou ikonu z Safari; relativní PWA manifest zachová
+HTTPS původ. Není potřeba další aplikace.
+
+Další krok: Převzít ISBN od Míly a ověřit konkrétní chybějící obálku;
+opravený rok vyžaduje samostatné schválené p+n.
+Navrhované další kroky: Potom pilot přibližně20 knih a umístění na Macu.
+
+Technický důkaz: Kamerová oprava4e7007ae je skutečně nasazená, účtenka
+d4e292cadfbff224094fd22cb4614ccd, push/deploy confirmed, plná brána3823,
+smoke5/5 a přesná HTTP/HTTPS shoda HTML. Nová oprava roku:36 cílených
+PASS/1,462s, dva regresní FAIL před opravou → PASS po ní, statická brána
+PASS. Veřejný příklad9788025229033 vrací2018, Egmont,0,384s; nejde
+o ISBN nahlášené Mílou. Logy library_year_czech_catalog_*_20261113.log.
+Výchozí API roku neposílalo; explicitní field[] jej poskytuje. Zdroj schématu:
+https://github.com/vufind-org/vufind/blob/dev/config/vufind/SearchApiRecordFields.yaml .
+Tato nová metadata změna je pouze lokální; soukromé knihy se nepřepisovaly.
