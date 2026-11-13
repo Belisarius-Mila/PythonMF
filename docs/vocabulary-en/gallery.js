@@ -3,9 +3,10 @@ const M = globalThis.VocabularyModel;
 const appRoot = document.querySelector("[data-json-url]");
 const DATA_URL = appRoot?.dataset.jsonUrl || "../data/vocabulary-en.json";
 const AUDIO_DATA_URL = appRoot?.dataset.audioUrl || "../data/vocabulary-en-audio.json";
+const SENTENCE_AUDIO_URL = "../data/vocabulary-en-sentence-audio.json";
 const ui = Object.fromEntries(["galleryView","studyView","totalCount","totalLabel","searchInput","topicPicker","topicFilters","topicSummary","clearTopicsButton","filterSelect","groupSelect","sortSelect","sizeButton","partFilters","levelFilters","sourceFilters","continueButton","shuffleButton","resetButton","emptyResetButton","sectionNav","galleryNotice","galleryGroups","emptyState","galleryFooter","backButton","backBottomButton","studyPosition","wordImage","pictureFallback","speakPromptButton","promptLabel","promptText","messageStrip","revealButton","answerCard","answerEn","answerCz","sentenceBox","sentenceEn","sentenceCz","speakAnswerButton","roundStatus","previousButton","nextButton","newRoundButton"].map(id => [id,document.getElementById(id)]));
 const defaults = () => ({filter:"all",query:"",topics:[],sources:[],parts:[],levels:[],groupBy:"topic",sort:"recommended",labelLanguage:"en",direction:"czToEn",practice:"words",large:false});
-const state = {data:null,audioManifest:null,items:[],...defaults(),currentItem:null,revealed:false,view:"gallery",sequence:[],index:0,mode:"ordered",lastUid:"",visitId:"",fromGallery:false,anchorOffset:120};
+const state = {data:null,audioManifest:null,sentenceAudioManifest:null,items:[],...defaults(),currentItem:null,revealed:false,view:"gallery",sequence:[],index:0,mode:"ordered",lastUid:"",visitId:"",fromGallery:false,anchorOffset:120};
 const STORAGE_KEY="vocabulary-en.navigation.v1", LAST_KEY="vocabulary-en.last-card.v1";
 function context() { return Object.fromEntries(Object.keys(defaults()).map(key => [key,Array.isArray(state[key]) ? [...state[key]] : state[key]])); }
 function sanitizeContext(value={}) {
@@ -152,9 +153,10 @@ function renderCurrentItem(){
   ui.sentenceBox.hidden=!(item.sentenceEn || item.sentenceCz);ui.answerCard.classList.toggle("hidden",!state.revealed || !prompt.available);
   ui.revealButton.hidden=state.revealed;
   ui.revealButton.disabled=!prompt.available;
-  ui.speakPromptButton.textContent=sentencePractice ? (state.direction==="czToEn" ? "♪ Slovíčko česky" : "♪ Slovíčko anglicky") : "♪ Přehrát zadání";
-  ui.speakAnswerButton.hidden=sentencePractice;
-  ui.messageStrip.textContent=!prompt.available ? "U tohoto slovíčka ještě chybí anglická nebo česká věta. Přepni na Slovíčko nebo pokračuj dál." : sentencePractice ? (state.revealed ? "Porovnej svou větu s odpovědí a pokračuj na další obrázek." : "Zkus říct celou větu. Tlačítko pod obrázkem přehraje jen slovíčko.") : state.revealed ? "Poslechni si odpověď nebo pokračuj na další slovíčko." : "Nejdřív si odpověď zkus říct. Pak ji můžeš odhalit.";
+  ui.speakPromptButton.textContent=sentencePractice ? "♪ Přehrát větu" : "♪ Přehrát zadání";
+  ui.speakAnswerButton.hidden=false;
+  ui.speakAnswerButton.textContent=sentencePractice ? "♪ Přehrát překlad" : "♪ Přehrát odpověď";
+  ui.messageStrip.textContent=!prompt.available ? "U tohoto slovíčka ještě chybí anglická nebo česká věta. Přepni na Slovíčko nebo pokračuj dál." : sentencePractice ? (state.revealed ? "Porovnej svou větu s odpovědí. Překlad si můžeš také poslechnout." : "Zkus říct celou větu. Zadání si můžeš přehrát.") : state.revealed ? "Poslechni si odpověď nebo pokračuj na další slovíčko." : "Nejdřív si odpověď zkus říct. Pak ji můžeš odhalit.";
   const studyContext=context();
   const group=M.groupInfo(item,studyContext,state.data?.catalog);
   const groupItems=state.sequence.filter(entry=>M.groupInfo(entry,studyContext,state.data?.catalog).id===group.id);
@@ -235,7 +237,7 @@ function applyRoute({initial=false}={}){
 
 const audioCache=new Map();
 let currentAudio=null,currentPlaybackCancel=null,playbackToken=0;
-function audioRecord(item){return M.audioRecord(item,state.audioManifest);}
+function audioRecord(item){return state.practice==="sentences" ? M.sentenceAudioRecord(item,state.sentenceAudioManifest) : M.audioRecord(item,state.audioManifest);}
 function audioUrl(relativePath) {
   return new URL(`../${relativePath}`, window.location.href).toString();
 }
@@ -323,7 +325,7 @@ function playOneAudio(relativePath, token) {
 async function playAudioSequence(relativePaths) {
   const paths = relativePaths.filter(Boolean);
   if (!paths.length) {
-    ui.messageStrip.textContent = "Zvuk pro toto slovicko zatim neni pripraveny.";
+    ui.messageStrip.textContent = state.practice==="sentences" ? "Zvuk pro tuto větu zatím není připravený. Můžeš se učit podle textu." : "Zvuk pro toto slovicko zatim neni pripraveny.";
     return;
   }
   stopAudioPlayback();
@@ -353,11 +355,11 @@ function speakPrompt() {
 }
 
 function speakAnswer() {
-  if (!state.currentItem || state.practice === "sentences") {
+  if (!state.currentItem || (state.practice === "sentences" && !state.revealed)) {
     return;
   }
   const record = audioRecord(state.currentItem);
-  playAudioSequence([record?.en, record?.cz]);
+  playAudioSequence(state.practice==="sentences" ? [state.direction==="czToEn" ? record?.en : record?.cz] : [record?.en, record?.cz]);
 }
 
 function bindEvents(){
@@ -388,6 +390,9 @@ async function init(){
   void readJson(AUDIO_DATA_URL).then(manifest=>{
     state.audioManifest=manifest;if(state.currentItem)primeCurrentAudio(state.currentItem);
   }).catch(()=>{ui.galleryNotice.textContent="Zvuk se nepodařilo načíst. Slovíčka můžeš dál procházet.";});
+  void readJson(SENTENCE_AUDIO_URL).then(manifest=>{
+    state.sentenceAudioManifest=manifest;if(state.currentItem && state.practice==="sentences")primeCurrentAudio(state.currentItem);
+  }).catch(()=>{}); // Sentence text and word audio work even if this optional file is unavailable.
   let data;
   try {data=await readJson(DATA_URL);} catch (_) {data=null;}
   if(!Array.isArray(data?.items) || !Array.isArray(data?.catalog?.groups) || !Array.isArray(data?.catalog?.parents)){

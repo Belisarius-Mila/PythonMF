@@ -1,15 +1,14 @@
 # VocabularyEN web: obrazové kartičky pro opakování slovíček
 
-## Aktuální stav — 2026-11-13 15:55 CET
 
-Galerie v1 je živá na GitHub Pages ze zdroje 0ec447e7; živá účtenka a čtyři
-HTTP/SHA-256 kontroly jsou doložené níže. Nový režim Slovíčko / Věta je nyní
-místně implementovaný v Datově větvi; 425 dvojic původních vět, žádná nová
-syntéza. Cílené testy i Safari jsou v pořádku; finální plná brána PASS:
-3823 testů / 927,757 s, 5 SKIP, žádné chyby/selhání.
-Kanonický aktuální handoff: handoffs/workstreams/project-vocabulary-en.md.
-Předchozí oddíly popisují historické etapy a jejich tehdejší stav.
+## Aktuální stav — 2026-11-13 18:39 CET
 
+Galerie i režim Slovíčko / Věta jsou na produkčních Pages z9c6cc825,
+živá účtenka a šest HTTP/SHA kontrol potvrzené. Nově Míla schválil
+425 EN +425 CZ MP3 vět ve stejných hlasech. Generátor a přehrávač hotové,
+29 cílených Python (včetně27Node) PASS; všech850 MP3 hotových a dekódovaných, plná brána3831 /646,379s, 5 SKIP, OK. Soukromý náhled vydaný. Původní slovíčkové nahrávky se nemění.
+Kanonický handoff: handoffs/workstreams/project-vocabulary-en.md.
+Následující starší oddíly zachovávají tehdejší stav.
 
 ## Publikační vazba a věty — 2026-11-13 12:58 CET
 
@@ -613,3 +612,88 @@ Technický důkaz: Živý GitHub audit před integrací byl aligned4e7007ae,
 completed/done, pushed=true, deployed=true. Původní Datův worktree
 zůstává zachovaný a čistý na 9ef50b2f. Přesný merge SHA a konečnou účtenku
 p+n doplní bezpečný TXT výsledek v Downloads a privátní release receipt.
+
+
+## 2026-11-13 18:39 CET — Schválené větné audio, generování a přehrávač
+
+Hotovo: Prvních šest skutečných MP3 vět je vytvořených a dekódovatelných;
+Aria pro EN a Vlasta pro CZ, tempo -10 %. Oddělený generátor navazuje
+na původní CSV a 425 párů vět. Rozhraní přehrává celé zadání a po odhalení
+pouze cílový překlad, v obou směrech. Původní slovíčkový režim zůstává.
+
+Rozhodnutí: Míla výslovně zadal začít větným audiem a po vysvětlení hlasů
+a rozsahu 425 EN + 425 CZ řekl „OK, jdeme na to!“. Jde o pokračování
+vlastního vývoje, bez nového souhlasu s Pages p+n. Registrovaný Edge TTS
+se používá pro veřejné věty; žádný přechod na placené Azure ani nové modely.
+Chybějící edge-tts7.3.1 doplněné jen do privátního generačního prostředí.
+První lokální pokus skončil před sítí kvůli chybějící knihovně; nebyla
+provedená externí syntéza ani opakovaný nejistý požadavek.
+
+Další krok: Dokončit všech 850 nahrávek, ověřit celou sadu i návrat/obnovu
+v aplikaci a uložit vlastní checkpoint. Soukromý Sites náhled se aktualizuje
+při zachování publika; nové Pages vydání vyžaduje samostatné p+n.
+Navrhované další kroky: Mílův poslech vět a fyzická iPhone přejímka.
+
+Technický důkaz: 13 Python testů generátoru/slovníčkového audia PASS /0,187s;
+27 Node scénářů PASS /12,087s, včetně ochrany překladu před odhalením,
+neshodných vět a zastavení při navigaci. Šest MP3 dekódovaných ffmpeg,
+délka 2,06–3,67s; dvě ukázky přehrané afplay. To nenahrazuje lidskou
+přejímku přirozenosti a výslovnosti. Trvalý stav běžící dávky je
+data/private/vocabulary_en_sentence_audio_20261113/generation.json.
+
+Předchozí režim vět je už produkčně vydaný z9c6cc825; účtenka
+1e2d90febc09702a5538f43a75e50228 completed/done, Terra/high, push i
+Pages confirmed, plná brána3823/637,9s a šest HTTP/SHA souborů shodných.
+Starší zápisy o čekající integraci/publikaci tohoto režimu jsou historické.
+Nové větné MP3 tímto předchozím vydáním zahrnuté nebyly.
+
+Doplnění 2026-11-13 18:47 CET: Všech850 MP3 vytvořených, všech850 dekódovaných ffmpeg,
+žádné chybějící. Celkem16 445 376B, délky1,872–5,496s. Původní CSV,
+JSON425 karet, slovíčkový manifest a845 slovíčkových MP3 bajtově shodné
+s původním manifestem. Safari: obě jazyková zadání, odhalený cílový
+překlad, přechod na cow, původní slovíčkový zvuk i návrat na poslední
+dlaždici. 29 cílených Python testů (včetně27Node scénářů) PASS /12,853s.
+Plná brána běží nad13 zmrazenými zdroji/testy/daty; MP3 mají samostatné
+otisky v audio_verification.json. Soukromý náhled se aktualizuje.
+
+Soukromý Sites náhled aktualizovaný, audience pouze vlastník:
+https://vocabulary-en-layout-20261113.fairfly9.chatgpt.site
+Zdroj4eb3854dff55272de031acba563dbc38908cb3db, deployment
+appgdep_6af74d752cac8191a325f8c7e4f74b07 succeeded. Archiv ověřený proti
+všem850 MP3 i třem změněným JSON/JS souborům. Lokální Safari přehrávání
+ověřené; následné otevření vzdáleného náhledu nemohlo být dokončené,
+protože se nativní okno Safari souběžně měnilo. Fyzický iPhone čeká.
+
+
+## 2026-11-13 18:56 CET — Větné audio dokončené a ověřené
+
+Hotovo:425 anglických a425 českých vět mají vlastní nahrávky Aria/Vlasta
+při tempu -10 %. Věta přehraje zadání; po odhalení odpovědi lze přehrát
+cílový překlad. Původní slovíčka i845 MP3 jsou zachované. Soukromý náhled
+je vydaný na stejné adrese a přístupný pouze vlastníkovi.
+
+Rozhodnutí: Dokončený schválený vývoj s externí syntézou přes původní Edge
+TTS. Žádné nové placené Azure/modelové volání, žádný nový TVBCP a žádné
+PythonMF p+n nebo změna Willova main.
+
+Další krok: Mílův lidský poslech a fyzická iPhone přejímka soukromého náhledu.
+Navrhované další kroky: Po přejímce samostatné schválené Pages p+n audia.
+
+Technický důkaz: Plná brána3831 testů /646,379s, 5 SKIP, OK. Dříve29
+cílených Python včetně27Node PASS /12,853s. Všech13 zmrazených vstupů
+po bráně shodných;850/850 MP3 dekódovaných a beze změny, původní CSV,
+karty, slovíčkový manifest a845 MP3 rovněž shodné. Celkem16 445 376B nového
+audia; délky1,872–5,496s. Nativní Safari lokálně potvrdilo obě jazyková
+zadání, oba cílové překlady, skrytou odpověď po Další, slovíčkový zvuk
+a návrat na poslední miniaturu. To není fyzická iPhone ani lidská přejímka.
+
+Soukromý Sites: zdroj4eb3854dff55272de031acba563dbc38908cb3db, deployment
+appgdep_6af74d752cac8191a325f8c7e4f74b07 succeeded,850 MP3 a3 změněné
+JSON/JS soubory v archivu bajtově ověřené. Pokus o následné zobrazení
+vzdálené verze v Safari zastavený při souběžně se měnícím okně; úspěšný
+nativní deployment je ověřený a místní browser přehrávání potvrzené.
+
+Log: vocabulary_en_sentence_audio_full_gate_20261113.log
+SHA-256:7a55c1ad64af68f438134840913d5fcc12db6917aa1171dd26679e3754baed42
+Privátní důkazy: data/private/vocabulary_en_sentence_audio_20261113/.
+Scénář v Downloads: Vocabulary_EN_vetne_audio_2026-11-13.txt.

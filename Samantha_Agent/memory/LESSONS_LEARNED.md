@@ -2357,3 +2357,18 @@ s mock video-only kamerou, stop tracků a dekódováním WASM.
   mobilní celé HTML se skutečnými hlavičkami: kamera před pozdrženým JS,
   reálný WASM a jeho blokovaná varianta s ukončením stop PASS. Fyzický iPhone
   je samostatná přejímka po vlastním p+n.
+
+
+### 2026-11-13 — Větné audio má vlastní textovou identitu a normalizaci
+
+- Kontext: slovíčkový generátor převádí čárky a středníky na tečky a má
+  výjimku hlasu pro izolované cat. Přímé převzetí těchto pravidel do celých
+  vět by měnilo interpunkci a mohlo přehrát jiný text po redakční úpravě.
+- Řešení: samostatný větný manifest/namespace, přesný text obou vět a UID
+  vedle EN/CZ. Zachovat interpunkci, soubor určit hlasem/tempem/textem.
+  Před syntézou uložit privátní požadavek; při nejistotě bez uloženého MP3
+  nic automaticky neopakovat. Manifest publikovat do výstupu až při úplné
+  sadě. Cílový překlad přehrát pouze po odhalení odpovědi.
+- Ověření: 850 skutečných MP3 dekódovaných; všech845 slovíčkových MP3
+  a původní obsah beze změny. 29 cílených Python testů včetně27Node PASS,
+  obě jazykové verze ověřené v nativním Safari.
