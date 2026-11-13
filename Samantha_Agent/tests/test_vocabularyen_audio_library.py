@@ -110,7 +110,7 @@ class VocabularyEnAudioLibraryTests(unittest.TestCase):
 
     def test_production_web_uses_mp3_manifest_without_system_speech_fallback(self) -> None:
         html = (REPO_ROOT / "docs" / "vocabulary-en" / "index.html").read_text(encoding="utf-8")
-        javascript = (REPO_ROOT / "docs" / "vocabulary-en" / "app.js").read_text(encoding="utf-8")
+        javascript = (REPO_ROOT / "docs" / "vocabulary-en" / "gallery.js").read_text(encoding="utf-8")
 
         self.assertIn("data-audio-url", html)
         self.assertIn("vocabulary-en-audio.json", javascript)

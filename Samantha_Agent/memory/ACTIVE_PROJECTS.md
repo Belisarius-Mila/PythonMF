@@ -10,6 +10,14 @@ Samostatný terminálový projekt bez pracovního proudu v Cockpitu:
 
 - **Python se Samanthou** — priorita 2, aktivní; 1.5/Codex na Linuxu Míla potvrdil. Nový třetí balíček Praktické úlohy: 7 lekcí, celkem 21. 62 testů a GUI s nezměněnou 1.5 prošly. Paměť: `projects/python_se_samanthou.md`; handoff: `handoffs/python_se_samanthou_course_package_2026_09_06.md`. Další krok: přikopírovat samostatný balíček do kurzy a restartovat. Samostatný terminálový projekt, dosud bez integrace do Cockpitu.
 
+- 2026-11-13: Vocabulary EN, samostatný terminálový projekt, priorita 2 — místní
+  galerie 425 karet / 18 skupin, trvalé UID/audio ID, 384 náhledů a přesný návrat
+  k poslední kartě. 21 cílených + 17 Node scénářů OK, nativní Safari desktop/
+  úzké zobrazení. Plná brána NEZELENÁ: 3685 testů / 910,695 s, 5 SKIP; 1 chyba registru (opravena), 2 SDK startup timeouty. Následně 36 cílených kontrol: 35 OK, 1 SDK inicializace s limitem 0,5 s stále ERROR. Další Mílova
+  přejímka, fyzický iPhone a samostatné rozhodnutí o vydání. Paměť:
+  `projects/vocabulary_en_web_cards.md`; handoff:
+  `handoffs/vocabulary_en_gallery_v1_2026_11_13.md`. Bez nového proudu v Cockpitu.
+
 | Oblast | Priorita | Rezim | Stav | Memory soubor | Handoff | Dalsi krok |
 | --- | --- | --- | --- | --- | --- | --- |
 | Camino | 1 | active | 2026-11-04: Terra lokálně opravila 2 selhání mediálních testů CI bez změny produkce/workflow. FAIL→PASS bez binárek; běžné moduly 37 PASS bez skip, službový PATH 32 PASS + 5 skip, skutečný Orus zvlášť PASS. Předchozí UI posledního filmu a osobní střihy zachované. | `projects/camino.md`; `reports/camino_export_created_time_20261028.md` | `handoffs/workstreams/project-camino.md`; `tvbcp/workstreams/project-camino.md` | Samostatné p+n a přejímka nového GitHub CI runu; potom návrat k e-mailovému testu. Dosud otevřená fyzická přejímka posledního filmu/ruční volby/nového otevření zůstává zachovaná. |

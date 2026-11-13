@@ -1,0 +1,98 @@
+VOCABULARY EN — GALERIE V1 A AUTORSTVÍ
+
+Web: docs/vocabulary-en/index.html
+Galerie: gallery.js, model.js, gallery.css
+Staré app.js a styles.css dál používá Vocabulary EN83. Při změně galerie se
+nemění; EN83 má svůj stávající formát bez nového katalogu.
+
+1. Zdroje obsahu
+
+VocabularyEN.csv: EN/CZ, věty, původní WS, L a HT. CSV zůstává kompatibilní
+s desktopem. L znamená výběr pro web, nikoli osobní pokrok studenta.
+
+vocabulary_en_catalog.json: trvalé identity a redakční metadata galerie.
+- id je dosavadní číselná identita audia. Jednou přidělené číslo se nemění.
+- uid je trvalá identita konkrétní karty a významu. Nemění se při přesunu,
+  změně řazení ani opravě textu. Dva významy orange mají různá UID.
+- matches obsahuje přesné dvojice EN/CZ, které patří této identitě.
+- primaryGroup je výchozí místo; musí být i v topicIds. Vedlejší topicIds
+  umožňují hledat kartu v dalších tématech bez duplicit v galerii.
+- partOfSpeech a expressionType umožní výběr slovních druhů a frází.
+- difficultyBand 1/2/3 je orientační didaktický návrh, nikoli CEFR ani
+  hodnocení schopností dítěte. difficultyStatus=draft to výslovně eviduje.
+- editorialStatus=needs-review upozorňuje autora na víceznačnost.
+- galleryOrder řídí doporučené pořadí uvnitř skupiny. Pořadí řádku v CSV
+  ani číselná identita se kvůli řazení galerie nepřepisují.
+- related eviduje související tvary/protiklady; samostatné lekce na těchto
+  vztazích jsou navazující možnost, zatím nemají vlastní uživatelský režim.
+
+Zdroj Benji se při exportu odvozuje z existujícího WS=Benji. Nevede se druhá
+nezávislá kopie tohoto údaje v katalogu. Původní WS se při exportu zachová.
+
+2. Přidání a oprava karty
+
+Novou kartu nejprve přidat do CSV. Do katalogu přidělit dosud nepoužité id
+(včetně rezervovaných starších záznamů), nové uid a přesný match EN/CZ.
+Doplnit výchozí téma a další metadata. Export neznámý nebo duplicitní match
+zastaví a nebude odhadovat identitu z Order či samotného anglického názvu.
+
+Při opravě překladu/hesla doplnit nový match ke STEJNÉ identitě. Zkontrolovat
+stále platný konkrétní význam a audio. Žádný match nesmí patřit dvěma kartám.
+Stará čísla a UID se nikdy nerecyklují pro jiná slovíčka. Neaktivní záznam
+katalogu může zůstat jako rezervace; rozhodnutí o mazání vyžaduje Mílův souhlas.
+
+Běžná změna věty nebo příznaků L/HT identitu nemění. Aplikace před přehráním
+ověřuje, že audio manifest má shodný sourceEn i sourceCz. Mismatched audio
+se nepřehraje. Nové nahrávky se v rámci tohoto vývoje negenerovaly.
+
+3. Obnovení exportu
+
+Z kořene PythonMF:
+  Samantha_Agent/.venv/bin/python VocabularyEN/sync_vocabulary_en_to_docs.py --preserve-extra-assets
+
+Vždy použít preserve-extra-assets: tento vývoj neobsahuje souhlas s mazáním.
+Export vytvoří metadata v docs/data/vocabulary-en.json a odvozené WebP náhledy
+v docs/assets/vocabulary-en-thumbs. Originály pro velkou kartu zůstanou zachované.
+Některé schválené starší ilustrace existují pouze v dosavadní webové knihovně;
+export použije jejich přesný název před obecným fallbackem (například courtyard).
+
+Náhledy mají delší stranu nejvýše 384 px, poměr stran se zachová. Název
+obsahuje otisk zdroje. Při budoucí změně profilu náhledu je nutné verzovat také
+jeho adresu; žádné hromadné přepisování/mazání starých souborů se neprovádí.
+
+Pouze ověření audia bez syntézy:
+  Samantha_Agent/.venv/bin/python VocabularyEN/build_vocabulary_en_audio.py
+
+Případná nová syntéza s --apply je jiný, zvlášť autorizovaný krok.
+
+4. Cílené kontroly
+
+Z adresáře Samantha_Agent:
+  .venv/bin/python -m unittest tests.test_vocabularyen_gallery tests.test_vocabularyen_audio_library tests.test_vocabularyen_audio_casting
+  node --test tests/test_vocabularyen_selection.js
+
+Nová gallery sada spouští také 10 relevantních původních exportních a
+obrázkových kontrol. Pět dalších historických snapshot auditů MMTX zůstává
+v test_vocabularyen_mmtx_import.py: v původním HEAD také selhávají, protože
+novější dialogy obsahují další hesla a stará účtenka očekává 1055 mapování.
+Tento vývoj jejich očekávání neupravuje a neprohlašuje úplnost dnešního MMTX.
+Záznam je v projektu Vocabulary EN; původní testy zůstaly beze změny.
+
+5. Místní náhled a vydání
+
+Z kořene PythonMF:
+  Samantha_Agent/.venv/bin/python -m http.server 8812 --bind 127.0.0.1 --directory docs
+  http://127.0.0.1:8812/vocabulary-en/
+
+Jedna dlouhá galerie, téma jako výchozí pohled, 2 sloupce na telefonu,
+8 sloupců při dostatečné šířce. Jazyk popisků nemění pořadí ani směr učení.
+Více témat je NEBO, další hlediska průnik. Ve velké kartě Předchozí/Další
+pracují nad neměnnou posloupností. Zpět vrací poslední učenou miniaturu.
+Náhodné procvičování se spouští jen výslovně a kolo se samo nerestartuje.
+
+Do sessionStorage se ukládá navigace jedné karty prohlížeče, do localStorage
+pouze poslední karta/kontext. Není to osobní skóre ani přenos mezi zařízeními.
+Bez úložiště stále funguje právě otevřená galerie a návrat do ní.
+
+Publikace GitHub Pages/p+n je samostatně schvalovaný krok. Místní proklik
+nenahrazuje fyzickou iPhone přejímku a lidský poslech všech nahrávek.

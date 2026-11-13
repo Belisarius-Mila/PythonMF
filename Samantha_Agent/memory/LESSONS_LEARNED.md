@@ -2207,3 +2207,26 @@ Tento důkaz nenahrazuje skutečný reboot/wake po upgradu.
 - Kontext: turn/steer může přidat další userMessage do stejného tahu; dosavadní kontrola všech user items jako jediné by po platném doplnění zneplatnila výsledek, obecné povolení více vstupů by zase obešlo guard.
 - Řešení: opt-in ledger odděluje právě jeden původní client ID od přesných command IDs rezervovaných před RPC. Původní started/final/completed důkazy zůstávají; cizí/duplicitní vstup neprojde. Samostatná trvalá command účtenka rozliší přijetí, odmítnutí a nejistotu. Ztráta ACK, journalu nebo volajícího nikdy neznamená nový start; rodičovská journal bariéra a doménový otisk přežijí kompakci.
 - Ověření: produkční client/dispatcher/Hub a HTTP fixture provedly série deseti doplnění do jediného turnu se stejným oprávněním. Selhání ukládání/HTTP/calleru, cizí ACK/generace, změna kontextu a dokončení během doplnění nevyvolaly druhý RPC ani nepřepsaly rodičovský výsledek. Žádný skutečný modelový pokus.
+
+
+### 2026-11-13 — Nový learner nesmí rozbít druhou aplikaci se sdílenými zdroji
+
+- Kontext: Vocabulary EN83 načítá původní `vocabulary-en/app.js` a `styles.css`.
+  Nová galerie EN potřebuje katalog, který data EN83 nemají.
+- Řešení: před přepsáním vstupního JS/CSS vyhledat ostatní konzumenty. Novou
+  galerii oddělit do `gallery.js`, `model.js`, `gallery.css`, původní sdílené
+  soubory zachovat. Metadata patří do autorského katalogu a překládají se podle
+  přesného významu na neměnné UID/audio ID, nikoli podle aktuálního řádku.
+- Ověření: EN83 i původní app.js/styles.css mají nulový diff; cílená přejímka
+  potvrzuje obě vstupní HTML, stabilní audio po přesunu/vložení řádku a oba
+  významy orange. Všechna starší pole 425 karet zůstala obsahově shodná.
+
+
+### 2026-11-13 — Terminálový projekt nepatří automaticky do tabulky proudů
+
+- Kontext: tabulku ACTIVE_PROJECTS spotřebovává katalog Human–Adam. Nový aktivní
+  řádek Vocabulary EN bez záznamu v WORKSTREAMS způsobil testový nesoulad.
+- Řešení: samostatný terminálový projekt evidovat v určené netabulkové sekci
+  s pamětí a handoffem; pouhé místní zadání nezakládá nový proud v Cockpitu.
+- Ověření: po přesunu zápisu všechny testy WorkstreamCatalog prošly; další
+  0,5s SDK startup timeout je samostatný výsledek, nikoli zelená celá brána.

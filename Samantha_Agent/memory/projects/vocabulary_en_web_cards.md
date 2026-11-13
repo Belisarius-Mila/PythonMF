@@ -1,5 +1,50 @@
 # VocabularyEN web: obrazové kartičky pro opakování slovíček
 
+## Galerie v1 — místní implementace 2026-11-13 10:53 CET
+
+- Hotová místní galerie **425 karet / 18 skupin** podle schválené přílohy.
+  Výchozí Téma, české ovládání, popisky EN/CZ, hledání bez diakritiky, doporučené
+  i abecední řazení; širší obrazovka až 8 sloupců, telefon výchozí 2 sloupce.
+- Více témat je NEBO, zdroj Benji/slovní druh/náročnost/výběr L nebo HT tvoří
+  průnik. Jedna karta je v galerii právě jednou. Náročnost je redakční návrh.
+- Velká karta zachovává pořadí galerie a odhalení odpovědi/věty/MP3. Předchozí,
+  Další, hranice skupin a konec výběru; náhodné kolo pouze explicitně, bez
+  opakování. Návrat nahoře i dole, Escape a browser Zpět; fokus i zvýraznění
+  poslední učené miniatury. Obnova karty i galerie zachová původní posloupnost.
+- Trvalé UID i dosavadní číselné audio ID jsou v samostatném katalogu;
+  desktopové CSV se neměnilo. Neznámý/duplicitní význam export zastaví.
+- **384 náhledů, 7,883,044 B**, delší strana nejvýše 384 px, původní média
+  zachovaná. Všechna dosavadní pole původních 425 karet obsahově beze změny.
+- Galerii vlastní gallery.js/model.js/gallery.css; původní sdílené app.js a
+  styles.css jsou beze změny kvůli Vocabulary EN83.
+- Ověření: 21 cílených Python testů, v nich 17 Node scénářů skutečného
+  controlleru a 10 relevantních starších exportních kontrol. Nativní Safari:
+  galerie → cat/cow/crocodile → browser Zpět na krokodýla, úzké 2sloupcové
+  zobrazení se zvětšením, odhalení a spodní návrat; původní zoom/okno obnovené.
+- Plná brána: NEZELENÁ: 3685 testů / 910,695 s, 5 SKIP; 1 chyba registru (opravena), 2 SDK startup timeouty. Následně 36 cílených kontrol: 35 OK, 1 SDK inicializace s limitem 0,5 s stále ERROR.
+- Pět dalších starších MMTX snapshot auditů selhává také na nezměněných HEAD
+  zdrojích: nová hesla v dialozích a starý počet mapování. Původní testy ani
+  jejich očekávání se nepřepisovaly; samostatně řešit případný obsahový audit.
+- Aktuální handoff: `handoffs/vocabulary_en_gallery_v1_2026_11_13.md`.
+  Autorský postup: `VocabularyEN/GALLERY_AUTHORING.txt`.
+- Další krok: Mílova přejímka místního návrhu a samostatné rozhodnutí o vydání.
+  Fyzický iPhone, poslech všech MP3 a publikace tím nejsou doložené. Jde o
+  samostatný terminálový projekt; nový TVBCP ani proud v Cockpitu nevznikl.
+
+## Galerie v1 — schválená rozhodnutí 2026-11-13
+
+- Míla schválil výchozí galerii a základní pohled **Téma** se stručným českým
+  ovládáním. **Další** sleduje pořadí galerie; náhodně pouze po výslovné volbě.
+- Mobilní výchozí rozložení: větší dlaždice ve **dvou sloupcích**.
+- Příloha návrhu: **425 karet / 18 skupin**, schválená jako výchozí mapa.
+  Víceznačnosti se při redakci ověřují podle konkrétního významu, věty a obrázku.
+- Podrobný podklad v Downloads:
+  `Vocabulary_EN_okruhy_a_obrazova_galerie_navrh_2026-11-12.txt`; obsahuje
+  schválení z 13. 11., rozbor filtrů, všech 425 karet a přejímací podmínky.
+- Další krok: místní první verze — metadata a stabilní identita karet, galerie
+  propojená s velkou kartou a návratem na poslední učenou miniaturu.
+- Tento zápis eviduje rozhodnutí; funkční změna ani publikace v něm neproběhly.
+
 ## Stav
 
 Vznikl nový malý webový projekt na bázi `VocabularyEN/vocab_trainer_en.py`.
