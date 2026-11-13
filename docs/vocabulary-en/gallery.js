@@ -4,13 +4,13 @@ const appRoot = document.querySelector("[data-json-url]");
 const DATA_URL = appRoot?.dataset.jsonUrl || "../data/vocabulary-en.json";
 const AUDIO_DATA_URL = appRoot?.dataset.audioUrl || "../data/vocabulary-en-audio.json";
 const ui = Object.fromEntries(["galleryView","studyView","totalCount","totalLabel","searchInput","topicPicker","topicFilters","topicSummary","clearTopicsButton","filterSelect","groupSelect","sortSelect","sizeButton","partFilters","levelFilters","sourceFilters","continueButton","shuffleButton","resetButton","emptyResetButton","sectionNav","galleryNotice","galleryGroups","emptyState","galleryFooter","backButton","backBottomButton","studyPosition","wordImage","pictureFallback","speakPromptButton","promptLabel","promptText","messageStrip","revealButton","answerCard","answerEn","answerCz","sentenceBox","sentenceEn","sentenceCz","speakAnswerButton","roundStatus","previousButton","nextButton","newRoundButton"].map(id => [id,document.getElementById(id)]));
-const defaults = () => ({filter:"all",query:"",topics:[],sources:[],parts:[],levels:[],groupBy:"topic",sort:"recommended",labelLanguage:"en",direction:"czToEn",large:false});
+const defaults = () => ({filter:"all",query:"",topics:[],sources:[],parts:[],levels:[],groupBy:"topic",sort:"recommended",labelLanguage:"en",direction:"czToEn",practice:"words",large:false});
 const state = {data:null,audioManifest:null,items:[],...defaults(),currentItem:null,revealed:false,view:"gallery",sequence:[],index:0,mode:"ordered",lastUid:"",visitId:"",fromGallery:false,anchorOffset:120};
 const STORAGE_KEY="vocabulary-en.navigation.v1", LAST_KEY="vocabulary-en.last-card.v1";
 function context() { return Object.fromEntries(Object.keys(defaults()).map(key => [key,Array.isArray(state[key]) ? [...state[key]] : state[key]])); }
 function sanitizeContext(value={}) {
   const result=defaults();
-  for(const [key,allowed] of Object.entries({filter:["all","selected","hard"],groupBy:["topic","part","level","none"],sort:["recommended","en","cz"],labelLanguage:["en","cz"],direction:["czToEn","enToCz"]})) if(allowed.includes(value[key]))result[key]=value[key];
+  for(const [key,allowed] of Object.entries({filter:["all","selected","hard"],groupBy:["topic","part","level","none"],sort:["recommended","en","cz"],labelLanguage:["en","cz"],direction:["czToEn","enToCz"],practice:["words","sentences"]})) if(allowed.includes(value[key]))result[key]=value[key];
   const groups=(state.data?.catalog?.groups || []).map(group=>group.id);
   for(const [key,allowed] of Object.entries({topics:groups,sources:["benji"],parts:[...Object.keys(M.posLabels),"expression"],levels:["1","2","3","unclassified"]}))result[key]=Array.isArray(value[key]) ? [...new Set(value[key].filter(v=>allowed.includes(String(v))).map(String))].slice(0,50) : [];
   result.query=typeof value.query==="string" ? value.query.slice(0,200) : "";
@@ -55,6 +55,7 @@ function syncControls(){
   ui.sizeButton.setAttribute("aria-pressed",String(state.large));ui.galleryView.classList.toggle("large-tiles",state.large);
   document.querySelectorAll("[data-label]").forEach(button=>button.setAttribute("aria-pressed",String(button.dataset.label===state.labelLanguage)));
   document.querySelectorAll("[data-direction]").forEach(button=>button.setAttribute("aria-pressed",String(button.dataset.direction===state.direction)));
+  document.querySelectorAll("[data-practice]").forEach(button=>button.setAttribute("aria-pressed",String(button.dataset.practice===state.practice)));
   for(const [id,key] of [["topicFilters","topics"],["partFilters","parts"],["levelFilters","levels"],["sourceFilters","sources"]])ui[id].querySelectorAll("input").forEach(input=>{input.checked=state[key].includes(input.value);});
   const labels=state.topics.map(id=>state.data?.catalog?.groups.find(group=>group.id===id)?.label).filter(Boolean);
   ui.topicSummary.textContent=labels.length ? labels.join(" + ") : "Všechna témata";
@@ -139,16 +140,21 @@ function openStudy(uid,mode="ordered",tile=null){
 }
 function renderCurrentItem(){
   const item=state.currentItem;if(!item)return;
-  const prompt=state.direction==="czToEn" ? item.cz : item.en;
-  ui.promptLabel.textContent=state.direction==="czToEn" ? "Řekni anglicky" : "Řekni česky";
-  ui.promptText.textContent=prompt;
+  const sentencePractice=state.practice==="sentences",prompt=M.studyPrompt(item,context());
+  ui.studyView.classList.toggle("sentence-practice",sentencePractice);
+  ui.studyView.setAttribute("aria-label",sentencePractice ? "Procvičování vět" : "Učení slovíčka");
+  ui.promptLabel.textContent=prompt.label;
+  ui.promptText.textContent=prompt.text;ui.promptText.lang=prompt.language;
   ui.wordImage.hidden=!item.image;ui.pictureFallback.hidden=Boolean(item.image);
   if(item.image)ui.wordImage.src=new URL(`../${item.image}`,window.location.href).toString();else ui.wordImage.removeAttribute("src");
-  ui.wordImage.alt=prompt;
+  ui.wordImage.alt=state.direction==="czToEn" ? item.cz : item.en;
   ui.answerEn.textContent=item.en;ui.answerCz.textContent=item.cz;ui.sentenceEn.textContent=item.sentenceEn || "";ui.sentenceCz.textContent=item.sentenceCz || "";
-  ui.sentenceBox.hidden=!(item.sentenceEn || item.sentenceCz);ui.answerCard.classList.toggle("hidden",!state.revealed);
+  ui.sentenceBox.hidden=!(item.sentenceEn || item.sentenceCz);ui.answerCard.classList.toggle("hidden",!state.revealed || !prompt.available);
   ui.revealButton.hidden=state.revealed;
-  ui.messageStrip.textContent=state.revealed ? "Poslechni si odpověď nebo pokračuj na další slovíčko." : "Nejdřív si odpověď zkus říct. Pak ji můžeš odhalit.";
+  ui.revealButton.disabled=!prompt.available;
+  ui.speakPromptButton.textContent=sentencePractice ? (state.direction==="czToEn" ? "♪ Slovíčko česky" : "♪ Slovíčko anglicky") : "♪ Přehrát zadání";
+  ui.speakAnswerButton.hidden=sentencePractice;
+  ui.messageStrip.textContent=!prompt.available ? "U tohoto slovíčka ještě chybí anglická nebo česká věta. Přepni na Slovíčko nebo pokračuj dál." : sentencePractice ? (state.revealed ? "Porovnej svou větu s odpovědí a pokračuj na další obrázek." : "Zkus říct celou větu. Tlačítko pod obrázkem přehraje jen slovíčko.") : state.revealed ? "Poslechni si odpověď nebo pokračuj na další slovíčko." : "Nejdřív si odpověď zkus říct. Pak ji můžeš odhalit.";
   const studyContext=context();
   const group=M.groupInfo(item,studyContext,state.data?.catalog);
   const groupItems=state.sequence.filter(entry=>M.groupInfo(entry,studyContext,state.data?.catalog).id===group.id);
@@ -162,6 +168,11 @@ function renderCurrentItem(){
   ui.roundStatus.textContent=next ? boundary ? "Poslední slovíčko této skupiny. Dál začíná další skupina." : "" : "To je konec tohoto výběru. Můžeš se vrátit na přehled.";
   syncControls();primeCurrentAudio(item);
   document.title=state.view==="study" ? `${item.en} · Vocabulary EN` : document.title;
+}
+function setPracticeMode(mode){
+  if(state.view!=="study" || !["words","sentences"].includes(mode))return;
+  stopAudioPlayback();state.practice=mode;state.revealed=false;
+  renderCurrentItem();writeHistory("study");persist();
 }
 function moveStudy(delta){
   const index=state.index+delta;if(state.view!=="study" || index<0 || index>=state.sequence.length)return;
@@ -342,7 +353,7 @@ function speakPrompt() {
 }
 
 function speakAnswer() {
-  if (!state.currentItem) {
+  if (!state.currentItem || state.practice === "sentences") {
     return;
   }
   const record = audioRecord(state.currentItem);
@@ -352,6 +363,7 @@ function speakAnswer() {
 function bindEvents(){
   document.querySelectorAll("[data-label]").forEach(button=>button.addEventListener("click",()=>{state.labelLanguage=button.dataset.label;renderGallery();writeHistory("gallery");persist();}));
   document.querySelectorAll("[data-direction]").forEach(button=>button.addEventListener("click",()=>{state.direction=button.dataset.direction;stopAudioPlayback();renderCurrentItem();if(state.currentItem && state.view==="study")writeHistory("study");persist();}));
+  document.querySelectorAll("[data-practice]").forEach(button=>button.addEventListener("click",()=>setPracticeMode(button.dataset.practice)));
   ui.searchInput.addEventListener("input",()=>{state.query=ui.searchInput.value.slice(0,200);selectionChanged();});
   for(const [id,key] of [["filterSelect","filter"],["groupSelect","groupBy"],["sortSelect","sort"]])ui[id].addEventListener("change",()=>{state[key]=ui[id].value;selectionChanged();});
   ui.sizeButton.addEventListener("click",()=>{state.large=!state.large;syncControls();writeHistory("gallery");persist();});
@@ -360,7 +372,7 @@ function bindEvents(){
   ui.continueButton.addEventListener("click",()=>openStudy(state.lastUid));
   ui.shuffleButton.addEventListener("click",()=>openStudy("","random"));
   ui.backButton.addEventListener("click",returnToGallery);ui.backBottomButton.addEventListener("click",returnToGallery);ui.previousButton.addEventListener("click",()=>moveStudy(-1));ui.nextButton.addEventListener("click",()=>moveStudy(1));ui.newRoundButton.addEventListener("click",newRandomRound);
-  ui.revealButton.addEventListener("click",()=>{state.revealed=true;renderCurrentItem();});
+  ui.revealButton.addEventListener("click",()=>{if(!state.currentItem || !M.studyPrompt(state.currentItem,context()).available)return;state.revealed=true;renderCurrentItem();});
   ui.speakPromptButton.addEventListener("click",speakPrompt);ui.wordImage.addEventListener("click",speakPrompt);ui.speakAnswerButton.addEventListener("click",speakAnswer);
   ui.wordImage.addEventListener("error",()=>{ui.wordImage.hidden=true;ui.pictureFallback.hidden=false;});
   document.addEventListener("keydown",event=>{if(event.key==="Escape" && state.view==="study"){event.preventDefault();returnToGallery();}});

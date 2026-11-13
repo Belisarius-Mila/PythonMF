@@ -1,5 +1,16 @@
 # VocabularyEN web: obrazové kartičky pro opakování slovíček
 
+## Aktuální stav — 2026-11-13 15:55 CET
+
+Galerie v1 je živá na GitHub Pages ze zdroje 0ec447e7; živá účtenka a čtyři
+HTTP/SHA-256 kontroly jsou doložené níže. Nový režim Slovíčko / Věta je nyní
+místně implementovaný v Datově větvi; 425 dvojic původních vět, žádná nová
+syntéza. Cílené testy i Safari jsou v pořádku; finální plná brána PASS:
+3823 testů / 927,757 s, 5 SKIP, žádné chyby/selhání.
+Kanonický aktuální handoff: handoffs/workstreams/project-vocabulary-en.md.
+Předchozí oddíly popisují historické etapy a jejich tehdejší stav.
+
+
 ## Publikační vazba a věty — 2026-11-13 12:58 CET
 
 - Míla zadal další krok. Místně doplněný projekt `project-vocabulary-en`
@@ -524,3 +535,81 @@ fb062e34, main498ba91a o12 commitů napřed, žádné nasazení. Oprava:29 test�
 PASS/13,193s s PATH=/usr/bin:/bin:/usr/sbin:/sbin, včetně skutečných Node
 scénářů; rychlá statická brána PASS. Původní důkaz zachovaný v
 logs/all_commits_failed_gate_20261113.log a all_commits_runtime_release_20261113.log.
+
+
+## 2026-11-13 15:55 CET — Procvičování vět a potvrzené vydání galerie
+
+Hotovo: Na velké kartě je přepínač Slovíčko / Věta. Celé věty jdou
+procvičovat CZ → EN i EN → CZ, odhalení ukáže obě jazykové verze. Další
+sleduje galerii a návrat zvýrazní poslední miniaturu. Volba přežije historii,
+obnovu i pokračování; výchozí režim a staré odkazy zůstávají slovíčkové.
+
+Rozhodnutí: Pokračování navazuje na Mílův dřívější požadavek na věty; nové
+placené audio se nevytváří. Zvuk v režimu Věta má jasný popisek Slovíčko;
+aplikace nehodnotí správnost ani výslovnost. Nový TVBCP nebyl dohodnutý.
+
+Další krok: Mílova přejímka vět na telefonu v aktualizovaném soukromém náhledu.
+Místní checkpoint odděluje novou funkci od již vydané produkční galerie.
+Navrhované další kroky: Mílova přejímka vět na telefonu; poté samostatné
+rozhodnutí o integraci a Pages vydání této nové funkce. Nahrávky celých vět
+zůstávají možným odděleným krokem.
+
+Technický důkaz: 25 Node scénářů PASS / 16,511 s; 22 cílených Python testů
+PASS / 17,653 s (včetně Node a původních exportních kontrol). Nativní Safari
+potvrdilo odhalení obou vět, oba směry, skrytou odpověď na další kartě, úzké
+zobrazení a návrat na cow se zvýrazněním Tady jsme skončili. Fyzický iPhone
+není tímto doložený. Plná brána PASS: 3823 testů / 927,757 s, 5 SKIP,
+0 failures/errors. Všech pět zmrazených zdrojů/testů po bráně bajtově shodných;
+source_manifest.json a final_verification.json jsou v
+data/private/vocabulary_en_sentences_20261113/.
+
+Dnešní živá kontrola navíc potvrzuje už hotové Pages vydání původní galerie:
+účtenka 63ea606335ef4e37fe02905091edfcd3, completed/done, deployed=true,
+cíl project-vocabulary-en / github_pages, zdroj 0ec447e7949e343991ed9dc5ae99152c8aab9384.
+Veřejné index.html/gallery.js/gallery.css/model.js odpovídaly tomuto main
+bajtově (HTTP i SHA-256). Starší zápisy o čekající publikaci jsou historické.
+Tento nový režim vět zatím součástí Pages není.
+
+Nezávislý soukromý náhled galerie je již vydaný na
+https://vocabulary-en-layout-20261113.fairfly9.chatgpt.site
+Site appgprj_6af70efd30b081919af279ac1930a3a6; pouze vlastník, žádné rozšíření
+přístupu. Původní verze zdroje cf9063615487740bf320739ea376eb246a51d754,
+deployment appgdep_6af7101f75a48191ab43e28c7e545deb. Aktualizace vět: zdroj
+3b9c65861001db8cff8ec739a0ae2466d507564b, deployment
+appgdep_6af72635871c8191931e5289107d6820 succeeded. Nativní Safari ověřilo
+na vydaném webu cat a přepnutí Slovíčko → Věta s celým českým zadáním.
+Přístup zůstává pouze vlastník; archiv má shodné čtyři soubory rozhraní,
+média i data jsou beze změny. Main a běžící Cockpit se tímto krokem nemění.
+
+Finální uzavření 2026-11-13 16:17 CET: plná brána vocabulary_en_sentences_full_gate_20261113.log
+SHA-256 d7fe52a48a1dec3927907612b479cb7cf852f6a348602792f7c0c1c2cc3aa962. Soukromý Sites náhled je
+vydaný a prokliknutý v nativním Safari; fyzický iPhone čeká. Všechny nové
+zdroje/testy jsou shodné s bránou; původní manifest karet a audia beze změny.
+Příští krok je Mílova přejímka, poté samostatné rozhodnutí o integraci/p+n.
+Žádný nový TVBCP; checkpoint je místní v Datově větvi, nikoli Cockpit checkpoint.
+
+
+## 2026-11-13 17:06 CET — Schválené předání vlastních commitů Terře p+n
+
+Hotovo: Režim vět z checkpointu 9ef50b2f je začleněný nad již publikovaný
+main4e7007ae. Všechny čtyři webové zdroje jsou shodné s vlastní zelenou
+branou 3823 / 927,757 s, 5 SKIP, OK. Willův ISBN krok už je na GitHubu
+a má dokončenou vlastní účtenku; do nového publikačního rozsahu nevstupuje
+jako čekající cizí práce. Jeho nezávislé soubory zůstávají bajtově shodné,
+paměťový index zachovává oba záznamy.
+
+Rozhodnutí: Míla výslovně zadal Terra p+n pro vlastní commity. Předání
+použije jediný submit_release(wait=True), projekt project-vocabulary-en,
+cíl github_pages a centrální schválenou roli release_executor Terra/high.
+Žádné nové TVBCP a žádný restart Cockpitu nebo služby Camino.
+
+Další krok: Po integrační kontrole zarovnat čisté profily a předat přesný
+nový main registrovanému vykonavateli. Samostatná soukromá účtenka je
+autoritou výsledku; tento zápis není tvrzením o budoucí publikaci.
+Navrhované další kroky: Po potvrzeném Pages vydání Mílova přejímka na iPhonu.
+
+Technický důkaz: Živý GitHub audit před integrací byl aligned4e7007ae,
+0 čekajících commitů. Willova účtenka d4e292cadfbff224094fd22cb4614ccd
+completed/done, pushed=true, deployed=true. Původní Datův worktree
+zůstává zachovaný a čistý na 9ef50b2f. Přesný merge SHA a konečnou účtenku
+p+n doplní bezpečný TXT výsledek v Downloads a privátní release receipt.

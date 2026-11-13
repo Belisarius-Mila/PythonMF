@@ -40,13 +40,13 @@
     </section>
 
     <section id="studyView" class="study-view" aria-label="Učení slovíčka" hidden>
-      <header class="study-header"><button id="backButton" type="button">← Zpět na přehled</button><p id="studyPosition" tabindex="-1"></p><div class="segmented direction-switch" aria-label="Směr procvičování"><button data-direction="czToEn" type="button" aria-pressed="true">CZ → EN</button><button data-direction="enToCz" type="button" aria-pressed="false">EN → CZ</button></div></header>
+      <header class="study-header"><button id="backButton" type="button">← Zpět na přehled</button><p id="studyPosition" tabindex="-1"></p><div class="study-controls"><div class="segmented" aria-label="Co procvičovat"><button data-practice="words" type="button" aria-pressed="true">Slovíčko</button><button data-practice="sentences" type="button" aria-pressed="false">Věta</button></div><div class="segmented direction-switch" aria-label="Směr procvičování"><button data-direction="czToEn" type="button" aria-pressed="true">CZ → EN</button><button data-direction="enToCz" type="button" aria-pressed="false">EN → CZ</button></div></div></header>
       <div class="card-layout">
         <div class="picture-panel"><div class="picture-wrap"><img id="wordImage" alt="" hidden><span id="pictureFallback" hidden>Obrázek se nepodařilo načíst.</span></div><button id="speakPromptButton" type="button" class="audio-button">♪ Přehrát zadání</button></div>
         <article class="study-panel"><p id="promptLabel" class="eyebrow">Řekni anglicky</p><h2 id="promptText">…</h2>
           <p id="messageStrip" class="study-message" role="status" aria-live="polite">Nejdřív si odpověď zkus říct.</p>
           <button id="revealButton" type="button" class="primary">Ukázat odpověď</button>
-          <div id="answerCard" class="answer-card hidden"><dl class="answer-pair"><div><dt>Anglicky</dt><dd id="answerEn"></dd></div><div><dt>Česky</dt><dd id="answerCz"></dd></div></dl><div id="sentenceBox"><p id="sentenceEn"></p><p id="sentenceCz" class="translation"></p></div><button id="speakAnswerButton" type="button">♪ Přehrát odpověď</button></div>
+          <div id="answerCard" class="answer-card hidden"><dl class="answer-pair"><div><dt>Anglicky</dt><dd id="answerEn" lang="en"></dd></div><div><dt>Česky</dt><dd id="answerCz" lang="cs"></dd></div></dl><div id="sentenceBox"><p id="sentenceEn" lang="en"></p><p id="sentenceCz" class="translation" lang="cs"></p></div><button id="speakAnswerButton" type="button">♪ Přehrát odpověď</button></div>
           <p id="roundStatus" class="meta"></p>
         </article>
       </div>

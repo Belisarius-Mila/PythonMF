@@ -31,7 +31,7 @@ async function app({items=vocabulary.items,url="https://example.test/PythonMF/vo
   doc.createElement=tag=>new Element(tag,doc);doc.createDocumentFragment=()=>new Element("fragment",doc);
   const appRoot=new Element("main",doc);appRoot.dataset={jsonUrl:"../data/vocabulary-en.json",audioUrl:"../data/vocabulary-en-audio.json"};doc.append(appRoot);
   for(const [,id] of html.matchAll(/\bid="([^"]+)"/g)){const node=new Element("div",doc);node.id=id;appRoot.append(node);}
-  for(const [data,values] of [["direction",["czToEn","enToCz"]],["label",["en","cz"]]])for(const value of values){const button=new Element("button",doc);button.dataset[data]=value;appRoot.append(button);}
+  for(const [data,values] of [["direction",["czToEn","enToCz"]],["label",["en","cz"]],["practice",["words","sentences"]]])for(const value of values){const button=new Element("button",doc);button.dataset[data]=value;appRoot.append(button);}
   const listeners={};let scroll=0;const location={href:url};const historyEntries=[{url,state:null}];let historyIndex=0;
   const win={location,innerHeight:844,addEventListener:(name,fn)=>(listeners[name]??=[]).push(fn),scrollTo:value=>{scroll=value.top||0;},get scrollY(){return scroll;},requestAnimationFrame:fn=>fn()};
   const emit=(name,extra={})=>{for(const fn of listeners[name]||[])fn(extra);};
@@ -42,9 +42,9 @@ async function app({items=vocabulary.items,url="https://example.test/PythonMF/vo
   const data={...vocabulary,items};
   const ctx=vm.createContext({document:doc,window:win,URL,URLSearchParams,Audio:AudioFixture,console,fetch:async url=>{if(slowAudio && url.includes("audio"))return new Promise(()=>{});if(failData && !url.includes("audio"))throw Error("offline");if(manifest===null && url.includes("audio"))throw Error("audio unavailable");return {ok:true,json:async()=>url.includes("audio")?manifest:data};}});
   vm.runInContext(fs.readFileSync(path.join(root,"vocabulary-en/model.js"),"utf8"),ctx);
-  vm.runInContext(source.replace('void init();','globalThis.ready=init();')+'\nglobalThis.api={state,context,buildSelection,orderedSelection,openStudy,moveStudy,newRandomRound,returnToGallery,renderGallery,selectionChanged,applyRoute,speakPrompt,speakAnswer,stopAudioPlayback};',ctx);
+  vm.runInContext(source.replace('void init();','globalThis.ready=init();')+'\nglobalThis.api={state,context,buildSelection,orderedSelection,openStudy,moveStudy,newRandomRound,returnToGallery,renderGallery,selectionChanged,applyRoute,speakPrompt,speakAnswer,stopAudioPlayback,setPracticeMode};',ctx);
   await ctx.ready;
-  return {...ctx.api,doc,win,emit,players,session,local,historyEntries,element:id=>doc.getElementById(id),directions:doc.querySelectorAll("[data-direction]"),labels:doc.querySelectorAll("[data-label]")};
+  return {...ctx.api,doc,win,emit,players,session,local,historyEntries,element:id=>doc.getElementById(id),directions:doc.querySelectorAll("[data-direction]"),labels:doc.querySelectorAll("[data-label]"),practices:doc.querySelectorAll("[data-practice]")};
 }
 const sample=vocabulary.items.slice(0,4);
 test("switching translation direction preserves current card and the ordered selection",async()=>{
@@ -133,4 +133,69 @@ test("reloading the gallery preserves the frozen random order for browser Forwar
   const after=await app({url:before.win.location.href,session:before.session,local:before.local});
   after.win.history.pushState({vocabularyEN:1,kind:"study",fromGallery:true},"",studyUrl);after.applyRoute();
   assert.equal(after.state.currentItem.uid,uid);assert.deepEqual(Array.from(after.state.sequence,i=>i.uid),order);assert.deepEqual([...after.state.sources],["benji"]);assert.equal(after.state.mode,"random");
+});
+
+test("sentence prompts use complete paired texts in the selected direction",()=>{
+  const cat=vocabulary.items.find(item=>item.uid==="ven-0020");
+  assert.equal(model.studyPrompt(cat,{practice:"sentences",direction:"czToEn"}).text,cat.sentenceCz);
+  assert.equal(model.studyPrompt(cat,{practice:"sentences",direction:"enToCz"}).text,cat.sentenceEn);
+  assert.equal(model.studyPrompt(cat,{practice:"words",direction:"czToEn"}).text,cat.cz);
+  assert.equal(model.studyPrompt({...cat,sentenceEn:" "},{practice:"sentences"}).available,false);
+});
+test("switching practice keeps the card and order, stops audio, and hides the previous answer",async()=>{
+  const view=await app();view.openStudy("ven-0020");const order=Array.from(view.state.sequence,model.key),cat=view.state.currentItem;
+  assert.equal(view.state.practice,"words");view.element("revealButton").click();view.speakPrompt();
+  view.practices[1].click();
+  assert.equal(view.state.practice,"sentences");assert.equal(view.state.currentItem.uid,cat.uid);assert.deepEqual(Array.from(view.state.sequence,model.key),order);
+  assert.equal(view.element("promptText").textContent,cat.sentenceCz);assert.equal(view.element("promptText").lang,"cs");
+  assert.equal(view.element("answerCard").classList.contains("hidden"),true);assert.equal(view.state.revealed,false);
+  assert.ok(view.players.filter(player=>player.played).every(player=>player.paused));
+  assert.equal(view.practices[1].getAttribute("aria-pressed"),"true");assert.equal(view.practices[0].getAttribute("aria-pressed"),"false");
+  view.directions[1].click();assert.equal(view.element("promptText").textContent,cat.sentenceEn);assert.equal(view.element("promptText").lang,"en");
+  assert.match(view.element("promptLabel").textContent,/větu česky/);
+  view.element("revealButton").click();assert.equal(view.element("answerCard").classList.contains("hidden"),false);
+  assert.equal(view.element("sentenceCz").textContent,cat.sentenceCz);
+  view.practices[0].click();assert.equal(view.element("promptText").textContent,cat.en);assert.equal(view.element("speakAnswerButton").hidden,false);
+  assert.equal(view.element("speakPromptButton").textContent,"♪ Přehrát zadání");
+});
+test("sentence practice clearly offers word audio and never pretends it is a sentence recording",async()=>{
+  const view=await app();view.openStudy("ven-0020");view.practices[1].click();
+  assert.match(view.element("speakPromptButton").textContent,/Slovíčko česky/);
+  assert.match(view.element("messageStrip").textContent,/přehraje jen slovíčko/);
+  assert.equal(view.element("speakAnswerButton").hidden,true);view.speakAnswer();assert.ok(view.players.every(player=>!player.played));
+  view.speakPrompt();assert.ok(view.players.some(player=>player.played && player.url.endsWith(audio.items["20"].cz)));
+  view.directions[1].click();assert.match(view.element("speakPromptButton").textContent,/Slovíčko anglicky/);
+});
+test("sentence practice survives next, previous, gallery return and continuation at the last tile",async()=>{
+  const view=await app();view.state.topics=["topic-06"];view.selectionChanged();const order=view.orderedSelection();view.openStudy(order[2].uid);view.practices[1].click();
+  view.element("revealButton").click();view.moveStudy(1);const last=view.state.currentItem;
+  assert.equal(last.uid,order[3].uid);assert.equal(view.state.practice,"sentences");assert.equal(view.element("promptText").textContent,last.sentenceCz);assert.equal(view.state.revealed,false);
+  view.moveStudy(-1);assert.equal(view.state.currentItem.uid,order[2].uid);view.moveStudy(1);view.returnToGallery();
+  assert.equal(view.doc.activeElement.id,`tile-${last.uid}`);assert.equal(view.state.view,"gallery");assert.equal(view.state.practice,"sentences");
+  view.element("continueButton").click();assert.equal(view.state.currentItem.uid,last.uid);assert.equal(view.element("promptText").textContent,last.sentenceCz);
+});
+test("sentence practice restores from reload and browser Forward without changing a random sequence",async()=>{
+  const before=await app();before.openStudy("","random");before.practices[1].click();before.directions[1].click();before.moveStudy(1);
+  const uid=before.state.currentItem.uid,order=Array.from(before.state.sequence,model.key);
+  const after=await app({url:before.win.location.href,session:before.session,local:before.local});
+  assert.equal(after.state.practice,"sentences");assert.equal(after.state.currentItem.uid,uid);assert.deepEqual(Array.from(after.state.sequence,model.key),order);
+  assert.equal(after.element("promptText").textContent,after.state.currentItem.sentenceEn);
+  after.win.history.back(); // A reload has no earlier entry; explicit return still preserves the mode.
+  after.returnToGallery();assert.equal(after.state.view,"gallery");
+  const studyUrl=before.win.location.href;after.win.history.pushState({vocabularyEN:1,kind:"study",fromGallery:true},"",studyUrl);after.applyRoute();
+  assert.equal(after.state.practice,"sentences");assert.equal(after.state.currentItem.uid,uid);assert.deepEqual(Array.from(after.state.sequence,model.key),order);
+});
+test("missing sentence pairs are explicit and never reveal a fabricated or stale answer",async()=>{
+  const cat=vocabulary.items.find(item=>item.uid==="ven-0020"),missing={...cat,sentenceEn:"",sentenceCz:""};
+  const view=await app({items:[missing]});view.openStudy(cat.uid);view.practices[1].click();
+  assert.equal(view.element("revealButton").disabled,true);assert.match(view.element("messageStrip").textContent,/chybí/);
+  view.element("revealButton").click();assert.equal(view.state.revealed,false);assert.equal(view.element("answerCard").classList.contains("hidden"),true);
+  view.practices[0].click();assert.equal(view.element("promptText").textContent,cat.cz);assert.equal(view.element("revealButton").disabled,false);
+});
+test("old or invalid practice state stays compatible and sentence links work with blocked storage",async()=>{
+  const invalid=await app({url:"https://example.test/PythonMF/vocabulary-en/#card=ven-0020&practice=invalid"});assert.equal(invalid.state.practice,"words");
+  const old=await app({url:"https://example.test/PythonMF/vocabulary-en/#card=ven-0020"});assert.equal(old.state.practice,"words");
+  const linked=await app({url:"https://example.test/PythonMF/vocabulary-en/#card=ven-0020&practice=sentences",blocked:true});
+  assert.equal(linked.state.practice,"sentences");assert.equal(linked.element("promptText").textContent,linked.state.currentItem.sentenceCz);
+  linked.returnToGallery();assert.equal(linked.doc.activeElement.id,"tile-ven-0020");
 });
