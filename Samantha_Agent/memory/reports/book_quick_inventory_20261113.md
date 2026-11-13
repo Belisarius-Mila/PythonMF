@@ -97,3 +97,35 @@ Downloads Samantha_Knihovna_ISBN_testovaci_scenar_2026-11-13.txt je celý
 vykonatelný přejímací postup, ověřený zpětným načtením. Žádný test nesahal
 do skutečného soukromého archivu. Kamerový prototyp je lokální software,
 ne důkaz skutečného zařízení. Další krok: vydání a fyzická přejímka.
+
+
+## 2026-11-13 15:59 CET — Lokální oprava nereagujícího startu kamery
+
+Hotovo: Připravené okamžité vyžádání kamery po klepnutí, bez předchozího
+čekání na JS/WASM čtečku. Stav je u tlačítka před náhledem, opakované klepnutí
+při startu blokované; chyba povolení či čtečky je viditelná. Načítání JS/WASM
+má15s mez a při chybě ukončí stream. Pozdní starý start nezastaví novou kameru.
+
+Rozhodnutí: Míla nahlásil první fyzický iPhone problém „Skenovat kamerou“
+bez viditelné reakce. Konkrétní příčina na jeho zařízení ještě není potvrzená;
+čeká informace Safari versus ikona a znění původního stavu. Oprava odstraňuje
+prokázané čekání před žádostí a chybějící ohraničení chyb. Zápisy knih,
+umístění, katalogy, oprávnění HTTP a modely se nemění.
+
+Další krok: Samostatné p+n opraveného commitu a znovu fyzický iPhone sken.
+Navrhované další kroky: Po úspěšném startu pilot přibližně20 knih, včetně
+duplicity a chybějící obálky. E-mailový A+C zůstává odložený.
+
+Technický důkaz: První verze je již vydaná v0ec447e7, runtime účtenka
+1267634111aad32de7f188312d900770 confirmed; dnešní následný audit HTTP/HTTPS
+potvrdil přesně shodné HTML, camera=(self) a obě čtecí asset URL HTTP200.
+Regrese okamžité žádosti FAIL před opravou → PASS po ní; šest nových
+Node průchodů (odmítnutí, timeout, chybějící API, chyba WASM, zavření, restart)
+a původní životní cyklus/ukládání PASS.60 cílených Python testů PASS/13,294s,
+rychlá statická brána PASS. Celé COCKPIT_HTML se skutečnými hlavičkami,
+viewport390, falešná video-only kamera před uvolněním pozdrženého reader.js,
+viditelný stav a následné načtení skutečného WASM PASS. Zablokovaný WASM
+zobrazí chybu, ukončí stopy a znovu zpřístupní tlačítko.0 zápisů archivu.
+Nová oprava je pouze lokální, bez p+n a bez potvrzené fyzické iPhone přejímky.
+Logy library_camera_start_browser_20261113.log a library_camera_start_static_20261113.log;
+privátní doklad camera_start_fix_browser_qa/result.json.

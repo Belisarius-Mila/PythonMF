@@ -2339,3 +2339,21 @@ s mock video-only kamerou, stop tracků a dekódováním WASM.
 - Ověření:29 testů PASS v minimálním launchd PATH, včetně skutečných
   Node scénářů; rychlá statická brána PASS. Původní účtenka zůstává
   attention; nový opravený head vyžaduje novou přesnou release účtenku.
+
+
+### 2026-11-13 — Start kamery nesmí čekat potichu na čtečku
+
+- Kontext: první iPhone přejímka hlásila tlačítko bez reakce. JS před žádostí
+  o kameru čekal na dynamický script; onload výjimka mohla ponechat promise
+  neukončenou. Stav byl až za formulářem a chyby dekodéru se při čtení snímků
+  ztrácely jako běžný nečitelný kód. Přesná příčina konkrétního iPhonu
+  tím ještě není doložená.
+- Řešení: vyžádat video přímo v click cestě, připravit reader/WASM až nad
+  zapnutou kamerou, zobrazit stav vedle tlačítka, ohraničit načítání a chybu
+  inicializace zachytit před smyčkou snímků. Zachovat generační rušení,
+  aby pozdní dokončení starého skenu neukončilo nově otevřený stream.
+- Ověření: FAIL→PASS pro žádost před downloadem; odmítnutí/timeout/API/WASM/
+  zavření/restart PASS,60 cílených testů a statická brána PASS. Headless
+  mobilní celé HTML se skutečnými hlavičkami: kamera před pozdrženým JS,
+  reálný WASM a jeho blokovaná varianta s ukončením stop PASS. Fyzický iPhone
+  je samostatná přejímka po vlastním p+n.

@@ -764,6 +764,7 @@
           <div class="quick-book-toolbar"><h3 id="quickBookHeading">Rychlé přidání knihy</h3><button type="button" class="secondary" id="quickBookClose">Zavřít</button></div>
           <p>Naskenuj ISBN, zkontroluj knihu a ulož. Umístění doplníš později na Macu.</p>
           <div class="quick-book-toolbar"><button class="primary" type="button" id="quickBookScan">Skenovat kamerou</button><button class="secondary" type="button" id="quickBookStop" hidden>Zastavit kameru</button></div>
+          <div id="quickBookStatus" class="status-line" role="status" aria-live="polite">Kamera i fotografie kódu se zpracují v telefonu. Katalogům odešleme jen ISBN.</div>
           <video id="quickBookVideo" muted playsinline hidden aria-label="Náhled zadní kamery pro čtení ISBN"></video>
           <label class="library-field">Nebo fotografie čárového kódu<input type="file" id="quickBookImage" accept="image/*" capture="environment"></label>
           <div class="quick-book-grid">
@@ -778,7 +779,6 @@
               <label class="library-field">Rok, pokud je známý<input id="quickBookYear" type="text" inputmode="numeric" maxlength="4" autocomplete="off"></label>
             </div>
           </div>
-          <div id="quickBookStatus" class="status-line" role="status" aria-live="polite">Kamera i fotografie kódu se zpracují v telefonu. Katalogům odešleme jen ISBN.</div>
           <div id="quickBookDuplicate" class="quick-book-toolbar"></div>
           <div class="quick-book-toolbar">
             <button class="primary" id="quickBookSave" type="button">Uložit do knihovny</button>

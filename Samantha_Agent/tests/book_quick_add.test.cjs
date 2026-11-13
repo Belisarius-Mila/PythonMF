@@ -1,6 +1,7 @@
 "use strict";
 const assert = require("node:assert/strict");
 const fs = require("node:fs");
+const vm = require("node:vm");
 const {normalizeISBN, safeCover, PendingWrite, Camera, boot} = require("../app/frontend/cockpit/book_quick_add.js");
 const tick = () => new Promise(resolve => setImmediate(resolve));
 function store() { const values = new Map(); return {getItem: k => values.get(k) || null, setItem: (k, v) => values.set(k, v), removeItem: k => values.delete(k)}; }
@@ -22,7 +23,87 @@ function dom() {
   return {elements, getElementById: id => elements.get(id), createElement: () => new Element(),
     addEventListener: (k, fn) => { handlers[k] = fn; }, dispatchEvent: () => {}, handlers};
 }
+function cameraFixture() {
+  const doc = dom(), scripts = [], timers = new Map();
+  let permit, deny, mediaCalls = 0, stopped = 0, timerID = 0;
+  const video = doc.getElementById("quickBookVideo"); video.play = async () => {};
+  doc.head = {append: script => scripts.push(script)};
+  doc.createElement = () => ({remove() { this.removed = true; }});
+  const context = {module: {exports: {}}, document: doc, localStorage: store(),
+    navigator: {mediaDevices: {getUserMedia: constraints => {
+      mediaCalls++; assert.equal(constraints.audio, false);
+      return new Promise((resolve, reject) => { permit = resolve; deny = reject; });
+    }}}, isSecureContext: true, crypto: {randomUUID: () => "camera_test_request"},
+    addEventListener() {}, CustomEvent: class {},
+    setTimeout(fn, ms) { const id = ++timerID; timers.set(id, {fn, ms}); return id; },
+    clearTimeout(id) { timers.delete(id); }};
+  vm.runInNewContext(fs.readFileSync("app/frontend/cockpit/book_quick_add.js", "utf8"), context);
+  const ui = context.module.exports.boot(doc); ui.setAvailable(true);
+  const el = id => doc.getElementById(id); el("quickBookOpen").dispatch("click");
+  return {doc, scripts, timers, context, el, ui,
+    get mediaCalls() { return mediaCalls; }, get stopped() { return stopped; },
+    permit() { permit({getTracks: () => [{stop() { stopped++; }}]}); },
+    deny(name) { deny(Object.assign(new Error("permission"), {name})); }};
+}
+async function cameraClickRegressions() {
+  const denied = cameraFixture(), deniedStart = denied.el("quickBookScan").dispatch("click");
+  assert.equal(denied.mediaCalls, 1, "a click requests camera before downloading the decoder");
+  assert.equal(denied.scripts.length, 0);
+  assert.equal(denied.el("quickBookScan").disabled, true);
+  assert.match(denied.el("quickBookStatus").textContent, /Otevírám zadní kameru/);
+  denied.deny("NotAllowedError"); await deniedStart;
+  assert.match(denied.el("quickBookStatus").textContent, /nemá povolení/);
+  assert.equal(denied.el("quickBookScan").disabled, false);
+  assert.equal(denied.el("quickBookStop").hidden, true);
+
+  const stalled = cameraFixture(), stalledStart = stalled.el("quickBookScan").dispatch("click");
+  stalled.permit(); await tick();
+  assert.equal(stalled.scripts.length, 1);
+  assert.equal(stalled.el("quickBookVideo").srcObject !== null, true);
+  assert.match(stalled.el("quickBookStatus").textContent, /Kamera je zapnutá/);
+  const timeout = [...stalled.timers.values()].find(t => t.ms === 15000);
+  assert.ok(timeout); timeout.fn(); await stalledStart;
+  assert.equal(stalled.stopped, 1); assert.equal(stalled.scripts[0].removed, true);
+  assert.match(stalled.el("quickBookStatus").textContent, /Čtečku se nepodařilo připravit/);
+  assert.equal(stalled.timers.size, 0);
+
+  for (const invalid of [true, false]) {
+    const broken = cameraFixture(), start = broken.el("quickBookScan").dispatch("click");
+    broken.permit(); await tick();
+    if (!invalid) broken.context.ZXingWASM = {prepareZXingModule: async () => { throw Error("WASM unavailable"); }};
+    await broken.scripts[0].onload(); await start;
+    assert.equal(broken.stopped, 1);
+    assert.match(broken.el("quickBookStatus").textContent, /Čtečku se nepodařilo připravit/);
+    assert.equal(broken.timers.size, 0);
+  }
+
+  const closed = cameraFixture(), closedStart = closed.el("quickBookScan").dispatch("click");
+  closed.permit(); await tick(); closed.el("quickBookClose").dispatch("click");
+  const notice = closed.el("quickBookStatus").textContent;
+  closed.context.ZXingWASM = {prepareZXingModule: async () => {}};
+  await closed.scripts[0].onload(); await closedStart;
+  assert.equal(closed.stopped, 1); assert.equal(closed.el("quickBookVideo").srcObject, null);
+  assert.equal(closed.el("quickBookStatus").textContent, notice, "late decoder cannot reopen or update a closed scanner");
+  assert.equal(closed.timers.size, 0);
+
+  const restarted = cameraFixture(), oldStart = restarted.el("quickBookScan").dispatch("click");
+  restarted.permit(); await tick(); restarted.el("quickBookStop").dispatch("click");
+  const newStart = restarted.el("quickBookScan").dispatch("click");
+  assert.equal(restarted.mediaCalls, 2); restarted.permit(); await tick();
+  restarted.context.ZXingWASM = {prepareZXingModule: async () => {}};
+  await restarted.scripts[0].onload(); await Promise.all([oldStart, newStart]);
+  assert.equal(restarted.stopped, 1, "late completion from an old scan must not stop the replacement camera");
+  assert.ok(restarted.el("quickBookVideo").srcObject);
+  assert.match(restarted.el("quickBookStatus").textContent, /Namiř zadní kameru/);
+  restarted.el("quickBookStop").dispatch("click"); assert.equal(restarted.stopped, 2);
+  assert.equal(restarted.timers.size, 0);
+
+  const markup = fs.readFileSync("app/frontend/cockpit/page.html", "utf8");
+  assert.ok(markup.indexOf('id="quickBookScan"') < markup.indexOf('id="quickBookStatus"'));
+  assert.ok(markup.indexOf('id="quickBookStatus"') < markup.indexOf('id="quickBookVideo"'), "camera feedback is next to the button, before the form");
+}
 async function run() {
+  await cameraClickRegressions();
   assert.equal(normalizeISBN("ISBN 0-385-47257-9"), "9780385472579");
   assert.equal(normalizeISBN("ISBN-13: 978-0-385-47257-9"), "9780385472579");
   for (const input of ["4006381333931", "9780385472570", "123", ""]) assert.throws(() => normalizeISBN(input));

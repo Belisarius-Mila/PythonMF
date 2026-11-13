@@ -46,13 +46,17 @@
       if (this.stream) this.stream.getTracks().forEach(t => t.stop());
       this.stream = null; this.video.srcObject = null;
     }
-    async start() {
+    async start(prepare) {
       this.stop(); const token = this.token;
       try {
         const stream = await this.media.getUserMedia({video: {facingMode: {ideal: "environment"}, width: {ideal: 1280}}, audio: false});
         if (this.token !== token) { stream.getTracks().forEach(t => t.stop()); return; }
         this.stream = stream; this.video.srcObject = stream;
+        this.video.muted = true; this.video.playsInline = true;
         await this.video.play();
+        if (this.token !== token) return;
+        if (prepare) await prepare();
+        if (this.token !== token) return;
         const tick = async () => {
           if (this.token !== token) return;
           try {
@@ -63,17 +67,34 @@
           if (this.token === token) this.timer = setTimeout(tick, 250);
         };
         if (this.token === token) tick();
-      } catch (_) { if (this.token === token) { this.stop(); this.error(); } }
+      } catch (error) { if (this.token === token) { this.stop(); this.error(error); } }
     }
   }
   let decoderPromise;
   function decoder() {
     if (!decoderPromise) decoderPromise = new Promise((resolve, reject) => {
       const s = document.createElement("script"); s.src = "/assets/book-scanner/3.1.6/reader.js";
-      s.onload = () => { root.ZXingWASM.prepareZXingModule({overrides: {locateFile: () => "/assets/book-scanner/3.1.6/zxing_reader.wasm"}}); resolve(root.ZXingWASM); };
-      s.onerror = () => { decoderPromise = null; reject(Error("Čtečku nelze načíst. ISBN můžeš zadat ručně.")); };
+      let finished = false;
+      const finish = (error, api) => {
+        if (finished) return;
+        finished = true; clearTimeout(timeout); s.onload = null; s.onerror = null;
+        if (error) {
+          s.remove(); const failure = Error("Čtečku se nepodařilo připravit. Zkus to znovu, vyber fotografii kódu nebo zadej ISBN ručně.");
+          failure.name = "BookScannerError"; reject(failure);
+        } else resolve(api);
+      };
+      const timeout = setTimeout(() => finish(Error("timeout")), 15000);
+      s.onload = async () => {
+        try {
+          const api = root.ZXingWASM;
+          if (!api || typeof api.prepareZXingModule !== "function") throw Error("reader unavailable");
+          await api.prepareZXingModule({overrides: {locateFile: () => "/assets/book-scanner/3.1.6/zxing_reader.wasm"}, fireImmediately: true});
+          finish(null, api);
+        } catch (error) { finish(error); }
+      };
+      s.onerror = () => finish(Error("reader unavailable"));
       document.head.append(s);
-    });
+    }).catch(error => { decoderPromise = null; throw error; });
     return decoderPromise;
   }
   async function decodeImage(source) {
@@ -101,7 +122,7 @@
     const status = el("quickBookStatus"), isbn = el("quickBookISBN"), title = el("quickBookTitle"), author = el("quickBookAuthor"), year = el("quickBookYear");
     const open = el("quickBookOpen"), save = el("quickBookSave"), scan = el("quickBookScan"), video = el("quickBookVideo");
     const image = el("quickBookCover"), coverNote = el("quickBookCoverNote"), duplicate = el("quickBookDuplicate");
-    let generation = 0, edits = 0, additional = false, available = false, rows = [], listGeneration = 0, opened = false, completed = false;
+    let generation = 0, edits = 0, additional = false, available = false, rows = [], listGeneration = 0, opened = false, completed = false, startingCamera = false;
     const notice = text => { status.textContent = text; };
     let ledger;
     try { ledger = new PendingWrite(root.localStorage, (kind, payload) => request(kind === "locations" ? "/api/library/books/locations" : "/api/library/book/quick", payload),
@@ -111,6 +132,7 @@
     function controls() {
       const p = pending(), busy = ledger && ledger.busy;
       [isbn, title, author, year, scan, el("quickBookLookup"), el("quickBookImage"), el("quickBookLocationsOpen"), el("quickBookAdditional")].forEach(x => { x.disabled = !!p || !!busy || !ledger; });
+      scan.disabled = scan.disabled || startingCamera; scan.textContent = startingCamera ? "Otevírám kameru…" : "Skenovat kamerou";
       save.disabled = !!busy || !ledger || completed; save.textContent = p ? "Dokončit původní zápis" : "Uložit do knihovny";
       el("quickBookRecover").hidden = !p; el("quickBookNext").hidden = !!p || !el("quickBookNext").dataset.ready;
       el("quickBookLocationsSave").disabled = !!p || !!busy;
@@ -121,10 +143,16 @@
     }
     image.addEventListener("error", () => { image.hidden = true; coverNote.textContent = "Bez obálky"; });
     const camera = new Camera(root.navigator.mediaDevices, video, decodeImage, code => { isbn.value = code; changedISBN(); lookup(); },
-      () => { video.hidden = true; el("quickBookStop").hidden = true; notice("Kamera není dostupná nebo nemá povolení. Zadej ISBN nebo vyber fotografii kódu."); });
-    function stop() { camera.stop(); video.hidden = true; el("quickBookStop").hidden = true; }
+      error => {
+        stop();
+        if (error && error.name === "BookScannerError") notice(error.message);
+        else if (error && error.name === "NotAllowedError") notice("Kamera nemá povolení. V nastavení této stránky povol kameru a zkus to znovu. Můžeš také vybrat fotografii kódu nebo zadat ISBN ručně.");
+        else if (error && error.name === "NotFoundError") notice("Na tomto zařízení nebyla nalezena kamera. Vyber fotografii kódu nebo zadej ISBN ručně.");
+        else notice("Kameru se nepodařilo otevřít. Zavři ji v ostatních aplikacích a zkus to znovu, nebo vyber fotografii kódu či zadej ISBN ručně.");
+      });
+    function stop() { camera.stop(); startingCamera = false; video.hidden = true; el("quickBookStop").hidden = true; controls(); }
     function close() { opened = false; generation++; listGeneration++; stop(); panel.hidden = true; open.setAttribute("aria-expanded", "false"); }
-    function changedISBN() { generation++; additional = false; completed = false; duplicate.replaceChildren(); title.value = ""; author.value = ""; year.value = ""; setCover(""); el("quickBookAdditional").hidden = true; controls(); }
+    function changedISBN() { stop(); generation++; additional = false; completed = false; duplicate.replaceChildren(); title.value = ""; author.value = ""; year.value = ""; setCover(""); el("quickBookAdditional").hidden = true; controls(); }
     async function lookup() {
       if (pending()) return;
       stop(); let code;
@@ -208,11 +236,19 @@
     [title, author, year].forEach(x => x.addEventListener("input", () => { edits++; }));
     el("quickBookLookup").addEventListener("click", lookup);
     scan.addEventListener("click", async () => {
-      if (pending()) return;
-      if (!root.isSecureContext || !root.navigator.mediaDevices) { notice("Kamera vyžaduje zabezpečené HTTPS připojení. ISBN můžeš zadat ručně."); return; }
-      generation++; const token = generation; notice("Připravuji čtečku…");
-      try { await decoder(); if (token !== generation || !opened) return; video.hidden = false; el("quickBookStop").hidden = false; notice("Namiř zadní kameru na knižní čárový kód."); await camera.start(); }
-      catch (_) { notice("Čtečku nelze načíst. ISBN můžeš zadat ručně."); }
+      if (pending() || startingCamera) return;
+      if (!root.isSecureContext || !root.navigator.mediaDevices || typeof root.navigator.mediaDevices.getUserMedia !== "function") { notice("Kamera vyžaduje zabezpečené HTTPS připojení. Otevři Cockpit přes jeho HTTPS adresu, nebo zadej ISBN ručně."); return; }
+      generation++; const token = generation; startingCamera = true; controls();
+      video.hidden = false; el("quickBookStop").hidden = false;
+      notice("Otevírám zadní kameru. Pokud se zobrazí žádost, povol její použití.");
+      try {
+        await camera.start(async () => {
+          if (token !== generation || !opened) return;
+          notice("Kamera je zapnutá, připravuji čtečku…"); await decoder();
+          if (token !== generation || !opened) return;
+          notice("Namiř zadní kameru na knižní čárový kód.");
+        });
+      } finally { if (token === generation && opened) { startingCamera = false; controls(); } }
     });
     el("quickBookStop").addEventListener("click", stop);
     el("quickBookImage").addEventListener("change", async event => {
