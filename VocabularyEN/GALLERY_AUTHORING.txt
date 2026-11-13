@@ -96,3 +96,18 @@ Bez úložiště stále funguje právě otevřená galerie a návrat do ní.
 
 Publikace GitHub Pages/p+n je samostatně schvalovaný krok. Místní proklik
 nenahrazuje fyzickou iPhone přejímku a lidský poslech všech nahrávek.
+
+6. Procvičování vět (2026-11-13)
+
+Na velké kartě přepni Slovíčko / Věta. Věta používá existující dvojici
+Sentence/SentenceT z CSV (sentenceEn/sentenceCz v exportu), nikoli automatický
+překlad. Směr CZ → EN / EN → CZ vybírá celé zadání. Odhalení ukáže obě věty
+a drobně i samotné slovíčko. Chybějící dvojice odhalení zakáže a vysvětlí proč.
+
+Volba se zachová při Další/Předchozí, návratu do galerie, pokračování, obnově
+i historii prohlížeče. Nemění pořadí, filtry, UID ani audio ID. Staré odkazy
+bez volby practice se otevřou ve slovíčkovém režimu.
+
+MP3 stále přehrávají pouze slovíčko. V režimu Věta je toto výslovně napsané
+u tlačítka pod obrázkem; tlačítko zvuku odpovědi je skryté. Nové audio ani
+syntéza nevznikají. Režim zatím nehodnotí výslovnost ani správnost odpovědi.

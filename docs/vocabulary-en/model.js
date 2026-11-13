@@ -60,7 +60,21 @@
     const record=manifest?.items?.[String(item?.id)];
     return record && record.sourceEn===item.en && record.sourceCz===item.cz ? record : null;
   }
-  const api = {normalize,key,select,buckets,ordered,shuffle,restoreSequence,audioRecord,posLabels,levelLabels,countLabel,groupInfo};
+  function studyPrompt(item, context = {}) {
+    const english = context.direction === "enToCz";
+    if (context.practice !== "sentences") return {
+      text: english ? item.en : item.cz,
+      label: english ? "Řekni česky" : "Řekni anglicky",
+      language: english ? "en" : "cs", available: true,
+    };
+    const available = [item.sentenceEn,item.sentenceCz].every(value => typeof value === "string" && value.trim());
+    return {
+      text: available ? (english ? item.sentenceEn : item.sentenceCz) : "Věta zatím není doplněná.",
+      label: english ? "Řekni větu česky" : "Řekni větu anglicky",
+      language: available ? (english ? "en" : "cs") : "cs", available,
+    };
+  }
+  const api = {normalize,key,select,buckets,ordered,shuffle,restoreSequence,audioRecord,studyPrompt,posLabels,levelLabels,countLabel,groupInfo};
   if (typeof module !== "undefined" && module.exports) module.exports=api;
   else root.VocabularyModel=api;
 })(globalThis);
