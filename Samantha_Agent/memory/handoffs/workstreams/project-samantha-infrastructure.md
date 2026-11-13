@@ -1,10 +1,10 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
-Dohlížitel pošty, Cockpitu/AppServeru, autosave a SSD vydaný v fb062e34.
-Účtenka f414b8d3c33e18033b65f00375a40559: push/deploy confirmed,
-plná publikační brána3760 PASS, smoke5/5; živý HTML a endpoint ověřené.
-Pravidelná služba a oznámení nejsou instalované/aktivované; vnější hlídač
-nenastavený. Další je schválení konkrétní instalace a dvě vlastní Pushcut
-notifikace. Recovery správce a Data worktree se nemigrují.
+Dohlížitel vydaný v fb062e34 a vlastní služba13.11. nainstalovaná/aktivní.
+Installed/owned/loaded=true; první scheduled kontrola09:09 UTC dokončená,
+pošta/Cockpit/AppServer/autosave ok, SSD warning pod30 GiB.
+Pushcut vypnutý; další je soukromé předání dvou nových webhooků
+SamanthaDohledProblem a SamanthaDohledObnova a fyzická přejímka na iPhonu.
+Vnější hlídač nenastavený. Recovery správce a Data worktree se nemigrují.
 <!-- SAMANTHA_CURRENT_STATUS_END -->
 
 ### Předchozí stav infrastruktury
@@ -1771,3 +1771,31 @@ shodné se zdrojem a status200 configured=false/notifications_enabled=false.
 Produkční namespace a vlastní plist neexistují; vnější hlídač nenastavený.
 returned_to_adam=false označuje portálový příznak; nativní převzetí dokončené,
 není důvodem opakování. Tento závěrečný zápis je lokální pro příští balíček.
+
+
+## 2026-11-13 10:09 CET — Pravidelný dohled nainstalovaný
+
+Hotovo: Dohlížitel běží jako vlastní dvouminutová služba. První skutečný
+automatický snímek ukázal poštu, Cockpit, App Server a autosave v pořádku;
+SSD hlásí méně než30 GiB volného místa.
+
+Rozhodnutí: Míla výslovně zadal instalaci a dvě Pushcut oznámení, poté
+potvrdil přesnou globální větu pro vlastní LaunchAgent. Nainstalovaný byl
+jen předložený manifest; sledované služby se nerestartovaly. Pushcut zůstává
+vypnutý, dokud nebudou předané dva nové vlastní webhooky.
+
+Další krok: Připojit SamanthaDohledProblem a SamanthaDohledObnova přes
+soukromé předání Copy URL; první URL čeká na potvrzení připravené schránky.
+Navrhované další kroky: Skutečné doručení/klepnutí na iPhonu a později
+nezávislý vnější dohled nad Macem.
+
+Technický důkaz: Vlastní com.miloslavfalta.samantha.agent-supervisor,
+installed/owned/loaded=true, installation_state=installed. Schválený digest
+b0f33b14b89b03131764849f8fddb9d655e8049a01de891032b703f3852020b4.
+První scheduled last_run_at2026-11-13T09:09:00.278566+00:00,
+configured=true, worker_recent=true, notifications_enabled=false;
+živý GET /api/agent-supervisor/status HTTP200. Privátní účtenka
+agent_supervisor_setup_20261113/installation_acceptance.json,
+config/state mají oprávnění0600. Žádné ostré oznámení nebylo odeslané.
+Vnější hlídač nenastavený. Provozní instalace nevyžaduje nové p+n;
+následný dokumentační zápis zůstane lokální pro příští balíček.

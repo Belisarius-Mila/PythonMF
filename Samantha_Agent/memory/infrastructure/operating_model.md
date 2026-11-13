@@ -113,3 +113,8 @@ Dohlížitel je od13.11. nasazený v Cockpitu (fb062e34, účtenka
 f414b8d3c33e18033b65f00375a40559, smoke5/5). Pravidelná služba není
 instalovaná, configured=false a oznámení vypnutá. Další je konkrétní
 schválení instalace a dvou vlastních Pushcut notifikací; vnější hlídač chybí.
+
+Aktualizace13.11.10:09 CET: vlastní dvouminutová služba dohlížitele je
+nainstalovaná/owned/loaded a první scheduled snímek ověřený. Pošta, Cockpit,
+App Server a autosave ok, SSD warning pod30 GiB. Pushcut stále vypnutý;
+čeká předání dvou nových webhooků a fyzická přejímka. P+n neopakovat.

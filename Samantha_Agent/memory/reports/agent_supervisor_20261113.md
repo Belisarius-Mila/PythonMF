@@ -70,3 +70,31 @@ shodné se zdrojem a status200 configured=false/notifications_enabled=false.
 Produkční namespace a vlastní plist neexistují; vnější hlídač nenastavený.
 returned_to_adam=false označuje portálový příznak; nativní převzetí dokončené,
 není důvodem opakování. Tento závěrečný zápis je lokální pro příští balíček.
+
+
+## 2026-11-13 10:09 CET — Pravidelný dohled nainstalovaný
+
+Hotovo: Dohlížitel běží jako vlastní dvouminutová služba. První skutečný
+automatický snímek ukázal poštu, Cockpit, App Server a autosave v pořádku;
+SSD hlásí méně než30 GiB volného místa.
+
+Rozhodnutí: Míla výslovně zadal instalaci a dvě Pushcut oznámení, poté
+potvrdil přesnou globální větu pro vlastní LaunchAgent. Nainstalovaný byl
+jen předložený manifest; sledované služby se nerestartovaly. Pushcut zůstává
+vypnutý, dokud nebudou předané dva nové vlastní webhooky.
+
+Další krok: Připojit SamanthaDohledProblem a SamanthaDohledObnova přes
+soukromé předání Copy URL; první URL čeká na potvrzení připravené schránky.
+Navrhované další kroky: Skutečné doručení/klepnutí na iPhonu a později
+nezávislý vnější dohled nad Macem.
+
+Technický důkaz: Vlastní com.miloslavfalta.samantha.agent-supervisor,
+installed/owned/loaded=true, installation_state=installed. Schválený digest
+b0f33b14b89b03131764849f8fddb9d655e8049a01de891032b703f3852020b4.
+První scheduled last_run_at2026-11-13T09:09:00.278566+00:00,
+configured=true, worker_recent=true, notifications_enabled=false;
+živý GET /api/agent-supervisor/status HTTP200. Privátní účtenka
+agent_supervisor_setup_20261113/installation_acceptance.json,
+config/state mají oprávnění0600. Žádné ostré oznámení nebylo odeslané.
+Vnější hlídač nenastavený. Provozní instalace nevyžaduje nové p+n;
+následný dokumentační zápis zůstane lokální pro příští balíček.
