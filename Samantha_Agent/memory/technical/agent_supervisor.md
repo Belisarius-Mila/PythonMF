@@ -9,8 +9,9 @@ Implementováno a 13.11. vydáno v fb062e34: pošta, Cockpit, sdílený App Serv
 P+n potvrzuje účtenka f414b8d3c33e18033b65f00375a40559; živý panel a GET200 ověřené.
 Aktuální provoz13.11.: vlastní služba je nainstalovaná, načtená a aktivní po
 přesné globální větě. Dvě vlastní Pushcut oznámení jsou připojená a zapnutá;
-první skutečné SSD varování09:32 UTC accepted1. Fyzické doručení/zvuk/odkaz
-a iPhonu a skutečné oznámení obnovy zatím nejsou potvrzené.
+první skutečné SSD varování09:32 UTC accepted1. Míla potvrdil doručení
+varování na iPhone a přístup do přehledu Servis → Provoz. Zvuk a oznámení
+obnovy zatím nejsou výslovně potvrzené; skutečná obnova dosud nenastala.
 Pravidelná služba i oznámení jsou výchozím stavem vypnuté. Vývoj nepovoluje
 nasazení, instalaci LaunchAgentu, zapnutí oznámení ani externího hlídače.
 Soví automatika, ScienceNews, recovery správce a ostatní služby se nemění.

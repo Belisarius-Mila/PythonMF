@@ -124,3 +124,9 @@ zapnutá. První skutečné SSD varování přijato API (accepted1); pošta, Coc
 App Server a autosave ok. Obnova nakonfigurovaná přesným názvem ve stejném
 účtu. Otevřené: iPhone doručení/zvuk/Default Action, skutečné oznámení obnovy
 a nezávislý vnější hlídač. P+n není potřeba opakovat.
+
+Aktualizace13.11.: Míla potvrdil iPhone doručení varování a přístup do
+přehledu Dohled nad agenty v Servis → Provoz. Automatický incident zůstal
+accepted1 bez dalšího opakování; jeden výslovný test po Dismiss má vlastní
+účtenku. Otevřené jsou místní test obnovy, skutečná obnova, zvuk a vnější
+hlídač. Žádný úklid SSD nebyl schválený.

@@ -127,3 +127,28 @@ config i hooks mají0600. Obnova je nakonfigurovaná, její HTTP přijetí ani
 fyzické doručení zatím ověřené nejsou. Vnější hlídač nenastavený.
 Zdroj formátu https://www.pushcut.io/support/notifications .
 Provozní konfigurace nevyžaduje další p+n; tento zápis je lokální pro příští balíček.
+
+
+## 2026-11-13 10:59 CET — Doručení varování a přístup do přehledu potvrzené
+
+Hotovo: Míla potvrdil doručení upozornění na iPhone a přístup do Servisu;
+našel přehled Dohled nad agenty v Provozu. Po doplnění Default Action je
+cesta do přehledu uživatelsky ověřená. Aktuální služba i oznámení běží.
+
+Rozhodnutí: Na výslovnou žádost po zavření přes Dismiss odešlo právě jedno
+nové upozornění. Má vlastní trvalou privátní testovací účtenku; původní
+incident ani jeho odeslání se nerestartovaly. Žádné další p+n či systémová změna.
+
+Další krok: Místní Test Notification u SamanthaDohledObnova a potvrzení
+doručení a otevření Servisu; potom zbývá skutečný přechod incidentu do obnovy.
+Navrhované další kroky: Nezávislý vnější dohled nad Macem. Nedostatek místa
+na SSD řešit zvlášť; žádný úklid není schválený. Zvuk nebyl výslovně potvrzený.
+
+Technický důkaz: Čerstvý scheduled snímek09:56:55 UTC, worker_recent=true,
+notifications_enabled=true, vlastní služba installed/owned/loaded=true.
+Pošta/Cockpit/AppServer/autosave ok, SSD storage_low. Automatické accepted1
+beze změny i po dalších cyklech, rejected/delivery_unknown/pending0.
+Samostatná žádost manual_problem_repeat_after_dismiss_01.json accepted,
+obsahuje rezervaci před send; není druhým automatickým incidentem.
+Privátní iphone_acceptance.json obsahuje jen redigované příznaky přejímky.
+Obnova dosud neodeslaná; vnější hlídač nenastavený. Závěrečný zápis je lokální.
