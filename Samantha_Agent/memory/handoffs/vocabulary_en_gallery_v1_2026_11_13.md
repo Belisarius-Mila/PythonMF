@@ -1,8 +1,8 @@
 Nazev: Vocabulary EN — galerie v1
 Priorita: 2
-Stav: ceka na retest
+Stav: ceka na rozhodnuti
 Pripomenout pri startu: ne
-Datum: 2026-11-13 10:53 CET
+Datum: 2026-11-13 12:52 CET
 
 Co se resilo:
 Míla schválil výchozí galerii, Téma/stručné české ovládání, sousední Další,
@@ -18,12 +18,13 @@ Co je hotove:
 - EN83 má zachovaný původní sdílený trainer; nová galerie používá vlastní zdroje.
 - 21 cílených Python testů OK, včetně 17 Node scénářů a 10 starších relevantních
   exportních kontrol. Nativní Safari desktop i úzký 2sloupcový pohled PASS.
-- Plná brána: NEZELENÁ: 3685 testů / 910,695 s, 5 SKIP; 1 chyba registru (opravena), 2 SDK startup timeouty. Následně 36 cílených kontrol: 35 OK, 1 SDK inicializace s limitem 0,5 s stále ERROR.
+- Finální plná brána PASS: 3685 testů / 566,387 s, 5 SKIP. Registry i SDK
+  testový blokátor jsou opravené. 71 cílených SDK/galerie kontrol PASS.
+- Míla přijal místní Mac galerii; zdroje 12/12 a náhledy 384/384 odpovídají
+  uloženému manifestu. Původní CSV a audio manifest mají shodné SHA-256.
 
 Co neni hotove:
-- Mílova ruční přejímka, skutečný iPhone a lidský poslech všech nahrávek.
-- Celková brána není zelená: zůstává nezměněný syntetický SDK startup timeout
-  s limitem 0,5 s. Bez změny limitů/SDK kódu; před vydáním samostatně vyřešit.
+- Skutečný iPhone a lidský poslech všech nahrávek; místní Mac UI Míla přijal 13. 11.
 - Integrace do main, push a publikace Pages nejsou součástí tohoto pokynu.
 - Slovní druhy/náročnost jsou první redakční návrh, víceznačnosti označené.
 - Pět historických MMTX snapshot auditů selhává i na původních HEAD zdrojích:
@@ -31,7 +32,9 @@ Co neni hotove:
   mapping receipt očekává 1055 položek. Jejich očekávání zůstala beze změny.
 
 Dalsi krok:
-Převzít místní první verzi s Mílou, následně samostatně rozhodnout o vydání.
+Místní v1 je ověřená a Mac UI přijaté. Další krok je samostatné rozhodnutí
+o integraci/vydání a fyzická iPhone přejímka. Před vydáním ověřit přesnou
+registrovanou vazbu Vocabulary EN na publisher; nepoužívat odhadem jiný proud.
 
 Navrhovane dalsi kroky:
 - Fyzická iPhone přejímka včetně zvuku a návratu.
@@ -51,11 +54,16 @@ Zmenene nebo relevantni soubory:
 
 Ověření a důkazy:
 - logs/vocabulary_en_gallery_targeted_final_20261113.log.
-- logs/vocabulary_en_gallery_full_gate_verified_20261113.log.
+- Historická neúspěšná brána: logs/vocabulary_en_gallery_full_gate_verified_20261113.log.
+- Finální zelená brána: logs/vocabulary_en_sdk_phase_full_gate_20261113.log;
+  SHA-256 faf515a0bd8401844afd181c862527c8d81fbf4ad8aaeeb8f308925d65ec512b.
+- data/private/vocabulary_en_sdk_phase_20261113/: zmrazené SDK zdroje,
+  shodné i po bráně; full_gate_timings.json potvrzuje nulové chyby/selhání.
 - logs/vocabulary_en_historical_audit_baseline_20261113.log.
 - logs/vocabulary_en_gallery_gate_followup_20261113.log: chyba nového řádku
   registru opravená přesunem do samostatných terminálových projektů; všechny
-  testy katalogu proudů OK. Z 36 kontrol jediný error v SDK startup fixture.
+  testy katalogu proudů OK. Tehdejší SDK startup error následně vyřešen
+  oddělením inicializace od původního testovaného RPC limitu.
 - Dočasný místní server náhledu po přejímce ukončen; postup nového spuštění
   je v GALLERY_AUTHORING.txt.
 - Ignorované data/private/vocabulary_en_gallery_v1_20261113/source_manifest_final.json:
@@ -68,3 +76,14 @@ Bezpecnost / neukladat:
 Žádný placený modelový/TTS pokus, služba, zveřejnění ani změna Willova checkoutu.
 Nekopírovat soukromá data, autosave, klíče a QA archiv do Gitu. Nový TVBCP ani
 Cockpit proud nejsou založené. Historický obrázkový handoff z 6. 9. zůstává historií.
+
+
+## 2026-11-13 — přejímka Míly a navazující SDK testová oprava
+
+Místní Mac ovládání je přijaté Mílou. Fyzický iPhone a veřejná publikace
+nejsou tímto souhlasem nahrazené. Pět historických MMTX auditů zůstává samostatně.
+Příčinou SDK chyby byla aplikace krátkého RPC limitu již na inicializaci.
+V syntetických testech oddělené fáze: standardní start 3 s, vlastní operace
+beze změny 0,5/0,6 s. Produkční zdroje beze změny, žádný retry ani živý model.
+71 cílených testů PASS / 22,124 s. Plná brána: PASS — 3685 testů / 566,387 s, 5 SKIP, 0 failures/errors.
+Kanonický SDK zápis je zároveň v handoffu/TVBCP layer-human-adam-development.

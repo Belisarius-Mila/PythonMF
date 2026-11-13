@@ -2230,3 +2230,20 @@ Tento důkaz nenahrazuje skutečný reboot/wake po upgradu.
   s pamětí a handoffem; pouhé místní zadání nezakládá nový proud v Cockpitu.
 - Ověření: po přesunu zápisu všechny testy WorkstreamCatalog prošly; další
   0,5s SDK startup timeout je samostatný výsledek, nikoli zelená celá brána.
+
+
+### 2026-11-13 — Negativní RPC deadline patří až za inicializaci testovacího klienta
+
+- Kontext: syntetické SDK testy měly 0,5–0,6 s pro úmyslně mlčící RPC, stejná
+  hodnota se omylem používala už při konstrukci CLI/SDK proxy. První handshake
+  naměřený 1,1645 s pak selhal dřív, než test vůbec poslal testovanou operaci.
+- Řešení: nejdřív dokončit inicializaci se stávajícím standardním limitem,
+  potom nastavit původní krátkou operační mez. Nezvyšovat testovanou RPC mez,
+  nepřidávat retry a neměnit produkční transport. Skutečný test selhání
+  inicializace si ponechá vlastní původní deadline.
+- Ověření: 71 cílených PASS s ResourceWarning jako chybou; zůstává jediný
+  turn/start, decline approvals, ukončení pouze vlastní proxy a původní
+  delivery_unknown. Měření/proxy byly jen proti vlastním syntetickým socketům.
+
+- Finální ověření: plná kanonická brána 3685 testů / 566,387 s, 5 SKIP, OK;
+  zmrazené SDK zdroje jsou po běhu shodné.

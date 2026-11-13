@@ -1,5 +1,21 @@
 # VocabularyEN web: obrazové kartičky pro opakování slovíček
 
+## Mílova přejímka místní galerie — 2026-11-13
+
+- 2026-11-13 12:41 CET: po odkazu na místní Mac náhled a pěti bodech přejímky Míla
+  přijal ovládání galerie a výslovně zadal pokračovat.
+- Místní uživatelská přejímka je přijatá. Fyzický iPhone a veřejná publikace
+  zůstávají samostatné; tento souhlas nepředstírá poslech všech 845 MP3.
+- Finální plná brána PASS — 3685 testů / 566,387 s, 5 SKIP, 0 failures/errors.
+  71 cílených SDK/galerie testů PASS / 22,124 s. Příčinou byl krátký RPC limit
+  chybně aplikovaný také na inicializaci. Testy nyní inicializují s původní
+  standardní 3s mezí a potom měří operaci původními 0,5–0,6 s. Produkční SDK
+  adaptér ani provoz se nemění; žádný retry ani modelová inference.
+- Finální zdroje 12/12 a náhledy 384/384 odpovídají manifestu; původní CSV
+  a audio manifest jsou shodné. Log: vocabulary_en_sdk_phase_full_gate_20261113.log.
+- Další krok: samostatně rozhodnout integraci/vydání a fyzický iPhone. Před
+  vydáním ověřit přesnou registrovanou vazbu Vocabulary EN na publisher.
+
 ## Galerie v1 — místní implementace 2026-11-13 10:53 CET
 
 - Hotová místní galerie **425 karet / 18 skupin** podle schválené přílohy.
@@ -21,13 +37,13 @@
   controlleru a 10 relevantních starších exportních kontrol. Nativní Safari:
   galerie → cat/cow/crocodile → browser Zpět na krokodýla, úzké 2sloupcové
   zobrazení se zvětšením, odhalení a spodní návrat; původní zoom/okno obnovené.
-- Plná brána: NEZELENÁ: 3685 testů / 910,695 s, 5 SKIP; 1 chyba registru (opravena), 2 SDK startup timeouty. Následně 36 cílených kontrol: 35 OK, 1 SDK inicializace s limitem 0,5 s stále ERROR.
+- Historická brána před opravou SDK (nahrazená finální zelenou výše): NEZELENÁ: 3685 testů / 910,695 s, 5 SKIP; 1 chyba registru (opravena), 2 SDK startup timeouty. Následně 36 cílených kontrol: 35 OK, 1 SDK inicializace s limitem 0,5 s stále ERROR.
 - Pět dalších starších MMTX snapshot auditů selhává také na nezměněných HEAD
   zdrojích: nová hesla v dialozích a starý počet mapování. Původní testy ani
   jejich očekávání se nepřepisovaly; samostatně řešit případný obsahový audit.
 - Aktuální handoff: `handoffs/vocabulary_en_gallery_v1_2026_11_13.md`.
   Autorský postup: `VocabularyEN/GALLERY_AUTHORING.txt`.
-- Další krok: Mílova přejímka místního návrhu a samostatné rozhodnutí o vydání.
+- Tehdejší další krok: Mílova přejímka místního návrhu (nyní přijatá) a samostatné rozhodnutí o vydání.
   Fyzický iPhone, poslech všech MP3 a publikace tím nejsou doložené. Jde o
   samostatný terminálový projekt; nový TVBCP ani proud v Cockpitu nevznikl.
 

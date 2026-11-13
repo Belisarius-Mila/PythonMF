@@ -10,12 +10,13 @@ Samostatný terminálový projekt bez pracovního proudu v Cockpitu:
 
 - **Python se Samanthou** — priorita 2, aktivní; 1.5/Codex na Linuxu Míla potvrdil. Nový třetí balíček Praktické úlohy: 7 lekcí, celkem 21. 62 testů a GUI s nezměněnou 1.5 prošly. Paměť: `projects/python_se_samanthou.md`; handoff: `handoffs/python_se_samanthou_course_package_2026_09_06.md`. Další krok: přikopírovat samostatný balíček do kurzy a restartovat. Samostatný terminálový projekt, dosud bez integrace do Cockpitu.
 
-- 2026-11-13: Vocabulary EN, samostatný terminálový projekt, priorita 2 — místní
-  galerie 425 karet / 18 skupin, trvalé UID/audio ID, 384 náhledů a přesný návrat
-  k poslední kartě. 21 cílených + 17 Node scénářů OK, nativní Safari desktop/
-  úzké zobrazení. Plná brána NEZELENÁ: 3685 testů / 910,695 s, 5 SKIP; 1 chyba registru (opravena), 2 SDK startup timeouty. Následně 36 cílených kontrol: 35 OK, 1 SDK inicializace s limitem 0,5 s stále ERROR. Další Mílova
-  přejímka, fyzický iPhone a samostatné rozhodnutí o vydání. Paměť:
-  `projects/vocabulary_en_web_cards.md`; handoff:
+- 2026-11-13: Vocabulary EN, samostatný terminálový projekt, priorita 2 — Mac UI
+  přijaté Mílou. Galerie 425 karet / 18 skupin, 384 náhledů, přesný návrat ke
+  kartě. SDK test opraven oddělením inicializace a původního RPC limitu.
+  71 cílených PASS; finální plná brána 3685 testů / 566,387 s, 5 SKIP, OK.
+  Zdrojové otisky shodné; produkční SDK se nemění. Další krok: samostatné
+  rozhodnutí o integraci/vydání s ověřenou vazbou na publisher a fyzický iPhone.
+  Paměť: `projects/vocabulary_en_web_cards.md`; handoff:
   `handoffs/vocabulary_en_gallery_v1_2026_11_13.md`. Bez nového proudu v Cockpitu.
 
 | Oblast | Priorita | Rezim | Stav | Memory soubor | Handoff | Dalsi krok |

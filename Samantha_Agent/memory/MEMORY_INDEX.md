@@ -1,4 +1,6 @@
 # Memory Index
+- `projects/vocabulary_en_web_cards.md`; `handoffs/vocabulary_en_gallery_v1_2026_11_13.md`; `handoffs/human_adam_layer_workstream_start_2026_07_20.md` - 13. 11.: Míla přijal místní Mac galerii. SDK testová oprava odděluje standardní inicializaci od původního 0,5/0,6s RPC limitu; 71 cílených PASS, plná brána PASS — 3685 testů / 566,387 s, 5 SKIP, 0 failures/errors. Jen syntetické sockety, produkční zdroje/role/služby beze změny; bez p+n.
+
 
 - `reports/human_adam_ha04_server_work_20261112.md`; `handoffs/human_adam_layer_workstream_start_2026_07_20.md`; `tvbcp/architektura_komunikace_samantha.txt`; `infrastructure/codex_reconnect_recovery.md` — 12.11.: HA-04 lokálně: trvalé ID/přijetí, serverový worker, staré send jako wait adapter, nový202 start/read/cursor/resync a recover bez opakování. Metadata bez raw reasoning/args, pevný thread/child job a původní oprávnění.325 cílených PASS včetně vlastního process crash/HTTP disconnect. Finální plná lokální brána PASS: 3635 testů / 573,186 s, 31 SKIP; finální zdroj včetně child-job ochrany a oprav registrů. Následné jediné Terra p+n schválené; request/job/účtenka v reportu. HA-05 UI a živá/fyzická přejímka dál otevřené.
 

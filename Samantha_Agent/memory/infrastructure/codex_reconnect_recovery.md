@@ -354,3 +354,34 @@ zdrojů/testů v ha06_source_receipt.json má shodné SHA-256; jejich poslední 
 předcházejí finálnímu běhu včetně opravy pořadí action inventáře. Bez dalších
 změn kódu, nového modelového tahu, zásahu do main, Willova checkoutu či služeb.
 Bezpečný manifest a otisk zeleného logu jsou v human_adam_ha06_exact_append_20261112.txt.
+
+
+### 2026-11-13 12:43 CET — Testový SDK pilot: oddělení inicializace od RPC deadline
+
+Hotovo: Místní Mac přejímku Vocabulary EN Míla přijal. Navazující testová oprava
+odstraňuje nesprávné měření CLI/SDK inicializace do krátkého limitu určeného
+pro záměrně mlčící RPC. Obchodní doručení ani oprávnění se nemění.
+
+Rozhodnutí: Míla výslovně zadal pokračovat po přejímce galerie. Oprava se
+omezuje na test_codex_sdk_socket_pilot.py: nejprve dokončit handshake s existující
+standardní 3s mezí, potom nastavit původní 0,5/0,6s limit testované operace.
+WebSocket negativní kontrola dál používá původní 1s inicializační limit.
+Žádný limit produkčního klienta, approval, ledger či retry kontrakt se neupravuje;
+SDK zůstává neadoptovaný syntetický pilot, není náhradou současného transportu.
+
+Další krok: Místní oprava je ověřená plnou zelenou branou a uzavírá se
+checkpointem tohoto zápisu. Integrace a vydání zůstávají samostatné; před
+vydáním ověřit přesnou registrovanou vazbu Vocabulary EN na publisher.
+
+Navrhované další kroky: Případné samostatné vydání již přijaté galerie a fyzická
+iPhone přejímka. Historický MMTX obsahový audit má vlastní otevřený rozsah.
+
+Technický důkaz: Tři pouze syntetická připojení měla inicializaci 1,1645 /
+0,1965 / 0,1962 s; metody pouze initialize, initialized, thread/read. 71 cílených
+testů PASS / 22,124 s s ResourceWarning jako chybou, včetně původního jediného
+turn/start a delivery_unknown bez opakování. Plná brána: PASS — 3685 testů / 566,387 s, 5 SKIP, 0 failures/errors.
+Finální log má SHA-256 faf515a0bd8401844afd181c862527c8d81fbf4ad8aaeeb8f308925d65ec512b.
+Logy vocabulary_en_sdk_phase_targeted_final_20261113.log a
+vocabulary_en_sdk_phase_full_gate_20261113.log; zdrojové otisky a měření
+v ignorovaném data/private/vocabulary_en_sdk_phase_20261113/. Bez živého
+App Serveru, modelové inference, nového vlákna, restartu, změny role či p+n.
