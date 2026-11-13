@@ -815,3 +815,28 @@ statická brána PASS. Předpoklad před převzetím: main908a6aee, originbb05bf
 profily zarovnané a žádná aktivní release úloha. Konečný výsledek autoritativně
 v privátní release účtence a závěrečném TXT v Downloads; tento zápis
 sám budoucí push ani nasazení nepotvrzuje. Nový TVBCP nevzniká.
+
+
+### 2026-11-14 00:03 CET — Oprava testovacího přípravku před vydáním
+
+Hotovo: Příčina zastaveného vydání je dohledaná. Sedm testů následných
+změn e-mailové služby selhalo při pomocném Git commitu, kterému chyběla
+syntetická identita. Doplněny stejné lokální parametry -c jako u ostatních
+commitů přípravku; produkční kód ani konfigurace Gitu se nemění.
+
+Rozhodnutí: Platí Mílův výslovný souhlas se všemi čekajícími commity včetně
+Willova908a6aee; cílem nasazení zůstává pouze Vocabulary EN GitHub Pages.
+Předchozí job d8a4ccdf718ec01252b852bf3bb7d1d7 je zachován jako attention.
+
+Další krok: Po cílených testech a statické bráně předat opravený přesný
+main registrovanému vykonavateli s novou identitou vydání.
+
+Navrhované další kroky: Dokončit Pages ověření a Mílův poslech na iPhonu.
+Bez nového TVBCP; jeho založení nebylo dohodnuté.
+
+Technický důkaz: Původní plná brána3858 testů /731,197s skončila právě
+7 chybami ve followup_install, před push. Čerstvý ls-remote potvrdil původní
+origin bb05bf8f; publikace nezačala. Původní log zachovaný v soukromém
+vocabulary_en_audio_listen_release_20261114_fixture_fix/failed_gate_20261113.log.
+Cílená sada30 testů PASS /19,618s a statická brána PASS; vlastní
+logs/vocabulary_en_release_fixture_* protokoly. Konečný provozní výsledek patří do privátní účtenky a Downloads.

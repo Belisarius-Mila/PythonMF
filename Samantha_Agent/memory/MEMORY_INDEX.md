@@ -1,3 +1,5 @@
+- `handoffs/workstreams/project-vocabulary-en.md`; `projects/vocabulary_en_web_cards.md` — 14.11.: první p+n zastavené před push sedmi chybami testovací Git identity. Přípravek opraven lokálním -c, žádný produkční zásah; po kontrolách nové přesné registrované předání celého schváleného balíčku. Původní účtenka zachovaná.
+
 # Memory Index
 - `handoffs/workstreams/project-vocabulary-en.md`; `projects/vocabulary_en_web_cards.md` — 13.11.: Míla na přesný dotaz výslovně schválil všechny commity včetně cizího908a6aee. Kandidát b5a2383a ověřený (30Python včetně34Node PASS, statická brána PASS). Celý GitHub rozsah nyní schválený; cíl vydání stále Vocabulary EN Pages, bez runtime deploy Knihovny.
 

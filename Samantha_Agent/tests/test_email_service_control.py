@@ -313,7 +313,7 @@ class ServiceControlTests(unittest.TestCase):
             path.parent.mkdir(parents=True, exist_ok=True)
             path.write_text("SYNTHETIC_FEATURE_VERSION = 1\n")
         self.git("add", "app/email")
-        self.git("commit", "-m", "synthetic follow-up support")
+        self.git("-c", "user.name=Synthetic", "-c", "user.email=synthetic@example.test", "commit", "-m", "synthetic follow-up support")
         self.prepare()
         self.install()
         return self.plan["source_head"]

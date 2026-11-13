@@ -2396,6 +2396,9 @@ s mock video-only kamerou, stop tracků a dekódováním WASM.
   či projektového Gitu. S touto env prošla celá dotčená sada30 testů.
 - Ověření: library_thumbnail_email_fixture_retry_20261113.log; kompletní
   opakovaná brána ve library_thumbnail_full_gate_verified_20261113.log.
+- Trvalá oprava14.11.: followup_install musí stejně jako ostatní pomocné
+  commity předat -c user.name=Synthetic a -c user.email=synthetic@example.test.
+  Identita jen pro původní spuštění brány nestačí serverově spuštěným testům.
 
 
 ### 2026-11-13 — Větné audio má vlastní textovou identitu a normalizaci
