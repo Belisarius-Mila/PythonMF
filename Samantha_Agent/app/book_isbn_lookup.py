@@ -71,6 +71,7 @@ def lookup_book_by_isbn(
     opener: Callable[..., Any] | None = None,
     timeout: float = DEFAULT_BOOK_ISBN_LOOKUP_TIMEOUT,
     tls_context: ssl.SSLContext | None = None,
+    enrich: bool = True,
 ) -> dict[str, Any]:
     normalized_isbn = normalize_book_isbn(isbn)
     if not normalized_isbn:
@@ -94,6 +95,8 @@ def lookup_book_by_isbn(
     except BookIsbnLookupError as exc:
         primary_error = exc
     else:
+        if not enrich:
+            return result
         try:
             open_library = _lookup_book_in_open_library(
                 normalized_isbn,
@@ -122,6 +125,33 @@ def lookup_book_by_isbn(
         if primary_error is not None and not isinstance(primary_error, BookIsbnNotFoundError):
             raise primary_error
         raise fallback_error
+
+
+def lookup_book_preview(
+    *,
+    isbn: str,
+    opener: Callable[..., Any] | None = None,
+    timeout: float = 3.0,
+    tls_context: ssl.SSLContext | None = None,
+) -> dict[str, Any]:
+    normalized_isbn = normalize_book_isbn(isbn)
+    if not normalized_isbn:
+        raise ValueError("Vyplň ISBN knihy.")
+
+    canonical_isbn = isbn10_to_isbn13(normalized_isbn) if len(normalized_isbn) == 10 else normalized_isbn
+    if not canonical_isbn.startswith(("978", "979")):
+        raise ValueError("Náhled vyžaduje ISBN knihy s prefixem 978 nebo 979.")
+
+    result = lookup_book_by_isbn(
+        isbn=normalized_isbn,
+        opener=opener,
+        timeout=timeout,
+        tls_context=tls_context,
+        enrich=False,
+    )
+    result["isbn"] = canonical_isbn
+    result["cover_url"] = f"https://covers.openlibrary.org/b/isbn/{canonical_isbn}-S.jpg?default=false"
+    return result
 
 
 def _lookup_book_in_knihovny(

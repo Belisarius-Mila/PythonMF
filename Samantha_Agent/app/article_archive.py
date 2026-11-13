@@ -157,6 +157,8 @@ class ArticleArchiveItem:
     book_location: str = ""
     book_isbn: str = ""
     book_publication_year: str = ""
+    book_record_state: str = ""
+    book_cover_url: str = ""
     read_state: str = "normal"
     read_state_label: str = "běžné"
     read_note: str = ""
@@ -184,6 +186,8 @@ class ArticleArchiveItem:
             "book_location": self.book_location,
             "book_isbn": self.book_isbn,
             "book_publication_year": self.book_publication_year,
+            "book_record_state": self.book_record_state,
+            "book_cover_url": self.book_cover_url,
             "snippet": snippet,
             "read_state": self.read_state,
             "read_state_label": self.read_state_label,
@@ -820,7 +824,7 @@ def update_article(
     if not clean_title:
         raise ValueError("Název článku nesmí být prázdný.")
     clean_text = normalize_manual_text(text)
-    if not clean_text:
+    if not clean_text and not (item.book_record_state == "basic" and category == "books"):
         raise ValueError("Text článku nesmí být prázdný.")
     text_path = resolve_archive_relative_file(archive_root, item.text_file)
     metadata_path = article_metadata_path(item, archive_root=archive_root)
@@ -853,7 +857,7 @@ def update_article(
     clean_book_publication_year = normalize_book_publication_year(
         existing_book_publication_year if book_publication_year is None else book_publication_year
     )
-    if normalized_category == "books":
+    if normalized_category == "books" and item.book_record_state != "basic":
         if not clean_book_author:
             raise ValueError("Uveď autora knihy.")
         if not clean_book_location:
@@ -867,7 +871,11 @@ def update_article(
     raw["book_author"] = clean_book_author
     raw["book_location"] = clean_book_location
     raw["book_isbn"] = clean_book_isbn
+    if clean_book_isbn != existing_book_isbn and raw.get("book_cover_url"):
+        raw["book_cover_url"] = ""
     raw["book_publication_year"] = clean_book_publication_year
+    if item.book_record_state == "basic" and clean_text and clean_book_author and clean_book_location:
+        raw["book_record_state"] = ""
     raw["text_chars"] = str(len(clean_text))
     raw["updated_at"] = (now or datetime.now(timezone.utc)).replace(microsecond=0).isoformat()
 
@@ -1916,6 +1924,10 @@ def article_item_from_raw(raw: dict[str, Any]) -> ArticleArchiveItem:
         book_location=str(raw.get("book_location", "")).strip(),
         book_isbn=str(raw.get("book_isbn", "")).strip(),
         book_publication_year=str(raw.get("book_publication_year", "")).strip(),
+        book_record_state="basic" if category == "books" and raw.get("book_record_state") == "basic" else "",
+        book_cover_url=str(raw.get("book_cover_url", "")) if re.fullmatch(
+            r"https://covers\.openlibrary\.org/b/isbn/(?:978|979)[0-9]{10}-S\.jpg\?default=false",
+            str(raw.get("book_cover_url", ""))) else "",
         read_state=read_state,
         read_state_label=READ_STATE_LABELS[read_state],
         read_note=str(raw.get("read_note", "")).strip(),

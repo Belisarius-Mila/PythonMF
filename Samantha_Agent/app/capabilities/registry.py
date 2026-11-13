@@ -12,6 +12,20 @@ from app.capabilities.models import (
 
 CAPABILITIES: tuple[CapabilityRecord, ...] = (
     CapabilityRecord(
+        capability_id="book_inventory_read", label="Preview ISBN and read missing book locations",
+        risk=RiskLevel.READ_ONLY, reads=("private book metadata", "fixed public ISBN catalogs"), writes=(),
+        tool="app.cockpit_book_inventory.inventory_lookup", audit=AuditPolicy.REDACTED,
+        notes="Local barcode decoding, public queries contain ISBN only; bounded in-process cache, no AI or book creation.",
+    ),
+    CapabilityRecord(
+        capability_id="book_inventory_save", label="Save a confirmed basic book or assign selected locations",
+        risk=RiskLevel.LOCAL_WRITE, reads=("explicit book fields and revisions",),
+        writes=("private existing book archive", "durable request identity"),
+        tool="app.cockpit_book_inventory.inventory_action", audit=AuditPolicy.REDACTED,
+        requires_confirmation=True, confirmation_policy=ConfirmationPolicy.EXACT_CURRENT_MESSAGE,
+        notes="Only explicit save/selected location buttons; repeated identities never create another copy or overwrite later edits. No deletion, AI, email or service changes.",
+    ),
+    CapabilityRecord(
         capability_id="agent_supervisor_read", label="Read cached agent supervision",
         risk=RiskLevel.READ_ONLY, reads=("bounded private supervisor snapshot",), writes=(),
         tool="app.cockpit_agent_supervisor.agent_supervisor_overview", audit=AuditPolicy.REDACTED,

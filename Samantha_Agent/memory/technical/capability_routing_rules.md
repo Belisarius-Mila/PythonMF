@@ -359,3 +359,15 @@ před POST trvalé sending, nejistota bez retry. Konfigurace je pouze soukromá.
 pošta, modelové tahy a vnější hlídač se těmito vstupy neobnovují.
 Shellové status/check/tick/service-preview jsou v registru workflow.
 Podrobně `agent_supervisor.md`.
+
+## Rychlá inventura knih —13.11.2026
+
+Čtecí capability book_inventory_read: pevné katalogy pouze podle ISBN,
+RAM cache a aktuální revize knih; /api/library/book/quick-lookup,
+/api/library/books/inventory, /api/library/book/quick-status. Žádná AI.
+book_inventory_save přes cockpit_book_inventory.inventory_action: potvrzené
+POST /api/library/book/quick a /api/library/books/locations, stabilní ID,
+rezervace před zápisem a společný archivní zámek. Status nic nevytváří ani
+neobnovuje, výslovné dokončení používá jen původní identitu. Poškozené nebo
+cizí údaje se nepřepisují; nejisté zápisy se automaticky neopakují. Kamera
+lokální; umístění až na Macu. Detaily technical/book_quick_inventory.md.

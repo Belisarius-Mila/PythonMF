@@ -758,7 +758,47 @@
           <button class="secondary" id="libraryAddUrlBtn" type="button" aria-expanded="false" aria-controls="libraryArchivePanel">Přidat z webu</button>
           <button class="secondary" id="libraryAddTextBtn" type="button" aria-expanded="false" aria-controls="libraryTextPanel">Přidat vlastní text</button>
           <button class="secondary hidden" id="libraryAddBookBtn" type="button" aria-expanded="false" aria-controls="libraryBookPanel" disabled>Přidat knihu</button>
+          <button class="primary" id="quickBookOpen" type="button" hidden disabled aria-expanded="false" aria-controls="quickBookPanel">Naskenovat / přidat ISBN</button>
         </div>
+        <section id="quickBookPanel" class="quick-book-panel" hidden aria-labelledby="quickBookHeading">
+          <div class="quick-book-toolbar"><h3 id="quickBookHeading">Rychlé přidání knihy</h3><button type="button" class="secondary" id="quickBookClose">Zavřít</button></div>
+          <p>Naskenuj ISBN, zkontroluj knihu a ulož. Umístění doplníš později na Macu.</p>
+          <div class="quick-book-toolbar"><button class="primary" type="button" id="quickBookScan">Skenovat kamerou</button><button class="secondary" type="button" id="quickBookStop" hidden>Zastavit kameru</button></div>
+          <video id="quickBookVideo" muted playsinline hidden aria-label="Náhled zadní kamery pro čtení ISBN"></video>
+          <label class="library-field">Nebo fotografie čárového kódu<input type="file" id="quickBookImage" accept="image/*" capture="environment"></label>
+          <div class="quick-book-grid">
+            <label class="library-field">ISBN<input id="quickBookISBN" type="text" inputmode="text" autocomplete="off" maxlength="40" placeholder="ISBN-10 nebo ISBN-13"></label>
+            <button class="secondary" id="quickBookLookup" type="button">Načíst knihu</button>
+          </div>
+          <div class="quick-book-preview">
+            <div><img id="quickBookCover" hidden alt="Náhled obálky knihy" referrerpolicy="no-referrer"><small id="quickBookCoverNote">Náhled obálky se doplní podle ISBN.</small></div>
+            <div class="quick-book-fields">
+              <label class="library-field">Název<input id="quickBookTitle" type="text" maxlength="500" autocomplete="off"></label>
+              <label class="library-field">Autor, pokud je známý<input id="quickBookAuthor" type="text" maxlength="300" autocomplete="off"></label>
+              <label class="library-field">Rok, pokud je známý<input id="quickBookYear" type="text" inputmode="numeric" maxlength="4" autocomplete="off"></label>
+            </div>
+          </div>
+          <div id="quickBookStatus" class="status-line" role="status" aria-live="polite">Kamera i fotografie kódu se zpracují v telefonu. Katalogům odešleme jen ISBN.</div>
+          <div id="quickBookDuplicate" class="quick-book-toolbar"></div>
+          <div class="quick-book-toolbar">
+            <button class="primary" id="quickBookSave" type="button">Uložit do knihovny</button>
+            <button class="secondary" id="quickBookRecover" type="button" hidden>Obnovit stav původního zápisu</button>
+            <button class="secondary" id="quickBookAcknowledgeConflict" type="button" hidden>Potvrdit kontrolu aktuálních umístění a vybrat znovu</button>
+            <button class="secondary" id="quickBookAcknowledgeRemoved" type="button" hidden>Rozumím, původní kniha už není v knihovně</button>
+            <button class="secondary" id="quickBookAdditional" type="button" hidden>Přidat další exemplář</button>
+            <button class="primary" id="quickBookNext" type="button" hidden>Další kniha</button>
+          </div>
+          <hr>
+          <button class="secondary" id="quickBookLocationsOpen" type="button">Doplnit umístění na Macu</button>
+          <section id="quickBookLocations" hidden aria-label="Knihy k doplnění umístění">
+            <h4>Doplnit umístění</h4>
+            <div class="quick-book-toolbar"><label class="library-field"><input id="quickBookMissingOnly" type="checkbox" checked> Jen knihy bez umístění</label><button type="button" class="secondary" id="quickBookLocationsRefresh">Obnovit přehled</button></div>
+            <div id="quickBookLocationList" class="quick-book-location-list"></div>
+            <label class="library-field">Umístění pro vybrané knihy<input type="text" id="quickBookLocationInput" maxlength="300" placeholder="Například obývák, police 2"></label>
+            <button class="primary" id="quickBookLocationsSave" type="button">Přiřadit umístění vybraným</button>
+            <div id="quickBookLocationsStatus" class="status-line" role="status"></div>
+          </section>
+        </section>
         <div id="libraryArchivePanel" class="library-add-panel hidden">
           <h3 class="library-add-title">Přidat článek z webu</h3>
           <div class="library-archive-grid">

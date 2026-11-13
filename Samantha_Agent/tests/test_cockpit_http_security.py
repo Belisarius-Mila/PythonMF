@@ -112,6 +112,27 @@ class CockpitHttpSecurityTests(unittest.TestCase):
             self.assertEqual(headers.get(name), value)
         self.assertNotIn("Python", headers.get("Server", ""))
 
+    def test_camera_wasm_and_cover_policy_is_scoped_to_main_page(self) -> None:
+        from app.cockpit import cockpit_response_security_headers
+        root = dict(cockpit_response_security_headers("/?view=books"))
+        self.assertIn("camera=(self)", root["Permissions-Policy"])
+        self.assertIn("'wasm-unsafe-eval'", root["Content-Security-Policy"])
+        self.assertNotIn("'unsafe-eval'", root["Content-Security-Policy"])
+        self.assertIn("https://covers.openlibrary.org", root["Content-Security-Policy"])
+        for path in ("/api/server/health", "/emails-to-resolve/", "/local-apps/other/", "/assets/book-scanner/3.1.6/reader.js"):
+            self.assertEqual(cockpit_response_security_headers(path), COCKPIT_SECURITY_HEADERS)
+        with running_cockpit_server() as (host, port, _logger):
+            connection = http.client.HTTPConnection(host, port, timeout=5)
+            try:
+                connection.request("GET", "/")
+                response = connection.getresponse()
+                self.assertEqual(response.status, 200)
+                self.assertEqual(response.getheader("Permissions-Policy"), root["Permissions-Policy"])
+                self.assertEqual(response.getheader("Content-Security-Policy"), root["Content-Security-Policy"])
+                response.read()
+            finally:
+                connection.close()
+
     def test_health_recovery_status_dispatch_preserves_http_json_contracts(self) -> None:
         routes = (
             ("/api/status", "cockpit_status"),

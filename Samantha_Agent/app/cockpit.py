@@ -8,6 +8,7 @@ from app.cockpit_calendar_edit import calendar_edit_action
 from app.cockpit_calendar_tasks import calendar_task_status, calendar_task_action, task_page_route
 from app.cockpit_pwa import cockpit_manifest_route
 from app.cockpit_agent_supervisor import agent_supervisor_overview
+from app.cockpit_book_inventory import BOOK_INVENTORY_GET_PATHS, book_inventory_get_route, inventory_action
 from app.cockpit_email_calendar import email_calendar_draft_action, email_calendar_draft_status
 from app.interior_ai import interior_ai_start_action, interior_ai_recover_action
 
@@ -609,6 +610,21 @@ COCKPIT_SECURITY_HEADERS: tuple[tuple[str, str], ...] = (
         "frame-src 'self'; form-action 'self'",
     ),
 )
+
+
+def cockpit_response_security_headers(path: str) -> tuple[tuple[str, str], ...]:
+    """Only the main private page needs camera, local WASM and catalog images."""
+    if urlparse(path).path != "/":
+        return COCKPIT_SECURITY_HEADERS
+    headers = []
+    for name, value in COCKPIT_SECURITY_HEADERS:
+        if name == "Permissions-Policy":
+            value = value.replace("camera=()", "camera=(self)")
+        elif name == "Content-Security-Policy":
+            value = value.replace("script-src 'self' 'unsafe-inline'", "script-src 'self' 'unsafe-inline' 'wasm-unsafe-eval'")
+            value = value.replace("img-src 'self' data: blob:", "img-src 'self' data: blob: https://covers.openlibrary.org")
+        headers.append((name, value))
+    return tuple(headers)
 
 
 class CockpitHttpError(RuntimeError):
@@ -9304,6 +9320,18 @@ COCKPIT_POST_ACTIONS: tuple[dict[str, str], ...] = (
         "test_level": "direct",
     },
     {
+        "path": "/api/library/book/quick",
+        "label": "Potvrzeně uložit základní knihu s identitou požadavku",
+        "risk": "private_write", "confirmation": "explicit_save_button",
+        "handler_name": "inventory_action", "test_level": "direct",
+    },
+    {
+        "path": "/api/library/books/locations",
+        "label": "Přiřadit umístění vybraným knihám s kontrolou jejich verzí",
+        "risk": "private_write", "confirmation": "explicit_selected_books_button",
+        "handler_name": "inventory_action", "test_level": "direct",
+    },
+    {
         "path": "/api/library/book",
         "label": "Ulozit knihu do knihovny",
         "risk": "private_write",
@@ -9771,6 +9799,8 @@ class CockpitServer:
             def do_GET(self) -> None:  # noqa: N802
                 self.validate_request_access(require_origin=False)
                 parsed = urlparse(self.path)
+                if book_inventory_get_route(parsed, self):
+                    return
                 if cockpit_manifest_route(parsed, self):
                     return
                 if task_page_route(parsed, self):
@@ -10666,6 +10696,12 @@ class CockpitServer:
                     payload = self.read_json()
                     self.respond_json(library_archive_text_action(payload))
                     return
+                if parsed.path == "/api/library/book/quick":
+                    self.respond_json(inventory_action(self.read_json(), action="create"))
+                    return
+                if parsed.path == "/api/library/books/locations":
+                    self.respond_json(inventory_action(self.read_json(), action="locations"))
+                    return
                 if parsed.path == "/api/library/book":
                     payload = self.read_json()
                     self.respond_json(library_archive_book_action(payload))
@@ -11059,7 +11095,7 @@ class CockpitServer:
 
             def end_headers(self) -> None:
                 if not getattr(self, "_security_headers_sent", False):
-                    for name, value in COCKPIT_SECURITY_HEADERS:
+                    for name, value in cockpit_response_security_headers(self.path):
                         self.send_header(name, value)
                     self._security_headers_sent = True
                 super().end_headers()

@@ -1,6 +1,20 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
+### Rychlé ISBN knihy —13.11.2026, lokálně dokončené
+
+- Schválené rychlé přidávání do existujícího archivu. Umístění až na Macu.
+- Implementované jádro/skener/UI,368 cílených integračních PASS a skutečná
+  headless komponentová QA390/1280 včetně WASM a ztracené HTTP odpovědi.
+- Finální plná brána3783 OK/31 skip,327 bezpečnostních/integračních PASS,
+  plná stránka s hlavičkami + mock video-only kamera/stop tracků/WASM PASS.
+- Připravený místní checkpoint, bez p+n/deploy a fyzické iPhone kamery.
+- Další: samostatné p+n a fyzická přejímka podle Downloads TXT, přibližně20 knih.
+- Hranice: technical/book_quick_inventory.md; reports/book_quick_inventory_20261113.md.
+- Data worktree a jiné služby se nemění; e-mailový A+C odložený na později.
+
+### ScienceNews — dosavadní doložený stav (nový živý audit se nyní neprováděl)
+
 - Aktualizováno: 2026-11-10 11:32 CET; proud `project-knowledge-library`, Data / `data/parallel-20261104`.
 - ScienceNews je skutečně aktivované: nasazený kód, role i servírovaná ochrana
   celého českého uložení byly před spuštěním ověřené. Míla výslovně zapnul službu
@@ -881,3 +895,51 @@ Hotovo: Do main převzatý závěr Data3035fc14 a jeho dosud nesloučená histor
 Důkaz: Report `data_repository_integration_20261112.md` popisuje rozsah a ověření. Původní účtenky jsou historické důkazy z10.–11.11., nikoli nový provozní audit. Žádná nová aktivace, modelový tah, push ani nasazení.
 
 Rizika a další krok: Přejímky na zařízení a procesní nejistota původního Pages publisheru zůstávají otevřené. Hotové lokální commity čekají na samostatný pokyn k publikaci. Datův vlastní worktree a rozpracovaná UI větev se nemění.
+
+
+## 2026-11-13 12:54 CET — Rychlé ISBN knihy lokálně připravené, plná brána probíhá
+
+Hotovo: Telefonní sken/ruční ISBN, náhled, potvrzené základní uložení,
+kontrola duplicity a další exemplář. Umístění se doplní až na Macu,
+jednotlivě nebo pro vybrané knihy. Původní podrobný formulář zachovaný.
+
+Rozhodnutí: Míla schválil plán a zahájení vývoje. Katalogovou část předala
+registrovaná Luna; Adam převzal přesný ověřený diff a řešil kameru/persistenci/UI.
+E-mailový test A+C odložený, nasazení Cockpitu ještě není schválené.
+
+Další krok: Dokončit plnou bránu a místní checkpoint; potom samostatné p+n
+a fyzická přejímka kamery a přibližně20 knih na iPhonu/Macu.
+Navrhované další kroky: Podle pilotu doplnit české zdroje obálek. ScienceNews
+přejímka zůstává samostatná; tato práce ji nepotvrzuje ani znovu neaktivuje.
+
+Technický důkaz:368 cílených integračních PASS, Node ochrany ručních úprav,
+trvalé identity a kamery; headless390/1280 bez přetékání, skutečný WASM EAN13,
+ztracená HTTP odpověď a reload bez druhého zápisu v izolovaném archivu.
+Podrobnosti reports/book_quick_inventory_20261113.md a
+technical/book_quick_inventory.md. Plná brána zatím není doklad PASS.
+
+
+## 2026-11-13 13:11 CET — Rychlé ISBN knihy lokálně dokončené
+
+Hotovo: Schválená první verze je připravená k samostatnému vydání. Kamera,
+lokální fotografie kódu a ruční ISBN vedou k náhledu a potvrzenému zápisu
+do Mac archivu; umístění až později. Přehled a hromadné přiřazení umístění,
+duplicity a výslovný další exemplář dokončené. Podrobný původní formulář zachovaný.
+
+Rozhodnutí: Žádná změna schváleného rozsahu. Původní plná brána byla
+překonaná opravou skutečných hlaviček; finální nový běh prošel. Kód je
+lokální, p+n ani fyzická iPhone přejímka zatím nebyly provedené.
+
+Další krok: Samostatně schválit p+n proudu project-knowledge-library;
+potom fyzická iPhone/Mac přejímka podle TXT v Downloads.
+Navrhované další kroky: Pilot přibližně20 knih a podle jeho výsledků další
+české zdroje obálek. E-mailové A+C a ScienceNews zůstávají samostatné.
+
+Technický důkaz: Finální plná brána3783 testů OK/31 skip,646,686s unit testy,
+fáze654,3s, log library_isbn_full_gate_final_20261113.log. Všech21 finálních
+zdrojových otisků beze změny.368 cílených a327 bezpečnostních/integračních
+PASS, překrývající se sady. Plné COCKPIT_HTML se skutečnými hlavičkami,
+headless390/1280, fake kamera pouze video + stop tracků, skutečný WASM,
+disconnect/reload bez druhého zápisu PASS. Soukromý živý archiv se neměnil.
+Zkouška není fyzický iPhone ani deployment. Kompletní scénář v Downloads:
+Samantha_Knihovna_ISBN_testovaci_scenar_2026-11-13.txt.

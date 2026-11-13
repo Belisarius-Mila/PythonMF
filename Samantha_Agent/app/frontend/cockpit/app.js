@@ -3674,6 +3674,7 @@ Soubor nebude trvale smazán.`);
     }
 
     function setLibraryAddMode(mode) {
+      if (window.SamanthaBookQuickUI) window.SamanthaBookQuickUI.close();
       const showUrl = mode === "url";
       const showText = mode === "text";
       const showBook = mode === "book";
@@ -3716,6 +3717,7 @@ Soubor nebude trvale smazán.`);
 
     function syncLibraryBookAddAvailability(category, readState) {
       const available = category === "books" && !readState;
+      if (window.SamanthaBookQuickUI) window.SamanthaBookQuickUI.setAvailable(available);
       if (!available && !libraryBookPanel.classList.contains("hidden")) {
         setLibraryAddMode("");
       }
@@ -4031,6 +4033,7 @@ Soubor nebude trvale smazán.`);
       const title = libraryEditTitleInput.value.trim();
       const text = libraryEditTextInput.value.trim();
       const isBook = libraryEditCategoryInput.value === "books";
+      const basicBook = isBook && currentLibrarySelectedItem && currentLibrarySelectedItem.book_record_state === "basic";
       const bookAuthor = libraryEditBookAuthorInput.value.trim();
       const bookPublicationYear = libraryEditBookPublicationYearInput.value.trim();
       const bookLocation = libraryEditBookLocationInput.value.trim();
@@ -4045,12 +4048,12 @@ Soubor nebude trvale smazán.`);
         libraryEditStatus.textContent = "Nejdřív vyber položku v knihovně.";
         return;
       }
-      if (!title || !text) {
+      if (!title || (!text && !basicBook)) {
         libraryEditStatus.textContent = "Název ani text článku nesmí být prázdný.";
         (!title ? libraryEditTitleInput : libraryEditTextInput).focus();
         return;
       }
-      if (isBook && (!bookAuthor || !bookLocation)) {
+      if (isBook && !basicBook && (!bookAuthor || !bookLocation)) {
         libraryEditStatus.textContent = "U knihy vyplň autora i umístění.";
         (!bookAuthor ? libraryEditBookAuthorInput : libraryEditBookLocationInput).focus();
         return;
@@ -5217,6 +5220,12 @@ ${confirmation}`, "");
       row.dataset.articleId = item.id || "";
       row.classList.toggle("active", currentLibrarySelectedId === item.id);
       row.classList.toggle("to-read", item.read_state === "to_read");
+      if (item.category === "books" && window.SamanthaBookQuick && window.SamanthaBookQuick.safeCover(item.book_cover_url)
+          && !(item.attachment_roles || []).includes("book_cover")) {
+        const cover = document.createElement("img");
+        cover.className = "library-catalog-cover"; cover.alt = ""; cover.loading = "lazy"; cover.referrerPolicy = "no-referrer";
+        cover.src = item.book_cover_url; cover.addEventListener("error", () => cover.remove()); row.appendChild(cover);
+      }
       const title = document.createElement("div");
       title.className = "library-title";
       title.textContent = item.one_line_title || item.title || "Bez názvu";
@@ -6866,6 +6875,9 @@ ${item.context || ""}`);
     libraryAddUrlBtn.addEventListener("click", () => toggleLibraryAddMode("url"));
     libraryAddTextBtn.addEventListener("click", () => toggleLibraryAddMode("text"));
     libraryAddBookBtn.addEventListener("click", () => toggleLibraryAddMode("book"));
+    document.addEventListener("library-inventory-opening", () => setLibraryAddMode(""));
+    document.addEventListener("library-inventory-saved", () => { if (currentLibraryCategory === "books") loadLibraryCategory("books"); });
+    document.addEventListener("library-inventory-open", event => { if (event.detail && event.detail.id) loadLibraryItem(event.detail.id, true); });
     libraryArchiveBtn.addEventListener("click", archiveLibraryUrl);
     libraryTextSaveBtn.addEventListener("click", saveLibraryText);
     libraryBookCoverInput.addEventListener("change", previewSelectedLibraryBookCover);

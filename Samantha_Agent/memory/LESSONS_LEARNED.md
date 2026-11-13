@@ -2237,3 +2237,18 @@ izolovanými testy. Ostré zapnutí a externí watchdog jsou zvlášť.
 - Problém: uživatel vidí zkopírovanou Pushcut URL na telefonu, ale pbpaste na Macu čte jiný text. Z toho nelze vyvozovat nesprávné kopírování; příčina přenosu nebyla doložená.
 - Řešení: obsah nevypsat, bezpečně validovat a oddělit schránky obou zařízení. Po soukromém získání prvního webhooku lze další oznámení v témže známém účtu adresovat přesným zadaným názvem podle dokumentovaného Pushcut formátu; není třeba další přenos secretu. Nesestavovat jiný účet ani neznámý název. Skutečné HTTP přijetí a fyzické doručení ověřit odděleně, nejistý POST neopakovat.
 - Ověření: první clipboard URL soukromě uložená, název SamanthaDohledProblem ověřený bez secret výpisu; automatický skutečný SSD incident accepted1. Obnova nakonfigurovaná, její přijetí/doručení zůstává otevřené. Report agent_supervisor_20261113.md; https://www.pushcut.io/support/notifications .
+
+
+### LL-130 — Rychlá knižní karta musí projít celým starým čtecím a editačním řetězcem
+
+- Typ: opakující se. Řešení nalezeno:13112026.
+- Problém: odstranění povinného umístění/anotace pouze ve formuláři nestačí; původní backend a editor vyžadují úplnou knihu. Ztracená HTTP odpověď po zápisu navíc může vést k duplicitě.
+- Řešení: explicitní základní typ karty v témže archivu, skutečně chybějící údaje bez falešných zástupných textů, kompatibilní přehled/editor/search. Rezervovat stabilní identitu před zápisem a po výpadku číst původní výsledek; další exemplář je samostatné výslovné rozhodnutí. Při doplňování umístění kontrolovat revize všech zvolených knih a zachovat cizí změny i po částečném selhání.
+- Ověření: skutečný process crash, chyba disku po publikaci a uprostřed batch, souběh dvou zápisů, editace/replay/vyřazení, Node a headless HTTP disconnect+reload bez druhého záznamu. Viz book_quick_inventory_20261113.md; fyzická iPhone kamera samostatně.
+
+Doplnění13112026 k LL-130: kamerový/WASM pilot ověřit i s produkčními HTTP
+hlavičkami a celou stránkou. Izolovaná komponenta bez Permissions-Policy/CSP
+může projít, zatímco skutečný dokument kameru nebo WASM zakazuje. Povolení
+omezit na potřebný hlavní dokument a pevný katalogový host, ostatní trasy
+ponechat v původní politice. Ověřeno skutečnou HTTP odpovědí a prohlížečem
+s mock video-only kamerou, stop tracků a dekódováním WASM.
