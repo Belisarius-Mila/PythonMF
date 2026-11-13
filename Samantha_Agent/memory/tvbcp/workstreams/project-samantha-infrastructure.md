@@ -1923,3 +1923,32 @@ agent_supervisor_setup_20261113/installation_acceptance.json,
 config/state mají oprávnění0600. Žádné ostré oznámení nebylo odeslané.
 Vnější hlídač nenastavený. Provozní instalace nevyžaduje nové p+n;
 následný dokumentační zápis zůstane lokální pro příští balíček.
+
+
+## 2026-11-13 10:33 CET — Pushcut připojený a zapnutý
+
+Hotovo: Pravidelný dohled má zapnutá dvě samostatná oznámení. První
+skutečné varování kvůli SSD automaticky odeslal a Pushcut ho přijal.
+Pošta, Cockpit, App Server i autosave jsou podle posledního snímku v pořádku.
+
+Rozhodnutí: Pokračování původně schválené instalace a nastavení Pushcutu.
+URL problému soukromě převzatá ze schránky, URL obnovy sestavená pro tentýž
+účet z přesného zadaného názvu SamanthaDohledObnova podle oficiálního formátu
+Pushcutu. Druhý clipboard přenos se nepodařil; nepředstíráme jeho úspěch.
+Webhooky se nevypisují a neukládají do Gitu. E-mailové nastavení se nemění.
+
+Další krok: Míla potvrdí skutečné doručení a zvuk na iPhonu; zkontroluje
+Default Action obou oznámení na URL Servisu podle připraveného TXT.
+Navrhované další kroky: Ověřit oznámení skutečné obnovy a později nezávislý
+vnější dohled nad Macem. Falešná obnova ani další testovací POST nevznikly.
+
+Technický důkaz: Živý GET status HTTP200, configured=true,
+notifications_enabled=true, worker_recent=true; scheduled09:32:01 UTC.
+Notification_counts accepted1, pending/rejected/delivery_unknown0.
+Záznam patří skutečnému storage_low incidentu; jiné služby ok. Vlastní služba
+installed/owned/loaded=true. Privátní notification_activation.json a
+notification_acceptance.json ve složce agent_supervisor_setup_20261113;
+config i hooks mají0600. Obnova je nakonfigurovaná, její HTTP přijetí ani
+fyzické doručení zatím ověřené nejsou. Vnější hlídač nenastavený.
+Zdroj formátu https://www.pushcut.io/support/notifications .
+Provozní konfigurace nevyžaduje další p+n; tento zápis je lokální pro příští balíček.

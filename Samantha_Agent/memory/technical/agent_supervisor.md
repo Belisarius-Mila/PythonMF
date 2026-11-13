@@ -8,8 +8,9 @@ Jde o deterministický dohled bez AI, nikoli o změnu architektury App Serveru.
 Implementováno a 13.11. vydáno v fb062e34: pošta, Cockpit, sdílený App Server, autosave a SSD.
 P+n potvrzuje účtenka f414b8d3c33e18033b65f00375a40559; živý panel a GET200 ověřené.
 Aktuální provoz13.11.: vlastní služba je nainstalovaná, načtená a aktivní po
-přesné globální větě; první scheduled snímek09:09 UTC ověřený. Oznámení
-jsou stále vypnutá do předání dvou nových Pushcut webhooků.
+přesné globální větě. Dvě vlastní Pushcut oznámení jsou připojená a zapnutá;
+první skutečné SSD varování09:32 UTC accepted1. Fyzické doručení/zvuk/odkaz
+a iPhonu a skutečné oznámení obnovy zatím nejsou potvrzené.
 Pravidelná služba i oznámení jsou výchozím stavem vypnuté. Vývoj nepovoluje
 nasazení, instalaci LaunchAgentu, zapnutí oznámení ani externího hlídače.
 Soví automatika, ScienceNews, recovery správce a ostatní služby se nemění.
@@ -110,3 +111,9 @@ okno, živá dlouhá práce, budoucí čas, souběžné workery, restart inciden
 nejisté odeslání, selhání persist po send, zastaralá obnova, vlastní/cizí plist,
 nejistý bootstrap bez retry, redakce a pouze čtecí HTTP. Skutečný iPhone,
 aktivovaný LaunchAgent, ostrý Pushcut a výpadek celého Macu zůstávají otevřené.
+
+Názvy aktuálních oznámení: SamanthaDohledProblem a SamanthaDohledObnova.
+Druhá URL může být při stejném účtu sestavená z již soukromě získané první
+URL a přesného názvu podle dokumentace Pushcutu; nepřenášet secret do chatu
+ani žádat znovu Copy URL kvůli rozdílným schránkám zařízení. Samotná syntaxe
+URL neprokazuje HTTP přijetí nebo fyzické doručení obnoveného oznámení.

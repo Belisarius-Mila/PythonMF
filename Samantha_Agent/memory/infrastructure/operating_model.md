@@ -118,3 +118,9 @@ Aktualizace13.11.10:09 CET: vlastní dvouminutová služba dohlížitele je
 nainstalovaná/owned/loaded a první scheduled snímek ověřený. Pošta, Cockpit,
 App Server a autosave ok, SSD warning pod30 GiB. Pushcut stále vypnutý;
 čeká předání dvou nových webhooků a fyzická přejímka. P+n neopakovat.
+
+Aktualizace13.11.10:32 CET: dva vlastní Pushcut cíle připojené, oznámení
+zapnutá. První skutečné SSD varování přijato API (accepted1); pošta, Cockpit,
+App Server a autosave ok. Obnova nakonfigurovaná přesným názvem ve stejném
+účtu. Otevřené: iPhone doručení/zvuk/Default Action, skutečné oznámení obnovy
+a nezávislý vnější hlídač. P+n není potřeba opakovat.

@@ -2229,3 +2229,11 @@ heartbeat sledované služby, skutečnou úplnost všech zdrojů a ověřeně b�
 delší práci. Současné výpadky sdružuje; před POST rezervuje doručení a
 nejistotu po pádu neopakuje. Souběh, restart a disková chyba po send ověřené
 izolovanými testy. Ostré zapnutí a externí watchdog jsou zvlášť.
+
+
+### LL-129 — Schránka Macu neprokazuje obsah schránky iPhonu
+
+- Typ: opakující se. Řešení nalezeno: 13112026.
+- Problém: uživatel vidí zkopírovanou Pushcut URL na telefonu, ale pbpaste na Macu čte jiný text. Z toho nelze vyvozovat nesprávné kopírování; příčina přenosu nebyla doložená.
+- Řešení: obsah nevypsat, bezpečně validovat a oddělit schránky obou zařízení. Po soukromém získání prvního webhooku lze další oznámení v témže známém účtu adresovat přesným zadaným názvem podle dokumentovaného Pushcut formátu; není třeba další přenos secretu. Nesestavovat jiný účet ani neznámý název. Skutečné HTTP přijetí a fyzické doručení ověřit odděleně, nejistý POST neopakovat.
+- Ověření: první clipboard URL soukromě uložená, název SamanthaDohledProblem ověřený bez secret výpisu; automatický skutečný SSD incident accepted1. Obnova nakonfigurovaná, její přijetí/doručení zůstává otevřené. Report agent_supervisor_20261113.md; https://www.pushcut.io/support/notifications .
