@@ -1,4 +1,6 @@
 # Memory Index
+- `handoffs/workstreams/project-vocabulary-en.md`; `projects/vocabulary_en_web_cards.md` — 13.11.: Míla na přesný dotaz výslovně schválil všechny commity včetně cizího908a6aee. Kandidát b5a2383a ověřený (30Python včetně34Node PASS, statická brána PASS). Celý GitHub rozsah nyní schválený; cíl vydání stále Vocabulary EN Pages, bez runtime deploy Knihovny.
+
 - `handoffs/workstreams/project-vocabulary-en.md`; `projects/vocabulary_en_web_cards.md` — 13.11.: Míla zadal p+n dvou vlastních kroků3ca7bf0d+581fbed3. Izolovaný integrační kandidát nad908a6aee; obsah i cizí soubory zachované. Před publikací nutné rozhodnout GitHub rozsah: cizí908a6aee je dosud pending. Main ani produkce se v přípravě nemění.
 
 - `handoffs/workstreams/project-vocabulary-en.md`; `projects/vocabulary_en_web_cards.md` — 13.11.: nový režim Učení/Poslech dlaždic, vždy EN, bez otevření karty a bez změny historie/bookmarku/scrollu. 30 cílených Python včetně34Node PASS, Safari desktop. Stejný soukromý náhled vydaný, vlastní checkpoint s předáním; předchozí větné audio3ca7bf0d je zachované. Pages p+n obou kroků samostatně.

@@ -4,7 +4,7 @@ Nazev: Vocabulary EN
 Pracovni proud: project-vocabulary-en
 Typ: Project
 Priorita: 2
-Stav: ceka na rozhodnuti
+Stav: rozpracovane
 Pripomenout pri startu: ne
 Datum: 2026-11-13 20:58 CET
 
@@ -25,7 +25,7 @@ Co neni hotove:
 - Samostatně schválené Pages p+n obou nových vlastních kroků.
 
 Dalsi krok:
-Připravené p+n vlastních změn; rozhodnout rozsah kvůli cizímu pending908a6aee.
+Celý rozsah výslovně schválený; předat přesný main Terře pro Pages vydání.
 
 Navrhovane dalsi kroky:
 - Fyzická iPhone přejímka nového přepínače.
@@ -350,3 +350,28 @@ Nový TVBCP nevzniká, běžící Cockpit ani Camino se tímto Pages krokem nena
 Integrační přejímka: 30 cílených Python testů včetně34Node scénářů
 PASS /23,001s; statická brána PASS. Kandidát je připravený k rozhodnutí
 o přesném GitHub rozsahu, produkce ani main zatím nezměněné.
+
+
+## 2026-11-13 23:45 CET — Schválený celý čekající GitHub balíček
+
+Hotovo: Integrační kandidát b5a2383a je ověřený, vlastní větné audio
+a poslech dlaždic i nezávislé Willovy zdroje jsou zachované.
+
+Rozhodnutí: Na přesný dotaz k cizímu pending908a6aee Míla odpověděl
+„Vezmi všechny commity prosím...“. Tím výslovně rozšířil GitHub rozsah
+a překonal předchozí omezení ponechat Willův commit stranou. Schválené
+jsou vlastní3ca7bf0d+581fbed3, integrační mergeb5a2383a a čekající908a6aee
+včetně nutného dokumentačního potvrzení tohoto rozhodnutí. Nasazovaný
+cíl zůstává project-vocabulary-en / github_pages. Nejde o nový runtime
+deploy Knihovny/Cockpitu ani změnu služby Camino.
+
+Další krok: Převzít ověřenou integraci na čistý main, zarovnat čisté profily
+a předat přesný head registrovanému submit_release(wait=True). Role
+release_executor se bere z centrálního JSON; očekávaná Terra/high.
+Navrhované další kroky: Po potvrzeném Pages vydání fyzická iPhone přejímka.
+
+Technický důkaz: Integrační30 Python testů včetně34Node PASS /23,001s,
+statická brána PASS. Předpoklad před převzetím: main908a6aee, originbb05bf8f,
+profily zarovnané a žádná aktivní release úloha. Konečný výsledek autoritativně
+v privátní release účtence a závěrečném TXT v Downloads; tento zápis
+sám budoucí push ani nasazení nepotvrzuje. Nový TVBCP nevzniká.
