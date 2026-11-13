@@ -1673,6 +1673,8 @@ class HumanAdamProfileManager:
             result["work_protocol"] = {"schema_version": 1, "server_owned": True,
                                        "start_path": "/api/human-adam/work/start",
                                        "read_path": "/api/human-adam/work",
+                                       "command_protocol": 1, "steer_path": "/api/human-adam/work/steer",
+                                       "command_read_path": "/api/human-adam/work/command",
                                        "replays_on_restart": False, "legacy_send_waits": True}
             return result
         except (AppServerError, SessionHubError, OSError, ValueError) as exc:
@@ -1732,7 +1734,8 @@ class HumanAdamProfileManager:
         with self._state_lock:
             if self._work_controller is None:
                 self._work_controller = WorkController(self.state_path.parent / "owned_work",
-                                                       completion_reader=self._work_completion)
+                                                       completion_reader=self._work_completion,
+                                                       command_scope_guard=lambda record: self.active_workstream_id == record["scope"]["workstream_id"])
             return self._work_controller
 
     def _work_completion(self, record: dict) -> dict | None:

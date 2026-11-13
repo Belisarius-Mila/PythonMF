@@ -1,119 +1,58 @@
 <!doctype html>
 <html lang="cs">
-  <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Vocabulary EN Cards</title>
-    <link rel="stylesheet" href="styles.css">
-  </head>
-  <body>
-    <main
-      class="page-shell"
-      data-json-url="../data/vocabulary-en.json"
-      data-audio-url="../data/vocabulary-en-audio.json"
-    >
-      <section class="app-frame">
-        <header class="hero-bar">
-          <div class="hero-copy">
-            <p class="eyebrow">Vnuci • VocabularyEN.csv</p>
-            <h1>Obrazkove karticky EN</h1>
-          </div>
-          <div class="hero-stats">
-            <article class="stat-card">
-              <span class="stat-label">Slovicka</span>
-              <strong class="stat-value" id="totalCount">0</strong>
-            </article>
-            <article class="stat-card">
-              <span class="stat-label">Zbyva</span>
-              <strong class="stat-value" id="remainingCount">0</strong>
-            </article>
-            <article class="stat-card">
-              <span class="stat-label">Sada</span>
-              <strong class="stat-value stat-small" id="selectionLabel">VSE</strong>
-            </article>
-          </div>
-        </header>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#f5f1e8">
+  <meta name="description" content="Obrázková angličtina: vyber si téma, poslouchej a uč se po jednom slovíčku.">
+  <title>Vocabulary EN · Slovíčka v obrázcích</title>
+  <link rel="stylesheet" href="gallery.css">
+  <script src="model.js" defer></script>
+  <script src="gallery.js" defer></script>
+</head>
+<body>
+  <main class="page-shell" data-json-url="../data/vocabulary-en.json" data-audio-url="../data/vocabulary-en-audio.json">
+    <section id="galleryView" aria-label="Přehled slovíček">
+      <header class="hero">
+        <div><p class="eyebrow">Vocabulary EN</p><h1>Slovíčka v obrázcích</h1><p class="intro">Vyber si obrázek. Uč se vlastním tempem.</p></div>
+        <div class="hero-count"><strong id="totalCount">…</strong><span id="totalLabel">slovíček ve výběru</span></div>
+      </header>
+      <div class="gallery-toolbar">
+        <label class="search-field"><span>Hledat slovíčko</span><input id="searchInput" type="search" placeholder="Anglicky nebo česky…" autocomplete="off"></label>
+        <details class="topic-picker" id="topicPicker"><summary id="topicSummary">Všechna témata</summary><fieldset id="topicFilters"><legend>Vyber jedno nebo více témat</legend></fieldset><button type="button" id="clearTopicsButton">Všechna témata</button></details>
+        <div class="label-switch"><span>Popisky obrázků</span><div class="segmented"><button type="button" data-label="en" aria-pressed="true">EN</button><button type="button" data-label="cz" aria-pressed="false">CZ</button></div></div>
+      </div>
+      <details class="layout-options"><summary>Uspořádání a další výběr</summary>
+      <div class="gallery-options">
+        <label>Výběr<select id="filterSelect"><option value="all">Všechna slovíčka</option><option value="selected">Vybraná učitelem</option><option value="hard">Těžká k procvičení</option></select></label>
+        <label>Seskupit podle<select id="groupSelect"><option value="topic">Téma</option><option value="part">Slovní druh</option><option value="level">Náročnost</option><option value="none">Bez skupin</option></select></label>
+        <label>Řadit<select id="sortSelect"><option value="recommended">Doporučeně</option><option value="en">Abecedně EN</option><option value="cz">Abecedně CZ</option></select></label>
+        <button id="sizeButton" type="button" aria-pressed="false">Větší obrázky</button>
+        <details class="more-options"><summary>Další výběr</summary><div class="extra-filters"><fieldset id="partFilters"><legend>Slovní druh nebo fráze</legend></fieldset><fieldset id="levelFilters"><legend>Náročnost · pracovní návrh</legend></fieldset><fieldset id="sourceFilters"><legend>Odkud slovíčka známe</legend></fieldset></div></details>
+      </div>
+      </details>
+      <div class="gallery-actions"><button id="continueButton" type="button" hidden>Pokračovat u posledního slovíčka</button><button id="shuffleButton" type="button">Procvičit zamíchaně</button><button id="resetButton" type="button">Zrušit filtry</button></div>
+      <nav id="sectionNav" class="section-nav" aria-label="Přejít na část přehledu"></nav>
+      <p id="galleryNotice" class="notice" role="status" aria-live="polite"></p>
+      <div id="galleryGroups" aria-busy="true"><p class="loading">Připravujeme obrázky…</p></div>
+      <div id="emptyState" class="empty-state" hidden><h2>Tady zatím žádné slovíčko není.</h2><p>Zkus jiné téma nebo zruš některý filtr.</p><button id="emptyResetButton" type="button">Zobrazit všechna slovíčka</button></div>
+      <footer id="galleryFooter" class="gallery-footer" hidden>To jsou všechna slovíčka v tomto výběru. Obrázky tě vezmou zpět k učení.</footer>
+    </section>
 
-        <section class="control-panel">
-          <div class="control-group">
-            <span class="control-label">Filtr</span>
-            <div class="chip-row">
-              <button class="chip active" data-filter="all" type="button">Vse</button>
-              <button class="chip" data-filter="selected" type="button">Jen L</button>
-              <button class="chip" data-filter="hard" type="button">Jen HT</button>
-            </div>
-          </div>
-
-          <div class="control-group">
-            <span class="control-label">Smer</span>
-            <div class="chip-row">
-              <button class="chip active" data-direction="czToEn" type="button">CZ -> EN</button>
-              <button class="chip" data-direction="enToCz" type="button">EN -> CZ</button>
-            </div>
-          </div>
-
-          <div class="control-group control-group-wide" id="wordSetGroup" hidden>
-            <div class="control-label-row">
-              <span class="control-label">Word Set</span>
-              <button class="mini-button" id="clearWordSetsButton" type="button">Vsechny</button>
-            </div>
-            <p class="control-helper" id="wordSetSummary">Vsechny okruhy</p>
-            <div class="wordset-list" id="wordSetList"></div>
-          </div>
-        </section>
-
-        <section class="card-layout">
-          <article class="picture-panel">
-            <div class="picture-wrap">
-              <img id="wordImage" alt="" hidden>
-              <div class="picture-fallback" id="pictureFallback">Bez obrazku</div>
-            </div>
-            <div class="picture-meta">
-              <span class="pill" id="orderBadge">#0</span>
-              <span class="pill pill-soft" id="imageBadge">image</span>
-            </div>
-          </article>
-
-          <article class="study-panel">
-            <div class="prompt-block">
-              <p class="prompt-label" id="promptLabel">Rekni anglicky</p>
-              <h2 class="prompt-text" id="promptText">Nacitam...</h2>
-              <button class="audio-button" id="speakPromptButton" type="button">Prehraj zadani</button>
-            </div>
-
-            <div class="answer-card hidden" id="answerCard">
-              <div class="answer-grid">
-                <div>
-                  <p class="answer-label">EN</p>
-                  <p class="answer-text" id="answerEn">-</p>
-                </div>
-                <div>
-                  <p class="answer-label">CZ</p>
-                  <p class="answer-text" id="answerCz">-</p>
-                </div>
-              </div>
-              <div class="sentence-box" id="sentenceBox">
-                <p class="sentence-label">Sentence</p>
-                <p class="sentence-text" id="sentenceEn">-</p>
-                <p class="sentence-label">SentenceT</p>
-                <p class="sentence-text" id="sentenceCz">-</p>
-              </div>
-            </div>
-
-            <div class="message-strip" id="messageStrip">
-              Klikni na "Nove slovo". Potom muzes odpoved odhalit nebo prehrat.
-            </div>
-
-            <div class="action-grid">
-              <button class="action-button action-primary" id="newWordButton" type="button">Nove slovo</button>
-              <button class="action-button" id="revealButton" type="button">Ukaz odpoved</button>
-              <button class="action-button" id="speakAnswerButton" type="button">Prehraj odpoved</button>
-            </div>
-          </article>
-        </section>
-      </section>
-    </main>
-
-    <script src="app.js"></script>
-  </body>
+    <section id="studyView" class="study-view" aria-label="Učení slovíčka" hidden>
+      <header class="study-header"><button id="backButton" type="button">← Zpět na přehled</button><p id="studyPosition" tabindex="-1"></p><div class="segmented direction-switch" aria-label="Směr procvičování"><button data-direction="czToEn" type="button" aria-pressed="true">CZ → EN</button><button data-direction="enToCz" type="button" aria-pressed="false">EN → CZ</button></div></header>
+      <div class="card-layout">
+        <div class="picture-panel"><div class="picture-wrap"><img id="wordImage" alt="" hidden><span id="pictureFallback" hidden>Obrázek se nepodařilo načíst.</span></div><button id="speakPromptButton" type="button" class="audio-button">♪ Přehrát zadání</button></div>
+        <article class="study-panel"><p id="promptLabel" class="eyebrow">Řekni anglicky</p><h2 id="promptText">…</h2>
+          <p id="messageStrip" class="study-message" role="status" aria-live="polite">Nejdřív si odpověď zkus říct.</p>
+          <button id="revealButton" type="button" class="primary">Ukázat odpověď</button>
+          <div id="answerCard" class="answer-card hidden"><dl class="answer-pair"><div><dt>Anglicky</dt><dd id="answerEn"></dd></div><div><dt>Česky</dt><dd id="answerCz"></dd></div></dl><div id="sentenceBox"><p id="sentenceEn"></p><p id="sentenceCz" class="translation"></p></div><button id="speakAnswerButton" type="button">♪ Přehrát odpověď</button></div>
+          <p id="roundStatus" class="meta"></p>
+        </article>
+      </div>
+      <nav class="study-navigation" aria-label="Další slovíčko"><button id="previousButton" type="button">← Předchozí</button><button id="nextButton" class="primary" type="button">Další →</button><button id="newRoundButton" type="button" hidden>Nové zamíchané kolo</button><button id="backBottomButton" type="button" aria-label="Zpět na přehled">Přehled</button></nav>
+    </section>
+    <noscript><p>Pro zobrazení slovíček je potřeba povolit JavaScript.</p></noscript>
+  </main>
+</body>
 </html>

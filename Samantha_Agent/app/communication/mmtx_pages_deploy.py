@@ -233,7 +233,7 @@ def publish_mmtx_pages_current_main(
     """Publish one clean GitHub-aligned main and prove the Pages deployment."""
 
     repo = Path(source_repo).resolve()
-    if smoke_path not in {"", "colors-numbers/", "to-be-to-have/"}:
+    if smoke_path not in {"", "colors-numbers/", "to-be-to-have/", "vocabulary-en/"}:
         raise MmtxPagesDeployError("Pages nemají registrovanou HTTP kontrolu aplikace.")
     if not _PUBLISH_LOCK.acquire(blocking=False):
         raise MmtxPagesDeployError("Jiné MMTX nasazení právě probíhá.")

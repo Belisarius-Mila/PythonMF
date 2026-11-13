@@ -2252,3 +2252,77 @@ může projít, zatímco skutečný dokument kameru nebo WASM zakazuje. Povolen�
 omezit na potřebný hlavní dokument a pevný katalogový host, ostatní trasy
 ponechat v původní politice. Ověřeno skutečnou HTTP odpovědí a prohlížečem
 s mock video-only kamerou, stop tracků a dekódováním WASM.
+
+### 2026-11-12 — Append do tahu nesmí zrušit ani rozvolnit důkaz původního zadání
+
+- Kontext: turn/steer může přidat další userMessage do stejného tahu; dosavadní kontrola všech user items jako jediné by po platném doplnění zneplatnila výsledek, obecné povolení více vstupů by zase obešlo guard.
+- Řešení: opt-in ledger odděluje právě jeden původní client ID od přesných command IDs rezervovaných před RPC. Původní started/final/completed důkazy zůstávají; cizí/duplicitní vstup neprojde. Samostatná trvalá command účtenka rozliší přijetí, odmítnutí a nejistotu. Ztráta ACK, journalu nebo volajícího nikdy neznamená nový start; rodičovská journal bariéra a doménový otisk přežijí kompakci.
+- Ověření: produkční client/dispatcher/Hub a HTTP fixture provedly série deseti doplnění do jediného turnu se stejným oprávněním. Selhání ukládání/HTTP/calleru, cizí ACK/generace, změna kontextu a dokončení během doplnění nevyvolaly druhý RPC ani nepřepsaly rodičovský výsledek. Žádný skutečný modelový pokus.
+
+
+### 2026-11-13 — Nový learner nesmí rozbít druhou aplikaci se sdílenými zdroji
+
+- Kontext: Vocabulary EN83 načítá původní `vocabulary-en/app.js` a `styles.css`.
+  Nová galerie EN potřebuje katalog, který data EN83 nemají.
+- Řešení: před přepsáním vstupního JS/CSS vyhledat ostatní konzumenty. Novou
+  galerii oddělit do `gallery.js`, `model.js`, `gallery.css`, původní sdílené
+  soubory zachovat. Metadata patří do autorského katalogu a překládají se podle
+  přesného významu na neměnné UID/audio ID, nikoli podle aktuálního řádku.
+- Ověření: EN83 i původní app.js/styles.css mají nulový diff; cílená přejímka
+  potvrzuje obě vstupní HTML, stabilní audio po přesunu/vložení řádku a oba
+  významy orange. Všechna starší pole 425 karet zůstala obsahově shodná.
+
+
+### 2026-11-13 — Terminálový projekt nepatří automaticky do tabulky proudů
+
+- Kontext: tabulku ACTIVE_PROJECTS spotřebovává katalog Human–Adam. Nový aktivní
+  řádek Vocabulary EN bez záznamu v WORKSTREAMS způsobil testový nesoulad.
+- Řešení: samostatný terminálový projekt evidovat v určené netabulkové sekci
+  s pamětí a handoffem; pouhé místní zadání nezakládá nový proud v Cockpitu.
+- Ověření: po přesunu zápisu všechny testy WorkstreamCatalog prošly; další
+  0,5s SDK startup timeout je samostatný výsledek, nikoli zelená celá brána.
+
+
+### 2026-11-13 — Negativní RPC deadline patří až za inicializaci testovacího klienta
+
+- Kontext: syntetické SDK testy měly 0,5–0,6 s pro úmyslně mlčící RPC, stejná
+  hodnota se omylem používala už při konstrukci CLI/SDK proxy. První handshake
+  naměřený 1,1645 s pak selhal dřív, než test vůbec poslal testovanou operaci.
+- Řešení: nejdřív dokončit inicializaci se stávajícím standardním limitem,
+  potom nastavit původní krátkou operační mez. Nezvyšovat testovanou RPC mez,
+  nepřidávat retry a neměnit produkční transport. Skutečný test selhání
+  inicializace si ponechá vlastní původní deadline.
+- Ověření: 71 cílených PASS s ResourceWarning jako chybou; zůstává jediný
+  turn/start, decline approvals, ukončení pouze vlastní proxy a původní
+  delivery_unknown. Měření/proxy byly jen proti vlastním syntetickým socketům.
+
+- Finální ověření: plná kanonická brána 3685 testů / 566,387 s, 5 SKIP, OK;
+  zmrazené SDK zdroje jsou po běhu shodné.
+
+
+### 2026-11-13 — Nový Pages projekt musí projít až skutečným publisherem
+
+- Kontext: Vocabulary EN potřebuje vlastní publikační identitu a HTTP cestu.
+  Samotná registrace v katalogu a PAGES_PROJECT_PATHS nestačí: publisher má
+  samostatný seznam povolených smoke cest. Mock celé serverové odpovědi by
+  chybějící vnitřní povolení neodhalil.
+- Řešení: zkontrolovat katalog, mapu i vnitřní whitelist; cíleně projít skutečnou
+  funkci publisheru s injektovaným runnerem a HTTP fetcherem. Ověřit přesnou
+  URL se zmrazeným SHA pro nové i již hotové nasazení. Zachovat odmítnutí
+  neregistrovaných cest před jakýmkoli příkazem.
+- Ověření: 67 cílených publikačních kontrol PASS / 6,026 s, bez GitHubu/modelu.
+  Celková brána: PASS — 3688 testů / 631,512 s, 5 SKIP, 0 failures/errors. Registrace musí být před ostrým
+  předáním načtená v serverovém runtime; místní test není veřejné vydání.
+
+
+### 2026-11-13 — Integrační worktree potřebuje skutečný kořen .venv
+
+- Kontext: celý .venv byl vlastní pomocnou symlink zkratkou na již existující
+  závislosti. Čtecí recovery status správně odmítl alias mezi rodiči sandboxu;
+  v plné bráně selhala jediná CLI kontrola ještě před jakoukoli akcí.
+- Řešení: opravit pouze prostředí integračního worktree. Vlastní zkratku
+  uchovat privátně, vytvořit skutečný místní kořen .venv a referencovat stejné
+  existující dependency bin/lib. Neměnit scheduler guard, produkční kód ani
+  jeho testová očekávání, nic neinstalovat a nespouštět službu.
+- Ověření: celý recovery scheduler 42 PASS / 0,746 s s ResourceWarning jako
+  chybou; zdroje zůstaly shodné. Nová plná brána: PASS: 3823 testů / 580,485 s, 8 SKIP; 3 SDK schema kontroly následně PASS / 0,376 s, zbývá 5 původních SKIP.

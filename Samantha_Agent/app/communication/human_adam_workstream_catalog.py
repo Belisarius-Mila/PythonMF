@@ -469,6 +469,17 @@ WORKSTREAM_CATALOG = validate_workstream_catalog(
             query_aliases=("Linux", "Linuxový počítač"),
         ),
         _record(
+            "project-vocabulary-en",
+            "Project",
+            "Vocabulary EN",
+            "active",
+            "2",
+            "Vocabulary EN",
+            capabilities=CanonicalWorkstreamCapabilities(
+                production_deployment_target="github_pages",
+            ),
+        ),
+        _record(
             "project-vocabulary-fr",
             "Project",
             "Vocabulary FR",

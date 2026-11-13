@@ -329,3 +329,102 @@ Navrhované další kroky: Případné vydání HA-05 a fyzickou Mac/iPhone/živ
 Technický důkaz: 417 cílených testů OK / 17,214 s. Skutečný HA-04 public producer, observer a wire dispatcher ověřily plán před ACK, cizí turn/generaci, commentary-only a nezměněné doručení; retence kompaktního veřejného obsahu zachová trvalý ID soubor a idempotenci. 18 Node scénářů, 11 veřejných testů, 140 skutečných browser kontrol na pěti velikostech; ustálené popředí 723–733 ms ve fixtures, aktivní mobilní/desktop karta vizuálně zkontrolovaná. Plná brána 3648 testů OK / 534,548 s, 5 SKIP. Report human_adam_ha05_live_ui_20261112.txt. První plný UI běh ukončen při přijetí HA-04; závěrečná brána ověřuje celou spojenou verzi. Žádný skutečný App Server/model/služba ani p+n.
 
 Doplnění ověření téhož kroku: po plné bráně už jen frontendová preflight blokace odeslání před připojením; 417 cílených / 17,214 s a finální statická brána OK, finální browser QA zopakované. Backend/payload/persistence proti plné bráně nezměněné.
+
+### 2026-11-12 13:45 CET — HA-06: doplnění pokynu do původní práce bez nového tahu
+
+Hotovo: V Práce / Probíhá je samostatné doplnění pokynu se stavem přijetí, odmítnutí či neověřeného doručení. Při konci tahu nebo chybě zůstává text rozepsaný. Hlavní draft, starší chat, fokus/výběr a řeč zůstávají stabilní. Deset doplnění míří do stejné práce; nevyvolá nový start.
+
+Rozhodnutí: Míla výslovně zadal HA-06. Doplnění dědí pouze původní autoritu běžícího tahu. Trvalá identita a otisk před RPC, přesný expectedTurnId a owner/scope/connection/policy guard; žádný override ani automatický retry. Klientský proof dál vyžaduje právě jeden původní user item, výjimka je jen pro přesně evidované opt-in command IDs. Starší peer bez ověřeného korelačního schématu nedostane spekulativní RPC. Nová oprávnění ani souhlas s p+n nevznikají.
+
+Další krok: HA-07 — zastavení s přesným výsledkem na další zadání.
+
+Navrhované další kroky: HA-05 je podle Mílova vzkazu nasazený. Vydání HA-06 a skutečnou modelovou/Mac/iPhone přejímku samostatně schválit. U peer>=0.167 je ještě otevřené živé ověření metody/echo client ID; starší fallback recovery zůstává striktní a může ponechat delivery_unknown. Tento stav nepovolí další start.
+
+Technický důkaz: 479 finálních cílených OK / 28,096 s; statická brána OK. 16 backendových a 4 HTTP scénáře s produkčním klientem/dispatcherem/Hubem/observerem/repository a syntetickým wire. Klientská, integrační a HTTP série deseti doplnění vždy jeden turn/start, původní sandbox/model; duplicitní příkaz, cizí tah/scope/generace, storage/caller/HTTP failure, restart, retence a závod dokončení bez replay. 15 Node scénářů a 130 skutečných browser kontrol na pěti velikostech PASS, mobilní/desktop formulář vizuálně zkontrolovaný. Plná brána PASS: 3669 testů / 585,097 s, 5 SKIP. Report human_adam_ha06_exact_append_20261112.txt; schéma/důkazní otisky mimo Git. Bez skutečné App Server relace, služby, placeného modelu nebo změny Willova checkoutu.
+
+
+### 2026-11-12 18:03 CET — HA-06: uzavření ověření a lokální předání
+
+Hotovo: Doplnění přesné běžící práce je lokálně dokončené a ověřené, připravené
+k předání z Datovy větve. HA-05 je podle Mílova dnešního vzkazu již nasazený.
+
+Rozhodnutí: Míla zadal porovnat finální zdroje s existující zelenou branou
+a dokončit vlastní handoff, TVBCP i lokální checkpoint. Produkční zdroje ani
+testy se při uzavření neměnily; shodná plná sada se neopakovala.
+
+Další krok: Předat lokální checkpoint HA-06 k samostatnému rozhodnutí o integraci
+a vydání; tento pokyn sám neschvaluje push ani nasazení HA-06.
+
+Navrhované další kroky: HA-07 pouze na další zadání. Živá metoda/echo klientského
+ID a fyzická Mac/iPhone přejímka zůstávají otevřené v samostatném rozsahu.
+Striktní fallback po výpadku dál může ponechat delivery_unknown a neopravňuje retry.
+
+Technický důkaz: Finální zelená logs/ha06_full_gate_final_20261112.log má
+3669 testů / 585,097 s, 5 SKIP a Cockpit quality gate: OK. Všech 18 finálních
+zdrojů/testů v ha06_source_receipt.json má shodné SHA-256; jejich poslední změny
+předcházejí finálnímu běhu včetně opravy pořadí action inventáře. Bez dalších
+změn kódu, nového modelového tahu, zásahu do main, Willova checkoutu či služeb.
+Bezpečný manifest a otisk zeleného logu jsou v human_adam_ha06_exact_append_20261112.txt.
+
+
+### 2026-11-13 12:43 CET — Testový SDK pilot: oddělení inicializace od RPC deadline
+
+Hotovo: Místní Mac přejímku Vocabulary EN Míla přijal. Navazující testová oprava
+odstraňuje nesprávné měření CLI/SDK inicializace do krátkého limitu určeného
+pro záměrně mlčící RPC. Obchodní doručení ani oprávnění se nemění.
+
+Rozhodnutí: Míla výslovně zadal pokračovat po přejímce galerie. Oprava se
+omezuje na test_codex_sdk_socket_pilot.py: nejprve dokončit handshake s existující
+standardní 3s mezí, potom nastavit původní 0,5/0,6s limit testované operace.
+WebSocket negativní kontrola dál používá původní 1s inicializační limit.
+Žádný limit produkčního klienta, approval, ledger či retry kontrakt se neupravuje;
+SDK zůstává neadoptovaný syntetický pilot, není náhradou současného transportu.
+
+Další krok: Místní oprava je ověřená plnou zelenou branou a uzavírá se
+checkpointem tohoto zápisu. Integrace a vydání zůstávají samostatné; před
+vydáním ověřit přesnou registrovanou vazbu Vocabulary EN na publisher.
+
+Navrhované další kroky: Případné samostatné vydání již přijaté galerie a fyzická
+iPhone přejímka. Historický MMTX obsahový audit má vlastní otevřený rozsah.
+
+Technický důkaz: Tři pouze syntetická připojení měla inicializaci 1,1645 /
+0,1965 / 0,1962 s; metody pouze initialize, initialized, thread/read. 71 cílených
+testů PASS / 22,124 s s ResourceWarning jako chybou, včetně původního jediného
+turn/start a delivery_unknown bez opakování. Plná brána: PASS — 3685 testů / 566,387 s, 5 SKIP, 0 failures/errors.
+Finální log má SHA-256 faf515a0bd8401844afd181c862527c8d81fbf4ad8aaeeb8f308925d65ec512b.
+Logy vocabulary_en_sdk_phase_targeted_final_20261113.log a
+vocabulary_en_sdk_phase_full_gate_20261113.log; zdrojové otisky a měření
+v ignorovaném data/private/vocabulary_en_sdk_phase_20261113/. Bez živého
+App Serveru, modelové inference, nového vlákna, restartu, změny role či p+n.
+
+
+### 2026-11-13 13:42 CET — Schválená místní integrace HA-06 a Vocabulary EN
+
+Hotovo: Oddělený integrační worktree obsahuje schválené Datovy f95734f5,
+9b584b95, 2f16cf66 a 9f113231 nad main9857d2e6. 77 samostatných main souborů
+a 424 samostatných Datových souborů zůstává bajtově shodných; společné registry
+zachovávají obě strany. Původní Datův worktree zůstává čistý.
+
+Rozhodnutí: Míla schválil všechny Datovy commity a Willovy nechává stranou.
+Jde o místní integraci; není povolený push, nasazení ani změna služeb či rolí.
+
+Další krok: PASS: 3823 testů / 580,485 s, 8 SKIP; 3 SDK schema kontroly následně PASS / 0,376 s, zbývá 5 původních SKIP; dokončit jeden merge checkpoint a
+bezpečné fast-forward převzetí na shodném čistém main.
+
+Navrhované další kroky: Samostatně vyjasnit případný publikační rozsah; běžný
+GitHub balíček obsahuje i Willovy commity. Živý HA-06 pilot, iPhone a hlas vět
+zůstávají samostatné.
+
+Technický důkaz: 105 integračních PASS; 42 recovery kontrol PASS po opravě
+pouze vlastního .venv prostředí. Produkční recovery kód/testy nebyly měněné.
+Zdroje integrační brány jsou zmrazené v privátním source_receipt_final.json.
+
+Finální důkaz integrace: PASS: 3823 testů / 580,485 s, 8 SKIP; 3 SDK schema kontroly následně PASS / 0,376 s, zbývá 5 původních SKIP. Všech 40 zmrazených zdrojů/testů/dat
+zůstává shodných. Produkční recovery kód ani jeho testy nebyly měněné; první
+chybu způsobilo pouze vlastní pomocné .venv. Zkratka je zachovaná privátně,
+nový místní kořen je skutečný adresář se stejnými dependency referencemi.
+Tři schématové fixture odkazy byly doplněné, jejich přesné testy prošly;
+žádný z přeskočených schema testů není vydávaný za provedený plnou branou.
+Logy: data_integration_full_gate_final_20261113.log a
+data_integration_sdk_schema_final_20261113.log. SHA-256 plné brány:
+747854656af7205e4c217866b1976b2bc67772c0862abea23f3c9a99f196e6fb

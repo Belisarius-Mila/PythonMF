@@ -1,5 +1,87 @@
 # VocabularyEN web: obrazové kartičky pro opakování slovíček
 
+## Publikační vazba a věty — 2026-11-13 12:58 CET
+
+- Míla zadal další krok. Místně doplněný projekt `project-vocabulary-en`
+  s deklarovaným cílem github_pages a cestou `vocabulary-en/`. Používá
+  stávající publisher; žádný fallback přes MMTX ani Cockpit restart.
+- Katalog má 34 proudů. Nový záznam sám neotevírá soukromé vlákno, nevytváří
+  workspace ani TVBCP. Nový kanonický handoff je
+  `handoffs/workstreams/project-vocabulary-en.md`; podrobná historie galerie
+  zůstává v původním handoffu v1. TVBCP není založený a Cockpit checkpoint
+  tohoto nového proudu zatím není připravený.
+- Každá z 425 karet má Sentence i SentenceT, přesně převzaté do sentenceEn
+  a sentenceCz. Zobrazí se po odhalení odpovědi. Existujících 845 MP3
+  obsahuje slovíčka/překlady, nikoli celé věty. Nové nahrávky nevznikly.
+- Cílené ověření: 244 testů PASS / 24,880 s, včetně 18 Node scénářů. Plná brána:
+  PASS — 3688 testů / 631,512 s, 5 SKIP, 0 failures/errors. Slovníček ani galerie se tímto krokem nemění.
+- Main má 18 jiných commitů a Data tři vlastní před tímto krokem. Cizí změny
+  zůstávají zachované; integraci musí převzít vlastník main se servisním
+  rozhodnutím. Novou vazbu musí před Pages p+n znát i serverový runtime.
+- Další krok: servisní rozhodnutí pro integraci divergentní větve podle
+  předání; pak ověřit spojený kód, načíst serverovou vazbu a samostatné p+n.
+
+## Mílova přejímka místní galerie — 2026-11-13
+
+- 2026-11-13 12:41 CET: po odkazu na místní Mac náhled a pěti bodech přejímky Míla
+  přijal ovládání galerie a výslovně zadal pokračovat.
+- Místní uživatelská přejímka je přijatá. Fyzický iPhone a veřejná publikace
+  zůstávají samostatné; tento souhlas nepředstírá poslech všech 845 MP3.
+- Finální plná brána PASS — 3685 testů / 566,387 s, 5 SKIP, 0 failures/errors.
+  71 cílených SDK/galerie testů PASS / 22,124 s. Příčinou byl krátký RPC limit
+  chybně aplikovaný také na inicializaci. Testy nyní inicializují s původní
+  standardní 3s mezí a potom měří operaci původními 0,5–0,6 s. Produkční SDK
+  adaptér ani provoz se nemění; žádný retry ani modelová inference.
+- Finální zdroje 12/12 a náhledy 384/384 odpovídají manifestu; původní CSV
+  a audio manifest jsou shodné. Log: vocabulary_en_sdk_phase_full_gate_20261113.log.
+- Další krok: samostatně rozhodnout integraci/vydání a fyzický iPhone. Před
+  vydáním ověřit přesnou registrovanou vazbu Vocabulary EN na publisher.
+
+## Galerie v1 — místní implementace 2026-11-13 10:53 CET
+
+- Hotová místní galerie **425 karet / 18 skupin** podle schválené přílohy.
+  Výchozí Téma, české ovládání, popisky EN/CZ, hledání bez diakritiky, doporučené
+  i abecední řazení; širší obrazovka až 8 sloupců, telefon výchozí 2 sloupce.
+- Více témat je NEBO, zdroj Benji/slovní druh/náročnost/výběr L nebo HT tvoří
+  průnik. Jedna karta je v galerii právě jednou. Náročnost je redakční návrh.
+- Velká karta zachovává pořadí galerie a odhalení odpovědi/věty/MP3. Předchozí,
+  Další, hranice skupin a konec výběru; náhodné kolo pouze explicitně, bez
+  opakování. Návrat nahoře i dole, Escape a browser Zpět; fokus i zvýraznění
+  poslední učené miniatury. Obnova karty i galerie zachová původní posloupnost.
+- Trvalé UID i dosavadní číselné audio ID jsou v samostatném katalogu;
+  desktopové CSV se neměnilo. Neznámý/duplicitní význam export zastaví.
+- **384 náhledů, 7,883,044 B**, delší strana nejvýše 384 px, původní média
+  zachovaná. Všechna dosavadní pole původních 425 karet obsahově beze změny.
+- Galerii vlastní gallery.js/model.js/gallery.css; původní sdílené app.js a
+  styles.css jsou beze změny kvůli Vocabulary EN83.
+- Ověření: 21 cílených Python testů, v nich 17 Node scénářů skutečného
+  controlleru a 10 relevantních starších exportních kontrol. Nativní Safari:
+  galerie → cat/cow/crocodile → browser Zpět na krokodýla, úzké 2sloupcové
+  zobrazení se zvětšením, odhalení a spodní návrat; původní zoom/okno obnovené.
+- Historická brána před opravou SDK (nahrazená finální zelenou výše): NEZELENÁ: 3685 testů / 910,695 s, 5 SKIP; 1 chyba registru (opravena), 2 SDK startup timeouty. Následně 36 cílených kontrol: 35 OK, 1 SDK inicializace s limitem 0,5 s stále ERROR.
+- Pět dalších starších MMTX snapshot auditů selhává také na nezměněných HEAD
+  zdrojích: nová hesla v dialozích a starý počet mapování. Původní testy ani
+  jejich očekávání se nepřepisovaly; samostatně řešit případný obsahový audit.
+- Aktuální handoff: `handoffs/vocabulary_en_gallery_v1_2026_11_13.md`.
+  Autorský postup: `VocabularyEN/GALLERY_AUTHORING.txt`.
+- Tehdejší další krok: Mílova přejímka místního návrhu (nyní přijatá) a samostatné rozhodnutí o vydání.
+  Fyzický iPhone, poslech všech MP3 a publikace tím nejsou doložené. Jde o
+  samostatný terminálový projekt; nový TVBCP ani proud v Cockpitu nevznikl.
+
+## Galerie v1 — schválená rozhodnutí 2026-11-13
+
+- Míla schválil výchozí galerii a základní pohled **Téma** se stručným českým
+  ovládáním. **Další** sleduje pořadí galerie; náhodně pouze po výslovné volbě.
+- Mobilní výchozí rozložení: větší dlaždice ve **dvou sloupcích**.
+- Příloha návrhu: **425 karet / 18 skupin**, schválená jako výchozí mapa.
+  Víceznačnosti se při redakci ověřují podle konkrétního významu, věty a obrázku.
+- Podrobný podklad v Downloads:
+  `Vocabulary_EN_okruhy_a_obrazova_galerie_navrh_2026-11-12.txt`; obsahuje
+  schválení z 13. 11., rozbor filtrů, všech 425 karet a přejímací podmínky.
+- Další krok: místní první verze — metadata a stabilní identita karet, galerie
+  propojená s velkou kartou a návratem na poslední učenou miniaturu.
+- Tento zápis eviduje rozhodnutí; funkční změna ani publikace v něm neproběhly.
+
 ## Stav
 
 Vznikl nový malý webový projekt na bázi `VocabularyEN/vocab_trainer_en.py`.
@@ -363,3 +445,58 @@ python3 VocabularyEN/sync_vocabulary_en_to_docs.py --preserve-extra-assets
 ## Zdroj
 
 Souhrn ChatGPT/Codex konverzace k převodu části `vocab_trainer_en.py` do jednoduché webové learner aplikace pro mentálně postižené studenty, vytvoření sync skriptu `VocabularyEN -> docs`, prvního webového MVP, zmenšení hlavičky a přípravě seznamu chybějících obrázků v `Pict/`.
+
+Doplnění ověření: povolená cesta vocabulary-en/ je zapsaná také přímo
+v publisheru mmtx_pages_deploy.py. Cílený průchod používá skutečný publisher
+s injektovaným fake runnerem a HTTP fetcherem, pro nové i již hotové nasazení.
+První rozběhnutá plná brána byla kvůli tomuto doplnění zastavená; není
+vydávána za finální výsledek. Finální log má příponu full_gate_final.
+
+Finální ověření: PASS — 3688 testů / 631,512 s, 5 SKIP, 0 failures/errors. Všech 12 zmrazených
+zdrojů/testů je po bráně shodných. Z původního galerijního manifestu se změnily
+pouze dva záměrně rozšířené testy; zbývajících 10 zdrojů, všech 384 náhledů,
+CSV a audio manifest zůstávají shodné. Přímý publisher: 67 testů PASS / 6,026 s.
+Log: vocabulary_en_publication_binding_full_gate_final_20261113.log
+SHA-256: 57d9997b4d3b863a7b7c36fac7c96ced8e7c51185b893ae31fbf5897f09292c6
+
+
+### 2026-11-13 13:22 CET — Schválená integrace čtyř Datových commitů
+
+Hotovo: Připravený integrační kandidát nad main9857d2e6 spojuje HA-06,
+galerii Vocabulary EN, testovou SDK opravu a přesnou Pages registraci.
+77 souborů změněných pouze na main zůstává bajtově shodných; konfliktní
+registry zachovávají Willovy záznamy a doplňují Datovy. Původní worktree
+Data zůstává čistý na 9f113231; integrační výsledek je připravený k převzetí
+na main. Skutečné převzetí potvrzuje závěrečná účtenka v Downloads.
+
+Rozhodnutí: Míla schválil všechny Datovy commity a určil nechat Willovy
+stranou. Integrace zachová historii main i schválené f95734f5, 9b584b95,
+2f16cf66 a 9f113231. Žádný push, nasazení nebo služba tím nejsou povolené.
+
+Další krok: Samostatně rozhodnout o případném publikačním rozsahu.
+Závěrečná účtenka uvádí merge SHA a skutečné fast-forward převzetí na main;
+Willovy čekající commity se tímto souhlasem nepublikují.
+
+Navrhované další kroky: Samostatné publikování Vocabulary EN vyžaduje vlastní
+schválené p+n a serverově načtenou novou vazbu. Fyzický iPhone a případné
+nahrávky vět zůstávají otevřené. Žádný nový Vocabulary EN TVBCP nevznikl.
+
+Technický důkaz: 105 cílených kontrol PASS / 22,338 s; plná integrační brána
+PASS: 3823 testů / 580,485 s, 8 SKIP; 3 SDK schema kontroly následně PASS / 0,376 s, zbývá 5 původních SKIP. Zachovaný originální main i Datovy soubory,
+žádný reset/rebase/force push. Privátní source manifest a porovnání 77 souborů
+jsou v data/private/vocabulary_en_integration_20261113/ integračního worktree.
+
+Rozsah souhlasu k další fázi: Míla schválil čtyři Datovy commity a požádal
+nechat Willovy stranou. Toto není souhlas s celým čekajícím GitHub balíčkem.
+Běžné p+n audituje celý rozsah origin/main..main, takže se v této etapě
+nespouští. Před zveřejněním je potřeba samostatně určit a schválit jeho rozsah.
+
+Finální důkaz integrace: PASS: 3823 testů / 580,485 s, 8 SKIP; 3 SDK schema kontroly následně PASS / 0,376 s, zbývá 5 původních SKIP. Všech 40 zmrazených zdrojů/testů/dat
+zůstává shodných. Produkční recovery kód ani jeho testy nebyly měněné; první
+chybu způsobilo pouze vlastní pomocné .venv. Zkratka je zachovaná privátně,
+nový místní kořen je skutečný adresář se stejnými dependency referencemi.
+Tři schématové fixture odkazy byly doplněné, jejich přesné testy prošly;
+žádný z přeskočených schema testů není vydávaný za provedený plnou branou.
+Logy: data_integration_full_gate_final_20261113.log a
+data_integration_sdk_schema_final_20261113.log. SHA-256 plné brány:
+747854656af7205e4c217866b1976b2bc67772c0862abea23f3c9a99f196e6fb

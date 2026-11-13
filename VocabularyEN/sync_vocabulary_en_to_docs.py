@@ -3,6 +3,8 @@ from __future__ import annotations
 
 import argparse
 import csv
+import hashlib
+import io
 import json
 import re
 import shutil
@@ -15,6 +17,47 @@ from pathlib import Path
 APP_NAME = "VocabularyEN"
 CSV_FILENAME = "VocabularyEN.csv"
 SUPPORTED_IMAGE_SUFFIXES = (".png", ".jpg", ".jpeg", ".webp", ".gif")
+
+
+def load_catalog(csv_path: Path) -> dict | None:
+    """Curated identities live outside the desktop CSV and never follow its order."""
+    path = csv_path.with_name("vocabulary_en_catalog.json")
+    if csv_path.name != CSV_FILENAME or not path.exists():
+        if csv_path.resolve() == Path(__file__).with_name(CSV_FILENAME).resolve():
+            raise ValueError("Chybí katalog trvalých identit Vocabulary EN.")
+        return None
+    catalog = json.loads(path.read_text(encoding="utf-8"))
+    if catalog.get("schemaVersion") != 1:
+        raise ValueError("Neznámá verze katalogu Vocabulary EN.")
+    groups = {group["id"] for group in catalog["groups"]}
+    ids, uids, keys = set(), set(), set()
+    for entry in catalog["entries"]:
+        if (type(entry["id"]) is not int or entry["id"] < 1 or entry["id"] in ids
+                or not re.fullmatch(r"ven-[a-z0-9-]+", entry["uid"]) or entry["uid"] in uids
+                or entry["primaryGroup"] not in groups
+                or not set(entry["topicIds"]).issubset(groups)):
+            raise ValueError("Katalog obsahuje neplatnou nebo duplicitní identitu/skupinu.")
+        ids.add(entry["id"]); uids.add(entry["uid"])
+        for match in entry["matches"]:
+            key = (match["en"].strip(), match["cz"].strip())
+            if key in keys:
+                raise ValueError("Katalog obsahuje nejednoznačný význam karty.")
+            keys.add(key)
+    return catalog
+
+
+def resolve_catalog_rows(rows: list[dict], catalog: dict) -> list[dict]:
+    lookup = {(match["en"].strip(), match["cz"].strip()): entry
+              for entry in catalog["entries"] for match in entry["matches"]}
+    result, seen = [], set()
+    for row in rows:
+        key = (row["EN"].strip(), row["CZ"].strip())
+        entry = lookup.get(key)
+        if entry is None or entry["uid"] in seen:
+            raise ValueError(f"Doplň nebo oprav katalog trvalých identit pro {key!r}; "
+                             "pořadové číslo se nikdy nepoužije jako náhradní identita.")
+        seen.add(entry["uid"]); result.append(entry)
+    return result
 FEMALE_PRONOUNS = {"she", "her", "hers", "ona", "ji", "jeji"}
 MALE_PRONOUNS = {"he", "him", "his", "on", "ho", "jeho"}
 AMBIGUOUS_PRONOUNS = {
@@ -304,16 +347,23 @@ def build_export_payload(
     output_root: Path,
     asset_dir_name: str,
     source_csv_label: str,
+    catalog: dict | None = None,
 ) -> tuple[dict[str, object], dict[Path, str]]:
     asset_dir = output_root / "assets" / asset_dir_name
     asset_map: dict[Path, str] = {}
     items: list[dict[str, object]] = []
     image_source_counter: Counter[str] = Counter()
     word_sets_seen: dict[str, str] = {}
+    catalog_entries = resolve_catalog_rows(rows, catalog) if catalog is not None else None
 
     for index, row in enumerate(rows, start=1):
         requested_stem, image_source = choose_picture_stem(row, picture_stems, synonym_image_map)
         source_path = find_picture_path(requested_stem, base_dirs)
+        if source_path is None and catalog_entries is not None:
+            # Some approved legacy illustrations exist only in the web library.
+            # Reuse that exact stem before considering a generic fallback.
+            legacy_assets = Path(__file__).resolve().parents[1] / "docs" / "assets" / asset_dir_name
+            source_path = find_picture_path(requested_stem, [legacy_assets])
         resolved_stem = requested_stem
         image_missing = False
         word_sets = split_word_sets(row.get("WS", ""))
@@ -350,6 +400,12 @@ def build_export_payload(
             "imageSource": image_source,
             "imageMissing": image_missing,
         }
+        if catalog_entries is not None:
+            entry = catalog_entries[index - 1]
+            item.update({key: entry[key] for key in (
+                "id", "uid", "primaryGroup", "topicIds", "partOfSpeech", "expressionType",
+                "difficultyBand", "difficultyStatus", "editorialStatus", "galleryOrder", "related")})
+            item["sourceIds"] = ["benji"] if any(label.casefold() == "benji" for label in word_sets) else []
         items.append(item)
 
     payload = {
@@ -369,6 +425,11 @@ def build_export_payload(
         },
         "items": items,
     }
+    if catalog is not None:
+        payload["catalog"] = {"schemaVersion": 1, "groups": catalog["groups"], "parents": catalog["parents"]}
+        payload["revision"] = hashlib.sha256(json.dumps(
+            {"items": items, "catalog": payload["catalog"]}, sort_keys=True, ensure_ascii=False,
+        ).encode()).hexdigest()[:20]
     return payload, asset_map
 
 
@@ -390,7 +451,28 @@ def write_output(
     )
 
     for source_path, dest_name in sorted(asset_map.items(), key=lambda item: item[1]):
-        shutil.copy2(source_path, asset_dir / dest_name)
+        destination = asset_dir / dest_name
+        if source_path.resolve() != destination.resolve():
+            shutil.copy2(source_path, destination)
+
+    if "catalog" in payload:
+        from PIL import Image, ImageOps
+        thumbnail_dir = output_root / "assets" / f"{asset_dir_name}-thumbs"
+        thumbnail_dir.mkdir(parents=True, exist_ok=True)
+        thumbnails = {}
+        for source, name in asset_map.items():
+            digest = hashlib.sha256(source.read_bytes()).hexdigest()[:16]
+            target = thumbnail_dir / f"{Path(name).stem}-{digest}.webp"
+            if not target.exists():
+                with Image.open(source) as original:
+                    small = ImageOps.contain(ImageOps.exif_transpose(original).convert("RGBA"), (384, 384))
+                    buffer = io.BytesIO()
+                    small.save(buffer, format="WEBP", quality=82, method=6)
+                    target.write_bytes(buffer.getvalue())
+            thumbnails[name] = target.relative_to(output_root).as_posix()
+        for item in payload["items"]:
+            if item["image"]:
+                item["thumbnail"] = thumbnails[Path(item["image"]).name]
 
     output_json_path = data_dir / json_name
     output_json_path.write_text(
@@ -465,6 +547,7 @@ def main() -> int:
         output_root=output_roots[0],
         asset_dir_name=args.asset_dir_name,
         source_csv_label=source_csv_label,
+        catalog=load_catalog(csv_path),
     )
 
     for output_root in output_roots:

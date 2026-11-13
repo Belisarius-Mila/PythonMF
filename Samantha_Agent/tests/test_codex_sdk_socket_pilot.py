@@ -155,7 +155,8 @@ class SocketPilotTests(unittest.TestCase):
 
     def test_disconnect_before_ack_stays_unknown_without_second_action(self):
         fixture = self.fixture(scenario="disconnect_before_ack")
-        proxy = self.proxy(timeout=0.6)
+        proxy = self.proxy()
+        proxy.timeout = 0.6  # Bound the tested operation, not CLI/SDK initialization.
         with self.assertRaises(Exception):
             self.start(proxy)
         with self.assertRaises(PilotContractError):
@@ -166,7 +167,11 @@ class SocketPilotTests(unittest.TestCase):
 
     def test_silent_rpc_deadline_kills_only_proxy_and_never_resends(self):
         fixture = self.fixture(scenario="silent_before_ack")
-        proxy = self.proxy(timeout=0.5)
+        proxy = self.proxy()
+        self.assertEqual(proxy.initialized.serverInfo.name, "synthetic")
+        self.assertFalse(fixture.started_turn.is_set())
+        self.assertEqual(proxy.ledger, {})
+        proxy.timeout = 0.5  # Keep the strict RPC deadline after a completed handshake.
         with self.assertRaisesRegex(PilotContractError, "delivery_unknown"):
             self.start(proxy)
         self.assertIsNotNone(proxy.process.poll())
@@ -195,7 +200,8 @@ class SocketPilotTests(unittest.TestCase):
                 directory = Path(stack.enter_context(tempfile.TemporaryDirectory(prefix="p1c-", dir="/tmp")))
                 fixture = stack.enter_context(SyntheticSocket(directory, scenario=scenario))
                 proxy = stack.enter_context(FixtureProxyClient(codex_binary=Path(CLI), fixture_directory=directory,
-                                                            cwd=ROOT, timeout=0.6))
+                                                            cwd=ROOT))
+                proxy.timeout = 0.6
                 self.start(proxy)
                 receipt = proxy.observe_delivery("fixture-message", thread_id="fixture-thread", turn_id="fixture-turn")
                 self.assertEqual(receipt.state, "delivery_unknown")
@@ -227,7 +233,8 @@ class SocketPilotTests(unittest.TestCase):
 
     def test_concurrent_duplicate_is_blocked_while_first_request_is_pending(self):
         fixture = self.fixture(scenario="silent_before_ack")
-        proxy = self.proxy(timeout=0.6)
+        proxy = self.proxy()
+        proxy.timeout = 0.6
         failures = []
 
         def first_attempt():

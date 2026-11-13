@@ -81,6 +81,19 @@ class WorkstreamCatalogTests(unittest.TestCase):
             with self.subTest(workstream_id=record.workstream_id):
                 self.assertEqual(registry_names.count(primary_name), 1)
 
+    def test_vocabulary_en_is_a_distinct_pages_project(self) -> None:
+        record = next(
+            item for item in WORKSTREAM_CATALOG
+            if item.workstream_id == "project-vocabulary-en"
+        )
+
+        self.assertEqual(record.source_names, ("Vocabulary EN",))
+        self.assertEqual(record.mode, "active")
+        self.assertEqual(record.priority, "2")
+        self.assertEqual(record.capabilities.production_deployment_target, "github_pages")
+        self.assertFalse(record.capabilities.private_archive_enabled)
+        self.assertEqual(record.capabilities.owned_private_root, "")
+
     def test_catalog_covers_every_active_registry_row_and_two_default_misc_streams(self) -> None:
         source_names = [
             source_name
@@ -123,16 +136,16 @@ class WorkstreamCatalogTests(unittest.TestCase):
             misc_ids,
             {"misc-brainstorm", "misc-unclassified-development"},
         )
-        self.assertEqual(len(WORKSTREAM_CATALOG), 33)
+        self.assertEqual(len(WORKSTREAM_CATALOG), 34)
 
     def test_catalog_has_expected_type_distribution(self) -> None:
         self.assertEqual(
             Counter(record.workstream_type for record in WORKSTREAM_CATALOG),
-            {"Project": 27, "Tool": 4, "Misc": 2},
+            {"Project": 28, "Tool": 4, "Misc": 2},
         )
         self.assertEqual(
             Counter(record.mode for record in WORKSTREAM_CATALOG),
-            {"active": 31, "paused": 2},
+            {"active": 32, "paused": 2},
         )
 
     def test_to_be_to_have_is_an_active_project_with_legacy_name_aliases(self) -> None:

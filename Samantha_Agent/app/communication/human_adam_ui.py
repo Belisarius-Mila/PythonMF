@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from app.communication.human_adam_live_ui import HUMAN_ADAM_LIVE_SCRIPT
+from app.communication.human_adam_steer_ui import HUMAN_ADAM_STEER_SCRIPT
 
 
 HUMAN_ADAM_HTML = r"""<!doctype html>
@@ -234,6 +235,9 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
     #liveWorkCard summary { cursor:pointer; font-weight:600; }
     #liveWorkCard li { overflow-wrap:anywhere; white-space:pre-wrap; }
     #liveWorkReadState,#liveWorkGap { color:var(--warn); }
+    #steerInput { display:block; width:100%; min-height:110px; max-height:35dvh; resize:vertical; margin:8px 0; padding:10px; font:inherit; border:1px solid #bac7d8; border-radius:10px; }
+    .steer-actions { display:flex; flex-wrap:wrap; gap:8px; }
+    #steerHistory { font-size:13px; }
     .service-group { margin:12px 16px; border:1px solid var(--line); border-radius:12px; overflow:hidden; }
     .service-group > summary { cursor:pointer; padding:12px; font-weight:700; }
     .service-group .live-work-status-box { margin:0 12px 12px; }
@@ -410,6 +414,16 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
           <p id="liveWorkPlanEmpty"></p><p class="meta" id="liveWorkTruncated"></p><ol id="liveWorkPlan"></ol><ul id="liveWorkComments"></ul>
         </details>
         <details><summary>Poslední zaznamenané kroky</summary><ul id="liveWorkEvents"></ul></details>
+        <details id="steerBox" hidden><summary>Doplnit pokyn do této práce</summary>
+          <form id="steerForm" autocomplete="off">
+            <label for="steerInput">Upřesnění původního pokynu</label>
+            <textarea id="steerInput" maxlength="4000" autocomplete="off" placeholder="Co má Adam během této práce zohlednit?"></textarea>
+            <div class="steer-actions"><button id="steerSendBtn" type="submit" disabled>Doplnit tento tah</button>
+              <button id="steerVerifyBtn" type="button" hidden>Pouze ověřit doplnění</button></div>
+            <p class="meta" id="steerStatus" role="status" aria-live="polite"></p>
+          </form>
+          <details><summary>Předchozí doplnění této práce</summary><ul id="steerHistory"></ul></details>
+        </details>
         <button id="liveWorkRefreshBtn" type="button">Ověřit průběh</button>
       </section>
     </section>
@@ -688,6 +702,9 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
   const workStateEvidence = document.getElementById("workStateEvidence");
   let currentWorkState = null;
   let workMonitor = null;
+  let steerMonitor = null;
+  let currentWorkProtocol = null;
+  let steerNonceCounter = 0;
   let statusReadSequence = 0;
   let workReadSequence = 0;
   let chatRenderKey = "";
@@ -2185,10 +2202,12 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
     renderSession(session, {forceScrollToEnd:forceChatEnd});
     renderWorkState(payload && payload.work_state, session);
     void loadImageCandidates({forceChatEnd});
-    if (typeof workMonitor !== "undefined" && workMonitor) workMonitor.configure(payload && payload.work_protocol, {
+    currentWorkProtocol=payload && payload.work_protocol;
+    if (typeof workMonitor !== "undefined" && workMonitor) workMonitor.configure(currentWorkProtocol, {
       workstream_id:activeWorkstreamId, thread_id:String(session && session.thread_id || ""),
       connection_generation:Number(session && session.connection_generation || 0),
     });
+    if (typeof steerMonitor !== "undefined" && steerMonitor && workMonitor) steerMonitor.configure(currentWorkProtocol,workMonitor.snapshot());
   }
 
   function renderDevelopmentBadge(semaphore) {
@@ -4069,6 +4088,7 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
   }
 
   /* HA05_LIVE_SCRIPT */
+  /* HA06_STEER_SCRIPT */
 
   async function sendOwnedWork() {
     if (!sessionConnected) { notice.textContent="Nejdřív připoj relaci. Text zůstal v editoru; nic nebylo odesláno."; return; }
@@ -4204,6 +4224,7 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
     read:(query,signal)=>api(`/api/human-adam/work?${new URLSearchParams(query)}`,{signal}),
     onChange:view=>{
       renderHumanAdamLiveCard(document,view);
+      if(steerMonitor)steerMonitor.configure(currentWorkProtocol,view);
       workStateBox.hidden=Boolean(view.enabled && (view.active || view.blocked || view.error));
       syncControls(); updateMobileStatusSummary();
     },
@@ -4228,10 +4249,28 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
       } catch (_) { notice.textContent="Konečný stav práce je uložený; odpověď se nepodařilo načíst. Použij Obnovit stav."; }
     },
   });
+  steerMonitor=createHumanAdamSteer({
+    setTimeout:(fn,delay)=>window.setTimeout(fn,delay),clearTimeout:id=>window.clearTimeout(id),
+    storage:{getItem:key=>window.sessionStorage.getItem(key),setItem:(key,value)=>window.sessionStorage.setItem(key,value)},
+    newCommandId:identity=>{
+      let nonce="";
+      try{nonce=window.crypto.randomUUID().replace(/-/g,"");}catch(_){}
+      if(!/^[a-f0-9]{32}$/.test(nonce))nonce=Date.now().toString(16).padStart(12,"0").slice(-12)
+        + (++steerNonceCounter).toString(16).padStart(4,"0").slice(-4)
+        + Array.from({length:16},()=>Math.floor(Math.random()*16).toString(16)).join("");
+      return `ha06-${identity}-${nonce}`;
+    },
+    post:(body,signal)=>api("/api/human-adam/work/steer",{method:"POST",body:JSON.stringify(body),signal}),
+    read:(query,signal)=>api(`/api/human-adam/work/command?${new URLSearchParams(query)}`,{signal}),
+    onChange:view=>renderHumanAdamSteer(document,view),
+  });
+  document.getElementById("steerInput").addEventListener("input",event=>steerMonitor.setDraft(event.target.value));
+  document.getElementById("steerForm").addEventListener("submit",event=>{event.preventDefault();void steerMonitor.submit();});
+  document.getElementById("steerVerifyBtn").addEventListener("click",()=>steerMonitor.verify());
   document.getElementById("liveWorkRefreshBtn").addEventListener("click",()=>workMonitor.refresh());
   document.addEventListener("visibilitychange",()=>workMonitor.wake());
   window.addEventListener("online",()=>workMonitor.wake());
-  window.addEventListener("pageshow",()=>workMonitor.resume());
+  window.addEventListener("pageshow",()=>{workMonitor.resume();if(steerMonitor)steerMonitor.resume();});
 
 
 
@@ -4290,6 +4329,7 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
     workMonitor.pause();
     stopResultWatch();
     stopLunaReleasePoll();
+    if(steerMonitor)steerMonitor.pause();
     stopAnswerSpeech(false);
     stopCompletionMediaSound();
   });
@@ -4360,4 +4400,4 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
 </script>
 </body>
 </html>
-""".replace("/* HA05_LIVE_SCRIPT */", HUMAN_ADAM_LIVE_SCRIPT)
+""".replace("/* HA05_LIVE_SCRIPT */", HUMAN_ADAM_LIVE_SCRIPT).replace("/* HA06_STEER_SCRIPT */", HUMAN_ADAM_STEER_SCRIPT)

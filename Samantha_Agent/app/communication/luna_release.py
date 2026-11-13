@@ -54,6 +54,7 @@ PAGES_PROJECT_PATHS = {
     "project-mmtx": "",
     "project-colors-and-numbers": "colors-numbers/",
     "project-to-be-to-have": "to-be-to-have/",
+    "project-vocabulary-en": "vocabulary-en/",
 }
 INSTRUCTIONS = (
     "Jsi vykonavatel přesně vymezeného balíčku p+n. Dostáváš pouze "

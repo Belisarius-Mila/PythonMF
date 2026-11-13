@@ -371,3 +371,16 @@ rezervace před zápisem a společný archivní zámek. Status nic nevytváří 
 neobnovuje, výslovné dokončení používá jen původní identitu. Poškozené nebo
 cizí údaje se nepřepisují; nejisté zápisy se automaticky neopakují. Kamera
 lokální; umístění až na Macu. Detaily technical/book_quick_inventory.md.
+
+### 2026-11-12 13:45 CET — HA-06 přesné doplnění a čtení účtenky
+
+- `human_adam_work_steer` → `app.communication.human_adam_work.WorkController.steer`,
+  HTTP POST `/api/human-adam/work/steer`; external_send a potvrzený přesný text.
+  Kořen i původní klient patří serveru. Povinný operation/command/expectedTurnId,
+  aktuální vlastník/projekt/scope a původní oprávnění; žádný model/sandbox override.
+- `human_adam_work_command_read` → `WorkController.read_command`,
+  GET `/api/human-adam/work/command`; read-only scoped účtenka s no-store.
+  Ověření nepřidává model, reconnect, recovery mutaci ani další odeslání.
+- Doménová účtenka rozhoduje podle command.state, nikoli jen HTTP200/ok.
+  Pending/unverified se neprovádí znovu; známé odmítnutí ponechá text jako draft.
+  Role, nové modely a publikace nejsou součástí této schopnosti.

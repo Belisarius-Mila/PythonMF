@@ -12,6 +12,7 @@ from pathlib import Path
 from typing import Callable
 
 from build_audio_casting import RATE, _atomic_write, registered_synthesizer
+from sync_vocabulary_en_to_docs import load_catalog, resolve_catalog_rows
 
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
@@ -59,13 +60,16 @@ def load_csv_rows(csv_path: Path = CSV_PATH) -> list[dict[str, object]]:
     with csv_path.open("r", encoding="utf-8-sig", newline="") as handle:
         source_rows = list(csv.DictReader(handle))
 
+    source_rows = [row for row in source_rows if (row.get("EN") or "").strip() or (row.get("CZ") or "").strip()]
+    catalog = load_catalog(csv_path)
+    entries = resolve_catalog_rows(source_rows, catalog) if catalog is not None else None
     rows: list[dict[str, object]] = []
-    for row in source_rows:
+    for index, row in enumerate(source_rows):
         en = (row.get("EN") or "").strip()
         cz = (row.get("CZ") or "").strip()
         if not en and not cz:
             continue
-        rows.append({"id": int(row["Order"]), "en": en, "cz": cz})
+        rows.append({"id": entries[index]["id"] if entries is not None else int(row["Order"]), "en": en, "cz": cz})
     return rows
 
 

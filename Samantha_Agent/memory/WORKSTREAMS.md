@@ -10,10 +10,14 @@ prace je `Project`, konkretni opakovatelny vykonavatel je `Tool`, sdilena
 infrastrukturni schopnost muze byt `Layer` a `Misc` je jen skutecne nezarazena
 prace.
 
-Katalog slucuje vsech 32 zivych oblasti z `ACTIVE_PROJECTS.md`, zachovava
-samostatne projekty Vocabulary FR a Vocabulary IT a dva dohodnute vychozi
-proudy `Misc`. Vysledkem je 33 proudu: 27 projektu, 4 tooly a 2 `Misc`.
-Rezimy `paused` a `archived` jsou validni; dva projekty jsou nyni `paused`.
+Katalog zahrnuje oblasti z `ACTIVE_PROJECTS.md`, samostatné projekty
+Vocabulary EN/FR/IT a dva dohodnuté výchozí proudy `Misc`. Výsledkem je
+34 proudů: 28 projektů, 4 tooly a 2 `Misc`. Dva projekty jsou nyní `paused`.
+
+2026-11-13: Vocabulary EN je nově registrovaný pro samostatné vydání galerie
+na existujícím Pages publisheru s přesnou cestou `vocabulary-en/`. Tato místní
+registrace neotevírá soukromé vlákno ani workspace a sama nepublikuje. TVBCP
+Vocabulary EN není založený; vytvoření vyžaduje samostatnou výslovnou dohodu.
 
 Markdown se za behu neparsuje a neni zdrojem UI, vlaken, workspace, semaforu
 ani nasazovaci logiky. Faze 4.1 sama nic soukromeho nezaklada.
@@ -67,6 +71,7 @@ nesmi smesovat s Knihovnou clanku.
 | `project-to-be-to-have` | `Project` | ToBeToHave | active | 2 | ToBeToHave; navazuje na původní názvy To Be Training a ToBeTraining. |
 | `project-camino` | `Project` | Camino | active | 1 | Camino; v0.5 + U15, C01a/C01b/C01c přijaty v prototypovém rozsahu, T022/T023 PASS na 0.3.0 (4); další je po výslovném pokynu C02a, Viewer zůstává P0 v C08c–C08f. |
 | `project-linux-workstation` | `Project` | Linux / instalace a konfigurace | active | 2 | Linux / instalace a konfigurace; samostatná konzultace instalace, konfigurace a běžné práce na linuxovém počítači. |
+| `project-vocabulary-en` | `Project` | Vocabulary EN | active | 2 | Místní a webová varianta; Pages cíl `vocabulary-en/`, galerie 425 karet včetně vět EN/CZ. |
 | `project-vocabulary-fr` | `Project` | Vocabulary FR | active | 2 | Potvrzeny kanonicky projekt v `project_capability_map.md`; lokalni a webova varianta patri dohromady. |
 | `project-vocabulary-it` | `Project` | Vocabulary IT | paused | 2 | Potvrzeny kanonicky projekt v `project_capability_map.md`; lokalni a webova varianta patri dohromady. |
 | `tool-backup-restore` | `Tool` | Záloha a obnova | active | 1 | Samantha external backup |

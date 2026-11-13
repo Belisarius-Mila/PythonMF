@@ -22,9 +22,9 @@ class WorkstreamMemoryRegistryTests(unittest.TestCase):
             for path in (binding.handoff_relative_path, binding.tvbcp_relative_path)
         ]
 
-        self.assertEqual(len(bindings), 33)
-        self.assertEqual(len(paths), 66)
-        self.assertEqual(len(set(paths)), 66)
+        self.assertEqual(len(bindings), 34)
+        self.assertEqual(len(paths), 68)
+        self.assertEqual(len(set(paths)), 68)
         self.assertTrue(
             all(path.startswith("memory/handoffs/") for path in paths[0::2])
         )
@@ -68,7 +68,7 @@ class WorkstreamMemoryRegistryTests(unittest.TestCase):
             "memory/tvbcp/workstreams/project-mmtx.md",
         )
         self.assertEqual(status["ready_count"], 0)
-        self.assertEqual(status["workstream_count"], 33)
+        self.assertEqual(status["workstream_count"], 34)
         self.assertFalse((root / "memory").exists())
 
     def test_family_calendar_uses_lazy_paths_without_materializing_documents(self) -> None:
