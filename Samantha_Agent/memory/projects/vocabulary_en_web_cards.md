@@ -500,3 +500,27 @@ Tři schématové fixture odkazy byly doplněné, jejich přesné testy prošly;
 Logy: data_integration_full_gate_final_20261113.log a
 data_integration_sdk_schema_final_20261113.log. SHA-256 plné brány:
 747854656af7205e4c217866b1976b2bc67772c0862abea23f3c9a99f196e6fb
+
+
+## 2026-11-13 15:04 CET — Oprava servisního nalezení Node před společným p+n
+
+Hotovo: Regresní test galerie používá stejné nalezení Node jako kanonická
+brána. Funguje také při minimálním launchd PATH, bez změny systémového PATH,
+instalace či přeskočení testu. Galerie a její produkční data se nemění.
+
+Rozhodnutí: Míla výslovně schválil p+n všech čekajících commitů; tím je
+překonané předchozí omezení publikace pouze na Datovy commity. Nejprve
+společný runtime, následně vlastní registrovaný Pages cíl Vocabulary EN.
+Nový TVBCP se nezakládá.
+
+Další krok: Commit opravy, zarovnání čistých profilů a nové registrované
+p+n opraveného headu. Původní nejisté vydání se neopakuje.
+Navrhované další kroky: Po potvrzeném nasazení fyzická iPhone přejímka.
+
+Technický důkaz: Původní účtenka a843815b941d7872bcc6e69bea341829 skončila
+attention; 3823 testů / 53 skip / 1 error: FileNotFoundError node v novém
+galerijním testu. Brána skončila před _push_exact_head; živý GitHub dál
+fb062e34, main498ba91a o12 commitů napřed, žádné nasazení. Oprava:29 testů
+PASS/13,193s s PATH=/usr/bin:/bin:/usr/sbin:/sbin, včetně skutečných Node
+scénářů; rychlá statická brána PASS. Původní důkaz zachovaný v
+logs/all_commits_failed_gate_20261113.log a all_commits_runtime_release_20261113.log.

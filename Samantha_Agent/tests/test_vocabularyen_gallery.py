@@ -10,6 +10,8 @@ import sys
 import tempfile
 import unittest
 
+from scripts.cockpit_quality_gate import node_binary
+
 ROOT=Path(__file__).resolve().parents[2]
 VOCAB=ROOT/'VocabularyEN'
 SPEC=importlib.util.spec_from_file_location('vocabulary_gallery_sync',VOCAB/'sync_vocabulary_en_to_docs.py')
@@ -121,7 +123,7 @@ class VocabularyGalleryTests(unittest.TestCase):
             self.assertEqual(hashlib.sha256(original.read_bytes()).hexdigest(),original_hash)
 
     def test_controller_and_selection_regressions_execute_with_node(self):
-        result=subprocess.run(['node','--test',str(Path(__file__).with_name('test_vocabularyen_selection.js'))],cwd=Path(__file__).parents[1],capture_output=True,text=True,timeout=90)
+        result=subprocess.run([node_binary(),'--test',str(Path(__file__).with_name('test_vocabularyen_selection.js'))],cwd=Path(__file__).parents[1],capture_output=True,text=True,timeout=90)
         self.assertEqual(result.returncode,0,result.stdout+'\n'+result.stderr)
 
     def test_legacy_export_and_image_rules_still_hold(self):

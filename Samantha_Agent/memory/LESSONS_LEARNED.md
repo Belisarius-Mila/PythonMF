@@ -2326,3 +2326,16 @@ s mock video-only kamerou, stop tracků a dekódováním WASM.
   jeho testová očekávání, nic neinstalovat a nespouštět službu.
 - Ověření: celý recovery scheduler 42 PASS / 0,746 s s ResourceWarning jako
   chybou; zdroje zůstaly shodné. Nová plná brána: PASS: 3823 testů / 580,485 s, 8 SKIP; 3 SDK schema kontroly následně PASS / 0,376 s, zbývá 5 původních SKIP.
+
+
+### 2026-11-13 — Node test musí používat stejné nalezení runtime jako servisní brána
+
+- Kontext: galerie spouštěla Node pod jménem `node`. Terminálové testy prošly,
+  ale servisní PATH bez /usr/local/bin způsobil FileNotFoundError a zastavil
+  plnou bránu před pushem (3823 testů,1 error).
+- Řešení: použít stávající scripts.cockpit_quality_gate.node_binary, který
+  respektuje NODE_BINARY a ověřené instalační cesty. Neměnit systémové
+  prostředí a nezaměnit chybějící runtime za přeskočený test.
+- Ověření:29 testů PASS v minimálním launchd PATH, včetně skutečných
+  Node scénářů; rychlá statická brána PASS. Původní účtenka zůstává
+  attention; nový opravený head vyžaduje novou přesnou release účtenku.
