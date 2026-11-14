@@ -1,6 +1,6 @@
 {
   "app": "VocabularyEN",
-  "generatedAt": "2026-11-13T09:42:25.014646+00:00",
+  "generatedAt": "2026-11-14T18:06:22.420979+00:00",
   "sourceCsv": "VocabularyEN/VocabularyEN.csv",
   "itemCount": 425,
   "wordSets": [
@@ -20,7 +20,8 @@
     "withSentence": 425,
     "withSentenceTranslation": 425,
     "imageSources": {
-      "direct": 361,
+      "catalog": 1,
+      "direct": 360,
       "mapping": 64
     },
     "uniqueImageFiles": 384
@@ -58,6 +59,8 @@
       "editorialStatus": "draft",
       "galleryOrder": 1,
       "related": [],
+      "active": true,
+      "teachingType": "word",
       "sourceIds": [],
       "thumbnail": "assets/vocabulary-en-thumbs/glass-84b1c8c49720132f.webp"
     },
@@ -90,6 +93,8 @@
       "editorialStatus": "draft",
       "galleryOrder": 1,
       "related": [],
+      "active": true,
+      "teachingType": "word",
       "sourceIds": [],
       "thumbnail": "assets/vocabulary-en-thumbs/airport-493bebeafe19ffd1.webp"
     },
@@ -129,6 +134,8 @@
           "kind": "related"
         }
       ],
+      "active": true,
+      "teachingType": "word",
       "sourceIds": [],
       "thumbnail": "assets/vocabulary-en-thumbs/animal-25dfa0ae37170a77.webp"
     },
@@ -163,6 +170,8 @@
       "editorialStatus": "draft",
       "galleryOrder": 2,
       "related": [],
+      "active": true,
+      "teachingType": "word",
       "sourceIds": [],
       "thumbnail": "assets/vocabulary-en-thumbs/babyelephant-93b6c261ecdf55a3.webp"
     },
@@ -197,6 +206,8 @@
       "editorialStatus": "draft",
       "galleryOrder": 3,
       "related": [],
+      "active": true,
+      "teachingType": "word",
       "sourceIds": [],
       "thumbnail": "assets/vocabulary-en-thumbs/bag-258e6830305bebcb.webp"
     },
@@ -234,6 +245,8 @@
           "kind": "opposite"
         }
       ],
+      "active": true,
+      "teachingType": "word",
       "sourceIds": [],
       "thumbnail": "assets/vocabulary-en-thumbs/big-f7708bececdc0463.webp"
     },
@@ -268,6 +281,8 @@
       "editorialStatus": "draft",
       "galleryOrder": 2,
       "related": [],
+      "active": true,
+      "teachingType": "word",
       "sourceIds": [],
       "thumbnail": "assets/vocabulary-en-thumbs/bike-ef9064521a57b156.webp"
     },
@@ -302,6 +317,8 @@
       "editorialStatus": "draft",
       "galleryOrder": 6,
       "related": [],
+      "active": true,
+      "teachingType": "word",
       "sourceIds": [],
       "thumbnail": "assets/vocabulary-en-thumbs/bird-912edbb434b99a28.webp"
     },
@@ -336,6 +353,8 @@
       "editorialStatus": "draft",
       "galleryOrder": 1,
       "related": [],
+      "active": true,
+      "teachingType": "word",
       "sourceIds": [],
       "thumbnail": "assets/vocabulary-en-thumbs/black-dcf1016aaaf92590.webp"
     },
@@ -370,6 +389,8 @@
       "editorialStatus": "draft",
       "galleryOrder": 2,
       "related": [],
+      "active": true,
+      "teachingType": "word",
       "sourceIds": [],
       "thumbnail": "assets/vocabulary-en-thumbs/blue-6f8fd12368885eff.webp"
     },
@@ -404,6 +425,8 @@
       "editorialStatus": "draft",
       "galleryOrder": 7,
       "related": [],
+      "active": true,
+      "teachingType": "word",
       "sourceIds": [],
       "thumbnail": "assets/vocabulary-en-thumbs/book-bed340b6be6ddd22.webp"
     },
@@ -438,6 +461,8 @@
       "editorialStatus": "draft",
       "galleryOrder": 8,
       "related": [],
+      "active": true,
+      "teachingType": "word",
       "sourceIds": [],
       "thumbnail": "assets/vocabulary-en-thumbs/box-f038ee290cb78b72.webp"
     },
@@ -472,6 +497,8 @@
       "editorialStatus": "draft",
       "galleryOrder": 5,
       "related": [],
+      "active": true,
+      "teachingType": "word",
       "sourceIds": [],
       "thumbnail": "assets/vocabulary-en-thumbs/breakfast-f6187fe6cee5fb7c.webp"
     },
@@ -504,6 +531,8 @@
       "editorialStatus": "draft",
       "galleryOrder": 2,
       "related": [],
+      "active": true,
+      "teachingType": "word",
       "sourceIds": [],
       "thumbnail": "assets/vocabulary-en-thumbs/british-04764231dca88401.webp"
     },
@@ -538,6 +567,8 @@
       "editorialStatus": "draft",
       "galleryOrder": 3,
       "related": [],
+      "active": true,
+      "teachingType": "word",
       "sourceIds": [],
       "thumbnail": "assets/vocabulary-en-thumbs/man-738047ee61b90a80.webp"
     },
@@ -572,6 +603,8 @@
       "editorialStatus": "draft",
       "galleryOrder": 6,
       "related": [],
+      "active": true,
+      "teachingType": "word",
       "sourceIds": [],
       "thumbnail": "assets/vocabulary-en-thumbs/burger-eee74c6f24ac88d8.webp"
     },
@@ -604,6 +637,8 @@
       "editorialStatus": "draft",
       "galleryOrder": 6,
       "related": [],
+      "active": true,
+      "teachingType": "word",
       "sourceIds": [],
       "thumbnail": "assets/vocabulary-en-thumbs/busstation-6d2225da68a1dcc3.webp"
     },
@@ -630,14 +665,16 @@
         "topic-17"
       ],
       "partOfSpeech": [
-        "phrase"
+        "interjection"
       ],
-      "expressionType": "phrase",
+      "expressionType": "word",
       "difficultyBand": 2,
       "difficultyStatus": "draft",
       "editorialStatus": "draft",
       "galleryOrder": 3,
       "related": [],
+      "active": true,
+      "teachingType": "interaction",
       "sourceIds": [],
       "thumbnail": "assets/vocabulary-en-thumbs/bye-b8946686e754c5bd.webp"
     },
@@ -670,6 +707,8 @@
       "editorialStatus": "draft",
       "galleryOrder": 5,
       "related": [],
+      "active": true,
+      "teachingType": "word",
       "sourceIds": [],
       "thumbnail": "assets/vocabulary-en-thumbs/can-a4cd6398f131937d.webp"
     },
@@ -704,6 +743,8 @@
       "editorialStatus": "draft",
       "galleryOrder": 8,
       "related": [],
+      "active": true,
+      "teachingType": "word",
       "sourceIds": [],
       "thumbnail": "assets/vocabulary-en-thumbs/cat-fc19af28c00312ba.webp"
     },
@@ -736,6 +777,8 @@
       "editorialStatus": "draft",
       "galleryOrder": 9,
       "related": [],
+      "active": true,
+      "teachingType": "word",
       "sourceIds": [],
       "thumbnail": "assets/vocabulary-en-thumbs/cinema-e3513f0d5849253a.webp"
     },
@@ -770,6 +813,8 @@
       "editorialStatus": "draft",
       "galleryOrder": 11,
       "related": [],
+      "active": true,
+      "teachingType": "word",
       "sourceIds": [],
       "thumbnail": "assets/vocabulary-en-thumbs/coffee-2953179025e46d70.webp"
     },
@@ -804,6 +849,8 @@
       "editorialStatus": "draft",
       "galleryOrder": 9,
       "related": [],
+      "active": true,
+      "teachingType": "word",
       "sourceIds": [],
       "thumbnail": "assets/vocabulary-en-thumbs/cook-65018c6d6b90e8b2.webp"
     },
@@ -838,6 +885,8 @@
       "editorialStatus": "draft",
       "galleryOrder": 9,
       "related": [],
+      "active": true,
+      "teachingType": "word",
       "sourceIds": [],
       "thumbnail": "assets/vocabulary-en-thumbs/cow-03e80f5bd8ea604c.webp"
     },
@@ -872,6 +921,8 @@
       "editorialStatus": "draft",
       "galleryOrder": 10,
       "related": [],
+      "active": true,
+      "teachingType": "word",
       "sourceIds": [],
       "thumbnail": "assets/vocabulary-en-thumbs/crocodile-98aa6dea080e0346.webp"
     },
@@ -906,6 +957,8 @@
       "editorialStatus": "draft",
       "galleryOrder": 5,
       "related": [],
+      "active": true,
+      "teachingType": "word",
       "sourceIds": [],
       "thumbnail": "assets/vocabulary-en-thumbs/dark-a375979596e594d1.webp"
     },
@@ -940,6 +993,8 @@
       "editorialStatus": "draft",
       "galleryOrder": 13,
       "related": [],
+      "active": true,
+      "teachingType": "word",
       "sourceIds": [],
       "thumbnail": "assets/vocabulary-en-thumbs/dog-cc54f38780422336.webp"
     },
@@ -972,6 +1027,8 @@
       "editorialStatus": "draft",
       "galleryOrder": 6,
       "related": [],
+      "active": true,
+      "teachingType": "word",
       "sourceIds": [],
       "thumbnail": "assets/vocabulary-en-thumbs/doctor-07fdd205175e1074.webp"
     },
@@ -1006,6 +1063,8 @@
       "editorialStatus": "draft",
       "galleryOrder": 9,
       "related": [],
+      "active": true,
+      "teachingType": "word",
       "sourceIds": [],
       "thumbnail": "assets/vocabulary-en-thumbs/document-522b54b0c2ef5e01.webp"
     },
@@ -1040,6 +1099,8 @@
       "editorialStatus": "needs-review",
       "galleryOrder": 14,
       "related": [],
+      "active": true,
+      "teachingType": "word",
       "sourceIds": [],
       "thumbnail": "assets/vocabulary-en-thumbs/drink-777899dfdd45107d.webp"
     },
@@ -1075,6 +1136,8 @@
       "editorialStatus": "needs-review",
       "galleryOrder": 11,
       "related": [],
+      "active": true,
+      "teachingType": "word",
       "sourceIds": [],
       "thumbnail": "assets/vocabulary-en-thumbs/drawing-c91d31c7383b5235.webp"
     },
@@ -1109,6 +1172,8 @@
       "editorialStatus": "draft",
       "galleryOrder": 14,
       "related": [],
+      "active": true,
+      "teachingType": "word",
       "sourceIds": [],
       "thumbnail": "assets/vocabulary-en-thumbs/duck-5dd4b2c41eb547bb.webp"
     },
@@ -1143,6 +1208,8 @@
       "editorialStatus": "draft",
       "galleryOrder": 16,
       "related": [],
+      "active": true,
+      "teachingType": "word",
       "sourceIds": [],
       "thumbnail": "assets/vocabulary-en-thumbs/elephant-955170b9c06e03bf.webp"
     },
@@ -1175,6 +1242,8 @@
       "editorialStatus": "draft",
       "galleryOrder": 12,
       "related": [],
+      "active": true,
+      "teachingType": "word",
       "sourceIds": [],
       "thumbnail": "assets/vocabulary-en-thumbs/english-59bf1c67367ab289.webp"
     },
@@ -1201,7 +1270,7 @@
         "topic-17"
       ],
       "partOfSpeech": [
-        "phrase"
+        "verb"
       ],
       "expressionType": "phrase",
       "difficultyBand": 2,
@@ -1209,6 +1278,8 @@
       "editorialStatus": "draft",
       "galleryOrder": 6,
       "related": [],
+      "active": true,
+      "teachingType": "interaction",
       "sourceIds": [],
       "thumbnail": "assets/vocabulary-en-thumbs/excuseme-da16535e9e0ef9a1.webp"
     },
@@ -1241,6 +1312,8 @@
       "editorialStatus": "draft",
       "galleryOrder": 2,
       "related": [],
+      "active": true,
+      "teachingType": "word",
       "sourceIds": [],
       "thumbnail": "assets/vocabulary-en-thumbs/eyes-8a6e1aa5cfa4fd3b.webp"
     },
@@ -1275,6 +1348,8 @@
       "editorialStatus": "needs-review",
       "galleryOrder": 6,
       "related": [],
+      "active": true,
+      "teachingType": "word",
       "sourceIds": [],
       "thumbnail": "assets/vocabulary-en-thumbs/fair-b6676bec7c009295.webp"
     },
@@ -1309,6 +1384,8 @@
       "editorialStatus": "draft",
       "galleryOrder": 7,
       "related": [],
+      "active": true,
+      "teachingType": "word",
       "sourceIds": [],
       "thumbnail": "assets/vocabulary-en-thumbs/family-b32c7ae079dfeb58.webp"
     },
@@ -1343,6 +1420,8 @@
       "editorialStatus": "draft",
       "galleryOrder": 8,
       "related": [],
+      "active": true,
+      "teachingType": "word",
       "sourceIds": [],
       "thumbnail": "assets/vocabulary-en-thumbs/father-a55f0e92d43843f0.webp"
     },
@@ -1375,6 +1454,8 @@
       "editorialStatus": "draft",
       "galleryOrder": 5,
       "related": [],
+      "active": true,
+      "teachingType": "word",
       "sourceIds": [],
       "thumbnail": "assets/vocabulary-en-thumbs/field-bfaf81c9fa36853e.webp"
     },
@@ -1407,6 +1488,8 @@
       "editorialStatus": "draft",
       "galleryOrder": 13,
       "related": [],
+      "active": true,
+      "teachingType": "word",
       "sourceIds": [],
       "thumbnail": "assets/vocabulary-en-thumbs/film-5f27e53eab0d2e2f.webp"
     },
@@ -1441,6 +1524,8 @@
       "editorialStatus": "draft",
       "galleryOrder": 17,
       "related": [],
+      "active": true,
+      "teachingType": "word",
       "sourceIds": [],
       "thumbnail": "assets/vocabulary-en-thumbs/fish-73d27a843b1d6f10.webp"
     },
@@ -1473,6 +1558,8 @@
       "editorialStatus": "draft",
       "galleryOrder": 15,
       "related": [],
+      "active": true,
+      "teachingType": "word",
       "sourceIds": [],
       "thumbnail": "assets/vocabulary-en-thumbs/meal-712584ae8f863239.webp"
     },
@@ -1505,6 +1592,8 @@
       "editorialStatus": "needs-review",
       "galleryOrder": 10,
       "related": [],
+      "active": true,
+      "teachingType": "word",
       "sourceIds": [],
       "thumbnail": "assets/vocabulary-en-thumbs/free-1b48f45dfd08e468.webp"
     },
@@ -1542,6 +1631,8 @@
           "kind": "form"
         }
       ],
+      "active": true,
+      "teachingType": "word",
       "sourceIds": [],
       "thumbnail": "assets/vocabulary-en-thumbs/friend-6afe0cc56e4c84a9.webp"
     },
@@ -1574,6 +1665,8 @@
       "editorialStatus": "draft",
       "galleryOrder": 8,
       "related": [],
+      "active": true,
+      "teachingType": "word",
       "sourceIds": [],
       "thumbnail": "assets/vocabulary-en-thumbs/garden-eb89133a581f6f61.webp"
     },
@@ -1608,6 +1701,8 @@
       "editorialStatus": "draft",
       "galleryOrder": 19,
       "related": [],
+      "active": true,
+      "teachingType": "word",
       "sourceIds": [],
       "thumbnail": "assets/vocabulary-en-thumbs/giraffe-e683b188965e890a.webp"
     },
@@ -1642,6 +1737,8 @@
       "editorialStatus": "draft",
       "galleryOrder": 20,
       "related": [],
+      "active": true,
+      "teachingType": "word",
       "sourceIds": [],
       "thumbnail": "assets/vocabulary-en-thumbs/goat-b331cc774788c676.webp"
     },
@@ -1681,6 +1778,8 @@
           "kind": "form"
         }
       ],
+      "active": true,
+      "teachingType": "word",
       "sourceIds": [],
       "thumbnail": "assets/vocabulary-en-thumbs/go-34948ced7926409b.webp"
     },
@@ -1718,6 +1817,8 @@
           "kind": "opposite"
         }
       ],
+      "active": true,
+      "teachingType": "word",
       "sourceIds": [],
       "thumbnail": "assets/vocabulary-en-thumbs/good-9e7a2848dcc42c3f.webp"
     },
@@ -1744,14 +1845,16 @@
         "topic-17"
       ],
       "partOfSpeech": [
-        "phrase"
+        "interjection"
       ],
-      "expressionType": "phrase",
+      "expressionType": "word",
       "difficultyBand": 2,
       "difficultyStatus": "draft",
       "editorialStatus": "draft",
       "galleryOrder": 7,
       "related": [],
+      "active": true,
+      "teachingType": "interaction",
       "sourceIds": [],
       "thumbnail": "assets/vocabulary-en-thumbs/bye-b8946686e754c5bd.webp"
     },
@@ -1786,6 +1889,8 @@
       "editorialStatus": "draft",
       "galleryOrder": 7,
       "related": [],
+      "active": true,
+      "teachingType": "word",
       "sourceIds": [],
       "thumbnail": "assets/vocabulary-en-thumbs/green-a22562a6ac522a13.webp"
     },
@@ -1820,6 +1925,8 @@
       "editorialStatus": "draft",
       "galleryOrder": 8,
       "related": [],
+      "active": true,
+      "teachingType": "word",
       "sourceIds": [],
       "thumbnail": "assets/vocabulary-en-thumbs/grey-4efb906f115942f6.webp"
     },
@@ -1852,6 +1959,8 @@
       "editorialStatus": "draft",
       "galleryOrder": 3,
       "related": [],
+      "active": true,
+      "teachingType": "word",
       "sourceIds": [],
       "thumbnail": "assets/vocabulary-en-thumbs/hair-232c213e453487c0.webp"
     },
@@ -1884,6 +1993,8 @@
       "editorialStatus": "draft",
       "galleryOrder": 5,
       "related": [],
+      "active": true,
+      "teachingType": "word",
       "sourceIds": [],
       "thumbnail": "assets/vocabulary-en-thumbs/happy-2c89e2d29f781adb.webp"
     },
@@ -1918,6 +2029,8 @@
       "editorialStatus": "draft",
       "galleryOrder": 24,
       "related": [],
+      "active": true,
+      "teachingType": "word",
       "sourceIds": [],
       "thumbnail": "assets/vocabulary-en-thumbs/hear-d22c00bdb02bdb45.webp"
     },
@@ -1944,14 +2057,16 @@
         "topic-17"
       ],
       "partOfSpeech": [
-        "phrase"
+        "interjection"
       ],
-      "expressionType": "phrase",
+      "expressionType": "word",
       "difficultyBand": 2,
       "difficultyStatus": "draft",
       "editorialStatus": "draft",
       "galleryOrder": 8,
       "related": [],
+      "active": true,
+      "teachingType": "interaction",
       "sourceIds": [],
       "thumbnail": "assets/vocabulary-en-thumbs/hello-fa698a04012723ee.webp"
     },
@@ -1985,6 +2100,8 @@
       "editorialStatus": "needs-review",
       "galleryOrder": 6,
       "related": [],
+      "active": true,
+      "teachingType": "word",
       "sourceIds": [],
       "thumbnail": "assets/vocabulary-en-thumbs/help-9274a230853d3a6b.webp"
     },
@@ -2017,6 +2134,8 @@
       "editorialStatus": "draft",
       "galleryOrder": 9,
       "related": [],
+      "active": true,
+      "teachingType": "word",
       "sourceIds": [],
       "thumbnail": "assets/vocabulary-en-thumbs/home-109ef908524fca3c.webp"
     },
@@ -2051,6 +2170,8 @@
       "editorialStatus": "draft",
       "galleryOrder": 23,
       "related": [],
+      "active": true,
+      "teachingType": "word",
       "sourceIds": [],
       "thumbnail": "assets/vocabulary-en-thumbs/horse-e115147c85a68134.webp"
     },
@@ -2083,15 +2204,17 @@
       "editorialStatus": "draft",
       "galleryOrder": 10,
       "related": [],
+      "active": true,
+      "teachingType": "word",
       "sourceIds": [],
       "thumbnail": "assets/vocabulary-en-thumbs/house-0d94275b0278f751.webp"
     },
     {
       "id": 62,
       "order": 62,
-      "en": "I (am)",
-      "cz": "já (jsem)",
-      "sentenceEn": "I (am) ready now—let’s start.",
+      "en": "I",
+      "cz": "já",
+      "sentenceEn": "I am ready now—let’s start.",
       "sentenceCz": "Už jsem připravený—pojďme začít.",
       "wordSets": [],
       "selected": true,
@@ -2099,7 +2222,7 @@
       "image": "assets/vocabulary-en/iam.png",
       "imageStem": "iam",
       "imageRequestedStem": "iam",
-      "imageSource": "direct",
+      "imageSource": "catalog",
       "imageMissing": false,
       "uid": "ven-0062",
       "primaryGroup": "topic-17",
@@ -2107,14 +2230,16 @@
         "topic-17"
       ],
       "partOfSpeech": [
-        "phrase"
+        "pronoun"
       ],
-      "expressionType": "phrase",
+      "expressionType": "word",
       "difficultyBand": 2,
       "difficultyStatus": "draft",
       "editorialStatus": "draft",
       "galleryOrder": 10,
       "related": [],
+      "active": true,
+      "teachingType": "word",
       "sourceIds": [],
       "thumbnail": "assets/vocabulary-en-thumbs/iam-eeb04f048c5531b6.webp"
     },
@@ -2147,6 +2272,8 @@
       "editorialStatus": "draft",
       "galleryOrder": 6,
       "related": [],
+      "active": true,
+      "teachingType": "word",
       "sourceIds": [],
       "thumbnail": "assets/vocabulary-en-thumbs/in-6c928512a96444f1.webp"
     },
@@ -2181,6 +2308,8 @@
       "editorialStatus": "draft",
       "galleryOrder": 25,
       "related": [],
+      "active": true,
+      "teachingType": "word",
       "sourceIds": [],
       "thumbnail": "assets/vocabulary-en-thumbs/jump-0de8115319ad76ad.webp"
     },
@@ -2213,6 +2342,8 @@
       "editorialStatus": "draft",
       "galleryOrder": 10,
       "related": [],
+      "active": true,
+      "teachingType": "word",
       "sourceIds": [],
       "thumbnail": "assets/vocabulary-en-thumbs/lakepond-a2a8900cfa43707c.webp"
     },
@@ -2250,6 +2381,8 @@
           "kind": "opposite"
         }
       ],
+      "active": true,
+      "teachingType": "word",
       "sourceIds": [],
       "thumbnail": "assets/vocabulary-en-thumbs/left-db153161ff8147b0.webp"
     },
@@ -2282,6 +2415,8 @@
       "editorialStatus": "draft",
       "galleryOrder": 12,
       "related": [],
+      "active": true,
+      "teachingType": "word",
       "sourceIds": [],
       "thumbnail": "assets/vocabulary-en-thumbs/like-9f706ece8e9dd5db.webp"
     },
@@ -2316,6 +2451,8 @@
       "editorialStatus": "draft",
       "galleryOrder": 24,
       "related": [],
+      "active": true,
+      "teachingType": "word",
       "sourceIds": [],
       "thumbnail": "assets/vocabulary-en-thumbs/lion-cf2f02ecf30c66ee.webp"
     },
@@ -2348,6 +2485,8 @@
       "editorialStatus": "draft",
       "galleryOrder": 28,
       "related": [],
+      "active": true,
+      "teachingType": "word",
       "sourceIds": [],
       "thumbnail": "assets/vocabulary-en-thumbs/house-0d94275b0278f751.webp"
     },
@@ -2380,6 +2519,8 @@
       "editorialStatus": "draft",
       "galleryOrder": 13,
       "related": [],
+      "active": true,
+      "teachingType": "word",
       "sourceIds": [],
       "thumbnail": "assets/vocabulary-en-thumbs/love-825a7a4e207b87c2.webp"
     },
@@ -2414,6 +2555,8 @@
       "editorialStatus": "draft",
       "galleryOrder": 23,
       "related": [],
+      "active": true,
+      "teachingType": "word",
       "sourceIds": [],
       "thumbnail": "assets/vocabulary-en-thumbs/milk-b85d76059f187781.webp"
     },
@@ -2448,6 +2591,8 @@
       "editorialStatus": "draft",
       "galleryOrder": 12,
       "related": [],
+      "active": true,
+      "teachingType": "word",
       "sourceIds": [],
       "thumbnail": "assets/vocabulary-en-thumbs/mother-df448faa0479f811.webp"
     },
@@ -2482,6 +2627,8 @@
       "editorialStatus": "draft",
       "galleryOrder": 26,
       "related": [],
+      "active": true,
+      "teachingType": "word",
       "sourceIds": [],
       "thumbnail": "assets/vocabulary-en-thumbs/monkey-ea36cdac133e9935.webp"
     },
@@ -2516,6 +2663,8 @@
       "editorialStatus": "draft",
       "galleryOrder": 13,
       "related": [],
+      "active": true,
+      "teachingType": "word",
       "sourceIds": [],
       "thumbnail": "assets/vocabulary-en-thumbs/mother-df448faa0479f811.webp"
     },
@@ -2548,6 +2697,8 @@
       "editorialStatus": "draft",
       "galleryOrder": 14,
       "related": [],
+      "active": true,
+      "teachingType": "word",
       "sourceIds": [],
       "thumbnail": "assets/vocabulary-en-thumbs/name-d938d9376121d4bf.webp"
     },
@@ -2585,6 +2736,8 @@
           "kind": "opposite"
         }
       ],
+      "active": true,
+      "teachingType": "word",
       "sourceIds": [],
       "thumbnail": "assets/vocabulary-en-thumbs/new-8b0d59c2f6cf8d02.webp"
     },
@@ -2617,6 +2770,8 @@
       "editorialStatus": "draft",
       "galleryOrder": 15,
       "related": [],
+      "active": true,
+      "teachingType": "word",
       "sourceIds": [],
       "thumbnail": "assets/vocabulary-en-thumbs/sister-968dfe9aad169868.webp"
     },
@@ -2649,6 +2804,8 @@
       "editorialStatus": "draft",
       "galleryOrder": 13,
       "related": [],
+      "active": true,
+      "teachingType": "word",
       "sourceIds": [],
       "thumbnail": "assets/vocabulary-en-thumbs/office-8e81ca1a71b1af89.webp"
     },
@@ -2686,6 +2843,8 @@
           "kind": "opposite"
         }
       ],
+      "active": true,
+      "teachingType": "word",
       "sourceIds": [],
       "thumbnail": "assets/vocabulary-en-thumbs/old-eee12d69fedd87f5.webp"
     },
@@ -2720,6 +2879,8 @@
       "editorialStatus": "draft",
       "galleryOrder": 16,
       "related": [],
+      "active": true,
+      "teachingType": "word",
       "sourceIds": [],
       "thumbnail": "assets/vocabulary-en-thumbs/parents-583ea7d5e7551485.webp"
     },
@@ -2752,6 +2913,8 @@
       "editorialStatus": "draft",
       "galleryOrder": 14,
       "related": [],
+      "active": true,
+      "teachingType": "word",
       "sourceIds": [],
       "thumbnail": "assets/vocabulary-en-thumbs/park-585dbde6b22ac82b.webp"
     },
@@ -2786,6 +2949,8 @@
       "editorialStatus": "draft",
       "galleryOrder": 28,
       "related": [],
+      "active": true,
+      "teachingType": "word",
       "sourceIds": [],
       "thumbnail": "assets/vocabulary-en-thumbs/popcorn-2d7b725c5fa2fa83.webp"
     },
@@ -2820,6 +2985,8 @@
       "editorialStatus": "draft",
       "galleryOrder": 31,
       "related": [],
+      "active": true,
+      "teachingType": "word",
       "sourceIds": [],
       "thumbnail": "assets/vocabulary-en-thumbs/rabbit-d2743ce7e73b6d2c.webp"
     },
@@ -2854,6 +3021,8 @@
       "editorialStatus": "draft",
       "galleryOrder": 12,
       "related": [],
+      "active": true,
+      "teachingType": "word",
       "sourceIds": [],
       "thumbnail": "assets/vocabulary-en-thumbs/red-a7de81fec73d8fee.webp"
     },
@@ -2888,6 +3057,8 @@
       "editorialStatus": "draft",
       "galleryOrder": 32,
       "related": [],
+      "active": true,
+      "teachingType": "word",
       "sourceIds": [],
       "thumbnail": "assets/vocabulary-en-thumbs/rhino-9f3e32cc79ddbce0.webp"
     },
@@ -2922,6 +3093,8 @@
       "editorialStatus": "draft",
       "galleryOrder": 34,
       "related": [],
+      "active": true,
+      "teachingType": "word",
       "sourceIds": [],
       "thumbnail": "assets/vocabulary-en-thumbs/race-4be987f3ee368c75.webp"
     },
@@ -2956,6 +3129,8 @@
       "editorialStatus": "draft",
       "galleryOrder": 33,
       "related": [],
+      "active": true,
+      "teachingType": "word",
       "sourceIds": [],
       "thumbnail": "assets/vocabulary-en-thumbs/sheep-600d22aa412e7f59.webp"
     },
@@ -2990,6 +3165,8 @@
       "editorialStatus": "draft",
       "galleryOrder": 36,
       "related": [],
+      "active": true,
+      "teachingType": "word",
       "sourceIds": [],
       "thumbnail": "assets/vocabulary-en-thumbs/sing-5a2f29df21a0aef7.webp"
     },
@@ -3024,6 +3201,8 @@
       "editorialStatus": "draft",
       "galleryOrder": 17,
       "related": [],
+      "active": true,
+      "teachingType": "word",
       "sourceIds": [],
       "thumbnail": "assets/vocabulary-en-thumbs/sister-968dfe9aad169868.webp"
     },
@@ -3061,6 +3240,8 @@
           "kind": "opposite"
         }
       ],
+      "active": true,
+      "teachingType": "word",
       "sourceIds": [],
       "thumbnail": "assets/vocabulary-en-thumbs/small-67231d8af9e02987.webp"
     },
@@ -3093,6 +3274,8 @@
       "editorialStatus": "draft",
       "galleryOrder": 29,
       "related": [],
+      "active": true,
+      "teachingType": "word",
       "sourceIds": [],
       "thumbnail": "assets/vocabulary-en-thumbs/smart-b3e21154729b8483.webp"
     },
@@ -3125,6 +3308,8 @@
       "editorialStatus": "draft",
       "galleryOrder": 27,
       "related": [],
+      "active": true,
+      "teachingType": "word",
       "sourceIds": [],
       "thumbnail": "assets/vocabulary-en-thumbs/slow-ecbb2d1351d2c955.webp"
     },
@@ -3159,6 +3344,8 @@
       "editorialStatus": "draft",
       "galleryOrder": 37,
       "related": [],
+      "active": true,
+      "teachingType": "word",
       "sourceIds": [],
       "thumbnail": "assets/vocabulary-en-thumbs/speak-0d1857dfe83d2270.webp"
     },
@@ -3191,6 +3378,8 @@
       "editorialStatus": "draft",
       "galleryOrder": 32,
       "related": [],
+      "active": true,
+      "teachingType": "word",
       "sourceIds": [],
       "thumbnail": "assets/vocabulary-en-thumbs/tall-937dd9e2d7f54e3e.webp"
     },
@@ -3223,6 +3412,8 @@
       "editorialStatus": "draft",
       "galleryOrder": 20,
       "related": [],
+      "active": true,
+      "teachingType": "word",
       "sourceIds": [],
       "thumbnail": "assets/vocabulary-en-thumbs/teacher-1f14dcf8605cc5d3.webp"
     },
@@ -3257,6 +3448,8 @@
       "editorialStatus": "draft",
       "galleryOrder": 19,
       "related": [],
+      "active": true,
+      "teachingType": "word",
       "sourceIds": [],
       "thumbnail": "assets/vocabulary-en-thumbs/ticket-49945c6e1c739c9f.webp"
     },
@@ -3291,6 +3484,8 @@
       "editorialStatus": "draft",
       "galleryOrder": 44,
       "related": [],
+      "active": true,
+      "teachingType": "word",
       "sourceIds": [],
       "thumbnail": "assets/vocabulary-en-thumbs/walk-b42f28d6ee81eb54.webp"
     },
@@ -3325,6 +3520,8 @@
       "editorialStatus": "draft",
       "galleryOrder": 33,
       "related": [],
+      "active": true,
+      "teachingType": "word",
       "sourceIds": [],
       "thumbnail": "assets/vocabulary-en-thumbs/water-39a7b9c332d157af.webp"
     },
@@ -3359,6 +3556,8 @@
       "editorialStatus": "draft",
       "galleryOrder": 13,
       "related": [],
+      "active": true,
+      "teachingType": "word",
       "sourceIds": [],
       "thumbnail": "assets/vocabulary-en-thumbs/white-c0e1b8b95f3e7516.webp"
     },
@@ -3393,6 +3592,8 @@
       "editorialStatus": "draft",
       "galleryOrder": 14,
       "related": [],
+      "active": true,
+      "teachingType": "word",
       "sourceIds": [],
       "thumbnail": "assets/vocabulary-en-thumbs/yellow-0c405884a9318d6a.webp"
     },
@@ -3425,6 +3626,8 @@
       "editorialStatus": "draft",
       "galleryOrder": 22,
       "related": [],
+      "active": true,
+      "teachingType": "word",
       "sourceIds": [],
       "thumbnail": "assets/vocabulary-en-thumbs/garden-eb89133a581f6f61.webp"
     },
@@ -3459,6 +3662,8 @@
       "editorialStatus": "draft",
       "galleryOrder": 39,
       "related": [],
+      "active": true,
+      "teachingType": "word",
       "sourceIds": [],
       "thumbnail": "assets/vocabulary-en-thumbs/zebra-db7d0b3a2da7540a.webp"
     },
@@ -3491,6 +3696,8 @@
       "editorialStatus": "draft",
       "galleryOrder": 17,
       "related": [],
+      "active": true,
+      "teachingType": "word",
       "sourceIds": [],
       "thumbnail": "assets/vocabulary-en-thumbs/restaurant-92dc1b76b46aaeab.webp"
     },
@@ -3528,6 +3735,8 @@
           "kind": "opposite"
         }
       ],
+      "active": true,
+      "teachingType": "word",
       "sourceIds": [],
       "thumbnail": "assets/vocabulary-en-thumbs/near-309ec2f70adeca0a.webp"
     },
@@ -3565,6 +3774,8 @@
           "kind": "opposite"
         }
       ],
+      "active": true,
+      "teachingType": "word",
       "sourceIds": [],
       "thumbnail": "assets/vocabulary-en-thumbs/far-5a231f9f28874114.webp"
     },
@@ -3597,6 +3808,8 @@
       "editorialStatus": "draft",
       "galleryOrder": 12,
       "related": [],
+      "active": true,
+      "teachingType": "word",
       "sourceIds": [],
       "thumbnail": "assets/vocabulary-en-thumbs/straight-eee520c2a9f6f435.webp"
     },
@@ -3629,6 +3842,8 @@
       "editorialStatus": "draft",
       "galleryOrder": 16,
       "related": [],
+      "active": true,
+      "teachingType": "word",
       "sourceIds": [],
       "thumbnail": "assets/vocabulary-en-thumbs/turn-32a1e81cc6d5c932.webp"
     },
@@ -3661,6 +3876,8 @@
       "editorialStatus": "draft",
       "galleryOrder": 7,
       "related": [],
+      "active": true,
+      "teachingType": "word",
       "sourceIds": [],
       "thumbnail": "assets/vocabulary-en-thumbs/hungry-f8e48dabe3ccdaa0.webp"
     },
@@ -3693,6 +3910,8 @@
       "editorialStatus": "draft",
       "galleryOrder": 34,
       "related": [],
+      "active": true,
+      "teachingType": "word",
       "sourceIds": [],
       "thumbnail": "assets/vocabulary-en-thumbs/warm-d49a7cd65058822e.webp"
     },
@@ -3719,14 +3938,16 @@
         "topic-17"
       ],
       "partOfSpeech": [
-        "phrase"
+        "interjection"
       ],
-      "expressionType": "phrase",
+      "expressionType": "word",
       "difficultyBand": 2,
       "difficultyStatus": "draft",
       "editorialStatus": "draft",
       "galleryOrder": 23,
       "related": [],
+      "active": true,
+      "teachingType": "interaction",
       "sourceIds": [],
       "thumbnail": "assets/vocabulary-en-thumbs/welcome-4bf9fc68d30f3b16.webp"
     },
@@ -3761,6 +3982,8 @@
       "editorialStatus": "draft",
       "galleryOrder": 18,
       "related": [],
+      "active": true,
+      "teachingType": "word",
       "sourceIds": [],
       "thumbnail": "assets/vocabulary-en-thumbs/table-f8890079b9b2173f.webp"
     },
@@ -3795,6 +4018,8 @@
       "editorialStatus": "draft",
       "galleryOrder": 17,
       "related": [],
+      "active": true,
+      "teachingType": "word",
       "sourceIds": [],
       "thumbnail": "assets/vocabulary-en-thumbs/follow-2e7327a3e9588cb4.webp"
     },
@@ -3827,6 +4052,8 @@
       "editorialStatus": "draft",
       "galleryOrder": 12,
       "related": [],
+      "active": true,
+      "teachingType": "word",
       "sourceIds": [],
       "thumbnail": "assets/vocabulary-en-thumbs/menu-3569fef060339d50.webp"
     },
@@ -3859,6 +4086,8 @@
       "editorialStatus": "draft",
       "galleryOrder": 24,
       "related": [],
+      "active": true,
+      "teachingType": "word",
       "sourceIds": [],
       "thumbnail": "assets/vocabulary-en-thumbs/ready-2c66e94cc9f535c9.webp"
     },
@@ -3891,6 +4120,8 @@
       "editorialStatus": "draft",
       "galleryOrder": 32,
       "related": [],
+      "active": true,
+      "teachingType": "word",
       "sourceIds": [],
       "thumbnail": "assets/vocabulary-en-thumbs/order-9b77730bcd01bf2c.webp"
     },
@@ -3925,6 +4156,8 @@
       "editorialStatus": "draft",
       "galleryOrder": 19,
       "related": [],
+      "active": true,
+      "teachingType": "word",
       "sourceIds": [],
       "thumbnail": "assets/vocabulary-en-thumbs/juice-9cd21dfae60cd179.webp"
     },
@@ -3964,6 +4197,8 @@
           "kind": "form"
         }
       ],
+      "active": true,
+      "teachingType": "word",
       "sourceIds": [],
       "thumbnail": "assets/vocabulary-en-thumbs/apple-677980fdef544fe6.webp"
     },
@@ -3998,6 +4233,8 @@
       "editorialStatus": "draft",
       "galleryOrder": 25,
       "related": [],
+      "active": true,
+      "teachingType": "word",
       "sourceIds": [],
       "thumbnail": "assets/vocabulary-en-thumbs/orange-79fec09e12f7543d.webp"
     },
@@ -4032,6 +4269,8 @@
       "editorialStatus": "needs-review",
       "galleryOrder": 10,
       "related": [],
+      "active": true,
+      "teachingType": "word",
       "sourceIds": [],
       "thumbnail": "assets/vocabulary-en-thumbs/chicken-45858d5e78e33fc5.webp"
     },
@@ -4066,6 +4305,8 @@
       "editorialStatus": "draft",
       "galleryOrder": 30,
       "related": [],
+      "active": true,
+      "teachingType": "word",
       "sourceIds": [],
       "thumbnail": "assets/vocabulary-en-thumbs/rice-e32f282af4b01ada.webp"
     },
@@ -4100,6 +4341,8 @@
       "editorialStatus": "draft",
       "galleryOrder": 26,
       "related": [],
+      "active": true,
+      "teachingType": "word",
       "sourceIds": [],
       "thumbnail": "assets/vocabulary-en-thumbs/pasta-2b2c3383f7c9d605.webp"
     },
@@ -4134,6 +4377,8 @@
       "editorialStatus": "draft",
       "galleryOrder": 9,
       "related": [],
+      "active": true,
+      "teachingType": "word",
       "sourceIds": [],
       "thumbnail": "assets/vocabulary-en-thumbs/cheese-f8574465761b57f7.webp"
     },
@@ -4168,6 +4413,8 @@
       "editorialStatus": "draft",
       "galleryOrder": 16,
       "related": [],
+      "active": true,
+      "teachingType": "word",
       "sourceIds": [],
       "thumbnail": "assets/vocabulary-en-thumbs/fries-1e31addb64a19fdb.webp"
     },
@@ -4202,6 +4449,8 @@
       "editorialStatus": "draft",
       "galleryOrder": 29,
       "related": [],
+      "active": true,
+      "teachingType": "word",
       "sourceIds": [],
       "thumbnail": "assets/vocabulary-en-thumbs/potatoes-a5e23db7d3b6d3b1.webp"
     },
@@ -4236,6 +4485,8 @@
       "editorialStatus": "draft",
       "galleryOrder": 20,
       "related": [],
+      "active": true,
+      "teachingType": "word",
       "sourceIds": [],
       "thumbnail": "assets/vocabulary-en-thumbs/ketchup-1c84263293d0c189.webp"
     },
@@ -4270,6 +4521,8 @@
       "editorialStatus": "draft",
       "galleryOrder": 31,
       "related": [],
+      "active": true,
+      "teachingType": "word",
       "sourceIds": [],
       "thumbnail": "assets/vocabulary-en-thumbs/salad-77b617b137d43ab4.webp"
     },
@@ -4304,6 +4557,8 @@
       "editorialStatus": "draft",
       "galleryOrder": 22,
       "related": [],
+      "active": true,
+      "teachingType": "word",
       "sourceIds": [],
       "thumbnail": "assets/vocabulary-en-thumbs/meal-712584ae8f863239.webp"
     },
@@ -4336,6 +4591,8 @@
       "editorialStatus": "draft",
       "galleryOrder": 17,
       "related": [],
+      "active": true,
+      "teachingType": "word",
       "sourceIds": [],
       "thumbnail": "assets/vocabulary-en-thumbs/hot-87f02271668b6dd0.webp"
     },
@@ -4370,6 +4627,8 @@
       "editorialStatus": "draft",
       "galleryOrder": 32,
       "related": [],
+      "active": true,
+      "teachingType": "word",
       "sourceIds": [],
       "thumbnail": "assets/vocabulary-en-thumbs/sauce-72e59fe191811f05.webp"
     },
@@ -4404,6 +4663,8 @@
       "editorialStatus": "draft",
       "galleryOrder": 14,
       "related": [],
+      "active": true,
+      "teachingType": "word",
       "sourceIds": [],
       "thumbnail": "assets/vocabulary-en-thumbs/cake-0edc9856c5e8db80.webp"
     },
@@ -4438,6 +4699,8 @@
       "editorialStatus": "draft",
       "galleryOrder": 18,
       "related": [],
+      "active": true,
+      "teachingType": "word",
       "sourceIds": [],
       "thumbnail": "assets/vocabulary-en-thumbs/icecream-ea4b98882775c96d.webp"
     },
@@ -4470,6 +4733,8 @@
       "editorialStatus": "draft",
       "galleryOrder": 3,
       "related": [],
+      "active": true,
+      "teachingType": "word",
       "sourceIds": [],
       "thumbnail": "assets/vocabulary-en-thumbs/bill-52eeded32456b4a6.webp"
     },
@@ -4502,6 +4767,8 @@
       "editorialStatus": "draft",
       "galleryOrder": 16,
       "related": [],
+      "active": true,
+      "teachingType": "word",
       "sourceIds": [],
       "thumbnail": "assets/vocabulary-en-thumbs/pound-31b9d1334f8021d0.webp"
     },
@@ -4536,6 +4803,8 @@
       "editorialStatus": "draft",
       "galleryOrder": 8,
       "related": [],
+      "active": true,
+      "teachingType": "word",
       "sourceIds": [],
       "thumbnail": "assets/vocabulary-en-thumbs/card-2127c7b5c046b898.webp"
     },
@@ -4568,6 +4837,8 @@
       "editorialStatus": "draft",
       "galleryOrder": 14,
       "related": [],
+      "active": true,
+      "teachingType": "word",
       "sourceIds": [],
       "thumbnail": "assets/vocabulary-en-thumbs/pay-5307382da74fcad0.webp"
     },
@@ -4600,6 +4871,8 @@
       "editorialStatus": "draft",
       "galleryOrder": 5,
       "related": [],
+      "active": true,
+      "teachingType": "word",
       "sourceIds": [],
       "thumbnail": "assets/vocabulary-en-thumbs/nexttime-2c1b41d9a2e7a608.webp"
     },
@@ -4632,6 +4905,8 @@
       "editorialStatus": "draft",
       "galleryOrder": 42,
       "related": [],
+      "active": true,
+      "teachingType": "word",
       "sourceIds": [],
       "thumbnail": "assets/vocabulary-en-thumbs/try-da9b3e8db1cae9bd.webp"
     },
@@ -4664,6 +4939,8 @@
       "editorialStatus": "draft",
       "galleryOrder": 1,
       "related": [],
+      "active": true,
+      "teachingType": "word",
       "sourceIds": [],
       "thumbnail": "assets/vocabulary-en-thumbs/again-f850bb80c3bf6fde.webp"
     },
@@ -4672,7 +4949,7 @@
       "order": 139,
       "en": "please",
       "cz": "prosím",
-      "sentenceEn": "Please speak slowly;\" I want to understand.",
+      "sentenceEn": "Please speak slowly; I want to understand.",
       "sentenceCz": "Prosím mluv pomalu, chci rozumět.",
       "wordSets": [
         "Greetings"
@@ -4690,14 +4967,16 @@
         "topic-17"
       ],
       "partOfSpeech": [
-        "phrase"
+        "interjection"
       ],
-      "expressionType": "phrase",
+      "expressionType": "word",
       "difficultyBand": 2,
       "difficultyStatus": "draft",
       "editorialStatus": "draft",
       "galleryOrder": 18,
       "related": [],
+      "active": true,
+      "teachingType": "interaction",
       "sourceIds": [],
       "thumbnail": "assets/vocabulary-en-thumbs/please-d3fe08042e09f2d5.webp"
     },
@@ -4724,7 +5003,7 @@
         "topic-17"
       ],
       "partOfSpeech": [
-        "phrase"
+        "verb"
       ],
       "expressionType": "phrase",
       "difficultyBand": 2,
@@ -4732,6 +5011,8 @@
       "editorialStatus": "draft",
       "galleryOrder": 20,
       "related": [],
+      "active": true,
+      "teachingType": "interaction",
       "sourceIds": [],
       "thumbnail": "assets/vocabulary-en-thumbs/thankyou-ece15af6337a6184.webp"
     },
@@ -4757,15 +5038,15 @@
       "topicIds": [
         "topic-17"
       ],
-      "partOfSpeech": [
-        "phrase"
-      ],
+      "partOfSpeech": [],
       "expressionType": "phrase",
       "difficultyBand": 2,
       "difficultyStatus": "draft",
       "editorialStatus": "draft",
       "galleryOrder": 26,
       "related": [],
+      "active": true,
+      "teachingType": "interaction",
       "sourceIds": [],
       "thumbnail": "assets/vocabulary-en-thumbs/yourwelcome-ea3d0aef79a915d1.webp"
     },
@@ -4790,7 +5071,7 @@
         "topic-17"
       ],
       "partOfSpeech": [
-        "phrase"
+        "pronoun"
       ],
       "expressionType": "phrase",
       "difficultyBand": 2,
@@ -4798,6 +5079,8 @@
       "editorialStatus": "draft",
       "galleryOrder": 2,
       "related": [],
+      "active": true,
+      "teachingType": "interaction",
       "sourceIds": [],
       "thumbnail": "assets/vocabulary-en-thumbs/anythingelse-c7c0cb46a2303154.webp"
     },
@@ -4830,6 +5113,8 @@
       "editorialStatus": "draft",
       "galleryOrder": 30,
       "related": [],
+      "active": true,
+      "teachingType": "word",
       "sourceIds": [],
       "thumbnail": "assets/vocabulary-en-thumbs/where-420efcbd7f416321.webp"
     },
@@ -4867,6 +5152,8 @@
           "kind": "opposite"
         }
       ],
+      "active": true,
+      "teachingType": "word",
       "sourceIds": [],
       "thumbnail": "assets/vocabulary-en-thumbs/right-21fdd7f15405fde4.webp"
     },
@@ -4891,7 +5178,7 @@
         "topic-17"
       ],
       "partOfSpeech": [
-        "phrase"
+        "verb"
       ],
       "expressionType": "phrase",
       "difficultyBand": 2,
@@ -4899,6 +5186,8 @@
       "editorialStatus": "draft",
       "galleryOrder": 24,
       "related": [],
+      "active": true,
+      "teachingType": "word",
       "sourceIds": [],
       "thumbnail": "assets/vocabulary-en-thumbs/like-9f706ece8e9dd5db.webp"
     },
@@ -4931,6 +5220,8 @@
       "editorialStatus": "draft",
       "galleryOrder": 3,
       "related": [],
+      "active": true,
+      "teachingType": "word",
       "sourceIds": [],
       "thumbnail": "assets/vocabulary-en-thumbs/enjoy-1fb543e6685105b1.webp"
     },
@@ -4955,7 +5246,7 @@
         "topic-17"
       ],
       "partOfSpeech": [
-        "phrase"
+        "adverb"
       ],
       "expressionType": "phrase",
       "difficultyBand": 2,
@@ -4963,6 +5254,8 @@
       "editorialStatus": "draft",
       "galleryOrder": 16,
       "related": [],
+      "active": true,
+      "teachingType": "interaction",
       "sourceIds": [],
       "thumbnail": "assets/vocabulary-en-thumbs/ofcourse-fb2f55aa2d9c1ed3.webp"
     },
@@ -4971,8 +5264,8 @@
       "order": 148,
       "en": "sure",
       "cz": "jistě",
-      "sentenceEn": "I am not sure.",
-      "sentenceCz": "Nejsem si jistý.",
+      "sentenceEn": "Sure, I can help you.",
+      "sentenceCz": "Jistě, mohu ti pomoci.",
       "wordSets": [],
       "selected": false,
       "hardTraining": false,
@@ -4987,14 +5280,16 @@
         "topic-17"
       ],
       "partOfSpeech": [
-        "phrase"
+        "adverb"
       ],
-      "expressionType": "phrase",
+      "expressionType": "word",
       "difficultyBand": 2,
       "difficultyStatus": "draft",
       "editorialStatus": "draft",
       "galleryOrder": 19,
       "related": [],
+      "active": true,
+      "teachingType": "interaction",
       "sourceIds": [],
       "thumbnail": "assets/vocabulary-en-thumbs/sure-ede266ba70b7b09c.webp"
     },
@@ -5029,6 +5324,8 @@
       "editorialStatus": "draft",
       "galleryOrder": 21,
       "related": [],
+      "active": true,
+      "teachingType": "word",
       "sourceIds": [],
       "thumbnail": "assets/vocabulary-en-thumbs/meal-712584ae8f863239.webp"
     },
@@ -5052,15 +5349,15 @@
       "topicIds": [
         "topic-11"
       ],
-      "partOfSpeech": [
-        "phrase"
-      ],
+      "partOfSpeech": [],
       "expressionType": "phrase",
       "difficultyBand": 1,
       "difficultyStatus": "draft",
-      "editorialStatus": "draft",
+      "editorialStatus": "needs-review",
       "galleryOrder": 8,
       "related": [],
+      "active": true,
+      "teachingType": "word",
       "sourceIds": [],
       "thumbnail": "assets/vocabulary-en-thumbs/howmuch-6e94fbfdd4f45f7c.webp"
     },
@@ -5093,6 +5390,8 @@
       "editorialStatus": "draft",
       "galleryOrder": 22,
       "related": [],
+      "active": true,
+      "teachingType": "word",
       "sourceIds": [],
       "thumbnail": "assets/vocabulary-en-thumbs/something-d0efe214b57eabad.webp"
     },
@@ -5125,6 +5424,8 @@
       "editorialStatus": "draft",
       "galleryOrder": 11,
       "related": [],
+      "active": true,
+      "teachingType": "word",
       "sourceIds": [],
       "thumbnail": "assets/vocabulary-en-thumbs/how-8f608ad5ec8e1bba.webp"
     },
@@ -5157,6 +5458,8 @@
       "editorialStatus": "draft",
       "galleryOrder": 4,
       "related": [],
+      "active": true,
+      "teachingType": "word",
       "sourceIds": [],
       "thumbnail": "assets/vocabulary-en-thumbs/next-d6be6a4c9b61bbb6.webp"
     },
@@ -5189,6 +5492,8 @@
       "editorialStatus": "draft",
       "galleryOrder": 10,
       "related": [],
+      "active": true,
+      "teachingType": "word",
       "sourceIds": [],
       "thumbnail": "assets/vocabulary-en-thumbs/crossing-438fb477e06726f0.webp"
     },
@@ -5221,6 +5526,8 @@
       "editorialStatus": "draft",
       "galleryOrder": 2,
       "related": [],
+      "active": true,
+      "teachingType": "word",
       "sourceIds": [],
       "thumbnail": "assets/vocabulary-en-thumbs/call-f68846c618fd6b0e.webp"
     },
@@ -5253,6 +5560,8 @@
       "editorialStatus": "draft",
       "galleryOrder": 16,
       "related": [],
+      "active": true,
+      "teachingType": "word",
       "sourceIds": [],
       "thumbnail": "assets/vocabulary-en-thumbs/river-117cb47ac543ca59.webp"
     },
@@ -5285,6 +5594,8 @@
       "editorialStatus": "needs-review",
       "galleryOrder": 22,
       "related": [],
+      "active": true,
+      "teachingType": "word",
       "sourceIds": [],
       "thumbnail": "assets/vocabulary-en-thumbs/skating-af69bb52f0ea8176.webp"
     },
@@ -5317,6 +5628,8 @@
       "editorialStatus": "draft",
       "galleryOrder": 19,
       "related": [],
+      "active": true,
+      "teachingType": "word",
       "sourceIds": [],
       "thumbnail": "assets/vocabulary-en-thumbs/together-fcd1099a75e7a071.webp"
     },
@@ -5349,6 +5662,8 @@
       "editorialStatus": "needs-review",
       "galleryOrder": 18,
       "related": [],
+      "active": true,
+      "teachingType": "word",
       "sourceIds": [],
       "thumbnail": "assets/vocabulary-en-thumbs/play-97d5f2788def8981.webp"
     },
@@ -5381,6 +5696,8 @@
       "editorialStatus": "draft",
       "galleryOrder": 9,
       "related": [],
+      "active": true,
+      "teachingType": "word",
       "sourceIds": [],
       "thumbnail": "assets/vocabulary-en-thumbs/time-ddd7298c0266476c.webp"
     },
@@ -5413,6 +5730,8 @@
       "editorialStatus": "draft",
       "galleryOrder": 7,
       "related": [],
+      "active": true,
+      "teachingType": "word",
       "sourceIds": [],
       "thumbnail": "assets/vocabulary-en-thumbs/clock-d57ebffe47c40913.webp"
     },
@@ -5445,6 +5764,8 @@
       "editorialStatus": "draft",
       "galleryOrder": 11,
       "related": [],
+      "active": true,
+      "teachingType": "word",
       "sourceIds": [],
       "thumbnail": "assets/vocabulary-en-thumbs/week-6fad35801594c48f.webp"
     },
@@ -5477,6 +5798,8 @@
       "editorialStatus": "draft",
       "galleryOrder": 3,
       "related": [],
+      "active": true,
+      "teachingType": "word",
       "sourceIds": [],
       "thumbnail": "assets/vocabulary-en-thumbs/monday-d1330365e1247c58.webp"
     },
@@ -5501,14 +5824,16 @@
         "topic-17"
       ],
       "partOfSpeech": [
-        "phrase"
+        "interjection"
       ],
-      "expressionType": "phrase",
+      "expressionType": "word",
       "difficultyBand": 2,
       "difficultyStatus": "draft",
       "editorialStatus": "draft",
       "galleryOrder": 1,
       "related": [],
+      "active": true,
+      "teachingType": "interaction",
       "sourceIds": [],
       "thumbnail": "assets/vocabulary-en-thumbs/agreed-823f14556f75bbaa.webp"
     },
@@ -5543,6 +5868,8 @@
       "editorialStatus": "draft",
       "galleryOrder": 5,
       "related": [],
+      "active": true,
+      "teachingType": "word",
       "sourceIds": [],
       "thumbnail": "assets/vocabulary-en-thumbs/sister-968dfe9aad169868.webp"
     },
@@ -5577,6 +5904,8 @@
       "editorialStatus": "draft",
       "galleryOrder": 18,
       "related": [],
+      "active": true,
+      "teachingType": "word",
       "sourceIds": [],
       "thumbnail": "assets/vocabulary-en-thumbs/man-738047ee61b90a80.webp"
     },
@@ -5611,6 +5940,8 @@
       "editorialStatus": "draft",
       "galleryOrder": 1,
       "related": [],
+      "active": true,
+      "teachingType": "word",
       "sourceIds": [],
       "thumbnail": "assets/vocabulary-en-thumbs/aunt-4efc8779978626c9.webp"
     },
@@ -5645,6 +5976,8 @@
       "editorialStatus": "draft",
       "galleryOrder": 21,
       "related": [],
+      "active": true,
+      "teachingType": "word",
       "sourceIds": [],
       "thumbnail": "assets/vocabulary-en-thumbs/uncle-9660b7881d66d1f0.webp"
     },
@@ -5679,6 +6012,8 @@
       "editorialStatus": "draft",
       "galleryOrder": 4,
       "related": [],
+      "active": true,
+      "teachingType": "word",
       "sourceIds": [],
       "thumbnail": "assets/vocabulary-en-thumbs/cousin-7b47b925573b1dc7.webp"
     },
@@ -5713,6 +6048,8 @@
       "editorialStatus": "draft",
       "galleryOrder": 9,
       "related": [],
+      "active": true,
+      "teachingType": "word",
       "sourceIds": [],
       "thumbnail": "assets/vocabulary-en-thumbs/orange-79fec09e12f7543d.webp"
     },
@@ -5747,6 +6084,8 @@
       "editorialStatus": "draft",
       "galleryOrder": 11,
       "related": [],
+      "active": true,
+      "teachingType": "word",
       "sourceIds": [],
       "thumbnail": "assets/vocabulary-en-thumbs/purple-0a576c987def43b2.webp"
     },
@@ -5781,6 +6120,8 @@
       "editorialStatus": "draft",
       "galleryOrder": 10,
       "related": [],
+      "active": true,
+      "teachingType": "word",
       "sourceIds": [],
       "thumbnail": "assets/vocabulary-en-thumbs/pink-88986d22ae00ba97.webp"
     },
@@ -5820,6 +6161,8 @@
           "kind": "form"
         }
       ],
+      "active": true,
+      "teachingType": "word",
       "sourceIds": [],
       "thumbnail": "assets/vocabulary-en-thumbs/bear-70916e22a26bd773.webp"
     },
@@ -5854,6 +6197,8 @@
       "editorialStatus": "draft",
       "galleryOrder": 7,
       "related": [],
+      "active": true,
+      "teachingType": "word",
       "sourceIds": [],
       "thumbnail": "assets/vocabulary-en-thumbs/camel-dd0f048b57200f57.webp"
     },
@@ -5888,6 +6233,8 @@
       "editorialStatus": "draft",
       "galleryOrder": 12,
       "related": [],
+      "active": true,
+      "teachingType": "word",
       "sourceIds": [],
       "thumbnail": "assets/vocabulary-en-thumbs/deer-bd7a650ee0361235.webp"
     },
@@ -5922,6 +6269,8 @@
       "editorialStatus": "draft",
       "galleryOrder": 15,
       "related": [],
+      "active": true,
+      "teachingType": "word",
       "sourceIds": [],
       "thumbnail": "assets/vocabulary-en-thumbs/eagle-999852cb87353e52.webp"
     },
@@ -5956,6 +6305,8 @@
       "editorialStatus": "draft",
       "galleryOrder": 18,
       "related": [],
+      "active": true,
+      "teachingType": "word",
       "sourceIds": [],
       "thumbnail": "assets/vocabulary-en-thumbs/fox-f63355439c663ddf.webp"
     },
@@ -5990,6 +6341,8 @@
       "editorialStatus": "draft",
       "galleryOrder": 21,
       "related": [],
+      "active": true,
+      "teachingType": "word",
       "sourceIds": [],
       "thumbnail": "assets/vocabulary-en-thumbs/goose-c0a83efb98728de1.webp"
     },
@@ -6024,6 +6377,8 @@
       "editorialStatus": "draft",
       "galleryOrder": 22,
       "related": [],
+      "active": true,
+      "teachingType": "word",
       "sourceIds": [],
       "thumbnail": "assets/vocabulary-en-thumbs/hippo-378f23ace66af6db.webp"
     },
@@ -6058,6 +6413,8 @@
       "editorialStatus": "draft",
       "galleryOrder": 27,
       "related": [],
+      "active": true,
+      "teachingType": "word",
       "sourceIds": [],
       "thumbnail": "assets/vocabulary-en-thumbs/mouse-c68efffa308cf43d.webp"
     },
@@ -6092,6 +6449,8 @@
       "editorialStatus": "draft",
       "galleryOrder": 28,
       "related": [],
+      "active": true,
+      "teachingType": "word",
       "sourceIds": [],
       "thumbnail": "assets/vocabulary-en-thumbs/parrot-e51d5a28a1540102.webp"
     },
@@ -6131,6 +6490,8 @@
           "kind": "form"
         }
       ],
+      "active": true,
+      "teachingType": "word",
       "sourceIds": [],
       "thumbnail": "assets/vocabulary-en-thumbs/pig-94d0dc715eaaa559.webp"
     },
@@ -6165,6 +6526,8 @@
       "editorialStatus": "draft",
       "galleryOrder": 34,
       "related": [],
+      "active": true,
+      "teachingType": "word",
       "sourceIds": [],
       "thumbnail": "assets/vocabulary-en-thumbs/snake-ca7da376360b3493.webp"
     },
@@ -6199,6 +6562,8 @@
       "editorialStatus": "draft",
       "galleryOrder": 36,
       "related": [],
+      "active": true,
+      "teachingType": "word",
       "sourceIds": [],
       "thumbnail": "assets/vocabulary-en-thumbs/tortoise-87a3806194e303ae.webp"
     },
@@ -6233,6 +6598,8 @@
       "editorialStatus": "draft",
       "galleryOrder": 37,
       "related": [],
+      "active": true,
+      "teachingType": "word",
       "sourceIds": [],
       "thumbnail": "assets/vocabulary-en-thumbs/turkey-314397a3792a0243.webp"
     },
@@ -6267,6 +6634,8 @@
       "editorialStatus": "draft",
       "galleryOrder": 38,
       "related": [],
+      "active": true,
+      "teachingType": "word",
       "sourceIds": [],
       "thumbnail": "assets/vocabulary-en-thumbs/wolf-ce7d82f5a27d6d9f.webp"
     },
@@ -6301,6 +6670,8 @@
       "editorialStatus": "draft",
       "galleryOrder": -99,
       "related": [],
+      "active": true,
+      "teachingType": "word",
       "sourceIds": [
         "benji"
       ],
@@ -6337,6 +6708,8 @@
       "editorialStatus": "draft",
       "galleryOrder": -98,
       "related": [],
+      "active": true,
+      "teachingType": "word",
       "sourceIds": [
         "benji"
       ],
@@ -6373,6 +6746,8 @@
       "editorialStatus": "draft",
       "galleryOrder": -97,
       "related": [],
+      "active": true,
+      "teachingType": "word",
       "sourceIds": [
         "benji"
       ],
@@ -6409,6 +6784,8 @@
       "editorialStatus": "draft",
       "galleryOrder": -96,
       "related": [],
+      "active": true,
+      "teachingType": "word",
       "sourceIds": [
         "benji"
       ],
@@ -6445,6 +6822,8 @@
       "editorialStatus": "draft",
       "galleryOrder": -95,
       "related": [],
+      "active": true,
+      "teachingType": "word",
       "sourceIds": [
         "benji"
       ],
@@ -6481,6 +6860,8 @@
       "editorialStatus": "draft",
       "galleryOrder": -94,
       "related": [],
+      "active": true,
+      "teachingType": "word",
       "sourceIds": [
         "benji"
       ],
@@ -6517,6 +6898,8 @@
       "editorialStatus": "draft",
       "galleryOrder": -93,
       "related": [],
+      "active": true,
+      "teachingType": "word",
       "sourceIds": [
         "benji"
       ],
@@ -6553,6 +6936,8 @@
       "editorialStatus": "draft",
       "galleryOrder": -92,
       "related": [],
+      "active": true,
+      "teachingType": "word",
       "sourceIds": [
         "benji"
       ],
@@ -6595,6 +6980,8 @@
           "kind": "form"
         }
       ],
+      "active": false,
+      "teachingType": "word",
       "sourceIds": [
         "benji"
       ],
@@ -6631,6 +7018,8 @@
       "editorialStatus": "draft",
       "galleryOrder": 22,
       "related": [],
+      "active": true,
+      "teachingType": "word",
       "sourceIds": [
         "benji"
       ],
@@ -6673,6 +7062,8 @@
           "kind": "form"
         }
       ],
+      "active": false,
+      "teachingType": "word",
       "sourceIds": [
         "benji"
       ],
@@ -6711,6 +7102,8 @@
       "editorialStatus": "draft",
       "galleryOrder": 2,
       "related": [],
+      "active": true,
+      "teachingType": "word",
       "sourceIds": [
         "benji"
       ],
@@ -6738,15 +7131,15 @@
       "topicIds": [
         "topic-17"
       ],
-      "partOfSpeech": [
-        "phrase"
-      ],
+      "partOfSpeech": [],
       "expressionType": "phrase",
       "difficultyBand": 2,
       "difficultyStatus": "draft",
       "editorialStatus": "draft",
       "galleryOrder": 22,
       "related": [],
+      "active": false,
+      "teachingType": "word",
       "sourceIds": [
         "benji"
       ],
@@ -6788,6 +7181,8 @@
           "kind": "form"
         }
       ],
+      "active": false,
+      "teachingType": "word",
       "sourceIds": [
         "benji"
       ],
@@ -6817,14 +7212,16 @@
         "topic-17"
       ],
       "partOfSpeech": [
-        "phrase"
+        "interjection"
       ],
-      "expressionType": "phrase",
+      "expressionType": "word",
       "difficultyBand": 2,
       "difficultyStatus": "draft",
       "editorialStatus": "draft",
       "galleryOrder": 17,
       "related": [],
+      "active": true,
+      "teachingType": "interaction",
       "sourceIds": [
         "benji"
       ],
@@ -6853,7 +7250,7 @@
         "topic-17"
       ],
       "partOfSpeech": [
-        "phrase"
+        "verb"
       ],
       "expressionType": "phrase",
       "difficultyBand": 2,
@@ -6861,6 +7258,8 @@
       "editorialStatus": "draft",
       "galleryOrder": 14,
       "related": [],
+      "active": true,
+      "teachingType": "interaction",
       "sourceIds": [
         "benji"
       ],
@@ -6888,15 +7287,15 @@
       "topicIds": [
         "topic-17"
       ],
-      "partOfSpeech": [
-        "phrase"
-      ],
+      "partOfSpeech": [],
       "expressionType": "phrase",
       "difficultyBand": 2,
       "difficultyStatus": "draft",
       "editorialStatus": "draft",
       "galleryOrder": 21,
       "related": [],
+      "active": false,
+      "teachingType": "word",
       "sourceIds": [
         "benji"
       ],
@@ -6933,6 +7332,8 @@
       "editorialStatus": "draft",
       "galleryOrder": 26,
       "related": [],
+      "active": true,
+      "teachingType": "word",
       "sourceIds": [
         "benji"
       ],
@@ -6975,6 +7376,8 @@
           "kind": "form"
         }
       ],
+      "active": true,
+      "teachingType": "word",
       "sourceIds": [
         "benji"
       ],
@@ -7012,6 +7415,8 @@
       "editorialStatus": "draft",
       "galleryOrder": 4,
       "related": [],
+      "active": true,
+      "teachingType": "word",
       "sourceIds": [
         "benji"
       ],
@@ -7049,6 +7454,8 @@
       "editorialStatus": "draft",
       "galleryOrder": 7,
       "related": [],
+      "active": true,
+      "teachingType": "word",
       "sourceIds": [
         "benji"
       ],
@@ -7086,6 +7493,8 @@
       "editorialStatus": "draft",
       "galleryOrder": 20,
       "related": [],
+      "active": true,
+      "teachingType": "word",
       "sourceIds": [
         "benji"
       ],
@@ -7123,6 +7532,8 @@
       "editorialStatus": "draft",
       "galleryOrder": 5,
       "related": [],
+      "active": true,
+      "teachingType": "word",
       "sourceIds": [
         "benji"
       ],
@@ -7160,6 +7571,8 @@
       "editorialStatus": "draft",
       "galleryOrder": 5,
       "related": [],
+      "active": true,
+      "teachingType": "word",
       "sourceIds": [
         "benji"
       ],
@@ -7196,6 +7609,8 @@
       "editorialStatus": "draft",
       "galleryOrder": 23,
       "related": [],
+      "active": true,
+      "teachingType": "word",
       "sourceIds": [
         "benji"
       ],
@@ -7233,6 +7648,8 @@
       "editorialStatus": "draft",
       "galleryOrder": 3,
       "related": [],
+      "active": true,
+      "teachingType": "word",
       "sourceIds": [
         "benji"
       ],
@@ -7270,6 +7687,8 @@
       "editorialStatus": "draft",
       "galleryOrder": 4,
       "related": [],
+      "active": true,
+      "teachingType": "word",
       "sourceIds": [
         "benji"
       ],
@@ -7307,6 +7726,8 @@
       "editorialStatus": "draft",
       "galleryOrder": 14,
       "related": [],
+      "active": true,
+      "teachingType": "word",
       "sourceIds": [
         "benji"
       ],
@@ -7344,6 +7765,8 @@
       "editorialStatus": "draft",
       "galleryOrder": 6,
       "related": [],
+      "active": true,
+      "teachingType": "word",
       "sourceIds": [
         "benji"
       ],
@@ -7380,6 +7803,8 @@
       "editorialStatus": "draft",
       "galleryOrder": 6,
       "related": [],
+      "active": true,
+      "teachingType": "word",
       "sourceIds": [
         "benji"
       ],
@@ -7417,6 +7842,8 @@
       "editorialStatus": "draft",
       "galleryOrder": 5,
       "related": [],
+      "active": true,
+      "teachingType": "word",
       "sourceIds": [
         "benji"
       ],
@@ -7454,6 +7881,8 @@
       "editorialStatus": "draft",
       "galleryOrder": 17,
       "related": [],
+      "active": true,
+      "teachingType": "word",
       "sourceIds": [
         "benji"
       ],
@@ -7491,6 +7920,8 @@
       "editorialStatus": "draft",
       "galleryOrder": 3,
       "related": [],
+      "active": true,
+      "teachingType": "word",
       "sourceIds": [
         "benji"
       ],
@@ -7527,6 +7958,8 @@
       "editorialStatus": "draft",
       "galleryOrder": 21,
       "related": [],
+      "active": true,
+      "teachingType": "word",
       "sourceIds": [
         "benji"
       ],
@@ -7564,6 +7997,8 @@
       "editorialStatus": "draft",
       "galleryOrder": 8,
       "related": [],
+      "active": true,
+      "teachingType": "word",
       "sourceIds": [
         "benji"
       ],
@@ -7601,6 +8036,8 @@
       "editorialStatus": "draft",
       "galleryOrder": 4,
       "related": [],
+      "active": true,
+      "teachingType": "word",
       "sourceIds": [
         "benji"
       ],
@@ -7637,6 +8074,8 @@
       "editorialStatus": "draft",
       "galleryOrder": 13,
       "related": [],
+      "active": true,
+      "teachingType": "word",
       "sourceIds": [
         "benji"
       ],
@@ -7674,6 +8113,8 @@
       "editorialStatus": "draft",
       "galleryOrder": 4,
       "related": [],
+      "active": true,
+      "teachingType": "word",
       "sourceIds": [
         "benji"
       ],
@@ -7711,6 +8152,8 @@
       "editorialStatus": "draft",
       "galleryOrder": 21,
       "related": [],
+      "active": true,
+      "teachingType": "word",
       "sourceIds": [
         "benji"
       ],
@@ -7748,6 +8191,8 @@
       "editorialStatus": "draft",
       "galleryOrder": 2,
       "related": [],
+      "active": true,
+      "teachingType": "word",
       "sourceIds": [
         "benji"
       ],
@@ -7784,6 +8229,8 @@
       "editorialStatus": "draft",
       "galleryOrder": 17,
       "related": [],
+      "active": true,
+      "teachingType": "word",
       "sourceIds": [
         "benji"
       ],
@@ -7821,6 +8268,8 @@
       "editorialStatus": "draft",
       "galleryOrder": 7,
       "related": [],
+      "active": true,
+      "teachingType": "word",
       "sourceIds": [
         "benji"
       ],
@@ -7858,6 +8307,8 @@
       "editorialStatus": "draft",
       "galleryOrder": 15,
       "related": [],
+      "active": true,
+      "teachingType": "word",
       "sourceIds": [
         "benji"
       ],
@@ -7895,6 +8346,8 @@
       "editorialStatus": "draft",
       "galleryOrder": 6,
       "related": [],
+      "active": true,
+      "teachingType": "word",
       "sourceIds": [
         "benji"
       ],
@@ -7931,6 +8384,8 @@
       "editorialStatus": "draft",
       "galleryOrder": 2,
       "related": [],
+      "active": true,
+      "teachingType": "word",
       "sourceIds": [
         "benji"
       ],
@@ -7968,6 +8423,8 @@
       "editorialStatus": "draft",
       "galleryOrder": 18,
       "related": [],
+      "active": true,
+      "teachingType": "word",
       "sourceIds": [
         "benji"
       ],
@@ -8005,6 +8462,8 @@
       "editorialStatus": "draft",
       "galleryOrder": 19,
       "related": [],
+      "active": true,
+      "teachingType": "word",
       "sourceIds": [
         "benji"
       ],
@@ -8042,6 +8501,8 @@
       "editorialStatus": "draft",
       "galleryOrder": 11,
       "related": [],
+      "active": true,
+      "teachingType": "word",
       "sourceIds": [
         "benji"
       ],
@@ -8079,6 +8540,8 @@
       "editorialStatus": "draft",
       "galleryOrder": 19,
       "related": [],
+      "active": true,
+      "teachingType": "word",
       "sourceIds": [
         "benji"
       ],
@@ -8116,6 +8579,8 @@
       "editorialStatus": "draft",
       "galleryOrder": 20,
       "related": [],
+      "active": true,
+      "teachingType": "word",
       "sourceIds": [
         "benji"
       ],
@@ -8153,6 +8618,8 @@
       "editorialStatus": "draft",
       "galleryOrder": 7,
       "related": [],
+      "active": true,
+      "teachingType": "word",
       "sourceIds": [
         "benji"
       ],
@@ -8190,6 +8657,8 @@
       "editorialStatus": "draft",
       "galleryOrder": 2,
       "related": [],
+      "active": true,
+      "teachingType": "word",
       "sourceIds": [
         "benji"
       ],
@@ -8226,6 +8695,8 @@
       "editorialStatus": "draft",
       "galleryOrder": 11,
       "related": [],
+      "active": true,
+      "teachingType": "word",
       "sourceIds": [
         "benji"
       ],
@@ -8263,6 +8734,8 @@
       "editorialStatus": "draft",
       "galleryOrder": 12,
       "related": [],
+      "active": true,
+      "teachingType": "word",
       "sourceIds": [
         "benji"
       ],
@@ -8300,6 +8773,8 @@
       "editorialStatus": "draft",
       "galleryOrder": 6,
       "related": [],
+      "active": true,
+      "teachingType": "word",
       "sourceIds": [
         "benji"
       ],
@@ -8337,6 +8812,8 @@
       "editorialStatus": "draft",
       "galleryOrder": 17,
       "related": [],
+      "active": true,
+      "teachingType": "word",
       "sourceIds": [
         "benji"
       ],
@@ -8374,6 +8851,8 @@
       "editorialStatus": "draft",
       "galleryOrder": 4,
       "related": [],
+      "active": true,
+      "teachingType": "word",
       "sourceIds": [
         "benji"
       ],
@@ -8411,6 +8890,8 @@
       "editorialStatus": "draft",
       "galleryOrder": 18,
       "related": [],
+      "active": true,
+      "teachingType": "word",
       "sourceIds": [
         "benji"
       ],
@@ -8448,6 +8929,8 @@
       "editorialStatus": "draft",
       "galleryOrder": 13,
       "related": [],
+      "active": true,
+      "teachingType": "word",
       "sourceIds": [
         "benji"
       ],
@@ -8485,6 +8968,8 @@
       "editorialStatus": "draft",
       "galleryOrder": 10,
       "related": [],
+      "active": true,
+      "teachingType": "word",
       "sourceIds": [
         "benji"
       ],
@@ -8522,6 +9007,8 @@
       "editorialStatus": "draft",
       "galleryOrder": 11,
       "related": [],
+      "active": true,
+      "teachingType": "word",
       "sourceIds": [
         "benji"
       ],
@@ -8559,6 +9046,8 @@
       "editorialStatus": "draft",
       "galleryOrder": 16,
       "related": [],
+      "active": true,
+      "teachingType": "word",
       "sourceIds": [
         "benji"
       ],
@@ -8596,6 +9085,8 @@
       "editorialStatus": "draft",
       "galleryOrder": 13,
       "related": [],
+      "active": true,
+      "teachingType": "word",
       "sourceIds": [
         "benji"
       ],
@@ -8633,6 +9124,8 @@
       "editorialStatus": "draft",
       "galleryOrder": 17,
       "related": [],
+      "active": true,
+      "teachingType": "word",
       "sourceIds": [
         "benji"
       ],
@@ -8670,6 +9163,8 @@
       "editorialStatus": "draft",
       "galleryOrder": 23,
       "related": [],
+      "active": true,
+      "teachingType": "word",
       "sourceIds": [
         "benji"
       ],
@@ -8707,6 +9202,8 @@
       "editorialStatus": "draft",
       "galleryOrder": 14,
       "related": [],
+      "active": true,
+      "teachingType": "word",
       "sourceIds": [
         "benji"
       ],
@@ -8744,6 +9241,8 @@
       "editorialStatus": "draft",
       "galleryOrder": 12,
       "related": [],
+      "active": true,
+      "teachingType": "word",
       "sourceIds": [
         "benji"
       ],
@@ -8781,6 +9280,8 @@
       "editorialStatus": "draft",
       "galleryOrder": 1,
       "related": [],
+      "active": true,
+      "teachingType": "word",
       "sourceIds": [
         "benji"
       ],
@@ -8818,6 +9319,8 @@
       "editorialStatus": "draft",
       "galleryOrder": 27,
       "related": [],
+      "active": true,
+      "teachingType": "word",
       "sourceIds": [
         "benji"
       ],
@@ -8855,6 +9358,8 @@
       "editorialStatus": "draft",
       "galleryOrder": 24,
       "related": [],
+      "active": true,
+      "teachingType": "word",
       "sourceIds": [
         "benji"
       ],
@@ -8882,15 +9387,15 @@
       "topicIds": [
         "topic-17"
       ],
-      "partOfSpeech": [
-        "phrase"
-      ],
+      "partOfSpeech": [],
       "expressionType": "phrase",
       "difficultyBand": 2,
       "difficultyStatus": "draft",
       "editorialStatus": "draft",
       "galleryOrder": 13,
       "related": [],
+      "active": false,
+      "teachingType": "word",
       "sourceIds": [
         "benji"
       ],
@@ -8918,15 +9423,15 @@
       "topicIds": [
         "topic-17"
       ],
-      "partOfSpeech": [
-        "phrase"
-      ],
+      "partOfSpeech": [],
       "expressionType": "phrase",
       "difficultyBand": 2,
       "difficultyStatus": "draft",
       "editorialStatus": "draft",
       "galleryOrder": 11,
       "related": [],
+      "active": false,
+      "teachingType": "word",
       "sourceIds": [
         "benji"
       ],
@@ -8954,15 +9459,15 @@
       "topicIds": [
         "topic-17"
       ],
-      "partOfSpeech": [
-        "phrase"
-      ],
+      "partOfSpeech": [],
       "expressionType": "phrase",
       "difficultyBand": 2,
       "difficultyStatus": "draft",
       "editorialStatus": "draft",
       "galleryOrder": 4,
       "related": [],
+      "active": false,
+      "teachingType": "word",
       "sourceIds": [
         "benji"
       ],
@@ -8990,15 +9495,15 @@
       "topicIds": [
         "topic-17"
       ],
-      "partOfSpeech": [
-        "phrase"
-      ],
+      "partOfSpeech": [],
       "expressionType": "phrase",
       "difficultyBand": 2,
       "difficultyStatus": "draft",
       "editorialStatus": "draft",
       "galleryOrder": 5,
       "related": [],
+      "active": false,
+      "teachingType": "word",
       "sourceIds": [
         "benji"
       ],
@@ -9036,6 +9541,8 @@
       "editorialStatus": "draft",
       "galleryOrder": 30,
       "related": [],
+      "active": true,
+      "teachingType": "interaction",
       "sourceIds": [
         "benji"
       ],
@@ -9073,6 +9580,8 @@
       "editorialStatus": "draft",
       "galleryOrder": 43,
       "related": [],
+      "active": true,
+      "teachingType": "word",
       "sourceIds": [
         "benji"
       ],
@@ -9110,6 +9619,8 @@
       "editorialStatus": "draft",
       "galleryOrder": 29,
       "related": [],
+      "active": true,
+      "teachingType": "word",
       "sourceIds": [
         "benji"
       ],
@@ -9146,6 +9657,8 @@
       "editorialStatus": "draft",
       "galleryOrder": 25,
       "related": [],
+      "active": true,
+      "teachingType": "word",
       "sourceIds": [
         "benji"
       ],
@@ -9182,6 +9695,8 @@
       "editorialStatus": "draft",
       "galleryOrder": 15,
       "related": [],
+      "active": true,
+      "teachingType": "word",
       "sourceIds": [
         "benji"
       ],
@@ -9219,6 +9734,8 @@
       "editorialStatus": "draft",
       "galleryOrder": 11,
       "related": [],
+      "active": true,
+      "teachingType": "word",
       "sourceIds": [
         "benji"
       ],
@@ -9260,6 +9777,8 @@
           "kind": "opposite"
         }
       ],
+      "active": true,
+      "teachingType": "word",
       "sourceIds": [
         "benji"
       ],
@@ -9296,6 +9815,8 @@
       "editorialStatus": "draft",
       "galleryOrder": 7,
       "related": [],
+      "active": true,
+      "teachingType": "word",
       "sourceIds": [
         "benji"
       ],
@@ -9332,6 +9853,8 @@
       "editorialStatus": "draft",
       "galleryOrder": 24,
       "related": [],
+      "active": true,
+      "teachingType": "word",
       "sourceIds": [
         "benji"
       ],
@@ -9368,6 +9891,8 @@
       "editorialStatus": "draft",
       "galleryOrder": 13,
       "related": [],
+      "active": true,
+      "teachingType": "word",
       "sourceIds": [
         "benji"
       ],
@@ -9410,6 +9935,8 @@
           "kind": "form"
         }
       ],
+      "active": false,
+      "teachingType": "word",
       "sourceIds": [
         "benji"
       ],
@@ -9446,6 +9973,8 @@
       "editorialStatus": "draft",
       "galleryOrder": 4,
       "related": [],
+      "active": true,
+      "teachingType": "word",
       "sourceIds": [
         "benji"
       ],
@@ -9482,6 +10011,8 @@
       "editorialStatus": "draft",
       "galleryOrder": 17,
       "related": [],
+      "active": true,
+      "teachingType": "word",
       "sourceIds": [
         "benji"
       ],
@@ -9518,6 +10049,8 @@
       "editorialStatus": "draft",
       "galleryOrder": 11,
       "related": [],
+      "active": true,
+      "teachingType": "word",
       "sourceIds": [
         "benji"
       ],
@@ -9554,6 +10087,8 @@
       "editorialStatus": "needs-review",
       "galleryOrder": 5,
       "related": [],
+      "active": true,
+      "teachingType": "word",
       "sourceIds": [
         "benji"
       ],
@@ -9590,6 +10125,8 @@
       "editorialStatus": "draft",
       "galleryOrder": 22,
       "related": [],
+      "active": true,
+      "teachingType": "word",
       "sourceIds": [
         "benji"
       ],
@@ -9626,6 +10163,8 @@
       "editorialStatus": "draft",
       "galleryOrder": 3,
       "related": [],
+      "active": true,
+      "teachingType": "word",
       "sourceIds": [
         "benji"
       ],
@@ -9662,6 +10201,8 @@
       "editorialStatus": "draft",
       "galleryOrder": 19,
       "related": [],
+      "active": true,
+      "teachingType": "word",
       "sourceIds": [
         "benji"
       ],
@@ -9699,6 +10240,8 @@
       "editorialStatus": "draft",
       "galleryOrder": 6,
       "related": [],
+      "active": true,
+      "teachingType": "word",
       "sourceIds": [
         "benji"
       ],
@@ -9736,6 +10279,8 @@
       "editorialStatus": "draft",
       "galleryOrder": 15,
       "related": [],
+      "active": true,
+      "teachingType": "word",
       "sourceIds": [
         "benji"
       ],
@@ -9773,6 +10318,8 @@
       "editorialStatus": "draft",
       "galleryOrder": 18,
       "related": [],
+      "active": true,
+      "teachingType": "word",
       "sourceIds": [
         "benji"
       ],
@@ -9810,6 +10357,8 @@
       "editorialStatus": "draft",
       "galleryOrder": 3,
       "related": [],
+      "active": true,
+      "teachingType": "word",
       "sourceIds": [
         "benji"
       ],
@@ -9851,6 +10400,8 @@
           "kind": "opposite"
         }
       ],
+      "active": true,
+      "teachingType": "word",
       "sourceIds": [
         "benji"
       ],
@@ -9878,15 +10429,15 @@
       "topicIds": [
         "topic-17"
       ],
-      "partOfSpeech": [
-        "phrase"
-      ],
+      "partOfSpeech": [],
       "expressionType": "phrase",
       "difficultyBand": 2,
       "difficultyStatus": "draft",
       "editorialStatus": "draft",
       "galleryOrder": 12,
       "related": [],
+      "active": true,
+      "teachingType": "interaction",
       "sourceIds": [
         "benji"
       ],
@@ -9923,6 +10474,8 @@
       "editorialStatus": "draft",
       "galleryOrder": 7,
       "related": [],
+      "active": true,
+      "teachingType": "word",
       "sourceIds": [
         "benji"
       ],
@@ -9960,6 +10513,8 @@
       "editorialStatus": "draft",
       "galleryOrder": 8,
       "related": [],
+      "active": true,
+      "teachingType": "word",
       "sourceIds": [
         "benji"
       ],
@@ -9997,6 +10552,8 @@
       "editorialStatus": "draft",
       "galleryOrder": 33,
       "related": [],
+      "active": true,
+      "teachingType": "word",
       "sourceIds": [
         "benji"
       ],
@@ -10034,6 +10591,8 @@
       "editorialStatus": "draft",
       "galleryOrder": 7,
       "related": [],
+      "active": true,
+      "teachingType": "word",
       "sourceIds": [
         "benji"
       ],
@@ -10071,6 +10630,8 @@
       "editorialStatus": "draft",
       "galleryOrder": 4,
       "related": [],
+      "active": true,
+      "teachingType": "word",
       "sourceIds": [
         "benji"
       ],
@@ -10113,6 +10674,8 @@
           "kind": "related"
         }
       ],
+      "active": true,
+      "teachingType": "word",
       "sourceIds": [
         "benji"
       ],
@@ -10151,6 +10714,8 @@
       "editorialStatus": "draft",
       "galleryOrder": 20,
       "related": [],
+      "active": true,
+      "teachingType": "word",
       "sourceIds": [
         "benji"
       ],
@@ -10188,6 +10753,8 @@
       "editorialStatus": "draft",
       "galleryOrder": 15,
       "related": [],
+      "active": true,
+      "teachingType": "word",
       "sourceIds": [
         "benji"
       ],
@@ -10224,6 +10791,8 @@
       "editorialStatus": "draft",
       "galleryOrder": 23,
       "related": [],
+      "active": true,
+      "teachingType": "word",
       "sourceIds": [
         "benji"
       ],
@@ -10261,6 +10830,8 @@
       "editorialStatus": "draft",
       "galleryOrder": 9,
       "related": [],
+      "active": true,
+      "teachingType": "word",
       "sourceIds": [
         "benji"
       ],
@@ -10302,6 +10873,8 @@
           "kind": "opposite"
         }
       ],
+      "active": true,
+      "teachingType": "word",
       "sourceIds": [
         "benji"
       ],
@@ -10339,6 +10912,8 @@
       "editorialStatus": "draft",
       "galleryOrder": 35,
       "related": [],
+      "active": true,
+      "teachingType": "word",
       "sourceIds": [
         "benji"
       ],
@@ -10375,6 +10950,8 @@
       "editorialStatus": "draft",
       "galleryOrder": 19,
       "related": [],
+      "active": true,
+      "teachingType": "word",
       "sourceIds": [
         "benji"
       ],
@@ -10411,6 +10988,8 @@
       "editorialStatus": "draft",
       "galleryOrder": 2,
       "related": [],
+      "active": true,
+      "teachingType": "word",
       "sourceIds": [
         "benji"
       ],
@@ -10448,6 +11027,8 @@
       "editorialStatus": "draft",
       "galleryOrder": 3,
       "related": [],
+      "active": true,
+      "teachingType": "word",
       "sourceIds": [
         "benji"
       ],
@@ -10484,6 +11065,8 @@
       "editorialStatus": "draft",
       "galleryOrder": 26,
       "related": [],
+      "active": true,
+      "teachingType": "word",
       "sourceIds": [
         "benji"
       ],
@@ -10521,6 +11104,8 @@
       "editorialStatus": "draft",
       "galleryOrder": 3,
       "related": [],
+      "active": true,
+      "teachingType": "word",
       "sourceIds": [
         "benji"
       ],
@@ -10558,6 +11143,8 @@
       "editorialStatus": "draft",
       "galleryOrder": 12,
       "related": [],
+      "active": true,
+      "teachingType": "word",
       "sourceIds": [
         "benji"
       ],
@@ -10594,6 +11181,8 @@
       "editorialStatus": "draft",
       "galleryOrder": 17,
       "related": [],
+      "active": true,
+      "teachingType": "word",
       "sourceIds": [
         "benji"
       ],
@@ -10631,6 +11220,8 @@
       "editorialStatus": "draft",
       "galleryOrder": 4,
       "related": [],
+      "active": true,
+      "teachingType": "word",
       "sourceIds": [
         "benji"
       ],
@@ -10669,6 +11260,8 @@
       "editorialStatus": "draft",
       "galleryOrder": 1,
       "related": [],
+      "active": true,
+      "teachingType": "word",
       "sourceIds": [
         "benji"
       ],
@@ -10705,6 +11298,8 @@
       "editorialStatus": "draft",
       "galleryOrder": 1,
       "related": [],
+      "active": true,
+      "teachingType": "word",
       "sourceIds": [
         "benji"
       ],
@@ -10741,6 +11336,8 @@
       "editorialStatus": "draft",
       "galleryOrder": 2,
       "related": [],
+      "active": true,
+      "teachingType": "word",
       "sourceIds": [
         "benji"
       ],
@@ -10777,6 +11374,8 @@
       "editorialStatus": "draft",
       "galleryOrder": 1,
       "related": [],
+      "active": true,
+      "teachingType": "word",
       "sourceIds": [
         "benji"
       ],
@@ -10813,6 +11412,8 @@
       "editorialStatus": "draft",
       "galleryOrder": 1,
       "related": [],
+      "active": true,
+      "teachingType": "word",
       "sourceIds": [
         "benji"
       ],
@@ -10849,6 +11450,8 @@
       "editorialStatus": "needs-review",
       "galleryOrder": 1,
       "related": [],
+      "active": true,
+      "teachingType": "word",
       "sourceIds": [
         "benji"
       ],
@@ -10885,6 +11488,8 @@
       "editorialStatus": "draft",
       "galleryOrder": 3,
       "related": [],
+      "active": true,
+      "teachingType": "word",
       "sourceIds": [
         "benji"
       ],
@@ -10921,6 +11526,8 @@
       "editorialStatus": "draft",
       "galleryOrder": 2,
       "related": [],
+      "active": true,
+      "teachingType": "word",
       "sourceIds": [
         "benji"
       ],
@@ -10957,6 +11564,8 @@
       "editorialStatus": "draft",
       "galleryOrder": 1,
       "related": [],
+      "active": true,
+      "teachingType": "word",
       "sourceIds": [
         "benji"
       ],
@@ -10993,6 +11602,8 @@
       "editorialStatus": "draft",
       "galleryOrder": 2,
       "related": [],
+      "active": true,
+      "teachingType": "word",
       "sourceIds": [
         "benji"
       ],
@@ -11029,6 +11640,8 @@
       "editorialStatus": "draft",
       "galleryOrder": 5,
       "related": [],
+      "active": true,
+      "teachingType": "word",
       "sourceIds": [
         "benji"
       ],
@@ -11065,6 +11678,8 @@
       "editorialStatus": "draft",
       "galleryOrder": 4,
       "related": [],
+      "active": true,
+      "teachingType": "word",
       "sourceIds": [
         "benji"
       ],
@@ -11101,6 +11716,8 @@
       "editorialStatus": "draft",
       "galleryOrder": 1,
       "related": [],
+      "active": true,
+      "teachingType": "word",
       "sourceIds": [
         "benji"
       ],
@@ -11137,6 +11754,8 @@
       "editorialStatus": "draft",
       "galleryOrder": 3,
       "related": [],
+      "active": true,
+      "teachingType": "word",
       "sourceIds": [
         "benji"
       ],
@@ -11173,6 +11792,8 @@
       "editorialStatus": "draft",
       "galleryOrder": 5,
       "related": [],
+      "active": true,
+      "teachingType": "word",
       "sourceIds": [
         "benji"
       ],
@@ -11209,6 +11830,8 @@
       "editorialStatus": "draft",
       "galleryOrder": 4,
       "related": [],
+      "active": true,
+      "teachingType": "word",
       "sourceIds": [
         "benji"
       ],
@@ -11245,6 +11868,8 @@
       "editorialStatus": "draft",
       "galleryOrder": 8,
       "related": [],
+      "active": true,
+      "teachingType": "word",
       "sourceIds": [
         "benji"
       ],
@@ -11281,6 +11906,8 @@
       "editorialStatus": "draft",
       "galleryOrder": 10,
       "related": [],
+      "active": true,
+      "teachingType": "word",
       "sourceIds": [
         "benji"
       ],
@@ -11317,6 +11944,8 @@
       "editorialStatus": "draft",
       "galleryOrder": 11,
       "related": [],
+      "active": true,
+      "teachingType": "word",
       "sourceIds": [
         "benji"
       ],
@@ -11353,6 +11982,8 @@
       "editorialStatus": "draft",
       "galleryOrder": 2,
       "related": [],
+      "active": true,
+      "teachingType": "word",
       "sourceIds": [
         "benji"
       ],
@@ -11389,6 +12020,8 @@
       "editorialStatus": "draft",
       "galleryOrder": 13,
       "related": [],
+      "active": true,
+      "teachingType": "word",
       "sourceIds": [
         "benji"
       ],
@@ -11425,6 +12058,8 @@
       "editorialStatus": "draft",
       "galleryOrder": 2,
       "related": [],
+      "active": true,
+      "teachingType": "word",
       "sourceIds": [
         "benji"
       ],
@@ -11461,6 +12096,8 @@
       "editorialStatus": "draft",
       "galleryOrder": -89,
       "related": [],
+      "active": true,
+      "teachingType": "word",
       "sourceIds": [
         "benji"
       ],
@@ -11497,6 +12134,8 @@
       "editorialStatus": "draft",
       "galleryOrder": 6,
       "related": [],
+      "active": true,
+      "teachingType": "word",
       "sourceIds": [
         "benji"
       ],
@@ -11533,6 +12172,8 @@
       "editorialStatus": "draft",
       "galleryOrder": 1,
       "related": [],
+      "active": true,
+      "teachingType": "word",
       "sourceIds": [
         "benji"
       ],
@@ -11569,6 +12210,8 @@
       "editorialStatus": "draft",
       "galleryOrder": 9,
       "related": [],
+      "active": true,
+      "teachingType": "word",
       "sourceIds": [
         "benji"
       ],
@@ -11605,6 +12248,8 @@
       "editorialStatus": "draft",
       "galleryOrder": 16,
       "related": [],
+      "active": true,
+      "teachingType": "word",
       "sourceIds": [
         "benji"
       ],
@@ -11641,6 +12286,8 @@
       "editorialStatus": "needs-review",
       "galleryOrder": 5,
       "related": [],
+      "active": true,
+      "teachingType": "word",
       "sourceIds": [
         "benji"
       ],
@@ -11677,6 +12324,8 @@
       "editorialStatus": "draft",
       "galleryOrder": 7,
       "related": [],
+      "active": true,
+      "teachingType": "word",
       "sourceIds": [
         "benji"
       ],
@@ -11713,6 +12362,8 @@
       "editorialStatus": "draft",
       "galleryOrder": 4,
       "related": [],
+      "active": true,
+      "teachingType": "word",
       "sourceIds": [
         "benji"
       ],
@@ -11754,6 +12405,8 @@
           "kind": "opposite"
         }
       ],
+      "active": true,
+      "teachingType": "word",
       "sourceIds": [
         "benji"
       ],
@@ -11790,6 +12443,8 @@
       "editorialStatus": "draft",
       "galleryOrder": 19,
       "related": [],
+      "active": true,
+      "teachingType": "word",
       "sourceIds": [
         "benji"
       ],
@@ -11826,6 +12481,8 @@
       "editorialStatus": "draft",
       "galleryOrder": 13,
       "related": [],
+      "active": true,
+      "teachingType": "word",
       "sourceIds": [
         "benji"
       ],
@@ -11862,6 +12519,8 @@
       "editorialStatus": "draft",
       "galleryOrder": 15,
       "related": [],
+      "active": true,
+      "teachingType": "word",
       "sourceIds": [
         "benji"
       ],
@@ -11898,6 +12557,8 @@
       "editorialStatus": "needs-review",
       "galleryOrder": 22,
       "related": [],
+      "active": true,
+      "teachingType": "word",
       "sourceIds": [
         "benji"
       ],
@@ -11934,6 +12595,8 @@
       "editorialStatus": "draft",
       "galleryOrder": 4,
       "related": [],
+      "active": true,
+      "teachingType": "word",
       "sourceIds": [
         "benji"
       ],
@@ -11970,6 +12633,8 @@
       "editorialStatus": "draft",
       "galleryOrder": 23,
       "related": [],
+      "active": true,
+      "teachingType": "word",
       "sourceIds": [
         "benji"
       ],
@@ -12006,6 +12671,8 @@
       "editorialStatus": "draft",
       "galleryOrder": 8,
       "related": [],
+      "active": true,
+      "teachingType": "word",
       "sourceIds": [
         "benji"
       ],
@@ -12042,6 +12709,8 @@
       "editorialStatus": "draft",
       "galleryOrder": 4,
       "related": [],
+      "active": true,
+      "teachingType": "word",
       "sourceIds": [
         "benji"
       ],
@@ -12078,6 +12747,8 @@
       "editorialStatus": "draft",
       "galleryOrder": 16,
       "related": [],
+      "active": true,
+      "teachingType": "word",
       "sourceIds": [
         "benji"
       ],
@@ -12114,6 +12785,8 @@
       "editorialStatus": "needs-review",
       "galleryOrder": 9,
       "related": [],
+      "active": true,
+      "teachingType": "word",
       "sourceIds": [
         "benji"
       ],
@@ -12150,6 +12823,8 @@
       "editorialStatus": "draft",
       "galleryOrder": 5,
       "related": [],
+      "active": true,
+      "teachingType": "word",
       "sourceIds": [
         "benji"
       ],
@@ -12178,14 +12853,16 @@
         "topic-17"
       ],
       "partOfSpeech": [
-        "phrase"
+        "interjection"
       ],
-      "expressionType": "phrase",
+      "expressionType": "word",
       "difficultyBand": 2,
       "difficultyStatus": "draft",
       "editorialStatus": "draft",
       "galleryOrder": 9,
       "related": [],
+      "active": true,
+      "teachingType": "interaction",
       "sourceIds": [
         "benji"
       ],
@@ -12222,6 +12899,8 @@
       "editorialStatus": "draft",
       "galleryOrder": 10,
       "related": [],
+      "active": true,
+      "teachingType": "word",
       "sourceIds": [
         "benji"
       ],
@@ -12258,6 +12937,8 @@
       "editorialStatus": "draft",
       "galleryOrder": 7,
       "related": [],
+      "active": true,
+      "teachingType": "word",
       "sourceIds": [
         "benji"
       ],
@@ -12294,6 +12975,8 @@
       "editorialStatus": "draft",
       "galleryOrder": 12,
       "related": [],
+      "active": true,
+      "teachingType": "word",
       "sourceIds": [
         "benji"
       ],
@@ -12330,6 +13013,8 @@
       "editorialStatus": "draft",
       "galleryOrder": 11,
       "related": [],
+      "active": true,
+      "teachingType": "word",
       "sourceIds": [
         "benji"
       ],
@@ -12366,6 +13051,8 @@
       "editorialStatus": "draft",
       "galleryOrder": 8,
       "related": [],
+      "active": true,
+      "teachingType": "word",
       "sourceIds": [
         "benji"
       ],
@@ -12402,6 +13089,8 @@
       "editorialStatus": "draft",
       "galleryOrder": 9,
       "related": [],
+      "active": true,
+      "teachingType": "word",
       "sourceIds": [
         "benji"
       ],
@@ -12438,6 +13127,8 @@
       "editorialStatus": "draft",
       "galleryOrder": 10,
       "related": [],
+      "active": true,
+      "teachingType": "word",
       "sourceIds": [
         "benji"
       ],
@@ -12474,6 +13165,8 @@
       "editorialStatus": "draft",
       "galleryOrder": 11,
       "related": [],
+      "active": true,
+      "teachingType": "word",
       "sourceIds": [
         "benji"
       ],
@@ -12510,6 +13203,8 @@
       "editorialStatus": "draft",
       "galleryOrder": 15,
       "related": [],
+      "active": true,
+      "teachingType": "word",
       "sourceIds": [
         "benji"
       ],
@@ -12546,6 +13241,8 @@
       "editorialStatus": "draft",
       "galleryOrder": 26,
       "related": [],
+      "active": true,
+      "teachingType": "word",
       "sourceIds": [
         "benji"
       ],
@@ -12582,6 +13279,8 @@
       "editorialStatus": "draft",
       "galleryOrder": 27,
       "related": [],
+      "active": true,
+      "teachingType": "word",
       "sourceIds": [
         "benji"
       ],
@@ -12618,6 +13317,8 @@
       "editorialStatus": "draft",
       "galleryOrder": 18,
       "related": [],
+      "active": true,
+      "teachingType": "word",
       "sourceIds": [
         "benji"
       ],
@@ -12654,6 +13355,8 @@
       "editorialStatus": "draft",
       "galleryOrder": 12,
       "related": [],
+      "active": true,
+      "teachingType": "word",
       "sourceIds": [
         "benji"
       ],
@@ -12690,6 +13393,8 @@
       "editorialStatus": "draft",
       "galleryOrder": 9,
       "related": [],
+      "active": true,
+      "teachingType": "word",
       "sourceIds": [
         "benji"
       ],
@@ -12726,6 +13431,8 @@
       "editorialStatus": "draft",
       "galleryOrder": 19,
       "related": [],
+      "active": true,
+      "teachingType": "word",
       "sourceIds": [
         "benji"
       ],
@@ -12762,6 +13469,8 @@
       "editorialStatus": "draft",
       "galleryOrder": 10,
       "related": [],
+      "active": true,
+      "teachingType": "word",
       "sourceIds": [
         "benji"
       ],
@@ -12798,6 +13507,8 @@
       "editorialStatus": "draft",
       "galleryOrder": 14,
       "related": [],
+      "active": true,
+      "teachingType": "word",
       "sourceIds": [
         "benji"
       ],
@@ -12834,6 +13545,8 @@
       "editorialStatus": "draft",
       "galleryOrder": 11,
       "related": [],
+      "active": true,
+      "teachingType": "word",
       "sourceIds": [
         "benji"
       ],
@@ -12870,6 +13583,8 @@
       "editorialStatus": "draft",
       "galleryOrder": 15,
       "related": [],
+      "active": true,
+      "teachingType": "word",
       "sourceIds": [
         "benji"
       ],
@@ -12906,6 +13621,8 @@
       "editorialStatus": "draft",
       "galleryOrder": 14,
       "related": [],
+      "active": true,
+      "teachingType": "word",
       "sourceIds": [
         "benji"
       ],
@@ -12942,6 +13659,8 @@
       "editorialStatus": "draft",
       "galleryOrder": 21,
       "related": [],
+      "active": true,
+      "teachingType": "word",
       "sourceIds": [
         "benji"
       ],
@@ -12978,6 +13697,8 @@
       "editorialStatus": "draft",
       "galleryOrder": -91,
       "related": [],
+      "active": true,
+      "teachingType": "word",
       "sourceIds": [
         "benji"
       ],
@@ -13006,14 +13727,16 @@
         "topic-17"
       ],
       "partOfSpeech": [
-        "phrase"
+        "interjection"
       ],
-      "expressionType": "phrase",
+      "expressionType": "word",
       "difficultyBand": 2,
       "difficultyStatus": "draft",
       "editorialStatus": "draft",
       "galleryOrder": 15,
       "related": [],
+      "active": true,
+      "teachingType": "interaction",
       "sourceIds": [
         "benji"
       ],
@@ -13050,6 +13773,8 @@
       "editorialStatus": "draft",
       "galleryOrder": 16,
       "related": [],
+      "active": true,
+      "teachingType": "word",
       "sourceIds": [
         "benji"
       ],
@@ -13086,6 +13811,8 @@
       "editorialStatus": "draft",
       "galleryOrder": 6,
       "related": [],
+      "active": true,
+      "teachingType": "word",
       "sourceIds": [
         "benji"
       ],
@@ -13122,6 +13849,8 @@
       "editorialStatus": "draft",
       "galleryOrder": 17,
       "related": [],
+      "active": true,
+      "teachingType": "word",
       "sourceIds": [
         "benji"
       ],
@@ -13158,6 +13887,8 @@
       "editorialStatus": "draft",
       "galleryOrder": 10,
       "related": [],
+      "active": true,
+      "teachingType": "word",
       "sourceIds": [
         "benji"
       ],
@@ -13194,6 +13925,8 @@
       "editorialStatus": "draft",
       "galleryOrder": 18,
       "related": [],
+      "active": true,
+      "teachingType": "word",
       "sourceIds": [
         "benji"
       ],
@@ -13235,6 +13968,8 @@
           "kind": "opposite"
         }
       ],
+      "active": true,
+      "teachingType": "word",
       "sourceIds": [
         "benji"
       ],
@@ -13271,6 +14006,8 @@
       "editorialStatus": "draft",
       "galleryOrder": 19,
       "related": [],
+      "active": true,
+      "teachingType": "word",
       "sourceIds": [
         "benji"
       ],
@@ -13307,6 +14044,8 @@
       "editorialStatus": "draft",
       "galleryOrder": 16,
       "related": [],
+      "active": true,
+      "teachingType": "word",
       "sourceIds": [
         "benji"
       ],
@@ -13343,6 +14082,8 @@
       "editorialStatus": "draft",
       "galleryOrder": 15,
       "related": [],
+      "active": true,
+      "teachingType": "word",
       "sourceIds": [
         "benji"
       ],
@@ -13379,6 +14120,8 @@
       "editorialStatus": "draft",
       "galleryOrder": 16,
       "related": [],
+      "active": true,
+      "teachingType": "word",
       "sourceIds": [
         "benji"
       ],
@@ -13415,6 +14158,8 @@
       "editorialStatus": "draft",
       "galleryOrder": 25,
       "related": [],
+      "active": true,
+      "teachingType": "word",
       "sourceIds": [
         "benji"
       ],
@@ -13451,6 +14196,8 @@
       "editorialStatus": "draft",
       "galleryOrder": 26,
       "related": [],
+      "active": true,
+      "teachingType": "word",
       "sourceIds": [
         "benji"
       ],
@@ -13487,6 +14234,8 @@
       "editorialStatus": "draft",
       "galleryOrder": 35,
       "related": [],
+      "active": true,
+      "teachingType": "word",
       "sourceIds": [
         "benji"
       ],
@@ -13523,6 +14272,8 @@
       "editorialStatus": "draft",
       "galleryOrder": 21,
       "related": [],
+      "active": true,
+      "teachingType": "word",
       "sourceIds": [
         "benji"
       ],
@@ -13559,6 +14310,8 @@
       "editorialStatus": "needs-review",
       "galleryOrder": 8,
       "related": [],
+      "active": true,
+      "teachingType": "word",
       "sourceIds": [
         "benji"
       ],
@@ -13595,6 +14348,8 @@
       "editorialStatus": "needs-review",
       "galleryOrder": 18,
       "related": [],
+      "active": true,
+      "teachingType": "word",
       "sourceIds": [
         "benji"
       ],
@@ -13631,6 +14386,8 @@
       "editorialStatus": "draft",
       "galleryOrder": 20,
       "related": [],
+      "active": true,
+      "teachingType": "word",
       "sourceIds": [
         "benji"
       ],
@@ -13667,6 +14424,8 @@
       "editorialStatus": "draft",
       "galleryOrder": 16,
       "related": [],
+      "active": true,
+      "teachingType": "word",
       "sourceIds": [
         "benji"
       ],
@@ -13703,6 +14462,8 @@
       "editorialStatus": "draft",
       "galleryOrder": 21,
       "related": [],
+      "active": true,
+      "teachingType": "word",
       "sourceIds": [
         "benji"
       ],
@@ -13739,6 +14500,8 @@
       "editorialStatus": "draft",
       "galleryOrder": 30,
       "related": [],
+      "active": true,
+      "teachingType": "word",
       "sourceIds": [
         "benji"
       ],
@@ -13775,6 +14538,8 @@
       "editorialStatus": "draft",
       "galleryOrder": 38,
       "related": [],
+      "active": true,
+      "teachingType": "word",
       "sourceIds": [
         "benji"
       ],
@@ -13811,6 +14576,8 @@
       "editorialStatus": "draft",
       "galleryOrder": 39,
       "related": [],
+      "active": true,
+      "teachingType": "word",
       "sourceIds": [
         "benji"
       ],
@@ -13847,6 +14614,8 @@
       "editorialStatus": "draft",
       "galleryOrder": 40,
       "related": [],
+      "active": true,
+      "teachingType": "word",
       "sourceIds": [
         "benji"
       ],
@@ -13883,6 +14652,8 @@
       "editorialStatus": "draft",
       "galleryOrder": 20,
       "related": [],
+      "active": true,
+      "teachingType": "word",
       "sourceIds": [
         "benji"
       ],
@@ -13919,6 +14690,8 @@
       "editorialStatus": "draft",
       "galleryOrder": 31,
       "related": [],
+      "active": true,
+      "teachingType": "word",
       "sourceIds": [
         "benji"
       ],
@@ -13955,6 +14728,8 @@
       "editorialStatus": "draft",
       "galleryOrder": 41,
       "related": [],
+      "active": true,
+      "teachingType": "word",
       "sourceIds": [
         "benji"
       ],
@@ -13991,6 +14766,8 @@
       "editorialStatus": "draft",
       "galleryOrder": -90,
       "related": [],
+      "active": true,
+      "teachingType": "word",
       "sourceIds": [
         "benji"
       ],
@@ -14027,6 +14804,8 @@
       "editorialStatus": "needs-review",
       "galleryOrder": 23,
       "related": [],
+      "active": true,
+      "teachingType": "word",
       "sourceIds": [
         "benji"
       ],
@@ -14063,6 +14842,8 @@
       "editorialStatus": "draft",
       "galleryOrder": 24,
       "related": [],
+      "active": true,
+      "teachingType": "word",
       "sourceIds": [
         "benji"
       ],
@@ -14099,6 +14880,8 @@
       "editorialStatus": "draft",
       "galleryOrder": 13,
       "related": [],
+      "active": true,
+      "teachingType": "word",
       "sourceIds": [
         "benji"
       ],
@@ -14135,6 +14918,8 @@
       "editorialStatus": "draft",
       "galleryOrder": 25,
       "related": [],
+      "active": true,
+      "teachingType": "word",
       "sourceIds": [
         "benji"
       ],
@@ -14171,6 +14956,8 @@
       "editorialStatus": "draft",
       "galleryOrder": 14,
       "related": [],
+      "active": true,
+      "teachingType": "word",
       "sourceIds": [
         "benji"
       ],
@@ -14207,6 +14994,8 @@
       "editorialStatus": "draft",
       "galleryOrder": 15,
       "related": [],
+      "active": true,
+      "teachingType": "word",
       "sourceIds": [
         "benji"
       ],
@@ -14243,6 +15032,8 @@
       "editorialStatus": "draft",
       "galleryOrder": 10,
       "related": [],
+      "active": true,
+      "teachingType": "word",
       "sourceIds": [
         "benji"
       ],
@@ -14279,6 +15070,8 @@
       "editorialStatus": "draft",
       "galleryOrder": 33,
       "related": [],
+      "active": true,
+      "teachingType": "word",
       "sourceIds": [
         "benji"
       ],
@@ -14315,6 +15108,8 @@
       "editorialStatus": "draft",
       "galleryOrder": -88,
       "related": [],
+      "active": true,
+      "teachingType": "word",
       "sourceIds": [
         "benji"
       ],
@@ -14351,6 +15146,8 @@
       "editorialStatus": "draft",
       "galleryOrder": 18,
       "related": [],
+      "active": true,
+      "teachingType": "word",
       "sourceIds": [
         "benji"
       ],
@@ -14387,6 +15184,8 @@
       "editorialStatus": "draft",
       "galleryOrder": 27,
       "related": [],
+      "active": true,
+      "teachingType": "word",
       "sourceIds": [
         "benji"
       ],
@@ -14423,6 +15222,8 @@
       "editorialStatus": "draft",
       "galleryOrder": 21,
       "related": [],
+      "active": true,
+      "teachingType": "word",
       "sourceIds": [
         "benji"
       ],
@@ -14459,6 +15260,8 @@
       "editorialStatus": "draft",
       "galleryOrder": 45,
       "related": [],
+      "active": true,
+      "teachingType": "word",
       "sourceIds": [
         "benji"
       ],
@@ -14495,6 +15298,8 @@
       "editorialStatus": "draft",
       "galleryOrder": 28,
       "related": [],
+      "active": true,
+      "teachingType": "word",
       "sourceIds": [
         "benji"
       ],
@@ -14531,6 +15336,8 @@
       "editorialStatus": "draft",
       "galleryOrder": 29,
       "related": [],
+      "active": true,
+      "teachingType": "word",
       "sourceIds": [
         "benji"
       ],
@@ -14567,6 +15374,8 @@
       "editorialStatus": "draft",
       "galleryOrder": 31,
       "related": [],
+      "active": true,
+      "teachingType": "word",
       "sourceIds": [
         "benji"
       ],
@@ -14603,6 +15412,8 @@
       "editorialStatus": "draft",
       "galleryOrder": 21,
       "related": [],
+      "active": true,
+      "teachingType": "word",
       "sourceIds": [
         "benji"
       ],
@@ -14639,6 +15450,8 @@
       "editorialStatus": "draft",
       "galleryOrder": 32,
       "related": [],
+      "active": true,
+      "teachingType": "word",
       "sourceIds": [
         "benji"
       ],
@@ -14675,6 +15488,8 @@
       "editorialStatus": "draft",
       "galleryOrder": 35,
       "related": [],
+      "active": true,
+      "teachingType": "word",
       "sourceIds": [
         "benji"
       ],
@@ -14711,6 +15526,8 @@
       "editorialStatus": "draft",
       "galleryOrder": 33,
       "related": [],
+      "active": true,
+      "teachingType": "word",
       "sourceIds": [
         "benji"
       ],
@@ -14747,6 +15564,8 @@
       "editorialStatus": "draft",
       "galleryOrder": 23,
       "related": [],
+      "active": true,
+      "teachingType": "word",
       "sourceIds": [
         "benji"
       ],
@@ -14783,6 +15602,8 @@
       "editorialStatus": "draft",
       "galleryOrder": 34,
       "related": [],
+      "active": true,
+      "teachingType": "word",
       "sourceIds": [
         "benji"
       ],
@@ -14819,6 +15640,8 @@
       "editorialStatus": "draft",
       "galleryOrder": 24,
       "related": [],
+      "active": true,
+      "teachingType": "word",
       "sourceIds": [
         "benji"
       ],
@@ -14855,6 +15678,8 @@
       "editorialStatus": "draft",
       "galleryOrder": 12,
       "related": [],
+      "active": true,
+      "teachingType": "word",
       "sourceIds": [
         "benji"
       ],
@@ -14883,14 +15708,16 @@
         "topic-17"
       ],
       "partOfSpeech": [
-        "phrase"
+        "interjection"
       ],
-      "expressionType": "phrase",
+      "expressionType": "word",
       "difficultyBand": 2,
       "difficultyStatus": "draft",
       "editorialStatus": "draft",
       "galleryOrder": 25,
       "related": [],
+      "active": true,
+      "teachingType": "interaction",
       "sourceIds": [
         "benji"
       ],
@@ -14927,6 +15754,8 @@
       "editorialStatus": "draft",
       "galleryOrder": 13,
       "related": [],
+      "active": true,
+      "teachingType": "word",
       "sourceIds": [
         "benji"
       ],
@@ -14963,6 +15792,8 @@
       "editorialStatus": "draft",
       "galleryOrder": 35,
       "related": [],
+      "active": true,
+      "teachingType": "word",
       "sourceIds": [
         "benji"
       ],
@@ -14999,6 +15830,8 @@
       "editorialStatus": "draft",
       "galleryOrder": 36,
       "related": [],
+      "active": true,
+      "teachingType": "word",
       "sourceIds": [
         "benji"
       ],
@@ -15134,5 +15967,5 @@
       }
     ]
   },
-  "revision": "1ca68db9ee1313aa82de"
+  "revision": "695164752d5d38a1de1b"
 }

@@ -55,6 +55,7 @@ async function app({items=vocabulary.items,url="https://example.test/PythonMF/vo
 }
 const sample=vocabulary.items.slice(0,4);
 const learners=require('../../docs/vocabulary-en/learners.js');
+const retiredUids=['ven-0195','ven-0197','ven-0199','ven-0200','ven-0203','ven-0257','ven-0258','ven-0259','ven-0260','ven-0271'];
 async function until(predicate){for(let n=0;n<200;n++){if(predicate())return;await new Promise(resolve=>setTimeout(resolve,10));}assert.fail('UI did not settle');}
 async function unlock(view,pin='1234'){
   view.element('pinInput').value=pin;view.element('pinRepeat').value=pin;view.element('unlockButton').click();
@@ -62,6 +63,79 @@ async function unlock(view,pin='1234'){
 }
 function chooseWord(view,uid,checked=true){const input=view.element('settingsGroups').querySelectorAll('.learner-word-check').find(input=>input.dataset.uid===uid);assert.ok(input);input.checked=checked;input.emit('change');}
 function chooseUser(view,id){view.element('learnerSelect').value=id;view.element('learnerSelect').emit('change');}
+
+test('retired cards keep their identities but cannot enter selection, random practice or restored sequences',async()=>{
+  assert.equal(vocabulary.items.length,425);
+  assert.deepEqual(vocabulary.items.filter(item=>item.active===false).map(model.key),retiredUids);
+  const selected=model.ordered(vocabulary.items,{},vocabulary.catalog);
+  assert.equal(selected.length,415);assert.ok(selected.every(item=>!retiredUids.includes(item.uid)));
+  assert.deepEqual(model.restoreSequence([...retiredUids,'ven-0020'],vocabulary.items).map(model.key),['ven-0020']);
+  const view=await app({url:'https://example.test/PythonMF/vocabulary-en/#card=ven-0257'});
+  assert.equal(view.state.view,'gallery');assert.equal(view.state.currentItem,null);
+  assert.match(view.element('galleryNotice').textContent,/vyřazena/);
+  assert.ok(retiredUids.every(uid=>!view.element(`tile-${uid}`)));
+});
+
+test('teaching type intersects topics and learner selection and survives study, return and reload',async()=>{
+  const local=storage(),value=learners.empty();value.profiles.A.selected=['ven-0057','ven-0020',...retiredUids];
+  local.setItem(learners.KEY,JSON.stringify(value));const view=await app({local});chooseUser(view,'A');
+  view.element('teachingTypeSelect').value='interaction';view.element('teachingTypeSelect').emit('change');
+  assert.deepEqual(Array.from(view.orderedSelection(),model.key),['ven-0057']);
+  view.element('tile-ven-0057').click();view.returnToGallery();
+  assert.equal(view.state.teachingType,'interaction');assert.equal(view.doc.activeElement.id,'tile-ven-0057');
+  const after=await app({url:view.win.location.href,local,session:view.session});
+  assert.equal(after.state.teachingType,'interaction');assert.equal(after.element('teachingTypeSelect').value,'interaction');
+  assert.deepEqual(Array.from(after.orderedSelection(),model.key),['ven-0057']);
+  after.state.topics=['topic-06'];after.selectionChanged();assert.equal(after.orderedSelection().length,0);
+  after.element('resetButton').click();assert.equal(after.state.teachingType,'all');assert.equal(after.orderedSelection().length,415);
+});
+
+test('all four learner profiles preserve retired selected and difficult IDs through visible bulk edits, save and backup',async()=>{
+  const local=storage(),value=learners.empty(),pin=await learners.makePin('1234',require('node:crypto').webcrypto);
+  for(const id of learners.IDS)value.profiles[id]={selected:['ven-0020',...retiredUids],hard:['ven-0020',...retiredUids],pin};
+  local.setItem(learners.KEY,JSON.stringify(value));const original=local.getItem(learners.KEY),view=await app({local});
+  assert.equal(local.getItem(learners.KEY),original);
+  for(const id of learners.IDS){
+    chooseUser(view,id);view.element('editLearnerHard').click();await unlock(view);
+    const inputs=view.element('settingsGroups').querySelectorAll('.learner-word-check');
+    assert.deepEqual(inputs.map(input=>input.dataset.uid),['ven-0020']);
+    chooseWord(view,'ven-0020',false);view.element('saveLearner').click();
+    const saved=JSON.parse(local.getItem(learners.KEY));assert.deepEqual(saved.profiles[id].selected,value.profiles[id].selected);
+    assert.deepEqual(saved.profiles[id].hard,retiredUids);assert.deepEqual(saved.profiles[id].pin,pin);
+    const restored=learners.parseBackup(JSON.stringify(learners.backup(saved)));
+    assert.deepEqual(restored.profiles[id].selected,value.profiles[id].selected);assert.deepEqual(restored.profiles[id].hard,retiredUids);
+  }
+  // A visible topic bulk change must leave every hidden membership intact too.
+  view.element('settingsTab').click();await unlock(view);
+  view.element('settingsSearch').value='cat';view.element('settingsSearch').emit('input');
+  const group=view.element('settingsGroups').querySelector('.learner-group-check');group.checked=false;group.emit('change');
+  view.element('saveLearner').click();const saved=JSON.parse(local.getItem(learners.KEY));
+  assert.deepEqual(saved.profiles.D.selected,retiredUids);assert.deepEqual(saved.profiles.D.hard,retiredUids);
+});
+
+test('importing a backup with retired cards preserves them and explains their hidden state',async()=>{
+  const view=await app();view.element('settingsTab').click();await unlock(view);
+  const incoming=learners.backup(learners.empty());incoming.profiles.A.selected=['ven-0020',...retiredUids];incoming.profiles.A.hard=[retiredUids[0]];
+  view.element('learnerFile').files=[{size:1000,text:async()=>JSON.stringify(incoming)}];view.element('learnerFile').emit('change');
+  await until(()=>/Načtený návrh/.test(view.element('settingsNotice').textContent));
+  assert.match(view.element('settingsNotice').textContent,/10 vyřazených karet/);view.element('saveLearner').click();
+  const saved=JSON.parse(view.local.getItem(learners.KEY));assert.deepEqual(saved.profiles.A.selected,incoming.profiles.A.selected);
+  assert.deepEqual(saved.profiles.A.hard,incoming.profiles.A.hard);
+});
+
+test('word type includes multiword names, interactions are separate and empty idiom filter is usable',async()=>{
+  assert.equal(model.select(vocabulary.items,{teachingType:'word'}).length,396);
+  assert.equal(model.select(vocabulary.items,{teachingType:'interaction'}).length,19);
+  assert.equal(model.select(vocabulary.items,{teachingType:'idiom'}).length,0);
+  for(const uid of ['ven-0004','ven-0017','ven-0131','ven-0145'])assert.ok(model.select(vocabulary.items,{teachingType:'word'}).some(i=>i.uid===uid));
+  const view=await app({url:'https://example.test/PythonMF/vocabulary-en/#teachingType=idiom'});
+  assert.equal(view.orderedSelection().length,0);assert.equal(view.element('emptyState').hidden,false);
+  view.element('emptyResetButton').click();assert.equal(view.orderedSelection().length,415);
+  const future={...sample[0],uid:'ven-future-idiom',teachingType:'idiom'};
+  assert.deepEqual(model.select([...sample,future],{teachingType:'idiom'}).map(model.key),['ven-future-idiom']);
+  const legacy=sample.map(({teachingType,active,...item})=>item);
+  assert.equal(model.select(legacy,{teachingType:'word'}).length,4);
+});
 test('settings saves only A, keeps eighteen topic definitions, and a fresh browser has independent empty profiles',async()=>{
   const view=await app({items:sample});view.element('settingsTab').click();await unlock(view);
   chooseWord(view,sample[0].uid);chooseWord(view,sample[1].uid);assert.equal(view.local.getItem(learners.KEY),null);
@@ -188,8 +262,8 @@ test("switching translation direction preserves current card and the ordered sel
 test("explicit random practice shows every card once in each of three rounds despite direction changes",async()=>{
   const view=await app();view.element("shuffleButton").click();
   for(let round=0;round<3;round++){
-    const seen=new Set();for(let i=0;i<425;i++){view.directions[i%2].click();assert.ok(!seen.has(view.state.currentItem.uid));seen.add(view.state.currentItem.uid);if(i<424)view.element("nextButton").click();}
-    assert.equal(seen.size,425);assert.equal(view.element("nextButton").hidden,true);assert.match(view.element("roundStatus").textContent,/konec/);if(round<2)view.element("newRoundButton").click();
+    const seen=new Set();for(let i=0;i<415;i++){view.directions[i%2].click();assert.ok(!seen.has(view.state.currentItem.uid));seen.add(view.state.currentItem.uid);if(i<414)view.element("nextButton").click();}
+    assert.equal(seen.size,415);assert.equal(view.element("nextButton").hidden,true);assert.match(view.element("roundStatus").textContent,/konec/);if(round<2)view.element("newRoundButton").click();
   }
 });
 test("a new random round never immediately repeats the last card",async()=>{
@@ -201,12 +275,12 @@ test("empty, singleton, and changed filter selections work",async()=>{
   const view=await app();view.state.filter="selected";view.selectionChanged();assert.equal(view.element("totalCount").textContent,"107");view.openStudy("","random");assert.equal(view.state.sequence.length,107);
 });
 test("topics combine by union while source, part, difficulty and selection narrow by intersection",()=>{
-  const animals=model.select(vocabulary.items,{topics:["topic-06"]});const benjiAnimals=model.select(vocabulary.items,{topics:["topic-06"],sources:["benji"]});assert.equal(animals.length,39);assert.equal(benjiAnimals.length,6);
+  const animals=model.select(vocabulary.items,{topics:["topic-06"]});const benjiAnimals=model.select(vocabulary.items,{topics:["topic-06"],sources:["benji"]});assert.equal(animals.length,37);assert.equal(benjiAnimals.length,4);
   const union=model.select(vocabulary.items,{topics:["topic-06","topic-05"],sources:["benji"],parts:["noun"]});assert.ok(union.every(i=>i.sourceIds.includes("benji") && i.partOfSpeech.includes("noun") && i.topicIds.some(t=>["topic-06","topic-05"].includes(t))));assert.ok(union.length>6);
   assert.equal(model.select(vocabulary.items,{query:"orisky"})[0].en,"nuts");assert.equal(model.select(vocabulary.items,{query:"orange"}).length,2);
 });
-test("gallery is the default; all 425 tiles occur once and language never changes order",async()=>{
-  const view=await app();assert.equal(view.state.view,"gallery");assert.equal(view.element("studyView").hidden,true);const tiles=view.element("galleryGroups").querySelectorAll(".vocab-tile");assert.equal(tiles.length,425);assert.equal(new Set(tiles.map(t=>t.dataset.uid)).size,425);
+test("gallery is the default; all 415 active tiles occur once and language never changes order",async()=>{
+  const view=await app();assert.equal(view.state.view,"gallery");assert.equal(view.element("studyView").hidden,true);const tiles=view.element("galleryGroups").querySelectorAll(".vocab-tile");assert.equal(tiles.length,415);assert.equal(new Set(tiles.map(t=>t.dataset.uid)).size,415);
   const order=tiles.map(t=>t.dataset.uid);view.labels[1].click();assert.deepEqual(view.element("galleryGroups").querySelectorAll(".vocab-tile").map(t=>t.dataset.uid),order);assert.match(view.element("tile-ven-0020").textContent,/kočka/);
 });
 test("next follows the gallery across group boundaries and return anchors the LAST studied tile",async()=>{
@@ -231,7 +305,7 @@ test("study navigation stops audio, resets revealed answer, and preserves focus 
   const view=await app();view.openStudy("ven-0020");view.element("revealButton").click();assert.equal(view.state.revealed,true);view.speakPrompt();assert.ok(view.players.some(p=>p.played));view.moveStudy(1);assert.equal(view.state.revealed,false);assert.ok(view.players.filter(p=>p.played).every(p=>p.paused));view.doc.emit("keydown",{key:"Escape"});assert.equal(view.state.view,"gallery");
 });
 test("audio identity must match BOTH texts; missing audio does not block the gallery",async()=>{
-  const cat=vocabulary.items.find(i=>i.en==="cat");const wrong={items:{[cat.id]:{sourceEn:"cat",sourceCz:"špatně",en:"wrong.mp3"}}};assert.equal(model.audioRecord(cat,wrong),null);const view=await app({manifest:null});assert.equal(view.element("galleryGroups").querySelectorAll(".vocab-tile").length,425);view.openStudy(cat.uid);view.speakPrompt();assert.match(view.element("messageStrip").textContent,/neni pripraveny/);
+  const cat=vocabulary.items.find(i=>i.en==="cat");const wrong={items:{[cat.id]:{sourceEn:"cat",sourceCz:"špatně",en:"wrong.mp3"}}};assert.equal(model.audioRecord(cat,wrong),null);const view=await app({manifest:null});assert.equal(view.element("galleryGroups").querySelectorAll(".vocab-tile").length,415);view.openStudy(cat.uid);view.speakPrompt();assert.match(view.element("messageStrip").textContent,/neni pripraveny/);
 });
 test("revealing and changing a card keeps both sentences attached to the studied meaning",async()=>{
   const view=await app();view.openStudy("ven-0118");
@@ -259,7 +333,7 @@ test("a broken vocabulary request has an explicit error and does not claim an em
 });
 
 test("a pending audio request never delays the gallery or prevents a bottom-bar return",async()=>{
-  const view=await app({slowAudio:true});assert.equal(view.element("galleryGroups").querySelectorAll(".vocab-tile").length,425);view.openStudy("ven-0020");assert.equal(view.element("backBottomButton").hidden,false);view.element("backBottomButton").click();assert.equal(view.state.view,"gallery");assert.equal(view.doc.activeElement.id,"tile-ven-0020");
+  const view=await app({slowAudio:true});assert.equal(view.element("galleryGroups").querySelectorAll(".vocab-tile").length,415);view.openStudy("ven-0020");assert.equal(view.element("backBottomButton").hidden,false);view.element("backBottomButton").click();assert.equal(view.state.view,"gallery");assert.equal(view.doc.activeElement.id,"tile-ven-0020");
 });
 test("reloading the gallery preserves the frozen random order for browser Forward",async()=>{
   const before=await app();before.state.sources=["benji"];before.selectionChanged();before.openStudy("","random");before.moveStudy(1);

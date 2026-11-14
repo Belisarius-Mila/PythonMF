@@ -2555,3 +2555,15 @@ s mock video-only kamerou, stop tracků a dekódováním WASM.
   i ISBN, změna ISBN, starý replay a oddělený snapshot PASS. Bulk odstranění
   starých soukromých metadat připravit zvlášť s přesným náhledem, původními
   bajty v záloze a novou požadovanou globální větou; nespojovat se startupem.
+
+### 2026-11-14 — Vyřazení učiva nesmí ztratit lokální členství karet
+
+- Kontext: společná statická aplikace nemá přístup k výběrům všech A–D
+  v různých prohlížečích. Vyřazované vzory nebo pravidelné plurály už mají UID.
+- Řešení: ponechat zdrojový záznam i média a samostatné active=false.
+  Zobrazení/učení/Nastavení filtrují aktivitu, ukládání zachová i skrytá UID.
+  Hromadná změna upravuje pouze viditelné karty; import a záloha nic neprořezávají.
+  Typ učiva je oddělený od počtu slov, slovního druhu i tematického zařazení.
+- Ověření: všechny4 profily v reálném JS controlleru zachovají skryté selected/hard
+  při editaci, hromadné změně a záloze.53 Node a29 cílených Python PASS;
+  příklady10 skrytých a415 aktivních karet. Finální plná brána3880 PASS/31 SKIP. Úplný report reports/vocabulary_en_teaching_types_20261114.md.

@@ -1,7 +1,10 @@
 /* Shared selection and navigation rules; no DOM, network, or learner writes. */
 (function (root) {
   "use strict";
-  const posLabels = {noun:"Podstatná jména",verb:"Slovesa",adjective:"Přídavná jména",adverb:"Příslovce",pronoun:"Zájmena",number:"Číslovky",preposition:"Předložky",conjunction:"Spojky",article:"Členy",determiner:"Určující slova",particle:"Částice","verb-modal":"Způsobová slovesa",phrase:"Fráze",other:"Další výrazy"};
+  const posLabels = {noun:"Podstatná jména",verb:"Slovesa",adjective:"Přídavná jména",adverb:"Příslovce",pronoun:"Zájmena",number:"Číslovky",preposition:"Předložky",conjunction:"Spojky",article:"Členy",determiner:"Určující slova",particle:"Částice",interjection:"Citoslovce","verb-modal":"Způsobová slovesa",other:"Další výrazy"};
+  const teachingTypeLabels = {word:"Slovíčka",interaction:"Interakce",idiom:"Fráze"};
+  const isActive = item => item.active !== false;
+  const teachingType = item => item.teachingType || "word";
   const countLabel = n => `${n} ${n === 1 ? "slovíčko" : n >= 2 && n <= 4 ? "slovíčka" : "slovíček"}`;
   const levelLabels = {1:"Názorné a základní",2:"Běžné použití",3:"Potřebuje větu"};
   const normalize = value => String(value || "").normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLocaleLowerCase("cs").trim();
@@ -11,8 +14,11 @@
     const query = normalize(context.query);
     const topics = context.topics || [], sources = context.sources || [], parts = context.parts || [], levels = context.levels || [];
     return items.filter(item =>
+      isActive(item) && (!context.teachingType || context.teachingType === "all" || teachingType(item) === context.teachingType) &&
       (context.filter !== "selected" || item.selected) && (context.filter !== "hard" || item.hardTraining) &&
       any(topics, item.topicIds || []) && any(sources, item.sourceIds || []) &&
+      // Keep the former multiword filter usable in old links. New controls
+      // use teachingType independently from grammatical part of speech.
       any(parts, [...(item.partOfSpeech || []), ...(item.expressionType === "phrase" ? ["expression"] : [])]) &&
       any(levels, [item.difficultyBand || "unclassified"]) &&
       (!query || normalize(`${item.en} ${item.cz}`).includes(query)));
@@ -32,7 +38,7 @@
     const labelFor = id => groupBy === "none" ? "Všechna vybraná slovíčka" : groupBy === "part" ? posLabels[id] || "Další výrazy" : groupBy === "level" ? levelLabels[id] || "Zatím nezařazené" : byId.get(id)?.label || "Další slovíčka";
     const preferred = groupBy === "topic" ? groups.map(group => group.id) : groupBy === "part" ? Object.keys(posLabels) : ["1","2","3","unclassified"];
     const map = new Map();
-    for (const item of items) {
+    for (const item of items.filter(isActive)) {
       const id = idFor(item);
       if (!map.has(id)) map.set(id, {id,label:labelFor(id),parentId:byId.get(id)?.parentId,items:[]});
       map.get(id).items.push(item);
@@ -53,7 +59,7 @@
     return result;
   }
   function restoreSequence(keys, items) {
-    const known = new Map(items.map(item => [key(item),item]));
+    const known = new Map(items.filter(isActive).map(item => [key(item),item]));
     return [...new Set(keys)].filter(id => known.has(id)).map(id => known.get(id));
   }
   function audioRecord(item, manifest) {
@@ -80,7 +86,7 @@
       language: available ? (english ? "en" : "cs") : "cs", available,
     };
   }
-  const api = {normalize,key,select,buckets,ordered,shuffle,restoreSequence,audioRecord,sentenceAudioRecord,studyPrompt,posLabels,levelLabels,countLabel,groupInfo};
+  const api = {normalize,key,select,buckets,ordered,shuffle,restoreSequence,audioRecord,sentenceAudioRecord,studyPrompt,posLabels,levelLabels,countLabel,groupInfo,isActive,teachingType,teachingTypeLabels};
   if (typeof module !== "undefined" && module.exports) module.exports=api;
   else root.VocabularyModel=api;
 })(globalThis);

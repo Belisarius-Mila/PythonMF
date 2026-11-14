@@ -60,7 +60,7 @@ help,pomoc,58,"Thank you for your help;"" I really needed it.","Děkuju za pomoc
 home,domov,59,"After work, I go home and rest for a while.",Po práci jdu domů a chvíli si odpočinu.,,ano,ano
 horse,kůň,60,The horse runs fast and then stops quietly.,Kůň rychle běží a pak tiše zastaví.,Animals,ano,ne
 house,dům,61,"Our house is small, but we love it.","Náš dům je malý, ale máme ho rádi.",,ano,ano
-I (am),já (jsem),62,I (am) ready now—let’s start.,Už jsem připravený—pojďme začít.,,ano,ne
+I,já,62,I am ready now—let’s start.,Už jsem připravený—pojďme začít.,,ano,ne
 in,v,63,The keys are in my pocket.,Klíče jsou v mé kapse.,,ne,ne
 jump,skákat,64,The child can jump over the small puddle.,Dítě umí přeskočit malou louži.,Actions,ne,ne
 lake,jezero,65,We sit by the lake / pond and watch the water.,Sedíme u rybníka a díváme se na vodu.,,ne,ne
@@ -137,7 +137,7 @@ pay,zaplatit,135,"I pay now, and we can go.",Teď zaplatím a můžeme jít.,,an
 next time,příště,136,"Next time, I will try the pizza.",Příště zkusím pizzu.,,ne,ne
 try,zkusit,137,"I try a new soup, and it is good.",Zkusím novou polévku a je dobrá.,,ne,ano
 again,znovu,138,We come again because we like this place.,"Přijdeme znovu, protože se nám to tu líbí.",,ne,ne
-please,prosím,139,"Please speak slowly;"" I want to understand.","Prosím mluv pomalu, chci rozumět.",Greetings,ne,ne
+please,prosím,139,Please speak slowly; I want to understand.,"Prosím mluv pomalu, chci rozumět.",Greetings,ne,ne
 thank you,děkuji,140,Thank you for your help today.,Děkuji za tvoji dnešní pomoc.,Greetings,ne,ne
 you're welcome,není zač,141,You're welcome—I'm happy to help.,Není zač—ráda pomůžu.,Greetings,ne,ano
 anything else,ještě něco,142,"Anything else, or is that all?","Ještě něco, nebo je to všechno?",,ne,ano
@@ -146,7 +146,7 @@ right,"pravý, správný, doprava",144,Go straight and then turn right.,Jdi rovn
 would like,"chtěl bych, rád bych",145,What would you like?,Co byste si dal? Co byste rád?,,ano,ano
 enjoy,užít si,146,Enjoy your meal.,Nechte si chutnat. (Užijte si jídlo).,,ano,ano
 of course,samozřejmě,147,Can I have ketchup? Of course.,Mohu si dát kečup? Samozřejmě.,,ne,ne
-sure,jistě,148,I am not sure.,Nejsem si jistý.,,ne,ne
+sure,jistě,148,"Sure, I can help you.","Jistě, mohu ti pomoci.",,ne,ne
 lunch,oběd,149,We have lunch at twelve o'clock.,Máme oběd ve 12 hodin.,Food,ano,ne
 how much,kolik,150,How much is it?,Kolik to stojí?,,ano,ano
 something,něco,151,Would you like something to drink?,Dáte si něco k pití.,,ne,ano

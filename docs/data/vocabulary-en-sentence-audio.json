@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "kind": "sentences",
   "source": "VocabularyEN/VocabularyEN.csv",
-  "sourceDigest": "fa2fa77709907bc99b4b39c94aa4addbc9d5b9517751426cfe6e6c5e99d16fb1",
+  "sourceDigest": "3e42b863c5609a3eabe088d9bdc33e3e209c53dbcd631ac7bfab03144ba3c0f6",
   "rate": "-10%",
   "voices": {
     "en": {
@@ -690,13 +690,13 @@
     },
     "ven-0062": {
       "uid": "ven-0062",
-      "sourceEn": "I (am)",
-      "sourceCz": "já (jsem)",
-      "sourceSentenceEn": "I (am) ready now—let’s start.",
+      "sourceEn": "I",
+      "sourceCz": "já",
+      "sourceSentenceEn": "I am ready now—let’s start.",
       "sourceSentenceCz": "Už jsem připravený—pojďme začít.",
-      "spokenEn": "I (am) ready now—let’s start.",
+      "spokenEn": "I am ready now—let’s start.",
       "spokenCz": "Už jsem připravený—pojďme začít.",
-      "en": "assets/vocabulary-en-sentences/en-us-aria-neural/31a2d71049aa20a890ac.mp3",
+      "en": "assets/vocabulary-en-sentences/en-us-aria-neural/9de037389ac6a5a947b0.mp3",
       "cz": "assets/vocabulary-en-sentences/cs-cz-vlasta-neural/93fb66e695d933c0fe2d.mp3"
     },
     "ven-0063": {
@@ -1539,11 +1539,11 @@
       "uid": "ven-0139",
       "sourceEn": "please",
       "sourceCz": "prosím",
-      "sourceSentenceEn": "Please speak slowly;\" I want to understand.",
+      "sourceSentenceEn": "Please speak slowly; I want to understand.",
       "sourceSentenceCz": "Prosím mluv pomalu, chci rozumět.",
-      "spokenEn": "Please speak slowly;\" I want to understand.",
+      "spokenEn": "Please speak slowly; I want to understand.",
       "spokenCz": "Prosím mluv pomalu, chci rozumět.",
-      "en": "assets/vocabulary-en-sentences/en-us-aria-neural/f78b95184258f4695a2c.mp3",
+      "en": "assets/vocabulary-en-sentences/en-us-aria-neural/bacd4068d7f32a908001.mp3",
       "cz": "assets/vocabulary-en-sentences/cs-cz-vlasta-neural/0f9a5223b9aa5e3b7c3e.mp3"
     },
     "ven-0140": {
@@ -1638,12 +1638,12 @@
       "uid": "ven-0148",
       "sourceEn": "sure",
       "sourceCz": "jistě",
-      "sourceSentenceEn": "I am not sure.",
-      "sourceSentenceCz": "Nejsem si jistý.",
-      "spokenEn": "I am not sure.",
-      "spokenCz": "Nejsem si jistý.",
-      "en": "assets/vocabulary-en-sentences/en-us-aria-neural/dbd3e796287f6b22ea91.mp3",
-      "cz": "assets/vocabulary-en-sentences/cs-cz-vlasta-neural/f2346c93a1474c124258.mp3"
+      "sourceSentenceEn": "Sure, I can help you.",
+      "sourceSentenceCz": "Jistě, mohu ti pomoci.",
+      "spokenEn": "Sure, I can help you.",
+      "spokenCz": "Jistě, mohu ti pomoci.",
+      "en": "assets/vocabulary-en-sentences/en-us-aria-neural/c729eed3dc105ed3ffe6.mp3",
+      "cz": "assets/vocabulary-en-sentences/cs-cz-vlasta-neural/312564edcff98f79a816.mp3"
     },
     "ven-0149": {
       "uid": "ven-0149",

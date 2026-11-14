@@ -32,7 +32,7 @@
       id=L.IDS.includes(nextId)?nextId:"A";hardMode=hard;opened=true;load();prepare();onOpen();
     }
     function counts(){
-      const known=new Set(data.items.map(item=>item.uid));
+      const known=new Set(data.items.filter(model.isActive).map(item=>item.uid));
       ui.learnerCount.textContent=`Vybráno ${draft.selected.filter(uid=>known.has(uid)).length} slovíček · obtížných ${draft.hard.filter(uid=>known.has(uid)).length}`;
     }
     function change(items,checked){
@@ -52,7 +52,7 @@
     }
     function render(){
       const query=model.normalize(ui.settingsSearch.value),chosen=new Set(draft.selected);
-      const items=data.items.filter(item=>(!hardMode||chosen.has(item.uid))&&(!query||model.normalize(`${item.en} ${item.cz}`).includes(query)));
+      const items=data.items.filter(item=>model.isActive(item)&&(!hardMode||chosen.has(item.uid))&&(!query||model.normalize(`${item.en} ${item.cz}`).includes(query)));
       const groups=model.buckets(items,{groupBy:"topic",sort:"recommended"},data.catalog),fragment=doc.createDocumentFragment();
       for(const group of groups){
         const section=doc.createElement("section");section.className="vocab-section";
@@ -121,7 +121,8 @@
         const imported=L.parseBackup(await file.text());if(ticket!==epoch||!opened||!draft)return;
         const known=new Set(data.items.map(item=>item.uid)),p=imported.profiles[target],unknown=p.selected.filter(uid=>!known.has(uid)).length;
         draft={...draft,selected:[...p.selected],hard:[...p.hard]};render();
-        notice(`Načtený návrh pro ${target}: ${p.selected.length} slov, ${p.hard.length} obtížných. ${unknown?`${unknown} slov zatím není v této verzi slovníku. `:""}Potvrď tlačítkem Uložit. Ostatní uživatelé i zdejší PIN zůstanou zachovaní.`);
+        const retired=new Set(data.items.filter(item=>!model.isActive(item)).map(item=>item.uid)),hidden=p.selected.filter(uid=>retired.has(uid)).length;
+        notice(`Načtený návrh pro ${target}: ${p.selected.length} slov, ${p.hard.length} obtížných. ${unknown?`${unknown} slov zatím není v této verzi slovníku. `:""}${hidden?`${hidden} vyřazených karet zůstane uložených, ale nebude se zobrazovat. `:""}Potvrď tlačítkem Uložit. Ostatní uživatelé i zdejší PIN zůstanou zachovaní.`);
       }catch(error){if(ticket===epoch)notice(error.message);}
       finally{if(ticket===epoch)ui.learnerFile.value="";}
     });

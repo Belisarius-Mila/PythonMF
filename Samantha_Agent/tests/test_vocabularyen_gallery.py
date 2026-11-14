@@ -25,6 +25,55 @@ class VocabularyGalleryTests(unittest.TestCase):
         cls.catalog=sync.load_catalog(VOCAB/'VocabularyEN.csv')
         cls.manifest=json.loads((ROOT/'docs/data/vocabulary-en.json').read_text())
 
+    def test_approved_retirements_preserve_records_and_active_teaching_types(self):
+        inactive={item['uid'] for item in self.manifest['items'] if not item['active']}
+        self.assertEqual(inactive,{'ven-0195','ven-0197','ven-0199','ven-0200','ven-0203',
+                                   'ven-0257','ven-0258','ven-0259','ven-0260','ven-0271'})
+        self.assertEqual(len(self.manifest['items']),425)
+        active=[item for item in self.manifest['items'] if item['active']]
+        self.assertEqual(len(active),415)
+        self.assertEqual(sum(i['teachingType']=='interaction' for i in active),19)
+        self.assertEqual(sum(i['teachingType']=='word' for i in active),396)
+        self.assertFalse(any(i['teachingType']=='idiom' for i in active))
+        for entry in self.catalog['entries']:
+            if entry.get('retirementReason')=='regular_plural_duplicate':
+                target=next(e for e in self.catalog['entries'] if e['uid']==entry['singularUid'])
+                self.assertTrue(target['active']);self.assertNotEqual(entry['uid'],target['uid'])
+        # Singular-only irregular lemmas and unpaired plurals must not disappear.
+        for en in ['goose','mouse','eyes','parents','potatoes','pants','boots','nuts']:
+            self.assertTrue(next(i for i in active if i['en']==en)['active'])
+
+    def test_word_and_sentence_corrections_keep_I_identity_and_picture(self):
+        item=next(i for i in self.manifest['items'] if i['uid']=='ven-0062')
+        self.assertEqual((item['id'],item['en'],item['cz'],item['partOfSpeech']),(62,'I','já',['pronoun']))
+        self.assertEqual(item['image'],'assets/vocabulary-en/iam.png')
+        old=sync.resolve_catalog_rows([{'EN':'I (am)','CZ':'já (jsem)'}],self.catalog)
+        self.assertEqual(old[0]['uid'],item['uid'])
+        self.assertEqual(item['sentenceEn'],'I am ready now—let’s start.')
+        sure=next(i for i in self.manifest['items'] if i['uid']=='ven-0148')
+        self.assertEqual(sure['sentenceEn'],'Sure, I can help you.')
+        please=next(i for i in self.manifest['items'] if i['uid']=='ven-0139')
+        self.assertEqual(please['sentenceEn'],'Please speak slowly; I want to understand.')
+
+    def test_invalid_activity_type_image_override_and_plural_reference_are_rejected(self):
+        with tempfile.TemporaryDirectory() as directory:
+            csv=Path(directory)/'VocabularyEN.csv';csv.write_text('EN,CZ\n')
+            path=csv.with_name('vocabulary_en_catalog.json')
+            for field,value in [('active',1),('teachingType','unknown'),('imageStemOverride','../other'),
+                                ('imageStemOverride',123),('singularUid','ven-missing')]:
+                catalog=copy.deepcopy(self.catalog);catalog['entries'][0][field]=value
+                path.write_text(json.dumps(catalog))
+                with self.subTest(field=field,value=value),self.assertRaises(ValueError):sync.load_catalog(csv)
+
+    def test_reexport_carries_teaching_metadata_and_pins_the_renamed_picture(self):
+        dirs=sync.build_picture_base_dirs(ROOT,VOCAB/'VocabularyEN.csv')
+        mapping=sync.load_external_mapping(dirs,VOCAB/'VocabularyEN.csv')
+        payload,_=sync.build_export_payload(self.rows,dirs,mapping,sync.discover_picture_stems(dirs),
+            ROOT/'docs','vocabulary-en','VocabularyEN/VocabularyEN.csv',self.catalog)
+        expected={i['uid']:(i['active'],i['teachingType'],i['image']) for i in self.manifest['items']}
+        actual={i['uid']:(i['active'],i['teachingType'],i['image']) for i in payload['items']}
+        self.assertEqual(actual,expected)
+
     def test_catalog_covers_all_meanings_once_and_does_not_merge_orange(self):
         entries=sync.resolve_catalog_rows(self.rows,self.catalog)
         self.assertEqual(len(entries),425)

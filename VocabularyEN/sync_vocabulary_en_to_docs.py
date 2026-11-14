@@ -32,6 +32,11 @@ def load_catalog(csv_path: Path) -> dict | None:
     groups = {group["id"] for group in catalog["groups"]}
     ids, uids, keys = set(), set(), set()
     for entry in catalog["entries"]:
+        if (type(entry.get("active", True)) is not bool
+                or entry.get("teachingType", "word") not in {"word", "interaction", "idiom"}
+                or ("imageStemOverride" in entry and (not isinstance(entry["imageStemOverride"], str)
+                    or not re.fullmatch(r"[a-z0-9_-]+", entry["imageStemOverride"])))):
+            raise ValueError("Katalog obsahuje neplatný typ učiva, aktivitu nebo obrázkovou vazbu.")
         if (type(entry["id"]) is not int or entry["id"] < 1 or entry["id"] in ids
                 or not re.fullmatch(r"ven-[a-z0-9-]+", entry["uid"]) or entry["uid"] in uids
                 or entry["primaryGroup"] not in groups
@@ -43,6 +48,14 @@ def load_catalog(csv_path: Path) -> dict | None:
             if key in keys:
                 raise ValueError("Katalog obsahuje nejednoznačný význam karty.")
             keys.add(key)
+    by_uid = {entry["uid"]: entry for entry in catalog["entries"]}
+    for entry in catalog["entries"]:
+        if "singularUid" in entry:
+            target = by_uid.get(entry["singularUid"])
+            if (entry.get("active", True) or target is None or target is entry
+                    or not target.get("active", True)
+                    or "noun" not in entry["partOfSpeech"] or "noun" not in target["partOfSpeech"]):
+                raise ValueError("Vyřazené množné číslo nemá platnou aktivní vazbu na podstatné jméno.")
     return catalog
 
 
@@ -358,6 +371,9 @@ def build_export_payload(
 
     for index, row in enumerate(rows, start=1):
         requested_stem, image_source = choose_picture_stem(row, picture_stems, synonym_image_map)
+        if catalog_entries is not None and catalog_entries[index - 1].get("imageStemOverride"):
+            requested_stem = catalog_entries[index - 1]["imageStemOverride"]
+            image_source = "catalog"
         source_path = find_picture_path(requested_stem, base_dirs)
         if source_path is None and catalog_entries is not None:
             # Some approved legacy illustrations exist only in the web library.
@@ -405,6 +421,8 @@ def build_export_payload(
             item.update({key: entry[key] for key in (
                 "id", "uid", "primaryGroup", "topicIds", "partOfSpeech", "expressionType",
                 "difficultyBand", "difficultyStatus", "editorialStatus", "galleryOrder", "related")})
+            item["active"] = entry.get("active", True)
+            item["teachingType"] = entry.get("teachingType", "word")
             item["sourceIds"] = ["benji"] if any(label.casefold() == "benji" for label in word_sets) else []
         items.append(item)
 

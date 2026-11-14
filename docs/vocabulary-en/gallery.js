@@ -5,8 +5,8 @@ const DATA_URL = appRoot?.dataset.jsonUrl || "../data/vocabulary-en.json";
 const AUDIO_DATA_URL = appRoot?.dataset.audioUrl || "../data/vocabulary-en-audio.json";
 const SENTENCE_AUDIO_URL = "../data/vocabulary-en-sentence-audio.json";
 const galleryModeHint=document.getElementById("galleryModeHint");
-const ui = Object.fromEntries(["galleryView","studyView","totalCount","totalLabel","searchInput","topicPicker","topicFilters","topicSummary","clearTopicsButton","filterSelect","groupSelect","sortSelect","sizeButton","partFilters","levelFilters","sourceFilters","continueButton","shuffleButton","resetButton","emptyResetButton","sectionNav","galleryNotice","galleryGroups","emptyState","galleryFooter","backButton","backBottomButton","studyPosition","wordImage","pictureFallback","speakPromptButton","promptLabel","promptText","messageStrip","revealButton","answerCard","answerEn","answerCz","sentenceBox","sentenceEn","sentenceCz","speakAnswerButton","roundStatus","previousButton","nextButton","newRoundButton"].map(id => [id,document.getElementById(id)]));
-const defaults = () => ({filter:"all",query:"",topics:[],sources:[],parts:[],levels:[],groupBy:"topic",sort:"recommended",labelLanguage:"en",direction:"czToEn",practice:"words",large:false,learner:"all",onlyLearnerHard:false});
+const ui = Object.fromEntries(["galleryView","studyView","totalCount","totalLabel","searchInput","topicPicker","topicFilters","topicSummary","clearTopicsButton","filterSelect","teachingTypeSelect","groupSelect","sortSelect","sizeButton","partFilters","levelFilters","sourceFilters","continueButton","shuffleButton","resetButton","emptyResetButton","sectionNav","galleryNotice","galleryGroups","emptyState","galleryFooter","backButton","backBottomButton","studyPosition","wordImage","pictureFallback","speakPromptButton","promptLabel","promptText","messageStrip","revealButton","answerCard","answerEn","answerCz","sentenceBox","sentenceEn","sentenceCz","speakAnswerButton","roundStatus","previousButton","nextButton","newRoundButton"].map(id => [id,document.getElementById(id)]));
+const defaults = () => ({filter:"all",teachingType:"all",query:"",topics:[],sources:[],parts:[],levels:[],groupBy:"topic",sort:"recommended",labelLanguage:"en",direction:"czToEn",practice:"words",large:false,learner:"all",onlyLearnerHard:false});
 const state = {data:null,audioManifest:null,sentenceAudioManifest:null,items:[],...defaults(),galleryMode:"learn",currentItem:null,revealed:false,view:"gallery",sequence:[],index:0,mode:"ordered",lastUid:"",visitId:"",fromGallery:false,anchorOffset:120};
 let galleryTranslation=null;
 let learnerUI=null;
@@ -15,7 +15,7 @@ const STORAGE_KEY="vocabulary-en.navigation.v1", LAST_KEY="vocabulary-en.last-ca
 function context() { return Object.fromEntries(Object.keys(defaults()).map(key => [key,Array.isArray(state[key]) ? [...state[key]] : state[key]])); }
 function sanitizeContext(value={}) {
   const result=defaults();
-  for(const [key,allowed] of Object.entries({filter:["all","selected","hard"],groupBy:["topic","part","level","none"],sort:["recommended","en","cz"],labelLanguage:["en","cz"],direction:["czToEn","enToCz"],practice:["words","sentences"]})) if(allowed.includes(value[key]))result[key]=value[key];
+  for(const [key,allowed] of Object.entries({filter:["all","selected","hard"],teachingType:["all","word","interaction","idiom"],groupBy:["topic","part","level","none"],sort:["recommended","en","cz"],labelLanguage:["en","cz"],direction:["czToEn","enToCz"],practice:["words","sentences"]})) if(allowed.includes(value[key]))result[key]=value[key];
   const groups=(state.data?.catalog?.groups || []).map(group=>group.id);
   for(const [key,allowed] of Object.entries({topics:groups,sources:["benji"],parts:[...Object.keys(M.posLabels),"expression"],levels:["1","2","3","unclassified"]}))result[key]=Array.isArray(value[key]) ? [...new Set(value[key].filter(v=>allowed.includes(String(v))).map(String))].slice(0,50) : [];
   result.query=typeof value.query==="string" ? value.query.slice(0,200) : "";
@@ -63,7 +63,7 @@ function syncControls(){
   learnerSelect.value=state.learner;learnerSelect.disabled=!learnerUI?.available;
   learnerHardFilter.disabled=editLearnerHard.disabled=state.learner==="all"||!learnerUI?.available;
   learnerHardFilter.setAttribute("aria-pressed",String(state.onlyLearnerHard));
-  ui.searchInput.value=state.query;ui.filterSelect.value=state.filter;ui.groupSelect.value=state.groupBy;ui.sortSelect.value=state.sort;
+  ui.searchInput.value=state.query;ui.filterSelect.value=state.filter;ui.teachingTypeSelect.value=state.teachingType;ui.groupSelect.value=state.groupBy;ui.sortSelect.value=state.sort;
   ui.sizeButton.setAttribute("aria-pressed",String(state.large));ui.galleryView.classList.toggle("large-tiles",state.large);
   document.querySelectorAll("[data-label]").forEach(button=>button.setAttribute("aria-pressed",String(button.dataset.label===state.labelLanguage)));
   document.querySelectorAll("[data-direction]").forEach(button=>button.setAttribute("aria-pressed",String(button.dataset.direction===state.direction)));
@@ -114,7 +114,7 @@ function makeCheckOptions(target,options,key){
 }
 function buildFilterControls(){
   makeCheckOptions(ui.topicFilters,state.data?.catalog?.groups || [],"topics");
-  makeCheckOptions(ui.partFilters,[...Object.entries(M.posLabels).filter(([id])=>id!=="other" && id!=="phrase").map(([id,label])=>({id,label})),{id:"expression",label:"Fráze a slovní spojení"}],"parts");
+  makeCheckOptions(ui.partFilters,Object.entries(M.posLabels).filter(([id])=>id!=="other").map(([id,label])=>({id,label})),"parts");
   makeCheckOptions(ui.levelFilters,Object.entries(M.levelLabels).map(([id,label])=>({id,label})),"levels");
   makeCheckOptions(ui.sourceFilters,[{id:"benji",label:"Benji"}],"sources");
 }
@@ -168,7 +168,7 @@ function selectionChanged(){
   ui.galleryNotice.textContent=`Ve výběru ${M.countLabel(buildSelection().length)}.${state.groupBy === "level" || state.levels.length ? " Náročnost je orientační návrh pro výuku." : ""}`;
   if(state.learner!=="all"&&!personalItems().length)ui.galleryNotice.textContent=state.onlyLearnerHard?`Uživatel ${state.learner} nemá označená obtížná slova. Použij Výběr obtížných slov.`:`Uživatel ${state.learner} zatím nemá vlastní slovní zásobu. Vyber ji v Nastavení.`;
 }
-function resetFilters(){Object.assign(state,{filter:"all",query:"",topics:[],sources:[],parts:[],levels:[],learner:"all",onlyLearnerHard:false});selectionChanged();}
+function resetFilters(){Object.assign(state,{filter:"all",teachingType:"all",query:"",topics:[],sources:[],parts:[],levels:[],learner:"all",onlyLearnerHard:false});selectionChanged();}
 function switchView(kind){
   state.view=kind;ui.galleryView.hidden=kind!=="gallery";ui.studyView.hidden=kind!=="study";
   document.getElementById("settingsView").hidden=kind!=="settings";
@@ -260,7 +260,7 @@ function applyRoute({initial=false}={}){
   if(!learnerUI?.available){state.learner="all";state.onlyLearnerHard=false;}
   if(current.card){
     const target=state.items.find(item=>M.key(item)===current.card);
-    if(!target){state.lastUid="";state.currentItem=null;switchView("gallery");renderGallery();ui.galleryNotice.textContent="Odkazované slovíčko už v tomto slovníku není. Vyber si jiné.";writeHistory("gallery");return;}
+    if(!target){state.lastUid="";state.currentItem=null;switchView("gallery");renderGallery();ui.galleryNotice.textContent=state.data.items.some(item=>M.key(item)===current.card && !M.isActive(item))?"Tato karta byla vyřazena z nabídky. Vyber si jiné slovíčko.":"Odkazované slovíčko už v tomto slovníku není. Vyber si jiné.";writeHistory("gallery");return;}
     if(!initial && current.hasContext)Object.assign(state,current.context);
     if(!learnerUI?.available){state.learner="all";state.onlyLearnerHard=false;}
     if(!personalItems().some(item=>M.key(item)===current.card)){
@@ -268,7 +268,7 @@ function applyRoute({initial=false}={}){
     }
     state.sequence=saved?.revision===state.data?.revision && saved?.currentUid===current.card && Array.isArray(saved.sequence) ? M.restoreSequence(saved.sequence.slice(0,5000),orderedSelection()) : orderedSelection();
     if(!state.sequence.some(item=>M.key(item)===current.card)){
-      Object.assign(state,{filter:"all",query:"",topics:[],sources:[],parts:[],levels:[]});state.sequence=orderedSelection();renderGallery();
+      Object.assign(state,{filter:"all",teachingType:"all",query:"",topics:[],sources:[],parts:[],levels:[]});state.sequence=orderedSelection();renderGallery();
     }
     state.index=state.sequence.findIndex(item=>M.key(item)===current.card);state.currentItem=target;state.lastUid=current.card;
     state.mode=saved?.currentUid===current.card && saved.mode==="random" ? "random" : "ordered";
@@ -428,7 +428,7 @@ function bindEvents(){
   document.querySelectorAll("[data-direction]").forEach(button=>button.addEventListener("click",()=>{state.direction=button.dataset.direction;stopAudioPlayback();renderCurrentItem();if(state.currentItem && state.view==="study")writeHistory("study");persist();}));
   document.querySelectorAll("[data-practice]").forEach(button=>button.addEventListener("click",()=>setPracticeMode(button.dataset.practice)));
   ui.searchInput.addEventListener("input",()=>{state.query=ui.searchInput.value.slice(0,200);selectionChanged();});
-  for(const [id,key] of [["filterSelect","filter"],["groupSelect","groupBy"],["sortSelect","sort"]])ui[id].addEventListener("change",()=>{state[key]=ui[id].value;selectionChanged();});
+  for(const [id,key] of [["filterSelect","filter"],["teachingTypeSelect","teachingType"],["groupSelect","groupBy"],["sortSelect","sort"]])ui[id].addEventListener("change",()=>{state[key]=ui[id].value;selectionChanged();});
   ui.sizeButton.addEventListener("click",()=>{state.large=!state.large;syncControls();writeHistory("gallery");persist();});
   ui.clearTopicsButton.addEventListener("click",()=>{state.topics=[];selectionChanged();});
   ui.resetButton.addEventListener("click",resetFilters);ui.emptyResetButton.addEventListener("click",resetFilters);
@@ -460,7 +460,7 @@ async function init(){
     ui.galleryGroups.replaceChildren();ui.galleryGroups.setAttribute("aria-busy","false");ui.totalCount.textContent="—";ui.shuffleButton.disabled=true;
     ui.galleryNotice.textContent="Slovník se nepodařilo načíst. Zkus obnovit stránku.";return;
   }
-  state.data=data;state.items=data.items;
+  state.data=data;state.items=data.items.filter(M.isActive);
   if(globalThis.VocabularyLearnerUI&&globalThis.VocabularyLearners)learnerUI=globalThis.VocabularyLearnerUI.create({doc:document,win:window,data,model:M,
     onOpen:()=>{stopAudioPlayback();switchView("settings");window.scrollTo({top:0});},
     onClose:()=>showGallery({render:true}),

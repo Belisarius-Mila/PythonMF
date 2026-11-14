@@ -188,3 +188,35 @@ PIN se se zálohou neobnovuje; při jeho zapomenutí lze zálohu načíst do
 jiného prohlížeče s novým PINem. Změny z jiného okna vyžadují znovu
 otevřít úpravy, aby nedošlo k jejich přepsání. Při chybě zápisu zůstane
 návrh otevřený a uložení se nehlásí jako úspěšné.
+
+
+10. Typ učiva a vyřazení karty (2026-11-14)
+
+teachingType: word (Slovíčka), interaction (Interakce), idiom (Fráze).
+Slovíčko může obsahovat více slov (ice cream, would like). Interakce jsou
+hotové komunikační reakce a výzvy. Fráze jsou v tomto projektu celé výpovědi
+s idiomatickým či ustáleným přeneseným významem. Žádné nové idiomy v této etapě.
+expressionType dál popisuje jen jednoslovnost/víceslovnost; není to typ učiva.
+partOfSpeech je gramatický údaj: u celé výpovědi může být prázdný, ne Fráze.
+
+active=false vyřadí kartu z galerie, poslechu, učení, náhodného kola i Nastavení.
+Záznam v CSV/katalogu, UID, audio ID a soubory zůstávají. Vyřazené UID v osobní
+zásobě nebo obtížných nesmí prosté otevření, editace, Uložit ani import odstranit.
+Tyto vazby se nesmějí automaticky nahrazovat jiným UID ani recyklovat.
+
+Pravidelné množné číslo skrýt pouze po kontrole existence stejného významu
+v jednotném čísle. singularUid eviduje vazbu v katalogu. Neskrývat nepravidelné
+woman/women, child/children ani různé významy glass/glasses. Plurály bez
+samostatné jednotné karty zatím ponechat; nepoužívat automatické odřezání s/es.
+Aktuálně skryté plurály: apples, pigs, friends, bears. Běžná jména a jejich UID
+zůstávají. Dalších6 skrytých položek jsou schválené gramatické stavební vzory.
+
+imageStemOverride může při schválené opravě hesla připnout původní obrázek.
+Povolený je pouze jednoduchý název bez cesty, například iam. Oprava I (am) na I
+ponechává ven-0062 a jeho dosavadní obrázek; starý EN/CZ match zůstává rezervovaný.
+Při změně EN/CZ nebo vět znovu auditovat příslušný audio manifest, generovat
+pouze chybějící schválené nahrávky a zachovat všechny původní MP3.
+
+Příznak active se v této etapě uplatňuje ve webové galerii EN. Původní
+desktopový trainer čte nadále kompatibilní CSV se425 záznamy; jeho filtr
+se tímto webovým vývojem nemění. EN83 a jeho sdílené app.js/styles.css zachované.

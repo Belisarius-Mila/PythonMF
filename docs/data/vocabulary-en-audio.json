@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "source": "VocabularyEN/VocabularyEN.csv",
-  "sourceDigest": "dfcf04a66048d461f520e4bd7c7f96fa7a50ea2e5a2ea3dd2a369ca9654a8da6",
+  "sourceDigest": "266d96a896bcbd8ed0ec91eb63874be6bf444704863c49c90463117a9b98e3cc",
   "rate": "-10%",
   "voices": {
     "en": {
@@ -511,12 +511,12 @@
       "cz": "assets/vocabulary-en-audio/cs-cz-vlasta-neural/2079a7f4544f486a088c.mp3"
     },
     "62": {
-      "sourceEn": "I (am)",
-      "sourceCz": "já (jsem)",
-      "spokenEn": "I am",
-      "spokenCz": "já jsem",
-      "en": "assets/vocabulary-en-audio/en-us-aria-neural/6dd7b52a399ca1c16a14.mp3",
-      "cz": "assets/vocabulary-en-audio/cs-cz-vlasta-neural/35d01e8d1c0de6004cfd.mp3"
+      "sourceEn": "I",
+      "sourceCz": "já",
+      "spokenEn": "I",
+      "spokenCz": "já",
+      "en": "assets/vocabulary-en-audio/en-us-aria-neural/bd725e8edd9271d03981.mp3",
+      "cz": "assets/vocabulary-en-audio/cs-cz-vlasta-neural/2fd110eb01f0960be49d.mp3"
     },
     "63": {
       "sourceEn": "in",
