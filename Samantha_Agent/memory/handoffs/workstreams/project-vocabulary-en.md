@@ -4,40 +4,36 @@ Nazev: Vocabulary EN
 Pracovni proud: project-vocabulary-en
 Typ: Project
 Priorita: 2
-Stav: ceka na retest
+Stav: lokalne hotove, ceka na p+n
 Pripomenout pri startu: ne
-Datum: 2026-11-13 20:58 CET
+Datum: 2026-11-14 10:33 CET
 
 Co se resilo:
-Míla schválil režim Poslech anglických slovíček přímo v galerii.
+Krátký český popisek při poslechu dlaždice; původní anglický název zachovat
+i při českém směru procvičování.
 
 Co je hotove:
-- Předchozí větné audio: 850 MP3, checkpoint 3ca7bf0d, soukromý náhled.
-- Nově Učení / Poslech v galerii; jeden klik, vždy EN, bez změny bookmarku,
-  filtrů, pozice nebo historie. Přepínač zůstává při posunu po ruce.
-- 30 cílených Python testů včetně 34 Node PASS /14,959s; Safari desktop.
-- Audio ani obsah karet se neměnily, žádná nová syntéza.
-- Soukromý náhled vydaný; handoff i projektová paměť jsou ve stejném
-  místním checkpointu.
+- Předchozí galerie,425 dvojic vět a850 větných MP3 jsou vydané; Míla přijal.
+- Nově lokálně po kliknutí v Poslechu čeština na1000ms, potom původní popisek.
+- Opakovaný klik obnoví interval, jiná dlaždice či změna režimu ho ukončí.
+- Safari místně potvrdilo cat → kočka → cat se zvukem.
+- Obsah, audio a současné ovládání jsou zachované.
 
 Co neni hotove:
-- Mílův poslech a fyzická iPhone přejímka.
-- Samostatně schválené Pages p+n obou nových vlastních kroků.
+- Nové Pages p+n krátké nápovědy a fyzická iPhone přejímka.
 
 Dalsi krok:
-Mílova iPhone přejímka nového přepínače a poslechu v soukromém náhledu.
+Samostatné Pages p+n nové české nápovědy.
 
 Navrhovane dalsi kroky:
-- Fyzická iPhone přejímka nového přepínače.
-- Samostatné Pages p+n větného audia a poslechu dlaždic.
+- Mílova zkouška délky české nápovědy po vydání na iPhonu.
 
 Zmenene nebo relevantni soubory:
-gallery.js; index.html; gallery.css; test_vocabularyen_selection.js;
-GALLERY_AUTHORING.txt a příslušná projektová paměť.
+gallery.js; test_vocabularyen_selection.js; GALLERY_AUTHORING.txt a projektová paměť.
 
 Bezpecnost / neukladat:
-Bez nových TTS/modelových volání, bez nového TVBCP a bez PythonMF p+n.
-Cizí main/Will se nemění. Sites náhled zachová přístup pouze vlastníkovi.
+Bez nové syntézy, změny425 karet nebo MP3, bez nového TVBCP.
+Cizí main a jeho rozpracované soubory zůstávají zachované.
 
 ## Historie
 
@@ -319,3 +315,31 @@ Závěrečné doladění: hláška v přepínači má min-width:0 a zalamování
 slov, aby na úzkém displeji nevynucovala vodorovný posuv. Finální Node retest:
 34/34 PASS /14,441s. Finální statická brána PASS, soukromá verze obsahuje
 tuto stejnou CSS.
+
+
+## 2026-11-14 10:33 CET — Sekundová česká nápověda při poslechu
+
+Hotovo: Kliknutí na dlaždici v Poslechu přehraje původní EN slovíčko
+a na1000ms ukáže český popisek. Potom se vrátí původní popisek.
+Míla upřesnil zachovat anglický název i v českém směru procvičování;
+CZ→EN ani EN→CZ proto jazyk běžného popisku nemění. Stávající samostatný
+přepínač popisků EN/CZ zůstává zachovaný. Míla předchozí produkční
+slovník i nalezené věty přijal; nejde o novou syntézu nebo úpravu obsahu.
+
+Rozhodnutí: Nový klik obnoví celou sekundu. Jiná dlaždice vrátí předchozí
+popisek hned. Změna režimu, filtrů, jazyka popisků, otevření učení
+a opuštění stránky krátkou nápovědu ukončí. Poslech nemění bookmark,
+historii, filtry ani uložený učební kontext.
+
+Další krok: Samostatné Pages p+n nové české nápovědy. Předchozí souhlas se všemi commity patřil dokončenému
+vydání9ab2c87b a nepředstírá publikaci tohoto nového kroku.
+
+Navrhované další kroky: Po schváleném vydání ověřit délku nápovědy na iPhonu.
+Nový TVBCP není dohodnutý, proto nevzniká.
+
+Technický důkaz: Nativní Safari v místním náhledu zobrazilo po kliknutí
+kočka a následně znovu cat se zvukem, bez otevření karty. Node sada má
+37 scénářů PASS /35,520s včetně časování999/1000ms v obou směrech,
+opakovaného kliknutí a rušení nápovědy. Statická brána PASS. Finální protokol: vocabulary_en_translation_flash_node_final_20261114.log.
+Původní CSV,425 karet, oba audio manifesty, obrázky i MP3 zůstávají beze změny.
+Fyzický iPhone a nové produkční vydání tímto krokem nejsou potvrzené.

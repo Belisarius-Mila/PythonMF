@@ -147,6 +147,11 @@ Přepínač Učení / Poslech je přichycený nahoře při posouvání přehledu
 Výchozí Učení zachovává otevření velké karty. Poslech přehraje vždy EN
 slovíčkovou MP3 a neotevře kartu, nezmění URL, historii ani učební bookmark.
 Opakovaný klik začne od začátku; další obrázek zastaví předchozí.
+Při kliknutí na1000ms vystřídá běžný popisek český překlad, potom se
+vrátí původní název. Platí v obou směrech procvičování. Opakovaný klik
+obnoví celou sekundu; jiná dlaždice, změna režimu, filtru, popisků nebo
+opuštění stránky nápovědu ukončí. Samostatné nastavení popisků EN/CZ
+se nemění.
 Popisky EN/CZ a nastavení Slovíčko/Věta jsou nezávislé na tomto poslechu.
 
 Poslech je přechodná volba otevřené stránky; reload vrací Učení. Přepnutí

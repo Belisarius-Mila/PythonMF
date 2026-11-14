@@ -1,4 +1,6 @@
 # Memory Index
+- `handoffs/workstreams/project-vocabulary-en.md`; `projects/vocabulary_en_web_cards.md` — 14.11.: lokálně česká nápověda na1000ms při kliknutí v Poslechu; potom původní popisek. Oba směry zachované, Safari cat→kočka→cat. 37 Node PASS, statická brána PASS; vlastní checkpoint a samostatné Pages p+n, bez nového TVBCP.
+
 - `handoffs/workstreams/project-vocabulary-en.md`; `projects/vocabulary_en_web_cards.md` — 13.11.: nový režim Učení/Poslech dlaždic, vždy EN, bez otevření karty a bez změny historie/bookmarku/scrollu. 30 cílených Python včetně34Node PASS, Safari desktop. Stejný soukromý náhled vydaný, vlastní checkpoint s předáním; předchozí větné audio3ca7bf0d je zachované. Pages p+n obou kroků samostatně.
 
 - `handoffs/workstreams/project-vocabulary-en.md`; `projects/vocabulary_en_web_cards.md` — 13.11.: režim vět již na Pages z9c6cc825, Terra p+n potvrzené. Míla schválil425EN+425CZ MP3 stejnými hlasy; generátor/přehrávač hotové,850MP3 dekódovaných,29Python včetně27Node PASS; plná brána3831 /646,379s, 5 SKIP, OK,13/13 vstupů shodných. Soukromý náhled vydaný, místní checkpoint s předáním. Další krok Mílův poslech/iPhone a samostatné Pages p+n audia.
