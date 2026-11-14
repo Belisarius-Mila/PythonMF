@@ -730,12 +730,14 @@
           <div class="library-book-view-tabs" aria-label="Způsob zobrazení knih">
             <button class="secondary active" type="button" data-library-book-view="all">Všechny</button>
             <button class="secondary" type="button" data-library-book-view="category">Podle oborů</button>
+            <button class="secondary" type="button" data-library-book-view="group">Podle skupin</button>
             <button class="secondary" type="button" data-library-book-view="author">Podle autorů</button>
             <button class="secondary" type="button" data-library-book-view="location">Podle umístění</button>
           </div>
           <p class="library-field-hint">Nabídka se doplňuje podle uložených knih. V jednom poli můžeš vybrat více hodnot; různá pole se kombinují.</p>
           <div class="library-book-filter-grid">
             <label class="library-field"><span class="library-field-label">Obor</span><select id="libraryBookSubjectFilter" multiple size="4" aria-label="Obory knih"></select></label>
+            <label class="library-field"><span class="library-field-label">Skupina Konspektu</span><select id="libraryBookGroupFilter" multiple size="4" aria-label="Skupiny Konspektu knih"></select></label>
             <label class="library-field"><span class="library-field-label">Žánr / forma</span><select id="libraryBookGenreFilter" multiple size="4" aria-label="Žánry a formy knih"></select></label>
             <label class="library-field"><span class="library-field-label">Autor</span><select id="libraryBookAuthorFilter"><option value="">Všichni autoři</option></select></label>
             <label class="library-field"><span class="library-field-label">Umístění</span><select id="libraryBookLocationFilter"><option value="">Všechna umístění</option></select></label>
@@ -779,6 +781,7 @@
               <label class="library-field">Autor, pokud je známý<input id="quickBookAuthor" type="text" maxlength="300" autocomplete="off"></label>
               <label class="library-field">Rok, pokud je známý<input id="quickBookYear" type="text" inputmode="numeric" maxlength="4" autocomplete="off"></label>
               <label class="library-field">Obor<select id="quickBookSubject" multiple size="4" aria-label="Obor knihy"></select><span class="library-field-hint">Chybí obor? Vyber jej zde. Více oborů je možné.</span></label>
+              <label class="library-field"><span class="library-field-label">Skupina Konspektu</span><select id="quickBookGroup" multiple size="4" aria-label="Skupina Konspektu knihy"></select><span class="library-field-hint">Nejprve vyber obor, potom nepovinnou podrobnější skupinu. Více skupin je možné.</span></label>
               <p id="quickBookClassification" class="library-field-hint">Katalogové třídění zatím není doplněné.</p>
             </div>
           </div>
@@ -973,6 +976,7 @@
             </div>
             <p id="libraryBookClassification" class="library-field-hint">Katalogové třídění zatím není doplněné.</p>
                 <label class="library-field"><span class="library-field-label">Obor</span><select id="libraryBookSubjectInput" multiple size="4" aria-label="Obor knihy"></select><span class="library-field-hint">Vyber obor, pokud chybí. Ruční změna se uloží až potvrzením karty.</span></label>
+              <label class="library-field"><span class="library-field-label">Skupina Konspektu</span><select id="libraryBookGroupInput" multiple size="4" aria-label="Skupina Konspektu knihy"></select><span class="library-field-hint">Nejprve vyber obor, potom nepovinnou podrobnější skupinu. Více skupin je možné.</span></label>
 
             <div id="libraryBookOptionsStatus" class="status-line">Umístění můžeš doplnit později na Macu.</div>
           </div>
@@ -1111,6 +1115,7 @@
                 </div>
                 <p id="libraryEditBookClassification" class="library-field-hint">Katalogové třídění zatím není doplněné.</p>
                 <label class="library-field"><span class="library-field-label">Obor</span><select id="libraryEditBookSubjectInput" multiple size="4" aria-label="Obor knihy"></select><span class="library-field-hint">Vyber obor, pokud chybí. Ruční změna se uloží až potvrzením karty.</span></label>
+              <label class="library-field"><span class="library-field-label">Skupina Konspektu</span><select id="libraryEditBookGroupInput" multiple size="4" aria-label="Skupina Konspektu knihy"></select><span class="library-field-hint">Nejprve vyber obor, potom nepovinnou podrobnější skupinu. Více skupin je možné.</span></label>
 
               </div>
               <label class="library-field">

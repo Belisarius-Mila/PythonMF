@@ -39,6 +39,26 @@ class FakeResponse:
 
 
 class BookIsbnLookupTests(unittest.TestCase):
+    def test_conspectus_groups_stay_bound_to_their_marc_field(self):
+        from app.book_taxonomy import record_classification
+        def field(code, name, number="", scheme="Konspekt"):
+            return f'<datafield tag="072"><subfield code="a">{code}</subfield><subfield code="x">{name}</subfield><subfield code="9">{number}</subfield><subfield code="2">{scheme}</subfield></datafield>'
+        def classify(xml):
+            return record_classification({"fullRecord": xml}, isbn="9788024932460", source_url="https://www.knihovny.cz/Record/test")
+        fiction = {"code": "821.162.3-3", "label": "Česká próza", "subject": "Beletrie"}
+        children = {"code": "821-93", "label": "Literatura pro děti a mládež (beletrie)", "subject": "Literatura pro děti a mládež"}
+        xml = '<record>'+field(fiction["code"], fiction["label"])+field(children["code"], children["label"], "26")+'</record>'
+        self.assertEqual(classify(xml)["groups"], [fiction, children])
+        for invalid in [field("unknown", "Česká próza", "25"), field(fiction["code"], "", "25"),
+                        field(fiction["code"], "Česká próza", "13"), field(fiction["code"], "Česká próza", "25", "other"),
+                        field(fiction["code"], "Česká próza", "25").replace('</datafield>', '<subfield code="x">Jiné</subfield></datafield>')]:
+            with self.subTest(invalid=invalid):
+                self.assertEqual(classify('<record>'+invalid+'</record>')["groups"], [])
+        self.assertEqual(classify('<record>'+field(fiction["code"], fiction["label"])*2+'</record>')["groups"], [fiction])
+        # Text from another MARC field may never supply the missing name.
+        xml = '<record><datafield tag="072"><subfield code="a">821.162.3-3</subfield><subfield code="2">Konspekt</subfield></datafield><datafield tag="072"><subfield code="x">Česká próza</subfield><subfield code="2">Konspekt</subfield></datafield></record>'
+        self.assertEqual(classify(xml)["groups"], [])
+
     def test_classification_is_bound_to_selected_record_not_search_facets(self):
         xml = '<collection xmlns="http://www.loc.gov/MARC21/slim"><record><datafield tag="072"><subfield code="a">821.162.3-3</subfield><subfield code="2">Konspekt</subfield></datafield></record></collection>'
         response = {"status": "OK", "facets": {"conspectus_facet_mv": [{"translated": "Matematika"}]}, "records": [

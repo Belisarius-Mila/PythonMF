@@ -139,7 +139,7 @@
     const librarySearchBtn = document.getElementById("librarySearchBtn");
     const libraryBookOverview = document.getElementById("libraryBookOverview");
     const libraryBookOverviewCount = document.getElementById("libraryBookOverviewCount");
-    const bookFacetSelects = {subjects: document.getElementById("libraryBookSubjectFilter"), genres: document.getElementById("libraryBookGenreFilter"), topics: document.getElementById("libraryBookTopicFilter"), languages: document.getElementById("libraryBookLanguageFilter"), author: document.getElementById("libraryBookAuthorFilter"), location: document.getElementById("libraryBookLocationFilter")};
+    const bookFacetSelects = {subjects: document.getElementById("libraryBookSubjectFilter"), groups: document.getElementById("libraryBookGroupFilter"), genres: document.getElementById("libraryBookGenreFilter"), topics: document.getElementById("libraryBookTopicFilter"), languages: document.getElementById("libraryBookLanguageFilter"), author: document.getElementById("libraryBookAuthorFilter"), location: document.getElementById("libraryBookLocationFilter")};
     const libraryBookAuthorFilter = document.getElementById("libraryBookAuthorFilter");
     const libraryBookLocationFilter = document.getElementById("libraryBookLocationFilter");
     const libraryBookClearFiltersBtn = document.getElementById("libraryBookClearFiltersBtn");
@@ -375,17 +375,25 @@
     const bookClassifications = {create: null, edit: null};
     const bookSubjectInputs = {create: document.getElementById("libraryBookSubjectInput"), edit: document.getElementById("libraryEditBookSubjectInput")};
     const bookSubjectManual = {create: false, edit: false};
+    const bookGroupInputs = {create: document.getElementById("libraryBookGroupInput"), edit: document.getElementById("libraryEditBookGroupInput")};
+    const bookGroupManual = {create: false, edit: false};
     Object.values(bookSubjectInputs).forEach(input => LibraryBookFacets.fillSubjects(input, [], document));
     function showBookClassification(target, value, item = null) {
       bookClassifications[target] = value || null;
       if (item) bookSubjectManual[target] = item.book_subjects_origin === "manual";
+      if (item) bookGroupManual[target] = item.book_groups_origin === "manual";
       if (item || !bookSubjectManual[target]) LibraryBookFacets.fillSubjects(bookSubjectInputs[target], item ? item.book_subjects : value && value.subjects || [], document);
+      const selected = item ? (item.book_groups || []).map(group => group.code) : bookGroupManual[target]
+        ? LibraryBookFacets.selectedGroups(bookGroupInputs[target]) : (value && value.groups || []).map(group => group.code);
+      LibraryBookFacets.fillGroups(bookGroupInputs[target], LibraryBookFacets.selectedSubjects(bookSubjectInputs[target]), selected, value && value.groups, document);
       document.getElementById(target === "edit" ? "libraryEditBookClassification" : "libraryBookClassification").textContent = LibraryBookFacets.describe(value,
-        bookSubjectManual[target] ? LibraryBookFacets.selectedSubjects(bookSubjectInputs[target]) : null);
+        bookSubjectManual[target] ? LibraryBookFacets.selectedSubjects(bookSubjectInputs[target]) : null,
+        bookGroupManual[target] ? LibraryBookFacets.manualGroupEntries(LibraryBookFacets.selectedGroups(bookGroupInputs[target])) : null);
     }
     function bookClassificationPayload(target, isbn) {
       const value = bookClassifications[target];
       const payload = bookSubjectManual[target] ? {book_subjects_manual: LibraryBookFacets.selectedSubjects(bookSubjectInputs[target])} : {};
+      if (bookGroupManual[target]) payload.book_groups_manual = LibraryBookFacets.selectedGroups(bookGroupInputs[target]);
       try { if (value && SamanthaBookQuick.normalizeISBN(value.isbn) === SamanthaBookQuick.normalizeISBN(isbn)) payload.book_classification = value; }
       catch (_err) { /* A manual subject also works for a book without an ISBN. */ }
       return payload;
@@ -3762,6 +3770,11 @@ Soubor nebude trvale smazán.`);
     }
 
     function renderLibraryBookOptions(options) {
+      if (Array.isArray(options.groups)) {
+        LibraryBookFacets.setGroupOptions(options.groups);
+        Object.keys(bookClassifications).forEach(target => showBookClassification(target, bookClassifications[target]));
+        if (window.SamanthaBookQuickUI) window.SamanthaBookQuickUI.refreshGroups();
+      }
       libraryBookOptions = {locations: Array.isArray(options.locations) ? options.locations.map(String) : libraryBookOptions.locations};
       renderLibraryBookLocationOptions(libraryBookLocationInput, libraryBookOptions.locations);
       renderLibraryBookLocationOptions(libraryEditBookLocationInput, libraryBookOptions.locations);
@@ -3860,6 +3873,7 @@ Soubor nebude trvale smazán.`);
         libraryEditSourceNoteInput,
         libraryEditTextInput,
         bookSubjectInputs.edit,
+        bookGroupInputs.edit,
       ].forEach((field) => {
         field.disabled = disabled;
       });
@@ -4046,13 +4060,15 @@ Soubor nebude trvale smazán.`);
       const allLabels = {author: "Všichni autoři", location: "Všechna umístění"};
       Object.entries(bookFacetSelects).forEach(([key, select]) => {
         const entries = LibraryBookFacets.facets(currentLibraryBookOverviewItems, selections, key);
+        if (key === "groups") entries.sort((a, b) => LibraryBookFacets.groupLabel(a.value, currentLibraryBookOverviewItems)
+          .localeCompare(LibraryBookFacets.groupLabel(b.value, currentLibraryBookOverviewItems), "cs"));
         select.replaceChildren();
         if (!select.multiple) {
           const option = document.createElement("option"); option.value = ""; option.textContent = allLabels[key]; select.append(option);
         }
         entries.forEach(({value, count}) => {
           const option = document.createElement("option"); option.value = value;
-          option.textContent = `${value === LibraryBookFacets.MISSING ? "Bez zařazení" : value} (${count})`;
+          option.textContent = `${value === LibraryBookFacets.MISSING ? "Bez zařazení" : key === "groups" ? LibraryBookFacets.groupLabel(value, currentLibraryBookOverviewItems) : value} (${count})`;
           option.selected = (selections[key] || []).includes(value); select.append(option);
         });
         if (!select.multiple && !(selections[key] || []).length) select.value = "";
@@ -4071,6 +4087,10 @@ Soubor nebude trvale smazán.`);
         if (view === "category") {
           const selected = bookFacetSelections().subjects;
           keys = LibraryBookFacets.values(item, "subjects").filter(value => !selected.length || selected.includes(value)).map(value => value === LibraryBookFacets.MISSING ? "Bez zařazení" : value);
+        } else if (view === "group") {
+          const selected = bookFacetSelections().groups;
+          keys = LibraryBookFacets.values(item, "groups", bookFacetSelections().subjects).filter(value => !selected.length || selected.includes(value))
+            .map(value => value === LibraryBookFacets.MISSING ? "Bez skupiny" : value);
         } else if (view === "author") {
           keys = [String(item.book_author || "").trim() || "Autor neuveden"];
         } else {
@@ -4093,7 +4113,7 @@ Soubor nebude trvale smazán.`);
           section.className = "library-book-group";
           const heading = document.createElement("h4");
           heading.className = "library-book-group-title";
-          heading.textContent = `${groupName} (${groupItems.length})`;
+          heading.textContent = `${view === "group" ? LibraryBookFacets.groupLabel(groupName, items) : groupName} (${groupItems.length})`;
           section.append(heading);
           libraryBookAlphabetical(groupItems).forEach((item) => section.append(createLibraryItemRow(item)));
           libraryList.append(section);
@@ -4886,7 +4906,7 @@ Soubor nebude trvale smazán.`);
         libraryBookAuthorInput.value = "";
         libraryBookPublicationYearInput.value = "";
         libraryBookIsbnInput.value = "";
-        bookSubjectManual.create = false; showBookClassification("create", null);
+        bookSubjectManual.create = false; bookGroupManual.create = false; showBookClassification("create", null);
         libraryBookLocationInput.value = "";
         libraryBookSourceInput.value = "";
         libraryBookSummaryInput.value = "";
@@ -6882,10 +6902,14 @@ ${item.context || ""}`);
       });
     });
     [["create", libraryBookIsbnInput], ["edit", libraryEditBookIsbnInput]].forEach(([target, input]) => {
-      input.addEventListener("input", () => { bookSubjectManual[target] = false; showBookClassification(target, null); clearLibraryBookCatalogComparison(target); });
+      input.addEventListener("input", () => { bookSubjectManual[target] = false; bookGroupManual[target] = false; showBookClassification(target, null); clearLibraryBookCatalogComparison(target); });
     });
     Object.entries(bookSubjectInputs).forEach(([target, input]) => input.addEventListener("change", () => {
       bookSubjectManual[target] = true; showBookClassification(target, bookClassifications[target]);
+      if (target === "edit") markLibraryEditorDirty();
+    }));
+    Object.entries(bookGroupInputs).forEach(([target, input]) => input.addEventListener("change", () => {
+      bookGroupManual[target] = true; showBookClassification(target, bookClassifications[target]);
       if (target === "edit") markLibraryEditorDirty();
     }));
     Object.values(bookFacetSelects).forEach((select) => {

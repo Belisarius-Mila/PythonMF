@@ -2567,3 +2567,16 @@ s mock video-only kamerou, stop tracků a dekódováním WASM.
 - Ověření: všechny4 profily v reálném JS controlleru zachovají skryté selected/hard
   při editaci, hromadné změně a záloze.53 Node a29 cílených Python PASS;
   příklady10 skrytých a415 aktivních karet. Finální plná brána3880 PASS/31 SKIP. Úplný report reports/vocabulary_en_teaching_types_20261114.md.
+
+
+### 2026-11-14 — Skupina Konspektu má stabilní kód a konkrétní nadřazený obor
+
+- Kontext: Katalogové záznamy mohou používat více doložených názvů téhož kódu;
+  kniha může mít více oborů a skupin. Samotný název není stabilní identita.
+- Řešení: Počty/filtr/seskupení stavět na přesném kódu, název převzít z téhož
+  MARC072$x a vazbu na obor držet pohromadě. Závislý filtr i seskupení omezit
+  stejným zvoleným oborem. Ruční původ samostatně; chybějící optional klíč
+  nepřidávat při normalizaci starých payloadů kvůli původnímu fingerprintu.
+- Ověření: aliasy názvů sdílejí jeden počet; víceoborová browserová fixture
+  zobrazuje jen skupiny vybraného oboru. Ruční/ISBN/replay/pád testy a3918 plná
+  brána PASS; následná frontendová podmínka browser390/1280 +24 testů PASS.

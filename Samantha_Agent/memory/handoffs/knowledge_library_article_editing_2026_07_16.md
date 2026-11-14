@@ -1,32 +1,41 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
-### Knihy — ruční obor a odstranění starých kategorií (14.11.2026)
+### Knihy — obnova kontextu a skupiny Konspektu
 
-- Dosavadní verze93d6fac3 byla úspěšně vydaná přes Terru; živé HTTP302,
-  HTTPS, katalog a zdrojová shoda jsou doložené v privátní účtence
-  combined_release_20261114/live_verification.json. Míla nyní potvrzuje,
-  že skenování na iPhonu funguje výborně. Toto není přejímka dnešní nové úpravy.
-- Nový místní krok: z rychlého přidání, podrobného formuláře, editoru,
-  přehledu a API voleb odstraněné původní knižní kategorie. Nové zápisy
-  je neukládají. Technické značky obrázků a ostatní knihovní sekce zachované.
-- Obor lze ručně vybrat z26 oficiálních hlavních oborů Konspektu, také
-  bez katalogového zařazení nebo ISBN. Vlastní27.obor nevzniká. Ruční původ
-  je oddělený od nezměněného katalogového snapshotu. Filtry používají
-  výsledný ruční obor; běžná editace jej zachová, změna ISBN jej zneplatní.
-- Konspekt se dále člení na skupiny, např. Beletrie → Česká próza.
-  Žánr/forma a témata jsou samostatné osy. Podskupiny nyní neukládáme.
-- Bezpečné čištění starých živých kategorií je pouze připravené: připravený
-  přesný náhled, kontrola souběhu, původní bajty v záloze před prvním zápisem,
-  obnovitelný stav. Původní transakční historie zůstává neměnná kvůli replay.
-  Žádný startup hook, HTTP apply ani automatická migrace.
-- Hromadné soukromé čištění čeká na NOVÉ potvrzení přesnou větou podle
-  technical/global_safety_brake.md. Starší potvrzení jiného úkolu neplatí.
-  Nové p+n zatím není autorizované. Další krok: předložit konkrétní náhled a požádat o příslušné potvrzení.
-  Místní vývoj dokončený; Plná brána PASS: 3908 testů / 765.447s, 31 přeskočených.
-- Důkazy: reports/book_manual_subjects_20261114.md, soukromé podklady
-  data/private/book_subject_edit_20261114/. Data worktrees, ScienceNews,
-  odložený emailový A+C test a aktivace agentů beze změny.
+Priorita: 2; stav: rozpracovane; připomenout při startu: ano.
+
+- Ruční obory a odstranění starých kategorií jsou vydané:24096145,
+  Terra job cc7bb358f72b61b428a8f4fb09fa7c7b, push/deploy confirmed,
+  publikační brána3908 PASS a smoke5/5. Nativní účtenka zkontrolovaná;
+  portálový returned_to_adam není potvrzený.
+- Následné jednorázové čištění je dokončené:3 knihy,11 položek slovníku,
+  5 souborů; přesné původní zálohy ověřené, všech6 knih a jejich obrázky
+  i zařazení zachované,0 starých kategorií. Historie operací beze změny.
+  Apply ani původní p+n neopakovat. Důkazy zůstávají soukromě pod
+  data/private/book_subject_edit_20261114/ (completion/release/live/cleanup).
+- Skupiny Konspektu jsou místně dokončené: katalogové i samostatné ruční,
+ 606 pojmenovaných kódů, závislý filtr a seskupení.394 cílených PASS,
+ plná3918 PASS/31 SKIP; po drobném UI zpřesnění browser a24 frontendových PASS.
+ Nové p+n ani fyzická přejímka neproběhly. Katalogové MARC072:
+  $a kód, $x název, $9 hlavní obor, $2 Konspekt. Nevymýšlet z názvu či faset.
+  Staré snapshoty a pending fingerprints/replay musí zůstat kompatibilní;
+  ruční původ samostatný, žádná hromadná migrace soukromých knih.
+- Pořadí: knihovna → konkrétní UI na iPhonu → poštovní přejímka A+C.
+  Podrobnosti mobilního UI zatím chybí; nevymýšlet celkový redesign.
+  Nový ruční obor ještě čeká na fyzickou iPhone přejímku. Dosavadní sken
+  Míla přijal. Vnější watchdog není objednaná implementace.
+- Pošta: dnešní soukromý most uvádí configured/worker_recent=true,
+  active=0/completed=4; to není budoucí provozní důkaz. Před testem znovu
+  registrovaně ověřit běh a vazby. Historický stav12.11. není dnešní stav.
+- Blokace main skončila: přesný cizí Vocabulary EN job
+  4e5e18a70db086fa6eac083f0f9e2984 dokončený,2b17cbb4, Pages/push confirmed,
+  3912 PASS, HTTP200. Pouze čekání a čtení téže účtenky, žádný nový submit.
+  Dočasný soukromý most je tímto dorovnaný; nový TVBCP nevzniká.
+
+Další krok: upřesnit konkrétní iPhone UI průchod a pokračovat drobnou cílenou
+ úpravou; po UI poštovní A+C. Knihovní krok končí místním commitem, případné
+ nové p+n a fyzická přejímka jsou samostatné. Nový vývoj nepovoluje nové p+n, aktivace ani hromadné čištění.
 
 ### ScienceNews — dosavadní doložený stav (nový živý audit se nyní neprováděl)
 
@@ -1112,3 +1121,69 @@ Viewporty390/1280 bez přetékání;2 syntetické knihy v izolovaném archivu,
 0 produkčních POST a0 neodchycených výjimek. Logy obalkyknih_*_20261114.log;
 privátní podklady data/private/obalkyknih_integration_20261114/.
 Statická brána logs/obalkyknih_static_gate_20261114.log.
+
+
+## 2026-11-14 19:58 CET — Dorovnání soukromého mostu po vydání
+
+Hotovo: Ruční knihovní obory jsou vydané a jednorázové čištění starých
+kategorií dokončené. Přesné zálohy, všechny knihy, obrázky a zařazení zachované;
+historie operací se neměnila. Kanonický stav nyní odpovídá dokončeným účtenkám.
+
+Rozhodnutí: Míla zadal pořadí knihovna (jemnější skupiny Konspektu), potom
+konkrétní iPhone UI a poštovní A+C. Vývoj skupin schválený; nové p+n ani
+hromadná migrace tím nejsou povolené. Vnější watchdog zůstává pouze návrh.
+
+Další krok: Zpětně kompatibilně doplnit skupiny z vybraného MARC072 a jejich UI.
+Navrhované další kroky: Fyzická přejímka nového zařazení, konkrétní mobilní
+průchod a poté poštovní scénář v Downloads. Skutečná noc dohledu čeká na Mílu.
+
+Technický důkaz:24096145 / cc7bb358f72b61b428a8f4fb09fa7c7b,
+push/deploy confirmed,3908 PASS/smoke5. cleanup_receipt:done,3 knihy,
+11 položek,5 souborů, přesné původní zálohy a0 zbývajících kategorií.
+completion_receipt/live_verification v data/private/book_subject_edit_20261114/.
+Cizí Vocabulary EN4e5e18a70db086fa6eac083f0f9e2984 ověřené jedním programovým
+čekáním:completed,3912 PASS,push+Pages confirmed,HTTP200. Nic se neopakovalo.
+Dnešní health potvrzuje0f157594c8dba03b/PID77219; není to důkaz fyzického UI.
+
+
+## 2026-11-14 20:05 CET — Jemnější skupiny Konspektu místně připravené
+
+Hotovo: Knihy umí podrobnější katalogové i samostatné ruční skupiny pod oborem;
+rychlé i úplné přidání, editace bez ISBN, filtr s počty a Podle skupin.
+
+Rozhodnutí: Zůstávají26 hlavní obory, žánry a témata samostatně. Identitou
+skupiny je kód; názvy pouze z vybraného MARC072$x nebo doložené mapy MZK.
+606 ručních pojmenovaných kódů; nepojmenovaných10 pouze z konkrétního katalogu.
+Staré v1 payloady bez groups zůstanou nezměněné; žádná hromadná migrace.
+
+Další krok: Dokončit plnou bránu persistence a jeden místní commit.
+Navrhované další kroky: Samostatně schválené p+n/fyzická přejímka, konkrétní
+UI na iPhonu a potom poštovní A+C. Podrobnosti mobilního průchodu chybí.
+
+Technický důkaz:394 cílených PASS, izolovaný skutečný browser390/1280,
+včetně celého sestaveného Cockpitu a options API;0 produkčních POST/výjimek,
+ruční skupina bez ISBN, clear a rychlé přidání ověřené. Plná brána probíhá.
+Report reports/book_conspectus_groups_20261114.md, private důkazy ve stejnojmenné
+složce data/private/. Zatím bez nového push/nasazení a fyzické iPhone přejímky.
+
+
+## 2026-11-14 20:20 CET — Skupiny Konspektu místně dokončené
+
+Hotovo: Podrobnější katalogové i ruční skupiny jsou v přidání, editaci,
+kartách, závislém filtru a pohledu Podle skupin. Fungují i bez ISBN.
+Kanonické předání dokončeného předchozího vydání/čištění je dorovnané.
+
+Rozhodnutí: Žádné nové rozhodnutí; původ a kompatibilita zachované,
+žádné nové p+n ani hromadné přepisování soukromých knih.
+
+Další krok: Upřesnit konkrétní obrazovku/průchod iPhone UI; zatím chybí
+Mílův popis. Pro nové knihovní skupiny je případné p+n samostatný krok.
+Navrhované další kroky: Fyzická telefonní přejímka a po UI poštovní A+C;
+před poštou nový čtecí audit, žádná automatická aktivace/send.
+
+Technický důkaz:394 cílených PASS; plná brána3918 PASS/31 SKIP/767,493s.
+Následné jednorádkové zpřesnění frontendového seskupení (backend beze změny)
+prošlo browser390/1280 a24 frontendovými testy; finální statická brána před
+commitem.0 produkčních POST/výjimek. Důkaz reports/book_conspectus_groups_20261114.md
++ privátní final_validation.json. Místní commit následuje; dosud bez nového
+push/nasazení a bez fyzické iPhone přejímky. Stará data a Data worktrees zachované.

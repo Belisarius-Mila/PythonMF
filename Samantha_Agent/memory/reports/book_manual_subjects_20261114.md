@@ -48,3 +48,26 @@ přebíjelo .hidden a v knižním editoru zůstávalo pole Tagy. Cílené pravid
 pro skryté pole uvnitř editoru opravuje jeho skutečné skrytí. Browser ověřil
 computed display:none pro knihu a opětovnou dostupnost u článku. Předchozí
 neúplný běh brány byl zastaven, jeho log není PASS; rozhoduje nový finální běh.
+
+
+## 2026-11-14 19:58 CET — Dorovnání soukromého mostu po vydání
+
+Hotovo: Ruční knihovní obory jsou vydané a jednorázové čištění starých
+kategorií dokončené. Přesné zálohy, všechny knihy, obrázky a zařazení zachované;
+historie operací se neměnila. Kanonický stav nyní odpovídá dokončeným účtenkám.
+
+Rozhodnutí: Míla zadal pořadí knihovna (jemnější skupiny Konspektu), potom
+konkrétní iPhone UI a poštovní A+C. Vývoj skupin schválený; nové p+n ani
+hromadná migrace tím nejsou povolené. Vnější watchdog zůstává pouze návrh.
+
+Další krok: Zpětně kompatibilně doplnit skupiny z vybraného MARC072 a jejich UI.
+Navrhované další kroky: Fyzická přejímka nového zařazení, konkrétní mobilní
+průchod a poté poštovní scénář v Downloads. Skutečná noc dohledu čeká na Mílu.
+
+Technický důkaz:24096145 / cc7bb358f72b61b428a8f4fb09fa7c7b,
+push/deploy confirmed,3908 PASS/smoke5. cleanup_receipt:done,3 knihy,
+11 položek,5 souborů, přesné původní zálohy a0 zbývajících kategorií.
+completion_receipt/live_verification v data/private/book_subject_edit_20261114/.
+Cizí Vocabulary EN4e5e18a70db086fa6eac083f0f9e2984 ověřené jedním programovým
+čekáním:completed,3912 PASS,push+Pages confirmed,HTTP200. Nic se neopakovalo.
+Dnešní health potvrzuje0f157594c8dba03b/PID77219; není to důkaz fyzického UI.

@@ -174,10 +174,18 @@
     const panel = el("quickBookPanel"); if (!panel) return null;
     const status = el("quickBookStatus"), isbn = el("quickBookISBN"), title = el("quickBookTitle"), author = el("quickBookAuthor"), year = el("quickBookYear");
     const subject = el("quickBookSubject"), classificationNote = el("quickBookClassification");
+    const group = el("quickBookGroup");
     let manualSubjectsTouched = false;
+    let manualGroupsTouched = false;
     root.LibraryBookFacets.fillSubjects(subject, [], doc);
     let classification = null;
-    const describe = value => root.LibraryBookFacets.describe(value, manualSubjectsTouched ? root.LibraryBookFacets.selectedSubjects(subject) : null);
+    const describe = value => root.LibraryBookFacets.describe(value, manualSubjectsTouched ? root.LibraryBookFacets.selectedSubjects(subject) : null,
+      manualGroupsTouched ? root.LibraryBookFacets.manualGroupEntries(root.LibraryBookFacets.selectedGroups(group)) : null);
+    function refreshGroups() {
+      const selected = manualGroupsTouched ? root.LibraryBookFacets.selectedGroups(group) : (classification && classification.groups || []).map(entry => entry.code);
+      root.LibraryBookFacets.fillGroups(group, root.LibraryBookFacets.selectedSubjects(subject), selected, classification && classification.groups, doc);
+      classificationNote.textContent = describe(classification);
+    }
     const open = el("quickBookOpen"), save = el("quickBookSave"), scan = el("quickBookScan"), video = el("quickBookVideo");
     const image = el("quickBookCover"), coverLink = el("quickBookCoverLink"), coverNote = el("quickBookCoverNote"), duplicate = el("quickBookDuplicate");
     let generation = 0, edits = 0, additional = false, available = false, rows = [], listGeneration = 0, opened = false, completed = false, startingCamera = false;
@@ -189,7 +197,7 @@
     const pending = () => { try { return ledger && ledger.pending(); } catch (_) { return true; } };
     function controls() {
       const p = pending(), busy = ledger && ledger.busy;
-      [isbn, title, author, year, subject, scan, el("quickBookLookup"), el("quickBookImage"), el("quickBookLocationsOpen"), el("quickBookAdditional")].forEach(x => { x.disabled = !!p || !!busy || !ledger || completed; });
+      [isbn, title, author, year, subject, group, scan, el("quickBookLookup"), el("quickBookImage"), el("quickBookLocationsOpen"), el("quickBookAdditional")].forEach(x => { x.disabled = !!p || !!busy || !ledger || completed; });
       scan.disabled = scan.disabled || startingCamera; scan.textContent = startingCamera ? "Otevírám kameru…" : "Skenovat kamerou";
       save.disabled = !!busy || !ledger || completed; save.textContent = p ? "Dokončit původní zápis" : "Uložit do knihovny";
       el("quickBookRecover").hidden = !p; el("quickBookNext").hidden = !!p || !el("quickBookNext").dataset.ready;
@@ -208,7 +216,7 @@
       });
     function stop() { camera.stop(); startingCamera = false; video.hidden = true; el("quickBookStop").hidden = true; controls(); }
     function close() { opened = false; generation++; listGeneration++; stop(); panel.hidden = true; open.setAttribute("aria-expanded", "false"); }
-    function changedISBN() { stop(); generation++; additional = false; completed = false; duplicate.replaceChildren(); title.value = ""; author.value = ""; year.value = ""; manualSubjectsTouched = false; root.LibraryBookFacets.fillSubjects(subject, [], doc); classification = null; classificationNote.textContent = describe(null); setCover(""); el("quickBookAdditional").hidden = true; controls(); }
+    function changedISBN() { stop(); generation++; additional = false; completed = false; duplicate.replaceChildren(); title.value = ""; author.value = ""; year.value = ""; manualSubjectsTouched = false; manualGroupsTouched = false; root.LibraryBookFacets.fillSubjects(subject, [], doc); classification = null; refreshGroups(); setCover(""); el("quickBookAdditional").hidden = true; controls(); }
     async function lookup() {
       if (pending()) return;
       stop(); let code;
@@ -223,7 +231,7 @@
         const b = data.book || {}; title.value = b.title || ""; author.value = b.author || ""; year.value = b.publication_year || ""; setCover(b.cover_url);
         classification = b.book_classification || null;
         if (!manualSubjectsTouched) root.LibraryBookFacets.fillSubjects(subject, classification ? classification.subjects : [], doc);
-        classificationNote.textContent = describe(classification);
+        refreshGroups();
         notice(data.found ? "Zkontroluj knihu a ulož ji. Umístění doplníš později na Macu." : data.message); title.focus();
       } catch (_) { if (token === generation && opened) notice("Katalog neodpověděl. Doplň název a knihu ulož ručně."); }
     }
@@ -304,7 +312,8 @@
     el("quickBookClose").addEventListener("click", close);
     isbn.addEventListener("input", changedISBN);
     [title, author, year].forEach(x => x.addEventListener("input", () => { edits++; }));
-    subject.addEventListener("change", () => { manualSubjectsTouched = true; edits++; classificationNote.textContent = describe(classification); });
+    subject.addEventListener("change", () => { manualSubjectsTouched = true; edits++; refreshGroups(); });
+    group.addEventListener("change", () => { manualGroupsTouched = true; edits++; classificationNote.textContent = describe(classification); });
     el("quickBookLookup").addEventListener("click", lookup);
     scan.addEventListener("click", async () => {
       if (pending() || startingCamera) return;
@@ -339,6 +348,7 @@
         perform("create", {isbn: code, title: title.value.trim(), author: author.value.trim(), publication_year: year.value.trim(), additional_copy: additional,
           store_cover: true,
           ...(manualSubjectsTouched ? {book_subjects_manual: root.LibraryBookFacets.selectedSubjects(subject)} : {}),
+          ...(manualGroupsTouched ? {book_groups_manual: root.LibraryBookFacets.selectedGroups(group)} : {}),
           ...(classification ? {book_classification: classification} : {})});
       } catch (e) { notice(e.message); }
     });
@@ -374,7 +384,7 @@
     });
     doc.addEventListener("visibilitychange", () => { if (doc.hidden) { generation++; stop(); } });
     root.addEventListener("pagehide", stop);
-    return {close, setAvailable(value) { available = value; open.hidden = !value; open.disabled = !value; if (!value) close(); }};
+    return {close, refreshGroups, setAvailable(value) { available = value; open.hidden = !value; open.disabled = !value; if (!value) close(); }};
   }
   const api = {normalizeISBN, safeCover, coverSources, bindCover, PendingWrite, Camera, boot};
   if (typeof module !== "undefined" && module.exports) module.exports = api;

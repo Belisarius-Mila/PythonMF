@@ -1582,3 +1582,69 @@ Technický důkaz:395 širších a41 finálních cílených testů PASS; izolova
 browser390/1280 ověřil nové uložení i editaci, bez produkčních POST a výjimek.
 Plná brána PASS: 3908 testů / 765.447s, 31 přeskočených.
 Živá data nebyla hromadně změněna. Podrobnosti reports/book_manual_subjects_20261114.md.
+
+
+## 2026-11-14 19:58 CET — Dorovnání soukromého mostu po vydání
+
+Hotovo: Ruční knihovní obory jsou vydané a jednorázové čištění starých
+kategorií dokončené. Přesné zálohy, všechny knihy, obrázky a zařazení zachované;
+historie operací se neměnila. Kanonický stav nyní odpovídá dokončeným účtenkám.
+
+Rozhodnutí: Míla zadal pořadí knihovna (jemnější skupiny Konspektu), potom
+konkrétní iPhone UI a poštovní A+C. Vývoj skupin schválený; nové p+n ani
+hromadná migrace tím nejsou povolené. Vnější watchdog zůstává pouze návrh.
+
+Další krok: Zpětně kompatibilně doplnit skupiny z vybraného MARC072 a jejich UI.
+Navrhované další kroky: Fyzická přejímka nového zařazení, konkrétní mobilní
+průchod a poté poštovní scénář v Downloads. Skutečná noc dohledu čeká na Mílu.
+
+Technický důkaz:24096145 / cc7bb358f72b61b428a8f4fb09fa7c7b,
+push/deploy confirmed,3908 PASS/smoke5. cleanup_receipt:done,3 knihy,
+11 položek,5 souborů, přesné původní zálohy a0 zbývajících kategorií.
+completion_receipt/live_verification v data/private/book_subject_edit_20261114/.
+Cizí Vocabulary EN4e5e18a70db086fa6eac083f0f9e2984 ověřené jedním programovým
+čekáním:completed,3912 PASS,push+Pages confirmed,HTTP200. Nic se neopakovalo.
+Dnešní health potvrzuje0f157594c8dba03b/PID77219; není to důkaz fyzického UI.
+
+
+## 2026-11-14 20:05 CET — Jemnější skupiny Konspektu místně připravené
+
+Hotovo: Knihy umí podrobnější katalogové i samostatné ruční skupiny pod oborem;
+rychlé i úplné přidání, editace bez ISBN, filtr s počty a Podle skupin.
+
+Rozhodnutí: Zůstávají26 hlavní obory, žánry a témata samostatně. Identitou
+skupiny je kód; názvy pouze z vybraného MARC072$x nebo doložené mapy MZK.
+606 ručních pojmenovaných kódů; nepojmenovaných10 pouze z konkrétního katalogu.
+Staré v1 payloady bez groups zůstanou nezměněné; žádná hromadná migrace.
+
+Další krok: Dokončit plnou bránu persistence a jeden místní commit.
+Navrhované další kroky: Samostatně schválené p+n/fyzická přejímka, konkrétní
+UI na iPhonu a potom poštovní A+C. Podrobnosti mobilního průchodu chybí.
+
+Technický důkaz:394 cílených PASS, izolovaný skutečný browser390/1280,
+včetně celého sestaveného Cockpitu a options API;0 produkčních POST/výjimek,
+ruční skupina bez ISBN, clear a rychlé přidání ověřené. Plná brána probíhá.
+Report reports/book_conspectus_groups_20261114.md, private důkazy ve stejnojmenné
+složce data/private/. Zatím bez nového push/nasazení a fyzické iPhone přejímky.
+
+
+## 2026-11-14 20:20 CET — Skupiny Konspektu místně dokončené
+
+Hotovo: Podrobnější katalogové i ruční skupiny jsou v přidání, editaci,
+kartách, závislém filtru a pohledu Podle skupin. Fungují i bez ISBN.
+Kanonické předání dokončeného předchozího vydání/čištění je dorovnané.
+
+Rozhodnutí: Žádné nové rozhodnutí; původ a kompatibilita zachované,
+žádné nové p+n ani hromadné přepisování soukromých knih.
+
+Další krok: Upřesnit konkrétní obrazovku/průchod iPhone UI; zatím chybí
+Mílův popis. Pro nové knihovní skupiny je případné p+n samostatný krok.
+Navrhované další kroky: Fyzická telefonní přejímka a po UI poštovní A+C;
+před poštou nový čtecí audit, žádná automatická aktivace/send.
+
+Technický důkaz:394 cílených PASS; plná brána3918 PASS/31 SKIP/767,493s.
+Následné jednorádkové zpřesnění frontendového seskupení (backend beze změny)
+prošlo browser390/1280 a24 frontendovými testy; finální statická brána před
+commitem.0 produkčních POST/výjimek. Důkaz reports/book_conspectus_groups_20261114.md
++ privátní final_validation.json. Místní commit následuje; dosud bez nového
+push/nasazení a bez fyzické iPhone přejímky. Stará data a Data worktrees zachované.

@@ -677,6 +677,22 @@ class CockpitTests(unittest.TestCase):
             tags=["historie", "rodina"],
         )
 
+    def test_library_full_create_and_edit_pass_manual_conspectus_groups(self) -> None:
+        from app import article_archive
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            with patch("app.cockpit.archive_book_entry", side_effect=lambda **kwargs: article_archive.archive_book_entry(archive_root=root, **kwargs)):
+                created = library_archive_book_action({"title":"Synthetic book", "author":"Author", "summary":"Summary", "location":"Shelf",
+                    "book_subjects_manual":["Beletrie"], "book_groups_manual":["821.162.3-3"]})
+            self.assertTrue(created["ok"])
+            self.assertEqual(created["item"]["book_groups"][0]["code"], "821.162.3-3")
+            with patch("app.cockpit.update_article", side_effect=lambda **kwargs: article_archive.update_article(archive_root=root, **kwargs)):
+                edited = library_update_article_action({"article_id":created["item"]["id"], "title":"Synthetic book", "text":"Summary", "category":"books",
+                    "book_author":"Author", "book_location":"Shelf", "book_groups_manual":[]})
+            self.assertTrue(edited["ok"])
+            self.assertEqual(edited["item"]["book_groups"], [])
+            self.assertEqual(edited["item"]["book_groups_origin"], "manual")
+
     def test_library_book_options_actions_list_and_add_private_values(self) -> None:
         options = {
             "locations": ["obývák", "jídelna", "půda"],

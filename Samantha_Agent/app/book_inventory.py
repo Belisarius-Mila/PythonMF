@@ -14,7 +14,7 @@ from urllib.parse import urlsplit
 
 from app import article_archive as archive
 from app.book_isbn_lookup import isbn10_to_isbn13, lookup_book_preview
-from app.book_taxonomy import normalize_classification, normalize_manual_subjects
+from app.book_taxonomy import normalize_classification, normalize_manual_subjects, normalize_manual_groups
 from app.book_thumbnail import fetch_thumbnail, MAX_THUMBNAIL_BYTES
 from app.file_persistence import atomic_create_bytes, atomic_create_text, atomic_write_json
 
@@ -170,7 +170,7 @@ def _finish(root, operation):
 
 @archive._serialized_archive_write
 def save_inventory_book(payload, *, archive_root=archive.DEFAULT_ARCHIVE_ROOT):
-    if not isinstance(payload, dict) or set(payload) - {"request_id", "isbn", "title", "author", "publication_year", "additional_copy", "categories", "store_cover", "book_classification", "book_subjects_manual"}:
+    if not isinstance(payload, dict) or set(payload) - {"request_id", "isbn", "title", "author", "publication_year", "additional_copy", "categories", "store_cover", "book_classification", "book_subjects_manual", "book_groups_manual"}:
         raise ValueError("Neplatný požadavek knihy.")
     identity = _request(payload.get("request_id"))
     isbn = canonical_isbn(payload.get("isbn"))
@@ -202,6 +202,10 @@ def save_inventory_book(payload, *, archive_root=archive.DEFAULT_ARCHIVE_ROOT):
     if "book_subjects_manual" in payload:
         manual_subjects = normalize_manual_subjects(payload["book_subjects_manual"])
         content["book_subjects_manual"] = manual_subjects
+    manual_groups = None
+    if "book_groups_manual" in payload:
+        manual_groups = normalize_manual_groups(payload["book_groups_manual"], manual_subjects if manual_subjects is not None else (classification or {}).get("subjects", []))
+        content["book_groups_manual"] = manual_groups
     root = Path(archive_root)
     _validate_registry(root)
     document = _operations(root)
@@ -232,6 +236,8 @@ def save_inventory_book(payload, *, archive_root=archive.DEFAULT_ARCHIVE_ROOT):
             raw["book_classification"] = classification
         if manual_subjects is not None:
             raw["book_subjects_manual"] = manual_subjects
+        if manual_groups is not None:
+            raw["book_groups_manual"] = manual_groups
         operation = {"kind": "create", "fingerprint": fingerprint(content), "state": "prepared", "metadata": raw}
         if store_cover:
             image, status = fetch_thumbnail(isbn)

@@ -24,7 +24,7 @@ from typing import Any, Callable
 from urllib.parse import urlparse, urlunparse
 from xml.sax.saxutils import escape
 
-from app.book_taxonomy import SUBJECTS, normalize_classification, normalize_manual_subjects
+from app.book_taxonomy import SUBJECTS, GROUP_OPTIONS, effective_groups, normalize_classification, normalize_manual_subjects, normalize_manual_groups
 from app.file_persistence import atomic_write_text, exclusive_file_lock
 from app.library_images import LIBRARY_PHOTO_STORAGE_POLICY, prepare_library_photo, prepare_library_thumbnail
 
@@ -149,6 +149,7 @@ class ArticleArchiveItem:
     book_cover_url: str = ""
     book_classification: dict[str, Any] | None = None
     book_subjects_manual: tuple[str, ...] | None = None
+    book_groups_manual: tuple[str, ...] | None = None
     read_state: str = "normal"
     read_state_label: str = "běžné"
     read_note: str = ""
@@ -181,7 +182,9 @@ class ArticleArchiveItem:
             "book_record_state": self.book_record_state,
             "book_cover_url": self.book_cover_url,
             **({"book_subjects": list(self.book_subjects_manual if self.book_subjects_manual is not None else (self.book_classification or {}).get("subjects", [])),
-                "book_subjects_origin": "manual" if self.book_subjects_manual is not None else "catalog" if self.book_classification else ""} if self.category == "books" else {}),
+                "book_subjects_origin": "manual" if self.book_subjects_manual is not None else "catalog" if self.book_classification else "",
+                "book_groups": effective_groups(self.book_classification, self.book_subjects_manual, self.book_groups_manual),
+                "book_groups_origin": "manual" if self.book_groups_manual is not None else "catalog" if (self.book_classification or {}).get("groups") else ""} if self.category == "books" else {}),
             **({"book_classification": self.book_classification} if self.book_classification is not None else {}),
             **({"book_cover_attachment_id": preferred_cover.id} if preferred_cover else {}),
             "snippet": snippet,
@@ -553,6 +556,7 @@ def archive_book_entry(
     tags: list[str] | None = None,
     book_classification: dict[str, Any] | None = None,
     book_subjects_manual: list[str] | None = None,
+    book_groups_manual: list[str] | None = None,
     archive_root: Path = DEFAULT_ARCHIVE_ROOT,
 ) -> dict[str, Any]:
     clean_title = str(title or "").strip()[:500]
@@ -580,6 +584,7 @@ def archive_book_entry(
         book_publication_year=clean_publication_year,
         book_classification=book_classification,
         book_subjects_manual=book_subjects_manual,
+        book_groups_manual=book_groups_manual,
     )
     return {
         "ok": True,
@@ -588,10 +593,11 @@ def archive_book_entry(
     }
 
 
-def list_book_options(*, archive_root: Path = DEFAULT_ARCHIVE_ROOT) -> dict[str, list[str]]:
+def list_book_options(*, archive_root: Path = DEFAULT_ARCHIVE_ROOT) -> dict[str, Any]:
     options = {
         "locations": list(DEFAULT_BOOK_LOCATIONS),
         "subjects": list(SUBJECTS),
+        "groups": [dict(group) for group in GROUP_OPTIONS],
     }
     options_path = archive_root / BOOK_OPTIONS_FILENAME
     if not options_path.is_file():
@@ -816,6 +822,7 @@ def update_article(
     book_publication_year: str | None = None,
     book_classification: dict[str, Any] | None = None,
     book_subjects_manual: list[str] | None = None,
+    book_groups_manual: list[str] | None = None,
     archive_root: Path = DEFAULT_ARCHIVE_ROOT,
     now: datetime | None = None,
 ) -> dict[str, Any]:
@@ -868,6 +875,9 @@ def update_article(
             raise ValueError("Uveď umístění knihy.")
     classification = normalize_classification(book_classification, clean_book_isbn) if book_classification is not None else None
     manual_subjects = normalize_manual_subjects(book_subjects_manual) if book_subjects_manual is not None else None
+    effective_classification = classification if classification is not None else item.book_classification if clean_book_isbn == existing_book_isbn else None
+    effective_subjects = manual_subjects if manual_subjects is not None else item.book_subjects_manual if clean_book_isbn == existing_book_isbn else None
+    manual_groups = normalize_manual_groups(book_groups_manual, effective_subjects if effective_subjects is not None else (effective_classification or {}).get("subjects", [])) if book_groups_manual is not None else None
     raw["title"] = clean_title
     raw["one_line_title"] = compact_title(clean_title)
     raw["category"] = normalized_category
@@ -880,6 +890,7 @@ def update_article(
     if clean_book_isbn != existing_book_isbn:
         raw.pop("book_classification", None)
         raw.pop("book_subjects_manual", None)
+        raw.pop("book_groups_manual", None)
         raw["book_cover_url"] = ""
         raw.pop("book_cover_status", None)
         # Keep every file, but do not present a different edition's catalog image as its cover.
@@ -890,6 +901,8 @@ def update_article(
         raw["book_classification"] = classification
     if manual_subjects is not None:
         raw["book_subjects_manual"] = manual_subjects
+    if manual_groups is not None:
+        raw["book_groups_manual"] = manual_groups
     raw["book_publication_year"] = clean_book_publication_year
     if item.book_record_state == "basic" and clean_text and clean_book_author and clean_book_location:
         raw["book_record_state"] = ""
@@ -1796,9 +1809,11 @@ def write_text_archive(
     book_publication_year: str = "",
     book_classification: dict[str, Any] | None = None,
     book_subjects_manual: list[str] | None = None,
+    book_groups_manual: list[str] | None = None,
 ) -> dict[str, Any]:
     classification = normalize_classification(book_classification, book_isbn) if book_classification is not None else None
     manual_subjects = normalize_manual_subjects(book_subjects_manual) if book_subjects_manual is not None else None
+    manual_groups = normalize_manual_groups(book_groups_manual, manual_subjects if manual_subjects is not None else (classification or {}).get("subjects", [])) if book_groups_manual is not None else None
     clean_text = normalize_manual_text(text)
     item_id = text_entry_id(title, clean_text, now)
     item_dir = archive_root / "articles" / item_id
@@ -1834,6 +1849,8 @@ def write_text_archive(
         metadata["book_classification"] = classification
     if manual_subjects is not None:
         metadata["book_subjects_manual"] = manual_subjects
+    if manual_groups is not None:
+        metadata["book_groups_manual"] = manual_groups
     metadata_path.write_text(json.dumps(metadata, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
     update_registry(archive_root / "registry.jsonl", metadata)
     return metadata
@@ -1955,6 +1972,7 @@ def article_item_from_raw(raw: dict[str, Any]) -> ArticleArchiveItem:
             str(raw.get("book_cover_url", ""))) else "",
         book_classification=normalize_classification(raw["book_classification"], raw.get("book_isbn", "")) if raw.get("book_classification") is not None else None,
         book_subjects_manual=tuple(normalize_manual_subjects(raw["book_subjects_manual"])) if raw.get("book_subjects_manual") is not None else None,
+        book_groups_manual=tuple(normalize_manual_groups(raw["book_groups_manual"])) if raw.get("book_groups_manual") is not None else None,
         read_state=read_state,
         read_state_label=READ_STATE_LABELS[read_state],
         read_note=str(raw.get("read_note", "")).strip(),

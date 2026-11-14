@@ -66,6 +66,64 @@ class InventoryTests(unittest.TestCase):
     def classification(self):
         return {"version": 1, "isbn": "9780385472579", "subjects": ["Beletrie"], "genres": ["romány"], "topics": ["historie"], "languages": ["English"], "source_url": "https://www.knihovny.cz/Record/test"}
 
+    def test_catalog_groups_persist_replay_and_old_fingerprint_stays_identical(self):
+        from app.book_taxonomy import normalize_classification
+        old = self.classification()
+        self.assertEqual(normalize_classification(old, old["isbn"]), old)
+        self.assertNotIn("groups", normalize_classification(old, old["isbn"]))
+        group = {"code": "821.162.3-3", "label": "Česká próza", "subject": "Beletrie"}
+        snapshot = {**old, "groups": [group]}
+        saved = self.save(book_classification=snapshot)["item"]
+        self.assertEqual(saved["book_groups"], [group])
+        self.assertEqual(saved["book_groups_origin"], "catalog")
+        edited = archive.update_article(article_id=saved["id"], title="Changed", text="", category="books", archive_root=self.root)["item"]
+        self.assertEqual(edited["book_groups"], [group])
+        self.assertEqual(self.save(book_classification=snapshot)["item"]["title"], "Changed")
+        changed = archive.update_article(article_id=saved["id"], title="Changed", text="", category="books", book_isbn="9788024932460", archive_root=self.root)["item"]
+        self.assertEqual(changed["book_groups"], [])
+
+    def test_manual_groups_are_separate_and_follow_effective_parent_subject(self):
+        snapshot = {**self.classification(), "groups": [{"code": "821.162.3-3", "label": "Česká próza", "subject": "Beletrie"}]}
+        saved = self.save(book_classification=snapshot, book_subjects_manual=["Matematika"], book_groups_manual=["51"])["item"]
+        self.assertEqual(saved["book_groups"], [{"code": "51", "label": "Matematika", "subject": "Matematika"}])
+        self.assertEqual(saved["book_groups_origin"], "manual")
+        self.assertEqual(saved["book_classification"], snapshot)
+        edited = archive.update_article(article_id=saved["id"], title="Changed", text="", category="books", book_subjects_manual=["Beletrie"], archive_root=self.root)["item"]
+        self.assertEqual(edited["book_groups"], [], "Never show a group under a different manual parent")
+        cleared = archive.update_article(article_id=saved["id"], title="Changed", text="", category="books", book_groups_manual=[], archive_root=self.root)["item"]
+        self.assertEqual(cleared["book_groups_origin"], "manual")
+        self.assertEqual(cleared["book_groups"], [], "An explicit empty override does not restore catalog groups")
+        changed = archive.update_article(article_id=saved["id"], title="Changed", text="", category="books", book_isbn="9788024932460", archive_root=self.root)["item"]
+        self.assertEqual(changed["book_groups_origin"], "")
+
+    def test_invalid_groups_cannot_write_and_manual_group_works_without_isbn(self):
+        snapshot = self.classification()
+        group = {"code": "821.162.3-3", "label": "Česká próza", "subject": "Beletrie"}
+        for bad in [None, {}, [group]*31, [{**group,"subject":"Matematika"}], [{**group,"code":"unknown"}], [{**group,"label":""}], [{**group,"extra":True}]]:
+            with self.subTest(bad=bad), self.assertRaises(ValueError):
+                self.save(book_classification={**snapshot,"groups":bad})
+        for codes in [None, "51", ["unknown"], ["51"]]:
+            with self.subTest(codes=codes), self.assertRaises(ValueError):
+                self.save(book_classification=snapshot, book_groups_manual=codes)
+        self.assertFalse((self.root/"registry.jsonl").exists())
+        result = archive.archive_book_entry(title="Manual", author="Author", summary="Summary", location="Shelf", book_subjects_manual=["Matematika"], book_groups_manual=["51"], archive_root=self.root)
+        self.assertEqual(result["item"]["book_groups"][0]["code"], "51")
+        self.assertNotIn("book_classification", result["item"])
+
+    def test_group_payload_resumes_after_crash_without_changing_reserved_metadata(self):
+        snapshot = {**self.classification(), "groups": [{"code": "821.162.3-3", "label": "Česká próza", "subject": "Beletrie"}]}
+        payload = {**self.payload, "book_classification": snapshot, "book_subjects_manual": ["Matematika"], "book_groups_manual": ["51"]}
+        process = multiprocessing.get_context("fork").Process(target=crash_before_registry, args=(str(self.root), payload))
+        process.start(); process.join(10)
+        self.assertEqual(process.exitcode,75)
+        before = json.loads((self.root/"inventory_operations.json").read_text())["operations"][self.payload["request_id"]]
+        self.assertEqual(before["metadata"]["book_groups_manual"],["51"])
+        with patch.object(books,"fetch_thumbnail",side_effect=AssertionError("Replay must not fetch")):
+            saved = books.save_inventory_book(payload, archive_root=self.root)["item"]
+            self.assertEqual(books.save_inventory_book(payload, archive_root=self.root)["item"]["id"],saved["id"])
+        self.assertEqual(saved["book_groups"][0]["code"],"51")
+        self.assertEqual(len(archive.load_article_registry(self.root)),1)
+
     def test_classification_snapshot_survives_replay_edits_and_isbn_change(self):
         classification = self.classification()
         saved = self.save(book_classification=classification, categories=["vlastní"])["item"]

@@ -15,6 +15,9 @@ from xml.etree import ElementTree
 _TABLE = json.loads(Path(__file__).with_name("book_conspectus.json").read_text(encoding="utf-8"))
 SUBJECTS = tuple(_TABLE["subjects"])
 _GROUPS = _TABLE["groups"]
+GROUP_OPTIONS = tuple({"code": code, "label": names[0], "subject": SUBJECTS[_GROUPS[code] - 1]}
+                      for code, names in _TABLE.get("group_names", {}).items() if code in _GROUPS and names)
+_MANUAL_GROUPS = {group["code"]: group for group in GROUP_OPTIONS}
 
 
 def labels(value, *, limit=30, length=120):
@@ -38,6 +41,40 @@ def normalize_manual_subjects(value):
     return result
 
 
+def normalize_manual_groups(value, subjects=None):
+    result = labels(value, length=80)
+    if any(code not in _MANUAL_GROUPS for code in result):
+        raise ValueError("Vyber skupinu z nabídky Konspektu.")
+    if subjects is not None and any(_MANUAL_GROUPS[code]["subject"] not in subjects for code in result):
+        raise ValueError("Nejprve vyber odpovídající obor skupiny Konspektu.")
+    return result
+
+
+def effective_groups(classification, manual_subjects=None, manual_groups=None):
+    subjects = manual_subjects if manual_subjects is not None else (classification or {}).get("subjects", [])
+    groups = ([_MANUAL_GROUPS[code] for code in manual_groups] if manual_groups is not None
+              else (classification or {}).get("groups", []))
+    return [dict(group) for group in groups if group["subject"] in subjects]
+
+
+def normalize_groups(value, subjects):
+    if not isinstance(value, list) or len(value) > 30:
+        raise ValueError("Neplatné skupiny Konspektu.")
+    result, seen = [], set()
+    for group in value:
+        if not isinstance(group, dict) or set(group) != {"code", "label", "subject"}:
+            raise ValueError("Neplatná skupina Konspektu.")
+        code, label, subject = group["code"], group["label"], group["subject"]
+        if (not isinstance(code, str) or code not in _GROUPS
+                or subject != SUBJECTS[_GROUPS[code] - 1] or subject not in subjects
+                or not isinstance(label, str) or not label.strip() or len(label) > 200):
+            raise ValueError("Skupina nepatří ke zvolenému oboru Konspektu.")
+        if code not in seen:
+            result.append({"code": code, "label": " ".join(label.split()), "subject": subject})
+            seen.add(code)
+    return result
+
+
 def _isbn13(value):
     value = re.sub(r"[\s-]", "", str(value)).upper()
     if re.fullmatch(r"[0-9]{9}[0-9X]", value):
@@ -47,7 +84,8 @@ def _isbn13(value):
 
 
 def normalize_classification(value, isbn):
-    if not isinstance(value, dict) or set(value) != {"version", "isbn", "subjects", "genres", "topics", "languages", "source_url"} or type(value.get("version")) is not int or value["version"] != 1:
+    required = {"version", "isbn", "subjects", "genres", "topics", "languages", "source_url"}
+    if not isinstance(value, dict) or not required <= set(value) or set(value) - required - {"groups"} or type(value.get("version")) is not int or value["version"] != 1:
         raise ValueError("Neplatný formát třídění knihy.")
     if not isinstance(value["isbn"], str) or _isbn13(value["isbn"]) != _isbn13(isbn):
         raise ValueError("Třídění patří jinému ISBN. Znovu knihu dohledej.")
@@ -62,11 +100,14 @@ def normalize_classification(value, isbn):
         result[key] = labels(value[key], limit=26 if key == "subjects" else 30)
     if any(subject not in SUBJECTS for subject in result["subjects"]):
         raise ValueError("Neznámý obor knihy.")
+    # Absence stays absent: old durable payloads must retain their exact fingerprint.
+    if "groups" in value:
+        result["groups"] = normalize_groups(value["groups"], result["subjects"])
     return result
 
 
 def record_classification(record, *, isbn, source_url):
-    subjects, marc_languages = [], []
+    subjects, groups, marc_languages = [], [], []
     xml = record.get("fullRecord")
     if isinstance(xml, str) and len(xml) <= 256 * 1024 and not re.search(r"<!\s*(?:DOCTYPE|ENTITY)", xml, re.I):
         try:
@@ -94,6 +135,13 @@ def record_classification(record, *, isbn, source_url):
                         label = SUBJECTS[number - 1]
                         if label not in subjects:
                             subjects.append(label)
+                    codes = [text for code, text in subfields if code == "a"]
+                    names = [text for code, text in subfields if code == "x"]
+                    # Keep the code/name/parent from this one field together.
+                    if (len(codes) == len(names) == 1 and codes[0] in _GROUPS
+                            and numbers == [_GROUPS[codes[0]]] and names[0] and len(names[0]) <= 200
+                            and not any(group["code"] == codes[0] for group in groups) and len(groups) < 30):
+                        groups.append({"code": codes[0], "label": names[0], "subject": SUBJECTS[numbers[0] - 1]})
         except ElementTree.ParseError:
             pass
     typed = {"genre/form": [], "topic": []}
@@ -113,4 +161,4 @@ def record_classification(record, *, isbn, source_url):
         languages = [names.get(code, code) for code in marc_languages if re.fullmatch(r"[a-z]{3}", code) and code not in {"und", "zxx"}][:30]
     return normalize_classification({"version": 1, "isbn": isbn, "subjects": subjects,
         "genres": labels(typed["genre/form"]), "topics": labels(typed["topic"]),
-        "languages": languages, "source_url": source_url}, isbn)
+        "languages": languages, "source_url": source_url, "groups": groups}, isbn)
