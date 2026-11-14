@@ -35,6 +35,10 @@ async function app({items=vocabulary.items,url="https://example.test/PythonMF/vo
   for(const [data,values] of [["direction",["czToEn","enToCz"]],["label",["en","cz"]],["practice",["words","sentences"]],["galleryMode",["learn","listen"]]])for(const value of values){const button=new Element("button",doc);button.dataset[data]=value;appRoot.append(button);}
   const listeners={};let scroll=0;const location={href:url};const historyEntries=[{url,state:null}];let historyIndex=0;
   const win={location,innerHeight:844,addEventListener:(name,fn)=>(listeners[name]??=[]).push(fn),scrollTo:value=>{scroll=value.top||0;},get scrollY(){return scroll;},requestAnimationFrame:fn=>fn()};
+  let now=0,nextTimer=0;const timers=new Map();
+  win.setTimeout=(callback,delay)=>{const id=++nextTimer;timers.set(id,{callback,at:now+delay});return id;};
+  win.clearTimeout=id=>timers.delete(id);
+  const advance=ms=>{now+=ms;for(const [id,timer] of [...timers])if(timer.at<=now){timers.delete(id);timer.callback();}};
   const emit=(name,extra={})=>{for(const fn of listeners[name]||[])fn(extra);};
   const travel=delta=>{if(!historyEntries[historyIndex+delta])return;historyIndex+=delta;location.href=historyEntries[historyIndex].url;emit("popstate");emit("hashchange");};
   win.history={get state(){return historyEntries[historyIndex].state;},replaceState:(state,unused,url)=>{location.href=new URL(url,location.href).href;historyEntries[historyIndex]={url:location.href,state};},pushState:(state,unused,url)=>{location.href=new URL(url,location.href).href;historyEntries.splice(historyIndex+1);historyEntries.push({url:location.href,state});historyIndex++;},back:()=>travel(-1),forward:()=>travel(1)};
@@ -45,7 +49,7 @@ async function app({items=vocabulary.items,url="https://example.test/PythonMF/vo
   vm.runInContext(fs.readFileSync(path.join(root,"vocabulary-en/model.js"),"utf8"),ctx);
   vm.runInContext(source.replace('void init();','globalThis.ready=init();')+'\nglobalThis.api={state,context,buildSelection,orderedSelection,openStudy,moveStudy,newRandomRound,returnToGallery,renderGallery,selectionChanged,applyRoute,speakPrompt,speakAnswer,stopAudioPlayback,setPracticeMode};',ctx);
   await ctx.ready;
-  return {...ctx.api,doc,win,emit,players,session,local,historyEntries,element:id=>doc.getElementById(id),directions:doc.querySelectorAll("[data-direction]"),labels:doc.querySelectorAll("[data-label]"),practices:doc.querySelectorAll("[data-practice]"),galleryModes:doc.querySelectorAll("[data-gallery-mode]")};
+  return {...ctx.api,doc,win,emit,advance,players,session,local,historyEntries,element:id=>doc.getElementById(id),directions:doc.querySelectorAll("[data-direction]"),labels:doc.querySelectorAll("[data-label]"),practices:doc.querySelectorAll("[data-practice]"),galleryModes:doc.querySelectorAll("[data-gallery-mode]")};
 }
 const sample=vocabulary.items.slice(0,4);
 test("gallery listening plays the English WORD with Czech labels and sentence practice without opening or changing navigation",async()=>{
@@ -57,6 +61,32 @@ test("gallery listening plays the English WORD with Czech labels and sentence pr
   assert.deepEqual([...view.local.map],before.local);assert.deepEqual([...view.session.map],before.session);
   assert.equal(tile.getAttribute('aria-label'),'Přehrát anglicky: cat');assert.equal(view.element('galleryModeHint').textContent,'Anglicky: cat');
   assert.equal(view.players.filter(p=>p.played).length,1);assert.ok(view.players.find(p=>p.played).url.endsWith(audio.items['20'].en));
+  view.advance(1000);assert.equal(tile.querySelector('.tile-label').textContent,'kočka');
+});
+test("listening shows Czech for exactly one second then restores the English caption without changing navigation",async()=>{
+  for(const direction of ['czToEn','enToCz']){
+    const view=await app({url:`https://example.test/PythonMF/vocabulary-en/#direction=${direction}`});view.galleryModes[1].click();const tile=view.element('tile-ven-0020'),caption=tile.querySelector('.tile-label');
+    const before={url:view.win.location.href,history:view.historyEntries.length,session:[...view.session.map],local:[...view.local.map]};
+    tile.click();assert.equal(caption.textContent,'kočka');assert.equal(caption.lang,'cs');
+    view.advance(999);assert.equal(caption.textContent,'kočka');view.advance(1);assert.equal(caption.textContent,'cat');assert.equal(caption.lang,'en');
+    assert.equal(view.state.view,'gallery');assert.equal(view.win.location.href,before.url);assert.equal(view.historyEntries.length,before.history);
+    assert.deepEqual([...view.session.map],before.session);assert.deepEqual([...view.local.map],before.local);
+  }
+});
+test("repeated clicks renew the translation second and switching tiles restores the previous caption immediately",async()=>{
+  const view=await app();view.galleryModes[1].click();const cat=view.element('tile-ven-0020'),cow=view.element('tile-ven-0024');
+  cat.click();view.advance(600);cat.click();view.advance(400);assert.equal(cat.querySelector('.tile-label').textContent,'kočka');
+  view.advance(599);assert.equal(cat.querySelector('.tile-label').textContent,'kočka');view.advance(1);assert.equal(cat.querySelector('.tile-label').textContent,'cat');
+  cat.click();view.advance(500);cow.click();assert.equal(cat.querySelector('.tile-label').textContent,'cat');assert.equal(cow.querySelector('.tile-label').textContent,'kráva');
+  view.advance(500);assert.equal(cow.querySelector('.tile-label').textContent,'kráva');view.advance(500);assert.equal(cow.querySelector('.tile-label').textContent,'cow');
+});
+test("changing mode, labels, filters or leaving the page cancels the temporary translation",async()=>{
+  const view=await app();view.galleryModes[1].click();const cat=view.element('tile-ven-0020');cat.click();view.galleryModes[0].click();
+  assert.equal(cat.querySelector('.tile-label').textContent,'cat');view.advance(1000);assert.equal(cat.querySelector('.tile-label').textContent,'cat');
+  view.galleryModes[1].click();cat.click();view.labels[1].click();view.advance(1000);assert.equal(view.element('tile-ven-0020').querySelector('.tile-label').textContent,'kočka');
+  view.labels[0].click();const old=view.element('tile-ven-0020');old.click();view.state.query='cow';view.selectionChanged();
+  assert.equal(old.querySelector('.tile-label').textContent,'cat');const cow=view.element('tile-ven-0024');cow.click();view.emit('pagehide');view.advance(1000);
+  assert.equal(cow.querySelector('.tile-label').textContent,'cow');
 });
 test("repeating a tile restarts its audio, and another tile stops the previous word",async()=>{
   const view=await app();view.galleryModes[1].click();view.element('tile-ven-0020').click();const cat=view.players.find(p=>p.played);cat.currentTime=1;

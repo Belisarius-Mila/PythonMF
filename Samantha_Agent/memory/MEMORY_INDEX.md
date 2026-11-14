@@ -1,6 +1,8 @@
 - `handoffs/workstreams/project-vocabulary-en.md`; `projects/vocabulary_en_web_cards.md` — 14.11.: první p+n zastavené před push sedmi chybami testovací Git identity. Přípravek opraven lokálním -c, žádný produkční zásah; po kontrolách nové přesné registrované předání celého schváleného balíčku. Původní účtenka zachovaná.
 
 # Memory Index
+- `handoffs/workstreams/project-vocabulary-en.md`; `projects/vocabulary_en_web_cards.md` — 14.11.: lokálně česká nápověda na1000ms při kliknutí v Poslechu; potom původní popisek. Oba směry zachované, Safari cat→kočka→cat. 37 Node PASS, statická brána PASS; vlastní checkpoint a samostatné Pages p+n, bez nového TVBCP.
+
 - `handoffs/workstreams/project-vocabulary-en.md`; `projects/vocabulary_en_web_cards.md` — 13.11.: Míla na přesný dotaz výslovně schválil všechny commity včetně cizího908a6aee. Kandidát b5a2383a ověřený (30Python včetně34Node PASS, statická brána PASS). Celý GitHub rozsah nyní schválený; cíl vydání stále Vocabulary EN Pages, bez runtime deploy Knihovny.
 
 - `handoffs/workstreams/project-vocabulary-en.md`; `projects/vocabulary_en_web_cards.md` — 13.11.: Míla zadal p+n dvou vlastních kroků3ca7bf0d+581fbed3. Izolovaný integrační kandidát nad908a6aee; obsah i cizí soubory zachované. Před publikací nutné rozhodnout GitHub rozsah: cizí908a6aee je dosud pending. Main ani produkce se v přípravě nemění.
