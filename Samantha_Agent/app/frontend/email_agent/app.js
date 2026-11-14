@@ -8,6 +8,7 @@
   let pushcutDirty = false;
   let pushcutBusy = false;
   let refreshGeneration = 0;
+  const moreActionViews = new Map();
   function node(tag, text, className) {
     const element = document.createElement(tag);
     if (text !== undefined) element.textContent = text;
@@ -52,25 +53,25 @@
     const m = proposal.metadata;
     metadata.append(node("p", [m.title, m.domain, m.document_type, m.counterparty, ...m.tags].filter(Boolean).join(" · ")));
     card.append(metadata);
-    const buttons = node("div", undefined, "actions");
+    const primary = node("div", undefined, "actions email-primary-actions");
+    const secondary = node("div", undefined, "actions email-secondary-actions");
+    const more = node("details", undefined, "email-more-actions");
+    more.open = moreActionViews.get(item.id)?.open || false;
+    moreActionViews.set(item.id, more);
+    const other = node("div", undefined, "actions");
+    more.append(node("summary", "Další akce"), other);
     const enabled = item.status === "awaiting_confirmation";
     const archived = item.status === "archived";
     if ((enabled || archived) && window.SamanthaCalendarDraft) {
       if (item.calendar_suggestion?.status === "ready") card.append(node("p", "Návrh do kalendáře je připravený. Zkontroluj jej před zápisem.", "reason"));
-      buttons.append(action("Do kalendáře", () => window.SamanthaCalendarDraft.open(item), true));
+      secondary.append(action("Do kalendáře", () => window.SamanthaCalendarDraft.open(item), true));
     }
     const replyStatus = (item.reply || {}).status;
     if (replyStatus === "smtp_sent") card.append(node("p", "Odpověď přijal odesílací server."));
     if (["sending", "delivery_unknown"].includes(replyStatus)) card.append(node("p", "Výsledek odeslání vyžaduje ověření. Odpověď znovu neposílej."));
     if ((item.reply || {}).receipt?.sent_copy_status === "failed") card.append(node("p", "Kopie v Odeslané poště se nepodařila ověřit; odpověď znovu neposílej."));
     if (enabled || archived) {
-      if (!archived)
-      buttons.append(action("Uložit", async () => {
-        if (!window.confirm(`Uložit e-mail „${m.title}“ podle zobrazeného návrhu?`)) return;
-        await request("/api/email-agent/archive", {id: item.id, proposal_digest: item.proposal_digest, confirmed: true});
-        byId("notice").textContent = "E-mail byl uložen do místního archivu.";
-      }));
-      if (!["sending", "delivery_unknown", "smtp_sent"].includes(replyStatus)) buttons.append(action(proposal.reply_draft ? "Upravit odpověď" : "Napsat odpověď", async () => {
+      if (!["sending", "delivery_unknown", "smtp_sent"].includes(replyStatus)) primary.append(action("Odpovědět", async () => {
         editing = item;
         byId("replyRecipient").textContent = `Odpověď na zprávu od: ${header.sender || ""}`;
         byId("replySubject").value = proposal.reply_subject || `Re: ${header.subject || ""}`;
@@ -79,19 +80,24 @@
         resetConfirmation();
         editor.showModal();
       }));
-      for (const [label, kind] of [["Ignorovat", "ignore"], ["Smazat z Cockpitu", "dismiss"]]) {
-        buttons.append(action(label, () => request("/api/email-agent/dismiss", {ids: [item.id], action: kind}), true));
-      }
-      buttons.append(action("Příště nedůležité", async () => {
+      if (!archived) primary.append(action("Uložit do archivu", async () => {
+        if (!window.confirm(`Uložit e-mail „${m.title}“ podle zobrazeného návrhu?`)) return;
+        await request("/api/email-agent/archive", {id: item.id, proposal_digest: item.proposal_digest, confirmed: true});
+        byId("notice").textContent = "E-mail byl uložen do místního archivu.";
+      }));
+      other.append(action("Ignorovat", () => request("/api/email-agent/dismiss", {ids: [item.id], action: "ignore"}), true));
+      other.append(action("Příště nedůležité", async () => {
         await request("/api/email-agent/remember-importance", {id: item.id});
         byId("notice").textContent = "Preference pro tohoto odesílatele a podobný předmět je uložená. Tuto kartu můžeš dál vyřídit.";
       }, true));
-    } else buttons.append(action("Ověřit uložení", async () => {
+      other.append(action("Smazat z Cockpitu", () => request("/api/email-agent/dismiss", {ids: [item.id], action: "dismiss"}), true));
+    } else primary.append(action("Ověřit uložení", async () => {
       await request("/api/email-agent/archive", {id: item.id, proposal_digest: item.proposal_digest, confirmed: true});
     }));
-    card.append(buttons);
+    card.append(primary, secondary);
+    if (other.children.length) card.append(more);
     card.id = `email-${item.id}`;
-    window.SamanthaEmailFollowups?.attach(card, item);
+    window.SamanthaEmailFollowups?.attach(card, item, secondary);
     return card;
   }
   function resetConfirmation() {
@@ -142,6 +148,7 @@
     if (sourceErrors || data.assessment_errors || data.calendar_suggestion_errors) byId("status").textContent += " Některé kontroly nebo návrhy vyžadují ověření.";
     const cards = byId("cards"); cards.replaceChildren();
     data.cards.forEach(item => cards.append(renderCard(item)));
+    for (const id of moreActionViews.keys()) if (!data.cards.some(item => item.id === id)) moreActionViews.delete(id);
     window.SamanthaEmailFollowups?.syncCards();
     if (!data.cards.length) cards.append(node("p", "Žádné důležité zprávy k řešení."));
     const hours = byId("hours"); hours.replaceChildren();

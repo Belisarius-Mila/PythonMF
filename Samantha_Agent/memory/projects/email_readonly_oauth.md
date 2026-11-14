@@ -1,12 +1,13 @@
-## Aktuální návaznost — 2026-11-14 20:48 CET
+## Aktuální návaznost — 2026-11-14 21:03 CET
 
-Knihovna64e9897a je nasazená a živě ověřená. Míla zadal pokračovat UI
-poštovního agenta na iPhonu. Místně opravená prokázaná chyba úzkých tlačítek
-na kartách;26 frontendových a browser320/390/1280 PASS, dosud bez nového
-nasazení UI. Další konkrétní přání zatím chybí. Živý čtecí snímek:
-monitor configured/worker_recent=true, active=0/completed=4.
-Přejímka A+C zůstává po UI, žádná nová aktivace/send/modelový pokus.
-Samostatný e-mailový TVBCP není dohodnutý; UI sledují existující Cockpit dokumenty.
+Míla schválil tlačítka a kompaktní hlídání. Místně dokončené: dvě hlavní řady,
+Další akce, sbalená zpráva i aktivní záležitost, rozbalení drží refresh.
+51 cílených a browser320/390/1280 PASS; zdroj/akce/historie zachované.
+Nové p+n UI a fyzická iPhone přejímka zbývají, po UI navazuje A+C.
+Knihovna64e9897a je vydaná; živý čtecí snímek monitoru z20:48 CET je true/true,
+active0/completed4, není to trvalá záruka. Žádné nové aktivace/send/model.
+Report reports/email_compact_ui_20261114.md; UI kryje existující Cockpit TVBCP.
+Samostatný e-mailový TVBCP nadále není dohodnutý; celý projekt se neuzavírá.
 
 ## Obnova po /new — 2026-11-12 17:56 CET
 
@@ -2132,3 +2133,19 @@ reports/email_mobile_actions_20261114.md; soukromé důkazy email_mobile_ui_2026
 active=0/completed=4; neodvozovat dnešní stav ze snímku12.11.
 UI kryje existující Cockpit handoff/TVBCP. Samostatný e-mailový TVBCP není
 dohodnutý; celý poštovní projekt se tím neuzavírá a nový TVBCP nevzniká.
+
+
+## 2026-11-14 21:03 CET — Kompaktní hlídání a přehlednější akce pošty
+
+Hotovo: Hlídaný e-mail a aktivní záležitost se sbalí na název a Hlídáno;
+rozbalením zůstane dostupný celý obsah a akce. Akce zprávy jsou ve schválených
+dvou řadách, méně časté pod Další akce. Refresh drží ruční rozbalení.
+Rozhodnutí: Míla schválil návrh tlačítek a výslovně doplnil sbalení hlídání.
+Další krok: Samostatně schválené p+n UI a fyzická telefonní přejímka.
+Navrhované další kroky: Po UI poštovní A+C podle TXT v Downloads.
+Technický důkaz:51 cílených PASS, browser320/390/1280, sbalené karty70px,
+klávesnice/touch, create/refresh/complete a koncept ověřené;0 produkčních POST.
+Stavy Ke kontrole, neověřený běh a odeslání zůstávají viditelné. Backend,
+ID/digesty/potvrzení beze změny, žádný nový model/timer/aktivace. Podrobně
+reports/email_compact_ui_20261114.md. Místní vývoj, bez push/nasazení/iPhone QA.
+UI kryje stávající Cockpit TVBCP; samostatný e-mailový TVBCP není dohodnutý.

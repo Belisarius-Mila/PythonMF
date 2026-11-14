@@ -103,6 +103,15 @@ function find(element, label) {
   assert.match(ids.cards.textContent, /<img src=x onerror=alert\(1\)>/);
   assert.equal(followupsRefreshes, 1);
   assert.deepEqual(followupAttachments, ['important']);
+  const primaryRow = ids.cards.children[0].children.find(child => child.className === 'actions email-primary-actions');
+  assert.deepEqual(primaryRow.children.map(child => child.textContent), ['Odpovědět','Uložit do archivu']);
+  const moreActions = ids.cards.children[0].children.find(child => child.className === 'email-more-actions');
+  assert.equal(moreActions.open, false);
+  assert.deepEqual(moreActions.children[1].children.map(child => child.textContent), ['Ignorovat','Příště nedůležité','Smazat z Cockpitu']);
+  moreActions.open = true;
+  await intervals[0]();
+  assert.equal(ids.cards.children[0].children.find(child => child.className === 'email-more-actions').open, true,
+    'An ordinary refresh keeps additional actions open');
   followupsOpen = true;
   const callsBeforeFollowupEdit = calls.length;
   await intervals[0]();
@@ -126,7 +135,7 @@ function find(element, label) {
   const initialProposal = {...data.cards[0].proposal};
   data.cards[0].proposal = {...initialProposal, reply_subject: '', reply_draft: ''};
   await intervals[0]();
-  const writeReply = find(ids.cards, 'Napsat odpověď');
+  const writeReply = find(ids.cards, 'Odpovědět');
   assert.ok(writeReply, 'A card without a generated draft must offer a blank editor');
   const mutationsBeforeOpen = calls.filter(call => call.payload !== null).length;
   await writeReply.click();
@@ -141,15 +150,15 @@ function find(element, label) {
   await ids.replyForm.listeners.submit({preventDefault() {}});
   assert.equal(data.cards[0].proposal.reply_draft, 'Děkuji za zprávu.');
   assert.equal(calls.some(call => /prepare-reply|send-reply/.test(call.url)), false);
-  await find(ids.cards, 'Upravit odpověď').click();
+  await find(ids.cards, 'Odpovědět').click();
   assert.equal(ids.replyBody.value, 'Děkuji za zprávu.');
   await ids.closeEditor.click();
   data.cards[0].proposal = {...initialProposal, reply_subject: '', reply_draft: ''};
   for (const status of ['sending', 'delivery_unknown', 'smtp_sent']) {
     data.cards[0].reply = {status};
     await intervals[0]();
-    assert.equal(find(ids.cards, 'Napsat odpověď'), null, `Do not reopen a ${status} reply`);
-    assert.equal(find(ids.cards, 'Upravit odpověď'), null);
+    assert.equal(find(ids.cards, 'Odpovědět'), null, `Do not reopen a ${status} reply`);
+    assert.equal(find(ids.cards, 'Odpovědět'), null);
   }
   delete data.cards[0].reply;
   data.cards[0].proposal = initialProposal;
@@ -198,7 +207,7 @@ function find(element, label) {
   assert.deepEqual(calls.find(call => call.url.endsWith('/forget-visibility')).payload, {id: 'visibility-1'});
   assert.equal(JSON.stringify(data.hours), hourBefore, 'Cancelling restores the prior hourly row');
   assert.equal(calls.some(call => /dismiss|archive|send-reply/.test(call.url)), false);
-  await find(ids.cards, 'Upravit odpověď').click();
+  await find(ids.cards, 'Odpovědět').click();
   assert.equal(ids.replyEditor.open, true);
   ids.replySubject.value = 'Můj předmět'; ids.replyBody.value = 'Moje upravená odpověď';
   const count = calls.length;
@@ -212,7 +221,7 @@ function find(element, label) {
   assert.equal(edit.payload.expected_digest, 'original-digest');
   assert.equal(ids.replyEditor.open, false);
   assert.equal(submitter.disabled, false);
-  await find(ids.cards, 'Upravit odpověď').click();
+  await find(ids.cards, 'Odpovědět').click();
   ids.replyBody.value = 'Text ke skutečnému druhému potvrzení';
   let releasePreparation;
   preparationHold = new Promise(resolve => { releasePreparation = resolve; });
@@ -247,10 +256,10 @@ function find(element, label) {
   assert.deepEqual(calls.find(call => call.url.endsWith('/dismiss')).payload.ids, ['low-1','low-2']);
   assert.equal(data.hours.length, 0);
   confirmChoice = false;
-  await find(ids.cards, 'Uložit').click();
+  await find(ids.cards, 'Uložit do archivu').click();
   assert.equal(calls.filter(call => call.url.endsWith('/archive')).length, 0);
   confirmChoice = true;
-  await find(ids.cards, 'Uložit').click();
+  await find(ids.cards, 'Uložit do archivu').click();
   assert.equal(calls.filter(call => call.url.endsWith('/archive')).length, 1);
   assert.equal(calls.find(call => call.url.endsWith('/archive')).payload.proposal_digest, 'new-digest');
   assert.equal(data.cards.length, 0);

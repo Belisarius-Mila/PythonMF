@@ -159,7 +159,7 @@ boot.nonce=0;
 const flush=()=>new Promise(resolve=>setImmediate(resolve));
 const posts=s=>s.calls.filter(x=>x.payload);
 async function open(b) {
-  const button=find(b.card,'Hlídat tuto záležitost');assert.ok(button);await button.click();
+  const button=find(b.card,'Hlídat záležitost');assert.ok(button);await button.click();
   assert.equal(b.ids.followupEditor.open,true);assert.equal(b.api.isOpen(),true);
 }
 function edit(b,values={}) {
@@ -187,12 +187,25 @@ async function submit(b) {await b.ids.followupForm.fire('submit',{submitter:b.id
   await b.api.refresh();assert.equal(b.ids.followupGoal.value,'Nezahodit rozepsaný cíl');
   await submit(b);
   assert.equal(posts(b.s).length,1);assert.equal(posts(b.s)[0].payload.fields.check_at,'2099-01-15T08:00:00.000Z');
+  const mailFold = () => b.card.children.find(child => child.className === 'tracked-disclosure');
+  const caseFold = () => b.ids.followupsActive.children[0].children.find(child => child.className === 'tracked-disclosure');
+  assert.equal(mailFold().open,false,'A confirmed newly watched email collapses immediately');
+  assert.equal(caseFold().open,false,'The active matter also has a compact summary');
+  assert.match(mailFold().children[0].textContent,/Hlídáno/);
+  const mutationCount=posts(b.s).length;
+  mailFold().open=true;caseFold().open=true;
+  await b.api.refresh();
+  assert.equal(mailFold().open,true);assert.equal(caseFold().open,true,'Refresh preserves manual expansion');
+  assert.equal(posts(b.s).length,mutationCount,'Reading and expanding never mutate a matter');
+  mailFold().open=false;caseFold().open=false;await b.api.refresh();
+  assert.equal(mailFold().open,false);assert.equal(caseFold().open,false);
   assert.match(b.ids.followupsActive.textContent,/Nezahodit rozepsaný cíl/);
   assert.equal(b.ids.followupEditor.open,false);
-  assert.equal(find(b.card,'Hlídat tuto záležitost'),null);
+  assert.equal(find(b.card,'Hlídat záležitost'),null);
   assert.ok(find(b.card,'Hlídání'));assert.ok(find(b.card,'Vyřízeno'));
   await find(b.ids.followupsActive,'Vyřízeno').click();await flush();
   assert.equal(b.s.value.state,'completed');assert.match(b.ids.followupsCompleted.textContent,/Nezahodit/);
+  assert.equal(mailFold(),undefined,'A completed matter no longer collapses the original email');
   assert.equal(b.ids.followupsActive.textContent.includes('Nezahodit'),false);
   await find(b.ids.followupsCompleted,'Hlídání').click();await flush();
   assert.equal(b.ids.followupEditor.open,true,'Reopening must allow a fresh check time');
@@ -275,7 +288,7 @@ async function submit(b) {await b.ids.followupForm.fire('submit',{submitter:b.id
   assert.equal(b.ids.followupEditor.open,false);
 
   const corrupted=new Map([['samantha.email.followup.intent.v1','not json']]);
-  b=await boot(server(),corrupted);await find(b.card,'Hlídat tuto záležitost').click();
+  b=await boot(server(),corrupted);await find(b.card,'Hlídat záležitost').click();
   assert.equal(b.ids.followupEditor.open,false);assert.equal(posts(b.s).length,0,'Malformed recovery state is not discarded to allow a second intent');
   b=await boot(server(stored({tracking:{status:'source_unverified',last_checked_at:'2026-11-12T09:00:00Z',
     last_verified_at:'2026-11-12T08:00:00Z',next_check_slot:'2026-11-12T10:00:00Z'}})));
@@ -295,7 +308,7 @@ async function submit(b) {await b.ids.followupForm.fire('submit',{submitter:b.id
     observations:{items:{[relatedID]:{observed_at:'2026-11-12T09:00:00Z'}},reviews:{}}})));
   const relatedCard=new Element('article');b.c.document.body.append(relatedCard);
   b.api.attach(relatedCard,{id:relatedID,status:'awaiting_confirmation'});
-  assert.equal(find(relatedCard,'Hlídat tuto záležitost'),null,'Bound reply opens the existing matter');
+  assert.equal(find(relatedCard,'Hlídat záležitost'),null,'Bound reply opens the existing matter');
   assert.match(relatedCard.textContent,/Záležitost/);
   const sourceButton=b.ids.followupsActive.querySelectorAll('button').find(x=>x.textContent.startsWith('Související zpráva'));
   await sourceButton.click();assert.ok(b.s.calls.at(-1).url.includes('&item_id='+relatedID));
@@ -341,5 +354,18 @@ async function submit(b) {await b.ids.followupForm.fire('submit',{submitter:b.id
   b=await boot(server({...proposed,suggestion:{...suggestion,status:'stale'}}));
   assert.equal(find(b.ids.followupsActive,'Převzít další krok'),null);
   assert.match(b.ids.followupsActive.textContent,/starších podkladů/);
+  const attentionServer=server(stored({tracking:{status:'binding_review'}}));attentionServer.running=true;
+  b=await boot(attentionServer);
+  assert.match(mailFold().children[0].textContent,/Hlídáno · Ke kontrole/);
+  assert.match(caseFold().children[0].textContent,/Hlídáno · Ke kontrole/);
+  assert.equal(posts(b.s).length,0);
+  const uncertainCard=new Element('article');
+  b.api.attach(uncertainCard,{id:itemID,status:'awaiting_confirmation',header:{subject:'Odpověď k ověření'},reply:{status:'delivery_unknown'}});
+  assert.match(uncertainCard.children[0].children[0].textContent,/Odeslání k ověření/);
+  const pendingArchive=new Element('article');
+  b.api.attach(pendingArchive,{id:itemID,status:'archiving',header:{subject:'Uložení k ověření'}});
+  assert.match(pendingArchive.children[0].children[0].textContent,/Uložení k ověření/);
+  b.s.mode='unavailable';await b.api.refresh();
+  assert.match(caseFold().children[0].textContent,/běh neověřený/,'A compact row still reports stale monitoring');
   console.log('Follow-up UI: lifecycle/recovery, source binding, related read, truthful worker state and no second timer OK');
 })().catch(error=>{console.error(error);process.exitCode=1;});

@@ -9,6 +9,8 @@
     next_step: byId("followupNextStep"), waiting_on: byId("followupWaitingOn"),
     check_at: byId("followupCheckAt")};
   const records = new Map(), cards = new Map();
+  const disclosures = new Map();
+  let monitoringVerified = false;
   let editing = null, pending = null, storageFault = false;
   let busy = false, ready = false, sequence = 0, epoch = 0;
   const node = (tag, text, className) => {
@@ -79,24 +81,58 @@
       : mode === "create" ? "Název a cíl jsou převzaté z e-mailového návrhu. Uprav je a doplň další krok i čas kontroly." : "";
     controls(); dialog.showModal(); fields[mode === "reopen" ? "check_at" : "title"].focus();
   }
-  function transitions(value) {
+  function transitions(value, includeEdit = true) {
     const actions = node("div", undefined, "actions");
     actions.append(button("Hlídání", () => open("reopen", value), value.state === "active"),
       button("Vyřízeno", () => mutate({action: "set_state", id: value.id,
         expected_revision: value.revision, state: "completed"}), value.state === "completed"));
-    if (value.state === "active") actions.append(button("Upravit hlídání", () => open("update", value)));
+    if (value.state === "active" && includeEdit) actions.append(button("Upravit hlídání", () => open("update", value)));
     return actions;
   }
+  function trackingBadge(value, item = null) {
+    if (["sending", "delivery_unknown"].includes(item?.reply?.status) || item?.reply?.receipt?.sent_copy_status === "failed")
+      return "Hlídáno · Odeslání k ověření";
+    if (item?.status && !["awaiting_confirmation", "archived"].includes(item.status))
+      return "Hlídáno · Uložení k ověření";
+    const needsReview = ["binding_review", "related_message", "due_no_observed_reply", "source_binding_unverified", "source_unverified"].includes(value.tracking?.status)
+      || value.suggestion?.status === "pending" || value.source.thread_binding !== "verified_headers"
+      || ["unverified", "invalid"].includes(value.assessment?.status)
+      || Object.values(value.observations?.reviews || {}).some(event => !event.resolution && event.generation === value.generation);
+    return !ready || !monitoringVerified ? "Hlídáno · běh neověřený" : needsReview ? "Hlídáno · Ke kontrole" : "Hlídáno";
+  }
+  function disclosure(key, title, badge, body) {
+    const previous = disclosures.get(key);
+    const detail = node("details", undefined, "tracked-disclosure");
+    detail.open = previous?.open || false;
+    const summary = node("summary", undefined, "tracked-summary");
+    summary.append(node("span", title, "tracked-title"), node("span", badge, "tracked-badge" + (badge === "Hlídáno" ? "" : " needs-review")));
+    detail.append(summary, body); disclosures.set(key, detail);
+    return detail;
+  }
   function paintCard(entry) {
-    const value = [...records.values()].find(value => value.source.item_id === entry.item.id
+    const matches = [...records.values()].filter(value => value.source.item_id === entry.item.id
       || Object.hasOwn(value.observations?.items || {}, entry.item.id));
+    const value = matches.find(value => value.state === "active") || matches[0];
     entry.holder.replaceChildren();
+    if (entry.secondaryAction) entry.secondaryAction.remove();
     if (value) {
-      entry.holder.append(node("p", `Záležitost: ${value.title}`), transitions(value));
-    } else if (["awaiting_confirmation", "archived"].includes(entry.item.status)) {
-      entry.holder.append(button("Hlídat tuto záležitost", () => open("create", entry.item)));
+      entry.holder.append(node("p", `Záležitost: ${value.title}`), transitions(value, !entry.secondary));
+    } else if (!entry.secondary && ["awaiting_confirmation", "archived"].includes(entry.item.status)) {
+      entry.holder.append(button("Hlídat záležitost", () => open("create", entry.item)));
+    }
+    if (entry.secondary && ["awaiting_confirmation", "archived"].includes(entry.item.status)) {
+      entry.secondaryAction = button(value?.state === "active" ? "Upravit hlídání" : "Hlídat záležitost",
+        () => open(value ? value.state === "active" ? "update" : "reopen" : "create", value || entry.item));
+      entry.secondary.replaceChildren(entry.secondaryAction, ...Array.from(entry.secondary.children));
     }
     entry.holder.append(node("p", "Archivace nebo skrytí e-mailové karty neukončí evidovanou záležitost.", "meta"));
+    const active = value?.state === "active";
+    if (entry.heading) entry.heading.hidden = active;
+    entry.card.classList.toggle("is-tracked", active);
+    if (active) {
+      const key = `mail:${entry.item.id}:${value.id}:${value.generation}`;
+      entry.card.replaceChildren(disclosure(key, entry.item.header?.subject || value.title, trackingBadge(value, entry.item), entry.body));
+    } else entry.card.replaceChildren(entry.body);
   }
   function suggestionPanel(value, showSource) {
     const root = node("section", undefined, "followup-suggestion"), suggestion = value.suggestion;
@@ -203,7 +239,15 @@
             : event.changes?.state === "completed" ? "Vyřízeno" : "Obnovení hlídání");
           detail.append(node("p", `${dateText(event.at || value.updated_at)} · ${label}`, "meta"));
         }
-        card.append(detail); root.append(card);
+        card.append(detail);
+        if (state === "active") {
+          const body = node("div", undefined, "tracked-body");
+          body.append(...Array.from(card.children));
+          if (body.children[0]) body.children[0].hidden = true;
+          card.classList.add("is-tracked");
+          card.replaceChildren(disclosure(`case:${value.id}:${value.generation}`, value.title, trackingBadge(value), body));
+        }
+        root.append(card);
       }
       if (!values.length) root.append(node("p", state === "active" ? "Žádné aktivní záležitosti." : "Žádné vyřízené záležitosti."));
     }
@@ -211,6 +255,7 @@
       if (!document.contains(entry.card)) cards.delete(id);
       else paintCard(entry);
     }
+    for (const [key, detail] of disclosures) if (!document.contains(detail)) disclosures.delete(key);
     controls();
   }
   function remember(value) {
@@ -237,6 +282,7 @@
       const data = await read();
       if (ticket !== sequence || started !== epoch) return;
       for (const value of [...data.active, ...data.completed]) remember(value);
+      monitoringVerified = data.capabilities.automatic_monitoring;
       ready = true;
       status.textContent = data.capabilities.automatic_monitoring
         ? "Hodinová kontrola běží. Výsledek a poslední ověření zdroje jsou u každé záležitosti."
@@ -335,9 +381,12 @@
   byId("followupVerify").addEventListener("click", refresh);
   window.SamanthaEmailFollowups = {
     refresh, isOpen: () => dialog.open || busy,
-    attach(card, item) {
+    attach(card, item, secondary = null) {
       const holder = node("section", undefined, "followup-controls");
-      const entry = {card, item, holder}; card.append(holder); cards.set(item.id, entry); paintCard(entry);
+      const heading = card.children[0], body = node("div", undefined, "email-card-content");
+      body.append(...Array.from(card.children), holder);
+      const entry = {card, item, holder, body, heading, secondary};
+      cards.set(item.id, entry); paintCard(entry);
     },
     syncCards: paint,
   };

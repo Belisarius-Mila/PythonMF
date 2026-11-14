@@ -1,11 +1,11 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
-## Aktuální UI pošty — 2026-11-14
+## Aktuální UI pošty — 2026-11-14 21:03 CET
 
-Runtime64e9897a je vydaný a živě ověřený (3918 PASS/smoke5/HTTPS exact).
-Následně místně opravené mačkání šesti tlačítek e-mailové karty na iPhonu:
-26 frontendových +browser320/390/1280 PASS, bez nového p+n UI.
-Další UI preference čekají na Mílu; po UI poštovní A+C. Fyzický telefon
-zatím neověřený. Report reports/email_mobile_actions_20261114.md.
+Místně dokončené schválené akce a kompaktní hlídané zprávy/záležitosti.
+51 cílených +browser320/390/1280 PASS; rozbalení drží refresh a důležité
+stavy zůstávají vidět. Report reports/email_compact_ui_20261114.md.
+UI čeká na samostatné p+n a fyzický iPhone; runtime64e9897a beze změny.
+Po UI navazuje poštovní A+C, původní aktivace se neopakují.
 
 ## Aktuální dokončení HTTPS služby — 2026-11-14 16:02 CET
 
@@ -2862,3 +2862,19 @@ reports/email_mobile_actions_20261114.md; soukromé důkazy email_mobile_ui_2026
 active=0/completed=4; neodvozovat dnešní stav ze snímku12.11.
 UI kryje existující Cockpit handoff/TVBCP. Samostatný e-mailový TVBCP není
 dohodnutý; celý poštovní projekt se tím neuzavírá a nový TVBCP nevzniká.
+
+
+## 2026-11-14 21:03 CET — Kompaktní hlídání a přehlednější akce pošty
+
+Hotovo: Hlídaný e-mail a aktivní záležitost se sbalí na název a Hlídáno;
+rozbalením zůstane dostupný celý obsah a akce. Akce zprávy jsou ve schválených
+dvou řadách, méně časté pod Další akce. Refresh drží ruční rozbalení.
+Rozhodnutí: Míla schválil návrh tlačítek a výslovně doplnil sbalení hlídání.
+Další krok: Samostatně schválené p+n UI a fyzická telefonní přejímka.
+Navrhované další kroky: Po UI poštovní A+C podle TXT v Downloads.
+Technický důkaz:51 cílených PASS, browser320/390/1280, sbalené karty70px,
+klávesnice/touch, create/refresh/complete a koncept ověřené;0 produkčních POST.
+Stavy Ke kontrole, neověřený běh a odeslání zůstávají viditelné. Backend,
+ID/digesty/potvrzení beze změny, žádný nový model/timer/aktivace. Podrobně
+reports/email_compact_ui_20261114.md. Místní vývoj, bez push/nasazení/iPhone QA.
+UI kryje stávající Cockpit TVBCP; samostatný e-mailový TVBCP není dohodnutý.

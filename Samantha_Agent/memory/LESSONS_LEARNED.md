@@ -2590,3 +2590,13 @@ s mock video-only kamerou, stop tracků a dekódováním WASM.
   a desktop zachovat. Samotný test scrollWidth nestačí k přejímce UI.
 - Ověření: skutečné rozměry154×44–58px na390px a246×44px na320px,
   desktop/dialog shodné,26 frontendových a browser320/390/1280 PASS.
+
+
+### 2026-11-14 — Sbalení hlídání patří do UI, nikoli do životního cyklu
+
+- Řešení: sbalit až po potvrzené aktivní záležitosti; nativní details drží
+  ruční stav při renderu, klíč zahrnuje generaci. Vyřízení vrátí celou zprávu.
+  Ve stručném štítku zachovat stav k posouzení a neověřený běh/odeslání.
+- Ověření: create, refresh, complete, nejasné výsledky a hlavičky v Node,
+  skutečné keyboard/touch a obě sbalené karty70px v browser320/390/1280 PASS;
+  samotné otevření/refresh nepřidávají POST, timer ani doménový zápis.
