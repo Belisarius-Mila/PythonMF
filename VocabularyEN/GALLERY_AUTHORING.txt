@@ -158,3 +158,33 @@ Poslech je přechodná volba otevřené stránky; reload vrací Učení. Přepnu
 režimu zachová stejné dlaždice i scroll. Filtrace/překreslení, otevření
 učení a opuštění stránky zvuk zastaví. Při neshodném nebo chybějícím
 audiu se chyba objeví ve stále viditelné liště. Nevznikají nové MP3.
+
+
+9. Místní uživatelé A–D (2026-11-14)
+
+V Nastavení vyber uživatele a při prvním použití zvol PIN4–8 číslic
+a zopakuj jej. Další úpravy vyžadují tento PIN. PIN je místní pojistka
+proti nechtěnému přepsání, nikoli internetový účet. Čtení profilu je volné.
+Při výběru slovní zásoby klikni na kartu/checkbox nebo na výběr celého
+zobrazeného tématu. Hledání omezuje pouze zobrazení, ne uložené výběry.
+Uložení je výslovné; odchod s úpravami vyžaduje potvrzení jejich zahození.
+Odebrání slova ze zásoby odstraní i jeho označení obtížnosti.
+
+V Přehledu vyber A/B/C/D. Jen obtížná filtruje osobní zásobu; Výběr
+obtížných slov otevře označování po PINu, pouze mezi vlastními slovy.
+Všichni zobrazí společný slovník. Zrušit filtry vrátí také Všichni, ale
+nevymaže výběry. Témata ani obsah/MP3 se osobními úpravami nemění.
+
+Zálohovat výběry A–D stáhne Vocabulary_EN_vybery.json bez PINů.
+Na druhém zařízení otevři Nastavení cílového uživatele, zvol jeho místní
+PIN a Načíst výběry ze zálohy. Načte se pouze stejný uživatel A/B/C/D;
+zkontroluj návrh a Uložit. Pro další uživatele postup zopakuj. Zdejší
+PIN a ostatní profily se nepřenášejí/nepřepisují. Záloha vychází z uložených
+dat, nikoli z rozpracovaného návrhu. Soubor s neznámým formátem se odmítne.
+
+Každý prohlížeč i jeho profil mají vlastní data. Vymazání dat webu,
+soukromé prohlížení nebo změna adresy webu mohou ovlivnit jejich dostupnost.
+PIN se se zálohou neobnovuje; při jeho zapomenutí lze zálohu načíst do
+jiného prohlížeče s novým PINem. Změny z jiného okna vyžadují znovu
+otevřít úpravy, aby nedošlo k jejich přepsání. Při chybě zápisu zůstane
+návrh otevřený a uložení se nehlásí jako úspěšné.

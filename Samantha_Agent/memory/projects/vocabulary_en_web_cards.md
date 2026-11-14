@@ -1,13 +1,14 @@
 # VocabularyEN web: obrazové kartičky pro opakování slovíček
 
 
-## Aktuální stav — 2026-11-14 10:33 CET
+## Aktuální stav — 2026-11-14 12:35 CET
 
-Předchozí produkční galerie, věty a jejich audio jsou vydané a Míla je přijal.
-Nově lokálně sekundová česká nápověda při kliknutí v Poslechu: běžný popisek
-se po1000ms vrátí. Směr CZ→EN/EN→CZ původní anglický popisek nemění.
-Nativní Safari potvrdilo cat → kočka → cat se zvukem.
-Nové Pages vydání je samostatný krok; bez nového TVBCP.
+Místně nové profily A–D: vlastní zásoba, obtížná slova, PIN pro úpravy,
+záloha a potvrzovaná obnova jednoho uživatele. Každý prohlížeč má vlastní
+data; žádná synchronizace zařízení. Všech18 témat a původní obsah zachované.
+Plná brána3831 testů PASS /683,815s (5 SKIP);48 Node PASS.
+Vlastní checkpoint s ověřením zdrojů, produkce novými kroky nezměněná.
+Předchozí p+n Míla odložil a FR commit vyloučil. Bez nového TVBCP.
 Kanonický handoff: handoffs/workstreams/project-vocabulary-en.md.
 
 ## Publikační vazba a věty — 2026-11-13 12:58 CET
@@ -786,3 +787,50 @@ kočka a následně znovu cat se zvukem, bez otevření karty. Node sada má
 opakovaného kliknutí a rušení nápovědy. Statická brána PASS. Finální protokol: vocabulary_en_translation_flash_node_final_20261114.log.
 Původní CSV,425 karet, oba audio manifesty, obrázky i MP3 zůstávají beze změny.
 Fyzický iPhone a nové produkční vydání tímto krokem nejsou potvrzené.
+
+
+## 2026-11-14 12:35 CET — Místní profily A–D a přenos osobních výběrů
+
+Hotovo: Nastavení nabízí vlastní slovní zásobu A–D, místní PIN4–8 číslic,
+výběr jednotlivých slov i celého zobrazeného tématu. V galerii přibylo
+Všichni/A/B/C/D, Jen obtížná a Výběr obtížných slov. Osobní výběr
+se protíná se stávajícími filtry; všech18 definic témat zůstává stejných.
+Věty, poslech, náhodné kolo a návrat do galerie pracují s osobním výběrem.
+
+Rozhodnutí: Míla zvolil ukládání zvlášť v každém prohlížeči a schválil
+zálohu/načtení. Bez serveru, účtů a automatické synchronizace zařízení.
+PIN chrání úpravy jako místní pojistka; ukládá se pouze náhodná sůl
+a PBKDF2-SHA256 hash, nikoli číslice PINu. Záloha obsahuje výběry A–D
+bez PINů. Obnova načte do návrhu právě otevřeného uživatele; vyžaduje
+Uložit a zachová ostatní uživatele i zdejší PIN. Nový TVBCP není dohodnutý.
+
+Další krok: Přejímka na PC/Android/iPhonu podle scénáře v Downloads. Předchozí publikace české sekundové
+nápovědy je na Mílův pokyn odložená; FR commit musí zůstat stranou.
+Tento vývoj nepovoluje nové p+n a produkci nemění.
+
+Navrhované další kroky: Mac/PC a fyzický Android/iPhone přejímka podle
+Vocabulary_EN_profily_A-D_test_2026-11-14.txt v Downloads, potom
+samostatné rozhodnutí o produkčním vydání.
+
+Technický důkaz: Samostatné learners.js a learner-ui.js, známé UID místo
+pořadí řádků, záloha validovaná před použitím, žádné cizí HTML.
+Ověření read-back zápisu a kontrola původního místního snímku brání
+přepsání změn z druhého okna. Poškozené/zakázané úložiště neblokuje
+společný slovník a nepřepisuje se prázdnými daty. Pozdní import nesmí
+přepsat dalšího uživatele nebo novější ruční úpravy. Safari ukázalo
+Přehled/Nastavení/PIN formulář; úplná ruční přejímka byla přerušená
+souběžným používáním Safari. Žádná fyzická mobilní přejímka není doložená.
+Finální testy a otisky budou v privátním vocabulary_en_learners_20261114/.
+
+
+Ověření a checkpoint: Plná brána PASS,3831 testů /670,998s unit část,
+683,815s celý běh,5 SKIP, bez failures/errors. 48 cílených Node scénářů
+PASS /20,384s. Po bráně13/13 zmrazených souborů shodných; následné
+změny jen v zápisu výsledků a poučení,8/8 zdrojů aplikace a testů zůstává
+shodných s testovaným stavem. Před commitem ještě rychlá statická brána.
+Log vocabulary_en_learners_full_gate_20261114.log, SHA-256:
+fc8368436ebff87cb506120f46ddfda8b4f246dca1cba9378b92cb4e18be2fa1
+Skutečná Git identita se neměnila; syntetická identita byla pouze v env
+testovacího procesu kvůli již známému pomocnému Git commitu přípravku.
+Privátní verification.json/source_manifest/checkpoint zůstávají autoritou
+konkrétního checkpointu. Žádný nový push, deploy ani TVBCP.

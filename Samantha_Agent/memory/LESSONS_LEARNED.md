@@ -2385,3 +2385,18 @@ s mock video-only kamerou, stop tracků a dekódováním WASM.
   velké kartě.
 - Ověření: Původní FAIL→PASS pro CZ popisky a EN poslech; finálně30
   cílených Python včetně34Node PASS /14,959s, Safari desktop.
+
+
+### 2026-11-14 — Místní osobní výběry a opožděná obnova
+
+- Kontext: uživatelé A–D sdílejí425 karet, ale každý má vlastní místní
+  zásobu a obtížná slova. Načtení souboru může doběhnout až po změně profilu
+  nebo ručních úpravách; uložený snímek může mezitím změnit druhé okno.
+- Řešení: výběry ukládat podle UID odděleně od zdrojového slovníku.
+  Import validovat do návrhu, potvrdit Uložit a spojit s epochou profilu
+  i ručního výběru. Před zápisem ověřit původní snímek a pak read-back.
+  Poškozené úložiště nepřepisovat výchozím prázdným stavem. PIN hash
+  držet místně; přenositelná záloha obsahuje pouze osobní výběry.
+- Ověření:48 Node scénářů PASS včetně pozdního importu, quota/corrupt
+  storage, cizího snímku a obnovy bez změny ostatních profilů/PINů.
+  Plná brána3831 PASS,5 SKIP; vocabulary_en_learners_full_gate_20261114.log.

@@ -8,10 +8,13 @@
   <title>Vocabulary EN · Slovíčka v obrázcích</title>
   <link rel="stylesheet" href="gallery.css">
   <script src="model.js" defer></script>
+  <script src="learners.js" defer></script>
+  <script src="learner-ui.js" defer></script>
   <script src="gallery.js" defer></script>
 </head>
 <body>
   <main class="page-shell" data-json-url="../data/vocabulary-en.json" data-audio-url="../data/vocabulary-en-audio.json">
+    <nav class="app-navigation" aria-label="Část aplikace"><button id="galleryTab" type="button" aria-pressed="true">Přehled</button><button id="settingsTab" type="button" aria-pressed="false">Nastavení</button></nav>
     <section id="galleryView" aria-label="Přehled slovíček">
       <header class="hero">
         <div><p class="eyebrow">Vocabulary EN</p><h1>Slovíčka v obrázcích</h1><p class="intro">Vyber si obrázek. Uč se vlastním tempem.</p></div>
@@ -21,6 +24,12 @@
         <div class="segmented" role="group" aria-label="Kliknutí na obrázek"><button type="button" data-gallery-mode="learn" aria-pressed="true">Učení</button><button type="button" data-gallery-mode="listen" aria-pressed="false">Poslech</button></div>
         <p id="galleryModeHint" role="status" aria-live="polite">Kliknutí otevře kartu.</p>
       </div>
+      <div class="learner-toolbar">
+        <label>Uživatel<select id="learnerSelect"><option value="all">Všichni · celý slovník</option><option value="A">Uživatel A</option><option value="B">Uživatel B</option><option value="C">Uživatel C</option><option value="D">Uživatel D</option></select></label>
+        <button id="learnerHardFilter" type="button" aria-pressed="false" disabled>Jen obtížná</button>
+        <button id="editLearnerHard" type="button" disabled>Výběr obtížných slov</button>
+      </div>
+      <p id="learnerNotice" class="notice" role="status"></p>
       <div class="gallery-toolbar">
         <label class="search-field"><span>Hledat slovíčko</span><input id="searchInput" type="search" placeholder="Anglicky nebo česky…" autocomplete="off"></label>
         <details class="topic-picker" id="topicPicker"><summary id="topicSummary">Všechna témata</summary><fieldset id="topicFilters"><legend>Vyber jedno nebo více témat</legend></fieldset><button type="button" id="clearTopicsButton">Všechna témata</button></details>
@@ -55,6 +64,25 @@
         </article>
       </div>
       <nav class="study-navigation" aria-label="Další slovíčko"><button id="previousButton" type="button">← Předchozí</button><button id="nextButton" class="primary" type="button">Další →</button><button id="newRoundButton" type="button" hidden>Nové zamíchané kolo</button><button id="backBottomButton" type="button" aria-label="Zpět na přehled">Přehled</button></nav>
+    </section>
+    <section id="settingsView" aria-label="Nastavení slovní zásoby" hidden>
+      <h1>Nastavení</h1>
+      <p>Každý uživatel má vlastní slovní zásobu a obtížná slova. Výběry platí pouze v tomto prohlížeči; pro jiné zařízení použij zálohu. Vymazáním dat webu můžeš o místní výběry přijít.</p>
+      <div class="learner-toolbar"><label>Slovní zásoba<select id="settingsUser"><option>A</option><option>B</option><option>C</option><option>D</option></select></label><button id="backupLearners" type="button">Zálohovat výběry A–D</button><button id="cancelLearner" type="button">Zpět bez uložení</button></div>
+      <h2 id="settingsTitle">Slovní zásoba A</h2><p id="settingsMode"></p>
+      <div id="pinPanel" class="pin-panel">
+        <label>PIN (4–8 číslic)<input id="pinInput" type="password" inputmode="numeric" pattern="[0-9]{4,8}" maxlength="8" autocomplete="off"></label>
+        <label id="pinRepeatLabel">PIN ještě jednou<input id="pinRepeat" type="password" inputmode="numeric" maxlength="8" autocomplete="off"></label>
+        <button id="unlockButton" type="button">Odemknout úpravy</button>
+      </div>
+      <p id="settingsNotice" class="notice" role="status" aria-live="polite"></p>
+      <div id="learnerEditor" hidden>
+        <div class="learner-editor-bar"><p id="learnerCount"></p><button id="saveLearner" class="primary" type="button">Uložit slovní zásobu</button><button id="importLearners" type="button">Načíst výběry ze zálohy</button></div>
+        <p>Záloha načte pouze právě otevřeného uživatele. Ostatní výběry a zdejší PIN se nezmění. Načtený návrh musíš uložit.</p>
+        <input id="learnerFile" type="file" accept="application/json,.json" hidden>
+        <label>Hledat při výběru<input id="settingsSearch" type="search" placeholder="Anglicky nebo česky…" autocomplete="off"></label>
+        <div id="settingsGroups"></div>
+      </div>
     </section>
     <noscript><p>Pro zobrazení slovíček je potřeba povolit JavaScript.</p></noscript>
   </main>

@@ -30,7 +30,7 @@ async function app({items=vocabulary.items,url="https://example.test/PythonMF/vo
   const doc=new Element("document");doc.doc=doc;doc.title="Vocabulary";
   doc.getElementById=id=>doc.descendants().find(node=>node.id===id)||null;
   doc.createElement=tag=>new Element(tag,doc);doc.createDocumentFragment=()=>new Element("fragment",doc);
-  const appRoot=new Element("main",doc);appRoot.dataset={jsonUrl:"../data/vocabulary-en.json",audioUrl:"../data/vocabulary-en-audio.json"};doc.append(appRoot);
+  const appRoot=new Element("main",doc);appRoot.dataset={jsonUrl:"../data/vocabulary-en.json",audioUrl:"../data/vocabulary-en-audio.json"};doc.append(appRoot);doc.body=appRoot;
   for(const [,id] of html.matchAll(/\bid="([^"]+)"/g)){const node=new Element("div",doc);node.id=id;appRoot.append(node);}
   for(const [data,values] of [["direction",["czToEn","enToCz"]],["label",["en","cz"]],["practice",["words","sentences"]],["galleryMode",["learn","listen"]]])for(const value of values){const button=new Element("button",doc);button.dataset[data]=value;appRoot.append(button);}
   const listeners={};let scroll=0;const location={href:url};const historyEntries=[{url,state:null}];let historyIndex=0;
@@ -38,6 +38,7 @@ async function app({items=vocabulary.items,url="https://example.test/PythonMF/vo
   let now=0,nextTimer=0;const timers=new Map();
   win.setTimeout=(callback,delay)=>{const id=++nextTimer;timers.set(id,{callback,at:now+delay});return id;};
   win.clearTimeout=id=>timers.delete(id);
+  win.crypto=require('node:crypto').webcrypto;win.Blob=Blob;win.URL=URL;win.confirm=()=>true;
   const advance=ms=>{now+=ms;for(const [id,timer] of [...timers])if(timer.at<=now){timers.delete(id);timer.callback();}};
   const emit=(name,extra={})=>{for(const fn of listeners[name]||[])fn(extra);};
   const travel=delta=>{if(!historyEntries[historyIndex+delta])return;historyIndex+=delta;location.href=historyEntries[historyIndex].url;emit("popstate");emit("hashchange");};
@@ -45,13 +46,70 @@ async function app({items=vocabulary.items,url="https://example.test/PythonMF/vo
   if(blocked){Object.defineProperty(win,"sessionStorage",{get(){throw Error("blocked")}});Object.defineProperty(win,"localStorage",{get(){throw Error("blocked")}});}else{win.sessionStorage=session;win.localStorage=local;}
   const players=[];class AudioFixture {constructor(url){this.url=url;this.handlers={};this.currentTime=0;this.playCount=0;players.push(this);}addEventListener(name,fn){this.handlers[name]=fn;}removeEventListener(name,fn){if(this.handlers[name]===fn)delete this.handlers[name];}pause(){this.paused=true;}play(){this.played=true;this.playCount++;return Promise.resolve();}}
   const data={...vocabulary,items};
-  const ctx=vm.createContext({document:doc,window:win,URL,URLSearchParams,Audio:AudioFixture,console,fetch:async url=>{if(slowAudio && url.includes("audio"))return new Promise(()=>{});if(failData && !url.includes("audio"))throw Error("offline");const selected=url.includes("sentence-audio")?sentenceManifest:manifest;if(selected===null && url.includes("audio"))throw Error("audio unavailable");return {ok:true,json:async()=>url.includes("audio")?selected:data};}});
+  const ctx=vm.createContext({document:doc,window:win,URL,URLSearchParams,TextEncoder,Audio:AudioFixture,console,fetch:async url=>{if(slowAudio && url.includes("audio"))return new Promise(()=>{});if(failData && !url.includes("audio"))throw Error("offline");const selected=url.includes("sentence-audio")?sentenceManifest:manifest;if(selected===null && url.includes("audio"))throw Error("audio unavailable");return {ok:true,json:async()=>url.includes("audio")?selected:data};}});
   vm.runInContext(fs.readFileSync(path.join(root,"vocabulary-en/model.js"),"utf8"),ctx);
+  for(const name of ['learners.js','learner-ui.js'])vm.runInContext(fs.readFileSync(path.join(root,'vocabulary-en',name),'utf8'),ctx);
   vm.runInContext(source.replace('void init();','globalThis.ready=init();')+'\nglobalThis.api={state,context,buildSelection,orderedSelection,openStudy,moveStudy,newRandomRound,returnToGallery,renderGallery,selectionChanged,applyRoute,speakPrompt,speakAnswer,stopAudioPlayback,setPracticeMode};',ctx);
   await ctx.ready;
   return {...ctx.api,doc,win,emit,advance,players,session,local,historyEntries,element:id=>doc.getElementById(id),directions:doc.querySelectorAll("[data-direction]"),labels:doc.querySelectorAll("[data-label]"),practices:doc.querySelectorAll("[data-practice]"),galleryModes:doc.querySelectorAll("[data-gallery-mode]")};
 }
 const sample=vocabulary.items.slice(0,4);
+const learners=require('../../docs/vocabulary-en/learners.js');
+async function until(predicate){for(let n=0;n<200;n++){if(predicate())return;await new Promise(resolve=>setTimeout(resolve,10));}assert.fail('UI did not settle');}
+async function unlock(view,pin='1234'){
+  view.element('pinInput').value=pin;view.element('pinRepeat').value=pin;view.element('unlockButton').click();
+  await until(()=>!view.element('learnerEditor').hidden||/správný|nepodporuje/.test(view.element('settingsNotice').textContent));
+}
+function chooseWord(view,uid,checked=true){const input=view.element('settingsGroups').querySelectorAll('.learner-word-check').find(input=>input.dataset.uid===uid);assert.ok(input);input.checked=checked;input.emit('change');}
+function chooseUser(view,id){view.element('learnerSelect').value=id;view.element('learnerSelect').emit('change');}
+test('settings saves only A, keeps eighteen topic definitions, and a fresh browser has independent empty profiles',async()=>{
+  const view=await app({items:sample});view.element('settingsTab').click();await unlock(view);
+  chooseWord(view,sample[0].uid);chooseWord(view,sample[1].uid);assert.equal(view.local.getItem(learners.KEY),null);
+  view.element('saveLearner').click();chooseUser(view,'A');assert.equal(view.state.view,'gallery');assert.equal(view.buildSelection().length,2);assert.equal(view.state.data.catalog.groups.length,18);
+  const saved=JSON.parse(view.local.getItem(learners.KEY));assert.equal(saved.profiles.B.selected.length,0);assert.ok(saved.profiles.A.pin.hash);assert.ok(!view.local.getItem(learners.KEY).includes('1234'));
+  const reload=await app({items:sample,local:view.local,session:view.session});assert.equal(reload.state.learner,'A');assert.equal(reload.buildSelection().length,2);
+  const other=await app({items:sample});chooseUser(other,'A');assert.equal(other.buildSelection().length,0);assert.equal(view.buildSelection().length,2);
+});
+test('personal hard editing requires the PIN and stays within the selected vocabulary for learning and listening',async()=>{
+  const view=await app({items:sample});view.element('settingsTab').click();await unlock(view);chooseWord(view,sample[0].uid);chooseWord(view,sample[1].uid);view.element('saveLearner').click();chooseUser(view,'A');
+  view.element('editLearnerHard').click();await unlock(view,'4321');assert.equal(view.element('learnerEditor').hidden,true);
+  await unlock(view);assert.equal(view.element('settingsGroups').querySelectorAll('.learner-word-check').length,2);chooseWord(view,sample[1].uid);view.element('saveLearner').click();
+  view.element('learnerHardFilter').click();assert.deepEqual(view.buildSelection().map(i=>i.uid),[sample[1].uid]);
+  view.element('tile-'+sample[1].uid).click();assert.equal(view.state.view,'study');assert.equal(view.state.sequence.length,1);view.returnToGallery();
+  chooseUser(view,'B');assert.equal(view.buildSelection().length,0);chooseUser(view,'all');assert.equal(view.buildSelection().length,4);
+});
+test('backup import previews one user, requires Save, preserves the local PIN and other users, and rejects malformed files',async()=>{
+  const view=await app({items:sample});view.element('settingsTab').click();await unlock(view);chooseWord(view,sample[0].uid);view.element('saveLearner').click();
+  const before=view.local.getItem(learners.KEY),pin=JSON.parse(before).profiles.A.pin;
+  view.element('settingsTab').click();await unlock(view);const file=view.element('learnerFile');file.files=[{size:1,text:async()=>'{'}];file.emit('change');await until(()=>view.element('settingsNotice').textContent.includes('platný JSON'));assert.equal(view.local.getItem(learners.KEY),before);
+  const backup=learners.backup(learners.empty());backup.profiles.A.selected=[sample[2].uid];backup.profiles.A.hard=[sample[2].uid];backup.profiles.B.selected=[sample[3].uid];
+  file.files=[{size:200,text:async()=>JSON.stringify(backup)}];file.emit('change');await until(()=>view.element('settingsNotice').textContent.includes('Načtený návrh'));assert.equal(view.local.getItem(learners.KEY),before);
+  view.element('saveLearner').click();const saved=JSON.parse(view.local.getItem(learners.KEY));assert.deepEqual(saved.profiles.A.selected,[sample[2].uid]);assert.deepEqual(saved.profiles.A.pin,pin);assert.deepEqual(saved.profiles.B.selected,[]);
+});
+test('failed persistence keeps the editor open and corrupt storage does not block the shared gallery',async()=>{
+  const local=storage();local.setItem=()=>{throw Error('quota');};const view=await app({items:sample,local});view.element('settingsTab').click();await unlock(view);chooseWord(view,sample[0].uid);view.element('saveLearner').click();
+  assert.equal(view.state.view,'settings');assert.match(view.element('settingsNotice').textContent,/nepodařilo uložit/);assert.equal(view.local.getItem(learners.KEY),null);
+  const broken=storage();broken.setItem(learners.KEY,'broken');const normal=await app({items:sample,local:broken,url:'https://example.test/#learner=A'});
+  assert.equal(normal.state.learner,'all');assert.equal(normal.buildSelection().length,4);assert.equal(normal.element('learnerSelect').disabled,true);assert.equal(broken.getItem(learners.KEY),'broken');
+});
+test('other-tab changes and direct links cannot continue learning removed personal words',async()=>{
+  const local=storage(),value=learners.empty();value.profiles.A.selected=[sample[0].uid,sample[1].uid];local.setItem(learners.KEY,JSON.stringify(value));
+  const view=await app({items:sample,local,url:'https://example.test/#learner=A'});view.element('tile-'+sample[0].uid).click();assert.equal(view.state.view,'study');
+  value.profiles.A.selected=[sample[1].uid];local.setItem(learners.KEY,JSON.stringify(value));view.emit('storage',{key:learners.KEY});
+  assert.equal(view.state.view,'gallery');assert.equal(view.buildSelection().length,1);assert.match(view.element('galleryNotice').textContent,/není v aktuálním výběru/);
+  const linked=await app({items:sample,local,url:'https://example.test/#learner=A&card='+sample[0].uid});assert.equal(linked.state.view,'gallery');assert.equal(linked.state.currentItem,null);
+});
+test('a late import cannot replace newer manual edits or the next user draft',async()=>{
+  const view=await app({items:sample});view.element('settingsTab').click();await unlock(view);
+  const backup=learners.backup(learners.empty());backup.profiles.A.selected=[sample[2].uid];let finish;
+  const file=view.element('learnerFile');file.files=[{size:200,text:()=>new Promise(resolve=>{finish=resolve;})}];file.emit('change');
+  chooseWord(view,sample[0].uid);finish(JSON.stringify(backup));await new Promise(resolve=>setImmediate(resolve));view.element('saveLearner').click();
+  assert.deepEqual(JSON.parse(view.local.getItem(learners.KEY)).profiles.A.selected,[sample[0].uid]);
+  view.element('settingsTab').click();await unlock(view);let next;file.files=[{size:200,text:()=>new Promise(resolve=>{next=resolve;})}];file.emit('change');
+  view.element('settingsUser').value='B';view.element('settingsUser').emit('change');await unlock(view);chooseWord(view,sample[1].uid);
+  next(JSON.stringify(backup));await new Promise(resolve=>setImmediate(resolve));view.element('saveLearner').click();
+  assert.deepEqual(JSON.parse(view.local.getItem(learners.KEY)).profiles.B.selected,[sample[1].uid]);
+});
 test("gallery listening plays the English WORD with Czech labels and sentence practice without opening or changing navigation",async()=>{
   const view=await app();view.labels[1].click();view.state.practice='sentences';view.win.scrollTo({top:1250});
   const before={url:view.win.location.href,history:view.historyEntries.length,last:view.state.lastUid,local:[...view.local.map],session:[...view.session.map]};

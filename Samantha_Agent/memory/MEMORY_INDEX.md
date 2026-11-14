@@ -1,4 +1,6 @@
 # Memory Index
+- `handoffs/workstreams/project-vocabulary-en.md`; `projects/vocabulary_en_web_cards.md` — 14.11.: schválené místní A–D, vlastní zásoba/obtížná, PIN a záloha/načtení bez PINů. Hotové místně:48 Node PASS, plná brána3831 PASS /683,815s,5 SKIP,13/13 zdrojů shodných. 18 témat zachovaných. Předchozí publikace odložená, FR vynechat.
+
 - `handoffs/workstreams/project-vocabulary-en.md`; `projects/vocabulary_en_web_cards.md` — 14.11.: lokálně česká nápověda na1000ms při kliknutí v Poslechu; potom původní popisek. Oba směry zachované, Safari cat→kočka→cat. 37 Node PASS, statická brána PASS; vlastní checkpoint a samostatné Pages p+n, bez nového TVBCP.
 
 - `handoffs/workstreams/project-vocabulary-en.md`; `projects/vocabulary_en_web_cards.md` — 13.11.: nový režim Učení/Poslech dlaždic, vždy EN, bez otevření karty a bez změny historie/bookmarku/scrollu. 30 cílených Python včetně34Node PASS, Safari desktop. Stejný soukromý náhled vydaný, vlastní checkpoint s předáním; předchozí větné audio3ca7bf0d je zachované. Pages p+n obou kroků samostatně.
