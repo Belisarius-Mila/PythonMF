@@ -4,40 +4,36 @@ Nazev: Vocabulary EN
 Pracovni proud: project-vocabulary-en
 Typ: Project
 Priorita: 2
-Stav: rozpracovane
+Stav: lokalne hotove, ceka na p+n
 Pripomenout pri startu: ne
-Datum: 2026-11-13 20:58 CET
+Datum: 2026-11-14 10:33 CET
 
 Co se resilo:
-Míla schválil režim Poslech anglických slovíček přímo v galerii.
+Krátký český popisek při poslechu dlaždice; původní anglický název zachovat
+i při českém směru procvičování.
 
 Co je hotove:
-- Předchozí větné audio: 850 MP3, checkpoint 3ca7bf0d, soukromý náhled.
-- Nově Učení / Poslech v galerii; jeden klik, vždy EN, bez změny bookmarku,
-  filtrů, pozice nebo historie. Přepínač zůstává při posunu po ruce.
-- 30 cílených Python testů včetně 34 Node PASS /14,959s; Safari desktop.
-- Audio ani obsah karet se neměnily, žádná nová syntéza.
-- Soukromý náhled vydaný; handoff i projektová paměť jsou ve stejném
-  místním checkpointu.
+- Předchozí galerie,425 dvojic vět a850 větných MP3 jsou vydané; Míla přijal.
+- Nově lokálně po kliknutí v Poslechu čeština na1000ms, potom původní popisek.
+- Opakovaný klik obnoví interval, jiná dlaždice či změna režimu ho ukončí.
+- Safari místně potvrdilo cat → kočka → cat se zvukem.
+- Obsah, audio a současné ovládání jsou zachované.
 
 Co neni hotove:
-- Mílův poslech a fyzická iPhone přejímka.
-- Samostatně schválené Pages p+n obou nových vlastních kroků.
+- Nové Pages p+n krátké nápovědy a fyzická iPhone přejímka.
 
 Dalsi krok:
-Celý rozsah výslovně schválený; předat přesný main Terře pro Pages vydání.
+Samostatné Pages p+n nové české nápovědy.
 
 Navrhovane dalsi kroky:
-- Fyzická iPhone přejímka nového přepínače.
-- Samostatné Pages p+n větného audia a poslechu dlaždic.
+- Mílova zkouška délky české nápovědy po vydání na iPhonu.
 
 Zmenene nebo relevantni soubory:
-gallery.js; index.html; gallery.css; test_vocabularyen_selection.js;
-GALLERY_AUTHORING.txt a příslušná projektová paměť.
+gallery.js; test_vocabularyen_selection.js; GALLERY_AUTHORING.txt a projektová paměť.
 
 Bezpecnost / neukladat:
-Bez nových TTS/modelových volání, bez nového TVBCP a bez PythonMF p+n.
-Cizí main/Will se nemění. Sites náhled zachová přístup pouze vlastníkovi.
+Bez nové syntézy, změny425 karet nebo MP3, bez nového TVBCP.
+Cizí main a jeho rozpracované soubory zůstávají zachované.
 
 ## Historie
 
@@ -400,3 +396,104 @@ origin bb05bf8f; publikace nezačala. Původní log zachovaný v soukromém
 vocabulary_en_audio_listen_release_20261114_fixture_fix/failed_gate_20261113.log.
 Cílená sada30 testů PASS /19,618s a statická brána PASS; vlastní
 logs/vocabulary_en_release_fixture_* protokoly. Konečný provozní výsledek patří do privátní účtenky a Downloads.
+
+
+## 2026-11-14 10:33 CET — Sekundová česká nápověda při poslechu
+
+Hotovo: Kliknutí na dlaždici v Poslechu přehraje původní EN slovíčko
+a na1000ms ukáže český popisek. Potom se vrátí původní popisek.
+Míla upřesnil zachovat anglický název i v českém směru procvičování;
+CZ→EN ani EN→CZ proto jazyk běžného popisku nemění. Stávající samostatný
+přepínač popisků EN/CZ zůstává zachovaný. Míla předchozí produkční
+slovník i nalezené věty přijal; nejde o novou syntézu nebo úpravu obsahu.
+
+Rozhodnutí: Nový klik obnoví celou sekundu. Jiná dlaždice vrátí předchozí
+popisek hned. Změna režimu, filtrů, jazyka popisků, otevření učení
+a opuštění stránky krátkou nápovědu ukončí. Poslech nemění bookmark,
+historii, filtry ani uložený učební kontext.
+
+Další krok: Samostatné Pages p+n nové české nápovědy. Předchozí souhlas se všemi commity patřil dokončenému
+vydání9ab2c87b a nepředstírá publikaci tohoto nového kroku.
+
+Navrhované další kroky: Po schváleném vydání ověřit délku nápovědy na iPhonu.
+Nový TVBCP není dohodnutý, proto nevzniká.
+
+Technický důkaz: Nativní Safari v místním náhledu zobrazilo po kliknutí
+kočka a následně znovu cat se zvukem, bez otevření karty. Node sada má
+37 scénářů PASS /35,520s včetně časování999/1000ms v obou směrech,
+opakovaného kliknutí a rušení nápovědy. Statická brána PASS. Finální protokol: vocabulary_en_translation_flash_node_final_20261114.log.
+Původní CSV,425 karet, oba audio manifesty, obrázky i MP3 zůstávají beze změny.
+Fyzický iPhone a nové produkční vydání tímto krokem nejsou potvrzené.
+
+
+## 2026-11-14 10:39 CET — Schválené produkční vydání české nápovědy
+
+Hotovo: Izolovaná integrace c372ada6 nad publikovaným main e53dd971.
+JS, testy a návod jsou bajtově shodné s37 scénáři PASS. Obě historie
+paměťových zápisů jsou zachované, původní média i cizí práce také.
+
+Rozhodnutí: Míla zadal „OK, prosím dej na produkce jestli je to možné...“.
+Cíl project-vocabulary-en / github_pages, cesta vocabulary-en/.
+Bez runtime nasazení Cockpitu, bez syntézy a bez nového TVBCP.
+
+Další krok: Po bezpečné připravenosti kanonického main a profilů
+převzít přesnou integraci a jednou zavolat submit_release(wait=True).
+
+Navrhované další kroky: Fyzická přejímka krátké nápovědy na iPhonu.
+
+Technický důkaz: Při přípravě main e53dd971 odpovídá GitHubu, ale má
+cizí rozpracované Vocabulary FR a nezařazený agent_supervisor 2.md.
+Živý github-batch-audit: audit_failed; deploy-audit: ready=false.
+Cizí obsah se nemění, nezařazuje ani neodkládá. Release nebyl spuštěný.
+Konečný výsledek patří do privátní účtenky a Downloads.
+
+
+## 2026-11-14 10:41 CET — Připravené přesné vydání, čeká rozhodnutí o okolním stavu
+
+Hotovo: Kandidát obsahuje českou nápovědu c372ada6 a aktuální kanonický
+main4ad82a7f. Vlastní gallery.js,37scénářový test i návod jsou stále
+bajtově shodné s otestovaným checkpointem; cizí FR změny se neupravovaly.
+
+Rozhodnutí: Produkční Vocabulary EN vydání je výslovně schválené.
+Nový cizí pending commit4ad82a7f vznikl souběžně a nebyl součástí
+předchozího konkrétního publikačního balíčku. Jeho GitHub zahrnutí
+vyžaduje potvrdit rozsah. Samotné nasazení zůstává Vocabulary EN Pages.
+
+Další krok: Potvrdit zahrnutí4ad82a7f do GitHub balíčku a zachování
+starší nezařazené kopie agent_supervisor 2.md v ignorovaném privátním
+archivu. Teprve pak čistý main/profily a registrované p+n.
+
+Navrhované další kroky: Krátká fyzická iPhone přejímka po publikaci.
+
+Technický důkaz: Cizí nezařazený soubor je7777B, SHA-256
+08bf3f5c2fa41d235ea9678e978cfe6dce9700863e0dbe8e2bb1b78c17717f12.
+Nemá se mazat ani commitovat; navržený archiv zachová přesné bajty.
+Živá publikační brána odmítá nečistý main a nezarovnané profily.
+Dosud žádný push, modelové předání ani deploy. Konečné provozní důkazy
+patří do privátní účtenky a Downloads, nikoli do dalšího pending commitu.
+
+
+## 2026-11-14 11:07 CET — Společné vydání všech lokálních a Datových commitů
+
+Hotovo: Do společného kandidáta je převzatý celý hotový Datův krok české
+sekundové nápovědy při anglickém poslechu. Kód,37Node scénářů a návod jsou
+bajtově shodné s Datovým kandidátem9f759706; jeho původní worktree je čistý
+a zachovaný. Dnešní již veřejně ověřená sova zůstává bajtově beze změny.
+
+Rozhodnutí: Po dokončení sovy Míla výslovně zadal nasadit všechny lokální
+commity včetně Datových. Tím je potvrzený i dříve čekající společný GitHub
+rozsah. Cíl zbývajícího vývoje je project-vocabulary-en / github_pages;
+statické Pages obsahují také dnešní sovu. Žádný nový TVBCP nebyl sjednaný.
+
+Další krok: Přesný integrační checkpoint předat jednou registrovanému
+submit_release(wait=True), po plné bráně ověřit původní Pages běh i veřejné
+gallery.js a dnešní soví audio. Konečný výsledek patří do soukromé účtenky
+data/private/all_local_data_release_20261114/release_receipt.json a
+public_verification.json; tento přípravný zápis sám nasazení nepotvrzuje.
+
+Navrhované další kroky: Fyzická iPhone přejímka sekundové nápovědy.
+
+Technický důkaz: Integračních11 Python testů včetně Node scénářů PASS /23,964s.
+Zdroj před integracíb2bfb8b2, vlastní Datův krokc372ada6, integrační historie
+e9cb0f9d+9f759706. Převzetí bez konfliktu; ostatní změny zachované.
+Statická brána logs/all_local_data_release_20261114_static.log.

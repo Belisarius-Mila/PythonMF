@@ -392,3 +392,21 @@ Technický důkaz: 25 cílených testů PASS, celé dekódování FFmpeg PASS, p
 shoda textu a obou webových kopií. SHA-256 e7dda033f257efad3451545d06ffed5923280d984f8872b2414a793b43755826;
 app.js?v=3b8f3c02f05ac57a. Podklady data/daily_3am/revisions/20261114_manual/,
 logy logs/owl_20261114_targeted.log a logs/owl_20261114_static_gate.log.
+
+
+## 2026-11-14 11:07 CET — Dnešní sova veřejně ověřená
+
+Hotovo: Veřejný přehrávač vybírá dnešní ruční promluvu. Stažené audio
+83088 B /13,848s má přesný připravený SHA-256 a celé se dekóduje bez chyby.
+
+Rozhodnutí: Jediné vydání, automatika zůstává vypnutá. Po jeho dokončení
+Míla výslovně zadal vydat všechny zbývající lokální commity včetně Datových.
+
+Další krok: Navazující společné Pages vydání Vocabulary EN, se zachováním
+dnešní sovy. Navrhované další kroky: Poslech Mílou.
+
+Technický důkaz: Zdrojb2bfb8b261041e4b6f7c47d338fa4b7988486573;
+Terra job72406ba0984b0bceeb526afe4a1b1a2f completed, push/deploy confirmed,
+3876 testů PASS /750,5s. Pages43583524806 success nad přesným SHA,
+deployment7785989199. HTTP200/audio/mp3, veřejné JS a SHA audia shodné.
+Účtenka data/daily_3am/receipts/20261114_publication.json.

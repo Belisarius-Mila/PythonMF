@@ -8,6 +8,7 @@ const galleryModeHint=document.getElementById("galleryModeHint");
 const ui = Object.fromEntries(["galleryView","studyView","totalCount","totalLabel","searchInput","topicPicker","topicFilters","topicSummary","clearTopicsButton","filterSelect","groupSelect","sortSelect","sizeButton","partFilters","levelFilters","sourceFilters","continueButton","shuffleButton","resetButton","emptyResetButton","sectionNav","galleryNotice","galleryGroups","emptyState","galleryFooter","backButton","backBottomButton","studyPosition","wordImage","pictureFallback","speakPromptButton","promptLabel","promptText","messageStrip","revealButton","answerCard","answerEn","answerCz","sentenceBox","sentenceEn","sentenceCz","speakAnswerButton","roundStatus","previousButton","nextButton","newRoundButton"].map(id => [id,document.getElementById(id)]));
 const defaults = () => ({filter:"all",query:"",topics:[],sources:[],parts:[],levels:[],groupBy:"topic",sort:"recommended",labelLanguage:"en",direction:"czToEn",practice:"words",large:false});
 const state = {data:null,audioManifest:null,sentenceAudioManifest:null,items:[],...defaults(),galleryMode:"learn",currentItem:null,revealed:false,view:"gallery",sequence:[],index:0,mode:"ordered",lastUid:"",visitId:"",fromGallery:false,anchorOffset:120};
+let galleryTranslation=null;
 const STORAGE_KEY="vocabulary-en.navigation.v1", LAST_KEY="vocabulary-en.last-card.v1";
 function context() { return Object.fromEntries(Object.keys(defaults()).map(key => [key,Array.isArray(state[key]) ? [...state[key]] : state[key]])); }
 function sanitizeContext(value={}) {
@@ -71,9 +72,21 @@ function setGalleryMode(mode){
   if(state.view!=="gallery" || !["learn","listen"].includes(mode))return;
   stopAudioPlayback();state.galleryMode=mode;syncGalleryMode();
 }
-async function speakGalleryItem(item){
+function clearGalleryTranslation(){
+  const previous=galleryTranslation;if(!previous)return;
+  galleryTranslation=null;window.clearTimeout(previous.timer);
+  previous.caption.textContent=previous.text;previous.caption.lang=previous.lang;
+}
+function flashGalleryTranslation(item,tile){
+  const caption=tile?.querySelector(".tile-label");if(!caption || !item.cz)return;
+  const flash={caption,text:caption.textContent,lang:caption.lang,timer:null};
+  galleryTranslation=flash;caption.textContent=item.cz;caption.lang="cs";
+  flash.timer=window.setTimeout(()=>{if(galleryTranslation===flash)clearGalleryTranslation();},1000);
+}
+async function speakGalleryItem(item,tile){
   if(state.view!=="gallery" || state.galleryMode!=="listen")return;
   stopAudioPlayback();const token=playbackToken;
+  flashGalleryTranslation(item,tile);
   const record=M.audioRecord(item,state.audioManifest);
   if(!record?.en){galleryModeHint.textContent="Zvuk zatím není připravený. Zkus to za chvíli.";return;}
   galleryModeHint.textContent=`Anglicky: ${item.en}`;
@@ -125,8 +138,8 @@ function renderGallery(){
         image.src=new URL(`../${item.thumbnail || item.image}`,window.location.href).toString();
         image.addEventListener("error",()=>{image.hidden=true;picture.textContent="Bez obrázku";},{once:true});picture.append(image);
       }else picture.textContent="Bez obrázku";
-      const caption=document.createElement("span");caption.className="tile-label";caption.textContent=labelText;
-      tile.append(picture,caption);tile.addEventListener("click",()=>{if(state.galleryMode==="listen")void speakGalleryItem(item);else openStudy(M.key(item),"ordered",tile);});grid.append(tile);
+      const caption=document.createElement("span");caption.className="tile-label";caption.textContent=labelText;caption.lang=state.labelLanguage==="cz" ? "cs" : "en";
+      tile.append(picture,caption);tile.addEventListener("click",()=>{if(state.galleryMode==="listen")void speakGalleryItem(item,tile);else openStudy(M.key(item),"ordered",tile);});grid.append(tile);
     }
     section.append(heading,grid);fragment.append(section);
   }
@@ -290,6 +303,7 @@ function primeCurrentAudio(item) {
 }
 
 function stopAudioPlayback() {
+  clearGalleryTranslation();
   playbackToken += 1;
   if (currentPlaybackCancel) {
     const cancel = currentPlaybackCancel;
