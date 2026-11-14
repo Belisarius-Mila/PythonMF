@@ -3,7 +3,8 @@
 Míla schválil tlačítka a kompaktní hlídání. Místně dokončené: dvě hlavní řady,
 Další akce, sbalená zpráva i aktivní záležitost, rozbalení drží refresh.
 51 cílených a browser320/390/1280 PASS; zdroj/akce/historie zachované.
-Nové p+n UI a fyzická iPhone přejímka zbývají, po UI navazuje A+C.
+P+n UI Míla nyní schválil; výsledek určuje jediná účtenka jobf7c6646a07a469b8a5ccd7314b4c2cab.
+Po potvrzeném vydání fyzický iPhone a A+C; původní job se neopakuje.
 Knihovna64e9897a je vydaná; živý čtecí snímek monitoru z20:48 CET je true/true,
 active0/completed4, není to trvalá záruka. Žádné nové aktivace/send/model.
 Report reports/email_compact_ui_20261114.md; UI kryje existující Cockpit TVBCP.
@@ -2149,3 +2150,19 @@ Stavy Ke kontrole, neověřený běh a odeslání zůstávají viditelné. Backe
 ID/digesty/potvrzení beze změny, žádný nový model/timer/aktivace. Podrobně
 reports/email_compact_ui_20261114.md. Místní vývoj, bez push/nasazení/iPhone QA.
 UI kryje stávající Cockpit TVBCP; samostatný e-mailový TVBCP není dohodnutý.
+
+
+## 2026-11-14 21:14 CET — Schválené vydání mobilního UI pošty
+
+Hotovo: Obě UI úpravy a cílené přejímky jsou připravené k publikaci.
+Rozhodnutí: Míla výslovně zadal „OK, nasaď svoji práci.“ Balíček obsahuje
+3c306c20 a1a5b7a07 + tento bezpečný publikační zápis; žádnou další funkční změnu.
+Další krok: Jediné registrované p+n project-email-cases do runtime Cockpitu.
+Navrhované další kroky: Po potvrzeném vydání fyzický iPhone a poštovní A+C.
+Technický důkaz:51 cílených, finálních26 frontendových a browser320/390/1280
+PASS. Stabilní request email-compact-ui-20261114-v1, job f7c6646a07a469b8a5ccd7314b4c2cab.
+Autoritativní výsledek: data/private/email_compact_ui_20261114/release_receipt.json
++ release_live_verification.json. Tento zápis není tvrzením o výsledku.
+Při nejistotě ověřit stejný job; nic automaticky znovu nespouštět. Původní
+knihovní job3f40788a a aktivace pošty se neopakují. Samostatný e-mailový TVBCP
+zůstává nedohodnutý; tento publikační UI krok kryjí existující Cockpit dokumenty.

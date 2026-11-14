@@ -1,6 +1,6 @@
 # Kompaktní hlídání a akce e-mailů
 
-Stav: místně hotové a cíleně ověřené; bez nového push/nasazení. 2026-11-14 21:03 CET.
+Stav: cíleně ověřené; p+n nyní výslovně schválené, výsledek z účtenky jobf7c6646a07a469b8a5ccd7314b4c2cab. 2026-11-14 21:03 CET.
 Proud: UI pošty v Cockpitu; existující Cockpit handoff/TVBCP a e-mailová paměť.
 
 Míla schválil dvě řady akcí (Odpovědět/Uložit do archivu, Hlídat záležitost/
@@ -37,3 +37,19 @@ Runtime knihovny64e9897a se tímto místním vývojem nemění. UI má samostatn
 Samostatný e-mailový TVBCP nebyl dohodnutý a nevzniká; celý e-mailový projekt
 zůstává otevřený, A+C je stále po UI. Žádný IMAP/SMTP/model, aktivace nebo
 hromadná změna živých zpráv není součástí této práce.
+
+
+## 2026-11-14 21:14 CET — Schválené vydání mobilního UI pošty
+
+Hotovo: Obě UI úpravy a cílené přejímky jsou připravené k publikaci.
+Rozhodnutí: Míla výslovně zadal „OK, nasaď svoji práci.“ Balíček obsahuje
+3c306c20 a1a5b7a07 + tento bezpečný publikační zápis; žádnou další funkční změnu.
+Další krok: Jediné registrované p+n project-email-cases do runtime Cockpitu.
+Navrhované další kroky: Po potvrzeném vydání fyzický iPhone a poštovní A+C.
+Technický důkaz:51 cílených, finálních26 frontendových a browser320/390/1280
+PASS. Stabilní request email-compact-ui-20261114-v1, job f7c6646a07a469b8a5ccd7314b4c2cab.
+Autoritativní výsledek: data/private/email_compact_ui_20261114/release_receipt.json
++ release_live_verification.json. Tento zápis není tvrzením o výsledku.
+Při nejistotě ověřit stejný job; nic automaticky znovu nespouštět. Původní
+knihovní job3f40788a a aktivace pošty se neopakují. Samostatný e-mailový TVBCP
+zůstává nedohodnutý; tento publikační UI krok kryjí existující Cockpit dokumenty.
