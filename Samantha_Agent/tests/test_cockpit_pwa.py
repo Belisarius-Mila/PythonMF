@@ -37,7 +37,7 @@ class CockpitHomeScreenTests(unittest.TestCase):
         home=self.manifest_for('/');calendar=self.manifest_for('/calendar/')
         self.assertEqual(home,calendar)
         self.assertEqual(home['effective_start'],self.base+'/');self.assertEqual(home['effective_id'],self.base+'/')
-        self.assertEqual(home['display'],'standalone')
+        self.assertEqual(home['display'],'browser')
 
     def test_task_and_main_are_distinct_apps_and_keep_existing_task_identity(self):
         main=self.manifest_for('/');task=self.manifest_for('/calendar/task/')
@@ -45,6 +45,14 @@ class CockpitHomeScreenTests(unittest.TestCase):
         self.assertEqual(task['effective_id'],self.base+'/calendar/task/')
         self.assertEqual(task['effective_start'],self.base+'/calendar/task/')
         self.assertEqual(task['scope'],'/calendar/task/');self.assertNotEqual(main['name'],task['name'])
+        self.assertEqual(task['display'],'standalone')
+
+    def test_main_and_calendar_request_browser_mode_but_task_stays_standalone(self):
+        for path in ['/','/calendar/']:
+            code,body,_=self.get(path);self.assertEqual(code,200)
+            self.assertIn('name="apple-mobile-web-app-capable" content="no"',body.decode())
+        code,body,_=self.get('/calendar/task/');self.assertEqual(code,200)
+        self.assertIn('name="apple-mobile-web-app-capable" content="yes"',body.decode())
 
     def test_install_metadata_never_redirects_or_calls_calendar_mutations(self):
         with patch('app.cockpit_calendar_tasks.TASKS.execute') as create,patch('app.cockpit_calendar_delete.DELETIONS.execute') as delete:

@@ -1,4 +1,15 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
+## Aktuální místní krok — 2026-11-14, Cockpit HTTPS/Safari
+
+Ve vlastní větvi data/cockpit-web-navigation-20261114 připravený nativní
+start webových aplikací, ruční GET návrat a jednotný vzdálený HTTPS vstup.
+41 cílených PASS; finální plná brána3890 PASS/31 SKIP,13/13 zdrojů shodných.
+P+n až po dokončení Willovy práce.
+Produkce a síťová konfigurace se tímto vývojem nemění. Původní ikonu a data
+zachovat; Safari záložka a fyzická přejímka iPhonu až po nasazení. Původní
+výběr A neobnovený. Podrobnosti a důkazy v posledním záznamu a v reportu
+reports/cockpit_web_apps_navigation_20261114.md. Níže jsou starší podklady.
+
 ## Obnova po /new — 2026-11-12 17:56 CET
 
 E-mailové etapy1–4 vydané v614abe8b; Terra job4365c4ba67f01d3cf4eb3dde9ae1eaec
@@ -2732,3 +2743,66 @@ Node scénářů. Rychlá statická brána PASS a git diff --check bez chyb.
 Nejde o fyzické ověření iPhonu ani o potvrzenou příčinu/obnovu výběru A.
 Nové nasazení běžícího Cockpitu se samostatně potvrzuje; žádný restart,
 push ani deploy touto lokální opravou neproběhl.
+
+
+## 2026-11-14 15:14 CET — Jediný vstup do HTTPS Cockpitu v Safari
+
+Hotovo: Místně připravené přesměrování starého vzdáleného HTTP vstupu
+na již existující soukromou HTTPS adresu. Hlavní Cockpit i přehled kalendáře
+nyní žádají režim běžného prohlížeče. Předchozí nativní odkazy aplikací
+a ruční tlačítka Znovu otevřít Cockpit zůstávají součástí balíčku.
+
+Rozhodnutí: Míla schválil vývoj jedné cesty: ikona jako záložka Safari →
+HTTPS Cockpit. Přechod má nastat hned při vstupu, ne až při spuštění kamery
+nebo uprostřed rozepsaného formuláře. P+n až po dokončení Willovy práce;
+tento krok nepovoluje restart nebo změnu běžící síťové konfigurace.
+
+Další krok: Po vlastním lokálním checkpointu počkat na dokončení Willovy
+práce. Potom znovu auditovat společný main, integrovat oba vlastní commity
+z větve data/cockpit-web-navigation-20261114 se zachováním nových Willových
+změn a provést registrované p+n cíle Cockpit. Předchozí checkpoint 50f113f5
+obsahuje nativní odkazy a ruční návrat; nynější navazující checkpoint HTTPS.
+Žádný push, nasazení ani restart tímto krokem neproběhl.
+
+Navrhované další kroky: Po nasazení jednorázově přidat hlavní HTTPS stránku
+jako záložku Safari s vypnutým Otevřít jako webovou aplikaci; pokud se volba
+na daném iOS ukazuje. Stará instalovaná ikona se tím sama nepřevede.
+Nejprve ponechat starou ikonu a data kvůli původnímu výběru A. Ověřit na
+iPhonu otevření Vocabulary → návrat → opětovné otevření, případně export
+původního A a vědomé načtení do zvoleného kontextu. Obnova A není doložená.
+
+Technický důkaz: 41 cílených Python testů PASS / 9,854 s, včetně skutečných
+HTTP scénářů a předchozích Node navigačních testů. Finální plná brána
+PASS: 3890 testů / 1013,138 s, 31 SKIP. Všech 13/13 finálních zdrojových souborů
+obou vlastních kroků bajtově shodných se zmrazeným manifestem tohoto běhu.
+Po této bráně už měněná pouze dokumentace a privátní účtenka, nikoli kód.
+
+Kontrakt: Jen GET / s navigačními hlavičkami na vzdáleném Host :8770.
+Dočasné 302 + no-store, query zachovaná, fragment ponechaný prohlížeči.
+API, POST, lokální přístup, jiné porty a již použitý HTTPS host beze změny.
+Cíl pochází výhradně z read-only Tailscale serve status --json: privátní
+HTTPS 443 root proxy na 127.0.0.1:8770, bez Funnel a nejednoznačného cíle.
+Host/forwarded hlavičky ani query cíl neurčují. CLI timeout 2 s, paměťová
+cache 60 s, po chybě 10 s; bez ověřené konfigurace zůstane původní stránka.
+Žádné automatické generování certifikátu nebo změny Serve. Skutečné
+jméno tailnetu se nezapisuje do Gitu ani do cache souboru.
+
+Identita hlavního manifestu id/start/scope / zachovaná, display=browser;
+Apple capable=no na hlavním Cockpitu a kalendářovém přehledu. Samostatný
+Nový úkol /calendar/task/ má dál vlastní identitu a standalone režim.
+Žádné mazání nebo migrace místních dat, změny profilových klíčů,
+knihovního formuláře, ISBN kamery či Willových souborů v main.
+
+Meze: Testy prokazují serverový/klientský kontrakt, nikoli chování staré
+ikony či fyzickou kameru Mílova iPhonu. iOS 26 může při Přidat na plochu
+nabídnout webovou aplikaci jako výchozí i přes metadata; vypnout příslušnou
+volbu je uživatelský krok. Nasazený runtime zatím tuto místní změnu nemá.
+Důkazy: logs/cockpit_https_entry_targeted_final_20261114.log,
+logs/cockpit_https_entry_full_gate_final_20261114.log a privátní zdrojový manifest
+v data/private/cockpit_https_entry_20261114/.
+
+Čtecí ověření skutečné konfigurace 14:57 CET: nový resolver přijímá
+stávající privátní HTTPS Serve. Žádná změna sítě, hostname redigovaný;
+privátní discovery_verification.json. První plný běh byl vědomě přerušen
+před dokončením kvůli normalizaci lokální adresy s koncovou tečkou;
+finální zdroje mají rozšířený lokální test a vlastní nový celý běh.

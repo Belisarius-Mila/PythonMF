@@ -1201,6 +1201,12 @@ Doplnění 12112026 — obnova Data po restartu ve druhém okně VS Code:
   i při úspěchu; ponechat odkaz nezávisle na jeho návratové hodnotě.
   Ruční návrat přes GET formulář funguje i při selhání JS; bez auto-resetu
   při probuzení a bez mazání ikony/dat.4 Node a30 cílených Python PASS.
+  Při sjednocení vstupu přesměrovat pouze vzdálenou navigaci z legacy
+  portu; API/POST/probes a loopback ponechat. Cíl HTTPS ověřit read-only
+  proti existující privátní Serve proxy, nikdy jej neskládat z Host nebo
+  query. Loopback normalizovat stejně jako vstupní allowlist včetně
+  koncové tečky localhost./127.0.0.1.;41 cílených HTTP/frontend PASS.
+  Manifest browser sám nepřevede již instalovanou iOS ikonu ani její data.
 
 
 ### 2026-09-14 14:44 CEST — Kompaktní prázdný stav nesmí schovat chybu
