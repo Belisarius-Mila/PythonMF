@@ -1195,6 +1195,14 @@ Doplnění 12112026 — obnova Data po restartu ve druhém okně VS Code:
 - Řešení: s openerem zaměřit původní okno a zavřít čtečku, bez něj navigovat na Cockpit; při odmítnutém zavření dát instrukci. Náhradní popup odkaz otevřít uživatelským kliknutím v nové kartě bez openeru, přijímat pouze HTTP(S).
 - Ověření: samostatná i skutečně otevřená popup karta, uzavřený/nedostupný opener, odmítnuté zavření, zachovaný rozepsaný vstup a odstranění starého odkazu při další zprávě. Důkaz: reports/cockpit_ui_u02_2026_09_14.json.
 
+- Doplnění14.11.: katalogové webové aplikace mají být skutečné odkazy
+  target=_blank/rel=noopener, nikoli JS tlačítka recyklující pojmenované
+  okno přes about:blank. Pomocný window.open s noopener může vrátit null
+  i při úspěchu; ponechat odkaz nezávisle na jeho návratové hodnotě.
+  Ruční návrat přes GET formulář funguje i při selhání JS; bez auto-resetu
+  při probuzení a bez mazání ikony/dat.4 Node a30 cílených Python PASS.
+
+
 ### 2026-09-14 14:44 CEST — Kompaktní prázdný stav nesmí schovat chybu
 - Projev: sbalení podle pouhého count=0 může skrýt selhání poskytovatele; grid se stretch zase natahuje nulové sousedy podle dlouhé fronty.
 - Řešení: rozlišit ověřené prázdno, práci a chybu. Nuly sbalit, chyby/práci otevřít při změně stavu; stejný stav respektuje ruční rozbalení. Použít align-items:start a u dlouhých seznamů ověřit skutečné posouvání včetně klávesnice.

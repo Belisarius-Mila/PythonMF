@@ -1,6 +1,8 @@
 - `handoffs/workstreams/project-vocabulary-en.md`; `projects/vocabulary_en_web_cards.md` — 14.11.: první p+n zastavené před push sedmi chybami testovací Git identity. Přípravek opraven lokálním -c, žádný produkční zásah; po kontrolách nové přesné registrované předání celého schváleného balíčku. Původní účtenka zachovaná.
 
 # Memory Index
+- `reports/cockpit_web_apps_navigation_20261114.md`; `handoffs/workstreams/project-cockpit.md`; `tvbcp/workstreams/project-cockpit.md` — 14.11.: místně nativní odkazy Webových aplikací místo recyklovaných popupů a ruční GET návrat do Cockpitu. 30 cílených testů, bez změny úložiště/PWA/HTTPS. Typ ikony a obnova A na telefonu nepotvrzené; runtime nasazení samostatně.
+
 - `handoffs/workstreams/project-vocabulary-en.md`; `projects/vocabulary_en_web_cards.md` — 14.11.: schválené místní A–D, vlastní zásoba/obtížná, PIN a záloha/načtení bez PINů. Hotové místně:48 Node PASS, plná brána3831 PASS /683,815s,5 SKIP,13/13 zdrojů shodných. 18 témat zachovaných. Předchozí publikace odložená, FR vynechat.
 
 - `handoffs/workstreams/project-vocabulary-en.md`; `projects/vocabulary_en_web_cards.md` — 14.11.: lokálně česká nápověda na1000ms při kliknutí v Poslechu; potom původní popisek. Oba směry zachované, Safari cat→kočka→cat. 37 Node PASS, statická brána PASS; vlastní checkpoint a samostatné Pages p+n, bez nového TVBCP.

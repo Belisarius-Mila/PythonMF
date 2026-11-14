@@ -12,6 +12,10 @@
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
     }
     body { margin: 0; background: var(--bg); color: var(--ink); }
+    .cockpit-home-form { display: inline-flex; margin: 0; }
+    #webAppsModal .modal-header { flex-wrap: wrap; }
+    #webAppsModal .modal-header h2 { flex: 1; }
+    #webAppsModal .cockpit-home-form { flex-basis: 100%; }
     header { min-height: 54px; box-sizing: border-box; padding: 10px 20px; display: flex; flex-wrap: wrap; gap: 12px 20px; align-items: center; justify-content: space-between; background: #182230; color: white; }
     h1 { margin: 0; font-size: 19px; font-weight: 650; letter-spacing: 0; }
     main { padding: 18px 20px 24px; display: grid; gap: 16px; }

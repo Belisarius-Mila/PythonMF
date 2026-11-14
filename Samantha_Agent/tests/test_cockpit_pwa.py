@@ -2,6 +2,7 @@ import json
 import re
 import threading
 import unittest
+from html.parser import HTMLParser
 from http.server import ThreadingHTTPServer
 from urllib.error import HTTPError
 from urllib.parse import urljoin
@@ -54,3 +55,16 @@ class CockpitHomeScreenTests(unittest.TestCase):
     def test_manifest_cannot_choose_a_destination_from_query(self):
         for path in ['/cockpit.webmanifest?start_url=/calendar/task/','/calendar/task/manifest.webmanifest?entry=main']:
             code,body,headers=self.get(path);self.assertEqual(code,400);self.assertFalse(json.loads(body)['ok']);self.assertNotIn('Location',headers)
+
+    def test_home_recovery_is_an_explicit_native_get_without_storage_reset(self):
+        class Forms(HTMLParser):
+            def __init__(self):super().__init__();self.forms=[]
+            def handle_starttag(self,tag,attrs):
+                if tag=='form':self.forms.append(dict(attrs))
+        code,body,_=self.get('/');self.assertEqual(code,200);parser=Forms();parser.feed(body.decode())
+        forms=[form for form in parser.forms if form.get('class')=='cockpit-home-form']
+        self.assertEqual(len(forms),2)
+        for form in forms:
+            self.assertEqual(form.get('action'),'/');self.assertEqual(form.get('method'),'get');self.assertNotIn('onsubmit',form)
+        with patch('app.cockpit_calendar_tasks.TASKS.execute') as create,patch('app.cockpit_calendar_delete.DELETIONS.execute') as delete:
+            code,_,_=self.get('/?');self.assertEqual(code,200);create.assert_not_called();delete.assert_not_called()
