@@ -50,9 +50,9 @@ EXPECTED_PAGES = {
     ),
     "cockpit": (
         COCKPIT_HTML,
-        720059,
-        13085,
-        "574975fe7d4b71ff4d91bbe8bb9ca3f819293b2dd0af2c488d123f72c20ca387",
+        721113,
+        13096,
+        "c7cb64c72a7c4c15837430c1cd6417cb447445031ea1e08c11d674ba067f6cc2",
     ),
 }
 
@@ -174,6 +174,13 @@ const disabled = {...active, state:"disabled", message:"Automatika vypnutá"};
     def test_dialog_navigation_behavior(self) -> None:
         result = subprocess.run(
             [node_binary(), str(Path(__file__).with_name("cockpit_navigation_frontend.test.cjs"))],
+            capture_output=True, text=True, timeout=30, check=False,
+        )
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+
+    def test_web_apps_use_native_navigation_with_popup_fallback(self) -> None:
+        result = subprocess.run(
+            [node_binary(), '--test', str(Path(__file__).with_name('cockpit_web_apps_navigation.test.cjs'))],
             capture_output=True, text=True, timeout=30, check=False,
         )
         self.assertEqual(result.returncode, 0, result.stdout + result.stderr)

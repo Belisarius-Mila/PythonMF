@@ -7,6 +7,7 @@ from app.cockpit_calendar_delete import calendar_delete_action
 from app.cockpit_calendar_edit import calendar_edit_action
 from app.cockpit_calendar_tasks import calendar_task_status, calendar_task_action, task_page_route
 from app.cockpit_pwa import cockpit_manifest_route
+from app.cockpit_https_entry import HttpsCockpitEntry
 from app.cockpit_agent_supervisor import agent_supervisor_overview
 from app.cockpit_book_inventory import BOOK_INVENTORY_GET_PATHS, book_inventory_get_route, inventory_action
 from app.cockpit_email_calendar import email_calendar_draft_action, email_calendar_draft_status
@@ -9692,6 +9693,7 @@ class CockpitServer:
     def make_handler(self):
         cockpit_host = self.host
         cockpit_port = self.port
+        https_entry = HttpsCockpitEntry(enabled=cockpit_port == COCKPIT_PORT)
         interior_routes = InteriorRoutes()
         calendar_routes = CalendarOverviewRoutes()
         health_recovery_status_dispatch = build_health_recovery_status_dispatch(
@@ -9904,6 +9906,14 @@ class CockpitServer:
                     self.respond_scandocu_proxy(parsed, method="GET")
                     return
                 if parsed.path == "/":
+                    redirect = https_entry.redirect_target(self.path, self.headers)
+                    if redirect:
+                        self.send_response(HTTPStatus.FOUND)
+                        self.send_header("Location", redirect)
+                        self.send_header("Cache-Control", "no-store")
+                        self.send_header("Content-Length", "0")
+                        self.end_headers()
+                        return
                     self.respond_html(COCKPIT_HTML)
                     return
                 if parsed.path == "/human-adam/":

@@ -1,10 +1,13 @@
-"""Read-only install identity for the main Cockpit, separate from task entry."""
+"""Browser bookmark identity for the main Cockpit, separate from task entry.
+
+Existing Home Screen installations keep their own browser-managed mode/data.
+"""
 import json
 from http import HTTPStatus
 
 MANIFEST_PATH = '/cockpit.webmanifest'
 MANIFEST = {'id':'/', 'name':'Samantha Cockpit', 'short_name':'Cockpit',
-            'start_url':'/', 'scope':'/', 'display':'standalone', 'lang':'cs',
+            'start_url':'/', 'scope':'/', 'display':'browser', 'lang':'cs',
             'background_color':'#f5f7fa', 'theme_color':'#245ccd'}
 
 

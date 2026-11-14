@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="no">
   <meta name="apple-mobile-web-app-title" content="Cockpit">
   <link rel="manifest" href="/cockpit.webmanifest">
   <title>Samantha Cockpit</title>
@@ -38,6 +38,7 @@
         <button class="secondary" id="webAppsBtn">Webové aplikace</button>
         <button class="secondary" id="serviceBtn">Servis</button>
         <button class="secondary" id="refreshBtn">Obnovit</button>
+        <form id="cockpitHomeForm" class="cockpit-home-form" action="/" method="get"><button class="secondary" type="submit" title="Znovu načte úvod Cockpitu. Neuložený rozepsaný text může zmizet.">Znovu otevřít Cockpit</button></form>
       </div>
       <button class="science-news-entry science-empty" id="scienceNewsBtn" type="button" aria-label="ScienceNews: načítám stav"><span aria-hidden="true">⚛</span> ScienceNews</button>
     </nav>
@@ -680,6 +681,7 @@
       <div class="modal-header">
         <h2 id="webAppsTitle">Webové aplikace</h2>
         <button class="secondary" id="webAppsCloseBtn">Zavřít</button>
+        <form class="cockpit-home-form" action="/" method="get"><button class="secondary" type="submit" title="Znovu načte úvod Cockpitu. Neuložený rozepsaný text může zmizet.">Znovu otevřít Cockpit</button></form>
       </div>
       <div class="modal-body">
         <div id="webAppsStatus" class="status-line">Načítám aplikace...</div>

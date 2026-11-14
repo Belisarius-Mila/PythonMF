@@ -6523,6 +6523,15 @@ ${item.context || ""}`);
       }
     }
 
+    function webAppTargetUrl(app) {
+      try {
+        const target = new URL(app.url, window.location.href);
+        if (!["https:", "http:"].includes(target.protocol)) return "";
+        if (app.kind === "GitHub Pages") target.searchParams.set("cockpit_cache", String(Date.now()));
+        return target.href;
+      } catch (_) { return ""; }
+    }
+
     function renderWebApps(apps) {
       webAppsList.innerHTML = "";
       apps.forEach((app) => {
@@ -6538,11 +6547,18 @@ ${item.context || ""}`);
         const kind = document.createElement("div");
         kind.className = "app-kind";
         kind.textContent = app.kind || "";
-        const link = document.createElement("button");
+        const targetUrl = app.launch_type !== "desktop" && app.id !== "scandocu" ? webAppTargetUrl(app) : "";
+        const link = document.createElement(targetUrl ? "a" : "button");
         link.className = "button-link";
-        link.type = "button";
         link.textContent = "Otevřít";
-        link.addEventListener("click", () => openWebApp(app));
+        if (targetUrl) {
+          link.href = targetUrl;
+          link.target = "_blank";
+          link.rel = "noopener";
+        } else {
+          link.type = "button";
+          link.addEventListener("click", () => openWebApp(app));
+        }
         text.appendChild(title);
         text.appendChild(description);
         text.appendChild(kind);
@@ -6662,23 +6678,12 @@ ${item.context || ""}`);
           openScanDocu();
         return;
       }
-      const target = new URL(app.url, window.location.href);
-      if (app.kind === "GitHub Pages") {
-        target.searchParams.set("cockpit_cache", String(Date.now()));
-      }
-      const targetUrl = target.href;
-      const windowName = `SamanthaWebApp_${String(app.id || "app").replace(/[^A-Za-z0-9_]+/g, "_")}`;
-      const appWindow = window.open(
-        "about:blank",
-        windowName,
-        "popup=yes,width=1280,height=880,left=120,top=70"
-      );
-      if (appWindow) {
-        appWindow.location.href = targetUrl;
-        appWindow.focus();
-      } else {
-        showMessage("Prohlížeč zablokoval nové okno. Použij odkaz níže.", targetUrl);
-      }
+      const targetUrl = webAppTargetUrl(app);
+      if (!targetUrl) { showMessage("Aplikace nemá platnou webovou adresu."); return; }
+      // Async catalog shortcuts may lose user activation. Always retain a native link.
+      showMessage("Pokud se aplikace neotevřela, otevři ji odkazem níže.", targetUrl);
+      try { window.open(targetUrl, "_blank", "noopener"); }
+      catch (err) { recordFrontendError(err); }
     }
 
     function openEmailHub() {
