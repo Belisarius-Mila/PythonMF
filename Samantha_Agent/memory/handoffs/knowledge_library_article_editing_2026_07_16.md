@@ -1,71 +1,32 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
-### Knihy —14.11.2026, obálky a katalogové třídění lokálně
+### Knihy — ruční obor a odstranění starých kategorií (14.11.2026)
 
-- Online Obálkyknih/cache3 jsou v místním commitu34b34a54. Bez trvalých
-  kopií Obálkyknih; vlastní/místní obálky a Open Library náhrada zachované.
-- Nově lokálně oddělené26obory Konspektu, žánry/formy, témata a jazyky.
-  Metadata patří vybranému katalogovému záznamu a ISBN, ne společným fasetám.
-  Knihovny.cz → MARC072 → přesná oficiální tabulka MZK. Nic se neodhaduje.
-- Náhled a oba podrobné formuláře převezmou třídění až při výslovném uložení.
-  V editoru lze jednotlivě doplnit starší knihu. Původní tagy zůstávají;
-  žádná hromadná změna živých knih. Změna ISBN zneplatní starý snapshot.
-- Filtry rostou jen podle uložených knih, mají počty a Bez zařazení.
-  OR v jednom poli, AND mezi poli, závislé nabídky a zachovaný nulový výběr.
-  Obor/žánr hlavní; témata/jazyk/původní štítky v dalších filtrech.
-- 116 cílených PASS; finální parser19 a frontend23 PASS. Izolovaný skutečný
-  browser390/1280 ověřil filtry i uložení nové klasifikace,0 produkčních POST,
-  0 výjimek a žádné přetékání. Plný běh3885:0 selhání kontrol,31 skip,1 syntetický RPC timeout.
-  Celý jeho nezměněný modul samostatně42 PASS; nejde o čistý návrat plné brány.
-- Původní payloady bez nového snapshotu mají stejné fingerprinty; replay
-  a status neprovádí nové vyhledání. Fyzická přejímka na iPhonu zbývá.
-- Další krok: společné vydání až po dokončení souběžného Data; vlastní
-  publikační brána a iPhone přejímka zůstávají. Místní krok uzavřen, bez push
-  a nasazení. Podrobné důkazy v reportu, včetně samostatného RPC retestu.
-- Důkazy: technical/book_quick_inventory.md,
-  reports/book_catalog_classification_20261114.md a tvbcp/knihovna_cockpit.txt.
-  Data worktree a odložený e-mailový A+C test se nemění.
-
-### Společné p+n schválené — 2026-11-14 15:39 CET
-
-Míla výslovně schválil úplné p+n přes Terru. Integrované oba Datovy commity
-50f113f5/a356e51d a oba knihovní34b34a54/b5f7ee7e. Společný cíl je registrovaný
-runtime Cockpit, projekt project-cockpit. Kontrolní otisk složeného frontendu
-přepočítaný po sloučení;361 cílených integračních testů PASS.
-Samostatné Datovy worktrees zachované. Síťová konfigurace, místní výběry A,
-živé knihy ani aktivace e-mailového agenta se při integraci nemění.
-
-Autoritativní stav tohoto vydání určuje jediná trvalá účtenka požadavku
-all-local-cockpit-20261114-total-v1 a privátní souhrn
-data/private/combined_release_20261114/runtime_receipt.json.
-Při obnově chybějící účtenka neznamená neprovedený push/deploy: ověřit stejný
-job a živý stav, nic automaticky neopakovat. Tento zápis sám není potvrzením
-publikace. Po potvrzeném vydání zbývá fyzický iPhone pilot knih a nové
-otevírání aplikací; původní ikonu/data ani výběr A nemazat.
-
-### Knihovna nasazená, dokončení jednotného HTTPS vstupu — 2026-11-14 16:02 CET
-
-První společné p+n potvrzené:9b846f75, Terra job79c8b5b1ddac34d3714b0cd826f6b7ab,
-push/deploy confirmed,3899 testů PASS/661,2s, smoke5/5 a chráněné služby beze změny.
-Živý HTML odpovídá zdroji a ISBN vrací Beletrie. Následná živá kontrola starého
-HTTP vstupu odhalila chybějící CLI režim Tailscale pod launchd. Terminálový
-resolver fungoval; bez TERM/TERM_PROGRAM/TAILSCALE_BE_CLI reálná GUI binárka
-vrátila exit0 a neplatný JSON. S explicitním CLI režimem validní JSON.
-
-Oprava: pouze čtecí subprocess serve status --json dostane ve vlastní kopii
-prostředí TAILSCALE_BE_CLI=1. Rodičovské prostředí, Serve, síť, certifikáty,
-PWA identity, soukromá data a aktivace agentů beze změny.90 cílených testů PASS,
-včetně skutečného procesu v minimálním syntetickém prostředí a ochrany rodiče.
-LL-072 je opakovatelný podklad; nepřenášet celé terminálové nastavení do služby.
-
-Dokončení opravy má vlastní nový registrovaný požadavek
-all-local-cockpit-20261114-https-cli-v1 a privátní autoritativní účtenku
-data/private/combined_release_20261114/https_cli_fix_receipt.json.
-Původní úspěšný job se neopakuje. Stav nové opravy a finální živé HTTP302,
-HTTPS, HTML a katalogové ověření určují tato účtenka a live_verification.json.
-Při nejistotě číst stejný job, nikoli znovu spouštět vydání. Fyzický iPhone
-pilot a případná obnova A zůstávají samostatné, původní data/ikonu nemazat.
+- Dosavadní verze93d6fac3 byla úspěšně vydaná přes Terru; živé HTTP302,
+  HTTPS, katalog a zdrojová shoda jsou doložené v privátní účtence
+  combined_release_20261114/live_verification.json. Míla nyní potvrzuje,
+  že skenování na iPhonu funguje výborně. Toto není přejímka dnešní nové úpravy.
+- Nový místní krok: z rychlého přidání, podrobného formuláře, editoru,
+  přehledu a API voleb odstraněné původní knižní kategorie. Nové zápisy
+  je neukládají. Technické značky obrázků a ostatní knihovní sekce zachované.
+- Obor lze ručně vybrat z26 oficiálních hlavních oborů Konspektu, také
+  bez katalogového zařazení nebo ISBN. Vlastní27.obor nevzniká. Ruční původ
+  je oddělený od nezměněného katalogového snapshotu. Filtry používají
+  výsledný ruční obor; běžná editace jej zachová, změna ISBN jej zneplatní.
+- Konspekt se dále člení na skupiny, např. Beletrie → Česká próza.
+  Žánr/forma a témata jsou samostatné osy. Podskupiny nyní neukládáme.
+- Bezpečné čištění starých živých kategorií je pouze připravené: připravený
+  přesný náhled, kontrola souběhu, původní bajty v záloze před prvním zápisem,
+  obnovitelný stav. Původní transakční historie zůstává neměnná kvůli replay.
+  Žádný startup hook, HTTP apply ani automatická migrace.
+- Hromadné soukromé čištění čeká na NOVÉ potvrzení přesnou větou podle
+  technical/global_safety_brake.md. Starší potvrzení jiného úkolu neplatí.
+  Nové p+n zatím není autorizované. Další krok: předložit konkrétní náhled a požádat o příslušné potvrzení.
+  Místní vývoj dokončený; Plná brána PASS: 3908 testů / 765.447s, 31 přeskočených.
+- Důkazy: reports/book_manual_subjects_20261114.md, soukromé podklady
+  data/private/book_subject_edit_20261114/. Data worktrees, ScienceNews,
+  odložený emailový A+C test a aktivace agentů beze změny.
 
 ### ScienceNews — dosavadní doložený stav (nový živý audit se nyní neprováděl)
 

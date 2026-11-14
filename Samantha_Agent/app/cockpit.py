@@ -877,6 +877,7 @@ def library_archive_book_action(payload: dict[str, Any]) -> dict[str, Any]:
             publication_year=str(payload.get("publication_year", "")),
             tags=parse_tag_payload(payload.get("tags", [])),
             **({"book_classification": payload["book_classification"]} if "book_classification" in payload else {}),
+            **({"book_subjects_manual": payload["book_subjects_manual"]} if "book_subjects_manual" in payload else {}),
         )
     except ValueError as exc:
         return {"ok": False, "message": str(exc), "error": "invalid_book"}
@@ -1084,6 +1085,7 @@ def library_update_article_action(payload: dict[str, Any]) -> dict[str, Any]:
             category=str(payload.get("category", "other")),
             tags=parse_tag_payload(payload.get("tags", [])),
             **({"book_classification": payload["book_classification"]} if "book_classification" in payload else {}),
+            **({"book_subjects_manual": payload["book_subjects_manual"]} if "book_subjects_manual" in payload else {}),
             source_label=str(payload.get("source_label", "")),
             source_note=str(payload.get("source_note", "")),
             book_author=str(payload.get("book_author", "")),

@@ -331,3 +331,35 @@ jednotlivě doplnit přes Dohledat podle ISBN a Uložit úpravy. Staré durable
 payloady bez book_classification mají totožné fingerprinty; status/replay
 nevyhledává katalog a při obnově používá pouze původní rezervovaná metadata.
 Podrobné důkazy: reports/book_catalog_classification_20261114.md.
+
+
+## 2026-11-14 18:56 CET — Ruční obor a zrušení prozatímních kategorií
+
+- Dosavadní verze93d6fac3 byla úspěšně vydaná přes Terru; živé HTTP302,
+  HTTPS, katalog a zdrojová shoda jsou doložené v privátní účtence
+  combined_release_20261114/live_verification.json. Míla nyní potvrzuje,
+  že skenování na iPhonu funguje výborně. Toto není přejímka dnešní nové úpravy.
+- Nový místní krok: z rychlého přidání, podrobného formuláře, editoru,
+  přehledu a API voleb odstraněné původní knižní kategorie. Nové zápisy
+  je neukládají. Technické značky obrázků a ostatní knihovní sekce zachované.
+- Obor lze ručně vybrat z26 oficiálních hlavních oborů Konspektu, také
+  bez katalogového zařazení nebo ISBN. Vlastní27.obor nevzniká. Ruční původ
+  je oddělený od nezměněného katalogového snapshotu. Filtry používají
+  výsledný ruční obor; běžná editace jej zachová, změna ISBN jej zneplatní.
+- Konspekt se dále člení na skupiny, např. Beletrie → Česká próza.
+  Žánr/forma a témata jsou samostatné osy. Podskupiny nyní neukládáme.
+- Bezpečné čištění starých živých kategorií je pouze připravené: připravený
+  přesný náhled, kontrola souběhu, původní bajty v záloze před prvním zápisem,
+  obnovitelný stav. Původní transakční historie zůstává neměnná kvůli replay.
+  Žádný startup hook, HTTP apply ani automatická migrace.
+- Hromadné soukromé čištění čeká na NOVÉ potvrzení přesnou větou podle
+  technical/global_safety_brake.md. Starší potvrzení jiného úkolu neplatí.
+  Nové p+n zatím není autorizované. Další krok: předložit konkrétní náhled a požádat o příslušné potvrzení.
+  Místní vývoj dokončený; Plná brána PASS: 3908 testů / 765.447s, 31 přeskočených.
+- Důkazy: reports/book_manual_subjects_20261114.md, soukromé podklady
+  data/private/book_subject_edit_20261114/. Data worktrees, ScienceNews,
+  odložený emailový A+C test a aktivace agentů beze změny.
+
+
+Historické popisy původních kategorií výše jsou překonané tímto krokem.
+Podrobný kontrakt a ověření: reports/book_manual_subjects_20261114.md.

@@ -12,6 +12,21 @@ from app.capabilities.models import (
 
 CAPABILITIES: tuple[CapabilityRecord, ...] = (
     CapabilityRecord(
+        capability_id="book_legacy_cleanup_preview", label="Preview removal of retired book categories",
+        risk=RiskLevel.LOCAL_WRITE, reads=("private book metadata and operation state",),
+        writes=("private immutable cleanup preview",), tool="app.book_legacy_cleanup.preview_cleanup",
+        audit=AuditPolicy.REDACTED, notes="No live metadata edits, deletion, publication or model calls.",
+    ),
+    CapabilityRecord(
+        capability_id="book_legacy_cleanup_apply", label="Apply an explicitly approved book category cleanup",
+        risk=RiskLevel.DESTRUCTIVE, reads=("exact preview and unchanged book metadata",),
+        writes=("remove only retired category labels and option key", "exact original-byte backups and durable receipt"),
+        tool="app.book_legacy_cleanup.apply_cleanup", requires_confirmation=True,
+        confirmation_policy=ConfirmationPolicy.EXACT_PHRASE, voice_allowed=VoicePolicy.BLOCKED,
+        mobile_allowed=MobilePolicy.BLOCKED, audit=AuditPolicy.REDACTED,
+        notes="Exact global safety phrase and SHA256 preview ID; no public route or startup hook. Preserve books, photographs, manual/catalog subjects and transaction history. Interrupted work resumes only its original approved bytes.",
+    ),
+    CapabilityRecord(
         capability_id="book_inventory_read", label="Preview ISBN and read missing book locations",
         risk=RiskLevel.READ_ONLY, reads=("private book metadata", "fixed public ISBN catalogs"), writes=(),
         tool="app.cockpit_book_inventory.inventory_lookup", audit=AuditPolicy.REDACTED,
@@ -23,7 +38,7 @@ CAPABILITIES: tuple[CapabilityRecord, ...] = (
         writes=("private existing book archive", "durable request identity"),
         tool="app.cockpit_book_inventory.inventory_action", audit=AuditPolicy.REDACTED,
         requires_confirmation=True, confirmation_policy=ConfirmationPolicy.EXACT_CURRENT_MESSAGE,
-        notes="Only explicit save/selected location buttons; optional bounded local JPEG cover from covers.openlibrary.org, catalog genre labels without inference. Repeated identities never create another copy or overwrite later edits. No deletion, AI, email or service changes.",
+        notes="Only explicit save/selected location buttons; optional bounded local JPEG cover from covers.openlibrary.org, catalog classification and separately identified manual Conspectus subjects without inference. Repeated identities never create another copy or overwrite later edits. No deletion, AI, email or service changes.",
     ),
     CapabilityRecord(
         capability_id="agent_supervisor_read", label="Read cached agent supervision",

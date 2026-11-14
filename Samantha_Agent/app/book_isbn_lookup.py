@@ -209,29 +209,11 @@ def _lookup_book_in_knihovny(
                 "publish_date": "; ".join(dates)[:100],
                 "publication_year": next(iter(years)) if len(years) == 1 else "",
                 "number_of_pages": 0,
-                "categories": _knihovny_genres(record.get("subjectsExtended")),
                 **({"book_classification": record_classification(record, isbn=normalized_isbn, source_url=source_url)} if source_url else {}),
                 "source_name": KNIHOVNY_SOURCE_NAME,
                 "source_url": source_url,
             }
     raise BookIsbnNotFoundError("Pro toto ISBN nebyla v českém katalogu nalezena kniha.")
-
-
-def _knihovny_genres(subjects):
-    """Only typed genre/form headings; a topic is not a book's genre."""
-    result = []
-    for subject in subjects if isinstance(subjects, list) else []:
-        if not isinstance(subject, dict) or subject.get("type") != "genre/form":
-            continue
-        headings = subject.get("heading")
-        if not isinstance(headings, list) or not headings or not isinstance(headings[0], str):
-            continue
-        value = " ".join(headings[0].split())
-        if value and len(value) <= 80 and value.casefold() not in {x.casefold() for x in result}:
-            result.append(value)
-        if len(result) == 10:
-            break
-    return result
 
 
 def _lookup_book_in_open_library(

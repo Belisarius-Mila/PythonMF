@@ -173,9 +173,11 @@
     const el = id => doc.getElementById(id);
     const panel = el("quickBookPanel"); if (!panel) return null;
     const status = el("quickBookStatus"), isbn = el("quickBookISBN"), title = el("quickBookTitle"), author = el("quickBookAuthor"), year = el("quickBookYear");
-    const categories = el("quickBookCategories"), classificationNote = el("quickBookClassification");
+    const subject = el("quickBookSubject"), classificationNote = el("quickBookClassification");
+    let manualSubjectsTouched = false;
+    root.LibraryBookFacets.fillSubjects(subject, [], doc);
     let classification = null;
-    const describe = value => root.LibraryBookFacets ? root.LibraryBookFacets.describe(value) : "";
+    const describe = value => root.LibraryBookFacets.describe(value, manualSubjectsTouched ? root.LibraryBookFacets.selectedSubjects(subject) : null);
     const open = el("quickBookOpen"), save = el("quickBookSave"), scan = el("quickBookScan"), video = el("quickBookVideo");
     const image = el("quickBookCover"), coverLink = el("quickBookCoverLink"), coverNote = el("quickBookCoverNote"), duplicate = el("quickBookDuplicate");
     let generation = 0, edits = 0, additional = false, available = false, rows = [], listGeneration = 0, opened = false, completed = false, startingCamera = false;
@@ -187,7 +189,7 @@
     const pending = () => { try { return ledger && ledger.pending(); } catch (_) { return true; } };
     function controls() {
       const p = pending(), busy = ledger && ledger.busy;
-      [isbn, title, author, year, categories, scan, el("quickBookLookup"), el("quickBookImage"), el("quickBookLocationsOpen"), el("quickBookAdditional")].forEach(x => { x.disabled = !!p || !!busy || !ledger; });
+      [isbn, title, author, year, subject, scan, el("quickBookLookup"), el("quickBookImage"), el("quickBookLocationsOpen"), el("quickBookAdditional")].forEach(x => { x.disabled = !!p || !!busy || !ledger || completed; });
       scan.disabled = scan.disabled || startingCamera; scan.textContent = startingCamera ? "Otevírám kameru…" : "Skenovat kamerou";
       save.disabled = !!busy || !ledger || completed; save.textContent = p ? "Dokončit původní zápis" : "Uložit do knihovny";
       el("quickBookRecover").hidden = !p; el("quickBookNext").hidden = !!p || !el("quickBookNext").dataset.ready;
@@ -206,7 +208,7 @@
       });
     function stop() { camera.stop(); startingCamera = false; video.hidden = true; el("quickBookStop").hidden = true; controls(); }
     function close() { opened = false; generation++; listGeneration++; stop(); panel.hidden = true; open.setAttribute("aria-expanded", "false"); }
-    function changedISBN() { stop(); generation++; additional = false; completed = false; duplicate.replaceChildren(); title.value = ""; author.value = ""; year.value = ""; categories.value = ""; classification = null; classificationNote.textContent = describe(null); setCover(""); el("quickBookAdditional").hidden = true; controls(); }
+    function changedISBN() { stop(); generation++; additional = false; completed = false; duplicate.replaceChildren(); title.value = ""; author.value = ""; year.value = ""; manualSubjectsTouched = false; root.LibraryBookFacets.fillSubjects(subject, [], doc); classification = null; classificationNote.textContent = describe(null); setCover(""); el("quickBookAdditional").hidden = true; controls(); }
     async function lookup() {
       if (pending()) return;
       stop(); let code;
@@ -220,6 +222,7 @@
         if (edits !== edit) { notice("Náhled přišel po tvé úpravě; ruční údaje zůstaly zachované."); return; }
         const b = data.book || {}; title.value = b.title || ""; author.value = b.author || ""; year.value = b.publication_year || ""; setCover(b.cover_url);
         classification = b.book_classification || null;
+        if (!manualSubjectsTouched) root.LibraryBookFacets.fillSubjects(subject, classification ? classification.subjects : [], doc);
         classificationNote.textContent = describe(classification);
         notice(data.found ? "Zkontroluj knihu a ulož ji. Umístění doplníš později na Macu." : data.message); title.focus();
       } catch (_) { if (token === generation && opened) notice("Katalog neodpověděl. Doplň název a knihu ulož ručně."); }
@@ -300,7 +303,8 @@
     });
     el("quickBookClose").addEventListener("click", close);
     isbn.addEventListener("input", changedISBN);
-    [title, author, year, categories].forEach(x => x.addEventListener("input", () => { edits++; }));
+    [title, author, year].forEach(x => x.addEventListener("input", () => { edits++; }));
+    subject.addEventListener("change", () => { manualSubjectsTouched = true; edits++; classificationNote.textContent = describe(classification); });
     el("quickBookLookup").addEventListener("click", lookup);
     scan.addEventListener("click", async () => {
       if (pending() || startingCamera) return;
@@ -333,7 +337,8 @@
       if (pending()) { perform("create", {}); return; }
       try { const code = normalizeISBN(isbn.value); if (!title.value.trim()) { notice("Doplň název knihy."); title.focus(); return; }
         perform("create", {isbn: code, title: title.value.trim(), author: author.value.trim(), publication_year: year.value.trim(), additional_copy: additional,
-          categories: categories.value.split(",").map(x => x.trim()).filter(Boolean), store_cover: true,
+          store_cover: true,
+          ...(manualSubjectsTouched ? {book_subjects_manual: root.LibraryBookFacets.selectedSubjects(subject)} : {}),
           ...(classification ? {book_classification: classification} : {})});
       } catch (e) { notice(e.message); }
     });

@@ -108,9 +108,6 @@
     const libraryBookLocationInput = document.getElementById("libraryBookLocationInput");
     const libraryBookNewLocationInput = document.getElementById("libraryBookNewLocationInput");
     const libraryBookAddLocationBtn = document.getElementById("libraryBookAddLocationBtn");
-    const libraryBookCategoryChoices = document.getElementById("libraryBookCategoryChoices");
-    const libraryBookNewCategoryInput = document.getElementById("libraryBookNewCategoryInput");
-    const libraryBookAddCategoryBtn = document.getElementById("libraryBookAddCategoryBtn");
     const libraryBookOptionsStatus = document.getElementById("libraryBookOptionsStatus");
     const libraryBookCoverInput = document.getElementById("libraryBookCoverInput");
     const libraryBookCoverPreviewWrap = document.getElementById("libraryBookCoverPreviewWrap");
@@ -142,8 +139,7 @@
     const librarySearchBtn = document.getElementById("librarySearchBtn");
     const libraryBookOverview = document.getElementById("libraryBookOverview");
     const libraryBookOverviewCount = document.getElementById("libraryBookOverviewCount");
-    const libraryBookCategoryFilter = document.getElementById("libraryBookCategoryFilter");
-    const bookFacetSelects = {subjects: document.getElementById("libraryBookSubjectFilter"), genres: document.getElementById("libraryBookGenreFilter"), topics: document.getElementById("libraryBookTopicFilter"), languages: document.getElementById("libraryBookLanguageFilter"), legacy: libraryBookCategoryFilter, author: document.getElementById("libraryBookAuthorFilter"), location: document.getElementById("libraryBookLocationFilter")};
+    const bookFacetSelects = {subjects: document.getElementById("libraryBookSubjectFilter"), genres: document.getElementById("libraryBookGenreFilter"), topics: document.getElementById("libraryBookTopicFilter"), languages: document.getElementById("libraryBookLanguageFilter"), author: document.getElementById("libraryBookAuthorFilter"), location: document.getElementById("libraryBookLocationFilter")};
     const libraryBookAuthorFilter = document.getElementById("libraryBookAuthorFilter");
     const libraryBookLocationFilter = document.getElementById("libraryBookLocationFilter");
     const libraryBookClearFiltersBtn = document.getElementById("libraryBookClearFiltersBtn");
@@ -180,10 +176,6 @@
     const libraryEditBookCatalogDifferences = document.getElementById("libraryEditBookCatalogDifferences");
     const libraryEditBookCatalogKeepBtn = document.getElementById("libraryEditBookCatalogKeepBtn");
     const libraryEditBookCatalogReplaceBtn = document.getElementById("libraryEditBookCatalogReplaceBtn");
-    const libraryEditBookCategoryChoices = document.getElementById("libraryEditBookCategoryChoices");
-    const libraryEditBookNewCategoryInput = document.getElementById("libraryEditBookNewCategoryInput");
-    const libraryEditBookAddCategoryBtn = document.getElementById("libraryEditBookAddCategoryBtn");
-    const libraryEditBookOptionsStatus = document.getElementById("libraryEditBookOptionsStatus");
     const libraryEditTagsInput = document.getElementById("libraryEditTagsInput");
     const libraryEditSourceInput = document.getElementById("libraryEditSourceInput");
     const libraryEditSourceNoteInput = document.getElementById("libraryEditSourceNoteInput");
@@ -381,20 +373,27 @@
     let libraryBookOcrFiles = [];
     let libraryBookOcrDraftText = "";
     const bookClassifications = {create: null, edit: null};
-    function showBookClassification(target, value) {
+    const bookSubjectInputs = {create: document.getElementById("libraryBookSubjectInput"), edit: document.getElementById("libraryEditBookSubjectInput")};
+    const bookSubjectManual = {create: false, edit: false};
+    Object.values(bookSubjectInputs).forEach(input => LibraryBookFacets.fillSubjects(input, [], document));
+    function showBookClassification(target, value, item = null) {
       bookClassifications[target] = value || null;
-      document.getElementById(target === "edit" ? "libraryEditBookClassification" : "libraryBookClassification").textContent = LibraryBookFacets.describe(value);
+      if (item) bookSubjectManual[target] = item.book_subjects_origin === "manual";
+      if (item || !bookSubjectManual[target]) LibraryBookFacets.fillSubjects(bookSubjectInputs[target], item ? item.book_subjects : value && value.subjects || [], document);
+      document.getElementById(target === "edit" ? "libraryEditBookClassification" : "libraryBookClassification").textContent = LibraryBookFacets.describe(value,
+        bookSubjectManual[target] ? LibraryBookFacets.selectedSubjects(bookSubjectInputs[target]) : null);
     }
     function bookClassificationPayload(target, isbn) {
       const value = bookClassifications[target];
-      try { return value && SamanthaBookQuick.normalizeISBN(value.isbn) === SamanthaBookQuick.normalizeISBN(isbn) ? {book_classification: value} : {}; }
-      catch (_err) { return {}; }
+      const payload = bookSubjectManual[target] ? {book_subjects_manual: LibraryBookFacets.selectedSubjects(bookSubjectInputs[target])} : {};
+      try { if (value && SamanthaBookQuick.normalizeISBN(value.isbn) === SamanthaBookQuick.normalizeISBN(isbn)) payload.book_classification = value; }
+      catch (_err) { /* A manual subject also works for a book without an ISBN. */ }
+      return payload;
     }
     let pendingLibraryBookCatalogComparison = null;
     let pendingLibraryEditBookCatalogComparison = null;
     let libraryBookOptions = {
       locations: ["obývák", "jídelna", "půda"],
-      categories: ["román", "fantasy", "sci-fi", "vesmír", "biologie", "matematika", "paleontologie", "knihy pro děti", "knihy pro mládež", "učebnice", "cizojazyčná literatura", "detektivky"],
     };
     let currentQuantitative = null;
     let frontendLastError = "";
@@ -620,9 +619,6 @@
         "libraryBookLocationInput",
         "libraryBookNewLocationInput",
         "libraryBookAddLocationBtn",
-        "libraryBookCategoryChoices",
-        "libraryBookNewCategoryInput",
-        "libraryBookAddCategoryBtn",
         "libraryBookOptionsStatus",
         "libraryBookCoverInput",
         "libraryBookCoverPreviewWrap",
@@ -654,7 +650,6 @@
         "librarySearchBtn",
         "libraryBookOverview",
         "libraryBookOverviewCount",
-        "libraryBookCategoryFilter",
         "libraryBookAuthorFilter",
         "libraryBookLocationFilter",
         "libraryBookClearFiltersBtn",
@@ -674,10 +669,6 @@
         "libraryEditBookIsbnLookupBtn",
         "libraryEditBookIsbnLookupStatus",
         "libraryEditBookIsbnSourceLink",
-        "libraryEditBookCategoryChoices",
-        "libraryEditBookNewCategoryInput",
-        "libraryEditBookAddCategoryBtn",
-        "libraryEditBookOptionsStatus",
         "libraryEditTagsInput",
         "libraryEditSourceInput",
         "libraryEditSourceNoteInput",
@@ -3737,31 +3728,6 @@ Soubor nebude trvale smazán.`);
       libraryAddBookBtn.disabled = !available;
     }
 
-    function selectedLibraryBookCategories(container) {
-      return Array.from(container.querySelectorAll('input[type="checkbox"]:checked'))
-        .map((input) => input.value)
-        .filter(Boolean);
-    }
-
-    function renderLibraryBookCategoryChoices(container, values, selectedValues = []) {
-      const selected = new Set(selectedValues.map((value) => String(value || "").toLocaleLowerCase("cs")));
-      const choices = [...values];
-      selectedValues.forEach(value => { if (!choices.some(x => String(x).toLocaleLowerCase("cs") === String(value).toLocaleLowerCase("cs"))) choices.push(value); });
-      container.replaceChildren();
-      choices.forEach((value) => {
-        const label = document.createElement("label");
-        label.className = "library-book-category-choice";
-        const input = document.createElement("input");
-        input.type = "checkbox";
-        input.value = value;
-        input.checked = selected.has(String(value).toLocaleLowerCase("cs"));
-        const text = document.createElement("span");
-        text.textContent = value;
-        label.append(input, text);
-        container.append(label);
-      });
-    }
-
     function renderLibraryBookLocationOptions(select, values) {
       const selected = select.value;
       select.replaceChildren();
@@ -3796,88 +3762,35 @@ Soubor nebude trvale smazán.`);
     }
 
     function renderLibraryBookOptions(options) {
-      const createSelected = selectedLibraryBookCategories(libraryBookCategoryChoices);
-      const editSelected = selectedLibraryBookCategories(libraryEditBookCategoryChoices);
-      libraryBookOptions = {
-        locations: Array.isArray(options.locations) ? options.locations.map(String) : libraryBookOptions.locations,
-        categories: Array.isArray(options.categories) ? options.categories.map(String) : libraryBookOptions.categories,
-      };
+      libraryBookOptions = {locations: Array.isArray(options.locations) ? options.locations.map(String) : libraryBookOptions.locations};
       renderLibraryBookLocationOptions(libraryBookLocationInput, libraryBookOptions.locations);
       renderLibraryBookLocationOptions(libraryEditBookLocationInput, libraryBookOptions.locations);
-      renderLibraryBookCategoryChoices(libraryBookCategoryChoices, libraryBookOptions.categories, createSelected);
-      renderLibraryBookCategoryChoices(libraryEditBookCategoryChoices, libraryBookOptions.categories, editSelected);
-    }
-
-    function setLibraryBookSelectedCategories(container, selectedValues) {
-      renderLibraryBookCategoryChoices(container, libraryBookOptions.categories, selectedValues);
     }
 
     async function loadLibraryBookOptions() {
       try {
         const data = await fetchJson("/api/library/book/options");
-        if (!data.ok || !data.options) {
-          libraryBookOptionsStatus.textContent = data.message || "Používám základní seznam umístění a kategorií.";
-          libraryEditBookOptionsStatus.textContent = data.message || "Používám základní seznam kategorií.";
-          renderLibraryBookOptions(libraryBookOptions);
-          return false;
-        }
-        renderLibraryBookOptions(data.options);
-        libraryBookOptionsStatus.textContent = "Vyber umístění a případné vlastní štítky. Katalogové třídění se doplní při dohledání ISBN.";
-        libraryEditBookOptionsStatus.textContent = "Novou kategorii můžeš přidat a rovnou ji vybrat pro tuto knihu.";
-        return true;
+        renderLibraryBookOptions(data.options || libraryBookOptions);
+        libraryBookOptionsStatus.textContent = data.ok ? "Umístění můžeš doplnit později. Obor vyber z nabídky." : data.message || "Seznam umístění není dostupný.";
+        return Boolean(data.ok);
       } catch (err) {
-        recordFrontendError(err);
-        renderLibraryBookOptions(libraryBookOptions);
-        libraryBookOptionsStatus.textContent = "Seznam se nepodařilo načíst; můžeš použít základní možnosti.";
-        libraryEditBookOptionsStatus.textContent = "Seznam se nepodařilo načíst; můžeš použít základní kategorie.";
-        return false;
+        recordFrontendError(err); renderLibraryBookOptions(libraryBookOptions);
+        libraryBookOptionsStatus.textContent = "Seznam umístění se nepodařilo načíst."; return false;
       }
     }
 
-    async function addLibraryBookOption(kind, target = "create") {
-      const isLocation = kind === "location";
-      const isEdit = target === "edit";
-      const input = isEdit
-        ? libraryEditBookNewCategoryInput
-        : (isLocation ? libraryBookNewLocationInput : libraryBookNewCategoryInput);
-      const button = isEdit
-        ? libraryEditBookAddCategoryBtn
-        : (isLocation ? libraryBookAddLocationBtn : libraryBookAddCategoryBtn);
-      const status = isEdit ? libraryEditBookOptionsStatus : libraryBookOptionsStatus;
-      const value = input.value.trim();
-      if (!value) {
-        status.textContent = isLocation ? "Napiš nové umístění." : "Napiš novou kategorii.";
-        input.focus();
-        return;
-      }
-      button.disabled = true;
-      status.textContent = "Přidávám položku do soukromého seznamu...";
+    async function addLibraryBookOption(kind) {
+      if (kind !== "location") return;
+      const value = libraryBookNewLocationInput.value.trim();
+      if (!value) { libraryBookOptionsStatus.textContent = "Napiš nové umístění."; return; }
+      libraryBookAddLocationBtn.disabled = true;
       try {
         const data = await postJson("/api/library/book/options", {kind, value});
-        if (!data.ok || !data.options) {
-          status.textContent = data.message || "Položku se nepodařilo přidat.";
-          return;
-        }
-        renderLibraryBookOptions(data.options);
-        input.value = "";
-        if (isLocation) {
-          libraryBookLocationInput.value = data.value || value;
-        } else {
-          const categoryChoices = isEdit ? libraryEditBookCategoryChoices : libraryBookCategoryChoices;
-          const selected = selectedLibraryBookCategories(categoryChoices);
-          selected.push(data.value || value);
-          setLibraryBookSelectedCategories(categoryChoices, selected);
-          if (isEdit) markLibraryEditorDirty();
-        }
-        status.textContent = isEdit
-          ? `${data.message || "Položka byla přidána do seznamu."} Kategorie je vybraná; kartu potvrď tlačítkem Uložit úpravy.`
-          : (data.message || "Položka byla přidána do seznamu.");
-      } catch (err) {
-        recordFrontendError(err);
-        status.textContent = `Položku se nepodařilo přidat: ${err}`;
-      } finally {
-        button.disabled = false;
-      }
+        if (!data.ok) { libraryBookOptionsStatus.textContent = data.message; return; }
+        renderLibraryBookOptions(data.options); libraryBookLocationInput.value = data.value || value;
+        libraryBookNewLocationInput.value = ""; libraryBookOptionsStatus.textContent = "Umístění je přidané.";
+      } catch (err) { recordFrontendError(err); libraryBookOptionsStatus.textContent = "Umístění se nepodařilo přidat."; }
+      finally { libraryBookAddLocationBtn.disabled = false; }
     }
 
     function resetLibraryExportState(message) {
@@ -3942,16 +3855,12 @@ Soubor nebude trvale smazán.`);
         libraryEditBookIsbnLookupBtn,
         libraryEditBookCatalogKeepBtn,
         libraryEditBookCatalogReplaceBtn,
-        libraryEditBookNewCategoryInput,
-        libraryEditBookAddCategoryBtn,
         libraryEditTagsInput,
         libraryEditSourceInput,
         libraryEditSourceNoteInput,
         libraryEditTextInput,
+        bookSubjectInputs.edit,
       ].forEach((field) => {
-        field.disabled = disabled;
-      });
-      libraryEditBookCategoryChoices.querySelectorAll('input[type="checkbox"]').forEach((field) => {
         field.disabled = disabled;
       });
     }
@@ -4022,10 +3931,9 @@ Soubor nebude trvale smazán.`);
         setLibraryBookLocationValue(libraryEditBookLocationInput, item.book_location || "");
         libraryEditBookIsbnInput.value = item.book_isbn || "";
         resetLibraryEditBookIsbnTools();
-        showBookClassification("edit", item.book_classification);
+        showBookClassification("edit", item.book_classification, item);
         syncLibraryEditBookFields(item.category || "other");
         libraryEditTagsInput.value = Array.isArray(item.tags) ? item.tags.join(", ") : "";
-        setLibraryBookSelectedCategories(libraryEditBookCategoryChoices, Array.isArray(item.tags) ? item.tags : []);
         libraryEditSourceInput.value = item.source_label || "";
         libraryEditSourceNoteInput.value = item.source_note || "";
         libraryEditTextInput.value = currentLibrarySelectedText;
@@ -4052,12 +3960,6 @@ Soubor nebude trvale smazán.`);
       const bookPublicationYear = libraryEditBookPublicationYearInput.value.trim();
       const bookLocation = libraryEditBookLocationInput.value.trim();
       const bookIsbn = libraryEditBookIsbnInput.value.trim();
-      const selectedBookCategories = selectedLibraryBookCategories(libraryEditBookCategoryChoices);
-      const knownBookCategories = new Set(libraryBookOptions.categories.map((value) => value.toLocaleLowerCase("cs")));
-      const preservedBookTags = libraryEditTagsInput.value
-        .split(/[,;]/)
-        .map((value) => value.trim())
-        .filter((value) => value && !knownBookCategories.has(value.toLocaleLowerCase("cs")));
       if (!articleId) {
         libraryEditStatus.textContent = "Nejdřív vyber položku v knihovně.";
         return;
@@ -4081,7 +3983,7 @@ Soubor nebude trvale smazán.`);
           title,
           text,
           category: libraryEditCategoryInput.value || "other",
-          tags: isBook ? [...preservedBookTags, ...selectedBookCategories] : libraryEditTagsInput.value.trim(),
+          tags: isBook ? (currentLibrarySelectedItem.tags || []).filter(value => ["obalka", "ma-obrazek"].includes(value)) : libraryEditTagsInput.value.trim(),
           source_label: libraryEditSourceInput.value.trim(),
           source_note: libraryEditSourceNoteInput.value.trim(),
           book_author: bookAuthor,
@@ -4122,13 +4024,6 @@ Soubor nebude trvale smazán.`);
       libraryStatus.textContent = "Otevírám původní článek na webu.";
     }
 
-    function libraryBookCategories(item) {
-      const technicalTags = new Set(["obalka", "ma-obrazek"]);
-      return (Array.isArray(item && item.tags) ? item.tags : [])
-        .map((value) => String(value || "").trim())
-        .filter((value) => value && !technicalTags.has(value.toLocaleLowerCase("cs")));
-    }
-
     function libraryBookAlphabetical(items) {
       return [...items].sort((left, right) => {
         const titleOrder = String(left.one_line_title || left.title || "").localeCompare(
@@ -4148,7 +4043,7 @@ Soubor nebude trvale smazán.`);
 
     function refreshLibraryBookOverviewFilters() {
       const selections = bookFacetSelections();
-      const allLabels = {legacy: "Všechny štítky", author: "Všichni autoři", location: "Všechna umístění"};
+      const allLabels = {author: "Všichni autoři", location: "Všechna umístění"};
       Object.entries(bookFacetSelects).forEach(([key, select]) => {
         const entries = LibraryBookFacets.facets(currentLibraryBookOverviewItems, selections, key);
         select.replaceChildren();
@@ -4971,7 +4866,7 @@ Soubor nebude trvale smazán.`);
           isbn,
           location,
           summary,
-          tags: selectedLibraryBookCategories(libraryBookCategoryChoices),
+          tags: [],
           ...bookClassificationPayload("create", isbn),
         });
         if (!data.ok) {
@@ -4991,9 +4886,8 @@ Soubor nebude trvale smazán.`);
         libraryBookAuthorInput.value = "";
         libraryBookPublicationYearInput.value = "";
         libraryBookIsbnInput.value = "";
-        showBookClassification("create", null);
+        bookSubjectManual.create = false; showBookClassification("create", null);
         libraryBookLocationInput.value = "";
-        setLibraryBookSelectedCategories(libraryBookCategoryChoices, []);
         libraryBookSourceInput.value = "";
         libraryBookSummaryInput.value = "";
         clearLibraryBookIsbnLookupResult();
@@ -5294,7 +5188,7 @@ ${confirmation}`, "");
       if (item.category === "books" && item.book_publication_year) parts.push(`Rok vydání: ${item.book_publication_year}`);
       if (item.category === "books" && item.book_isbn) parts.push(`ISBN: ${item.book_isbn}`);
       if (item.category === "books" && item.book_location) parts.push(`Umístění: ${item.book_location}`);
-      if (item.category === "books") parts.push(LibraryBookFacets.describe(item.book_classification));
+      if (item.category === "books") parts.push(LibraryBookFacets.describeItem(item));
       if (item.source_label) parts.push(item.source_label);
       const url = item.canonical_url || item.source_url || "";
       if (url) {
@@ -5315,9 +5209,9 @@ ${confirmation}`, "");
       const summary = libraryItemMeta(item);
       if (summary) lines.push(summary);
       const tags = item && item.category === "books"
-        ? libraryBookCategories(item)
+        ? []
         : (Array.isArray(item && item.tags) ? item.tags.filter(Boolean) : []);
-      if (tags.length) lines.push(`${item && item.category === "books" ? "Kategorie" : "Tagy"}: ${tags.join(", ")}`);
+      if (tags.length) lines.push(`Tagy: ${tags.join(", ")}`);
       const sourceNote = String(item && item.source_note || "").trim();
       if (sourceNote) lines.push(`Poznámka ke zdroji: ${sourceNote}`);
       return lines.join("\n");
@@ -6919,8 +6813,6 @@ ${item.context || ""}`);
     libraryEditBookCatalogReplaceBtn.addEventListener("click", () => resolveLibraryBookCatalogComparison("edit", true));
     libraryEditBookIsbnPhotoReadBtn.addEventListener("click", readLibraryEditBookIsbnFromPhoto);
     libraryBookAddLocationBtn.addEventListener("click", () => addLibraryBookOption("location"));
-    libraryBookAddCategoryBtn.addEventListener("click", () => addLibraryBookOption("category"));
-    libraryEditBookAddCategoryBtn.addEventListener("click", () => addLibraryBookOption("category", "edit"));
     libraryBookSummaryDraftBtn.addEventListener("click", generateLibraryBookSummary);
     libraryBookSaveBtn.addEventListener("click", saveLibraryBook);
     libraryEditBtn.addEventListener("click", openLibraryEditor);
@@ -6943,7 +6835,6 @@ ${item.context || ""}`);
     libraryEditCategoryInput.addEventListener("change", () => {
       syncLibraryEditBookFields(libraryEditCategoryInput.value);
     });
-    libraryEditBookCategoryChoices.addEventListener("change", markLibraryEditorDirty);
     libraryAttachmentSaveBtn.addEventListener("click", attachLibraryImage);
     document.getElementById("libraryPhotosClearDoneBtn").addEventListener("click", () => {
       for (const task of [...libraryPhotos.tasks]) if (task.state === "attached") libraryPhotos.remove(task);
@@ -6991,8 +6882,12 @@ ${item.context || ""}`);
       });
     });
     [["create", libraryBookIsbnInput], ["edit", libraryEditBookIsbnInput]].forEach(([target, input]) => {
-      input.addEventListener("input", () => { showBookClassification(target, null); clearLibraryBookCatalogComparison(target); });
+      input.addEventListener("input", () => { bookSubjectManual[target] = false; showBookClassification(target, null); clearLibraryBookCatalogComparison(target); });
     });
+    Object.entries(bookSubjectInputs).forEach(([target, input]) => input.addEventListener("change", () => {
+      bookSubjectManual[target] = true; showBookClassification(target, bookClassifications[target]);
+      if (target === "edit") markLibraryEditorDirty();
+    }));
     Object.values(bookFacetSelects).forEach((select) => {
       select.addEventListener("change", renderLibraryBookOverviewItems);
     });

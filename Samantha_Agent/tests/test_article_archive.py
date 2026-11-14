@@ -639,37 +639,20 @@ class ArticleArchiveTests(unittest.TestCase):
         self.assertEqual(by_isbn["count"], 1)
         self.assertEqual(by_publication_year["count"], 1)
 
-    def test_book_options_have_defaults_and_persist_custom_values(self) -> None:
-        with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
-            archive_root = Path(temp_dir)
-            defaults = list_book_options(archive_root=archive_root)
-            added_location = add_book_option(
-                kind="location",
-                value="pracovna",
-                archive_root=archive_root,
-            )
-            added_category = add_book_option(
-                kind="category",
-                value="historie vědy",
-                archive_root=archive_root,
-            )
-            duplicate = add_book_option(
-                kind="category",
-                value=" Historie   vědy ",
-                archive_root=archive_root,
-            )
-            loaded = list_book_options(archive_root=archive_root)
-
-        self.assertEqual(defaults["locations"], ["obývák", "jídelna", "půda"])
-        self.assertIn("román", defaults["categories"])
-        self.assertIn("knihy pro mládež", defaults["categories"])
-        self.assertIn("učebnice", defaults["categories"])
-        self.assertIn("cizojazyčná literatura", defaults["categories"])
-        self.assertTrue(added_location["added"])
-        self.assertTrue(added_category["added"])
-        self.assertFalse(duplicate["added"])
-        self.assertEqual(loaded["locations"][-1], "pracovna")
-        self.assertEqual(loaded["categories"].count("historie vědy"), 1)
+    def test_book_options_offer_subjects_and_locations_without_legacy_categories(self):
+        from app.book_taxonomy import SUBJECTS
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            (root / "book_options.json").write_text(json.dumps({"locations":["půda"],"categories":["fantasy"]}))
+            options = list_book_options(archive_root=root)
+            self.assertNotIn("categories", options)
+            self.assertEqual(options["subjects"], list(SUBJECTS))
+            self.assertEqual(len(options["subjects"]), 26)
+            added = add_book_option(kind="location", value="pracovna", archive_root=root)
+            self.assertIn("pracovna", added["options"]["locations"])
+            with self.assertRaises(ValueError): add_book_option(kind="category",value="fantasy",archive_root=root)
+            # Reading current options cannot perform an unapproved bulk cleanup.
+            self.assertEqual(json.loads((root/"book_options.json").read_text())["categories"],["fantasy"])
 
     def test_books_overview_returns_complete_alphabetical_registry(self) -> None:
         with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
@@ -702,12 +685,12 @@ class ArticleArchiveTests(unittest.TestCase):
     def test_book_options_reject_invalid_kind_empty_and_oversized_values(self) -> None:
         with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
             archive_root = Path(temp_dir)
-            with self.assertRaisesRegex(ValueError, "zda přidáváš"):
+            with self.assertRaisesRegex(ValueError, "Přidat lze umístění"):
                 add_book_option(kind="unknown", value="test", archive_root=archive_root)
             with self.assertRaisesRegex(ValueError, "Napiš novou hodnotu"):
                 add_book_option(kind="location", value="  ", archive_root=archive_root)
             with self.assertRaisesRegex(ValueError, "nejvýše 80"):
-                add_book_option(kind="category", value="x" * 81, archive_root=archive_root)
+                add_book_option(kind="location", value="x" * 81, archive_root=archive_root)
 
     def test_book_requires_title_author_summary_and_location(self) -> None:
         required_fields = {

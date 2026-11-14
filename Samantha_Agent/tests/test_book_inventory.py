@@ -30,6 +30,39 @@ class InventoryTests(unittest.TestCase):
     def save(self, **changes):
         return books.save_inventory_book({**self.payload, **changes}, archive_root=self.root)
 
+    def test_manual_subject_in_full_form_without_isbn_and_taxonomy_matches_frontend(self):
+        from app.book_taxonomy import SUBJECTS
+        result=archive.archive_book_entry(title="Manual book",author="Author",summary="Summary",location="Shelf",tags=["fantasy","obalka"],book_subjects_manual=["Matematika"],archive_root=self.root)
+        self.assertEqual(result["item"]["book_subjects"],["Matematika"])
+        self.assertEqual(result["item"]["book_subjects_origin"],"manual")
+        self.assertNotIn("book_classification",result["item"])
+        item=archive.find_article(result["item"]["id"],archive_root=self.root)
+        self.assertEqual(json.loads(archive.article_metadata_path(item,archive_root=self.root).read_text())["tags"],["obalka"])
+        from scripts.cockpit_quality_gate import node_binary
+        result=subprocess.run([node_binary(),"-e","process.stdout.write(JSON.stringify(require('./app/frontend/cockpit/book_facets.js').SUBJECTS))"],capture_output=True,text=True,check=True)
+        self.assertEqual(json.loads(result.stdout),list(SUBJECTS))
+
+    def test_manual_subject_is_effective_without_changing_catalog_provenance(self):
+        c=self.classification();saved=self.save(book_classification=c,book_subjects_manual=["Matematika"])["item"]
+        self.assertEqual(saved["book_subjects"],["Matematika"])
+        self.assertEqual(saved["book_subjects_origin"],"manual")
+        self.assertEqual(saved["book_classification"],c)
+        self.assertEqual(self.save(book_classification=c,book_subjects_manual=["Matematika"])["item"]["id"],saved["id"])
+        edited=archive.update_article(article_id=saved["id"],title=saved["title"],text="",category="books",archive_root=self.root)["item"]
+        self.assertEqual(edited["book_subjects"],["Matematika"])
+        changed=archive.update_article(article_id=saved["id"],title=saved["title"],text="",category="books",book_isbn="9788024932460",archive_root=self.root)["item"]
+        self.assertEqual(changed["book_subjects"],[])
+        self.assertNotEqual(changed["book_subjects_origin"],"manual")
+
+    def test_manual_subject_on_missing_catalog_and_invalid_subject_never_writes(self):
+        for value in [None, "Beletrie", ["román"], ["Beletrie"]*27]:
+            with self.assertRaises(ValueError):self.save(book_subjects_manual=value)
+        self.assertFalse((self.root/"registry.jsonl").exists())
+        saved=self.save(book_subjects_manual=["Beletrie"])["item"]
+        self.assertEqual(saved["book_subjects"],["Beletrie"])
+        self.assertNotIn("book_classification",saved)
+        with self.assertRaises(ValueError):self.save(book_subjects_manual=["Matematika"])
+
     def classification(self):
         return {"version": 1, "isbn": "9780385472579", "subjects": ["Beletrie"], "genres": ["romány"], "topics": ["historie"], "languages": ["English"], "source_url": "https://www.knihovny.cz/Record/test"}
 
@@ -37,13 +70,13 @@ class InventoryTests(unittest.TestCase):
         classification = self.classification()
         saved = self.save(book_classification=classification, categories=["vlastní"])["item"]
         self.assertEqual(saved["book_classification"], classification)
-        self.assertEqual(saved["tags"], ["vlastní"])
+        self.assertEqual(saved["tags"], [])
         self.assertEqual(self.save(book_classification=classification, categories=["vlastní"])["item"]["id"], saved["id"])
         edited = archive.update_article(article_id=saved["id"], title="Edited", text="", category="books", tags=saved["tags"], archive_root=self.root)["item"]
         self.assertEqual(edited["book_classification"], classification)
         changed = archive.update_article(article_id=saved["id"], title="Edited", text="", category="books", tags=saved["tags"], book_isbn="9788024932460", archive_root=self.root)["item"]
         self.assertNotIn("book_classification", changed)
-        self.assertEqual(changed["tags"], ["vlastní"])
+        self.assertEqual(changed["tags"], [])
         with self.assertRaises(ValueError):
             self.save(book_classification={**classification, "subjects": ["Matematika"]}, categories=["vlastní"])
         self.assertEqual(len(books.inventory_books(archive_root=self.root)["items"]), 1)
@@ -80,7 +113,7 @@ class InventoryTests(unittest.TestCase):
         fetch.assert_called_once_with("9780385472579")
         self.assertEqual(result, replay)
         item = result["item"]
-        self.assertEqual(item["tags"], ["humoristické příběhy"])
+        self.assertEqual(item["tags"], [])
         self.assertEqual(item["book_cover_attachment_id"], "catalog-cover")
         local = archive.get_article_attachment(article_id=item["id"], attachment_id="catalog-cover", variant="thumb", archive_root=self.root)
         self.assertEqual(local["path"].read_bytes(), image)

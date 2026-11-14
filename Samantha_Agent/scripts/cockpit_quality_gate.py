@@ -24,6 +24,8 @@ NODE_FALLBACK_PATHS = (
 )
 
 COMPILE_PATHS = (
+    "app/book_legacy_cleanup.py",
+    "app/book_taxonomy.py",
     "app/book_thumbnail.py",
     "app/book_inventory.py",
     "app/cockpit_book_inventory.py",
@@ -360,6 +362,7 @@ SHELL_PATHS = (
 )
 
 TEST_MODULES = (
+    "tests.test_book_legacy_cleanup",
     "tests.test_vocabularyen_gallery",
     "tests.test_vocabularyen_audio_library",
     "tests.test_cockpit_pwa",

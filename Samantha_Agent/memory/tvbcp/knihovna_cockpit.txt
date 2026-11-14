@@ -1560,3 +1560,25 @@ Původní úspěšný job se neopakuje. Stav nové opravy a finální živé HTT
 HTTPS, HTML a katalogové ověření určují tato účtenka a live_verification.json.
 Při nejistotě číst stejný job, nikoli znovu spouštět vydání. Fyzický iPhone
 pilot a případná obnova A zůstávají samostatné, původní data/ikonu nemazat.
+
+
+## 2026-11-14 18:56 CET — Ruční obor a zrušení starých kategorií knih
+
+Hotovo: Místně lze vybrat obor při skenování, podrobném založení i editaci,
+včetně knihy bez zařazení. Původní kategorie zmizely z knižních formulářů,
+čtečky a filtrů. Míla potvrdil funkčnost dosavadního skenování na iPhonu.
+
+Rozhodnutí: Na Mílův pokyn rušíme prozatímní kategorie. Používáme26 hlavních
+oborů Konspektu; ruční volbu evidujeme samostatně od katalogových údajů.
+Žánry a témata jsou nezávislé. Historické operace neměníme.
+
+Další krok: Předložit přesný náhled
+hromadného odstranění starých kategorií s nutným potvrzením globální brzdy.
+Nové p+n vyžaduje samostatný pokyn.
+
+Navrhované další kroky: Po schváleném vydání ověřit ruční zařazení na iPhonu.
+
+Technický důkaz:395 širších a41 finálních cílených testů PASS; izolovaný
+browser390/1280 ověřil nové uložení i editaci, bez produkčních POST a výjimek.
+Plná brána PASS: 3908 testů / 765.447s, 31 přeskočených.
+Živá data nebyla hromadně změněna. Podrobnosti reports/book_manual_subjects_20261114.md.

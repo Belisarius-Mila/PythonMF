@@ -24,7 +24,7 @@ from typing import Any, Callable
 from urllib.parse import urlparse, urlunparse
 from xml.sax.saxutils import escape
 
-from app.book_taxonomy import normalize_classification
+from app.book_taxonomy import SUBJECTS, normalize_classification, normalize_manual_subjects
 from app.file_persistence import atomic_write_text, exclusive_file_lock
 from app.library_images import LIBRARY_PHOTO_STORAGE_POLICY, prepare_library_photo, prepare_library_thumbnail
 
@@ -91,20 +91,7 @@ SOURCE_REEXTRACT_PREVIEW_ENCODING = "iso-8859-2"
 MAX_DECOMPRESSED_HTML_BYTES = 20 * 1024 * 1024
 BOOK_OPTIONS_FILENAME = "book_options.json"
 DEFAULT_BOOK_LOCATIONS = ("obývák", "jídelna", "půda")
-DEFAULT_BOOK_CATEGORIES = (
-    "román",
-    "fantasy",
-    "sci-fi",
-    "vesmír",
-    "biologie",
-    "matematika",
-    "paleontologie",
-    "knihy pro děti",
-    "knihy pro mládež",
-    "učebnice",
-    "cizojazyčná literatura",
-    "detektivky",
-)
+
 
 
 @dataclass(frozen=True)
@@ -161,6 +148,7 @@ class ArticleArchiveItem:
     book_record_state: str = ""
     book_cover_url: str = ""
     book_classification: dict[str, Any] | None = None
+    book_subjects_manual: tuple[str, ...] | None = None
     read_state: str = "normal"
     read_state_label: str = "běžné"
     read_note: str = ""
@@ -185,13 +173,15 @@ class ArticleArchiveItem:
             "source_url": self.source_url,
             "canonical_url": self.canonical_url,
             "text_chars": self.text_chars,
-            "tags": list(self.tags),
+            "tags": [tag for tag in self.tags if self.category != "books" or tag.casefold() in {"obalka", "ma-obrazek"}],
             "book_author": self.book_author,
             "book_location": self.book_location,
             "book_isbn": self.book_isbn,
             "book_publication_year": self.book_publication_year,
             "book_record_state": self.book_record_state,
             "book_cover_url": self.book_cover_url,
+            **({"book_subjects": list(self.book_subjects_manual if self.book_subjects_manual is not None else (self.book_classification or {}).get("subjects", [])),
+                "book_subjects_origin": "manual" if self.book_subjects_manual is not None else "catalog" if self.book_classification else ""} if self.category == "books" else {}),
             **({"book_classification": self.book_classification} if self.book_classification is not None else {}),
             **({"book_cover_attachment_id": preferred_cover.id} if preferred_cover else {}),
             "snippet": snippet,
@@ -562,6 +552,7 @@ def archive_book_entry(
     publication_year: str = "",
     tags: list[str] | None = None,
     book_classification: dict[str, Any] | None = None,
+    book_subjects_manual: list[str] | None = None,
     archive_root: Path = DEFAULT_ARCHIVE_ROOT,
 ) -> dict[str, Any]:
     clean_title = str(title or "").strip()[:500]
@@ -588,6 +579,7 @@ def archive_book_entry(
         book_isbn=clean_isbn,
         book_publication_year=clean_publication_year,
         book_classification=book_classification,
+        book_subjects_manual=book_subjects_manual,
     )
     return {
         "ok": True,
@@ -599,7 +591,7 @@ def archive_book_entry(
 def list_book_options(*, archive_root: Path = DEFAULT_ARCHIVE_ROOT) -> dict[str, list[str]]:
     options = {
         "locations": list(DEFAULT_BOOK_LOCATIONS),
-        "categories": list(DEFAULT_BOOK_CATEGORIES),
+        "subjects": list(SUBJECTS),
     }
     options_path = archive_root / BOOK_OPTIONS_FILENAME
     if not options_path.is_file():
@@ -607,13 +599,13 @@ def list_book_options(*, archive_root: Path = DEFAULT_ARCHIVE_ROOT) -> dict[str,
     try:
         stored = json.loads(options_path.read_text(encoding="utf-8"))
     except (OSError, json.JSONDecodeError) as exc:
-        raise ValueError("Uložený seznam umístění a kategorií knih je poškozený.") from exc
+        raise ValueError("Uložený seznam umístění knih je poškozený.") from exc
     if not isinstance(stored, dict):
-        raise ValueError("Uložený seznam umístění a kategorií knih je poškozený.")
-    for key in ("locations", "categories"):
+        raise ValueError("Uložený seznam umístění knih je poškozený.")
+    for key in ("locations",):
         raw_values = stored.get(key, [])
         if not isinstance(raw_values, list):
-            raise ValueError("Uložený seznam umístění a kategorií knih je poškozený.")
+            raise ValueError("Uložený seznam umístění knih je poškozený.")
         options[key] = merge_book_option_values(options[key], raw_values)
     return options
 
@@ -624,9 +616,9 @@ def add_book_option(
     value: str,
     archive_root: Path = DEFAULT_ARCHIVE_ROOT,
 ) -> dict[str, Any]:
-    option_key = {"location": "locations", "category": "categories"}.get(str(kind or "").strip())
+    option_key = "locations" if str(kind or "").strip() == "location" else ""
     if not option_key:
-        raise ValueError("Vyber, zda přidáváš umístění, nebo kategorii knihy.")
+        raise ValueError("Přidat lze umístění. Obor vyber z nabídky Konspektu.")
     clean_value = normalize_book_option_value(value)
     options = list_book_options(archive_root=archive_root)
     existing = next(
@@ -640,7 +632,7 @@ def add_book_option(
         options_path = archive_root / BOOK_OPTIONS_FILENAME
         atomic_write_text(
             options_path,
-            json.dumps(options, ensure_ascii=False, indent=2) + "\n",
+            json.dumps({**(json.loads(options_path.read_text(encoding="utf-8")) if options_path.exists() else {}), "locations": options["locations"]}, ensure_ascii=False, indent=2) + "\n",
         )
     return {
         "options": options,
@@ -823,6 +815,7 @@ def update_article(
     book_isbn: str | None = None,
     book_publication_year: str | None = None,
     book_classification: dict[str, Any] | None = None,
+    book_subjects_manual: list[str] | None = None,
     archive_root: Path = DEFAULT_ARCHIVE_ROOT,
     now: datetime | None = None,
 ) -> dict[str, Any]:
@@ -852,6 +845,8 @@ def update_article(
     if any(attachment.kind == "image" for attachment in item.attachments) and "ma-obrazek" not in clean_tags:
         clean_tags.append("ma-obrazek")
     normalized_category = normalize_category(category)
+    if normalized_category == "books":
+        clean_tags = [tag for tag in clean_tags if tag.casefold() in {"obalka", "ma-obrazek"}]
     existing_book_author = str(raw.get("book_author", ""))
     existing_book_location = str(raw.get("book_location", ""))
     existing_book_isbn = str(raw.get("book_isbn", ""))
@@ -872,6 +867,7 @@ def update_article(
         if not clean_book_location:
             raise ValueError("Uveď umístění knihy.")
     classification = normalize_classification(book_classification, clean_book_isbn) if book_classification is not None else None
+    manual_subjects = normalize_manual_subjects(book_subjects_manual) if book_subjects_manual is not None else None
     raw["title"] = clean_title
     raw["one_line_title"] = compact_title(clean_title)
     raw["category"] = normalized_category
@@ -883,6 +879,7 @@ def update_article(
     raw["book_isbn"] = clean_book_isbn
     if clean_book_isbn != existing_book_isbn:
         raw.pop("book_classification", None)
+        raw.pop("book_subjects_manual", None)
         raw["book_cover_url"] = ""
         raw.pop("book_cover_status", None)
         # Keep every file, but do not present a different edition's catalog image as its cover.
@@ -891,6 +888,8 @@ def update_article(
                 attachment["role"] = "supporting_image"
     if classification is not None:
         raw["book_classification"] = classification
+    if manual_subjects is not None:
+        raw["book_subjects_manual"] = manual_subjects
     raw["book_publication_year"] = clean_book_publication_year
     if item.book_record_state == "basic" and clean_text and clean_book_author and clean_book_location:
         raw["book_record_state"] = ""
@@ -1763,7 +1762,7 @@ def write_article_archive(
         "title": article.title,
         "one_line_title": compact_title(article.title),
         "category": normalize_category(category),
-        "tags": [str(tag).strip() for tag in tags if str(tag).strip()],
+        "tags": [str(tag).strip() for tag in tags if str(tag).strip() and (normalize_category(category) != "books" or str(tag).strip().casefold() in {"obalka", "ma-obrazek"})],
         "source_url": source_url,
         "canonical_url": article.canonical_url,
         "archived_at": now.isoformat(),
@@ -1796,8 +1795,10 @@ def write_text_archive(
     book_isbn: str = "",
     book_publication_year: str = "",
     book_classification: dict[str, Any] | None = None,
+    book_subjects_manual: list[str] | None = None,
 ) -> dict[str, Any]:
     classification = normalize_classification(book_classification, book_isbn) if book_classification is not None else None
+    manual_subjects = normalize_manual_subjects(book_subjects_manual) if book_subjects_manual is not None else None
     clean_text = normalize_manual_text(text)
     item_id = text_entry_id(title, clean_text, now)
     item_dir = archive_root / "articles" / item_id
@@ -1810,7 +1811,7 @@ def write_text_archive(
         "title": title,
         "one_line_title": compact_title(title),
         "category": normalize_category(category),
-        "tags": [str(tag).strip() for tag in tags if str(tag).strip()],
+        "tags": [str(tag).strip() for tag in tags if str(tag).strip() and (normalize_category(category) != "books" or str(tag).strip().casefold() in {"obalka", "ma-obrazek"})],
         "source_type": "manual_text",
         "source_label": str(source_label or "Vložený text").strip()[:160] or "Vložený text",
         "source_note": str(source_note or "").strip()[:1000],
@@ -1831,6 +1832,8 @@ def write_text_archive(
     }
     if classification is not None:
         metadata["book_classification"] = classification
+    if manual_subjects is not None:
+        metadata["book_subjects_manual"] = manual_subjects
     metadata_path.write_text(json.dumps(metadata, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
     update_registry(archive_root / "registry.jsonl", metadata)
     return metadata
@@ -1951,6 +1954,7 @@ def article_item_from_raw(raw: dict[str, Any]) -> ArticleArchiveItem:
             r"https://covers\.openlibrary\.org/b/isbn/(?:978|979)[0-9]{10}-S\.jpg\?default=false",
             str(raw.get("book_cover_url", ""))) else "",
         book_classification=normalize_classification(raw["book_classification"], raw.get("book_isbn", "")) if raw.get("book_classification") is not None else None,
+        book_subjects_manual=tuple(normalize_manual_subjects(raw["book_subjects_manual"])) if raw.get("book_subjects_manual") is not None else None,
         read_state=read_state,
         read_state_label=READ_STATE_LABELS[read_state],
         read_note=str(raw.get("read_note", "")).strip(),

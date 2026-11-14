@@ -2541,3 +2541,17 @@ s mock video-only kamerou, stop tracků a dekódováním WASM.
   s CLI validní JSON. Nový procesový test s prázdným prostředím a test
   neovlivněného rodiče,90 cílených PASS. Finální živý doklad je v konkrétní
   účtence HTTPS opravy a live_verification.json, ne ve starší obecné účtence.
+
+
+### 2026-11-14 — Ruční obor nesmí přepsat katalogový důkaz ani identitu replay
+
+- Kontext: katalog knihy nemusí dodat obor; staré volné kategorie nejsou
+  hierarchie Konspektu a jejich ruční doplnění nesmí předstírat původ v katalogu.
+- Řešení: samostatné volitelné ruční zařazení z26 hlavních oborů; výsledný obor
+  pro filtry má pravdivý původ. Chybějící pole zachovává předchozí hodnotu,
+  změna ISBN ji ruší. Původní payload kategorie držet jen pro ověření identity
+  rozpracovaných operací, nikoli pro nové knižní metadata.
+- Ověření: nové uložení a editor v reálném izolovaném browseru, žádný katalog
+  i ISBN, změna ISBN, starý replay a oddělený snapshot PASS. Bulk odstranění
+  starých soukromých metadat připravit zvlášť s přesným náhledem, původními
+  bajty v záloze a novou požadovanou globální větou; nespojovat se startupem.

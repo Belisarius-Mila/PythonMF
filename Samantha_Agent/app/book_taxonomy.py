@@ -31,6 +31,13 @@ def labels(value, *, limit=30, length=120):
     return result
 
 
+def normalize_manual_subjects(value):
+    result = labels(value, limit=26)
+    if any(subject not in SUBJECTS for subject in result):
+        raise ValueError("Vyber obor z nabídky Konspektu.")
+    return result
+
+
 def _isbn13(value):
     value = re.sub(r"[\s-]", "", str(value)).upper()
     if re.fullmatch(r"[0-9]{9}[0-9X]", value):

@@ -81,15 +81,15 @@ class BookIsbnLookupTests(unittest.TestCase):
                     {"type": "genre/form", "heading": ["humoristické příběhy"]},
                     {"type": "genre/form", "heading": ["Humoristické příběhy"]},
                     {"type": "genre/form", "heading": "malformed"}, None]
-        response = {"status": "OK", "records": [{"title": "Test", "subjectsExtended": subjects}]}
+        response = {"status": "OK", "records": [{"id":"test.genres", "title": "Test", "subjectsExtended": subjects}]}
         result = lookup_book_by_isbn(isbn="9781234567897", enrich=False, opener=lambda *_a, **_k: FakeResponse(json.dumps(response).encode()))
-        self.assertEqual(result["categories"], ["české příběhy", "humoristické příběhy"])
+        self.assertEqual(result["book_classification"]["genres"], ["české příběhy", "humoristické příběhy"])
 
     def test_absent_genres_are_empty_without_inference(self):
         for subjects in [None, {}, [], [{"type": "topic", "heading": ["román"]}]]:
-            response = {"status": "OK", "records": [{"title": "Román", "subjectsExtended": subjects}]}
+            response = {"status": "OK", "records": [{"id":"test.genres", "title": "Román", "subjectsExtended": subjects}]}
             result = lookup_book_by_isbn(isbn="9781234567897", enrich=False, opener=lambda *_a, **_k: FakeResponse(json.dumps(response).encode()))
-            self.assertEqual(result["categories"], [])
+            self.assertEqual(result["book_classification"]["genres"], [])
 
     def test_knihovny_is_primary_and_open_library_only_enriches_details(self) -> None:
         knihovny_payload = {

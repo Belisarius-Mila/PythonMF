@@ -2,11 +2,13 @@
 const assert = require("node:assert/strict");
 const fs = require("node:fs");
 const vm = require("node:vm");
+global.LibraryBookFacets = require("../app/frontend/cockpit/book_facets.js");
 const {normalizeISBN, safeCover, PendingWrite, Camera, boot} = require("../app/frontend/cockpit/book_quick_add.js");
 const tick = () => new Promise(resolve => setImmediate(resolve));
 function store() { const values = new Map(); return {getItem: k => values.get(k) || null, setItem: (k, v) => values.set(k, v), removeItem: k => values.delete(k)}; }
 class Element {
   constructor() { this.value = ""; this.hidden = false; this.disabled = false; this.dataset = {}; this.handlers = {}; this.children = []; this.checked = false; this.files = []; this.textContent = ""; }
+  get selectedOptions() { return this.children.filter(option => option.selected); }
   addEventListener(k, fn) { this.handlers[k] = fn; }
   dispatch(k, event = {}) { return this.handlers[k] && this.handlers[k]({target: this, ...event}); }
   append(...children) { this.children.push(...children); }
@@ -29,7 +31,7 @@ function cameraFixture() {
   const video = doc.getElementById("quickBookVideo"); video.play = async () => {};
   doc.head = {append: script => scripts.push(script)};
   doc.createElement = () => ({remove() { this.removed = true; }});
-  const context = {module: {exports: {}}, document: doc, localStorage: store(),
+  const context = {module: {exports: {}}, document: doc, LibraryBookFacets: global.LibraryBookFacets, localStorage: store(),
     navigator: {mediaDevices: {getUserMedia: constraints => {
       mediaCalls++; assert.equal(constraints.audio, false);
       return new Promise((resolve, reject) => { permit = resolve; deny = reject; });
@@ -162,20 +164,21 @@ async function run() {
   assert.equal(e("quickBookTitle").value, "");
 
   const loading3 = e("quickBookLookup").dispatch("click");
-  e("quickBookCategories").value = "Moje kategorie"; e("quickBookCategories").dispatch("input");
+  e("quickBookSubject").children.find(x=>x.value==="Matematika").selected=true; e("quickBookSubject").dispatch("change");
   answer({ok: true, found: true, book: {title: "Late", categories: ["román"]}}); await loading3;
-  assert.equal(e("quickBookCategories").value, "Moje kategorie", "late catalog never overwrites a category edit");
+  assert.deepEqual(e("quickBookSubject").selectedOptions.map(x=>x.value),["Matematika"],"late lookup preserves manual subject");
   const loading4 = e("quickBookLookup").dispatch("click");
   const classification = {version: 1, isbn: "9788025229033", source_url: "https://www.knihovny.cz/Record/test", subjects: ["Beletrie"], genres: ["humoristické příběhy"], topics: ["humor"], languages: ["Czech"]};
   answer({ok: true, found: true, book: {title: "Book", categories: ["české příběhy", "humoristické příběhy"], book_classification: classification}}); await loading4;
-  assert.equal(e("quickBookCategories").value, "Moje kategorie", "a fresh catalog snapshot stays separate from user tags");
+  assert.deepEqual(e("quickBookSubject").selectedOptions.map(x=>x.value),["Matematika"],"manual assignment stays distinct from catalog data");
   let savedPayload;
   global.fetch = async (_url, options) => {
     savedPayload = JSON.parse(options.body);
     return {ok: true, json: async () => ({ok: true, state: "done", item: {id: "one", book_cover_attachment_id: "catalog-cover"}})};
   };
   e("quickBookTitle").value = "Saved book"; e("quickBookSave").dispatch("click"); await tick(); await tick();
-  assert.deepEqual(savedPayload.categories, ["Moje kategorie"]);
+  assert.equal("categories" in savedPayload,false);
+  assert.deepEqual(savedPayload.book_subjects_manual,["Matematika"]);
   assert.deepEqual(savedPayload.book_classification, classification);
   assert.equal(savedPayload.store_cover, true);
   assert.match(e("quickBookCover").src, /^\/api\/library\/attachment\?id=one&attachment_id=catalog-cover&variant=thumb$/);
@@ -184,15 +187,8 @@ async function run() {
   assert.equal(e("quickBookNext").hidden, false);
   e("quickBookNext").dispatch("click"); assert.equal(e("quickBookSave").disabled, false);
   assert.equal(e("quickBookTitle").value, "");
-  assert.equal(e("quickBookCategories").value, "");
+  assert.deepEqual(e("quickBookSubject").selectedOptions, []);
   assert.equal(e("quickBookCover").hidden, true);
-  // A catalog genre outside the shared defaults remains selected in the full editor.
-  const source = fs.readFileSync("app/frontend/cockpit/app.js", "utf8");
-  const start = source.indexOf("    function renderLibraryBookCategoryChoices(");
-  const end = source.indexOf("    function renderLibraryBookLocationOptions(", start);
-  const render = new Function("document", source.slice(start, end) + ";return renderLibraryBookCategoryChoices;")(doc);
-  const choices = new Element(); render(choices, ["román"], ["humoristické příběhy"]);
-  assert.equal(choices.children.find(x => x.children[0].value === "humoristické příběhy").children[0].checked, true);
   ui.setAvailable(false); assert.equal(e("quickBookPanel").hidden, true); assert.equal(e("quickBookOpen").hidden, true);
   global.fetch = originalFetch;
   console.log("Quick book frontend: ISBN, durable writes/reload, double click, unavailable storage, camera cancellation, stale lookup and explicit next: OK");
