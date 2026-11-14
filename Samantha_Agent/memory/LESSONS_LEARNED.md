@@ -2483,3 +2483,35 @@ s mock video-only kamerou, stop tracků a dekódováním WASM.
 - Ověření: živá obálka170×240 v reálném prohlížeči pod registrovaným originem,
   skutečný Referer, chyba/1×1/timeout, lazy načtení po scrollu a místní priorita
   PASS. Původní backendová persistence a její bezpečnostní testy beze změny.
+
+
+### 2026-11-14 — ISBN může vrátit více záznamů; třídění musí patřit vybranému
+
+- Kontext: stejné ISBN vrací různé knihovní záznamy a někdy odlišný rok.
+  Souhrnné fasety obsahují i údaje ostatních záznamů a nejsou důkazem
+  oboru konkrétní vybrané knihy.
+- Řešení: požádat o fullRecord ve stejném výsledku a převzít072 se schématem
+  Konspekt z jediného MARC záznamu; použít číselné $9 nebo přesnou oficiální
+  tabulku $a. Žánry a témata držet v typovaných polích, ne ve smíšeném tagu.
+  Chybějící třídění neodhadovat. Nová volitelná metadata otiskovat pouze,
+  pokud byla v payloadu, aby staré rozpracované zápisy zachovaly identitu.
+- Ověření: živý lookup vybraného záznamu, fixture s nesouvisející souhrnnou
+  fasetou a druhým vydáním, neplatné/nejasné XML, starý pending replay,
+  změna ISBN a skutečný prohlížeč s filtry390/1280 PASS.
+
+
+### 2026-11-14 — Před plnou bránou uzavřít také texty sestavovaného frontendu
+
+- Kontext: plná sada importuje COCKPIT_HTML na začátku a později porovnává
+  nově složenou stránku. I změna nápovědy během běhu vytvoří nesouhlas dvou
+  různých snímků, přestože čerstvý samostatný frontendový test projde.
+- Řešení: před dlouhým během dokončit browserovou přejímku, nápovědu
+  i frontendový hash a zmrazit zdrojové otisky. Během běhu měnit jen zápisy.
+  Volitelné nové parametry předat starším akcím pouze při přítomnosti
+  v payloadu. Audit relativních tras nesmí zaměnit cestu externí URL
+  za naši backendovou trasu.
+- Ověření:28 dotčených kontraktů a116 knihovních testů v čerstvých bězích
+  PASS. Finální produkční zdroje zaznamenané v privátní účtence a dále
+  beze změn během finálního plného běhu. Jeho jediný nezávislý syntetický
+  RPC timeout ověřen opakováním celého nezměněného modulu42 PASS; v účtence
+  zachovat původní nečistý návrat brány a oddělený retest.

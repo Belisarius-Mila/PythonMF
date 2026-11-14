@@ -1,23 +1,31 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
-### Rychlé ISBN knihy — 2026-11-13 20:17 CET, nová změna lokálně
+### Knihy —14.11.2026, obálky a katalogové třídění lokálně
 
-- Kamera4e7007ae a rokbb05bf8f už mají samostatné dokončené p+n.
-  Po přechodu na HTTPS Míla potvrdil načtení knihy.
-- Nově nepovinné katalogové žánry a skutečné místní JPEG miniatury při
-  explicitním Uložit. Bez známé kategorie zůstává Bez kategorie.
-- Zachovaná obnova původního zápisu; lokální obrázek i seznam prokázané
-  v headless390/1280 při blokovaném externím hostu.49+83 cílených PASS.
-- Plná brána: 3850 testů OK/31 skip, 642.1 s; statická i plná brána PASS. Tento nový krok zatím bez p+n.
-- Pro9788024932460 katalog2016 a dvě kategorie, Open Library obálka404.
-  Obálkyknih.cz čekají na odpověď; nově je nutný souhlas s trvalými
-  miniaturami, protože původní dotaz je nežádal a podmínky je zakazují.
-- Další: schválené p+n, iPhone přejímka a pilot přibližně20 knih; umístění
-  až na Macu. Fyzická přejímka tohoto nového kroku dosud neproběhla.
-- Podrobnosti: technical/book_quick_inventory.md a
-  reports/book_quick_inventory_20261113.md, existující tvbcp/knihovna_cockpit.txt.
-- Data worktree, jiné služby a odložený e-mailový A+C test se nemění.
+- Online Obálkyknih/cache3 jsou v místním commitu34b34a54. Bez trvalých
+  kopií Obálkyknih; vlastní/místní obálky a Open Library náhrada zachované.
+- Nově lokálně oddělené26obory Konspektu, žánry/formy, témata a jazyky.
+  Metadata patří vybranému katalogovému záznamu a ISBN, ne společným fasetám.
+  Knihovny.cz → MARC072 → přesná oficiální tabulka MZK. Nic se neodhaduje.
+- Náhled a oba podrobné formuláře převezmou třídění až při výslovném uložení.
+  V editoru lze jednotlivě doplnit starší knihu. Původní tagy zůstávají;
+  žádná hromadná změna živých knih. Změna ISBN zneplatní starý snapshot.
+- Filtry rostou jen podle uložených knih, mají počty a Bez zařazení.
+  OR v jednom poli, AND mezi poli, závislé nabídky a zachovaný nulový výběr.
+  Obor/žánr hlavní; témata/jazyk/původní štítky v dalších filtrech.
+- 116 cílených PASS; finální parser19 a frontend23 PASS. Izolovaný skutečný
+  browser390/1280 ověřil filtry i uložení nové klasifikace,0 produkčních POST,
+  0 výjimek a žádné přetékání. Plný běh3885:0 selhání kontrol,31 skip,1 syntetický RPC timeout.
+  Celý jeho nezměněný modul samostatně42 PASS; nejde o čistý návrat plné brány.
+- Původní payloady bez nového snapshotu mají stejné fingerprinty; replay
+  a status neprovádí nové vyhledání. Fyzická přejímka na iPhonu zbývá.
+- Další krok: společné vydání až po dokončení souběžného Data; vlastní
+  publikační brána a iPhone přejímka zůstávají. Místní krok uzavřen, bez push
+  a nasazení. Podrobné důkazy v reportu, včetně samostatného RPC retestu.
+- Důkazy: technical/book_quick_inventory.md,
+  reports/book_catalog_classification_20261114.md a tvbcp/knihovna_cockpit.txt.
+  Data worktree a odložený e-mailový A+C test se nemění.
 
 ### ScienceNews — dosavadní doložený stav (nový živý audit se nyní neprováděl)
 

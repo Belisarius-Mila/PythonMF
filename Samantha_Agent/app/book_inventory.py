@@ -14,6 +14,7 @@ from urllib.parse import urlsplit
 
 from app import article_archive as archive
 from app.book_isbn_lookup import isbn10_to_isbn13, lookup_book_preview
+from app.book_taxonomy import normalize_classification
 from app.book_thumbnail import fetch_thumbnail, MAX_THUMBNAIL_BYTES
 from app.file_persistence import atomic_create_bytes, atomic_create_text, atomic_write_json
 
@@ -169,7 +170,7 @@ def _finish(root, operation):
 
 @archive._serialized_archive_write
 def save_inventory_book(payload, *, archive_root=archive.DEFAULT_ARCHIVE_ROOT):
-    if not isinstance(payload, dict) or set(payload) - {"request_id", "isbn", "title", "author", "publication_year", "additional_copy", "categories", "store_cover"}:
+    if not isinstance(payload, dict) or set(payload) - {"request_id", "isbn", "title", "author", "publication_year", "additional_copy", "categories", "store_cover", "book_classification"}:
         raise ValueError("Neplatný požadavek knihy.")
     identity = _request(payload.get("request_id"))
     isbn = canonical_isbn(payload.get("isbn"))
@@ -193,6 +194,10 @@ def save_inventory_book(payload, *, archive_root=archive.DEFAULT_ARCHIVE_ROOT):
         content["categories"] = categories
     if "store_cover" in payload:
         content["store_cover"] = store_cover
+    classification = None
+    if "book_classification" in payload:
+        classification = normalize_classification(payload["book_classification"], isbn)
+        content["book_classification"] = classification
     root = Path(archive_root)
     _validate_registry(root)
     document = _operations(root)
@@ -219,6 +224,8 @@ def save_inventory_book(payload, *, archive_root=archive.DEFAULT_ARCHIVE_ROOT):
                "archived_at": datetime.now(timezone.utc).isoformat(), "text_file": f"articles/{item_id}/article.txt",
                "html_file": "", "text_chars": "0", "read_state": "normal", "read_note": "",
                "read_state_updated_at": "", "attachments": []}
+        if classification is not None:
+            raw["book_classification"] = classification
         operation = {"kind": "create", "fingerprint": fingerprint(content), "state": "prepared", "metadata": raw}
         if store_cover:
             image, status = fetch_thumbnail(isbn)

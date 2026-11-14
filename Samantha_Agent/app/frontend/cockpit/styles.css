@@ -234,7 +234,7 @@
     .library-book-overview-head strong { color: #166534; font-size: 13px; }
     .library-book-view-tabs { display: flex; gap: 7px; flex-wrap: wrap; }
     .library-book-view-tabs button.active { background: #15803d; color: white; }
-    .library-book-filter-grid { display: grid; grid-template-columns: repeat(3, minmax(140px, 1fr)) auto; gap: 8px; align-items: end; }
+    .library-book-filter-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 8px; align-items: end; }
     .library-layout { display: grid; grid-template-columns: minmax(260px, .85fr) minmax(320px, 1.15fr); gap: 12px; align-items: start; }
     .library-list { display: grid; gap: 8px; max-height: 58vh; overflow: auto; padding-right: 4px; }
     .library-book-group { display: grid; gap: 7px; }
@@ -614,3 +614,6 @@
 .library-item-with-cover .library-catalog-cover { float: none; margin: 0; }
 .library-item-main { display: grid; gap: 5px; flex: 1; min-width: 0; border: 0; border-radius: 4px; padding: 0; background: transparent; color: inherit; font: inherit; text-align: left; }
 @media (max-width: 520px) { .quick-book-grid { grid-template-columns: minmax(0, 1fr); } .quick-book-preview { grid-template-columns: 64px minmax(0, 1fr); gap: 10px; } .quick-book-preview img { max-width: 60px; } }
+
+    .library-book-filter-grid select[multiple] { min-height: 94px; max-width: 100%; }
+    .library-book-filter-grid .library-field { min-width: 0; }

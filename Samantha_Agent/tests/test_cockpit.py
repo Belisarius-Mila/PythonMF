@@ -190,7 +190,7 @@ class CockpitTests(unittest.TestCase):
         routes: list[tuple[str, str]] = []
         for source_name, html_text in html_sources.items():
             for raw_path in re.findall(
-                r'/(?:api|documents|purchases|email-processing|janicka-kucharka|lekarna-admin|local-apps)[^"\'`\s<)]*',
+                r'(?<=["\'`])/(?:api|documents|purchases|email-processing|janicka-kucharka|lekarna-admin|local-apps)[^"\'`\s<)]*',
                 html_text,
             ):
                 route = raw_path.split("?", 1)[0].split("${", 1)[0]
@@ -544,6 +544,12 @@ class CockpitTests(unittest.TestCase):
         self.assertNotIn(path, self.cockpit_do_post_routes())
         self.assertNotIn("human_adam_deployment_completion_action", source)
         self.assertNotIn("human_adam_deployment_completion_status_action", source)
+
+    def test_frontend_route_audit_distinguishes_external_url_paths(self) -> None:
+        html = '<script>fetch("/api/local-test?x=1");fetch(`/documents/local`)</script><img src="https://cache3.obalkyknih.cz/api/cover?isbn=123">'
+        with patch("tests.test_cockpit.COCKPIT_HTML", html):
+            routes = [route for name, route in self.frontend_literal_routes() if name == "cockpit"]
+        self.assertEqual(routes, ["/api/local-test", "/documents/local"])
 
     def test_frontend_literal_routes_exist_in_backend(self) -> None:
         exact_backend_routes = set(self.cockpit_do_get_routes()) | set(self.cockpit_do_post_routes())
@@ -1795,7 +1801,9 @@ class CockpitTests(unittest.TestCase):
         self.assertIn("function renderLibraryBookOverviewItems()", COCKPIT_HTML)
         self.assertIn("function renderLibraryBookGrouped(items, view)", COCKPIT_HTML)
         self.assertIn("function createLibraryItemRow(item)", COCKPIT_HTML)
-        self.assertIn(': libraryBookCategories(item);', COCKPIT_HTML)
+        self.assertIn('id="libraryBookSubjectFilter"', COCKPIT_HTML)
+        self.assertIn('id="libraryBookGenreFilter"', COCKPIT_HTML)
+        self.assertIn('id="libraryBookTopicFilter"', COCKPIT_HTML)
         self.assertIn('libraryBookOverviewCount.textContent', COCKPIT_HTML)
         self.assertIn('class="secondary hidden" id="libraryAddBookBtn"', COCKPIT_HTML)
         self.assertIn("function syncLibraryBookAddAvailability(category, readState)", COCKPIT_HTML)

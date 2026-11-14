@@ -24,6 +24,7 @@ from typing import Any, Callable
 from urllib.parse import urlparse, urlunparse
 from xml.sax.saxutils import escape
 
+from app.book_taxonomy import normalize_classification
 from app.file_persistence import atomic_write_text, exclusive_file_lock
 from app.library_images import LIBRARY_PHOTO_STORAGE_POLICY, prepare_library_photo, prepare_library_thumbnail
 
@@ -159,6 +160,7 @@ class ArticleArchiveItem:
     book_publication_year: str = ""
     book_record_state: str = ""
     book_cover_url: str = ""
+    book_classification: dict[str, Any] | None = None
     read_state: str = "normal"
     read_state_label: str = "běžné"
     read_note: str = ""
@@ -190,6 +192,7 @@ class ArticleArchiveItem:
             "book_publication_year": self.book_publication_year,
             "book_record_state": self.book_record_state,
             "book_cover_url": self.book_cover_url,
+            **({"book_classification": self.book_classification} if self.book_classification is not None else {}),
             **({"book_cover_attachment_id": preferred_cover.id} if preferred_cover else {}),
             "snippet": snippet,
             "read_state": self.read_state,
@@ -558,6 +561,7 @@ def archive_book_entry(
     isbn: str = "",
     publication_year: str = "",
     tags: list[str] | None = None,
+    book_classification: dict[str, Any] | None = None,
     archive_root: Path = DEFAULT_ARCHIVE_ROOT,
 ) -> dict[str, Any]:
     clean_title = str(title or "").strip()[:500]
@@ -583,6 +587,7 @@ def archive_book_entry(
         book_location=clean_location,
         book_isbn=clean_isbn,
         book_publication_year=clean_publication_year,
+        book_classification=book_classification,
     )
     return {
         "ok": True,
@@ -817,6 +822,7 @@ def update_article(
     book_location: str | None = None,
     book_isbn: str | None = None,
     book_publication_year: str | None = None,
+    book_classification: dict[str, Any] | None = None,
     archive_root: Path = DEFAULT_ARCHIVE_ROOT,
     now: datetime | None = None,
 ) -> dict[str, Any]:
@@ -865,6 +871,7 @@ def update_article(
             raise ValueError("Uveď autora knihy.")
         if not clean_book_location:
             raise ValueError("Uveď umístění knihy.")
+    classification = normalize_classification(book_classification, clean_book_isbn) if book_classification is not None else None
     raw["title"] = clean_title
     raw["one_line_title"] = compact_title(clean_title)
     raw["category"] = normalized_category
@@ -875,12 +882,15 @@ def update_article(
     raw["book_location"] = clean_book_location
     raw["book_isbn"] = clean_book_isbn
     if clean_book_isbn != existing_book_isbn:
+        raw.pop("book_classification", None)
         raw["book_cover_url"] = ""
         raw.pop("book_cover_status", None)
         # Keep every file, but do not present a different edition's catalog image as its cover.
         for attachment in raw.get("attachments", []):
             if attachment.get("id") == "catalog-cover" and attachment.get("role") == "book_cover":
                 attachment["role"] = "supporting_image"
+    if classification is not None:
+        raw["book_classification"] = classification
     raw["book_publication_year"] = clean_book_publication_year
     if item.book_record_state == "basic" and clean_text and clean_book_author and clean_book_location:
         raw["book_record_state"] = ""
@@ -1785,7 +1795,9 @@ def write_text_archive(
     book_location: str = "",
     book_isbn: str = "",
     book_publication_year: str = "",
+    book_classification: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
+    classification = normalize_classification(book_classification, book_isbn) if book_classification is not None else None
     clean_text = normalize_manual_text(text)
     item_id = text_entry_id(title, clean_text, now)
     item_dir = archive_root / "articles" / item_id
@@ -1817,6 +1829,8 @@ def write_text_archive(
         "read_state_updated_at": "",
         "attachments": [],
     }
+    if classification is not None:
+        metadata["book_classification"] = classification
     metadata_path.write_text(json.dumps(metadata, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
     update_registry(archive_root / "registry.jsonl", metadata)
     return metadata
@@ -1936,6 +1950,7 @@ def article_item_from_raw(raw: dict[str, Any]) -> ArticleArchiveItem:
         book_cover_url=str(raw.get("book_cover_url", "")) if re.fullmatch(
             r"https://covers\.openlibrary\.org/b/isbn/(?:978|979)[0-9]{10}-S\.jpg\?default=false",
             str(raw.get("book_cover_url", ""))) else "",
+        book_classification=normalize_classification(raw["book_classification"], raw.get("book_isbn", "")) if raw.get("book_classification") is not None else None,
         read_state=read_state,
         read_state_label=READ_STATE_LABELS[read_state],
         read_note=str(raw.get("read_note", "")).strip(),

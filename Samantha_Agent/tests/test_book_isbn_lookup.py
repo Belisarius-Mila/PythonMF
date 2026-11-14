@@ -39,6 +39,42 @@ class FakeResponse:
 
 
 class BookIsbnLookupTests(unittest.TestCase):
+    def test_classification_is_bound_to_selected_record_not_search_facets(self):
+        xml = '<collection xmlns="http://www.loc.gov/MARC21/slim"><record><datafield tag="072"><subfield code="a">821.162.3-3</subfield><subfield code="2">Konspekt</subfield></datafield></record></collection>'
+        response = {"status": "OK", "facets": {"conspectus_facet_mv": [{"translated": "Matematika"}]}, "records": [
+            {"id": "test.first", "title": "First edition", "fullRecord": xml, "languages": ["Czech"],
+             "subjectsExtended": [{"type": "genre/form", "heading": ["české příběhy"]}, {"type": "topic", "heading": ["muži a ženy", "humor"]}]},
+            {"id": "test.second", "title": "Other edition", "fullRecord": xml.replace("821.162.3-3", "51")}]}
+        calls = []
+        def opener(request, **_kwargs):
+            calls.append(request.full_url)
+            return FakeResponse(json.dumps(response).encode())
+        result = lookup_book_by_isbn(isbn="9788024932460", enrich=False, opener=opener)
+        classification = result["book_classification"]
+        self.assertEqual(len(calls), 1)
+        self.assertEqual(classification["subjects"], ["Beletrie"])
+        self.assertEqual(classification["genres"], ["české příběhy"])
+        self.assertEqual(classification["topics"], ["muži a ženy — humor"])
+        self.assertEqual(classification["languages"], ["Czech"])
+        self.assertEqual(classification["source_url"], result["source_url"])
+
+    def test_marc_language_fallback_uses_only_document_language(self):
+        from app.book_taxonomy import record_classification
+        xml = '<record><datafield tag="041"><subfield code="a">cze</subfield><subfield code="h">eng</subfield></datafield></record>'
+        result = record_classification({"languages": [], "fullRecord": xml}, isbn="9788024932460", source_url="https://www.knihovny.cz/Record/test")
+        self.assertEqual(result["languages"], ["čeština"])
+
+    def test_conspectus_exact_groups_and_optional_number_without_guessing(self):
+        from app.book_taxonomy import record_classification, SUBJECTS
+        self.assertEqual(len(SUBJECTS), 26)
+        def classify(content):
+            return record_classification({"fullRecord": content}, isbn="9788024932460", source_url="https://www.knihovny.cz/Record/test")["subjects"]
+        field = '<datafield tag="072"><subfield code="a">821-93</subfield><subfield code="2">Konspekt</subfield></datafield>'
+        self.assertEqual(classify('<record>' + field + '</record>'), ["Literatura pro děti a mládež"])
+        self.assertEqual(classify('<record>' + field.replace('821-93', 'not-a-group').replace('</datafield>', '<subfield code="9">13</subfield></datafield>') + '</record>'), ["Matematika"])
+        for xml in ['<record>' + field.replace('</datafield>', '<subfield code="9">' + '9' * 5000 + '</subfield></datafield>') .replace('821-93', 'unknown') + '</record>', 'broken', '<record>'+field.replace('821-93', '821-93-unknown')+'</record>', '<record>'+field.replace('Konspekt', 'other')+'</record>', '<collection><record>'+field+'</record><record>'+field+'</record></collection>', '<!DOCTYPE record [<!ENTITY a "secret">]><record>'+field+'</record>']:
+            self.assertEqual(classify(xml), [])
+
     def test_only_typed_catalog_genres_are_categories(self):
         subjects = [{"type": "topic", "heading": ["muži a ženy", "humor"]},
                     {"type": "genre/form", "heading": ["české příběhy"]},
@@ -109,7 +145,7 @@ class BookIsbnLookupTests(unittest.TestCase):
                 "lookfor": ["9781234567897"],
                 "type": ["ISN"],
                 "limit": ["10"],
-                "field[]": ["id", "title", "authors", "publicationDates", "publishers", "subjectsExtended"],
+                "field[]": ["id", "title", "authors", "publicationDates", "publishers", "subjectsExtended", "fullRecord", "languages"],
             },
         )
         self.assertEqual(timeout, 8.0)

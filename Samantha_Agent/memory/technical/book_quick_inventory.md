@@ -298,3 +298,36 @@ Viewporty390/1280 bez přetékání;2 syntetické knihy v izolovaném archivu,
 0 produkčních POST a0 neodchycených výjimek. Logy obalkyknih_*_20261114.log;
 privátní podklady data/private/obalkyknih_integration_20261114/.
 Statická brána logs/obalkyknih_static_gate_20261114.log.
+
+## Katalogové obory a rostoucí filtry —14.11.2026
+
+Nová lokální verze ukládá vedle původních tagů volitelný snapshot
+book_classification v1: isbn, subjects, genres, topics, languages a source_url.
+Obory používají26 názvů z aktuálního Knihovny.cz. MARCXML vybraného záznamu,
+nikoli společné vyhledávací fasety, poskytne pole072 se schématem Konspekt.
+Číselné $9 nebo přesný kód $a se převedou oficiální tabulkou recordmanager2
+Moravské zemské knihovny. Zdroj, datum a SHA-256 tabulky jsou vedle dat.
+Neznámý kód, chybějící údaj, neplatné XML nebo více vložených záznamů se
+neodhaduje. Žánr/forma pochází jen z typovaného genre/form; témata z topic
+včetně poddělení. Jazyk případně z dokumentového041$a nebo008, nikoli041$h.
+
+Rychlý náhled zobrazuje třídění samostatně; vlastní štítky zůstávají volitelné.
+Stejný snapshot umí předvyplnit katalogové dohledání v podrobném vytvoření
+nebo editoru, přetrvá až po výslovném Uložit. Změna ISBN zneplatní třídění
+předchozí knihy. Běžná editace bez nového snapshotu původní třídění zachová.
+Nový snapshot musí být vázaný ke stejnému ISBN a zdrojovému katalogu.
+
+Přehled knih sestavuje obory, žánry, témata, jazyky, autory, umístění i
+původní štítky pouze z aktuálně uložených knih. Nabídka má počty a volbu
+Bez zařazení. Více hodnot jednoho pole znamená OR, různá pole AND.
+Počty a nabídky zohlední ostatní filtry; vlastní vybraný filtr nevylučují.
+Vybraná hodnota s nulovým výsledkem zůstane vidět a sama se nezruší.
+Seskupení Podle oborů používá nové obory. Témata/jazyk/původní štítky jsou
+v rozbalitelných dalších filtrech; autor a umístění zůstávají dostupné.
+
+Staré tagy se nemigrují ani nehádají. Dosavadní slovník vlastních štítků
+zůstává kompatibilní. Živé knihy nebyly hromadně přepsané. Starší knihu lze
+jednotlivě doplnit přes Dohledat podle ISBN a Uložit úpravy. Staré durable
+payloady bez book_classification mají totožné fingerprinty; status/replay
+nevyhledává katalog a při obnově používá pouze původní rezervovaná metadata.
+Podrobné důkazy: reports/book_catalog_classification_20261114.md.

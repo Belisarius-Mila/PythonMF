@@ -173,7 +173,9 @@
     const el = id => doc.getElementById(id);
     const panel = el("quickBookPanel"); if (!panel) return null;
     const status = el("quickBookStatus"), isbn = el("quickBookISBN"), title = el("quickBookTitle"), author = el("quickBookAuthor"), year = el("quickBookYear");
-    const categories = el("quickBookCategories");
+    const categories = el("quickBookCategories"), classificationNote = el("quickBookClassification");
+    let classification = null;
+    const describe = value => root.LibraryBookFacets ? root.LibraryBookFacets.describe(value) : "";
     const open = el("quickBookOpen"), save = el("quickBookSave"), scan = el("quickBookScan"), video = el("quickBookVideo");
     const image = el("quickBookCover"), coverLink = el("quickBookCoverLink"), coverNote = el("quickBookCoverNote"), duplicate = el("quickBookDuplicate");
     let generation = 0, edits = 0, additional = false, available = false, rows = [], listGeneration = 0, opened = false, completed = false, startingCamera = false;
@@ -204,7 +206,7 @@
       });
     function stop() { camera.stop(); startingCamera = false; video.hidden = true; el("quickBookStop").hidden = true; controls(); }
     function close() { opened = false; generation++; listGeneration++; stop(); panel.hidden = true; open.setAttribute("aria-expanded", "false"); }
-    function changedISBN() { stop(); generation++; additional = false; completed = false; duplicate.replaceChildren(); title.value = ""; author.value = ""; year.value = ""; categories.value = ""; setCover(""); el("quickBookAdditional").hidden = true; controls(); }
+    function changedISBN() { stop(); generation++; additional = false; completed = false; duplicate.replaceChildren(); title.value = ""; author.value = ""; year.value = ""; categories.value = ""; classification = null; classificationNote.textContent = describe(null); setCover(""); el("quickBookAdditional").hidden = true; controls(); }
     async function lookup() {
       if (pending()) return;
       stop(); let code;
@@ -217,7 +219,8 @@
         if (!data.ok) { notice(data.message || "Knihu nelze dohledat."); return; }
         if (edits !== edit) { notice("Náhled přišel po tvé úpravě; ruční údaje zůstaly zachované."); return; }
         const b = data.book || {}; title.value = b.title || ""; author.value = b.author || ""; year.value = b.publication_year || ""; setCover(b.cover_url);
-        categories.value = Array.isArray(b.categories) ? b.categories.join(", ") : "";
+        classification = b.book_classification || null;
+        classificationNote.textContent = describe(classification);
         notice(data.found ? "Zkontroluj knihu a ulož ji. Umístění doplníš později na Macu." : data.message); title.focus();
       } catch (_) { if (token === generation && opened) notice("Katalog neodpověděl. Doplň název a knihu ulož ručně."); }
     }
@@ -330,7 +333,8 @@
       if (pending()) { perform("create", {}); return; }
       try { const code = normalizeISBN(isbn.value); if (!title.value.trim()) { notice("Doplň název knihy."); title.focus(); return; }
         perform("create", {isbn: code, title: title.value.trim(), author: author.value.trim(), publication_year: year.value.trim(), additional_copy: additional,
-          categories: categories.value.split(",").map(x => x.trim()).filter(Boolean), store_cover: true});
+          categories: categories.value.split(",").map(x => x.trim()).filter(Boolean), store_cover: true,
+          ...(classification ? {book_classification: classification} : {})});
       } catch (e) { notice(e.message); }
     });
     el("quickBookAdditional").addEventListener("click", () => { additional = true; el("quickBookAdditional").hidden = true; notice("Dalším uložením přidáš další fyzický exemplář této knihy."); });

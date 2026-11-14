@@ -13,6 +13,7 @@ from typing import Any, Callable
 import certifi
 
 from app.article_archive import normalize_book_isbn
+from app.book_taxonomy import record_classification
 
 
 OPEN_LIBRARY_BOOKS_API = "https://openlibrary.org/api/books"
@@ -168,7 +169,7 @@ def _lookup_book_in_knihovny(
                 "lookfor": candidate,
                 "type": "ISN",
                 "limit": 10,
-                "field[]": ["id", "title", "authors", "publicationDates", "publishers", "subjectsExtended"],
+                "field[]": ["id", "title", "authors", "publicationDates", "publishers", "subjectsExtended", "fullRecord", "languages"],
             },
             doseq=True,
         )
@@ -209,6 +210,7 @@ def _lookup_book_in_knihovny(
                 "publication_year": next(iter(years)) if len(years) == 1 else "",
                 "number_of_pages": 0,
                 "categories": _knihovny_genres(record.get("subjectsExtended")),
+                **({"book_classification": record_classification(record, isbn=normalized_isbn, source_url=source_url)} if source_url else {}),
                 "source_name": KNIHOVNY_SOURCE_NAME,
                 "source_url": source_url,
             }

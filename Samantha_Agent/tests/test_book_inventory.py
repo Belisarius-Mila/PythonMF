@@ -30,6 +30,47 @@ class InventoryTests(unittest.TestCase):
     def save(self, **changes):
         return books.save_inventory_book({**self.payload, **changes}, archive_root=self.root)
 
+    def classification(self):
+        return {"version": 1, "isbn": "9780385472579", "subjects": ["Beletrie"], "genres": ["romány"], "topics": ["historie"], "languages": ["English"], "source_url": "https://www.knihovny.cz/Record/test"}
+
+    def test_classification_snapshot_survives_replay_edits_and_isbn_change(self):
+        classification = self.classification()
+        saved = self.save(book_classification=classification, categories=["vlastní"])["item"]
+        self.assertEqual(saved["book_classification"], classification)
+        self.assertEqual(saved["tags"], ["vlastní"])
+        self.assertEqual(self.save(book_classification=classification, categories=["vlastní"])["item"]["id"], saved["id"])
+        edited = archive.update_article(article_id=saved["id"], title="Edited", text="", category="books", tags=saved["tags"], archive_root=self.root)["item"]
+        self.assertEqual(edited["book_classification"], classification)
+        changed = archive.update_article(article_id=saved["id"], title="Edited", text="", category="books", tags=saved["tags"], book_isbn="9788024932460", archive_root=self.root)["item"]
+        self.assertNotIn("book_classification", changed)
+        self.assertEqual(changed["tags"], ["vlastní"])
+        with self.assertRaises(ValueError):
+            self.save(book_classification={**classification, "subjects": ["Matematika"]}, categories=["vlastní"])
+        self.assertEqual(len(books.inventory_books(archive_root=self.root)["items"]), 1)
+
+    def test_invalid_classification_never_creates_archive_or_fetches(self):
+        classification = self.classification()
+        with patch.object(books, "fetch_thumbnail") as fetch:
+            for invalid in [None, {}, {**classification, "isbn": "9788024932460"}, {**classification, "subjects": ["Román"]}, {**classification, "source_url": "https://evil.example/Record/a"}, {**classification, "topics": ["a"] * 31}, {**classification, "version": True}]:
+                with self.assertRaises(ValueError):
+                    self.save(book_classification=invalid, store_cover=True)
+            fetch.assert_not_called()
+        self.assertFalse((self.root / "registry.jsonl").exists())
+        self.assertFalse((self.root / "inventory_operations.json").exists())
+
+    def test_old_pending_fingerprint_and_explicit_enrichment(self):
+        # Simulate a pre-upgrade reserved operation, then resume its original payload.
+        with patch.object(books, "_finish", side_effect=OSError("interrupted")):
+            with self.assertRaises(OSError): self.save()
+        document = json.loads((self.root / "inventory_operations.json").read_text())
+        old = books.fingerprint({"kind": "create", "isbn": "9780385472579", "title": "Test book", "author": "", "publication_year": "", "additional_copy": False})
+        self.assertEqual(document["operations"][self.payload["request_id"]]["fingerprint"], old)
+        saved = self.save()["item"]
+        self.assertNotIn("book_classification", saved)
+        result = archive.update_article(article_id=saved["id"], title=saved["title"], text="", category="books", tags=["fantasy"], book_classification=self.classification(), archive_root=self.root)["item"]
+        self.assertEqual(result["book_classification"], self.classification())
+        self.assertEqual(self.save()["item"]["book_classification"], self.classification())
+
     def test_local_cover_categories_survive_replay_and_serve_offline(self):
         from tests.test_book_thumbnail import jpeg
         image = jpeg()
@@ -244,6 +285,11 @@ class CatalogTests(unittest.TestCase):
     def test_online_cover_sources_and_backlink_behavior(self):
         from scripts.cockpit_quality_gate import node_binary
         result = subprocess.run([node_binary(), str(Path(__file__).with_name("book_cover_sources.test.cjs"))], capture_output=True, text=True, timeout=30)
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+
+    def test_dynamic_facets(self):
+        from scripts.cockpit_quality_gate import node_binary
+        result = subprocess.run([node_binary(), str(Path(__file__).with_name("book_facets.test.cjs"))], capture_output=True, text=True, timeout=30)
         self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
 
     def test_frontend_behavior(self):

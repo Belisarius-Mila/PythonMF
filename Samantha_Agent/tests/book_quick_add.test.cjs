@@ -166,15 +166,17 @@ async function run() {
   answer({ok: true, found: true, book: {title: "Late", categories: ["román"]}}); await loading3;
   assert.equal(e("quickBookCategories").value, "Moje kategorie", "late catalog never overwrites a category edit");
   const loading4 = e("quickBookLookup").dispatch("click");
-  answer({ok: true, found: true, book: {title: "Book", categories: ["české příběhy", "humoristické příběhy"]}}); await loading4;
-  assert.equal(e("quickBookCategories").value, "české příběhy, humoristické příběhy");
+  const classification = {version: 1, isbn: "9788025229033", source_url: "https://www.knihovny.cz/Record/test", subjects: ["Beletrie"], genres: ["humoristické příběhy"], topics: ["humor"], languages: ["Czech"]};
+  answer({ok: true, found: true, book: {title: "Book", categories: ["české příběhy", "humoristické příběhy"], book_classification: classification}}); await loading4;
+  assert.equal(e("quickBookCategories").value, "Moje kategorie", "a fresh catalog snapshot stays separate from user tags");
   let savedPayload;
   global.fetch = async (_url, options) => {
     savedPayload = JSON.parse(options.body);
     return {ok: true, json: async () => ({ok: true, state: "done", item: {id: "one", book_cover_attachment_id: "catalog-cover"}})};
   };
   e("quickBookTitle").value = "Saved book"; e("quickBookSave").dispatch("click"); await tick(); await tick();
-  assert.deepEqual(savedPayload.categories, ["české příběhy", "humoristické příběhy"]);
+  assert.deepEqual(savedPayload.categories, ["Moje kategorie"]);
+  assert.deepEqual(savedPayload.book_classification, classification);
   assert.equal(savedPayload.store_cover, true);
   assert.match(e("quickBookCover").src, /^\/api\/library\/attachment\?id=one&attachment_id=catalog-cover&variant=thumb$/);
   assert.equal(e("quickBookCoverNote").textContent, "Miniatura uložená na Macu");

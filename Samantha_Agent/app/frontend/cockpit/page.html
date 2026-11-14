@@ -727,25 +727,25 @@
           </div>
           <div class="library-book-view-tabs" aria-label="Způsob zobrazení knih">
             <button class="secondary active" type="button" data-library-book-view="all">Všechny</button>
-            <button class="secondary" type="button" data-library-book-view="category">Podle kategorií</button>
+            <button class="secondary" type="button" data-library-book-view="category">Podle oborů</button>
             <button class="secondary" type="button" data-library-book-view="author">Podle autorů</button>
             <button class="secondary" type="button" data-library-book-view="location">Podle umístění</button>
           </div>
+          <p class="library-field-hint">Nabídka se doplňuje podle uložených knih. V jednom poli můžeš vybrat více hodnot; různá pole se kombinují.</p>
           <div class="library-book-filter-grid">
-            <label class="library-field">
-              <span class="library-field-label">Kategorie</span>
-              <select id="libraryBookCategoryFilter"><option value="">Všechny kategorie</option></select>
-            </label>
-            <label class="library-field">
-              <span class="library-field-label">Autor</span>
-              <select id="libraryBookAuthorFilter"><option value="">Všichni autoři</option></select>
-            </label>
-            <label class="library-field">
-              <span class="library-field-label">Umístění</span>
-              <select id="libraryBookLocationFilter"><option value="">Všechna umístění</option></select>
-            </label>
+            <label class="library-field"><span class="library-field-label">Obor</span><select id="libraryBookSubjectFilter" multiple size="4" aria-label="Obory knih"></select></label>
+            <label class="library-field"><span class="library-field-label">Žánr / forma</span><select id="libraryBookGenreFilter" multiple size="4" aria-label="Žánry a formy knih"></select></label>
+            <label class="library-field"><span class="library-field-label">Autor</span><select id="libraryBookAuthorFilter"><option value="">Všichni autoři</option></select></label>
+            <label class="library-field"><span class="library-field-label">Umístění</span><select id="libraryBookLocationFilter"><option value="">Všechna umístění</option></select></label>
             <button class="secondary library-field-button" id="libraryBookClearFiltersBtn" type="button">Zrušit filtry</button>
           </div>
+          <details><summary>Další filtry: témata, jazyk a původní štítky</summary>
+            <div class="library-book-filter-grid">
+              <label class="library-field"><span class="library-field-label">Témata</span><select id="libraryBookTopicFilter" multiple size="4" aria-label="Témata knih"></select></label>
+              <label class="library-field"><span class="library-field-label">Jazyk</span><select id="libraryBookLanguageFilter" multiple size="4" aria-label="Jazyky knih"></select></label>
+              <label class="library-field"><span class="library-field-label">Původní / vlastní štítky</span><select id="libraryBookCategoryFilter"><option value="">Všechny štítky</option></select></label>
+            </div>
+          </details>
         </section>
         <div id="libraryStatus" class="status-line">Načítám knihovnu...</div>
         <section id="libraryPhotoQueue" class="library-photo-queue hidden" aria-label="Připravované fotografie">
@@ -777,7 +777,8 @@
               <label class="library-field">Název<input id="quickBookTitle" type="text" maxlength="500" autocomplete="off"></label>
               <label class="library-field">Autor, pokud je známý<input id="quickBookAuthor" type="text" maxlength="300" autocomplete="off"></label>
               <label class="library-field">Rok, pokud je známý<input id="quickBookYear" type="text" inputmode="numeric" maxlength="4" autocomplete="off"></label>
-              <label class="library-field">Kategorie z katalogu, pokud je známá<input id="quickBookCategories" type="text" maxlength="810" autocomplete="off" placeholder="Bez kategorie; více kategorií odděl čárkou"></label>
+              <label class="library-field">Vlastní štítky (volitelné)<input id="quickBookCategories" type="text" maxlength="810" autocomplete="off" placeholder="Více štítků odděl čárkou"></label>
+              <p id="quickBookClassification" class="library-field-hint">Katalogové třídění zatím není doplněné.</p>
             </div>
           </div>
           <p>Dostupnou miniaturu z Open Library uložíme na Mac. Náhled z Obálkyknih.cz zůstává online.</p>
@@ -969,16 +970,17 @@
               </label>
               <button class="secondary" id="libraryBookAddLocationBtn" type="button">Přidat umístění</button>
             </div>
-            <fieldset class="library-book-category-fieldset">
+            <p id="libraryBookClassification" class="library-field-hint">Katalogové třídění zatím není doplněné.</p>
+                <fieldset class="library-book-category-fieldset">
               <legend>Kategorie knihy (volitelné)</legend>
               <div id="libraryBookCategoryChoices" class="library-book-category-choices"></div>
             </fieldset>
             <div class="library-book-option-add-row">
               <label class="library-field">
-                <span class="library-field-label">Přidat novou kategorii</span>
-                <input id="libraryBookNewCategoryInput" type="text" maxlength="80" placeholder="Nová kategorie">
+                <span class="library-field-label">Přidat vlastní štítek</span>
+                <input id="libraryBookNewCategoryInput" type="text" maxlength="80" placeholder="Vlastní štítek">
               </label>
-              <button class="secondary" id="libraryBookAddCategoryBtn" type="button">Přidat kategorii</button>
+              <button class="secondary" id="libraryBookAddCategoryBtn" type="button">Přidat štítek</button>
             </div>
             <div id="libraryBookOptionsStatus" class="status-line">Umístění a kategorie můžeš rozšířit přímo tady.</div>
           </div>
@@ -1115,18 +1117,19 @@
                     <span class="library-field-hint">Volba pouze upraví editaci. Karta se změní až tlačítkem Uložit úpravy.</span>
                   </div>
                 </div>
+                <p id="libraryEditBookClassification" class="library-field-hint">Katalogové třídění zatím není doplněné.</p>
                 <fieldset class="library-book-category-fieldset library-edit-book-category-fieldset">
-                  <legend>Kategorie knihy</legend>
+                  <legend>Původní / vlastní štítky</legend>
                   <div id="libraryEditBookCategoryChoices" class="library-book-category-choices"></div>
                 </fieldset>
                 <div class="library-book-option-add-row library-edit-book-category-option-add-row">
                   <label class="library-field">
-                    <span class="library-field-label">Přidat novou kategorii</span>
-                    <input id="libraryEditBookNewCategoryInput" type="text" maxlength="80" placeholder="Nová kategorie">
+                    <span class="library-field-label">Přidat vlastní štítek</span>
+                    <input id="libraryEditBookNewCategoryInput" type="text" maxlength="80" placeholder="Vlastní štítek">
                   </label>
-                  <button class="secondary" id="libraryEditBookAddCategoryBtn" type="button">Přidat kategorii</button>
+                  <button class="secondary" id="libraryEditBookAddCategoryBtn" type="button">Přidat štítek</button>
                 </div>
-                <div id="libraryEditBookOptionsStatus" class="status-line library-edit-book-options-status">Novou kategorii můžeš přidat a rovnou ji vybrat pro tuto knihu.</div>
+                <div id="libraryEditBookOptionsStatus" class="status-line library-edit-book-options-status">Vlastní štítek se uloží ke knize. Obor, žánr a témata se přebírají zvlášť z katalogu.</div>
               </div>
               <label class="library-field">
                 <span class="library-field-label">Tagy</span>
