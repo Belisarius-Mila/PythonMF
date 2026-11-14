@@ -4,9 +4,9 @@ Nazev: Vocabulary EN
 Pracovni proud: project-vocabulary-en
 Typ: Project
 Priorita: 2
-Stav: integrovano, Pages vydani vyslovne schvalene
+Stav: nasazeno, ceka na fyzickou prejimku
 Pripomenout pri startu: ne
-Datum: 2026-11-14 22:03 CET
+Datum: 2026-11-14 22:23 CET
 
 Co se resilo:
 Opravit chyby, zachovat běžné významy a podle potřeby přidat samostatné karty,
@@ -17,16 +17,16 @@ Co je hotove:
 -19 redakčních kontrol uzavřených,18 témat a425 původních identit zachovaných.
 -8 ilustrací,31 slovních a42 větných MP3;2479 původních médií shodných.
 -36 cílených Python včetně55 Node PASS; plná brána3920 PASS /706,416s unit část,31 SKIP;107/107 finálních zdrojů a médií shodných.
--Poslední produkční2b17cbb4 má potvrzené Terra p+n a17 veřejných SHA shod.
+-Produkčníe780fe98 má potvrzené Terra p+n,3920 PASS a100 veřejných SHA shod.
 
 Co neni hotove:
-Nové Pages p+n a přejímka telefonu.
+Fyzická přejímka telefonu a vizuální kontrola nových významů.
 
 Dalsi krok:
-Dokončit schválené Pages p+n; potom přejímka telefonu.
+Přejímka nových významů a osobních A–D na telefonu.
 
 Navrhovane dalsi kroky:
-Přejímka významů/profilů, samostatné Pages vydání, pohodlný autorský vstup
+Přejímka významů/profilů, pohodlný autorský vstup
 a budoucí idiomy. Oxford čeká na Mílův odeslaný dotaz.
 
 Zmenene nebo relevantni soubory:
@@ -37,9 +37,8 @@ soubory; GALLERY_AUTHORING.txt; reports/vocabulary_en_meaning_cards_20261114.md.
 Bezpecnost / neukladat:
 Nové významy mají ven-0426 ažven-0442. Osobní výběry/PINy zůstávají
 v prohlížečích, nové významy se do A–D přidávají výslovným výběrem.
-Žádný výmaz médií ani migrace UID. Vlastní větev nad64e9897a; souběžný main
-a knihovna se nemění. Nové Pages p+n je nyní výslovně schválené. Samostatný TVBCP není dohodnutý.
-Aktuální browser host nebyl dostupný; fyzický telefon neověřený.
+Žádný výmaz médií ani migrace UID. Vlastní větev nad64e9897a; main převzal změny se zachováním novějšího UI a knihovny. Pages p+n dokončené. Samostatný TVBCP není dohodnutý.
+Veřejné bajty ověřené; fyzický telefon a vizuální přejímka neověřené.
 
 ## Historie
 
@@ -768,3 +767,27 @@ scénářů PASS /19,725s;108 Datových a16 nezávislých main souborů shodnýc
 Po doplnění vlastního předání:108 Datových a11 nezávislých produkčních/main
 souborů bajtově shodných;5 dalších nezávislých dokumentů main zachovává celý
 původní obsah a přidává pouze autorizované závěrečné předání poštovního UI.
+
+
+## 2026-11-14 22:23 CET — Významové karty veřejně vydané a ověřené
+
+Hotovo: Vocabulary EN na Pages obsahuje442 záznamů/432 aktivních karet,
+všech17 nových významů,8 nových ilustrací a73 MP3. Veřejný obsah přesně
+odpovídá schválenému integračnímu vydání. Dokumentace poštovního UI je
+dorovnaná; původní poštovní vydání se neopakovalo.
+Rozhodnutí: Dokončené Mílou schválené Pages p+n; žádné nové rozhodnutí.
+Další krok: Fyzická přejímka nových významů a osobních výběrů A–D na iPhonu.
+Navrhované další kroky: Potom návrat k poštovnímu A+C; autorský vstup
+a budoucí idiomy zůstávají volitelné navazující kroky.
+Technický důkaz:e780fe98, job203708b8edeb3bdcfd8080e03aa16bc1 completed,
+Terra/high,push/deploy confirmed, plná brána3920 PASS/763,3s, Pages
+workflow43642325042/deployment7794063099, HTTP200. Čtecí kontrola všech
+100 veřejných souborů (92 změněných) ověřila velikosti/SHA,17 nových UID,
+442/432 a přesný aktuální GitHub head. Chráněné služby beze změny; Cockpit
+health je zdravý se stejným procesem/kódem. Datův worktree zůstává zachovaný.
+Účtenka a public_verification.json jsou v privátním
+vocabulary_meanings_release_20261114/. Původní caller účtenka převzatá;
+portálový returned_to_adam není potvrzený. Fyzický iPhone ani aktuální
+vizuální přejímka nejsou doložené. Žádné p+n ani generování neopakovat.
+Závěrečný dokumentační checkpoint vzniká po vydání místně; nemění nasazené
+produkční soubory a není důvodem pro další nasazení. Bez nového TVBCP.

@@ -178,3 +178,27 @@ scénářů PASS /19,725s;108 Datových a16 nezávislých main souborů shodnýc
 Po doplnění vlastního předání:108 Datových a11 nezávislých produkčních/main
 souborů bajtově shodných;5 dalších nezávislých dokumentů main zachovává celý
 původní obsah a přidává pouze autorizované závěrečné předání poštovního UI.
+
+
+## 2026-11-14 22:23 CET — Významové karty veřejně vydané a ověřené
+
+Hotovo: Vocabulary EN na Pages obsahuje442 záznamů/432 aktivních karet,
+všech17 nových významů,8 nových ilustrací a73 MP3. Veřejný obsah přesně
+odpovídá schválenému integračnímu vydání. Dokumentace poštovního UI je
+dorovnaná; původní poštovní vydání se neopakovalo.
+Rozhodnutí: Dokončené Mílou schválené Pages p+n; žádné nové rozhodnutí.
+Další krok: Fyzická přejímka nových významů a osobních výběrů A–D na iPhonu.
+Navrhované další kroky: Potom návrat k poštovnímu A+C; autorský vstup
+a budoucí idiomy zůstávají volitelné navazující kroky.
+Technický důkaz:e780fe98, job203708b8edeb3bdcfd8080e03aa16bc1 completed,
+Terra/high,push/deploy confirmed, plná brána3920 PASS/763,3s, Pages
+workflow43642325042/deployment7794063099, HTTP200. Čtecí kontrola všech
+100 veřejných souborů (92 změněných) ověřila velikosti/SHA,17 nových UID,
+442/432 a přesný aktuální GitHub head. Chráněné služby beze změny; Cockpit
+health je zdravý se stejným procesem/kódem. Datův worktree zůstává zachovaný.
+Účtenka a public_verification.json jsou v privátním
+vocabulary_meanings_release_20261114/. Původní caller účtenka převzatá;
+portálový returned_to_adam není potvrzený. Fyzický iPhone ani aktuální
+vizuální přejímka nejsou doložené. Žádné p+n ani generování neopakovat.
+Závěrečný dokumentační checkpoint vzniká po vydání místně; nemění nasazené
+produkční soubory a není důvodem pro další nasazení. Bez nového TVBCP.
