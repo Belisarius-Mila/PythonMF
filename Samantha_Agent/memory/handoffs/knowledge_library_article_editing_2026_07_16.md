@@ -1,7 +1,7 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
-### Knihy — obnova kontextu a skupiny Konspektu
+### Knihy — skupiny Konspektu nasazené
 
 Priorita: 2; stav: rozpracovane; připomenout při startu: ano.
 
@@ -14,10 +14,10 @@ Priorita: 2; stav: rozpracovane; připomenout při startu: ano.
   i zařazení zachované,0 starých kategorií. Historie operací beze změny.
   Apply ani původní p+n neopakovat. Důkazy zůstávají soukromě pod
   data/private/book_subject_edit_20261114/ (completion/release/live/cleanup).
-- Skupiny Konspektu jsou místně dokončené: katalogové i samostatné ruční,
+- Skupiny Konspektu jsou nasazené v64e9897a: katalogové i samostatné ruční,
  606 pojmenovaných kódů, závislý filtr a seskupení.394 cílených PASS,
  plná3918 PASS/31 SKIP; po drobném UI zpřesnění browser a24 frontendových PASS.
- Nové p+n ani fyzická přejímka neproběhly. Katalogové MARC072:
+ P+n potvrzené job3f40788ac09e6a1b24ada757ef6534c1, smoke5/5; fyzická přejímka zbývá. Katalogové MARC072:
   $a kód, $x název, $9 hlavní obor, $2 Konspekt. Nevymýšlet z názvu či faset.
   Staré snapshoty a pending fingerprints/replay musí zůstat kompatibilní;
   ruční původ samostatný, žádná hromadná migrace soukromých knih.
@@ -33,9 +33,10 @@ Priorita: 2; stav: rozpracovane; připomenout při startu: ano.
   3912 PASS, HTTP200. Pouze čekání a čtení téže účtenky, žádný nový submit.
   Dočasný soukromý most je tímto dorovnaný; nový TVBCP nevzniká.
 
-Další krok: upřesnit konkrétní iPhone UI průchod a pokračovat drobnou cílenou
- úpravou; po UI poštovní A+C. Knihovní krok končí místním commitem, případné
- nové p+n a fyzická přejímka jsou samostatné. Nový vývoj nepovoluje nové p+n, aktivace ani hromadné čištění.
+Další krok: pokračovat UI poštovního agenta; místní oprava mobilních tlačítek
+je v reports/email_mobile_actions_20261114.md. Knihovna64e9897a je již nasazená,
+fyzická iPhone přejímka zbývá. Po UI poštovní A+C; nové aktivace ani hromadné
+čištění nejsou zadané.
 
 ### ScienceNews — dosavadní doložený stav (nový živý audit se nyní neprováděl)
 
@@ -1187,3 +1188,18 @@ prošlo browser390/1280 a24 frontendovými testy; finální statická brána př
 commitem.0 produkčních POST/výjimek. Důkaz reports/book_conspectus_groups_20261114.md
 + privátní final_validation.json. Místní commit následuje; dosud bez nového
 push/nasazení a bez fyzické iPhone přejímky. Stará data a Data worktrees zachované.
+
+
+## 2026-11-14 20:48 CET — Skupiny Konspektu nasazené
+
+Hotovo: Jemnější katalogové i ruční skupiny jsou dostupné v běžícím Cockpitu.
+Rozhodnutí: Míla výslovně zadal nasazení knihovny a potom UI poštovního agenta.
+Další krok: Fyzická přejímka skupin na iPhonu; vývoj pokračuje UI pošty.
+Navrhované další kroky: Po UI poštovní přejímka A+C; původní čištění neopakovat.
+Technický důkaz:64e9897a, jediný job3f40788ac09e6a1b24ada757ef6534c1,
+Terra,3918 testů PASS/731,1s, push/deploy confirmed, smoke5/5,
+chráněné služby shodné. Živý HTTPS přesně odpovídá zdroji,606 skupin přes API,
+code_stamp42ad54202295bc7c/PID32060, GitHub zarovnaný. Native účtenka zkontrolovaná;
+portálový returned_to_adam se nepotvrzuje. Private release_receipt.json a
+release_live_verification.json v book_conspectus_groups_20261114/.
+Fyzický iPhone zatím neověřený; žádná migrace knih ani změna pošty.

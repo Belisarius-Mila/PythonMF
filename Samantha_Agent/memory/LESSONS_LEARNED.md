@@ -2580,3 +2580,13 @@ s mock video-only kamerou, stop tracků a dekódováním WASM.
 - Ověření: aliasy názvů sdílejí jeden počet; víceoborová browserová fixture
   zobrazuje jen skupiny vybraného oboru. Ruční/ISBN/replay/pád testy a3918 plná
   brána PASS; následná frontendová podmínka browser390/1280 +24 testů PASS.
+
+
+### 2026-11-14 — flex:1 může z mobilních tlačítek udělat úzké sloupce
+
+- Kontext: šest akcí e-mailové karty na390px dostalo po46px; text se lámal
+  po písmenech a tlačítka vyrostla na256px, přesto stránka nepřetékala.
+- Řešení: mobilní flex základ9rem jen u dotčeného řádku; ostatní dialogy
+  a desktop zachovat. Samotný test scrollWidth nestačí k přejímce UI.
+- Ověření: skutečné rozměry154×44–58px na390px a246×44px na320px,
+  desktop/dialog shodné,26 frontendových a browser320/390/1280 PASS.

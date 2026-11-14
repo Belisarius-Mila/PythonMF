@@ -1,4 +1,12 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
+## Aktuální UI pošty — 2026-11-14
+
+Runtime64e9897a je vydaný a živě ověřený (3918 PASS/smoke5/HTTPS exact).
+Následně místně opravené mačkání šesti tlačítek e-mailové karty na iPhonu:
+26 frontendových +browser320/390/1280 PASS, bez nového p+n UI.
+Další UI preference čekají na Mílu; po UI poštovní A+C. Fyzický telefon
+zatím neověřený. Report reports/email_mobile_actions_20261114.md.
+
 ## Aktuální dokončení HTTPS služby — 2026-11-14 16:02 CET
 
 První společné p+n potvrzené:9b846f75, Terra job79c8b5b1ddac34d3714b0cd826f6b7ab,
@@ -2835,3 +2843,22 @@ stávající privátní HTTPS Serve. Žádná změna sítě, hostname redigovan�
 privátní discovery_verification.json. První plný běh byl vědomě přerušen
 před dokončením kvůli normalizaci lokální adresy s koncovou tečkou;
 finální zdroje mají rozšířený lokální test a vlastní nový celý běh.
+
+
+## 2026-11-14 20:48 CET — Čitelná tlačítka pošty na mobilu, místně
+
+Hotovo: Akce důležitých zpráv se na390px řadí do dvou sloupců; na320px
+pod sebe. Původních46×256px je nyní154×44–58px. Text se neláme po písmenech.
+Rozhodnutí: Malá oprava prokázané CSS chyby v rámci Mílova zadání UI pošty;
+pořadí/názvy/handlery, editor odpovědi, schvalování a backend beze změny.
+Další krok: Upřesnit další konkrétní potíže UI od Míly. Tato oprava je místní;
+nové p+n poštovního UI není zadané, fyzická telefonní přejímka zbývá.
+Navrhované další kroky: Po UI poštovní A+C podle TXT v Downloads.
+Technický důkaz:26 frontendových PASS a browser320/390/1280 ze skutečného
+místního HTML,0 produkčních POST/výjimek/přetékání. Desktop a editor597px
+shodné s původním stavem; finální statická brána před commitem. Report
+reports/email_mobile_actions_20261114.md; soukromé důkazy email_mobile_ui_20261114/.
+Čtecí živý snímek 2026-11-14 20:48 CET: monitor configured/worker_recent=true,
+active=0/completed=4; neodvozovat dnešní stav ze snímku12.11.
+UI kryje existující Cockpit handoff/TVBCP. Samostatný e-mailový TVBCP není
+dohodnutý; celý poštovní projekt se tím neuzavírá a nový TVBCP nevzniká.

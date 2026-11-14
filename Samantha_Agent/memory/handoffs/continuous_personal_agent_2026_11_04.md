@@ -1,3 +1,13 @@
+## Aktuální návaznost — 2026-11-14 20:48 CET
+
+Knihovna64e9897a je nasazená a živě ověřená. Míla zadal pokračovat UI
+poštovního agenta na iPhonu. Místně opravená prokázaná chyba úzkých tlačítek
+na kartách;26 frontendových a browser320/390/1280 PASS, dosud bez nového
+nasazení UI. Další konkrétní přání zatím chybí. Živý čtecí snímek:
+monitor configured/worker_recent=true, active=0/completed=4.
+Přejímka A+C zůstává po UI, žádná nová aktivace/send/modelový pokus.
+Samostatný e-mailový TVBCP není dohodnutý; UI sledují existující Cockpit dokumenty.
+
 ## Předání před /new — 2026-11-12 17:56 CET
 
 Nazev: Živá přejímka hlídání e-mailových záležitostí
@@ -1813,3 +1823,22 @@ atomické rozhodnutí více věcí, generic-cache eviction a CSRF PASS. Skutečn
 headless Edge390×844 a1280×1000, bezpečný text a šířky tlačítek PASS.
 Finální plná brána PASS:3709 testů /538,314s,31 SKIP. Syntetické bytes/turns měření není důkaz stejné ceny.
 Bez skutečného IMAP/SMTP/modelového pilotu, změny rolí, upgradu, aktivace nebo Datovy kopie.
+
+
+## 2026-11-14 20:48 CET — Čitelná tlačítka pošty na mobilu, místně
+
+Hotovo: Akce důležitých zpráv se na390px řadí do dvou sloupců; na320px
+pod sebe. Původních46×256px je nyní154×44–58px. Text se neláme po písmenech.
+Rozhodnutí: Malá oprava prokázané CSS chyby v rámci Mílova zadání UI pošty;
+pořadí/názvy/handlery, editor odpovědi, schvalování a backend beze změny.
+Další krok: Upřesnit další konkrétní potíže UI od Míly. Tato oprava je místní;
+nové p+n poštovního UI není zadané, fyzická telefonní přejímka zbývá.
+Navrhované další kroky: Po UI poštovní A+C podle TXT v Downloads.
+Technický důkaz:26 frontendových PASS a browser320/390/1280 ze skutečného
+místního HTML,0 produkčních POST/výjimek/přetékání. Desktop a editor597px
+shodné s původním stavem; finální statická brána před commitem. Report
+reports/email_mobile_actions_20261114.md; soukromé důkazy email_mobile_ui_20261114/.
+Čtecí živý snímek 2026-11-14 20:48 CET: monitor configured/worker_recent=true,
+active=0/completed=4; neodvozovat dnešní stav ze snímku12.11.
+UI kryje existující Cockpit handoff/TVBCP. Samostatný e-mailový TVBCP není
+dohodnutý; celý poštovní projekt se tím neuzavírá a nový TVBCP nevzniká.

@@ -2942,3 +2942,22 @@ Původní úspěšný job se neopakuje. Stav nové opravy a finální živé HTT
 HTTPS, HTML a katalogové ověření určují tato účtenka a live_verification.json.
 Při nejistotě číst stejný job, nikoli znovu spouštět vydání. Fyzický iPhone
 pilot a případná obnova A zůstávají samostatné, původní data/ikonu nemazat.
+
+
+## 2026-11-14 20:48 CET — Čitelná tlačítka pošty na mobilu, místně
+
+Hotovo: Akce důležitých zpráv se na390px řadí do dvou sloupců; na320px
+pod sebe. Původních46×256px je nyní154×44–58px. Text se neláme po písmenech.
+Rozhodnutí: Malá oprava prokázané CSS chyby v rámci Mílova zadání UI pošty;
+pořadí/názvy/handlery, editor odpovědi, schvalování a backend beze změny.
+Další krok: Upřesnit další konkrétní potíže UI od Míly. Tato oprava je místní;
+nové p+n poštovního UI není zadané, fyzická telefonní přejímka zbývá.
+Navrhované další kroky: Po UI poštovní A+C podle TXT v Downloads.
+Technický důkaz:26 frontendových PASS a browser320/390/1280 ze skutečného
+místního HTML,0 produkčních POST/výjimek/přetékání. Desktop a editor597px
+shodné s původním stavem; finální statická brána před commitem. Report
+reports/email_mobile_actions_20261114.md; soukromé důkazy email_mobile_ui_20261114/.
+Čtecí živý snímek 2026-11-14 20:48 CET: monitor configured/worker_recent=true,
+active=0/completed=4; neodvozovat dnešní stav ze snímku12.11.
+UI kryje existující Cockpit handoff/TVBCP. Samostatný e-mailový TVBCP není
+dohodnutý; celý poštovní projekt se tím neuzavírá a nový TVBCP nevzniká.

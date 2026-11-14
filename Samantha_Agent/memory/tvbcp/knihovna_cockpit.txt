@@ -1648,3 +1648,18 @@ prošlo browser390/1280 a24 frontendovými testy; finální statická brána př
 commitem.0 produkčních POST/výjimek. Důkaz reports/book_conspectus_groups_20261114.md
 + privátní final_validation.json. Místní commit následuje; dosud bez nového
 push/nasazení a bez fyzické iPhone přejímky. Stará data a Data worktrees zachované.
+
+
+## 2026-11-14 20:48 CET — Skupiny Konspektu nasazené
+
+Hotovo: Jemnější katalogové i ruční skupiny jsou dostupné v běžícím Cockpitu.
+Rozhodnutí: Míla výslovně zadal nasazení knihovny a potom UI poštovního agenta.
+Další krok: Fyzická přejímka skupin na iPhonu; vývoj pokračuje UI pošty.
+Navrhované další kroky: Po UI poštovní přejímka A+C; původní čištění neopakovat.
+Technický důkaz:64e9897a, jediný job3f40788ac09e6a1b24ada757ef6534c1,
+Terra,3918 testů PASS/731,1s, push/deploy confirmed, smoke5/5,
+chráněné služby shodné. Živý HTTPS přesně odpovídá zdroji,606 skupin přes API,
+code_stamp42ad54202295bc7c/PID32060, GitHub zarovnaný. Native účtenka zkontrolovaná;
+portálový returned_to_adam se nepotvrzuje. Private release_receipt.json a
+release_live_verification.json v book_conspectus_groups_20261114/.
+Fyzický iPhone zatím neověřený; žádná migrace knih ani změna pošty.

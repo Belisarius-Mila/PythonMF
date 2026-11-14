@@ -1,7 +1,7 @@
 # Jemnější skupiny Konspektu —14.11.2026
 
-Stav: místně dokončené a ověřené; bez nového push/nasazení.
-Proud: project-knowledge-library. Nové p+n není součástí zadání.
+Stav: vydané64e9897a; živý HTTPS a606 skupin API potvrzené.
+Proud: project-knowledge-library. Nasazení Míla následně výslovně schválil.
 
 ## Výsledek
 
@@ -58,10 +58,26 @@ Název konkrétního katalogového snapshotu se nenahrazuje názvem nabídky.
 Dosavadní ruční obory24096145 a jednorázové čištění jsou dokončené a kanonicky
 dorovnané; neopakovat apply ani vydání. Cizí Vocabulary EN4e5e18a7 dokončené,
 3912 PASS/push+Pages confirmed/HTTP200; main se během aktivity neměnil.
-Tento krok je pouze místní vývoj. Fyzická iPhone přejímka a případné budoucí
-samostatně schválené p+n zůstávají otevřené. Soukromé knihy se testem neměnily.
+Vývojový checkpoint byl následně výslovně schváleným p+n vydaný jako64e9897a;
+přesná účtenka je níže. Fyzická iPhone přejímka zůstává otevřená.
+Soukromé knihy se testem neměnily.
 Další pořadí Míly: konkrétní iPhone UI (podrobnosti dosud chybí), pak poštovní
 přejímka A+C podle Downloads; před ní nový čtecí audit běhu a zdrojových vazeb.
 Vnější watchdog, poštovní aktivace ani Mac sleep nejsou zadané zásahy.
 
 Aktualizováno: 2026-11-14 20:05 CET.
+
+
+## 2026-11-14 20:48 CET — Skupiny Konspektu nasazené
+
+Hotovo: Jemnější katalogové i ruční skupiny jsou dostupné v běžícím Cockpitu.
+Rozhodnutí: Míla výslovně zadal nasazení knihovny a potom UI poštovního agenta.
+Další krok: Fyzická přejímka skupin na iPhonu; vývoj pokračuje UI pošty.
+Navrhované další kroky: Po UI poštovní přejímka A+C; původní čištění neopakovat.
+Technický důkaz:64e9897a, jediný job3f40788ac09e6a1b24ada757ef6534c1,
+Terra,3918 testů PASS/731,1s, push/deploy confirmed, smoke5/5,
+chráněné služby shodné. Živý HTTPS přesně odpovídá zdroji,606 skupin přes API,
+code_stamp42ad54202295bc7c/PID32060, GitHub zarovnaný. Native účtenka zkontrolovaná;
+portálový returned_to_adam se nepotvrzuje. Private release_receipt.json a
+release_live_verification.json v book_conspectus_groups_20261114/.
+Fyzický iPhone zatím neověřený; žádná migrace knih ani změna pošty.
