@@ -2427,3 +2427,17 @@ s mock video-only kamerou, stop tracků a dekódováním WASM.
   velké kartě.
 - Ověření: Původní FAIL→PASS pro CZ popisky a EN poslech; finálně30
   cílených Python včetně34Node PASS /14,959s, Safari desktop.
+
+
+### 2026-11-14 — DarkWake není normální probuzení ani porucha agenta
+
+- Kontext: místní120s dohlížitel odesílal při systémových údržbových probuzeních
+  starý heartbeat pošty/autosave jako výpadek. Před otevřením víka8 doručení
+  přijatých Pushcutem;04:32:11 DarkWake →04:32:14 incident.
+- Řešení: noční okno před kontrolou čerstvosti, čtecí systemstate a waketime,
+  trvalá grace5min a pro600s autosave až15min, pozastavit sends i obnovy při
+  spánku/nejistotě. Dvě trvající kontroly pro nové varování. Zachovat ID a
+  delivery_unknown; nepovažovat spánek za úspěch. Nový diskový kontext musí
+  přečíst i starší reader, dokud řízené p+n nerestartuje Cockpit.
+- Ověření:71 cílených, restart/pending/night/grace/autosave/Node PASS;
+  reports/agent_supervisor_sleep_fix_20261114.md. Další noc je reálná přejímka.

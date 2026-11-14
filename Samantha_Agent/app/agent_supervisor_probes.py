@@ -2,10 +2,35 @@
 from __future__ import annotations
 
 import json
+import re
+from datetime import datetime, timezone
 import subprocess
 import urllib.request
 
 from app.agent_supervisor import PROJECT, LABELS
+
+
+def power_probe(*, runner=subprocess.run):
+    """Read-only OS capabilities distinguish full wake from maintenance DarkWake."""
+    capabilities = runner(["/usr/bin/pmset", "-g", "systemstate"],
+        capture_output=True, text=True, timeout=3, check=False)
+    match = re.search(r"^Current System Capabilities are: ([A-Za-z ]+)\s*$", capabilities.stdout[:4096], re.MULTILINE)
+    if capabilities.returncode or not match:
+        return {"state": "unknown"}
+    tokens = set(match[1].split())
+    if not tokens or tokens - {"CPU", "Graphics", "Audio", "Network", "None"}:
+        return {"state": "unknown"}
+    state = "awake" if "Graphics" in tokens else "sleeping"
+    wake_at = ""
+    try:
+        wake = runner(["/usr/sbin/sysctl", "-n", "kern.waketime"],
+            capture_output=True, text=True, timeout=3, check=False)
+        stamp = re.search(r"\bsec\s*=\s*([0-9]{1,12})\s*,", wake.stdout[:1024])
+        if wake.returncode == 0 and stamp:
+            wake_at = datetime.fromtimestamp(int(stamp[1]), timezone.utc).isoformat()
+    except (OSError, ValueError, OverflowError, subprocess.SubprocessError):
+        pass  # The persistent transition/gap check also provides a wake grace period.
+    return {"state": state, "wake_at": wake_at}
 
 
 def email_probe():
@@ -73,14 +98,22 @@ def storage_probe():
 
 
 PROBES = {"email": email_probe, "cockpit": cockpit_probe, "appserver": appserver_probe,
-          "autosave": autosave_probe, "storage": storage_probe}
+          "autosave": autosave_probe, "storage": storage_probe, "power": power_probe}
 
 
 def collect(*, probes=None):
     result = {}
+    selected = PROBES if probes is None else probes
+    if "power" in selected:
+        try:
+            result["power"] = selected["power"]()
+        except Exception:
+            result["power"] = {"state": "unknown"}
+        if result["power"].get("state") != "awake":
+            return result  # No network probes or sends during maintenance wake/uncertainty.
     for identity in LABELS:
         try:
-            result[identity] = (probes or PROBES)[identity]()
+            result[identity] = selected[identity]()
         except Exception:
             # Exception messages may contain secrets, URLs or process arguments.
             result[identity] = {"probe_failed": True}

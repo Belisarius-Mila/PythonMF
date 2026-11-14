@@ -1,7 +1,7 @@
 (() => {
   "use strict";
   const states = {ok: "V pořádku", working: "Pracuje", warning: "Pozor", error: "Chyba",
-    unknown: "Neověřeno", disabled: "Vypnuto", outside_hours: "Mimo provozní okno"};
+    unknown: "Neověřeno", disabled: "Vypnuto", outside_hours: "Mimo provozní okno", paused: "Pozastaveno"};
   let pending = false;
   function time(value) {
     return value ? new Date(value).toLocaleString("cs-CZ", {timeZone: "Europe/Prague"}) : "zatím nedoloženo";
@@ -18,6 +18,7 @@
     status.textContent = `${mode} Poslední kontrola: ${time(data.last_run_at)}. `
       + `Upozornění: ${data.notifications_enabled ? "zapnutá" : "vypnutá"}. `
       + "Vnější hlídání dostupnosti Macu není nastavené.";
+    if (data.notifications_paused) status.textContent += " Oznámení jsou dočasně pozastavená kvůli spánku, rozběhu nebo neověřenému stavu Macu.";
     for (const item of data.rows || []) {
       const card = doc.createElement("div");
       card.className = "agent-supervisor-row";

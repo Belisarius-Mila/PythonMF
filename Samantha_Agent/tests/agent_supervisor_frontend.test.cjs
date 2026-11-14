@@ -28,5 +28,9 @@ vm.runInNewContext(fs.readFileSync("app/frontend/cockpit/agent_supervisor.js", "
   assert.match(status.textContent,/vypnutý/);
   fail=true; await frontend.refresh();
   assert.equal(list.children.length,0); assert.match(status.textContent,/nelze ověřit/);
+  frontend.render({ok:true, configured:true, worker_recent:true, notifications_enabled:true,
+    notifications_paused:true, rows:[{label:'Autosave',state:'paused',message:'Mac se probouzí.'}]},status,list,doc);
+  assert.match(list.children[0].children[0].textContent,/Pozastaveno/);
+  assert.match(status.textContent,/dočasně pozastavená/);
   console.log("Supervisor frontend PASS");
 })().catch(error => { console.error(error); process.exitCode=1; });

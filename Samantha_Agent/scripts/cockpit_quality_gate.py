@@ -570,6 +570,7 @@ TEST_MODULES = (
     "tests.test_book_thumbnail",
     "tests.test_book_isbn_lookup",
     "tests.test_agent_supervisor",
+    "tests.test_agent_supervisor_sleep",
     "tests.test_speech_transcribe",
     "tests.test_email_outbound_tools",
     "tests.test_email_work_outbox",

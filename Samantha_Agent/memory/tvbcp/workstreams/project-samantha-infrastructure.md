@@ -2024,3 +2024,23 @@ pending/rejected/delivery_unknown0. Po uvolnění skutečně změřeno přibliž
 30,12 GiB volných; původně26,44 GiB. Privátní automatic_recovery_acceptance.json
 obsahuje obě API účtenky a potvrzení iPhonu. Žádná simulace zdravého stavu,
 ruční recovery POST, restart nebo změna prahu. Vnější hlídač nenastavený.
+
+
+## 2026-11-14 07:52 CET — Oprava nočních hlášek dohlížitele
+
+Hotovo: Pošta má noční okno před heartbeatem. DarkWake/spánek/nejistý
+power stav pozastaví oznámení; po probuzení5min, pro autosave až15min.
+Nová závada vyžaduje potvrzení další kontrolou, krátký výpadek bez poplachu.
+Spánek nemění otevřený incident na obnovený; nejisté doručení se neopakuje.
+
+Rozhodnutí: Míla výslovně schválil opravu i Terra p+n. Vlastní izolovaný
+worktree a jeden commit na main; žádné změny LaunchAgentu/Pushcut nastavení,
+pošty, Camina či autosave. Vnější dohled se neaktivuje.
+
+Technický důkaz:71 cílených a Node PASS, čtecí OS sonda PASS.
+Plná brána 3876 testů/31 skip v izolaci (668.4s): pouze1 chyba nezměněného recovery CLI bootstrapu mimo kanonický projekt; stejný test v kanonickém prostředí PASS. Nové testy dohledu PASS; úplná kanonická publikační brána následuje u Terry. Report agent_supervisor_sleep_fix_20261114.md.
+Provozní účtenka po již schváleném vydání bude mimo Git
+v logs/agent_supervisor_sleep_release_20261114.log.
+
+Další krok: Jediné registrované Terra p+n a ověření živého scheduled tiku;
+potom přejímka další skutečné noci. Nic uměle neuspávat ani nepřesílat.

@@ -17,9 +17,16 @@ LABELS = {"email": "Poštovní agent", "cockpit": "Cockpit", "appserver": "App S
           "autosave": "Autosave", "storage": "Místo na SSD"}
 BAD = {"warning", "error", "unknown"}
 GOOD = {"ok", "working"}
+WAKE_GRACE_SECONDS = 300
+FAILURE_CONFIRM_SECONDS = 90
+PAUSE_CODES = {"host_sleeping", "wake_grace", "power_unknown"}
 CONFIG = {"version": 1, "enabled": False, "notifications_enabled": False,
           "failure_url": "", "recovery_url": ""}
 MESSAGES = {
+    "host_sleeping": "Mac spí nebo se probudil jen na údržbu; oznámení jsou pozastavená.",
+    "wake_grace": "Mac se právě probudil; služby mají 5 minut na obnovení provozu.",
+    "power_unknown": "Stav spánku Macu nelze ověřit; oznámení jsou pozastavená.",
+    "autosave_wake_grace": "Autosave má po probuzení až 15 minut na další desetiminutový cyklus.",
     "ok": "Kontrola v pořádku.", "disabled": "Vědomě vypnuto.",
     "unavailable": "Stav nelze ověřit.", "outside_hours": "Mimo provozní okno 07–22.",
     "service_missing": "Zapnutá služba není ověřeně načtená.",
@@ -56,7 +63,7 @@ def age(value, now):
 
 
 def row(identity, state, code, *, last_success_at="", next_due_at="", checked_at=""):
-    if identity not in LABELS or state not in BAD | GOOD | {"disabled", "outside_hours"}:
+    if identity not in LABELS or state not in BAD | GOOD | {"disabled", "outside_hours", "paused"}:
         raise ValueError("Neplatný stav dohledu.")
     return {"id": identity, "label": LABELS[identity], "state": state, "code": code,
             "message": MESSAGES[code], "last_success_at": last_success_at,
@@ -70,6 +77,11 @@ def email_row(evidence, now):
         return row(identity, "unknown", "unavailable")
     if not evidence["enabled"]:
         return row(identity, "disabled", "disabled")
+    local = now.astimezone(PRAGUE)
+    if not 7 <= local.hour <= 22:
+        next_day = local + timedelta(days=local.hour > 22)
+        due = next_day.replace(hour=7, minute=0, second=0, microsecond=0)
+        return row(identity, "outside_hours", "outside_hours", next_due_at=due.isoformat())
     if not all(evidence.get(k) is True for k in ("installed", "owned", "loaded")):
         return row(identity, "error", "service_missing")
     health = evidence.get("health", {})
@@ -86,11 +98,6 @@ def email_row(evidence, now):
         return row(identity, "error", "heartbeat_missing")
     if health.get("status") not in {"completed", "already_completed", "outside_hours", "incomplete"}:
         return row(identity, "error", "worker_failed")
-    local = now.astimezone(PRAGUE)
-    if not 7 <= local.hour <= 22:
-        next_day = local + timedelta(days=local.hour > 22)
-        due = next_day.replace(hour=7, minute=0, second=0, microsecond=0)
-        return row(identity, "outside_hours", "outside_hours", next_due_at=due.isoformat())
     slot = local.replace(minute=0, second=0, microsecond=0).astimezone(timezone.utc)
     next_due = slot + timedelta(hours=1) if local.hour < 22 else (
         local + timedelta(days=1)).replace(hour=7, minute=0, second=0, microsecond=0)
@@ -161,6 +168,46 @@ def evaluate(evidence, now):
     return result
 
 
+def power_window(document, evidence, now):
+    """A persisted wake grace cannot be shortened by a worker restart or polling."""
+    if "power" not in evidence:
+        return "", {}  # Existing offline collectors; the production collector always reports power.
+    power = evidence["power"]
+    state = power.get("state") if isinstance(power, dict) else "unknown"
+    if state not in {"awake", "sleeping"}:
+        return "power_unknown", {"power_state": "unknown", "notification_pause_reason": "power_unknown"}
+    if state == "sleeping":
+        return "host_sleeping", {"power_state": "sleeping", "resume_after": "", "autosave_resume_after": "", "notification_pause_reason": "host_sleeping"}
+    wake = instant(power.get("wake_at"))
+    if wake and wake > now:
+        return "power_unknown", {"power_state": "unknown", "notification_pause_reason": "power_unknown"}
+    until = instant(document.get("resume_after"))
+    autosave_until = instant(document.get("autosave_resume_after"))
+    gap = age(document.get("last_run_at"), now)
+    if document.get("power_state") != "awake" or (gap is not None and gap > 300):
+        until = now + timedelta(seconds=WAKE_GRACE_SECONDS)
+        autosave_until = now + timedelta(minutes=15)
+    elif wake and power.get("wake_at") != document.get("last_wake_at") and (now - wake).total_seconds() < WAKE_GRACE_SECONDS:
+        until = max(until or wake, wake + timedelta(seconds=WAKE_GRACE_SECONDS))
+        autosave_until = max(autosave_until or wake, wake + timedelta(minutes=15))
+    code = "wake_grace" if until and now < until else ""
+    return code, {"power_state": "awake", "last_wake_at": power.get("wake_at", ""),
+                  "resume_after": until.isoformat() if until else "",
+                  "autosave_resume_after": autosave_until.isoformat() if autosave_until else "", "notification_pause_reason": code}
+
+
+def confirmed_failure(incident, now):
+    elapsed = age(incident.get("bad_since"), now)
+    return elapsed is not None and elapsed >= FAILURE_CONFIRM_SECONDS
+
+
+def stored_rows(rows):
+    # The installed CLI reads source on each tick; an older Cockpit reader may
+    # still be running until p+n restarts it. Keep its on-disk schema readable.
+    return [{**r, "state": "unknown", "code": "unavailable", "message": MESSAGES["unavailable"],
+             "pause_code": r["code"]} if r["state"] == "paused" else r for r in rows]
+
+
 class AgentSupervisor:
     def __init__(self, root=ROOT, *, collector=None, sender=None, clock=None):
         self.root = Path(root)
@@ -220,13 +267,20 @@ class AgentSupervisor:
                     raise WorkRepositoryError("Poškozený stav dohledu.")
                 times = {key: value.get(key) if instant(value.get(key)) else ""
                          for key in ("last_success_at", "next_due_at", "checked_at")}
-                rows.append(row(value["id"], value["state"], value["code"], **times))
+                pause_code = value.get("pause_code")
+                if pause_code in PAUSE_CODES | {"autosave_wake_grace"}:
+                    rows.append(row(value["id"], "paused", pause_code, **times))
+                else:
+                    rows.append(row(value["id"], value["state"], value["code"], **times))
         if not recent:
             rows = [row(key, "unknown", "snapshot_stale") for key in LABELS]
         return {"ok": True, "version": 1, "configured": config["enabled"],
                 "notifications_enabled": config["notifications_enabled"], "snapshot_recent": recent,
                 "worker_recent": recent and config["enabled"] and document.get("origin") == "scheduled",
                 "last_run_at": document.get("last_run_at", ""), "origin": document.get("origin", ""),
+                "power_state": document.get("power_state") if document.get("power_state") in {"awake", "sleeping"} else "unknown",
+                "notifications_paused": document.get("notification_pause_reason") in PAUSE_CODES,
+                "notification_pause_reason": document.get("notification_pause_reason") if document.get("notification_pause_reason") in PAUSE_CODES else "",
                 "rows": rows, "external_watchdog": "not_configured", "read_only": True,
                 "notification_counts": {state: len({e.get("delivery_id", key) for key, e in document.get("events", {}).items()
                     if e.get("status") == state})
@@ -253,16 +307,35 @@ class AgentSupervisor:
                 now = self.clock().astimezone(timezone.utc)
                 rows = evaluate(evidence, now)
                 at = now.isoformat()
+                previous = self.repository.read()
+                pause, power_fields = power_window(previous, evidence, now)
+                autosave_until = instant(power_fields.get("autosave_resume_after"))
+                if not pause and autosave_until and now < autosave_until:
+                    rows = [row("autosave", "paused", "autosave_wake_grace", last_success_at=r["last_success_at"],
+                        next_due_at=autosave_until.isoformat(), checked_at=at)
+                        if r["id"] == "autosave" and r["state"] in BAD else r for r in rows]
+                if pause:
+                    old_rows = {r["id"]: r for r in previous.get("rows", [])}
+                    rows = [row(identity, "paused", pause,
+                        last_success_at=old_rows.get(identity, {}).get("last_success_at", ""),
+                        next_due_at=power_fields.get("resume_after") or (now + timedelta(seconds=120)).isoformat(),
+                        checked_at=at) for identity in LABELS]
                 def save(document):
                     if document.get("version") != 1:
                         raise WorkRepositoryError("Neznámá verze dohledu.")
+                    document.update(power_fields)
                     if not scheduled:
-                        document.update(rows=rows, last_run_at=at, origin="manual")
+                        document.update(rows=stored_rows(rows), last_run_at=at, origin="manual")
                         return RepositoryMutation(document)
                     incidents, events = document["incidents"], document["events"]
                     for event in events.values():
                         if event["status"] == "sending":
                             event["status"] = "delivery_unknown"
+                    if pause:
+                        for incident in incidents.values():
+                            incident.pop("bad_since", None)
+                        document.update(rows=stored_rows(rows), last_run_at=at, origin="scheduled")
+                        return RepositoryMutation(document)
                     def queue(kind, incident):
                         key = incident["id"] + ":" + kind
                         if key not in events and scheduled and config["notifications_enabled"]:
@@ -276,9 +349,14 @@ class AgentSupervisor:
                                 current = {"id": uuid4().hex, "agent_id": identity, "opened_at": at,
                                            "closed_at": ""}
                                 incidents[identity] = current
+                            if age(current.get("bad_since"), now) is None:
+                                current["bad_since"] = at
                             current.update(code=value["code"], state=value["state"])
-                            queue("failure", current)
-                        elif value["state"] == "working":
+                            if confirmed_failure(current, now):
+                                queue("failure", current)
+                        elif value["state"] in {"working", "outside_hours", "paused"}:
+                            if current:
+                                current.pop("bad_since", None)
                             # Starting work is not proof that the missing scan has recovered.
                             continue
                         elif current and not current.get("closed_at"):
@@ -293,15 +371,15 @@ class AgentSupervisor:
                         current = incidents.get(event["agent_id"], {})
                         relevant = (event["incident_id"] == current.get("id") and (
                             (event["kind"] == "failure" and not current.get("closed_at")
-                             and states[event["agent_id"]] in BAD | {"working"}) or
+                             and states[event["agent_id"]] in BAD | {"working", "outside_hours", "paused"}) or
                             (event["kind"] == "recovery" and current.get("closed_at")
                              and states[event["agent_id"]] in GOOD)))
                         if event["status"] == "pending" and not relevant:
                             event["status"] = "superseded"
-                    document.update(rows=rows, last_run_at=at, origin="scheduled" if scheduled else "manual")
+                    document.update(rows=stored_rows(rows), last_run_at=at, origin="scheduled" if scheduled else "manual")
                     return RepositoryMutation(document)
                 self.repository.transact(save)
-                if scheduled and config["notifications_enabled"]:
+                if scheduled and config["notifications_enabled"] and not pause:
                     self._dispatch(config)
                 return self.status()
         except FileLockTimeoutError:
@@ -311,10 +389,12 @@ class AgentSupervisor:
         from app.email.pushcut import trigger_pushcut
         sender = self.sender or trigger_pushcut
         document = self.repository.read()
-        states = {value["id"]: value["state"] for value in document["rows"]}
+        states = {value["id"]: "paused" if value.get("pause_code") in PAUSE_CODES | {"autosave_wake_grace"}
+                  else value["state"] for value in document["rows"]}
         for kind in ("failure", "recovery"):
             identities = [key for key, event in document["events"].items()
                           if event["status"] == "pending" and event["kind"] == kind
+                          and (kind != "failure" or confirmed_failure(document["incidents"].get(event["agent_id"], {}), self.clock().astimezone(timezone.utc)))
                           and (states[event["agent_id"]] in BAD if kind == "failure"
                                else states[event["agent_id"]] == "ok")]
             if not identities:

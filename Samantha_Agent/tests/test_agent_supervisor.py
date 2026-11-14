@@ -74,6 +74,13 @@ class EvaluationTests(unittest.TestCase):
         self.assertEqual(email_row(value, night)["state"], "outside_hours")
         self.assertIn("07:00", email_row(value, night)["next_due_at"])
 
+    def test_night_precedes_old_missing_future_and_failed_heartbeat(self):
+        night = NOW.replace(hour=2)
+        for health in ({}, {"finished_at": (night-timedelta(hours=3)).isoformat()},
+                       {"finished_at": (night+timedelta(hours=3)).isoformat()}, {"status": "failed"}):
+            value = evidence()["email"]; value["health"] = health
+            self.assertEqual(email_row(value, night)["state"], "outside_hours")
+
     def test_verified_long_work_is_not_misreported_as_dead(self):
         value = evidence()["email"]
         value["health"] = {"status": "running", "started_at": (NOW-timedelta(minutes=25)).isoformat()}
@@ -117,6 +124,9 @@ class EvaluationTests(unittest.TestCase):
 
 class SupervisorTests(unittest.TestCase):
     def setUp(self):
+        # Delivery/repository tests isolate dispatch from the separately tested debounce clock.
+        confirmation = patch("app.agent_supervisor.FAILURE_CONFIRM_SECONDS", 0)
+        confirmation.start(); self.addCleanup(confirmation.stop)
         temp=tempfile.TemporaryDirectory();self.addCleanup(temp.cleanup)
         self.root=Path(temp.name)/"supervisor";self.value=evidence();self.sent=[]
         self.service=AgentSupervisor(self.root,collector=lambda:copy.deepcopy(self.value),

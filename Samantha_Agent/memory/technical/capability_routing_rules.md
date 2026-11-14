@@ -395,3 +395,12 @@ JPEG240×320/64 KiB, přesměrování jen na týž HTTPS host. Pouze místní p�
 v existujícím archivu; před zápisem rezervace bajtů a hash, resume bez sítě.
 Chyba poskytovatele neblokuje knihu. Preview/status nemění archiv. Žádné
 hromadné doplnění starých knih, registrace Obálkyknih.cz ani odchozí zpráva.
+
+
+### Dohlížitel — spánek a stabilní varování (2026-11-14)
+
+Existující agent_supervisor_tick / AgentSupervisor.check(scheduled=True)
+čte také pevné pmset -g systemstate a sysctl -n kern.waketime. Žádný zápis
+energetických nastavení. Při DarkWake/neověřeném power stavu neběží síťové
+sondy ani sendy. Trvalá grace po probuzení a potvrzení závady další kontrolou.
+GET zůstává čtecí. Instalace, Pushcut opt-in a vnější dohled se nemění.
