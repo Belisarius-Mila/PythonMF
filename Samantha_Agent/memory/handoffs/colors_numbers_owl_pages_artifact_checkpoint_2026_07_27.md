@@ -366,3 +366,29 @@ v data/daily_3am/revisions/20261113_v2/release_receipt.json.
 Veřejný app.js?v=d15adc4379d3de42 a audio
 owl_131126_v2.mp3?v=20261113b-f193a1227880. Tento místní dokumentační
 checkpoint neopakuje publikaci; původní nejistá účtenka se nepřepisuje.
+
+
+## 2026-11-14 10:50 CET — Dnešní ruční soví promluva
+
+Hotovo: Přesné nové zadání je v jediném řádku pro14.11. a v hotové MP3
+owl_141126.mp3 (83088 B /13.848 s). Obě kopie přehrávače
+vybírají toto audio s novými cache otisky; starší nahrávky jsou zachované.
+
+Rozhodnutí: Výslovně zadané dnešní produkční vydání. Stejný hlas Antonin
+a rychlost -10 %, jediná syntéza. Živé Pages workflow má pouze ruční dispatch,
+bez cronu/TTS; soví automatika zůstává vypnutá. Text se do paměti nekopíruje.
+
+Další krok: Registrované p+n proudu project-colors-and-numbers nad přesným
+checkpointem; následně ověřit původní Pages běh a veřejné JS/MP3. Tento zápis
+je příprava vydání, nikoli důkaz nasazení. Konečný výsledek bude v
+data/daily_3am/receipts/20261114_publication.json a v původní release účtence
+data/daily_3am/revisions/20261114_manual/release_receipt.json.
+
+Navrhované další kroky: Poslech Mílou po nasazení; e-mailová přejímka A+C
+zůstává odložená. Pro tento terminálový obsahový krok není sjednaný samostatný
+TVBCP; nový se nezakládá.
+
+Technický důkaz: 25 cílených testů PASS, celé dekódování FFmpeg PASS, přesná
+shoda textu a obou webových kopií. SHA-256 e7dda033f257efad3451545d06ffed5923280d984f8872b2414a793b43755826;
+app.js?v=3b8f3c02f05ac57a. Podklady data/daily_3am/revisions/20261114_manual/,
+logy logs/owl_20261114_targeted.log a logs/owl_20261114_static_gate.log.
