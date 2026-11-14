@@ -1,18 +1,14 @@
 # VocabularyEN web: obrazové kartičky pro opakování slovíček
 
 
-## Aktuální místní stav — 2026-11-14 19:11 CET
+## Aktuální místní stav — 2026-11-14 20:59 CET
 
-Schválené typy Slovíčka / Interakce / Fráze a skrytí nepotřebných položek.
-Nová místní nabídka415 karet:396 slovíček a19 Interakcí; žádné nové idiomy.
-Šest větných vzorů a4 pravidelné plurály pouze neaktivní. Všech425 UID,
-18 témat a uložené výběry A–D zachované. I, sure a please opravené včetně
-6 nových MP3;2473 původních mediálních souborů beze změny.
-29 cílených Python včetně53 Node a18 kontrol brány PASS, finální plná brána3880 PASS /871,256s,31 SKIP;19/19 zdrojů shodných.
-Vlastní větev data/vocabulary-types-20261114 nad68d2b720; žádný nový push,
-Pages p+n ani restart. Nasazení a fyzická přejímka jsou následující kroky.
-Kanonický handoff: handoffs/workstreams/project-vocabulary-en.md;
-report: reports/vocabulary_en_teaching_types_20261114.md. Bez nového TVBCP.
+Obsahová revize:442 záznamů,432 aktivních,17 nových významových karet,
+19 uzavřených redakčních kontrol. Osm ilustrací a73 MP3. Původních425 UID,
+18 témat a osobní výběry zachované.36 cílených Python včetně55 Node PASS;
+plná brána3920 PASS /706,416s unit část,31 SKIP;107/107 finálních zdrojů a médií shodných. Nový report: reports/vocabulary_en_meaning_cards_20261114.md.
+Poslední potvrzená produkce2b17cbb4; významové karty nyní integrované,
+Pages p+n výslovně schválené; konečný výsledek viz poslední časovaný zápis.
 
 ## Publikační vazba a věty — 2026-11-13 12:58 CET
 
@@ -1116,3 +1112,92 @@ přípravný zápis nepotvrzuje budoucí push ani nasazení; autoritou výsledku
 je data/private/vocabulary_types_release_20261114/result.json a závěrečné
 public_verification.json/final_receipt.json na kanonickém main, též TXT
 v Downloads. Fyzická přejímka telefonu zůstává následná. Bez nového TVBCP.
+
+
+## 2026-11-14 20:59 CET — Významové karty a obsahová revize
+
+Hotovo: Zkontrolovaných19 položek,17 nových významových/slovnědruhových karet
+ven-0426 ažven-0442. Celkem442 záznamů,432 aktivních:413 Slovíček a19 Interakcí.
+Všech18 témat a425 původních UID/audio ID/proveniencí/L/HT/aktivit zachovaných.
+Běžné další významy second/help/free/right/open/smile atd. mají vlastní věty
+a vlastní identitu; opatrně je správně carefully. Osm nových ilustrací,
+31 nových slovních a42 větných MP3 stejnými hlasy/tempy.
+
+Rozhodnutí: Míla schválil opravu chyb i doplnění významových karet, vět
+a podle potřeby obrázků. Jedna karta procvičuje jasný význam; stejné anglické
+heslo může mít více karet. Správné další významy se nezahazují. Nové karty
+nevstupují automaticky do osobních výběrů A–D ani do zdrojového Benji.
+Samostatný TVBCP nebyl dohodnutý a nevzniká. Vývoj probíhá ve vlastní větvi
+data/vocabulary-meanings-20261114 nad64e9897a, zachovává současnou knihovnu.
+
+Další krok: Po plné bráně vlastní místní checkpoint; nové Pages p+n je
+samostatný navazující krok. Poslední potvrzené Pages p+n je2b17cbb4, účtenka
+4e5e18a70db086fa6eac083f0f9e2984 completed/confirmed,3912 testů a17 veřejných
+souborů shodných. Tento nový obsah ještě není nasazený.
+
+Navrhované další kroky: Přejímka nových významů a výběrů na telefonu;
+samostatné Pages vydání; autorský vstup a budoucí idiomy. Oxford stále čeká
+na Mílův dotaz, žádná Oxford data nejsou přebíraná.
+
+Technický důkaz:36 cílených Python testů PASS /19,288s včetně55 Node scénářů,
+nových kontrol obou second a samostatných osobních výběrů. Všech2479 původních
+médií bajtově shodných; všech73 nových MP3 dekódovaných ffmpeg. Benji autorství
+rozlišuje původní Order i heslo, aby další významy nezdědily nesprávný zdroj.
+Historický desetiheslový casting včetně40MP3 zůstává původní; testuje se proti
+jeho historickému vstupu a současné CSV přísně odmítne jako změněný zdroj.
+Plná brána PASS:3920 testů /706,416s unit část,31 SKIP. Všech107 finálních zdrojů/testů/dat/médií je shodných s finální branou.
+Dva nepoužité nové náhledy others/proverbs z předběžných exportů jsou zachované v soukromém
+archivu mimo publikační balíček. Finální výsledek a otisky jsou v soukromém
+data/private/vocabulary_meanings_20261114/verification.json a checkpoint.json.
+Browser host při pokusu o místní proklik nebyl dostupný; aktuální vizuální
+přejímka celé stránky ani fyzického telefonu tím není doložená.
+
+
+## 2026-11-14 21:29 CET — Finální místní uzavření revize
+
+Hotovo:442 záznamů/432 aktivních,17 nových významových karet. Všech19
+zrevidovaných karet má pevnou vazbu na schválený obrázek;424 původních
+obrázkových vazeb zachovaných, pouze free má záměrně nový obraz volného času.
+
+Rozhodnutí: Rozsah Mílova schválení je stejný; žádné nové rozhodnutí ani TVBCP.
+Další krok: Samostatně schválené Pages p+n.
+Navrhované další kroky: Přejímka významů a osobních výběrů na telefonu.
+
+Technický důkaz: Finální plná brána3920 PASS /706,416s unit část,
+31 SKIP,0 failures/errors;36 cílených Python včetně55 Node PASS /36,142s.
+Všech107/107 finálních zdrojů/testů/dat/médií shodných s touto branou;
+2479 původních médií zachovaných,73 nových MP3 dekódovaných.
+První zelená brána byla doplněná závěrečnou kontrolou původních obrazových
+vazeb: změna CZ careful způsobila obecný fallback; nyní jsou obrázky
+19 karet připnuté a tuto chybu hlídá regresní test. Dva nepoužité nové
+náhledy jsou zachované v privátním archivu, nikoli v publikačním balíčku.
+Konečný checkpoint a shodu commitovaných bajtů potvrzuje privátní
+checkpoint.json; vlastní worktree je zachovaný, main/knihovna se nemění.
+Vizuální browser host nebyl dostupný, fyzický telefon neověřený.
+
+
+## 2026-11-14 22:03 CET — Schválená integrace a Pages vydání významových karet
+
+Hotovo: Datův checkpoint97d34aef je převzatý nad současný main2ed8f750.
+442 záznamů/432 aktivních,17 nových významových karet,8 ilustrací a73 MP3;
+poštovní UI i knihovna zůstávají zachované. Závěrečné Datovy obrázkové vazby
+jsou převzaté beze změny.
+Rozhodnutí: Míla výslovně schválil doplnit dokumentaci a nasadit Datovu práci.
+Jediný cílový proud project-vocabulary-en / github_pages / vocabulary-en/.
+Další krok: Dokončit statické ověření a lokální integrační
+checkpoint a jediný submit_release(wait=True).
+Navrhované další kroky: Po potvrzeném vydání přejímka významů a A–D na iPhonu.
+Technický důkaz:108/108 Datových souborů mimo memory a16/16 nezávislých
+souborů main bajtově shodných s rodiči; konflikt jen v LESSONS_LEARNED vyřešen
+zachováním obou záznamů. Datova plná brána3920 PASS/31 SKIP nad107 zmrazenými
+zdroji zůstává historickým důkazem, novou plnou publikační bránu provede worker.
+Request adam-vocab-meanings-20261114-v1, deterministický job 203708b8edeb3bdcfd8080e03aa16bc1.
+Autoritou výsledku bude data/private/vocabulary_meanings_release_20261114/
+release_receipt.json a public_verification.json. Tento přípravný zápis
+nepotvrzuje budoucí publikaci; při nejistotě ověřit stejný job bez resubmit.
+Původní2b17cbb4/4e5e18a7 neopakovat. Žádný Cockpit restart, nový model
+obsahu, přepis osobních výběrů, výmaz médií či nový TVBCP. Fyzický telefon
+a aktuální vizuální přejímka nových významů zůstávají otevřené.
+
+Integrační přejímka na současném main:36 cílených Python testů včetně55 Node
+scénářů PASS /19,725s;108 Datových a16 nezávislých main souborů shodných.

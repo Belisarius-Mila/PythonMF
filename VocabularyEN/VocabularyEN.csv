@@ -28,8 +28,8 @@ dark,tmavý,26,"The room is dark, so I turn on the light.","V pokoji je tma, tak
 dog,pes,27,The dog waits by the door for a walk.,Pes čeká u dveří na procházku.,Animals,ano,ne
 doctor,lékař,28,The doctor listens carefully and speaks calmly.,Doktor pozorně poslouchá a mluví klidně.,,ano,ne
 document,dokument,29,Please sign this document at the bottom.,Prosím podepiš tento dokument dole.,Things,ne,ne
-drink,"nápoj, pít",30,"When I feel tired, I drink a little water.","Když jsem unavený, napiju se trochu vody.",Actions,ano,ano
-drawing,kreslení,31,Your drawing is funny and very clear.,Tvá kresba je vtipná a moc povedená.,Actions,ano,ne
+drink,pít,30,"When I feel tired, I drink a little water.","Když jsem unavený, napiju se trochu vody.",Actions,ano,ano
+drawing,kreslení,31,Drawing is fun.,Kreslení je zábava.,Actions,ano,ne
 duck,kachna,32,A duck swims slowly across the pond.,Kachna pomalu plave přes rybník.,Animals,ano,ne
 elephant,slon,33,The elephant lifts its trunk and greets the kids.,Slon zvedne chobot a jako by zdravil děti.,Animals,ano,ne
 English,angličtina,34,I read an English story before I sleep.,Před spaním čtu anglický příběh.,,ano,ne
@@ -42,7 +42,7 @@ field,pole,40,"In the field, the grass moves in the wind.",Na poli se tráva hý
 film,film,41,"This film is quiet, but it stays in my mind.","Ten film je klidný, ale zůstane mi v hlavě.",,ano,ano
 fish,ryba,42,"The fish jumps, and the water makes circles.",Ryba vyskočí a na vodě udělá kruhy.,Animals,ano,ano
 food,jídlo,43,"The food is hot, so I wait a moment.","Jídlo je horké, tak chvilku počkám.",,ne,ano
-free,volný; zdarma,44,Are you free this evening for a short walk?,Máš dnes večer čas na krátkou procházku?,,ne,ne
+free,volný,44,Are you free this evening for a short walk?,Máš dnes večer čas na krátkou procházku?,,ne,ne
 friend,kamarád,45,A good friend helps without asking for anything.,"Dobrý přítel pomůže, aniž by něco chtěl.",,ano,ano
 garden,zahrada,46,I have a big garden.,Mám velkou zahradu.,,ano,ano
 giraffe,žirafa,47,The giraffe reaches the leaves at the top.,Žirafa dosáhne na listy úplně nahoře.,Animals,ano,ne
@@ -56,7 +56,7 @@ hair,vlasy,54,My hair gets messy in the wind.,Ve větru se mi rozcuchají vlasy.
 happy,šťastný,55,I feel happy when the sun comes out.,"Jsem šťastný, když vyjde slunce.",,ano,ne
 hear,slyšet,56,Can you hear the birds outside?,Slyšíš venku ptáky?,Actions,ano,ne
 hello,"ahoj, dobrý den",57,Hello! How was your day?,Ahoj! Jaký jsi měl den?,Greetings,ano,ne
-help,pomoc,58,"Thank you for your help;"" I really needed it.","Děkuju za pomoc, opravdu jsem ji potřeboval.",,ano,ano
+help,pomoc,58,Thank you for your help. I really needed it.,Děkuju za pomoc. Opravdu jsem ji potřeboval.,,ano,ano
 home,domov,59,"After work, I go home and rest for a while.",Po práci jdu domů a chvíli si odpočinu.,,ano,ano
 horse,kůň,60,The horse runs fast and then stops quietly.,Kůň rychle běží a pak tiše zastaví.,Animals,ano,ne
 house,dům,61,"Our house is small, but we love it.","Náš dům je malý, ale máme ho rádi.",,ano,ano
@@ -117,7 +117,7 @@ order,objednat (si),115,"We order food, then we talk quietly.",Objednáme si jí
 juice,džus,116,She drinks orange juice with breakfast.,K snídani pije pomerančový džus.,Food,ano,ano
 apple,jablko,117,I eat an apple on my way to work.,Cestou do práce sním jablko.,Food,ano,ano
 orange,pomeranč,118,He peels an orange and shares it with me.,Oloupe pomeranč a rozdělí se se mnou.,Food,ano,ano
-chicken,kuře,119,"For dinner, we cook chicken with rice.",K večeři uvaříme kuře s rýží.,Food,ano,ano
+chicken,kuřecí maso,119,"For dinner, we cook chicken with rice.",K večeři uvaříme kuře s rýží.,Food,ano,ano
 rice,rýže,120,I add a little salt to the rice.,Do rýže přidám trochu soli.,Food,ano,ano
 pasta,těstoviny,121,The pasta is ready in ten minutes.,Těstoviny jsou hotové za deset minut.,Food,ano,ano
 cheese,sýr,122,I put cheese on the bread and heat it.,Dám na chleba sýr a ohřeju ho.,Food,ano,ano
@@ -142,7 +142,7 @@ thank you,děkuji,140,Thank you for your help today.,Děkuji za tvoji dnešní p
 you're welcome,není zač,141,You're welcome—I'm happy to help.,Není zač—ráda pomůžu.,Greetings,ne,ano
 anything else,ještě něco,142,"Anything else, or is that all?","Ještě něco, nebo je to všechno?",,ne,ano
 where,"kde, kam",143,Where do you go?,Kam jdeš?,,ano,ano
-right,"pravý, správný, doprava",144,Go straight and then turn right.,Jdi rovně a pak zahni doprava.,,ano,ano
+right,doprava,144,Go straight and then turn right.,Jdi rovně a pak zahni doprava.,,ano,ano
 would like,"chtěl bych, rád bych",145,What would you like?,Co byste si dal? Co byste rád?,,ano,ano
 enjoy,užít si,146,Enjoy your meal.,Nechte si chutnat. (Užijte si jídlo).,,ano,ano
 of course,samozřejmě,147,Can I have ketchup? Of course.,Mohu si dát kečup? Samozřejmě.,,ne,ne
@@ -157,7 +157,7 @@ call,"volat, telefonovat",155,I call Jane.,Zavolám Janě.,,ano,ne
 river,řeka,156,I you go to school near the river.,Chodím do školy blízko řeky.,,ano,ne
 skating,bruslení,157,Do you like skating?,Máš ráda bruslení?,,ano,ne
 together,"dohromady, spolu",158,We can play together with Peter.,Můžeme si hrát společně s Petrem.,,ne,ne
-play,"hrát si, hra",159,We play with our friends.,Hrajeme si s našimi přáteli.,,ano,ne
+play,hrát si,159,We play with our friends.,Hrajeme si s našimi přáteli.,,ano,ne
 time,čas,160,At what time?,V kolik hodin?,,ne,ne
 o'clock,hodin,161,At five o'clock.,V pět hodin.,,ne,ne
 week,týden,162,I have time on Monday next week.,Mám čas v pondělí příští týden.,,ano,ne
@@ -273,7 +273,7 @@ bears,medvědi,271,The bears walk slowly through the forest.,Medvědi pomalu kr�
 but,ale,272,"I am tired, but I am happy.","Jsem unavený, ale jsem šťastný.",Benji,ne,ne
 scared,vystrašený,273,The horse is scared of the loud noise.,Kůň se bojí hlasitého zvuku.,Benji,ne,ne
 friendly,přátelský,274,The horse is calm and friendly.,Kůň je klidný a přátelský.,Benji,ne,ne
-careful,"opatrný, opatrně",275,Be careful when you cross the road.,"Buď opatrný, když přecházíš silnici.",Benji,ne,ne
+careful,opatrný,275,Be careful when you cross the road.,"Buď opatrný, když přecházíš silnici.",Benji,ne,ne
 warning,varování,276,The warning tells us to stop.,"Varování nám říká, abychom zastavili.",Benji,ne,ne
 farm,farma,277,There are cows and chickens on the farm.,Na farmě jsou krávy a slepice.,Benji,ne,ne
 stranger,cizinec,278,Do not open the gate for a stranger.,Neotvírej branku cizinci.,Benji,ne,ne
@@ -330,20 +330,20 @@ else,jiný; další,328,Ask someone else for help.,Požádej o pomoc někoho jin
 energy,energie,329,I have lots of energy today.,Dnes mám hodně energie.,Benji,ne,ne
 excellent,výborný,330,That is an excellent answer.,To je výborná odpověď.,Benji,ne,ne
 finish,dokončit,331,We finish the lesson together.,Společně dokončíme lekci.,Benji,ne,ne
-first,první; nejdříve,332,I will go first.,Půjdu první.,Benji,ne,ne
+first,první,332,The orange rabbit is first.,Oranžový králík je první.,Benji,ne,ne
 for,pro,333,This apple is for you.,Tohle jablko je pro tebe.,Benji,ne,ne
 from,z; od,334,The rabbit comes from the forest.,Králík přichází z lesa.,Benji,ne,ne
 full,plný,335,The basket is full of apples.,Košík je plný jablek.,Benji,ne,ne
 give,dát,336,Please give me the book.,Prosím dej mi tu knihu.,Benji,ne,ne
 gone,pryč,337,The old bridge is gone.,Starý most je pryč.,Benji,ne,ne
 great,skvělý,338,You have a great idea.,Máš skvělý nápad.,Benji,ne,ne
-guard,hlídat; strážce,339,The dog can guard the gate.,Pes může hlídat branku.,Benji,ne,ne
+guard,hlídat,339,The dog can guard the gate.,Pes může hlídat branku.,Benji,ne,ne
 happiness,štěstí; radost,340,I wish you happiness.,Přeji ti štěstí.,Benji,ne,ne
 have,mít,341,I have a small bag.,Mám malou tašku.,Benji,ne,ne
 he,on,342,He is my friend.,On je můj kamarád.,Benji,ne,ne
 health,zdraví,343,I wish you good health.,Přeji ti hodně zdraví.,Benji,ne,ne
 heavy,těžký,344,My bag is too heavy.,Moje taška je příliš těžká.,Benji,ne,ne
-her,ji; jí; její,345,I can help her.,Mohu jí pomoci.,Benji,ne,ne
+her,ji; jí,345,I can help her.,Mohu jí pomoci.,Benji,ne,ne
 here,tady; sem,346,Your book is here.,Tvoje kniha je tady.,Benji,ne,ne
 hi,ahoj,347,"Hi, I am your new friend.","Ahoj, jsem tvůj nový kamarád.",Benji,ne,ne
 him,ho; mu,348,Give him the map.,Dej mu tu mapu.,Benji,ne,ne
@@ -374,7 +374,7 @@ now,teď,372,We can go now.,Teď můžeme jít.,Benji,ne,ne
 of,z,373,One of the apples is green.,Jedno z jablek je zelené.,Benji,ne,ne
 on,na,374,The book is on the table.,Kniha je na stole.,Benji,ne,ne
 only,jen; pouze,375,I have only one pencil.,Mám jen jednu tužku.,Benji,ne,ne
-open,otevřený; otevřít,376,Please open the door.,Prosím otevři dveře.,Benji,ne,ne
+open,otevřít,376,Please open the door.,Prosím otevři dveře.,Benji,ne,ne
 or,nebo,377,Do you want an apple or a banana?,"Chceš jablko, nebo banán?",Benji,ne,ne
 party,oslava; večírek,378,We have a birthday party today.,Dnes máme narozeninovou oslavu.,Benji,ne,ne
 reason,důvod,379,Tell me the reason.,Řekni mi důvod.,Benji,ne,ne
@@ -383,8 +383,8 @@ safe,bezpečný,381,The bridge is safe.,Most je bezpečný.,Benji,ne,ne
 safely,bezpečně,382,We cross the road safely.,Bezpečně přejdeme silnici.,Benji,ne,ne
 save,zachránit,383,We can save the little bird.,Můžeme zachránit malého ptáčka.,Benji,ne,ne
 school,škola,384,I walk to school with my friend.,Chodím do školy s kamarádem.,Benji,ne,ne
-second,sekunda; druhý,385,"Wait a second, please.",Počkej prosím chvilku.,Benji,ne,ne
-smile,usmívat se; úsměv,386,I smile when I see my friends.,"Usmívám se, když vidím své kamarády.",Benji,ne,ne
+second,sekunda,385,"Wait a second, please.",Počkej prosím chvilku.,Benji,ne,ne
+smile,usmívat se,386,I smile when I see my friends.,"Usmívám se, když vidím své kamarády.",Benji,ne,ne
 so,tak; tak moc,387,I am so happy today.,Dnes jsem tak šťastný.,Benji,ne,ne
 some,nějaký; trochu,388,Please give me some water.,Prosím dej mi trochu vody.,Benji,ne,ne
 someone,někdo,389,Someone is at the door.,Někdo je u dveří.,Benji,ne,ne
@@ -396,7 +396,7 @@ stream,potok,394,A small stream flows through the forest.,Lesem protéká malý 
 strong,silný; pevný,395,The bridge is strong.,Most je pevný.,Benji,ne,ne
 tap,klepnout,396,Tap the picture of the rabbit.,Klepni na obrázek králíka.,Benji,ne,ne
 ten,deset,397,There are ten apples in the basket.,V košíku je deset jablek.,Benji,ne,ne
-that,tamten; že,398,That house is big.,Tamten dům je velký.,Benji,ne,ne
+that,tamten; tamta; tamto,398,That bird is small.,Tamten pták je malý.,Benji,ne,ne
 the,určitý člen,399,The cat is under the table.,Ta kočka je pod stolem.,Benji,ne,ne
 there,tam,400,My friend is over there.,Můj kamarád je tamhle.,Benji,ne,ne
 this,tento; tohle,401,This is my new bag.,Tohle je moje nová taška.,Benji,ne,ne
@@ -424,3 +424,20 @@ yes,ano,422,"Yes, I can help you.","Ano, mohu ti pomoci.",Benji,ne,ne
 yet,ještě; zatím,423,We are not ready yet.,Ještě nejsme připraveni.,Benji,ne,ne
 you,ty; vy,424,You are my friend.,Ty jsi můj kamarád.,Benji,ne,ne
 your,tvůj; váš,425,Is this your book?,Je to tvoje kniha?,Benji,ne,ne
+drink,nápoj,426,This drink is cold.,Tenhle nápoj je studený.,,ne,ne
+drawing,kresba,427,This drawing shows a house.,Na této kresbě je dům.,,ne,ne
+free,zdarma,428,The water is free.,Voda je zdarma.,,ne,ne
+free,svobodný,429,I feel free.,Cítím se svobodný.,,ne,ne
+help,pomoci; pomáhat,430,Can you help me?,Můžeš mi pomoci?,,ne,ne
+chicken,slepice,431,The chicken walks in the yard.,Slepice chodí po dvoře.,,ne,ne
+right,správný,432,This is the right shape.,Tohle je správný tvar.,,ne,ne
+right,pravý,433,Raise your right hand.,Zvedni pravou ruku.,,ne,ne
+play,hra (činnost),434,Play helps children learn.,Hra pomáhá dětem učit se.,,ne,ne
+carefully,opatrně,435,Cross the road carefully.,Přejdi opatrně přes silnici.,,ne,ne
+first,nejdříve,436,You go first.,Ty jdi nejdříve.,,ne,ne
+guard,strážce,437,The guard stands by the gate.,Strážce stojí u brány.,,ne,ne
+her,její,438,Her bag is red.,Její taška je červená.,,ne,ne
+open,otevřený,439,The door is open.,Dveře jsou otevřené.,,ne,ne
+second,druhý,440,The rabbit in blue is second.,Králík v modrém je druhý.,,ne,ne
+smile,úsměv,441,His smile makes me happy.,Jeho úsměv mi dělá radost.,,ne,ne
+that,že,442,I think that the bird is beautiful.,"Myslím, že ten pták je krásný.",,ne,ne

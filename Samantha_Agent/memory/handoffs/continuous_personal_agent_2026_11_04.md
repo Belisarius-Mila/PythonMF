@@ -1876,3 +1876,20 @@ Autoritativní výsledek: data/private/email_compact_ui_20261114/release_receipt
 Při nejistotě ověřit stejný job; nic automaticky znovu nespouštět. Původní
 knihovní job3f40788a a aktivace pošty se neopakují. Samostatný e-mailový TVBCP
 zůstává nedohodnutý; tento publikační UI krok kryjí existující Cockpit dokumenty.
+
+
+## 2026-11-14 22:03 CET — Potvrzené vydání poštovního UI a obnovené předání
+
+Hotovo: Přehlednější mobilní akce a sbalování hlídaných zpráv i záležitostí
+juž běží v Cockpitu. Úspěšný konec původního vydání je nyní doplněný do předání.
+Rozhodnutí: Míla schválil doplnění dokumentace a vydání Datových významových
+karet Vocabulary EN; toto doplnění neopakuje vydání ani aktivaci pošty.
+Další krok: Fyzicky ověřit E-maily k řešení na iPhonu.
+Navrhované další kroky: Potom živý test A+C podle TXT v Downloads; před ním
+nový čtecí audit monitoru. Žádný testovací send ani aktivace touto obnovou.
+Technický důkaz:2ed8f750, původní job f7c6646a07a469b8a5ccd7314b4c2cab
+completed, push/deploy confirmed,3918 PASS a smoke5/5. Uložené ověření HTTPS
+potvrzuje přesnou shodu; dnešní čtecí status potvrzuje tentýž dokončený job.
+Původní release_receipt.json a release_live_verification.json jsou v privátním
+email_compact_ui_20261114/. Fyzický iPhone neověřený; caller účtenka převzatá,
+portálový returned_to_adam není potvrzený. Samostatný e-mailový TVBCP nevzniká.

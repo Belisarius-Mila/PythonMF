@@ -65,10 +65,10 @@ function chooseWord(view,uid,checked=true){const input=view.element('settingsGro
 function chooseUser(view,id){view.element('learnerSelect').value=id;view.element('learnerSelect').emit('change');}
 
 test('retired cards keep their identities but cannot enter selection, random practice or restored sequences',async()=>{
-  assert.equal(vocabulary.items.length,425);
+  assert.equal(vocabulary.items.length,442);
   assert.deepEqual(vocabulary.items.filter(item=>item.active===false).map(model.key),retiredUids);
   const selected=model.ordered(vocabulary.items,{},vocabulary.catalog);
-  assert.equal(selected.length,415);assert.ok(selected.every(item=>!retiredUids.includes(item.uid)));
+  assert.equal(selected.length,432);assert.ok(selected.every(item=>!retiredUids.includes(item.uid)));
   assert.deepEqual(model.restoreSequence([...retiredUids,'ven-0020'],vocabulary.items).map(model.key),['ven-0020']);
   const view=await app({url:'https://example.test/PythonMF/vocabulary-en/#card=ven-0257'});
   assert.equal(view.state.view,'gallery');assert.equal(view.state.currentItem,null);
@@ -87,7 +87,7 @@ test('teaching type intersects topics and learner selection and survives study, 
   assert.equal(after.state.teachingType,'interaction');assert.equal(after.element('teachingTypeSelect').value,'interaction');
   assert.deepEqual(Array.from(after.orderedSelection(),model.key),['ven-0057']);
   after.state.topics=['topic-06'];after.selectionChanged();assert.equal(after.orderedSelection().length,0);
-  after.element('resetButton').click();assert.equal(after.state.teachingType,'all');assert.equal(after.orderedSelection().length,415);
+  after.element('resetButton').click();assert.equal(after.state.teachingType,'all');assert.equal(after.orderedSelection().length,432);
 });
 
 test('all four learner profiles preserve retired selected and difficult IDs through visible bulk edits, save and backup',async()=>{
@@ -124,13 +124,13 @@ test('importing a backup with retired cards preserves them and explains their hi
 });
 
 test('word type includes multiword names, interactions are separate and empty idiom filter is usable',async()=>{
-  assert.equal(model.select(vocabulary.items,{teachingType:'word'}).length,396);
+  assert.equal(model.select(vocabulary.items,{teachingType:'word'}).length,413);
   assert.equal(model.select(vocabulary.items,{teachingType:'interaction'}).length,19);
   assert.equal(model.select(vocabulary.items,{teachingType:'idiom'}).length,0);
   for(const uid of ['ven-0004','ven-0017','ven-0131','ven-0145'])assert.ok(model.select(vocabulary.items,{teachingType:'word'}).some(i=>i.uid===uid));
   const view=await app({url:'https://example.test/PythonMF/vocabulary-en/#teachingType=idiom'});
   assert.equal(view.orderedSelection().length,0);assert.equal(view.element('emptyState').hidden,false);
-  view.element('emptyResetButton').click();assert.equal(view.orderedSelection().length,415);
+  view.element('emptyResetButton').click();assert.equal(view.orderedSelection().length,432);
   const future={...sample[0],uid:'ven-future-idiom',teachingType:'idiom'};
   assert.deepEqual(model.select([...sample,future],{teachingType:'idiom'}).map(model.key),['ven-future-idiom']);
   const legacy=sample.map(({teachingType,active,...item})=>item);
@@ -262,8 +262,8 @@ test("switching translation direction preserves current card and the ordered sel
 test("explicit random practice shows every card once in each of three rounds despite direction changes",async()=>{
   const view=await app();view.element("shuffleButton").click();
   for(let round=0;round<3;round++){
-    const seen=new Set();for(let i=0;i<415;i++){view.directions[i%2].click();assert.ok(!seen.has(view.state.currentItem.uid));seen.add(view.state.currentItem.uid);if(i<414)view.element("nextButton").click();}
-    assert.equal(seen.size,415);assert.equal(view.element("nextButton").hidden,true);assert.match(view.element("roundStatus").textContent,/konec/);if(round<2)view.element("newRoundButton").click();
+    const seen=new Set();for(let i=0;i<432;i++){view.directions[i%2].click();assert.ok(!seen.has(view.state.currentItem.uid));seen.add(view.state.currentItem.uid);if(i<431)view.element("nextButton").click();}
+    assert.equal(seen.size,432);assert.equal(view.element("nextButton").hidden,true);assert.match(view.element("roundStatus").textContent,/konec/);if(round<2)view.element("newRoundButton").click();
   }
 });
 test("a new random round never immediately repeats the last card",async()=>{
@@ -275,12 +275,12 @@ test("empty, singleton, and changed filter selections work",async()=>{
   const view=await app();view.state.filter="selected";view.selectionChanged();assert.equal(view.element("totalCount").textContent,"107");view.openStudy("","random");assert.equal(view.state.sequence.length,107);
 });
 test("topics combine by union while source, part, difficulty and selection narrow by intersection",()=>{
-  const animals=model.select(vocabulary.items,{topics:["topic-06"]});const benjiAnimals=model.select(vocabulary.items,{topics:["topic-06"],sources:["benji"]});assert.equal(animals.length,37);assert.equal(benjiAnimals.length,4);
+  const animals=model.select(vocabulary.items,{topics:["topic-06"]});const benjiAnimals=model.select(vocabulary.items,{topics:["topic-06"],sources:["benji"]});assert.equal(animals.length,38);assert.equal(benjiAnimals.length,4);
   const union=model.select(vocabulary.items,{topics:["topic-06","topic-05"],sources:["benji"],parts:["noun"]});assert.ok(union.every(i=>i.sourceIds.includes("benji") && i.partOfSpeech.includes("noun") && i.topicIds.some(t=>["topic-06","topic-05"].includes(t))));assert.ok(union.length>6);
   assert.equal(model.select(vocabulary.items,{query:"orisky"})[0].en,"nuts");assert.equal(model.select(vocabulary.items,{query:"orange"}).length,2);
 });
-test("gallery is the default; all 415 active tiles occur once and language never changes order",async()=>{
-  const view=await app();assert.equal(view.state.view,"gallery");assert.equal(view.element("studyView").hidden,true);const tiles=view.element("galleryGroups").querySelectorAll(".vocab-tile");assert.equal(tiles.length,415);assert.equal(new Set(tiles.map(t=>t.dataset.uid)).size,415);
+test("gallery is the default; all 432 active tiles occur once and language never changes order",async()=>{
+  const view=await app();assert.equal(view.state.view,"gallery");assert.equal(view.element("studyView").hidden,true);const tiles=view.element("galleryGroups").querySelectorAll(".vocab-tile");assert.equal(tiles.length,432);assert.equal(new Set(tiles.map(t=>t.dataset.uid)).size,432);
   const order=tiles.map(t=>t.dataset.uid);view.labels[1].click();assert.deepEqual(view.element("galleryGroups").querySelectorAll(".vocab-tile").map(t=>t.dataset.uid),order);assert.match(view.element("tile-ven-0020").textContent,/kočka/);
 });
 test("next follows the gallery across group boundaries and return anchors the LAST studied tile",async()=>{
@@ -305,7 +305,7 @@ test("study navigation stops audio, resets revealed answer, and preserves focus 
   const view=await app();view.openStudy("ven-0020");view.element("revealButton").click();assert.equal(view.state.revealed,true);view.speakPrompt();assert.ok(view.players.some(p=>p.played));view.moveStudy(1);assert.equal(view.state.revealed,false);assert.ok(view.players.filter(p=>p.played).every(p=>p.paused));view.doc.emit("keydown",{key:"Escape"});assert.equal(view.state.view,"gallery");
 });
 test("audio identity must match BOTH texts; missing audio does not block the gallery",async()=>{
-  const cat=vocabulary.items.find(i=>i.en==="cat");const wrong={items:{[cat.id]:{sourceEn:"cat",sourceCz:"špatně",en:"wrong.mp3"}}};assert.equal(model.audioRecord(cat,wrong),null);const view=await app({manifest:null});assert.equal(view.element("galleryGroups").querySelectorAll(".vocab-tile").length,415);view.openStudy(cat.uid);view.speakPrompt();assert.match(view.element("messageStrip").textContent,/neni pripraveny/);
+  const cat=vocabulary.items.find(i=>i.en==="cat");const wrong={items:{[cat.id]:{sourceEn:"cat",sourceCz:"špatně",en:"wrong.mp3"}}};assert.equal(model.audioRecord(cat,wrong),null);const view=await app({manifest:null});assert.equal(view.element("galleryGroups").querySelectorAll(".vocab-tile").length,432);view.openStudy(cat.uid);view.speakPrompt();assert.match(view.element("messageStrip").textContent,/neni pripraveny/);
 });
 test("revealing and changing a card keeps both sentences attached to the studied meaning",async()=>{
   const view=await app();view.openStudy("ven-0118");
@@ -326,14 +326,14 @@ test("revealing and changing a card keeps both sentences attached to the studied
   assert.equal(view.element("sentenceEn").textContent,view.state.currentItem.sentenceEn);
 });
 test("ordinal numbers and related meanings stay distinct; natural cardinal order precedes other quantities",()=>{
-  const numbers=model.ordered(vocabulary.items,{topics:["topic-11"],sort:"recommended"},vocabulary.catalog);assert.deepEqual(numbers.slice(0,12).map(i=>i.en),["one","two","three","four","five","six","seven","eight","nine","ten","eleven","twelve"]);assert.ok(!numbers.some(i=>i.en==="second"));assert.equal(new Set(vocabulary.items.map(model.key)).size,425);
+  const numbers=model.ordered(vocabulary.items,{topics:["topic-11"],sort:"recommended"},vocabulary.catalog);assert.deepEqual(numbers.slice(0,12).map(i=>i.en),["one","two","three","four","five","six","seven","eight","nine","ten","eleven","twelve"]);assert.deepEqual(numbers.filter(i=>i.en==="second").map(model.key),["ven-0440"]);assert.ok(!numbers.some(i=>i.uid==="ven-0385"));assert.equal(new Set(vocabulary.items.map(model.key)).size,442);
 });
 test("a broken vocabulary request has an explicit error and does not claim an empty loaded dictionary",async()=>{
   const view=await app({failData:true});assert.equal(view.element("totalCount").textContent,"—");assert.match(view.element("galleryNotice").textContent,/nepodařilo/);assert.equal(view.element("shuffleButton").disabled,true);
 });
 
 test("a pending audio request never delays the gallery or prevents a bottom-bar return",async()=>{
-  const view=await app({slowAudio:true});assert.equal(view.element("galleryGroups").querySelectorAll(".vocab-tile").length,415);view.openStudy("ven-0020");assert.equal(view.element("backBottomButton").hidden,false);view.element("backBottomButton").click();assert.equal(view.state.view,"gallery");assert.equal(view.doc.activeElement.id,"tile-ven-0020");
+  const view=await app({slowAudio:true});assert.equal(view.element("galleryGroups").querySelectorAll(".vocab-tile").length,432);view.openStudy("ven-0020");assert.equal(view.element("backBottomButton").hidden,false);view.element("backBottomButton").click();assert.equal(view.state.view,"gallery");assert.equal(view.doc.activeElement.id,"tile-ven-0020");
 });
 test("reloading the gallery preserves the frozen random order for browser Forward",async()=>{
   const before=await app();before.state.sources=["benji"];before.selectionChanged();before.openStudy("","random");before.moveStudy(1);
@@ -431,4 +431,26 @@ test("old or invalid practice state stays compatible and sentence links work wit
   const linked=await app({url:"https://example.test/PythonMF/vocabulary-en/#card=ven-0020&practice=sentences",blocked:true});
   assert.equal(linked.state.practice,"sentences");assert.equal(linked.element("promptText").textContent,linked.state.currentItem.sentenceCz);
   linked.returnToGallery();assert.equal(linked.doc.activeElement.id,"tile-ven-0020");
+});
+
+// A homograph is a set of distinct meanings, never an identity based on spelling.
+test("same English spellings preserve independent meanings, audio records, POS and navigation",async()=>{
+  const ids=["ven-0385","ven-0440"],items=ids.map(uid=>vocabulary.items.find(i=>i.uid===uid));
+  assert.deepEqual(items.map(i=>i.cz),["sekunda","druhý"]);
+  assert.deepEqual(model.select(items,{parts:["noun"]}).map(model.key),[ids[0]]);
+  assert.deepEqual(model.select(items,{parts:["number"]}).map(model.key),[ids[1]]);
+  const records=items.map(i=>model.audioRecord(i,audio));assert.ok(records.every(Boolean));
+  assert.equal(records[0].en,records[1].en);assert.notEqual(records[0].cz,records[1].cz);
+  const view=await app({items}),order=Array.from(view.orderedSelection(),model.key);view.openStudy(order[0]);view.moveStudy(1);
+  assert.equal(view.state.currentItem.uid,order[1]);view.openStudy(ids[1]);assert.equal(view.state.currentItem.sentenceEn,"The rabbit in blue is second.");
+  view.returnToGallery();assert.equal(view.doc.activeElement.id,"tile-"+ids[1]);
+});
+test("a stored personal selection of the original meaning never silently acquires its new siblings",async()=>{
+  const local=storage(),value=learners.empty();value.profiles.A.selected=["ven-0385"];value.profiles.A.hard=["ven-0385"];
+  local.setItem(learners.KEY,JSON.stringify(value));const before=local.getItem(learners.KEY),view=await app({local});
+  chooseUser(view,"A");assert.deepEqual(Array.from(view.orderedSelection(),model.key),["ven-0385"]);
+  assert.equal(local.getItem(learners.KEY),before);view.element("settingsTab").click();await unlock(view);
+  chooseWord(view,"ven-0440");view.element("saveLearner").click();
+  const saved=JSON.parse(local.getItem(learners.KEY));assert.deepEqual(saved.profiles.A.selected,["ven-0385","ven-0440"]);
+  assert.deepEqual(saved.profiles.A.hard,["ven-0385"]);
 });

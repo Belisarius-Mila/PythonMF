@@ -2,7 +2,7 @@
 """Add the Benji word-set label to the retained rows imported from MMTX.
 
 The default mode is read-only. ``--apply`` atomically updates only physical CSV
-rows whose normalized English word belongs to the curated MMTX import. Existing
+rows whose stable Order and English word belong to the curated MMTX import. Existing
 word-set labels are preserved and CRLF line endings remain unchanged.
 """
 
@@ -53,8 +53,10 @@ def audit(path: Path = CSV_PATH) -> tuple[list[dict[str, str]], list[dict[str, s
     import_module = load_import_module()
     keys = imported_keys(import_module)
     rows = load_rows(path)
-    targets = [row for row in rows if import_module.normalize_word(row["EN"]) in keys]
-    if len(targets) != len(keys):
+    orders = set(range(187, 187 + len(keys)))
+    targets = [row for row in rows if int(row["Order"]) in orders
+               and import_module.normalize_word(row["EN"]) in keys]
+    if len(targets) != len(keys) or {import_module.normalize_word(row["EN"]) for row in targets} != keys:
         raise SystemExit(f"Expected {len(keys)} imported MMTX rows, found {len(targets)}")
     if [int(row["Order"]) for row in targets] != list(range(187, 187 + len(keys))):
         raise SystemExit("Imported MMTX rows are not the expected consecutive orders from 187")
@@ -72,6 +74,7 @@ def build_updated_bytes(
     target_keys: set[str],
     *,
     import_module=None,
+    target_orders: set[int] | None = None,
 ) -> tuple[bytes, list[str]]:
     module = import_module or load_import_module()
     if original.replace(b"\r\n", b"").count(b"\n"):
@@ -86,6 +89,8 @@ def build_updated_bytes(
         fields = next(csv.reader([text]))
         if len(fields) != len(EXPECTED_FIELDS):
             raise SystemExit(f"Unexpected field count on physical CSV line {index + 1}")
+        if target_orders is not None and int(fields[2]) not in target_orders:
+            continue
         if module.normalize_word(fields[0]) not in target_keys:
             continue
         updated_word_sets = module.merge_word_sets(fields[5], BENJI_LABEL)
@@ -104,11 +109,13 @@ def build_updated_bytes(
 
 def apply(path: Path = CSV_PATH) -> list[str]:
     import_module = load_import_module()
+    targets, _ = audit(path)
     original = path.read_bytes()
     updated, changed_words = build_updated_bytes(
         original,
         imported_keys(import_module),
         import_module=import_module,
+        target_orders={int(row["Order"]) for row in targets},
     )
     if not changed_words:
         return []
