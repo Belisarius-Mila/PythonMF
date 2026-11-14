@@ -123,7 +123,7 @@ class VocabularyGalleryTests(unittest.TestCase):
             self.assertEqual(hashlib.sha256(original.read_bytes()).hexdigest(),original_hash)
 
     def test_controller_and_selection_regressions_execute_with_node(self):
-        result=subprocess.run([node_binary(),'--test',str(Path(__file__).with_name('test_vocabularyen_selection.js'))],cwd=Path(__file__).parents[1],capture_output=True,text=True,timeout=90)
+        result=subprocess.run([node_binary(),'--test',str(Path(__file__).with_name('test_vocabularyen_selection.js')),str(Path(__file__).with_name('test_vocabularyen_learners.js'))],cwd=Path(__file__).parents[1],capture_output=True,text=True,timeout=120)
         self.assertEqual(result.returncode,0,result.stdout+'\n'+result.stderr)
 
     def test_legacy_export_and_image_rules_still_hold(self):

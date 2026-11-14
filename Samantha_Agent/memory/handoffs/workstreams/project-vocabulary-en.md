@@ -4,36 +4,38 @@ Nazev: Vocabulary EN
 Pracovni proud: project-vocabulary-en
 Typ: Project
 Priorita: 2
-Stav: lokalne hotove, ceka na p+n
+Stav: schvalene p+n, priprava vydani
 Pripomenout pri startu: ne
-Datum: 2026-11-14 10:33 CET
+Datum: 2026-11-14 12:35 CET
 
 Co se resilo:
-Krátký český popisek při poslechu dlaždice; původní anglický název zachovat
-i při českém směru procvičování.
+Místní uživatelé A–D, vlastní slovní zásoba a obtížná slova, PIN a záloha.
 
 Co je hotove:
-- Předchozí galerie,425 dvojic vět a850 větných MP3 jsou vydané; Míla přijal.
-- Nově lokálně po kliknutí v Poslechu čeština na1000ms, potom původní popisek.
-- Opakovaný klik obnoví interval, jiná dlaždice či změna režimu ho ukončí.
-- Safari místně potvrdilo cat → kočka → cat se zvukem.
-- Obsah, audio a současné ovládání jsou zachované.
+- Nastavení profilů, zaškrtávací galerie, výběr po tématech a hledání.
+- Osobní filtry v původních18 tématech, obě jazykové verze a poslech.
+- Místní PIN pro úpravy; záloha A–D bez PINů, obnova jednoho uživatele
+  do návrhu před explicitním Uložit. Ostatní výběry se nepřepisují.
+- Dřívější sekundová česká nápověda zůstává místně zachovaná.
 
 Co neni hotove:
-- Nové Pages p+n krátké nápovědy a fyzická iPhone přejímka.
+- Fyzická přejímka na cílových zařízeních.
+- Produkční vydání nových kroků; dřívější p+n Míla odložil, FR vynechat.
 
 Dalsi krok:
-Samostatné Pages p+n nové české nápovědy.
+Registrované Pages p+n schválené Mílou; potom přejímka podle scénáře v Downloads.
 
 Navrhovane dalsi kroky:
-- Mílova zkouška délky české nápovědy po vydání na iPhonu.
+- Přejímka PC/Android/iPhone a potom samostatné schválení vydání.
 
 Zmenene nebo relevantni soubory:
-gallery.js; test_vocabularyen_selection.js; GALLERY_AUTHORING.txt a projektová paměť.
+learners.js; learner-ui.js; gallery.js; index.html; gallery.css;
+test_vocabularyen_learners.js; test_vocabularyen_selection.js;
+test_vocabularyen_gallery.py; GALLERY_AUTHORING.txt a projektová paměť.
 
 Bezpecnost / neukladat:
-Bez nové syntézy, změny425 karet nebo MP3, bez nového TVBCP.
-Cizí main a jeho rozpracované soubory zůstávají zachované.
+Žádné skutečné PINy/výběry v Gitu, žádné TTS/modelové volání nebo nový TVBCP.
+Bez zásahu do cizího main, FR dat či souborů. Místní data nepovažovat za účet.
 
 ## Historie
 
@@ -497,3 +499,78 @@ Technický důkaz: Integračních11 Python testů včetně Node scénářů PASS
 Zdroj před integracíb2bfb8b2, vlastní Datův krokc372ada6, integrační historie
 e9cb0f9d+9f759706. Převzetí bez konfliktu; ostatní změny zachované.
 Statická brána logs/all_local_data_release_20261114_static.log.
+
+
+## 2026-11-14 12:35 CET — Místní profily A–D a přenos osobních výběrů
+
+Hotovo: Nastavení nabízí vlastní slovní zásobu A–D, místní PIN4–8 číslic,
+výběr jednotlivých slov i celého zobrazeného tématu. V galerii přibylo
+Všichni/A/B/C/D, Jen obtížná a Výběr obtížných slov. Osobní výběr
+se protíná se stávajícími filtry; všech18 definic témat zůstává stejných.
+Věty, poslech, náhodné kolo a návrat do galerie pracují s osobním výběrem.
+
+Rozhodnutí: Míla zvolil ukládání zvlášť v každém prohlížeči a schválil
+zálohu/načtení. Bez serveru, účtů a automatické synchronizace zařízení.
+PIN chrání úpravy jako místní pojistka; ukládá se pouze náhodná sůl
+a PBKDF2-SHA256 hash, nikoli číslice PINu. Záloha obsahuje výběry A–D
+bez PINů. Obnova načte do návrhu právě otevřeného uživatele; vyžaduje
+Uložit a zachová ostatní uživatele i zdejší PIN. Nový TVBCP není dohodnutý.
+
+Další krok: Přejímka na PC/Android/iPhonu podle scénáře v Downloads. Předchozí publikace české sekundové
+nápovědy je na Mílův pokyn odložená; FR commit musí zůstat stranou.
+Tento vývoj nepovoluje nové p+n a produkci nemění.
+
+Navrhované další kroky: Mac/PC a fyzický Android/iPhone přejímka podle
+Vocabulary_EN_profily_A-D_test_2026-11-14.txt v Downloads, potom
+samostatné rozhodnutí o produkčním vydání.
+
+Technický důkaz: Samostatné learners.js a learner-ui.js, známé UID místo
+pořadí řádků, záloha validovaná před použitím, žádné cizí HTML.
+Ověření read-back zápisu a kontrola původního místního snímku brání
+přepsání změn z druhého okna. Poškozené/zakázané úložiště neblokuje
+společný slovník a nepřepisuje se prázdnými daty. Pozdní import nesmí
+přepsat dalšího uživatele nebo novější ruční úpravy. Safari ukázalo
+Přehled/Nastavení/PIN formulář; úplná ruční přejímka byla přerušená
+souběžným používáním Safari. Žádná fyzická mobilní přejímka není doložená.
+Finální testy a otisky budou v privátním vocabulary_en_learners_20261114/.
+
+
+Ověření a checkpoint: Plná brána PASS,3831 testů /670,998s unit část,
+683,815s celý běh,5 SKIP, bez failures/errors. 48 cílených Node scénářů
+PASS /20,384s. Po bráně13/13 zmrazených souborů shodných; následné
+změny jen v zápisu výsledků a poučení,8/8 zdrojů aplikace a testů zůstává
+shodných s testovaným stavem. Před commitem ještě rychlá statická brána.
+Log vocabulary_en_learners_full_gate_20261114.log, SHA-256:
+fc8368436ebff87cb506120f46ddfda8b4f246dca1cba9378b92cb4e18be2fa1
+Skutečná Git identita se neměnila; syntetická identita byla pouze v env
+testovacího procesu kvůli již známému pomocnému Git commitu přípravku.
+Privátní verification.json/source_manifest/checkpoint zůstávají autoritou
+konkrétního checkpointu. Žádný nový push, deploy ani TVBCP.
+
+
+## 2026-11-14 13:30 CET — Schválené p+n místních profilů A–D
+
+Hotovo: Přesný vlastní24d26fa5 integrovaný nad publikovaný main5b9dda8e.
+Všech8 zdrojů aplikace a testů shodných s checkpointem48 Node PASS
+a plnou branou3831 PASS; paměťové konflikty zachovaly oba celé záznamy.
+
+Rozhodnutí: Míla výslovně zadal „Nejprve p+n prosím.“ pro profily A–D.
+Cíl project-vocabulary-en / github_pages / vocabulary-en/.
+Živý ls-remote potvrdil5b9dda8e; dříve vyloučený FR commit4ad82a7f už
+je v GitHub main. Do nového rozsahu se tedy FR ani sova nově nepřidávají.
+
+Další krok: Po kontrole integrace převzít čistý main/profily a předat
+přesný nový head jedinému submit_release(wait=True). Nový TVBCP nevzniká.
+
+Navrhované další kroky: Produkční přejímka PC/Android/iPhone podle TXT
+v Downloads po potvrzeném Pages vydání.
+
+Technický důkaz: Pouze Vocabulary EN runtime/testy/návod a paměť;
+ostatní5b9dda8e soubory zachované. Konečný push, deploy, plná publikační
+brána a veřejné otisky patří do privátní účtenky a Downloads.
+Běžící Cockpit, Camino a autosave se tímto Pages krokem nenasazují.
+
+Integrační přejímka:30 cílených Python testů včetně48 Node scénářů PASS
+/16,834s. Rychlá statická brána PASS.8/8 zdrojů a testů shodných s24d26fa5.
+Připravený rozsah proti GitHub5b9dda8e tvoří pouze vlastní checkpoint
+a integrační merge. Profily při přípravě čisté a zarovnané s main5b9dda8e.
