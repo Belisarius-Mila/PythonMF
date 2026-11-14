@@ -2441,3 +2441,16 @@ s mock video-only kamerou, stop tracků a dekódováním WASM.
   přečíst i starší reader, dokud řízené p+n nerestartuje Cockpit.
 - Ověření:71 cílených, restart/pending/night/grace/autosave/Node PASS;
   reports/agent_supervisor_sleep_fix_20261114.md. Další noc je reálná přejímka.
+
+
+### 2026-11-14 — Při doplnění Janiných vět ověřit i české tvary a distribuci
+
+- Kontext:18 prázdných příkladových dvojic, nové oděvní výrazy a několik
+  dřívějších mezer ve vazbách; nevycházet ze starých Order oprav.
+- Řešení: propojit změny s aktuálním FR/CZ a SHA snímkem, zachovat původní
+  věty/pořadí/L/HT. U ces a cette rozlišit množné a ženské jednotné číslo;
+  plné české klíče chrání rozdílné klientské resolvery před aliasovým fallbackem.
+  Obrázky create-only, přesný lokální exclude a shodný mapping v obou Pict.
+- Ověření:18 párů doplněno,17 mapování,6 nových WebP. Všechny tři slovníky
+  a oba skutečné resolvery bez mezer,6 testů/statická brána PASS,8 uploadů
+  potvrzeno NSURL. Fyzický reload telefonu zůstává samostatný.

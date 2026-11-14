@@ -446,3 +446,28 @@ cizí rozpracované Vocabulary FR a nezařazený agent_supervisor 2.md.
 Živý github-batch-audit: audit_failed; deploy-audit: ready=false.
 Cizí obsah se nemění, nezařazuje ani neodkládá. Release nebyl spuštěný.
 Konečný výsledek patří do privátní účtenky a Downloads.
+
+
+## 2026-11-14 10:41 CET — Připravené přesné vydání, čeká rozhodnutí o okolním stavu
+
+Hotovo: Kandidát obsahuje českou nápovědu c372ada6 a aktuální kanonický
+main4ad82a7f. Vlastní gallery.js,37scénářový test i návod jsou stále
+bajtově shodné s otestovaným checkpointem; cizí FR změny se neupravovaly.
+
+Rozhodnutí: Produkční Vocabulary EN vydání je výslovně schválené.
+Nový cizí pending commit4ad82a7f vznikl souběžně a nebyl součástí
+předchozího konkrétního publikačního balíčku. Jeho GitHub zahrnutí
+vyžaduje potvrdit rozsah. Samotné nasazení zůstává Vocabulary EN Pages.
+
+Další krok: Potvrdit zahrnutí4ad82a7f do GitHub balíčku a zachování
+starší nezařazené kopie agent_supervisor 2.md v ignorovaném privátním
+archivu. Teprve pak čistý main/profily a registrované p+n.
+
+Navrhované další kroky: Krátká fyzická iPhone přejímka po publikaci.
+
+Technický důkaz: Cizí nezařazený soubor je7777B, SHA-256
+08bf3f5c2fa41d235ea9678e978cfe6dce9700863e0dbe8e2bb1b78c17717f12.
+Nemá se mazat ani commitovat; navržený archiv zachová přesné bajty.
+Živá publikační brána odmítá nečistý main a nezarovnané profily.
+Dosud žádný push, modelové předání ani deploy. Konečné provozní důkazy
+patří do privátní účtenky a Downloads, nikoli do dalšího pending commitu.

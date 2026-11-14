@@ -422,3 +422,23 @@ Technický důkaz:
 - Plná brána: 2273 evidovaných testů, 449,8 s, passed=true. Smoke 5/5, protected_services_unchanged=true.
 - Jedna Adamova kontrola: GitHub main přesně na vydaném headu, health HTTP 200, nový Cockpit PID 67574 / code_stamp ae3b321d9492092a. FR 477/451 a IT 471, všechny CSV/mapping otisky i 16 distribučních kopií nových obrázků přesně shodné s předávacími důkazy.
 - Caller účtenku převzal; returned_to_adam=false neprokazuje automatické portálové doručení a není důvodem retry. Bez opakování p+n. Tento výsledkový zápis místně pro další balíček; fyzický reload a vzdálená synchronizace neověřené.
+
+
+## 2026-11-14 10:36 CET — Nová Janina slovíčka
+
+Hotovo:18 nových FR/CZ příkladových dvojic, Jana469/469 úplných;4 české
+opravy. Šest nových ilustrací v obou Pict, další existující znovu použité.
+Mapping1136 (+17), český/abecední, distribuční kopie shodné; staré vazby
+a všechny L/HT/Order zachované. Míla FR477 / IT471 beze změny.
+
+Rozhodnutí: Výslovné pověření Míly zahrnuje věty, potřebné obrázky a mapping.
+Existující bezpečný CSV store a zálohy, žádné použití starého Order helperu.
+Žádné přepsání obrázků, mazání, app build ani p+n.
+
+Technický důkaz:6 kanonických testů a statická brána PASS; celý audit
+FR Míla477 / FR Jana469 / IT Míla471, všechny věty úplné, skutečné desktopové i Pythonista resolvery bez chybějících obrázků;1517 obrazových cest dekódováno,0 chybějících mapování/souborů. NSURL upload všech8 souborů potvrzený. Podrobnosti
+reports/vocabularyfr_jana_refresh_20261114.md; privátní účtenky
+data/private/vocabularyfr_refresh_20261114/.
+
+Další krok: Janin reload dat/obrázků v aplikaci; fyzický telefon dosud
+neověřený. Mapping pouze v Pict, nové soubory uvedené v reportu.

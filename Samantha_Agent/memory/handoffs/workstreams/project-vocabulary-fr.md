@@ -1,14 +1,19 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
-- Aktualizováno: 2026-11-04 14:40 CET.
-- Mílovo FR má 477 řádků po doplnění 243 celých záznamů pro 235 chybějících hesel od Jany. Původních 234 řádků přesně zachovaných; nové obsahují původní příklady, rod i zdrojové L/HT, pouze Order navazuje 235–477. Jana má 451 řádků a IT 471.
-- Osm nových ilustrací je v obou Pict, společný český abecední mapping má 1119 vazeb a obě kopie jsou shodné. Janiny věty 451/451 úplné, u cent opraveno sto. Společný audit všech tří slovníků bez mezer, 1007 používaných souborů dekódovaných.
-- Terra 6.1/high dokončila p+n čtyř čekajících commitů do b3b302b291d7863a5d5a26796d4f6e5993e5b31c. Účtenka 9ea7a7007816df4117a71a750031c507, project-vocabulary-fr → cockpit, completed, push_state/deployment_state=confirmed.
-- Plná publikační brána prošla: evidováno 2273 testů, 449,8 s. Následná kontrola běhu 5/5 a protected_services_unchanged=true. Jedna Adamova kontrola: skutečný GitHub head shodný s vydaným, health HTTP 200, Cockpit PID 67574 a code_stamp ae3b321d9492092a. Slovníková data, mappingy a všech 16 kopií nových obrázků hashově zachované po nasazení.
-- Caller převzal konečnou účtenku v této terminálové relaci. returned_to_adam=false je portálový příznak a není důvodem retry. Neproběhlo samostatné sestavení nebo vydání VocabularyFR.app ani nové Pages vydání; Janina sdílená data byla doplněná již před p+n. Následný výsledkový zápis je místní pro další balíček.
-- Prompty a náhled: PictNew/generated/20261104_fr_jana_refresh_batch001/generation_report.json a review.html. Soukromé importní důkazy v data/private/vocabularyfr_merge_jana_to_mila_20261104/ a obrazové důkazy ve vocabularyfr_refresh_20261104/; žádná Janina CSV nebo soukromé plány v Gitu.
-- Další krok: načíst aktualizovaná slovníková data v používaných aplikacích. Fyzický reload a vzdálené iCloud doručení tímto vydáním NEOVĚŘENO; dvě ostatní soukromé lexikální poznámky zůstávají k případné samostatné revizi.
+- Aktualizováno: 2026-11-14 10:36 CET.
+- Jana469/469 úplných Sentence/SentenceT po18 nových dvojicích a4 českých opravách.
+- Šest nových ilustrací1254×1254 WebP <250kB v obou Pict, shodné hashově.
+- Společný český abecední mapping1136 (+17), všechny původní vazby zachované;
+  distribuční kopie bajtově shodné. Mílovo FR477 a IT471 beze změny.
+-6 kanonických testů a rychlá statická brána PASS. Společný audit:
+  FR Míla477 / FR Jana469 / IT Míla471, všechny věty úplné, skutečné desktopové i Pythonista resolvery bez chybějících obrázků;1517 obrazových cest dekódováno,0 chybějících mapování/souborů.
+- Foundation potvrdilo nahrání CSV, mappingu a6 obrázků do iCloudu. Fyzický
+  reload na Janině telefonu čeká; vzdálený běh se nepředstírá.
+- Další: načíst nová data v aplikaci; žádný nový build ani p+n nebyly zadané.
+- Podrobnosti reports/vocabularyfr_jana_refresh_20261114.md a
+  projects/pictnew_vocabulary_image_pipeline.md. Soukromé zálohy/účtenky
+  data/private/vocabularyfr_refresh_20261114/; Jana CSV ani nové obrázky v Gitu nejsou.
 <!-- SAMANTHA_CURRENT_STATUS_END -->
 
 # Handoff pracovního proudu: Vocabulary FR
@@ -354,3 +359,48 @@ Technický důkaz:
 - Plná brána: 2273 evidovaných testů, 449,8 s, passed=true. Smoke 5/5, protected_services_unchanged=true.
 - Jedna Adamova kontrola: GitHub main přesně na vydaném headu, health HTTP 200, nový Cockpit PID 67574 / code_stamp ae3b321d9492092a. FR 477/451 a IT 471, všechny CSV/mapping otisky i 16 distribučních kopií nových obrázků přesně shodné s předávacími důkazy.
 - Caller účtenku převzal; returned_to_adam=false neprokazuje automatické portálové doručení a není důvodem retry. Bez opakování p+n. Tento výsledkový zápis místně pro další balíček; fyzický reload a vzdálená synchronizace neověřené.
+
+
+## 2026-11-14 10:36 CET — Janina nová slovíčka, věty a ilustrace
+
+Hotovo: Na výslovný požadavek Míly doplněno18 dvojic Sentence/SentenceT
+v aktivním Janině iCloud VocabularyFR.csv. Janin soubor má469 řádků
+a všechny dvojice úplné. Zachované všechny původní neprázdné věty, pořadí,
+FR hesla, L/HT, gender a další sloupce;4 české opravy: cette → tato/tahle,
+porter → nosit/mít na sobě, jupe → sukně, bizarre → bizarní/divné.
+Starý helper vázaný na Order nebyl aplikován. Zápis přes existující
+vocabulary_csv_store se SHA kontrolou, ověřenou zálohou a atomickou výměnou.
+
+Obrázky: Šest nových samostatných ilustrací přes vestavěný image_gen
+(clothes, these, short, tshirt, strange, suitsyou); Adam zkontroloval výstupy
+v rámci výslovného pověření vytvořit potřebné obrázky a aktualizovat mapping.
+Čtvercové1254×1254 WebP,94 226–229 300 B, bez textu. Ostatní obrázky znovu
+použité včetně jacket pro nosit/mít na sobě. Žádná původní ilustrace se
+nepřepisovala ani nemazala. Nové soubory v obou Pict mají stejné SHA-256.
+
+Mapping:1119 →1136 českých abecedních vazeb,17 nových klíčů. Zachované
+všechny dosavadní vazby. Doplněné i nalezené starší mezery pro křehké,
+pozvaného hosta, závody a pst. Kanonický Pict/mapping.json a Janina
+distribuční kopie jsou bajtově shodné. Mílovo FR477 a IT471 hashově
+beze změny; staré kořenové CSV ani VocabularyFR_Jana.csv se nepoužívají
+a neměnily se.
+
+Ověření:6 kanonických testů mappingu PASS, rychlá statická brána PASS.
+Společný audit všech tří aktivních slovníků a skutečných desktopových/
+Pythonista resolverů: FR Míla477 / FR Jana469 / IT Míla471, všechny věty úplné, skutečné desktopové i Pythonista resolvery bez chybějících obrázků;1517 obrazových cest dekódováno,0 chybějících mapování/souborů.
+Foundation NSURL potvrdilo uploaded=true, uploading=false, upload_error=false
+pro Janino CSV, mapping a všech6 nových obrázků (8 souborů). Fyzický reload
+na Janině iPhonu je samostatná přejímka; samotný upload jej nedokazuje.
+
+Soukromé plány, ověřené zálohy a účtenky:
+data/private/vocabularyfr_refresh_20261114/. Nové ilustrace a prompty:
+PictNew/generated/20261114_fr_jana_refresh_batch001/generation_report.json
+a review.html. Generované obrázky a soukromé CSV zůstávají mimo Git přes
+přesný lokální exclude. Do checkpointu patří mapping a bezpečné podklady.
+Nesouvisející nezařazený agent_supervisor 2.md zůstává zachovaný.
+
+Další krok: Jana znovu načte sdílená data v používané aplikaci. Nahrát/
+synchronizovat VocabularyFR/VocabularyFR.csv a v Pict mapping.json plus
+clothes.webp, these.webp, short.webp, tshirt.webp, strange.webp, suitsyou.webp.
+Mapping patří pouze do Pict. Kód aplikací, instalace, Cockpit ani Pages se
+neměnily; žádné p+n ani externí zpráva nebyly zadané či provedené.
