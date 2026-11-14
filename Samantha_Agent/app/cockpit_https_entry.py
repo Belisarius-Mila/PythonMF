@@ -51,6 +51,7 @@ def read_serve_status() -> object:
     result = subprocess.run(
         [str(binary), "serve", "status", "--json"],
         capture_output=True, text=True, timeout=2, check=False,
+        env={**os.environ, "TAILSCALE_BE_CLI": "1"},
     )
     return json.loads(result.stdout) if result.returncode == 0 else None
 

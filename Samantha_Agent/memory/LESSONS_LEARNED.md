@@ -2529,3 +2529,15 @@ s mock video-only kamerou, stop tracků a dekódováním WASM.
   beze změn během finálního plného běhu. Jeho jediný nezávislý syntetický
   RPC timeout ověřen opakováním celého nezměněného modulu42 PASS; v účtence
   zachovat původní nečistý návrat brány a oddělený retest.
+
+
+### 2026-11-14 16:02 CET — LL-072 platí také pro nový HTTPS resolver Cockpitu
+
+- Kontext: Jednotkové HTTP testy a terminálový resolver prošly, ale skutečný
+  launchd server vracel původní HTTP200. Živá kontrola po p+n odhalila rozdíl.
+- Řešení: Také read_serve_status předá pouze svému čtecímu subprocessu
+  TAILSCALE_BE_CLI=1; rodič ani síťová konfigurace se nemění.
+- Ověření: Skutečná binárka bez terminálových proměnných: exit0/neplatný JSON;
+  s CLI validní JSON. Nový procesový test s prázdným prostředím a test
+  neovlivněného rodiče,90 cílených PASS. Finální živý doklad je v konkrétní
+  účtence HTTPS opravy a live_verification.json, ne ve starší obecné účtence.

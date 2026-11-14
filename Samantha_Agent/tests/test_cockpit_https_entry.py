@@ -2,10 +2,14 @@ from __future__ import annotations
 
 import copy
 import http.client
+import json
+import os
 import subprocess
+import tempfile
 import threading
 import unittest
 from http.server import ThreadingHTTPServer
+from pathlib import Path
 from unittest.mock import Mock, patch
 
 from app import cockpit
@@ -93,6 +97,20 @@ class HttpsCockpitEntryTests(unittest.TestCase):
         args, kwargs = run.call_args
         self.assertEqual(args[0][1:], ['serve','status','--json'])
         self.assertEqual(kwargs['timeout'], 2)
+        self.assertEqual(kwargs['env']['TAILSCALE_BE_CLI'], '1')
+
+    def test_launchd_environment_gets_cli_json_without_changing_parent(self):
+        with tempfile.TemporaryDirectory() as directory:
+            binary = Path(directory) / 'tailscale'
+            binary.write_text('#!/bin/sh\nif [ "$TAILSCALE_BE_CLI" = 1 ]; then\n'
+                              + 'printf \'%s\\n\' ' + "'" + json.dumps(STATUS) + "'\n"
+                              + 'else\nprintf "GUI mode is not JSON\\n"\nfi\n')
+            binary.chmod(0o700)
+            with patch.dict(os.environ, {'SAMANTHA_TAILSCALE_BIN': str(binary)}, clear=True):
+                self.assertEqual(read_serve_status(), STATUS)
+                self.assertNotIn('TAILSCALE_BE_CLI', os.environ)
+                self.assertNotIn('TERM', os.environ)
+                self.assertNotIn('TERM_PROGRAM', os.environ)
 
 
 class HttpsCockpitHttpTests(unittest.TestCase):

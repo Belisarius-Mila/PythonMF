@@ -2910,3 +2910,35 @@ Při obnově chybějící účtenka neznamená neprovedený push/deploy: ověři
 job a živý stav, nic automaticky neopakovat. Tento zápis sám není potvrzením
 publikace. Po potvrzeném vydání zbývá fyzický iPhone pilot knih a nové
 otevírání aplikací; původní ikonu/data ani výběr A nemazat.
+
+
+## 2026-11-14 16:02 CET — CLI režim při čtení HTTPS konfigurace
+
+Hotovo: Minimální oprava čtecího subprocessu a90 cílených PASS.
+
+Rozhodnutí: Dokončit už schválené úplné nasazení bez změny síťové konfigurace.
+
+Další krok: Nový přesný registrovaný job opravy a živé HTTP302.
+
+Navrhované další kroky: Fyzická přejímka iPhonu, zachovat původní data.
+
+Technický důkaz: První společné p+n potvrzené:9b846f75, Terra job79c8b5b1ddac34d3714b0cd826f6b7ab,
+push/deploy confirmed,3899 testů PASS/661,2s, smoke5/5 a chráněné služby beze změny.
+Živý HTML odpovídá zdroji a ISBN vrací Beletrie. Následná živá kontrola starého
+HTTP vstupu odhalila chybějící CLI režim Tailscale pod launchd. Terminálový
+resolver fungoval; bez TERM/TERM_PROGRAM/TAILSCALE_BE_CLI reálná GUI binárka
+vrátila exit0 a neplatný JSON. S explicitním CLI režimem validní JSON.
+
+Oprava: pouze čtecí subprocess serve status --json dostane ve vlastní kopii
+prostředí TAILSCALE_BE_CLI=1. Rodičovské prostředí, Serve, síť, certifikáty,
+PWA identity, soukromá data a aktivace agentů beze změny.90 cílených testů PASS,
+včetně skutečného procesu v minimálním syntetickém prostředí a ochrany rodiče.
+LL-072 je opakovatelný podklad; nepřenášet celé terminálové nastavení do služby.
+
+Dokončení opravy má vlastní nový registrovaný požadavek
+all-local-cockpit-20261114-https-cli-v1 a privátní autoritativní účtenku
+data/private/combined_release_20261114/https_cli_fix_receipt.json.
+Původní úspěšný job se neopakuje. Stav nové opravy a finální živé HTTP302,
+HTTPS, HTML a katalogové ověření určují tato účtenka a live_verification.json.
+Při nejistotě číst stejný job, nikoli znovu spouštět vydání. Fyzický iPhone
+pilot a případná obnova A zůstávají samostatné, původní data/ikonu nemazat.
