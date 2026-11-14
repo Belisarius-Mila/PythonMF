@@ -2600,3 +2600,12 @@ s mock video-only kamerou, stop tracků a dekódováním WASM.
 - Ověření: create, refresh, complete, nejasné výsledky a hlavičky v Node,
   skutečné keyboard/touch a obě sbalené karty70px v browser320/390/1280 PASS;
   samotné otevření/refresh nepřidávají POST, timer ani doménový zápis.
+
+
+### 2026-11-14 — Stejné EN neurčuje významovou identitu ani původ karty
+
+- Kontext: Při rozdělení second, help, right a dalších hesel na významové karty přibudou stejné anglické názvy. Starší Benji audit vybíral jen podle normalizovaného EN a zahrnul i novější významy.
+- Řešení: Význam má vlastní UID/audio ID a přesný EN/CZ match; původní aliasy zůstávají stejné identitě. Autorský Benji apply omezuje zdroj na původní Order i heslo. Nový význam nepřebírá osobní A–D ani cizí provenienci. Připnuté obrázky používají skutečné kanonické názvy bez pomlček; ověřit imageStem a imageSource místo tichého others.
+- Ověření: Oba významy second mají oddělenou navigaci, CZ audio a výběr A; nové významy zůstávají bez Benji i po skutečném dočasném apply. 36 cílených Python včetně55 Node scénářů PASS; 73 nových MP3 dekódovaných, 2479 původních médií shodných.
+
+Finální ověření tohoto kroku: plná brána3920 PASS /706,416s unit část,31 SKIP;107/107 finálních zdrojů/médií shodných se zeleným během.

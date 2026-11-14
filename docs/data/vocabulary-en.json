@@ -1,8 +1,8 @@
 {
   "app": "VocabularyEN",
-  "generatedAt": "2026-11-14T18:06:22.420979+00:00",
+  "generatedAt": "2026-11-14T20:15:52.654793+00:00",
   "sourceCsv": "VocabularyEN/VocabularyEN.csv",
-  "itemCount": 425,
+  "itemCount": 442,
   "wordSets": [
     "Actions",
     "Animals",
@@ -17,14 +17,14 @@
     "selected": 107,
     "hardTraining": 70,
     "wordSetCount": 8,
-    "withSentence": 425,
-    "withSentenceTranslation": 425,
+    "withSentence": 442,
+    "withSentenceTranslation": 442,
     "imageSources": {
-      "catalog": 1,
-      "direct": 360,
-      "mapping": 64
+      "catalog": 37,
+      "direct": 342,
+      "mapping": 63
     },
-    "uniqueImageFiles": 384
+    "uniqueImageFiles": 392
   },
   "items": [
     {
@@ -1072,7 +1072,7 @@
       "id": 30,
       "order": 30,
       "en": "drink",
-      "cz": "nápoj, pít",
+      "cz": "pít",
       "sentenceEn": "When I feel tired, I drink a little water.",
       "sentenceCz": "Když jsem unavený, napiju se trochu vody.",
       "wordSets": [
@@ -1083,7 +1083,7 @@
       "image": "assets/vocabulary-en/drink.jpg",
       "imageStem": "drink",
       "imageRequestedStem": "drink",
-      "imageSource": "direct",
+      "imageSource": "catalog",
       "imageMissing": false,
       "uid": "ven-0030",
       "primaryGroup": "topic-16",
@@ -1096,9 +1096,14 @@
       "expressionType": "word",
       "difficultyBand": 2,
       "difficultyStatus": "draft",
-      "editorialStatus": "needs-review",
+      "editorialStatus": "reviewed",
       "galleryOrder": 14,
-      "related": [],
+      "related": [
+        {
+          "uid": "ven-0426",
+          "kind": "same-lemma"
+        }
+      ],
       "active": true,
       "teachingType": "word",
       "sourceIds": [],
@@ -1109,8 +1114,8 @@
       "order": 31,
       "en": "drawing",
       "cz": "kreslení",
-      "sentenceEn": "Your drawing is funny and very clear.",
-      "sentenceCz": "Tvá kresba je vtipná a moc povedená.",
+      "sentenceEn": "Drawing is fun.",
+      "sentenceCz": "Kreslení je zábava.",
       "wordSets": [
         "Actions"
       ],
@@ -1119,7 +1124,7 @@
       "image": "assets/vocabulary-en/drawing.webp",
       "imageStem": "drawing",
       "imageRequestedStem": "drawing",
-      "imageSource": "direct",
+      "imageSource": "catalog",
       "imageMissing": false,
       "uid": "ven-0031",
       "primaryGroup": "topic-09",
@@ -1133,9 +1138,14 @@
       "expressionType": "word",
       "difficultyBand": 1,
       "difficultyStatus": "draft",
-      "editorialStatus": "needs-review",
+      "editorialStatus": "reviewed",
       "galleryOrder": 11,
-      "related": [],
+      "related": [
+        {
+          "uid": "ven-0427",
+          "kind": "same-lemma"
+        }
+      ],
       "active": true,
       "teachingType": "word",
       "sourceIds": [],
@@ -1332,7 +1342,7 @@
       "image": "assets/vocabulary-en/fair.webp",
       "imageStem": "fair",
       "imageRequestedStem": "fair",
-      "imageSource": "direct",
+      "imageSource": "catalog",
       "imageMissing": false,
       "uid": "ven-0037",
       "primaryGroup": "topic-10",
@@ -1345,7 +1355,7 @@
       "expressionType": "word",
       "difficultyBand": 1,
       "difficultyStatus": "draft",
-      "editorialStatus": "needs-review",
+      "editorialStatus": "reviewed",
       "galleryOrder": 6,
       "related": [],
       "active": true,
@@ -1567,16 +1577,16 @@
       "id": 44,
       "order": 44,
       "en": "free",
-      "cz": "volný; zdarma",
+      "cz": "volný",
       "sentenceEn": "Are you free this evening for a short walk?",
       "sentenceCz": "Máš dnes večer čas na krátkou procházku?",
       "wordSets": [],
       "selected": false,
       "hardTraining": false,
-      "image": "assets/vocabulary-en/free.png",
-      "imageStem": "free",
-      "imageRequestedStem": "free",
-      "imageSource": "direct",
+      "image": "assets/vocabulary-en/sensefreetime.png",
+      "imageStem": "sensefreetime",
+      "imageRequestedStem": "sensefreetime",
+      "imageSource": "catalog",
       "imageMissing": false,
       "uid": "ven-0044",
       "primaryGroup": "topic-14",
@@ -1589,13 +1599,22 @@
       "expressionType": "word",
       "difficultyBand": 2,
       "difficultyStatus": "draft",
-      "editorialStatus": "needs-review",
+      "editorialStatus": "reviewed",
       "galleryOrder": 10,
-      "related": [],
+      "related": [
+        {
+          "uid": "ven-0428",
+          "kind": "same-lemma"
+        },
+        {
+          "uid": "ven-0429",
+          "kind": "same-lemma"
+        }
+      ],
       "active": true,
       "teachingType": "word",
       "sourceIds": [],
-      "thumbnail": "assets/vocabulary-en-thumbs/free-1b48f45dfd08e468.webp"
+      "thumbnail": "assets/vocabulary-en-thumbs/sensefreetime-0d7c9181ea9ba5c8.webp"
     },
     {
       "id": 45,
@@ -2075,15 +2094,15 @@
       "order": 58,
       "en": "help",
       "cz": "pomoc",
-      "sentenceEn": "Thank you for your help;\" I really needed it.",
-      "sentenceCz": "Děkuju za pomoc, opravdu jsem ji potřeboval.",
+      "sentenceEn": "Thank you for your help. I really needed it.",
+      "sentenceCz": "Děkuju za pomoc. Opravdu jsem ji potřeboval.",
       "wordSets": [],
       "selected": true,
       "hardTraining": true,
       "image": "assets/vocabulary-en/help.png",
       "imageStem": "help",
       "imageRequestedStem": "help",
-      "imageSource": "direct",
+      "imageSource": "catalog",
       "imageMissing": false,
       "uid": "ven-0058",
       "primaryGroup": "topic-15",
@@ -2091,15 +2110,19 @@
         "topic-15"
       ],
       "partOfSpeech": [
-        "noun",
-        "verb"
+        "noun"
       ],
       "expressionType": "word",
       "difficultyBand": 2,
       "difficultyStatus": "draft",
-      "editorialStatus": "needs-review",
+      "editorialStatus": "reviewed",
       "galleryOrder": 6,
-      "related": [],
+      "related": [
+        {
+          "uid": "ven-0430",
+          "kind": "same-lemma"
+        }
+      ],
       "active": true,
       "teachingType": "word",
       "sourceIds": [],
@@ -4242,7 +4265,7 @@
       "id": 119,
       "order": 119,
       "en": "chicken",
-      "cz": "kuře",
+      "cz": "kuřecí maso",
       "sentenceEn": "For dinner, we cook chicken with rice.",
       "sentenceCz": "K večeři uvaříme kuře s rýží.",
       "wordSets": [
@@ -4253,7 +4276,7 @@
       "image": "assets/vocabulary-en/chicken.png",
       "imageStem": "chicken",
       "imageRequestedStem": "chicken",
-      "imageSource": "direct",
+      "imageSource": "catalog",
       "imageMissing": false,
       "uid": "ven-0119",
       "primaryGroup": "topic-05",
@@ -4266,9 +4289,14 @@
       "expressionType": "word",
       "difficultyBand": 1,
       "difficultyStatus": "draft",
-      "editorialStatus": "needs-review",
+      "editorialStatus": "reviewed",
       "galleryOrder": 10,
-      "related": [],
+      "related": [
+        {
+          "uid": "ven-0431",
+          "kind": "same-lemma"
+        }
+      ],
       "active": true,
       "teachingType": "word",
       "sourceIds": [],
@@ -5122,7 +5150,7 @@
       "id": 144,
       "order": 144,
       "en": "right",
-      "cz": "pravý, správný, doprava",
+      "cz": "doprava",
       "sentenceEn": "Go straight and then turn right.",
       "sentenceCz": "Jdi rovně a pak zahni doprava.",
       "wordSets": [],
@@ -5131,7 +5159,7 @@
       "image": "assets/vocabulary-en/right.jpg",
       "imageStem": "right",
       "imageRequestedStem": "right",
-      "imageSource": "direct",
+      "imageSource": "catalog",
       "imageMissing": false,
       "uid": "ven-0144",
       "primaryGroup": "topic-13",
@@ -5144,12 +5172,20 @@
       "expressionType": "word",
       "difficultyBand": 2,
       "difficultyStatus": "draft",
-      "editorialStatus": "needs-review",
+      "editorialStatus": "reviewed",
       "galleryOrder": 11,
       "related": [
         {
           "uid": "ven-0066",
           "kind": "opposite"
+        },
+        {
+          "uid": "ven-0432",
+          "kind": "same-lemma"
+        },
+        {
+          "uid": "ven-0433",
+          "kind": "same-lemma"
         }
       ],
       "active": true,
@@ -5342,7 +5378,7 @@
       "image": "assets/vocabulary-en/howmuch.webp",
       "imageStem": "howmuch",
       "imageRequestedStem": "howmuch",
-      "imageSource": "direct",
+      "imageSource": "catalog",
       "imageMissing": false,
       "uid": "ven-0150",
       "primaryGroup": "topic-11",
@@ -5353,7 +5389,7 @@
       "expressionType": "phrase",
       "difficultyBand": 1,
       "difficultyStatus": "draft",
-      "editorialStatus": "needs-review",
+      "editorialStatus": "reviewed",
       "galleryOrder": 8,
       "related": [],
       "active": true,
@@ -5578,7 +5614,7 @@
       "image": "assets/vocabulary-en/skating.png",
       "imageStem": "skating",
       "imageRequestedStem": "skating",
-      "imageSource": "direct",
+      "imageSource": "catalog",
       "imageMissing": false,
       "uid": "ven-0157",
       "primaryGroup": "topic-09",
@@ -5591,7 +5627,7 @@
       "expressionType": "word",
       "difficultyBand": 1,
       "difficultyStatus": "draft",
-      "editorialStatus": "needs-review",
+      "editorialStatus": "reviewed",
       "galleryOrder": 22,
       "related": [],
       "active": true,
@@ -5637,7 +5673,7 @@
       "id": 159,
       "order": 159,
       "en": "play",
-      "cz": "hrát si, hra",
+      "cz": "hrát si",
       "sentenceEn": "We play with our friends.",
       "sentenceCz": "Hrajeme si s našimi přáteli.",
       "wordSets": [],
@@ -5646,7 +5682,7 @@
       "image": "assets/vocabulary-en/play.png",
       "imageStem": "play",
       "imageRequestedStem": "play",
-      "imageSource": "direct",
+      "imageSource": "catalog",
       "imageMissing": false,
       "uid": "ven-0159",
       "primaryGroup": "topic-09",
@@ -5659,9 +5695,14 @@
       "expressionType": "word",
       "difficultyBand": 1,
       "difficultyStatus": "draft",
-      "editorialStatus": "needs-review",
+      "editorialStatus": "reviewed",
       "galleryOrder": 18,
-      "related": [],
+      "related": [
+        {
+          "uid": "ven-0434",
+          "kind": "same-lemma"
+        }
+      ],
       "active": true,
       "teachingType": "word",
       "sourceIds": [],
@@ -10060,7 +10101,7 @@
       "id": 275,
       "order": 275,
       "en": "careful",
-      "cz": "opatrný, opatrně",
+      "cz": "opatrný",
       "sentenceEn": "Be careful when you cross the road.",
       "sentenceCz": "Buď opatrný, když přecházíš silnici.",
       "wordSets": [
@@ -10071,7 +10112,7 @@
       "image": "assets/vocabulary-en/warning.webp",
       "imageStem": "warning",
       "imageRequestedStem": "warning",
-      "imageSource": "mapping",
+      "imageSource": "catalog",
       "imageMissing": false,
       "uid": "ven-0275",
       "primaryGroup": "topic-14",
@@ -10084,9 +10125,14 @@
       "expressionType": "word",
       "difficultyBand": 2,
       "difficultyStatus": "draft",
-      "editorialStatus": "needs-review",
+      "editorialStatus": "reviewed",
       "galleryOrder": 5,
-      "related": [],
+      "related": [
+        {
+          "uid": "ven-0435",
+          "kind": "derived-word"
+        }
+      ],
       "active": true,
       "teachingType": "word",
       "sourceIds": [
@@ -11434,7 +11480,7 @@
       "image": "assets/vocabulary-en/all.png",
       "imageStem": "all",
       "imageRequestedStem": "all",
-      "imageSource": "direct",
+      "imageSource": "catalog",
       "imageMissing": false,
       "uid": "ven-0310",
       "primaryGroup": "topic-11",
@@ -11447,7 +11493,7 @@
       "expressionType": "word",
       "difficultyBand": 3,
       "difficultyStatus": "draft",
-      "editorialStatus": "needs-review",
+      "editorialStatus": "reviewed",
       "galleryOrder": 1,
       "related": [],
       "active": true,
@@ -12259,9 +12305,9 @@
       "id": 332,
       "order": 332,
       "en": "first",
-      "cz": "první; nejdříve",
-      "sentenceEn": "I will go first.",
-      "sentenceCz": "Půjdu první.",
+      "cz": "první",
+      "sentenceEn": "The orange rabbit is first.",
+      "sentenceCz": "Oranžový králík je první.",
       "wordSets": [
         "Benji"
       ],
@@ -12270,7 +12316,7 @@
       "image": "assets/vocabulary-en/first.webp",
       "imageStem": "first",
       "imageRequestedStem": "first",
-      "imageSource": "direct",
+      "imageSource": "catalog",
       "imageMissing": false,
       "uid": "ven-0332",
       "primaryGroup": "topic-11",
@@ -12278,14 +12324,19 @@
         "topic-11"
       ],
       "partOfSpeech": [
-        "adjective"
+        "number"
       ],
       "expressionType": "word",
       "difficultyBand": 1,
       "difficultyStatus": "draft",
-      "editorialStatus": "needs-review",
+      "editorialStatus": "reviewed",
       "galleryOrder": 5,
-      "related": [],
+      "related": [
+        {
+          "uid": "ven-0436",
+          "kind": "same-lemma"
+        }
+      ],
       "active": true,
       "teachingType": "word",
       "sourceIds": [
@@ -12530,7 +12581,7 @@
       "id": 339,
       "order": 339,
       "en": "guard",
-      "cz": "hlídat; strážce",
+      "cz": "hlídat",
       "sentenceEn": "The dog can guard the gate.",
       "sentenceCz": "Pes může hlídat branku.",
       "wordSets": [
@@ -12541,7 +12592,7 @@
       "image": "assets/vocabulary-en/guard.webp",
       "imageStem": "guard",
       "imageRequestedStem": "guard",
-      "imageSource": "direct",
+      "imageSource": "catalog",
       "imageMissing": false,
       "uid": "ven-0339",
       "primaryGroup": "topic-16",
@@ -12554,9 +12605,14 @@
       "expressionType": "word",
       "difficultyBand": 2,
       "difficultyStatus": "draft",
-      "editorialStatus": "needs-review",
+      "editorialStatus": "reviewed",
       "galleryOrder": 22,
-      "related": [],
+      "related": [
+        {
+          "uid": "ven-0437",
+          "kind": "same-lemma"
+        }
+      ],
       "active": true,
       "teachingType": "word",
       "sourceIds": [
@@ -12758,7 +12814,7 @@
       "id": 345,
       "order": 345,
       "en": "her",
-      "cz": "ji; jí; její",
+      "cz": "ji; jí",
       "sentenceEn": "I can help her.",
       "sentenceCz": "Mohu jí pomoci.",
       "wordSets": [
@@ -12769,7 +12825,7 @@
       "image": "assets/vocabulary-en/her.webp",
       "imageStem": "her",
       "imageRequestedStem": "her",
-      "imageSource": "direct",
+      "imageSource": "catalog",
       "imageMissing": false,
       "uid": "ven-0345",
       "primaryGroup": "topic-18",
@@ -12782,9 +12838,14 @@
       "expressionType": "word",
       "difficultyBand": 3,
       "difficultyStatus": "draft",
-      "editorialStatus": "needs-review",
+      "editorialStatus": "reviewed",
       "galleryOrder": 9,
-      "related": [],
+      "related": [
+        {
+          "uid": "ven-0438",
+          "kind": "same-lemma"
+        }
+      ],
       "active": true,
       "teachingType": "word",
       "sourceIds": [
@@ -13936,7 +13997,7 @@
       "id": 376,
       "order": 376,
       "en": "open",
-      "cz": "otevřený; otevřít",
+      "cz": "otevřít",
       "sentenceEn": "Please open the door.",
       "sentenceCz": "Prosím otevři dveře.",
       "wordSets": [
@@ -13947,7 +14008,7 @@
       "image": "assets/vocabulary-en/open.png",
       "imageStem": "open",
       "imageRequestedStem": "open",
-      "imageSource": "direct",
+      "imageSource": "catalog",
       "imageMissing": false,
       "uid": "ven-0376",
       "primaryGroup": "topic-16",
@@ -13960,12 +14021,16 @@
       "expressionType": "word",
       "difficultyBand": 2,
       "difficultyStatus": "draft",
-      "editorialStatus": "needs-review",
+      "editorialStatus": "reviewed",
       "galleryOrder": 31,
       "related": [
         {
           "uid": "ven-0295",
           "kind": "opposite"
+        },
+        {
+          "uid": "ven-0439",
+          "kind": "same-lemma"
         }
       ],
       "active": true,
@@ -14283,7 +14348,7 @@
       "id": 385,
       "order": 385,
       "en": "second",
-      "cz": "sekunda; druhý",
+      "cz": "sekunda",
       "sentenceEn": "Wait a second, please.",
       "sentenceCz": "Počkej prosím chvilku.",
       "wordSets": [
@@ -14294,7 +14359,7 @@
       "image": "assets/vocabulary-en/second.webp",
       "imageStem": "second",
       "imageRequestedStem": "second",
-      "imageSource": "direct",
+      "imageSource": "catalog",
       "imageMissing": false,
       "uid": "ven-0385",
       "primaryGroup": "topic-12",
@@ -14307,9 +14372,14 @@
       "expressionType": "word",
       "difficultyBand": 2,
       "difficultyStatus": "draft",
-      "editorialStatus": "needs-review",
+      "editorialStatus": "reviewed",
       "galleryOrder": 8,
-      "related": [],
+      "related": [
+        {
+          "uid": "ven-0440",
+          "kind": "same-lemma"
+        }
+      ],
       "active": true,
       "teachingType": "word",
       "sourceIds": [
@@ -14321,7 +14391,7 @@
       "id": 386,
       "order": 386,
       "en": "smile",
-      "cz": "usmívat se; úsměv",
+      "cz": "usmívat se",
       "sentenceEn": "I smile when I see my friends.",
       "sentenceCz": "Usmívám se, když vidím své kamarády.",
       "wordSets": [
@@ -14332,7 +14402,7 @@
       "image": "assets/vocabulary-en/smile.webp",
       "imageStem": "smile",
       "imageRequestedStem": "smile",
-      "imageSource": "direct",
+      "imageSource": "catalog",
       "imageMissing": false,
       "uid": "ven-0386",
       "primaryGroup": "topic-15",
@@ -14345,9 +14415,14 @@
       "expressionType": "word",
       "difficultyBand": 2,
       "difficultyStatus": "draft",
-      "editorialStatus": "needs-review",
+      "editorialStatus": "reviewed",
       "galleryOrder": 18,
-      "related": [],
+      "related": [
+        {
+          "uid": "ven-0441",
+          "kind": "same-lemma"
+        }
+      ],
       "active": true,
       "teachingType": "word",
       "sourceIds": [
@@ -14777,9 +14852,9 @@
       "id": 398,
       "order": 398,
       "en": "that",
-      "cz": "tamten; že",
-      "sentenceEn": "That house is big.",
-      "sentenceCz": "Tamten dům je velký.",
+      "cz": "tamten; tamta; tamto",
+      "sentenceEn": "That bird is small.",
+      "sentenceCz": "Tamten pták je malý.",
       "wordSets": [
         "Benji"
       ],
@@ -14788,7 +14863,7 @@
       "image": "assets/vocabulary-en/that.png",
       "imageStem": "that",
       "imageRequestedStem": "that",
-      "imageSource": "direct",
+      "imageSource": "catalog",
       "imageMissing": false,
       "uid": "ven-0398",
       "primaryGroup": "topic-18",
@@ -14796,14 +14871,20 @@
         "topic-18"
       ],
       "partOfSpeech": [
+        "determiner",
         "pronoun"
       ],
       "expressionType": "word",
       "difficultyBand": 3,
       "difficultyStatus": "draft",
-      "editorialStatus": "needs-review",
+      "editorialStatus": "reviewed",
       "galleryOrder": 23,
-      "related": [],
+      "related": [
+        {
+          "uid": "ven-0442",
+          "kind": "same-lemma"
+        }
+      ],
       "active": true,
       "teachingType": "word",
       "sourceIds": [
@@ -15836,6 +15917,669 @@
         "benji"
       ],
       "thumbnail": "assets/vocabulary-en-thumbs/yourm-371ac31304634d73.webp"
+    },
+    {
+      "id": 426,
+      "order": 426,
+      "en": "drink",
+      "cz": "nápoj",
+      "sentenceEn": "This drink is cold.",
+      "sentenceCz": "Tenhle nápoj je studený.",
+      "wordSets": [],
+      "selected": false,
+      "hardTraining": false,
+      "image": "assets/vocabulary-en/glass.jpg",
+      "imageStem": "glass",
+      "imageRequestedStem": "glass",
+      "imageSource": "catalog",
+      "imageMissing": false,
+      "uid": "ven-0426",
+      "primaryGroup": "topic-05",
+      "topicIds": [
+        "topic-05"
+      ],
+      "partOfSpeech": [
+        "noun"
+      ],
+      "expressionType": "word",
+      "difficultyBand": 2,
+      "difficultyStatus": "draft",
+      "editorialStatus": "reviewed",
+      "galleryOrder": 34,
+      "related": [
+        {
+          "uid": "ven-0030",
+          "kind": "same-lemma"
+        }
+      ],
+      "active": true,
+      "teachingType": "word",
+      "sourceIds": [],
+      "thumbnail": "assets/vocabulary-en-thumbs/glass-84b1c8c49720132f.webp"
+    },
+    {
+      "id": 427,
+      "order": 427,
+      "en": "drawing",
+      "cz": "kresba",
+      "sentenceEn": "This drawing shows a house.",
+      "sentenceCz": "Na této kresbě je dům.",
+      "wordSets": [],
+      "selected": false,
+      "hardTraining": false,
+      "image": "assets/vocabulary-en/drawing.webp",
+      "imageStem": "drawing",
+      "imageRequestedStem": "drawing",
+      "imageSource": "catalog",
+      "imageMissing": false,
+      "uid": "ven-0427",
+      "primaryGroup": "topic-09",
+      "topicIds": [
+        "topic-09"
+      ],
+      "partOfSpeech": [
+        "noun"
+      ],
+      "expressionType": "word",
+      "difficultyBand": 1,
+      "difficultyStatus": "draft",
+      "editorialStatus": "reviewed",
+      "galleryOrder": 24,
+      "related": [
+        {
+          "uid": "ven-0031",
+          "kind": "same-lemma"
+        }
+      ],
+      "active": true,
+      "teachingType": "word",
+      "sourceIds": [],
+      "thumbnail": "assets/vocabulary-en-thumbs/drawing-c91d31c7383b5235.webp"
+    },
+    {
+      "id": 428,
+      "order": 428,
+      "en": "free",
+      "cz": "zdarma",
+      "sentenceEn": "The water is free.",
+      "sentenceCz": "Voda je zdarma.",
+      "wordSets": [],
+      "selected": false,
+      "hardTraining": false,
+      "image": "assets/vocabulary-en/sensefreegratis.png",
+      "imageStem": "sensefreegratis",
+      "imageRequestedStem": "sensefreegratis",
+      "imageSource": "catalog",
+      "imageMissing": false,
+      "uid": "ven-0428",
+      "primaryGroup": "topic-14",
+      "topicIds": [
+        "topic-14"
+      ],
+      "partOfSpeech": [
+        "adjective"
+      ],
+      "expressionType": "word",
+      "difficultyBand": 2,
+      "difficultyStatus": "draft",
+      "editorialStatus": "reviewed",
+      "galleryOrder": 36,
+      "related": [
+        {
+          "uid": "ven-0044",
+          "kind": "same-lemma"
+        }
+      ],
+      "active": true,
+      "teachingType": "word",
+      "sourceIds": [],
+      "thumbnail": "assets/vocabulary-en-thumbs/sensefreegratis-6f03ad9030406111.webp"
+    },
+    {
+      "id": 429,
+      "order": 429,
+      "en": "free",
+      "cz": "svobodný",
+      "sentenceEn": "I feel free.",
+      "sentenceCz": "Cítím se svobodný.",
+      "wordSets": [],
+      "selected": false,
+      "hardTraining": false,
+      "image": "assets/vocabulary-en/free.png",
+      "imageStem": "free",
+      "imageRequestedStem": "free",
+      "imageSource": "catalog",
+      "imageMissing": false,
+      "uid": "ven-0429",
+      "primaryGroup": "topic-15",
+      "topicIds": [
+        "topic-15"
+      ],
+      "partOfSpeech": [
+        "adjective"
+      ],
+      "expressionType": "word",
+      "difficultyBand": 2,
+      "difficultyStatus": "draft",
+      "editorialStatus": "reviewed",
+      "galleryOrder": 25,
+      "related": [
+        {
+          "uid": "ven-0044",
+          "kind": "same-lemma"
+        }
+      ],
+      "active": true,
+      "teachingType": "word",
+      "sourceIds": [],
+      "thumbnail": "assets/vocabulary-en-thumbs/free-1b48f45dfd08e468.webp"
+    },
+    {
+      "id": 430,
+      "order": 430,
+      "en": "help",
+      "cz": "pomoci; pomáhat",
+      "sentenceEn": "Can you help me?",
+      "sentenceCz": "Můžeš mi pomoci?",
+      "wordSets": [],
+      "selected": false,
+      "hardTraining": false,
+      "image": "assets/vocabulary-en/help.png",
+      "imageStem": "help",
+      "imageRequestedStem": "help",
+      "imageSource": "catalog",
+      "imageMissing": false,
+      "uid": "ven-0430",
+      "primaryGroup": "topic-16",
+      "topicIds": [
+        "topic-16"
+      ],
+      "partOfSpeech": [
+        "verb"
+      ],
+      "expressionType": "word",
+      "difficultyBand": 2,
+      "difficultyStatus": "draft",
+      "editorialStatus": "reviewed",
+      "galleryOrder": 46,
+      "related": [
+        {
+          "uid": "ven-0058",
+          "kind": "same-lemma"
+        }
+      ],
+      "active": true,
+      "teachingType": "word",
+      "sourceIds": [],
+      "thumbnail": "assets/vocabulary-en-thumbs/help-9274a230853d3a6b.webp"
+    },
+    {
+      "id": 431,
+      "order": 431,
+      "en": "chicken",
+      "cz": "slepice",
+      "sentenceEn": "The chicken walks in the yard.",
+      "sentenceCz": "Slepice chodí po dvoře.",
+      "wordSets": [],
+      "selected": false,
+      "hardTraining": false,
+      "image": "assets/vocabulary-en/sensechickenanimal.png",
+      "imageStem": "sensechickenanimal",
+      "imageRequestedStem": "sensechickenanimal",
+      "imageSource": "catalog",
+      "imageMissing": false,
+      "uid": "ven-0431",
+      "primaryGroup": "topic-06",
+      "topicIds": [
+        "topic-06"
+      ],
+      "partOfSpeech": [
+        "noun"
+      ],
+      "expressionType": "word",
+      "difficultyBand": 1,
+      "difficultyStatus": "draft",
+      "editorialStatus": "reviewed",
+      "galleryOrder": 40,
+      "related": [
+        {
+          "uid": "ven-0119",
+          "kind": "same-lemma"
+        }
+      ],
+      "active": true,
+      "teachingType": "word",
+      "sourceIds": [],
+      "thumbnail": "assets/vocabulary-en-thumbs/sensechickenanimal-888bdb70d846c9dd.webp"
+    },
+    {
+      "id": 432,
+      "order": 432,
+      "en": "right",
+      "cz": "správný",
+      "sentenceEn": "This is the right shape.",
+      "sentenceCz": "Tohle je správný tvar.",
+      "wordSets": [],
+      "selected": false,
+      "hardTraining": false,
+      "image": "assets/vocabulary-en/senserightcorrect.png",
+      "imageStem": "senserightcorrect",
+      "imageRequestedStem": "senserightcorrect",
+      "imageSource": "catalog",
+      "imageMissing": false,
+      "uid": "ven-0432",
+      "primaryGroup": "topic-14",
+      "topicIds": [
+        "topic-14"
+      ],
+      "partOfSpeech": [
+        "adjective"
+      ],
+      "expressionType": "word",
+      "difficultyBand": 2,
+      "difficultyStatus": "draft",
+      "editorialStatus": "reviewed",
+      "galleryOrder": 37,
+      "related": [
+        {
+          "uid": "ven-0144",
+          "kind": "same-lemma"
+        }
+      ],
+      "active": true,
+      "teachingType": "word",
+      "sourceIds": [],
+      "thumbnail": "assets/vocabulary-en-thumbs/senserightcorrect-1be6797ad9dc1983.webp"
+    },
+    {
+      "id": 433,
+      "order": 433,
+      "en": "right",
+      "cz": "pravý",
+      "sentenceEn": "Raise your right hand.",
+      "sentenceCz": "Zvedni pravou ruku.",
+      "wordSets": [],
+      "selected": false,
+      "hardTraining": false,
+      "image": "assets/vocabulary-en/senserightside.png",
+      "imageStem": "senserightside",
+      "imageRequestedStem": "senserightside",
+      "imageSource": "catalog",
+      "imageMissing": false,
+      "uid": "ven-0433",
+      "primaryGroup": "topic-13",
+      "topicIds": [
+        "topic-13"
+      ],
+      "partOfSpeech": [
+        "adjective"
+      ],
+      "expressionType": "word",
+      "difficultyBand": 2,
+      "difficultyStatus": "draft",
+      "editorialStatus": "reviewed",
+      "galleryOrder": 19,
+      "related": [
+        {
+          "uid": "ven-0144",
+          "kind": "same-lemma"
+        }
+      ],
+      "active": true,
+      "teachingType": "word",
+      "sourceIds": [],
+      "thumbnail": "assets/vocabulary-en-thumbs/senserightside-8bdb22f49071b488.webp"
+    },
+    {
+      "id": 434,
+      "order": 434,
+      "en": "play",
+      "cz": "hra (činnost)",
+      "sentenceEn": "Play helps children learn.",
+      "sentenceCz": "Hra pomáhá dětem učit se.",
+      "wordSets": [],
+      "selected": false,
+      "hardTraining": false,
+      "image": "assets/vocabulary-en/play.png",
+      "imageStem": "play",
+      "imageRequestedStem": "play",
+      "imageSource": "catalog",
+      "imageMissing": false,
+      "uid": "ven-0434",
+      "primaryGroup": "topic-09",
+      "topicIds": [
+        "topic-09"
+      ],
+      "partOfSpeech": [
+        "noun"
+      ],
+      "expressionType": "word",
+      "difficultyBand": 1,
+      "difficultyStatus": "draft",
+      "editorialStatus": "reviewed",
+      "galleryOrder": 25,
+      "related": [
+        {
+          "uid": "ven-0159",
+          "kind": "same-lemma"
+        }
+      ],
+      "active": true,
+      "teachingType": "word",
+      "sourceIds": [],
+      "thumbnail": "assets/vocabulary-en-thumbs/play-97d5f2788def8981.webp"
+    },
+    {
+      "id": 435,
+      "order": 435,
+      "en": "carefully",
+      "cz": "opatrně",
+      "sentenceEn": "Cross the road carefully.",
+      "sentenceCz": "Přejdi opatrně přes silnici.",
+      "wordSets": [],
+      "selected": false,
+      "hardTraining": false,
+      "image": "assets/vocabulary-en/warning.webp",
+      "imageStem": "warning",
+      "imageRequestedStem": "warning",
+      "imageSource": "catalog",
+      "imageMissing": false,
+      "uid": "ven-0435",
+      "primaryGroup": "topic-16",
+      "topicIds": [
+        "topic-16"
+      ],
+      "partOfSpeech": [
+        "adverb"
+      ],
+      "expressionType": "word",
+      "difficultyBand": 2,
+      "difficultyStatus": "draft",
+      "editorialStatus": "reviewed",
+      "galleryOrder": 47,
+      "related": [
+        {
+          "uid": "ven-0275",
+          "kind": "derived-word"
+        }
+      ],
+      "active": true,
+      "teachingType": "word",
+      "sourceIds": [],
+      "thumbnail": "assets/vocabulary-en-thumbs/warning-c71e238ad9cc697e.webp"
+    },
+    {
+      "id": 436,
+      "order": 436,
+      "en": "first",
+      "cz": "nejdříve",
+      "sentenceEn": "You go first.",
+      "sentenceCz": "Ty jdi nejdříve.",
+      "wordSets": [],
+      "selected": false,
+      "hardTraining": false,
+      "image": "assets/vocabulary-en/first.webp",
+      "imageStem": "first",
+      "imageRequestedStem": "first",
+      "imageSource": "catalog",
+      "imageMissing": false,
+      "uid": "ven-0436",
+      "primaryGroup": "topic-12",
+      "topicIds": [
+        "topic-12"
+      ],
+      "partOfSpeech": [
+        "adverb"
+      ],
+      "expressionType": "word",
+      "difficultyBand": 1,
+      "difficultyStatus": "draft",
+      "editorialStatus": "reviewed",
+      "galleryOrder": 14,
+      "related": [
+        {
+          "uid": "ven-0332",
+          "kind": "same-lemma"
+        }
+      ],
+      "active": true,
+      "teachingType": "word",
+      "sourceIds": [],
+      "thumbnail": "assets/vocabulary-en-thumbs/first-155689b8176fb256.webp"
+    },
+    {
+      "id": 437,
+      "order": 437,
+      "en": "guard",
+      "cz": "strážce",
+      "sentenceEn": "The guard stands by the gate.",
+      "sentenceCz": "Strážce stojí u brány.",
+      "wordSets": [],
+      "selected": false,
+      "hardTraining": false,
+      "image": "assets/vocabulary-en/senseguardperson.png",
+      "imageStem": "senseguardperson",
+      "imageRequestedStem": "senseguardperson",
+      "imageSource": "catalog",
+      "imageMissing": false,
+      "uid": "ven-0437",
+      "primaryGroup": "topic-01",
+      "topicIds": [
+        "topic-01"
+      ],
+      "partOfSpeech": [
+        "noun"
+      ],
+      "expressionType": "word",
+      "difficultyBand": 2,
+      "difficultyStatus": "draft",
+      "editorialStatus": "reviewed",
+      "galleryOrder": 22,
+      "related": [
+        {
+          "uid": "ven-0339",
+          "kind": "same-lemma"
+        }
+      ],
+      "active": true,
+      "teachingType": "word",
+      "sourceIds": [],
+      "thumbnail": "assets/vocabulary-en-thumbs/senseguardperson-b7600d5239d2cce6.webp"
+    },
+    {
+      "id": 438,
+      "order": 438,
+      "en": "her",
+      "cz": "její",
+      "sentenceEn": "Her bag is red.",
+      "sentenceCz": "Její taška je červená.",
+      "wordSets": [],
+      "selected": false,
+      "hardTraining": false,
+      "image": "assets/vocabulary-en/senseherpossessive.png",
+      "imageStem": "senseherpossessive",
+      "imageRequestedStem": "senseherpossessive",
+      "imageSource": "catalog",
+      "imageMissing": false,
+      "uid": "ven-0438",
+      "primaryGroup": "topic-18",
+      "topicIds": [
+        "topic-18"
+      ],
+      "partOfSpeech": [
+        "determiner"
+      ],
+      "expressionType": "word",
+      "difficultyBand": 3,
+      "difficultyStatus": "draft",
+      "editorialStatus": "reviewed",
+      "galleryOrder": 37,
+      "related": [
+        {
+          "uid": "ven-0345",
+          "kind": "same-lemma"
+        }
+      ],
+      "active": true,
+      "teachingType": "word",
+      "sourceIds": [],
+      "thumbnail": "assets/vocabulary-en-thumbs/senseherpossessive-b5a97fb02057a2bb.webp"
+    },
+    {
+      "id": 439,
+      "order": 439,
+      "en": "open",
+      "cz": "otevřený",
+      "sentenceEn": "The door is open.",
+      "sentenceCz": "Dveře jsou otevřené.",
+      "wordSets": [],
+      "selected": false,
+      "hardTraining": false,
+      "image": "assets/vocabulary-en/open.png",
+      "imageStem": "open",
+      "imageRequestedStem": "open",
+      "imageSource": "catalog",
+      "imageMissing": false,
+      "uid": "ven-0439",
+      "primaryGroup": "topic-14",
+      "topicIds": [
+        "topic-14"
+      ],
+      "partOfSpeech": [
+        "adjective"
+      ],
+      "expressionType": "word",
+      "difficultyBand": 2,
+      "difficultyStatus": "draft",
+      "editorialStatus": "reviewed",
+      "galleryOrder": 38,
+      "related": [
+        {
+          "uid": "ven-0376",
+          "kind": "same-lemma"
+        }
+      ],
+      "active": true,
+      "teachingType": "word",
+      "sourceIds": [],
+      "thumbnail": "assets/vocabulary-en-thumbs/open-5760ab0555e9161c.webp"
+    },
+    {
+      "id": 440,
+      "order": 440,
+      "en": "second",
+      "cz": "druhý",
+      "sentenceEn": "The rabbit in blue is second.",
+      "sentenceCz": "Králík v modrém je druhý.",
+      "wordSets": [],
+      "selected": false,
+      "hardTraining": false,
+      "image": "assets/vocabulary-en/sensesecondordinal.png",
+      "imageStem": "sensesecondordinal",
+      "imageRequestedStem": "sensesecondordinal",
+      "imageSource": "catalog",
+      "imageMissing": false,
+      "uid": "ven-0440",
+      "primaryGroup": "topic-11",
+      "topicIds": [
+        "topic-11"
+      ],
+      "partOfSpeech": [
+        "number"
+      ],
+      "expressionType": "word",
+      "difficultyBand": 2,
+      "difficultyStatus": "draft",
+      "editorialStatus": "reviewed",
+      "galleryOrder": 22,
+      "related": [
+        {
+          "uid": "ven-0385",
+          "kind": "same-lemma"
+        }
+      ],
+      "active": true,
+      "teachingType": "word",
+      "sourceIds": [],
+      "thumbnail": "assets/vocabulary-en-thumbs/sensesecondordinal-1212788c7a7a1df0.webp"
+    },
+    {
+      "id": 441,
+      "order": 441,
+      "en": "smile",
+      "cz": "úsměv",
+      "sentenceEn": "His smile makes me happy.",
+      "sentenceCz": "Jeho úsměv mi dělá radost.",
+      "wordSets": [],
+      "selected": false,
+      "hardTraining": false,
+      "image": "assets/vocabulary-en/smile.webp",
+      "imageStem": "smile",
+      "imageRequestedStem": "smile",
+      "imageSource": "catalog",
+      "imageMissing": false,
+      "uid": "ven-0441",
+      "primaryGroup": "topic-15",
+      "topicIds": [
+        "topic-15"
+      ],
+      "partOfSpeech": [
+        "noun"
+      ],
+      "expressionType": "word",
+      "difficultyBand": 2,
+      "difficultyStatus": "draft",
+      "editorialStatus": "reviewed",
+      "galleryOrder": 26,
+      "related": [
+        {
+          "uid": "ven-0386",
+          "kind": "same-lemma"
+        }
+      ],
+      "active": true,
+      "teachingType": "word",
+      "sourceIds": [],
+      "thumbnail": "assets/vocabulary-en-thumbs/smile-3605c89a6049334a.webp"
+    },
+    {
+      "id": 442,
+      "order": 442,
+      "en": "that",
+      "cz": "že",
+      "sentenceEn": "I think that the bird is beautiful.",
+      "sentenceCz": "Myslím, že ten pták je krásný.",
+      "wordSets": [],
+      "selected": false,
+      "hardTraining": false,
+      "image": "assets/vocabulary-en/that.png",
+      "imageStem": "that",
+      "imageRequestedStem": "that",
+      "imageSource": "catalog",
+      "imageMissing": false,
+      "uid": "ven-0442",
+      "primaryGroup": "topic-18",
+      "topicIds": [
+        "topic-18"
+      ],
+      "partOfSpeech": [
+        "conjunction"
+      ],
+      "expressionType": "word",
+      "difficultyBand": 3,
+      "difficultyStatus": "draft",
+      "editorialStatus": "reviewed",
+      "galleryOrder": 38,
+      "related": [
+        {
+          "uid": "ven-0398",
+          "kind": "same-lemma"
+        }
+      ],
+      "active": true,
+      "teachingType": "word",
+      "sourceIds": [],
+      "thumbnail": "assets/vocabulary-en-thumbs/that-827af021331358e1.webp"
     }
   ],
   "catalog": {
@@ -15967,5 +16711,5 @@
       }
     ]
   },
-  "revision": "695164752d5d38a1de1b"
+  "revision": "7e1fbbd24d79c6553648"
 }

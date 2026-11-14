@@ -29,11 +29,11 @@ class VocabularyGalleryTests(unittest.TestCase):
         inactive={item['uid'] for item in self.manifest['items'] if not item['active']}
         self.assertEqual(inactive,{'ven-0195','ven-0197','ven-0199','ven-0200','ven-0203',
                                    'ven-0257','ven-0258','ven-0259','ven-0260','ven-0271'})
-        self.assertEqual(len(self.manifest['items']),425)
+        self.assertEqual(len(self.manifest['items']),442)
         active=[item for item in self.manifest['items'] if item['active']]
-        self.assertEqual(len(active),415)
+        self.assertEqual(len(active),432)
         self.assertEqual(sum(i['teachingType']=='interaction' for i in active),19)
-        self.assertEqual(sum(i['teachingType']=='word' for i in active),396)
+        self.assertEqual(sum(i['teachingType']=='word' for i in active),413)
         self.assertFalse(any(i['teachingType']=='idiom' for i in active))
         for entry in self.catalog['entries']:
             if entry.get('retirementReason')=='regular_plural_duplicate':
@@ -54,6 +54,47 @@ class VocabularyGalleryTests(unittest.TestCase):
         self.assertEqual(sure['sentenceEn'],'Sure, I can help you.')
         please=next(i for i in self.manifest['items'] if i['uid']=='ven-0139')
         self.assertEqual(please['sentenceEn'],'Please speak slowly; I want to understand.')
+
+    def test_meaning_variants_keep_legacy_aliases_and_have_real_pinned_illustrations(self):
+        by_uid={i['uid']:i for i in self.manifest['items']}
+        for number in range(1,426):
+            uid=f'ven-{number:04d}'
+            self.assertEqual(by_uid[uid]['id'],number)
+        old=sync.resolve_catalog_rows([{'EN':'second','CZ':'sekunda; druhý'},
+                                      {'EN':'help','CZ':'pomoc'},
+                                      {'EN':'free','CZ':'volný; zdarma'}],self.catalog)
+        self.assertEqual([e['uid'] for e in old],['ven-0385','ven-0058','ven-0044'])
+        for uid,cz,pos in [('ven-0385','sekunda','noun'),('ven-0440','druhý','number'),
+                          ('ven-0058','pomoc','noun'),('ven-0430','pomoci; pomáhat','verb'),
+                          ('ven-0428','zdarma','adjective'),('ven-0435','opatrně','adverb')]:
+            self.assertEqual((by_uid[uid]['cz'],by_uid[uid]['partOfSpeech']),(cz,[pos]))
+        for entry in self.catalog['entries']:
+            if entry.get('imageStemOverride','').startswith('sense'):
+                item=by_uid[entry['uid']]
+                self.assertEqual(item['imageSource'],'catalog')
+                self.assertEqual(item['imageStem'],entry['imageStemOverride'])
+                self.assertNotIn('others',item['image'])
+        for uid,stem in [('ven-0275','warning'),('ven-0030','drink'),('ven-0119','chicken'),
+                         ('ven-0144','right'),('ven-0398','that')]:
+            self.assertEqual((by_uid[uid]['imageStem'],by_uid[uid]['imageSource']),(stem,'catalog'))
+        self.assertFalse(any(i['editorialStatus']=='needs-review' for i in by_uid.values() if i['active']))
+
+    def test_benji_apply_never_tags_later_meanings_with_the_same_english_spelling(self):
+        from tests import test_vocabularyen_mmtx_import as legacy
+        module=legacy.load_benji_module()
+        with tempfile.TemporaryDirectory() as directory:
+            path=Path(directory)/'VocabularyEN.csv'
+            raw=(VOCAB/'VocabularyEN.csv').read_bytes()
+            rows=list(__import__('csv').DictReader(__import__('io').StringIO(raw.decode())))
+            target=next(row for row in rows if row['Order']=='385');target['WS']=''
+            with path.open('w',newline='') as handle:
+                writer=__import__('csv').DictWriter(handle,fieldnames=list(rows[0]),lineterminator='\r\n')
+                writer.writeheader();writer.writerows(rows)
+            self.assertEqual(module.apply(path),['second'])
+            updated=module.load_rows(path)
+            self.assertIn('Benji',next(row for row in updated if row['Order']=='385')['WS'])
+            self.assertEqual([row['WS'] for row in updated if int(row['Order'])>425],['']*17)
+            self.assertEqual(module.apply(path),[])
 
     def test_invalid_activity_type_image_override_and_plural_reference_are_rejected(self):
         with tempfile.TemporaryDirectory() as directory:
@@ -76,8 +117,8 @@ class VocabularyGalleryTests(unittest.TestCase):
 
     def test_catalog_covers_all_meanings_once_and_does_not_merge_orange(self):
         entries=sync.resolve_catalog_rows(self.rows,self.catalog)
-        self.assertEqual(len(entries),425)
-        self.assertEqual(len({e['uid'] for e in entries}),425)
+        self.assertEqual(len(entries),442)
+        self.assertEqual(len({e['uid'] for e in entries}),442)
         self.assertEqual(len(self.catalog['groups']),18)
         orange=[entry for row,entry in zip(self.rows,entries) if row['EN']=='orange']
         self.assertEqual([e['uid'] for e in orange],['ven-0118','ven-0170'])
@@ -89,7 +130,7 @@ class VocabularyGalleryTests(unittest.TestCase):
         resolved=sync.resolve_catalog_rows(reversed_rows,self.catalog)
         self.assertEqual([e['uid'] for e in resolved],list(reversed([e['uid'] for e in original])))
         catalog=copy.deepcopy(self.catalog)
-        entry=copy.deepcopy(catalog['entries'][0]);entry.update(id=426,uid='ven-new-card',matches=[{'en':'test addition','cz':'zkouška'}])
+        entry=copy.deepcopy(catalog['entries'][0]);entry.update(id=max(e['id'] for e in catalog['entries'])+1,uid='ven-new-card',matches=[{'en':'test addition','cz':'zkouška'}])
         catalog['entries'].append(entry)
         rows=[{'EN':'test addition','CZ':'zkouška'},*self.rows]
         after=sync.resolve_catalog_rows(rows,catalog)
@@ -141,11 +182,11 @@ class VocabularyGalleryTests(unittest.TestCase):
                 self.assertEqual((record['sourceEn'],record['sourceCz']),(item['en'],item['cz']))
         yard=next(i for i in self.manifest['items'] if i['uid']=='ven-0300')
         self.assertEqual(yard['image'],'assets/vocabulary-en/courtyard.webp')
-        self.assertEqual(self.manifest['stats']['uniqueImageFiles'],384)
+        self.assertEqual(self.manifest['stats']['uniqueImageFiles'],392)
 
     def test_every_sentence_and_translation_stays_with_its_source_meaning(self):
         source={(row['EN'],row['CZ']):row for row in self.rows}
-        self.assertEqual(len(self.manifest['items']),425)
+        self.assertEqual(len(self.manifest['items']),442)
         for item in self.manifest['items']:
             with self.subTest(uid=item['uid']):
                 row=source[(item['en'],item['cz'])]
