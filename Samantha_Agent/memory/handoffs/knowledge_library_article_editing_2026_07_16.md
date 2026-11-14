@@ -1069,3 +1069,37 @@ nové změny. Bez změny skutečného Gitu prošla s procesní syntetickou Git
 identitou celá dotčená sada30 testů a potom znovu i úplná brána.
 Konečný log: library_thumbnail_full_gate_verified_20261113.log;
 podrobná měření: library_thumbnail_unit_timings_20261113.log.
+
+
+## 2026-11-14 14:38 CET — Online obálky z Obálkyknih.cz
+
+Hotovo: Místně napojený rychlý ISBN náhled a seznam knih přes ověřený
+cache3.obalkyknih.cz. Obrázek otevírá povinný odkaz na zdroj, název v seznamu
+otvírá naši knihu. Chyba, prázdný1×1 obrázek a5s čekání v náhledu přejdou
+na Open Library. Lazy obrázky v seznamu se nevyčerpají dřív, než jsou vidět.
+Uložení knihy zachová online náhled; vlastní fotografie a místní miniatura
+mají přednost. Nové vysvětlení rozlišuje online a místně uloženou obálku.
+
+Rozhodnutí: Míla výslovně zadal napojení i při částečném rozšíření oprávnění
+mezi servery. Používá se doložený cache3 a dosavadní náhrada Open Library.
+Pouze pro tento obrázek odchází registrovaný origin, žádná cesta či parametry
+našeho soukromého katalogu. Trvalé ukládání obálek Obálkyknih není schválené;
+server je nestahuje. Původní ukládání Open Library, metadata, zápisové
+identity, zdrojové vazby a ochrana při změně ISBN zůstávají zachované.
+
+Další krok: Samostatné p+n proudu project-knowledge-library do runtime
+Cockpitu a fyzická přejímka na iPhonu. Tato změna ještě není nasazená.
+
+Navrhované další kroky: Schválená náhrada prozatímních kategorií26obory,
+oddělené žánry/formy a témata; dynamické filtry jen ze skutečně uložených
+knih s počty. Jde o další samostatný krok. Trvalé miniatury Obálkyknih
+doplnit jen podle výslovné dohody s poskytovatelem.
+
+Technický důkaz:88 cílených Python testů včetně Node regresí PASS. Finální
+frontendový kontrakt znovu23 PASS. Skutečný headless prohlížeč na registrovaném
+HTTPS originu načetl živou obálku170×240 a ověřil backlink, uložení bez
+kopie Obálkyknih, chybový/1×1/timeout fallback, místní prioritu i lazy scroll.
+Viewporty390/1280 bez přetékání;2 syntetické knihy v izolovaném archivu,
+0 produkčních POST a0 neodchycených výjimek. Logy obalkyknih_*_20261114.log;
+privátní podklady data/private/obalkyknih_integration_20261114/.
+Statická brána logs/obalkyknih_static_gate_20261114.log.

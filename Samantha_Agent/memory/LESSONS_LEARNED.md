@@ -2469,3 +2469,17 @@ s mock video-only kamerou, stop tracků a dekódováním WASM.
 - Ověření:48 Node scénářů PASS včetně pozdního importu, quota/corrupt
   storage, cizího snímku a obnovy bez změny ostatních profilů/PINů.
   Plná brána3831 PASS,5 SKIP; vocabulary_en_learners_full_gate_20261114.log.
+
+
+### 2026-11-14 14:38 CET — Online obálka potřebuje povolený origin a funkční lazy box
+
+- Kontext: globální no-referrer je bezpečné výchozí nastavení, ale poskytovatel
+  ověřuje katalog podle Referer. Lazy obrázek schovaný až do onload se vůbec
+  nemusí začít načítat; timeout před posunem stránky by vyčerpal všechny zdroje.
+- Řešení: jen na obrázku pevného ověřeného hostu nastavit origin; zachovat
+  globální politiku a povinný backlink. Lazy řádku nechat viditelný rozměrový
+  box a nepoužívat zde rychlý preview timeout. Pozdní callbacky oddělit podle
+  knihy i konkrétního pokusu; místní obrázky načítat s původní politikou.
+- Ověření: živá obálka170×240 v reálném prohlížeči pod registrovaným originem,
+  skutečný Referer, chyba/1×1/timeout, lazy načtení po scrollu a místní priorita
+  PASS. Původní backendová persistence a její bezpečnostní testy beze změny.

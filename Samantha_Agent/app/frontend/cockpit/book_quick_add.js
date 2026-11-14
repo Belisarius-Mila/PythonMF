@@ -12,6 +12,59 @@
     return code;
   }
   function safeCover(value) { return /^https:\/\/covers\.openlibrary\.org\/b\/isbn\/(978|979)[0-9]{10}-S\.jpg\?default=false$/.test(value || ""); }
+  function coverSources(value) {
+    if (!safeCover(value)) return [];
+    let isbn;
+    try { isbn = normalizeISBN(value.match(/\/isbn\/([0-9]+)-S\.jpg/)[1]); }
+    catch (_) { return []; }
+    return [
+      {url: "https://cache3.obalkyknih.cz/api/cover?multi=" + encodeURIComponent(JSON.stringify({isbn})) + "&type=medium&keywords=" + isbn,
+        backlink: "https://www.obalkyknih.cz/view?isbn=" + isbn, label: "Náhled z Obálkyknih.cz (online)", referrerPolicy: "origin"},
+      {url: value, backlink: "https://openlibrary.org/isbn/" + isbn, label: "Náhled z Open Library", referrerPolicy: "no-referrer"}
+    ];
+  }
+  const coverBindings = new WeakMap();
+  function bindCover(image, value, {link = null, note = null, timeoutMs = 5000} = {}) {
+    const previous = coverBindings.get(image); if (previous) previous.cancel();
+    const state = {attempt: 0, index: 0, timer: null, done: false};
+    const sources = coverSources(value).filter(source => link || source.referrerPolicy !== "origin");
+    const clearTimer = () => { if (state.timer !== null) root.clearTimeout(state.timer); state.timer = null; };
+    const reset = () => {
+      image.hidden = true; image.onload = null; image.onerror = null; image.removeAttribute("src");
+      if (link) { link.hidden = true; link.removeAttribute("href"); link.removeAttribute("aria-label"); }
+    };
+    state.cancel = () => {
+      clearTimer();
+      if (coverBindings.get(image) === state) { coverBindings.delete(image); reset(); }
+    };
+    coverBindings.set(image, state);
+    function next() {
+      if (coverBindings.get(image) !== state) return;
+      clearTimer(); reset(); state.done = false;
+      const token = ++state.attempt, source = sources[state.index++];
+      if (!source) { if (note) note.textContent = "Bez obálky"; return; }
+      // Lazy images need a visible layout box before the browser starts their request.
+      if (image.loading === "lazy") { image.hidden = false; if (link) link.hidden = false; }
+      const current = () => coverBindings.get(image) === state && state.attempt === token && !state.done;
+      image.onload = () => {
+        if (!current()) return;
+        if (image.naturalWidth <= 1 || image.naturalHeight <= 1) { next(); return; }
+        clearTimer(); state.done = true; image.onload = null; image.onerror = null; image.hidden = false;
+        if (link) {
+          link.href = source.backlink; link.target = "_blank"; link.rel = "noopener noreferrer";
+          link.setAttribute("aria-label", source.label + " — otevřít zdroj"); link.hidden = false;
+        }
+        if (note) note.textContent = source.label;
+      };
+      image.onerror = () => { if (current()) next(); };
+      image.referrerPolicy = source.referrerPolicy;
+      if (note) note.textContent = "Načítám obálku…";
+      if (timeoutMs > 0) state.timer = root.setTimeout(() => { if (current()) next(); }, timeoutMs);
+      image.src = source.url;
+    }
+    next();
+    return state.cancel;
+  }
   class PendingWrite {
     constructor(storage, send, read, uuid) { this.storage = storage; this.send = send; this.read = read; this.uuid = uuid; this.busy = false; }
     pending() { const s = this.storage.getItem(KEY); return s ? JSON.parse(s) : null; }
@@ -122,7 +175,7 @@
     const status = el("quickBookStatus"), isbn = el("quickBookISBN"), title = el("quickBookTitle"), author = el("quickBookAuthor"), year = el("quickBookYear");
     const categories = el("quickBookCategories");
     const open = el("quickBookOpen"), save = el("quickBookSave"), scan = el("quickBookScan"), video = el("quickBookVideo");
-    const image = el("quickBookCover"), coverNote = el("quickBookCoverNote"), duplicate = el("quickBookDuplicate");
+    const image = el("quickBookCover"), coverLink = el("quickBookCoverLink"), coverNote = el("quickBookCoverNote"), duplicate = el("quickBookDuplicate");
     let generation = 0, edits = 0, additional = false, available = false, rows = [], listGeneration = 0, opened = false, completed = false, startingCamera = false;
     const notice = text => { status.textContent = text; };
     let ledger;
@@ -139,10 +192,8 @@
       el("quickBookLocationsSave").disabled = !!p || !!busy;
     }
     function setCover(url) {
-      image.hidden = true; image.removeAttribute("src"); coverNote.textContent = "Bez obálky";
-      if (safeCover(url)) { image.src = url; image.hidden = false; coverNote.textContent = "Náhled z Open Library"; }
+      bindCover(image, url, {link: coverLink, note: coverNote});
     }
-    image.addEventListener("error", () => { image.hidden = true; coverNote.textContent = "Bez obálky"; });
     const camera = new Camera(root.navigator.mediaDevices, video, decodeImage, code => { isbn.value = code; changedISBN(); lookup(); },
       error => {
         stop();
@@ -176,10 +227,13 @@
       if (kind !== "locations") { completed = true; el("quickBookNext").dataset.ready = "1"; el("quickBookNext").hidden = false; }
       if (kind !== "locations" && data.item) {
         if (data.item.book_cover_attachment_id) {
+          setCover("");
           image.src = "/api/library/attachment?id=" + encodeURIComponent(data.item.id) + "&attachment_id=" + encodeURIComponent(data.item.book_cover_attachment_id) + "&variant=thumb";
-          image.hidden = false; coverNote.textContent = "Miniatura uložená na Macu";
-        } else if (data.item.book_cover_status) {
-          setCover(""); coverNote.textContent = "Kniha uložena bez obálky — miniatura nebyla dostupná.";
+          image.referrerPolicy = "no-referrer"; image.hidden = false; coverLink.hidden = false;
+          image.onerror = () => { image.hidden = true; coverLink.hidden = true; coverNote.textContent = "Uložená miniatura není dostupná."; };
+          coverNote.textContent = "Miniatura uložená na Macu";
+        } else {
+          setCover(data.item.book_cover_url || "");
         }
       }
       doc.dispatchEvent(new CustomEvent("library-inventory-saved", {detail: data.item || {}}));
@@ -313,7 +367,7 @@
     root.addEventListener("pagehide", stop);
     return {close, setAvailable(value) { available = value; open.hidden = !value; open.disabled = !value; if (!value) close(); }};
   }
-  const api = {normalizeISBN, safeCover, PendingWrite, Camera, boot};
+  const api = {normalizeISBN, safeCover, coverSources, bindCover, PendingWrite, Camera, boot};
   if (typeof module !== "undefined" && module.exports) module.exports = api;
   else { root.SamanthaBookQuick = api; document.addEventListener("DOMContentLoaded", () => { root.SamanthaBookQuickUI = boot(document); }); }
 })(typeof window !== "undefined" ? window : globalThis);

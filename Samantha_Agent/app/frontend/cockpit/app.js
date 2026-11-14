@@ -5216,18 +5216,30 @@ ${confirmation}`, "");
     }
 
     function createLibraryItemRow(item) {
-      const row = document.createElement("button");
-      row.type = "button";
+      const remoteCover = item.category === "books" && !item.book_cover_attachment_id
+        && window.SamanthaBookQuick && window.SamanthaBookQuick.safeCover(item.book_cover_url)
+        && !(item.attachment_roles || []).includes("book_cover");
+      const row = document.createElement(remoteCover ? "div" : "button");
+      const content = remoteCover ? document.createElement("button") : row;
+      content.type = "button";
+      if (remoteCover) content.className = "library-item-main";
       row.className = "library-item";
       row.dataset.articleId = item.id || "";
       row.classList.toggle("active", currentLibrarySelectedId === item.id);
       row.classList.toggle("to-read", item.read_state === "to_read");
-      if (item.category === "books" && (item.book_cover_attachment_id || (window.SamanthaBookQuick && window.SamanthaBookQuick.safeCover(item.book_cover_url)
-          && !(item.attachment_roles || []).includes("book_cover")))) {
+      if (item.category === "books" && (item.book_cover_attachment_id || remoteCover)) {
         const cover = document.createElement("img");
         cover.className = "library-catalog-cover"; cover.alt = ""; cover.loading = "lazy"; cover.referrerPolicy = "no-referrer";
-        cover.src = item.book_cover_attachment_id ? libraryAttachmentUrl(item.id, item.book_cover_attachment_id, "thumb") : item.book_cover_url;
-        cover.addEventListener("error", () => cover.remove()); row.appendChild(cover);
+        if (remoteCover) {
+          cover.width = 48; cover.height = 68;
+          const link = document.createElement("a"); link.className = "library-catalog-cover-link";
+          link.appendChild(cover); row.appendChild(link); row.classList.add("library-item-with-cover");
+          // Lazy images may stay outside the viewport; do not expire them before they start loading.
+          window.SamanthaBookQuick.bindCover(cover, item.book_cover_url, {link, timeoutMs: 0});
+        } else {
+          cover.src = libraryAttachmentUrl(item.id, item.book_cover_attachment_id, "thumb");
+          cover.addEventListener("error", () => cover.remove()); row.appendChild(cover);
+        }
       }
       const title = document.createElement("div");
       title.className = "library-title";
@@ -5235,21 +5247,22 @@ ${confirmation}`, "");
       const meta = document.createElement("div");
       meta.className = "library-meta";
       meta.textContent = libraryItemMeta(item);
-      row.appendChild(title);
+      content.appendChild(title);
       if (item.read_state === "to_read") {
         const badge = document.createElement("div");
         badge.className = "library-read-badge";
         badge.textContent = item.read_state_label || "k přečtení";
-        row.appendChild(badge);
+        content.appendChild(badge);
       }
-      row.appendChild(meta);
+      content.appendChild(meta);
       if (item.snippet) {
         const snippet = document.createElement("div");
         snippet.className = "library-snippet";
         snippet.textContent = item.snippet;
-        row.appendChild(snippet);
+        content.appendChild(snippet);
       }
-      row.addEventListener("click", () => loadLibraryItem(item.id || "", true));
+      content.addEventListener("click", () => loadLibraryItem(item.id || "", true));
+      if (remoteCover) row.appendChild(content);
       return row;
     }
 

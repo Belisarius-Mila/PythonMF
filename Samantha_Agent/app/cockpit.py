@@ -622,7 +622,7 @@ def cockpit_response_security_headers(path: str) -> tuple[tuple[str, str], ...]:
             value = value.replace("camera=()", "camera=(self)")
         elif name == "Content-Security-Policy":
             value = value.replace("script-src 'self' 'unsafe-inline'", "script-src 'self' 'unsafe-inline' 'wasm-unsafe-eval'")
-            value = value.replace("img-src 'self' data: blob:", "img-src 'self' data: blob: https://covers.openlibrary.org")
+            value = value.replace("img-src 'self' data: blob:", "img-src 'self' data: blob: https://covers.openlibrary.org https://cache3.obalkyknih.cz")
         headers.append((name, value))
     return tuple(headers)
 

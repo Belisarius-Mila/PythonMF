@@ -241,6 +241,11 @@ class InventoryTests(unittest.TestCase):
 
 
 class CatalogTests(unittest.TestCase):
+    def test_online_cover_sources_and_backlink_behavior(self):
+        from scripts.cockpit_quality_gate import node_binary
+        result = subprocess.run([node_binary(), str(Path(__file__).with_name("book_cover_sources.test.cjs"))], capture_output=True, text=True, timeout=30)
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+
     def test_frontend_behavior(self):
         from scripts.cockpit_quality_gate import node_binary
         result = subprocess.run([node_binary(), str(Path(__file__).with_name("book_quick_add.test.cjs"))], capture_output=True, text=True, timeout=30)

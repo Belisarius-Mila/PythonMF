@@ -609,4 +609,8 @@
 .quick-book-location-row { display: flex; gap: 10px; align-items: start; padding: 9px 0; overflow-wrap: anywhere; }
 .quick-book-location-row input { flex: 0 0 auto; margin-top: 4px; }
 .library-catalog-cover { float: left; max-width: 48px; max-height: 68px; margin: 0 10px 5px 0; object-fit: contain; }
+.library-item-with-cover { display: flex; align-items: flex-start; gap: 10px; cursor: default; }
+.library-catalog-cover-link { flex: 0 0 auto; }
+.library-item-with-cover .library-catalog-cover { float: none; margin: 0; }
+.library-item-main { display: grid; gap: 5px; flex: 1; min-width: 0; border: 0; border-radius: 4px; padding: 0; background: transparent; color: inherit; font: inherit; text-align: left; }
 @media (max-width: 520px) { .quick-book-grid { grid-template-columns: minmax(0, 1fr); } .quick-book-preview { grid-template-columns: 64px minmax(0, 1fr); gap: 10px; } .quick-book-preview img { max-width: 60px; } }

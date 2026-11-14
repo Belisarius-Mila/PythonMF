@@ -119,6 +119,9 @@ class CockpitHttpSecurityTests(unittest.TestCase):
         self.assertIn("'wasm-unsafe-eval'", root["Content-Security-Policy"])
         self.assertNotIn("'unsafe-eval'", root["Content-Security-Policy"])
         self.assertIn("https://covers.openlibrary.org", root["Content-Security-Policy"])
+        self.assertIn("https://cache3.obalkyknih.cz", root["Content-Security-Policy"])
+        self.assertNotIn("https://cache2.obalkyknih.cz", root["Content-Security-Policy"])
+        self.assertEqual(root["Referrer-Policy"], dict(COCKPIT_SECURITY_HEADERS)["Referrer-Policy"])
         for path in ("/api/server/health", "/emails-to-resolve/", "/local-apps/other/", "/assets/book-scanner/3.1.6/reader.js"):
             self.assertEqual(cockpit_response_security_headers(path), COCKPIT_SECURITY_HEADERS)
         with running_cockpit_server() as (host, port, _logger):
