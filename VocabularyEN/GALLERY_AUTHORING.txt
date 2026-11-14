@@ -220,3 +220,31 @@ pouze chybějící schválené nahrávky a zachovat všechny původní MP3.
 Příznak active se v této etapě uplatňuje ve webové galerii EN. Původní
 desktopový trainer čte nadále kompatibilní CSV se425 záznamy; jeho filtr
 se tímto webovým vývojem nemění. EN83 a jeho sdílené app.js/styles.css zachované.
+
+
+11. Významové karty (2026-11-14)
+
+Stejné EN může mít více samostatných významů či slovních druhů: second
+sekunda/druhý, help pomoc/pomoci. Každý má vlastní UID/audio ID, EN/CZ match,
+příkladovou větu a významově odpovídající obrázek. related kind=same-lemma
+spojuje významy; derived-word značí například careful/carefully.
+Původní UID se nikdy nepřidělí novému významu. Staré EN/CZ match zůstávají
+rezervované stejné identitě; osobní výběry A–D automaticky nezískají sourozence.
+Nová významová karta nedědí Benji jen kvůli shodnému EN. tag_mmtx_benji_word_set
+používá při skutečném apply i původní Order, nejen normalizované heslo.
+
+Nové ilustrace EN mají zdroj v VocabularyEN/Pict a připnutý imageStemOverride.
+Používat kanonické názvy jen z malých ASCII písmen/číslic (sensefreetime):
+vyhledávač názvy normalizuje. Při exportu vždy zkontrolovat skutečný
+imageSource=catalog a imageStem, aby nešlo o náhradní others.
+
+Aktuální CSV/web mají442 záznamů,432 aktivních. Audio manifesty obsahují
+všech442 včetně10 historicky skrytých. Osm nových ilustrací a73 MP3 se
+přidalo, původní soubory se nemažou ani nepřepisují.
+Historický casting10 hesel/40MP3 zůstává zmrazený. Jeho původní builder
+záměrně odmítá změněné živé CSV; jeho testy používají původní textový vstup.
+Současná produkční audio knihovna je oddělená a ověřuje se proti živému CSV.
+
+Po opravě překladu se může změnit heuristický výběr obrázku. U19 zde
+zrevidovaných karet je proto původní nebo schválený nový obrázek připnutý
+katalogem. Závěrečný audit porovnává i obrazové vazby původních UID.

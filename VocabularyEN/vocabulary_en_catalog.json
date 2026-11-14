@@ -870,6 +870,10 @@
         {
           "en": "drink",
           "cz": "nápoj, pít"
+        },
+        {
+          "en": "drink",
+          "cz": "pít"
         }
       ],
       "primaryGroup": "topic-16",
@@ -882,11 +886,18 @@
       "expressionType": "word",
       "difficultyBand": 2,
       "difficultyStatus": "draft",
-      "editorialStatus": "needs-review",
+      "editorialStatus": "reviewed",
       "galleryOrder": 14,
-      "related": [],
+      "related": [
+        {
+          "uid": "ven-0426",
+          "kind": "same-lemma"
+        }
+      ],
       "active": true,
-      "teachingType": "word"
+      "teachingType": "word",
+      "editorialNote": "Význam, slovní druh, obrázek a příklad zkontrolovány; další významy mají vlastní UID.",
+      "imageStemOverride": "drink"
     },
     {
       "id": 31,
@@ -908,11 +919,18 @@
       "expressionType": "word",
       "difficultyBand": 1,
       "difficultyStatus": "draft",
-      "editorialStatus": "needs-review",
+      "editorialStatus": "reviewed",
       "galleryOrder": 11,
-      "related": [],
+      "related": [
+        {
+          "uid": "ven-0427",
+          "kind": "same-lemma"
+        }
+      ],
       "active": true,
-      "teachingType": "word"
+      "teachingType": "word",
+      "editorialNote": "Význam, slovní druh, obrázek a příklad zkontrolovány; další významy mají vlastní UID.",
+      "imageStemOverride": "drawing"
     },
     {
       "id": 32,
@@ -1058,11 +1076,13 @@
       "expressionType": "word",
       "difficultyBand": 1,
       "difficultyStatus": "draft",
-      "editorialStatus": "needs-review",
+      "editorialStatus": "reviewed",
       "galleryOrder": 6,
       "related": [],
       "active": true,
-      "teachingType": "word"
+      "teachingType": "word",
+      "editorialNote": "Význam, slovní druh, obrázek a příklad zkontrolovány; další významy mají vlastní UID.",
+      "imageStemOverride": "fair"
     },
     {
       "id": 38,
@@ -1221,6 +1241,10 @@
         {
           "en": "free",
           "cz": "volný; zdarma"
+        },
+        {
+          "en": "free",
+          "cz": "volný"
         }
       ],
       "primaryGroup": "topic-14",
@@ -1233,11 +1257,22 @@
       "expressionType": "word",
       "difficultyBand": 2,
       "difficultyStatus": "draft",
-      "editorialStatus": "needs-review",
+      "editorialStatus": "reviewed",
       "galleryOrder": 10,
-      "related": [],
+      "related": [
+        {
+          "uid": "ven-0428",
+          "kind": "same-lemma"
+        },
+        {
+          "uid": "ven-0429",
+          "kind": "same-lemma"
+        }
+      ],
       "active": true,
-      "teachingType": "word"
+      "teachingType": "word",
+      "editorialNote": "Význam, slovní druh, obrázek a příklad zkontrolovány; další významy mají vlastní UID.",
+      "imageStemOverride": "sensefreetime"
     },
     {
       "id": 45,
@@ -1593,17 +1628,23 @@
         "topic-15"
       ],
       "partOfSpeech": [
-        "noun",
-        "verb"
+        "noun"
       ],
       "expressionType": "word",
       "difficultyBand": 2,
       "difficultyStatus": "draft",
-      "editorialStatus": "needs-review",
+      "editorialStatus": "reviewed",
       "galleryOrder": 6,
-      "related": [],
+      "related": [
+        {
+          "uid": "ven-0430",
+          "kind": "same-lemma"
+        }
+      ],
       "active": true,
-      "teachingType": "word"
+      "teachingType": "word",
+      "editorialNote": "Význam, slovní druh, obrázek a příklad zkontrolovány; další významy mají vlastní UID.",
+      "imageStemOverride": "help"
     },
     {
       "id": 59,
@@ -3153,6 +3194,10 @@
         {
           "en": "chicken",
           "cz": "kuře"
+        },
+        {
+          "en": "chicken",
+          "cz": "kuřecí maso"
         }
       ],
       "primaryGroup": "topic-05",
@@ -3165,11 +3210,18 @@
       "expressionType": "word",
       "difficultyBand": 1,
       "difficultyStatus": "draft",
-      "editorialStatus": "needs-review",
+      "editorialStatus": "reviewed",
       "galleryOrder": 10,
-      "related": [],
+      "related": [
+        {
+          "uid": "ven-0431",
+          "kind": "same-lemma"
+        }
+      ],
       "active": true,
-      "teachingType": "word"
+      "teachingType": "word",
+      "editorialNote": "Význam, slovní druh, obrázek a příklad zkontrolovány; další významy mají vlastní UID.",
+      "imageStemOverride": "chicken"
     },
     {
       "id": 120,
@@ -3776,6 +3828,10 @@
         {
           "en": "right",
           "cz": "pravý, správný, doprava"
+        },
+        {
+          "en": "right",
+          "cz": "doprava"
         }
       ],
       "primaryGroup": "topic-13",
@@ -3788,16 +3844,26 @@
       "expressionType": "word",
       "difficultyBand": 2,
       "difficultyStatus": "draft",
-      "editorialStatus": "needs-review",
+      "editorialStatus": "reviewed",
       "galleryOrder": 11,
       "related": [
         {
           "uid": "ven-0066",
           "kind": "opposite"
+        },
+        {
+          "uid": "ven-0432",
+          "kind": "same-lemma"
+        },
+        {
+          "uid": "ven-0433",
+          "kind": "same-lemma"
         }
       ],
       "active": true,
-      "teachingType": "word"
+      "teachingType": "word",
+      "editorialNote": "Význam, slovní druh, obrázek a příklad zkontrolovány; další významy mají vlastní UID.",
+      "imageStemOverride": "right"
     },
     {
       "id": 145,
@@ -3941,12 +4007,13 @@
       "expressionType": "phrase",
       "difficultyBand": 1,
       "difficultyStatus": "draft",
-      "editorialStatus": "needs-review",
+      "editorialStatus": "reviewed",
       "galleryOrder": 8,
       "related": [],
       "active": true,
       "teachingType": "word",
-      "editorialNote": "Tazací výraz kolik; gramatická funkce závisí na doplnění."
+      "editorialNote": "Tázací výraz kolik; věta How much is it? procvičuje cenu. Samostatný slovní druh se nevynucuje.",
+      "imageStemOverride": "howmuch"
     },
     {
       "id": 151,
@@ -4117,11 +4184,13 @@
       "expressionType": "word",
       "difficultyBand": 1,
       "difficultyStatus": "draft",
-      "editorialStatus": "needs-review",
+      "editorialStatus": "reviewed",
       "galleryOrder": 22,
       "related": [],
       "active": true,
-      "teachingType": "word"
+      "teachingType": "word",
+      "editorialNote": "Význam, slovní druh, obrázek a příklad zkontrolovány; další významy mají vlastní UID.",
+      "imageStemOverride": "skating"
     },
     {
       "id": 158,
@@ -4155,6 +4224,10 @@
         {
           "en": "play",
           "cz": "hrát si, hra"
+        },
+        {
+          "en": "play",
+          "cz": "hrát si"
         }
       ],
       "primaryGroup": "topic-09",
@@ -4167,11 +4240,18 @@
       "expressionType": "word",
       "difficultyBand": 1,
       "difficultyStatus": "draft",
-      "editorialStatus": "needs-review",
+      "editorialStatus": "reviewed",
       "galleryOrder": 18,
-      "related": [],
+      "related": [
+        {
+          "uid": "ven-0434",
+          "kind": "same-lemma"
+        }
+      ],
       "active": true,
-      "teachingType": "word"
+      "teachingType": "word",
+      "editorialNote": "Význam, slovní druh, obrázek a příklad zkontrolovány; další významy mají vlastní UID.",
+      "imageStemOverride": "play"
     },
     {
       "id": 160,
@@ -7098,6 +7178,10 @@
         {
           "en": "careful",
           "cz": "opatrný, opatrně"
+        },
+        {
+          "en": "careful",
+          "cz": "opatrný"
         }
       ],
       "primaryGroup": "topic-14",
@@ -7110,11 +7194,18 @@
       "expressionType": "word",
       "difficultyBand": 2,
       "difficultyStatus": "draft",
-      "editorialStatus": "needs-review",
+      "editorialStatus": "reviewed",
       "galleryOrder": 5,
-      "related": [],
+      "related": [
+        {
+          "uid": "ven-0435",
+          "kind": "derived-word"
+        }
+      ],
       "active": true,
-      "teachingType": "word"
+      "teachingType": "word",
+      "editorialNote": "Význam, slovní druh, obrázek a příklad zkontrolovány; další významy mají vlastní UID.",
+      "imageStemOverride": "warning"
     },
     {
       "id": 276,
@@ -8000,11 +8091,13 @@
       "expressionType": "word",
       "difficultyBand": 3,
       "difficultyStatus": "draft",
-      "editorialStatus": "needs-review",
+      "editorialStatus": "reviewed",
       "galleryOrder": 1,
       "related": [],
       "active": true,
-      "teachingType": "word"
+      "teachingType": "word",
+      "editorialNote": "Význam, slovní druh, obrázek a příklad zkontrolovány; další významy mají vlastní UID.",
+      "imageStemOverride": "all"
     },
     {
       "id": 311,
@@ -8538,6 +8631,10 @@
         {
           "en": "first",
           "cz": "první; nejdříve"
+        },
+        {
+          "en": "first",
+          "cz": "první"
         }
       ],
       "primaryGroup": "topic-11",
@@ -8545,16 +8642,23 @@
         "topic-11"
       ],
       "partOfSpeech": [
-        "adjective"
+        "number"
       ],
       "expressionType": "word",
       "difficultyBand": 1,
       "difficultyStatus": "draft",
-      "editorialStatus": "needs-review",
+      "editorialStatus": "reviewed",
       "galleryOrder": 5,
-      "related": [],
+      "related": [
+        {
+          "uid": "ven-0436",
+          "kind": "same-lemma"
+        }
+      ],
       "active": true,
-      "teachingType": "word"
+      "teachingType": "word",
+      "editorialNote": "Význam, slovní druh, obrázek a příklad zkontrolovány; další významy mají vlastní UID.",
+      "imageStemOverride": "first"
     },
     {
       "id": 333,
@@ -8718,6 +8822,10 @@
         {
           "en": "guard",
           "cz": "hlídat; strážce"
+        },
+        {
+          "en": "guard",
+          "cz": "hlídat"
         }
       ],
       "primaryGroup": "topic-16",
@@ -8730,11 +8838,18 @@
       "expressionType": "word",
       "difficultyBand": 2,
       "difficultyStatus": "draft",
-      "editorialStatus": "needs-review",
+      "editorialStatus": "reviewed",
       "galleryOrder": 22,
-      "related": [],
+      "related": [
+        {
+          "uid": "ven-0437",
+          "kind": "same-lemma"
+        }
+      ],
       "active": true,
-      "teachingType": "word"
+      "teachingType": "word",
+      "editorialNote": "Význam, slovní druh, obrázek a příklad zkontrolovány; další významy mají vlastní UID.",
+      "imageStemOverride": "guard"
     },
     {
       "id": 340,
@@ -8868,6 +8983,10 @@
         {
           "en": "her",
           "cz": "ji; jí; její"
+        },
+        {
+          "en": "her",
+          "cz": "ji; jí"
         }
       ],
       "primaryGroup": "topic-18",
@@ -8880,11 +8999,18 @@
       "expressionType": "word",
       "difficultyBand": 3,
       "difficultyStatus": "draft",
-      "editorialStatus": "needs-review",
+      "editorialStatus": "reviewed",
       "galleryOrder": 9,
-      "related": [],
+      "related": [
+        {
+          "uid": "ven-0438",
+          "kind": "same-lemma"
+        }
+      ],
       "active": true,
-      "teachingType": "word"
+      "teachingType": "word",
+      "editorialNote": "Význam, slovní druh, obrázek a příklad zkontrolovány; další významy mají vlastní UID.",
+      "imageStemOverride": "her"
     },
     {
       "id": 346,
@@ -9643,6 +9769,10 @@
         {
           "en": "open",
           "cz": "otevřený; otevřít"
+        },
+        {
+          "en": "open",
+          "cz": "otevřít"
         }
       ],
       "primaryGroup": "topic-16",
@@ -9655,16 +9785,22 @@
       "expressionType": "word",
       "difficultyBand": 2,
       "difficultyStatus": "draft",
-      "editorialStatus": "needs-review",
+      "editorialStatus": "reviewed",
       "galleryOrder": 31,
       "related": [
         {
           "uid": "ven-0295",
           "kind": "opposite"
+        },
+        {
+          "uid": "ven-0439",
+          "kind": "same-lemma"
         }
       ],
       "active": true,
-      "teachingType": "word"
+      "teachingType": "word",
+      "editorialNote": "Význam, slovní druh, obrázek a příklad zkontrolovány; další významy mají vlastní UID.",
+      "imageStemOverride": "open"
     },
     {
       "id": 377,
@@ -9873,6 +10009,10 @@
         {
           "en": "second",
           "cz": "sekunda; druhý"
+        },
+        {
+          "en": "second",
+          "cz": "sekunda"
         }
       ],
       "primaryGroup": "topic-12",
@@ -9885,11 +10025,18 @@
       "expressionType": "word",
       "difficultyBand": 2,
       "difficultyStatus": "draft",
-      "editorialStatus": "needs-review",
+      "editorialStatus": "reviewed",
       "galleryOrder": 8,
-      "related": [],
+      "related": [
+        {
+          "uid": "ven-0440",
+          "kind": "same-lemma"
+        }
+      ],
       "active": true,
-      "teachingType": "word"
+      "teachingType": "word",
+      "editorialNote": "Význam, slovní druh, obrázek a příklad zkontrolovány; další významy mají vlastní UID.",
+      "imageStemOverride": "second"
     },
     {
       "id": 386,
@@ -9898,6 +10045,10 @@
         {
           "en": "smile",
           "cz": "usmívat se; úsměv"
+        },
+        {
+          "en": "smile",
+          "cz": "usmívat se"
         }
       ],
       "primaryGroup": "topic-15",
@@ -9910,11 +10061,18 @@
       "expressionType": "word",
       "difficultyBand": 2,
       "difficultyStatus": "draft",
-      "editorialStatus": "needs-review",
+      "editorialStatus": "reviewed",
       "galleryOrder": 18,
-      "related": [],
+      "related": [
+        {
+          "uid": "ven-0441",
+          "kind": "same-lemma"
+        }
+      ],
       "active": true,
-      "teachingType": "word"
+      "teachingType": "word",
+      "editorialNote": "Význam, slovní druh, obrázek a příklad zkontrolovány; další významy mají vlastní UID.",
+      "imageStemOverride": "smile"
     },
     {
       "id": 387,
@@ -10198,6 +10356,10 @@
         {
           "en": "that",
           "cz": "tamten; že"
+        },
+        {
+          "en": "that",
+          "cz": "tamten; tamta; tamto"
         }
       ],
       "primaryGroup": "topic-18",
@@ -10205,16 +10367,24 @@
         "topic-18"
       ],
       "partOfSpeech": [
+        "determiner",
         "pronoun"
       ],
       "expressionType": "word",
       "difficultyBand": 3,
       "difficultyStatus": "draft",
-      "editorialStatus": "needs-review",
+      "editorialStatus": "reviewed",
       "galleryOrder": 23,
-      "related": [],
+      "related": [
+        {
+          "uid": "ven-0442",
+          "kind": "same-lemma"
+        }
+      ],
       "active": true,
-      "teachingType": "word"
+      "teachingType": "word",
+      "editorialNote": "Význam, slovní druh, obrázek a příklad zkontrolovány; další významy mají vlastní UID.",
+      "imageStemOverride": "that"
     },
     {
       "id": 399,
@@ -10890,6 +11060,550 @@
       "related": [],
       "active": true,
       "teachingType": "word"
+    },
+    {
+      "id": 426,
+      "uid": "ven-0426",
+      "matches": [
+        {
+          "en": "drink",
+          "cz": "nápoj"
+        }
+      ],
+      "primaryGroup": "topic-05",
+      "topicIds": [
+        "topic-05"
+      ],
+      "partOfSpeech": [
+        "noun"
+      ],
+      "expressionType": "word",
+      "difficultyBand": 2,
+      "difficultyStatus": "draft",
+      "editorialStatus": "reviewed",
+      "galleryOrder": 34,
+      "related": [
+        {
+          "uid": "ven-0030",
+          "kind": "same-lemma"
+        }
+      ],
+      "active": true,
+      "teachingType": "word",
+      "editorialNote": "Schválená samostatná významová nebo slovnědruhová karta.",
+      "imageStemOverride": "glass"
+    },
+    {
+      "id": 427,
+      "uid": "ven-0427",
+      "matches": [
+        {
+          "en": "drawing",
+          "cz": "kresba"
+        }
+      ],
+      "primaryGroup": "topic-09",
+      "topicIds": [
+        "topic-09"
+      ],
+      "partOfSpeech": [
+        "noun"
+      ],
+      "expressionType": "word",
+      "difficultyBand": 1,
+      "difficultyStatus": "draft",
+      "editorialStatus": "reviewed",
+      "galleryOrder": 24,
+      "related": [
+        {
+          "uid": "ven-0031",
+          "kind": "same-lemma"
+        }
+      ],
+      "active": true,
+      "teachingType": "word",
+      "editorialNote": "Schválená samostatná významová nebo slovnědruhová karta.",
+      "imageStemOverride": "drawing"
+    },
+    {
+      "id": 428,
+      "uid": "ven-0428",
+      "matches": [
+        {
+          "en": "free",
+          "cz": "zdarma"
+        }
+      ],
+      "primaryGroup": "topic-14",
+      "topicIds": [
+        "topic-14"
+      ],
+      "partOfSpeech": [
+        "adjective"
+      ],
+      "expressionType": "word",
+      "difficultyBand": 2,
+      "difficultyStatus": "draft",
+      "editorialStatus": "reviewed",
+      "galleryOrder": 36,
+      "related": [
+        {
+          "uid": "ven-0044",
+          "kind": "same-lemma"
+        }
+      ],
+      "active": true,
+      "teachingType": "word",
+      "editorialNote": "Schválená samostatná významová nebo slovnědruhová karta.",
+      "imageStemOverride": "sensefreegratis"
+    },
+    {
+      "id": 429,
+      "uid": "ven-0429",
+      "matches": [
+        {
+          "en": "free",
+          "cz": "svobodný"
+        }
+      ],
+      "primaryGroup": "topic-15",
+      "topicIds": [
+        "topic-15"
+      ],
+      "partOfSpeech": [
+        "adjective"
+      ],
+      "expressionType": "word",
+      "difficultyBand": 2,
+      "difficultyStatus": "draft",
+      "editorialStatus": "reviewed",
+      "galleryOrder": 25,
+      "related": [
+        {
+          "uid": "ven-0044",
+          "kind": "same-lemma"
+        }
+      ],
+      "active": true,
+      "teachingType": "word",
+      "editorialNote": "Schválená samostatná významová nebo slovnědruhová karta.",
+      "imageStemOverride": "free"
+    },
+    {
+      "id": 430,
+      "uid": "ven-0430",
+      "matches": [
+        {
+          "en": "help",
+          "cz": "pomoci; pomáhat"
+        }
+      ],
+      "primaryGroup": "topic-16",
+      "topicIds": [
+        "topic-16"
+      ],
+      "partOfSpeech": [
+        "verb"
+      ],
+      "expressionType": "word",
+      "difficultyBand": 2,
+      "difficultyStatus": "draft",
+      "editorialStatus": "reviewed",
+      "galleryOrder": 46,
+      "related": [
+        {
+          "uid": "ven-0058",
+          "kind": "same-lemma"
+        }
+      ],
+      "active": true,
+      "teachingType": "word",
+      "editorialNote": "Schválená samostatná významová nebo slovnědruhová karta.",
+      "imageStemOverride": "help"
+    },
+    {
+      "id": 431,
+      "uid": "ven-0431",
+      "matches": [
+        {
+          "en": "chicken",
+          "cz": "slepice"
+        }
+      ],
+      "primaryGroup": "topic-06",
+      "topicIds": [
+        "topic-06"
+      ],
+      "partOfSpeech": [
+        "noun"
+      ],
+      "expressionType": "word",
+      "difficultyBand": 1,
+      "difficultyStatus": "draft",
+      "editorialStatus": "reviewed",
+      "galleryOrder": 40,
+      "related": [
+        {
+          "uid": "ven-0119",
+          "kind": "same-lemma"
+        }
+      ],
+      "active": true,
+      "teachingType": "word",
+      "editorialNote": "Schválená samostatná významová nebo slovnědruhová karta.",
+      "imageStemOverride": "sensechickenanimal"
+    },
+    {
+      "id": 432,
+      "uid": "ven-0432",
+      "matches": [
+        {
+          "en": "right",
+          "cz": "správný"
+        }
+      ],
+      "primaryGroup": "topic-14",
+      "topicIds": [
+        "topic-14"
+      ],
+      "partOfSpeech": [
+        "adjective"
+      ],
+      "expressionType": "word",
+      "difficultyBand": 2,
+      "difficultyStatus": "draft",
+      "editorialStatus": "reviewed",
+      "galleryOrder": 37,
+      "related": [
+        {
+          "uid": "ven-0144",
+          "kind": "same-lemma"
+        }
+      ],
+      "active": true,
+      "teachingType": "word",
+      "editorialNote": "Schválená samostatná významová nebo slovnědruhová karta.",
+      "imageStemOverride": "senserightcorrect"
+    },
+    {
+      "id": 433,
+      "uid": "ven-0433",
+      "matches": [
+        {
+          "en": "right",
+          "cz": "pravý"
+        }
+      ],
+      "primaryGroup": "topic-13",
+      "topicIds": [
+        "topic-13"
+      ],
+      "partOfSpeech": [
+        "adjective"
+      ],
+      "expressionType": "word",
+      "difficultyBand": 2,
+      "difficultyStatus": "draft",
+      "editorialStatus": "reviewed",
+      "galleryOrder": 19,
+      "related": [
+        {
+          "uid": "ven-0144",
+          "kind": "same-lemma"
+        }
+      ],
+      "active": true,
+      "teachingType": "word",
+      "editorialNote": "Schválená samostatná významová nebo slovnědruhová karta.",
+      "imageStemOverride": "senserightside"
+    },
+    {
+      "id": 434,
+      "uid": "ven-0434",
+      "matches": [
+        {
+          "en": "play",
+          "cz": "hra (činnost)"
+        }
+      ],
+      "primaryGroup": "topic-09",
+      "topicIds": [
+        "topic-09"
+      ],
+      "partOfSpeech": [
+        "noun"
+      ],
+      "expressionType": "word",
+      "difficultyBand": 1,
+      "difficultyStatus": "draft",
+      "editorialStatus": "reviewed",
+      "galleryOrder": 25,
+      "related": [
+        {
+          "uid": "ven-0159",
+          "kind": "same-lemma"
+        }
+      ],
+      "active": true,
+      "teachingType": "word",
+      "editorialNote": "Schválená samostatná významová nebo slovnědruhová karta.",
+      "imageStemOverride": "play"
+    },
+    {
+      "id": 435,
+      "uid": "ven-0435",
+      "matches": [
+        {
+          "en": "carefully",
+          "cz": "opatrně"
+        }
+      ],
+      "primaryGroup": "topic-16",
+      "topicIds": [
+        "topic-16"
+      ],
+      "partOfSpeech": [
+        "adverb"
+      ],
+      "expressionType": "word",
+      "difficultyBand": 2,
+      "difficultyStatus": "draft",
+      "editorialStatus": "reviewed",
+      "galleryOrder": 47,
+      "related": [
+        {
+          "uid": "ven-0275",
+          "kind": "derived-word"
+        }
+      ],
+      "active": true,
+      "teachingType": "word",
+      "editorialNote": "Schválená samostatná významová nebo slovnědruhová karta.",
+      "imageStemOverride": "warning"
+    },
+    {
+      "id": 436,
+      "uid": "ven-0436",
+      "matches": [
+        {
+          "en": "first",
+          "cz": "nejdříve"
+        }
+      ],
+      "primaryGroup": "topic-12",
+      "topicIds": [
+        "topic-12"
+      ],
+      "partOfSpeech": [
+        "adverb"
+      ],
+      "expressionType": "word",
+      "difficultyBand": 1,
+      "difficultyStatus": "draft",
+      "editorialStatus": "reviewed",
+      "galleryOrder": 14,
+      "related": [
+        {
+          "uid": "ven-0332",
+          "kind": "same-lemma"
+        }
+      ],
+      "active": true,
+      "teachingType": "word",
+      "editorialNote": "Schválená samostatná významová nebo slovnědruhová karta.",
+      "imageStemOverride": "first"
+    },
+    {
+      "id": 437,
+      "uid": "ven-0437",
+      "matches": [
+        {
+          "en": "guard",
+          "cz": "strážce"
+        }
+      ],
+      "primaryGroup": "topic-01",
+      "topicIds": [
+        "topic-01"
+      ],
+      "partOfSpeech": [
+        "noun"
+      ],
+      "expressionType": "word",
+      "difficultyBand": 2,
+      "difficultyStatus": "draft",
+      "editorialStatus": "reviewed",
+      "galleryOrder": 22,
+      "related": [
+        {
+          "uid": "ven-0339",
+          "kind": "same-lemma"
+        }
+      ],
+      "active": true,
+      "teachingType": "word",
+      "editorialNote": "Schválená samostatná významová nebo slovnědruhová karta.",
+      "imageStemOverride": "senseguardperson"
+    },
+    {
+      "id": 438,
+      "uid": "ven-0438",
+      "matches": [
+        {
+          "en": "her",
+          "cz": "její"
+        }
+      ],
+      "primaryGroup": "topic-18",
+      "topicIds": [
+        "topic-18"
+      ],
+      "partOfSpeech": [
+        "determiner"
+      ],
+      "expressionType": "word",
+      "difficultyBand": 3,
+      "difficultyStatus": "draft",
+      "editorialStatus": "reviewed",
+      "galleryOrder": 37,
+      "related": [
+        {
+          "uid": "ven-0345",
+          "kind": "same-lemma"
+        }
+      ],
+      "active": true,
+      "teachingType": "word",
+      "editorialNote": "Schválená samostatná významová nebo slovnědruhová karta.",
+      "imageStemOverride": "senseherpossessive"
+    },
+    {
+      "id": 439,
+      "uid": "ven-0439",
+      "matches": [
+        {
+          "en": "open",
+          "cz": "otevřený"
+        }
+      ],
+      "primaryGroup": "topic-14",
+      "topicIds": [
+        "topic-14"
+      ],
+      "partOfSpeech": [
+        "adjective"
+      ],
+      "expressionType": "word",
+      "difficultyBand": 2,
+      "difficultyStatus": "draft",
+      "editorialStatus": "reviewed",
+      "galleryOrder": 38,
+      "related": [
+        {
+          "uid": "ven-0376",
+          "kind": "same-lemma"
+        }
+      ],
+      "active": true,
+      "teachingType": "word",
+      "editorialNote": "Schválená samostatná významová nebo slovnědruhová karta.",
+      "imageStemOverride": "open"
+    },
+    {
+      "id": 440,
+      "uid": "ven-0440",
+      "matches": [
+        {
+          "en": "second",
+          "cz": "druhý"
+        }
+      ],
+      "primaryGroup": "topic-11",
+      "topicIds": [
+        "topic-11"
+      ],
+      "partOfSpeech": [
+        "number"
+      ],
+      "expressionType": "word",
+      "difficultyBand": 2,
+      "difficultyStatus": "draft",
+      "editorialStatus": "reviewed",
+      "galleryOrder": 22,
+      "related": [
+        {
+          "uid": "ven-0385",
+          "kind": "same-lemma"
+        }
+      ],
+      "active": true,
+      "teachingType": "word",
+      "editorialNote": "Schválená samostatná významová nebo slovnědruhová karta.",
+      "imageStemOverride": "sensesecondordinal"
+    },
+    {
+      "id": 441,
+      "uid": "ven-0441",
+      "matches": [
+        {
+          "en": "smile",
+          "cz": "úsměv"
+        }
+      ],
+      "primaryGroup": "topic-15",
+      "topicIds": [
+        "topic-15"
+      ],
+      "partOfSpeech": [
+        "noun"
+      ],
+      "expressionType": "word",
+      "difficultyBand": 2,
+      "difficultyStatus": "draft",
+      "editorialStatus": "reviewed",
+      "galleryOrder": 26,
+      "related": [
+        {
+          "uid": "ven-0386",
+          "kind": "same-lemma"
+        }
+      ],
+      "active": true,
+      "teachingType": "word",
+      "editorialNote": "Schválená samostatná významová nebo slovnědruhová karta.",
+      "imageStemOverride": "smile"
+    },
+    {
+      "id": 442,
+      "uid": "ven-0442",
+      "matches": [
+        {
+          "en": "that",
+          "cz": "že"
+        }
+      ],
+      "primaryGroup": "topic-18",
+      "topicIds": [
+        "topic-18"
+      ],
+      "partOfSpeech": [
+        "conjunction"
+      ],
+      "expressionType": "word",
+      "difficultyBand": 3,
+      "difficultyStatus": "draft",
+      "editorialStatus": "reviewed",
+      "galleryOrder": 38,
+      "related": [
+        {
+          "uid": "ven-0398",
+          "kind": "same-lemma"
+        }
+      ],
+      "active": true,
+      "teachingType": "word",
+      "editorialNote": "Schválená samostatná významová nebo slovnědruhová karta.",
+      "imageStemOverride": "that"
     }
   ]
 }

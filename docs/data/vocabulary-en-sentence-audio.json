@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "kind": "sentences",
   "source": "VocabularyEN/VocabularyEN.csv",
-  "sourceDigest": "3e42b863c5609a3eabe088d9bdc33e3e209c53dbcd631ac7bfab03144ba3c0f6",
+  "sourceDigest": "fbe0e09727ef8089e3fd45da7b0e88386ce9b09993f90b1745f1c35a14254f43",
   "rate": "-10%",
   "voices": {
     "en": {
@@ -339,7 +339,7 @@
     "ven-0030": {
       "uid": "ven-0030",
       "sourceEn": "drink",
-      "sourceCz": "nápoj, pít",
+      "sourceCz": "pít",
       "sourceSentenceEn": "When I feel tired, I drink a little water.",
       "sourceSentenceCz": "Když jsem unavený, napiju se trochu vody.",
       "spokenEn": "When I feel tired, I drink a little water.",
@@ -351,12 +351,12 @@
       "uid": "ven-0031",
       "sourceEn": "drawing",
       "sourceCz": "kreslení",
-      "sourceSentenceEn": "Your drawing is funny and very clear.",
-      "sourceSentenceCz": "Tvá kresba je vtipná a moc povedená.",
-      "spokenEn": "Your drawing is funny and very clear.",
-      "spokenCz": "Tvá kresba je vtipná a moc povedená.",
-      "en": "assets/vocabulary-en-sentences/en-us-aria-neural/7c53ae8a25156c35d5a0.mp3",
-      "cz": "assets/vocabulary-en-sentences/cs-cz-vlasta-neural/5b3146cfce62e06710f9.mp3"
+      "sourceSentenceEn": "Drawing is fun.",
+      "sourceSentenceCz": "Kreslení je zábava.",
+      "spokenEn": "Drawing is fun.",
+      "spokenCz": "Kreslení je zábava.",
+      "en": "assets/vocabulary-en-sentences/en-us-aria-neural/2467f1b07b90bd211655.mp3",
+      "cz": "assets/vocabulary-en-sentences/cs-cz-vlasta-neural/71427818b770fafc2ee4.mp3"
     },
     "ven-0032": {
       "uid": "ven-0032",
@@ -493,7 +493,7 @@
     "ven-0044": {
       "uid": "ven-0044",
       "sourceEn": "free",
-      "sourceCz": "volný; zdarma",
+      "sourceCz": "volný",
       "sourceSentenceEn": "Are you free this evening for a short walk?",
       "sourceSentenceCz": "Máš dnes večer čas na krátkou procházku?",
       "spokenEn": "Are you free this evening for a short walk?",
@@ -648,12 +648,12 @@
       "uid": "ven-0058",
       "sourceEn": "help",
       "sourceCz": "pomoc",
-      "sourceSentenceEn": "Thank you for your help;\" I really needed it.",
-      "sourceSentenceCz": "Děkuju za pomoc, opravdu jsem ji potřeboval.",
-      "spokenEn": "Thank you for your help;\" I really needed it.",
-      "spokenCz": "Děkuju za pomoc, opravdu jsem ji potřeboval.",
-      "en": "assets/vocabulary-en-sentences/en-us-aria-neural/cbeae5887ef5b90b6ca1.mp3",
-      "cz": "assets/vocabulary-en-sentences/cs-cz-vlasta-neural/0ad54235aeb55295a33b.mp3"
+      "sourceSentenceEn": "Thank you for your help. I really needed it.",
+      "sourceSentenceCz": "Děkuju za pomoc. Opravdu jsem ji potřeboval.",
+      "spokenEn": "Thank you for your help. I really needed it.",
+      "spokenCz": "Děkuju za pomoc. Opravdu jsem ji potřeboval.",
+      "en": "assets/vocabulary-en-sentences/en-us-aria-neural/efa40249f034e73c04f7.mp3",
+      "cz": "assets/vocabulary-en-sentences/cs-cz-vlasta-neural/28b1080a03cacf09b15b.mp3"
     },
     "ven-0059": {
       "uid": "ven-0059",
@@ -1318,7 +1318,7 @@
     "ven-0119": {
       "uid": "ven-0119",
       "sourceEn": "chicken",
-      "sourceCz": "kuře",
+      "sourceCz": "kuřecí maso",
       "sourceSentenceEn": "For dinner, we cook chicken with rice.",
       "sourceSentenceCz": "K večeři uvaříme kuře s rýží.",
       "spokenEn": "For dinner, we cook chicken with rice.",
@@ -1593,7 +1593,7 @@
     "ven-0144": {
       "uid": "ven-0144",
       "sourceEn": "right",
-      "sourceCz": "pravý, správný, doprava",
+      "sourceCz": "doprava",
       "sourceSentenceEn": "Go straight and then turn right.",
       "sourceSentenceCz": "Jdi rovně a pak zahni doprava.",
       "spokenEn": "Go straight and then turn right.",
@@ -1758,7 +1758,7 @@
     "ven-0159": {
       "uid": "ven-0159",
       "sourceEn": "play",
-      "sourceCz": "hrát si, hra",
+      "sourceCz": "hrát si",
       "sourceSentenceEn": "We play with our friends.",
       "sourceSentenceCz": "Hrajeme si s našimi přáteli.",
       "spokenEn": "We play with our friends.",
@@ -3034,7 +3034,7 @@
     "ven-0275": {
       "uid": "ven-0275",
       "sourceEn": "careful",
-      "sourceCz": "opatrný, opatrně",
+      "sourceCz": "opatrný",
       "sourceSentenceEn": "Be careful when you cross the road.",
       "sourceSentenceCz": "Buď opatrný, když přecházíš silnici.",
       "spokenEn": "Be careful when you cross the road.",
@@ -3661,13 +3661,13 @@
     "ven-0332": {
       "uid": "ven-0332",
       "sourceEn": "first",
-      "sourceCz": "první; nejdříve",
-      "sourceSentenceEn": "I will go first.",
-      "sourceSentenceCz": "Půjdu první.",
-      "spokenEn": "I will go first.",
-      "spokenCz": "Půjdu první.",
-      "en": "assets/vocabulary-en-sentences/en-us-aria-neural/3fb87e7176bc1ab6e943.mp3",
-      "cz": "assets/vocabulary-en-sentences/cs-cz-vlasta-neural/e1dd3cd73db47ced078a.mp3"
+      "sourceCz": "první",
+      "sourceSentenceEn": "The orange rabbit is first.",
+      "sourceSentenceCz": "Oranžový králík je první.",
+      "spokenEn": "The orange rabbit is first.",
+      "spokenCz": "Oranžový králík je první.",
+      "en": "assets/vocabulary-en-sentences/en-us-aria-neural/39ca3e572651f3b9cba6.mp3",
+      "cz": "assets/vocabulary-en-sentences/cs-cz-vlasta-neural/e2caf328377c45fd16d0.mp3"
     },
     "ven-0333": {
       "uid": "ven-0333",
@@ -3738,7 +3738,7 @@
     "ven-0339": {
       "uid": "ven-0339",
       "sourceEn": "guard",
-      "sourceCz": "hlídat; strážce",
+      "sourceCz": "hlídat",
       "sourceSentenceEn": "The dog can guard the gate.",
       "sourceSentenceCz": "Pes může hlídat branku.",
       "spokenEn": "The dog can guard the gate.",
@@ -3804,7 +3804,7 @@
     "ven-0345": {
       "uid": "ven-0345",
       "sourceEn": "her",
-      "sourceCz": "ji; jí; její",
+      "sourceCz": "ji; jí",
       "sourceSentenceEn": "I can help her.",
       "sourceSentenceCz": "Mohu jí pomoci.",
       "spokenEn": "I can help her.",
@@ -4145,7 +4145,7 @@
     "ven-0376": {
       "uid": "ven-0376",
       "sourceEn": "open",
-      "sourceCz": "otevřený; otevřít",
+      "sourceCz": "otevřít",
       "sourceSentenceEn": "Please open the door.",
       "sourceSentenceCz": "Prosím otevři dveře.",
       "spokenEn": "Please open the door.",
@@ -4244,7 +4244,7 @@
     "ven-0385": {
       "uid": "ven-0385",
       "sourceEn": "second",
-      "sourceCz": "sekunda; druhý",
+      "sourceCz": "sekunda",
       "sourceSentenceEn": "Wait a second, please.",
       "sourceSentenceCz": "Počkej prosím chvilku.",
       "spokenEn": "Wait a second, please.",
@@ -4255,7 +4255,7 @@
     "ven-0386": {
       "uid": "ven-0386",
       "sourceEn": "smile",
-      "sourceCz": "usmívat se; úsměv",
+      "sourceCz": "usmívat se",
       "sourceSentenceEn": "I smile when I see my friends.",
       "sourceSentenceCz": "Usmívám se, když vidím své kamarády.",
       "spokenEn": "I smile when I see my friends.",
@@ -4387,13 +4387,13 @@
     "ven-0398": {
       "uid": "ven-0398",
       "sourceEn": "that",
-      "sourceCz": "tamten; že",
-      "sourceSentenceEn": "That house is big.",
-      "sourceSentenceCz": "Tamten dům je velký.",
-      "spokenEn": "That house is big.",
-      "spokenCz": "Tamten dům je velký.",
-      "en": "assets/vocabulary-en-sentences/en-us-aria-neural/d9e029738665e61154a4.mp3",
-      "cz": "assets/vocabulary-en-sentences/cs-cz-vlasta-neural/b9766d13ee1b1a90d6ae.mp3"
+      "sourceCz": "tamten; tamta; tamto",
+      "sourceSentenceEn": "That bird is small.",
+      "sourceSentenceCz": "Tamten pták je malý.",
+      "spokenEn": "That bird is small.",
+      "spokenCz": "Tamten pták je malý.",
+      "en": "assets/vocabulary-en-sentences/en-us-aria-neural/5f7559aef80ba6428694.mp3",
+      "cz": "assets/vocabulary-en-sentences/cs-cz-vlasta-neural/fa4a63c02100d9ac9040.mp3"
     },
     "ven-0399": {
       "uid": "ven-0399",
@@ -4691,11 +4691,198 @@
       "spokenCz": "Je to tvoje kniha?",
       "en": "assets/vocabulary-en-sentences/en-us-aria-neural/9ab42ba414e1fb480d21.mp3",
       "cz": "assets/vocabulary-en-sentences/cs-cz-vlasta-neural/fbef3875425730438aa0.mp3"
+    },
+    "ven-0426": {
+      "uid": "ven-0426",
+      "sourceEn": "drink",
+      "sourceCz": "nápoj",
+      "sourceSentenceEn": "This drink is cold.",
+      "sourceSentenceCz": "Tenhle nápoj je studený.",
+      "spokenEn": "This drink is cold.",
+      "spokenCz": "Tenhle nápoj je studený.",
+      "en": "assets/vocabulary-en-sentences/en-us-aria-neural/c452137f1fa36cdb167d.mp3",
+      "cz": "assets/vocabulary-en-sentences/cs-cz-vlasta-neural/bc35548073d4c01d75c9.mp3"
+    },
+    "ven-0427": {
+      "uid": "ven-0427",
+      "sourceEn": "drawing",
+      "sourceCz": "kresba",
+      "sourceSentenceEn": "This drawing shows a house.",
+      "sourceSentenceCz": "Na této kresbě je dům.",
+      "spokenEn": "This drawing shows a house.",
+      "spokenCz": "Na této kresbě je dům.",
+      "en": "assets/vocabulary-en-sentences/en-us-aria-neural/1f5c0ab65f19ae7a28db.mp3",
+      "cz": "assets/vocabulary-en-sentences/cs-cz-vlasta-neural/2b243b98a27d8b5bb954.mp3"
+    },
+    "ven-0428": {
+      "uid": "ven-0428",
+      "sourceEn": "free",
+      "sourceCz": "zdarma",
+      "sourceSentenceEn": "The water is free.",
+      "sourceSentenceCz": "Voda je zdarma.",
+      "spokenEn": "The water is free.",
+      "spokenCz": "Voda je zdarma.",
+      "en": "assets/vocabulary-en-sentences/en-us-aria-neural/22fed2519f274847db4b.mp3",
+      "cz": "assets/vocabulary-en-sentences/cs-cz-vlasta-neural/6813fffea5e9fa5e44a5.mp3"
+    },
+    "ven-0429": {
+      "uid": "ven-0429",
+      "sourceEn": "free",
+      "sourceCz": "svobodný",
+      "sourceSentenceEn": "I feel free.",
+      "sourceSentenceCz": "Cítím se svobodný.",
+      "spokenEn": "I feel free.",
+      "spokenCz": "Cítím se svobodný.",
+      "en": "assets/vocabulary-en-sentences/en-us-aria-neural/f8264c7b8ee96491d260.mp3",
+      "cz": "assets/vocabulary-en-sentences/cs-cz-vlasta-neural/7c1ebfc2cf63e1e7cbc4.mp3"
+    },
+    "ven-0430": {
+      "uid": "ven-0430",
+      "sourceEn": "help",
+      "sourceCz": "pomoci; pomáhat",
+      "sourceSentenceEn": "Can you help me?",
+      "sourceSentenceCz": "Můžeš mi pomoci?",
+      "spokenEn": "Can you help me?",
+      "spokenCz": "Můžeš mi pomoci?",
+      "en": "assets/vocabulary-en-sentences/en-us-aria-neural/be17daa7fe9a567f375f.mp3",
+      "cz": "assets/vocabulary-en-sentences/cs-cz-vlasta-neural/b3ecded8825921e56544.mp3"
+    },
+    "ven-0431": {
+      "uid": "ven-0431",
+      "sourceEn": "chicken",
+      "sourceCz": "slepice",
+      "sourceSentenceEn": "The chicken walks in the yard.",
+      "sourceSentenceCz": "Slepice chodí po dvoře.",
+      "spokenEn": "The chicken walks in the yard.",
+      "spokenCz": "Slepice chodí po dvoře.",
+      "en": "assets/vocabulary-en-sentences/en-us-aria-neural/45fb64c45910cbe9e9c9.mp3",
+      "cz": "assets/vocabulary-en-sentences/cs-cz-vlasta-neural/fce648387e8cf978adef.mp3"
+    },
+    "ven-0432": {
+      "uid": "ven-0432",
+      "sourceEn": "right",
+      "sourceCz": "správný",
+      "sourceSentenceEn": "This is the right shape.",
+      "sourceSentenceCz": "Tohle je správný tvar.",
+      "spokenEn": "This is the right shape.",
+      "spokenCz": "Tohle je správný tvar.",
+      "en": "assets/vocabulary-en-sentences/en-us-aria-neural/0642bff8976ce18a20d2.mp3",
+      "cz": "assets/vocabulary-en-sentences/cs-cz-vlasta-neural/a01769b9d86866e8dd47.mp3"
+    },
+    "ven-0433": {
+      "uid": "ven-0433",
+      "sourceEn": "right",
+      "sourceCz": "pravý",
+      "sourceSentenceEn": "Raise your right hand.",
+      "sourceSentenceCz": "Zvedni pravou ruku.",
+      "spokenEn": "Raise your right hand.",
+      "spokenCz": "Zvedni pravou ruku.",
+      "en": "assets/vocabulary-en-sentences/en-us-aria-neural/77ca2c6c6684c863e0ed.mp3",
+      "cz": "assets/vocabulary-en-sentences/cs-cz-vlasta-neural/e5c7bf839bd029dad0f5.mp3"
+    },
+    "ven-0434": {
+      "uid": "ven-0434",
+      "sourceEn": "play",
+      "sourceCz": "hra (činnost)",
+      "sourceSentenceEn": "Play helps children learn.",
+      "sourceSentenceCz": "Hra pomáhá dětem učit se.",
+      "spokenEn": "Play helps children learn.",
+      "spokenCz": "Hra pomáhá dětem učit se.",
+      "en": "assets/vocabulary-en-sentences/en-us-aria-neural/b93d86284616490baf4c.mp3",
+      "cz": "assets/vocabulary-en-sentences/cs-cz-vlasta-neural/b2cc87eca752a0188a08.mp3"
+    },
+    "ven-0435": {
+      "uid": "ven-0435",
+      "sourceEn": "carefully",
+      "sourceCz": "opatrně",
+      "sourceSentenceEn": "Cross the road carefully.",
+      "sourceSentenceCz": "Přejdi opatrně přes silnici.",
+      "spokenEn": "Cross the road carefully.",
+      "spokenCz": "Přejdi opatrně přes silnici.",
+      "en": "assets/vocabulary-en-sentences/en-us-aria-neural/639e386ad16e927d001a.mp3",
+      "cz": "assets/vocabulary-en-sentences/cs-cz-vlasta-neural/d5dd4ec074d2d2c474ad.mp3"
+    },
+    "ven-0436": {
+      "uid": "ven-0436",
+      "sourceEn": "first",
+      "sourceCz": "nejdříve",
+      "sourceSentenceEn": "You go first.",
+      "sourceSentenceCz": "Ty jdi nejdříve.",
+      "spokenEn": "You go first.",
+      "spokenCz": "Ty jdi nejdříve.",
+      "en": "assets/vocabulary-en-sentences/en-us-aria-neural/b967a5d094d343a6d1ee.mp3",
+      "cz": "assets/vocabulary-en-sentences/cs-cz-vlasta-neural/d31e69f7664444d8adfe.mp3"
+    },
+    "ven-0437": {
+      "uid": "ven-0437",
+      "sourceEn": "guard",
+      "sourceCz": "strážce",
+      "sourceSentenceEn": "The guard stands by the gate.",
+      "sourceSentenceCz": "Strážce stojí u brány.",
+      "spokenEn": "The guard stands by the gate.",
+      "spokenCz": "Strážce stojí u brány.",
+      "en": "assets/vocabulary-en-sentences/en-us-aria-neural/67b8882c39c751e3f984.mp3",
+      "cz": "assets/vocabulary-en-sentences/cs-cz-vlasta-neural/f207dc688fd7b27b3594.mp3"
+    },
+    "ven-0438": {
+      "uid": "ven-0438",
+      "sourceEn": "her",
+      "sourceCz": "její",
+      "sourceSentenceEn": "Her bag is red.",
+      "sourceSentenceCz": "Její taška je červená.",
+      "spokenEn": "Her bag is red.",
+      "spokenCz": "Její taška je červená.",
+      "en": "assets/vocabulary-en-sentences/en-us-aria-neural/56029bcbe18af843b747.mp3",
+      "cz": "assets/vocabulary-en-sentences/cs-cz-vlasta-neural/7af408ae22974c94aac4.mp3"
+    },
+    "ven-0439": {
+      "uid": "ven-0439",
+      "sourceEn": "open",
+      "sourceCz": "otevřený",
+      "sourceSentenceEn": "The door is open.",
+      "sourceSentenceCz": "Dveře jsou otevřené.",
+      "spokenEn": "The door is open.",
+      "spokenCz": "Dveře jsou otevřené.",
+      "en": "assets/vocabulary-en-sentences/en-us-aria-neural/d43d59a99d16d93cf5ac.mp3",
+      "cz": "assets/vocabulary-en-sentences/cs-cz-vlasta-neural/a3236bf17bc3b6b290d3.mp3"
+    },
+    "ven-0440": {
+      "uid": "ven-0440",
+      "sourceEn": "second",
+      "sourceCz": "druhý",
+      "sourceSentenceEn": "The rabbit in blue is second.",
+      "sourceSentenceCz": "Králík v modrém je druhý.",
+      "spokenEn": "The rabbit in blue is second.",
+      "spokenCz": "Králík v modrém je druhý.",
+      "en": "assets/vocabulary-en-sentences/en-us-aria-neural/159a0675bb9a282955ed.mp3",
+      "cz": "assets/vocabulary-en-sentences/cs-cz-vlasta-neural/c654d3e02b7b27f36c60.mp3"
+    },
+    "ven-0441": {
+      "uid": "ven-0441",
+      "sourceEn": "smile",
+      "sourceCz": "úsměv",
+      "sourceSentenceEn": "His smile makes me happy.",
+      "sourceSentenceCz": "Jeho úsměv mi dělá radost.",
+      "spokenEn": "His smile makes me happy.",
+      "spokenCz": "Jeho úsměv mi dělá radost.",
+      "en": "assets/vocabulary-en-sentences/en-us-aria-neural/7e898366c3acd38cee46.mp3",
+      "cz": "assets/vocabulary-en-sentences/cs-cz-vlasta-neural/fd1b575fcff414374021.mp3"
+    },
+    "ven-0442": {
+      "uid": "ven-0442",
+      "sourceEn": "that",
+      "sourceCz": "že",
+      "sourceSentenceEn": "I think that the bird is beautiful.",
+      "sourceSentenceCz": "Myslím, že ten pták je krásný.",
+      "spokenEn": "I think that the bird is beautiful.",
+      "spokenCz": "Myslím, že ten pták je krásný.",
+      "en": "assets/vocabulary-en-sentences/en-us-aria-neural/0160ce75060b97d45725.mp3",
+      "cz": "assets/vocabulary-en-sentences/cs-cz-vlasta-neural/0ca33933d173166fb2c4.mp3"
     }
   },
   "stats": {
-    "itemCount": 425,
-    "audioReferences": 850,
-    "uniqueAssets": 850
+    "itemCount": 442,
+    "audioReferences": 884,
+    "uniqueAssets": 884
   }
 }

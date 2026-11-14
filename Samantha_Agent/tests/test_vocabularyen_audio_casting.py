@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import csv
 import importlib.util
 import json
 import sys
@@ -18,8 +19,20 @@ SPEC.loader.exec_module(builder)
 
 
 class VocabularyEnAudioCastingTests(unittest.TestCase):
-    def test_casting_source_matches_current_vocabulary_csv(self) -> None:
-        items = builder.load_casting_items()
+    def historical_csv(self, directory):
+        path=Path(directory)/"VocabularyEN.csv"
+        with path.open("w",newline="") as handle:
+            writer=csv.DictWriter(handle,fieldnames=["EN","CZ","Order"])
+            writer.writeheader()
+            writer.writerows({"EN":en,"CZ":cz,"Order":order}
+                             for _,order,en,cz,_,_ in builder.CASTING_SOURCE)
+        return path
+
+    def test_historical_casting_keeps_its_source_and_rejects_changed_production_csv(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            items = builder.load_casting_items(self.historical_csv(directory))
+        with self.assertRaisesRegex(ValueError,"se změnil"):
+            builder.load_casting_items()
 
         self.assertEqual(len(items), 10)
         self.assertEqual(len({item.item_id for item in items}), len(items))
@@ -37,9 +50,10 @@ class VocabularyEnAudioCastingTests(unittest.TestCase):
 
         with tempfile.TemporaryDirectory() as temp_dir:
             output = Path(temp_dir)
-            first = builder.build_casting(output, synthesize=fake_synthesize)
+            source = self.historical_csv(temp_dir)
+            first = builder.build_casting(output, synthesize=fake_synthesize, csv_path=source)
             manifest_bytes = (output / "casting.json").read_bytes()
-            second = builder.build_casting(output, synthesize=fake_synthesize)
+            second = builder.build_casting(output, synthesize=fake_synthesize, csv_path=source)
 
             self.assertEqual(first, {"generated": 40, "skipped": 0, "total": 40})
             self.assertEqual(second, {"generated": 0, "skipped": 40, "total": 40})
