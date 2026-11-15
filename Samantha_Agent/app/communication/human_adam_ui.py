@@ -1098,7 +1098,14 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
     return ({cockpit:"Cockpit Samanthy", github_pages:"Web projektu (GitHub Pages)"})[String(target || "")] || "Cíl nasazení neověřen";
   }
 
+  function serverJobPhase(focus) {
+    return focus.attention ? "Úloha vyžaduje kontrolu" : focus.phase;
+  }
+
   function workStateSummary(state=currentWorkState) {
+    const jobs=humanAdamServerJobs(state);
+    if (jobs.focus && !deliveryUncertain && !sendInFlight && state && state.model && state.model.state!=="running")
+      return [serverJobPhase(jobs.focus), "Navazující serverová úloha. Stav vychází z její původní účtenky."];
     const value = state && state.summary ? String(state.summary.state || "") : "unverified";
     return ({
       running:["Adam pracuje", "Čekáme na potvrzený výsledek modelového tahu."],
@@ -1175,14 +1182,65 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
     if (!workStateEvidence.children.length) {
       const row = document.createElement("li"); row.textContent = "Pro tento snímek nejsou další doklady k zobrazení."; workStateEvidence.appendChild(row);
     }
+    for (const item of humanAdamServerJobs(currentWorkState).rows) {
+      const row=document.createElement("li"); row.textContent=item.text;
+      workStateEvidence.appendChild(row);
+    }
+    syncServerJobPresentation();
+    scheduleServerJobPoll();
     updateMobileStatusSummary();
+  }
+
+  let serverJobPollTimer=null, serverJobPollBusy=false;
+  function syncServerJobPresentation(view=workMonitor && workMonitor.snapshot()) {
+    const focus=humanAdamServerJobs(currentWorkState).focus;
+    if (!focus || deliveryUncertain || view && view.pendingIdentity && !view.operation
+      || view && view.operation && view.operation.delivery_state==="unknown"
+      || view && view.operation && ["running","accepted"].includes(view.operation.lifecycle_state)
+      || view && view.operation && focus.parent && focus.parent.operation_id!==view.operation.operation_id) return;
+    workStateBox.hidden=false;
+    if (view && view.enabled && view.operation) {
+      document.getElementById("liveWorkTitle").textContent=serverJobPhase(focus);
+      document.getElementById("liveWorkActivity").textContent=focus.text;
+    }
+  }
+  function scheduleServerJobPoll() {
+    const view=workMonitor && workMonitor.snapshot();
+    const focus=humanAdamServerJobs(currentWorkState).focus;
+    const needed=focus && focus.active || view && view.operation && view.operation.lifecycle_state==="awaiting_completion";
+    if (serverJobPollTimer!==null || serverJobPollBusy || document.hidden || !needed) return;
+    const expected=JSON.stringify(currentWorkState && currentWorkState.scope);
+    const revision=currentWorkState && currentWorkState.revision;
+    serverJobPollTimer=window.setTimeout(async()=>{
+      serverJobPollTimer=null; serverJobPollBusy=true;
+      try {
+        const payload=await api("/api/human-adam/status",{cache:"no-store"});
+        if (JSON.stringify(currentWorkState && currentWorkState.scope)!==expected
+          || (currentWorkState && currentWorkState.revision)!==revision) return;
+        const scope=payload.work_state && payload.work_state.scope;
+        if (!payload.ok || JSON.stringify(scope)!==expected) throw new Error("server_job_source_unverified");
+        if (Date.parse(payload.work_state.observed_at)>=Date.parse(currentWorkState.observed_at))
+          renderWorkState(payload.work_state,payload.session);
+      } catch (error) {
+        if (error.staleStatus || JSON.stringify(currentWorkState && currentWorkState.scope)!==expected
+          || (currentWorkState && currentWorkState.revision)!==revision) return;
+        renderWorkState(null,lastSession); workStateBox.hidden=false;
+      }
+      finally { serverJobPollBusy=false; scheduleServerJobPoll(); }
+    },2500);
   }
 
   function updateMobileStatusSummary() {
     let text = "";
     let tone = "warn";
     const liveView = typeof workMonitor !== "undefined" && workMonitor ? workMonitor.snapshot() : null;
-    if (liveView && liveView.enabled && (liveView.active || liveView.blocked || liveView.error)) {
+    const serverFocus=humanAdamServerJobs(currentWorkState).focus;
+    if (serverFocus && !sendInFlight && !deliveryUncertain && !(liveView && liveView.pendingIdentity && !liveView.operation)
+      && !(liveView && liveView.operation && liveView.operation.delivery_state==="unknown")
+      && (!liveView || !liveView.operation || !["running","accepted"].includes(liveView.operation.lifecycle_state))
+      && (!serverFocus.parent || !liveView || !liveView.operation || serverFocus.parent.operation_id===liveView.operation.operation_id)) {
+      text=serverJobPhase(serverFocus);
+    } else if (liveView && liveView.enabled && (liveView.active || liveView.blocked || liveView.error)) {
       text = humanAdamLiveSummary(liveView);
     } else if (deliveryUncertain) {
       text = "Stav doručení je nejistý · obnov stav · pokyn neposílej znovu";
@@ -3325,7 +3383,7 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
       renderLunaReleaseJob(payload.job);
       lunaReleaseMeta.textContent = packageSummary;
       if (lunaReleaseJobActive(payload.job)) scheduleLunaReleasePoll();
-      else await loadStatus();
+      await loadStatus();
       notice.textContent = dryRun ? "Zkouška balíčku začala." : "Předání p+n vykonavateli začalo.";
       return true;
     } catch (error) {
@@ -4253,6 +4311,7 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
       if(steerMonitor)steerMonitor.configure(currentWorkProtocol,view);
       if(interruptMonitor)interruptMonitor.configure(currentWorkProtocol,view);
       workStateBox.hidden=Boolean(view.enabled && (view.active || view.blocked || view.error));
+      syncServerJobPresentation(view); scheduleServerJobPoll();
       syncControls(); updateMobileStatusSummary();
     },
     onTerminal:async (operation,{notify})=>{
@@ -4308,8 +4367,8 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
   document.getElementById("steerForm").addEventListener("submit",event=>{event.preventDefault();void steerMonitor.submit();});
   document.getElementById("steerVerifyBtn").addEventListener("click",()=>steerMonitor.verify());
   document.getElementById("liveWorkRefreshBtn").addEventListener("click",()=>workMonitor.refresh());
-  document.addEventListener("visibilitychange",()=>workMonitor.wake());
-  window.addEventListener("online",()=>workMonitor.wake());
+  document.addEventListener("visibilitychange",()=>{workMonitor.wake();scheduleServerJobPoll();});
+  window.addEventListener("online",()=>{workMonitor.wake();scheduleServerJobPoll();});
   window.addEventListener("pageshow",()=>{workMonitor.resume();if(steerMonitor)steerMonitor.resume();});
 
 

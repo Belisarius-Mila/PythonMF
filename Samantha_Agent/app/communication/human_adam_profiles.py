@@ -1604,6 +1604,7 @@ class HumanAdamProfileManager:
         errors: list[str] = []
         completion = dict(payload.get("last_step_completion") or {})
         job_snapshot = None
+        job = None
         try:
             record = self.completion_status_store.load(workstream_id=workstream_id)
             if record is not None:
@@ -1623,8 +1624,12 @@ class HumanAdamProfileManager:
             errors.append("completion")
             completion = {}
         release = None
+        releases = []
         try:
-            release = public_job(LunaReleaseStore(self.state_path.parent / "luna_release").load())
+            release_store = LunaReleaseStore(self.state_path.parent / "luna_release")
+            release_store.load()  # Validate metadata health; never select a job by this global pointer.
+            releases = release_store.recent(workstream_id)
+            release = public_job(releases[0]) if releases else None
         except (AppServerError, OSError, TypeError, ValueError):
             errors.append("publication")
         active = (payload.get("workstream_selection") or {}).get("active") or {}
@@ -1638,13 +1643,53 @@ class HumanAdamProfileManager:
                       and session == current_session)
         if not isinstance(payload.get("session"), dict):
             errors.append("session")
-        return build_human_adam_work_state(
+        result = build_human_adam_work_state(
             workstream_id=workstream_id, observed_at=datetime.now(timezone.utc).isoformat(),
             session_snapshot=payload.get("session"), runtime_snapshot=payload.get("runtime"),
             completion_snapshot=completion, completion_job_snapshot=job_snapshot,
             release_snapshot=release, snapshot_consistent=consistent,
             source_errors=tuple(errors),
         )
+        from dataclasses import asdict
+        from app.communication.human_adam_work import WorkStore
+        from app.communication.human_adam_job_progress import build_server_job_progress
+        from app.communication.simple_main_deploy import load_simple_main_deployment_receipt
+        records, deployment = [], None
+        try:
+            records = WorkStore(self.state_path.parent/'owned_work').recent(workstream_id)
+            if self.simple_main_deployment_receipt_path.exists():
+                deployment = load_simple_main_deployment_receipt(self.simple_main_deployment_receipt_path)
+        except (AppServerError, OSError, ValueError):
+            errors.append('server_jobs')
+        consistent = (consistent and workstream_id == self.active_workstream_id
+            and service is self.active_service and session == service.hub.snapshot())
+        if not consistent:
+            result = build_human_adam_work_state(workstream_id=workstream_id,
+                observed_at=result['observed_at'],session_snapshot=payload.get('session'),
+                runtime_snapshot=payload.get('runtime'),snapshot_consistent=False)
+        latest = next((row for row in reversed(session.get('messages') or [])
+                       if row.get('thread_id') == session.get('thread_id')),{})
+        result['server_jobs'] = build_server_job_progress(workstream_id=workstream_id,
+            thread_id=session.get('thread_id',''), latest_client_id=latest.get('client_message_id',''),
+            observed_at=result['observed_at'], records=records,
+            completion_job=asdict(job) if job is not None else None,
+            releases=releases, deployment=deployment,
+            consistent=consistent, source_errors=errors,
+            latest_received_at=latest.get('received_at') or session.get('updated_at',''),
+            model_running=session.get('turn_busy') is True)
+        current_job = next((row for row in result['server_jobs']['jobs']
+            if row['job_id'] == result['server_jobs']['current_job_id']),None)
+        if result['publication']['state'] == 'reported_active' and not (current_job and current_job['kind'] == 'release'):
+            result['publication']['state'] = 'recorded'
+            if result['summary']['state'] == 'publication_reported':
+                result['summary'] = {'state':'ready' if result['connection']['state'] == 'connected' else 'disconnected',
+                                     'operation_id':None}
+        if not result['server_jobs']['consistent'] and result['summary']['state'] == 'ready':
+            result['summary'] = {'state':'unverified','operation_id':None}
+        import hashlib
+        result['revision'] = hashlib.sha256(json.dumps({k:v for k,v in result.items()
+            if k not in {'revision','observed_at'}},sort_keys=True).encode()).hexdigest()
+        return result
 
     def status(self) -> dict[str, Any]:
         try:

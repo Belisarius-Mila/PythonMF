@@ -229,5 +229,25 @@ async function test(name,fn){await fn();passed++;console.log(`PASS ${name}`);}
     h.setResponse(frame(operation({scope:{...scope,connection_generation:2},lifecycle_state:'completed',delivery_state:'confirmed'})));
     await h.advance(750);assert(h.monitor.snapshot().error);assert.equal(h.monitor.snapshot().operation.lifecycle_state,'running');
   });
+  await test('server job phases and later verification expose only public labels',async()=>{
+    const state={scope,server_jobs:{schema_version:1,read_only:true,writes_performed:false,consistent:true,
+      scope,jobs:[{job_id:id,kind:'release',state:'attention',phase:'done',current:true,reported_active:false,
+        deployment_target:'cockpit',outcome:'deployment_verified',verified_head:'f'.repeat(40),later_verified:true,
+        parent:{client_request_id:client},message:'PRIVATE_RAW',token:'PRIVATE_RAW'}],current_job_id:id}};
+    const result=context.humanAdamServerJobs(state);
+    assert.equal(result.focus,null);assert(result.rows[0].text.includes('dodatečně ověřeno'));
+    assert(result.rows[0].text.includes('původní účtenka'));assert(!JSON.stringify(result).includes('PRIVATE_RAW'));
+    state.server_jobs.jobs[0]={...state.server_jobs.jobs[0],state:'running',phase:'verification',reported_active:true};
+    assert.equal(context.humanAdamServerJobs(state).focus.phase,'Ověřuji nasazení');
+    state.server_jobs.scope={...scope,workstream_id:'foreign-project'};
+    assert.equal(context.humanAdamServerJobs(state).rows.length,0);
+  });
+  await test('server jobs never use malformed or unavailable projections as active progress',async()=>{
+    for(const changed of [{consistent:false},{writes_performed:true},{read_only:false},{schema_version:2}]){
+      const progress={schema_version:1,consistent:true,read_only:true,writes_performed:false,scope,
+        current_job_id:id,jobs:[{job_id:id,kind:'checkpoint',state:'running',phase:'checkpoint_validation',reported_active:true,current:true}],...changed};
+      assert.equal(context.humanAdamServerJobs({scope,server_jobs:progress}).focus,null);
+    }
+  });
   console.log(`HA-05 monitor: ${passed} scenarios PASS`);
 })().catch(error=>{console.error(error);process.exitCode=1;});

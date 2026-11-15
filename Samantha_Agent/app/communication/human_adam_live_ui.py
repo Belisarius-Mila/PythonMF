@@ -215,6 +215,43 @@ function humanAdamUsageLines(operation) {
   return {title:total ? `Spotřeba práce: ${fmt(total.total_tokens)} tokenů · ${complete?"doložená":"neúplná"}` : unknown.title,parts};
 }
 
+function humanAdamServerJobs(state) {
+  const progress=state && state.server_jobs, scope=state && state.scope;
+  const empty={focus:null,rows:[]};
+  if (!progress || progress.schema_version!==1 || progress.read_only!==true || progress.writes_performed!==false
+    || progress.consistent!==true || !scope || !progress.scope || progress.scope.workstream_id!==scope.workstream_id
+    || progress.scope.thread_id!==scope.thread_id || !Array.isArray(progress.jobs) || progress.jobs.length>16) return empty;
+  const phases={queued:"Čeká na zpracování",checkpoint_validation:"Ověřuji a ukládám checkpoint",retry_waiting:"Čeká dokončovací kontrola",
+    checkpoint_completed:"Checkpoint uložen",completion_completed:"Dokončovací kontrola skončila",attention:"Vyžaduje kontrolu",handoff:"Předávám balíček vykonavateli",
+    protection:"Kontroluji chráněné služby",push_requested:"Ověřuji a odesílám na GitHub",validation:"Ověřuji již odeslaný kód",
+    deploy_requested:"Nasazuji Cockpit",publish_requested:"Publikuji web projektu",verification:"Ověřuji nasazení",
+    return:"Předávám výsledek",done:"Vydávací úloha skončila"};
+  const rows=[];
+  for (const job of progress.jobs) {
+    if (!job || typeof job.job_id!=="string" || !/^[a-f0-9]{32,64}$/.test(job.job_id)
+      || !["checkpoint","release"].includes(job.kind) || !phases[job.phase]
+      || !["queued","running","retry_waiting","completed","failed","attention","dry_run_completed"].includes(job.state)) continue;
+    const target=({cockpit:"Cockpit",github_pages:"Web projektu"})[job.deployment_target] || "";
+    const verified=job.outcome==="deployment_verified" && /^[a-f0-9]{40}$/.test(job.verified_head || "") && target;
+    let text=`${job.kind==="checkpoint"?"Checkpoint":job.dry_run===true?"Zkouška p+n":"P+n"}: ${phases[job.phase]}`;
+    if (["failed","attention"].includes(job.state)) text += " · původní účtenka vyžaduje kontrolu";
+    if (target) text += ` · ${target}`;
+    if (verified) text += ` · ${job.later_verified?"nasazení dodatečně ověřeno":"nasazení ověřeno"} ${job.verified_head.slice(0,12)}`;
+    if (job.outcome==="dry_run_completed") text += " · zkouška bez publikování";
+    if (job.parent && typeof job.parent.client_request_id==="string") text += " · navazuje na původní zadání";
+    else if (job.kind==="release") text += " · samostatné vydání";
+    if (job.reported_active) text += " · stav účtenky, živost vykonavatele není ověřena";
+    const usage=job.executor_usage;
+    if (job.kind==="release" && usage && ["input_tokens","cached_input_tokens","output_tokens","reasoning_output_tokens","total_tokens"].every(key=>Number.isSafeInteger(usage[key]) && usage[key]>=0)
+      && usage.total_tokens===usage.input_tokens+usage.output_tokens && usage.cached_input_tokens<=usage.input_tokens && usage.reasoning_output_tokens<=usage.output_tokens)
+      text += ` · vykonavatel ${usage.total_tokens.toLocaleString("cs-CZ")} tokenů`;
+    rows.push({id:job.job_id,text,phase:phases[job.phase],active:job.reported_active===true && job.current===true,
+      current:job.current===true,attention:["failed","attention"].includes(job.state) && job.outcome==="unverified",
+      parent:job.parent || null,kind:job.kind});
+  }
+  return {rows,focus:rows.find(row=>row.id===progress.current_job_id && row.current && (row.active || row.attention)) || null};
+}
+
 function humanAdamLiveSummary(view) {
   if (!view || !view.enabled) return "";
   if (view.error) return "Průběh práce není ověřen";

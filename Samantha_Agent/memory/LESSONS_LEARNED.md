@@ -2750,3 +2750,11 @@ Příští CLI běh opravu načte, nová ostrá záloha v tomto vývojovém krok
 - Typ: opakující se
 - Řešení nalezeno: 15112026
 - Řešení: Sjednotit skutečný child environment a stejným resolverem jej otisknout; nestačí smazat pole z digestu. U stejného vlastníka zachovat owner/special bity a UID, group/other neovlivňují jeho přístup. Cizí vlastník vyžaduje celé mode/GID. Testovat dirty gate → commit → private clone → push gate → deploy gate s jediným runnerem; změněný obsah/nástroje/pokrytí/owner execute musí dál zneplatnit cache.
+
+
+### LL-134 — Starší attention job nesmí převzít aktuální průběh
+
+- Problém: Výběr prvního neúspěšného/aktivního jobu oživí starou attention účtenku i po novějším úspěšném vydání stejného cíle.
+- Typ: opakující se
+- Řešení nalezeno: 15112026
+- Řešení: Nejprve vybrat nejnovější doklad každé současné fáze/cíle, teprve pak jeho aktivní/attention stav. Starší doklady zachovat jen v historii. Parent odvozovat ze serverově potvrzené identity a source projektu/vlákna, nikdy z globálního current pointeru. Pozdější přesný deployment důkaz obohatí projekci, nemění původní účtenku a nepovoluje opakování akce.

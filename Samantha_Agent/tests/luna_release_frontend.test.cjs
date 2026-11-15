@@ -13,6 +13,7 @@ function sourceBetween(start, end) {
 }
 
 const source = [
+  sourceBetween("function humanAdamServerJobs", "function humanAdamLiveSummary"),
   'const LUNA_RELEASE_POLL_INTERVAL_MS = 2500;',
   sourceBetween("function syncControls() {", "function lunaReleaseJobActive"),
   sourceBetween("function lunaReleaseJobActive", "function setBusy("),
@@ -64,6 +65,9 @@ function harness(apiHandler, confirmResult=true) {
     classList: {add() {}, remove() {}, toggle() {}, contains() { return false; }},
     setAttribute(name, value) { this.attributes[name] = value; },
     focus() { this.focused = true; },
+    children: [],
+    appendChild(child) { this.children.push(child); },
+    replaceChildren(...children) { this.children=children; },
   });
   const names = [
     "connectBtn", "profileSelect", "profileSwitchBtn", "refreshBtn", "workOpenBtn",
@@ -76,7 +80,8 @@ function harness(apiHandler, confirmResult=true) {
     "lunaReleaseStatus", "connectionBadge", "mobileStatusText", "mobileStatusSummary",
     "lunaReleaseRefreshBtn", "lunaReleaseRepeatActions", "lunaReleaseRepeatBtn",
     "workspaceBadge", "turnActivity", "workPanel", "deployMeta", "workCloseBtn",
-    "threadRotationPanel", "tvbcpPanel",
+    "threadRotationPanel", "tvbcpPanel", "workStateBox", "workStateTitle", "workStateDescription",
+    "workStateElapsed", "workStateAxes", "workStateObserved", "workStateEvidence",
   ];
   const scope = Object.fromEntries(names.map((name) => [name, element()]));
   scope.input.value = "p+n";
@@ -110,6 +115,8 @@ function harness(apiHandler, confirmResult=true) {
   scope.lunaReleasePollTimerId = null;
   scope.currentWorkstreamLiveStatus = null;
   scope.currentWorkState = null;
+  scope.workMonitor = null;
+  scope.document = {hidden:false,createElement:()=>element(),getElementById:name=>scope[name] || (scope[name]=element())};
   scope.panelReturnFocus = null;
   scope.workstreamProductionTarget = "";
   scope.githubBatchAudit = {ok:true,read_only:true,writes_performed:false,state:"aligned",local_head:"b".repeat(40),origin_head:"b".repeat(40)};

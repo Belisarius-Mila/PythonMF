@@ -103,6 +103,17 @@ def _validated(job: Any) -> dict[str, Any]:
         raise LunaReleaseError("Předání Luně nemá platný rozsah.")
     if job.get("executor") is not None:
         agent_roles.validate_selection(job["executor"])
+    parent = job.get('parent_work')
+    if parent is not None:
+        from app.communication.human_adam_work import operation_id
+        if (not isinstance(parent,dict) or set(parent) != {'operation_id','client_request_id','thread_id','profile_id'}
+                or not CLIENT_ID.fullmatch(str(parent.get('client_request_id','')))
+                or not isinstance(parent.get('thread_id'),str) or not 1 <= len(parent['thread_id']) <= 256
+                or not all(32 < ord(c) < 127 for c in parent['thread_id'])
+                or parent['thread_id'] != job.get('parent_thread_id')
+                or not WORKSTREAM_ID_RE.fullmatch(str(parent.get('profile_id','')))
+                or parent.get('operation_id') != operation_id(job['workstream_id'],parent['client_request_id'])):
+            raise LunaReleaseError('Vydání nemá platnou vazbu na původní práci.')
     return {"deployment_target": "cockpit", **job}
 
 
@@ -119,6 +130,7 @@ def public_job(job: dict[str, Any] | None) -> dict[str, Any] | None:
     return {**{key: checked.get(key) for key in keys},
             "executor": agent_roles.validate_selection(checked["executor"]) if checked.get("executor") else None,
             "active": checked["state"] in ACTIVE_STATES,
+            "parent_work": dict(checked['parent_work']) if checked.get('parent_work') else None,
             "target_short": checked["target_head"][:12],
             "model_usage": normalize_usage((checked.get("luna_proof") or {}).get("token_usage")),
             "gate": {key: gate[key] for key in ("passed", "mode", "test_count", "duration_seconds",
@@ -165,6 +177,24 @@ class LunaReleaseStore:
         atomic_write_json(path, job, ensure_ascii=False, indent=2)
         os.chmod(path, 0o600)
         return job
+
+    def recent(self, workstream_id: str, *, limit: int = 16) -> list[dict[str, Any]]:
+        """Bounded read of project history; never recover a worker or follow current.json."""
+        if not WORKSTREAM_ID_RE.fullmatch(workstream_id) or type(limit) is not int or not 1 <= limit <= 32:
+            raise LunaReleaseError("Historie nemá platný projekt nebo limit.")
+        paths = [path for path in self.root.glob('*.json') if JOB_ID.fullmatch(path.stem)]
+        paths.sort(key=lambda path:(path.stat().st_mtime_ns,path.name),reverse=True)
+        result = []
+        for path in paths[:128]:
+            if path.is_symlink():
+                raise LunaReleaseError('Historie vydání obsahuje nepovolený odkaz.')
+            job = self.load(path.stem)
+            if job['workstream_id'] == workstream_id:
+                result.append(job)
+                if len(result) == limit:
+                    break
+        result.sort(key=lambda job:(job.get('created_at',''),job['job_id']),reverse=True)
+        return result
 
     def update(self, job_id: str, **changes: Any) -> dict[str, Any]:
         with self.lock():
@@ -298,6 +328,24 @@ def audit_release(service: Any = None, *, require_parent: bool = True) -> dict[s
             "message": "Celý přesný balíček je připravený k předání vykonavateli."}
 
 
+def _release_parent(service: Any, session: dict, workstream: str) -> dict | None:
+    """Pin only the server-owned completed work behind this portal confirmation."""
+    from app.communication.human_adam_work import operation_id
+    thread = session.get('thread_id')
+    messages = session.get('messages') or []
+    latest = next((row for row in reversed(messages) if row.get('thread_id') == thread),{})
+    client = latest.get('client_message_id','')
+    if (latest.get('status') != 'completed' or latest.get('delivery_confirmed') is not True
+            or not isinstance(client,str) or not CLIENT_ID.fullmatch(client) or not hasattr(service,'work_controller')):
+        return None
+    record = service.work_controller.store.load(operation_id(workstream,client))
+    if (not record or record['thread_id'] != thread or record['delivery_state'] != 'confirmed'
+            or record['scope']['workstream_id'] != workstream):
+        return None
+    return {'operation_id':record['operation_id'],'client_request_id':client,
+            'thread_id':thread,'profile_id':record['scope']['profile_id']}
+
+
 def start_release(
     payload: dict[str, Any], *, service: Any, store: LunaReleaseStore | None = None,
     launcher: Callable[..., Any] = subprocess.Popen,
@@ -345,6 +393,7 @@ def start_release(
             "expected_code_stamp": audit["expected_code_stamp"], "token": secrets.token_hex(32),
             "client_message_id": request_id, "user_text": str(payload.get("user_text") or "p+n")[:300],
             "parent_thread_id": str(session.get("thread_id") or ""),
+            "parent_work": _release_parent(service, session, audit['workstream_id']) if return_channel == 'cockpit' else None,
             "dry_run": payload["dry_run"], "pushed": False, "deployed": False,
             "push_state": "not_started", "deployment_state": "not_started",
             "returned_to_adam": False, "return_dispatched": False,

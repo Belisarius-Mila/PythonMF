@@ -49,7 +49,7 @@ const names=['workStateBox','workStateTitle','workStateDescription','workStateEl
   'projectContinuityReasons','projectContinuityMeta','developmentProject','developmentHandoff','workStateObserved','workStateEvidence','mobileStatusText','mobileStatusSummary','input','chat','latestAnswerBtn'];
 const scope=Object.fromEntries(names.map(name=>[name,document.getElementById(name)]));
 Object.assign(scope,{
-  document,URL,console,currentWorkState:null,statusReadSequence:0,workReadSequence:0,
+  document,URL,console,currentWorkState:null,workMonitor:null,statusReadSequence:0,workReadSequence:0,
   activeWorkstreamId:'project-current',activeWorkstreamLabel:'Aktuální projekt',
   deliveryUncertain:false,sendInFlight:false,sessionTurnBusy:false,lastSession:null,
   renderedExchanges:new Map(),chatRenderKey:'',chatRenderedThread:'',imageCandidatesByMessage:new Map(),
@@ -64,6 +64,8 @@ Object.assign(scope,{
     setTimeout:fn=>{fn();return 1;},visualViewport:null},
 });
 const source=[
+  between('function humanAdamServerJobs','function humanAdamLiveSummary'),
+  between('function humanAdamLiveSummary','function renderHumanAdamLiveCard'),
   between('function publicationTargetLabel','function elapsedClock'),
   between('function elapsedClock','function stopTurnTimer'),
   between('function safeAnswerLink','function workspaceRequiresWorkDetail'),
@@ -195,5 +197,46 @@ const state={schema_version:1,read_only:true,writes_performed:false,consistent:t
     assert.equal(calls[1].path,'/api/human-adam/status');assert.equal(scope.busy,false);
     if(unavailable){assert.match(scope.notice.textContent,/Aktuální stav práce se nepodařilo ověřit/);assert(!scope.notice.textContent.includes('Připojení selhalo'));}
   }
-  console.log('HA-02 PASS: scoped state, safe links/markup, collapsed prompts, stable focus/speech/scroll, views, viewport and stale reads');
+  const jobTimers=[];scope.window.setTimeout=fn=>{jobTimers.push(fn);return jobTimers.length;};
+  scope.session=structuredClone(session);
+  scope.state={...structuredClone(state),revision:'job-1',server_jobs:{schema_version:1,read_only:true,writes_performed:false,
+    consistent:true,scope:state.scope,current_job_id:'a'.repeat(32),jobs:[{job_id:'a'.repeat(32),kind:'checkpoint',state:'running',
+      phase:'checkpoint_validation',current:true,reported_active:true,parent:{client_request_id:'request-current'}}]}};
+  run('renderWorkState(state,session)');
+  assert.equal(scope.workStateTitle.textContent,'Ověřuji a ukládám checkpoint');
+  assert.equal(scope.mobileStatusText.textContent,'Ověřuji a ukládám checkpoint');
+  assert(scope.workStateEvidence.textContent.includes('navazuje na původní zadání'));
+  assert.equal(jobTimers.length,1);
+  scope.deliveryUncertain=true;run('updateMobileStatusSummary()');
+  assert(scope.mobileStatusText.textContent.includes('nejistý'));
+  scope.deliveryUncertain=false;
+  scope.workMonitor={snapshot:()=>({enabled:true,blocked:true,error:'missing receipt',pendingIdentity:true,operation:null})};
+  run('updateMobileStatusSummary()');assert.equal(scope.mobileStatusText.textContent,'Průběh práce není ověřen');
+  scope.workMonitor=null;
+  const activeJob=scope.state.server_jobs.jobs[0];
+  scope.state.server_jobs.jobs[0]={...activeJob,state:'attention',phase:'done',reported_active:false,outcome:'unverified'};
+  run('renderWorkState(state,session)');assert.equal(scope.mobileStatusText.textContent,'Úloha vyžaduje kontrolu');
+  scope.state.server_jobs.jobs[0]=activeJob;run('renderWorkState(state,session)');
+  let finishRead;const reads=[];scope.api=(path,options)=>{reads.push({path,options});return new Promise(resolve=>{finishRead=resolve;});};
+  const oldState=structuredClone(scope.state),oldSession=structuredClone(session),waiting=jobTimers.shift()();
+  scope.state={...structuredClone(state),revision:'new-thread',scope:{...state.scope,thread_id:'new-thread'}};
+  scope.session={...session,thread_id:'new-thread'};
+  run('renderWorkState(state,session)');
+  finishRead({ok:true,work_state:oldState,session:oldSession});await waiting;
+  assert.equal(scope.currentWorkState.scope.thread_id,'new-thread');
+  assert.equal(scope.workStateTitle.textContent,'Adam čeká na zadání');
+  assert.equal(reads.length,1);assert.equal(reads[0].path,'/api/human-adam/status');
+  assert.equal(reads[0].options.method,undefined);
+  scope.state={...oldState,revision:'job-2'};scope.session=oldSession;
+  run('renderWorkState(state,session)');
+  let failOldRead;scope.api=()=>new Promise((resolve,reject)=>{failOldRead=reject;});
+  const staleFailure=jobTimers.shift()();
+  scope.state={...structuredClone(state),revision:'newer-status'};
+  run('renderWorkState(state,session)');
+  failOldRead(Object.assign(Error('stale read'),{staleStatus:true}));await staleFailure;
+  assert.equal(scope.currentWorkState.revision,'newer-status');
+  scope.state={...oldState,revision:'job-3'};run('renderWorkState(state,session)');
+  scope.api=async()=>({ok:false});await jobTimers.shift()();
+  assert.equal(scope.currentWorkState,null);assert.equal(scope.workStateTitle.textContent,'Stav práce není ověřen');
+  console.log('HA-02 PASS: scoped state, server-job phases, safe links/markup, collapsed prompts, stable focus/speech/scroll, views, viewport and stale reads');
 })().catch(error=>{console.error(error);process.exitCode=1;});

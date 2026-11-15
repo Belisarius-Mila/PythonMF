@@ -43,6 +43,34 @@ class FakeService:
 
 
 class LunaReleaseTests(unittest.TestCase):
+    def test_project_history_is_read_only_and_independent_of_the_global_pointer(self):
+        first=self.create()
+        self.store.update(first['job_id'],state='completed')
+        self.service.active_workstream_id='project-mmtx'
+        second=self.create(client_message_id='release-foreign-456',expected_deployment_target='github_pages')
+        before={p.name:p.read_bytes() for p in self.store.root.glob('*.json')}
+        with patch.object(self.store,'status',side_effect=AssertionError('must not recover')):
+            rows=self.store.recent('project-cockpit')
+        self.assertEqual([row['job_id'] for row in rows],[first['job_id']])
+        self.assertNotEqual(rows[0]['job_id'],second['job_id'])
+        self.assertEqual(before,{p.name:p.read_bytes() for p in self.store.root.glob('*.json')})
+
+    def test_portal_parent_is_pinned_from_the_exact_confirmed_work_record(self):
+        from app.communication.human_adam_work import WorkStore,normalized_request
+        store=WorkStore(Path(self.directory.name)/'work')
+        scope={'workstream_id':'project-cockpit','profile_id':'human_adam','thread_id':'original-parent-thread','connection_generation':1}
+        record,_=store.admit(normalized_request({'text':'PRIVATE_TEXT','client_message_id':'model-request-123'}),
+            scope,'owner',session_path=Path(self.directory.name)/'session.json')
+        store.change(record['operation_id'],'owner','finished',fields={'delivery_state':'confirmed','lifecycle_state':'completed'})
+        self.service.work_controller=SimpleNamespace(store=store)
+        self.service.hub.snapshot=lambda:{'thread_id':scope['thread_id'],'messages':[{'client_message_id':'model-request-123',
+            'thread_id':scope['thread_id'],'status':'completed','delivery_confirmed':True}]}
+        job=self.create()
+        self.assertEqual(job['parent_work']['operation_id'],record['operation_id'])
+        self.assertNotIn('PRIVATE_TEXT',json.dumps(release.public_job(job)))
+        job['parent_work']['operation_id']='e'*32
+        with self.assertRaises(release.LunaReleaseError):self.store.write(job)
+
     def test_service_query_forces_cli_only_for_tailscale_and_preserves_parent_environment(self):
         from scripts import camino_service_control as camino
 
