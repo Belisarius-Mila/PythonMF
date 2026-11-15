@@ -408,6 +408,10 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
         <h3 id="liveWorkTitle" role="status" aria-live="polite"></h3>
         <p id="liveWorkActivity"></p>
         <p class="meta"><span id="liveWorkDuration"></span> · <span id="liveWorkUpdated"></span></p>
+        <p class="meta" id="liveWorkUsage">Spotřeba zatím není k dispozici.</p>
+        <details><summary>Čas a spotřeba</summary><ul id="liveWorkUsageParts"></ul>
+          <p class="meta">Měření zahrnuje Adama a registrovaná předání pomocníkům. Časy pomocníků se překrývají s průchodem Adama. Cena není k dispozici; nejde o vyúčtování účtu.</p>
+        </details>
         <p class="meta" id="liveWorkObserved"></p>
         <p class="meta" id="liveWorkReadState"></p>
         <p class="meta" id="liveWorkGap"></p>

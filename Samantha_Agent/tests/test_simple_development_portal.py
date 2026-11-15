@@ -48,6 +48,27 @@ class SimpleDevelopmentPortalTests(unittest.TestCase):
         self.engine.accept.assert_not_called()
         self.assertEqual(self.dispatch('accept', job_id='job', candidate_digest='digest')['state'], 'applied')
 
+    def test_usage_is_bound_to_original_parent_and_not_repeated_on_receipt_read(self):
+        self.manager.work_controller = Mock()
+        result = self.dispatch(task={'goal': 'first'})
+        recorder = self.manager.work_controller.record_helper_usage
+        self.assertEqual(recorder.call_count, 2)  # Unknown before start, one final update.
+        first, last = recorder.call_args_list
+        self.assertEqual(first.args[:3], ('project-cockpit', 'message', 'thread'))
+        self.assertEqual(len(first.args[3]), 64)
+        self.assertEqual(first.args[3], last.args[3])
+        self.assertEqual(last.args[4]['job_id'], 'job')
+        self.assertIsInstance(last.args[4]['duration_ms'], int)
+        self.assertEqual(self.dispatch(task={'goal': 'first'}), result)
+        self.assertEqual(recorder.call_count, 2)
+
+    def test_usage_write_failure_cannot_fail_or_repeat_development(self):
+        self.manager.work_controller = Mock()
+        self.manager.work_controller.record_helper_usage.side_effect = OSError('PRIVATE')
+        self.assertEqual(self.dispatch(task={'goal': 'first'})['state'], 'ready_for_review')
+        self.assertEqual(self.dispatch(task={'goal': 'first'})['state'], 'ready_for_review')
+        self.engine.run.assert_called_once()
+
     def test_explicit_multifile_route_uses_luna_engine_and_same_acceptance(self):
         self.bridge._engine = portal.development
         task = {'kind': 'explicit_project_change', 'explicit_luna': True}

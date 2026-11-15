@@ -516,7 +516,8 @@ class CanonicalSessionHub:
                                     and (self.model, self.reasoning_effort, self.sandbox_policy, self.approval_policy) == bound_policy)
                 observing = work_observer.attach(client, bound_thread, guard=original_steer_guard) if work_observer else nullcontext(None)
                 with observing as accepted:
-                    options = {"on_turn_accepted": accepted, "allow_steer": True, "allow_interrupt": True} if accepted else {}
+                    options = {"on_turn_accepted": accepted, "allow_steer": True, "allow_interrupt": True,
+                               "on_usage": work_observer.measured} if accepted else {}
                     receipt: TurnReceipt = client.send_text(
                         thread_id=str(self._state["thread_id"]),
                         text=clean_model_input,
@@ -578,6 +579,7 @@ class CanonicalSessionHub:
                         "thread_id": receipt.thread_id,
                         "turn_id": receipt.turn_id,
                         "delivery_confirmed": receipt.delivered,
+                        "token_measurement": getattr(receipt, "token_measurement", None),
                         "recovery_required": False,
                     }
                 )

@@ -18,6 +18,7 @@ from pathlib import Path
 from typing import Any, Callable
 
 from app.release_usage import normalize_usage
+from app.codex_usage import UsageMeter
 from app.codex_appserver_inputs import TurnInputLedger, AppServerSteerRejected
 from app.codex_appserver_dispatch import (
     AppServerDispatcher, AppServerError, AppServerTimeout, AppServerContractError,
@@ -165,6 +166,7 @@ class TurnReceipt:
     duration_ms: int
     generated_images: tuple[dict[str, str], ...] = ()
     thread_token_usage: dict[str, int] | None = None
+    token_measurement: dict | None = None
 
     @property
     def delivered(self) -> bool:
@@ -487,6 +489,7 @@ class CodexAppServerClient:
             raise AppServerContractError("Neplatné povolení experimentálního protokolu.")
         self.experimental_api = experimental_api
         self._turn_input_ledger = TurnInputLedger()
+        self._usage_anchors = {}
         self.codex_binary = codex_binary
         self.connection_id = uuid.uuid4().hex
         self.version = read_codex_version(codex_binary)
@@ -545,7 +548,14 @@ class CodexAppServerClient:
         self._permission_params(params, permission_profile, legacy="sandbox")
         result = self.transport.request("thread/start", params)
         self._verify_permission_profile(result, permission_profile, model=model, cwd=cwd)
-        return self._thread_id(result, operation="thread/start")
+        thread_id = self._thread_id(result, operation="thread/start")
+        # Only a successful new-thread RPC proves a zero starting counter.
+        if not hasattr(self, "_usage_anchors"):
+            self._usage_anchors = {}
+        self._usage_anchors[thread_id] = {"fresh": True, "total": {
+            key: 0 for key in ("input_tokens", "cached_input_tokens", "output_tokens",
+                               "reasoning_output_tokens", "total_tokens")}}
+        return thread_id
 
     def resume_thread(
         self,
@@ -583,6 +593,7 @@ class CodexAppServerClient:
         resumed = self._thread_id(result, operation="thread/resume")
         if resumed != expected:
             raise AppServerContractError("App-server obnovil jiné vlákno.")
+        getattr(self, "_usage_anchors", {}).pop(resumed, None)
         return resumed
 
     def _permission_params(self, params, profile, *, legacy):
@@ -636,6 +647,7 @@ class CodexAppServerClient:
         on_turn_accepted: Callable[[str], None] | None = None,
         allow_steer: bool = False,
         allow_interrupt: bool = False,
+        on_usage: Callable[[dict], None] | None = None,
     ) -> TurnReceipt:
         if type(allow_steer) is not bool or type(allow_interrupt) is not bool:
             raise AppServerContractError("Neplatné povolení doplnění tahu.")
@@ -669,12 +681,29 @@ class CodexAppServerClient:
             if service_tier_for_turn not in {"default", "priority"}:
                 raise AppServerContractError("Neplatná rychlost zpracování tahu.")
             params["serviceTierForTurn"] = service_tier_for_turn
+        anchors = getattr(self, "_usage_anchors", None)
+        if anchors is None:
+            self._usage_anchors = anchors = {}
+        # Consume before dispatch: an uncertain request invalidates continuity.
+        meter = UsageMeter(thread_id, model=model, effort=effort, service_tier=service_tier_for_turn,
+                           anchor=anchors.pop(thread_id, None))
         result = self.transport.request("turn/start", params)
         accepted_at = utc_now()
         turn = result.get("turn")
         turn_id = turn.get("id") if isinstance(turn, dict) else None
         if not isinstance(turn_id, str) or not turn_id:
             raise AppServerContractError("turn/start nevrátil turnId.")
+        meter.turn_id = turn_id
+        terminal_seen = False
+        def measured(*, terminal=False):
+            value = meter.snapshot(terminal=terminal,
+                duration_ms=round((time.monotonic() - started_monotonic) * 1000))
+            if on_usage is not None:
+                try:
+                    on_usage(value)
+                except Exception:
+                    pass  # Measurement must never change delivery or cause a retry.
+            return value
         ledger = self._inputs()
         input_state = ledger.begin(thread_id, turn_id, message_id, steer_enabled=allow_steer,
                                    interrupt_enabled=allow_interrupt)
@@ -722,6 +751,8 @@ class CodexAppServerClient:
                     raw_usage = params.get("tokenUsage")
                     token_usage = normalize_usage(raw_usage.get("total") if isinstance(raw_usage, dict) else None,
                                                   camel_case=True)
+                    meter.observe(token_usage)
+                    measured()
                 item = params.get("item")
                 if method == "item/completed" and isinstance(item, dict):
                     if item.get("type") == "userMessage":
@@ -743,6 +774,7 @@ class CodexAppServerClient:
                     status = str(completed_turn.get("status") or "")
                     if status not in {"completed", "failed", "interrupted"}:
                         raise AppServerContractError("turn/completed nemá platný koncový stav.")
+                    terminal_seen = True
                     if isinstance(completed_turn.get("error"), dict):
                         last_turn_error = completed_turn["error"]
                     if status == "failed":
@@ -794,12 +826,17 @@ class CodexAppServerClient:
                 duration_ms=round((time.monotonic() - started_monotonic) * 1000),
                 generated_images=generated_images,
                 thread_token_usage=token_usage,
+                token_measurement=measured(terminal=True),
             )
             if not receipt.delivered:
                 raise AppServerContractError("Turn nebyl jednoznačně potvrzen jako doručený a dokončený.")
             return receipt
 
         finally:
+            measured(terminal=terminal_seen)
+            anchor = meter.anchor(terminal=terminal_seen)
+            if anchor is not None:
+                anchors[thread_id] = anchor
             ledger.close(input_state)
 
     def _inputs(self) -> TurnInputLedger:

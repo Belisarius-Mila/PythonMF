@@ -162,6 +162,37 @@ function createHumanAdamWorkMonitor(host) {
   };
 }
 
+function humanAdamUsageLines(operation) {
+  const summary=operation && operation.usage_summary;
+  const unknown={title:"Spotřeba není k dispozici.",parts:[]};
+  if (!summary || summary.schema_version!==1 || summary.source!=="owned_work_measurements"
+      || summary.coverage!=="owned_turn_and_registered_portal_helpers" || !Array.isArray(summary.components)
+      || summary.components.length>9) return unknown;
+  const number=value=>Number.isSafeInteger(value)&&value>=0;
+  const checked=u=>u && ["input_tokens","cached_input_tokens","output_tokens","reasoning_output_tokens","total_tokens"].every(k=>number(u[k]))
+    && u.total_tokens===u.input_tokens+u.output_tokens && u.cached_input_tokens<=u.input_tokens && u.reasoning_output_tokens<=u.output_tokens;
+  const fmt=n=>n.toLocaleString("cs-CZ"), clock=ms=>`${Math.floor(ms/60000)}:${String(Math.floor(ms/1000)%60).padStart(2,"0")}`;
+  const total=summary.recorded_usage;
+  if (total!==null && !checked(total)) return unknown;
+  const parts=[];let complete=summary.complete===true;
+  const sums={input_tokens:0,cached_input_tokens:0,output_tokens:0,reasoning_output_tokens:0,total_tokens:0};let known=0;
+  for (const component of summary.components) {
+    if (!component || !["adam","helper"].includes(component.kind) || (component.usage!==null && !checked(component.usage))) return unknown;
+    const model=typeof component.model==="string" && /^[A-Za-z0-9._:/-]{1,128}$/.test(component.model) ? component.model : "model neověřen";
+    const u=component.usage;
+    complete=complete && component.complete===true && checked(u) && model!=="model neověřen";
+    if (u) {known++;for(const key of Object.keys(sums)) sums[key]+=u[key];}
+    let text=`${component.kind==="adam"?"Adam":"Pomocník"} (${model}): `;
+    text+=u ? `${fmt(u.total_tokens)} tokenů; vstup ${fmt(u.input_tokens)} (z toho cache ${fmt(u.cached_input_tokens)}), výstup ${fmt(u.output_tokens)} (z toho uvažování ${fmt(u.reasoning_output_tokens)})` : "spotřeba neúplná nebo nedostupná";
+    if (number(component.duration_ms)) text+=` · ${clock(component.duration_ms)}`;
+    parts.push(text);
+    if (component.kind==="adam" && checked(component.baseline) && checked(component.thread_total))
+      parts.push(`Počítadlo vlákna: ${fmt(component.baseline.total_tokens)} → ${fmt(component.thread_total.total_tokens)} tokenů.`);
+  }
+  if (total && (!known || Object.keys(sums).some(key=>!number(sums[key]) || sums[key]!==total[key]))) return unknown;
+  return {title:total ? `Spotřeba práce: ${fmt(total.total_tokens)} tokenů · ${complete?"doložená":"neúplná"}` : unknown.title,parts};
+}
+
 function humanAdamLiveSummary(view) {
   if (!view || !view.enabled) return "";
   if (view.error) return "Průběh práce není ověřen";
@@ -190,6 +221,10 @@ function renderHumanAdamLiveCard(doc, view, now = Date.now()) {
   const end = operation && ["completed","failed","not_dispatched","interrupted"].includes(operation.lifecycle_state) ? updated : now;
   const seconds = Number.isFinite(start) ? Math.max(0,Math.floor((end-start)/1000)) : null;
   set("liveWorkDuration", seconds === null ? "" : `Od přijetí: ${Math.floor(seconds/60)}:${String(seconds%60).padStart(2,"0")}`);
+  const usage=humanAdamUsageLines(!view.error && operation && operation.lifecycle_state!=="unverified" ? operation : null);
+  const usageTitle=doc.getElementById("liveWorkUsage"), usageParts=doc.getElementById("liveWorkUsageParts");
+  if (usageTitle) usageTitle.textContent=usage.title;
+  if (usageParts) usageParts.replaceChildren(...usage.parts.map(text=>{const row=doc.createElement("li");row.textContent=text;return row;}));
   const labels = {accepted:"Pokyn byl přijat", model_dispatching:"Předání Adamovi", turn_acknowledged:"Adam přijal tah",
     turn_started:"Adam zpracovává zadání", tool_started:"Probíhá práce s nástrojem", tool_finished:"Nástroj dokončil krok",
     message_started:"Adam připravuje odpověď", message_finished:"Dílčí zpráva dokončena", plan:"Plán byl aktualizován",

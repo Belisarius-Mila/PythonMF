@@ -7,6 +7,7 @@ from contextlib import contextmanager
 from app.codex_appserver import AppServerError, AppServerSteerRejected
 from app.communication.human_adam_work import WorkConflict
 from app.communication.human_adam_public_progress import public_event, merge_public_progress
+from app.codex_usage import measurement_projection
 
 METHODS = ("turn/started", "turn/completed", "turn/plan/updated", "item/started", "item/completed")
 
@@ -29,6 +30,22 @@ class WorkObserver:
         """Durable barrier before the only permitted turn/start call."""
         self.store.change(self.identity, self.owner, "model_dispatching",
                           fields={"_dispatch_started": True, "delivery_state": "pending"})
+
+    def measured(self, measurement) -> None:
+        """Called by the original turn receiver, independently of the event queue."""
+        if not self._lock.acquire(blocking=False):
+            return
+        try:
+            safe = measurement_projection(measurement)
+            record = self.store.load(self.identity)
+            if (safe is None or safe["thread_id"] != record["thread_id"]
+                    or not self._turn_id or safe["turn_id"] != self._turn_id):
+                return
+            self.store.change(self.identity, self.owner, "usage_updated", fields={"_model_usage": safe}, timeout=0)
+        except Exception:
+            pass  # Missing telemetry never invalidates the original result.
+        finally:
+            self._lock.release()
 
     def assert_thread(self, thread_id: str) -> None:
         if thread_id != self.store.load(self.identity)["thread_id"]:

@@ -100,6 +100,11 @@ class WorkHTTPTests(unittest.TestCase):
         self.assertFalse(switch['ok'])
         self.release.set();done=self.wait_done(identity)
         self.assertEqual(done['operations'][0]['delivery_state'],'confirmed')
+        usage = done['operations'][0]['usage_summary']
+        self.assertEqual(usage['source'], 'owned_work_measurements')
+        self.assertIsNone(usage['recorded_usage'])  # Legacy synthetic client has no telemetry.
+        self.assertFalse(usage['complete'])
+        self.assertIsNone(usage['price']['amount'])
         self.assertEqual(SyntheticClient.instances[0].sent,1)
         self.assertIn('writable=false',SyntheticClient.instances[0].sent_texts[0])
         self.assertEqual(self.manager.active_workstream_id,self.project)

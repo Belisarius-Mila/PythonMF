@@ -17,6 +17,8 @@ from app.file_persistence import exclusive_file_lock, FileLockTimeoutError
 from app.work_repository import JsonWorkRepository, RepositoryMutation, WorkRepositoryError
 from app.communication.session_hub import SessionBusyError, SessionDeliveryUnknownError
 from app.communication.human_adam_public_progress import public_projection
+from app.communication.human_adam_usage import usage_projection, helper_projection
+from app.codex_usage import measurement_projection
 
 ID = re.compile(r"[a-f0-9]{32}\Z")
 CLIENT = re.compile(r"[A-Za-z0-9][A-Za-z0-9._:-]{7,127}\Z")
@@ -190,7 +192,8 @@ class WorkStore:
             return record, True
 
     def change(self, identity: str, owner: str, kind: str, *, fields: dict | None = None,
-               wire: tuple[str, int] | None = None, recover: bool = False, with_effect: bool = False):
+               wire: tuple[str, int] | None = None, recover: bool = False, with_effect: bool = False,
+               timeout: float = 10.0):
         def mutate(value):
             current = self.load(identity)
             if current is None:
@@ -216,7 +219,7 @@ class WorkStore:
             if current["lifecycle_state"] in TERMINAL and current["delivery_state"] == "confirmed":
                 current.pop("_accepted_input", None)  # Original remains in the canonical conversation.
             return RepositoryMutation(current, copy.deepcopy(current))
-        result = self.repository(identity).transact(mutate)
+        result = self.repository(identity).transact(mutate, timeout=timeout)
         return (result.result, result.changed) if with_effect else result.result
 
     @staticmethod
@@ -231,6 +234,7 @@ class WorkStore:
         progress = public_projection(value.get("public_progress"))
         if progress is not None:
             view["public_progress"] = progress
+        view["usage_summary"] = usage_projection(value)
         if value["lifecycle_state"] not in TERMINAL and not owned:
             view["lifecycle_state"] = "unverified"
         first = value["events"][0]["cursor"] if value["events"] else value["revision"]
@@ -260,6 +264,7 @@ class _Handle:
         self.thread: threading.Thread | None = None
         self.observer = None
         self.scope = None
+        self.helper_usage = {}
 
 
 class WorkController:
@@ -487,17 +492,20 @@ class WorkController:
                               fields={"lifecycle_state": "running"})
             result = reservation.execute(observer)
             entry = result.get("entry") or {}
+            observer.measured(entry.get("token_measurement"))
             if (entry.get("status") == "interrupted" and entry.get("terminal_confirmed") is True
                     and entry.get("thread_id") == original["thread_id"]
                     and entry.get("client_message_id") == original["client_request_id"]
                     and entry.get("turn_id") == self.store.load(identity)["turn_id"] and entry.get("turn_id")):
                 self.store.change(identity, self.owner, "execution_interrupted",
-                                  fields={"lifecycle_state": "interrupted", "delivery_state": "confirmed"})
+                                  fields={"lifecycle_state": "interrupted", "delivery_state": "confirmed",
+                                          "_helper_usage": handle.helper_usage, "_usage_finalized": True})
                 handle.response = result
                 return
             delivered = (entry.get("status") == "completed" and entry.get("delivery_confirmed") is True)
             fields = {"lifecycle_state": "completed" if delivered else "unverified",
-                      "delivery_state": "confirmed" if delivered else "unknown"}
+                      "delivery_state": "confirmed" if delivered else "unknown",
+                      "_helper_usage": handle.helper_usage, "_usage_finalized": delivered}
             if delivered:
                 record = original
                 if (entry.get("thread_id") != record["thread_id"]
@@ -555,6 +563,34 @@ class WorkController:
         except Exception:
             pass  # Missing source evidence never becomes a successful completion.
 
+    def record_helper_usage(self, workstream_id, client_message_id, thread_id, helper_id, result):
+        """Trusted portal callback; never consume a global/latest helper receipt."""
+        if not isinstance(helper_id, str) or not re.fullmatch(r"[a-f0-9]{64}", helper_id):
+            return
+        identity = operation_id(workstream_id, client_message_id)
+        safe = helper_projection(result)
+        if safe is None:
+            return
+        stored = {"executor": {"model": safe["model"], "reasoning_effort": safe["effort"]},
+                  "job_id": safe["job_id"], "model_usage": safe["usage"], "duration_ms": safe["duration_ms"]}
+        handle = self._handles.get(identity)
+        if (handle and handle.scope and handle.scope.get("thread_id") == thread_id
+                and handle.scope.get("workstream_id") == workstream_id and not handle.finished.is_set()
+                and (helper_id in handle.helper_usage or len(handle.helper_usage) < 8)):
+            # Volatile fallback is flushed with the required terminal transaction,
+            # even if the optional live telemetry write meets a busy lock.
+            handle.helper_usage = {**handle.helper_usage, helper_id: stored}
+        record = self.store.load(identity)
+        if (not record or record["thread_id"] != thread_id or record["owner_generation"] != self.owner
+                or record["lifecycle_state"] in TERMINAL):
+            return
+        helpers = dict(record.get("_helper_usage") or {})
+        if helper_id not in helpers and len(helpers) >= 8:
+            return
+        # Store only the same numeric whitelist used by the public projection.
+        helpers[helper_id] = stored
+        self.store.change(identity, self.owner, "helper_usage_updated", fields={"_helper_usage": helpers}, timeout=0)
+
     def recover(self, workstream_id: str, identity: str) -> dict:
         with self._lock:
             record = self.store.load(identity)
@@ -579,6 +615,10 @@ class WorkController:
                                 and (not record["turn_id"] or record["turn_id"] == entry["turn_id"])):
                             fields.update(lifecycle_state="completed", delivery_state="confirmed",
                                           turn_id=entry.get("turn_id", ""), failure_code="")
+                            measurement = measurement_projection(entry.get("token_measurement"))
+                            if (measurement and measurement["thread_id"] == record["thread_id"]
+                                    and measurement["turn_id"] == entry["turn_id"]):
+                                fields["_model_usage"] = measurement
                             completion = self._completion(record)
                             if record["completion"] and not completion:
                                 fields["lifecycle_state"] = "unverified"

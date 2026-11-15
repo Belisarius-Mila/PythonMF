@@ -51,6 +51,15 @@ class PortalDelegation:
                 atomic_write_json(self._grant['channel'] / 'closed.json', {'state': 'closed'})
                 self._grant = None
 
+    @staticmethod
+    def _record_usage(grant, manager, result, *, duration_ms=None):
+        try:
+            manager.work_controller.record_helper_usage(
+                grant['workstream_id'], grant['client_message_id'], grant['thread_id'],
+                grant['request_digest'], {**result, 'duration_ms': duration_ms})
+        except Exception:
+            pass  # Optional accounting cannot fail or repeat a delegated action.
+
     def _serve(self, token, channel, manager):
         seen = set()
         while True:
@@ -106,7 +115,13 @@ class PortalDelegation:
                     return grant['result'] or {'state': 'attention', 'reason': 'Předání se přerušilo; neopakovat.'}
                 grant['request_digest'] = digest
                 grant['engine'] = engine
-                grant['result'] = engine.run(payload['task'], root=grant['root'], confirmed=True)
+                self._record_usage(grant, manager, {})
+                started = time.monotonic()
+                try:
+                    grant['result'] = engine.run(payload['task'], root=grant['root'], confirmed=True)
+                finally:
+                    self._record_usage(grant, manager, grant['result'] or {},
+                                       duration_ms=round((time.monotonic() - started) * 1000))
                 return grant['result']
             if operation == 'review_anchors' and set(payload) == {'token', 'operation', 'job_id', 'answer_digest', 'corrections'}:
                 result = grant['result'] or {}

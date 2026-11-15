@@ -225,6 +225,15 @@ nebo jejichž princip lze znovu použít v jiné části projektu.
 
 Doplnění 17102026 k LL-071: Nativní modelový pomocník navíc zdvojuje roli, pokud worker již sám volá Lunu. Společný submit_release nyní audituje a spouští jednu Lunu přímo; programové wait_for_release je připnuté k job ID, timeout neprovádí retry. Ověřeno všemi 33 proudy a skutečným syntetickým tahem bez publikace; z počtu vrstev samotného nevyvozovat procento úspory.
 
+Doplnění 15.11.2026 HA-08: Pro deltu modelového tahu používat kumulativní
+total s prokázaným výchozím bodem, ne součet opakovaných/coalescovaných last.
+Nulový základ je důkaz nového vlákna, nikoli předpoklad po resume. Neznámý
+základ, změna modelu/effort/tier nebo pokles čítače znamenají neúplné měření.
+Předání pomocníka párovat k původnímu parentu a stabilnímu otisku; opakované
+čtení a integrační review nesmějí přičíst stejnou spotřebu. Ověřeno izolovanými
+klientskými, persistence/recovery a frontendovými smluvními testy bez modelu.
+
+
 ### LL-070 — Doporučený nástupce modelu není schválená náhrada
 
 - Problém: Pevné jméno modelu zastaví delegaci po jeho stažení; automatický
