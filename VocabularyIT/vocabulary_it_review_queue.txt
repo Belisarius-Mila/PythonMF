@@ -139,3 +139,9 @@ Aktualizace po schválení15.11.2026:
 Storia/gli/niente mají rozhodnuté hlavní významy a existující vazby.
 487 obrazových vazeb připnutých,10 nových ilustrací čeká vizuální přejímku.
 Historický seznam112 neznamená aktuální počet otevřených rozhodnutí.
+
+
+PŘIJATÉ OBRAZY A GALERIE15.11.2026
+Míla přijal všech10 nových ilustrací.497/497 vazeb je hotových.
+Nová IT galerie, věty a vlastní profily A–D jsou místně implementované.
+Skutečný browser proklik a zvuková knihovna zůstávají otevřené.

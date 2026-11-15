@@ -568,90 +568,100 @@
         "it": "portafoglio",
         "cz": "portfolio (soubor investic)",
         "requirement": "Investiční portfolio: graf, rozložení investic; peněženka učí jiný význam.",
-        "state": "candidate-awaiting-visual-approval",
+        "state": "accepted",
         "candidate": "PictNew/generated/20261115_it_web_review/vit-0013.webp",
-        "candidateSha256": "87064879c4bc108f71e5a1245052761379416aeb9451aced729ca0c57b11cada"
+        "candidateSha256": "87064879c4bc108f71e5a1245052761379416aeb9451aced729ca0c57b11cada",
+        "selectedImage": "Pict/it_web_vit_0013.webp"
       },
       {
         "uid": "vit-0108",
         "it": "éclair",
         "cz": "zákusek",
         "requirement": "Éclair: podlouhlý odpalovaný zákusek s čokoládovou polevou; nyní je ovocný koláč.",
-        "state": "candidate-awaiting-visual-approval",
+        "state": "accepted",
         "candidate": "PictNew/generated/20261115_it_web_review/vit-0108.webp",
-        "candidateSha256": "c5df885ff7a975510fbbe56f48788e6d7c14f13cc66f84f2d98711297dae5a88"
+        "candidateSha256": "c5df885ff7a975510fbbe56f48788e6d7c14f13cc66f84f2d98711297dae5a88",
+        "selectedImage": "Pict/it_web_vit_0108.webp"
       },
       {
         "uid": "vit-0115",
         "it": "brioche",
         "cz": "brioška, sladké pečivo",
         "requirement": "Brioche: sladká brioška nebo plněné sladké pečivo; budova pekárny není pečivo.",
-        "state": "candidate-awaiting-visual-approval",
+        "state": "accepted",
         "candidate": "PictNew/generated/20261115_it_web_review/vit-0115.webp",
-        "candidateSha256": "c46b6c437ef2526100991385dd2f782d1cb02683dc2e454f5692ad0d3bf1981a"
+        "candidateSha256": "c46b6c437ef2526100991385dd2f782d1cb02683dc2e454f5692ad0d3bf1981a",
+        "selectedImage": "Pict/it_web_vit_0115.webp"
       },
       {
         "uid": "vit-0129",
         "it": "stazione",
         "cz": "nádraží, stanice",
         "requirement": "Vlakové nádraží/stanice: budova s nástupištěm; současná autobusová zastávka je užší jiný kontext.",
-        "state": "candidate-awaiting-visual-approval",
+        "state": "accepted",
         "candidate": "PictNew/generated/20261115_it_web_review/vit-0129.webp",
-        "candidateSha256": "e71b8bf43c2589af900780c7af298afc2ce2a3e22006b860438f15731a4c6f48"
+        "candidateSha256": "e71b8bf43c2589af900780c7af298afc2ce2a3e22006b860438f15731a4c6f48",
+        "selectedImage": "Pict/it_web_vit_0129.webp"
       },
       {
         "uid": "vit-0136",
         "it": "mese",
         "cz": "měsíc",
         "requirement": "Měsíc jako časové období: kalendář jednoho měsíce, nikoli Měsíc na obloze.",
-        "state": "candidate-awaiting-visual-approval",
+        "state": "accepted",
         "candidate": "PictNew/generated/20261115_it_web_review/vit-0136.webp",
-        "candidateSha256": "b0897241b6db04336725c80105e8662dbd7c7a44d08fd96c359e36b9269ff258"
+        "candidateSha256": "b0897241b6db04336725c80105e8662dbd7c7a44d08fd96c359e36b9269ff258",
+        "selectedImage": "Pict/it_web_vit_0136.webp"
       },
       {
         "uid": "vit-0186",
         "it": "rivista",
         "cz": "časopis",
         "requirement": "Časopis: otevřený barevný časopis; současná zavřená kniha není časopis.",
-        "state": "candidate-awaiting-visual-approval",
+        "state": "accepted",
         "candidate": "PictNew/generated/20261115_it_web_review/vit-0186.webp",
-        "candidateSha256": "c3dc55e7699e502e58fecf30b8c774d1152018b8c54be3b929bc4b2f9257c011"
+        "candidateSha256": "c3dc55e7699e502e58fecf30b8c774d1152018b8c54be3b929bc4b2f9257c011",
+        "selectedImage": "Pict/it_web_vit_0186.webp"
       },
       {
         "uid": "vit-0217",
         "it": "euro",
         "cz": "euro",
         "requirement": "Euro: eurové bankovky/mince nebo jasný symbol eura; současný obrázek má dolary.",
-        "state": "candidate-awaiting-visual-approval",
+        "state": "accepted",
         "candidate": "PictNew/generated/20261115_it_web_review/vit-0217.webp",
-        "candidateSha256": "1a422cac7492bfa260c53e1cff4770116b29e65775a563ff4d5b80ba3eb544a5"
+        "candidateSha256": "1a422cac7492bfa260c53e1cff4770116b29e65775a563ff4d5b80ba3eb544a5",
+        "selectedImage": "Pict/it_web_vit_0217.webp"
       },
       {
         "uid": "vit-0247",
         "it": "pescare",
         "cz": "lovit, rybařit",
         "requirement": "Rybařit: člověk s prutem u řeky; současný talíř s upečenou rybou neukazuje činnost.",
-        "state": "candidate-awaiting-visual-approval",
+        "state": "accepted",
         "candidate": "PictNew/generated/20261115_it_web_review/vit-0247.webp",
-        "candidateSha256": "b8bb4c1105a153f364837d2adedc8970a0421031172bb2e6cd9f5d41a8c41bde"
+        "candidateSha256": "b8bb4c1105a153f364837d2adedc8970a0421031172bb2e6cd9f5d41a8c41bde",
+        "selectedImage": "Pict/it_web_vit_0247.webp"
       },
       {
         "uid": "vit-0320",
         "it": "lavarsi",
         "cz": "umýt se",
         "requirement": "Umýt se/umýt si ruce: ruce pod tekoucí vodou; současná ilustrace pere prádlo.",
-        "state": "candidate-awaiting-visual-approval",
+        "state": "accepted",
         "candidate": "PictNew/generated/20261115_it_web_review/vit-0320.webp",
-        "candidateSha256": "c99befdabe3af67d16bdfa6bb4e09b6f73afee877f85b36b5620d77152410a73"
+        "candidateSha256": "c99befdabe3af67d16bdfa6bb4e09b6f73afee877f85b36b5620d77152410a73",
+        "selectedImage": "Pict/it_web_vit_0320.webp"
       },
       {
         "uid": "vit-0443",
         "it": "anello",
         "cz": "prsten, kruh",
         "requirement": "Prsten: zlatý prsten na ruce nebo samostatně; současná obruč znázorňuje jiný význam.",
-        "state": "candidate-awaiting-visual-approval",
+        "state": "accepted",
         "candidate": "PictNew/generated/20261115_it_web_review/vit-0443.webp",
-        "candidateSha256": "1e52b8bd7a0c6b1d65c5b7c6344731805bb2ccfb4bc48cb14e4ce0c609b66ff1"
+        "candidateSha256": "1e52b8bd7a0c6b1d65c5b7c6344731805bb2ccfb4bc48cb14e4ce0c609b66ff1",
+        "selectedImage": "Pict/it_web_vit_0443.webp"
       }
     ],
     "contentBeforeImage": [

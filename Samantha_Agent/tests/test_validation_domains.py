@@ -188,10 +188,13 @@ class ValidationDomainsTests(unittest.TestCase):
             'VocabularyIT/vocabulary_it_export.py',
             'PictNew/generated/20261115_it_web_review/vit-0013.webp',
             'docs/data/vocabulary-it-v2.json',
+            'docs/vocabulary-it/gallery.js', 'Pict/it_web_vit_0136.webp',
+            'Samantha_Agent/tests/test_vocabularyit_selection.js',
             'Samantha_Agent/tests/test_vocabularyit_catalog.py'])
         self.assertEqual(result.domains, ('vocabulary_it',))
         self.assertIn('tests.test_vocabularyit_catalog', result.modules)
         self.assertIn('tests.test_vocabularyit_export', result.modules)
+        self.assertIn('tests.test_vocabularyit_gallery', result.modules)
         self.assertIn('tests.test_cockpit_http_security', result.modules)
         self.assertNotIn('tests.test_calendar_writer', result.modules)
         self.assertNotIn('tests.test_vocabulary_authoring', result.modules)

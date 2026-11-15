@@ -1,3 +1,8 @@
+AKTUÁLNĚ15.11.2026:497 úplných karet a přijatých obrazových vazeb.
+Vlastní galerie/učení/profily A–D místně v docs/vocabulary-it/.
+Audio ještě není vyrobené; fyzický browser QA otevřený (nedostupné CUA).
+Nejde o zveřejněné vydání. Podrobnosti jsou v posledním oddílu.
+
 AKTUÁLNĚ15.11.2026:497 webových karet, původní CSV471 zachované.
 24 úprav schválených a použitých,26 nových významů; export v2 a miniatury.
 10 nových ilustrací čeká vizuální přejímku,487 ostatních vazeb připnutých.
@@ -130,3 +135,34 @@ připnuté v obrazovém manifestu. Ověří jejich case/SHA a nepovolí jiné p�
 obrazy. Samotná kontrola původního snímku zůstává přísná; zmrazenou kopii
 z bodu1 nikdy nedoplňovat ani nepřepisovat. additionalPinnedImages odlišuje
 nové přijaté soubory od777 původních vstupů. Nyní je tato hodnota0.
+
+PŘIJATÉ ILUSTRACE, GALERIE A PROFILY, 15.11.2026
+Míla přijal všech10 kandidátů. Jejich kopie mají nové názvy
+Pict/it_web_vit_*.webp, sdílený mapping zůstává nezměněný. Každá karta má
+imageStatus=reviewed,407 připnutých souborů. Původní777 vstupní manifest je
+neměnný; nová úplná projekce má10 dalších přijatých obrazů.
+
+Aktuální export z kořene PythonMF:
+python3 VocabularyIT/vocabulary_it_export.py --root Samantha_Agent/data/private/vocabulary_it_gallery_20261115/inputs --output docs
+Výsledek497 karet/814 assetů, mode=release (jen datové podklady), obrazy complete.
+Starý --preview s kandidátním reportem této již přijaté dávky nepoužívat.
+Původní zmrazený adresář z bodu1 nikdy nerozšiřovat.
+
+Web: docs/vocabulary-it/index.html. Vlastní model.js/gallery.js/gallery.css,
+learners.js/learner-ui.js; žádné změny EN předlohy. Žádné en aliasy v IT datech.
+Local/sessionStorage: vocabulary-it.learners.v1, vocabulary-it.navigation.v1,
+vocabulary-it.last-card.v1. Záloha má kind=vocabulary-it.learner-backup,
+UID vit-…; EN zálohy/UID se odmítají. Čtyři profily začínají prázdné.
+PIN je místní zábrana proti nechtěné editaci, ne serverový účet.
+L/HT z desktopu se do profilů ani společných filtrů nepřebírají.
+
+Prázdné IT audio manifesty mají status=not-generated. Budoucí vazby budou
+UID+language=it+kind+zdrojové texty+IT mediální cesty; ne EN hlas nebo TTS fallback.
+Slovo a věta mají oddělený kontrakt. Italská hra ještě není zapnutá.
+Pro zvuk nejprve schválený malý vzorek dle bodu6, pak teprve celá sada.
+
+15 JS scénářů testuje skutečný kód galerie/profilů v DOM harnessu včetně
+history/reload/návratu, posledních N, rodu, chybějícího hlasu, PIN/CAS a importu.
+814 assetů má ověřený hash/case/dekódování/rozměry. HTTP zdroje200.
+CUA host je nedostupný: nepovažovat automatické prokliky za fyzickou browser QA.
+Krátký ruční test je Vocabulary_IT_galerie_rucni_test_2026-11-15.txt v Downloads.

@@ -377,6 +377,7 @@ TEST_MODULES = (
     "tests.test_vocabularyen_gallery",
     "tests.test_vocabularyit_catalog",
     "tests.test_vocabularyit_export",
+    "tests.test_vocabularyit_gallery",
     "tests.test_vocabularyen_audio_library",
     "tests.test_cockpit_pwa",
     "tests.test_cockpit_https_entry",

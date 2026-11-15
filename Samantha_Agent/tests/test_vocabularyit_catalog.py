@@ -113,8 +113,8 @@ class VocabularyItalianCatalogTests(unittest.TestCase):
         self.assertEqual({entry["primaryGroup"] for entry in entries}, {f"topic-{n:02d}" for n in range(1, 19)})
         self.assertEqual(sum(entry["editorialStatus"] == "reviewed" for entry in entries), 50)
         self.assertTrue(all(entry["difficultyStatus"] == "proposed" for entry in entries))
-        self.assertEqual(sum(entry["imageStatus"] == "reviewed" for entry in entries), 487)
-        self.assertEqual(sum(entry["imageStatus"] == "replacement-needed" for entry in entries), 10)
+        self.assertEqual(sum(entry["imageStatus"] == "reviewed" for entry in entries), 497)
+        self.assertEqual(sum(entry["imageStatus"] == "replacement-needed" for entry in entries), 0)
         self.assertEqual(sum(entry["imageStatus"] == "pending-review" for entry in entries), 0)
         self.assertTrue(all(entry["legacyAddedAt"] is None for entry in entries))
         self.assertEqual(entries[465]["formOfUid"], "vit-0467")
@@ -141,21 +141,26 @@ class VocabularyItalianCatalogTests(unittest.TestCase):
             it.effective_card_text(rows[0], entries[107])
         self.assertEqual(self.rows, it.load_rows(ROOT / "VocabularyIT/VocabularyIT.csv"))
 
-    def test_review_manifest_pins_content_and_never_claims_pending_images_complete(self):
+    def test_accepted_manifest_pins_original_and_new_images_without_rewriting_foundation(self):
         manifest = json.loads((ROOT / "VocabularyIT/vocabulary_it_image_manifest.json").read_text())
         source_files = self.snapshot["files"]
         self.assertEqual(manifest["foundationManifestSha256"], it.digest(it.MANIFEST))
-        self.assertEqual(len(manifest["files"]), 397)
+        self.assertEqual(len(manifest["files"]), 407)
         for path, record in manifest["files"].items():
-            self.assertEqual(record["sha256"], source_files[path]["sha256"])
-            self.assertEqual(record["bytes"], source_files[path]["bytes"])
+            if path in source_files:
+                self.assertEqual(record["sha256"], source_files[path]["sha256"])
+                self.assertEqual(record["bytes"], source_files[path]["bytes"])
+            else:
+                self.assertTrue(path.startswith("Pict/it_web_vit_"))
+                self.assertEqual(record["sha256"], it.digest(ROOT / path))
+                self.assertEqual(record["bytes"], (ROOT / path).stat().st_size)
         entries = self.catalog["entries"]
         for entry in entries:
             if entry["imageStatus"] == "reviewed":
                 self.assertEqual(entry["imageSha256"], manifest["files"][entry["imageFile"]]["sha256"])
             else:
                 self.assertIsNone(entry["imageFile"])
-        self.assertIsNone(entries[135]["imageFile"])  # month must not silently reuse the Moon
+        self.assertEqual(entries[135]["imageFile"], "Pict/it_web_vit_0136.webp")  # month, not Moon
         self.assertEqual(entries[400]["imageFile"], "Pict/interpreter.webp")  # language, not tongue
 
     def image_fixture(self, root):

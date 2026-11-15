@@ -1194,6 +1194,76 @@
       "height": 1024,
       "format": "WEBP"
     },
+    "Pict/it_web_vit_0013.webp": {
+      "sha256": "87064879c4bc108f71e5a1245052761379416aeb9451aced729ca0c57b11cada",
+      "bytes": 64010,
+      "width": 900,
+      "height": 900,
+      "format": "WEBP"
+    },
+    "Pict/it_web_vit_0108.webp": {
+      "sha256": "c5df885ff7a975510fbbe56f48788e6d7c14f13cc66f84f2d98711297dae5a88",
+      "bytes": 42866,
+      "width": 900,
+      "height": 900,
+      "format": "WEBP"
+    },
+    "Pict/it_web_vit_0115.webp": {
+      "sha256": "c46b6c437ef2526100991385dd2f782d1cb02683dc2e454f5692ad0d3bf1981a",
+      "bytes": 90108,
+      "width": 900,
+      "height": 900,
+      "format": "WEBP"
+    },
+    "Pict/it_web_vit_0129.webp": {
+      "sha256": "e71b8bf43c2589af900780c7af298afc2ce2a3e22006b860438f15731a4c6f48",
+      "bytes": 103360,
+      "width": 900,
+      "height": 900,
+      "format": "WEBP"
+    },
+    "Pict/it_web_vit_0136.webp": {
+      "sha256": "b0897241b6db04336725c80105e8662dbd7c7a44d08fd96c359e36b9269ff258",
+      "bytes": 34994,
+      "width": 900,
+      "height": 900,
+      "format": "WEBP"
+    },
+    "Pict/it_web_vit_0186.webp": {
+      "sha256": "c3dc55e7699e502e58fecf30b8c774d1152018b8c54be3b929bc4b2f9257c011",
+      "bytes": 72590,
+      "width": 900,
+      "height": 900,
+      "format": "WEBP"
+    },
+    "Pict/it_web_vit_0217.webp": {
+      "sha256": "1a422cac7492bfa260c53e1cff4770116b29e65775a563ff4d5b80ba3eb544a5",
+      "bytes": 64194,
+      "width": 900,
+      "height": 900,
+      "format": "WEBP"
+    },
+    "Pict/it_web_vit_0247.webp": {
+      "sha256": "b8bb4c1105a153f364837d2adedc8970a0421031172bb2e6cd9f5d41a8c41bde",
+      "bytes": 96490,
+      "width": 900,
+      "height": 900,
+      "format": "WEBP"
+    },
+    "Pict/it_web_vit_0320.webp": {
+      "sha256": "c99befdabe3af67d16bdfa6bb4e09b6f73afee877f85b36b5620d77152410a73",
+      "bytes": 67806,
+      "width": 900,
+      "height": 900,
+      "format": "WEBP"
+    },
+    "Pict/it_web_vit_0443.webp": {
+      "sha256": "1e52b8bd7a0c6b1d65c5b7c6344731805bb2ccfb4bc48cb14e4ce0c609b66ff1",
+      "bytes": 27834,
+      "width": 900,
+      "height": 900,
+      "format": "WEBP"
+    },
     "Pict/italian.webp": {
       "sha256": "16ed07a3010a53862b1617123f900b9326a889c884d73a397ef2a9244c4f8796",
       "bytes": 175652,
