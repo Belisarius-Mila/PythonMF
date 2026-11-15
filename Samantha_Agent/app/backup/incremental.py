@@ -11,6 +11,7 @@ from pathlib import Path
 from typing import Iterable
 
 from app.backup.activity_state import record_backup_completed
+from app.file_persistence import atomic_write_text
 
 
 SAMANTHA_DIR = Path(__file__).resolve().parents[2]
@@ -162,7 +163,8 @@ def run_backup(
     if state_path.exists():
         backup_state_path = plan.pythonmf_dest / "Samantha_Agent" / "data" / "backup" / "activity_state.json"
         backup_state_path.parent.mkdir(parents=True, exist_ok=True)
-        _copy_file_chunked(state_path, backup_state_path)
+        # The initial copy may share this inode with older snapshots.
+        atomic_write_text(backup_state_path, state_path.read_text(encoding="utf-8"))
         shutil.copystat(state_path, backup_state_path, follow_symlinks=False)
 
     lines.append("")

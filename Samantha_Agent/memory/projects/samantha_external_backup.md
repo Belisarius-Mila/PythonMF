@@ -2,6 +2,19 @@
 
 Projekt zalozen 2026-05-19.
 
+## 2026-11-15 11:18 CET — Trvalá oprava evidence zálohy hotová místně
+
+Závěrečné uložení activity_state.json nyní atomicky nahrazuje pouze novou
+kopii; starší hardlinky zůstávají beze změny. Existující helper zachovává
+úplný soubor i při selhání a následný copystat drží původní režim/časy.
+Ověřeno dvěma novými regresními scénáři, 43 cílenými a plnou bránou:
+3940 testů, 0 chyb, 31 SKIP / 780.013 s unit část; 2/2 otisků shodných.
+Příští místní registrovaný CLI běh načte opravený modul z main.
+Další krok: běžná následující záloha a její živé převzetí. V tomto kroku
+se skutečné zálohy ani běžící služby neměnily; nový ostrý snapshot není ověřený.
+Podrobnosti reports/backup_activity_atomic_20261115.md. Předchozí platná
+recovery20261115_100224 a Camino20261115_102018-a9791da6 zůstávají zachované.
+
 ## 2026-11-15 10:34 CET — Úklid SSD a ověřená recovery záloha
 
 Úklid hotový: skutečně +12,66 GiB; osm schválených čistých kopií a18 starých

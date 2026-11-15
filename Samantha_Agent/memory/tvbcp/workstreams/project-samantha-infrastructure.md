@@ -2066,3 +2066,24 @@ shod, čtyři skutečné obnovy a Git connectivity PASS.33 starých evidenčníc
 SHA/mtime před/po stejné. Současný0601ecba měnil jen memory; výchozí2779af14
 a novější Git zaznamenané odděleně, žádný atomický obraz všech souborů se netvrdí.
 Report s bezpečnými čísly ssd_cleanup_backup_20261115.md; soukromé účtenky mimo Git.
+
+
+## 2026-11-15 11:18 CET — Trvalá atomická evidence zálohy
+
+Hotovo: Příští místní záloha uloží novou evidenci atomicky, starší sdílené
+kopie zůstanou beze změny. Zachované časy/režim a úplný soubor při selhání.
+
+Rozhodnutí: Míla schválil opravu pokynem warp5 po vysvětlení rozsahu.
+Malou kritickou změnu provedl hlavní Adam existujícím atomickým helperem.
+Příští CLI načte nový kód z main; ostrá záloha ani runtime deploy nebyly součástí kroku.
+
+Další krok: Při příští pravidelné recovery převzít skutečnou účtenku nové verze.
+
+Navrhované další kroky: Dřívější fyzické přejímky a vnější dohled zůstávají
+samostatně. Předchozí recovery20261115_100224 je dále platná.
+
+Technický důkaz: Dvě nové regrese skutečného run_backup nejprve FAIL,
+poté PASS. 43 cílených testů PASS. Plná kanonická brána 3940 testů,
+0 chyb, 31 SKIP / 780.013 s jednotková část; 2/2 zdrojových otisků shodných.
+Jen dočasné syntetické soubory, žádný přístup k externímu disku.
+Report backup_activity_atomic_20261115.md a privátní log/časování/manifest.

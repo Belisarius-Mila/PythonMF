@@ -2643,3 +2643,11 @@ Finální ověření tohoto kroku: plná brána3920 PASS /706,416s unit část,3
   před/po shodné, nová evidence odpovídá dokončené záloze. Report
   ssd_cleanup_backup_20261115.md. Trvalá oprava programu zatím není provedena;
   před další zálohou ji řešit a otestovat regresi nezměněných starších snapshotů.
+
+Doplnění 2026-11-15 11:18 CET: Trvalá oprava run_backup používá existující atomic_write_text
+pouze pro závěrečnou kopii evidence a poté copystat. Nová položka získá vlastní
+inode, starší odkazy se neotevírají pro zápis. Dvě regrese skutečného průchodu
+v dočasném projektu potvrzují staré bajty/mtime/režim i neporušený JSON při
+selhání os.replace. 43 cílených a plná 3940/0 chyb/31 SKIP PASS;
+2/2 finálních zdrojových otisků shodných. Report backup_activity_atomic_20261115.md.
+Příští CLI běh opravu načte, nová ostrá záloha v tomto vývojovém kroku neproběhla.
