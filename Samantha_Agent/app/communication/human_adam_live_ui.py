@@ -2,7 +2,7 @@
 
 HUMAN_ADAM_LIVE_SCRIPT = r"""
 function createHumanAdamWorkMonitor(host) {
-  const terminal = new Set(["completed", "failed", "not_dispatched"]);
+  const terminal = new Set(["completed", "failed", "not_dispatched", "interrupted"]);
   const states = new Set([...terminal, "accepted", "running", "awaiting_completion", "unverified"]);
   let scope = null, enabled = false, epoch = 0, timer = null, request = null;
   let operation = null, identity = "", clientId = "", cursor = 0, serverGeneration = "";
@@ -54,7 +54,7 @@ function createHumanAdamWorkMonitor(host) {
       || !Array.isArray(value.events) || value.events.length > 128
       || typeof value.resync_required !== "boolean" || typeof value.event_gap !== "boolean"
       || !Number.isFinite(Date.parse(value.created_at)) || !Number.isFinite(Date.parse(value.updated_at))) throw new Error("invalid_view");
-    if (value.lifecycle_state === "completed" && value.delivery_state !== "confirmed") throw new Error("unconfirmed_completion");
+    if (["completed","interrupted"].includes(value.lifecycle_state) && value.delivery_state !== "confirmed") throw new Error("unconfirmed_completion");
     if (identity && value.operation_id !== identity || clientId && value.client_request_id !== clientId) throw new Error("other_identity");
     let previous = 0;
     for (const event of value.events) {
@@ -169,7 +169,7 @@ function humanAdamLiveSummary(view) {
   if (!operation) return view.blocked ? view.pendingIdentity ? "Čekám na potvrzení přijetí" : "Načítám stav práce" : "";
   return ({accepted:"Pokyn přijat · čeká na zpracování", running:"Adam pracuje",
     awaiting_completion:"Ověřuji a dokončuji výsledek", completed:"Práce dokončena",
-    failed:"Práce vyžaduje kontrolu", not_dispatched:"Pokyn nebyl spuštěn",
+    failed:"Práce vyžaduje kontrolu", interrupted:"Práce zastavena", not_dispatched:"Pokyn nebyl spuštěn",
     unverified:"Stav původní práce není ověřen"})[operation.lifecycle_state];
 }
 
@@ -179,7 +179,7 @@ function renderHumanAdamLiveCard(doc, view, now = Date.now()) {
   if (card.hidden) return;
   const set = (id, value) => { const node = doc.getElementById(id); if (node.textContent !== value) node.textContent = value; };
   const operation = view.operation;
-  set("liveWorkTitle", `${operation && ["completed","failed","not_dispatched"].includes(operation.lifecycle_state) ? "Poslední práce · " : ""}${humanAdamLiveSummary(view)}`);
+  set("liveWorkTitle", `${operation && ["completed","failed","not_dispatched","interrupted"].includes(operation.lifecycle_state) ? "Poslední práce · " : ""}${humanAdamLiveSummary(view)}`);
   card.dataset.state = view.error ? "unverified" : operation ? operation.lifecycle_state : "accepted";
   set("liveWorkReadState", view.error || (view.watching ? "Průběh se obnovuje automaticky." : "Sledování skončilo. Stav můžeš znovu ověřit."));
   const checked = Date.parse(view.observedAt);
@@ -187,14 +187,16 @@ function renderHumanAdamLiveCard(doc, view, now = Date.now()) {
   const updated = operation ? Date.parse(operation.updated_at) : NaN;
   set("liveWorkUpdated", Number.isFinite(updated) ? `Poslední zaznamenaná změna: ${new Date(updated).toLocaleTimeString("cs-CZ")}` : "Zatím bez potvrzené aktualizace.");
   const start = operation ? Date.parse(operation.created_at) : NaN;
-  const end = operation && ["completed","failed","not_dispatched"].includes(operation.lifecycle_state) ? updated : now;
+  const end = operation && ["completed","failed","not_dispatched","interrupted"].includes(operation.lifecycle_state) ? updated : now;
   const seconds = Number.isFinite(start) ? Math.max(0,Math.floor((end-start)/1000)) : null;
   set("liveWorkDuration", seconds === null ? "" : `Od přijetí: ${Math.floor(seconds/60)}:${String(seconds%60).padStart(2,"0")}`);
   const labels = {accepted:"Pokyn byl přijat", model_dispatching:"Předání Adamovi", turn_acknowledged:"Adam přijal tah",
     turn_started:"Adam zpracovává zadání", tool_started:"Probíhá práce s nástrojem", tool_finished:"Nástroj dokončil krok",
     message_started:"Adam připravuje odpověď", message_finished:"Dílčí zpráva dokončena", plan:"Plán byl aktualizován",
     turn_completed:"Modelový tah skončil", execution_finished:"Zpracování skončilo", completion_updated:"Stav dokončování se změnil",
-    execution_unverified:"Výsledek vyžaduje ověření", event_gap:"Část průběhu není k dispozici"};
+    execution_unverified:"Výsledek vyžaduje ověření", execution_interrupted:"Práce byla zastavena",
+    interrupt_requested:"Požadavek na zastavení", interrupt_receipt:"Stav žádosti o zastavení",
+    event_gap:"Část průběhu není k dispozici"};
   const events = operation && !view.error ? operation.events : [];
   const latest = [...events].reverse().find(item => labels[item.kind]);
   set("liveWorkActivity", operation && operation.lifecycle_state === "awaiting_completion" ? "Čekám na dokončovací kontrolu."

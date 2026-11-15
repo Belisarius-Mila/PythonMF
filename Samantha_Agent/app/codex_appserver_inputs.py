@@ -20,6 +20,8 @@ class TurnInputs:
     turn_id: str
     original_id: str
     steer_enabled: bool
+    interrupt_enabled: bool = False
+    interrupt_requested: bool = False
     commands: set[str] = field(default_factory=set)
     closed: bool = False
 
@@ -29,24 +31,35 @@ class TurnInputLedger:
         self._lock = threading.RLock()
         self._turns = {}
 
-    def begin(self, thread_id, turn_id, original_id, *, steer_enabled=False):
+    def begin(self, thread_id, turn_id, original_id, *, steer_enabled=False, interrupt_enabled=False):
         with self._lock:
             key = (thread_id, turn_id)
             if key in self._turns or len(self._turns) >= 32:
                 raise AppServerContractError("Vstupy tahu nemají jednoznačnou kapacitu nebo identitu.")
-            state = TurnInputs(thread_id, turn_id, original_id, steer_enabled)
+            state = TurnInputs(thread_id, turn_id, original_id, steer_enabled, interrupt_enabled)
             self._turns[key] = state
             return state
 
     def available(self, thread_id, turn_id):
         with self._lock:
             state = self._turns.get((thread_id, turn_id))
-            return bool(state and not state.closed and state.steer_enabled and len(state.commands) < 64)
+            return bool(state and not state.closed and not state.interrupt_requested and state.steer_enabled and len(state.commands) < 64)
+
+    def can_interrupt(self, thread_id, turn_id):
+        with self._lock:
+            state = self._turns.get((thread_id, turn_id))
+            return bool(state and not state.closed and state.interrupt_enabled and not state.interrupt_requested)
+
+    def reserve_interrupt(self, thread_id, turn_id):
+        with self._lock:
+            if not self.can_interrupt(thread_id, turn_id):
+                raise AppServerSteerRejected("work_not_running")
+            self._turns[(thread_id, turn_id)].interrupt_requested = True
 
     def reserve(self, thread_id, turn_id, command_id):
         with self._lock:
             state = self._turns.get((thread_id, turn_id))
-            if not state or state.closed or not state.steer_enabled:
+            if not state or state.closed or state.interrupt_requested or not state.steer_enabled:
                 raise AppServerSteerRejected("work_not_running")
             if command_id == state.original_id or command_id in state.commands:
                 raise AppServerSteerRejected("command_identity_conflict")

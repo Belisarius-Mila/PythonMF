@@ -2704,3 +2704,16 @@ Příští CLI běh opravu načte, nová ostrá záloha v tomto vývojovém krok
 - Ověření:46 testů archivace PASS; původní veřejný vzorek1048 znaků nahradilo
  3420 znaků s celým tělem a bez diskuze. Regresní vzorky jsou vlastní syntetické
  texty; žádný obsah soukromé knihovny nepatří do Gitu.
+
+
+### 2026-11-15 19:39 CET — Potvrzení žádosti o Stop není konec práce
+
+- Kontext: HA-07 přidává přerušení vedle dlouhého příjmu původního tahu.
+- Příčina: RPC ACK může přijít před terminalitou, po přirozeném dokončení
+  nebo se ztratit; druhý pokus by mohl zasáhnout nesprávnou práci.
+- Řešení: trvalá původní identita před RPC, jediný turn/interrupt, čtecí
+  následné ověření. Terminalitu svázat s původním user input a přesným
+  turn/completed; částečnou odpověď nepředávat automatickému dokončení.
+- Ověření: izolované Python/HTTP/Node a skutečný Unix/WebSocket; dvojklik,
+  pád, reconnect/owner loss, dokončení vítězící v závodu a zapisovací WIP.
+  Plánovaná živá přejímka má vlastní souhlas; test nevytváří modelový tah.

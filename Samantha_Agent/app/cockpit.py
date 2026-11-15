@@ -158,7 +158,7 @@ from app.communication.human_adam_service import (
     human_adam_work_review_action,
 )
 from app.communication.human_adam_work_routes import (
-    work_start_action, work_read_action, work_recover_action, work_steer_action, work_command_read_action, work_http_status,
+    work_start_action, work_read_action, work_recover_action, work_steer_action, work_interrupt_action, work_command_read_action, work_http_status,
 )
 from app.communication.human_adam_images import (
     HUMAN_ADAM_IMAGE_STORE,
@@ -9067,6 +9067,9 @@ COCKPIT_POST_ACTIONS: tuple[dict[str, str], ...] = (
     {"path": "/api/human-adam/work/steer", "label": "Doplnit přesný běžící tah Human–Adam",
      "risk": "external_send", "confirmation": "explicit_confirmation",
      "handler_name": "work_steer_action", "test_level": "direct"},
+    {"path": "/api/human-adam/work/interrupt", "label": "Požádat o zastavení přesné běžící práce",
+     "risk": "external_send", "confirmation": "explicit_confirmation",
+     "handler_name": "work_interrupt_action", "test_level": "direct"},
     {"path": "/api/human-adam/work/recover", "label": "Ověřit původní práci bez nového zadání",
      "risk": "private_write", "confirmation": "explicit_confirmation",
      "handler_name": "work_recover_action", "test_level": "direct"},
@@ -10513,6 +10516,10 @@ class CockpitServer:
                     return
                 if parsed.path == "/api/human-adam/work/steer":
                     result = work_steer_action(self.read_json(), service=HUMAN_ADAM)
+                    self.respond_json(result, status=work_http_status(result))
+                    return
+                if parsed.path == "/api/human-adam/work/interrupt":
+                    result = work_interrupt_action(self.read_json(), service=HUMAN_ADAM)
                     self.respond_json(result, status=work_http_status(result))
                     return
                 if parsed.path == "/api/human-adam/work/recover":

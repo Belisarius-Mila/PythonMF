@@ -10,7 +10,7 @@ from contextlib import nullcontext
 from pathlib import Path
 from typing import Any, Callable
 
-from app.codex_appserver import AppServerError, CodexAppServerClient, TurnReceipt, utc_now
+from app.codex_appserver import AppServerError, AppServerTurnInterrupted, CodexAppServerClient, TurnReceipt, utc_now
 from app.file_persistence import atomic_write_json
 
 
@@ -459,7 +459,7 @@ class CanonicalSessionHub:
         with self._state_lock:
             existing = self._message_locked(clean_id)
             if existing is not None:
-                if existing.get("status") == "completed":
+                if existing.get("status") == "completed" or (existing.get("status") == "interrupted" and existing.get("terminal_confirmed") is True):
                     return {"ok": True, "duplicate_prevented": True, "entry": copy.deepcopy(existing)}
                 raise SessionDeliveryUnknownError(
                     "Tato zpráva už byla přijata bez konečného důkazu; automaticky ji neposílám znovu."
@@ -471,7 +471,7 @@ class CanonicalSessionHub:
             with self._state_lock:
                 existing = self._message_locked(clean_id)
                 if existing is not None:
-                    if existing.get("status") == "completed":
+                    if existing.get("status") == "completed" or (existing.get("status") == "interrupted" and existing.get("terminal_confirmed") is True):
                         return {"ok": True, "duplicate_prevented": True, "entry": copy.deepcopy(existing)}
                     raise SessionDeliveryUnknownError(
                         "Tato zpráva už byla přijata bez konečného důkazu; automaticky ji neposílám znovu."
@@ -516,7 +516,7 @@ class CanonicalSessionHub:
                                     and (self.model, self.reasoning_effort, self.sandbox_policy, self.approval_policy) == bound_policy)
                 observing = work_observer.attach(client, bound_thread, guard=original_steer_guard) if work_observer else nullcontext(None)
                 with observing as accepted:
-                    options = {"on_turn_accepted": accepted, "allow_steer": True} if accepted else {}
+                    options = {"on_turn_accepted": accepted, "allow_steer": True, "allow_interrupt": True} if accepted else {}
                     receipt: TurnReceipt = client.send_text(
                         thread_id=str(self._state["thread_id"]),
                         text=clean_model_input,
@@ -528,6 +528,20 @@ class CanonicalSessionHub:
                         model=self.model,
                         **options,
                     )
+            except AppServerTurnInterrupted as exc:
+                if (work_observer is None or exc.thread_id != bound_thread or exc.client_message_id != clean_id
+                        or not exc.turn_id):
+                    raise SessionHubError("Zastavení neodpovídá původní práci.") from exc
+                with self._state_lock:
+                    entry = self._message_locked(clean_id)
+                    if entry is None or entry["thread_id"] != exc.thread_id:
+                        raise SessionHubError("Chybí původní záznam zastavené práce.") from exc
+                    entry.update(status="interrupted", terminal_confirmed=True, recovery_required=False,
+                                 delivery_confirmed=False, turn_id=exc.turn_id, completed_at=utc_now(), answer=exc.answer)
+                    self._state["active_turn"] = None
+                    self._state["connection_state"] = "connected"
+                    self._save_locked()
+                    return {"ok": True, "duplicate_prevented": False, "entry": copy.deepcopy(entry)}
             except Exception as exc:
                 recovered_receipt = self._recovery_receipt_after_failure(
                     thread_id=str(self._state["thread_id"]),

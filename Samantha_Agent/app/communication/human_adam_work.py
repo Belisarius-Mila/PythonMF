@@ -21,7 +21,7 @@ from app.communication.human_adam_public_progress import public_projection
 ID = re.compile(r"[a-f0-9]{32}\Z")
 CLIENT = re.compile(r"[A-Za-z0-9][A-Za-z0-9._:-]{7,127}\Z")
 PROJECT = re.compile(r"[a-z][a-z0-9_-]{1,63}\Z")
-TERMINAL = frozenset({"completed", "failed", "not_dispatched"})
+TERMINAL = frozenset({"completed", "failed", "not_dispatched", "interrupted"})
 STATES = TERMINAL | {"accepted", "running", "awaiting_completion", "unverified"}
 MAX_EVENTS, MAX_RECENT = 128, 64
 MAX_WORKERS, MAX_RESPONSE_CACHE = 8, 2
@@ -276,6 +276,8 @@ class WorkController:
         self.commands = WorkCommands(self.store.root / "commands", self.owner, resolve=self._resolve_command,
             before_dispatch=self._mark_command_dispatch, journal_required=lambda identity:
                 (self.store.load(identity) or {}).get("_commands_journal") is True)
+        from app.communication.human_adam_work_interrupt import WorkInterrupts
+        self.interrupts = WorkInterrupts(self)
 
     def _command_parent(self, workstream_id, identity):
         value = self.store.load(identity)
@@ -283,7 +285,7 @@ class WorkController:
             raise AppServerSteerRejected("scope_changed")
         return value
 
-    def _command_target(self, value, expected_turn_id, *, check_scope=True):
+    def _command_target(self, value, expected_turn_id, *, check_scope=True, interrupt=False):
         if check_scope:
             try:
                 valid = callable(self._command_scope_guard) and self._command_scope_guard(value) is True
@@ -301,21 +303,28 @@ class WorkController:
             if not expected_turn_id or value["turn_id"] != expected_turn_id:
                 raise AppServerSteerRejected("turn_changed")
             observer = handle.observer
-        if observer is None or not observer.can_steer(expected_turn_id):
+        supported = observer and (observer.can_interrupt(expected_turn_id) if interrupt else observer.can_steer(expected_turn_id))
+        if not supported:
             raise AppServerSteerRejected("work_not_running")
         return observer
 
     def _resolve_command(self, request):
         def perform():
             value = self._command_parent(request["workstream_id"], request["operation_id"])
+            if self.interrupts.blocked(value):
+                raise AppServerSteerRejected("work_not_running")
             observer = self._command_target(value, request["expectedTurnId"])
             return observer.steer(expected_turn_id=request["expectedTurnId"], command_id=request["command_id"], text=request["text"])
         value = self._command_parent(request["workstream_id"], request["operation_id"])
+        if self.interrupts.blocked(value):
+            raise AppServerSteerRejected("work_not_running")
         self._command_target(value, request["expectedTurnId"])
         return perform
 
     def _mark_command_dispatch(self, request):
         value = self._command_parent(request["workstream_id"], request["operation_id"])
+        if self.interrupts.blocked(value):
+            raise AppServerSteerRejected("work_not_running")
         self._command_target(value, request["expectedTurnId"])
         record = self.store.change(value["operation_id"], self.owner, "command_dispatching", fields={"_commands_journal": True})
         if record.get("_commands_journal") is not True:
@@ -333,6 +342,9 @@ class WorkController:
     def read_command(self, workstream_id, identity, command_id):
         self._command_parent(workstream_id, identity)
         return self.commands.read(workstream_id, identity, command_id)
+
+    def interrupt(self, workstream_id, payload):
+        return self.interrupts.submit(workstream_id, payload)
 
     def _completion(self, record: dict) -> dict | None:
         value = self.completion_reader(record)
@@ -361,7 +373,13 @@ class WorkController:
                 public = self.store.public(value, cursor=cursor, owned=self._owned(value["operation_id"]))
                 try:
                     self._command_target(value, value["turn_id"], check_scope=False)
-                    public["capabilities"]["steer"] = not self.commands.blocked(workstream_id, value["operation_id"])
+                    public["capabilities"]["steer"] = not self.commands.blocked(workstream_id, value["operation_id"]) and not self.interrupts.blocked(value)
+                except AppServerSteerRejected:
+                    pass
+                public["interrupt"] = self.interrupts.public(value, lifecycle_state=public["lifecycle_state"])
+                try:
+                    self._command_target(value, value["turn_id"], check_scope=False, interrupt=True)
+                    public["capabilities"]["interrupt"] = public["interrupt"] is None
                 except AppServerSteerRejected:
                     pass
                 public["recent_commands"] = self.commands.recent(workstream_id, value["operation_id"])
@@ -378,8 +396,9 @@ class WorkController:
     def _existing_result(record: dict) -> dict:
         session = JsonWorkRepository(Path(record["_session_path"])).read()
         entry = next((e for e in session.get("messages", []) if e.get("client_message_id") == record["client_request_id"]
-                      and e.get("thread_id") == record["thread_id"] and e.get("status") == "completed"
-                      and e.get("delivery_confirmed") is True), None)
+                      and e.get("thread_id") == record["thread_id"] and (
+                          e.get("status") == "completed" and e.get("delivery_confirmed") is True
+                          or e.get("status") == "interrupted" and e.get("terminal_confirmed") is True)), None)
         if not entry:
             raise SessionDeliveryUnknownError("Původní výsledek není ověřený. Pokyn znovu neposílej.")
         return {"ok": True, "duplicate_prevented": True, "entry": entry, "session": session,
@@ -468,6 +487,14 @@ class WorkController:
                               fields={"lifecycle_state": "running"})
             result = reservation.execute(observer)
             entry = result.get("entry") or {}
+            if (entry.get("status") == "interrupted" and entry.get("terminal_confirmed") is True
+                    and entry.get("thread_id") == original["thread_id"]
+                    and entry.get("client_message_id") == original["client_request_id"]
+                    and entry.get("turn_id") == self.store.load(identity)["turn_id"] and entry.get("turn_id")):
+                self.store.change(identity, self.owner, "execution_interrupted",
+                                  fields={"lifecycle_state": "interrupted", "delivery_state": "confirmed"})
+                handle.response = result
+                return
             delivered = (entry.get("status") == "completed" and entry.get("delivery_confirmed") is True)
             fields = {"lifecycle_state": "completed" if delivered else "unverified",
                       "delivery_state": "confirmed" if delivered else "unknown"}
@@ -559,6 +586,9 @@ class WorkController:
                                 fields["completion"] = completion
                                 fields["lifecycle_state"] = {"completed": "completed", "failed": "failed"}.get(
                                     completion["state"], "awaiting_completion")
+                        elif (entry and entry.get("status") == "interrupted" and entry.get("terminal_confirmed") is True
+                              and entry.get("turn_id") and record["turn_id"] == entry["turn_id"]):
+                            fields.update(lifecycle_state="interrupted", delivery_state="confirmed", failure_code="")
                     _, changed = self.store.change(identity, self.owner, "recovered_existing_evidence",
                                                    fields=fields, recover=True, with_effect=True)
             except FileLockTimeoutError as exc:

@@ -109,7 +109,8 @@ def build_human_adam_work_state(
         model["state"] = "unverified"
         incident("model", "delivery_uncertain")
     elif latest_id:
-        state = "completed" if message_state == "completed" and latest.get("delivery_confirmed") is True else "unverified"
+        state = ("completed" if message_state == "completed" and latest.get("delivery_confirmed") is True else
+                 "interrupted" if message_state == "interrupted" and latest.get("terminal_confirmed") is True and _id(latest.get("turn_id")) else "unverified")
         history.append(operation("model", latest_id, state, latest.get("completed_at"), thread_id=thread))
         if state == "unverified":
             model["state"] = "unverified"

@@ -532,6 +532,8 @@ TEST_MODULES = (
     "tests.test_human_adam_work_http",
     "tests.test_human_adam_steer",
     "tests.test_human_adam_steer_http",
+    "tests.test_human_adam_interrupt",
+    "tests.test_human_adam_interrupt_http",
     "tests.test_human_adam_takeover",
     "tests.test_local_appserver_runtime",
     "tests.test_file_persistence",

@@ -74,6 +74,17 @@ def work_steer_action(payload, *, service):
     return _call(steer)
 
 
+def work_interrupt_action(payload, *, service):
+    def interrupt():
+        if (not isinstance(payload, dict)
+                or set(payload) != {"workstream_id", "operation_id", "command_id", "expectedTurnId", "confirmed"}
+                or payload["confirmed"] is not True):
+            raise WorkError("Zastavení vyžaduje konkrétní potvrzenou práci a tah.")
+        return service.work_controller.interrupt(_scope(payload["workstream_id"]),
+            {key: payload[key] for key in ("operation_id", "command_id", "expectedTurnId")})
+    return _call(interrupt)
+
+
 def work_command_read_action(query, *, service):
     def read():
         if not isinstance(query, dict) or set(query) != {"workstream_id", "operation_id", "command_id"}:

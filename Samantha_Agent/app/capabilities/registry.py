@@ -120,6 +120,15 @@ CAPABILITIES: tuple[CapabilityRecord, ...] = (
         notes="No resend, recovery mutation or model call; absent evidence never authorizes repetition.",
     ),
     CapabilityRecord(
+        capability_id="human_adam_work_interrupt", label="Request interruption of the exact owned active turn",
+        risk=RiskLevel.EXTERNAL_SEND, reads=("original work, turn and unchanged owner authorization",),
+        writes=("private durable interruption receipt", "one turn/interrupt on the existing connection"),
+        tool="app.communication.human_adam_work.WorkController.interrupt",
+        requires_confirmation=True, confirmation_policy=ConfirmationPolicy.EXACT_CURRENT_MESSAGE,
+        audit=AuditPolicy.REDACTED,
+        notes="ACK is not a terminal outcome. No resend, new turn, reconnect, process kill, rollback or automatic completion of partial work.",
+    ),
+    CapabilityRecord(
         capability_id="human_adam_work_start", label="Accept one scoped Human–Adam request",
         risk=RiskLevel.EXTERNAL_SEND, reads=("explicit user message and unchanged profile authorization",),
         writes=("private durable admission", "one existing canonical model turn and its authorized completion"),

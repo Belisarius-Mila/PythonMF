@@ -48,6 +48,14 @@ def build(**changes):
 
 
 class WorkStateTests(unittest.TestCase):
+    def test_interrupted_history_requires_terminal_proof(self):
+        for confirmed in (False,True):
+            with self.subTest(confirmed=confirmed):
+                result=build(session_snapshot=session(messages=[message(status="interrupted",delivery_confirmed=False,
+                    terminal_confirmed=confirmed,turn_id="turn-current")]))
+                self.assertEqual(result["history"][0]["state"],"interrupted" if confirmed else "unverified")
+                self.assertEqual(result["summary"]["state"],"ready" if confirmed else "unverified")
+
     def test_idle_connected_is_ready_and_does_not_grant_mutations(self):
         result = build()
         self.assertEqual(result["summary"]["state"], "ready")

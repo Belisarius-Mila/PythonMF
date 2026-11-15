@@ -72,6 +72,14 @@ class AppServerTurnError(AppServerContractError):
         self.will_retry = False
 
 
+class AppServerTurnInterrupted(AppServerTurnError):
+    """Exact terminal interruption with the original user-input proof."""
+    def __init__(self, *, thread_id, turn_id, client_message_id, answer):
+        super().__init__("interrupted", None)
+        self.thread_id, self.turn_id = thread_id, turn_id
+        self.client_message_id, self.answer = client_message_id, answer
+
+
 def codex_environment(base_env: dict[str, str] | None = None) -> dict[str, str]:
     env = dict(base_env or os.environ)
     existing = [part for part in str(env.get("PATH") or "").split(os.pathsep) if part]
@@ -627,8 +635,9 @@ class CodexAppServerClient:
         service_tier_for_turn: str | None = None,
         on_turn_accepted: Callable[[str], None] | None = None,
         allow_steer: bool = False,
+        allow_interrupt: bool = False,
     ) -> TurnReceipt:
-        if type(allow_steer) is not bool:
+        if type(allow_steer) is not bool or type(allow_interrupt) is not bool:
             raise AppServerContractError("Neplatné povolení doplnění tahu.")
         clean_text = str(text or "").strip()
         if not clean_text:
@@ -667,7 +676,8 @@ class CodexAppServerClient:
         if not isinstance(turn_id, str) or not turn_id:
             raise AppServerContractError("turn/start nevrátil turnId.")
         ledger = self._inputs()
-        input_state = ledger.begin(thread_id, turn_id, message_id, steer_enabled=allow_steer)
+        input_state = ledger.begin(thread_id, turn_id, message_id, steer_enabled=allow_steer,
+                                   interrupt_enabled=allow_interrupt)
         try:
             if on_turn_accepted is not None:
                 try:
@@ -733,7 +743,9 @@ class CodexAppServerClient:
                     status = str(completed_turn.get("status") or "")
                     if status not in {"completed", "failed", "interrupted"}:
                         raise AppServerContractError("turn/completed nemá platný koncový stav.")
-                    if status != "completed":
+                    if isinstance(completed_turn.get("error"), dict):
+                        last_turn_error = completed_turn["error"]
+                    if status == "failed":
                         error = completed_turn.get("error")
                         raise AppServerTurnError(status, error if isinstance(error, dict) else last_turn_error)
                     completed_items = completed_turn.get("items")
@@ -760,6 +772,12 @@ class CodexAppServerClient:
                         authoritative_images = completed_generated_images(completed_items)
                         if authoritative_images:
                             generated_images = authoritative_images
+
+            if status == "interrupted":
+                if allow_interrupt and turn_started_confirmed and len(user_items) == 1:
+                    raise AppServerTurnInterrupted(thread_id=thread_id, turn_id=turn_id,
+                        client_message_id=message_id, answer=final_agent_answer(agent_messages))
+                raise AppServerTurnError("interrupted", last_turn_error)
 
             receipt = TurnReceipt(
                 client_message_id=message_id,
@@ -813,6 +831,23 @@ class CodexAppServerClient:
         if result.get("turnId") != expected_turn_id:
             raise AppServerContractError("Doplnění nemá potvrzenou identitu původního tahu.")
         return {"turn_id": expected_turn_id, "command_id": command_id, "accepted_into_turn": True}
+
+    def can_interrupt_turn(self, thread_id: str, turn_id: str) -> bool:
+        version = getattr(self, "server_version", None)
+        return bool(isinstance(version, CodexVersion) and (version.major, version.minor, version.patch) >= (0, 167, 0)
+                    and self.running and self._inputs().can_interrupt(thread_id, turn_id))
+
+    def interrupt_turn(self, *, thread_id: str, expected_turn_id: str) -> dict[str, Any]:
+        if not all(isinstance(v, str) and 0 < len(v) <= 256 and all(32 < ord(c) < 127 for c in v)
+                   for v in (thread_id, expected_turn_id)):
+            raise AppServerSteerRejected("invalid_request")
+        if not self.can_interrupt_turn(thread_id, expected_turn_id):
+            raise AppServerSteerRejected("work_not_running")
+        self._inputs().reserve_interrupt(thread_id, expected_turn_id)
+        result = self.transport.request("turn/interrupt", {"threadId": thread_id, "turnId": expected_turn_id})
+        if result != {}:
+            raise AppServerContractError("Zastavení nemá platné potvrzení požadavku.")
+        return {"turn_id": expected_turn_id, "request_accepted": True}
 
     def read_effective_config(self, *, cwd: Path) -> dict[str, Any]:
         result = self.transport.request(

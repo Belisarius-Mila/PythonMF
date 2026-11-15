@@ -432,3 +432,18 @@ nebo veřejná studentům dostupná API route. Nové zdroje nepřebírají Benji
 ani A–D. Zařazení nedělá commit/push/deploy; checkpoint a p+n používají
 své dosavadní mechanismy. Jedna známá autorská kopie a její privátní store;
 nezávislé kopie se automaticky neslučují.
+
+
+## 2026-11-15 19:39 CET — HA-07 potvrzené zastavení původní práce
+
+human_adam_work_interrupt → WorkController.interrupt přes registrované POST
+/api/human-adam/work/interrupt, confirmed=true, workstream_id/operation_id,
+stabilní command_id=ha07-operation_id a expectedTurnId. Server vlastní cestu
+i původní spojení. Jediný turn/interrupt bez turn/start, reconnect či kill.
+Trvalá účtenka v původním parent journalu se čte přes human_adam_work_read;
+GET nic neopakuje ani neobnovuje. ACK pouze potvrzuje žádost. Potvrzené
+přerušení vyžaduje původní korelaci vstupu a terminalitu přesného tahu;
+unknown zůstává neověřený. Cizí scope/owner/politika/turn se odmítne.
+Interrupce neprovádí automatický checkpoint, odchozí operaci ani rollback
+částečného výsledku. Zapisovací WIP a ownership zůstávají zachované.
+Obecné zastavování dokončovací brány a publikace není povolené.

@@ -1675,6 +1675,7 @@ class HumanAdamProfileManager:
                                        "read_path": "/api/human-adam/work",
                                        "command_protocol": 1, "steer_path": "/api/human-adam/work/steer",
                                        "command_read_path": "/api/human-adam/work/command",
+                                       "interrupt_protocol": 1, "interrupt_path": "/api/human-adam/work/interrupt",
                                        "replays_on_restart": False, "legacy_send_waits": True}
             return result
         except (AppServerError, SessionHubError, OSError, ValueError) as exc:
@@ -2024,6 +2025,21 @@ class HumanAdamProfileManager:
             raise
         finally:
             self.simple_development_portal.revoke(delegation_token)
+        interrupted = result.get("entry") or {}
+        if interrupted.get("status") == "interrupted" and interrupted.get("terminal_confirmed") is True:
+            if writable:
+                self.completion_status_store.update(workstream_id=self.active_workstream_id,
+                    client_message_id=client_message_id, state=TURN_FAILED, failure_code="turn_failed")
+            if ownership_started:
+                workspace = service.workspace.status()
+                if workspace.get("dirty"):
+                    self.deferred_integration_store.finalize(workstream_id=self.active_workstream_id,
+                        client_message_id=client_message_id, workspace_status=workspace, completion=None)
+                else:
+                    self.deferred_integration_store.clear(client_message_id=client_message_id)
+            return {**result, "workspace_synced": workspace_synced,
+                    "automatic_operation": {"state": "interrupted", "attempted": False},
+                    "automatic_completion": {"state": "interrupted", "attempted": False}}
         transient_images = result.pop("_generated_images", [])
         delivered_entry = result.get("entry")
         image_import = import_completed_generated_images(

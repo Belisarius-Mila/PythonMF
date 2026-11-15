@@ -82,6 +82,24 @@ class WorkObserver:
         return client.steer_text(thread_id=self.store.load(self.identity)["thread_id"],
                                  expected_turn_id=expected_turn_id, command_id=command_id, text=text)
 
+    def can_interrupt(self, expected_turn_id: str) -> bool:
+        with self._lock:
+            client, guard = self._client, self._guard
+            ready = not self._closed and self._started and not self._terminal_seen.is_set() and self._turn_id == expected_turn_id
+        check = getattr(client, "can_interrupt_turn", None)
+        try:
+            return bool(ready and callable(guard) and guard() is True and callable(check)
+                        and check(self.store.load(self.identity)["thread_id"], expected_turn_id) is True)
+        except Exception:
+            return False
+
+    def interrupt(self, expected_turn_id):
+        if not self.can_interrupt(expected_turn_id):
+            raise AppServerSteerRejected("work_not_running")
+        with self._lock:
+            client = self._client
+        return client.interrupt_turn(thread_id=self.store.load(self.identity)["thread_id"], expected_turn_id=expected_turn_id)
+
     def _event(self, event) -> None:
         params = event.params
         # Raw protocol payloads never enter the store. Public plan/commentary

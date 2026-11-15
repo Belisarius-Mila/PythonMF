@@ -17,7 +17,7 @@ function createHumanAdamSteer(host) {
   function canSubmit(){return Boolean(available() && draft.trim() && draftTarget===key(scope));}
   function snapshot(){return {enabled,draft,receipt,error,posting,reading:Boolean(reading),unresolved:unresolved(),canSubmit:canSubmit(),
     available:available(),detachedDraft:Boolean(draft && draftTarget!==key(scope)),
-    finished:Boolean(work && work.operation && ["completed","failed","not_dispatched","awaiting_completion"].includes(work.operation.lifecycle_state)),
+    finished:Boolean(work && work.operation && ["completed","failed","not_dispatched","interrupted","awaiting_completion"].includes(work.operation.lifecycle_state)),
     workUnverified:Boolean(work && (work.error || work.operation && work.operation.lifecycle_state==="unverified")),
     scope,canRead:Boolean(reference),recent:work && work.operation && work.operation.recent_commands || null};}
   function changed(){host.onChange(snapshot());}

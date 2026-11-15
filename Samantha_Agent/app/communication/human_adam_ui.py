@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from app.communication.human_adam_live_ui import HUMAN_ADAM_LIVE_SCRIPT
 from app.communication.human_adam_steer_ui import HUMAN_ADAM_STEER_SCRIPT
+from app.communication.human_adam_interrupt_ui import HUMAN_ADAM_INTERRUPT_SCRIPT
 
 
 HUMAN_ADAM_HTML = r"""<!doctype html>
@@ -424,6 +425,8 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
           </form>
           <details><summary>Předchozí doplnění této práce</summary><ul id="steerHistory"></ul></details>
         </details>
+        <div id="interruptBox" hidden><button id="interruptBtn" type="button" disabled>Zastavit tuto práci</button>
+          <p id="interruptStatus" class="meta" role="status" aria-live="polite"></p></div>
         <button id="liveWorkRefreshBtn" type="button">Ověřit průběh</button>
       </section>
     </section>
@@ -703,6 +706,7 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
   let currentWorkState = null;
   let workMonitor = null;
   let steerMonitor = null;
+  let interruptMonitor = null;
   let currentWorkProtocol = null;
   let steerNonceCounter = 0;
   let statusReadSequence = 0;
@@ -1247,6 +1251,7 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
     input.value = "";
     input.defaultValue = "";
     if (input.style) input.style.height = "";
+    if(typeof interruptMonitor !== "undefined" && interruptMonitor)interruptMonitor.saveDrafts();
   }
 
   function showSendFailure(message, originalText="") {
@@ -1266,7 +1271,8 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
     if (pendingSubmission.threadId && session.thread_id !== pendingSubmission.threadId) return;
     const messages = Array.isArray(session.messages) ? session.messages : [];
     const proof = messages.find(item => item.client_message_id === pendingSubmission.clientId);
-    if (!proof || proof.status !== "completed" || proof.delivery_confirmed !== true) return;
+    if (!proof || !(proof.status === "completed" && proof.delivery_confirmed === true
+      || proof.status === "interrupted" && proof.terminal_confirmed === true)) return;
     pendingSubmission = null;
     document.getElementById("sendFailure").hidden = true;
     document.getElementById("sendFailureDraft").textContent = "";
@@ -2004,7 +2010,8 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
         exchange = document.createElement("div");
         exchange.className = "exchange";
         exchange.appendChild(bubble(item.user_text || "", "human", `Odesláno ${formatTime(item.client_sent_at || item.received_at)}`));
-        const confirmed = item.delivery_confirmed ? "Doručení potvrzeno" : (item.status === "delivery_unknown" ? "Doručení nejisté – neposílat automaticky znovu" : "Zpracování nedokončeno");
+        const confirmed = item.status === "interrupted" && item.terminal_confirmed === true ? "Práce zastavena · částečný výsledek"
+          : item.delivery_confirmed ? "Doručení potvrzeno" : (item.status === "delivery_unknown" ? "Doručení nejisté – neposílat automaticky znovu" : "Zpracování nedokončeno");
         if (item.answer) exchange.appendChild(bubble(item.answer, "adam", `Adam · ${formatTime(item.completed_at)} · ${confirmed}`, item.answer, imageCandidatesByMessage.get(String(item.client_message_id || "")) || []));
         else exchange.appendChild(bubble(item.status === "pending" ? "Adam pracuje…" : confirmed, "adam", formatTime(item.received_at)));
       }
@@ -4089,6 +4096,7 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
 
   /* HA05_LIVE_SCRIPT */
   /* HA06_STEER_SCRIPT */
+  /* HA07_INTERRUPT_SCRIPT */
 
   async function sendOwnedWork() {
     if (!sessionConnected) { notice.textContent="Nejdřív připoj relaci. Text zůstal v editoru; nic nebylo odesláno."; return; }
@@ -4225,6 +4233,7 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
     onChange:view=>{
       renderHumanAdamLiveCard(document,view);
       if(steerMonitor)steerMonitor.configure(currentWorkProtocol,view);
+      if(interruptMonitor)interruptMonitor.configure(currentWorkProtocol,view);
       workStateBox.hidden=Boolean(view.enabled && (view.active || view.blocked || view.error));
       syncControls(); updateMobileStatusSummary();
     },
@@ -4262,8 +4271,21 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
     },
     post:(body,signal)=>api("/api/human-adam/work/steer",{method:"POST",body:JSON.stringify(body),signal}),
     read:(query,signal)=>api(`/api/human-adam/work/command?${new URLSearchParams(query)}`,{signal}),
-    onChange:view=>renderHumanAdamSteer(document,view),
+    onChange:view=>{renderHumanAdamSteer(document,view);if(interruptMonitor)interruptMonitor.saveDrafts();},
   });
+  interruptMonitor=createHumanAdamInterrupt({
+    setTimeout:(fn,delay)=>window.setTimeout(fn,delay),clearTimeout:id=>window.clearTimeout(id),
+    storage:{getItem:key=>window.sessionStorage.getItem(key),setItem:(key,value)=>window.sessionStorage.setItem(key,value)},
+    getDrafts:()=>({composer:input.value,append:steerMonitor.snapshot().draft}),
+    restoreDrafts:value=>{if(!value || typeof value.composer!=="string" || value.composer.length>12000
+      || typeof value.append!=="string" || value.append.length>4000)return;
+      if(!input.value)input.value=value.composer;
+      if(!steerMonitor.snapshot().draft && value.append)steerMonitor.setDraft(value.append);},
+    post:(body,signal)=>api("/api/human-adam/work/interrupt",{method:"POST",body:JSON.stringify(body),signal}),
+    refresh:()=>workMonitor.refresh(),onChange:view=>renderHumanAdamInterrupt(document,view),
+  });
+  document.getElementById("interruptBtn").addEventListener("click",()=>{void interruptMonitor.submit();});
+  input.addEventListener("input",()=>interruptMonitor.saveDrafts());
   document.getElementById("steerInput").addEventListener("input",event=>steerMonitor.setDraft(event.target.value));
   document.getElementById("steerForm").addEventListener("submit",event=>{event.preventDefault();void steerMonitor.submit();});
   document.getElementById("steerVerifyBtn").addEventListener("click",()=>steerMonitor.verify());
@@ -4330,6 +4352,7 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
     stopResultWatch();
     stopLunaReleasePoll();
     if(steerMonitor)steerMonitor.pause();
+    if(interruptMonitor)interruptMonitor.pause();
     stopAnswerSpeech(false);
     stopCompletionMediaSound();
   });
@@ -4400,4 +4423,4 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
 </script>
 </body>
 </html>
-""".replace("/* HA05_LIVE_SCRIPT */", HUMAN_ADAM_LIVE_SCRIPT).replace("/* HA06_STEER_SCRIPT */", HUMAN_ADAM_STEER_SCRIPT)
+""".replace("/* HA05_LIVE_SCRIPT */", HUMAN_ADAM_LIVE_SCRIPT).replace("/* HA06_STEER_SCRIPT */", HUMAN_ADAM_STEER_SCRIPT).replace("/* HA07_INTERRUPT_SCRIPT */", HUMAN_ADAM_INTERRUPT_SCRIPT)
