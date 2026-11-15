@@ -7,6 +7,8 @@ const root=path.resolve(__dirname,"../../docs");
 const model=require(path.join(root,"vocabulary-en/model.js"));
 const vocabulary=JSON.parse(fs.readFileSync(path.join(root,"data/vocabulary-en.json"),"utf8"));
 const audio=JSON.parse(fs.readFileSync(path.join(root,"data/vocabulary-en-audio.json"),"utf8"));
+const quizCatalog=JSON.parse(fs.readFileSync(path.join(root,"data/vocabulary-en-quiz.json"),"utf8"));
+const quiz=require(path.join(root,"vocabulary-en/quiz.js"));
 const sentenceAudio={kind:"sentences",items:Object.fromEntries(vocabulary.items.map(i=>[i.uid,{uid:i.uid,sourceEn:i.en,sourceCz:i.cz,sourceSentenceEn:i.sentenceEn,sourceSentenceCz:i.sentenceCz,en:`assets/sentence-en/${i.uid}.mp3`,cz:`assets/sentence-cz/${i.uid}.mp3`}]))};
 const html=fs.readFileSync(path.join(root,"vocabulary-en/index.html"),"utf8");
 const source=fs.readFileSync(path.join(root,"vocabulary-en/gallery.js"),"utf8");
@@ -26,7 +28,7 @@ class Element {
   getBoundingClientRect(){return {top:160,width:140,height:180};} focus(){this.doc.activeElement=this;}scrollIntoView(){this.doc.scrolled=this.id;}
 }
 function storage(map=new Map()){return {map,getItem:key=>map.get(key)||null,setItem:(key,value)=>map.set(key,String(value))};}
-async function app({items=vocabulary.items,url="https://example.test/PythonMF/vocabulary-en/",session=storage(),local=storage(),blocked=false,manifest=audio,sentenceManifest=sentenceAudio,failData=false,slowAudio=false}={}){
+async function app({items=vocabulary.items,url="https://example.test/PythonMF/vocabulary-en/",session=storage(),local=storage(),blocked=false,manifest=audio,sentenceManifest=sentenceAudio,failData=false,slowAudio=false,failQuiz=false}={}){
   const doc=new Element("document");doc.doc=doc;doc.title="Vocabulary";
   doc.getElementById=id=>doc.descendants().find(node=>node.id===id)||null;
   doc.createElement=tag=>new Element(tag,doc);doc.createDocumentFragment=()=>new Element("fragment",doc);
@@ -46,16 +48,170 @@ async function app({items=vocabulary.items,url="https://example.test/PythonMF/vo
   if(blocked){Object.defineProperty(win,"sessionStorage",{get(){throw Error("blocked")}});Object.defineProperty(win,"localStorage",{get(){throw Error("blocked")}});}else{win.sessionStorage=session;win.localStorage=local;}
   const players=[];class AudioFixture {constructor(url){this.url=url;this.handlers={};this.currentTime=0;this.playCount=0;players.push(this);}addEventListener(name,fn){this.handlers[name]=fn;}removeEventListener(name,fn){if(this.handlers[name]===fn)delete this.handlers[name];}pause(){this.paused=true;}play(){this.played=true;this.playCount++;return Promise.resolve();}}
   const data={...vocabulary,items};
-  const ctx=vm.createContext({document:doc,window:win,URL,URLSearchParams,TextEncoder,Audio:AudioFixture,console,fetch:async url=>{if(slowAudio && url.includes("audio"))return new Promise(()=>{});if(failData && !url.includes("audio"))throw Error("offline");const selected=url.includes("sentence-audio")?sentenceManifest:manifest;if(selected===null && url.includes("audio"))throw Error("audio unavailable");return {ok:true,json:async()=>url.includes("audio")?selected:data};}});
+  const ctx=vm.createContext({document:doc,window:win,URL,URLSearchParams,TextEncoder,Audio:AudioFixture,console,fetch:async url=>{if(url.includes("-quiz.json")){if(failQuiz)throw Error("quiz unavailable");return {ok:true,json:async()=>quizCatalog};}if(slowAudio && url.includes("audio"))return new Promise(()=>{});if(failData && !url.includes("audio"))throw Error("offline");const selected=url.includes("sentence-audio")?sentenceManifest:manifest;if(selected===null && url.includes("audio"))throw Error("audio unavailable");return {ok:true,json:async()=>url.includes("audio")?selected:data};}});
   vm.runInContext(fs.readFileSync(path.join(root,"vocabulary-en/model.js"),"utf8"),ctx);
-  for(const name of ['learners.js','learner-ui.js'])vm.runInContext(fs.readFileSync(path.join(root,'vocabulary-en',name),'utf8'),ctx);
+  for(const name of ['learners.js','learner-ui.js','quiz.js'])vm.runInContext(fs.readFileSync(path.join(root,'vocabulary-en',name),'utf8'),ctx);
   vm.runInContext(source.replace('void init();','globalThis.ready=init();')+'\nglobalThis.api={state,context,buildSelection,orderedSelection,openStudy,moveStudy,newRandomRound,returnToGallery,renderGallery,selectionChanged,applyRoute,speakPrompt,speakAnswer,stopAudioPlayback,setPracticeMode};',ctx);
   await ctx.ready;
   return {...ctx.api,doc,win,emit,advance,players,session,local,historyEntries,element:id=>doc.getElementById(id),directions:doc.querySelectorAll("[data-direction]"),labels:doc.querySelectorAll("[data-label]"),practices:doc.querySelectorAll("[data-practice]"),galleryModes:doc.querySelectorAll("[data-gallery-mode]")};
 }
 const sample=vocabulary.items.slice(0,4);
+const quizItems=['ven-0020','ven-0024','ven-0027','ven-0048'].map(uid=>vocabulary.items.find(item=>item.uid===uid));
+function quizButtons(view){return view.element('quizChoices').querySelectorAll('button');}
+function activePlayer(view){return view.players.find(player=>player.handlers.ended);}
+async function loadQuizPictures(view){
+  for(const image of view.element('quizChoices').querySelectorAll('img'))image.emit('load');
+  await until(()=>activePlayer(view));
+}
+async function hearQuiz(view){
+  await loadQuizPictures(view);activePlayer(view).handlers.ended();
+  await until(()=>quizButtons(view).every(button=>!button.disabled));
+}
+function quizTarget(view){const player=activePlayer(view);assert.ok(player);return vocabulary.items.find(item=>new URL('../'+audio.items[String(item.id)]?.en,view.win.location.href).href===player.url);}
+function quizFilter(view,id,value){const field=view.element(id);if(typeof value==='boolean')field.checked=value;else field.value=value;field.emit('change');}
 const learners=require('../../docs/vocabulary-en/learners.js');
 const retiredUids=['ven-0195','ven-0197','ven-0199','ven-0200','ven-0203','ven-0257','ven-0258','ven-0259','ven-0260','ven-0271'];
+
+test('latest cards use permanent creation IDs, then intersect learner and topic filters without reordering input',()=>{
+  const items=[{...quizItems[0],id:2,order:99},{...quizItems[1],id:8,order:1},{...quizItems[2],id:6,order:2},{...quizItems[3],id:20,active:false}];
+  const before=JSON.stringify(items);
+  assert.deepEqual([...model.latestIds(items,2)],[items[1].uid,items[2].uid]);
+  assert.deepEqual(model.select([items[0]],{recentCount:2},items),[]);
+  assert.deepEqual(model.select(items,{recentCount:2}).map(model.key),[items[1].uid,items[2].uid]);
+  assert.equal(JSON.stringify(items),before);
+  for(const bad of [-1,1.5,5001,Infinity,true,{},[20],'twenty'])assert.equal(model.recentCount(bad),0);
+});
+test('recent filter keeps its number through study, history, reload and reset',async()=>{
+  const view=await app();quizFilter(view,'recentOnly',true);
+  assert.equal(view.buildSelection().length,20);assert.ok(view.buildSelection().every(i=>i.id>=503));
+  view.openStudy('ven-0521');view.returnToGallery();
+  assert.equal(view.state.recentCount,20);
+  const after=await app({url:view.win.location.href,session:view.session,local:view.local});
+  assert.equal(after.state.recentCount,20);assert.equal(after.element('recentCount').value,'20');
+  after.element('resetButton').click();assert.equal(after.state.recentCount,0);assert.equal(after.buildSelection().length,512);
+});
+test('reviewed quiz sources reject missing audio, altered meanings, retired and changed images',()=>{
+  assert.equal(quiz.eligible(quizItems,audio,quizCatalog).length,4);
+  for(const change of [{active:false},{cz:'changed'},{en:'changed'},{image:'different.webp'}])assert.equal(quiz.eligible([{...quizItems[0],...change}],audio,quizCatalog).length,0);
+  assert.equal(quiz.eligible(quizItems,null,quizCatalog).length,0);
+  assert.equal(quiz.eligible(quizItems,audio,null).length,0);
+});
+test('every reviewed target has four compatible distinct options inside its pool',()=>{
+  const pool=quiz.eligible(vocabulary.items,audio,quizCatalog);
+  for(const target of pool){
+    const q=quiz.question(target,pool,audio,quizCatalog,()=>.37);assert.ok(q,target.uid);
+    assert.equal(q.choices.length,4);assert.equal(new Set(q.choices.map(model.key)).size,4);
+    assert.equal(q.choices.filter(item=>item.uid===target.uid).length,1);
+    for(let i=0;i<4;i++)for(let j=i+1;j<4;j++)assert.ok(quiz.compatible(q.choices[i],q.choices[j],audio,quizCatalog));
+  }
+  const deer=vocabulary.items.find(i=>i.en==='deer'),stag=vocabulary.items.find(i=>i.en==='stag');
+  assert.equal(quiz.compatible(deer,stag,audio,quizCatalog),false);
+  const copy={...quizItems[1],image:quizItems[0].image};assert.equal(quiz.compatible(quizItems[0],copy,audio,quizCatalog),false);
+  assert.equal(quiz.question(quizItems[0],quizItems.slice(0,3),audio,quizCatalog),null);
+  const blue=vocabulary.items.find(i=>i.en==='blue'),two=vocabulary.items.find(i=>i.en==='two');
+  assert.equal(quiz.compatible(blue,quizItems[0],audio,quizCatalog),false);
+  assert.equal(quiz.compatible(two,quizItems[0],audio,quizCatalog),false);
+});
+test('color and number questions use four options of the same kind, never an arbitrary colored or counted object',async()=>{
+  const pool=quiz.eligible(vocabulary.items,audio,quizCatalog);
+  for(const en of ['blue','two']){
+    const target=pool.find(item=>item.en===en),q=quiz.question(target,pool,audio,quizCatalog,()=>.4);
+    assert.ok(q);assert.ok(q.choices.every(item=>quizCatalog.entries[item.uid].format===quizCatalog.entries[target.uid].format));
+  }
+  const view=await app();view.element('quizTab').click();quizFilter(view,'quizTopic','topic-10');
+  assert.equal(view.element('quizStart').disabled,false);view.element('quizStart').click();
+  assert.ok(quizButtons(view).every(button=>quizCatalog.entries[button.dataset.uid].format==='colors'));
+});
+test('game requires loaded pictures and completed prompt, hides labels, reveals correct choice and ignores double clicks',async()=>{
+  const view=await app({items:quizItems}),original=view.local.getItem(learners.KEY);
+  view.element('quizTab').click();view.element('quizStart').click();
+  assert.equal(view.state.view,'quiz');assert.equal(view.players.length,0);assert.equal(quizButtons(view).length,4);
+  for(const button of quizButtons(view)){assert.ok(button.disabled);assert.equal(button.querySelector('.quiz-caption').textContent.trim(),'');assert.match(button.getAttribute('aria-label'),/^Vybrat obrázek [1-4]$/);}
+  await loadQuizPictures(view);const target=quizTarget(view),button=quizButtons(view).find(b=>b.dataset.uid===target.uid);
+  button.click();assert.equal(view.element('quizNext').disabled,true);
+  activePlayer(view).handlers.ended();await until(()=>!button.disabled);button.click();button.click();
+  assert.equal(quizButtons(view).filter(b=>b.classList.contains('is-correct')).length,1);
+  assert.equal(button.querySelector('.quiz-caption').textContent,target.en);assert.equal(view.element('quizNext').disabled,false);
+  assert.equal(view.local.getItem(learners.KEY),original);assert.ok(activePlayer(view));
+  view.element('quizNext').click();assert.equal(view.element('quizPosition').textContent,'Slovíčko 2 z 4');
+});
+test('wrong answer is marked, only correct label is revealed and prompt is replayed',async()=>{
+  const view=await app({items:quizItems});view.element('quizTab').click();view.element('quizStart').click();
+  await loadQuizPictures(view);const target=quizTarget(view);activePlayer(view).handlers.ended();
+  await until(()=>quizButtons(view).every(b=>!b.disabled));
+  const wrong=quizButtons(view).find(b=>b.dataset.uid!==target.uid);wrong.click();
+  assert.ok(wrong.classList.contains('is-wrong'));assert.equal(wrong.querySelector('.quiz-mark').textContent,'×');
+  assert.equal(wrong.querySelector('.quiz-caption').textContent.trim(),'');
+  const correct=quizButtons(view).find(b=>b.classList.contains('is-correct'));assert.equal(correct.dataset.uid,target.uid);
+  assert.equal(correct.querySelector('.quiz-caption').textContent,target.en);
+  assert.match(view.element('quizMessage').textContent,/Správný je označený/);assert.ok(activePlayer(view));
+});
+test('a finite quiz round asks each target once, scores once and only restarts explicitly',async()=>{
+  const view=await app({items:quizItems}),seen=new Set();view.element('quizTab').click();view.element('quizStart').click();
+  for(let i=0;i<4;i++){
+    await loadQuizPictures(view);const target=quizTarget(view);assert.ok(!seen.has(target.uid));seen.add(target.uid);
+    activePlayer(view).handlers.ended();await until(()=>quizButtons(view).every(b=>!b.disabled));
+    const correct=quizButtons(view).find(b=>b.dataset.uid===target.uid);correct.click();correct.click();
+    view.element('quizNext').click();
+  }
+  assert.equal(view.element('quizEnd').hidden,false);assert.equal(view.element('quizRound').hidden,true);
+  assert.equal(view.element('quizResult').textContent,'Správně na první pokus: 4 z 4.');assert.equal(activePlayer(view),undefined);
+  view.element('quizAgain').click();assert.equal(view.element('quizPosition').textContent,'Slovíčko 1 z 4');
+});
+test('all hard mode uses shared hard flags and pending or failed word audio prevents guessing',async()=>{
+  const items=quizItems.map((item,index)=>({...item,hardTraining:index<3})),view=await app({items});
+  view.element('quizTab').click();quizFilter(view,'quizHard',true);assert.ok(view.element('quizStart').disabled);
+  const slow=await app({items:quizItems,slowAudio:true});slow.element('quizTab').click();assert.ok(slow.element('quizStart').disabled);
+  const failed=await app({items:quizItems,manifest:null});failed.element('quizTab').click();assert.ok(failed.element('quizStart').disabled);assert.match(failed.element('quizPoolNotice').textContent,/Zvuk.*nepodařilo/);
+});
+test('changed personal membership during a question cancels the round instead of broadening its pool',async()=>{
+  const local=storage(),value=learners.empty();value.profiles.C.selected=quizItems.map(model.key);local.setItem(learners.KEY,JSON.stringify(value));
+  const view=await app({local});view.element('quizTab').click();quizFilter(view,'quizLearner','C');view.element('quizStart').click();await loadQuizPictures(view);
+  const playing=activePlayer(view);value.profiles.C.selected=quizItems.slice(0,3).map(model.key);local.setItem(learners.KEY,JSON.stringify(value));view.emit('storage',{key:learners.KEY});
+  assert.ok(playing.paused);assert.equal(view.element('quizSetup').hidden,false);assert.ok(view.element('quizStart').disabled);assert.match(view.element('quizPoolNotice').textContent,/Výběr se změnil/);
+});
+test('quiz combines personal difficult words and one topic and never borrows options outside the filter',async()=>{
+  const local=storage(),value=learners.empty();value.profiles.D.selected=quizItems.map(model.key);value.profiles.D.hard=quizItems.slice(0,3).map(model.key);
+  local.setItem(learners.KEY,JSON.stringify(value));const saved=local.getItem(learners.KEY),view=await app({local});
+  view.element('quizTab').click();quizFilter(view,'quizLearner','D');quizFilter(view,'quizTopic','topic-06');quizFilter(view,'quizHard',true);
+  assert.ok(view.element('quizStart').disabled);assert.match(view.element('quizPoolNotice').textContent,/čtyři/);
+  quizFilter(view,'quizHard',false);assert.equal(view.element('quizStart').disabled,false);view.element('quizStart').click();
+  assert.deepEqual(new Set(quizButtons(view).map(b=>b.dataset.uid)),new Set(quizItems.map(model.key)));
+  assert.equal(local.getItem(learners.KEY),saved);
+});
+test('latest quiz selection is global before the learner intersection and preserves editable count',async()=>{
+  const local=storage(),value=learners.empty();value.profiles.A.selected=quizItems.map(model.key);local.setItem(learners.KEY,JSON.stringify(value));
+  const view=await app({local});view.element('quizTab').click();quizFilter(view,'quizLearner','A');quizFilter(view,'quizRecentOnly',true);
+  assert.ok(view.element('quizStart').disabled);assert.match(view.element('quizPoolNotice').textContent,/0 slovíček/);
+  quizFilter(view,'quizRecentCount','5000');assert.equal(view.element('quizStart').disabled,false);
+  quizFilter(view,'quizRecentCount','2.5');assert.ok(view.element('quizStart').disabled);assert.match(view.element('quizPoolNotice').textContent,/celé číslo/);
+});
+test('game leaves gallery bookmark, learner data and random study sequence intact through Back and Forward',async()=>{
+  const view=await app({items:quizItems});view.openStudy(quizItems[0].uid,'random');
+  view.setPracticeMode('sentences');
+  const sequence=view.state.sequence.map(model.key),last=view.state.lastUid,stored=view.local.getItem('vocabulary-en.last-card.v1');
+  view.element('quizTab').click();view.element('quizStart').click();await loadQuizPictures(view);
+  const player=activePlayer(view);assert.ok(!player.url.includes('/sentence-en/'));view.element('quizBack').click();
+  assert.equal(view.state.view,'study');assert.ok(player.paused);assert.equal(view.state.lastUid,last);assert.deepEqual(view.state.sequence.map(model.key),sequence);
+  assert.equal(view.state.practice,'sentences');
+  assert.equal(view.local.getItem('vocabulary-en.last-card.v1'),stored);
+  view.win.history.forward();assert.equal(view.state.view,'quiz');assert.equal(view.element('quizSetup').hidden,false);
+});
+test('game can reopen from its link without storage or automatic speech and failed catalog leaves gallery usable',async()=>{
+  const view=await app({items:quizItems,blocked:true,url:'https://example.test/PythonMF/vocabulary-en/#game=listen-pictures'});
+  assert.equal(view.state.view,'quiz');assert.equal(view.players.filter(p=>p.played).length,0);assert.equal(view.element('quizStart').disabled,false);
+  view.element('quizBack').click();assert.equal(view.state.view,'gallery');
+  const failed=await app({failQuiz:true});failed.element('quizTab').click();assert.ok(failed.element('quizStart').disabled);assert.match(failed.element('quizPoolNotice').textContent,/nepodařilo načíst/);
+  failed.element('quizBack').click();assert.equal(failed.buildSelection().length,512);
+});
+test('image failure can be skipped without a score and a late audio error cannot overwrite another screen',async()=>{
+  const view=await app({items:quizItems});view.element('quizTab').click();view.element('quizStart').click();
+  view.element('quizChoices').querySelector('img').emit('error');assert.equal(view.element('quizNext').disabled,false);
+  assert.match(view.element('quizMessage').textContent,/nezapočítá/);view.element('quizNext').click();
+  await loadQuizPictures(view);const lateError=activePlayer(view).handlers.error;
+  view.element('quizChange').click();lateError();await Promise.resolve();
+  assert.equal(view.element('quizSetup').hidden,false);assert.equal(view.element('quizRound').hidden,true);
+});
 async function until(predicate){for(let n=0;n<200;n++){if(predicate())return;await new Promise(resolve=>setTimeout(resolve,10));}assert.fail('UI did not settle');}
 async function unlock(view,pin='1234'){
   view.element('pinInput').value=pin;view.element('pinRepeat').value=pin;view.element('unlockButton').click();

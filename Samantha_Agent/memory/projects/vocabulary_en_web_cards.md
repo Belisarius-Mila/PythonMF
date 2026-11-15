@@ -1491,3 +1491,68 @@ Vlastní větev navazuje na6615b75d nad d141d030; společný main ani Willovy
 změny se tímto krokem nemění. Privátní důkazy: vocabulary_lake_batch4_20261115.
 Publikace, poslech člověkem ani fyzická přejímka nejsou tímto potvrzené.
 Samostatný Vocabulary EN TVBCP nebyl dohodnutý; handoff/projekt/registry zapsané.
+
+
+### 2026-11-15 18:20 CET — Poslechni a vyber obrázek a filtr posledních karet
+
+Hotovo: Místně nová hra se čtyřmi obrázky, anglickým zadáním a vyhodnocením
+správně/zelená/✓/EN název nebo chybně/šedá/×; správné slovo se v obou
+případech znovu přehraje. Další je ruční, kolo se samo neopakuje.
+Filtry Vše/A–D, obtížná, jeden z18 okruhů, posledně přidaných N.
+První výběr189 vhodných významů; čtveřice barev/čísel/objektů oddělené.
+Posledně přidaná jsou také v galerii a zachovají se při návratu a obnově.
+
+Rozhodnutí: Míla zadal obrazovou hru a počet posledně přidaných slovíček.
+Pro první provedení se N počítá z celého slovníku před osobním a tematickým
+filtrem; tento význam byl nabídnut k případnému upřesnění. Hra nezařazuje
+nejednoznačné obrázky ani možnosti mimo výsledný filtr. Výběry/PIN/A–D,
+CSV, hlavní katalog a všechny dosavadní audio/obrazové soubory se nemění.
+Samostatný Vocabulary EN TVBCP nebyl dohodnutý; nový nevzniká.
+
+Další krok: Mílova přejímka, fyzický telefon a samostatné Pages p+n.
+
+Navrhované další kroky: Posoudit další karty pro herní katalog podle obrázků;
+Oxford zůstává nezávisle otevřený.
+
+Technický důkaz: Herní i dosavadní Node regrese; programem vybraná v3 brána
+a finální účtenka v data/private/vocabulary_picture_quiz_20261115/.
+26 místních HTTP odpovědí přesně shodných;7 klíčových dosavadních zdrojů
+proti HEAD bajtově zachovaných. Safari Mac: správné rabbit, chybné horse,
+skryté názvy, čtyři fotografie a Další, okruh Zvířata, N20 prázdná čtveřice /
+N100 pět platných cílů, obnova. Úzké CSS rozložení ověřené dočasným zvětšením
+stránky; zoom obnoven a vlastní náhledové okno zavřené. Nejde o fyzický iPhone
+ani lidskou přejímku výslovnosti všech189 slov. Nová hra dosud bez push/nasazení.
+Vlastní Data worktree ebbd, větev data/parallel-20261104, základ b0d89adb;
+main a Willův novější vývoj zůstávají stranou.
+
+Lokální validační základ tohoto kroku je společný b0d89adb; origin/main
+mezitím pokročil o nezávislou Osel opravu de3899b1. Před publikací převzít
+do aktuálního main a ověřit spojený kandidát. Cizí změny se nevracejí.
+
+
+### 2026-11-15 18:38 CET — Schválené Pages p+n obrázkové hry
+
+Hotovo: Připravená integrace schváleného Data5adee00a nad čistým a s GitHubem
+zarovnaným main de3899b1. Funkční zdroje hry a kontrol jsou přesně zachované;
+nezávislá zveřejněná Osel oprava zůstává. Dva sdílené paměťové registry drží
+oba projektové záznamy. Žádný nový obsah, obraz ani zvuk se negeneruje.
+
+Rozhodnutí: Míla výslovně zadal „Prosím p+n, dobrá práce.!!!“ pro tuto hru
+a filtr posledních karet. Cíl project-vocabulary-en → GitHub Pages,
+jediné registrované submit_release(wait=True), request
+data-vocabulary-picture-quiz-5adee00a-20261115-v1. Model vybírá centrální politika.
+
+Další krok: Dokončit integrační bránu, převzít čistý kandidát na main
+a předat přesný commit registrovanému vykonavateli.
+
+Navrhované další kroky: Po konečné účtence veřejná kontrola HTML/JS/CSS
+a herního katalogu; fyzická telefonní a hlasová přejímka samostatně.
+
+Technický důkaz:17 nesdílených souborů proti oběma větvím bajtově přesných.
+Původní místní brána155 PASS včetně71 Node, HTTP26 přesných; zdroje hry
+jsou beze změny. Integrační účtenka v private vocabulary_picture_quiz_release_20261115.
+Tento přípravný zápis ještě nepotvrzuje spuštění jobu, push ani nasazení.
+
+Integrační brána dokončena: validation-v3 targeted155 PASS, 124.4s,
+receipt cf17dc0c5b05b7d59c6e561e63c9f65b21048cf36eb028b9275fdc6cd9d74ff2.
+Kontrola diff --check bez nálezu; funkční zdroje proti5adee00a beze změny.

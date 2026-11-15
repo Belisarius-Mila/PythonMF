@@ -10,11 +10,21 @@
   const normalize = value => String(value || "").normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLocaleLowerCase("cs").trim();
   const key = item => String(item.uid || item.id);
   const any = (selected, values) => !selected.length || values.some(value => selected.includes(String(value)));
-  function select(items, context = {}) {
+  function recentCount(value) {
+    if(typeof value!=="number" && (typeof value!=="string" || !/^[0-9]+$/.test(value)))return 0;
+    const count=Number(value);
+    return Number.isSafeInteger(count) && count>0 && count<=5000 ? count : 0;
+  }
+  function latestIds(items, value) {
+    const count=recentCount(value);
+    return count ? new Set(items.filter(isActive).slice().sort((a,b)=>Number(b.id)-Number(a.id)).slice(0,count).map(key)) : null;
+  }
+  function select(items, context = {}, allItems = items) {
     const query = normalize(context.query);
+    const latest=latestIds(allItems,context.recentCount);
     const topics = context.topics || [], sources = context.sources || [], parts = context.parts || [], levels = context.levels || [];
     return items.filter(item =>
-      isActive(item) && (!context.teachingType || context.teachingType === "all" || teachingType(item) === context.teachingType) &&
+      isActive(item) && (!latest || latest.has(key(item))) && (!context.teachingType || context.teachingType === "all" || teachingType(item) === context.teachingType) &&
       (context.filter !== "selected" || item.selected) && (context.filter !== "hard" || item.hardTraining) &&
       any(topics, item.topicIds || []) && any(sources, item.sourceIds || []) &&
       // Keep the former multiword filter usable in old links. New controls
@@ -52,7 +62,7 @@
       return rank(a.id)-rank(b.id) || a.label.localeCompare(b.label,"cs");
     }).map(group => ({...group,items:group.items.sort(compare)}));
   }
-  function ordered(items, context, catalog) { return buckets(select(items,context),context,catalog).flatMap(group => group.items); }
+  function ordered(items, context, catalog, allItems=items) { return buckets(select(items,context,allItems),context,catalog).flatMap(group => group.items); }
   function shuffle(items, random = Math.random) {
     const result = [...items];
     for (let i=result.length-1;i>0;i--) { const j=Math.floor(random()*(i+1)); [result[i],result[j]]=[result[j],result[i]]; }
@@ -86,7 +96,7 @@
       language: available ? (english ? "en" : "cs") : "cs", available,
     };
   }
-  const api = {normalize,key,select,buckets,ordered,shuffle,restoreSequence,audioRecord,sentenceAudioRecord,studyPrompt,posLabels,levelLabels,countLabel,groupInfo,isActive,teachingType,teachingTypeLabels};
+  const api = {normalize,key,select,buckets,ordered,shuffle,restoreSequence,audioRecord,sentenceAudioRecord,studyPrompt,posLabels,levelLabels,countLabel,groupInfo,isActive,teachingType,teachingTypeLabels,recentCount,latestIds};
   if (typeof module !== "undefined" && module.exports) module.exports=api;
   else root.VocabularyModel=api;
 })(globalThis);

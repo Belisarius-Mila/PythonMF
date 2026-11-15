@@ -228,6 +228,21 @@ class VocabularyGalleryTests(unittest.TestCase):
         result=subprocess.run([node_binary(),'--test',str(Path(__file__).with_name('test_vocabularyen_selection.js')),str(Path(__file__).with_name('test_vocabularyen_learners.js'))],cwd=Path(__file__).parents[1],capture_output=True,text=True,timeout=120)
         self.assertEqual(result.returncode,0,result.stdout+'\n'+result.stderr)
 
+    def test_picture_quiz_catalog_pins_only_existing_active_meanings_and_exported_images(self):
+        catalog=json.loads((ROOT/'docs/data/vocabulary-en-quiz.json').read_text())
+        self.assertEqual(catalog['schemaVersion'],1)
+        self.assertGreaterEqual(len(catalog['entries']),4)
+        by_uid={item['uid']:item for item in self.manifest['items']}
+        for uid,entry in catalog['entries'].items():
+            item=by_uid[uid]
+            self.assertTrue(item['active'],uid)
+            self.assertEqual(item['teachingType'],'word',uid)
+            self.assertEqual((entry['en'],entry['cz'],entry['image']),
+                             (item['en'],item['cz'],item['image']),uid)
+            self.assertIsInstance(entry['conflicts'],list)
+            self.assertIn(entry['format'],('objects','colors','numbers'))
+            self.assertTrue((ROOT/'docs'/entry['image']).is_file(),uid)
+
     def test_legacy_export_and_image_rules_still_hold(self):
         import inspect
         from tests import test_vocabularyen_mmtx_import as legacy
