@@ -1,14 +1,14 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
-- Aktualizováno: 2026-11-15 21:29 CET
-- Webový port: bod1 hotový; bod2 má dokončený obrazový přehled a konkrétní redakční návrh.
-- 471 původních UID aktivních;458 karet připnutých k383 přesným obrazovým souborům.
-- 10 obrazů k doplnění,3 vazby až po rozhodnutí o významu; úplnost obrazů zatím false.
-- 24 návrhů víceznačných karet čeká na Mílovo rozhodnutí; žádné dělení nyní neprovedené.
-- Jasné webové opravy: italská věta u éclair a chiamare=volat/telefonovat.
-- Původní CSV/L/HT/mapping/Pict/EN zachované; galerie/audio/publikování dosud nehotové.
-- Dále: rozhodnout návrh významů, doplnit obrazy; pokračovat exportem podle plánu.
+- Aktualizováno: 2026-11-15 21:51 CET
+- Míla schválil všech24 významových návrhů; použité,26 nových webových karet.
+- Webový katalog497 aktivních UID, původních471 řádků/UID/rodů/L/HT zachovaných.
+- 487 karet má přesné schválené existující vazby na397 souborů.
+- 10 nových ilustrací připravených ve vlastní pracovní sadě; čeká vizuální přejímka.
+- Nový exportér v2 a miniatury, náhled497 karet/814 assetů. Finální režim kandidáty odmítá.
+- Dále: vizuálně přijmout10 ilustrací, potom vlastní IT galerie/profily/audio podle plánu.
+- Místní vývoj, bez p+n; původní IT/EN weby ani sdílené Pict/mapping se nemění.
 <!-- SAMANTHA_CURRENT_STATUS_END -->
 
 # Handoff pracovního proudu: Vocabulary IT
@@ -17,21 +17,22 @@ Nazev: Vocabulary IT
 Pracovni proud: project-vocabulary-it
 Typ: Project
 Priorita: 2
-Stav: rozpracovane — webovy port, bod2 obrazova revize a navrh vyznamu
+Stav: rozpracovane — schvalene vyznamy a mistni export v2
 Pripomenout pri startu: ne
-Datum: 2026-11-15 21:29 CET
+Datum: 2026-11-15 21:51 CET
 
 Co se resilo:
-Schválený webový port IT podle EN, první bod: katalog významů a uzavřené vstupy.
+Webový port Vocabulary IT podle EN: schválené významy, vlastní karty, obrazy a export.
 
 Co je hotove:
--471 trvalých identit a návrhy metadat,777 zmrazených souborů, prioritní revizní fronta.
+- 24 úprav použito,26 nových významů,497 UID; původní CSV471 zachované.
+- 10 ilustrací připravených k vizuální přejímce; exportér v2 s miniaturami.
 
 Co neni hotove:
-- Rozhodnutí o24 návrzích,13 nehotových obrazových vazeb, finální metadata, exporter/miniatury, galerie/profily/audio a vydání.
+- Vizuální přejímka nové desetice, vlastní galerie/profily/audio/hra a vydání.
 
 Dalsi krok:
-Rozhodnout24 konkrétních návrhů a doplnit13 obrazových vazeb; potom export.
+Přijmout desetici ilustrací, navázat bodem4: samostatná IT galerie.
 
 Navrhovane dalsi kroky:
 - Prubezne aktualizovat pouze potvrzenymi checkpointy tohoto proudu.
@@ -164,3 +165,45 @@ Finální doménová brána a otisky zdrojů jsou private/vocabulary_it_review_2
 Úplný snímek z bodu1 zůstává neměnný; původní zdroje ani EN se nepřepisují.
 Bez nového audio/obrazového generování, push nebo nasazení. Lokální ověření
 proti společnému77b5f652; souběžný main a Willova aktivace Human–Adam nedotčené.
+
+
+### 2026-11-15 21:51 CET — Schválené významy, nové ilustrace a bezpečný export
+
+Hotovo: Schválených24 hlavních významů je zapracovaných a26 dalších významů
+má vlastní kartu/větu, vit-0472–0497. Web497 aktivních karet, starý slovník
+zůstává471 řádků. Zachované původní identifikační aliasy; gli jako člen a
+niente jako nic nepřevzaly cizí reakci/zájmeno. Běžná slovesná spojení jako
+avere ragione zůstávají Slovíčky, Forza/Pronto/Congratulazioni jsou Interakce.
+Existující487 vazeb/397 souborů přesně připnutých; další10 obrazů hotových
+jako pracovní kandidáti ve PictNew/generated/20261115_it_web_review.
+Samostatný HTML přehled10 obrázků je i v Downloads, vložené obrázky fungují
+bez závislosti na jiném místním adresáři. Nový exportér vytváří JSON v2,
+obrázky do900px a miniatury do240px. Skutečný náhled497 karet/814 assetů.
+
+Rozhodnutí: Míla „Se vším souhlasím, pokračuj…“ schválil významové návrhy
+a pokračování. Nové významy se přidávají jen do webového katalogu, původní
+CSV se nemigruje. Nové ilustrace byly technicky i obrazově zkontrolované
+Adamem; přejímku Mílou tím nenahrazujeme. Kandidátní sada se nedostává do
+sdíleného Pict ani mappingu. Původní obrazové knihovny a staré IT/EN výstupy
+zůstávají zachované. Datum přidání mají jen26 skutečně nových webových karet.
+Obtížnost je vlastní návrh, nikoli CEFR; zbývající stará metadata nejsou plně revidovaná.
+
+Další krok: Míla vizuálně přijme připravenou desetici v
+Vocabulary_IT_kontrola_10_obrazku_2026-11-15.html (Downloads); potom dokončit
+obrazové vazby a vlastní IT galerii (bod4). Kopírování do sdíleného Pict má
+podle vocabulary_image_generation_workflow.md předcházet vizuální schválení.
+
+Navrhované další kroky: Vlastní IT galerie s návratem na kartu a filtry;
+oddělené profily A–D; samostatně schválený zvukový vzorek/slova/věty;
+italská hra a pozdější samostatně autorizované vydání.
+
+Technický důkaz: Cílené katalogové/exportní/doménové testy ověřují zachování
+471 UID/CSV/rodů/L/HT,26 webových významů, odmítnutí změněných dat/case/hash,
+změny během konverze, zákaz kandidáta ve finálním režimu, bezpečné cesty,
+neměnné assety a přepnutí JSON až nakonec včetně simulace přerušení.
+Celý náhled a technická přejímka souborů jsou private/vocabulary_it_export_20261115;
+finální programová brána v gate.json/gate.log. Plná sada nezadaná.
+Soukromý původní snímek777 vstupů je beze změny. Vestavěný image_gen,10/10,
+max103360 bajtů/kandidát; prompty a SHA jsou v generation_report.json.
+Není hotová nová galerie, profily, audio ani vydání. Lokální brána proti
+společnému77b5f652, žádná automatická integrace souběžného main.

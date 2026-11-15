@@ -16,7 +16,7 @@ Přijatá pravidla
   současné EN včetně všech aktivních hesel; posoudit italské konflikty.
 
 Základní soubory a hranice
-VocabularyIT/vocabulary_it_catalog.json:471 identit, všechna metadata návrhy.
+VocabularyIT/vocabulary_it_catalog.json:497 identit (471 původních a26 webových);24 schválených hlavních významů a26 nových, ostatní metadata dále návrhy.
 VocabularyIT/vocabulary_it_input_manifest.json: otisky777 původních vstupů.
 VocabularyIT/vocabulary_it_catalog.py: pouze čtení a ověření, žádný CSV writer.
 VocabularyIT/vocabulary_it_review_queue.txt:112 prioritních karet k revizi.
@@ -26,7 +26,7 @@ Worktree má745 obrazů oproti761 v kanonickém zdroji;16 rozdílů je ve snímk
 Bez úplného zdroje kontrola záměrně selže. Soukromé kopie nepatří do Gitu.
 
 První bod nevybírá hotové obrázky ani nevydává návrhy za jazykovou přejímku.
-Historický bod1 měl všech471 imageFile=null/pending-review; aktuální obrazová revize je níže. Metadata jsou nadále needs-review. Návrh má
+Historický bod1 měl všech471 imageFile=null/pending-review; aktuální obrazová revize je níže. Zbývající metadata jsou needs-review;24 hlavních a26 nových významů jsou po schválení reviewed. Historický návrh měl
 460 Slovíček/11 Interakcí, žádné Fráze automaticky. Všechny tvary zůstávají.
 Původní vstupní CSV SHA-256:
 ed9b24c3f9cda8e7873f37adea3e71070d388fd00890b67b34c29a93d30a3ec5
@@ -104,3 +104,45 @@ Finální doménová brána a otisky zdrojů jsou private/vocabulary_it_review_2
 Úplný snímek z bodu1 zůstává neměnný; původní zdroje ani EN se nepřepisují.
 Bez nového audio/obrazového generování, push nebo nasazení. Lokální ověření
 proti společnému77b5f652; souběžný main a Willova aktivace Human–Adam nedotčené.
+
+
+### 2026-11-15 21:51 CET — Schválené významy, nové ilustrace a bezpečný export
+
+Hotovo: Schválených24 hlavních významů je zapracovaných a26 dalších významů
+má vlastní kartu/větu, vit-0472–0497. Web497 aktivních karet, starý slovník
+zůstává471 řádků. Zachované původní identifikační aliasy; gli jako člen a
+niente jako nic nepřevzaly cizí reakci/zájmeno. Běžná slovesná spojení jako
+avere ragione zůstávají Slovíčky, Forza/Pronto/Congratulazioni jsou Interakce.
+Existující487 vazeb/397 souborů přesně připnutých; další10 obrazů hotových
+jako pracovní kandidáti ve PictNew/generated/20261115_it_web_review.
+Samostatný HTML přehled10 obrázků je i v Downloads, vložené obrázky fungují
+bez závislosti na jiném místním adresáři. Nový exportér vytváří JSON v2,
+obrázky do900px a miniatury do240px. Skutečný náhled497 karet/814 assetů.
+
+Rozhodnutí: Míla „Se vším souhlasím, pokračuj…“ schválil významové návrhy
+a pokračování. Nové významy se přidávají jen do webového katalogu, původní
+CSV se nemigruje. Nové ilustrace byly technicky i obrazově zkontrolované
+Adamem; přejímku Mílou tím nenahrazujeme. Kandidátní sada se nedostává do
+sdíleného Pict ani mappingu. Původní obrazové knihovny a staré IT/EN výstupy
+zůstávají zachované. Datum přidání mají jen26 skutečně nových webových karet.
+Obtížnost je vlastní návrh, nikoli CEFR; zbývající stará metadata nejsou plně revidovaná.
+
+Další krok: Míla vizuálně přijme připravenou desetici v
+Vocabulary_IT_kontrola_10_obrazku_2026-11-15.html (Downloads); potom dokončit
+obrazové vazby a vlastní IT galerii (bod4). Kopírování do sdíleného Pict má
+podle vocabulary_image_generation_workflow.md předcházet vizuální schválení.
+
+Navrhované další kroky: Vlastní IT galerie s návratem na kartu a filtry;
+oddělené profily A–D; samostatně schválený zvukový vzorek/slova/věty;
+italská hra a pozdější samostatně autorizované vydání.
+
+Technický důkaz: Cílené katalogové/exportní/doménové testy ověřují zachování
+471 UID/CSV/rodů/L/HT,26 webových významů, odmítnutí změněných dat/case/hash,
+změny během konverze, zákaz kandidáta ve finálním režimu, bezpečné cesty,
+neměnné assety a přepnutí JSON až nakonec včetně simulace přerušení.
+Celý náhled a technická přejímka souborů jsou private/vocabulary_it_export_20261115;
+finální programová brána v gate.json/gate.log. Plná sada nezadaná.
+Soukromý původní snímek777 vstupů je beze změny. Vestavěný image_gen,10/10,
+max103360 bajtů/kandidát; prompty a SHA jsou v generation_report.json.
+Není hotová nová galerie, profily, audio ani vydání. Lokální brána proti
+společnému77b5f652, žádná automatická integrace souběžného main.

@@ -1,3 +1,8 @@
+AKTUÁLNĚ15.11.2026:497 webových karet, původní CSV471 zachované.
+24 úprav schválených a použitých,26 nových významů; export v2 a miniatury.
+10 nových ilustrací čeká vizuální přejímku,487 ostatních vazeb připnutých.
+Podrobný současný postup je na konci. Níže je zachovaný popis prvního základu.
+
 VOCABULARY IT — WEBOVÝ ZÁKLAD, BOD 1 (15.11.2026)
 
 Stav
@@ -88,3 +93,40 @@ Webové texty effective_card_text přebírají opravy jen pro shodnou zdrojovou
 větu. U éclair je francouzský příklad opraven na italský, chiamare překládáno
 volat/telefonovat. Původní CSV a jeho aliasy jsou zachované.
 Bod2 zatím není úplná jazyková korektura všech vět či schválení všech metadat.
+
+SCHVÁLENÉ VÝZNAMY A EXPORT V2, 15.11.2026
+Míla schválil24 návrhů. Použité na původních UID,26 dalších významů jako
+nové webové karty vit-0472–0497; origin=web, webText, addedAt skutečného vzniku.
+Původních471 řádků se dál čte podle původních aliasů a nezměněných rodů/L/HT.
+all_card_texts spojí oba zdroje bez vytváření falešných CSV řádků. Původní
+Order ani změna fyzického pořadí nepřiděluje jiné UID. Případný genderOverride
+opravuje jen webový výstup tam, kde se bývalé podstatné jméno učí jako reakce/sloveso.
+Další ID je498; při aktualizaci nepouštět historický seeder ani jednorázový apply skript znovu.
+
+487 karet má přesné vazby na397 existujících obrazů.10 nových ilustrací
+je v PictNew/generated/20261115_it_web_review včetně promptů/reportu/review.html.
+Zatím jsou kandidátní, nikoli přijatá sdílená knihovna; Pict/mapping se nezměnily.
+
+Samostatný exporter vocabulary_it_export.py nemění starý sync_vocabulary_it_to_docs.py.
+Z kořene PythonMF (výstup musí být vlastní zvolený adresář):
+python3 VocabularyIT/vocabulary_it_export.py --root Samantha_Agent/data/private/vocabulary_it_foundation_20261115/inputs --output Samantha_Agent/data/private/vocabulary_it_export_20261115/web_preview --preview --candidates PictNew/generated/20261115_it_web_review
+Vytvoří data/vocabulary-it-v2.json a assets/vocabulary-it-v2/images|thumbs.
+Náhled497 karet,814 souborů (407 obrazů ve dvou velikostech). Data mají vlastní
+it/cz/sentenceIt/sentenceCz a rody; neobsahují L/HT ani osobní profily.
+Běžný režim bez --preview odmítá nehotové vazby; --candidates je povoleno
+jen v náhledu. Není žádný automatický fallback, cleanup ani spuštění zvuku.
+Staré obrázky nemají přidělené smyšlené datum vzniku; datum mají jen nové významy.
+
+Prvním zápisům předchází ověření všech vstupů a příprava. Obrazy mají hash
+v názvu, existující odlišné bajty se nepřepíší. JSON se publikuje atomicky
+jako poslední; při přerušení zůstává staré JSON i assety. Selhaný stage se
+zachová k diagnostice. Cesty se symlinky ven se odmítnou. Kandidátní obrazy
+ve výstupu zůstávají výslovně imageReviewed=false.
+Dále vizuální přejímka nové desetice a vlastní IT galerie podle bodu4 plánu.
+
+Přidání budoucích přijatých ilustrací nemění původní vstupní manifest.
+Audit umí v novém úplném pracovním zdroji navíc povolit právě obrázky
+připnuté v obrazovém manifestu. Ověří jejich case/SHA a nepovolí jiné přebývající
+obrazy. Samotná kontrola původního snímku zůstává přísná; zmrazenou kopii
+z bodu1 nikdy nedoplňovat ani nepřepisovat. additionalPinnedImages odlišuje
+nové přijaté soubory od777 původních vstupů. Nyní je tato hodnota0.

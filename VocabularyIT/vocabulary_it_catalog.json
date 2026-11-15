@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "language": "it",
-  "metadataStatus": "proposed-with-visual-review-and-open-content-questions",
+  "metadataStatus": "approved-polysemy-applied; remaining-metadata-proposed",
   "identityPolicy": "UID assigned once; exact NFC IT/CZ matches and explicit aliases, never current row Order.",
   "sourceManifest": "vocabulary_it_input_manifest.json",
   "parents": [
@@ -399,11 +399,15 @@
       "id": 7,
       "uid": "vit-0007",
       "it": "forte",
-      "cz": "silný, hlasitě (nahlas)",
+      "cz": "silný",
       "matches": [
         {
           "it": "forte",
           "cz": "silný, hlasitě (nahlas)"
+        },
+        {
+          "it": "forte",
+          "cz": "silný"
         }
       ],
       "legacyOrder": 7,
@@ -413,14 +417,13 @@
         "topic-14"
       ],
       "partOfSpeech": [
-        "adjective",
-        "adverb"
+        "adjective"
       ],
       "teachingType": "word",
       "expressionType": "word",
       "difficultyBand": 3,
       "difficultyStatus": "proposed",
-      "editorialStatus": "needs-review",
+      "editorialStatus": "reviewed",
       "reviewPriority": "high",
       "reviewReasons": [
         "metadata-proposal",
@@ -428,14 +431,26 @@
       ],
       "lemma": "forte",
       "formOfUid": null,
-      "related": [],
+      "related": [
+        {
+          "uid": "vit-0472",
+          "kind": "same-spelling"
+        }
+      ],
       "active": true,
       "imageFile": "Pict/strong.png",
       "imageStatus": "reviewed",
       "imageReviewNote": "Vizuálně zkontrolovaná existující ilustrace k významu nebo příkladovému kontextu; u abstraktních hesel mnemotechnická pomůcka.",
       "imageSha256": "c48b3b94a0f3137c29376c66fceb9cf4cb2127efaff9176cc9c82517fd76a2a9",
       "imageRole": "contextual",
-      "reviewOutcome": "visual-context-checked"
+      "reviewOutcome": "approved-content-applied",
+      "sentenceOverride": {
+        "sourceIt": "Oggi c'è un vento forte. Non parlare forte qui.",
+        "sourceCz": "Dnes je silný vítr. Tady nemluv nahlas.",
+        "it": "Oggi c’è un vento forte.",
+        "cz": "Dnes je silný vítr."
+      },
+      "origin": "legacy"
     },
     {
       "id": 8,
@@ -4047,11 +4062,15 @@
       "id": 96,
       "uid": "vit-0096",
       "it": "tedesco",
-      "cz": "němec, němčina",
+      "cz": "německý; Němec",
       "matches": [
         {
           "it": "tedesco",
           "cz": "němec, němčina"
+        },
+        {
+          "it": "tedesco",
+          "cz": "německý; Němec"
         }
       ],
       "legacyOrder": 96,
@@ -4068,7 +4087,7 @@
       "expressionType": "word",
       "difficultyBand": 3,
       "difficultyStatus": "proposed",
-      "editorialStatus": "needs-review",
+      "editorialStatus": "reviewed",
       "reviewPriority": "high",
       "reviewReasons": [
         "metadata-proposal",
@@ -4077,14 +4096,26 @@
       ],
       "lemma": "tedesco",
       "formOfUid": null,
-      "related": [],
+      "related": [
+        {
+          "uid": "vit-0473",
+          "kind": "same-spelling"
+        }
+      ],
       "active": true,
       "imageFile": "Pict/german.png",
       "imageStatus": "reviewed",
       "imageReviewNote": "Vizuálně zkontrolovaná existující ilustrace k významu nebo příkladovému kontextu; u abstraktních hesel mnemotechnická pomůcka.",
       "imageSha256": "6cc9c788187fb53996dab0bb594c2af81c6cfd4800ef09875eb00f4c348fe4a3",
       "imageRole": "contextual",
-      "reviewOutcome": "visual-context-checked"
+      "reviewOutcome": "approved-content-applied",
+      "sentenceOverride": {
+        "sourceIt": "Il mio collega è tedesco e vive vicino a Praga.",
+        "sourceCz": "Můj kolega je Němec a bydlí poblíž Prahy.",
+        "it": "Il mio collega è tedesco e vive vicino a Praga.",
+        "cz": "Můj kolega je Němec a bydlí poblíž Prahy."
+      },
+      "origin": "legacy"
     },
     {
       "id": 97,
@@ -4805,11 +4836,15 @@
       "id": 114,
       "uid": "vit-0114",
       "it": "storia",
-      "cz": "historie, příběh",
+      "cz": "příběh",
       "matches": [
         {
           "it": "storia",
           "cz": "historie, příběh"
+        },
+        {
+          "it": "storia",
+          "cz": "příběh"
         }
       ],
       "legacyOrder": 114,
@@ -4825,19 +4860,33 @@
       "expressionType": "word",
       "difficultyBand": 1,
       "difficultyStatus": "proposed",
-      "editorialStatus": "needs-review",
+      "editorialStatus": "reviewed",
       "reviewPriority": "normal",
       "reviewReasons": [
         "metadata-proposal"
       ],
       "lemma": "storia",
       "formOfUid": null,
-      "related": [],
+      "related": [
+        {
+          "uid": "vit-0474",
+          "kind": "same-spelling"
+        }
+      ],
       "active": true,
-      "imageFile": null,
-      "imageStatus": "pending-review",
-      "imageReviewNote": "Historie versus příběh: vybrat hlavní význam a jeho konkrétní ilustraci.",
-      "reviewOutcome": "content-question"
+      "imageFile": "Pict/dictionary.webp",
+      "imageStatus": "reviewed",
+      "imageReviewNote": "Existující obraz jako kontext nebo mnemotechnická pomůcka pro význam; nejde o záruku jednoznačné odpovědi ve hře.",
+      "reviewOutcome": "approved-content-applied",
+      "sentenceOverride": {
+        "sourceIt": "Raccontami una storia prima di dormire.",
+        "sourceCz": "Povídej mi příběh před spaním.",
+        "it": "Raccontami una storia prima di dormire.",
+        "cz": "Povídej mi příběh před spaním."
+      },
+      "origin": "legacy",
+      "imageSha256": "e26972191af7362ccf849a1e6c684d023f839967fe4649c637cf82935e8a4920",
+      "imageRole": "contextual"
     },
     {
       "id": 115,
@@ -5041,11 +5090,15 @@
       "id": 120,
       "uid": "vit-0120",
       "it": "piacere",
-      "cz": "líbit se, potěšení",
+      "cz": "líbit se",
       "matches": [
         {
           "it": "piacere",
           "cz": "líbit se, potěšení"
+        },
+        {
+          "it": "piacere",
+          "cz": "líbit se"
         }
       ],
       "legacyOrder": 120,
@@ -5055,14 +5108,13 @@
         "topic-15"
       ],
       "partOfSpeech": [
-        "verb",
-        "noun"
+        "verb"
       ],
       "teachingType": "word",
       "expressionType": "word",
       "difficultyBand": 3,
       "difficultyStatus": "proposed",
-      "editorialStatus": "needs-review",
+      "editorialStatus": "reviewed",
       "reviewPriority": "high",
       "reviewReasons": [
         "metadata-proposal",
@@ -5075,6 +5127,10 @@
         {
           "uid": "vit-0018",
           "kind": "same-spelling"
+        },
+        {
+          "uid": "vit-0475",
+          "kind": "same-spelling"
         }
       ],
       "active": true,
@@ -5083,7 +5139,14 @@
       "imageReviewNote": "Vizuálně zkontrolovaná existující ilustrace k významu nebo příkladovému kontextu; u abstraktních hesel mnemotechnická pomůcka.",
       "imageSha256": "3c4094ec2431a1a2264168cacd30f1760861b7c0fa2628fddc4b3270f236ce4f",
       "imageRole": "contextual",
-      "reviewOutcome": "visual-context-checked"
+      "reviewOutcome": "approved-content-applied",
+      "sentenceOverride": {
+        "sourceIt": "Mi piace questo posto, è tranquillo e pulito.",
+        "sourceCz": "Líbí se mi tohle místo, je klidné a čisté.",
+        "it": "Mi piace questo posto, è tranquillo e pulito.",
+        "cz": "Líbí se mi tohle místo, je klidné a čisté."
+      },
+      "origin": "legacy"
     },
     {
       "id": 121,
@@ -5369,11 +5432,15 @@
       "id": 128,
       "uid": "vit-0128",
       "it": "male",
-      "cz": "špatně, zle, bolest, zlo",
+      "cz": "špatně; zle",
       "matches": [
         {
           "it": "male",
           "cz": "špatně, zle, bolest, zlo"
+        },
+        {
+          "it": "male",
+          "cz": "špatně; zle"
         }
       ],
       "legacyOrder": 128,
@@ -5383,14 +5450,13 @@
         "topic-02"
       ],
       "partOfSpeech": [
-        "adverb",
-        "noun"
+        "adverb"
       ],
       "teachingType": "word",
       "expressionType": "word",
       "difficultyBand": 3,
       "difficultyStatus": "proposed",
-      "editorialStatus": "needs-review",
+      "editorialStatus": "reviewed",
       "reviewPriority": "high",
       "reviewReasons": [
         "metadata-proposal",
@@ -5398,14 +5464,30 @@
       ],
       "lemma": "male",
       "formOfUid": null,
-      "related": [],
+      "related": [
+        {
+          "uid": "vit-0476",
+          "kind": "same-spelling"
+        },
+        {
+          "uid": "vit-0477",
+          "kind": "related"
+        }
+      ],
       "active": true,
-      "imageFile": "Pict/painevil.webp",
+      "imageFile": "Pict/sick.webp",
       "imageStatus": "reviewed",
-      "imageReviewNote": "Vizuálně zkontrolovaná existující ilustrace k významu nebo příkladovému kontextu; u abstraktních hesel mnemotechnická pomůcka.",
-      "imageSha256": "9def2cb7a8dc8a6a9e7541eb8b87bb340a89ba04fdde40390852ae470e98177b",
+      "imageReviewNote": "Existující obraz jako kontext nebo mnemotechnická pomůcka pro význam; nejde o záruku jednoznačné odpovědi ve hře.",
+      "imageSha256": "7b853d901b60a17b6696267e95d18488d505422121097e839af3c222e8603ebb",
       "imageRole": "contextual",
-      "reviewOutcome": "visual-context-checked"
+      "reviewOutcome": "approved-content-applied",
+      "sentenceOverride": {
+        "sourceIt": "Oggi sto male, quindi resto a casa.",
+        "sourceCz": "Dnes se cítím špatně, tak zůstanu doma.",
+        "it": "Oggi sto male, quindi resto a casa.",
+        "cz": "Dnes se cítím špatně, tak zůstanu doma."
+      },
+      "origin": "legacy"
     },
     {
       "id": 129,
@@ -6367,27 +6449,29 @@
       "id": 153,
       "uid": "vit-0153",
       "it": "forza",
-      "cz": "síla, no tak",
+      "cz": "no tak!; do toho!",
       "matches": [
         {
           "it": "forza",
           "cz": "síla, no tak"
+        },
+        {
+          "it": "forza",
+          "cz": "no tak!; do toho!"
         }
       ],
       "legacyOrder": 153,
       "legacyAddedAt": null,
-      "primaryGroup": "topic-15",
+      "primaryGroup": "topic-17",
       "topicIds": [
-        "topic-15"
+        "topic-17"
       ],
-      "partOfSpeech": [
-        "noun"
-      ],
-      "teachingType": "word",
+      "partOfSpeech": [],
+      "teachingType": "interaction",
       "expressionType": "word",
       "difficultyBand": 3,
       "difficultyStatus": "proposed",
-      "editorialStatus": "needs-review",
+      "editorialStatus": "reviewed",
       "reviewPriority": "high",
       "reviewReasons": [
         "metadata-proposal",
@@ -6395,14 +6479,27 @@
       ],
       "lemma": "forza",
       "formOfUid": null,
-      "related": [],
+      "related": [
+        {
+          "uid": "vit-0478",
+          "kind": "same-spelling"
+        }
+      ],
       "active": true,
-      "imageFile": "Pict/power.PNG",
+      "imageFile": "Pict/letsgo.PNG",
       "imageStatus": "reviewed",
-      "imageReviewNote": "Vizuálně zkontrolovaná existující ilustrace k významu nebo příkladovému kontextu; u abstraktních hesel mnemotechnická pomůcka.",
-      "imageSha256": "d2a43b7b5c9630f1ee72d6d567caab259ea875472a1430b6e85c61ddec3f27ba",
+      "imageReviewNote": "Existující obraz jako kontext nebo mnemotechnická pomůcka pro význam; nejde o záruku jednoznačné odpovědi ve hře.",
+      "imageSha256": "6ba55659a4a4996753afa019737d56a255c797372a08dde278edb0d71dafcc1f",
       "imageRole": "contextual",
-      "reviewOutcome": "visual-context-checked"
+      "reviewOutcome": "approved-content-applied",
+      "sentenceOverride": {
+        "sourceIt": "Forza, andiamo! Siamo in ritardo.",
+        "sourceCz": "No tak, jdeme! Jdeme pozdě.",
+        "it": "Forza, andiamo! Siamo in ritardo.",
+        "cz": "No tak, jdeme! Jdeme pozdě."
+      },
+      "origin": "legacy",
+      "genderOverride": ""
     },
     {
       "id": 154,
@@ -7049,11 +7146,15 @@
       "id": 170,
       "uid": "vit-0170",
       "it": "macchina",
-      "cz": "auto, vůz, stroj",
+      "cz": "auto; vůz",
       "matches": [
         {
           "it": "macchina",
           "cz": "auto, vůz, stroj"
+        },
+        {
+          "it": "macchina",
+          "cz": "auto; vůz"
         }
       ],
       "legacyOrder": 170,
@@ -7069,7 +7170,7 @@
       "expressionType": "word",
       "difficultyBand": 3,
       "difficultyStatus": "proposed",
-      "editorialStatus": "needs-review",
+      "editorialStatus": "reviewed",
       "reviewPriority": "high",
       "reviewReasons": [
         "metadata-proposal",
@@ -7082,6 +7183,10 @@
         {
           "uid": "vit-0283",
           "kind": "related"
+        },
+        {
+          "uid": "vit-0479",
+          "kind": "same-spelling"
         }
       ],
       "active": true,
@@ -7090,7 +7195,14 @@
       "imageReviewNote": "Vizuálně zkontrolovaná existující ilustrace k významu nebo příkladovému kontextu; u abstraktních hesel mnemotechnická pomůcka.",
       "imageSha256": "54e2c3b4838963f1098ee6ff37afd432a37e6fbceb80027b1551893daa8a846b",
       "imageRole": "contextual",
-      "reviewOutcome": "visual-context-checked"
+      "reviewOutcome": "approved-content-applied",
+      "sentenceOverride": {
+        "sourceIt": "La macchina è dal meccanico, quindi oggi vado in treno.",
+        "sourceCz": "Auto je u mechanika, takže dnes jedu vlakem.",
+        "it": "La macchina è dal meccanico, quindi oggi vado in treno.",
+        "cz": "Auto je u mechanika, takže dnes jedu vlakem."
+      },
+      "origin": "legacy"
     },
     {
       "id": 171,
@@ -7542,27 +7654,29 @@
       "id": 182,
       "uid": "vit-0182",
       "it": "pronto",
-      "cz": "připravený, hotový, haló, prosím?",
+      "cz": "haló?",
       "matches": [
         {
           "it": "pronto",
           "cz": "připravený, hotový, haló, prosím?"
+        },
+        {
+          "it": "pronto",
+          "cz": "haló?"
         }
       ],
       "legacyOrder": 182,
       "legacyAddedAt": null,
-      "primaryGroup": "topic-14",
+      "primaryGroup": "topic-17",
       "topicIds": [
-        "topic-14"
+        "topic-17"
       ],
-      "partOfSpeech": [
-        "adjective"
-      ],
-      "teachingType": "word",
+      "partOfSpeech": [],
+      "teachingType": "interaction",
       "expressionType": "word",
       "difficultyBand": 3,
       "difficultyStatus": "proposed",
-      "editorialStatus": "needs-review",
+      "editorialStatus": "reviewed",
       "reviewPriority": "high",
       "reviewReasons": [
         "metadata-proposal",
@@ -7570,14 +7684,27 @@
       ],
       "lemma": "pronto",
       "formOfUid": null,
-      "related": [],
+      "related": [
+        {
+          "uid": "vit-0480",
+          "kind": "same-spelling"
+        }
+      ],
       "active": true,
       "imageFile": "Pict/hello2.PNG",
       "imageStatus": "reviewed",
       "imageReviewNote": "Telefonní pozdrav Haló podle příkladové věty; jiný význam pronto je v návrzích.",
       "imageSha256": "faaa69260b529c08077f0125b29d10759f47ceb3812db283c425f02bb793aed7",
       "imageRole": "contextual",
-      "reviewOutcome": "visual-context-checked"
+      "reviewOutcome": "approved-content-applied",
+      "sentenceOverride": {
+        "sourceIt": "Pronto? Chi parla, per favore?",
+        "sourceCz": "Haló? Kdo mluví, prosím?",
+        "it": "Pronto? Chi parla, per favore?",
+        "cz": "Haló? Kdo mluví, prosím?"
+      },
+      "origin": "legacy",
+      "genderOverride": ""
     },
     {
       "id": 183,
@@ -10144,11 +10271,15 @@
       "id": 246,
       "uid": "vit-0246",
       "it": "calcio",
-      "cz": "fotbal, vápník",
+      "cz": "fotbal",
       "matches": [
         {
           "it": "calcio",
           "cz": "fotbal, vápník"
+        },
+        {
+          "it": "calcio",
+          "cz": "fotbal"
         }
       ],
       "legacyOrder": 246,
@@ -10164,7 +10295,7 @@
       "expressionType": "word",
       "difficultyBand": 3,
       "difficultyStatus": "proposed",
-      "editorialStatus": "needs-review",
+      "editorialStatus": "reviewed",
       "reviewPriority": "high",
       "reviewReasons": [
         "metadata-proposal",
@@ -10172,14 +10303,26 @@
       ],
       "lemma": "calcio",
       "formOfUid": null,
-      "related": [],
+      "related": [
+        {
+          "uid": "vit-0481",
+          "kind": "same-spelling"
+        }
+      ],
       "active": true,
       "imageFile": "Pict/football.PNG",
       "imageStatus": "reviewed",
       "imageReviewNote": "Vizuálně zkontrolovaná existující ilustrace k významu nebo příkladovému kontextu; u abstraktních hesel mnemotechnická pomůcka.",
       "imageSha256": "e64cefd91e3a618b20ba90d0f16d4fdba57df0d29c4f0ca2abab7de97cb72da3",
       "imageRole": "contextual",
-      "reviewOutcome": "visual-context-checked"
+      "reviewOutcome": "approved-content-applied",
+      "sentenceOverride": {
+        "sourceIt": "Mio figlio gioca a calcio con gli amici.",
+        "sourceCz": "Můj syn hraje s přáteli fotbal.",
+        "it": "Mio figlio gioca a calcio con gli amici.",
+        "cz": "Můj syn hraje s přáteli fotbal."
+      },
+      "origin": "legacy"
     },
     {
       "id": 247,
@@ -10503,11 +10646,15 @@
       "id": 255,
       "uid": "vit-0255",
       "it": "gli",
-      "cz": "ti, ty",
+      "cz": "určitý člen, mužský rod množného čísla",
       "matches": [
         {
           "it": "gli",
           "cz": "ti, ty"
+        },
+        {
+          "it": "gli",
+          "cz": "určitý člen, mužský rod množného čísla"
         }
       ],
       "legacyOrder": 255,
@@ -10517,14 +10664,13 @@
         "topic-18"
       ],
       "partOfSpeech": [
-        "article",
-        "pronoun"
+        "article"
       ],
       "teachingType": "word",
       "expressionType": "word",
       "difficultyBand": 3,
       "difficultyStatus": "proposed",
-      "editorialStatus": "needs-review",
+      "editorialStatus": "reviewed",
       "reviewPriority": "high",
       "reviewReasons": [
         "metadata-proposal",
@@ -10533,12 +10679,26 @@
       ],
       "lemma": "gli",
       "formOfUid": null,
-      "related": [],
+      "related": [
+        {
+          "uid": "vit-0482",
+          "kind": "same-spelling"
+        }
+      ],
       "active": true,
-      "imageFile": null,
-      "imageStatus": "pending-review",
-      "imageReviewNote": "Nejprve odlišit určitý člen gli od zájmena gli=mu podle rozhodnutí o kartě.",
-      "reviewOutcome": "content-question"
+      "imageFile": "Pict/ready.webp",
+      "imageStatus": "reviewed",
+      "imageReviewNote": "Existující obraz jako kontext nebo mnemotechnická pomůcka pro význam; nejde o záruku jednoznačné odpovědi ve hře.",
+      "reviewOutcome": "approved-content-applied",
+      "sentenceOverride": {
+        "sourceIt": "Gli telefono domani mattina.",
+        "sourceCz": "Zítra ráno mu zavolám.",
+        "it": "Gli zaini sono nuovi.",
+        "cz": "Batohy jsou nové."
+      },
+      "origin": "legacy",
+      "imageSha256": "95fcdab3727e3ca27a11b3f4e32e08c67b69800d50894851c22f05630c890d5b",
+      "imageRole": "contextual"
     },
     {
       "id": 256,
@@ -10704,11 +10864,15 @@
       "id": 260,
       "uid": "vit-0260",
       "it": "solo",
-      "cz": "sám, pouze, jen",
+      "cz": "sám",
       "matches": [
         {
           "it": "solo",
           "cz": "sám, pouze, jen"
+        },
+        {
+          "it": "solo",
+          "cz": "sám"
         }
       ],
       "legacyOrder": 260,
@@ -10718,14 +10882,13 @@
         "topic-11"
       ],
       "partOfSpeech": [
-        "adjective",
-        "adverb"
+        "adjective"
       ],
       "teachingType": "word",
       "expressionType": "word",
       "difficultyBand": 3,
       "difficultyStatus": "proposed",
-      "editorialStatus": "needs-review",
+      "editorialStatus": "reviewed",
       "reviewPriority": "high",
       "reviewReasons": [
         "metadata-proposal",
@@ -10733,14 +10896,26 @@
       ],
       "lemma": "solo",
       "formOfUid": null,
-      "related": [],
+      "related": [
+        {
+          "uid": "vit-0483",
+          "kind": "same-spelling"
+        }
+      ],
       "active": true,
       "imageFile": "Pict/private.webp",
       "imageStatus": "reviewed",
       "imageReviewNote": "Samota doma v klidném prostředí místo temné fotografie.",
       "imageSha256": "dccc9728a8f695674c2e0f6f7258ac3b7997680bea05addbaec7fbeb80af0f7c",
       "imageRole": "contextual",
-      "reviewOutcome": "visual-context-checked"
+      "reviewOutcome": "approved-content-applied",
+      "sentenceOverride": {
+        "sourceIt": "Oggi sono solo a casa.",
+        "sourceCz": "Dnes jsem sám doma.",
+        "it": "Oggi sono solo a casa.",
+        "cz": "Dnes jsem sám doma."
+      },
+      "origin": "legacy"
     },
     {
       "id": 261,
@@ -10952,11 +11127,15 @@
       "id": 266,
       "uid": "vit-0266",
       "it": "dolce",
-      "cz": "sladký, sladkost, jemný, něžný",
+      "cz": "sladký",
       "matches": [
         {
           "it": "dolce",
           "cz": "sladký, sladkost, jemný, něžný"
+        },
+        {
+          "it": "dolce",
+          "cz": "sladký"
         }
       ],
       "legacyOrder": 266,
@@ -10966,14 +11145,13 @@
         "topic-05"
       ],
       "partOfSpeech": [
-        "adjective",
-        "noun"
+        "adjective"
       ],
       "teachingType": "word",
       "expressionType": "word",
       "difficultyBand": 3,
       "difficultyStatus": "proposed",
-      "editorialStatus": "needs-review",
+      "editorialStatus": "reviewed",
       "reviewPriority": "high",
       "reviewReasons": [
         "metadata-proposal",
@@ -10981,14 +11159,30 @@
       ],
       "lemma": "dolce",
       "formOfUid": null,
-      "related": [],
+      "related": [
+        {
+          "uid": "vit-0484",
+          "kind": "same-spelling"
+        },
+        {
+          "uid": "vit-0485",
+          "kind": "same-spelling"
+        }
+      ],
       "active": true,
       "imageFile": "Pict/cake.png",
       "imageStatus": "reviewed",
       "imageReviewNote": "Vizuálně zkontrolovaná existující ilustrace k významu nebo příkladovému kontextu; u abstraktních hesel mnemotechnická pomůcka.",
       "imageSha256": "0edc9856c5e8db802eb9a5ccd5d3c4b1f74bfa0db5ab1330d559fe07d5b3235b",
       "imageRole": "contextual",
-      "reviewOutcome": "visual-context-checked"
+      "reviewOutcome": "approved-content-applied",
+      "sentenceOverride": {
+        "sourceIt": "Questo tè è troppo dolce. Ha una voce dolce.",
+        "sourceCz": "Tento čaj je příliš sladký. Má jemný hlas.",
+        "it": "Questo tè è troppo dolce.",
+        "cz": "Tento čaj je příliš sladký."
+      },
+      "origin": "legacy"
     },
     {
       "id": 267,
@@ -12138,11 +12332,15 @@
       "id": 295,
       "uid": "vit-0295",
       "it": "destro",
-      "cz": "pravý, a destra vpravo, napravo",
+      "cz": "pravý",
       "matches": [
         {
           "it": "destro",
           "cz": "pravý, a destra vpravo, napravo"
+        },
+        {
+          "it": "destro",
+          "cz": "pravý"
         }
       ],
       "legacyOrder": 295,
@@ -12158,7 +12356,7 @@
       "expressionType": "word",
       "difficultyBand": 3,
       "difficultyStatus": "proposed",
-      "editorialStatus": "needs-review",
+      "editorialStatus": "reviewed",
       "reviewPriority": "high",
       "reviewReasons": [
         "metadata-proposal",
@@ -12166,14 +12364,26 @@
       ],
       "lemma": "destro",
       "formOfUid": null,
-      "related": [],
+      "related": [
+        {
+          "uid": "vit-0486",
+          "kind": "related"
+        }
+      ],
       "active": true,
       "imageFile": "Pict/right.jpg",
       "imageStatus": "reviewed",
       "imageReviewNote": "Vizuálně zkontrolovaná existující ilustrace k významu nebo příkladovému kontextu; u abstraktních hesel mnemotechnická pomůcka.",
       "imageSha256": "21fdd7f15405fde429741b7964ca2d5af24bd91e2a56353b9be43ae20e55bc38",
       "imageRole": "contextual",
-      "reviewOutcome": "visual-context-checked"
+      "reviewOutcome": "approved-content-applied",
+      "sentenceOverride": {
+        "sourceIt": "Gira a destra.",
+        "sourceCz": "Odboč doprava.",
+        "it": "Il braccio destro è più forte.",
+        "cz": "Pravá paže je silnější."
+      },
+      "origin": "legacy"
     },
     {
       "id": 296,
@@ -13591,11 +13801,15 @@
       "id": 331,
       "uid": "vit-0331",
       "it": "niente",
-      "cz": "nic, není zač",
+      "cz": "nic",
       "matches": [
         {
           "it": "niente",
           "cz": "nic, není zač"
+        },
+        {
+          "it": "niente",
+          "cz": "nic"
         }
       ],
       "legacyOrder": 331,
@@ -13611,7 +13825,7 @@
       "expressionType": "word",
       "difficultyBand": 3,
       "difficultyStatus": "proposed",
-      "editorialStatus": "needs-review",
+      "editorialStatus": "reviewed",
       "reviewPriority": "high",
       "reviewReasons": [
         "metadata-proposal",
@@ -13620,12 +13834,26 @@
       ],
       "lemma": "niente",
       "formOfUid": null,
-      "related": [],
+      "related": [
+        {
+          "uid": "vit-0487",
+          "kind": "related"
+        }
+      ],
       "active": true,
-      "imageFile": null,
-      "imageStatus": "pending-review",
-      "imageReviewNote": "Nejprve odlišit niente=nic od reakce Di niente.=Není zač.",
-      "reviewOutcome": "content-question"
+      "imageFile": "Pict/nothing.png",
+      "imageStatus": "reviewed",
+      "imageReviewNote": "Existující obraz jako kontext nebo mnemotechnická pomůcka pro význam; nejde o záruku jednoznačné odpovědi ve hře.",
+      "reviewOutcome": "approved-content-applied",
+      "sentenceOverride": {
+        "sourceIt": "Di niente.",
+        "sourceCz": "Není zač.",
+        "it": "Nella scatola non c’è niente.",
+        "cz": "V krabici nic není."
+      },
+      "origin": "legacy",
+      "imageSha256": "9ae2e0b28fb021e6dde0415d54ad875aa97aa4e6c9c78546bf44f54ae430b699",
+      "imageRole": "contextual"
     },
     {
       "id": 332,
@@ -13712,11 +13940,15 @@
       "id": 334,
       "uid": "vit-0334",
       "it": "perché",
-      "cz": "proč, protože",
+      "cz": "proč",
       "matches": [
         {
           "it": "perché",
           "cz": "proč, protože"
+        },
+        {
+          "it": "perché",
+          "cz": "proč"
         }
       ],
       "legacyOrder": 334,
@@ -13726,14 +13958,13 @@
         "topic-18"
       ],
       "partOfSpeech": [
-        "adverb",
-        "conjunction"
+        "adverb"
       ],
       "teachingType": "word",
       "expressionType": "word",
       "difficultyBand": 3,
       "difficultyStatus": "proposed",
-      "editorialStatus": "needs-review",
+      "editorialStatus": "reviewed",
       "reviewPriority": "high",
       "reviewReasons": [
         "metadata-proposal",
@@ -13743,14 +13974,26 @@
       ],
       "lemma": "perché",
       "formOfUid": null,
-      "related": [],
+      "related": [
+        {
+          "uid": "vit-0488",
+          "kind": "same-spelling"
+        }
+      ],
       "active": true,
       "imageFile": "Pict/why.png",
       "imageStatus": "reviewed",
       "imageReviewNote": "Vizuálně zkontrolovaná existující ilustrace k významu nebo příkladovému kontextu; u abstraktních hesel mnemotechnická pomůcka.",
       "imageSha256": "08e37ab1e6ea488007b8cd58673adb18fdef86ffa8122202dffce5b2c8bca0b0",
       "imageRole": "mnemonic",
-      "reviewOutcome": "visual-context-checked"
+      "reviewOutcome": "approved-content-applied",
+      "sentenceOverride": {
+        "sourceIt": "Perché parti così presto?",
+        "sourceCz": "Proč odjíždíš tak brzy?",
+        "it": "Perché parti così presto?",
+        "cz": "Proč odjíždíš tak brzy?"
+      },
+      "origin": "legacy"
     },
     {
       "id": 335,
@@ -14078,11 +14321,15 @@
       "id": 343,
       "uid": "vit-0343",
       "it": "sentire",
-      "cz": "cítit, slyšet",
+      "cz": "slyšet",
       "matches": [
         {
           "it": "sentire",
           "cz": "cítit, slyšet"
+        },
+        {
+          "it": "sentire",
+          "cz": "slyšet"
         }
       ],
       "legacyOrder": 343,
@@ -14098,7 +14345,7 @@
       "expressionType": "word",
       "difficultyBand": 3,
       "difficultyStatus": "proposed",
-      "editorialStatus": "needs-review",
+      "editorialStatus": "reviewed",
       "reviewPriority": "high",
       "reviewReasons": [
         "metadata-proposal",
@@ -14106,14 +14353,26 @@
       ],
       "lemma": "sentire",
       "formOfUid": null,
-      "related": [],
+      "related": [
+        {
+          "uid": "vit-0489",
+          "kind": "same-spelling"
+        }
+      ],
       "active": true,
       "imageFile": "Pict/hear.webp",
       "imageStatus": "reviewed",
       "imageReviewNote": "Vizuálně zkontrolovaná existující ilustrace k významu nebo příkladovému kontextu; u abstraktních hesel mnemotechnická pomůcka.",
       "imageSha256": "d22c00bdb02bdb45a68e41afedda3906f6fe150717508aabe83f4077f3d93d1e",
       "imageRole": "contextual",
-      "reviewOutcome": "visual-context-checked"
+      "reviewOutcome": "approved-content-applied",
+      "sentenceOverride": {
+        "sourceIt": "Sento un rumore strano.",
+        "sourceCz": "Slyším zvláštní zvuk.",
+        "it": "Sento un rumore strano.",
+        "cz": "Slyším zvláštní zvuk."
+      },
+      "origin": "legacy"
     },
     {
       "id": 344,
@@ -14199,11 +14458,15 @@
       "id": 346,
       "uid": "vit-0346",
       "it": "sinistro",
-      "cz": "levý, a sinistra vlevo, nalevo",
+      "cz": "levý",
       "matches": [
         {
           "it": "sinistro",
           "cz": "levý, a sinistra vlevo, nalevo"
+        },
+        {
+          "it": "sinistro",
+          "cz": "levý"
         }
       ],
       "legacyOrder": 346,
@@ -14219,7 +14482,7 @@
       "expressionType": "word",
       "difficultyBand": 3,
       "difficultyStatus": "proposed",
-      "editorialStatus": "needs-review",
+      "editorialStatus": "reviewed",
       "reviewPriority": "high",
       "reviewReasons": [
         "metadata-proposal",
@@ -14227,14 +14490,26 @@
       ],
       "lemma": "sinistro",
       "formOfUid": null,
-      "related": [],
+      "related": [
+        {
+          "uid": "vit-0490",
+          "kind": "related"
+        }
+      ],
       "active": true,
       "imageFile": "Pict/left.jpg",
       "imageStatus": "reviewed",
       "imageReviewNote": "Vizuálně zkontrolovaná existující ilustrace k významu nebo příkladovému kontextu; u abstraktních hesel mnemotechnická pomůcka.",
       "imageSha256": "db153161ff8147b0844ad7387116c16a0bf499b4b11fcf0012d1f4538dab39e6",
       "imageRole": "contextual",
-      "reviewOutcome": "visual-context-checked"
+      "reviewOutcome": "approved-content-applied",
+      "sentenceOverride": {
+        "sourceIt": "La mano sinistra mi fa male.",
+        "sourceCz": "Levá ruka mě bolí.",
+        "it": "La mano sinistra mi fa male.",
+        "cz": "Levá ruka mě bolí."
+      },
+      "origin": "legacy"
     },
     {
       "id": 347,
@@ -14480,11 +14755,15 @@
       "id": 353,
       "uid": "vit-0353",
       "it": "tempo",
-      "cz": "čas, počasí",
+      "cz": "čas",
       "matches": [
         {
           "it": "tempo",
           "cz": "čas, počasí"
+        },
+        {
+          "it": "tempo",
+          "cz": "čas"
         }
       ],
       "legacyOrder": 353,
@@ -14500,7 +14779,7 @@
       "expressionType": "word",
       "difficultyBand": 3,
       "difficultyStatus": "proposed",
-      "editorialStatus": "needs-review",
+      "editorialStatus": "reviewed",
       "reviewPriority": "high",
       "reviewReasons": [
         "metadata-proposal",
@@ -14508,14 +14787,26 @@
       ],
       "lemma": "tempo",
       "formOfUid": null,
-      "related": [],
+      "related": [
+        {
+          "uid": "vit-0491",
+          "kind": "same-spelling"
+        }
+      ],
       "active": true,
       "imageFile": "Pict/time.PNG",
       "imageStatus": "reviewed",
       "imageReviewNote": "Vizuálně zkontrolovaná existující ilustrace k významu nebo příkladovému kontextu; u abstraktních hesel mnemotechnická pomůcka.",
       "imageSha256": "ddd7298c0266476c99d96a8d2fef2564599183f3585a3c64b0b896b4373ca4cc",
       "imageRole": "contextual",
-      "reviewOutcome": "visual-context-checked"
+      "reviewOutcome": "approved-content-applied",
+      "sentenceOverride": {
+        "sourceIt": "Certamente, ma non per molto tempo.",
+        "sourceCz": "Určitě, ale ne na dlouho.",
+        "it": "Certamente, ma non per molto tempo.",
+        "cz": "Určitě, ale ne na dlouho."
+      },
+      "origin": "legacy"
     },
     {
       "id": 354,
@@ -16422,11 +16713,15 @@
       "id": 401,
       "uid": "vit-0401",
       "it": "lingua",
-      "cz": "jazyk",
+      "cz": "jazyk (řeč)",
       "matches": [
         {
           "it": "lingua",
           "cz": "jazyk"
+        },
+        {
+          "it": "lingua",
+          "cz": "jazyk (řeč)"
         }
       ],
       "legacyOrder": 401,
@@ -16442,7 +16737,7 @@
       "expressionType": "word",
       "difficultyBand": 3,
       "difficultyStatus": "proposed",
-      "editorialStatus": "needs-review",
+      "editorialStatus": "reviewed",
       "reviewPriority": "high",
       "reviewReasons": [
         "metadata-proposal",
@@ -16450,14 +16745,26 @@
       ],
       "lemma": "lingua",
       "formOfUid": null,
-      "related": [],
+      "related": [
+        {
+          "uid": "vit-0492",
+          "kind": "same-spelling"
+        }
+      ],
       "active": true,
       "imageFile": "Pict/interpreter.webp",
       "imageStatus": "reviewed",
       "imageReviewNote": "Jazyk jako řeč/komunikace podle věty, nikoli vyplazený jazyk.",
       "imageSha256": "1a464a31c785cc542192ad1d7f714d681685d84f7b6eca8c7f66062d812e4669",
       "imageRole": "mnemonic",
-      "reviewOutcome": "visual-context-checked"
+      "reviewOutcome": "approved-content-applied",
+      "sentenceOverride": {
+        "sourceIt": "Conosce altre lingue straniere?",
+        "sourceCz": "Znáte jiné cizí jazyky?",
+        "it": "Conosce altre lingue straniere?",
+        "cz": "Znáte jiné cizí jazyky?"
+      },
+      "origin": "legacy"
     },
     {
       "id": 402,
@@ -16908,12 +17215,16 @@
     {
       "id": 413,
       "uid": "vit-0413",
-      "it": "ragione",
-      "cz": "pravda, důvod",
+      "it": "avere ragione",
+      "cz": "mít pravdu",
       "matches": [
         {
           "it": "ragione",
           "cz": "pravda, důvod"
+        },
+        {
+          "it": "avere ragione",
+          "cz": "mít pravdu"
         }
       ],
       "legacyOrder": 413,
@@ -16923,28 +17234,41 @@
         "topic-15"
       ],
       "partOfSpeech": [
-        "noun"
+        "verb"
       ],
       "teachingType": "word",
-      "expressionType": "word",
+      "expressionType": "phrase",
       "difficultyBand": 3,
       "difficultyStatus": "proposed",
-      "editorialStatus": "needs-review",
+      "editorialStatus": "reviewed",
       "reviewPriority": "high",
       "reviewReasons": [
         "metadata-proposal",
         "mixed-meanings"
       ],
-      "lemma": "ragione",
+      "lemma": "avere ragione",
       "formOfUid": null,
-      "related": [],
+      "related": [
+        {
+          "uid": "vit-0493",
+          "kind": "related"
+        }
+      ],
       "active": true,
       "imageFile": "Pict/true.webp",
       "imageStatus": "reviewed",
       "imageReviewNote": "Mít pravdu v příkladové větě; další význam důvod zůstává v revizi.",
       "imageSha256": "d55dbe23dca19deed687c91769f6eec8caba0bcb3eafa8bc587c6118a5c078b1",
       "imageRole": "contextual",
-      "reviewOutcome": "visual-context-checked"
+      "reviewOutcome": "approved-content-applied",
+      "sentenceOverride": {
+        "sourceIt": "Già, ha ragione.",
+        "sourceCz": "Ano, máte pravdu.",
+        "it": "Già, ha ragione.",
+        "cz": "Ano, máte pravdu."
+      },
+      "origin": "legacy",
+      "genderOverride": ""
     },
     {
       "id": 414,
@@ -17070,11 +17394,15 @@
       "id": 417,
       "uid": "vit-0417",
       "it": "stare",
-      "cz": "být, mít se, zůstat",
+      "cz": "mít se; být v určitém stavu",
       "matches": [
         {
           "it": "stare",
           "cz": "být, mít se, zůstat"
+        },
+        {
+          "it": "stare",
+          "cz": "mít se; být v určitém stavu"
         }
       ],
       "legacyOrder": 417,
@@ -17090,7 +17418,7 @@
       "expressionType": "word",
       "difficultyBand": 3,
       "difficultyStatus": "proposed",
-      "editorialStatus": "needs-review",
+      "editorialStatus": "reviewed",
       "reviewPriority": "high",
       "reviewReasons": [
         "metadata-proposal",
@@ -17100,14 +17428,26 @@
       ],
       "lemma": "stare",
       "formOfUid": null,
-      "related": [],
+      "related": [
+        {
+          "uid": "vit-0494",
+          "kind": "same-spelling"
+        }
+      ],
       "active": true,
       "imageFile": "Pict/feel.webp",
       "imageStatus": "reviewed",
       "imageReviewNote": "Mít se/být v určitém stavu podle Come sta?, nikoli vlastnit předmět.",
       "imageSha256": "f43d911ebec9d839b5df2b608feecf8cc261d0cc6bc0be5bdfb7debd166110bd",
       "imageRole": "contextual",
-      "reviewOutcome": "visual-context-checked"
+      "reviewOutcome": "approved-content-applied",
+      "sentenceOverride": {
+        "sourceIt": "Come sta? Bene, grazie, e Lei?",
+        "sourceCz": "Jak se máte? Dobře, děkuji, a vy?",
+        "it": "Come sta? Bene, grazie, e Lei?",
+        "cz": "Jak se máte? Dobře, děkuji, a vy?"
+      },
+      "origin": "legacy"
     },
     {
       "id": 418,
@@ -18401,11 +18741,15 @@
       "id": 450,
       "uid": "vit-0450",
       "it": "paese",
-      "cz": "země; stát; vesnice; obec; kraj podle kontextu",
+      "cz": "země; stát",
       "matches": [
         {
           "it": "paese",
           "cz": "země; stát; vesnice; obec; kraj podle kontextu"
+        },
+        {
+          "it": "paese",
+          "cz": "země; stát"
         }
       ],
       "legacyOrder": 450,
@@ -18421,7 +18765,7 @@
       "expressionType": "word",
       "difficultyBand": 3,
       "difficultyStatus": "proposed",
-      "editorialStatus": "needs-review",
+      "editorialStatus": "reviewed",
       "reviewPriority": "high",
       "reviewReasons": [
         "metadata-proposal",
@@ -18429,14 +18773,26 @@
       ],
       "lemma": "paese",
       "formOfUid": null,
-      "related": [],
+      "related": [
+        {
+          "uid": "vit-0495",
+          "kind": "same-spelling"
+        }
+      ],
       "active": true,
       "imageFile": "Pict/brazil.png",
       "imageStatus": "reviewed",
       "imageReviewNote": "Země/stát podle příkladové věty o Brazílii; vesnice je samostatný návrh.",
       "imageSha256": "516e2a852b1fc326ff62b9d76603c357f391599cdda2f3b3ad6b3c6762800073",
       "imageRole": "contextual",
-      "reviewOutcome": "visual-context-checked"
+      "reviewOutcome": "approved-content-applied",
+      "sentenceOverride": {
+        "sourceIt": "Il Brasile è un grande paese.",
+        "sourceCz": "Brazílie je velká země.",
+        "it": "Il Brasile è un grande paese.",
+        "cz": "Brazílie je velká země."
+      },
+      "origin": "legacy"
     },
     {
       "id": 451,
@@ -18852,12 +19208,16 @@
     {
       "id": 461,
       "uid": "vit-0461",
-      "it": "congratulazione",
-      "cz": "gratulace, blahopřání",
+      "it": "Congratulazioni!",
+      "cz": "Gratuluji!; Blahopřeji!",
       "matches": [
         {
           "it": "congratulazione",
           "cz": "gratulace, blahopřání"
+        },
+        {
+          "it": "Congratulazioni!",
+          "cz": "Gratuluji!; Blahopřeji!"
         }
       ],
       "legacyOrder": 461,
@@ -18866,24 +19226,26 @@
       "topicIds": [
         "topic-17"
       ],
-      "partOfSpeech": [
-        "noun"
-      ],
-      "teachingType": "word",
+      "partOfSpeech": [],
+      "teachingType": "interaction",
       "expressionType": "word",
       "difficultyBand": 2,
       "difficultyStatus": "proposed",
-      "editorialStatus": "needs-review",
+      "editorialStatus": "reviewed",
       "reviewPriority": "high",
       "reviewReasons": [
         "metadata-proposal",
         "possible-overlap"
       ],
-      "lemma": "congratulazione",
+      "lemma": "Congratulazioni!",
       "formOfUid": null,
       "related": [
         {
           "uid": "vit-0457",
+          "kind": "related"
+        },
+        {
+          "uid": "vit-0496",
           "kind": "related"
         }
       ],
@@ -18893,7 +19255,15 @@
       "imageReviewNote": "Vizuálně zkontrolovaná existující ilustrace k významu nebo příkladovému kontextu; u abstraktních hesel mnemotechnická pomůcka.",
       "imageSha256": "08a549b09934ac32d78d58bc4c40da5835f71638d3ec4662f1ce2388862a8979",
       "imageRole": "contextual",
-      "reviewOutcome": "visual-context-checked"
+      "reviewOutcome": "approved-content-applied",
+      "sentenceOverride": {
+        "sourceIt": "Congratulazioni per il tuo successo!",
+        "sourceCz": "Gratuluji k tvému úspěchu!",
+        "it": "Congratulazioni per il tuo successo!",
+        "cz": "Gratuluji k tvému úspěchu!"
+      },
+      "origin": "legacy",
+      "genderOverride": ""
     },
     {
       "id": 462,
@@ -18939,11 +19309,15 @@
       "id": 463,
       "uid": "vit-0463",
       "it": "mai",
-      "cz": "nikdy, někdy v otázce",
+      "cz": "nikdy",
       "matches": [
         {
           "it": "mai",
           "cz": "nikdy, někdy v otázce"
+        },
+        {
+          "it": "mai",
+          "cz": "nikdy"
         }
       ],
       "legacyOrder": 463,
@@ -18959,7 +19333,7 @@
       "expressionType": "word",
       "difficultyBand": 3,
       "difficultyStatus": "proposed",
-      "editorialStatus": "needs-review",
+      "editorialStatus": "reviewed",
       "reviewPriority": "high",
       "reviewReasons": [
         "metadata-proposal",
@@ -18967,14 +19341,26 @@
       ],
       "lemma": "mai",
       "formOfUid": null,
-      "related": [],
+      "related": [
+        {
+          "uid": "vit-0497",
+          "kind": "same-spelling"
+        }
+      ],
       "active": true,
       "imageFile": "Pict/never.webp",
       "imageStatus": "reviewed",
       "imageReviewNote": "Vizuálně zkontrolovaná existující ilustrace k významu nebo příkladovému kontextu; u abstraktních hesel mnemotechnická pomůcka.",
       "imageSha256": "39ca7e082f1f80f038ec9d06df3a995f940cb811762998e4ec599bc9ce4eeed1",
       "imageRole": "mnemonic",
-      "reviewOutcome": "visual-context-checked"
+      "reviewOutcome": "approved-content-applied",
+      "sentenceOverride": {
+        "sourceIt": "Non vado mai lì. Hai mai visitato Roma?",
+        "sourceCz": "Nikdy tam nechodím. Navštívil jsi někdy Řím?",
+        "it": "Non vado mai lì.",
+        "cz": "Nikdy tam nechodím."
+      },
+      "origin": "legacy"
     },
     {
       "id": 464,
@@ -19299,7 +19685,1306 @@
       "imageSha256": "7367f7fd8c5258a0483bdee5d5f0d8ad51f90def8fd60796b980f213454811dd",
       "imageRole": "mnemonic",
       "reviewOutcome": "visual-context-checked"
+    },
+    {
+      "id": 472,
+      "uid": "vit-0472",
+      "it": "forte",
+      "cz": "nahlas",
+      "matches": [
+        {
+          "it": "forte",
+          "cz": "nahlas"
+        }
+      ],
+      "legacyOrder": null,
+      "legacyAddedAt": null,
+      "primaryGroup": "topic-14",
+      "topicIds": [
+        "topic-14"
+      ],
+      "partOfSpeech": [
+        "adverb"
+      ],
+      "teachingType": "word",
+      "expressionType": "word",
+      "difficultyBand": 3,
+      "difficultyStatus": "proposed",
+      "editorialStatus": "reviewed",
+      "reviewPriority": "normal",
+      "reviewReasons": [],
+      "lemma": "forte",
+      "formOfUid": null,
+      "related": [
+        {
+          "uid": "vit-0007",
+          "kind": "same-spelling"
+        }
+      ],
+      "active": true,
+      "imageFile": "Pict/loud.png",
+      "imageStatus": "reviewed",
+      "imageReviewNote": "Existující obraz jako kontext nebo mnemotechnická pomůcka pro význam; nejde o záruku jednoznačné odpovědi ve hře.",
+      "imageSha256": "52ea4856bd7c8068e5319ff0d8d7966462824d6e05e9d9c88e3f60f683d1fad8",
+      "imageRole": "contextual",
+      "reviewOutcome": "approved-new-meaning",
+      "origin": "web",
+      "addedAt": "2026-11-15",
+      "webText": {
+        "sentenceIt": "Non parlare forte qui.",
+        "sentenceCz": "Tady nemluv nahlas.",
+        "genderIt": ""
+      }
+    },
+    {
+      "id": 473,
+      "uid": "vit-0473",
+      "it": "tedesco",
+      "cz": "němčina",
+      "matches": [
+        {
+          "it": "tedesco",
+          "cz": "němčina"
+        }
+      ],
+      "legacyOrder": null,
+      "legacyAddedAt": null,
+      "primaryGroup": "topic-18",
+      "topicIds": [
+        "topic-18"
+      ],
+      "partOfSpeech": [
+        "noun"
+      ],
+      "teachingType": "word",
+      "expressionType": "word",
+      "difficultyBand": 3,
+      "difficultyStatus": "proposed",
+      "editorialStatus": "reviewed",
+      "reviewPriority": "normal",
+      "reviewReasons": [],
+      "lemma": "tedesco",
+      "formOfUid": null,
+      "related": [
+        {
+          "uid": "vit-0096",
+          "kind": "same-spelling"
+        }
+      ],
+      "active": true,
+      "imageFile": "Pict/german.png",
+      "imageStatus": "reviewed",
+      "imageReviewNote": "Existující obraz jako kontext nebo mnemotechnická pomůcka pro význam; nejde o záruku jednoznačné odpovědi ve hře.",
+      "imageSha256": "6cc9c788187fb53996dab0bb594c2af81c6cfd4800ef09875eb00f4c348fe4a3",
+      "imageRole": "contextual",
+      "reviewOutcome": "approved-new-meaning",
+      "origin": "web",
+      "addedAt": "2026-11-15",
+      "webText": {
+        "sentenceIt": "Studio il tedesco ogni giorno.",
+        "sentenceCz": "Každý den se učím německy.",
+        "genderIt": "m"
+      }
+    },
+    {
+      "id": 474,
+      "uid": "vit-0474",
+      "it": "storia",
+      "cz": "historie; dějiny",
+      "matches": [
+        {
+          "it": "storia",
+          "cz": "historie; dějiny"
+        }
+      ],
+      "legacyOrder": null,
+      "legacyAddedAt": null,
+      "primaryGroup": "topic-10",
+      "topicIds": [
+        "topic-10"
+      ],
+      "partOfSpeech": [
+        "noun"
+      ],
+      "teachingType": "word",
+      "expressionType": "word",
+      "difficultyBand": 1,
+      "difficultyStatus": "proposed",
+      "editorialStatus": "reviewed",
+      "reviewPriority": "normal",
+      "reviewReasons": [],
+      "lemma": "storia",
+      "formOfUid": null,
+      "related": [
+        {
+          "uid": "vit-0114",
+          "kind": "same-spelling"
+        }
+      ],
+      "active": true,
+      "imageFile": "Pict/history.PNG",
+      "imageStatus": "reviewed",
+      "imageReviewNote": "Existující obraz jako kontext nebo mnemotechnická pomůcka pro význam; nejde o záruku jednoznačné odpovědi ve hře.",
+      "reviewOutcome": "approved-new-meaning",
+      "origin": "web",
+      "imageSha256": "9d0c189a0136dd039849990c76d166de849bc35edfb23b9c3e10611a0e1052b3",
+      "imageRole": "contextual",
+      "addedAt": "2026-11-15",
+      "webText": {
+        "sentenceIt": "La storia di questa città è interessante.",
+        "sentenceCz": "Historie tohoto města je zajímavá.",
+        "genderIt": "f"
+      }
+    },
+    {
+      "id": 475,
+      "uid": "vit-0475",
+      "it": "piacere",
+      "cz": "potěšení",
+      "matches": [
+        {
+          "it": "piacere",
+          "cz": "potěšení"
+        }
+      ],
+      "legacyOrder": null,
+      "legacyAddedAt": null,
+      "primaryGroup": "topic-15",
+      "topicIds": [
+        "topic-15"
+      ],
+      "partOfSpeech": [
+        "noun"
+      ],
+      "teachingType": "word",
+      "expressionType": "word",
+      "difficultyBand": 3,
+      "difficultyStatus": "proposed",
+      "editorialStatus": "reviewed",
+      "reviewPriority": "normal",
+      "reviewReasons": [],
+      "lemma": "piacere",
+      "formOfUid": null,
+      "related": [
+        {
+          "uid": "vit-0120",
+          "kind": "same-spelling"
+        }
+      ],
+      "active": true,
+      "imageFile": "Pict/tolikepleasure.webp",
+      "imageStatus": "reviewed",
+      "imageReviewNote": "Existující obraz jako kontext nebo mnemotechnická pomůcka pro význam; nejde o záruku jednoznačné odpovědi ve hře.",
+      "imageSha256": "3c4094ec2431a1a2264168cacd30f1760861b7c0fa2628fddc4b3270f236ce4f",
+      "imageRole": "contextual",
+      "reviewOutcome": "approved-new-meaning",
+      "origin": "web",
+      "addedAt": "2026-11-15",
+      "webText": {
+        "sentenceIt": "Leggere è un piacere.",
+        "sentenceCz": "Čtení je potěšení.",
+        "genderIt": "m"
+      }
+    },
+    {
+      "id": 476,
+      "uid": "vit-0476",
+      "it": "male",
+      "cz": "zlo",
+      "matches": [
+        {
+          "it": "male",
+          "cz": "zlo"
+        }
+      ],
+      "legacyOrder": null,
+      "legacyAddedAt": null,
+      "primaryGroup": "topic-15",
+      "topicIds": [
+        "topic-15"
+      ],
+      "partOfSpeech": [
+        "noun"
+      ],
+      "teachingType": "word",
+      "expressionType": "word",
+      "difficultyBand": 3,
+      "difficultyStatus": "proposed",
+      "editorialStatus": "reviewed",
+      "reviewPriority": "normal",
+      "reviewReasons": [],
+      "lemma": "male",
+      "formOfUid": null,
+      "related": [
+        {
+          "uid": "vit-0128",
+          "kind": "same-spelling"
+        }
+      ],
+      "active": true,
+      "imageFile": "Pict/evil.png",
+      "imageStatus": "reviewed",
+      "imageReviewNote": "Existující obraz jako kontext nebo mnemotechnická pomůcka pro význam; nejde o záruku jednoznačné odpovědi ve hře.",
+      "imageSha256": "0d1e0a46e3d933b90e7ccbb15207ce016c36c42e7311f4a7d4b991b0c01350b3",
+      "imageRole": "contextual",
+      "reviewOutcome": "approved-new-meaning",
+      "origin": "web",
+      "addedAt": "2026-11-15",
+      "webText": {
+        "sentenceIt": "Il bene e il male sono opposti.",
+        "sentenceCz": "Dobro a zlo jsou protiklady.",
+        "genderIt": "m"
+      }
+    },
+    {
+      "id": 477,
+      "uid": "vit-0477",
+      "it": "fare male",
+      "cz": "bolet",
+      "matches": [
+        {
+          "it": "fare male",
+          "cz": "bolet"
+        }
+      ],
+      "legacyOrder": null,
+      "legacyAddedAt": null,
+      "primaryGroup": "topic-02",
+      "topicIds": [
+        "topic-02"
+      ],
+      "partOfSpeech": [
+        "verb"
+      ],
+      "teachingType": "word",
+      "expressionType": "phrase",
+      "difficultyBand": 3,
+      "difficultyStatus": "proposed",
+      "editorialStatus": "reviewed",
+      "reviewPriority": "normal",
+      "reviewReasons": [],
+      "lemma": "fare male",
+      "formOfUid": null,
+      "related": [
+        {
+          "uid": "vit-0128",
+          "kind": "related"
+        }
+      ],
+      "active": true,
+      "imageFile": "Pict/painevil.webp",
+      "imageStatus": "reviewed",
+      "imageReviewNote": "Existující obraz jako kontext nebo mnemotechnická pomůcka pro význam; nejde o záruku jednoznačné odpovědi ve hře.",
+      "imageSha256": "9def2cb7a8dc8a6a9e7541eb8b87bb340a89ba04fdde40390852ae470e98177b",
+      "imageRole": "contextual",
+      "reviewOutcome": "approved-new-meaning",
+      "origin": "web",
+      "addedAt": "2026-11-15",
+      "webText": {
+        "sentenceIt": "Mi fa male la testa.",
+        "sentenceCz": "Bolí mě hlava.",
+        "genderIt": ""
+      }
+    },
+    {
+      "id": 478,
+      "uid": "vit-0478",
+      "it": "forza",
+      "cz": "síla",
+      "matches": [
+        {
+          "it": "forza",
+          "cz": "síla"
+        }
+      ],
+      "legacyOrder": null,
+      "legacyAddedAt": null,
+      "primaryGroup": "topic-15",
+      "topicIds": [
+        "topic-15"
+      ],
+      "partOfSpeech": [
+        "noun"
+      ],
+      "teachingType": "word",
+      "expressionType": "word",
+      "difficultyBand": 3,
+      "difficultyStatus": "proposed",
+      "editorialStatus": "reviewed",
+      "reviewPriority": "normal",
+      "reviewReasons": [],
+      "lemma": "forza",
+      "formOfUid": null,
+      "related": [
+        {
+          "uid": "vit-0153",
+          "kind": "same-spelling"
+        }
+      ],
+      "active": true,
+      "imageFile": "Pict/strong.png",
+      "imageStatus": "reviewed",
+      "imageReviewNote": "Existující obraz jako kontext nebo mnemotechnická pomůcka pro význam; nejde o záruku jednoznačné odpovědi ve hře.",
+      "imageSha256": "c48b3b94a0f3137c29376c66fceb9cf4cb2127efaff9176cc9c82517fd76a2a9",
+      "imageRole": "contextual",
+      "reviewOutcome": "approved-new-meaning",
+      "origin": "web",
+      "addedAt": "2026-11-15",
+      "webText": {
+        "sentenceIt": "Per aprire questa porta serve molta forza.",
+        "sentenceCz": "K otevření těchto dveří je potřeba velká síla.",
+        "genderIt": "f"
+      }
+    },
+    {
+      "id": 479,
+      "uid": "vit-0479",
+      "it": "macchina",
+      "cz": "stroj",
+      "matches": [
+        {
+          "it": "macchina",
+          "cz": "stroj"
+        }
+      ],
+      "legacyOrder": null,
+      "legacyAddedAt": null,
+      "primaryGroup": "topic-04",
+      "topicIds": [
+        "topic-04"
+      ],
+      "partOfSpeech": [
+        "noun"
+      ],
+      "teachingType": "word",
+      "expressionType": "word",
+      "difficultyBand": 3,
+      "difficultyStatus": "proposed",
+      "editorialStatus": "reviewed",
+      "reviewPriority": "normal",
+      "reviewReasons": [],
+      "lemma": "macchina",
+      "formOfUid": null,
+      "related": [
+        {
+          "uid": "vit-0170",
+          "kind": "same-spelling"
+        }
+      ],
+      "active": true,
+      "imageFile": "Pict/machine.PNG",
+      "imageStatus": "reviewed",
+      "imageReviewNote": "Existující obraz jako kontext nebo mnemotechnická pomůcka pro význam; nejde o záruku jednoznačné odpovědi ve hře.",
+      "imageSha256": "7bafba2b4c32b857d06bbd2c51830ac55f7cf24a8b132ce3ed40cb1682f93243",
+      "imageRole": "contextual",
+      "reviewOutcome": "approved-new-meaning",
+      "origin": "web",
+      "addedAt": "2026-11-15",
+      "webText": {
+        "sentenceIt": "Questa macchina serve per tagliare il legno.",
+        "sentenceCz": "Tento stroj slouží k řezání dřeva.",
+        "genderIt": "f"
+      }
+    },
+    {
+      "id": 480,
+      "uid": "vit-0480",
+      "it": "pronto",
+      "cz": "připravený; hotový",
+      "matches": [
+        {
+          "it": "pronto",
+          "cz": "připravený; hotový"
+        }
+      ],
+      "legacyOrder": null,
+      "legacyAddedAt": null,
+      "primaryGroup": "topic-14",
+      "topicIds": [
+        "topic-14"
+      ],
+      "partOfSpeech": [
+        "adjective"
+      ],
+      "teachingType": "word",
+      "expressionType": "word",
+      "difficultyBand": 3,
+      "difficultyStatus": "proposed",
+      "editorialStatus": "reviewed",
+      "reviewPriority": "normal",
+      "reviewReasons": [],
+      "lemma": "pronto",
+      "formOfUid": null,
+      "related": [
+        {
+          "uid": "vit-0182",
+          "kind": "same-spelling"
+        }
+      ],
+      "active": true,
+      "imageFile": "Pict/ready.PNG",
+      "imageStatus": "reviewed",
+      "imageReviewNote": "Existující obraz jako kontext nebo mnemotechnická pomůcka pro význam; nejde o záruku jednoznačné odpovědi ve hře.",
+      "imageSha256": "2c66e94cc9f535c99f96fe08b33d5a95365f193a3c6ad9843853a7a9ea878022",
+      "imageRole": "contextual",
+      "reviewOutcome": "approved-new-meaning",
+      "origin": "web",
+      "addedAt": "2026-11-15",
+      "webText": {
+        "sentenceIt": "Sono pronto per partire.",
+        "sentenceCz": "Jsem připravený vyrazit.",
+        "genderIt": ""
+      }
+    },
+    {
+      "id": 481,
+      "uid": "vit-0481",
+      "it": "calcio",
+      "cz": "vápník",
+      "matches": [
+        {
+          "it": "calcio",
+          "cz": "vápník"
+        }
+      ],
+      "legacyOrder": null,
+      "legacyAddedAt": null,
+      "primaryGroup": "topic-02",
+      "topicIds": [
+        "topic-02"
+      ],
+      "partOfSpeech": [
+        "noun"
+      ],
+      "teachingType": "word",
+      "expressionType": "word",
+      "difficultyBand": 3,
+      "difficultyStatus": "proposed",
+      "editorialStatus": "reviewed",
+      "reviewPriority": "normal",
+      "reviewReasons": [],
+      "lemma": "calcio",
+      "formOfUid": null,
+      "related": [
+        {
+          "uid": "vit-0246",
+          "kind": "same-spelling"
+        }
+      ],
+      "active": true,
+      "imageFile": "Pict/milk.jpg",
+      "imageStatus": "reviewed",
+      "imageReviewNote": "Existující obraz jako kontext nebo mnemotechnická pomůcka pro význam; nejde o záruku jednoznačné odpovědi ve hře.",
+      "imageSha256": "b85d76059f187781af9a25a6556330eb331646d8b29b4c3859cb4b92f3bfe883",
+      "imageRole": "contextual",
+      "reviewOutcome": "approved-new-meaning",
+      "origin": "web",
+      "addedAt": "2026-11-15",
+      "webText": {
+        "sentenceIt": "Il latte contiene calcio.",
+        "sentenceCz": "Mléko obsahuje vápník.",
+        "genderIt": "m"
+      }
+    },
+    {
+      "id": 482,
+      "uid": "vit-0482",
+      "it": "gli",
+      "cz": "mu; jemu",
+      "matches": [
+        {
+          "it": "gli",
+          "cz": "mu; jemu"
+        }
+      ],
+      "legacyOrder": null,
+      "legacyAddedAt": null,
+      "primaryGroup": "topic-18",
+      "topicIds": [
+        "topic-18"
+      ],
+      "partOfSpeech": [
+        "pronoun"
+      ],
+      "teachingType": "word",
+      "expressionType": "word",
+      "difficultyBand": 3,
+      "difficultyStatus": "proposed",
+      "editorialStatus": "reviewed",
+      "reviewPriority": "normal",
+      "reviewReasons": [],
+      "lemma": "gli",
+      "formOfUid": null,
+      "related": [
+        {
+          "uid": "vit-0255",
+          "kind": "same-spelling"
+        }
+      ],
+      "active": true,
+      "imageFile": "Pict/him.webp",
+      "imageStatus": "reviewed",
+      "imageReviewNote": "Existující obraz jako kontext nebo mnemotechnická pomůcka pro význam; nejde o záruku jednoznačné odpovědi ve hře.",
+      "reviewOutcome": "approved-new-meaning",
+      "origin": "web",
+      "imageSha256": "aab8654e0393bb5d420809078d5dab8090c9d5b8b713a5bff39702fe09b77d1f",
+      "imageRole": "contextual",
+      "addedAt": "2026-11-15",
+      "webText": {
+        "sentenceIt": "Gli telefono domani mattina.",
+        "sentenceCz": "Zítra ráno mu zavolám.",
+        "genderIt": ""
+      }
+    },
+    {
+      "id": 483,
+      "uid": "vit-0483",
+      "it": "solo",
+      "cz": "pouze; jen",
+      "matches": [
+        {
+          "it": "solo",
+          "cz": "pouze; jen"
+        }
+      ],
+      "legacyOrder": null,
+      "legacyAddedAt": null,
+      "primaryGroup": "topic-18",
+      "topicIds": [
+        "topic-18"
+      ],
+      "partOfSpeech": [
+        "adverb"
+      ],
+      "teachingType": "word",
+      "expressionType": "word",
+      "difficultyBand": 3,
+      "difficultyStatus": "proposed",
+      "editorialStatus": "reviewed",
+      "reviewPriority": "normal",
+      "reviewReasons": [],
+      "lemma": "solo",
+      "formOfUid": null,
+      "related": [
+        {
+          "uid": "vit-0260",
+          "kind": "same-spelling"
+        }
+      ],
+      "active": true,
+      "imageFile": "Pict/only.webp",
+      "imageStatus": "reviewed",
+      "imageReviewNote": "Existující obraz jako kontext nebo mnemotechnická pomůcka pro význam; nejde o záruku jednoznačné odpovědi ve hře.",
+      "imageSha256": "8c10260df50d56f16b561dad9608945f6ee2bfe37dd4b6beff56a9baf8ec06ca",
+      "imageRole": "contextual",
+      "reviewOutcome": "approved-new-meaning",
+      "origin": "web",
+      "addedAt": "2026-11-15",
+      "webText": {
+        "sentenceIt": "Ho solo cinque minuti.",
+        "sentenceCz": "Mám jen pět minut.",
+        "genderIt": ""
+      }
+    },
+    {
+      "id": 484,
+      "uid": "vit-0484",
+      "it": "dolce",
+      "cz": "jemný",
+      "matches": [
+        {
+          "it": "dolce",
+          "cz": "jemný"
+        }
+      ],
+      "legacyOrder": null,
+      "legacyAddedAt": null,
+      "primaryGroup": "topic-14",
+      "topicIds": [
+        "topic-14"
+      ],
+      "partOfSpeech": [
+        "adjective"
+      ],
+      "teachingType": "word",
+      "expressionType": "word",
+      "difficultyBand": 3,
+      "difficultyStatus": "proposed",
+      "editorialStatus": "reviewed",
+      "reviewPriority": "normal",
+      "reviewReasons": [],
+      "lemma": "dolce",
+      "formOfUid": null,
+      "related": [
+        {
+          "uid": "vit-0266",
+          "kind": "same-spelling"
+        }
+      ],
+      "active": true,
+      "imageFile": "Pict/sing.png",
+      "imageStatus": "reviewed",
+      "imageReviewNote": "Existující obraz jako kontext nebo mnemotechnická pomůcka pro význam; nejde o záruku jednoznačné odpovědi ve hře.",
+      "imageSha256": "5a2f29df21a0aef796f1c8b7a462f095e944976c565facfda9558356de2f62f6",
+      "imageRole": "contextual",
+      "reviewOutcome": "approved-new-meaning",
+      "origin": "web",
+      "addedAt": "2026-11-15",
+      "webText": {
+        "sentenceIt": "Ha una voce dolce.",
+        "sentenceCz": "Má jemný hlas.",
+        "genderIt": ""
+      }
+    },
+    {
+      "id": 485,
+      "uid": "vit-0485",
+      "it": "dolce",
+      "cz": "dezert; sladkost",
+      "matches": [
+        {
+          "it": "dolce",
+          "cz": "dezert; sladkost"
+        }
+      ],
+      "legacyOrder": null,
+      "legacyAddedAt": null,
+      "primaryGroup": "topic-05",
+      "topicIds": [
+        "topic-05"
+      ],
+      "partOfSpeech": [
+        "noun"
+      ],
+      "teachingType": "word",
+      "expressionType": "word",
+      "difficultyBand": 3,
+      "difficultyStatus": "proposed",
+      "editorialStatus": "reviewed",
+      "reviewPriority": "normal",
+      "reviewReasons": [],
+      "lemma": "dolce",
+      "formOfUid": null,
+      "related": [
+        {
+          "uid": "vit-0266",
+          "kind": "same-spelling"
+        }
+      ],
+      "active": true,
+      "imageFile": "Pict/cake.png",
+      "imageStatus": "reviewed",
+      "imageReviewNote": "Existující obraz jako kontext nebo mnemotechnická pomůcka pro význam; nejde o záruku jednoznačné odpovědi ve hře.",
+      "imageSha256": "0edc9856c5e8db802eb9a5ccd5d3c4b1f74bfa0db5ab1330d559fe07d5b3235b",
+      "imageRole": "contextual",
+      "reviewOutcome": "approved-new-meaning",
+      "origin": "web",
+      "addedAt": "2026-11-15",
+      "webText": {
+        "sentenceIt": "Dopo cena mangio un dolce.",
+        "sentenceCz": "Po večeři si dám dezert.",
+        "genderIt": "m"
+      }
+    },
+    {
+      "id": 486,
+      "uid": "vit-0486",
+      "it": "a destra",
+      "cz": "vpravo; doprava",
+      "matches": [
+        {
+          "it": "a destra",
+          "cz": "vpravo; doprava"
+        }
+      ],
+      "legacyOrder": null,
+      "legacyAddedAt": null,
+      "primaryGroup": "topic-13",
+      "topicIds": [
+        "topic-13"
+      ],
+      "partOfSpeech": [
+        "adverb"
+      ],
+      "teachingType": "word",
+      "expressionType": "phrase",
+      "difficultyBand": 3,
+      "difficultyStatus": "proposed",
+      "editorialStatus": "reviewed",
+      "reviewPriority": "normal",
+      "reviewReasons": [],
+      "lemma": "a destra",
+      "formOfUid": null,
+      "related": [
+        {
+          "uid": "vit-0295",
+          "kind": "related"
+        }
+      ],
+      "active": true,
+      "imageFile": "Pict/right.jpg",
+      "imageStatus": "reviewed",
+      "imageReviewNote": "Existující obraz jako kontext nebo mnemotechnická pomůcka pro význam; nejde o záruku jednoznačné odpovědi ve hře.",
+      "imageSha256": "21fdd7f15405fde429741b7964ca2d5af24bd91e2a56353b9be43ae20e55bc38",
+      "imageRole": "contextual",
+      "reviewOutcome": "approved-new-meaning",
+      "origin": "web",
+      "addedAt": "2026-11-15",
+      "webText": {
+        "sentenceIt": "Gira a destra.",
+        "sentenceCz": "Odboč doprava.",
+        "genderIt": ""
+      }
+    },
+    {
+      "id": 487,
+      "uid": "vit-0487",
+      "it": "Di niente.",
+      "cz": "Není zač.",
+      "matches": [
+        {
+          "it": "Di niente.",
+          "cz": "Není zač."
+        }
+      ],
+      "legacyOrder": null,
+      "legacyAddedAt": null,
+      "primaryGroup": "topic-17",
+      "topicIds": [
+        "topic-17"
+      ],
+      "partOfSpeech": [],
+      "teachingType": "interaction",
+      "expressionType": "phrase",
+      "difficultyBand": 3,
+      "difficultyStatus": "proposed",
+      "editorialStatus": "reviewed",
+      "reviewPriority": "normal",
+      "reviewReasons": [],
+      "lemma": "Di niente.",
+      "formOfUid": null,
+      "related": [
+        {
+          "uid": "vit-0331",
+          "kind": "related"
+        }
+      ],
+      "active": true,
+      "imageFile": "Pict/yourwelcome.webp",
+      "imageStatus": "reviewed",
+      "imageReviewNote": "Existující obraz jako kontext nebo mnemotechnická pomůcka pro význam; nejde o záruku jednoznačné odpovědi ve hře.",
+      "reviewOutcome": "approved-new-meaning",
+      "origin": "web",
+      "imageSha256": "ea3d0aef79a915d1de9d5a134f0aaea8ff69889ab90f7ee5a0aee81d6966c416",
+      "imageRole": "contextual",
+      "addedAt": "2026-11-15",
+      "webText": {
+        "sentenceIt": "Di niente.",
+        "sentenceCz": "Není zač.",
+        "genderIt": ""
+      }
+    },
+    {
+      "id": 488,
+      "uid": "vit-0488",
+      "it": "perché",
+      "cz": "protože",
+      "matches": [
+        {
+          "it": "perché",
+          "cz": "protože"
+        }
+      ],
+      "legacyOrder": null,
+      "legacyAddedAt": null,
+      "primaryGroup": "topic-18",
+      "topicIds": [
+        "topic-18"
+      ],
+      "partOfSpeech": [
+        "conjunction"
+      ],
+      "teachingType": "word",
+      "expressionType": "word",
+      "difficultyBand": 3,
+      "difficultyStatus": "proposed",
+      "editorialStatus": "reviewed",
+      "reviewPriority": "normal",
+      "reviewReasons": [],
+      "lemma": "perché",
+      "formOfUid": null,
+      "related": [
+        {
+          "uid": "vit-0334",
+          "kind": "same-spelling"
+        }
+      ],
+      "active": true,
+      "imageFile": "Pict/rain.webp",
+      "imageStatus": "reviewed",
+      "imageReviewNote": "Existující obraz jako kontext nebo mnemotechnická pomůcka pro význam; nejde o záruku jednoznačné odpovědi ve hře.",
+      "imageSha256": "177aebb88ae0be9a7ff52d5a36bdeeca5a7db553adef0cb4a497d237b77cdb3d",
+      "imageRole": "contextual",
+      "reviewOutcome": "approved-new-meaning",
+      "origin": "web",
+      "addedAt": "2026-11-15",
+      "webText": {
+        "sentenceIt": "Resto a casa perché piove.",
+        "sentenceCz": "Zůstávám doma, protože prší.",
+        "genderIt": ""
+      }
+    },
+    {
+      "id": 489,
+      "uid": "vit-0489",
+      "it": "sentire",
+      "cz": "cítit",
+      "matches": [
+        {
+          "it": "sentire",
+          "cz": "cítit"
+        }
+      ],
+      "legacyOrder": null,
+      "legacyAddedAt": null,
+      "primaryGroup": "topic-15",
+      "topicIds": [
+        "topic-15"
+      ],
+      "partOfSpeech": [
+        "verb"
+      ],
+      "teachingType": "word",
+      "expressionType": "word",
+      "difficultyBand": 3,
+      "difficultyStatus": "proposed",
+      "editorialStatus": "reviewed",
+      "reviewPriority": "normal",
+      "reviewReasons": [],
+      "lemma": "sentire",
+      "formOfUid": null,
+      "related": [
+        {
+          "uid": "vit-0343",
+          "kind": "same-spelling"
+        }
+      ],
+      "active": true,
+      "imageFile": "Pict/sunflowers.webp",
+      "imageStatus": "reviewed",
+      "imageReviewNote": "Existující obraz jako kontext nebo mnemotechnická pomůcka pro význam; nejde o záruku jednoznačné odpovědi ve hře.",
+      "imageSha256": "bf59de6ae4215c7506fc8178f45e1b40eaf91a5a52d47362a36267595bd68880",
+      "imageRole": "contextual",
+      "reviewOutcome": "approved-new-meaning",
+      "origin": "web",
+      "addedAt": "2026-11-15",
+      "webText": {
+        "sentenceIt": "Sento il profumo dei fiori.",
+        "sentenceCz": "Cítím vůni květin.",
+        "genderIt": ""
+      }
+    },
+    {
+      "id": 490,
+      "uid": "vit-0490",
+      "it": "a sinistra",
+      "cz": "vlevo; doleva",
+      "matches": [
+        {
+          "it": "a sinistra",
+          "cz": "vlevo; doleva"
+        }
+      ],
+      "legacyOrder": null,
+      "legacyAddedAt": null,
+      "primaryGroup": "topic-13",
+      "topicIds": [
+        "topic-13"
+      ],
+      "partOfSpeech": [
+        "adverb"
+      ],
+      "teachingType": "word",
+      "expressionType": "phrase",
+      "difficultyBand": 3,
+      "difficultyStatus": "proposed",
+      "editorialStatus": "reviewed",
+      "reviewPriority": "normal",
+      "reviewReasons": [],
+      "lemma": "a sinistra",
+      "formOfUid": null,
+      "related": [
+        {
+          "uid": "vit-0346",
+          "kind": "related"
+        }
+      ],
+      "active": true,
+      "imageFile": "Pict/left.jpg",
+      "imageStatus": "reviewed",
+      "imageReviewNote": "Existující obraz jako kontext nebo mnemotechnická pomůcka pro význam; nejde o záruku jednoznačné odpovědi ve hře.",
+      "imageSha256": "db153161ff8147b0844ad7387116c16a0bf499b4b11fcf0012d1f4538dab39e6",
+      "imageRole": "contextual",
+      "reviewOutcome": "approved-new-meaning",
+      "origin": "web",
+      "addedAt": "2026-11-15",
+      "webText": {
+        "sentenceIt": "Gira a sinistra.",
+        "sentenceCz": "Odboč doleva.",
+        "genderIt": ""
+      }
+    },
+    {
+      "id": 491,
+      "uid": "vit-0491",
+      "it": "tempo",
+      "cz": "počasí",
+      "matches": [
+        {
+          "it": "tempo",
+          "cz": "počasí"
+        }
+      ],
+      "legacyOrder": null,
+      "legacyAddedAt": null,
+      "primaryGroup": "topic-07",
+      "topicIds": [
+        "topic-07"
+      ],
+      "partOfSpeech": [
+        "noun"
+      ],
+      "teachingType": "word",
+      "expressionType": "word",
+      "difficultyBand": 3,
+      "difficultyStatus": "proposed",
+      "editorialStatus": "reviewed",
+      "reviewPriority": "normal",
+      "reviewReasons": [],
+      "lemma": "tempo",
+      "formOfUid": null,
+      "related": [
+        {
+          "uid": "vit-0353",
+          "kind": "same-spelling"
+        }
+      ],
+      "active": true,
+      "imageFile": "Pict/sun.webp",
+      "imageStatus": "reviewed",
+      "imageReviewNote": "Existující obraz jako kontext nebo mnemotechnická pomůcka pro význam; nejde o záruku jednoznačné odpovědi ve hře.",
+      "imageSha256": "b1f9d46fb7479edca0a208b186411c54027250122e839ce97a475455fdc8f7b7",
+      "imageRole": "contextual",
+      "reviewOutcome": "approved-new-meaning",
+      "origin": "web",
+      "addedAt": "2026-11-15",
+      "webText": {
+        "sentenceIt": "Oggi il tempo è bello.",
+        "sentenceCz": "Dnes je pěkné počasí.",
+        "genderIt": "m"
+      }
+    },
+    {
+      "id": 492,
+      "uid": "vit-0492",
+      "it": "lingua",
+      "cz": "jazyk (orgán)",
+      "matches": [
+        {
+          "it": "lingua",
+          "cz": "jazyk (orgán)"
+        }
+      ],
+      "legacyOrder": null,
+      "legacyAddedAt": null,
+      "primaryGroup": "topic-02",
+      "topicIds": [
+        "topic-02"
+      ],
+      "partOfSpeech": [
+        "noun"
+      ],
+      "teachingType": "word",
+      "expressionType": "word",
+      "difficultyBand": 3,
+      "difficultyStatus": "proposed",
+      "editorialStatus": "reviewed",
+      "reviewPriority": "normal",
+      "reviewReasons": [],
+      "lemma": "lingua",
+      "formOfUid": null,
+      "related": [
+        {
+          "uid": "vit-0401",
+          "kind": "same-spelling"
+        }
+      ],
+      "active": true,
+      "imageFile": "Pict/language.webp",
+      "imageStatus": "reviewed",
+      "imageReviewNote": "Existující obraz jako kontext nebo mnemotechnická pomůcka pro význam; nejde o záruku jednoznačné odpovědi ve hře.",
+      "imageSha256": "dd479b4638ccb281c44537e6ebc6679e1ee4e36820500a1d85fa19b19c20d60d",
+      "imageRole": "contextual",
+      "reviewOutcome": "approved-new-meaning",
+      "origin": "web",
+      "addedAt": "2026-11-15",
+      "webText": {
+        "sentenceIt": "La lingua è nella bocca.",
+        "sentenceCz": "Jazyk je v ústech.",
+        "genderIt": "f"
+      }
+    },
+    {
+      "id": 493,
+      "uid": "vit-0493",
+      "it": "ragione",
+      "cz": "důvod",
+      "matches": [
+        {
+          "it": "ragione",
+          "cz": "důvod"
+        }
+      ],
+      "legacyOrder": null,
+      "legacyAddedAt": null,
+      "primaryGroup": "topic-18",
+      "topicIds": [
+        "topic-18"
+      ],
+      "partOfSpeech": [
+        "noun"
+      ],
+      "teachingType": "word",
+      "expressionType": "word",
+      "difficultyBand": 3,
+      "difficultyStatus": "proposed",
+      "editorialStatus": "reviewed",
+      "reviewPriority": "normal",
+      "reviewReasons": [],
+      "lemma": "ragione",
+      "formOfUid": null,
+      "related": [
+        {
+          "uid": "vit-0413",
+          "kind": "related"
+        }
+      ],
+      "active": true,
+      "imageFile": "Pict/reason.PNG",
+      "imageStatus": "reviewed",
+      "imageReviewNote": "Existující obraz jako kontext nebo mnemotechnická pomůcka pro význam; nejde o záruku jednoznačné odpovědi ve hře.",
+      "imageSha256": "dd83f0a4ef3c673d8615f0e27ad54fd8d68805abfdc4b85bb3c70e05e071e7ad",
+      "imageRole": "contextual",
+      "reviewOutcome": "approved-new-meaning",
+      "origin": "web",
+      "addedAt": "2026-11-15",
+      "webText": {
+        "sentenceIt": "Non conosco la ragione della sua assenza.",
+        "sentenceCz": "Neznám důvod jeho nepřítomnosti.",
+        "genderIt": "f"
+      }
+    },
+    {
+      "id": 494,
+      "uid": "vit-0494",
+      "it": "stare",
+      "cz": "zůstávat; pobývat",
+      "matches": [
+        {
+          "it": "stare",
+          "cz": "zůstávat; pobývat"
+        }
+      ],
+      "legacyOrder": null,
+      "legacyAddedAt": null,
+      "primaryGroup": "topic-16",
+      "topicIds": [
+        "topic-16"
+      ],
+      "partOfSpeech": [
+        "verb"
+      ],
+      "teachingType": "word",
+      "expressionType": "word",
+      "difficultyBand": 3,
+      "difficultyStatus": "proposed",
+      "editorialStatus": "reviewed",
+      "reviewPriority": "normal",
+      "reviewReasons": [],
+      "lemma": "stare",
+      "formOfUid": null,
+      "related": [
+        {
+          "uid": "vit-0417",
+          "kind": "same-spelling"
+        }
+      ],
+      "active": true,
+      "imageFile": "Pict/stay.PNG",
+      "imageStatus": "reviewed",
+      "imageReviewNote": "Existující obraz jako kontext nebo mnemotechnická pomůcka pro význam; nejde o záruku jednoznačné odpovědi ve hře.",
+      "imageSha256": "0de5a9643dee9feac7b6039e736eb079d673b90c8b67c653990b30cba5c723d3",
+      "imageRole": "contextual",
+      "reviewOutcome": "approved-new-meaning",
+      "origin": "web",
+      "addedAt": "2026-11-15",
+      "webText": {
+        "sentenceIt": "Stasera sto a casa.",
+        "sentenceCz": "Dnes večer zůstanu doma.",
+        "genderIt": ""
+      }
+    },
+    {
+      "id": 495,
+      "uid": "vit-0495",
+      "it": "paese",
+      "cz": "vesnice; obec",
+      "matches": [
+        {
+          "it": "paese",
+          "cz": "vesnice; obec"
+        }
+      ],
+      "legacyOrder": null,
+      "legacyAddedAt": null,
+      "primaryGroup": "topic-08",
+      "topicIds": [
+        "topic-08"
+      ],
+      "partOfSpeech": [
+        "noun"
+      ],
+      "teachingType": "word",
+      "expressionType": "word",
+      "difficultyBand": 3,
+      "difficultyStatus": "proposed",
+      "editorialStatus": "reviewed",
+      "reviewPriority": "normal",
+      "reviewReasons": [],
+      "lemma": "paese",
+      "formOfUid": null,
+      "related": [
+        {
+          "uid": "vit-0450",
+          "kind": "same-spelling"
+        }
+      ],
+      "active": true,
+      "imageFile": "Pict/paese.webp",
+      "imageStatus": "reviewed",
+      "imageReviewNote": "Existující obraz jako kontext nebo mnemotechnická pomůcka pro význam; nejde o záruku jednoznačné odpovědi ve hře.",
+      "imageSha256": "314c293bc064d4c68d1344fec8a42b20b14fad8558690e36f8024a903a71fac4",
+      "imageRole": "contextual",
+      "reviewOutcome": "approved-new-meaning",
+      "origin": "web",
+      "addedAt": "2026-11-15",
+      "webText": {
+        "sentenceIt": "Abito in un piccolo paese vicino al mare.",
+        "sentenceCz": "Bydlím v malé vesnici poblíž moře.",
+        "genderIt": "m"
+      }
+    },
+    {
+      "id": 496,
+      "uid": "vit-0496",
+      "it": "congratulazione",
+      "cz": "gratulace; blahopřání (podstatné jméno)",
+      "matches": [
+        {
+          "it": "congratulazione",
+          "cz": "gratulace; blahopřání (podstatné jméno)"
+        }
+      ],
+      "legacyOrder": null,
+      "legacyAddedAt": null,
+      "primaryGroup": "topic-17",
+      "topicIds": [
+        "topic-17"
+      ],
+      "partOfSpeech": [
+        "noun"
+      ],
+      "teachingType": "word",
+      "expressionType": "word",
+      "difficultyBand": 2,
+      "difficultyStatus": "proposed",
+      "editorialStatus": "reviewed",
+      "reviewPriority": "normal",
+      "reviewReasons": [],
+      "lemma": "congratulazione",
+      "formOfUid": null,
+      "related": [
+        {
+          "uid": "vit-0461",
+          "kind": "related"
+        }
+      ],
+      "active": true,
+      "imageFile": "Pict/party.png",
+      "imageStatus": "reviewed",
+      "imageReviewNote": "Existující obraz jako kontext nebo mnemotechnická pomůcka pro význam; nejde o záruku jednoznačné odpovědi ve hře.",
+      "imageSha256": "08a549b09934ac32d78d58bc4c40da5835f71638d3ec4662f1ce2388862a8979",
+      "imageRole": "contextual",
+      "reviewOutcome": "approved-new-meaning",
+      "origin": "web",
+      "addedAt": "2026-11-15",
+      "webText": {
+        "sentenceIt": "Le sue congratulazioni mi fanno piacere.",
+        "sentenceCz": "Jeho blahopřání mě těší.",
+        "genderIt": "f"
+      }
+    },
+    {
+      "id": 497,
+      "uid": "vit-0497",
+      "it": "mai",
+      "cz": "někdy; už někdy (v otázce)",
+      "matches": [
+        {
+          "it": "mai",
+          "cz": "někdy; už někdy (v otázce)"
+        }
+      ],
+      "legacyOrder": null,
+      "legacyAddedAt": null,
+      "primaryGroup": "topic-18",
+      "topicIds": [
+        "topic-18"
+      ],
+      "partOfSpeech": [
+        "adverb"
+      ],
+      "teachingType": "word",
+      "expressionType": "word",
+      "difficultyBand": 3,
+      "difficultyStatus": "proposed",
+      "editorialStatus": "reviewed",
+      "reviewPriority": "normal",
+      "reviewReasons": [],
+      "lemma": "mai",
+      "formOfUid": null,
+      "related": [
+        {
+          "uid": "vit-0463",
+          "kind": "same-spelling"
+        }
+      ],
+      "active": true,
+      "imageFile": "Pict/question.webp",
+      "imageStatus": "reviewed",
+      "imageReviewNote": "Otázka jako mnemotechnická pomůcka: mai se zde učí ve významu někdy/už někdy v otázce. Nejde o význam Říman.",
+      "imageSha256": "14f537f48e34d4b4753c7999ad70e6117d864349e3a777b5089d7620f6d6485f",
+      "imageRole": "mnemonic",
+      "reviewOutcome": "approved-new-meaning",
+      "origin": "web",
+      "addedAt": "2026-11-15",
+      "webText": {
+        "sentenceIt": "Hai mai visitato Roma?",
+        "sentenceCz": "Navštívil jsi někdy Řím?",
+        "genderIt": ""
+      }
     }
   ],
-  "imageManifest": "vocabulary_it_image_manifest.json"
+  "imageManifest": "vocabulary_it_image_manifest.json",
+  "nextId": 498
 }

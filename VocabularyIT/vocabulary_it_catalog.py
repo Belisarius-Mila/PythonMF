@@ -109,6 +109,19 @@ def validate_catalog(catalog: dict) -> dict:
         if identity(entry.get("it"), entry.get("cz")) not in {
                 identity(match["it"], match["cz"]) for match in matches}:
             raise ValueError(f"Hlavní význam není mezi aliasy {uid}.")
+        origin = entry.get("origin", "legacy")
+        if origin not in {"legacy", "web"}:
+            raise ValueError(f"Neznámý původ karty {uid}.")
+        if origin == "web":
+            text = entry.get("webText")
+            if (not isinstance(text, dict) or set(text) != {"sentenceIt", "sentenceCz", "genderIt"}
+                    or not all(isinstance(text.get(key), str) and text[key].strip()
+                               for key in ("sentenceIt", "sentenceCz"))
+                    or text["genderIt"] not in {"", "m", "f"}
+                    or not isinstance(entry.get("addedAt"), str)
+                    or not re.fullmatch(r"\d{4}-\d{2}-\d{2}", entry["addedAt"])
+                    or "sentenceOverride" in entry):
+                raise ValueError(f"Neúplná samostatná webová karta {uid}.")
         image_status = entry.get("imageStatus")
         if image_status not in {"pending-review", "replacement-needed", "reviewed"}:
             raise ValueError(f"Neplatný stav obrazové revize {uid}.")
@@ -128,6 +141,8 @@ def validate_catalog(catalog: dict) -> dict:
                 or set(override) != {"sourceIt", "sourceCz", "it", "cz"}
                 or not all(isinstance(value, str) and value.strip() for value in override.values())):
             raise ValueError(f"Neplatná oprava příkladové věty {uid}.")
+        if "genderOverride" in entry and entry["genderOverride"] not in {"", "m", "f"}:
+            raise ValueError(f"Neplatná webová oprava rodu {uid}.")
         uids.add(uid)
         ids.add(number)
     for entry in entries:
@@ -161,8 +176,10 @@ def resolve_catalog_rows(rows: list[dict], catalog: dict, *, require_all: bool =
             raise ValueError(f"Dva řádky by použily tutéž identitu {entry['uid']}.")
         seen.add(entry["uid"])
         result.append(entry)
-    if require_all and seen != {entry["uid"] for entry in catalog["entries"]}:
-        raise ValueError("Zdrojové CSV nepokrývá všechny původní katalogové identity.")
+    if require_all:
+        legacy = {entry["uid"] for entry in catalog["entries"] if entry.get("origin", "legacy") == "legacy"}
+        if seen != legacy:
+            raise ValueError("Zdrojové CSV nepokrývá všechny původní katalogové identity.")
     return result
 
 
@@ -178,7 +195,16 @@ def effective_card_text(row: dict, entry: dict) -> dict:
             raise ValueError(f"Zdrojová věta se změnila; znovu posuď opravu {entry['uid']}.")
         sentence_it, sentence_cz = override["it"], override["cz"]
     return {"it": entry["it"], "cz": entry["cz"], "sentenceIt": sentence_it,
-            "sentenceCz": sentence_cz, "genderIt": row["gender_it"]}
+            "sentenceCz": sentence_cz, "genderIt": entry.get("genderOverride", row["gender_it"])}
+
+
+def all_card_texts(rows: list[dict], catalog: dict) -> list[tuple[dict, dict]]:
+    """Read legacy cards plus explicit web additions, with no synthetic CSV rows."""
+    resolved = resolve_catalog_rows(rows, catalog, require_all=True)
+    texts = {entry["uid"]: effective_card_text(row, entry) for row, entry in zip(rows, resolved)}
+    return [(entry, {"it": entry["it"], "cz": entry["cz"], **entry["webText"]}
+             if entry.get("origin", "legacy") == "web" else texts[entry["uid"]])
+            for entry in catalog["entries"]]
 
 
 def verify_image_bindings(root: Path, catalog: dict, manifest: dict, *, require_complete: bool = False) -> dict:
@@ -210,7 +236,7 @@ def verify_image_bindings(root: Path, catalog: dict, manifest: dict, *, require_
             "complete": not pending, "exact": True}
 
 
-def verify_input_manifest(root: Path, manifest: dict) -> dict:
+def verify_input_manifest(root: Path, manifest: dict, *, extra_images: set[str] | None = None) -> dict:
     """Verify pinned bytes and exact case against canonical or frozen inputs."""
     root = root.resolve()
     if manifest.get("schemaVersion") != 1 or manifest.get("project") != "VocabularyIT":
@@ -236,7 +262,7 @@ def verify_input_manifest(root: Path, manifest: dict) -> dict:
     expected_images = {name for name, record in files.items() if record.get("kind") == "image"}
     actual_images = {path.relative_to(root).as_posix() for path in (root / "Pict").iterdir()
                      if path.is_file() and path.suffix.lower() in IMAGE_SUFFIXES}
-    if expected_images != actual_images:
+    if expected_images | (extra_images or set()) != actual_images:
         raise ValueError("Změnil se úplný inventář obrazů Pict.")
     return {"verifiedFiles": len(files), "verifiedImages": len(expected_images), "exact": True}
 
@@ -245,29 +271,35 @@ def audit(root: Path, catalog_path: Path = CATALOG, manifest_path: Path = MANIFE
           image_manifest_path: Path | None = None, *, require_complete_images: bool = False) -> dict:
     catalog = load_catalog(catalog_path)
     manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
-    proof = verify_input_manifest(root, manifest)
-    rows = load_rows(root / "VocabularyIT/VocabularyIT.csv")
-    entries = resolve_catalog_rows(rows, catalog, require_all=True)
-    for row, entry in zip(rows, entries):
-        effective_card_text(row, entry)
-    image_proof = {}
+    image_manifest = None
+    extra_images = set()
     if image_manifest_path is not None:
         image_manifest = json.loads(image_manifest_path.read_text(encoding="utf-8"))
-        if image_manifest.get("foundationManifestSha256") != digest(manifest_path):
+        if (image_manifest.get("foundationManifestSha256") != digest(manifest_path)
+                or not isinstance(image_manifest.get("files"), dict)):
             raise ValueError("Obrazová revize patří jinému vstupnímu snímku.")
+        extra_images = set(image_manifest["files"]) - set(manifest["files"])
+    proof = verify_input_manifest(root, manifest, extra_images=extra_images)
+    rows = load_rows(root / "VocabularyIT/VocabularyIT.csv")
+    entries = resolve_catalog_rows(rows, catalog, require_all=True)
+    cards = all_card_texts(rows, catalog)
+    image_proof = {}
+    if image_manifest is not None:
         image_proof = {"imageBindings": verify_image_bindings(
             root, catalog, image_manifest, require_complete=require_complete_images)}
     elif require_complete_images:
         raise ValueError("Úplnost obrazů vyžaduje obrazový manifest.")
-    return {**proof, **image_proof, "cards": len(rows), "identities": len({entry["uid"] for entry in entries}),
-            "topics": len(catalog["groups"]), "allActive": all(entry["active"] for entry in entries),
+    return {**proof, **image_proof, "additionalPinnedImages": len(extra_images),
+            "cards": len(cards), "legacyCards": len(rows),
+            "identities": len({entry["uid"] for entry, _ in cards}),
+            "topics": len(catalog["groups"]), "allActive": all(entry["active"] for entry, _ in cards),
             "metadataStatus": catalog["metadataStatus"],
             "highPriorityReview": [{"uid": entry["uid"], "it": entry["it"], "cz": entry["cz"],
                                     "reasons": entry["reviewReasons"]} for entry in entries
                                    if entry["reviewPriority"] == "high"],
             "genderCounts": dict(Counter(row["gender_it"] or "unspecified" for row in rows)),
-            "teachingTypes": dict(Counter(entry["teachingType"] for entry in entries)),
-            "topicCounts": dict(sorted(Counter(entry["primaryGroup"] for entry in entries).items())),
+            "teachingTypes": dict(Counter(entry["teachingType"] for entry, _ in cards)),
+            "topicCounts": dict(sorted(Counter(entry["primaryGroup"] for entry, _ in cards).items())),
             "csvSha256": digest(root / "VocabularyIT/VocabularyIT.csv"),
             "catalogSha256": digest(catalog_path)}
 

@@ -107,21 +107,21 @@ class VocabularyItalianCatalogTests(unittest.TestCase):
                 if change == "reasons": catalog["reviewCodes"] = None
                 with self.assertRaises(ValueError): it.validate_catalog(catalog)
 
-    def test_all_metadata_are_proposals_and_verb_forms_remain_active(self):
+    def test_approved_meanings_keep_remaining_metadata_proposals_and_active_forms(self):
         entries = self.catalog["entries"]
         self.assertEqual(len(self.catalog["groups"]), 18)
         self.assertEqual({entry["primaryGroup"] for entry in entries}, {f"topic-{n:02d}" for n in range(1, 19)})
-        self.assertTrue(all(entry["editorialStatus"] == "needs-review" for entry in entries))
+        self.assertEqual(sum(entry["editorialStatus"] == "reviewed" for entry in entries), 50)
         self.assertTrue(all(entry["difficultyStatus"] == "proposed" for entry in entries))
-        self.assertEqual(sum(entry["imageStatus"] == "reviewed" for entry in entries), 458)
+        self.assertEqual(sum(entry["imageStatus"] == "reviewed" for entry in entries), 487)
         self.assertEqual(sum(entry["imageStatus"] == "replacement-needed" for entry in entries), 10)
-        self.assertEqual(sum(entry["imageStatus"] == "pending-review" for entry in entries), 3)
+        self.assertEqual(sum(entry["imageStatus"] == "pending-review" for entry in entries), 0)
         self.assertTrue(all(entry["legacyAddedAt"] is None for entry in entries))
         self.assertEqual(entries[465]["formOfUid"], "vit-0467")
         self.assertEqual(entries[469]["formOfUid"], "vit-0205")
         self.assertEqual(entries[470]["lemma"], "quello")
         for n in (466, 470, 471): self.assertTrue(entries[n - 1]["active"])
-        self.assertEqual(sum(entry["teachingType"] == "interaction" for entry in entries), 11)
+        self.assertEqual(sum(entry["teachingType"] == "interaction" for entry in entries), 15)
         self.assertTrue(all(entry["teachingType"] == "word" or not entry["partOfSpeech"] for entry in entries))
 
     def test_web_corrections_preserve_original_identity_and_reject_stale_sentences(self):
@@ -145,7 +145,7 @@ class VocabularyItalianCatalogTests(unittest.TestCase):
         manifest = json.loads((ROOT / "VocabularyIT/vocabulary_it_image_manifest.json").read_text())
         source_files = self.snapshot["files"]
         self.assertEqual(manifest["foundationManifestSha256"], it.digest(it.MANIFEST))
-        self.assertEqual(len(manifest["files"]), 383)
+        self.assertEqual(len(manifest["files"]), 397)
         for path, record in manifest["files"].items():
             self.assertEqual(record["sha256"], source_files[path]["sha256"])
             self.assertEqual(record["bytes"], source_files[path]["bytes"])
@@ -199,19 +199,28 @@ class VocabularyItalianCatalogTests(unittest.TestCase):
             with self.assertRaisesRegex(ValueError, "není dokončená"):
                 it.verify_image_bindings(root, catalog, manifest, require_complete=True)
 
-    def test_content_proposals_cannot_silently_split_or_retag_existing_cards(self):
+    def test_approved_content_preserves_legacy_aliases_and_links_26_new_meanings(self):
         review = json.loads((ROOT / "VocabularyIT/vocabulary_it_content_review.json").read_text())
-        self.assertEqual(review["status"], "awaiting-content-decision")
+        self.assertEqual(review["status"], "approved-and-applied")
         self.assertEqual(len(review["items"]), 24)
         by_uid = {entry["uid"]: entry for entry in self.catalog["entries"]}
         for proposal in review["items"]:
-            self.assertEqual(proposal["state"], "proposal-not-applied")
+            self.assertEqual(proposal["state"], "applied")
             entry = by_uid[proposal["uid"]]
             source = proposal["source"]
-            self.assertEqual((entry["it"], entry["cz"]), (source["it"], source["cz"]))
+            self.assertEqual((entry["it"], entry["cz"]), (proposal["mainProposal"]["it"], proposal["mainProposal"]["cz"]))
             self.assertEqual(it.resolve_catalog_rows([{"IT": source["it"], "CZ": source["cz"]}], self.catalog)[0]["uid"], proposal["uid"])
-            self.assertNotIn("sentenceOverride", entry)
-        self.assertEqual(len(by_uid), 471)
+            self.assertIn("sentenceOverride", entry)
+            for uid in proposal["createdUids"]:
+                self.assertEqual(by_uid[uid]["origin"], "web")
+                self.assertIn(entry["uid"], [link["uid"] for link in by_uid[uid]["related"]])
+        self.assertEqual(len(by_uid), 497)
+        self.assertEqual(sum(len(p["createdUids"]) for p in review["items"]), 26)
+        cards = it.all_card_texts(self.rows, self.catalog)
+        self.assertEqual(len(cards), 497)
+        self.assertEqual(cards[471][0]["uid"], "vit-0472")
+        self.assertEqual(cards[471][1]["sentenceCz"], "Tady nemluv nahlas.")
+        self.assertEqual(cards[412][1]["genderIt"], "")
 
     def test_source_manifest_has_precise_image_names_and_sha_for_every_pinned_input(self):
         images = {name: record for name, record in self.snapshot["files"].items() if record["kind"] == "image"}

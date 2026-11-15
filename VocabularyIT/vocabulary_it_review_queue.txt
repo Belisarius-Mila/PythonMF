@@ -133,3 +133,9 @@ vit-0463 | mai | nikdy, někdy v otázce | topic-12 | mixed-meanings
 vit-0466 | usi | používáš | topic-16 | inflected-form
 vit-0470 | vinti | vyhrané (mužský rod množného čísla) | topic-16 | inflected-form
 vit-0471 | quelle | ty, tamty (ženský rod množného čísla) | topic-18 | inflected-form
+
+Aktualizace po schválení15.11.2026:
+24 významových návrhů aplikováno,26 dalších významů nově vit-0472–0497.
+Storia/gli/niente mají rozhodnuté hlavní významy a existující vazby.
+487 obrazových vazeb připnutých,10 nových ilustrací čeká vizuální přejímku.
+Historický seznam112 neznamená aktuální počet otevřených rozhodnutí.

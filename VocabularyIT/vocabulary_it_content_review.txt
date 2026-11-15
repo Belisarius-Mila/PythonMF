@@ -1,3 +1,6 @@
+AKTUÁLNÍ STAV15.11.2026: Míla schválil návrh;24 úprav je použito,26 dalších významů přidáno.
+Web497 karet, původní CSV471 zachované. Níže je původní návrh a na konci potvrzený výsledek.
+
 VOCABULARY IT — REVIZE VÝZNAMŮ A OBRÁZKŮ, 15.11.2026
 
 Stav: lokální podklad druhého bodu, nikoli hotová webová aplikace.
@@ -192,3 +195,44 @@ https://www.treccani.it/vocabolario/niente/ — niente versus Di niente
 https://www.treccani.it/vocabolario/piacere/ — slovesné piacere
 https://www.treccani.it/vocabolario/infatti/ — potvrzení/vysvětlení, proto obraz true
 https://accademiadellacrusca.it/it/consulenza/uso-di-gli-per-a-lui-a-loro-e-a-lei/102 — zájmeno gli = a lui
+
+
+SCHVÁLENO A ZAPRACOVÁNO, 15.11.2026
+Míla: Se vším souhlasím, pokračuj…
+Původní návrh výše je zachovaný jako historie. Všech24 hlavních úprav je nyní použito
+a dalších26 významů má nové samostatné webové identity. Původních471 řádků CSV
+a jejich UID, rody a L/HT zůstává zachovaných. Webový katalog má497 karet.
+U gli zůstává původní karta členem, zájmeno má novou identitu; u niente původní
+karta učí nic a reakce Di niente. má novou kartu.
+
+Nové webové karty (datum skutečného přidání15.11.2026):
+vit-0472 | forte | nahlas
+vit-0473 | tedesco | němčina
+vit-0474 | storia | historie; dějiny
+vit-0475 | piacere | potěšení
+vit-0476 | male | zlo
+vit-0477 | fare male | bolet
+vit-0478 | forza | síla
+vit-0479 | macchina | stroj
+vit-0480 | pronto | připravený; hotový
+vit-0481 | calcio | vápník
+vit-0482 | gli | mu; jemu
+vit-0483 | solo | pouze; jen
+vit-0484 | dolce | jemný
+vit-0485 | dolce | dezert; sladkost
+vit-0486 | a destra | vpravo; doprava
+vit-0487 | Di niente. | Není zač.
+vit-0488 | perché | protože
+vit-0489 | sentire | cítit
+vit-0490 | a sinistra | vlevo; doleva
+vit-0491 | tempo | počasí
+vit-0492 | lingua | jazyk (orgán)
+vit-0493 | ragione | důvod
+vit-0494 | stare | zůstávat; pobývat
+vit-0495 | paese | vesnice; obec
+vit-0496 | congratulazione | gratulace; blahopřání (podstatné jméno)
+vit-0497 | mai | někdy; už někdy (v otázce)
+
+10 nových ilustrací je vygenerovaných do oddělené pracovní sady,
+čekají na vizuální schválení. Původní Pict a mapping se nemění.
+Čtecí náhled: Vocabulary_IT_kontrola_10_obrazku_2026-11-15.html v Downloads.

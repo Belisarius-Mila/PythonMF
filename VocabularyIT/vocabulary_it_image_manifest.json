@@ -1061,6 +1061,20 @@
       "height": 1024,
       "format": "WEBP"
     },
+    "Pict/him.webp": {
+      "sha256": "aab8654e0393bb5d420809078d5dab8090c9d5b8b713a5bff39702fe09b77d1f",
+      "bytes": 213484,
+      "width": 1254,
+      "height": 1254,
+      "format": "WEBP"
+    },
+    "Pict/history.PNG": {
+      "sha256": "9d0c189a0136dd039849990c76d166de849bc35edfb23b9c3e10611a0e1052b3",
+      "bytes": 134652,
+      "width": 768,
+      "height": 615,
+      "format": "PNG"
+    },
     "Pict/home.jpg": {
       "sha256": "109ef908524fca3c8bef73a438e282391277967b93bb79a52db16fc3ca1e821d",
       "bytes": 101799,
@@ -1222,6 +1236,13 @@
       "height": 563,
       "format": "PNG"
     },
+    "Pict/language.webp": {
+      "sha256": "dd479b4638ccb281c44537e6ebc6679e1ee4e36820500a1d85fa19b19c20d60d",
+      "bytes": 121792,
+      "width": 1024,
+      "height": 1024,
+      "format": "WEBP"
+    },
     "Pict/leavealone.webp": {
       "sha256": "a7fd0b7efd0a45d8ec88af9529ea59dd4ed79a8c96aa2a60500c69530b336289",
       "bytes": 151930,
@@ -1255,6 +1276,13 @@
       "bytes": 155027,
       "width": 768,
       "height": 615,
+      "format": "PNG"
+    },
+    "Pict/letsgo.PNG": {
+      "sha256": "6ba55659a4a4996753afa019737d56a255c797372a08dde278edb0d71dafcc1f",
+      "bytes": 250860,
+      "width": 960,
+      "height": 960,
       "format": "PNG"
     },
     "Pict/life.PNG": {
@@ -1291,6 +1319,20 @@
       "width": 1024,
       "height": 1024,
       "format": "WEBP"
+    },
+    "Pict/loud.png": {
+      "sha256": "52ea4856bd7c8068e5319ff0d8d7966462824d6e05e9d9c88e3f60f683d1fad8",
+      "bytes": 220814,
+      "width": 768,
+      "height": 768,
+      "format": "PNG"
+    },
+    "Pict/machine.PNG": {
+      "sha256": "7bafba2b4c32b857d06bbd2c51830ac55f7cf24a8b132ce3ed40cb1682f93243",
+      "bytes": 41026,
+      "width": 704,
+      "height": 563,
+      "format": "PNG"
     },
     "Pict/man.png": {
       "sha256": "738047ee61b90a800cc46af78b6450a212f62be2c1ff9eecc63c9f9b056cd0be",
@@ -1354,6 +1396,13 @@
       "width": 1024,
       "height": 1024,
       "format": "WEBP"
+    },
+    "Pict/milk.jpg": {
+      "sha256": "b85d76059f187781af9a25a6556330eb331646d8b29b4c3859cb4b92f3bfe883",
+      "bytes": 102142,
+      "width": 901,
+      "height": 1351,
+      "format": "JPEG"
     },
     "Pict/miror.jpg": {
       "sha256": "6a6836cd878a08121ea27c69a1543937801b7ceb21ff37a17f320b96738dd355",
@@ -1481,6 +1530,13 @@
       "height": 563,
       "format": "PNG"
     },
+    "Pict/nothing.png": {
+      "sha256": "9ae2e0b28fb021e6dde0415d54ad875aa97aa4e6c9c78546bf44f54ae430b699",
+      "bytes": 279416,
+      "width": 768,
+      "height": 768,
+      "format": "PNG"
+    },
     "Pict/nove.webp": {
       "sha256": "5afdbfbb56dbedac3cc8a065bace95775a47dc8c6abde2e268159455dc8d7b43",
       "bytes": 114080,
@@ -1544,6 +1600,13 @@
       "height": 740,
       "format": "PNG"
     },
+    "Pict/only.webp": {
+      "sha256": "8c10260df50d56f16b561dad9608945f6ee2bfe37dd4b6beff56a9baf8ec06ca",
+      "bytes": 151340,
+      "width": 1254,
+      "height": 1254,
+      "format": "WEBP"
+    },
     "Pict/open.PNG": {
       "sha256": "5760ab0555e9161c554023450a6bd9908ca291f3eed4d93b14548dfe8899aa56",
       "bytes": 92122,
@@ -1592,6 +1655,13 @@
       "width": 576,
       "height": 576,
       "format": "PNG"
+    },
+    "Pict/paese.webp": {
+      "sha256": "314c293bc064d4c68d1344fec8a42b20b14fad8558690e36f8024a903a71fac4",
+      "bytes": 239010,
+      "width": 1024,
+      "height": 1024,
+      "format": "WEBP"
     },
     "Pict/painevil.webp": {
       "sha256": "9def2cb7a8dc8a6a9e7541eb8b87bb340a89ba04fdde40390852ae470e98177b",
@@ -1712,13 +1782,6 @@
       "height": 1024,
       "format": "WEBP"
     },
-    "Pict/power.PNG": {
-      "sha256": "d2a43b7b5c9630f1ee72d6d567caab259ea875472a1430b6e85c61ddec3f27ba",
-      "bytes": 144634,
-      "width": 704,
-      "height": 704,
-      "format": "PNG"
-    },
     "Pict/pray.webp": {
       "sha256": "6fbeac7caaa70134d02fab5f75dbe59ce4f741ce2a2d9944ada9e2ee7f89ada1",
       "bytes": 103272,
@@ -1775,6 +1838,13 @@
       "height": 1024,
       "format": "WEBP"
     },
+    "Pict/question.webp": {
+      "sha256": "14f537f48e34d4b4753c7999ad70e6117d864349e3a777b5089d7620f6d6485f",
+      "bytes": 152128,
+      "width": 1254,
+      "height": 1254,
+      "format": "WEBP"
+    },
     "Pict/race.PNG": {
       "sha256": "4be987f3ee368c75118248f087f5e8116429bf0d48ecc4fbc2f61296946382b4",
       "bytes": 150302,
@@ -1796,6 +1866,13 @@
       "height": 1024,
       "format": "WEBP"
     },
+    "Pict/ready.PNG": {
+      "sha256": "2c66e94cc9f535c99f96fe08b33d5a95365f193a3c6ad9843853a7a9ea878022",
+      "bytes": 104957,
+      "width": 704,
+      "height": 563,
+      "format": "PNG"
+    },
     "Pict/ready.webp": {
       "sha256": "95fcdab3727e3ca27a11b3f4e32e08c67b69800d50894851c22f05630c890d5b",
       "bytes": 42906,
@@ -1808,6 +1885,13 @@
       "bytes": 281974,
       "width": 740,
       "height": 740,
+      "format": "PNG"
+    },
+    "Pict/reason.PNG": {
+      "sha256": "dd83f0a4ef3c673d8615f0e27ad54fd8d68805abfdc4b85bb3c70e05e071e7ad",
+      "bytes": 222490,
+      "width": 832,
+      "height": 832,
       "format": "PNG"
     },
     "Pict/remember.webp": {
@@ -2131,6 +2215,13 @@
       "width": 576,
       "height": 576,
       "format": "PNG"
+    },
+    "Pict/sunflowers.webp": {
+      "sha256": "bf59de6ae4215c7506fc8178f45e1b40eaf91a5a52d47362a36267595bd68880",
+      "bytes": 197250,
+      "width": 1254,
+      "height": 1254,
+      "format": "WEBP"
     },
     "Pict/sure.webp": {
       "sha256": "ede266ba70b7b09cd1af507cc7f36263437aec8ebca64ecc02ba88cd787252f1",
@@ -2677,6 +2768,13 @@
       "width": 768,
       "height": 768,
       "format": "PNG"
+    },
+    "Pict/yourwelcome.webp": {
+      "sha256": "ea3d0aef79a915d1de9d5a134f0aaea8ff69889ab90f7ee5a0aee81d6966c416",
+      "bytes": 36150,
+      "width": 1024,
+      "height": 1024,
+      "format": "WEBP"
     },
     "Pict/zero.PNG": {
       "sha256": "177f794a035b81937718fcf60a8ed378e56ef1a73c8b63d852be7ba019c3667f",
