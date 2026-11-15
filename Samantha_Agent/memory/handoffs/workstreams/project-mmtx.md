@@ -1,6 +1,8 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
+- 2026-11-15: Místně připraven samostatný rozcestník Matýsek angličtina se třemi velkými dlaždicemi MMTX / Colors and Numbers / Vocabulary EN a přenosným HTML v Downloads. HTTP15/15 PASS; GUI/PC přejímka a nové Pages p+n otevřené. Podrobnosti v závěrečném záznamu níže.
+
 - 2026-11-11 20:46 CET: Přátelé1–4 s jednotným ovládáním jsou na Pages2106bead nezávisle potvrzené: workflow43090037585 success, deployment7719962425 success, veřejné HTML/JS/CSS/player4/4 HTTP200 a byte/SHA exact (168015 B). Terra jobae8ee174 potvrdil push a plnou bránu3487 PASS /639,7 s, ale předčasně skončil attention s deployment_state=uncertain; účtenka zůstává nezměněná. Žádná další publikace, pouze čtecí dokončení již spuštěného workflow. Main/origin čisté/aligned, 0 pending, oba profily aligned. Data závěrečný receipt je místní; hlasová a iPhone přejímka otevřená.
 
 - 2026-11-11 20:33 CET: Terra p+n první balíček d35e81a6 zastavilo v plné bráně3487 testů (1 FAIL: Node mimo servisní PATH). GitHub read-only stále f6770814, žádný push/deployment; starý job504e3635 uzavřený a neopakovat. Test opraven společným node_binary() s vynucením systémového PATH; nový přesný audit a request data-mmtx-friends-playback-44bfbb5f-20261111-v2 po kontrolách. Kód přehrávače/MP3 beze změny.
@@ -1457,3 +1459,55 @@ Hotovo: Do main převzatý závěr Data3035fc14 a jeho dosud nesloučená histor
 Důkaz: Report `data_repository_integration_20261112.md` popisuje rozsah a ověření. Původní účtenky jsou historické důkazy z10.–11.11., nikoli nový provozní audit. Žádná nová aktivace, modelový tah, push ani nasazení.
 
 Rizika a další krok: Přejímky na zařízení a procesní nejistota původního Pages publisheru zůstávají otevřené. Hotové lokální commity čekají na samostatný pokyn k publikaci. Datův vlastní worktree a rozpracovaná UI větev se nemění.
+
+
+### 2026-11-15 15:58 CET — Matýsek angličtina: samostatný třídlaždicový rozcestník
+
+Hotovo: Připravená statická stránka docs/matysek-anglictina/ se záhlavím
+„Matýsek angličtina“ a třemi velkými obrazovými odkazy: Matýsek MMTX,
+Colors and Numbers, Vocabulary EN. Celá dlaždice je odkaz ve stejném panelu;
+návrat přes historii prohlížeče. V Downloads je přenosný MatysekAngličtina.html
+s vloženými styly a absolutními veřejnými odkazy, použitelný z plochy PC
+s připojením k internetu. Existující aplikace a obrázky se nemění.
+
+Rozhodnutí: Míla zadal samostatný jednoduchý dětský rozcestník pro všechny tři
+aplikace a název ikony MatysekAngličtina. Použité existující ilustrace Benjiho,
+sovy a slovníkové kartičky. Žádný nový účet, JavaScript, úložiště ani automatické
+přehrávání. Veřejný cíl po vydání: /PythonMF/matysek-anglictina/ v project-mmtx.
+
+Další krok: Mílova přejímka přenosného HTML a samostatné potvrzení p+n,
+poté ověřit veřejnou cestu a dodat finální Windows internetový zástupce.
+
+Navrhované další kroky: Otevření na vnukově PC a přenesení zástupce na plochu.
+Vocabulary IT zůstává ve fázi hotové analýzy; tímto krokem se nerozvíjí.
+
+Technický důkaz: Struktura přesně 3 odkazy, 3 obrázky, 1 h1, žádný script;
+15 místních/veřejných HTTP kontrol PASS, přesné cíle tří aplikací a jejich
+ilustrací. Plná programová brána prošla: 4000 testů / 859,8 s, validation-v2.
+Důkaz je v data/private/matysek_anglictina_20261115/validation_full.json;
+receipt 4a9d0800f90964ee7bc3da2d206fc9f01b8b1957a392a63ac119423bc544fafb.
+Vlastní větev data/matysek-anglictina-20261115 nad 95037bfe;
+main a ostatní Datovy worktrees zachované. GUI přejímka otevřená: browser host nedostupný, nativní Safari
+odmítlo akce při změně aktivní aplikace a jednou vypršel požadavek. Vzhled
+v prohlížeči ani Windows fyzicky neprohlašovat za přijatý. Bez push/nasazení.
+
+
+## 2026-11-15 16:39 CET — Schválené vydání všech commitů bez plné brány a úklid
+
+Hotovo: Připraven společný balíček v3 validace4972819a a Datova rozcestníku
+Matýsek angličtina260121d3. Nový web má přesně tři odkazy; původní aplikace
+se nemění. Sloučení zachovává oba paměťové zápisy i přesné Datovy webové soubory.
+
+Rozhodnutí: Míla výslovně zadal všechny commity p+n, vyčistit repo a bez plné
+brány. Nejprve registrovaně načíst již cíleně ověřenou v3, pak jediné
+submit_release(wait=True) pro každý cíl: infrastruktura/Cockpit a MMTX/Pages.
+Žádný ruční --full. Úklid využívá dnešní potvrzení globální brzdy a nynější
+výslovný pokyn: pouze dokončené větve/kopie; soukromé věci zachovat,
+rozpracované a používané worktrees neodstraňovat. Bez přepisování historie.
+
+Další krok: Převzít konkrétní účtenky vydání, ověřit /matysek-anglictina/ a
+provést připravený úklid. Navrhované další kroky: lidská přejímka na Windows.
+Technický důkaz: v3 vlastní207 testů PASS, Datův hotový rozcestník má své
+původní ověření; nezměněné části se znovu netestují. Před integračním commitem
+pouze statika. Výsledky a přesné job ID/časy/úklidový manifest budou v
+private focused_pn_cleanup_20261115/. Tento zápis sám nepotvrzuje publikaci.

@@ -2103,3 +2103,24 @@ v private validation_focused_20261115/completion.json; bez PASS se neuzavírá.
 Žádný nový ostrý p+n/restart, role, kalendářový/poštovní zápis či nový TVBCP.
 Předchozí skutečné v2 vydání95037bfe obou cílů je doložené v
 private all_pending_release_20261115/completion.json, nikoli novým živým auditem.
+
+
+## 2026-11-15 16:39 CET — Schválené vydání všech commitů bez plné brány a úklid
+
+Hotovo: Připraven společný balíček v3 validace4972819a a Datova rozcestníku
+Matýsek angličtina260121d3. Nový web má přesně tři odkazy; původní aplikace
+se nemění. Sloučení zachovává oba paměťové zápisy i přesné Datovy webové soubory.
+
+Rozhodnutí: Míla výslovně zadal všechny commity p+n, vyčistit repo a bez plné
+brány. Nejprve registrovaně načíst již cíleně ověřenou v3, pak jediné
+submit_release(wait=True) pro každý cíl: infrastruktura/Cockpit a MMTX/Pages.
+Žádný ruční --full. Úklid využívá dnešní potvrzení globální brzdy a nynější
+výslovný pokyn: pouze dokončené větve/kopie; soukromé věci zachovat,
+rozpracované a používané worktrees neodstraňovat. Bez přepisování historie.
+
+Další krok: Převzít konkrétní účtenky vydání, ověřit /matysek-anglictina/ a
+provést připravený úklid. Navrhované další kroky: lidská přejímka na Windows.
+Technický důkaz: v3 vlastní207 testů PASS, Datův hotový rozcestník má své
+původní ověření; nezměněné části se znovu netestují. Před integračním commitem
+pouze statika. Výsledky a přesné job ID/časy/úklidový manifest budou v
+private focused_pn_cleanup_20261115/. Tento zápis sám nepotvrzuje publikaci.
