@@ -92,7 +92,7 @@ def run_checkpoint_quality_gate(
     before = store = baseline = None
     try:
         base, paths = changed_paths(repo, validation_base)
-        plan = select_validation_plan(paths)
+        plan = select_validation_plan(paths, repo=repo, base=base)
         if plan.reason == "policy_runtime_requires_reload":
             raise ValidationPolicyError("Validation runtime requires reload.")
         before = capture_inputs(repo)
@@ -115,8 +115,10 @@ def run_checkpoint_quality_gate(
             previous_scope, current_scope = dict(compatible["scope_inputs"]), dict(before.scope)
             scope_changes = [name for name in previous_scope.keys() | current_scope.keys()
                              if previous_scope.get(name) != current_scope.get(name)]
-            compatible_plan = select_validation_plan(scope_changes)
-            if compatible_plan.mode == "targeted":
+            compatible_plan = select_validation_plan(scope_changes, repo=repo)
+            new_code = any(name not in previous_scope and Path(name).suffix in {'.py', '.js', '.swift'}
+                           for name in scope_changes)
+            if compatible_plan.mode == "targeted" and not new_code:
                 plan, baseline = compatible_plan, compatible
         if plan.mode == "targeted" and baseline is None:
             plan = ValidationPlan("full", reason="verified_baseline_required")
@@ -156,7 +158,9 @@ def run_checkpoint_quality_gate(
             failure_type="gate_process_error",
         ) from exc
     duration = round(time.monotonic() - started, 1)
-    output = f"{completed.stdout or ''}\n{completed.stderr or ''}".strip()
+    output = (f"Validation policy: {POLICY_VERSION}; mode: {plan.mode}; reason: {plan.reason}; "
+              f"domains: {','.join(plan.domains)}\n"
+              f"{completed.stdout or ''}\n{completed.stderr or ''}").strip()
     log_path.parent.mkdir(parents=True, exist_ok=True)
     atomic_write_text(log_path, output[-MAX_GATE_LOG_CHARS:] + "\n")
     matches = re.findall(r"Ran\s+(\d+)\s+tests", output)

@@ -1,19 +1,25 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
-## 2026-11-15 11:55 CET — Jednotná validace a účtenky místně
+## 2026-11-15 14:48 CET — Doménová validace místně
 
-Míla schválil trvalé zrychlení ověření/p+n. Společná programová politika
-vybírá plné nebo pevné cílené testy; přesně shodný obsah/prostředí lze převzít
-z podepsané místní účtenky. Základ nejvýše24h, změněný rizikový kód vždy plná
-sada. Automatické zápisy checkpointu vyžadují jen odpovídající dokumentační
-testy, pokud ostatní otestované bajty zůstaly stejné. Starý skip testy neobchází.
-Regrese a frontendové ověření PASS; závěrečný plný výsledek/počty/čas i měření
-cache jsou v data/private/validation_policy_20261115/completion.json a Git
-metadatech. Dokončení uzavírá pouze skutečná PASS účtenka, nikoli tento text.
-Pravidla technical/validation_policy.md; projekt projects/samantha_validation.md.
-Další krok: samostatně povolené p+n nového backendu a převzetí skutečné úspory
-celého vydání. Běžící Cockpit zatím starý; push, restart a deploy neprovedené.
-Média/historie Gitu, ostré zálohy a aktivní Data se v tomto kroku nemění.
-Další optimalizace Git testovacích fixture a oddělení médií jen jako návrhy.
+Schválená druhá etapa: pevná mapa12 domén a skutečné závislosti vybírají
+potřebné testy. Kalendářový writer:282 testů,39,283s unit /56,874s celý
+běh místo předchozích3972/645,4s. Neznámé vazby, nový spustitelný soubor
+nebo společný kritický kód mají plnou sadu; počet300 není ořezávací strop.
+Cílený místní běh stále potřebuje podepsaný plný základ stejného prostředí
+nejvýše24h. GitHub má stejný výběr plus denní02:17 UTC/ruční úplnou regresi;
+rozvrh začne platit až po budoucím schváleném pushi, bez místního plánovače.
+Git fixture používají nezávislé kopie procesové šablony bez hardlinků.
+94 cílených a112 Git/release regresí PASS. Závěrečný úplný důkaz této
+změny pravidel, přesné počty/časy a finální otisky jsou pouze v
+`data/private/validation_domains_20261115/completion.json`; krok uzavře jen PASS.
+Pravidla `technical/validation_policy.md`, projekt `projects/samantha_validation.md`,
+report `reports/validation_domains_20261115.md`. Samostatné p+n není zadané.
+
+Předchozí v1 byla skutečně vydaná v38a33532, job
+0203d0fbaf6cae4b993c7fa4670a9bb6; tento historický doklad není nový živý audit.
+Kalendářový f2b56fa3 i tato v2 zůstávají místní. Žádný push, deploy, restart,
+helper/grant, calendar create ani zásah do aktivního Data. Původní kalendářový
+unknown neuzavírat a neopakovat zápis. Další krok: samostatně potvrzené p+n.
 
 ## 2026-11-15 11:18 CET — Trvalá oprava evidence zálohy hotová místně
 
@@ -2011,3 +2017,36 @@ Technické zdroje: https://github.com/apple-oss-distributions/PowerManagement/bl
 (System Capabilities) a https://github.com/apple-oss-distributions/xnu/blob/main/iokit/IOKit/pwr_mgt/IOPM.h
 (Graphics0x02). Provozní cesta je lokální Mac; GitHub uchovává kód a Pushcut
 doručuje oznámení.
+
+
+## 2026-11-15 14:48 CET — Potřebné doménové testy místo celé sady při každé opravě
+
+Hotovo: Existující kalendářový zapisovač má282 potřebných testů a celý
+ověřovací běh56,874s, přibližně11× rychleji než poslední plná brána.
+Společný základ a všechny kalendářové bezpečnostní/recovery scénáře zůstávají.
+Git testy mají nezávislé kopie jednou vytvořené šablony; soukromá data nejsou sdílená.
+
+Rozhodnutí: Míla schválil doménové balíčky/závislosti, denní plnou CI regresi
+a zrychlení Git fixture pokynem OK, jdi na to. Neznámé/shared kritické zásahy,
+nové spustitelné soubory a samotná politika zůstávají plné. Počet testů není
+bezpečnostní strop. Zachovaný podpis, přesné vstupy a24h plný místní základ;
+CI není místní publikační účtenka. Jeden křehký hash test nahrazen existující
+funkční kompoziční kontrolou, další testovací soubory se nemažou.
+
+Další krok: Samostatně autorizované p+n nového backendu; noční CI až po pushi.
+Navrhované další kroky: Po skutečném vydání převzít délku doménového p+n.
+Další slučování testů pouze při doložené duplicitě; média/historie se nepřesouvají.
+
+Technický důkaz:94 cílených PASS, kalendář282/0 chyb/0 skip,39,283s unit,
+56,874s celkem;112 Git/checkpoint/release PASS /120,044s. Čtyři původně
+nejdražší Git moduly nyní106,396s proti historickým190,805s (odlišný běh,
+nikoli řízený A/B). Přímé měření přípravy osmi fixture je v soukromé
+fixture_setup_comparison.json. Regrese pokrývají relative/reverse importy,
+neznámé/dynamické vazby, změnu fixture, stale mapu/registr, obsahové změny při
+stejném mtime, celý CI diff/mělký checkout a zákaz nového kódu přes scope cache.
+Závěrečná povinná plná brána této změny pravidel, skutečný počet a nezměněné
+finální otisky jsou pouze v data/private/validation_domains_20261115/completion.json
+podle reportu validation_domains_20261115.md; bez skutečného PASS se neuzavírá.
+Tato v2 ani f2b56fa3 nejsou publikované; předchozí v1 vydání38a33532 je historicky
+doložené účtenkou0203d0fbaf6cae4b993c7fa4670a9bb6. Žádný nový modelový běh,
+restart, pošta/calendar zápis, EventKit grant, ostrá záloha či zásah do Data.

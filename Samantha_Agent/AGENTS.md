@@ -63,10 +63,12 @@ Společné pracovní instrukce PythonMF; cesty níže jsou vůči `Samantha_Agen
 
 ## Ověření a Git podle prostředí
 
-- Pro běžnou změnu proveď cílené ověření a před lokálním commitem rychlou
-  statickou bránu. Plná brána zůstává povinná ihned u rizikových změn workflow,
-  závislostí, checkpointu, dávkového push/deploy procesu, persistence, záloh,
-  transakcí nebo odchozího e-mailu a kalendáře.
+- Pro běžnou změnu proveď programem vybranou doménovou bránu včetně statických
+  kontrol a závislých testů. Platí i pro opravu kalendáře nebo doménového zápisu;
+  jejich bezpečnostní a recovery testy se nevynechávají. Plná brána je povinná
+  při změně společného workflow, závislostí, checkpointu, push/deploy procesu,
+  sdílené persistence, záloh, transakcí či validačních pravidel a při neznámém
+  dopadu. Nový spustitelný soubor před prvním vydáním vyžaduje plný základ.
 - Úspěšné ověření nezměněné části neopakuj bez nového důvodu. Opakuj je po
   relevantní změně, při selhání či konkrétní nevyřešené pochybnosti;
   povinné publikační a bezpečnostní brány tím nejsou přeskočeny.
@@ -74,9 +76,11 @@ Společné pracovní instrukce PythonMF; cesty níže jsou vůči `Samantha_Agen
   `app/communication/validation_policy.py` a `memory/technical/validation_policy.md`.
   Lokálně použij registrovaný `validate_project` (`scripts/validation_gate.py`).
   Model nesmí volit rychlejší režim ani pro publikaci použít samotné
-  `--skip-unit-tests`. Neznámé, rizikové a vlastní změny validačních pravidel
+  `--skip-unit-tests`. Neznámé, společné kritické a vlastní změny validačních pravidel
   vyžadují plnou bránu; její platnou podepsanou účtenku přesně stejných vstupů
-  lze převzít podle programové politiky. Známé malé změny mají pevné cílené testy.
+  lze převzít podle programové politiky. Mapu domén rozšiřují skutečné Python
+  závislosti; při nejistotě se výběr rozšíří na plnou sadu, nikdy se neořízne
+  na požadovaný počet. GitHub CI má navíc denní a ručně spustitelnou plnou sadu.
 - **Terminálový Adam na `main`:** po dokončeném vývojovém kroku vytvoř jeden
   lokální commit z konkrétně zkontrolovaných souborů, pokud Míla neřekl
   `bez commitu`. Read-only audit a diagnostika commit nevytvářejí.

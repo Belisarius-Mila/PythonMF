@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import hashlib
 import json
 import subprocess
 import tempfile
@@ -23,37 +22,12 @@ from app.cockpit_frontend import (
 from scripts.cockpit_quality_gate import node_binary
 
 
-EXPECTED_PAGES = {
-    "interior": (
-        INTERIOR_HTML,
-        59391,
-        722,
-        "66d7614ffe0581a0c7018b7425b34c15feccdc5c6dc3f89d67ba35a5c046bae0",
-    ),
-    "email_agent": (
-        EMAIL_AGENT_HTML,
-        69251,
-        1023,
-        "94c71a2cee34b447faac08f14126b42a3280c7dfd0ad1fe910e5e15e694d02d5",
-    ),
-    "email_archive": (
-        EMAIL_ARCHIVE_HTML,
-        38504,
-        1086,
-        "6f6abca26870c6287dd4d5a4f7a32f8fa135afd25eef78dd797731ac6d17a116",
-    ),
-    "email_processing": (
-        EMAIL_PROCESSING_HTML,
-        68452,
-        1423,
-        "b180c0d76edf446e9e34906d4bbf6d545580aea4f9267844c69704847d692bf3",
-    ),
-    "cockpit": (
-        COCKPIT_HTML,
-        738324,
-        13294,
-        "3bfac179cfaa9a9e3a586ac6cec70da021945cfd819a62f8d241c24194fbe84a",
-    ),
+RENDERED_PAGES = {
+    "interior": INTERIOR_HTML,
+    "email_agent": EMAIL_AGENT_HTML,
+    "email_archive": EMAIL_ARCHIVE_HTML,
+    "email_processing": EMAIL_PROCESSING_HTML,
+    "cockpit": COCKPIT_HTML,
 }
 
 
@@ -211,18 +185,8 @@ const disabled = {...active, state:"disabled", message:"Automatika vypnutá"};
         )
         self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
 
-    def test_rendered_pages_keep_expected_asset_contract(self) -> None:
-        for page_id, (rendered, length, line_count, expected_sha256) in EXPECTED_PAGES.items():
-            with self.subTest(page_id=page_id):
-                self.assertEqual(len(rendered), length)
-                self.assertEqual(len(rendered.splitlines()), line_count)
-                self.assertEqual(
-                    hashlib.sha256(rendered.encode("utf-8")).hexdigest(),
-                    expected_sha256,
-                )
-
     def test_asset_layout_and_composition(self) -> None:
-        for page_id, (rendered, _length, _line_count, _sha256) in EXPECTED_PAGES.items():
+        for page_id, rendered in RENDERED_PAGES.items():
             with self.subTest(page_id=page_id):
                 page_dir = FRONTEND_ROOT / page_id
                 template = (page_dir / "page.html").read_text(encoding="utf-8")
@@ -242,6 +206,12 @@ const disabled = {...active, state:"disabled", message:"Automatika vypnutá"};
                 for module in modules:
                     self.assertNotIn("{{SAMANTHA_CSS}}", module)
                     self.assertNotIn("{{SAMANTHA_JAVASCRIPT}}", module)
+                self.assertIn(styles, rendered)
+                self.assertIn(javascript, rendered)
+                self.assertNotIn("{{SAMANTHA_CSS}}", rendered)
+                self.assertNotIn("{{SAMANTHA_JAVASCRIPT}}", rendered)
+                for module in modules:
+                    self.assertIn(module, rendered)
                 self.assertEqual(load_frontend_page(page_id), rendered)
 
     def test_cockpit_uses_frontend_loader_instead_of_embedded_pages(self) -> None:

@@ -6,6 +6,7 @@ private Git metadata, outside model workspaces and the versioned source tree.
 """
 from __future__ import annotations
 
+import ast
 import hashlib
 import hmac
 import importlib.metadata
@@ -25,11 +26,15 @@ from pathlib import Path
 from typing import Callable, Iterable
 
 from app.communication.git_runtime import GIT_EXECUTABLE
+from app.communication.validation_domains import (BOUNDARY_TESTS, CORE_TESTS,
+    LOADED_SOURCE_HASH, modules_for_scopes, scopes_for_path)
 from app.file_persistence import FilePersistenceError, atomic_create_bytes, atomic_write_json
 
-POLICY_VERSION = "validation-v1"
+POLICY_VERSION = "validation-v2"
 MAX_RECEIPT_AGE_SECONDS = 24 * 60 * 60
 _LOADED_POLICY_SOURCE = hashlib.sha256(Path(__file__).read_bytes()).hexdigest()
+_DOMAIN_SOURCE = Path(__file__).with_name('validation_domains.py')
+_LOADED_DOMAIN_SOURCE = LOADED_SOURCE_HASH
 DOC_TESTS = ("tests.test_human_adam_workstream_memory", "tests.test_memory_truth_audit")
 FRONTEND_TESTS = ("tests.test_cockpit_frontend", "tests.test_article_archive",
                   "tests.test_book_cover", "tests.test_library_photos", "tests.test_cockpit_pwa")
@@ -38,8 +43,6 @@ _DOC_NAMES = frozenset({"Samantha_Agent/memory/ACTIVE_PROJECTS.md",
                         "Samantha_Agent/memory/LESSONS_LEARNED.md"})
 _DOC_PREFIXES = tuple("Samantha_Agent/memory/" + name + "/"
                       for name in ("handoffs", "projects", "reports", "tvbcp"))
-_FRONTEND_NAMES = frozenset("Samantha_Agent/app/frontend/cockpit/" + name for name in
-                          ("styles.css", "library_travel.js", "library_photos.js", "library_image_worker.js"))
 
 
 class ValidationPolicyError(RuntimeError):
@@ -51,6 +54,7 @@ class ValidationPlan:
     mode: str
     modules: tuple[str, ...] = ()
     reason: str = "unknown_or_sensitive_change"
+    domains: tuple[str, ...] = ()
 
     @property
     def recipe(self) -> str:
@@ -65,30 +69,149 @@ def _digest(value) -> str:
     return hashlib.sha256(_encoded(value)).hexdigest()
 
 
-def select_validation_plan(paths: Iterable[str]) -> ValidationPlan:
-    if _file_hash(Path(__file__)) != _LOADED_POLICY_SOURCE:
+def select_validation_plan(paths: Iterable[str], *, repo: Path | None = None,
+                           base: str | None = None) -> ValidationPlan:
+    if (_file_hash(Path(__file__)) != _LOADED_POLICY_SOURCE
+            or _file_hash(_DOMAIN_SOURCE) != _LOADED_DOMAIN_SOURCE
+            or not _registry_is_current()):
         return ValidationPlan("full", reason="policy_runtime_requires_reload")
-    modules: set[str] = set()
+    modules: set[str] = set(CORE_TESTS)
+    domains: set[str] = set()
+    names = []
     seen = False
     for raw in paths:
         seen = True
-        name = str(raw).replace("\\", "/")
-        if name.startswith("/") or ".." in name.split("/"):
+        name = str(raw)
+        if name.startswith("/") or ".." in name.split("/") or "\\" in name:
             return ValidationPlan("full", reason="invalid_change_path")
+        names.append(name)
         selected = _modules_for_path(name)
         if selected is None:
             return ValidationPlan("full")
         modules.update(selected)
+        domains.update(_scopes(name))
     if not seen:
         return ValidationPlan("full", reason="no_new_scope_requires_existing_proof")
-    return ValidationPlan("targeted", tuple(sorted(modules)), "known_documentation_or_frontend")
+    if repo is not None:
+        try:
+            # New executable code is verified fully before first publication.
+            if base:
+                previous = set(os.fsdecode(p) for p in git(repo, 'ls-tree', '-r', '--name-only', '-z', base).split(b'\0') if p)
+                if any(Path(n).suffix in {'.py', '.js', '.swift'} and n not in previous for n in names):
+                    return ValidationPlan('full', reason='new_code_requires_full_baseline')
+            extra, reached = _dependent_tests(repo, names)
+            modules.update(extra)
+            domains.update(reached)
+        except ValidationPolicyError as exc:
+            return ValidationPlan('full', reason=str(exc))
+        except (OSError, SyntaxError, UnicodeError):
+            return ValidationPlan('full', reason='unverified_dependency')
+    return ValidationPlan("targeted", tuple(sorted(modules)), "reviewed_domains", tuple(sorted(domains)))
+
+
+def _registry():
+    from scripts.cockpit_quality_gate import TEST_MODULES
+    return TEST_MODULES
+
+
+def _registry_is_current():
+    from scripts import cockpit_quality_gate as gate
+    return _file_hash(Path(gate.__file__)) == gate.LOADED_SOURCE_HASH
+
+
+def _scopes(name):
+    relative = name.removeprefix('Samantha_Agent/')
+    return scopes_for_path(relative, _registry())
 
 
 def _modules_for_path(name: str) -> tuple[str, ...] | None:
     if name in _DOC_NAMES or (name.startswith(_DOC_PREFIXES)
                               and Path(name).suffix.lower() in {".md", ".txt", ".json"}):
         return DOC_TESTS
-    return FRONTEND_TESTS if name in _FRONTEND_NAMES else None
+    scopes = _scopes(name)
+    if scopes:
+        return tuple(sorted(modules_for_scopes(scopes, _registry())))
+    return None
+
+
+def _dependent_tests(repo: Path, changed: list[str]) -> tuple[set[str], set[str]]:
+    """Reverse static imports, with reviewed composition/consumer contracts.
+
+    Unknown consumers, parse errors or dynamic imports in changed code fail
+    closed. Swift/JS/runtime protocol edges belong to the explicit domain map.
+    """
+    def module_name(name):
+        return name[:-3].replace('/', '.').removesuffix('.__init__')
+    seeds = {module_name(n.removeprefix('Samantha_Agent/')) for n in changed
+             if n.startswith(('Samantha_Agent/app/', 'Samantha_Agent/tests/')) and n.endswith('.py')}
+    if not seeds:
+        return set(), set()
+    project = repo / 'Samantha_Agent'
+    paths = [p for folder in ('app', 'tests') for p in (project/folder).rglob('*.py')]
+    modules = {module_name(p.relative_to(project).as_posix()): p for p in paths}
+    sources = tuple((name, path.name == '__init__.py', path.read_text(encoding='utf-8'))
+                    for name, path in sorted(modules.items()))
+    reverse, dynamic = _import_graph(sources)
+    if seeds & dynamic:
+        raise ValidationPolicyError('dynamic_dependency_requires_full')
+    selected, scopes, seen = set(), set(), set(seeds)
+    pending = list(seeds)
+    while pending:
+        current = pending.pop()
+        for consumer in reverse.get(current, ()):
+            if consumer in seen:
+                continue
+            seen.add(consumer)
+            if consumer in BOUNDARY_TESTS:
+                selected.update(BOUNDARY_TESTS[consumer])
+                continue
+            if consumer.startswith('tests.'):
+                if consumer not in _registry():
+                    raise ValidationPolicyError('unregistered_consumer_test')
+                selected.add(consumer)
+                # Changing a fixture expands all fixture users. Merely running
+                # a test does not change fixtures exported by that test module.
+                if current.startswith('tests.'):
+                    pending.append(consumer)
+                continue
+            path = 'Samantha_Agent/' + modules[consumer].relative_to(project).as_posix()
+            owned = _scopes(path)
+            if not owned:
+                raise ValidationPolicyError('unassigned_dependent:'+consumer)
+            scopes.update(owned)
+            selected.update(modules_for_scopes(owned, _registry()))
+            pending.append(consumer)
+    return selected, scopes
+
+
+@lru_cache(maxsize=1)
+def _import_graph(sources):
+    """Cache by actual source text, never mtime; no stale dependency edges."""
+    reverse, dynamic = {}, set()
+    for name, is_package, source in sources:
+        tree = ast.parse(source)
+        package = name.split('.') if is_package else name.split('.')[:-1]
+        for node in ast.walk(tree):
+            if isinstance(node, ast.Call) and (
+                    isinstance(node.func, ast.Name) and node.func.id in {'__import__','exec','eval'}
+                    or isinstance(node.func, ast.Attribute)
+                    and node.func.attr in {'import_module','__import__','exec','eval'}):
+                dynamic.add(name)
+            imports = []
+            if isinstance(node, ast.Import):
+                imports = [alias.name for alias in node.names]
+                if any(alias.name.split('.')[0] in {'importlib','runpy'} for alias in node.names):
+                    dynamic.add(name)
+            elif isinstance(node, ast.ImportFrom):
+                prefix = package[:len(package)-node.level+1] if node.level else []
+                base = '.'.join([*prefix, *([node.module] if node.module else [])])
+                imports = [base, *[base+'.'+alias.name for alias in node.names]]
+                if base.split('.')[0] in {'importlib','runpy'} or (
+                        base == 'builtins' and any(a.name in {'__import__','exec','eval'} for a in node.names)):
+                    dynamic.add(name)
+            for imported in imports:
+                reverse.setdefault(imported, set()).add(name)
+    return reverse, dynamic
 
 
 def git(repo: Path, *args: str) -> bytes:

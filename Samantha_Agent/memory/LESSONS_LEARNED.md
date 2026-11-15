@@ -2665,3 +2665,10 @@ Příští CLI běh opravu načte, nová ostrá záloha v tomto vývojovém krok
 - Kontext: create se vrátil jako write_unknown a přehled našel jednu odpovídající celodenní událost s koncem o1 sekundu dříve. Apple TN3130 popisuje23:59:59 místo půlnoci dalšího dne.
 - Řešení: jen celodenní konec přesně23:59:59 normalizovat pro porovnání a výlučné end_day; nativní end/identitu zachovat. Začátek, všechny ostatní údaje, marker a alarmy kontrolovat přesně. Původní journal/UUID se nemění, recovery nikdy nedává další create. V2 zdroj oddělit od zdroje živého helperu; nový build/grant a unknown musejí zůstat dostupné přes existující UI.
 - Ověření: skutečná Swift logika proti fake EventKit FAIL→PASS,21 scénářů obou reprezentací/DST/neshod a zákazu dalšího save;238 integračních PASS. Podepsaný preview/6 self-test PASS, jeho read-only probe potřebuje vlastní Mac grant a nic nezapsal. Plný závěrečný důkaz v private completion.json podle reports/calendar_all_day_verification_20261115.md; přesná živá markerová identita zůstává otevřená.
+
+
+### 2026-11-15 — Doménová validace potřebuje i skutečné konzumenty
+
+- Kontext:3972 testů při kalendářové opravě; pevný úzký seznam UI/dokumentů neuměl běžnou doménovou změnu.
+- Řešení: pevná serverová mapa domén a malý společný základ, rozšířené reverzními importy a explicitními konzumentskými hranicemi. Test spuštěný kvůli produkci sám nerozšiřuje své nezměněné fixture uživatele; změněná fixture ano. Neznámá/dynamická vazba, nový spustitelný soubor a společný kritický zásah znamenají plnou sadu. Stejná CI politika plus denní/ruční full; žádný klientský výběr počtu.
+- Ověření:282 kalendářových PASS /56,874s celý běh,94 cílených a112 Git/release regresí PASS. Zákaz nového kódu přes podepsanou scope cache, stale mapa/registr i změna obsahu se stejným mtime pokryté. Fixture úplně kopírované bez hardlinků, ověřené oddělené refs/index/objekty/syntetická tajemství. Závěrečný plný důkaz v private completion.json podle validation_domains_20261115.md.

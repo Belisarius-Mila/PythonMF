@@ -1,7 +1,9 @@
 from __future__ import annotations
 
 import subprocess
+import shutil
 import tempfile
+import threading
 import unittest
 from pathlib import Path
 from unittest.mock import patch
@@ -33,7 +35,26 @@ def git(cwd: Path, *args: str) -> str:
     return completed.stdout.strip()
 
 
+_SOURCE_TEMPLATE = None
+_SOURCE_TEMPLATE_LOCK = threading.Lock()
+
+
 def make_source(root: Path) -> Path:
+    """Copy an immutable synthetic seed; all worktrees/Git metadata stay private.
+
+    No hardlinks: mutations of refs, index, tracked or ignored files in one
+    fixture must never modify another fixture or the reusable seed.
+    """
+    global _SOURCE_TEMPLATE
+    with _SOURCE_TEMPLATE_LOCK:
+        if _SOURCE_TEMPLATE is None:
+            _SOURCE_TEMPLATE = tempfile.TemporaryDirectory(prefix='samantha-git-test-seed-')
+            _initialize_source(Path(_SOURCE_TEMPLATE.name))
+        seed = Path(_SOURCE_TEMPLATE.name) / 'source'
+        return Path(shutil.copytree(seed, root/'source', symlinks=True))
+
+
+def _initialize_source(root: Path) -> Path:
     source = root / "source"
     source.mkdir()
     git(source, "init", "-b", "main")
@@ -52,6 +73,31 @@ def make_source(root: Path) -> Path:
     (private_dir / "secret.txt").write_text("secret\n", encoding="utf-8")
     (source / "AuditCockpit56_M.txt").write_text("untracked\n", encoding="utf-8")
     return source
+
+
+class SourceFixtureIsolationTests(unittest.TestCase):
+    def test_seed_copies_have_independent_objects_refs_index_and_private_files(self):
+        with tempfile.TemporaryDirectory() as temp:
+            root=Path(temp)
+            roots=[root/name for name in ('first','second','third')]
+            for item in roots:
+                item.mkdir()
+            first,second=(make_source(item) for item in roots[:2])
+            initial=git(second,'rev-parse','HEAD')
+            tracked='Samantha_Agent/tracked.py'
+            (first/tracked).write_text('VALUE = 99\n')
+            (first/'Samantha_Agent/data/private/secret.txt').write_text('changed synthetic value\n')
+            git(first,'add',tracked)
+            git(first,'commit','-m','First fixture only')
+            third=make_source(roots[2])
+            for clean in (second,third):
+                self.assertEqual(git(clean,'rev-parse','HEAD'),initial)
+                self.assertEqual((clean/tracked).read_text(),'VALUE = 1\n')
+                self.assertEqual((clean/'Samantha_Agent/data/private/secret.txt').read_text(),'secret\n')
+                self.assertNotEqual((first/'.git/index').stat().st_ino,(clean/'.git/index').stat().st_ino)
+                obj=next((clean/'.git/objects').glob('[0-9a-f][0-9a-f]/*'))
+                peer=first/obj.relative_to(clean)
+                self.assertNotEqual(obj.stat().st_ino,peer.stat().st_ino)
 
 
 class GitExecutableTests(unittest.TestCase):

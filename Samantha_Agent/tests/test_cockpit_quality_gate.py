@@ -169,35 +169,15 @@ class CockpitQualityGateTests(unittest.TestCase):
         self.assertIn("async function sendMessage(event)", source)
         self.assertIn("async function loadDocument()", source)
 
-    def test_workflow_triggers_cover_communication_layer_and_match(self) -> None:
-        workflow_path = PROJECT_ROOT.parent / ".github" / "workflows" / "cockpit-quality-gate.yml"
-        source = workflow_path.read_text(encoding="utf-8")
-
-        def trigger_paths(trigger: str, end_marker: str) -> set[str]:
-            start = source.index(f"  {trigger}:")
-            end = source.index(end_marker, start)
-            block = source[start:end]
-            return set(re.findall(r'^\s+- "([^"]+)"$', block, flags=re.MULTILINE))
-
-        pull_request_paths = trigger_paths("pull_request", "  push:")
-        push_paths = trigger_paths("push", "\npermissions:")
-        required = {
-            ".github/workflows/cockpit-quality-gate.yml",
-            "Samantha_Agent/app/cockpit_frontend.py",
-            "Samantha_Agent/app/cockpit_readonly_routes.py",
-            "Samantha_Agent/app/frontend/**",
-            "Samantha_Agent/app/communication/**",
-            "Samantha_Agent/tests/test_communication*.py",
-            "Samantha_Agent/tests/test_human_adam*.py",
-            "Samantha_Agent/tests/test_simple_main_*.py",
-            "Samantha_Agent/tests/test_local_appserver_runtime.py",
-            "Samantha_Agent/app/family_calendar.py",
-            "Samantha_Agent/app/family_calendar_delivery*.py",
-            "Samantha_Agent/tests/test_family_calendar*.py",
-        }
-
-        self.assertEqual(pull_request_paths, push_paths)
-        self.assertTrue(required.issubset(push_paths), required - push_paths)
+    def test_ci_checks_every_change_and_schedules_one_full_daily_run(self):
+        source=(PROJECT_ROOT.parent/'.github/workflows/cockpit-quality-gate.yml').read_text()
+        triggers=source.split('permissions:')[0]
+        self.assertIn('  pull_request:',triggers)
+        self.assertIn('  push:',triggers)
+        self.assertIn('  schedule:',triggers)
+        self.assertIn('  workflow_dispatch:',triggers)
+        self.assertNotIn('paths:',triggers)
+        self.assertIn('run: python scripts/validation_ci.py',source)
 
     def test_source_metrics_counts_only_top_level_definitions(self) -> None:
         source = """class Example:

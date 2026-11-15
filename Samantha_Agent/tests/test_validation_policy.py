@@ -10,6 +10,8 @@ import unittest
 from unittest.mock import patch
 
 from app.communication import validation_policy as policy
+from app.communication.validation_domains import CORE_TESTS, modules_for_scopes
+from scripts.cockpit_quality_gate import TEST_MODULES
 from app.communication.checkpoint_quality_gate import HumanAdamGateError, run_checkpoint_quality_gate
 from app.communication.human_adam_workspace import HumanAdamWorkspaceManager
 
@@ -31,7 +33,8 @@ class ValidationPolicyTests(unittest.TestCase):
         self.project = self.repo / "Samantha_Agent"
         self.write("scripts/cockpit_quality_gate.py", "# synthetic gate\n")
         self.write("app/frontend/cockpit/styles.css", "body { color: black; }\n")
-        for name in (*policy.DOC_TESTS, *policy.FRONTEND_TESTS):
+        for name in {*policy.DOC_TESTS, *policy.FRONTEND_TESTS, *CORE_TESTS,
+                     *modules_for_scopes({'calendar'},TEST_MODULES)}:
             self.write(name.replace(".", "/") + ".py", "# synthetic module\n")
         self.commit()
         self.base = git(self.repo, "rev-parse", "HEAD")
@@ -69,11 +72,12 @@ class ValidationPolicyTests(unittest.TestCase):
         result = policy.select_validation_plan(["Samantha_Agent/memory/reports/example.md",
                                                 "Samantha_Agent/app/frontend/cockpit/library_travel.js"])
         self.assertEqual(result.mode, "targeted")
-        self.assertEqual(set(result.modules), set(policy.DOC_TESTS + policy.FRONTEND_TESTS))
+        self.assertTrue(set(policy.DOC_TESTS + CORE_TESTS).issubset(result.modules))
+        self.assertIn('tests.test_library_photos',result.modules)
 
     def test_sensitive_unknown_empty_and_policy_changes_require_full(self):
         for name in ("app/backup/incremental.py", "app/file_persistence.py", "app/email/service.py",
-                     "app/calendar_writer.py", "config/agent_roles.json", "requirements.txt", "AGENTS.md",
+                     "config/agent_roles.json", "requirements.txt", "AGENTS.md",
                      "app/communication/validation_policy.py", "app/unknown.py", "tests/new_test.py"):
             with self.subTest(path=name):
                 plan = policy.select_validation_plan(["Samantha_Agent/" + name,
@@ -93,9 +97,22 @@ class ValidationPolicyTests(unittest.TestCase):
         self.write("app/frontend/cockpit/styles.css", "body { color: blue; }\n")
         result = self.run_gate()
         self.assertEqual(result.mode, "targeted")
-        self.assertEqual(self.calls[0][-len(policy.FRONTEND_TESTS):], list(sorted(policy.FRONTEND_TESTS)))
+        selected=self.calls[0][self.calls[0].index('--test-modules')+1:]
+        self.assertTrue(set(CORE_TESTS).issubset(selected))
+        self.assertIn('tests.test_library_photos',selected)
         self.write("app/backup/synthetic.py", "VALUE = 1\n")
         self.assertEqual(self.run_gate().mode, "full")
+
+    def test_scoped_calendar_edit_requires_write_tests_and_new_source_cannot_use_scope_cache(self):
+        self.write('app/calendar_writer.py','VALUE = 1\n')
+        self.commit()
+        self.base=git(self.repo,'rev-parse','HEAD')
+        self.certify_baseline()
+        self.write('app/calendar_writer.py','VALUE = 2\n')
+        self.assertEqual(self.run_gate().mode,'targeted')
+        self.assertIn('tests.test_email_calendar_write',self.calls[-1])
+        self.write('app/calendar_unreviewed_new.py','VALUE = 3\n')
+        self.assertEqual(self.run_gate().mode,'full')
 
     def test_identical_pass_is_reused_and_bound_after_local_commit(self):
         self.write("app/new_code.py", "VALUE = 1\n")
@@ -122,7 +139,7 @@ class ValidationPolicyTests(unittest.TestCase):
         self.commit()
         result = self.run_gate()
         self.assertEqual(result.mode, "targeted")
-        self.assertEqual(self.calls[-1][-len(policy.DOC_TESTS):], list(sorted(policy.DOC_TESTS)))
+        self.assertEqual(set(self.calls[-1][self.calls[-1].index('--test-modules')+1:]),set(policy.DOC_TESTS+CORE_TESTS))
         self.assertTrue(self.run_gate().reused)
         self.write("app/new_code.py", "VALUE = 2\n")
         self.assertEqual(self.run_gate().mode, "full")

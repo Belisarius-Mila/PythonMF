@@ -5,6 +5,7 @@ from __future__ import annotations
 
 import argparse
 import ast
+import hashlib
 import os
 import re
 import shutil
@@ -18,12 +19,15 @@ from typing import Sequence
 
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
+LOADED_SOURCE_HASH = hashlib.sha256(Path(__file__).read_bytes()).hexdigest()
 NODE_FALLBACK_PATHS = (
     Path("/opt/homebrew/bin/node"),
     Path("/usr/local/bin/node"),
 )
 
 COMPILE_PATHS = (
+    "app/communication/validation_domains.py",
+    "scripts/validation_ci.py",
     "app/calendar_event_time.py",
     "app/vocabulary_authoring.py",
     "app/book_legacy_cleanup.py",
@@ -418,6 +422,9 @@ TEST_MODULES = (
     "tests.test_backup_run_tools",
     "tests.test_cockpit_quality_gate",
     "tests.test_validation_policy",
+    "tests.test_validation_domains",
+    "tests.test_memory_truth_audit",
+    "tests.test_book_cover",
     "tests.test_codex_sessions",
     "tests.test_screen_sessions",
     "tests.test_screen_recovery",
