@@ -1,0 +1,87 @@
+:root {
+  color-scheme: light;
+  font-family: "Trebuchet MS", "Segoe UI", system-ui, sans-serif;
+  color: #233c46;
+  background: #fbf7ed;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+}
+* { box-sizing: border-box; }
+body { margin: 0; }
+.page { width: min(1220px, 100%); margin: auto; padding: 54px 36px 24px; }
+.welcome { text-align: center; margin-bottom: 38px; }
+.welcome-mark {
+  display: inline-block; padding: 8px 18px; border-radius: 12px 12px 12px 3px;
+  color: #28584e; background: #deede0; font-weight: 800; font-size: 18px;
+  transform: rotate(-6deg);
+}
+h1 { margin: 17px 0 12px; font-size: clamp(36px, 5vw, 60px); line-height: 1.12; letter-spacing: -2px; }
+h1 span { color: #287461; }
+.welcome p { margin: 0; color: #53636b; font-size: 21px; line-height: 1.5; }
+.games { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 25px; }
+.game {
+  --accent: #805028; --soft: #fff0d6;
+  display: flex; flex-direction: column; min-width: 0; color: inherit; text-decoration: none;
+  border: 2px solid #e6dfcf; border-radius: 25px; background: #fffefb;
+  box-shadow: 0 7px 0 #e9e3d4; overflow: hidden;
+  transition: transform 150ms ease, box-shadow 150ms ease, border-color 150ms ease;
+}
+.colors { --accent: #78492c; --soft: #f9e6ce; }
+.words { --accent: #286a5b; --soft: #e2f0e7; }
+.game:focus-visible { outline: 4px solid #244f92; outline-offset: 6px; }
+.picture { position: relative; height: 246px; overflow: hidden; background: #f7eee0; }
+.picture img { display: block; width: 100%; height: 100%; object-fit: cover; }
+.story img { object-position: 43% 50%; }
+.colors img { object-position: 50% 28%; }
+.words .picture { background: #f5fcfc; }
+.words img { object-fit: contain; padding: 4px 0 20px; }
+.category {
+  position: absolute; left: 15px; bottom: 14px; max-width: calc(100% - 30px);
+  padding: 8px 12px; border-radius: 10px; background: #fffdf4; color: #34434a;
+  box-shadow: 0 2px 8px #182b3b14; font-size: 13px; font-weight: 800; line-height: 1.25;
+}
+.numbers { position: absolute; display: flex; gap: 6px; top: 14px; right: 14px; transform: rotate(5deg); }
+.numbers b {
+  display: grid; place-items: center; width: 34px; height: 39px; border-radius: 9px;
+  color: #fff; background: #bd3e3c; font-size: 24px; box-shadow: 0 3px 0 #0002;
+}
+.numbers b:nth-child(2) { background: #286a96; transform: translateY(5px); }
+.numbers b:nth-child(3) { background: #4c722f; }
+.word-card {
+  position: absolute; top: 15px; right: 14px; padding: 8px 12px; background: #fff;
+  border: 1px solid #dceae3; border-radius: 10px; font-size: 16px; font-weight: 800;
+  transform: rotate(5deg); color: #286a5b; box-shadow: 0 3px 0 #dae7de;
+}
+.word-card span { margin-left: 7px; }
+.game-body { padding: 23px 23px 24px; flex: 1; display: flex; flex-direction: column; }
+h2 { font-size: clamp(21px, 2vw, 27px); letter-spacing: -.7px; line-height: 1.2; margin: 0 0 12px; }
+.game-body p { margin: 0 0 25px; color: #53616a; font-size: 16px; line-height: 1.65; }
+.play {
+  display: flex; justify-content: space-between; align-items: center; gap: 12px;
+  margin-top: auto; padding: 13px 16px; color: var(--accent); background: var(--soft);
+  border-radius: 12px; font-size: 18px; font-weight: 800; min-height: 50px;
+}
+.play span { font-size: 23px; line-height: 1; }
+footer { margin: 28px 0 0; color: #637074; text-align: center; font-size: 14px; line-height: 1.6; }
+@media (hover: hover) {
+  .game:hover { transform: translateY(-5px); border-color: var(--accent); box-shadow: 0 12px 0 #e9e3d4; }
+}
+@media (max-width: 1000px) and (min-width: 741px) {
+  .page { padding: 34px 24px 24px; }
+  .games { gap: 16px; }
+  .game-body { padding: 20px 16px; }
+  .picture { height: 205px; }
+  h2 { min-height: 2.4em; }
+}
+@media (max-width: 740px) {
+  .page { width: min(480px, 100%); padding: 30px 20px 24px; }
+  .welcome { margin-bottom: 27px; }
+  h1 { font-size: clamp(32px, 7.5vw, 40px); letter-spacing: -1.2px; }
+  .welcome p { font-size: 17px; }
+  .games { grid-template-columns: minmax(0, 1fr); gap: 24px; }
+  .picture { height: 225px; }
+  h2 { font-size: 26px; }
+  .game-body { padding: 21px; }
+  .game-body p { margin-bottom: 18px; }
+}
+@media (prefers-reduced-motion: reduce) { .game { transition: none; } }
