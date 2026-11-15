@@ -1,6 +1,18 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
+### Cestování / místa — zjednodušení místně dokončené
+
+Priorita: 2; stav: ceka na prejimku/nasazeni; připomenout při startu: ano.
+
+- Schválený přehled míst s fotografiemi/úvodem a samostatný detail. Správa
+  i export pod Další možnosti, návrat drží hledání a pozici. Ostatní kategorie
+  zachované.114 cílených PASS a izolovaný browser320/390/1280 PASS.
+- Soukromá data se nemigrují, náhledy jen čtou existující text a ID fotografie.
+- Další krok: samostatně schválené nasazení, potom fyzický iPhone.
+  Kód je pouze místní. Podrobně reports/travel_places_ui_20261115.md.
+
+
 ### Knihy — skupiny Konspektu nasazené
 
 Priorita: 2; stav: rozpracovane; připomenout při startu: ano.
@@ -1203,3 +1215,27 @@ code_stamp42ad54202295bc7c/PID32060, GitHub zarovnaný. Native účtenka zkontro
 portálový returned_to_adam se nepotvrzuje. Private release_receipt.json a
 release_live_verification.json v book_conspectus_groups_20261114/.
 Fyzický iPhone zatím neověřený; žádná migrace knih ani změna pošty.
+
+
+## 2026-11-15 08:05 CET — Cestování / místa: klidnější přehled a samostatný detail místně
+
+Hotovo: Cestování / místa má přehled karet s fotografií a krátkým úvodem,
+hledání, jeden přepínač kategorií a nabídku Přidat místo. Detail na telefonu
+i desktopu ukáže místo, fotografie a poznámky; Další možnosti a údaje
+obsahují původní správu, stav čtení a export. Správa fotografií je při editaci.
+Zpět zachová hledání i pozici; stejný kontext zůstane po uložení úprav/stavu.
+Rozhodnutí: Míla schválil navržené zjednodušení a zahájení vývoje, warp1.
+Rozsah je pouze Cestování / místa; ostatní kategorie zachovávají původní UI.
+Další krok: Samostatně schválené nasazení a potom fyzická přejímka na iPhonu.
+Navrhované další kroky: Dříve otevřená přejímka knih a poštovní A+C zůstávají
+oddělené. Další přestavba Knihovny ani nové cestovní funkce nejsou součástí.
+Technický důkaz:114 cílených PASS /16,501s, sestavený celý Cockpit v izolovaném
+Edge320/390/1280 bez přetékání a nechycených výjimek. Návrat, fotografie,
+PDF, ochrana rozepsaného textu, uložení, chyba čtení a opožděná odpověď PASS.
+Jen2 syntetické POST (stav/edit),0 produkčních POST; soukromé karty se
+nepřepisovaly. Náhled čte nejvýše2048 znaků již uloženého textu a vrací
+max241 znaků, kontroluje kořen archivu; fotka se odkazuje původním ID.
+Žádná migrace, model, generování či aktivace. Report
+reports/travel_places_ui_20261115.md; privátní důkazy travel_ui_20261115/.
+Statická brána PASS; plná publikační brána až při schváleném p+n.
+Tento výsledek je místní, bez push/nasazení a fyzické iPhone přejímky.

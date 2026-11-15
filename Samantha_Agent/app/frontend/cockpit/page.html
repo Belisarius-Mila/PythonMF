@@ -692,10 +692,18 @@
   <div id="libraryModal" class="modal-backdrop hidden" role="dialog" aria-modal="true" aria-labelledby="libraryTitle">
     <div class="modal library-modal">
       <div class="modal-header">
+        <button class="secondary travel-only" id="libraryTravelBack" type="button">← Zpět na místa</button>
         <h2 id="libraryTitle">Knihovna</h2>
         <button class="secondary" id="libraryCloseBtn">Zavřít</button>
       </div>
       <div class="modal-body">
+        <div id="libraryTravelToolbar" class="travel-only travel-toolbar">
+          <label class="library-field"><span class="library-field-label">Kategorie Knihovny</span><select id="libraryTravelCategory" aria-label="Kategorie Knihovny"></select></label>
+          <details id="libraryTravelAddMenu" class="travel-add-menu">
+            <summary>+ Přidat místo</summary>
+            <div><button type="button" class="secondary" data-travel-add="text">Vlastní poznámka</button><button type="button" class="secondary" data-travel-add="url">Odkaz z webu</button></div>
+          </details>
+        </div>
         <div class="library-tabs" aria-label="Kategorie knihovny">
           <button class="secondary" id="scienceNewsLibraryBtn" type="button">Vědecké novinky</button>
           <button class="secondary library-tab" type="button" data-library-category="all">Všechny</button>
@@ -1021,6 +1029,8 @@
           <div id="libraryReader" class="library-reader" aria-live="polite">
             <div class="library-reader-head">
               <h3 id="libraryReaderTitle" class="library-reader-title">Vyber článek</h3>
+              <details id="libraryReaderTools" open>
+                <summary>Další možnosti a údaje</summary>
               <div id="libraryReaderMeta" class="library-meta library-reader-meta">Vlevo vyber položku nebo použij fulltextové hledání.</div>
               <div class="library-reader-actions" aria-label="Akce vybraného článku">
                 <div class="library-action-group" aria-label="Akce článku">
@@ -1045,7 +1055,9 @@
                 </div>
               </div>
               <div id="libraryExportStatus" class="status-line">Export PDF se připraví lokálně a odešle až po potvrzení.</div>
+              </details>
             </div>
+            <div id="libraryTravelPhotos" class="travel-only travel-photos" aria-label="Fotografie a dokumenty místa"></div>
             <div id="libraryEditPanel" class="library-edit-panel hidden">
               <div class="library-edit-grid">
                 <label class="library-field">

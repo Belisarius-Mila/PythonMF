@@ -187,6 +187,11 @@ class ArticleArchiveItem:
                 "book_groups_origin": "manual" if self.book_groups_manual is not None else "catalog" if (self.book_classification or {}).get("groups") else ""} if self.category == "books" else {}),
             **({"book_classification": self.book_classification} if self.book_classification is not None else {}),
             **({"book_cover_attachment_id": preferred_cover.id} if preferred_cover else {}),
+            **({"preview_image": next((
+                {"attachment_id": image.id, "variant": "thumb" if image.thumb_file else "readable" if image.readable_file else "original"}
+                for image in self.attachments
+                if image.mime_type.startswith("image/") and (image.thumb_file or image.readable_file or image.original_file)
+            ), None)} if self.category == "travel_places" else {}),
             "snippet": snippet,
             "read_state": self.read_state,
             "read_state_label": self.read_state_label,
@@ -2070,6 +2075,22 @@ def normalized_datetime(value: str) -> str:
         return value
 
 
+def travel_card_preview(item: ArticleArchiveItem, archive_root: Path) -> str:
+    """A short, read-only excerpt for place cards; never scan the whole archive."""
+    path = (archive_root / item.text_file).resolve()
+    if not path.is_relative_to(archive_root.resolve()):
+        return ""
+    try:
+        with path.open(encoding="utf-8", errors="replace") as source:
+            text = source.read(2048)
+    except OSError:
+        return ""
+    titles = {item.title.casefold(), item.one_line_title.casefold()}
+    lines = [line.strip().lstrip("# ") for line in text.splitlines()]
+    excerpt = " ".join(line for line in lines if line and line.casefold() not in titles and line != "---")
+    return excerpt[:240].rstrip() + ("…" if len(excerpt) > 240 else "")
+
+
 def list_articles(
     *,
     category: str = "other",
@@ -2079,8 +2100,8 @@ def list_articles(
 ) -> dict[str, Any]:
     wanted = "all" if str(category or "").strip().casefold() == "all" else normalize_category(category)
     wanted_read_state = normalize_read_state(read_state) if str(read_state or "").strip() else ""
-    items = [
-        item.to_summary()
+    selected = [
+        item
         for item in load_article_registry(archive_root)
         if (wanted == "all" or item.category == wanted)
         and (not wanted_read_state or item.read_state == wanted_read_state)
@@ -2091,8 +2112,11 @@ def list_articles(
         "category_label": CATEGORY_LABELS[wanted] if wanted != "all" else "Vše",
         "read_state": wanted_read_state,
         "read_state_label": READ_STATE_LABELS[wanted_read_state] if wanted_read_state else "",
-        "items": items[: max(1, min(limit, 500))],
-        "count": len(items),
+        "items": [
+            {**item.to_summary(), **({"preview_text": travel_card_preview(item, archive_root)} if item.category == "travel_places" else {})}
+            for item in selected[: max(1, min(limit, 500))]
+        ],
+        "count": len(selected),
     }
 
 

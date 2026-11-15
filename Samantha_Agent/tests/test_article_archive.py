@@ -67,6 +67,46 @@ else:
 
 
 class ArticleArchiveTests(unittest.TestCase):
+    def test_travel_cards_show_saved_intro_and_photo_without_writing_archive(self) -> None:
+        from app import article_archive as archive
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            created = archive_text_entry(title="Testovací údolí", text="Testovací údolí\n\nKlidná stezka kolem řeky.\nVlastní poznámky.",
+                                         category="travel_places", archive_root=root)
+            item_id = created["item"]["id"]
+            metadata_path = root / "articles" / item_id / "metadata.json"
+            raw = json.loads(metadata_path.read_text())
+            raw["attachments"] = [{"id": "foto", "label": "Údolí", "kind": "image", "mime_type": "image/jpeg",
+                                   "thumb_file": "articles/photo-thumb.jpg", "readable_file": "articles/photo.jpg"}]
+            metadata_path.write_text(json.dumps(raw))
+            archive.update_registry(root / "registry.jsonl", raw)
+            archive_text_entry(title="Recept", text="Jiná kategorie", category="recipes", archive_root=root)
+            before = {str(p.relative_to(root)): p.read_bytes() for p in root.rglob("*") if p.is_file()}
+            listed = list_articles(category="all", archive_root=root)
+            travel = next(x for x in listed["items"] if x["category"] == "travel_places")
+            self.assertEqual(travel["preview_image"], {"attachment_id": "foto", "variant": "thumb"})
+            self.assertEqual(travel["preview_text"], "Klidná stezka kolem řeky. Vlastní poznámky.")
+            self.assertNotIn("attachments", travel)
+            recipe = next(x for x in listed["items"] if x["category"] == "recipes")
+            self.assertNotIn("preview_text", recipe)
+            self.assertNotIn("preview_image", recipe)
+            searched = search_articles(query="řeky", category="travel_places", archive_root=root)
+            self.assertEqual(searched["items"][0]["preview_image"], travel["preview_image"])
+            self.assertEqual(before, {str(p.relative_to(root)): p.read_bytes() for p in root.rglob("*") if p.is_file()})
+
+    def test_travel_intro_is_bounded_and_cannot_read_outside_archive(self) -> None:
+        from dataclasses import replace
+        from app import article_archive as archive
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir) / "archive"
+            created = archive_text_entry(title="Místo", text="A" * 5000, category="travel_places", archive_root=root)
+            item = archive.find_article(created["item"]["id"], archive_root=root)
+            self.assertLessEqual(len(archive.travel_card_preview(item, root)), 241)
+            outside = Path(temp_dir) / "outside.txt"
+            outside.write_text("Obsah nesmí být vrácen")
+            self.assertEqual(archive.travel_card_preview(replace(item, text_file="../outside.txt"), root), "")
+            self.assertEqual(archive.travel_card_preview(replace(item, text_file="missing.txt"), root), "")
+
     def test_update_article_changes_editable_fields_and_preserves_attachments(self) -> None:
         with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
             archive_root = Path(temp_dir)

@@ -2609,3 +2609,10 @@ s mock video-only kamerou, stop tracků a dekódováním WASM.
 - Ověření: Oba významy second mají oddělenou navigaci, CZ audio a výběr A; nové významy zůstávají bez Benji i po skutečném dočasném apply. 36 cílených Python včetně55 Node scénářů PASS; 73 nových MP3 dekódovaných, 2479 původních médií shodných.
 
 Finální ověření tohoto kroku: plná brána3920 PASS /706,416s unit část,31 SKIP;107/107 finálních zdrojů/médií shodných se zeleným během.
+
+
+### 2026-11-15 — Návrat z detailu obnovuje skutečný posuvník a ruší staré čtení
+
+- Kontext: Knihovna posouvá `.modal`, ne její vnitřní `.modal-body`. Při návratu z detailu nestačí obnovit hledaný text; starý GET navíc může doběhnout po návratu.
+- Řešení: zachovat pozici skutečného scroll containeru, obnovit fokus bez dalšího posunu a zneplatnit staré čtení pořadím požadavků. Rozepsanou editaci dál chrání původní potvrzení.
+- Ověření: skutečný sestavený Cockpit v izolovaném browseru320/390/1280, návrat po čtení/uložení, odmítnutí ztráty draftu a opožděný GET po otevření jiné karty PASS. Žádné nové POST při navigaci.

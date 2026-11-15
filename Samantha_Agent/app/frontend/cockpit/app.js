@@ -369,6 +369,15 @@
     let currentFamilyCalendarPeople = [];
     let familyCalendarEditorDirty = false;
     let libraryEditorDirty = false;
+    let libraryItemRequest = 0;
+    let libraryListRequest = 0;
+    const libraryTravel = LibraryTravel.create({document, modal: libraryModal, list: libraryList,
+      readerTitle: libraryReaderTitle, attachmentUrl: libraryAttachmentUrl, openImage: openLibraryAttachmentViewer,
+      beforeBack: () => closeLibraryEditor(),
+      onBack: () => { libraryItemRequest++; currentLibrarySelectedId = ""; updateLibraryReadStateButtons(null); },
+      add: mode => toggleLibraryAddMode(mode),
+      selectCategory: (category, readState) => loadLibraryCategory(category, readState),
+    });
     let libraryBookCoverObjectUrl = "";
     let libraryBookOcrFiles = [];
     let libraryBookOcrDraftText = "";
@@ -3905,6 +3914,7 @@ Soubor nebude trvale smazán.`);
     function closeLibraryEditor(force = false) {
       if (!force && !confirmLibraryEditorDiscard()) return false;
       libraryEditPanel.classList.add("hidden");
+      libraryTravel.editing(false);
       libraryEditorDirty = false;
       setLibraryEditorFieldsDisabled(false);
       libraryEditSaveBtn.disabled = false;
@@ -3916,6 +3926,7 @@ Soubor nebude trvale smazán.`);
 
     async function openLibraryEditor() {
       const articleId = currentLibrarySelectedId;
+      const request = libraryItemRequest;
       if (!articleId) {
         libraryStatus.textContent = "Nejdřív vyber položku v knihovně.";
         return;
@@ -3929,9 +3940,11 @@ Soubor nebude trvale smazán.`);
       setLibraryEditorFieldsDisabled(true);
       libraryEditStatus.textContent = "Načítám celý text k bezpečné editaci...";
       libraryEditPanel.classList.remove("hidden");
+      libraryTravel.editing(true);
       try {
         const data = await fetchJson(`/api/library/item?id=${encodeURIComponent(articleId)}&full=1`);
-        if (!data.ok || currentLibrarySelectedId !== articleId) {
+        if (request !== libraryItemRequest || currentLibrarySelectedId !== articleId) return;
+        if (!data.ok) {
           libraryEditStatus.textContent = data.message || "Článek nelze načíst k editaci.";
           return;
         }
@@ -3957,10 +3970,11 @@ Soubor nebude trvale smazán.`);
         libraryEditStatus.textContent = "Můžeš upravit text i údaje a spravovat fotografie této karty.";
         libraryEditTitleInput.focus();
       } catch (err) {
+        if (request !== libraryItemRequest || currentLibrarySelectedId !== articleId) return;
         recordFrontendError(err);
         libraryEditStatus.textContent = `Chyba načtení editace: ${err}`;
       } finally {
-        libraryEditBtn.disabled = !currentLibrarySelectedId;
+        if (request === libraryItemRequest && currentLibrarySelectedId === articleId) libraryEditBtn.disabled = false;
       }
     }
 
@@ -4013,7 +4027,7 @@ Soubor nebude trvale smazán.`);
         const item = data.item || {};
         const targetCategory = item.category || currentLibraryCategory || "other";
         closeLibraryEditor(true);
-        await loadLibraryCategory(targetCategory, "");
+        await reloadLibraryAfterChange(targetCategory, "");
         if (item.id) await loadLibraryItem(item.id);
         libraryStatus.textContent = data.message || "Úpravy článku byly uloženy.";
       } catch (err) {
@@ -4147,6 +4161,9 @@ Soubor nebude trvale smazán.`);
       closeLibraryEditor(true);
       currentLibraryCategory = category || "other";
       currentLibraryReadStateFilter = readState || "";
+      const request = ++libraryListRequest;
+      libraryItemRequest++;
+      libraryTravel.configure(currentLibraryCategory);
       syncLibraryCreateCategories(currentLibraryCategory);
       syncLibraryBookAddAvailability(currentLibraryCategory, currentLibraryReadStateFilter);
       currentLibrarySelectedId = "";
@@ -4167,6 +4184,7 @@ Soubor nebude trvale smazán.`);
         libraryBookOverview.classList.toggle("hidden", !showBookOverview);
         if (showBookOverview) {
           const data = await fetchJson("/api/library/books/overview");
+          if (request !== libraryListRequest) return false;
           if (!data.ok) throw new Error(data.message || "Úplný přehled knih se nepodařilo načíst.");
           currentLibraryBookOverviewItems = Array.isArray(data.items) ? data.items : [];
           refreshLibraryBookOverviewFilters();
@@ -4179,6 +4197,7 @@ Soubor nebude trvale smazán.`);
         currentLibraryBookOverviewItems = [];
         const url = `/api/library/list?category=${encodeURIComponent(currentLibraryCategory)}&read_state=${encodeURIComponent(currentLibraryReadStateFilter)}&limit=200`;
         const data = await fetchJson(url);
+        if (request !== libraryListRequest) return false;
         currentLibraryItems = data.items || [];
         renderLibraryItems(currentLibraryItems);
         const label = currentLibraryReadStateFilter ? (data.read_state_label || "K přečtení") : (data.category_label || "Kategorie");
@@ -4188,6 +4207,7 @@ Soubor nebude trvale smazán.`);
         return true;
       } catch (err) {
         recordFrontendError(err);
+        if (request !== libraryListRequest) return false;
         libraryStatus.textContent = `Chyba načtení knihovny: ${err}`;
         return false;
       }
@@ -4201,6 +4221,18 @@ Soubor nebude trvale smazán.`);
       });
     }
 
+    async function reloadLibraryAfterChange(category, readState = "") {
+      const query = libraryTravel.active() ? librarySearchInput.value : "";
+      await loadLibraryCategory(category, readState);
+      if (libraryTravel.active()) {
+        if (query.trim().length >= 2) {
+          librarySearchInput.value = query;
+          await searchLibrary();
+        }
+        libraryTravel.restoreListPosition();
+      }
+    }
+
     async function searchLibrary() {
       const query = librarySearchInput.value.trim();
       if (query.length < 2) {
@@ -4209,6 +4241,9 @@ Soubor nebude trvale smazán.`);
       }
       if (!confirmLibraryEditorDiscard()) return;
       closeLibraryEditor(true);
+      const request = ++libraryListRequest;
+      libraryItemRequest++;
+      libraryTravel.configure(currentLibraryCategory);
       libraryBookOverview.classList.add("hidden");
       currentLibrarySelectedId = "";
       currentLibrarySelectedText = "";
@@ -4224,6 +4259,7 @@ Soubor nebude trvale smazán.`);
       try {
         const url = `/api/library/search?category=${encodeURIComponent(currentLibraryCategory)}&read_state=${encodeURIComponent(currentLibraryReadStateFilter)}&q=${encodeURIComponent(query)}&limit=80`;
         const data = await fetchJson(url);
+        if (request !== libraryListRequest) return false;
         currentLibraryItems = data.items || [];
         renderLibraryItems(currentLibraryItems);
         libraryStatus.textContent = currentLibraryItems.length
@@ -4231,6 +4267,7 @@ Soubor nebude trvale smazán.`);
           : `Pro „${query}“ nic nenalezeno.`;
       } catch (err) {
         recordFrontendError(err);
+        if (request !== libraryListRequest) return;
         libraryStatus.textContent = `Chyba hledání v knihovně: ${err}`;
       }
     }
@@ -5114,7 +5151,7 @@ ${confirmation}`, "");
         updateLibraryReadStateButtons(item);
         const targetCategory = currentLibraryReadStateFilter ? "all" : (item.category || currentLibraryCategory);
         const targetReadState = currentLibraryReadStateFilter || "";
-        await loadLibraryCategory(targetCategory, targetReadState);
+        await reloadLibraryAfterChange(targetCategory, targetReadState);
         if (item.id) {
           await loadLibraryItem(item.id);
         }
@@ -5126,6 +5163,9 @@ ${confirmation}`, "");
     }
 
     function createLibraryItemRow(item) {
+      if (libraryTravel.active() && item.category === "travel_places") {
+        return libraryTravel.card(item, () => loadLibraryItem(item.id || "", true));
+      }
       const remoteCover = item.category === "books" && !item.book_cover_attachment_id
         && window.SamanthaBookQuick && window.SamanthaBookQuick.safeCover(item.book_cover_url)
         && !(item.attachment_roles || []).includes("book_cover");
@@ -5245,12 +5285,14 @@ ${confirmation}`, "");
 
     async function loadFullLibraryItemText() {
       const articleId = currentLibrarySelectedId;
+      const request = libraryItemRequest;
       if (!articleId) return;
       libraryShowFullTextBtn.disabled = true;
       libraryFullTextMessage.textContent = "Načítám celý text článku...";
       try {
         const data = await fetchJson(`/api/library/item?id=${encodeURIComponent(articleId)}&full=1`);
-        if (!data.ok || currentLibrarySelectedId !== articleId) {
+        if (request !== libraryItemRequest || currentLibrarySelectedId !== articleId) return;
+        if (!data.ok) {
           libraryFullTextMessage.textContent = data.message || "Celý text článku nelze načíst.";
           return;
         }
@@ -5259,10 +5301,11 @@ ${confirmation}`, "");
         setLibraryFullTextNotice(false);
         libraryStatus.textContent = "Celý text článku je načtený.";
       } catch (err) {
+        if (request !== libraryItemRequest || currentLibrarySelectedId !== articleId) return;
         recordFrontendError(err);
         libraryFullTextMessage.textContent = `Chyba načtení celého textu: ${err}`;
       } finally {
-        libraryShowFullTextBtn.disabled = false;
+        if (request === libraryItemRequest && currentLibrarySelectedId === articleId) libraryShowFullTextBtn.disabled = false;
       }
     }
 
@@ -5413,6 +5456,7 @@ ${phrase}`, "");
 
     function renderLibraryAttachments(articleId, attachments, category = "") {
       if (!libraryAttachmentSection || !libraryReaderAttachments) return;
+      libraryTravel.photos(articleId, attachments);
       libraryReaderAttachments.innerHTML = "";
       const items = Array.isArray(attachments) ? attachments : [];
       const hasArticle = Boolean(articleId);
@@ -5513,7 +5557,9 @@ ${phrase}`, "");
       if (articleId === currentLibrarySelectedId && !libraryEditPanel.classList.contains("hidden")) return;
       if (!confirmLibraryEditorDiscard()) return;
       closeLibraryEditor(true);
-      if (scrollOnMobile) scrollLibraryReaderIntoViewOnMobile();
+      const request = ++libraryItemRequest;
+      libraryTravel.beginItem(articleId);
+      if (scrollOnMobile && !libraryTravel.active()) scrollLibraryReaderIntoViewOnMobile();
       currentLibrarySelectedText = "";
       currentLibrarySelectedId = articleId;
       libraryDeleteBtn.disabled = false;
@@ -5521,15 +5567,16 @@ ${phrase}`, "");
       document.querySelectorAll(".library-item").forEach((node) => {
         node.classList.toggle("active", node.dataset.articleId === articleId);
       });
-      libraryReaderTitle.textContent = "Načítám článek...";
+      libraryReaderTitle.textContent = libraryTravel.active() ? "Načítám místo…" : "Načítám článek...";
       libraryReaderMeta.textContent = "";
       libraryReaderText.textContent = "";
       setLibraryFullTextNotice(false);
       renderLibraryAttachments("", []);
       try {
         const data = await fetchJson(`/api/library/item?id=${encodeURIComponent(articleId)}`);
+        if (request !== libraryItemRequest || currentLibrarySelectedId !== articleId) return;
         if (!data.ok) {
-          libraryReaderTitle.textContent = "Článek nelze načíst";
+          libraryReaderTitle.textContent = libraryTravel.active() ? "Místo nelze načíst" : "Článek nelze načíst";
           libraryReaderMeta.textContent = data.message || data.error || "";
           libraryDeleteBtn.disabled = true;
           currentLibrarySelectedId = "";
@@ -5547,6 +5594,7 @@ ${phrase}`, "");
         renderLibraryAttachments(item.id || articleId, item.attachments || [], item.category || currentLibraryCategory);
       } catch (err) {
         recordFrontendError(err);
+        if (request !== libraryItemRequest || currentLibrarySelectedId !== articleId) return;
         libraryReaderTitle.textContent = "Chyba čtení";
         libraryReaderMeta.textContent = String(err);
         renderLibraryAttachments("", []);

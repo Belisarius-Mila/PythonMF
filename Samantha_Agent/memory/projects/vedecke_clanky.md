@@ -544,3 +544,27 @@ Hotovo: Do main převzatý závěr Data3035fc14 a jeho dosud nesloučená histor
 Důkaz: Report `data_repository_integration_20261112.md` popisuje rozsah a ověření. Původní účtenky jsou historické důkazy z10.–11.11., nikoli nový provozní audit. Žádná nová aktivace, modelový tah, push ani nasazení.
 
 Rizika a další krok: Přejímky na zařízení a procesní nejistota původního Pages publisheru zůstávají otevřené. Hotové lokální commity čekají na samostatný pokyn k publikaci. Datův vlastní worktree a rozpracovaná UI větev se nemění.
+
+
+## 2026-11-15 08:05 CET — Cestování / místa: klidnější přehled a samostatný detail místně
+
+Hotovo: Cestování / místa má přehled karet s fotografií a krátkým úvodem,
+hledání, jeden přepínač kategorií a nabídku Přidat místo. Detail na telefonu
+i desktopu ukáže místo, fotografie a poznámky; Další možnosti a údaje
+obsahují původní správu, stav čtení a export. Správa fotografií je při editaci.
+Zpět zachová hledání i pozici; stejný kontext zůstane po uložení úprav/stavu.
+Rozhodnutí: Míla schválil navržené zjednodušení a zahájení vývoje, warp1.
+Rozsah je pouze Cestování / místa; ostatní kategorie zachovávají původní UI.
+Další krok: Samostatně schválené nasazení a potom fyzická přejímka na iPhonu.
+Navrhované další kroky: Dříve otevřená přejímka knih a poštovní A+C zůstávají
+oddělené. Další přestavba Knihovny ani nové cestovní funkce nejsou součástí.
+Technický důkaz:114 cílených PASS /16,501s, sestavený celý Cockpit v izolovaném
+Edge320/390/1280 bez přetékání a nechycených výjimek. Návrat, fotografie,
+PDF, ochrana rozepsaného textu, uložení, chyba čtení a opožděná odpověď PASS.
+Jen2 syntetické POST (stav/edit),0 produkčních POST; soukromé karty se
+nepřepisovaly. Náhled čte nejvýše2048 znaků již uloženého textu a vrací
+max241 znaků, kontroluje kořen archivu; fotka se odkazuje původním ID.
+Žádná migrace, model, generování či aktivace. Report
+reports/travel_places_ui_20261115.md; privátní důkazy travel_ui_20261115/.
+Statická brána PASS; plná publikační brána až při schváleném p+n.
+Tento výsledek je místní, bez push/nasazení a fyzické iPhone přejímky.
