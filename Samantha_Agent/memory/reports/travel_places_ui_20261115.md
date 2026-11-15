@@ -58,3 +58,24 @@ požadavku v úspěchu, chybě a dokončení. Browser výslovně podržel starý
 editorový GET, otevřel stejné místo znovu a napsal nový draft; opožděný
 výsledek jej nezměnil. Nová finální sada114 PASS/16,501s a statická brána
 PASS. Otisky8 finálních zdrojů/testů v privátním source_manifest.json.
+
+
+## 2026-11-15 08:10 CET — Schválené vlastní Terra p+n Cestování / místa
+
+Hotovo: Vývojový checkpoint35b5402e je připravený k vydání,114 cílených,
+statická brána i izolovaný browser320/390/1280 PASS.
+Rozhodnutí: Míla výslovně zadal p+n via Terra pouze pro Willovu práci.
+Balíček obsahuje35b5402e, Willův závěrečný dokumentační7d8c04e4 k minulému
+vydání Vocabulary EN a tento bezpečný publikační zápis. Další Datovy větve
+a nový Vocabulary obsah nejsou součástí. Cíl project-knowledge-library / cockpit.
+Další krok: Jediné registrované submit_release(wait=True), potom převzetí
+účtenky a čtecí kontrola živé Knihovny. Po potvrzeném vydání fyzický iPhone.
+Navrhované další kroky: Původní přejímky knih a poštovní A+C zůstávají
+oddělené; žádná aktivace nebo změna soukromých záznamů.
+Technický důkaz:8/8 finálních zdrojů/testů stále shodných s místní přejímkou.
+Request travel-places-ui-20261115-own-v1, deterministický job c67e607ca431ef10d7c0522dee0e2845.
+Aktuální výsledek vydání určuje výhradně přesná privátní
+data/private/travel_ui_20261115/release/release_receipt.json
+a live_verification.json, nikoli tento předpublikační záznam.
+Účtenka explicitně odděluje push, nasazení, ověření a fyzický telefon.
+Při timeoutu či nejistotě ověřit stejný job; žádné automatické opakování.
