@@ -1328,3 +1328,17 @@ Technický důkaz: Zdroj e2276615 + předání acb6e0a8, integrační základ072
 Předchozí Knihovna jobfff30ae477f38401ae8e582208e9a582 je attention/neaktivní;
 živý GitHub audit stálee780fe98 a5 čekajících commitů před integrací.
 Pages vydání nesmí restartovat Cockpit. Nový TVBCP není sjednaný.
+
+
+## 2026-11-15 09:47 CET — Schválený společný balíček
+
+Hotovo: Integrace Vocabulary EN je připravená nad nezměněným main072ab251.
+Rozhodnutí: Míla výslovně potvrdil „ANO vše najednou“ k přesné otázce
+zahrnout čtyři Willovy commity do společného push a vydat Vocabulary EN
+přes Pages bez restartu Cockpitu. Tento rozsah je nyní schválený.
+Další krok: Jediné registrované Terra p+n pro project-vocabulary-en/github_pages
+s přesným finálním lokálním headem a trvalou identitou požadavku.
+Navrhované další kroky: Po vydání ověřit veřejné soubory a fyzický telefon.
+Technický důkaz:47 integračních Python testů a statická brána PASS,
+82 původních zelených zdrojů a12 nezávislých main souborů přesně zachovaných.
+Žádný nový obsah ani média se negenerují; samostatný TVBCP není sjednaný.
