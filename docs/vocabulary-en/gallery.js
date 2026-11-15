@@ -4,12 +4,14 @@ const appRoot = document.querySelector("[data-json-url]");
 const DATA_URL = appRoot?.dataset.jsonUrl || "../data/vocabulary-en.json";
 const AUDIO_DATA_URL = appRoot?.dataset.audioUrl || "../data/vocabulary-en-audio.json";
 const SENTENCE_AUDIO_URL = "../data/vocabulary-en-sentence-audio.json";
+const QUIZ_DATA_URL = "../data/vocabulary-en-quiz.json";
 const galleryModeHint=document.getElementById("galleryModeHint");
 const ui = Object.fromEntries(["galleryView","studyView","totalCount","totalLabel","searchInput","topicPicker","topicFilters","topicSummary","clearTopicsButton","filterSelect","teachingTypeSelect","groupSelect","sortSelect","sizeButton","partFilters","levelFilters","sourceFilters","continueButton","shuffleButton","resetButton","emptyResetButton","sectionNav","galleryNotice","galleryGroups","emptyState","galleryFooter","backButton","backBottomButton","studyPosition","wordImage","pictureFallback","speakPromptButton","promptLabel","promptText","messageStrip","revealButton","answerCard","answerEn","answerCz","sentenceBox","sentenceEn","sentenceCz","speakAnswerButton","roundStatus","previousButton","nextButton","newRoundButton"].map(id => [id,document.getElementById(id)]));
-const defaults = () => ({filter:"all",teachingType:"all",query:"",topics:[],sources:[],parts:[],levels:[],groupBy:"topic",sort:"recommended",labelLanguage:"en",direction:"czToEn",practice:"words",large:false,learner:"all",onlyLearnerHard:false});
+const defaults = () => ({filter:"all",teachingType:"all",query:"",topics:[],sources:[],parts:[],levels:[],groupBy:"topic",sort:"recommended",labelLanguage:"en",direction:"czToEn",practice:"words",large:false,learner:"all",onlyLearnerHard:false,recentCount:0});
 const state = {data:null,audioManifest:null,sentenceAudioManifest:null,items:[],...defaults(),galleryMode:"learn",currentItem:null,revealed:false,view:"gallery",sequence:[],index:0,mode:"ordered",lastUid:"",visitId:"",fromGallery:false,anchorOffset:120};
 let galleryTranslation=null;
 let learnerUI=null;
+let quizUI=null,quizCatalog=null;
 const learnerSelect=document.getElementById("learnerSelect"),learnerHardFilter=document.getElementById("learnerHardFilter"),editLearnerHard=document.getElementById("editLearnerHard");
 const STORAGE_KEY="vocabulary-en.navigation.v1", LAST_KEY="vocabulary-en.last-card.v1";
 function context() { return Object.fromEntries(Object.keys(defaults()).map(key => [key,Array.isArray(state[key]) ? [...state[key]] : state[key]])); }
@@ -22,6 +24,7 @@ function sanitizeContext(value={}) {
   result.large=value.large===true;
   result.learner=["A","B","C","D"].includes(value.learner)?value.learner:"all";
   result.onlyLearnerHard=result.learner!=="all"&&value.onlyLearnerHard===true;
+  result.recentCount=M.recentCount(value.recentCount);
   return result;
 }
 function readStorage(storage,key) { try { const value=storage.getItem(key); return value && value.length<100000 ? JSON.parse(value) : null; } catch(_){return null;} }
@@ -34,6 +37,7 @@ function persist() {
 }
 function routeUrl(kind,uid="") {
   const params=new URLSearchParams(), current=context();
+  if(kind==="quiz")params.set("game","listen-pictures");
   if(uid)params.set(kind==="study" ? "card" : "last",uid);
   for(const key of Object.keys(defaults())) {
     const value=current[key], fallback=defaults()[key];
@@ -49,11 +53,11 @@ function route() {
   const params=new URLSearchParams(new URL(window.location.href).hash.slice(1));
   const raw={};
   for(const key of Object.keys(defaults()))if(params.has(key))raw[key]=Array.isArray(defaults()[key]) ? params.get(key).split(",") : ["large","onlyLearnerHard"].includes(key) ? params.get(key)==="true" : params.get(key);
-  return {hasContext:Object.keys(raw).length>0,context:sanitizeContext(raw),card:params.get("card") || "",last:params.get("last") || ""};
+  return {hasContext:Object.keys(raw).length>0,context:sanitizeContext(raw),card:params.get("card") || "",last:params.get("last") || "",game:params.get("game")==="listen-pictures"};
 }
 function personalItems(){return learnerUI?learnerUI.filter(state.items,state.learner,state.onlyLearnerHard):state.items;}
-function buildSelection(){return M.select(personalItems(),context());}
-function orderedSelection(){return M.ordered(personalItems(),context(),state.data?.catalog);}
+function buildSelection(){return M.select(personalItems(),context(),state.items);}
+function orderedSelection(){return M.ordered(personalItems(),context(),state.data?.catalog,state.items);}
 function updateCounts(selection=buildSelection()) {
   ui.totalCount.textContent=String(selection.length);
   ui.totalLabel.textContent=`${M.countLabel(selection.length).replace(/^\d+ /, "")} ve výběru`;
@@ -65,6 +69,9 @@ function syncControls(){
   learnerHardFilter.setAttribute("aria-pressed",String(state.onlyLearnerHard));
   ui.searchInput.value=state.query;ui.filterSelect.value=state.filter;ui.teachingTypeSelect.value=state.teachingType;ui.groupSelect.value=state.groupBy;ui.sortSelect.value=state.sort;
   ui.sizeButton.setAttribute("aria-pressed",String(state.large));ui.galleryView.classList.toggle("large-tiles",state.large);
+  document.getElementById("recentOnly").checked=state.recentCount>0;
+  document.getElementById("recentCount").disabled=!state.recentCount;
+  document.getElementById("recentCount").value=String(state.recentCount || 20);
   document.querySelectorAll("[data-label]").forEach(button=>button.setAttribute("aria-pressed",String(button.dataset.label===state.labelLanguage)));
   document.querySelectorAll("[data-direction]").forEach(button=>button.setAttribute("aria-pressed",String(button.dataset.direction===state.direction)));
   document.querySelectorAll("[data-practice]").forEach(button=>button.setAttribute("aria-pressed",String(button.dataset.practice===state.practice)));
@@ -168,13 +175,28 @@ function selectionChanged(){
   ui.galleryNotice.textContent=`Ve výběru ${M.countLabel(buildSelection().length)}.${state.groupBy === "level" || state.levels.length ? " Náročnost je orientační návrh pro výuku." : ""}`;
   if(state.learner!=="all"&&!personalItems().length)ui.galleryNotice.textContent=state.onlyLearnerHard?`Uživatel ${state.learner} nemá označená obtížná slova. Použij Výběr obtížných slov.`:`Uživatel ${state.learner} zatím nemá vlastní slovní zásobu. Vyber ji v Nastavení.`;
 }
-function resetFilters(){Object.assign(state,{filter:"all",teachingType:"all",query:"",topics:[],sources:[],parts:[],levels:[],learner:"all",onlyLearnerHard:false});selectionChanged();}
+function resetFilters(){Object.assign(state,{filter:"all",teachingType:"all",query:"",topics:[],sources:[],parts:[],levels:[],learner:"all",onlyLearnerHard:false,recentCount:0});selectionChanged();}
 function switchView(kind){
+  if(kind!=="quiz")quizUI?.leave();
   state.view=kind;ui.galleryView.hidden=kind!=="gallery";ui.studyView.hidden=kind!=="study";
+  document.getElementById("quizView").hidden=kind!=="quiz";
+  document.getElementById("quizTab").setAttribute("aria-pressed",String(kind==="quiz"));
   document.getElementById("settingsView").hidden=kind!=="settings";
   document.getElementById("settingsTab").setAttribute("aria-pressed",String(kind==="settings"));
-  document.getElementById("galleryTab").setAttribute("aria-pressed",String(kind!=="settings"));
+  document.getElementById("galleryTab").setAttribute("aria-pressed",String(kind==="gallery"||kind==="study"));
   document.title=kind==="study" && state.currentItem ? `${state.currentItem.en} · Vocabulary EN` : "Vocabulary EN · Slovíčka v obrázcích";
+}
+function openQuiz({fromHistory=false}={}){
+  if(!quizUI)return;
+  if(state.view==="settings"&&!learnerUI?.close())return;
+  if(state.view!=="quiz")persist();
+  quizUI.open();
+  if(!fromHistory)writeHistory("quiz","pushState");
+}
+function returnFromQuiz(){
+  if(state.view!=="quiz")return;
+  if(window.history.state?.vocabularyEN===1&&window.history.state?.kind==="quiz")window.history.back();
+  else showGallery({render:true});
 }
 function freshVisit(){return `${Date.now().toString(36)}-${Math.random().toString(36).slice(2,10)}`;}
 function openStudy(uid,mode="ordered",tile=null){
@@ -258,6 +280,7 @@ function applyRoute({initial=false}={}){
   const current=route(),saved=savedNavigation(),last=savedLast();
   if(initial)Object.assign(state,current.hasContext ? current.context : sanitizeContext(saved?.context || last?.context || {}));
   if(!learnerUI?.available){state.learner="all";state.onlyLearnerHard=false;}
+  if(current.game&&quizUI){openQuiz({fromHistory:true});return;}
   if(current.card){
     const target=state.items.find(item=>M.key(item)===current.card);
     if(!target){state.lastUid="";state.currentItem=null;switchView("gallery");renderGallery();ui.galleryNotice.textContent=state.data.items.some(item=>M.key(item)===current.card && !M.isActive(item))?"Tato karta byla vyřazena z nabídky. Vyber si jiné slovíčko.":"Odkazované slovíčko už v tomto slovníku není. Vyber si jiné.";writeHistory("gallery");return;}
@@ -268,7 +291,7 @@ function applyRoute({initial=false}={}){
     }
     state.sequence=saved?.revision===state.data?.revision && saved?.currentUid===current.card && Array.isArray(saved.sequence) ? M.restoreSequence(saved.sequence.slice(0,5000),orderedSelection()) : orderedSelection();
     if(!state.sequence.some(item=>M.key(item)===current.card)){
-      Object.assign(state,{filter:"all",teachingType:"all",query:"",topics:[],sources:[],parts:[],levels:[]});state.sequence=orderedSelection();renderGallery();
+      Object.assign(state,{filter:"all",teachingType:"all",query:"",topics:[],sources:[],parts:[],levels:[],recentCount:0});state.sequence=orderedSelection();renderGallery();
     }
     state.index=state.sequence.findIndex(item=>M.key(item)===current.card);state.currentItem=target;state.lastUid=current.card;
     state.mode=saved?.currentUid===current.card && saved.mode==="random" ? "random" : "ordered";
@@ -419,7 +442,15 @@ function speakAnswer() {
 
 function bindEvents(){
   document.getElementById("settingsTab").addEventListener("click",()=>learnerUI?.open(state.learner));
-  document.getElementById("galleryTab").addEventListener("click",()=>{if(state.view==="settings")learnerUI?.close();else if(state.view==="study")returnToGallery();});
+  document.getElementById("galleryTab").addEventListener("click",()=>{if(state.view==="settings")learnerUI?.close();else if(state.view==="study")returnToGallery();else if(state.view==="quiz")quizUI?.close();});
+  document.getElementById("quizTab").addEventListener("click",()=>{if(state.view!=="quiz")openQuiz();});
+  const recentInput=document.getElementById("recentCount"),recentOnly=document.getElementById("recentOnly");
+  function changeRecent(){
+    const count=recentOnly.checked?M.recentCount(recentInput.value):0;
+    if(recentOnly.checked&&!count){ui.galleryNotice.textContent="Počet musí být celé číslo od 1 do 5000.";return;}
+    state.recentCount=count;selectionChanged();
+  }
+  recentInput.addEventListener("change",changeRecent);recentOnly.addEventListener("change",changeRecent);
   learnerSelect.addEventListener("change",()=>{state.learner=learnerSelect.value;state.onlyLearnerHard=false;selectionChanged();});
   learnerHardFilter.addEventListener("click",()=>{if(state.learner!=="all"){state.onlyLearnerHard=!state.onlyLearnerHard;selectionChanged();}});
   editLearnerHard.addEventListener("click",()=>{if(state.learner!=="all")learnerUI?.open(state.learner,true);});
@@ -438,10 +469,10 @@ function bindEvents(){
   ui.revealButton.addEventListener("click",()=>{if(!state.currentItem || !M.studyPrompt(state.currentItem,context()).available)return;state.revealed=true;renderCurrentItem();});
   ui.speakPromptButton.addEventListener("click",speakPrompt);ui.wordImage.addEventListener("click",speakPrompt);ui.speakAnswerButton.addEventListener("click",speakAnswer);
   ui.wordImage.addEventListener("error",()=>{ui.wordImage.hidden=true;ui.pictureFallback.hidden=false;});
-  document.addEventListener("keydown",event=>{if(event.key==="Escape" && state.view==="study"){event.preventDefault();returnToGallery();}});
+  document.addEventListener("keydown",event=>{if(event.key==="Escape"){if(state.view==="study"){event.preventDefault();returnToGallery();}else if(state.view==="quiz"){event.preventDefault();quizUI?.close();}}});
   window.addEventListener("popstate",()=>{stopAudioPlayback();applyRoute();});
-  window.addEventListener("hashchange",()=>{const card=route().card;if(card && (state.view!=="study" || M.key(state.currentItem)!==card))applyRoute();});
-  window.addEventListener("pagehide",()=>{persist();stopAudioPlayback();});
+  window.addEventListener("hashchange",()=>{const current=route();if(current.game||state.view==="quiz"||current.card && (state.view!=="study" || M.key(state.currentItem)!==current.card))applyRoute();});
+  window.addEventListener("pagehide",()=>{persist();quizUI?.leave();stopAudioPlayback();});
   window.addEventListener("pageshow",event=>{if(event.persisted){stopAudioPlayback();if(state.view==="gallery")focusLast();}});
 }
 async function readJson(url){const response=await fetch(url,{cache:"no-store"});if(!response.ok)throw new Error(`HTTP ${response.status}`);return response.json();}
@@ -449,8 +480,9 @@ async function init(){
   bindEvents();
   // A slow or missing pronunciation file must never hold the picture atlas closed.
   void readJson(AUDIO_DATA_URL).then(manifest=>{
-    state.audioManifest=manifest;if(state.currentItem)primeCurrentAudio(state.currentItem);
-  }).catch(()=>{ui.galleryNotice.textContent="Zvuk se nepodařilo načíst. Slovíčka můžeš dál procházet.";});
+    state.audioManifest=manifest;if(state.currentItem)primeCurrentAudio(state.currentItem);quizUI?.refresh();
+  }).catch(()=>{state.audioManifest=false;ui.galleryNotice.textContent="Zvuk se nepodařilo načíst. Slovíčka můžeš dál procházet.";quizUI?.refresh();});
+  void readJson(QUIZ_DATA_URL).then(data=>{if(data?.schemaVersion!==1||!data.entries||typeof data.entries!=="object"||Array.isArray(data.entries))throw new Error("Neplatný výběr obrázků.");quizCatalog=data;quizUI?.refresh();}).catch(()=>{quizCatalog=false;quizUI?.refresh();});
   void readJson(SENTENCE_AUDIO_URL).then(manifest=>{
     state.sentenceAudioManifest=manifest;if(state.currentItem && state.practice==="sentences")primeCurrentAudio(state.currentItem);
   }).catch(()=>{}); // Sentence text and word audio work even if this optional file is unavailable.
@@ -464,9 +496,14 @@ async function init(){
   if(globalThis.VocabularyLearnerUI&&globalThis.VocabularyLearners)learnerUI=globalThis.VocabularyLearnerUI.create({doc:document,win:window,data,model:M,
     onOpen:()=>{stopAudioPlayback();switchView("settings");window.scrollTo({top:0});},
     onClose:()=>showGallery({render:true}),
-    onChange:edited=>{if(edited){state.learner=edited;}if(state.view==="gallery"){selectionChanged();}else if(state.view==="study"){applyRoute();}}
+    onChange:edited=>{if(edited){state.learner=edited;}if(state.view==="gallery"){selectionChanged();}else if(state.view==="study"){applyRoute();}quizUI?.refresh();}
   });
   else document.getElementById("learnerNotice").textContent="Osobní výběry se nepodařilo načíst. Zkus obnovit stránku; společný slovník zůstává dostupný.";
+  if(globalThis.VocabularyQuiz)quizUI=globalThis.VocabularyQuiz.create({doc:document,win:window,getData:()=>state.data,getAudio:()=>state.audioManifest,getCatalog:()=>quizCatalog,
+    getPersonal:(id,hard)=>learnerUI?.filter(state.items,id,hard)||[],isAvailable:()=>Boolean(learnerUI?.available),
+    onOpen:()=>{stopAudioPlayback();switchView("quiz");window.scrollTo({top:0});},onClose:returnFromQuiz,
+    play:item=>{stopAudioPlayback();return playOneAudio(M.audioRecord(item,state.audioManifest)?.en,playbackToken);},stop:stopAudioPlayback});
+  document.getElementById("quizTab").disabled=!quizUI;
   buildFilterControls();renderGallery();applyRoute({initial:true});
 }
 void init();

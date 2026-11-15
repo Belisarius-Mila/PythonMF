@@ -10,11 +10,12 @@
   <script src="model.js" defer></script>
   <script src="learners.js" defer></script>
   <script src="learner-ui.js" defer></script>
+  <script src="quiz.js" defer></script>
   <script src="gallery.js" defer></script>
 </head>
 <body>
   <main class="page-shell" data-json-url="../data/vocabulary-en.json" data-audio-url="../data/vocabulary-en-audio.json">
-    <nav class="app-navigation" aria-label="Část aplikace"><button id="galleryTab" type="button" aria-pressed="true">Přehled</button><button id="settingsTab" type="button" aria-pressed="false">Nastavení</button></nav>
+    <nav class="app-navigation" aria-label="Část aplikace"><button id="galleryTab" type="button" aria-pressed="true">Přehled</button><button id="quizTab" type="button" aria-pressed="false" disabled>Poslechni a vyber obrázek</button><button id="settingsTab" type="button" aria-pressed="false">Nastavení</button></nav>
     <section id="galleryView" aria-label="Přehled slovíček">
       <header class="hero">
         <div><p class="eyebrow">Vocabulary EN</p><h1>Slovíčka v obrázcích</h1><p class="intro">Vyber si obrázek. Uč se vlastním tempem.</p></div>
@@ -37,6 +38,7 @@
       </div>
       <details class="layout-options"><summary>Uspořádání a další výběr</summary>
       <div class="gallery-options">
+        <div class="recent-filter"><label class="check-option"><input id="recentOnly" type="checkbox">Posledně přidaná</label><label>Počet nových karet<input id="recentCount" type="number" min="1" max="5000" step="1" value="20" disabled></label><small>Nejnovější karty celého slovníku; ostatní filtry výběr dále omezí.</small></div>
         <label>Výběr<select id="filterSelect"><option value="all">Všechna slovíčka</option><option value="selected">Vybraná učitelem</option><option value="hard">Těžká k procvičení</option></select></label>
         <label>Typ učiva<select id="teachingTypeSelect"><option value="all">Vše</option><option value="word">Slovíčka</option><option value="interaction">Interakce</option><option value="idiom">Fráze</option></select></label>
         <label>Seskupit podle<select id="groupSelect"><option value="topic">Téma</option><option value="part">Slovní druh</option><option value="level">Náročnost</option><option value="none">Bez skupin</option></select></label>
@@ -65,6 +67,28 @@
         </article>
       </div>
       <nav class="study-navigation" aria-label="Další slovíčko"><button id="previousButton" type="button">← Předchozí</button><button id="nextButton" class="primary" type="button">Další →</button><button id="newRoundButton" type="button" hidden>Nové zamíchané kolo</button><button id="backBottomButton" type="button" aria-label="Zpět na přehled">Přehled</button></nav>
+    </section>
+    <section id="quizView" class="quiz-view" aria-labelledby="quizTitle" hidden>
+      <header class="quiz-header"><div><p class="eyebrow">Obrázková hra</p><h1 id="quizTitle">Poslechni a vyber obrázek</h1><p>Poslechni si anglické slovo. Potom vyber jeden ze čtyř obrázků.</p></div><button id="quizBack" type="button">← Zpět</button></header>
+      <div id="quizSetup" class="quiz-setup">
+        <div class="quiz-filters">
+          <label>Slovní zásoba<select id="quizLearner"><option value="all">Vše</option><option value="A">Uživatel A</option><option value="B">Uživatel B</option><option value="C">Uživatel C</option><option value="D">Uživatel D</option></select></label>
+          <label>Okruh<select id="quizTopic"><option value="">Všech 18 okruhů</option></select></label>
+          <label class="check-option"><input id="quizHard" type="checkbox"><span id="quizHardLabel">Jen obtížná (společný výběr)</span></label>
+          <div class="recent-filter"><label class="check-option"><input id="quizRecentOnly" type="checkbox">Posledně přidaná</label><label>Počet nových karet<input id="quizRecentCount" type="number" min="1" max="5000" step="1" value="20" disabled></label></div>
+        </div>
+        <p class="meta">Filtry se kombinují. „Posledně přidaná“ znamená nejnovější karty celého slovníku.</p>
+        <p class="meta">Hra používá názorná slovíčka vhodná k rozpoznání z obrázku. Ostatní karty zůstávají v Přehledu.</p>
+        <p id="quizPoolNotice" class="notice" role="status" aria-live="polite"></p>
+        <button id="quizStart" class="primary" type="button" disabled>Spustit hru</button>
+      </div>
+      <div id="quizRound" hidden>
+        <div class="quiz-toolbar"><p id="quizPosition" tabindex="-1"></p><button id="quizReplay" type="button">♪ Zopakovat slovo</button><button id="quizChange" type="button">Změnit výběr</button></div>
+        <p id="quizMessage" class="quiz-message" role="status" aria-live="polite"></p>
+        <div id="quizChoices" class="quiz-choices" aria-label="Čtyři obrázky"></div>
+        <div class="quiz-actions"><button id="quizNext" class="primary" type="button" disabled>Další →</button></div>
+      </div>
+      <div id="quizEnd" class="quiz-end" hidden><h2>Hotovo!</h2><p id="quizResult"></p><button id="quizAgain" class="primary" type="button">Hrát znovu</button><button id="quizEndChange" type="button">Změnit výběr</button></div>
     </section>
     <section id="settingsView" aria-label="Nastavení slovní zásoby" hidden>
       <h1>Nastavení</h1>

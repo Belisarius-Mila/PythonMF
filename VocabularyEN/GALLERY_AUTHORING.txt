@@ -277,3 +277,51 @@ head/face/ear/nose/mouth/neck/arm/hand/leg/foot. Celkem452 záznamů,442 aktivn�
 Média všech původních karet zachovaná; přidáno10 obrazových karet a40MP3.
 Nové významy jsou v topic-02 a osobní A–D si je vybírají samostatně.
 Samotné zařazení neprovádí Git commit ani Pages publikaci.
+
+
+13. Poslechni a vyber obrázek; posledně přidané karty (2026-11-15)
+
+Samostatná záložka hry používá existující anglické slovíčkové MP3. Nastavení
+hry: Vše / A–D, obtížná, jeden z18 okruhů, posledně přidaných N (výchozí20).
+Filtry se kombinují průnikem. Pro Vše znamenají obtížná původní společný HT;
+pro A–D vlastní hard. Herní filtry jsou jen v sessionStorage picture-quiz.v1.
+Hra nemění slovní zásobu, hard, PIN ani studijní bookmark/pořadí galerie.
+
+Posledně přidaná jsou i v galerii v Uspořádání a další výběr. Nejprve se
+vybere N nejnovějších aktivních karet CELÉHO slovníku podle trvalého id,
+nikoli pořadí CSV, abecedy nebo času opravy. Potom se uplatní další filtry.
+N je celé číslo1–5000; po zapnutí je připraveno20. Výsledek může mít méně než N
+položek. Stav galerie se zachová v URL, obnově, historii i návratu z učení.
+
+Herní katalog docs/data/vocabulary-en-quiz.json je explicitní první výběr189
+konkrétních významů:166 objektů/scén,11 barev a12 základních čísel. Každé UID
+má kontrolní EN/CZ, přesný obrazový soubor, format a seznam konfliktů.
+Oprava hesla, překladu nebo obrazové cesty vyřadí starou herní vazbu, dokud
+se znovu neposoudí. Nová slovíčka nejsou automaticky vhodná do obrazového kvízu.
+Při přidání ověřit, zda je lze rozlišit ze samotného obrázku. U abstraktních
+významů zůstávají k dispozici dosavadní galerie, poslech a větné procvičování.
+
+Všechny4 možnosti jsou z výsledného filtru. U barev jen barvy, u čísel jen
+čísla; s objekty se nemíchají. Stejný obraz/stem, stejné znění/známá homofona,
+stejný CZ text, related a explicitní skupiny typu deer/stag se nesmějí potkat.
+Další trojice se hledá i s návratem, aby náhodná volba nezablokovala existující
+platnou čtveřici. U příliš úzkého filtru hra vysvětlí potřebu rozšíření;
+nepřidává cizí obrázky mimo osobní zásobu ani neukazuje méně než4 možnosti.
+
+Nejprve se načtou4 obrázky a přehraje anglické zadání, pak se odemknou odpovědi.
+Popisky a názvy přístupnosti před odpovědí neprozrazují heslo. Jedno kliknutí
+uzamkne otázku. Správná karta se zeleně zvýrazní, dostane ✓ a EN název,
+chybná zešedne a dostane ×. V obou případech se správné slovo znovu přečte.
+Pokračování je ruční přes Další. Každý vhodný cíl se v kole objeví jednou;
+na konci je jednoduchý výsledek, nové kolo jen po kliknutí Hrát znovu.
+
+Zvuk používá společný rušitelný přehrávač; odchod, změna výběru, historie
+a pagehide jej zastaví. Pozdní načtení/chyba nesmí přepsat novou otázku.
+Bez čitelného audio manifestu nelze hádat; při chybě přehrání slouží Zopakovat.
+Vadný obrázek lze přeskočit bez započtení. Změna osobní zásoby v jiném okně
+ukončí rozpracované kolo, pokud přestane odpovídat jeho výběr.
+
+Responzivní hra má2 sloupce. Nízký viewport může vyžadovat svislé posunutí;
+po spuštění a Další se obrazovka přesune ke hře. Návrat k filtrům ukáže
+jejich ovládání. Fyzická telefonní a úplná významová přejímka zůstávají
+samostatné vůči automatickým kontrolám a místnímu Safari.

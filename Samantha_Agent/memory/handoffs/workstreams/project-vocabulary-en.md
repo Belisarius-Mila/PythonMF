@@ -4,49 +4,47 @@ Nazev: Vocabulary EN
 Pracovni proud: project-vocabulary-en
 Typ: Project
 Priorita: 2
-Stav: mistne hotove ctyri davky, vsech70 navrhu MMTX; ceka na samostatne Pages p+n
+Stav: mistne hotova obrazkova hra a filtr poslednich karet, ceka na prejimku a Pages p+n
 Pripomenout pri startu: ne
-Datum: 2026-11-15 13:18 CET
+Datum: 2026-11-15 18:20 CET
 
 Co se resilo:
-Zbývajících15 nových hesel,3 další významy a2 doplňky včetně jeleního samce.
+Hra Poslechni a vyber obrázek se4 možnostmi a vyhodnocením; posledně přidaných N.
 
 Co je hotove:
-- Místní dávky10+20+20+20, UID ven-0453–0522. Celkem522 záznamů,
-  512 aktivních:492 Slovíček a20 Interakcí,18 témat.
-- Poslední20 má EN/CZ příklady,20 obrazů/náhledů a80 audio referencí:
-  77 novýchMP3 a3 shodné stávající EN nahrávky call/too/turn.
--16 nových ilustrací a4 převzaté. Stag=jelení samec, fishing hut=rybářská chatrč.
--52 Python včetně56 Node a statická brána PASS.502 původních identit,
-  2927 médií a CSV prefix zachované.499 starších karet/katalogových záznamů shodných,
-  u call/too/turn pouze3 odkazy related na nové významy;120 HTTP shodných,
-  145 zdrojů zmrazených po ověření.
-- Všechny70 návrhů je obsahově hotových; tři další významy mají vlastní UID.
-  Žádná z těchto čtyř místních dávek dosud nebyla publikovaná.
+- Samostatná záložka,189 vhodných významů,4 odlišné možnosti v rámci filtru.
+- Vše/A–D, obtížná,1 z18 okruhů a posledních N. Galerie má stejný filtr N.
+- Skryté popisky před odpovědí; poté zelená/✓/EN název a případně šedá/×;
+  správné slovo se opět přehraje. Ruční Další, konec kola, výsledek.
+- Oddělené možnosti barev/čísel/objektů; shodné obrázky, audio a známé
+  homofony/související významy a konflikty nevytvoří nejednoznačnou čtveřici.
+- Návrat, historie, přerušení zvuku, chyby souborů a malé výběry ošetřené.
+- Zachovaná všechna522 UID/512 aktivních karet,18 témat, A–D a původní média.
 
 Co neni hotove:
-Samostatné p+n všech70 nových karet, fyzická přejímka telefonu a poslech.
-Poslední vlastní potvrzené Pages vydání2779af14 obsahovalo452/442;
-nejde o nový živý audit produkce. Nové p+n nezadané.
+Veřejné vydání nové hry, fyzický telefon a úplná obrazová/hlasová přejímka
+první sady. Starší publikační zápisy níže nejsou novým živým auditem.
 
 Dalsi krok:
-Samostatně autorizované Pages p+n s čerstvým auditem celého čekajícího balíčku.
+Mílova přejímka a samostatně potvrzené Pages p+n; výsledek jen z nové účtenky.
 
 Navrhovane dalsi kroky:
-Telefonní přejímka nových70 karet, vět a A–D; samostatně čekání na Oxford.
-Původní zásobník65+3+2 vyčerpaný, nové náměty nyní nezadané.
+Rozšíření herního výběru podle jednoznačnosti ilustrací; Oxford nezávisle.
 
 Zmenene nebo relevantni soubory:
-CSV/katalog;3 webové manifesty;20 zdrojových obrazů,20 webových kopií,
-20 náhledů/77MP3;3 inventární testy; reports/vocabulary_en_lake_batch4_20261115.md.
+docs/vocabulary-en/quiz.js, gallery.js, model.js, index.html, gallery.css;
+docs/data/vocabulary-en-quiz.json; test_vocabularyen_selection.js,
+test_vocabularyen_gallery.py; GALLERY_AUTHORING.txt.
 
 Bezpecnost / neukladat:
-Větev data/vocabulary-lake-batch1-20261115 navazuje na6615b75d nad d141d030;
-společný main a Willovy změny zůstávají stranou. Všechny4 dávky applied.
-Poslední request lake-vocabulary-batch4-20261115-v1; žádné opakování generování/přípravy.
-Privátní důkazy v data/private/vocabulary_lake_batch4_20261115/ a autorském store.
-Původní UID/A–D/Benji zachované; nové karty osobně nepřiřazené.
-Samostatný Vocabulary EN TVBCP nebyl dohodnutý.
+Data worktree ebbd na data/parallel-20261104 nad b0d89adb; main/Will nedotčené.
+Origin mezitím pokročil na de3899b1 (Osel). Místní brána používá explicitní
+společný základ b0d89adb; před p+n je nutné převzetí do aktuálního main
+a ověření celého spojeného kandidáta. Žádný merge/rebase/push nyní.
+Soukromé důkazy data/private/vocabulary_picture_quiz_20261115/.
+Hra neukládá osobní výsledky do profilů, nemění vybraná/obtížná ani PIN.
+Herní filtry jen sessionStorage, galerie používá své dosavadní úložiště.
+Nový TVBCP nedohodnutý, nevzniká. Nic z původních dávek znovu negenerovat.
 
 ## Historie
 
@@ -1072,3 +1070,36 @@ konflikty pouze v paměťových indexech řešené zachováním obou stran.
 Výsledek, job ID, časy bran, GitHub SHA a živé ověření budou pouze v
 privátní složce data/private/all_pending_release_20261115/. Tento zápis
 sám nepotvrzuje push/deploy. Kalendářový unknown se automaticky neopakuje.
+
+
+### 2026-11-15 18:20 CET — Poslechni a vyber obrázek a filtr posledních karet
+
+Hotovo: Místně nová hra se čtyřmi obrázky, anglickým zadáním a vyhodnocením
+správně/zelená/✓/EN název nebo chybně/šedá/×; správné slovo se v obou
+případech znovu přehraje. Další je ruční, kolo se samo neopakuje.
+Filtry Vše/A–D, obtížná, jeden z18 okruhů, posledně přidaných N.
+První výběr189 vhodných významů; čtveřice barev/čísel/objektů oddělené.
+Posledně přidaná jsou také v galerii a zachovají se při návratu a obnově.
+
+Rozhodnutí: Míla zadal obrazovou hru a počet posledně přidaných slovíček.
+Pro první provedení se N počítá z celého slovníku před osobním a tematickým
+filtrem; tento význam byl nabídnut k případnému upřesnění. Hra nezařazuje
+nejednoznačné obrázky ani možnosti mimo výsledný filtr. Výběry/PIN/A–D,
+CSV, hlavní katalog a všechny dosavadní audio/obrazové soubory se nemění.
+Samostatný Vocabulary EN TVBCP nebyl dohodnutý; nový nevzniká.
+
+Další krok: Mílova přejímka, fyzický telefon a samostatné Pages p+n.
+
+Navrhované další kroky: Posoudit další karty pro herní katalog podle obrázků;
+Oxford zůstává nezávisle otevřený.
+
+Technický důkaz: Herní i dosavadní Node regrese; programem vybraná v3 brána
+a finální účtenka v data/private/vocabulary_picture_quiz_20261115/.
+26 místních HTTP odpovědí přesně shodných;7 klíčových dosavadních zdrojů
+proti HEAD bajtově zachovaných. Safari Mac: správné rabbit, chybné horse,
+skryté názvy, čtyři fotografie a Další, okruh Zvířata, N20 prázdná čtveřice /
+N100 pět platných cílů, obnova. Úzké CSS rozložení ověřené dočasným zvětšením
+stránky; zoom obnoven a vlastní náhledové okno zavřené. Nejde o fyzický iPhone
+ani lidskou přejímku výslovnosti všech189 slov. Nová hra dosud bez push/nasazení.
+Vlastní Data worktree ebbd, větev data/parallel-20261104, základ b0d89adb;
+main a Willův novější vývoj zůstávají stranou.

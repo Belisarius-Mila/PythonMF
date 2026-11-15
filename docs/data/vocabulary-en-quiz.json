@@ -1,0 +1,1415 @@
+{
+  "schemaVersion": 1,
+  "description": "Počáteční výběr názorných významů pro hru se čtyřmi obrázky. Změna hesla, překladu nebo obrázku vyžaduje novou kontrolu této vazby.",
+  "entries": {
+    "ven-0001": {
+      "en": "a glass (of water)",
+      "cz": "sklenice (vody)",
+      "image": "assets/vocabulary-en/glass.jpg",
+      "conflicts": [
+        "drink-vessel"
+      ],
+      "format": "objects"
+    },
+    "ven-0002": {
+      "en": "airport",
+      "cz": "letiště",
+      "image": "assets/vocabulary-en/airport.webp",
+      "conflicts": [],
+      "format": "objects"
+    },
+    "ven-0004": {
+      "en": "baby elephant",
+      "cz": "slůně",
+      "image": "assets/vocabulary-en/babyelephant.webp",
+      "conflicts": [
+        "elephant"
+      ],
+      "format": "objects"
+    },
+    "ven-0005": {
+      "en": "bag",
+      "cz": "taška",
+      "image": "assets/vocabulary-en/bag.jpg",
+      "conflicts": [],
+      "format": "objects"
+    },
+    "ven-0007": {
+      "en": "bike",
+      "cz": "kolo",
+      "image": "assets/vocabulary-en/bike.jpg",
+      "conflicts": [],
+      "format": "objects"
+    },
+    "ven-0009": {
+      "en": "black",
+      "cz": "černý",
+      "image": "assets/vocabulary-en/black.jpg",
+      "format": "colors",
+      "conflicts": []
+    },
+    "ven-0010": {
+      "en": "blue",
+      "cz": "modrý",
+      "image": "assets/vocabulary-en/blue.jpg",
+      "format": "colors",
+      "conflicts": []
+    },
+    "ven-0011": {
+      "en": "book",
+      "cz": "kniha",
+      "image": "assets/vocabulary-en/book.jpg",
+      "conflicts": [
+        "paper"
+      ],
+      "format": "objects"
+    },
+    "ven-0012": {
+      "en": "box",
+      "cz": "krabice",
+      "image": "assets/vocabulary-en/box.jpg",
+      "conflicts": [],
+      "format": "objects"
+    },
+    "ven-0016": {
+      "en": "burger",
+      "cz": "hamburger",
+      "image": "assets/vocabulary-en/burger.png",
+      "conflicts": [],
+      "format": "objects"
+    },
+    "ven-0017": {
+      "en": "bus station",
+      "cz": "autobusové nádraží",
+      "image": "assets/vocabulary-en/busstation.webp",
+      "conflicts": [],
+      "format": "objects"
+    },
+    "ven-0020": {
+      "en": "cat",
+      "cz": "kočka",
+      "image": "assets/vocabulary-en/cat.webp",
+      "conflicts": [],
+      "format": "objects"
+    },
+    "ven-0021": {
+      "en": "cinema",
+      "cz": "kino",
+      "image": "assets/vocabulary-en/cinema.png",
+      "conflicts": [],
+      "format": "objects"
+    },
+    "ven-0022": {
+      "en": "coffee",
+      "cz": "káva",
+      "image": "assets/vocabulary-en/coffee.jpg",
+      "conflicts": [
+        "drink-vessel"
+      ],
+      "format": "objects"
+    },
+    "ven-0024": {
+      "en": "cow",
+      "cz": "kráva",
+      "image": "assets/vocabulary-en/cow.webp",
+      "conflicts": [],
+      "format": "objects"
+    },
+    "ven-0025": {
+      "en": "crocodile",
+      "cz": "krokodýl",
+      "image": "assets/vocabulary-en/crocodile.webp",
+      "conflicts": [],
+      "format": "objects"
+    },
+    "ven-0027": {
+      "en": "dog",
+      "cz": "pes",
+      "image": "assets/vocabulary-en/dog.jpg",
+      "conflicts": [],
+      "format": "objects"
+    },
+    "ven-0028": {
+      "en": "doctor",
+      "cz": "lékař",
+      "image": "assets/vocabulary-en/doctor.png",
+      "conflicts": [],
+      "format": "objects"
+    },
+    "ven-0029": {
+      "en": "document",
+      "cz": "dokument",
+      "image": "assets/vocabulary-en/document.webp",
+      "conflicts": [
+        "paper"
+      ],
+      "format": "objects"
+    },
+    "ven-0031": {
+      "en": "drawing",
+      "cz": "kreslení",
+      "image": "assets/vocabulary-en/drawing.webp",
+      "conflicts": [],
+      "format": "objects"
+    },
+    "ven-0032": {
+      "en": "duck",
+      "cz": "kachna",
+      "image": "assets/vocabulary-en/duck.webp",
+      "conflicts": [],
+      "format": "objects"
+    },
+    "ven-0033": {
+      "en": "elephant",
+      "cz": "slon",
+      "image": "assets/vocabulary-en/elephant.webp",
+      "conflicts": [
+        "elephant"
+      ],
+      "format": "objects"
+    },
+    "ven-0036": {
+      "en": "eyes",
+      "cz": "oči",
+      "image": "assets/vocabulary-en/eyes.webp",
+      "conflicts": [],
+      "format": "objects"
+    },
+    "ven-0038": {
+      "en": "family",
+      "cz": "rodina",
+      "image": "assets/vocabulary-en/family.jpg",
+      "conflicts": [
+        "people"
+      ],
+      "format": "objects"
+    },
+    "ven-0040": {
+      "en": "field",
+      "cz": "pole",
+      "image": "assets/vocabulary-en/field.webp",
+      "conflicts": [
+        "landscape"
+      ],
+      "format": "objects"
+    },
+    "ven-0042": {
+      "en": "fish",
+      "cz": "ryba",
+      "image": "assets/vocabulary-en/fish.png",
+      "conflicts": [],
+      "format": "objects"
+    },
+    "ven-0046": {
+      "en": "garden",
+      "cz": "zahrada",
+      "image": "assets/vocabulary-en/garden.jpg",
+      "conflicts": [
+        "landscape"
+      ],
+      "format": "objects"
+    },
+    "ven-0047": {
+      "en": "giraffe",
+      "cz": "žirafa",
+      "image": "assets/vocabulary-en/giraffe.jpg",
+      "conflicts": [],
+      "format": "objects"
+    },
+    "ven-0048": {
+      "en": "goat",
+      "cz": "koza",
+      "image": "assets/vocabulary-en/goat.webp",
+      "conflicts": [],
+      "format": "objects"
+    },
+    "ven-0052": {
+      "en": "green",
+      "cz": "zelený",
+      "image": "assets/vocabulary-en/green.webp",
+      "format": "colors",
+      "conflicts": []
+    },
+    "ven-0053": {
+      "en": "grey",
+      "cz": "šedý",
+      "image": "assets/vocabulary-en/grey.webp",
+      "format": "colors",
+      "conflicts": []
+    },
+    "ven-0054": {
+      "en": "hair",
+      "cz": "vlasy",
+      "image": "assets/vocabulary-en/hair.jpg",
+      "conflicts": [],
+      "format": "objects"
+    },
+    "ven-0060": {
+      "en": "horse",
+      "cz": "kůň",
+      "image": "assets/vocabulary-en/horse.webp",
+      "conflicts": [],
+      "format": "objects"
+    },
+    "ven-0061": {
+      "en": "house",
+      "cz": "dům",
+      "image": "assets/vocabulary-en/house.png",
+      "conflicts": [
+        "building"
+      ],
+      "format": "objects"
+    },
+    "ven-0065": {
+      "en": "lake",
+      "cz": "jezero",
+      "image": "assets/vocabulary-en/lakepond.webp",
+      "conflicts": [
+        "landscape"
+      ],
+      "format": "objects"
+    },
+    "ven-0068": {
+      "en": "lion",
+      "cz": "lev",
+      "image": "assets/vocabulary-en/lion.webp",
+      "conflicts": [],
+      "format": "objects"
+    },
+    "ven-0071": {
+      "en": "milk",
+      "cz": "mléko",
+      "image": "assets/vocabulary-en/milk.jpg",
+      "conflicts": [
+        "drink-vessel"
+      ],
+      "format": "objects"
+    },
+    "ven-0073": {
+      "en": "monkey",
+      "cz": "opice",
+      "image": "assets/vocabulary-en/monkey.webp",
+      "conflicts": [],
+      "format": "objects"
+    },
+    "ven-0078": {
+      "en": "office",
+      "cz": "kancelář",
+      "image": "assets/vocabulary-en/office.webp",
+      "conflicts": [],
+      "format": "objects"
+    },
+    "ven-0081": {
+      "en": "park",
+      "cz": "park",
+      "image": "assets/vocabulary-en/park.jpg",
+      "conflicts": [
+        "landscape"
+      ],
+      "format": "objects"
+    },
+    "ven-0082": {
+      "en": "popcorn",
+      "cz": "popcorn",
+      "image": "assets/vocabulary-en/popcorn.webp",
+      "conflicts": [],
+      "format": "objects"
+    },
+    "ven-0083": {
+      "en": "rabbit",
+      "cz": "králík",
+      "image": "assets/vocabulary-en/rabbit.webp",
+      "conflicts": [],
+      "format": "objects"
+    },
+    "ven-0084": {
+      "en": "red",
+      "cz": "červený",
+      "image": "assets/vocabulary-en/red.webp",
+      "format": "colors",
+      "conflicts": []
+    },
+    "ven-0085": {
+      "en": "rhino",
+      "cz": "nosorožec",
+      "image": "assets/vocabulary-en/rhino.webp",
+      "conflicts": [],
+      "format": "objects"
+    },
+    "ven-0087": {
+      "en": "sheep",
+      "cz": "ovce",
+      "image": "assets/vocabulary-en/sheep.webp",
+      "conflicts": [],
+      "format": "objects"
+    },
+    "ven-0095": {
+      "en": "teacher",
+      "cz": "učitel",
+      "image": "assets/vocabulary-en/teacher.webp",
+      "conflicts": [],
+      "format": "objects"
+    },
+    "ven-0096": {
+      "en": "ticket",
+      "cz": "lístek",
+      "image": "assets/vocabulary-en/ticket.webp",
+      "conflicts": [
+        "paper"
+      ],
+      "format": "objects"
+    },
+    "ven-0098": {
+      "en": "water",
+      "cz": "voda",
+      "image": "assets/vocabulary-en/water.jpg",
+      "conflicts": [
+        "drink-vessel"
+      ],
+      "format": "objects"
+    },
+    "ven-0099": {
+      "en": "white",
+      "cz": "bílý",
+      "image": "assets/vocabulary-en/white.webp",
+      "format": "colors",
+      "conflicts": []
+    },
+    "ven-0100": {
+      "en": "yellow",
+      "cz": "žlutý",
+      "image": "assets/vocabulary-en/yellow.jpg",
+      "format": "colors",
+      "conflicts": []
+    },
+    "ven-0102": {
+      "en": "zebra",
+      "cz": "zebra",
+      "image": "assets/vocabulary-en/zebra.webp",
+      "conflicts": [],
+      "format": "objects"
+    },
+    "ven-0103": {
+      "en": "restaurant",
+      "cz": "restaurace",
+      "image": "assets/vocabulary-en/restaurant.jpg",
+      "conflicts": [],
+      "format": "objects"
+    },
+    "ven-0111": {
+      "en": "table",
+      "cz": "stůl",
+      "image": "assets/vocabulary-en/table.jpg",
+      "conflicts": [],
+      "format": "objects"
+    },
+    "ven-0113": {
+      "en": "menu",
+      "cz": "jídelní lístek",
+      "image": "assets/vocabulary-en/menu.jpg",
+      "conflicts": [
+        "paper"
+      ],
+      "format": "objects"
+    },
+    "ven-0116": {
+      "en": "juice",
+      "cz": "džus",
+      "image": "assets/vocabulary-en/juice.jpg",
+      "conflicts": [
+        "drink-vessel"
+      ],
+      "format": "objects"
+    },
+    "ven-0117": {
+      "en": "apple",
+      "cz": "jablko",
+      "image": "assets/vocabulary-en/apple.png",
+      "conflicts": [],
+      "format": "objects"
+    },
+    "ven-0118": {
+      "en": "orange",
+      "cz": "pomeranč",
+      "image": "assets/vocabulary-en/orange.webp",
+      "conflicts": [],
+      "format": "objects"
+    },
+    "ven-0119": {
+      "en": "chicken",
+      "cz": "kuřecí maso",
+      "image": "assets/vocabulary-en/chicken.png",
+      "conflicts": [],
+      "format": "objects"
+    },
+    "ven-0120": {
+      "en": "rice",
+      "cz": "rýže",
+      "image": "assets/vocabulary-en/rice.jpg",
+      "conflicts": [],
+      "format": "objects"
+    },
+    "ven-0121": {
+      "en": "pasta",
+      "cz": "těstoviny",
+      "image": "assets/vocabulary-en/pasta.jpg",
+      "conflicts": [],
+      "format": "objects"
+    },
+    "ven-0122": {
+      "en": "cheese",
+      "cz": "sýr",
+      "image": "assets/vocabulary-en/cheese.jpg",
+      "conflicts": [],
+      "format": "objects"
+    },
+    "ven-0123": {
+      "en": "fries",
+      "cz": "hranolky",
+      "image": "assets/vocabulary-en/fries.jpg",
+      "conflicts": [],
+      "format": "objects"
+    },
+    "ven-0124": {
+      "en": "potatoes",
+      "cz": "brambory",
+      "image": "assets/vocabulary-en/potatoes.jpg",
+      "conflicts": [],
+      "format": "objects"
+    },
+    "ven-0125": {
+      "en": "ketchup",
+      "cz": "kečup",
+      "image": "assets/vocabulary-en/ketchup.jpg",
+      "conflicts": [],
+      "format": "objects"
+    },
+    "ven-0126": {
+      "en": "salad",
+      "cz": "salát",
+      "image": "assets/vocabulary-en/salad.jpg",
+      "conflicts": [],
+      "format": "objects"
+    },
+    "ven-0129": {
+      "en": "sauce",
+      "cz": "omáčka",
+      "image": "assets/vocabulary-en/sauce.jpg",
+      "conflicts": [],
+      "format": "objects"
+    },
+    "ven-0131": {
+      "en": "ice cream",
+      "cz": "zmrzlina",
+      "image": "assets/vocabulary-en/icecream.jpg",
+      "conflicts": [],
+      "format": "objects"
+    },
+    "ven-0132": {
+      "en": "bill",
+      "cz": "účet",
+      "image": "assets/vocabulary-en/bill.jpg",
+      "conflicts": [
+        "paper"
+      ],
+      "format": "objects"
+    },
+    "ven-0134": {
+      "en": "card",
+      "cz": "karta",
+      "image": "assets/vocabulary-en/card.jpg",
+      "conflicts": [
+        "paper"
+      ],
+      "format": "objects"
+    },
+    "ven-0154": {
+      "en": "crossing",
+      "cz": "křižovatka",
+      "image": "assets/vocabulary-en/crossing.png",
+      "conflicts": [],
+      "format": "objects"
+    },
+    "ven-0156": {
+      "en": "river",
+      "cz": "řeka",
+      "image": "assets/vocabulary-en/river.png",
+      "conflicts": [
+        "landscape"
+      ],
+      "format": "objects"
+    },
+    "ven-0157": {
+      "en": "skating",
+      "cz": "bruslení",
+      "image": "assets/vocabulary-en/skating.png",
+      "conflicts": [],
+      "format": "objects"
+    },
+    "ven-0170": {
+      "en": "orange",
+      "cz": "oranžový",
+      "image": "assets/vocabulary-en/orange.webp",
+      "format": "colors",
+      "conflicts": []
+    },
+    "ven-0171": {
+      "en": "purple",
+      "cz": "fialový",
+      "image": "assets/vocabulary-en/purple.png",
+      "format": "colors",
+      "conflicts": []
+    },
+    "ven-0172": {
+      "en": "pink",
+      "cz": "růžový",
+      "image": "assets/vocabulary-en/pink.png",
+      "format": "colors",
+      "conflicts": []
+    },
+    "ven-0173": {
+      "en": "bear",
+      "cz": "medvěd",
+      "image": "assets/vocabulary-en/bear.png",
+      "conflicts": [],
+      "format": "objects"
+    },
+    "ven-0174": {
+      "en": "camel",
+      "cz": "velbloud",
+      "image": "assets/vocabulary-en/camel.png",
+      "conflicts": [],
+      "format": "objects"
+    },
+    "ven-0175": {
+      "en": "deer",
+      "cz": "jelen",
+      "image": "assets/vocabulary-en/deer.png",
+      "conflicts": [
+        "deer"
+      ],
+      "format": "objects"
+    },
+    "ven-0176": {
+      "en": "eagle",
+      "cz": "orel",
+      "image": "assets/vocabulary-en/eagle.png",
+      "conflicts": [],
+      "format": "objects"
+    },
+    "ven-0177": {
+      "en": "fox",
+      "cz": "liška",
+      "image": "assets/vocabulary-en/fox.png",
+      "conflicts": [],
+      "format": "objects"
+    },
+    "ven-0178": {
+      "en": "goose",
+      "cz": "husa",
+      "image": "assets/vocabulary-en/goose.png",
+      "conflicts": [],
+      "format": "objects"
+    },
+    "ven-0179": {
+      "en": "hippo",
+      "cz": "hroch",
+      "image": "assets/vocabulary-en/hippo.png",
+      "conflicts": [],
+      "format": "objects"
+    },
+    "ven-0180": {
+      "en": "mouse",
+      "cz": "myš",
+      "image": "assets/vocabulary-en/mouse.png",
+      "conflicts": [],
+      "format": "objects"
+    },
+    "ven-0181": {
+      "en": "parrot",
+      "cz": "papoušek",
+      "image": "assets/vocabulary-en/parrot.png",
+      "conflicts": [],
+      "format": "objects"
+    },
+    "ven-0182": {
+      "en": "pig",
+      "cz": "prase",
+      "image": "assets/vocabulary-en/pig.webp",
+      "conflicts": [],
+      "format": "objects"
+    },
+    "ven-0183": {
+      "en": "snake",
+      "cz": "had",
+      "image": "assets/vocabulary-en/snake.png",
+      "conflicts": [],
+      "format": "objects"
+    },
+    "ven-0184": {
+      "en": "tortoise",
+      "cz": "želva",
+      "image": "assets/vocabulary-en/tortoise.png",
+      "conflicts": [],
+      "format": "objects"
+    },
+    "ven-0185": {
+      "en": "turkey",
+      "cz": "krocan",
+      "image": "assets/vocabulary-en/turkey.png",
+      "conflicts": [],
+      "format": "objects"
+    },
+    "ven-0186": {
+      "en": "wolf",
+      "cz": "vlk",
+      "image": "assets/vocabulary-en/wolf.png",
+      "conflicts": [],
+      "format": "objects"
+    },
+    "ven-0187": {
+      "en": "one",
+      "cz": "jedna",
+      "image": "assets/vocabulary-en/one.webp",
+      "format": "numbers",
+      "conflicts": []
+    },
+    "ven-0188": {
+      "en": "two",
+      "cz": "dva",
+      "image": "assets/vocabulary-en/two.webp",
+      "format": "numbers",
+      "conflicts": []
+    },
+    "ven-0189": {
+      "en": "three",
+      "cz": "tři",
+      "image": "assets/vocabulary-en/three.webp",
+      "format": "numbers",
+      "conflicts": []
+    },
+    "ven-0190": {
+      "en": "four",
+      "cz": "čtyři",
+      "image": "assets/vocabulary-en/four.webp",
+      "format": "numbers",
+      "conflicts": []
+    },
+    "ven-0191": {
+      "en": "five",
+      "cz": "pět",
+      "image": "assets/vocabulary-en/five.png",
+      "format": "numbers",
+      "conflicts": []
+    },
+    "ven-0192": {
+      "en": "six",
+      "cz": "šest",
+      "image": "assets/vocabulary-en/six.webp",
+      "format": "numbers",
+      "conflicts": []
+    },
+    "ven-0193": {
+      "en": "seven",
+      "cz": "sedm",
+      "image": "assets/vocabulary-en/seven.webp",
+      "format": "numbers",
+      "conflicts": []
+    },
+    "ven-0194": {
+      "en": "eight",
+      "cz": "osm",
+      "image": "assets/vocabulary-en/otto.webp",
+      "format": "numbers",
+      "conflicts": []
+    },
+    "ven-0196": {
+      "en": "sunflowers",
+      "cz": "slunečnice",
+      "image": "assets/vocabulary-en/sunflowers.webp",
+      "conflicts": [],
+      "format": "objects"
+    },
+    "ven-0206": {
+      "en": "ball",
+      "cz": "míč",
+      "image": "assets/vocabulary-en/ball.png",
+      "conflicts": [],
+      "format": "objects"
+    },
+    "ven-0207": {
+      "en": "car",
+      "cz": "auto",
+      "image": "assets/vocabulary-en/car.png",
+      "conflicts": [],
+      "format": "objects"
+    },
+    "ven-0208": {
+      "en": "train",
+      "cz": "vlak",
+      "image": "assets/vocabulary-en/train.png",
+      "conflicts": [],
+      "format": "objects"
+    },
+    "ven-0209": {
+      "en": "cup",
+      "cz": "hrnek",
+      "image": "assets/vocabulary-en/cup.png",
+      "conflicts": [
+        "drink-vessel"
+      ],
+      "format": "objects"
+    },
+    "ven-0210": {
+      "en": "shoe",
+      "cz": "bota",
+      "image": "assets/vocabulary-en/shoe.png",
+      "conflicts": [],
+      "format": "objects"
+    },
+    "ven-0211": {
+      "en": "tree",
+      "cz": "strom",
+      "image": "assets/vocabulary-en/tree.png",
+      "conflicts": [
+        "wood"
+      ],
+      "format": "objects"
+    },
+    "ven-0212": {
+      "en": "banana",
+      "cz": "banán",
+      "image": "assets/vocabulary-en/banana.png",
+      "conflicts": [],
+      "format": "objects"
+    },
+    "ven-0216": {
+      "en": "flower",
+      "cz": "kytka",
+      "image": "assets/vocabulary-en/flower.png",
+      "conflicts": [],
+      "format": "objects"
+    },
+    "ven-0220": {
+      "en": "sun",
+      "cz": "slunce",
+      "image": "assets/vocabulary-en/sun.webp",
+      "conflicts": [],
+      "format": "objects"
+    },
+    "ven-0221": {
+      "en": "carrot",
+      "cz": "mrkev",
+      "image": "assets/vocabulary-en/carrot.png",
+      "conflicts": [],
+      "format": "objects"
+    },
+    "ven-0222": {
+      "en": "chair",
+      "cz": "židle",
+      "image": "assets/vocabulary-en/chair.png",
+      "conflicts": [],
+      "format": "objects"
+    },
+    "ven-0223": {
+      "en": "moon",
+      "cz": "měsíc",
+      "image": "assets/vocabulary-en/moon.png",
+      "conflicts": [],
+      "format": "objects"
+    },
+    "ven-0224": {
+      "en": "bread",
+      "cz": "chleba",
+      "image": "assets/vocabulary-en/bread.png",
+      "conflicts": [],
+      "format": "objects"
+    },
+    "ven-0225": {
+      "en": "truck",
+      "cz": "náklaďák",
+      "image": "assets/vocabulary-en/truck.png",
+      "conflicts": [],
+      "format": "objects"
+    },
+    "ven-0226": {
+      "en": "bed",
+      "cz": "postel",
+      "image": "assets/vocabulary-en/bed.webp",
+      "conflicts": [],
+      "format": "objects"
+    },
+    "ven-0227": {
+      "en": "star",
+      "cz": "hvězda",
+      "image": "assets/vocabulary-en/star.png",
+      "conflicts": [],
+      "format": "objects"
+    },
+    "ven-0228": {
+      "en": "cake",
+      "cz": "dort",
+      "image": "assets/vocabulary-en/cake.png",
+      "conflicts": [],
+      "format": "objects"
+    },
+    "ven-0229": {
+      "en": "plane",
+      "cz": "letadlo",
+      "image": "assets/vocabulary-en/plane.png",
+      "conflicts": [],
+      "format": "objects"
+    },
+    "ven-0230": {
+      "en": "door",
+      "cz": "dveře",
+      "image": "assets/vocabulary-en/door.png",
+      "conflicts": [],
+      "format": "objects"
+    },
+    "ven-0231": {
+      "en": "cloud",
+      "cz": "mrak",
+      "image": "assets/vocabulary-en/cloud.png",
+      "conflicts": [],
+      "format": "objects"
+    },
+    "ven-0232": {
+      "en": "rocket",
+      "cz": "raketa",
+      "image": "assets/vocabulary-en/rocket.png",
+      "conflicts": [],
+      "format": "objects"
+    },
+    "ven-0233": {
+      "en": "window",
+      "cz": "okno",
+      "image": "assets/vocabulary-en/window.webp",
+      "conflicts": [],
+      "format": "objects"
+    },
+    "ven-0234": {
+      "en": "key",
+      "cz": "klíč",
+      "image": "assets/vocabulary-en/key.png",
+      "conflicts": [],
+      "format": "objects"
+    },
+    "ven-0235": {
+      "en": "stone",
+      "cz": "kámen",
+      "image": "assets/vocabulary-en/stone.png",
+      "conflicts": [],
+      "format": "objects"
+    },
+    "ven-0236": {
+      "en": "robot",
+      "cz": "robot",
+      "image": "assets/vocabulary-en/robot.png",
+      "conflicts": [],
+      "format": "objects"
+    },
+    "ven-0237": {
+      "en": "fork",
+      "cz": "vidlička",
+      "image": "assets/vocabulary-en/fork.png",
+      "conflicts": [],
+      "format": "objects"
+    },
+    "ven-0238": {
+      "en": "cap",
+      "cz": "čepice",
+      "image": "assets/vocabulary-en/cap.png",
+      "conflicts": [],
+      "format": "objects"
+    },
+    "ven-0239": {
+      "en": "leaf",
+      "cz": "list",
+      "image": "assets/vocabulary-en/leaf.png",
+      "conflicts": [
+        "wood"
+      ],
+      "format": "objects"
+    },
+    "ven-0240": {
+      "en": "cookie",
+      "cz": "sušenka",
+      "image": "assets/vocabulary-en/cookie.jpg",
+      "conflicts": [],
+      "format": "objects"
+    },
+    "ven-0241": {
+      "en": "block",
+      "cz": "kostka",
+      "image": "assets/vocabulary-en/block.png",
+      "conflicts": [],
+      "format": "objects"
+    },
+    "ven-0242": {
+      "en": "pencil",
+      "cz": "tužka",
+      "image": "assets/vocabulary-en/pencil.png",
+      "conflicts": [],
+      "format": "objects"
+    },
+    "ven-0243": {
+      "en": "pants",
+      "cz": "kalhoty",
+      "image": "assets/vocabulary-en/pants.webp",
+      "conflicts": [],
+      "format": "objects"
+    },
+    "ven-0244": {
+      "en": "stick",
+      "cz": "klacek",
+      "image": "assets/vocabulary-en/stick.png",
+      "conflicts": [
+        "wood"
+      ],
+      "format": "objects"
+    },
+    "ven-0245": {
+      "en": "corn",
+      "cz": "kukuřice",
+      "image": "assets/vocabulary-en/corn.png",
+      "conflicts": [],
+      "format": "objects"
+    },
+    "ven-0246": {
+      "en": "doll",
+      "cz": "panenka",
+      "image": "assets/vocabulary-en/doll.png",
+      "conflicts": [],
+      "format": "objects"
+    },
+    "ven-0247": {
+      "en": "map",
+      "cz": "mapa",
+      "image": "assets/vocabulary-en/map.webp",
+      "conflicts": [
+        "paper"
+      ],
+      "format": "objects"
+    },
+    "ven-0248": {
+      "en": "soap",
+      "cz": "mýdlo",
+      "image": "assets/vocabulary-en/soap.png",
+      "conflicts": [],
+      "format": "objects"
+    },
+    "ven-0249": {
+      "en": "pillow",
+      "cz": "polštář",
+      "image": "assets/vocabulary-en/pillow.png",
+      "conflicts": [],
+      "format": "objects"
+    },
+    "ven-0250": {
+      "en": "grape",
+      "cz": "hroznové víno",
+      "image": "assets/vocabulary-en/grape.png",
+      "conflicts": [],
+      "format": "objects"
+    },
+    "ven-0252": {
+      "en": "kite",
+      "cz": "drak",
+      "image": "assets/vocabulary-en/kite.png",
+      "conflicts": [],
+      "format": "objects"
+    },
+    "ven-0253": {
+      "en": "lamp",
+      "cz": "lampa",
+      "image": "assets/vocabulary-en/lamp.png",
+      "conflicts": [],
+      "format": "objects"
+    },
+    "ven-0254": {
+      "en": "boots",
+      "cz": "holinky",
+      "image": "assets/vocabulary-en/boots.png",
+      "conflicts": [],
+      "format": "objects"
+    },
+    "ven-0255": {
+      "en": "pea",
+      "cz": "hrášek",
+      "image": "assets/vocabulary-en/pea.png",
+      "conflicts": [],
+      "format": "objects"
+    },
+    "ven-0256": {
+      "en": "nuts",
+      "cz": "oříšky",
+      "image": "assets/vocabulary-en/nuts.webp",
+      "conflicts": [],
+      "format": "objects"
+    },
+    "ven-0265": {
+      "en": "path",
+      "cz": "cesta",
+      "image": "assets/vocabulary-en/travel.png",
+      "conflicts": [],
+      "format": "objects"
+    },
+    "ven-0266": {
+      "en": "crow",
+      "cz": "havran",
+      "image": "assets/vocabulary-en/crow.webp",
+      "conflicts": [],
+      "format": "objects"
+    },
+    "ven-0269": {
+      "en": "valley",
+      "cz": "údolí",
+      "image": "assets/vocabulary-en/valley.webp",
+      "conflicts": [
+        "landscape"
+      ],
+      "format": "objects"
+    },
+    "ven-0277": {
+      "en": "farm",
+      "cz": "farma",
+      "image": "assets/vocabulary-en/farm.webp",
+      "conflicts": [
+        "landscape"
+      ],
+      "format": "objects"
+    },
+    "ven-0280": {
+      "en": "pump",
+      "cz": "pumpa",
+      "image": "assets/vocabulary-en/pump.webp",
+      "conflicts": [],
+      "format": "objects"
+    },
+    "ven-0282": {
+      "en": "bucket",
+      "cz": "vědro, kbelík",
+      "image": "assets/vocabulary-en/bucket.webp",
+      "conflicts": [],
+      "format": "objects"
+    },
+    "ven-0285": {
+      "en": "forest",
+      "cz": "les",
+      "image": "assets/vocabulary-en/forest.webp",
+      "conflicts": [
+        "landscape"
+      ],
+      "format": "objects"
+    },
+    "ven-0286": {
+      "en": "handle",
+      "cz": "páka",
+      "image": "assets/vocabulary-en/handle.webp",
+      "conflicts": [],
+      "format": "objects"
+    },
+    "ven-0294": {
+      "en": "gate",
+      "cz": "branka",
+      "image": "assets/vocabulary-en/gate.webp",
+      "conflicts": [],
+      "format": "objects"
+    },
+    "ven-0296": {
+      "en": "squirrel",
+      "cz": "veverka",
+      "image": "assets/vocabulary-en/squirrel.webp",
+      "conflicts": [],
+      "format": "objects"
+    },
+    "ven-0300": {
+      "en": "yard",
+      "cz": "dvorek",
+      "image": "assets/vocabulary-en/courtyard.webp",
+      "conflicts": [],
+      "format": "objects"
+    },
+    "ven-0301": {
+      "en": "badger",
+      "cz": "jezevec",
+      "image": "assets/vocabulary-en/badger.webp",
+      "conflicts": [],
+      "format": "objects"
+    },
+    "ven-0304": {
+      "en": "fence",
+      "cz": "plot",
+      "image": "assets/vocabulary-en/fence.webp",
+      "conflicts": [],
+      "format": "objects"
+    },
+    "ven-0317": {
+      "en": "bridge",
+      "cz": "most",
+      "image": "assets/vocabulary-en/bridge.png",
+      "conflicts": [],
+      "format": "objects"
+    },
+    "ven-0318": {
+      "en": "brown",
+      "cz": "hnědý",
+      "image": "assets/vocabulary-en/brown.webp",
+      "format": "colors",
+      "conflicts": []
+    },
+    "ven-0327": {
+      "en": "eleven",
+      "cz": "jedenáct",
+      "image": "assets/vocabulary-en/eleven.webp",
+      "format": "numbers",
+      "conflicts": []
+    },
+    "ven-0360": {
+      "en": "log",
+      "cz": "kláda",
+      "image": "assets/vocabulary-en/log.webp",
+      "conflicts": [
+        "wood"
+      ],
+      "format": "objects"
+    },
+    "ven-0369": {
+      "en": "nine",
+      "cz": "devět",
+      "image": "assets/vocabulary-en/nove.webp",
+      "format": "numbers",
+      "conflicts": []
+    },
+    "ven-0384": {
+      "en": "school",
+      "cz": "škola",
+      "image": "assets/vocabulary-en/school.png",
+      "conflicts": [],
+      "format": "objects"
+    },
+    "ven-0394": {
+      "en": "stream",
+      "cz": "potok",
+      "image": "assets/vocabulary-en/stream.webp",
+      "conflicts": [
+        "landscape"
+      ],
+      "format": "objects"
+    },
+    "ven-0397": {
+      "en": "ten",
+      "cz": "deset",
+      "image": "assets/vocabulary-en/ten.webp",
+      "format": "numbers",
+      "conflicts": []
+    },
+    "ven-0406": {
+      "en": "twelve",
+      "cz": "dvanáct",
+      "image": "assets/vocabulary-en/twelve.webp",
+      "format": "numbers",
+      "conflicts": []
+    },
+    "ven-0427": {
+      "en": "drawing",
+      "cz": "kresba",
+      "image": "assets/vocabulary-en/drawing.webp",
+      "conflicts": [],
+      "format": "objects"
+    },
+    "ven-0431": {
+      "en": "chicken",
+      "cz": "slepice",
+      "image": "assets/vocabulary-en/sensechickenanimal.png",
+      "conflicts": [],
+      "format": "objects"
+    },
+    "ven-0437": {
+      "en": "guard",
+      "cz": "strážce",
+      "image": "assets/vocabulary-en/senseguardperson.png",
+      "conflicts": [],
+      "format": "objects"
+    },
+    "ven-0443": {
+      "en": "head",
+      "cz": "hlava",
+      "image": "assets/vocabulary-en/ven0443.png",
+      "conflicts": [
+        "head-face"
+      ],
+      "format": "objects"
+    },
+    "ven-0444": {
+      "en": "face",
+      "cz": "obličej",
+      "image": "assets/vocabulary-en/ven0444.png",
+      "conflicts": [
+        "head-face"
+      ],
+      "format": "objects"
+    },
+    "ven-0445": {
+      "en": "ear",
+      "cz": "ucho",
+      "image": "assets/vocabulary-en/ven0445.png",
+      "conflicts": [],
+      "format": "objects"
+    },
+    "ven-0446": {
+      "en": "nose",
+      "cz": "nos",
+      "image": "assets/vocabulary-en/ven0446.png",
+      "conflicts": [],
+      "format": "objects"
+    },
+    "ven-0447": {
+      "en": "mouth",
+      "cz": "ústa",
+      "image": "assets/vocabulary-en/ven0447.png",
+      "conflicts": [],
+      "format": "objects"
+    },
+    "ven-0448": {
+      "en": "neck",
+      "cz": "krk",
+      "image": "assets/vocabulary-en/ven0448.png",
+      "conflicts": [],
+      "format": "objects"
+    },
+    "ven-0449": {
+      "en": "arm",
+      "cz": "paže",
+      "image": "assets/vocabulary-en/ven0449.png",
+      "conflicts": [
+        "arm-hand"
+      ],
+      "format": "objects"
+    },
+    "ven-0450": {
+      "en": "hand",
+      "cz": "ruka",
+      "image": "assets/vocabulary-en/ven0450.webp",
+      "conflicts": [
+        "arm-hand"
+      ],
+      "format": "objects"
+    },
+    "ven-0451": {
+      "en": "leg",
+      "cz": "noha",
+      "image": "assets/vocabulary-en/ven0451.png",
+      "conflicts": [
+        "leg-foot"
+      ],
+      "format": "objects"
+    },
+    "ven-0452": {
+      "en": "foot",
+      "cz": "chodidlo",
+      "image": "assets/vocabulary-en/ven0452.png",
+      "conflicts": [
+        "leg-foot"
+      ],
+      "format": "objects"
+    },
+    "ven-0453": {
+      "en": "sky",
+      "cz": "obloha",
+      "image": "assets/vocabulary-en/ven0453.webp",
+      "conflicts": [],
+      "format": "objects"
+    },
+    "ven-0454": {
+      "en": "frog",
+      "cz": "žába",
+      "image": "assets/vocabulary-en/ven0454.png",
+      "conflicts": [],
+      "format": "objects"
+    },
+    "ven-0455": {
+      "en": "beaver",
+      "cz": "bobr",
+      "image": "assets/vocabulary-en/ven0455.png",
+      "conflicts": [],
+      "format": "objects"
+    },
+    "ven-0456": {
+      "en": "woodpecker",
+      "cz": "datel",
+      "image": "assets/vocabulary-en/ven0456.png",
+      "conflicts": [],
+      "format": "objects"
+    },
+    "ven-0457": {
+      "en": "net",
+      "cz": "podběrák",
+      "image": "assets/vocabulary-en/ven0457.png",
+      "conflicts": [],
+      "format": "objects"
+    },
+    "ven-0458": {
+      "en": "hut",
+      "cz": "chatrč",
+      "image": "assets/vocabulary-en/ven0458.png",
+      "conflicts": [
+        "building"
+      ],
+      "format": "objects"
+    },
+    "ven-0459": {
+      "en": "shore",
+      "cz": "břeh",
+      "image": "assets/vocabulary-en/ven0459.png",
+      "conflicts": [
+        "landscape"
+      ],
+      "format": "objects"
+    },
+    "ven-0460": {
+      "en": "fire",
+      "cz": "oheň",
+      "image": "assets/vocabulary-en/ven0460.png",
+      "conflicts": [],
+      "format": "objects"
+    },
+    "ven-0468": {
+      "en": "people",
+      "cz": "lidé",
+      "image": "assets/vocabulary-en/ven0468.png",
+      "conflicts": [
+        "people"
+      ],
+      "format": "objects"
+    },
+    "ven-0470": {
+      "en": "team",
+      "cz": "tým",
+      "image": "assets/vocabulary-en/ven0470.png",
+      "conflicts": [
+        "people"
+      ],
+      "format": "objects"
+    },
+    "ven-0521": {
+      "en": "stag",
+      "cz": "jelení samec",
+      "image": "assets/vocabulary-en/ven0521.png",
+      "conflicts": [
+        "deer"
+      ],
+      "format": "objects"
+    },
+    "ven-0522": {
+      "en": "fishing hut",
+      "cz": "rybářská chatrč",
+      "image": "assets/vocabulary-en/ven0522.png",
+      "conflicts": [
+        "building"
+      ],
+      "format": "objects"
+    }
+  }
+}
