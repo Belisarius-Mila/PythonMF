@@ -1,0 +1,129 @@
+{
+  "schemaVersion": 1,
+  "project": "VocabularyIT-candidates",
+  "mode": "built-in image_gen",
+  "status": "accepted",
+  "items": [
+    {
+      "uid": "vit-0013",
+      "it": "portafoglio",
+      "cz": "portfolio (soubor investic)",
+      "file": "vit-0013.webp",
+      "sha256": "87064879c4bc108f71e5a1245052761379416aeb9451aced729ca0c57b11cada",
+      "bytes": 64010,
+      "width": 900,
+      "height": 900,
+      "status": "accepted",
+      "prompt": "Use case: illustration-story. Asset type: one square picture vocabulary card for Italian learners. Illustrate an investment portfolio: a tidy folder open on a desk containing three simple unlabelled charts, a diversified pie chart, a bar chart and a gently rising line chart, with a few small neutral coins beside it. The charts are the main subject, not a wallet. Friendly clear children's educational illustration, crisp shapes, softly shaded colors, warm white background, large centered subject readable at 160 pixels. No words, letters, numbers, labels, watermark or brand names."
+    },
+    {
+      "uid": "vit-0108",
+      "it": "éclair",
+      "cz": "zákusek",
+      "file": "vit-0108.webp",
+      "sha256": "c5df885ff7a975510fbbe56f48788e6d7c14f13cc66f84f2d98711297dae5a88",
+      "bytes": 42866,
+      "width": 900,
+      "height": 900,
+      "status": "accepted",
+      "prompt": "Use case: illustration-story. Asset type: one square picture vocabulary card for Italian learners. Primary request: A single classic chocolate éclair, an elongated golden choux pastry filled with pale cream, glossy dark chocolate icing on top, sitting on a plain small plate. Not a round cake or fruit tart. Style: friendly clear children's educational illustration, crisp shapes, softly shaded colors, warm white background, large centered subject readable at 160 pixels. No words, letters, labels, watermark or brand names except the explicitly requested euro symbol. Only the requested main concept."
+    },
+    {
+      "uid": "vit-0115",
+      "it": "brioche",
+      "cz": "brioška, sladké pečivo",
+      "file": "vit-0115.webp",
+      "sha256": "c46b6c437ef2526100991385dd2f782d1cb02683dc2e454f5692ad0d3bf1981a",
+      "bytes": 90108,
+      "width": 900,
+      "height": 900,
+      "status": "accepted",
+      "prompt": "Use case: illustration-story. Asset type: one square picture vocabulary card for Italian learners. Primary request: A single golden brioche bread bun with its characteristic rounded top, a small torn section showing soft airy buttery crumb, on a simple plate. Not a bakery building and not a croissant. Style: friendly clear children's educational illustration, crisp shapes, softly shaded colors, warm white background, large centered subject readable at 160 pixels. No words, letters, labels, watermark or brand names except the explicitly requested euro symbol. Only the requested main concept."
+    },
+    {
+      "uid": "vit-0129",
+      "it": "stazione",
+      "cz": "nádraží, stanice",
+      "file": "vit-0129.webp",
+      "sha256": "e71b8bf43c2589af900780c7af298afc2ce2a3e22006b860438f15731a4c6f48",
+      "bytes": 103360,
+      "width": 900,
+      "height": 900,
+      "status": "accepted",
+      "prompt": "Use case: illustration-story. Asset type: one square picture vocabulary card for Italian learners. Primary request: A small railway station beside a platform with a passenger train stopped on clearly visible steel railway tracks. The train and station are the central subject. Not a bus stop. Style: friendly clear children's educational illustration, crisp shapes, softly shaded colors, warm white background, large centered subject readable at 160 pixels. No words, letters, labels, watermark or brand names except the explicitly requested euro symbol. Only the requested main concept."
+    },
+    {
+      "uid": "vit-0136",
+      "it": "mese",
+      "cz": "měsíc",
+      "file": "vit-0136.webp",
+      "sha256": "b0897241b6db04336725c80105e8662dbd7c7a44d08fd96c359e36b9269ff258",
+      "bytes": 34994,
+      "width": 900,
+      "height": 900,
+      "status": "accepted",
+      "prompt": "Use case: illustration-story. Asset type: one square picture vocabulary card for Italian learners. Primary request: A large paper wall calendar showing the grid of a single month, seven columns and five rows of blank small date boxes, a few boxes gently highlighted to suggest a month as a time period. No Moon or night sky. No text or numbers. Style: friendly clear children's educational illustration, crisp shapes, softly shaded colors, warm white background, large centered subject readable at 160 pixels. No words, letters, labels, watermark or brand names except the explicitly requested euro symbol. Only the requested main concept."
+    },
+    {
+      "uid": "vit-0186",
+      "it": "rivista",
+      "cz": "časopis",
+      "file": "vit-0186.webp",
+      "sha256": "c3dc55e7699e502e58fecf30b8c774d1152018b8c54be3b929bc4b2f9257c011",
+      "bytes": 72590,
+      "width": 900,
+      "height": 900,
+      "status": "accepted",
+      "prompt": "Use case: illustration-story. Asset type: one square picture vocabulary card for Italian learners. Primary request: An open colorful magazine with clearly visible thin glossy pages, picture blocks and abstract layout bars without readable text, plus the turned corner of a cover. Not a thick book. Style: friendly clear children's educational illustration, crisp shapes, softly shaded colors, warm white background, large centered subject readable at 160 pixels. No words, letters, labels, watermark or brand names except the explicitly requested euro symbol. Only the requested main concept."
+    },
+    {
+      "uid": "vit-0217",
+      "it": "euro",
+      "cz": "euro",
+      "file": "vit-0217.webp",
+      "sha256": "1a422cac7492bfa260c53e1cff4770116b29e65775a563ff4d5b80ba3eb544a5",
+      "bytes": 64194,
+      "width": 900,
+      "height": 900,
+      "status": "accepted",
+      "prompt": "Use case: illustration-story. Asset type: one square picture vocabulary card for Italian learners. Primary request: A small stack of euro coins and two stylized euro banknotes. A large recognizable € currency symbol appears on each note and one coin, no other words or numbers. Absolutely no dollar signs, dollars or US banknotes. Style: friendly clear children's educational illustration, crisp shapes, softly shaded colors, warm white background, large centered subject readable at 160 pixels. No words, letters, labels, watermark or brand names except the explicitly requested euro symbol. Only the requested main concept."
+    },
+    {
+      "uid": "vit-0247",
+      "it": "pescare",
+      "cz": "lovit, rybařit",
+      "file": "vit-0247.webp",
+      "sha256": "b8bb4c1105a153f364837d2adedc8970a0421031172bb2e6cd9f5d41a8c41bde",
+      "bytes": 96490,
+      "width": 900,
+      "height": 900,
+      "status": "accepted",
+      "prompt": "Use case: illustration-story. Asset type: one square picture vocabulary card for Italian learners. Primary request: A child safely sitting on a grassy riverbank holding a fishing rod, fishing line going to a small bobber on the water, a peaceful clear scene showing the action of fishing. No cooked fish, no dangerous hooks close to the child. Style: friendly clear children's educational illustration, crisp shapes, softly shaded colors, warm white background, large centered subject readable at 160 pixels. No words, letters, labels, watermark or brand names except the explicitly requested euro symbol. Only the requested main concept."
+    },
+    {
+      "uid": "vit-0320",
+      "it": "lavarsi",
+      "cz": "umýt se",
+      "file": "vit-0320.webp",
+      "sha256": "c99befdabe3af67d16bdfa6bb4e09b6f73afee877f85b36b5620d77152410a73",
+      "bytes": 67806,
+      "width": 900,
+      "height": 900,
+      "status": "accepted",
+      "prompt": "Use case: illustration-story. Asset type: one square picture vocabulary card for Italian learners. Primary request: Close-up of two small human hands being washed with soap lather beneath a running bathroom tap over a sink, clean water and a few droplets, clearly hand washing. No laundry or washing machine. Style: friendly clear children's educational illustration, crisp shapes, softly shaded colors, warm white background, large centered subject readable at 160 pixels. No words, letters, labels, watermark or brand names except the explicitly requested euro symbol. Only the requested main concept."
+    },
+    {
+      "uid": "vit-0443",
+      "it": "anello",
+      "cz": "prsten, kruh",
+      "file": "vit-0443.webp",
+      "sha256": "1e52b8bd7a0c6b1d65c5b7c6344731805bb2ccfb4bc48cb14e4ce0c609b66ff1",
+      "bytes": 27834,
+      "width": 900,
+      "height": 900,
+      "status": "accepted",
+      "prompt": "Use case: illustration-story. Asset type: one square picture vocabulary card for Italian learners. Primary request: A single small gold finger ring with a plain polished circular band and a tiny simple gemstone, shown close-up on a neutral surface with a soft shadow. Clearly jewelry for a finger, not a hula hoop or sports ring. Style: friendly clear children's educational illustration, crisp shapes, softly shaded colors, warm white background, large centered subject readable at 160 pixels. No words, letters, labels, watermark or brand names except the explicitly requested euro symbol. Only the requested main concept."
+    }
+  ],
+  "approval": "Míla: Přijímám, bezchybné… (15.11.2026)"
+}

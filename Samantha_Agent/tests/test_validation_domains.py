@@ -180,3 +180,25 @@ class ValidationDomainsTests(unittest.TestCase):
         self.assertNotIn('tests.test_calendar_writer',result.modules)
         code=select_validation_plan([*paths,'Samantha_Agent/app/vocabulary_authoring.py'])
         self.assertIn('tests.test_vocabulary_authoring',code.modules)
+
+    def test_italian_foundation_has_its_own_inventory_and_identity_checks(self):
+        result=select_validation_plan([
+            'VocabularyIT/vocabulary_it_catalog.py', 'VocabularyIT/vocabulary_it_catalog.json',
+            'VocabularyIT/vocabulary_it_input_manifest.json', 'VocabularyIT/VocabularyIT.csv',
+            'VocabularyIT/vocabulary_it_export.py',
+            'VocabularyIT/vocabulary_it_audio.py',
+            'docs/assets/vocabulary-it-audio/it-it-elsa-neural/fixture.mp3',
+            'docs/assets/vocabulary-it-sentences/cs-cz-vlasta-neural/fixture.mp3',
+            'PictNew/generated/20261115_it_web_review/vit-0013.webp',
+            'docs/data/vocabulary-it-v2.json',
+            'docs/vocabulary-it/gallery.js', 'Pict/it_web_vit_0136.webp',
+            'Samantha_Agent/tests/test_vocabularyit_selection.js',
+            'Samantha_Agent/tests/test_vocabularyit_catalog.py'])
+        self.assertEqual(result.domains, ('vocabulary_it',))
+        self.assertIn('tests.test_vocabularyit_catalog', result.modules)
+        self.assertIn('tests.test_vocabularyit_export', result.modules)
+        self.assertIn('tests.test_vocabularyit_gallery', result.modules)
+        self.assertIn('tests.test_vocabularyit_audio', result.modules)
+        self.assertIn('tests.test_cockpit_http_security', result.modules)
+        self.assertNotIn('tests.test_calendar_writer', result.modules)
+        self.assertNotIn('tests.test_vocabulary_authoring', result.modules)

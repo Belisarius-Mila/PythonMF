@@ -94,6 +94,14 @@ class WorkstreamCatalogTests(unittest.TestCase):
         self.assertFalse(record.capabilities.private_archive_enabled)
         self.assertEqual(record.capabilities.owned_private_root, "")
 
+    def test_vocabulary_it_uses_its_own_registered_pages_path(self) -> None:
+        from app.communication.luna_release import release_target, PAGES_PROJECT_PATHS
+        record=next(item for item in WORKSTREAM_CATALOG if item.workstream_id=='project-vocabulary-it')
+        self.assertEqual(record.capabilities.production_deployment_target,'github_pages')
+        self.assertEqual(release_target(record.workstream_id),'github_pages')
+        self.assertEqual(PAGES_PROJECT_PATHS[record.workstream_id],'vocabulary-it/')
+        self.assertNotEqual(PAGES_PROJECT_PATHS[record.workstream_id],PAGES_PROJECT_PATHS['project-vocabulary-en'])
+
     def test_catalog_covers_every_active_registry_row_and_two_default_misc_streams(self) -> None:
         source_names = [
             source_name

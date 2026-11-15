@@ -1,0 +1,216 @@
+AKTUÁLNĚ15.11.2026: Kompletní IT/CZ slova a věty pro497 karet.
+1907 MP3, Elsa/Vlasta při-10 %, plná kontrola souborů. Safari Mac ověřený.
+Dále bod7 — obrázková hra; telefonní přejímka a publikace samostatně.
+
+AKTUÁLNĚ15.11.2026:497 úplných karet a přijatých obrazových vazeb.
+Vlastní galerie/učení/profily A–D místně v docs/vocabulary-it/.
+Audio ještě není vyrobené; fyzický browser QA otevřený (nedostupné CUA).
+Nejde o zveřejněné vydání. Podrobnosti jsou v posledním oddílu.
+
+AKTUÁLNĚ15.11.2026:497 webových karet, původní CSV471 zachované.
+24 úprav schválených a použitých,26 nových významů; export v2 a miniatury.
+10 nových ilustrací čeká vizuální přejímku,487 ostatních vazeb připnutých.
+Podrobný současný postup je na konci. Níže je zachovaný popis prvního základu.
+
+VOCABULARY IT — WEBOVÝ ZÁKLAD, BOD 1 (15.11.2026)
+
+Stav
+První bod schváleného plánu je místně připravený.471 významů, všech471
+zachovaných aktivních; vit-0001 až vit-0471.18 témat převzatých z EN.
+Slovní druh, typ a vlastní obtížnost jsou redakční NÁVRHY, nikoli schválené
+jazykové údaje nebo A1–C2. Navrženo460 Slovíček a11 Interakcí; Fráze zatím
+nepřidělené.112 karet má konkrétní důvod přednostní revize, ne prokázanou chybu.
+Aktuálně bod2:458 přesných obrazových vazeb,10 náhrad a3 významové otázky otevřené.
+
+Soubory
+vocabulary_it_catalog.json — identity, explicitní aliasy, návrhy metadat.
+vocabulary_it_input_manifest.json — otisky777 původních souborů,761 obrazů.
+vocabulary_it_catalog.py — pouze čtení/ověření katalogu a vstupního snímku.
+vocabulary_it_review_queue.txt — celá prioritní revizní fronta112 karet.
+Původní VocabularyIT.csv, mapping.json, desktop/Pythonista, rody a L/HT se
+v tomto bodu nezměnily. Nový exporter, galerie, profily ani audio zde ještě nejsou.
+
+Identita
+UID a číselné id se přidělily právě jednou. Aktuální Order sloužil jen jako
+podklad inicializace. Resolve používá dvojici IT/CZ, normalizuje Unicode NFC
+a odstraňuje mezery na začátku a konci textu. Zachovává diakritiku, velikost písmen a interpunkci.
+Tolerantní vyhledávání obrázku neurčuje identitu. Další podporované znění
+se připíše do matches jako explicitní alias stejné karty.
+Přeřazení/přečíslování CSV UID nemění. Neznámé heslo a dva řádky pro stejné
+UID vyvolají chybu. Změna významu nezdědí cizí identitu podle čísla řádku.
+Dva významy portafoglio, su, ora, vicino, nipote apod. zůstávají oddělené.
+Nový význam bude potřebovat nové UID a samostatné zařazení; tato etapa
+neimplementuje jeho automatický zápis. Nepouštět znovu jednorázový seeder.
+
+Historická data a formy
+Datum přidání starých karet neznáme, legacyAddedAt je null. Nevydáváme datum
+migrace za datum vzniku slovíčka. Výslovné návrhy lemma/formOfUid propojují
+např. usi→usare a vinti→vincere. Všechny tvary zůstávají aktivní k revizi.
+L označuje naučené, HT obtížné; nejsou to nové osobní výběry. Budoucí IT profily
+začínají prázdné a mají vlastní klíče/zálohy oddělené od EN.
+
+Zmrazené vstupy a kontrola
+Kanonická místní Pict má761 podporovaných obrazů, tento Data worktree745.
+Chybějících16 je zachovaných v soukromém snímku s přesnými jmény a bajty.
+Snímek obsahuje777 souborů,121703729 bajtů. Úplné kopie nejsou v Gitu.
+Cesta od kořene PythonMF:
+Samantha_Agent/data/private/vocabulary_it_foundation_20261115/inputs/
+
+Čtecí kontrola ze stejného kořene PythonMF:
+python3 VocabularyIT/vocabulary_it_catalog.py --root Samantha_Agent/data/private/vocabulary_it_foundation_20261115/inputs
+Výsledek je JSON na stdout. Souborům ve snímku se nic nezapisuje.
+Na kanonickém úplném repozitáři můžeš zadat --root .
+V neúplném worktree výchozí root záměrně ohlásí chybějící přesnou cestu;
+nemá se to obcházet odhadem nebo náhradním obrázkem. Pro audit použij úplný
+snímek. Další etapy převezmou přesně zvolené obrazy ze schváleného zdroje.
+Kontrola odmítne změněné bajty, jiný seznam obrazů, chybějící soubor, jinou
+velikost písmen i cestu mimo zvolený kořen. Neprovádí cleanup žádných assetů.
+
+Testy
+Nová registrovaná doména vocabulary_it vybere test_vocabularyit_catalog.py
+pro nové katalogové podklady a jejich čtecí nástroje. Neobchází společné
+bezpečnostní či validační smluvní testy. Běžná brána se pouští přes
+Samantha_Agent/scripts/validation_gate.py; po souběžném posunu origin/main
+může lokální Data ověření použít doložený společný základ. Není to doklad
+integrace do nového main ani oprávnění k publikaci.
+
+Plán a další krok
+Podrobný osmibodový plán je doplněk C na konci
+Vocabulary_IT_analyza_proveditelnosti_2026-11-15.txt v Downloads.
+Dále bod2: revize významů a konkrétních obrázků. Začít16 rozdíly resolverů,
+piacere/perché/stare a tvary/rody, potom potvrdit zbývající metadata.
+Kanonický handoff a existující TVBCP: project-vocabulary-it.md.
+
+BOD2 — OBRAZOVÁ REVIZE A KONKRÉTNÍ OBSAHOVÝ NÁVRH
+471 karet prohlédnuto v přehledu, sporné varianty porovnány cíleně.
+458 karet připnutých k383 existujícím souborům.10 ilustrací k náhradě,
+storia/gli/niente potřebují nejprve významové rozhodnutí. Obrazy abstraktních
+hesel jsou často mnemotechnické nebo kontextové, nikoli jednoznačný překlad.
+Původní obrazy mohou obsahovat text; vhodnost pro hru se prověří samostatně.
+
+vocabulary_it_image_manifest.json připíná přesné soubory a vazbu na původní
+vstupní snímek. Žádná heuristika ani fallback se nesmí vydávat za schválenou vazbu.
+Kontrola z kořene PythonMF:
+python3 VocabularyIT/vocabulary_it_catalog.py --root Samantha_Agent/data/private/vocabulary_it_foundation_20261115/inputs --image-manifest VocabularyIT/vocabulary_it_image_manifest.json
+Výsledek imageBindings.exact=true, complete=false, pendingUids13.
+Přepínač --require-complete-images musí nyní selhat;13 nehotových karet je záměrně viditelných.
+
+vocabulary_it_content_review.json/txt obsahují24 konkrétních návrhů hlavního
+a dalších významů, dosud NEPOUŽITÝCH. Před přiřazením nových UID vyřešit
+rozhodnutí; původní identity zachovat a neodvozovat význam z chybného příkladu.
+Webové texty effective_card_text přebírají opravy jen pro shodnou zdrojovou
+větu. U éclair je francouzský příklad opraven na italský, chiamare překládáno
+volat/telefonovat. Původní CSV a jeho aliasy jsou zachované.
+Bod2 zatím není úplná jazyková korektura všech vět či schválení všech metadat.
+
+SCHVÁLENÉ VÝZNAMY A EXPORT V2, 15.11.2026
+Míla schválil24 návrhů. Použité na původních UID,26 dalších významů jako
+nové webové karty vit-0472–0497; origin=web, webText, addedAt skutečného vzniku.
+Původních471 řádků se dál čte podle původních aliasů a nezměněných rodů/L/HT.
+all_card_texts spojí oba zdroje bez vytváření falešných CSV řádků. Původní
+Order ani změna fyzického pořadí nepřiděluje jiné UID. Případný genderOverride
+opravuje jen webový výstup tam, kde se bývalé podstatné jméno učí jako reakce/sloveso.
+Další ID je498; při aktualizaci nepouštět historický seeder ani jednorázový apply skript znovu.
+
+487 karet má přesné vazby na397 existujících obrazů.10 nových ilustrací
+je v PictNew/generated/20261115_it_web_review včetně promptů/reportu/review.html.
+Zatím jsou kandidátní, nikoli přijatá sdílená knihovna; Pict/mapping se nezměnily.
+
+Samostatný exporter vocabulary_it_export.py nemění starý sync_vocabulary_it_to_docs.py.
+Z kořene PythonMF (výstup musí být vlastní zvolený adresář):
+python3 VocabularyIT/vocabulary_it_export.py --root Samantha_Agent/data/private/vocabulary_it_foundation_20261115/inputs --output Samantha_Agent/data/private/vocabulary_it_export_20261115/web_preview --preview --candidates PictNew/generated/20261115_it_web_review
+Vytvoří data/vocabulary-it-v2.json a assets/vocabulary-it-v2/images|thumbs.
+Náhled497 karet,814 souborů (407 obrazů ve dvou velikostech). Data mají vlastní
+it/cz/sentenceIt/sentenceCz a rody; neobsahují L/HT ani osobní profily.
+Běžný režim bez --preview odmítá nehotové vazby; --candidates je povoleno
+jen v náhledu. Není žádný automatický fallback, cleanup ani spuštění zvuku.
+Staré obrázky nemají přidělené smyšlené datum vzniku; datum mají jen nové významy.
+
+Prvním zápisům předchází ověření všech vstupů a příprava. Obrazy mají hash
+v názvu, existující odlišné bajty se nepřepíší. JSON se publikuje atomicky
+jako poslední; při přerušení zůstává staré JSON i assety. Selhaný stage se
+zachová k diagnostice. Cesty se symlinky ven se odmítnou. Kandidátní obrazy
+ve výstupu zůstávají výslovně imageReviewed=false.
+Dále vizuální přejímka nové desetice a vlastní IT galerie podle bodu4 plánu.
+
+Přidání budoucích přijatých ilustrací nemění původní vstupní manifest.
+Audit umí v novém úplném pracovním zdroji navíc povolit právě obrázky
+připnuté v obrazovém manifestu. Ověří jejich case/SHA a nepovolí jiné přebývající
+obrazy. Samotná kontrola původního snímku zůstává přísná; zmrazenou kopii
+z bodu1 nikdy nedoplňovat ani nepřepisovat. additionalPinnedImages odlišuje
+nové přijaté soubory od777 původních vstupů. Nyní je tato hodnota0.
+
+PŘIJATÉ ILUSTRACE, GALERIE A PROFILY, 15.11.2026
+Míla přijal všech10 kandidátů. Jejich kopie mají nové názvy
+Pict/it_web_vit_*.webp, sdílený mapping zůstává nezměněný. Každá karta má
+imageStatus=reviewed,407 připnutých souborů. Původní777 vstupní manifest je
+neměnný; nová úplná projekce má10 dalších přijatých obrazů.
+
+Aktuální export z kořene PythonMF:
+python3 VocabularyIT/vocabulary_it_export.py --root Samantha_Agent/data/private/vocabulary_it_gallery_20261115/inputs --output docs
+Výsledek497 karet/814 assetů, mode=release (jen datové podklady), obrazy complete.
+Starý --preview s kandidátním reportem této již přijaté dávky nepoužívat.
+Původní zmrazený adresář z bodu1 nikdy nerozšiřovat.
+
+Web: docs/vocabulary-it/index.html. Vlastní model.js/gallery.js/gallery.css,
+learners.js/learner-ui.js; žádné změny EN předlohy. Žádné en aliasy v IT datech.
+Local/sessionStorage: vocabulary-it.learners.v1, vocabulary-it.navigation.v1,
+vocabulary-it.last-card.v1. Záloha má kind=vocabulary-it.learner-backup,
+UID vit-…; EN zálohy/UID se odmítají. Čtyři profily začínají prázdné.
+PIN je místní zábrana proti nechtěné editaci, ne serverový účet.
+L/HT z desktopu se do profilů ani společných filtrů nepřebírají.
+
+Prázdné IT audio manifesty mají status=not-generated. Budoucí vazby budou
+UID+language=it+kind+zdrojové texty+IT mediální cesty; ne EN hlas nebo TTS fallback.
+Slovo a věta mají oddělený kontrakt. Italská hra ještě není zapnutá.
+Pro zvuk nejprve schválený malý vzorek dle bodu6, pak teprve celá sada.
+
+15 JS scénářů testuje skutečný kód galerie/profilů v DOM harnessu včetně
+history/reload/návratu, posledních N, rodu, chybějícího hlasu, PIN/CAS a importu.
+814 assetů má ověřený hash/case/dekódování/rozměry. HTTP zdroje200.
+CUA host je nedostupný: nepovažovat automatické prokliky za fyzickou browser QA.
+Krátký ruční test je Vocabulary_IT_galerie_rucni_test_2026-11-15.txt v Downloads.
+
+
+### 2026-11-15 23:08 CET — Italský hlas a úplná knihovna slov i vět
+
+Hotovo: Všech497 aktivních karet má hotové nahrávky slovíčka i příkladové
+věty v italštině a češtině.1988 vazeb používá1907 unikátních MP3 (26920656 B).
+Italský hlas Elsa, český Vlasta, rychlost-10 %. Poslech v galerii přehraje
+italské slovo a krátce ukáže češtinu; větší karta přehrává slovo nebo celou
+větu v právě zvoleném směru. Hotová knihovna přežije nový export dat.
+
+Rozhodnutí: Míla schválil pokračování „italský hlas a zvuková knihovna…“
+a potvrdil, že nemá jinou hlasovou preferenci. Použit stávající registrovaný
+Edge generátor; žádné nové placené Azure volání. Původní EN ani CSV/mapping
+se nemění. Souhlas s vývojem není p+n.
+
+Další krok: Italská obrázková hra podle bodu7 schváleného plánu.
+
+Navrhované další kroky: Přesná revize italských obrazových kolizí pro hru;
+telefonní poslech/přejímka; samostatně registrovaný publikační cíl a vydání.
+
+Technický důkaz:1907/1907 souborů má přesnou SHA, kladnou délku, MP3 codec,
+plné dekódování a netichý signál. 1801 nových nahrávek, 106 přesně
+shodných českých převzatých z EN do vlastní IT knihovny. Manifesty mají
+status=complete,497 UID každý, přesné zdrojové texty a oddělené word/sentence
+cesty.10 audio testů bez online syntézy a16 JS scénářů v doménové bráně:
+nejistá žádost blokuje opakování, souběh drží zámek, před každým novým
+voláním se kontrolují zdroje a veřejný index vzniká až po úplné kontrole.
+Fyzický Safari na Macu: galerie,2/4/6 sloupců při100 %,8 při zmenšení,
+věta/odhalení/Další/návrat, posledních20 a reload; reálné MP3 přehrávání
+slova IT a věty IT/CZ s modrou ikonou přehrávání Safari, CZ nápověda a návrat
+italského popisku. Veškeré audio nebylo ručně poslechnuto; jazyková korektura
+všech vět/metadat a skutečný iPhone/Android zůstávají otevřené.
+Původní browser bridge je nedostupný, nativní Safari CUA funguje. Vlastní QA
+okno a lokální server po testu uzavřené. Fyzický profil/PIN se neměnil.
+Finální programová brána a shoda zdrojů: private/vocabulary_it_audio_20261115.
+Lokální checkpoint proti společnému77b5f652; žádný push, nasazení ani zásah
+do divergentního main/Willovy práce.
+
+ZVUKOVÝ NÁSTROJ
+vocabulary_it_audio.py: bez --apply vypíše plán, nic neodesílá.
+Vyžaduje stejný úplný --root jako exporter a ffmpeg/ffprobe v PATH.
+--apply potřebuje privátní --receipt; nepoužívat nový ledger k opakování
+nejistého běhu. Hotové MP3 jsou neměnné a přesně připnuté v manifestech.
+Exporter rozpozná úplnou knihovnu podle UID/textů/SHA a zachová audioStatus.

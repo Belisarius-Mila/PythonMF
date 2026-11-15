@@ -494,6 +494,9 @@ WORKSTREAM_CATALOG = validate_workstream_catalog(
             "active",
             "2",
             "Vocabulary IT",
+            capabilities=CanonicalWorkstreamCapabilities(
+                production_deployment_target="github_pages",
+            ),
         ),
         # Tools: concrete reusable executors and workflows.
         _record(

@@ -140,6 +140,18 @@ class MmtxPagesDeployTests(unittest.TestCase):
                 triggered = any(call[:3] == ("/usr/local/bin/gh", "workflow", "run") for call in runner.calls)
                 self.assertEqual(triggered, not already_deployed)
 
+    def test_vocabulary_it_uses_exact_registered_path_on_an_existing_deployment(self) -> None:
+        from app.communication.luna_release import PAGES_PROJECT_PATHS
+        with tempfile.TemporaryDirectory() as directory:
+            urls=[]
+            result=publish_mmtx_pages_current_main(source_repo=Path(directory),
+                runner=FakeRunner(already_deployed=True),expected_head=HEAD,
+                smoke_path=PAGES_PROJECT_PATHS['project-vocabulary-it'],
+                smoke_fetcher=lambda url:urls.append(url) or 200,sleeper=lambda _:None)
+            self.assertEqual(result['main_head'],HEAD)
+            self.assertEqual(result['smoke_path'],'vocabulary-it/')
+            self.assertEqual(urls,[f'https://belisarius-mila.github.io/PythonMF/vocabulary-it/?verify={HEAD[:12]}'])
+
     def test_frozen_head_is_returned_with_full_sha_and_rechecked_after_publication(self) -> None:
         runner = FakeRunner(already_deployed=True)
         with tempfile.TemporaryDirectory() as temp_dir:

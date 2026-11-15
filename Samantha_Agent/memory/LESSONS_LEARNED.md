@@ -188,6 +188,8 @@ nebo jejichž princip lze znovu použít v jiné části projektu.
 - Řešení nalezeno: 20102026
 - Řešení: v samostatné sériové denní rutině použít pro jednu TTS operaci Microsoft endpoint `api.msedgeservices.com/tts/cognitiveservices/websocket/v1`, po úspěchu i chybě obnovit původní nastavení knihovny. Neměnit text, hlas ani rychlost a nepřepisovat předchozí audio při chybě. Skutečný canonical local-preview vytvořil platnou 23,376s MP3; 24 cílených testů prošlo. Produkční výsledek vždy ověřit zvlášť přes workflow head a veřejný JS/MP3. [Upstream incident](https://github.com/rany2/edge-tts/issues/490).
 
+- Doplnění15.11.2026, Vocabulary IT: výchozí registrovaný Edge endpoint znovu funguje. Historický workaround nezapínat automaticky; chybějící veřejný query parametr způsobí403 ještě před SSML. Ověřit konkrétní transport, zachovat ledger před žádostí a nezkoušet nejistý výsledek znovu. Pro paralelní výrobu držet endpoint po celou dávku a obnovit až po join.1907 MP3 celé dekódované;10 testů identity/ledgeru/zámku a16 JS scénářů.
+
 ### LL-075 — Záloha živého archivu potřebuje vlastní rozsah a skutečně zastavenou službu
 
 - Problém: zelená projektová záloha PythonMF nepokrývala živé Camino v Application Support. Návrat z launchctl bootout navíc ještě neznamenal dokončené zastavení; první pokus proto nevytvořil snapshot a služba vyžadovala řízený návrat.
@@ -544,6 +546,10 @@ klientskými, persistence/recovery a frontendovými smluvními testy bez modelu.
   dočasném runneru.
 
 ### LL-002 — Slovníkové aplikace: konzistence kódu, mappingu a obrázků
+
+- Doplnění15.11.2026 (IT revize): existence obrazu a shodný resolver neprokazují významovou správnost (mese/Měsíc, euro/dolar, lavarsi/praní). Před portem prohlédnout všechny karty s větami, výsledné vazby připnout přesným jménem/case a SHA. Kontex­tový obraz není důkaz jedinečné možnosti ve hře; obrazový audit musí umět skončit přesně ověřený, ale neúplný.
+
+- Doplnění15.11.2026: Data worktree může mít méně lokálních Pict než kanonická pracovní složka (IT761 proti745). Před portem ověřit oba skutečné inventáře; úplné zdroje zachovat v uzavřeném private snímku a přesném manifestu. Chybějící soubor ve worktree nenahrazovat odhadem ani z něj nevyvozovat chybějící produkční ilustraci. U IT ověřeno777 vstupů včetně761 obrazů proti kanonickému i zmrazenému kořeni.
 
 - Doplnění 4. 11. 2026: historické opravy podle Order nelze použít na nově uspořádané CSV. Náhled starého Janina helperu by přepsal 10 jiných hesel. Doplňovat jen prázdné věty podle aktuálního FR/CZ a snímku souboru; použít existující bezpečný CSV store s ověřenou zálohou a konfliktní kontrolou. Celý původní řádek a L/HT ověřit po zápisu. Stávající helper má zůstat jen čtecím podkladem, dokud nebude samostatně opravený.
 

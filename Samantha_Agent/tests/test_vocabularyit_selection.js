@@ -1,0 +1,199 @@
+const assert=require('node:assert/strict');
+const fs=require('node:fs');const path=require('node:path');const vm=require('node:vm');const test=require('node:test');
+const root=path.resolve(__dirname,'../../docs');
+const model=require(path.join(root,'vocabulary-it/model.js'));
+const learners=require(path.join(root,'vocabulary-it/learners.js'));
+const vocabulary=JSON.parse(fs.readFileSync(path.join(root,'data/vocabulary-it-v2.json'),'utf8'));
+const html=fs.readFileSync(path.join(root,'vocabulary-it/index.html'),'utf8');
+const source=fs.readFileSync(path.join(root,'vocabulary-it/gallery.js'),'utf8');
+const audio={language:'it',kind:'words',items:Object.fromEntries(vocabulary.items.map(i=>[i.uid,{uid:i.uid,sourceIt:i.it,sourceCz:i.cz,it:`assets/vocabulary-it-audio/fixture/${i.uid}-it.mp3`,cz:`assets/vocabulary-it-audio/fixture/${i.uid}-cz.mp3`}]))};
+const sentenceAudio={language:'it',kind:'sentences',items:Object.fromEntries(vocabulary.items.map(i=>[i.uid,{uid:i.uid,sourceIt:i.it,sourceCz:i.cz,sourceSentenceIt:i.sentenceIt,sourceSentenceCz:i.sentenceCz,it:`assets/vocabulary-it-sentences/fixture/${i.uid}-it.mp3`,cz:`assets/vocabulary-it-sentences/fixture/${i.uid}-cz.mp3`}]))};
+const quizCatalog={};
+class Element {
+  constructor(tag="div",doc){this.tagName=tag;this.doc=doc;this.children=[];this.dataset={};this.listeners={};this.attributes={};this.className="";this.hidden=false;this.value="";this._text="";
+    this.classList={toggle:(name,on)=>{const parts=new Set(this.className.split(/\s+/).filter(Boolean));const add=on===undefined ? !parts.has(name) : on;add ? parts.add(name) : parts.delete(name);this.className=[...parts].join(" ");},add:name=>this.classList.toggle(name,true),remove:name=>this.classList.toggle(name,false),contains:name=>this.className.split(/\s+/).includes(name)};}
+  set textContent(value){this._text=String(value);this.children=[];} get textContent(){return this._text+this.children.map(child=>child.textContent).join("");}
+  append(...nodes){for(const node of nodes){if(node.tagName==="fragment"){this.append(...node.children);continue;}if(node.parentNode)node.remove();this.children.push(node);node.parentNode=this;}}
+  replaceChildren(...nodes){for(const child of this.children)child.parentNode=null;this.children=[];this._text="";this.append(...nodes);}
+  remove(){if(this.parentNode)this.parentNode.children=this.parentNode.children.filter(child=>child!==this);this.parentNode=null;}
+  addEventListener(name,handler){(this.listeners[name]??=[]).push(handler);} removeEventListener(name,handler){this.listeners[name]=(this.listeners[name]||[]).filter(fn=>fn!==handler);}
+  emit(name,extra={}){for(const fn of this.listeners[name]||[])fn({target:this,preventDefault(){},...extra});}
+  click(){this.emit("click");} setAttribute(name,value){this.attributes[name]=String(value);}getAttribute(name){return this.attributes[name];}removeAttribute(name){delete this.attributes[name];}
+  descendants(){return this.children.flatMap(child=>[child,...child.descendants()]);}
+  matches(selector){if(selector.startsWith("."))return this.classList.contains(selector.slice(1));if(selector.startsWith("[data-"))return selector.slice(6,-1).replace(/-([a-z])/g,(_,c)=>c.toUpperCase()) in this.dataset;return this.tagName===selector;}
+  querySelectorAll(selector){return this.descendants().filter(node=>node.matches(selector));}querySelector(selector){return this.querySelectorAll(selector)[0]||null;}
+  getBoundingClientRect(){return {top:160,width:140,height:180};} focus(){this.doc.activeElement=this;}scrollIntoView(){this.doc.scrolled=this.id;}
+}
+function storage(map=new Map()){return {map,getItem:key=>map.get(key)||null,setItem:(key,value)=>map.set(key,String(value))};}
+async function app({items=vocabulary.items,url="https://example.test/PythonMF/vocabulary-it/",session=storage(),local=storage(),blocked=false,manifest=audio,sentenceManifest=sentenceAudio,failData=false,slowAudio=false,failQuiz=false,dataOverride={}}={}){
+  const doc=new Element("document");doc.doc=doc;doc.title="Vocabulary";
+  doc.getElementById=id=>doc.descendants().find(node=>node.id===id)||null;
+  doc.createElement=tag=>new Element(tag,doc);doc.createDocumentFragment=()=>new Element("fragment",doc);
+  const appRoot=new Element("main",doc);appRoot.dataset={jsonUrl:"../data/vocabulary-it-v2.json",audioUrl:"../data/vocabulary-it-audio.json"};doc.append(appRoot);doc.body=appRoot;
+  for(const [,id] of html.matchAll(/\bid="([^"]+)"/g)){const node=new Element("div",doc);node.id=id;appRoot.append(node);}
+  for(const [data,values] of [["direction",["czToIt","itToCz"]],["label",["it","cz"]],["practice",["words","sentences"]],["galleryMode",["learn","listen"]]])for(const value of values){const button=new Element("button",doc);button.dataset[data]=value;appRoot.append(button);}
+  const listeners={};let scroll=0;const location={href:url};const historyEntries=[{url,state:null}];let historyIndex=0;
+  const win={location,innerHeight:844,addEventListener:(name,fn)=>(listeners[name]??=[]).push(fn),scrollTo:value=>{scroll=value.top||0;},get scrollY(){return scroll;},requestAnimationFrame:fn=>fn()};
+  let now=0,nextTimer=0;const timers=new Map();
+  win.setTimeout=(callback,delay)=>{const id=++nextTimer;timers.set(id,{callback,at:now+delay});return id;};
+  win.clearTimeout=id=>timers.delete(id);
+  win.crypto=require('node:crypto').webcrypto;win.Blob=Blob;win.URL=URL;win.confirm=()=>true;
+  const advance=ms=>{now+=ms;for(const [id,timer] of [...timers])if(timer.at<=now){timers.delete(id);timer.callback();}};
+  const emit=(name,extra={})=>{for(const fn of listeners[name]||[])fn(extra);};
+  const travel=delta=>{if(!historyEntries[historyIndex+delta])return;historyIndex+=delta;location.href=historyEntries[historyIndex].url;emit("popstate");emit("hashchange");};
+  win.history={get state(){return historyEntries[historyIndex].state;},replaceState:(state,unused,url)=>{location.href=new URL(url,location.href).href;historyEntries[historyIndex]={url:location.href,state};},pushState:(state,unused,url)=>{location.href=new URL(url,location.href).href;historyEntries.splice(historyIndex+1);historyEntries.push({url:location.href,state});historyIndex++;},back:()=>travel(-1),forward:()=>travel(1)};
+  if(blocked){Object.defineProperty(win,"sessionStorage",{get(){throw Error("blocked")}});Object.defineProperty(win,"localStorage",{get(){throw Error("blocked")}});}else{win.sessionStorage=session;win.localStorage=local;}
+  const players=[];class AudioFixture {constructor(url){this.url=url;this.handlers={};this.currentTime=0;this.playCount=0;players.push(this);}addEventListener(name,fn){this.handlers[name]=fn;}removeEventListener(name,fn){if(this.handlers[name]===fn)delete this.handlers[name];}pause(){this.paused=true;}play(){this.played=true;this.playCount++;return Promise.resolve();}}
+  const data={...vocabulary,items,...dataOverride};
+  const ctx=vm.createContext({document:doc,window:win,URL,URLSearchParams,TextEncoder,Audio:AudioFixture,console,fetch:async url=>{if(url.includes("-quiz.json")){if(failQuiz)throw Error("quiz unavailable");return {ok:true,json:async()=>quizCatalog};}if(slowAudio && url.includes("audio"))return new Promise(()=>{});if(failData && !url.includes("audio"))throw Error("offline");const selected=url.includes("sentence-audio")?sentenceManifest:manifest;if(selected===null && url.includes("audio"))throw Error("audio unavailable");return {ok:true,json:async()=>url.includes("audio")?selected:data};}});
+  vm.runInContext(fs.readFileSync(path.join(root,"vocabulary-it/model.js"),"utf8"),ctx);
+  for(const name of ['learners.js','learner-ui.js'])vm.runInContext(fs.readFileSync(path.join(root,'vocabulary-it',name),'utf8'),ctx);
+  vm.runInContext(source.replace('void init();','globalThis.ready=init();')+'\nglobalThis.api={state,context,buildSelection,orderedSelection,openStudy,moveStudy,newRandomRound,returnToGallery,renderGallery,selectionChanged,applyRoute,speakPrompt,speakAnswer,stopAudioPlayback,setPracticeMode};',ctx);
+  await ctx.ready;
+  return {...ctx.api,doc,win,emit,advance,players,session,local,historyEntries,element:id=>doc.getElementById(id),directions:doc.querySelectorAll("[data-direction]"),labels:doc.querySelectorAll("[data-label]"),practices:doc.querySelectorAll("[data-practice]"),galleryModes:doc.querySelectorAll("[data-gallery-mode]")};
+}
+const catalog={groups:vocabulary.groups,parents:vocabulary.parents};
+const sleep=ms=>new Promise(resolve=>setTimeout(resolve,ms));
+async function until(check){for(let i=0;i<300;i++){if(check())return;await sleep(10);}throw Error('Timed out');}
+function change(view,id,value){const node=view.element(id);if(typeof value==='boolean')node.checked=value;else node.value=value;node.emit('change');}
+
+test('497 Italian meanings and18 topics; new20 intersect filters without source order mutation',()=>{
+ assert.equal(vocabulary.items.length,497);assert.equal(vocabulary.groups.length,18);
+ assert.equal(vocabulary.imageReviewComplete,true);assert.ok(vocabulary.items.every(i=>i.imageReviewed));
+ const before=JSON.stringify(vocabulary);
+ const latest=model.select(vocabulary.items,{recentCount:20});
+ assert.equal(latest.length,20);assert.ok(latest.every(i=>i.id>=478));
+ assert.equal(model.select(vocabulary.items,{query:'eclair'})[0].it,'éclair');
+ assert.equal(model.select(vocabulary.items,{query:'němčina'})[0].uid,'vit-0473');
+ assert.equal(model.select(vocabulary.items,{topics:['topic-09'],recentCount:20}).every(i=>i.topicIds.includes('topic-09')),true);
+ const ordered=model.ordered(vocabulary.items,{groupBy:'topic'},catalog);
+ assert.equal(new Set(ordered.map(i=>i.uid)).size,497);
+ assert.equal(JSON.stringify(vocabulary),before);
+});
+test('Italian and Czech prompts preserve complete sentences and correct lang',()=>{
+ const i=vocabulary.items.find(i=>i.uid==='vit-0108');
+ assert.equal(model.studyPrompt(i,{direction:'itToCz'}).text,'éclair');
+ assert.equal(model.studyPrompt(i,{direction:'itToCz',practice:'sentences'}).language,'it');
+ assert.equal(model.studyPrompt(i,{direction:'itToCz',practice:'sentences'}).text,'Dopo il pasto prendo un éclair al cioccolato.');
+ assert.equal(model.studyPrompt(i,{direction:'czToIt',practice:'sentences'}).text,i.sentenceCz);
+ assert.equal(model.studyPrompt({...i,sentenceIt:''},{practice:'sentences'}).available,false);
+});
+test('audio must match Italian UID, language, texts and own asset namespace',()=>{
+ const i=vocabulary.items[0],valid=audio.items[i.uid];
+ assert.ok(model.audioRecord(i,audio));assert.ok(model.sentenceAudioRecord(i,sentenceAudio));
+ for(const change of [{uid:'vit-9999'},{sourceIt:'wrong'},{sourceCz:'wrong'},{it:'assets/vocabulary-en-audio/voice/x.mp3'},{it:'https://outside.test/x.mp3'},{cz:'assets/vocabulary-it-audio/../x.mp3'}]){
+  assert.equal(model.audioRecord(i,{...audio,items:{[i.uid]:{...valid,...change}}}),null);
+ }
+ assert.equal(model.audioRecord(i,{...audio,language:'en'}),null);
+ assert.equal(model.sentenceAudioRecord(i,{...sentenceAudio,items:{[i.uid]:{...sentenceAudio.items[i.uid],sourceSentenceIt:'changed'}}}),null);
+ assert.equal(model.audioRecord(i,{language:'it',kind:'words',items:{}}),null);
+});
+test('actual gallery opens, shows497 thumbnails, ordered next and returns to the current tile',async()=>{
+ const view=await app();assert.equal(view.state.view,'gallery');assert.equal(view.buildSelection().length,497);
+ assert.equal(view.element('galleryGroups').querySelectorAll('.vocab-tile').length,497);
+ assert.equal(view.element('galleryGroups').querySelectorAll('img').every(i=>i.width===240),true);
+ const target=view.orderedSelection()[3];view.openStudy(target.uid);
+ assert.equal(view.state.currentItem.uid,target.uid);assert.equal(view.state.mode,'ordered');
+ view.moveStudy(1);const last=view.state.currentItem.uid;view.returnToGallery();
+ assert.equal(view.state.view,'gallery');assert.equal(view.state.lastUid,last);
+ assert.equal(view.doc.activeElement.id,'tile-'+last);assert.ok(view.win.scrollY>0);
+ assert.ok(view.doc.getElementById('tile-'+last).classList.contains('is-last'));
+});
+test('last20, language switch, sentence mode, refresh and back/forward keep selection',async()=>{
+ const view=await app();change(view,'recentOnly',true);assert.equal(view.buildSelection().length,20);
+ const target=view.orderedSelection()[2];view.openStudy(target.uid);view.setPracticeMode('sentences');
+ view.directions.find(b=>b.dataset.direction==='itToCz').click();view.element('revealButton').click();
+ assert.equal(view.element('promptText').textContent,target.sentenceIt);assert.equal(view.element('promptText').lang,'it');
+ assert.equal(view.state.recentCount,20);
+ const refreshed=await app({url:view.win.location.href,session:view.session,local:view.local});
+ assert.equal(refreshed.state.currentItem.uid,target.uid);assert.equal(refreshed.state.practice,'sentences');
+ assert.equal(refreshed.state.direction,'itToCz');assert.equal(refreshed.state.recentCount,20);
+ view.returnToGallery();assert.equal(view.state.view,'gallery');view.win.history.forward();assert.equal(view.state.view,'study');
+});
+test('random ordering is explicit; missing and foreign deep links return to gallery',async()=>{
+ const view=await app();view.openStudy('','random');assert.equal(view.state.mode,'random');
+ const bad=await app({url:'https://example.test/vocabulary-it/#card=ven-0001'});assert.equal(bad.state.view,'gallery');
+ assert.match(bad.element('galleryNotice').textContent,/není/);
+ const foreign=await app({dataOverride:{language:'en'}});assert.equal(foreign.state.data,null);assert.match(foreign.element('galleryNotice').textContent,/nepodařilo načíst/);
+});
+test('gender is shown for nouns, not old noun metadata on reactions',async()=>{
+ const view=await app();view.openStudy('vit-0001');assert.equal(view.element('wordGender').hidden,false);
+ assert.match(view.element('wordGender').textContent,/rod/);view.returnToGallery();view.openStudy('vit-0461');assert.equal(view.element('wordGender').hidden,true);
+});
+test('missing audio never blocks gallery, never constructs a player, and keeps listening recent filter',async()=>{
+ const view=await app({manifest:{language:'it',kind:'words',status:'not-generated',items:{}},sentenceManifest:null});
+ assert.equal(view.buildSelection().length,497);change(view,'recentOnly',true);
+ view.galleryModes.find(b=>b.dataset.galleryMode==='listen').click();
+ const tile=view.element('galleryGroups').querySelectorAll('.vocab-tile')[0];const caption=tile.querySelector('.tile-label').textContent;
+ tile.click();await sleep(0);assert.equal(view.state.view,'gallery');assert.equal(view.players.length,0);
+ assert.match(view.doc.getElementById('galleryModeHint').textContent,/není připravený/);
+ assert.equal(tile.querySelector('.tile-label').textContent,caption);
+ view.galleryModes.find(b=>b.dataset.galleryMode==='learn').click();tile.click();view.speakPrompt();
+ assert.match(view.element('messageStrip').textContent,/neni pripraveny|není připravený/);assert.equal(view.players.length,0);
+});
+test('Italian listening flashes Czech for1s and restores after rapid click/mode change',async()=>{
+ const view=await app();view.galleryModes.find(b=>b.dataset.galleryMode==='listen').click();
+ const tiles=view.element('galleryGroups').querySelectorAll('.vocab-tile').slice(0,2);
+ const words=tiles.map(tile=>tile.querySelector('.tile-label').textContent);
+ tiles[0].click();await sleep(0);assert.equal(tiles[0].querySelector('.tile-label').lang,'cs');
+ tiles[1].click();await sleep(0);assert.equal(tiles[0].querySelector('.tile-label').textContent,words[0]);
+ view.advance(1000);assert.equal(tiles[1].querySelector('.tile-label').textContent,words[1]);
+ tiles[0].click();view.galleryModes.find(b=>b.dataset.galleryMode==='learn').click();assert.equal(tiles[0].querySelector('.tile-label').textContent,words[0]);
+});
+test('complete real libraries resolve all497 meanings and drive both word and sentence players',async()=>{
+ const words=JSON.parse(fs.readFileSync(path.join(root,'data/vocabulary-it-audio.json'),'utf8'));
+ const sentences=JSON.parse(fs.readFileSync(path.join(root,'data/vocabulary-it-sentence-audio.json'),'utf8'));
+ assert.equal(words.status,'complete');assert.equal(sentences.status,'complete');
+ for(const item of vocabulary.items){assert.ok(model.audioRecord(item,words));assert.ok(model.sentenceAudioRecord(item,sentences));}
+ const view=await app({manifest:words,sentenceManifest:sentences});
+ view.galleryModes.find(b=>b.dataset.galleryMode==='listen').click();
+ const tile=view.element('galleryGroups').querySelectorAll('.vocab-tile')[0];tile.click();await sleep(0);
+ assert.equal(view.players.find(p=>p.played).url,new URL('../'+words.items[tile.dataset.uid].it,view.win.location.href).href);
+ view.galleryModes.find(b=>b.dataset.galleryMode==='learn').click();view.openStudy('vit-0108');
+ view.setPracticeMode('sentences');view.directions.find(b=>b.dataset.direction==='itToCz').click();
+ view.speakPrompt();await sleep(0);assert.ok(view.players.some(p=>p.played && p.url===new URL('../'+sentences.items['vit-0108'].it,view.win.location.href).href));
+ view.element('revealButton').click();view.speakAnswer();await sleep(0);
+ assert.ok(view.players.some(p=>p.played && p.url===new URL('../'+sentences.items['vit-0108'].cz,view.win.location.href).href));
+});
+test('blocked storage leaves common Italian gallery usable and settings honest',async()=>{
+ const view=await app({blocked:true});assert.equal(view.buildSelection().length,497);
+ assert.equal(view.element('learnerSelect').disabled,true);assert.match(view.element('learnerNotice').textContent,/nelze načíst/);
+});
+test('IT profiles begin empty; EN backup and IDs are rejected; EN storage is untouched',()=>{
+ const map=new Map([['vocabulary-en.learners.v1','EN PRIVATE DATA']]);const s=storage(map);const repo=learners.store(()=>s);const initial=repo.read();
+ assert.ok(learners.IDS.every(id=>initial.value.profiles[id].selected.length===0));
+ assert.equal(learners.KEY,'vocabulary-it.learners.v1');
+ const next=initial.value;next.profiles.A.selected=['vit-0001'];next.profiles.A.hard=['vit-0001'];repo.write(next,initial.raw);
+ assert.equal(map.get('vocabulary-en.learners.v1'),'EN PRIVATE DATA');
+ const backup=learners.backup(next);assert.equal(backup.kind,'vocabulary-it.learner-backup');assert.equal('pin' in backup.profiles.A,false);
+ assert.throws(()=>learners.parseBackup(JSON.stringify({...backup,kind:'vocabulary-en.learner-backup'})));
+ const invalid=structuredClone(backup);invalid.profiles.A.selected=['ven-0001'];invalid.profiles.A.hard=[];assert.throws(()=>learners.parseBackup(JSON.stringify(invalid)));
+});
+test('learner storage protects concurrent writes and hard words must be selected',()=>{
+ const s=storage();const repo=learners.store(()=>s),first=repo.read();const next=structuredClone(first.value);next.profiles.A.selected=['vit-0001'];
+ repo.write(next,first.raw);assert.throws(()=>repo.write(first.value,first.raw),/mezitím/);
+ const bad=repo.read().value;bad.profiles.B.hard=['vit-0002'];assert.throws(()=>repo.write(bad,repo.read().raw),/patřit/);
+});
+test('PIN uses a salted digest and confirms valid/invalid input',async()=>{
+ const crypto=require('node:crypto').webcrypto;const a=await learners.makePin('4826',crypto),b=await learners.makePin('4826',crypto);
+ assert.notEqual(a.salt,b.salt);assert.notEqual(a.hash,b.hash);assert.equal(await learners.verifyPin('4826',a,crypto),true);assert.equal(await learners.verifyPin('1111',a,crypto),false);
+ assert.equal(Object.hasOwn(a,'pin'),false);await assert.rejects(()=>learners.makePin('no',crypto));
+});
+test('settings save A, hard selection and restoring into another device remain language isolated',async()=>{
+ const view=await app();view.element('settingsTab').click();view.element('pinInput').value='4826';view.element('pinRepeat').value='4826';view.element('unlockButton').click();
+ await until(()=>!view.element('learnerEditor').hidden);
+ const box=view.element('settingsGroups').querySelectorAll('.learner-word-check')[0];box.checked=true;box.emit('change');view.element('saveLearner').click();
+ assert.equal(view.state.learner,'A');assert.equal(view.buildSelection().length,1);
+ view.element('editLearnerHard').click();view.element('pinInput').value='4826';view.element('unlockButton').click();await until(()=>!view.element('learnerEditor').hidden);
+ const hard=view.element('settingsGroups').querySelectorAll('.learner-word-check')[0];hard.checked=true;hard.emit('change');view.element('saveLearner').click();view.element('learnerHardFilter').click();assert.equal(view.buildSelection().length,1);
+ const saved=learners.store(()=>view.local).read().value;const backup=learners.parseBackup(JSON.stringify(learners.backup(saved)));
+ assert.deepEqual(backup.profiles.A.selected,[box.dataset.uid]);assert.deepEqual(backup.profiles.A.hard,[box.dataset.uid]);assert.equal('pin' in backup.profiles.A,false);
+ const other=learners.empty();other.profiles.B.selected=['vit-0002'];other.profiles.A={...other.profiles.A,...backup.profiles.A};assert.deepEqual(other.profiles.B.selected,['vit-0002']);assert.equal(learners.selection(vocabulary.items,other,'A').length,1);
+});
+test('actual backup import updates only unlocked A and preserves its PIN and B',async()=>{
+ const saved=learners.empty();saved.profiles.A.pin=await learners.makePin('4826',require('node:crypto').webcrypto);saved.profiles.A.selected=['vit-0001'];saved.profiles.B.selected=['vit-0002'];
+ const local=storage(new Map([[learners.KEY,JSON.stringify(saved)]]));const view=await app({local});view.element('settingsTab').click();view.element('pinInput').value='4826';view.element('unlockButton').click();await until(()=>!view.element('learnerEditor').hidden);
+ const imported=learners.backup(learners.empty());imported.profiles.A.selected=['vit-0003','vit-9999'];imported.profiles.A.hard=['vit-0003'];imported.profiles.B.selected=['vit-0004'];const raw=JSON.stringify(imported);
+ view.element('learnerFile').files=[{size:raw.length,text:async()=>raw}];view.element('learnerFile').emit('change');await until(()=>view.element('settingsNotice').textContent.includes('Načtený návrh'));view.element('saveLearner').click();
+ const after=learners.store(()=>local).read().value;assert.deepEqual(after.profiles.A.selected,['vit-0003','vit-9999']);assert.deepEqual(after.profiles.A.hard,['vit-0003']);assert.deepEqual(after.profiles.A.pin,saved.profiles.A.pin);assert.deepEqual(after.profiles.B,saved.profiles.B);
+});

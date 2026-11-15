@@ -1,0 +1,714 @@
+{
+  "schemaVersion": 1,
+  "project": "VocabularyIT",
+  "status": "approved-and-applied",
+  "policyProposal": "Původní UID zachovat pro hlavní význam. Další významy navrhnout jako nové karty s vlastní větou; nevymazávat obsah. Schváleno a použito:26 nových UID vit-0472–0497. U rozporné věty gli/niente zachovat původní identitu hesla a opravit příklad.",
+  "items": [
+    {
+      "uid": "vit-0007",
+      "state": "applied",
+      "source": {
+        "it": "forte",
+        "cz": "silný, hlasitě (nahlas)",
+        "sentenceIt": "Oggi c'è un vento forte. Non parlare forte qui.",
+        "sentenceCz": "Dnes je silný vítr. Tady nemluv nahlas."
+      },
+      "mainProposal": {
+        "it": "forte",
+        "cz": "silný",
+        "sentenceIt": "Oggi c’è un vento forte.",
+        "sentenceCz": "Dnes je silný vítr."
+      },
+      "additionalMeaningProposals": [
+        "forte — nahlas: Non parlare forte qui. / Tady nemluv nahlas."
+      ],
+      "note": "Oddělit přídavné jméno a příslovce.",
+      "createdUids": [
+        "vit-0472"
+      ]
+    },
+    {
+      "uid": "vit-0096",
+      "state": "applied",
+      "source": {
+        "it": "tedesco",
+        "cz": "němec, němčina",
+        "sentenceIt": "Il mio collega è tedesco e vive vicino a Praga.",
+        "sentenceCz": "Můj kolega je Němec a bydlí poblíž Prahy."
+      },
+      "mainProposal": {
+        "it": "tedesco",
+        "cz": "německý; Němec",
+        "sentenceIt": "Il mio collega è tedesco e vive vicino a Praga.",
+        "sentenceCz": "Můj kolega je Němec a bydlí poblíž Prahy."
+      },
+      "additionalMeaningProposals": [
+        "tedesco — němčina: Studio il tedesco ogni giorno. / Každý den se učím německy."
+      ],
+      "note": "Národnost/osoba a název jazyka vyžadují vlastní příklady.",
+      "createdUids": [
+        "vit-0473"
+      ]
+    },
+    {
+      "uid": "vit-0114",
+      "state": "applied",
+      "source": {
+        "it": "storia",
+        "cz": "historie, příběh",
+        "sentenceIt": "Raccontami una storia prima di dormire.",
+        "sentenceCz": "Povídej mi příběh před spaním."
+      },
+      "mainProposal": {
+        "it": "storia",
+        "cz": "příběh",
+        "sentenceIt": "Raccontami una storia prima di dormire.",
+        "sentenceCz": "Povídej mi příběh před spaním."
+      },
+      "additionalMeaningProposals": [
+        "storia — historie, dějiny: La storia di questa città è interessante. / Historie tohoto města je zajímavá."
+      ],
+      "note": "Obrázek historie neodpovídá současné větě o vyprávění.",
+      "createdUids": [
+        "vit-0474"
+      ]
+    },
+    {
+      "uid": "vit-0120",
+      "state": "applied",
+      "source": {
+        "it": "piacere",
+        "cz": "líbit se, potěšení",
+        "sentenceIt": "Mi piace questo posto, è tranquillo e pulito.",
+        "sentenceCz": "Líbí se mi tohle místo, je klidné a čisté."
+      },
+      "mainProposal": {
+        "it": "piacere",
+        "cz": "líbit se",
+        "sentenceIt": "Mi piace questo posto, è tranquillo e pulito.",
+        "sentenceCz": "Líbí se mi tohle místo, je klidné a čisté."
+      },
+      "additionalMeaningProposals": [
+        "piacere — potěšení: Leggere è un piacere. / Čtení je potěšení."
+      ],
+      "note": "Zachovat samostatnou existující seznamovací reakci Piacere (vit-0018).",
+      "createdUids": [
+        "vit-0475"
+      ]
+    },
+    {
+      "uid": "vit-0128",
+      "state": "applied",
+      "source": {
+        "it": "male",
+        "cz": "špatně, zle, bolest, zlo",
+        "sentenceIt": "Oggi sto male, quindi resto a casa.",
+        "sentenceCz": "Dnes se cítím špatně, tak zůstanu doma."
+      },
+      "mainProposal": {
+        "it": "male",
+        "cz": "špatně; zle",
+        "sentenceIt": "Oggi sto male, quindi resto a casa.",
+        "sentenceCz": "Dnes se cítím špatně, tak zůstanu doma."
+      },
+      "additionalMeaningProposals": [
+        "male — zlo: Il bene e il male sono opposti. / Dobro a zlo jsou protiklady.",
+        "fare male — bolet: Mi fa male la testa. / Bolí mě hlava."
+      ],
+      "note": "Bolest neučit stejnou větou jako příslovce špatně.",
+      "createdUids": [
+        "vit-0476",
+        "vit-0477"
+      ]
+    },
+    {
+      "uid": "vit-0153",
+      "state": "applied",
+      "source": {
+        "it": "forza",
+        "cz": "síla, no tak",
+        "sentenceIt": "Forza, andiamo! Siamo in ritardo.",
+        "sentenceCz": "No tak, jdeme! Jdeme pozdě."
+      },
+      "mainProposal": {
+        "it": "forza",
+        "cz": "no tak!; do toho!",
+        "sentenceIt": "Forza, andiamo! Siamo in ritardo.",
+        "sentenceCz": "No tak, jdeme! Jdeme pozdě."
+      },
+      "additionalMeaningProposals": [
+        "forza — síla: Per aprire questa porta serve molta forza. / K otevření těchto dveří je potřeba velká síla."
+      ],
+      "note": "Hlavní návrh je Interakce; síla je samostatné podstatné jméno.",
+      "createdUids": [
+        "vit-0478"
+      ]
+    },
+    {
+      "uid": "vit-0170",
+      "state": "applied",
+      "source": {
+        "it": "macchina",
+        "cz": "auto, vůz, stroj",
+        "sentenceIt": "La macchina è dal meccanico, quindi oggi vado in treno.",
+        "sentenceCz": "Auto je u mechanika, takže dnes jedu vlakem."
+      },
+      "mainProposal": {
+        "it": "macchina",
+        "cz": "auto; vůz",
+        "sentenceIt": "La macchina è dal meccanico, quindi oggi vado in treno.",
+        "sentenceCz": "Auto je u mechanika, takže dnes jedu vlakem."
+      },
+      "additionalMeaningProposals": [
+        "macchina — stroj: Questa macchina serve per tagliare il legno. / Tento stroj slouží k řezání dřeva."
+      ],
+      "note": "Nepřetěžovat jednu ilustraci dvěma různými věcmi.",
+      "createdUids": [
+        "vit-0479"
+      ]
+    },
+    {
+      "uid": "vit-0182",
+      "state": "applied",
+      "source": {
+        "it": "pronto",
+        "cz": "připravený, hotový, haló, prosím?",
+        "sentenceIt": "Pronto? Chi parla, per favore?",
+        "sentenceCz": "Haló? Kdo mluví, prosím?"
+      },
+      "mainProposal": {
+        "it": "pronto",
+        "cz": "haló?",
+        "sentenceIt": "Pronto? Chi parla, per favore?",
+        "sentenceCz": "Haló? Kdo mluví, prosím?"
+      },
+      "additionalMeaningProposals": [
+        "pronto — připravený; hotový: Sono pronto per partire. / Jsem připravený vyrazit."
+      ],
+      "note": "Telefonní reakce jako Interakce, přídavné jméno zvlášť.",
+      "createdUids": [
+        "vit-0480"
+      ]
+    },
+    {
+      "uid": "vit-0246",
+      "state": "applied",
+      "source": {
+        "it": "calcio",
+        "cz": "fotbal, vápník",
+        "sentenceIt": "Mio figlio gioca a calcio con gli amici.",
+        "sentenceCz": "Můj syn hraje s přáteli fotbal."
+      },
+      "mainProposal": {
+        "it": "calcio",
+        "cz": "fotbal",
+        "sentenceIt": "Mio figlio gioca a calcio con gli amici.",
+        "sentenceCz": "Můj syn hraje s přáteli fotbal."
+      },
+      "additionalMeaningProposals": [
+        "calcio — vápník: Il latte contiene calcio. / Mléko obsahuje vápník."
+      ],
+      "note": "Jedna fotbalová ilustrace nemůže učit chemický prvek.",
+      "createdUids": [
+        "vit-0481"
+      ]
+    },
+    {
+      "uid": "vit-0255",
+      "state": "applied",
+      "source": {
+        "it": "gli",
+        "cz": "ti, ty",
+        "sentenceIt": "Gli telefono domani mattina.",
+        "sentenceCz": "Zítra ráno mu zavolám."
+      },
+      "mainProposal": {
+        "it": "gli",
+        "cz": "určitý člen, mužský rod množného čísla",
+        "sentenceIt": "Gli zaini sono nuovi.",
+        "sentenceCz": "Batohy jsou nové."
+      },
+      "additionalMeaningProposals": [
+        "gli — mu; jemu: Gli telefono domani mattina. / Zítra ráno mu zavolám."
+      ],
+      "note": "Výjimka z pravidla hlavní význam podle věty: zachovat identitu původního členu ti/ty, opravit jeho větu; původní věta patří zájmenu. Rozhodnout před ilustrací.",
+      "createdUids": [
+        "vit-0482"
+      ]
+    },
+    {
+      "uid": "vit-0260",
+      "state": "applied",
+      "source": {
+        "it": "solo",
+        "cz": "sám, pouze, jen",
+        "sentenceIt": "Oggi sono solo a casa.",
+        "sentenceCz": "Dnes jsem sám doma."
+      },
+      "mainProposal": {
+        "it": "solo",
+        "cz": "sám",
+        "sentenceIt": "Oggi sono solo a casa.",
+        "sentenceCz": "Dnes jsem sám doma."
+      },
+      "additionalMeaningProposals": [
+        "solo — pouze; jen: Ho solo cinque minuti. / Mám jen pět minut."
+      ],
+      "note": "Přídavné jméno versus příslovce.",
+      "createdUids": [
+        "vit-0483"
+      ]
+    },
+    {
+      "uid": "vit-0266",
+      "state": "applied",
+      "source": {
+        "it": "dolce",
+        "cz": "sladký, sladkost, jemný, něžný",
+        "sentenceIt": "Questo tè è troppo dolce. Ha una voce dolce.",
+        "sentenceCz": "Tento čaj je příliš sladký. Má jemný hlas."
+      },
+      "mainProposal": {
+        "it": "dolce",
+        "cz": "sladký",
+        "sentenceIt": "Questo tè è troppo dolce.",
+        "sentenceCz": "Tento čaj je příliš sladký."
+      },
+      "additionalMeaningProposals": [
+        "dolce — jemný: Ha una voce dolce. / Má jemný hlas.",
+        "dolce — dezert; sladkost: Dopo cena mangio un dolce. / Po večeři si dám dezert."
+      ],
+      "note": "Dvě přídavná užití a podstatné jméno; každé s vlastním kontextem.",
+      "createdUids": [
+        "vit-0484",
+        "vit-0485"
+      ]
+    },
+    {
+      "uid": "vit-0295",
+      "state": "applied",
+      "source": {
+        "it": "destro",
+        "cz": "pravý, a destra vpravo, napravo",
+        "sentenceIt": "Gira a destra.",
+        "sentenceCz": "Odboč doprava."
+      },
+      "mainProposal": {
+        "it": "destro",
+        "cz": "pravý",
+        "sentenceIt": "Il braccio destro è più forte.",
+        "sentenceCz": "Pravá paže je silnější."
+      },
+      "additionalMeaningProposals": [
+        "a destra — vpravo; doprava: Gira a destra. / Odboč doprava."
+      ],
+      "note": "Zachovat destro jako přídavné jméno, původní větu použít u a destra.",
+      "createdUids": [
+        "vit-0486"
+      ]
+    },
+    {
+      "uid": "vit-0331",
+      "state": "applied",
+      "source": {
+        "it": "niente",
+        "cz": "nic, není zač",
+        "sentenceIt": "Di niente.",
+        "sentenceCz": "Není zač."
+      },
+      "mainProposal": {
+        "it": "niente",
+        "cz": "nic",
+        "sentenceIt": "Nella scatola non c’è niente.",
+        "sentenceCz": "V krabici nic není."
+      },
+      "additionalMeaningProposals": [
+        "Di niente. — Není zač. (Interakce)"
+      ],
+      "note": "Zachovat původní první význam nic, neproměnit UID v reakci na poděkování. Rozhodnout před ilustrací.",
+      "createdUids": [
+        "vit-0487"
+      ]
+    },
+    {
+      "uid": "vit-0334",
+      "state": "applied",
+      "source": {
+        "it": "perché",
+        "cz": "proč, protože",
+        "sentenceIt": "Perché parti così presto?",
+        "sentenceCz": "Proč odjíždíš tak brzy?"
+      },
+      "mainProposal": {
+        "it": "perché",
+        "cz": "proč",
+        "sentenceIt": "Perché parti così presto?",
+        "sentenceCz": "Proč odjíždíš tak brzy?"
+      },
+      "additionalMeaningProposals": [
+        "perché — protože: Resto a casa perché piove. / Zůstávám doma, protože prší."
+      ],
+      "note": "Otázka a příčinná spojka.",
+      "createdUids": [
+        "vit-0488"
+      ]
+    },
+    {
+      "uid": "vit-0343",
+      "state": "applied",
+      "source": {
+        "it": "sentire",
+        "cz": "cítit, slyšet",
+        "sentenceIt": "Sento un rumore strano.",
+        "sentenceCz": "Slyším zvláštní zvuk."
+      },
+      "mainProposal": {
+        "it": "sentire",
+        "cz": "slyšet",
+        "sentenceIt": "Sento un rumore strano.",
+        "sentenceCz": "Slyším zvláštní zvuk."
+      },
+      "additionalMeaningProposals": [
+        "sentire — cítit: Sento il profumo dei fiori. / Cítím vůni květin."
+      ],
+      "note": "Odlišné smyslové vnímání; sluch zůstává hlavním příkladem.",
+      "createdUids": [
+        "vit-0489"
+      ]
+    },
+    {
+      "uid": "vit-0346",
+      "state": "applied",
+      "source": {
+        "it": "sinistro",
+        "cz": "levý, a sinistra vlevo, nalevo",
+        "sentenceIt": "La mano sinistra mi fa male.",
+        "sentenceCz": "Levá ruka mě bolí."
+      },
+      "mainProposal": {
+        "it": "sinistro",
+        "cz": "levý",
+        "sentenceIt": "La mano sinistra mi fa male.",
+        "sentenceCz": "Levá ruka mě bolí."
+      },
+      "additionalMeaningProposals": [
+        "a sinistra — vlevo; doleva: Gira a sinistra. / Odboč doleva."
+      ],
+      "note": "Přídavné jméno a určení směru.",
+      "createdUids": [
+        "vit-0490"
+      ]
+    },
+    {
+      "uid": "vit-0353",
+      "state": "applied",
+      "source": {
+        "it": "tempo",
+        "cz": "čas, počasí",
+        "sentenceIt": "Certamente, ma non per molto tempo.",
+        "sentenceCz": "Určitě, ale ne na dlouho."
+      },
+      "mainProposal": {
+        "it": "tempo",
+        "cz": "čas",
+        "sentenceIt": "Certamente, ma non per molto tempo.",
+        "sentenceCz": "Určitě, ale ne na dlouho."
+      },
+      "additionalMeaningProposals": [
+        "tempo — počasí: Oggi il tempo è bello. / Dnes je pěkné počasí."
+      ],
+      "note": "Dva běžné významy, nikoli chybná duplicita.",
+      "createdUids": [
+        "vit-0491"
+      ]
+    },
+    {
+      "uid": "vit-0401",
+      "state": "applied",
+      "source": {
+        "it": "lingua",
+        "cz": "jazyk",
+        "sentenceIt": "Conosce altre lingue straniere?",
+        "sentenceCz": "Znáte jiné cizí jazyky?"
+      },
+      "mainProposal": {
+        "it": "lingua",
+        "cz": "jazyk (řeč)",
+        "sentenceIt": "Conosce altre lingue straniere?",
+        "sentenceCz": "Znáte jiné cizí jazyky?"
+      },
+      "additionalMeaningProposals": [
+        "lingua — jazyk (orgán): La lingua è nella bocca. / Jazyk je v ústech."
+      ],
+      "note": "Původní obrázek orgánu nahrazen kontextem komunikace.",
+      "createdUids": [
+        "vit-0492"
+      ]
+    },
+    {
+      "uid": "vit-0413",
+      "state": "applied",
+      "source": {
+        "it": "ragione",
+        "cz": "pravda, důvod",
+        "sentenceIt": "Già, ha ragione.",
+        "sentenceCz": "Ano, máte pravdu."
+      },
+      "mainProposal": {
+        "it": "avere ragione",
+        "cz": "mít pravdu",
+        "sentenceIt": "Già, ha ragione.",
+        "sentenceCz": "Ano, máte pravdu."
+      },
+      "additionalMeaningProposals": [
+        "ragione — důvod: Non conosco la ragione della sua assenza. / Neznám důvod jeho nepřítomnosti."
+      ],
+      "note": "Navržené hlavní heslo avere ragione jako běžné slovesné spojení; změna dosud nepoužitá.",
+      "createdUids": [
+        "vit-0493"
+      ]
+    },
+    {
+      "uid": "vit-0417",
+      "state": "applied",
+      "source": {
+        "it": "stare",
+        "cz": "být, mít se, zůstat",
+        "sentenceIt": "Come sta? Bene, grazie, e Lei?",
+        "sentenceCz": "Jak se máte? Dobře, děkuji, a vy?"
+      },
+      "mainProposal": {
+        "it": "stare",
+        "cz": "mít se; být v určitém stavu",
+        "sentenceIt": "Come sta? Bene, grazie, e Lei?",
+        "sentenceCz": "Jak se máte? Dobře, děkuji, a vy?"
+      },
+      "additionalMeaningProposals": [
+        "stare — zůstávat; pobývat: Stasera sto a casa. / Dnes večer zůstanu doma."
+      ],
+      "note": "Ponechat samostatné restare vit-0160, synonymum není totožná karta.",
+      "createdUids": [
+        "vit-0494"
+      ]
+    },
+    {
+      "uid": "vit-0450",
+      "state": "applied",
+      "source": {
+        "it": "paese",
+        "cz": "země; stát; vesnice; obec; kraj podle kontextu",
+        "sentenceIt": "Il Brasile è un grande paese.",
+        "sentenceCz": "Brazílie je velká země."
+      },
+      "mainProposal": {
+        "it": "paese",
+        "cz": "země; stát",
+        "sentenceIt": "Il Brasile è un grande paese.",
+        "sentenceCz": "Brazílie je velká země."
+      },
+      "additionalMeaningProposals": [
+        "paese — vesnice; obec: Abito in un piccolo paese vicino al mare. / Bydlím v malé vesnici poblíž moře."
+      ],
+      "note": "Podle věty stát, ne vesnice; kraj bez konkrétního významového kontextu nepřidávat.",
+      "createdUids": [
+        "vit-0495"
+      ]
+    },
+    {
+      "uid": "vit-0461",
+      "state": "applied",
+      "source": {
+        "it": "congratulazione",
+        "cz": "gratulace, blahopřání",
+        "sentenceIt": "Congratulazioni per il tuo successo!",
+        "sentenceCz": "Gratuluji k tvému úspěchu!"
+      },
+      "mainProposal": {
+        "it": "Congratulazioni!",
+        "cz": "Gratuluji!; Blahopřeji!",
+        "sentenceIt": "Congratulazioni per il tuo successo!",
+        "sentenceCz": "Gratuluji k tvému úspěchu!"
+      },
+      "additionalMeaningProposals": [
+        "congratulazione — gratulace (podstatné jméno, pouze pokud ho chceme samostatně vyučovat)"
+      ],
+      "note": "Navržené běžné heslo Congratulazioni! jako Interakce, nikoli idiom.",
+      "createdUids": [
+        "vit-0496"
+      ]
+    },
+    {
+      "uid": "vit-0463",
+      "state": "applied",
+      "source": {
+        "it": "mai",
+        "cz": "nikdy, někdy v otázce",
+        "sentenceIt": "Non vado mai lì. Hai mai visitato Roma?",
+        "sentenceCz": "Nikdy tam nechodím. Navštívil jsi někdy Řím?"
+      },
+      "mainProposal": {
+        "it": "mai",
+        "cz": "nikdy",
+        "sentenceIt": "Non vado mai lì.",
+        "sentenceCz": "Nikdy tam nechodím."
+      },
+      "additionalMeaningProposals": [
+        "mai — někdy; už někdy (v otázce): Hai mai visitato Roma? / Navštívil jsi někdy Řím?"
+      ],
+      "note": "Záporná výpověď a otázka mají odlišný český význam.",
+      "createdUids": [
+        "vit-0497"
+      ]
+    }
+  ],
+  "imageNeeds": {
+    "newImages": [
+      {
+        "uid": "vit-0013",
+        "it": "portafoglio",
+        "cz": "portfolio (soubor investic)",
+        "requirement": "Investiční portfolio: graf, rozložení investic; peněženka učí jiný význam.",
+        "state": "accepted",
+        "candidate": "PictNew/generated/20261115_it_web_review/vit-0013.webp",
+        "candidateSha256": "87064879c4bc108f71e5a1245052761379416aeb9451aced729ca0c57b11cada",
+        "selectedImage": "Pict/it_web_vit_0013.webp"
+      },
+      {
+        "uid": "vit-0108",
+        "it": "éclair",
+        "cz": "zákusek",
+        "requirement": "Éclair: podlouhlý odpalovaný zákusek s čokoládovou polevou; nyní je ovocný koláč.",
+        "state": "accepted",
+        "candidate": "PictNew/generated/20261115_it_web_review/vit-0108.webp",
+        "candidateSha256": "c5df885ff7a975510fbbe56f48788e6d7c14f13cc66f84f2d98711297dae5a88",
+        "selectedImage": "Pict/it_web_vit_0108.webp"
+      },
+      {
+        "uid": "vit-0115",
+        "it": "brioche",
+        "cz": "brioška, sladké pečivo",
+        "requirement": "Brioche: sladká brioška nebo plněné sladké pečivo; budova pekárny není pečivo.",
+        "state": "accepted",
+        "candidate": "PictNew/generated/20261115_it_web_review/vit-0115.webp",
+        "candidateSha256": "c46b6c437ef2526100991385dd2f782d1cb02683dc2e454f5692ad0d3bf1981a",
+        "selectedImage": "Pict/it_web_vit_0115.webp"
+      },
+      {
+        "uid": "vit-0129",
+        "it": "stazione",
+        "cz": "nádraží, stanice",
+        "requirement": "Vlakové nádraží/stanice: budova s nástupištěm; současná autobusová zastávka je užší jiný kontext.",
+        "state": "accepted",
+        "candidate": "PictNew/generated/20261115_it_web_review/vit-0129.webp",
+        "candidateSha256": "e71b8bf43c2589af900780c7af298afc2ce2a3e22006b860438f15731a4c6f48",
+        "selectedImage": "Pict/it_web_vit_0129.webp"
+      },
+      {
+        "uid": "vit-0136",
+        "it": "mese",
+        "cz": "měsíc",
+        "requirement": "Měsíc jako časové období: kalendář jednoho měsíce, nikoli Měsíc na obloze.",
+        "state": "accepted",
+        "candidate": "PictNew/generated/20261115_it_web_review/vit-0136.webp",
+        "candidateSha256": "b0897241b6db04336725c80105e8662dbd7c7a44d08fd96c359e36b9269ff258",
+        "selectedImage": "Pict/it_web_vit_0136.webp"
+      },
+      {
+        "uid": "vit-0186",
+        "it": "rivista",
+        "cz": "časopis",
+        "requirement": "Časopis: otevřený barevný časopis; současná zavřená kniha není časopis.",
+        "state": "accepted",
+        "candidate": "PictNew/generated/20261115_it_web_review/vit-0186.webp",
+        "candidateSha256": "c3dc55e7699e502e58fecf30b8c774d1152018b8c54be3b929bc4b2f9257c011",
+        "selectedImage": "Pict/it_web_vit_0186.webp"
+      },
+      {
+        "uid": "vit-0217",
+        "it": "euro",
+        "cz": "euro",
+        "requirement": "Euro: eurové bankovky/mince nebo jasný symbol eura; současný obrázek má dolary.",
+        "state": "accepted",
+        "candidate": "PictNew/generated/20261115_it_web_review/vit-0217.webp",
+        "candidateSha256": "1a422cac7492bfa260c53e1cff4770116b29e65775a563ff4d5b80ba3eb544a5",
+        "selectedImage": "Pict/it_web_vit_0217.webp"
+      },
+      {
+        "uid": "vit-0247",
+        "it": "pescare",
+        "cz": "lovit, rybařit",
+        "requirement": "Rybařit: člověk s prutem u řeky; současný talíř s upečenou rybou neukazuje činnost.",
+        "state": "accepted",
+        "candidate": "PictNew/generated/20261115_it_web_review/vit-0247.webp",
+        "candidateSha256": "b8bb4c1105a153f364837d2adedc8970a0421031172bb2e6cd9f5d41a8c41bde",
+        "selectedImage": "Pict/it_web_vit_0247.webp"
+      },
+      {
+        "uid": "vit-0320",
+        "it": "lavarsi",
+        "cz": "umýt se",
+        "requirement": "Umýt se/umýt si ruce: ruce pod tekoucí vodou; současná ilustrace pere prádlo.",
+        "state": "accepted",
+        "candidate": "PictNew/generated/20261115_it_web_review/vit-0320.webp",
+        "candidateSha256": "c99befdabe3af67d16bdfa6bb4e09b6f73afee877f85b36b5620d77152410a73",
+        "selectedImage": "Pict/it_web_vit_0320.webp"
+      },
+      {
+        "uid": "vit-0443",
+        "it": "anello",
+        "cz": "prsten, kruh",
+        "requirement": "Prsten: zlatý prsten na ruce nebo samostatně; současná obruč znázorňuje jiný význam.",
+        "state": "accepted",
+        "candidate": "PictNew/generated/20261115_it_web_review/vit-0443.webp",
+        "candidateSha256": "1e52b8bd7a0c6b1d65c5b7c6344731805bb2ccfb4bc48cb14e4ce0c609b66ff1",
+        "selectedImage": "Pict/it_web_vit_0443.webp"
+      }
+    ],
+    "contentBeforeImage": [
+      {
+        "uid": "vit-0114",
+        "it": "storia",
+        "requirement": "Historie versus příběh: vybrat hlavní význam a jeho konkrétní ilustraci.",
+        "state": "resolved",
+        "selectedImage": "Pict/dictionary.webp"
+      },
+      {
+        "uid": "vit-0255",
+        "it": "gli",
+        "requirement": "Nejprve odlišit určitý člen gli od zájmena gli=mu podle rozhodnutí o kartě.",
+        "state": "resolved",
+        "selectedImage": "Pict/ready.webp"
+      },
+      {
+        "uid": "vit-0331",
+        "it": "niente",
+        "requirement": "Nejprve odlišit niente=nic od reakce Di niente.=Není zač.",
+        "state": "resolved",
+        "selectedImage": "Pict/nothing.png"
+      }
+    ]
+  },
+  "sources": [
+    {
+      "url": "https://www.treccani.it/vocabolario/chiamare/",
+      "supports": "chiamare versus chiamarsi"
+    },
+    {
+      "url": "https://www.treccani.it/vocabolario/niente/",
+      "supports": "niente versus Di niente"
+    },
+    {
+      "url": "https://www.treccani.it/vocabolario/piacere/",
+      "supports": "slovesné piacere"
+    },
+    {
+      "url": "https://www.treccani.it/vocabolario/infatti/",
+      "supports": "potvrzení/vysvětlení, proto obraz true"
+    },
+    {
+      "url": "https://accademiadellacrusca.it/it/consulenza/uso-di-gli-per-a-lui-a-loro-e-a-lei/102",
+      "supports": "zájmeno gli = a lui"
+    }
+  ],
+  "approval": "Míla: Se vším souhlasím, pokračuj… (15.11.2026)"
+}

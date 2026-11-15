@@ -1,0 +1,147 @@
+VOCABULARY IT — PRIORITNÍ REVIZNÍ FRONTA, BOD 1
+Datum:15.11.2026
+
+Všech471 karet je zachovaných a všechna metadata jsou návrhy k revizi.
+Tato fronta vyznačuje112 prioritních karet. Nejde o112 prokázaných chyb.
+Aktualizace bod2:458 obrazových vazeb připnutých;13 nehotových.
+24 významových návrhů viz vocabulary_it_content_review.txt/json (zatím nepoužité).
+Níže je zachovaný seznam112 prioritních případů z bodu1, nikoli stav všech nevyřešených obrazů.
+Původní texty, rody, L/HT, obrázky a mapping se při založení fronty nezměnily.
+
+Kódy důvodu:
+metadata-proposal: Téma, slovní druh, typ a obtížnost jsou prvním redakčním návrhem, ne přejímkou.
+image-resolver-disagreement: Desktop a iPhone navrhují jiný obraz; rozhodnout podle hesla a věty.
+legacy-export-disagreement: Starý webový export navrhuje odlišnou nebo náhradní ilustraci.
+mixed-meanings: Více významů nebo gramatických použití v jedné kartě: posoudit podle věty.
+inflected-form: Konkrétní tvar: zachovat a posoudit vztah k lemmatu, neskrývat automaticky.
+homograph: Samostatné významy podobného zápisu zachovat pod vlastními UID.
+possible-overlap: Blízká nebo opakovaná hesla: posoudit, neslučovat automaticky.
+source-metadata: Slovní druh nebo rod potřebuje cílenou kontrolu; zdrojové pole se nezměnilo.
+expression-type: Rozlišit běžné slovesné spojení a idiom podle věty.
+part-of-speech-review: Slovní druh dosud neurčen: před exportem posoudit.
+
+UID | IT | CZ | témata | důvody
+vit-0002 | su | na | topic-13 | homograph
+vit-0003 | su | o | topic-18 | homograph
+vit-0007 | forte | silný, hlasitě (nahlas) | topic-14 | mixed-meanings
+vit-0012 | portafoglio | peněženka | topic-08 | homograph
+vit-0013 | portafoglio | portfolio (soubor investic) | topic-08 | homograph
+vit-0014 | mi chiamo | jmenuji se | topic-17 | inflected-form
+vit-0016 | vengo | pocházím | topic-16 | inflected-form
+vit-0018 | piacere | těší mě | topic-17 | homograph
+vit-0021 | vorrei | chtěl bych | topic-15 | inflected-form
+vit-0025 | anche | také | topic-18 | image-resolver-disagreement
+vit-0028 | e | a | topic-18 | image-resolver-disagreement
+vit-0032 | ho | mám | topic-16 | inflected-form, possible-overlap
+vit-0033 | abita | bydlí | topic-16 | inflected-form
+vit-0034 | hai | máš | topic-16 | inflected-form, possible-overlap
+vit-0035 | nipote | synovec | topic-01 | homograph
+vit-0036 | nipote | neteř | topic-01 | homograph
+vit-0039 | adesso | teď, nyní | topic-12 | possible-overlap
+vit-0043 | lui | on | topic-18 | image-resolver-disagreement
+vit-0063 | sono | já jsem | topic-16 | inflected-form
+vit-0074 | ci | tam | topic-13 | homograph
+vit-0075 | ci | nás, nám | topic-18 | homograph
+vit-0076 | vicino | blízko | topic-13 | homograph, possible-overlap
+vit-0077 | vicino | soused | topic-01 | homograph
+vit-0079 | ora | teď, nyní | topic-12 | homograph, possible-overlap
+vit-0080 | ora | hodina | topic-12 | homograph
+vit-0096 | tedesco | němec, němčina | topic-01 | mixed-meanings, source-metadata
+vit-0097 | Lei | vy | topic-18 | homograph
+vit-0098 | lei | ona | topic-18 | homograph
+vit-0101 | per | pro | topic-18 | image-resolver-disagreement, mixed-meanings, homograph
+vit-0102 | per | aby | topic-18 | image-resolver-disagreement, mixed-meanings, homograph
+vit-0105 | mirtilli | borůvky | topic-05 | inflected-form
+vit-0109 | allora | tak, tedy, tehdy | topic-18 | mixed-meanings
+vit-0120 | piacere | líbit se, potěšení | topic-15 | mixed-meanings, homograph
+vit-0122 | come | jak, jako | topic-18 | mixed-meanings
+vit-0128 | male | špatně, zle, bolest, zlo | topic-02 | mixed-meanings
+vit-0153 | forza | síla, no tak | topic-15 | mixed-meanings
+vit-0166 | via | ulice | topic-08 | source-metadata
+vit-0170 | macchina | auto, vůz, stroj | topic-08 | mixed-meanings, possible-overlap
+vit-0177 | po' | trochu | topic-11 | possible-overlap
+vit-0182 | pronto | připravený, hotový, haló, prosím? | topic-14 | mixed-meanings
+vit-0187 | romano | Říman, římský | topic-01 | mixed-meanings, source-metadata
+vit-0188 | russo | Rus, ruský | topic-01 | mixed-meanings, source-metadata
+vit-0192 | slovacco | Slovák, slovenský | topic-01 | mixed-meanings, source-metadata
+vit-0193 | so | vím | topic-16 | image-resolver-disagreement, inflected-form
+vit-0194 | sorpresa | překvapení | topic-15 | mixed-meanings
+vit-0198 | tecnico | technik, technický | topic-01 | mixed-meanings, source-metadata
+vit-0208 | che | jaký, který | topic-18 | homograph
+vit-0211 | chiamare | jmenovat se, volat, telefonovat | topic-17 | mixed-meanings
+vit-0219 | fragile | křehký | topic-14 | mixed-meanings
+vit-0220 | francese | Francouz, francouzský | topic-01 | mixed-meanings, source-metadata
+vit-0225 | inglese | Angličan, anglický | topic-01 | mixed-meanings, source-metadata
+vit-0226 | invitato | pozvaný, host | topic-01 | mixed-meanings, source-metadata
+vit-0227 | italiano | Ital, italský | topic-01 | mixed-meanings, source-metadata
+vit-0233 | misto | míchaný, smíšený | topic-05 | legacy-export-disagreement
+vit-0243 | ceco | Čech, český | topic-01 | mixed-meanings, source-metadata
+vit-0246 | calcio | fotbal, vápník | topic-09 | mixed-meanings
+vit-0255 | gli | ti, ty | topic-18 | mixed-meanings, source-metadata
+vit-0260 | solo | sám, pouze, jen | topic-11 | mixed-meanings
+vit-0262 | che | že | topic-18 | homograph
+vit-0266 | dolce | sladký, sladkost, jemný, něžný | topic-05 | mixed-meanings
+vit-0267 | un po’ | trochu | topic-11 | possible-overlap
+vit-0268 | malato | nemocný | topic-02 | possible-overlap
+vit-0283 | auto | auto | topic-08 | possible-overlap
+vit-0285 | caffè | káva | topic-05 | image-resolver-disagreement
+vit-0287 | capire | rozumět, chápat | topic-16 | possible-overlap
+vit-0289 | certamente | určitě, jistě | topic-14 | image-resolver-disagreement
+vit-0295 | destro | pravý, a destra vpravo, napravo | topic-13 | mixed-meanings
+vit-0298 | dottore | doktor, lékař | topic-01 | possible-overlap
+vit-0308 | Francia | Francie | topic-08 | source-metadata
+vit-0313 | Giovanni | Jan | topic-01 | source-metadata
+vit-0314 | girare | otočit, odbočit, zahnout | topic-16 | image-resolver-disagreement
+vit-0315 | Giulia | Julie | topic-01 | source-metadata
+vit-0322 | Luca | Lukáš | topic-01 | source-metadata
+vit-0323 | Luisa | Luisa | topic-01 | source-metadata
+vit-0326 | Margherita | Markéta | topic-01 | source-metadata
+vit-0329 | Milano | Milán | topic-08 | source-metadata
+vit-0331 | niente | nic, není zač | topic-18 | image-resolver-disagreement, mixed-meanings
+vit-0333 | Parigi | Paříž | topic-08 | source-metadata
+vit-0334 | perché | proč, protože | topic-18 | image-resolver-disagreement, legacy-export-disagreement, mixed-meanings
+vit-0338 | proprio | právě, zrovna | topic-12 | mixed-meanings
+vit-0342 | seguire | sledovat, následovat | topic-16 | image-resolver-disagreement
+vit-0343 | sentire | cítit, slyšet | topic-15 | mixed-meanings
+vit-0346 | sinistro | levý, a sinistra vlevo, nalevo | topic-13 | mixed-meanings
+vit-0353 | tempo | čas, počasí | topic-12 | mixed-meanings
+vit-0354 | turista | turista, turistka | topic-01 | source-metadata
+vit-0357 | vacanza, vacanze | dovolená, prázdniny | topic-08 | mixed-meanings
+vit-0360 | venire | přijít, přijet, jít, jet s kým | topic-16 | image-resolver-disagreement, mixed-meanings
+vit-0363 | vicino a | blízko | topic-13 | possible-overlap
+vit-0374 | ammalato | nemocný | topic-02 | possible-overlap
+vit-0376 | bisogno | potřeba | topic-15 | mixed-meanings
+vit-0396 | infatti | opravdu, to je fakt | topic-18 | image-resolver-disagreement, legacy-export-disagreement, mixed-meanings
+vit-0399 | interprete | tlumočník | topic-01 | source-metadata
+vit-0401 | lingua | jazyk | topic-18 | mixed-meanings
+vit-0403 | medico | doktor, lékař | topic-01 | possible-overlap
+vit-0413 | ragione | pravda, důvod | topic-15 | mixed-meanings
+vit-0417 | stare | být, mít se, zůstat | topic-16 | image-resolver-disagreement, legacy-export-disagreement, mixed-meanings
+vit-0424 | voglia | chuť | topic-15 | mixed-meanings
+vit-0425 | lasciare stare | nechat být | topic-16 | expression-type
+vit-0426 | fare due passi | jít na krátkou procházku | topic-09 | expression-type
+vit-0438 | calzini | ponožky | topic-03 | inflected-form, source-metadata
+vit-0440 | guanti | rukavice | topic-03 | inflected-form, source-metadata
+vit-0441 | pantaloni | kalhoty | topic-03 | inflected-form, source-metadata
+vit-0443 | anello | prsten, kruh | topic-03 | mixed-meanings
+vit-0450 | paese | země; stát; vesnice; obec; kraj podle kontextu | topic-08 | mixed-meanings
+vit-0453 | giardino | zahrada | topic-07 | image-resolver-disagreement
+vit-0457 | auguri | přání, gratulace, blahopřání | topic-17 | possible-overlap
+vit-0458 | comprendere | chápat, rozumět, zahrnovat | topic-16 | possible-overlap
+vit-0461 | congratulazione | gratulace, blahopřání | topic-17 | possible-overlap
+vit-0463 | mai | nikdy, někdy v otázce | topic-12 | mixed-meanings
+vit-0466 | usi | používáš | topic-16 | inflected-form
+vit-0470 | vinti | vyhrané (mužský rod množného čísla) | topic-16 | inflected-form
+vit-0471 | quelle | ty, tamty (ženský rod množného čísla) | topic-18 | inflected-form
+
+Aktualizace po schválení15.11.2026:
+24 významových návrhů aplikováno,26 dalších významů nově vit-0472–0497.
+Storia/gli/niente mají rozhodnuté hlavní významy a existující vazby.
+487 obrazových vazeb připnutých,10 nových ilustrací čeká vizuální přejímku.
+Historický seznam112 neznamená aktuální počet otevřených rozhodnutí.
+
+
+PŘIJATÉ OBRAZY A GALERIE15.11.2026
+Míla přijal všech10 nových ilustrací.497/497 vazeb je hotových.
+Nová IT galerie, věty a vlastní profily A–D jsou místně implementované.
+Skutečný browser proklik a zvuková knihovna zůstávají otevřené.
