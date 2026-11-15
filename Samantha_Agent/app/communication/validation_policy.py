@@ -299,14 +299,33 @@ def _input_hash(path: str, signature: tuple[int, ...]) -> str:
     return _file_hash(Path(path))
 
 
+def validation_environment() -> dict[str, str]:
+    """Run terminal and service gates with the same tools/imports/locale.
+
+    These overrides are passed to the child, never installed in the server's
+    process environment. Explicit Node/Xcode selection remains fingerprinted.
+    PYTHONPATH is relative to the gate's tested project, including private clones.
+    """
+    environment = dict(os.environ)
+    environment.update(
+        PATH=os.pathsep.join(dict.fromkeys((str(Path(sys.executable).absolute().parent),
+            '/opt/homebrew/bin', '/usr/local/bin', '/usr/bin', '/bin', '/usr/sbin', '/sbin'))),
+        PYTHONPATH='.', PYTHONHASHSEED='0', PYTHONWARNINGS='', PYTHONUTF8='1',
+        TZ='UTC', LC_ALL='C', LANG='C',
+    )
+    return environment
+
+
 def environment_fingerprint() -> str:
     from scripts.cockpit_quality_gate import node_binary
+    environment = validation_environment()
     tools = {}
     for name in ("python", "git", "node", "ffmpeg", "ffprobe", "swift", "xcrun"):
-        found = sys.executable if name == "python" else GIT_EXECUTABLE if name == "git" else shutil.which(name)
+        found = (sys.executable if name == "python" else GIT_EXECUTABLE if name == "git"
+                 else shutil.which(name, path=environment['PATH']))
         if name == "node":
             try:
-                found = node_binary()
+                found = node_binary(environment=environment)
             except SystemExit:
                 found = None
         if found:
@@ -322,8 +341,9 @@ def environment_fingerprint() -> str:
     return _digest({"python": sys.version, "executable": str(Path(sys.executable).resolve()),
                     "prefix": sys.prefix, "platform": platform.platform(), "tools": tools,
                     "dependencies": dependencies,
-                    "environment": {name: os.environ.get(name, "") for name in
-                                    ("DEVELOPER_DIR", "PYTHONPATH", "PYTHONHASHSEED", "PYTHONWARNINGS", "TZ", "LC_ALL", "LANG", "NODE_BINARY")}})
+                    "environment": {name: environment.get(name, "") for name in
+                                    ("DEVELOPER_DIR", "PYTHONPATH", "PYTHONHASHSEED", "PYTHONWARNINGS",
+                                     "PYTHONUTF8", "TZ", "LC_ALL", "LANG", "NODE_BINARY")}})
 
 
 @dataclass(frozen=True)
@@ -363,7 +383,13 @@ def capture_inputs(repo: Path, *, environment: str | None = None) -> ValidationI
             after = path.stat()
             if before != (after.st_dev, after.st_ino, after.st_size, after.st_mtime_ns, after.st_ctime_ns):
                 raise ValidationPolicyError("Validation input changed while hashing.")
-            rows.append((name, "file", stat.S_IMODE(info.st_mode), sha))
+            # A private clone may tighten group/other access (0644 -> 0600,
+            # 0755 -> 0700). For the same owner these bits do not affect tests.
+            # Preserve owner access, special bits, ownership and all foreign
+            # file permissions; do not chmod or expose private workspace files.
+            owned = info.st_uid == os.geteuid()
+            mode = stat.S_IMODE(info.st_mode) & (~0o077 if owned else 0o7777)
+            rows.append((name, "file", info.st_uid, None if owned else info.st_gid, mode, sha))
         else:
             raise ValidationPolicyError("Unsupported validation input.")
     env = environment if environment is not None else environment_fingerprint()

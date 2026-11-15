@@ -98,3 +98,20 @@ Vývoj sám nepovoluje push/deploy. Běžící v2 backend získá v3 až po samo
 povoleném nasazení; při příštím p+n nejprve registrovaně načíst ověřený nový
 validator, aby práci neobsluhoval starý v2 fallback. Média ani historii Gitu
 v tomto kroku nemigrujeme; Git testovací seed nadále používá nezávislé kopie.
+
+
+## 2026-11-15 22:31 CET — Stejné podmínky terminálu a služby
+
+Brána vždy předá podprocesu `validation_environment()`: pevný PATH se
+stejným Python prostředím a běžnými systémovými/Homebrew nástroji,
+PYTHONPATH relativní k ověřovanému projektu, hash seed0, UTF-8, locale C
+a UTC. Otisk nástrojů používá právě tento PATH. NODE_BINARY a DEVELOPER_DIR
+zůstávají výslovnými, otiskovanými volbami. Prostředí rodičovského Cockpitu
+se nemění a shell/editor nemůže do podprocesu přidat jiný PYTHONPATH.
+
+U souboru vlastněného efektivním UID se do otisku bere UID a owner/special
+mode; group/other bity nejsou pro přístup tohoto vlastníka relevantní.
+U cizího vlastníka zůstávají UID/GID a celé mode. Změna owner execute,
+read/write, special bits či vlastníka se neztrácí. Žádný chmod workspace.
+To sjednocuje čistý main a soukromý profil bez rozvolnění jeho práv.
+HMAC, expirace, kontrola vstupů před/po a covered_modules platí dál.

@@ -2742,3 +2742,11 @@ Příští CLI běh opravu načte, nová ostrá záloha v tomto vývojovém krok
 - Typ: opakující se
 - Řešení nalezeno: 15112026
 - Řešení: Konečný read-only doklad přesně stejné identity/proudu/vlákna lze ověřit i ze starší generace, pouze při obnově nepozorovaného odkazu. Teprve po tomto důkazu odkaz uvolnit a GET načíst aktuální práci. Nový admission, živý/unknown záznam a cizí/budoucí scope zůstanou striktní. Testovat obnovený panel se skutečným serverovým scope, nejen čerstvý prohlížeč.
+
+
+### LL-133 — Účtenka musí odpovídat skutečnému runneru
+
+- Problém: Lokální brána a server zopakují stejných665 testů, protože otisk zahrnul jiný caller PATH/PYTHONPATH/locale a soukromá kopie měla644/600 či755/700.
+- Typ: opakující se
+- Řešení nalezeno: 15112026
+- Řešení: Sjednotit skutečný child environment a stejným resolverem jej otisknout; nestačí smazat pole z digestu. U stejného vlastníka zachovat owner/special bity a UID, group/other neovlivňují jeho přístup. Cizí vlastník vyžaduje celé mode/GID. Testovat dirty gate → commit → private clone → push gate → deploy gate s jediným runnerem; změněný obsah/nástroje/pokrytí/owner execute musí dál zneplatnit cache.

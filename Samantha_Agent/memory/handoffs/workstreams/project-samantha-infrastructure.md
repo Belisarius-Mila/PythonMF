@@ -2124,3 +2124,29 @@ Technický důkaz: v3 vlastní207 testů PASS, Datův hotový rozcestník má sv
 původní ověření; nezměněné části se znovu netestují. Před integračním commitem
 pouze statika. Výsledky a přesné job ID/časy/úklidový manifest budou v
 private focused_pn_cleanup_20261115/. Tento zápis sám nepotvrzuje publikaci.
+
+
+## 2026-11-15 22:31 CET — Opětovné převzetí již ověřených testů
+
+Hotovo: Terminál a serverová brána používají stejné skutečné testovací
+prostředí. Soukromá kopie se shodným obsahem nezneplatní účtenku jen kvůli
+omezenějším právům ostatních uživatelů. Na souborech se žádná práva nemění.
+Rozhodnutí: Míla upřednostnil odstranění opakovaných testů před HA-09.
+Zůstává HMAC,24h platnost, přesný obsah a pokrytí modulů. Změna nástrojů,
+závislostí, vlastníkových práv, spustitelnosti nebo obsahu vyžaduje nový důkaz.
+Další krok: Po cílené bráně lokální commit a ověření převzetí v čistém
+profilu přes skutečný runner bez opakování testů. Nasazení vyžaduje samostatné p+n.
+Navrhované další kroky: Po vydání HA-09 — propojit checkpoint a Terra p+n
+s původním zadáním. Míla dnes potvrdil iPhone přejímku opravy HA-05.
+Technický důkaz: Poslední ostré p+n znovu provedlo665 testů/234,6s.
+Otisk prostředí terminálu se lišil od launchd;2027 souborů mělo při shodném
+HEAD jiné group/other bity (644/600 a755/700). Nové regrese před opravou
+selhaly;53 cílených testů po opravě PASS. Kanonický PATH, importy,
+locale, UTC a hash seed se skutečně předávají podprocesu. Výslovný Node
+nebo Xcode zůstává součástí otisku. Účtenka ignoruje group/other bity jen
+pro soubor vlastněný stejným efektivním uživatelem; UID, owner/special bity
+a veškerá práva cizího vlastníka zůstávají v otisku.
+Finální důkaz: data/private/validation_reuse_fix_20261115/completion.json.
+Rizika: Staré účtenky jiného formátu se nepřebírají. První ověření nové
+politiky musí proběhnout; fyzické/runtime ověření nenahrazuje testovací cache.
+Tento vývoj sám nezahrnuje push, restart ani HA-09.

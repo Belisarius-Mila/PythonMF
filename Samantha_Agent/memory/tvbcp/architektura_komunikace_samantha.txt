@@ -5350,3 +5350,16 @@ nový tah, zvuk či opakované převzetí neproběhne. Ovládání čeká na če
 Finální důkaz: data/private/ha05_mobile_reference_fix_20261115/completion.json.
 Rizika: Fyzická iPhone přejímka není nahrazena Node testem. Starý běžící nebo
 nejistý záznam zůstává zablokovaný; konec se nesmí předpokládat ani zahodit.
+
+
+## 2026-11-15 22:31 CET — iPhone ověřen, priorita rychlosti p+n
+
+Hotovo: Míla výslovně potvrdil bod1 — přejímku iPhonu po opravě HA-05.
+Rozhodnutí: Nejdříve opravit převzetí platných testovacích účtenek, potom HA-09.
+Další krok: Dokončit lokální infrastrukturní opravu podle jejího kanonického
+handoffu `handoffs/workstreams/project-samantha-infrastructure.md` a TVBCP
+`tvbcp/workstreams/project-samantha-infrastructure.md`.
+Navrhované další kroky: HA-09 — návazný checkpoint a Terra p+n ve společném průběhu.
+Technický důkaz: Dnešní vydání9340be1c potvrzené, smoke5/5, Mílovo iPhone PASS.
+Oprava cache má vlastní důkaz private validation_reuse_fix_20261115/completion.json;
+žádné další p+n ani HA-09 zatím nebylo zadáno.

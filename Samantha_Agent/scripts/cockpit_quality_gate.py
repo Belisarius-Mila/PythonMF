@@ -15,7 +15,7 @@ import time
 import warnings
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Sequence
+from typing import Mapping, Sequence
 
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
@@ -684,13 +684,14 @@ def architecture_messages() -> list[str]:
     return messages
 
 
-def node_binary() -> str:
+def node_binary(*, environment: Mapping[str, str] | None = None) -> str:
     """Find Node even when launchd supplies only the system PATH."""
+    environment = os.environ if environment is None else environment
     candidates: list[str] = []
-    configured = str(os.environ.get("NODE_BINARY") or "").strip()
+    configured = str(environment.get("NODE_BINARY") or "").strip()
     if configured:
         candidates.append(configured)
-    discovered = shutil.which("node")
+    discovered = shutil.which("node", path=environment.get('PATH', os.defpath))
     if discovered:
         candidates.append(discovered)
     candidates.extend(str(path) for path in NODE_FALLBACK_PATHS)

@@ -16,7 +16,7 @@ from app.communication.human_adam_workspace import HumanAdamWorkspaceManager
 from app.communication.validation_policy import (
     POLICY_VERSION, ValidationPlan, ValidationPolicyError, ValidationReceiptStore,
     capture_inputs, changed_paths, select_validation_plan,
-    contract_plan, covers,
+    contract_plan, covers, validation_environment,
 )
 
 
@@ -133,6 +133,7 @@ def run_checkpoint_quality_gate(
         completed = runner(
             command,
             cwd=str(workspace.project_root),
+            env=validation_environment(),
             capture_output=True,
             text=True,
             timeout=timeout,

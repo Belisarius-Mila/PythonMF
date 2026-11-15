@@ -5,6 +5,7 @@ import json
 import os
 from pathlib import Path
 import subprocess
+import sys
 import tempfile
 import unittest
 from unittest.mock import patch
@@ -331,6 +332,46 @@ class ValidationPolicyTests(unittest.TestCase):
         self.assertTrue(result.reused)
         self.assertEqual(len(self.calls), 1)
 
+    def test_commit_private_clone_push_and_deploy_use_one_test_run(self):
+        self.write('app/new_code.py', 'VALUE = 1\n')
+        (self.project/'scripts/cockpit_quality_gate.py').chmod(0o755)
+        first = self.run_gate()
+        self.commit()
+        clone = Path(self.temporary.name)/'private-profile'
+        subprocess.run([policy.GIT_EXECUTABLE, 'clone', str(self.repo), str(clone)],
+                       capture_output=True, check=True)
+        for path in clone.rglob('*'):
+            if path.is_file() and '.git' not in path.relative_to(clone).parts:
+                path.chmod(0o700 if path.stat().st_mode & 0o100 else 0o600)
+        workspace = HumanAdamWorkspaceManager(source_repo=self.repo, workspace_root=clone)
+        pushed = run_checkpoint_quality_gate(workspace=workspace, runner=self.runner,
+            log_path=Path(self.temporary.name)/'push.log', validation_base=self.base)
+        deployed = run_checkpoint_quality_gate(workspace=workspace, runner=self.runner,
+            log_path=Path(self.temporary.name)/'deploy.log', validation_base=git(clone,'rev-parse','HEAD'))
+        self.assertTrue(pushed.reused)
+        self.assertTrue(deployed.reused)
+        self.assertEqual(pushed.receipt_id, first.receipt_id)
+        self.assertEqual(len(self.calls), 1)
+
+    def test_owner_permission_changes_still_invalidate_receipts(self):
+        path = self.project/'app/frontend/cockpit/styles.css'
+        self.run_gate()
+        for mode in (0o744, 0o444):
+            path.chmod(mode)
+            self.assertFalse(self.run_gate().reused)
+        self.assertEqual(len(self.calls), 3)
+
+    def test_gate_runs_with_the_environment_used_for_its_fingerprint(self):
+        parent = dict(os.environ)
+        def runner(command, **kwargs):
+            self.assertEqual(kwargs['env'], policy.validation_environment())
+            self.assertEqual(kwargs['env']['PYTHONPATH'], '.')
+            self.assertEqual(kwargs['env']['LC_ALL'], 'C')
+            return self.runner(command, **kwargs)
+        run_checkpoint_quality_gate(workspace=self.workspace, runner=runner,
+            log_path=Path(self.temporary.name)/'environment.log', validation_base=self.base)
+        self.assertEqual(dict(os.environ), parent)
+
     def test_timeout_preserves_partial_output_without_signing_success(self):
         def timeout(*args, **kwargs):
             raise subprocess.TimeoutExpired(args[0], 1, output=b"Synthetic partial test progress")
@@ -341,6 +382,44 @@ class ValidationPolicyTests(unittest.TestCase):
         self.assertEqual(error.exception.failure_type, "gate_timeout")
         self.assertIn("Synthetic partial test progress", log.read_text())
         self.assertFalse((self.store.root / "receipt-key").exists())
+
+
+class ValidationEnvironmentTests(unittest.TestCase):
+    def test_canonical_child_imports_the_tested_project_instead_of_editor_paths(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            project=Path(temporary)/'project'; project.mkdir()
+            editor=Path(temporary)/'editor'; editor.mkdir()
+            (project/'synthetic_validation_input.py').write_text("VALUE = 'tested-project'\n")
+            (editor/'synthetic_validation_input.py').write_text("VALUE = 'editor-override'\n")
+            with patch.dict(os.environ, {'PYTHONPATH':str(editor),'LC_ALL':'cs_CZ.UTF-8'}):
+                result=subprocess.run([sys.executable,'-c',
+                    'import os, synthetic_validation_input as p; print(p.VALUE, os.environ["LC_ALL"])'],
+                    cwd=project, env=policy.validation_environment(), capture_output=True,text=True,check=True)
+            self.assertEqual(result.stdout.strip(),'tested-project C')
+
+    def test_terminal_and_launchd_fingerprint_the_same_test_environment(self):
+        with patch.dict(os.environ, {'PATH':'/usr/bin:/bin:/usr/sbin:/sbin',
+                'PYTHONPATH':'', 'PYTHONHASHSEED':'', 'PYTHONWARNINGS':'',
+                'LANG':'', 'LC_ALL':'', 'TZ':''}):
+            server = policy.environment_fingerprint()
+        with patch.dict(os.environ, {'PATH':'/nonexistent-terminal/bin:/usr/bin',
+                'PYTHONPATH':'/nonexistent/editor-imports', 'PYTHONHASHSEED':'random',
+                'PYTHONWARNINGS':'ignore', 'LANG':'cs_CZ.UTF-8', 'LC_ALL':'cs_CZ.UTF-8',
+                'TZ':'Europe/Prague'}):
+            self.assertEqual(policy.environment_fingerprint(), server)
+
+    def test_explicit_toolchain_change_still_invalidates_environment(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            executables=[]
+            for name in ('node-before','node-after'):
+                path=Path(temporary)/name
+                path.write_text('#!/bin/sh\nexit 0\n')
+                path.chmod(0o700)
+                executables.append(str(path))
+            with patch.dict(os.environ, {'NODE_BINARY':executables[0]}):
+                before=policy.environment_fingerprint()
+            with patch.dict(os.environ, {'NODE_BINARY':executables[1]}):
+                self.assertNotEqual(policy.environment_fingerprint(),before)
 
 
 if __name__ == "__main__":
