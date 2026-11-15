@@ -45,12 +45,25 @@ function createHumanAdamWorkMonitor(host) {
     if (timer !== null) host.clearTimeout(timer);
     timer = host.setTimeout(() => { timer = null; void poll(); }, delay);
   }
-  function validated(value) {
+  function readableScope(value, admission = false) {
+    if (sameScope(value && value.scope, scope)) return true;
+    const prior = value && value.scope;
+    const sealed = value && (value.lifecycle_state === "not_dispatched"
+      ? value.delivery_state === "not_started"
+      : ["completed","interrupted","failed"].includes(value.lifecycle_state) && value.delivery_state === "confirmed");
+    // An old pinned reference may be released only by exact terminal proof.
+    // Running/unknown work, admissions and observed current work stay strict.
+    return Boolean(!admission && !submitted && !operation && (identity || clientId) && sealed && prior
+      && prior.workstream_id === scope.workstream_id && prior.thread_id === scope.thread_id
+      && Number.isSafeInteger(prior.connection_generation) && prior.connection_generation >= 0
+      && prior.connection_generation < scope.connection_generation);
+  }
+  function validated(value, admission = false) {
     if (!value || value.schema_version !== 1 || value.read_only !== true || value.writes_performed !== false
       || !validId(value.operation_id) || !validClient(value.client_request_id)
       || !Number.isSafeInteger(value.revision) || value.revision < 1 || value.cursor !== value.revision
       || !states.has(value.lifecycle_state) || !["not_started","pending","confirmed","unknown"].includes(value.delivery_state)
-      || !sameScope(value.scope, scope) || value.thread_id !== scope.thread_id
+      || !readableScope(value, admission) || value.thread_id !== scope.thread_id
       || !Array.isArray(value.events) || value.events.length > 128
       || typeof value.resync_required !== "boolean" || typeof value.event_gap !== "boolean"
       || !Number.isFinite(Date.parse(value.created_at)) || !Number.isFinite(Date.parse(value.updated_at))) throw new Error("invalid_view");
@@ -69,7 +82,7 @@ function createHumanAdamWorkMonitor(host) {
     if (!payload || payload.ok !== true || payload.schema_version !== 1 || !Array.isArray(payload.operations)
       || payload.operations.length > 64 || typeof payload.server_generation !== "string" || !payload.server_generation
       || (!admission && (payload.read_only !== true || payload.writes_performed !== false))) throw new Error("invalid_envelope");
-    const candidates = payload.operations.filter(value => value && sameScope(value.scope, scope)
+    const candidates = payload.operations.filter(value => value && readableScope(value, admission)
       && (!identity || value.operation_id === identity) && (!clientId || value.client_request_id === clientId));
     if ((identity || clientId) && candidates.length !== 1) throw new Error("missing_identity");
     if (!candidates.length) {
@@ -77,7 +90,16 @@ function createHumanAdamWorkMonitor(host) {
     }
     // Discovery chooses the newest unfinished operation, never a foreign scope.
     candidates.sort((a,b) => Date.parse(b.created_at) - Date.parse(a.created_at));
-    const next = validated(candidates.find(value => !terminal.has(value.lifecycle_state)) || candidates[0]);
+    const next = validated(candidates.find(value => !terminal.has(value.lifecycle_state)) || candidates[0], admission);
+    if (!sameScope(next.scope, scope)) {
+      // The stored work is proven finished. Discover the current generation by
+      // GET before enabling input; never re-send or re-target an old request.
+      operation = null; identity = ""; clientId = ""; cursor = 0; serverGeneration = "";
+      error = ""; failures = 0; finished = false; observedAt = new Date(host.now()).toISOString();
+      remember(); changed();
+      Promise.resolve(host.onTerminal(next, {notify:false})).catch(() => {});
+      return;
+    }
     if (operation && operation.operation_id === next.operation_id && next.revision < operation.revision) {
       if (admission) return; // A delayed ACK cannot replace the newer read snapshot.
       throw new Error("stale_revision");

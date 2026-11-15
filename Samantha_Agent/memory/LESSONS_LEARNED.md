@@ -2734,3 +2734,11 @@ Příští CLI běh opravu načte, nová ostrá záloha v tomto vývojovém krok
 - Typ: opakující se
 - Řešení nalezeno: 15112026
 - Řešení: Nový výslovný zápis vázat na kanonicky přerušeného parenta a přesný ownership marker. Převzít jeho WIP před dispatch, nevydávat jej za dokončený a neopakovat původní tah. Testovat celý writable Stop → nový tah → Stop, reconnect i posun main, nikoli jen samotný RPC nebo čistý/read-only návrat.
+
+
+### LL-132 — Uložená reference práce přežije generaci spojení
+
+- Problém: Per-tab sessionStorage drží starou úlohu, zatímco reconnect zvýší connection_generation. Striktní filtr odmítne i její potvrzený konec a panel se trvale zamkne.
+- Typ: opakující se
+- Řešení nalezeno: 15112026
+- Řešení: Konečný read-only doklad přesně stejné identity/proudu/vlákna lze ověřit i ze starší generace, pouze při obnově nepozorovaného odkazu. Teprve po tomto důkazu odkaz uvolnit a GET načíst aktuální práci. Nový admission, živý/unknown záznam a cizí/budoucí scope zůstanou striktní. Testovat obnovený panel se skutečným serverovým scope, nejen čerstvý prohlížeč.

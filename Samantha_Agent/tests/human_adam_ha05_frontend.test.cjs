@@ -181,5 +181,53 @@ async function test(name,fn){await fn();passed++;console.log(`PASS ${name}`);}
       else assert.equal(accepted.length,1);
     }
   });
+  await test('sealed restored references from older connections rediscover current work through GET',async()=>{
+    for(const [state,delivery] of [['completed','confirmed'],['interrupted','confirmed'],['not_dispatched','not_started'],['failed','confirmed']]){
+      const old=operation({scope:{...scope,connection_generation:2},lifecycle_state:state,delivery_state:delivery});
+      const h=harness(frame(old));h.values.set('human-adam:work-reference:v1:'+scope.workstream_id,
+        JSON.stringify({thread_id:scope.thread_id,operation_id:id,client_message_id:client}));
+      h.monitor.configure(protocol,scope);await h.advance();
+      assert.equal(h.monitor.snapshot().error,'');assert(h.monitor.snapshot().blocked);
+      assert.equal(h.ends.length,1);assert.equal(h.ends[0].flags.notify,false);
+      const current=operation({operation_id:'b'.repeat(32),client_request_id:'human-adam-current-2'});
+      h.setResponse(frame(current));await h.advance(750);
+      assert(!('operation_id' in h.reads.at(-1).query));assert(!('client_message_id' in h.reads.at(-1).query));
+      assert.equal(h.monitor.snapshot().operation.operation_id,current.operation_id);assert.equal(h.monitor.snapshot().error,'');
+    }
+  });
+  await test('legacy client-only references recover terminal proof without resending',async()=>{
+    const h=harness(frame(operation({scope:{...scope,connection_generation:2},lifecycle_state:'interrupted',delivery_state:'confirmed'})));
+    h.values.set('human-adam:work-reference:v1:'+scope.workstream_id,JSON.stringify({thread_id:scope.thread_id,client_message_id:client}));
+    h.monitor.configure(protocol,scope);await h.advance();assert.equal(h.monitor.snapshot().error,'');
+    assert.equal(h.reads[0].query.client_message_id,client);
+    h.setResponse(frame(null));await h.advance(750);assert.equal(h.monitor.snapshot().blocked,false);
+  });
+  await test('unknown and active older work never loses its original reference',async()=>{
+    for(const [state,delivery] of [['running','pending'],['accepted','pending'],['awaiting_completion','confirmed'],['unverified','unknown'],['failed','unknown'],['not_dispatched','unknown']]){
+      const h=harness(frame(operation({scope:{...scope,connection_generation:2},lifecycle_state:state,delivery_state:delivery})));
+      h.values.set('human-adam:work-reference:v1:'+scope.workstream_id,JSON.stringify({thread_id:scope.thread_id,operation_id:id,client_message_id:client}));
+      h.monitor.configure(protocol,scope);await h.advance();assert(h.monitor.snapshot().error);assert(h.monitor.snapshot().blocked);
+      await h.advance(1000);assert.equal(h.reads.at(-1).query.operation_id,id);assert.equal(h.ends.length,0);
+      assert([...h.values.values()].some(v=>v.includes(id)));
+    }
+  });
+  await test('foreign or future terminal receipts cannot clear a stored reference',async()=>{
+    for(const changed of [{...scope,connection_generation:4},{...scope,thread_id:'foreign-thread',connection_generation:2},
+                         {...scope,workstream_id:'project-foreign',connection_generation:2}]){
+      const h=harness(frame(operation({scope:changed,lifecycle_state:'completed',delivery_state:'confirmed'})));
+      h.values.set('human-adam:work-reference:v1:'+scope.workstream_id,JSON.stringify({thread_id:scope.thread_id,operation_id:id,client_message_id:client}));
+      h.monitor.configure(protocol,scope);await h.advance();assert(h.monitor.snapshot().blocked);assert(h.monitor.snapshot().error);assert.equal(h.ends.length,0);
+    }
+  });
+  await test('an old terminal receipt cannot satisfy a new admission',async()=>{
+    const h=harness(frame(null));h.monitor.configure(protocol,scope);await h.advance();h.monitor.expect(client);
+    assert.equal(h.monitor.accepted(frame(operation({scope:{...scope,connection_generation:2},lifecycle_state:'completed',delivery_state:'confirmed'}))),false);
+    assert(h.monitor.snapshot().blocked);assert.equal(h.ends.length,0);
+  });
+  await test('current observed work cannot be replaced by an older terminal generation',async()=>{
+    const h=harness();h.monitor.configure(protocol,scope);await h.advance();
+    h.setResponse(frame(operation({scope:{...scope,connection_generation:2},lifecycle_state:'completed',delivery_state:'confirmed'})));
+    await h.advance(750);assert(h.monitor.snapshot().error);assert.equal(h.monitor.snapshot().operation.lifecycle_state,'running');
+  });
   console.log(`HA-05 monitor: ${passed} scenarios PASS`);
 })().catch(error=>{console.error(error);process.exitCode=1;});
