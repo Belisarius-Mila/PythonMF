@@ -65,10 +65,10 @@ function chooseWord(view,uid,checked=true){const input=view.element('settingsGro
 function chooseUser(view,id){view.element('learnerSelect').value=id;view.element('learnerSelect').emit('change');}
 
 test('retired cards keep their identities but cannot enter selection, random practice or restored sequences',async()=>{
-  assert.equal(vocabulary.items.length,462);
+  assert.equal(vocabulary.items.length,482);
   assert.deepEqual(vocabulary.items.filter(item=>item.active===false).map(model.key),retiredUids);
   const selected=model.ordered(vocabulary.items,{},vocabulary.catalog);
-  assert.equal(selected.length,452);assert.ok(selected.every(item=>!retiredUids.includes(item.uid)));
+  assert.equal(selected.length,472);assert.ok(selected.every(item=>!retiredUids.includes(item.uid)));
   assert.deepEqual(model.restoreSequence([...retiredUids,'ven-0020'],vocabulary.items).map(model.key),['ven-0020']);
   const view=await app({url:'https://example.test/PythonMF/vocabulary-en/#card=ven-0257'});
   assert.equal(view.state.view,'gallery');assert.equal(view.state.currentItem,null);
@@ -87,7 +87,7 @@ test('teaching type intersects topics and learner selection and survives study, 
   assert.equal(after.state.teachingType,'interaction');assert.equal(after.element('teachingTypeSelect').value,'interaction');
   assert.deepEqual(Array.from(after.orderedSelection(),model.key),['ven-0057']);
   after.state.topics=['topic-06'];after.selectionChanged();assert.equal(after.orderedSelection().length,0);
-  after.element('resetButton').click();assert.equal(after.state.teachingType,'all');assert.equal(after.orderedSelection().length,452);
+  after.element('resetButton').click();assert.equal(after.state.teachingType,'all');assert.equal(after.orderedSelection().length,472);
 });
 
 test('all four learner profiles preserve retired selected and difficult IDs through visible bulk edits, save and backup',async()=>{
@@ -124,13 +124,13 @@ test('importing a backup with retired cards preserves them and explains their hi
 });
 
 test('word type includes multiword names, interactions are separate and empty idiom filter is usable',async()=>{
-  assert.equal(model.select(vocabulary.items,{teachingType:'word'}).length,433);
+  assert.equal(model.select(vocabulary.items,{teachingType:'word'}).length,453);
   assert.equal(model.select(vocabulary.items,{teachingType:'interaction'}).length,19);
   assert.equal(model.select(vocabulary.items,{teachingType:'idiom'}).length,0);
   for(const uid of ['ven-0004','ven-0017','ven-0131','ven-0145'])assert.ok(model.select(vocabulary.items,{teachingType:'word'}).some(i=>i.uid===uid));
   const view=await app({url:'https://example.test/PythonMF/vocabulary-en/#teachingType=idiom'});
   assert.equal(view.orderedSelection().length,0);assert.equal(view.element('emptyState').hidden,false);
-  view.element('emptyResetButton').click();assert.equal(view.orderedSelection().length,452);
+  view.element('emptyResetButton').click();assert.equal(view.orderedSelection().length,472);
   const future={...sample[0],uid:'ven-future-idiom',teachingType:'idiom'};
   assert.deepEqual(model.select([...sample,future],{teachingType:'idiom'}).map(model.key),['ven-future-idiom']);
   const legacy=sample.map(({teachingType,active,...item})=>item);
@@ -262,8 +262,8 @@ test("switching translation direction preserves current card and the ordered sel
 test("explicit random practice shows every card once in each of three rounds despite direction changes",async()=>{
   const view=await app();view.element("shuffleButton").click();
   for(let round=0;round<3;round++){
-    const seen=new Set();for(let i=0;i<452;i++){view.directions[i%2].click();assert.ok(!seen.has(view.state.currentItem.uid));seen.add(view.state.currentItem.uid);if(i<451)view.element("nextButton").click();}
-    assert.equal(seen.size,452);assert.equal(view.element("nextButton").hidden,true);assert.match(view.element("roundStatus").textContent,/konec/);if(round<2)view.element("newRoundButton").click();
+    const seen=new Set();for(let i=0;i<472;i++){view.directions[i%2].click();assert.ok(!seen.has(view.state.currentItem.uid));seen.add(view.state.currentItem.uid);if(i<471)view.element("nextButton").click();}
+    assert.equal(seen.size,472);assert.equal(view.element("nextButton").hidden,true);assert.match(view.element("roundStatus").textContent,/konec/);if(round<2)view.element("newRoundButton").click();
   }
 });
 test("a new random round never immediately repeats the last card",async()=>{
@@ -279,8 +279,8 @@ test("topics combine by union while source, part, difficulty and selection narro
   const union=model.select(vocabulary.items,{topics:["topic-06","topic-05"],sources:["benji"],parts:["noun"]});assert.ok(union.every(i=>i.sourceIds.includes("benji") && i.partOfSpeech.includes("noun") && i.topicIds.some(t=>["topic-06","topic-05"].includes(t))));assert.ok(union.length>6);
   assert.equal(model.select(vocabulary.items,{query:"orisky"})[0].en,"nuts");assert.equal(model.select(vocabulary.items,{query:"orange"}).length,2);
 });
-test("gallery is the default; all 452 active tiles occur once and language never changes order",async()=>{
-  const view=await app();assert.equal(view.state.view,"gallery");assert.equal(view.element("studyView").hidden,true);const tiles=view.element("galleryGroups").querySelectorAll(".vocab-tile");assert.equal(tiles.length,452);assert.equal(new Set(tiles.map(t=>t.dataset.uid)).size,452);
+test("gallery is the default; all 472 active tiles occur once and language never changes order",async()=>{
+  const view=await app();assert.equal(view.state.view,"gallery");assert.equal(view.element("studyView").hidden,true);const tiles=view.element("galleryGroups").querySelectorAll(".vocab-tile");assert.equal(tiles.length,472);assert.equal(new Set(tiles.map(t=>t.dataset.uid)).size,472);
   const order=tiles.map(t=>t.dataset.uid);view.labels[1].click();assert.deepEqual(view.element("galleryGroups").querySelectorAll(".vocab-tile").map(t=>t.dataset.uid),order);assert.match(view.element("tile-ven-0020").textContent,/kočka/);
 });
 test("next follows the gallery across group boundaries and return anchors the LAST studied tile",async()=>{
@@ -305,7 +305,7 @@ test("study navigation stops audio, resets revealed answer, and preserves focus 
   const view=await app();view.openStudy("ven-0020");view.element("revealButton").click();assert.equal(view.state.revealed,true);view.speakPrompt();assert.ok(view.players.some(p=>p.played));view.moveStudy(1);assert.equal(view.state.revealed,false);assert.ok(view.players.filter(p=>p.played).every(p=>p.paused));view.doc.emit("keydown",{key:"Escape"});assert.equal(view.state.view,"gallery");
 });
 test("audio identity must match BOTH texts; missing audio does not block the gallery",async()=>{
-  const cat=vocabulary.items.find(i=>i.en==="cat");const wrong={items:{[cat.id]:{sourceEn:"cat",sourceCz:"špatně",en:"wrong.mp3"}}};assert.equal(model.audioRecord(cat,wrong),null);const view=await app({manifest:null});assert.equal(view.element("galleryGroups").querySelectorAll(".vocab-tile").length,452);view.openStudy(cat.uid);view.speakPrompt();assert.match(view.element("messageStrip").textContent,/neni pripraveny/);
+  const cat=vocabulary.items.find(i=>i.en==="cat");const wrong={items:{[cat.id]:{sourceEn:"cat",sourceCz:"špatně",en:"wrong.mp3"}}};assert.equal(model.audioRecord(cat,wrong),null);const view=await app({manifest:null});assert.equal(view.element("galleryGroups").querySelectorAll(".vocab-tile").length,472);view.openStudy(cat.uid);view.speakPrompt();assert.match(view.element("messageStrip").textContent,/neni pripraveny/);
 });
 test("revealing and changing a card keeps both sentences attached to the studied meaning",async()=>{
   const view=await app();view.openStudy("ven-0118");
@@ -326,14 +326,14 @@ test("revealing and changing a card keeps both sentences attached to the studied
   assert.equal(view.element("sentenceEn").textContent,view.state.currentItem.sentenceEn);
 });
 test("ordinal numbers and related meanings stay distinct; natural cardinal order precedes other quantities",()=>{
-  const numbers=model.ordered(vocabulary.items,{topics:["topic-11"],sort:"recommended"},vocabulary.catalog);assert.deepEqual(numbers.slice(0,12).map(i=>i.en),["one","two","three","four","five","six","seven","eight","nine","ten","eleven","twelve"]);assert.deepEqual(numbers.filter(i=>i.en==="second").map(model.key),["ven-0440"]);assert.ok(!numbers.some(i=>i.uid==="ven-0385"));assert.equal(new Set(vocabulary.items.map(model.key)).size,462);
+  const numbers=model.ordered(vocabulary.items,{topics:["topic-11"],sort:"recommended"},vocabulary.catalog);assert.deepEqual(numbers.slice(0,12).map(i=>i.en),["one","two","three","four","five","six","seven","eight","nine","ten","eleven","twelve"]);assert.deepEqual(numbers.filter(i=>i.en==="second").map(model.key),["ven-0440"]);assert.ok(!numbers.some(i=>i.uid==="ven-0385"));assert.equal(new Set(vocabulary.items.map(model.key)).size,482);
 });
 test("a broken vocabulary request has an explicit error and does not claim an empty loaded dictionary",async()=>{
   const view=await app({failData:true});assert.equal(view.element("totalCount").textContent,"—");assert.match(view.element("galleryNotice").textContent,/nepodařilo/);assert.equal(view.element("shuffleButton").disabled,true);
 });
 
 test("a pending audio request never delays the gallery or prevents a bottom-bar return",async()=>{
-  const view=await app({slowAudio:true});assert.equal(view.element("galleryGroups").querySelectorAll(".vocab-tile").length,452);view.openStudy("ven-0020");assert.equal(view.element("backBottomButton").hidden,false);view.element("backBottomButton").click();assert.equal(view.state.view,"gallery");assert.equal(view.doc.activeElement.id,"tile-ven-0020");
+  const view=await app({slowAudio:true});assert.equal(view.element("galleryGroups").querySelectorAll(".vocab-tile").length,472);view.openStudy("ven-0020");assert.equal(view.element("backBottomButton").hidden,false);view.element("backBottomButton").click();assert.equal(view.state.view,"gallery");assert.equal(view.doc.activeElement.id,"tile-ven-0020");
 });
 test("reloading the gallery preserves the frozen random order for browser Forward",async()=>{
   const before=await app();before.state.sources=["benji"];before.selectionChanged();before.openStudy("","random");before.moveStudy(1);

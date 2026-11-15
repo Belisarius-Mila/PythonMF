@@ -1395,3 +1395,34 @@ a aktuální browser přejímka nejsou doložené. Vlastní větev
 data/vocabulary-lake-batch1-20261115 nad d141d030; souběžný main s opravou
 zálohy zůstává stranou. Doklady: data/private/vocabulary_lake_batch1_20261115/
 a authoring job v data/private/vocabulary_authoring/. Bez nového TVBCP.
+
+
+## 2026-11-15 11:43 CET — Další schválená dvacítka z návrhu MMTX
+
+Hotovo: Místně zařazeno dalších20 karet podle pořadí zbývajícího TXT:
+dinner, meeting, morning, splash, race, people, idea, team, plan, place,
+side, work, shout, practise, sleep, bring, ask, think, check a leave.
+Každá má EN/CZ příklad, explicitní ilustraci, náhled a čtyři zvukové
+reference. Celkem482 záznamů/472 aktivních,453 Slovíček a19 Interakcí.
+Rozhodnutí: Míla zadal „dávku dalších navržených20 slovíček najednou“.
+Zvolený přesný seznam byl oznámen před přípravou. Ask je požádat, leave
+je nechat/ponechat; jiné významy se nepřimíchávají. Nové p+n nezadané.
+Další krok: Samostatně schválené Terra Pages p+n obou místních dávek (10+20).
+Navrhované další kroky: Přejímka telefonu; výběr z35 zbývajících nových
+hesel původního návrhu,3 doplňujících významů a2 volitelných rozšíření.
+Technický důkaz:52 Python testů PASS/27,378s včetně51 selection +5 learners
+Node scénářů, statická brána PASS. Všech462 starších položek/katalogových
+identit přesně stejných,2688 původních médií bajtově shodných, CSV prefix
+a CRLF zachované.80 nových MP3 dekódovaných,20 náhledů WebP zkontrolovaných,
+123/123 místních HTTP odpovědí přesně shodných.148 zdrojů/dat/testů/médií
+zmrazených po ověření. Nemění se aplikační ani autorský kód; v existujících
+testech se mění jen inventární čísla. Plná publikační brána patří do p+n.
+UIDven-0463 ažven-0482; dávka lake-vocabulary-next20-20261115-v1 je applied,
+digest5ea1a773d7d59ea7aed3afe9efa189359b635d6143d637644c486d92d70faef5.
+Obrázky:13 nově vytvořených vestavěným imagegen,1 úprava závodu bez nápisů,
+6 převzatých; žádné původní obrazy se nepřepisují. Aria/Vlasta,−10%,18 témat,
+původní UID a osobní výběry zachované. Nové karty nepřebírají A–D/Benji.
+Vlastní větev data/vocabulary-lake-batch1-20261115 obsahuje první desítku
+a tuto dvacítku; main s Willovou opravou zálohy zůstává stranou.
+Doklady: data/private/vocabulary_lake_batch2_20261115/. Dokončené dávky
+a média znovu negenerovat. Telefon/browser zatím nepřevzaté. Bez nového TVBCP.

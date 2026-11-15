@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "source": "VocabularyEN/VocabularyEN.csv",
-  "sourceDigest": "4468d5c9937004f096fe3d67521293e9b99f1c7f5a89249c48e2c5606274b7ff",
+  "sourceDigest": "ba855a7147b80ced580eaa5a909b8aa17a18c7cbb298052c0aa0f136b20811cc",
   "rate": "-10%",
   "voices": {
     "en": {
@@ -16,9 +16,9 @@
     }
   },
   "stats": {
-    "itemCount": 462,
-    "audioReferences": 924,
-    "uniqueAssets": 903
+    "itemCount": 482,
+    "audioReferences": 964,
+    "uniqueAssets": 943
   },
   "items": {
     "1": {
@@ -3717,6 +3717,166 @@
       "spokenCz": "zdravý",
       "en": "assets/vocabulary-en-audio/en-us-aria-neural/55dc6e1f0232fd7e7395.mp3",
       "cz": "assets/vocabulary-en-audio/cs-cz-vlasta-neural/1b526393c260e27e5b51.mp3"
+    },
+    "463": {
+      "sourceEn": "dinner",
+      "sourceCz": "večeře",
+      "spokenEn": "dinner",
+      "spokenCz": "večeře",
+      "en": "assets/vocabulary-en-audio/en-us-aria-neural/b141828201d14cef700d.mp3",
+      "cz": "assets/vocabulary-en-audio/cs-cz-vlasta-neural/9e0fe4dc29234fd8e3c6.mp3"
+    },
+    "464": {
+      "sourceEn": "meeting",
+      "sourceCz": "schůze; setkání",
+      "spokenEn": "meeting",
+      "spokenCz": "schůze. setkání",
+      "en": "assets/vocabulary-en-audio/en-us-aria-neural/4c0c93cdad83d7855b5d.mp3",
+      "cz": "assets/vocabulary-en-audio/cs-cz-vlasta-neural/62507ac2392b30b41b62.mp3"
+    },
+    "465": {
+      "sourceEn": "morning",
+      "sourceCz": "ráno",
+      "spokenEn": "morning",
+      "spokenCz": "ráno",
+      "en": "assets/vocabulary-en-audio/en-us-aria-neural/c7d849f0535a72688cc6.mp3",
+      "cz": "assets/vocabulary-en-audio/cs-cz-vlasta-neural/2422a6de1b69cf5258f2.mp3"
+    },
+    "466": {
+      "sourceEn": "splash",
+      "sourceCz": "šplouchnutí",
+      "spokenEn": "splash",
+      "spokenCz": "šplouchnutí",
+      "en": "assets/vocabulary-en-audio/en-us-aria-neural/57258c3512dfbe7f7919.mp3",
+      "cz": "assets/vocabulary-en-audio/cs-cz-vlasta-neural/f138144c28b2aab45b24.mp3"
+    },
+    "467": {
+      "sourceEn": "race",
+      "sourceCz": "závod",
+      "spokenEn": "race",
+      "spokenCz": "závod",
+      "en": "assets/vocabulary-en-audio/en-us-aria-neural/b1c00a9401325d3d0277.mp3",
+      "cz": "assets/vocabulary-en-audio/cs-cz-vlasta-neural/34a11cb072c63a393300.mp3"
+    },
+    "468": {
+      "sourceEn": "people",
+      "sourceCz": "lidé",
+      "spokenEn": "people",
+      "spokenCz": "lidé",
+      "en": "assets/vocabulary-en-audio/en-us-aria-neural/b89ab1bb84fb76a303ca.mp3",
+      "cz": "assets/vocabulary-en-audio/cs-cz-vlasta-neural/7dc0d204952b5fdbe83d.mp3"
+    },
+    "469": {
+      "sourceEn": "idea",
+      "sourceCz": "nápad",
+      "spokenEn": "idea",
+      "spokenCz": "nápad",
+      "en": "assets/vocabulary-en-audio/en-us-aria-neural/a86ef942e74b16fa9f31.mp3",
+      "cz": "assets/vocabulary-en-audio/cs-cz-vlasta-neural/fa7422958a70515ce6a7.mp3"
+    },
+    "470": {
+      "sourceEn": "team",
+      "sourceCz": "tým",
+      "spokenEn": "team",
+      "spokenCz": "tým",
+      "en": "assets/vocabulary-en-audio/en-us-aria-neural/6a287ba3dc769cbaceaa.mp3",
+      "cz": "assets/vocabulary-en-audio/cs-cz-vlasta-neural/581bb2ef7d02552fe3ef.mp3"
+    },
+    "471": {
+      "sourceEn": "plan",
+      "sourceCz": "plán",
+      "spokenEn": "plan",
+      "spokenCz": "plán",
+      "en": "assets/vocabulary-en-audio/en-us-aria-neural/4c98c3cd270d55c5ce3e.mp3",
+      "cz": "assets/vocabulary-en-audio/cs-cz-vlasta-neural/ab3abb678ab01fed50e7.mp3"
+    },
+    "472": {
+      "sourceEn": "place",
+      "sourceCz": "místo",
+      "spokenEn": "place",
+      "spokenCz": "místo",
+      "en": "assets/vocabulary-en-audio/en-us-aria-neural/493d9a2dbf787825f1e4.mp3",
+      "cz": "assets/vocabulary-en-audio/cs-cz-vlasta-neural/952fa1794654c6bb4341.mp3"
+    },
+    "473": {
+      "sourceEn": "side",
+      "sourceCz": "strana",
+      "spokenEn": "side",
+      "spokenCz": "strana",
+      "en": "assets/vocabulary-en-audio/en-us-aria-neural/7493cf64c4bbbf2484c4.mp3",
+      "cz": "assets/vocabulary-en-audio/cs-cz-vlasta-neural/57d2d3365ceec268e59c.mp3"
+    },
+    "474": {
+      "sourceEn": "work",
+      "sourceCz": "práce",
+      "spokenEn": "work",
+      "spokenCz": "práce",
+      "en": "assets/vocabulary-en-audio/en-us-aria-neural/37e30407f75892a5f38e.mp3",
+      "cz": "assets/vocabulary-en-audio/cs-cz-vlasta-neural/b1758841a96de33ec757.mp3"
+    },
+    "475": {
+      "sourceEn": "shout",
+      "sourceCz": "křičet",
+      "spokenEn": "shout",
+      "spokenCz": "křičet",
+      "en": "assets/vocabulary-en-audio/en-us-aria-neural/dbd1e073ecd41d41bf72.mp3",
+      "cz": "assets/vocabulary-en-audio/cs-cz-vlasta-neural/ff37ad37557ce8655d6d.mp3"
+    },
+    "476": {
+      "sourceEn": "practise",
+      "sourceCz": "trénovat; procvičovat",
+      "spokenEn": "practise",
+      "spokenCz": "trénovat. procvičovat",
+      "en": "assets/vocabulary-en-audio/en-us-aria-neural/1e94165d5d3e9ad22d14.mp3",
+      "cz": "assets/vocabulary-en-audio/cs-cz-vlasta-neural/90592337d7ca530b7e70.mp3"
+    },
+    "477": {
+      "sourceEn": "sleep",
+      "sourceCz": "spát",
+      "spokenEn": "sleep",
+      "spokenCz": "spát",
+      "en": "assets/vocabulary-en-audio/en-us-aria-neural/db77e2b332120a6e0616.mp3",
+      "cz": "assets/vocabulary-en-audio/cs-cz-vlasta-neural/a51ac15204f5bfe0cc38.mp3"
+    },
+    "478": {
+      "sourceEn": "bring",
+      "sourceCz": "přinést",
+      "spokenEn": "bring",
+      "spokenCz": "přinést",
+      "en": "assets/vocabulary-en-audio/en-us-aria-neural/14d6dc8d1c8a6d183c75.mp3",
+      "cz": "assets/vocabulary-en-audio/cs-cz-vlasta-neural/63b4d5c5ffd36c9b54d6.mp3"
+    },
+    "479": {
+      "sourceEn": "ask",
+      "sourceCz": "požádat",
+      "spokenEn": "ask",
+      "spokenCz": "požádat",
+      "en": "assets/vocabulary-en-audio/en-us-aria-neural/b5d63f52d43d0a95579a.mp3",
+      "cz": "assets/vocabulary-en-audio/cs-cz-vlasta-neural/0d7602a4d10c28d01376.mp3"
+    },
+    "480": {
+      "sourceEn": "think",
+      "sourceCz": "myslet si",
+      "spokenEn": "think",
+      "spokenCz": "myslet si",
+      "en": "assets/vocabulary-en-audio/en-us-aria-neural/682c980471219895ab5d.mp3",
+      "cz": "assets/vocabulary-en-audio/cs-cz-vlasta-neural/590519c41a3b217e2151.mp3"
+    },
+    "481": {
+      "sourceEn": "check",
+      "sourceCz": "zkontrolovat",
+      "spokenEn": "check",
+      "spokenCz": "zkontrolovat",
+      "en": "assets/vocabulary-en-audio/en-us-aria-neural/713cad7e66f9d16f8911.mp3",
+      "cz": "assets/vocabulary-en-audio/cs-cz-vlasta-neural/6a00e1b1be84707b5a83.mp3"
+    },
+    "482": {
+      "sourceEn": "leave",
+      "sourceCz": "nechat; ponechat",
+      "spokenEn": "leave",
+      "spokenCz": "nechat. ponechat",
+      "en": "assets/vocabulary-en-audio/en-us-aria-neural/2c0ce62e970fe78bd160.mp3",
+      "cz": "assets/vocabulary-en-audio/cs-cz-vlasta-neural/4ca5948f75aa4c4bc7c9.mp3"
     }
   }
 }

@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "kind": "sentences",
   "source": "VocabularyEN/VocabularyEN.csv",
-  "sourceDigest": "55928ff521ff0911a77dedb4594d6b85b41e1d6d0a471432e0b855ffc7fdc86b",
+  "sourceDigest": "b4e789d11543f53bb5c55535fb3bdf134bb293265b86f0e26632c324f9ae225d",
   "rate": "-10%",
   "voices": {
     "en": {
@@ -5098,11 +5098,231 @@
       "spokenCz": "Tento strom je zdravý.",
       "en": "assets/vocabulary-en-sentences/en-us-aria-neural/d60266ca28b89a577915.mp3",
       "cz": "assets/vocabulary-en-sentences/cs-cz-vlasta-neural/fe4bc1781fe88c35eb48.mp3"
+    },
+    "ven-0463": {
+      "uid": "ven-0463",
+      "sourceEn": "dinner",
+      "sourceCz": "večeře",
+      "sourceSentenceEn": "Dinner is on the table.",
+      "sourceSentenceCz": "Večeře je na stole.",
+      "spokenEn": "Dinner is on the table.",
+      "spokenCz": "Večeře je na stole.",
+      "en": "assets/vocabulary-en-sentences/en-us-aria-neural/b2f92270a153a32b03c0.mp3",
+      "cz": "assets/vocabulary-en-sentences/cs-cz-vlasta-neural/d630be3b2966e99af512.mp3"
+    },
+    "ven-0464": {
+      "uid": "ven-0464",
+      "sourceEn": "meeting",
+      "sourceCz": "schůze; setkání",
+      "sourceSentenceEn": "We have a meeting today.",
+      "sourceSentenceCz": "Dnes máme schůzi.",
+      "spokenEn": "We have a meeting today.",
+      "spokenCz": "Dnes máme schůzi.",
+      "en": "assets/vocabulary-en-sentences/en-us-aria-neural/a0e1c191c530be41b809.mp3",
+      "cz": "assets/vocabulary-en-sentences/cs-cz-vlasta-neural/198a2241349160ab335f.mp3"
+    },
+    "ven-0465": {
+      "uid": "ven-0465",
+      "sourceEn": "morning",
+      "sourceCz": "ráno",
+      "sourceSentenceEn": "It is morning.",
+      "sourceSentenceCz": "Je ráno.",
+      "spokenEn": "It is morning.",
+      "spokenCz": "Je ráno.",
+      "en": "assets/vocabulary-en-sentences/en-us-aria-neural/47f42ed2f9577bb6afe7.mp3",
+      "cz": "assets/vocabulary-en-sentences/cs-cz-vlasta-neural/ad09cfaaffe55daac8bc.mp3"
+    },
+    "ven-0466": {
+      "uid": "ven-0466",
+      "sourceEn": "splash",
+      "sourceCz": "šplouchnutí",
+      "sourceSentenceEn": "I hear a splash in the lake.",
+      "sourceSentenceCz": "Slyším šplouchnutí v jezeře.",
+      "spokenEn": "I hear a splash in the lake.",
+      "spokenCz": "Slyším šplouchnutí v jezeře.",
+      "en": "assets/vocabulary-en-sentences/en-us-aria-neural/fb40d8035eb6db5404b3.mp3",
+      "cz": "assets/vocabulary-en-sentences/cs-cz-vlasta-neural/ac32c251cec41700f768.mp3"
+    },
+    "ven-0467": {
+      "uid": "ven-0467",
+      "sourceEn": "race",
+      "sourceCz": "závod",
+      "sourceSentenceEn": "We run in a race.",
+      "sourceSentenceCz": "Běžíme závod.",
+      "spokenEn": "We run in a race.",
+      "spokenCz": "Běžíme závod.",
+      "en": "assets/vocabulary-en-sentences/en-us-aria-neural/45df87e39de5b1352b50.mp3",
+      "cz": "assets/vocabulary-en-sentences/cs-cz-vlasta-neural/d5d0fa71f1704290eac2.mp3"
+    },
+    "ven-0468": {
+      "uid": "ven-0468",
+      "sourceEn": "people",
+      "sourceCz": "lidé",
+      "sourceSentenceEn": "People walk in the park.",
+      "sourceSentenceCz": "Lidé chodí v parku.",
+      "spokenEn": "People walk in the park.",
+      "spokenCz": "Lidé chodí v parku.",
+      "en": "assets/vocabulary-en-sentences/en-us-aria-neural/ba35b151a0d3ebc6348f.mp3",
+      "cz": "assets/vocabulary-en-sentences/cs-cz-vlasta-neural/ec9d5506a016f2e3aead.mp3"
+    },
+    "ven-0469": {
+      "uid": "ven-0469",
+      "sourceEn": "idea",
+      "sourceCz": "nápad",
+      "sourceSentenceEn": "I have an idea.",
+      "sourceSentenceCz": "Mám nápad.",
+      "spokenEn": "I have an idea.",
+      "spokenCz": "Mám nápad.",
+      "en": "assets/vocabulary-en-sentences/en-us-aria-neural/76bba0982f86e67e2ef2.mp3",
+      "cz": "assets/vocabulary-en-sentences/cs-cz-vlasta-neural/9f77ad69a9eeb1ca0be6.mp3"
+    },
+    "ven-0470": {
+      "uid": "ven-0470",
+      "sourceEn": "team",
+      "sourceCz": "tým",
+      "sourceSentenceEn": "The team is ready.",
+      "sourceSentenceCz": "Tým je připravený.",
+      "spokenEn": "The team is ready.",
+      "spokenCz": "Tým je připravený.",
+      "en": "assets/vocabulary-en-sentences/en-us-aria-neural/ff3c9852ef55ab75a254.mp3",
+      "cz": "assets/vocabulary-en-sentences/cs-cz-vlasta-neural/e6fa5d31a531ee323425.mp3"
+    },
+    "ven-0471": {
+      "uid": "ven-0471",
+      "sourceEn": "plan",
+      "sourceCz": "plán",
+      "sourceSentenceEn": "We have a plan.",
+      "sourceSentenceCz": "Máme plán.",
+      "spokenEn": "We have a plan.",
+      "spokenCz": "Máme plán.",
+      "en": "assets/vocabulary-en-sentences/en-us-aria-neural/4978f96b60de2409d6c0.mp3",
+      "cz": "assets/vocabulary-en-sentences/cs-cz-vlasta-neural/6ff63f28d5cefc89ae69.mp3"
+    },
+    "ven-0472": {
+      "uid": "ven-0472",
+      "sourceEn": "place",
+      "sourceCz": "místo",
+      "sourceSentenceEn": "This is a good place.",
+      "sourceSentenceCz": "Tohle je dobré místo.",
+      "spokenEn": "This is a good place.",
+      "spokenCz": "Tohle je dobré místo.",
+      "en": "assets/vocabulary-en-sentences/en-us-aria-neural/88a70eab8c940c8b9d72.mp3",
+      "cz": "assets/vocabulary-en-sentences/cs-cz-vlasta-neural/86ed9d272a8a545b022d.mp3"
+    },
+    "ven-0473": {
+      "uid": "ven-0473",
+      "sourceEn": "side",
+      "sourceCz": "strana",
+      "sourceSentenceEn": "We are on this side.",
+      "sourceSentenceCz": "Jsme na této straně.",
+      "spokenEn": "We are on this side.",
+      "spokenCz": "Jsme na této straně.",
+      "en": "assets/vocabulary-en-sentences/en-us-aria-neural/d43ddfe5275351befed4.mp3",
+      "cz": "assets/vocabulary-en-sentences/cs-cz-vlasta-neural/dfa3be6b5bc6c36a16a1.mp3"
+    },
+    "ven-0474": {
+      "uid": "ven-0474",
+      "sourceEn": "work",
+      "sourceCz": "práce",
+      "sourceSentenceEn": "We do the work together.",
+      "sourceSentenceCz": "Děláme tu práci společně.",
+      "spokenEn": "We do the work together.",
+      "spokenCz": "Děláme tu práci společně.",
+      "en": "assets/vocabulary-en-sentences/en-us-aria-neural/0dacfcd38aba01649db8.mp3",
+      "cz": "assets/vocabulary-en-sentences/cs-cz-vlasta-neural/94d27211c1f54a3bca60.mp3"
+    },
+    "ven-0475": {
+      "uid": "ven-0475",
+      "sourceEn": "shout",
+      "sourceCz": "křičet",
+      "sourceSentenceEn": "Please do not shout.",
+      "sourceSentenceCz": "Prosím, nekřič.",
+      "spokenEn": "Please do not shout.",
+      "spokenCz": "Prosím, nekřič.",
+      "en": "assets/vocabulary-en-sentences/en-us-aria-neural/7cd7215f18f90c9613b1.mp3",
+      "cz": "assets/vocabulary-en-sentences/cs-cz-vlasta-neural/41019f79e5c79b95c8f8.mp3"
+    },
+    "ven-0476": {
+      "uid": "ven-0476",
+      "sourceEn": "practise",
+      "sourceCz": "trénovat; procvičovat",
+      "sourceSentenceEn": "I practise with my friends.",
+      "sourceSentenceCz": "Trénuji s kamarády.",
+      "spokenEn": "I practise with my friends.",
+      "spokenCz": "Trénuji s kamarády.",
+      "en": "assets/vocabulary-en-sentences/en-us-aria-neural/0f58e19175fcb8b85a0c.mp3",
+      "cz": "assets/vocabulary-en-sentences/cs-cz-vlasta-neural/0c18ff531516bbff4a69.mp3"
+    },
+    "ven-0477": {
+      "uid": "ven-0477",
+      "sourceEn": "sleep",
+      "sourceCz": "spát",
+      "sourceSentenceEn": "We sleep in the hut.",
+      "sourceSentenceCz": "Spíme v chatrči.",
+      "spokenEn": "We sleep in the hut.",
+      "spokenCz": "Spíme v chatrči.",
+      "en": "assets/vocabulary-en-sentences/en-us-aria-neural/0ff36f9d0a9f655ae2aa.mp3",
+      "cz": "assets/vocabulary-en-sentences/cs-cz-vlasta-neural/0cc8ee203c6ceb4ac416.mp3"
+    },
+    "ven-0478": {
+      "uid": "ven-0478",
+      "sourceEn": "bring",
+      "sourceCz": "přinést",
+      "sourceSentenceEn": "Please bring the bag here.",
+      "sourceSentenceCz": "Prosím, přines tašku sem.",
+      "spokenEn": "Please bring the bag here.",
+      "spokenCz": "Prosím, přines tašku sem.",
+      "en": "assets/vocabulary-en-sentences/en-us-aria-neural/adf9d14681c9107c7a3d.mp3",
+      "cz": "assets/vocabulary-en-sentences/cs-cz-vlasta-neural/2a60938850b7217ac32a.mp3"
+    },
+    "ven-0479": {
+      "uid": "ven-0479",
+      "sourceEn": "ask",
+      "sourceCz": "požádat",
+      "sourceSentenceEn": "We ask our friends for help.",
+      "sourceSentenceCz": "Žádáme kamarády o pomoc.",
+      "spokenEn": "We ask our friends for help.",
+      "spokenCz": "Žádáme kamarády o pomoc.",
+      "en": "assets/vocabulary-en-sentences/en-us-aria-neural/0e532f22c43eed6088c0.mp3",
+      "cz": "assets/vocabulary-en-sentences/cs-cz-vlasta-neural/f31881f0a53a63ee1f30.mp3"
+    },
+    "ven-0480": {
+      "uid": "ven-0480",
+      "sourceEn": "think",
+      "sourceCz": "myslet si",
+      "sourceSentenceEn": "I think the plan is good.",
+      "sourceSentenceCz": "Myslím si, že plán je dobrý.",
+      "spokenEn": "I think the plan is good.",
+      "spokenCz": "Myslím si, že plán je dobrý.",
+      "en": "assets/vocabulary-en-sentences/en-us-aria-neural/766af3b4138b27a23bb4.mp3",
+      "cz": "assets/vocabulary-en-sentences/cs-cz-vlasta-neural/08cc4950059b74c0e24d.mp3"
+    },
+    "ven-0481": {
+      "uid": "ven-0481",
+      "sourceEn": "check",
+      "sourceCz": "zkontrolovat",
+      "sourceSentenceEn": "We check the tree.",
+      "sourceSentenceCz": "Kontrolujeme strom.",
+      "spokenEn": "We check the tree.",
+      "spokenCz": "Kontrolujeme strom.",
+      "en": "assets/vocabulary-en-sentences/en-us-aria-neural/9fdf857b95ff6b5540cb.mp3",
+      "cz": "assets/vocabulary-en-sentences/cs-cz-vlasta-neural/972354f88cc6f0195009.mp3"
+    },
+    "ven-0482": {
+      "uid": "ven-0482",
+      "sourceEn": "leave",
+      "sourceCz": "nechat; ponechat",
+      "sourceSentenceEn": "We leave the bag here.",
+      "sourceSentenceCz": "Necháme tašku tady.",
+      "spokenEn": "We leave the bag here.",
+      "spokenCz": "Necháme tašku tady.",
+      "en": "assets/vocabulary-en-sentences/en-us-aria-neural/0718a677db830861b2e0.mp3",
+      "cz": "assets/vocabulary-en-sentences/cs-cz-vlasta-neural/644044c664e08928583d.mp3"
     }
   },
   "stats": {
-    "itemCount": 462,
-    "audioReferences": 924,
-    "uniqueAssets": 924
+    "itemCount": 482,
+    "audioReferences": 964,
+    "uniqueAssets": 964
   }
 }
