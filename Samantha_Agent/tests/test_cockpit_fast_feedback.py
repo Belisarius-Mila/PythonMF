@@ -34,6 +34,10 @@ class CockpitFastFeedbackTests(unittest.TestCase):
                     len(suite.test_targets),
                     len(set(suite.test_targets)),
                 )
+                loader=unittest.TestLoader()
+                resolved=loader.loadTestsFromNames(suite.test_targets)
+                self.assertFalse(loader.errors,loader.errors)
+                self.assertGreater(resolved.countTestCases(),0)
 
     def test_resolve_test_targets_preserves_order_and_removes_overlap(self) -> None:
         targets = resolve_test_targets(("frontend", "email-archive", "frontend"))
@@ -119,6 +123,7 @@ class CockpitFastFeedbackTests(unittest.TestCase):
         self.assertEqual(result, 0)
         self.assertIn("D3 fast feedback: OK", output.getvalue())
         self.assertIn(RELEASE_GATE_COMMAND, output.getvalue())
+        self.assertEqual(RELEASE_GATE_COMMAND,'.venv/bin/python scripts/validation_gate.py')
 
 
 if __name__ == "__main__":

@@ -1,36 +1,40 @@
 # Samantha — ověření a rychlost vydání
 
 Proud `project-samantha-infrastructure`; kanonická pravidla
-`../technical/validation_policy.md`, rozhodnutí v existujícím TVBCP téhož proudu.
+`../technical/validation_policy.md`, existující infrastrukturní handoff/TVBCP.
 
-15.11.2026 Míla schválil nejprve společný runner a podepsané účtenky, následně
-snížení běžného běhu pomocí domén/závislostí, denní úplné CI regrese a Git fixture.
+15.11.2026: Míla pověřil Adama další opravou a odmítl automatické plné brány
+při vývoji/commitu/p+n velkého projektu. Místní politika validation-v3 má
+cílené domény a smluvní sady pro sdílené komponenty. Plná regrese je pouze
+noční CI nebo výslovný ruční `validation_gate.py --full`. Nevyžaduje se
+plný základ pro nový soubor, změnu pravidel ani po expiraci účtenky.
 
-Aktuální místní politika validation-v2 má pevnou mapu12 oblastí a malý společný
-bezpečnostní základ. Reverzní importy přidávají potřebné konzumenty; neznámá
-závislost, dynamický import měněného modulu, nový spustitelný soubor či společná
-kritická změna znamená plnou sadu. Bezpečnost zápisu/obnovy kalendáře se ověřuje
-vždy při kalendářové změně. Počet300 je cíl, nikoli možnost testy oříznout.
+Opravené skutečné cesty VocabularyEN CSV/katalog/obrázky a docs/data,
+docs/assets včetně zvuků, vět a náhledů. Poslední Datova dávka503 cest
+nově vybírá99 testů/9 modulů, žádná nezařazená cesta. Skutečně PASS:
+99 testů/37,190s unit;53,881s celý diagnostický běh včetně statických kontrol
+a výběru. Nejde o měření nového ostrého p+n ani o živou přejímku telefonu.
+42 regresí selektoru/účtenek PASS před závěrečnou cílenou integrací.
 
-Změna existujícího calendar_writer:282 testů/39,283s, celý diagnostický běh
-56,874s. Předchozí plná kalendářová brána3972/621,309s unit,645,4s celkem.
-Aktuální změna samotné politiky vyžaduje závěrečnou plnou bránu; její skutečná
-účtenka, počty a neměnné finální otisky jsou v
-`data/private/validation_domains_20261115/completion.json`. Podrobný report
-`../reports/validation_domains_20261115.md`. Bez PASS účtenky nejde o dokončení.
+Podpis je dál v soukromých Git metadatech, přesné vstupy a zaznamenané
+covered_modules. Úzká účtenka nemůže přeskočit testy jiné čekající změny.
+Po24h se opakuje cílená sada, nikdy automaticky celý projekt. Procesová
+SHA cache přidává do klíče inode/device/ctime; stejná velikost/mtime změnu
+neskryjí. Měření úplného capture obsahu/prostředí15,098s první /2,142s opakované.
 
-Cílená místní publikace dále vyžaduje podepsaný plný základ stejného prostředí
-nejvýše24h starý. Převzetí stejných bajtů/režimů a kontrola před/po zůstávají.
-CI nad úplným event diffem používá stejnou mapu; denně02:17 UTC a ručně plná
-sada, bez místní publikační účtenky. Rozvrh je až v budoucím schváleném pushi.
-Git fixture jsou úplné samostatné kopie procesového seedu, bez hardlinků.
-Jeden křehký celostránkový hash test nahrazen funkční kompoziční kontrolou.
+Přijatý kompromis: méně okamžitě ověřených kombinací; chyba jiného konzumenta
+sdílené funkce se může projevit až v noci nebo při použití. Četnost neznáme.
+Bezpečnostní/recovery smluvní testy zůstávají, plná sada není důkaz živých
+oprávnění, doručení nebo iPhone. Nenahrazovat tento závěr tvrzením nulového rizika.
 
-Historický stav v1: vydáno38a33532 registrovaným Terra p+n,
-job0203d0fbaf6cae4b993c7fa4670a9bb6. Bootstrap byl plný798,9s, celé vydání871,1s;
-starý backend ještě nemohl převzít nový důkaz. Místní v1 full3966/623,6s
-oproti následnému převzetí25,9s. Stav v1 nenahrazuje aktuální živý audit.
+Poslední skutečné společné vydání v2+kalendář+Data je95037bfe, oba cíle
+potvrzené: Cockpit5/5, Pages7805060201, veřejný JSON522 karet přesně shodný.
+7 commitů, full775,3s, navazující34,3/38,4s, vydání od předání1204,9s.
+Účtenky95bf90ef2edd436f2ce26616a88621a9 /cba6543a65c27fa456db0a2b817e8f3e
+v private all_pending_release_20261115/. Tento historický výsledek není nový živý audit.
 
-Tento v2 vývoj ani předchozí kalendářový f2b56fa3 nejsou vydané.
-Žádné nové p+n, restart, helper/grant, kalendářový create ani záloha.
-Média, Git historie a aktivní Data zachované; fyzická/provozní přejímka zvlášť.
+V3 je nový místní vývoj bez p+n/restartu. Závěrečné cílené ověření, skutečné
+počty/časy, zdrojové otisky a commit jsou pouze v
+`data/private/validation_focused_20261115/completion.json`.
+Report `../reports/validation_focused_20261115.md`; žádný nový model, přesun
+médií, změna soukromých dat, role nebo kalendářový zápis.

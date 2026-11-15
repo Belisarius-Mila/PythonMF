@@ -75,22 +75,64 @@ class ValidationPolicyTests(unittest.TestCase):
         self.assertTrue(set(policy.DOC_TESTS + CORE_TESTS).issubset(result.modules))
         self.assertIn('tests.test_library_photos',result.modules)
 
-    def test_sensitive_unknown_empty_and_policy_changes_require_full(self):
+    def test_sensitive_unknown_empty_and_policy_changes_use_contract_suites(self):
         for name in ("app/backup/incremental.py", "app/file_persistence.py", "app/email/service.py",
                      "config/agent_roles.json", "requirements.txt", "AGENTS.md",
                      "app/communication/validation_policy.py", "app/unknown.py", "tests/new_test.py"):
             with self.subTest(path=name):
                 plan = policy.select_validation_plan(["Samantha_Agent/" + name,
                                                       "Samantha_Agent/app/frontend/cockpit/styles.css"])
-                self.assertEqual(plan.mode, "full")
-        self.assertEqual(policy.select_validation_plan([]).mode, "full")
-        self.assertEqual(policy.select_validation_plan(["../styles.css"]).mode, "full")
+                self.assertEqual(plan.mode, "targeted")
+                self.assertTrue(plan.modules)
+        self.assertEqual(policy.select_validation_plan([]).mode, "targeted")
+        with self.assertRaises(policy.ValidationPolicyError):
+            policy.select_validation_plan(["../styles.css"])
 
-    def test_first_targeted_change_requires_verified_baseline(self):
+    def test_first_targeted_change_never_requires_a_full_baseline(self):
         self.write("app/frontend/cockpit/styles.css", "body { color: blue; }\n")
         result = self.run_gate()
-        self.assertEqual(result.mode, "full")
-        self.assertNotIn("--test-modules", self.calls[0])
+        self.assertEqual(result.mode, "targeted")
+        self.assertIn("--test-modules", self.calls[0])
+
+    def test_full_suite_runs_only_when_explicit_and_never_reuses_a_focused_receipt(self):
+        self.run_gate()
+        self.calls.clear()
+        for _ in range(2):
+            result=self.run_gate(full_suite=True)
+            self.assertEqual(result.mode,'full')
+            self.assertFalse(result.reused)
+        self.assertEqual(len(self.calls),2)
+        self.assertTrue(all('--test-modules' not in command for command in self.calls))
+
+    def test_expired_receipt_runs_focused_tests_without_full_baseline(self):
+        self.run_gate()
+        with patch.object(policy,'MAX_RECEIPT_AGE_SECONDS',-1):
+            result=self.run_gate()
+        self.assertEqual(result.mode,'targeted')
+        self.assertFalse(result.reused)
+
+    def test_a_narrow_attestation_cannot_skip_other_pending_domain_checks(self):
+        self.write('app/calendar_writer.py','VALUE = 1\n')
+        self.write('memory/reports/synthetic.md','documentation\n')
+        inputs=policy.capture_inputs(self.repo)
+        docs=policy.select_validation_plan(['Samantha_Agent/memory/reports/synthetic.md'])
+        self.store.record(inputs,docs,test_count=10,duration_seconds=1)
+        result=self.run_gate()
+        self.assertFalse(result.reused)
+        self.assertIn('tests.test_calendar_writer',self.calls[-1])
+
+    def test_unchanged_files_reuse_hashes_but_same_size_mtime_writes_invalidate_them(self):
+        policy._input_hash.cache_clear()
+        with patch.object(policy,'_file_hash',wraps=policy._file_hash) as hashed:
+            first=policy.capture_inputs(self.repo)
+            calls=hashed.call_count
+            self.assertEqual(policy.capture_inputs(self.repo),first)
+            self.assertEqual(hashed.call_count,calls)
+            path=self.project/'app/frontend/cockpit/styles.css';info=path.stat()
+            path.write_bytes(path.read_bytes().replace(b'black',b'white'))
+            os.utime(path,ns=(info.st_atime_ns,info.st_mtime_ns))
+            self.assertNotEqual(policy.capture_inputs(self.repo).digest,first.digest)
+            self.assertGreater(hashed.call_count,calls)
 
     def test_targeted_gate_uses_program_modules_and_protects_complete_batch(self):
         self.certify_baseline()
@@ -101,9 +143,10 @@ class ValidationPolicyTests(unittest.TestCase):
         self.assertTrue(set(CORE_TESTS).issubset(selected))
         self.assertIn('tests.test_library_photos',selected)
         self.write("app/backup/synthetic.py", "VALUE = 1\n")
-        self.assertEqual(self.run_gate().mode, "full")
+        self.assertEqual(self.run_gate().mode, "targeted")
+        self.assertIn('tests.test_backup_incremental',self.calls[-1])
 
-    def test_scoped_calendar_edit_requires_write_tests_and_new_source_cannot_use_scope_cache(self):
+    def test_scoped_calendar_edit_and_new_source_keep_write_tests_without_full(self):
         self.write('app/calendar_writer.py','VALUE = 1\n')
         self.commit()
         self.base=git(self.repo,'rev-parse','HEAD')
@@ -112,7 +155,8 @@ class ValidationPolicyTests(unittest.TestCase):
         self.assertEqual(self.run_gate().mode,'targeted')
         self.assertIn('tests.test_email_calendar_write',self.calls[-1])
         self.write('app/calendar_unreviewed_new.py','VALUE = 3\n')
-        self.assertEqual(self.run_gate().mode,'full')
+        self.assertEqual(self.run_gate().mode,'targeted')
+        self.assertIn('tests.test_email_calendar_write',self.calls[-1])
 
     def test_identical_pass_is_reused_and_bound_after_local_commit(self):
         self.write("app/new_code.py", "VALUE = 1\n")
@@ -128,13 +172,13 @@ class ValidationPolicyTests(unittest.TestCase):
 
     def test_skip_flag_cannot_authorize_a_static_only_gate(self):
         result = self.run_gate(skip_unit_tests=True)
-        self.assertEqual(result.mode, "full")
+        self.assertEqual(result.mode, "targeted")
         self.assertGreater(result.test_count, 0)
         self.assertNotIn("--skip-unit-tests", self.calls[0])
 
     def test_checkpoint_journals_do_not_repeat_previously_passed_code_tests(self):
         self.write("app/new_code.py", "VALUE = 1\n")
-        self.assertEqual(self.run_gate().mode, "full")
+        self.assertEqual(self.run_gate().mode, "targeted")
         self.write("memory/handoffs/workstreams/example.md", "Synthetic checkpoint receipt\n")
         self.commit()
         result = self.run_gate()
@@ -142,7 +186,7 @@ class ValidationPolicyTests(unittest.TestCase):
         self.assertEqual(set(self.calls[-1][self.calls[-1].index('--test-modules')+1:]),set(policy.DOC_TESTS+CORE_TESTS))
         self.assertTrue(self.run_gate().reused)
         self.write("app/new_code.py", "VALUE = 2\n")
-        self.assertEqual(self.run_gate().mode, "full")
+        self.assertEqual(self.run_gate().mode, "targeted")
 
     def test_deployment_of_already_validated_targeted_commit_reuses_proof(self):
         self.certify_baseline()
@@ -157,11 +201,17 @@ class ValidationPolicyTests(unittest.TestCase):
         self.assertEqual(result.mode, "targeted")
         self.assertEqual(len(self.calls), 1)
 
-    def test_missing_targeted_module_falls_back_to_full(self):
+    def test_missing_targeted_module_fails_instead_of_running_full(self):
         self.certify_baseline()
         self.write("app/frontend/cockpit/styles.css", "body { color: blue; }\n")
         (self.project / (policy.FRONTEND_TESTS[0].replace(".", "/") + ".py")).unlink()
-        self.assertEqual(self.run_gate().mode, "full")
+        def missing_module(command, **kwargs):
+            self.assertIn('--test-modules',command)
+            self.assertIn(policy.FRONTEND_TESTS[0],command)
+            return subprocess.CompletedProcess(command,1,'ImportError: missing test module','')
+        with self.assertRaises(HumanAdamGateError):
+            run_checkpoint_quality_gate(workspace=self.workspace,runner=missing_module,
+                log_path=Path(self.temporary.name)/'missing.log',validation_base=self.base)
 
     def test_byte_change_invalidates_receipt_even_when_size_and_mtime_match(self):
         self.run_gate()
@@ -181,7 +231,7 @@ class ValidationPolicyTests(unittest.TestCase):
         first = self.run_gate()
         self.commit()
         result = self.run_gate()
-        self.assertEqual(first.mode, "full")
+        self.assertEqual(first.mode, "targeted")
         self.assertTrue(result.reused)
         self.assertEqual(result.receipt_id, first.receipt_id)
         self.assertEqual(len(self.calls), 1)
@@ -197,21 +247,21 @@ class ValidationPolicyTests(unittest.TestCase):
     def test_tampered_receipt_cannot_be_used(self):
         self.run_gate()
         inputs = policy.capture_inputs(self.repo)
-        path = self.store.root / ("full-" + inputs.digest + ".json")
+        plan=policy.select_validation_plan([])
+        path = self.store.root / (plan.recipe + "-" + inputs.digest + ".json")
         receipt = json.loads(path.read_text())
         receipt["body"]["test_count"] = 999999
         path.write_text(json.dumps(receipt))
-        self.assertIsNone(self.store.find(inputs, policy.ValidationPlan("full")))
+        self.assertIsNone(self.store.find(inputs, plan))
 
     def test_stale_loaded_policy_cannot_reuse_new_receipts(self):
         self.run_gate()
         with patch.object(policy, "_LOADED_POLICY_SOURCE", "synthetic-stale-source"):
-            result = self.run_gate()
-        self.assertEqual(result.mode, "full")
-        self.assertFalse(result.reused)
-        self.assertEqual(len(self.calls), 2)
+            with self.assertRaises(HumanAdamGateError):
+                self.run_gate()
+        self.assertEqual(len(self.calls), 1)
 
-    def test_receipt_expiry_and_targeted_chain_do_not_extend_full_baseline(self):
+    def test_targeted_receipt_uses_its_own_freshness_without_a_full_baseline_clock(self):
         now = [100.0]
         store = policy.ValidationReceiptStore(self.repo, clock=lambda: now[0])
         inputs = policy.capture_inputs(self.repo)
@@ -220,6 +270,8 @@ class ValidationPolicyTests(unittest.TestCase):
         plan = policy.select_validation_plan(["Samantha_Agent/memory/reports/example.md"])
         store.record(inputs, plan, test_count=2, duration_seconds=1, baseline=baseline)
         now[0] += 2
+        self.assertIsNotNone(store.find(inputs, plan, allow_bound=True))
+        now[0] += policy.MAX_RECEIPT_AGE_SECONDS
         self.assertIsNone(store.find(inputs, plan, allow_bound=True))
 
     def test_changed_inputs_during_gate_cannot_receive_receipt(self):
@@ -255,7 +307,7 @@ class ValidationPolicyTests(unittest.TestCase):
         _, paths = policy.changed_paths(self.repo, old)
         self.assertIn("Samantha_Agent/app/backup/original.py", paths)
         self.assertIn("Samantha_Agent/app/backup/new.py", paths)
-        self.assertEqual(policy.select_validation_plan(paths).mode, "full")
+        self.assertEqual(policy.select_validation_plan(paths).mode, "targeted")
 
     def test_shared_key_creation_and_atomic_receipts_survive_concurrent_writers(self):
         inputs = policy.capture_inputs(self.repo)

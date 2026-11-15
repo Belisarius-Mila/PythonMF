@@ -13,7 +13,7 @@ from typing import Sequence
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_TIMEOUT_SECONDS = 120
-RELEASE_GATE_COMMAND = ".venv/bin/python scripts/cockpit_quality_gate.py"
+RELEASE_GATE_COMMAND = ".venv/bin/python scripts/validation_gate.py"
 
 
 @dataclass(frozen=True)
@@ -33,7 +33,7 @@ DOMAIN_SUITES = {
             ),
             (
                 "tests.test_cockpit_frontend.CockpitFrontendContractTests."
-                "test_rendered_pages_keep_exact_pre_extraction_contract"
+                "test_asset_layout_and_composition"
             ),
         ),
     ),
@@ -124,7 +124,7 @@ def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
         description=(
             "Spustí rychlou doménovou regresi Cockpitu. "
-            "Nenahrazuje plnou Cockpit Quality Gate."
+            "Publikační rozsah vybírá společná validační politika."
         )
     )
     parser.add_argument(

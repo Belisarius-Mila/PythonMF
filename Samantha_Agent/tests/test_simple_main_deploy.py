@@ -188,11 +188,11 @@ class SimpleMainDeploymentTests(unittest.TestCase):
 
         self.assertTrue(audit["ready"])
         self.assertTrue(audit["remote_push_deferred"])
-        self.assertEqual(prepared["gate"]["mode"], "full")
+        self.assertEqual(prepared["gate"]["mode"], "targeted")
         self.assertGreater(prepared["gate"]["test_count"], 0)
         self.assertEqual(verified["state"], DEPLOYED)
-        self.assertEqual(verified["gate"]["mode"], "full")
-        self.assertEqual(receipt["gate_mode"], "full")
+        self.assertEqual(verified["gate"]["mode"], "targeted")
+        self.assertEqual(receipt["gate_mode"], "targeted")
         self.assertEqual(origin_after, origin_before)
 
     def test_batch_mode_local_deploy_audit_survives_remote_divergence(self) -> None:

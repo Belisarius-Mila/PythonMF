@@ -2685,3 +2685,10 @@ Příští CLI běh opravu načte, nová ostrá záloha v tomto vývojovém krok
 - Kontext: VocabularyAuthoring při přidání call/too/turn jako nových významů správně doplní same-lemma vazby také do tří původních katalogových a exportovaných karet. Úplná shoda všech původních objektů proto není správné očekávání.
 - Řešení: předem určit přesnou mapu staré UID → nové UID; očekávat pouze přidání odpovídajícího related záznamu v katalogu i exportu a ověřit opačný odkaz. Ostatní pole, identity, CSV prefix a starší média dál porovnávat přesně; nezamlčet tyto tři změny jako byte-exact.
 - Ověření: závěrečná dávka MMTX20, ven-0518/0519/0520 proti ven-0155/0204/0107.499 starších karet/katalogových záznamů přesně shodných, u3 pouze určené related;502 identit a2927 médií zachovaných,52 Python včetně56 Node PASS.
+
+
+### 2026-11-15 — Běžná data nesmějí vynutit úplný test projektu
+
+- Kontext: v2 měla Vocabulary doménu pro kód, ale chyběly skutečné sourozenecké VocabularyEN/docs cesty médií, exportů a inventárních testů;70 karet proto spustilo4000 testů. Opakované přebírání navíc četlo znovu celé stejné soubory.
+- Řešení: oddělená obsahová sada a skutečné cesty, běžné ověření bez plného základu i při commitu/checkpointu/p+n; full pouze noční/ruční podle nového Mílova rozhodnutí. Sdílené komponenty smluvně, ne každý konzument. HMAC covered_modules brání úzkému důkazu vynechat jinou změnu. Cache SHA vyžaduje i inode/device/ctime a před/po stat; samotné mtime/velikost nestačí.
+- Ověření: skutečná dávka503 cest/0 nezařazených →99 testů/53,881s PASS;42 cílených regresí PASS. Capture15,098s první /2,142s opakovaný. Konečný cílený důkaz v private completion.json podle validation_focused_20261115.md. Omezení: neočekávanou vazbu může odhalit až noční sada/použití; procento rizika neznáme.

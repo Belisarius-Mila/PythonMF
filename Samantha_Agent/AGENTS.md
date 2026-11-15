@@ -65,10 +65,13 @@ Společné pracovní instrukce PythonMF; cesty níže jsou vůči `Samantha_Agen
 
 - Pro běžnou změnu proveď programem vybranou doménovou bránu včetně statických
   kontrol a závislých testů. Platí i pro opravu kalendáře nebo doménového zápisu;
-  jejich bezpečnostní a recovery testy se nevynechávají. Plná brána je povinná
-  při změně společného workflow, závislostí, checkpointu, push/deploy procesu,
-  sdílené persistence, záloh, transakcí či validačních pravidel a při neznámém
-  dopadu. Nový spustitelný soubor před prvním vydáním vyžaduje plný základ.
+  jejich bezpečnostní a recovery testy se nevynechávají. Stejný postup platí
+  při přípravě lokálního commitu, checkpointu i p+n. Sdílené workflow,
+  persistence, zálohy a validační politika mají vlastní smluvní testy;
+  neznámý dopad rozšíří cílené kontroly, nikoli automaticky celý projekt.
+  Nový soubor, změna pravidel ani prošlá účtenka nevyžadují plný základ.
+  Plná sada je pouze noční CI nebo výslovný ruční pokyn; ani tato změna
+  pravidel se podle Mílova rozhodnutí z15.11.2026 neověřuje celou sadou.
 - Úspěšné ověření nezměněné části neopakuj bez nového důvodu. Opakuj je po
   relevantní změně, při selhání či konkrétní nevyřešené pochybnosti;
   povinné publikační a bezpečnostní brány tím nejsou přeskočeny.
@@ -76,11 +79,12 @@ Společné pracovní instrukce PythonMF; cesty níže jsou vůči `Samantha_Agen
   `app/communication/validation_policy.py` a `memory/technical/validation_policy.md`.
   Lokálně použij registrovaný `validate_project` (`scripts/validation_gate.py`).
   Model nesmí volit rychlejší režim ani pro publikaci použít samotné
-  `--skip-unit-tests`. Neznámé, společné kritické a vlastní změny validačních pravidel
-  vyžadují plnou bránu; její platnou podepsanou účtenku přesně stejných vstupů
-  lze převzít podle programové politiky. Mapu domén rozšiřují skutečné Python
-  závislosti; při nejistotě se výběr rozšíří na plnou sadu, nikdy se neořízne
-  na požadovaný počet. GitHub CI má navíc denní a ručně spustitelnou plnou sadu.
+  `--skip-unit-tests`. Platnou podepsanou účtenku přesně stejných vstupů
+  lze převzít podle programové politiky. Úzký důkaz nesmí přeskočit testy
+  jiné čekající změny; rozhoduje skutečné zaznamenané pokrytí. Mapu domén
+  rozšiřují Python závislosti a smluvní sady, nikdy se neořízne na požadovaný
+  počet. Plnou lokální sadu spouštěj jen na výslovné zadání pomocí
+  `scripts/validation_gate.py --full`; ne jako automatický závěr vývoje.
 - **Terminálový Adam na `main`:** po dokončeném vývojovém kroku vytvoř jeden
   lokální commit z konkrétně zkontrolovaných souborů, pokud Míla neřekl
   `bez commitu`. Read-only audit a diagnostika commit nevytvářejí.

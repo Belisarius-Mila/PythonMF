@@ -1,7 +1,7 @@
 """Server-owned validation selection and authenticated, exact-input receipts.
 
-Unknown changes require the full suite. A targeted release must descend from
-a locally verified baseline under this policy/environment. Receipts live in
+Changed domains and consumer contracts run before release; full regression is
+nightly/manual. No full-suite baseline is required. Receipts live in
 private Git metadata, outside model workspaces and the versioned source tree.
 """
 from __future__ import annotations
@@ -26,11 +26,11 @@ from pathlib import Path
 from typing import Callable, Iterable
 
 from app.communication.git_runtime import GIT_EXECUTABLE
-from app.communication.validation_domains import (BOUNDARY_TESTS, CORE_TESTS,
+from app.communication.validation_domains import (BOUNDARY_TESTS, CONTRACT_SCOPES, CORE_TESTS, FALLBACK_TESTS,
     LOADED_SOURCE_HASH, modules_for_scopes, scopes_for_path)
 from app.file_persistence import FilePersistenceError, atomic_create_bytes, atomic_write_json
 
-POLICY_VERSION = "validation-v2"
+POLICY_VERSION = "validation-v3"
 MAX_RECEIPT_AGE_SECONDS = 24 * 60 * 60
 _LOADED_POLICY_SOURCE = hashlib.sha256(Path(__file__).read_bytes()).hexdigest()
 _DOMAIN_SOURCE = Path(__file__).with_name('validation_domains.py')
@@ -74,7 +74,7 @@ def select_validation_plan(paths: Iterable[str], *, repo: Path | None = None,
     if (_file_hash(Path(__file__)) != _LOADED_POLICY_SOURCE
             or _file_hash(_DOMAIN_SOURCE) != _LOADED_DOMAIN_SOURCE
             or not _registry_is_current()):
-        return ValidationPlan("full", reason="policy_runtime_requires_reload")
+        return contract_plan('policy_runtime_requires_reload')
     modules: set[str] = set(CORE_TESTS)
     domains: set[str] = set()
     names = []
@@ -83,30 +83,47 @@ def select_validation_plan(paths: Iterable[str], *, repo: Path | None = None,
         seen = True
         name = str(raw)
         if name.startswith("/") or ".." in name.split("/") or "\\" in name:
-            return ValidationPlan("full", reason="invalid_change_path")
+            raise ValidationPolicyError('Invalid change path.')
+        if (name.startswith('Samantha_Agent/tests/test_') and name.endswith('.py')
+                and name.removeprefix('Samantha_Agent/')[:-3].replace('/', '.') not in _registry()):
+            raise ValidationPolicyError('Changed test must be added to the canonical test registry.')
         names.append(name)
         selected = _modules_for_path(name)
         if selected is None:
-            return ValidationPlan("full")
+            modules.update(FALLBACK_TESTS)
+            domains.add('unassigned')
+            continue
         modules.update(selected)
         domains.update(_scopes(name))
     if not seen:
-        return ValidationPlan("full", reason="no_new_scope_requires_existing_proof")
+        return contract_plan('no_new_scope_requires_existing_proof')
     if repo is not None:
         try:
-            # New executable code is verified fully before first publication.
-            if base:
-                previous = set(os.fsdecode(p) for p in git(repo, 'ls-tree', '-r', '--name-only', '-z', base).split(b'\0') if p)
-                if any(Path(n).suffix in {'.py', '.js', '.swift'} and n not in previous for n in names):
-                    return ValidationPlan('full', reason='new_code_requires_full_baseline')
+            # New code uses the same domain/consumer checks, never a hidden
+            # full-suite bootstrap. Compile changed Python even outside the
+            # static gate's long-standing source manifest.
+            for name in names:
+                path = repo / name
+                if path.suffix == '.py' and path.is_file():
+                    ast.parse(path.read_text(encoding='utf-8'), filename=name)
             extra, reached = _dependent_tests(repo, names)
             modules.update(extra)
             domains.update(reached)
         except ValidationPolicyError as exc:
-            return ValidationPlan('full', reason=str(exc))
+            modules.update(FALLBACK_TESTS)
+            return ValidationPlan('targeted', tuple(sorted(modules)), str(exc), tuple(sorted(domains)))
         except (OSError, SyntaxError, UnicodeError):
-            return ValidationPlan('full', reason='unverified_dependency')
+            raise ValidationPolicyError('Changed source or dependency graph cannot be parsed.')
     return ValidationPlan("targeted", tuple(sorted(modules)), "reviewed_domains", tuple(sorted(domains)))
+
+
+def contract_plan(reason: str) -> ValidationPlan:
+    return ValidationPlan('targeted', tuple(sorted(FALLBACK_TESTS)), reason)
+
+
+def covers(body: dict, plan: ValidationPlan) -> bool:
+    return body.get('mode') == 'full' or (plan.mode == 'targeted'
+        and set(plan.modules).issubset(body.get('covered_modules', body.get('modules', ()))))
 
 
 def _registry():
@@ -128,6 +145,13 @@ def _modules_for_path(name: str) -> tuple[str, ...] | None:
     if name in _DOC_NAMES or (name.startswith(_DOC_PREFIXES)
                               and Path(name).suffix.lower() in {".md", ".txt", ".json"}):
         return DOC_TESTS
+    relative = name.removeprefix('Samantha_Agent/')
+    if relative.startswith('tests/') and relative.endswith('.py'):
+        module = relative[:-3].replace('/', '.')
+        if module in _registry():
+            # Editing an assertion does not change every production module in
+            # its domain. Actual fixture users expand through reverse imports.
+            return (module,)
     scopes = _scopes(name)
     if scopes:
         return tuple(sorted(modules_for_scopes(scopes, _registry())))
@@ -137,8 +161,8 @@ def _modules_for_path(name: str) -> tuple[str, ...] | None:
 def _dependent_tests(repo: Path, changed: list[str]) -> tuple[set[str], set[str]]:
     """Reverse static imports, with reviewed composition/consumer contracts.
 
-    Unknown consumers, parse errors or dynamic imports in changed code fail
-    closed. Swift/JS/runtime protocol edges belong to the explicit domain map.
+    Unknown/dynamic consumers add contract checks; parse failures are explicit
+    errors. Swift/JS/runtime protocol edges belong to the explicit domain map.
     """
     def module_name(name):
         return name[:-3].replace('/', '.').removesuffix('.__init__')
@@ -146,15 +170,26 @@ def _dependent_tests(repo: Path, changed: list[str]) -> tuple[set[str], set[str]
              if n.startswith(('Samantha_Agent/app/', 'Samantha_Agent/tests/')) and n.endswith('.py')}
     if not seeds:
         return set(), set()
+    selected, scopes = set(), set()
+    # Shared primitives have explicit contract suites. Following every user of
+    # atomic_write_json would recreate the entire project-wide regression.
+    for seed in tuple(seeds):
+        owned = _scopes('Samantha_Agent/' + seed.replace('.', '/') + '.py')
+        if seed.startswith('app.') and owned & CONTRACT_SCOPES:
+            selected.update(modules_for_scopes(owned, _registry()))
+            scopes.update(owned)
+            seeds.remove(seed)
+    if not seeds:
+        return selected, scopes
     project = repo / 'Samantha_Agent'
     paths = [p for folder in ('app', 'tests') for p in (project/folder).rglob('*.py')]
     modules = {module_name(p.relative_to(project).as_posix()): p for p in paths}
     sources = tuple((name, path.name == '__init__.py', path.read_text(encoding='utf-8'))
                     for name, path in sorted(modules.items()))
     reverse, dynamic = _import_graph(sources)
-    if seeds & dynamic:
+    if {n for n in seeds if not n.startswith('tests.')} & dynamic:
         raise ValidationPolicyError('dynamic_dependency_requires_full')
-    selected, scopes, seen = set(), set(), set(seeds)
+    seen = set(seeds)
     pending = list(seeds)
     while pending:
         current = pending.pop()
@@ -167,7 +202,8 @@ def _dependent_tests(repo: Path, changed: list[str]) -> tuple[set[str], set[str]
                 continue
             if consumer.startswith('tests.'):
                 if consumer not in _registry():
-                    raise ValidationPolicyError('unregistered_consumer_test')
+                    selected.update(FALLBACK_TESTS)
+                    continue
                 selected.add(consumer)
                 # Changing a fixture expands all fixture users. Merely running
                 # a test does not change fixtures exported by that test module.
@@ -177,10 +213,14 @@ def _dependent_tests(repo: Path, changed: list[str]) -> tuple[set[str], set[str]
             path = 'Samantha_Agent/' + modules[consumer].relative_to(project).as_posix()
             owned = _scopes(path)
             if not owned:
-                raise ValidationPolicyError('unassigned_dependent:'+consumer)
+                selected.update(FALLBACK_TESTS)
+                scopes.add('unassigned')
+                pending.append(consumer)
+                continue
             scopes.update(owned)
             selected.update(modules_for_scopes(owned, _registry()))
-            pending.append(consumer)
+            if not owned & CONTRACT_SCOPES:
+                pending.append(consumer)
     return selected, scopes
 
 
@@ -249,6 +289,16 @@ def _binary_hash(path: str, signature: tuple[int, ...]) -> str:
     return _file_hash(Path(path))
 
 
+@lru_cache(maxsize=32768)
+def _input_hash(path: str, signature: tuple[int, ...]) -> str:
+    """Reuse bytes only while inode/device/size/mtime/ctime remain unchanged.
+
+    Restoring mtime after a same-size write changes ctime and misses this cache.
+    Symlinks are deliberately not cached by their own metadata.
+    """
+    return _file_hash(Path(path))
+
+
 def environment_fingerprint() -> str:
     from scripts.cockpit_quality_gate import node_binary
     tools = {}
@@ -309,7 +359,7 @@ def capture_inputs(repo: Path, *, environment: str | None = None) -> ValidationI
             rows.append((name, "symlink", os.readlink(path), _file_hash(path)))
         elif stat.S_ISREG(info.st_mode):
             before = (info.st_dev, info.st_ino, info.st_size, info.st_mtime_ns, info.st_ctime_ns)
-            sha = _file_hash(path)
+            sha = _input_hash(str(path), before)
             after = path.stat()
             if before != (after.st_dev, after.st_ino, after.st_size, after.st_mtime_ns, after.st_ctime_ns):
                 raise ValidationPolicyError("Validation input changed while hashing.")
@@ -373,7 +423,6 @@ class ValidationReceiptStore:
             now = self.clock()
             if (body["policy"] != POLICY_VERSION or body["environment"] != environment
                     or not 0 <= now - body["issued_at"] <= MAX_RECEIPT_AGE_SECONDS
-                    or not 0 <= now - body["full_baseline_at"] <= MAX_RECEIPT_AGE_SECONDS
                     or type(body["test_count"]) is not int or body["test_count"] < 1
                     or body["mode"] not in {"full", "targeted"}):
                 return None
@@ -407,7 +456,7 @@ class ValidationReceiptStore:
         for name in candidates:
             body = self._load(name, inputs.environment)
             if (body and body["inputs"] == inputs.digest and
-                    (body["mode"] == "full" or body["recipe"] == plan.recipe
+                    (covers(body, plan)
                      or (allow_bound and inputs.clean and body.get("head") == inputs.head))):
                 return body
         return None
@@ -423,14 +472,18 @@ class ValidationReceiptStore:
                duration_seconds: float, baseline: dict | None = None) -> dict:
         if plan.mode not in {"full", "targeted"} or type(test_count) is not int or test_count < 1:
             raise ValidationPolicyError("Only a successful test-bearing gate can be attested.")
-        if plan.mode == "targeted" and baseline is None:
-            raise ValidationPolicyError("Targeted validation requires a verified baseline.")
+        if plan.mode == 'targeted' and (not plan.modules or not set(plan.modules).issubset(_registry())):
+            raise ValidationPolicyError('Targeted validation requires registered test modules.')
         now = self.clock()
+        coverage = set(_registry() if plan.mode == 'full' else plan.modules)
+        if (baseline and baseline.get('protected_inputs') == inputs.protected_digest
+                and baseline.get('environment') == inputs.environment):
+            coverage.update(baseline.get('covered_modules', baseline.get('modules', ())))
         body = {"policy": POLICY_VERSION, "inputs": inputs.digest, "environment": inputs.environment,
                 "head": inputs.head if inputs.clean else None, "mode": plan.mode, "recipe": plan.recipe,
                 "modules": list(plan.modules), "test_count": test_count, "duration_seconds": duration_seconds,
                 "protected_inputs": inputs.protected_digest, "scope_inputs": list(inputs.scope),
-                "issued_at": now, "full_baseline_at": now if plan.mode == "full" else baseline["full_baseline_at"]}
+                "issued_at": now, "covered_modules": sorted(coverage)}
         name = ("full" if plan.mode == "full" else plan.recipe) + "-" + inputs.digest
         self._write(name, body)
         if inputs.protected_digest:

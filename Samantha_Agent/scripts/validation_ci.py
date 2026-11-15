@@ -16,7 +16,7 @@ import sys
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(PROJECT_ROOT))
 
-from app.communication.validation_policy import ValidationPlan, ValidationPolicyError, git, select_validation_plan
+from app.communication.validation_policy import ValidationPlan, ValidationPolicyError, contract_plan, git, select_validation_plan
 
 
 def event_base(name, event):
@@ -38,7 +38,8 @@ def event_base(name, event):
 def ci_plan(repo, name, event):
     base = event_base(name, event)
     if base is None:
-        return ValidationPlan('full', reason='scheduled_manual_or_unknown_ci_base'), None
+        return (ValidationPlan('full', reason='scheduled_or_manual') if name in {'schedule','workflow_dispatch'}
+                else contract_plan('unknown_ci_base')), None
     try:
         try:
             git(repo, 'cat-file', '-e', base+'^{commit}')
@@ -48,9 +49,9 @@ def ci_plan(repo, name, event):
         # base still defines the entire candidate diff, including force pushes.
         paths = git(repo, 'diff', '--no-renames', '--name-only', '-z', base, 'HEAD', '--')
         names = tuple(os.fsdecode(p) for p in paths.split(b'\0') if p)
-        return select_validation_plan(names, repo=repo, base=base), base
     except (OSError, ValueError, RuntimeError):
-        return ValidationPlan('full', reason='ci_base_or_dependency_unavailable'), None
+        return contract_plan('ci_base_or_dependency_unavailable'), None
+    return select_validation_plan(names, repo=repo, base=base), base
 
 
 def main():

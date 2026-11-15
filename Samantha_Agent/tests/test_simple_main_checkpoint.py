@@ -343,30 +343,30 @@ class SimpleMainCheckpointTests(unittest.TestCase):
         self.assertFalse(result["pushed"])
         self.assertTrue(result["remote_push_deferred"])
         self.assertEqual(result["pending_remote_commit_count"], 1)
-        self.assertEqual(result["gate"]["mode"], "full")
+        self.assertEqual(result["gate"]["mode"], "targeted")
         self.assertEqual(result["gate"]["test_count"], 12)
         self.assertNotEqual(source_head, origin_before)
         self.assertEqual(origin_after, origin_before)
         self.assertEqual(workspace_head, source_head)
-        self.assertIn("plná Cockpit brána: 12 testů", handoff)
+        self.assertIn("cílená Cockpit brána: 12 testů", handoff)
         self.assertIn("čeká na denní balíček", handoff)
 
-    def test_email_archive_http_routes_require_full_gate(self) -> None:
-        self.assertTrue(_requires_full_gate([
+    def test_email_archive_http_routes_use_targeted_contracts(self) -> None:
+        self.assertFalse(_requires_full_gate([
             {"path": "Samantha_Agent/app/cockpit_email_archive_routes.py"},
         ]))
 
-    def test_document_http_routes_require_full_gate(self) -> None:
-        self.assertTrue(_requires_full_gate([
+    def test_document_http_routes_use_targeted_contracts(self) -> None:
+        self.assertFalse(_requires_full_gate([
             {"path": "Samantha_Agent/app/cockpit_document_routes.py"},
         ]))
 
-    def test_shared_git_selection_requires_full_gate(self) -> None:
-        self.assertTrue(_requires_full_gate([
+    def test_shared_git_selection_uses_targeted_contracts(self) -> None:
+        self.assertFalse(_requires_full_gate([
             {"path": "Samantha_Agent/app/communication/git_runtime.py"},
         ]))
 
-    def test_high_risk_batch_checkpoint_keeps_full_gate(self) -> None:
+    def test_shared_batch_checkpoint_keeps_tests_without_full_gate(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
             root = Path(temp_dir)
             source, manager = prepare_environment(root)
@@ -388,7 +388,7 @@ class SimpleMainCheckpointTests(unittest.TestCase):
             origin_head = git(source, "rev-parse", "origin/main")
             local_head = git(source, "rev-parse", "HEAD")
 
-        self.assertEqual(result["gate"]["mode"], "full")
+        self.assertEqual(result["gate"]["mode"], "targeted")
         self.assertEqual(result["gate"]["test_count"], 12)
         self.assertNotEqual(local_head, origin_head)
 
@@ -510,7 +510,7 @@ class SimpleMainCheckpointTests(unittest.TestCase):
         self.assertIn("Automatický checkpoint 2026-07-20 07:00 CEST", handoff)
         self.assertIn("Stav při vytvoření checkpointu:", handoff)
         self.assertIn("## Aktuální stav", handoff)
-        self.assertIn("plná Cockpit brána: 12 testů", handoff)
+        self.assertIn("cílená Cockpit brána: 12 testů", handoff)
         self.assertIn("### 2026-07-20 07:00 CEST", tvbcp)
         self.assertIn("Jednoduchý backend dokončil jeden krok", tvbcp)
         chronological_start = tvbcp.index(

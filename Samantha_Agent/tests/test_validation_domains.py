@@ -37,6 +37,8 @@ class ValidationDomainsTests(unittest.TestCase):
         self.assertTrue(contracts.issubset(TEST_MODULES))
         for name in contracts:
             self.assertTrue((PROJECT_ROOT/(name.replace('.','/')+'.py')).is_file(),name)
+        with self.assertRaises(policy.ValidationPolicyError):
+            select_validation_plan(['Samantha_Agent/tests/test_new_unregistered.py'])
 
     def test_calendar_is_scoped_and_keeps_downstream_write_recovery_tests(self):
         plan=select_validation_plan(['Samantha_Agent/app/calendar_writer.py'])
@@ -46,13 +48,15 @@ class ValidationDomainsTests(unittest.TestCase):
             self.assertIn(name,plan.modules)
         self.assertNotIn('tests.test_camino_film_editor',plan.modules)
 
-    def test_global_and_unknown_changes_keep_the_full_gate(self):
+    def test_shared_and_unknown_changes_use_contracts_without_automatic_full(self):
         for path in ('app/file_persistence.py','app/work_repository.py','app/documents/transactions.py',
                      'app/unknown.py','requirements.txt','config/agent_roles.json','AGENTS.md',
                      'app/calendar_unknown/nested.py', 'unknown/app/calendar_writer.py',
                      'app/communication/validation_domains.py','scripts/cockpit_quality_gate.py'):
             with self.subTest(path=path):
-                self.assertEqual(select_validation_plan(['Samantha_Agent/'+path]).mode,'full')
+                result=select_validation_plan(['Samantha_Agent/'+path])
+                self.assertEqual(result.mode,'targeted')
+                self.assertTrue(result.modules)
 
     def test_reverse_relative_imports_expand_other_domains_and_direct_test_consumers(self):
         self.write('app/calendar_writer.py','VALUE = 1\n')
@@ -64,13 +68,15 @@ class ValidationDomainsTests(unittest.TestCase):
         self.assertIn('tests.test_interior_titles',result.modules)
         self.assertIn('tests.test_agent_reply',result.modules)
 
-    def test_unknown_production_or_unregistered_test_consumer_forces_full(self):
+    def test_unknown_production_or_unregistered_test_consumer_adds_contract_checks(self):
         for path in ('app/unknown_adapter.py','tests/unregistered_consumer.py'):
             with self.subTest(path=path), tempfile.TemporaryDirectory() as temp:
                 previous=self.repo
                 self.repo=Path(temp)
                 self.write(path,'from app.calendar_writer import VALUE\n')
-                self.assertEqual(self.plan('app/calendar_writer.py').mode,'full')
+                result=self.plan('app/calendar_writer.py')
+                self.assertEqual(result.mode,'targeted')
+                self.assertIn('tests.test_cockpit_quality_gate',result.modules)
                 self.repo=previous
 
     def test_running_a_test_does_not_expand_its_unchanged_fixture_users(self):
@@ -87,15 +93,19 @@ class ValidationDomainsTests(unittest.TestCase):
         result=self.plan('app/email/calendar_assessment.py')
         self.assertEqual(result.mode,'targeted')
         self.assertIn('tests.test_agent_reply',result.modules)
-        self.assertEqual(self.plan('app/email/codex_proposer.py').mode,'full')
+        self.assertEqual(self.plan('app/email/codex_proposer.py').mode,'targeted')
 
-    def test_dynamic_import_parse_failure_and_mixed_unknown_scope_fail_closed(self):
-        for text in ("__import__('app.calendar_writer')\n",'def invalid(\n',
+    def test_dynamic_dependencies_expand_contracts_and_invalid_python_stops_without_full(self):
+        for text in ("__import__('app.calendar_writer')\n",
                      "from importlib import import_module as load\nload('app.calendar_tasks')\n",
                      "from builtins import __import__ as load\nload('app.calendar_tasks')\n"):
             self.write('app/calendar_writer.py',text)
-            self.assertEqual(self.plan('app/calendar_writer.py').mode,'full')
-        self.assertEqual(self.plan('app/calendar_writer.py','requirements.txt').mode,'full')
+            result=self.plan('app/calendar_writer.py','requirements.txt')
+            self.assertEqual(result.mode,'targeted')
+            self.assertIn('tests.test_cockpit_quality_gate',result.modules)
+        self.write('app/calendar_writer.py','def invalid(\n')
+        with self.assertRaises(policy.ValidationPolicyError):
+            self.plan('app/calendar_writer.py')
 
     def test_import_cache_tracks_content_even_if_timestamps_are_restored(self):
         import os
@@ -106,11 +116,11 @@ class ValidationDomainsTests(unittest.TestCase):
         os.utime(path,ns=(original.st_atime_ns,original.st_mtime_ns))
         self.assertIn('interior',self.plan('app/calendar_writer.py').domains)
 
-    def test_new_executable_code_requires_full_and_deleted_source_still_expands_consumers(self):
+    def test_new_and_deleted_sources_expand_consumers_without_full_bootstrap(self):
         self.write('app/interior_titles.py','import app.calendar_writer\n')
         with patch.object(policy,'git',return_value=b'Samantha_Agent/app/calendar_tasks.py\0'):
             result=select_validation_plan(['Samantha_Agent/app/calendar_writer.py'],repo=self.repo,base='a'*40)
-        self.assertEqual(result.reason,'new_code_requires_full_baseline')
+        self.assertEqual(result.mode,'targeted')
         # Source is absent, but a surviving import still defines its consumer.
         self.assertIn('interior',self.plan('app/calendar_writer.py').domains)
 
@@ -131,14 +141,14 @@ class ValidationDomainsTests(unittest.TestCase):
         for event in (None,[],{'pull_request':None},{'pull_request':{'base':None}}):
             self.assertIsNone(event_base('pull_request',event))
 
-    def test_ci_unavailable_base_uses_full_and_schedule_never_needs_a_cache(self):
+    def test_ci_full_is_only_scheduled_or_manual_unknown_base_uses_contracts(self):
         with patch('scripts.validation_ci.git',side_effect=policy.ValidationPolicyError('unavailable')) as git:
             plan,base=ci_plan(self.repo,'schedule',{})
             self.assertEqual(plan.mode,'full')
             self.assertIsNone(base)
             git.assert_not_called()
             plan,base=ci_plan(self.repo,'push',{'before':'a'*40})
-            self.assertEqual(plan.mode,'full')
+            self.assertEqual(plan.mode,'targeted')
             self.assertIsNone(base)
 
     def test_ci_uses_complete_event_diff_and_fetches_missing_shallow_base(self):
@@ -147,6 +157,26 @@ class ValidationDomainsTests(unittest.TestCase):
         with patch('scripts.validation_ci.git',side_effect=[policy.ValidationPolicyError('shallow'),b'',diff]) as git:
             result,observed=ci_plan(self.repo,'push',{'before':base})
         self.assertEqual(observed,base)
-        self.assertEqual(result.mode,'full')
+        self.assertEqual(result.mode,'targeted')
+        self.assertIn('tests.test_calendar_writer',result.modules)
         self.assertEqual(git.call_args_list[1].args[1:],('fetch','--no-tags','--depth=1','origin',base))
         self.assertEqual(git.call_args_list[2].args[1:],('diff','--no-renames','--name-only','-z',base,'HEAD','--'))
+
+    def test_vocabulary_content_paths_include_new_media_and_inventory_tests_without_authoring(self):
+        paths=('VocabularyEN/VocabularyEN.csv','VocabularyEN/vocabulary_en_catalog.json',
+               'VocabularyEN/Pict/new.png','docs/assets/vocabulary-en/new.webp',
+               'docs/assets/vocabulary-en-thumbs/new.webp',
+               'docs/assets/vocabulary-en-audio/en-us-aria-neural/new.mp3',
+               'docs/assets/vocabulary-en-sentences/cs-cz-vlasta-neural/new.mp3',
+               'docs/data/vocabulary-en.json','docs/data/vocabulary-en-audio.json',
+               'Samantha_Agent/tests/test_vocabularyen_selection.js',
+               'Samantha_Agent/tests/test_vocabularyen_audio_library.py',
+               'Samantha_Agent/tests/test_vocabularyen_gallery.py')
+        result=select_validation_plan(paths)
+        self.assertEqual(result.domains,('vocabulary_content',))
+        self.assertIn('tests.test_vocabularyen_audio_library',result.modules)
+        self.assertIn('tests.test_vocabularyen_gallery',result.modules)
+        self.assertNotIn('tests.test_vocabulary_authoring',result.modules)
+        self.assertNotIn('tests.test_calendar_writer',result.modules)
+        code=select_validation_plan([*paths,'Samantha_Agent/app/vocabulary_authoring.py'])
+        self.assertIn('tests.test_vocabulary_authoring',code.modules)

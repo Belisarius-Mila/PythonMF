@@ -16,6 +16,7 @@ from app.communication.human_adam_workspace import HumanAdamWorkspaceManager
 from app.communication.validation_policy import (
     POLICY_VERSION, ValidationPlan, ValidationPolicyError, ValidationReceiptStore,
     capture_inputs, changed_paths, select_validation_plan,
+    contract_plan, covers,
 )
 
 
@@ -79,6 +80,7 @@ def run_checkpoint_quality_gate(
     timeout: float = DEFAULT_GATE_TIMEOUT_SECONDS,
     skip_unit_tests: bool = False,
     validation_base: str | None = None,
+    full_suite: bool = False,
 ) -> GateEvidence:
     gate_script = workspace.project_root / "scripts" / "cockpit_quality_gate.py"
     if not TRUSTED_PYTHON.is_file() or not gate_script.is_file():
@@ -88,21 +90,24 @@ def run_checkpoint_quality_gate(
         )
     started = time.monotonic()
     repo = workspace.workspace_root
-    plan = ValidationPlan("full")
+    plan = contract_plan('default_contracts')
     before = store = baseline = None
     try:
         base, paths = changed_paths(repo, validation_base)
         plan = select_validation_plan(paths, repo=repo, base=base)
         if plan.reason == "policy_runtime_requires_reload":
-            raise ValidationPolicyError("Validation runtime requires reload.")
+            raise HumanAdamGateError("Validační runtime potřebuje načíst novou verzi.", failure_type="gate_failure")
+        if full_suite:
+            plan = ValidationPlan('full', reason='explicit_full_request')
         before = capture_inputs(repo)
         store = ValidationReceiptStore(workspace.source_repo)
         # A caller's old skip flag never grants a static-only publication.
         # After push there is no new diff; an attested receipt for this exact
         # clean commit can also satisfy deployment/already-aligned validation.
-        cached = store.find(before, plan, allow_bound=not paths)
+        cached = None if full_suite else store.find(before, plan, allow_bound=not paths)
         compatible = store.compatible_baseline(before)
-        if cached is None and compatible and compatible["inputs"] == before.digest:
+        if (not full_suite and cached is None and compatible and compatible["inputs"] == before.digest
+                and (covers(compatible, plan) or not paths and before.clean and compatible.get('head') == before.head)):
             cached = compatible
         if cached:
             if capture_inputs(repo) != before:
@@ -110,26 +115,17 @@ def run_checkpoint_quality_gate(
             store.bind(before, cached)
             return GateEvidence(True, 0, cached["test_count"], round(time.monotonic() - started, 1),
                                 "", cached["mode"], True, cached["inputs"], POLICY_VERSION)
-        baseline = store.baseline(base, before.environment)
-        if compatible:
+        if compatible and not full_suite:
             previous_scope, current_scope = dict(compatible["scope_inputs"]), dict(before.scope)
             scope_changes = [name for name in previous_scope.keys() | current_scope.keys()
                              if previous_scope.get(name) != current_scope.get(name)]
             compatible_plan = select_validation_plan(scope_changes, repo=repo)
-            new_code = any(name not in previous_scope and Path(name).suffix in {'.py', '.js', '.swift'}
-                           for name in scope_changes)
-            if compatible_plan.mode == "targeted" and not new_code:
+            coverage = set(compatible.get('covered_modules', compatible.get('modules', ()))) | set(compatible_plan.modules)
+            if compatible_plan.mode == "targeted" and set(plan.modules).issubset(coverage):
                 plan, baseline = compatible_plan, compatible
-        if plan.mode == "targeted" and baseline is None:
-            plan = ValidationPlan("full", reason="verified_baseline_required")
-        if plan.mode == "targeted" and any(
-            not (repo / "Samantha_Agent" / (name.replace(".", "/") + ".py")).is_file()
-            for name in plan.modules
-        ):
-            plan = ValidationPlan("full", reason="targeted_test_module_unavailable")
-    except (ValidationPolicyError, FilePersistenceError, OSError, ValueError, TypeError):
-        # Unsupported Git/input/environment layouts cannot obtain a fast path.
-        plan, before, store, baseline = ValidationPlan("full"), None, None, None
+    except (ValidationPolicyError, FilePersistenceError, OSError, ValueError, TypeError) as exc:
+        raise HumanAdamGateError("Validační vstupy nelze ověřit; místo skryté plné sady oprav příčinu.",
+                                failure_type="gate_failure") from exc
     try:
         command = [str(TRUSTED_PYTHON), str(gate_script)]
         if plan.mode == "targeted":

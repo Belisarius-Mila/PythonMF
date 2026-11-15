@@ -1,11 +1,11 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
-15.11.: Schválená místní doménová validace v2: kalendář282 testů/56,874s celý
-běh. Mapa12 domén + reverzní závislosti, při nejistotě/global změně plná sada.
-Podepsaný plný místní základ24h zůstává; denní plná CI až po budoucím pushi.
-94 cílených a112 Git/release PASS; závěrečný plný důkaz a otisky jen v private
-validation_domains_20261115/completion.json. Uzavření pouze po skutečném PASS.
-Další krok samostatně potvrzené p+n. V1 už vydaná38a33532; nová v2 i kalendář
-f2b56fa3 pouze místně. Data/zálohy zachované, bez nového deploy/helper/calendar zápisu.
+15.11.: Místní v3 ruší automatické plné brány při přípravě commitu, checkpointu
+i p+n. Doménové/smluvní sady bez plného základu; full jen noční/ruční.
+Datova dávka503 cest →99 testů/53,881s,42 regresí PASS; finální cílený důkaz
+v private validation_focused_20261115/completion.json. Menší okamžité pokrytí
+mezimodulových vazeb je vědomý kompromis. Poslední vydané95037bfe má oba
+cíle potvrzené; v3 zatím bez p+n/restartu. Další krok samostatně povolené
+p+n v3 s načtením nového validatoru. Data/zálohy/kalendářové unknown zachované.
 <!-- SAMANTHA_CURRENT_STATUS_END -->
 
 ### Předchozí stav infrastruktury
@@ -2172,3 +2172,30 @@ konflikty pouze v paměťových indexech řešené zachováním obou stran.
 Výsledek, job ID, časy bran, GitHub SHA a živé ověření budou pouze v
 privátní složce data/private/all_pending_release_20261115/. Tento zápis
 sám nepotvrzuje push/deploy. Kalendářový unknown se automaticky neopakuje.
+
+
+## 2026-11-15 16:20 CET — Plná sada mimo běžný commit a p+n
+
+Hotovo: Datova dávka nově99 testů/53,881s místo4000 testů. Lokální commit,
+checkpoint a vydání mají společnou cílenou politiku bez plného základu.
+Změny společných komponent mají vlastní smluvní sady. Opakované otisky
+používají inode/ctime cache; změna stejné velikosti/mtime nezůstane skrytá.
+
+Rozhodnutí: Míla výslovně pověřil Adama opravou a odmítl povinnou plnou
+bránu velkého projektu; výslovně ověřil i přípravu commitu. Adam zvolil
+full pouze noční/ruční. Předchozí pravidlo povinného full pro infrastrukturu,
+nové soubory a změny politiky je nahrazené i pro tento vývojový krok.
+Přijímáme menší okamžité pokrytí nečekaných mezimodulových vazeb; mohou
+se projevit až v noční sadě nebo v použití. Nejde o nulové ani vyčíslené riziko.
+
+Další krok: Samostatně potvrzené p+n v3 a registrované načtení nové validace.
+Navrhované další kroky: Převzít skutečný čas příští obsahové publikace;
+pozorovat noční regresi. Přesuny médií/historie nejsou součástí této změny.
+
+Technický důkaz:42 cílených regresí PASS; reálná Datova dávka503 cest,
+9 modulů/99 testů PASS,37,190s unit/53,881s celkem. Capture15,098s první,
+2,142s opakovaný. Konečný cílený registrovaný běh/manifest/commit je pouze
+v private validation_focused_20261115/completion.json; bez PASS se neuzavírá.
+Žádný nový ostrý p+n/restart, role, kalendářový/poštovní zápis či nový TVBCP.
+Předchozí skutečné v2 vydání95037bfe obou cílů je doložené v
+private all_pending_release_20261115/completion.json, nikoli novým živým auditem.

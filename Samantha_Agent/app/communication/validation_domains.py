@@ -12,9 +12,27 @@ CORE_TESTS = ("tests.test_cockpit_http_security", "tests.test_cockpit_server",
               "tests.test_file_persistence", "tests.test_capability_runtime_policy",
               "tests.test_cockpit_frontend")
 
-# File patterns define reviewed areas. New code paths still require a full
-# baseline on their first release; unknown consumers also force a full gate.
+# Full regression is a separate nightly/manual operation. Runtime selection
+# expands domain/consumer contracts; it never selects the whole registry.
 SOURCES = {
+    "validation": ("app/communication/validation_*.py", "app/communication/checkpoint_quality_gate.py",
+                   "scripts/*quality_gate*.py", "scripts/validation_*.py", "AGENTS.md",
+                   "scripts/cockpit_fast_feedback.py", "memory/technical/validation_policy.md", ".github/workflows/*"),
+    "release": ("app/communication/github_batch.py", "app/communication/luna_release*.py",
+                "app/communication/simple_main_*.py", "app/communication/human_adam_workspace.py",
+                "app/communication/main_remote_sync.py", "app/communication/agent_roles.py",
+                "app/communication/git_runtime.py",
+                "config/agent_roles.json"),
+    "persistence": ("app/file_persistence.py", "app/work_repository.py", "app/document_tools.py",
+                    "app/documents/transactions.py"),
+    "backup": ("app/backup/*.py", "scripts/backup*.py"),
+    "vocabulary_content": ("VocabularyEN/VocabularyEN.csv", "VocabularyEN/vocabulary_en_catalog.json",
+                           "VocabularyEN/Pict/*.png", "VocabularyEN/Pict/*.webp", "VocabularyEN/Pict/*.jpg",
+                           "docs/assets/vocabulary-en/*.png", "docs/assets/vocabulary-en/*.webp",
+                           "docs/assets/vocabulary-en/*.jpg", "docs/assets/vocabulary-en-thumbs/*.webp",
+                           "docs/assets/vocabulary-en-audio/*/*.mp3", "docs/assets/vocabulary-en-sentences/*/*.mp3",
+                           "docs/data/vocabulary-en*.json", "tests/test_vocabularyen_selection.js",
+                           "tests/test_vocabularyen_learners.js"),
     "calendar": ("app/calendar_*.py", "app/cockpit_calendar*.py", "app/cockpit_email_calendar.py",
                  "app/email/calendar_*.py", "scripts/calendar_*.py", "scripts/calendar_*.swift",
                  "app/frontend/calendar_overview/*", "app/frontend/calendar_task/*",
@@ -33,16 +51,26 @@ SOURCES = {
                  "tests/interior_*.test.cjs"),
     "science": ("app/science_news*.py", "app/cockpit_science_news.py", "scripts/science_news*.py",
                 "tests/science_news*.test.cjs"),
-    "vocabulary": ("app/vocabulary*.py", "tests/vocabulary*.test.cjs", "docs/vocabulary-en/*"),
+    "vocabulary": ("app/vocabulary*.py", "VocabularyEN/*.py", "tests/vocabulary*.test.cjs", "docs/vocabulary-en/*"),
     "camino_film": ("app/camino_film*.py", "app/camino_mac_film*.py", "scripts/camino_film*.py",
                     "scripts/camino_mac_film*.py", "tests/camino_film*.test.cjs"),
-    "documents": ("app/documents/*.py", "app/email/archive_browser.py"),
+    "documents": ("app/documents/*.py", "app/email/archive_browser.py", "app/cockpit_document*.py",
+                  "app/cockpit_email_archive_routes.py"),
     "human_adam_ui": ("app/communication/human_adam_ui.py", "tests/human_adam*frontend.test.cjs",
                       "tests/human_adam_send_frontend.test.cjs", "tests/luna_release_frontend.test.cjs"),
     "mmtx": ("app/mmtx*.py", "tests/mmtx*.test.cjs", "docs/mmtx/*"),
 }
 
 TEST_PREFIXES = {
+    "validation": ("tests.test_validation_", "tests.test_cockpit_quality_gate", "tests.test_cockpit_fast_feedback", "tests.test_github_batch",
+                   "tests.test_luna_release_submission", "tests.test_simple_main_deploy",
+                   "tests.test_simple_main_checkpoint"),
+    "release": ("tests.test_github_batch", "tests.test_luna_release", "tests.test_simple_main_",
+                "tests.test_human_adam_workspace", "tests.test_main_remote_sync", "tests.test_agent_roles"),
+    "persistence": ("tests.test_file_persistence", "tests.test_work_repository", "tests.test_document_persistence",
+                    "tests.test_document_transactions", "tests.test_email_work_repository"),
+    "backup": ("tests.test_backup_",),
+    "vocabulary_content": ("tests.test_vocabularyen_gallery", "tests.test_vocabularyen_audio_library"),
     "calendar": ("tests.test_calendar_", "tests.test_cockpit_calendar", "tests.test_email_calendar_",
                  "tests.test_cockpit_email_calendar"),
     "library": ("tests.test_book_", "tests.test_cockpit_book_", "tests.test_library_", "tests.test_article_archive"),
@@ -54,7 +82,7 @@ TEST_PREFIXES = {
                     "tests.test_hourly_email_agent", "tests.test_email_calendar_assessment"),
     "interior": ("tests.test_interior_", "tests.test_cockpit_interior"),
     "science": ("tests.test_science_news",),
-    "vocabulary": ("tests.test_vocabulary",),
+    "vocabulary": ("tests.test_vocabulary_authoring",),
     "camino_film": ("tests.test_camino_film", "tests.test_camino_mac_film"),
     "documents": ("tests.test_document_", "tests.test_email_archive_browser"),
     "human_adam_ui": ("tests.test_human_adam_ui", "tests.test_workstream_live_status"),
@@ -72,13 +100,15 @@ BOUNDARY_TESTS = {
     "app.interior_ai_activation": ("tests.test_interior_ai_activation",),
 }
 
-ALWAYS_FULL = ("app/file_persistence.py", "app/work_repository.py", "app/documents/transactions.py",
-               "app/document_tools.py", "app/communication/validation_*.py",
-               "app/communication/checkpoint_quality_gate.py", "scripts/*quality_gate*.py",
-               "scripts/validation_*.py", "tests/test_validation_*.py", "tests/test_cockpit_quality_gate.py")
+# Shared primitives are checked through their contract suites instead of every
+# transitive consumer. Nightly regression checks the remaining combinations.
+CONTRACT_SCOPES = frozenset({'validation', 'release', 'persistence', 'backup'})
+FALLBACK_TESTS = (*CORE_TESTS, 'tests.test_capability_registry', 'tests.test_cockpit_quality_gate')
 
 
 def modules_for_scopes(scopes, registry):
+    if 'vocabulary' in scopes:
+        scopes = set(scopes) | {'vocabulary_content'}
     return {name for scope in scopes for name in registry if name.startswith(TEST_PREFIXES[scope])}
 
 
@@ -90,8 +120,6 @@ def _matches(path: str, pattern: str) -> bool:
 
 @lru_cache(maxsize=16384)
 def source_scopes(path: str) -> frozenset[str]:
-    if any(_matches(path, pattern) for pattern in ALWAYS_FULL):
-        return frozenset()
     return frozenset(name for name, patterns in SOURCES.items()
                      if any(_matches(path, pattern) for pattern in patterns))
 
@@ -99,7 +127,7 @@ def source_scopes(path: str) -> frozenset[str]:
 def scopes_for_path(path: str, registry) -> frozenset[str]:
     if path.startswith("tests/") and path.endswith(".py"):
         module = path[:-3].replace("/", ".")
-        if module not in registry or any(_matches(path, p) for p in ALWAYS_FULL):
+        if module not in registry:
             return frozenset()
         return frozenset(scope for scope, prefixes in TEST_PREFIXES.items() if module.startswith(prefixes))
     return source_scopes(path)

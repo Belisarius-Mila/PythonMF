@@ -18,13 +18,15 @@ from app.communication.validation_policy import ValidationReceiptStore, git
 def main(argv=None):
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--base", help="Compare the complete candidate to this Git revision (default origin/main).")
+    parser.add_argument('--full', action='store_true', help='Explicitly run the complete regression, bypassing cache.')
     args = parser.parse_args(argv)
     repo = Path(git(PROJECT_ROOT, "rev-parse", "--show-toplevel").decode().strip())
     workspace = HumanAdamWorkspaceManager(source_repo=repo, workspace_root=repo)
     store = ValidationReceiptStore(repo)
     log_path = store.root.parent / "samantha-validation-gate.log"
     print("Ověřuji programovou politiku a přesné vstupy; výsledek se zapíše do soukromé účtenky.", flush=True)
-    evidence = run_checkpoint_quality_gate(workspace=workspace, log_path=log_path, validation_base=args.base)
+    evidence = run_checkpoint_quality_gate(workspace=workspace, log_path=log_path, validation_base=args.base,
+                                          full_suite=args.full)
     print(json.dumps(evidence.public_dict(), ensure_ascii=False), flush=True)
     return 0
 
