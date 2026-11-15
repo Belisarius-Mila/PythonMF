@@ -4,47 +4,49 @@ Nazev: Vocabulary EN
 Pracovni proud: project-vocabulary-en
 Typ: Project
 Priorita: 2
-Stav: nasazeno, ceka na fyzickou prejimku
+Stav: mistne hotove ctyri davky, vsech70 navrhu MMTX; ceka na samostatne Pages p+n
 Pripomenout pri startu: ne
-Datum: 2026-11-15 10:07 CET
+Datum: 2026-11-15 13:18 CET
 
 Co se resilo:
-Nejprve schválené pravidlo jednotlivého/dávkového autorství, potom jeho
-implementace a doplnění10 částí těla včetně obrázků, vět a zvuků.
+Zbývajících15 nových hesel,3 další významy a2 doplňky včetně jeleního samce.
 
 Co je hotove:
--Interní registrovaný náhled, příprava, zařazení a stav jedné autorské dávky.
--Jedna položka/seznam/CSV, stabilní UID, staged média, obnova a kontrola souběhu.
--Ven-0443 ažven-0452;452 záznamů,442 aktivních:423 Slovíček a19 Interakcí.
--9 nových ilustrací, převzatá ruka,40 nových MP3;442 starých karet přesně stejné.
--2568 původních médií shodných,18 témat a všechny dosavadní identity zachované.
--90 cílených Python včetně56 Node PASS; plná brána3936 PASS /1017,426s unit část,31 SKIP;82/82 finálních zdrojů shodných.
--Pages vydání2779af14 potvrzené:3938 PASS,71/71 veřejných souborů shodných.
+- Místní dávky10+20+20+20, UID ven-0453–0522. Celkem522 záznamů,
+  512 aktivních:492 Slovíček a20 Interakcí,18 témat.
+- Poslední20 má EN/CZ příklady,20 obrazů/náhledů a80 audio referencí:
+  77 novýchMP3 a3 shodné stávající EN nahrávky call/too/turn.
+-16 nových ilustrací a4 převzaté. Stag=jelení samec, fishing hut=rybářská chatrč.
+-52 Python včetně56 Node a statická brána PASS.502 původních identit,
+  2927 médií a CSV prefix zachované.499 starších karet/katalogových záznamů shodných,
+  u call/too/turn pouze3 odkazy related na nové významy;120 HTTP shodných,
+  145 zdrojů zmrazených po ověření.
+- Všechny70 návrhů je obsahově hotových; tři další významy mají vlastní UID.
+  Žádná z těchto čtyř místních dávek dosud nebyla publikovaná.
 
 Co neni hotove:
-Fyzická přejímka částí těla a osobních výběrů na telefonu.
+Samostatné p+n všech70 nových karet, fyzická přejímka telefonu a poslech.
+Poslední vlastní potvrzené Pages vydání2779af14 obsahovalo452/442;
+nejde o nový živý audit produkce. Nové p+n nezadané.
 
 Dalsi krok:
-Přejímka částí těla a osobních výběrů A–D na telefonu.
+Samostatně autorizované Pages p+n s čerstvým auditem celého čekajícího balíčku.
 
 Navrhovane dalsi kroky:
-Samostatné Pages p+n a přejímka těla/profilů; další tematické dávky, případně
-pozdější interní formulář a idiomy. Oxford čeká na Mílův dotaz.
+Telefonní přejímka nových70 karet, vět a A–D; samostatně čekání na Oxford.
+Původní zásobník65+3+2 vyčerpaný, nové náměty nyní nezadané.
 
 Zmenene nebo relevantni soubory:
-vocabulary_en_authoring_rules.md; vocabulary_authoring.py; capability registry;
-quality gate; test_vocabulary_authoring.py;3 galerie/audio testy; CSV/katalog;
-3 webové manifesty;10 zdrojových obrazů,10 webových kopií,10 náhledů a40MP3;
-GALLERY_AUTHORING.txt; reports/vocabulary_en_authoring_body_20261115.md.
+CSV/katalog;3 webové manifesty;20 zdrojových obrazů,20 webových kopií,
+20 náhledů/77MP3;3 inventární testy; reports/vocabulary_en_lake_batch4_20261115.md.
 
 Bezpecnost / neukladat:
-Pravidlo zapsané před vývojem. Vlastní větev data/vocabulary-authoring-20261115
-nad7d8c04e4. Souběžný main a knihovna se nemění. Osobní PINy/výběry nejsou
-v Gitu ani v backendu; do A–D se nové karty vybírají výslovně. Žádný výmaz
-původních médií, automatický retry nejistého audia nebo nové p+n.
-Samostatný TVBCP není sjednaný. Dávka body-parts-20261115-v1 applied;
-soukromá účtenka a výsledek v data/private/vocabulary_authoring_body_20261115/.
-Fyzická přejímka telefonu zůstává následná.
+Větev data/vocabulary-lake-batch1-20261115 navazuje na6615b75d nad d141d030;
+společný main a Willovy změny zůstávají stranou. Všechny4 dávky applied.
+Poslední request lake-vocabulary-batch4-20261115-v1; žádné opakování generování/přípravy.
+Privátní důkazy v data/private/vocabulary_lake_batch4_20261115/ a autorském store.
+Původní UID/A–D/Benji zachované; nové karty osobně nepřiřazené.
+Samostatný Vocabulary EN TVBCP nebyl dohodnutý.
 
 ## Historie
 
@@ -922,3 +924,151 @@ důvodem retry. Dávku ani publikaci neopakovat. Soukromá autorita:
 vocabulary_authoring_release_20261115/release_receipt.json a public_verification.json.
 Závěrečný dokumentační checkpoint zůstává místně pro další běžný balíček;
 produkční soubory nemění a nový deployment nevyžaduje. Bez nového TVBCP.
+
+
+## 2026-11-15 11:21 CET — První schválená desítka z Cesty k jezeru
+
+Hotovo: Místně zařazených deset karet sky, frog, beaver, woodpecker, net,
+hut, shore, fire, sick a healthy. Každá má český význam, vlastní EN/CZ
+příklad, explicitní obrázek, náhled a čtyři zvukové reference. Net je
+rybářský podběrák; sick/healthy procvičují nemocný/zdravý strom.
+Celkem462 záznamů/452 aktivních:433 Slovíček a19 Interakcí,18 témat.
+Rozhodnutí: Míla schválil „doplň první desítku dle našich pravidel“
+z TXT návrhu MMTX. Zadaný rozsah je místní doplnění, nové p+n nezadané.
+Další krok: Samostatně autorizované Terra Pages p+n; potom přejímka telefonu.
+Navrhované další kroky: Po výběru další dávka ze zbývajícího návrhu MMTX;
+nové významy call/too/turn jsou pouze návrh, nikoli součást této desítky.
+Technický důkaz:52 cílených Python testů PASS/42,729s včetně51 výběrových
+a5 learner Node scénářů; rychlá statická brána PASS. Všech452 původních
+položek i katalogových identit přesně shodných,2628 původních médií
+bajtově zachovaných, původní CSV prefix/CRLF zachovaný.40/40 nových MP3
+dekódovaných ffmpeg,10 náhledů WebP384×384;63/63 lokálních HTTP odpovědí
+byte/SHA exact.78 finálních zdrojů/dat/testů/médií zmrazených po ověření.
+Změnil se pouze obsah a očekávané počty v existujících testech; aplikační
+a autorský kód beze změny. Plná publikační brána patří do následného p+n.
+Autorský request lake-vocabulary-first10-20261115-v1 je applied;
+ven-0453 ažven-0462,9 nových ilustrací vestavěným imagegen + převzaté sky.
+Dávku ani dokončená média znovu negenerovat. Aria/Vlasta a−10% zachované,
+osobní A–D/Benji nové karty automaticky nepřebírají. Fyzický telefon
+a aktuální browser přejímka nejsou doložené. Vlastní větev
+data/vocabulary-lake-batch1-20261115 nad d141d030; souběžný main s opravou
+zálohy zůstává stranou. Doklady: data/private/vocabulary_lake_batch1_20261115/
+a authoring job v data/private/vocabulary_authoring/. Bez nového TVBCP.
+
+
+## 2026-11-15 11:43 CET — Další schválená dvacítka z návrhu MMTX
+
+Hotovo: Místně zařazeno dalších20 karet podle pořadí zbývajícího TXT:
+dinner, meeting, morning, splash, race, people, idea, team, plan, place,
+side, work, shout, practise, sleep, bring, ask, think, check a leave.
+Každá má EN/CZ příklad, explicitní ilustraci, náhled a čtyři zvukové
+reference. Celkem482 záznamů/472 aktivních,453 Slovíček a19 Interakcí.
+Rozhodnutí: Míla zadal „dávku dalších navržených20 slovíček najednou“.
+Zvolený přesný seznam byl oznámen před přípravou. Ask je požádat, leave
+je nechat/ponechat; jiné významy se nepřimíchávají. Nové p+n nezadané.
+Další krok: Samostatně schválené Terra Pages p+n obou místních dávek (10+20).
+Navrhované další kroky: Přejímka telefonu; výběr z35 zbývajících nových
+hesel původního návrhu,3 doplňujících významů a2 volitelných rozšíření.
+Technický důkaz:52 Python testů PASS/27,378s včetně51 selection +5 learners
+Node scénářů, statická brána PASS. Všech462 starších položek/katalogových
+identit přesně stejných,2688 původních médií bajtově shodných, CSV prefix
+a CRLF zachované.80 nových MP3 dekódovaných,20 náhledů WebP zkontrolovaných,
+123/123 místních HTTP odpovědí přesně shodných.148 zdrojů/dat/testů/médií
+zmrazených po ověření. Nemění se aplikační ani autorský kód; v existujících
+testech se mění jen inventární čísla. Plná publikační brána patří do p+n.
+UIDven-0463 ažven-0482; dávka lake-vocabulary-next20-20261115-v1 je applied,
+digest5ea1a773d7d59ea7aed3afe9efa189359b635d6143d637644c486d92d70faef5.
+Obrázky:13 nově vytvořených vestavěným imagegen,1 úprava závodu bez nápisů,
+6 převzatých; žádné původní obrazy se nepřepisují. Aria/Vlasta,−10%,18 témat,
+původní UID a osobní výběry zachované. Nové karty nepřebírají A–D/Benji.
+Vlastní větev data/vocabulary-lake-batch1-20261115 obsahuje první desítku
+a tuto dvacítku; main s Willovou opravou zálohy zůstává stranou.
+Doklady: data/private/vocabulary_lake_batch2_20261115/. Dokončené dávky
+a média znovu negenerovat. Telefon/browser zatím nepřevzaté. Bez nového TVBCP.
+
+
+## 2026-11-15 13:02 CET — Třetí schválená dvacítka z návrhu MMTX
+
+Hotovo: Místně přidáno dalších20 karet: lead, show, start, find, take, tell, dry, wrong, hard, soon, tonight, just, even, then, before, beside, by, other, every, anyone.
+Každá má vlastní význam, EN/CZ větu, pevný obrázek, náhled a čtyři zvukové
+reference. Celkem502 záznamů/492 aktivních,473 Slovíček a19 Interakcí,18 témat.
+Rozhodnutí: Míla zadal „OK, pokračuj další 20kou...“. Použito dalších20 nových
+hesel podle pořadí původního TXT. Hard znamená náročný, by prostorové u,
+before časové před a just jen/pouze. Dosavadní autorská pravidla platí.
+Nové p+n nezadané; společný main a Willovy změny se tímto krokem nemění.
+Další krok: Samostatně schválené Pages p+n všech tří místních dávek10+20+20.
+Navrhované další kroky: Telefonní přejímka nových50 karet a A–D; zbývajících15
+nových hesel původního návrhu, případně jeho3 nové významy a2 volitelné položky.
+Technický důkaz:52 Python testů PASS/30.241s včetně51 selection +5 learners
+Node scénářů, statická brána PASS.482 starších položek/katalogových identit
+přesně zachovaných,2808 starších médií a CSV prefix/CRLF shodné.79 nových
+MP3 dekódovaných a80 referencí ověřených; české just sdílí již hotové audio
+jen; pouze.20 náhledů WebP ověřených,122/122 místních HTTP odpovědí shodných,
+147 zdrojů/dat/testů/médií zmrazených po ověření. Aplikační i autorský kód
+beze změny; mění se obsah a očekávané inventární počty ve3 existujících testech.
+Plná publikační brána zůstává povinná při samostatném p+n.
+UID ven-0483 až ven-0502, request lake-vocabulary-batch3-20261115-v1 je applied,
+digest 5611fdcee137af73b3c3c7d1a543c01b8715824413c6a7b82015a9e6afa5f005. Dokončené dávky a média znovu negenerovat.
+Obrázky:13 nových vestavěným imagegen,1 úprava every bez prozrazujícího textu,
+6 převzatých. Aria/Vlasta,−10%, osobní A–D/Benji a18 témat zachované.
+Doklady: data/private/vocabulary_lake_batch3_20261115/. Vlastní větev navazuje
+na8728c196 (předchozí dávka), základ d141d030. Produkce ani fyzická přejímka
+se tímto zápisem nepotvrzují. Samostatný Vocabulary EN TVBCP nebyl dohodnutý.
+
+
+## 2026-11-15 13:18 CET — Dokončení posledních dvaceti návrhů MMTX
+
+Hotovo: Místně doplněno dalších 20 karet: everyone, they, them, our, those, must, may, look like, look for, find out, cut down, take away, no one, one step at a time, See you there., call, too, turn, stag, fishing hut.
+Posledních 15 nových hesel původního seznamu, tři nové významy call/too/turn
+a dva výslovně vybrané doplňky stag a fishing hut mají EN/CZ příklad,
+pevnou ilustraci, náhled a čtyři audio reference. Nyní 522 záznamů,
+512 aktivních: 492 Slovíček a 20 Interakcí, stále 18 témat.
+Rozhodnutí: Míla výslovně zadal poslední dvacítku včetně všech tří významů
+a dvou doplňků s jelenem. Call=svolat/přivolat, too=příliš, turn=řada ve hře
+mají vlastní UID; původní významy se nemění. Stag=jelení samec doplňuje deer.
+See you there. patří do Interakcí. Nové p+n nebylo zadáno.
+Další krok: Samostatně schválené Pages p+n čtyř místních dávek (10+20+20+20).
+Navrhované další kroky: Telefonní přejímka nových 70 karet, vět a profilů A–D;
+Oxford zůstává samostatně otevřený. Původní návrh 65+3+2 je obsahově dokončený.
+Technický důkaz: 52 Python testů PASS/32.175s včetně 51 selection a 5 learners
+Node scénářů; statická brána PASS. Všech 502 původních identit zachovaných, 499 karet i katalogových záznamů
+přesně shodných. U call/too/turn přibyly pouze tři vzájemné vazby related
+na nové významy v katalogu i exportu; ostatní pole shodná.2927 médií
+bajtově zachovaných, CSV prefix i CRLF beze změny.
+77 nových MP3 dekódovaných, 80 nových referencí ověřených. Tři anglická
+hesla sdílejí stávající audio přesného textu/hlasu/tempa. 20 náhledů WebP
+zkontrolovaných, 120/120 místních HTTP souborů má shodné bajty/SHA;
+145 zdrojů/dat/testů/médií zmrazených po ověření. Aria/Vlasta,−10%.
+16 ilustrací vytvořeno vestavěným imagegen, 4 převzaté včetně jeleního samce.
+Nové karty nejsou přiřazené do A–D/Benji; stávající identity a výběry zachované.
+Autorský i aplikační kód beze změny; ve třech existujících testech pouze
+nové inventární počty včetně další Interakce a jelena v tématu Zvířata.
+Plná publikační brána zůstává povinná při samostatném p+n.
+UID ven-0503 až ven-0522, request lake-vocabulary-batch4-20261115-v1 je applied,
+digest f404ac10b079ea2631c592949c684447bd295f58ee9bc2d197ae8e53f9968353. Hotové dávky a média znovu negenerovat.
+Vlastní větev navazuje na6615b75d nad d141d030; společný main ani Willovy
+změny se tímto krokem nemění. Privátní důkazy: vocabulary_lake_batch4_20261115.
+Publikace, poslech člověkem ani fyzická přejímka nejsou tímto potvrzené.
+Samostatný Vocabulary EN TVBCP nebyl dohodnutý; handoff/projekt/registry zapsané.
+
+
+## 2026-11-15 15:23 CET — Schválené společné p+n včetně všech Datových dávek
+
+Hotovo: Čtyři hotové Datovy dávky70 karet se integrují s opravou kalendáře
+f2b56fa3 a doménovou validací c9b32af9. Vocabulary EN bude mít522 položek,
+512 aktivních,492 Slovíček/20 Interakcí, stále18 témat. Původní významy,
+osobní výběry a existující backendový kód zůstávají zachované.
+
+Rozhodnutí: Míla výslovně zadal p+n všech čekajících commitů včetně Data,
+požaduje minimum opakovaných bran a výrazné zrychlení. Rozsah zahrnuje
+společný GitHub balíček, běžící Cockpit i Vocabulary EN Pages. Jediné
+registrované submit_release(wait=True) pro každý odlišný cílový projekt;
+role/model se berou z centrální konfigurace. Již ověřené části se neopakují.
+
+Další krok: Registrované vydání obou cílů a převzetí jejich konkrétních účtenek.
+Navrhované další kroky: Lidská přejímka kalendáře a nových70 karet na telefonu.
+Technický důkaz: Datovy commity58e30135,8728c196,6615b75d,134793cb;
+konflikty pouze v paměťových indexech řešené zachováním obou stran.
+Výsledek, job ID, časy bran, GitHub SHA a živé ověření budou pouze v
+privátní složce data/private/all_pending_release_20261115/. Tento zápis
+sám nepotvrzuje push/deploy. Kalendářový unknown se automaticky neopakuje.

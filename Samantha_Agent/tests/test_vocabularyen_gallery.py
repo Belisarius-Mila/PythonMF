@@ -29,11 +29,11 @@ class VocabularyGalleryTests(unittest.TestCase):
         inactive={item['uid'] for item in self.manifest['items'] if not item['active']}
         self.assertEqual(inactive,{'ven-0195','ven-0197','ven-0199','ven-0200','ven-0203',
                                    'ven-0257','ven-0258','ven-0259','ven-0260','ven-0271'})
-        self.assertEqual(len(self.manifest['items']),452)
+        self.assertEqual(len(self.manifest['items']),522)
         active=[item for item in self.manifest['items'] if item['active']]
-        self.assertEqual(len(active),442)
-        self.assertEqual(sum(i['teachingType']=='interaction' for i in active),19)
-        self.assertEqual(sum(i['teachingType']=='word' for i in active),423)
+        self.assertEqual(len(active),512)
+        self.assertEqual(sum(i['teachingType']=='interaction' for i in active),20)
+        self.assertEqual(sum(i['teachingType']=='word' for i in active),492)
         self.assertFalse(any(i['teachingType']=='idiom' for i in active))
         for entry in self.catalog['entries']:
             if entry.get('retirementReason')=='regular_plural_duplicate':
@@ -93,7 +93,7 @@ class VocabularyGalleryTests(unittest.TestCase):
             self.assertEqual(module.apply(path),['second'])
             updated=module.load_rows(path)
             self.assertIn('Benji',next(row for row in updated if row['Order']=='385')['WS'])
-            self.assertEqual([row['WS'] for row in updated if int(row['Order'])>425],['']*27)
+            self.assertEqual([row['WS'] for row in updated if int(row['Order'])>425],['']*97)
             self.assertEqual(module.apply(path),[])
 
     def test_body_batch_adds_ten_complete_nouns_and_keeps_original_body_cards(self):
@@ -129,8 +129,8 @@ class VocabularyGalleryTests(unittest.TestCase):
 
     def test_catalog_covers_all_meanings_once_and_does_not_merge_orange(self):
         entries=sync.resolve_catalog_rows(self.rows,self.catalog)
-        self.assertEqual(len(entries),452)
-        self.assertEqual(len({e['uid'] for e in entries}),452)
+        self.assertEqual(len(entries),522)
+        self.assertEqual(len({e['uid'] for e in entries}),522)
         self.assertEqual(len(self.catalog['groups']),18)
         orange=[entry for row,entry in zip(self.rows,entries) if row['EN']=='orange']
         self.assertEqual([e['uid'] for e in orange],['ven-0118','ven-0170'])
@@ -194,11 +194,11 @@ class VocabularyGalleryTests(unittest.TestCase):
                 self.assertEqual((record['sourceEn'],record['sourceCz']),(item['en'],item['cz']))
         yard=next(i for i in self.manifest['items'] if i['uid']=='ven-0300')
         self.assertEqual(yard['image'],'assets/vocabulary-en/courtyard.webp')
-        self.assertEqual(self.manifest['stats']['uniqueImageFiles'],402)
+        self.assertEqual(self.manifest['stats']['uniqueImageFiles'],472)
 
     def test_every_sentence_and_translation_stays_with_its_source_meaning(self):
         source={(row['EN'],row['CZ']):row for row in self.rows}
-        self.assertEqual(len(self.manifest['items']),452)
+        self.assertEqual(len(self.manifest['items']),522)
         for item in self.manifest['items']:
             with self.subTest(uid=item['uid']):
                 row=source[(item['en'],item['cz'])]

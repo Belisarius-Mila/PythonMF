@@ -2150,3 +2150,25 @@ podle reportu validation_domains_20261115.md; bez skutečného PASS se neuzavír
 Tato v2 ani f2b56fa3 nejsou publikované; předchozí v1 vydání38a33532 je historicky
 doložené účtenkou0203d0fbaf6cae4b993c7fa4670a9bb6. Žádný nový modelový běh,
 restart, pošta/calendar zápis, EventKit grant, ostrá záloha či zásah do Data.
+
+
+## 2026-11-15 15:23 CET — Schválené společné p+n včetně všech Datových dávek
+
+Hotovo: Čtyři hotové Datovy dávky70 karet se integrují s opravou kalendáře
+f2b56fa3 a doménovou validací c9b32af9. Vocabulary EN bude mít522 položek,
+512 aktivních,492 Slovíček/20 Interakcí, stále18 témat. Původní významy,
+osobní výběry a existující backendový kód zůstávají zachované.
+
+Rozhodnutí: Míla výslovně zadal p+n všech čekajících commitů včetně Data,
+požaduje minimum opakovaných bran a výrazné zrychlení. Rozsah zahrnuje
+společný GitHub balíček, běžící Cockpit i Vocabulary EN Pages. Jediné
+registrované submit_release(wait=True) pro každý odlišný cílový projekt;
+role/model se berou z centrální konfigurace. Již ověřené části se neopakují.
+
+Další krok: Registrované vydání obou cílů a převzetí jejich konkrétních účtenek.
+Navrhované další kroky: Lidská přejímka kalendáře a nových70 karet na telefonu.
+Technický důkaz: Datovy commity58e30135,8728c196,6615b75d,134793cb;
+konflikty pouze v paměťových indexech řešené zachováním obou stran.
+Výsledek, job ID, časy bran, GitHub SHA a živé ověření budou pouze v
+privátní složce data/private/all_pending_release_20261115/. Tento zápis
+sám nepotvrzuje push/deploy. Kalendářový unknown se automaticky neopakuje.

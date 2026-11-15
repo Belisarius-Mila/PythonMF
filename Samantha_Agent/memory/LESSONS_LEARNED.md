@@ -2672,3 +2672,16 @@ Příští CLI běh opravu načte, nová ostrá záloha v tomto vývojovém krok
 - Kontext:3972 testů při kalendářové opravě; pevný úzký seznam UI/dokumentů neuměl běžnou doménovou změnu.
 - Řešení: pevná serverová mapa domén a malý společný základ, rozšířené reverzními importy a explicitními konzumentskými hranicemi. Test spuštěný kvůli produkci sám nerozšiřuje své nezměněné fixture uživatele; změněná fixture ano. Neznámá/dynamická vazba, nový spustitelný soubor a společný kritický zásah znamenají plnou sadu. Stejná CI politika plus denní/ruční full; žádný klientský výběr počtu.
 - Ověření:282 kalendářových PASS /56,874s celý běh,94 cílených a112 Git/release regresí PASS. Zákaz nového kódu přes podepsanou scope cache, stale mapa/registr i změna obsahu se stejným mtime pokryté. Fixture úplně kopírované bez hardlinků, ověřené oddělené refs/index/objekty/syntetická tajemství. Závěrečný plný důkaz v private completion.json podle validation_domains_20261115.md.
+
+### 2026-11-15 11:21 CET — Inventář sourozeneckých médií čti z kořene Gitu
+
+- Kontext: z pracovního Samantha_Agent/ vrací git diff názvy vůči kořeni, ale git ls-files --others bez určeného kořene neprohledá sourozenecké docs/ a VocabularyEN/. Pak kompletní dávka mylně vypadá jako chybějící soubory.
+- Řešení: pro oba inventáře používat git -C <repo_root>; stejné kořenové cesty porovnávat s manifestem dávky. Nulový seznam nikdy nevydávat za ověření bez očekávaného počtu.
+- Ověření: správný inventář78 souborů souhlasí s75 změnami autorské dávky a3 testy;63 webových HTTP odpovědí má přesné SHA.
+
+
+### 2026-11-15 13:18 CET — Nový význam doplní vzájemné vazby related
+
+- Kontext: VocabularyAuthoring při přidání call/too/turn jako nových významů správně doplní same-lemma vazby také do tří původních katalogových a exportovaných karet. Úplná shoda všech původních objektů proto není správné očekávání.
+- Řešení: předem určit přesnou mapu staré UID → nové UID; očekávat pouze přidání odpovídajícího related záznamu v katalogu i exportu a ověřit opačný odkaz. Ostatní pole, identity, CSV prefix a starší média dál porovnávat přesně; nezamlčet tyto tři změny jako byte-exact.
+- Ověření: závěrečná dávka MMTX20, ven-0518/0519/0520 proti ven-0155/0204/0107.499 starších karet/katalogových záznamů přesně shodných, u3 pouze určené related;502 identit a2927 médií zachovaných,52 Python včetně56 Node PASS.
