@@ -19,6 +19,38 @@ from app.communication.human_adam_turn_completion import TurnCompletionMetadata
 
 
 class DeferredIntegrationStoreTests(unittest.TestCase):
+    def test_interrupted_owner_transfer_and_undispatched_rollback(self):
+        with tempfile.TemporaryDirectory() as temp:
+            store=DeferredIntegrationStore(Path(temp)/'marker.json')
+            store.begin(workstream_id='project-test',client_message_id='parent-request-0001',
+                workspace_status=self.status(source_pending_changes=0,dirty=False),integration_deferred=False)
+            previous=store.finalize(workstream_id='project-test',client_message_id='parent-request-0001',
+                workspace_status=self.status(source_pending_changes=0),completion=None)
+            before=store.path.read_bytes()
+            old=store.continue_interrupted(workstream_id='project-test',previous_client_id=previous.client_message_id,
+                client_message_id='child-request-0002',workspace_status=self.status(source_pending_changes=0))
+            self.assertEqual(old,previous);self.assertEqual(store.load().state,IN_PROGRESS)
+            with self.assertRaises(DeferredIntegrationError):
+                store.cancel_undispatched_continuation(old,client_message_id='foreign-request-0003',
+                    workspace_status=self.status(source_pending_changes=0))
+            store.cancel_undispatched_continuation(old,client_message_id='child-request-0002',
+                workspace_status=self.status(source_pending_changes=0))
+            self.assertEqual(store.path.read_bytes(),before)
+
+    def test_source_ahead_is_only_permitted_for_explicit_continuation(self):
+        with tempfile.TemporaryDirectory() as temp:
+            store=DeferredIntegrationStore(Path(temp)/'marker.json')
+            store.begin(workstream_id='project-test',client_message_id='parent-request-0001',
+                workspace_status=self.status(source_pending_changes=0,dirty=False),integration_deferred=False)
+            store.finalize(workstream_id='project-test',client_message_id='parent-request-0001',
+                workspace_status=self.status(source_pending_changes=0),completion=None)
+            status=self.status(source_pending_changes=0,relation='source_ahead')
+            with self.assertRaises(DeferredIntegrationError):
+                store.verify_owned(workstream_id='project-test',workspace_status=status)
+            store.continue_interrupted(workstream_id='project-test',previous_client_id='parent-request-0001',
+                client_message_id='child-request-0002',workspace_status=status)
+            self.assertTrue(store.load().integration_deferred)
+
     @staticmethod
     def completion() -> TurnCompletionMetadata:
         return TurnCompletionMetadata(

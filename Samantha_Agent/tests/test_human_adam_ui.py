@@ -13,6 +13,40 @@ from scripts.cockpit_quality_gate import node_binary
 
 
 class HumanAdamUiTests(unittest.TestCase):
+    def test_confirmed_stopped_work_continuation_in_actual_send_handler(self):
+        script=r'''
+const vm=require('node:vm'),assert=require('node:assert/strict');
+const html=JSON.parse(require('node:fs').readFileSync(0,'utf8'));
+const part=(a,b)=>html.slice(html.indexOf(a),html.indexOf(b,html.indexOf(a)+a.length));
+let resolve;const posts=[],confirms=[];
+const c={AbortController,console,writeIntentArmed:false,armedContinuation:null,
+ interruptedContinuation:{client_message_id:'parent-request-0001',workstream_id:'project-test',thread_id:'thread-test'},
+ writeIntentBtn:{disabled:false},notice:{},input:{value:'Pokračuj v této práci',focus(){}},
+ syncControls(){},sessionConnected:true,busy:false,sendInFlight:false,sessionTurnBusy:false,pendingSubmission:null,
+ voiceStarting:false,voiceRecording:false,voiceTranscribing:false,lunaReleaseStatusLoaded:true,
+ activeWorkstreamId:'project-test',lastSession:{thread_id:'thread-test',connection_generation:3,messages:[]},
+ window:{confirm:text=>{confirms.push(text);return true;},setTimeout,clearTimeout},
+ workMonitor:{snapshot:()=>({blocked:false}),expect(){},accepted:()=>true},
+ document:{getElementById:()=>({})},messageId:()=> 'child-request-0002',shouldInterceptLunaReleaseCommand:()=>false,
+ clearMessageInput(){c.input.value='';},runSendUiBestEffort:fn=>fn(),primeCompletionMediaSound:async()=>{},
+ renderSession(){},updateMobileStatusSummary(){},showSendFailure(){throw Error('Unexpected preparation failure');},
+ api:async(path,options)=>{posts.push({path,body:JSON.parse(options.body)});return new Promise(r=>resolve=r);}};
+vm.createContext(c);vm.runInContext(part('  function setWriteIntentArmed(', '  function setMobileStatusDetails(')
+ +part('  async function sendOwnedWork()', '  async function sendMessage(event)'),c);
+(async()=>{
+ c.armWriteIntent();assert(c.writeIntentArmed);assert(confirms[0].includes('zastavené práci'));
+ const sending=c.sendOwnedWork();await c.sendOwnedWork();assert.equal(posts.length,1);
+ assert.equal(posts[0].body.continue_from_client_message_id,'parent-request-0001');assert(posts[0].body.write_intent);
+ resolve({ok:true});await sending;assert.equal(c.armedContinuation,null);assert.equal(c.writeIntentArmed,false);
+ c.interruptedContinuation=null;c.input.value='Nový vývoj';c.armWriteIntent();
+ const fresh=c.sendOwnedWork();assert(!('continue_from_client_message_id' in posts[1].body));resolve({ok:true});await fresh;
+ console.log('Stopped-work continuation UI PASS');
+})().catch(error=>{console.error(error);process.exitCode=1;});
+'''
+        result=subprocess.run([node_binary(),'-e',script],input=json.dumps(HUMAN_ADAM_HTML),text=True,
+                              capture_output=True,timeout=15)
+        self.assertEqual(result.returncode,0,result.stdout+result.stderr)
+
     def test_ha07_stop_and_draft_recovery_in_node_vm(self) -> None:
         result = subprocess.run(
             [node_binary(), str(Path(__file__).with_name("human_adam_ha07_frontend.test.cjs"))],

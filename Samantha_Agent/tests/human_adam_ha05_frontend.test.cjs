@@ -158,7 +158,7 @@ async function test(name,fn){await fn();passed++;console.log(`PASS ${name}`);}
         lastSession:{thread_id:scope.thread_id,connection_generation:3,messages:[]},
         busy:false,sessionConnected:mode!=='disconnected',sendInFlight:false,sessionTurnBusy:false,pendingSubmission:null,
         voiceStarting:false,voiceRecording:false,voiceTranscribing:false,lunaReleaseStatusLoaded:true,
-        writeIntentArmed:true,deliveryUncertain:false,input:{value:'Přesné zadání'},notice:{textContent:''},
+        writeIntentArmed:true,armedContinuation:null,interruptedContinuation:null,deliveryUncertain:false,input:{value:'Přesné zadání'},notice:{textContent:''},
         document:{getElementById:id=>{if(!elements.has(id))elements.set(id,{hidden:false});return elements.get(id);}},
         messageId:()=>{if(mode==='preparation')throw Error('no identity');return client;},
         shouldInterceptLunaReleaseCommand:()=>false,

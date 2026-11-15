@@ -746,6 +746,8 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
   let workstreamDeploymentEnabled = true;
   let workstreamProductionTarget = "";
   let writeIntentArmed = false;
+  let interruptedContinuation = null;
+  let armedContinuation = null;
   let deliveryUncertain = false;
   let deploymentAudit = null;
   let mainRemoteSyncAudit = null;
@@ -955,7 +957,7 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
     composerMode.classList.toggle("armed", writeIntentArmed);
     writeIntentBtn.classList.toggle("armed", writeIntentArmed);
     writeIntentBtn.setAttribute("aria-pressed", writeIntentArmed ? "true" : "false");
-    writeIntentBtn.textContent = writeIntentArmed ? "Vývoj připraven" : "Zahájit vývoj";
+    writeIntentBtn.textContent = writeIntentArmed ? "Vývoj připraven" : interruptedContinuation ? "Pokračovat ve vývoji" : "Zahájit vývoj";
     voiceRecordBtn.disabled = busy || sendInFlight || sessionTurnBusy || voiceStarting || voiceRecording || voiceTranscribing || lunaReleaseBusy;
     voiceRecordBtn.classList.toggle("recording", voiceRecording);
     voiceRecordBtn.textContent = voiceRecording ? "Nahrávám…" : "Nahrát pokyn";
@@ -1069,15 +1071,21 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
 
   function setWriteIntentArmed(value) {
     writeIntentArmed = Boolean(value);
+    if (!writeIntentArmed) armedContinuation=null;
     syncControls();
   }
 
   function armWriteIntent() {
     if (writeIntentBtn.disabled || writeIntentArmed) return;
-    const confirmed = window.confirm("Jednorázově povolit zápis pouze pro následující pokyn?\n\nServer před odesláním ověří čistý main a všechny vývojové workspaces. Oprávnění se po jednom pokusu zruší.");
+    const resume=interruptedContinuation;
+    const confirmed = window.confirm(resume
+      ? "Pokračovat v zastavené práci se zachováním jejích rozpracovaných změn?\n\nNásledující pokyn dostane jednorázové oprávnění k vývoji. Server znovu ověří původní práci a její změny."
+      : "Jednorázově povolit zápis pouze pro následující pokyn?\n\nServer před odesláním ověří čistý main a všechny vývojové workspaces. Oprávnění se po jednom pokusu zruší.");
     if (!confirmed) return;
+    armedContinuation=resume;
     setWriteIntentArmed(true);
-    notice.textContent = "Jednorázový vývoj je připravený pro následující odeslaný pokyn.";
+    notice.textContent = resume ? "Pokračování je připravené. Napiš, jak má Adam navázat na zastavenou práci."
+      : "Jednorázový vývoj je připravený pro následující odeslaný pokyn.";
     input.focus();
   }
 
@@ -2161,7 +2169,10 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
     const session = payload && payload.session ? payload.session : null;
     const connected = Boolean(session && session.connected && payload.runtime && payload.runtime.reachable);
     sessionConnected = connected;
-    if (!connected) writeIntentArmed = false;
+    const resume=payload && payload.interrupted_work_continuation;
+    interruptedContinuation=connected && resume && resume.workstream_id===activeWorkstreamId
+      && resume.thread_id===String(session.thread_id || "") && typeof resume.client_message_id==="string" ? resume : null;
+    if (!connected) {writeIntentArmed = false;armedContinuation=null;}
     connectionBadge.textContent = connected ? "Připojeno" : "Odpojeno";
     connectionBadge.className = connected ? "badge ok" : "badge warn";
     profileBadge.textContent = `Proud: ${activeWorkstreamLabel}`;
@@ -2246,6 +2257,8 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
     const nextWorkstreamId = String(activeWorkstream.workstream_id || "");
     if (activeWorkstreamId && nextWorkstreamId !== activeWorkstreamId) {
       writeIntentArmed = false;
+      armedContinuation = null;
+      interruptedContinuation = null;
       workReadSequence += 1;
     }
     activeWorkstreamLabel = String(activeWorkstream.workstream_name || "Pracovní proud");
@@ -4119,10 +4132,11 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
     try {
       clientId=messageId(); sentAt=new Date().toISOString();
       body=JSON.stringify({message:text,client_message_id:clientId,client_sent_at:sentAt,
-        write_intent:writeIntentArmed,workstream_id:workstream,confirmed:true});
+        write_intent:writeIntentArmed,workstream_id:workstream,confirmed:true,
+        ...(writeIntentArmed && armedContinuation ? {continue_from_client_message_id:armedContinuation.client_message_id} : {})});
       workMonitor.expect(clientId);
     } catch (_) { showSendFailure("Pokyn se nepodařilo připravit. Text zůstal v editoru."); return; }
-    writeIntentArmed=false; sendInFlight=true; clearMessageInput(); syncControls();
+    writeIntentArmed=false; armedContinuation=null; sendInFlight=true; clearMessageInput(); syncControls();
     runSendUiBestEffort(() => { primeCompletionMediaSound().catch(() => {}); });
     const pending={client_message_id:clientId,user_text:text,client_sent_at:sentAt,received_at:sentAt,status:"pending",answer:""};
     runSendUiBestEffort(() => renderSession({...lastSession,messages:[...(lastSession && lastSession.messages || []),pending]}));

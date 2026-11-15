@@ -14,7 +14,7 @@ import hashlib
 import json
 import os
 import re
-from dataclasses import asdict, dataclass
+from dataclasses import asdict, dataclass, replace
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Sequence
@@ -517,6 +517,7 @@ class DeferredIntegrationStore:
                 READY_FOR_CONFIRMED_INTEGRATION,
             }
         ),
+        allow_source_ahead: bool = False,
     ) -> DeferredIntegrationRecord:
         record = self.load()
         changes = list(workspace_status.get("changes") or [])
@@ -526,10 +527,13 @@ class DeferredIntegrationStore:
             record.state not in allowed_states
             or record.workstream_id != str(workstream_id or "").strip().casefold()
             or workspace_status.get("dirty") is not True
-            or workspace_status.get("workspace_relation") != "aligned"
+            or workspace_status.get("workspace_relation") not in (
+                {"aligned", "source_ahead"} if allow_source_ahead else {"aligned"})
             or int(workspace_status.get("source_pending_changes") or 0) != 0
             or current_head != record.base_head
-            or source_head != record.base_head
+            or (source_head != record.base_head and not (
+                allow_source_ahead and workspace_status.get("workspace_relation") == "source_ahead"
+                and _HEAD_RE.fullmatch(source_head)))
             or len(changes) != record.change_count
             or change_fingerprint(changes) != record.change_fingerprint
         ):
@@ -538,6 +542,32 @@ class DeferredIntegrationStore:
                 "integrace vyžaduje servisní rozhodnutí."
             )
         return record
+
+    def continue_interrupted(self, *, workstream_id: str, previous_client_id: str,
+                             client_message_id: str, workspace_status: dict[str, Any]):
+        """Transfer verified WIP; caller must prove the parent's terminal interruption."""
+        record = self.verify_owned(workstream_id=workstream_id, workspace_status=workspace_status,
+            allowed_states=frozenset({OWNED_WIP_MISSING_METADATA}), allow_source_ahead=True)
+        if (record.client_message_id != previous_client_id or client_message_id == previous_client_id
+                or not _CLIENT_MESSAGE_ID_RE.fullmatch(client_message_id)):
+            raise DeferredIntegrationError("Pokračování neodpovídá původní zastavené práci.")
+        now = _now()
+        self._write(replace(record, state=IN_PROGRESS, client_message_id=client_message_id,
+                            change_count=0, change_fingerprint="", completion=None,
+                            integration_deferred=record.integration_deferred or
+                                workspace_status.get("workspace_relation") == "source_ahead",
+                            created_at=now, updated_at=now))
+        return record
+
+    def cancel_undispatched_continuation(self, previous, *, client_message_id, workspace_status):
+        """Restore parent ownership only when the caller proved no child dispatch."""
+        current = self.load()
+        if (current.state != IN_PROGRESS or current.client_message_id != client_message_id
+                or current.workstream_id != previous.workstream_id or current.base_head != previous.base_head
+                or workspace_status.get("head") != previous.base_head
+                or change_fingerprint(workspace_status.get("changes") or []) != previous.change_fingerprint):
+            raise DeferredIntegrationError("Vlastnictví pokračování se změnilo; nic se nepřepisuje.")
+        return self._write(previous)
 
     def attach_completion(
         self,

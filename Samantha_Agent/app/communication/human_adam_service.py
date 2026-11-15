@@ -262,13 +262,15 @@ class HumanAdamService:
             transport_factory=transport_factory,
         )
 
-    def _workspace_status(self) -> dict[str, Any]:
+    def _workspace_status(self, *, allow_source_ahead: bool = False) -> dict[str, Any]:
         status = self.workspace.status()
         if not status.get("prepared") or not status.get("project_ready"):
             raise AppServerError("Izolovaný workspace Human–Adam není připravený.")
         if not status.get("ok") or status.get("remotes"):
             raise AppServerError("Izolovaný workspace není v bezpečném stavu bez Git remote.")
-        if status.get("source_update_available") or status.get("workspace_relation") == "diverged":
+        continued = (allow_source_ahead and status.get("workspace_relation") == "source_ahead"
+                     and status.get("dirty") and not int(status.get("source_pending_changes") or 0))
+        if (status.get("source_update_available") and not continued) or status.get("workspace_relation") == "diverged":
             raise AppServerError("Izolovaný workspace čeká na bezpečnou aktualizaci z main.")
         return status
 
@@ -321,8 +323,9 @@ class HumanAdamService:
         except (AppServerError, SessionHubError, OSError, ValueError) as exc:
             return {"ok": False, "status": "human_adam_status_failed", "message": str(exc)}
 
-    def connect(self, *, recover_unreachable_runtime: bool = False) -> dict[str, Any]:
-        workspace = self._workspace_status()
+    def connect(self, *, recover_unreachable_runtime: bool = False,
+                preserve_interrupted_workspace: bool = False) -> dict[str, Any]:
+        workspace = self._workspace_status(allow_source_ahead=preserve_interrupted_workspace)
         self.runtime.start(recover_unreachable_owned=recover_unreachable_runtime)
         if not self._profile:
             self._profile = {
@@ -355,6 +358,7 @@ class HumanAdamService:
         write_intent: bool = False,
         observed_code_stamp: str = "",
         work_observer: Any = None,
+        preserve_interrupted_workspace: bool = False,
     ) -> dict[str, Any]:
         del observed_code_stamp
         if write_intent:
@@ -368,7 +372,10 @@ class HumanAdamService:
         session = self.hub.snapshot()
         if not runtime.get("reachable") or not session.get("connected"):
             raise SessionHubError("Nejdřív výslovně připoj Human–Adam.")
-        workspace = self._workspace_status()
+        if preserve_interrupted_workspace and (work_observer is None or not
+                work_observer.store.load(work_observer.identity).get("continuation_of")):
+            raise SessionHubError("Pokračování nemá původní zastavenou práci v serverovém journalu.")
+        workspace = self._workspace_status(allow_source_ahead=preserve_interrupted_workspace)
         result = self.hub.send(
             text=clean_text,
             client_message_id=client_message_id,

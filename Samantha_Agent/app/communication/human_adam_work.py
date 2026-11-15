@@ -48,7 +48,8 @@ def operation_id(workstream_id: str, client_message_id: str) -> str:
 
 
 def normalized_request(payload: dict) -> dict:
-    allowed = {"text", "client_message_id", "client_sent_at", "write_intent", "observed_code_stamp"}
+    allowed = {"text", "client_message_id", "client_sent_at", "write_intent", "observed_code_stamp",
+               "continue_from_client_message_id"}
     if not isinstance(payload, dict) or set(payload) - allowed:
         raise WorkError("Požadavek práce obsahuje nepovolené údaje.")
     text, client = payload.get("text"), payload.get("client_message_id")
@@ -61,10 +62,15 @@ def normalized_request(payload: dict) -> dict:
     for key, maximum in (("client_sent_at", 64), ("observed_code_stamp", 128)):
         if not isinstance(payload.get(key, ""), str) or len(payload.get(key, "")) > maximum:
             raise WorkError("Metadata požadavku nejsou platná.")
+    parent = payload.get("continue_from_client_message_id", "")
+    if (not isinstance(parent, str) or parent and (not CLIENT.fullmatch(parent)
+            or parent == client or payload.get("write_intent") is not True)):
+        raise WorkError("Pokračování vyžaduje původní práci a nové oprávnění k vývoji.")
     return {"text": text.strip(), "client_message_id": client,
             "client_sent_at": payload.get("client_sent_at", ""),
             "write_intent": payload.get("write_intent", False),
-            "observed_code_stamp": payload.get("observed_code_stamp", "")}
+            "observed_code_stamp": payload.get("observed_code_stamp", ""),
+            **({"continue_from_client_message_id": parent} if parent else {})}
 
 
 def fingerprint(payload: dict) -> str:
@@ -230,6 +236,8 @@ class WorkStore:
                 "kind", "lifecycle_state", "delivery_state", "created_at", "updated_at", "revision",
                 "completion", "failure_code", "event_gap")
         view = {k: copy.deepcopy(value[k]) for k in keys}
+        if isinstance(value.get("continuation_of"), str) and ID.fullmatch(value["continuation_of"]):
+            view["continuation_of"] = value["continuation_of"]
         view["completion"] = {key: value["completion"][key] for key in ("kind", "job_id", "state") if key in value["completion"]}
         progress = public_projection(value.get("public_progress"))
         if progress is not None:

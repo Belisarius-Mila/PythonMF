@@ -447,3 +447,13 @@ unknown zůstává neověřený. Cizí scope/owner/politika/turn se odmítne.
 Interrupce neprovádí automatický checkpoint, odchozí operaci ani rollback
 částečného výsledku. Zapisovací WIP a ownership zůstávají zachované.
 Obecné zastavování dokončovací brány a publikace není povolené.
+
+
+## Human–Adam — pokračování po Stop (2026-11-15 21:26 CET)
+
+Existující POST /api/human-adam/work/start přijímá volitelné
+continue_from_client_message_id pouze s write_intent=true a novou identitou
+požadavku. Parent se dokládá kanonickou relací a journalem zastavené práce,
+aktuálním workspace a private ownership markerem. Status nabízí pouze
+ověřený interrupted_work_continuation; čtení samo nic neobnovuje/neodesílá.
+Nová schopnost, endpoint, modelová role ani obecné povolení dirty WIP nevzniká.

@@ -2726,3 +2726,11 @@ Příští CLI běh opravu načte, nová ostrá záloha v tomto vývojovém krok
 - Ověření: izolované Python/HTTP/Node a skutečný Unix/WebSocket; dvojklik,
   pád, reconnect/owner loss, dokončení vítězící v závodu a zapisovací WIP.
   Plánovaná živá přejímka má vlastní souhlas; test nevytváří modelový tah.
+
+
+### LL-131 — Stop zapisovací práce potřebuje ověřené pokračování WIP
+
+- Problém: Úspěšné přerušení zachová soubory, ale brána nového vývoje vyžaduje čistý workspace. Test pouze poradního dalšího tahu tuto chybu neodhalí.
+- Typ: opakující se
+- Řešení nalezeno: 15112026
+- Řešení: Nový výslovný zápis vázat na kanonicky přerušeného parenta a přesný ownership marker. Převzít jeho WIP před dispatch, nevydávat jej za dokončený a neopakovat původní tah. Testovat celý writable Stop → nový tah → Stop, reconnect i posun main, nikoli jen samotný RPC nebo čistý/read-only návrat.

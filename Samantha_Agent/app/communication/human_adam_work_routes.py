@@ -32,12 +32,14 @@ def _call(callback):
 
 def work_start_action(payload, *, service, observed_code_stamp=""):
     def start():
-        allowed = {"message", "client_message_id", "client_sent_at", "workstream_id", "write_intent", "confirmed"}
+        allowed = {"message", "client_message_id", "client_sent_at", "workstream_id", "write_intent", "confirmed",
+                   "continue_from_client_message_id"}
         if not isinstance(payload, dict) or set(payload) - allowed or payload.get("confirmed") is not True:
             raise WorkError("Práce vyžaduje potvrzené přesné zadání.")
         return service.submit_work(wait=False, expected_workstream_id=_scope(payload.get("workstream_id")),
                                    text=payload.get("message"), client_message_id=payload.get("client_message_id"),
                                    client_sent_at=payload.get("client_sent_at", ""),
+                                   continue_from_client_message_id=payload.get("continue_from_client_message_id", ""),
                                    write_intent=payload.get("write_intent", False), observed_code_stamp=observed_code_stamp)
     return _call(start)
 

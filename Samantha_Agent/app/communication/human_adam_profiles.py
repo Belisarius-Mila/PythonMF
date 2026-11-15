@@ -1670,6 +1670,7 @@ class HumanAdamProfileManager:
                 "last_step_completion": self.last_step_completion_status(),
             }
             result["work_state"] = self._project_work_state(result, workstream_id, service)
+            result["interrupted_work_continuation"] = self._interrupted_work_continuation(service)
             result["work_protocol"] = {"schema_version": 1, "server_owned": True,
                                        "start_path": "/api/human-adam/work/start",
                                        "read_path": "/api/human-adam/work",
@@ -1711,7 +1712,8 @@ class HumanAdamProfileManager:
 
     def connect(self) -> dict[str, Any]:
         with self.profile_operation() as service:
-            workspace_synced = self._sync_clean_active_workspace_from_main(
+            continuing = self._interrupted_work_continuation(service, require_connected=False)
+            workspace_synced = False if continuing else self._sync_clean_active_workspace_from_main(
                 service=service,
             )
             session = service.hub.snapshot()
@@ -1721,7 +1723,8 @@ class HumanAdamProfileManager:
                 and not self._has_uncertain_delivery(session)
             )
             result = service.connect(
-                recover_unreachable_runtime=runtime_recovery_allowed
+                recover_unreachable_runtime=runtime_recovery_allowed,
+                **({"preserve_interrupted_workspace": True} if continuing else {}),
             )
         return {
             **result,
@@ -1791,10 +1794,54 @@ class HumanAdamProfileManager:
         with self.profile_operation() as service:
             return self._send_reserved(service, **kwargs)
 
+    def _interrupted_work_continuation(self, service, *, require_connected=True):
+        """Read-only proof for the exact stopped owner, never generic dirty-WIP permission."""
+        try:
+            workspace = service.workspace.status()
+            if (not workspace.get("dirty") or self.work_profile_id != "human_adam"
+                    or self.active_lazy_workstream_id or not workspace.get("prepared")
+                    or not workspace.get("ok") or workspace.get("remotes")
+                    or workspace.get("branch") != "main" or workspace.get("source_branch") != "main"
+                    or workspace.get("local_checkpoint_ahead") or workspace.get("local_checkpoint_preserved")
+                    or int(workspace.get("local_commit_count") or 0)
+                    or self._foreign_wip_blockers("human_adam")):
+                return None
+            marker = self.deferred_integration_store.verify_owned(
+                workstream_id=self.active_workstream_id, workspace_status=workspace,
+                allowed_states=frozenset({OWNED_WIP_MISSING_METADATA}), allow_source_ahead=True)
+            session = service.hub.snapshot()
+            if ((require_connected and not session.get("connected")) or session.get("turn_busy") or session.get("active_turn")
+                    or self._has_uncertain_delivery(session)):
+                return None
+            entry = next((e for e in session.get("messages", [])
+                          if e.get("client_message_id") == marker.client_message_id), None)
+            if (not entry or entry.get("status") != "interrupted" or entry.get("terminal_confirmed") is not True
+                    or entry.get("recovery_required") or entry.get("thread_id") != session.get("thread_id")):
+                return None
+            from app.communication.human_adam_work import WorkStore, operation_id
+            identity = operation_id(self.active_workstream_id, marker.client_message_id)
+            parent = WorkStore(self.state_path.parent / "owned_work").load(identity)
+            if (not parent or parent["lifecycle_state"] != "interrupted" or parent["delivery_state"] != "confirmed"
+                    or parent["thread_id"] != entry["thread_id"] or parent["turn_id"] != entry.get("turn_id")
+                    or parent["scope"]["profile_id"] != self.work_profile_id):
+                return None
+            return {"client_message_id": marker.client_message_id, "operation_id": identity,
+                    "thread_id": entry["thread_id"], "workstream_id": self.active_workstream_id,
+                    "integration_deferred": marker.integration_deferred or
+                        workspace.get("workspace_relation") == "source_ahead"}
+        except (AppServerError, OSError, ValueError, TypeError):
+            return None
+
     def _send_reserved(self, service: HumanAdamService, **kwargs: Any) -> dict[str, Any]:
-        workspace_synced = self._sync_clean_active_workspace_from_main(
-            service=service,
-        )
+        previous_client_id = kwargs.pop("continue_from_client_message_id", "")
+        continuing = None
+        previous_marker = None
+        if previous_client_id:
+            continuing = self._interrupted_work_continuation(service)
+            if (kwargs.get("write_intent") is not True or continuing is None
+                    or continuing["client_message_id"] != previous_client_id):
+                raise AppServerError("Zastavená práce nebo její změny už neodpovídají potvrzenému pokračování.")
+        workspace_synced = False if continuing else self._sync_clean_active_workspace_from_main(service=service)
         observed_code_stamp = str(
             kwargs.pop("observed_code_stamp", "") or ""
         )
@@ -1807,7 +1854,7 @@ class HumanAdamProfileManager:
         control_owner = "none"
         integration_deferred = False
         if write_intent:
-            integration_deferred = self._assert_one_turn_write_ready(
+            integration_deferred = continuing["integration_deferred"] if continuing else self._assert_one_turn_write_ready(
                 service=service,
                 active_id=active_id,
                 lazy_id=lazy_id,
@@ -1830,6 +1877,10 @@ class HumanAdamProfileManager:
             f"writable={'true' if writable else 'false'}",
             f"integration_deferred={'true' if integration_deferred else 'false'}",
         ]
+        if continuing:
+            control_lines.extend(("continuing_interrupted_work=true",
+                "rule=Continue the same explicitly resumed work with its preserved edits. "
+                "Do not restart already completed external actions or switch to an unrelated task."))
         control_lines.extend(
             self.trusted_external_generation_consent.development_control_lines(
                 registered_capability_ids=tuple(
@@ -1964,22 +2015,33 @@ class HumanAdamProfileManager:
             )
         )
         if ownership_started:
-            self.deferred_integration_store.begin(
-                workstream_id=self.active_workstream_id,
-                client_message_id=client_message_id,
-                workspace_status=service.workspace.status(),
-                integration_deferred=integration_deferred,
-            )
+            if continuing:
+                observer = kwargs.get("work_observer")
+                if observer is not None:
+                    observer.store.change(observer.identity, observer.owner, "work_continued",
+                                          fields={"continuation_of": continuing["operation_id"]})
+                previous_marker = self.deferred_integration_store.continue_interrupted(
+                    workstream_id=self.active_workstream_id, previous_client_id=previous_client_id,
+                    client_message_id=client_message_id, workspace_status=service.workspace.status())
+            else:
+                self.deferred_integration_store.begin(
+                    workstream_id=self.active_workstream_id,
+                    client_message_id=client_message_id,
+                    workspace_status=service.workspace.status(),
+                    integration_deferred=integration_deferred,
+                )
         from app.simple_development_portal import control_block
-        delegation_token = self.simple_development_portal.issue(
-            manager=self, service=service, workstream_id=self.active_workstream_id,
-            client_message_id=client_message_id, writable=writable,
-        )
-        development_control_block += control_block(delegation_token)
+        delegation_token = None
         try:
+            delegation_token = self.simple_development_portal.issue(
+                manager=self, service=service, workstream_id=self.active_workstream_id,
+                client_message_id=client_message_id, writable=writable,
+            )
+            development_control_block += control_block(delegation_token)
             result = service.send(
                 **kwargs,
                 development_control_block=development_control_block,
+                **({"preserve_interrupted_workspace": True} if continuing else {}),
             )
         except Exception:
             if writable:
@@ -2010,12 +2072,21 @@ class HumanAdamProfileManager:
             if ownership_started:
                 try:
                     session = service.hub.snapshot()
-                    if self._has_uncertain_delivery(session):
+                    if previous_marker and not any(e.get("client_message_id") == client_message_id
+                                                   for e in session.get("messages", [])):
+                        self.deferred_integration_store.cancel_undispatched_continuation(
+                            previous_marker, client_message_id=client_message_id,
+                            workspace_status=service.workspace.status())
+                    elif self._has_uncertain_delivery(session):
                         self.deferred_integration_store.mark_delivery_unknown(
                             workstream_id=self.active_workstream_id,
                             client_message_id=client_message_id,
                             workspace_status=service.workspace.status(),
                         )
+                    elif previous_marker and service.workspace.status().get("dirty"):
+                        self.deferred_integration_store.finalize(
+                            workstream_id=self.active_workstream_id, client_message_id=client_message_id,
+                            workspace_status=service.workspace.status(), completion=None)
                     else:
                         self.deferred_integration_store.clear(
                             client_message_id=client_message_id,
@@ -3670,6 +3741,15 @@ class HumanAdamProfileManager:
                     "can_recover": False,
                 }
             workspace_status = self.active_service.workspace.status()
+            continuation = self._interrupted_work_continuation(self.active_service)
+            if continuation is not None:
+                return {**result, "state": "owned_interrupted_work", "pending": True,
+                        "label": "Práce je zastavená, změny jsou zachované",
+                        "message": "Zastavený tah má potvrzený konec a odpovídající vlastnictví rozpracovaných změn.",
+                        "next_step": "Použij Pokračovat ve vývoji a napiš navazující pokyn.",
+                        "requires_service_decision": False, "ownership_marker_required": True,
+                        "ownership_marker_verified": True, "metadata_required": False,
+                        "can_integrate": False, "can_recover": False, "can_continue": True}
             if marker is not None and marker.state == OWNED_WIP_MISSING_METADATA:
                 try:
                     self.deferred_integration_store.verify_owned(
