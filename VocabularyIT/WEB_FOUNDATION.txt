@@ -6,7 +6,7 @@ zachovaných aktivních; vit-0001 až vit-0471.18 témat převzatých z EN.
 Slovní druh, typ a vlastní obtížnost jsou redakční NÁVRHY, nikoli schválené
 jazykové údaje nebo A1–C2. Navrženo460 Slovíček a11 Interakcí; Fráze zatím
 nepřidělené.112 karet má konkrétní důvod přednostní revize, ne prokázanou chybu.
-Všech471 obrazových vazeb čeká na potvrzení ve druhém bodu.
+Aktuálně bod2:458 přesných obrazových vazeb,10 náhrad a3 významové otázky otevřené.
 
 Soubory
 vocabulary_it_catalog.json — identity, explicitní aliasy, návrhy metadat.
@@ -66,3 +66,25 @@ Vocabulary_IT_analyza_proveditelnosti_2026-11-15.txt v Downloads.
 Dále bod2: revize významů a konkrétních obrázků. Začít16 rozdíly resolverů,
 piacere/perché/stare a tvary/rody, potom potvrdit zbývající metadata.
 Kanonický handoff a existující TVBCP: project-vocabulary-it.md.
+
+BOD2 — OBRAZOVÁ REVIZE A KONKRÉTNÍ OBSAHOVÝ NÁVRH
+471 karet prohlédnuto v přehledu, sporné varianty porovnány cíleně.
+458 karet připnutých k383 existujícím souborům.10 ilustrací k náhradě,
+storia/gli/niente potřebují nejprve významové rozhodnutí. Obrazy abstraktních
+hesel jsou často mnemotechnické nebo kontextové, nikoli jednoznačný překlad.
+Původní obrazy mohou obsahovat text; vhodnost pro hru se prověří samostatně.
+
+vocabulary_it_image_manifest.json připíná přesné soubory a vazbu na původní
+vstupní snímek. Žádná heuristika ani fallback se nesmí vydávat za schválenou vazbu.
+Kontrola z kořene PythonMF:
+python3 VocabularyIT/vocabulary_it_catalog.py --root Samantha_Agent/data/private/vocabulary_it_foundation_20261115/inputs --image-manifest VocabularyIT/vocabulary_it_image_manifest.json
+Výsledek imageBindings.exact=true, complete=false, pendingUids13.
+Přepínač --require-complete-images musí nyní selhat;13 nehotových karet je záměrně viditelných.
+
+vocabulary_it_content_review.json/txt obsahují24 konkrétních návrhů hlavního
+a dalších významů, dosud NEPOUŽITÝCH. Před přiřazením nových UID vyřešit
+rozhodnutí; původní identity zachovat a neodvozovat význam z chybného příkladu.
+Webové texty effective_card_text přebírají opravy jen pro shodnou zdrojovou
+větu. U éclair je francouzský příklad opraven na italský, chiamare překládáno
+volat/telefonovat. Původní CSV a jeho aliasy jsou zachované.
+Bod2 zatím není úplná jazyková korektura všech vět či schválení všech metadat.

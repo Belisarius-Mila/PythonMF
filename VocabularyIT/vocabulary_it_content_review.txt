@@ -1,0 +1,194 @@
+VOCABULARY IT — REVIZE VÝZNAMŮ A OBRÁZKŮ, 15.11.2026
+
+Stav: lokální podklad druhého bodu, nikoli hotová webová aplikace.
+Všech 471 původních identit zůstává aktivních. Žádné původní řádky ani L/HT se nemění.
+458 karet má přesnou obrazovou vazbu (383 různých souborů); 10 potřebuje novou ilustraci,
+3 potřebují významové rozhodnutí. U abstraktních slov je obrázek často jen pomůcka.
+
+Dvě jednoznačné webové opravy již připravené:
+- éclair: francouzský příklad nahrazen italským Dopo il pasto prendo un éclair al cioccolato.
+- chiamare: volat; telefonovat. Jmenovat se patří k existujícímu chiamarsi.
+Původní CSV a původní identifikační aliasy zůstávají; opravy jsou ve webovém katalogu.
+
+NÁVRH K ROZHODNUTÍ (zatím nepoužitý):
+Původní UID zachovat pro hlavní význam. Další významy navrhnout jako nové karty s vlastní větou; nevymazávat obsah. Žádné nové UID není přidělené. U rozporné věty gli/niente zachovat původní identitu hesla a opravit příklad.
+Další význam není automaticky duplicitou. Nové karty dostanou vlastní identitu, téma a obrázek.
+Výběr hlavního významu nemá zahodit ostatní běžné významy.
+
+24 KONKRÉTNÍCH PŘÍPADŮ:
+
+vit-0007 | původně forte = silný, hlasitě (nahlas)
+  Hlavní návrh: forte = silný
+  Příklad: Oggi c’è un vento forte. / Dnes je silný vítr.
+  Další: forte — nahlas: Non parlare forte qui. / Tady nemluv nahlas.
+  Poznámka: Oddělit přídavné jméno a příslovce.
+
+vit-0096 | původně tedesco = němec, němčina
+  Hlavní návrh: tedesco = německý; Němec
+  Příklad: Il mio collega è tedesco e vive vicino a Praga. / Můj kolega je Němec a bydlí poblíž Prahy.
+  Další: tedesco — němčina: Studio il tedesco ogni giorno. / Každý den se učím německy.
+  Poznámka: Národnost/osoba a název jazyka vyžadují vlastní příklady.
+
+vit-0114 | původně storia = historie, příběh
+  Hlavní návrh: storia = příběh
+  Příklad: Raccontami una storia prima di dormire. / Povídej mi příběh před spaním.
+  Další: storia — historie, dějiny: La storia di questa città è interessante. / Historie tohoto města je zajímavá.
+  Poznámka: Obrázek historie neodpovídá současné větě o vyprávění.
+
+vit-0120 | původně piacere = líbit se, potěšení
+  Hlavní návrh: piacere = líbit se
+  Příklad: Mi piace questo posto, è tranquillo e pulito. / Líbí se mi tohle místo, je klidné a čisté.
+  Další: piacere — potěšení: Leggere è un piacere. / Čtení je potěšení.
+  Poznámka: Zachovat samostatnou existující seznamovací reakci Piacere (vit-0018).
+
+vit-0128 | původně male = špatně, zle, bolest, zlo
+  Hlavní návrh: male = špatně; zle
+  Příklad: Oggi sto male, quindi resto a casa. / Dnes se cítím špatně, tak zůstanu doma.
+  Další: male — zlo: Il bene e il male sono opposti. / Dobro a zlo jsou protiklady.
+  Další: fare male — bolet: Mi fa male la testa. / Bolí mě hlava.
+  Poznámka: Bolest neučit stejnou větou jako příslovce špatně.
+
+vit-0153 | původně forza = síla, no tak
+  Hlavní návrh: forza = no tak!; do toho!
+  Příklad: Forza, andiamo! Siamo in ritardo. / No tak, jdeme! Jdeme pozdě.
+  Další: forza — síla: Per aprire questa porta serve molta forza. / K otevření těchto dveří je potřeba velká síla.
+  Poznámka: Hlavní návrh je Interakce; síla je samostatné podstatné jméno.
+
+vit-0170 | původně macchina = auto, vůz, stroj
+  Hlavní návrh: macchina = auto; vůz
+  Příklad: La macchina è dal meccanico, quindi oggi vado in treno. / Auto je u mechanika, takže dnes jedu vlakem.
+  Další: macchina — stroj: Questa macchina serve per tagliare il legno. / Tento stroj slouží k řezání dřeva.
+  Poznámka: Nepřetěžovat jednu ilustraci dvěma různými věcmi.
+
+vit-0182 | původně pronto = připravený, hotový, haló, prosím?
+  Hlavní návrh: pronto = haló?
+  Příklad: Pronto? Chi parla, per favore? / Haló? Kdo mluví, prosím?
+  Další: pronto — připravený; hotový: Sono pronto per partire. / Jsem připravený vyrazit.
+  Poznámka: Telefonní reakce jako Interakce, přídavné jméno zvlášť.
+
+vit-0246 | původně calcio = fotbal, vápník
+  Hlavní návrh: calcio = fotbal
+  Příklad: Mio figlio gioca a calcio con gli amici. / Můj syn hraje s přáteli fotbal.
+  Další: calcio — vápník: Il latte contiene calcio. / Mléko obsahuje vápník.
+  Poznámka: Jedna fotbalová ilustrace nemůže učit chemický prvek.
+
+vit-0255 | původně gli = ti, ty
+  Hlavní návrh: gli = určitý člen, mužský rod množného čísla
+  Příklad: Gli zaini sono nuovi. / Batohy jsou nové.
+  Další: gli — mu; jemu: Gli telefono domani mattina. / Zítra ráno mu zavolám.
+  Poznámka: Výjimka z pravidla hlavní význam podle věty: zachovat identitu původního členu ti/ty, opravit jeho větu; původní věta patří zájmenu. Rozhodnout před ilustrací.
+
+vit-0260 | původně solo = sám, pouze, jen
+  Hlavní návrh: solo = sám
+  Příklad: Oggi sono solo a casa. / Dnes jsem sám doma.
+  Další: solo — pouze; jen: Ho solo cinque minuti. / Mám jen pět minut.
+  Poznámka: Přídavné jméno versus příslovce.
+
+vit-0266 | původně dolce = sladký, sladkost, jemný, něžný
+  Hlavní návrh: dolce = sladký
+  Příklad: Questo tè è troppo dolce. / Tento čaj je příliš sladký.
+  Další: dolce — jemný: Ha una voce dolce. / Má jemný hlas.
+  Další: dolce — dezert; sladkost: Dopo cena mangio un dolce. / Po večeři si dám dezert.
+  Poznámka: Dvě přídavná užití a podstatné jméno; každé s vlastním kontextem.
+
+vit-0295 | původně destro = pravý, a destra vpravo, napravo
+  Hlavní návrh: destro = pravý
+  Příklad: Il braccio destro è più forte. / Pravá paže je silnější.
+  Další: a destra — vpravo; doprava: Gira a destra. / Odboč doprava.
+  Poznámka: Zachovat destro jako přídavné jméno, původní větu použít u a destra.
+
+vit-0331 | původně niente = nic, není zač
+  Hlavní návrh: niente = nic
+  Příklad: Nella scatola non c’è niente. / V krabici nic není.
+  Další: Di niente. — Není zač. (Interakce)
+  Poznámka: Zachovat původní první význam nic, neproměnit UID v reakci na poděkování. Rozhodnout před ilustrací.
+
+vit-0334 | původně perché = proč, protože
+  Hlavní návrh: perché = proč
+  Příklad: Perché parti così presto? / Proč odjíždíš tak brzy?
+  Další: perché — protože: Resto a casa perché piove. / Zůstávám doma, protože prší.
+  Poznámka: Otázka a příčinná spojka.
+
+vit-0343 | původně sentire = cítit, slyšet
+  Hlavní návrh: sentire = slyšet
+  Příklad: Sento un rumore strano. / Slyším zvláštní zvuk.
+  Další: sentire — cítit: Sento il profumo dei fiori. / Cítím vůni květin.
+  Poznámka: Odlišné smyslové vnímání; sluch zůstává hlavním příkladem.
+
+vit-0346 | původně sinistro = levý, a sinistra vlevo, nalevo
+  Hlavní návrh: sinistro = levý
+  Příklad: La mano sinistra mi fa male. / Levá ruka mě bolí.
+  Další: a sinistra — vlevo; doleva: Gira a sinistra. / Odboč doleva.
+  Poznámka: Přídavné jméno a určení směru.
+
+vit-0353 | původně tempo = čas, počasí
+  Hlavní návrh: tempo = čas
+  Příklad: Certamente, ma non per molto tempo. / Určitě, ale ne na dlouho.
+  Další: tempo — počasí: Oggi il tempo è bello. / Dnes je pěkné počasí.
+  Poznámka: Dva běžné významy, nikoli chybná duplicita.
+
+vit-0401 | původně lingua = jazyk
+  Hlavní návrh: lingua = jazyk (řeč)
+  Příklad: Conosce altre lingue straniere? / Znáte jiné cizí jazyky?
+  Další: lingua — jazyk (orgán): La lingua è nella bocca. / Jazyk je v ústech.
+  Poznámka: Původní obrázek orgánu nahrazen kontextem komunikace.
+
+vit-0413 | původně ragione = pravda, důvod
+  Hlavní návrh: avere ragione = mít pravdu
+  Příklad: Già, ha ragione. / Ano, máte pravdu.
+  Další: ragione — důvod: Non conosco la ragione della sua assenza. / Neznám důvod jeho nepřítomnosti.
+  Poznámka: Navržené hlavní heslo avere ragione jako běžné slovesné spojení; změna dosud nepoužitá.
+
+vit-0417 | původně stare = být, mít se, zůstat
+  Hlavní návrh: stare = mít se; být v určitém stavu
+  Příklad: Come sta? Bene, grazie, e Lei? / Jak se máte? Dobře, děkuji, a vy?
+  Další: stare — zůstávat; pobývat: Stasera sto a casa. / Dnes večer zůstanu doma.
+  Poznámka: Ponechat samostatné restare vit-0160, synonymum není totožná karta.
+
+vit-0450 | původně paese = země; stát; vesnice; obec; kraj podle kontextu
+  Hlavní návrh: paese = země; stát
+  Příklad: Il Brasile è un grande paese. / Brazílie je velká země.
+  Další: paese — vesnice; obec: Abito in un piccolo paese vicino al mare. / Bydlím v malé vesnici poblíž moře.
+  Poznámka: Podle věty stát, ne vesnice; kraj bez konkrétního významového kontextu nepřidávat.
+
+vit-0461 | původně congratulazione = gratulace, blahopřání
+  Hlavní návrh: Congratulazioni! = Gratuluji!; Blahopřeji!
+  Příklad: Congratulazioni per il tuo successo! / Gratuluji k tvému úspěchu!
+  Další: congratulazione — gratulace (podstatné jméno, pouze pokud ho chceme samostatně vyučovat)
+  Poznámka: Navržené běžné heslo Congratulazioni! jako Interakce, nikoli idiom.
+
+vit-0463 | původně mai = nikdy, někdy v otázce
+  Hlavní návrh: mai = nikdy
+  Příklad: Non vado mai lì. / Nikdy tam nechodím.
+  Další: mai — někdy; už někdy (v otázce): Hai mai visitato Roma? / Navštívil jsi někdy Řím?
+  Poznámka: Záporná výpověď a otázka mají odlišný český význam.
+
+10 NOVÝCH ILUSTRACÍ K DOPLNĚNÍ:
+vit-0013 portafoglio: Investiční portfolio: graf, rozložení investic; peněženka učí jiný význam.
+vit-0108 éclair: Éclair: podlouhlý odpalovaný zákusek s čokoládovou polevou; nyní je ovocný koláč.
+vit-0115 brioche: Brioche: sladká brioška nebo plněné sladké pečivo; budova pekárny není pečivo.
+vit-0129 stazione: Vlakové nádraží/stanice: budova s nástupištěm; současná autobusová zastávka je užší jiný kontext.
+vit-0136 mese: Měsíc jako časové období: kalendář jednoho měsíce, nikoli Měsíc na obloze.
+vit-0186 rivista: Časopis: otevřený barevný časopis; současná zavřená kniha není časopis.
+vit-0217 euro: Euro: eurové bankovky/mince nebo jasný symbol eura; současný obrázek má dolary.
+vit-0247 pescare: Rybařit: člověk s prutem u řeky; současný talíř s upečenou rybou neukazuje činnost.
+vit-0320 lavarsi: Umýt se/umýt si ruce: ruce pod tekoucí vodou; současná ilustrace pere prádlo.
+vit-0443 anello: Prsten: zlatý prsten na ruce nebo samostatně; současná obruč znázorňuje jiný význam.
+
+3 OBRAZY PO ROZHODNUTÍ O VÝZNAMU:
+vit-0114 storia: Historie versus příběh: vybrat hlavní význam a jeho konkrétní ilustraci.
+vit-0255 gli: Nejprve odlišit určitý člen gli od zájmena gli=mu podle rozhodnutí o kartě.
+vit-0331 niente: Nejprve odlišit niente=nic od reakce Di niente.=Není zač.
+
+Hranice revize: obrazově prohlédnuto všech471 karet, porovnáno16 rozdílů resolverů.
+Tento přehled není doklad úplné jazykové korektury všech471 vět ani ověřeného CEFR.
+Původní témata/slovní druhy/obtížnost zůstávají návrhy. Obrázky mohou obsahovat původní text;
+pro hru bude nutné zvlášť prověřit prozrazení odpovědi a vizuálně shodné alternativy.
+Další krok: rozhodnutí o tomto návrhu, doplnění obrazů, potom exporter a galerie.
+
+JAZYKOVÉ PODKLADY:
+https://www.treccani.it/vocabolario/chiamare/ — chiamare versus chiamarsi
+https://www.treccani.it/vocabolario/niente/ — niente versus Di niente
+https://www.treccani.it/vocabolario/piacere/ — slovesné piacere
+https://www.treccani.it/vocabolario/infatti/ — potvrzení/vysvětlení, proto obraz true
+https://accademiadellacrusca.it/it/consulenza/uso-di-gli-per-a-lui-a-loro-e-a-lei/102 — zájmeno gli = a lui

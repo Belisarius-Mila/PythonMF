@@ -113,7 +113,9 @@ class VocabularyItalianCatalogTests(unittest.TestCase):
         self.assertEqual({entry["primaryGroup"] for entry in entries}, {f"topic-{n:02d}" for n in range(1, 19)})
         self.assertTrue(all(entry["editorialStatus"] == "needs-review" for entry in entries))
         self.assertTrue(all(entry["difficultyStatus"] == "proposed" for entry in entries))
-        self.assertTrue(all(entry["imageFile"] is None and entry["imageStatus"] == "pending-review" for entry in entries))
+        self.assertEqual(sum(entry["imageStatus"] == "reviewed" for entry in entries), 458)
+        self.assertEqual(sum(entry["imageStatus"] == "replacement-needed" for entry in entries), 10)
+        self.assertEqual(sum(entry["imageStatus"] == "pending-review" for entry in entries), 3)
         self.assertTrue(all(entry["legacyAddedAt"] is None for entry in entries))
         self.assertEqual(entries[465]["formOfUid"], "vit-0467")
         self.assertEqual(entries[469]["formOfUid"], "vit-0205")
@@ -121,6 +123,95 @@ class VocabularyItalianCatalogTests(unittest.TestCase):
         for n in (466, 470, 471): self.assertTrue(entries[n - 1]["active"])
         self.assertEqual(sum(entry["teachingType"] == "interaction" for entry in entries), 11)
         self.assertTrue(all(entry["teachingType"] == "word" or not entry["partOfSpeech"] for entry in entries))
+
+    def test_web_corrections_preserve_original_identity_and_reject_stale_sentences(self):
+        rows = copy.deepcopy(self.rows)
+        entries = it.resolve_catalog_rows(rows, self.catalog, require_all=True)
+        text = it.effective_card_text(rows[107], entries[107])
+        self.assertTrue(rows[107]["Sentence"].startswith("Je prends"))
+        self.assertEqual(text["sentenceIt"], "Dopo il pasto prendo un éclair al cioccolato.")
+        self.assertEqual(text["sentenceCz"], rows[107]["SentenceT"])
+        self.assertEqual(it.effective_card_text(rows[210], entries[210])["cz"], "volat; telefonovat")
+        self.assertEqual(entries[210]["uid"], "vit-0211")
+        self.assertEqual(it.resolve_catalog_rows([{**rows[210], "CZ": "volat; telefonovat"}], self.catalog)[0]["uid"], "vit-0211")
+        rows[107]["Sentence"] = "Nová zdrojová věta"
+        with self.assertRaisesRegex(ValueError, "Zdrojová věta"):
+            it.effective_card_text(rows[107], entries[107])
+        with self.assertRaisesRegex(ValueError, "jinému významu"):
+            it.effective_card_text(rows[0], entries[107])
+        self.assertEqual(self.rows, it.load_rows(ROOT / "VocabularyIT/VocabularyIT.csv"))
+
+    def test_review_manifest_pins_content_and_never_claims_pending_images_complete(self):
+        manifest = json.loads((ROOT / "VocabularyIT/vocabulary_it_image_manifest.json").read_text())
+        source_files = self.snapshot["files"]
+        self.assertEqual(manifest["foundationManifestSha256"], it.digest(it.MANIFEST))
+        self.assertEqual(len(manifest["files"]), 383)
+        for path, record in manifest["files"].items():
+            self.assertEqual(record["sha256"], source_files[path]["sha256"])
+            self.assertEqual(record["bytes"], source_files[path]["bytes"])
+        entries = self.catalog["entries"]
+        for entry in entries:
+            if entry["imageStatus"] == "reviewed":
+                self.assertEqual(entry["imageSha256"], manifest["files"][entry["imageFile"]]["sha256"])
+            else:
+                self.assertIsNone(entry["imageFile"])
+        self.assertIsNone(entries[135]["imageFile"])  # month must not silently reuse the Moon
+        self.assertEqual(entries[400]["imageFile"], "Pict/interpreter.webp")  # language, not tongue
+
+    def image_fixture(self, root):
+        source = self.fixture(root)["files"]["Pict/Photo.webp"]
+        catalog = copy.deepcopy(self.catalog)
+        catalog["entries"] = catalog["entries"][:1]
+        entry = catalog["entries"][0]
+        entry.update(imageFile="Pict/Photo.webp", imageSha256=source["sha256"],
+                     imageStatus="reviewed", imageRole="contextual", related=[])
+        manifest = {"schemaVersion": 1, "project": "VocabularyIT-images", "files": {"Pict/Photo.webp": source}}
+        return catalog, manifest
+
+    def test_image_pin_rejects_changed_bytes_case_hash_manifest_and_escape(self):
+        for change in ("bytes", "case", "sha", "missing", "extra", "escape", "malformed"):
+            with self.subTest(change=change), tempfile.TemporaryDirectory() as name:
+                root = Path(name)
+                catalog, manifest = self.image_fixture(root)
+                self.assertTrue(it.verify_image_bindings(root, catalog, manifest, require_complete=True)["complete"])
+                entry = catalog["entries"][0]
+                if change == "bytes": (root / "Pict/Photo.webp").write_bytes(b"different")
+                if change == "sha": entry["imageSha256"] = "0" * 64
+                if change == "missing": manifest["files"] = {}
+                if change == "extra": manifest["files"]["Pict/extra.webp"] = manifest["files"]["Pict/Photo.webp"]
+                if change == "malformed": manifest["files"]["Pict/Photo.webp"] = None
+                if change == "case":
+                    entry["imageFile"] = "Pict/photo.webp"
+                    manifest["files"]["Pict/photo.webp"] = manifest["files"].pop("Pict/Photo.webp")
+                if change == "escape": entry["imageFile"] = "Pict/../Photo.webp"
+                with self.assertRaises(ValueError): it.verify_image_bindings(root, catalog, manifest)
+
+    def test_incomplete_images_cannot_pass_required_complete_check(self):
+        with tempfile.TemporaryDirectory() as name:
+            root = Path(name)
+            catalog, manifest = self.image_fixture(root)
+            entry = catalog["entries"][0]
+            entry.update(imageStatus="replacement-needed", imageFile=None)
+            manifest["files"] = {}
+            proof = it.verify_image_bindings(root, catalog, manifest)
+            self.assertFalse(proof["complete"])
+            self.assertEqual(proof["pendingUids"], [entry["uid"]])
+            with self.assertRaisesRegex(ValueError, "není dokončená"):
+                it.verify_image_bindings(root, catalog, manifest, require_complete=True)
+
+    def test_content_proposals_cannot_silently_split_or_retag_existing_cards(self):
+        review = json.loads((ROOT / "VocabularyIT/vocabulary_it_content_review.json").read_text())
+        self.assertEqual(review["status"], "awaiting-content-decision")
+        self.assertEqual(len(review["items"]), 24)
+        by_uid = {entry["uid"]: entry for entry in self.catalog["entries"]}
+        for proposal in review["items"]:
+            self.assertEqual(proposal["state"], "proposal-not-applied")
+            entry = by_uid[proposal["uid"]]
+            source = proposal["source"]
+            self.assertEqual((entry["it"], entry["cz"]), (source["it"], source["cz"]))
+            self.assertEqual(it.resolve_catalog_rows([{"IT": source["it"], "CZ": source["cz"]}], self.catalog)[0]["uid"], proposal["uid"])
+            self.assertNotIn("sentenceOverride", entry)
+        self.assertEqual(len(by_uid), 471)
 
     def test_source_manifest_has_precise_image_names_and_sha_for_every_pinned_input(self):
         images = {name: record for name, record in self.snapshot["files"].items() if record["kind"] == "image"}

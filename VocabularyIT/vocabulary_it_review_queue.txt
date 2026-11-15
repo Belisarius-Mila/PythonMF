@@ -3,7 +3,9 @@ Datum:15.11.2026
 
 Všech471 karet je zachovaných a všechna metadata jsou návrhy k revizi.
 Tato fronta vyznačuje112 prioritních karet. Nejde o112 prokázaných chyb.
-U všech471 bude ve druhém bodu potvrzený konkrétní obrázek podle významu/věty.
+Aktualizace bod2:458 obrazových vazeb připnutých;13 nehotových.
+24 významových návrhů viz vocabulary_it_content_review.txt/json (zatím nepoužité).
+Níže je zachovaný seznam112 prioritních případů z bodu1, nikoli stav všech nevyřešených obrazů.
 Původní texty, rody, L/HT, obrázky a mapping se při založení fronty nezměnily.
 
 Kódy důvodu:

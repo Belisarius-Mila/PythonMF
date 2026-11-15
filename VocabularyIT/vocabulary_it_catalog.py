@@ -109,6 +109,25 @@ def validate_catalog(catalog: dict) -> dict:
         if identity(entry.get("it"), entry.get("cz")) not in {
                 identity(match["it"], match["cz"]) for match in matches}:
             raise ValueError(f"Hlavní význam není mezi aliasy {uid}.")
+        image_status = entry.get("imageStatus")
+        if image_status not in {"pending-review", "replacement-needed", "reviewed"}:
+            raise ValueError(f"Neplatný stav obrazové revize {uid}.")
+        image_file = entry.get("imageFile")
+        if image_status == "reviewed":
+            if (not isinstance(image_file, str) or not image_file.startswith("Pict/")
+                    or len(PurePosixPath(image_file).parts) != 2
+                    or PurePosixPath(image_file).as_posix() != image_file
+                    or PurePosixPath(image_file).suffix.lower() not in IMAGE_SUFFIXES
+                    or not re.fullmatch(r"[0-9a-f]{64}", entry.get("imageSha256", ""))
+                    or entry.get("imageRole") not in {"literal", "contextual", "mnemonic"}):
+                raise ValueError(f"Neúplná připnutá ilustrace {uid}.")
+        elif image_file is not None:
+            raise ValueError(f"Nevyřešená ilustrace má schválenou cestu {uid}.")
+        override = entry.get("sentenceOverride")
+        if override is not None and (not isinstance(override, dict)
+                or set(override) != {"sourceIt", "sourceCz", "it", "cz"}
+                or not all(isinstance(value, str) and value.strip() for value in override.values())):
+            raise ValueError(f"Neplatná oprava příkladové věty {uid}.")
         uids.add(uid)
         ids.add(number)
     for entry in entries:
@@ -147,6 +166,50 @@ def resolve_catalog_rows(rows: list[dict], catalog: dict, *, require_all: bool =
     return result
 
 
+def effective_card_text(row: dict, entry: dict) -> dict:
+    """Apply reviewed web text without rewriting the original desktop CSV."""
+    if identity(row.get("IT"), row.get("CZ")) not in {
+            identity(match["it"], match["cz"]) for match in entry["matches"]}:
+        raise ValueError("Oprava textu patří jinému významu.")
+    sentence_it, sentence_cz = row["Sentence"], row["SentenceT"]
+    override = entry.get("sentenceOverride")
+    if override:
+        if (sentence_it, sentence_cz) != (override["sourceIt"], override["sourceCz"]):
+            raise ValueError(f"Zdrojová věta se změnila; znovu posuď opravu {entry['uid']}.")
+        sentence_it, sentence_cz = override["it"], override["cz"]
+    return {"it": entry["it"], "cz": entry["cz"], "sentenceIt": sentence_it,
+            "sentenceCz": sentence_cz, "genderIt": row["gender_it"]}
+
+
+def verify_image_bindings(root: Path, catalog: dict, manifest: dict, *, require_complete: bool = False) -> dict:
+    """No heuristic or fallback may replace a reviewed, exact-case image pin."""
+    validate_catalog(catalog)
+    if manifest.get("schemaVersion") != 1 or manifest.get("project") != "VocabularyIT-images":
+        raise ValueError("Neznámý manifest obrazové revize.")
+    ready = [entry for entry in catalog["entries"] if entry["imageStatus"] == "reviewed"]
+    pending = [entry["uid"] for entry in catalog["entries"] if entry["imageStatus"] != "reviewed"]
+    files = manifest.get("files")
+    if not isinstance(files, dict) or set(files) != {entry["imageFile"] for entry in ready}:
+        raise ValueError("Manifest nepokrývá přesně připnuté obrázky.")
+    expected_paths = {path.name for path in (root / "Pict").iterdir() if path.is_file()}
+    for relative, record in files.items():
+        path = root / relative
+        if (not isinstance(record, dict) or type(record.get("bytes")) is not int
+                or record["bytes"] < 1 or not isinstance(record.get("sha256"), str)
+                or not re.fullmatch(r"[0-9a-f]{64}", record["sha256"])
+                or PurePosixPath(relative).name not in expected_paths or not path.is_file()
+                or not path.resolve().is_relative_to(root.resolve())
+                or path.stat().st_size != record["bytes"] or digest(path) != record["sha256"]):
+            raise ValueError(f"Změněná nebo nepřesná ilustrace {relative}.")
+    for entry in ready:
+        if files[entry["imageFile"]]["sha256"] != entry["imageSha256"]:
+            raise ValueError(f"Ilustrace je svázaná s jiným obsahem {entry['uid']}.")
+    if require_complete and pending:
+        raise ValueError(f"Obrazová revize není dokončená: zbývá {len(pending)} karet.")
+    return {"readyCards": len(ready), "verifiedImages": len(files), "pendingUids": pending,
+            "complete": not pending, "exact": True}
+
+
 def verify_input_manifest(root: Path, manifest: dict) -> dict:
     """Verify pinned bytes and exact case against canonical or frozen inputs."""
     root = root.resolve()
@@ -178,13 +241,25 @@ def verify_input_manifest(root: Path, manifest: dict) -> dict:
     return {"verifiedFiles": len(files), "verifiedImages": len(expected_images), "exact": True}
 
 
-def audit(root: Path, catalog_path: Path = CATALOG, manifest_path: Path = MANIFEST) -> dict:
+def audit(root: Path, catalog_path: Path = CATALOG, manifest_path: Path = MANIFEST,
+          image_manifest_path: Path | None = None, *, require_complete_images: bool = False) -> dict:
     catalog = load_catalog(catalog_path)
     manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
     proof = verify_input_manifest(root, manifest)
     rows = load_rows(root / "VocabularyIT/VocabularyIT.csv")
     entries = resolve_catalog_rows(rows, catalog, require_all=True)
-    return {**proof, "cards": len(rows), "identities": len({entry["uid"] for entry in entries}),
+    for row, entry in zip(rows, entries):
+        effective_card_text(row, entry)
+    image_proof = {}
+    if image_manifest_path is not None:
+        image_manifest = json.loads(image_manifest_path.read_text(encoding="utf-8"))
+        if image_manifest.get("foundationManifestSha256") != digest(manifest_path):
+            raise ValueError("Obrazová revize patří jinému vstupnímu snímku.")
+        image_proof = {"imageBindings": verify_image_bindings(
+            root, catalog, image_manifest, require_complete=require_complete_images)}
+    elif require_complete_images:
+        raise ValueError("Úplnost obrazů vyžaduje obrazový manifest.")
+    return {**proof, **image_proof, "cards": len(rows), "identities": len({entry["uid"] for entry in entries}),
             "topics": len(catalog["groups"]), "allActive": all(entry["active"] for entry in entries),
             "metadataStatus": catalog["metadataStatus"],
             "highPriorityReview": [{"uid": entry["uid"], "it": entry["it"], "cz": entry["cz"],
@@ -202,9 +277,12 @@ def main() -> None:
     parser.add_argument("--root", type=Path, default=ROOT, help="Kanonický nebo zmrazený kořen vstupů.")
     parser.add_argument("--catalog", type=Path, default=CATALOG)
     parser.add_argument("--manifest", type=Path, default=MANIFEST)
+    parser.add_argument("--image-manifest", type=Path)
+    parser.add_argument("--require-complete-images", action="store_true")
     args = parser.parse_args()
     try:
-        result = audit(args.root, args.catalog, args.manifest)
+        result = audit(args.root, args.catalog, args.manifest, args.image_manifest,
+                       require_complete_images=args.require_complete_images)
     except (OSError, ValueError) as exc:
         parser.exit(2, f"Kontrola Vocabulary IT selhala: {exc}\n")
     print(json.dumps(result, ensure_ascii=False, indent=2))
