@@ -2044,3 +2044,25 @@ v logs/agent_supervisor_sleep_release_20261114.log.
 
 Další krok: Jediné registrované Terra p+n a ověření živého scheduled tiku;
 potom přejímka další skutečné noci. Nic uměle neuspávat ani nepřesílat.
+
+
+## 2026-11-15 10:34 CET — Úklid SSD a ověřená šifrovaná záloha
+
+Hotovo: SSD skutečně +12,66 GiB, schválených osm kopií a18 autosave souborů
+odstraněno po zachování potřebných souborů. Recovery `20261115_100224` a
+Camino `20261115_102018-a9791da6` ověřené; služby opět zdravé.
+
+Rozhodnutí: Míla výslovně schválil rozsah úklidu globální brzdou a navazující
+recovery zálohu. Zachované aktivní worktrees, větve a starší snapshoty.
+Atomicky oddělena pouze evidence nového snapshotu, aby dokončení nepřepsalo staré hardlinky.
+
+Další krok: Před další zálohou trvale opravit atomické nahrazení cíle activity_state.
+
+Navrhované další kroky: Úplná instalace a přejímka náhradního Macu zůstává samostatná;
+dřívější fyzická přejímka dohlížitele/recovery návodu se tímto neuzavírá.
+
+Technický důkaz:139871 souborů/0 skipped; čtyři DB,316 originálů; pět SHA
+shod, čtyři skutečné obnovy a Git connectivity PASS.33 starých evidenčních souborů
+SHA/mtime před/po stejné. Současný0601ecba měnil jen memory; výchozí2779af14
+a novější Git zaznamenané odděleně, žádný atomický obraz všech souborů se netvrdí.
+Report s bezpečnými čísly ssd_cleanup_backup_20261115.md; soukromé účtenky mimo Git.

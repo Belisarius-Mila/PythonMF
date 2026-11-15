@@ -2630,3 +2630,16 @@ Finální ověření tohoto kroku: plná brána3920 PASS /706,416s unit část,3
 - Kontext: Jednotlivé a tematické doplňování nesmí přidělit stejné UID dvěma významům, znovu vyrábět hotové zvuky nebo po výpadku přepsat pozdější změnu.
 - Řešení: Jeden preview/prepare/apply pro položku/list/CSV, pevný input/source digest, rezervace UID ve writer lease určeného autorského workspace a staged kompletní artefakty. Před každým zápisem kontrola původních/očekávaných bajtů, včetně čerstvě přečteného staged souboru. Dokončený request je replay bez mutace; requested/uncertain zvuk bez souboru se neopakuje.
 - Ověření: Skutečný process exit uprostřed apply, přesná obnova, dva souběžné připravované requesty, změna zdroje i staged dat za běhu. První skutečná dávka10 částí těla applied jednou,40MP3 a replay bez generování;90 cílených Python včetně56 Node PASS. Všech442 původních položek i2568 médií zachovaných.
+
+
+### 2026-11-15 — Evidenci snapshotu nepřepisovat přes sdílený hardlink
+
+- Kontext: inkrementální recovery nejprve hardlinkuje nezměněný activity_state.json,
+  ale po dokončení jej přepisuje přes wb. Potvrzeno34 linků včetně nové kopie.
+- Řešení pro tento běh: ještě před dokončením nahradit pouze položku nového
+  snapshotu samostatnou kopií se stejnými bajty přes atomické os.replace.
+  Při změně zdroje/identity nebo již dokončeném manifestu zásah zastavit.
+- Ověření: nový cíl má jeden link, obsah a mtime všech33 starších evidencí
+  před/po shodné, nová evidence odpovídá dokončené záloze. Report
+  ssd_cleanup_backup_20261115.md. Trvalá oprava programu zatím není provedena;
+  před další zálohou ji řešit a otestovat regresi nezměněných starších snapshotů.

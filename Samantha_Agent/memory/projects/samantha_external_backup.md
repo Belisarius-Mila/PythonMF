@@ -2,6 +2,18 @@
 
 Projekt zalozen 2026-05-19.
 
+## 2026-11-15 10:34 CET — Úklid SSD a ověřená recovery záloha
+
+Úklid hotový: skutečně +12,66 GiB; osm schválených čistých kopií a18 starých
+autosave souborů odstraněno, potřebné ignorované soubory i aktivní Data zachované.
+Recovery `20261115_100224` a Camino `20261115_102018-a9791da6` dokončené:
+139871/0 skipped, čtyři DB a316 originálů, pět SHA shod a čtyři skutečné obnovy PASS.
+Služby zdravé, backup_status15.11. Při závěru SSD34.29 GiB volno.
+Dnešní ochrana samostatné evidenční kopie zachovala33 starších souborů beze změny.
+Další krok: před další zálohou trvale opravit přepis activity_state přes hardlink.
+Souběh byl pouze dokumentační2779af14→0601ecba; snapshot není atomický obraz Macu.
+Podrobnosti reports/ssd_cleanup_backup_20261115.md; citlivé účtenky mimo Git.
+
 ## Aktuální integrační stav 2026-11-08 20:51 CET
 
 Pět dokončených Datových commitů lokálně integrováno do main. Plná brána 3289 testů OK (31 skipped).
