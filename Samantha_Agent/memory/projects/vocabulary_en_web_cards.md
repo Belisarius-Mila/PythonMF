@@ -1342,3 +1342,26 @@ Navrhované další kroky: Po vydání ověřit veřejné soubory a fyzický tel
 Technický důkaz:47 integračních Python testů a statická brána PASS,
 82 původních zelených zdrojů a12 nezávislých main souborů přesně zachovaných.
 Žádný nový obsah ani média se negenerují; samostatný TVBCP není sjednaný.
+
+
+## 2026-11-15 10:07 CET — Terra Pages p+n dokončené a veřejně ověřené
+
+Hotovo: Deset částí těla s obrázky, větami a audiem je veřejně ve Vocabulary EN.
+Slovník má452 záznamů/442 aktivních; původní karty a osobní identity zachované.
+Rozhodnutí: Dokončený celý Mílou schválený společný push sedmi commitů,
+včetně čtyř Willových. Cílem tohoto vydání byl Vocabulary EN/Pages;
+Cockpit se nerestartoval a jeho běžící proces/kód jsou shodné s výchozím stavem.
+Další krok: Fyzická přejímka částí těla a osobních výběrů A–D na telefonu.
+Navrhované další kroky: Další tematické dávky přes hotový autorský postup;
+Oxford nadále čeká na odpověď. Nasazení Willova Cockpit UI je samostatný cíl.
+Technický důkaz:2779af14, job5cf76b0c85a854c64b04a003c7cf1356 completed,
+Terra/high, push+deploy confirmed, plná brána3938 PASS/868,3s. Pages
+workflow43697487353/deployment7801188909, vocabulary-en/ HTTP200.
+71/71 veřejných souborů má přesnou velikost/SHA-256 předaného headu;
+452/442 a všech10 nových UID potvrzených veřejným JSON. Živý GitHub head shodný.
+Protected services unchanged; fyzický iPhone tímto není ověřený. Původní
+caller účtenka převzatá; portálový returned_to_adam není potvrzený a není
+důvodem retry. Dávku ani publikaci neopakovat. Soukromá autorita:
+vocabulary_authoring_release_20261115/release_receipt.json a public_verification.json.
+Závěrečný dokumentační checkpoint zůstává místně pro další běžný balíček;
+produkční soubory nemění a nový deployment nevyžaduje. Bez nového TVBCP.
