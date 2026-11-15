@@ -1556,3 +1556,27 @@ Tento přípravný zápis ještě nepotvrzuje spuštění jobu, push ani nasazen
 Integrační brána dokončena: validation-v3 targeted155 PASS, 124.4s,
 receipt cf17dc0c5b05b7d59c6e561e63c9f65b21048cf36eb028b9275fdc6cd9d74ff2.
 Kontrola diff --check bez nálezu; funkční zdroje proti5adee00a beze změny.
+
+
+### 2026-11-15 18:48 CET — Hra a poslední slovíčka vydané na Pages
+
+Hotovo: Na veřejné Vocabulary EN je Poslechni a vyber obrázek i filtr
+posledních N karet. Původní slovník, profily a média zachované.
+
+Rozhodnutí: Provedené schválené p+n jedinou registrovanou cestou;
+žádné další modelové předání, změna rolí ani restart Cockpitu.
+
+Další krok: Mílova přejímka veřejné hry, zejména na telefonu.
+
+Navrhované další kroky: Pozdější rozšíření vhodných herních významů; Oxford nezávisle.
+
+Technický důkaz: Vydaný commit ffa62f7fd3eb3d6397079a20160aaba4846057d1,
+job2838a4ef7a46734dca52f45adc67c9ea completed, push/deploy confirmed.
+Brána validation-v3 targeted155 PASS; HTTP200. Pages deployment7807368101,
+workflow43742983160. Veřejných6/6 HTML/JS/CSS/katalog souborů bajtově přesných
+proti vydanému commitu a vzdálený main shodný. Chráněné služby beze změny.
+returned_to_adam=false pro terminálový caller; automatický návrat nepotvrzen,
+hlavní Adam účtenku a veřejné zdroje jednou zkontroloval v původní relaci.
+Fyzický iPhone a lidská přejímka všech nahrávek otevřené. Soukromé důkazy
+vocabulary_picture_quiz_release_20261115/release_result.json a public_sources.json.
+Závěrečný dokumentační checkpoint je lokální; nevyžaduje další Pages vydání.

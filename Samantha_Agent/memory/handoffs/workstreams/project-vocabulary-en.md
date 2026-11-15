@@ -4,9 +4,9 @@ Nazev: Vocabulary EN
 Pracovni proud: project-vocabulary-en
 Typ: Project
 Priorita: 2
-Stav: p+n schvalene, pripravena integrace do main a Pages vydani
+Stav: hra a filtr poslednich N verejne vydane, cekaji na telefonni prejimku
 Pripomenout pri startu: ne
-Datum: 2026-11-15 18:38 CET
+Datum: 2026-11-15 18:48 CET
 
 Co se resilo:
 Hra Poslechni a vyber obrázek se4 možnostmi a vyhodnocením; posledně přidaných N.
@@ -20,13 +20,15 @@ Co je hotove:
   homofony/související významy a konflikty nevytvoří nejednoznačnou čtveřici.
 - Návrat, historie, přerušení zvuku, chyby souborů a malé výběry ošetřené.
 - Zachovaná všechna522 UID/512 aktivních karet,18 témat, A–D a původní média.
+- Pages vydání ffa62f7f potvrzené; všech6 změněných veřejných zdrojů přesných.
 
 Co neni hotove:
-Veřejné vydání nové hry, fyzický telefon a úplná obrazová/hlasová přejímka
-první sady. Starší publikační zápisy níže nejsou novým živým auditem.
+Fyzický telefon a úplná obrazová/hlasová přejímka první sady.
+Automatický návrat v účtence returned_to_adam=false (terminálový caller);
+výsledek hlavní Adam zkontroloval přímo v této relaci.
 
 Dalsi krok:
-Dokončit přesnou integraci a jediné registrované Pages p+n; výsledek jen z nové účtenky.
+Mílova přejímka hry a filtru na produkci, zejména na telefonu.
 
 Navrhovane dalsi kroky:
 Rozšíření herního výběru podle jednoznačnosti ilustrací; Oxford nezávisle.
@@ -37,12 +39,10 @@ docs/data/vocabulary-en-quiz.json; test_vocabularyen_selection.js,
 test_vocabularyen_gallery.py; GALLERY_AUTHORING.txt.
 
 Bezpecnost / neukladat:
-Data worktree ebbd na data/parallel-20261104 nad b0d89adb; main/Will nedotčené.
-Origin mezitím pokročil na de3899b1 (Osel). Místní brána používá explicitní
-společný základ b0d89adb. Míla nyní schválil p+n; připravená integrační
-větev data/vocabulary-picture-release-20261115 nad de3899b1 zachovává
-obě historie. Před vydáním musí projít brána spojeného kandidáta.
-Soukromé důkazy data/private/vocabulary_picture_quiz_20261115/.
+Zdroj Data5adee00a integrován bez konfliktů přes ffa62f7f nad de3899b1.
+Zveřejněná Osel oprava zachovaná; přesný vydaný main/GitHub ffa62f7f.
+Privátní důkazy data/private/vocabulary_picture_quiz_release_20261115/.
+Žádná opakovaná publikace; jediný job2838a4ef7a46734dca52f45adc67c9ea dokončen.
 Hra neukládá osobní výsledky do profilů, nemění vybraná/obtížná ani PIN.
 Herní filtry jen sessionStorage, galerie používá své dosavadní úložiště.
 Nový TVBCP nedohodnutý, nevzniká. Nic z původních dávek znovu negenerovat.
@@ -1132,3 +1132,27 @@ Tento přípravný zápis ještě nepotvrzuje spuštění jobu, push ani nasazen
 Integrační brána dokončena: validation-v3 targeted155 PASS, 124.4s,
 receipt cf17dc0c5b05b7d59c6e561e63c9f65b21048cf36eb028b9275fdc6cd9d74ff2.
 Kontrola diff --check bez nálezu; funkční zdroje proti5adee00a beze změny.
+
+
+### 2026-11-15 18:48 CET — Hra a poslední slovíčka vydané na Pages
+
+Hotovo: Na veřejné Vocabulary EN je Poslechni a vyber obrázek i filtr
+posledních N karet. Původní slovník, profily a média zachované.
+
+Rozhodnutí: Provedené schválené p+n jedinou registrovanou cestou;
+žádné další modelové předání, změna rolí ani restart Cockpitu.
+
+Další krok: Mílova přejímka veřejné hry, zejména na telefonu.
+
+Navrhované další kroky: Pozdější rozšíření vhodných herních významů; Oxford nezávisle.
+
+Technický důkaz: Vydaný commit ffa62f7fd3eb3d6397079a20160aaba4846057d1,
+job2838a4ef7a46734dca52f45adc67c9ea completed, push/deploy confirmed.
+Brána validation-v3 targeted155 PASS; HTTP200. Pages deployment7807368101,
+workflow43742983160. Veřejných6/6 HTML/JS/CSS/katalog souborů bajtově přesných
+proti vydanému commitu a vzdálený main shodný. Chráněné služby beze změny.
+returned_to_adam=false pro terminálový caller; automatický návrat nepotvrzen,
+hlavní Adam účtenku a veřejné zdroje jednou zkontroloval v původní relaci.
+Fyzický iPhone a lidská přejímka všech nahrávek otevřené. Soukromé důkazy
+vocabulary_picture_quiz_release_20261115/release_result.json a public_sources.json.
+Závěrečný dokumentační checkpoint je lokální; nevyžaduje další Pages vydání.
