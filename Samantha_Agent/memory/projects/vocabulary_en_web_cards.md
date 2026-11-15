@@ -1455,3 +1455,39 @@ Obrázky:13 nových vestavěným imagegen,1 úprava every bez prozrazujícího t
 Doklady: data/private/vocabulary_lake_batch3_20261115/. Vlastní větev navazuje
 na8728c196 (předchozí dávka), základ d141d030. Produkce ani fyzická přejímka
 se tímto zápisem nepotvrzují. Samostatný Vocabulary EN TVBCP nebyl dohodnutý.
+
+
+## 2026-11-15 13:18 CET — Dokončení posledních dvaceti návrhů MMTX
+
+Hotovo: Místně doplněno dalších 20 karet: everyone, they, them, our, those, must, may, look like, look for, find out, cut down, take away, no one, one step at a time, See you there., call, too, turn, stag, fishing hut.
+Posledních 15 nových hesel původního seznamu, tři nové významy call/too/turn
+a dva výslovně vybrané doplňky stag a fishing hut mají EN/CZ příklad,
+pevnou ilustraci, náhled a čtyři audio reference. Nyní 522 záznamů,
+512 aktivních: 492 Slovíček a 20 Interakcí, stále 18 témat.
+Rozhodnutí: Míla výslovně zadal poslední dvacítku včetně všech tří významů
+a dvou doplňků s jelenem. Call=svolat/přivolat, too=příliš, turn=řada ve hře
+mají vlastní UID; původní významy se nemění. Stag=jelení samec doplňuje deer.
+See you there. patří do Interakcí. Nové p+n nebylo zadáno.
+Další krok: Samostatně schválené Pages p+n čtyř místních dávek (10+20+20+20).
+Navrhované další kroky: Telefonní přejímka nových 70 karet, vět a profilů A–D;
+Oxford zůstává samostatně otevřený. Původní návrh 65+3+2 je obsahově dokončený.
+Technický důkaz: 52 Python testů PASS/32.175s včetně 51 selection a 5 learners
+Node scénářů; statická brána PASS. Všech 502 původních identit zachovaných, 499 karet i katalogových záznamů
+přesně shodných. U call/too/turn přibyly pouze tři vzájemné vazby related
+na nové významy v katalogu i exportu; ostatní pole shodná.2927 médií
+bajtově zachovaných, CSV prefix i CRLF beze změny.
+77 nových MP3 dekódovaných, 80 nových referencí ověřených. Tři anglická
+hesla sdílejí stávající audio přesného textu/hlasu/tempa. 20 náhledů WebP
+zkontrolovaných, 120/120 místních HTTP souborů má shodné bajty/SHA;
+145 zdrojů/dat/testů/médií zmrazených po ověření. Aria/Vlasta,−10%.
+16 ilustrací vytvořeno vestavěným imagegen, 4 převzaté včetně jeleního samce.
+Nové karty nejsou přiřazené do A–D/Benji; stávající identity a výběry zachované.
+Autorský i aplikační kód beze změny; ve třech existujících testech pouze
+nové inventární počty včetně další Interakce a jelena v tématu Zvířata.
+Plná publikační brána zůstává povinná při samostatném p+n.
+UID ven-0503 až ven-0522, request lake-vocabulary-batch4-20261115-v1 je applied,
+digest f404ac10b079ea2631c592949c684447bd295f58ee9bc2d197ae8e53f9968353. Hotové dávky a média znovu negenerovat.
+Vlastní větev navazuje na6615b75d nad d141d030; společný main ani Willovy
+změny se tímto krokem nemění. Privátní důkazy: vocabulary_lake_batch4_20261115.
+Publikace, poslech člověkem ani fyzická přejímka nejsou tímto potvrzené.
+Samostatný Vocabulary EN TVBCP nebyl dohodnutý; handoff/projekt/registry zapsané.

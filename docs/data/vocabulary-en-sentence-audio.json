@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "kind": "sentences",
   "source": "VocabularyEN/VocabularyEN.csv",
-  "sourceDigest": "325953b4f46606f4e1b88f125c6f5b45aafdbc6b1b93c12e5c2b133e97ad00c3",
+  "sourceDigest": "274f079dc59ff32f64f6b7eb1d96649fcd02085f10d0af119d0a7b8d411512db",
   "rate": "-10%",
   "voices": {
     "en": {
@@ -5538,11 +5538,231 @@
       "spokenCz": "Potřebuje někdo pomoc?",
       "en": "assets/vocabulary-en-sentences/en-us-aria-neural/650110ab80773529b452.mp3",
       "cz": "assets/vocabulary-en-sentences/cs-cz-vlasta-neural/2a8e9bc8ad6a1f1f7a15.mp3"
+    },
+    "ven-0503": {
+      "uid": "ven-0503",
+      "sourceEn": "everyone",
+      "sourceCz": "všichni; každý",
+      "sourceSentenceEn": "Everyone is here.",
+      "sourceSentenceCz": "Všichni jsou tady.",
+      "spokenEn": "Everyone is here.",
+      "spokenCz": "Všichni jsou tady.",
+      "en": "assets/vocabulary-en-sentences/en-us-aria-neural/dda05c8c982409c20b12.mp3",
+      "cz": "assets/vocabulary-en-sentences/cs-cz-vlasta-neural/66482ff31541d2e6a7c2.mp3"
+    },
+    "ven-0504": {
+      "uid": "ven-0504",
+      "sourceEn": "they",
+      "sourceCz": "oni; ony; ona",
+      "sourceSentenceEn": "They are playing.",
+      "sourceSentenceCz": "Oni si hrají.",
+      "spokenEn": "They are playing.",
+      "spokenCz": "Oni si hrají.",
+      "en": "assets/vocabulary-en-sentences/en-us-aria-neural/3195c82dbb41da6dbc22.mp3",
+      "cz": "assets/vocabulary-en-sentences/cs-cz-vlasta-neural/b20546f4c69e11596093.mp3"
+    },
+    "ven-0505": {
+      "uid": "ven-0505",
+      "sourceEn": "them",
+      "sourceCz": "je; jim",
+      "sourceSentenceEn": "I can help them.",
+      "sourceSentenceCz": "Mohu jim pomoci.",
+      "spokenEn": "I can help them.",
+      "spokenCz": "Mohu jim pomoci.",
+      "en": "assets/vocabulary-en-sentences/en-us-aria-neural/1818c2e87158c284b44a.mp3",
+      "cz": "assets/vocabulary-en-sentences/cs-cz-vlasta-neural/1cd0aa3d046fe8420ef0.mp3"
+    },
+    "ven-0506": {
+      "uid": "ven-0506",
+      "sourceEn": "our",
+      "sourceCz": "náš",
+      "sourceSentenceEn": "This is our boat.",
+      "sourceSentenceCz": "Tohle je naše loď.",
+      "spokenEn": "This is our boat.",
+      "spokenCz": "Tohle je naše loď.",
+      "en": "assets/vocabulary-en-sentences/en-us-aria-neural/c4127fafe342e16dfa59.mp3",
+      "cz": "assets/vocabulary-en-sentences/cs-cz-vlasta-neural/96e6e4d50bef578b8f7b.mp3"
+    },
+    "ven-0507": {
+      "uid": "ven-0507",
+      "sourceEn": "those",
+      "sourceCz": "tamti; tamty; tamta",
+      "sourceSentenceEn": "Those houses are old.",
+      "sourceSentenceCz": "Tamty domy jsou staré.",
+      "spokenEn": "Those houses are old.",
+      "spokenCz": "Tamty domy jsou staré.",
+      "en": "assets/vocabulary-en-sentences/en-us-aria-neural/ff17ec0d33df77646f6c.mp3",
+      "cz": "assets/vocabulary-en-sentences/cs-cz-vlasta-neural/d58959eed00e0791653a.mp3"
+    },
+    "ven-0508": {
+      "uid": "ven-0508",
+      "sourceEn": "must",
+      "sourceCz": "muset",
+      "sourceSentenceEn": "I must do my homework.",
+      "sourceSentenceCz": "Musím udělat domácí úkol.",
+      "spokenEn": "I must do my homework.",
+      "spokenCz": "Musím udělat domácí úkol.",
+      "en": "assets/vocabulary-en-sentences/en-us-aria-neural/2c00feef4545e81349aa.mp3",
+      "cz": "assets/vocabulary-en-sentences/cs-cz-vlasta-neural/659d050c18068eba08bd.mp3"
+    },
+    "ven-0509": {
+      "uid": "ven-0509",
+      "sourceEn": "may",
+      "sourceCz": "možná; může se stát, že",
+      "sourceSentenceEn": "It may rain tonight.",
+      "sourceSentenceCz": "Dnes večer možná bude pršet.",
+      "spokenEn": "It may rain tonight.",
+      "spokenCz": "Dnes večer možná bude pršet.",
+      "en": "assets/vocabulary-en-sentences/en-us-aria-neural/3dc6151c6c4ccfa3fe35.mp3",
+      "cz": "assets/vocabulary-en-sentences/cs-cz-vlasta-neural/020008346aec69a1bb93.mp3"
+    },
+    "ven-0510": {
+      "uid": "ven-0510",
+      "sourceEn": "look like",
+      "sourceCz": "vypadat jako",
+      "sourceSentenceEn": "These clouds look like ears.",
+      "sourceSentenceCz": "Tyto mraky vypadají jako uši.",
+      "spokenEn": "These clouds look like ears.",
+      "spokenCz": "Tyto mraky vypadají jako uši.",
+      "en": "assets/vocabulary-en-sentences/en-us-aria-neural/00183008955a5dfc5568.mp3",
+      "cz": "assets/vocabulary-en-sentences/cs-cz-vlasta-neural/b29c0c380583426b1f16.mp3"
+    },
+    "ven-0511": {
+      "uid": "ven-0511",
+      "sourceEn": "look for",
+      "sourceCz": "hledat",
+      "sourceSentenceEn": "We look for the boat.",
+      "sourceSentenceCz": "Hledáme loď.",
+      "spokenEn": "We look for the boat.",
+      "spokenCz": "Hledáme loď.",
+      "en": "assets/vocabulary-en-sentences/en-us-aria-neural/9132c19de2ad0550c346.mp3",
+      "cz": "assets/vocabulary-en-sentences/cs-cz-vlasta-neural/1dcbb48490f856627267.mp3"
+    },
+    "ven-0512": {
+      "uid": "ven-0512",
+      "sourceEn": "find out",
+      "sourceCz": "zjistit",
+      "sourceSentenceEn": "We want to find out what is inside.",
+      "sourceSentenceCz": "Chceme zjistit, co je uvnitř.",
+      "spokenEn": "We want to find out what is inside.",
+      "spokenCz": "Chceme zjistit, co je uvnitř.",
+      "en": "assets/vocabulary-en-sentences/en-us-aria-neural/903e7a7f27e37d13b5fb.mp3",
+      "cz": "assets/vocabulary-en-sentences/cs-cz-vlasta-neural/bb6d82959531a838a6d0.mp3"
+    },
+    "ven-0513": {
+      "uid": "ven-0513",
+      "sourceEn": "cut down",
+      "sourceCz": "pokácet",
+      "sourceSentenceEn": "They cut down a sick tree.",
+      "sourceSentenceCz": "Kácejí nemocný strom.",
+      "spokenEn": "They cut down a sick tree.",
+      "spokenCz": "Kácejí nemocný strom.",
+      "en": "assets/vocabulary-en-sentences/en-us-aria-neural/a0b91538092baa2872e0.mp3",
+      "cz": "assets/vocabulary-en-sentences/cs-cz-vlasta-neural/a7ea14d278f54acf05b2.mp3"
+    },
+    "ven-0514": {
+      "uid": "ven-0514",
+      "sourceEn": "take away",
+      "sourceCz": "odnést; odvézt",
+      "sourceSentenceEn": "We take the bags away.",
+      "sourceSentenceCz": "Odnášíme tašky pryč.",
+      "spokenEn": "We take the bags away.",
+      "spokenCz": "Odnášíme tašky pryč.",
+      "en": "assets/vocabulary-en-sentences/en-us-aria-neural/65c1d53129eb44e0b681.mp3",
+      "cz": "assets/vocabulary-en-sentences/cs-cz-vlasta-neural/200871ef3e255306893d.mp3"
+    },
+    "ven-0515": {
+      "uid": "ven-0515",
+      "sourceEn": "no one",
+      "sourceCz": "nikdo",
+      "sourceSentenceEn": "No one is in the hut.",
+      "sourceSentenceCz": "V chatrči nikdo není.",
+      "spokenEn": "No one is in the hut.",
+      "spokenCz": "V chatrči nikdo není.",
+      "en": "assets/vocabulary-en-sentences/en-us-aria-neural/382569c7e474f18d7aa1.mp3",
+      "cz": "assets/vocabulary-en-sentences/cs-cz-vlasta-neural/54b500159f6f60652288.mp3"
+    },
+    "ven-0516": {
+      "uid": "ven-0516",
+      "sourceEn": "one step at a time",
+      "sourceCz": "postupně; krok za krokem",
+      "sourceSentenceEn": "We go one step at a time.",
+      "sourceSentenceCz": "Postupujeme krok za krokem.",
+      "spokenEn": "We go one step at a time.",
+      "spokenCz": "Postupujeme krok za krokem.",
+      "en": "assets/vocabulary-en-sentences/en-us-aria-neural/b7a912799e45deea019a.mp3",
+      "cz": "assets/vocabulary-en-sentences/cs-cz-vlasta-neural/888513917ec9a803eccc.mp3"
+    },
+    "ven-0517": {
+      "uid": "ven-0517",
+      "sourceEn": "See you there.",
+      "sourceCz": "Uvidíme se tam.",
+      "sourceSentenceEn": "We are going to the lake. See you there!",
+      "sourceSentenceCz": "Jdeme k jezeru. Uvidíme se tam!",
+      "spokenEn": "We are going to the lake. See you there!",
+      "spokenCz": "Jdeme k jezeru. Uvidíme se tam!",
+      "en": "assets/vocabulary-en-sentences/en-us-aria-neural/f6213be199d3063a1440.mp3",
+      "cz": "assets/vocabulary-en-sentences/cs-cz-vlasta-neural/3d0cdce5e9ffd32b8819.mp3"
+    },
+    "ven-0518": {
+      "uid": "ven-0518",
+      "sourceEn": "call",
+      "sourceCz": "svolat; přivolat",
+      "sourceSentenceEn": "We call our friends to the meeting.",
+      "sourceSentenceCz": "Svoláváme kamarády na schůzi.",
+      "spokenEn": "We call our friends to the meeting.",
+      "spokenCz": "Svoláváme kamarády na schůzi.",
+      "en": "assets/vocabulary-en-sentences/en-us-aria-neural/b8307ab559d002a6d536.mp3",
+      "cz": "assets/vocabulary-en-sentences/cs-cz-vlasta-neural/095d025e1151e5f91003.mp3"
+    },
+    "ven-0519": {
+      "uid": "ven-0519",
+      "sourceEn": "too",
+      "sourceCz": "příliš",
+      "sourceSentenceEn": "There is too much candy.",
+      "sourceSentenceCz": "Je tu příliš mnoho sladkostí.",
+      "spokenEn": "There is too much candy.",
+      "spokenCz": "Je tu příliš mnoho sladkostí.",
+      "en": "assets/vocabulary-en-sentences/en-us-aria-neural/dac6178267f7d1246923.mp3",
+      "cz": "assets/vocabulary-en-sentences/cs-cz-vlasta-neural/8facec8775a9fa24da7e.mp3"
+    },
+    "ven-0520": {
+      "uid": "ven-0520",
+      "sourceEn": "turn",
+      "sourceCz": "řada; být na řadě",
+      "sourceSentenceEn": "It is my turn.",
+      "sourceSentenceCz": "Teď jsem na řadě já.",
+      "spokenEn": "It is my turn.",
+      "spokenCz": "Teď jsem na řadě já.",
+      "en": "assets/vocabulary-en-sentences/en-us-aria-neural/5d6558beb01df2fa0e1f.mp3",
+      "cz": "assets/vocabulary-en-sentences/cs-cz-vlasta-neural/7f1c462a60262490fa6c.mp3"
+    },
+    "ven-0521": {
+      "uid": "ven-0521",
+      "sourceEn": "stag",
+      "sourceCz": "jelení samec",
+      "sourceSentenceEn": "The stag has large antlers.",
+      "sourceSentenceCz": "Jelení samec má velké paroží.",
+      "spokenEn": "The stag has large antlers.",
+      "spokenCz": "Jelení samec má velké paroží.",
+      "en": "assets/vocabulary-en-sentences/en-us-aria-neural/fc19b117875d3e9e21e2.mp3",
+      "cz": "assets/vocabulary-en-sentences/cs-cz-vlasta-neural/d9f71ec99685e6f91988.mp3"
+    },
+    "ven-0522": {
+      "uid": "ven-0522",
+      "sourceEn": "fishing hut",
+      "sourceCz": "rybářská chatrč",
+      "sourceSentenceEn": "The fishing hut is by the lake.",
+      "sourceSentenceCz": "Rybářská chatrč je u jezera.",
+      "spokenEn": "The fishing hut is by the lake.",
+      "spokenCz": "Rybářská chatrč je u jezera.",
+      "en": "assets/vocabulary-en-sentences/en-us-aria-neural/970b3d18b5bce62cfacd.mp3",
+      "cz": "assets/vocabulary-en-sentences/cs-cz-vlasta-neural/eb7cb7cc0039f8d9c82b.mp3"
     }
   },
   "stats": {
-    "itemCount": 502,
-    "audioReferences": 1004,
-    "uniqueAssets": 1004
+    "itemCount": 522,
+    "audioReferences": 1044,
+    "uniqueAssets": 1044
   }
 }

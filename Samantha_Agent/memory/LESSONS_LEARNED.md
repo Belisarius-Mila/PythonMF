@@ -2650,3 +2650,10 @@ Finální ověření tohoto kroku: plná brána3920 PASS /706,416s unit část,3
 - Kontext: z pracovního Samantha_Agent/ vrací git diff názvy vůči kořeni, ale git ls-files --others bez určeného kořene neprohledá sourozenecké docs/ a VocabularyEN/. Pak kompletní dávka mylně vypadá jako chybějící soubory.
 - Řešení: pro oba inventáře používat git -C <repo_root>; stejné kořenové cesty porovnávat s manifestem dávky. Nulový seznam nikdy nevydávat za ověření bez očekávaného počtu.
 - Ověření: správný inventář78 souborů souhlasí s75 změnami autorské dávky a3 testy;63 webových HTTP odpovědí má přesné SHA.
+
+
+### 2026-11-15 13:18 CET — Nový význam doplní vzájemné vazby related
+
+- Kontext: VocabularyAuthoring při přidání call/too/turn jako nových významů správně doplní same-lemma vazby také do tří původních katalogových a exportovaných karet. Úplná shoda všech původních objektů proto není správné očekávání.
+- Řešení: předem určit přesnou mapu staré UID → nové UID; očekávat pouze přidání odpovídajícího related záznamu v katalogu i exportu a ověřit opačný odkaz. Ostatní pole, identity, CSV prefix a starší média dál porovnávat přesně; nezamlčet tyto tři změny jako byte-exact.
+- Ověření: závěrečná dávka MMTX20, ven-0518/0519/0520 proti ven-0155/0204/0107.499 starších karet/katalogových záznamů přesně shodných, u3 pouze určené related;502 identit a2927 médií zachovaných,52 Python včetně56 Node PASS.

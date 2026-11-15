@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "source": "VocabularyEN/VocabularyEN.csv",
-  "sourceDigest": "2644cbf12b7ba57aef55228dc94232d52ffc1edc51b3c917cabbeec3f7ec835e",
+  "sourceDigest": "55e377cb2dbcd17d688be84fd8c7f81af67a901469b7f6c5ad138a9b0831ab71",
   "rate": "-10%",
   "voices": {
     "en": {
@@ -16,9 +16,9 @@
     }
   },
   "stats": {
-    "itemCount": 502,
-    "audioReferences": 1004,
-    "uniqueAssets": 982
+    "itemCount": 522,
+    "audioReferences": 1044,
+    "uniqueAssets": 1019
   },
   "items": {
     "1": {
@@ -4037,6 +4037,166 @@
       "spokenCz": "někdo. kdokoli",
       "en": "assets/vocabulary-en-audio/en-us-aria-neural/a4c8d6d342f509df7865.mp3",
       "cz": "assets/vocabulary-en-audio/cs-cz-vlasta-neural/34ceda77d6205eb7fa9c.mp3"
+    },
+    "503": {
+      "sourceEn": "everyone",
+      "sourceCz": "všichni; každý",
+      "spokenEn": "everyone",
+      "spokenCz": "všichni. každý",
+      "en": "assets/vocabulary-en-audio/en-us-aria-neural/c94c87b9b366e6f66ed4.mp3",
+      "cz": "assets/vocabulary-en-audio/cs-cz-vlasta-neural/902685b1625018cecb85.mp3"
+    },
+    "504": {
+      "sourceEn": "they",
+      "sourceCz": "oni; ony; ona",
+      "spokenEn": "they",
+      "spokenCz": "oni. ony. ona",
+      "en": "assets/vocabulary-en-audio/en-us-aria-neural/8126c8b8a258a5c70c7c.mp3",
+      "cz": "assets/vocabulary-en-audio/cs-cz-vlasta-neural/86e1b625fcb65e9edb65.mp3"
+    },
+    "505": {
+      "sourceEn": "them",
+      "sourceCz": "je; jim",
+      "spokenEn": "them",
+      "spokenCz": "je. jim",
+      "en": "assets/vocabulary-en-audio/en-us-aria-neural/348e3dc16f6596c945d0.mp3",
+      "cz": "assets/vocabulary-en-audio/cs-cz-vlasta-neural/21de019b8afa9520c0fa.mp3"
+    },
+    "506": {
+      "sourceEn": "our",
+      "sourceCz": "náš",
+      "spokenEn": "our",
+      "spokenCz": "náš",
+      "en": "assets/vocabulary-en-audio/en-us-aria-neural/c206cae817cd0a62a7b5.mp3",
+      "cz": "assets/vocabulary-en-audio/cs-cz-vlasta-neural/818c1d6ff08c80b31227.mp3"
+    },
+    "507": {
+      "sourceEn": "those",
+      "sourceCz": "tamti; tamty; tamta",
+      "spokenEn": "those",
+      "spokenCz": "tamti. tamty. tamta",
+      "en": "assets/vocabulary-en-audio/en-us-aria-neural/d861872425ae12a519a1.mp3",
+      "cz": "assets/vocabulary-en-audio/cs-cz-vlasta-neural/6feb459fb82388fa9500.mp3"
+    },
+    "508": {
+      "sourceEn": "must",
+      "sourceCz": "muset",
+      "spokenEn": "must",
+      "spokenCz": "muset",
+      "en": "assets/vocabulary-en-audio/en-us-aria-neural/38388947fa2d15f89825.mp3",
+      "cz": "assets/vocabulary-en-audio/cs-cz-vlasta-neural/c220d96c0ef70d702ac9.mp3"
+    },
+    "509": {
+      "sourceEn": "may",
+      "sourceCz": "možná; může se stát, že",
+      "spokenEn": "may",
+      "spokenCz": "možná. může se stát. že",
+      "en": "assets/vocabulary-en-audio/en-us-aria-neural/de33d88d4b0b6f91b0c6.mp3",
+      "cz": "assets/vocabulary-en-audio/cs-cz-vlasta-neural/66359f50ef4187a502d5.mp3"
+    },
+    "510": {
+      "sourceEn": "look like",
+      "sourceCz": "vypadat jako",
+      "spokenEn": "look like",
+      "spokenCz": "vypadat jako",
+      "en": "assets/vocabulary-en-audio/en-us-aria-neural/eec870e520f0e8dac44e.mp3",
+      "cz": "assets/vocabulary-en-audio/cs-cz-vlasta-neural/ba9e4aa0be92473e7710.mp3"
+    },
+    "511": {
+      "sourceEn": "look for",
+      "sourceCz": "hledat",
+      "spokenEn": "look for",
+      "spokenCz": "hledat",
+      "en": "assets/vocabulary-en-audio/en-us-aria-neural/3d8d2d982f5cadd1ef3a.mp3",
+      "cz": "assets/vocabulary-en-audio/cs-cz-vlasta-neural/14b093483e2df823f602.mp3"
+    },
+    "512": {
+      "sourceEn": "find out",
+      "sourceCz": "zjistit",
+      "spokenEn": "find out",
+      "spokenCz": "zjistit",
+      "en": "assets/vocabulary-en-audio/en-us-aria-neural/32c6f60f776aec09bc8b.mp3",
+      "cz": "assets/vocabulary-en-audio/cs-cz-vlasta-neural/30c109c7803817730951.mp3"
+    },
+    "513": {
+      "sourceEn": "cut down",
+      "sourceCz": "pokácet",
+      "spokenEn": "cut down",
+      "spokenCz": "pokácet",
+      "en": "assets/vocabulary-en-audio/en-us-aria-neural/218c876d4237a9ce42a1.mp3",
+      "cz": "assets/vocabulary-en-audio/cs-cz-vlasta-neural/cf489c83ffdf0ac64244.mp3"
+    },
+    "514": {
+      "sourceEn": "take away",
+      "sourceCz": "odnést; odvézt",
+      "spokenEn": "take away",
+      "spokenCz": "odnést. odvézt",
+      "en": "assets/vocabulary-en-audio/en-us-aria-neural/25165e5509a535878c53.mp3",
+      "cz": "assets/vocabulary-en-audio/cs-cz-vlasta-neural/f20912efdf814c19e38a.mp3"
+    },
+    "515": {
+      "sourceEn": "no one",
+      "sourceCz": "nikdo",
+      "spokenEn": "no one",
+      "spokenCz": "nikdo",
+      "en": "assets/vocabulary-en-audio/en-us-aria-neural/8d1c5c99da60fcab13a5.mp3",
+      "cz": "assets/vocabulary-en-audio/cs-cz-vlasta-neural/04ef6a2414a23ac6f6be.mp3"
+    },
+    "516": {
+      "sourceEn": "one step at a time",
+      "sourceCz": "postupně; krok za krokem",
+      "spokenEn": "one step at a time",
+      "spokenCz": "postupně. krok za krokem",
+      "en": "assets/vocabulary-en-audio/en-us-aria-neural/7347816fac18e5e76f47.mp3",
+      "cz": "assets/vocabulary-en-audio/cs-cz-vlasta-neural/c903dc051c8147106f44.mp3"
+    },
+    "517": {
+      "sourceEn": "See you there.",
+      "sourceCz": "Uvidíme se tam.",
+      "spokenEn": "See you there.",
+      "spokenCz": "Uvidíme se tam.",
+      "en": "assets/vocabulary-en-audio/en-us-aria-neural/e4df260ce2dce6d06134.mp3",
+      "cz": "assets/vocabulary-en-audio/cs-cz-vlasta-neural/02b9df5421ad21b2611d.mp3"
+    },
+    "518": {
+      "sourceEn": "call",
+      "sourceCz": "svolat; přivolat",
+      "spokenEn": "call",
+      "spokenCz": "svolat. přivolat",
+      "en": "assets/vocabulary-en-audio/en-us-aria-neural/4683c2eedf8cc48f8577.mp3",
+      "cz": "assets/vocabulary-en-audio/cs-cz-vlasta-neural/6e73b611b1e0a2b0fa6e.mp3"
+    },
+    "519": {
+      "sourceEn": "too",
+      "sourceCz": "příliš",
+      "spokenEn": "too",
+      "spokenCz": "příliš",
+      "en": "assets/vocabulary-en-audio/en-us-aria-neural/9701abb43610c598c430.mp3",
+      "cz": "assets/vocabulary-en-audio/cs-cz-vlasta-neural/21a85f817fd86e3d7cce.mp3"
+    },
+    "520": {
+      "sourceEn": "turn",
+      "sourceCz": "řada; být na řadě",
+      "spokenEn": "turn",
+      "spokenCz": "řada. být na řadě",
+      "en": "assets/vocabulary-en-audio/en-us-aria-neural/07d037c32a57de2740c1.mp3",
+      "cz": "assets/vocabulary-en-audio/cs-cz-vlasta-neural/46e73ffce04ff0abc307.mp3"
+    },
+    "521": {
+      "sourceEn": "stag",
+      "sourceCz": "jelení samec",
+      "spokenEn": "stag",
+      "spokenCz": "jelení samec",
+      "en": "assets/vocabulary-en-audio/en-us-aria-neural/36cad01cdb448e6464eb.mp3",
+      "cz": "assets/vocabulary-en-audio/cs-cz-vlasta-neural/741e182fcb8c7be07592.mp3"
+    },
+    "522": {
+      "sourceEn": "fishing hut",
+      "sourceCz": "rybářská chatrč",
+      "spokenEn": "fishing hut",
+      "spokenCz": "rybářská chatrč",
+      "en": "assets/vocabulary-en-audio/en-us-aria-neural/62782579dc7edeef18e2.mp3",
+      "cz": "assets/vocabulary-en-audio/cs-cz-vlasta-neural/b5260bb4464cbf8c931d.mp3"
     }
   }
 }
