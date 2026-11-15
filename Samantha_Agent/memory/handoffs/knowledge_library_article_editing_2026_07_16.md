@@ -1,7 +1,7 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
-### Cestování / místa — vývoj dokončený, vlastní Terra p+n schválené
+### Cestování / místa — úplně ověřené, p+n čeká na servisní rozhodnutí
 
 Priorita: 2; stav: ceka na prejimku/nasazeni; připomenout při startu: ano.
 
@@ -12,7 +12,9 @@ Priorita: 2; stav: ceka na prejimku/nasazeni; připomenout při startu: ano.
 - P+n výslovně schválené; první brána zastavila jedinou chybu, opravenou
   beze změny rozsahu. Aktuální výsledek podle přesného jobufff30ae477f38401ae8e582208e9a582
   a privátní travel_ui_20261115/release_v2/release_receipt.json + live_verification.json.
-  Po potvrzení zbývá fyzický iPhone; podrobně reports/travel_places_ui_20261115.md.
+  V2 skončilo attention bez push/nasazení; následná celá diagnostická sada
+  3922/0 chyb PASS. Čeká rozhodnutí o samostatné opravě900s limitu.
+  Fyzický iPhone až po vydání; podrobně reports/travel_places_ui_20261115.md.
 
 
 ### Knihy — skupiny Konspektu nasazené
@@ -1287,3 +1289,29 @@ Nová oprava vyžaduje novou identitu: request travel-places-ui-20261115-own-v2,
 jobfff30ae477f38401ae8e582208e9a582. Výsledek výhradně z privátní
 travel_ui_20261115/release_v2/release_receipt.json + live_verification.json.
 Žádný resubmit původního jobu, změna časových limitů nebo vynechání testů.
+
+
+## 2026-11-15 09:04 CET — Úplná diagnostika zelená, p+n čeká na servisní rozhodnutí
+
+Hotovo: Opravený zdrojda1ee2bc prošel celou nezměněnou kanonickou sadou
+v témže profilu Knihovny:3922 testů,0 failures/errors,31 SKIP. Testová část
+822,728s; import5,669s; příprava syntaxe9,3s a jednotkový krok829,2s.
+Všech8 finálních zdrojů/testů odpovídá zmrazeným otiskům opravy.
+Rozhodnutí: Žádné rozšíření schváleného rozsahu UI; čeká se na samostatné
+rozhodnutí Míly o servisní opravě limitu900→1500s a řízeném načtení po plné
+bráně. Návrh zatím není aplikovaný. Další publikační pokus se nespouští.
+Další krok: Rozhodnutí o servisní opravě; teprve poté dokončit registrované
+Terra p+n a ověřit živý Cockpit.
+Navrhované další kroky: Po potvrzeném vydání fyzický iPhone; poštovní A+C
+a přejímka knih odděleně.
+Technický důkaz: v2 fff30ae477f38401ae8e582208e9a582 skončil attention
+po přibližně15min, nový gate log se nezapsal. Spolu s pevným900s limitem
+a jeho větví TimeoutExpired to odpovídá vypršení času, ne novému doloženému
+FAIL. Úplná samostatná brána s --unit-test-timings následně PASS. První
+FAIL knižního rendereru z v1 je opravou64 testů a touto úplnou sadou uzavřený.
+Čerstvý registrovaný GitHub audit pořád e780fe98; runtime PID72316 a stamp
+42ad54202295bc7c beze změny. Push ani nasazení tedy neproběhly.
+Privátní důkazy: travel_ui_20261115/release_v2/diagnostic_gate.log,
+diagnostic_timings.json, release_receipt.json, source_manifest.json.
+Servisní proposal.patch je pouze návrh mimo Git; nezměněná publikační
+brána se neobchází a testy se neškrtají.
