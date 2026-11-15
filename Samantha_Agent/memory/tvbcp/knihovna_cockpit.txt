@@ -1708,3 +1708,28 @@ data/private/travel_ui_20261115/release/release_receipt.json
 a live_verification.json, nikoli tento předpublikační záznam.
 Účtenka explicitně odděluje push, nasazení, ověření a fyzický telefon.
 Při timeoutu či nejistotě ověřit stejný job; žádné automatické opakování.
+
+
+## 2026-11-15 08:29 CET — Oprava oddělení rendereru a nové přesné vlastní vydání
+
+Hotovo: Jediná podmínka v rendereru nejprve ověří kategorii travel_places,
+a teprve potom sahá na cestovní controller. Samostatný původní test
+knižních obálek tak dál funguje bez nové globální závislosti. Funkce
+nového UI ani rozsah se nerozšiřují.64 knižních/frontendových testů
+PASS/17,073s a znovu celý browser320/390/1280 včetně nového draftu PASS.
+Rozhodnutí: Pokračování stejného Mílou schváleného p+n via Terra jen
+Willova balíčku. Datovy další větve zůstávají mimo.
+Další krok: Po statické bráně a lokálním checkpointu nové jediné registrované
+vydání opraveného headu; potom ověřit živý Cockpit a fyzický iPhone.
+Navrhované další kroky: Původní přejímky knih a poštovní A+C odděleně.
+Technický důkaz: Původní jobc67e607ca431ef10d7c0522dee0e2845 skončil attention;
+3922 testů/53 SKIP, jediný FAIL test_online_cover_sources_and_backlink_behavior
+s ReferenceError libraryTravel v izolovaném Node rendereru. Plná brána
+ukončená, žádný timeout. Čerstvý registrovaný GitHub audit doložil stále
+e780fe98,3 vlastní pending commity; runtime PID72316/stamp42ad54202295bc7c
+beze změny. Push tedy nebyl proveden a nasazení nezačalo; původní účtenka
+a first_gate.log jsou zachované v privátním travel_ui_20261115/release/.
+Nová oprava vyžaduje novou identitu: request travel-places-ui-20261115-own-v2,
+jobfff30ae477f38401ae8e582208e9a582. Výsledek výhradně z privátní
+travel_ui_20261115/release_v2/release_receipt.json + live_verification.json.
+Žádný resubmit původního jobu, změna časových limitů nebo vynechání testů.

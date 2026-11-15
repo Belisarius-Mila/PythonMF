@@ -2616,3 +2616,10 @@ Finální ověření tohoto kroku: plná brána3920 PASS /706,416s unit část,3
 - Kontext: Knihovna posouvá `.modal`, ne její vnitřní `.modal-body`. Při návratu z detailu nestačí obnovit hledaný text; starý GET navíc může doběhnout po návratu.
 - Řešení: zachovat pozici skutečného scroll containeru, obnovit fokus bez dalšího posunu a zneplatnit staré čtení pořadím požadavků. Rozepsanou editaci dál chrání původní potvrzení.
 - Ověření: skutečný sestavený Cockpit v izolovaném browseru320/390/1280, návrat po čtení/uložení, odmítnutí ztráty draftu a opožděný GET po otevření jiné karty PASS. Žádné nové POST při navigaci.
+
+
+### 2026-11-15 — Společný renderer nejprve ověří kategorii, potom její controller
+
+- Kontext: cestovní hook v createLibraryItemRow vyhodnotil libraryTravel ještě před kategorií. Skutečný izolovaný test knižních obálek přebírá tento renderer bez cestovního controlleru.
+- Řešení: category === travel_places je první krátce vyhodnocená podmínka; ostatní kategorie novou závislost nepotřebují. Nerozšiřovat knižní mock ani nevynechat původní test.
+- Ověření:64 testů book_inventory/cockpit_frontend a celý syntetický Cockpit320/390/1280 PASS. Plná brána původní chybu správně zachytila před pushem.

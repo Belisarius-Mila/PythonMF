@@ -52,7 +52,7 @@ EXPECTED_PAGES = {
         COCKPIT_HTML,
         738324,
         13294,
-        "f9fc452a97adbc7bbc877fea2842b46c6300759db9e3f4224c93c327f6b1e08a",
+        "3bfac179cfaa9a9e3a586ac6cec70da021945cfd819a62f8d241c24194fbe84a",
     ),
 }
 

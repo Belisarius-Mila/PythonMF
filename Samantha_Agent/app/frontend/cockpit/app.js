@@ -5163,7 +5163,7 @@ ${confirmation}`, "");
     }
 
     function createLibraryItemRow(item) {
-      if (libraryTravel.active() && item.category === "travel_places") {
+      if (item.category === "travel_places" && libraryTravel.active()) {
         return libraryTravel.card(item, () => loadLibraryItem(item.id || "", true));
       }
       const remoteCover = item.category === "books" && !item.book_cover_attachment_id
