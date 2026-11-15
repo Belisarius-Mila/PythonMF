@@ -12,6 +12,34 @@ from app.capabilities.models import (
 
 CAPABILITIES: tuple[CapabilityRecord, ...] = (
     CapabilityRecord(
+        capability_id="vocabulary_authoring_preview", label="Preview one or a batch of Vocabulary EN meanings",
+        risk=RiskLevel.READ_ONLY, reads=("Vocabulary EN source revision and explicit entries",), writes=(),
+        tool="app.vocabulary_authoring.VocabularyAuthoring.preview", audit=AuditPolicy.SAFE_SUMMARY,
+        notes="Internal author workflow. One item/list/CSV share one schema. No generation, source mutation, learner writes or publication.",
+    ),
+    CapabilityRecord(
+        capability_id="vocabulary_authoring_prepare", label="Prepare an explicitly requested Vocabulary EN batch",
+        risk=RiskLevel.EXTERNAL_GENERATION, reads=("exact preview", "reviewed image candidates", "public vocabulary text"),
+        writes=("private staged content and durable media receipt",),
+        tool="app.vocabulary_authoring.VocabularyAuthoring.prepare", audit=AuditPolicy.SAFE_SUMMARY,
+        metadata={"durable_consent": "trusted_external_generation_v1"},
+        notes="Explicit author task only; existing registered TTS, no LLM or image-provider change. Stable reserved identities, one writer, no uncertain replay. No live source edits or publication.",
+    ),
+    CapabilityRecord(
+        capability_id="vocabulary_authoring_apply", label="Apply the exact prepared Vocabulary EN batch locally",
+        risk=RiskLevel.LOCAL_WRITE, reads=("exact prepared digest and unchanged source revision",),
+        writes=("Vocabulary EN CSV/catalog/assets/manifests", "durable application receipt"),
+        requires_confirmation=True, confirmation_policy=ConfirmationPolicy.EXACT_CURRENT_MESSAGE,
+        tool="app.vocabulary_authoring.VocabularyAuthoring.apply", audit=AuditPolicy.SAFE_SUMMARY,
+        notes="Authorized local completion of the original author task. Recover only original/expected bytes. Preserve existing IDs, learner profiles, unrelated edits and all media; no commit, push, deploy or deletion.",
+    ),
+    CapabilityRecord(
+        capability_id="vocabulary_authoring_status", label="Read one exact Vocabulary EN authoring receipt",
+        risk=RiskLevel.READ_ONLY, reads=("one private authoring receipt",), writes=(),
+        tool="app.vocabulary_authoring.VocabularyAuthoring.status", audit=AuditPolicy.SAFE_SUMMARY,
+        notes="Read the original request only; never retry media, mutate source or publish.",
+    ),
+    CapabilityRecord(
         capability_id="book_legacy_cleanup_preview", label="Preview removal of retired book categories",
         risk=RiskLevel.LOCAL_WRITE, reads=("private book metadata and operation state",),
         writes=("private immutable cleanup preview",), tool="app.book_legacy_cleanup.preview_cleanup",

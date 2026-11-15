@@ -24,6 +24,7 @@ NODE_FALLBACK_PATHS = (
 )
 
 COMPILE_PATHS = (
+    "app/vocabulary_authoring.py",
     "app/book_legacy_cleanup.py",
     "app/book_taxonomy.py",
 
@@ -364,6 +365,7 @@ SHELL_PATHS = (
 )
 
 TEST_MODULES = (
+    "tests.test_vocabulary_authoring",
     "tests.test_book_legacy_cleanup",
     "tests.test_vocabularyen_gallery",
     "tests.test_vocabularyen_audio_library",

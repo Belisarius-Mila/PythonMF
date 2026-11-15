@@ -248,3 +248,32 @@ Současná produkční audio knihovna je oddělená a ověřuje se proti živém
 Po opravě překladu se může změnit heuristický výběr obrázku. U19 zde
 zrevidovaných karet je proto původní nebo schválený nový obrázek připnutý
 katalogem. Závěrečný audit porovnává i obrazové vazby původních UID.
+
+
+12. Jednotlivý a dávkový autorský vstup (2026-11-15)
+
+Kanonické pravidlo: Samantha_Agent/memory/technical/vocabulary_en_authoring_rules.md.
+Náhled/příprava/zařazení: app.vocabulary_authoring.VocabularyAuthoring.
+Data převede přirozené zadání na jednu položku nebo seznam; CSV vyžaduje
+hlavičku EN/CZ (volitelně Sentence/SentenceT a redakční metadata). Samotné
+EN/CZ lze zkontrolovat; chybějící věty, slovní druh a téma Data doplní před
+přípravou. Případný formulář použije stejné operace.
+
+preview(items) nic nezapisuje. prepare(request_id, items, images=...,
+expected_preview=preview['digest'], confirmed=True) používá přesné image
+klíče z preview, existující/zkontrolované obrázky a dosavadní TTS.
+apply(request_id, expected_digest=prepared['digest'], confirmed=True)
+zařadí jen ověřený balíček. status(request_id) pouze čte původní účtenku.
+Potvrzení vychází z již zadaného autorského úkolu, neopakuje se pro každý řádek.
+
+Privátní dávky: Samantha_Agent/data/private/vocabulary_authoring/.
+Pro pokračování používat tentýž autorský workspace a store. Přerušený
+proces se obnovuje původním request_id; nejistá externí syntéza bez souboru
+blokuje další automatický pokus. Dokončený apply je idempotentní a nevrací
+pozdější cizí změny zpět. Změna zdroje blokuje zastaralý balíček.
+
+První skutečná dávka: body-parts-20261115-v1, ven-0443 ažven-0452,
+head/face/ear/nose/mouth/neck/arm/hand/leg/foot. Celkem452 záznamů,442 aktivních.
+Média všech původních karet zachovaná; přidáno10 obrazových karet a40MP3.
+Nové významy jsou v topic-02 a osobní A–D si je vybírají samostatně.
+Samotné zařazení neprovádí Git commit ani Pages publikaci.

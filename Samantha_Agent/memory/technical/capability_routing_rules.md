@@ -404,3 +404,23 @@ Existující agent_supervisor_tick / AgentSupervisor.check(scheduled=True)
 energetických nastavení. Při DarkWake/neověřeném power stavu neběží síťové
 sondy ani sendy. Trvalá grace po probuzení a potvrzení závady další kontrolou.
 GET zůstává čtecí. Instalace, Pushcut opt-in a vnější dohled se nemění.
+
+
+## Vocabulary EN — autorský vstup (2026-11-15)
+
+Kanonické pravidlo: vocabulary_en_authoring_rules.md. Interní autorství používá
+app.vocabulary_authoring.VocabularyAuthoring nad určeným autorským workspace.
+Náhled: vocabulary_authoring_preview → preview; jedna položka/list/CSV.
+Příprava: vocabulary_authoring_prepare → prepare, přesný preview digest,
+stabilní request_id, explicitní zadání a ověřené obrázky. Pouze staged data
+a současný registrovaný TTS; nejisté generování se neopakuje automaticky.
+Zařazení: vocabulary_authoring_apply → apply s přesným prepared digest
+a confirmed=True podle již zadaného autorského úkolu. Lokální zdroje
+se mění jen při shodě revize, původních/očekávaných bajtů a jedné writer lease.
+Stav: vocabulary_authoring_status → status, read-only jedna původní účtenka.
+
+Přirozený význam a redakční doplnění obstará Data v chatu; žádný nový model
+nebo veřejná studentům dostupná API route. Nové zdroje nepřebírají Benji
+ani A–D. Zařazení nedělá commit/push/deploy; checkpoint a p+n používají
+své dosavadní mechanismy. Jedna známá autorská kopie a její privátní store;
+nezávislé kopie se automaticky neslučují.

@@ -11604,6 +11604,266 @@
       "teachingType": "word",
       "editorialNote": "Schválená samostatná významová nebo slovnědruhová karta.",
       "imageStemOverride": "that"
+    },
+    {
+      "partOfSpeech": [
+        "noun"
+      ],
+      "primaryGroup": "topic-02",
+      "topicIds": [
+        "topic-02"
+      ],
+      "difficultyBand": 1,
+      "teachingType": "word",
+      "id": 443,
+      "uid": "ven-0443",
+      "matches": [
+        {
+          "en": "head",
+          "cz": "hlava"
+        }
+      ],
+      "expressionType": "word",
+      "active": true,
+      "difficultyStatus": "draft",
+      "editorialStatus": "reviewed",
+      "imageStemOverride": "ven0443",
+      "galleryOrder": 5,
+      "related": []
+    },
+    {
+      "partOfSpeech": [
+        "noun"
+      ],
+      "primaryGroup": "topic-02",
+      "topicIds": [
+        "topic-02"
+      ],
+      "difficultyBand": 1,
+      "teachingType": "word",
+      "id": 444,
+      "uid": "ven-0444",
+      "matches": [
+        {
+          "en": "face",
+          "cz": "obličej"
+        }
+      ],
+      "expressionType": "word",
+      "active": true,
+      "difficultyStatus": "draft",
+      "editorialStatus": "reviewed",
+      "imageStemOverride": "ven0444",
+      "galleryOrder": 6,
+      "related": []
+    },
+    {
+      "partOfSpeech": [
+        "noun"
+      ],
+      "primaryGroup": "topic-02",
+      "topicIds": [
+        "topic-02"
+      ],
+      "difficultyBand": 1,
+      "teachingType": "word",
+      "id": 445,
+      "uid": "ven-0445",
+      "matches": [
+        {
+          "en": "ear",
+          "cz": "ucho"
+        }
+      ],
+      "expressionType": "word",
+      "active": true,
+      "difficultyStatus": "draft",
+      "editorialStatus": "reviewed",
+      "imageStemOverride": "ven0445",
+      "galleryOrder": 7,
+      "related": []
+    },
+    {
+      "partOfSpeech": [
+        "noun"
+      ],
+      "primaryGroup": "topic-02",
+      "topicIds": [
+        "topic-02"
+      ],
+      "difficultyBand": 1,
+      "teachingType": "word",
+      "id": 446,
+      "uid": "ven-0446",
+      "matches": [
+        {
+          "en": "nose",
+          "cz": "nos"
+        }
+      ],
+      "expressionType": "word",
+      "active": true,
+      "difficultyStatus": "draft",
+      "editorialStatus": "reviewed",
+      "imageStemOverride": "ven0446",
+      "galleryOrder": 8,
+      "related": []
+    },
+    {
+      "partOfSpeech": [
+        "noun"
+      ],
+      "primaryGroup": "topic-02",
+      "topicIds": [
+        "topic-02"
+      ],
+      "difficultyBand": 1,
+      "teachingType": "word",
+      "id": 447,
+      "uid": "ven-0447",
+      "matches": [
+        {
+          "en": "mouth",
+          "cz": "ústa"
+        }
+      ],
+      "expressionType": "word",
+      "active": true,
+      "difficultyStatus": "draft",
+      "editorialStatus": "reviewed",
+      "imageStemOverride": "ven0447",
+      "galleryOrder": 9,
+      "related": []
+    },
+    {
+      "partOfSpeech": [
+        "noun"
+      ],
+      "primaryGroup": "topic-02",
+      "topicIds": [
+        "topic-02"
+      ],
+      "difficultyBand": 1,
+      "teachingType": "word",
+      "id": 448,
+      "uid": "ven-0448",
+      "matches": [
+        {
+          "en": "neck",
+          "cz": "krk"
+        }
+      ],
+      "expressionType": "word",
+      "active": true,
+      "difficultyStatus": "draft",
+      "editorialStatus": "reviewed",
+      "imageStemOverride": "ven0448",
+      "galleryOrder": 10,
+      "related": []
+    },
+    {
+      "partOfSpeech": [
+        "noun"
+      ],
+      "primaryGroup": "topic-02",
+      "topicIds": [
+        "topic-02"
+      ],
+      "difficultyBand": 1,
+      "teachingType": "word",
+      "id": 449,
+      "uid": "ven-0449",
+      "matches": [
+        {
+          "en": "arm",
+          "cz": "paže"
+        }
+      ],
+      "expressionType": "word",
+      "active": true,
+      "difficultyStatus": "draft",
+      "editorialStatus": "reviewed",
+      "imageStemOverride": "ven0449",
+      "galleryOrder": 11,
+      "related": []
+    },
+    {
+      "partOfSpeech": [
+        "noun"
+      ],
+      "primaryGroup": "topic-02",
+      "topicIds": [
+        "topic-02"
+      ],
+      "difficultyBand": 1,
+      "teachingType": "word",
+      "id": 450,
+      "uid": "ven-0450",
+      "matches": [
+        {
+          "en": "hand",
+          "cz": "ruka"
+        }
+      ],
+      "expressionType": "word",
+      "active": true,
+      "difficultyStatus": "draft",
+      "editorialStatus": "reviewed",
+      "imageStemOverride": "ven0450",
+      "galleryOrder": 12,
+      "related": []
+    },
+    {
+      "partOfSpeech": [
+        "noun"
+      ],
+      "primaryGroup": "topic-02",
+      "topicIds": [
+        "topic-02"
+      ],
+      "difficultyBand": 1,
+      "teachingType": "word",
+      "id": 451,
+      "uid": "ven-0451",
+      "matches": [
+        {
+          "en": "leg",
+          "cz": "noha"
+        }
+      ],
+      "expressionType": "word",
+      "active": true,
+      "difficultyStatus": "draft",
+      "editorialStatus": "reviewed",
+      "imageStemOverride": "ven0451",
+      "galleryOrder": 13,
+      "related": []
+    },
+    {
+      "partOfSpeech": [
+        "noun"
+      ],
+      "primaryGroup": "topic-02",
+      "topicIds": [
+        "topic-02"
+      ],
+      "difficultyBand": 1,
+      "teachingType": "word",
+      "id": 452,
+      "uid": "ven-0452",
+      "matches": [
+        {
+          "en": "foot",
+          "cz": "chodidlo"
+        }
+      ],
+      "expressionType": "word",
+      "active": true,
+      "difficultyStatus": "draft",
+      "editorialStatus": "reviewed",
+      "imageStemOverride": "ven0452",
+      "galleryOrder": 14,
+      "related": []
     }
   ]
 }

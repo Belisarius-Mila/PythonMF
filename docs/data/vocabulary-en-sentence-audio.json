@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "kind": "sentences",
   "source": "VocabularyEN/VocabularyEN.csv",
-  "sourceDigest": "fbe0e09727ef8089e3fd45da7b0e88386ce9b09993f90b1745f1c35a14254f43",
+  "sourceDigest": "b4b88d196cd41a246158760378c9d61be08ca91dd498ccc9da8e5406d2a5986a",
   "rate": "-10%",
   "voices": {
     "en": {
@@ -4878,11 +4878,121 @@
       "spokenCz": "Myslím, že ten pták je krásný.",
       "en": "assets/vocabulary-en-sentences/en-us-aria-neural/0160ce75060b97d45725.mp3",
       "cz": "assets/vocabulary-en-sentences/cs-cz-vlasta-neural/0ca33933d173166fb2c4.mp3"
+    },
+    "ven-0443": {
+      "uid": "ven-0443",
+      "sourceEn": "head",
+      "sourceCz": "hlava",
+      "sourceSentenceEn": "I nod my head.",
+      "sourceSentenceCz": "Kývám hlavou.",
+      "spokenEn": "I nod my head.",
+      "spokenCz": "Kývám hlavou.",
+      "en": "assets/vocabulary-en-sentences/en-us-aria-neural/ba5b8486a72b772f719e.mp3",
+      "cz": "assets/vocabulary-en-sentences/cs-cz-vlasta-neural/dec2b0ad7c8755769457.mp3"
+    },
+    "ven-0444": {
+      "uid": "ven-0444",
+      "sourceEn": "face",
+      "sourceCz": "obličej",
+      "sourceSentenceEn": "I wash my face.",
+      "sourceSentenceCz": "Myji si obličej.",
+      "spokenEn": "I wash my face.",
+      "spokenCz": "Myji si obličej.",
+      "en": "assets/vocabulary-en-sentences/en-us-aria-neural/1291f42b28e4e7827651.mp3",
+      "cz": "assets/vocabulary-en-sentences/cs-cz-vlasta-neural/cc750849863727538dd6.mp3"
+    },
+    "ven-0445": {
+      "uid": "ven-0445",
+      "sourceEn": "ear",
+      "sourceCz": "ucho",
+      "sourceSentenceEn": "This is my ear.",
+      "sourceSentenceCz": "Tohle je moje ucho.",
+      "spokenEn": "This is my ear.",
+      "spokenCz": "Tohle je moje ucho.",
+      "en": "assets/vocabulary-en-sentences/en-us-aria-neural/1c5a1ea623cb65eb7e0d.mp3",
+      "cz": "assets/vocabulary-en-sentences/cs-cz-vlasta-neural/f414af2499214817decb.mp3"
+    },
+    "ven-0446": {
+      "uid": "ven-0446",
+      "sourceEn": "nose",
+      "sourceCz": "nos",
+      "sourceSentenceEn": "Touch your nose.",
+      "sourceSentenceCz": "Dotkni se nosu.",
+      "spokenEn": "Touch your nose.",
+      "spokenCz": "Dotkni se nosu.",
+      "en": "assets/vocabulary-en-sentences/en-us-aria-neural/38c720e6460e4589eafe.mp3",
+      "cz": "assets/vocabulary-en-sentences/cs-cz-vlasta-neural/a54e7ad19ffb10e946f9.mp3"
+    },
+    "ven-0447": {
+      "uid": "ven-0447",
+      "sourceEn": "mouth",
+      "sourceCz": "ústa",
+      "sourceSentenceEn": "Open your mouth.",
+      "sourceSentenceCz": "Otevři ústa.",
+      "spokenEn": "Open your mouth.",
+      "spokenCz": "Otevři ústa.",
+      "en": "assets/vocabulary-en-sentences/en-us-aria-neural/577348d8b8203d3d1c14.mp3",
+      "cz": "assets/vocabulary-en-sentences/cs-cz-vlasta-neural/7563d37d8cde418abeea.mp3"
+    },
+    "ven-0448": {
+      "uid": "ven-0448",
+      "sourceEn": "neck",
+      "sourceCz": "krk",
+      "sourceSentenceEn": "This is my neck.",
+      "sourceSentenceCz": "Tohle je můj krk.",
+      "spokenEn": "This is my neck.",
+      "spokenCz": "Tohle je můj krk.",
+      "en": "assets/vocabulary-en-sentences/en-us-aria-neural/41124259722176e651de.mp3",
+      "cz": "assets/vocabulary-en-sentences/cs-cz-vlasta-neural/b685271f7a0b78a31e41.mp3"
+    },
+    "ven-0449": {
+      "uid": "ven-0449",
+      "sourceEn": "arm",
+      "sourceCz": "paže",
+      "sourceSentenceEn": "Raise your arm.",
+      "sourceSentenceCz": "Zvedni paži.",
+      "spokenEn": "Raise your arm.",
+      "spokenCz": "Zvedni paži.",
+      "en": "assets/vocabulary-en-sentences/en-us-aria-neural/544e2a6e73fdfde7f95d.mp3",
+      "cz": "assets/vocabulary-en-sentences/cs-cz-vlasta-neural/349bdcf5db22f76153d0.mp3"
+    },
+    "ven-0450": {
+      "uid": "ven-0450",
+      "sourceEn": "hand",
+      "sourceCz": "ruka",
+      "sourceSentenceEn": "I wash my hands.",
+      "sourceSentenceCz": "Myji si ruce.",
+      "spokenEn": "I wash my hands.",
+      "spokenCz": "Myji si ruce.",
+      "en": "assets/vocabulary-en-sentences/en-us-aria-neural/11277d3d843385a53af6.mp3",
+      "cz": "assets/vocabulary-en-sentences/cs-cz-vlasta-neural/1f292b8a21154ba44d67.mp3"
+    },
+    "ven-0451": {
+      "uid": "ven-0451",
+      "sourceEn": "leg",
+      "sourceCz": "noha",
+      "sourceSentenceEn": "I stand on one leg.",
+      "sourceSentenceCz": "Stojím na jedné noze.",
+      "spokenEn": "I stand on one leg.",
+      "spokenCz": "Stojím na jedné noze.",
+      "en": "assets/vocabulary-en-sentences/en-us-aria-neural/fe3b88956b5e0c1a040c.mp3",
+      "cz": "assets/vocabulary-en-sentences/cs-cz-vlasta-neural/f8c83957c36d72bfe392.mp3"
+    },
+    "ven-0452": {
+      "uid": "ven-0452",
+      "sourceEn": "foot",
+      "sourceCz": "chodidlo",
+      "sourceSentenceEn": "Put your foot on the floor.",
+      "sourceSentenceCz": "Polož chodidlo na podlahu.",
+      "spokenEn": "Put your foot on the floor.",
+      "spokenCz": "Polož chodidlo na podlahu.",
+      "en": "assets/vocabulary-en-sentences/en-us-aria-neural/2e92dda59d0aed18f24b.mp3",
+      "cz": "assets/vocabulary-en-sentences/cs-cz-vlasta-neural/267c87524a8bb70f92ed.mp3"
     }
   },
   "stats": {
-    "itemCount": 442,
-    "audioReferences": 884,
-    "uniqueAssets": 884
+    "itemCount": 452,
+    "audioReferences": 904,
+    "uniqueAssets": 904
   }
 }

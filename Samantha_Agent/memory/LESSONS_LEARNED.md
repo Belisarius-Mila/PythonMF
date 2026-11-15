@@ -2623,3 +2623,10 @@ Finální ověření tohoto kroku: plná brána3920 PASS /706,416s unit část,3
 - Kontext: cestovní hook v createLibraryItemRow vyhodnotil libraryTravel ještě před kategorií. Skutečný izolovaný test knižních obálek přebírá tento renderer bez cestovního controlleru.
 - Řešení: category === travel_places je první krátce vyhodnocená podmínka; ostatní kategorie novou závislost nepotřebují. Nerozšiřovat knižní mock ani nevynechat původní test.
 - Ověření:64 testů book_inventory/cockpit_frontend a celý syntetický Cockpit320/390/1280 PASS. Plná brána původní chybu správně zachytila před pushem.
+
+
+### 2026-11-15 — Dávka slovníku má jednotný vstup a obnovitelný přesný výstup
+
+- Kontext: Jednotlivé a tematické doplňování nesmí přidělit stejné UID dvěma významům, znovu vyrábět hotové zvuky nebo po výpadku přepsat pozdější změnu.
+- Řešení: Jeden preview/prepare/apply pro položku/list/CSV, pevný input/source digest, rezervace UID ve writer lease určeného autorského workspace a staged kompletní artefakty. Před každým zápisem kontrola původních/očekávaných bajtů, včetně čerstvě přečteného staged souboru. Dokončený request je replay bez mutace; requested/uncertain zvuk bez souboru se neopakuje.
+- Ověření: Skutečný process exit uprostřed apply, přesná obnova, dva souběžné připravované requesty, změna zdroje i staged dat za běhu. První skutečná dávka10 částí těla applied jednou,40MP3 a replay bez generování;90 cílených Python včetně56 Node PASS. Všech442 původních položek i2568 médií zachovaných.

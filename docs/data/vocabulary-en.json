@@ -1,8 +1,8 @@
 {
   "app": "VocabularyEN",
-  "generatedAt": "2026-11-14T20:15:52.654793+00:00",
+  "generatedAt": "2026-11-15T07:15:47.634285+00:00",
   "sourceCsv": "VocabularyEN/VocabularyEN.csv",
-  "itemCount": 442,
+  "itemCount": 452,
   "wordSets": [
     "Actions",
     "Animals",
@@ -17,14 +17,14 @@
     "selected": 107,
     "hardTraining": 70,
     "wordSetCount": 8,
-    "withSentence": 442,
-    "withSentenceTranslation": 442,
+    "withSentence": 452,
+    "withSentenceTranslation": 452,
     "imageSources": {
-      "catalog": 37,
+      "catalog": 47,
       "direct": 342,
       "mapping": 63
     },
-    "uniqueImageFiles": 392
+    "uniqueImageFiles": 402
   },
   "items": [
     {
@@ -16580,6 +16580,346 @@
       "teachingType": "word",
       "sourceIds": [],
       "thumbnail": "assets/vocabulary-en-thumbs/that-827af021331358e1.webp"
+    },
+    {
+      "id": 443,
+      "order": 443,
+      "en": "head",
+      "cz": "hlava",
+      "sentenceEn": "I nod my head.",
+      "sentenceCz": "Kývám hlavou.",
+      "wordSets": [],
+      "selected": false,
+      "hardTraining": false,
+      "image": "assets/vocabulary-en/ven0443.png",
+      "imageStem": "ven0443",
+      "imageRequestedStem": "ven0443",
+      "imageSource": "catalog",
+      "imageMissing": false,
+      "uid": "ven-0443",
+      "primaryGroup": "topic-02",
+      "topicIds": [
+        "topic-02"
+      ],
+      "partOfSpeech": [
+        "noun"
+      ],
+      "expressionType": "word",
+      "difficultyBand": 1,
+      "difficultyStatus": "draft",
+      "editorialStatus": "reviewed",
+      "galleryOrder": 5,
+      "related": [],
+      "active": true,
+      "teachingType": "word",
+      "sourceIds": [],
+      "thumbnail": "assets/vocabulary-en-thumbs/ven0443-91c9ba9340701dc4.webp"
+    },
+    {
+      "id": 444,
+      "order": 444,
+      "en": "face",
+      "cz": "obličej",
+      "sentenceEn": "I wash my face.",
+      "sentenceCz": "Myji si obličej.",
+      "wordSets": [],
+      "selected": false,
+      "hardTraining": false,
+      "image": "assets/vocabulary-en/ven0444.png",
+      "imageStem": "ven0444",
+      "imageRequestedStem": "ven0444",
+      "imageSource": "catalog",
+      "imageMissing": false,
+      "uid": "ven-0444",
+      "primaryGroup": "topic-02",
+      "topicIds": [
+        "topic-02"
+      ],
+      "partOfSpeech": [
+        "noun"
+      ],
+      "expressionType": "word",
+      "difficultyBand": 1,
+      "difficultyStatus": "draft",
+      "editorialStatus": "reviewed",
+      "galleryOrder": 6,
+      "related": [],
+      "active": true,
+      "teachingType": "word",
+      "sourceIds": [],
+      "thumbnail": "assets/vocabulary-en-thumbs/ven0444-a3805e147554a623.webp"
+    },
+    {
+      "id": 445,
+      "order": 445,
+      "en": "ear",
+      "cz": "ucho",
+      "sentenceEn": "This is my ear.",
+      "sentenceCz": "Tohle je moje ucho.",
+      "wordSets": [],
+      "selected": false,
+      "hardTraining": false,
+      "image": "assets/vocabulary-en/ven0445.png",
+      "imageStem": "ven0445",
+      "imageRequestedStem": "ven0445",
+      "imageSource": "catalog",
+      "imageMissing": false,
+      "uid": "ven-0445",
+      "primaryGroup": "topic-02",
+      "topicIds": [
+        "topic-02"
+      ],
+      "partOfSpeech": [
+        "noun"
+      ],
+      "expressionType": "word",
+      "difficultyBand": 1,
+      "difficultyStatus": "draft",
+      "editorialStatus": "reviewed",
+      "galleryOrder": 7,
+      "related": [],
+      "active": true,
+      "teachingType": "word",
+      "sourceIds": [],
+      "thumbnail": "assets/vocabulary-en-thumbs/ven0445-73038def51d1fe65.webp"
+    },
+    {
+      "id": 446,
+      "order": 446,
+      "en": "nose",
+      "cz": "nos",
+      "sentenceEn": "Touch your nose.",
+      "sentenceCz": "Dotkni se nosu.",
+      "wordSets": [],
+      "selected": false,
+      "hardTraining": false,
+      "image": "assets/vocabulary-en/ven0446.png",
+      "imageStem": "ven0446",
+      "imageRequestedStem": "ven0446",
+      "imageSource": "catalog",
+      "imageMissing": false,
+      "uid": "ven-0446",
+      "primaryGroup": "topic-02",
+      "topicIds": [
+        "topic-02"
+      ],
+      "partOfSpeech": [
+        "noun"
+      ],
+      "expressionType": "word",
+      "difficultyBand": 1,
+      "difficultyStatus": "draft",
+      "editorialStatus": "reviewed",
+      "galleryOrder": 8,
+      "related": [],
+      "active": true,
+      "teachingType": "word",
+      "sourceIds": [],
+      "thumbnail": "assets/vocabulary-en-thumbs/ven0446-db28b9f529e18467.webp"
+    },
+    {
+      "id": 447,
+      "order": 447,
+      "en": "mouth",
+      "cz": "ústa",
+      "sentenceEn": "Open your mouth.",
+      "sentenceCz": "Otevři ústa.",
+      "wordSets": [],
+      "selected": false,
+      "hardTraining": false,
+      "image": "assets/vocabulary-en/ven0447.png",
+      "imageStem": "ven0447",
+      "imageRequestedStem": "ven0447",
+      "imageSource": "catalog",
+      "imageMissing": false,
+      "uid": "ven-0447",
+      "primaryGroup": "topic-02",
+      "topicIds": [
+        "topic-02"
+      ],
+      "partOfSpeech": [
+        "noun"
+      ],
+      "expressionType": "word",
+      "difficultyBand": 1,
+      "difficultyStatus": "draft",
+      "editorialStatus": "reviewed",
+      "galleryOrder": 9,
+      "related": [],
+      "active": true,
+      "teachingType": "word",
+      "sourceIds": [],
+      "thumbnail": "assets/vocabulary-en-thumbs/ven0447-b4ffc6bbca291cbb.webp"
+    },
+    {
+      "id": 448,
+      "order": 448,
+      "en": "neck",
+      "cz": "krk",
+      "sentenceEn": "This is my neck.",
+      "sentenceCz": "Tohle je můj krk.",
+      "wordSets": [],
+      "selected": false,
+      "hardTraining": false,
+      "image": "assets/vocabulary-en/ven0448.png",
+      "imageStem": "ven0448",
+      "imageRequestedStem": "ven0448",
+      "imageSource": "catalog",
+      "imageMissing": false,
+      "uid": "ven-0448",
+      "primaryGroup": "topic-02",
+      "topicIds": [
+        "topic-02"
+      ],
+      "partOfSpeech": [
+        "noun"
+      ],
+      "expressionType": "word",
+      "difficultyBand": 1,
+      "difficultyStatus": "draft",
+      "editorialStatus": "reviewed",
+      "galleryOrder": 10,
+      "related": [],
+      "active": true,
+      "teachingType": "word",
+      "sourceIds": [],
+      "thumbnail": "assets/vocabulary-en-thumbs/ven0448-1aa0ad7ee3cdf211.webp"
+    },
+    {
+      "id": 449,
+      "order": 449,
+      "en": "arm",
+      "cz": "paže",
+      "sentenceEn": "Raise your arm.",
+      "sentenceCz": "Zvedni paži.",
+      "wordSets": [],
+      "selected": false,
+      "hardTraining": false,
+      "image": "assets/vocabulary-en/ven0449.png",
+      "imageStem": "ven0449",
+      "imageRequestedStem": "ven0449",
+      "imageSource": "catalog",
+      "imageMissing": false,
+      "uid": "ven-0449",
+      "primaryGroup": "topic-02",
+      "topicIds": [
+        "topic-02"
+      ],
+      "partOfSpeech": [
+        "noun"
+      ],
+      "expressionType": "word",
+      "difficultyBand": 1,
+      "difficultyStatus": "draft",
+      "editorialStatus": "reviewed",
+      "galleryOrder": 11,
+      "related": [],
+      "active": true,
+      "teachingType": "word",
+      "sourceIds": [],
+      "thumbnail": "assets/vocabulary-en-thumbs/ven0449-690efec8f2e7a439.webp"
+    },
+    {
+      "id": 450,
+      "order": 450,
+      "en": "hand",
+      "cz": "ruka",
+      "sentenceEn": "I wash my hands.",
+      "sentenceCz": "Myji si ruce.",
+      "wordSets": [],
+      "selected": false,
+      "hardTraining": false,
+      "image": "assets/vocabulary-en/ven0450.webp",
+      "imageStem": "ven0450",
+      "imageRequestedStem": "ven0450",
+      "imageSource": "catalog",
+      "imageMissing": false,
+      "uid": "ven-0450",
+      "primaryGroup": "topic-02",
+      "topicIds": [
+        "topic-02"
+      ],
+      "partOfSpeech": [
+        "noun"
+      ],
+      "expressionType": "word",
+      "difficultyBand": 1,
+      "difficultyStatus": "draft",
+      "editorialStatus": "reviewed",
+      "galleryOrder": 12,
+      "related": [],
+      "active": true,
+      "teachingType": "word",
+      "sourceIds": [],
+      "thumbnail": "assets/vocabulary-en-thumbs/ven0450-717e739ae37a07fe.webp"
+    },
+    {
+      "id": 451,
+      "order": 451,
+      "en": "leg",
+      "cz": "noha",
+      "sentenceEn": "I stand on one leg.",
+      "sentenceCz": "Stojím na jedné noze.",
+      "wordSets": [],
+      "selected": false,
+      "hardTraining": false,
+      "image": "assets/vocabulary-en/ven0451.png",
+      "imageStem": "ven0451",
+      "imageRequestedStem": "ven0451",
+      "imageSource": "catalog",
+      "imageMissing": false,
+      "uid": "ven-0451",
+      "primaryGroup": "topic-02",
+      "topicIds": [
+        "topic-02"
+      ],
+      "partOfSpeech": [
+        "noun"
+      ],
+      "expressionType": "word",
+      "difficultyBand": 1,
+      "difficultyStatus": "draft",
+      "editorialStatus": "reviewed",
+      "galleryOrder": 13,
+      "related": [],
+      "active": true,
+      "teachingType": "word",
+      "sourceIds": [],
+      "thumbnail": "assets/vocabulary-en-thumbs/ven0451-133bfdb60fd994e3.webp"
+    },
+    {
+      "id": 452,
+      "order": 452,
+      "en": "foot",
+      "cz": "chodidlo",
+      "sentenceEn": "Put your foot on the floor.",
+      "sentenceCz": "Polož chodidlo na podlahu.",
+      "wordSets": [],
+      "selected": false,
+      "hardTraining": false,
+      "image": "assets/vocabulary-en/ven0452.png",
+      "imageStem": "ven0452",
+      "imageRequestedStem": "ven0452",
+      "imageSource": "catalog",
+      "imageMissing": false,
+      "uid": "ven-0452",
+      "primaryGroup": "topic-02",
+      "topicIds": [
+        "topic-02"
+      ],
+      "partOfSpeech": [
+        "noun"
+      ],
+      "expressionType": "word",
+      "difficultyBand": 1,
+      "difficultyStatus": "draft",
+      "editorialStatus": "reviewed",
+      "galleryOrder": 14,
+      "related": [],
+      "active": true,
+      "teachingType": "word",
+      "sourceIds": [],
+      "thumbnail": "assets/vocabulary-en-thumbs/ven0452-aaeed5b9ae29df0f.webp"
     }
   ],
   "catalog": {
@@ -16711,5 +17051,5 @@
       }
     ]
   },
-  "revision": "7e1fbbd24d79c6553648"
+  "revision": "b294adbd1d10e3fb676d"
 }

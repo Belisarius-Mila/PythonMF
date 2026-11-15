@@ -4,41 +4,47 @@ Nazev: Vocabulary EN
 Pracovni proud: project-vocabulary-en
 Typ: Project
 Priorita: 2
-Stav: nasazeno, ceka na fyzickou prejimku
-Pripomenout pri startu: ne
-Datum: 2026-11-14 22:23 CET
+Stav: pripraveno k predani, ceka na schvaleni rozsahu spolecneho balicku
+Pripomenout pri startu: ano
+Datum: 2026-11-15 08:27 CET
 
 Co se resilo:
-Opravit chyby, zachovat běžné významy a podle potřeby přidat samostatné karty,
-věty a obrázky.
+Nejprve schválené pravidlo jednotlivého/dávkového autorství, potom jeho
+implementace a doplnění10 částí těla včetně obrázků, vět a zvuků.
 
 Co je hotove:
--442 záznamů,432 aktivních:413 Slovíček a19 Interakcí;17 nových významů.
--19 redakčních kontrol uzavřených,18 témat a425 původních identit zachovaných.
--8 ilustrací,31 slovních a42 větných MP3;2479 původních médií shodných.
--36 cílených Python včetně55 Node PASS; plná brána3920 PASS /706,416s unit část,31 SKIP;107/107 finálních zdrojů a médií shodných.
--Produkčníe780fe98 má potvrzené Terra p+n,3920 PASS a100 veřejných SHA shod.
+-Interní registrovaný náhled, příprava, zařazení a stav jedné autorské dávky.
+-Jedna položka/seznam/CSV, stabilní UID, staged média, obnova a kontrola souběhu.
+-Ven-0443 ažven-0452;452 záznamů,442 aktivních:423 Slovíček a19 Interakcí.
+-9 nových ilustrací, převzatá ruka,40 nových MP3;442 starých karet přesně stejné.
+-2568 původních médií shodných,18 témat a všechny dosavadní identity zachované.
+-90 cílených Python včetně56 Node PASS; plná brána3936 PASS /1017,426s unit část,31 SKIP;82/82 finálních zdrojů shodných.
+-Poslední doložené Pages vydání významů e780fe98 podle předchozí účtenky/handoffu.
 
 Co neni hotove:
-Fyzická přejímka telefonu a vizuální kontrola nových významů.
+Nové Pages p+n a fyzická přejímka telefonu.
 
 Dalsi krok:
-Přejímka nových významů a osobních A–D na telefonu.
+Samostatně schválené Pages p+n a přejímka telefonu.
 
 Navrhovane dalsi kroky:
-Přejímka významů/profilů, pohodlný autorský vstup
-a budoucí idiomy. Oxford čeká na Mílův odeslaný dotaz.
+Samostatné Pages p+n a přejímka těla/profilů; další tematické dávky, případně
+pozdější interní formulář a idiomy. Oxford čeká na Mílův dotaz.
 
 Zmenene nebo relevantni soubory:
-VocabularyEN.csv; vocabulary_en_catalog.json; VocabularyEN/Pict/;3 webové
-manifesty; nové obrázky/náhledy/MP3; tag_mmtx_benji_word_set.py;4 testové
-soubory; GALLERY_AUTHORING.txt; reports/vocabulary_en_meaning_cards_20261114.md.
+vocabulary_en_authoring_rules.md; vocabulary_authoring.py; capability registry;
+quality gate; test_vocabulary_authoring.py;3 galerie/audio testy; CSV/katalog;
+3 webové manifesty;10 zdrojových obrazů,10 webových kopií,10 náhledů a40MP3;
+GALLERY_AUTHORING.txt; reports/vocabulary_en_authoring_body_20261115.md.
 
 Bezpecnost / neukladat:
-Nové významy mají ven-0426 ažven-0442. Osobní výběry/PINy zůstávají
-v prohlížečích, nové významy se do A–D přidávají výslovným výběrem.
-Žádný výmaz médií ani migrace UID. Vlastní větev nad64e9897a; main převzal změny se zachováním novějšího UI a knihovny. Pages p+n dokončené. Samostatný TVBCP není dohodnutý.
-Veřejné bajty ověřené; fyzický telefon a vizuální přejímka neověřené.
+Pravidlo zapsané před vývojem. Vlastní větev data/vocabulary-authoring-20261115
+nad7d8c04e4. Souběžný main a knihovna se nemění. Osobní PINy/výběry nejsou
+v Gitu ani v backendu; do A–D se nové karty vybírají výslovně. Žádný výmaz
+původních médií, automatický retry nejistého audia nebo nové p+n.
+Samostatný TVBCP není sjednaný. Dávka body-parts-20261115-v1 applied;
+soukromá účtenka a výsledek v data/private/vocabulary_authoring_body_20261115/.
+Fyzická přejímka telefonu zůstává následná.
 
 ## Historie
 
@@ -791,3 +797,91 @@ portálový returned_to_adam není potvrzený. Fyzický iPhone ani aktuální
 vizuální přejímka nejsou doložené. Žádné p+n ani generování neopakovat.
 Závěrečný dokumentační checkpoint vzniká po vydání místně; nemění nasazené
 produkční soubory a není důvodem pro další nasazení. Bez nového TVBCP.
+
+
+## 2026-11-15 08:27 CET — Autorský vstup a první dávka částí těla
+
+Hotovo: Jeden interní autorský postup přijímá jednotlivou položku, seznam
+i CSV. Připraví obsah a média v odděleném prostoru, rezervuje stabilní UID
+a zařadí přesný ověřený balíček. Stav dávky je dohledatelný; opakované
+zařazení vrací původní účtenku. Přirozené zadání interpretuje Data v chatu.
+První skutečná dávka má10 částí těla ven-0443 ažven-0452,9 nových ilustrací,
+1 převzatý obraz ruky a40MP3. Celkem452 záznamů/442 aktivních,423 Slovíček
+a19 Interakcí;18 témat a všechny původní osobní identity zachované.
+
+Rozhodnutí: Míla nejprve schválil zápis návrhu jako pravidla a potom vývoj
+a doplnění10 částí těla. Pravidlo technical/vocabulary_en_authoring_rules.md
+bylo uložené před vytvořením implementace; původní SHA a čas jsou v soukromé
+rule_receipt.json. Jedna karta/jeden význam, bez automatického převzetí
+A–D nebo Benji. Nové p+n zadané nebylo. Nový TVBCP není sjednaný.
+
+Další krok: Dokončit plnou bránu, porovnat finální zdroje a vlastní checkpoint.
+Navrhované další kroky: Samostatné Terra Pages p+n a přejímka těla na telefonu;
+podle potřeby pozdější interní formulář, další tematické dávky a idiomy.
+Oxford stále čeká na Mílův odeslaný dotaz.
+
+Technický důkaz:90 cílených Python PASS /46,101s včetně56 Node scénářů.
+Ověřený skutečný process exit po prvním zdrojovém zápisu, obnova stejné dávky,
+souběh dvou příprav se samostatnými ID, cizí změny, změněný připravený soubor
+i jeho změna uprostřed aplikace a zákaz opakování nejistého externího zvuku.
+Všech442 původních položek exportu přesně shodných,2568 původních médií
+bajtově shodných,40 nových MP3 dekódovaných ffmpeg. Skutečná dávka
+body-parts-20261115-v1 je applied;75 změněných souborů a kontrolovaný replay
+bez dalšího přidání/generování. Finální plná brána3936 PASS /1017,426s unit část,31 SKIP; soukromá autorita
+výsledku je data/private/vocabulary_authoring_body_20261115/verification.json
+a checkpoint.json. Vizuální iPhone přejímka není automatickými testy doložená.
+
+
+## 2026-11-15 08:39 CET — Finální uzavření autorského vstupu a dávky těla
+
+Hotovo: Schválené pravidlo uložené před implementací, jednotný interní
+autorský postup a skutečná dávka10 částí těla, kompletní obrázky/věty/audio.
+452 záznamů/442 aktivních; všech442 původních karet přesně zachovaných.
+Rozhodnutí: Mílovo schválení místního vývoje platí; nové rozhodnutí nevzniklo.
+Další krok: Samostatně schválené Terra Pages p+n.
+Navrhované další kroky: Přejímka těla a osobních výběrů na telefonu, další
+tematické dávky, pozdější interní formulář.
+Technický důkaz: Plná brána3936 PASS /1017,426s unit část,
+31 SKIP,0 failures/errors;90 cílených Python včetně56 Node PASS.
+Všech82/82 finálních zdrojů/testů/dat/médií shodných se zelenou branou;
+2568 původních médií zachovaných,40 nových MP3 dekódovaných. Skutečná dávka
+body-parts-20261115-v1 applied jednou, replay bez generování nebo zápisu.
+Browser host nebyl dostupný; fyzická telefonní přejímka zůstává následná.
+Soukromý checkpoint.json potvrzuje výsledný commit a shodu commitovaných
+bajtů. Nový TVBCP nebyl sjednaný ani založený.
+
+
+## 2026-11-15 08:45 CET — Předání před restartem počítače
+
+Hotovo: Vývoj i skutečná dávka10 částí těla jsou v checkpointu e2276615
+(e2276615a41738f1378d84f4f7a81f7b2b91cb8c). Pravidlo bylo zapsané před vývojem,
+452 záznamů/442 aktivních,40MP3. Plná brána3936 bez chyb,31 SKIP;82 zdrojů
+commitovaných přesně podle zeleného běhu.
+Rozhodnutí: Míla restartuje počítač. Žádná generace ani publikace neběží.
+Další krok: Po restartu nejprve jen obnovit kontext a ověřit vlastní worktree
+data/vocabulary-authoring-20261115, kanonický handoff a privátní
+data/private/vocabulary_authoring_body_20261115/verification.json a checkpoint.json.
+Navrhované další kroky: Teprve na nový pokyn Terra p+n a telefonní přejímka.
+Technický důkaz: Dávka body-parts-20261115-v1 je applied. Neopakovat její
+generování, přípravu ani zařazování; hotové obrázky/zvuky jsou uložené.
+Předrestartový zápis je samostatná dokumentace nad e2276615; kód se nemění.
+Souběžný main/knihovna zůstávají stranou. Samostatný TVBCP není dohodnutý.
+
+
+## 2026-11-15 09:31 CET — Obnovení a příprava předání Terře
+
+Hotovo: Po restartu obnoven hotový autorský vstup a deset částí těla.
+V odděleném integračním worktree je zachovaných všech82 zdrojů zelené brány
+a12 nezávislých souborů současného main bajtově shodných. Sdílené indexy
+zachovávají záznamy Vocabulary EN i Knihovny. Dávka se znovu negenerovala.
+Rozhodnutí: Míla výslovně zadal Terra p+n Vocabulary EN. Společný publisher
+vydává celý main; čtyři další Willovy commity nejsou touto větou automaticky
+schválené. O rozsahu společného push je položena konkrétní otázka.
+Další krok: Po potvrzení rozsahu převzít připravenou integraci, zarovnat
+jen čisté nedivergentní profily a zavolat jediné submit_release(wait=True).
+Navrhované další kroky: Fyzická přejímka částí těla a A–D na telefonu.
+Technický důkaz: Zdroj e2276615 + předání acb6e0a8, integrační základ072ab251.
+47 cílených Python testů PASS/31,471s a rychlá statická brána PASS.
+Předchozí Knihovna jobfff30ae477f38401ae8e582208e9a582 je attention/neaktivní;
+živý GitHub audit stálee780fe98 a5 čekajících commitů před integrací.
+Pages vydání nesmí restartovat Cockpit. Nový TVBCP není sjednaný.
