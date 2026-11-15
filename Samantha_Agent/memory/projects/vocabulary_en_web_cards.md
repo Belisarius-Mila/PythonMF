@@ -1608,3 +1608,38 @@ přehrání fishing hut, jeho karta a pořadí1/20. Vlastní náhledové okno za
 uživatelské produkční okno zachované. CSV/slovník/hlasy/A–D/PIN beze změny.
 Povinná doménová brána a zdrojové otisky: private vocabulary_quiz_all_cards_20261115.
 Produkce zůstává na předchozím vydání ffa62f7f; nová úprava bez push/deploy.
+
+
+### 2026-11-15 19:29 CET — Rozšířená hra a viditelný filtr veřejně vydané
+
+Hotovo: Na produkci je hra pro všech512 aktivních karet včetně abstraktních
+a Interakcí. Posledních20 funguje celých20/20; filtr N je viditelný v Přehledu
+pro Učení i Poslech. Zdrojová data, média a osobní výběry zachované.
+
+Rozhodnutí: Míla zadal „ok p+n“. Jediné registrované vydání přesného77b5f652
+a předchozího dokumentačního2da440c4, bez dalšího modelového předání či retry.
+Původní účtenka se neopravuje ručně; oddělený čtecí důkaz potvrzuje produkci.
+
+Další krok: Mílova přejímka aktuální produkce, zejména na telefonu.
+
+Navrhované další kroky: Sledování rozlišitelnosti abstraktních ilustrací;
+servisně vysvětlit nesoulad automatické účtenky a úspěšného Pages deploymentu.
+Oxford nezávisle.
+
+Technický důkaz: Job b708fb36e6a8e5e530a0415f431a61e2 potvrdil push
+a155 PASS validation-v3 targeted, receipt739aec0e6bb27094f3c9990c86e83dcb4414e8f806f16ba357ef273696e2717b.
+Publikační kontrola jobu skončila attention/deployment uncertain, zpráva
+„Pages nedoložily přesný commit, deployment a HTTP smoke.“ returned_to_adam=false.
+Čtecí dohledání původního běhu: workflow43746755971 completed/success
+a deployment7807887008 success jsou přesně pro77b5f652d4262514648c26e9be74137f22c41184.
+Veřejných6/6 HTML/JS/CSS/katalog souborů HTTP200 a bajtově přesných, vzdálený
+main shodný. Produkce nezávisle potvrzená; automatická účtenka nadále neuzavřená,
+příčina jejího nesouladu nezjištěná. Nic znovu nespuštěno. Důkazy private
+vocabulary_quiz_all_cards_release_20261115/release_result.json, public_sources.json
+a independent_verification.json. Telefonní přejímka otevřená.
+Závěrečný dokumentační checkpoint je místní a nepotřebuje další Pages vydání.
+
+Závěrečný zápis je ve vlastním Data worktree: na main se mezitím objevil
+souběžný nesouvisející vývoj. Přesunuté jen4 vlastní dokumenty; cizí kód
+ani jeho stage nebyly změněné. Původní main kontrola není důkazem těchto
+čtyř dokumentů; vlastní finální brána má samostatný privátní log.

@@ -4,9 +4,9 @@ Nazev: Vocabulary EN
 Pracovni proud: project-vocabulary-en
 Typ: Project
 Priorita: 2
-Stav: mistne rozsirena hra na vsech512 karet a viditelny filtr pro Uceni/Poslech; ceka p+n
+Stav: rozsireni verejne overene; automaticka uctenka attention, bez opakovani p+n
 Pripomenout pri startu: ne
-Datum: 2026-11-15 19:15 CET
+Datum: 2026-11-15 19:29 CET
 
 Co se resilo:
 Hra Poslechni a vyber obrázek se4 možnostmi a vyhodnocením; posledně přidaných N.
@@ -22,15 +22,16 @@ Co je hotove:
   homofony/související významy a konflikty nevytvoří nejednoznačnou čtveřici.
 - Návrat, historie, přerušení zvuku, chyby souborů a malé výběry ošetřené.
 - Zachovaná všechna522 UID/512 aktivních karet,18 témat, A–D a původní média.
-- Pages vydání ffa62f7f potvrzené; všech6 změněných veřejných zdrojů přesných.
+- Nové veřejné vydání77b5f652 nezávisle potvrzené přesným deploymentem
+  a6/6 veřejnými zdroji; původní automatická účtenka attention.
 
 Co neni hotove:
-Publikace nového rozšíření, fyzický telefon a významová přejímka abstraktních karet.
-Automatický návrat v účtence returned_to_adam=false (terminálový caller);
-výsledek hlavní Adam zkontroloval přímo v této relaci.
+Fyzický telefon, významová přejímka abstraktních karet a vysvětlení nesouladu
+automatické účtenky (attention/deployment uncertain) s potvrzenou produkcí.
+returned_to_adam=false; hlavní Adam čtecí důkazy ověřil zde.
 
 Dalsi krok:
-Po lokálním checkpointu samostatně potvrzené p+n rozšíření; potom telefon.
+Mílova přejímka aktuální produkce; již vydané rozšíření znovu nepublikovat.
 
 Navrhovane dalsi kroky:
 Sledování rozlišitelnosti abstraktních ilustrací; Oxford nezávisle.
@@ -42,10 +43,12 @@ test_vocabularyen_gallery.py; GALLERY_AUTHORING.txt.
 
 Bezpecnost / neukladat:
 Zdroj Data5adee00a integrován bez konfliktů přes ffa62f7f nad de3899b1.
-Zveřejněná Osel oprava zachovaná; přesný vydaný main/GitHub ffa62f7f.
+Zveřejněná Osel oprava zachovaná; nový vydaný main/GitHub77b5f652.
 Privátní důkazy data/private/vocabulary_picture_quiz_release_20261115/.
 Předchozí publikace job2838a4ef7a46734dca52f45adc67c9ea dokončená; neopakovat.
-Nové rozšíření je místní Data worktree nad2da440c4, bez nového p+n.
+Rozšíření převzato z Data worktree přesným fast-forwardem na main.
+Nový jobb708fb36e6a8e5e530a0415f431a61e2 skončil attention; produkce potvrzena
+nezávisle bez dalšího submit/publish. Důkazy vocabulary_quiz_all_cards_release_20261115.
 Hra neukládá osobní výsledky do profilů, nemění vybraná/obtížná ani PIN.
 Herní filtry jen sessionStorage, galerie používá své dosavadní úložiště.
 Nový TVBCP nedohodnutý, nevzniká. Nic z původních dávek znovu negenerovat.
@@ -1187,3 +1190,38 @@ přehrání fishing hut, jeho karta a pořadí1/20. Vlastní náhledové okno za
 uživatelské produkční okno zachované. CSV/slovník/hlasy/A–D/PIN beze změny.
 Povinná doménová brána a zdrojové otisky: private vocabulary_quiz_all_cards_20261115.
 Produkce zůstává na předchozím vydání ffa62f7f; nová úprava bez push/deploy.
+
+
+### 2026-11-15 19:29 CET — Rozšířená hra a viditelný filtr veřejně vydané
+
+Hotovo: Na produkci je hra pro všech512 aktivních karet včetně abstraktních
+a Interakcí. Posledních20 funguje celých20/20; filtr N je viditelný v Přehledu
+pro Učení i Poslech. Zdrojová data, média a osobní výběry zachované.
+
+Rozhodnutí: Míla zadal „ok p+n“. Jediné registrované vydání přesného77b5f652
+a předchozího dokumentačního2da440c4, bez dalšího modelového předání či retry.
+Původní účtenka se neopravuje ručně; oddělený čtecí důkaz potvrzuje produkci.
+
+Další krok: Mílova přejímka aktuální produkce, zejména na telefonu.
+
+Navrhované další kroky: Sledování rozlišitelnosti abstraktních ilustrací;
+servisně vysvětlit nesoulad automatické účtenky a úspěšného Pages deploymentu.
+Oxford nezávisle.
+
+Technický důkaz: Job b708fb36e6a8e5e530a0415f431a61e2 potvrdil push
+a155 PASS validation-v3 targeted, receipt739aec0e6bb27094f3c9990c86e83dcb4414e8f806f16ba357ef273696e2717b.
+Publikační kontrola jobu skončila attention/deployment uncertain, zpráva
+„Pages nedoložily přesný commit, deployment a HTTP smoke.“ returned_to_adam=false.
+Čtecí dohledání původního běhu: workflow43746755971 completed/success
+a deployment7807887008 success jsou přesně pro77b5f652d4262514648c26e9be74137f22c41184.
+Veřejných6/6 HTML/JS/CSS/katalog souborů HTTP200 a bajtově přesných, vzdálený
+main shodný. Produkce nezávisle potvrzená; automatická účtenka nadále neuzavřená,
+příčina jejího nesouladu nezjištěná. Nic znovu nespuštěno. Důkazy private
+vocabulary_quiz_all_cards_release_20261115/release_result.json, public_sources.json
+a independent_verification.json. Telefonní přejímka otevřená.
+Závěrečný dokumentační checkpoint je místní a nepotřebuje další Pages vydání.
+
+Závěrečný zápis je ve vlastním Data worktree: na main se mezitím objevil
+souběžný nesouvisející vývoj. Přesunuté jen4 vlastní dokumenty; cizí kód
+ani jeho stage nebyly změněné. Původní main kontrola není důkazem těchto
+čtyř dokumentů; vlastní finální brána má samostatný privátní log.
