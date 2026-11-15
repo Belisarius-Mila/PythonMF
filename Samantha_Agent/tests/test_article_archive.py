@@ -411,6 +411,60 @@ class ArticleArchiveTests(unittest.TestCase):
                 max_decompressed_bytes=64,
             )
 
+    def test_osel_extract_preserves_intro_body_and_sources_without_discussion(self) -> None:
+        title = "Nová metoda měření zachovává kvantový stav"
+        html = f"""<html><head><title>OSEL.CZ - {title}</title></head><body>
+<nav>Redakce Registrace Reklama</nav>
+<div id="clanek_detail_obal">
+<div id="clanek_detail_nadpis">{title}</div>
+<div id="clanek_detail_popis">Úvod vysvětluje přínos nové metody.</div>
+<div id="clanek_detail_obsah">
+<p>První odstavec popisuje skutečný výzkum.</p>
+<div><p>Druhý odstavec zachovává omezení výsledků.</p></div>
+<p>Literatura</p><p>https://example.test/studie</p>
+</div>
+<div id="clanek_detail_souvisejici">Kvantový stav a nová metoda</div>
+<div id="clanky_diskuse"><article>Diskusní příspěvek čtenáře.</article></div>
+</div></body></html>"""
+        for host in ("osel.cz", "www.osel.cz"):
+            with self.subTest(host=host):
+                article = extract_article(html.encode(), f"https://{host}/synthetic.html#diskuse")
+                self.assertIn(title, article.text)
+                self.assertIn("Úvod vysvětluje", article.text)
+                self.assertIn("První odstavec", article.text)
+                self.assertIn("Druhý odstavec", article.text)
+                self.assertIn("https://example.test/studie", article.text)
+                self.assertNotIn("Kvantový stav a nová metoda", article.text)
+                self.assertNotIn("Diskusní příspěvek", article.text)
+                self.assertNotIn("Redakce Registrace", article.text)
+
+    def test_osel_missing_or_empty_body_does_not_write_archive(self) -> None:
+        for body in ("", '<div id="clanek_detail_obsah"> </div>'):
+            with self.subTest(body=body), tempfile.TemporaryDirectory() as temp_dir:
+                root = Path(temp_dir)
+                archive_text_entry(title="Vlastní poznámka", text="Zachovat beze změny.", archive_root=root)
+                before = {p.relative_to(root): p.read_bytes() for p in root.rglob("*") if p.is_file()}
+                html = ('<html><head><title>Chybějící článek</title></head><body>'
+                        '<div id="clanek_detail_popis">Samotný úvod nestačí.</div>' + body +
+                        '<div id="clanky_diskuse"><article>Komentář čtenáře.</article></div></body></html>')
+                with patch("app.article_archive.fetch_url", return_value=html.encode()):
+                    with self.assertRaisesRegex(ValueError, "tělo článku"):
+                        archive_url(url="https://www.osel.cz/synthetic.html", archive_root=root)
+                after = {p.relative_to(root): p.read_bytes() for p in root.rglob("*") if p.is_file()}
+                self.assertEqual(before, after)
+
+    def test_early_article_title_wins_over_late_related_title(self) -> None:
+        title = "Nová metoda měření zachovává kvantový stav"
+        lines = ["Menu", title, "Úvod článku.", "První skutečný odstavec výzkumu."]
+        lines.extend(f"Další skutečný odstavec číslo {i}." for i in range(12))
+        lines.extend(["Související články", "Kvantový stav a nová metoda", "Diskuze", "Komentář čtenáře."])
+        text = trim_to_article_body("\n".join(lines), title)
+        self.assertTrue(text.startswith(title))
+        self.assertIn("Úvod článku.", text)
+        self.assertIn("První skutečný odstavec", text)
+        self.assertIn("Další skutečný odstavec číslo 11.", text)
+        self.assertNotIn("Komentář čtenáře", text)
+
     def test_extract_article_prefers_main_content_over_footer_title_duplicate(self) -> None:
         html = """<!doctype html>
 <html>

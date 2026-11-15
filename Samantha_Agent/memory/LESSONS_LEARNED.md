@@ -2692,3 +2692,15 @@ Příští CLI běh opravu načte, nová ostrá záloha v tomto vývojovém krok
 - Kontext: v2 měla Vocabulary doménu pro kód, ale chyběly skutečné sourozenecké VocabularyEN/docs cesty médií, exportů a inventárních testů;70 karet proto spustilo4000 testů. Opakované přebírání navíc četlo znovu celé stejné soubory.
 - Řešení: oddělená obsahová sada a skutečné cesty, běžné ověření bez plného základu i při commitu/checkpointu/p+n; full pouze noční/ruční podle nového Mílova rozhodnutí. Sdílené komponenty smluvně, ne každý konzument. HMAC covered_modules brání úzkému důkazu vynechat jinou změnu. Cache SHA vyžaduje i inode/device/ctime a před/po stat; samotné mtime/velikost nestačí.
 - Ověření: skutečná dávka503 cest/0 nezařazených →99 testů/53,881s PASS;42 cílených regresí PASS. Capture15,098s první /2,142s opakovaný. Konečný cílený důkaz v private completion.json podle validation_focused_20261115.md. Omezení: neočekávanou vazbu může odhalit až noční sada/použití; procento rizika neznáme.
+
+
+### 2026-11-15 17:09 CET — Import článku nesmí začínat u podobného titulku v souvisejících
+
+- Kontext: Osel má tělo v div#clanek_detail_obsah, nikoli v generickém article/main.
+- Příčina: náhradní výběr ignoroval nadpisy na řádcích0–10; podobný titulek za
+  článkem tak získal přednost a výsledek mohl obsahovat samotnou diskuzi.
+- Řešení: rozpoznat nadpis/perex/tělo Osel, chybějící tělo odmítnout před zápisem
+  a při obecném skórování nevynechávat časný skutečný nadpis.
+- Ověření:46 testů archivace PASS; původní veřejný vzorek1048 znaků nahradilo
+ 3420 znaků s celým tělem a bez diskuze. Regresní vzorky jsou vlastní syntetické
+ texty; žádný obsah soukromé knihovny nepatří do Gitu.

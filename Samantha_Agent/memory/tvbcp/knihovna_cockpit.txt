@@ -1759,3 +1759,28 @@ Privátní důkazy: travel_ui_20261115/release_v2/diagnostic_gate.log,
 diagnostic_timings.json, release_receipt.json, source_manifest.json.
 Servisní proposal.patch je pouze návrh mimo Git; nezměněná publikační
 brána se neobchází a testy se neškrtají.
+
+
+## 2026-11-15 17:09 CET — Osel.cz: oprava importu článku místo diskuze
+
+Hotovo: Import Osel.cz rozpoznává nadpis, perex a vlastní tělo článku;
+související nabídky a diskuze se neukládají. Chybějící či prázdné tělo
+uložení zastaví před zápisem. Obecné hledání začátku už neignoruje nadpis
+v prvních jedenácti řádcích ve prospěch pozdějšího podobného titulku.
+Rozhodnutí: Míla výslovně schválil implementaci a okamžité nasazení.
+Platí cílená validační politika v3, bez automatické plné sady.
+Další krok: Dokončit autorizované registrované p+n project-knowledge-library
+a zkontrolovat načtenou verzi. Výsledek vydání určuje přesná soukromá
+účtenka a completion.json v data/private/osel_article_fix_20261115/.
+Navrhované další kroky: Převzít konkrétní Mílův odkaz a případně opravit
+jednu chybnou uloženou kartu; její totožnost zatím není známá. Automatická
+migrace, přepis poznámek ani hromadná změna knihovny se neprovádí.
+Technický důkaz:46 testů archivace PASS včetně zachování perexu, těla, zdrojů,
+odmítnutí samotné diskuze bez změny archivu a chyby časného nadpisu.
+Skutečný veřejný vzorek Osel15087 nyní3420 znaků; celý původní nadpis, perex
+a tělo jsou zachované, diskuze vyloučená. Původní extrakce vracela1048 znaků
+a vynechávala tělo. Test veřejného zdroje nezapsal žádnou živou kartu.
+Předpublikační cílenou bránu a konečný runtime doloží stejná soukromá složka;
+tento předpublikační zápis sám není důkaz nasazení ani fyzické přejímky.
+Riziko: změna HTML Osel.cz bez identifikovaného těla bezpečně odmítne import;
+přesný původní uživatelský článek zůstává do získání odkazu neověřený.

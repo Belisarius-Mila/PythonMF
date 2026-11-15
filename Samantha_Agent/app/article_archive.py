@@ -1417,7 +1417,7 @@ def extract_article(
     html_text = decode_html_document(html_bytes, http_encoding=http_encoding)
     title = extract_title(html_text) or urlparse(source_url).netloc or "article"
     canonical = extract_canonical_url(html_text) or strip_tracking_query(source_url)
-    text = extract_preferred_readable_text(html_text)
+    text = extract_preferred_readable_text(html_text, source_url=source_url)
     if not text:
         parser = ReadableTextParser()
         parser.feed(html_text)
@@ -1462,7 +1462,21 @@ def detect_html_declared_encoding(html_bytes: bytes) -> str:
     return ""
 
 
-def extract_preferred_readable_text(html_text: str) -> str:
+def extract_preferred_readable_text(html_text: str, *, source_url: str = "") -> str:
+    if (urlparse(source_url).hostname or "").casefold() in {"osel.cz", "www.osel.cz"}:
+        body = PreferredReadableTextParser(("div", "id", "clanek_detail_obsah"))
+        body.feed(html_text)
+        body_text = body.text().strip()
+        if not body_text:
+            raise ValueError("Na Osel.cz se nepodařilo získat tělo článku. Diskuzi místo článku neukládám.")
+        parts = []
+        for target_id in ("clanek_detail_nadpis", "clanek_detail_popis"):
+            parser = PreferredReadableTextParser(("div", "id", target_id))
+            parser.feed(html_text)
+            if text := parser.text().strip():
+                parts.append(text)
+        return "\n".join([*parts, body_text])
+
     preferred_targets = (
         ("div", "id", "clanek"),
         ("article", "", ""),
@@ -1700,11 +1714,11 @@ def detect_article_start(lines: list[str], title: str) -> int:
             score = matching_word_count(folded, title_words)
             if score >= min(2, len(title_words)):
                 candidates.append((95 + score, min(index + 1, len(lines) - 1)))
-        if index > 10 and title_words:
+        if title_words:
             score = matching_word_count(folded, title_words)
             if score >= min(3, len(title_words)) and len(line) <= 180:
                 candidates.append((80 + score, index))
-        if index > 10 and title_head and title_head.casefold() in folded:
+        if title_head and title_head.casefold() in folded:
             candidates.append((70, index))
 
     if candidates:
