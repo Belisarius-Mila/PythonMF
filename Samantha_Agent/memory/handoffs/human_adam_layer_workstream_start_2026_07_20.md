@@ -1,16 +1,34 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
-## Lokální integrace schválené Datovy práce — 2026-11-13
+## Aktuální stav
 
-Míla schválil všechny čtyři Datovy commity a Willovy nechává stranou.
-Integrační merge zachovává main9857d2e6 a přesné f95734f5, 9b584b95,
-2f16cf66 a 9f113231. Všech 77 samostatných main souborů a 424 Datových
-souborů je shodných; společné registry zachovávají obě sady záznamů.
-Plná integrační brána 3823 testů / 580,485 s OK (8 SKIP); tři SDK schema
-kontroly doplněné samostatně 3/3 PASS, zbývá 5 původních SKIP. Zdroje 40/40
-shodné. Původní Datův worktree je čistý na 9f113231. Cílový merge SHA a
-skutečné převzetí na main potvrzuje závěrečná účtenka v Downloads.
-Žádný push, publikace, restart, nová role ani nový modelový pokus. Běžný
-GitHub balíček obsahuje i Willovy commity a tímto souhlasem se nepředává.
+- Obnoveno potvrzeným checkpointem: 2026-11-15 22:02 CET
+
+### Hotovo
+- Vocabulary IT je zařazené mezi aktivní pracovní proudy se zachovanou historií
+- Předchozí stav main byl před tímto checkpointem serverově nasazený a ověřený.
+
+### Otevřeno
+- Pozdější nasazení nového checkpointu zatím není tímto snapshotem doložené.
+
+### Rizika
+- Žádné další doložené provozní riziko.
+
+### Další krok
+- Samostatně nasadit změnu katalogu a obnovit nabídku pracovních proudů v Cockpitu
+
+### Rozhodnutí
+- Znovu aktivovat existující proud Vocabulary IT místo zakládání nového
+
+### Navrhované další kroky
+- Žádné další návrhy nad rámec bezprostředního kroku.
+
+### Technický stav checkpointu
+- Změna je otestovaná (558 testů).
+- Git před checkpointem: lokální `main` na `2f3dc305b95d`; GitHub může být starší a čeká na denní balíček.
+- Poslední serverově potvrzené nasazení: `2f3dc305b95d` · odpovídá ověřenému main před tímto checkpointem · 494 testů · smoke 5/5 · 2026-11-15T20:40:25+00:00.
+- Read-only živý stav: main=`aligned`, deployment=`verified_current`, runtime=`connected`.
+- Tento snapshot je součástí lokálního checkpointu; push na GitHub zůstává odložený do potvrzeného denního balíčku.
+- Tato sekce nahrazuje pouze předchozí aktuální souhrn; chronologické bloky níže zůstávají historickými snapshoty.
 <!-- SAMANTHA_CURRENT_STATUS_END -->
 
 Nazev: Human–Adam / vyvojove prostredi - zalozeni pracovniho proudu Layer
@@ -3709,3 +3727,15 @@ Rizika: Pokračování není replay ani rollback. Rozpracované změny vyžaduj�
 svůj dokončovací a integrační postup. Pád v nejistém okně zůstává fail-closed
 pro servisní ověření. Podpora se vztahuje na ověřený primární Human–Adam WIP.
 Živá UI/modelová přejímka následuje až po zvlášť schváleném nasazení.
+
+### Automatický checkpoint 2026-11-15 22:02 CET
+
+- Pracovní proud: `layer-human-adam-development`
+- Hotovo: Vocabulary IT je zařazené mezi aktivní pracovní proudy se zachovanou historií; Předchozí stav main byl před tímto checkpointem serverově nasazený a ověřený.
+- Otevřeno: Pozdější nasazení nového checkpointu zatím není tímto snapshotem doložené.
+- Rizika: Žádné další doložené provozní riziko.
+- Stav při vytvoření checkpointu: testy prošly; tento historický blok sám nepotvrzuje pozdější nasazení.
+- Ověření: cílená Cockpit brána: 558 testů, 381.0 s, výsledek OK
+- Změněné cesty před paměťovým zápisem (5): `Samantha_Agent/app/communication/human_adam_workstream_catalog.py`, `Samantha_Agent/memory/ACTIVE_PROJECTS.md`, `Samantha_Agent/memory/WORKSTREAMS.md`, `Samantha_Agent/tests/test_human_adam_workstream_catalog.py`, `Samantha_Agent/tests/test_human_adam_workstream_selection.py`
+- Commit: `Aktivovat existující proud Vocabulary IT`
+- Další krok: Samostatně nasadit změnu katalogu a obnovit nabídku pracovních proudů v Cockpitu

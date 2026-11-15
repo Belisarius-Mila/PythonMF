@@ -12,7 +12,7 @@ prace.
 
 Katalog zahrnuje oblasti z `ACTIVE_PROJECTS.md`, samostatné projekty
 Vocabulary EN/FR/IT a dva dohodnuté výchozí proudy `Misc`. Výsledkem je
-34 proudů: 28 projektů, 4 tooly a 2 `Misc`. Dva projekty jsou nyní `paused`.
+34 proudů: 28 projektů, 4 tooly a 2 `Misc`. Jeden projekt je nyní `paused`.
 
 2026-11-13: Vocabulary EN je nově registrovaný pro samostatné vydání galerie
 na existujícím Pages publisheru s přesnou cestou `vocabulary-en/`. Tato místní
@@ -73,7 +73,7 @@ nesmi smesovat s Knihovnou clanku.
 | `project-linux-workstation` | `Project` | Linux / instalace a konfigurace | active | 2 | Linux / instalace a konfigurace; samostatná konzultace instalace, konfigurace a běžné práce na linuxovém počítači. |
 | `project-vocabulary-en` | `Project` | Vocabulary EN | active | 2 | Místní a webová varianta; Pages cíl `vocabulary-en/`, galerie 425 karet včetně vět EN/CZ. |
 | `project-vocabulary-fr` | `Project` | Vocabulary FR | active | 2 | Potvrzeny kanonicky projekt v `project_capability_map.md`; lokalni a webova varianta patri dohromady. |
-| `project-vocabulary-it` | `Project` | Vocabulary IT | paused | 2 | Potvrzeny kanonicky projekt v `project_capability_map.md`; lokalni a webova varianta patri dohromady. |
+| `project-vocabulary-it` | `Project` | Vocabulary IT | active | 2 | Potvrzeny kanonicky projekt v `project_capability_map.md`; lokalni a webova varianta patri dohromady. |
 | `tool-backup-restore` | `Tool` | Záloha a obnova | active | 1 | Samantha external backup |
 | `tool-media-image-resize` | `Tool` | Zmenšování obrázků | active | 1 | Media image resize utility |
 | `tool-vocabulary-image-pipeline` | `Tool` | PictNew / obrázky ke slovíčkům | active | 2 | PictNew / Vocabulary image workflow |

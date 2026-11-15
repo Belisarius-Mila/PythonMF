@@ -491,7 +491,7 @@ WORKSTREAM_CATALOG = validate_workstream_catalog(
             "project-vocabulary-it",
             "Project",
             "Vocabulary IT",
-            "paused",
+            "active",
             "2",
             "Vocabulary IT",
         ),

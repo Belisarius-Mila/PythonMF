@@ -145,7 +145,7 @@ class WorkstreamCatalogTests(unittest.TestCase):
         )
         self.assertEqual(
             Counter(record.mode for record in WORKSTREAM_CATALOG),
-            {"active": 32, "paused": 2},
+            {"active": 33, "paused": 1},
         )
 
     def test_to_be_to_have_is_an_active_project_with_legacy_name_aliases(self) -> None:
@@ -416,8 +416,15 @@ class WorkstreamCatalogTests(unittest.TestCase):
 
         self.assertEqual(
             paused_ids,
-            {"project-mobile-input", "project-vocabulary-it"},
+            {"project-mobile-input"},
         )
+        vocabulary_it = next(
+            record for record in WORKSTREAM_CATALOG
+            if record.workstream_id == "project-vocabulary-it"
+        )
+        self.assertEqual(vocabulary_it.mode, "active")
+        self.assertEqual(vocabulary_it.name, "Vocabulary IT")
+        self.assertIn("Vocabulary IT", _active_project_names())
         self.assertIn("| Vocabulary FR |", capability_map)
         self.assertIn("| Vocabulary IT |", capability_map)
 
