@@ -44,6 +44,35 @@ class FakePilot(CalendarAccessPilot):
 
 
 class CalendarOverviewTests(unittest.TestCase):
+    def test_modern_all_day_end_normalizes_display_days_but_keeps_native_identity(self):
+        for start,end,start_day,end_day,exclusive_day,zone in [
+            ('2026-11-11T23:00:00Z','2026-11-12T22:59:59Z','2026-11-12','2026-11-12','2026-11-13','Europe/Prague'),
+            ('2026-03-27T23:00:00Z','2026-03-29T21:59:59Z','2026-03-28','2026-03-29','2026-03-30','Europe/Prague'),
+            ('2026-10-23T22:00:00Z','2026-10-25T22:59:59Z','2026-10-24','2026-10-25','2026-10-26','Europe/Prague'),
+            ('2026-11-11T23:00:00Z','2026-11-12T22:59:59Z','2026-11-12','2026-11-12','2026-11-13','GMT+0100'),
+        ]:
+            with self.subTest(end=end,zone=zone):
+                self.now=datetime.fromisoformat(start.replace('Z','+00:00'))
+                row={'calendar_id':'a','title':'Synthetic','start':start,'end':end,'all_day':True,
+                     'timezone':zone,'start_day':start_day,'end_day':end_day}
+                result=self.pilot.read_overview(['a'],confirmed=True)
+                result['events']=[row]
+                _,events,_=self.store._validated_read(result,['a'])
+                self.assertEqual(events[0]['end'],end)
+                self.assertEqual(events[0]['end_day'],exclusive_day)
+                result['events']=[row|{'end_day':'2026-01-01'}]
+                with self.assertRaises(CalendarOverviewError):self.store._validated_read(result,['a'])
+
+    def test_legacy_all_day_midnight_and_timed_event_keep_existing_bounds(self):
+        self.now=datetime(2026,11,11,23,tzinfo=timezone.utc)
+        for all_day in (True,False):
+            result=self.pilot.read_overview(['a'],confirmed=True)
+            result['events']=[{'calendar_id':'a','title':'Synthetic','start':'2026-11-11T23:00:00Z',
+                'end':'2026-11-12T23:00:00Z','all_day':all_day,'timezone':'Europe/Prague',
+                'start_day':'2026-11-12','end_day':'2026-11-13'}]
+            _,events,_=self.store._validated_read(result,['a'])
+            self.assertEqual(events[0]['end_day'],'2026-11-13')
+
     def setUp(self):
         self.temp = tempfile.TemporaryDirectory(); self.addCleanup(self.temp.cleanup)
         self.now=datetime(2026,11,7,12,tzinfo=timezone.utc)

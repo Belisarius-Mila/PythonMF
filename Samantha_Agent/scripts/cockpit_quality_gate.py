@@ -24,6 +24,7 @@ NODE_FALLBACK_PATHS = (
 )
 
 COMPILE_PATHS = (
+    "app/calendar_event_time.py",
     "app/vocabulary_authoring.py",
     "app/book_legacy_cleanup.py",
     "app/book_taxonomy.py",

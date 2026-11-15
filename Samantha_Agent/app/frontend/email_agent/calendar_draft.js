@@ -52,7 +52,7 @@
       ui.start.value = f.date + (f.start_time && !f.all_day ? "T" + f.start_time : "");
     }
     review = data.review; write = data.write;
-    ui.permission.hidden = Boolean(data.writer_built && write?.state !== "blocked");
+    ui.permission.hidden = Boolean(data.writer_built && write?.state !== "blocked" && !write?.needs_authorization);
     ui.fields.hidden = !draft;
     ui.link.hidden = write?.state !== "verified";
     if (!ui.link.hidden) ui.link.href = `/calendar/?email=${encodeURIComponent(item.id)}`;

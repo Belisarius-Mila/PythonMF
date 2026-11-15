@@ -7,10 +7,13 @@ import time
 from uuid import uuid4
 
 from app.calendar_access_pilot import CalendarAccessPilot, CalendarPilotError, PROJECT, DEFAULT_ROOT
+from app.calendar_event_time import exclusive_all_day_end
 
 
 class CalendarWriter(CalendarAccessPilot):
-    source = PROJECT / 'scripts/calendar_writer.swift'
+    # Immutable v1 remains available to the already-running helper/runtime.
+    # A new signed build and its own OS grant are activated separately.
+    source = PROJECT / 'scripts/calendar_writer_v2.swift'
     bundle_id = 'com.samantha.calendar-writer'
     binary_name = 'CalendarWriter'
     app_name = 'SamanthaCalendarWriter.app'
@@ -65,7 +68,10 @@ class CalendarWriter(CalendarAccessPilot):
             for key in ('calendar_id', 'title', 'time_zone', 'all_day', 'location', 'join_url'):
                 if actual.get(key) != event[key]: raise CalendarPilotError('Zapsané údaje neodpovídají návrhu.')
             for key in ('start', 'end'):
-                if datetime.fromisoformat(actual[key].replace('Z', '+00:00')) != datetime.fromisoformat(event[key]):
+                observed = datetime.fromisoformat(actual[key].replace('Z', '+00:00'))
+                if key == 'end':
+                    observed = exclusive_all_day_end(observed, all_day=event['all_day'], time_zone=event['time_zone'])
+                if observed != datetime.fromisoformat(event[key]):
                     raise CalendarPilotError('Zapsaný čas neodpovídá návrhu.')
             if (not isinstance(actual.get('event_id'), str) or not actual['event_id']
                     or actual.get('marker') != 'Samantha event: ' + event['operation_id']

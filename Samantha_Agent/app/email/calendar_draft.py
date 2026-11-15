@@ -113,11 +113,16 @@ class CalendarDraftService:
             job={key:job.get(key) for key in ('status','request_id','message')}
         draft=copy.deepcopy(entry.get('draft')) if entry else None
         if draft: draft.setdefault('reminders', [1440, 60])  # Side-effect-free compatibility for existing concepts.
+        try:
+            self.writer.check_build()
+            writer_built = True
+        except (ValueError, OSError):
+            writer_built = False
         return {'ok':True,'source':{'id':item_id,'subject':card['header']['subject'],'date':card['header']['date']},
             'model':entry['job'].get('selection',{}).get('model','') if entry else agent_roles.load_role(role=agent_roles.EMAIL_ROLE)['preferred_model'],
             'job':job,'draft':draft,**self.review.status(entry),
             'write':copy.deepcopy(entry.get('write')) if entry else None,
-            'writer_built':(self.writer.root/'build.json').exists(),
+            'writer_built':writer_built,
             'calendar_writes':bool(entry and entry.get('write',{}).get('state')=='verified')}
 
     def prepare(self,payload):

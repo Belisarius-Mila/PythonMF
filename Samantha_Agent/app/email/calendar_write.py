@@ -76,11 +76,15 @@ class CalendarWrite:
             state = 'unknown'
         messages = {'verified': 'Zapsáno.', 'blocked': 'Povol zápis na Macu a ověř cílový kalendář. Událost nevznikla.',
                     'unknown': 'Výsledek zápisu není potvrzený. Obnov pouze původní zápis; další událost se nevytvoří.'}
+        needs_authorization = bool(result and result.get('status') == 'authorization_required')
+        message = ('Pro ověření původního zápisu nejprve povol přístup na Macu. Nová událost se nevytvoří.'
+                   if recover and needs_authorization else messages[state])
         def finish(document):
             current = document['items'][item_id]['write']
             if current['event']['operation_id'] != write['event']['operation_id']:
                 raise ValueError('Identita zápisu se změnila.')
-            current.update(state=state, message=messages[state], checked_at=service.clock().isoformat())
+            current.update(state=state, message=message, needs_authorization=needs_authorization,
+                           checked_at=service.clock().isoformat())
             if result and state == 'verified': current['verified_event'] = copy.deepcopy(result['event'])
         service._mutate(finish)
         return service.status(item_id)

@@ -7,6 +7,7 @@ import subprocess
 from pathlib import Path
 
 from app.calendar_access_pilot import CalendarAccessPilot, CalendarPilotError
+from app.calendar_event_time import event_zone, exclusive_all_day_end
 from app.file_persistence import FilePersistenceError, exclusive_file_lock
 
 
@@ -136,6 +137,13 @@ class CalendarOverview:
             days = {key: text(row.get(key), 10) for key in ("start_day", "end_day")}
             for day in days.values():
                 datetime.strptime(day, "%Y-%m-%d")
+            if row['all_day']:
+                normalized_end = exclusive_all_day_end(b, all_day=True, time_zone=zone)
+                if normalized_end != b:
+                    local_end = b.astimezone(event_zone(zone))
+                    if days['end_day'] != local_end.date().isoformat():
+                        raise CalendarOverviewError("Neplatný konec celodenního období.")
+                    days['end_day'] = normalized_end.astimezone(event_zone(zone)).date().isoformat()
             if row["all_day"] and days["end_day"] <= days["start_day"]:
                 raise CalendarOverviewError("Neplatné celodenní období.")
             clean_events.append({"calendar_id": row["calendar_id"], "title": text(row.get("title"), 400),

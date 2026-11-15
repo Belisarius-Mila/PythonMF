@@ -1,4 +1,13 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
+## 2026-11-15 — Ověření celodenního zápisu z pošty
+
+Místní oprava rozpozná půlnoc i nativní23:59:59; přesný native end/identita
+zůstávají zachované, přehled používá správné výlučné end_day. Původní zdroj/helper
+se nemění; nová generace je připravená odděleně.238 integračních a21 nativních
+scénářů PASS; skutečný plný důkaz určuje private completion.json z handoffu.
+Další krok: potvrzené p+n, nový produkční helper/grant a původní read-only recover.
+Do kalendáře nic nezapsáno; původní unknown se bez ověření neuzavírá.
+
 ## Aktuální místní krok — 2026-11-14, Cockpit HTTPS/Safari
 
 Ve vlastní větvi data/cockpit-web-navigation-20261114 připravený nativní
@@ -3010,3 +3019,28 @@ potvrzuje přesnou shodu; dnešní čtecí status potvrzuje tentýž dokončený
 Původní release_receipt.json a release_live_verification.json jsou v privátním
 email_compact_ui_20261114/. Fyzický iPhone neověřený; caller účtenka převzatá,
 portálový returned_to_adam není potvrzený. Samostatný e-mailový TVBCP nevzniká.
+
+
+## 2026-11-15 14:00 CET — Ověření celodenní události po zápisu z pošty
+
+**Hotovo:** Místní oprava rozpozná oba doložené nativní konce stejné celodenní
+události: půlnoc a23:59:59. Zachovává skutečné nativní end i identitu, přehled
+má správné výlučné end_day. UI nabídne nový helper/grant i u původního unknown.
+
+**Rozhodnutí:** Míla výslovně schválil opravu po čtecí diagnóze. Původní UUID
+a journal zůstávají; žádný další create. V2 zdroj ponechává dosud běžící
+helper funkční a jeho produkční přepnutí se provede samostatně.
+
+**Další krok:** Potvrzené p+n, nový produkční helper/grant na Macu a pouze
+read-only recover stejné původní operace. Neznámý zápis se bez důkazu neuzavírá.
+
+**Navrhované další kroky:** Po dočtení uživatelská Mac/iPhone přejímka; žádná
+nová testovací událost ani automatický zásah do iCloudu nejsou součástí vývoje.
+
+**Technický důkaz:** Původní Swift regrese FAIL, v2 PASS v21 in-memory scénářích;
+238 integračních PASS, isolated signed build/6 self-test PASS. Nový pouze čtecí
+probe authorization_required/not_determined, calendar_writes=false. Plná
+závěrečná brána a commit pouze v private completion.json podle reportu
+calendar_all_day_verification_20261115.md. Bez skutečného PASS se krok neuzavírá.
+Samostatný e-mailový TVBCP nevzniká; tento společný kalendářový/UI krok kryje
+existující Cockpit TVBCP. Žádný nový model, kalendářový zápis ani p+n.

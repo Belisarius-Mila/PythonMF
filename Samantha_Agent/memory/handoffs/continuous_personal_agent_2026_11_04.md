@@ -1,4 +1,18 @@
-## Aktuální návaznost — 2026-11-14 21:03 CET
+## Aktuální návaznost — 2026-11-15 14:00 CET
+
+Míla schválil opravu nepotvrzeného celodenního zápisu z pošty. Příčinou je
+nativní end23:59:59 proti půlnoci očekávané verifierem. Místní v2 ověřuje
+jen tuto přesnou rovnocennost; nativní identitu/údaje zachovává. Přehled
+opravuje výlučné end_day, UI podporuje nový grant i při původním unknown.
+238 integračních a21 nativních scénářů PASS; isolated build/6 self-test PASS.
+Závěrečná plná brána a commit pouze podle soukromé completion.json uvedené
+v reports/calendar_all_day_verification_20261115.md. Žádný nový create ani
+změna původní evidence; nový writer potřebuje OS grant a zůstal bez něj.
+Další krok: samostatně potvrzené p+n a produkční helper/grant, pak read-only
+recover původní identity. Společný kalendářový/UI krok kryje project-cockpit
+a jeho existující TVBCP; samostatný e-mailový TVBCP se nezakládá.
+
+## Předchozí návaznost — 2026-11-14 21:03 CET
 
 Míla schválil tlačítka a kompaktní hlídání. Místně dokončené: dvě hlavní řady,
 Další akce, sbalená zpráva i aktivní záležitost, rozbalení drží refresh.

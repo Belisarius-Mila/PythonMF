@@ -1,4 +1,17 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
+## 2026-11-15 14:00 CET — Místní oprava celodenního zápisu z pošty
+
+Verifier rozumí půlnoci i nativnímu23:59:59; ostatní údaje a původní identita
+zůstávají přesné. Přehled opravuje end_day, skutečný end zachovává. V2 zdroj
+ponechává dosavadní živý helper funkční; UI nabídne oprávnění i během recover.
+Původní nativní regrese FAIL→PASS,21 scénářů bez EventKit,238 integračních PASS.
+Izolovaný podepsaný build/6 self-test PASS. Nový read-only probe potřebuje OS
+grant; nic nezapsal a původní unknown nezměnil. Plný závěrečný důkaz/commit
+jen v data/private/calendar_all_day_fix_20261115/completion.json; uzavření po PASS.
+Další krok: samostatné potvrzené p+n, nový produkční helper a jeho Mac grant,
+potom recover původního operation_id bez dalšího create. Nasazení ani aktivace
+v tomto vývoji neprovedené. Report reports/calendar_all_day_verification_20261115.md.
+
 ## Aktuální UI pošty — 2026-11-14 21:03 CET
 
 Místně dokončené schválené akce a kompaktní hlídané zprávy/záležitosti.

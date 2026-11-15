@@ -64,6 +64,14 @@ function input(key,value){const n=nodes['calendarDraft_'+key];n.value=value;n.li
  const uncertain={...reviewed,write:{state:'unknown',message:'Ověř původní zápis'}};
  queue.push(uncertain);await api.open(item);assert(button('Ověřit původní zápis'));assert(nodes.calendarDraft_title.disabled);
  queue.push(written);await button('Ověřit původní zápis').listeners.click();assert.equal(requests.at(-1).payload.action,'write');button('Zavřít').listeners.click();
+ // A new helper/OS grant can be requested without losing the old uncertain operation.
+ for(const state of [{...uncertain,writer_built:false},{...uncertain,write:{...uncertain.write,needs_authorization:true}}]) {
+  queue.push(state);await api.open(item);assert(!button('Povolit zápis na Macu').hidden);
+  queue.push(uncertain);await button('Povolit zápis na Macu').listeners.click();
+  assert.equal(requests.at(-1).payload.action,'authorize_writer');assert(nodes.calendarDraft_title.disabled);
+  queue.push(written);await button('Ověřit původní zápis').listeners.click();
+  assert.equal(requests.at(-1).payload.action,'write');button('Zavřít').listeners.click();
+ }
  // CAS failure preserves edits, and closing cancels any pending autosave.
  queue.push(complete,reviewed);await api.open(item);input('title','Neztratit');queue.push({ok:false,message:'Revision conflict'});await timer(600);
  assert.equal(nodes.calendarDraft_title.value,'Neztratit');assert(all(body).some(n=>n.textContent==='Revision conflict'));

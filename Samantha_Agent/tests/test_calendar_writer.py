@@ -3,6 +3,8 @@ from pathlib import Path
 import subprocess
 import tempfile
 import unittest
+import sys
+from datetime import datetime
 from copy import deepcopy
 from unittest.mock import patch
 
@@ -65,3 +67,34 @@ class CalendarWriterTests(unittest.TestCase):
         self.assertLess(source.index('fsync(journalFD)'),source.index('store.save('))
         for api in ('store.remove(', 'EKReminder(', 'event.attendees =', 'reset('):self.assertNotIn(api,source)
         self.assertIn('EKAlarm(relativeOffset:',source)
+
+    def test_modern_all_day_readback_keeps_raw_native_end_and_exact_identity(self):
+        event=EVENT|{'all_day':True,'start':'2026-11-11T23:00:00+00:00','end':'2026-11-12T23:00:00+00:00'}
+        actual=event|{'event_id':'native-id','marker':'Samantha event: '+event['operation_id'],'end':'2026-11-12T22:59:59Z'}
+        self.change={'event':actual}
+        result=self.writer.execute_event(event,recover=True,confirmed=True)
+        self.assertEqual(result['event']['end'],actual['end'])
+        for change in ({'end':'2026-11-12T22:59:58Z'}, {'end':'2026-11-12T22:59:59.500Z'},
+                       {'start':'2026-11-11T22:59:59Z'}, {'marker':'Other operation'}, {'reminders':[60]}):
+            self.change={'event':actual|change}
+            with self.subTest(change=change),self.assertRaises(CalendarPilotError):
+                self.writer.execute_event(event,recover=True,confirmed=True)
+        self.change={'event':actual|{'all_day':False}}
+        with self.assertRaises(CalendarPilotError):self.writer.execute_event(event|{'all_day':False},confirmed=True)
+
+
+@unittest.skipUnless(sys.platform=='darwin','Native writer harness requires Swift on macOS')
+class CalendarWriterNativeTests(unittest.TestCase):
+    def test_production_writer_against_in_memory_eventkit(self):
+        with tempfile.TemporaryDirectory(prefix='calendar-writer-native-') as tmp:
+            root=Path(tmp).resolve()
+            source=CalendarWriter.source.read_text()
+            core=source.split('\ndo {\n    let args =')[0].replace('import EventKit\n','')
+            fake=Path('tests/calendar_writer_fake_eventkit.swift').read_text()
+            code=core+'\n'+fake+'\ndo { try runCalendarWriterHarness(URL(fileURLWithPath:CommandLine.arguments[1])) } catch { fputs("writer_harness_failed: \\(error)\\n",stderr);exit(2) }\n'
+            path=root/'test.swift';path.write_text(code);binary=root/'test'
+            compiled=subprocess.run(['/usr/bin/xcrun','swiftc','-swift-version','5',str(path),'-framework','AppKit','-o',str(binary)],capture_output=True,text=True,timeout=180)
+            self.assertEqual(compiled.returncode,0,compiled.stderr)
+            result=subprocess.run([str(binary),str(root/'state')],capture_output=True,text=True,timeout=25)
+            self.assertEqual(result.returncode,0,result.stdout+result.stderr)
+            self.assertIn('21 PASS; real calendar access: false',result.stdout)

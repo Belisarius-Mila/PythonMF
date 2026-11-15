@@ -83,6 +83,26 @@ class CalendarWriteTests(unittest.TestCase):
         self.assertEqual([r for _,r in writer.calls],[False,True])
         with self.assertRaises(ValueError):self.edit(title='Another event')
 
+    def test_recovery_permission_loss_preserves_identity_and_exposes_authorize(self):
+        writer=self.writer();writer.result='write_unknown';view=self.review()
+        original=self.write(view)['write']['event']['operation_id']
+        writer.result='authorization_required'
+        result=self.write(view)
+        self.assertEqual(result['write']['state'],'unknown')
+        self.assertTrue(result['write']['needs_authorization'])
+        self.assertEqual(result['write']['event']['operation_id'],original)
+        writer.result='saved_verified'
+        result=self.write(view)
+        self.assertEqual(result['write']['state'],'verified')
+        self.assertFalse(result['write']['needs_authorization'])
+        self.assertEqual([recover for _,recover in writer.calls],[False,True,True])
+
+    def test_stale_helper_is_not_reported_as_ready(self):
+        writer=self.writer()
+        self.assertTrue(self.state()['writer_built'])
+        with patch.object(writer,'check_build',side_effect=ValueError('Synthetic stale build')):
+            self.assertFalse(self.state()['writer_built'])
+
     def test_verified_event_cannot_be_edited_into_another_create(self):
         self.writer();self.write(self.review())
         with self.assertRaises(ValueError):self.edit(title='Another event')

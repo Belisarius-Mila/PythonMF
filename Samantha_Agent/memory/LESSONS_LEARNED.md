@@ -2658,3 +2658,10 @@ Příští CLI běh opravu načte, nová ostrá záloha v tomto vývojovém krok
 - Kontext: checkpoint, p+n a deploy měly rozdílné přepínače; opakovaná plná sada tvořila většinu času vydání. Samotný handoff/TVBCP po testech navíc mění strom.
 - Řešení: jediný programový výběr, neznámé/rizikové změny plná sada; pevná mapa cílených testů jen nad ověřeným základem. HMAC účtenka všech bajtů/režimů, prostředí a politiky mimo workspace, platnost původní plné brány24h. Změněné checkpointové dokumenty ověřit samostatně pouze při shodě všech ostatních otestovaných souborů. Samotný starý skip není důkaz.
 - Ověření: syntetické regrese podvržení, expirace, stejné velikosti/mtime, změny prostředí, starého modulu, souběhu, ztráty vstupů a řetězení; worker a Node VM odmítají nedoložený targeted. Kanonický návod validation_policy.md; skutečný závěrečný plný důkaz v private completion.json podle handoffu.
+
+
+### 2026-11-15 — Celodenní EventKit konec není obecná sekundová tolerance
+
+- Kontext: create se vrátil jako write_unknown a přehled našel jednu odpovídající celodenní událost s koncem o1 sekundu dříve. Apple TN3130 popisuje23:59:59 místo půlnoci dalšího dne.
+- Řešení: jen celodenní konec přesně23:59:59 normalizovat pro porovnání a výlučné end_day; nativní end/identitu zachovat. Začátek, všechny ostatní údaje, marker a alarmy kontrolovat přesně. Původní journal/UUID se nemění, recovery nikdy nedává další create. V2 zdroj oddělit od zdroje živého helperu; nový build/grant a unknown musejí zůstat dostupné přes existující UI.
+- Ověření: skutečná Swift logika proti fake EventKit FAIL→PASS,21 scénářů obou reprezentací/DST/neshod a zákazu dalšího save;238 integračních PASS. Podepsaný preview/6 self-test PASS, jeho read-only probe potřebuje vlastní Mac grant a nic nezapsal. Plný závěrečný důkaz v private completion.json podle reports/calendar_all_day_verification_20261115.md; přesná živá markerová identita zůstává otevřená.

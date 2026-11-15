@@ -1,4 +1,19 @@
-## Aktuální návaznost — 2026-11-14 21:03 CET
+## Aktuální návaznost — 2026-11-15 14:00 CET
+
+Místní oprava ověřování celodenní události: EventKit může vrátit23:59:59
+posledního dne. V2 a Python přijímají jen tuto reprezentaci proti půlnoci;
+ostatní pole, marker a zákaz dalšího create zůstávají přesné. Přehled má
+správné výlučné end_day při zachovaném nativním end. Původní helper/zdroj
+je zachovaný, UI neztratí unknown při novém Mac grantu.
+Pravidla technical/calendar_all_day_boundaries.md; doklady a hranice
+reports/calendar_all_day_verification_20261115.md.238 integračních/21 nativních
+scénářů a isolated build PASS; závěrečný plný důkaz v private completion.json.
+Bez nového p+n, produkční přestavby/grantu či potvrzení skutečné markerové
+identity. Další krok je jejich výslovné provedení, pouze recover původního UUID.
+Společný kalendářový/UI krok kryje existující Cockpit TVBCP; e-mailový TVBCP
+samostatně není dohodnutý a nevzniká.
+
+## Předchozí návaznost — 2026-11-14 21:03 CET
 
 Míla schválil tlačítka a kompaktní hlídání. Místně dokončené: dvě hlavní řady,
 Další akce, sbalená zpráva i aktivní záležitost, rozbalení drží refresh.
