@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "source": "VocabularyEN/VocabularyEN.csv",
-  "sourceDigest": "f6ba63852e36d10214bf23521178b6e9ca792cb728e200fb7e8100e3dedfdd58",
+  "sourceDigest": "4468d5c9937004f096fe3d67521293e9b99f1c7f5a89249c48e2c5606274b7ff",
   "rate": "-10%",
   "voices": {
     "en": {
@@ -16,9 +16,9 @@
     }
   },
   "stats": {
-    "itemCount": 452,
-    "audioReferences": 904,
-    "uniqueAssets": 883
+    "itemCount": 462,
+    "audioReferences": 924,
+    "uniqueAssets": 903
   },
   "items": {
     "1": {
@@ -3637,6 +3637,86 @@
       "spokenCz": "chodidlo",
       "en": "assets/vocabulary-en-audio/en-us-aria-neural/4f039d358697107a64c5.mp3",
       "cz": "assets/vocabulary-en-audio/cs-cz-vlasta-neural/7cae32e30f069b528b26.mp3"
+    },
+    "453": {
+      "sourceEn": "sky",
+      "sourceCz": "obloha",
+      "spokenEn": "sky",
+      "spokenCz": "obloha",
+      "en": "assets/vocabulary-en-audio/en-us-aria-neural/4f0d91e8370ef2a5abf8.mp3",
+      "cz": "assets/vocabulary-en-audio/cs-cz-vlasta-neural/b861e44c99e9f1a5ee16.mp3"
+    },
+    "454": {
+      "sourceEn": "frog",
+      "sourceCz": "žába",
+      "spokenEn": "frog",
+      "spokenCz": "žába",
+      "en": "assets/vocabulary-en-audio/en-us-aria-neural/19c3ab13c3bf26a1f27d.mp3",
+      "cz": "assets/vocabulary-en-audio/cs-cz-vlasta-neural/792a62cce3de0a3dab60.mp3"
+    },
+    "455": {
+      "sourceEn": "beaver",
+      "sourceCz": "bobr",
+      "spokenEn": "beaver",
+      "spokenCz": "bobr",
+      "en": "assets/vocabulary-en-audio/en-us-aria-neural/c54965d2ec1b167813c6.mp3",
+      "cz": "assets/vocabulary-en-audio/cs-cz-vlasta-neural/3261829d396776135334.mp3"
+    },
+    "456": {
+      "sourceEn": "woodpecker",
+      "sourceCz": "datel",
+      "spokenEn": "woodpecker",
+      "spokenCz": "datel",
+      "en": "assets/vocabulary-en-audio/en-us-aria-neural/4af48225cef8fd9a374d.mp3",
+      "cz": "assets/vocabulary-en-audio/cs-cz-vlasta-neural/fa93585b45de0a982c7a.mp3"
+    },
+    "457": {
+      "sourceEn": "net",
+      "sourceCz": "podběrák",
+      "spokenEn": "net",
+      "spokenCz": "podběrák",
+      "en": "assets/vocabulary-en-audio/en-us-aria-neural/113eb483b170cd710853.mp3",
+      "cz": "assets/vocabulary-en-audio/cs-cz-vlasta-neural/11750cb33554bbf495f8.mp3"
+    },
+    "458": {
+      "sourceEn": "hut",
+      "sourceCz": "chatrč",
+      "spokenEn": "hut",
+      "spokenCz": "chatrč",
+      "en": "assets/vocabulary-en-audio/en-us-aria-neural/94ecffccfcb77b59524b.mp3",
+      "cz": "assets/vocabulary-en-audio/cs-cz-vlasta-neural/3d026ea93827f34da601.mp3"
+    },
+    "459": {
+      "sourceEn": "shore",
+      "sourceCz": "břeh",
+      "spokenEn": "shore",
+      "spokenCz": "břeh",
+      "en": "assets/vocabulary-en-audio/en-us-aria-neural/a0d155e9f765cba71128.mp3",
+      "cz": "assets/vocabulary-en-audio/cs-cz-vlasta-neural/48c4b0b92e4154edc3ac.mp3"
+    },
+    "460": {
+      "sourceEn": "fire",
+      "sourceCz": "oheň",
+      "spokenEn": "fire",
+      "spokenCz": "oheň",
+      "en": "assets/vocabulary-en-audio/en-us-aria-neural/72791a1cdf3e7b5f6c2e.mp3",
+      "cz": "assets/vocabulary-en-audio/cs-cz-vlasta-neural/1ce1cf6e5f80cc42cdcc.mp3"
+    },
+    "461": {
+      "sourceEn": "sick",
+      "sourceCz": "nemocný",
+      "spokenEn": "sick",
+      "spokenCz": "nemocný",
+      "en": "assets/vocabulary-en-audio/en-us-aria-neural/f578d8f0c278e2c878cd.mp3",
+      "cz": "assets/vocabulary-en-audio/cs-cz-vlasta-neural/d01cad2e022e1a89128d.mp3"
+    },
+    "462": {
+      "sourceEn": "healthy",
+      "sourceCz": "zdravý",
+      "spokenEn": "healthy",
+      "spokenCz": "zdravý",
+      "en": "assets/vocabulary-en-audio/en-us-aria-neural/55dc6e1f0232fd7e7395.mp3",
+      "cz": "assets/vocabulary-en-audio/cs-cz-vlasta-neural/1b526393c260e27e5b51.mp3"
     }
   }
 }

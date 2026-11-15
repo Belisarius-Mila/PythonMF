@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "kind": "sentences",
   "source": "VocabularyEN/VocabularyEN.csv",
-  "sourceDigest": "b4b88d196cd41a246158760378c9d61be08ca91dd498ccc9da8e5406d2a5986a",
+  "sourceDigest": "55928ff521ff0911a77dedb4594d6b85b41e1d6d0a471432e0b855ffc7fdc86b",
   "rate": "-10%",
   "voices": {
     "en": {
@@ -4988,11 +4988,121 @@
       "spokenCz": "Polož chodidlo na podlahu.",
       "en": "assets/vocabulary-en-sentences/en-us-aria-neural/2e92dda59d0aed18f24b.mp3",
       "cz": "assets/vocabulary-en-sentences/cs-cz-vlasta-neural/267c87524a8bb70f92ed.mp3"
+    },
+    "ven-0453": {
+      "uid": "ven-0453",
+      "sourceEn": "sky",
+      "sourceCz": "obloha",
+      "sourceSentenceEn": "The sky is blue.",
+      "sourceSentenceCz": "Obloha je modrá.",
+      "spokenEn": "The sky is blue.",
+      "spokenCz": "Obloha je modrá.",
+      "en": "assets/vocabulary-en-sentences/en-us-aria-neural/0cc7e6811e4e2f8ce96f.mp3",
+      "cz": "assets/vocabulary-en-sentences/cs-cz-vlasta-neural/0be016035aaedc55b764.mp3"
+    },
+    "ven-0454": {
+      "uid": "ven-0454",
+      "sourceEn": "frog",
+      "sourceCz": "žába",
+      "sourceSentenceEn": "A frog jumps into the water.",
+      "sourceSentenceCz": "Žába skáče do vody.",
+      "spokenEn": "A frog jumps into the water.",
+      "spokenCz": "Žába skáče do vody.",
+      "en": "assets/vocabulary-en-sentences/en-us-aria-neural/82a5b06e66c4cd3edcee.mp3",
+      "cz": "assets/vocabulary-en-sentences/cs-cz-vlasta-neural/e77f1858867da4efe92d.mp3"
+    },
+    "ven-0455": {
+      "uid": "ven-0455",
+      "sourceEn": "beaver",
+      "sourceCz": "bobr",
+      "sourceSentenceEn": "The beaver swims in the lake.",
+      "sourceSentenceCz": "Bobr plave v jezeře.",
+      "spokenEn": "The beaver swims in the lake.",
+      "spokenCz": "Bobr plave v jezeře.",
+      "en": "assets/vocabulary-en-sentences/en-us-aria-neural/c3e1127ce8050249155f.mp3",
+      "cz": "assets/vocabulary-en-sentences/cs-cz-vlasta-neural/72a0d58f12ceddf33048.mp3"
+    },
+    "ven-0456": {
+      "uid": "ven-0456",
+      "sourceEn": "woodpecker",
+      "sourceCz": "datel",
+      "sourceSentenceEn": "A woodpecker sits on the tree.",
+      "sourceSentenceCz": "Datel sedí na stromě.",
+      "spokenEn": "A woodpecker sits on the tree.",
+      "spokenCz": "Datel sedí na stromě.",
+      "en": "assets/vocabulary-en-sentences/en-us-aria-neural/122365c6e04a1590be97.mp3",
+      "cz": "assets/vocabulary-en-sentences/cs-cz-vlasta-neural/aadad4b96f5ba2b89b39.mp3"
+    },
+    "ven-0457": {
+      "uid": "ven-0457",
+      "sourceEn": "net",
+      "sourceCz": "podběrák",
+      "sourceSentenceEn": "The fish is in the net.",
+      "sourceSentenceCz": "Ryba je v podběráku.",
+      "spokenEn": "The fish is in the net.",
+      "spokenCz": "Ryba je v podběráku.",
+      "en": "assets/vocabulary-en-sentences/en-us-aria-neural/7c1472ad459ca991d405.mp3",
+      "cz": "assets/vocabulary-en-sentences/cs-cz-vlasta-neural/b5a9348ada89d3e284dd.mp3"
+    },
+    "ven-0458": {
+      "uid": "ven-0458",
+      "sourceEn": "hut",
+      "sourceCz": "chatrč",
+      "sourceSentenceEn": "The old hut is near the lake.",
+      "sourceSentenceCz": "Stará chatrč je blízko jezera.",
+      "spokenEn": "The old hut is near the lake.",
+      "spokenCz": "Stará chatrč je blízko jezera.",
+      "en": "assets/vocabulary-en-sentences/en-us-aria-neural/726930b647ee0b134a96.mp3",
+      "cz": "assets/vocabulary-en-sentences/cs-cz-vlasta-neural/cbe3e716608f79b53950.mp3"
+    },
+    "ven-0459": {
+      "uid": "ven-0459",
+      "sourceEn": "shore",
+      "sourceCz": "břeh",
+      "sourceSentenceEn": "The boat is near the shore.",
+      "sourceSentenceCz": "Loď je blízko břehu.",
+      "spokenEn": "The boat is near the shore.",
+      "spokenCz": "Loď je blízko břehu.",
+      "en": "assets/vocabulary-en-sentences/en-us-aria-neural/f016fd578d6a5256ac51.mp3",
+      "cz": "assets/vocabulary-en-sentences/cs-cz-vlasta-neural/16adda2cdca87c82f9ca.mp3"
+    },
+    "ven-0460": {
+      "uid": "ven-0460",
+      "sourceEn": "fire",
+      "sourceCz": "oheň",
+      "sourceSentenceEn": "The fire is hot.",
+      "sourceSentenceCz": "Oheň je horký.",
+      "spokenEn": "The fire is hot.",
+      "spokenCz": "Oheň je horký.",
+      "en": "assets/vocabulary-en-sentences/en-us-aria-neural/eef37e2f12f1a011b743.mp3",
+      "cz": "assets/vocabulary-en-sentences/cs-cz-vlasta-neural/8d71584112138e06a50e.mp3"
+    },
+    "ven-0461": {
+      "uid": "ven-0461",
+      "sourceEn": "sick",
+      "sourceCz": "nemocný",
+      "sourceSentenceEn": "This tree is sick.",
+      "sourceSentenceCz": "Tento strom je nemocný.",
+      "spokenEn": "This tree is sick.",
+      "spokenCz": "Tento strom je nemocný.",
+      "en": "assets/vocabulary-en-sentences/en-us-aria-neural/948e02f95a3791aa7c18.mp3",
+      "cz": "assets/vocabulary-en-sentences/cs-cz-vlasta-neural/024f00192feb98ed49bf.mp3"
+    },
+    "ven-0462": {
+      "uid": "ven-0462",
+      "sourceEn": "healthy",
+      "sourceCz": "zdravý",
+      "sourceSentenceEn": "This tree is healthy.",
+      "sourceSentenceCz": "Tento strom je zdravý.",
+      "spokenEn": "This tree is healthy.",
+      "spokenCz": "Tento strom je zdravý.",
+      "en": "assets/vocabulary-en-sentences/en-us-aria-neural/d60266ca28b89a577915.mp3",
+      "cz": "assets/vocabulary-en-sentences/cs-cz-vlasta-neural/fe4bc1781fe88c35eb48.mp3"
     }
   },
   "stats": {
-    "itemCount": 452,
-    "audioReferences": 904,
-    "uniqueAssets": 904
+    "itemCount": 462,
+    "audioReferences": 924,
+    "uniqueAssets": 924
   }
 }

@@ -2643,3 +2643,10 @@ Finální ověření tohoto kroku: plná brána3920 PASS /706,416s unit část,3
   před/po shodné, nová evidence odpovídá dokončené záloze. Report
   ssd_cleanup_backup_20261115.md. Trvalá oprava programu zatím není provedena;
   před další zálohou ji řešit a otestovat regresi nezměněných starších snapshotů.
+
+
+### 2026-11-15 11:21 CET — Inventář sourozeneckých médií čti z kořene Gitu
+
+- Kontext: z pracovního Samantha_Agent/ vrací git diff názvy vůči kořeni, ale git ls-files --others bez určeného kořene neprohledá sourozenecké docs/ a VocabularyEN/. Pak kompletní dávka mylně vypadá jako chybějící soubory.
+- Řešení: pro oba inventáře používat git -C <repo_root>; stejné kořenové cesty porovnávat s manifestem dávky. Nulový seznam nikdy nevydávat za ověření bez očekávaného počtu.
+- Ověření: správný inventář78 souborů souhlasí s75 změnami autorské dávky a3 testy;63 webových HTTP odpovědí má přesné SHA.

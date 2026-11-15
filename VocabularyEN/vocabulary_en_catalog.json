@@ -11864,6 +11864,275 @@
       "imageStemOverride": "ven0452",
       "galleryOrder": 14,
       "related": []
+    },
+    {
+      "partOfSpeech": [
+        "noun"
+      ],
+      "primaryGroup": "topic-07",
+      "topicIds": [
+        "topic-07"
+      ],
+      "difficultyBand": 1,
+      "teachingType": "word",
+      "id": 453,
+      "uid": "ven-0453",
+      "matches": [
+        {
+          "en": "sky",
+          "cz": "obloha"
+        }
+      ],
+      "expressionType": "word",
+      "active": true,
+      "difficultyStatus": "draft",
+      "editorialStatus": "reviewed",
+      "imageStemOverride": "ven0453",
+      "galleryOrder": 27,
+      "related": []
+    },
+    {
+      "partOfSpeech": [
+        "noun"
+      ],
+      "primaryGroup": "topic-06",
+      "topicIds": [
+        "topic-06",
+        "topic-07"
+      ],
+      "difficultyBand": 1,
+      "teachingType": "word",
+      "id": 454,
+      "uid": "ven-0454",
+      "matches": [
+        {
+          "en": "frog",
+          "cz": "žába"
+        }
+      ],
+      "expressionType": "word",
+      "active": true,
+      "difficultyStatus": "draft",
+      "editorialStatus": "reviewed",
+      "imageStemOverride": "ven0454",
+      "galleryOrder": 41,
+      "related": []
+    },
+    {
+      "partOfSpeech": [
+        "noun"
+      ],
+      "primaryGroup": "topic-06",
+      "topicIds": [
+        "topic-06",
+        "topic-07"
+      ],
+      "difficultyBand": 2,
+      "teachingType": "word",
+      "id": 455,
+      "uid": "ven-0455",
+      "matches": [
+        {
+          "en": "beaver",
+          "cz": "bobr"
+        }
+      ],
+      "expressionType": "word",
+      "active": true,
+      "difficultyStatus": "draft",
+      "editorialStatus": "reviewed",
+      "imageStemOverride": "ven0455",
+      "galleryOrder": 42,
+      "related": []
+    },
+    {
+      "partOfSpeech": [
+        "noun"
+      ],
+      "primaryGroup": "topic-06",
+      "topicIds": [
+        "topic-06",
+        "topic-07"
+      ],
+      "difficultyBand": 2,
+      "teachingType": "word",
+      "id": 456,
+      "uid": "ven-0456",
+      "matches": [
+        {
+          "en": "woodpecker",
+          "cz": "datel"
+        }
+      ],
+      "expressionType": "word",
+      "active": true,
+      "difficultyStatus": "draft",
+      "editorialStatus": "reviewed",
+      "imageStemOverride": "ven0456",
+      "galleryOrder": 43,
+      "related": []
+    },
+    {
+      "partOfSpeech": [
+        "noun"
+      ],
+      "primaryGroup": "topic-04",
+      "topicIds": [
+        "topic-04",
+        "topic-09"
+      ],
+      "difficultyBand": 2,
+      "teachingType": "word",
+      "id": 457,
+      "uid": "ven-0457",
+      "matches": [
+        {
+          "en": "net",
+          "cz": "podběrák"
+        }
+      ],
+      "expressionType": "word",
+      "active": true,
+      "difficultyStatus": "draft",
+      "editorialStatus": "reviewed",
+      "imageStemOverride": "ven0457",
+      "galleryOrder": 20,
+      "related": []
+    },
+    {
+      "partOfSpeech": [
+        "noun"
+      ],
+      "primaryGroup": "topic-04",
+      "topicIds": [
+        "topic-04",
+        "topic-07"
+      ],
+      "difficultyBand": 2,
+      "teachingType": "word",
+      "id": 458,
+      "uid": "ven-0458",
+      "matches": [
+        {
+          "en": "hut",
+          "cz": "chatrč"
+        }
+      ],
+      "expressionType": "word",
+      "active": true,
+      "difficultyStatus": "draft",
+      "editorialStatus": "reviewed",
+      "imageStemOverride": "ven0458",
+      "galleryOrder": 21,
+      "related": []
+    },
+    {
+      "partOfSpeech": [
+        "noun"
+      ],
+      "primaryGroup": "topic-07",
+      "topicIds": [
+        "topic-07"
+      ],
+      "difficultyBand": 2,
+      "teachingType": "word",
+      "id": 459,
+      "uid": "ven-0459",
+      "matches": [
+        {
+          "en": "shore",
+          "cz": "břeh"
+        }
+      ],
+      "expressionType": "word",
+      "active": true,
+      "difficultyStatus": "draft",
+      "editorialStatus": "reviewed",
+      "imageStemOverride": "ven0459",
+      "galleryOrder": 28,
+      "related": []
+    },
+    {
+      "partOfSpeech": [
+        "noun"
+      ],
+      "primaryGroup": "topic-07",
+      "topicIds": [
+        "topic-07"
+      ],
+      "difficultyBand": 1,
+      "teachingType": "word",
+      "id": 460,
+      "uid": "ven-0460",
+      "matches": [
+        {
+          "en": "fire",
+          "cz": "oheň"
+        }
+      ],
+      "expressionType": "word",
+      "active": true,
+      "difficultyStatus": "draft",
+      "editorialStatus": "reviewed",
+      "imageStemOverride": "ven0460",
+      "galleryOrder": 29,
+      "related": []
+    },
+    {
+      "partOfSpeech": [
+        "adjective"
+      ],
+      "primaryGroup": "topic-02",
+      "topicIds": [
+        "topic-02",
+        "topic-07",
+        "topic-14"
+      ],
+      "difficultyBand": 1,
+      "teachingType": "word",
+      "id": 461,
+      "uid": "ven-0461",
+      "matches": [
+        {
+          "en": "sick",
+          "cz": "nemocný"
+        }
+      ],
+      "expressionType": "word",
+      "active": true,
+      "difficultyStatus": "draft",
+      "editorialStatus": "reviewed",
+      "imageStemOverride": "ven0461",
+      "galleryOrder": 15,
+      "related": []
+    },
+    {
+      "partOfSpeech": [
+        "adjective"
+      ],
+      "primaryGroup": "topic-02",
+      "topicIds": [
+        "topic-02",
+        "topic-07",
+        "topic-14"
+      ],
+      "difficultyBand": 1,
+      "teachingType": "word",
+      "id": 462,
+      "uid": "ven-0462",
+      "matches": [
+        {
+          "en": "healthy",
+          "cz": "zdravý"
+        }
+      ],
+      "expressionType": "word",
+      "active": true,
+      "difficultyStatus": "draft",
+      "editorialStatus": "reviewed",
+      "imageStemOverride": "ven0462",
+      "galleryOrder": 16,
+      "related": []
     }
   ]
 }

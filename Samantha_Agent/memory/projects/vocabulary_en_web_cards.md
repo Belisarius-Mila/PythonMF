@@ -1365,3 +1365,33 @@ důvodem retry. Dávku ani publikaci neopakovat. Soukromá autorita:
 vocabulary_authoring_release_20261115/release_receipt.json a public_verification.json.
 Závěrečný dokumentační checkpoint zůstává místně pro další běžný balíček;
 produkční soubory nemění a nový deployment nevyžaduje. Bez nového TVBCP.
+
+
+## 2026-11-15 11:21 CET — První schválená desítka z Cesty k jezeru
+
+Hotovo: Místně zařazených deset karet sky, frog, beaver, woodpecker, net,
+hut, shore, fire, sick a healthy. Každá má český význam, vlastní EN/CZ
+příklad, explicitní obrázek, náhled a čtyři zvukové reference. Net je
+rybářský podběrák; sick/healthy procvičují nemocný/zdravý strom.
+Celkem462 záznamů/452 aktivních:433 Slovíček a19 Interakcí,18 témat.
+Rozhodnutí: Míla schválil „doplň první desítku dle našich pravidel“
+z TXT návrhu MMTX. Zadaný rozsah je místní doplnění, nové p+n nezadané.
+Další krok: Samostatně autorizované Terra Pages p+n; potom přejímka telefonu.
+Navrhované další kroky: Po výběru další dávka ze zbývajícího návrhu MMTX;
+nové významy call/too/turn jsou pouze návrh, nikoli součást této desítky.
+Technický důkaz:52 cílených Python testů PASS/42,729s včetně51 výběrových
+a5 learner Node scénářů; rychlá statická brána PASS. Všech452 původních
+položek i katalogových identit přesně shodných,2628 původních médií
+bajtově zachovaných, původní CSV prefix/CRLF zachovaný.40/40 nových MP3
+dekódovaných ffmpeg,10 náhledů WebP384×384;63/63 lokálních HTTP odpovědí
+byte/SHA exact.78 finálních zdrojů/dat/testů/médií zmrazených po ověření.
+Změnil se pouze obsah a očekávané počty v existujících testech; aplikační
+a autorský kód beze změny. Plná publikační brána patří do následného p+n.
+Autorský request lake-vocabulary-first10-20261115-v1 je applied;
+ven-0453 ažven-0462,9 nových ilustrací vestavěným imagegen + převzaté sky.
+Dávku ani dokončená média znovu negenerovat. Aria/Vlasta a−10% zachované,
+osobní A–D/Benji nové karty automaticky nepřebírají. Fyzický telefon
+a aktuální browser přejímka nejsou doložené. Vlastní větev
+data/vocabulary-lake-batch1-20261115 nad d141d030; souběžný main s opravou
+zálohy zůstává stranou. Doklady: data/private/vocabulary_lake_batch1_20261115/
+a authoring job v data/private/vocabulary_authoring/. Bez nového TVBCP.

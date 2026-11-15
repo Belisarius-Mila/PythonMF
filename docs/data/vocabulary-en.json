@@ -1,8 +1,8 @@
 {
   "app": "VocabularyEN",
-  "generatedAt": "2026-11-15T07:15:47.634285+00:00",
+  "generatedAt": "2026-11-15T10:15:55.353910+00:00",
   "sourceCsv": "VocabularyEN/VocabularyEN.csv",
-  "itemCount": 452,
+  "itemCount": 462,
   "wordSets": [
     "Actions",
     "Animals",
@@ -17,14 +17,14 @@
     "selected": 107,
     "hardTraining": 70,
     "wordSetCount": 8,
-    "withSentence": 452,
-    "withSentenceTranslation": 452,
+    "withSentence": 462,
+    "withSentenceTranslation": 462,
     "imageSources": {
-      "catalog": 47,
+      "catalog": 57,
       "direct": 342,
       "mapping": 63
     },
-    "uniqueImageFiles": 402
+    "uniqueImageFiles": 412
   },
   "items": [
     {
@@ -16920,6 +16920,355 @@
       "teachingType": "word",
       "sourceIds": [],
       "thumbnail": "assets/vocabulary-en-thumbs/ven0452-aaeed5b9ae29df0f.webp"
+    },
+    {
+      "id": 453,
+      "order": 453,
+      "en": "sky",
+      "cz": "obloha",
+      "sentenceEn": "The sky is blue.",
+      "sentenceCz": "Obloha je modrá.",
+      "wordSets": [],
+      "selected": false,
+      "hardTraining": false,
+      "image": "assets/vocabulary-en/ven0453.webp",
+      "imageStem": "ven0453",
+      "imageRequestedStem": "ven0453",
+      "imageSource": "catalog",
+      "imageMissing": false,
+      "uid": "ven-0453",
+      "primaryGroup": "topic-07",
+      "topicIds": [
+        "topic-07"
+      ],
+      "partOfSpeech": [
+        "noun"
+      ],
+      "expressionType": "word",
+      "difficultyBand": 1,
+      "difficultyStatus": "draft",
+      "editorialStatus": "reviewed",
+      "galleryOrder": 27,
+      "related": [],
+      "active": true,
+      "teachingType": "word",
+      "sourceIds": [],
+      "thumbnail": "assets/vocabulary-en-thumbs/ven0453-6df6a33dfc2f5137.webp"
+    },
+    {
+      "id": 454,
+      "order": 454,
+      "en": "frog",
+      "cz": "žába",
+      "sentenceEn": "A frog jumps into the water.",
+      "sentenceCz": "Žába skáče do vody.",
+      "wordSets": [],
+      "selected": false,
+      "hardTraining": false,
+      "image": "assets/vocabulary-en/ven0454.png",
+      "imageStem": "ven0454",
+      "imageRequestedStem": "ven0454",
+      "imageSource": "catalog",
+      "imageMissing": false,
+      "uid": "ven-0454",
+      "primaryGroup": "topic-06",
+      "topicIds": [
+        "topic-06",
+        "topic-07"
+      ],
+      "partOfSpeech": [
+        "noun"
+      ],
+      "expressionType": "word",
+      "difficultyBand": 1,
+      "difficultyStatus": "draft",
+      "editorialStatus": "reviewed",
+      "galleryOrder": 41,
+      "related": [],
+      "active": true,
+      "teachingType": "word",
+      "sourceIds": [],
+      "thumbnail": "assets/vocabulary-en-thumbs/ven0454-6f4a59f840a64c3f.webp"
+    },
+    {
+      "id": 455,
+      "order": 455,
+      "en": "beaver",
+      "cz": "bobr",
+      "sentenceEn": "The beaver swims in the lake.",
+      "sentenceCz": "Bobr plave v jezeře.",
+      "wordSets": [],
+      "selected": false,
+      "hardTraining": false,
+      "image": "assets/vocabulary-en/ven0455.png",
+      "imageStem": "ven0455",
+      "imageRequestedStem": "ven0455",
+      "imageSource": "catalog",
+      "imageMissing": false,
+      "uid": "ven-0455",
+      "primaryGroup": "topic-06",
+      "topicIds": [
+        "topic-06",
+        "topic-07"
+      ],
+      "partOfSpeech": [
+        "noun"
+      ],
+      "expressionType": "word",
+      "difficultyBand": 2,
+      "difficultyStatus": "draft",
+      "editorialStatus": "reviewed",
+      "galleryOrder": 42,
+      "related": [],
+      "active": true,
+      "teachingType": "word",
+      "sourceIds": [],
+      "thumbnail": "assets/vocabulary-en-thumbs/ven0455-f657431f98d0bea2.webp"
+    },
+    {
+      "id": 456,
+      "order": 456,
+      "en": "woodpecker",
+      "cz": "datel",
+      "sentenceEn": "A woodpecker sits on the tree.",
+      "sentenceCz": "Datel sedí na stromě.",
+      "wordSets": [],
+      "selected": false,
+      "hardTraining": false,
+      "image": "assets/vocabulary-en/ven0456.png",
+      "imageStem": "ven0456",
+      "imageRequestedStem": "ven0456",
+      "imageSource": "catalog",
+      "imageMissing": false,
+      "uid": "ven-0456",
+      "primaryGroup": "topic-06",
+      "topicIds": [
+        "topic-06",
+        "topic-07"
+      ],
+      "partOfSpeech": [
+        "noun"
+      ],
+      "expressionType": "word",
+      "difficultyBand": 2,
+      "difficultyStatus": "draft",
+      "editorialStatus": "reviewed",
+      "galleryOrder": 43,
+      "related": [],
+      "active": true,
+      "teachingType": "word",
+      "sourceIds": [],
+      "thumbnail": "assets/vocabulary-en-thumbs/ven0456-07631b384ba7ee37.webp"
+    },
+    {
+      "id": 457,
+      "order": 457,
+      "en": "net",
+      "cz": "podběrák",
+      "sentenceEn": "The fish is in the net.",
+      "sentenceCz": "Ryba je v podběráku.",
+      "wordSets": [],
+      "selected": false,
+      "hardTraining": false,
+      "image": "assets/vocabulary-en/ven0457.png",
+      "imageStem": "ven0457",
+      "imageRequestedStem": "ven0457",
+      "imageSource": "catalog",
+      "imageMissing": false,
+      "uid": "ven-0457",
+      "primaryGroup": "topic-04",
+      "topicIds": [
+        "topic-04",
+        "topic-09"
+      ],
+      "partOfSpeech": [
+        "noun"
+      ],
+      "expressionType": "word",
+      "difficultyBand": 2,
+      "difficultyStatus": "draft",
+      "editorialStatus": "reviewed",
+      "galleryOrder": 20,
+      "related": [],
+      "active": true,
+      "teachingType": "word",
+      "sourceIds": [],
+      "thumbnail": "assets/vocabulary-en-thumbs/ven0457-3211ddd31b53e962.webp"
+    },
+    {
+      "id": 458,
+      "order": 458,
+      "en": "hut",
+      "cz": "chatrč",
+      "sentenceEn": "The old hut is near the lake.",
+      "sentenceCz": "Stará chatrč je blízko jezera.",
+      "wordSets": [],
+      "selected": false,
+      "hardTraining": false,
+      "image": "assets/vocabulary-en/ven0458.png",
+      "imageStem": "ven0458",
+      "imageRequestedStem": "ven0458",
+      "imageSource": "catalog",
+      "imageMissing": false,
+      "uid": "ven-0458",
+      "primaryGroup": "topic-04",
+      "topicIds": [
+        "topic-04",
+        "topic-07"
+      ],
+      "partOfSpeech": [
+        "noun"
+      ],
+      "expressionType": "word",
+      "difficultyBand": 2,
+      "difficultyStatus": "draft",
+      "editorialStatus": "reviewed",
+      "galleryOrder": 21,
+      "related": [],
+      "active": true,
+      "teachingType": "word",
+      "sourceIds": [],
+      "thumbnail": "assets/vocabulary-en-thumbs/ven0458-cb5ffe9781bcd1b3.webp"
+    },
+    {
+      "id": 459,
+      "order": 459,
+      "en": "shore",
+      "cz": "břeh",
+      "sentenceEn": "The boat is near the shore.",
+      "sentenceCz": "Loď je blízko břehu.",
+      "wordSets": [],
+      "selected": false,
+      "hardTraining": false,
+      "image": "assets/vocabulary-en/ven0459.png",
+      "imageStem": "ven0459",
+      "imageRequestedStem": "ven0459",
+      "imageSource": "catalog",
+      "imageMissing": false,
+      "uid": "ven-0459",
+      "primaryGroup": "topic-07",
+      "topicIds": [
+        "topic-07"
+      ],
+      "partOfSpeech": [
+        "noun"
+      ],
+      "expressionType": "word",
+      "difficultyBand": 2,
+      "difficultyStatus": "draft",
+      "editorialStatus": "reviewed",
+      "galleryOrder": 28,
+      "related": [],
+      "active": true,
+      "teachingType": "word",
+      "sourceIds": [],
+      "thumbnail": "assets/vocabulary-en-thumbs/ven0459-28a08529c211b112.webp"
+    },
+    {
+      "id": 460,
+      "order": 460,
+      "en": "fire",
+      "cz": "oheň",
+      "sentenceEn": "The fire is hot.",
+      "sentenceCz": "Oheň je horký.",
+      "wordSets": [],
+      "selected": false,
+      "hardTraining": false,
+      "image": "assets/vocabulary-en/ven0460.png",
+      "imageStem": "ven0460",
+      "imageRequestedStem": "ven0460",
+      "imageSource": "catalog",
+      "imageMissing": false,
+      "uid": "ven-0460",
+      "primaryGroup": "topic-07",
+      "topicIds": [
+        "topic-07"
+      ],
+      "partOfSpeech": [
+        "noun"
+      ],
+      "expressionType": "word",
+      "difficultyBand": 1,
+      "difficultyStatus": "draft",
+      "editorialStatus": "reviewed",
+      "galleryOrder": 29,
+      "related": [],
+      "active": true,
+      "teachingType": "word",
+      "sourceIds": [],
+      "thumbnail": "assets/vocabulary-en-thumbs/ven0460-b6fe3206bf0b67f9.webp"
+    },
+    {
+      "id": 461,
+      "order": 461,
+      "en": "sick",
+      "cz": "nemocný",
+      "sentenceEn": "This tree is sick.",
+      "sentenceCz": "Tento strom je nemocný.",
+      "wordSets": [],
+      "selected": false,
+      "hardTraining": false,
+      "image": "assets/vocabulary-en/ven0461.png",
+      "imageStem": "ven0461",
+      "imageRequestedStem": "ven0461",
+      "imageSource": "catalog",
+      "imageMissing": false,
+      "uid": "ven-0461",
+      "primaryGroup": "topic-02",
+      "topicIds": [
+        "topic-02",
+        "topic-07",
+        "topic-14"
+      ],
+      "partOfSpeech": [
+        "adjective"
+      ],
+      "expressionType": "word",
+      "difficultyBand": 1,
+      "difficultyStatus": "draft",
+      "editorialStatus": "reviewed",
+      "galleryOrder": 15,
+      "related": [],
+      "active": true,
+      "teachingType": "word",
+      "sourceIds": [],
+      "thumbnail": "assets/vocabulary-en-thumbs/ven0461-26dfa381970c3b26.webp"
+    },
+    {
+      "id": 462,
+      "order": 462,
+      "en": "healthy",
+      "cz": "zdravý",
+      "sentenceEn": "This tree is healthy.",
+      "sentenceCz": "Tento strom je zdravý.",
+      "wordSets": [],
+      "selected": false,
+      "hardTraining": false,
+      "image": "assets/vocabulary-en/ven0462.png",
+      "imageStem": "ven0462",
+      "imageRequestedStem": "ven0462",
+      "imageSource": "catalog",
+      "imageMissing": false,
+      "uid": "ven-0462",
+      "primaryGroup": "topic-02",
+      "topicIds": [
+        "topic-02",
+        "topic-07",
+        "topic-14"
+      ],
+      "partOfSpeech": [
+        "adjective"
+      ],
+      "expressionType": "word",
+      "difficultyBand": 1,
+      "difficultyStatus": "draft",
+      "editorialStatus": "reviewed",
+      "galleryOrder": 16,
+      "related": [],
+      "active": true,
+      "teachingType": "word",
+      "sourceIds": [],
+      "thumbnail": "assets/vocabulary-en-thumbs/ven0462-4b254263bf1b156b.webp"
     }
   ],
   "catalog": {
@@ -17051,5 +17400,5 @@
       }
     ]
   },
-  "revision": "b294adbd1d10e3fb676d"
+  "revision": "fda66cc7b79d0bd7c724"
 }
