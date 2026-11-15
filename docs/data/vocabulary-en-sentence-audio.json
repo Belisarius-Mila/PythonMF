@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "kind": "sentences",
   "source": "VocabularyEN/VocabularyEN.csv",
-  "sourceDigest": "b4e789d11543f53bb5c55535fb3bdf134bb293265b86f0e26632c324f9ae225d",
+  "sourceDigest": "325953b4f46606f4e1b88f125c6f5b45aafdbc6b1b93c12e5c2b133e97ad00c3",
   "rate": "-10%",
   "voices": {
     "en": {
@@ -5318,11 +5318,231 @@
       "spokenCz": "Necháme tašku tady.",
       "en": "assets/vocabulary-en-sentences/en-us-aria-neural/0718a677db830861b2e0.mp3",
       "cz": "assets/vocabulary-en-sentences/cs-cz-vlasta-neural/644044c664e08928583d.mp3"
+    },
+    "ven-0483": {
+      "uid": "ven-0483",
+      "sourceEn": "lead",
+      "sourceCz": "vést",
+      "sourceSentenceEn": "We lead the team.",
+      "sourceSentenceCz": "Vedeme tým.",
+      "spokenEn": "We lead the team.",
+      "spokenCz": "Vedeme tým.",
+      "en": "assets/vocabulary-en-sentences/en-us-aria-neural/dadbd9809b594987d894.mp3",
+      "cz": "assets/vocabulary-en-sentences/cs-cz-vlasta-neural/c2654a918cc854646f2b.mp3"
+    },
+    "ven-0484": {
+      "uid": "ven-0484",
+      "sourceEn": "show",
+      "sourceCz": "ukázat",
+      "sourceSentenceEn": "I show you the map.",
+      "sourceSentenceCz": "Ukazuji ti mapu.",
+      "spokenEn": "I show you the map.",
+      "spokenCz": "Ukazuji ti mapu.",
+      "en": "assets/vocabulary-en-sentences/en-us-aria-neural/5eb7a0a9e087ab05183f.mp3",
+      "cz": "assets/vocabulary-en-sentences/cs-cz-vlasta-neural/5ba5d0a0ab913dc0accc.mp3"
+    },
+    "ven-0485": {
+      "uid": "ven-0485",
+      "sourceEn": "start",
+      "sourceCz": "začít",
+      "sourceSentenceEn": "We start the race.",
+      "sourceSentenceCz": "Začínáme závod.",
+      "spokenEn": "We start the race.",
+      "spokenCz": "Začínáme závod.",
+      "en": "assets/vocabulary-en-sentences/en-us-aria-neural/884cd1be0ee185bcbbc4.mp3",
+      "cz": "assets/vocabulary-en-sentences/cs-cz-vlasta-neural/131403ff4926e9fb65b8.mp3"
+    },
+    "ven-0486": {
+      "uid": "ven-0486",
+      "sourceEn": "find",
+      "sourceCz": "najít",
+      "sourceSentenceEn": "I can find the key.",
+      "sourceSentenceCz": "Dokážu najít klíč.",
+      "spokenEn": "I can find the key.",
+      "spokenCz": "Dokážu najít klíč.",
+      "en": "assets/vocabulary-en-sentences/en-us-aria-neural/81db0005d9f3340c7e84.mp3",
+      "cz": "assets/vocabulary-en-sentences/cs-cz-vlasta-neural/7bd60b307fbb33051e33.mp3"
+    },
+    "ven-0487": {
+      "uid": "ven-0487",
+      "sourceEn": "take",
+      "sourceCz": "vzít",
+      "sourceSentenceEn": "Take the book.",
+      "sourceSentenceCz": "Vezmi knihu.",
+      "spokenEn": "Take the book.",
+      "spokenCz": "Vezmi knihu.",
+      "en": "assets/vocabulary-en-sentences/en-us-aria-neural/cd68fa1bd3f0832508cc.mp3",
+      "cz": "assets/vocabulary-en-sentences/cs-cz-vlasta-neural/143ba9ffaf214370f32c.mp3"
+    },
+    "ven-0488": {
+      "uid": "ven-0488",
+      "sourceEn": "tell",
+      "sourceCz": "povědět",
+      "sourceSentenceEn": "Tell me about the lake.",
+      "sourceSentenceCz": "Pověz mi o jezeře.",
+      "spokenEn": "Tell me about the lake.",
+      "spokenCz": "Pověz mi o jezeře.",
+      "en": "assets/vocabulary-en-sentences/en-us-aria-neural/4a2b05e380950e01d54a.mp3",
+      "cz": "assets/vocabulary-en-sentences/cs-cz-vlasta-neural/76ccbd73a0827a373fbe.mp3"
+    },
+    "ven-0489": {
+      "uid": "ven-0489",
+      "sourceEn": "dry",
+      "sourceCz": "suchý",
+      "sourceSentenceEn": "The hut is dry inside.",
+      "sourceSentenceCz": "Uvnitř chatrče je sucho.",
+      "spokenEn": "The hut is dry inside.",
+      "spokenCz": "Uvnitř chatrče je sucho.",
+      "en": "assets/vocabulary-en-sentences/en-us-aria-neural/245231423fbda9e1bf07.mp3",
+      "cz": "assets/vocabulary-en-sentences/cs-cz-vlasta-neural/98e44af44028ba007f40.mp3"
+    },
+    "ven-0490": {
+      "uid": "ven-0490",
+      "sourceEn": "wrong",
+      "sourceCz": "nesprávný",
+      "sourceSentenceEn": "The answer is wrong.",
+      "sourceSentenceCz": "Odpověď je nesprávná.",
+      "spokenEn": "The answer is wrong.",
+      "spokenCz": "Odpověď je nesprávná.",
+      "en": "assets/vocabulary-en-sentences/en-us-aria-neural/8c697f92d247c2d7f2cb.mp3",
+      "cz": "assets/vocabulary-en-sentences/cs-cz-vlasta-neural/41ed9454b4b79275ca42.mp3"
+    },
+    "ven-0491": {
+      "uid": "ven-0491",
+      "sourceEn": "hard",
+      "sourceCz": "náročný",
+      "sourceSentenceEn": "The work is hard.",
+      "sourceSentenceCz": "Práce je náročná.",
+      "spokenEn": "The work is hard.",
+      "spokenCz": "Práce je náročná.",
+      "en": "assets/vocabulary-en-sentences/en-us-aria-neural/17f32a0874f55a08e0d3.mp3",
+      "cz": "assets/vocabulary-en-sentences/cs-cz-vlasta-neural/cecd9d57981cd4039313.mp3"
+    },
+    "ven-0492": {
+      "uid": "ven-0492",
+      "sourceEn": "soon",
+      "sourceCz": "brzy",
+      "sourceSentenceEn": "We will go soon.",
+      "sourceSentenceCz": "Brzy půjdeme.",
+      "spokenEn": "We will go soon.",
+      "spokenCz": "Brzy půjdeme.",
+      "en": "assets/vocabulary-en-sentences/en-us-aria-neural/abe4af941979a95f1e74.mp3",
+      "cz": "assets/vocabulary-en-sentences/cs-cz-vlasta-neural/b9a045d26b26db4a3104.mp3"
+    },
+    "ven-0493": {
+      "uid": "ven-0493",
+      "sourceEn": "tonight",
+      "sourceCz": "dnes večer; dnes v noci",
+      "sourceSentenceEn": "We will eat here tonight.",
+      "sourceSentenceCz": "Dnes večer tady budeme jíst.",
+      "spokenEn": "We will eat here tonight.",
+      "spokenCz": "Dnes večer tady budeme jíst.",
+      "en": "assets/vocabulary-en-sentences/en-us-aria-neural/67b52c1ea2e145185ca3.mp3",
+      "cz": "assets/vocabulary-en-sentences/cs-cz-vlasta-neural/00d21136a06e5c5f0f9b.mp3"
+    },
+    "ven-0494": {
+      "uid": "ven-0494",
+      "sourceEn": "just",
+      "sourceCz": "jen; pouze",
+      "sourceSentenceEn": "I need just one more piece.",
+      "sourceSentenceCz": "Potřebuji už jen jeden dílek.",
+      "spokenEn": "I need just one more piece.",
+      "spokenCz": "Potřebuji už jen jeden dílek.",
+      "en": "assets/vocabulary-en-sentences/en-us-aria-neural/b784f4e4dec882835509.mp3",
+      "cz": "assets/vocabulary-en-sentences/cs-cz-vlasta-neural/7ca85088ba4db95bc606.mp3"
+    },
+    "ven-0495": {
+      "uid": "ven-0495",
+      "sourceEn": "even",
+      "sourceCz": "dokonce; i",
+      "sourceSentenceEn": "Even the healthy trees need help.",
+      "sourceSentenceCz": "Dokonce i zdravé stromy potřebují pomoc.",
+      "spokenEn": "Even the healthy trees need help.",
+      "spokenCz": "Dokonce i zdravé stromy potřebují pomoc.",
+      "en": "assets/vocabulary-en-sentences/en-us-aria-neural/d22e37719d791fa77aa2.mp3",
+      "cz": "assets/vocabulary-en-sentences/cs-cz-vlasta-neural/50e08cad9fcdd7c6a778.mp3"
+    },
+    "ven-0496": {
+      "uid": "ven-0496",
+      "sourceEn": "then",
+      "sourceCz": "potom",
+      "sourceSentenceEn": "I finish my work, then I play.",
+      "sourceSentenceCz": "Dokončím práci a potom si hraji.",
+      "spokenEn": "I finish my work, then I play.",
+      "spokenCz": "Dokončím práci a potom si hraji.",
+      "en": "assets/vocabulary-en-sentences/en-us-aria-neural/b9d1bfa05e549d989f64.mp3",
+      "cz": "assets/vocabulary-en-sentences/cs-cz-vlasta-neural/f3ccbbf7430f89062442.mp3"
+    },
+    "ven-0497": {
+      "uid": "ven-0497",
+      "sourceEn": "before",
+      "sourceCz": "před",
+      "sourceSentenceEn": "We eat before the meeting.",
+      "sourceSentenceCz": "Jíme před schůzí.",
+      "spokenEn": "We eat before the meeting.",
+      "spokenCz": "Jíme před schůzí.",
+      "en": "assets/vocabulary-en-sentences/en-us-aria-neural/f94753fbe1f19fd31f94.mp3",
+      "cz": "assets/vocabulary-en-sentences/cs-cz-vlasta-neural/b2aa148129989714b381.mp3"
+    },
+    "ven-0498": {
+      "uid": "ven-0498",
+      "sourceEn": "beside",
+      "sourceCz": "vedle",
+      "sourceSentenceEn": "The boat is beside the hut.",
+      "sourceSentenceCz": "Loď je vedle chatrče.",
+      "spokenEn": "The boat is beside the hut.",
+      "spokenCz": "Loď je vedle chatrče.",
+      "en": "assets/vocabulary-en-sentences/en-us-aria-neural/905e2cdf227f2037684e.mp3",
+      "cz": "assets/vocabulary-en-sentences/cs-cz-vlasta-neural/9b6e7265919c49494333.mp3"
+    },
+    "ven-0499": {
+      "uid": "ven-0499",
+      "sourceEn": "by",
+      "sourceCz": "u",
+      "sourceSentenceEn": "The path is by the lake.",
+      "sourceSentenceCz": "Cesta je u jezera.",
+      "spokenEn": "The path is by the lake.",
+      "spokenCz": "Cesta je u jezera.",
+      "en": "assets/vocabulary-en-sentences/en-us-aria-neural/f3dcbee68d6a6b5a9479.mp3",
+      "cz": "assets/vocabulary-en-sentences/cs-cz-vlasta-neural/8df18014fb7fe5e773c3.mp3"
+    },
+    "ven-0500": {
+      "uid": "ven-0500",
+      "sourceEn": "other",
+      "sourceCz": "jiný; druhý",
+      "sourceSentenceEn": "I want the other block.",
+      "sourceSentenceCz": "Chci tu druhou kostku.",
+      "spokenEn": "I want the other block.",
+      "spokenCz": "Chci tu druhou kostku.",
+      "en": "assets/vocabulary-en-sentences/en-us-aria-neural/5e22127972d8c96e8cb3.mp3",
+      "cz": "assets/vocabulary-en-sentences/cs-cz-vlasta-neural/c7cab3e3982c8601ea9c.mp3"
+    },
+    "ven-0501": {
+      "uid": "ven-0501",
+      "sourceEn": "every",
+      "sourceCz": "každý",
+      "sourceSentenceEn": "I play every day.",
+      "sourceSentenceCz": "Hraji si každý den.",
+      "spokenEn": "I play every day.",
+      "spokenCz": "Hraji si každý den.",
+      "en": "assets/vocabulary-en-sentences/en-us-aria-neural/223e36cf2eccb8e4b827.mp3",
+      "cz": "assets/vocabulary-en-sentences/cs-cz-vlasta-neural/94a56970820034678e94.mp3"
+    },
+    "ven-0502": {
+      "uid": "ven-0502",
+      "sourceEn": "anyone",
+      "sourceCz": "někdo; kdokoli",
+      "sourceSentenceEn": "Does anyone need help?",
+      "sourceSentenceCz": "Potřebuje někdo pomoc?",
+      "spokenEn": "Does anyone need help?",
+      "spokenCz": "Potřebuje někdo pomoc?",
+      "en": "assets/vocabulary-en-sentences/en-us-aria-neural/650110ab80773529b452.mp3",
+      "cz": "assets/vocabulary-en-sentences/cs-cz-vlasta-neural/2a8e9bc8ad6a1f1f7a15.mp3"
     }
   },
   "stats": {
-    "itemCount": 482,
-    "audioReferences": 964,
-    "uniqueAssets": 964
+    "itemCount": 502,
+    "audioReferences": 1004,
+    "uniqueAssets": 1004
   }
 }

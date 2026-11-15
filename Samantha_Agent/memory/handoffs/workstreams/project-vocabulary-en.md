@@ -4,44 +4,46 @@ Nazev: Vocabulary EN
 Pracovni proud: project-vocabulary-en
 Typ: Project
 Priorita: 2
-Stav: mistne hotove dve davky10+20, overeno, ceka na samostatne Pages p+n
+Stav: mistne hotove tri davky10+20+20, overeno, ceka na samostatne Pages p+n
 Pripomenout pri startu: ne
-Datum: 2026-11-15 11:43 CET
+Datum: 2026-11-15 13:02 CET
 
 Co se resilo:
-První desítka a dalších20 schválených slovíček z TXT návrhu MMTX Cesta
-k jezeru podle kanonického autorského postupu.
+Pokračování původního návrhu MMTX Cesta k jezeru, třetí dávka20 slovíček.
 
 Co je hotove:
-- První desítka ven-0453–0462 a druhá dvacítka ven-0463–0482;
-  celkem482 záznamů/472 aktivních,453 Slovíček a19 Interakcí,18 témat.
-- Druhá dávka:20 EN/CZ vět,20 explicitních obrazů/náhledů a80 nových MP3;
-  13 nových ilustrací,1 upravený závod a6 převzatých.
--52 cílených Python testů včetně56 Node scénářů a statická brána PASS.
--462 starších položek/identit a2688 médií přesně shodných;80 dekódovaných
-  MP3,123 místních HTTP souborů shodných,148 zdrojů zmrazených po ověření.
-- Obě místní dávky zatím nebyly publikované; poslední vlastní potvrzené
-  Pages vydání2779af14 obsahovalo452/442. Nové p+n nezadané.
+- Tři dávky ven-0453–0502, celkem50 nových místních karet;
+  celkem502 záznamů/492 aktivních,473 Slovíček a19 Interakcí,18 témat.
+- Poslední20: EN/CZ příklady,20 obrazů/náhledů,80 zvukových referencí,
+  79 novýchMP3 a1 již existující shodná nahrávka;13 nových ilustrací,
+  1 úprava a6 převzatých.
+-52 Python včetně56 Node scénářů a statická brána PASS.
+-482 předchozích položek/katalogových identit,2808 médií a CSV prefix přesně
+  zachované;122 místních HTTP souborů shodných,147 zdrojů zmrazených.
+- Žádná z těchto tří dávek dosud nebyla publikovaná. Poslední vlastní
+  potvrzené Pages vydání2779af14 obsahovalo452/442; nové p+n nezadané.
 
 Co neni hotove:
-Publikování obou dávek10+20 a fyzická přejímka telefonu.
+Publikování tří dávek10+20+20 a fyzická přejímka telefonu.
 
 Dalsi krok:
-Na samostatný pokyn Terra Pages p+n s čerstvým auditem celého balíčku.
+Samostatně autorizované Pages p+n, s čerstvým auditem celého balíčku.
 
 Navrhovane dalsi kroky:
-Přejímka nových30 karet a A–D na telefonu; dalších35 hesel ze zásobníku MMTX.
+Telefonní přejímka50 karet a A–D; zbývajících15 nových hesel MMTX,
+3 doplňující významy a2 volitelné položky původního návrhu.
 
 Zmenene nebo relevantni soubory:
 CSV/katalog;3 webové manifesty;20 zdrojových obrazů,20 webových kopií,
-20 náhledů a80MP3;3 inventární testy; reports/vocabulary_en_lake_batch2_20261115.md.
+20 náhledů a79MP3;3 inventární testy; reports/vocabulary_en_lake_batch3_20261115.md.
 
 Bezpecnost / neukladat:
-Vlastní větev data/vocabulary-lake-batch1-20261115 navazuje druhou dávkou
-na58e30135 (první desítka), základ d141d030. Souběžný main se nemění.
-Dávky first10 i next20 jsou applied; žádné opakování médií/přípravy.
-Soukromé doklady v data/private/vocabulary_lake_batch2_20261115/ a původním
-autorském store. Nové karty nepřebírají A–D ani Benji. Nový TVBCP není sjednaný.
+Vlastní větev data/vocabulary-lake-batch1-20261115 navazuje na8728c196,
+první dávka58e30135, základ d141d030; souběžný main se nemění.
+Všechny tři dávky jsou applied. Poslední request lake-vocabulary-batch3-20261115-v1;
+žádné opakování generování/přípravy. Soukromé doklady v
+ data/private/vocabulary_lake_batch3_20261115/ a původním autorském store.
+Nové karty nepřebírají A–D ani Benji. Nový TVBCP není sjednaný.
 
 ## Historie
 
@@ -980,3 +982,32 @@ Vlastní větev data/vocabulary-lake-batch1-20261115 obsahuje první desítku
 a tuto dvacítku; main s Willovou opravou zálohy zůstává stranou.
 Doklady: data/private/vocabulary_lake_batch2_20261115/. Dokončené dávky
 a média znovu negenerovat. Telefon/browser zatím nepřevzaté. Bez nového TVBCP.
+
+
+## 2026-11-15 13:02 CET — Třetí schválená dvacítka z návrhu MMTX
+
+Hotovo: Místně přidáno dalších20 karet: lead, show, start, find, take, tell, dry, wrong, hard, soon, tonight, just, even, then, before, beside, by, other, every, anyone.
+Každá má vlastní význam, EN/CZ větu, pevný obrázek, náhled a čtyři zvukové
+reference. Celkem502 záznamů/492 aktivních,473 Slovíček a19 Interakcí,18 témat.
+Rozhodnutí: Míla zadal „OK, pokračuj další 20kou...“. Použito dalších20 nových
+hesel podle pořadí původního TXT. Hard znamená náročný, by prostorové u,
+before časové před a just jen/pouze. Dosavadní autorská pravidla platí.
+Nové p+n nezadané; společný main a Willovy změny se tímto krokem nemění.
+Další krok: Samostatně schválené Pages p+n všech tří místních dávek10+20+20.
+Navrhované další kroky: Telefonní přejímka nových50 karet a A–D; zbývajících15
+nových hesel původního návrhu, případně jeho3 nové významy a2 volitelné položky.
+Technický důkaz:52 Python testů PASS/30.241s včetně51 selection +5 learners
+Node scénářů, statická brána PASS.482 starších položek/katalogových identit
+přesně zachovaných,2808 starších médií a CSV prefix/CRLF shodné.79 nových
+MP3 dekódovaných a80 referencí ověřených; české just sdílí již hotové audio
+jen; pouze.20 náhledů WebP ověřených,122/122 místních HTTP odpovědí shodných,
+147 zdrojů/dat/testů/médií zmrazených po ověření. Aplikační i autorský kód
+beze změny; mění se obsah a očekávané inventární počty ve3 existujících testech.
+Plná publikační brána zůstává povinná při samostatném p+n.
+UID ven-0483 až ven-0502, request lake-vocabulary-batch3-20261115-v1 je applied,
+digest 5611fdcee137af73b3c3c7d1a543c01b8715824413c6a7b82015a9e6afa5f005. Dokončené dávky a média znovu negenerovat.
+Obrázky:13 nových vestavěným imagegen,1 úprava every bez prozrazujícího textu,
+6 převzatých. Aria/Vlasta,−10%, osobní A–D/Benji a18 témat zachované.
+Doklady: data/private/vocabulary_lake_batch3_20261115/. Vlastní větev navazuje
+na8728c196 (předchozí dávka), základ d141d030. Produkce ani fyzická přejímka
+se tímto zápisem nepotvrzují. Samostatný Vocabulary EN TVBCP nebyl dohodnutý.

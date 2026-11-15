@@ -1426,3 +1426,32 @@ Vlastní větev data/vocabulary-lake-batch1-20261115 obsahuje první desítku
 a tuto dvacítku; main s Willovou opravou zálohy zůstává stranou.
 Doklady: data/private/vocabulary_lake_batch2_20261115/. Dokončené dávky
 a média znovu negenerovat. Telefon/browser zatím nepřevzaté. Bez nového TVBCP.
+
+
+## 2026-11-15 13:02 CET — Třetí schválená dvacítka z návrhu MMTX
+
+Hotovo: Místně přidáno dalších20 karet: lead, show, start, find, take, tell, dry, wrong, hard, soon, tonight, just, even, then, before, beside, by, other, every, anyone.
+Každá má vlastní význam, EN/CZ větu, pevný obrázek, náhled a čtyři zvukové
+reference. Celkem502 záznamů/492 aktivních,473 Slovíček a19 Interakcí,18 témat.
+Rozhodnutí: Míla zadal „OK, pokračuj další 20kou...“. Použito dalších20 nových
+hesel podle pořadí původního TXT. Hard znamená náročný, by prostorové u,
+before časové před a just jen/pouze. Dosavadní autorská pravidla platí.
+Nové p+n nezadané; společný main a Willovy změny se tímto krokem nemění.
+Další krok: Samostatně schválené Pages p+n všech tří místních dávek10+20+20.
+Navrhované další kroky: Telefonní přejímka nových50 karet a A–D; zbývajících15
+nových hesel původního návrhu, případně jeho3 nové významy a2 volitelné položky.
+Technický důkaz:52 Python testů PASS/30.241s včetně51 selection +5 learners
+Node scénářů, statická brána PASS.482 starších položek/katalogových identit
+přesně zachovaných,2808 starších médií a CSV prefix/CRLF shodné.79 nových
+MP3 dekódovaných a80 referencí ověřených; české just sdílí již hotové audio
+jen; pouze.20 náhledů WebP ověřených,122/122 místních HTTP odpovědí shodných,
+147 zdrojů/dat/testů/médií zmrazených po ověření. Aplikační i autorský kód
+beze změny; mění se obsah a očekávané inventární počty ve3 existujících testech.
+Plná publikační brána zůstává povinná při samostatném p+n.
+UID ven-0483 až ven-0502, request lake-vocabulary-batch3-20261115-v1 je applied,
+digest 5611fdcee137af73b3c3c7d1a543c01b8715824413c6a7b82015a9e6afa5f005. Dokončené dávky a média znovu negenerovat.
+Obrázky:13 nových vestavěným imagegen,1 úprava every bez prozrazujícího textu,
+6 převzatých. Aria/Vlasta,−10%, osobní A–D/Benji a18 témat zachované.
+Doklady: data/private/vocabulary_lake_batch3_20261115/. Vlastní větev navazuje
+na8728c196 (předchozí dávka), základ d141d030. Produkce ani fyzická přejímka
+se tímto zápisem nepotvrzují. Samostatný Vocabulary EN TVBCP nebyl dohodnutý.
