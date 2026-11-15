@@ -536,6 +536,8 @@ Doplnění 17102026 k LL-071: Nativní modelový pomocník navíc zdvojuje roli,
 
 ### LL-002 — Slovníkové aplikace: konzistence kódu, mappingu a obrázků
 
+- Doplnění15.11.2026: Data worktree může mít méně lokálních Pict než kanonická pracovní složka (IT761 proti745). Před portem ověřit oba skutečné inventáře; úplné zdroje zachovat v uzavřeném private snímku a přesném manifestu. Chybějící soubor ve worktree nenahrazovat odhadem ani z něj nevyvozovat chybějící produkční ilustraci. U IT ověřeno777 vstupů včetně761 obrazů proti kanonickému i zmrazenému kořeni.
+
 - Doplnění 4. 11. 2026: historické opravy podle Order nelze použít na nově uspořádané CSV. Náhled starého Janina helperu by přepsal 10 jiných hesel. Doplňovat jen prázdné věty podle aktuálního FR/CZ a snímku souboru; použít existující bezpečný CSV store s ověřenou zálohou a konfliktní kontrolou. Celý původní řádek a L/HT ověřit po zápisu. Stávající helper má zůstat jen čtecím podkladem, dokud nebude samostatně opravený.
 
 - Problém: Obrázky se nemusí zobrazovat, přestože mapping vypadá správně.

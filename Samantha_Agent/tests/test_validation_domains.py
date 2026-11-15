@@ -180,3 +180,14 @@ class ValidationDomainsTests(unittest.TestCase):
         self.assertNotIn('tests.test_calendar_writer',result.modules)
         code=select_validation_plan([*paths,'Samantha_Agent/app/vocabulary_authoring.py'])
         self.assertIn('tests.test_vocabulary_authoring',code.modules)
+
+    def test_italian_foundation_has_its_own_inventory_and_identity_checks(self):
+        result=select_validation_plan([
+            'VocabularyIT/vocabulary_it_catalog.py', 'VocabularyIT/vocabulary_it_catalog.json',
+            'VocabularyIT/vocabulary_it_input_manifest.json', 'VocabularyIT/VocabularyIT.csv',
+            'Samantha_Agent/tests/test_vocabularyit_catalog.py'])
+        self.assertEqual(result.domains, ('vocabulary_it',))
+        self.assertIn('tests.test_vocabularyit_catalog', result.modules)
+        self.assertIn('tests.test_cockpit_http_security', result.modules)
+        self.assertNotIn('tests.test_calendar_writer', result.modules)
+        self.assertNotIn('tests.test_vocabulary_authoring', result.modules)

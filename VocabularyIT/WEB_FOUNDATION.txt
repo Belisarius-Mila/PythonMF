@@ -1,0 +1,68 @@
+VOCABULARY IT — WEBOVÝ ZÁKLAD, BOD 1 (15.11.2026)
+
+Stav
+První bod schváleného plánu je místně připravený.471 významů, všech471
+zachovaných aktivních; vit-0001 až vit-0471.18 témat převzatých z EN.
+Slovní druh, typ a vlastní obtížnost jsou redakční NÁVRHY, nikoli schválené
+jazykové údaje nebo A1–C2. Navrženo460 Slovíček a11 Interakcí; Fráze zatím
+nepřidělené.112 karet má konkrétní důvod přednostní revize, ne prokázanou chybu.
+Všech471 obrazových vazeb čeká na potvrzení ve druhém bodu.
+
+Soubory
+vocabulary_it_catalog.json — identity, explicitní aliasy, návrhy metadat.
+vocabulary_it_input_manifest.json — otisky777 původních souborů,761 obrazů.
+vocabulary_it_catalog.py — pouze čtení/ověření katalogu a vstupního snímku.
+vocabulary_it_review_queue.txt — celá prioritní revizní fronta112 karet.
+Původní VocabularyIT.csv, mapping.json, desktop/Pythonista, rody a L/HT se
+v tomto bodu nezměnily. Nový exporter, galerie, profily ani audio zde ještě nejsou.
+
+Identita
+UID a číselné id se přidělily právě jednou. Aktuální Order sloužil jen jako
+podklad inicializace. Resolve používá dvojici IT/CZ, normalizuje Unicode NFC
+a odstraňuje mezery na začátku a konci textu. Zachovává diakritiku, velikost písmen a interpunkci.
+Tolerantní vyhledávání obrázku neurčuje identitu. Další podporované znění
+se připíše do matches jako explicitní alias stejné karty.
+Přeřazení/přečíslování CSV UID nemění. Neznámé heslo a dva řádky pro stejné
+UID vyvolají chybu. Změna významu nezdědí cizí identitu podle čísla řádku.
+Dva významy portafoglio, su, ora, vicino, nipote apod. zůstávají oddělené.
+Nový význam bude potřebovat nové UID a samostatné zařazení; tato etapa
+neimplementuje jeho automatický zápis. Nepouštět znovu jednorázový seeder.
+
+Historická data a formy
+Datum přidání starých karet neznáme, legacyAddedAt je null. Nevydáváme datum
+migrace za datum vzniku slovíčka. Výslovné návrhy lemma/formOfUid propojují
+např. usi→usare a vinti→vincere. Všechny tvary zůstávají aktivní k revizi.
+L označuje naučené, HT obtížné; nejsou to nové osobní výběry. Budoucí IT profily
+začínají prázdné a mají vlastní klíče/zálohy oddělené od EN.
+
+Zmrazené vstupy a kontrola
+Kanonická místní Pict má761 podporovaných obrazů, tento Data worktree745.
+Chybějících16 je zachovaných v soukromém snímku s přesnými jmény a bajty.
+Snímek obsahuje777 souborů,121703729 bajtů. Úplné kopie nejsou v Gitu.
+Cesta od kořene PythonMF:
+Samantha_Agent/data/private/vocabulary_it_foundation_20261115/inputs/
+
+Čtecí kontrola ze stejného kořene PythonMF:
+python3 VocabularyIT/vocabulary_it_catalog.py --root Samantha_Agent/data/private/vocabulary_it_foundation_20261115/inputs
+Výsledek je JSON na stdout. Souborům ve snímku se nic nezapisuje.
+Na kanonickém úplném repozitáři můžeš zadat --root .
+V neúplném worktree výchozí root záměrně ohlásí chybějící přesnou cestu;
+nemá se to obcházet odhadem nebo náhradním obrázkem. Pro audit použij úplný
+snímek. Další etapy převezmou přesně zvolené obrazy ze schváleného zdroje.
+Kontrola odmítne změněné bajty, jiný seznam obrazů, chybějící soubor, jinou
+velikost písmen i cestu mimo zvolený kořen. Neprovádí cleanup žádných assetů.
+
+Testy
+Nová registrovaná doména vocabulary_it vybere test_vocabularyit_catalog.py
+pro nové katalogové podklady a jejich čtecí nástroje. Neobchází společné
+bezpečnostní či validační smluvní testy. Běžná brána se pouští přes
+Samantha_Agent/scripts/validation_gate.py; po souběžném posunu origin/main
+může lokální Data ověření použít doložený společný základ. Není to doklad
+integrace do nového main ani oprávnění k publikaci.
+
+Plán a další krok
+Podrobný osmibodový plán je doplněk C na konci
+Vocabulary_IT_analyza_proveditelnosti_2026-11-15.txt v Downloads.
+Dále bod2: revize významů a konkrétních obrázků. Začít16 rozdíly resolverů,
+piacere/perché/stare a tvary/rody, potom potvrdit zbývající metadata.
+Kanonický handoff a existující TVBCP: project-vocabulary-it.md.
