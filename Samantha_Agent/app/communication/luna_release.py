@@ -121,7 +121,8 @@ def public_job(job: dict[str, Any] | None) -> dict[str, Any] | None:
             "active": checked["state"] in ACTIVE_STATES,
             "target_short": checked["target_head"][:12],
             "model_usage": normalize_usage((checked.get("luna_proof") or {}).get("token_usage")),
-            "gate": {key: gate[key] for key in ("passed", "mode", "test_count", "duration_seconds") if key in gate},
+            "gate": {key: gate[key] for key in ("passed", "mode", "test_count", "duration_seconds",
+                                               "receipt_id", "policy_version", "reused") if key in gate},
             "verification": {key: verification[key] for key in ("state", "main_head", "code_stamp", "smoke_count", "protected_services_unchanged", "deployment_target", "deployment_id", "workflow_run_id", "smoke_http_status", "smoke_path") if key in verification}}
 
 
@@ -692,14 +693,17 @@ def run_release(
                 job = store.update(job_id, pushed=True, push_state="confirmed", gate=pushed.get("gate", {}))
             else:
                 job = store.update(job_id, phase="validation", push_state="already_aligned",
-                                   message="Vykonavatel ověřuje již odeslaný main plnou bránou.")
+                                   message="Vykonavatel ověřuje již odeslaný main společnou validační politikou.")
                 validated = call("/api/human-adam/luna-release/execute", {"job_id": job_id}, token=token)
                 if not validated.get("ok"):
-                    raise LunaReleaseError("Plná publikační brána neprošla.")
+                    raise LunaReleaseError("Povinná publikační brána neprošla.")
                 job = store.update(job_id, gate=validated.get("gate", {}))
             gate = job["gate"]
-            if not gate.get("passed") or gate.get("mode") != "full" or int(gate.get("test_count") or 0) < 1:
-                raise LunaReleaseError("Chybí doklad plné publikační brány.")
+            if (not gate.get("passed") or gate.get("mode") not in {"full", "targeted"}
+                    or int(gate.get("test_count") or 0) < 1
+                    or (gate.get("mode") == "targeted" and
+                        (not gate.get("receipt_id") or not gate.get("policy_version")))):
+                raise LunaReleaseError("Chybí doklad programově určené publikační brány.")
             exact = call("/api/human-adam/github-batch-audit")
             if exact.get("state") != "aligned" or exact.get("local_head") != job["target_head"]:
                 raise LunaReleaseError("Shoda GitHubu a předaného balíčku není potvrzená.")

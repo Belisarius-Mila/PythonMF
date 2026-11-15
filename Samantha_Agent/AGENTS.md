@@ -70,6 +70,13 @@ Společné pracovní instrukce PythonMF; cesty níže jsou vůči `Samantha_Agen
 - Úspěšné ověření nezměněné části neopakuj bez nového důvodu. Opakuj je po
   relevantní změně, při selhání či konkrétní nevyřešené pochybnosti;
   povinné publikační a bezpečnostní brány tím nejsou přeskočeny.
+- Závazný výběr a opětovné využití testů pro terminál, checkpoint i p+n řídí
+  `app/communication/validation_policy.py` a `memory/technical/validation_policy.md`.
+  Lokálně použij registrovaný `validate_project` (`scripts/validation_gate.py`).
+  Model nesmí volit rychlejší režim ani pro publikaci použít samotné
+  `--skip-unit-tests`. Neznámé, rizikové a vlastní změny validačních pravidel
+  vyžadují plnou bránu; její platnou podepsanou účtenku přesně stejných vstupů
+  lze převzít podle programové politiky. Známé malé změny mají pevné cílené testy.
 - **Terminálový Adam na `main`:** po dokončeném vývojovém kroku vytvoř jeden
   lokální commit z konkrétně zkontrolovaných souborů, pokud Míla neřekl
   `bez commitu`. Read-only audit a diagnostika commit nevytvářejí.

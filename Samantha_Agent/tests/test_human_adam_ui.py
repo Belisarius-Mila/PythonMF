@@ -211,7 +211,7 @@ const wait=async predicate=>{for(let n=0;n<100;n++){if(predicate())return;await 
         self.assertIn("Nasadit aktuální main do Cockpitu", HUMAN_ADAM_HTML)
         self.assertIn("Běžící Cockpit ověřen", HUMAN_ADAM_HTML)
         self.assertIn("GitHub čeká na denní balíček", HUMAN_ADAM_HTML)
-        self.assertIn("před jedním pushem proběhne úplná brána", HUMAN_ADAM_HTML)
+        self.assertIn("před jedním pushem se ověří potřebné kontroly", HUMAN_ADAM_HTML)
         self.assertIn('id="deployConfirmation"', HUMAN_ADAM_HTML)
         self.assertIn('autocomplete="off"', HUMAN_ADAM_HTML)
         self.assertIn('autocorrect="off"', HUMAN_ADAM_HTML)

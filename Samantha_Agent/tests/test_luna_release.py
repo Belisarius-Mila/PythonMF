@@ -164,6 +164,27 @@ class LunaReleaseTests(unittest.TestCase):
         self.assertEqual(public["model_usage"], counts)
         self.assertNotIn("must-not-leak", json.dumps(public))
 
+    def test_targeted_gate_needs_server_receipt_and_preserves_public_proof(self):
+        for signed in (False, True):
+            with self.subTest(signed=signed):
+                job = self.create(client_message_id="targeted-request-" + str(signed))
+                original, calls = self.fake_api()
+                def call(path, payload=None, **kwargs):
+                    response = original(path, payload, **kwargs)
+                    if path.endswith("github-batch"):
+                        response["gate"] = {"passed": True, "mode": "targeted", "test_count": 12}
+                        if signed:
+                            response["gate"].update(receipt_id="d" * 64, policy_version="validation-v1", reused=True)
+                    return response
+                result = self.run_job(job, call=call)
+                if signed:
+                    self.assertEqual(result["job"]["state"], "completed")
+                    self.assertEqual(result["job"]["gate"]["receipt_id"], "d" * 64)
+                    self.assertTrue(result["job"]["gate"]["reused"])
+                else:
+                    self.assertEqual(result["job"]["state"], "attention")
+                    self.assertNotIn("/api/human-adam/deploy", calls)
+
     def test_client_cannot_replace_the_audited_executor(self):
         with self.assertRaises(release.LunaReleaseError):
             self.create(expected_executor={**EXECUTOR, "model":"different-executor"})

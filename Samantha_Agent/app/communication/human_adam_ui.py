@@ -380,7 +380,7 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
         <p>Nasazení nespouštěj současně z Cockpitu a z terminálového Adama. Stavový řádek vždy rozlišuje lokální <code>Git/main</code> od kódu načteného v běžícím Cockpitu.</p>
 
         <h4>3. Denní GitHub balíček</h4>
-        <p>GitHub běžný vývoj nezdržuje. Až budeš chtít uzavřít denní balíček, otevři <strong>Práce</strong>, zkontroluj seznam čekajících commitů a vlož přesnou potvrzovací větu. Cockpit potom jednou spustí úplnou bránu a jedním pushem odešle celý balíček.</p>
+        <p>GitHub běžný vývoj nezdržuje. Až budeš chtít uzavřít denní balíček, otevři <strong>Práce</strong>, zkontroluj seznam čekajících commitů a vlož přesnou potvrzovací větu. Cockpit ověří potřebné kontroly a jedním pushem odešle celý balíček.</p>
 
         <h4>Když něco nejde</h4>
         <ul>
@@ -1016,7 +1016,7 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
         && job.state === "completed" && ["confirmed", "already_aligned"].includes(job.push_state)
         && job.deployment_state === "confirmed" && proof.deployment_target === "github_pages"
         && proof.state === "deployed" && proof.smoke_http_status === 200
-        && gate.passed === true && gate.mode === "full" && gate.test_count > 0 && sameHead;
+        && gate.passed === true && (gate.mode === "full" || (gate.mode === "targeted" && gate.receipt_id && gate.policy_version)) && gate.test_count > 0 && sameHead;
       return current ? {state:"current", canStart:false, canRepeat:true,
         message:`Main je na GitHubu. Poslední účtenka potvrzuje publikaci webu tohoto proudu pro stejný commit${observed}.`}
         : unknown(`Main je na GitHubu; aktuální publikace webu tohoto proudu zatím není potvrzená${observed}. Ověření a případné nové p+n můžeš zadat v dalších akcích.`, true);
@@ -3019,7 +3019,7 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
     if (githubBatchAudit.ready === true && state === "ready") {
       const count = Number(githubBatchAudit.commit_count || 0);
       const files = Number(githubBatchAudit.change_count || 0);
-      githubBatchMeta.textContent = `${count} čekajících commitů · ${files} změněných souborů · před jedním pushem proběhne úplná brána · vlož přesně: ${githubBatchAudit.confirmation_text || ""}`;
+      githubBatchMeta.textContent = `${count} čekajících commitů · ${files} změněných souborů · před jedním pushem se ověří potřebné kontroly · vlož přesně: ${githubBatchAudit.confirmation_text || ""}`;
       batchWorkflowGithub.textContent = `GitHub: ${count} lokálních commitů bezpečně čeká na pozdější denní balíček.`;
       githubBatchConfirmation.hidden = false;
       githubBatchConfirmation.disabled = false;
@@ -3078,7 +3078,7 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
     }
     githubBatchBtn.disabled = true;
     githubBatchConfirmation.disabled = true;
-    githubBatchMeta.textContent = "Spouštím jednu úplnou bránu a potom jeden přesný push denního balíčku…";
+    githubBatchMeta.textContent = "Ověřuji potřebné kontroly a potom odešlu přesný denní balíček…";
     try {
       const payload = await api("/api/human-adam/github-batch", {
         method:"POST",
@@ -3138,7 +3138,7 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
       label += model ? ` · model ${model}` : " · model neověřený";
       const gate = lunaReleaseJob.gate || {};
       const verification = lunaReleaseJob.verification || {};
-      const testsConfirmed = gate.passed === true && gate.mode === "full"
+      const testsConfirmed = gate.passed === true && (gate.mode === "full" || (gate.mode === "targeted" && gate.receipt_id && gate.policy_version))
         && Number.isInteger(gate.test_count) && gate.test_count > 0;
       label += testsConfirmed ? ` · ${gate.test_count} testů PASS` : " · testy neověřené";
       label += testsConfirmed && Number.isFinite(gate.duration_seconds) && gate.duration_seconds >= 0
@@ -3873,9 +3873,9 @@ HUMAN_ADAM_HTML = r"""<!doctype html>
     const deployedAt = String(payload && payload.deployed_at || "").trim();
     const parsedTime = new Date(deployedAt);
     if (!/^[0-9a-f]{7,12}$/.test(mainShort)) return null;
-    if (!["full","quick"].includes(gateMode)) return null;
+    if (!["full","targeted","quick"].includes(gateMode)) return null;
     if (!Number.isInteger(testCount)) return null;
-    if ((gateMode === "full" && testCount <= 0) || (gateMode === "quick" && testCount !== 0)) return null;
+    if ((["full","targeted"].includes(gateMode) && testCount <= 0) || (gateMode === "quick" && testCount !== 0)) return null;
     if (smokeCount !== 5 || Number.isNaN(parsedTime.getTime())) return null;
     return {
       schema_version:1,

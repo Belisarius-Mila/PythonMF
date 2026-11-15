@@ -38,6 +38,7 @@ from app.communication.workstream_live_status import (
     build_workstream_live_status,
 )
 from app.file_persistence import atomic_replace_text_under_external_lock
+from app.communication.validation_policy import select_validation_plan
 from scripts.human_adam_takeover import (
     CONFIRMATION_TEXT as LEGACY_FAST_FORWARD_CONFIRMATION,
     TakeoverError,
@@ -59,25 +60,6 @@ _SENSITIVE_TEXT_RE = re.compile(
 )
 _CHECKPOINT_LOCK = threading.Lock()
 PROJECT_TIME_ZONE = ZoneInfo("Europe/Prague")
-_FULL_GATE_PATH_PREFIXES = (
-    ".github/workflows/",
-    "Samantha_Agent/requirements.txt",
-    "Samantha_Agent/app/cockpit.py",
-    "Samantha_Agent/app/cockpit_document_routes.py",
-    "Samantha_Agent/app/cockpit_email_archive_routes.py",
-    "Samantha_Agent/app/file_persistence.py",
-    "Samantha_Agent/app/backup/",
-    "Samantha_Agent/app/documents/transactions.py",
-    "Samantha_Agent/app/email/work_outbox.py",
-    "Samantha_Agent/app/family_calendar_delivery",
-    "Samantha_Agent/app/communication/checkpoint_quality_gate.py",
-    "Samantha_Agent/app/communication/github_batch.py",
-    "Samantha_Agent/app/communication/git_runtime.py",
-    "Samantha_Agent/app/communication/main_remote_sync.py",
-    "Samantha_Agent/app/communication/simple_main_checkpoint.py",
-    "Samantha_Agent/app/communication/simple_main_deploy.py",
-    "Samantha_Agent/scripts/human_adam_takeover.py",
-)
 
 
 class SimpleMainCheckpointError(AppServerError):
@@ -303,9 +285,9 @@ def _safe_deployment_snapshot(
     if (
         not _SHORT_HEAD_RE.fullmatch(main_short)
         or parsed_at.tzinfo is None
-        or (gate_mode == "full" and test_count <= 0)
+        or (gate_mode in {"full", "targeted"} and test_count <= 0)
         or (gate_mode == "quick" and test_count != 0)
-        or gate_mode not in {"full", "quick"}
+        or gate_mode not in {"full", "targeted", "quick"}
         or smoke_count != 5
     ):
         raise SimpleMainCheckpointError(
@@ -756,9 +738,11 @@ def _validation_text(evidence: GateEvidence) -> str:
             f"{evidence.duration_seconds:.1f} s, výsledek OK; "
             "cílené testy potvrdila dokončovací účtenka vývojového tahu"
         )
+    label = "cílená" if evidence.mode == "targeted" else "plná"
+    reuse = "; převzatá ověřená účtenka stejných vstupů" if evidence.reused else ""
     return (
-        f"plná Cockpit brána: {evidence.test_count} testů, "
-        f"{evidence.duration_seconds:.1f} s, výsledek OK"
+        f"{label} Cockpit brána: {evidence.test_count} testů, "
+        f"{evidence.duration_seconds:.1f} s, výsledek OK{reuse}"
     )
 
 
@@ -986,14 +970,7 @@ def _validate_change_rows(
 
 
 def _requires_full_gate(changes: Sequence[dict[str, str]]) -> bool:
-    for item in changes:
-        path = str(item.get("path") or "").strip().replace("\\", "/")
-        if any(
-            path == prefix or path.startswith(prefix)
-            for prefix in _FULL_GATE_PATH_PREFIXES
-        ):
-            return True
-    return False
+    return select_validation_plan(str(item.get("path") or "") for item in changes).mode == "full"
 
 
 def _known_origin_main(source_repo: Path) -> str:
@@ -1238,7 +1215,7 @@ def complete_simple_main_checkpoint(
     """Validate, record, commit and align one workstream step.
 
     In daily-batch mode the local commit is integrated without contacting or
-    changing GitHub.  A later separately confirmed batch runs the full gate and
+    changing GitHub. A later separately confirmed batch applies the shared policy and
     pushes all accumulated commits together.
     """
 
@@ -1306,18 +1283,11 @@ def complete_simple_main_checkpoint(
         original_active_projects = _read_memory_file(active_projects_path)
 
         progress("gate", "running")
-        initial_changes = list(initial.get("changes") or [])
-        quick_gate = bool(
-            defer_remote_push
-            and allow_quick_gate
-            and not _requires_full_gate(initial_changes)
-        )
         try:
             evidence = run_checkpoint_quality_gate(
                 workspace=workspace,
                 runner=gate_runner,
                 log_path=gate_log_path,
-                skip_unit_tests=quick_gate,
             )
         except HumanAdamGateError as exc:
             progress("gate", "failed")
@@ -1545,6 +1515,8 @@ def complete_simple_main_checkpoint(
                 "test_count": evidence.test_count,
                 "duration_seconds": evidence.duration_seconds,
                 "mode": evidence.mode,
+                **({"receipt_id": evidence.receipt_id, "policy_version": evidence.policy_version,
+                    "reused": evidence.reused} if evidence.policy_version else {}),
             },
             "handoff_path": safe_request.handoff_relative_path,
             "tvbcp_path": safe_request.tvbcp_relative_path,

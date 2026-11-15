@@ -77,6 +77,11 @@ Kazdy workflow command ma mit:
 
 ## Aktualni prikazy
 
+`validate_project` (2026-11-15): pevný `.venv/bin/python scripts/validation_gate.py`,
+společná programová politika `validation_policy.md`. Místní testy a soukromé
+účtenky bez publikační nebo systémové změny, `requires_confirmation=false`.
+Oprávnění k vývoji pokrývá toto běžné reverzibilní ověření.
+
 ```text
 backup_project_recovery
 backup_project_dry_run

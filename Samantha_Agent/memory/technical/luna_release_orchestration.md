@@ -14,13 +14,14 @@ proudy portálu (aktuálně 34), včetně přímé terminálové relace.
   a názvy chráněných služeb. Nedostává celou historii, přihlašovací údaje,
   soukromá data ani oprávnění opravovat kód či systém.
 - Jediný read-only modelový tah přebírá přesný cíl strukturovanou odpovědí.
-  Stávající serverové Python postupy provádějí plnou publikační bránu,
+  Stávající serverové Python postupy provádějí programově určenou publikační bránu
+  podle `validation_policy.md` (plná, pevná cílená, nebo platná podepsaná účtenka),
   přesný GitHub batch push a registrované nasazení: běžící runtime Samanthy
   s restartem a smoke 5/5, nebo společný Pages publisher s přesným deployment
   SHA a HTTP 200 konkrétní webové aplikace.
 - Celý rozsah mezi GitHub main a lokálním main je jeden balíček. Počet
   commitů není omezený na jeden. Je-li main již přesně na GitHubu, proběhne
-  plná brána a registrované nasazení bez dalšího push.
+  stejná povinná validační politika a registrované nasazení bez dalšího push.
 - Soukromý záznam a oddělený proces přežijí restart Cockpitu i zavření karty.
   Každý požadavek má vlastní účtenku; předchozí se nepřepisují ani nemažou.
 
@@ -130,7 +131,7 @@ Podrobnosti: [report opravy](../reports/human_adam_workstream_pn_fix_2026_10_23.
   nebo aktualizaci služby Camino. Jejich specifické vydání zůstává samostatnou
   operací s vlastním oprávněním; běžné p+n tyto služby nepřepíná.
 - Pravidla projektu, handoff/TVBCP a jeho cílené kontroly plní hlavní Adam
-  před commitem. Luna přebírá hotový rozsah a server vynutí plnou publikační bránu.
+  před commitem. Luna přebírá hotový rozsah a server vynutí společnou validační politiku.
 
 ## Ochrany
 

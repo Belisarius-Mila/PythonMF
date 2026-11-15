@@ -307,7 +307,7 @@ def push_github_batch(
     gate_runner: Callable[..., subprocess.CompletedProcess[str]] = subprocess.run,
     gate_log_path: Path = DEFAULT_GATE_LOG,
 ) -> dict[str, Any]:
-    """Run one full gate and push the exact audited commit range."""
+    """Validate by the shared policy and push the exact audited commit range."""
 
     if str(confirmation or "").strip() != GITHUB_BATCH_CONFIRMATION:
         raise GitHubBatchError(
@@ -334,10 +334,11 @@ def push_github_batch(
                 workspace=workspace,
                 runner=gate_runner,
                 log_path=gate_log_path,
+                validation_base=expected_origin,
             )
         except HumanAdamGateError as exc:
             raise GitHubBatchError(
-                "Úplná večerní brána neprošla; nic se nepushnulo a lokální práce zůstává zachovaná."
+                "Povinná publikační brána neprošla; nic se nepushnulo a lokální práce zůstává zachovaná."
             ) from exc
         final = audit_github_batch(source_repo=workspace.source_repo)
         if (

@@ -1,4 +1,20 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
+## 2026-11-15 11:55 CET — Jednotná validace a účtenky místně
+
+Míla schválil trvalé zrychlení ověření/p+n. Společná programová politika
+vybírá plné nebo pevné cílené testy; přesně shodný obsah/prostředí lze převzít
+z podepsané místní účtenky. Základ nejvýše24h, změněný rizikový kód vždy plná
+sada. Automatické zápisy checkpointu vyžadují jen odpovídající dokumentační
+testy, pokud ostatní otestované bajty zůstaly stejné. Starý skip testy neobchází.
+Regrese a frontendové ověření PASS; závěrečný plný výsledek/počty/čas i měření
+cache jsou v data/private/validation_policy_20261115/completion.json a Git
+metadatech. Dokončení uzavírá pouze skutečná PASS účtenka, nikoli tento text.
+Pravidla technical/validation_policy.md; projekt projects/samantha_validation.md.
+Další krok: samostatně povolené p+n nového backendu a převzetí skutečné úspory
+celého vydání. Běžící Cockpit zatím starý; push, restart a deploy neprovedené.
+Média/historie Gitu, ostré zálohy a aktivní Data se v tomto kroku nemění.
+Další optimalizace Git testovacích fixture a oddělení médií jen jako návrhy.
+
 ## 2026-11-15 11:18 CET — Trvalá oprava evidence zálohy hotová místně
 
 Závěrečné uložení activity_state.json nyní atomicky nahrazuje pouze novou

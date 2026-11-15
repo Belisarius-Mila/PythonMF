@@ -140,7 +140,7 @@ class SimpleMainDeploymentTests(unittest.TestCase):
             "POTVRZUJI NASAZENI AKTUALNIHO MAIN DO COCKPITU",
         )
 
-    def test_batch_mode_deploys_local_ahead_main_with_quick_gate(self) -> None:
+    def test_batch_mode_cannot_skip_tests_for_unverified_local_main(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
             root = Path(temp_dir)
             source, primary, peer, _head = prepare_clean_main(root)
@@ -188,11 +188,11 @@ class SimpleMainDeploymentTests(unittest.TestCase):
 
         self.assertTrue(audit["ready"])
         self.assertTrue(audit["remote_push_deferred"])
-        self.assertEqual(prepared["gate"]["mode"], "quick")
-        self.assertEqual(prepared["gate"]["test_count"], 0)
+        self.assertEqual(prepared["gate"]["mode"], "full")
+        self.assertGreater(prepared["gate"]["test_count"], 0)
         self.assertEqual(verified["state"], DEPLOYED)
-        self.assertEqual(verified["gate"]["mode"], "quick")
-        self.assertEqual(receipt["gate_mode"], "quick")
+        self.assertEqual(verified["gate"]["mode"], "full")
+        self.assertEqual(receipt["gate_mode"], "full")
         self.assertEqual(origin_after, origin_before)
 
     def test_batch_mode_local_deploy_audit_survives_remote_divergence(self) -> None:

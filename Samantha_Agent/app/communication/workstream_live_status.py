@@ -297,7 +297,7 @@ def _deployment_status(
     expected_stamp = _safe_code_stamp(deployment.get("expected_code_stamp"))
     observed_stamp = _safe_code_stamp(server.get("code_stamp"))
     gate_evidence_valid = bool(
-        (gate_mode == "full" and test_count > 0)
+        (gate_mode in {"full", "targeted"} and test_count > 0)
         or (gate_mode == "quick" and test_count == 0)
     )
     head_matches = bool(
@@ -340,7 +340,7 @@ def _deployment_status(
         "main_short": deployment_head[:12],
         "deployed_at": deployed_at,
         "test_count": test_count,
-        "gate_mode": gate_mode if gate_mode in {"full", "quick"} else "unknown",
+        "gate_mode": gate_mode if gate_mode in {"full", "targeted", "quick"} else "unknown",
         "smoke_count": smoke_count,
         "current_head": head_matches,
         "code_stamp_verified": state == "verified_current",

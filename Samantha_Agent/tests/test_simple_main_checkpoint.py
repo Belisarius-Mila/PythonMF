@@ -311,7 +311,7 @@ class SimpleMainCheckpointTests(unittest.TestCase):
             "2026-07-20 07:00 CEST",
         )
 
-    def test_daily_batch_checkpoint_uses_quick_gate_and_keeps_origin_behind(self) -> None:
+    def test_unknown_daily_change_requires_tests_and_keeps_origin_behind(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
             root = Path(temp_dir)
             source, manager = prepare_environment(root)
@@ -343,12 +343,12 @@ class SimpleMainCheckpointTests(unittest.TestCase):
         self.assertFalse(result["pushed"])
         self.assertTrue(result["remote_push_deferred"])
         self.assertEqual(result["pending_remote_commit_count"], 1)
-        self.assertEqual(result["gate"]["mode"], "quick")
-        self.assertEqual(result["gate"]["test_count"], 0)
+        self.assertEqual(result["gate"]["mode"], "full")
+        self.assertEqual(result["gate"]["test_count"], 12)
         self.assertNotEqual(source_head, origin_before)
         self.assertEqual(origin_after, origin_before)
         self.assertEqual(workspace_head, source_head)
-        self.assertIn("rychlou syntax/whitespace bránou", handoff)
+        self.assertIn("plná Cockpit brána: 12 testů", handoff)
         self.assertIn("čeká na denní balíček", handoff)
 
     def test_email_archive_http_routes_require_full_gate(self) -> None:

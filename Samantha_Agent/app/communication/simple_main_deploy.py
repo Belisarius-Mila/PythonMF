@@ -235,9 +235,9 @@ def _pending_receipt(
     prepared_at: str,
 ) -> dict[str, Any]:
     clean_mode = str(gate_mode or "").strip()
-    if clean_mode not in {"full", "quick"}:
+    if clean_mode not in {"full", "targeted", "quick"}:
         raise SimpleMainDeploymentError("Nasazení nemá platný režim ověření.")
-    if (clean_mode == "full" and test_count <= 0) or (
+    if (clean_mode in {"full", "targeted"} and test_count <= 0) or (
         clean_mode == "quick" and test_count != 0
     ):
         raise SimpleMainDeploymentError("Nasazení nemá platný důkaz ověření.")
@@ -526,6 +526,8 @@ def prepare_simple_main_deployment(
                 "test_count": evidence.test_count,
                 "duration_seconds": evidence.duration_seconds,
                 "mode": evidence.mode,
+                **({"receipt_id": evidence.receipt_id, "policy_version": evidence.policy_version,
+                    "reused": evidence.reused} if evidence.policy_version else {}),
             },
             "workspaces": final_rows or initial_rows,
             "restart_required": True,

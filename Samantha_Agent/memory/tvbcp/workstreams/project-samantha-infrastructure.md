@@ -1,7 +1,10 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
-Pět dokončených Datových commitů lokálně integrováno; plná brána 3289 testů OK (31 skipped).
-Aktivní správce dál používá Data worktree, služba ani soukromý stav se nemigrují.
-Push/nasazení neprovedené; fyzický iPhone a první slot15.11. otevřené.
+15.11.: Místní společná validační politika s pevnými cílenými testy a podepsanými
+účtenkami stejných vstupů; neznámé/rizikové změny mají plnou bránu. Základ24h,
+checkpointové dokumenty neopakují již ověřený kód. Regrese/UI PASS; závěrečný
+plný důkaz je soukromá completion.json uvedená v handoffu, uzavření jen po PASS.
+Příští krok samostatně povolené p+n backendu a měření celého vydání.
+Push/deploy/restart neprovedené; Data i ověřené zálohy zachované.
 <!-- SAMANTHA_CURRENT_STATUS_END -->
 
 ### Předchozí stav infrastruktury
@@ -2087,3 +2090,29 @@ poté PASS. 43 cílených testů PASS. Plná kanonická brána 3940 testů,
 0 chyb, 31 SKIP / 780.013 s jednotková část; 2/2 zdrojových otisků shodných.
 Jen dočasné syntetické soubory, žádný přístup k externímu disku.
 Report backup_activity_atomic_20261115.md a privátní log/časování/manifest.
+
+
+## 2026-11-15 11:55 CET — Potřebné kontroly bez opakování stejného kódu
+
+Hotovo: Jediná místní programová politika propojuje terminál, checkpoint,
+GitHub batch, Lunu a deploy. Převzetí podepsané účtenky ověřuje skutečné bajty,
+prostředí a24h základ; pevně známé změny mají své testy, ostatní plnou sadu.
+Dopis checkpointových dokumentů sám neopakuje již ověřený kód.
+
+Rozhodnutí: Míla výslovně schválil implementaci po vysvětlení nepřiměřené
+doby p+n. Model nemůže vybrat rychlý režim; nemění se oprávnění k publikaci,
+smoke ani kontrola chráněných služeb. Klíč/účtenky zůstávají v Git metadatech.
+
+Další krok: Samostatně autorizované p+n nového backendu a převzetí skutečné
+úspory celého vydání. Místní kód sám nemění již běžící Cockpit.
+
+Navrhované další kroky: Po měření zvážit dlouhé syntetické Git fixture a
+oddělení médií od kódu. Přesuny médií/historie ani nový ostrý backup se neprovádějí.
+
+Technický důkaz: Regrese podpisu, expirace, prostředí, obsahové změny, souběhu,
+starého modulu/skip přepínače, checkpointových dokumentů a worker/UI PASS.
+Závěrečná plná brána této workflow změny je povinná před lokálním commitem;
+její skutečné počty, čas a měření reuse obsahuje pouze soukromá
+data/private/validation_policy_20261115/completion.json a podepsaná účtenka.
+Report validation_policy_20261115.md vysvětluje proč se tento verzovaný zápis
+po bráně nemění. Bez jejího skutečného PASS se krok neuzavírá.

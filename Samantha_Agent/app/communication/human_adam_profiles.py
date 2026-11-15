@@ -914,7 +914,7 @@ class HumanAdamProfileManager:
                 "smoke_count": int(receipt.get("smoke_count") or 0),
                 "gate_mode": str(receipt.get("gate_mode") or "full"),
                 "gate_passed": str(receipt.get("gate_mode") or "full")
-                in {"full", "quick"},
+                in {"full", "targeted", "quick"},
                 "smoke_passed": state == "deployed",
                 "deployed_at": str(receipt.get("deployed_at") or ""),
                 "prepared_at": str(receipt.get("prepared_at") or ""),
@@ -1156,7 +1156,7 @@ class HumanAdamProfileManager:
         expected_local_head: str,
         confirmation: str,
     ) -> dict[str, Any]:
-        """Run the full gate once and push one exact audited daily batch."""
+        """Apply the shared validation policy and push one exact audited daily batch."""
 
         if not self.github_batch_mode:
             raise AppServerError("Dávkový GitHub režim není aktivní.")
@@ -1186,7 +1186,7 @@ class HumanAdamProfileManager:
             raise AppServerError("Předaný main není přesně zarovnaný s GitHubem.")
 
     def validate_luna_release(self, *, expected_head: str, workstream_id: str) -> dict[str, Any]:
-        """Full publication gate when the exact batch is already on GitHub."""
+        """Shared validation policy when the exact batch is already on GitHub."""
         with self.profile_operation() as service:
             self._luna_release_preflight(expected_head=expected_head, workstream_id=workstream_id, service=service)
             gate = run_checkpoint_quality_gate(workspace=service.workspace)

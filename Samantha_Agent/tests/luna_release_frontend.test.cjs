@@ -253,6 +253,11 @@ async function main() {
     push_state:"confirmed",deployment_state:"confirmed",gate:{passed:true,mode:"full",test_count:10},
     verification:{deployment_target:"github_pages",state:"deployed",smoke_http_status:200,main_head:"b".repeat(40)}};
   assert.equal(publication.test.lunaReleasePanelState().state, "current");
+  publication.scope.lunaReleaseJob.gate = {passed:true,mode:"targeted",test_count:12};
+  assert.equal(publication.test.lunaReleasePanelState().state, "unverified");
+  publication.scope.lunaReleaseJob.gate.receipt_id = "d".repeat(64);
+  publication.scope.lunaReleaseJob.gate.policy_version = "validation-v1";
+  assert.equal(publication.test.lunaReleasePanelState().state, "current");
   publication.scope.lunaReleaseJob.workstream_id = "project-camino";
   assert.equal(publication.test.lunaReleasePanelState().state, "unverified");
   publication.scope.lunaReleaseStatusLoaded = false;

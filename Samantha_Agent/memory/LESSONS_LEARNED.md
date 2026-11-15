@@ -2651,3 +2651,10 @@ v dočasném projektu potvrzují staré bajty/mtime/režim i neporušený JSON p
 selhání os.replace. 43 cílených a plná 3940/0 chyb/31 SKIP PASS;
 2/2 finálních zdrojových otisků shodných. Report backup_activity_atomic_20261115.md.
 Příští CLI běh opravu načte, nová ostrá záloha v tomto vývojovém kroku neproběhla.
+
+
+### 2026-11-15 — Opakované ověření musí vynutit společná politika
+
+- Kontext: checkpoint, p+n a deploy měly rozdílné přepínače; opakovaná plná sada tvořila většinu času vydání. Samotný handoff/TVBCP po testech navíc mění strom.
+- Řešení: jediný programový výběr, neznámé/rizikové změny plná sada; pevná mapa cílených testů jen nad ověřeným základem. HMAC účtenka všech bajtů/režimů, prostředí a politiky mimo workspace, platnost původní plné brány24h. Změněné checkpointové dokumenty ověřit samostatně pouze při shodě všech ostatních otestovaných souborů. Samotný starý skip není důkaz.
+- Ověření: syntetické regrese podvržení, expirace, stejné velikosti/mtime, změny prostředí, starého modulu, souběhu, ztráty vstupů a řetězení; worker a Node VM odmítají nedoložený targeted. Kanonický návod validation_policy.md; skutečný závěrečný plný důkaz v private completion.json podle handoffu.

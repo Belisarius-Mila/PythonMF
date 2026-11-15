@@ -138,6 +138,24 @@ class CockpitQualityGateTests(unittest.TestCase):
         self.assertIn("async function requestAiSuggestion()", source)
         self.assertIn("async function loadDocuments()", source)
 
+    def test_targeted_modules_keep_static_checks_and_use_only_registered_tests(self) -> None:
+        modules = ["tests.test_cockpit_frontend", "tests.test_library_photos"]
+        with patch("scripts.cockpit_quality_gate.run_checked") as run, patch("builtins.print"):
+            self.assertEqual(gate_main(["--test-modules", *modules]), 0)
+        commands = {call.args[0]: call.args[1] for call in run.call_args_list}
+        self.assertEqual(commands["unit tests"], [sys.executable, "-m", "unittest", *modules])
+        self.assertIn("syntax", commands)
+        with patch("scripts.cockpit_quality_gate.run_checked") as run, \
+                patch("sys.stderr", io.StringIO()), self.assertRaises(SystemExit):
+            gate_main(["--test-modules", "tests.unregistered"])
+        run.assert_not_called()
+
+    def test_targeted_modules_cannot_be_combined_with_static_only_flag(self) -> None:
+        with patch("scripts.cockpit_quality_gate.run_checked") as run, \
+                patch("sys.stderr", io.StringIO()), self.assertRaises(SystemExit):
+            gate_main(["--test-modules", "tests.test_cockpit_frontend", "--skip-unit-tests"])
+        run.assert_not_called()
+
     def test_janicka_r2_page_javascript_is_included_in_syntax_gate(self) -> None:
         source = janicka_r2_javascript_source()
 

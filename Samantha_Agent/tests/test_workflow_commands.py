@@ -15,6 +15,13 @@ from app.workflows.commands import (
 
 
 class WorkflowCommandTests(unittest.TestCase):
+    def test_validation_uses_fixed_policy_entrypoint_without_publish_flags(self):
+        command = next(c for c in workflow_commands.WORKFLOW_COMMANDS if c.command_id == "validate_project")
+        self.assertEqual(command.argv, (str(workflow_commands.PYTHON_BIN),
+                                       str(workflow_commands.SAMANTHA_DIR / "scripts/validation_gate.py")))
+        self.assertFalse(command.requires_confirmation)
+        self.assertIn("účtenky", command.writes)
+
     def test_email_install_and_reload_require_exact_system_confirmation(self):
         commands = {c.command_id: c for c in workflow_commands.WORKFLOW_COMMANDS}
         for action in ("install", "upgrade", "verify-restart"):

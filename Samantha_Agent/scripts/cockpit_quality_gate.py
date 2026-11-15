@@ -231,6 +231,8 @@ COMPILE_PATHS = (
     "app/communication/development_semaphore.py",
     "app/communication/deferred_integration.py",
     "app/communication/checkpoint_quality_gate.py",
+    "app/communication/validation_policy.py",
+    "scripts/validation_gate.py",
     "app/communication/human_adam_completion_status.py",
     "app/communication/human_adam_completion_job.py",
     "app/communication/luna_release.py",
@@ -414,6 +416,7 @@ TEST_MODULES = (
     "tests.test_backup_camino",
     "tests.test_backup_run_tools",
     "tests.test_cockpit_quality_gate",
+    "tests.test_validation_policy",
     "tests.test_codex_sessions",
     "tests.test_screen_sessions",
     "tests.test_screen_recovery",
@@ -802,6 +805,10 @@ def build_parser() -> argparse.ArgumentParser:
         help="Run only whitespace, metrics and syntax checks.",
     )
     parser.add_argument(
+        "--test-modules", nargs="+", choices=TEST_MODULES,
+        help="Run the server-selected targeted modules after all static checks.",
+    )
+    parser.add_argument(
         "--unit-test-timings",
         type=Path,
         help="Optionally write aggregate module/test timings to JSON; preserves the full suite.",
@@ -819,6 +826,8 @@ def main(argv: Sequence[str] | None = None) -> int:
     args = parser.parse_args(argv)
     if args.skip_unit_tests and args.unit_test_timings is not None:
         parser.error("--unit-test-timings requires unit tests")
+    if args.skip_unit_tests and args.test_modules:
+        parser.error("--test-modules cannot be combined with --skip-unit-tests")
     print("Samantha Cockpit quality gate")
     print("Architecture metrics (informational, never a hard failure):")
     for message in architecture_messages():
@@ -866,10 +875,11 @@ def main(argv: Sequence[str] | None = None) -> int:
     )
     run_checked("shell syntax", ["/bin/zsh", "-n", *SHELL_PATHS])
     if not args.skip_unit_tests:
-        command = [sys.executable, "-m", "unittest", *TEST_MODULES]
+        modules = tuple(args.test_modules) if args.test_modules else TEST_MODULES
+        command = [sys.executable, "-m", "unittest", *modules]
         if args.unit_test_timings is not None:
             command = [sys.executable, "-m", "scripts.cockpit_test_timing",
-                       "--output", str(args.unit_test_timings), *TEST_MODULES]
+                       "--output", str(args.unit_test_timings), *modules]
         run_checked("unit tests", command)
 
     print("\nCockpit quality gate: OK")

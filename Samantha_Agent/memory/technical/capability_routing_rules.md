@@ -1,5 +1,13 @@
 # Capability routing rules
 
+## Společná validace vývoje a vydání — 2026-11-15
+
+Registrovaný `validate_project` spouští pevný `scripts/validation_gate.py`
+podle `validation_policy.md`. Zapisuje pouze místní testovací důkaz/log
+v Git metadatech a syntetické testovací soubory; nepublikuje ani nenasazuje.
+Pythonové checkpoint/p+n/deploy operace volají tentýž serverový runner.
+Model neposkytuje režim ani seznam přeskočených testů.
+
 ## ScienceNews — 03/K4 (2026-11-09)
 
 Proud `project-knowledge-library`, pravidla `science_news.md`. Čtení fronty:

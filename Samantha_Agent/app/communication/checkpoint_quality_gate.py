@@ -11,14 +11,19 @@ from pathlib import Path
 from typing import Any, Callable
 
 from app.codex_appserver import AppServerError
+from app.file_persistence import FilePersistenceError, atomic_write_text
 from app.communication.human_adam_workspace import HumanAdamWorkspaceManager
+from app.communication.validation_policy import (
+    POLICY_VERSION, ValidationPlan, ValidationPolicyError, ValidationReceiptStore,
+    capture_inputs, changed_paths, select_validation_plan,
+)
 
 
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
 TRUSTED_PYTHON = Path(sys.executable)
 DEFAULT_GATE_LOG = PROJECT_ROOT / "data" / "private" / "communication" / "human_adam_deploy_gate.log"
 MAX_GATE_LOG_CHARS = 2_000_000
-DEFAULT_GATE_TIMEOUT_SECONDS = 900.0
+DEFAULT_GATE_TIMEOUT_SECONDS = 1500.0
 GATE_FAILURE_TYPES = frozenset(
     {
         "syntax_error",
@@ -48,9 +53,12 @@ class GateEvidence:
     duration_seconds: float
     log_path: str
     mode: str = "full"
+    reused: bool = False
+    receipt_id: str = ""
+    policy_version: str = ""
 
     def public_dict(self) -> dict[str, Any]:
-        return {
+        result = {
             "passed": self.passed,
             "returncode": self.returncode,
             "test_count": self.test_count,
@@ -58,6 +66,9 @@ class GateEvidence:
             "log_path": self.log_path,
             "mode": self.mode,
         }
+        if self.policy_version:
+            result.update(reused=self.reused, receipt_id=self.receipt_id, policy_version=self.policy_version)
+        return result
 
 
 def run_checkpoint_quality_gate(
@@ -67,6 +78,7 @@ def run_checkpoint_quality_gate(
     log_path: Path = DEFAULT_GATE_LOG,
     timeout: float = DEFAULT_GATE_TIMEOUT_SECONDS,
     skip_unit_tests: bool = False,
+    validation_base: str | None = None,
 ) -> GateEvidence:
     gate_script = workspace.project_root / "scripts" / "cockpit_quality_gate.py"
     if not TRUSTED_PYTHON.is_file() or not gate_script.is_file():
@@ -75,10 +87,51 @@ def run_checkpoint_quality_gate(
             failure_type="gate_process_error",
         )
     started = time.monotonic()
+    repo = workspace.workspace_root
+    plan = ValidationPlan("full")
+    before = store = baseline = None
+    try:
+        base, paths = changed_paths(repo, validation_base)
+        plan = select_validation_plan(paths)
+        if plan.reason == "policy_runtime_requires_reload":
+            raise ValidationPolicyError("Validation runtime requires reload.")
+        before = capture_inputs(repo)
+        store = ValidationReceiptStore(workspace.source_repo)
+        # A caller's old skip flag never grants a static-only publication.
+        # After push there is no new diff; an attested receipt for this exact
+        # clean commit can also satisfy deployment/already-aligned validation.
+        cached = store.find(before, plan, allow_bound=not paths)
+        compatible = store.compatible_baseline(before)
+        if cached is None and compatible and compatible["inputs"] == before.digest:
+            cached = compatible
+        if cached:
+            if capture_inputs(repo) != before:
+                raise HumanAdamGateError("Vstupy se při ověření účtenky změnily.", failure_type="gate_failure")
+            store.bind(before, cached)
+            return GateEvidence(True, 0, cached["test_count"], round(time.monotonic() - started, 1),
+                                "", cached["mode"], True, cached["inputs"], POLICY_VERSION)
+        baseline = store.baseline(base, before.environment)
+        if compatible:
+            previous_scope, current_scope = dict(compatible["scope_inputs"]), dict(before.scope)
+            scope_changes = [name for name in previous_scope.keys() | current_scope.keys()
+                             if previous_scope.get(name) != current_scope.get(name)]
+            compatible_plan = select_validation_plan(scope_changes)
+            if compatible_plan.mode == "targeted":
+                plan, baseline = compatible_plan, compatible
+        if plan.mode == "targeted" and baseline is None:
+            plan = ValidationPlan("full", reason="verified_baseline_required")
+        if plan.mode == "targeted" and any(
+            not (repo / "Samantha_Agent" / (name.replace(".", "/") + ".py")).is_file()
+            for name in plan.modules
+        ):
+            plan = ValidationPlan("full", reason="targeted_test_module_unavailable")
+    except (ValidationPolicyError, FilePersistenceError, OSError, ValueError, TypeError):
+        # Unsupported Git/input/environment layouts cannot obtain a fast path.
+        plan, before, store, baseline = ValidationPlan("full"), None, None, None
     try:
         command = [str(TRUSTED_PYTHON), str(gate_script)]
-        if skip_unit_tests:
-            command.append("--skip-unit-tests")
+        if plan.mode == "targeted":
+            command.extend(["--test-modules", *plan.modules])
         completed = runner(
             command,
             cwd=str(workspace.project_root),
@@ -88,6 +141,11 @@ def run_checkpoint_quality_gate(
             check=False,
         )
     except subprocess.TimeoutExpired as exc:
+        partial = exc.stdout or b""
+        if isinstance(partial, bytes):
+            partial = partial.decode("utf-8", errors="replace")
+        log_path.parent.mkdir(parents=True, exist_ok=True)
+        atomic_write_text(log_path, partial[-MAX_GATE_LOG_CHARS:] + "\n")
         raise HumanAdamGateError(
             "Kontrolní brána checkpointu se nedokončila; nic nebylo nasazeno.",
             failure_type="gate_timeout",
@@ -100,19 +158,19 @@ def run_checkpoint_quality_gate(
     duration = round(time.monotonic() - started, 1)
     output = f"{completed.stdout or ''}\n{completed.stderr or ''}".strip()
     log_path.parent.mkdir(parents=True, exist_ok=True)
-    log_path.write_text(output[-MAX_GATE_LOG_CHARS:] + "\n", encoding="utf-8")
+    atomic_write_text(log_path, output[-MAX_GATE_LOG_CHARS:] + "\n")
     matches = re.findall(r"Ran\s+(\d+)\s+tests", output)
     evidence = GateEvidence(
         passed=completed.returncode == 0 and "Cockpit quality gate: OK" in output,
         returncode=int(completed.returncode),
-        test_count=0 if skip_unit_tests else (int(matches[-1]) if matches else 0),
+        test_count=int(matches[-1]) if matches else 0,
         duration_seconds=duration,
         log_path=(
             str(log_path.relative_to(PROJECT_ROOT))
             if log_path.is_relative_to(PROJECT_ROOT)
             else str(log_path)
         ),
-        mode="quick" if skip_unit_tests else "full",
+        mode=plan.mode,
     )
     if not evidence.passed:
         folded_output = output.casefold()
@@ -133,4 +191,23 @@ def run_checkpoint_quality_gate(
             f"Kontrolní brána checkpointu neprošla; nic nebylo nasazeno. Log: {evidence.log_path}",
             failure_type=failure_type,
         )
+    if evidence.test_count < 1:
+        raise HumanAdamGateError("Brána nedoložila provedení testů.", failure_type="gate_failure")
+    if before is not None and store is not None:
+        try:
+            after = capture_inputs(repo)
+        except (ValidationPolicyError, OSError) as exc:
+            raise HumanAdamGateError("Vstupy po validační bráně nelze bezpečně ověřit.", failure_type="gate_failure") from exc
+        if after != before:
+            raise HumanAdamGateError("Vstupy se během validační brány změnily.", failure_type="gate_failure")
+        try:
+            body = store.record(after, plan, test_count=evidence.test_count,
+                                duration_seconds=evidence.duration_seconds, baseline=baseline)
+            return GateEvidence(evidence.passed, evidence.returncode, evidence.test_count,
+                                evidence.duration_seconds, evidence.log_path, evidence.mode,
+                                False, body["inputs"], POLICY_VERSION)
+        except (ValidationPolicyError, FilePersistenceError, OSError) as exc:
+            if plan.mode != "full":
+                raise HumanAdamGateError("Cílená brána nemá ověřitelnou účtenku.", failure_type="gate_failure") from exc
+            # A real successful full run remains valid without an accelerator.
     return evidence
