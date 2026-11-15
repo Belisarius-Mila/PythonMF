@@ -67,7 +67,7 @@ async function hearQuiz(view){
   await loadQuizPictures(view);activePlayer(view).handlers.ended();
   await until(()=>quizButtons(view).every(button=>!button.disabled));
 }
-function quizTarget(view){const player=activePlayer(view);assert.ok(player);return vocabulary.items.find(item=>new URL('../'+audio.items[String(item.id)]?.en,view.win.location.href).href===player.url);}
+function quizTarget(view){const player=activePlayer(view);assert.ok(player);const choices=new Set(quizButtons(view).map(button=>button.dataset.uid));return vocabulary.items.find(item=>choices.has(item.uid)&&new URL('../'+audio.items[String(item.id)]?.en,view.win.location.href).href===player.url);}
 function quizFilter(view,id,value){const field=view.element(id);if(typeof value==='boolean')field.checked=value;else field.value=value;field.emit('change');}
 const learners=require('../../docs/vocabulary-en/learners.js');
 const retiredUids=['ven-0195','ven-0197','ven-0199','ven-0200','ven-0203','ven-0257','ven-0258','ven-0259','ven-0260','ven-0271'];
@@ -90,13 +90,32 @@ test('recent filter keeps its number through study, history, reload and reset',a
   assert.equal(after.state.recentCount,20);assert.equal(after.element('recentCount').value,'20');
   after.element('resetButton').click();assert.equal(after.state.recentCount,0);assert.equal(after.buildSelection().length,512);
 });
-test('reviewed quiz sources reject missing audio, altered meanings, retired and changed images',()=>{
+test('quiz sources include all active teaching types with matching audio and an image',()=>{
   assert.equal(quiz.eligible(quizItems,audio,quizCatalog).length,4);
-  for(const change of [{active:false},{cz:'changed'},{en:'changed'},{image:'different.webp'}])assert.equal(quiz.eligible([{...quizItems[0],...change}],audio,quizCatalog).length,0);
+  for(const change of [{active:false},{cz:'changed'},{en:'changed'},{image:''}])assert.equal(quiz.eligible([{...quizItems[0],...change}],audio,quizCatalog).length,0);
   assert.equal(quiz.eligible(quizItems,null,quizCatalog).length,0);
   assert.equal(quiz.eligible(quizItems,audio,null).length,0);
+  assert.equal(quiz.eligible(vocabulary.items,audio,quizCatalog).length,512);
+  const interaction=vocabulary.items.find(item=>item.uid==='ven-0517');
+  assert.equal(quiz.eligible([interaction],audio,quizCatalog)[0],interaction);
+  const future={...interaction,uid:'ven-0523',id:523,en:'A new expression.',cz:'Nový výraz.',teachingType:'idiom',image:'assets/vocabulary-en/future.webp'};
+  const futureAudio={items:{...audio.items,523:{sourceEn:future.en,sourceCz:future.cz,en:'assets/audio/new.mp3'}}};
+  assert.equal(quiz.eligible([future],futureAudio,quizCatalog)[0],future);
+  assert.ok(quiz.question(future,[future,...quizItems],futureAudio,quizCatalog));
 });
-test('every reviewed target has four compatible distinct options inside its pool',()=>{
+test('recent selection is shared by gallery learning and in-place listening',async()=>{
+  const view=await app();quizFilter(view,'recentOnly',true);
+  const keys=view.buildSelection().map(model.key);assert.equal(keys.length,20);
+  const item=view.buildSelection().find(item=>item.uid==='ven-0517');assert.ok(item);
+  view.galleryModes[1].click();view.element('tile-'+item.uid).click();
+  assert.equal(view.state.view,'gallery');assert.equal(view.state.recentCount,20);
+  assert.deepEqual(view.buildSelection().map(model.key),keys);assert.ok(activePlayer(view));
+  view.galleryModes[0].click();view.element('tile-'+item.uid).click();
+  assert.equal(view.state.view,'study');assert.equal(view.state.currentItem.uid,item.uid);
+  assert.deepEqual(new Set(view.state.sequence.map(model.key)),new Set(keys));
+  view.returnToGallery();assert.equal(view.state.recentCount,20);assert.deepEqual(view.buildSelection().map(model.key),keys);
+});
+test('every active target has four compatible distinct options inside its pool',()=>{
   const pool=quiz.eligible(vocabulary.items,audio,quizCatalog);
   for(const target of pool){
     const q=quiz.question(target,pool,audio,quizCatalog,()=>.37);assert.ok(q,target.uid);
@@ -111,6 +130,24 @@ test('every reviewed target has four compatible distinct options inside its pool
   const blue=vocabulary.items.find(i=>i.en==='blue'),two=vocabulary.items.find(i=>i.en==='two');
   assert.equal(quiz.compatible(blue,quizItems[0],audio,quizCatalog),false);
   assert.equal(quiz.compatible(two,quizItems[0],audio,quizCatalog),false);
+});
+test('latest twenty all enter a complete round including abstract words and an interaction',async()=>{
+  const latest=model.select(vocabulary.items,{recentCount:20}),wanted=new Set(latest.map(model.key));
+  assert.equal(latest.length,20);assert.ok(wanted.has('ven-0503'));assert.ok(wanted.has('ven-0522'));
+  assert.deepEqual(new Set(quiz.eligible(latest,audio,quizCatalog).map(model.key)),wanted);
+  const view=await app(),seen=new Set();view.element('quizTab').click();quizFilter(view,'quizRecentOnly',true);
+  assert.equal(view.element('quizStart').disabled,false);assert.match(view.element('quizPoolNotice').textContent,/Pro tuto hru 20 slovíček/);
+  view.element('quizStart').click();
+  for(let n=0;n<20;n++){
+    await loadQuizPictures(view);const target=quizTarget(view);assert.ok(wanted.has(target.uid));assert.ok(!seen.has(target.uid));seen.add(target.uid);
+    activePlayer(view).handlers.ended();await until(()=>quizButtons(view).every(button=>!button.disabled));
+    assert.ok(quizButtons(view).every(button=>wanted.has(button.dataset.uid)));
+    const buttons=quizButtons(view),choice=n===0?buttons.find(button=>button.dataset.uid!==target.uid):buttons.find(button=>button.dataset.uid===target.uid);
+    choice.click();assert.equal(buttons.find(button=>button.classList.contains('is-correct')).querySelector('.quiz-caption').textContent,target.en);
+    view.element('quizNext').click();
+  }
+  assert.deepEqual(seen,wanted);assert.equal(view.element('quizResult').textContent,'Správně na první pokus: 19 z 20.');
+  assert.equal(view.element('quizEnd').hidden,false);
 });
 test('color and number questions use four options of the same kind, never an arbitrary colored or counted object',async()=>{
   const pool=quiz.eligible(vocabulary.items,audio,quizCatalog);

@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "description": "Počáteční výběr názorných významů pro hru se čtyřmi obrázky. Změna hesla, překladu nebo obrázku vyžaduje novou kontrolu této vazby.",
+  "description": "Pomocná pravidla pro rozlišení barev, čísel a známých obrazových konfliktů. Hra zahrnuje i aktivní karty mimo tento seznam, mají-li obrázek a odpovídající anglický zvuk.",
   "entries": {
     "ven-0001": {
       "en": "a glass (of water)",

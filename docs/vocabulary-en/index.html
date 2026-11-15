@@ -36,9 +36,9 @@
         <details class="topic-picker" id="topicPicker"><summary id="topicSummary">Všechna témata</summary><fieldset id="topicFilters"><legend>Vyber jedno nebo více témat</legend></fieldset><button type="button" id="clearTopicsButton">Všechna témata</button></details>
         <div class="label-switch"><span>Popisky obrázků</span><div class="segmented"><button type="button" data-label="en" aria-pressed="true">EN</button><button type="button" data-label="cz" aria-pressed="false">CZ</button></div></div>
       </div>
+      <div class="recent-filter gallery-recent"><label class="check-option"><input id="recentOnly" type="checkbox">Posledně přidaná</label><label>Počet nových karet<input id="recentCount" type="number" min="1" max="5000" step="1" value="20" disabled></label><small>Nejnovější karty celého slovníku pro Učení i Poslech; ostatní filtry výběr dále omezí.</small></div>
       <details class="layout-options"><summary>Uspořádání a další výběr</summary>
       <div class="gallery-options">
-        <div class="recent-filter"><label class="check-option"><input id="recentOnly" type="checkbox">Posledně přidaná</label><label>Počet nových karet<input id="recentCount" type="number" min="1" max="5000" step="1" value="20" disabled></label><small>Nejnovější karty celého slovníku; ostatní filtry výběr dále omezí.</small></div>
         <label>Výběr<select id="filterSelect"><option value="all">Všechna slovíčka</option><option value="selected">Vybraná učitelem</option><option value="hard">Těžká k procvičení</option></select></label>
         <label>Typ učiva<select id="teachingTypeSelect"><option value="all">Vše</option><option value="word">Slovíčka</option><option value="interaction">Interakce</option><option value="idiom">Fráze</option></select></label>
         <label>Seskupit podle<select id="groupSelect"><option value="topic">Téma</option><option value="part">Slovní druh</option><option value="level">Náročnost</option><option value="none">Bez skupin</option></select></label>
@@ -78,7 +78,7 @@
           <div class="recent-filter"><label class="check-option"><input id="quizRecentOnly" type="checkbox">Posledně přidaná</label><label>Počet nových karet<input id="quizRecentCount" type="number" min="1" max="5000" step="1" value="20" disabled></label></div>
         </div>
         <p class="meta">Filtry se kombinují. „Posledně přidaná“ znamená nejnovější karty celého slovníku.</p>
-        <p class="meta">Hra používá názorná slovíčka vhodná k rozpoznání z obrázku. Ostatní karty zůstávají v Přehledu.</p>
+        <p class="meta">Hra zahrnuje všechna slovíčka i výrazy s obrázkem a anglickým zvukem.</p>
         <p id="quizPoolNotice" class="notice" role="status" aria-live="polite"></p>
         <button id="quizStart" class="primary" type="button" disabled>Spustit hru</button>
       </div>

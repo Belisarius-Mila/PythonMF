@@ -287,19 +287,24 @@ Filtry se kombinují průnikem. Pro Vše znamenají obtížná původní společ
 pro A–D vlastní hard. Herní filtry jsou jen v sessionStorage picture-quiz.v1.
 Hra nemění slovní zásobu, hard, PIN ani studijní bookmark/pořadí galerie.
 
-Posledně přidaná jsou i v galerii v Uspořádání a další výběr. Nejprve se
+Posledně přidaná jsou viditelně v Přehledu pro Učení i Poslech. Nejprve se
 vybere N nejnovějších aktivních karet CELÉHO slovníku podle trvalého id,
 nikoli pořadí CSV, abecedy nebo času opravy. Potom se uplatní další filtry.
 N je celé číslo1–5000; po zapnutí je připraveno20. Výsledek může mít méně než N
 položek. Stav galerie se zachová v URL, obnově, historii i návratu z učení.
 
-Herní katalog docs/data/vocabulary-en-quiz.json je explicitní první výběr189
-konkrétních významů:166 objektů/scén,11 barev a12 základních čísel. Každé UID
-má kontrolní EN/CZ, přesný obrazový soubor, format a seznam konfliktů.
-Oprava hesla, překladu nebo obrazové cesty vyřadí starou herní vazbu, dokud
-se znovu neposoudí. Nová slovíčka nejsou automaticky vhodná do obrazového kvízu.
-Při přidání ověřit, zda je lze rozlišit ze samotného obrázku. U abstraktních
-významů zůstávají k dispozici dosavadní galerie, poslech a větné procvičování.
+Hra zahrnuje všechna aktivní hesla s obrázkem a odpovídajícím anglickým
+zvukem, včetně abstraktních slov, Interakcí a případných Frází. Nové karty
+vstupují automaticky, bez ručního přidání do herního seznamu. Datum přidání
+se nyní neeviduje; nejnovější jsou určené vzestupně přidělovaným trvalým id.
+
+Katalog docs/data/vocabulary-en-quiz.json je pomocná mapa189 známých pravidel
+pro barvy/čísla a obrazové konflikty, nikoli seznam povolených hesel. Metadata
+se použijí při shodě UID a EN/CZ významu. Změna obrazové cesty nevyřazuje
+kartu; nadále platí kontrola skutečné aktuální cesty a stem. U nové či změněné
+identity se použijí obecná pravidla a současné related vazby. Při doplnění
+známého významového konfliktu lze mapu rozšířit. Chybějící zvuk či obrázek
+kartu vyřadí; vadné soubory při načítání zůstávají ošetřené běžným přeskočením.
 
 Všechny4 možnosti jsou z výsledného filtru. U barev jen barvy, u čísel jen
 čísla; s objekty se nemíchají. Stejný obraz/stem, stejné znění/známá homofona,

@@ -6,6 +6,12 @@
   const word=value=>M.normalize(value).replace(/[^a-z0-9]+/g,"");
   const homophones=["to two too","there their they're","right write","know no","i eye","for four","one won","see sea","by buy bye","where wear","here hear","sun son","flower flour","week weak"];
   const soundGroups=new Map(homophones.flatMap((group,index)=>group.split(" ").map(term=>[word(term),`homophone-${index}`])));
+  const general={format:"objects",conflicts:[]};
+  function metadata(item,catalog){
+    const entry=catalog?.entries?.[item.uid];
+    return entry?.en===item.en && entry.cz===item.cz && Array.isArray(entry.conflicts)
+      && ["objects","colors","numbers"].includes(entry.format) ? entry : general;
+  }
   function sound(item,audio){
     const value=word(M.audioRecord(item,audio)?.spokenEn || item.en);
     return soundGroups.get(value)||value;
@@ -13,15 +19,12 @@
   function eligible(items,audio,catalog){
     if(catalog?.schemaVersion!==1)return [];
     return items.filter(item=>{
-      const entry=catalog.entries?.[item.uid],record=M.audioRecord(item,audio);
-      return M.isActive(item) && M.teachingType(item)==="word" && item.image && record?.en && entry
-        && entry.en===item.en && entry.cz===item.cz && entry.image===item.image && Array.isArray(entry.conflicts)
-        && ["objects","colors","numbers"].includes(entry.format);
+      const record=M.audioRecord(item,audio);
+      return M.isActive(item) && item.image && record?.en;
     });
   }
   function compatible(a,b,audio,catalog){
-    const left=catalog.entries[a.uid],right=catalog.entries[b.uid];
-    if(!left||!right)return false;
+    const left=metadata(a,catalog),right=metadata(b,catalog);
     return left.format===right.format && a.uid!==b.uid && sound(a,audio)!==sound(b,audio) && word(a.cz)!==word(b.cz)
       && a.image.toLowerCase()!==b.image.toLowerCase()
       && (!a.imageStem || !b.imageStem || word(a.imageStem)!==word(b.imageStem))
@@ -29,7 +32,7 @@
       && !(a.related || []).some(link=>link.uid===b.uid) && !(b.related || []).some(link=>link.uid===a.uid);
   }
   function question(target,pool,audio,catalog,random=Math.random){
-    const candidates=M.shuffle(pool.filter(item=>compatible(target,item,audio,catalog)),random);
+    const candidates=M.shuffle(pool,random);
     function fill(chosen,start){
       if(chosen.length===4)return chosen;
       for(let i=start;i<candidates.length;i++){
@@ -79,7 +82,7 @@
       const pending=!getAudio()||!getCatalog();
       ui.quizPoolNotice.textContent=getCatalog()===false?"Výběr obrázků pro hru se nepodařilo načíst. Obnov stránku; Přehled můžeš dál používat.":getAudio()===false?"Zvuk pro hru se nepodařilo načíst. Obnov stránku; Přehled můžeš dál používat.":filters.learner!=="all"&&!isAvailable()?"Osobní výběry nejsou dostupné. Můžeš zvolit Vše nebo obnovit stránku.":pending?"Připravuji obrázky a zvuk…":targets.length
         ? `Ve filtru ${M.countLabel(selected.length)}. Pro tuto hru ${M.countLabel(targets.length)}. Všechny čtyři možnosti budou z tohoto výběru.`
-        : `Ve filtru ${M.countLabel(selected.length)}, z toho ${M.countLabel(pool.length)} s vhodným obrázkem a zvukem. Potřebujeme čtyři vzájemně odlišné možnosti. Zkus větší počet nových karet nebo širší výběr.`;
+        : `Ve filtru ${M.countLabel(selected.length)}, z toho ${M.countLabel(pool.length)} s obrázkem a anglickým zvukem. Pro otázku potřebujeme čtyři vzájemně odlišné možnosti z tohoto výběru. Zkus větší počet nových karet nebo širší výběr.`;
       if(invalidated){ui.quizPoolNotice.textContent="Výběr se změnil. Spusť nové kolo. "+ui.quizPoolNotice.textContent;ui.quizSetup.scrollIntoView({block:"start"});}
     }
     function setup(){

@@ -1580,3 +1580,31 @@ hlavní Adam účtenku a veřejné zdroje jednou zkontroloval v původní relaci
 Fyzický iPhone a lidská přejímka všech nahrávek otevřené. Soukromé důkazy
 vocabulary_picture_quiz_release_20261115/release_result.json a public_sources.json.
 Závěrečný dokumentační checkpoint je lokální; nevyžaduje další Pages vydání.
+
+
+### 2026-11-15 19:15 CET — Všechna hesla ve hře a viditelná poslední slovíčka
+
+Hotovo: Místní hra nabízí všech512 aktivních karet včetně abstraktních významů
+a20 Interakcí. Poslední dvacítka503–522 je celá hratelná. V Přehledu je filtr
+Posledně přidaná viditelný pro Učení i Poslech se společným počtem a návratem.
+
+Rozhodnutí: Míla zvolil rozšíření na všechna slovíčka a výslovně požaduje
+posledně přidaná i v základním učení/poslechu. Pomocná mapa189 významů
+uchovává známé konflikty a druhy možností; neomezuje přístup nových karet.
+Vstupují všechna aktivní hesla s obrázkem a odpovídajícím EN zvukem, včetně
+Interakcí a budoucích Frází. Skryté historické karty zůstávají mimo výběr.
+
+Další krok: Po konečném lokálním ověření/checkpointu samostatně schválit p+n.
+
+Navrhované další kroky: Fyzická telefonní přejímka a průběžné sledování
+rozlišitelnosti abstraktních ilustrací. Oxford nezávisle.
+
+Technický důkaz: Přímá regrese reprodukovala189 místo512 a2 místo20.
+Po úpravě úspěšný celý dvacetipoložkový scénář s chybnou i správnou odpovědí,
+bez možnosti mimo filtr a s každým UID právě jednou. Test také pokrývá
+budoucí kartu mimo pomocnou mapu. Safari Mac:512/512 a20/20, čtyři skutečné
+obrázky/zvuk, nesprávná odpověď/správný EN název a Další2/20; Přehled20,
+přehrání fishing hut, jeho karta a pořadí1/20. Vlastní náhledové okno zavřené,
+uživatelské produkční okno zachované. CSV/slovník/hlasy/A–D/PIN beze změny.
+Povinná doménová brána a zdrojové otisky: private vocabulary_quiz_all_cards_20261115.
+Produkce zůstává na předchozím vydání ffa62f7f; nová úprava bez push/deploy.

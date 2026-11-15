@@ -4,15 +4,17 @@ Nazev: Vocabulary EN
 Pracovni proud: project-vocabulary-en
 Typ: Project
 Priorita: 2
-Stav: hra a filtr poslednich N verejne vydane, cekaji na telefonni prejimku
+Stav: mistne rozsirena hra na vsech512 karet a viditelny filtr pro Uceni/Poslech; ceka p+n
 Pripomenout pri startu: ne
-Datum: 2026-11-15 18:48 CET
+Datum: 2026-11-15 19:15 CET
 
 Co se resilo:
 Hra Poslechni a vyber obrázek se4 možnostmi a vyhodnocením; posledně přidaných N.
 
 Co je hotove:
-- Samostatná záložka,189 vhodných významů,4 odlišné možnosti v rámci filtru.
+- Samostatná záložka, všech512 aktivních hesel,4 odlišné možnosti v rámci filtru.
+- Posledních20 ve hře20/20; pomocná mapa189 položek už neomezuje nové karty.
+- Filtr Posledně přidaná v Přehledu viditelný pro Učení i Poslech.
 - Vše/A–D, obtížná,1 z18 okruhů a posledních N. Galerie má stejný filtr N.
 - Skryté popisky před odpovědí; poté zelená/✓/EN název a případně šedá/×;
   správné slovo se opět přehraje. Ruční Další, konec kola, výsledek.
@@ -23,15 +25,15 @@ Co je hotove:
 - Pages vydání ffa62f7f potvrzené; všech6 změněných veřejných zdrojů přesných.
 
 Co neni hotove:
-Fyzický telefon a úplná obrazová/hlasová přejímka první sady.
+Publikace nového rozšíření, fyzický telefon a významová přejímka abstraktních karet.
 Automatický návrat v účtence returned_to_adam=false (terminálový caller);
 výsledek hlavní Adam zkontroloval přímo v této relaci.
 
 Dalsi krok:
-Mílova přejímka hry a filtru na produkci, zejména na telefonu.
+Po lokálním checkpointu samostatně potvrzené p+n rozšíření; potom telefon.
 
 Navrhovane dalsi kroky:
-Rozšíření herního výběru podle jednoznačnosti ilustrací; Oxford nezávisle.
+Sledování rozlišitelnosti abstraktních ilustrací; Oxford nezávisle.
 
 Zmenene nebo relevantni soubory:
 docs/vocabulary-en/quiz.js, gallery.js, model.js, index.html, gallery.css;
@@ -42,7 +44,8 @@ Bezpecnost / neukladat:
 Zdroj Data5adee00a integrován bez konfliktů přes ffa62f7f nad de3899b1.
 Zveřejněná Osel oprava zachovaná; přesný vydaný main/GitHub ffa62f7f.
 Privátní důkazy data/private/vocabulary_picture_quiz_release_20261115/.
-Žádná opakovaná publikace; jediný job2838a4ef7a46734dca52f45adc67c9ea dokončen.
+Předchozí publikace job2838a4ef7a46734dca52f45adc67c9ea dokončená; neopakovat.
+Nové rozšíření je místní Data worktree nad2da440c4, bez nového p+n.
 Hra neukládá osobní výsledky do profilů, nemění vybraná/obtížná ani PIN.
 Herní filtry jen sessionStorage, galerie používá své dosavadní úložiště.
 Nový TVBCP nedohodnutý, nevzniká. Nic z původních dávek znovu negenerovat.
@@ -1156,3 +1159,31 @@ hlavní Adam účtenku a veřejné zdroje jednou zkontroloval v původní relaci
 Fyzický iPhone a lidská přejímka všech nahrávek otevřené. Soukromé důkazy
 vocabulary_picture_quiz_release_20261115/release_result.json a public_sources.json.
 Závěrečný dokumentační checkpoint je lokální; nevyžaduje další Pages vydání.
+
+
+### 2026-11-15 19:15 CET — Všechna hesla ve hře a viditelná poslední slovíčka
+
+Hotovo: Místní hra nabízí všech512 aktivních karet včetně abstraktních významů
+a20 Interakcí. Poslední dvacítka503–522 je celá hratelná. V Přehledu je filtr
+Posledně přidaná viditelný pro Učení i Poslech se společným počtem a návratem.
+
+Rozhodnutí: Míla zvolil rozšíření na všechna slovíčka a výslovně požaduje
+posledně přidaná i v základním učení/poslechu. Pomocná mapa189 významů
+uchovává známé konflikty a druhy možností; neomezuje přístup nových karet.
+Vstupují všechna aktivní hesla s obrázkem a odpovídajícím EN zvukem, včetně
+Interakcí a budoucích Frází. Skryté historické karty zůstávají mimo výběr.
+
+Další krok: Po konečném lokálním ověření/checkpointu samostatně schválit p+n.
+
+Navrhované další kroky: Fyzická telefonní přejímka a průběžné sledování
+rozlišitelnosti abstraktních ilustrací. Oxford nezávisle.
+
+Technický důkaz: Přímá regrese reprodukovala189 místo512 a2 místo20.
+Po úpravě úspěšný celý dvacetipoložkový scénář s chybnou i správnou odpovědí,
+bez možnosti mimo filtr a s každým UID právě jednou. Test také pokrývá
+budoucí kartu mimo pomocnou mapu. Safari Mac:512/512 a20/20, čtyři skutečné
+obrázky/zvuk, nesprávná odpověď/správný EN název a Další2/20; Přehled20,
+přehrání fishing hut, jeho karta a pořadí1/20. Vlastní náhledové okno zavřené,
+uživatelské produkční okno zachované. CSV/slovník/hlasy/A–D/PIN beze změny.
+Povinná doménová brána a zdrojové otisky: private vocabulary_quiz_all_cards_20261115.
+Produkce zůstává na předchozím vydání ffa62f7f; nová úprava bez push/deploy.
