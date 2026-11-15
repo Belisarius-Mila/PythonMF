@@ -18,7 +18,7 @@ Přijatá pravidla
 Základní soubory a hranice
 VocabularyIT/vocabulary_it_catalog.json:497 identit (471 původních a26 webových);24 schválených hlavních významů a26 nových, ostatní metadata dále návrhy.
 VocabularyIT/vocabulary_it_input_manifest.json: neměnné otisky777 původních vstupů.
-Aktuální stav:497 obrazových vazeb/407 zdrojů, nová galerie a profily místně; viz poslední záznam.
+Aktuální stav:497 karet, galerie/profily a úplné IT/CZ audio1907 MP3 místně; viz poslední záznam.
 VocabularyIT/vocabulary_it_catalog.py: pouze čtení a ověření, žádný CSV writer.
 VocabularyIT/vocabulary_it_review_queue.txt:112 prioritních karet k revizi.
 VocabularyIT/WEB_FOUNDATION.txt: identita, přesné kontrolní příkazy a další bod.
@@ -196,3 +196,40 @@ plný obraz až po otevření karty. HTTP stránka, moduly/data a zkoušený obr
 Finální programová brána a shoda zdrojů jsou private/vocabulary_it_gallery_20261115.
 Lokální ověření proti společnému77b5f652, žádný merge/rebase/push souběžného main.
 Fyzický Safari/iPhone/Android proklik a poslech nejsou tímto milníkem přijaté.
+
+
+### 2026-11-15 23:08 CET — Italský hlas a úplná knihovna slov i vět
+
+Hotovo: Všech497 aktivních karet má hotové nahrávky slovíčka i příkladové
+věty v italštině a češtině.1988 vazeb používá1907 unikátních MP3 (26920656 B).
+Italský hlas Elsa, český Vlasta, rychlost-10 %. Poslech v galerii přehraje
+italské slovo a krátce ukáže češtinu; větší karta přehrává slovo nebo celou
+větu v právě zvoleném směru. Hotová knihovna přežije nový export dat.
+
+Rozhodnutí: Míla schválil pokračování „italský hlas a zvuková knihovna…“
+a potvrdil, že nemá jinou hlasovou preferenci. Použit stávající registrovaný
+Edge generátor; žádné nové placené Azure volání. Původní EN ani CSV/mapping
+se nemění. Souhlas s vývojem není p+n.
+
+Další krok: Italská obrázková hra podle bodu7 schváleného plánu.
+
+Navrhované další kroky: Přesná revize italských obrazových kolizí pro hru;
+telefonní poslech/přejímka; samostatně registrovaný publikační cíl a vydání.
+
+Technický důkaz:1907/1907 souborů má přesnou SHA, kladnou délku, MP3 codec,
+plné dekódování a netichý signál. 1801 nových nahrávek, 106 přesně
+shodných českých převzatých z EN do vlastní IT knihovny. Manifesty mají
+status=complete,497 UID každý, přesné zdrojové texty a oddělené word/sentence
+cesty.10 audio testů bez online syntézy a16 JS scénářů v doménové bráně:
+nejistá žádost blokuje opakování, souběh drží zámek, před každým novým
+voláním se kontrolují zdroje a veřejný index vzniká až po úplné kontrole.
+Fyzický Safari na Macu: galerie,2/4/6 sloupců při100 %,8 při zmenšení,
+věta/odhalení/Další/návrat, posledních20 a reload; reálné MP3 přehrávání
+slova IT a věty IT/CZ s modrou ikonou přehrávání Safari, CZ nápověda a návrat
+italského popisku. Veškeré audio nebylo ručně poslechnuto; jazyková korektura
+všech vět/metadat a skutečný iPhone/Android zůstávají otevřené.
+Původní browser bridge je nedostupný, nativní Safari CUA funguje. Vlastní QA
+okno a lokální server po testu uzavřené. Fyzický profil/PIN se neměnil.
+Finální programová brána a shoda zdrojů: private/vocabulary_it_audio_20261115.
+Lokální checkpoint proti společnému77b5f652; žádný push, nasazení ani zásah
+do divergentního main/Willovy práce.

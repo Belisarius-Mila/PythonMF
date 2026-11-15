@@ -188,6 +188,8 @@ nebo jejichž princip lze znovu použít v jiné části projektu.
 - Řešení nalezeno: 20102026
 - Řešení: v samostatné sériové denní rutině použít pro jednu TTS operaci Microsoft endpoint `api.msedgeservices.com/tts/cognitiveservices/websocket/v1`, po úspěchu i chybě obnovit původní nastavení knihovny. Neměnit text, hlas ani rychlost a nepřepisovat předchozí audio při chybě. Skutečný canonical local-preview vytvořil platnou 23,376s MP3; 24 cílených testů prošlo. Produkční výsledek vždy ověřit zvlášť přes workflow head a veřejný JS/MP3. [Upstream incident](https://github.com/rany2/edge-tts/issues/490).
 
+- Doplnění15.11.2026, Vocabulary IT: výchozí registrovaný Edge endpoint znovu funguje. Historický workaround nezapínat automaticky; chybějící veřejný query parametr způsobí403 ještě před SSML. Ověřit konkrétní transport, zachovat ledger před žádostí a nezkoušet nejistý výsledek znovu. Pro paralelní výrobu držet endpoint po celou dávku a obnovit až po join.1907 MP3 celé dekódované;10 testů identity/ledgeru/zámku a16 JS scénářů.
+
 ### LL-075 — Záloha živého archivu potřebuje vlastní rozsah a skutečně zastavenou službu
 
 - Problém: zelená projektová záloha PythonMF nepokrývala živé Camino v Application Support. Návrat z launchctl bootout navíc ještě neznamenal dokončené zastavení; první pokus proto nevytvořil snapshot a služba vyžadovala řízený návrat.

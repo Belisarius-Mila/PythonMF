@@ -121,8 +121,42 @@ def safe_target(root: Path, relative: str) -> Path:
     return path
 
 
+def audio_status(root: Path, payload: dict) -> str:
+    """Do not reset a completed library to a stale migration placeholder."""
+    items = {item["uid"]: item for item in payload["items"] if item["active"]}
+    present = False
+    for kind, name, namespace in (("words", "vocabulary-it-audio.json", "audio"),
+                                  ("sentences", "vocabulary-it-sentence-audio.json", "sentences")):
+        path = root / "data" / name
+        if not path.is_file():
+            return "partial" if present else "not-generated"
+        manifest = json.loads(path.read_text(encoding="utf-8"))
+        if manifest.get("status") != "complete":
+            return "partial" if present else "not-generated"
+        present = True
+        if (manifest.get("language") != "it" or manifest.get("kind") != kind
+                or not isinstance(manifest.get("items"), dict) or set(manifest["items"]) != set(items)):
+            return "partial"
+        for uid, item in items.items():
+            record = manifest["items"][uid]
+            expected = {"sourceIt": item["it"], "sourceCz": item["cz"]}
+            if kind == "sentences":
+                expected.update(sourceSentenceIt=item["sentenceIt"], sourceSentenceCz=item["sentenceCz"])
+            if record.get("uid") != uid or any(record.get(k) != v for k, v in expected.items()):
+                return "partial"
+            for language in ("it", "cz"):
+                relative = record.get(language)
+                if not isinstance(relative, str) or not relative.startswith(f"assets/vocabulary-it-{namespace}/"):
+                    return "partial"
+                asset = safe_target(root, relative)
+                if not asset.is_file() or digest(asset) != manifest.get("assetSha256", {}).get(relative):
+                    return "partial"
+    return "complete"
+
+
 def write_export(output: Path, payload: dict, assets: dict[str, bytes]) -> dict:
     output = output.absolute()
+    payload = {**payload, "audioStatus": audio_status(output, payload)}
     for relative, data in assets.items():
         if (not relative.startswith(ASSET_DIR + "/") or ".." in PurePosixPath(relative).parts
                 or not relative.endswith(hashlib.sha256(data).hexdigest() + ".webp")):

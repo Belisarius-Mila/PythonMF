@@ -42,15 +42,16 @@ class VocabularyItalianGalleryTests(unittest.TestCase):
             with Image.open(path) as im:
                 im.load();self.assertLessEqual(max(im.size),limit)
 
-    def test_page_modules_are_local_and_audio_is_explicitly_not_generated(self):
+    def test_page_modules_are_local_and_both_audio_kinds_are_ready(self):
         html=(DOCS/'vocabulary-it/index.html').read_text()
         for name in ('model.js','learners.js','learner-ui.js','gallery.js','gallery.css'):
             self.assertIn(name,html)
             self.assertTrue((DOCS/'vocabulary-it'/name).is_file())
         for kind,name in [('words','vocabulary-it-audio.json'),('sentences','vocabulary-it-sentence-audio.json')]:
             manifest=json.loads((DOCS/'data'/name).read_text())
-            self.assertEqual((manifest['language'],manifest['kind'],manifest['status']),('it',kind,'not-generated'))
-            self.assertEqual(manifest['items'],{})
+            self.assertEqual((manifest['language'],manifest['kind'],manifest['status']),('it',kind,'complete'))
+            self.assertEqual(len(manifest['items']),497)
+        self.assertEqual(self.data['audioStatus'],'complete')
         self.assertIn('lang="it"',html)
         self.assertNotIn('vocabulary-en',html)
         css=(DOCS/'vocabulary-it/gallery.css').read_text()

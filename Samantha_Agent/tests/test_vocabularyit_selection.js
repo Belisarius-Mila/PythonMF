@@ -140,6 +140,21 @@ test('Italian listening flashes Czech for1s and restores after rapid click/mode 
  view.advance(1000);assert.equal(tiles[1].querySelector('.tile-label').textContent,words[1]);
  tiles[0].click();view.galleryModes.find(b=>b.dataset.galleryMode==='learn').click();assert.equal(tiles[0].querySelector('.tile-label').textContent,words[0]);
 });
+test('complete real libraries resolve all497 meanings and drive both word and sentence players',async()=>{
+ const words=JSON.parse(fs.readFileSync(path.join(root,'data/vocabulary-it-audio.json'),'utf8'));
+ const sentences=JSON.parse(fs.readFileSync(path.join(root,'data/vocabulary-it-sentence-audio.json'),'utf8'));
+ assert.equal(words.status,'complete');assert.equal(sentences.status,'complete');
+ for(const item of vocabulary.items){assert.ok(model.audioRecord(item,words));assert.ok(model.sentenceAudioRecord(item,sentences));}
+ const view=await app({manifest:words,sentenceManifest:sentences});
+ view.galleryModes.find(b=>b.dataset.galleryMode==='listen').click();
+ const tile=view.element('galleryGroups').querySelectorAll('.vocab-tile')[0];tile.click();await sleep(0);
+ assert.equal(view.players.find(p=>p.played).url,new URL('../'+words.items[tile.dataset.uid].it,view.win.location.href).href);
+ view.galleryModes.find(b=>b.dataset.galleryMode==='learn').click();view.openStudy('vit-0108');
+ view.setPracticeMode('sentences');view.directions.find(b=>b.dataset.direction==='itToCz').click();
+ view.speakPrompt();await sleep(0);assert.ok(view.players.some(p=>p.played && p.url===new URL('../'+sentences.items['vit-0108'].it,view.win.location.href).href));
+ view.element('revealButton').click();view.speakAnswer();await sleep(0);
+ assert.ok(view.players.some(p=>p.played && p.url===new URL('../'+sentences.items['vit-0108'].cz,view.win.location.href).href));
+});
 test('blocked storage leaves common Italian gallery usable and settings honest',async()=>{
  const view=await app({blocked:true});assert.equal(view.buildSelection().length,497);
  assert.equal(view.element('learnerSelect').disabled,true);assert.match(view.element('learnerNotice').textContent,/nelze načíst/);

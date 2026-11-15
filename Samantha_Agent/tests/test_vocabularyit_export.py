@@ -191,6 +191,28 @@ class VocabularyItalianExportTests(unittest.TestCase):
             with self.assertRaises(ValueError): export.write_export(out, payload, assets)
             self.assertEqual(list(outside.iterdir()), [])
 
+    def test_reexport_preserves_audio_state_only_for_current_exact_manifests(self):
+        with tempfile.TemporaryDirectory() as name:
+            root = Path(name); args = self.fixture(root); payload, assets = export.prepare_export(root, **args)
+            out = root / 'out'; (out / 'data').mkdir(parents=True)
+            self.assertEqual(export.audio_status(out, payload), 'not-generated')
+            for kind, file, folder in [('words','vocabulary-it-audio.json','audio'),('sentences','vocabulary-it-sentence-audio.json','sentences')]:
+                records, hashes = {}, {}
+                for item in payload['items']:
+                    r = {'uid': item['uid'], 'sourceIt': item['it'], 'sourceCz': item['cz']}
+                    if kind == 'sentences': r.update(sourceSentenceIt=item['sentenceIt'],sourceSentenceCz=item['sentenceCz'])
+                    for lang in ('it','cz'):
+                        rel = f'assets/vocabulary-it-{folder}/fixture/{item["uid"]}-{lang}.mp3'
+                        path = out / rel; path.parent.mkdir(parents=True,exist_ok=True); path.write_bytes(b'fixture-audio')
+                        r[lang] = rel; hashes[rel] = catalog.digest(path)
+                    records[item['uid']] = r
+                (out / 'data' / file).write_text(json.dumps({'language':'it','kind':kind,'status':'complete','items':records,'assetSha256':hashes}))
+            self.assertEqual(export.audio_status(out,payload),'complete')
+            export.write_export(out,payload,assets)
+            self.assertEqual(json.loads((out/'data'/export.DATA_NAME).read_text())['audioStatus'],'complete')
+            changed=copy.deepcopy(payload);changed['items'][0]['sentenceIt']='Different'
+            self.assertEqual(export.audio_status(out,changed),'partial')
+
 
 if __name__ == '__main__':
     unittest.main()
