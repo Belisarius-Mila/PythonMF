@@ -1,14 +1,12 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
-- Aktualizováno: 2026-11-16 18:50 CET
--599 nových karet z dostupného přepisu viditelných částí lekcí3–8 je připravených v18 tématech. Lekce1–2 v podkladu nejsou. Aktivní katalog/CSV/export zatím497/471/497, osobní profily se nemění.
-- Přípravný checkpoint0ecce0b1 zachovává599 nových identit, obrazy, věty a slabiky. Původních1907 MP3 a všechny další hotové soubory jsou ověřené a zachované.
-- Mílou schválený pomalý Edge pokus skončil hned při prvním samostatném požadavku znovu HTTP429, bez Retry-After. Další Edge požadavek se neposlal.
-- Míla následně výslovně zvolil Azure Elsa/Vlasta, nejprve dvě ukázky a celkový limit2 USD bez daně. Obě ukázky prošly dekódováním a afplay. Probíhá jediný sériový běh zbývajících MP3; NEspouštět jej podruhé.
-- Autorita živého průběhu: `data/private/vocabulary_it_leda_20261116/azure_generation_receipt.json`, `audio_receipt.json`, `azure_full.log`. Řízená produkce po dávkách do10000 SSML znaků, jednou na položku, rezervace spotřeby před POST, celkový strop2 USD; původní nejisté Edge pokusy jsou archivované.
-- Odhad doplnění před spuštěním:110534 účtovaných znaků,1,65801 USD při ověřené sazbě15 USD/1M; skutečná částka podle hotové účtenky může být nižší díky přesnému znovupoužití. Žádný API klíč do Gitu ani argv.
-- Zbývá dočkat původní běh, ověřit celý zvuk, aplikovat uzavřenou dávku, přenést practiceChanges, aktualizovat integrační počty a udělat finální checkpoint. P+n tohoto obsahu nebylo zadáno.
+- Aktualizováno: 2026-11-16 20:40 CET
+- Místně zařazeno599 nových významových karet LEDA, celkem1096 aktivních v18 původních tématech. Obrázky, vlastní IT/CZ věty, rody/slovní druhy, slabiky i procvičování jsou kompletní.
+- Zvuk:4222 ověřených a plně dekódovaných MP3,4384 reference pro1096 karet. Všech1907 původních MP3 je bajtově zachovaných; doplněno2315. Původních497 katalogových a spelling záznamů, CSV471/mapping/vstupní manifest i osobní profily zachované.
+- Schválený jediný Azure běh dokončen: 2258 unikátních požadavků, 108567 rezervovaných SSML znaků, odhad API 1.62851 USD bez daně při15 USD/1M, pod schváleným limitem2 USD. Elsa/Vlasta -10%; přesné starší nahrávky znovu použité. Nejde o výpis faktury.
+- Účtenky a úplné důkazy pouze private/vocabulary_it_leda_20261116: azure_generation_receipt.json, complete_audio_verification.json, apply_receipt.json a finální validační log/otisky. Žádný další placený požadavek ani retry nyní není potřeba.
+- Zpracovaný TXT obsahuje jen viditelné části lekcí3–8,708 řádků; podklad lekcí1–2 chybí. Nové p+n nebylo zadáno. Místní ověření není veřejné nasazení ani přijetí na Mílově zařízení.
 <!-- SAMANTHA_CURRENT_STATUS_END -->
 
 # Handoff pracovního proudu: Vocabulary IT
@@ -17,49 +15,43 @@ Nazev: Vocabulary IT
 Pracovni proud: project-vocabulary-it
 Typ: Project
 Priorita: 2
-Stav: probíhá schválený Azure běh; původní proces a účtenku neopakovat
+Stav: hotový místní balíček LEDA, čeká samostatné p+n
 Pripomenout pri startu: ano
-Datum: 2026-11-16 17:13 CET
+Datum: 2026-11-16 20:40 CET
 
 Co se resilo:
-Mílův požadavek doplnit slovíčka z prvních osmi lekcí LEDA včetně všech médií.
-Nalezený uživatelský TXT obsahuje jen viditelné části lekcí3–8.
+Doplnění chybějící slovní zásoby z uživatelského přepisu LEDA včetně všech médií.
+Podklad má708 řádků z viditelných částí lekcí3–8, lekce1–2 nebyly nalezeny.
 
 Co je hotove:
--599 nových karet v18 tématech, vlastní příklady IT/CZ, trvalé identity a explicitní dělení pro psaní.
--136 nových vybraných obrazových zdrojů:51 imagegen,81 vlastních grafik včetně map,1 fotografie CC0 a3 přijaté ilustrace těla z EN. Původní knihovna se nepřepisuje.
-- Kandidát všech1096 karet přesně ověřený v úplném zdrojovém snímku:659 pinů/657 odlišných obrazů,1314 webových obrazů/náhledů.
-- Původních497 katalogových/spelling záznamů,471 CSV řádků, mapping a1907 MP3 zachované. Profilová úložiště se nečetla ani neměnila.
-- TXT v Downloads `Vocabulary_IT_LEDA_pripravena_slovicka_2026-11-16.txt`; místní review.html. Aktivní aplikace zatím497.
+-599 nových karet vit-0498–1096, celkem1096 aktivních a18 původních okruhů.
+-136 nových vybraných obrazových zdrojů,659 přesných pinů/657 různých obrazů,1314 webových assetů. Všechny nové věty vlastní, slabiky explicitně ověřené, barevné a významové konflikty přenesené do builderu/quizu.
+- Plná knihovna4222 MP3/4384 referencí; původních1907 souborů přesně zachovaných. Azure účtenka state=complete; nespouštět výrobu znovu.
+- Původních497 katalogových a spelling záznamů,471 CSV řádků, mapping i neměnný vstupní manifest zachované. Osobní výběry A–D se nečetly ani neměnily.
+- Přehled všech599 karet v Downloads Vocabulary_IT_LEDA_pripravena_slovicka_2026-11-16.txt, místní review.html; finální důkazy a zdrojové otisky v privátní složce.
 
 Co neni hotove:
-- Probíhá jediný Azure běh zbývajících MP3 se schválenými hlasy Elsa/Vlasta a limitem2 USD bez daně. První dvě ukázky prošly; živé počty jsou pouze v azure_generation_receipt.json a audio_receipt.json.
-- Nespouštět druhou kopii. Při obnově nejprve ověřit původní proces/účtenku a případný uncertain; žádný automatický placený retry.
-- Zařazení kompletního katalogu/exportu, přenos practiceChanges, závěrečné testy a checkpoint po dokončení zvuků.
-- Podklady lekcí1–2 nebyly nalezeny; byl vyžádán název jiného souboru. Nové p+n nebylo zadáno.
+- Nové p+n nebylo zadáno. Produkční byte shoda a fyzická přejímka tohoto nového balíčku se tímto místním checkpointem nepotvrzují.
+- Podklad lekcí1–2 chybí; nelze tvrdit pokrytí úplných osmi lekcí.
 
 Dalsi krok:
-Dočkat původní build_audio_azure.py full. Potom ověřit kompletní MP3 a spustit
-uzavřené apply_complete_batch.py, update_applied_tests.py a finální kontrolu.
-Používá se stejný audio_receipt.json a samostatná globální účetní kniha Azure;
-přechody z Edge a rozšíření plánu jsou archivované. Nevyrábět znovu hotové MP3.
+Po výslovném pokynu použít jedinou registrovanou p+n cestu pro project-vocabulary-it.
+Neopakovat již dokončenou výrobu; konečný lokální checkpoint určuje final_completion.json.
 
 Navrhovane dalsi kroky:
-- Dokončit audio a teprve potom zařadit celou dávku; nerozšířit aktivní obsah o neúplnou knihovnu.
-- Přenést `practiceChanges` z kandidáta do vocabulary_it_practice.py, obnovit quiz, aktualizovat pevné počty testů497/1907/814 na skutečné nové hodnoty.
-- Finální místní brána a samostatné p+n až na nový výslovný pokyn.
-- Dohledat případný další podklad lekcí1–2.
+- Mílova krátká přejímka poslechu a psaní po vydání.
+- Dohledat případný další podklad1–2.
 
 Zmenene nebo relevantni soubory:
-- Kandidát `VocabularyIT/batches/leda_20261116.json`, obrazový review batch, katalogové testy a projektové zápisy.
-- Veškeré privátní zdroje, vstupní projekce, kandidátní katalogy, export, TTS plány/účtenka a logy: `data/private/vocabulary_it_leda_20261116/`.
-- `audio_texts.json` je původní zmrazený plán1073 karet; `audio_texts_v2.json` má1096 a zachovává všechny původní texty/ID. `audio_extension_plan.json` dokládá historické rozšíření; aktuální ledger už váže smíšeného poskytovatele. Staré stavy jsou archivované a nesmějí se přepsat zpět.
-- `prepare_bindings.py`, `prepare_catalog.py`, `build_spelling.py`, `build_preview.py`, `build_review.py` jsou uzavřené místní přípravné nástroje, ne aktivní importní služba.
+VocabularyIT katalog/image_manifest/spelling/practice/batches/leda_20261116.json,
+Pict nové připnuté obrazy, docs/data IT export/quiz/audio manifesty a nové webové assety.
+Soukromé vstupy, přepisy, uzavřená projekce, plány, ledger a účtenky pouze
+private/vocabulary_it_leda_20261116. Konečný stav zdrojů musí odpovídat finální zelené bráně.
 
 Bezpecnost / neukladat:
-- Knihovní TXT, plné logy odpovědí a audio účtenka zůstávají private. Žádná tajemství ani osobní profily do Gitu.
-- UID498–1096 jsou rezervované tímto připraveným balíčkem. Při změně základního katalogu zastavit a ručně posoudit souběh; nepřečíslovat hotová média.
-- Neopakovat dokončené/nejisté externí požadavky automaticky. Původní2 ženské varianty ilustrací zůstaly jako nepoužité kandidáty, nic se nemazalo.
+Žádné klíče, soukromý podklad ani profily do Gitu. Neměnit Willův main, neprovádět
+merge/rebase/push bez dalšího zadání. Audio v2 a Azure účetní kniha jsou uzavřené;
+staré archivované HTTP429 pokusy nejsou pokynem k novému požadavku.
 
 ### Automatický checkpoint 2026-08-04 19:15 CEST
 
@@ -556,3 +548,25 @@ Navrhované další kroky:
 Technický důkaz:
 -9 předběžných offline testů Azure/změny poskytovatele PASS. Povolená Elsa přidaná do registrovaného Azure writeru; změna označení mixed provider zachovává všechny staré asset cesty i joby.
 - Veškeré klíče jen z existující místní konfigurace přes registrovaný transport, žádná změna účtu, tarifu či nasazení. Pevný globální rozpočet a soukromé rezervace před každým POST.
+
+
+### 2026-11-16 20:40 CET — Dokončené doplnění LEDA do webové italštiny
+
+Hotovo:
+-599 nových karet je místně v aplikaci, celkem1096 ve stejných18 okruzích. Vlastní příklady IT/CZ, přesné obrazy, slabiky, celé poslechy a procvičování včetně psaní i Posledních20.
+- Kompletních4222 MP3/4384 referencí. Původních497 identit/spelling záznamů,1907 MP3 a vstupní CSV/mapping zachovaných; osobní profily se nečetly ani neměnily.
+
+Rozhodnutí:
+- Dokončen dříve schválený obsah a Azure Elsa/Vlasta do2 USD bez daně. Nové obsahové rozhodnutí ani povolení p+n nevzniklo. Úroveň obtížnosti je náš návrh, nikoli CEFR.
+
+Další krok:
+Samostatně schválené p+n hotového webového balíčku; do té doby jde o místní vývoj.
+
+Navrhované další kroky:
+- Krátká Mílova přejímka skutečného poslechu a procvičování po vydání.
+- Dohledat případný další uživatelský podklad lekcí1–2.
+
+Technický důkaz:
+- Všech4222 MP3 prošlo úplným FFmpeg dekódováním a SHA kontrolou;1907 původních souborů je přesně shodných. Azure 2258 požadavků/108567 znaků, odhad 1.62851 USD bez daně, žádný nejistý placený výsledek ani automatický retry.
+- Uzavřený zdrojový audit1096 karet/659 pinů/657 různých obrazů,1314 webových assetů. Každá karta umí platnou čtveřici v celém výběru. Integrační a UI testy i programem vybraná validation-v3 brána jsou doložené ve finálních privátních účtenkách.
+- Programem vybraná brána168 PASS; Safari na samostatném localhost původu:1096 karet, Posledních20, palazzo/věta/návrat, musica classica včetně správného obrázku, neúplného psaní, nápovědy, dokončení a Další. Testovací okno/server zavřené; produkční profily a Mílova přejímka nedotčené.

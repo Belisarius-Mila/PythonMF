@@ -64,17 +64,17 @@ const sleep=ms=>new Promise(resolve=>setTimeout(resolve,ms));
 async function until(check){for(let i=0;i<300;i++){if(check())return;await sleep(10);}throw Error('Timed out');}
 function change(view,id,value){const node=view.element(id);if(typeof value==='boolean')node.checked=value;else node.value=value;node.emit('change');}
 
-test('497 Italian meanings and18 topics; new20 intersect filters without source order mutation',()=>{
- assert.equal(vocabulary.items.length,497);assert.equal(vocabulary.groups.length,18);
+test('1096 Italian meanings and18 topics; new20 intersect filters without source order mutation',()=>{
+ assert.equal(vocabulary.items.length,1096);assert.equal(vocabulary.groups.length,18);
  assert.equal(vocabulary.imageReviewComplete,true);assert.ok(vocabulary.items.every(i=>i.imageReviewed));
  const before=JSON.stringify(vocabulary);
  const latest=model.select(vocabulary.items,{recentCount:20});
- assert.equal(latest.length,20);assert.ok(latest.every(i=>i.id>=478));
+ assert.equal(latest.length,20);assert.ok(latest.every(i=>i.id>=1077));
  assert.equal(model.select(vocabulary.items,{query:'eclair'})[0].it,'éclair');
  assert.equal(model.select(vocabulary.items,{query:'němčina'})[0].uid,'vit-0473');
  assert.equal(model.select(vocabulary.items,{topics:['topic-09'],recentCount:20}).every(i=>i.topicIds.includes('topic-09')),true);
  const ordered=model.ordered(vocabulary.items,{groupBy:'topic'},catalog);
- assert.equal(new Set(ordered.map(i=>i.uid)).size,497);
+ assert.equal(new Set(ordered.map(i=>i.uid)).size,1096);
  assert.equal(JSON.stringify(vocabulary),before);
 });
 test('Italian and Czech prompts preserve complete sentences and correct lang',()=>{
@@ -95,9 +95,9 @@ test('audio must match Italian UID, language, texts and own asset namespace',()=
  assert.equal(model.sentenceAudioRecord(i,{...sentenceAudio,items:{[i.uid]:{...sentenceAudio.items[i.uid],sourceSentenceIt:'changed'}}}),null);
  assert.equal(model.audioRecord(i,{language:'it',kind:'words',items:{}}),null);
 });
-test('actual gallery opens, shows497 thumbnails, ordered next and returns to the current tile',async()=>{
- const view=await app();assert.equal(view.state.view,'gallery');assert.equal(view.buildSelection().length,497);
- assert.equal(view.element('galleryGroups').querySelectorAll('.vocab-tile').length,497);
+test('actual gallery opens, shows1096 thumbnails, ordered next and returns to the current tile',async()=>{
+ const view=await app();assert.equal(view.state.view,'gallery');assert.equal(view.buildSelection().length,1096);
+ assert.equal(view.element('galleryGroups').querySelectorAll('.vocab-tile').length,1096);
  assert.equal(view.element('galleryGroups').querySelectorAll('img').every(i=>i.width===240),true);
  const target=view.orderedSelection()[3];view.openStudy(target.uid);
  assert.equal(view.state.currentItem.uid,target.uid);assert.equal(view.state.mode,'ordered');
@@ -129,7 +129,7 @@ test('gender is shown for nouns, not old noun metadata on reactions',async()=>{
 });
 test('missing audio never blocks gallery, never constructs a player, and keeps listening recent filter',async()=>{
  const view=await app({manifest:{language:'it',kind:'words',status:'not-generated',items:{}},sentenceManifest:null});
- assert.equal(view.buildSelection().length,497);change(view,'recentOnly',true);
+ assert.equal(view.buildSelection().length,1096);change(view,'recentOnly',true);
  view.galleryModes.find(b=>b.dataset.galleryMode==='listen').click();
  const tile=view.element('galleryGroups').querySelectorAll('.vocab-tile')[0];const caption=tile.querySelector('.tile-label').textContent;
  tile.click();await sleep(0);assert.equal(view.state.view,'gallery');assert.equal(view.players.length,0);
@@ -147,7 +147,7 @@ test('Italian listening flashes Czech for1s and restores after rapid click/mode 
  view.advance(1000);assert.equal(tiles[1].querySelector('.tile-label').textContent,words[1]);
  tiles[0].click();view.galleryModes.find(b=>b.dataset.galleryMode==='learn').click();assert.equal(tiles[0].querySelector('.tile-label').textContent,words[0]);
 });
-test('complete real libraries resolve all497 meanings and drive both word and sentence players',async()=>{
+test('complete real libraries resolve all1096 meanings and drive both word and sentence players',async()=>{
  const words=JSON.parse(fs.readFileSync(path.join(root,'data/vocabulary-it-audio.json'),'utf8'));
  const sentences=JSON.parse(fs.readFileSync(path.join(root,'data/vocabulary-it-sentence-audio.json'),'utf8'));
  assert.equal(words.status,'complete');assert.equal(sentences.status,'complete');
@@ -163,7 +163,7 @@ test('complete real libraries resolve all497 meanings and drive both word and se
  assert.ok(view.players.some(p=>p.played && p.url===new URL('../'+sentences.items['vit-0108'].cz,view.win.location.href).href));
 });
 test('blocked storage leaves common Italian gallery usable and settings honest',async()=>{
- const view=await app({blocked:true});assert.equal(view.buildSelection().length,497);
+ const view=await app({blocked:true});assert.equal(view.buildSelection().length,1096);
  assert.equal(view.element('learnerSelect').disabled,true);assert.match(view.element('learnerNotice').textContent,/nelze načíst/);
 });
 test('IT profiles begin empty; EN backup and IDs are rejected; EN storage is untouched',()=>{
@@ -215,8 +215,8 @@ function correctChoice(view){const word=view.element('practiceWord').textContent
 async function readyQuestion(view){completeImages(view);await animateWord(view);endSound(view);await sleep(0);}
 async function practiceView(options={}){const view=await app({items:fourItems,...options});view.element('quizTab').click();view.element('quizStart').click();return view;}
 
-test('reviewed practice metadata covers497 cards; all can form a valid four-picture question in the full selection',()=>{
- const pool=practice.eligible(vocabulary.items,audio,quizCatalog);assert.equal(pool.length,497);
+test('reviewed practice metadata covers1096 cards; all can form a valid four-picture question in the full selection',()=>{
+ const pool=practice.eligible(vocabulary.items,audio,quizCatalog);assert.equal(pool.length,1096);
  const latest=practice.eligible(model.select(vocabulary.items,{recentCount:20}),audio,quizCatalog);assert.equal(latest.length,20);assert.ok(latest.every(i=>practice.question(i,latest,quizCatalog,()=>.5)));
  for(const item of pool){const q=practice.question(item,pool,quizCatalog,()=>.5);assert.equal(q.choices.length,4);assert.ok(q.choices.some(i=>i.uid===item.uid));assert.equal(new Set(q.choices.map(i=>i.image)).size,4);for(let a=0;a<4;a++)for(let b=a+1;b<4;b++)assert.ok(practice.compatible(q.choices[a],q.choices[b],quizCatalog));}
  assert.equal(practice.question(pool[0],pool.slice(0,3),quizCatalog),null);
@@ -252,7 +252,7 @@ test('one initial error is requeued once after the original words; score counts 
 });
 test('game inherits personal A, hard and latest20 filters; it never borrows distractors or writes learner storage',async()=>{
  const local=storage(),repo=learners.store(()=>local),initial=repo.read(),next=initial.value;
- const ids=['vit-0479','vit-0481','vit-0491','vit-0492'];next.profiles.A.selected=[...ids,'vit-0001'];next.profiles.A.hard=ids;repo.write(next,initial.raw);const saved=local.getItem(learners.KEY);
+ const recent=model.select(vocabulary.items,{recentCount:20});const sample=practice.question(recent[0],recent,quizCatalog,()=>0.41);assert.ok(sample);const ids=sample.choices.map(i=>i.uid);next.profiles.A.selected=[...ids,'vit-0001'];next.profiles.A.hard=ids;repo.write(next,initial.raw);const saved=local.getItem(learners.KEY);
  const view=await app({local});change(view,'learnerSelect','A');view.element('learnerHardFilter').click();change(view,'recentOnly',true);view.element('quizTab').click();
  assert.match(view.element('quizSelection').textContent,/Uživatel A.*obtížná.*Posledních 20/);assert.match(view.element('quizPoolNotice').textContent,/4 slovíčka/);view.element('quizStart').click();assert.ok(choices(view).every(b=>ids.includes(b.dataset.uid)));
  await readyQuestion(view);correctChoice(view).click();view.element('quizBack').click();assert.equal(view.state.view,'gallery');assert.equal(view.state.learner,'A');assert.equal(view.state.onlyLearnerHard,true);assert.equal(view.state.recentCount,20);assert.equal(local.getItem(learners.KEY),saved);

@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "language": "it",
   "batch": "leda-visible-lessons-3-8-20261116",
-  "state": "prepared-audio-incomplete",
+  "state": "applied",
   "baseCatalogSha256": "4ff7a912514dcd50e1945597810fb506d292bce3c947d3fea40b8cea1bfc459a",
   "baseEntriesSha256": "505040fa2d036635fa7295fa3b30bb25a057a3694365fe61dd1d32bf0b9fe612",
   "baseSpellingEntriesSha256": "be5052eefd251a46bfcb9ad831c931bc83d68e911ce928485ed9acaa19443c15",
@@ -51046,7 +51046,7 @@
     "VocabularyIT/vocabulary_it_input_manifest.json": "306d6ce98936cd4861d7fe204ef7250187a3b99bb47d09ba6c72a562ebed693c"
   },
   "audio": {
-    "status": "HTTP429-awaiting-explicit-retry-answer",
+    "status": "complete",
     "profile": {
       "it": "it-IT-ElsaNeural",
       "cz": "cs-CZ-VlastaNeural",
@@ -51061,9 +51061,13 @@
       "czechAssets": 2142
     },
     "originalAssetsPreserved": 1907,
-    "newAssetsReady": 4,
-    "uncertainRequests": 2,
-    "allOriginalJobsUnchanged": true
+    "newAssetsReady": 2315,
+    "uncertainRequests": 0,
+    "allOriginalJobsUnchanged": true,
+    "originalAssetsSha256": "d0e9397808dccf3d036030a63053f09cb61bd92174cac555153a85e1e0416739",
+    "provider": "registered-edge-tts+azure-neural",
+    "azureReservedCharacters": 108567,
+    "estimatedApiCostExcludingTaxUSD": 1.628505
   },
   "review": {
     "editor": "Adam",

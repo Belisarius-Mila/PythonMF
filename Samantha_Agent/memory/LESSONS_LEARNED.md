@@ -1755,6 +1755,8 @@ Doplnění 12112026 — obnova Data po restartu ve druhém okně VS Code:
 
 - Doplnění 2026-11-01 po přijetí ukázek: zbývajících 128 stop dokončeno 128 unikátními Azure požadavky, 5 870 znaků; plná sada 144/144 a staré MP3 beze změny. Testy výběru ukázek a překročení rozpočtu mají používat syntetická data, aby po dokončení scény nezávisely na skutečně chybějících stopách.
 
+- Doplnění 2026-11-16, Vocabulary IT:429 se zopakovalo i u jediného pomalého Edge požadavku; konkrétní kvótu bez odpovědi poskytovatele neodhadovat. Po výslovném souhlasu Azure uzavřel2258 unikátních požadavků/108567 SSML znaků za odhad1,628505 USD bez daně; globální rezervace před POST dodržela schválený strop2 USD napříč malými běhy.4222 MP3 plně dekódováno,1907 původních přesně zachováno. Smíšený provider mění metadata, nikoli identitu/cestu hotového zvuku. Dokončený běh neopakovat; účtenka state=complete. Viz vocabulary_it_leda_20261116.md.
+
 ### LL-097 — Modernizace App Serveru nesmí obejít důkaz doručení
 
 - Problém: resume zbytečně načítal historii, commentary se mohlo stát odpovědí a obecná chyba zahazovala strukturu. Lokální verze CLI sama nedokládá verzi sdíleného listeneru.

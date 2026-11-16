@@ -16,9 +16,9 @@ Přijatá pravidla
   současné EN včetně všech aktivních hesel; posoudit italské konflikty.
 
 Základní soubory a hranice
-VocabularyIT/vocabulary_it_catalog.json:497 identit (471 původních a26 webových);24 schválených hlavních významů a26 nových, ostatní metadata dále návrhy.
+VocabularyIT/vocabulary_it_catalog.json:1096 identit (471 původních,26 dřívějších webových a599 LEDA). Původní metadata zůstávají zachovaná,599 nových významů redakčně ověřených; obtížnost pouze návrh.
 VocabularyIT/vocabulary_it_input_manifest.json: neměnné otisky777 původních vstupů.
-Aktuální stav: oprava časování816d559a vydaná; Míla potvrdil sluchátka. LEDA599 připravených nových karet, aktivních497; po potvrzeném Edge429 probíhá schválená Azure výroba do2 USD; nezdvojovat původní proces. Viz vocabulary_it_leda_20261116.md.
+Aktuální stav: LEDA599 místně zařazeno, celkem1096 karet/18 témat, kompletních4222 MP3. Azure dokončen pod limitem2 USD; nové p+n nebylo zadáno. Podklad1–2 chybí. Viz vocabulary_it_leda_20261116.md.
 VocabularyIT/vocabulary_it_catalog.py: pouze čtení a ověření, žádný CSV writer.
 VocabularyIT/vocabulary_it_review_queue.txt:112 prioritních karet k revizi.
 VocabularyIT/WEB_FOUNDATION.txt: identita, přesné kontrolní příkazy a další bod.
@@ -478,3 +478,25 @@ Navrhované další kroky:
 Technický důkaz:
 -9 předběžných offline testů Azure/změny poskytovatele PASS. Povolená Elsa přidaná do registrovaného Azure writeru; změna označení mixed provider zachovává všechny staré asset cesty i joby.
 - Veškeré klíče jen z existující místní konfigurace přes registrovaný transport, žádná změna účtu, tarifu či nasazení. Pevný globální rozpočet a soukromé rezervace před každým POST.
+
+
+### 2026-11-16 20:40 CET — Dokončené doplnění LEDA do webové italštiny
+
+Hotovo:
+-599 nových karet je místně v aplikaci, celkem1096 ve stejných18 okruzích. Vlastní příklady IT/CZ, přesné obrazy, slabiky, celé poslechy a procvičování včetně psaní i Posledních20.
+- Kompletních4222 MP3/4384 referencí. Původních497 identit/spelling záznamů,1907 MP3 a vstupní CSV/mapping zachovaných; osobní profily se nečetly ani neměnily.
+
+Rozhodnutí:
+- Dokončen dříve schválený obsah a Azure Elsa/Vlasta do2 USD bez daně. Nové obsahové rozhodnutí ani povolení p+n nevzniklo. Úroveň obtížnosti je náš návrh, nikoli CEFR.
+
+Další krok:
+Samostatně schválené p+n hotového webového balíčku; do té doby jde o místní vývoj.
+
+Navrhované další kroky:
+- Krátká Mílova přejímka skutečného poslechu a procvičování po vydání.
+- Dohledat případný další uživatelský podklad lekcí1–2.
+
+Technický důkaz:
+- Všech4222 MP3 prošlo úplným FFmpeg dekódováním a SHA kontrolou;1907 původních souborů je přesně shodných. Azure 2258 požadavků/108567 znaků, odhad 1.62851 USD bez daně, žádný nejistý placený výsledek ani automatický retry.
+- Uzavřený zdrojový audit1096 karet/659 pinů/657 různých obrazů,1314 webových assetů. Každá karta umí platnou čtveřici v celém výběru. Integrační a UI testy i programem vybraná validation-v3 brána jsou doložené ve finálních privátních účtenkách.
+- Programem vybraná brána168 PASS; Safari na samostatném localhost původu:1096 karet, Posledních20, palazzo/věta/návrat, musica classica včetně správného obrázku, neúplného psaní, nápovědy, dokončení a Další. Testovací okno/server zavřené; produkční profily a Mílova přejímka nedotčené.
