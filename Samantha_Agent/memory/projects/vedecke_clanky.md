@@ -756,3 +756,30 @@ prokazatelně hotové části se nepřekládají znovu. Nedostatečný rozpočet
 zbývající práci a ponechá hotové části; limit se automaticky nezvyšuje.
 Riziko: skutečná významová přejímka celého překladu a fyzická přejímka okna
 na Mílově zařízení čekají. Vývoj sám nepovoluje nový placený překlad ani p+n.
+
+
+### 2026-11-16 17:47 CET — DALTAC: timeout a převzetí původního překladu
+
+Hotovo: místní oprava odděluje ScienceNews klienta600s od p+n klienta90s.
+Původní první část DALTAC byla převzatá bez nového modelového požadavku;
+18730 českých znaků, doložená spotřeba2,2477 kreditu. Model ji dokončil za143s,
+ale původní klient skončil dříve. Zbývající části se zatím nespouštěly.
+Rozhodnutí: Míla nahlásil přerušený překlad celé studie. Oprava zachovává
+původní thread/turn/client ID a povoluje doplnit chybějící usage jen z jednoho
+přesně odpovídajícího dokončeného nativního záznamu. Zdroj, model, sandbox,
+odpověď, pořadí a monotónnost čítačů musí souhlasit; nic se neodhaduje.
+Další krok: dokončit místní ověření a commit. Potom vyžádat konkrétní souhlas
+s limitem20 kreditů pouze pro DALTAC, pokračováním původního překladu a p+n
+opravy. Souhlas zatím není udělený; aktuální rezervace studie zůstává15.
+Navrhované další kroky: po potvrzení převzít celý český text a příští páteční
+výběr. Ostatní fyzické přejímky Knihovny zůstávají otevřené.
+Technický důkaz: původní úsek má kompletní SDK historii a finální lokální
+čítače přesně stejného dokončeného tahu. Nová registrovaná nabídka rozpočtu
+má otisk studie/role/původních účtenek; authorize je lokální a idempotentní,
+nezahajuje model a nemění výchozí15 ani měsíční100. Platí jen pro jednu studii
+po výslovném souhlasu. Odhad z první části16,36 za celý text je orientační;
+20 je návrh rezervy/přejímky, nikoli tvrdý upstream billing cap.
+Konečný stav, brána, původní obnova a cenový návrh jsou v private/
+science_translation_timeout_20261116/. Žádné navýšení ani další placená část
+nebyly při opravě provedené. Dokumentační vydání382677f1 už je dokončené;
+nesouvisí s 90s limitem a původní model doběhl i po odpojení klienta.

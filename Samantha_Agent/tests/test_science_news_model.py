@@ -48,6 +48,15 @@ class Client:
 
 
 class ModelTests(unittest.TestCase):
+    def test_science_client_has_its_own_long_wait_without_changing_release_client(self):
+        from app.science_news_model import new_science_client
+        from app.communication.luna_release import new_luna_client
+        with patch('app.codex_appserver.CodexAppServerClient') as science:
+            new_science_client()
+        self.assertEqual(science.call_args.kwargs['timeout'],600)
+        with patch('app.communication.luna_release.CodexAppServerClient') as release:
+            new_luna_client()
+        self.assertEqual(release.call_args.kwargs['timeout'],90)
     def setUp(self):
         self.temp=tempfile.TemporaryDirectory();self.addCleanup(self.temp.cleanup)
         self.store=ScienceNews(Path(self.temp.name)/'news')

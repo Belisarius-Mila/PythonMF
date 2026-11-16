@@ -10,6 +10,7 @@ from unittest.mock import Mock, patch
 from app.science_news import ScienceNews, digest
 from app.science_news_runner import tick, PRAGUE, INSTRUCTIONS, SCHEMA
 from app.science_news_recovery import recover_model_result, close_interrupted_issue, weekly_status
+from app.science_news_recovery import native_turn_usage, complete_receipt_usage
 from app.science_news_model import call_model
 from tests.test_science_news import packet, answer
 from tests.test_science_news_model import Client, BINDING, SELECTED
@@ -27,6 +28,68 @@ class RecoveryTests(unittest.TestCase):
         (self.store.root/'activation.json').write_text(json.dumps(self.approved))
         for method,value in [('load_role',BINDING),('resolve_role',SELECTED),('assert_current',SELECTED)]:
             p=patch('app.science_news_model.agent_roles.'+method,return_value=value);p.start();self.addCleanup(p.stop)
+
+    def native_log(self):
+        from app.science_news import digest
+        root=Path(self.temp.name).resolve()/'sessions';folder=root/'2026/11/16';folder.mkdir(parents=True)
+        thread='01a1e533-2541-7cd2-8776-03c98e87bf7e';turn='original-turn';key='editor_fixture'
+        context=str((self.store.root/'contexts'/digest(key)).resolve())
+        usage={'input_tokens':10,'cached_input_tokens':0,'output_tokens':20,'reasoning_output_tokens':0,'total_tokens':30}
+        rows=[{'type':'session_meta','payload':{'id':thread,'cwd':context}},
+          {'type':'event_msg','timestamp':'2026-11-16T10:00:01Z','payload':{'type':'task_started','turn_id':turn}},
+          {'type':'turn_context','payload':{'turn_id':turn,'cwd':context,'model':SELECTED['model'],
+           'effort':SELECTED['reasoning_effort'],'approval_policy':'never','sandbox_policy':{'type':'read-only'}}},
+          {'type':'event_msg','timestamp':'2026-11-16T10:02:00Z','payload':{'type':'token_count','info':{'total_token_usage':usage}}},
+          {'type':'event_msg','timestamp':'2026-11-16T10:02:01Z','payload':{'type':'task_complete','turn_id':turn,'last_agent_message':'{"items":[]}'}}]
+        path=folder/('rollout-'+thread+'.jsonl')
+        def save():path.write_text('\n'.join(json.dumps(i) for i in rows)+'\n')
+        save()
+        job={'thread_id':thread,'turn_id':turn,'executor':SELECTED,'started_at':'2026-11-16T10:00:00+00:00'}
+        return root,path,rows,save,job,usage
+
+    def test_original_native_completion_supplies_missing_final_usage_without_a_client(self):
+        root,path,rows,save,job,usage=self.native_log()
+        result,proof=native_turn_usage(self.store,'editor_fixture',job,'{"items":[]}',sessions_root=root)
+        self.assertEqual(result,usage);self.assertEqual(proof['turn_id'],job['turn_id'])
+        self.assertEqual(proof['kind'],'native_final_token_count')
+
+    def test_native_usage_requires_exact_final_turn_context_and_answer(self):
+        import copy
+        root,path,rows,save,job,usage=self.native_log();original=copy.deepcopy(rows)
+        changes=[lambda r:r.pop(),lambda r:r.append(copy.deepcopy(r[1])),
+                 lambda r:r.append(copy.deepcopy(r[2])),
+                 lambda r:r[2]['payload'].update(model='different'),
+                 lambda r:r[0]['payload'].update(id='foreign-thread'),
+                 lambda r:r[4]['payload'].update(turn_id='foreign'),
+                 lambda r:r[4]['payload'].update(last_agent_message='different answer'),
+                 lambda r:r[3].update(timestamp='2026-11-15T10:00:00Z'),
+                 lambda r:r[3]['payload']['info']['total_token_usage'].update(output_tokens=-1),
+                 lambda r:r[2]['payload']['sandbox_policy'].update(network_access=True)]
+        for change in changes:
+            rows[:]=copy.deepcopy(original);change(rows);save()
+            with self.subTest(change=change),self.assertRaises(ValueError):
+                native_turn_usage(self.store,'editor_fixture',job,'{"items":[]}',sessions_root=root)
+
+    def test_receipt_recovery_fills_native_usage_and_accepts_once_without_rpc(self):
+        root,path,rows,save,metadata,usage=self.native_log()
+        job=self.frozen_model(usage=False);job.update(metadata)
+        job['receipt']={'answer':'{"items":[]}','delivered':True,'thread_id':job['thread_id'],
+            'turn_id':job['turn_id'],'client_message_id':job['client_message_id'],'usage':None}
+        with self.store.transaction() as state:state['jobs']['editor_fixture']=job
+        original=native_turn_usage
+        with patch('app.science_news_recovery.native_turn_usage',side_effect=lambda *a:original(*a,sessions_root=root)), \
+                patch('app.science_news_model.new_science_client',side_effect=AssertionError('No RPC')):
+            result=recover_model_result(self.store,'editor_fixture',{},'instructions',{})
+        self.assertEqual(result,{'items':[]});accepted=self.store._read()['jobs']['editor_fixture']
+        self.assertEqual(accepted['state'],'completed');self.assertEqual(accepted['usage'],usage)
+        self.assertIn('usage_provenance',accepted)
+
+    def test_native_fallback_cannot_override_invalid_observed_counters(self):
+        job=self.frozen_model(usage=False);job['usage_invalid']=True
+        job['receipt']={'answer':'{"items":[]}','usage':None}
+        with patch('app.science_news_recovery.native_turn_usage') as native:
+            complete_receipt_usage(self.store,'editor_fixture',job)
+        native.assert_not_called()
 
     def test_persistent_thread_and_sdk_receipt_saved_before_disconnect_failure(self):
         class ExitFailure(Client):

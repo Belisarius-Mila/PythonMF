@@ -2,12 +2,87 @@
 from __future__ import annotations
 
 import json
+import hashlib
+import re
 from datetime import datetime, timedelta
+from pathlib import Path
 from zoneinfo import ZoneInfo
 
 from app.codex_appserver import final_agent_answer
 from app.release_usage import normalize_usage, estimate_standard_credits
 from app.science_news import digest, utc_now
+
+
+def native_turn_usage(store, key, job, answer, *, sessions_root=None):
+    """Validate final local usage for this one completed original turn only.
+
+    No model calls, history export, inferred counters or partial usage. A second
+    turn, mismatched final answer, changed context or unfinished log blocks it.
+    """
+    thread, turn = job.get('thread_id'), job.get('turn_id')
+    if not isinstance(thread, str) or not re.fullmatch(r'[0-9a-f-]{36}', thread) or not turn:
+        raise ValueError('Původní tah nemá ověřitelnou místní identitu.')
+    root = Path(sessions_root) if sessions_root is not None else Path.home() / '.codex/sessions'
+    paths = list(root.glob('*/*/*/*' + thread + '.jsonl'))
+    if len(paths) != 1 or any(p.is_symlink() for p in (paths[0], *paths[0].parents)):
+        raise ValueError('Původní místní záznam není jednoznačný.')
+    path = paths[0]
+    before = path.stat()
+    if before.st_size > 2_000_000:
+        raise ValueError('Původní místní záznam překročil limit.')
+    raw = path.read_bytes()
+    after = path.stat()
+    if (before.st_ino, before.st_size, before.st_mtime_ns, before.st_ctime_ns) != (after.st_ino, after.st_size, after.st_mtime_ns, after.st_ctime_ns):
+        raise ValueError('Původní záznam se ještě mění.')
+    rows = [json.loads(line) for line in raw.splitlines() if line.strip()]
+    meta = [r['payload'] for r in rows if r.get('type') == 'session_meta']
+    contexts = [r['payload'] for r in rows if r.get('type') == 'turn_context']
+    events = [(n,r) for n,r in enumerate(rows) if r.get('type') == 'event_msg']
+    starts = [(n,r) for n,r in events if r['payload'].get('type') == 'task_started']
+    ends = [(n,r) for n,r in events if r['payload'].get('type') == 'task_complete']
+    tokens = [(n,r) for n,r in events if r['payload'].get('type') == 'token_count']
+    context = str((store.root / 'contexts' / digest(key)).resolve())
+    if (len(meta) != 1 or meta[0].get('id') != thread or meta[0].get('cwd') != context
+            or len(contexts) != 1 or len(starts) != 1 or len(ends) != 1 or not tokens):
+        raise ValueError('Místní záznam nedokládá jediný původní tah.')
+    c = contexts[0]; selected = job['executor']
+    if (c.get('turn_id') != turn or c.get('cwd') != context or c.get('model') != selected['model']
+            or c.get('effort') != selected['reasoning_effort'] or c.get('approval_policy') != 'never'
+            or c.get('service_tier') not in (None,'standard')
+            or c.get('sandbox_policy',{}).get('type') not in ('read-only','readOnly')
+            or any(c.get('sandbox_policy',{}).get(k) is True for k in ('network_access','networkAccess'))):
+        raise ValueError('Místní kontext původního tahu se neshoduje.')
+    start_index, start = starts[0]; end_index, end = ends[0]; token_index, token = tokens[-1]
+    if (not start_index < token_index < end_index or start['payload'].get('turn_id') != turn
+            or end['payload'].get('turn_id') != turn
+            or str(end['payload'].get('last_agent_message','')).strip() != answer.strip()):
+        raise ValueError('Chybí dokončení a poslední spotřeba přesně původní odpovědi.')
+    started = datetime.fromisoformat(start['timestamp'].replace('Z','+00:00'))
+    observed = datetime.fromisoformat(token['timestamp'].replace('Z','+00:00'))
+    completed = datetime.fromisoformat(end['timestamp'].replace('Z','+00:00'))
+    if not datetime.fromisoformat(job['started_at']) <= started <= observed <= completed:
+        raise ValueError('Časové doklady původní spotřeby se neshodují.')
+    usage = None
+    for _, row in tokens:
+        current = normalize_usage((row['payload'].get('info') or {}).get('total_token_usage'))
+        if current is None or (usage is not None and any(current[k] < usage[k] for k in current)):
+            raise ValueError('Původní místní spotřeba není úplná nebo se vynulovala.')
+        usage = current
+    return usage, {'kind':'native_final_token_count','sha256':hashlib.sha256(raw).hexdigest(),
+        'thread_id':thread,'turn_id':turn,'completed_at':end['timestamp'],'observed_at':token['timestamp']}
+
+
+def complete_receipt_usage(store, key, job):
+    proof = job.get('receipt', {})
+    if proof.get('usage') is not None or job.get('usage_invalid') or job.get('guard_rejected'):
+        return
+    usage, provenance = native_turn_usage(store, key, job, proof.get('answer',''))
+    with store.transaction() as state:
+        current = state['jobs'][key]
+        if current.get('receipt') != proof or current.get('usage_invalid') or current.get('guard_rejected'):
+            raise ValueError('Původní doklad se při ověření změnil.')
+        current['receipt']['usage'] = usage
+        current['usage_provenance'] = provenance
 
 
 def record_event(store, key, event):
@@ -78,9 +153,8 @@ def accept_result(store, key, approved):
 
 def recover_model_result(store, key, payload, instructions, schema, *, client_factory=None):
     """Read precisely the original request, with no create/send/retry fallback."""
-    from app.science_news_model import policy, ROLE
+    from app.science_news_model import policy, ROLE, new_science_client
     from app.communication import agent_roles
-    from app.communication.luna_release import new_luna_client
     approved = policy(store)
     job = store._read()['jobs'].get(key)
     if not job:
@@ -89,7 +163,7 @@ def recover_model_result(store, key, payload, instructions, schema, *, client_fa
         raise ValueError('Původní výstup porušil omezení; nelze jej automaticky přijmout.')
     if job.get('phase') == 'preflight' and not job.get('thread_id'):
         from app.science_news_model import call_model
-        return call_model(store,key,payload,instructions,schema,client_factory=client_factory or new_luna_client,
+        return call_model(store,key,payload,instructions,schema,client_factory=client_factory or new_science_client,
                           budget_group=job.get('budget_group'))
     from app.science_news_model import model_fingerprint
     expected = model_fingerprint(payload, instructions, schema, approved, job.get('budget_group'))
@@ -98,6 +172,7 @@ def recover_model_result(store, key, payload, instructions, schema, *, client_fa
     if job['state'] == 'completed':
         return job['answer']
     if job.get('receipt'):
+        complete_receipt_usage(store, key, job)
         return accept_result(store, key, approved)
     if (not job.get('persistent') or not job.get('thread_id') or not job.get('client_message_id')
             or not job.get('executor')):
@@ -105,7 +180,7 @@ def recover_model_result(store, key, payload, instructions, schema, *, client_fa
     selected = job['executor']
     agent_roles.assert_current(selected, role=ROLE)
     context = store.root / 'contexts' / digest(key)
-    with (client_factory or new_luna_client)() as client:
+    with (client_factory or new_science_client)() as client:
         # Resume attaches ONLY the pinned existing thread. It never starts work.
         client.resume_thread(job['thread_id'], cwd=context, model=selected['model'],
             developer_instructions=instructions, base_instructions=instructions,
@@ -134,6 +209,7 @@ def recover_model_result(store, key, payload, instructions, schema, *, client_fa
             receipt={'answer': answer, 'thread_id': job['thread_id'], 'turn_id': turn['id'],
                      'client_message_id': job['client_message_id'], 'delivered': True, 'usage': usage},
             recovered_at=utc_now())
+    complete_receipt_usage(store, key, store._read()['jobs'][key])
     return accept_result(store, key, approved)
 
 

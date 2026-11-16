@@ -2842,3 +2842,12 @@ Před měřením neodpovězeného RPC použít potvrzené readiness RPC syntetic
 peeru. Ochrana EOF, úklid vláken/deskriptorů i2s limit zůstávají; neměří se
 startup interpretu. Změna je jen ve fixture, nikoli v živém transportu.
 Důkaz a původní selhání: private science_news_translation_fix_20261116.
+
+
+Doplnění16112026 k LL-121: sdílený konstruktor klienta p+n měl90s timeout,
+nevhodný pro úplný dlouhý překlad (ověřená část143s). Oddělit deadline
+překladu od releasu a nejprve převzít původní odpověď. Chybějící spotřebu
+lze doplnit jen přes identitu, dokončení a finální token_count původního
+tahu; neplatné čítače ani druhý tah nepovolují fallback. Cena prvního úseku
+může ukázat, že limit celé studie nestačí: připravit přesný scoped návrh,
+bez výslovného souhlasu nenavyšovat ani nerozdělit budget na více jobů.

@@ -9,7 +9,7 @@ from unittest.mock import Mock, patch
 
 from app.science_news import ScienceNews, identity
 from app.science_news_model import call_model, monthly_charged, ScienceBudgetError
-from app.science_news_translation import split_source, translate_study
+from app.science_news_translation import split_source, translate_study, budget_preview, authorize_budget
 from tests.test_science_news import item
 from tests.test_science_news_model import Client, BINDING, SELECTED
 
@@ -204,6 +204,61 @@ class FullStudyTests(unittest.TestCase):
                        budget_group='missing_group', client_factory=self.factory)
         self.assertEqual(self.calls(), 0)
         self.factory.assert_not_called()
+
+    def interrupted_after_verified_part(self):
+        def stopped(*a,**kw):
+            self.model(*a,**kw)
+            raise OSError('stopped after original completed receipt')
+        with self.assertRaises(OSError):self.run_study(model=stopped)
+
+    def test_budget_change_requires_exact_explicit_consent_and_sends_no_model_request(self):
+        self.interrupted_after_verified_part()
+        preview=budget_preview(self.store,item_id=self.item['id'],limit=20)
+        self.assertEqual(preview['old_limit'],15);self.assertEqual(preview['verified_parts'],1)
+        args={'item_id':self.item['id'],'limit':20,'expected_digest':preview['proposal_digest'],'request_id':'budget-fixture-request'}
+        with self.assertRaises(ValueError):authorize_budget(self.store,**args)
+        with self.assertRaises(ValueError):authorize_budget(self.store,**{**args,'expected_digest':'0'*64},confirmed=True)
+        self.assertEqual(self.store._read()['jobs'][self.key]['reserved_credits'],15)
+        self.assertTrue(authorize_budget(self.store,**args,confirmed=True)['ok'])
+        self.assertTrue(authorize_budget(self.store,**args,confirmed=True)['replayed'])
+        self.assertEqual(self.store._read()['jobs'][self.key]['reserved_credits'],20)
+        self.assertEqual(self.calls(),1)
+
+    def test_budget_proposal_rejects_unknown_parts_and_insufficient_monthly_capacity(self):
+        self.interrupted_after_verified_part()
+        with self.store.transaction() as state:
+            parent=state['jobs'][self.key]
+            state['jobs']['other_unknown']={'state':'delivery_unknown','month':parent['month'],'reserved_credits':85}
+        with self.assertRaises(ScienceBudgetError):budget_preview(self.store,item_id=self.item['id'],limit=20)
+        with self.store.transaction() as state:
+            state['jobs']['other_unknown'].update(state='completed',estimated_credits=0)
+            first=state['jobs'][state['jobs'][self.key]['part_keys'][0]]
+            first['state']='delivery_unknown'
+        with self.assertRaises(ValueError):budget_preview(self.store,item_id=self.item['id'],limit=20)
+        self.assertEqual(self.calls(),1)
+
+    def test_authorized_study_budget_completes_original_parts_without_changing_default_limit(self):
+        original=self.factory.side_effect
+        def factory():
+            client=original();send=client.send_text
+            def expensive(**kw):
+                result=send(**kw)
+                result.thread_token_usage={'input_tokens':40000,'cached_input_tokens':0,'output_tokens':16000,
+                    'reasoning_output_tokens':0,'total_tokens':56000}
+                return result
+            client.send_text=expensive;return client
+        self.factory.side_effect=factory
+        with self.assertRaises(ScienceBudgetError):self.run_study()
+        self.assertEqual(self.calls(),2)
+        proposal=budget_preview(self.store,item_id=self.item['id'],limit=20)
+        authorize_budget(self.store,item_id=self.item['id'],limit=20,expected_digest=proposal['proposal_digest'],
+                         request_id='approved-budget-for-fixture',confirmed=True)
+        self.run_study()
+        state=self.store._read();parent=state['jobs'][self.key]
+        self.assertEqual(parent['state'],'completed');self.assertEqual(self.calls(),3)
+        self.assertEqual(parent['estimated_credits'],18)
+        self.assertEqual(monthly_charged(state,parent['month']),18)
+        self.assertEqual(json.loads((self.store.root/'activation.json').read_text())['max_job_credits'],15)
 
 
 if __name__ == '__main__': unittest.main()

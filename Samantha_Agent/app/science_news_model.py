@@ -11,10 +11,9 @@ from datetime import datetime, timezone
 from zoneinfo import ZoneInfo
 
 from app.communication import agent_roles
-from app.communication.luna_release import new_luna_client
 from app.release_usage import normalize_usage, estimate_standard_credits
 from app.routine_tasks import start_data_only_thread
-from app.science_news import digest, utc_now
+from app.science_news import ID, digest, utc_now
 
 ROLE = "science_news_editor"
 TRANSLATION_INSTRUCTIONS = """Přelož celý dodaný zdrojový text do češtiny, bez
@@ -27,6 +26,15 @@ TRANSLATION_SCHEMA = {"type": "object", "properties": {"translation": {"type": "
 
 class ScienceBudgetError(ValueError):
     pass
+
+
+def new_science_client():
+    """A long translation must not inherit the release handoff's 90s timeout."""
+    from functools import partial
+    from app.codex_appserver import CodexAppServerClient, UnixSocketAppServerTransport, DEFAULT_CODEX_BIN
+    from app.communication.local_runtime import DEFAULT_SOCKET_PATH
+    return CodexAppServerClient(codex_binary=DEFAULT_CODEX_BIN, timeout=600,
+        transport_factory=partial(UnixSocketAppServerTransport, socket_path=DEFAULT_SOCKET_PATH))
 
 
 def policy(store):
@@ -146,12 +154,30 @@ def model_fingerprint(payload, instructions, schema, approved, budget_group=None
     return digest(fields)
 
 
+def study_limit(parent, approved):
+    consent = parent.get('budget_authorization')
+    if not consent:
+        return approved['max_job_credits']
+    limit = consent.get('limit')
+    if (type(limit) not in (int,float) or not math.isfinite(limit)
+            or not approved['max_job_credits'] < limit <= approved['max_month_credits']
+            or not ID.fullmatch(str(consent.get('request_id','')))
+            or consent.get('source_fingerprint') != parent.get('fingerprint')
+            or not re_full_digest(consent.get('proposal_digest'))):
+        raise ValueError('Navýšení rozpočtu studie nemá přesný souhlas.')
+    return limit
+
+
+def re_full_digest(value):
+    return isinstance(value,str) and len(value)==64 and all(c in '0123456789abcdef' for c in value)
+
+
 def group_allowance(state, key, group, payload, approved):
     parent = state['jobs'].get(group, {})
     keys = parent.get('part_keys', [])
     if (parent.get('kind') != 'translation_group' or parent.get('state') not in ('running', 'attention')
             or parent.get('policy') != approved or key not in keys
-            or parent.get('reserved_credits') != approved['max_job_credits']
+            or parent.get('reserved_credits') != study_limit(parent, approved)
             or parent.get('role_policy_digest') != agent_roles.load_role(role=ROLE)['policy_digest']):
         raise ValueError('Celý překlad nemá ověřenou společnou rezervaci.')
     index = keys.index(key)
@@ -166,10 +192,10 @@ def group_allowance(state, key, group, payload, approved):
         spent += cost
     if any(state['jobs'].get(k) for k in keys[index+1:]):
         raise ValueError('Pořadí původních částí překladu není ověřené.')
-    return round(parent['reserved_credits'] - spent, 8)
+    return min(approved['max_job_credits'], round(parent['reserved_credits'] - spent, 8))
 
 
-def call_model(store, key, payload, instructions, schema, *, client_factory=new_luna_client, budget_group=None):
+def call_model(store, key, payload, instructions, schema, *, client_factory=new_science_client, budget_group=None):
     from app.file_persistence import exclusive_file_lock, FileLockTimeoutError
     policy(store)  # Inactive never creates locks or private state.
     store._safe()

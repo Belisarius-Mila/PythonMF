@@ -394,3 +394,24 @@ původními účtenkami. GET nepokračuje, nejistá část se znovu neposílá.
 Zdroj, oprávnění, role i aktivace se kontrolují před další částí a složením.
 Částečný text nikdy nezapne Uložit zprávu. Omezený budget může další část
 zastavit před RPC; hotové části zůstávají soukromě zachované bez navýšení.
+
+
+## Delší modelový tah a výslovný rozpočet jedné studie — 2026-11-16
+
+ScienceNews používá vlastní new_science_client s600s limitem; release klient
+zůstává90s. Při timeoutu nic neopakuje. Chybí-li ve validovaném původním SDK
+dokladu usage, recovery smí ověřit finální token_count jediného nativního
+rolloutu stejného thread/turn/cwd/model/effort, read-only sandboxu a stejné
+finální odpovědi. Nutný jediný start/kontext/dokončení, finální monotónní
+čítače mezi startem a completion, stabilní soubor do2MB, žádný symlink.
+Guard rejection a neplatné již pozorované usage se fallbackem neobcházejí.
+Záznam se neexportuje; uloží se jen usage a provenance(hash/ID/čas).
+science_news_translation_budget_preview dává neplacený návrh pro přerušenou
+studii po ověření všech již požadovaných částí. Žádný neověřený úsek nesmí
+být schovaný pod novou rezervu. science_news_translation_budget_authorize
+vyžaduje confirmed, stabilní request_id a aktuální proposal_digest. Pod
+zámkem pracovníka i stavu ověří kapacitu měsíce a přidá scoped souhlas pouze
+k této zmrazené studii. Výchozí max_job_credits zůstává15, měsíční100;
+podřízený tah dostane nejvýše15 a současně zbytek odsouhlasené studie.
+Autorizační operace nevolá model, nepokračuje ani nepublikuje. Stejný souhlas
+je idempotentní, jiná studie/částky/vstup se stejným ID jsou odmítnuté.

@@ -12,6 +12,20 @@ from app.capabilities.models import (
 
 CAPABILITIES: tuple[CapabilityRecord, ...] = (
     CapabilityRecord(
+        capability_id="science_news_translation_budget_preview", label="Preview one study's exact translation budget",
+        risk=RiskLevel.READ_ONLY, reads=("original verified parts and study fingerprint", "current approved monthly budget"), writes=(),
+        tool="app.science_news_translation.budget_preview", audit=AuditPolicy.REDACTED,
+        notes="Read-only estimate and exact proposal digest. No model request or budget change; unknown original parts block approval.",
+    ),
+    CapabilityRecord(
+        capability_id="science_news_translation_budget_authorize", label="Authorize an exact increased budget for one study",
+        risk=RiskLevel.LOCAL_WRITE, reads=("exact current proposal digest", "explicit scoped user consent"),
+        writes=("one study reservation and idempotent consent receipt",),
+        tool="app.science_news_translation.authorize_budget", requires_confirmation=True,
+        confirmation_policy=ConfirmationPolicy.SUMMARY_BEFORE_ACTION, audit=AuditPolicy.REDACTED,
+        notes="Only the named frozen study; preserves role, default per-part limit and monthly cap. Does not resume work, send a model request or publish anything.",
+    ),
+    CapabilityRecord(
         capability_id="science_news_manual", label="Prepare an explicitly requested catch-up issue",
         risk=RiskLevel.EXTERNAL_GENERATION, reads=("public source packet for one completed week", "approved editor and budget"),
         writes=("private manual issue, original model receipt and ScienceNews inbox",),
