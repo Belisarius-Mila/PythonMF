@@ -7,6 +7,11 @@
       ? new Date(seconds * 1000).toLocaleString("cs-CZ", {timeZone: "Europe/Prague"}) : "zatím nedoloženo";
   }
   function text(element, value) { if (element.textContent !== value) element.textContent = value; }
+  function size(bytes) {
+    if (!Number.isFinite(bytes) || bytes < 0) return "neověřeno";
+    const value = bytes / 2 ** 30;
+    return `${value.toFixed(value > 0 && value < 0.01 ? 3 : 2)} GiB`;
+  }
   function render(data, status, metrics, list, doc = document) {
     metrics.replaceChildren(); list.replaceChildren();
     status.className = "status-line";
@@ -46,8 +51,11 @@
     for (const item of data.rows || []) {
       const card = doc.createElement("div"); card.className = "agent-supervisor-row";
       const title = doc.createElement("strong"); title.textContent = `${states[item.state] || "Neověřeno"}: ${item.name}`;
+      const header = doc.createElement("div"); header.className = "housekeeping-row-header";
+      const volume = doc.createElement("span"); volume.className = "housekeeping-size"; volume.textContent = size(item.allocated_bytes);
+      header.append(title, volume);
       const reason = doc.createElement("div"); reason.textContent = item.reason;
-      card.append(title, reason);
+      card.append(header, reason);
       if (item.ready_after && item.state === "pending") {
         const earliest = doc.createElement("div"); earliest.className = "project-meta";
         earliest.textContent = `Nejdřívější úklid: ${date(item.ready_after)}`; card.appendChild(earliest);
@@ -57,6 +65,15 @@
     if (audit.checked_at && !data.rows?.length) {
       const empty = doc.createElement("p"); empty.className = "project-meta";
       empty.textContent = "Žádné dočasné pracovní kopie v povoleném rozsahu."; list.appendChild(empty);
+    }
+    for (const item of data.retained || []) {
+      const card = doc.createElement("div"); card.className = "agent-supervisor-row";
+      const header = doc.createElement("div"); header.className = "housekeeping-row-header";
+      const title = doc.createElement("strong"); title.textContent = item.label;
+      const volume = doc.createElement("span"); volume.className = "housekeeping-size"; volume.textContent = size(item.allocated_bytes);
+      header.append(title, volume);
+      const reason = doc.createElement("div"); reason.textContent = item.reason;
+      card.append(header, reason); list.appendChild(card);
     }
   }
   function visible() {
@@ -102,5 +119,5 @@
     window.setInterval(() => { if (visible()) refresh(); }, 60000);
     if (visible()) refresh();
   }
-  window.SamanthaWorkspaceHousekeeping = {init, refresh, render};
+  window.SamanthaWorkspaceHousekeeping = {init, refresh, render, size};
 })();

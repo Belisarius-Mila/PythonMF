@@ -17,6 +17,8 @@ REASONS = {
     "Workspace is in use": "Pracovní kopie se právě používá.",
     "Workspace is locked, missing or prunable": "Kopie je zamčená nebo její stav vyžaduje kontrolu.",
     "Cannot verify open files": "Používání pracovní kopie nelze ověřit.",
+    "Unique data exceeds compact preservation limit": "Jedinečná data potřebují samostatnou větší zálohu.",
+    "Hidden index flags need manual review": "Nastavení pracovní kopie vyžaduje ruční kontrolu.",
 }
 
 
@@ -43,7 +45,8 @@ class HousekeepingOverview:
 
     def _audit(self):
         try:
-            value = {"rows": self.service.preview()["worktrees"], "scheduler": self.probe(),
+            preview = self.service.preview()
+            value = {"rows": preview["worktrees"], "retained": preview.get("retained", []), "scheduler": self.probe(),
                      "checked_at": self.clock()}
             failed = False
         except Exception:
@@ -82,9 +85,13 @@ class HousekeepingOverview:
                     continue
                 entry = entries.get(name, {})
                 retirement = entry.get("state")
-                ready_after = entry.get("marked_at", 0) + GRACE_SECONDS if retirement == "retired" else None
+                ready_after = entry.get("marked_at", 0) + (0 if entry.get("version") == 2 else GRACE_SECONDS) if retirement == "retired" else None
                 if retirement in {"removing", "attention"}:
                     state, reason = "blocked", "Předchozí odstranění vyžaduje ruční ověření."
+                elif entry.get("failure_stage"):
+                    state, reason = "blocked", "Zachování podkladů nebo úklid potřebuje kontrolu."
+                elif entry.get("version") == 2 and retirement == "retired" and entry.get("fingerprint") != row.get("fingerprint"):
+                    state, reason = "blocked", "Obsah kopie se po uzavření změnil."
                 elif not row.get("eligible"):
                     state, reason = "blocked", REASONS.get(row.get("reason"), "Stav kopie nelze ověřit.")
                 elif retirement == "retired":
@@ -92,7 +99,8 @@ class HousekeepingOverview:
                     reason = "Běží ochranná lhůta." if ready_after > now else "Čeká na ověření při hodinovém úklidu."
                 else:
                     state, reason = "unclosed", "Čeká na označení dokončené práce."
-                rows.append({"name": name, "state": state, "reason": reason, "ready_after": ready_after})
+                rows.append({"name": name, "state": state, "reason": reason, "ready_after": ready_after,
+                             "allocated_bytes": row.get("allocated_bytes")})
         counts = {state: sum(r["state"] == state for r in rows) if cached else None
                   for state in ("pending", "blocked", "unclosed")}
         run_at = latest.get("time")
@@ -107,7 +115,9 @@ class HousekeepingOverview:
                 "last_run": {"at": run_at, "state": latest.get("state"), "recent": recent,
                              "worktrees_removed": len(latest.get("removed", [])),
                              "autosave_removed": latest.get("autosave", {}).get("removed"),
-                             "free_change_bytes": change}, "counts": counts, "rows": rows}
+                             "free_change_bytes": change}, "counts": counts, "rows": rows,
+                "retained": [{"label": r["label"], "reason": r["reason"], "allocated_bytes": r.get("allocated_bytes")}
+                             for r in (cached.get("retained", []) if cached else [])]}
 
 
 _OVERVIEW = HousekeepingOverview()

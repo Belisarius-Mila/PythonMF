@@ -296,6 +296,202 @@ class WorktreeCleanupTests(unittest.TestCase):
         self.assertEqual(len(calls), 3)
 
 
+class PublishedCleanupTests(unittest.TestCase):
+    command = WorktreeCleanupTests.command
+    autosave = WorktreeCleanupTests.autosave
+
+    def setUp(self):
+        WorktreeCleanupTests.setUp(self)
+        with (self.repo / ".git/info/exclude").open("a") as stream:
+            stream.write("\n/Samantha_Agent/data/session_autosave/\n")
+        from app.worktree_cleanup_v2 import PublishedCleanup
+        self.cleaner = PublishedCleanup(self.service)
+        self.command(self.repo, "update-ref", "refs/remotes/origin/main", "HEAD")
+        self.service._write("activation.json", {"enabled": True})
+
+    def activate_v2(self):
+        p = self.cleaner.prepare(completed_names=[self.path.name])
+        self.cleaner.activate(confirmation=CONFIRMATION, proposal_sha256=p["sha256"], approval_ref="fixture-user-consent")
+        return p
+
+    def test_dirty_index_and_working_versions_are_preserved_before_actual_removal(self):
+        (self.path / "tracked.txt").write_text("staged version")
+        self.command(self.path, "add", "tracked.txt")
+        (self.path / "tracked.txt").write_text("working version")
+        self.activate_v2()
+        result = self.service.tick()
+        self.assertEqual(result["removed"], ["data-finished"])
+        objects = {p.read_bytes() for p in (self.service.root / "preserved/objects").iterdir()}
+        self.assertEqual(objects, {b"staged version", b"working version"})
+        self.assertEqual((self.repo / "tracked.txt").read_text(), "original")
+        self.assertEqual(self.command(self.repo, "rev-parse", "data/finished").strip(), self.head)
+
+    def test_git_history_content_is_not_archived_again_and_small_unique_data_is(self):
+        (self.path / "private").mkdir()
+        (self.path / "private/snapshot").write_text("original")
+        (self.path / "private/receipt").write_text("unique receipt")
+        (self.path / "private/.build").mkdir()
+        (self.path / "private/.build/cache").write_text("regenerable cache")
+        self.activate_v2()
+        self.assertEqual(self.service.tick()["removed"], ["data-finished"])
+        objects = [p.read_bytes() for p in (self.service.root / "preserved/objects").iterdir()]
+        self.assertEqual(objects, [b"unique receipt"])
+        import gzip
+        manifest = json.loads(gzip.decompress(next((self.service.root / "preserved").glob("*.json.gz")).read_bytes()))
+        self.assertTrue(next(r for r in manifest["records"] if r["path"] == "private/snapshot")["in_git"])
+
+    def test_source_change_during_preservation_stops_before_normalization(self):
+        (self.path / "tracked.txt").write_text("finished work")
+        self.activate_v2()
+        from app.worktree_cleanup_v2 import PublishedCleanup
+        original = PublishedCleanup._preserve
+        def changed(cleaner, scan):
+            original(cleaner, scan)
+            (self.path / "tracked.txt").write_text("new work after completion")
+        with patch.object(PublishedCleanup, "_preserve", changed):
+            self.assertTrue(self.service.tick()["blocked"])
+        self.assertEqual((self.path / "tracked.txt").read_text(), "new work after completion")
+
+    def test_copy_failure_never_removes_original(self):
+        (self.path / "tracked.txt").write_text("unique")
+        self.activate_v2()
+        with patch("app.worktree_cleanup_v2.atomic_create_bytes", side_effect=OSError("fixture failure")):
+            self.assertTrue(self.service.tick()["blocked"])
+        self.assertEqual((self.path / "tracked.txt").read_text(), "unique")
+
+    def test_corrupt_preserved_object_blocks_removal(self):
+        import hashlib
+        (self.path / "tracked.txt").write_text("unique")
+        root = self.service.root / "preserved/objects"
+        root.mkdir(parents=True)
+        (root / hashlib.sha256(b"unique").hexdigest()).write_text("corrupt")
+        self.activate_v2()
+        self.assertTrue(self.service.tick()["blocked"])
+        self.assertEqual((self.path / "tracked.txt").read_text(), "unique")
+
+    def test_preserving_symlink_never_reads_or_removes_outside_target(self):
+        outside = self.root / "outside-precious"
+        outside.write_text("must stay")
+        (self.path / "private").mkdir()
+        (self.path / "private/link").symlink_to(outside)
+        self.activate_v2()
+        self.assertEqual(self.service.tick()["removed"], ["data-finished"])
+        self.assertEqual(outside.read_text(), "must stay")
+
+    def test_legacy_opt_in_does_not_enable_expanded_rules_and_new_consent_is_bound(self):
+        (self.path / "tracked.txt").write_text("unique")
+        self.assertFalse(self.service.inspect("data-finished")["eligible"])
+        proposal = self.cleaner.prepare(completed_names=[self.path.name])
+        with self.assertRaises(ValueError):
+            self.cleaner.activate(confirmation="ano", proposal_sha256=proposal["sha256"], approval_ref="fixture-consent")
+        (self.path / "tracked.txt").write_text("changed")
+        with self.assertRaises(ValueError):
+            self.cleaner.activate(confirmation=CONFIRMATION, proposal_sha256=proposal["sha256"], approval_ref="fixture-consent")
+        self.assertNotIn("policy_version", self.service._read("activation.json", {}))
+
+    def test_two_snapshots_and_exact_numbered_legacy_names_only(self):
+        root = self.autosave()
+        (root / "previous_session 40").write_text("old")
+        (root / "previous_info 2.txt").write_text("old")
+        (root / "previous_session_2.jsonl").write_text("unknown name stays")
+        self.activate_v2()
+        result = self.service._autosave()
+        self.assertEqual(result["removed"], 39)
+        self.assertEqual(len(list(root.glob("session_*.jsonl"))), 2)
+        for name in ("latest_session.jsonl", "previous_session.jsonl", "previous_session_2.jsonl"):
+            self.assertTrue((root / name).exists())
+
+    def test_published_source_required_for_worktrees_but_retention_continues(self):
+        root = self.autosave()
+        self.activate_v2()
+        (self.repo / "tracked.txt").write_text("next development")
+        self.command(self.repo, "commit", "-am", "pending work")
+        result = self.service.tick()
+        self.assertTrue(self.path.exists())
+        self.assertTrue(result["blocked"])
+        self.assertEqual(len(list(root.glob("session_*.jsonl"))), 2)
+
+    def test_reachability_change_after_publication_does_not_look_like_changed_work(self):
+        self.activate_v2()
+        (self.path / "tracked.txt").write_text("next published content")
+        self.command(self.path, "add", "tracked.txt")
+        self.service.retire("data-finished", expected_head=self.head)
+        (self.repo / "tracked.txt").write_text("next published content")
+        self.command(self.repo, "commit", "-am", "publish")
+        self.command(self.repo, "update-ref", "refs/remotes/origin/main", "HEAD")
+        self.assertEqual(self.service.tick()["removed"], ["data-finished"])
+
+    def test_only_build_subdirectories_in_old_archives_are_deleted(self):
+        root = self.project / "data/private/ssd_cleanup_20261115/preserved/fixture"
+        (root / ".build").mkdir(parents=True)
+        (root / ".build/cache").write_text("cache")
+        (root / "keep.json").write_text("retained receipt")
+        self.activate_v2()
+        self.assertEqual(self.service.tick()["cache_dirs_removed"], 1)
+        self.assertFalse((root / ".build").exists())
+        self.assertEqual((root / "keep.json").read_text(), "retained receipt")
+
+    def test_busy_and_large_unique_content_are_preserved(self):
+        self.activate_v2()
+        self.service.busy_probe = lambda path: True
+        self.assertTrue(self.service.tick()["blocked"])
+        self.assertTrue(self.path.exists())
+        self.service.busy_probe = lambda path: False
+        (self.path / "tracked.txt").write_text("large unique content")
+        with patch("app.worktree_cleanup_v2.MAX_UNIQUE_BYTES", 1):
+            self.assertFalse(self.cleaner.inspect("data-finished")["eligible"])
+
+    def test_unconfirmed_removal_has_archive_and_is_not_repeated(self):
+        (self.path / "tracked.txt").write_text("unique")
+        self.activate_v2()
+        from app.worktree_cleanup_v2 import PublishedCleanup
+        original = PublishedCleanup._git
+        attempts = []
+        def fail(cleaner, path, *args, **kwargs):
+            if args[:2] == ("worktree", "remove"):
+                attempts.append(args); raise ValueError("uncertain")
+            return original(cleaner, path, *args, **kwargs)
+        with patch.object(PublishedCleanup, "_git", fail):
+            self.service.tick(); self.service.tick()
+        self.assertEqual(len(attempts), 1)
+        self.assertNotIn("--force", attempts[0])
+        self.assertTrue(any(p.read_bytes() == b"unique" for p in (self.service.root / "preserved/objects").iterdir()))
+
+    def test_synthetic_release_never_touches_real_housekeeping(self):
+        from app.worktree_cleanup_v2 import after_release_cleanup
+        with patch("app.worktree_cleanup.Housekeeping") as constructor:
+            result = after_release_cleanup({"deployed": True}, store_root=self.root / "fake-release")
+        self.assertEqual(result["state"], "not_applicable")
+        constructor.assert_not_called()
+
+    def test_scope_change_disables_deletion_and_real_hook_requires_v2(self):
+        from app.worktree_cleanup_v2 import after_release_cleanup
+        canonical = self.project / "data/private/communication/luna_release"
+        with patch("app.worktree_cleanup.PROJECT", self.project), patch("app.worktree_cleanup.Housekeeping", return_value=self.service), patch.object(self.service, "tick") as tick:
+            self.assertEqual(after_release_cleanup({"deployed": True}, store_root=canonical)["state"], "not_enabled")
+            tick.assert_not_called()
+        self.activate_v2()
+        with patch("app.worktree_cleanup_v2.MAX_UNIQUE_BYTES", 1):
+            result = self.service.tick()
+        self.assertEqual(result["state"], "attention")
+        self.assertTrue(self.path.exists())
+
+    def test_discovery_alone_does_not_close_a_workspace(self):
+        proposal = self.cleaner.prepare()
+        self.cleaner.activate(confirmation=CONFIRMATION, proposal_sha256=proposal["sha256"], approval_ref="fixture-user-consent")
+        self.service.tick()
+        self.assertTrue(self.path.exists())
+
+    def test_emergency_autosave_in_a_worktree_is_not_read_or_deleted(self):
+        root = self.path / "private/session_autosave"
+        root.mkdir(parents=True)
+        (root / "session_20261101_000000.jsonl").write_text("private emergency context")
+        result = self.cleaner.inspect("data-finished")
+        self.assertFalse(result["eligible"])
+        self.assertIn("metadata-only", result["reason"])
+        self.assertTrue((root / "session_20261101_000000.jsonl").exists())
+
+
 class HousekeepingCardTests(unittest.TestCase):
     def setUp(self):
         from app.cockpit_housekeeping import HousekeepingOverview

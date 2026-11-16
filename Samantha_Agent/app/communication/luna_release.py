@@ -814,6 +814,9 @@ def run_release(
             job = store.update(job_id, deployed=True, deployment_state="confirmed", verification={
                 **verification, "state": "deployed", "main_head": job["target_head"],
                 "deployment_target": job["deployment_target"], "protected_services_unchanged": True})
+            from app.worktree_cleanup_v2 import after_release_cleanup
+            maintenance = after_release_cleanup(job, store_root=store.root)
+            job = store.update(job_id, post_release_housekeeping=maintenance)
         except Exception as exc:
             # No raw command, exception text, tokens or private output is exposed.
             failure_message = (str(exc) if type(exc) in {LunaReleaseError, agent_roles.AgentRoleError} else

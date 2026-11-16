@@ -1,4 +1,29 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
+## 2026-11-16 11:16 CET — Schválený úklid v2, velikosti vpravo, p+n zadáno
+
+Míla schválil konkrétní odstranění zbytečných kopií po vysvětlení rozdílu
+mezi Gitovým kódem a soukromými daty, vývoj i následné p+n. Souhlas navazuje
+na již potvrzenou globální brzdu; další obecné povolení se znovu nevyžaduje.
+V2 má vlastní přesný návrh a atomickou aktivaci, samotné nasazení kódu
+nerozšiřuje dosavadní v1. Main/stálý Data/provozní profily/externí zálohy chráněné.
+
+Pravidla: explicitně dokončené data-* kopie po publikaci; Gitově dosažitelný
+obsah se nekopíruje, malé jedinečné pracovní i připravené verze se nejprve
+ověřeně uloží zvlášť (max100MiB/kopie, komprimovaný manifest). Teprve pak
+normalizace a git worktree remove bez force; větve zůstávají. Nejasné
+odstranění se neopakuje. Schválené staré .build cache ve2 pevných archivech
+jsou obnovitelné. Autosave latest/previous +2 hodinové časy a přesný úklid
+starých číslovaných variant. Karta vpravo uvádí GiB u kopií i zachovaných archivů.
+
+Živý čtecí preflight4 neaktivních kopií:8,85GiB, unikátní podklady10,22MiB
+včetně odlišných indexových verzí. Další kandidáti1,89GiB starých build cache
+a0,79GiB legacy autosave. Jde o alokace, nikoli slíbený zisk; skutečný rozdíl
+se změří při schváleném běhu.127 cílených integračních testů PASS; konečné
+testy, commit/p+n, přesný plán, zachování a měření jsou v private/
+workspace_housekeeping/v2_development.json a v2_completion.json.
+Další krok: dokončit právě zadané p+n, aktivaci a úklid; poté ScienceNews.
+Samotný tento zápis není důkaz fyzického odstranění nebo publikace.
+
 ## 2026-11-16 10:19 CET — Karta úklidu místně hotová, čeká na p+n
 
 Na Mílovo zadání doplněn čtecí přehled Servis → Provoz → Úklid pracovních

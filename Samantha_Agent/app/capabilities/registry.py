@@ -12,6 +12,20 @@ from app.capabilities.models import (
 
 CAPABILITIES: tuple[CapabilityRecord, ...] = (
     CapabilityRecord(
+        capability_id="workspace_housekeeping_prepare_v2", label="Prepare compact preservation and published-work cleanup",
+        risk=RiskLevel.LOCAL_WRITE, reads=("published main history", "exact disposable worktrees", "approved archive cache roots"),
+        writes=("private exact cleanup proposal",), tool="app.worktree_cleanup_v2.PublishedCleanup.prepare",
+        audit=AuditPolicy.REDACTED, notes="Only previews. Counts unique content, reuses reachable Git blobs and protects active workspaces. No deletion, activation or archive writes.",
+    ),
+    CapabilityRecord(
+        capability_id="workspace_housekeeping_activate_v2", label="Authorize the exact expanded cleanup scope",
+        risk=RiskLevel.DESTRUCTIVE, reads=("exact proposal and code digest", "explicit scope consent and global safety acknowledgement"),
+        writes=("durable version-two policy and exact completed-work targets",),
+        tool="app.worktree_cleanup_v2.PublishedCleanup.activate", requires_confirmation=True,
+        confirmation_policy=ConfirmationPolicy.EXACT_PHRASE, audit=AuditPolicy.REDACTED,
+        notes="Separate explicit scope approval. Two timestamped snapshots plus current/previous; exact numbered legacy names; only .build inside the two reviewed old archive roots. Published worktrees require verified compact preservation first. No force removal, branch deletion, external backup or live-profile changes.",
+    ),
+    CapabilityRecord(
         capability_id="workspace_housekeeping_status", label="Read the Cockpit housekeeping card",
         risk=RiskLevel.READ_ONLY, reads=("private cleanup summaries", "cached read-only workspace and launchd audit"),
         writes=(), tool="app.cockpit_housekeeping.housekeeping_overview", audit=AuditPolicy.REDACTED,
@@ -28,7 +42,7 @@ CAPABILITIES: tuple[CapabilityRecord, ...] = (
         risk=RiskLevel.LOCAL_WRITE, reads=("exact workspace and head", "Git, ignored-data and process checks"),
         writes=("private explicit completion marker",), tool="app.worktree_cleanup.Housekeeping.retire",
         audit=AuditPolicy.REDACTED,
-        notes="Only direct data-* linked worktrees; one-hour grace. Cancel the marker before any reuse. No deletion or activation.",
+        notes="Only direct data-* linked worktrees. V1 one-hour grace; activated V2 waits for clean published main and verified compact preservation. Cancel before reuse. Marking never deletes or activates.",
     ),
     CapabilityRecord(
         capability_id="workspace_housekeeping_cancel", label="Cancel retirement before workspace reuse",
@@ -56,7 +70,7 @@ CAPABILITIES: tuple[CapabilityRecord, ...] = (
         writes=("remove verified retired worktrees and surplus timestamped autosave", "bounded private receipt"),
         tool="app.worktree_cleanup.Housekeeping.tick", requires_confirmation=True,
         confirmation_policy=ConfirmationPolicy.EXACT_PHRASE, audit=AuditPolicy.REDACTED,
-        notes="Scheduled use is covered only by the activated fixed contract. Unknown ignored data, active/dirty/unmerged/changed workspaces block; never force, delete branches or touch system caches. Unknown removal never retries.",
+        notes="Scheduled use is covered only by its activated fixed contract. V1 blocks unknown data; separately approved V2 preserves small unique versions and reuses reachable Git blobs before removal, including completed dirty copies. Active/unmerged/changed/oversized work stays. Never force, delete branches, touch OS caches or retry uncertain removal.",
     ),
     CapabilityRecord(
         capability_id="vocabulary_authoring_preview", label="Preview one or a batch of Vocabulary EN meanings",

@@ -13,7 +13,8 @@ const elements = Object.fromEntries(["housekeepingStatus", "housekeepingMetrics"
 const doc = {hidden:false, handlers:{}, createElement: () => new Element(), getElementById: id => elements[id], addEventListener(name, callback) { this.handlers[name] = callback; }};
 const fixture = {ok:true,enabled:true,scheduler:{loaded:true,last_exit_code:0},audit:{checked_at:10000,stale:false,pending:false},
   last_run:{at:10000,recent:true,state:"completed",free_change_bytes:2**29,autosave_removed:48,worktrees_removed:0},
-  counts:{pending:0,blocked:1,unclosed:0},rows:[{name:"<img onerror=alert(1)>",state:"blocked",reason:"Lokální data."}]};
+  counts:{pending:0,blocked:1,unclosed:0},rows:[{name:"<img onerror=alert(1)>",state:"blocked",reason:"Lokální data.",allocated_bytes:2**30}],
+  retained:[{label:"Zachované podklady",reason:"Ověřené kopie.",allocated_bytes:2**28}]};
 let requests = [], fail = false, resolveFetch, intervalCallback;
 const ctx = {document:doc,window:{setTimeout,clearTimeout,setInterval:callback=>{intervalCallback=callback;}},AbortController,Date,
   fetch: (url, options) => {
@@ -29,7 +30,10 @@ vm.runInNewContext(fs.readFileSync("app/frontend/cockpit/housekeeping.js","utf8"
   assert.deepEqual(requests,["/api/workspace-housekeeping?refresh=1"]);
   assert.match(status.textContent,/každou hodinu/);
   assert.match(metrics.children[1].children[1].textContent,/\+0\.50 GiB/);
-  assert.match(list.children[0].children[0].textContent,/<img/);
+  assert.match(list.children[0].children[0].children[0].textContent,/<img/);
+  assert.equal(list.children[0].children[0].children[1].textContent,"1.00 GiB");
+  assert.equal(list.children[1].children[0].children[1].textContent,"0.25 GiB");
+  assert.equal(frontend.size(null),"neověřeno");assert.equal(frontend.size(0),"0.00 GiB");
   fail=true; await frontend.refresh();
   assert.equal(list.children.length,0); assert.equal(metrics.children.length,0); assert.match(status.textContent,/nelze ověřit/);
   frontend.render({...fixture,audit:{pending:true,checked_at:null},counts:{pending:null,blocked:null,unclosed:null},rows:[]},status,metrics,list,doc);

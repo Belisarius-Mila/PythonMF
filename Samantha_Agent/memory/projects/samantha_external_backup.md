@@ -2,6 +2,19 @@
 
 Projekt zalozen 2026-05-19.
 
+## 2026-11-16 11:16 CET — Schválené zjednodušení místních kopií v2
+
+Míla výslovně schválil konkrétní úklid, vývoj+p+n a velikosti vpravo.
+Gitové obsahy se opakovaně nekopírují; jedinečné podklady se před odstraněním
+dočasné kopie uloží a ověří zvlášť. Zálohy soukromých dat/externí recovery,
+main, stálý Data a provozní prostory jsou mimo mazání. Jen2 vymezené staré
+archivy dovolují odstranění .build; ostatní podklady zůstávají.
+Autosave zůstává aktuální/předchozí+2 hodinové časy; staré číslované varianty
+má nová explicitně schválená maska. Samotná publikace nezmění aktivní v1,
+v2 má přesný plán, digest a souhlas včetně již potvrzené globální brzdy.
+Preflight4kopie8,85GiB/unikáty10,22MiB;127 integračních PASS. Konečný stav
+zadaného vydání a fyzického úklidu v private/workspace_housekeeping/v2_completion.json.
+
 ## 2026-11-16 10:19 CET — Čtecí servisní přehled úklidu připravený
 
 V Cockpitu místně doplněna karta Servis → Provoz → Úklid pracovních kopií:

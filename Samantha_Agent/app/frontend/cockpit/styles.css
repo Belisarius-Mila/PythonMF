@@ -637,6 +637,9 @@
 /* Supervisor cards stay readable on the phone without a wide status table. */
 .agent-supervisor-row { padding: 10px 0; border-bottom: 1px solid #d8dee8; overflow-wrap: anywhere; }
 .agent-supervisor-row strong { display: block; margin-bottom: 4px; }
+.housekeeping-row-header { display: flex; align-items: baseline; gap: 12px; justify-content: space-between; }
+.housekeeping-row-header strong { min-width: 0; }
+.housekeeping-size { flex: 0 0 auto; white-space: nowrap; font-variant-numeric: tabular-nums; font-size: 13px; }
 /* Quick ISBN inventory shares the private library and defers location to Mac. */
 .quick-book-panel { border: 1px solid var(--line, #d4dce4); border-radius: 14px; padding: 16px; margin: 14px 0; min-width: 0; }
 .quick-book-panel[hidden], .quick-book-panel [hidden], #quickBookOpen[hidden] { display: none !important; }

@@ -1,5 +1,51 @@
 # Úklid dočasných pracovních kopií
 
+## Schválená v2 — 2026-11-16
+
+Míla po konkrétním auditu schválil širší úklid, zobrazení velikostí vpravo,
+vývoj i p+n. Navazuje na potvrzenou globální brzdu v této relaci. Souhlas
+platí pro níže vymezený rozsah, nikoli pro všechny soukromé či externí zálohy.
+
+V2 je samostatný registrovaný PublishedCleanup.prepare/activate; běžné nasazení
+kódu nepřepne již aktivní v1. Prepare potřebuje čistý publikovaný main,
+zmrazí kořeny, otisky kopií, kód i limit zachování. Activate vyžaduje jeho
+SHA-256, globální větu a referenci konkrétního souhlasu. Stávající LaunchAgent
+se nepřepisuje ani nerestartuje. Policy_version2 se ukládá atomicky.
+
+- Jen explicitně uzavřené přímé data-* worktrees stejného repozitáře;
+  main, stálý Data a provozní profily zůstávají chráněné. Před reuse cancel.
+- Po ověřeném push/deploy registrovaný vykonavatel spustí již autorizovaný
+  úklid označených kopií; hodinový tick je záloha. Neoznačená nová práce
+  se podle pouhé nečinnosti automaticky neuzavírá.
+- Vyžaduje čistý main shodný s origin/main a začleněný HEAD kopie. Obsah
+  dosažitelný z historie main se znovu nekopíruje; jeho blob/path reference
+  zůstává v kompaktním manifestu. Samotná čistota Gitu neprokazuje soukromá data.
+- Odlišné pracovní i připravené verze se uchovají zvlášť ve verificovaném
+  soukromém content-addressed archivu, nejvýše100MiB unikátů na kopii.
+  Komprimovaný manifest drží cesty, módy a reference. Jednotlivé obsahy,
+  hashe a soukromé cesty se nezveřejňují a nepatří do Gitu.
+- Teprve po ověření archivu a novém otisku kopie se normalizují zachované
+  změny přes git restore na původní HEAD a provede git worktree remove
+  bez force. Větve se nemažou. Chyba po zahájení odstranění zůstane attention,
+  bez automatického opakování; evidence má přesnou fázi selhání.
+- .build je regenerovatelná cache uvnitř dočasné kopie. Navíc lze odstranit
+  jen .build pod dvěma zkontrolovanými starými archivy:
+  private/ssd_cleanup_20261115/preserved a
+  private/focused_pn_cleanup_20261115/retired_worktree_data.
+  Ostatní archivované soubory a aktivně používané cache zůstávají.
+- Autosave: latest/previous + dva nejnovější hodinové časy. Staré číslované
+  varianty latest/previous_session/info se odstraňují jen podle přesné masky;
+  obsah se nečte. Chybějící či stará současná obnova blokuje retenci.
+  Nepublikovaný nový vývoj odloží úklid pracovních kopií, nikoli retenci.
+
+Cockpit vpravo uvádí GiB i u ponechaných kopií a zachovaných archivů;
+neověřená velikost zůstává neověřená. Jde o alokované bloky se zohledněním
+hardlinků, ne příslib skutečného zisku. Ten změří disk_usage před/po.
+Aktuální živý plán, aktivace a úklid mají oddělené soukromé účtenky ve
+workspace_housekeeping. Nejasné případy a větší unikáty zůstávají ke kontrole.
+
+Následující část uchovává původní v1; účinnou verzi určuje activation.json.
+
 ## Čtecí karta v Cockpitu — 2026-11-16
 
 Servis → Provoz → Úklid pracovních kopií má místně připravenou kartu:

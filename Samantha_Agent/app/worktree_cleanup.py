@@ -29,6 +29,21 @@ def digest(value):
     return hashlib.sha256(json.dumps(value, sort_keys=True, separators=(",", ":")).encode()).hexdigest()
 
 
+def allocated_bytes(path):
+    """Allocated blocks, deduplicating hardlinks without following directory links."""
+    path = Path(path)
+    if not path.exists() or path.is_symlink():
+        return None
+    total, seen = 0, set()
+    for directory, dirs, files in os.walk(path, followlinks=False):
+        for name in files + [n for n in dirs if (Path(directory) / n).is_symlink()]:
+            s = (Path(directory) / name).lstat()
+            key = (s.st_dev, s.st_ino)
+            if key not in seen:
+                total += s.st_blocks * 512; seen.add(key)
+    return total
+
+
 class Housekeeping:
     def __init__(self, project=PROJECT, *, worktrees=None, busy_probe=None, clock=time.time):
         self.project = Path(project).resolve()
@@ -95,9 +110,13 @@ class Housekeeping:
                    for line in result.stdout.decode(errors="replace").splitlines() if line.startswith("n"))
 
     def inspect(self, name):
+        if self._read("activation.json", {}).get("policy_version") == 2:
+            from app.worktree_cleanup_v2 import PublishedCleanup
+            return PublishedCleanup(self).inspect(name)
         row = {"name": name, "eligible": False, "reason": "unverified"}
         try:
             path = self._path(name)
+            row["allocated_bytes"] = allocated_bytes(path)
             linked = self._linked().get(str(path))
             if linked is None or "locked" in linked or "prunable" in linked:
                 raise ValueError("Workspace is locked, missing or prunable")
@@ -121,6 +140,10 @@ class Housekeeping:
                     raise ValueError("Unsafe ignored path")
                 item = path / relative
                 s = item.lstat()
+                if "session_autosave" in relative.parts:
+                    unknown += 1
+                    inventory.append([str(relative), s.st_ino, s.st_size, s.st_mtime_ns, None])
+                    continue
                 # Never follow ignored symlinks, including ancestors of a cache file.
                 safe = not item.is_symlink() and not any((path / p).is_symlink() for p in relative.parents)
                 cache = any(p in CACHES for p in relative.parts[:-1]) or relative.name == ".DS_Store"
@@ -149,12 +172,7 @@ class Housekeeping:
                 raise ValueError("Unknown ignored data must be preserved first")
             if self.busy_probe(path):
                 raise ValueError("Workspace is in use")
-            allocated = 0
-            for directory, dirs, files in os.walk(path, followlinks=False):
-                for filename in files:
-                    s = (Path(directory) / filename).lstat()
-                    allocated += s.st_blocks * 512
-            row.update(eligible=True, reason="ready", allocated_bytes=allocated)
+            row.update(eligible=True, reason="ready")
         except (ValueError, OSError, subprocess.SubprocessError) as exc:
             row["reason"] = str(exc) if isinstance(exc, ValueError) else type(exc).__name__
         return row
@@ -171,14 +189,27 @@ class Housekeeping:
             row["retirement"] = entry.get("state") if entry else "not_retired"
             rows.append(row)
         auto = self.project / "data/session_autosave"
-        plan = build_cleanup_plan(autosave_dir=auto, keep_latest_snapshots=12)
+        keep = 2 if self._read("activation.json", {}).get("policy_version") == 2 else 12
+        plan = build_cleanup_plan(autosave_dir=auto, keep_latest_snapshots=keep)
+        retained = []
+        for label, path, reason in (
+            ("Autosave", auto, f"Aktuální a předchozí obnova plus {keep} hodinové snapshoty."),
+            ("Jedinečné zachované podklady", self.root / "preserved", "Ověřené malé podklady a odkazy na obsah v Gitu."),
+            ("Podklady z úklidu 15. listopadu", self.project / "data/private/ssd_cleanup_20261115/preserved", "Zachované místní podklady; cache sestavení se mohou uklidit."),
+            ("Podklady ze starších pracovních kopií", self.project / "data/private/focused_pn_cleanup_20261115/retired_worktree_data", "Zachované místní podklady; cache sestavení se mohou uklidit."),
+        ):
+            if path.exists() and path.resolve() == path:
+                retained.append({"label": label, "allocated_bytes": allocated_bytes(path), "reason": reason})
         return {"enabled": self._read("activation.json", {}).get("enabled", False), "worktrees": rows,
                 "autosave": {"delete_count": plan.delete_count, "allocated_bytes": plan.allocated_bytes,
-                             "keep_latest_snapshots": 12}, "grace_seconds": GRACE_SECONDS}
+                             "keep_latest_snapshots": keep}, "grace_seconds": GRACE_SECONDS, "retained": retained}
 
     def retire(self, name, *, expected_head):
         # This is an explicit completion marker, not a delete operation.
         with exclusive_file_lock(self.root / "operation"):
+            if self._read("activation.json", {}).get("policy_version") == 2:
+                from app.worktree_cleanup_v2 import PublishedCleanup
+                return PublishedCleanup(self).retire_unlocked(name, expected_head)
             row = self.inspect(name)
             if not row["eligible"] or row.get("head") != expected_head:
                 raise ValueError("Workspace is not ready at the approved head: " + row["reason"])
@@ -215,7 +246,18 @@ class Housekeeping:
                 return {"state": "blocked", "reason": "Current and previous recovery must exist"}
         if self.clock() - (root / "latest_session.jsonl").stat().st_mtime > 1200:
             return {"state": "blocked", "reason": "Current recovery is stale"}
-        plan = build_cleanup_plan(autosave_dir=root, keep_latest_snapshots=12)
+        expanded = self._read("activation.json", {}).get("policy_version") == 2
+        plan = build_cleanup_plan(autosave_dir=root, keep_latest_snapshots=2 if expanded else 12)
+        from dataclasses import replace
+        from scripts.cleanup_session_autosave import CleanupFile
+        if expanded:
+            from app.worktree_cleanup_v2 import LEGACY_AUTOSAVE_PATTERN
+            extra = []
+            for p in root.iterdir():
+                if re.fullmatch(LEGACY_AUTOSAVE_PATTERN, p.name) and p.is_file() and not p.is_symlink():
+                    s = p.stat()
+                    extra.append(CleanupFile(path=str(p), size_bytes=s.st_size, allocated_bytes=s.st_blocks * 512, timestamp="legacy"))
+            plan = replace(plan, delete_files=plan.delete_files + tuple(extra))
         frozen = {}
         for item in plan.delete_files:
             p = Path(item.path)
@@ -243,6 +285,9 @@ class Housekeeping:
         with exclusive_file_lock(self.root / "operation"):
             if not self._read("activation.json", {}).get("enabled", False):
                 return {"state": "disabled", "removed": []}
+            if self._read("activation.json", {}).get("policy_version") == 2:
+                from app.worktree_cleanup_v2 import PublishedCleanup
+                return PublishedCleanup(self).tick_unlocked()
             before = shutil.disk_usage(self.project).free
             state = self._read("state.json", {"entries": {}})
             removed, blocked = [], []

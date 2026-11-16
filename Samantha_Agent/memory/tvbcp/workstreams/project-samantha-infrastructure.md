@@ -1,4 +1,11 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
+16.11.11:16 CET: Míla schválil konkrétní úklid v2, GiB vpravo, vývoj+p+n.
+Gitové obsahy se znovu nezálohují; malé unikáty se ověří odděleně, pak
+uzavřené kopie po publikaci odstraní. Jen přesné staré build cache,
+autosave latest/previous+2 hodinové časy. V1 se bez vlastní aktivace nerozšiřuje.
+Preflight4kopie8,85GiB/unikáty10,22MiB;127 integrací PASS. Skutečný konec,
+zisk a účtenka pouze private/workspace_housekeeping/v2_completion.json.
+
 16.11.10:19 CET: Místně čtecí karta Servis → Provoz → Úklid pracovních kopií,
 54 cílených PASS, konečný důkaz private/workspace_housekeeping/ui_development.json.
 Plánovač/poslední běh/volné místo/důvody kopií, bezpečné pozadí/cache/stáří.
@@ -2316,3 +2323,21 @@ Technický důkaz:54 cílených Python testů včetně HTTP a Node PASS. Čtecí
 provozní vzorek0 čekajících/4 ponechané, plánovač loaded/exit0; žádná živá
 data mazána. Aktivační kontrakt shodný. Finální brána/commit/čtecí vzorek
 v private/workspace_housekeeping/ui_development.json; fyzická přejímka otevřená.
+
+## 2026-11-16 11:16 CET — Úklid podle skutečné obnovitelnosti a velikosti v GiB
+
+Hotovo: V2 umí odděleně zachovat malé jedinečné podklady a připravené/pracovní
+verze před odstraněním dokončené kopie. Obsah v historii main se neduplikuje.
+Přidané velikosti vpravo u ponechaných kopií a archivů; neověřená velikost
+se nevydává za nulu. Pravidla retence zmenšena na aktuální/předchozí a2 časy.
+Rozhodnutí: Míla souhlasil s konkrétním navrženým úklidem, vývojem i p+n;
+globální riziko již potvrdil v téže relaci. Rozsah je v přesném novém plánu.
+Aktivní prostory a soukromá/externí data se plošně nemažou. Bez dokončení
+nebo potvrzení shody publikovaného main se pracovní kopie nemaže.
+Další krok: Dokončit právě autorizované p+n a živý úklid s měřením.
+Navrhované další kroky: Po úklidu původní oprava obnovy ScienceNews.
+Technický důkaz:127 integračních PASS, oddělené skutečné syntetické testy
+uchování indexu/pracovní verze, selhání archivu, scope guardu a neduplikace
+Gitových blobů. Preflight4 kopie8,85GiB, unikáty10,22MiB; finální počty,
+SHA, účtenky, skutečné zisku a rizika v private/workspace_housekeeping/
+v2_development.json a v2_completion.json. Syntetický důkaz není živý úklid.

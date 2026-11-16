@@ -319,13 +319,13 @@ def _camino_service_commands() -> tuple[WorkflowCommand, ...]:
 
 WORKFLOW_COMMANDS: tuple[WorkflowCommand, ...] = (
     *(WorkflowCommand(
-        command_id="workspace_housekeeping_" + action, title=f"Úklid pracovních kopií: {action}",
+        command_id="workspace_housekeeping_" + action.replace("-", "_"), title=f"Úklid pracovních kopií: {action}",
         purpose="Čtecí přehled bezpečných kandidátů nebo příprava neaktivního návrhu hodinového úklidu.",
         aliases=(f"úklid pracovních kopií {action}",),
         argv=(str(PYTHON_BIN), str(SAMANTHA_DIR / "scripts/workspace_housekeeping.py"), action),
-        cwd=SAMANTHA_DIR, risk="private_write" if action == "prepare" else "read_only_preview",
-        writes="pouze soukromý návrh; bez aktivace a mazání" if action == "prepare" else "nic",
-    ) for action in ("preview", "prepare", "status")),
+        cwd=SAMANTHA_DIR, risk="private_write" if action.startswith("prepare") else "read_only_preview",
+        writes="pouze soukromý návrh; bez aktivace a mazání" if action.startswith("prepare") else "nic",
+    ) for action in ("preview", "prepare", "prepare-v2", "status")),
     *(WorkflowCommand(
         command_id="science_news_" + action.replace("-", "_"), title=f"ScienceNews: {action}",
         purpose="Stav, čtecí náhled zdrojů nebo neinstalovaný náhled plánovače vědeckých novinek.",

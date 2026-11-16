@@ -91,11 +91,13 @@ def activate(housekeeping, *, confirmation, proposal_sha256, agents=None, runner
 
 def main(argv=None):
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("action", choices=("preview", "prepare", "activate", "retire", "cancel", "tick", "status"))
+    parser.add_argument("action", choices=("preview", "prepare", "activate", "retire", "cancel", "tick", "status", "prepare-v2", "activate-v2"))
     parser.add_argument("--name", default="")
     parser.add_argument("--head", default="")
     parser.add_argument("--confirmation", default="")
     parser.add_argument("--proposal-sha256", default="")
+    parser.add_argument("--approval-ref", default="")
+    parser.add_argument("--completed-name", action="append", default=[])
     args = parser.parse_args(argv)
     service = Housekeeping()
     try:
@@ -111,6 +113,11 @@ def main(argv=None):
             result = service.cancel(args.name)
         elif args.action == "tick":
             result = service.tick()
+        elif args.action in {"prepare-v2", "activate-v2"}:
+            from app.worktree_cleanup_v2 import PublishedCleanup
+            cleaner = PublishedCleanup(service)
+            result = cleaner.prepare(completed_names=args.completed_name) if args.action == "prepare-v2" else cleaner.activate(
+                confirmation=args.confirmation, proposal_sha256=args.proposal_sha256, approval_ref=args.approval_ref)
         else:
             result = {"activation": service._read("activation.json", {"enabled": False}),
                       "latest": service._read("latest.json", {})}

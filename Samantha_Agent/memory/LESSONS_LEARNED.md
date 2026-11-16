@@ -2775,3 +2775,11 @@ Příští CLI běh opravu načte, nová ostrá záloha v tomto vývojovém krok
 - Ověření:57 cílených PASS včetně reálného syntetického git worktree remove,
   souběhu a nejistého pokusu bez retry. Živý náhled ponechal všechny4 kopie;
   aktivace plánovače je samostatná. Pravidla workspace_housekeeping.md.
+- 2026-11-16: U uzavřených pracovních kopií rozlišovat cache, Gitové bloby
+  a malé unikáty. Pouhá kontrola čistoty zablokovala503 cest, ale496 bylo
+  shodných s aktuálním main; v ignorovaných podkladech1,07GiB už bylo v Gitu.
+  V2 zachová pracovní i připravené unikáty a ověří je před normalizací,
+  pak odstraní kopii bez force. Staré číslované autosave vyžadují přesnou
+  masku; .build je cache. Git nenahrazuje soukromé/externí zálohy.
+  Syntetické destruktivní scénáře a přesný plán před živým během jsou povinné;
+  konečný důkaz a skutečný zisk pouze v workspace_housekeeping/v2_completion.json.

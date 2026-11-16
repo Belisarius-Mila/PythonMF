@@ -100,8 +100,10 @@ Společné pracovní instrukce PythonMF; cesty níže jsou vůči `Samantha_Agen
   `app.worktree_cleanup.Housekeeping.retire(name, expected_head=...)`.
   Před jeho opětovným použitím zruš označení přes `cancel(name)`; při nejistém
   mazání do něj nepiš. Pravidla a samostatná aktivace plánovače jsou v
-  `memory/technical/workspace_housekeeping.md`. Neznámá ignorovaná data
-  nejprve zachovej, nepoužívej force removal.
+  `memory/technical/workspace_housekeeping.md`. Označení zapisuj z hlavního
+  checkoutu do jeho společného registru. Aktivní v2 po ověřeném p+n uklidí
+  označené kopie a předem zachová malé jedinečné podklady; Gitové obsahy
+  nekopíruje znovu. Větší nebo neověřená data ponechá. Nepoužívej force removal.
 - Hotové kroky automaticky nepushuj. Push vyžaduje výslovný pokyn, potvrzené
   uzavření denního balíčku nebo musí být nutný pro výslovně zadaný vzdálený provoz.
 - Čistý `main` pouze napřed před `origin/main` je `GitHub batch pending` a

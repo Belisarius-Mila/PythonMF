@@ -2,6 +2,15 @@
 
 ## Úklid pracovních kopií — 2026-11-16
 
+V2 přidává workspace_housekeeping_prepare_v2/activate_v2. Prepare nemění
+data a objevování samo kopie neuzavírá; přesné completed_names musí být
+výslovně schválené nebo je vlastník označí retire z hlavního checkoutu.
+Samostatný digest a souhlas aktivují dvě hodinové obnovy a přesné legacy
+masky, zachování malých unikátů a vymezené staré build cache. P+n hook
+smí po ověřeném vydání spustit jen dříve aktivovanou v2, pouze v kanonickém
+runtime; syntetické testy nemohou sáhnout na skutečné registry. Podrobnosti
+technical/workspace_housekeeping.md. API zobrazení zůstává jen čtecí.
+
 Registrované workspace_housekeeping_preview/retire/cancel/prepare/activate/tick
 řídí technical/workspace_housekeeping.md. Preview/status nemažou, retire je
 výslovné uzavření přesného dokončeného worktree, cancel je povinný před reuse.
