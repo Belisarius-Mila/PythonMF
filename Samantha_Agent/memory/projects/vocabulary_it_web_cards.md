@@ -18,7 +18,7 @@ Přijatá pravidla
 Základní soubory a hranice
 VocabularyIT/vocabulary_it_catalog.json:497 identit (471 původních a26 webových);24 schválených hlavních významů a26 nových, ostatní metadata dále návrhy.
 VocabularyIT/vocabulary_it_input_manifest.json: neměnné otisky777 původních vstupů.
-Aktuální stav: Psaní zveřejněné f07dce0a má hlášené zvukové vady; nová místní oprava45 JS PASS a Safari tok, p+n opravy schválené, výsledek private/vocabulary_it_timing_release_20261116/completion.json.
+Aktuální stav: oprava časování816d559a vydaná; Míla potvrdil sluchátka. LEDA599 připravených nových karet, aktivních497; dokončení zvuků čeká na odpověď k HTTP429. Viz vocabulary_it_leda_20261116.md.
 VocabularyIT/vocabulary_it_catalog.py: pouze čtení a ověření, žádný CSV writer.
 VocabularyIT/vocabulary_it_review_queue.txt:112 prioritních karet k revizi.
 VocabularyIT/WEB_FOUNDATION.txt: identita, přesné kontrolní příkazy a další bod.
@@ -431,3 +431,29 @@ i s Psaním; ověřit začátek a konec, potom telefon/VoiceOver.
 Technický důkaz: Jediné registrované submit_release(wait=True), zmrazený
 head/cíl/model, programová doménová brána a přesné veřejné soubory. Účtenka
 requested/uncertain není potvrzené vydání a nezadává se nový pokus.
+
+
+### 2026-11-16 17:13 CET — LEDA: připravená dávka599 karet, zvuky zatím neúplné
+
+Hotovo:
+- Dostupný přepis lekcí3–8 porovnaný s497 kartami.599 nových významů v18 tématech, vlastní věty, rody/slovní druhy, slabiky, pevné obrazy a úplné pokrytí708 zdrojových řádků.
+- Připravená kontrolní galerie a TXT v Downloads. Aktivní aplikace se zatím nemění; původní osobní výběry a zvuky zůstávají zachované.
+- Předchozí hlášený zvukový problém Míla uzavřel potvrzením sluchátek; vydání816d559a má dokončenou účtenku.
+
+Rozhodnutí:
+- Míla zadal úplné místní doplnění včetně médií. Použije se dostupný podklad bez domýšlení chybějících lekcí1–2; p+n je samostatné.
+- Po HTTP429 se neúspěšný požadavek neopakuje automaticky. Otázka na řízené opakování čeká na odpověď.
+
+Další krok:
+Po Mílově odpovědi dokončit audio podle stejné privátní účtenky a zachovaných otisků.
+
+Navrhované další kroky:
+- Zařadit uzavřený balíček, přenést practiceChanges a ověřit skutečné zvuky/počty.
+- Případně dohledat podklad1–2; potom nové p+n jen na výslovný pokyn.
+
+Technický důkaz:
+- Přesná soukromá projekce1096 karet:659 obrazových pinů,657 odlišných zdrojů a1314 exportovaných obrazů/náhledů. Původní katalog/spelling/CSV/mapping zachované.
+- Náhled:43 původních scénářů PASS; zbývající2 upravené varianty PASS samostatně (čestně neúplná reálná knihovna a A/hard/latest20 s novými UID). Nejde o akustickou přejímku nových MP3.
+- Nových5 smluvních kontrol v test_vocabularyit_catalog.py; finální programová brána a otisky podle soukromé gate účtenky v leda adresáři. Zatím žádné publikování.
+
+- Cílená programová brána připraveného balíčku:131 kontrol PASS (validation-v3), včetně5 nových kontrol katalogu. Finální zdrojové otisky a účtenka jsou v private/vocabulary_it_leda_20261116; nejde o dokončení zvuků ani zveřejnění.

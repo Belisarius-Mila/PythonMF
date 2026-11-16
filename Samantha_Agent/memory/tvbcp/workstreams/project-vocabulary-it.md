@@ -1,13 +1,13 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
-- Aktualizováno: 2026-11-16 14:10 CET
-- Psaní je zveřejněné ve f07dce0a, ale Míla při používání nahlásil přerušování/začátky zvuku a chybějící čtení po dopsání. Přejímka zvuku tedy znovu otevřená.
-- Místní oprava: Další i replay čekají na skutečné ended +250ms; přepínač Psaní čekání neobejde. Po600ms zeleného potvrzení psaní následuje nové celé přečtení.
-- Každý herní poslech má vlastní Audio od nuly; přednačtení dalšího zadání zachované. Žádná nová hlasová výroba ani zásah do osobních výběrů.
--45 JS scénářů PASS;3 nové reprodukce na původním kódu selhávaly. Safari potvrdilo celý tok na congratulazione a Di niente. včetně replay s draftem a návratu na původní okno.
-- Skutečné akustické přijetí na Mílově zařízení/telefonu zůstává otevřené; AX a ended nejsou záznam slyšitelného výstupu.
-- P+n opravy výslovně schválené; aktuální výsledek private vocabulary_it_timing_release_20261116/release.json a completion.json. Poslechový retest po vydání otevřený.
+- Aktualizováno: 2026-11-16 17:13 CET
+- Předchozí oprava zvukového časování vydaná ze816d559a; účtenka14:30 potvrzuje push/deploy. Míla následně potvrdil, že zbývající useknuté začátky způsobovala sluchátka. Další oprava časování není otevřený úkol.
+- LEDA: z dostupného TXT zpracováno708 řádků viditelných částí lekcí3–8. Lekce1–2 v souboru nejsou; jejich úplnost se nepředstírá.
+- Připraveno599 nových významových karet vit-0498–1096: vlastní IT/CZ věty, slovní druhy/rody,18 původních témat, obrazy a slabiky. Aktivní katalog, export, původní MP3 i výběry A–D zůstávají na497 kartách beze změny.
+- Kandidát `VocabularyIT/batches/leda_20261116.json`; přehled `PictNew/generated/20261116_it_leda/review.html`. Úplný soukromý náhled má1096 karet/657 různých obrazových zdrojů/1314 webových assetů. Není publikovaný.
+- Audio plán:4384 reference/4222 unikátních MP3, původních1907 zachovaných. Nové4 hotové (2 syntézy,2 přesně převzaté EN/CZ);2311 chybí, z toho2 požadavky skončily HTTP429. Jejich opakování čeká na odpověď Míly na asynchronní otázku; bez ní znovu nic neposílat.
+- Zbývá dokončit zvuky, zařadit uzavřenou dávku a přenést připravené obrazové konflikty/barvy do practice builderu, aktualizovat počty integračních testů a projít finální bránou. P+n tohoto obsahu nebylo zadáno.
 <!-- SAMANTHA_CURRENT_STATUS_END -->
 
 # TVBCP: Vocabulary IT
@@ -504,3 +504,29 @@ i s Psaním; ověřit začátek a konec, potom telefon/VoiceOver.
 Technický důkaz: Jediné registrované submit_release(wait=True), zmrazený
 head/cíl/model, programová doménová brána a přesné veřejné soubory. Účtenka
 requested/uncertain není potvrzené vydání a nezadává se nový pokus.
+
+
+### 2026-11-16 17:13 CET — LEDA: připravená dávka599 karet, zvuky zatím neúplné
+
+Hotovo:
+- Dostupný přepis lekcí3–8 porovnaný s497 kartami.599 nových významů v18 tématech, vlastní věty, rody/slovní druhy, slabiky, pevné obrazy a úplné pokrytí708 zdrojových řádků.
+- Připravená kontrolní galerie a TXT v Downloads. Aktivní aplikace se zatím nemění; původní osobní výběry a zvuky zůstávají zachované.
+- Předchozí hlášený zvukový problém Míla uzavřel potvrzením sluchátek; vydání816d559a má dokončenou účtenku.
+
+Rozhodnutí:
+- Míla zadal úplné místní doplnění včetně médií. Použije se dostupný podklad bez domýšlení chybějících lekcí1–2; p+n je samostatné.
+- Po HTTP429 se neúspěšný požadavek neopakuje automaticky. Otázka na řízené opakování čeká na odpověď.
+
+Další krok:
+Po Mílově odpovědi dokončit audio podle stejné privátní účtenky a zachovaných otisků.
+
+Navrhované další kroky:
+- Zařadit uzavřený balíček, přenést practiceChanges a ověřit skutečné zvuky/počty.
+- Případně dohledat podklad1–2; potom nové p+n jen na výslovný pokyn.
+
+Technický důkaz:
+- Přesná soukromá projekce1096 karet:659 obrazových pinů,657 odlišných zdrojů a1314 exportovaných obrazů/náhledů. Původní katalog/spelling/CSV/mapping zachované.
+- Náhled:43 původních scénářů PASS; zbývající2 upravené varianty PASS samostatně (čestně neúplná reálná knihovna a A/hard/latest20 s novými UID). Nejde o akustickou přejímku nových MP3.
+- Nových5 smluvních kontrol v test_vocabularyit_catalog.py; finální programová brána a otisky podle soukromé gate účtenky v leda adresáři. Zatím žádné publikování.
+
+- Cílená programová brána připraveného balíčku:131 kontrol PASS (validation-v3), včetně5 nových kontrol katalogu. Finální zdrojové otisky a účtenka jsou v private/vocabulary_it_leda_20261116; nejde o dokončení zvuků ani zveřejnění.
