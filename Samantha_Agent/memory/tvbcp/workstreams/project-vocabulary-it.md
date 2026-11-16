@@ -1,14 +1,14 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
-- Aktualizováno: 2026-11-16 11:09 CET
-- Zveřejněná galerie497 karet/1907 MP3 a odkaz Cockpitu2f6c783a funkční, p+n dokončené.
-- Nový režim Slovo a obrázek místně:4 obrázky, slabiky/spojení/zvuk, opravné pokusy, velká karta a opakování chyb.
-- Vlastní filtr Přehledu se zachovává celý; automaticky se nemění A–D ani obtížné příznaky.
-- 497 přesných jazykových záznamů,495 dělení a2 výslovně celé přejímky; všech497 má čtveřici v plném výběru.
--29 JS scénářů,6 Python včetně JS wrapperu a17 HTTP přesných. Finální brána/checkpoint v private vocabulary_it_spelling_20261116.
-- Nové fyzické QA otevřené: Safari/Finder bez dostupného okna, browser bridge nedostupný.
-- Tento herní krok ještě nepublikovaný. Dále fyzický proklik a samostatné Pages p+n; psaní zpaměti později.
+- Aktualizováno: 2026-11-16 12:55 CET
+- Slovo a obrázek již zveřejněné (dd0ceade / začlenění ee6d904d), Míla potvrdil funkčnost.
+- Nové volitelné Psaní místně hotové: po dohrání velké karty se zápis skryje, velké pole přijme přesný text, zeleně potvrdí600ms a zavře se.
+- Nápověda ukáže slovo500ms, zachová rozepsaný text a má samostatné oznámení pro čtečku.
+-38 JS scénářů PASS; skutečný Safari proklik: skrytí/fokus, částečný zápis, nápověda, dopsání, uzavření a další otázka. Telefon/VoiceOver přejímka otevřená.
+- Jednorázový dřívější výpadek nelze zpětně určit; všech1282 veřejných herních assetů HTTP200, přesných a plně dekódovatelných.
+- Nové Psaní dosud nepublikované; finální programová brána, otisk a checkpoint v private vocabulary_it_writing_20261116.
+- Další krok: samostatně schválené Pages p+n tohoto kroku; předchozí vydání neopakovat.
 <!-- SAMANTHA_CURRENT_STATUS_END -->
 
 # TVBCP: Vocabulary IT
@@ -405,3 +405,38 @@ Fyzická vizuální/přehrávací přejímka tohoto nového režimu není dolož
 CUA Safari i Finder vracejí cgWindowNotFound, browser access host unavailable.
 Nepovažovat DOM/HTTP za skutečný render nebo iPhone/Android přejímku.
 Finální brána, otisk zdrojů a lokální checkpoint: private/vocabulary_it_spelling_20261116.
+
+
+### 2026-11-16 12:55 CET — Volitelné psaní zpaměti po velké kartě
+
+Hotovo: V režimu Slovo a obrázek přibyl přepínač Psaní. Po dokončení
+italského přehrání velké karty se zápis skryje a objeví se velké zvýrazněné
+pole. Správný celý zápis se automaticky potvrdí zeleně600ms, pole zmizí
+a vrátí se karta s tlačítkem Další. Nápověda ukáže slovo500ms bez ztráty
+rozepsaného textu; opakované stisknutí čas obnoví. Skrytý zápis nezůstává
+v alternativním textu obrázku. Samostatná živá zpráva s italským lang
+zpřístupní nápovědu i čtečce obrazovky.
+
+Rozhodnutí: Výslovně schválené doplnění tlačítka a nápovědy v této hře.
+Výchozí Psaní je vypnuté. Během návštěvy zachová volbu mezi koly, po reloadu
+začne vypnuté. Zkouší se celý italský zápis z karty včetně interpunkce;
+přízvuky a dvojité souhlásky se vyžadují, velikost písmen, krajní/opakované
+mezery a běžné telefonní apostrofy se tolerují. Chybné Enter vysvětlí
+neshodu, samotné rozepsání se netrestá. Žádný nový trvalý profil/draft,
+žádné automatické označení obtížných; původní opakování obrázkových chyb
+zachované. Souhrn přidá počet správných zápisů a použití nápovědy.
+
+Další krok: Po samostatném p+n zveřejnit nové Psaní a převzít je na telefonu.
+Navrhované další kroky: Jazyková revize metadat/vět a přejímka VoiceOver.
+
+Technický důkaz:38 JS scénářů PASS, včetně NFC/diakritiky/IME,500ms hintu,
+600ms potvrzení, replay bez ztráty draftu, přepnutí během psaní, chybového
+zvuku/timeoutu, návratu/bfcache a nepřepisování A–D. Ve skutečném Safari
+ověřená částečná odpověď ma, nápověda mai, dokončení mai, uzavření pole,
+fokus na Další a přechod na paese. Vlastní testovací okno zavřené, původní
+rozehrané produkční okno zachované. Fyzický telefon ani skutečný VoiceOver
+se tím nepotvrzují. Brána/otisk/checkpoint: private/vocabulary_it_writing_20261116.
+Předchozí hra již nasazená a uživatelem přijatá. Čtecí audit všech jejích1282
+assetů (814 obrazů/miniatur a468 IT word MP3) na veřejné adrese prošel HTTP200,
+SHA i úplným dekódováním bez závady; přesná příčina jedné minulé chyby neznámá.
+Toto nové psaní je jen místní, bez nového p+n a bez zásahu do Willova main.

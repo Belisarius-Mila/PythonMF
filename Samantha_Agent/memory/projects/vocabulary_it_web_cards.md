@@ -18,7 +18,7 @@ Přijatá pravidla
 Základní soubory a hranice
 VocabularyIT/vocabulary_it_catalog.json:497 identit (471 původních a26 webových);24 schválených hlavních významů a26 nových, ostatní metadata dále návrhy.
 VocabularyIT/vocabulary_it_input_manifest.json: neměnné otisky777 původních vstupů.
-Aktuální stav: galerie/audio/odkaz Cockpitu zveřejněné; nový režim Slovo a obrázek místně implementovaný, viz poslední záznam.
+Aktuální stav: galerie/audio/odkaz Cockpitu i Slovo a obrázek zveřejněné a přijaté; nové volitelné Psaní místně hotové, viz poslední záznam.
 VocabularyIT/vocabulary_it_catalog.py: pouze čtení a ověření, žádný CSV writer.
 VocabularyIT/vocabulary_it_review_queue.txt:112 prioritních karet k revizi.
 VocabularyIT/WEB_FOUNDATION.txt: identita, přesné kontrolní příkazy a další bod.
@@ -331,3 +331,38 @@ Fyzická vizuální/přehrávací přejímka tohoto nového režimu není dolož
 CUA Safari i Finder vracejí cgWindowNotFound, browser access host unavailable.
 Nepovažovat DOM/HTTP za skutečný render nebo iPhone/Android přejímku.
 Finální brána, otisk zdrojů a lokální checkpoint: private/vocabulary_it_spelling_20261116.
+
+
+### 2026-11-16 12:55 CET — Volitelné psaní zpaměti po velké kartě
+
+Hotovo: V režimu Slovo a obrázek přibyl přepínač Psaní. Po dokončení
+italského přehrání velké karty se zápis skryje a objeví se velké zvýrazněné
+pole. Správný celý zápis se automaticky potvrdí zeleně600ms, pole zmizí
+a vrátí se karta s tlačítkem Další. Nápověda ukáže slovo500ms bez ztráty
+rozepsaného textu; opakované stisknutí čas obnoví. Skrytý zápis nezůstává
+v alternativním textu obrázku. Samostatná živá zpráva s italským lang
+zpřístupní nápovědu i čtečce obrazovky.
+
+Rozhodnutí: Výslovně schválené doplnění tlačítka a nápovědy v této hře.
+Výchozí Psaní je vypnuté. Během návštěvy zachová volbu mezi koly, po reloadu
+začne vypnuté. Zkouší se celý italský zápis z karty včetně interpunkce;
+přízvuky a dvojité souhlásky se vyžadují, velikost písmen, krajní/opakované
+mezery a běžné telefonní apostrofy se tolerují. Chybné Enter vysvětlí
+neshodu, samotné rozepsání se netrestá. Žádný nový trvalý profil/draft,
+žádné automatické označení obtížných; původní opakování obrázkových chyb
+zachované. Souhrn přidá počet správných zápisů a použití nápovědy.
+
+Další krok: Po samostatném p+n zveřejnit nové Psaní a převzít je na telefonu.
+Navrhované další kroky: Jazyková revize metadat/vět a přejímka VoiceOver.
+
+Technický důkaz:38 JS scénářů PASS, včetně NFC/diakritiky/IME,500ms hintu,
+600ms potvrzení, replay bez ztráty draftu, přepnutí během psaní, chybového
+zvuku/timeoutu, návratu/bfcache a nepřepisování A–D. Ve skutečném Safari
+ověřená částečná odpověď ma, nápověda mai, dokončení mai, uzavření pole,
+fokus na Další a přechod na paese. Vlastní testovací okno zavřené, původní
+rozehrané produkční okno zachované. Fyzický telefon ani skutečný VoiceOver
+se tím nepotvrzují. Brána/otisk/checkpoint: private/vocabulary_it_writing_20261116.
+Předchozí hra již nasazená a uživatelem přijatá. Čtecí audit všech jejích1282
+assetů (814 obrazů/miniatur a468 IT word MP3) na veřejné adrese prošel HTTP200,
+SHA i úplným dekódováním bez závady; přesná příčina jedné minulé chyby neznámá.
+Toto nové psaní je jen místní, bez nového p+n a bez zásahu do Willova main.

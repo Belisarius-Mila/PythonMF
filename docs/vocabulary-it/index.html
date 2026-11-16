@@ -70,11 +70,11 @@
       <nav class="study-navigation" aria-label="Další slovíčko"><button id="previousButton" type="button">← Předchozí</button><button id="nextButton" class="primary" type="button">Další →</button><button id="newRoundButton" type="button" hidden>Nové zamíchané kolo</button><button id="backBottomButton" type="button" aria-label="Zpět na přehled">Přehled</button></nav>
     </section>
     <section id="quizView" class="quiz-view spelling-practice" aria-labelledby="quizTitle" hidden>
-      <header class="quiz-header"><div><p class="eyebrow">Procvičování italštiny</p><h1 id="quizTitle">Slovo a obrázek</h1><p>Prohlédni si zápis, poslechni slovo a vyber správný obrázek.</p></div><button id="quizBack" type="button">← Přehled</button></header>
+      <header class="quiz-header"><div><p class="eyebrow">Procvičování italštiny</p><h1 id="quizTitle">Slovo a obrázek</h1><p>Prohlédni si zápis, poslechni slovo a vyber správný obrázek.</p></div><div class="practice-header-actions"><button id="practiceWritingToggle" class="writing-toggle" type="button" aria-pressed="false" aria-controls="practiceWritingPanel">Psaní: vypnuto</button><button id="quizBack" type="button">← Přehled</button></div></header>
       <div id="quizSetup" class="quiz-setup">
         <h2>Tvůj aktuální výběr</h2><p id="quizSelection"></p>
         <p>Platí všechny filtry z Přehledu: osobní zásoba A–D, obtížná slova, okruhy, hledání i posledně přidaná.</p>
-        <p>Slabiky se spojí do slova a zazní italština. Po správné odpovědi si prohlédneš velkou kartu. Dál pokračuješ vlastním tempem.</p>
+        <p>Slabiky se spojí do slova a zazní italština. Po správné odpovědi si prohlédneš velkou kartu. Zapni Psaní, pokud chceš potom napsat slovo zpaměti. Dál pokračuješ vlastním tempem.</p>
         <p id="quizPoolNotice" class="notice" role="status" aria-live="polite"></p>
         <div class="practice-setup-actions"><button id="quizStart" class="primary" type="button" disabled>Začít procvičovat</button><button id="quizSetupChange" type="button">Změnit filtr v Přehledu</button></div>
       </div>
@@ -83,7 +83,7 @@
         <p id="quizMessage" class="quiz-message" role="status" aria-live="polite"></p>
         <div id="quizChoices" class="quiz-choices" aria-label="Čtyři obrázky"></div>
         <div id="practiceStrip" class="spelling-strip"><p id="practiceWord" class="spelling-word" lang="it" role="heading" aria-level="2"></p><p id="practiceNote" class="practice-note"></p></div>
-        <article id="practiceHero" class="practice-hero" hidden><img id="practiceHeroImage" width="600" height="600" alt=""><h2 id="practiceHeroWord" class="spelling-word" lang="it" tabindex="-1"></h2><p id="practiceHeroCz" lang="cs"></p></article>
+        <article id="practiceHero" class="practice-hero" hidden><img id="practiceHeroImage" width="600" height="600" alt=""><h2 id="practiceHeroWord" class="spelling-word" lang="it" tabindex="-1"></h2><p id="practiceHeroCz" lang="cs"></p><div id="practiceWritingPanel" class="practice-writing" hidden><label for="practiceWritingInput">Napiš italsky zpaměti</label><input id="practiceWritingInput" type="text" lang="it" inputmode="text" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" enterkeyhint="done" aria-describedby="practiceWritingStatus" placeholder="Piš sem…"><div class="writing-actions"><button id="practiceWritingHint" type="button">Nápověda · 0,5 s</button><p id="practiceWritingStatus" role="status" aria-live="polite"></p></div><p id="practiceWritingHintStatus" class="practice-hint-announcement" role="status" aria-live="polite" aria-atomic="true"></p></div></article>
         <div class="quiz-actions"><button id="quizNext" class="primary" type="button" disabled>Další →</button></div>
       </div>
       <div id="quizEnd" class="quiz-end" hidden><h2>Kolo dokončeno</h2><p id="quizResult"></p><button id="quizAgain" class="primary" type="button">Znovu celý výběr</button><button id="quizErrors" type="button">Zopakovat chyby z kola</button><button id="quizEndChange" type="button">Změnit výběr</button></div>
