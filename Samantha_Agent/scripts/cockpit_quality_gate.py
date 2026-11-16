@@ -401,6 +401,7 @@ TEST_MODULES = (
     "tests.test_science_news_model",
     "tests.test_science_news_recovery",
     "tests.test_science_news_manual",
+    "tests.test_science_news_translation",
     "tests.test_science_news_trial",
     "tests.test_science_news_cached_translation",
     "tests.test_science_news_activation",

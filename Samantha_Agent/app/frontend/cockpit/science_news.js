@@ -78,14 +78,17 @@
       }
     }
     async function translate(item) {
+      if (working.has(item.id)) return;
+      working.add(item.id);
       // Synchronous navigation preserves the iOS user gesture. Same-origin page
       // polls a read-only endpoint; it NEVER restarts the translation on reload.
-      const popup = openWindow(`/science-news/translation?id=${encodeURIComponent(item.id)}`, "_blank", "noopener");
-      void popup;
       try {
+        const popup = openWindow(`/science-news/translation?id=${encodeURIComponent(item.id)}`, "_blank", "noopener");
+        void popup;
         await api("/api/science-news/translate", {item_id: item.id});
         message("Překlad se zobrazí v samostatném okně.");
       } catch (error) { message(error.message); }
+      finally { working.delete(item.id); }
     }
     function render(data) {
       elements.list.replaceChildren();

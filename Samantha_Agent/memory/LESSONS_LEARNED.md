@@ -2823,3 +2823,22 @@ Příští CLI běh opravu načte, nová ostrá záloha v tomto vývojovém krok
   nejistý požadavek. Oddělit prokazatelný preflight před thread/start.
   Explicitní uzavření bez výstupu ponechá podklady, unknown i rezervu;
   GET upozorňuje na přerušené/chybějící vydání i při prázdné frontě.
+
+
+Doplnění16112026 k LL-121: popup otevřený před POST musí číst i trvalý důvod
+odmítnuté přípravy, nikoli obecné not_started. Nature používá veřejný cookie
+přechod; izolovaný vázaný handshake není plošné povolení IDP hostu. rel=license
+může být na a a obecná extrakce stránky může vrátit jen náhled. Přesný rozsah
+studie se ověřuje ze sekcí včetně metod/referencí/rozšířených dat. Dělený překlad
+musí mít jednu společnou rezervu a původní účtenku každé části; unknown část
+nepovoluje její retry ani další placenou část. Důkazy: tests.test_science_news,
+tests.test_science_news_translation a science_news_frontend.test.cjs; živé
+zdrojové čtení v private science_news_translation_fix_20261116/source_audit.json.
+
+
+Doplnění16112026: syntetický EOF test App Serveru v návazné sadě dvakrát
+zahrnul pomalý start nového Pythonu do2s reakčního limitu; izolovaně prošel.
+Před měřením neodpovězeného RPC použít potvrzené readiness RPC syntetického
+peeru. Ochrana EOF, úklid vláken/deskriptorů i2s limit zůstávají; neměří se
+startup interpretu. Změna je jen ve fixture, nikoli v živém transportu.
+Důkaz a původní selhání: private science_news_translation_fix_20261116.

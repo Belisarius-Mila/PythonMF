@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import email.utils
 import html
+import http.cookiejar
 import re
 import ssl
 import urllib.error
@@ -37,6 +38,30 @@ class FeedRedirect(urllib.request.HTTPRedirectHandler):
         return super().redirect_request(req, fp, code, msg, headers, target)
 
 
+class NatureIdentityRedirect(FeedRedirect):
+    """Public publisher cookie handshake, without login or persisted cookies."""
+    max_redirections = 6
+
+    def __init__(self, original):
+        self.original = public_url(original)
+
+    def redirect_request(self, req, fp, code, msg, headers, newurl):
+        from urllib.parse import parse_qs, urlsplit
+        target = urlsplit(public_url(newurl))
+        previous = urlsplit(req.full_url)
+        if target.hostname == 'idp.nature.com':
+            authorize = (previous.hostname == 'www.nature.com' and target.path == '/authorize'
+                and parse_qs(target.query).get('redirect_uri') == [self.original]
+                and parse_qs(target.query).get('response_type') == ['cookie'])
+            transit = previous.hostname == 'idp.nature.com' and previous.path == '/authorize' and target.path == '/transit'
+            if not (authorize or transit):
+                raise ValueError('Nepovolené přesměrování vydavatele.')
+            return urllib.request.HTTPRedirectHandler.redirect_request(self, req, fp, code, msg, headers, newurl)
+        if previous.hostname == 'idp.nature.com' and public_url(newurl) != self.original:
+            raise ValueError('Vydavatel se nevrátil k původnímu veřejnému zdroji.')
+        return super().redirect_request(req, fp, code, msg, headers, newurl)
+
+
 def fetch_feed(url):
     if url not in SOURCES.values():
         raise ValueError("Neznámý zdroj.")
@@ -53,11 +78,82 @@ def fetch_public(url):
         context = ssl.create_default_context(cafile=certifi.where())
     except ImportError:
         context = ssl.create_default_context()
-    with urllib.request.build_opener(FeedRedirect(), urllib.request.HTTPSHandler(context=context)).open(request, timeout=20) as response:
+    handlers = [FeedRedirect(), urllib.request.HTTPSHandler(context=context)]
+    if urlsplit(url).hostname == 'www.nature.com':
+        handlers[0] = NatureIdentityRedirect(url)
+        handlers.append(urllib.request.HTTPCookieProcessor(http.cookiejar.CookieJar()))
+    with urllib.request.build_opener(*handlers).open(request, timeout=20) as response:
         data = response.read(MAX_BYTES + 1)
     if len(data) > MAX_BYTES:
         raise ValueError("Zdroj překročil limit velikosti.")
     return data
+
+
+class SourcePreparationError(ValueError):
+    def __init__(self, code, message):
+        super().__init__(message)
+        self.code = code
+
+
+def nature_article_text(data):
+    """Read the full study body, including Methods, references and extended data."""
+    from app.article_archive import ReadableTextParser
+
+    class Body(ReadableTextParser):
+        def __init__(self):
+            super().__init__()
+            self.body = 0
+            self.excluded = 0
+            self.finished = False
+            self.sections = set()
+
+        def handle_starttag(self, tag, attrs):
+            values = dict(attrs)
+            if tag == 'div' and 'c-article-body' in values.get('class', '').split() and not self.body:
+                self.body = 1
+                return
+            if not self.body:
+                return
+            if tag == 'div':
+                self.body += 1
+            if self.finished:
+                return
+            if tag == 'section':
+                title = values.get('data-title', '')
+                if self.excluded:
+                    self.excluded += 1
+                elif title == 'References':
+                    self.sections.add(title)
+                elif title in ('Rights and permissions', 'About this article'):
+                    self.finished = True
+                elif title == 'Inline Recommendations' or values.get('aria-labelledby') == 'content-related-subjects':
+                    self.excluded = 1
+                else:
+                    self.sections.add(title)
+            if not self.excluded and not self.finished:
+                super().handle_starttag(tag, attrs)
+
+        def handle_endtag(self, tag):
+            if not self.body:
+                return
+            if tag == 'div':
+                self.body -= 1
+            if self.excluded:
+                if tag == 'section':
+                    self.excluded -= 1
+                return
+            if not self.finished:
+                super().handle_endtag(tag)
+
+        def handle_data(self, value):
+            if self.body and not self.excluded and not self.finished:
+                super().handle_data(value)
+
+    parser = Body()
+    parser.feed(data.decode('utf-8', errors='replace'))
+    if not {'Main', 'References'} <= parser.sections or not parser.finished:
+        raise SourcePreparationError('source_incomplete', 'Úplné tělo studie se nepodařilo ověřit. Samotný abstrakt nepřeložím jako celou zprávu.')
+    return parser.text()
 
 
 def reusable_full_text(item, *, fetch=fetch_public):
@@ -74,7 +170,7 @@ def reusable_full_text(item, *, fetch=fetch_public):
         licence = ""
         def handle_starttag(self, tag, attrs):
             attrs = dict(attrs)
-            if tag != "link" or "license" not in attrs.get("rel", "").lower().split():
+            if tag not in ('link', 'a') or "license" not in attrs.get("rel", "").lower().split():
                 return
             url = urlsplit(attrs.get("href", ""))
             if url.hostname not in ("creativecommons.org", "www.creativecommons.org"):
@@ -83,17 +179,23 @@ def reusable_full_text(item, *, fetch=fetch_public):
             if re.fullmatch(r"/licenses/by-sa/(?:3\.0|4\.0)/?", url.path): self.licence = "cc-by-sa"
             if re.fullmatch(r"/publicdomain/zero/1\.0/?", url.path): self.licence = "cc0"
 
-    data = fetch(item["source_url"])
+    try:
+        data = fetch(item["source_url"])
+    except (OSError, ValueError) as error:
+        raise SourcePreparationError('source_unavailable', 'Plný text se nepodařilo načíst od vydavatele. Překlad nebyl spuštěný ani účtovaný. Zkus jej později nebo otevři původní zprávu.') from error
     if len(data) > MAX_BYTES:
         raise ValueError("Zdrojový text je příliš velký.")
     parser = LicenceParser()
     parser.feed(data.decode("utf-8", errors="replace"))
     if not parser.licence:
-        raise ValueError("Plný text nemá ověřené oprávnění k překladu. Otevři zdroj nebo připrav oprávněný text pro import.")
-    article = extract_article(data, item["source_url"])
-    if not 200 <= len(article.text) <= 50_000:
-        raise ValueError("Celou zprávu nelze v přijatelném rozsahu ověřit; nepoužiji místo ní abstrakt.")
-    return article.text, parser.licence
+        raise SourcePreparationError('permission_unverified', "Plný text nemá ověřené oprávnění k překladu. Otevři zdroj nebo připrav oprávněný text pro import.")
+    is_nature_study = urlsplit(item['source_url']).hostname == 'www.nature.com' and urlsplit(item['source_url']).path.startswith('/articles/s')
+    text = nature_article_text(data) if is_nature_study else extract_article(data, item['source_url']).text
+    if len(text) > 300_000:
+        raise SourcePreparationError('source_too_large', f'Úplná studie má {len(text):,} znaků a překračuje limit 300 000 znaků. Překlad nebyl spuštěný ani účtovaný. Text nezkracuji.')
+    if len(text) < 200:
+        raise SourcePreparationError('source_incomplete', "Celou zprávu nelze ověřit; nepoužiji místo ní abstrakt.")
+    return text, parser.licence
 
 
 def plain(value):

@@ -34,7 +34,7 @@ function setup(fetch, sharedStorage) {
  let ids=0;
  const api=context.window.SamanthaScienceNews.create({document:{createElement:t=>new Element(t)},elements,
    fetch:async(path,options)=>{calls.push({path,payload:options?JSON.parse(options.body):null});events.push('fetch');return fetch(path,options);},
-   storage,openWindow:(...args)=>{opened.push(args);events.push('window');},openLibrary:()=>events.push('library'),uuid:()=>`req${++ids}`});
+   storage,openWindow:(...args)=>{opened.push(args);events.push('window');if(elements.popupError)throw elements.popupError;},openLibrary:()=>events.push('library'),uuid:()=>`req${++ids}`});
  const button=label=>nodes(elements.list).find(i=>i.tagName==='button'&&i.textContent===label);
  return {api,elements,calls,opened,saved,events,button,storage};
 }
@@ -81,6 +81,42 @@ test('translation opens separate window synchronously and never resolves inbox',
  assert.equal(f.events[0],'window');assert.match(f.opened[0][0],/translation\?id=sn_fixture/);
  assert.equal(f.opened[0][2],'noopener');assert.equal(f.elements.list.children.length,1);
  assert.equal(f.calls[1].path,'/api/science-news/translate');
+});
+test('repeated clicks while the translation request is pending open only one window',async()=>{
+ let release;
+ const f=setup(async(path)=>path.endsWith('/translate')
+  ?await new Promise(resolve=>{release=()=>resolve(response({ok:true,state:'running'}));})
+  :response({...data(),activated:true}));
+ await f.api.refresh();const first=f.button('Přeložit celou zprávu').click();
+ await f.button('Přeložit celou zprávu').click();
+ assert.equal(f.opened.length,1);assert.equal(f.calls.filter(c=>c.path.endsWith('/translate')).length,1);
+ release();await first;
+});
+test('browser window error releases the translation button without sending work',async()=>{
+ const f=setup(async()=>response({...data(),activated:true}));await f.api.refresh();
+ f.elements.popupError=Error('Window unavailable');await f.button('Přeložit celou zprávu').click();
+ assert.equal(f.calls.length,1);assert.match(f.elements.status.textContent,/Window unavailable/);
+ f.elements.popupError=null;await f.button('Přeložit celou zprávu').click();
+ assert.equal(f.calls.filter(c=>c.path.endsWith('/translate')).length,1);
+});
+
+test('translation window shows the actual source failure and only performs reads',async()=>{
+ const {execFileSync}=require('node:child_process');
+ const page=JSON.parse(execFileSync('.venv/bin/python',['-c','import json; from app.science_news_translation_page import PAGE; print(json.dumps(PAGE))'],{encoding:'utf8'}));
+ const script=page.match(/<script>([\s\S]*?)<\/script>/)[1];
+ const el=Object.fromEntries(['status','source','text','heading'].map(k=>[k,new Element()]));
+ const calls=[],timers=[];let now=0;
+ const context={URL,URLSearchParams,location:{search:'?id=sn_fixture'},Date:{now:()=>now},
+  document:{getElementById:id=>el[id],querySelector:()=>el.heading},
+  fetch:async(...args)=>{calls.push(args);return response({ok:true,state:'blocked',
+   message:'Plný text se nepodařilo načíst od vydavatele. Překlad nebyl spuštěný.',
+   title:'Study',source_url:'https://www.nature.com/articles/fixture'});},
+  setTimeout:fn=>timers.push(fn)};
+ vm.runInNewContext(script,context);await new Promise(setImmediate);
+ assert.match(el.status.textContent,/od vydavatele/);assert.match(el.source.href,/nature.com/);
+ now=11000;await timers.shift()();
+ assert.equal(timers.length,0);assert(calls.every(c=>c.length===1));
+ assert.equal(el.text.textContent,'');
 });
 test('inactive translation is explained and sends no request or popup',async()=>{
  const f=setup(async()=>response(data([{...fixtureItem,translation_available:false}])));await f.api.refresh();

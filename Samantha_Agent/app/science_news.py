@@ -70,7 +70,7 @@ def validate_item(raw):
         raise ValueError("Neplatná vazba sledování.")
     # Only trusted editorial import may attach reusable full source text. Model
     # output is projected onto an explicit smaller set of fields by the runner.
-    if len(item.get("source_text", "")) > 120_000:
+    if len(item.get("source_text", "")) > 300_000:
         raise ValueError("Plný text překročil limit.")
     return item
 

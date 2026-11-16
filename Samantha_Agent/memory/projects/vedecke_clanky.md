@@ -727,3 +727,32 @@ brána a lokální commit v completion.json stejné složky. Tento zápis sám
 nedokládá výsledek modelu, push ani nové nasazení kódu.
 Předchozí oprava019a4948 je již vydaná; její skutečná účtenka je
 science_news_recovery_20261116/release_result.json a completion.json.
+
+
+### 2026-11-16 16:57 CET — Celá studie na vyžádání a oprava překladu
+
+Hotovo: místní oprava načítá veřejný článek Nature přes jeho běžný cookie
+přechod a ověřuje úplné tělo studie. Překladové okno ukazuje konkrétní chybu,
+původní odkaz i postup po částech. Dlouhá studie se zpracuje v původním pořadí
+včetně metod, bibliografie a textu rozšířených obrázků; uložit lze až celý
+spojený český text. Samostatné soubory příloh nejsou součástí HTML překladu.
+Rozhodnutí: Míla chce celou studii, když sám vyhodnotí její zásadní význam.
+Překlad spouští až jeho explicitní kliknutí; čtení okna nic neobjednává.
+Stávající role Sol/medium Standard a rozpočet15 kreditů platí společně pro
+celou studii, nikoli zvlášť pro každý úsek.100/měsíc zůstává. Limity jsou
+rezervace a následná přejímka usage, nikoli tvrdý upstream billing cap.
+Další krok: dokončit programovou bránu a lokální commit; nové p+n této
+opravy zatím nebylo zadané. Poté přejmout jedno výslovně vybrané celé dílo.
+Navrhované další kroky: přejmout příští přirozený páteční výběr.
+Technický důkaz: cílené testy a přesný konečný checkpoint jsou v private/
+science_news_translation_fix_20261116/development.json a completion.json.
+Zdrojové čtení ověřilo DALTAC137277 znaků (8 úseků), M87*87679 (5 úseků),
+oba s CC BY. Studie embryí má CC BY-NC-ND a současný import ji pro automatický
+překlad nepřijímá; bez oprávněného dodaného textu zůstává blokovaná.0 nových
+placených překladových tahů a žádná změna živých článků při vývoji.
+Zámek drží jednoho pracovníka, zmrazený zdroj/role/rozpočet i původní modelové
+účtenky. Neověřený úsek blokuje další práci a drží společnou rezervu;
+prokazatelně hotové části se nepřekládají znovu. Nedostatečný rozpočet zastaví
+zbývající práci a ponechá hotové části; limit se automaticky nezvyšuje.
+Riziko: skutečná významová přejímka celého překladu a fyzická přejímka okna
+na Mílově zařízení čekají. Vývoj sám nepovoluje nový placený překlad ani p+n.

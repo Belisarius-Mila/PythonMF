@@ -25,6 +25,10 @@ TRANSLATION_SCHEMA = {"type": "object", "properties": {"translation": {"type": "
     "complete": {"type": "boolean"}}, "required": ["translation", "complete"], "additionalProperties": False}
 
 
+class ScienceBudgetError(ValueError):
+    pass
+
+
 def policy(store):
     path = store.root / "activation.json"
     if path.is_symlink() or not path.exists():
@@ -117,58 +121,109 @@ class OneTurn:
         return event
 
 
-def call_model(store, key, payload, instructions, schema, *, client_factory=new_luna_client):
+def monthly_charged(state, month, *, exclude=None):
+    total = 0
+    for key, job in state['jobs'].items():
+        if job.get('month') != month or key == exclude:
+            continue
+        if job.get('budget_group'):
+            parent = state['jobs'].get(job['budget_group'], {})
+            if parent.get('kind') != 'translation_group' or key not in parent.get('part_keys', []) or parent.get('month') != month:
+                raise ValueError('Rozpočtová vazba překladu není ověřená.')
+            continue  # The whole study's reservation/actual cost is counted once.
+        actual = job.get('estimated_credits')
+        if job.get('state') == 'completed' and type(actual) in (int, float) and math.isfinite(actual) and actual >= 0:
+            total += actual
+        else:
+            total += job.get('reserved_credits', 0)
+    return total
+
+
+def model_fingerprint(payload, instructions, schema, approved, budget_group=None):
+    fields = {'payload': payload, 'instructions': instructions, 'schema': schema, 'policy': approved}
+    if budget_group is not None:
+        fields['budget_group'] = budget_group
+    return digest(fields)
+
+
+def group_allowance(state, key, group, payload, approved):
+    parent = state['jobs'].get(group, {})
+    keys = parent.get('part_keys', [])
+    if (parent.get('kind') != 'translation_group' or parent.get('state') not in ('running', 'attention')
+            or parent.get('policy') != approved or key not in keys
+            or parent.get('reserved_credits') != approved['max_job_credits']
+            or parent.get('role_policy_digest') != agent_roles.load_role(role=ROLE)['policy_digest']):
+        raise ValueError('Celý překlad nemá ověřenou společnou rezervaci.')
+    index = keys.index(key)
+    if parent['parts'][index] != payload:
+        raise ValueError('Část překladu neodpovídá zmrazené studii.')
+    spent = 0
+    for previous in keys[:index]:
+        job = state['jobs'].get(previous, {})
+        cost = job.get('estimated_credits')
+        if job.get('state') != 'completed' or type(cost) not in (int, float) or not math.isfinite(cost) or cost < 0:
+            raise ValueError('Nejprve ověř původní předchozí část překladu.')
+        spent += cost
+    if any(state['jobs'].get(k) for k in keys[index+1:]):
+        raise ValueError('Pořadí původních částí překladu není ověřené.')
+    return round(parent['reserved_credits'] - spent, 8)
+
+
+def call_model(store, key, payload, instructions, schema, *, client_factory=new_luna_client, budget_group=None):
     from app.file_persistence import exclusive_file_lock, FileLockTimeoutError
     policy(store)  # Inactive never creates locks or private state.
     store._safe()
     store.root.mkdir(parents=True, exist_ok=True, mode=0o700)
     try:
         with exclusive_file_lock(store.root / ('model_worker_' + digest(key)), timeout=0):
-            return _call_model_locked(store,key,payload,instructions,schema,client_factory=client_factory)
+            return _call_model_locked(store,key,payload,instructions,schema,client_factory=client_factory, budget_group=budget_group)
     except FileLockTimeoutError as error:
         raise ValueError('Původní požadavek ještě běží; nic neopakuji.') from error
 
 
-def _call_model_locked(store, key, payload, instructions, schema, *, client_factory):
+def _call_model_locked(store, key, payload, instructions, schema, *, client_factory, budget_group=None):
     approved = policy(store)
     text = json.dumps(payload, ensure_ascii=False, sort_keys=True)
     if len(text.encode()) > 180_000:
         raise ValueError("Podklady překročily velikostní limit.")
     binding = agent_roles.load_role(role=ROLE)
+    from app.science_news_recovery import recover_model_result, record_event, accept_result
+    snapshot = store._read()
+    old = snapshot['jobs'].get(key)
+    if old and old.get('budget_group') != budget_group:
+        raise ValueError('Původní požadavek patří jinému rozpočtu.')
+    if old and old.get('phase') != 'preflight':
+        return recover_model_result(store, key, payload, instructions, schema, client_factory=client_factory)
+    allowance = group_allowance(snapshot, key, budget_group, payload, approved) if budget_group else approved['max_job_credits']
     for candidate in binding["approved_models"]:
         # A conservative preflight estimate, still NOT a hard output/billing cap.
         estimate = estimate_standard_credits(candidate["model"], {
             "input_tokens": len(text.encode()) + len(instructions.encode()) + len(json.dumps(schema).encode()),
             "cached_input_tokens": 0, "output_tokens": 16_000, "reasoning_output_tokens": 0,
             "total_tokens": len(text.encode()) + len(instructions.encode()) + len(json.dumps(schema).encode()) + 16_000})
-        if estimate is None or estimate > approved["max_job_credits"]:
-            raise ValueError("Předběžná rezervace nepokryje odhad požadavku.")
+        if estimate is None or estimate > allowance:
+            raise ScienceBudgetError("Předběžná rezervace nepokryje odhad požadavku.")
     month = datetime.now(timezone.utc).astimezone(ZoneInfo("Europe/Prague")).strftime("%Y-%m")
-    fingerprint = digest({"payload": payload, "instructions": instructions, "schema": schema, "policy": approved})
-    from app.science_news_recovery import recover_model_result, record_event, accept_result
-    old = store._read()['jobs'].get(key)
-    if old and old.get('phase') != 'preflight':
-        return recover_model_result(store, key, payload, instructions, schema, client_factory=client_factory)
+    fingerprint = model_fingerprint(payload, instructions, schema, approved, budget_group)
     with store.transaction() as state:
         old = state["jobs"].get(key)
         if old and (old.get('phase') != 'preflight' or old.get('thread_id')
                     or old.get('fingerprint') != fingerprint or old.get('guard_rejected')
                     or old.get('role_policy_digest') != binding['policy_digest']):
             raise ValueError("Původní modelový pokus vyžaduje ověření; neopakuji jej.")
-        def charged(job):
-            actual = job.get("estimated_credits")
-            if (job.get("state") == "completed" and type(actual) in (int, float)
-                    and math.isfinite(actual) and actual >= 0):
-                return actual
-            return job.get("reserved_credits", 0)
-        used = sum(charged(j) for k,j in state["jobs"].items() if j.get("month") == month and k != key)
-        if used + approved["max_job_credits"] > approved["max_month_credits"]:
-            raise ValueError("Měsíční rozpočet nemá volnou rezervu.")
+        used = monthly_charged(state, month, exclude=key)
+        if budget_group:
+            if state['jobs'][budget_group]['month'] != month or group_allowance(state, key, budget_group, payload, approved) != allowance:
+                raise ValueError('Společná rezervace se před tahem změnila.')
+        if used + (0 if budget_group else approved["max_job_credits"]) > approved["max_month_credits"]:
+            raise ScienceBudgetError("Měsíční rozpočet nemá volnou rezervu.")
         state["jobs"][key] = {"state": "delivery_unknown", "fingerprint": fingerprint,
-            "reserved_credits": approved["max_job_credits"], "month": month, "started_at": old.get("started_at", utc_now()) if old else utc_now(), "persistent": True,
+            "reserved_credits": allowance, "month": month, "started_at": old.get("started_at", utc_now()) if old else utc_now(), "persistent": True,
             "preflight_count": (old.get("preflight_count", 0) if old else 0) + 1,
             "client_message_id": "science-news-" + digest({"key": key, "fingerprint": fingerprint})[:40],
             "phase": "preflight", "role_policy_digest": binding["policy_digest"]}
+        if budget_group:
+            state['jobs'][key].update(budget_group=budget_group, credit_limit=allowance)
     def accepted(turn_id):
         if not isinstance(turn_id, str) or not turn_id:
             raise ValueError('Původní tah nemá ID.')

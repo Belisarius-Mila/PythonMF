@@ -5,7 +5,7 @@ import threading
 
 from app.science_news import ScienceNews, digest
 from app.science_news_model import call_model, policy, TRANSLATION_INSTRUCTIONS, TRANSLATION_SCHEMA
-from app.science_news_sources import reusable_full_text
+from app.science_news_sources import reusable_full_text, SourcePreparationError
 
 WORKERS = threading.BoundedSemaphore(2)
 
@@ -58,12 +58,26 @@ def science_news_translation_status(item_id, *, store=None):
         job = store._read()["jobs"].get("translation_" + item_id, {})
         if item.get("translation"):
             return {"ok": True, "state": "completed", "title": item["title"], "translation": item["translation"], "source_url": item["source_url"]}
-        return {"ok": True, "state": job.get("state", "not_started"), "title": item["title"]}
+        preparation = item.get('translation_preparation', {})
+        result = {"ok": True, "state": job.get("state", preparation.get('state', "not_started")),
+            "title": item["title"], 'source_url': item['source_url']}
+        if job.get('message'):
+            result['message'] = job['message']
+        if job.get('part_count'):
+            result['part_count'] = job['part_count']
+            result['completed_parts'] = job.get('completed_parts', 0)
+        if not job and preparation.get('message'):
+            result['message'] = preparation['message']
+            result['error_code'] = preparation.get('error_code')
+        return result
     except (OSError, ValueError, TypeError, KeyError):
         return {"ok": False, "message": "Stav překladu nelze ověřit."}
 
 
 def translate(store, item, *, model=call_model):
+    if len(item['source_text']) > 20_000:
+        from app.science_news_translation import translate_study
+        return translate_study(store, item, model=model)
     key = "model_translation_" + item["id"]
     answer = model(store, key, {"source_text": item["source_text"]}, TRANSLATION_INSTRUCTIONS, TRANSLATION_SCHEMA)
     text = answer.get("translation", "")
@@ -85,34 +99,61 @@ def science_news_translate_action(payload, *, store=None):
         if item.get("translation"):
             return {"ok": True, "state": "completed"}
         policy(store)
+        key = "translation_" + item["id"]
+        existing = store._read()['jobs'].get(key)
+        if existing and existing.get('kind') not in ('translation_group', 'translation_pending'):
+            return {'ok': True, 'state': existing['state']}
+
+        def preparation(state, message, code=None):
+            with store.transaction() as data:
+                data['items'][item['id']]['translation_preparation'] = {
+                    'state': state, 'message': message, 'error_code': code}
+
+        def blocked(code, message):
+            preparation('blocked', message, code)
+            return {'ok': False, 'state': 'blocked', 'error_code': code,
+                    'operation_started': False, 'message': message}
+
         if not item.get("source_text"):
-            source_text, permission = reusable_full_text(item)
+            preparation('preparing_source', 'Načítám a ověřuji úplný zdrojový text…')
+            try:
+                source_text, permission = reusable_full_text(item)
+            except SourcePreparationError as error:
+                return blocked(error.code, str(error))
             with store.transaction() as state:
                 state["items"][item["id"]].update(source_text=source_text, translation_permission=permission)
             item = store.item(item["id"])
         if not item.get("source_text") or item.get("translation_permission") not in ("cc-by", "cc-by-sa", "cc0", "public-domain", "user-provided"):
-            return {"ok": False, "message": "Plný text a oprávnění k překladu zatím nejsou ověřené. Zdroj můžeš otevřít odkazem; abstrakt nevydávám za celý překlad."}
+            return blocked('permission_unverified', "Plný text a oprávnění k překladu zatím nejsou ověřené. Zdroj můžeš otevřít odkazem; abstrakt nevydávám za celý překlad.")
         acquired = WORKERS.acquire(blocking=False)
         if not acquired:
-            return {"ok": False, "message": "Připravují se jiné překlady. Zkus později."}
-        key = "translation_" + item["id"]
+            return blocked('busy', "Připravují se jiné překlady. Zkus později.")
         with store.transaction() as state:
             if key in state["jobs"]:
-                WORKERS.release()
-                acquired = False
-                return {"ok": True, "state": state["jobs"][key]["state"]}
-            state["jobs"][key] = {"state": "running"}
+                if state['jobs'][key].get('kind') not in ('translation_group', 'translation_pending'):
+                    WORKERS.release()
+                    acquired = False
+                    return {"ok": True, "state": state["jobs"][key]["state"]}
+            else:
+                state["jobs"][key] = {"state": "running", 'kind': 'translation_pending'}
+            state['items'][item['id']].pop('translation_preparation', None)
 
         def worker():
+            from app.science_news_translation import TranslationBusy, translate_study
+            status = None
             try:
-                translate(store, item)
+                translate_study(store, item)
                 status = "completed"
+            except TranslationBusy:
+                return
             except Exception:
                 status = "attention"
             finally:
                 try:
-                    with store.transaction() as state:
-                        state["jobs"][key]["state"] = status
+                    if status is not None:
+                        with store.transaction() as state:
+                            if state['jobs'][key].get('kind') != 'translation_group':
+                                state["jobs"][key]["state"] = status
                 finally:
                     WORKERS.release()
         threading.Thread(target=worker, daemon=True).start()

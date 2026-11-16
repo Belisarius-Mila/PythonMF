@@ -9,7 +9,8 @@ from pathlib import Path
 from unittest.mock import Mock, patch
 
 from app.science_news import ScienceNews, identity, public_url, archive_item
-from app.science_news_sources import parse_feed, collect, SOURCES, reusable_full_text
+from app.science_news_sources import (parse_feed, collect, SOURCES, reusable_full_text,
+    NatureIdentityRedirect, SourcePreparationError, nature_article_text)
 from app.science_news_runner import tick, slot, grounded_items, PRAGUE
 from app.cockpit_science_news import science_news_overview, science_news_decision_action, science_news_translate_action, translate
 from app.science_news_model import call_model, policy, OneTurn
@@ -194,6 +195,34 @@ class StoreTests(unittest.TestCase):
         self.assertEqual(self.store.overview()["pending_count"], 1)
         self.assertEqual(self.store._read()["jobs"], {})
 
+    def test_source_failure_is_visible_in_translation_window_without_paid_job(self):
+        from app.cockpit_science_news import science_news_translation_status
+        news = self.publish()
+        message = 'Úplná studie překračuje limit; překlad nebyl spuštěný.'
+        with patch('app.cockpit_science_news.policy'), \
+                patch('app.cockpit_science_news.reusable_full_text', side_effect=SourcePreparationError('source_too_large', message)), \
+                patch('app.cockpit_science_news.translate') as model:
+            result = science_news_translate_action({'item_id': news}, store=self.store)
+        self.assertFalse(result['ok']);self.assertIs(result['operation_started'], False)
+        self.assertEqual(result['error_code'], 'source_too_large')
+        before = self.store.path.read_bytes()
+        status = science_news_translation_status(news, store=self.store)
+        self.assertEqual(status['state'], 'blocked');self.assertEqual(status['message'], message)
+        self.assertEqual(status['source_url'], item()['source_url'])
+        self.assertEqual(self.store.path.read_bytes(), before)
+        self.assertEqual(self.store._read()['jobs'], {});model.assert_not_called()
+
+    def test_existing_uncertain_translation_cannot_refetch_or_start_a_second_worker(self):
+        news = self.publish()
+        with self.store.transaction() as state:
+            state['jobs']['translation_' + news] = {'state': 'attention'}
+        with patch('app.cockpit_science_news.policy'), \
+                patch('app.cockpit_science_news.reusable_full_text') as source, \
+                patch('app.cockpit_science_news.translate') as model:
+            result = science_news_translate_action({'item_id': news}, store=self.store)
+        self.assertEqual(result, {'ok': True, 'state': 'attention'})
+        source.assert_not_called();model.assert_not_called()
+
     def test_translation_is_separate_from_decision(self):
         news = self.publish([item(source_text="A sufficiently long complete source message for the fixture.", translation_permission="user-provided")])
         model = Mock(return_value={"translation": "Dostatečně dlouhý úplný český překlad této zkušební zdrojové zprávy.", "complete": True})
@@ -281,6 +310,65 @@ class StoreTests(unittest.TestCase):
 
 
 class ContractTests(unittest.TestCase):
+    def test_public_nature_cookie_redirect_is_bound_to_original_article(self):
+        from urllib.request import Request
+        from urllib.parse import urlencode
+        original = 'https://www.nature.com/articles/s41586-fixture'
+        guard = NatureIdentityRedirect(original)
+        auth = 'https://idp.nature.com/authorize?' + urlencode({'response_type': 'cookie', 'redirect_uri': original})
+        self.assertEqual(guard.redirect_request(Request(original), None, 303, '', {}, auth).full_url, auth)
+        transit = 'https://idp.nature.com/transit?opaque=fixture'
+        self.assertEqual(guard.redirect_request(Request(auth), None, 302, '', {}, transit).full_url, transit)
+        self.assertEqual(guard.redirect_request(Request(transit), None, 302, '', {}, original).full_url, original)
+        invalid = [
+            (original, auth.replace('idp.nature.com', 'idp.nature.com.evil.example')),
+            (original, auth.replace('/authorize?', '/login?')),
+            (original, auth.replace('response_type=cookie', 'response_type=code')),
+            (original, auth.replace('s41586-fixture', 'different')),
+            (transit, 'https://www.nature.com/articles/different'),
+            (transit, 'https://www.nasa.gov/'),
+            (original, 'http://idp.nature.com/authorize'),
+        ]
+        for previous, target in invalid:
+            with self.subTest(target=target), self.assertRaises(ValueError):
+                guard.redirect_request(Request(previous), None, 302, '', {}, target)
+
+    def test_nature_body_preserves_results_and_methods_but_not_page_navigation(self):
+        source = ('<nav>Do not translate navigation</nav><div class="c-article-body">'
+            '<section data-title="Abstract"><p>Abstract text</p>'
+            '<section data-title="Inline Recommendations"><p>Foreign recommendation</p></section></section>'
+            '<section data-title="Main"><p>Full introduction</p></section>'
+            '<section data-title="Results"><p>Actual results</p></section>'
+            '<section data-title="Methods"><p>Complete methods</p></section>'
+            '<section data-title="References"><p>Original bibliography</p></section>'
+            '<section data-title="Extended data figures and tables"><p>Extended figure description</p></section>'
+            '<section data-title="Rights and permissions"><p>Publisher metadata</p></section>'
+            '</div><footer>Other footer</footer>')
+        text = nature_article_text(source.encode())
+        for present in ('Abstract text', 'Full introduction', 'Actual results', 'Complete methods', 'Original bibliography', 'Extended figure description'):
+            self.assertIn(present, text)
+        for absent in ('navigation', 'recommendation', 'metadata', 'footer'):
+            self.assertNotIn(absent, text)
+        for incomplete in ('<article><p>Only an abstract</p></article>', source.split('<section data-title="References">')[0]):
+            with self.assertRaises(SourcePreparationError):nature_article_text(incomplete.encode())
+
+    def test_nature_anchor_licence_and_full_text_size_are_checked_before_model(self):
+        source = ('<a rel="license" href="http://creativecommons.org/licenses/by/4.0/">CC BY</a>'
+            '<div class="c-article-body"><section data-title="Main"><p>' + 'Full research text. ' * 30 +
+            '</p></section><section data-title="Methods"><p>Included methods.</p></section>'
+            '<section data-title="References">References</section><section data-title="Rights and permissions">Metadata</section></div>')
+        study = item(source_url='https://www.nature.com/articles/s41586-fixture')
+        text, licence = reusable_full_text(study, fetch=Mock(return_value=source.encode()))
+        self.assertEqual(licence, 'cc-by');self.assertIn('Included methods.', text)
+        too_long = source.replace('Included methods.', 'Long methods. ' * 24000)
+        with self.assertRaises(SourcePreparationError) as caught:
+            reusable_full_text(study, fetch=Mock(return_value=too_long.encode()))
+        self.assertEqual(caught.exception.code, 'source_too_large')
+        with self.assertRaises(SourcePreparationError) as caught:
+            reusable_full_text(study, fetch=Mock(side_effect=OSError('do not expose transport details')))
+        self.assertEqual(caught.exception.code, 'source_unavailable')
+        self.assertNotIn('transport details', str(caught.exception))
+
     def test_full_translation_source_needs_explicit_derivative_friendly_licence(self):
         body='<article><h1>Source</h1><p>'+('A complete scientific source paragraph. '*20)+'</p></article>'
         for licence in ('', '<link rel="license" href="https://creativecommons.org/licenses/by-nd/4.0/">'):

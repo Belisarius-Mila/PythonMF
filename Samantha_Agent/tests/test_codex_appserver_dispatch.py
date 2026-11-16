@@ -561,14 +561,19 @@ class TransportLifecycleTests(unittest.TestCase):
                 self.assertIn(t.diagnostics()['close_reason'], expected)
 
     def test_synthetic_stdio_peer_eof_wakes_unanswered_rpc(self):
-        # Executable fixture reads one request and exits. It is not Codex.
+        # Answer a readiness RPC before measuring EOF delivery. Interpreter
+        # startup under the whole suite is not part of the transport deadline.
         with tempfile.TemporaryDirectory() as directory:
             peer=Path(directory)/'synthetic-peer'
             import sys
-            peer.write_text(f'#!{sys.executable}\nimport sys\nsys.stdin.readline()\n')
+            peer.write_text(f'#!{sys.executable}\nimport sys,json\n'
+                'ready=json.loads(sys.stdin.readline())\n'
+                'print(json.dumps({"id":ready["id"],"result":{"ready":True}}),flush=True)\n'
+                'sys.stdin.readline()\n')
             peer.chmod(0o700)
             t=StdioAppServerTransport(codex_binary=str(peer),timeout=10)
             try:
+                self.assertEqual(t.request('config/read',{}), {'ready':True})
                 started=time.monotonic()
                 with self.assertRaises(AppServerClosedError):t.request('config/read',{})
                 self.assertLess(time.monotonic()-started,2)

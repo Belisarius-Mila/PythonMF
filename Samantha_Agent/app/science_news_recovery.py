@@ -56,11 +56,22 @@ def accept_result(store, key, approved):
                 or measured['turn_id'] != job['turn_id'] or measured['usage'] != usage):
             raise ValueError('Měření původního požadavku není úplné.')
     cost = estimate_standard_credits(selected['model'], usage)
-    if usage is None or cost is None or cost > approved['max_job_credits'] or usage['output_tokens'] > 16_000 or usage['total_tokens'] > 100_000:
+    limit = job.get('credit_limit', approved['max_job_credits'])
+    if type(limit) not in (int,float) or not 0 < limit <= approved['max_job_credits']:
+        raise ValueError('Původní rozpočet není ověřený.')
+    if usage is None or cost is None or cost > limit or usage['output_tokens'] > 16_000 or usage['total_tokens'] > 100_000:
         raise ValueError('Původní výsledek nemá přijatelný doklad spotřeby.')
     agent_roles.assert_current(selected, role=ROLE)
     answer = json.loads(proof['answer'])
     with store.transaction() as state:
+        if job.get('budget_group'):
+            parent = state['jobs'].get(job['budget_group'], {})
+            keys = parent.get('part_keys', [])
+            prior = keys[:keys.index(key)] if key in keys else []
+            if (parent.get('kind') != 'translation_group' or parent.get('policy') != approved or key not in keys
+                    or any(state['jobs'].get(k,{}).get('state') != 'completed' for k in prior)
+                    or sum(state['jobs'][k]['estimated_credits'] for k in prior) + cost > parent['reserved_credits']):
+                raise ValueError('Celá studie překračuje společný rozpočet.')
         state['jobs'][key].update(state='completed', answer=answer, usage=usage, estimated_credits=cost)
     return answer
 
@@ -78,8 +89,10 @@ def recover_model_result(store, key, payload, instructions, schema, *, client_fa
         raise ValueError('Původní výstup porušil omezení; nelze jej automaticky přijmout.')
     if job.get('phase') == 'preflight' and not job.get('thread_id'):
         from app.science_news_model import call_model
-        return call_model(store,key,payload,instructions,schema,client_factory=client_factory or new_luna_client)
-    expected = digest({'payload': payload, 'instructions': instructions, 'schema': schema, 'policy': approved})
+        return call_model(store,key,payload,instructions,schema,client_factory=client_factory or new_luna_client,
+                          budget_group=job.get('budget_group'))
+    from app.science_news_model import model_fingerprint
+    expected = model_fingerprint(payload, instructions, schema, approved, job.get('budget_group'))
     if job.get('fingerprint') != expected:
         raise ValueError('Otisk původního požadavku se změnil.')
     if job['state'] == 'completed':

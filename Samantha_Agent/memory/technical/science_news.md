@@ -365,3 +365,32 @@ původní výsledek přes guarded call_model; jiný obsah se stejným ID je odm�
 Odpověď a položky se uloží před idempotentní publikací do soukromé fronty.
 Nedokončený zápis nevyžaduje nové placené volání. Známé články se nepřepisují.
 Služba, termín dalšího vydání, role a Git publikace se touto operací nemění.
+
+
+## Celé studie na výslovné vyžádání — 2026-11-16
+
+POST translate nejprve připraví veřejný plný zdroj a ověří oprávnění; GET
+okna/statusu zůstává čtecí. Konkrétní odmítnutí je v translation_preparation
+u položky, nikoli falešný modelový job. Popup zobrazuje důvod i původní odkaz.
+Nature má jednorázový izolovaný CookieJar a úzce vázaný přechod přes
+idp.nature.com/authorize (response_type=cookie, původní redirect_uri),
+/transit a návrat k přesnému zdroji. Bez přihlášení či trvalých cookies;
+libovolný IDP/login/cizí návrat je odmítnutý. Ostatní zdroje zachovávají guard.
+Licence může být v rel=license na link i a; BY-ND/BY-NC-ND se nepovolují.
+Nature čte celé c-article-body včetně metod, referencí a rozšířených dat až
+k metadatům Rights/About. Náhled obecného parseru není úplná studie.
+Překlad nejvýše300000 znaků dělí app.science_news_translation na úseky
+nejvýše20000 znaků při přesném zachování vstupu. Externí soubory příloh
+se automaticky nestahují. Výstup je celý HTML článek jako český text.
+translation_<item> je jeden translation_group a jedna společná rezervace
+max_job_credits. Podřízené modelové účtenky mají budget_group, závazný úsek
+ve zmrazeném plánu a credit_limit ze zbývajícího rozpočtu; měsíční kontrola
+počítá rodiče jednou. Neznámý rodič, jiné podklady, chybějící předchozí
+úsek nebo přesměrovaný rozpočet blokují tah před klientem. Nehotová skupina
+drží rezervu; hotová účtuje součet skutečných přijatých nákladů částí.
+Každá část používá stávající persistent one-turn guard, původní client/thread/
+turn ID a read-only recovery. Explicitní nový POST může pokračovat jen
+původními účtenkami. GET nepokračuje, nejistá část se znovu neposílá.
+Zdroj, oprávnění, role i aktivace se kontrolují před další částí a složením.
+Částečný text nikdy nezapne Uložit zprávu. Omezený budget může další část
+zastavit před RPC; hotové části zůstávají soukromě zachované bez navýšení.

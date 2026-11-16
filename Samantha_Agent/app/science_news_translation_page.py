@@ -14,6 +14,14 @@ async function poll(){
   const response=await fetch('/api/science-news/translation?id='+encodeURIComponent(id));
   const data=await response.json();
   if(!response.ok||!data.ok)throw new Error(data.message||'Stav není ověřený.');
+  if(data.title)document.querySelector('h1').textContent=data.title;
+  if(data.source_url){
+   const url=new URL(data.source_url);
+   if(url.protocol==='https:'&&!url.username&&!url.password){
+    document.getElementById('source').href=url.href;
+    document.getElementById('source').textContent='Otevřít původní zprávu';
+   }
+  }
   if(data.state==='completed'){
    document.querySelector('h1').textContent=data.title;
    document.getElementById('text').textContent=data.translation;
@@ -24,9 +32,10 @@ async function poll(){
    }
    document.getElementById('status').textContent='Český překlad zdrojové zprávy.';return;
   }
-  if(data.state==='attention'||Date.now()-started>240000)throw new Error('Překlad vyžaduje ověření. Další pokus se automaticky nespustí.');
-  document.getElementById('status').textContent=data.state==='not_started'?'Překlad zatím nebyl zahájen. Podrobnosti najdeš u zprávy v Cockpitu.':'Připravuji překlad…';
-  if(data.state!=='not_started'||Date.now()-started<10000)setTimeout(poll,2000);
+  if(data.state==='attention'||Date.now()-started>1800000)throw new Error(data.message||'Překlad vyžaduje ověření. Další pokus se automaticky nespustí.');
+  const progress=data.part_count?` Hotovo ${data.completed_parts} z ${data.part_count} částí.`:'';
+  document.getElementById('status').textContent=(data.message||(data.state==='not_started'?'Čekám na potvrzení zahájení překladu…':'Připravuji překlad…'))+progress;
+  if(!['not_started','blocked'].includes(data.state)||Date.now()-started<10000)setTimeout(poll,Date.now()-started<10000?2000:5000);
  }catch(error){document.getElementById('status').textContent=error.message;}
 }
 poll();</script></html>"""
