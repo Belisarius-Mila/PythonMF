@@ -6578,12 +6578,14 @@ Dalsi krok:
         self.assertIn('id="webAppsBtn"', header)
         self.assertEqual(COCKPIT_HTML.count('id="webAppsBtn"'), 1)
 
-    def test_web_apps_catalog_contains_vocabulary_desktop_trainers(self) -> None:
+    def test_web_apps_catalog_opens_italian_web_app_and_keeps_french_desktop_trainer(self) -> None:
         apps = {item["id"]: item for item in web_apps_catalog()["apps"]}
 
-        self.assertEqual(apps["vocabulary-it-trainer"]["launch_type"], "desktop")
+        self.assertNotEqual(apps["vocabulary-it-trainer"].get("launch_type"), "desktop")
+        self.assertEqual(apps["vocabulary-it-trainer"]["url"],
+                         "https://belisarius-mila.github.io/PythonMF/vocabulary-it/")
+        self.assertEqual(apps["vocabulary-it-trainer"]["title"], "Vocabulary IT")
         self.assertEqual(apps["vocabulary-fr-trainer"]["launch_type"], "desktop")
-        self.assertIn("Vocabulary IT", apps["vocabulary-it-trainer"]["title"])
         self.assertIn("Vocabulary FR", apps["vocabulary-fr-trainer"]["title"])
 
     def test_web_apps_catalog_contains_multilo_desktop_app(self) -> None:

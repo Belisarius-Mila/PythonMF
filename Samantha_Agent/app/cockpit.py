@@ -567,11 +567,10 @@ WEB_APP_CATALOG: tuple[dict[str, str], ...] = (
     },
     {
         "id": "vocabulary-it-trainer",
-        "title": "Vocabulary IT trainer",
-        "description": "Desktopový italský slovníkový trenažér s obrázky a lokálními CSV daty.",
-        "url": "",
-        "kind": "desktopová aplikace",
-        "launch_type": "desktop",
+        "title": "Vocabulary IT",
+        "description": "Obrazové italské kartičky se slovíčky, větami, nahrávkami IT/CZ a vlastními výběry A–D.",
+        "url": "https://belisarius-mila.github.io/PythonMF/vocabulary-it/",
+        "kind": "GitHub Pages",
     },
     {
         "id": "vocabulary-fr-trainer",

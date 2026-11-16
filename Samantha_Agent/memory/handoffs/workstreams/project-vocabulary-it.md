@@ -1,13 +1,12 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
-- Aktualizováno: 2026-11-15 23:08 CET
-- 497 úplných karet, vlastní IT galerie/učení/profily A–D a814 obrazových assetů.
-- Kompletní slova i věty IT/CZ:1988 vazeb/1907 MP3, Elsa/Vlasta při-10 %.
-- Všechny MP3 ověřené SHA/dekódováním/délkou/signálem; žádné nejisté žádosti.
-- Poslech galerie a vět fyzicky ověřený v Safari na Macu;16 automatických JS scénářů.
-- Telefonní přejímka a úplná jazyková revize otevřené; dále bod7, obrázková hra.
-- Bez p+n, EN/CSV/mapping a původní snímek zachované.
+- Aktualizováno: 2026-11-16 08:33 CET
+- Webová aplikace497 karet/1907 MP3 vydaná na Pages v a53c1757; index nyní HTTP200 a přesný.
+- V živém Cockpitu zůstává stará desktopová položka. Nové přepojení katalogu místně připravené.
+- Položka Vocabulary IT vede na veřejnou galerii; ID vocabulary-it-trainer zachované.
+- Pro promítnutí této nové opravy do běžícího Cockpitu zbývá samostatně schválené p+n.
+- Dále obrázková hra, telefonní přejímka a úplná jazyková revize.
 <!-- SAMANTHA_CURRENT_STATUS_END -->
 
 # Handoff pracovního proudu: Vocabulary IT
@@ -16,22 +15,23 @@ Nazev: Vocabulary IT
 Pracovni proud: project-vocabulary-it
 Typ: Project
 Priorita: 2
-Stav: rozpracovane — galerie/profily/audio mistne hotove, hra a vydani otevrene
+Stav: rozpracovane — web vydany, katalogove prepojeni mistne pripravene
 Pripomenout pri startu: ne
-Datum: 2026-11-15 23:08 CET
+Datum: 2026-11-16 08:33 CET
 
 Co se resilo:
-Italský hlas Elsa a vlastní knihovna slov i vět v IT/CZ.
+Přepojení Vocabulary IT z desktopové položky na novou webovou galerii.
 
 Co je hotove:
-- 497 karet,814 obrazových assetů,1988 zvukových vazeb/1907 MP3.
-- Galerie/učení/profily, kompletní audio a skutečný Safari proklik/MP3 test.
+- Webová galerie a IT/CZ audio jsou zveřejněné; index ověřený HTTP200 a SHA.
+- Místní katalog má veřejnou adresu a název Vocabulary IT, stabilní ID zachované.
 
 Co neni hotove:
-- Obrázková hra, úplná jazyková revize, telefonní přejímka a vydání.
+- Nasazení této nové katalogové opravy do Cockpitu čeká na samostatné p+n.
+- Obrázková hra, úplná jazyková revize a telefonní přejímka.
 
 Dalsi krok:
-Bod7 — italská hra s kontrolou podobných obrázků a významových kolizí.
+Samostatně schválit p+n nové katalogové opravy.
 
 Navrhovane dalsi kroky:
 - Prubezne aktualizovat pouze potvrzenymi checkpointy tohoto proudu.
@@ -319,3 +319,27 @@ Finální důkaz: data/private/data_it_release_20261116/completion.json,
 konkrétní cockpit_release.json, it_release.json a public_verification.json.
 Rizika: Přejímka všech vět a skutečný telefon zůstávají otevřené. Tento
 přípravný zápis sám nepotvrzuje push, nasazení ani úspěšnou fyzickou přejímku.
+
+
+### 2026-11-16 08:33 CET — Webové Vocabulary IT v katalogu Cockpitu
+
+Hotovo: Položka Vocabulary IT je v místním zdroji katalogu Webové aplikace
+přepojená na https://belisarius-mila.github.io/PythonMF/vocabulary-it/.
+Název Vocabulary IT, popis kartiček/vět/IT-CZ audia/profilů; původní ID
+vocabulary-it-trainer zachované pro existující zkratky. Použije se standardní
+nativní odkaz do nové karty; starý desktopový program zůstává dostupný vlastní cestou.
+
+Rozhodnutí: Míla požádal o nahrazení současné desktopové položky novou webovou.
+Samostatné p+n této katalogové opravy dosud nezadal.
+
+Další krok: Po samostatném souhlasu vydat tuto katalogovou změnu do Cockpitu.
+Navrhované další kroky: Pak pokračovat obrázkovou hrou a telefonní přejímkou.
+
+Technický důkaz: Živý katalog před změnou HTTP200 stále vrací desktopovou
+položku. Publikovaný index nové aplikace HTTP200 a bajtově přesně odpovídá
+aktuálnímu zdroji. Dřívější vydání a53c1757 dokončené: Cockpit35ac23c2…
+a Pages2a7ef1bc…, existující účtenka data_it_release_20261116/completion.json.
+Neopakovat předchozí vydání. Aktualizovaný katalogový test zachovává FR
+jako desktop; frontend již používá nativní odkazy target=_blank/rel=noopener.
+Finální programová brána a shoda zdrojů: private/vocabulary_it_cockpit_20261116.
+Nová katalogová změna je pouze místní, běžící Cockpit se v tomto kroku nerestartuje.

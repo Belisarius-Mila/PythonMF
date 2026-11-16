@@ -18,7 +18,7 @@ Přijatá pravidla
 Základní soubory a hranice
 VocabularyIT/vocabulary_it_catalog.json:497 identit (471 původních a26 webových);24 schválených hlavních významů a26 nových, ostatní metadata dále návrhy.
 VocabularyIT/vocabulary_it_input_manifest.json: neměnné otisky777 původních vstupů.
-Aktuální stav:497 karet, galerie/profily a úplné IT/CZ audio1907 MP3 místně; viz poslední záznam.
+Aktuální stav:497 karet a1907 MP3 zveřejněných; přepojení katalogu Cockpitu místně připravené, viz poslední záznam.
 VocabularyIT/vocabulary_it_catalog.py: pouze čtení a ověření, žádný CSV writer.
 VocabularyIT/vocabulary_it_review_queue.txt:112 prioritních karet k revizi.
 VocabularyIT/WEB_FOUNDATION.txt: identita, přesné kontrolní příkazy a další bod.
@@ -260,3 +260,27 @@ Finální důkaz: data/private/data_it_release_20261116/completion.json,
 konkrétní cockpit_release.json, it_release.json a public_verification.json.
 Rizika: Přejímka všech vět a skutečný telefon zůstávají otevřené. Tento
 přípravný zápis sám nepotvrzuje push, nasazení ani úspěšnou fyzickou přejímku.
+
+
+### 2026-11-16 08:33 CET — Webové Vocabulary IT v katalogu Cockpitu
+
+Hotovo: Položka Vocabulary IT je v místním zdroji katalogu Webové aplikace
+přepojená na https://belisarius-mila.github.io/PythonMF/vocabulary-it/.
+Název Vocabulary IT, popis kartiček/vět/IT-CZ audia/profilů; původní ID
+vocabulary-it-trainer zachované pro existující zkratky. Použije se standardní
+nativní odkaz do nové karty; starý desktopový program zůstává dostupný vlastní cestou.
+
+Rozhodnutí: Míla požádal o nahrazení současné desktopové položky novou webovou.
+Samostatné p+n této katalogové opravy dosud nezadal.
+
+Další krok: Po samostatném souhlasu vydat tuto katalogovou změnu do Cockpitu.
+Navrhované další kroky: Pak pokračovat obrázkovou hrou a telefonní přejímkou.
+
+Technický důkaz: Živý katalog před změnou HTTP200 stále vrací desktopovou
+položku. Publikovaný index nové aplikace HTTP200 a bajtově přesně odpovídá
+aktuálnímu zdroji. Dřívější vydání a53c1757 dokončené: Cockpit35ac23c2…
+a Pages2a7ef1bc…, existující účtenka data_it_release_20261116/completion.json.
+Neopakovat předchozí vydání. Aktualizovaný katalogový test zachovává FR
+jako desktop; frontend již používá nativní odkazy target=_blank/rel=noopener.
+Finální programová brána a shoda zdrojů: private/vocabulary_it_cockpit_20261116.
+Nová katalogová změna je pouze místní, běžící Cockpit se v tomto kroku nerestartuje.
