@@ -14,7 +14,7 @@ import urllib.error
 import urllib.request
 
 from app.agent_supervisor import AgentSupervisor, evaluate, email_row, LABELS
-from app.agent_supervisor_probes import collect
+from app.agent_supervisor_probes import collect, appserver_probe
 from app.agent_supervisor_service import SupervisorService, CONFIRMATION, SOURCES
 from app.cockpit_agent_supervisor import agent_supervisor_overview
 from app.work_repository import WorkRepositoryError, RepositoryMutation
@@ -120,6 +120,48 @@ class EvaluationTests(unittest.TestCase):
         rows=evaluate(value,NOW)
         self.assertEqual(rows[0]["state"],"unknown")
         self.assertEqual(rows[1]["state"],"ok")
+
+
+class AppServerProbeTests(unittest.TestCase):
+    def probe(self, transport):
+        from app.codex_appserver import CodexVersion
+        with patch("app.codex_appserver.UnixSocketAppServerTransport", return_value=transport), \
+                patch("app.codex_appserver.read_codex_version", return_value=CodexVersion.parse("codex-cli 0.169.0")):
+            return appserver_probe()
+
+    def transport(self):
+        transport = Mock(running=True, process_id=0)
+        def request(method, params):
+            if method == "initialize":
+                return {"userAgent": "codex_cli_rs/0.169.0 (synthetic)"}
+            raise TimeoutError("PRIVATE slow catalog must not affect local health")
+        transport.request.side_effect = request
+        return transport
+
+    def test_slow_catalog_cannot_report_local_rpc_server_as_down(self):
+        transport = self.transport()
+        self.assertEqual(self.probe(transport), {"reachable": True})
+        self.assertEqual([c.args[0] for c in transport.request.call_args_list], ["initialize"])
+        transport.notify.assert_called_once_with("initialized")
+        transport.close.assert_called_once_with()
+
+    def test_failed_or_invalid_handshake_is_never_healthy(self):
+        from app.codex_appserver import AppServerTimeout, AppServerContractError
+        for fault, error in ((AppServerTimeout("PRIVATE timeout"), AppServerTimeout),
+                             ({"userAgent": "PRIVATE invalid server"}, AppServerContractError)):
+            with self.subTest(error=error):
+                transport = self.transport()
+                transport.request.side_effect = fault if isinstance(fault, Exception) else None
+                transport.request.return_value = fault
+                with self.assertRaises(error):
+                    self.probe(transport)
+                transport.close.assert_called_once_with()
+                transport.notify.assert_not_called()
+
+    def test_closed_connection_after_handshake_is_not_healthy(self):
+        transport = self.transport(); transport.running = False
+        self.assertEqual(self.probe(transport), {"reachable": False})
+        transport.close.assert_called_once_with()
 
 
 class SupervisorTests(unittest.TestCase):

@@ -1,4 +1,21 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
+## 2026-11-16 18:30 CET — Dohlížitel: pomalý katalog není výpadek App Serveru
+
+Hotovo: Kontrola App Serveru používá ověřený místní initialize/initialized
+handshake místo katalogu modelů. Skutečně nedostupné spojení nebo vadný
+handshake zůstávají poruchou; dvě trvající kontroly, spánek a obnova se nemění.
+Rozhodnutí: Žádné nové provozní nastavení; úzká oprava na Mílovo hlášení
+opakovaných krátkých poplachů. Pravidelný worker načítá zdroj při každém tiknutí.
+Další krok: Samostatné p+n pro GitHub a společný runtime; není nyní zadané.
+Navrhované další kroky: Sledovat další běžný provoz bez falešných poplachů.
+Technický důkaz: Dnes8 přijatých párů problém/obnova. Původní sonda5×
+vypršela po3s, zatímco initialize odpověděl za0,001s a model/list za5,006s.
+51 cílených testů PASS včetně pomalého katalogu, vadného/timeout handshaku,
+uzavření, spánku a incidentů. Živé nové vzorky, pravidelný tik a konečná
+programová brána/commit: private/agent_supervisor_appserver_20261116/
+completion.json. Konfigurace, LaunchAgent, proces serveru a Pushcut se
+ručně nemění. Sonda prokazuje místní RPC, nikoli úspěch placeného modelu.
+
 ## 2026-11-16 11:16 CET — Schválený úklid v2, velikosti vpravo, p+n zadáno
 
 Míla schválil konkrétní odstranění zbytečných kopií po vysvětlení rozdílu

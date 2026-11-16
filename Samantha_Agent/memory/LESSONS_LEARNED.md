@@ -2859,3 +2859,14 @@ tokenů. Pro nový krátký požadavek zmenšit jeho přejímací strop a připn
 k otisku/účtence; nikdy nezměnit již požadovaný tah ani rozpočet. Regrese
 prokazuje dokončení celé studie pod limitem20 i odmítnutí výstupu nad menší
 strop. Skutečný DALTAC dokončen17,0578/20, sedm původních částí beze změny.
+
+
+### 2026-11-16 18:30 CET — Dostupnost App Serveru se neměří rychlostí katalogu
+
+- Kontext: opakované krátké poplachy; místní initialize1ms, model/list5s
+  proti3s limitu. Proces a místní RPC byly dostupné.
+- Řešení: čtecí ověřený initialize/initialized na existujícím socketu;
+  nevolat model/list v sondě dostupnosti. Nedostupný/vadný handshake zůstává
+  poruchou, potvrzování incidentů ani odesílání se nemění.
+- Ověření:51 cílených PASS, včetně timeoutu katalogu a vadného handshaku;
+  konečné živé vzorky a brána private/agent_supervisor_appserver_20261116/completion.json.

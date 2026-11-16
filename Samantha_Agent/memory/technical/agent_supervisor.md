@@ -32,8 +32,10 @@ pravidelně běžícího workeru.
   pošty se nevydávají za chybu scanu.
 - Cockpit: pevný loopback `/api/server/health`, bounded GET bez proxy,
   přesměrování či obchodních dat.
-- App Server: připojení na existující sdílený Unix socket a čtecí katalog
-  modelů; bez startu procesu, thread/start, turn/start nebo modelového tahu.
+- App Server: připojení na existující sdílený Unix socket a ověřený místní
+  initialize/initialized handshake; bez katalogu modelů, startu procesu,
+  thread/start, turn/start nebo modelového tahu. Katalog může při aktualizaci
+  odpovídat pomalu i při plně dostupném místním RPC serveru.
 - Autosave: právě jeden watcher, čerstvost metadat do20 minut, poslední chyba.
   Nečte obsah nouzových session logů.
 - SSD: varování pod30 GiB, kritický stav pod15 GiB; žádný úklid.
@@ -200,3 +202,15 @@ projektu bez úpravy kódu prošel; neobchází se žádná aktivace a nekopíru
 se privátní data. Doklad logs/agent_supervisor_sleep_canonical_environment_test_20261114.log.
 Plnou kanonickou bránu nad přesným commitem musí před push/deploy dokončit
 registrovaná Terra; konečná provozní účtenka zůstává mimo Git.
+
+
+## 2026-11-16 18:30 CET — Oddělení dostupnosti místního RPC od katalogu
+
+Místní handshake1ms a katalog5,006s proti3s limitu vysvětlily opakované
+krátké poplachy. Kontrola nyní ověřuje stejný protokol a podporovanou verzi
+serveru bez model/list; vadný či nedokončený handshake není zelený. Žádný
+nový modelový tah, restart, retry, změna odesílání či potvrzovací lhůty.
+Pravidelný CLI worker načte zdroj při dalším běhu, Cockpit vyžaduje samostatné
+nasazení.51 cílených testů PASS; konečná účtenka
+private/agent_supervisor_appserver_20261116/completion.json.
+Úspěšný handshake nedokládá dostupnost poskytovatele ani úspěch modelového tahu.

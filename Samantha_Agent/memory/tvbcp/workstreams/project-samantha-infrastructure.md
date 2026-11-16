@@ -1,4 +1,9 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
+2026-11-16 18:30 CET: Dohlížitel opraven proti pomalému model/list. Místní ověřený
+handshake, stávající dvoukontrolní potvrzení i spánek zachované;51 cílených PASS.
+Běžný worker načte zdroj automaticky; GitHub/společný runtime čekají na p+n.
+Konečný důkaz private/agent_supervisor_appserver_20261116/completion.json.
+
 16.11.11:16 CET: Míla schválil konkrétní úklid v2, GiB vpravo, vývoj+p+n.
 Gitové obsahy se znovu nezálohují; malé unikáty se ověří odděleně, pak
 uzavřené kopie po publikaci odstraní. Jen přesné staré build cache,
@@ -2341,3 +2346,20 @@ uchování indexu/pracovní verze, selhání archivu, scope guardu a neduplikace
 Gitových blobů. Preflight4 kopie8,85GiB, unikáty10,22MiB; finální počty,
 SHA, účtenky, skutečné zisku a rizika v private/workspace_housekeeping/
 v2_development.json a v2_completion.json. Syntetický důkaz není živý úklid.
+
+## 2026-11-16 18:30 CET — Dohlížitel: pomalý katalog není výpadek App Serveru
+
+Hotovo: Kontrola App Serveru používá ověřený místní initialize/initialized
+handshake místo katalogu modelů. Skutečně nedostupné spojení nebo vadný
+handshake zůstávají poruchou; dvě trvající kontroly, spánek a obnova se nemění.
+Rozhodnutí: Žádné nové provozní nastavení; úzká oprava na Mílovo hlášení
+opakovaných krátkých poplachů. Pravidelný worker načítá zdroj při každém tiknutí.
+Další krok: Samostatné p+n pro GitHub a společný runtime; není nyní zadané.
+Navrhované další kroky: Sledovat další běžný provoz bez falešných poplachů.
+Technický důkaz: Dnes8 přijatých párů problém/obnova. Původní sonda5×
+vypršela po3s, zatímco initialize odpověděl za0,001s a model/list za5,006s.
+51 cílených testů PASS včetně pomalého katalogu, vadného/timeout handshaku,
+uzavření, spánku a incidentů. Živé nové vzorky, pravidelný tik a konečná
+programová brána/commit: private/agent_supervisor_appserver_20261116/
+completion.json. Konfigurace, LaunchAgent, proces serveru a Pushcut se
+ručně nemění. Sonda prokazuje místní RPC, nikoli úspěch placeného modelu.

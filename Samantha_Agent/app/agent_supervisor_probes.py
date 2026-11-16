@@ -78,11 +78,12 @@ def appserver_probe():
     from app.communication.local_runtime import DEFAULT_SOCKET_PATH
     from app.codex_appserver import CodexAppServerClient, UnixSocketAppServerTransport
     from functools import partial
-    # Connect/init/model-list only. No process controller, thread/turn or retry.
+    # A validated initialize response proves the local RPC server is alive.
+    # model/list can wait on a catalog refresh even while local RPCs work.
+    # No process controller, thread/turn, model request or retry.
     factory = partial(UnixSocketAppServerTransport, socket_path=DEFAULT_SOCKET_PATH, timeout=3)
     with CodexAppServerClient(transport_factory=factory, timeout=3) as client:
-        models = client.list_models()
-    return {"reachable": bool(models)}
+        return {"reachable": client.running}
 
 
 def autosave_probe():
