@@ -2,6 +2,16 @@
 
 Projekt zalozen 2026-05-19.
 
+## 2026-11-16 09:32 CET — Hodinový úklid aktivní
+
+Po přesné globální větě aktivovaný jediný nový LaunchAgent hodinového úklidu;
+definice shodná, načtený, první běh exit0/completed. Odstraněno48 historických
+autosave souborů, skutečně+0,5002GiB, po běhu21,10GiB volných. Latest/previous
+i12 nejnovějších časů zachované. Pracovní kopie0; staré lokální kopie potřebují
+nejprve zachování dat/uzavření. Běžící autosave ani zálohy se neměnily.
+Důkaz private/workspace_housekeeping/activation_verification.json. Kód41b16b1c
+již ověřen705 cílenými testy; tato aktivace nemění jeho zdroj ani nepublikuje.
+
 ## 2026-11-16 09:12 CET — Automatický úklid SSD před aktivací
 
 Úklid pracovních kopií a retence autosave mají vlastní registrovaný modul

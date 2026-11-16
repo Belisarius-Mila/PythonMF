@@ -1,4 +1,11 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
+16.11.09:32 CET: Hodinový úklid po přesné globální větě aktivovaný; definice
+shodná, loaded/runs1/exit0/3600s. První běh dokončený:48 starých autosave,
+skutečně+0,5002GiB, pracovní kopie0. Kód41b16b1c/705 cílených PASS,
+bez push/restartu Cockpitu. Další krok: zachovat lokální data starých kopií
+a uzavřít je; potom ScienceNews. Důkaz private/workspace_housekeeping/
+activation_verification.json. Starší čekání na aktivaci níže je historické.
+
 16.11.: Hodinový úklid výslovně dokončených dočasných worktrees a12 časů
 autosave je implementovaný;57 cílených PASS, finální brána/commit v private
 workspace_housekeeping/development.json. Samostatná aktivace čeká na přesnou
@@ -2273,3 +2280,18 @@ Technický důkaz:57 cílených testů PASS, včetně souběhu a skutečného od
 syntetického Git worktree. Živý náhled ponechal4/4 kopií, autosave nabízí48
 souborů/~0,50GiB; žádná skutečná data smazaná. Konečná programová brána,
 commit a návrh v private/workspace_housekeeping/development.json.
+
+## 2026-11-16 09:32 CET — Pravidelný úklid zapnutý a ověřený
+
+Hotovo: Hodinový plánovač je načtený. První běh odstranil48 starých časových
+autosave souborů a naměřil+0,5002GiB; aktuální/předchozí obnova i12 nejnovějších
+časů zůstaly. Žádná pracovní kopie se nemazala.
+Rozhodnutí: Míla potvrdil přesnou globální větu pro připravený návrh,
+nový LaunchAgent a trvalé mazání výhradně podle schválených pravidel.
+Další krok: Zachovat potřebná lokální data ve3 starých kopiích a poté je
+výslovně uzavřít; čtvrtá s rozpracovanými změnami zůstává.
+Navrhované další kroky: Následně oprava obnovy a chybového hlášení ScienceNews.
+Technický důkaz: Přesný plist, loaded/runs1/exit0/interval3600s; první běh
+completed, smazané worktrees0, autosave48. Kód41b16b1c/705 cílených PASS
+se neměnil a testy kódu se neopakují. Privátní activation_verification.json
+uchovává původní účtenku; bez push, nového backupu či restartu Cockpitu.

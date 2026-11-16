@@ -1,4 +1,21 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
+## 2026-11-16 09:32 CET — Hodinový úklid aktivní, první běh ověřen
+
+Míla přesnou globální větou schválil aktuální připravený návrh. Registrovaná
+aktivace jednou nainstalovala nový com.samantha.workspace-housekeeping;
+definice přesně shodná, loaded/runs1/exit0, interval3600s. První běh completed:
+48 starých časových autosave souborů odstraněno, skutečný rozdíl+0,5002GiB,
+po běhu21,10GiB volných. Latest/previous a12 nejnovějších časů zachované;
+watcher ani jeho služba se neměnily. Pracovních kopií odstraněno0.
+
+Kód41b16b1c ověřen705 cílenými testy, bez plné sady. Služba běží z místního
+main bez push nebo restartu Cockpitu. Čtyři stávající pracovní kopie nejsou
+označené za dokončené:3 potřebují zachování lokálních dat, jedna má změny.
+Další krok: vyřešit jejich lokální data/uzavření; potom navázat ScienceNews.
+Přesný neměnný důkaz prvního běhu v private/workspace_housekeeping/
+activation_verification.json; development.json má konečný stav a checkpoint.
+Tato aktivace nemění předchozí zálohy a neopakuje publikaci.
+
 ## 2026-11-16 09:12 CET — Automatický úklid připraven, aktivace čeká
 
 Míla schválil vývoj úklidu po auditu SSD35,69→20,97GiB. Hlavní příčina:
