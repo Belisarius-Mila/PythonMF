@@ -1,5 +1,45 @@
 # Znalostní databáze / Knihovna článků
 
+### 2026-11-16 15:12 CET — ScienceNews: obnova a viditelné selhání
+
+Hotovo: místní oprava připravuje ověřitelné převzetí původního výsledku po
+přerušení a upozornění v horním ScienceNews tlačítku i prázdném přehledu.
+Rozlišuje přípravu, připravené vydání, chybějící/zpožděný běh, neověřený
+výsledek a výslovné uzavření bez výstupu. GET pouze čte; nic neobnovuje ani
+nespouští. Již publikované vydání a archivní rozhodnutí zůstávají beze změny.
+
+Rozhodnutí: Míla schválil opravu obnovy a upozornění. Živý audit původního
+vydání13.11. doložil začátek08:04 CET,60 zmrazených kandidátů, chybějící
+odpověď a nedostupné dočasné vlákno. Registrované uzavření bez výsledku
+ponechalo celá původní data i delivery_unknown a rezervaci15 kreditů;
+žádný nový modelový tah, vlákno ani turn/start nebyly při obnově vytvořené.
+Současný týden se neopakuje; další týdny nejsou touto účtenkou blokované.
+Role Sol/medium Standard, schválené15/job a100/měsíc i služba60s se nemění.
+
+Nové běhy používají trvalé datové vlákno, pevné client_message_id a turn_id,
+doklad odpovědi uložený před odpojením a průběžně zaznamenanou usage.
+Obnova smí pouze převzít dokončení přesně původního tahu; kontroluje původní
+vstup, povolené typy položek, rozsah, roli, aktivaci, otisk podkladů a budget.
+Neověřené doručení nebo chybějící usage nepovolují druhý tah ani uvolnění
+rezervy. Jen trvale doložený preflight PŘED thread/start může pokračovat
+prvním požadavkem po návratu spojení; marker thread_requested se uloží před
+RPC a pak se žádné nové vlákno nevytváří. Samostatné zámky brání souběžné
+přípravě/tahu. Starší prokazatelně hotový výsledek lze dokončit i další týden.
+
+Další krok: dokončit programovou bránu a lokální commit; nové p+n pro tuto
+opravu zatím nebylo zadané. Potom ověřit servírované upozornění a příští
+přirozený páteční běh. Starou nejistou účtenku znovu neposílat;13.11. nemá
+obnovitelný výběr a nesmí se vydávat za úspěšné prázdné vydání.
+
+Navrhované další kroky: nasadit upozornění; přejmout příští páteční vydání.
+Technický důkaz:127 cílených PASS včetně recovery po odpojení/publikaci,
+původního thread/turn/client ID, chybějící usage, cizích vstupů/nástrojů,
+souběhu, známého preflightu, přesného uzavření, uchování rozpočtu a Node UI.
+Konečná brána/commit a skutečná closure jsou v private/
+science_news_recovery_20261116/development.json a closure_receipt.json.
+Oprava sama neprovádí nové placené vydání, překlad, archivaci ani změnu služby.
+
+
 Aktuální stav: 2026-11-10 10:58 CET: Systémové potvrzení přijato a blokátor nové role je uzavřený: registrovaný upgrade pošty 617f3e0d→8c83e93b ověřen,95 položek i business digest/nastavení/role identické. Skutečný nový parser načítá live science binding. Zadané nasazení pokračuje se související kalendářovou opravou; páteční automatika vypnutá.
 
 Aktuální integrační stav: 2026-11-10 10:09 CET: Datův `aad367c7` je převzatý a testovaný pouze na izolované větvi `will/science-news-20261110`; živý main/pošta/role zůstávají beze změny. 134 cílených testů PASS; před nasazením nutný kompatibilní upgrade hodinové pošty a jeho systémové potvrzení. Podrobnosti `reports/science_news_aad367c7_integration_20261110.md`.

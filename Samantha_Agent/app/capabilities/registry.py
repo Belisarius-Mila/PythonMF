@@ -12,6 +12,20 @@ from app.capabilities.models import (
 
 CAPABILITIES: tuple[CapabilityRecord, ...] = (
     CapabilityRecord(
+        capability_id="science_news_recovery_status", label="Read ScienceNews preparation health",
+        risk=RiskLevel.READ_ONLY, reads=("safe weekly job states",), writes=(),
+        tool="app.science_news_recovery.weekly_status", audit=AuditPolicy.REDACTED,
+        notes="No network/model/recovery writes. Interrupted, overdue and closed-without-output are not an empty successful inbox.",
+    ),
+    CapabilityRecord(
+        capability_id="science_news_close_interrupted", label="Close an interrupted issue without output",
+        risk=RiskLevel.LOCAL_WRITE, reads=("exact interrupted issue fingerprint", "explicit scoped approval"),
+        writes=("private resolution marker only",), tool="app.science_news_recovery.close_interrupted_issue",
+        requires_confirmation=True, confirmation_policy=ConfirmationPolicy.SUMMARY_BEFORE_ACTION,
+        audit=AuditPolicy.REDACTED,
+        notes="Preserves original payload, unknown model job and full reserved budget. No retry, publication, thread or paid request.",
+    ),
+    CapabilityRecord(
         capability_id="workspace_housekeeping_prepare_v2", label="Prepare compact preservation and published-work cleanup",
         risk=RiskLevel.LOCAL_WRITE, reads=("published main history", "exact disposable worktrees", "approved archive cache roots"),
         writes=("private exact cleanup proposal",), tool="app.worktree_cleanup_v2.PublishedCleanup.prepare",

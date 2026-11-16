@@ -14,12 +14,16 @@ def science_news_overview(*, store=None):
     try:
         store = store or ScienceNews()
         result = store.overview()
+        from app.science_news_recovery import weekly_status
         result["schedule"] = "Pátek 09:00 · Europe/Prague"
         try:
-            policy(store)
+            approved = policy(store)
             result["activated"] = True
         except (OSError, ValueError):
             result["activated"] = False
+        from datetime import datetime
+        result['preparation'] = weekly_status(store, enabled=result['activated'],
+            activated_at=datetime.fromisoformat(approved['activated_at']) if result['activated'] else None)
         return result
     except (OSError, ValueError, TypeError, KeyError):
         return {"ok": False, "message": "ScienceNews nelze načíst; stav novinek není ověřený."}

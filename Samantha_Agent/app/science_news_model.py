@@ -49,12 +49,17 @@ def policy(store):
 
 
 class OneTurn:
-    def __init__(self, inner, context, selected, instructions, payload, schema, before_send=lambda: None):
+    def __init__(self, inner, context, selected, instructions, payload, schema, before_send=lambda: None,
+                 *, ephemeral=True, observe=lambda event: None, accepted=lambda turn: None,
+                 reject=lambda: None, before_thread=lambda: None):
         self.inner, self.context, self.selected = inner, context, selected
         self.instructions, self.payload, self.schema = instructions, payload, schema
         self.started = self.attempted = False
         self.thread_id = None
         self.before_send = before_send
+        self.ephemeral, self.observe, self.accepted = ephemeral, observe, accepted
+        self.turn_id = None
+        self.reject, self.before_thread = reject, before_thread
 
     def __getattr__(self, name):
         return getattr(self.inner, name)
@@ -65,12 +70,13 @@ class OneTurn:
         if method == "thread/start":
             if (self.started or params.get("model") != self.selected["model"]
                     or params.get("cwd") != str(self.context.resolve())
-                    or params.get("ephemeral") is not True
+                    or params.get("ephemeral") is not self.ephemeral
                     or params.get("sandbox") != "read-only" or params.get("approvalPolicy") != "never"
                     or params.get("baseInstructions") != self.instructions
                     or params.get("developerInstructions") != self.instructions):
                 raise ValueError("Změněný rozsah izolovaného vlákna.")
             self.started = True
+            self.before_thread()
             reply = self.inner.request(method, params)
             if (reply.get("model") != self.selected["model"] or reply.get("cwd") != str(self.context.resolve())
                     or reply.get("approvalPolicy") != "never" or reply.get("sandbox", {}).get("type") != "readOnly"
@@ -90,7 +96,10 @@ class OneTurn:
                 raise ValueError("Druhý tah nebo změna schváleného zadání.")
             self.attempted = True
             self.before_send()
-            return self.inner.request(method, {**params, "serviceTierForTurn": "default"})
+            reply = self.inner.request(method, {**params, "serviceTierForTurn": "default"})
+            self.turn_id = reply.get('turn', {}).get('id')
+            self.accepted(self.turn_id)
+            return reply
         raise ValueError("RPC mimo rozsah zpravodaje.")
 
     def receive(self, predicate, **kwargs):
@@ -98,11 +107,29 @@ class OneTurn:
         params = event.get("params", {})
         item = params.get("item", {})
         if item and item.get("type") not in ("userMessage", "agentMessage", "reasoning", "contextCompaction"):
+            self.reject()
             raise ValueError("Výstup obsahoval nepovolené použití nástroje.")
+        nested = params.get('turn', {}).get('items', [])
+        if any(i.get('type') not in ('userMessage', 'agentMessage', 'reasoning', 'contextCompaction') for i in nested):
+            self.reject()
+            raise ValueError('Dokončený tah obsahoval nepovolený nástroj.')
+        self.observe(event)
         return event
 
 
 def call_model(store, key, payload, instructions, schema, *, client_factory=new_luna_client):
+    from app.file_persistence import exclusive_file_lock, FileLockTimeoutError
+    policy(store)  # Inactive never creates locks or private state.
+    store._safe()
+    store.root.mkdir(parents=True, exist_ok=True, mode=0o700)
+    try:
+        with exclusive_file_lock(store.root / ('model_worker_' + digest(key)), timeout=0):
+            return _call_model_locked(store,key,payload,instructions,schema,client_factory=client_factory)
+    except FileLockTimeoutError as error:
+        raise ValueError('Původní požadavek ještě běží; nic neopakuji.') from error
+
+
+def _call_model_locked(store, key, payload, instructions, schema, *, client_factory):
     approved = policy(store)
     text = json.dumps(payload, ensure_ascii=False, sort_keys=True)
     if len(text.encode()) > 180_000:
@@ -118,11 +145,15 @@ def call_model(store, key, payload, instructions, schema, *, client_factory=new_
             raise ValueError("Předběžná rezervace nepokryje odhad požadavku.")
     month = datetime.now(timezone.utc).astimezone(ZoneInfo("Europe/Prague")).strftime("%Y-%m")
     fingerprint = digest({"payload": payload, "instructions": instructions, "schema": schema, "policy": approved})
+    from app.science_news_recovery import recover_model_result, record_event, accept_result
+    old = store._read()['jobs'].get(key)
+    if old and old.get('phase') != 'preflight':
+        return recover_model_result(store, key, payload, instructions, schema, client_factory=client_factory)
     with store.transaction() as state:
         old = state["jobs"].get(key)
-        if old:
-            if old.get("fingerprint") == fingerprint and old["state"] == "completed":
-                return old["answer"]
+        if old and (old.get('phase') != 'preflight' or old.get('thread_id')
+                    or old.get('fingerprint') != fingerprint or old.get('guard_rejected')
+                    or old.get('role_policy_digest') != binding['policy_digest']):
             raise ValueError("Původní modelový pokus vyžaduje ověření; neopakuji jej.")
         def charged(job):
             actual = job.get("estimated_credits")
@@ -130,46 +161,66 @@ def call_model(store, key, payload, instructions, schema, *, client_factory=new_
                     and math.isfinite(actual) and actual >= 0):
                 return actual
             return job.get("reserved_credits", 0)
-        used = sum(charged(j) for j in state["jobs"].values() if j.get("month") == month)
+        used = sum(charged(j) for k,j in state["jobs"].items() if j.get("month") == month and k != key)
         if used + approved["max_job_credits"] > approved["max_month_credits"]:
             raise ValueError("Měsíční rozpočet nemá volnou rezervu.")
         state["jobs"][key] = {"state": "delivery_unknown", "fingerprint": fingerprint,
-            "reserved_credits": approved["max_job_credits"], "month": month, "started_at": utc_now()}
-    # No catch/retry: caller keeps the unknown persistent marker on any failure.
-    with client_factory() as client:
-        account = client.transport.request("account/read", {"refreshToken": False}).get("account")
-        if not isinstance(account, dict) or account.get("type") != "chatgpt":
-            raise ValueError("Kreditový zpravodaj vyžaduje přihlášení přes ChatGPT.")
-        selected = agent_roles.resolve_role(client.list_models(include_hidden=True), role=ROLE)
-        if selected["policy_digest"] != binding["policy_digest"]:
-            raise ValueError("Role se od přípravy změnila.")
-        context = store.root / "contexts" / digest(key)
-        if any(p.is_symlink() for p in (context, *context.parents)):
-            raise ValueError("Izolovaný kontext nesmí být symlink.")
-        def before_send():
-            agent_roles.assert_current(selected, role=ROLE)
-            if policy(store) != approved:
-                raise ValueError("Aktivace se před tahem změnila.")
-        client.transport = OneTurn(client.transport, context, selected, instructions, text, schema, before_send)
-        thread = start_data_only_thread(client, context, selected["model"], instructions)["thread_id"]
+            "reserved_credits": approved["max_job_credits"], "month": month, "started_at": old.get("started_at", utc_now()) if old else utc_now(), "persistent": True,
+            "preflight_count": (old.get("preflight_count", 0) if old else 0) + 1,
+            "client_message_id": "science-news-" + digest({"key": key, "fingerprint": fingerprint})[:40],
+            "phase": "preflight", "role_policy_digest": binding["policy_digest"]}
+    def accepted(turn_id):
+        if not isinstance(turn_id, str) or not turn_id:
+            raise ValueError('Původní tah nemá ID.')
         with store.transaction() as state:
-            state["jobs"][key].update(thread_id=thread, executor=selected)
-        receipt = client.send_text(thread_id=thread, text=text, model=selected["model"],
-            effort=selected["reasoning_effort"], approval_policy="never",
-            sandbox_policy={"type": "readOnly", "networkAccess": False}, output_schema=schema)
-    # Raw result survives a validation/usage failure; never trigger another call.
-    with store.transaction() as state:
-        state["jobs"][key]["raw_answer"] = receipt.answer
-    if getattr(receipt, "delivered", False) is not True or getattr(receipt, "thread_id", None) != thread:
-        raise ValueError("Doručení výsledku konkrétnímu vláknu nebylo ověřeno; neopakovat.")
-    usage = normalize_usage(receipt.thread_token_usage)
-    cost = estimate_standard_credits(selected["model"], usage)
-    if usage is None or cost is None or cost > approved["max_job_credits"] or usage["output_tokens"] > 16_000 or usage["total_tokens"] > 100_000:
-        raise ValueError("Výsledek nemá přijatelný důkaz spotřeby; neopakovat.")
-    agent_roles.assert_current(selected, role=ROLE)
+            state['jobs'][key]['turn_id'] = turn_id
+    def rejected():
+        with store.transaction() as state:
+            state['jobs'][key]['guard_rejected'] = True
+    try:
+        with client_factory() as client:
+            account = client.transport.request("account/read", {"refreshToken": False}).get("account")
+            if not isinstance(account, dict) or account.get("type") != "chatgpt":
+                raise ValueError("Kreditový zpravodaj vyžaduje přihlášení přes ChatGPT.")
+            selected = agent_roles.resolve_role(client.list_models(include_hidden=True), role=ROLE)
+            if selected["policy_digest"] != binding["policy_digest"]:
+                raise ValueError("Role se od přípravy změnila.")
+            context = store.root / "contexts" / digest(key)
+            if any(p.is_symlink() for p in (context, *context.parents)):
+                raise ValueError("Izolovaný kontext nesmí být symlink.")
+            def before_send():
+                agent_roles.assert_current(selected, role=ROLE)
+                if policy(store) != approved:
+                    raise ValueError("Aktivace se před tahem změnila.")
+            def before_thread():
+                with store.transaction() as state:
+                    state['jobs'][key].update(phase='thread_requested',executor=selected)
+            client.transport = OneTurn(client.transport, context, selected, instructions, text, schema, before_send,
+                ephemeral=False, observe=lambda event: record_event(store,key,event), accepted=accepted,
+                reject=rejected, before_thread=before_thread)
+            thread = start_data_only_thread(client, context, selected["model"], instructions, ephemeral=False)["thread_id"]
+            with store.transaction() as state:
+                state["jobs"][key].update(thread_id=thread, executor=selected)
+                client_id = state['jobs'][key]['client_message_id']
+            receipt = client.send_text(thread_id=thread, text=text, model=selected["model"],
+                effort=selected["reasoning_effort"], approval_policy="never",
+                sandbox_policy={"type": "readOnly", "networkAccess": False}, output_schema=schema,
+                client_message_id=client_id)
+            # Persist BEFORE disconnect/context-manager exit; no response is lost
+            # merely because closing the transport fails after a completed turn.
+            with store.transaction() as state:
+                job = state['jobs'][key]
+                job.update(raw_answer=receipt.answer, receipt={'answer':receipt.answer,
+                    'delivered':getattr(receipt,'delivered',False),
+                    'thread_id':getattr(receipt,'thread_id',None),
+                    'turn_id':getattr(receipt,'turn_id',job.get('turn_id')),
+                    'client_message_id':getattr(receipt,'client_message_id',client_id),
+                    'usage':getattr(receipt,'thread_token_usage',None),
+                    'measurement':getattr(receipt,'token_measurement',None)})
+    except Exception:
+        if not store._read()['jobs'][key].get('receipt'):
+            raise
+        # Only the exact completed receipt can close a post-delivery error.
     if policy(store) != approved:
-        raise ValueError("Aktivace se během běhu změnila.")
-    answer = json.loads(receipt.answer)
-    with store.transaction() as state:
-        state["jobs"][key].update(state="completed", answer=answer, usage=usage, estimated_credits=cost)
-    return answer
+        raise ValueError('Aktivace se během běhu změnila.')
+    return accept_result(store,key,approved)

@@ -55,7 +55,8 @@ def _sources() -> dict[str, Any]:
 
 
 def start_data_only_thread(client: Any, context: Path, model: str, instructions: str,
-                           *, disabled_features: tuple[str, ...] = (), restrict_read_access: bool = False) -> dict[str, Any]:
+                           *, disabled_features: tuple[str, ...] = (), restrict_read_access: bool = False,
+                           ephemeral: bool = True) -> dict[str, Any]:
     """One isolated context; only per-thread configuration, never global state."""
     context.mkdir(parents=True, exist_ok=True)
     if context.is_symlink() or any(context.iterdir()):
@@ -91,7 +92,7 @@ def start_data_only_thread(client: Any, context: Path, model: str, instructions:
         overrides["permissions"] = {profile: {"filesystem": {":minimal": "read", str(context.resolve()): "read"},
                                               "network": {"enabled": False}}}
     options = {"permission_profile": profile} if profile else {}
-    thread = client.start_thread(cwd=context, ephemeral=True, developer_instructions=instructions,
+    thread = client.start_thread(cwd=context, ephemeral=ephemeral, developer_instructions=instructions,
                                  sandbox="read-only", approval_policy="never",
                                  model=model, config_overrides=overrides,
                                  base_instructions=instructions, **options)

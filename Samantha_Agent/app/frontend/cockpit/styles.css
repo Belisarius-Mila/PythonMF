@@ -24,6 +24,8 @@
     .science-news-entry.science-empty { background: #596574; color: white; }
     .science-news-entry.science-pending { background: #18794e; color: white; animation: science-news-pulse 2s ease-in-out infinite; }
     .science-news-entry.science-unknown { outline: 2px solid #e9aa34; }
+    .science-news-entry.science-attention { background: #8a4b00; color: white; border: 2px solid #e9aa34; animation: none; }
+    #scienceNewsStatus[data-attention="true"] { color: #9b3800; font-weight: 650; }
     @keyframes science-news-pulse { 50% { box-shadow: 0 0 0 6px rgb(48 190 110 / 28%); } }
     @media (prefers-reduced-motion: reduce) { .science-news-entry.science-pending { animation: none; } }
     #scienceNewsSection { border: 1px solid var(--line); padding: 14px; margin-bottom: 16px; border-radius: 8px; }

@@ -10,7 +10,8 @@ from pathlib import Path
 from datetime import datetime, timedelta
 from zoneinfo import ZoneInfo
 
-from app.science_news import AREAS, ScienceNews, digest, identity, validate_item
+from app.science_news import AREAS, ScienceNews, digest, identity, validate_item, utc_now
+from app.file_persistence import exclusive_file_lock, FileLockTimeoutError
 from app.science_news_sources import collect
 
 PRAGUE = ZoneInfo("Europe/Prague")
@@ -82,7 +83,20 @@ def grounded_items(answer, packet, follows):
     return clean
 
 
-def tick(store, now, *, reviewer, collector=collect, activated_at=None):
+def tick(store, now, *, reviewer, collector=collect, activated_at=None, recoverer=None):
+    if activated_at is not None and slot(now) < activated_at:
+        return {"ok": True, "state": "not_due"}
+    store._safe()
+    store.root.mkdir(parents=True, exist_ok=True, mode=0o700)
+    try:
+        with exclusive_file_lock(store.root / 'weekly_worker', timeout=0):
+            return _tick_locked(store, now, reviewer=reviewer, collector=collector,
+                                activated_at=activated_at, recoverer=recoverer)
+    except FileLockTimeoutError:
+        return {'ok': True, 'state': 'preparing'}
+
+
+def _tick_locked(store, now, *, reviewer, collector, activated_at, recoverer):
     """A persistent preparation attempt per slot, never a second model attempt.
 
     reviewer(packet) supplies the actual guarded model implementation. Production
@@ -92,17 +106,54 @@ def tick(store, now, *, reviewer, collector=collect, activated_at=None):
     if activated_at is not None and due < activated_at:
         return {"ok": True, "state": "not_due"}
     key = "weekly_" + due.date().isoformat().replace("-", "")
+    from app.science_news_recovery import issue_closed
+    snapshot = store._read()
+    older = sorted((k,j) for k,j in snapshot['jobs'].items() if k.startswith('weekly_')
+                   and k < key and j.get('state') in ('started','attention') and not issue_closed(j))
+    if older:
+        old_key, old_job = older[0]
+        packet = old_job.get('packet', {})
+        model_key = 'editor_' + str(packet.get('collected_at',''))[:10].replace('-', '')
+        if recoverer and packet and model_key in snapshot['jobs']:
+            # Finish a provable OLD result first, never begin an old paid request.
+            from app.science_news_recovery import recover_model_result
+            def original_only(data):
+                return recover_model_result(store, model_key, data, INSTRUCTIONS, SCHEMA)
+            return _tick_locked(store, datetime.fromisoformat(old_job['due']), reviewer=reviewer,
+                    collector=collector, activated_at=activated_at, recoverer=original_only)
+        return {'ok':False,'state':'attention','message':'Nejprve ověř přerušené starší vydání.'}
     with store.transaction() as state:
-        if any(k.startswith("weekly_") and j["state"] in ("started", "attention")
-               for k, j in state["jobs"].items() if k != key):
+        if any(k.startswith("weekly_") and j["state"] in ("started", "attention") and not issue_closed(j)
+               for k, j in state["jobs"].items() if k < key):
             return {"ok": False, "state": "attention", "message": "Nejprve ověř přerušené starší vydání."}
         job = state["jobs"].get(key)
         if job and job["state"] == "published":
             return {"ok": True, "state": "already_published"}
-        if job and job["state"] not in ("prepared",):
-            return {"ok": False, "state": "attention", "message": "Předchozí pokus vyžaduje ověření; nic neopakuji."}
+        if job and issue_closed(job):
+            return {'ok': True, 'state': 'closed_without_output'}
+        if job and job['state'] != 'prepared':
+            if not recoverer:
+                return {"ok": False, "state": "attention", "message": "Předchozí pokus vyžaduje ověření; nic neopakuji."}
+            if not job.get('packet'):
+                # The collector always freezes its packet before requesting a model.
+                job = None
         if job is None:
-            state["jobs"][key] = {"state": "started", "due": due.isoformat()}
+            state["jobs"][key] = {"state": "started", "due": due.isoformat(),
+                                    "phase": "collecting", "updated_at": utc_now()}
+    if job and job['state'] != 'prepared':
+        try:
+            packet = job['packet']
+            if digest(packet) != job.get('packet_digest'):
+                raise ValueError('Zmrazené podklady se změnily.')
+            answer = job['raw_answer'] if 'raw_answer' in job else recoverer(packet)
+            items = grounded_items(answer, packet, packet.get('follows', []))
+            with store.transaction() as state:
+                state['jobs'][key].update(state='prepared', raw_answer=answer, items=items,
+                                          phase='prepared', updated_at=utc_now())
+        except Exception as error:
+            with store.transaction() as state:
+                state['jobs'][key].update(state='attention', error_type=type(error).__name__, updated_at=utc_now())
+            return {'ok':False, 'state':'attention', 'message':'Původní výsledek zatím nelze ověřit; nový modelový pokus nespouštím.'}
     if job is None:
         try:
             packet = collector(now)
@@ -132,21 +183,28 @@ def tick(store, now, *, reviewer, collector=collect, activated_at=None):
                 "reason": i["recommendation_reason"]} for i in calibration["candidates"]]
             # Freeze all data before any paid handoff, retaining raw result.
             with store.transaction() as state:
-                state["jobs"][key].update(packet=packet, packet_digest=digest(packet))
+                state["jobs"][key].update(packet=packet, packet_digest=digest(packet), phase="reviewing", updated_at=utc_now())
             answer = reviewer(packet) if packet["candidates"] else {"items": []}
             with store.transaction() as state:
-                state["jobs"][key]["raw_answer"] = answer
+                state["jobs"][key].update(raw_answer=answer, phase="validating", updated_at=utc_now())
             items = grounded_items(answer, packet, follows)
             with store.transaction() as state:
-                state["jobs"][key].update(state="prepared", items=items)
-        except Exception:
+                state["jobs"][key].update(state="prepared", items=items, phase="prepared", updated_at=utc_now())
+        except Exception as error:
             with store.transaction() as state:
-                state["jobs"][key]["state"] = "attention"
+                state["jobs"][key].update(state="attention", error_type=type(error).__name__, updated_at=utc_now())
             return {"ok": False, "state": "attention", "message": "Příprava nebyla ověřena; automaticky ji neopakuji."}
     if now < due:
         return {"ok": True, "state": "prepared", "available_at": due.isoformat()}
     job = store._read()["jobs"][key]
-    store.publish(key, job["items"], available_at=due.isoformat(), source_health=job["packet"]["source_health"])
-    with store.transaction() as state:
-        state["jobs"][key]["state"] = "published"
+    try:
+        with store.transaction() as state:
+            state['jobs'][key].update(phase='publishing', updated_at=utc_now())
+        store.publish(key, job["items"], available_at=due.isoformat(), source_health=job["packet"]["source_health"])
+        with store.transaction() as state:
+            state["jobs"][key].update(state="published", phase="published", updated_at=utc_now())
+    except Exception as error:
+        with store.transaction() as state:
+            state['jobs'][key].update(state='attention', error_type=type(error).__name__, updated_at=utc_now())
+        return {'ok':False, 'state':'attention', 'message':'Publikaci je třeba ověřit; připravený výsledek zůstává zachovaný.'}
     return {"ok": True, "state": "published", "item_count": len(job["items"])}

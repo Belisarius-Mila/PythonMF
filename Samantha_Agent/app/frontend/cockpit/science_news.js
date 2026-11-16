@@ -31,10 +31,13 @@
     function message(text) { elements.status.textContent = text; }
     function indicator(data) {
       const pending = data.pending_count > 0;
+      const attention = data.preparation?.attention === true;
       elements.entry.classList.toggle("science-pending", pending);
-      elements.entry.classList.toggle("science-empty", !pending);
+      elements.entry.classList.toggle("science-empty", !pending && !attention);
+      elements.entry.classList.toggle("science-attention", attention);
       elements.entry.classList.remove("science-unknown");
-      elements.entry.setAttribute("aria-label", pending ? `ScienceNews: ${data.pending_count} nevyřízených zpráv` : "ScienceNews: vše vyřízeno");
+      elements.entry.setAttribute("aria-label", attention ? "ScienceNews: příprava vyžaduje pozornost" : pending ? `ScienceNews: ${data.pending_count} nevyřízených zpráv` : "ScienceNews: vše vyřízeno");
+      elements.entry.title = attention ? data.preparation.message : "Vědecké novinky";
     }
     function operation(id, action) {
       const key = `science-news-operation:${id}`;
@@ -139,12 +142,16 @@
       }
       const last = data.issues[data.issues.length - 1];
       let text = data.pending_count ? `${data.pending_count} zpráv k vyřízení.` : "Všechny zprávy máš vyřízené.";
+      if (data.preparation?.state && data.preparation.state !== "ok") {
+        text = data.preparation.message + (data.pending_count ? ` ${data.pending_count} zpráv k vyřízení.` : "");
+      }
       if (!data.activated) text += " Automatický zpravodaj zatím není aktivovaný.";
       if (last) {
         text += ` Poslední vydání: ${new Date(last.available_at).toLocaleString("cs-CZ")}.`;
         if (last.source_health.some(i => i.state !== "ok")) text += " Některé zdroje nebyly dostupné; výběr je neúplný.";
       }
       message(text);
+      elements.status.setAttribute("data-attention", data.preparation?.attention === true ? "true" : "false");
     }
     async function refresh() {
       const token = ++sequence;

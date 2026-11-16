@@ -476,3 +476,12 @@ požadavku. Parent se dokládá kanonickou relací a journalem zastavené práce
 aktuálním workspace a private ownership markerem. Status nabízí pouze
 ověřený interrupted_work_continuation; čtení samo nic neobnovuje/neodesílá.
 Nová schopnost, endpoint, modelová role ani obecné povolení dirty WIP nevzniká.
+
+
+ScienceNews: `app.science_news_recovery.weekly_status` je pouze čtecí stav přípravy.
+`close_interrupted_issue(store, key, expected_fingerprint=..., request_id=..., confirmed=True)`
+po konkrétním schválení uloží jen marker uzavření bez výstupu. Zachová všechna
+původní data a neznámý modelový pokus i rezervu; nevolá model ani publikaci.
+Obnova původního výsledku nepovoluje nový thread/start/turn/start; výjimka je
+trvale doložený preflight před prvním thread/start, který pokračuje prvním
+požadavkem v původním schváleném rozsahu a se stejnou rezervací.

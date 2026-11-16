@@ -2812,3 +2812,14 @@ Příští CLI běh opravu načte, nová ostrá záloha v tomto vývojovém krok
 - Kontext: Předčasné Další/replay přeruší správně spuštěný hlas. Obnovení karty po textu samo další poslech nespustí. Zjednodušená audio fixture s okamžitým currentTime=0 může skrýt opožděný rewind.
 - Řešení: Další i replay zamknout po celou zvukovou fázi a krátký odstup po ended, přepínače nesmí bránu obejít. Správné psaní má výslovnou další zvukovou fázi. Herní pokusy používají čerstvý Audio od nuly, příprava URL je samostatná; odchod a timeout bezpečně zruší callbacky.
 - Ověření:3 reprodukce na původním kódu FAIL při38 původních PASS; opravená verze45 PASS, včetně dlouhého audia, opožděného rewind, přepínačů a finálního error/timeout. Safari dokončilo celý tok dvou hesel; akustická a telefonní přejímka zůstává samostatná.
+
+
+### 2026-11-16 15:12 CET — Dočasné placené vlákno neslouží k obnově po restartu
+
+- Problém: ScienceNews13.11. začalo po probuzení08:04, ale ephemeral
+  vlákno se ztratilo bez výsledku; samotné častější spouštění nepomůže.
+- Řešení: trvalé datové vlákno, uložit client/turn ID a odpověď+usage ještě
+  před odpojením. Obnova čte jen původní dokončený tah, nikdy nepřeposílá
+  nejistý požadavek. Oddělit prokazatelný preflight před thread/start.
+  Explicitní uzavření bez výstupu ponechá podklady, unknown i rezervu;
+  GET upozorňuje na přerušené/chybějící vydání i při prázdné frontě.

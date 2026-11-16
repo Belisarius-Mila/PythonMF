@@ -148,3 +148,24 @@ test('server attention response never releases a possibly started request',async
  assert.equal(f.saved.size,1);const count=f.calls.length;
  await f.button('Nezařazovat').click();assert.equal(f.calls.length,count);
 });
+
+test('interrupted preparation is visible with an empty inbox and no mutating call',async()=>{
+ const broken={...data([]),activated:true,preparation:{state:'attention',attention:true,message:'Příprava se přerušila; výsledek není ověřený.'}};
+ const f=setup(async()=>response(broken));await f.api.refresh();
+ assert(f.elements.entry.classes.has('science-attention'));
+ assert(!f.elements.entry.classes.has('science-empty'));
+ assert.match(f.elements.status.textContent,/přerušila/);
+ assert(!f.elements.status.textContent.includes('Všechny zprávy máš vyřízené'));
+ assert.equal(f.elements.status.attributes['data-attention'],'true');
+ assert.equal(f.calls.length,1);assert.equal(f.calls[0].payload,null);
+});
+test('closed issue stays visibly incomplete until a later successful issue',async()=>{
+ let closed=true;
+ const f=setup(async()=>response({...data([]),activated:true,preparation:closed
+   ?{state:'closed_without_output',attention:true,message:'Vydání bylo uzavřeno bez výsledku.'}
+   :{state:'ok',attention:false,message:'V pořádku'}}));
+ await f.api.refresh();assert(f.elements.entry.classes.has('science-attention'));
+ assert.match(f.elements.status.textContent,/bez výsledku/);
+ closed=false;await f.api.refresh();assert(!f.elements.entry.classes.has('science-attention'));
+ assert(f.elements.entry.classes.has('science-empty'));
+});

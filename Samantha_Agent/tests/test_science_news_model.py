@@ -29,9 +29,10 @@ class Client:
     def __enter__(self):return self
     def __exit__(self,*args):pass
     def list_models(self,**kwargs):return []
+    def resume_thread(self,*args,**kwargs):raise ValueError('Original turn unavailable')
     def read_effective_config(self,**kwargs):return {'mcp_servers':{}}
     def start_thread(self,**kwargs):
-        params={'cwd':str(kwargs['cwd'].resolve()),'model':kwargs['model'],'ephemeral':True,
+        params={'cwd':str(kwargs['cwd'].resolve()),'model':kwargs['model'],'ephemeral':kwargs.get('ephemeral',True),
             'approvalPolicy':kwargs['approval_policy'],'sandbox':kwargs['sandbox'],
             'baseInstructions':kwargs['base_instructions'],'developerInstructions':kwargs['developer_instructions'],
             'config':kwargs['config_overrides']}
@@ -76,7 +77,8 @@ class ModelTests(unittest.TestCase):
         factory=Mock(return_value=Client(fail=True))
         with self.assertRaises(TimeoutError):call_model(self.store,'fixture',{},'instructions',{},client_factory=factory)
         with self.assertRaises(ValueError):call_model(ScienceNews(self.store.root),'fixture',{},'instructions',{},client_factory=factory)
-        self.assertEqual(factory.call_count,1)
+        self.assertEqual(factory.call_count,2)
+        self.assertEqual(sum(m == 'turn/start' for m,_ in factory.return_value.inner.calls),1)
         self.assertEqual(self.store._read()['jobs']['fixture']['state'],'delivery_unknown')
 
     def test_monthly_reservation_and_input_estimate_stop_before_client(self):
@@ -126,7 +128,8 @@ class ModelTests(unittest.TestCase):
         self.assertEqual(client.inner.request.call_count,1)
         self.assertEqual(client.inner.request.call_args.args[0],'account/read')
         with self.assertRaises(ValueError):call_model(self.store,'new',{},'instructions',{},client_factory=factory)
-        self.assertEqual(factory.call_count,1)
+        self.assertEqual(factory.call_count,2)
+        self.assertFalse(any(m in ("thread/start","turn/start") for m,_ in client.inner.calls))
 
     def test_transport_rejects_second_turn_broader_permissions_and_tools(self):
         context=Path(self.temp.name).resolve();inner=Inner()
