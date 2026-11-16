@@ -37,7 +37,7 @@ function persist() {
 }
 function routeUrl(kind,uid="") {
   const params=new URLSearchParams(), current=context();
-  if(kind==="quiz")params.set("game","listen-pictures");
+  if(kind==="quiz")params.set("game","word-pictures");
   if(uid)params.set(kind==="study" ? "card" : "last",uid);
   for(const key of Object.keys(defaults())) {
     const value=current[key], fallback=defaults()[key];
@@ -53,7 +53,7 @@ function route() {
   const params=new URLSearchParams(new URL(window.location.href).hash.slice(1));
   const raw={};
   for(const key of Object.keys(defaults()))if(params.has(key))raw[key]=Array.isArray(defaults()[key]) ? params.get(key).split(",") : ["large","onlyLearnerHard"].includes(key) ? params.get(key)==="true" : params.get(key);
-  return {hasContext:Object.keys(raw).length>0,context:sanitizeContext(raw),card:params.get("card") || "",last:params.get("last") || "",game:params.get("game")==="listen-pictures"};
+  return {hasContext:Object.keys(raw).length>0,context:sanitizeContext(raw),card:params.get("card") || "",last:params.get("last") || "",game:["word-pictures","listen-pictures"].includes(params.get("game"))};
 }
 function personalItems(){return learnerUI?learnerUI.filter(state.items,state.learner,state.onlyLearnerHard):state.items;}
 function buildSelection(){return M.select(personalItems(),context(),state.items);}
@@ -196,8 +196,7 @@ function openQuiz({fromHistory=false}={}){
 }
 function returnFromQuiz(){
   if(state.view!=="quiz")return;
-  if(window.history.state?.vocabularyIT===1&&window.history.state?.kind==="quiz")window.history.back();
-  else showGallery({render:true});
+  showGallery({render:true});
 }
 function freshVisit(){return `${Date.now().toString(36)}-${Math.random().toString(36).slice(2,10)}`;}
 function openStudy(uid,mode="ordered",tile=null){
@@ -282,7 +281,7 @@ function applyRoute({initial=false}={}){
   const current=route(),saved=savedNavigation(),last=savedLast();
   if(initial)Object.assign(state,current.hasContext ? current.context : sanitizeContext(saved?.context || last?.context || {}));
   if(!learnerUI?.available){state.learner="all";state.onlyLearnerHard=false;}
-  if(current.game&&quizUI){openQuiz({fromHistory:true});return;}
+  if(current.game&&quizUI){if(current.hasContext)Object.assign(state,current.context);openQuiz({fromHistory:true});return;}
   if(current.card){
     const target=state.items.find(item=>M.key(item)===current.card);
     if(!target){state.lastUid="";state.currentItem=null;switchView("gallery");renderGallery();ui.galleryNotice.textContent=state.data.items.some(item=>M.key(item)===current.card && !M.isActive(item))?"Tato karta byla vyřazena z nabídky. Vyber si jiné slovíčko.":"Odkazované slovíčko už v tomto slovníku není. Vyber si jiné.";writeHistory("gallery");return;}
@@ -475,7 +474,7 @@ function bindEvents(){
   window.addEventListener("popstate",()=>{stopAudioPlayback();applyRoute();});
   window.addEventListener("hashchange",()=>{const current=route();if(current.game||state.view==="quiz"||current.card && (state.view!=="study" || M.key(state.currentItem)!==current.card))applyRoute();});
   window.addEventListener("pagehide",()=>{persist();quizUI?.leave();stopAudioPlayback();});
-  window.addEventListener("pageshow",event=>{if(event.persisted){stopAudioPlayback();if(state.view==="gallery")focusLast();}});
+  window.addEventListener("pageshow",event=>{if(event.persisted){stopAudioPlayback();if(state.view==="gallery")focusLast();else if(state.view==="quiz")quizUI?.open();}});
 }
 async function readJson(url){const response=await fetch(url,{cache:"no-store"});if(!response.ok)throw new Error(`HTTP ${response.status}`);return response.json();}
 async function init(){
@@ -484,7 +483,7 @@ async function init(){
   void readJson(AUDIO_DATA_URL).then(manifest=>{
     state.audioManifest=manifest;document.getElementById("audioNotice").hidden=manifest?.status!=="not-generated";if(state.currentItem)primeCurrentAudio(state.currentItem);quizUI?.refresh();
   }).catch(()=>{state.audioManifest=false;ui.galleryNotice.textContent="Zvuk se nepodařilo načíst. Slovíčka můžeš dál procházet.";quizUI?.refresh();});
-  if(globalThis.VocabularyQuiz)void readJson(QUIZ_DATA_URL).then(data=>{if(data?.schemaVersion!==1||!data.entries||typeof data.entries!=="object"||Array.isArray(data.entries))throw new Error("Neplatný výběr obrázků.");quizCatalog=data;quizUI?.refresh();}).catch(()=>{quizCatalog=false;quizUI?.refresh();});
+  if(globalThis.VocabularyITPractice)void readJson(QUIZ_DATA_URL).then(data=>{if(data?.schemaVersion!==1||data.language!=="it"||data.kind!=="spelling-pictures"||!data.entries||typeof data.entries!=="object"||Array.isArray(data.entries))throw new Error("Neplatný výběr obrázků.");quizCatalog=data;quizUI?.refresh();}).catch(()=>{quizCatalog=false;quizUI?.refresh();});
   void readJson(SENTENCE_AUDIO_URL).then(manifest=>{
     state.sentenceAudioManifest=manifest;if(state.currentItem && state.practice==="sentences")primeCurrentAudio(state.currentItem);
   }).catch(()=>{}); // Sentence text and word audio work even if this optional file is unavailable.
@@ -502,8 +501,8 @@ async function init(){
     onChange:edited=>{if(edited){if(edited!==state.learner)state.onlyLearnerHard=false;state.learner=edited;}if(state.view==="gallery"){selectionChanged();}else if(state.view==="study"){applyRoute();}quizUI?.refresh();}
   });
   else document.getElementById("learnerNotice").textContent="Osobní výběry se nepodařilo načíst. Zkus obnovit stránku; společný slovník zůstává dostupný.";
-  if(globalThis.VocabularyQuiz)quizUI=globalThis.VocabularyQuiz.create({doc:document,win:window,getData:()=>state.data,getAudio:()=>state.audioManifest,getCatalog:()=>quizCatalog,
-    getPersonal:(id,hard)=>learnerUI?.filter(state.items,id,hard)||[],isAvailable:()=>Boolean(learnerUI?.available),
+  if(globalThis.VocabularyITPractice)quizUI=globalThis.VocabularyITPractice.create({doc:document,win:window,getData:()=>state.data,getAudio:()=>state.audioManifest,getCatalog:()=>quizCatalog,
+    getSelection:buildSelection,getContext:context,
     onOpen:()=>{stopAudioPlayback();switchView("quiz");window.scrollTo({top:0});},onClose:returnFromQuiz,
     play:item=>{stopAudioPlayback();return playOneAudio(M.audioRecord(item,state.audioManifest)?.it,playbackToken);},stop:stopAudioPlayback});
   document.getElementById("quizTab").disabled=!quizUI;

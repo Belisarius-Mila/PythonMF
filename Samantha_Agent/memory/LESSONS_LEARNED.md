@@ -2783,3 +2783,10 @@ Příští CLI běh opravu načte, nová ostrá záloha v tomto vývojovém krok
   masku; .build je cache. Git nenahrazuje soukromé/externí zálohy.
   Syntetické destruktivní scénáře a přesný plán před živým během jsou povinné;
   konečný důkaz a skutečný zisk pouze v workspace_housekeeping/v2_completion.json.
+
+
+### 2026-11-16 11:09 CET — Animované procvičování musí po návratu znovu otevřít svůj stav
+
+- Kontext: pagehide ruší zvuk/časovače a uzavírá komponentu; bfcache pak vrátí DOM se stejným viditelným panelem. Pouhé ponechání DOM nechá uzavřenou komponentu, která ignoruje nové callbacky.
+- Řešení: při persisted pageshow podle skutečného view znovu otevřít přípravu kola. Každé nové zadání/odchod má generační token a zruší všechny časovače i audio. Nejisté nebo nepřesné slovníkové dělení se zobrazuje celé; pieces.join musí přesně zachovat původní zápis.
+- Ověření:29 JS scénářů včetně zavření během animace/zvuku, pozdních load/error/ended událostí, history/bfcache, přímého replay po odmítnutém autoplay a nulových změn A–D. Fyzický browser není tímto automatickým důkazem nahrazený.

@@ -191,6 +191,7 @@ class ValidationDomainsTests(unittest.TestCase):
             'docs/assets/vocabulary-it-sentences/cs-cz-vlasta-neural/fixture.mp3',
             'PictNew/generated/20261115_it_web_review/vit-0013.webp',
             'docs/data/vocabulary-it-v2.json',
+            'docs/data/vocabulary-it-quiz.json',
             'docs/vocabulary-it/gallery.js', 'Pict/it_web_vit_0136.webp',
             'Samantha_Agent/tests/test_vocabularyit_selection.js',
             'Samantha_Agent/tests/test_vocabularyit_catalog.py'])

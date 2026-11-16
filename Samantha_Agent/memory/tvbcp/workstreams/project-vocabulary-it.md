@@ -1,12 +1,14 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
-- Aktualizováno: 2026-11-16 08:33 CET
-- Webová aplikace497 karet/1907 MP3 vydaná na Pages v a53c1757; index nyní HTTP200 a přesný.
-- V živém Cockpitu zůstává stará desktopová položka. Nové přepojení katalogu místně připravené.
-- Položka Vocabulary IT vede na veřejnou galerii; ID vocabulary-it-trainer zachované.
-- Pro promítnutí této nové opravy do běžícího Cockpitu zbývá samostatně schválené p+n.
-- Dále obrázková hra, telefonní přejímka a úplná jazyková revize.
+- Aktualizováno: 2026-11-16 11:09 CET
+- Zveřejněná galerie497 karet/1907 MP3 a odkaz Cockpitu2f6c783a funkční, p+n dokončené.
+- Nový režim Slovo a obrázek místně:4 obrázky, slabiky/spojení/zvuk, opravné pokusy, velká karta a opakování chyb.
+- Vlastní filtr Přehledu se zachovává celý; automaticky se nemění A–D ani obtížné příznaky.
+- 497 přesných jazykových záznamů,495 dělení a2 výslovně celé přejímky; všech497 má čtveřici v plném výběru.
+-29 JS scénářů,6 Python včetně JS wrapperu a17 HTTP přesných. Finální brána/checkpoint v private vocabulary_it_spelling_20261116.
+- Nové fyzické QA otevřené: Safari/Finder bez dostupného okna, browser bridge nedostupný.
+- Tento herní krok ještě nepublikovaný. Dále fyzický proklik a samostatné Pages p+n; psaní zpaměti později.
 <!-- SAMANTHA_CURRENT_STATUS_END -->
 
 # TVBCP: Vocabulary IT
@@ -356,3 +358,50 @@ Neopakovat předchozí vydání. Aktualizovaný katalogový test zachovává FR
 jako desktop; frontend již používá nativní odkazy target=_blank/rel=noopener.
 Finální programová brána a shoda zdrojů: private/vocabulary_it_cockpit_20261116.
 Nová katalogová změna je pouze místní, běžící Cockpit se v tomto kroku nerestartuje.
+
+
+### 2026-11-16 11:09 CET — Slovo a obrázek: zápis, zvuk a čtyři možnosti
+
+Hotovo: Místně vznikl samostatný dospělý režim Slovo a obrázek. Převzal
+všechny právě nastavené filtry Přehledu včetně A–D/obtížných, více témat,
+hledání, slovního druhu, obtížnosti a posledních N. Čtyři velké bezejmenné
+obrázky2×2; dole postupné úseky la · var · si, plynulé spojení lavarsi a
+existující italská MP3. Odpovědi se zpřístupní po poslechu. Chybná volba
+zešedne, přeškrtne se a vyřadí; zbývající pokusy zůstávají. Po správné volbě
+jedna velká karta, přesný italský zápis, český význam a znovu italský hlas.
+Karta zůstává do Další. Jednou chybované heslo má ještě jedno opakování na
+konci kola; souhrn nabízí nové kolo z chyb. Profily ani obtížné příznaky
+se automaticky nepřepisují. Další vlastní psaní zpaměti je pozdější etapa.
+
+497 explicitních jazykových záznamů zachovává přesně původní IT/CZ zápis,
+interpunkci/case/diakritiku;495 redakčně rozdělených, éclair/brioche zatím
+výslovně celé. Zdroje Crusca/Treccani a poznámky u sporných slov v katalogu.
+Každý význam umí ve společném výběru vytvořit čtveřici, posledních20 také20/20.
+Stejné heslo/obraz, shodný český význam, related a ručně vymezené obrazové
+kolize se nekladou proti sobě; barvy soutěží s barvami. Příliš úzký filtr
+vysvětlí chybějící čtveřici, nepůjčuje si možnosti zvenku. V okruhu Barvy
+jsou samostatně vhodné4 ze6; zbývající2 jsou dostupné v širším výběru.
+
+Rozhodnutí: Míla schválil celý návrh a vývoj první verze. Slabiky se v této
+verzi zobrazují, při spojení se čte celé slovo současným hlasem Elsa.
+Žádná nová syntéza, změna původních CSV/obrazů/EN ani povolení nového p+n.
+Předchozí oprava odkazu Cockpitu je již vydaná2f6c783a, jobae50fd8846bee6e2839b23b1d756a0e1,
+774 testů převzatých, smoke5/5; tuto starší publikaci neopakovat.
+
+Další krok: Fyzický proklik nového režimu a poslech podle TXT v Downloads;
+potom samostatně schválené Pages p+n tohoto nového herního kroku.
+
+Navrhované další kroky: Doladit obrazové kolize podle používání; později
+navazující psaní slova zpaměti; pokračovat jazykovou revizí metadat/vět.
+
+Technický důkaz:29 JS scénářů skutečné galerie/profilů/procvičování PASS;
+6 Python testů dat/assetů včetně JS wrapperu PASS. Všech497 UID má přesné
+pieces.join('')==it; homografy konzistentní, nesprávné texty/cesty/slabiky
+odmítnuté. HTTP17/17 zdrojů a ukázkových obrázků/MP3 přesných. Zkoušené
+chyby zvuku/obrázku,15s obrazový a20s zvukový timeout, přímý replay po blokovaném autoplay,
+pozdní callbacky, opakované kliky, klávesy1–4, reduced motion, návrat,
+historie a bfcache. Výběry A–D/původní poslední karta se nemění.
+Fyzická vizuální/přehrávací přejímka tohoto nového režimu není doložená:
+CUA Safari i Finder vracejí cgWindowNotFound, browser access host unavailable.
+Nepovažovat DOM/HTTP za skutečný render nebo iPhone/Android přejímku.
+Finální brána, otisk zdrojů a lokální checkpoint: private/vocabulary_it_spelling_20261116.
