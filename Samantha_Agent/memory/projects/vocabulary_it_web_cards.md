@@ -517,3 +517,24 @@ shodné s7278e110; programová integrační brána a přesný vydaný head budou
 v private/vocabulary_it_leda_release_20261116/completion.json a release_result.json.
 Žádná nová výroba zvuků/obrázků, změna placeného limitu ani plná lokální sada.
 Připravené předání není důkaz veřejného nasazení; fyzická přejímka zůstává otevřená.
+
+
+## 2026-11-16 21:40 CET — LEDA dávka veřejně vydaná a převzatá
+
+Hotovo:599 nových karet z7278e110 je veřejně dostupných ve Vocabulary IT,
+celkem1096 karet s kompletními médii. Původní Datovy commity zachované v main
+1327df57, Data worktree zůstal čistý na7278e110 a nebyl přepínaný.
+Rozhodnutí: Dokončené Mílou výslovně zadané p+n. Žádná další výroba médií,
+placené volání, zásah do osobních zásob ani opakovaný push.
+Další krok: Mílův poslech a fyzická telefonní přejímka. Vydání neopakovat.
+Navrhované další kroky: Doplnit podklady lekcí1–2 teprve po jejich dodání.
+Technický důkaz: integrační168 cílených PASS; Pages krok převzal tutéž platnou
+účtenku. Původní čekající Git push dokončení nezávisle ověřené na GitHubu,
+poté registrovaně provedená pouze zbývající publikace. Konečný Pages job
+2a52f7bbc0064dd46898e271d025e21d completed/already_aligned/deployment confirmed,
+deployment7835202950 a workflow43947407881 nad přesným1327df57.
+HTTP200 a20/20 reprezentativních veřejných souborů bajtově shodných. Chráněné
+služby beze změny. Autoritativní completion.json a public_verification.json
+v data/private/vocabulary_it_leda_release_20261116/. Původní attention účtenka
+zůstává historickým dokladem timeoutu; není důvodem k dalšímu p+n.
+Fyzická přejímka není prokázaná HTTP testem.

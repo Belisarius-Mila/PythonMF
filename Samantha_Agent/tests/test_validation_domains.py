@@ -58,6 +58,17 @@ class ValidationDomainsTests(unittest.TestCase):
                 self.assertEqual(result.mode,'targeted')
                 self.assertTrue(result.modules)
 
+    def test_shared_chat_frontend_and_node_fixture_keep_the_real_two_client_test(self):
+        for path in ('app/frontend/samantha_chat/app.js', 'app/frontend/samantha_chat/page.html',
+                     'app/frontend/samantha_chat/styles.css', 'tests/shared_chat_frontend.test.cjs'):
+            with self.subTest(path=path):
+                result = self.plan(path)
+                self.assertEqual(result.mode, 'targeted')
+                self.assertIn('tests.test_shared_chat_http', result.modules)
+                self.assertIn('tests.test_shared_chat_runtime', result.modules)
+                self.assertIn('tests.test_cockpit_http_security', result.modules)
+                self.assertNotIn('tests.test_calendar_writer', result.modules)
+
     def test_reverse_relative_imports_expand_other_domains_and_direct_test_consumers(self):
         self.write('app/calendar_writer.py','VALUE = 1\n')
         self.write('app/interior_titles.py','from .calendar_writer import VALUE\n')

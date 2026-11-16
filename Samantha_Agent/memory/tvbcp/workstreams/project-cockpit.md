@@ -1,4 +1,32 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
+## 2026-11-16 21:32 CET — Samantha, společný provozní rozhovor iPhone / Cockpit / Mint
+
+Místně dokončený první balíček: samostatný trvalý rozhovor, jednorázový
+párovací kód, společný rozepsaný text a výslovné převzetí psaní. Telefon využívá
+nativní diktování klávesnice; monitor může otázku upravit a odeslat. Obě zařízení
+vidí stejnou historii a odpověď. Vstup je tlačítko Samantha v Cockpitu a /samantha/.
+Plán uložený a zpětně ověřený v Downloads jako
+Samantha_iPhone_Cockpit_Mint_plan_vyvoje_2026-11-16.txt.
+
+335 cílených testů PASS včetně skutečného HTTP toku dvou JS klientů, konfliktu
+pozdního přepisu, souběžného odeslání, výpadku a ztracené HTTP odpovědi. Živý
+App Server přijal samostatný rozhovor se stávajícím modelem, bez modelového tahu
+nebo změny vývojových profilů. Konečnou programovou bránu, commit a stav profilů
+určuje data/private/shared_chat_20261116/completion.json; bez PASS nelze uzavřít.
+
+Další krok: samostatně schválené p+n balíčku do Cockpitu a fyzická přejímka
+telefon → diktování → ruční oprava na Mintu → jedno odeslání → společná odpověď.
+Dále knihovní hledání a karty, uložení po dohodě, kalendář a řízený prohlížeč.
+Tyto nástroje zatím nejsou připojené. Fyzická přejímka ani skutečná modelová
+odpověď nebyly tímto vývojem provedené; Safari náhled se nepodařilo ověřit.
+Nejasný tah po restartu zůstane neověřený a nesmí se automaticky odeslat znovu.
+Technická paměť: technical/shared_chat.md. Nový TVBCP se nezakládá.
+
+Před vývojem splněné Datovo p+n: původní7278e110 zachovaný v integračním
+1327df57;1096 karet veřejně vydaných,20 souborů bajtově ověřených, Data worktree
+nedotčený. Důkaz: data/private/vocabulary_it_leda_release_20261116/completion.json.
+Starší bloky níže jsou historické podklady a neurčují dnešní živý stav.
+
 ## 2026-11-15 — Ověření celodenního zápisu z pošty
 
 Místní oprava rozpozná půlnoc i nativní23:59:59; přesný native end/identita
@@ -3044,3 +3072,28 @@ závěrečná brána a commit pouze v private completion.json podle reportu
 calendar_all_day_verification_20261115.md. Bez skutečného PASS se krok neuzavírá.
 Samostatný e-mailový TVBCP nevzniká; tento společný kalendářový/UI krok kryje
 existující Cockpit TVBCP. Žádný nový model, kalendářový zápis ani p+n.
+
+
+## 2026-11-16 21:32 CET — První balíček společné Samanthy
+
+**Hotovo:** Telefon a monitor mohou sdílet samostatný rozhovor, připojit se
+jednorázovým kódem a předávat rozepsanou otázku. Pozdní telefon nepřepíše ruční
+opravu z Mintu. Obnovení stránky ani nejisté HTTP neodešlou otázku podruhé.
+Plán všech dalších balíčků je ověřeně uložený jako TXT v Downloads.
+
+**Rozhodnutí:** Míla schválil první balíček iPhone / Cockpit / Mint a přednostně
+Datovo p+n. Zachovává se App Server a dosavadní model; samostatný provozní chat
+nemění vývojové rozhovory. Diktování přes mikrofon klávesnice, bez placeného
+živého hlasového režimu. Propojení nástrojů až v dalších přijatých balíčcích.
+
+**Další krok:** Po samostatném potvrzení nasadit a fyzicky přejmout první balíček.
+
+**Navrhované další kroky:** Knihovní hledání s náhledy; ukládání článků, receptů
+a míst po dohodě; kalendářové návrhy; prohlížeč ovládaný na monitoru.
+
+**Technický důkaz:**335 cílených PASS, dva skuteční JS klienti přes HTTP,
+souběžné odeslání pouze jednou, reload, pozdní GET a offline/online. Skutečný
+App Server přijal oddělené připojení bez modelové otázky. Brána/commit jsou v
+private shared_chat_20261116/completion.json. Fyzický iPhone/Mint, živá modelová
+odpověď a p+n tohoto balíčku otevřené. Nejasný tah po restartu zůstává blokovaný
+bez automatického retry. Datův již vydaný7278e110 se neopakuje.

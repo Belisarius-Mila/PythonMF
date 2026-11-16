@@ -12,6 +12,20 @@ from app.capabilities.models import (
 
 CAPABILITIES: tuple[CapabilityRecord, ...] = (
     CapabilityRecord(
+        capability_id="shared_chat_status", label="Read an explicitly paired operating conversation",
+        risk=RiskLevel.READ_ONLY, reads=("authenticated conversation and shared draft",), writes=(),
+        tool="app.cockpit_shared_chat.shared_chat_status", audit=AuditPolicy.REDACTED,
+        notes="GET never creates a room, model client, thread or turn. Device credentials stay out of URLs and logs.",
+    ),
+    CapabilityRecord(
+        capability_id="shared_chat_action", label="Pair devices, share a draft and explicitly submit a chat message",
+        risk=RiskLevel.EXTERNAL_GENERATION, reads=("explicit paired-browser action and current draft revision",),
+        writes=("private operating conversation, device pairing and original message receipt",),
+        tool="app.cockpit_shared_chat.shared_chat_action", audit=AuditPolicy.REDACTED,
+        metadata={"durable_consent": "trusted_external_generation_v1"},
+        notes="Only explicit send starts a model turn, using the existing human-chat model. Draft edits, pairing, GET and reconnect do not call the model. No library/calendar/browser actions in package one; no development-profile mutation or automatic resend.",
+    ),
+    CapabilityRecord(
         capability_id="science_news_translation_budget_preview", label="Preview one study's exact translation budget",
         risk=RiskLevel.READ_ONLY, reads=("original verified parts and study fingerprint", "current approved monthly budget"), writes=(),
         tool="app.science_news_translation.budget_preview", audit=AuditPolicy.REDACTED,

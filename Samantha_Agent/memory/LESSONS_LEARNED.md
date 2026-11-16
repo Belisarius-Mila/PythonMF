@@ -595,6 +595,11 @@ klientskými, persistence/recovery a frontendovými smluvními testy bez modelu.
   kořen projektu. Profilové workspaces stav pouze čtou nebo aktualizují ve
   společném umístění; nevytvářejí vlastní kopie, které by se mohly rozejít.
 
+- Doplnění16.11.2026: společný draft telefonu a monitoru má navíc jednu
+  revizi a výslovné převzetí psaní. Pozdní GET nepřebije novou revizi a pozdní
+  zápis telefonu neprojde CAS po úpravě na Mintu. Skuteční dva JS klienti přes
+  HTTP ověřili zachování konfliktního textu i jedno odeslání při ztracené odpovědi.
+
 ### LL-005 — Procvičování slovíček může zablokovat direct-main vývoj
 
 - Problém: Slovníkové aplikace při běžném procvičování zapsaly příznaky `HT`

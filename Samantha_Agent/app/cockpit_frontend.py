@@ -7,6 +7,7 @@ FRONTEND_ROOT = Path(__file__).resolve().with_name("frontend")
 CSS_MARKER = "{{SAMANTHA_CSS}}"
 JAVASCRIPT_MARKER = "{{SAMANTHA_JAVASCRIPT}}"
 FRONTEND_PAGE_IDS = (
+    "samantha_chat",
     "calendar_task",
     "calendar_overview",
     "interior",
@@ -77,3 +78,4 @@ EMAIL_ARCHIVE_HTML = load_frontend_page("email_archive")
 EMAIL_AGENT_HTML = load_frontend_page("email_agent")
 EMAIL_PROCESSING_HTML = load_frontend_page("email_processing")
 COCKPIT_HTML = load_frontend_page("cockpit")
+SHARED_CHAT_HTML = load_frontend_page("samantha_chat")

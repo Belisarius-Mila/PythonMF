@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from app.cockpit_interior import INTERIOR_HTML, InteriorRoutes, interior_atelier_action
 from app.cockpit_calendar import CalendarOverviewRoutes, calendar_overview_action
+from app.cockpit_shared_chat import shared_chat_get, shared_chat_action
 from app.cockpit_calendar_agenda import calendar_agenda_status, calendar_agenda_action
 from app.cockpit_calendar_delete import calendar_delete_action
 from app.cockpit_calendar_edit import calendar_edit_action
@@ -8704,6 +8705,7 @@ def shell_quote_for_applescript(value: str) -> str:
 
 
 COCKPIT_POST_ACTIONS: tuple[dict[str, str], ...] = (
+    {"path": "/api/samantha-chat/action", "label": "Společný rozhovor Samanthy", "risk": "external_ai", "confirmation": "explicit_chat_action", "handler_name": "shared_chat_action", "test_level": "direct"},
     {"path":"/api/calendar/edit", "label":"Upravit název, datum a čas jedné původní události",
      "risk":"external_send", "confirmation":"explicit_existing_event_title_date_time_single_occurrence",
      "handler_name":"calendar_edit_action", "test_level":"direct"},
@@ -9834,6 +9836,8 @@ class CockpitServer:
                         result = email_calendar_draft_status(params["id"][0])
                         self.respond_json(result, status=HTTPStatus.OK if result["ok"] else HTTPStatus.BAD_REQUEST)
                     return
+                if shared_chat_get(parsed, self):
+                    return
                 if calendar_routes.dispatch(parsed=parsed, responder=self):
                     return
                 if interior_routes.dispatch(parsed=parsed, responder=self):
@@ -10220,6 +10224,10 @@ class CockpitServer:
             def do_POST(self) -> None:  # noqa: N802
                 self.validate_request_access(require_origin=True)
                 parsed = urlparse(self.path)
+                if parsed.path == "/api/samantha-chat/action":
+                    result = shared_chat_action(self.read_json(), peer=self.client_address[0]) if not parsed.query else {"ok": False, "message": "Neplatný požadavek."}
+                    self.respond_json(result, status=HTTPStatus.OK if result['ok'] else HTTPStatus.BAD_REQUEST)
+                    return
                 canonical_release_server = int(self.server.server_address[1]) == COCKPIT_PORT
                 luna_release_target = ""
                 if parsed.path.startswith("/api/human-adam/luna-release/") and not canonical_release_server:

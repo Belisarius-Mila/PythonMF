@@ -1,0 +1,27 @@
+<!doctype html>
+<html lang="cs"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Samantha — rozhovor</title><style>{{SAMANTHA_CSS}}</style></head>
+<body><main>
+<header><a href="/">← Cockpit</a><h1>Samantha</h1><p id="connection" role="status">Připojuji rozhovor…</p></header>
+<section id="setup" hidden aria-label="Připojení rozhovoru">
+  <h2>Rozhovor na monitoru</h2><label>Název počítače<input id="name" maxlength="40" value="Mint" autocomplete="off"></label>
+  <button id="create" type="button">Zahájit rozhovor</button>
+  <h2>Připojit telefon</h2><label>Kód z monitoru<input id="code" inputmode="numeric" maxlength="6" autocomplete="off" placeholder="Šestimístný kód"></label>
+  <button id="join" type="button">Připojit se k rozhovoru</button>
+</section>
+<section id="chat" hidden aria-label="Společný rozhovor">
+  <details id="pairPanel" hidden><summary>Připojit telefon</summary>
+    <button id="pair" type="button">Zobrazit připojovací kód</button>
+    <p id="pairCode" aria-live="polite"></p><p>Kód je jednorázový a platí deset minut. Na iPhonu otevři Samanthu a zadej ho.</p>
+  </details>
+  <div id="messages" role="log" aria-label="Zprávy rozhovoru" aria-live="polite"></div>
+  <p id="work" role="status"></p>
+  <div class="composer"><button id="claim" type="button">Psát / diktovat zde</button>
+    <label>Otázka pro Samanthu<textarea id="input" maxlength="12000" rows="4" readonly placeholder="Převezmi psaní tlačítkem výše. Na iPhonu použij mikrofon klávesnice."></textarea></label>
+    <div class="actions"><button id="send" type="button">Odeslat</button><button id="refresh" type="button" class="secondary">Obnovit stav</button></div>
+  </div>
+  <details id="recovery" hidden><summary>Text zachovaný na tomto zařízení</summary><pre id="recoveryText"></pre><button id="recover" type="button">Použít zachovaný text</button></details>
+</section>
+<button id="disconnect" type="button" class="secondary" hidden>Změnit připojení tohoto zařízení</button>
+<p id="status" role="status" aria-live="polite"></p>
+</main><script>{{SAMANTHA_JAVASCRIPT}}</script></body></html>
