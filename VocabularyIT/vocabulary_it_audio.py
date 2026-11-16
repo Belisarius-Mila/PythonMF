@@ -78,7 +78,9 @@ def load_items(source_root: Path, output_root: Path):
     return [item for item in data['items'] if item['active']]
 
 
-def plan(items,voices=VOICES):
+def plan(items,voices=VOICES,*,provider='registered-edge-tts'):
+    if provider not in {'registered-edge-tts','registered-azure-neural','registered-edge-tts+azure-neural'}:
+        raise ValueError('Neznámý registrovaný poskytovatel audia.')
     if set(voices)!={'it','cz'} or voices['it'] not in {'it-IT-ElsaNeural','it-IT-IsabellaNeural','it-IT-DiegoNeural'} or voices['cz']!='cs-CZ-VlastaNeural':
         raise ValueError('Neznámý hlasový profil.')
     manifests={};jobs={}
@@ -95,7 +97,7 @@ def plan(items,voices=VOICES):
                 if path in jobs and jobs[path]!=job:raise ValueError('Kolize zvukové identity.')
                 jobs[path]=job
             records[uid]=record
-        manifests[kind]={'schemaVersion':1,'language':'it','kind':kind,'status':'complete','provider':'registered-edge-tts',
+        manifests[kind]={'schemaVersion':1,'language':'it','kind':kind,'status':'complete','provider':provider,
                          'rate':RATE,'voices':voices,'items':records,'sourceDigest':hashlib.sha256(encoded(records)).hexdigest()}
     identity=hashlib.sha256(encoded(manifests)).hexdigest()
     return {'schemaVersion':1,'project':'VocabularyIT-audio','digest':identity,'manifests':manifests,'jobs':jobs,

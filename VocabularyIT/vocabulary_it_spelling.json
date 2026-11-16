@@ -2,8 +2,8 @@
   "schemaVersion": 1,
   "language": "it",
   "reviewedAt": "2026-11-16",
-  "reviewMethod": "Explicitní ruční slovník471 tokenů; každé z497 hesel složeno pouze z tohoto revidovaného seznamu. Nejde o automatické dělení za běhu. Nejasné přejímky jsou výslovně neověřené a celé.",
-  "sourceDataSha256": "713bbdf3f700d2fbbbc49db51165eb38cc7a678319fe8cc58e8062557874299c",
+  "reviewMethod": "Explicit reviewed decompositions; original 497 records preserved; 599 additions checked against Italian syllable rules.",
+  "sourceDataSha256": "5f4850ad122b7c4b02733f94ad3bd61d263466583a3ab23ce1dbdcf3886691eb",
   "sources": [
     {
       "url": "https://www.treccani.it/vocabolario/libreria/",
@@ -36,6 +36,14 @@
     {
       "url": "https://www.treccani.it/magazine/lingua_italiana/domande_e_risposte/grammatica/grammatica_990.html",
       "use": "Ve sciare se i ve kmeni vyslovuje."
+    },
+    {
+      "url": "https://www.treccani.it/magazine/lingua_italiana/domande_e_risposte/grammatica/grammatica_250.html",
+      "use": "Riuscire: riu-sci-re; přípustná i hranice ri-u-scire."
+    },
+    {
+      "url": "https://www.treccani.it/vocabolario/restituire/",
+      "use": "Restituire: vyslovené samohlásky u-i."
     }
   ],
   "entries": {
@@ -5421,6 +5429,6851 @@
       ],
       "reviewed": true,
       "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0498": {
+      "it": "Una mano lava l'altra.",
+      "cz": "Ruka ruku myje.",
+      "pieces": [
+        "U",
+        "na",
+        " ",
+        "ma",
+        "no",
+        " ",
+        "la",
+        "va",
+        " ",
+        "l'al",
+        "tra",
+        "."
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0499": {
+      "it": "partire",
+      "cz": "odjet; odejít na cestu",
+      "pieces": [
+        "par",
+        "ti",
+        "re"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0500": {
+      "it": "Bianca",
+      "cz": "Blanka",
+      "pieces": [
+        "Bian",
+        "ca"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0501": {
+      "it": "bianco",
+      "cz": "bílý",
+      "pieces": [
+        "bian",
+        "co"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0502": {
+      "it": "blu",
+      "cz": "tmavě modrý",
+      "pieces": [
+        "blu"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0503": {
+      "it": "così",
+      "cz": "tak; takto",
+      "pieces": [
+        "co",
+        "sì"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0504": {
+      "it": "dentro",
+      "cz": "uvnitř; dovnitř",
+      "pieces": [
+        "den",
+        "tro"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0505": {
+      "it": "femmina",
+      "cz": "dívka; osoba ženského pohlaví",
+      "pieces": [
+        "fem",
+        "mi",
+        "na"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0506": {
+      "it": "grande",
+      "cz": "velký",
+      "pieces": [
+        "gran",
+        "de"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0507": {
+      "it": "lasciare",
+      "cz": "nechat; opustit",
+      "pieces": [
+        "la",
+        "scia",
+        "re"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0508": {
+      "it": "Marco",
+      "cz": "Marek",
+      "pieces": [
+        "Mar",
+        "co"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0509": {
+      "it": "Maria",
+      "cz": "Marie",
+      "pieces": [
+        "Ma",
+        "ri",
+        "a"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0510": {
+      "it": "maschio",
+      "cz": "chlapec; osoba mužského pohlaví",
+      "pieces": [
+        "ma",
+        "schio"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0511": {
+      "it": "nazionale",
+      "cz": "národní",
+      "pieces": [
+        "na",
+        "zio",
+        "na",
+        "le"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0512": {
+      "it": "nero",
+      "cz": "černý",
+      "pieces": [
+        "ne",
+        "ro"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0513": {
+      "it": "occhio",
+      "cz": "oko",
+      "pieces": [
+        "oc",
+        "chio"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0514": {
+      "it": "però",
+      "cz": "ale; avšak",
+      "pieces": [
+        "pe",
+        "rò"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0515": {
+      "it": "piccolo",
+      "cz": "malý",
+      "pieces": [
+        "pic",
+        "co",
+        "lo"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0516": {
+      "it": "qualche",
+      "cz": "několik; nějaký",
+      "pieces": [
+        "qual",
+        "che"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0517": {
+      "it": "quello",
+      "cz": "tamten; onen; to",
+      "pieces": [
+        "quel",
+        "lo"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0518": {
+      "it": "squadra",
+      "cz": "tým; družstvo",
+      "pieces": [
+        "squa",
+        "dra"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0519": {
+      "it": "topo",
+      "cz": "myš",
+      "pieces": [
+        "to",
+        "po"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0520": {
+      "it": "verde",
+      "cz": "zelený",
+      "pieces": [
+        "ver",
+        "de"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0521": {
+      "it": "verità",
+      "cz": "pravda",
+      "pieces": [
+        "ve",
+        "ri",
+        "tà"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0522": {
+      "it": "Vero?",
+      "cz": "viď?; že ano?",
+      "pieces": [
+        "Ve",
+        "ro",
+        "?"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0523": {
+      "it": "volentieri",
+      "cz": "rád; ochotně",
+      "pieces": [
+        "vo",
+        "len",
+        "tie",
+        "ri"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0524": {
+      "it": "accordo",
+      "cz": "dohoda",
+      "pieces": [
+        "ac",
+        "cor",
+        "do"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0525": {
+      "it": "aiutare",
+      "cz": "pomoci; pomáhat",
+      "pieces": [
+        "a",
+        "iu",
+        "ta",
+        "re"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0526": {
+      "it": "gli altri",
+      "cz": "ostatní",
+      "pieces": [
+        "gli",
+        " ",
+        "al",
+        "tri"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0527": {
+      "it": "America",
+      "cz": "Amerika",
+      "pieces": [
+        "A",
+        "me",
+        "ri",
+        "ca"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0528": {
+      "it": "amore",
+      "cz": "láska",
+      "pieces": [
+        "a",
+        "mo",
+        "re"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0529": {
+      "it": "Antonio",
+      "cz": "Antonín",
+      "pieces": [
+        "An",
+        "to",
+        "nio"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0530": {
+      "it": "appartamento",
+      "cz": "byt",
+      "pieces": [
+        "ap",
+        "par",
+        "ta",
+        "men",
+        "to"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0531": {
+      "it": "appuntamento",
+      "cz": "schůzka",
+      "pieces": [
+        "ap",
+        "pun",
+        "ta",
+        "men",
+        "to"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0532": {
+      "it": "biglietto",
+      "cz": "vstupenka",
+      "pieces": [
+        "bi",
+        "gliet",
+        "to"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0533": {
+      "it": "cambiare",
+      "cz": "přestupovat",
+      "pieces": [
+        "cam",
+        "bia",
+        "re"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0534": {
+      "it": "carta",
+      "cz": "hrací karta",
+      "pieces": [
+        "car",
+        "ta"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0535": {
+      "it": "caso",
+      "cz": "případ",
+      "pieces": [
+        "ca",
+        "so"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0536": {
+      "it": "chiedere",
+      "cz": "ptát se",
+      "pieces": [
+        "chie",
+        "de",
+        "re"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0537": {
+      "it": "cinema",
+      "cz": "kino",
+      "pieces": [
+        "ci",
+        "ne",
+        "ma"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0538": {
+      "it": "colpa",
+      "cz": "vina",
+      "pieces": [
+        "col",
+        "pa"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0539": {
+      "it": "complimento",
+      "cz": "poklona; lichotka",
+      "pieces": [
+        "com",
+        "pli",
+        "men",
+        "to"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0540": {
+      "it": "concerto",
+      "cz": "koncert",
+      "pieces": [
+        "con",
+        "cer",
+        "to"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0541": {
+      "it": "cosa",
+      "cz": "věc",
+      "pieces": [
+        "co",
+        "sa"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0542": {
+      "it": "credere",
+      "cz": "věřit",
+      "pieces": [
+        "cre",
+        "de",
+        "re"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0543": {
+      "it": "direttore",
+      "cz": "ředitel",
+      "pieces": [
+        "di",
+        "ret",
+        "to",
+        "re"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0544": {
+      "it": "durare",
+      "cz": "trvat",
+      "pieces": [
+        "du",
+        "ra",
+        "re"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0545": {
+      "it": "fabbrica",
+      "cz": "továrna",
+      "pieces": [
+        "fab",
+        "bri",
+        "ca"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0546": {
+      "it": "famiglia",
+      "cz": "rodina",
+      "pieces": [
+        "fa",
+        "mi",
+        "glia"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0547": {
+      "it": "faticoso",
+      "cz": "namáhavý; únavný",
+      "pieces": [
+        "fa",
+        "ti",
+        "co",
+        "so"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0548": {
+      "it": "fermata",
+      "cz": "zastávka, stanice",
+      "pieces": [
+        "fer",
+        "ma",
+        "ta"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0549": {
+      "it": "filarmonica",
+      "cz": "filharmonie",
+      "pieces": [
+        "fi",
+        "lar",
+        "mo",
+        "ni",
+        "ca"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0550": {
+      "it": "fino a",
+      "cz": "až do; až k",
+      "pieces": [
+        "fi",
+        "no",
+        " ",
+        "a"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0551": {
+      "it": "fiorentino",
+      "cz": "florentský",
+      "pieces": [
+        "fio",
+        "ren",
+        "ti",
+        "no"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0552": {
+      "it": "Francesco",
+      "cz": "František",
+      "pieces": [
+        "Fran",
+        "ce",
+        "sco"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0553": {
+      "it": "fumare",
+      "cz": "kouřit",
+      "pieces": [
+        "fu",
+        "ma",
+        "re"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0554": {
+      "it": "genitori",
+      "cz": "rodiče",
+      "pieces": [
+        "ge",
+        "ni",
+        "to",
+        "ri"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0555": {
+      "it": "Giacomo",
+      "cz": "Jakub",
+      "pieces": [
+        "Gia",
+        "co",
+        "mo"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0556": {
+      "it": "Giuseppe",
+      "cz": "Josef",
+      "pieces": [
+        "Giu",
+        "sep",
+        "pe"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0557": {
+      "it": "incrocio",
+      "cz": "křižovatka",
+      "pieces": [
+        "in",
+        "cro",
+        "cio"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0558": {
+      "it": "indovinello",
+      "cz": "hádanka",
+      "pieces": [
+        "in",
+        "do",
+        "vi",
+        "nel",
+        "lo"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0559": {
+      "it": "intenso",
+      "cz": "intenzivní; silný",
+      "pieces": [
+        "in",
+        "ten",
+        "so"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0560": {
+      "it": "inviare",
+      "cz": "poslat; zaslat",
+      "pieces": [
+        "in",
+        "via",
+        "re"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0561": {
+      "it": "lavoro",
+      "cz": "práce",
+      "pieces": [
+        "la",
+        "vo",
+        "ro"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0562": {
+      "it": "libertà",
+      "cz": "svoboda",
+      "pieces": [
+        "li",
+        "ber",
+        "tà"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0563": {
+      "it": "mamma",
+      "cz": "maminka, mamka",
+      "pieces": [
+        "mam",
+        "ma"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0564": {
+      "it": "meglio",
+      "cz": "lépe",
+      "pieces": [
+        "me",
+        "glio"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0565": {
+      "it": "metà",
+      "cz": "polovina",
+      "pieces": [
+        "me",
+        "tà"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0566": {
+      "it": "metropolitana",
+      "cz": "metro",
+      "pieces": [
+        "me",
+        "tro",
+        "po",
+        "li",
+        "ta",
+        "na"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0567": {
+      "it": "mettere",
+      "cz": "dát někam; položit",
+      "pieces": [
+        "met",
+        "te",
+        "re"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0568": {
+      "it": "mostra",
+      "cz": "výstava",
+      "pieces": [
+        "mo",
+        "stra"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0569": {
+      "it": "nostro",
+      "cz": "náš",
+      "pieces": [
+        "no",
+        "stro"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0570": {
+      "it": "offrire",
+      "cz": "nabídnout; pozvat na něco",
+      "pieces": [
+        "of",
+        "fri",
+        "re"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0571": {
+      "it": "oppure",
+      "cz": "nebo",
+      "pieces": [
+        "op",
+        "pu",
+        "re"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0572": {
+      "it": "organo",
+      "cz": "varhany",
+      "pieces": [
+        "or",
+        "ga",
+        "no"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0573": {
+      "it": "parte",
+      "cz": "část",
+      "pieces": [
+        "par",
+        "te"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0574": {
+      "it": "partita",
+      "cz": "partie; hra",
+      "pieces": [
+        "par",
+        "ti",
+        "ta"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0575": {
+      "it": "passeggiata",
+      "cz": "procházka",
+      "pieces": [
+        "pas",
+        "seg",
+        "gia",
+        "ta"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0576": {
+      "it": "peggio",
+      "cz": "hůře",
+      "pieces": [
+        "peg",
+        "gio"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0577": {
+      "it": "pensare a",
+      "cz": "myslet na",
+      "pieces": [
+        "pen",
+        "sa",
+        "re",
+        " ",
+        "a"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0578": {
+      "it": "pensione",
+      "cz": "důchod, penze",
+      "pieces": [
+        "pen",
+        "sio",
+        "ne"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0579": {
+      "it": "pezzo",
+      "cz": "kus",
+      "pieces": [
+        "pez",
+        "zo"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0580": {
+      "it": "piede",
+      "cz": "chodidlo; noha od kotníku dolů",
+      "pieces": [
+        "pie",
+        "de"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0581": {
+      "it": "pieno",
+      "cz": "plný",
+      "pieces": [
+        "pie",
+        "no"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0582": {
+      "it": "più",
+      "cz": "více",
+      "pieces": [
+        "più"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0583": {
+      "it": "porta",
+      "cz": "dveře",
+      "pieces": [
+        "por",
+        "ta"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0584": {
+      "it": "possibile",
+      "cz": "možný",
+      "pieces": [
+        "pos",
+        "si",
+        "bi",
+        "le"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0585": {
+      "it": "potere",
+      "cz": "moci",
+      "pieces": [
+        "po",
+        "te",
+        "re"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0586": {
+      "it": "primo",
+      "cz": "první",
+      "pieces": [
+        "pri",
+        "mo"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0587": {
+      "it": "qualcosa",
+      "cz": "něco",
+      "pieces": [
+        "qual",
+        "co",
+        "sa"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0588": {
+      "it": "residenziale",
+      "cz": "obytný; rezidenční",
+      "pieces": [
+        "re",
+        "si",
+        "den",
+        "zia",
+        "le"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0589": {
+      "it": "santo",
+      "cz": "svatý",
+      "pieces": [
+        "san",
+        "to"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0590": {
+      "it": "sapere",
+      "cz": "vědět; znát fakt",
+      "pieces": [
+        "sa",
+        "pe",
+        "re"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0591": {
+      "it": "scacchi",
+      "cz": "šachy",
+      "pieces": [
+        "scac",
+        "chi"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0592": {
+      "it": "scappare",
+      "cz": "uprchnout; uniknout",
+      "pieces": [
+        "scap",
+        "pa",
+        "re"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0593": {
+      "it": "scendere",
+      "cz": "jít dolů",
+      "pieces": [
+        "scen",
+        "de",
+        "re"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0594": {
+      "it": "scrivere",
+      "cz": "psát; napsat",
+      "pieces": [
+        "scri",
+        "ve",
+        "re"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0595": {
+      "it": "scultore",
+      "cz": "sochař",
+      "pieces": [
+        "scul",
+        "to",
+        "re"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0596": {
+      "it": "se",
+      "cz": "jestli; pokud; když",
+      "pieces": [
+        "se"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0597": {
+      "it": "secondo",
+      "cz": "druhý",
+      "pieces": [
+        "se",
+        "con",
+        "do"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0598": {
+      "it": "segretaria",
+      "cz": "sekretářka",
+      "pieces": [
+        "se",
+        "gre",
+        "ta",
+        "ria"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0599": {
+      "it": "soprattutto",
+      "cz": "zejména; především",
+      "pieces": [
+        "so",
+        "prat",
+        "tut",
+        "to"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0600": {
+      "it": "stadio",
+      "cz": "stadion",
+      "pieces": [
+        "sta",
+        "dio"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0601": {
+      "it": "Stefano",
+      "cz": "Štěpán",
+      "pieces": [
+        "Ste",
+        "fa",
+        "no"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0602": {
+      "it": "suo",
+      "cz": "jeho; její; váš při vykání",
+      "pieces": [
+        "su",
+        "o"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0603": {
+      "it": "tardi",
+      "cz": "pozdě",
+      "pieces": [
+        "tar",
+        "di"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0604": {
+      "it": "tavolo",
+      "cz": "stůl",
+      "pieces": [
+        "ta",
+        "vo",
+        "lo"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0605": {
+      "it": "tra",
+      "cz": "mezi",
+      "pieces": [
+        "tra"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0606": {
+      "it": "traffico",
+      "cz": "provoz",
+      "pieces": [
+        "traf",
+        "fi",
+        "co"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0607": {
+      "it": "tivù",
+      "cz": "televize",
+      "pieces": [
+        "ti",
+        "vù"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0608": {
+      "it": "università",
+      "cz": "univerzita",
+      "pieces": [
+        "u",
+        "ni",
+        "ver",
+        "si",
+        "tà"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0609": {
+      "it": "valido",
+      "cz": "platný",
+      "pieces": [
+        "va",
+        "li",
+        "do"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0610": {
+      "it": "vietato",
+      "cz": "zakázaný; zakázáno",
+      "pieces": [
+        "vie",
+        "ta",
+        "to"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0611": {
+      "it": "volere",
+      "cz": "chtít",
+      "pieces": [
+        "vo",
+        "le",
+        "re"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0612": {
+      "it": "volere bene",
+      "cz": "mít rád",
+      "pieces": [
+        "vo",
+        "le",
+        "re",
+        " ",
+        "be",
+        "ne"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0613": {
+      "it": "voltare",
+      "cz": "zahnout; otočit",
+      "pieces": [
+        "vol",
+        "ta",
+        "re"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0614": {
+      "it": "vostro",
+      "cz": "váš při oslovení více osob",
+      "pieces": [
+        "vo",
+        "stro"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0615": {
+      "it": "zona",
+      "cz": "oblast, zóna",
+      "pieces": [
+        "zo",
+        "na"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0616": {
+      "it": "accompagnare",
+      "cz": "doprovodit; doprovázet",
+      "pieces": [
+        "ac",
+        "com",
+        "pa",
+        "gna",
+        "re"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0617": {
+      "it": "acqua",
+      "cz": "voda",
+      "pieces": [
+        "ac",
+        "qua"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0618": {
+      "it": "Africa",
+      "cz": "Afrika",
+      "pieces": [
+        "A",
+        "fri",
+        "ca"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0619": {
+      "it": "alcuni",
+      "cz": "někteří; několik",
+      "pieces": [
+        "al",
+        "cu",
+        "ni"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0620": {
+      "it": "animale",
+      "cz": "zvíře",
+      "pieces": [
+        "a",
+        "ni",
+        "ma",
+        "le"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0621": {
+      "it": "arrabbiarsi",
+      "cz": "rozzlobit se; rozčílit se",
+      "pieces": [
+        "ar",
+        "rab",
+        "biar",
+        "si"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0622": {
+      "it": "arrivare",
+      "cz": "dorazit; přijít; přijet",
+      "pieces": [
+        "ar",
+        "ri",
+        "va",
+        "re"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0623": {
+      "it": "barca",
+      "cz": "loďka, člun",
+      "pieces": [
+        "bar",
+        "ca"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0624": {
+      "it": "bastare",
+      "cz": "stačit",
+      "pieces": [
+        "ba",
+        "sta",
+        "re"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0625": {
+      "it": "binario",
+      "cz": "kolej; nástupiště",
+      "pieces": [
+        "bi",
+        "na",
+        "rio"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0626": {
+      "it": "bosco",
+      "cz": "les",
+      "pieces": [
+        "bo",
+        "sco"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0627": {
+      "it": "capitale",
+      "cz": "hlavní město",
+      "pieces": [
+        "ca",
+        "pi",
+        "ta",
+        "le"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0628": {
+      "it": "castello",
+      "cz": "hrad; zámek",
+      "pieces": [
+        "ca",
+        "stel",
+        "lo"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0629": {
+      "it": "Chiara",
+      "cz": "Klára",
+      "pieces": [
+        "Chia",
+        "ra"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0630": {
+      "it": "ciò che",
+      "cz": "to, co",
+      "pieces": [
+        "ciò",
+        " ",
+        "che"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0631": {
+      "it": "classico",
+      "cz": "klasický",
+      "pieces": [
+        "clas",
+        "si",
+        "co"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0632": {
+      "it": "collezione",
+      "cz": "sbírka",
+      "pieces": [
+        "col",
+        "le",
+        "zio",
+        "ne"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0633": {
+      "it": "Come mai?",
+      "cz": "jak to?; jak je to možné?",
+      "pieces": [
+        "Co",
+        "me",
+        " ",
+        "mai",
+        "?"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0634": {
+      "it": "contento",
+      "cz": "spokojený",
+      "pieces": [
+        "con",
+        "ten",
+        "to"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0635": {
+      "it": "corona",
+      "cz": "koruna jako pokrývka hlavy",
+      "pieces": [
+        "co",
+        "ro",
+        "na"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0636": {
+      "it": "davanti a",
+      "cz": "před; před něčím místně",
+      "pieces": [
+        "da",
+        "van",
+        "ti",
+        " ",
+        "a"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0637": {
+      "it": "dipendere da",
+      "cz": "záviset na; záležet na",
+      "pieces": [
+        "di",
+        "pen",
+        "de",
+        "re",
+        " ",
+        "da"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0638": {
+      "it": "dire",
+      "cz": "říct; říkat",
+      "pieces": [
+        "di",
+        "re"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0639": {
+      "it": "direttamente",
+      "cz": "přímo",
+      "pieces": [
+        "di",
+        "ret",
+        "ta",
+        "men",
+        "te"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0640": {
+      "it": "discoteca",
+      "cz": "diskotéka",
+      "pieces": [
+        "di",
+        "sco",
+        "te",
+        "ca"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0641": {
+      "it": "dispiacere",
+      "cz": "mrzet; nelíbit se",
+      "pieces": [
+        "di",
+        "spia",
+        "ce",
+        "re"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0642": {
+      "it": "divertirsi",
+      "cz": "bavit se",
+      "pieces": [
+        "di",
+        "ver",
+        "tir",
+        "si"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0643": {
+      "it": "elenco",
+      "cz": "seznam (i telefonní)",
+      "pieces": [
+        "e",
+        "len",
+        "co"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0644": {
+      "it": "far fare",
+      "cz": "nechat udělat",
+      "pieces": [
+        "far",
+        " ",
+        "fa",
+        "re"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0645": {
+      "it": "fila",
+      "cz": "řada",
+      "pieces": [
+        "fi",
+        "la"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0646": {
+      "it": "fiore",
+      "cz": "květ, květina",
+      "pieces": [
+        "fio",
+        "re"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0647": {
+      "it": "fissare",
+      "cz": "stanovit; určit",
+      "pieces": [
+        "fis",
+        "sa",
+        "re"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0648": {
+      "it": "galleria d'arte",
+      "cz": "galerie",
+      "pieces": [
+        "gal",
+        "le",
+        "ri",
+        "a",
+        " ",
+        "d'ar",
+        "te"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0649": {
+      "it": "giro",
+      "cz": "okruh; okružní cesta",
+      "pieces": [
+        "gi",
+        "ro"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0650": {
+      "it": "guarire",
+      "cz": "uzdravit se; vyléčit se",
+      "pieces": [
+        "gua",
+        "ri",
+        "re"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0651": {
+      "it": "guida",
+      "cz": "průvodce jako osoba",
+      "pieces": [
+        "gui",
+        "da"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0652": {
+      "it": "indirizzo",
+      "cz": "adresa",
+      "pieces": [
+        "in",
+        "di",
+        "riz",
+        "zo"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0653": {
+      "it": "invitare",
+      "cz": "pozvat",
+      "pieces": [
+        "in",
+        "vi",
+        "ta",
+        "re"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0654": {
+      "it": "lago",
+      "cz": "jezero",
+      "pieces": [
+        "la",
+        "go"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0655": {
+      "it": "libro giallo",
+      "cz": "detektivka",
+      "pieces": [
+        "li",
+        "bro",
+        " ",
+        "gial",
+        "lo"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0656": {
+      "it": "mancare",
+      "cz": "chybět",
+      "pieces": [
+        "man",
+        "ca",
+        "re"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0657": {
+      "it": "mandare",
+      "cz": "poslat",
+      "pieces": [
+        "man",
+        "da",
+        "re"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0658": {
+      "it": "mare",
+      "cz": "moře",
+      "pieces": [
+        "ma",
+        "re"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0659": {
+      "it": "marito",
+      "cz": "manžel",
+      "pieces": [
+        "ma",
+        "ri",
+        "to"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0660": {
+      "it": "matrimonio",
+      "cz": "manželství",
+      "pieces": [
+        "ma",
+        "tri",
+        "mo",
+        "nio"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0661": {
+      "it": "mattino",
+      "cz": "ráno",
+      "pieces": [
+        "mat",
+        "ti",
+        "no"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0662": {
+      "it": "mezzanotte",
+      "cz": "půlnoc",
+      "pieces": [
+        "mez",
+        "za",
+        "not",
+        "te"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0663": {
+      "it": "mezzo",
+      "cz": "půl",
+      "pieces": [
+        "mez",
+        "zo"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0664": {
+      "it": "mezzogiorno",
+      "cz": "poledne",
+      "pieces": [
+        "mez",
+        "zo",
+        "gior",
+        "no"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0665": {
+      "it": "mille",
+      "cz": "tisíc",
+      "pieces": [
+        "mil",
+        "le"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0666": {
+      "it": "moglie",
+      "cz": "manželka",
+      "pieces": [
+        "mo",
+        "glie"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0667": {
+      "it": "monte",
+      "cz": "hora",
+      "pieces": [
+        "mon",
+        "te"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0668": {
+      "it": "monumento",
+      "cz": "památka, pomník",
+      "pieces": [
+        "mo",
+        "nu",
+        "men",
+        "to"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0669": {
+      "it": "municipio",
+      "cz": "radnice",
+      "pieces": [
+        "mu",
+        "ni",
+        "ci",
+        "pio"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0670": {
+      "it": "museo",
+      "cz": "muzeum",
+      "pieces": [
+        "mu",
+        "se",
+        "o"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0671": {
+      "it": "musica",
+      "cz": "hudba",
+      "pieces": [
+        "mu",
+        "si",
+        "ca"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0672": {
+      "it": "nato",
+      "cz": "narozený",
+      "pieces": [
+        "na",
+        "to"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0673": {
+      "it": "natura",
+      "cz": "příroda",
+      "pieces": [
+        "na",
+        "tu",
+        "ra"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0674": {
+      "it": "neve",
+      "cz": "sníh",
+      "pieces": [
+        "ne",
+        "ve"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0675": {
+      "it": "nome",
+      "cz": "jméno",
+      "pieces": [
+        "no",
+        "me"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0676": {
+      "it": "non solo… ma anche",
+      "cz": "nejen… ale i",
+      "pieces": [
+        "non",
+        " ",
+        "so",
+        "lo",
+        "… ",
+        "ma",
+        " ",
+        "an",
+        "che"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0677": {
+      "it": "novità",
+      "cz": "novinka; novost",
+      "pieces": [
+        "no",
+        "vi",
+        "tà"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0678": {
+      "it": "nozze",
+      "cz": "svatba",
+      "pieces": [
+        "noz",
+        "ze"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0679": {
+      "it": "partenza",
+      "cz": "odjezd",
+      "pieces": [
+        "par",
+        "ten",
+        "za"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0680": {
+      "it": "passare",
+      "cz": "strávit čas",
+      "pieces": [
+        "pas",
+        "sa",
+        "re"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0681": {
+      "it": "piscina",
+      "cz": "bazén, plovárna",
+      "pieces": [
+        "pi",
+        "sci",
+        "na"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0682": {
+      "it": "portare",
+      "cz": "nést; nosit; přinést",
+      "pieces": [
+        "por",
+        "ta",
+        "re"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0683": {
+      "it": "prima",
+      "cz": "dříve; nejprve",
+      "pieces": [
+        "pri",
+        "ma"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0684": {
+      "it": "prima di",
+      "cz": "před něčím časově",
+      "pieces": [
+        "pri",
+        "ma",
+        " ",
+        "di"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0685": {
+      "it": "primavera",
+      "cz": "jaro",
+      "pieces": [
+        "pri",
+        "ma",
+        "ve",
+        "ra"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0686": {
+      "it": "prossimo",
+      "cz": "příští",
+      "pieces": [
+        "pros",
+        "si",
+        "mo"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0687": {
+      "it": "quarto",
+      "cz": "čtvrt; čtvrtina",
+      "pieces": [
+        "quar",
+        "to"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0688": {
+      "it": "quasi",
+      "cz": "skoro; téměř",
+      "pieces": [
+        "qua",
+        "si"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0689": {
+      "it": "raccontare",
+      "cz": "vyprávět",
+      "pieces": [
+        "rac",
+        "con",
+        "ta",
+        "re"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0690": {
+      "it": "repubblica",
+      "cz": "republika",
+      "pieces": [
+        "re",
+        "pub",
+        "bli",
+        "ca"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0691": {
+      "it": "riposare",
+      "cz": "odpočívat",
+      "pieces": [
+        "ri",
+        "po",
+        "sa",
+        "re"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0692": {
+      "it": "riposarsi",
+      "cz": "odpočinout si",
+      "pieces": [
+        "ri",
+        "po",
+        "sar",
+        "si"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0693": {
+      "it": "saluto",
+      "cz": "pozdrav",
+      "pieces": [
+        "sa",
+        "lu",
+        "to"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0694": {
+      "it": "senz'altro",
+      "cz": "určitě; zajisté",
+      "pieces": [
+        "sen",
+        "z'al",
+        "tro"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0695": {
+      "it": "sincero",
+      "cz": "upřímný",
+      "pieces": [
+        "sin",
+        "ce",
+        "ro"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0696": {
+      "it": "soltanto",
+      "cz": "jen; pouze",
+      "pieces": [
+        "sol",
+        "tan",
+        "to"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0697": {
+      "it": "sospiro",
+      "cz": "vzdech",
+      "pieces": [
+        "so",
+        "spi",
+        "ro"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0698": {
+      "it": "spettacolo",
+      "cz": "podívaná",
+      "pieces": [
+        "spet",
+        "ta",
+        "co",
+        "lo"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0699": {
+      "it": "spiaggia",
+      "cz": "pláž",
+      "pieces": [
+        "spiag",
+        "gia"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0700": {
+      "it": "sportello",
+      "cz": "přepážka, okénko",
+      "pieces": [
+        "spor",
+        "tel",
+        "lo"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0701": {
+      "it": "sposa",
+      "cz": "nevěsta",
+      "pieces": [
+        "spo",
+        "sa"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0702": {
+      "it": "sposarsi",
+      "cz": "oženit se; vdát se",
+      "pieces": [
+        "spo",
+        "sar",
+        "si"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0703": {
+      "it": "sposo",
+      "cz": "ženich, snoubenec",
+      "pieces": [
+        "spo",
+        "so"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0704": {
+      "it": "storico",
+      "cz": "historický",
+      "pieces": [
+        "sto",
+        "ri",
+        "co"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0705": {
+      "it": "tanto",
+      "cz": "tolik; mnoho",
+      "pieces": [
+        "tan",
+        "to"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0706": {
+      "it": "teatro",
+      "cz": "divadlo",
+      "pieces": [
+        "te",
+        "a",
+        "tro"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0707": {
+      "it": "tram",
+      "cz": "tramvaj",
+      "pieces": [
+        "tram"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0708": {
+      "it": "ultimo",
+      "cz": "poslední",
+      "pieces": [
+        "ul",
+        "ti",
+        "mo"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0709": {
+      "it": "verso",
+      "cz": "směrem k",
+      "pieces": [
+        "ver",
+        "so"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0710": {
+      "it": "visitare",
+      "cz": "navštívit; prohlédnout si",
+      "pieces": [
+        "vi",
+        "si",
+        "ta",
+        "re"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0711": {
+      "it": "uno",
+      "cz": "jeden",
+      "pieces": [
+        "u",
+        "no"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0712": {
+      "it": "due",
+      "cz": "dva",
+      "pieces": [
+        "du",
+        "e"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0713": {
+      "it": "tre",
+      "cz": "tři",
+      "pieces": [
+        "tre"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0714": {
+      "it": "quattro",
+      "cz": "čtyři",
+      "pieces": [
+        "quat",
+        "tro"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0715": {
+      "it": "cinque",
+      "cz": "pět",
+      "pieces": [
+        "cin",
+        "que"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0716": {
+      "it": "sei",
+      "cz": "šest",
+      "pieces": [
+        "sei"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0717": {
+      "it": "sette",
+      "cz": "sedm",
+      "pieces": [
+        "set",
+        "te"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0718": {
+      "it": "dieci",
+      "cz": "deset",
+      "pieces": [
+        "die",
+        "ci"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0719": {
+      "it": "undici",
+      "cz": "jedenáct",
+      "pieces": [
+        "un",
+        "di",
+        "ci"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0720": {
+      "it": "dodici",
+      "cz": "dvanáct",
+      "pieces": [
+        "do",
+        "di",
+        "ci"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0721": {
+      "it": "tredici",
+      "cz": "třináct",
+      "pieces": [
+        "tre",
+        "di",
+        "ci"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0722": {
+      "it": "quattordici",
+      "cz": "čtrnáct",
+      "pieces": [
+        "quat",
+        "tor",
+        "di",
+        "ci"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0723": {
+      "it": "quindici",
+      "cz": "patnáct",
+      "pieces": [
+        "quin",
+        "di",
+        "ci"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0724": {
+      "it": "sedici",
+      "cz": "šestnáct",
+      "pieces": [
+        "se",
+        "di",
+        "ci"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0725": {
+      "it": "diciassette",
+      "cz": "sedmnáct",
+      "pieces": [
+        "di",
+        "cias",
+        "set",
+        "te"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0726": {
+      "it": "diciotto",
+      "cz": "osmnáct",
+      "pieces": [
+        "di",
+        "ciot",
+        "to"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0727": {
+      "it": "diciannove",
+      "cz": "devatenáct",
+      "pieces": [
+        "di",
+        "cian",
+        "no",
+        "ve"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0728": {
+      "it": "venti",
+      "cz": "dvacet",
+      "pieces": [
+        "ven",
+        "ti"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0729": {
+      "it": "ventuno",
+      "cz": "dvacet jeden",
+      "pieces": [
+        "ven",
+        "tu",
+        "no"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0730": {
+      "it": "ventidue",
+      "cz": "dvacet dva",
+      "pieces": [
+        "ven",
+        "ti",
+        "du",
+        "e"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0731": {
+      "it": "ventitré",
+      "cz": "dvacet tři",
+      "pieces": [
+        "ven",
+        "ti",
+        "tré"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0732": {
+      "it": "ventiquattro",
+      "cz": "dvacet čtyři",
+      "pieces": [
+        "ven",
+        "ti",
+        "quat",
+        "tro"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0733": {
+      "it": "venticinque",
+      "cz": "dvacet pět",
+      "pieces": [
+        "ven",
+        "ti",
+        "cin",
+        "que"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0734": {
+      "it": "ventisei",
+      "cz": "dvacet šest",
+      "pieces": [
+        "ven",
+        "ti",
+        "sei"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0735": {
+      "it": "ventisette",
+      "cz": "dvacet sedm",
+      "pieces": [
+        "ven",
+        "ti",
+        "set",
+        "te"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0736": {
+      "it": "ventotto",
+      "cz": "dvacet osm",
+      "pieces": [
+        "ven",
+        "tot",
+        "to"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0737": {
+      "it": "ventinove",
+      "cz": "dvacet devět",
+      "pieces": [
+        "ven",
+        "ti",
+        "no",
+        "ve"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0738": {
+      "it": "trenta",
+      "cz": "třicet",
+      "pieces": [
+        "tren",
+        "ta"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0739": {
+      "it": "trentuno",
+      "cz": "třicet jeden",
+      "pieces": [
+        "tren",
+        "tu",
+        "no"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0740": {
+      "it": "trentatré",
+      "cz": "třicet tři",
+      "pieces": [
+        "tren",
+        "ta",
+        "tré"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0741": {
+      "it": "trentotto",
+      "cz": "třicet osm",
+      "pieces": [
+        "tren",
+        "tot",
+        "to"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0742": {
+      "it": "quaranta",
+      "cz": "čtyřicet",
+      "pieces": [
+        "qua",
+        "ran",
+        "ta"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0743": {
+      "it": "cinquanta",
+      "cz": "padesát",
+      "pieces": [
+        "cin",
+        "quan",
+        "ta"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0744": {
+      "it": "sessanta",
+      "cz": "šedesát",
+      "pieces": [
+        "ses",
+        "san",
+        "ta"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0745": {
+      "it": "settanta",
+      "cz": "sedmdesát",
+      "pieces": [
+        "set",
+        "tan",
+        "ta"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0746": {
+      "it": "ottanta",
+      "cz": "osmdesát",
+      "pieces": [
+        "ot",
+        "tan",
+        "ta"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0747": {
+      "it": "novanta",
+      "cz": "devadesát",
+      "pieces": [
+        "no",
+        "van",
+        "ta"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0748": {
+      "it": "cento",
+      "cz": "sto",
+      "pieces": [
+        "cen",
+        "to"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0749": {
+      "it": "centouno",
+      "cz": "sto jeden",
+      "pieces": [
+        "cen",
+        "to",
+        "u",
+        "no"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0750": {
+      "it": "centootto",
+      "cz": "sto osm",
+      "pieces": [
+        "cen",
+        "to",
+        "ot",
+        "to"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0751": {
+      "it": "centottanta",
+      "cz": "sto osmdesát",
+      "pieces": [
+        "cen",
+        "tot",
+        "tan",
+        "ta"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0752": {
+      "it": "duemila",
+      "cz": "dva tisíce",
+      "pieces": [
+        "du",
+        "e",
+        "mi",
+        "la"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0753": {
+      "it": "cinquemila",
+      "cz": "pět tisíc",
+      "pieces": [
+        "cin",
+        "que",
+        "mi",
+        "la"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0754": {
+      "it": "abituato a",
+      "cz": "zvyklý na",
+      "pieces": [
+        "a",
+        "bi",
+        "tua",
+        "to",
+        " ",
+        "a"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0755": {
+      "it": "accomodarsi",
+      "cz": "posadit se; udělat si pohodlí",
+      "pieces": [
+        "ac",
+        "co",
+        "mo",
+        "dar",
+        "si"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0756": {
+      "it": "agenzia",
+      "cz": "agentura, kancelář",
+      "pieces": [
+        "a",
+        "gen",
+        "zi",
+        "a"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0757": {
+      "it": "almeno",
+      "cz": "alespoň",
+      "pieces": [
+        "al",
+        "me",
+        "no"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0758": {
+      "it": "andarsene",
+      "cz": "odejít; odcházet",
+      "pieces": [
+        "an",
+        "dar",
+        "se",
+        "ne"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0759": {
+      "it": "anzi",
+      "cz": "naopak",
+      "pieces": [
+        "an",
+        "zi"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0760": {
+      "it": "appena",
+      "cz": "jakmile",
+      "pieces": [
+        "ap",
+        "pe",
+        "na"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0761": {
+      "it": "attimo",
+      "cz": "okamžik",
+      "pieces": [
+        "at",
+        "ti",
+        "mo"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0762": {
+      "it": "attivo",
+      "cz": "aktivní; činný",
+      "pieces": [
+        "at",
+        "ti",
+        "vo"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0763": {
+      "it": "attraversare",
+      "cz": "přejít; projet",
+      "pieces": [
+        "at",
+        "tra",
+        "ver",
+        "sa",
+        "re"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0764": {
+      "it": "babbo",
+      "cz": "tatínek",
+      "pieces": [
+        "bab",
+        "bo"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0765": {
+      "it": "bambina",
+      "cz": "děvčátko, holčička",
+      "pieces": [
+        "bam",
+        "bi",
+        "na"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0766": {
+      "it": "barzelletta",
+      "cz": "vtip, anekdota",
+      "pieces": [
+        "bar",
+        "zel",
+        "let",
+        "ta"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0767": {
+      "it": "benvenuto",
+      "cz": "vítaný",
+      "pieces": [
+        "ben",
+        "ve",
+        "nu",
+        "to"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0768": {
+      "it": "campo",
+      "cz": "pole",
+      "pieces": [
+        "cam",
+        "po"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0769": {
+      "it": "cavarsela",
+      "cz": "poradit si; vyváznout",
+      "pieces": [
+        "ca",
+        "var",
+        "se",
+        "la"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0770": {
+      "it": "cellulare",
+      "cz": "mobilní telefon",
+      "pieces": [
+        "cel",
+        "lu",
+        "la",
+        "re"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0771": {
+      "it": "centrale",
+      "cz": "ústřední; hlavní; centrální",
+      "pieces": [
+        "cen",
+        "tra",
+        "le"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0772": {
+      "it": "centro",
+      "cz": "střed",
+      "pieces": [
+        "cen",
+        "tro"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0773": {
+      "it": "cercare di",
+      "cz": "snažit se",
+      "pieces": [
+        "cer",
+        "ca",
+        "re",
+        " ",
+        "di"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0774": {
+      "it": "cifra",
+      "cz": "číslice",
+      "pieces": [
+        "ci",
+        "fra"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0775": {
+      "it": "colle",
+      "cz": "pahorek",
+      "pieces": [
+        "col",
+        "le"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0776": {
+      "it": "conoscenza",
+      "cz": "znalost",
+      "pieces": [
+        "co",
+        "no",
+        "scen",
+        "za"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0777": {
+      "it": "cugino",
+      "cz": "bratranec",
+      "pieces": [
+        "cu",
+        "gi",
+        "no"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0778": {
+      "it": "dare",
+      "cz": "dát; dávat; darovat",
+      "pieces": [
+        "da",
+        "re"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0779": {
+      "it": "disperare",
+      "cz": "zoufat; ztrácet naději",
+      "pieces": [
+        "di",
+        "spe",
+        "ra",
+        "re"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0780": {
+      "it": "disturbare",
+      "cz": "rušit; obtěžovat",
+      "pieces": [
+        "di",
+        "stur",
+        "ba",
+        "re"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0781": {
+      "it": "disturbarsi",
+      "cz": "obtěžovat se",
+      "pieces": [
+        "di",
+        "stur",
+        "bar",
+        "si"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0782": {
+      "it": "disturbo",
+      "cz": "rušení; obtěžování",
+      "pieces": [
+        "di",
+        "stur",
+        "bo"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0783": {
+      "it": "diverso",
+      "cz": "různý; rozdílný",
+      "pieces": [
+        "di",
+        "ver",
+        "so"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0784": {
+      "it": "entrare",
+      "cz": "vstoupit; vejít",
+      "pieces": [
+        "en",
+        "tra",
+        "re"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0785": {
+      "it": "far vedere",
+      "cz": "ukázat",
+      "pieces": [
+        "far",
+        " ",
+        "ve",
+        "de",
+        "re"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0786": {
+      "it": "felice",
+      "cz": "šťastný",
+      "pieces": [
+        "fe",
+        "li",
+        "ce"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0787": {
+      "it": "figurarsi",
+      "cz": "představit si",
+      "pieces": [
+        "fi",
+        "gu",
+        "rar",
+        "si"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0788": {
+      "it": "Filippo",
+      "cz": "Filip",
+      "pieces": [
+        "Fi",
+        "lip",
+        "po"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0789": {
+      "it": "fisso",
+      "cz": "pevný",
+      "pieces": [
+        "fis",
+        "so"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0790": {
+      "it": "fondo",
+      "cz": "dno",
+      "pieces": [
+        "fon",
+        "do"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0791": {
+      "it": "fronte",
+      "cz": "čelo",
+      "pieces": [
+        "fron",
+        "te"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0792": {
+      "it": "gamba",
+      "cz": "noha (celá)",
+      "pieces": [
+        "gam",
+        "ba"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0793": {
+      "it": "giù",
+      "cz": "dole; dolů",
+      "pieces": [
+        "giù"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0794": {
+      "it": "indietro",
+      "cz": "zpět; zpátky",
+      "pieces": [
+        "in",
+        "die",
+        "tro"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0795": {
+      "it": "invito",
+      "cz": "pozvání",
+      "pieces": [
+        "in",
+        "vi",
+        "to"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0796": {
+      "it": "lettera",
+      "cz": "dopis",
+      "pieces": [
+        "let",
+        "te",
+        "ra"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0797": {
+      "it": "lettino",
+      "cz": "lehátko (na pláži)",
+      "pieces": [
+        "let",
+        "ti",
+        "no"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0798": {
+      "it": "letto",
+      "cz": "postel, lůžko",
+      "pieces": [
+        "let",
+        "to"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0799": {
+      "it": "lieto",
+      "cz": "veselý; potěšený",
+      "pieces": [
+        "lie",
+        "to"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0800": {
+      "it": "maledetto",
+      "cz": "prokletý; zatracený",
+      "pieces": [
+        "ma",
+        "le",
+        "det",
+        "to"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0801": {
+      "it": "messaggio",
+      "cz": "vzkaz, poselství",
+      "pieces": [
+        "mes",
+        "sag",
+        "gio"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0802": {
+      "it": "mettersi",
+      "cz": "sednout si; umístit se",
+      "pieces": [
+        "met",
+        "ter",
+        "si"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0803": {
+      "it": "mezzo",
+      "cz": "prostředek; dopravní prostředek",
+      "pieces": [
+        "mez",
+        "zo"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0804": {
+      "it": "modo",
+      "cz": "způsob",
+      "pieces": [
+        "mo",
+        "do"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0805": {
+      "it": "mostrare",
+      "cz": "ukázat",
+      "pieces": [
+        "mo",
+        "stra",
+        "re"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0806": {
+      "it": "naturale",
+      "cz": "přírodní; přirozený",
+      "pieces": [
+        "na",
+        "tu",
+        "ra",
+        "le"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0807": {
+      "it": "notte",
+      "cz": "noc",
+      "pieces": [
+        "not",
+        "te"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0808": {
+      "it": "nulla",
+      "cz": "nic",
+      "pieces": [
+        "nul",
+        "la"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0809": {
+      "it": "occuparsi di",
+      "cz": "zabývat se",
+      "pieces": [
+        "oc",
+        "cu",
+        "par",
+        "si",
+        " ",
+        "di"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0810": {
+      "it": "ombrellone",
+      "cz": "plážový slunečník",
+      "pieces": [
+        "om",
+        "brel",
+        "lo",
+        "ne"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0811": {
+      "it": "palazzo",
+      "cz": "palác",
+      "pieces": [
+        "pa",
+        "laz",
+        "zo"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0812": {
+      "it": "paura",
+      "cz": "strach",
+      "pieces": [
+        "pa",
+        "u",
+        "ra"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0813": {
+      "it": "peccato",
+      "cz": "hřích",
+      "pieces": [
+        "pec",
+        "ca",
+        "to"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0814": {
+      "it": "permettere",
+      "cz": "dovolit",
+      "pieces": [
+        "per",
+        "met",
+        "te",
+        "re"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0815": {
+      "it": "posta",
+      "cz": "pošta",
+      "pieces": [
+        "po",
+        "sta"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0816": {
+      "it": "preoccuparsi",
+      "cz": "dělat si starosti",
+      "pieces": [
+        "pre",
+        "oc",
+        "cu",
+        "par",
+        "si"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0817": {
+      "it": "preparare",
+      "cz": "připravit; připravovat",
+      "pieces": [
+        "pre",
+        "pa",
+        "ra",
+        "re"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0818": {
+      "it": "presentare",
+      "cz": "představit; uvést",
+      "pieces": [
+        "pre",
+        "sen",
+        "ta",
+        "re"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0819": {
+      "it": "prestare",
+      "cz": "půjčit někomu",
+      "pieces": [
+        "pre",
+        "sta",
+        "re"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0820": {
+      "it": "prestito",
+      "cz": "půjčka",
+      "pieces": [
+        "pre",
+        "sti",
+        "to"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0821": {
+      "it": "promettere",
+      "cz": "slíbit; slibovat",
+      "pieces": [
+        "pro",
+        "met",
+        "te",
+        "re"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0822": {
+      "it": "provare",
+      "cz": "zkusit; zkoušet",
+      "pieces": [
+        "pro",
+        "va",
+        "re"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0823": {
+      "it": "proverbio",
+      "cz": "přísloví",
+      "pieces": [
+        "pro",
+        "ver",
+        "bio"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0824": {
+      "it": "pure",
+      "cz": "jen; klidně při pobídce",
+      "pieces": [
+        "pu",
+        "re"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0825": {
+      "it": "qualcuno",
+      "cz": "někdo",
+      "pieces": [
+        "qual",
+        "cu",
+        "no"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0826": {
+      "it": "raramente",
+      "cz": "zřídka; málokdy",
+      "pieces": [
+        "ra",
+        "ra",
+        "men",
+        "te"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0827": {
+      "it": "regolare",
+      "cz": "pravidelný; řádný",
+      "pieces": [
+        "re",
+        "go",
+        "la",
+        "re"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0828": {
+      "it": "restituire",
+      "cz": "vrátit",
+      "pieces": [
+        "re",
+        "sti",
+        "tu",
+        "i",
+        "re"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0829": {
+      "it": "richiamare",
+      "cz": "zavolat zpět; znovu zavolat",
+      "pieces": [
+        "ri",
+        "chia",
+        "ma",
+        "re"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0830": {
+      "it": "riferire",
+      "cz": "vyřídit; sdělit",
+      "pieces": [
+        "ri",
+        "fe",
+        "ri",
+        "re"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0831": {
+      "it": "risolvere",
+      "cz": "vyřešit",
+      "pieces": [
+        "ri",
+        "sol",
+        "ve",
+        "re"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0832": {
+      "it": "ritornare",
+      "cz": "vrátit se",
+      "pieces": [
+        "ri",
+        "tor",
+        "na",
+        "re"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0833": {
+      "it": "rivedere",
+      "cz": "znovu vidět",
+      "pieces": [
+        "ri",
+        "ve",
+        "de",
+        "re"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0834": {
+      "it": "rivedersi",
+      "cz": "znovu se vidět",
+      "pieces": [
+        "ri",
+        "ve",
+        "der",
+        "si"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0835": {
+      "it": "salutare",
+      "cz": "pozdravit",
+      "pieces": [
+        "sa",
+        "lu",
+        "ta",
+        "re"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0836": {
+      "it": "sbrigarsi",
+      "cz": "pospíšit si",
+      "pieces": [
+        "sbri",
+        "gar",
+        "si"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0837": {
+      "it": "scienza",
+      "cz": "věda",
+      "pieces": [
+        "scien",
+        "za"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0838": {
+      "it": "sedia",
+      "cz": "židle",
+      "pieces": [
+        "se",
+        "dia"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0839": {
+      "it": "segreteria",
+      "cz": "sekretariát",
+      "pieces": [
+        "se",
+        "gre",
+        "te",
+        "ri",
+        "a"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0840": {
+      "it": "sicuramente",
+      "cz": "jistě; určitě",
+      "pieces": [
+        "si",
+        "cu",
+        "ra",
+        "men",
+        "te"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0841": {
+      "it": "sperare",
+      "cz": "doufat",
+      "pieces": [
+        "spe",
+        "ra",
+        "re"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0842": {
+      "it": "telefonata",
+      "cz": "telefonní hovor",
+      "pieces": [
+        "te",
+        "le",
+        "fo",
+        "na",
+        "ta"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0843": {
+      "it": "telefono",
+      "cz": "telefon",
+      "pieces": [
+        "te",
+        "le",
+        "fo",
+        "no"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0844": {
+      "it": "tenere",
+      "cz": "držet; ponechat si",
+      "pieces": [
+        "te",
+        "ne",
+        "re"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0845": {
+      "it": "tenersi",
+      "cz": "držet se",
+      "pieces": [
+        "te",
+        "ner",
+        "si"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0846": {
+      "it": "torre",
+      "cz": "věž",
+      "pieces": [
+        "tor",
+        "re"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0847": {
+      "it": "tranquillo",
+      "cz": "klidný",
+      "pieces": [
+        "tran",
+        "quil",
+        "lo"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0848": {
+      "it": "trattare",
+      "cz": "jednat; projednávat",
+      "pieces": [
+        "trat",
+        "ta",
+        "re"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0849": {
+      "it": "uguale",
+      "cz": "stejný; rovný",
+      "pieces": [
+        "u",
+        "gua",
+        "le"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0850": {
+      "it": "uomo",
+      "cz": "muž, člověk",
+      "pieces": [
+        "uo",
+        "mo"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0851": {
+      "it": "veramente",
+      "cz": "opravdu; skutečně",
+      "pieces": [
+        "ve",
+        "ra",
+        "men",
+        "te"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0852": {
+      "it": "vestirsi",
+      "cz": "oblékat se",
+      "pieces": [
+        "ve",
+        "stir",
+        "si"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0853": {
+      "it": "vestito",
+      "cz": "šaty; oděv",
+      "pieces": [
+        "ve",
+        "sti",
+        "to"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0854": {
+      "it": "volta",
+      "cz": "krát; jeden výskyt",
+      "pieces": [
+        "vol",
+        "ta"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0855": {
+      "it": "accadere",
+      "cz": "stát se; přihodit se",
+      "pieces": [
+        "ac",
+        "ca",
+        "de",
+        "re"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0856": {
+      "it": "accendere",
+      "cz": "zapálit",
+      "pieces": [
+        "ac",
+        "cen",
+        "de",
+        "re"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0857": {
+      "it": "amare",
+      "cz": "milovat; mít rád",
+      "pieces": [
+        "a",
+        "ma",
+        "re"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0858": {
+      "it": "americano",
+      "cz": "americký",
+      "pieces": [
+        "a",
+        "me",
+        "ri",
+        "ca",
+        "no"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0859": {
+      "it": "ammettere",
+      "cz": "připustit; uznat",
+      "pieces": [
+        "am",
+        "met",
+        "te",
+        "re"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0860": {
+      "it": "annunciare",
+      "cz": "oznámit",
+      "pieces": [
+        "an",
+        "nun",
+        "cia",
+        "re"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0861": {
+      "it": "arte",
+      "cz": "umění",
+      "pieces": [
+        "ar",
+        "te"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0862": {
+      "it": "attenzione",
+      "cz": "pozornost",
+      "pieces": [
+        "at",
+        "ten",
+        "zio",
+        "ne"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0863": {
+      "it": "augurio",
+      "cz": "předzvěst; znamení",
+      "pieces": [
+        "au",
+        "gu",
+        "rio"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0864": {
+      "it": "avvincente",
+      "cz": "napínavý; poutavý",
+      "pieces": [
+        "av",
+        "vin",
+        "cen",
+        "te"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0865": {
+      "it": "bagnarsi",
+      "cz": "namočit se; zmoknout",
+      "pieces": [
+        "ba",
+        "gnar",
+        "si"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0866": {
+      "it": "bagnato",
+      "cz": "mokrý; promoklý",
+      "pieces": [
+        "ba",
+        "gna",
+        "to"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0867": {
+      "it": "bambino",
+      "cz": "dítě, děcko",
+      "pieces": [
+        "bam",
+        "bi",
+        "no"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0868": {
+      "it": "borsa",
+      "cz": "taška",
+      "pieces": [
+        "bor",
+        "sa"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0869": {
+      "it": "bravissimo",
+      "cz": "výborný; vynikající",
+      "pieces": [
+        "bra",
+        "vis",
+        "si",
+        "mo"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0870": {
+      "it": "buio",
+      "cz": "tma",
+      "pieces": [
+        "bu",
+        "io"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0871": {
+      "it": "canzone",
+      "cz": "píseň, písnička",
+      "pieces": [
+        "can",
+        "zo",
+        "ne"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0872": {
+      "it": "carta d'imbarco",
+      "cz": "palubní vstupenka",
+      "pieces": [
+        "car",
+        "ta",
+        " ",
+        "d'im",
+        "bar",
+        "co"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0873": {
+      "it": "CD",
+      "cz": "cédéčko",
+      "pieces": [
+        "CD"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0874": {
+      "it": "chiave",
+      "cz": "klíč",
+      "pieces": [
+        "chia",
+        "ve"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0875": {
+      "it": "chitarra",
+      "cz": "kytara",
+      "pieces": [
+        "chi",
+        "tar",
+        "ra"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0876": {
+      "it": "cognata",
+      "cz": "švagrová",
+      "pieces": [
+        "co",
+        "gna",
+        "ta"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0877": {
+      "it": "cognato",
+      "cz": "švagr",
+      "pieces": [
+        "co",
+        "gna",
+        "to"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0878": {
+      "it": "combinazione",
+      "cz": "kombinace",
+      "pieces": [
+        "com",
+        "bi",
+        "na",
+        "zio",
+        "ne"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0879": {
+      "it": "consiglio",
+      "cz": "rada",
+      "pieces": [
+        "con",
+        "si",
+        "glio"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0880": {
+      "it": "contemporaneo",
+      "cz": "současný",
+      "pieces": [
+        "con",
+        "tem",
+        "po",
+        "ra",
+        "ne",
+        "o"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0881": {
+      "it": "corrente",
+      "cz": "elektrický proud",
+      "pieces": [
+        "cor",
+        "ren",
+        "te"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0882": {
+      "it": "crocetta",
+      "cz": "křížek",
+      "pieces": [
+        "cro",
+        "cet",
+        "ta"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0883": {
+      "it": "cugina",
+      "cz": "sestřenice",
+      "pieces": [
+        "cu",
+        "gi",
+        "na"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0884": {
+      "it": "curioso",
+      "cz": "zvědavý",
+      "pieces": [
+        "cu",
+        "rio",
+        "so"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0885": {
+      "it": "danno",
+      "cz": "škoda, ztráta",
+      "pieces": [
+        "dan",
+        "no"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0886": {
+      "it": "decidere",
+      "cz": "rozhodnout se",
+      "pieces": [
+        "de",
+        "ci",
+        "de",
+        "re"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0887": {
+      "it": "dimenticare",
+      "cz": "zapomenout",
+      "pieces": [
+        "di",
+        "men",
+        "ti",
+        "ca",
+        "re"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0888": {
+      "it": "domandare",
+      "cz": "ptát se; zeptat se",
+      "pieces": [
+        "do",
+        "man",
+        "da",
+        "re"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0889": {
+      "it": "donna",
+      "cz": "žena",
+      "pieces": [
+        "don",
+        "na"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0890": {
+      "it": "etrusco",
+      "cz": "etruský",
+      "pieces": [
+        "e",
+        "tru",
+        "sco"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0891": {
+      "it": "fa",
+      "cz": "před; po časovém údaji",
+      "pieces": [
+        "fa"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0892": {
+      "it": "fiume",
+      "cz": "řeka",
+      "pieces": [
+        "fiu",
+        "me"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0893": {
+      "it": "forma",
+      "cz": "tvar; forma",
+      "pieces": [
+        "for",
+        "ma"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0894": {
+      "it": "fortunato",
+      "cz": "mající štěstí; šťastný",
+      "pieces": [
+        "for",
+        "tu",
+        "na",
+        "to"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0895": {
+      "it": "genere",
+      "cz": "druh",
+      "pieces": [
+        "ge",
+        "ne",
+        "re"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0896": {
+      "it": "geografia",
+      "cz": "zeměpis",
+      "pieces": [
+        "ge",
+        "o",
+        "gra",
+        "fi",
+        "a"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0897": {
+      "it": "Germania",
+      "cz": "Německo",
+      "pieces": [
+        "Ger",
+        "ma",
+        "nia"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0898": {
+      "it": "giornale",
+      "cz": "noviny",
+      "pieces": [
+        "gior",
+        "na",
+        "le"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0899": {
+      "it": "giusto",
+      "cz": "správný; spravedlivý",
+      "pieces": [
+        "giu",
+        "sto"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0900": {
+      "it": "grosso",
+      "cz": "velký; mohutný",
+      "pieces": [
+        "gros",
+        "so"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0901": {
+      "it": "ieri",
+      "cz": "včera",
+      "pieces": [
+        "ie",
+        "ri"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0902": {
+      "it": "imbarco",
+      "cz": "nástup na palubu",
+      "pieces": [
+        "im",
+        "bar",
+        "co"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0903": {
+      "it": "imparare",
+      "cz": "naučit se",
+      "pieces": [
+        "im",
+        "pa",
+        "ra",
+        "re"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0904": {
+      "it": "importante",
+      "cz": "důležitý",
+      "pieces": [
+        "im",
+        "por",
+        "tan",
+        "te"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0905": {
+      "it": "incontrare",
+      "cz": "potkat",
+      "pieces": [
+        "in",
+        "con",
+        "tra",
+        "re"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0906": {
+      "it": "incidente",
+      "cz": "nehoda",
+      "pieces": [
+        "in",
+        "ci",
+        "den",
+        "te"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0907": {
+      "it": "indicare",
+      "cz": "označit; ukázat",
+      "pieces": [
+        "in",
+        "di",
+        "ca",
+        "re"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0908": {
+      "it": "intendere",
+      "cz": "mít v úmyslu; zamýšlet",
+      "pieces": [
+        "in",
+        "ten",
+        "de",
+        "re"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0909": {
+      "it": "intendersi di",
+      "cz": "vyznat se v; rozumět",
+      "pieces": [
+        "in",
+        "ten",
+        "der",
+        "si",
+        " ",
+        "di"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0910": {
+      "it": "lotteria",
+      "cz": "loterie",
+      "pieces": [
+        "lot",
+        "te",
+        "ri",
+        "a"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0911": {
+      "it": "luce",
+      "cz": "světlo",
+      "pieces": [
+        "lu",
+        "ce"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0912": {
+      "it": "maggiore",
+      "cz": "větší",
+      "pieces": [
+        "mag",
+        "gio",
+        "re"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0913": {
+      "it": "Mario",
+      "cz": "Mario",
+      "pieces": [
+        "Ma",
+        "rio"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0914": {
+      "it": "meraviglioso",
+      "cz": "nádherný; úžasný",
+      "pieces": [
+        "me",
+        "ra",
+        "vi",
+        "glio",
+        "so"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0915": {
+      "it": "moltissimo",
+      "cz": "velmi mnoho; moc",
+      "pieces": [
+        "mol",
+        "tis",
+        "si",
+        "mo"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0916": {
+      "it": "morto",
+      "cz": "mrtvý",
+      "pieces": [
+        "mor",
+        "to"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0917": {
+      "it": "natura morta",
+      "cz": "zátiší (malířské)",
+      "pieces": [
+        "na",
+        "tu",
+        "ra",
+        " ",
+        "mor",
+        "ta"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0918": {
+      "it": "né… né",
+      "cz": "ani… ani",
+      "pieces": [
+        "né",
+        "… ",
+        "né"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0919": {
+      "it": "neanche",
+      "cz": "ani ne; ani",
+      "pieces": [
+        "ne",
+        "an",
+        "che"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0920": {
+      "it": "nemmeno",
+      "cz": "ani ne; ani",
+      "pieces": [
+        "nem",
+        "me",
+        "no"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0921": {
+      "it": "nessuno",
+      "cz": "nikdo; žádný",
+      "pieces": [
+        "nes",
+        "su",
+        "no"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0922": {
+      "it": "Oddio!",
+      "cz": "proboha!",
+      "pieces": [
+        "Od",
+        "di",
+        "o",
+        "!"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0923": {
+      "it": "paesaggio",
+      "cz": "krajina",
+      "pieces": [
+        "pa",
+        "e",
+        "sag",
+        "gio"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0924": {
+      "it": "panchina",
+      "cz": "lavička",
+      "pieces": [
+        "pan",
+        "chi",
+        "na"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0925": {
+      "it": "passeggero",
+      "cz": "cestující",
+      "pieces": [
+        "pas",
+        "seg",
+        "ge",
+        "ro"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0926": {
+      "it": "pena",
+      "cz": "námaha; utrpení",
+      "pieces": [
+        "pe",
+        "na"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0927": {
+      "it": "piacevole",
+      "cz": "příjemný",
+      "pieces": [
+        "pia",
+        "ce",
+        "vo",
+        "le"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0928": {
+      "it": "pianoforte",
+      "cz": "klavír, piano",
+      "pieces": [
+        "pia",
+        "no",
+        "for",
+        "te"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0929": {
+      "it": "pittore",
+      "cz": "malíř",
+      "pieces": [
+        "pit",
+        "to",
+        "re"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0930": {
+      "it": "pittura",
+      "cz": "malířství; malba jako obor",
+      "pieces": [
+        "pit",
+        "tu",
+        "ra"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0931": {
+      "it": "Po",
+      "cz": "Pád",
+      "pieces": [
+        "Po"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0932": {
+      "it": "praticamente",
+      "cz": "prakticky",
+      "pieces": [
+        "pra",
+        "ti",
+        "ca",
+        "men",
+        "te"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0933": {
+      "it": "preoccupare",
+      "cz": "dělat starosti",
+      "pieces": [
+        "pre",
+        "oc",
+        "cu",
+        "pa",
+        "re"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0934": {
+      "it": "presentarsi",
+      "cz": "představit se",
+      "pieces": [
+        "pre",
+        "sen",
+        "tar",
+        "si"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0935": {
+      "it": "proposito",
+      "cz": "úmysl; záměr",
+      "pieces": [
+        "pro",
+        "po",
+        "si",
+        "to"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0936": {
+      "it": "quadro",
+      "cz": "obraz",
+      "pieces": [
+        "qua",
+        "dro"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0937": {
+      "it": "regalare",
+      "cz": "darovat",
+      "pieces": [
+        "re",
+        "ga",
+        "la",
+        "re"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0938": {
+      "it": "ricevere",
+      "cz": "dostat; přijmout",
+      "pieces": [
+        "ri",
+        "ce",
+        "ve",
+        "re"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0939": {
+      "it": "ricordarsi di",
+      "cz": "pamatovat si; vzpomínat si na",
+      "pieces": [
+        "ri",
+        "cor",
+        "dar",
+        "si",
+        " ",
+        "di"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0940": {
+      "it": "rimanere",
+      "cz": "zůstat",
+      "pieces": [
+        "ri",
+        "ma",
+        "ne",
+        "re"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0941": {
+      "it": "Rinascimento",
+      "cz": "renesance",
+      "pieces": [
+        "Ri",
+        "na",
+        "sci",
+        "men",
+        "to"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0942": {
+      "it": "ringraziare",
+      "cz": "poděkovat; děkovat",
+      "pieces": [
+        "rin",
+        "gra",
+        "zia",
+        "re"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0943": {
+      "it": "rischiare",
+      "cz": "riskovat",
+      "pieces": [
+        "ri",
+        "schia",
+        "re"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0944": {
+      "it": "ritardo",
+      "cz": "zpoždění",
+      "pieces": [
+        "ri",
+        "tar",
+        "do"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0945": {
+      "it": "riuscire",
+      "cz": "podařit se; zvládnout",
+      "pieces": [
+        "riu",
+        "sci",
+        "re"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0946": {
+      "it": "rovinare",
+      "cz": "zničit; zkazit",
+      "pieces": [
+        "ro",
+        "vi",
+        "na",
+        "re"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0947": {
+      "it": "Salve!",
+      "cz": "zdravím!; dobrý den!",
+      "pieces": [
+        "Sal",
+        "ve",
+        "!"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0948": {
+      "it": "Sardegna",
+      "cz": "Sardinie",
+      "pieces": [
+        "Sar",
+        "de",
+        "gna"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0949": {
+      "it": "sbagliare",
+      "cz": "zmýlit se; splést se",
+      "pieces": [
+        "sba",
+        "glia",
+        "re"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0950": {
+      "it": "scorso",
+      "cz": "minulý; uplynulý",
+      "pieces": [
+        "scor",
+        "so"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0951": {
+      "it": "serata",
+      "cz": "večer; večerní setkání",
+      "pieces": [
+        "se",
+        "ra",
+        "ta"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0952": {
+      "it": "serio",
+      "cz": "vážný",
+      "pieces": [
+        "se",
+        "rio"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0953": {
+      "it": "Sicilia",
+      "cz": "Sicílie",
+      "pieces": [
+        "Si",
+        "ci",
+        "lia"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0954": {
+      "it": "sognare",
+      "cz": "snít; zdát se ve snu",
+      "pieces": [
+        "so",
+        "gna",
+        "re"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0955": {
+      "it": "soldi",
+      "cz": "peníze",
+      "pieces": [
+        "sol",
+        "di"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0956": {
+      "it": "somma",
+      "cz": "částka",
+      "pieces": [
+        "som",
+        "ma"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0957": {
+      "it": "sorpreso",
+      "cz": "překvapený",
+      "pieces": [
+        "sor",
+        "pre",
+        "so"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0958": {
+      "it": "spiegare",
+      "cz": "vysvětlit",
+      "pieces": [
+        "spie",
+        "ga",
+        "re"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0959": {
+      "it": "stamattina",
+      "cz": "dnes ráno",
+      "pieces": [
+        "sta",
+        "mat",
+        "ti",
+        "na"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0960": {
+      "it": "stupendo",
+      "cz": "nádherný; úžasný",
+      "pieces": [
+        "stu",
+        "pen",
+        "do"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0961": {
+      "it": "succedere",
+      "cz": "stát se; přihodit se",
+      "pieces": [
+        "suc",
+        "ce",
+        "de",
+        "re"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0962": {
+      "it": "suocera",
+      "cz": "tchyně",
+      "pieces": [
+        "suo",
+        "ce",
+        "ra"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0963": {
+      "it": "suocero",
+      "cz": "tchán",
+      "pieces": [
+        "suo",
+        "ce",
+        "ro"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0964": {
+      "it": "suonare",
+      "cz": "zvonit",
+      "pieces": [
+        "suo",
+        "na",
+        "re"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0965": {
+      "it": "sveglia",
+      "cz": "budík",
+      "pieces": [
+        "sve",
+        "glia"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0966": {
+      "it": "testimone",
+      "cz": "svědek",
+      "pieces": [
+        "te",
+        "sti",
+        "mo",
+        "ne"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0967": {
+      "it": "Tevere",
+      "cz": "Tibera",
+      "pieces": [
+        "Te",
+        "ve",
+        "re"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0968": {
+      "it": "trasformare",
+      "cz": "přeměnit",
+      "pieces": [
+        "tra",
+        "sfor",
+        "ma",
+        "re"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0969": {
+      "it": "uscire",
+      "cz": "vyjít; jít ven; vyjet",
+      "pieces": [
+        "u",
+        "sci",
+        "re"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0970": {
+      "it": "valere",
+      "cz": "mít hodnotu; mít cenu",
+      "pieces": [
+        "va",
+        "le",
+        "re"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0971": {
+      "it": "valigia",
+      "cz": "kufr, zavazadlo",
+      "pieces": [
+        "va",
+        "li",
+        "gia"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0972": {
+      "it": "viaggiare",
+      "cz": "cestovat",
+      "pieces": [
+        "viag",
+        "gia",
+        "re"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0973": {
+      "it": "violino",
+      "cz": "housle",
+      "pieces": [
+        "vi",
+        "o",
+        "li",
+        "no"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0974": {
+      "it": "vivere",
+      "cz": "žít; prožít",
+      "pieces": [
+        "vi",
+        "ve",
+        "re"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0975": {
+      "it": "quest'anno",
+      "cz": "letos",
+      "pieces": [
+        "que",
+        "st'an",
+        "no"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0976": {
+      "it": "bagno",
+      "cz": "toaleta; záchod",
+      "pieces": [
+        "ba",
+        "gno"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0977": {
+      "it": "bagno",
+      "cz": "koupel",
+      "pieces": [
+        "ba",
+        "gno"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0978": {
+      "it": "bagno",
+      "cz": "koupaliště; lázně",
+      "pieces": [
+        "ba",
+        "gno"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0979": {
+      "it": "andare in bagno",
+      "cz": "jít na toaletu",
+      "pieces": [
+        "an",
+        "da",
+        "re",
+        " ",
+        "in",
+        " ",
+        "ba",
+        "gno"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0980": {
+      "it": "in fretta",
+      "cz": "ve spěchu; rychle",
+      "pieces": [
+        "in",
+        " ",
+        "fret",
+        "ta"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0981": {
+      "it": "per",
+      "cz": "za; při ceně",
+      "pieces": [
+        "per"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0982": {
+      "it": "per",
+      "cz": "do; při směru cesty",
+      "pieces": [
+        "per"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0983": {
+      "it": "per",
+      "cz": "krát; při násobení",
+      "pieces": [
+        "per"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0984": {
+      "it": "tutti e due",
+      "cz": "oba",
+      "pieces": [
+        "tut",
+        "ti",
+        " ",
+        "e",
+        " ",
+        "du",
+        "e"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0985": {
+      "it": "avere bisogno di",
+      "cz": "potřebovat",
+      "pieces": [
+        "a",
+        "ve",
+        "re",
+        " ",
+        "bi",
+        "so",
+        "gno",
+        " ",
+        "di"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0986": {
+      "it": "avere caldo",
+      "cz": "být někomu horko",
+      "pieces": [
+        "a",
+        "ve",
+        "re",
+        " ",
+        "cal",
+        "do"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0987": {
+      "it": "Fa caldo.",
+      "cz": "Je horko.",
+      "pieces": [
+        "Fa",
+        " ",
+        "cal",
+        "do",
+        "."
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0988": {
+      "it": "libreria",
+      "cz": "knihovna jako nábytek; police na knihy",
+      "pieces": [
+        "li",
+        "bre",
+        "ri",
+        "a"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0989": {
+      "it": "male",
+      "cz": "bolest",
+      "pieces": [
+        "ma",
+        "le"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0990": {
+      "it": "mal di testa",
+      "cz": "bolest hlavy",
+      "pieces": [
+        "mal",
+        " ",
+        "di",
+        " ",
+        "te",
+        "sta"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0991": {
+      "it": "È a due passi.",
+      "cz": "Je to kousek.",
+      "pieces": [
+        "È",
+        " ",
+        "a",
+        " ",
+        "du",
+        "e",
+        " ",
+        "pas",
+        "si",
+        "."
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0992": {
+      "it": "ragione",
+      "cz": "rozum",
+      "pieces": [
+        "ra",
+        "gio",
+        "ne"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0993": {
+      "it": "straniero",
+      "cz": "cizí; zahraniční",
+      "pieces": [
+        "stra",
+        "nie",
+        "ro"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0994": {
+      "it": "biglietto",
+      "cz": "jízdenka",
+      "pieces": [
+        "bi",
+        "gliet",
+        "to"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0995": {
+      "it": "cambiare",
+      "cz": "změnit; vyměnit; změnit se",
+      "pieces": [
+        "cam",
+        "bia",
+        "re"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0996": {
+      "it": "giocare a carte",
+      "cz": "hrát karty",
+      "pieces": [
+        "gio",
+        "ca",
+        "re",
+        " ",
+        "a",
+        " ",
+        "car",
+        "te"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0997": {
+      "it": "per caso",
+      "cz": "náhodou",
+      "pieces": [
+        "per",
+        " ",
+        "ca",
+        "so"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0998": {
+      "it": "chiedere",
+      "cz": "požádat; žádat",
+      "pieces": [
+        "chie",
+        "de",
+        "re"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-0999": {
+      "it": "Complimenti!",
+      "cz": "Gratuluji!; Výborně!",
+      "pieces": [
+        "Com",
+        "pli",
+        "men",
+        "ti",
+        "!"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-1000": {
+      "it": "Che cosa?",
+      "cz": "Co?",
+      "pieces": [
+        "Che",
+        " ",
+        "co",
+        "sa",
+        "?"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-1001": {
+      "it": "loro",
+      "cz": "jejich",
+      "pieces": [
+        "lo",
+        "ro"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-1002": {
+      "it": "a metà strada",
+      "cz": "v půli cesty",
+      "pieces": [
+        "a",
+        " ",
+        "me",
+        "tà",
+        " ",
+        "stra",
+        "da"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-1003": {
+      "it": "nipote",
+      "cz": "vnuk",
+      "pieces": [
+        "ni",
+        "po",
+        "te"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-1004": {
+      "it": "nipote",
+      "cz": "vnučka",
+      "pieces": [
+        "ni",
+        "po",
+        "te"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-1005": {
+      "it": "parte",
+      "cz": "strana",
+      "pieces": [
+        "par",
+        "te"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-1006": {
+      "it": "dall'altra parte",
+      "cz": "na druhé straně",
+      "pieces": [
+        "dal",
+        "l'al",
+        "tra",
+        " ",
+        "par",
+        "te"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-1007": {
+      "it": "partita",
+      "cz": "zápas; utkání",
+      "pieces": [
+        "par",
+        "ti",
+        "ta"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-1008": {
+      "it": "a piedi",
+      "cz": "pěšky",
+      "pieces": [
+        "a",
+        " ",
+        "pie",
+        "di"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-1009": {
+      "it": "stare in piedi",
+      "cz": "stát na nohou",
+      "pieces": [
+        "sta",
+        "re",
+        " ",
+        "in",
+        " ",
+        "pie",
+        "di"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-1010": {
+      "it": "non… più",
+      "cz": "už ne",
+      "pieces": [
+        "non",
+        "… ",
+        "più"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-1011": {
+      "it": "porta",
+      "cz": "brána",
+      "pieces": [
+        "por",
+        "ta"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-1012": {
+      "it": "porta",
+      "cz": "branka ve sportu",
+      "pieces": [
+        "por",
+        "ta"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-1013": {
+      "it": "sapere",
+      "cz": "umět",
+      "pieces": [
+        "sa",
+        "pe",
+        "re"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-1014": {
+      "it": "collega",
+      "cz": "kolegyně",
+      "pieces": [
+        "col",
+        "le",
+        "ga"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-1015": {
+      "it": "corona",
+      "cz": "koruna jako měna",
+      "pieces": [
+        "co",
+        "ro",
+        "na"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-1016": {
+      "it": "Mi dispiace.",
+      "cz": "Je mi líto.; Mrzí mě to.",
+      "pieces": [
+        "Mi",
+        " ",
+        "di",
+        "spia",
+        "ce",
+        "."
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-1017": {
+      "it": "fare la fila",
+      "cz": "stát ve frontě",
+      "pieces": [
+        "fa",
+        "re",
+        " ",
+        "la",
+        " ",
+        "fi",
+        "la"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-1018": {
+      "it": "essere in fiore",
+      "cz": "být v květu; kvést",
+      "pieces": [
+        "es",
+        "se",
+        "re",
+        " ",
+        "in",
+        " ",
+        "fio",
+        "re"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-1019": {
+      "it": "guida",
+      "cz": "průvodce jako kniha",
+      "pieces": [
+        "gui",
+        "da"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-1020": {
+      "it": "matrimonio",
+      "cz": "svatba",
+      "pieces": [
+        "ma",
+        "tri",
+        "mo",
+        "nio"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-1021": {
+      "it": "ora legale",
+      "cz": "letní čas",
+      "pieces": [
+        "o",
+        "ra",
+        " ",
+        "le",
+        "ga",
+        "le"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-1022": {
+      "it": "ora solare",
+      "cz": "zimní; standardní čas",
+      "pieces": [
+        "o",
+        "ra",
+        " ",
+        "so",
+        "la",
+        "re"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-1023": {
+      "it": "passare",
+      "cz": "minout; přejít",
+      "pieces": [
+        "pas",
+        "sa",
+        "re"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-1024": {
+      "it": "passare",
+      "cz": "podat věc",
+      "pieces": [
+        "pas",
+        "sa",
+        "re"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-1025": {
+      "it": "portare",
+      "cz": "vézt; dopravit",
+      "pieces": [
+        "por",
+        "ta",
+        "re"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-1026": {
+      "it": "appena",
+      "cz": "sotva",
+      "pieces": [
+        "ap",
+        "pe",
+        "na"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-1027": {
+      "it": "conoscenza",
+      "cz": "známost; osobní kontakt",
+      "pieces": [
+        "co",
+        "no",
+        "scen",
+        "za"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-1028": {
+      "it": "disturbo",
+      "cz": "zdravotní potíž",
+      "pieces": [
+        "di",
+        "stur",
+        "bo"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-1029": {
+      "it": "Si figuri!",
+      "cz": "Ale prosím vás!; To nestojí za řeč!",
+      "pieces": [
+        "Si",
+        " ",
+        "fi",
+        "gu",
+        "ri",
+        "!"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-1030": {
+      "it": "fondo",
+      "cz": "pozadí",
+      "pieces": [
+        "fon",
+        "do"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-1031": {
+      "it": "in fondo a",
+      "cz": "na konci",
+      "pieces": [
+        "in",
+        " ",
+        "fon",
+        "do",
+        " ",
+        "a"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-1032": {
+      "it": "di fronte",
+      "cz": "naproti; protější",
+      "pieces": [
+        "di",
+        " ",
+        "fron",
+        "te"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-1033": {
+      "it": "Sei in gamba!",
+      "cz": "Jsi šikovný!",
+      "pieces": [
+        "Sei",
+        " ",
+        "in",
+        " ",
+        "gam",
+        "ba",
+        "!"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-1034": {
+      "it": "andare a letto",
+      "cz": "jít spát",
+      "pieces": [
+        "an",
+        "da",
+        "re",
+        " ",
+        "a",
+        " ",
+        "let",
+        "to"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-1035": {
+      "it": "a lungo",
+      "cz": "dlouho; dlouze",
+      "pieces": [
+        "a",
+        " ",
+        "lun",
+        "go"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-1036": {
+      "it": "mettersi",
+      "cz": "obléci si; vzít si na sebe",
+      "pieces": [
+        "met",
+        "ter",
+        "si"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-1037": {
+      "it": "Peccato!",
+      "cz": "Škoda!",
+      "pieces": [
+        "Pec",
+        "ca",
+        "to",
+        "!"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-1038": {
+      "it": "provare",
+      "cz": "zkusit si oblečení",
+      "pieces": [
+        "pro",
+        "va",
+        "re"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-1039": {
+      "it": "sedia a sdraio",
+      "cz": "plážová rozkládací židle; lehátko",
+      "pieces": [
+        "se",
+        "dia",
+        " ",
+        "a",
+        " ",
+        "sdra",
+        "io"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-1040": {
+      "it": "segreteria telefonica",
+      "cz": "telefonní záznamník",
+      "pieces": [
+        "se",
+        "gre",
+        "te",
+        "ri",
+        "a",
+        " ",
+        "te",
+        "le",
+        "fo",
+        "ni",
+        "ca"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-1041": {
+      "it": "telefono fisso",
+      "cz": "pevná telefonní linka",
+      "pieces": [
+        "te",
+        "le",
+        "fo",
+        "no",
+        " ",
+        "fis",
+        "so"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-1042": {
+      "it": "tenere a",
+      "cz": "lpět na; záležet na něčem",
+      "pieces": [
+        "te",
+        "ne",
+        "re",
+        " ",
+        "a"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-1043": {
+      "it": "trattarsi di",
+      "cz": "jít o; jednat se o",
+      "pieces": [
+        "trat",
+        "tar",
+        "si",
+        " ",
+        "di"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-1044": {
+      "it": "uomini",
+      "cz": "lidé; muži",
+      "pieces": [
+        "uo",
+        "mi",
+        "ni"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-1045": {
+      "it": "via",
+      "cz": "pryč",
+      "pieces": [
+        "vi",
+        "a"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-1046": {
+      "it": "la prossima volta",
+      "cz": "příště",
+      "pieces": [
+        "la",
+        " ",
+        "pros",
+        "si",
+        "ma",
+        " ",
+        "vol",
+        "ta"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-1047": {
+      "it": "un'altra volta",
+      "cz": "jindy; znovu někdy",
+      "pieces": [
+        "u",
+        "n'al",
+        "tra",
+        " ",
+        "vol",
+        "ta"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-1048": {
+      "it": "qualche volta",
+      "cz": "někdy; občas",
+      "pieces": [
+        "qual",
+        "che",
+        " ",
+        "vol",
+        "ta"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-1049": {
+      "it": "accendere",
+      "cz": "zapnout přístroj",
+      "pieces": [
+        "ac",
+        "cen",
+        "de",
+        "re"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-1050": {
+      "it": "accendere la luce",
+      "cz": "rozsvítit",
+      "pieces": [
+        "ac",
+        "cen",
+        "de",
+        "re",
+        " ",
+        "la",
+        " ",
+        "lu",
+        "ce"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-1051": {
+      "it": "Tanti auguri!",
+      "cz": "Všechno nejlepší!",
+      "pieces": [
+        "Tan",
+        "ti",
+        " ",
+        "au",
+        "gu",
+        "ri",
+        "!"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-1052": {
+      "it": "bagnarsi",
+      "cz": "koupat se",
+      "pieces": [
+        "ba",
+        "gnar",
+        "si"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-1053": {
+      "it": "combinazione",
+      "cz": "náhoda",
+      "pieces": [
+        "com",
+        "bi",
+        "na",
+        "zio",
+        "ne"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-1054": {
+      "it": "tenersi in forma",
+      "cz": "udržovat se ve formě",
+      "pieces": [
+        "te",
+        "ner",
+        "si",
+        " ",
+        "in",
+        " ",
+        "for",
+        "ma"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-1055": {
+      "it": "Non prendermi in giro.",
+      "cz": "Nedělej si ze mě legraci.",
+      "pieces": [
+        "Non",
+        " ",
+        "pren",
+        "der",
+        "mi",
+        " ",
+        "in",
+        " ",
+        "gi",
+        "ro",
+        "."
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-1056": {
+      "it": "l'altro ieri",
+      "cz": "předevčírem",
+      "pieces": [
+        "l'al",
+        "tro",
+        " ",
+        "ie",
+        "ri"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-1057": {
+      "it": "neanch'io",
+      "cz": "ani já ne",
+      "pieces": [
+        "ne",
+        "an",
+        "ch'i",
+        "o"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-1058": {
+      "it": "in nessun posto",
+      "cz": "nikde; nikam",
+      "pieces": [
+        "in",
+        " ",
+        "nes",
+        "sun",
+        " ",
+        "po",
+        "sto"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-1059": {
+      "it": "pittura",
+      "cz": "malba; obraz",
+      "pieces": [
+        "pit",
+        "tu",
+        "ra"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-1060": {
+      "it": "a proposito",
+      "cz": "mimochodem; při té příležitosti",
+      "pieces": [
+        "a",
+        " ",
+        "pro",
+        "po",
+        "si",
+        "to"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-1061": {
+      "it": "sbagliare strada",
+      "cz": "splést si cestu",
+      "pieces": [
+        "sba",
+        "glia",
+        "re",
+        " ",
+        "stra",
+        "da"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-1062": {
+      "it": "sul serio",
+      "cz": "vážně; doopravdy",
+      "pieces": [
+        "sul",
+        " ",
+        "se",
+        "rio"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-1063": {
+      "it": "sotto",
+      "cz": "dole; níže",
+      "pieces": [
+        "sot",
+        "to"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-1064": {
+      "it": "suonare il violino",
+      "cz": "hrát na housle",
+      "pieces": [
+        "suo",
+        "na",
+        "re",
+        " ",
+        "il",
+        " ",
+        "vi",
+        "o",
+        "li",
+        "no"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-1065": {
+      "it": "uscire insieme",
+      "cz": "chodit spolu jako partneři",
+      "pieces": [
+        "u",
+        "sci",
+        "re",
+        " ",
+        "in",
+        "sie",
+        "me"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-1066": {
+      "it": "curioso",
+      "cz": "zvláštní; podivný",
+      "pieces": [
+        "cu",
+        "rio",
+        "so"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-1067": {
+      "it": "forte",
+      "cz": "silně; pevně",
+      "pieces": [
+        "for",
+        "te"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-1068": {
+      "it": "Già.",
+      "cz": "Ano, je to tak.",
+      "pieces": [
+        "Già",
+        "."
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-1069": {
+      "it": "ci",
+      "cz": "na to; o tom",
+      "pieces": [
+        "ci"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-1070": {
+      "it": "stare di casa",
+      "cz": "bydlet",
+      "pieces": [
+        "sta",
+        "re",
+        " ",
+        "di",
+        " ",
+        "ca",
+        "sa"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-1071": {
+      "it": "piacere",
+      "cz": "laskavost",
+      "pieces": [
+        "pia",
+        "ce",
+        "re"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-1072": {
+      "it": "ricordare",
+      "cz": "připomínat",
+      "pieces": [
+        "ri",
+        "cor",
+        "da",
+        "re"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-1073": {
+      "it": "figli",
+      "cz": "děti jako potomci",
+      "pieces": [
+        "fi",
+        "gli"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-1074": {
+      "it": "mani",
+      "cz": "ruce",
+      "pieces": [
+        "ma",
+        "ni"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-1075": {
+      "it": "Quanto tempo?",
+      "cz": "Jak dlouho?",
+      "pieces": [
+        "Quan",
+        "to",
+        " ",
+        "tem",
+        "po",
+        "?"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-1076": {
+      "it": "squadra",
+      "cz": "pracovní směna; pracovní tým",
+      "pieces": [
+        "squa",
+        "dra"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-1077": {
+      "it": "accordo",
+      "cz": "akord; souzvuk",
+      "pieces": [
+        "ac",
+        "cor",
+        "do"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-1078": {
+      "it": "D'accordo.",
+      "cz": "Souhlasím.; Dobře.",
+      "pieces": [
+        "D'ac",
+        "cor",
+        "do",
+        "."
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-1079": {
+      "it": "credere",
+      "cz": "domnívat se; myslet si",
+      "pieces": [
+        "cre",
+        "de",
+        "re"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-1080": {
+      "it": "passeggiata",
+      "cz": "projížďka",
+      "pieces": [
+        "pas",
+        "seg",
+        "gia",
+        "ta"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-1081": {
+      "it": "più",
+      "cz": "plus při sčítání",
+      "pieces": [
+        "più"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-1082": {
+      "it": "scendere",
+      "cz": "vystoupit z dopravního prostředku",
+      "pieces": [
+        "scen",
+        "de",
+        "re"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-1083": {
+      "it": "secondo tempo",
+      "cz": "druhý poločas",
+      "pieces": [
+        "se",
+        "con",
+        "do",
+        " ",
+        "tem",
+        "po"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-1084": {
+      "it": "tra",
+      "cz": "za při časovém údaji",
+      "pieces": [
+        "tra"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-1085": {
+      "it": "musica classica",
+      "cz": "vážná hudba; klasická hudba",
+      "pieces": [
+        "mu",
+        "si",
+        "ca",
+        " ",
+        "clas",
+        "si",
+        "ca"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-1086": {
+      "it": "soltanto",
+      "cz": "teprve; až při časovém údaji",
+      "pieces": [
+        "sol",
+        "tan",
+        "to"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-1087": {
+      "it": "verso",
+      "cz": "kolem; přibližně při časovém údaji",
+      "pieces": [
+        "ver",
+        "so"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-1088": {
+      "it": "accomodarsi",
+      "cz": "jít dál; vstoupit",
+      "pieces": [
+        "ac",
+        "co",
+        "mo",
+        "dar",
+        "si"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-1089": {
+      "it": "centro",
+      "cz": "centrum města; středisko",
+      "pieces": [
+        "cen",
+        "tro"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-1090": {
+      "it": "palazzo",
+      "cz": "velký dům; bytový dům",
+      "pieces": [
+        "pa",
+        "laz",
+        "zo"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-1091": {
+      "it": "andare via",
+      "cz": "odejít; odjet pryč",
+      "pieces": [
+        "an",
+        "da",
+        "re",
+        " ",
+        "vi",
+        "a"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-1092": {
+      "it": "del genere",
+      "cz": "toho druhu; takový",
+      "pieces": [
+        "del",
+        " ",
+        "ge",
+        "ne",
+        "re"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-1093": {
+      "it": "valere la pena",
+      "cz": "stát za to",
+      "pieces": [
+        "va",
+        "le",
+        "re",
+        " ",
+        "la",
+        " ",
+        "pe",
+        "na"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-1094": {
+      "it": "presentarsi",
+      "cz": "dostavit se",
+      "pieces": [
+        "pre",
+        "sen",
+        "tar",
+        "si"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-1095": {
+      "it": "a proposito",
+      "cz": "vhod; v pravý čas",
+      "pieces": [
+        "a",
+        " ",
+        "pro",
+        "po",
+        "si",
+        "to"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-1096": {
+      "it": "sognare",
+      "cz": "snít o něčem; mít přání do budoucna",
+      "pieces": [
+        "so",
+        "gna",
+        "re"
+      ],
+      "reviewed": true,
+      "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
     }
   }
 }

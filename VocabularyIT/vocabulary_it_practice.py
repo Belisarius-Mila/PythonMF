@@ -78,6 +78,14 @@ CONFLICTS = {
 }
 COLORS = {'giallo', 'grigio', 'marrone', 'viola'}
 
+# This reviewed content batch keeps picture exclusions next to its source meanings.
+_LEDA_CHANGES = json.loads((Path(__file__).with_name('batches') / 'leda_20261116.json').read_text())['practiceChanges']
+COLORS.update(_LEDA_CHANGES['colors'])
+for _group, _words in _LEDA_CHANGES['extend'].items():
+    CONFLICTS[_group] += '|' + _words
+CONFLICTS.update(_LEDA_CHANGES['new'])
+
+
 
 def build(data, spelling):
     items = data['items']

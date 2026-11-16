@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "project": "VocabularyIT-images",
   "foundationManifestSha256": "306d6ce98936cd4861d7fe204ef7250187a3b99bb47d09ba6c72a562ebed693c",
-  "reviewKind": "Visual inspection of all 471 cards in overview sheets and targeted image comparisons; contextual images are not claimed to uniquely encode abstract words.",
+  "reviewKind": "exact image pins; 497 prior cards preserved; reviewed LEDA additions",
   "files": {
     "Pict/Iam.PNG": {
       "sha256": "eeb04f048c5531b69f5619d3d1e41d9b6f27bcbac20037d92d50b25b55a4cec9",
@@ -2852,6 +2852,1770 @@
       "width": 704,
       "height": 704,
       "format": "PNG"
+    },
+    "Pict/it_leda_guitar.webp": {
+      "sha256": "5b9e1f267d670f7733d47040a7db7915d7500b120ef518e439f5cbc26058ab09",
+      "bytes": 60610,
+      "width": 1200,
+      "height": 1200,
+      "format": "WEBP"
+    },
+    "Pict/new.webp": {
+      "sha256": "8b0d59c2f6cf8d02d2348ba2848feb385fd37dd7ab7bd54c2ae007c9a57c7f08",
+      "bytes": 38726,
+      "width": 1024,
+      "height": 1024,
+      "format": "WEBP"
+    },
+    "Pict/it_leda_citygate.webp": {
+      "sha256": "6ac8e88128341677da2a7456086807d2292e1698343b981395874d85bf519f5c",
+      "bytes": 294122,
+      "width": 1200,
+      "height": 1200,
+      "format": "WEBP"
+    },
+    "Pict/it_leda_number_1000.webp": {
+      "sha256": "1048231b871574a92851ba3d08f84c47ba1ae3dde84f0f10212bc5939ca1f8b1",
+      "bytes": 9382,
+      "width": 900,
+      "height": 900,
+      "format": "WEBP"
+    },
+    "Pict/it_leda_stadium.webp": {
+      "sha256": "59e331530191aa8aa3b6e3b6d12fce13b59aa68d18fd1a89446b36b62a210795",
+      "bytes": 190300,
+      "width": 1200,
+      "height": 1200,
+      "format": "WEBP"
+    },
+    "Pict/it_leda_painting.webp": {
+      "sha256": "2e4c0f6f590b48df3f6797175201fce772d179d7debb89164a670316a3930a2e",
+      "bytes": 206826,
+      "width": 1200,
+      "height": 1200,
+      "format": "WEBP"
+    },
+    "Pict/it_leda_violin.webp": {
+      "sha256": "a54c92536bc97b10f063e5f3d2d14e5f379e3519981f4241bb3ff74a1805a811",
+      "bytes": 145626,
+      "width": 1200,
+      "height": 1200,
+      "format": "WEBP"
+    },
+    "Pict/it_leda_eyes.webp": {
+      "sha256": "8a6e1aa5cfa4fd3b7073ae16189585d5b960eedcdb7d5512f2a9d07e64a91ec4",
+      "bytes": 15246,
+      "width": 1024,
+      "height": 1024,
+      "format": "WEBP"
+    },
+    "Pict/it_leda_graphic_summer_time.webp": {
+      "sha256": "0edd44f7f394349873e91d4c7fbf50560e6286c5ce7415484e44817fc6c6b798",
+      "bytes": 21182,
+      "width": 900,
+      "height": 900,
+      "format": "WEBP"
+    },
+    "Pict/it_leda_number_24.webp": {
+      "sha256": "9d4bbe7caf8429177d2dd1a62175fde8b440341b7fa89829b560ffb0071b894c",
+      "bytes": 17010,
+      "width": 900,
+      "height": 900,
+      "format": "WEBP"
+    },
+    "Pict/yesterday.PNG": {
+      "sha256": "2792f237ecbfe33b5e6db670d71305d4f74a42f71cc46c35d8b13f861002dedf",
+      "bytes": 179652,
+      "width": 896,
+      "height": 717,
+      "format": "PNG"
+    },
+    "Pict/it_leda_number_2.webp": {
+      "sha256": "111ecc0b80974eddf874447bedce4ddba562aaf5a45f072a092986e66d6a4b4c",
+      "bytes": 6326,
+      "width": 900,
+      "height": 900,
+      "format": "WEBP"
+    },
+    "Pict/it_leda_leg.png": {
+      "sha256": "133bfdb60fd994e3e2927aaf9ed0e84f775e05a0470470041f6f25db3393a155",
+      "bytes": 1166772,
+      "width": 1254,
+      "height": 1254,
+      "format": "PNG"
+    },
+    "Pict/it_leda_wedding.webp": {
+      "sha256": "156da9442c7728eadef94fd987f6b2caceba90af9bedd729a722f321b7e08614",
+      "bytes": 183310,
+      "width": 1200,
+      "height": 1200,
+      "format": "WEBP"
+    },
+    "Pict/forest.webp": {
+      "sha256": "f29e2bfcfee6c042ae0a6ea86b4c28e146d1c76abe54a2e7cc4d3e2df9fc5378",
+      "bytes": 289346,
+      "width": 1254,
+      "height": 1254,
+      "format": "WEBP"
+    },
+    "Pict/idea.webp": {
+      "sha256": "fa5912e7bbeeb7d9ad664d5bb2a787e6a3137e86897ed45c54a66d186bb09fd5",
+      "bytes": 89198,
+      "width": 1024,
+      "height": 1024,
+      "format": "WEBP"
+    },
+    "Pict/it_leda_number_3.webp": {
+      "sha256": "12ddae9b22dce06569397ec6907c5c76c740e42116f4805bb67443dc6e8e97fe",
+      "bytes": 7468,
+      "width": 900,
+      "height": 900,
+      "format": "WEBP"
+    },
+    "Pict/it_leda_graphic_end.webp": {
+      "sha256": "1fd1b21503b2e8bb443e4cbfa2755084113c9644e4e4eb483f83ca042297c95a",
+      "bytes": 9182,
+      "width": 900,
+      "height": 900,
+      "format": "WEBP"
+    },
+    "Pict/it_leda_number_1.webp": {
+      "sha256": "68bc969abd1ae316d98d8a996dfdc2bf0a6a7a482bc930c5d62587bfb4980ffb",
+      "bytes": 4224,
+      "width": 900,
+      "height": 900,
+      "format": "WEBP"
+    },
+    "Pict/it_leda_number_30.webp": {
+      "sha256": "9ea1c9d779e0dd66e5383f930d4b64000b063f8996ebc8d16819f8ce34570ce4",
+      "bytes": 20942,
+      "width": 900,
+      "height": 900,
+      "format": "WEBP"
+    },
+    "Pict/it_leda_graphic_cd.webp": {
+      "sha256": "8bbc0614da507976fcf616227c391083b2cd5e7b30070e620c27a484bfaf0f69",
+      "bytes": 26344,
+      "width": 900,
+      "height": 900,
+      "format": "WEBP"
+    },
+    "Pict/happiness.webp": {
+      "sha256": "caf9d664a909889f205eb2d8734ecddc2f9a4a947ab6d008bf6f4a4d3ebc53a1",
+      "bytes": 226364,
+      "width": 1254,
+      "height": 1254,
+      "format": "WEBP"
+    },
+    "Pict/lost.png": {
+      "sha256": "b73ed9c875e7fe65f4c73c22a30a76b9e798e0891103d84034c708175e76ed31",
+      "bytes": 296607,
+      "width": 740,
+      "height": 740,
+      "format": "PNG"
+    },
+    "Pict/it_leda_number_26.webp": {
+      "sha256": "c5438bbeb612c168414109984892b2e5edf3f5df3187b6a13db2b910555b5cee",
+      "bytes": 19398,
+      "width": 900,
+      "height": 900,
+      "format": "WEBP"
+    },
+    "Pict/it_leda_postoffice.webp": {
+      "sha256": "d1bb7635346234afbe8da8ad71f7303390adcb4b88ced12158fe9612311978e7",
+      "bytes": 170394,
+      "width": 1200,
+      "height": 1200,
+      "format": "WEBP"
+    },
+    "Pict/give.webp": {
+      "sha256": "6a64a6947f88da3c3d04f20da56aee8ebe53a8ab9343783a211f4facf626f5ee",
+      "bytes": 144932,
+      "width": 1254,
+      "height": 1254,
+      "format": "WEBP"
+    },
+    "Pict/it_leda_graphic_halfway.webp": {
+      "sha256": "07e1dd4e221c85c499f8718b54ac3f59daf822c263aec423a949f668803d97c4",
+      "bytes": 8946,
+      "width": 900,
+      "height": 900,
+      "format": "WEBP"
+    },
+    "Pict/it_leda_number_50.webp": {
+      "sha256": "ebd62aa3a495d18fe15bf30f8d63336772dd4a16c319b0c41485f318e37b468f",
+      "bytes": 7818,
+      "width": 900,
+      "height": 900,
+      "format": "WEBP"
+    },
+    "Pict/it_leda_graphic_address.webp": {
+      "sha256": "ce03ccef11e1e2fdc7fba4a431acb24428d17640e19eeac12a16bb0e45663737",
+      "bytes": 7828,
+      "width": 900,
+      "height": 900,
+      "format": "WEBP"
+    },
+    "Pict/entrance.PNG": {
+      "sha256": "d2a050ccd32d1e2ed30b365e501d323503f7ca7e05deaeb0ee2bfce5eaf4aff3",
+      "bytes": 93206,
+      "width": 704,
+      "height": 563,
+      "format": "PNG"
+    },
+    "Pict/key.png": {
+      "sha256": "331ef9c2d08f018e03161fc53ed73eb678502a6eb35cb8f300869026b00bbfe8",
+      "bytes": 271449,
+      "width": 768,
+      "height": 768,
+      "format": "PNG"
+    },
+    "Pict/sad.webp": {
+      "sha256": "06d8f9f5623036ae57a867c880d18632749edd12c2653cb5d0d5196c5993f449",
+      "bytes": 158852,
+      "width": 1024,
+      "height": 1024,
+      "format": "WEBP"
+    },
+    "Pict/it_leda_headache.webp": {
+      "sha256": "068b42f21b959ea110407becfa155372991c50750c81bf860a1ab83a2f7243eb",
+      "bytes": 149676,
+      "width": 1200,
+      "height": 1200,
+      "format": "WEBP"
+    },
+    "Pict/it_leda_graphic_multiply.webp": {
+      "sha256": "8d52bba7eee69e45f71caeed49eb6c080f973f30b08f5ee2a64964022fb728b6",
+      "bytes": 10036,
+      "width": 900,
+      "height": 900,
+      "format": "WEBP"
+    },
+    "Pict/it_leda_graphic_side.webp": {
+      "sha256": "c6daf011adf1401f8a79ef2aadb117874eb2fed83b5f1ba54a96c3f7c516d63b",
+      "bytes": 7608,
+      "width": 900,
+      "height": 900,
+      "format": "WEBP"
+    },
+    "Pict/it_leda_newspaper.webp": {
+      "sha256": "93729d56a716f29a9819df9eb91df1fc279a0a563f8fd78a9c37e40e76eb8ca7",
+      "bytes": 244080,
+      "width": 1200,
+      "height": 1200,
+      "format": "WEBP"
+    },
+    "Pict/lakepond.webp": {
+      "sha256": "a2a8900cfa43707ce14688cfefd61d50effb664447f51e89ad08a3f277fa9e6f",
+      "bytes": 34060,
+      "width": 1024,
+      "height": 1024,
+      "format": "WEBP"
+    },
+    "Pict/satisfied.png": {
+      "sha256": "34bd262983ee0a9ee702683684b920ef3120acb2e46c05bed8679cf8cfd47fa4",
+      "bytes": 286047,
+      "width": 740,
+      "height": 740,
+      "format": "PNG"
+    },
+    "Pict/it_leda_freedom.webp": {
+      "sha256": "f7ad30711bf05152b76fb43aac020f21d269306edbd17b0eae7a14930cff0a8d",
+      "bytes": 163628,
+      "width": 1200,
+      "height": 1200,
+      "format": "WEBP"
+    },
+    "Pict/seeyoulater.png": {
+      "sha256": "44f95f2f1af764d2e4272c04f50d5421b310da217db4f68308d92a14ab007a65",
+      "bytes": 297389,
+      "width": 740,
+      "height": 740,
+      "format": "PNG"
+    },
+    "Pict/handle.webp": {
+      "sha256": "494d931cd003e095f773a773b687b5b9eaab4f3a22e00cf2c1a93af6b41a61a4",
+      "bytes": 183010,
+      "width": 1254,
+      "height": 1254,
+      "format": "WEBP"
+    },
+    "Pict/bread.png": {
+      "sha256": "0af45729ca7620532ef68f82db509f23063053f6cb9a13ea7e95730399df21bd",
+      "bytes": 132673,
+      "width": 420,
+      "height": 420,
+      "format": "PNG"
+    },
+    "Pict/sometimes.png": {
+      "sha256": "0b2307a3b5cb4f8317312eb43e8dd7b49c677cccab8df53db37e2ccdf7687b6c",
+      "bytes": 298438,
+      "width": 740,
+      "height": 740,
+      "format": "PNG"
+    },
+    "Pict/it_leda_foot.png": {
+      "sha256": "aaeed5b9ae29df0f66445597a1e8c8fbf03ea37874832296ef424e29dbe46b29",
+      "bytes": 1444990,
+      "width": 1254,
+      "height": 1254,
+      "format": "PNG"
+    },
+    "Pict/night.webp": {
+      "sha256": "1e09d9a8b4c309ab9bcf52cbdba4b17381f8c30252d4b9ab58fac1b2dff19710",
+      "bytes": 88130,
+      "width": 1024,
+      "height": 1024,
+      "format": "WEBP"
+    },
+    "Pict/leaf.png": {
+      "sha256": "3ae07d1d7f89edc8c63ddab1667cd3a6d76bcd56d2332ec91945eaa4e5d04417",
+      "bytes": 135330,
+      "width": 420,
+      "height": 420,
+      "format": "PNG"
+    },
+    "Pict/small.webp": {
+      "sha256": "67231d8af9e02987a0f9378e6b09af74ddb90c0f00b7becf39ae9afc35f7093a",
+      "bytes": 23742,
+      "width": 1024,
+      "height": 1024,
+      "format": "WEBP"
+    },
+    "Pict/it_leda_graphic_shapes.webp": {
+      "sha256": "3df9e7e5b85dbddd11f32180437546a1035b3a98c0f32ded5b5fead6677c21e3",
+      "bytes": 8860,
+      "width": 900,
+      "height": 900,
+      "format": "WEBP"
+    },
+    "Pict/it_leda_graphic_background.webp": {
+      "sha256": "4f41dca3b89594e4f42fca9e49db15df672e978ea812dbfc75288f6dc2bf2a6e",
+      "bytes": 12504,
+      "width": 900,
+      "height": 900,
+      "format": "WEBP"
+    },
+    "Pict/it_leda_graphic_blue.webp": {
+      "sha256": "d56ce3d08fe093a6eee3ebc71657115d30c8d4596163f4cda4581f143e040ce0",
+      "bytes": 6258,
+      "width": 900,
+      "height": 900,
+      "format": "WEBP"
+    },
+    "Pict/water.jpg": {
+      "sha256": "39a7b9c332d157afd3ea6e17c086dd8e842f75d455af9c108c05b22796e7da49",
+      "bytes": 102163,
+      "width": 614,
+      "height": 921,
+      "format": "JPEG"
+    },
+    "Pict/name.webp": {
+      "sha256": "d938d9376121d4bfb6784e7e07f0e65e776083b9b6aef8bb61ca54edbe61a95c",
+      "bytes": 20338,
+      "width": 1024,
+      "height": 1024,
+      "format": "WEBP"
+    },
+    "Pict/it_leda_graphic_add.webp": {
+      "sha256": "752427b51f29177600041d5d4aad45221c76fdf0758cdb98b9070a20fd9dbf99",
+      "bytes": 8880,
+      "width": 900,
+      "height": 900,
+      "format": "WEBP"
+    },
+    "Pict/it_leda_worried.webp": {
+      "sha256": "704e540efc5efb503d992968ebb0a0df6887ee9fc2b39c0d2229c6bd1587adbe",
+      "bytes": 146118,
+      "width": 1200,
+      "height": 1200,
+      "format": "WEBP"
+    },
+    "Pict/something.webp": {
+      "sha256": "67b18493d2b53b1568b7a05d641e8b963ada712ad396837e84594bdb1b252ffc",
+      "bytes": 70928,
+      "width": 1024,
+      "height": 1024,
+      "format": "WEBP"
+    },
+    "Pict/bag.jpg": {
+      "sha256": "258e6830305bebcb3653526e069de2c290eba86ce5d168390ebe14c34e88a075",
+      "bytes": 102222,
+      "width": 1024,
+      "height": 1536,
+      "format": "JPEG"
+    },
+    "Pict/two.webp": {
+      "sha256": "1298558de6b1ad4f2bc06f699b08f516fbdc18046636ae58aa201f0fd9bbddfa",
+      "bytes": 107104,
+      "width": 1254,
+      "height": 1254,
+      "format": "WEBP"
+    },
+    "Pict/someone.png": {
+      "sha256": "117e79feb1d57d552ab43748318c724d348988fdde056368c4115b9efd392504",
+      "bytes": 294151,
+      "width": 740,
+      "height": 740,
+      "format": "PNG"
+    },
+    "Pict/pen.webp": {
+      "sha256": "ea3cd6bf7a60f23759987675f4390b4a103fcd63dcfe2bc67373c290d99af14e",
+      "bytes": 85990,
+      "width": 1024,
+      "height": 1024,
+      "format": "WEBP"
+    },
+    "Pict/it_leda_number_29.webp": {
+      "sha256": "cba8afd722424b6c00707caa3d6a784264dd33a09b6b8f2923c62bb6e4a85a6c",
+      "bytes": 20518,
+      "width": 900,
+      "height": 900,
+      "format": "WEBP"
+    },
+    "Pict/it_leda_number_22.webp": {
+      "sha256": "39e9efb20eb87c17c94f6df6af2f94cddfb705c77b56ec7feb6011eee772e8b9",
+      "bytes": 17064,
+      "width": 900,
+      "height": 900,
+      "format": "WEBP"
+    },
+    "Pict/not.webp": {
+      "sha256": "fd0a4bd0841948fb451aa07f510b783054e24ed4aaee1368fc61e11f682d180e",
+      "bytes": 158392,
+      "width": 1254,
+      "height": 1254,
+      "format": "WEBP"
+    },
+    "Pict/family.jpg": {
+      "sha256": "b32c7ae079dfeb58b90855aab7a02680a017af38b92983834364f1da277c12e8",
+      "bytes": 101541,
+      "width": 901,
+      "height": 1351,
+      "format": "JPEG"
+    },
+    "Pict/it_leda_number_20.webp": {
+      "sha256": "442f59927fe6faf38300f0a609091cd539fb6da458120f29a795a570856928eb",
+      "bytes": 16376,
+      "width": 900,
+      "height": 900,
+      "format": "WEBP"
+    },
+    "Pict/special.webp": {
+      "sha256": "31269259edc2bce9e722a1e3513c73f1f2091c9e056a7abe14430a5cb58d3aa5",
+      "bytes": 186904,
+      "width": 1254,
+      "height": 1254,
+      "format": "WEBP"
+    },
+    "Pict/it_leda_graphic_bottom.webp": {
+      "sha256": "253b285290095ea1675b48e02e803983705a6910f5dd5bc7de71c6a05a7edf6a",
+      "bytes": 5016,
+      "width": 900,
+      "height": 900,
+      "format": "WEBP"
+    },
+    "Pict/it_leda_number_23.webp": {
+      "sha256": "18c63fe36c14245a64a00d98098b9c7b6308d470ab8c9269a035501e0090b38e",
+      "bytes": 17978,
+      "width": 900,
+      "height": 900,
+      "format": "WEBP"
+    },
+    "Pict/it_leda_hands.webp": {
+      "sha256": "775e87d5ef27b30be5f840ef7b594b37e67e475ec451a164125e5d77b430f6a1",
+      "bytes": 96040,
+      "width": 1200,
+      "height": 1200,
+      "format": "WEBP"
+    },
+    "Pict/it_leda_theatre.webp": {
+      "sha256": "7e03534dee5659a224f14f9dae2d95fb4d5864950b71a68d912ae9b613a97d6b",
+      "bytes": 252362,
+      "width": 1200,
+      "height": 1200,
+      "format": "WEBP"
+    },
+    "Pict/it_leda_graphic_black.webp": {
+      "sha256": "63f3378898df08206bbd46807445bcf6c395feee114294ecc72e071a9d7daae5",
+      "bytes": 5464,
+      "width": 900,
+      "height": 900,
+      "format": "WEBP"
+    },
+    "Pict/chair.png": {
+      "sha256": "6311267ea9acf4d040f41de931bd9acd973bab0f7fe6bfd41d50ceebb16c9ddd",
+      "bytes": 278659,
+      "width": 768,
+      "height": 768,
+      "format": "PNG"
+    },
+    "Pict/duration.webp": {
+      "sha256": "3627af70840da3b41301d56fb646499cf371e83bf2f399f1840c67676a27e8b7",
+      "bytes": 211586,
+      "width": 1254,
+      "height": 1254,
+      "format": "WEBP"
+    },
+    "Pict/boat.png": {
+      "sha256": "d3a10039b389137d10e2f7aad9959c5bccb95e3c0c0607141acb7c24fea8bfa6",
+      "bytes": 94313,
+      "width": 420,
+      "height": 420,
+      "format": "PNG"
+    },
+    "Pict/it_leda_smoking.webp": {
+      "sha256": "ade98bf5cfe12cb042ea09851f81ae0f9a7724b043633f9c8b77a3f99ccfbd45",
+      "bytes": 183716,
+      "width": 1200,
+      "height": 1200,
+      "format": "WEBP"
+    },
+    "Pict/cinema.png": {
+      "sha256": "e3513f0d5849253a10737244e848419341e0c6fbaa8ccd1d37cc715c5b56786b",
+      "bytes": 95853,
+      "width": 542,
+      "height": 814,
+      "format": "PNG"
+    },
+    "Pict/it_leda_graphic_white.webp": {
+      "sha256": "55d97bd887bdd13ecc96ab8844d71de2424025cf4ba8734079630ce9e7bdb993",
+      "bytes": 4956,
+      "width": 900,
+      "height": 900,
+      "format": "WEBP"
+    },
+    "Pict/late.webp": {
+      "sha256": "39f08bdd57772dd0d5057cbc85335d9a5ea083f8ba5d3eb3cc25a6c1ad9208a2",
+      "bytes": 149140,
+      "width": 1024,
+      "height": 1024,
+      "format": "WEBP"
+    },
+    "Pict/it_leda_organ.webp": {
+      "sha256": "b400876f283a6ee533c0d49386cd5d6ec4b18dd090d92fb4bccf5b1be241b304",
+      "bytes": 195506,
+      "width": 1200,
+      "height": 1200,
+      "format": "WEBP"
+    },
+    "Pict/prepare.png": {
+      "sha256": "3a136b0895f727373a12309e253ee9791cbd4aeca8c8c64dc86fe013beac4481",
+      "bytes": 290281,
+      "width": 740,
+      "height": 740,
+      "format": "PNG"
+    },
+    "Pict/it_leda_graphic_part.webp": {
+      "sha256": "f4e18500cc896ceaf33083f7ded86da048708613497b3dee34ab7ae058c26357",
+      "bytes": 16670,
+      "width": 900,
+      "height": 900,
+      "format": "WEBP"
+    },
+    "Pict/it_leda_graphic_cross.webp": {
+      "sha256": "e28acdfa0b3152bc89598f0e5f290493369858ae5545f93bd11577fee3434a04",
+      "bytes": 9970,
+      "width": 900,
+      "height": 900,
+      "format": "WEBP"
+    },
+    "Pict/chase.webp": {
+      "sha256": "05c0b1efac2f423f0736e93a69bcf898a6525c5da0d07c1699429ede44375f28",
+      "bytes": 196844,
+      "width": 1254,
+      "height": 1254,
+      "format": "WEBP"
+    },
+    "Pict/ticket.webp": {
+      "sha256": "49945c6e1c739c9fc944ee2e1d449a10b566fdcbee53c9e6c1d171b921dd9668",
+      "bytes": 14806,
+      "width": 1024,
+      "height": 1024,
+      "format": "WEBP"
+    },
+    "Pict/it_leda_monument.webp": {
+      "sha256": "88c263db5c7444a5448df6fcff49d1bafaef5b2612dcc851ebd44b57f69711d3",
+      "bytes": 205662,
+      "width": 1200,
+      "height": 1200,
+      "format": "WEBP"
+    },
+    "Pict/first.webp": {
+      "sha256": "155689b8176fb256f1a11570d9a0da7e1f6775b6406c01bb7d6c0fc56cc47746",
+      "bytes": 291002,
+      "width": 1254,
+      "height": 1254,
+      "format": "WEBP"
+    },
+    "Pict/it_leda_servicecounter.webp": {
+      "sha256": "cbe29570d0f804ed928ed2e8e3ea90748348aab71c059f63b231a416b8e6316c",
+      "bytes": 163494,
+      "width": 1200,
+      "height": 1200,
+      "format": "WEBP"
+    },
+    "Pict/animal.webp": {
+      "sha256": "25dfa0ae37170a77321db76e42c3252152531a75b9088a2ec8bc87a7e19e8029",
+      "bytes": 31310,
+      "width": 1024,
+      "height": 1024,
+      "format": "WEBP"
+    },
+    "Pict/try.webp": {
+      "sha256": "da9b3e8db1cae9bdd2e9ac0f049a6c2ceb4171d789d7d35c9a83c5983e046440",
+      "bytes": 36058,
+      "width": 1024,
+      "height": 1024,
+      "format": "WEBP"
+    },
+    "Pict/femaleengineer.webp": {
+      "sha256": "d4103cf038688740d75b1d75e249f359ff21e473154aa6f237109698f8dd527f",
+      "bytes": 107820,
+      "width": 1024,
+      "height": 1024,
+      "format": "WEBP"
+    },
+    "Pict/it_leda_number_90.webp": {
+      "sha256": "49de1dfe82c780e3914f2da76224dc13ef1321155918c0bf1ec915ea7a59087e",
+      "bytes": 8310,
+      "width": 900,
+      "height": 900,
+      "format": "WEBP"
+    },
+    "Pict/suitcase.webp": {
+      "sha256": "f6c2aaf88967adce7ab3acace1b930146ab8468e7a9db015192aadb974e8ec91",
+      "bytes": 154856,
+      "width": 1024,
+      "height": 1024,
+      "format": "WEBP"
+    },
+    "Pict/spring.PNG": {
+      "sha256": "f95ccc61769dd4033c7c73cd99cd688dc70b2d1619b1d6584f51168ff039465a",
+      "bytes": 78244,
+      "width": 704,
+      "height": 704,
+      "format": "PNG"
+    },
+    "Pict/health.webp": {
+      "sha256": "327b112f970a0195c820452759bee1dc80bfe7da23ce65110a1804fbb5f4afb0",
+      "bytes": 297090,
+      "width": 1254,
+      "height": 1254,
+      "format": "WEBP"
+    },
+    "Pict/it_leda_number_4.webp": {
+      "sha256": "b2547c0a19ac9b5a387df82d66207d90289ed967868f7bbcbbeac1cd6c4c8494",
+      "bytes": 6374,
+      "width": 900,
+      "height": 900,
+      "format": "WEBP"
+    },
+    "Pict/it_leda_number_60.webp": {
+      "sha256": "0bab2de5936f90c5d2b654d1b523ba3b972f98829915479f560c72900afd406e",
+      "bytes": 8362,
+      "width": 900,
+      "height": 900,
+      "format": "WEBP"
+    },
+    "Pict/it_leda_graphic_winter_time.webp": {
+      "sha256": "e3592895471a241d4ae5aed29d7d6a808dffb32133cfcd0832e2525940dda155",
+      "bytes": 21042,
+      "width": 900,
+      "height": 900,
+      "format": "WEBP"
+    },
+    "Pict/it_leda_metro.webp": {
+      "sha256": "7e93e1f245aa1bd446b67957aef4224ca99713b7b4f5c3701df0601a8a5f750f",
+      "bytes": 215646,
+      "width": 1200,
+      "height": 1200,
+      "format": "WEBP"
+    },
+    "Pict/it_leda_graphic_noon.webp": {
+      "sha256": "8707aa97ff54c20f779641240d5cdc5d8d945230e13c3afd6ea8dbe5ca9f982c",
+      "bytes": 23412,
+      "width": 900,
+      "height": 900,
+      "format": "WEBP"
+    },
+    "Pict/it_leda_map_america.webp": {
+      "sha256": "0bc61ce5d2ae146364b581f3dbfe53ff1073771dd830fefce5e7dc19a9a3bf3f",
+      "bytes": 35276,
+      "width": 900,
+      "height": 900,
+      "format": "WEBP"
+    },
+    "Pict/it_leda_townhall.webp": {
+      "sha256": "7213fd5582b4ca395335d66edb4d1bec7bcbc6f178e486f9aa87fae944296f72",
+      "bytes": 208434,
+      "width": 1200,
+      "height": 1200,
+      "format": "WEBP"
+    },
+    "Pict/welcome.PNG": {
+      "sha256": "4bf9fc68d30f3b16f49d310cfb97e4bff2f91b49b44fcf547709eb0096c63341",
+      "bytes": 168939,
+      "width": 704,
+      "height": 563,
+      "format": "PNG"
+    },
+    "Pict/it_leda_platform.webp": {
+      "sha256": "7c095fc9947e82e8d8bac712026bb6ced7c0fa8870f81784d8dc4fb6a606cd9e",
+      "bytes": 290730,
+      "width": 1200,
+      "height": 1200,
+      "format": "WEBP"
+    },
+    "Pict/it_leda_number_21.webp": {
+      "sha256": "4f43e4a77b76879b06c4c5c3a8d88872d57c10c46d2a352531c513868ecde554",
+      "bytes": 15112,
+      "width": 900,
+      "height": 900,
+      "format": "WEBP"
+    },
+    "Pict/gone.webp": {
+      "sha256": "29d53a5db2b771aa764f471c6cefd44fdb53aa44ddf3e0c8ccba4990598708c6",
+      "bytes": 168800,
+      "width": 1254,
+      "height": 1254,
+      "format": "WEBP"
+    },
+    "Pict/it_leda_number_10.webp": {
+      "sha256": "47dbd7569d4a6a6898ce37db1e45ce37d0f9ba68e0a0dbc21fee8e1a68b4fc2d",
+      "bytes": 10888,
+      "width": 900,
+      "height": 900,
+      "format": "WEBP"
+    },
+    "Pict/star.png": {
+      "sha256": "79881dbd3a89f8b9456a6a0ea0fc30796c0c1388b1aff37c39c9346db93ad3b1",
+      "bytes": 85671,
+      "width": 420,
+      "height": 420,
+      "format": "PNG"
+    },
+    "Pict/it_leda_number_6.webp": {
+      "sha256": "de2aa91918060c5ab3c81bbc67c8e8f7a39b37b32238c6a492ed9d04e88862a2",
+      "bytes": 8906,
+      "width": 900,
+      "height": 900,
+      "format": "WEBP"
+    },
+    "Pict/it_leda_graphic_second.webp": {
+      "sha256": "879965107c03ceeed82fa18a1b91e3d9b5dc0353da7ab7bdc0bc4d7d91e2b93e",
+      "bytes": 14894,
+      "width": 900,
+      "height": 900,
+      "format": "WEBP"
+    },
+    "Pict/it_leda_graphic_playingcard.webp": {
+      "sha256": "85dfb8f77880e815446e422197c0f7f7cde5cdc2339df461159e2dd4b0dae2b9",
+      "bytes": 9334,
+      "width": 900,
+      "height": 900,
+      "format": "WEBP"
+    },
+    "Pict/magnificent.png": {
+      "sha256": "ff8cc8000f6466d5499ab3169bfba8ed8a540e8ed95c8c687177e85115e6e97b",
+      "bytes": 286184,
+      "width": 740,
+      "height": 740,
+      "format": "PNG"
+    },
+    "Pict/it_leda_hill.webp": {
+      "sha256": "c1bad4487bb1c748d9093d03bfec3f74e55a46ef24fdc79b64aaa99d224a5717",
+      "bytes": 240598,
+      "width": 1200,
+      "height": 1200,
+      "format": "WEBP"
+    },
+    "Pict/box.jpg": {
+      "sha256": "f038ee290cb78b7289e831a8b6da11bc764cc8ea20d9274b703aac97192f3767",
+      "bytes": 98911,
+      "width": 1024,
+      "height": 1536,
+      "format": "JPEG"
+    },
+    "Pict/field.webp": {
+      "sha256": "bfaf81c9fa36853e484988363b6bd92863d8350ec1ff38588a8f258b46b45f73",
+      "bytes": 31626,
+      "width": 1024,
+      "height": 1024,
+      "format": "WEBP"
+    },
+    "Pict/it_leda_stilllife.webp": {
+      "sha256": "44667f421f27c3d9076ad9ae6c390bcf2d288e575ed6ff83d881af0498f0162c",
+      "bytes": 208906,
+      "width": 1200,
+      "height": 1200,
+      "format": "WEBP"
+    },
+    "Pict/it_leda_queue.webp": {
+      "sha256": "bd66cde32afc96aa5f21ed811cbff13ec826e2135228b38994b6a15a9161d3df",
+      "bytes": 166978,
+      "width": 1200,
+      "height": 1200,
+      "format": "WEBP"
+    },
+    "Pict/made.webp": {
+      "sha256": "3c608740b8ca6e828fcf3b3b9ba8ec65abf47f72f7cb6c7e4b9aa3a046167c8b",
+      "bytes": 91522,
+      "width": 1024,
+      "height": 1024,
+      "format": "WEBP"
+    },
+    "Pict/it_leda_letter.webp": {
+      "sha256": "a7dba26a4f925d041ea01d5bd170c5409cb1777bcaf42b3195ba3164c9b26cb6",
+      "bytes": 190792,
+      "width": 1200,
+      "height": 1200,
+      "format": "WEBP"
+    },
+    "Pict/clevergirl.webp": {
+      "sha256": "7f29e1a9ac85908c688e607b400daf52755d078031f0fbcbfcb63e4bf694e790",
+      "bytes": 97428,
+      "width": 1024,
+      "height": 1024,
+      "format": "WEBP"
+    },
+    "Pict/it_leda_graphic_method.webp": {
+      "sha256": "8a70d0559a18ad51032d7266ae2c0155580b42121828a6d17df89fa37bad555d",
+      "bytes": 8518,
+      "width": 900,
+      "height": 900,
+      "format": "WEBP"
+    },
+    "Pict/it_leda_sculptor.webp": {
+      "sha256": "9a5dee85933bfcc8a5ff4cf7b1a9af613d2a18b0beb98392356db2aae3db7763",
+      "bytes": 236068,
+      "width": 1200,
+      "height": 1200,
+      "format": "WEBP"
+    },
+    "Pict/her.webp": {
+      "sha256": "0c5e444e0ca5f32295cdb0363df1ec26da9d50daceed9c10c555a9c99604b68a",
+      "bytes": 218770,
+      "width": 1254,
+      "height": 1254,
+      "format": "WEBP"
+    },
+    "Pict/bank.webp": {
+      "sha256": "69c7b2c22c1bcb531f45a4ab08292758a86409162d39f5aebb09bf8dee62d0cd",
+      "bytes": 159368,
+      "width": 1024,
+      "height": 1024,
+      "format": "WEBP"
+    },
+    "Pict/it_leda_number_11.webp": {
+      "sha256": "f656efb4545d69e1ef4a4a1f893ca115b972aa63c6dc4a87350fb5a399476ba8",
+      "bytes": 9714,
+      "width": 900,
+      "height": 900,
+      "format": "WEBP"
+    },
+    "Pict/it_leda_accident.webp": {
+      "sha256": "92163483f94367e80d190bbf9a00f25500c31f5e5a99d3fb26ab19a20ac8067a",
+      "bytes": 227982,
+      "width": 1200,
+      "height": 1200,
+      "format": "WEBP"
+    },
+    "Pict/full.webp": {
+      "sha256": "1bdb3edf5f3c96bdf39a1835886756c084b53d893b7c67e24d67ea5a0b30c2b8",
+      "bytes": 183618,
+      "width": 1254,
+      "height": 1254,
+      "format": "WEBP"
+    },
+    "Pict/finish.webp": {
+      "sha256": "441ac47bc5605caebf33454d43a356648ad2da3eafe60bc6ca240369fea301b1",
+      "bytes": 286010,
+      "width": 1254,
+      "height": 1254,
+      "format": "WEBP"
+    },
+    "Pict/trust.webp": {
+      "sha256": "bb7131880a0dccf49cff646c704a80b53eec1641c7844522d7ba5c3ebefc3c3d",
+      "bytes": 289054,
+      "width": 1254,
+      "height": 1254,
+      "format": "WEBP"
+    },
+    "Pict/it_leda_number_33.webp": {
+      "sha256": "7fb4c19f19ac3f2922ef3472ed9b95316575a2962825a1820a6ccd0a79e07de0",
+      "bytes": 8552,
+      "width": 900,
+      "height": 900,
+      "format": "WEBP"
+    },
+    "Pict/school2.PNG": {
+      "sha256": "d774a7ac7773fe507f225a806029271aeb8becc16b09d044a710f80a368bc5a5",
+      "bytes": 218190,
+      "width": 832,
+      "height": 832,
+      "format": "PNG"
+    },
+    "Pict/hot.webp": {
+      "sha256": "dd0baf949448bd79acb67d873768a467fc07b740f3885c7362f990fd60fea6f6",
+      "bytes": 68586,
+      "width": 1024,
+      "height": 1024,
+      "format": "WEBP"
+    },
+    "Pict/it_leda_map_sicilia.webp": {
+      "sha256": "057e6810ff19681b10b1e76435b06c25052de1641d6b0947ddf8692e698fa4b3",
+      "bytes": 18656,
+      "width": 900,
+      "height": 900,
+      "format": "WEBP"
+    },
+    "Pict/some.png": {
+      "sha256": "741c6cc295141a33d61921a2aeb1a8e870caf58b85bc936c7423477d484a60c0",
+      "bytes": 276715,
+      "width": 768,
+      "height": 768,
+      "format": "PNG"
+    },
+    "Pict/notebook.webp": {
+      "sha256": "1a83c6649f4be6e5ccfca5472c4e7115ef57586321819f3a696e001a890c0f7e",
+      "bytes": 92660,
+      "width": 1024,
+      "height": 1024,
+      "format": "WEBP"
+    },
+    "Pict/it_leda_witness_male.webp": {
+      "sha256": "837f853f4d6b486be885e66783c4ca44df3121b587f96cf11ecc6447a6158af5",
+      "bytes": 101124,
+      "width": 1200,
+      "height": 1200,
+      "format": "WEBP"
+    },
+    "Pict/bus.webp": {
+      "sha256": "9dd82e8442c5bbdf86b0e0a8aa92e108a90e9dc1feba4a46243d9f7cacb7d5df",
+      "bytes": 186850,
+      "width": 1024,
+      "height": 1024,
+      "format": "WEBP"
+    },
+    "Pict/it_leda_passenger_male.webp": {
+      "sha256": "6301cfafbcd458296794a488ce482b27d5fb87e5e153a0afcc4e700be0b5c41e",
+      "bytes": 173598,
+      "width": 1200,
+      "height": 1200,
+      "format": "WEBP"
+    },
+    "Pict/dress.png": {
+      "sha256": "2acd6f7508918852a8ab0bc83da70b021c97e584ba1befcc4870b2017b9a7ece",
+      "bytes": 96095,
+      "width": 1024,
+      "height": 1024,
+      "format": "PNG"
+    },
+    "Pict/it_leda_graphic_until.webp": {
+      "sha256": "fe5fd37e4be84a0298f7130a9025cc757f1ef027138dfae1087e849bac6646bd",
+      "bytes": 13812,
+      "width": 900,
+      "height": 900,
+      "format": "WEBP"
+    },
+    "Pict/it_leda_number_27.webp": {
+      "sha256": "513646eefe54fc6d3e380e35668cfe1ee3697b9099fb52c540581fb0262e1776",
+      "bytes": 18210,
+      "width": 900,
+      "height": 900,
+      "format": "WEBP"
+    },
+    "Pict/it_leda_piano.webp": {
+      "sha256": "77f31810018907667ac2d22b23fbdd915d306b9b0357ebb84c38611aea1a5ec8",
+      "bytes": 97770,
+      "width": 1200,
+      "height": 1200,
+      "format": "WEBP"
+    },
+    "Pict/it_leda_boarding.webp": {
+      "sha256": "2a09111ddf76405eee35b961b1af46c21477ee905d0acb7bfc40ccaa21e529e6",
+      "bytes": 135956,
+      "width": 1200,
+      "height": 1200,
+      "format": "WEBP"
+    },
+    "Pict/turn.webp": {
+      "sha256": "3c3fd929c760aca8ce65141fb1772f4f349d264fbf83306924fadbf656faa639",
+      "bytes": 63082,
+      "width": 1024,
+      "height": 1024,
+      "format": "WEBP"
+    },
+    "Pict/it_leda_number_12.webp": {
+      "sha256": "e2c64e988170f59e004378e497271adc4ec9d851f5241b7065d58484bc726931",
+      "bytes": 11650,
+      "width": 900,
+      "height": 900,
+      "format": "WEBP"
+    },
+    "Pict/parents.jpg": {
+      "sha256": "583ea7d5e7551485efcf9889c242e1715b7ff6fa82cf40cb18726abe93974f0b",
+      "bytes": 101626,
+      "width": 901,
+      "height": 1351,
+      "format": "JPEG"
+    },
+    "Pict/it_leda_number_80.webp": {
+      "sha256": "85eddc8600c918ed8b8c9900a5c16476e6a01b84a8b0bd34e8b4179e9960a99e",
+      "bytes": 8408,
+      "width": 900,
+      "height": 900,
+      "format": "WEBP"
+    },
+    "Pict/it_leda_number_180.webp": {
+      "sha256": "22231d0413e1fa431765305bfcfd11017a55cb25878be3a65c78d52894a53efc",
+      "bytes": 9236,
+      "width": 900,
+      "height": 900,
+      "format": "WEBP"
+    },
+    "Pict/dark.webp": {
+      "sha256": "a375979596e594d1281e1773397e5450df594946cdbf38a4b092a40e4bc8743c",
+      "bytes": 15478,
+      "width": 1024,
+      "height": 1024,
+      "format": "WEBP"
+    },
+    "Pict/get.webp": {
+      "sha256": "81faaada735029401d6ad3ea1f1fa2879ea8604a80b73350ab8439786b25975d",
+      "bytes": 196594,
+      "width": 1254,
+      "height": 1254,
+      "format": "WEBP"
+    },
+    "Pict/valley.webp": {
+      "sha256": "62f25cdaaf1726d2629bfb3a853b781638e73719d296c2f23cfbda914b7f69ab",
+      "bytes": 298004,
+      "width": 1254,
+      "height": 1254,
+      "format": "WEBP"
+    },
+    "Pict/it_leda_number_14.webp": {
+      "sha256": "f6d2d751eafa928912218db63ae70e8a5b0ee72cf9fe6afc7b2361d077238853",
+      "bytes": 11432,
+      "width": 900,
+      "height": 900,
+      "format": "WEBP"
+    },
+    "Pict/it_leda_map_sardegna.webp": {
+      "sha256": "8476809e1d87e76e35cae4dfd5163686f91a2aac32a8b381b5786b663c7242bc",
+      "bytes": 18486,
+      "width": 900,
+      "height": 900,
+      "format": "WEBP"
+    },
+    "Pict/it_leda_graphic_half.webp": {
+      "sha256": "5ac2618623d80067727c9cf2dbcd7e15622de1e8d3bcdc194028ffe02839bf41",
+      "bytes": 15142,
+      "width": 900,
+      "height": 900,
+      "format": "WEBP"
+    },
+    "Pict/warning.webp": {
+      "sha256": "c71e238ad9cc697eece9a1dea24a39b3cfedc05abfa2f8728ef8f2ec9e3dfbe4",
+      "bytes": 194806,
+      "width": 1254,
+      "height": 1254,
+      "format": "WEBP"
+    },
+    "Pict/again.webp": {
+      "sha256": "f850bb80c3bf6fde4243bcbef550a7484ce9599a2b4d8842fe4d20065ea1a037",
+      "bytes": 38042,
+      "width": 1024,
+      "height": 1024,
+      "format": "WEBP"
+    },
+    "Pict/energy.webp": {
+      "sha256": "77979ac74096c746d52667860e862319a2b8fc61c4d882610cfb6d6f58561b34",
+      "bytes": 277830,
+      "width": 1254,
+      "height": 1254,
+      "format": "WEBP"
+    },
+    "Pict/it_leda_graphic_quarter.webp": {
+      "sha256": "6d3264e6f373cd9556d452b7527bc94a4e7b8195ae312f6f7a3117db7b93b217",
+      "bytes": 14738,
+      "width": 900,
+      "height": 900,
+      "format": "WEBP"
+    },
+    "Pict/forget.webp": {
+      "sha256": "5f85cc17756de7b921f1ef5af2c022b938d6d0e849f461b88f01555887bfa7c3",
+      "bytes": 234496,
+      "width": 1254,
+      "height": 1254,
+      "format": "WEBP"
+    },
+    "Pict/mouse.png": {
+      "sha256": "c68efffa308cf43da92e4fe648fd116f410465516947b768f5390f13b4b08ad2",
+      "bytes": 137641,
+      "width": 420,
+      "height": 420,
+      "format": "PNG"
+    },
+    "Pict/river.png": {
+      "sha256": "117cb47ac543ca59b9bc8dd49d3c850582fd5b96b254f6085d6ab2bd5dcca5c4",
+      "bytes": 180715,
+      "width": 704,
+      "height": 704,
+      "format": "PNG"
+    },
+    "Pict/musicnotebook.webp": {
+      "sha256": "0c44eaa3396a8e99ec0ba7804cf3bf4cbbcbd8b9b53f78830a6ddfa27d199917",
+      "bytes": 93898,
+      "width": 1024,
+      "height": 1024,
+      "format": "WEBP"
+    },
+    "Pict/crossing.PNG": {
+      "sha256": "438fb477e06726f04c4d257f8e51256591a9f21af0ccbbecc57fdaebbefb3e56",
+      "bytes": 149830,
+      "width": 704,
+      "height": 704,
+      "format": "PNG"
+    },
+    "Pict/it_leda_graphic_opposite.webp": {
+      "sha256": "c6daf011adf1401f8a79ef2aadb117874eb2fed83b5f1ba54a96c3f7c516d63b",
+      "bytes": 7608,
+      "width": 900,
+      "height": 900,
+      "format": "WEBP"
+    },
+    "Pict/it_leda_castle.webp": {
+      "sha256": "95b5a9af23b38fbb0eadd00f6b7c6fcddf615c3d283e1e09e92a5e889a2f28da",
+      "bytes": 194494,
+      "width": 1200,
+      "height": 1200,
+      "format": "WEBP"
+    },
+    "Pict/it_leda_graphic_green.webp": {
+      "sha256": "5afea9d33e708211b0b950982354aa5e43e2e30c0349b9cf22c2239669c60b68",
+      "bytes": 6004,
+      "width": 900,
+      "height": 900,
+      "format": "WEBP"
+    },
+    "Pict/delivery.webp": {
+      "sha256": "8335bf0fa0b7f8a626e578460e3eea2195c5abf5af5ba9f2b8e03828ee7eae84",
+      "bytes": 126710,
+      "width": 1024,
+      "height": 1024,
+      "format": "WEBP"
+    },
+    "Pict/student.webp": {
+      "sha256": "53f65c7dcfde125b547f1f6ad67872cf99042fd4390393ec37742b316b275dbd",
+      "bytes": 105540,
+      "width": 1024,
+      "height": 1024,
+      "format": "WEBP"
+    },
+    "Pict/today.PNG": {
+      "sha256": "37a92a7f6a98a2e0fffce212d5d86bce3a8754903e64262eb47b3de14ac00d18",
+      "bytes": 121948,
+      "width": 640,
+      "height": 512,
+      "format": "PNG"
+    },
+    "Pict/door.png": {
+      "sha256": "31b18ba699fce4ab8a4e9eb0a769f27d36a9349f7a4d5bde796aa457930746b6",
+      "bytes": 123165,
+      "width": 420,
+      "height": 420,
+      "format": "PNG"
+    },
+    "Pict/it_leda_palace.webp": {
+      "sha256": "ec7b93307762035d9291ef4329b28f480792e64feff46834d40143ce0caac28c",
+      "bytes": 255644,
+      "width": 1200,
+      "height": 1200,
+      "format": "WEBP"
+    },
+    "Pict/calm.webp": {
+      "sha256": "e2fdf9c3531142378a697bcb9de5a8c7bc7b60a0e24259ffa9706192cf638d43",
+      "bytes": 131316,
+      "width": 1024,
+      "height": 1024,
+      "format": "WEBP"
+    },
+    "Pict/it_leda_graphic_last.webp": {
+      "sha256": "6d04449d4112da2c49e5d1db7ef6e75d7a9a3d0d016e2d9045e493a729deb392",
+      "bytes": 14940,
+      "width": 900,
+      "height": 900,
+      "format": "WEBP"
+    },
+    "Pict/apartment.png": {
+      "sha256": "0249e38044aeb2631b308b6743aef0639bd0499c9f7383d4855a3cc0ee79f759",
+      "bytes": 280984,
+      "width": 720,
+      "height": 720,
+      "format": "PNG"
+    },
+    "Pict/it_leda_number_16.webp": {
+      "sha256": "4f34c61b3300fa5137f3692137a73fabdf32f2c3d3e1a939f3c9b63ac501450d",
+      "bytes": 13736,
+      "width": 900,
+      "height": 900,
+      "format": "WEBP"
+    },
+    "Pict/agreed.PNG": {
+      "sha256": "823f14556f75bbaa5731e5687e8eb44d372d43f916f8885a86eadd9d3ee61dfe",
+      "bytes": 177613,
+      "width": 704,
+      "height": 704,
+      "format": "PNG"
+    },
+    "Pict/it_leda_number_25.webp": {
+      "sha256": "358442fa627dcb8cfd2e90188641347929be04d5f13afb792147dc2e2d5188de",
+      "bytes": 18408,
+      "width": 900,
+      "height": 900,
+      "format": "WEBP"
+    },
+    "Pict/nolonger.webp": {
+      "sha256": "5987f9c268503f07a75530c01f496812e5ff06efa44443c9a6a18c29d6fced33",
+      "bytes": 125780,
+      "width": 1024,
+      "height": 1024,
+      "format": "WEBP"
+    },
+    "Pict/it_leda_graphic_towards.webp": {
+      "sha256": "8db87818ef398a84bb39d9d5579605b512b9a80b0e2e082d99fca4cf3bed0baa",
+      "bytes": 11160,
+      "width": 900,
+      "height": 900,
+      "format": "WEBP"
+    },
+    "Pict/it_leda_bookshelf.webp": {
+      "sha256": "b917dea4fe06a28eee8a0f6367f9c939168c55a061c4b8dc2684fdfd5d6fecf8",
+      "bytes": 145872,
+      "width": 1200,
+      "height": 1200,
+      "format": "WEBP"
+    },
+    "Pict/broken.png": {
+      "sha256": "499d044ef85f2ea7114b8498ed130077223d8b0cb347e89e8070089796b96f14",
+      "bytes": 277004,
+      "width": 740,
+      "height": 740,
+      "format": "PNG"
+    },
+    "Pict/it_leda_alarm_clock.webp": {
+      "sha256": "898bae49d632566806544d032361aa044ced0ae670b9e02b4dc07d238a347f35",
+      "bytes": 110084,
+      "width": 1200,
+      "height": 1200,
+      "format": "WEBP"
+    },
+    "Pict/wish.webp": {
+      "sha256": "0a6a7879feafedfdcb97c333be5dc651f9304f302d6876c959e79cca2056b452",
+      "bytes": 117348,
+      "width": 1254,
+      "height": 1254,
+      "format": "WEBP"
+    },
+    "Pict/help.webp": {
+      "sha256": "a6a947a02568f799f4b651d47b83c45ccddf7a2edce57f5ee14e290b3c1e681e",
+      "bytes": 38740,
+      "width": 1024,
+      "height": 1024,
+      "format": "WEBP"
+    },
+    "Pict/it_leda_disco.webp": {
+      "sha256": "a1040599b4cd009eaf32959868ea1f817dd65ea00954b7b147c26d16fb4d4e86",
+      "bytes": 179736,
+      "width": 1200,
+      "height": 1200,
+      "format": "WEBP"
+    },
+    "Pict/meet.webp": {
+      "sha256": "f9b242b9ac5d1c207544624864cf837a3636f57c5bc69abf7900ada7317ec78f",
+      "bytes": 146230,
+      "width": 1024,
+      "height": 1024,
+      "format": "WEBP"
+    },
+    "Pict/it_leda_number_5000.webp": {
+      "sha256": "bb3af28dc7552acd3c9aa36bca46372f1ac784c3ff7c1b6930f9eef67ca81444",
+      "bytes": 10544,
+      "width": 900,
+      "height": 900,
+      "format": "WEBP"
+    },
+    "Pict/it_leda_number_101.webp": {
+      "sha256": "695ed562c3aa57b47169f5dbcb9870d01c44ae341025aa884552b9b5620b459d",
+      "bytes": 6996,
+      "width": 900,
+      "height": 900,
+      "format": "WEBP"
+    },
+    "Pict/it_leda_number_70.webp": {
+      "sha256": "444fd15fec0c6d5d6bd77608573dc4ea1b082ea4aaea2c13e7930f9b28c49014",
+      "bytes": 6808,
+      "width": 900,
+      "height": 900,
+      "format": "WEBP"
+    },
+    "Pict/love.jpg": {
+      "sha256": "825a7a4e207b87c2eb42038bac914e9b6635ea82bead5984e58fe10894ab835f",
+      "bytes": 102097,
+      "width": 792,
+      "height": 1189,
+      "format": "JPEG"
+    },
+    "Pict/it_leda_orchestra.webp": {
+      "sha256": "68dbe6936c0e379376170224828369000d7283175ca01389a92836f475fca66d",
+      "bytes": 181876,
+      "width": 1200,
+      "height": 1200,
+      "format": "WEBP"
+    },
+    "Pict/smart.webp": {
+      "sha256": "b3e21154729b8483007f1f250e8068e265d4359cf98d72cf578a0e49323b9b73",
+      "bytes": 45732,
+      "width": 1024,
+      "height": 1024,
+      "format": "WEBP"
+    },
+    "Pict/university.webp": {
+      "sha256": "47be04ed5efbacf8250d224da2a3c4a12aaa1f1bab44c687d9def18e0494dca3",
+      "bytes": 204724,
+      "width": 1024,
+      "height": 1024,
+      "format": "WEBP"
+    },
+    "Pict/it_leda_number_17.webp": {
+      "sha256": "d987100f2628637d0c86dce24017d5132439ae1146cc16eb7211f3ee839a607b",
+      "bytes": 12494,
+      "width": 900,
+      "height": 900,
+      "format": "WEBP"
+    },
+    "Pict/it_leda_landline.webp": {
+      "sha256": "16f304eed8af76e23a837699df10c305f5cd40e7355967106e042499e50c5fad",
+      "bytes": 90338,
+      "width": 1200,
+      "height": 1200,
+      "format": "WEBP"
+    },
+    "Pict/it_leda_graphic_midnight.webp": {
+      "sha256": "fd4d15b1532e490ed4979b3eb13212f465069e01732084548d1a81cc92a6d04d",
+      "bytes": 18500,
+      "width": 900,
+      "height": 900,
+      "format": "WEBP"
+    },
+    "Pict/through.png": {
+      "sha256": "42129e4ef1b3cff2d860ab5084ddeecf6f7dccb7473d316b76caeb72a3701c1a",
+      "bytes": 282788,
+      "width": 740,
+      "height": 740,
+      "format": "PNG"
+    },
+    "Pict/it_leda_chess.webp": {
+      "sha256": "57f221a17f43df3535988cb42a850da8a2972eee9ac51ce03d76232802344fdf",
+      "bytes": 186768,
+      "width": 1200,
+      "height": 1200,
+      "format": "WEBP"
+    },
+    "Pict/big.webp": {
+      "sha256": "f7708bececdc04638d7eb1117df2d376fad351fb6ff479c37f8bcc46ebbf9264",
+      "bytes": 49240,
+      "width": 1024,
+      "height": 1024,
+      "format": "WEBP"
+    },
+    "Pict/it_leda_number_7.webp": {
+      "sha256": "bbe0ccc317a64ffdbbd9b42287d7c014fe4c1f106976f3269cbac460a8df6e7b",
+      "bytes": 7758,
+      "width": 900,
+      "height": 900,
+      "format": "WEBP"
+    },
+    "Pict/swimmingpool.webp": {
+      "sha256": "e51e64225a5771648cf7e545030fc38ce715195b9a5aaf5784a3118eb1176160",
+      "bytes": 214122,
+      "width": 1024,
+      "height": 1024,
+      "format": "WEBP"
+    },
+    "Pict/it_leda_beach.webp": {
+      "sha256": "1e5f2b22dd2dc6234e5a431e7aca0a00d80c9ab9d18f0ce1ebb531e46aa2c670",
+      "bytes": 234940,
+      "width": 1200,
+      "height": 1200,
+      "format": "WEBP"
+    },
+    "Pict/inside.webp": {
+      "sha256": "142f7272b746904376e4358f33b52cc9530136c173f04582d584c304e2b1e986",
+      "bytes": 151738,
+      "width": 1254,
+      "height": 1254,
+      "format": "WEBP"
+    },
+    "Pict/it_leda_graphic_current.webp": {
+      "sha256": "8c1e6f7b86cae42841953e763dfe12304bb7898b016574f42be637a83fd0315d",
+      "bytes": 11218,
+      "width": 900,
+      "height": 900,
+      "format": "WEBP"
+    },
+    "Pict/it_leda_graphic_footballgoal.webp": {
+      "sha256": "a83aa0637940d0831c50278fb948a708e44bb0d1746903484910ca754d64af6a",
+      "bytes": 12614,
+      "width": 900,
+      "height": 900,
+      "format": "WEBP"
+    },
+    "Pict/it_leda_candle.webp": {
+      "sha256": "fcfb271bb880180996cc65d50282203a26d7c50d760fa5025a5572fd44979a9f",
+      "bytes": 64550,
+      "width": 1200,
+      "height": 1200,
+      "format": "WEBP"
+    },
+    "Pict/it_leda_florence.webp": {
+      "sha256": "94527e683dd58635f5b11f5c2f4c5be145c696bfc0c9b961bf9305e72c568c04",
+      "bytes": 261236,
+      "width": 1200,
+      "height": 1200,
+      "format": "WEBP"
+    },
+    "Pict/it_leda_number_18.webp": {
+      "sha256": "bf9c8dd9941a7168c234a8c41d51598932d3909b8ff2b003deb9a6e1fca609a6",
+      "bytes": 14626,
+      "width": 900,
+      "height": 900,
+      "format": "WEBP"
+    },
+    "Pict/it_leda_number_100.webp": {
+      "sha256": "1aae6c65cb558340a0d9285e5a61a21a92f7205daa25459a2d1c65c414f656ac",
+      "bytes": 8608,
+      "width": 900,
+      "height": 900,
+      "format": "WEBP"
+    },
+    "Pict/lamp.png": {
+      "sha256": "8a99133b1040a739de78b43d21dfe279a4cb341c3aa92947bdfc11d563226c8e",
+      "bytes": 79975,
+      "width": 420,
+      "height": 420,
+      "format": "PNG"
+    },
+    "Pict/enjoy.webp": {
+      "sha256": "1fb543e6685105b1139d8978a7616f1e6dd0f61503e49a99f7b52e923644e1e2",
+      "bytes": 81604,
+      "width": 1024,
+      "height": 1024,
+      "format": "WEBP"
+    },
+    "Pict/it_leda_number_40.webp": {
+      "sha256": "f5bcc877ba3fd571869cd7081f1e5950a034be90eb80793fcaabf8594da6a4df",
+      "bytes": 6812,
+      "width": 900,
+      "height": 900,
+      "format": "WEBP"
+    },
+    "Pict/infront.webp": {
+      "sha256": "dfa9bb1f1bd4a3b27130c10f17c0b74f879e0e047d55e689f5aeb6a48ea715a0",
+      "bytes": 103600,
+      "width": 1024,
+      "height": 1024,
+      "format": "WEBP"
+    },
+    "Pict/cousin.png": {
+      "sha256": "7b47b925573b1dc759e0400a3a67c01f83c74e16a6e5e83f02fc04aab8f294ba",
+      "bytes": 111505,
+      "width": 704,
+      "height": 704,
+      "format": "PNG"
+    },
+    "Pict/jacket.webp": {
+      "sha256": "00299402469356061815384290746c59448f1ce13cf1e144d731beeaf79afdd2",
+      "bytes": 213542,
+      "width": 1254,
+      "height": 1254,
+      "format": "WEBP"
+    },
+    "Pict/it_leda_number_19.webp": {
+      "sha256": "88ebdef788759f37cdfa9f3ad56fe618cbc6f12966b012c933b52462e39d9908",
+      "bytes": 14798,
+      "width": 900,
+      "height": 900,
+      "format": "WEBP"
+    },
+    "Pict/dream.webp": {
+      "sha256": "e464694d179b2a177676ea1f0820c69dc1961e001c8460a4ee215ac1a2493aa7",
+      "bytes": 219246,
+      "width": 1254,
+      "height": 1254,
+      "format": "WEBP"
+    },
+    "Pict/lookinside.webp": {
+      "sha256": "be10e2a4214ab5c08847c4fbff8d802698de9a484ed45f0ffdafd482fe8290dc",
+      "bytes": 141394,
+      "width": 1254,
+      "height": 1254,
+      "format": "WEBP"
+    },
+    "Pict/scared.webp": {
+      "sha256": "536a400772ce02e7c5ddc76f7fa019f5bbd861e445bb4d8f035baa1670228bef",
+      "bytes": 249806,
+      "width": 1254,
+      "height": 1254,
+      "format": "WEBP"
+    },
+    "Pict/it_leda_number_2000.webp": {
+      "sha256": "81c741234f6ecb9c727a50343ad5759c02adcd11e3409b1b3021c243ffa43dd0",
+      "bytes": 10578,
+      "width": 900,
+      "height": 900,
+      "format": "WEBP"
+    },
+    "Pict/it_leda_graphic_crown.webp": {
+      "sha256": "3b949fcb3216b78e8525376875fa4fa9cd33c30e989c7940123c6779335df780",
+      "bytes": 16980,
+      "width": 900,
+      "height": 900,
+      "format": "WEBP"
+    },
+    "Pict/it_leda_map_africa.webp": {
+      "sha256": "139c32b31f6138ddbe19ceab0929276c5d292f5b01437c1f2ac608ea86d52266",
+      "bytes": 34338,
+      "width": 900,
+      "height": 900,
+      "format": "WEBP"
+    },
+    "Pict/it_leda_number_31.webp": {
+      "sha256": "f965d437db967ac6bab614d76ab35ceee5af5424a74301cef6353b954cf3c051",
+      "bytes": 6558,
+      "width": 900,
+      "height": 900,
+      "format": "WEBP"
+    },
+    "Pict/it_leda_painter.webp": {
+      "sha256": "2b49caa24823f6a377ef2a5c2cbf6159b2da1bcbb03d672ddabf4b0d4723aa68",
+      "bytes": 238692,
+      "width": 1200,
+      "height": 1200,
+      "format": "WEBP"
+    },
+    "Pict/it_leda_dead_tree.webp": {
+      "sha256": "3e5b4afd562d2f2f18fced3494253efe31f38aa2b759819aab386ef4a354cb3b",
+      "bytes": 230574,
+      "width": 1200,
+      "height": 1200,
+      "format": "WEBP"
+    },
+    "Pict/it_leda_tram.webp": {
+      "sha256": "c0943ed45913543b9ac1fbae6ec7b5719d7e711996193df077c78866074eb2aa",
+      "bytes": 189372,
+      "width": 1200,
+      "height": 1200,
+      "format": "WEBP"
+    },
+    "Pict/district.png": {
+      "sha256": "9921d7f91fd6fecde69e72a61e467fd897487aa69f4327bccf033defa037b899",
+      "bytes": 288693,
+      "width": 720,
+      "height": 720,
+      "format": "PNG"
+    },
+    "Pict/it_leda_heat.webp": {
+      "sha256": "89f5d3cc2f6442fd71b61c78deb34d0d080a7b05951eea466ea1d3d17dfe041f",
+      "bytes": 216490,
+      "width": 1200,
+      "height": 1200,
+      "format": "WEBP"
+    },
+    "Pict/excellent.webp": {
+      "sha256": "5127b6828fb0d042682b8759d73542b96c50c52bc5461f3ab6fbb457201596b2",
+      "bytes": 208618,
+      "width": 1254,
+      "height": 1254,
+      "format": "WEBP"
+    },
+    "Pict/it_leda_factory.webp": {
+      "sha256": "6d0eeac825592506b8f46b15c087ad7d2cca5b810c52163a3e0b19f2a34d2585",
+      "bytes": 257212,
+      "width": 1200,
+      "height": 1200,
+      "format": "WEBP"
+    },
+    "Pict/it_leda_beachchair.webp": {
+      "sha256": "159568cb93451f6bdc3edcb1e26de814d588baa0c177dfbdc0bf5b72c4accf1d",
+      "bytes": 208800,
+      "width": 1200,
+      "height": 1200,
+      "format": "WEBP"
+    },
+    "Pict/it_leda_number_108.webp": {
+      "sha256": "93f4be9ecc041f5452ee12af3511894542d3639a68a615971a2c73e424041aa3",
+      "bytes": 9244,
+      "width": 900,
+      "height": 900,
+      "format": "WEBP"
+    },
+    "Pict/bring.PNG": {
+      "sha256": "1069d50a852e2ced29d436dc16ab778980fb8c8d0fe69f304d1a1a682b0f9836",
+      "bytes": 143534,
+      "width": 896,
+      "height": 717,
+      "format": "PNG"
+    },
+    "Pict/it_leda_number_5.webp": {
+      "sha256": "5ef7cf44373a52622b2c335cdc27f5578b309dec43ab89588613e67ffdc1c5cb",
+      "bytes": 7938,
+      "width": 900,
+      "height": 900,
+      "format": "WEBP"
+    },
+    "Pict/many.webp": {
+      "sha256": "bf06a2d01208ab20c140446f51f500228c69d5013d8a4438db504416612ff112",
+      "bytes": 276342,
+      "width": 1254,
+      "height": 1254,
+      "format": "WEBP"
+    },
+    "Pict/plusieurs.webp": {
+      "sha256": "e25eae4f03bc4f351201faf95c6cfefa91ba549bab40eb0da58cb8121bb4bab3",
+      "bytes": 148656,
+      "width": 1024,
+      "height": 1024,
+      "format": "WEBP"
+    },
+    "Pict/it_leda_number_15.webp": {
+      "sha256": "58e7b555460d81de07589ff261310c7308cecc8a418f7bc28c5b27461369cc95",
+      "bytes": 12930,
+      "width": 900,
+      "height": 900,
+      "format": "WEBP"
+    },
+    "Pict/can.webp": {
+      "sha256": "a4cd6398f131937da6a20988fda82b8ae550d607d65470016bf392c753fd7c33",
+      "bytes": 43024,
+      "width": 1024,
+      "height": 1024,
+      "format": "WEBP"
+    },
+    "Pict/it_leda_number_38.webp": {
+      "sha256": "aa6b4cc2f5a1a431da388860f421333e94388e1d600987df703d5cd3f4ba5fdf",
+      "bytes": 8750,
+      "width": 900,
+      "height": 900,
+      "format": "WEBP"
+    },
+    "Pict/it_leda_number_28.webp": {
+      "sha256": "12845132a1abdd9600fa76496df8b2753f0d63e34d332c5eac026468047852c9",
+      "bytes": 20316,
+      "width": 900,
+      "height": 900,
+      "format": "WEBP"
+    },
+    "Pict/boy.png": {
+      "sha256": "16ab5290bd74c392eb165b17bf8f1f7277bc1d4ad958e7c554a6f648b28e5029",
+      "bytes": 236350,
+      "width": 768,
+      "height": 768,
+      "format": "PNG"
+    },
+    "Pict/it_leda_bench.webp": {
+      "sha256": "0d5936b85fdd32609584a704587778ec008946228874367de975b73a2dd7b224",
+      "bytes": 204766,
+      "width": 1200,
+      "height": 1200,
+      "format": "WEBP"
+    },
+    "Pict/it_leda_stampcollection.webp": {
+      "sha256": "0eba66d742e941d9f949125524235e6a98633058f23a6cea9d3ce5062576f93b",
+      "bytes": 204332,
+      "width": 1200,
+      "height": 1200,
+      "format": "WEBP"
+    },
+    "Pict/table.jpg": {
+      "sha256": "f8890079b9b2173f1d4522cc147aea8ecd9346ff9f6f83abc4a9c2204a3531d5",
+      "bytes": 102231,
+      "width": 1046,
+      "height": 697,
+      "format": "JPEG"
+    },
+    "Pict/flower.png": {
+      "sha256": "00fb210b68a82ea01ff841825f3c1531393096c1380cfc38788f3b86e8e91446",
+      "bytes": 111422,
+      "width": 420,
+      "height": 420,
+      "format": "PNG"
+    },
+    "Pict/busstation.webp": {
+      "sha256": "6d2225da68a1dcc39dbb7121720e25eb5af93c38f46e020380fbb6dd47a3398d",
+      "bytes": 38672,
+      "width": 1024,
+      "height": 1024,
+      "format": "WEBP"
+    },
+    "Pict/bed.webp": {
+      "sha256": "78a55d55704eab6d9dbdd61999b2949df115eb910e7d9f0f3f3f6aa347bf241c",
+      "bytes": 82592,
+      "width": 1024,
+      "height": 1024,
+      "format": "WEBP"
+    },
+    "Pict/it_leda_graphic_first.webp": {
+      "sha256": "88d2e3e8a85f08708b214ff0b7839f130f72623b3965923def3e303cc8d764f7",
+      "bytes": 14922,
+      "width": 900,
+      "height": 900,
+      "format": "WEBP"
+    },
+    "Pict/it_leda_forehead.webp": {
+      "sha256": "d4cf20f41b05af7d7e056904c168f40f8c4fb57b1dc88f9253e220ed2e2f0719",
+      "bytes": 197080,
+      "width": 1200,
+      "height": 1200,
+      "format": "WEBP"
+    },
+    "Pict/it_leda_angry.webp": {
+      "sha256": "c2221fd9579fdd8bc2ff2405c2675880f7e2fd9c41012c3a6a69b154c3a81698",
+      "bytes": 106620,
+      "width": 1200,
+      "height": 1200,
+      "format": "WEBP"
+    },
+    "Pict/it_leda_number_13.webp": {
+      "sha256": "7e477dd28c3676968a695d545a1dab4cb07451fb3d1cfd3e673f6e600d1f43de",
+      "bytes": 12462,
+      "width": 900,
+      "height": 900,
+      "format": "WEBP"
+    },
+    "Pict/no.webp": {
+      "sha256": "074f27aa7b3a6945e586e314f5e8e48f19cfbb8ba89b3921e294a5a876172644",
+      "bytes": 192214,
+      "width": 1254,
+      "height": 1254,
+      "format": "WEBP"
+    },
+    "Pict/it_leda_museum.webp": {
+      "sha256": "7029faa21076b7071898416402c28f25f915adac1bcb951641266d16e1750821",
+      "bytes": 178174,
+      "width": 1200,
+      "height": 900,
+      "format": "WEBP"
+    },
+    "Pict/nexttime.webp": {
+      "sha256": "2c1b41d9a2e7a6081749b085192d1fdabc1f0348abd519724c692bc171e27a05",
+      "bytes": 84294,
+      "width": 1024,
+      "height": 1024,
+      "format": "WEBP"
     }
   }
 }

@@ -43,6 +43,15 @@ class VocabularyItalianAudioTests(unittest.TestCase):
         for value in ['',None,'x'*1501]:
             with self.assertRaises(ValueError):a.text(value,'words')
 
+    def test_explicit_provider_changes_metadata_without_replacing_any_existing_asset(self):
+        edge=a.plan(ITEMS)
+        mixed=a.plan(ITEMS,provider='registered-edge-tts+azure-neural')
+        self.assertEqual(edge['jobs'],mixed['jobs'])
+        self.assertEqual(edge['stats'],mixed['stats'])
+        self.assertNotEqual(edge['digest'],mixed['digest'])
+        self.assertEqual(mixed['manifests']['words']['provider'],'registered-edge-tts+azure-neural')
+        with self.assertRaises(ValueError):a.plan(ITEMS,provider='unknown-service')
+
     def test_requested_receipt_precedes_transport_and_completed_jobs_resume_without_calls(self):
         with tempfile.TemporaryDirectory() as name:
             root=Path(name);receipt=root/'private/receipt.json';p=a.plan(ITEMS);calls=[]
@@ -111,26 +120,26 @@ class VocabularyItalianAudioTests(unittest.TestCase):
         self.assertEqual(communicate.WSS_URL,previous)
 
     def test_sources_validate_against_current_catalog_before_planning(self):
-        items=a.load_items(ROOT,ROOT/'docs');self.assertEqual(len(items),497)
+        items=a.load_items(ROOT,ROOT/'docs');self.assertEqual(len(items),1096)
         with tempfile.TemporaryDirectory() as name:
             out=Path(name);(out/'data').mkdir();data=json.loads((ROOT/'docs/data/vocabulary-it-v2.json').read_text());data['items'][0]['sentenceIt']='Different sentence';(out/'data/vocabulary-it-v2.json').write_text(json.dumps(data))
             with self.assertRaisesRegex(ValueError,'význam nebo věty'):a.load_items(ROOT,out)
 
     def test_complete_production_library_matches_all_current_texts_voices_and_hashes(self):
-        items=a.load_items(ROOT,ROOT/'docs');expected=a.plan(items);all_paths=set()
-        self.assertEqual(expected['stats']['references'],1988)
-        self.assertEqual(expected['stats']['uniqueAssets'],1907)
+        items=a.load_items(ROOT,ROOT/'docs');expected=a.plan(items,provider='registered-edge-tts+azure-neural');all_paths=set()
+        self.assertEqual(expected['stats']['references'],4384)
+        self.assertEqual(expected['stats']['uniqueAssets'],4222)
         for kind,name in [('words','vocabulary-it-audio.json'),('sentences','vocabulary-it-sentence-audio.json')]:
             manifest=json.loads((ROOT/'docs/data'/name).read_text())
             self.assertEqual(manifest['status'],'complete')
-            for field in ('schemaVersion','language','kind','rate','voices','items','sourceDigest'):
+            for field in ('schemaVersion','language','kind','provider','rate','voices','items','sourceDigest'):
                 self.assertEqual(manifest[field],expected['manifests'][kind][field])
             for path,sha in manifest['assetSha256'].items():
                 full=ROOT/'docs'/path
                 self.assertTrue(full.is_file());self.assertGreater(full.stat().st_size,1000)
                 self.assertEqual(a.digest(full),sha);all_paths.add(path)
         self.assertEqual(all_paths,set(expected['jobs']))
-        self.assertEqual(len(all_paths),1907)
+        self.assertEqual(len(all_paths),4222)
         for kind in ('words','sentences'):
             for lang in ('it','cz'):
                 path=next(iter(expected['manifests'][kind]['items'].values()))[lang]
