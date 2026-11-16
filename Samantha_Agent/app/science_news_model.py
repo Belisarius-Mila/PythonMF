@@ -147,10 +147,12 @@ def monthly_charged(state, month, *, exclude=None):
     return total
 
 
-def model_fingerprint(payload, instructions, schema, approved, budget_group=None):
+def model_fingerprint(payload, instructions, schema, approved, budget_group=None, output_limit=16000):
     fields = {'payload': payload, 'instructions': instructions, 'schema': schema, 'policy': approved}
     if budget_group is not None:
         fields['budget_group'] = budget_group
+    if output_limit != 16000:
+        fields['output_limit'] = output_limit
     return digest(fields)
 
 
@@ -195,19 +197,22 @@ def group_allowance(state, key, group, payload, approved):
     return min(approved['max_job_credits'], round(parent['reserved_credits'] - spent, 8))
 
 
-def call_model(store, key, payload, instructions, schema, *, client_factory=new_science_client, budget_group=None):
+def call_model(store, key, payload, instructions, schema, *, client_factory=new_science_client, budget_group=None, output_limit=16000):
     from app.file_persistence import exclusive_file_lock, FileLockTimeoutError
     policy(store)  # Inactive never creates locks or private state.
+    if type(output_limit) is not int or not 1 <= output_limit <= 16000:
+        raise ValueError('Neplatný přejímací limit výstupu.')
     store._safe()
     store.root.mkdir(parents=True, exist_ok=True, mode=0o700)
     try:
         with exclusive_file_lock(store.root / ('model_worker_' + digest(key)), timeout=0):
-            return _call_model_locked(store,key,payload,instructions,schema,client_factory=client_factory, budget_group=budget_group)
+            return _call_model_locked(store,key,payload,instructions,schema,client_factory=client_factory,
+                                      budget_group=budget_group, output_limit=output_limit)
     except FileLockTimeoutError as error:
         raise ValueError('Původní požadavek ještě běží; nic neopakuji.') from error
 
 
-def _call_model_locked(store, key, payload, instructions, schema, *, client_factory, budget_group=None):
+def _call_model_locked(store, key, payload, instructions, schema, *, client_factory, budget_group=None, output_limit=16000):
     approved = policy(store)
     text = json.dumps(payload, ensure_ascii=False, sort_keys=True)
     if len(text.encode()) > 180_000:
@@ -216,7 +221,7 @@ def _call_model_locked(store, key, payload, instructions, schema, *, client_fact
     from app.science_news_recovery import recover_model_result, record_event, accept_result
     snapshot = store._read()
     old = snapshot['jobs'].get(key)
-    if old and old.get('budget_group') != budget_group:
+    if old and (old.get('budget_group') != budget_group or old.get('output_limit',16000) != output_limit):
         raise ValueError('Původní požadavek patří jinému rozpočtu.')
     if old and old.get('phase') != 'preflight':
         return recover_model_result(store, key, payload, instructions, schema, client_factory=client_factory)
@@ -225,12 +230,12 @@ def _call_model_locked(store, key, payload, instructions, schema, *, client_fact
         # A conservative preflight estimate, still NOT a hard output/billing cap.
         estimate = estimate_standard_credits(candidate["model"], {
             "input_tokens": len(text.encode()) + len(instructions.encode()) + len(json.dumps(schema).encode()),
-            "cached_input_tokens": 0, "output_tokens": 16_000, "reasoning_output_tokens": 0,
-            "total_tokens": len(text.encode()) + len(instructions.encode()) + len(json.dumps(schema).encode()) + 16_000})
+            "cached_input_tokens": 0, "output_tokens": output_limit, "reasoning_output_tokens": 0,
+            "total_tokens": len(text.encode()) + len(instructions.encode()) + len(json.dumps(schema).encode()) + output_limit})
         if estimate is None or estimate > allowance:
             raise ScienceBudgetError("Předběžná rezervace nepokryje odhad požadavku.")
     month = datetime.now(timezone.utc).astimezone(ZoneInfo("Europe/Prague")).strftime("%Y-%m")
-    fingerprint = model_fingerprint(payload, instructions, schema, approved, budget_group)
+    fingerprint = model_fingerprint(payload, instructions, schema, approved, budget_group, output_limit)
     with store.transaction() as state:
         old = state["jobs"].get(key)
         if old and (old.get('phase') != 'preflight' or old.get('thread_id')
@@ -250,6 +255,8 @@ def _call_model_locked(store, key, payload, instructions, schema, *, client_fact
             "phase": "preflight", "role_policy_digest": binding["policy_digest"]}
         if budget_group:
             state['jobs'][key].update(budget_group=budget_group, credit_limit=allowance)
+        if output_limit != 16000:
+            state['jobs'][key]['output_limit'] = output_limit
     def accepted(turn_id):
         if not isinstance(turn_id, str) or not turn_id:
             raise ValueError('Původní tah nemá ID.')

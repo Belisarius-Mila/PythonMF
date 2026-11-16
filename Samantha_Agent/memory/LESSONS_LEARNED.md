@@ -2851,3 +2851,11 @@ lze doplnit jen přes identitu, dokončení a finální token_count původního
 tahu; neplatné čítače ani druhý tah nepovolují fallback. Cena prvního úseku
 může ukázat, že limit celé studie nestačí: připravit přesný scoped návrh,
 bez výslovného souhlasu nenavyšovat ani nerozdělit budget na více jobů.
+
+
+Doplnění16112026 k LL-121: při posledním krátkém úseku bylo přijatých7/8 částí
+za16,4619 kreditu, ale preflight pro2131 znaků požadoval rezervu16000 output
+tokenů. Pro nový krátký požadavek zmenšit jeho přejímací strop a připnout jej
+k otisku/účtence; nikdy nezměnit již požadovaný tah ani rozpočet. Regrese
+prokazuje dokončení celé studie pod limitem20 i odmítnutí výstupu nad menší
+strop. Skutečný DALTAC dokončen17,0578/20, sedm původních částí beze změny.

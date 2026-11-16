@@ -415,3 +415,13 @@ k této zmrazené studii. Výchozí max_job_credits zůstává15, měsíční100
 podřízený tah dostane nejvýše15 a současně zbytek odsouhlasené studie.
 Autorizační operace nevolá model, nepokračuje ani nepublikuje. Stejný souhlas
 je idempotentní, jiná studie/částky/vstup se stejným ID jsou odmítnuté.
+
+
+Krátký poslední úsek děleného překladu má vlastní menší přejímací strop
+output_limit=min(16000,max(4096,2*počet_znaků)). Platí pouze pro dosud
+nepožadovaný úsek; původní účtenka vždy zachovává svůj limit (legacy16000).
+Limit je závazně v otisku, preflight odhadu i přejímce skutečné usage.
+Nemění celkový ani měsíční rozpočet a nezkracuje dodaný text či požadavek
+complete. Původní paid pokus nelze změnou output_limit přeposlat nebo přijmout
+s širším limitem. Jako ostatní stropy jde o následnou přejímku, nikoli provider
+hard cap. Ověřený případ: závěr2131 znaků, strop4262, celá studie17,0578/20.

@@ -90,8 +90,12 @@ def _translate_locked(store, item, *, model):
             current = store._read()['jobs'][key]
             if str(index) in current['translations']:
                 continue
+            original = store._read()['jobs'].get(part_keys[index])
+            # Preserve every original request's ceiling. Only unrequested short
+            # parts use a tighter acceptance bound; they still must be complete.
+            output_limit = original.get('output_limit',16000) if original else min(16000,max(4096,2*len(payload['source_text'])))
             answer = model(store, part_keys[index], payload, TRANSLATION_INSTRUCTIONS,
-                           TRANSLATION_SCHEMA, budget_group=key)
+                           TRANSLATION_SCHEMA, budget_group=key, output_limit=output_limit)
             text = answer.get('translation', '')
             if (set(answer) != {'translation', 'complete'} or answer['complete'] is not True
                     or not isinstance(text, str) or not .3 * len(payload['source_text']) <= len(text) <= 4 * len(payload['source_text'])):

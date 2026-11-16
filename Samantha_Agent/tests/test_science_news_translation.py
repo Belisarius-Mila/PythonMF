@@ -260,5 +260,29 @@ class FullStudyTests(unittest.TestCase):
         self.assertEqual(monthly_charged(state,parent['month']),18)
         self.assertEqual(json.loads((self.store.root/'activation.json').read_text())['max_job_credits'],15)
 
+    def test_short_tail_uses_a_tighter_pinned_ceiling_and_finishes_within_approved_total(self):
+        source=self.source[:41000]
+        with self.store.transaction() as state:state['items'][self.item['id']]['source_text']=source
+        self.item=self.store.item(self.item['id']);original=self.factory.side_effect
+        def factory():
+            client=original();send=client.send_text
+            def measured(**kw):
+                result=send(**kw);part=json.loads(kw['text'])['part_index']
+                tokens=(80000,16000) if part<3 else (10000,2000)
+                result.thread_token_usage={'input_tokens':tokens[0],'cached_input_tokens':0,'output_tokens':tokens[1],
+                    'reasoning_output_tokens':0,'total_tokens':sum(tokens)}
+                return result
+            client.send_text=measured;return client
+        self.factory.side_effect=factory;self.interrupted_after_verified_part()
+        proposal=budget_preview(self.store,item_id=self.item['id'],limit=20)
+        authorize_budget(self.store,item_id=self.item['id'],limit=20,expected_digest=proposal['proposal_digest'],
+                         request_id='study-budget-short-tail-fixture',confirmed=True)
+        self.run_study()
+        state=self.store._read();parent=state['jobs'][self.key]
+        self.assertEqual(parent['state'],'completed');self.assertEqual(parent['estimated_credits'],17)
+        self.assertEqual(parent['reserved_credits'],20);self.assertEqual(self.calls(),3)
+        tail=state['jobs'][parent['part_keys'][-1]]
+        self.assertEqual(tail['output_limit'],4096);self.assertEqual(tail['credit_limit'],4)
+
 
 if __name__ == '__main__': unittest.main()

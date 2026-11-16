@@ -48,6 +48,15 @@ class Client:
 
 
 class ModelTests(unittest.TestCase):
+    def test_narrow_output_ceiling_is_pinned_and_overrun_cannot_be_accepted(self):
+        factory=Mock(return_value=Client())
+        with self.assertRaises(ValueError):
+            call_model(self.store,'narrow_fixture',{},'instructions',{},client_factory=factory,output_limit=10)
+        job=self.store._read()['jobs']['narrow_fixture']
+        self.assertEqual(job['output_limit'],10);self.assertEqual(job['state'],'delivery_unknown')
+        with self.assertRaises(ValueError):
+            call_model(self.store,'narrow_fixture',{},'instructions',{},client_factory=factory,output_limit=20)
+        self.assertEqual(factory.call_count,1)
     def test_science_client_has_its_own_long_wait_without_changing_release_client(self):
         from app.science_news_model import new_science_client
         from app.communication.luna_release import new_luna_client

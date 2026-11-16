@@ -132,9 +132,12 @@ def accept_result(store, key, approved):
             raise ValueError('Měření původního požadavku není úplné.')
     cost = estimate_standard_credits(selected['model'], usage)
     limit = job.get('credit_limit', approved['max_job_credits'])
+    output_limit = job.get('output_limit',16000)
+    if type(output_limit) is not int or not 1 <= output_limit <= 16000:
+        raise ValueError('Původní přejímací limit výstupu není ověřený.')
     if type(limit) not in (int,float) or not 0 < limit <= approved['max_job_credits']:
         raise ValueError('Původní rozpočet není ověřený.')
-    if usage is None or cost is None or cost > limit or usage['output_tokens'] > 16_000 or usage['total_tokens'] > 100_000:
+    if usage is None or cost is None or cost > limit or usage['output_tokens'] > output_limit or usage['total_tokens'] > 100_000:
         raise ValueError('Původní výsledek nemá přijatelný doklad spotřeby.')
     agent_roles.assert_current(selected, role=ROLE)
     answer = json.loads(proof['answer'])
@@ -164,9 +167,9 @@ def recover_model_result(store, key, payload, instructions, schema, *, client_fa
     if job.get('phase') == 'preflight' and not job.get('thread_id'):
         from app.science_news_model import call_model
         return call_model(store,key,payload,instructions,schema,client_factory=client_factory or new_science_client,
-                          budget_group=job.get('budget_group'))
+                          budget_group=job.get('budget_group'),output_limit=job.get('output_limit',16000))
     from app.science_news_model import model_fingerprint
-    expected = model_fingerprint(payload, instructions, schema, approved, job.get('budget_group'))
+    expected = model_fingerprint(payload, instructions, schema, approved, job.get('budget_group'),job.get('output_limit',16000))
     if job.get('fingerprint') != expected:
         raise ValueError('Otisk původního požadavku se změnil.')
     if job['state'] == 'completed':

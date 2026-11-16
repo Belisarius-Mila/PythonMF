@@ -1942,3 +1942,27 @@ Konečný stav, brána, původní obnova a cenový návrh jsou v private/
 science_translation_timeout_20261116/. Žádné navýšení ani další placená část
 nebyly při opravě provedené. Dokumentační vydání382677f1 už je dokončené;
 nesouvisí s 90s limitem a původní model doběhl i po odpojení klienta.
+
+
+### 2026-11-16 18:15 CET — DALTAC celý přeložený a krátký závěr
+
+Hotovo: celá studie DALTAC má139057 českých znaků,8/8 částí a původní odkaz.
+Živý endpoint vrací přesně uložený celý text. Sedm dříve přijatých částí
+zůstalo beze změny; krátký závěr byl požadovaný poprvé. Spotřeba17,0578 kreditu
+je pod Mílou výslovně schváleným společným limitem20. Neproběhl duplicitní tah.
+Rozhodnutí: Míla schválil20 pouze pro tuto studii a následné c+n. Výchozí15
+pro další studie, měsíční100 i standardní role/model zůstávají zachované.
+Další krok: Míla si celý překlad přečte a podle svého rozhodnutí uloží zprávu.
+Navrhované další kroky: přejmout příští přirozený páteční výběr; ostatní
+fyzické přejímky Knihovny zůstávají otevřené.
+Technický důkaz: posledních2131 znaků blokoval předběžný odhad plných16000
+výstupních tokenů. Nový dosud nepožadovaný krátký úsek má menší přejímací strop
+podle délky; tento strop je v otisku a uložené účtence a skutečná usage se
+kontroluje vůči němu. Původní požadavky si zachovávají původní stropy. Překlad
+se nekrátí a complete/rozsah se stále ověřují. Skutečný závěr měl strop4262;
+celková rezervace20 se nezměnila. Jde o přejímací limity, ne upstream billing cap.
+Podklady: private/science_translation_timeout_20261116/translation_result.json
+(včetně původní obnovy a souhlasu). Konečné ověření/publikace této navazující
+opravy jsou v private/science_translation_tail_20261116/completion.json.
+Celý text už je čitelný; významová a fyzická přejímka náleží Mílovi. Archivace
+ani rozhodnutí save/follow/dismiss se automaticky neprováděly.

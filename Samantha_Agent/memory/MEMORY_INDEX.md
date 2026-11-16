@@ -760,3 +760,5 @@ Tento soubor je rozcestnik dlouhodobe pameti pro Samantha Agent.
 - `reports/systemovy_audit_projekty_tooly_vrstvy_2026_11_16.txt` — historický full audit16.11.17:17 před dorovnáním agregátu. Následné obsahové srovnání Knihovny, rodinného kalendáře a HA-09 je v kanonickém handoffu/TVBCP Samantha Agent/RAG; dokončená vydání se neopakují. Konečný doklad údržby: private project_registry_alignment_20261116/completion.json.
 
 -16.11.17:47: původní DALTAC část byla dokončená po90s klientském timeoutu; převzetí18730 znaků/2,2477 kreditu bez nového tahu. Místně science klient600s + přesný native final usage fallback. Návrh limitu20/studii je pouze připravený, vyžaduje konkrétní souhlas. Kanonický handoff/TVBCP Knihovny; výsledek private science_translation_timeout_20261116/completion.json.
+
+-16.11.18:15: DALTAC celý přeložený8/8,139057 českých znaků,17,0578 kreditu pod schválenými20; živý readback shodný, žádný duplicitní modelový tah. Přijímací strop krátkého dosud nepožadovaného závěru je zmenšený a zmrazený v jeho účtence. Handoff/TVBCP Knihovny a projects/vedecke_clanky.md; konečný checkpoint/p+n private science_translation_tail_20261116/completion.json.
