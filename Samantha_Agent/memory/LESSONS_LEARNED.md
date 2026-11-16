@@ -2764,3 +2764,10 @@ Příští CLI běh opravu načte, nová ostrá záloha v tomto vývojovém krok
 - Typ: opakující se
 - Řešení nalezeno: 15112026
 - Řešení: Nejprve vybrat nejnovější doklad každé současné fáze/cíle, teprve pak jeho aktivní/attention stav. Starší doklady zachovat jen v historii. Parent odvozovat ze serverově potvrzené identity a source projektu/vlákna, nikdy z globálního current pointeru. Pozdější přesný deployment důkaz obohatí projekci, nemění původní účtenku a nepovoluje opakování akce.
+
+
+### 2026-11-16 11:09 CET — Animované procvičování musí po návratu znovu otevřít svůj stav
+
+- Kontext: pagehide ruší zvuk/časovače a uzavírá komponentu; bfcache pak vrátí DOM se stejným viditelným panelem. Pouhé ponechání DOM nechá uzavřenou komponentu, která ignoruje nové callbacky.
+- Řešení: při persisted pageshow podle skutečného view znovu otevřít přípravu kola. Každé nové zadání/odchod má generační token a zruší všechny časovače i audio. Nejisté nebo nepřesné slovníkové dělení se zobrazuje celé; pieces.join musí přesně zachovat původní zápis.
+- Ověření:29 JS scénářů včetně zavření během animace/zvuku, pozdních load/error/ended událostí, history/bfcache, přímého replay po odmítnutém autoplay a nulových změn A–D. Fyzický browser není tímto automatickým důkazem nahrazený.

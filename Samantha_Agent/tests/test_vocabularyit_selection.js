@@ -8,7 +8,8 @@ const html=fs.readFileSync(path.join(root,'vocabulary-it/index.html'),'utf8');
 const source=fs.readFileSync(path.join(root,'vocabulary-it/gallery.js'),'utf8');
 const audio={language:'it',kind:'words',items:Object.fromEntries(vocabulary.items.map(i=>[i.uid,{uid:i.uid,sourceIt:i.it,sourceCz:i.cz,it:`assets/vocabulary-it-audio/fixture/${i.uid}-it.mp3`,cz:`assets/vocabulary-it-audio/fixture/${i.uid}-cz.mp3`}]))};
 const sentenceAudio={language:'it',kind:'sentences',items:Object.fromEntries(vocabulary.items.map(i=>[i.uid,{uid:i.uid,sourceIt:i.it,sourceCz:i.cz,sourceSentenceIt:i.sentenceIt,sourceSentenceCz:i.sentenceCz,it:`assets/vocabulary-it-sentences/fixture/${i.uid}-it.mp3`,cz:`assets/vocabulary-it-sentences/fixture/${i.uid}-cz.mp3`}]))};
-const quizCatalog={};
+const quizCatalog=JSON.parse(fs.readFileSync(path.join(root,"data/vocabulary-it-quiz.json"),"utf8"));
+const practice=require(path.join(root,"vocabulary-it/practice.js"));
 class Element {
   constructor(tag="div",doc){this.tagName=tag;this.doc=doc;this.children=[];this.dataset={};this.listeners={};this.attributes={};this.className="";this.hidden=false;this.value="";this._text="";
     this.classList={toggle:(name,on)=>{const parts=new Set(this.className.split(/\s+/).filter(Boolean));const add=on===undefined ? !parts.has(name) : on;add ? parts.add(name) : parts.delete(name);this.className=[...parts].join(" ");},add:name=>this.classList.toggle(name,true),remove:name=>this.classList.toggle(name,false),contains:name=>this.className.split(/\s+/).includes(name)};}
@@ -25,7 +26,7 @@ class Element {
   getBoundingClientRect(){return {top:160,width:140,height:180};} focus(){this.doc.activeElement=this;}scrollIntoView(){this.doc.scrolled=this.id;}
 }
 function storage(map=new Map()){return {map,getItem:key=>map.get(key)||null,setItem:(key,value)=>map.set(key,String(value))};}
-async function app({items=vocabulary.items,url="https://example.test/PythonMF/vocabulary-it/",session=storage(),local=storage(),blocked=false,manifest=audio,sentenceManifest=sentenceAudio,failData=false,slowAudio=false,failQuiz=false,dataOverride={}}={}){
+async function app({items=vocabulary.items,url="https://example.test/PythonMF/vocabulary-it/",session=storage(),local=storage(),blocked=false,manifest=audio,sentenceManifest=sentenceAudio,failData=false,slowAudio=false,audioReject=false,reducedMotion=false,failQuiz=false,dataOverride={}}={}){
   const doc=new Element("document");doc.doc=doc;doc.title="Vocabulary";
   doc.getElementById=id=>doc.descendants().find(node=>node.id===id)||null;
   doc.createElement=tag=>new Element(tag,doc);doc.createDocumentFragment=()=>new Element("fragment",doc);
@@ -37,17 +38,18 @@ async function app({items=vocabulary.items,url="https://example.test/PythonMF/vo
   let now=0,nextTimer=0;const timers=new Map();
   win.setTimeout=(callback,delay)=>{const id=++nextTimer;timers.set(id,{callback,at:now+delay});return id;};
   win.clearTimeout=id=>timers.delete(id);
+  win.matchMedia=()=>({matches:reducedMotion});
   win.crypto=require('node:crypto').webcrypto;win.Blob=Blob;win.URL=URL;win.confirm=()=>true;
   const advance=ms=>{now+=ms;for(const [id,timer] of [...timers])if(timer.at<=now){timers.delete(id);timer.callback();}};
   const emit=(name,extra={})=>{for(const fn of listeners[name]||[])fn(extra);};
   const travel=delta=>{if(!historyEntries[historyIndex+delta])return;historyIndex+=delta;location.href=historyEntries[historyIndex].url;emit("popstate");emit("hashchange");};
   win.history={get state(){return historyEntries[historyIndex].state;},replaceState:(state,unused,url)=>{location.href=new URL(url,location.href).href;historyEntries[historyIndex]={url:location.href,state};},pushState:(state,unused,url)=>{location.href=new URL(url,location.href).href;historyEntries.splice(historyIndex+1);historyEntries.push({url:location.href,state});historyIndex++;},back:()=>travel(-1),forward:()=>travel(1)};
   if(blocked){Object.defineProperty(win,"sessionStorage",{get(){throw Error("blocked")}});Object.defineProperty(win,"localStorage",{get(){throw Error("blocked")}});}else{win.sessionStorage=session;win.localStorage=local;}
-  const players=[];class AudioFixture {constructor(url){this.url=url;this.handlers={};this.currentTime=0;this.playCount=0;players.push(this);}addEventListener(name,fn){this.handlers[name]=fn;}removeEventListener(name,fn){if(this.handlers[name]===fn)delete this.handlers[name];}pause(){this.paused=true;}play(){this.played=true;this.playCount++;return Promise.resolve();}}
+  const players=[];class AudioFixture {constructor(url){this.url=url;this.handlers={};this.currentTime=0;this.playCount=0;players.push(this);}addEventListener(name,fn){this.handlers[name]=fn;}removeEventListener(name,fn){if(this.handlers[name]===fn)delete this.handlers[name];}pause(){this.paused=true;}play(){this.played=true;this.playCount++;return audioReject?Promise.reject(Error("blocked")):Promise.resolve();}}
   const data={...vocabulary,items,...dataOverride};
   const ctx=vm.createContext({document:doc,window:win,URL,URLSearchParams,TextEncoder,Audio:AudioFixture,console,fetch:async url=>{if(url.includes("-quiz.json")){if(failQuiz)throw Error("quiz unavailable");return {ok:true,json:async()=>quizCatalog};}if(slowAudio && url.includes("audio"))return new Promise(()=>{});if(failData && !url.includes("audio"))throw Error("offline");const selected=url.includes("sentence-audio")?sentenceManifest:manifest;if(selected===null && url.includes("audio"))throw Error("audio unavailable");return {ok:true,json:async()=>url.includes("audio")?selected:data};}});
   vm.runInContext(fs.readFileSync(path.join(root,"vocabulary-it/model.js"),"utf8"),ctx);
-  for(const name of ['learners.js','learner-ui.js'])vm.runInContext(fs.readFileSync(path.join(root,'vocabulary-it',name),'utf8'),ctx);
+  for(const name of ['learners.js','learner-ui.js','practice.js'])vm.runInContext(fs.readFileSync(path.join(root,'vocabulary-it',name),'utf8'),ctx);
   vm.runInContext(source.replace('void init();','globalThis.ready=init();')+'\nglobalThis.api={state,context,buildSelection,orderedSelection,openStudy,moveStudy,newRandomRound,returnToGallery,renderGallery,selectionChanged,applyRoute,speakPrompt,speakAnswer,stopAudioPlayback,setPracticeMode};',ctx);
   await ctx.ready;
   return {...ctx.api,doc,win,emit,advance,players,session,local,historyEntries,element:id=>doc.getElementById(id),directions:doc.querySelectorAll("[data-direction]"),labels:doc.querySelectorAll("[data-label]"),practices:doc.querySelectorAll("[data-practice]"),galleryModes:doc.querySelectorAll("[data-gallery-mode]")};
@@ -196,4 +198,86 @@ test('actual backup import updates only unlocked A and preserves its PIN and B',
  const imported=learners.backup(learners.empty());imported.profiles.A.selected=['vit-0003','vit-9999'];imported.profiles.A.hard=['vit-0003'];imported.profiles.B.selected=['vit-0004'];const raw=JSON.stringify(imported);
  view.element('learnerFile').files=[{size:raw.length,text:async()=>raw}];view.element('learnerFile').emit('change');await until(()=>view.element('settingsNotice').textContent.includes('Načtený návrh'));view.element('saveLearner').click();
  const after=learners.store(()=>local).read().value;assert.deepEqual(after.profiles.A.selected,['vit-0003','vit-9999']);assert.deepEqual(after.profiles.A.hard,['vit-0003']);assert.deepEqual(after.profiles.A.pin,saved.profiles.A.pin);assert.deepEqual(after.profiles.B,saved.profiles.B);
+});
+
+const fourIds=['vit-0001','vit-0093','vit-0106','vit-0320'];
+const fourItems=vocabulary.items.filter(i=>fourIds.includes(i.uid));
+function choices(view){return view.element('quizChoices').querySelectorAll('.practice-choice');}
+function completeImages(view){for(const image of view.element('quizChoices').querySelectorAll('img'))image.emit('load');}
+async function animateWord(view){for(let n=0;n<35;n++){view.advance(100);await sleep(0);}}
+function endSound(view){const player=[...view.players].reverse().find(p=>p.handlers.ended);assert.ok(player,'a real player must have started');player.handlers.ended();}
+function correctChoice(view){const word=view.element('practiceWord').textContent;return choices(view).find(b=>vocabulary.items.find(i=>i.uid===b.dataset.uid).it===word);}
+async function readyQuestion(view){completeImages(view);await animateWord(view);endSound(view);await sleep(0);}
+async function practiceView(options={}){const view=await app({items:fourItems,...options});view.element('quizTab').click();view.element('quizStart').click();return view;}
+
+test('reviewed practice metadata covers497 cards; all can form a valid four-picture question in the full selection',()=>{
+ const pool=practice.eligible(vocabulary.items,audio,quizCatalog);assert.equal(pool.length,497);
+ const latest=practice.eligible(model.select(vocabulary.items,{recentCount:20}),audio,quizCatalog);assert.equal(latest.length,20);assert.ok(latest.every(i=>practice.question(i,latest,quizCatalog,()=>.5)));
+ for(const item of pool){const q=practice.question(item,pool,quizCatalog,()=>.5);assert.equal(q.choices.length,4);assert.ok(q.choices.some(i=>i.uid===item.uid));assert.equal(new Set(q.choices.map(i=>i.image)).size,4);for(let a=0;a<4;a++)for(let b=a+1;b<4;b++)assert.ok(practice.compatible(q.choices[a],q.choices[b],quizCatalog));}
+ assert.equal(practice.question(pool[0],pool.slice(0,3),quizCatalog),null);
+ assert.equal(practice.question({...pool[0],active:false},pool,quizCatalog),null);
+});
+test('practice refuses changed spellings, source meanings, image bindings and foreign namespaces',()=>{
+ const item=vocabulary.items.find(i=>i.uid==='vit-0320'),entry=quizCatalog.entries[item.uid];assert.deepEqual(entry.pieces,['la','var','si']);
+ for(const change of [{it:'lavare'},{cz:'jiný význam'},{image:'other.webp'},{thumbnail:'other.webp'},{pieces:['la','var','si!']},{reviewed:false},{displayMode:'unknown'}])assert.equal(practice.record(item,{...quizCatalog,entries:{[item.uid]:{...entry,...change}}}),null);
+ assert.equal(practice.record(item,{...quizCatalog,language:'en'}),null);
+ assert.equal(practice.compatible(vocabulary.items.find(i=>i.uid==='vit-0353'),vocabulary.items.find(i=>i.uid==='vit-0491'),quizCatalog),false);
+ assert.equal(practice.compatible(vocabulary.items.find(i=>i.uid==='vit-0298'),vocabulary.items.find(i=>i.uid==='vit-0403'),quizCatalog),false);
+});
+test('four tiles wait for images, show syllables, join spelling and enable answers only after Italian audio ends',async()=>{
+ const view=await practiceView();assert.equal(view.state.view,'quiz');assert.equal(choices(view).length,4);assert.ok(choices(view).every(b=>b.disabled));assert.equal(view.players.length,0);
+ const images=view.element('quizChoices').querySelectorAll('img');for(const image of images.slice(0,3))image.emit('load');await animateWord(view);assert.equal(view.players.length,0);
+ images[3].emit('load');assert.ok(view.element('practiceWord').children.some(s=>s.classList.contains('is-pending')));
+ await animateWord(view);assert.ok(view.element('practiceWord').classList.contains('is-joined'));assert.ok(choices(view).every(b=>b.disabled));assert.ok(view.players.some(p=>p.played));
+ endSound(view);await sleep(0);assert.ok(choices(view).every(b=>!b.disabled));assert.equal(view.element('quizNext').disabled,true);
+ assert.ok(!view.element('practiceStrip').hidden);assert.ok(view.element('practiceHero').hidden);
+});
+test('a wrong picture becomes crossed out, remaining attempts stay active, and correct answer grows one card until Next',async()=>{
+ const view=await practiceView();await readyQuestion(view);const correct=correctChoice(view),wrong=choices(view).find(b=>b!==correct);const word=view.element('practiceWord').textContent;
+ wrong.click();wrong.click();assert.ok(wrong.disabled);assert.ok(wrong.classList.contains('is-wrong'));assert.equal(wrong.querySelector('.quiz-mark').textContent,'×');assert.ok(!correct.disabled);assert.equal(view.element('practiceWord').textContent,word);assert.equal(view.element('quizChoices').hidden,false);
+ correct.click();correct.click();assert.equal(view.element('quizChoices').hidden,true);assert.equal(view.element('practiceStrip').hidden,true);assert.equal(view.element('practiceHero').hidden,false);assert.equal(view.element('practiceHeroWord').textContent,word);assert.ok(view.element('practiceHeroCz').textContent);assert.equal(view.element('quizNext').disabled,false);
+ view.advance(10000);await sleep(0);assert.equal(view.element('practiceHero').hidden,false);assert.equal(view.element('practiceHeroWord').textContent,word);assert.match(view.element('quizMessage').textContent,/zopakuješ/);
+});
+test('one initial error is requeued once after the original words; score counts first tries and remedial drill is available',async()=>{
+ const view=await practiceView();let mistaken;
+ for(let n=0;n<4;n++){await readyQuestion(view);const right=correctChoice(view);if(n===0){mistaken=right.dataset.uid;choices(view).find(b=>b!==right).click();}right.click();view.element('quizNext').click();}
+ assert.match(view.element('quizPosition').textContent,/Opakování/);await readyQuestion(view);assert.equal(correctChoice(view).dataset.uid,mistaken);choices(view).find(b=>b!==correctChoice(view)).click();correctChoice(view).click();assert.match(view.element('quizMessage').textContent,/Po kole/);view.element('quizNext').click();
+ assert.equal(view.element('quizEnd').hidden,false);assert.match(view.element('quizResult').textContent,/Na první pokus 3 z 4\. Opakování 1/);assert.equal(view.element('quizErrors').disabled,false);
+ view.element('quizErrors').click();await readyQuestion(view);assert.equal(correctChoice(view).dataset.uid,mistaken);
+});
+test('game inherits personal A, hard and latest20 filters; it never borrows distractors or writes learner storage',async()=>{
+ const local=storage(),repo=learners.store(()=>local),initial=repo.read(),next=initial.value;
+ const ids=['vit-0479','vit-0481','vit-0491','vit-0492'];next.profiles.A.selected=[...ids,'vit-0001'];next.profiles.A.hard=ids;repo.write(next,initial.raw);const saved=local.getItem(learners.KEY);
+ const view=await app({local});change(view,'learnerSelect','A');view.element('learnerHardFilter').click();change(view,'recentOnly',true);view.element('quizTab').click();
+ assert.match(view.element('quizSelection').textContent,/Uživatel A.*obtížná.*Posledních 20/);assert.match(view.element('quizPoolNotice').textContent,/4 slovíčka/);view.element('quizStart').click();assert.ok(choices(view).every(b=>ids.includes(b.dataset.uid)));
+ await readyQuestion(view);correctChoice(view).click();view.element('quizBack').click();assert.equal(view.state.view,'gallery');assert.equal(view.state.learner,'A');assert.equal(view.state.onlyLearnerHard,true);assert.equal(view.state.recentCount,20);assert.equal(local.getItem(learners.KEY),saved);
+});
+test('narrow filters and unavailable data explain the blocker; the common gallery remains usable',async()=>{
+ for(const options of [{items:fourItems.slice(0,3)},{items:[]},{failQuiz:true},{manifest:null}]){
+  const view=await app(options);view.element('quizTab').click();assert.equal(view.element('quizStart').disabled,true);assert.ok(view.element('quizPoolNotice').textContent);view.element('quizBack').click();assert.equal(view.state.view,'gallery');
+ }
+});
+test('an image error or timeout permits an explicit unscored skip without revealing a wrong answer',async()=>{
+ for(const timeout of [false,true]){const view=await practiceView();if(timeout)view.advance(15000);else view.element('quizChoices').querySelector('img').emit('error');assert.equal(view.element('quizNext').disabled,false);assert.match(view.element('quizMessage').textContent,/obrázek.*nepodařilo/);assert.ok(view.element('practiceHero').hidden);view.element('quizNext').click();assert.match(view.element('quizPosition').textContent,/Slovíčko 2/);}
+});
+test('blocked playback has an explicit gesture retry that preserves the current four images and word',async()=>{
+ const view=await practiceView({audioReject:true});completeImages(view);await animateWord(view);await sleep(0);assert.match(view.element('quizMessage').textContent,/Zvuk se nepodařilo/);const ids=choices(view).map(b=>b.dataset.uid);assert.ok(choices(view).every(b=>b.disabled));
+ for(const player of view.players)player.play=function(){this.played=true;this.playCount++;return Promise.resolve();};view.element('quizReplay').click();await sleep(0);endSound(view);await sleep(0);assert.deepEqual(choices(view).map(b=>b.dataset.uid),ids);assert.ok(choices(view).every(b=>!b.disabled));
+});
+test('leaving during animation or audio cancels late callbacks; history and bfcache restore usable setup',async()=>{
+ const view=await practiceView();completeImages(view);view.win.history.back();const before=view.players.length;await animateWord(view);assert.equal(view.state.view,'gallery');assert.equal(view.players.length,before);
+ view.win.history.forward();assert.equal(view.state.view,'quiz');assert.equal(view.element('quizSetup').hidden,false);view.element('quizStart').click();completeImages(view);await animateWord(view);assert.ok(view.players.some(p=>p.played));
+ view.emit('pagehide');view.emit('pageshow',{persisted:true});assert.equal(view.element('quizSetup').hidden,false);view.element('quizStart').click();await readyQuestion(view);assert.ok(!correctChoice(view).disabled);
+});
+test('reduced motion keeps spelling readable immediately, and keyboard answers obey the same correct-answer rules',async()=>{
+ const view=await practiceView({reducedMotion:true});completeImages(view);assert.ok(view.element('practiceWord').classList.contains('is-joined'));endSound(view);await sleep(0);
+ const correct=correctChoice(view),n=choices(view).indexOf(correct)+1;view.doc.emit('keydown',{key:String(n)});assert.equal(view.element('practiceHero').hidden,false);
+});
+test('a stalled MP3 times out into an explicit retry or skip instead of leaving all controls locked',async()=>{
+ const view=await practiceView();completeImages(view);await animateWord(view);assert.ok(choices(view).every(b=>b.disabled));view.advance(20000);await sleep(0);
+ assert.match(view.element('quizMessage').textContent,/Přehrávání se nedokončilo/);assert.equal(view.element('quizNext').disabled,false);assert.ok(view.players.every(p=>p.paused));
+ view.element('quizReplay').click();await sleep(0);endSound(view);await sleep(0);assert.ok(choices(view).every(b=>!b.disabled));
+});
+test('explicit overview and change-filter buttons return to gallery even when practice was opened from a study card',async()=>{
+ for(const id of ['quizBack','quizSetupChange']){const view=await app({items:fourItems});view.openStudy('vit-0001');view.element('quizTab').click();view.element(id).click();assert.equal(view.state.view,'gallery');assert.ok(!view.win.location.href.includes('card='));assert.equal(view.state.lastUid,'vit-0001');}
 });

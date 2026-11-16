@@ -37,6 +37,7 @@ SOURCES = {
                       "PictNew/generated/*_it_web_review/*", "docs/data/vocabulary-it-v2.json",
                       "Pict/it_web_vit_*.webp", "docs/vocabulary-it/*",
                       "docs/data/vocabulary-it-audio.json", "docs/data/vocabulary-it-sentence-audio.json",
+                      "docs/data/vocabulary-it-quiz.json",
                       "docs/assets/vocabulary-it-audio/*/*.mp3", "docs/assets/vocabulary-it-sentences/*/*.mp3",
                       "tests/test_vocabularyit_selection.js",
                       "docs/assets/vocabulary-it-v2/*/*.webp",

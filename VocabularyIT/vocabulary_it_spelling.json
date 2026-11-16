@@ -1,0 +1,5426 @@
+{
+  "schemaVersion": 1,
+  "language": "it",
+  "reviewedAt": "2026-11-16",
+  "reviewMethod": "Explicitní ruční slovník471 tokenů; každé z497 hesel složeno pouze z tohoto revidovaného seznamu. Nejde o automatické dělení za běhu. Nejasné přejímky jsou výslovně neověřené a celé.",
+  "sourceDataSha256": "713bbdf3f700d2fbbbc49db51165eb38cc7a678319fe8cc58e8062557874299c",
+  "sources": [
+    {
+      "url": "https://www.treccani.it/vocabolario/libreria/",
+      "use": "Přízvučné i v librerìa a koncový hiát ri-a."
+    },
+    {
+      "url": "https://www.treccani.it/vocabolario/proprio/",
+      "use": "Pròprio, nepřízvučné io po skupině pr."
+    },
+    {
+      "url": "https://accademiadellacrusca.it/it/consulenza/divisione-in-sillabe/302",
+      "use": "Pravidla dvojhlásek/hiátů, zdvojených souhlásek, s+souhlásky a nedělitelných skupin."
+    },
+    {
+      "url": "https://www.treccani.it/enciclopedia/divisione-in-prontuario-sillabe_(Enciclopedia-dell%27Italiano)/",
+      "use": "Pravidla grafického dělení, diakritického i, digramů gli/gn/sc/ch/gh a souhláskových skupin."
+    },
+    {
+      "url": "https://www.treccani.it/magazine/lingua_italiana/domande_e_risposte/grammatica/grammatica_1696.html",
+      "use": "Slovníková podoba vi-o-la a její odlišnost od běžné dvojslabičné výslovnosti."
+    },
+    {
+      "url": "https://www.treccani.it/vocabolario/coinquilino/",
+      "use": "Složenina co- + inquilino; zachování morfémového hiátu."
+    },
+    {
+      "url": "https://www.treccani.it/vocabolario/brioche/",
+      "use": "Francouzská přejímka s francouzskou výslovností; grafické dělení zatím nepřijato."
+    },
+    {
+      "url": "https://www.treccani.it/magazine/lingua_italiana/domande_e_risposte/grammatica/grammatica_990.html",
+      "use": "Ve sciare se i ve kmeni vyslovuje."
+    }
+  ],
+  "entries": {
+    "vit-0001": {
+      "it": "piatto",
+      "cz": "talíř",
+      "pieces": [
+        "piat",
+        "to"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0002": {
+      "it": "su",
+      "cz": "na",
+      "pieces": [
+        "su"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0003": {
+      "it": "su",
+      "cz": "o",
+      "pieces": [
+        "su"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0004": {
+      "it": "laggiù",
+      "cz": "tam",
+      "pieces": [
+        "lag",
+        "giù"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0005": {
+      "it": "torta",
+      "cz": "dort, koláč",
+      "pieces": [
+        "tor",
+        "ta"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0006": {
+      "it": "troppo",
+      "cz": "příliš / moc",
+      "pieces": [
+        "trop",
+        "po"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0007": {
+      "it": "forte",
+      "cz": "silný",
+      "pieces": [
+        "for",
+        "te"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0008": {
+      "it": "cappello",
+      "cz": "klobouk",
+      "pieces": [
+        "cap",
+        "pel",
+        "lo"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0009": {
+      "it": "amica",
+      "cz": "kamarádka",
+      "pieces": [
+        "a",
+        "mi",
+        "ca"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0010": {
+      "it": "fidanzata",
+      "cz": "přítelkyně",
+      "pieces": [
+        "fi",
+        "dan",
+        "za",
+        "ta"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0011": {
+      "it": "cantare",
+      "cz": "zpívat",
+      "pieces": [
+        "can",
+        "ta",
+        "re"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0012": {
+      "it": "portafoglio",
+      "cz": "peněženka",
+      "pieces": [
+        "por",
+        "ta",
+        "fo",
+        "glio"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0013": {
+      "it": "portafoglio",
+      "cz": "portfolio (soubor investic)",
+      "pieces": [
+        "por",
+        "ta",
+        "fo",
+        "glio"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0014": {
+      "it": "mi chiamo",
+      "cz": "jmenuji se",
+      "pieces": [
+        "mi",
+        " ",
+        "chia",
+        "mo"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0015": {
+      "it": "Come stai? Come va?",
+      "cz": "Jak se máš?",
+      "pieces": [
+        "Co",
+        "me",
+        " ",
+        "stai",
+        "?",
+        " ",
+        "Co",
+        "me",
+        " ",
+        "va",
+        "?"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0016": {
+      "it": "vengo",
+      "cz": "pocházím",
+      "pieces": [
+        "ven",
+        "go"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0017": {
+      "it": "E tu?",
+      "cz": "A ty?",
+      "pieces": [
+        "E",
+        " ",
+        "tu",
+        "?"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0018": {
+      "it": "piacere",
+      "cz": "těší mě",
+      "pieces": [
+        "pia",
+        "ce",
+        "re"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0019": {
+      "it": "a presto",
+      "cz": "brzy na viděnou",
+      "pieces": [
+        "a",
+        " ",
+        "pre",
+        "sto"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0020": {
+      "it": "arrivederci",
+      "cz": "na shledanou",
+      "pieces": [
+        "ar",
+        "ri",
+        "ve",
+        "der",
+        "ci"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0021": {
+      "it": "vorrei",
+      "cz": "chtěl bych",
+      "pieces": [
+        "vor",
+        "rei"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0022": {
+      "it": "per favore",
+      "cz": "prosím",
+      "pieces": [
+        "per",
+        " ",
+        "fa",
+        "vo",
+        "re"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0023": {
+      "it": "sì",
+      "cz": "ano",
+      "pieces": [
+        "sì"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0024": {
+      "it": "io",
+      "cz": "já",
+      "pieces": [
+        "i",
+        "o"
+      ],
+      "reviewed": true,
+      "reviewNote": "Přízvučné i tvoří hiát i-o; nedoplňuje se psaný přízvuk."
+    },
+    "vit-0025": {
+      "it": "anche",
+      "cz": "také",
+      "pieces": [
+        "an",
+        "che"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0026": {
+      "it": "perfetto",
+      "cz": "skvěle",
+      "pieces": [
+        "per",
+        "fet",
+        "to"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0027": {
+      "it": "o",
+      "cz": "nebo",
+      "pieces": [
+        "o"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0028": {
+      "it": "e",
+      "cz": "a",
+      "pieces": [
+        "e"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0029": {
+      "it": "dove",
+      "cz": "kde",
+      "pieces": [
+        "do",
+        "ve"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0030": {
+      "it": "di dove",
+      "cz": "odkud",
+      "pieces": [
+        "di",
+        " ",
+        "do",
+        "ve"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0031": {
+      "it": "bene",
+      "cz": "dobře",
+      "pieces": [
+        "be",
+        "ne"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0032": {
+      "it": "ho",
+      "cz": "mám",
+      "pieces": [
+        "ho"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0033": {
+      "it": "abita",
+      "cz": "bydlí",
+      "pieces": [
+        "a",
+        "bi",
+        "ta"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0034": {
+      "it": "hai",
+      "cz": "máš",
+      "pieces": [
+        "hai"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0035": {
+      "it": "nipote",
+      "cz": "synovec",
+      "pieces": [
+        "ni",
+        "po",
+        "te"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0036": {
+      "it": "nipote",
+      "cz": "neteř",
+      "pieces": [
+        "ni",
+        "po",
+        "te"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0037": {
+      "it": "figlia",
+      "cz": "dcera",
+      "pieces": [
+        "fi",
+        "glia"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0038": {
+      "it": "figlio",
+      "cz": "syn",
+      "pieces": [
+        "fi",
+        "glio"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0039": {
+      "it": "adesso",
+      "cz": "teď, nyní",
+      "pieces": [
+        "a",
+        "des",
+        "so"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0040": {
+      "it": "zia",
+      "cz": "teta",
+      "pieces": [
+        "zi",
+        "a"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0041": {
+      "it": "zio",
+      "cz": "strýc",
+      "pieces": [
+        "zi",
+        "o"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0042": {
+      "it": "tu",
+      "cz": "ty",
+      "pieces": [
+        "tu"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0043": {
+      "it": "lui",
+      "cz": "on",
+      "pieces": [
+        "lui"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0044": {
+      "it": "voi",
+      "cz": "vy",
+      "pieces": [
+        "voi"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0045": {
+      "it": "noi",
+      "cz": "my",
+      "pieces": [
+        "noi"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0046": {
+      "it": "loro",
+      "cz": "ony, oni",
+      "pieces": [
+        "lo",
+        "ro"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0047": {
+      "it": "mio",
+      "cz": "můj",
+      "pieces": [
+        "mi",
+        "o"
+      ],
+      "reviewed": true,
+      "reviewNote": "Přízvučné i tvoří hiát mi-o; nedoplňuje se psaný přízvuk."
+    },
+    "vit-0048": {
+      "it": "mia",
+      "cz": "moje",
+      "pieces": [
+        "mi",
+        "a"
+      ],
+      "reviewed": true,
+      "reviewNote": "Přízvučné i tvoří hiát mi-a; nedoplňuje se psaný přízvuk."
+    },
+    "vit-0049": {
+      "it": "tuo",
+      "cz": "tvůj",
+      "pieces": [
+        "tu",
+        "o"
+      ],
+      "reviewed": true,
+      "reviewNote": "Přízvučné u tvoří hiát tu-o; nedoplňuje se psaný přízvuk."
+    },
+    "vit-0050": {
+      "it": "tua",
+      "cz": "tvá",
+      "pieces": [
+        "tu",
+        "a"
+      ],
+      "reviewed": true,
+      "reviewNote": "Přízvučné u tvoří hiát tu-a; nedoplňuje se psaný přízvuk."
+    },
+    "vit-0051": {
+      "it": "una",
+      "cz": "jedna (neurčitý člen)",
+      "pieces": [
+        "u",
+        "na"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0052": {
+      "it": "un",
+      "cz": "jeden (neurčitý člen)",
+      "pieces": [
+        "un"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0053": {
+      "it": "sorella",
+      "cz": "sestra",
+      "pieces": [
+        "so",
+        "rel",
+        "la"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0054": {
+      "it": "fratello",
+      "cz": "bratr",
+      "pieces": [
+        "fra",
+        "tel",
+        "lo"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0055": {
+      "it": "madre",
+      "cz": "matka",
+      "pieces": [
+        "ma",
+        "dre"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0056": {
+      "it": "padre",
+      "cz": "otec",
+      "pieces": [
+        "pa",
+        "dre"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0057": {
+      "it": "nonna",
+      "cz": "babička",
+      "pieces": [
+        "non",
+        "na"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0058": {
+      "it": "nonno",
+      "cz": "dědeček",
+      "pieces": [
+        "non",
+        "no"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0059": {
+      "it": "molto",
+      "cz": "velmi",
+      "pieces": [
+        "mol",
+        "to"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0060": {
+      "it": "divertente",
+      "cz": "zábavný",
+      "pieces": [
+        "di",
+        "ver",
+        "ten",
+        "te"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0061": {
+      "it": "interessante",
+      "cz": "zajímavý",
+      "pieces": [
+        "in",
+        "te",
+        "res",
+        "san",
+        "te"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0062": {
+      "it": "cattivo",
+      "cz": "zlý, protivný",
+      "pieces": [
+        "cat",
+        "ti",
+        "vo"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0063": {
+      "it": "sono",
+      "cz": "já jsem",
+      "pieces": [
+        "so",
+        "no"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0064": {
+      "it": "sicuro",
+      "cz": "jistý",
+      "pieces": [
+        "si",
+        "cu",
+        "ro"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0065": {
+      "it": "certo",
+      "cz": "samozřejmě",
+      "pieces": [
+        "cer",
+        "to"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0066": {
+      "it": "sempre",
+      "cz": "pořád, stále, vždy",
+      "pieces": [
+        "sem",
+        "pre"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0067": {
+      "it": "per niente",
+      "cz": "vůbec",
+      "pieces": [
+        "per",
+        " ",
+        "nien",
+        "te"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0068": {
+      "it": "ma",
+      "cz": "ale",
+      "pieces": [
+        "ma"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0069": {
+      "it": "giacca",
+      "cz": "sako",
+      "pieces": [
+        "giac",
+        "ca"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0070": {
+      "it": "brutto",
+      "cz": "ošklivý, špatný",
+      "pieces": [
+        "brut",
+        "to"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0071": {
+      "it": "specchio",
+      "cz": "zrcadlo",
+      "pieces": [
+        "spec",
+        "chio"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0072": {
+      "it": "camicia",
+      "cz": "košile",
+      "pieces": [
+        "ca",
+        "mi",
+        "cia"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0073": {
+      "it": "lontano",
+      "cz": "daleko",
+      "pieces": [
+        "lon",
+        "ta",
+        "no"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0074": {
+      "it": "ci",
+      "cz": "tam",
+      "pieces": [
+        "ci"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0075": {
+      "it": "ci",
+      "cz": "nás, nám",
+      "pieces": [
+        "ci"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0076": {
+      "it": "vicino",
+      "cz": "blízko",
+      "pieces": [
+        "vi",
+        "ci",
+        "no"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0077": {
+      "it": "vicino",
+      "cz": "soused",
+      "pieces": [
+        "vi",
+        "ci",
+        "no"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0078": {
+      "it": "uscita",
+      "cz": "východ",
+      "pieces": [
+        "u",
+        "sci",
+        "ta"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0079": {
+      "it": "ora",
+      "cz": "teď, nyní",
+      "pieces": [
+        "o",
+        "ra"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0080": {
+      "it": "ora",
+      "cz": "hodina",
+      "pieces": [
+        "o",
+        "ra"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0081": {
+      "it": "cappotto",
+      "cz": "kabát",
+      "pieces": [
+        "cap",
+        "pot",
+        "to"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0082": {
+      "it": "maglione",
+      "cz": "svetr",
+      "pieces": [
+        "ma",
+        "glio",
+        "ne"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0083": {
+      "it": "gonna",
+      "cz": "sukně",
+      "pieces": [
+        "gon",
+        "na"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0084": {
+      "it": "scontrino",
+      "cz": "účtenka",
+      "pieces": [
+        "scon",
+        "tri",
+        "no"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0085": {
+      "it": "cibo",
+      "cz": "jídlo",
+      "pieces": [
+        "ci",
+        "bo"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0086": {
+      "it": "regalo",
+      "cz": "dárek",
+      "pieces": [
+        "re",
+        "ga",
+        "lo"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0087": {
+      "it": "compleanno",
+      "cz": "narozeniny",
+      "pieces": [
+        "com",
+        "ple",
+        "an",
+        "no"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0088": {
+      "it": "biscotto",
+      "cz": "sušenka",
+      "pieces": [
+        "bi",
+        "scot",
+        "to"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0089": {
+      "it": "piazza",
+      "cz": "náměstí",
+      "pieces": [
+        "piaz",
+        "za"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0090": {
+      "it": "lì",
+      "cz": "tam",
+      "pieces": [
+        "lì"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0091": {
+      "it": "giallo",
+      "cz": "žlutý",
+      "pieces": [
+        "gial",
+        "lo"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0092": {
+      "it": "bagno",
+      "cz": "koupelna",
+      "pieces": [
+        "ba",
+        "gno"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0093": {
+      "it": "cane",
+      "cz": "pes",
+      "pieces": [
+        "ca",
+        "ne"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0094": {
+      "it": "ogni",
+      "cz": "každý",
+      "pieces": [
+        "o",
+        "gni"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0095": {
+      "it": "caldo",
+      "cz": "teplý",
+      "pieces": [
+        "cal",
+        "do"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0096": {
+      "it": "tedesco",
+      "cz": "německý; Němec",
+      "pieces": [
+        "te",
+        "de",
+        "sco"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0097": {
+      "it": "Lei",
+      "cz": "vy",
+      "pieces": [
+        "Lei"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0098": {
+      "it": "lei",
+      "cz": "ona",
+      "pieces": [
+        "lei"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0099": {
+      "it": "ragazza",
+      "cz": "dívka",
+      "pieces": [
+        "ra",
+        "gaz",
+        "za"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0100": {
+      "it": "guardare",
+      "cz": "dívat se, sledovat",
+      "pieces": [
+        "guar",
+        "da",
+        "re"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0101": {
+      "it": "per",
+      "cz": "pro",
+      "pieces": [
+        "per"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0102": {
+      "it": "per",
+      "cz": "aby",
+      "pieces": [
+        "per"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0103": {
+      "it": "pompelmo",
+      "cz": "grep",
+      "pieces": [
+        "pom",
+        "pel",
+        "mo"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0104": {
+      "it": "bicchiere",
+      "cz": "sklenice",
+      "pieces": [
+        "bic",
+        "chie",
+        "re"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0105": {
+      "it": "mirtilli",
+      "cz": "borůvky",
+      "pieces": [
+        "mir",
+        "til",
+        "li"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0106": {
+      "it": "mela",
+      "cz": "jablko",
+      "pieces": [
+        "me",
+        "la"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0107": {
+      "it": "fragola",
+      "cz": "jahoda",
+      "pieces": [
+        "fra",
+        "go",
+        "la"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0108": {
+      "it": "éclair",
+      "cz": "zákusek",
+      "pieces": [
+        "éclair"
+      ],
+      "reviewed": false,
+      "reviewNote": "Francouzská přejímka; ponecháno celé slovo, grafické dělení zatím nepřijato."
+    },
+    "vit-0109": {
+      "it": "allora",
+      "cz": "tak, tedy, tehdy",
+      "pieces": [
+        "al",
+        "lo",
+        "ra"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0110": {
+      "it": "insegnare",
+      "cz": "učit, vyučovat",
+      "pieces": [
+        "in",
+        "se",
+        "gna",
+        "re"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0111": {
+      "it": "lavorare",
+      "cz": "pracovat",
+      "pieces": [
+        "la",
+        "vo",
+        "ra",
+        "re"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0112": {
+      "it": "spesso",
+      "cz": "často",
+      "pieces": [
+        "spes",
+        "so"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0113": {
+      "it": "ballare",
+      "cz": "tančit",
+      "pieces": [
+        "bal",
+        "la",
+        "re"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0114": {
+      "it": "storia",
+      "cz": "příběh",
+      "pieces": [
+        "sto",
+        "ria"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0115": {
+      "it": "brioche",
+      "cz": "brioška, sladké pečivo",
+      "pieces": [
+        "brioche"
+      ],
+      "reviewed": false,
+      "reviewNote": "Francouzská grafika a výslovnost; ponecháno celé slovo, grafické dělení zatím nepřijato."
+    },
+    "vit-0116": {
+      "it": "forno",
+      "cz": "trouba",
+      "pieces": [
+        "for",
+        "no"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0117": {
+      "it": "mercato",
+      "cz": "trh",
+      "pieces": [
+        "mer",
+        "ca",
+        "to"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0118": {
+      "it": "negozio",
+      "cz": "obchod",
+      "pieces": [
+        "ne",
+        "go",
+        "zio"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0119": {
+      "it": "panificio",
+      "cz": "pekárna",
+      "pieces": [
+        "pa",
+        "ni",
+        "fi",
+        "cio"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0120": {
+      "it": "piacere",
+      "cz": "líbit se",
+      "pieces": [
+        "pia",
+        "ce",
+        "re"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0121": {
+      "it": "grazie",
+      "cz": "děkuji",
+      "pieces": [
+        "gra",
+        "zie"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0122": {
+      "it": "come",
+      "cz": "jak, jako",
+      "pieces": [
+        "co",
+        "me"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0123": {
+      "it": "ufficio",
+      "cz": "kancelář, úřad",
+      "pieces": [
+        "uf",
+        "fi",
+        "cio"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0124": {
+      "it": "ospedale",
+      "cz": "nemocnice",
+      "pieces": [
+        "o",
+        "spe",
+        "da",
+        "le"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0125": {
+      "it": "impegnato",
+      "cz": "zaneprázdněný",
+      "pieces": [
+        "im",
+        "pe",
+        "gna",
+        "to"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0126": {
+      "it": "tutti i giorni",
+      "cz": "každý den",
+      "pieces": [
+        "tut",
+        "ti",
+        " ",
+        "i",
+        " ",
+        "gior",
+        "ni"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0127": {
+      "it": "cuoca",
+      "cz": "kuchařka",
+      "pieces": [
+        "cuo",
+        "ca"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0128": {
+      "it": "male",
+      "cz": "špatně; zle",
+      "pieces": [
+        "ma",
+        "le"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0129": {
+      "it": "stazione",
+      "cz": "nádraží, stanice",
+      "pieces": [
+        "sta",
+        "zio",
+        "ne"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0130": {
+      "it": "aiuto",
+      "cz": "pomoc",
+      "pieces": [
+        "a",
+        "iu",
+        "to"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0131": {
+      "it": "allegro",
+      "cz": "veselý, radostný",
+      "pieces": [
+        "al",
+        "le",
+        "gro"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0132": {
+      "it": "chiesa",
+      "cz": "kostel",
+      "pieces": [
+        "chie",
+        "sa"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0133": {
+      "it": "giocare",
+      "cz": "hrát, hrát si",
+      "pieces": [
+        "gio",
+        "ca",
+        "re"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0134": {
+      "it": "estate",
+      "cz": "léto",
+      "pieces": [
+        "e",
+        "sta",
+        "te"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0135": {
+      "it": "zaino",
+      "cz": "batoh",
+      "pieces": [
+        "zai",
+        "no"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0136": {
+      "it": "mese",
+      "cz": "měsíc",
+      "pieces": [
+        "me",
+        "se"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0137": {
+      "it": "solito",
+      "cz": "obvyklý",
+      "pieces": [
+        "so",
+        "li",
+        "to"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0138": {
+      "it": "mangiare",
+      "cz": "jíst",
+      "pieces": [
+        "man",
+        "gia",
+        "re"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0139": {
+      "it": "inverno",
+      "cz": "zima",
+      "pieces": [
+        "in",
+        "ver",
+        "no"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0140": {
+      "it": "gatto",
+      "cz": "kočka",
+      "pieces": [
+        "gat",
+        "to"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0141": {
+      "it": "insieme",
+      "cz": "společně, dohromady",
+      "pieces": [
+        "in",
+        "sie",
+        "me"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0142": {
+      "it": "albergo",
+      "cz": "hotel",
+      "pieces": [
+        "al",
+        "ber",
+        "go"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0143": {
+      "it": "andare",
+      "cz": "jít, jet",
+      "pieces": [
+        "an",
+        "da",
+        "re"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0144": {
+      "it": "aspettare",
+      "cz": "čekat",
+      "pieces": [
+        "a",
+        "spet",
+        "ta",
+        "re"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0145": {
+      "it": "casa",
+      "cz": "dům, domov",
+      "pieces": [
+        "ca",
+        "sa"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0146": {
+      "it": "cercare",
+      "cz": "hledat",
+      "pieces": [
+        "cer",
+        "ca",
+        "re"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0147": {
+      "it": "da",
+      "cz": "od, z, u, k",
+      "pieces": [
+        "da"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0148": {
+      "it": "domani",
+      "cz": "zítra",
+      "pieces": [
+        "do",
+        "ma",
+        "ni"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0149": {
+      "it": "domattina",
+      "cz": "zítra ráno",
+      "pieces": [
+        "do",
+        "mat",
+        "ti",
+        "na"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0150": {
+      "it": "esercizio",
+      "cz": "cvičení, úkol, trénink",
+      "pieces": [
+        "e",
+        "ser",
+        "ci",
+        "zio"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0151": {
+      "it": "favore",
+      "cz": "laskavost",
+      "pieces": [
+        "fa",
+        "vo",
+        "re"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0152": {
+      "it": "forse",
+      "cz": "možná",
+      "pieces": [
+        "for",
+        "se"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0153": {
+      "it": "forza",
+      "cz": "no tak!; do toho!",
+      "pieces": [
+        "for",
+        "za"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0154": {
+      "it": "lezione",
+      "cz": "lekce, hodina",
+      "pieces": [
+        "le",
+        "zio",
+        "ne"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0155": {
+      "it": "pagare",
+      "cz": "platit",
+      "pieces": [
+        "pa",
+        "ga",
+        "re"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0156": {
+      "it": "parola",
+      "cz": "slovo",
+      "pieces": [
+        "pa",
+        "ro",
+        "la"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0157": {
+      "it": "poi",
+      "cz": "potom / pak",
+      "pieces": [
+        "poi"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0158": {
+      "it": "pregare",
+      "cz": "modlit se, prosit",
+      "pieces": [
+        "pre",
+        "ga",
+        "re"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0159": {
+      "it": "qua",
+      "cz": "tady",
+      "pieces": [
+        "qua"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0160": {
+      "it": "restare",
+      "cz": "zůstat",
+      "pieces": [
+        "re",
+        "sta",
+        "re"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0161": {
+      "it": "ricordare",
+      "cz": "pamatovat si, připomenout si",
+      "pieces": [
+        "ri",
+        "cor",
+        "da",
+        "re"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0162": {
+      "it": "stasera",
+      "cz": "dnes večer",
+      "pieces": [
+        "sta",
+        "se",
+        "ra"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0163": {
+      "it": "subito",
+      "cz": "hned, okamžitě",
+      "pieces": [
+        "su",
+        "bi",
+        "to"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0164": {
+      "it": "tornare",
+      "cz": "vrátit se",
+      "pieces": [
+        "tor",
+        "na",
+        "re"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0165": {
+      "it": "treno",
+      "cz": "vlak",
+      "pieces": [
+        "tre",
+        "no"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0166": {
+      "it": "via",
+      "cz": "ulice",
+      "pieces": [
+        "vi",
+        "a"
+      ],
+      "reviewed": true,
+      "reviewNote": "vi-a s hiátem; na rozdíl od odvozenin via-le a viag-gio."
+    },
+    "vit-0167": {
+      "it": "viale",
+      "cz": "třída, alej",
+      "pieces": [
+        "via",
+        "le"
+      ],
+      "reviewed": true,
+      "reviewNote": "via-le, přechod nepřízvučného i v odvozenině do souhláskové funkce."
+    },
+    "vit-0168": {
+      "it": "vocabolo",
+      "cz": "slovíčko, výraz",
+      "pieces": [
+        "vo",
+        "ca",
+        "bo",
+        "lo"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0169": {
+      "it": "di solito",
+      "cz": "obvykle",
+      "pieces": [
+        "di",
+        " ",
+        "so",
+        "li",
+        "to"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0170": {
+      "it": "macchina",
+      "cz": "auto; vůz",
+      "pieces": [
+        "mac",
+        "chi",
+        "na"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0171": {
+      "it": "quando",
+      "cz": "kdy, když",
+      "pieces": [
+        "quan",
+        "do"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0172": {
+      "it": "nemico",
+      "cz": "nepřítel",
+      "pieces": [
+        "ne",
+        "mi",
+        "co"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0173": {
+      "it": "numero",
+      "cz": "číslo",
+      "pieces": [
+        "nu",
+        "me",
+        "ro"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0174": {
+      "it": "occupato",
+      "cz": "obsazeno",
+      "pieces": [
+        "oc",
+        "cu",
+        "pa",
+        "to"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0175": {
+      "it": "parlare",
+      "cz": "mluvit",
+      "pieces": [
+        "par",
+        "la",
+        "re"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0176": {
+      "it": "permesso",
+      "cz": "dovolení, svolení",
+      "pieces": [
+        "per",
+        "mes",
+        "so"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0177": {
+      "it": "po'",
+      "cz": "trochu",
+      "pieces": [
+        "po",
+        "'"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0178": {
+      "it": "poco",
+      "cz": "málo",
+      "pieces": [
+        "po",
+        "co"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0179": {
+      "it": "poco fa",
+      "cz": "před chvílí",
+      "pieces": [
+        "po",
+        "co",
+        " ",
+        "fa"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0180": {
+      "it": "posto",
+      "cz": "místo",
+      "pieces": [
+        "po",
+        "sto"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0181": {
+      "it": "prendere",
+      "cz": "vzít, brát",
+      "pieces": [
+        "pren",
+        "de",
+        "re"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0182": {
+      "it": "pronto",
+      "cz": "haló?",
+      "pieces": [
+        "pron",
+        "to"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0183": {
+      "it": "quale",
+      "cz": "který",
+      "pieces": [
+        "qua",
+        "le"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0184": {
+      "it": "questo",
+      "cz": "tento",
+      "pieces": [
+        "que",
+        "sto"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0185": {
+      "it": "rispondere",
+      "cz": "odpovědět",
+      "pieces": [
+        "ri",
+        "spon",
+        "de",
+        "re"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0186": {
+      "it": "rivista",
+      "cz": "časopis",
+      "pieces": [
+        "ri",
+        "vi",
+        "sta"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0187": {
+      "it": "romano",
+      "cz": "Říman, římský",
+      "pieces": [
+        "ro",
+        "ma",
+        "no"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0188": {
+      "it": "russo",
+      "cz": "Rus, ruský",
+      "pieces": [
+        "rus",
+        "so"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0189": {
+      "it": "scheda",
+      "cz": "karta, lístek",
+      "pieces": [
+        "sche",
+        "da"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0190": {
+      "it": "scusare",
+      "cz": "omluvit, promiňte",
+      "pieces": [
+        "scu",
+        "sa",
+        "re"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0191": {
+      "it": "simpatico",
+      "cz": "sympatický",
+      "pieces": [
+        "sim",
+        "pa",
+        "ti",
+        "co"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0192": {
+      "it": "slovacco",
+      "cz": "Slovák, slovenský",
+      "pieces": [
+        "slo",
+        "vac",
+        "co"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0193": {
+      "it": "so",
+      "cz": "vím",
+      "pieces": [
+        "so"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0194": {
+      "it": "sorpresa",
+      "cz": "překvapení",
+      "pieces": [
+        "sor",
+        "pre",
+        "sa"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0195": {
+      "it": "Spagna",
+      "cz": "Španělsko",
+      "pieces": [
+        "Spa",
+        "gna"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0196": {
+      "it": "spremuta",
+      "cz": "čerstvá šťáva",
+      "pieces": [
+        "spre",
+        "mu",
+        "ta"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0197": {
+      "it": "te",
+      "cz": "tebe, ti",
+      "pieces": [
+        "te"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0198": {
+      "it": "tecnico",
+      "cz": "technik, technický",
+      "pieces": [
+        "tec",
+        "ni",
+        "co"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0199": {
+      "it": "telefonico",
+      "cz": "telefonní",
+      "pieces": [
+        "te",
+        "le",
+        "fo",
+        "ni",
+        "co"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0200": {
+      "it": "trovare",
+      "cz": "najít",
+      "pieces": [
+        "tro",
+        "va",
+        "re"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0201": {
+      "it": "trovarsi",
+      "cz": "nacházet se, být",
+      "pieces": [
+        "tro",
+        "var",
+        "si"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0202": {
+      "it": "vaniglia",
+      "cz": "vanilka",
+      "pieces": [
+        "va",
+        "ni",
+        "glia"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0203": {
+      "it": "vendere",
+      "cz": "prodat, prodávat",
+      "pieces": [
+        "ven",
+        "de",
+        "re"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0204": {
+      "it": "vino",
+      "cz": "víno",
+      "pieces": [
+        "vi",
+        "no"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0205": {
+      "it": "vincere",
+      "cz": "vyhrát",
+      "pieces": [
+        "vin",
+        "ce",
+        "re"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0206": {
+      "it": "zero",
+      "cz": "nula",
+      "pieces": [
+        "ze",
+        "ro"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0207": {
+      "it": "cena",
+      "cz": "večeře",
+      "pieces": [
+        "ce",
+        "na"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0208": {
+      "it": "che",
+      "cz": "jaký, který",
+      "pieces": [
+        "che"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0209": {
+      "it": "che cosa",
+      "cz": "co",
+      "pieces": [
+        "che",
+        " ",
+        "co",
+        "sa"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0210": {
+      "it": "chi",
+      "cz": "kdo",
+      "pieces": [
+        "chi"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0211": {
+      "it": "chiamare",
+      "cz": "volat; telefonovat",
+      "pieces": [
+        "chia",
+        "ma",
+        "re"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0212": {
+      "it": "conoscere",
+      "cz": "znát, poznat",
+      "pieces": [
+        "co",
+        "no",
+        "sce",
+        "re"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0213": {
+      "it": "di",
+      "cz": "z, ze, od",
+      "pieces": [
+        "di"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0214": {
+      "it": "dopo",
+      "cz": "po, potom",
+      "pieces": [
+        "do",
+        "po"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0215": {
+      "it": "ecco",
+      "cz": "tady je; tady jsou",
+      "pieces": [
+        "ec",
+        "co"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0216": {
+      "it": "essere",
+      "cz": "být",
+      "pieces": [
+        "es",
+        "se",
+        "re"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0217": {
+      "it": "euro",
+      "cz": "euro",
+      "pieces": [
+        "eu",
+        "ro"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0218": {
+      "it": "fontana",
+      "cz": "kašna, fontána",
+      "pieces": [
+        "fon",
+        "ta",
+        "na"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0219": {
+      "it": "fragile",
+      "cz": "křehký",
+      "pieces": [
+        "fra",
+        "gi",
+        "le"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0220": {
+      "it": "francese",
+      "cz": "Francouz, francouzský",
+      "pieces": [
+        "fran",
+        "ce",
+        "se"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0221": {
+      "it": "francobollo",
+      "cz": "poštovní známka",
+      "pieces": [
+        "fran",
+        "co",
+        "bol",
+        "lo"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0222": {
+      "it": "gelato",
+      "cz": "zmrzlina",
+      "pieces": [
+        "ge",
+        "la",
+        "to"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0223": {
+      "it": "giorno",
+      "cz": "den",
+      "pieces": [
+        "gior",
+        "no"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0224": {
+      "it": "gustoso",
+      "cz": "chutný",
+      "pieces": [
+        "gu",
+        "sto",
+        "so"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0225": {
+      "it": "inglese",
+      "cz": "Angličan, anglický",
+      "pieces": [
+        "in",
+        "gle",
+        "se"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0226": {
+      "it": "invitato",
+      "cz": "pozvaný, host",
+      "pieces": [
+        "in",
+        "vi",
+        "ta",
+        "to"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0227": {
+      "it": "italiano",
+      "cz": "Ital, italský",
+      "pieces": [
+        "i",
+        "ta",
+        "lia",
+        "no"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0228": {
+      "it": "leggere",
+      "cz": "číst",
+      "pieces": [
+        "leg",
+        "ge",
+        "re"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0229": {
+      "it": "libero",
+      "cz": "volný, svobodný",
+      "pieces": [
+        "li",
+        "be",
+        "ro"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0230": {
+      "it": "limone",
+      "cz": "citron",
+      "pieces": [
+        "li",
+        "mo",
+        "ne"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0231": {
+      "it": "minuto",
+      "cz": "minuta",
+      "pieces": [
+        "mi",
+        "nu",
+        "to"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0232": {
+      "it": "meno",
+      "cz": "méně",
+      "pieces": [
+        "me",
+        "no"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0233": {
+      "it": "misto",
+      "cz": "míchaný, smíšený",
+      "pieces": [
+        "mi",
+        "sto"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0234": {
+      "it": "naturalmente",
+      "cz": "přirozeně, samozřejmě",
+      "pieces": [
+        "na",
+        "tu",
+        "ral",
+        "men",
+        "te"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0235": {
+      "it": "altro",
+      "cz": "jiný, další",
+      "pieces": [
+        "al",
+        "tro"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0236": {
+      "it": "arancia",
+      "cz": "pomeranč",
+      "pieces": [
+        "a",
+        "ran",
+        "cia"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0237": {
+      "it": "banana",
+      "cz": "banán",
+      "pieces": [
+        "ba",
+        "na",
+        "na"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0238": {
+      "it": "bello",
+      "cz": "krásný, hezký",
+      "pieces": [
+        "bel",
+        "lo"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0239": {
+      "it": "benissimo",
+      "cz": "výborně",
+      "pieces": [
+        "be",
+        "nis",
+        "si",
+        "mo"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0240": {
+      "it": "bravo",
+      "cz": "dobrý, šikovný",
+      "pieces": [
+        "bra",
+        "vo"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0241": {
+      "it": "buono",
+      "cz": "dobrý",
+      "pieces": [
+        "buo",
+        "no"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0242": {
+      "it": "camera",
+      "cz": "pokoj",
+      "pieces": [
+        "ca",
+        "me",
+        "ra"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0243": {
+      "it": "ceco",
+      "cz": "Čech, český",
+      "pieces": [
+        "ce",
+        "co"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0244": {
+      "it": "nuotare",
+      "cz": "plavat",
+      "pieces": [
+        "nuo",
+        "ta",
+        "re"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0245": {
+      "it": "pattinare",
+      "cz": "bruslit",
+      "pieces": [
+        "pat",
+        "ti",
+        "na",
+        "re"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0246": {
+      "it": "calcio",
+      "cz": "fotbal",
+      "pieces": [
+        "cal",
+        "cio"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0247": {
+      "it": "pescare",
+      "cz": "lovit, rybařit",
+      "pieces": [
+        "pe",
+        "sca",
+        "re"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0248": {
+      "it": "pescato",
+      "cz": "úlovek, ulovená ryba",
+      "pieces": [
+        "pe",
+        "sca",
+        "to"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0249": {
+      "it": "autunno",
+      "cz": "podzim",
+      "pieces": [
+        "au",
+        "tun",
+        "no"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0250": {
+      "it": "sciare",
+      "cz": "lyžovat",
+      "pieces": [
+        "sci",
+        "a",
+        "re"
+      ],
+      "reviewed": true,
+      "reviewNote": "i je ve slovesném kmeni vyslovované; sci-a-re, nejde o stejný typ jako sciar-pa."
+    },
+    "vit-0251": {
+      "it": "settimana",
+      "cz": "týden",
+      "pieces": [
+        "set",
+        "ti",
+        "ma",
+        "na"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0252": {
+      "it": "disegnare",
+      "cz": "kreslit",
+      "pieces": [
+        "di",
+        "se",
+        "gna",
+        "re"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0253": {
+      "it": "cucinare",
+      "cz": "vařit",
+      "pieces": [
+        "cu",
+        "ci",
+        "na",
+        "re"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0254": {
+      "it": "fra",
+      "cz": "mezi, za",
+      "pieces": [
+        "fra"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0255": {
+      "it": "gli",
+      "cz": "určitý člen, mužský rod množného čísla",
+      "pieces": [
+        "gli"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0256": {
+      "it": "quante",
+      "cz": "kolik",
+      "pieces": [
+        "quan",
+        "te"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0257": {
+      "it": "porco",
+      "cz": "prase",
+      "pieces": [
+        "por",
+        "co"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0258": {
+      "it": "cartolina",
+      "cz": "pohlednice",
+      "pieces": [
+        "car",
+        "to",
+        "li",
+        "na"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0259": {
+      "it": "libro",
+      "cz": "kniha",
+      "pieces": [
+        "li",
+        "bro"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0260": {
+      "it": "solo",
+      "cz": "sám",
+      "pieces": [
+        "so",
+        "lo"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0261": {
+      "it": "davvero",
+      "cz": "opravdu, skutečně",
+      "pieces": [
+        "dav",
+        "ve",
+        "ro"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0262": {
+      "it": "che",
+      "cz": "že",
+      "pieces": [
+        "che"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0263": {
+      "it": "gentile",
+      "cz": "laskavý, milý, zdvořilý",
+      "pieces": [
+        "gen",
+        "ti",
+        "le"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0264": {
+      "it": "stanco",
+      "cz": "unavený",
+      "pieces": [
+        "stan",
+        "co"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0265": {
+      "it": "purtroppo",
+      "cz": "bohužel",
+      "pieces": [
+        "pur",
+        "trop",
+        "po"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0266": {
+      "it": "dolce",
+      "cz": "sladký",
+      "pieces": [
+        "dol",
+        "ce"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0267": {
+      "it": "un po’",
+      "cz": "trochu",
+      "pieces": [
+        "un",
+        " ",
+        "po",
+        "’"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0268": {
+      "it": "malato",
+      "cz": "nemocný",
+      "pieces": [
+        "ma",
+        "la",
+        "to"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0269": {
+      "it": "buonanotte",
+      "cz": "dobrou noc",
+      "pieces": [
+        "buo",
+        "na",
+        "not",
+        "te"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0270": {
+      "it": "debole",
+      "cz": "slabý",
+      "pieces": [
+        "de",
+        "bo",
+        "le"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0271": {
+      "it": "preferire",
+      "cz": "preferovat, dávat přednost",
+      "pieces": [
+        "pre",
+        "fe",
+        "ri",
+        "re"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0272": {
+      "it": "pallacanestro",
+      "cz": "basketbal",
+      "pieces": [
+        "pal",
+        "la",
+        "ca",
+        "ne",
+        "stro"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0273": {
+      "it": "pallavolo",
+      "cz": "volejbal",
+      "pieces": [
+        "pal",
+        "la",
+        "vo",
+        "lo"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0274": {
+      "it": "camminare",
+      "cz": "chodit, kráčet",
+      "pieces": [
+        "cam",
+        "mi",
+        "na",
+        "re"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0275": {
+      "it": "odiare",
+      "cz": "nenávidět",
+      "pieces": [
+        "o",
+        "dia",
+        "re"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0276": {
+      "it": "abbastanza",
+      "cz": "dost, docela",
+      "pieces": [
+        "ab",
+        "ba",
+        "stan",
+        "za"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0277": {
+      "it": "aereo",
+      "cz": "letadlo",
+      "pieces": [
+        "a",
+        "e",
+        "re",
+        "o"
+      ],
+      "reviewed": true,
+      "reviewNote": "Dvě sousední silné samohlásky tvoří hiát: a-e-re-o."
+    },
+    "vit-0278": {
+      "it": "alzarsi",
+      "cz": "vstát, vstávat",
+      "pieces": [
+        "al",
+        "zar",
+        "si"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0279": {
+      "it": "ancora",
+      "cz": "ještě",
+      "pieces": [
+        "an",
+        "co",
+        "ra"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0280": {
+      "it": "anno",
+      "cz": "rok",
+      "pieces": [
+        "an",
+        "no"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0281": {
+      "it": "aprire",
+      "cz": "otevřít",
+      "pieces": [
+        "a",
+        "pri",
+        "re"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0282": {
+      "it": "asciugamano",
+      "cz": "ručník",
+      "pieces": [
+        "a",
+        "sciu",
+        "ga",
+        "ma",
+        "no"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0283": {
+      "it": "auto",
+      "cz": "auto",
+      "pieces": [
+        "au",
+        "to"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0284": {
+      "it": "automobilismo",
+      "cz": "automobilismus",
+      "pieces": [
+        "au",
+        "to",
+        "mo",
+        "bi",
+        "li",
+        "smo"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0285": {
+      "it": "caffè",
+      "cz": "káva",
+      "pieces": [
+        "caf",
+        "fè"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0286": {
+      "it": "campeggio",
+      "cz": "kemp",
+      "pieces": [
+        "cam",
+        "peg",
+        "gio"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0287": {
+      "it": "capire",
+      "cz": "rozumět, chápat",
+      "pieces": [
+        "ca",
+        "pi",
+        "re"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0288": {
+      "it": "caro",
+      "cz": "drahý",
+      "pieces": [
+        "ca",
+        "ro"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0289": {
+      "it": "certamente",
+      "cz": "určitě, jistě",
+      "pieces": [
+        "cer",
+        "ta",
+        "men",
+        "te"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0290": {
+      "it": "chiamarsi",
+      "cz": "jmenovat se",
+      "pieces": [
+        "chia",
+        "mar",
+        "si"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0291": {
+      "it": "chiuso",
+      "cz": "zavřený, zavřeno",
+      "pieces": [
+        "chiu",
+        "so"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0292": {
+      "it": "città",
+      "cz": "město",
+      "pieces": [
+        "cit",
+        "tà"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0293": {
+      "it": "costare",
+      "cz": "stát peníze",
+      "pieces": [
+        "co",
+        "sta",
+        "re"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0294": {
+      "it": "cuore",
+      "cz": "srdce",
+      "pieces": [
+        "cuo",
+        "re"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0295": {
+      "it": "destro",
+      "cz": "pravý",
+      "pieces": [
+        "de",
+        "stro"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0296": {
+      "it": "difficile",
+      "cz": "těžký, nesnadný",
+      "pieces": [
+        "dif",
+        "fi",
+        "ci",
+        "le"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0297": {
+      "it": "dormire",
+      "cz": "spát",
+      "pieces": [
+        "dor",
+        "mi",
+        "re"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0298": {
+      "it": "dottore",
+      "cz": "doktor, lékař",
+      "pieces": [
+        "dot",
+        "to",
+        "re"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0299": {
+      "it": "dovere",
+      "cz": "muset, mít povinnost",
+      "pieces": [
+        "do",
+        "ve",
+        "re"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0300": {
+      "it": "dritto",
+      "cz": "rovně, přímo",
+      "pieces": [
+        "drit",
+        "to"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0301": {
+      "it": "elegante",
+      "cz": "elegantní",
+      "pieces": [
+        "e",
+        "le",
+        "gan",
+        "te"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0302": {
+      "it": "facile",
+      "cz": "lehký, snadný",
+      "pieces": [
+        "fa",
+        "ci",
+        "le"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0303": {
+      "it": "fermarsi",
+      "cz": "zdržet se, zastavit se",
+      "pieces": [
+        "fer",
+        "mar",
+        "si"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0304": {
+      "it": "finestra",
+      "cz": "okno",
+      "pieces": [
+        "fi",
+        "ne",
+        "stra"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0305": {
+      "it": "finire",
+      "cz": "skončit",
+      "pieces": [
+        "fi",
+        "ni",
+        "re"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0306": {
+      "it": "formula",
+      "cz": "formule",
+      "pieces": [
+        "for",
+        "mu",
+        "la"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0307": {
+      "it": "foto",
+      "cz": "fotka, fotografie",
+      "pieces": [
+        "fo",
+        "to"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0308": {
+      "it": "Francia",
+      "cz": "Francie",
+      "pieces": [
+        "Fran",
+        "cia"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0309": {
+      "it": "freddo",
+      "cz": "studený",
+      "pieces": [
+        "fred",
+        "do"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0310": {
+      "it": "fretta",
+      "cz": "spěch, in fretta rychle",
+      "pieces": [
+        "fret",
+        "ta"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0311": {
+      "it": "gara",
+      "cz": "závod",
+      "pieces": [
+        "ga",
+        "ra"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0312": {
+      "it": "giovane",
+      "cz": "mladý",
+      "pieces": [
+        "gio",
+        "va",
+        "ne"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0313": {
+      "it": "Giovanni",
+      "cz": "Jan",
+      "pieces": [
+        "Gio",
+        "van",
+        "ni"
+      ],
+      "reviewed": true,
+      "reviewNote": "Gio-van-ni; skupina Gio zůstává spolu a zdvojené nn se dělí."
+    },
+    "vit-0314": {
+      "it": "girare",
+      "cz": "otočit, odbočit, zahnout",
+      "pieces": [
+        "gi",
+        "ra",
+        "re"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0315": {
+      "it": "Giulia",
+      "cz": "Julie",
+      "pieces": [
+        "Giu",
+        "lia"
+      ],
+      "reviewed": true,
+      "reviewNote": "Giu-lia; diakritické i ve skupině Giu a nepřízvučné ia na konci."
+    },
+    "vit-0316": {
+      "it": "interessare",
+      "cz": "zajímat",
+      "pieces": [
+        "in",
+        "te",
+        "res",
+        "sa",
+        "re"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0317": {
+      "it": "interessarsi di",
+      "cz": "zajímat se o",
+      "pieces": [
+        "in",
+        "te",
+        "res",
+        "sar",
+        "si",
+        " ",
+        "di"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0318": {
+      "it": "là",
+      "cz": "tam",
+      "pieces": [
+        "là"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0319": {
+      "it": "lavare",
+      "cz": "umýt, prát",
+      "pieces": [
+        "la",
+        "va",
+        "re"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0320": {
+      "it": "lavarsi",
+      "cz": "umýt se",
+      "pieces": [
+        "la",
+        "var",
+        "si"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0321": {
+      "it": "lentamente",
+      "cz": "pomalu",
+      "pieces": [
+        "len",
+        "ta",
+        "men",
+        "te"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0322": {
+      "it": "Luca",
+      "cz": "Lukáš",
+      "pieces": [
+        "Lu",
+        "ca"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0323": {
+      "it": "Luisa",
+      "cz": "Luisa",
+      "pieces": [
+        "Lu",
+        "i",
+        "sa"
+      ],
+      "reviewed": true,
+      "reviewNote": "Hiát mezi u a přízvučným i: Lu-i-sa; zdrojový zápis bez přidaného přízvuku."
+    },
+    "vit-0324": {
+      "it": "lungo",
+      "cz": "dlouhý",
+      "pieces": [
+        "lun",
+        "go"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0325": {
+      "it": "mano",
+      "cz": "ruka",
+      "pieces": [
+        "ma",
+        "no"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0326": {
+      "it": "Margherita",
+      "cz": "Markéta",
+      "pieces": [
+        "Mar",
+        "ghe",
+        "ri",
+        "ta"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0327": {
+      "it": "mattina",
+      "cz": "ráno",
+      "pieces": [
+        "mat",
+        "ti",
+        "na"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0328": {
+      "it": "me",
+      "cz": "mně, mě, mi",
+      "pieces": [
+        "me"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0329": {
+      "it": "Milano",
+      "cz": "Milán",
+      "pieces": [
+        "Mi",
+        "la",
+        "no"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0330": {
+      "it": "nave",
+      "cz": "loď",
+      "pieces": [
+        "na",
+        "ve"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0331": {
+      "it": "niente",
+      "cz": "nic",
+      "pieces": [
+        "nien",
+        "te"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0332": {
+      "it": "ottimista",
+      "cz": "optimistický",
+      "pieces": [
+        "ot",
+        "ti",
+        "mi",
+        "sta"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0333": {
+      "it": "Parigi",
+      "cz": "Paříž",
+      "pieces": [
+        "Pa",
+        "ri",
+        "gi"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0334": {
+      "it": "perché",
+      "cz": "proč",
+      "pieces": [
+        "per",
+        "ché"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0335": {
+      "it": "ponte",
+      "cz": "most",
+      "pieces": [
+        "pon",
+        "te"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0336": {
+      "it": "problema",
+      "cz": "problém",
+      "pieces": [
+        "pro",
+        "ble",
+        "ma"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0337": {
+      "it": "programma",
+      "cz": "program",
+      "pieces": [
+        "pro",
+        "gram",
+        "ma"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0338": {
+      "it": "proprio",
+      "cz": "právě, zrovna",
+      "pieces": [
+        "pro",
+        "prio"
+      ],
+      "reviewed": true,
+      "reviewNote": "pro-prio; souhlásková skupina pr a nepřízvučné io zůstávají spolu."
+    },
+    "vit-0339": {
+      "it": "pulito",
+      "cz": "čistý",
+      "pieces": [
+        "pu",
+        "li",
+        "to"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0340": {
+      "it": "radio",
+      "cz": "rádio, rozhlas",
+      "pieces": [
+        "ra",
+        "dio"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0341": {
+      "it": "scusarsi",
+      "cz": "omluvit se",
+      "pieces": [
+        "scu",
+        "sar",
+        "si"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0342": {
+      "it": "seguire",
+      "cz": "sledovat, následovat",
+      "pieces": [
+        "se",
+        "gui",
+        "re"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0343": {
+      "it": "sentire",
+      "cz": "slyšet",
+      "pieces": [
+        "sen",
+        "ti",
+        "re"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0344": {
+      "it": "sentirsi",
+      "cz": "cítit se",
+      "pieces": [
+        "sen",
+        "tir",
+        "si"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0345": {
+      "it": "servire",
+      "cz": "sloužit, obsluhovat",
+      "pieces": [
+        "ser",
+        "vi",
+        "re"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0346": {
+      "it": "sinistro",
+      "cz": "levý",
+      "pieces": [
+        "si",
+        "ni",
+        "stro"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0347": {
+      "it": "sole",
+      "cz": "slunce",
+      "pieces": [
+        "so",
+        "le"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0348": {
+      "it": "sotto",
+      "cz": "pod",
+      "pieces": [
+        "sot",
+        "to"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0349": {
+      "it": "sporco",
+      "cz": "špinavý",
+      "pieces": [
+        "spor",
+        "co"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0350": {
+      "it": "stesso",
+      "cz": "tentýž, stejný",
+      "pieces": [
+        "stes",
+        "so"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0351": {
+      "it": "stipendio",
+      "cz": "plat, výplata",
+      "pieces": [
+        "sti",
+        "pen",
+        "dio"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0352": {
+      "it": "straniero",
+      "cz": "cizinec",
+      "pieces": [
+        "stra",
+        "nie",
+        "ro"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0353": {
+      "it": "tempo",
+      "cz": "čas",
+      "pieces": [
+        "tem",
+        "po"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0354": {
+      "it": "turista",
+      "cz": "turista, turistka",
+      "pieces": [
+        "tu",
+        "ri",
+        "sta"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0355": {
+      "it": "tutti",
+      "cz": "všichni",
+      "pieces": [
+        "tut",
+        "ti"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0356": {
+      "it": "tutto",
+      "cz": "všechno, celý",
+      "pieces": [
+        "tut",
+        "to"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0357": {
+      "it": "vacanza, vacanze",
+      "cz": "dovolená, prázdniny",
+      "pieces": [
+        "va",
+        "can",
+        "za",
+        ",",
+        " ",
+        "va",
+        "can",
+        "ze"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0358": {
+      "it": "vecchio",
+      "cz": "starý",
+      "pieces": [
+        "vec",
+        "chio"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0359": {
+      "it": "vedere",
+      "cz": "vidět",
+      "pieces": [
+        "ve",
+        "de",
+        "re"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0360": {
+      "it": "venire",
+      "cz": "přijít, přijet, jít, jet s kým",
+      "pieces": [
+        "ve",
+        "ni",
+        "re"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0361": {
+      "it": "vero",
+      "cz": "pravý, pravdivý, opravdový",
+      "pieces": [
+        "ve",
+        "ro"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0362": {
+      "it": "viaggio",
+      "cz": "cesta",
+      "pieces": [
+        "viag",
+        "gio"
+      ],
+      "reviewed": true,
+      "reviewNote": "viag-gio; nepřízvučné ia zůstává spolu a zdvojené gg se dělí."
+    },
+    "vit-0363": {
+      "it": "vicino a",
+      "cz": "blízko",
+      "pieces": [
+        "vi",
+        "ci",
+        "no",
+        " ",
+        "a"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0364": {
+      "it": "volo",
+      "cz": "let",
+      "pieces": [
+        "vo",
+        "lo"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0365": {
+      "it": "vulcano",
+      "cz": "sopka",
+      "pieces": [
+        "vul",
+        "ca",
+        "no"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0366": {
+      "it": "lunedì",
+      "cz": "pondělí",
+      "pieces": [
+        "lu",
+        "ne",
+        "dì"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0367": {
+      "it": "giovedì",
+      "cz": "čtvrtek",
+      "pieces": [
+        "gio",
+        "ve",
+        "dì"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0368": {
+      "it": "venerdì",
+      "cz": "pátek",
+      "pieces": [
+        "ve",
+        "ner",
+        "dì"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0369": {
+      "it": "martedì",
+      "cz": "úterý",
+      "pieces": [
+        "mar",
+        "te",
+        "dì"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0370": {
+      "it": "mercoledì",
+      "cz": "středa",
+      "pieces": [
+        "mer",
+        "co",
+        "le",
+        "dì"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0371": {
+      "it": "sabato",
+      "cz": "sobota",
+      "pieces": [
+        "sa",
+        "ba",
+        "to"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0372": {
+      "it": "domenica",
+      "cz": "neděle",
+      "pieces": [
+        "do",
+        "me",
+        "ni",
+        "ca"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0373": {
+      "it": "quanto",
+      "cz": "kolik",
+      "pieces": [
+        "quan",
+        "to"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0374": {
+      "it": "ammalato",
+      "cz": "nemocný",
+      "pieces": [
+        "am",
+        "ma",
+        "la",
+        "to"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0375": {
+      "it": "bicicletta",
+      "cz": "jízdní kolo",
+      "pieces": [
+        "bi",
+        "ci",
+        "clet",
+        "ta"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0376": {
+      "it": "bisogno",
+      "cz": "potřeba",
+      "pieces": [
+        "bi",
+        "so",
+        "gno"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0377": {
+      "it": "chiudere",
+      "cz": "zavřít",
+      "pieces": [
+        "chiu",
+        "de",
+        "re"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0378": {
+      "it": "cielo",
+      "cz": "obloha, nebe",
+      "pieces": [
+        "cie",
+        "lo"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0379": {
+      "it": "collega",
+      "cz": "kolega",
+      "pieces": [
+        "col",
+        "le",
+        "ga"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0380": {
+      "it": "colore",
+      "cz": "barva",
+      "pieces": [
+        "co",
+        "lo",
+        "re"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0381": {
+      "it": "cominciare",
+      "cz": "začít, začínat",
+      "pieces": [
+        "co",
+        "min",
+        "cia",
+        "re"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0382": {
+      "it": "coperto",
+      "cz": "zatažený, pokrytý",
+      "pieces": [
+        "co",
+        "per",
+        "to"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0383": {
+      "it": "corso",
+      "cz": "kurz",
+      "pieces": [
+        "cor",
+        "so"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0384": {
+      "it": "desiderare",
+      "cz": "přát si",
+      "pieces": [
+        "de",
+        "si",
+        "de",
+        "ra",
+        "re"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0385": {
+      "it": "divertimento",
+      "cz": "zábava",
+      "pieces": [
+        "di",
+        "ver",
+        "ti",
+        "men",
+        "to"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0386": {
+      "it": "dizionario",
+      "cz": "slovník",
+      "pieces": [
+        "di",
+        "zio",
+        "na",
+        "rio"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0387": {
+      "it": "dopodomani",
+      "cz": "pozítří",
+      "pieces": [
+        "do",
+        "po",
+        "do",
+        "ma",
+        "ni"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0388": {
+      "it": "fame",
+      "cz": "hlad",
+      "pieces": [
+        "fa",
+        "me"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0389": {
+      "it": "film",
+      "cz": "film",
+      "pieces": [
+        "film"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0390": {
+      "it": "frequentare",
+      "cz": "navštěvovat",
+      "pieces": [
+        "fre",
+        "quen",
+        "ta",
+        "re"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0391": {
+      "it": "fuori",
+      "cz": "ven, venku",
+      "pieces": [
+        "fuo",
+        "ri"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0392": {
+      "it": "gita",
+      "cz": "výlet",
+      "pieces": [
+        "gi",
+        "ta"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0393": {
+      "it": "grave",
+      "cz": "vážný, těžký",
+      "pieces": [
+        "gra",
+        "ve"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0394": {
+      "it": "grigio",
+      "cz": "šedý",
+      "pieces": [
+        "gri",
+        "gio"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0395": {
+      "it": "incontrarsi",
+      "cz": "setkat se, sejít se",
+      "pieces": [
+        "in",
+        "con",
+        "trar",
+        "si"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0396": {
+      "it": "infatti",
+      "cz": "opravdu, to je fakt",
+      "pieces": [
+        "in",
+        "fat",
+        "ti"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0397": {
+      "it": "ingegnere",
+      "cz": "inženýr",
+      "pieces": [
+        "in",
+        "ge",
+        "gne",
+        "re"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0398": {
+      "it": "Inghilterra",
+      "cz": "Anglie",
+      "pieces": [
+        "In",
+        "ghil",
+        "ter",
+        "ra"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0399": {
+      "it": "interprete",
+      "cz": "tlumočník",
+      "pieces": [
+        "in",
+        "ter",
+        "pre",
+        "te"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0400": {
+      "it": "libreria",
+      "cz": "knihkupectví",
+      "pieces": [
+        "li",
+        "bre",
+        "ri",
+        "a"
+      ],
+      "reviewed": true,
+      "reviewNote": "Přízvučné i v librerìa tvoří hiát li-bre-ri-a; zdrojový zápis bez přidaného přízvuku."
+    },
+    "vit-0401": {
+      "it": "lingua",
+      "cz": "jazyk (řeč)",
+      "pieces": [
+        "lin",
+        "gua"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0402": {
+      "it": "Londra",
+      "cz": "Londýn",
+      "pieces": [
+        "Lon",
+        "dra"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0403": {
+      "it": "medico",
+      "cz": "doktor, lékař",
+      "pieces": [
+        "me",
+        "di",
+        "co"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0404": {
+      "it": "montagna",
+      "cz": "hora, hory",
+      "pieces": [
+        "mon",
+        "ta",
+        "gna"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0405": {
+      "it": "ombrello",
+      "cz": "deštník",
+      "pieces": [
+        "om",
+        "brel",
+        "lo"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0406": {
+      "it": "passo",
+      "cz": "krok",
+      "pieces": [
+        "pas",
+        "so"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0407": {
+      "it": "piantina",
+      "cz": "plánek, mapka",
+      "pieces": [
+        "pian",
+        "ti",
+        "na"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0408": {
+      "it": "piovere",
+      "cz": "pršet",
+      "pieces": [
+        "pio",
+        "ve",
+        "re"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0409": {
+      "it": "pomeriggio",
+      "cz": "odpoledne",
+      "pieces": [
+        "po",
+        "me",
+        "rig",
+        "gio"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0410": {
+      "it": "privato",
+      "cz": "soukromý",
+      "pieces": [
+        "pri",
+        "va",
+        "to"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0411": {
+      "it": "professoressa",
+      "cz": "profesorka",
+      "pieces": [
+        "pro",
+        "fes",
+        "so",
+        "res",
+        "sa"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0412": {
+      "it": "qualche cosa",
+      "cz": "něco",
+      "pieces": [
+        "qual",
+        "che",
+        " ",
+        "co",
+        "sa"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0413": {
+      "it": "avere ragione",
+      "cz": "mít pravdu",
+      "pieces": [
+        "a",
+        "ve",
+        "re",
+        " ",
+        "ra",
+        "gio",
+        "ne"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0414": {
+      "it": "ristorante",
+      "cz": "restaurace",
+      "pieces": [
+        "ri",
+        "sto",
+        "ran",
+        "te"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0415": {
+      "it": "sete",
+      "cz": "žízeň",
+      "pieces": [
+        "se",
+        "te"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0416": {
+      "it": "signorina",
+      "cz": "slečna",
+      "pieces": [
+        "si",
+        "gno",
+        "ri",
+        "na"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0417": {
+      "it": "stare",
+      "cz": "mít se; být v určitém stavu",
+      "pieces": [
+        "sta",
+        "re"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0418": {
+      "it": "strada",
+      "cz": "cesta, ulice, silnice",
+      "pieces": [
+        "stra",
+        "da"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0419": {
+      "it": "Svezia",
+      "cz": "Švédsko",
+      "pieces": [
+        "Sve",
+        "zia"
+      ],
+      "reviewed": true,
+      "reviewNote": "Sve-zia; nepřízvučné ia patří k téže slabice."
+    },
+    "vit-0420": {
+      "it": "tascabile",
+      "cz": "kapesní",
+      "pieces": [
+        "ta",
+        "sca",
+        "bi",
+        "le"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0421": {
+      "it": "televisione",
+      "cz": "televize",
+      "pieces": [
+        "te",
+        "le",
+        "vi",
+        "sio",
+        "ne"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0422": {
+      "it": "testa",
+      "cz": "hlava",
+      "pieces": [
+        "te",
+        "sta"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0423": {
+      "it": "vita",
+      "cz": "život",
+      "pieces": [
+        "vi",
+        "ta"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0424": {
+      "it": "voglia",
+      "cz": "chuť",
+      "pieces": [
+        "vo",
+        "glia"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0425": {
+      "it": "lasciare stare",
+      "cz": "nechat být",
+      "pieces": [
+        "la",
+        "scia",
+        "re",
+        " ",
+        "sta",
+        "re"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0426": {
+      "it": "fare due passi",
+      "cz": "jít na krátkou procházku",
+      "pieces": [
+        "fa",
+        "re",
+        " ",
+        "du",
+        "e",
+        " ",
+        "pas",
+        "si"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0427": {
+      "it": "fare",
+      "cz": "dělat",
+      "pieces": [
+        "fa",
+        "re"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0428": {
+      "it": "noioso",
+      "cz": "nudný",
+      "pieces": [
+        "no",
+        "io",
+        "so"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0429": {
+      "it": "ascoltare",
+      "cz": "poslouchat",
+      "pieces": [
+        "a",
+        "scol",
+        "ta",
+        "re"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0430": {
+      "it": "carne",
+      "cz": "maso",
+      "pieces": [
+        "car",
+        "ne"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0431": {
+      "it": "famoso",
+      "cz": "slavný, známý",
+      "pieces": [
+        "fa",
+        "mo",
+        "so"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0432": {
+      "it": "comprare",
+      "cz": "koupit, kupovat",
+      "pieces": [
+        "com",
+        "pra",
+        "re"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0433": {
+      "it": "isola",
+      "cz": "ostrov",
+      "pieces": [
+        "i",
+        "so",
+        "la"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0434": {
+      "it": "antico",
+      "cz": "starobylý, dávný, antický",
+      "pieces": [
+        "an",
+        "ti",
+        "co"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0435": {
+      "it": "ambasciata",
+      "cz": "velvyslanectví",
+      "pieces": [
+        "am",
+        "ba",
+        "scia",
+        "ta"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0436": {
+      "it": "Brasile",
+      "cz": "Brazílie",
+      "pieces": [
+        "Bra",
+        "si",
+        "le"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0437": {
+      "it": "marrone",
+      "cz": "hnědý",
+      "pieces": [
+        "mar",
+        "ro",
+        "ne"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0438": {
+      "it": "calzini",
+      "cz": "ponožky",
+      "pieces": [
+        "cal",
+        "zi",
+        "ni"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0439": {
+      "it": "viola",
+      "cz": "fialový",
+      "pieces": [
+        "vi",
+        "o",
+        "la"
+      ],
+      "reviewed": true,
+      "reviewNote": "Zvolená slovníková podoba s hiátem vi-o-la; Treccani popisuje i běžnou dvojslabičnou výslovnost."
+    },
+    "vit-0440": {
+      "it": "guanti",
+      "cz": "rukavice",
+      "pieces": [
+        "guan",
+        "ti"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0441": {
+      "it": "pantaloni",
+      "cz": "kalhoty",
+      "pieces": [
+        "pan",
+        "ta",
+        "lo",
+        "ni"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0442": {
+      "it": "cintura",
+      "cz": "pásek",
+      "pieces": [
+        "cin",
+        "tu",
+        "ra"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0443": {
+      "it": "anello",
+      "cz": "prsten, kruh",
+      "pieces": [
+        "a",
+        "nel",
+        "lo"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0444": {
+      "it": "rotto",
+      "cz": "rozbitý",
+      "pieces": [
+        "rot",
+        "to"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0445": {
+      "it": "orologio",
+      "cz": "hodiny, hodinky",
+      "pieces": [
+        "o",
+        "ro",
+        "lo",
+        "gio"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0446": {
+      "it": "nove",
+      "cz": "devět",
+      "pieces": [
+        "no",
+        "ve"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0447": {
+      "it": "otto",
+      "cz": "osm",
+      "pieces": [
+        "ot",
+        "to"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0448": {
+      "it": "in contanti",
+      "cz": "v hotovosti",
+      "pieces": [
+        "in",
+        " ",
+        "con",
+        "tan",
+        "ti"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0449": {
+      "it": "carta di credito",
+      "cz": "kreditní karta",
+      "pieces": [
+        "car",
+        "ta",
+        " ",
+        "di",
+        " ",
+        "cre",
+        "di",
+        "to"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0450": {
+      "it": "paese",
+      "cz": "země; stát",
+      "pieces": [
+        "pa",
+        "e",
+        "se"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0451": {
+      "it": "quartiere",
+      "cz": "čtvrť, městská část",
+      "pieces": [
+        "quar",
+        "tie",
+        "re"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0452": {
+      "it": "albero",
+      "cz": "strom",
+      "pieces": [
+        "al",
+        "be",
+        "ro"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0453": {
+      "it": "giardino",
+      "cz": "zahrada",
+      "pieces": [
+        "giar",
+        "di",
+        "no"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0454": {
+      "it": "coinquilino",
+      "cz": "spolubydlící",
+      "pieces": [
+        "co",
+        "in",
+        "qui",
+        "li",
+        "no"
+      ],
+      "reviewed": true,
+      "reviewNote": "Složenina co- + inquilino; zachovaný hiát co-in-."
+    },
+    "vit-0455": {
+      "it": "animale domestico",
+      "cz": "domácí zvíře",
+      "pieces": [
+        "a",
+        "ni",
+        "ma",
+        "le",
+        " ",
+        "do",
+        "me",
+        "sti",
+        "co"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0456": {
+      "it": "festa",
+      "cz": "oslava, svátek, párty",
+      "pieces": [
+        "fe",
+        "sta"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0457": {
+      "it": "auguri",
+      "cz": "přání, gratulace, blahopřání",
+      "pieces": [
+        "au",
+        "gu",
+        "ri"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0458": {
+      "it": "comprendere",
+      "cz": "chápat, rozumět, zahrnovat",
+      "pieces": [
+        "com",
+        "pren",
+        "de",
+        "re"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0459": {
+      "it": "sciarpa",
+      "cz": "šála",
+      "pieces": [
+        "sciar",
+        "pa"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0460": {
+      "it": "collana",
+      "cz": "náhrdelník",
+      "pieces": [
+        "col",
+        "la",
+        "na"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0461": {
+      "it": "Congratulazioni!",
+      "cz": "Gratuluji!; Blahopřeji!",
+      "pieces": [
+        "Con",
+        "gra",
+        "tu",
+        "la",
+        "zio",
+        "ni",
+        "!"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0462": {
+      "it": "già",
+      "cz": "již, už",
+      "pieces": [
+        "già"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0463": {
+      "it": "mai",
+      "cz": "nikdy",
+      "pieces": [
+        "mai"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0464": {
+      "it": "piano",
+      "cz": "pomalu, tiše",
+      "pieces": [
+        "pia",
+        "no"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0465": {
+      "it": "attore",
+      "cz": "herec",
+      "pieces": [
+        "at",
+        "to",
+        "re"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0466": {
+      "it": "usi",
+      "cz": "používáš",
+      "pieces": [
+        "u",
+        "si"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0467": {
+      "it": "usare",
+      "cz": "používat",
+      "pieces": [
+        "u",
+        "sa",
+        "re"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0468": {
+      "it": "sito",
+      "cz": "webová stránka, web",
+      "pieces": [
+        "si",
+        "to"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0469": {
+      "it": "attrice",
+      "cz": "herečka",
+      "pieces": [
+        "at",
+        "tri",
+        "ce"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0470": {
+      "it": "vinti",
+      "cz": "vyhrané (mužský rod množného čísla)",
+      "pieces": [
+        "vin",
+        "ti"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0471": {
+      "it": "quelle",
+      "cz": "ty, tamty (ženský rod množného čísla)",
+      "pieces": [
+        "quel",
+        "le"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0472": {
+      "it": "forte",
+      "cz": "nahlas",
+      "pieces": [
+        "for",
+        "te"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0473": {
+      "it": "tedesco",
+      "cz": "němčina",
+      "pieces": [
+        "te",
+        "de",
+        "sco"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0474": {
+      "it": "storia",
+      "cz": "historie; dějiny",
+      "pieces": [
+        "sto",
+        "ria"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0475": {
+      "it": "piacere",
+      "cz": "potěšení",
+      "pieces": [
+        "pia",
+        "ce",
+        "re"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0476": {
+      "it": "male",
+      "cz": "zlo",
+      "pieces": [
+        "ma",
+        "le"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0477": {
+      "it": "fare male",
+      "cz": "bolet",
+      "pieces": [
+        "fa",
+        "re",
+        " ",
+        "ma",
+        "le"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0478": {
+      "it": "forza",
+      "cz": "síla",
+      "pieces": [
+        "for",
+        "za"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0479": {
+      "it": "macchina",
+      "cz": "stroj",
+      "pieces": [
+        "mac",
+        "chi",
+        "na"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0480": {
+      "it": "pronto",
+      "cz": "připravený; hotový",
+      "pieces": [
+        "pron",
+        "to"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0481": {
+      "it": "calcio",
+      "cz": "vápník",
+      "pieces": [
+        "cal",
+        "cio"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0482": {
+      "it": "gli",
+      "cz": "mu; jemu",
+      "pieces": [
+        "gli"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0483": {
+      "it": "solo",
+      "cz": "pouze; jen",
+      "pieces": [
+        "so",
+        "lo"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0484": {
+      "it": "dolce",
+      "cz": "jemný",
+      "pieces": [
+        "dol",
+        "ce"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0485": {
+      "it": "dolce",
+      "cz": "dezert; sladkost",
+      "pieces": [
+        "dol",
+        "ce"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0486": {
+      "it": "a destra",
+      "cz": "vpravo; doprava",
+      "pieces": [
+        "a",
+        " ",
+        "de",
+        "stra"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0487": {
+      "it": "Di niente.",
+      "cz": "Není zač.",
+      "pieces": [
+        "Di",
+        " ",
+        "nien",
+        "te",
+        "."
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0488": {
+      "it": "perché",
+      "cz": "protože",
+      "pieces": [
+        "per",
+        "ché"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0489": {
+      "it": "sentire",
+      "cz": "cítit",
+      "pieces": [
+        "sen",
+        "ti",
+        "re"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0490": {
+      "it": "a sinistra",
+      "cz": "vlevo; doleva",
+      "pieces": [
+        "a",
+        " ",
+        "si",
+        "ni",
+        "stra"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0491": {
+      "it": "tempo",
+      "cz": "počasí",
+      "pieces": [
+        "tem",
+        "po"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0492": {
+      "it": "lingua",
+      "cz": "jazyk (orgán)",
+      "pieces": [
+        "lin",
+        "gua"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0493": {
+      "it": "ragione",
+      "cz": "důvod",
+      "pieces": [
+        "ra",
+        "gio",
+        "ne"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0494": {
+      "it": "stare",
+      "cz": "zůstávat; pobývat",
+      "pieces": [
+        "sta",
+        "re"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0495": {
+      "it": "paese",
+      "cz": "vesnice; obec",
+      "pieces": [
+        "pa",
+        "e",
+        "se"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0496": {
+      "it": "congratulazione",
+      "cz": "gratulace; blahopřání (podstatné jméno)",
+      "pieces": [
+        "con",
+        "gra",
+        "tu",
+        "la",
+        "zio",
+        "ne"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    },
+    "vit-0497": {
+      "it": "mai",
+      "cz": "někdy; už někdy (v otázce)",
+      "pieces": [
+        "mai"
+      ],
+      "reviewed": true,
+      "reviewNote": "Redakčně rozděleno podle standardních italských pravidel; přesný původní zápis zachován."
+    }
+  }
+}
