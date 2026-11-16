@@ -55,3 +55,20 @@ Oprava pouze místní; běžící Cockpit ani web se v tomto kroku nemění.
 Referenční význam media událostí: [play()](https://developer.mozilla.org/en-US/docs/Web/API/HTMLMediaElement/play)
 potvrzuje zahájení; [ended](https://developer.mozilla.org/en-US/docs/Web/API/HTMLMediaElement/ended_event)
 se používá pro dokončení. Nezaměňovat start Promise za konec nahrávky.
+
+
+### 2026-11-16 14:25 CET — Schválené p+n opravy zvukových přechodů
+
+Hotovo: Připravený commit816d559a začleněný do čistého main;45 herních
+scénářů a113 doménových kontrol prošlo, vlastní Safari tok dvou hesel dokončený.
+Rozhodnutí: Míla výslovně zadal „ok p+n please“ pro tuto opravu. Cíl je
+registrované Pages vocabulary-it/, bez dalšího vývoje či nového restartu Cockpitu.
+Další krok: Převzít přesnou konečnou účtenku a skutečný poslechový retest.
+Aktuální výsledek tohoto vydání a veřejná shoda jsou v private/
+vocabulary_it_timing_release_20261116/release.json a completion.json.
+Předchozí zmínky o místním/nepublikovaném stavu patří době před tímto souhlasem.
+Navrhované další kroky: Poslechnout několik krátkých i dlouhých hesel bez Psaní
+i s Psaním; ověřit začátek a konec, potom telefon/VoiceOver.
+Technický důkaz: Jediné registrované submit_release(wait=True), zmrazený
+head/cíl/model, programová doménová brána a přesné veřejné soubory. Účtenka
+requested/uncertain není potvrzené vydání a nezadává se nový pokus.

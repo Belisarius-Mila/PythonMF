@@ -18,7 +18,7 @@ Přijatá pravidla
 Základní soubory a hranice
 VocabularyIT/vocabulary_it_catalog.json:497 identit (471 původních a26 webových);24 schválených hlavních významů a26 nových, ostatní metadata dále návrhy.
 VocabularyIT/vocabulary_it_input_manifest.json: neměnné otisky777 původních vstupů.
-Aktuální stav: Psaní zveřejněné f07dce0a má hlášené zvukové vady; nová místní oprava45 JS PASS a Safari tok, dosud bez p+n.
+Aktuální stav: Psaní zveřejněné f07dce0a má hlášené zvukové vady; nová místní oprava45 JS PASS a Safari tok, p+n opravy schválené, výsledek private/vocabulary_it_timing_release_20261116/completion.json.
 VocabularyIT/vocabulary_it_catalog.py: pouze čtení a ověření, žádný CSV writer.
 VocabularyIT/vocabulary_it_review_queue.txt:112 prioritních karet k revizi.
 VocabularyIT/WEB_FOUNDATION.txt: identita, přesné kontrolní příkazy a další bod.
@@ -414,3 +414,20 @@ congratulazione a Di niente., obnovení karty, úspěšný konec finálního aud
 a fokus na Další. Původní produkční okno mano17/497 zachované. Toto potvrzuje
 stavový tok, nikoli akustický záznam ani iPhone/Android. Finální programová
 brána, otisk a lokální checkpoint: private/vocabulary_it_timing_20261116.
+
+
+### 2026-11-16 14:25 CET — Schválené p+n opravy zvukových přechodů
+
+Hotovo: Připravený commit816d559a začleněný do čistého main;45 herních
+scénářů a113 doménových kontrol prošlo, vlastní Safari tok dvou hesel dokončený.
+Rozhodnutí: Míla výslovně zadal „ok p+n please“ pro tuto opravu. Cíl je
+registrované Pages vocabulary-it/, bez dalšího vývoje či nového restartu Cockpitu.
+Další krok: Převzít přesnou konečnou účtenku a skutečný poslechový retest.
+Aktuální výsledek tohoto vydání a veřejná shoda jsou v private/
+vocabulary_it_timing_release_20261116/release.json a completion.json.
+Předchozí zmínky o místním/nepublikovaném stavu patří době před tímto souhlasem.
+Navrhované další kroky: Poslechnout několik krátkých i dlouhých hesel bez Psaní
+i s Psaním; ověřit začátek a konec, potom telefon/VoiceOver.
+Technický důkaz: Jediné registrované submit_release(wait=True), zmrazený
+head/cíl/model, programová doménová brána a přesné veřejné soubory. Účtenka
+requested/uncertain není potvrzené vydání a nezadává se nový pokus.

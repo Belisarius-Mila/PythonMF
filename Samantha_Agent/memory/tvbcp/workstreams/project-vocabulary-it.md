@@ -7,7 +7,7 @@
 - Každý herní poslech má vlastní Audio od nuly; přednačtení dalšího zadání zachované. Žádná nová hlasová výroba ani zásah do osobních výběrů.
 -45 JS scénářů PASS;3 nové reprodukce na původním kódu selhávaly. Safari potvrdilo celý tok na congratulazione a Di niente. včetně replay s draftem a návratu na původní okno.
 - Skutečné akustické přijetí na Mílově zařízení/telefonu zůstává otevřené; AX a ended nejsou záznam slyšitelného výstupu.
-- Oprava dosud pouze místní; gate/otisk/checkpoint: private vocabulary_it_timing_20261116. Další krok samostatné p+n po pokynu, potom poslechový retest.
+- P+n opravy výslovně schválené; aktuální výsledek private vocabulary_it_timing_release_20261116/release.json a completion.json. Poslechový retest po vydání otevřený.
 <!-- SAMANTHA_CURRENT_STATUS_END -->
 
 # TVBCP: Vocabulary IT
@@ -487,3 +487,20 @@ congratulazione a Di niente., obnovení karty, úspěšný konec finálního aud
 a fokus na Další. Původní produkční okno mano17/497 zachované. Toto potvrzuje
 stavový tok, nikoli akustický záznam ani iPhone/Android. Finální programová
 brána, otisk a lokální checkpoint: private/vocabulary_it_timing_20261116.
+
+
+### 2026-11-16 14:25 CET — Schválené p+n opravy zvukových přechodů
+
+Hotovo: Připravený commit816d559a začleněný do čistého main;45 herních
+scénářů a113 doménových kontrol prošlo, vlastní Safari tok dvou hesel dokončený.
+Rozhodnutí: Míla výslovně zadal „ok p+n please“ pro tuto opravu. Cíl je
+registrované Pages vocabulary-it/, bez dalšího vývoje či nového restartu Cockpitu.
+Další krok: Převzít přesnou konečnou účtenku a skutečný poslechový retest.
+Aktuální výsledek tohoto vydání a veřejná shoda jsou v private/
+vocabulary_it_timing_release_20261116/release.json a completion.json.
+Předchozí zmínky o místním/nepublikovaném stavu patří době před tímto souhlasem.
+Navrhované další kroky: Poslechnout několik krátkých i dlouhých hesel bez Psaní
+i s Psaním; ověřit začátek a konec, potom telefon/VoiceOver.
+Technický důkaz: Jediné registrované submit_release(wait=True), zmrazený
+head/cíl/model, programová doménová brána a přesné veřejné soubory. Účtenka
+requested/uncertain není potvrzené vydání a nezadává se nový pokus.
