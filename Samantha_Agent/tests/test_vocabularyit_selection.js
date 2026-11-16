@@ -281,3 +281,56 @@ test('a stalled MP3 times out into an explicit retry or skip instead of leaving 
 test('explicit overview and change-filter buttons return to gallery even when practice was opened from a study card',async()=>{
  for(const id of ['quizBack','quizSetupChange']){const view=await app({items:fourItems});view.openStudy('vit-0001');view.element('quizTab').click();view.element(id).click();assert.equal(view.state.view,'gallery');assert.ok(!view.win.location.href.includes('card='));assert.equal(view.state.lastUid,'vit-0001');}
 });
+
+async function writingView(options={}){const view=await app({items:fourItems,...options});view.element('quizTab').click();view.element('practiceWritingToggle').click();view.element('quizStart').click();await readyQuestion(view);correctChoice(view).click();return view;}
+async function beginWriting(view){endSound(view);await sleep(0);assert.equal(view.element('practiceWritingPanel').hidden,false);return view.element('practiceHeroWord').textContent;}
+function typeWriting(view,value,extra={}){const input=view.element('practiceWritingInput');input.value=value;input.emit('input',extra);}
+
+test('writing comparison preserves accents, double letters and punctuation; normalizes NFC, case, spacing and apostrophe typography',()=>{
+ for(const [typed,expected] of [['CAFFE\u0300','caffè'],[' mi   chiamo ','mi chiamo'],['un po\u2019',"un po'"],['CONGRATULAZIONI!','Congratulazioni!']])assert.equal(practice.writingMatches(typed,expected),true);
+ for(const [typed,expected] of [['caffe','caffè'],['caffé','caffè'],['caffè!','caffè'],['capello','cappello'],['mi chiamo','mi chiamano'],['','']])assert.equal(practice.writingMatches(typed,expected),false);
+});
+test('optional writing waits for answer audio, hides the spelling, then flashes green and closes only after the complete correct input',async()=>{
+ const view=await writingView();assert.equal(view.element('practiceWritingToggle').getAttribute('aria-pressed'),'true');assert.equal(view.element('practiceWritingPanel').hidden,true);assert.equal(view.element('practiceHeroWord').hidden,false);assert.equal(view.element('quizNext').disabled,true);
+ view.element('quizNext').click();assert.equal(view.element('practiceHero').hidden,false);
+ const word=await beginWriting(view);assert.equal(view.element('practiceHeroWord').hidden,true);assert.equal(view.element('practiceHeroImage').alt,'Obrázek k procvičování');assert.equal(view.doc.activeElement,view.element('practiceWritingInput'));
+ typeWriting(view,word.slice(0,-1));assert.equal(view.element('practiceWritingInput').readOnly,false);assert.equal(view.element('practiceWritingPanel').hidden,false);
+ typeWriting(view,word);assert.equal(view.element('practiceWritingInput').readOnly,true);assert.ok(view.element('practiceWritingInput').classList.contains('is-correct'));assert.equal(view.element('quizNext').disabled,true);
+ view.advance(599);assert.equal(view.element('practiceWritingPanel').hidden,false);view.advance(1);assert.equal(view.element('practiceWritingPanel').hidden,true);assert.equal(view.element('practiceHeroWord').hidden,false);assert.equal(view.element('quizNext').disabled,false);assert.equal(view.doc.activeElement,view.element('quizNext'));
+});
+test('half-second hints preserve the draft and a repeated click restarts the hint window',async()=>{
+ const view=await writingView();const word=await beginWriting(view),draft=word.slice(0,2);typeWriting(view,draft);view.element('practiceWritingHint').click();assert.equal(view.element('practiceHeroWord').hidden,false);assert.equal(view.element('practiceWritingInput').value,draft);
+ view.advance(499);assert.equal(view.element('practiceHeroWord').hidden,false);view.advance(1);assert.equal(view.element('practiceHeroWord').hidden,true);
+ assert.equal(view.element('practiceWritingHintStatus').textContent,`Nápověda 1: ${word}`);assert.equal(view.element('practiceWritingHintStatus').children[1].lang,'it');
+ view.element('practiceWritingHint').click();view.advance(300);view.element('practiceWritingHint').click();view.advance(200);assert.equal(view.element('practiceHeroWord').hidden,false);view.advance(300);assert.equal(view.element('practiceHeroWord').hidden,true);assert.equal(view.element('practiceWritingInput').value,draft);
+ assert.equal(view.element('practiceWritingHintStatus').textContent,`Nápověda 3: ${word}`);typeWriting(view,draft);assert.equal(view.element('practiceWritingHintStatus').textContent,'');
+});
+test('accent entry through composition is not accepted early; Enter explains an incorrect spelling',async()=>{
+ const ids=['vit-0285','vit-0366','vit-0334','vit-0292'];const view=await writingView({items:vocabulary.items.filter(i=>ids.includes(i.uid))});const word=await beginWriting(view);const plain=word.normalize('NFD').replace(/[\u0300-\u036f]/g,'');assert.notEqual(word,plain);
+ typeWriting(view,plain);view.element('practiceWritingInput').emit('keydown',{key:'Enter'});assert.equal(view.element('practiceWritingInput').getAttribute('aria-invalid'),'true');assert.equal(view.element('practiceWritingPanel').hidden,false);
+ view.element('practiceWritingInput').emit('compositionstart');typeWriting(view,word.toUpperCase().normalize('NFD'),{isComposing:true});assert.equal(view.element('practiceWritingInput').readOnly,false);view.element('practiceWritingInput').emit('compositionend');assert.equal(view.element('practiceWritingInput').readOnly,true);view.advance(600);assert.equal(view.element('practiceWritingPanel').hidden,true);
+});
+test('audio replay while writing keeps the draft and spelling hidden; green confirmation cannot be cancelled by replay or hints',async()=>{
+ const view=await writingView();const word=await beginWriting(view),draft=word.slice(0,2);typeWriting(view,draft);view.element('practiceWritingHint').click();view.element('quizReplay').click();await sleep(0);assert.equal(view.element('practiceHeroWord').hidden,true);assert.equal(view.element('practiceWritingInput').value,draft);endSound(view);await sleep(0);assert.equal(view.element('practiceWritingInput').value,draft);
+ typeWriting(view,word);view.element('quizReplay').click();view.element('practiceWritingHint').click();view.advance(600);assert.equal(view.element('practiceWritingPanel').hidden,true);assert.equal(view.element('quizNext').disabled,false);
+});
+test('writing can be enabled on an already-read card or disabled mid-draft without locking Next or losing the picture',async()=>{
+ const view=await practiceView();await readyQuestion(view);correctChoice(view).click();endSound(view);await sleep(0);view.element('practiceWritingToggle').click();assert.equal(view.element('practiceWritingPanel').hidden,false);const word=view.element('practiceHeroWord').textContent;typeWriting(view,word.slice(0,2));view.element('practiceWritingHint').click();
+ view.element('practiceWritingToggle').click();assert.equal(view.element('practiceWritingPanel').hidden,true);assert.equal(view.element('practiceHeroWord').hidden,false);assert.equal(view.element('quizNext').disabled,false);view.advance(500);assert.equal(view.element('practiceHeroWord').hidden,false);
+ view.element('practiceWritingToggle').click();assert.equal(view.element('practiceWritingPanel').hidden,false);typeWriting(view,word);view.advance(600);view.element('practiceWritingToggle').click();view.element('practiceWritingToggle').click();assert.equal(view.element('practiceWritingPanel').hidden,true);
+});
+test('failed or stalled answer audio keeps the spelling visible and permits retry before writing',async()=>{
+ for(const timeout of [false,true]){const view=await writingView();if(timeout)view.advance(20000);else view.players.find(p=>p.handlers.error).handlers.error();await sleep(0);assert.equal(view.element('practiceWritingPanel').hidden,true);assert.equal(view.element('practiceHeroWord').hidden,false);assert.equal(view.element('quizNext').disabled,false);
+  view.element('quizReplay').click();await sleep(0);assert.equal(view.element('quizNext').disabled,true);endSound(view);await sleep(0);assert.equal(view.element('practiceWritingPanel').hidden,false);
+ }
+});
+test('leaving or bfcache restoration clears hint and writing callbacks; keyboard digits never answer a picture while typing',async()=>{
+ const view=await writingView();const word=await beginWriting(view);view.element('practiceWritingHint').click();view.doc.emit('keydown',{key:'1',target:view.element('practiceWritingInput')});assert.equal(view.element('practiceWritingPanel').hidden,false);
+ view.element('quizBack').click();view.advance(10000);assert.equal(view.state.view,'gallery');assert.equal(view.element('practiceWritingPanel').hidden,true);
+ view.element('quizTab').click();view.element('quizStart').click();await readyQuestion(view);correctChoice(view).click();await beginWriting(view);typeWriting(view,view.element('practiceHeroWord').textContent);view.emit('pagehide');view.emit('pageshow',{persisted:true});view.advance(1000);assert.equal(view.element('quizSetup').hidden,false);assert.equal(view.element('practiceWritingPanel').hidden,true);
+});
+test('writing summary counts successful entries and hints without changing learner selections or persisting a draft',async()=>{
+ const view=await app({items:fourItems,blocked:true});view.element('quizTab').click();view.element('practiceWritingToggle').click();view.element('quizStart').click();
+ for(let n=0;n<4;n++){await readyQuestion(view);correctChoice(view).click();const word=await beginWriting(view);if(n===0)view.element('practiceWritingHint').click();typeWriting(view,word);view.advance(600);view.element('quizNext').click();}
+ assert.equal(view.element('quizEnd').hidden,false);assert.match(view.element('quizResult').textContent,/Správné zápisy: 4\. Použití nápovědy: 1/);assert.equal(view.local.getItem(learners.KEY),null);
+});
