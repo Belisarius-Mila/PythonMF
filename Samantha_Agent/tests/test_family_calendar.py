@@ -403,11 +403,10 @@ class FamilyCalendarTests(unittest.TestCase):
             today=date(2026, 12, 18),
             lookahead_days=0,
         )[0]
-        with self.assertRaisesRegex(ValueError, "D-2 nebo D-1"):
-            build_notification_preview(
-                event_today,
-                recipients=("first@example.invalid", "second@example.invalid"),
-            )
+        preview = build_notification_preview(
+            event_today, recipients=("first@example.invalid", "second@example.invalid"))
+        self.assertEqual(preview["notification_offset"], "D-0")
+        self.assertIn("Dnes má", preview["body"])
 
     def test_due_notification_previews_only_return_today_d2_and_d1_events(self) -> None:
         with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:

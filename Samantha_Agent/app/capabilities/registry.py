@@ -810,6 +810,15 @@ CAPABILITIES: tuple[CapabilityRecord, ...] = (
         notes="Returns only aggregate blockers; never reads the credential value, mutates recovery state, or calls SMTP.",
     ),
     CapabilityRecord(
+        capability_id="family_calendar_hourly_schedule", label="Configure hourly family-calendar checks",
+        risk=RiskLevel.SYSTEM_CHANGE, reads=("owned calendar LaunchAgent", "loaded reader version", "enabled calendar mode"),
+        writes=("owned calendar LaunchAgent", "private schedule receipts"), requires_confirmation=True,
+        confirmation_policy=ConfirmationPolicy.EXACT_PHRASE,
+        voice_allowed=VoicePolicy.APPROVAL_ONLY, mobile_allowed=MobilePolicy.APPROVAL_CARD,
+        audit=AuditPolicy.REDACTED, tool="family_calendar_hourly_schedule",
+        notes="Default preview is read-only; apply requires exact scope, global acknowledgement and deployed readers. No manual email or model call.",
+    ),
+    CapabilityRecord(
         capability_id="samantha_capability_audit",
         label="Run Samantha capability audit",
         risk=RiskLevel.READ_ONLY,

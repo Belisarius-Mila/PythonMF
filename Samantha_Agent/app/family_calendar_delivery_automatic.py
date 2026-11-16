@@ -6,15 +6,16 @@ import smtplib
 import stat
 from collections.abc import Callable
 from dataclasses import dataclass
-from datetime import date
+from datetime import date, datetime
 from pathlib import Path
+from zoneinfo import ZoneInfo
 
 from app.family_calendar import (
     DEFAULT_FAMILY_CALENDAR_PATH,
     load_family_people,
     upcoming_family_events,
 )
-from app.family_calendar_delivery import NotificationOffset
+from app.family_calendar_delivery import NotificationOffset, plan_delivery
 from app.family_calendar_delivery_config import (
     DEFAULT_FAMILY_CALENDAR_DELIVERY_CONFIG_PATH,
     DeliveryConfigMode,
@@ -33,7 +34,7 @@ from app.family_calendar_delivery_runner import (
     FamilyCalendarDeliveryRunResult,
     run_configured_family_calendar_delivery,
 )
-from app.family_calendar_delivery_store import DEFAULT_FAMILY_CALENDAR_DELIVERY_PATH
+from app.family_calendar_delivery_store import DEFAULT_FAMILY_CALENDAR_DELIVERY_PATH, load_delivery_records
 from app.family_calendar_icloud_smtp_client import ICloudSMTPClient
 from app.family_calendar_smtp_adapter import (
     SMTPClient,
@@ -62,6 +63,7 @@ class FamilyCalendarAutomaticDeliveryResult:
     recovery_checked: bool
     keychain_read: bool
     transport_called: bool
+    d0_count: int = 0
 
     def __repr__(self) -> str:
         return (
@@ -76,6 +78,7 @@ class FamilyCalendarAutomaticDeliveryResult:
             "candidate_count": self.candidate_count,
             "d2_count": self.d2_count,
             "d1_count": self.d1_count,
+            "d0_count": self.d0_count,
             "eligible_count": self.eligible_count,
             "attempted_count": self.attempted_count,
             "skipped_count": self.skipped_count,
@@ -115,6 +118,8 @@ _ENABLED_RUNNER_STATUSES = frozenset(
 def run_family_calendar_automatic_delivery(
     *,
     today: date | None = None,
+    now: datetime | None = None,
+    hourly_policy: bool | None = None,
     people_path: Path = DEFAULT_FAMILY_CALENDAR_PATH,
     config_path: Path = DEFAULT_FAMILY_CALENDAR_DELIVERY_CONFIG_PATH,
     state_path: Path = DEFAULT_FAMILY_CALENDAR_DELIVERY_PATH,
@@ -126,7 +131,11 @@ def run_family_calendar_automatic_delivery(
 ) -> FamilyCalendarAutomaticDeliveryResult:
     """Run today's enabled D-2/D-1 candidates through the persistent coordinator."""
 
-    today_date = today or date.today()
+    current = (now or datetime.now(ZoneInfo("Europe/Prague"))).astimezone(ZoneInfo("Europe/Prague"))
+    if hourly_policy is None:
+        from app.family_calendar_delivery_hourly import hourly_schedule_active
+        hourly_policy = hourly_schedule_active()
+    today_date = today or current.date()
     if not isinstance(today_date, date):
         return _empty_result("input_error")
     try:
@@ -136,6 +145,8 @@ def run_family_calendar_automatic_delivery(
     recipient_count = len(config.recipients)
     if config.mode is not DeliveryConfigMode.ENABLED:
         return _empty_result("not_enabled", recipient_count=recipient_count)
+    if today is None and current.hour < 8:
+        return _empty_result("enabled", recipient_count=recipient_count)
     if config.smtp_provider != "icloud":
         return _empty_result("provider_error", recipient_count=recipient_count)
 
@@ -180,13 +191,14 @@ def run_family_calendar_automatic_delivery(
         candidates = tuple(
             event
             for event in events
-            if event.notification_due and event.days_until in (1, 2)
+            if event.notification_due and event.days_until in ((0, 1, 2) if hourly_policy else (1, 2))
         )
     except Exception:  # noqa: BLE001 - private calendar details stay redacted.
         return _empty_result("calendar_error", recipient_count=recipient_count)
 
     d2_count = sum(event.days_until == 2 for event in candidates)
     d1_count = sum(event.days_until == 1 for event in candidates)
+    d0_count = sum(event.days_until == 0 for event in candidates)
     if not candidates:
         return _aggregate_result(
             status="enabled",
@@ -199,6 +211,24 @@ def run_family_calendar_automatic_delivery(
             results=(),
         )
 
+    # Skip known completed events before accessing the credential. The coordinator
+    # rechecks under its worker lock immediately before any actual send.
+    try:
+        records = load_delivery_records(state_path)
+        pending = []
+        for event in candidates:
+            plan = plan_delivery(event_key=event.event_key, offset=NotificationOffset(f"D-{event.days_until}"), records=records)
+            if plan.eligible and (hourly_policy or not plan.attempt):
+                pending.append(event)
+    except Exception:
+        return _empty_result("runtime_error", recipient_count=recipient_count, recovery_checked=True)
+    skipped = tuple(FamilyCalendarDeliveryRunResult("skipped", recipient_count, False, False, False)
+                    for _ in range(len(candidates) - len(pending)))
+    if not pending:
+        return _aggregate_result(status="enabled", candidate_count=len(candidates), d2_count=d2_count,
+                                 d1_count=d1_count, d0_count=d0_count, recipient_count=recipient_count,
+                                 recovery_checked=True, keychain_read=False, results=skipped)
+
     try:
         app_password = credential_reader()
     except Exception:  # noqa: BLE001 - Keychain and secret details stay redacted.
@@ -207,6 +237,7 @@ def run_family_calendar_automatic_delivery(
             candidate_count=len(candidates),
             d2_count=d2_count,
             d1_count=d1_count,
+            d0_count=d0_count,
             recipient_count=recipient_count,
             recovery_checked=True,
             keychain_read=True,
@@ -221,15 +252,16 @@ def run_family_calendar_automatic_delivery(
             candidate_count=len(candidates),
             d2_count=d2_count,
             d1_count=d1_count,
+            d0_count=d0_count,
             recipient_count=recipient_count,
             recovery_checked=True,
             keychain_read=True,
             results=(),
         )
 
-    results: list[FamilyCalendarDeliveryRunResult] = []
+    results: list[FamilyCalendarDeliveryRunResult] = list(skipped)
     try:
-        for event in candidates:
+        for event in pending:
             envelope = build_family_calendar_delivery_envelope(
                 event,
                 recipients=config.recipients,
@@ -259,6 +291,7 @@ def run_family_calendar_automatic_delivery(
                     candidate_count=len(candidates),
                     d2_count=d2_count,
                     d1_count=d1_count,
+                    d0_count=d0_count,
                     recipient_count=recipient_count,
                     recovery_checked=True,
                     keychain_read=True,
@@ -279,6 +312,7 @@ def run_family_calendar_automatic_delivery(
             candidate_count=len(candidates),
             d2_count=d2_count,
             d1_count=d1_count,
+            d0_count=d0_count,
             recipient_count=recipient_count,
             recovery_checked=True,
             keychain_read=True,
@@ -303,6 +337,7 @@ def run_family_calendar_automatic_delivery(
         candidate_count=len(candidates),
         d2_count=d2_count,
         d1_count=d1_count,
+        d0_count=d0_count,
         recipient_count=recipient_count,
         recovery_checked=True,
         keychain_read=True,
@@ -328,6 +363,7 @@ def _aggregate_result(
     recovery_checked: bool,
     keychain_read: bool,
     results: tuple[FamilyCalendarDeliveryRunResult, ...],
+    d0_count: int = 0,
     recovery_required_count: int | None = None,
 ) -> FamilyCalendarAutomaticDeliveryResult:
     return FamilyCalendarAutomaticDeliveryResult(
@@ -335,6 +371,7 @@ def _aggregate_result(
         candidate_count=candidate_count,
         d2_count=d2_count,
         d1_count=d1_count,
+        d0_count=d0_count,
         eligible_count=sum(result.attempt_eligible for result in results),
         attempted_count=sum(result.transport_called for result in results),
         skipped_count=sum(result.status == "skipped" for result in results),

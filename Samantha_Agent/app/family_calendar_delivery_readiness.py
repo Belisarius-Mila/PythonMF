@@ -277,6 +277,9 @@ def _planner_document_matches(raw: object, runner_path: Path) -> bool:
     if str(Path(arguments[1]).expanduser().resolve()) != expected_runner:
         return False
     interval = raw.get("StartCalendarInterval")
+    if isinstance(interval, list):
+        return (interval == [{"Hour": hour, "Minute": 0} for hour in range(8, 24)]
+                and raw.get("RunAtLoad") is True and raw.get("ProcessType") == "Background")
     if not isinstance(interval, dict):
         return False
     hour = interval.get("Hour")

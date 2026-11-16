@@ -11,6 +11,41 @@
 
 ## Aktuální stav
 
+## 2026-11-16 12:27 CET — Hodinové kontroly připravené místně
+
+Hotovo: hodinové kontroly od08:00 do23:00 a kontrola při spuštění služby,
+bez odesílání před08:00 v Europe/Prague. Poslední dohnání v den události
+(D-0), pouze pokud předchozí pokusy nebyly přijaté ani nejisté. Prokazatelné
+NOT_SENT lze opakovat s novým číslem pokusu, původní doklad se nepřepisuje;
+nejvýše24 pokusů pro jeden den/offset. SMTP_ACCEPTED, PARTIAL, SENDING nebo
+DELIVERY_UNKNOWN nepovolují automatické opakování. Hotové události se
+přeskočí před čtením hesla. Dřívější záznamy bez attempt se čtou jako pokus0.
+
+Rozhodnutí: Míla schválil zpevnění, změnil navržený interval15min na1hodinu
+a potvrdil nalezení domněle chybějící zprávy. Živý audit ověřil automatiku
+enabled,12 dokladů a0 blokátorů; obě dotčené zprávy byly nalezené v INBOX.
+Žádné osoby, data narození, adresy ani texty zpráv se do zápisu neukládají.
+
+Další krok: dokončit nyní výslovně schválené p+n kompatibilního Cockpitu a poté
+registrované family_calendar_hourly_schedule: nový preview a apply se
+shodným otiskem, potvrzeným rozsahem a již platnou globální brzdou. Před
+přepnutím ověří načtený kód, uloží původní plist a stav přechodu. Při nejistém
+bootstrap se nic neopakuje ani nezastavuje možný odesílající worker.
+RunAtLoad může spustit již schválenou automatiku; nový rozsah se povolí
+samostatným soukromým policy.json teprve při této aktivaci. Do té doby
+zůstává původní denní D-2/D-1 provoz. Míla následně výslovně zadal „pokračuj p+n“; toto vydání je tedy schválené.
+
+Navrhované další kroky: ověřit první přirozenou hodinovou kontrolu; stavy
+PARTIAL/DELIVERY_UNKNOWN nadále řešit ručně bez automatického retry.
+
+Technický důkaz:245 kalendářových testů PASS,13 nových scénářů (souběh,
+D-0, staré doklady, oddělené retry, havárie, limit, noční blokace, načtený
+reader, změněný plán a nejistý bootstrap). Živě pouze read-only preview;
+žádné odeslání ani změna LaunchAgentu/Keychain. Konečná brána, commit a
+navazující aktivace mají soukromý doklad family_calendar/hourly_development/
+development.json. Fyzická přejímka nové automatiky zatím neproběhla.
+
+
 - 2026-10-17 14:41 CEST: zobrazení bezpečného stavu je v Cockpitu pushnuté a řízeně
   nasazené (kód `ae30beddcdfd`, nový proces, smoke 5/5). Živý GET po nasazení
   potvrdil aktivní režim a bezpečnou projekci s časem; konfigurace automatiky

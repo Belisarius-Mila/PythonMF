@@ -196,6 +196,7 @@ class ICloudSMTPClient:
         confirmed_result: SMTPClientResult | None = None
         client_error: ICloudSMTPClientError | None = None
         operation_failed = False
+        send_started = False
         try:
             tls_context = self.tls_context_factory()
             with self.smtp_factory(
@@ -207,6 +208,7 @@ class ICloudSMTPClient:
                 smtp.starttls(context=tls_context)
                 smtp.ehlo()
                 smtp.login(self.username, self.app_password)
+                send_started = True
                 refused = smtp.send_message(
                     message,
                     from_addr=clean_from,
@@ -226,6 +228,10 @@ class ICloudSMTPClient:
                     refused_addresses=confirmed_result.refused_addresses,
                     session_close_ok=False,
                 )
+            if not send_started:
+                # Connection, TLS and authentication have not attempted DATA.
+                # These failures are safe for the next authorized hourly check.
+                return SMTPClientResult(refused_addresses=recipients, session_close_ok=False)
             if isinstance(exc, ICloudSMTPClientError):
                 client_error = exc
             else:

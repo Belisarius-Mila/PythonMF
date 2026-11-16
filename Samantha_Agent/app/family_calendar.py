@@ -21,7 +21,7 @@ DEFAULT_FAMILY_CALENDAR_PATH = (
 )
 FAMILY_CALENDAR_SCHEMA_VERSION = 1
 DEFAULT_LOOKAHEAD_DAYS = 30
-NOTIFICATION_OFFSETS = frozenset({1, 2})
+NOTIFICATION_OFFSETS = frozenset({0, 1, 2})
 PERSON_ID_RE = re.compile(r"person-[a-z0-9]{8,40}")
 NAME_DAY_RE = re.compile(r"(0[1-9]|1[0-2])-([0-2][0-9]|3[01])")
 EMAIL_ADDRESS_RE = re.compile(r"[^@\s]+@[^@\s]+\.[^@\s]+")
@@ -472,14 +472,14 @@ def build_notification_message(event: FamilyEvent) -> dict[str, Any]:
     """Build shared D-2/D-1 subject and body without recipients or I/O."""
 
     if not event.notification_due or event.days_until not in NOTIFICATION_OFFSETS:
-        raise ValueError("Zprávu lze sestavit jen pro upozornění D-2 nebo D-1.")
+        raise ValueError("Zprávu lze sestavit jen pro upozornění D-2, D-1 nebo D-0.")
     display_name = _message_single_line(event.display_name, field="display_name")
     relation_value = _message_single_line(event.relation, field="relation", required=False)
     event_label = _message_single_line(event.event_label, field="event_label")
 
     offset = f"D-{event.days_until}"
     relation = f" ({relation_value})" if relation_value else ""
-    timing = "Zítra" if event.days_until == 1 else "Za 2 dny"
+    timing = {0: "Dnes", 1: "Zítra", 2: "Za 2 dny"}[event.days_until]
     body_lines = [
         f"Rodinný kalendář – upozornění {offset}",
         "",
@@ -625,7 +625,7 @@ def _family_event(
         days_until=days_until,
         age=age,
         notification_due=notification_due,
-        catch_up=notification_due and days_until == 1,
+        catch_up=notification_due and days_until <= 1,
     )
 
 

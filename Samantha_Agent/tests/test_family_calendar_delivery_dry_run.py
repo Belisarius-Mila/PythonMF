@@ -48,6 +48,7 @@ class FamilyCalendarDeliveryOperationalDryRunTests(unittest.TestCase):
                     "candidate_count": 2,
                     "d2_count": 1,
                     "d1_count": 1,
+                    "d0_count": 0,
                     "eligible_count": 2,
                     "recipient_count": 4,
                     "coordinator_called": False,

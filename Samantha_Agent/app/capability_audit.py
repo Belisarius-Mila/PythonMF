@@ -62,9 +62,9 @@ CAPABILITY_AREAS = (
     ),
     CapabilityArea(
         name="Rodinny kalendar",
-        level="L3",
-        safety="read-only redacted readiness; no secret read, state write, recovery mutation, or send",
-        tools=("family_calendar_delivery_readiness",),
+        level="L3/L4",
+        safety="read-only redacted readiness; confirmed hourly activation changes only the owned scheduler and may start approved delivery",
+        tools=("family_calendar_delivery_readiness", "family_calendar_hourly_schedule"),
         follow_up="Use family_calendar_delivery_readiness for the current delivery mode; activation and delivery are not checked here.",
     ),
     CapabilityArea(

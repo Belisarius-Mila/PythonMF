@@ -207,7 +207,7 @@ class FamilyCalendarICloudSMTPClientTests(unittest.TestCase):
                 visible = f"{client!r} {result!r}"
                 _assert_redacted(self, visible)
 
-    def test_tls_login_and_send_failures_become_generic_and_adapter_marks_unknown(self) -> None:
+    def test_pre_send_failures_are_not_sent_but_send_failure_stays_unknown(self) -> None:
         for failure_at in ("starttls", "login", "send_message"):
             with self.subTest(failure_at=failure_at):
                 session = FakeSMTPSession(failure_at=failure_at)
@@ -222,13 +222,21 @@ class FamilyCalendarICloudSMTPClientTests(unittest.TestCase):
                 )
 
                 self.assertEqual(outcome.accepted_recipient_ids, ())
-                self.assertEqual(outcome.not_sent_recipient_ids, ())
-                self.assertEqual(outcome.unknown_recipient_ids, RECIPIENT_IDS)
+                self.assertEqual(outcome.not_sent_recipient_ids, RECIPIENT_IDS if failure_at != "send_message" else ())
+                self.assertEqual(outcome.unknown_recipient_ids, RECIPIENT_IDS if failure_at == "send_message" else ())
                 self.assertTrue(session.exited)
                 _assert_redacted(self, repr(outcome))
 
+    def test_connection_failure_never_enters_send_and_is_known_not_sent(self):
+        def offline(*args, **kwargs):
+            raise OSError("synthetic offline")
+        client = ICloudSMTPClient(SENDER_ADDRESS, APP_PASSWORD, offline)
+        result = client.send_message(_message(), from_addr=SENDER_ADDRESS, to_addrs=ADDRESSES)
+        self.assertEqual(result.refused_addresses, ADDRESSES)
+        self.assertFalse(result.session_close_ok)
+
     def test_client_error_suppresses_private_exception_context(self) -> None:
-        client = _client(FakeSMTPFactory(FakeSMTPSession(failure_at="login")))
+        client = _client(FakeSMTPFactory(FakeSMTPSession(failure_at="send_message")))
 
         with self.assertRaises(ICloudSMTPClientError) as raised:
             client.send_message(

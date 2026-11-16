@@ -41,6 +41,7 @@ class FamilyCalendarOperationalDryRunResult:
     recipient_count: int
     coordinator_called: bool
     transport_called: bool
+    d0_count: int = 0
 
     def safe_document(self) -> dict[str, object]:
         return {
@@ -48,6 +49,7 @@ class FamilyCalendarOperationalDryRunResult:
             "candidate_count": self.candidate_count,
             "d2_count": self.d2_count,
             "d1_count": self.d1_count,
+            "d0_count": self.d0_count,
             "eligible_count": self.eligible_count,
             "recipient_count": self.recipient_count,
             "coordinator_called": self.coordinator_called,
@@ -100,24 +102,21 @@ def run_family_calendar_operational_dry_run(
         candidates = [
             event
             for event in events
-            if event.notification_due and event.days_until in (1, 2)
+            if event.notification_due and event.days_until in (0, 1, 2)
         ]
     except Exception:  # noqa: BLE001 - private calendar details must stay redacted.
         return _empty_result("calendar_error", recipient_count=len(config.recipients))
 
     d2_count = sum(event.days_until == 2 for event in candidates)
     d1_count = sum(event.days_until == 1 for event in candidates)
+    d0_count = sum(event.days_until == 0 for event in candidates)
     guards = _RuntimeGuards()
     results: list[FamilyCalendarDeliveryRunResult] = []
     try:
         for event in candidates:
             result = configured_runner(
                 event_key=event.event_key,
-                offset=(
-                    NotificationOffset.D2
-                    if event.days_until == 2
-                    else NotificationOffset.D1
-                ),
+                offset=NotificationOffset(f"D-{event.days_until}"),
                 transport=guards.transport,
                 config_path=config_path,
                 state_path=state_path,
@@ -131,6 +130,7 @@ def run_family_calendar_operational_dry_run(
             candidate_count=len(candidates),
             d2_count=d2_count,
             d1_count=d1_count,
+            d0_count=d0_count,
             eligible_count=sum(result.attempt_eligible for result in results),
             recipient_count=len(config.recipients),
             guards=guards,
@@ -152,6 +152,7 @@ def run_family_calendar_operational_dry_run(
             candidate_count=len(candidates),
             d2_count=d2_count,
             d1_count=d1_count,
+            d0_count=d0_count,
             eligible_count=0,
             recipient_count=len(config.recipients),
             guards=guards,
@@ -166,6 +167,7 @@ def run_family_calendar_operational_dry_run(
         candidate_count=len(candidates),
         d2_count=d2_count,
         d1_count=d1_count,
+        d0_count=d0_count,
         eligible_count=eligible_count,
         recipient_count=len(config.recipients),
         guards=guards,
@@ -183,6 +185,7 @@ def _result(
     recipient_count: int,
     guards: _RuntimeGuards,
     results: list[FamilyCalendarDeliveryRunResult] | None = None,
+    d0_count: int = 0,
 ) -> FamilyCalendarOperationalDryRunResult:
     runner_results = results or []
     return FamilyCalendarOperationalDryRunResult(
@@ -190,6 +193,7 @@ def _result(
         candidate_count=candidate_count,
         d2_count=d2_count,
         d1_count=d1_count,
+        d0_count=d0_count,
         eligible_count=eligible_count,
         recipient_count=recipient_count,
         coordinator_called=(

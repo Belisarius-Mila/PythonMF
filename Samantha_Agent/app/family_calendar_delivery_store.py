@@ -207,7 +207,7 @@ def _records_from_document(raw: Any) -> dict[str, DeliveryRecord]:
 
 def _record_from_payload(operation_id: str, raw: Any) -> DeliveryRecord:
     expected_fields = {"event_key", "offset", "operation_id", "state", "recipients"}
-    if not isinstance(raw, dict) or set(raw) != expected_fields:
+    if not isinstance(raw, dict) or set(raw) not in (expected_fields, expected_fields | {"attempt"}):
         raise DeliveryStoreError("Stored delivery record has an invalid shape.")
     event_key = _required_string(raw.get("event_key"), field="event_key")
     stored_operation_id = _required_string(raw.get("operation_id"), field="operation_id")
@@ -241,6 +241,7 @@ def _record_from_payload(operation_id: str, raw: Any) -> DeliveryRecord:
         operation_id=stored_operation_id,
         eligible=True,
         reason="restore_from_private_store",
+        attempt=raw.get("attempt", 0),
     )
     try:
         sending = begin_delivery(
@@ -287,6 +288,7 @@ def _store_payload(records: dict[str, DeliveryRecord]) -> dict[str, Any]:
 
 def _record_payload(record: DeliveryRecord) -> dict[str, Any]:
     return {
+        **({"attempt": record.attempt} if record.attempt else {}),
         "event_key": record.event_key,
         "offset": record.offset.value,
         "operation_id": record.operation_id,

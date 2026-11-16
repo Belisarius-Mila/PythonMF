@@ -141,6 +141,7 @@ Aktualni registrovane reporty:
 | "Počkej na tuto účtenku p+n" | `app.communication.luna_release.wait_for_release(job_id)` | programové čekání připnuté k job ID, bez modelu, publikace a retry; timeout stav nepřepíše |
 | "Co Samantha umi?", "audit schopnosti", "kde jsou workflow rezervy?" | `samantha_capability_audit()` | cte registr toolu a workflow; nezapisuje |
 | "Je Rodinny kalendar pripraveny na automatiku?", "readiness kalendare" | `family_calendar_delivery_readiness()` | cte jen validaci private konfigurace, agregovane dorucovaci stavy, metadata planovace a existenci Keychain polozky; necte heslo, nezapisuje, nerecoveruje a neodesila |
+| "hodinová kontrola rodinného kalendáře" | `family_calendar_hourly_schedule()` | výchozí read-only preview; apply až po nasazení kompatibilního readeru, s přesným otiskem/souhlasem a globální brzdou; může spustit schválenou automatiku, žádný ruční e-mail ani modelový pokus |
 | "Udelej aktualni systemovy audit", "audit projektu/toolu/vrstev", "na cem dnes navazat?" | `samantha_project_audit(mode="quick", save=False)` | cte jen git-safe pametove registry a systemove reporty; necte private vault, e-maily ani soukrome dokumenty |
 | "Uloz aktualni systemovy audit" | `samantha_project_audit(mode="full", save=True)` | zapise git-safe textovy report do `memory/reports/`; bez private obsahu |
 | "Co je v knowledge inboxu?", "velke podklady", "archiv chatu k prostudovani" | `samantha_knowledge_inbox_inventory()` | vypise jen metadata souboru v private inboxu; necte obsah |

@@ -13,6 +13,7 @@ REQUIRED_RECIPIENT_COUNT = 4
 class NotificationOffset(str, Enum):
     D2 = "D-2"
     D1 = "D-1"
+    D0 = "D-0"
 
 
 class DeliveryState(str, Enum):
@@ -43,6 +44,7 @@ class DeliveryRecord:
     operation_id: str
     state: DeliveryState
     recipients: tuple[RecipientDelivery, ...]
+    attempt: int = 0
 
 
 @dataclass(frozen=True)
@@ -52,6 +54,7 @@ class DeliveryPlan:
     operation_id: str
     eligible: bool
     reason: str
+    attempt: int = 0
 
 
 def plan_delivery(
@@ -65,15 +68,27 @@ def plan_delivery(
     clean_event_key = _clean_event_key(event_key)
     clean_offset = _coerce_offset(offset)
     operation_id = delivery_operation_id(clean_event_key, clean_offset)
-    matching = [record for record in records if record.operation_id == operation_id]
+    records = tuple(records)
+    matching = [record for record in records
+                if record.event_key == clean_event_key and record.offset is clean_offset]
+    attempt = 0
     if matching:
-        return DeliveryPlan(
-            event_key=clean_event_key,
-            offset=clean_offset,
-            operation_id=operation_id,
-            eligible=False,
-            reason="already_recorded",
-        )
+        if any(record.state is not DeliveryState.NOT_SENT for record in matching):
+            return DeliveryPlan(clean_event_key, clean_offset, operation_id, False, "already_recorded")
+        attempt = max(record.attempt for record in matching) + 1
+        if attempt >= 24:
+            return DeliveryPlan(clean_event_key, clean_offset, operation_id, False, "retry_limit_reached")
+        operation_id = delivery_operation_id(clean_event_key, clean_offset, attempt=attempt)
+
+    others = [record for record in records
+              if record.event_key == clean_event_key and record.offset is not clean_offset]
+    if any(record.state is not DeliveryState.NOT_SENT for record in others):
+        reason = "d1_blocked_by_d2" if clean_offset is NotificationOffset.D1 else "blocked_by_previous_delivery"
+        return DeliveryPlan(clean_event_key, clean_offset, operation_id, False, reason)
+    if attempt:
+        return DeliveryPlan(clean_event_key, clean_offset, operation_id, True, "retry_after_not_sent", attempt)
+    if clean_offset is NotificationOffset.D0:
+        return DeliveryPlan(clean_event_key, clean_offset, operation_id, True, "catch_up_event_day")
 
     if clean_offset is NotificationOffset.D2:
         return DeliveryPlan(
@@ -94,7 +109,7 @@ def plan_delivery(
             eligible=True,
             reason="catch_up_d1_missing_d2",
         )
-    if len(d2_records) == 1 and d2_records[0].state is DeliveryState.NOT_SENT:
+    if d2_records and all(record.state is DeliveryState.NOT_SENT for record in d2_records):
         return DeliveryPlan(
             event_key=clean_event_key,
             offset=clean_offset,
@@ -120,7 +135,7 @@ def begin_delivery(
 
     if not plan.eligible:
         raise ValueError("Delivery cannot begin from an ineligible plan.")
-    expected_operation_id = delivery_operation_id(plan.event_key, plan.offset)
+    expected_operation_id = delivery_operation_id(plan.event_key, plan.offset, attempt=plan.attempt)
     if plan.operation_id != expected_operation_id:
         raise ValueError("Delivery plan has an inconsistent operation id.")
     clean_recipient_ids = _clean_recipient_ids(recipient_ids)
@@ -133,6 +148,7 @@ def begin_delivery(
             RecipientDelivery(recipient_id, RecipientDeliveryState.PENDING)
             for recipient_id in clean_recipient_ids
         ),
+        attempt=plan.attempt,
     )
 
 
@@ -195,10 +211,12 @@ def mark_interrupted_delivery(record: DeliveryRecord) -> DeliveryRecord:
     )
 
 
-def delivery_operation_id(event_key: str, offset: NotificationOffset | str) -> str:
+def delivery_operation_id(event_key: str, offset: NotificationOffset | str, *, attempt: int = 0) -> str:
     clean_event_key = _clean_event_key(event_key)
     clean_offset = _coerce_offset(offset)
-    return f"{clean_event_key}:{clean_offset.value}"
+    if type(attempt) is not int or not 0 <= attempt < 24:
+        raise ValueError("Delivery attempt must be an integer from 0 to 23.")
+    return f"{clean_event_key}:{clean_offset.value}" + (f":retry-{attempt}" if attempt else "")
 
 
 def _clean_event_key(value: str) -> str:
@@ -212,7 +230,7 @@ def _coerce_offset(value: NotificationOffset | str) -> NotificationOffset:
     try:
         return value if isinstance(value, NotificationOffset) else NotificationOffset(str(value))
     except ValueError as exc:
-        raise ValueError("Delivery offset must be D-2 or D-1.") from exc
+        raise ValueError("Delivery offset must be D-2, D-1 or D-0.") from exc
 
 
 def _clean_recipient_ids(values: Sequence[str]) -> tuple[str, ...]:

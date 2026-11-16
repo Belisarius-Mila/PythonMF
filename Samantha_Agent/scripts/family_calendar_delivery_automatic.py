@@ -48,7 +48,7 @@ def main(
     stream = sys.stdout if output is None else output
     arguments = build_parser().parse_args(argv)
     try:
-        today = date.fromisoformat(arguments.today) if arguments.today else date.today()
+        today = date.fromisoformat(arguments.today) if arguments.today else None
     except ValueError:
         print(
             json.dumps({"status": "input_error", "redacted": True}, sort_keys=True),

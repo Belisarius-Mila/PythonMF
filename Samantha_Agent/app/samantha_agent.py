@@ -260,6 +260,16 @@ def family_calendar_delivery_readiness() -> str:
 
 
 @function_tool
+def family_calendar_hourly_schedule(
+    apply: bool = False, fingerprint: str = "", confirmation: str = "", global_confirmation: str = "",
+) -> str:
+    """Preview hourly checks; apply only after deployed readers and exact confirmation."""
+    from app.family_calendar_delivery_hourly import hourly_schedule_tool
+    return hourly_schedule_tool(apply=apply, fingerprint=fingerprint, confirmation=confirmation,
+                                global_confirmation=global_confirmation)
+
+
+@function_tool
 def prepare_iphone_shortcut(
     name: str,
     purpose: str,
@@ -866,6 +876,7 @@ LOKALNI PAMET:
             copy_downloads_files_to_knowledge_inbox,
             iphone_shortcuts_playground_status,
             family_calendar_delivery_readiness,
+            family_calendar_hourly_schedule,
             prepare_iphone_shortcut,
             list_quick_notes,
             show_quick_note_detail,

@@ -40,7 +40,7 @@ class CapabilityAuditTests(unittest.TestCase):
                 self.assertNotIn("2026-06-01", text)
                 self.assertNotIn("Register PictNew and VocabularyEN workflows", text)
                 self.assertNotIn("Priority reserves:", text)
-                self.assertIn("Registry-covered agent tools: 85/85", text)
+                self.assertIn("Registry-covered agent tools: 86/86", text)
 
     def test_capability_audit_reports_mapped_tools_and_workflow_count(self) -> None:
         text = format_samantha_capability_audit()
@@ -56,7 +56,7 @@ class CapabilityAuditTests(unittest.TestCase):
             text,
         )
         self.assertRegex(text, r"High-risk capability records: [0-9]+")
-        self.assertIn("Registry-covered agent tools: 85/85", text)
+        self.assertIn("Registry-covered agent tools: 86/86", text)
         self.assertIn("Capability registry: OK", text)
         self.assertIn("Critical/action-write missing records: 0", text)
         self.assertIn("Action/review missing records: 0", text)

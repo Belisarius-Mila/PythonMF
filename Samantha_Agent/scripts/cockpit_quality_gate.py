@@ -550,6 +550,7 @@ TEST_MODULES = (
     "tests.test_family_calendar_icloud_smtp_client",
     "tests.test_family_calendar_delivery",
     "tests.test_family_calendar_delivery_automatic",
+    "tests.test_family_calendar_hourly",
     "tests.test_family_calendar_delivery_automation_activation",
     "tests.test_family_calendar_delivery_automation_preview",
     "tests.test_family_calendar_delivery_config",
