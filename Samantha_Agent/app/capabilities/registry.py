@@ -12,6 +12,47 @@ from app.capabilities.models import (
 
 CAPABILITIES: tuple[CapabilityRecord, ...] = (
     CapabilityRecord(
+        capability_id="workspace_housekeeping_preview", label="Preview disposable workspace housekeeping",
+        risk=RiskLevel.READ_ONLY, reads=("Git and local file metadata", "completion markers"), writes=(),
+        tool="app.worktree_cleanup.Housekeeping.preview", audit=AuditPolicy.REDACTED,
+        notes="No content reads, removal, model or service activation; current and previous autosave are protected.",
+    ),
+    CapabilityRecord(
+        capability_id="workspace_housekeeping_retire", label="Mark an integrated disposable workspace finished",
+        risk=RiskLevel.LOCAL_WRITE, reads=("exact workspace and head", "Git, ignored-data and process checks"),
+        writes=("private explicit completion marker",), tool="app.worktree_cleanup.Housekeeping.retire",
+        audit=AuditPolicy.REDACTED,
+        notes="Only direct data-* linked worktrees; one-hour grace. Cancel the marker before any reuse. No deletion or activation.",
+    ),
+    CapabilityRecord(
+        capability_id="workspace_housekeeping_cancel", label="Cancel retirement before workspace reuse",
+        risk=RiskLevel.LOCAL_WRITE, reads=("exact completion marker",), writes=("private cancellation",),
+        tool="app.worktree_cleanup.Housekeeping.cancel", audit=AuditPolicy.REDACTED,
+        notes="Does not retry or clear an uncertain removal.",
+    ),
+    CapabilityRecord(
+        capability_id="workspace_housekeeping_prepare", label="Prepare the housekeeping activation contract",
+        risk=RiskLevel.LOCAL_WRITE, reads=("current source, scope and read-only preview",),
+        writes=("private proposed contract and digest",), tool="scripts.workspace_housekeeping.prepare",
+        audit=AuditPolicy.REDACTED, notes="No deletion, activation or existing service change.",
+    ),
+    CapabilityRecord(
+        capability_id="workspace_housekeeping_activate", label="Activate the exact hourly housekeeping contract",
+        risk=RiskLevel.SYSTEM_CHANGE, reads=("exact source and scope digest", "global safety confirmation"),
+        writes=("new owned LaunchAgent and durable opt-in",), tool="scripts.workspace_housekeeping.activate",
+        requires_confirmation=True, confirmation_policy=ConfirmationPolicy.EXACT_PHRASE,
+        audit=AuditPolicy.REDACTED,
+        notes="Separate global safety phrase; preserves existing jobs, records intent before bootstrap, never retries uncertain activation.",
+    ),
+    CapabilityRecord(
+        capability_id="workspace_housekeeping_tick", label="Run previously authorized housekeeping",
+        risk=RiskLevel.DESTRUCTIVE, reads=("durable opt-in", "exact retired workspace identity", "fresh recovery metadata"),
+        writes=("remove verified retired worktrees and surplus timestamped autosave", "bounded private receipt"),
+        tool="app.worktree_cleanup.Housekeeping.tick", requires_confirmation=True,
+        confirmation_policy=ConfirmationPolicy.EXACT_PHRASE, audit=AuditPolicy.REDACTED,
+        notes="Scheduled use is covered only by the activated fixed contract. Unknown ignored data, active/dirty/unmerged/changed workspaces block; never force, delete branches or touch system caches. Unknown removal never retries.",
+    ),
+    CapabilityRecord(
         capability_id="vocabulary_authoring_preview", label="Preview one or a batch of Vocabulary EN meanings",
         risk=RiskLevel.READ_ONLY, reads=("Vocabulary EN source revision and explicit entries",), writes=(),
         tool="app.vocabulary_authoring.VocabularyAuthoring.preview", audit=AuditPolicy.SAFE_SUMMARY,

@@ -9,6 +9,15 @@ from app.capabilities import all_capabilities
 
 
 class CapabilityAuditTests(unittest.TestCase):
+    def test_high_risk_count_uses_records_instead_of_a_historical_catalog_total(self):
+        names = {"workspace_housekeeping_preview", "workspace_housekeeping_activate", "workspace_housekeeping_tick"}
+        records = tuple(record for record in all_capabilities() if record.capability_id in names)
+        self.assertEqual(len(records), 3)
+        with patch("app.capability_audit.all_capabilities", return_value=records):
+            text = format_samantha_capability_audit()
+        self.assertIn("Capability registry records: 3", text)
+        self.assertIn("High-risk capability records: 2", text)
+
     def test_actual_missing_registry_tool_remains_a_detected_gap(self) -> None:
         with patch("app.capability_audit._agent_tool_names", return_value=("new_unregistered_tool",)):
             text = format_samantha_capability_audit()
@@ -46,7 +55,7 @@ class CapabilityAuditTests(unittest.TestCase):
             f"Capability registry records: {len(all_capabilities())}",
             text,
         )
-        self.assertIn("High-risk capability records: 41", text)
+        self.assertRegex(text, r"High-risk capability records: [0-9]+")
         self.assertIn("Registry-covered agent tools: 85/85", text)
         self.assertIn("Capability registry: OK", text)
         self.assertIn("Critical/action-write missing records: 0", text)

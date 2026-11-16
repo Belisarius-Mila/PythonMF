@@ -1,4 +1,11 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
+16.11.: Hodinový úklid výslovně dokončených dočasných worktrees a12 časů
+autosave je implementovaný;57 cílených PASS, finální brána/commit v private
+workspace_housekeeping/development.json. Samostatná aktivace čeká na přesnou
+globální větu a aktuální digest. Živá data se nemažou;4 současné kopie blokují
+neověřená lokální data nebo rozpracované změny. Stav a pravidla mají přednost
+před níže zachovaným historickým souhrnem; zálohy a vydání se neopakují.
+
 15.11.: Místní v3 ruší automatické plné brány při přípravě commitu, checkpointu
 i p+n. Doménové/smluvní sady bez plného základu; full jen noční/ruční.
 Datova dávka503 cest →99 testů/53,881s,42 regresí PASS; finální cílený důkaz
@@ -2246,3 +2253,23 @@ Finální důkaz: data/private/validation_reuse_fix_20261115/completion.json.
 Rizika: Staré účtenky jiného formátu se nepřebírají. První ověření nové
 politiky musí proběhnout; fyzické/runtime ověření nenahrazuje testovací cache.
 Tento vývoj sám nezahrnuje push, restart ani HA-09.
+
+## 2026-11-16 09:12 CET — Automatické uzavírání dočasných kopií připravené
+
+Hotovo: Úklid umí odstranit výslovně dokončenou kopii po hodinové lhůtě
+a nové kontrole Gitu, identity, používání a zachovaných lokálních dat.
+Stejný hodinový plánovač drží12 časů autosave a chrání latest/previous.
+Nejisté mazání neobnovuje; skutečný výsledek měří volným místem před/po.
+
+Rozhodnutí: Míla schválil implementaci navržené automatizace. Pro pokračování
+se znovu používá stálá Data kopie, dočasná izolace se výslovně uzavírá.
+Aktivace pravidelného mazání a nového LaunchAgentu vyžaduje samostatnou
+přesnou větu a digest; žádné rozšíření na OS cache, swap, zálohy či větve.
+
+Další krok: Předložit konečný připravený návrh k aktivaci globální větou.
+Navrhované další kroky: Vyřešit zachování lokálních dat ve3 starých kopiích;
+rozpracovanou čtvrtou ponechat. Pak navázat opravou obnovy ScienceNews.
+Technický důkaz:57 cílených testů PASS, včetně souběhu a skutečného odstranění
+syntetického Git worktree. Živý náhled ponechal4/4 kopií, autosave nabízí48
+souborů/~0,50GiB; žádná skutečná data smazaná. Konečná programová brána,
+commit a návrh v private/workspace_housekeeping/development.json.

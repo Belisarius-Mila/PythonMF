@@ -1,5 +1,14 @@
 # Capability routing rules
 
+## Úklid pracovních kopií — 2026-11-16
+
+Registrované workspace_housekeeping_preview/retire/cancel/prepare/activate/tick
+řídí technical/workspace_housekeeping.md. Preview/status nemažou, retire je
+výslovné uzavření přesného dokončeného worktree, cancel je povinný před reuse.
+Samostatná aktivace vyžaduje globální větu a digest aktuálního návrhu. Plánovač
+pak v tomto pevném rozsahu uklízí pouze ověřené uzavřené kopie a přebytečné
+časové autosave; nejisté operace neopakuje. Neznámá lokální data blokují.
+
 ## Společná validace vývoje a vydání — 2026-11-15
 
 Registrovaný `validate_project` spouští pevný `scripts/validation_gate.py`

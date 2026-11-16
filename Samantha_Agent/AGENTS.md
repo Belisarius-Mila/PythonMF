@@ -94,6 +94,14 @@ Společné pracovní instrukce PythonMF; cesty níže jsou vůči `Samantha_Agen
 - Nepoužívej `git add .`. Po terminálovém commitu oznam krátké ID a počet
   čekajících lokálních commitů; zarovnej pouze čisté, nedivergentní profilové
   workspaces Human–Adam a Knihovna na lokální `main`.
+- Pro běžné pokračování používej existující pracovní kopii Data; další celou
+  kopii zakládej jen při potřebě izolace. Dokončený dočasný `data-*` worktree
+  po začlenění do `main` označ přes registrovaný
+  `app.worktree_cleanup.Housekeeping.retire(name, expected_head=...)`.
+  Před jeho opětovným použitím zruš označení přes `cancel(name)`; při nejistém
+  mazání do něj nepiš. Pravidla a samostatná aktivace plánovače jsou v
+  `memory/technical/workspace_housekeeping.md`. Neznámá ignorovaná data
+  nejprve zachovej, nepoužívej force removal.
 - Hotové kroky automaticky nepushuj. Push vyžaduje výslovný pokyn, potvrzené
   uzavření denního balíčku nebo musí být nutný pro výslovně zadaný vzdálený provoz.
 - Čistý `main` pouze napřed před `origin/main` je `GitHub batch pending` a

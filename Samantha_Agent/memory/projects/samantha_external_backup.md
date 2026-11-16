@@ -2,6 +2,20 @@
 
 Projekt zalozen 2026-05-19.
 
+## 2026-11-16 09:12 CET — Automatický úklid SSD před aktivací
+
+Úklid pracovních kopií a retence autosave mají vlastní registrovaný modul
+workspace_housekeeping; pravidla technical/workspace_housekeeping.md.
+Po výslovném uzavření přesného dočasného worktree a hodině se znovu ověřuje
+čistota, začlenění do main, identita, lokální data a používání. Neznámá data
+blokují; potřebná ignorovaná kopie smí být odstraněna jen při SHA-256 shodě
+s pravidelným souborem na kanonické cestě v main. Žádné mazání větví či záloh,
+OS cache/swap se neuklízejí. Autosave12 časů chrání latest/previous, obsah nečte.
+57 cílených testů PASS; konečná brána/commit v soukromém development.json.
+Aktivace nového plánovače a trvalého mazání čeká na přesnou globální větu;
+živý preview ponechal všechny4 staré kopie. Předchozí recovery15.11. platí,
+nová záloha ani skutečný úklid dnes neproběhly.
+
 ## 2026-11-15 11:18 CET — Trvalá oprava evidence zálohy hotová místně
 
 Závěrečné uložení activity_state.json nyní atomicky nahrazuje pouze novou

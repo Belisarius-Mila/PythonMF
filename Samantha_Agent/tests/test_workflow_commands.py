@@ -15,6 +15,15 @@ from app.workflows.commands import (
 
 
 class WorkflowCommandTests(unittest.TestCase):
+    def test_housekeeping_shell_commands_never_activate_or_remove(self):
+        commands = {c.command_id: c for c in workflow_commands.WORKFLOW_COMMANDS}
+        for action in ("preview", "prepare", "status"):
+            command = commands["workspace_housekeeping_" + action]
+            self.assertEqual(command.argv[-1], action)
+            self.assertIn("workspace_housekeeping.py", command.argv[1])
+        self.assertNotIn("workspace_housekeeping_tick", commands)
+        self.assertNotIn("workspace_housekeeping_activate", commands)
+
     def test_validation_uses_fixed_policy_entrypoint_without_publish_flags(self):
         command = next(c for c in workflow_commands.WORKFLOW_COMMANDS if c.command_id == "validate_project")
         self.assertEqual(command.argv, (str(workflow_commands.PYTHON_BIN),

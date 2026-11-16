@@ -2764,3 +2764,14 @@ Příští CLI běh opravu načte, nová ostrá záloha v tomto vývojovém krok
 - Typ: opakující se
 - Řešení nalezeno: 15112026
 - Řešení: Nejprve vybrat nejnovější doklad každé současné fáze/cíle, teprve pak jeho aktivní/attention stav. Starší doklady zachovat jen v historii. Parent odvozovat ze serverově potvrzené identity a source projektu/vlákna, nikdy z globálního current pointeru. Pozdější přesný deployment důkaz obohatí projekci, nemění původní účtenku a nepovoluje opakování akce.
+### 2026-11-16 — Čistý worktree nemusí být postradatelný
+
+- Problém: po úklidu vznikly4 nové celé pracovní kopie8,85GiB. Tři byly Gitově
+  čisté a začleněné v main, ale měly vlastní ignorovaná data; čtvrtá503 změn.
+- Řešení: znovu používat stálou Data kopii, dočasnou výslovně uzavřít a před
+  reuse označení zrušit. Mazání až po nové kontrole identity/head/branch,
+  ancestry, změn, lsof a ignorovaných dat. Potřebné kopie povolit pouze při
+  ověřené SHA-256 shodě s kanonickou cestou; neznámá data ponechat.
+- Ověření:57 cílených PASS včetně reálného syntetického git worktree remove,
+  souběhu a nejistého pokusu bez retry. Živý náhled ponechal všechny4 kopie;
+  aktivace plánovače je samostatná. Pravidla workspace_housekeeping.md.

@@ -1,4 +1,28 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
+## 2026-11-16 09:12 CET — Automatický úklid připraven, aktivace čeká
+
+Míla schválil vývoj úklidu po auditu SSD35,69→20,97GiB. Hlavní příčina:
+čtyři nové celé worktrees8,85GiB, swap po záloze+2GiB a nové cache.
+Registrovaný workspace_housekeeping zavádí výslovné dokončení worktree,
+hodinovou ochrannou lhůtu a samostatný hodinový plánovač. Před odstraněním
+znovu kontroluje main ancestry, head/branch/inode/inventář, čistotu a lsof;
+neznámá lokální data/nejistý pokus blokují. Pouze git worktree remove bez force,
+větve/stálý Data/provozní profily zachované. Přesné kopie ignorovaných dat v
+main ověřuje SHA-256 bez citlivých výpisů; neověřené kopie nepřesouvá ani nemaže.
+Součástí je retence12 časových autosave párů s ochranou čerstvé latest/previous;
+bez restartu watcheru. Před opětovným použitím retired kopie povinný cancel.
+
+57 cílených testů PASS včetně skutečného syntetického git odstranění,
+souběhu, zachování dat, větví a nejisté aktivace bez retry. Programová brána,
+konečný commit a soukromé podklady v private/workspace_housekeeping/development.json.
+Živý preview všechny4 stávající kopie ponechal:3 mají neověřená ignorovaná data,
+jedna503 změněných položek. Autosave nabízí48 souborů/~0,50GiB; nic živého smazáno.
+Další krok: schválit připravený aktuální digest a přesnou globální větu pro
+nový LaunchAgent/pravidelné mazání. Předchozí souhlas byl jednorázový rozsah;
+aktivace, p+n ani restart Cockpitu se v tomto vývoji neprovádějí.
+Pravidla technical/workspace_housekeeping.md; předchozí provozní důkazy
+zůstávají historické, dnešní cleanup nemění zálohy ani účtenky vydání.
+
 ## 2026-11-15 16:20 CET — Cílená validace včetně přípravy commitu místně
 
 Míla pověřil Adama odstraněním dlouhých plných bran. V3 má stejný cílený

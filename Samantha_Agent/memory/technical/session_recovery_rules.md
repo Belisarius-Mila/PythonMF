@@ -383,6 +383,11 @@ Vychozi pravidlo:
 - necist obsah autosave souboru, jen nazvy a velikosti.
 
 Předchozí pravidlo 12 dvojic platí při výslovně zapnuté automatické retenci.
+Od16.11.2026 lze retenci samostatně aktivovat také hodinovým registrovaným
+workspace_housekeeping podle technical/workspace_housekeeping.md. Ten chrání
+latest/previous a vyžaduje čerstvou obnovu; běžící watcher nemění. Návrh nebo
+instalovaný kód sám neznamená aktivaci. Stav této retence je v jeho vlastní
+activation.json/latest.json, nikoli v historickém příznaku watcheru.
 Nový nezávislý start má `SAMANTHA_AUTOSAVE_AUTO_CLEANUP=0`; existující
 historické kopie nemaže. Samotná nula kandidátů k úklidu není důkaz, že
 autosave běží. Kontrolovat také jeden proces, stáří uložení a poslední chybu.

@@ -26,6 +26,8 @@ NODE_FALLBACK_PATHS = (
 )
 
 COMPILE_PATHS = (
+    "app/worktree_cleanup.py",
+    "scripts/workspace_housekeeping.py",
     "app/communication/validation_domains.py",
     "scripts/validation_ci.py",
     "app/calendar_event_time.py",
@@ -595,6 +597,7 @@ TEST_MODULES = (
     "tests.test_cockpit_scandocu_proxy",
     "tests.test_safety_quick_checks",
     "tests.test_autosave_continuity",
+    "tests.test_worktree_cleanup",
     "tests.test_book_inventory",
     "tests.test_book_thumbnail",
     "tests.test_book_isbn_lookup",
