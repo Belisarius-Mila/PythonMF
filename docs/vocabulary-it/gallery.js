@@ -360,16 +360,18 @@ function stopAudioPlayback() {
   }
 }
 
-function playOneAudio(relativePath, token) {
+function playOneAudio(relativePath, token, { fresh = false } = {}) {
   return new Promise((resolve, reject) => {
-    const audio = cachedAudio(relativePath);
+    // Practice attempts get their own media element: no asynchronous rewind of
+    // an ended player, and no late event can belong to the next attempt.
+    const audio = fresh && relativePath ? new Audio(audioUrl(relativePath)) : cachedAudio(relativePath);
     if (!audio || token !== playbackToken) {
       resolve(false);
       return;
     }
 
     currentAudio = audio;
-    audio.currentTime = 0;
+    if (!fresh) audio.currentTime = 0;
     let settled = false;
     const finish = (completed, error = null) => {
       if (settled) {
@@ -504,7 +506,8 @@ async function init(){
   if(globalThis.VocabularyITPractice)quizUI=globalThis.VocabularyITPractice.create({doc:document,win:window,getData:()=>state.data,getAudio:()=>state.audioManifest,getCatalog:()=>quizCatalog,
     getSelection:buildSelection,getContext:context,
     onOpen:()=>{stopAudioPlayback();switchView("quiz");window.scrollTo({top:0});},onClose:returnFromQuiz,
-    play:item=>{stopAudioPlayback();return playOneAudio(M.audioRecord(item,state.audioManifest)?.it,playbackToken);},stop:stopAudioPlayback});
+    prepare:item=>cachedAudio(M.audioRecord(item,state.audioManifest)?.it),
+    play:item=>{stopAudioPlayback();return playOneAudio(M.audioRecord(item,state.audioManifest)?.it,playbackToken,{fresh:true});},stop:stopAudioPlayback});
   document.getElementById("quizTab").disabled=!quizUI;
   buildFilterControls();renderGallery();applyRoute({initial:true});
 }

@@ -2805,3 +2805,10 @@ Příští CLI běh opravu načte, nová ostrá záloha v tomto vývojovém krok
 - Doplnění tohoto kroku: chyba připojení/TLS/přihlášení před voláním SMTP
   send_message prokazatelně nezkusila DATA a smí skončit NOT_SENT. Výjimka
   uvnitř odesílání zůstává neznámá; potvrzení DATA přežije chybu QUIT.
+
+
+### 2026-11-16 14:10 CET — Dočtení karty řídí další krok i po správném psaní
+
+- Kontext: Předčasné Další/replay přeruší správně spuštěný hlas. Obnovení karty po textu samo další poslech nespustí. Zjednodušená audio fixture s okamžitým currentTime=0 může skrýt opožděný rewind.
+- Řešení: Další i replay zamknout po celou zvukovou fázi a krátký odstup po ended, přepínače nesmí bránu obejít. Správné psaní má výslovnou další zvukovou fázi. Herní pokusy používají čerstvý Audio od nuly, příprava URL je samostatná; odchod a timeout bezpečně zruší callbacky.
+- Ověření:3 reprodukce na původním kódu FAIL při38 původních PASS; opravená verze45 PASS, včetně dlouhého audia, opožděného rewind, přepínačů a finálního error/timeout. Safari dokončilo celý tok dvou hesel; akustická a telefonní přejímka zůstává samostatná.

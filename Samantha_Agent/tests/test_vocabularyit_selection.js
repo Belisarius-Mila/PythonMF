@@ -26,7 +26,7 @@ class Element {
   getBoundingClientRect(){return {top:160,width:140,height:180};} focus(){this.doc.activeElement=this;}scrollIntoView(){this.doc.scrolled=this.id;}
 }
 function storage(map=new Map()){return {map,getItem:key=>map.get(key)||null,setItem:(key,value)=>map.set(key,String(value))};}
-async function app({items=vocabulary.items,url="https://example.test/PythonMF/vocabulary-it/",session=storage(),local=storage(),blocked=false,manifest=audio,sentenceManifest=sentenceAudio,failData=false,slowAudio=false,audioReject=false,reducedMotion=false,failQuiz=false,dataOverride={}}={}){
+async function app({items=vocabulary.items,url="https://example.test/PythonMF/vocabulary-it/",session=storage(),local=storage(),blocked=false,manifest=audio,sentenceManifest=sentenceAudio,failData=false,slowAudio=false,audioReject=false,reducedMotion=false,failQuiz=false,delayedSeek=false,dataOverride={}}={}){
   const doc=new Element("document");doc.doc=doc;doc.title="Vocabulary";
   doc.getElementById=id=>doc.descendants().find(node=>node.id===id)||null;
   doc.createElement=tag=>new Element(tag,doc);doc.createDocumentFragment=()=>new Element("fragment",doc);
@@ -45,14 +45,19 @@ async function app({items=vocabulary.items,url="https://example.test/PythonMF/vo
   const travel=delta=>{if(!historyEntries[historyIndex+delta])return;historyIndex+=delta;location.href=historyEntries[historyIndex].url;emit("popstate");emit("hashchange");};
   win.history={get state(){return historyEntries[historyIndex].state;},replaceState:(state,unused,url)=>{location.href=new URL(url,location.href).href;historyEntries[historyIndex]={url:location.href,state};},pushState:(state,unused,url)=>{location.href=new URL(url,location.href).href;historyEntries.splice(historyIndex+1);historyEntries.push({url:location.href,state});historyIndex++;},back:()=>travel(-1),forward:()=>travel(1)};
   if(blocked){Object.defineProperty(win,"sessionStorage",{get(){throw Error("blocked")}});Object.defineProperty(win,"localStorage",{get(){throw Error("blocked")}});}else{win.sessionStorage=session;win.localStorage=local;}
-  const players=[];class AudioFixture {constructor(url){this.url=url;this.handlers={};this.currentTime=0;this.playCount=0;players.push(this);}addEventListener(name,fn){this.handlers[name]=fn;}removeEventListener(name,fn){if(this.handlers[name]===fn)delete this.handlers[name];}pause(){this.paused=true;}play(){this.played=true;this.playCount++;return audioReject?Promise.reject(Error("blocked")):Promise.resolve();}}
+  let rejectPlayback=audioReject;const players=[];class AudioFixture {
+    constructor(url){this.url=url;this.handlers={};this.position=0;this.playCount=0;this.starts=[];this.paused=true;players.push(this);}
+    get currentTime(){return this.position;}set currentTime(value){if(delayedSeek&&value===0&&this.position>0)this.seekPending=true;else this.position=value;}
+    addEventListener(name,fn){this.handlers[name]=fn;}removeEventListener(name,fn){if(this.handlers[name]===fn)delete this.handlers[name];}
+    pause(){this.paused=true;}play(){this.played=true;this.paused=false;this.playCount++;this.starts.push(this.position);return rejectPlayback?Promise.reject(Error("blocked")):Promise.resolve();}
+  }
   const data={...vocabulary,items,...dataOverride};
   const ctx=vm.createContext({document:doc,window:win,URL,URLSearchParams,TextEncoder,Audio:AudioFixture,console,fetch:async url=>{if(url.includes("-quiz.json")){if(failQuiz)throw Error("quiz unavailable");return {ok:true,json:async()=>quizCatalog};}if(slowAudio && url.includes("audio"))return new Promise(()=>{});if(failData && !url.includes("audio"))throw Error("offline");const selected=url.includes("sentence-audio")?sentenceManifest:manifest;if(selected===null && url.includes("audio"))throw Error("audio unavailable");return {ok:true,json:async()=>url.includes("audio")?selected:data};}});
   vm.runInContext(fs.readFileSync(path.join(root,"vocabulary-it/model.js"),"utf8"),ctx);
   for(const name of ['learners.js','learner-ui.js','practice.js'])vm.runInContext(fs.readFileSync(path.join(root,'vocabulary-it',name),'utf8'),ctx);
   vm.runInContext(source.replace('void init();','globalThis.ready=init();')+'\nglobalThis.api={state,context,buildSelection,orderedSelection,openStudy,moveStudy,newRandomRound,returnToGallery,renderGallery,selectionChanged,applyRoute,speakPrompt,speakAnswer,stopAudioPlayback,setPracticeMode};',ctx);
   await ctx.ready;
-  return {...ctx.api,doc,win,emit,advance,players,session,local,historyEntries,element:id=>doc.getElementById(id),directions:doc.querySelectorAll("[data-direction]"),labels:doc.querySelectorAll("[data-label]"),practices:doc.querySelectorAll("[data-practice]"),galleryModes:doc.querySelectorAll("[data-gallery-mode]")};
+  return {...ctx.api,doc,win,emit,advance,players,setAudioReject:value=>{rejectPlayback=value;},session,local,historyEntries,element:id=>doc.getElementById(id),directions:doc.querySelectorAll("[data-direction]"),labels:doc.querySelectorAll("[data-label]"),practices:doc.querySelectorAll("[data-practice]"),galleryModes:doc.querySelectorAll("[data-gallery-mode]")};
 }
 const catalog={groups:vocabulary.groups,parents:vocabulary.parents};
 const sleep=ms=>new Promise(resolve=>setTimeout(resolve,ms));
@@ -205,7 +210,7 @@ const fourItems=vocabulary.items.filter(i=>fourIds.includes(i.uid));
 function choices(view){return view.element('quizChoices').querySelectorAll('.practice-choice');}
 function completeImages(view){for(const image of view.element('quizChoices').querySelectorAll('img'))image.emit('load');}
 async function animateWord(view){for(let n=0;n<35;n++){view.advance(100);await sleep(0);}}
-function endSound(view){const player=[...view.players].reverse().find(p=>p.handlers.ended);assert.ok(player,'a real player must have started');player.handlers.ended();}
+function endSound(view){const player=[...view.players].reverse().find(p=>p.handlers.ended);assert.ok(player,'a real player must have started');player.position=1.25;player.handlers.ended();}
 function correctChoice(view){const word=view.element('practiceWord').textContent;return choices(view).find(b=>vocabulary.items.find(i=>i.uid===b.dataset.uid).it===word);}
 async function readyQuestion(view){completeImages(view);await animateWord(view);endSound(view);await sleep(0);}
 async function practiceView(options={}){const view=await app({items:fourItems,...options});view.element('quizTab').click();view.element('quizStart').click();return view;}
@@ -225,8 +230,8 @@ test('practice refuses changed spellings, source meanings, image bindings and fo
  assert.equal(practice.compatible(vocabulary.items.find(i=>i.uid==='vit-0298'),vocabulary.items.find(i=>i.uid==='vit-0403'),quizCatalog),false);
 });
 test('four tiles wait for images, show syllables, join spelling and enable answers only after Italian audio ends',async()=>{
- const view=await practiceView();assert.equal(view.state.view,'quiz');assert.equal(choices(view).length,4);assert.ok(choices(view).every(b=>b.disabled));assert.equal(view.players.length,0);
- const images=view.element('quizChoices').querySelectorAll('img');for(const image of images.slice(0,3))image.emit('load');await animateWord(view);assert.equal(view.players.length,0);
+ const view=await practiceView();assert.equal(view.state.view,'quiz');assert.equal(choices(view).length,4);assert.ok(choices(view).every(b=>b.disabled));assert.ok(view.players.every(p=>!p.played));
+ const images=view.element('quizChoices').querySelectorAll('img');for(const image of images.slice(0,3))image.emit('load');await animateWord(view);assert.ok(view.players.every(p=>!p.played));
  images[3].emit('load');assert.ok(view.element('practiceWord').children.some(s=>s.classList.contains('is-pending')));
  await animateWord(view);assert.ok(view.element('practiceWord').classList.contains('is-joined'));assert.ok(choices(view).every(b=>b.disabled));assert.ok(view.players.some(p=>p.played));
  endSound(view);await sleep(0);assert.ok(choices(view).every(b=>!b.disabled));assert.equal(view.element('quizNext').disabled,true);
@@ -235,13 +240,13 @@ test('four tiles wait for images, show syllables, join spelling and enable answe
 test('a wrong picture becomes crossed out, remaining attempts stay active, and correct answer grows one card until Next',async()=>{
  const view=await practiceView();await readyQuestion(view);const correct=correctChoice(view),wrong=choices(view).find(b=>b!==correct);const word=view.element('practiceWord').textContent;
  wrong.click();wrong.click();assert.ok(wrong.disabled);assert.ok(wrong.classList.contains('is-wrong'));assert.equal(wrong.querySelector('.quiz-mark').textContent,'×');assert.ok(!correct.disabled);assert.equal(view.element('practiceWord').textContent,word);assert.equal(view.element('quizChoices').hidden,false);
- correct.click();correct.click();assert.equal(view.element('quizChoices').hidden,true);assert.equal(view.element('practiceStrip').hidden,true);assert.equal(view.element('practiceHero').hidden,false);assert.equal(view.element('practiceHeroWord').textContent,word);assert.ok(view.element('practiceHeroCz').textContent);assert.equal(view.element('quizNext').disabled,false);
+ correct.click();correct.click();assert.equal(view.element('quizChoices').hidden,true);assert.equal(view.element('practiceStrip').hidden,true);assert.equal(view.element('practiceHero').hidden,false);assert.equal(view.element('practiceHeroWord').textContent,word);assert.ok(view.element('practiceHeroCz').textContent);assert.equal(view.element('quizNext').disabled,true);await endFeedback(view);assert.equal(view.element('quizNext').disabled,false);
  view.advance(10000);await sleep(0);assert.equal(view.element('practiceHero').hidden,false);assert.equal(view.element('practiceHeroWord').textContent,word);assert.match(view.element('quizMessage').textContent,/zopakuješ/);
 });
 test('one initial error is requeued once after the original words; score counts first tries and remedial drill is available',async()=>{
  const view=await practiceView();let mistaken;
- for(let n=0;n<4;n++){await readyQuestion(view);const right=correctChoice(view);if(n===0){mistaken=right.dataset.uid;choices(view).find(b=>b!==right).click();}right.click();view.element('quizNext').click();}
- assert.match(view.element('quizPosition').textContent,/Opakování/);await readyQuestion(view);assert.equal(correctChoice(view).dataset.uid,mistaken);choices(view).find(b=>b!==correctChoice(view)).click();correctChoice(view).click();assert.match(view.element('quizMessage').textContent,/Po kole/);view.element('quizNext').click();
+ for(let n=0;n<4;n++){await readyQuestion(view);const right=correctChoice(view);if(n===0){mistaken=right.dataset.uid;choices(view).find(b=>b!==right).click();}right.click();await endFeedback(view);view.element('quizNext').click();}
+ assert.match(view.element('quizPosition').textContent,/Opakování/);await readyQuestion(view);assert.equal(correctChoice(view).dataset.uid,mistaken);choices(view).find(b=>b!==correctChoice(view)).click();correctChoice(view).click();await endFeedback(view);view.element('quizNext').click();
  assert.equal(view.element('quizEnd').hidden,false);assert.match(view.element('quizResult').textContent,/Na první pokus 3 z 4\. Opakování 1/);assert.equal(view.element('quizErrors').disabled,false);
  view.element('quizErrors').click();await readyQuestion(view);assert.equal(correctChoice(view).dataset.uid,mistaken);
 });
@@ -262,7 +267,7 @@ test('an image error or timeout permits an explicit unscored skip without reveal
 });
 test('blocked playback has an explicit gesture retry that preserves the current four images and word',async()=>{
  const view=await practiceView({audioReject:true});completeImages(view);await animateWord(view);await sleep(0);assert.match(view.element('quizMessage').textContent,/Zvuk se nepodařilo/);const ids=choices(view).map(b=>b.dataset.uid);assert.ok(choices(view).every(b=>b.disabled));
- for(const player of view.players)player.play=function(){this.played=true;this.playCount++;return Promise.resolve();};view.element('quizReplay').click();await sleep(0);endSound(view);await sleep(0);assert.deepEqual(choices(view).map(b=>b.dataset.uid),ids);assert.ok(choices(view).every(b=>!b.disabled));
+ view.setAudioReject(false);view.element('quizReplay').click();await sleep(0);endSound(view);await sleep(0);assert.deepEqual(choices(view).map(b=>b.dataset.uid),ids);assert.ok(choices(view).every(b=>!b.disabled));
 });
 test('leaving during animation or audio cancels late callbacks; history and bfcache restore usable setup',async()=>{
  const view=await practiceView();completeImages(view);view.win.history.back();const before=view.players.length;await animateWord(view);assert.equal(view.state.view,'gallery');assert.equal(view.players.length,before);
@@ -275,7 +280,7 @@ test('reduced motion keeps spelling readable immediately, and keyboard answers o
 });
 test('a stalled MP3 times out into an explicit retry or skip instead of leaving all controls locked',async()=>{
  const view=await practiceView();completeImages(view);await animateWord(view);assert.ok(choices(view).every(b=>b.disabled));view.advance(20000);await sleep(0);
- assert.match(view.element('quizMessage').textContent,/Přehrávání se nedokončilo/);assert.equal(view.element('quizNext').disabled,false);assert.ok(view.players.every(p=>p.paused));
+ assert.match(view.element('quizMessage').textContent,/Přehrávání se nedokončilo/);assert.equal(view.element('quizNext').disabled,false);assert.ok(view.players.filter(p=>p.played).every(p=>p.paused));
  view.element('quizReplay').click();await sleep(0);endSound(view);await sleep(0);assert.ok(choices(view).every(b=>!b.disabled));
 });
 test('explicit overview and change-filter buttons return to gallery even when practice was opened from a study card',async()=>{
@@ -283,7 +288,8 @@ test('explicit overview and change-filter buttons return to gallery even when pr
 });
 
 async function writingView(options={}){const view=await app({items:fourItems,...options});view.element('quizTab').click();view.element('practiceWritingToggle').click();view.element('quizStart').click();await readyQuestion(view);correctChoice(view).click();return view;}
-async function beginWriting(view){endSound(view);await sleep(0);assert.equal(view.element('practiceWritingPanel').hidden,false);return view.element('practiceHeroWord').textContent;}
+async function endFeedback(view){endSound(view);await sleep(0);view.advance(250);await sleep(0);}
+async function beginWriting(view){await endFeedback(view);assert.equal(view.element('practiceWritingPanel').hidden,false);return view.element('practiceHeroWord').textContent;}
 function typeWriting(view,value,extra={}){const input=view.element('practiceWritingInput');input.value=value;input.emit('input',extra);}
 
 test('writing comparison preserves accents, double letters and punctuation; normalizes NFC, case, spacing and apostrophe typography',()=>{
@@ -296,7 +302,7 @@ test('optional writing waits for answer audio, hides the spelling, then flashes 
  const word=await beginWriting(view);assert.equal(view.element('practiceHeroWord').hidden,true);assert.equal(view.element('practiceHeroImage').alt,'Obrázek k procvičování');assert.equal(view.doc.activeElement,view.element('practiceWritingInput'));
  typeWriting(view,word.slice(0,-1));assert.equal(view.element('practiceWritingInput').readOnly,false);assert.equal(view.element('practiceWritingPanel').hidden,false);
  typeWriting(view,word);assert.equal(view.element('practiceWritingInput').readOnly,true);assert.ok(view.element('practiceWritingInput').classList.contains('is-correct'));assert.equal(view.element('quizNext').disabled,true);
- view.advance(599);assert.equal(view.element('practiceWritingPanel').hidden,false);view.advance(1);assert.equal(view.element('practiceWritingPanel').hidden,true);assert.equal(view.element('practiceHeroWord').hidden,false);assert.equal(view.element('quizNext').disabled,false);assert.equal(view.doc.activeElement,view.element('quizNext'));
+ view.advance(599);assert.equal(view.element('practiceWritingPanel').hidden,false);view.advance(1);assert.equal(view.element('practiceWritingPanel').hidden,true);assert.equal(view.element('practiceHeroWord').hidden,false);assert.equal(view.element('quizNext').disabled,true);await endFeedback(view);assert.equal(view.element('quizNext').disabled,false);assert.equal(view.doc.activeElement,view.element('quizNext'));
 });
 test('half-second hints preserve the draft and a repeated click restarts the hint window',async()=>{
  const view=await writingView();const word=await beginWriting(view),draft=word.slice(0,2);typeWriting(view,draft);view.element('practiceWritingHint').click();assert.equal(view.element('practiceHeroWord').hidden,false);assert.equal(view.element('practiceWritingInput').value,draft);
@@ -312,16 +318,16 @@ test('accent entry through composition is not accepted early; Enter explains an 
 });
 test('audio replay while writing keeps the draft and spelling hidden; green confirmation cannot be cancelled by replay or hints',async()=>{
  const view=await writingView();const word=await beginWriting(view),draft=word.slice(0,2);typeWriting(view,draft);view.element('practiceWritingHint').click();view.element('quizReplay').click();await sleep(0);assert.equal(view.element('practiceHeroWord').hidden,true);assert.equal(view.element('practiceWritingInput').value,draft);endSound(view);await sleep(0);assert.equal(view.element('practiceWritingInput').value,draft);
- typeWriting(view,word);view.element('quizReplay').click();view.element('practiceWritingHint').click();view.advance(600);assert.equal(view.element('practiceWritingPanel').hidden,true);assert.equal(view.element('quizNext').disabled,false);
+ typeWriting(view,word);view.element('quizReplay').click();view.element('practiceWritingHint').click();view.advance(600);assert.equal(view.element('practiceWritingPanel').hidden,true);assert.equal(view.element('quizNext').disabled,true);await endFeedback(view);assert.equal(view.element('quizNext').disabled,false);
 });
 test('writing can be enabled on an already-read card or disabled mid-draft without locking Next or losing the picture',async()=>{
- const view=await practiceView();await readyQuestion(view);correctChoice(view).click();endSound(view);await sleep(0);view.element('practiceWritingToggle').click();assert.equal(view.element('practiceWritingPanel').hidden,false);const word=view.element('practiceHeroWord').textContent;typeWriting(view,word.slice(0,2));view.element('practiceWritingHint').click();
+ const view=await practiceView();await readyQuestion(view);correctChoice(view).click();await endFeedback(view);view.element('practiceWritingToggle').click();assert.equal(view.element('practiceWritingPanel').hidden,false);const word=view.element('practiceHeroWord').textContent;typeWriting(view,word.slice(0,2));view.element('practiceWritingHint').click();
  view.element('practiceWritingToggle').click();assert.equal(view.element('practiceWritingPanel').hidden,true);assert.equal(view.element('practiceHeroWord').hidden,false);assert.equal(view.element('quizNext').disabled,false);view.advance(500);assert.equal(view.element('practiceHeroWord').hidden,false);
  view.element('practiceWritingToggle').click();assert.equal(view.element('practiceWritingPanel').hidden,false);typeWriting(view,word);view.advance(600);view.element('practiceWritingToggle').click();view.element('practiceWritingToggle').click();assert.equal(view.element('practiceWritingPanel').hidden,true);
 });
 test('failed or stalled answer audio keeps the spelling visible and permits retry before writing',async()=>{
  for(const timeout of [false,true]){const view=await writingView();if(timeout)view.advance(20000);else view.players.find(p=>p.handlers.error).handlers.error();await sleep(0);assert.equal(view.element('practiceWritingPanel').hidden,true);assert.equal(view.element('practiceHeroWord').hidden,false);assert.equal(view.element('quizNext').disabled,false);
-  view.element('quizReplay').click();await sleep(0);assert.equal(view.element('quizNext').disabled,true);endSound(view);await sleep(0);assert.equal(view.element('practiceWritingPanel').hidden,false);
+  view.element('quizReplay').click();await sleep(0);assert.equal(view.element('quizNext').disabled,true);await endFeedback(view);assert.equal(view.element('practiceWritingPanel').hidden,false);
  }
 });
 test('leaving or bfcache restoration clears hint and writing callbacks; keyboard digits never answer a picture while typing',async()=>{
@@ -331,6 +337,46 @@ test('leaving or bfcache restoration clears hint and writing callbacks; keyboard
 });
 test('writing summary counts successful entries and hints without changing learner selections or persisting a draft',async()=>{
  const view=await app({items:fourItems,blocked:true});view.element('quizTab').click();view.element('practiceWritingToggle').click();view.element('quizStart').click();
- for(let n=0;n<4;n++){await readyQuestion(view);correctChoice(view).click();const word=await beginWriting(view);if(n===0)view.element('practiceWritingHint').click();typeWriting(view,word);view.advance(600);view.element('quizNext').click();}
+ for(let n=0;n<4;n++){await readyQuestion(view);correctChoice(view).click();const word=await beginWriting(view);if(n===0)view.element('practiceWritingHint').click();typeWriting(view,word);view.advance(600);await endFeedback(view);view.element('quizNext').click();}
  assert.equal(view.element('quizEnd').hidden,false);assert.match(view.element('quizResult').textContent,/Správné zápisy: 4\. Použití nápovědy: 1/);assert.equal(view.local.getItem(learners.KEY),null);
+});
+
+
+test('feedback audio owns the large card until its real end; rapid Next and replay cannot cut it short',async()=>{
+ const view=await practiceView();await readyQuestion(view);correctChoice(view).click();const before=view.element('quizPosition').textContent,plays=view.players.reduce((n,p)=>n+p.playCount,0);
+ assert.equal(view.element('quizNext').disabled,true);assert.equal(view.element('quizReplay').disabled,true);
+ view.element('quizNext').click();view.element('quizReplay').click();view.advance(5000);await sleep(0);
+ assert.equal(view.element('quizPosition').textContent,before);assert.equal(view.players.reduce((n,p)=>n+p.playCount,0),plays);
+ endSound(view);await sleep(0);view.advance(250);assert.equal(view.element('quizNext').disabled,false);
+});
+test('practice starts a separate playback at zero even when rewinding a finished media element is asynchronous',async()=>{
+ const view=await practiceView({delayedSeek:true});await readyQuestion(view);const first=view.players.find(p=>p.played);correctChoice(view).click();await sleep(0);
+ const feedback=view.players.find(p=>p.handlers.ended);assert.ok(feedback);assert.equal(feedback.starts.at(-1),0);assert.notEqual(feedback,first);
+ first.handlers.ended?.();await sleep(0);assert.equal(view.element('quizNext').disabled,true);
+});
+test('successful writing restores the card and reads it again; Next waits for this final reading',async()=>{
+ const view=await writingView();const word=await beginWriting(view),before=view.players.reduce((n,p)=>n+p.playCount,0);typeWriting(view,word);view.advance(600);await sleep(0);
+ assert.equal(view.element('practiceWritingPanel').hidden,true);assert.equal(view.element('practiceHeroWord').hidden,false);assert.equal(view.players.reduce((n,p)=>n+p.playCount,0),before+1);assert.equal(view.element('quizNext').disabled,true);
+ endSound(view);await sleep(0);view.advance(250);assert.equal(view.element('quizNext').disabled,false);assert.match(view.element('quizMessage').textContent,/Správně napsáno/);
+});
+
+test('writing toggles cannot unlock Next while audio or its trailing pause owns the card',async()=>{
+ const view=await practiceView();await readyQuestion(view);correctChoice(view).click();
+ for(let n=0;n<4;n++)view.element('practiceWritingToggle').click();assert.equal(view.element('quizNext').disabled,true);
+ endSound(view);await sleep(0);view.element('practiceWritingToggle').click();view.element('practiceWritingToggle').click();view.advance(249);assert.equal(view.element('quizNext').disabled,true);view.advance(1);assert.equal(view.element('quizNext').disabled,false);
+});
+test('turning writing off during green confirmation still reads the completed word exactly once',async()=>{
+ const view=await writingView();const word=await beginWriting(view);typeWriting(view,word);const before=view.players.reduce((n,p)=>n+p.playCount,0);view.element('practiceWritingToggle').click();view.advance(600);await sleep(0);
+ assert.equal(view.element('practiceWritingPanel').hidden,true);assert.equal(view.players.reduce((n,p)=>n+p.playCount,0),before+1);assert.equal(view.element('quizNext').disabled,true);await endFeedback(view);assert.equal(view.element('quizNext').disabled,false);
+});
+test('a final post-writing audio error or timeout offers retry and never traps the completed answer',async()=>{
+ for(const timeout of [false,true]){const view=await writingView();const word=await beginWriting(view);typeWriting(view,word);view.advance(600);await sleep(0);const attempt=view.players.find(p=>p.handlers.ended);
+  if(timeout)view.advance(20000);else attempt.handlers.error();await sleep(0);assert.equal(view.element('practiceWritingPanel').hidden,true);assert.equal(view.element('quizNext').disabled,false);assert.equal(view.element('quizReplay').disabled,false);
+  view.element('quizReplay').click();await sleep(0);assert.equal(view.element('quizNext').disabled,true);await endFeedback(view);assert.equal(view.element('quizNext').disabled,false);assert.equal(view.element('practiceWritingPanel').hidden,true);
+ }
+});
+test('leaving during the final reading or its trailing pause cancels every old transition',async()=>{
+ for(const trailing of [false,true]){const view=await writingView();const word=await beginWriting(view);typeWriting(view,word);view.advance(600);const attempt=view.players.find(p=>p.handlers.ended),lateEnd=attempt.handlers.ended;
+  if(trailing){lateEnd();await sleep(0);}view.element('quizBack').click();lateEnd();view.advance(10000);await sleep(0);assert.equal(view.state.view,'gallery');assert.equal(view.element('practiceWritingPanel').hidden,true);assert.equal(view.element('quizRound').hidden,true);
+ }
 });

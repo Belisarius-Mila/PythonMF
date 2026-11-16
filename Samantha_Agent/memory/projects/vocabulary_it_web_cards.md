@@ -18,7 +18,7 @@ Přijatá pravidla
 Základní soubory a hranice
 VocabularyIT/vocabulary_it_catalog.json:497 identit (471 původních a26 webových);24 schválených hlavních významů a26 nových, ostatní metadata dále návrhy.
 VocabularyIT/vocabulary_it_input_manifest.json: neměnné otisky777 původních vstupů.
-Aktuální stav: galerie/audio/odkaz Cockpitu i Slovo a obrázek zveřejněné a přijaté; nové volitelné Psaní místně hotové, viz poslední záznam.
+Aktuální stav: Psaní zveřejněné f07dce0a má hlášené zvukové vady; nová místní oprava45 JS PASS a Safari tok, dosud bez p+n.
 VocabularyIT/vocabulary_it_catalog.py: pouze čtení a ověření, žádný CSV writer.
 VocabularyIT/vocabulary_it_review_queue.txt:112 prioritních karet k revizi.
 VocabularyIT/WEB_FOUNDATION.txt: identita, přesné kontrolní příkazy a další bod.
@@ -383,3 +383,34 @@ Navrhované další kroky: Telefonní a VoiceOver přejímka.
 Technický důkaz: Registrované submit_release(wait=True), přesné zmrazení
 headu/cíle/modelu a programová doménová brána. Stav requested/nejistý se
 nesmí pokládat za úspěch; nic automaticky neopakovat.
+
+
+### 2026-11-16 14:10 CET — Oprava souběhu zvuku, karty a psaní
+
+Hotovo: Velká karta se nyní dočte před povolením Další i replay, s krátkým
+250ms odstupem od skutečného konce nahrávky. Psaní začne až potom. Po správném
+textu zůstane600ms zelené potvrzení, pole se zavře a karta slovo znovu přečte;
+až po tomto čtení lze pokračovat. Přepínání Psaní čekání neobejde a vypnutí
+během zeleného potvrzení už nezruší závěrečné čtení. Každý poslech v této hře
+použije nový Audio element od začátku; URL se přednačítá při přípravě otázky.
+
+Rozhodnutí: Opravuje se Mílou nahlášená funkční závada zveřejněného Psaní.
+Původní f07dce0a je nasazený, ale přijetí jeho zvuku neplatí. Na původním kódu
+reprodukce prokázaly předčasné Další a chybějící závěrečný poslech. Třetí
+scénář modeluje opožděné přetočení z konce; konkrétní příčinu každého dřívějšího
+useknutí na fyzickém zařízení nelze vydávat za prokázanou. Profily A–D,
+nápověda500ms, obrázky, slovníková data a nahrávky se nemění. Nové p+n nezadané.
+
+Další krok: Samostatně schválené p+n této opravy a poslechový retest na zařízení.
+Navrhované další kroky: Telefon/VoiceOver přejímka a jazyková revize.
+
+Technický důkaz:45 JS PASS (38 původních se změněnými očekáváními blokování +7
+nových regresí). Reprodukce před opravou38 PASS/3 FAIL; nyní opravené všechny3.
+Testy pokrývají rychlé kliky, dlouhé audio, asynchronní rewind, přepínače během
+pending/250ms/green, chyby a20s timeout finálního čtení, opakování bez draft
+ztráty a odchod/pozdní callbacky. Skutečné Safari: dvě navazující hesla,
+blokovaný replay během poslechu, ruční replay s rozepsaným congratula, dopsání
+congratulazione a Di niente., obnovení karty, úspěšný konec finálního audia
+a fokus na Další. Původní produkční okno mano17/497 zachované. Toto potvrzuje
+stavový tok, nikoli akustický záznam ani iPhone/Android. Finální programová
+brána, otisk a lokální checkpoint: private/vocabulary_it_timing_20261116.

@@ -35,7 +35,7 @@
     }
     const choices=fill([target],0);return choices?{target,choices:M.shuffle(choices,random)}:null;
   }
-  function create({doc,win,getData,getAudio,getCatalog,getSelection,getContext,onOpen,onClose,play,stop}){
+  function create({doc,win,getData,getAudio,getCatalog,getSelection,getContext,onOpen,onClose,play,stop,prepare=()=>{}}){
     const ids=["quizSetup","quizStart","quizPoolNotice","quizSelection","quizSetupChange","quizRound","quizPosition","quizReplay","quizChange","quizMessage","quizChoices","quizNext","quizEnd","quizResult","quizAgain","quizErrors","quizEndChange","quizBack","practiceStrip","practiceWord","practiceNote","practiceHero","practiceHeroImage","practiceHeroWord","practiceHeroCz","practiceWritingToggle","practiceWritingPanel","practiceWritingInput","practiceWritingHint","practiceWritingStatus","practiceWritingHintStatus"];
     const ui=Object.fromEntries(ids.map(id=>[id,doc.getElementById(id)]));
     let opened=false,phase="setup",epoch=0,timers=new Set(),pool=[],targets=[],queue=[],index=0,current=null,buttons=[],mistakes=new Map(),firstCorrect=0,answered=0,repeated=0,skipped=0,initialCount=0,signature="",reviewRun=false,lastAudio=null,lastCatalog=null;
@@ -50,16 +50,17 @@
       resetWriting();phase="writing";writingUsed=true;ui.practiceHero.classList.add("is-writing");ui.practiceHeroWord.hidden=true;ui.practiceHeroImage.alt="Obrázek k procvičování";ui.practiceWritingPanel.hidden=false;ui.quizNext.disabled=true;
       ui.practiceWritingStatus.textContent="Napiš celý italský zápis z karty. Správný zápis se potvrdí sám.";message("Teď napiš slovo zpaměti. Nápověda ho ukáže na půl sekundy.");ui.practiceWritingPanel.scrollIntoView({block:"nearest"});ui.practiceWritingInput.focus({preventScroll:true});
     }
-    function finishWriting(){
+    function finishWriting(readAfter=false){
       if(!current)return;resetWriting();phase="answer";ui.practiceHeroImage.alt=current.target.it;ui.quizNext.disabled=false;ui.quizReplay.disabled=false;message(current.writingDone?"Správně napsáno. Pokračuj vlastním tempem.":"Psaní je vypnuté. Můžeš pokračovat na další slovíčko.");
+      if(readAfter)void read(epoch,true);
     }
     function toggleWriting(){
       writingEnabled=!writingEnabled;ui.practiceWritingToggle.setAttribute("aria-pressed",String(writingEnabled));ui.practiceWritingToggle.textContent=writingEnabled?"Psaní: zapnuto":"Psaní: vypnuto";
-      if(!writingEnabled&&["writing","writing-success"].includes(phase)){cancel();finishWriting();return;}
+      if(!writingEnabled&&phase==="writing"){cancel();finishWriting();return;}
       if(phase==="answer"){
+        const reading=["pending","settling"].includes(current.feedbackState);ui.quizNext.disabled=reading;
         if(writingEnabled&&current.feedbackState==="complete"&&!current.writingDone)startWriting();
-        else if(writingEnabled&&current.feedbackState==="pending"&&!current.writingDone){ui.quizNext.disabled=true;message("Psaní začne, až dohraje slovo na velké kartě.");}
-        else if(!writingEnabled)ui.quizNext.disabled=false;
+        else if(writingEnabled&&reading&&!current.writingDone)message("Psaní začne, až dohraje slovo na velké kartě.");
       }
     }
     function checkWriting(event={}){
@@ -68,7 +69,7 @@
       ui.practiceWritingInput.removeAttribute("aria-invalid");
       if(!writingMatches(ui.practiceWritingInput.value,current.target.it))return;
       cancel();phase="writing-success";current.writingDone=true;written++;ui.practiceWritingInput.readOnly=true;ui.practiceWritingInput.classList.add("is-correct");ui.practiceWritingHint.disabled=true;ui.quizReplay.disabled=true;ui.practiceWritingStatus.textContent="Správně napsáno.";message("Správně napsáno.");
-      const ticket=epoch;later(()=>{if(ticket===epoch&&opened&&phase==="writing-success"){finishWriting();ui.quizNext.focus({preventScroll:true});}},600);
+      const ticket=epoch;later(()=>{if(ticket===epoch&&opened&&phase==="writing-success"){finishWriting(true);}},600);
     }
     function hint(){
       if(phase!=="writing"||!current)return;hideHint();hints++;ui.practiceHeroWord.hidden=false;ui.practiceHeroWord.classList.add("is-hint");const ticket=epoch;
@@ -110,7 +111,7 @@
     function next(){
       cancel();resetWriting();if(index>=queue.length){finish();return;}
       const entry=queue[index],q=question(entry.item,pool,getCatalog());if(!q){setup();refresh();return;}
-      current={...q,review:entry.review,hadError:false,writingDone:false,feedbackState:"none"};phase="loading";buttons=[];
+      current={...q,review:entry.review,hadError:false,writingDone:false,feedbackState:"none"};phase="loading";buttons=[];prepare(q.target);
       ui.quizChoices.replaceChildren();ui.practiceWord.replaceChildren();ui.practiceStrip.hidden=false;ui.practiceHero.hidden=true;ui.quizChoices.hidden=false;
       ui.quizNext.disabled=true;ui.quizReplay.disabled=true;ui.quizNext.textContent="Další →";
       ui.quizPosition.textContent=entry.review?`Opakování · ${index+1} z ${queue.length}`:`Slovíčko ${index+1} z ${initialCount}`;
@@ -129,26 +130,37 @@
       later(()=>imageError(ticket),15000);ui.quizPosition.focus({preventScroll:true});ui.quizRound.scrollIntoView({block:"start"});
     }
     async function read(ticket,feedback=false){
-      const onAnswer=feedback&&phase==="answer";if(onAnswer)current.feedbackState="pending";
-      function failed(text){if(onAnswer){current.feedbackState="failed";ui.quizNext.disabled=false;}message(text);}
+      const onAnswer=feedback&&phase==="answer";ui.quizReplay.disabled=true;
+      if(onAnswer){current.feedbackState="pending";ui.quizNext.disabled=true;message(current.writingDone?"Správně napsáno. Poslouchej znovu celé slovo…":"Poslouchej slovo na velké kartě…");}
+      function failed(text){ui.quizReplay.disabled=false;if(onAnswer){current.feedbackState="failed";ui.quizNext.disabled=false;}message(text);}
       const deadline=later(()=>{
         if(ticket!==epoch||!opened)return;
         stop();
-        if(feedback)failed("Přehrávání se nedokončilo. Zvuk můžeš zopakovat; psaní také vypnout.");
-        else{phase="audio-error";buttons.forEach(b=>b.disabled=true);ui.quizNext.disabled=false;ui.quizNext.textContent="Přeskočit otázku →";message("Přehrávání se nedokončilo. Zopakuj slovo tlačítkem, nebo otázku přeskoč.");}
+        if(feedback)failed("Přehrávání se nedokončilo. Zopakuj slovo, nebo pokračuj dál.");
+        else{phase="audio-error";buttons.forEach(b=>b.disabled=true);ui.quizNext.disabled=false;ui.quizNext.textContent="Přeskočit otázku →";failed("Přehrávání se nedokončilo. Zopakuj slovo tlačítkem, nebo otázku přeskoč.");}
       },20000);
       try{
         const completed=await play(current.target);if(ticket!==epoch||!opened||!completed)return;
-        if(!feedback){phase="question";buttons.forEach(b=>b.disabled=b.classList.contains("is-wrong"));message(current.hadError?"Zkus jiný obrázek. Slovo si můžeš znovu přehrát.":"Vyber obrázek. Můžeš použít i klávesy 1–4.");}
-        else if(onAnswer){current.feedbackState="complete";startWriting();}
+        if(!feedback){phase="question";ui.quizReplay.disabled=false;buttons.forEach(b=>b.disabled=b.classList.contains("is-wrong"));message(current.hadError?"Zkus jiný obrázek. Slovo si můžeš znovu přehrát.":"Vyber obrázek. Můžeš použít i klávesy 1–4.");}
+        else{
+          if(onAnswer)current.feedbackState="settling";
+          // A short breath follows the real audio end; never a guessed word duration.
+          later(()=>{
+            if(ticket!==epoch||!opened)return;ui.quizReplay.disabled=false;
+            if(onAnswer&&phase==="answer"){
+              current.feedbackState="complete";startWriting();
+              if(phase==="answer"){ui.quizNext.disabled=false;message(current.writingDone?"Správně napsáno. Pokračuj vlastním tempem.":current.hadError?(current.review?"Správně. Po kole můžeš znovu procvičit chyby.":"Správně. Tohle slovo si v kole ještě zopakuješ."):"Prohlédni si kartu. Pokračuj vlastním tempem.");if(current.writingDone)ui.quizNext.focus({preventScroll:true});}
+            }else if(phase==="writing")message("Teď napiš slovo zpaměti. Nápověda ho ukáže na půl sekundy.");
+          },250);
+        }
       }catch(_){
         if(ticket!==epoch||!opened)return;
-        if(feedback)failed("Zvuk se nepodařilo přehrát. Zkus Zopakovat slovo; psaní můžeš vypnout.");
-        else{phase="audio-error";buttons.forEach(b=>b.disabled=true);ui.quizNext.disabled=false;ui.quizNext.textContent="Přeskočit otázku →";message("Zvuk se nepodařilo přehrát. Stiskni Zopakovat slovo, nebo otázku přeskoč.");}
+        if(feedback)failed("Zvuk se nepodařilo přehrát. Zkus Zopakovat slovo, nebo pokračuj dál.");
+        else{phase="audio-error";buttons.forEach(b=>b.disabled=true);ui.quizNext.disabled=false;ui.quizNext.textContent="Přeskočit otázku →";failed("Zvuk se nepodařilo přehrát. Stiskni Zopakovat slovo, nebo otázku přeskoč.");}
       }finally{win.clearTimeout(deadline);timers.delete(deadline);}
     }
     function present(){
-      cancel();const ticket=epoch,r=record(current.target,getCatalog());phase="presenting";buttons.forEach(b=>b.disabled=true);ui.quizNext.disabled=true;ui.quizNext.textContent="Další →";
+      cancel();const ticket=epoch,r=record(current.target,getCatalog());phase="presenting";buttons.forEach(b=>b.disabled=true);ui.quizReplay.disabled=true;ui.quizNext.disabled=true;ui.quizNext.textContent="Další →";
       ui.practiceWord.replaceChildren();ui.practiceWord.classList.remove("is-joined");ui.practiceWord.setAttribute("aria-label",current.target.it);
       ui.practiceNote.textContent=r.reviewed?"":"U tohoto přejatého výrazu ukazujeme celý zápis.";
       const nodes=r.pieces.map(piece=>{const span=doc.createElement("span");span.textContent=piece;span.className="spelling-piece is-pending";span.setAttribute("aria-hidden","true");ui.practiceWord.append(span);return span;});
@@ -160,8 +172,8 @@
       later(join,nodes.length*interval+450);
     }
     function replay(){
-      if(!current||["setup","loading","image-error","end","writing-success"].includes(phase))return;
-      if(["answer","writing"].includes(phase)){cancel();if(phase==="answer")ui.quizNext.disabled=writingEnabled&&!current.writingDone;void read(epoch,true);return;}
+      if(!current||ui.quizReplay.disabled||["setup","loading","image-error","end","writing-success"].includes(phase))return;
+      if(["answer","writing"].includes(phase)){cancel();if(phase==="answer")ui.quizNext.disabled=true;void read(epoch,true);return;}
       // A direct gesture retries playback without an animation delay (Safari).
       cancel();phase="presenting";ui.quizNext.disabled=true;ui.quizNext.textContent="Další →";ui.practiceWord.classList.add("is-joined");
       ui.practiceWord.querySelectorAll(".spelling-piece").forEach(n=>n.classList.remove("is-pending"));buttons.forEach(b=>b.disabled=true);message("Poslouchej italské slovo…");void read(epoch);
@@ -174,7 +186,7 @@
       ui.quizChoices.hidden=true;ui.practiceStrip.hidden=true;ui.practiceHero.hidden=false;ui.practiceHeroWord.textContent=current.target.it;ui.practiceHeroCz.textContent=current.target.cz;
       const heroTarget=current.target;let fallback=false;ui.practiceHeroImage.onerror=()=>{if(!fallback&&current?.target.uid===heroTarget.uid&&["answer","writing","writing-success"].includes(phase)){fallback=true;ui.practiceHeroImage.src=new win.URL(`../${heroTarget.thumbnail}`,win.location.href).href;}};
       ui.practiceHeroImage.alt=current.target.it;ui.practiceHeroImage.src=new win.URL(`../${current.target.image}`,win.location.href).href;
-      ui.quizNext.disabled=writingEnabled;ui.quizNext.textContent=index+1===queue.length?"Dokončit kolo":"Další →";
+      ui.quizNext.disabled=true;ui.quizNext.textContent=index+1===queue.length?"Dokončit kolo":"Další →";
       message(current.hadError?(current.review?"Správně. Po kole můžeš znovu procvičit chyby.":"Správně. Tohle slovo si v kole ještě zopakuješ."):"Správně. Prohlédni si obrázek i zápis slova.");ui.practiceHeroWord.focus({preventScroll:true});void read(epoch,true);
     }
     function advance(){if(ui.quizNext.disabled||!["answer","image-error","audio-error"].includes(phase))return;if(phase!=="answer")skipped++;index++;next();}

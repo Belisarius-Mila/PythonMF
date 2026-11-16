@@ -1,14 +1,13 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
-- Aktualizováno: 2026-11-16 12:55 CET
-- Slovo a obrázek již zveřejněné (dd0ceade / začlenění ee6d904d), Míla potvrdil funkčnost.
-- Nové volitelné Psaní místně hotové: po dohrání velké karty se zápis skryje, velké pole přijme přesný text, zeleně potvrdí600ms a zavře se.
-- Nápověda ukáže slovo500ms, zachová rozepsaný text a má samostatné oznámení pro čtečku.
--38 JS scénářů PASS; skutečný Safari proklik: skrytí/fokus, částečný zápis, nápověda, dopsání, uzavření a další otázka. Telefon/VoiceOver přejímka otevřená.
-- Jednorázový dřívější výpadek nelze zpětně určit; všech1282 veřejných herních assetů HTTP200, přesných a plně dekódovatelných.
-- P+n Psaní výslovně schválené; aktuální výsledek v private vocabulary_it_writing_release_20261116/completion.json a release.json.
-- Další krok: převzetí přesné účtenky tohoto Pages vydání a telefonní přejímka; předchozí vydání neopakovat.
+- Aktualizováno: 2026-11-16 14:10 CET
+- Psaní je zveřejněné ve f07dce0a, ale Míla při používání nahlásil přerušování/začátky zvuku a chybějící čtení po dopsání. Přejímka zvuku tedy znovu otevřená.
+- Místní oprava: Další i replay čekají na skutečné ended +250ms; přepínač Psaní čekání neobejde. Po600ms zeleného potvrzení psaní následuje nové celé přečtení.
+- Každý herní poslech má vlastní Audio od nuly; přednačtení dalšího zadání zachované. Žádná nová hlasová výroba ani zásah do osobních výběrů.
+-45 JS scénářů PASS;3 nové reprodukce na původním kódu selhávaly. Safari potvrdilo celý tok na congratulazione a Di niente. včetně replay s draftem a návratu na původní okno.
+- Skutečné akustické přijetí na Mílově zařízení/telefonu zůstává otevřené; AX a ended nejsou záznam slyšitelného výstupu.
+- Oprava dosud pouze místní; gate/otisk/checkpoint: private vocabulary_it_timing_20261116. Další krok samostatné p+n po pokynu, potom poslechový retest.
 <!-- SAMANTHA_CURRENT_STATUS_END -->
 
 # TVBCP: Vocabulary IT
@@ -457,3 +456,34 @@ Navrhované další kroky: Telefonní a VoiceOver přejímka.
 Technický důkaz: Registrované submit_release(wait=True), přesné zmrazení
 headu/cíle/modelu a programová doménová brána. Stav requested/nejistý se
 nesmí pokládat za úspěch; nic automaticky neopakovat.
+
+
+### 2026-11-16 14:10 CET — Oprava souběhu zvuku, karty a psaní
+
+Hotovo: Velká karta se nyní dočte před povolením Další i replay, s krátkým
+250ms odstupem od skutečného konce nahrávky. Psaní začne až potom. Po správném
+textu zůstane600ms zelené potvrzení, pole se zavře a karta slovo znovu přečte;
+až po tomto čtení lze pokračovat. Přepínání Psaní čekání neobejde a vypnutí
+během zeleného potvrzení už nezruší závěrečné čtení. Každý poslech v této hře
+použije nový Audio element od začátku; URL se přednačítá při přípravě otázky.
+
+Rozhodnutí: Opravuje se Mílou nahlášená funkční závada zveřejněného Psaní.
+Původní f07dce0a je nasazený, ale přijetí jeho zvuku neplatí. Na původním kódu
+reprodukce prokázaly předčasné Další a chybějící závěrečný poslech. Třetí
+scénář modeluje opožděné přetočení z konce; konkrétní příčinu každého dřívějšího
+useknutí na fyzickém zařízení nelze vydávat za prokázanou. Profily A–D,
+nápověda500ms, obrázky, slovníková data a nahrávky se nemění. Nové p+n nezadané.
+
+Další krok: Samostatně schválené p+n této opravy a poslechový retest na zařízení.
+Navrhované další kroky: Telefon/VoiceOver přejímka a jazyková revize.
+
+Technický důkaz:45 JS PASS (38 původních se změněnými očekáváními blokování +7
+nových regresí). Reprodukce před opravou38 PASS/3 FAIL; nyní opravené všechny3.
+Testy pokrývají rychlé kliky, dlouhé audio, asynchronní rewind, přepínače během
+pending/250ms/green, chyby a20s timeout finálního čtení, opakování bez draft
+ztráty a odchod/pozdní callbacky. Skutečné Safari: dvě navazující hesla,
+blokovaný replay během poslechu, ruční replay s rozepsaným congratula, dopsání
+congratulazione a Di niente., obnovení karty, úspěšný konec finálního audia
+a fokus na Další. Původní produkční okno mano17/497 zachované. Toto potvrzuje
+stavový tok, nikoli akustický záznam ani iPhone/Android. Finální programová
+brána, otisk a lokální checkpoint: private/vocabulary_it_timing_20261116.
