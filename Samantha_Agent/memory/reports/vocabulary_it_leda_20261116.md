@@ -68,3 +68,24 @@ practiceChanges, aktualizovat pevné integrační počty a ověřit skutečná m
 Potom samostatné p+n až na výslovný pokyn. Případné lekce1–2 nejprve dohledat.
 
 - Cílená programová brána připraveného balíčku:131 kontrol PASS (validation-v3), včetně5 nových kontrol katalogu. Finální zdrojové otisky a účtenka jsou v private/vocabulary_it_leda_20261116; nejde o dokončení zvuků ani zveřejnění.
+
+
+### 2026-11-16 18:50 CET — Potvrzené zachování dat a přechod na Azure
+
+Hotovo:
+-145/145 souborů přípravného checkpointu a1911/1911 tehdy hotových MP3 přesně ověřeno. Pomalý Edge pokus: jeden požadavek,429 i bez souběhu, žádný nový soubor; starý ledger archivovaný.
+- Azure technická zkouška IT Bianca/CZ Blanka:2 skutečné MP3,74 SSML znaků, dekódování a afplay úspěšné. Zahájený jediný sériový běh; průběžné počty patří účtence, ne tomuto textu.
+
+Rozhodnutí:
+- Míla výslovně schválil Azure Elsa/Vlasta a limit2 USD bez daně na celé doplnění, po návrhu dvou ukázek. Hotové soubory zůstávají, nejisté placené odpovědi se neopakují automaticky.
+
+Další krok:
+Dočkat původní běh podle azure_generation_receipt.json a dokončit místní zařazení. Nespouštět druhou kopii procesu.
+
+Navrhované další kroky:
+- Po kompletním audiu zařadit všech599 karet, aktualizovat praxi a testy, finální brána/checkpoint.
+- Podklad lekcí1–2 a samostatné p+n zůstávají oddělené kroky.
+
+Technický důkaz:
+-9 předběžných offline testů Azure/změny poskytovatele PASS. Povolená Elsa přidaná do registrovaného Azure writeru; změna označení mixed provider zachovává všechny staré asset cesty i joby.
+- Veškeré klíče jen z existující místní konfigurace přes registrovaný transport, žádná změna účtu, tarifu či nasazení. Pevný globální rozpočet a soukromé rezervace před každým POST.

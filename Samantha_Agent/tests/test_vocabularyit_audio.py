@@ -43,6 +43,15 @@ class VocabularyItalianAudioTests(unittest.TestCase):
         for value in ['',None,'x'*1501]:
             with self.assertRaises(ValueError):a.text(value,'words')
 
+    def test_explicit_provider_changes_metadata_without_replacing_any_existing_asset(self):
+        edge=a.plan(ITEMS)
+        mixed=a.plan(ITEMS,provider='registered-edge-tts+azure-neural')
+        self.assertEqual(edge['jobs'],mixed['jobs'])
+        self.assertEqual(edge['stats'],mixed['stats'])
+        self.assertNotEqual(edge['digest'],mixed['digest'])
+        self.assertEqual(mixed['manifests']['words']['provider'],'registered-edge-tts+azure-neural')
+        with self.assertRaises(ValueError):a.plan(ITEMS,provider='unknown-service')
+
     def test_requested_receipt_precedes_transport_and_completed_jobs_resume_without_calls(self):
         with tempfile.TemporaryDirectory() as name:
             root=Path(name);receipt=root/'private/receipt.json';p=a.plan(ITEMS);calls=[]

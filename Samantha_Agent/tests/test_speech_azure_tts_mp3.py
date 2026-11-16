@@ -27,6 +27,15 @@ class AzureSpeechTests(unittest.TestCase):
         self.assertEqual(count, len(text) + 31 + 4 + 3)
         self.assertIn('rate="-10%"', xml)
 
+    def test_italian_elsa_preserves_accents_and_exact_billable_text(self):
+        text = "L'acqua è qui."
+        xml, count = ssml_parts(text, 'it-IT-ElsaNeural')
+        root = ElementTree.fromstring(xml)
+        self.assertEqual(root.attrib['{http://www.w3.org/XML/1998/namespace}lang'], 'it-IT')
+        self.assertEqual(''.join(root.itertext()), text)
+        self.assertIn('it-IT-ElsaNeural', xml)
+        self.assertEqual(count, len(text) + 31)
+
     def test_success_keeps_credentials_out_of_argv_and_uses_one_post(self):
         runner = Mock(return_value=subprocess.CompletedProcess([], 0, b'ID3audio\n200', b''))
         budget = CharacterBudget()

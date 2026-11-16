@@ -18,7 +18,7 @@ Přijatá pravidla
 Základní soubory a hranice
 VocabularyIT/vocabulary_it_catalog.json:497 identit (471 původních a26 webových);24 schválených hlavních významů a26 nových, ostatní metadata dále návrhy.
 VocabularyIT/vocabulary_it_input_manifest.json: neměnné otisky777 původních vstupů.
-Aktuální stav: oprava časování816d559a vydaná; Míla potvrdil sluchátka. LEDA599 připravených nových karet, aktivních497; dokončení zvuků čeká na odpověď k HTTP429. Viz vocabulary_it_leda_20261116.md.
+Aktuální stav: oprava časování816d559a vydaná; Míla potvrdil sluchátka. LEDA599 připravených nových karet, aktivních497; po potvrzeném Edge429 probíhá schválená Azure výroba do2 USD; nezdvojovat původní proces. Viz vocabulary_it_leda_20261116.md.
 VocabularyIT/vocabulary_it_catalog.py: pouze čtení a ověření, žádný CSV writer.
 VocabularyIT/vocabulary_it_review_queue.txt:112 prioritních karet k revizi.
 VocabularyIT/WEB_FOUNDATION.txt: identita, přesné kontrolní příkazy a další bod.
@@ -457,3 +457,24 @@ Technický důkaz:
 - Nových5 smluvních kontrol v test_vocabularyit_catalog.py; finální programová brána a otisky podle soukromé gate účtenky v leda adresáři. Zatím žádné publikování.
 
 - Cílená programová brána připraveného balíčku:131 kontrol PASS (validation-v3), včetně5 nových kontrol katalogu. Finální zdrojové otisky a účtenka jsou v private/vocabulary_it_leda_20261116; nejde o dokončení zvuků ani zveřejnění.
+
+
+### 2026-11-16 18:50 CET — Potvrzené zachování dat a přechod na Azure
+
+Hotovo:
+-145/145 souborů přípravného checkpointu a1911/1911 tehdy hotových MP3 přesně ověřeno. Pomalý Edge pokus: jeden požadavek,429 i bez souběhu, žádný nový soubor; starý ledger archivovaný.
+- Azure technická zkouška IT Bianca/CZ Blanka:2 skutečné MP3,74 SSML znaků, dekódování a afplay úspěšné. Zahájený jediný sériový běh; průběžné počty patří účtence, ne tomuto textu.
+
+Rozhodnutí:
+- Míla výslovně schválil Azure Elsa/Vlasta a limit2 USD bez daně na celé doplnění, po návrhu dvou ukázek. Hotové soubory zůstávají, nejisté placené odpovědi se neopakují automaticky.
+
+Další krok:
+Dočkat původní běh podle azure_generation_receipt.json a dokončit místní zařazení. Nespouštět druhou kopii procesu.
+
+Navrhované další kroky:
+- Po kompletním audiu zařadit všech599 karet, aktualizovat praxi a testy, finální brána/checkpoint.
+- Podklad lekcí1–2 a samostatné p+n zůstávají oddělené kroky.
+
+Technický důkaz:
+-9 předběžných offline testů Azure/změny poskytovatele PASS. Povolená Elsa přidaná do registrovaného Azure writeru; změna označení mixed provider zachovává všechny staré asset cesty i joby.
+- Veškeré klíče jen z existující místní konfigurace přes registrovaný transport, žádná změna účtu, tarifu či nasazení. Pevný globální rozpočet a soukromé rezervace před každým POST.
