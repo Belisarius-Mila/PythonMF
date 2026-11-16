@@ -1420,3 +1420,25 @@ souběhu, známého preflightu, přesného uzavření, uchování rozpočtu a No
 Konečná brána/commit a skutečná closure jsou v private/
 science_news_recovery_20261116/development.json a closure_receipt.json.
 Oprava sama neprovádí nové placené vydání, překlad, archivaci ani změnu služby.
+
+
+### 2026-11-16 16:01 CET — Ruční náhrada vědeckého vydání
+
+Hotovo: samostatná registrovaná cesta pro výslovně vyžádaný nový výběr za
+jeden dokončený kalendářní týden. Nejvýše pět nových zpráv, český abstrakt,
+význam, nejistoty a původní odkaz. Předchozí rozhodnutí se neobnovují.
+Rozhodnutí: Míla požádal o nový kvalitní výběr za minulý týden; nemusí
+opakovat původní články. Zvolený interval9.–15.11.2026. Stejná schválená
+role Sol/medium Standard a rozpočet15/job,100/měsíc; stará rezerva zůstává.
+Další krok: dokončit tento jeden ruční běh a ověřit nové karty v Cockpitu.
+Navrhované další kroky: přejmout příští přirozený páteční běh.
+Technický důkaz:44 cílených testů PASS včetně souběhu, přerušení publikace,
+nejistého doručení bez druhého turn/start, vazby request_id na celý vstup,
+hranic týdne a zachování původní rezervy. Zmrazených60 veřejných podkladů;
+RSS doplněné pěti jednotlivě ověřenými primárními abstrakty. Dva živé RSS
+kanály nedostupné; pokrytí není úplné. Výsledková účtenka, počty a spotřeba
+jsou v data/private/science_news_manual_20261116/result.json; validační
+brána a lokální commit v completion.json stejné složky. Tento zápis sám
+nedokládá výsledek modelu, push ani nové nasazení kódu.
+Předchozí oprava019a4948 je již vydaná; její skutečná účtenka je
+science_news_recovery_20261116/release_result.json a completion.json.

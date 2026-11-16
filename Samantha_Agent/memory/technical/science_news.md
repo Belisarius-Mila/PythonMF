@@ -349,3 +349,19 @@ souběhu, známého preflightu, přesného uzavření, uchování rozpočtu a No
 Konečná brána/commit a skutečná closure jsou v private/
 science_news_recovery_20261116/development.json a closure_receipt.json.
 Oprava sama neprovádí nové placené vydání, překlad, archivaci ani změnu služby.
+
+
+## Výslovný ruční výběr za dokončený týden — 2026-11-16
+
+Registrované science_news_manual volá app.science_news_manual.run_manual:
+store, stabilní request_id, week_start (pondělí ISO), veřejný packet a
+confirmed=True pouze po výslovném novém zadání. Žádný automatický catch-up.
+Data všech kandidátů musí patřit do dokončeného týdne Europe/Prague;
+nejvýše60 kandidátů, přijatá kalibrace a aktivovaná role/rozpočet. Původní
+uzavřené nebo nejisté týdenní joby se nepřepisují ani neuvolňují jejich rezervy.
+Podklady, sledování a kalibrace jsou zmrazené před modelem, ruční job má
+vlastní zámek a editor_manual identitu. Opakované stejné zadání jen převezme
+původní výsledek přes guarded call_model; jiný obsah se stejným ID je odmítnutý.
+Odpověď a položky se uloží před idempotentní publikací do soukromé fronty.
+Nedokončený zápis nevyžaduje nové placené volání. Známé články se nepřepisují.
+Služba, termín dalšího vydání, role a Git publikace se touto operací nemění.

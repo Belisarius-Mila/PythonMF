@@ -12,6 +12,14 @@ from app.capabilities.models import (
 
 CAPABILITIES: tuple[CapabilityRecord, ...] = (
     CapabilityRecord(
+        capability_id="science_news_manual", label="Prepare an explicitly requested catch-up issue",
+        risk=RiskLevel.EXTERNAL_GENERATION, reads=("public source packet for one completed week", "approved editor and budget"),
+        writes=("private manual issue, original model receipt and ScienceNews inbox",),
+        tool="app.science_news_manual.run_manual", audit=AuditPolicy.REDACTED,
+        metadata={"durable_consent": "trusted_external_generation_v1"},
+        notes="Explicit new request only. At most five fresh discoveries; stable input and ID, original-result recovery. Does not reopen scheduled jobs, release unknown reservations or change the service/model.",
+    ),
+    CapabilityRecord(
         capability_id="science_news_recovery_status", label="Read ScienceNews preparation health",
         risk=RiskLevel.READ_ONLY, reads=("safe weekly job states",), writes=(),
         tool="app.science_news_recovery.weekly_status", audit=AuditPolicy.REDACTED,
