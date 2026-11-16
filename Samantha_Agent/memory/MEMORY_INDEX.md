@@ -756,3 +756,5 @@ Tento soubor je rozcestnik dlouhodobe pameti pro Samantha Agent.
 - 16.11.2026: výslovný nový ruční ScienceNews výběr za9.–15.11.; stejný proud Knihovny a jeho handoff/TVBCP. Původní13.11. zachované,60 veřejných podkladů včetně5 primárních abstraktů,44 cílených PASS. Konečný běh a lokální checkpoint doloží private science_news_manual_20261116/result.json a completion.json; bez automatického p+n.
 
 -16.11.2026: celá vědecká studie teprve na Mílovo vyžádání. Místní oprava Nature/úplného těla a popup chyb, postup po částech se společnou rezervou15/studii; podrobnosti v handoffu Knihovny/TVBCP a technical/science_news.md. DALTAC/M87 zdroje CC BY ověřené, embrya CC BY-NC-ND blokovaná,0 nových placených překladů. Konečný checkpoint/brána v private science_news_translation_fix_20261116; nové p+n nezadané.
+
+- `reports/systemovy_audit_projekty_tooly_vrstvy_2026_11_16.txt` — historický full audit16.11.17:17 před dorovnáním agregátu. Následné obsahové srovnání Knihovny, rodinného kalendáře a HA-09 je v kanonickém handoffu/TVBCP Samantha Agent/RAG; dokončená vydání se neopakují. Konečný doklad údržby: private project_registry_alignment_20261116/completion.json.

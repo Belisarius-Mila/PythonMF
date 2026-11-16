@@ -177,3 +177,23 @@ Technický důkaz:
 - Cílené testy `test_memory_truth_audit` a `test_project_audit_report`:
   11/11 PASS po projektovém zápisu. Rychlý systémový audit v 18:45 hlásí
   nula kandidátů po srovnání datovaného core a handoffu.
+
+
+### 2026-11-16 17:27 CET — Dorovnání souhrnného registru po vydáních
+
+Hotovo: ACTIVE_PROJECTS.md už u Knihovny, rodinného kalendáře a HA-09
+nenabízí znovu dokončený commit, publikování nebo aktivaci. Zachované jsou
+skutečně otevřené lidské přejímky. Záznamy rozlišují doložené dokončení od
+nového živého auditu; ostatní projektové řádky se nemění.
+Rozhodnutí: Míla schválil dorovnání a p+n podle potřeby. Oprava vychází
+z obsahového porovnání a konkrétních dokončených účtenek, nikoli jen z data.
+Další krok: dokončit dokumentační commit/p+n a zkontrolovat nulový drift
+agregátu po commitu. Výsledek je v private/project_registry_alignment_20261116/.
+Navrhované další kroky: při dalším uzavření kroku dorovnat rovněž stav a
+následující akci v agregátu; datum samo neověřuje obsah ostatních řádků.
+Technický důkaz: výchozí audit17:17 je zachovaný jako historický report
+systemovy_audit_projekty_tooly_vrstvy_2026_11_16.txt. Obsahové podklady:
+family_calendar/hourly_development/completion.json (db756e58, aktivace08–23),
+ha09_server_jobs_20261115/completion.json (a53c1757, published/deployed),
+science_news_translation_fix_20261116/completion.json (0f79fee0, deployed).
+Žádná nová aktivace, odchozí zpráva ani placený překlad nejsou součástí kroku.
