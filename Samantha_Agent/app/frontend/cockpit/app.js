@@ -6792,6 +6792,7 @@ ${item.context || ""}`);
 			    webAppsBtn.addEventListener("click", openWebAppsModal);
     libraryBtn.addEventListener("click", openLibraryModal);
     document.getElementById("agentSupervisorRefreshBtn").addEventListener("click", window.SamanthaAgentSupervisor.refresh);
+    window.SamanthaWorkspaceHousekeeping.init();
     familyCalendarBtn.addEventListener("click", openFamilyCalendarModal);
     projectsBtn.addEventListener("click", openProjectsModal);
     reviewReportBtn.addEventListener("click", loadDocumentReviewReport);

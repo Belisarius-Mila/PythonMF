@@ -1,5 +1,24 @@
 # Úklid dočasných pracovních kopií
 
+## Čtecí karta v Cockpitu — 2026-11-16
+
+Servis → Provoz → Úklid pracovních kopií má místně připravenou kartu:
+stav plánovače, poslední běh, skutečná změna volného místa a seznam čekajících,
+ponechaných a neuzavřených kopií s českými důvody. GET /api/workspace-housekeeping
+vrací jen redigovaný stav; ?refresh=1 žádá nové čtecí ověření. POST ani parametry
+pro mazání nejsou podporované. Registrovaná schopnost workspace_housekeeping_status.
+GET nic nezapisuje a nikdy nevolá tick/retire/activate ani model.
+
+Pomalé SHA-256/Git/procesové ověření běží v jediném pozadí v rámci serveru,
+výsledek se nejvýše5min drží v paměti. Načítání není nulový počet kopií;
+stará nebo neověřená data jsou označená. Obnova přehledu je čtecí tlačítko,
+automatické načítání/poll pouze při otevřeném Servis → Provoz.
+Prázdná fronta nezamlčí neuzavřené kopie mimo frontu. Nezobrazují se absolutní
+cesty, soukromé obsahy, jednotlivé hashe ani aktivační údaje.
+Tato karta nemění schválenou aktivaci ani rozsah pravidelného mazání.
+Kód karty a provozní nasazení jsou samostatné; stav vydání je v aktuálním
+handoffu/development.json, samotný tento návod nedokládá nasazení.
+
 Proud: project-samantha-infrastructure. Autor: Adam. Návrh schválen Mílou
 16.11.2026 („Jdeme na Wille, Warp 5.“); aktivace služby je samostatná.
 

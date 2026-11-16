@@ -1,4 +1,10 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
+16.11.10:19 CET: Místně čtecí karta Servis → Provoz → Úklid pracovních kopií,
+54 cílených PASS, konečný důkaz private/workspace_housekeeping/ui_development.json.
+Plánovač/poslední běh/volné místo/důvody kopií, bezpečné pozadí/cache/stáří.
+Skutečný čtecí probe0 čekajících/4 ponechané, loaded/exit0, aktivační kontrakt
+shodný. Karta čeká na samostatné p+n a fyzickou přejímku; daemon je již aktivní.
+
 16.11.09:32 CET: Hodinový úklid po přesné globální větě aktivovaný; definice
 shodná, loaded/runs1/exit0/3600s. První běh dokončený:48 starých autosave,
 skutečně+0,5002GiB, pracovní kopie0. Kód41b16b1c/705 cílených PASS,
@@ -2295,3 +2301,18 @@ Technický důkaz: Přesný plist, loaded/runs1/exit0/interval3600s; první běh
 completed, smazané worktrees0, autosave48. Kód41b16b1c/705 cílených PASS
 se neměnil a testy kódu se neopakují. Privátní activation_verification.json
 uchovává původní účtenku; bez push, nového backupu či restartu Cockpitu.
+
+## 2026-11-16 10:19 CET — Přehled úklidu v servisní části připravený
+
+Hotovo: Karta zobrazuje běh plánovače, poslední úklid, skutečnou změnu místa
+a čekající/ponechané/neuzavřené kopie s důvody. Ruční obnovení pouze čte;
+neověřený/starý stav nesmí vypadat jako aktuální úspěch nebo prázdná fronta.
+Rozhodnutí: Míla schválil doplnění navržené servisní karty. Mazací pravidla,
+služba a dříve potvrzený kontrakt se nemění; nové p+n se nepředpokládá.
+Další krok: Samostatné p+n pro zveřejnění karty v běžícím Cockpitu.
+Navrhované další kroky: Fyzická přejímka Servis → Provoz, potom zachování dat
+starých kopií a oprava obnovy ScienceNews.
+Technický důkaz:54 cílených Python testů včetně HTTP a Node PASS. Čtecí
+provozní vzorek0 čekajících/4 ponechané, plánovač loaded/exit0; žádná živá
+data mazána. Aktivační kontrakt shodný. Finální brána/commit/čtecí vzorek
+v private/workspace_housekeeping/ui_development.json; fyzická přejímka otevřená.

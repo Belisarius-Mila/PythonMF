@@ -9,6 +9,7 @@ from app.cockpit_calendar_tasks import calendar_task_status, calendar_task_actio
 from app.cockpit_pwa import cockpit_manifest_route
 from app.cockpit_https_entry import HttpsCockpitEntry
 from app.cockpit_agent_supervisor import agent_supervisor_overview
+from app.cockpit_housekeeping import housekeeping_overview
 from app.cockpit_book_inventory import BOOK_INVENTORY_GET_PATHS, book_inventory_get_route, inventory_action
 from app.cockpit_email_calendar import email_calendar_draft_action, email_calendar_draft_status
 from app.interior_ai import interior_ai_start_action, interior_ai_recover_action
@@ -9936,6 +9937,13 @@ class CockpitServer:
                     return
                 if parsed.path == "/emails-to-resolve/":
                     self.respond_html(EMAIL_AGENT_HTML)
+                    return
+                if parsed.path == "/api/workspace-housekeeping":
+                    if parsed.query not in {"", "refresh=1"}:
+                        self.respond_json({"ok": False, "message": "Neznámý parametr přehledu."}, status=400)
+                    else:
+                        result = housekeeping_overview(refresh=parsed.query == "refresh=1")
+                        self.respond_json(result, status=200 if result.get("ok") else 503)
                     return
                 if parsed.path == "/api/agent-supervisor/status":
                     if parsed.query:

@@ -2,6 +2,16 @@
 
 Projekt zalozen 2026-05-19.
 
+## 2026-11-16 10:19 CET — Čtecí servisní přehled úklidu připravený
+
+V Cockpitu místně doplněna karta Servis → Provoz → Úklid pracovních kopií:
+plánovač, poslední běh, změna volného místa, kopie a důvody jejich zachování.
+Jen GET/obnovení, bez mazání či změny služby. Pomalý audit v jednom pozadí,
+cache5min, viditelné stáří a chyby; žádné soukromé obsahy/cesty/hash výpisy.
+54 cílených testů PASS, samostatný čtecí probe0 čekajících/4 ponechané a shodný
+aktivační kontrakt. Hodinový daemon zůstává aktivní, karta čeká na samostatné
+p+n a fyzické ověření. Finální důkaz private/workspace_housekeeping/ui_development.json.
+
 ## 2026-11-16 09:32 CET — Hodinový úklid aktivní
 
 Po přesné globální větě aktivovaný jediný nový LaunchAgent hodinového úklidu;

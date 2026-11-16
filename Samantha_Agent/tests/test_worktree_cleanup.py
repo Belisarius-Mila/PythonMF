@@ -294,3 +294,115 @@ class WorktreeCleanupTests(unittest.TestCase):
                      agents=self.root / "agents", runner=runner)
         self.assertEqual(definition.read_bytes(), original)
         self.assertEqual(len(calls), 3)
+
+
+class HousekeepingCardTests(unittest.TestCase):
+    def setUp(self):
+        from app.cockpit_housekeeping import HousekeepingOverview
+        self.now = 10000
+        self.callbacks = []
+        class Store:
+            def __init__(self):
+                self.files = {"activation.json": {"enabled": True}, "state.json": {"entries": {}},
+                              "latest.json": {"time": 9900, "state": "completed", "removed": [],
+                                              "autosave": {"removed": 48}, "free_change_bytes": 2**29}}
+                self.rows = [{"name": "data-finished", "eligible": True, "inventory_sha256": "private-hash"},
+                             {"name": "data-private", "eligible": False, "reason": "Unknown ignored data must be preserved first", "path": "/private/secret"}]
+                self.fail = False
+            def _read(self, name, default):
+                return self.files.get(name, default)
+            def preview(self):
+                if self.fail:
+                    raise RuntimeError("private information")
+                return {"worktrees": self.rows}
+            def _write(self, *args):
+                raise AssertionError("A status card must never persist or mutate")
+        self.store = Store()
+        self.view = HousekeepingOverview(self.store, probe=lambda: {"loaded": True, "last_exit_code": 0},
+                                         clock=lambda: self.now, start=self.callbacks.append)
+
+    def sample(self):
+        self.view.overview()
+        self.callbacks.pop()()
+        return self.view.overview()
+
+    def test_first_request_is_pending_not_an_empty_success_and_one_audit_only(self):
+        for _ in range(3):
+            result = self.view.overview(refresh=True)
+            self.assertTrue(result["audit"]["pending"])
+            self.assertIsNone(result["counts"]["blocked"])
+            self.assertIsNone(result["scheduler"]["loaded"])
+        self.assertEqual(len(self.callbacks), 1)
+
+    def test_card_redacts_private_metadata_and_distinguishes_unclosed_blocked_and_pending(self):
+        result = self.sample()
+        self.assertEqual(result["counts"], {"pending": 0, "blocked": 1, "unclosed": 1})
+        self.assertEqual(result["last_run"]["autosave_removed"], 48)
+        self.assertEqual(result["last_run"]["free_change_bytes"], 2**29)
+        self.assertTrue(result["scheduler"]["loaded"])
+        self.assertNotIn("private-hash", json.dumps(result))
+        self.assertNotIn("/private/secret", json.dumps(result))
+        self.store.files["state.json"]["entries"]["data-finished"] = {"state": "retired", "marked_at": self.now}
+        result = self.view.overview()
+        self.assertEqual(result["counts"]["pending"], 1)
+        self.assertEqual(result["rows"][0]["ready_after"], self.now + GRACE_SECONDS)
+
+    def test_old_and_failed_audit_never_looks_current_or_erases_known_rows(self):
+        first = self.sample()
+        self.now += 301
+        result = self.view.overview()
+        self.assertTrue(result["audit"]["pending"])
+        self.assertTrue(result["audit"]["stale"])
+        self.store.fail = True
+        self.callbacks.pop()()
+        result = self.view.overview()
+        self.assertTrue(result["audit"]["failed"])
+        self.assertEqual(result["rows"], first["rows"])
+        self.assertNotIn("private information", json.dumps(result))
+
+    def test_stale_worker_and_unknown_measurement_are_not_success_or_zero(self):
+        self.store.files["latest.json"] = {"time": 10, "state": "attention"}
+        result = self.sample()
+        self.assertFalse(result["last_run"]["recent"])
+        self.assertIsNone(result["last_run"]["free_change_bytes"])
+        self.assertIsNone(result["last_run"]["autosave_removed"])
+
+    def test_uncertain_removal_is_shown_even_when_worktree_is_missing(self):
+        self.store.files["state.json"]["entries"]["data-missing"] = {"state": "attention"}
+        result = self.sample()
+        self.assertEqual(result["counts"]["blocked"], 2)
+        self.assertIn("ruční ověření", next(r for r in result["rows"] if r["name"] == "data-missing")["reason"])
+
+    def test_http_is_get_only_and_refresh_does_not_run_cleanup(self):
+        from http.client import HTTPConnection
+        from http.server import ThreadingHTTPServer
+        import threading
+        from app import cockpit
+        result = self.sample()
+        server = ThreadingHTTPServer(("127.0.0.1", 0), cockpit.CockpitServer().make_handler())
+        thread = threading.Thread(target=server.serve_forever, daemon=True)
+        thread.start()
+        try:
+            with patch("app.cockpit.housekeeping_overview", return_value=result) as overview, patch.object(Housekeeping, "tick") as tick:
+                for suffix in ("", "?refresh=1", "?apply=1"):
+                    connection = HTTPConnection("127.0.0.1", server.server_port, timeout=5)
+                    connection.request("GET", "/api/workspace-housekeeping" + suffix)
+                    response = connection.getresponse()
+                    self.assertEqual(response.status, 400 if "apply" in suffix else 200)
+                    response.read(); connection.close()
+                self.assertEqual(overview.call_count, 2)
+                self.assertEqual(overview.call_args.kwargs, {"refresh": True})
+                connection = HTTPConnection("127.0.0.1", server.server_port, timeout=5)
+                connection.request("POST", "/api/workspace-housekeeping", body="{}", headers={"Content-Type": "application/json", "Origin": f"http://127.0.0.1:{server.server_port}"})
+                response = connection.getresponse()
+                self.assertIn(response.status, (400, 404, 405)); response.read(); connection.close()
+                self.assertEqual(overview.call_count, 2)
+                tick.assert_not_called()
+        finally:
+            server.shutdown(); server.server_close(); thread.join(timeout=3)
+
+    def test_card_frontend_behavior(self):
+        from scripts.cockpit_quality_gate import node_binary
+        result = subprocess.run([node_binary(), str(Path(__file__).with_name("housekeeping_frontend.test.cjs"))],
+                                capture_output=True, text=True, timeout=15)
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)

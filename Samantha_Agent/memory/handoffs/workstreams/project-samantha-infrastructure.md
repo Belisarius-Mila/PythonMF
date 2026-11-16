@@ -1,4 +1,24 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
+## 2026-11-16 10:19 CET — Karta úklidu místně hotová, čeká na p+n
+
+Na Mílovo zadání doplněn čtecí přehled Servis → Provoz → Úklid pracovních
+kopií. Ukazuje plánovač, poslední běh, změnu volného místa, počty a důvody
+čekajících/ponechaných/neuzavřených kopií. Nový GET s jediným čtecím refresh
+parametrem nevystavuje zápis ani mazání. Pomalé ověření je v jednom pozadí,
+cache5min, viditelné stáří/chyba; UI načítá jen otevřenou servisní část.
+
+54 cílených testů PASS včetně skutečného HTTP GET/odmítnutého POST a Node
+stavů offline/stará data/pozdní odpověď/bezpečný text/skrytá karta. Živý
+samostatný čtecí probe:0 čekajících,4 ponechané, plánovač loaded/exit0,
+poslední běh48 autosave/+0,5002GiB. Otisk aktivačního kontraktu shodný,
+žádná změna daemonu či mazacího rozsahu. Konečná brána/commit a UI důkaz
+v private/workspace_housekeeping/ui_development.json.
+Další krok: samostatné p+n karty; její skutečné zobrazení v běžícím Cockpitu
+a fyzická přejímka ještě nejsou potvrzené. Potom zachování dat starých kopií
+a původní priorita opravy obnovy ScienceNews. Existující hodinový úklid
+zůstává aktivní; poslední publikovaný475ba522 má potvrzený push/deploy/smoke5
+v private/workspace_housekeeping/release_completion.json.
+
 ## 2026-11-16 09:32 CET — Hodinový úklid aktivní, první běh ověřen
 
 Míla přesnou globální větou schválil aktuální připravený návrh. Registrovaná

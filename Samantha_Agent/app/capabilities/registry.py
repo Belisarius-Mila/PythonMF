@@ -12,6 +12,12 @@ from app.capabilities.models import (
 
 CAPABILITIES: tuple[CapabilityRecord, ...] = (
     CapabilityRecord(
+        capability_id="workspace_housekeeping_status", label="Read the Cockpit housekeeping card",
+        risk=RiskLevel.READ_ONLY, reads=("private cleanup summaries", "cached read-only workspace and launchd audit"),
+        writes=(), tool="app.cockpit_housekeeping.housekeeping_overview", audit=AuditPolicy.REDACTED,
+        notes="GET only. Background audit reads Git/file/process metadata and verifies canonical duplicates without returning private paths or contents. No cleanup, retirement, activation, service change or model call. Stale/missing evidence remains visible.",
+    ),
+    CapabilityRecord(
         capability_id="workspace_housekeeping_preview", label="Preview disposable workspace housekeeping",
         risk=RiskLevel.READ_ONLY, reads=("Git and local file metadata", "completion markers"), writes=(),
         tool="app.worktree_cleanup.Housekeeping.preview", audit=AuditPolicy.REDACTED,
