@@ -19,6 +19,7 @@ import vocabulary_fr_catalog as catalog
 import vocabulary_fr_audio as audio
 import vocabulary_fr_export as export
 import vocabulary_fr_generation as generation
+import vocabulary_fr_personal as personal
 
 
 def fixture():
@@ -121,6 +122,49 @@ class CatalogTests(unittest.TestCase):
             (root / 'private').mkdir(); (root / 'private/tracked').write_text('test')
             subprocess.run(['git', '-C', str(root), 'add', '-f', 'private/tracked'], check=True)
             with self.assertRaises(ValueError): catalog.private_output(root / 'private')
+
+
+class PersonalHardTests(unittest.TestCase):
+    def test_hard_backup_has_no_profiles_selected_snapshot_or_learned_state(self):
+        rows, doc, _ = fixture()
+        self.assertEqual(personal.prepare_hard_backup(rows, doc), {
+            'schema': 1, 'kind': 'vocabulary-fr.personal-hard-backup',
+            'language': 'fr', 'hard': ['vfr-0002'],
+        })
+
+    def test_omitted_source_hard_flag_is_preserved_once(self):
+        rows, doc, _ = fixture()
+        rows[2]['HT'] = 'ano'
+        self.assertEqual(personal.prepare_hard_backup(rows, doc)['hard'], ['vfr-0001', 'vfr-0002'])
+        rows[0]['HT'] = 'ano'
+        self.assertEqual(personal.prepare_hard_backup(rows, doc)['hard'], ['vfr-0001', 'vfr-0002'])
+
+    def test_order_changes_do_not_reassign_hard_meaning(self):
+        rows, doc, _ = fixture()
+        expected = personal.prepare_hard_backup(rows, doc)
+        for index, row in enumerate(rows):
+            row['Order'] = str(200 + index)
+        doc['entries'].reverse()
+        self.assertEqual(personal.prepare_hard_backup(rows[::-1], doc), expected)
+
+    def test_distinct_meaning_and_web_correction_keep_exact_source_identity(self):
+        rows, doc, _ = fixture()
+        doc['entries'][1]['body']['fr'] = 'corrected synthetic spelling'
+        self.assertEqual(personal.prepare_hard_backup(rows, doc)['hard'], ['vfr-0002'])
+
+    def test_unknown_missing_and_duplicate_sources_fail(self):
+        rows, doc, _ = fixture()
+        changed = deepcopy(rows)
+        changed[0]['FR'] += '!'
+        for invalid in (changed, rows[:2], rows + [rows[0]]):
+            with self.subTest(rows=len(invalid)), self.assertRaises(ValueError):
+                personal.prepare_hard_backup(invalid, doc)
+
+    def test_empty_hard_selection_is_valid(self):
+        rows, doc, _ = fixture()
+        for row in rows:
+            row['HT'] = 'ne'
+        self.assertEqual(personal.prepare_hard_backup(rows, doc)['hard'], [])
 
 
 class ExportTests(unittest.TestCase):

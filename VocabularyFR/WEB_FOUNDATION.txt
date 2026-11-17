@@ -20,6 +20,16 @@ Explicit private input layout
 Keep learner-hints-private.json outside the delivered payload. Personal flags,
 PINs and local source paths are never part of exported card JSON.
 
+Private hard-word import (client integration required)
+  vocabulary_fr_personal.prepare_hard_backup(rows, catalog)
+returns {schema:1,kind:"vocabulary-fr.personal-hard-backup",language:"fr",
+hard:[permanent UID,...]}. The list contains each HT=ano meaning once, using
+the same exact source resolver and logical OR over approved omitted aliases.
+It contains no A-D profile, PIN, learned flag, source text or selected snapshot.
+All cards remain the implicit default inventory, including future additions.
+Keep the actual import outside Git/docs. This helper does not change a browser,
+provide client import support, or authorize publication of personal selections.
+
 UIDs
 Assign vfr-NNNN once and store them in the private catalog. resolve_rows()
 uses exact NFC source FR/CZ/sentence pairs, including explicit approved omitted
