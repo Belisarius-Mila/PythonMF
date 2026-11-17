@@ -1,8 +1,11 @@
 # VocabularyEN web: obrazové kartičky pro opakování slovíček
 
-Aktuální krok 2026-11-17 09:15 CET: místně kontinuální smyčka Slovíčka / Věta + slovíčko,
-EN hlas a text + český překlad, pausa a ovládání; p+n tohoto kroku nezadané.
-Kanonický handoff project-vocabulary-en.md a report vocabulary_en_continuous_20261117.md.
+Aktuální krok 2026-11-17 11:00 CET: místně pilot20 obrazových vět,51 vazeb na35
+existujících karet. Max5 EN popisků nad EN/CZ větou v kontinuální smyčce,
+potom původní velká slovní karta. Bez nových médií a změn A–D. Safari Mac
+ověřeno; finální brána/checkpoint v private completion.json. P+n a servis
+Cockpitu Míla nyní nechal Willovi, zde žádný release/restart/retry.
+Kanonický handoff project-vocabulary-en.md a report vocabulary_en_sentence_pictures_20261117.md.
 
 
 

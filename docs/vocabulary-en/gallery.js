@@ -5,6 +5,10 @@ const DATA_URL = appRoot?.dataset.jsonUrl || "../data/vocabulary-en.json";
 const AUDIO_DATA_URL = appRoot?.dataset.audioUrl || "../data/vocabulary-en-audio.json";
 const SENTENCE_AUDIO_URL = "../data/vocabulary-en-sentence-audio.json";
 const QUIZ_DATA_URL = "../data/vocabulary-en-quiz.json";
+const SENTENCE_PICTURES_URL = "../data/vocabulary-en-sentence-pictures.json";
+const sentencePicturesUI=document.getElementById("sentencePictures");
+const sentenceImagePreloads=new Map(),failedSentenceImages=new Set();
+let sentencePicturesManifest=null,sentencePicturesKey="";
 const galleryModeHint=document.getElementById("galleryModeHint");
 const ui = Object.fromEntries(["galleryView","studyView","totalCount","totalLabel","searchInput","topicPicker","topicFilters","topicSummary","clearTopicsButton","filterSelect","teachingTypeSelect","groupSelect","sortSelect","sizeButton","partFilters","levelFilters","sourceFilters","continueButton","shuffleButton","resetButton","emptyResetButton","sectionNav","galleryNotice","galleryGroups","emptyState","galleryFooter","backButton","backBottomButton","studyPosition","wordImage","pictureFallback","speakPromptButton","promptLabel","promptText","messageStrip","revealButton","answerCard","answerEn","answerCz","sentenceBox","sentenceEn","sentenceCz","speakAnswerButton","roundStatus","previousButton","nextButton","newRoundButton"].map(id => [id,document.getElementById(id)]));
 const defaults = () => ({filter:"all",teachingType:"all",query:"",topics:[],sources:[],parts:[],levels:[],groupBy:"topic",sort:"recommended",labelLanguage:"en",direction:"czToEn",practice:"words",large:false,learner:"all",onlyLearnerHard:false,recentCount:0});
@@ -249,7 +253,52 @@ function renderCurrentItem(){
   loopUI.studyLoopTranslation.hidden=!studyLoop.active;
   ui.speakPromptButton.hidden=studyLoop.active;
   if(studyLoop.active)renderStudyLoopCard();
+  const showPictures=studyLoop.active && studyLoop.phase==="sentences" && renderSentencePictures(item);
+  if(!showPictures)hideSentencePictures();
+  primeSentencePictures();
   document.title=state.view==="study" ? `${item.en} · Vocabulary EN` : document.title;
+}
+
+function sentenceConcepts(item){return M.sentencePictures(item,sentencePicturesManifest,state.data?.items || []);}
+function hideSentencePictures(){
+  sentencePicturesUI.hidden=true;sentencePicturesUI.replaceChildren();sentencePicturesKey="";
+  ui.studyView.classList.remove("sentence-context");
+}
+function primeSentencePictures(){
+  const next=state.sequence[(state.index+1)%state.sequence.length];
+  for(const item of [state.currentItem,next].filter(Boolean))for(const ref of sentenceConcepts(item)){
+    const relative=ref.item.thumbnail;
+    if(sentenceImagePreloads.has(relative) || failedSentenceImages.has(relative))continue;
+    const image=document.createElement("img");image.decoding="async";
+    image.src=new URL(`../${relative}`,window.location.href).toString();
+    sentenceImagePreloads.set(relative,image);
+    if(sentenceImagePreloads.size>10)sentenceImagePreloads.delete(sentenceImagePreloads.keys().next().value);
+  }
+}
+function renderSentencePictures(item){
+  const refs=sentenceConcepts(item).filter(ref=>!failedSentenceImages.has(ref.item.thumbnail));
+  if(!refs.length)return false;
+  const key=JSON.stringify([item.uid,refs.map(ref=>[ref.item.uid,ref.item.en,ref.item.thumbnail])]);
+  if(key!==sentencePicturesKey){
+    sentencePicturesUI.replaceChildren();sentencePicturesKey=key;
+    for(const ref of refs){
+      const figure=document.createElement("figure");figure.className="sentence-picture";figure.dataset.uid=ref.item.uid;
+      const image=document.createElement("img");image.alt="";image.width=384;image.height=384;image.decoding="async";image.loading="eager";
+      image.src=new URL(`../${ref.item.thumbnail}`,window.location.href).toString();
+      const caption=document.createElement("figcaption");caption.lang="en";caption.textContent=ref.item.en;caption.title=`Ve větě: ${ref.text}`;
+      image.addEventListener("error",()=>{
+        failedSentenceImages.add(ref.item.thumbnail);
+        if(figure.parentNode!==sentencePicturesUI)return;
+        figure.remove();sentencePicturesKey="";
+        sentencePicturesUI.setAttribute("data-count",String(sentencePicturesUI.children.length));
+        if(!sentencePicturesUI.children.length)hideSentencePictures();
+      },{once:true});
+      figure.append(image,caption);sentencePicturesUI.append(figure);
+    }
+  }
+  sentencePicturesUI.hidden=false;sentencePicturesUI.setAttribute("data-count",String(refs.length));
+  ui.studyView.classList.add("sentence-context");
+  return true;
 }
 
 function syncStudyLoopControls(){
@@ -265,6 +314,7 @@ function interruptStudyLoop(exit=true){
   if(studyLoop.cancelWait){studyLoop.cancelWait();studyLoop.cancelWait=null;}
   if(exit){
     studyLoop.active=false;
+    hideSentencePictures();
     loopUI.studyLoopTranslation.hidden=true;
     ui.studyView.classList.remove("loop-practice");
     loopUI.studyLoopStatus.textContent="Smyčka opakuje aktuální výběr anglicky, český překlad zůstává na obrazovce.";
@@ -594,6 +644,11 @@ function bindEvents(){
 async function readJson(url){const response=await fetch(url,{cache:"no-store"});if(!response.ok)throw new Error(`HTTP ${response.status}`);return response.json();}
 async function init(){
   bindEvents();
+  void readJson(SENTENCE_PICTURES_URL).then(manifest=>{
+    sentencePicturesManifest=manifest;primeSentencePictures();
+    // Late optional metadata must not swap pictures in a sentence already playing.
+    if(state.currentItem && state.view==="study" && !studyLoop.running)renderCurrentItem();
+  }).catch(()=>{sentencePicturesManifest=false;});
   // A slow or missing pronunciation file must never hold the picture atlas closed.
   void readJson(AUDIO_DATA_URL).then(manifest=>{
     state.audioManifest=manifest;if(state.currentItem)primeCurrentAudio(state.currentItem);quizUI?.refresh();

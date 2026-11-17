@@ -281,4 +281,83 @@ class VocabularyGalleryTests(unittest.TestCase):
         gallery=(ROOT/'docs/vocabulary-en/index.html').read_text()
         self.assertIn('src="gallery.js"',gallery)
 
+class SentencePictureTests(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls):
+        spec=importlib.util.spec_from_file_location('sentence_picture_builder',VOCAB/'build_sentence_pictures.py')
+        cls.builder=importlib.util.module_from_spec(spec);spec.loader.exec_module(cls.builder)
+        cls.source=json.loads((VOCAB/'vocabulary_en_sentence_pictures.json').read_text())
+        cls.data=json.loads((ROOT/'docs/data/vocabulary-en.json').read_text())
+        cls.export=json.loads((ROOT/'docs/data/vocabulary-en-sentence-pictures.json').read_text())
+
+    def test_reviewed_twenty_sentences_export_exactly_51_real_image_links(self):
+        from PIL import Image
+        expected=self.builder.build(self.source,self.data,asset_root=ROOT/'docs')
+        self.assertEqual(expected,self.export)
+        self.assertEqual(len(expected['entries']),20)
+        self.assertEqual(sum(len(r['concepts']) for r in expected['entries'].values()),51)
+        self.assertEqual(max(len(r['concepts']) for r in expected['entries'].values()),5)
+        items={i['uid']:i for i in self.data['items']};seen=set()
+        for record in expected['entries'].values():
+            for ref in record['concepts']:
+                item=items[ref['uid']];self.assertTrue(item['active'])
+                for key in ('image','thumbnail'):
+                    path=ROOT/'docs'/item[key]
+                    if path in seen:continue
+                    with Image.open(path) as image:image.load()
+                    seen.add(path)
+
+    def test_sentence_texts_and_concept_meanings_cannot_drift_silently(self):
+        for field in ('sourceEn','sourceCz','sourceSentenceEn','sourceSentenceCz'):
+            source=copy.deepcopy(self.source);source['entries']['ven-0020'][field]+=' changed'
+            with self.subTest(field=field),self.assertRaises(ValueError):self.builder.build(source,self.data)
+        for field in ('sourceEn','sourceCz'):
+            source=copy.deepcopy(self.source);source['entries']['ven-0020']['concepts'][1][field]+=' changed'
+            with self.subTest(field=field),self.assertRaises(ValueError):self.builder.build(source,self.data)
+
+    def test_bad_references_order_duplicates_and_overlong_rows_are_rejected(self):
+        for mode in ('unknown','duplicate','too-many','order','missing-word','inside-word','occurrence','review','shape','retired'):
+            source=copy.deepcopy(self.source);data=copy.deepcopy(self.data);r=source['entries']['ven-0020'];refs=r['concepts']
+            if mode=='unknown':refs[0]['uid']='ven-9999'
+            if mode=='duplicate':refs.insert(1,copy.deepcopy(refs[0]))
+            if mode=='too-many':r['concepts']=refs*2
+            if mode=='order':refs.reverse()
+            if mode=='missing-word':refs[0]['text']='kitten'
+            if mode=='inside-word':refs[1]['text']='sleep'
+            if mode=='occurrence':refs[0]['occurrence']=True
+            if mode=='review':r['reviewed']=False
+            if mode=='shape':r['concepts']=None
+            if mode=='retired':next(i for i in data['items'] if i['uid']=='ven-0477')['active']=False
+            with self.subTest(mode=mode),self.assertRaises(ValueError):self.builder.build(source,data)
+
+    def test_inflections_keep_the_exact_meaning_instead_of_spelling_homographs(self):
+        records=self.export['entries']
+        self.assertEqual([(r['uid'],r['text']) for r in records['ven-0020']['concepts']],
+                         [('ven-0020','cat'),('ven-0477','sleeps'),('ven-0222','chair')])
+        self.assertIn(('ven-0477','sleeping'),[(r['uid'],r['text']) for r in records['ven-0226']['concepts']])
+        self.assertIn(('ven-0376','opens'),[(r['uid'],r['text']) for r in records['ven-0234']['concepts']])
+        self.assertNotIn('ven-0439',[r['uid'] for r in records['ven-0234']['concepts']])
+        self.assertEqual([r['uid'] for r in records['ven-0430']['concepts']],['ven-0430'])
+        self.assertNotIn('ven-0058',[r['uid'] for r in records['ven-0430']['concepts']])
+        self.assertNotIn('ven-0097',[r['uid'] for r in records['ven-0027']['concepts']])
+        self.assertNotIn('ven-0081',[r['uid'] for r in records['ven-0207']['concepts']])
+
+    def test_offsets_use_javascript_utf16_and_do_not_depend_on_catalog_order(self):
+        source=copy.deepcopy(self.source);source['entries']={'ven-0020':source['entries']['ven-0020']};r=source['entries']['ven-0020']
+        data=copy.deepcopy(self.data);target=next(i for i in data['items'] if i['uid']=='ven-0020')
+        target['sentenceEn']='🐈 '+target['sentenceEn'];r['sourceSentenceEn']=target['sentenceEn']
+        result=self.builder.build(source,data);ref=result['entries']['ven-0020']['concepts'][0]
+        expected=len(target['sentenceEn'][:target['sentenceEn'].index('cat')].encode('utf-16-le'))//2
+        self.assertEqual(ref['start'],expected)
+        data['items'].reverse();self.assertEqual(self.builder.build(source,data),result)
+
+    def test_asset_traversal_missing_thumbnail_and_duplicate_image_are_rejected(self):
+        for mode in ('traversal','missing','duplicate-image'):
+            data=copy.deepcopy(self.data);items={i['uid']:i for i in data['items']}
+            if mode=='traversal':items['ven-0477']['thumbnail']='../private.png'
+            if mode=='missing':items['ven-0477']['thumbnail']='assets/vocabulary-en-thumbs/missing.webp'
+            if mode=='duplicate-image':items['ven-0477']['image']=items['ven-0020']['image']
+            with self.subTest(mode=mode),self.assertRaises(ValueError):self.builder.build(self.source,data,asset_root=ROOT/'docs')
+
+
 if __name__=='__main__':unittest.main()

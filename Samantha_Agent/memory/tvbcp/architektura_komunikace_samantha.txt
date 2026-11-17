@@ -5424,3 +5424,38 @@ Technický důkaz:
 - Safari Mac na samostatném localhost původu ověřilo automatické cat→další karty, větu a slovo dog s oběma překlady, pause/stop a návrat ke crocodile v galerii42 karet. Původní produkční okno park zůstalo beze změny, vlastní okno a server zavřené. Telefon a Mílova akustická přejímka zůstávají otevřené.
 - Finální programem vybraná validation-v3 brána, finální zdrojové otisky a checkpoint jsou pouze v private/vocabulary_en_continuous_20261117/completion.json. Bez push/deploy. Zdrojový základ7278e110.
 - Finální funkční kandidát prošel programovou bránou115 PASS (validation-v3), včetně všech80 JS scénářů galerie a samostatných kontrol profilů. Dodatečný zápis důkazu projde dokumentační bránou; přesnou shodu zdrojů po commitu doloží completion.json.
+
+
+### 2026-11-17 11:00 CET — Vocabulary EN, obrazové pojmy ve větách
+
+Hotovo:
+Pilot20 vět ukazuje až5 souvisejících obrázků s EN názvy nad celou EN větou
+a CZ překladem. Po dočtení a pauze se obnoví velká cílová karta/EN/CZ a zvuk
+slovíčka.51 předem revidovaných vazeb na35 existujících karet. Bez dalších
+obrázků či nahrávek; osobní výběry i ruční učení zachované. Vadné obrázky a
+neplatná metadata neblokují čtení. Ostatních492 aktivních vět má původní obraz.
+
+Rozhodnutí:
+Míla schválil pilot20 vět s předem připravenými významovými UID; nic neodvozovat
+online. Filtr vybírá cílové věty, související pojmy smí být z celého slovníku.
+P+n/servis Cockpitu nyní nechává Willovi; zde žádný restart ani release retry.
+Samostatný EN TVBCP není dohodnutý; tento existující záznam zůstává vazbou.
+
+Další krok:
+Willova integrace/vydání a Mílova přejímka pilotu.
+
+Navrhované další kroky:
+- Po přejímce rozšířit mapy vět.
+- IT až na samostatný pokyn.
+
+Technický důkaz:
+6 nových Python kontrol (významy, export, obrazové soubory, UTF16) a9 nových
+skutečných JS scénářů PASS. Safari Mac ukázalo5 obrazových pojmů nad větou
+bird/EN/CZ a následně velkou bird/pták kartu. Vlastní okno/server zavřené,
+telefon/akustická přejímka otevřené. Finální programová brána, přesné zdroje
+a checkpoint v private/vocabulary_en_sentence_pictures_20261117/completion.json.
+Report vocabulary_en_sentence_pictures_20261117.md a kanonický EN handoff
+obsahují mapu/odolnost/předání. Historický release job0d4eb5c attention se zde
+neopakuje; dnešní veřejný stav se tímto místním krokem netvrdí.
+
+Finální funkční kandidát: validation-v3 161 PASS, režim targeted. Po doplnění tohoto důkazu a zachování úplné historie handoffu následuje dokumentační brána; přesnou shodu finálního commitu potvrzuje privátní completion.json.
