@@ -1,4 +1,44 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
+## 2026-11-17 22:06 CET — Soukromé SMS v den rodinné události, vývoj bez aktivace
+
+Hotovo: Samostatné SMS pravidlo pro jednu příjemkyni je připravené místně.
+V den narozenin/svátku od09:00 Europe/Prague, pozdější hodinová kontrola
+událost tentýž den dožene. Další den už včerejší SMS nevytváří. Respektuje
+aktivní osoby a jejich reminders_enabled. Osobní oslovení/telefon a konkrétní
+náhled jsou jen v soukromém vypnutém návrhu; nikdy v Git/docs.
+Rozhodnutí: Míla zadal vývoj a následně výslovně schválil jednu testovací
+SMS po dokončení lokálního commitu. Automatický provoz přesného pravidla
+vyžaduje samostatný souhlas; vývoj, commit ani p+n jej nezapínají. Původní e-mailové D-2/D-1/D-0 příjemce a evidenci
+neměníme; používá se existující hodinový dispatcher, bez nového LaunchAgentu.
+Další krok: Po lokálním commitu provést jediný schválený test SMS se
+stabilní identitou. Výsledek bude v soukromém completion.json; nejistý
+pokus se neopakuje. Poté samostatné p+n a až po doloženém testu zvlášť
+potvrzená aktivace přesného pravidla.
+Navrhované další kroky: Fyzické přijetí testu a ověření skutečného běhového
+kontextu Zpráv/iPhonu, potom první přirozená kontrola a živý stav v Cockpitu.
+Technický důkaz:115 cílených kontrol PASS (SMS/hodinový kalendář, Messages,
+Cockpit/JS, registry/workflow). Zahrnují souběh, letní/zimní čas, probuzení,
+půlnoc během preflightu i zápisu záměru, vypnutá připomenutí, nové roční události, poškozený/
+chybějící ledger a havárii před/po transportu. SQL potvrzení vyžaduje novější
+ROWID, přesný plný telefon, přesný text a službu SMS; jiné texty/příjemci,
+staré řádky, duplicitní shody nebo nečitelný attributed-only text zůstanou unknown.
+Sending je trvalé před transportem. Opakuje se pouze prokazatelný preflight
+not_sent nejdřív za1h, nejvýše24 pokusů; sent/delivered/failed/unknown/sending
+se automaticky neopakují. Ztracené dokončení zůstává sending a je viditelné.
+SMS chyba neblokuje e-mail a e-mailová chyba neblokuje SMS. Ruční replay
+s --today nebo jinými argumenty SMS větev nikdy nespustí. Stav SMS v Cockpitu
+je samostatný a redigovaný i při neověřeném e-mailovém stavu.
+Soukromý návrh má700/600,0 doručovacích záznamů a enabled=false. Žádný skutečný
+Messages send, model, změna systémových oprávnění, plánovače nebo e-mailového
+nastavení. Vstupní živý audit ověřil původní automatiku active/0 blokátorů
+s hodinovým policy; jeho aktivaci neopakovat.
+Meze: Ověření skutečného SMS transportu, oprávnění Zpráv pro běhový proces
+a doručení přes iPhone nejsou simulací potvrzené. Nedoložený výsledek se
+přizná, neoznačí za doručený. Kódový proof neznamená zapnutou automatiku.
+Finální brána/head/stav: private family_calendar/sms_development_20261117/
+completion.json (targeted_tests.log, final_gate.log, private_preview.json).
+<!-- SAMANTHA_CURRENT_STATUS_END -->
+
 ## 2026-11-16 12:27 CET — Hodinové kontroly připravené místně
 
 Hotovo: hodinové kontroly od08:00 do23:00 a kontrola při spuštění služby,
@@ -32,7 +72,7 @@ reader, změněný plán a nejistý bootstrap). Živě pouze read-only preview;
 žádné odeslání ani změna LaunchAgentu/Keychain. Konečná brána, commit a
 navazující aktivace mají soukromý doklad family_calendar/hourly_development/
 development.json. Fyzická přejímka nové automatiky zatím neproběhla.
-<!-- SAMANTHA_CURRENT_STATUS_END -->
+
 
 # TVBCP: Rodinný kalendář
 
@@ -734,3 +774,43 @@ reader, změněný plán a nejistý bootstrap). Živě pouze read-only preview;
 žádné odeslání ani změna LaunchAgentu/Keychain. Konečná brána, commit a
 navazující aktivace mají soukromý doklad family_calendar/hourly_development/
 development.json. Fyzická přejímka nové automatiky zatím neproběhla.
+
+
+## 2026-11-17 22:06 CET — Soukromé SMS v den rodinné události, vývoj bez aktivace
+
+Hotovo: Samostatné SMS pravidlo pro jednu příjemkyni je připravené místně.
+V den narozenin/svátku od09:00 Europe/Prague, pozdější hodinová kontrola
+událost tentýž den dožene. Další den už včerejší SMS nevytváří. Respektuje
+aktivní osoby a jejich reminders_enabled. Osobní oslovení/telefon a konkrétní
+náhled jsou jen v soukromém vypnutém návrhu; nikdy v Git/docs.
+Rozhodnutí: Míla zadal vývoj a následně výslovně schválil jednu testovací
+SMS po dokončení lokálního commitu. Automatický provoz přesného pravidla
+vyžaduje samostatný souhlas; vývoj, commit ani p+n jej nezapínají. Původní e-mailové D-2/D-1/D-0 příjemce a evidenci
+neměníme; používá se existující hodinový dispatcher, bez nového LaunchAgentu.
+Další krok: Po lokálním commitu provést jediný schválený test SMS se
+stabilní identitou. Výsledek bude v soukromém completion.json; nejistý
+pokus se neopakuje. Poté samostatné p+n a až po doloženém testu zvlášť
+potvrzená aktivace přesného pravidla.
+Navrhované další kroky: Fyzické přijetí testu a ověření skutečného běhového
+kontextu Zpráv/iPhonu, potom první přirozená kontrola a živý stav v Cockpitu.
+Technický důkaz:115 cílených kontrol PASS (SMS/hodinový kalendář, Messages,
+Cockpit/JS, registry/workflow). Zahrnují souběh, letní/zimní čas, probuzení,
+půlnoc během preflightu i zápisu záměru, vypnutá připomenutí, nové roční události, poškozený/
+chybějící ledger a havárii před/po transportu. SQL potvrzení vyžaduje novější
+ROWID, přesný plný telefon, přesný text a službu SMS; jiné texty/příjemci,
+staré řádky, duplicitní shody nebo nečitelný attributed-only text zůstanou unknown.
+Sending je trvalé před transportem. Opakuje se pouze prokazatelný preflight
+not_sent nejdřív za1h, nejvýše24 pokusů; sent/delivered/failed/unknown/sending
+se automaticky neopakují. Ztracené dokončení zůstává sending a je viditelné.
+SMS chyba neblokuje e-mail a e-mailová chyba neblokuje SMS. Ruční replay
+s --today nebo jinými argumenty SMS větev nikdy nespustí. Stav SMS v Cockpitu
+je samostatný a redigovaný i při neověřeném e-mailovém stavu.
+Soukromý návrh má700/600,0 doručovacích záznamů a enabled=false. Žádný skutečný
+Messages send, model, změna systémových oprávnění, plánovače nebo e-mailového
+nastavení. Vstupní živý audit ověřil původní automatiku active/0 blokátorů
+s hodinovým policy; jeho aktivaci neopakovat.
+Meze: Ověření skutečného SMS transportu, oprávnění Zpráv pro běhový proces
+a doručení přes iPhone nejsou simulací potvrzené. Nedoložený výsledek se
+přizná, neoznačí za doručený. Kódový proof neznamená zapnutou automatiku.
+Finální brána/head/stav: private family_calendar/sms_development_20261117/
+completion.json (targeted_tests.log, final_gate.log, private_preview.json).

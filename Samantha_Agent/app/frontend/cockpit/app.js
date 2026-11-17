@@ -3581,10 +3581,13 @@ Soubor nebude trvale smazán.`);
         const data = await fetchJsonWithTimeout("/api/family-calendar/delivery-status", 15000);
         if (request !== familyCalendarDeliveryRequest) return;
         const known = ["active", "disabled", "dry_run", "attention"].includes(data.state);
-        if (data.ok !== true || !known || !data.message || !Number.isFinite(Date.parse(data.checked_at))) {
+        if (!Number.isFinite(Date.parse(data.checked_at))) {
           throw new Error("Neověřený stav automatického odesílání");
         }
-        familyCalendarDeliveryStatus.textContent = `${data.message} Ověřeno: ${new Date(data.checked_at).toLocaleString("cs-CZ")}.`;
+        const emailText=data.ok===true&&known&&data.message?data.message:"Stav automatického e-mailového odesílání se nepodařilo ověřit.";
+        const sms=data.sms||{},smsText=sms.status==='active'?'Osobní SMS: zapnuté, v den události od 9:00.':sms.status==='disabled'?'Osobní SMS: připravené, zatím vypnuté.':sms.status==='not_configured'?'Osobní SMS nejsou nastavené.':'Stav osobních SMS není ověřený.';
+        const smsAttention=sms.attention_count>0?' Některé SMS vyžadují kontrolu původního výsledku.':'';
+        familyCalendarDeliveryStatus.textContent = `${emailText} ${smsText}${smsAttention} Ověřeno: ${new Date(data.checked_at).toLocaleString("cs-CZ")}.`;
       } catch (_err) {
         if (request !== familyCalendarDeliveryRequest) return;
         familyCalendarDeliveryStatus.textContent = "Stav automatického e-mailového odesílání se nepodařilo ověřit. Zkus kalendář znovu otevřít.";

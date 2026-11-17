@@ -1,3 +1,15 @@
+## Rodinný kalendář — osobní SMS (2026-11-17)
+
+family_calendar_sms_prepare vytváří pouze vypnutý soukromý návrh. Status/preview
+čtou redigovaně stav/počty/otisk a nečtou Messages DB ani neodesílají.
+family_calendar_sms_control rozlišuje samostatný test s aktuálním potvrzením,
+přesným fingerprintem a request_id a pak samostatně schválenou aktivaci.
+Trvalý souhlas pokrývá jediný soukromý kontakt, šablonu, narozeniny/svátky
+od09:00 v den události; vývoj/p+n tento souhlas nedávají. Odesílání pouze
+vlastněným dispatcherem, záznam sending před transportem a přesná SQL korelace
+nového výsledku. Nejistý výsledek ani nový test ID neopravňují nový send.
+Podrobně family_calendar_sms.md; žádná změna SMTP, Keychain nebo LaunchAgentu.
+
 ## Samantha — čtecí Knihovna (2026-11-17)
 
 shared_chat_library_context → LibraryReader.prepare a shared_chat_library_search

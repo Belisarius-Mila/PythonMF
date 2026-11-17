@@ -174,5 +174,42 @@ def _create_messages_db_with_row(db_path: Path, error: int = 0) -> int:
     return before
 
 
+class CalendarSMSCorrelationTests(unittest.TestCase):
+    def setUp(self):
+        from app.family_calendar_sms_transport import MessagesSMS
+        temp=tempfile.TemporaryDirectory();self.addCleanup(temp.cleanup)
+        self.path=Path(temp.name)/'chat.db';self.phone='+420700000001';self.text='Synthetic exact SMS'
+        with sqlite3.connect(self.path) as db:
+            db.execute('CREATE TABLE handle(id TEXT)')
+            db.execute('INSERT INTO handle VALUES(?)',(self.phone,))
+            db.execute('INSERT INTO handle VALUES(?)',('+421700000001',))
+            db.execute('CREATE TABLE message(text TEXT,handle_id INTEGER,service TEXT,is_from_me INTEGER,is_sent INTEGER,is_delivered INTEGER,error INTEGER)')
+        self.add(self.text)
+        self.transport=MessagesSMS(self.path,sender=lambda *args:self.add(self.text),attempts=1,pause=lambda _:None)
+
+    def add(self,text,handle=1,service='SMS',sent=1,delivered=0,error=0):
+        with sqlite3.connect(self.path) as db:
+            db.execute('INSERT INTO message VALUES(?,?,?,?,?,?,?)',(text,handle,service,1,sent,delivered,error))
+
+    def test_requires_new_row_exact_body_and_full_recipient(self):
+        anchor=self.transport.preflight();self.assertEqual(anchor,1)
+        result=self.transport.send(self.phone,self.text,anchor)
+        self.assertEqual(result.state,'sent');self.assertGreater(result.row_id,anchor)
+        for sender in (lambda *a:None,lambda *a:self.add('unrelated message'),lambda *a:self.add(self.text,handle=2)):
+            self.transport.sender=sender;anchor=self.transport.preflight()
+            self.assertEqual(self.transport.send(self.phone,self.text,anchor).state,'unknown')
+
+    def test_verified_delivery_failure_and_unexpected_imessage_stay_distinct(self):
+        for kwargs,state in [({'delivered':1},'delivered'),({'sent':0,'error':1},'failed'),({'service':'iMessage'},'unknown'),({'sent':0},'unknown')]:
+            self.transport.sender=lambda *a:self.add(self.text,**kwargs)
+            result=self.transport.send(self.phone,self.text,self.transport.preflight());self.assertEqual(result.state,state)
+
+    def test_multiple_new_matches_and_unreadable_attributed_only_body_are_unknown(self):
+        self.transport.sender=lambda *a:(self.add(self.text),self.add(self.text))
+        self.assertEqual(self.transport.send(self.phone,self.text,self.transport.preflight()).state,'unknown')
+        self.transport.sender=lambda *a:self.add(None)
+        self.assertEqual(self.transport.send(self.phone,self.text,self.transport.preflight()).state,'unknown')
+
+
 if __name__ == "__main__":
     unittest.main()

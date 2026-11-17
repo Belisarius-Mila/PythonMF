@@ -260,6 +260,45 @@ def family_calendar_delivery_readiness() -> str:
 
 
 @function_tool
+def family_calendar_sms_status() -> str:
+    """Read only the redacted personal calendar SMS status."""
+    from app.family_calendar_sms import CalendarSMS
+    return json.dumps(CalendarSMS().status(), ensure_ascii=False)
+
+
+@function_tool
+def family_calendar_sms_preview() -> str:
+    """Preview the exact private SMS policy fingerprint without sending."""
+    from app.family_calendar_sms import CalendarSMS
+    try:
+        return json.dumps(CalendarSMS().preview(), ensure_ascii=False)
+    except Exception:
+        return json.dumps({'status': 'unverified', 'transport_called': False, 'redacted': True})
+
+
+@function_tool
+def family_calendar_sms_control(action: str, fingerprint: str = '', confirmation: str = '',
+                                request_id: str = '', confirmed: bool = False) -> str:
+    """Explicit test/activation consent; development or p+n never authorizes SMS."""
+    from app.family_calendar_sms import CalendarSMS, SMSAttemptError
+    service = CalendarSMS()
+    try:
+        if action == 'test':
+            result = service.test(fingerprint=fingerprint, confirmation=confirmation, request_id=request_id)
+        elif action == 'enable':
+            result = service.enable(fingerprint=fingerprint, confirmation=confirmation)
+        elif action == 'disable':
+            result = service.disable(confirmed=confirmed)
+        else:
+            raise ValueError()
+        return json.dumps(result, ensure_ascii=False)
+    except SMSAttemptError as error:
+        return json.dumps({'status': 'unverified', 'transport_called': error.transport_called, 'redacted': True})
+    except Exception:
+        return json.dumps({'status': 'blocked', 'redacted': True})
+
+
+@function_tool
 def family_calendar_hourly_schedule(
     apply: bool = False, fingerprint: str = "", confirmation: str = "", global_confirmation: str = "",
 ) -> str:
@@ -876,6 +915,9 @@ LOKALNI PAMET:
             copy_downloads_files_to_knowledge_inbox,
             iphone_shortcuts_playground_status,
             family_calendar_delivery_readiness,
+            family_calendar_sms_status,
+            family_calendar_sms_preview,
+            family_calendar_sms_control,
             family_calendar_hourly_schedule,
             prepare_iphone_shortcut,
             list_quick_notes,

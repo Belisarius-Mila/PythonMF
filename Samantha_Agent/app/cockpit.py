@@ -1219,6 +1219,7 @@ def family_calendar_delivery_status_action(
     *,
     readiness_loader: Callable[..., Any] | None = None,
     now: datetime | None = None,
+    sms_loader: Callable[..., Any] | None = None,
 ) -> dict[str, Any]:
     """Expose only a read-only automation summary, never recipients or credentials."""
     result = {
@@ -1228,6 +1229,15 @@ def family_calendar_delivery_status_action(
         "checked_at": (now or datetime.now(timezone.utc)).isoformat(),
         "read_only": True,
     }
+    try:
+        from app.family_calendar_sms import CalendarSMS
+        sms = (sms_loader or CalendarSMS().status)()
+        if (sms.get('status') not in ('active', 'disabled', 'not_configured', 'unverified')
+                or sms.get('writes_performed') is not False or sms.get('transport_called') is not False):
+            raise ValueError()
+        result['sms'] = {key: sms[key] for key in ('status', 'enabled', 'hour', 'timezone', 'attention_count') if key in sms}
+    except Exception:
+        result['sms'] = {'status': 'unverified', 'redacted': True}
     try:
         report = (readiness_loader or inspect_family_calendar_delivery_readiness)()
         if report.writes_performed or report.secret_read or report.transport_called:

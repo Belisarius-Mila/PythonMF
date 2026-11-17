@@ -12,6 +12,35 @@ from app.capabilities.models import (
 
 CAPABILITIES: tuple[CapabilityRecord, ...] = (
     CapabilityRecord(
+        capability_id="family_calendar_sms_prepare", label="Prepare a disabled private personal SMS rule",
+        risk=RiskLevel.LOCAL_WRITE, reads=("explicitly supplied recipient and salutation",),
+        writes=("create-only disabled private SMS draft and empty delivery ledger",),
+        requires_confirmation=True, confirmation_policy=ConfirmationPolicy.EXACT_CURRENT_MESSAGE,
+        tool="app.family_calendar_sms.CalendarSMS.prepare", audit=AuditPolicy.REDACTED,
+        notes="No overwrite, sender, Messages DB read, schedule change or activation. Phone and personalized text never enter Git.",
+    ),
+    CapabilityRecord(
+        capability_id="family_calendar_sms_status", label="Read redacted personal calendar SMS status",
+        risk=RiskLevel.READ_ONLY, reads=("private SMS policy and original delivery records",), writes=(),
+        tool="family_calendar_sms_status", audit=AuditPolicy.REDACTED,
+        notes="No phone/name/body exposure, Messages DB read, sender or model call. Corruption stays unverified.",
+    ),
+    CapabilityRecord(
+        capability_id="family_calendar_sms_preview", label="Preview day-of-event SMS policy",
+        risk=RiskLevel.READ_ONLY, reads=("private recipient/template policy", "today's active family calendar events"), writes=(),
+        tool="family_calendar_sms_preview", audit=AuditPolicy.REDACTED,
+        notes="Exact fingerprint and counts only; no Messages transport, activation or archive changes.",
+    ),
+    CapabilityRecord(
+        capability_id="family_calendar_sms_control", label="Confirm one SMS test or exact recurring calendar SMS policy",
+        risk=RiskLevel.EXTERNAL_SEND, reads=("exact private policy fingerprint and explicit scoped consent", "correlated SMS test receipt"),
+        writes=("one confirmed test SMS or separately authorized private recurring policy",),
+        requires_confirmation=True, confirmation_policy=ConfirmationPolicy.EXACT_CURRENT_MESSAGE,
+        voice_allowed=VoicePolicy.APPROVAL_ONLY, mobile_allowed=MobilePolicy.APPROVAL_CARD,
+        tool="family_calendar_sms_control", audit=AuditPolicy.REDACTED,
+        notes="Different exact confirmations for one test and enabling. Activation needs a matching successful test, loaded compatible runtime and active hourly schedule. No retry of uncertain/test sends; per-event durable intent precedes transport. Development/p+n grants no send consent.",
+    ),
+    CapabilityRecord(
         capability_id="shared_chat_library_context", label="Prepare local library evidence for the original Samantha question",
         risk=RiskLevel.READ_ONLY, reads=("explicit original question and prior room-scoped library results", "canonical stored library sources"), writes=(),
         tool="app.shared_chat_library.LibraryReader.prepare", audit=AuditPolicy.REDACTED,

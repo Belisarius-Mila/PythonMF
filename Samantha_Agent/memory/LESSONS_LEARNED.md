@@ -2920,3 +2920,17 @@ strop. Skutečný DALTAC dokončen17,0578/20, sedm původních částí beze zm�
   Text stránkovat s otiskem a UI chránit generačním číslem proti pozdnímu GET.
 - Ověření:33 cílených PASS včetně dvou HTTP klientů a3 nových JS scénářů;
   skutečných145 záznamů pouze čteno0,04–0,21s. Nativní/fyzická přejímka otevřená.
+
+
+### 2026-11-17 — Osobní kalendářová SMS potřebuje přesnou vlastní účtenku
+
+- Problém: poslední zpráva na stejné číslo může být jiný text; samotné datum
+  a posledních devět číslic není důkaz odeslání právě připravené SMS.
+- Typ: opakující se odchozí komunikace.
+- Řešení nalezeno:17112026.
+- Řešení: trvalé sending před senderem, předem přečtený ROWID a následná
+  shoda novějšího řádku, plného příjemce, textu a SMS služby. Výsledek po
+  výpadku je unknown/sending, bez nového send. Prokázaný preflight not_sent
+  lze zkusit při další hodinové kontrole. SMS oddělit od e-mailového ledgeru.
+- Ověření:115 cílených kontrol PASS, včetně souběhu, půlnoci, ztraceného
+  dokončení, cizích zpráv a ochrany testu proti novému ID. Žádná skutečná SMS.

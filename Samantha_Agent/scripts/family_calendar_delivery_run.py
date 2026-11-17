@@ -5,6 +5,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import io
 import sys
 from collections.abc import Callable, Sequence
 from pathlib import Path
@@ -77,5 +78,27 @@ def _mode_parser() -> argparse.ArgumentParser:
     return parser
 
 
+def scheduled_main(argv=None, *, output=None, email_runner=main, sms_runner=None):
+    """Keep SMS independent of email errors; custom/replay arguments never send SMS."""
+    args = list(sys.argv[1:] if argv is None else argv)
+    if args:
+        return email_runner(args, output=output)
+    from app.family_calendar_sms import run_calendar_sms
+    try:
+        sms = (sms_runner or run_calendar_sms)()
+    except Exception:
+        sms = {'status': 'unverified', 'redacted': True}
+    captured = io.StringIO()
+    try:
+        code = email_runner(args, output=captured)
+        result = json.loads(captured.getvalue())
+        if not isinstance(result, dict):
+            raise ValueError()
+    except Exception:
+        code, result = 1, {'status': 'runtime_error', 'redacted': True}
+    print(json.dumps({**result, 'sms': sms}, ensure_ascii=False), file=output or sys.stdout)
+    return code
+
+
 if __name__ == "__main__":
-    raise SystemExit(main())
+    raise SystemExit(scheduled_main())

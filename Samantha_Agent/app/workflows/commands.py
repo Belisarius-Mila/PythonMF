@@ -319,6 +319,16 @@ def _camino_service_commands() -> tuple[WorkflowCommand, ...]:
 
 WORKFLOW_COMMANDS: tuple[WorkflowCommand, ...] = (
     *(WorkflowCommand(
+        command_id='family_calendar_sms_'+action,
+        title='Rodinný kalendář — SMS '+action,
+        purpose='Soukromý stav/náhled; tick respektuje předem samostatně schválené SMS pravidlo.',
+        aliases=('rodinný kalendář sms '+action,),
+        argv=(str(PYTHON_BIN), str(SAMANTHA_DIR/'scripts/family_calendar_sms.py'), action),
+        cwd=SAMANTHA_DIR, risk='external_send' if action=='tick' else 'read_only',
+        writes='Původní SMS účtenky a již schválené SMS' if action=='tick' else 'nic',
+        requires_confirmation=action=='tick',
+    ) for action in ('status', 'preview', 'tick')),
+    *(WorkflowCommand(
         command_id="workspace_housekeeping_" + action.replace("-", "_"), title=f"Úklid pracovních kopií: {action}",
         purpose="Čtecí přehled bezpečných kandidátů nebo příprava neaktivního návrhu hodinového úklidu.",
         aliases=(f"úklid pracovních kopií {action}",),

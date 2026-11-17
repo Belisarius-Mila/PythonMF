@@ -99,6 +99,15 @@ class FamilyCalendarCockpitTests(unittest.TestCase):
         self.assertNotIn("private", json.dumps(result))
         self.assertNotIn("vypnuté", result["message"])
 
+    def test_sms_projection_is_independent_redacted_and_read_only(self):
+        sms={'status':'disabled','enabled':False,'hour':9,'attention_count':1,
+             'writes_performed':False,'transport_called':False,'phone':'PRIVATE','text':'PRIVATE'}
+        result=family_calendar_delivery_status_action(readiness_loader=lambda:self.readiness(config_mode='unknown'),sms_loader=lambda:sms)
+        self.assertFalse(result['ok']);self.assertEqual(result['sms']['status'],'disabled')
+        self.assertNotIn('PRIVATE',json.dumps(result));self.assertNotIn('phone',result['sms'])
+        sms['transport_called']=True
+        self.assertEqual(family_calendar_delivery_status_action(sms_loader=lambda:sms)['sms']['status'],'unverified')
+
     def test_delivery_status_get_uses_only_the_readonly_probe(self) -> None:
         with patch("app.cockpit.inspect_family_calendar_delivery_readiness", return_value=self.readiness()) as probe:
             server = ThreadingHTTPServer(("127.0.0.1", 0), CockpitServer().make_handler())
