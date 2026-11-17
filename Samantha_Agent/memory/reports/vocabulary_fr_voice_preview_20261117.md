@@ -1,7 +1,8 @@
 # Vocabulary FR — ukázka ženského a mužského hlasu
 
-Stav: Míla vybral Henriho, fr-FR-HenriNeural, tempo −10 %. Placená výroba
-celé knihovny zatím neschválená. Navazuje na obsahový checkpoint
+Stav: Míla vybral Henriho, fr-FR-HenriNeural, tempo −10 %. Následně schválil
+Azure výrobu do 2 USD bez daně; celá knihovna je hotová a soukromě ověřená.
+Dokončení dokládá reports/vocabulary_fr_azure_20261117.md. Navazuje na obsahový checkpoint
 `a119e84f`; uzavřený obsahový balíček v001 se nemění. Kanonické FR dokumenty
 nadále spravuje Will, tento redigovaný report je obsahový podklad k předání.
 
@@ -21,22 +22,21 @@ Hotovo:
 - Soukromá účtenka zachycuje explicitní autorizaci ukázky, text/hlasy/tempo,
   stavy před požadavkem, výsledné soubory a otisky. Do Gitu patří jen tento report.
 
-Podklad pro další výrobu, nikoli souhlas s placenými voláními:
+Původní cenový podklad před schválením výroby:
 
-- Ve zmrazeném balíčku chybí 904 různých FR klipů a 760 různých CZ klipů.
+- Ve výchozím zmrazeném balíčku chybělo 904 různých FR klipů a 760 různých CZ klipů.
   Původních 166 existujících českých MP3 je zachovaných.
 - Pro oba jazyky dohromady jde o 88 682 odhadovaných účtovaných znaků včetně
   zvolených SSML prosody tagů. Samotná francouzština má 47 737 těchto znaků.
 - Čerstvý veřejný ceník Azure pro germanywestcentral: 15 USD / 1M znaků.
   Odhad před daní a bez předpokladu bezplatné kvóty či slev je 1,33023 USD
   za vše chybějící, případně 0,716055 USD jen za FR. Nejde o vyúčtování účtu.
-- Azure adaptér dosud nepovoluje FR hlasy; společnou úpravu vlastní Will.
-  Žádná placená výroba ani automatická náhrada poskytovatele zde neproběhla.
+- Při přípravě ukázky Azure adaptér FR hlasy nepovoloval; doplnění následně
+  dokončil Will. Samotná hlasová ukázka placenou Azure syntézu nepoužila.
 
-Další krok: Will doplní vybraného Henriho do společného Azure adaptéru a ověří
-jeho testy. Před placenou výrobou potvrdit cenový limit připraveného plánu.
-Zachovat hotové MP3, identitu textů a pravidlo bez automatického opakování
-nejasného požadavku.
+Aktuální další krok: Will převezme nový uzavřený soukromý balíček v003, provede
+klientskou integrační přejímku a aktualizuje kanonické FR dokumenty. Publikace
+a fyzická přejímka jsou samostatné otevřené kroky.
 
 Ověřené veřejné podklady:
 
@@ -52,8 +52,9 @@ Ověřené veřejné podklady:
   karet a kanálů, připnuté texty/hlasy/tempo, 166 zachovávaných MP3 s otisky,
   9 pracovních bloků do 10 000 účtovaných znaků. Plán nebyl odeslaný.
 - Plán je vázaný na původní bundle digest; změna vstupů vyžaduje nový plán.
-  Návrh celkového cenového limitu je 2 USD bez daně; není zaznamenaný jako
-  schválený. Cenový odhad zůstává 1,33023 USD za vše chybějící.
-- Aktuálně ověřený Azure adaptér v Datově kopii i main vybraný FR hlas nepovoluje.
-  Data připravil Willovi přesné zadání v Downloads; společný adaptér sám nemění.
-- Další generace, placené volání, push, publikace nebo nasazení neproběhly.
+  Původní návrh celkového limitu byl 2 USD bez daně. Míla jej následně
+  výslovně schválil spolu s přesným plánem. Cenový odhad zůstává 1,33023 USD za vše chybějící.
+- V okamžiku volby hlasu Azure adaptér FR nepovoloval. Následný Willův přesný
+  patch Data převzal beze změny; společný adaptér znovu nenavrhoval.
+- V okamžiku volby hlasu celá výroba ještě neběžela. Následné dokončení je
+  uvedené v samostatném Azure reportu; push/publikace/nasazení Data neprováděl.
