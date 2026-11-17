@@ -46,7 +46,15 @@ async function app({items=vocabulary.items,url="https://example.test/PythonMF/vo
   const travel=delta=>{if(!historyEntries[historyIndex+delta])return;historyIndex+=delta;location.href=historyEntries[historyIndex].url;emit("popstate");emit("hashchange");};
   win.history={get state(){return historyEntries[historyIndex].state;},replaceState:(state,unused,url)=>{location.href=new URL(url,location.href).href;historyEntries[historyIndex]={url:location.href,state};},pushState:(state,unused,url)=>{location.href=new URL(url,location.href).href;historyEntries.splice(historyIndex+1);historyEntries.push({url:location.href,state});historyIndex++;},back:()=>travel(-1),forward:()=>travel(1)};
   if(blocked){Object.defineProperty(win,"sessionStorage",{get(){throw Error("blocked")}});Object.defineProperty(win,"localStorage",{get(){throw Error("blocked")}});}else{win.sessionStorage=session;win.localStorage=local;}
-  const players=[];class AudioFixture {constructor(url){this.url=url;this.handlers={};this.currentTime=0;this.playCount=0;players.push(this);}addEventListener(name,fn){this.handlers[name]=fn;}removeEventListener(name,fn){if(this.handlers[name]===fn)delete this.handlers[name];}pause(){this.paused=true;}play(){this.played=true;this.playCount++;return Promise.resolve();}}
+  const players=[];class AudioFixture {
+    constructor(url){this.url=url;this.handlers={};this.currentTime=0;this.playCount=0;this.ended=false;this.loadCount=0;players.push(this);}
+    set src(url){this.url=url;} get src(){return this.url;}
+    load(){this.currentTime=0;this.ended=false;this.loadCount++;}
+    addEventListener(name,fn){this.handlers[name]=fn;}
+    removeEventListener(name,fn){if(this.handlers[name]===fn)delete this.handlers[name];}
+    pause(){this.paused=true;}
+    play(){this.played=true;this.paused=false;this.ended=false;this.playCount++;return Promise.resolve();}
+  }
   const data={...vocabulary,items};
   const ctx=vm.createContext({document:doc,window:win,URL,URLSearchParams,TextEncoder,Audio:AudioFixture,console,fetch:async url=>{if(url.includes("-quiz.json")){if(failQuiz)throw Error("quiz unavailable");return {ok:true,json:async()=>quizCatalog};}if(slowAudio && url.includes("audio"))return new Promise(()=>{});if(failData && !url.includes("audio"))throw Error("offline");const selected=url.includes("sentence-audio")?sentenceManifest:manifest;if(selected===null && url.includes("audio"))throw Error("audio unavailable");return {ok:true,json:async()=>url.includes("audio")?selected:data};}});
   vm.runInContext(fs.readFileSync(path.join(root,"vocabulary-en/model.js"),"utf8"),ctx);
@@ -654,4 +662,105 @@ test("body batch stays within the original theme and navigates distinct new noun
   view.openStudy("ven-0443");assert.equal(view.state.currentItem.en,"head");view.moveStudy(1);
   assert.equal(view.state.currentItem.uid,"ven-0444");assert.equal(view.state.currentItem.sentenceEn,"I wash my face.");
   view.returnToGallery();assert.equal(view.doc.activeElement.id,"tile-ven-0444");
+});
+
+// Continuous study exercises the real gallery, timers, history and Audio API.
+const loopTick=()=>new Promise(resolve=>setImmediate(resolve));
+function finishLoopAudio(view){const player=activePlayer(view);assert.ok(player);player.ended=true;player.handlers.ended();return player;}
+async function nextLoopPhase(view,gap=2000){finishLoopAudio(view);await loopTick();view.advance(gap);await loopTick();}
+function loopMode(view,mode){view.element('studyLoopMode').value=mode;view.element('studyLoopMode').emit('change');}
+
+test('continuous words honor learner A, difficult, recent, topic and gallery order; wrap without changing profiles or flooding history',async()=>{
+  const local=storage(),value=learners.empty(),latest=model.select(vocabulary.items,{recentCount:20});
+  const selected=latest.filter(i=>i.primaryGroup===latest[0].primaryGroup).slice(0,3);assert.ok(selected.length>=2);
+  value.profiles.A.selected=selected.map(model.key);value.profiles.A.hard=selected.map(model.key);local.setItem(learners.KEY,JSON.stringify(value));const before=local.getItem(learners.KEY);
+  const view=await app({local});chooseUser(view,'A');view.element('learnerHardFilter').click();quizFilter(view,'recentOnly',true);view.state.topics=[selected[0].primaryGroup];view.selectionChanged();
+  const expected=view.orderedSelection().map(model.key);view.openStudy(expected[0]);const context=JSON.stringify(view.context()),entries=view.historyEntries.length;
+  view.element('studyLoopToggle').click();assert.equal(view.element('promptText').lang,'en');assert.equal(view.element('promptText').textContent,view.state.currentItem.en);assert.equal(view.element('studyLoopTranslation').textContent,view.state.currentItem.cz);
+  for(let index=1;index<=expected.length;index++){await nextLoopPhase(view);assert.equal(view.state.currentItem.uid,expected[index%expected.length]);}
+  assert.equal(view.historyEntries.length,entries);assert.equal(JSON.stringify(view.context()),context);assert.equal(local.getItem(learners.KEY),before);
+  assert.ok(view.players.filter(p=>p.played).every(p=>p.url.includes('/en-')));view.returnToGallery();
+  assert.equal(view.doc.activeElement.id,'tile-'+expected[0]);assert.equal(local.getItem(learners.KEY),before);
+});
+test('continuous sentence then word replaces both visible texts and uses one unlocked audio element loaded from zero',async()=>{
+  const view=await app({items:quizItems.slice(0,2)});view.openStudy(quizItems[0].uid);const sequence=view.state.sequence.map(model.key);const first=view.state.currentItem;
+  loopMode(view,'sentence-word');view.element('studyLoopToggle').click();const player=activePlayer(view);
+  assert.equal(view.element('promptText').textContent,first.sentenceEn);assert.equal(view.element('studyLoopTranslation').textContent,first.sentenceCz);assert.ok(player.url.endsWith(sentenceAudio.items[first.uid].en));
+  await nextLoopPhase(view);assert.equal(view.state.currentItem.uid,first.uid);assert.equal(view.element('promptText').textContent,first.en);assert.equal(view.element('studyLoopTranslation').textContent,first.cz);assert.equal(activePlayer(view),player);assert.ok(player.url.endsWith(audio.items[first.id].en));
+  await nextLoopPhase(view);assert.equal(view.state.currentItem.uid,sequence[1]);assert.equal(view.element('promptText').textContent,view.state.currentItem.sentenceEn);assert.equal(activePlayer(view),player);assert.equal(player.loadCount,3);assert.equal(player.currentTime,0);
+  assert.equal(view.players.filter(p=>p.played).length,1);view.element('studyLoopStop').click();assert.equal(view.state.practice,'words');assert.equal(view.state.direction,'czToEn');assert.equal(view.element('promptText').textContent,view.state.currentItem.cz);assert.ok(view.element('studyLoopTranslation').hidden);
+});
+test('long audio never advances on a guessed duration; full post-ended gap is respected',async()=>{
+  const view=await app({items:quizItems});view.openStudy(quizItems[0].uid);view.element('studyLoopToggle').click();const player=activePlayer(view),uid=view.state.currentItem.uid;
+  view.advance(45000);await loopTick();assert.equal(view.state.currentItem.uid,uid);assert.equal(player.playCount,1);
+  finishLoopAudio(view);await loopTick();view.advance(1999);await loopTick();assert.equal(view.state.currentItem.uid,uid);view.advance(1);await loopTick();assert.notEqual(view.state.currentItem.uid,uid);
+  view.element('studyLoopStop').click();
+});
+test('single-card loops reload from zero, ignore old ended events and pause without leaking a timer',async()=>{
+  const view=await app({items:[quizItems[0]]});view.openStudy(quizItems[0].uid);view.element('studyLoopToggle').click();const player=activePlayer(view),old=player.handlers.ended;player.currentTime=4;
+  view.element('studyLoopToggle').click();assert.ok(player.paused);old();await loopTick();view.advance(5000);await loopTick();assert.equal(player.playCount,1);
+  view.element('studyLoopToggle').click();assert.equal(player.currentTime,0);assert.equal(player.playCount,2);
+  player.handlers.ended();await loopTick();view.advance(3000);await loopTick();assert.equal(player.playCount,2);assert.ok(player.handlers.ended);
+  await nextLoopPhase(view);assert.equal(player.playCount,3);assert.equal(player.loadCount,3);assert.equal(view.state.currentItem.uid,quizItems[0].uid);
+  finishLoopAudio(view);await loopTick();view.element('studyLoopToggle').click();view.advance(10000);await loopTick();assert.equal(player.playCount,3);
+  view.element('studyLoopStop').click();
+});
+test('changing mode or delay pauses and requires a click; no direction or manual practice settings are overwritten',async()=>{
+  const view=await app({items:quizItems});view.openStudy(quizItems[0].uid);view.practices[1].click();view.directions[1].click();const before=JSON.stringify(view.context());
+  view.element('studyLoopToggle').click();loopMode(view,'sentence-word');assert.equal(activePlayer(view),undefined);assert.match(view.element('studyLoopToggle').textContent,/Pokračovat/);
+  assert.equal(view.element('promptText').textContent,view.state.currentItem.sentenceEn);view.element('studyLoopToggle').click();assert.ok(activePlayer(view));
+  view.element('studyLoopGap').value='4000';view.element('studyLoopGap').emit('change');assert.equal(activePlayer(view),undefined);view.element('studyLoopToggle').click();
+  const uid=view.state.currentItem.uid;finishLoopAudio(view);await loopTick();view.advance(3999);await loopTick();assert.equal(view.element('promptText').textContent,view.state.currentItem.sentenceEn);view.advance(1);await loopTick();assert.equal(view.state.currentItem.uid,uid);assert.equal(view.element('promptText').textContent,view.state.currentItem.en);
+  view.element('studyLoopStop').click();assert.equal(JSON.stringify(view.context()),before);assert.equal(view.element('promptText').textContent,view.state.currentItem.sentenceEn);
+});
+test('browser back, settings, quiz, manual navigation and bfcache cancel current audio and every scheduled continuation',async()=>{
+  for(const exit of ['back','settings','quiz','move','practice','pagehide']){
+    const view=await app({items:quizItems});view.openStudy(quizItems[0].uid);view.element('studyLoopToggle').click();const player=activePlayer(view),late=player.handlers.ended;
+    if(exit==='back')view.win.history.back();
+    if(exit==='settings')view.element('settingsTab').click();
+    if(exit==='quiz')view.element('quizTab').click();
+    if(exit==='move')view.moveStudy(1);
+    if(exit==='practice')view.practices[1].click();
+    if(exit==='pagehide'){view.emit('pagehide');view.emit('pageshow',{persisted:true});}
+    const uid=view.state.currentItem?.uid,plays=player.playCount;assert.ok(player.paused,exit);late();view.advance(120000);await loopTick();assert.equal(player.playCount,plays,exit);assert.equal(view.state.currentItem?.uid,uid,exit);assert.match(view.element('studyLoopToggle').textContent,/Spustit/);
+  }
+  const gap=await app({items:quizItems});gap.openStudy(quizItems[0].uid);gap.element('studyLoopToggle').click();const player=finishLoopAudio(gap);await loopTick();gap.returnToGallery();gap.advance(4000);await loopTick();assert.equal(player.playCount,1);assert.equal(gap.state.view,'gallery');
+});
+test('reload and direct links never restart an old loop automatically',async()=>{
+  const view=await app({items:quizItems});view.openStudy(quizItems[0].uid);view.element('studyLoopToggle').click();await nextLoopPhase(view);view.emit('pagehide');
+  const restored=await app({items:quizItems,url:view.win.location.href,session:view.session,local:view.local});assert.equal(restored.state.currentItem.uid,view.state.currentItem.uid);assert.ok(restored.players.every(p=>!p.played));assert.match(restored.element('studyLoopToggle').textContent,/Spustit/);
+});
+test('missing or mismatched loop audio pauses on the affected card and never falls back to another text or Czech',async()=>{
+  for(const mode of ['words','sentence-word']){
+    const first=quizItems[0],manifest={...audio,items:{...audio.items,[first.id]:{...audio.items[first.id],sourceCz:'wrong'}}};
+    const sentenceManifest={...sentenceAudio,items:{...sentenceAudio.items,[first.uid]:{...sentenceAudio.items[first.uid],sourceSentenceEn:'wrong'}}};
+    const view=await app({items:quizItems,manifest,sentenceManifest});view.openStudy(first.uid);loopMode(view,mode);view.element('studyLoopToggle').click();await loopTick();assert.equal(activePlayer(view),undefined);assert.ok(view.players.every(p=>!p.played));assert.match(view.element('studyLoopStatus').textContent,/Chybí.*pozastavená/);assert.equal(view.state.currentItem.uid,first.uid);view.advance(120000);await loopTick();assert.equal(view.state.currentItem.uid,first.uid);
+  }
+});
+test('audio rejection, native error and missing ended timeout pause the loop; late callbacks cannot resurrect it',async()=>{
+  for(const failure of ['reject','error','timeout']){
+    const view=await app({items:quizItems});view.openStudy(quizItems[0].uid);view.element('studyLoopToggle').click();const player=activePlayer(view),late=player.handlers.ended,uid=view.state.currentItem.uid;
+    if(failure==='error')player.handlers.error();
+    if(failure==='timeout')view.advance(90000);
+    if(failure==='reject'){view.element('studyLoopToggle').click();player.play=()=>Promise.reject(new Error('denied'));view.element('studyLoopToggle').click();}
+    await loopTick();assert.match(view.element('studyLoopStatus').textContent,/pozastavená/);assert.ok(player.paused);assert.equal(activePlayer(view),undefined);late();view.advance(10000);await loopTick();assert.equal(view.state.currentItem.uid,uid);
+  }
+});
+test('explicit shuffle keeps its chosen sequence across loop wrap; a plain set never shuffles itself',async()=>{
+  for(const mode of ['ordered','random']){
+    const view=await app({items:quizItems});view.openStudy(quizItems[0].uid,mode);const sequence=view.state.sequence.map(model.key),start=view.state.index;view.element('studyLoopToggle').click();
+    for(let step=1;step<=sequence.length+1;step++){await nextLoopPhase(view);assert.equal(view.state.currentItem.uid,sequence[(start+step)%sequence.length]);assert.deepEqual(view.state.sequence.map(model.key),sequence);}
+    view.element('studyLoopStop').click();
+  }
+});
+test('another tab changing personal membership cancels the loop before rebuilding its sequence',async()=>{
+  const local=storage(),value=learners.empty();value.profiles.A.selected=quizItems.map(model.key);local.setItem(learners.KEY,JSON.stringify(value));
+  const view=await app({local});chooseUser(view,'A');view.openStudy(quizItems[0].uid);view.element('studyLoopToggle').click();const player=activePlayer(view),late=player.handlers.ended;
+  value.profiles.A.selected=[quizItems[0].uid];local.setItem(learners.KEY,JSON.stringify(value));view.emit('storage',{key:learners.KEY});
+  assert.ok(player.paused);assert.match(view.element('studyLoopToggle').textContent,/Spustit/);late();view.advance(120000);await loopTick();assert.equal(player.playCount,1);assert.deepEqual(Array.from(view.state.sequence,model.key),[quizItems[0].uid]);
+});
+test('a filtered deep link loop returns to the matching gallery count, tiles and final bookmark',async()=>{
+  const view=await app({url:'https://example.test/PythonMF/vocabulary-en/#card=ven-0020&topics=topic-06'});const expected=view.orderedSelection().map(model.key);assert.equal(expected.length,42);
+  view.element('studyLoopToggle').click();await nextLoopPhase(view);const last=view.state.currentItem.uid;view.returnToGallery();
+  assert.equal(view.element('totalCount').textContent,'42');assert.deepEqual(view.element('galleryGroups').querySelectorAll('.vocab-tile').map(tile=>tile.dataset.uid),Array.from(expected));assert.equal(view.doc.activeElement.id,'tile-'+last);
 });

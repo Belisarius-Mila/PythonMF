@@ -2814,3 +2814,11 @@ Příští CLI běh opravu načte, nová ostrá záloha v tomto vývojovém krok
 - Kontext: Předčasné Další/replay přeruší správně spuštěný hlas. Obnovení karty po textu samo další poslech nespustí. Zjednodušená audio fixture s okamžitým currentTime=0 může skrýt opožděný rewind.
 - Řešení: Další i replay zamknout po celou zvukovou fázi a krátký odstup po ended, přepínače nesmí bránu obejít. Správné psaní má výslovnou další zvukovou fázi. Herní pokusy používají čerstvý Audio od nuly, příprava URL je samostatná; odchod a timeout bezpečně zruší callbacky.
 - Ověření:3 reprodukce na původním kódu FAIL při38 původních PASS; opravená verze45 PASS, včetně dlouhého audia, opožděného rewind, přepínačů a finálního error/timeout. Safari dokončilo celý tok dvou hesel; akustická a telefonní přejímka zůstává samostatná.
+
+
+### 2026-11-17 09:18 CET — Kontinuální poslech potřebuje skutečné ended a zrušitelnou prodlevu
+
+- Kontext: Vocabulary EN střídá uloženou větu/slovo a opakuje filtrovanou posloupnost bez dalšího klikání.
+- Řešení: první play přímo z uživatelského kliknutí; pro další úseky zachovat stejný odemknutý Audio element, měnit src a volat load (včetně stejné karty). To respektuje per-element autoplay a odstraní závislost na opožděném rewind. Přechod až po ended a plné prodlevě, generační rušení zvuku i timerů; reload/bfcache nikdy neobnovuje běh. Chyba či timeout pozastaví, neodpočítává další karty. Ignorovaný starý ended nesmí spotřebovat jednorázový listener nového úseku.
+- Ověření:115 cílených kontrol PASS včetně80 JS scénářů,12 nových scénářů smyčky. Safari skutečně přehrálo několik nových karet na jediné spuštění a větu→slovo s oběma překlady. Odmítnutý play musí také explicitně pause; jinak zmizí currentAudio reference dřív, než jej zastaví následná obsluha.
+- Navazující oprava: návrat z přímého filtrovaného odkazu musí galerii znovu vykreslit, ne jen označit poslední tile ve starém obsahu. Reprodukce512 místo42, po opravě42 a fokus poslední karty. Report vocabulary_en_continuous_20261117.md; fyzický telefon samostatně.

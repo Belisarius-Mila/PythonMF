@@ -1,5 +1,10 @@
 # VocabularyEN web: obrazové kartičky pro opakování slovíček
 
+Aktuální krok 2026-11-17 09:15 CET: místně kontinuální smyčka Slovíčka / Věta + slovíčko,
+EN hlas a text + český překlad, pausa a ovládání; p+n tohoto kroku nezadané.
+Kanonický handoff project-vocabulary-en.md a report vocabulary_en_continuous_20261117.md.
+
+
 
 ## Aktuální autorský vstup a tělo — 2026-11-15 08:27 CET
 
@@ -1643,3 +1648,28 @@ Závěrečný zápis je ve vlastním Data worktree: na main se mezitím objevil
 souběžný nesouvisející vývoj. Přesunuté jen4 vlastní dokumenty; cizí kód
 ani jeho stage nebyly změněné. Původní main kontrola není důkazem těchto
 čtyř dokumentů; vlastní finální brána má samostatný privátní log.
+
+
+### 2026-11-17 09:15 CET — Kontinuální procvičování Vocabulary EN
+
+Hotovo:
+- Na velké kartě je Smyčka: Slovíčka nebo Věta + slovíčko. Oba režimy ukazují angličtinu a pod ní český překlad, čte se pouze anglicky. Kombinace nejprve přečte a ukáže větu, potom samostatné slovo a pak pokračuje další kartou. Po poslední se opakuje první.
+- Používá přesně současný výběr, pořadí galerie a případné výslovné zamíchání. Vše/A–D/obtížná/témata/hledání/typ/posledních N se zachovávají. Původní osobní zásoba, PIN, jazykový směr, ruční režim a média se nepřepisují.
+- Pozastavit/Pokračovat, Ukončit smyčku a prodleva1/2/4/6 sekund po skutečném dočtení. Pokračovat opakuje přerušený úsek od začátku. Chybějící, nesouhlasný, odmítnutý či nedokončený zvuk smyčku pozastaví na stejné kartě.
+- Návrat a jiný režim/historie/změna osobního výběru z jiného okna zruší smyčku i čekání. Reload a bfcache ji nikdy samy nespouštějí. Návrat z filtrovaného přímého odkazu opravuje počet i miniatury podle platného filtru a označí poslední kartu.
+
+Rozhodnutí:
+- Míla zadal vývoj kontinuálního režimu nejprve v EN. Dva režimy odpovídají jeho zadání; výchozí pauza2 sekundy, bez automatického přeskakování chyb. Žádný nový TTS, zásah do IT, publikace ani samostatný projektový TVBCP tím nejsou povolené.
+
+Další krok:
+Po finální místní bráně a checkpointu samostatně schválené p+n Vocabulary EN.
+
+Navrhované další kroky:
+- Mílova přejímka tempa a poslechu na používaném zařízení po vydání.
+- Port do dalších jazykových aplikací až po samostatném pokynu.
+
+Technický důkaz:
+-12 nových skutečně vykonávaných JS scénářů: pořadí/filter A/obtížná/téma/nové, sentence→word, dlouhý zvuk/ended/pauza, jedno slovo a staré callbacky, přepínače, odchod/history/bfcache, reload, metadata, error/rejected/timeout, explicitní shuffle, změna profilu, filtrovaný přímý odkaz. Původní regresní scénáře zůstávají.
+- Safari Mac na samostatném localhost původu ověřilo automatické cat→další karty, větu a slovo dog s oběma překlady, pause/stop a návrat ke crocodile v galerii42 karet. Původní produkční okno park zůstalo beze změny, vlastní okno a server zavřené. Telefon a Mílova akustická přejímka zůstávají otevřené.
+- Finální programem vybraná validation-v3 brána, finální zdrojové otisky a checkpoint jsou pouze v private/vocabulary_en_continuous_20261117/completion.json. Bez push/deploy. Zdrojový základ7278e110.
+- Finální funkční kandidát prošel programovou bránou115 PASS (validation-v3), včetně všech80 JS scénářů galerie a samostatných kontrol profilů. Dodatečný zápis důkazu projde dokumentační bránou; přesnou shodu zdrojů po commitu doloží completion.json.

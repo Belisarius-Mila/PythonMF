@@ -4,54 +4,48 @@ Nazev: Vocabulary EN
 Pracovni proud: project-vocabulary-en
 Typ: Project
 Priorita: 2
-Stav: rozsireni verejne overene; automaticka uctenka attention, bez opakovani p+n
-Pripomenout pri startu: ne
-Datum: 2026-11-15 19:29 CET
+Stav: kontinuální režim hotový místně, finální důkaz v completion.json
+Pripomenout pri startu: ano
+Datum: 2026-11-17 09:15 CET
 
 Co se resilo:
-Hra Poslechni a vyber obrázek se4 možnostmi a vyhodnocením; posledně přidaných N.
+Mílův nový kontinuální režim v učení, nejprve Vocabulary EN.
 
 Co je hotove:
-- Samostatná záložka, všech512 aktivních hesel,4 odlišné možnosti v rámci filtru.
-- Posledních20 ve hře20/20; pomocná mapa189 položek už neomezuje nové karty.
-- Filtr Posledně přidaná v Přehledu viditelný pro Učení i Poslech.
-- Vše/A–D, obtížná,1 z18 okruhů a posledních N. Galerie má stejný filtr N.
-- Skryté popisky před odpovědí; poté zelená/✓/EN název a případně šedá/×;
-  správné slovo se opět přehraje. Ruční Další, konec kola, výsledek.
-- Oddělené možnosti barev/čísel/objektů; shodné obrázky, audio a známé
-  homofony/související významy a konflikty nevytvoří nejednoznačnou čtveřici.
-- Návrat, historie, přerušení zvuku, chyby souborů a malé výběry ošetřené.
-- Zachovaná všechna522 UID/512 aktivních karet,18 témat, A–D a původní média.
-- Nové veřejné vydání77b5f652 nezávisle potvrzené přesným deploymentem
-  a6/6 veřejnými zdroji; původní automatická účtenka attention.
+- Smyčka Slovíčka a Věta + slovíčko, vždy EN text/hlas a český překlad; po konci výběru znovu první karta.
+- Přesná současná posloupnost/filtry včetně A–D, obtížných, témat a posledních N. Náhodné pořadí pouze po dřívější výslovné volbě.
+- Spustit/Pozastavit/Pokračovat/Ukončit, mezera1/2/4/6 sekund až po skutečném ended. Chyba zvuku smyčku pozastaví, nepřeskočí kartu potichu. Zrušení všech pozdních callbacků při opuštění/změně profilu, bez autostartu po obnově.
+- Filtrovaný přímý odkaz se vrací do odpovídající galerie a k naposledy přehrávané miniatuře. Ruční učení i hra zachované.
+- Safari místně ověřeno,12 nových JS regresí. Konkrétní finální bránu a checkpoint ověř podle privátní completion.json.
+- Stávající522 UID/512 aktivních,18 témat, veškeré nahrávky/obrazy, A–D/PIN a IT jsou beze změny.
 
 Co neni hotove:
-Fyzický telefon, významová přejímka abstraktních karet a vysvětlení nesouladu
-automatické účtenky (attention/deployment uncertain) s potvrzenou produkcí.
-returned_to_adam=false; hlavní Adam čtecí důkazy ověřil zde.
+Nový krok nebyl pushnutý ani nasazený; nové p+n nebylo zadáno. Fyzický telefon,
+Mílova akustická přejímka a přenos do dalších jazyků zůstávají samostatné.
 
 Dalsi krok:
-Mílova přejímka aktuální produkce; již vydané rozšíření znovu nepublikovat.
+Na samostatný pokyn provést registrované p+n pro project-vocabulary-en.
+Novou výrobu zvuku nespouštět; tento krok používá pouze již uložená média.
 
 Navrhovane dalsi kroky:
-Sledování rozlišitelnosti abstraktních ilustrací; Oxford nezávisle.
+- Mílova přejímka tempa/smyčky po vydání.
+- Další jazyk až na samostatný pokyn.
+- Oxford a rozlišitelnost abstraktních obrázků zůstávají oddělené obsahové úkoly.
 
 Zmenene nebo relevantni soubory:
-docs/vocabulary-en/quiz.js, gallery.js, model.js, index.html, gallery.css;
-docs/data/vocabulary-en-quiz.json; test_vocabularyen_selection.js,
-test_vocabularyen_gallery.py; GALLERY_AUTHORING.txt.
+docs/vocabulary-en/gallery.js, gallery.css, index.html;
+tests/test_vocabularyen_selection.js; projects/vocabulary_en_web_cards.md;
+reports/vocabulary_en_continuous_20261117.md. Stávající obecný TVBCP záznam v
+architektura_komunikace_samantha.txt, nový projektový TVBCP nebyl dohodnutý.
 
 Bezpecnost / neukladat:
-Zdroj Data5adee00a integrován bez konfliktů přes ffa62f7f nad de3899b1.
-Zveřejněná Osel oprava zachovaná; nový vydaný main/GitHub77b5f652.
-Privátní důkazy data/private/vocabulary_picture_quiz_release_20261115/.
-Předchozí publikace job2838a4ef7a46734dca52f45adc67c9ea dokončená; neopakovat.
-Rozšíření převzato z Data worktree přesným fast-forwardem na main.
-Nový jobb708fb36e6a8e5e530a0415f431a61e2 skončil attention; produkce potvrzena
-nezávisle bez dalšího submit/publish. Důkazy vocabulary_quiz_all_cards_release_20261115.
-Hra neukládá osobní výsledky do profilů, nemění vybraná/obtížná ani PIN.
-Herní filtry jen sessionStorage, galerie používá své dosavadní úložiště.
-Nový TVBCP nedohodnutý, nevzniká. Nic z původních dávek znovu negenerovat.
+Používá se stálý Audio element odemknutý výslovným kliknutím, pro každý úsek
+nový src/load, generační rušení,90s watchdog. Žádná obnova smyčky z URL/úložiště.
+Nahrávky, profily a PIN se nečetly/měnily v produkčním prohlížeči.
+Soukromé důkazy private/vocabulary_en_continuous_20261117, zdroj7278e110.
+Pracovat ve stávajícím Data ebbd worktree; nespojovat svévolně Willův main.
+Starší vydání77b5f652 a jeho attention účtenku neopakovat. Tento nový krok je
+samostatný místní obsah; nevytváří nové audio ani runtime službu.
 
 ## Historie
 
@@ -1225,3 +1219,28 @@ Závěrečný zápis je ve vlastním Data worktree: na main se mezitím objevil
 souběžný nesouvisející vývoj. Přesunuté jen4 vlastní dokumenty; cizí kód
 ani jeho stage nebyly změněné. Původní main kontrola není důkazem těchto
 čtyř dokumentů; vlastní finální brána má samostatný privátní log.
+
+
+### 2026-11-17 09:15 CET — Kontinuální procvičování Vocabulary EN
+
+Hotovo:
+- Na velké kartě je Smyčka: Slovíčka nebo Věta + slovíčko. Oba režimy ukazují angličtinu a pod ní český překlad, čte se pouze anglicky. Kombinace nejprve přečte a ukáže větu, potom samostatné slovo a pak pokračuje další kartou. Po poslední se opakuje první.
+- Používá přesně současný výběr, pořadí galerie a případné výslovné zamíchání. Vše/A–D/obtížná/témata/hledání/typ/posledních N se zachovávají. Původní osobní zásoba, PIN, jazykový směr, ruční režim a média se nepřepisují.
+- Pozastavit/Pokračovat, Ukončit smyčku a prodleva1/2/4/6 sekund po skutečném dočtení. Pokračovat opakuje přerušený úsek od začátku. Chybějící, nesouhlasný, odmítnutý či nedokončený zvuk smyčku pozastaví na stejné kartě.
+- Návrat a jiný režim/historie/změna osobního výběru z jiného okna zruší smyčku i čekání. Reload a bfcache ji nikdy samy nespouštějí. Návrat z filtrovaného přímého odkazu opravuje počet i miniatury podle platného filtru a označí poslední kartu.
+
+Rozhodnutí:
+- Míla zadal vývoj kontinuálního režimu nejprve v EN. Dva režimy odpovídají jeho zadání; výchozí pauza2 sekundy, bez automatického přeskakování chyb. Žádný nový TTS, zásah do IT, publikace ani samostatný projektový TVBCP tím nejsou povolené.
+
+Další krok:
+Po finální místní bráně a checkpointu samostatně schválené p+n Vocabulary EN.
+
+Navrhované další kroky:
+- Mílova přejímka tempa a poslechu na používaném zařízení po vydání.
+- Port do dalších jazykových aplikací až po samostatném pokynu.
+
+Technický důkaz:
+-12 nových skutečně vykonávaných JS scénářů: pořadí/filter A/obtížná/téma/nové, sentence→word, dlouhý zvuk/ended/pauza, jedno slovo a staré callbacky, přepínače, odchod/history/bfcache, reload, metadata, error/rejected/timeout, explicitní shuffle, změna profilu, filtrovaný přímý odkaz. Původní regresní scénáře zůstávají.
+- Safari Mac na samostatném localhost původu ověřilo automatické cat→další karty, větu a slovo dog s oběma překlady, pause/stop a návrat ke crocodile v galerii42 karet. Původní produkční okno park zůstalo beze změny, vlastní okno a server zavřené. Telefon a Mílova akustická přejímka zůstávají otevřené.
+- Finální programem vybraná validation-v3 brána, finální zdrojové otisky a checkpoint jsou pouze v private/vocabulary_en_continuous_20261117/completion.json. Bez push/deploy. Zdrojový základ7278e110.
+- Finální funkční kandidát prošel programovou bránou115 PASS (validation-v3), včetně všech80 JS scénářů galerie a samostatných kontrol profilů. Dodatečný zápis důkazu projde dokumentační bránou; přesnou shodu zdrojů po commitu doloží completion.json.
