@@ -1,4 +1,24 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
+## 2026-11-17 20:21 CET — Společné předání osobního režimu a Datových commitů k p+n
+
+Hotovo: Uzavřené Datovy a5f11f68/c07df87b jsou začleněné včetně úplné
+historie a aktuálního dokladu soukromého předání souboru přes sdílený iCloud.
+Klientský1e7c8bd7 zůstává funkčně beze změny: Všechna464 / Jen obtížná203,
+18 okruhů, soukromé UID, výslovné potvrzení importu a zachování A–D.
+Rozhodnutí: Míla nyní výslovně zadal převzít hotové Datovy commity a vše p+n.
+Souhlas nezahrnuje zveřejnění osobních označení. Datův soukromý soubor je
+jednorázový import, pozdější přenos používá Janin poslední export; žádný autosync.
+Další krok: Registrované submit_release(wait=True) pro FR Pages a Cockpit,
+přesný integrační SHA, pak jediná kontrola účtenek a veřejných klientských bajtů.
+Navrhované další kroky: Jana importuje soubor ze sdílené Web_Jana na svém
+zařízení; fyzicky ověří přepínání, uložení a export do Zalohy.
+Technický důkaz: Předchozí klientská doménová brána151 PASS,44 cílených
+Python/35 JS, skutečný464/203, Safari reload. Převzetí mění jen dokumentaci;
+programová brána a přesný commit/p+n jsou v private
+vocabulary_fr_personal_hard_release_20261117/completion.json. Skutečný seznam,
+původní CSV a Janino zařízení nejsou součástí publikačního stromu ani přejímky.
+<!-- SAMANTHA_CURRENT_STATUS_END -->
+
 ## 2026-11-17 20:17 CET — Osobní obtížná slova Jany v prohlížeči
 
 Hotovo: Francouzština Jana má Všechna / Jen obtížná bez profilu a PINu,
@@ -28,7 +48,7 @@ completion.json (actual_acceptance.json, safari_verification.json, final_gate.lo
 Předchozí veřejné vydání059634d2 již dokončené; tento nový krok zatím místní.
 Rizika: smazání dat webu nebo jiný prohlížeč označení nepřevezme; používat export.
 Původní CSV/média a Datův checkout se nemění. Žádná TTS výroba ani nové p+n.
-<!-- SAMANTHA_CURRENT_STATUS_END -->
+
 
 ## 2026-11-17 — Schválené veřejné vydání Francouzština Jana
 
@@ -661,3 +681,23 @@ completion.json (actual_acceptance.json, safari_verification.json, final_gate.lo
 Předchozí veřejné vydání059634d2 již dokončené; tento nový krok zatím místní.
 Rizika: smazání dat webu nebo jiný prohlížeč označení nepřevezme; používat export.
 Původní CSV/média a Datův checkout se nemění. Žádná TTS výroba ani nové p+n.
+
+
+## 2026-11-17 20:21 CET — Společné předání osobního režimu a Datových commitů k p+n
+
+Hotovo: Uzavřené Datovy a5f11f68/c07df87b jsou začleněné včetně úplné
+historie a aktuálního dokladu soukromého předání souboru přes sdílený iCloud.
+Klientský1e7c8bd7 zůstává funkčně beze změny: Všechna464 / Jen obtížná203,
+18 okruhů, soukromé UID, výslovné potvrzení importu a zachování A–D.
+Rozhodnutí: Míla nyní výslovně zadal převzít hotové Datovy commity a vše p+n.
+Souhlas nezahrnuje zveřejnění osobních označení. Datův soukromý soubor je
+jednorázový import, pozdější přenos používá Janin poslední export; žádný autosync.
+Další krok: Registrované submit_release(wait=True) pro FR Pages a Cockpit,
+přesný integrační SHA, pak jediná kontrola účtenek a veřejných klientských bajtů.
+Navrhované další kroky: Jana importuje soubor ze sdílené Web_Jana na svém
+zařízení; fyzicky ověří přepínání, uložení a export do Zalohy.
+Technický důkaz: Předchozí klientská doménová brána151 PASS,44 cílených
+Python/35 JS, skutečný464/203, Safari reload. Převzetí mění jen dokumentaci;
+programová brána a přesný commit/p+n jsou v private
+vocabulary_fr_personal_hard_release_20261117/completion.json. Skutečný seznam,
+původní CSV a Janino zařízení nejsou součástí publikačního stromu ani přejímky.
