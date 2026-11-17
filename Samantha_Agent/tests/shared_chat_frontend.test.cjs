@@ -1,7 +1,7 @@
 'use strict';
 const assert=require('node:assert/strict');
 const {webcrypto}=require('node:crypto');
-const {Client}=require('../app/frontend/samantha_chat/app.js');
+const {Client,startPolling}=require('../app/frontend/samantha_chat/app.js');
 const base=process.argv[2];
 function store(){const data=new Map();return {getItem:k=>data.get(k)||null,setItem:(k,v)=>data.set(k,String(v)),removeItem:k=>data.delete(k)};}
 let loseSend=false,holdGet=false,releaseGet=null,sendCalls=0,offline=false;
@@ -24,6 +24,19 @@ function client(storage=store(),tabStorage=store()){
   assert.equal(phone.state.room_id,host.state.room_id);
   await phone.claim();phone.setText('Otázka namluvená na telefonu');await phone.flush();
   await host.refresh();assert.equal(host.text,'Otázka namluvená na telefonu');assert.equal(host.state.draft.can_edit,false);
+  // Continuous input must reach the real second HTTP client before dictation ends.
+  phone.setTimer=(fn,ms)=>setTimeout(fn,ms);phone.clearTimer=id=>clearTimeout(id);
+  const listeners={};const browser={setTimeout,clearTimeout,addEventListener:(name,fn)=>{listeners[name]=fn;}};
+  const doc={hidden:false,addEventListener:()=>{}};
+  let observedDuringInput=false,firstVisibleMs=null;const started=performance.now(),originalRender=host.render;
+  host.render=c=>{if(c.text.startsWith('Průběžný diktát ')){observedDuringInput=true;if(firstVisibleMs===null)firstVisibleMs=Math.round(performance.now()-started);}originalRender(c);};
+  const stop=startPolling(host,doc,browser);
+  try{
+    for(let n=0;n<12;n++){phone.setText('Průběžný diktát '+n);await new Promise(resolve=>setTimeout(resolve,80));}
+    assert.equal(observedDuringInput,true,'Mint must receive text before continuous typing ends');
+    await phone.flush();await host.refresh();assert.equal(host.text,'Průběžný diktát 11');
+  }finally{stop();phone.clearTimer(phone.timer);phone.timer=null;phone.setTimer=()=>1;phone.clearTimer=()=>{};}
+  console.log('Synthetic first visible dictation ms:',firstVisibleMs);
   await host.claim();host.setText('Otázka ručně opravená na Mintu');await host.flush();
   phone.setText('Opožděný telefonní diktát');await assert.rejects(phone.flush());
   assert.equal(phone.recovery.text,'Opožděný telefonní diktát');

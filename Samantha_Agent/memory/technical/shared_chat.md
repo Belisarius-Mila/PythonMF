@@ -1,5 +1,37 @@
 # Společný provozní rozhovor Samanthy
 
+## 2026-11-17 — Průběžný diktát a stálý vstup iPhone–Mint
+
+Hotovo: Diktát se průběžně ukládá nejvýše jedním požadavkem;150ms časovač
+se každou klávesou neodkládá. Pomalá síť slučuje mezilehlé změny, nevyrábí
+frontu starých snapshotů. Aktivní stránky kontrolují stav po400ms; skryté po5s,
+offline po2s. Jedno čtení současně, okamžitý návrat po pageshow/online/viditelnosti.
+Klepnutí do otázky synchronně otevře editaci/fokus před čekáním na HTTP.
+Po odeslání zůstává původní zařízení vlastníkem psaní, i když otázku odešle
+monitor. Fokus zůstane při kliknutí na Odeslat. Aktivní pole bezpečně obnovuje
+120s oprávnění po30s, vždy bez automatického převzetí cizího zařízení.
+Rozhodnutí: Míla potvrdil první skutečné spojení, ale rychlost a opakované
+mačkání přebírání/obnovy hodnotil jako nepoužitelné; schválil tento malý balíček.
+Původní CAS/revize, zachování konfliktního textu, párování a jediná identita
+odeslání zůstávají. Nový text během nejistého sendu se drží místně; pouze
+čtecí ověření nezahájí další otázku. Model, sandbox ani hlasová služba se nemění.
+Důkaz:23 cílených Python kontrol včetně skutečných dvou HTTP/JS klientů;
+9 nových deterministických JS scénářů (souvislý diktát, pomalá síť, pozdní GET,
+fokus, obnova vlastního oprávnění, žádné převzetí cizího, nejistý send a bfcache).
+První text druhý klient lokálně zobrazil za410ms během pokračujícího diktátu.
+Nativní Safari se dvěma oddělenými origins ověřilo klepnutí do pole, zachovaný
+fokus/editaci po jednom syntetickém sendu, druhou otázku bez přebírání a ruční
+opravu z monitoru bez přebíracího tlačítka. Původní okno zachované, vlastní
+okno/server ukončené;0 skutečných modelových volání, žádná skutečná konverzace.
+Rizika:410ms je lokální fixture, nikoli naměřená rychlost fyzického iPhonu
+přes Tailscale. Fyzický mikrofon/klávesnice a latence iPhone/Mint čekají
+na přejímku až po samostatném p+n. Odpověď modelu se zatím zobrazí celá.
+Další krok: Programová doménová brána a lokální commit; pak samostatné p+n
+včetně dřívějšího Henriho f75c17f9. Toto zadání neprovádí nasazení/restart.
+Finální důkaz/head: private shared_chat_responsive_20261117/completion.json;
+real_http_frontend.log, safari_verification.json, targeted_tests.log a final_gate.log.
+
+
 ## 2026-11-17 — Společná integrace FR a opravy přenosu Samanthy
 
 Hotovo: Oprava Window časovačů a viditelného stavu sdíleného draftu185d225b

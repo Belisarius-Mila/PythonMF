@@ -15,9 +15,9 @@ const client=new context.module.exports.Client({fetch:async()=>{throw Error('Une
 client.state={room_id:'synthetic-room',draft:{can_edit:true,text:'',revision:1}};
 client.setText('Synthetic browser draft');
 assert.equal(client.dirty,true);assert.equal(client.text,'Synthetic browser draft');
-assert.equal(callbacks.get(client.timer).delay,350);
+assert.equal(callbacks.get(client.timer).delay,150);
 assert.equal(JSON.parse(client.tabStorage.getItem('samantha-chat-draft')).text,'Synthetic browser draft');
-client.setText('Updated draft');assert.equal(callbacks.size,1,'typing replaces the pending debounce');
+client.setText('Updated draft');assert.equal(callbacks.size,1,'typing coalesces without postponing transfer');
 client.disconnect();assert.equal(callbacks.size,0,'disconnect cancels the native timer');
 console.log('PASS: native browser timer receiver, debounce replacement, local recovery and disconnect.');
 

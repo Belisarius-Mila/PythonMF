@@ -1,13 +1,14 @@
 (function(root){
   'use strict';
   const KEY='samantha-shared-chat-client';
+  const DRAFT_INTERVAL=150,ACTIVE_POLL=400,BACKGROUND_POLL=5000;
   function uuid(crypto){const bytes=new Uint8Array(16);crypto.getRandomValues(bytes);return Array.from(bytes,v=>v.toString(16).padStart(2,'0')).join('');}
   function cached(storage,key){try{const value=JSON.parse(storage.getItem(key)||'null');return value&&typeof value==='object'&&!Array.isArray(value)?value:null;}catch(_){return null;}}
   class Client {
     constructor({fetch,storage,tabStorage,crypto,render=()=>{},setTimer=(fn,delay)=>root.setTimeout(fn,delay),clearTimer=id=>root.clearTimeout(id)}){
       Object.assign(this,{fetch,storage,tabStorage,crypto,render,setTimer,clearTimer});
       this.editor=tabStorage.getItem('samantha-chat-editor')||uuid(crypto);tabStorage.setItem('samantha-chat-editor',this.editor);
-      this.token=storage.getItem(KEY)||'';this.state=null;this.online=false;this.text='';this.dirty=false;this.editVersion=0;this.epoch=0;this.busy=false;this.claiming=false;this.error='';this.chain=Promise.resolve();this.timer=null;
+      this.token=storage.getItem(KEY)||'';this.state=null;this.online=false;this.text='';this.dirty=false;this.editVersion=0;this.epoch=0;this.busy=false;this.claiming=false;this.error='';this.chain=Promise.resolve();this.timer=null;this.flushPromise=null;this.claimPromise=null;this.refreshPromise=null;this.focused=false;
       this.pending=cached(tabStorage,'samantha-chat-pending');
       this.recovery=cached(tabStorage,'samantha-chat-draft');
     }
@@ -34,12 +35,17 @@
         this.pending=null;this.tabStorage.removeItem('samantha-chat-pending');
       }
     }
-    async refresh(){
-      if(!this.token){this.notify();return;}
+    refresh(){
+      if(!this.token){this.notify();return Promise.resolve();}
+      if(this.refreshPromise)return this.refreshPromise;
       const epoch=this.epoch;
-      try{const data=await this.api();if(epoch!==this.epoch||this.busy)return;this.apply(data);this.error='';}
-      catch(error){if(epoch!==this.epoch||this.busy)return;this.error=error.message;this.online=false;}
-      this.notify();
+      const request=(async()=>{
+        try{const data=await this.api();if(epoch!==this.epoch||this.busy)return;const wasPending=this.pending;this.apply(data);this.error='';if(wasPending&&!this.pending)this.scheduleDraft();}
+        catch(error){if(epoch!==this.epoch||this.busy)return;this.error=error.message;this.online=false;}
+        this.notify();
+      })();
+      this.refreshPromise=request;
+      return request.finally(()=>{this.refreshPromise=null;});
     }
     enqueue(fn){
       const work=async()=>{this.busy=true;this.epoch++;this.notify();try{return await fn();}catch(error){this.error=error.message;if(error.connectionUnknown)this.online=false;throw error;}finally{this.busy=false;this.notify();}};
@@ -51,36 +57,57 @@
       return this.enqueue(async()=>{const data=await this.api(request);this.token=data.client_token;this.storage.setItem(KEY,this.token);this.tabStorage.removeItem(key);this.apply(data);this.error='';});
     }
     async pair(){return this.enqueue(async()=>{this.apply(await this.api({action:'pair'}));this.error='';});}
-    async claim(){
+    claim(takeover=true){
+      if(this.claimPromise)return this.claimPromise;
       this.claiming=true;
-      try{return await this.enqueue(async()=>{const data=await this.api({action:'claim',expected_revision:this.state.draft.revision,takeover:true});this.apply(data);this.error='';});}
-      finally{this.claiming=false;this.notify();}
+      const request=this.enqueue(async()=>{const data=await this.api({action:'claim',expected_revision:this.state.draft.revision,takeover});this.apply(data);this.error='';});
+      this.claimPromise=request;
+      return request.finally(()=>{this.claimPromise=null;this.claiming=false;this.notify();});
+    }
+    canWriteLocally(){return Boolean(this.state&&(this.state.draft.can_edit||this.claiming||(this.focused&&this.state.draft.is_writer)));}
+    async keepWriting(){
+      const draft=this.state?.draft;
+      if(this.focused&&this.online&&!this.busy&&!this.claiming&&draft?.is_writer&&draft.lease_remaining_ms<=90000)await this.claim(false);
+    }
+    scheduleDraft(){
+      if(this.timer!==null||this.flushPromise||this.pending||!this.dirty||!this.canWriteLocally())return;
+      this.timer=this.setTimer(()=>{void this.flush().catch(()=>{});},DRAFT_INTERVAL);
     }
     setText(text){
-      if(!this.state||(!this.state.draft.can_edit&&!this.claiming))return;
+      if(!this.canWriteLocally())return;
       this.text=text;this.dirty=true;this.editVersion++;
       this.recovery={room_id:this.state.room_id,text};this.tabStorage.setItem('samantha-chat-draft',JSON.stringify(this.recovery));
-      this.clearTimer(this.timer);this.timer=this.setTimer(()=>{void this.flush().catch(()=>{});},350);this.notify();
+      this.scheduleDraft();this.notify();
     }
-    async flush(){
-      this.clearTimer(this.timer);
-      return this.enqueue(async()=>{
-        if(!this.dirty)return;
+    flush(){
+      this.clearTimer(this.timer);this.timer=null;
+      if(this.flushPromise)return this.flushPromise;
+      const token=this.token;
+      const request=this.enqueue(async()=>{
+        if(!this.dirty||token!==this.token||!this.state)return;
+        if(this.pending)throw new Error('Nejprve ověř odeslání původní zprávy; nový text je zachovaný.');
+        if(!this.state.draft.can_edit&&this.focused&&this.state.draft.is_writer){
+          this.apply(await this.api({action:'claim',expected_revision:this.state.draft.revision,takeover:false}));
+          if(token!==this.token)return;
+        }
         const version=this.editVersion,text=this.text;
         const data=await this.api({action:'draft',text,expected_revision:this.state.draft.revision});
+        if(token!==this.token)return;
         if(version===this.editVersion)this.dirty=false;
         this.apply(data);this.error='';
       });
+      this.flushPromise=request;
+      return request.then(result=>{this.flushPromise=null;this.scheduleDraft();return result;},error=>{this.flushPromise=null;throw error;});
     }
     async send(){
-      await this.flush();
+      if(!this.pending)await this.flush();
       return this.enqueue(async()=>{
-        if(this.dirty)throw new Error('Nejprve dokonči přenos rozepsaného textu.');
+        if(this.dirty&&!this.pending)throw new Error('Nejprve dokonči přenos rozepsaného textu.');
         let request=this.pending;
         if(!request){request={action:'send',room_id:this.state.room_id,expected_revision:this.state.draft.revision,client_message_id:this.state.draft.client_message_id};this.tabStorage.setItem('samantha-chat-pending',JSON.stringify(request));this.pending=request;}
         if(request.room_id!==this.state.room_id)throw new Error('Předchozí zpráva patří jinému rozhovoru.');
         const {room_id,...payload}=request;void room_id;
-        this.apply(await this.api(payload));this.error='';
+        this.apply(await this.api(payload));this.error='';this.scheduleDraft();
       });
     }
     async restore(){const value=this.recovery?.text;if(value===undefined)return;await this.claim();this.setText(value);await this.flush();}
@@ -92,14 +119,14 @@
       el('setup').hidden=Boolean(c.token);el('chat').hidden=!c.state;
       el('connection').textContent=c.state?`${c.online?'Připojeno':'Spojení není ověřené'}: ${c.state.name} · ${c.state.client_label}`:c.token?'Obnovuji připojení…':'Vyber rozhovor nebo připoj telefon.';
       el('status').textContent=c.error;
-      el('draftStatus').textContent=!c.state?'':c.dirty?'Rozepsaný text zatím není přenesený na druhé zařízení.':c.state.draft.text?'Rozepsaný text je uložený pro obě zařízení.':c.state.draft.can_edit?'Můžeš psát nebo diktovat. Text se přenáší automaticky.':'Pro psaní na tomto zařízení stiskni „Psát / diktovat zde“.';
+      el('draftStatus').textContent=!c.state?'':c.dirty?(c.online?'Text se průběžně přenáší na druhé zařízení.':'Text je zachovaný zde; čekám na spojení.'):c.state.draft.text?'Rozepsaný text je uložený pro obě zařízení.':c.state.draft.can_edit?'Můžeš psát nebo diktovat. Text se přenáší automaticky.':'Klepni do otázky a začni psát nebo diktovat.';
       el('disconnect').hidden=!c.token;el('disconnect').disabled=c.busy;
       if(!c.state)return;
       el('pairPanel').hidden=!c.state.host;el('pairCode').textContent=c.state.pair_code||'';
       const draft=c.state.draft;
-      el('input').readOnly=!draft.can_edit&&!c.claiming;
+      el('input').readOnly=!c.canWriteLocally();
       if(el('input').value!==c.text)el('input').value=c.text;
-      el('claim').disabled=c.busy||!c.online;el('send').disabled=c.busy||!c.online||(!c.pending&&(c.state.busy||(!c.text.trim()&&!c.dirty)));
+      el('claim').textContent=draft.can_edit?'Klávesnice / diktování':'Převzít psaní zde';el('claim').disabled=c.busy||!c.online;el('send').disabled=c.busy||!c.online||(!c.pending&&(c.state.busy||(!c.text.trim()&&!c.dirty)));
       el('send').textContent=c.pending?'Ověřit odeslání':'Odeslat';
       const status=c.state.submission?.status;
       el('work').textContent=status==='pending'?'Samantha odpovídá…':status==='delivery_unknown'?'Dokončení předchozí zprávy není ověřené. Obnov stav; novou kopii neodesílej.':status==='not_sent'?'Zpráva nebyla odeslaná. Text je zachovaný; můžeš ji odeslat znovu.':'';
@@ -122,16 +149,47 @@
     el('create').onclick=()=>act(()=>client.setup('create',el('name').value));
     el('join').onclick=()=>act(()=>client.setup('join','iPhone',el('code').value.trim()));
     el('pair').onclick=()=>act(()=>client.pair());
-    el('claim').onclick=()=>{el('input').readOnly=false;el('input').focus();act(()=>client.claim());};
+    function beginWriting(){
+      if(!client.state||!client.online)return;
+      client.focused=true;
+      if(!client.state.draft.can_edit&&!client.claiming){
+        // Begin inside the gesture, before focus; iOS must not await HTTP.
+        void client.claim().catch(error=>{client.error=error.message;client.notify();});
+      }
+      el('input').readOnly=false;el('input').focus();
+    }
+    el('claim').onclick=beginWriting;
+    el('input').addEventListener('pointerdown',beginWriting);
+    el('input').addEventListener('focus',beginWriting);
+    el('input').addEventListener('blur',()=>{client.focused=false;});
     el('input').addEventListener('input',event=>{try{client.setText(event.target.value);}catch(_){client.error='Text se nepodařilo místně zachovat. Nezavírej okno; text můžeš zkopírovat.';client.notify();}});
     el('input').addEventListener('keydown',event=>{if((event.ctrlKey||event.metaKey)&&event.key==='Enter'&&!event.isComposing&&!el('send').disabled){event.preventDefault();act(()=>client.send());}});
+    el('send').addEventListener('pointerdown',event=>{if(doc.activeElement===el('input'))event.preventDefault();});
     el('send').onclick=()=>act(()=>client.send());el('refresh').onclick=()=>act(()=>client.refresh());
     el('recover').onclick=()=>act(()=>client.restore());el('disconnect').onclick=()=>client.disconnect();
-    async function poll(){await client.refresh();root.setTimeout(poll,2000);}
-    doc.addEventListener('visibilitychange',()=>{if(!doc.hidden)void client.refresh();});
-    root.addEventListener('online',()=>{void client.refresh();});
-    void poll();return client;
+    client.stopPolling=startPolling(client,doc,root);return client;
   }
-  if(typeof module!=='undefined'&&module.exports)module.exports={Client};
+  function startPolling(client,doc,browser=root){
+    let timer=null,running=false,again=false,stopped=false;
+    async function tick(){
+      if(stopped)return;
+      if(running){again=true;return;}
+      running=true;browser.clearTimeout(timer);timer=null;
+      try{await client.refresh();if(!doc.hidden)await client.keepWriting();}
+      catch(_){/* The client retains errors and drafts; never submit here. */}
+      finally{
+        running=false;
+        if(!stopped)timer=browser.setTimeout(tick,again?0:doc.hidden?BACKGROUND_POLL:client.online?ACTIVE_POLL:2000);
+        again=false;
+      }
+    }
+    function kick(){if(!stopped)void tick();}
+    doc.addEventListener('visibilitychange',kick);
+    browser.addEventListener('online',kick);
+    browser.addEventListener('pagehide',()=>{stopped=true;browser.clearTimeout(timer);});
+    browser.addEventListener('pageshow',()=>{stopped=false;kick();});
+    kick();return ()=>{stopped=true;browser.clearTimeout(timer);};
+  }
+  if(typeof module!=='undefined'&&module.exports)module.exports={Client,startPolling,attach};
   if(root.document)attach(root.document);
 })(typeof window==='undefined'?globalThis:window);

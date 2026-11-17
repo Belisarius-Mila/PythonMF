@@ -110,7 +110,9 @@ class SharedChat:
                              'answer': '', 'status': last['status'], 'received_at': '', 'completed_at': ''})
         draft = dict(room['draft'])
         writer = client['id'] + ':' + editor_id
-        draft['can_edit'] = draft['writer'] == writer and draft['lease_until'] > self.clock()
+        draft['is_writer'] = draft['writer'] == writer
+        draft['lease_remaining_ms'] = max(0, round((draft['lease_until'] - self.clock()) * 1000))
+        draft['can_edit'] = draft['is_writer'] and draft['lease_until'] > self.clock()
         pair = room.get('pair') or {}
         return {'ok': True, 'room_id': client['room_id'], 'name': room['name'],
                 'client_id': client['id'], 'client_label': client['label'], 'host': client['host'],
@@ -216,7 +218,9 @@ class SharedChat:
                     raise ChatError('Vyber aktuální neprázdnou zprávu.')
                 room['submission'] = {'client_message_id': draft['client_message_id'],
                     'user_text': draft['text'].strip(), 'status': 'pending'}
-                draft.update(text='', writer='', lease_until=0, revision=revision + 1, client_message_id=uuid4().hex)
+                # Keep the current writing device, including when the monitor sends
+                # the phone's draft. Sending is not a change of input device.
+                draft.update(text='', revision=revision + 1, client_message_id=uuid4().hex)
                 launch.update(room_id=client['room_id'], submission=dict(room['submission']), cleared_revision=draft['revision'])
             return RepositoryMutation(document)
         self.repo.transact(update)

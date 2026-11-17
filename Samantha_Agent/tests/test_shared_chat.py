@@ -95,6 +95,40 @@ class SharedChatTests(unittest.TestCase):
         self.assertEqual(state['draft']['text'],before['draft']['text'])
         with self.assertRaises(ChatError):self.action('draft',self.token,expected_revision=state['draft']['revision'],text='Late')
 
+    def test_monitor_send_keeps_phone_as_writer_and_next_draft_survives_finish(self):
+        phone=self.pair();token=phone['client_token'];editor='phone-editor-001'
+        state=self.draft('Phone draft',token,editor)
+        sent=self.action('send',self.token,expected_revision=state['draft']['revision'],client_message_id=state['draft']['client_message_id'])
+        self.assertFalse(sent['draft']['can_edit'])
+        state=self.service.status(token,editor)
+        self.assertTrue(state['draft']['is_writer']);self.assertTrue(state['draft']['can_edit'])
+        state=self.action('draft',token,editor,expected_revision=state['draft']['revision'],text='Next phone draft')
+        self.tasks.pop()()
+        state=self.service.status(token,editor)
+        self.assertEqual(state['draft']['text'],'Next phone draft')
+        self.assertEqual(state['messages'][0]['user_text'],'Phone draft')
+        self.assertTrue(state['draft']['can_edit'])
+        self.assertEqual(ChatModel.instances[0].sent,1)
+
+    def test_active_writer_renewal_never_takes_over_another_device(self):
+        phone=self.pair();token=phone['client_token'];editor='phone-editor-001'
+        state=self.draft('Phone draft',token,editor)
+        self.now+=60
+        state=self.service.status(token,editor)
+        self.assertEqual(state['draft']['lease_remaining_ms'],60000)
+        renewed=self.action('claim',token,editor,expected_revision=state['draft']['revision'],takeover=False)
+        self.assertEqual(renewed['draft']['lease_remaining_ms'],120000)
+        self.now+=70
+        self.assertTrue(self.service.status(token,editor)['draft']['can_edit'])
+        self.draft('Monitor correction')
+        foreign=self.service.status(token,editor)
+        self.assertFalse(foreign['draft']['is_writer'])
+        before=self.root.joinpath('rooms.json').read_bytes()
+        with self.assertRaises(ChatError):
+            self.action('claim',token,editor,expected_revision=foreign['draft']['revision'],takeover=False)
+        self.assertEqual(before,self.root.joinpath('rooms.json').read_bytes())
+        self.assertEqual(self.service.status(token,editor)['draft']['text'],'Monitor correction')
+
     def test_same_send_from_two_devices_has_one_turn_and_one_shared_answer(self):
         phone=self.pair();state=self.draft();draft=state['draft']
         payload={'expected_revision':draft['revision'],'client_message_id':draft['client_message_id']}

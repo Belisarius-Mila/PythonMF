@@ -74,6 +74,12 @@ class SharedChatHTTPTests(unittest.TestCase):
         self.assertEqual(result.returncode,0,result.stdout+result.stderr)
         self.assertIn('PASS: native browser timer receiver',result.stdout)
 
+    def test_responsive_composer_timers_focus_and_background_recovery(self):
+        result=subprocess.run([node_binary(),'--test',str(Path(__file__).with_name('shared_chat_responsiveness.test.cjs'))],
+            capture_output=True,text=True,timeout=20,check=False)
+        self.assertEqual(result.returncode,0,result.stdout+result.stderr)
+        self.assertIn('fail 0',result.stdout)
+
     def test_real_frontend_two_clients_reconnect_conflict_and_lost_response(self):
         self.service.launcher=lambda fn:fn()
         result=subprocess.run([node_binary(),str(Path(__file__).with_name('shared_chat_frontend.test.cjs')),self.url],

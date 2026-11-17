@@ -2895,3 +2895,10 @@ strop. Skutečný DALTAC dokončen17,0578/20, sedm původních částí beze zm�
 - Řešení nalezeno: 17112026
 - Řešení: výchozí adaptéry časovačů tvořit jako uzávěry nad konkrétním Window nebo je správně navázat. Nezaměňovat úspěch párování za přenesený draft; zobrazit jeho trvalý stav u editoru.
 - Ověření: brand-check regrese FAIL→PASS, automatický debounce uloží jeden draft bez modelového send. Dva nativní Safari klienti s oddělenými úložišti prokázali skutečný přenos oběma směry, převzetí a jeden syntetický send/reload bez duplikace. Fyzická zařízení samostatně.
+
+- Doplnění17.11.2026, sdílený diktát: resetovaný debounce může při souvislých
+  input událostech odkládat přenos neomezeně. Použít časově omezené slučování
+  s jedním požadavkem v letu; další stav vytvořit až z nejnovějšího textu.
+  Vlastnictví vstupu neukončovat každým sendem a automatickou obnovu provádět
+  přes CAS bez takeover.9 deterministických JS scénářů a dva HTTP klienti
+  prokázali přenos ještě během psaní; lokální410ms není důkaz Tailscale/iPhonu.
