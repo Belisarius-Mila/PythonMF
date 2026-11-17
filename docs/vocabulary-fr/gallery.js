@@ -194,7 +194,7 @@ function switchView(kind){
   document.getElementById("settingsView").hidden=kind!=="settings";
   document.getElementById("settingsTab").setAttribute("aria-pressed",String(kind==="settings"));
   document.getElementById("galleryTab").setAttribute("aria-pressed",String(kind==="gallery"||kind==="study"));
-  document.title=kind==="study" && state.currentItem ? `${state.currentItem.fr} · Vocabulary FR` : "Vocabulary FR · Slovíčka v obrázcích";
+  document.title=kind==="study" && state.currentItem ? `${state.currentItem.fr} · Francouzština Jana` : "Francouzština Jana · Slovíčka v obrázcích";
 }
 function openQuiz({fromHistory=false}={}){
   if(!quizUI)return;
@@ -259,7 +259,7 @@ function renderCurrentItem(){
   const showPictures=studyLoop.active && studyLoop.phase==="sentences" && renderSentencePictures(item);
   if(!showPictures)hideSentencePictures();
   primeSentencePictures();
-  document.title=state.view==="study" ? `${item.fr} · Vocabulary FR` : document.title;
+  document.title=state.view==="study" ? `${item.fr} · Francouzština Jana` : document.title;
 }
 function sentenceConcepts(item){return M.sentencePictures(item,sentencePicturesManifest,state.data?.items || []);}
 function hideSentencePictures(){

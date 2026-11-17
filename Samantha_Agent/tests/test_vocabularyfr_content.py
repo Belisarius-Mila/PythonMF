@@ -18,6 +18,7 @@ sys.path.insert(0, str(ROOT / 'VocabularyFR'))
 import vocabulary_fr_catalog as catalog
 import vocabulary_fr_audio as audio
 import vocabulary_fr_export as export
+import vocabulary_fr_generation as generation
 
 
 def fixture():
@@ -273,6 +274,92 @@ class AudioTests(unittest.TestCase):
 
     def test_unknown_voice_rejected(self):
         with self.assertRaises(ValueError): audio.prepare([], {}, french_voice='it-IT-ElsaNeural')
+
+
+def production_fixture():
+    jobs = {}
+    for channel, text in [('fr', 'œuvre-test'), ('cz', 'syntetická ukázka')]:
+        fields = {'kind': 'words', 'channel': channel, 'voice': generation.VOICES[channel],
+                  'rate': '-10%', 'text': text}
+        key = catalog.sha(catalog.encoded(fields))
+        jobs[key] = {**fields, 'id': key, 'sourceUids': ['vfr-0001'],
+                     'billableCharacters': generation.ssml_parts(text, fields['voice'])[1]}
+    total = sum(j['billableCharacters'] for j in jobs.values())
+    plan = {'schemaVersion': 1, 'project': 'VocabularyFR', 'sourceBundleManifestSha256': 'a' * 64,
+            'jobs': jobs, 'totalBillableCharacters': total,
+            'batches': [{'jobIds': list(jobs), 'reservedCharacters': total}]}
+    plan['planSha256'] = catalog.sha(catalog.encoded(plan))
+    approval = {'approved': True, 'provider': 'registered-azure-neural', 'planSha256': plan['planSha256'],
+                'voices': generation.VOICES, 'rate': '-10%', 'maxCharactersPerInvocation': 10000,
+                'publicPromotionApproved': False, 'noAutomaticRetry': True,
+                'sourceBundleManifestSha256': 'a' * 64, 'quotedPriceUsdPerMillionCharacters': 15,
+                'maxCostUsdExcludingTax': 2, 'planBillableCharacters': total}
+    return plan, approval
+
+
+class ProductionTests(unittest.TestCase):
+    def setUp(self):
+        self.temp = tempfile.TemporaryDirectory(); self.addCleanup(self.temp.cleanup)
+        self.root = Path(self.temp.name).resolve() / 'output'
+        self.plan, self.approval = production_fixture(); self.calls = []
+
+    def synthesize(self, text, *, voice, rate, budget):
+        ledger = catalog.load(self.root / 'ledger.json')
+        self.assertEqual(sum(j['state'] == 'reserved' for j in ledger['jobs'].values()), 1)
+        self.assertGreater(ledger['reservedCharacters'], 0)
+        budget.reserve(generation.ssml_parts(text, voice, rate)[1]); self.calls.append(text)
+        return b'synthetic bytes only ' + b'x' * 1500
+
+    def run_jobs(self, **kwargs):
+        return generation.produce(self.plan, self.approval, self.root, list(self.plan['jobs']),
+                                  synthesize=kwargs.pop('synthesize', self.synthesize),
+                                  verify_media=kwargs.pop('verify_media', lambda path: 1.), interval=0, **kwargs)
+
+    def test_reserve_before_transport_and_completed_jobs_never_regenerate(self):
+        first = self.run_jobs(); self.assertEqual(first['state'], 'complete'); self.assertEqual(len(self.calls), 2)
+        second = self.run_jobs(); self.assertEqual(second['newRequests'], 0); self.assertEqual(len(self.calls), 2)
+        self.assertEqual(first['reservedCharacters'], self.plan['totalBillableCharacters'])
+
+    def test_uncertain_call_stops_all_future_requests_and_is_not_refunded(self):
+        def fail(*args, **kwargs): raise RuntimeError('synthetic transport loss')
+        with self.assertRaises(RuntimeError): self.run_jobs(synthesize=fail)
+        ledger = catalog.load(self.root / 'ledger.json')
+        self.assertEqual(len(ledger['jobs']), 1); self.assertGreater(ledger['reservedCharacters'], 0)
+        with self.assertRaisesRegex(ValueError, 'Uncertain'): self.run_jobs()
+        self.assertEqual(self.calls, [])
+
+    def test_bad_media_stops_without_retry(self):
+        def fail(path): raise ValueError('synthetic decode failure')
+        with self.assertRaises(RuntimeError): self.run_jobs(verify_media=fail)
+        self.assertEqual(len(self.calls), 1)
+        with self.assertRaises(ValueError): self.run_jobs()
+        self.assertEqual(len(self.calls), 1)
+
+    def test_changed_existing_mp3_blocks_transport(self):
+        self.run_jobs(); ledger = catalog.load(self.root / 'ledger.json')
+        first = next(iter(ledger['jobs'].values())); (self.root / first['asset']).write_bytes(b'changed')
+        with self.assertRaises(ValueError): self.run_jobs()
+        self.assertEqual(len(self.calls), 2)
+
+    def test_revoked_approval_or_insufficient_complete_budget_sends_nothing(self):
+        for key, value in [('approved', False), ('maxCostUsdExcludingTax', .000001), ('noAutomaticRetry', False)]:
+            saved = self.approval[key]; self.approval[key] = value
+            with self.subTest(key=key), self.assertRaises(ValueError): self.run_jobs()
+            self.approval[key] = saved
+        self.assertEqual(self.calls, [])
+
+    def test_source_change_blocks_before_reservation(self):
+        with self.assertRaises(ValueError): self.run_jobs(source_guard=lambda: False)
+        ledger = catalog.load(self.root / 'ledger.json')
+        self.assertEqual(ledger['reservedCharacters'], 0); self.assertEqual(self.calls, [])
+
+    def test_plan_tampering_and_duplicate_jobs_fail_before_transport(self):
+        key = next(iter(self.plan['jobs'])); self.plan['jobs'][key]['text'] += 'changed'
+        with self.assertRaises(ValueError): self.run_jobs()
+        self.plan, self.approval = production_fixture()
+        with self.assertRaises(ValueError):
+            generation.produce(self.plan, self.approval, self.root, [key, key], synthesize=self.synthesize)
+        self.assertEqual(self.calls, [])
 
 
 if __name__ == '__main__':

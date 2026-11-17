@@ -42,6 +42,11 @@ class VocabularyFrenchWebGalleryTests(unittest.TestCase):
             public.parent.mkdir(parents=True)
             public.write_text('{"items": []}')
             self.assertIn('vocabulary-fr', ids())
+            apps=cockpit.web_apps_catalog()['apps']
+            self.assertEqual(apps[0]['id'],'vocabulary-fr')
+            self.assertEqual(apps[0]['title'],'Francouzština Jana')
+            self.assertEqual([app['id'] for app in apps[-2:]],['lekarna','lekarna-admin'])
+            self.assertIn('Francouzština Jana',(CLIENT/'index.html').read_text())
 
     def test_registered_web_target_is_distinct_and_desktop_launch_is_preserved(self):
         from app import cockpit

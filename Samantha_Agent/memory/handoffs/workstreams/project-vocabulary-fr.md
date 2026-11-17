@@ -1,3 +1,35 @@
+<!-- SAMANTHA_CURRENT_STATUS_START -->
+## 2026-11-17 — Francouzština Jana, finální obsah v003 a pořadí aplikací
+
+Hotovo: Převzaté Datovy uzavřené commity210d0e46/13fd015b/49432092/3c2ce8aa;
+Willův Henri patch je již shodný, společné soubory se znovu nepřepisují.
+Finální v003 proti předanému SHA prošla úplným ověřením:464 karet,18 témat,
+345 obrazů,898 větných vazeb a1830 dekódovaných MP3. Všechny4 kanály u všech
+karet complete (1856 odkazů), Henri/Vlasta−10 %,166 původních CZ MP3 zachovaných.
+Výroba je hotová, neopakovat ji. Skutečné texty, média, souhlasy a plány
+zůstávají v uzavřeném soukromém balíčku, tento kódový krok je nepropaguje.
+Obecný klient i budoucí webová karta jsou pojmenované Francouzština Jana;
+v katalogu je první, obě Lékárny (web/správa) poslední. Desktopový FR launcher
+zachovaný. Dokud není dostupný nasazený obsah, webovou kartu dál skrývá pojistka.
+Rozhodnutí: Míla výslovně zadal toto pořadí a následné p+n celé hotové práce.
+Dřívější potvrzený kontrakt v1.1 však drží skutečný obsah mimo Git/docs a
+v003 výslovně uvádí publicPromotionApproved=false. Před propagací byla Mílovi
+položena volba veřejné Pages jako EN/IT, nebo soukromé Cockpit/Tailscale.
+Odpověď je pro datovou publikaci nutná; p+n kódu ani tento zápis ji nenahrazuje.
+Důkaz:49 cílených Python kontrol PASS. Skutečný model.js/practice.js přijal
+všech1856 zvukových odkazů,898 kontextových vazeb a464 čtyřmožnostních otázek.
+Nativní Safari nad odděleným soukromým stagingem: nový název,464 karet,
+karta/věta, spuštění FR/CZ kanálů bez viditelné chyby. Nejde o fyzickou
+telefonní nebo lidskou akustickou přejímku. Vlastní okno/server ukončené,
+původní okno zachované. Žádné nové TTS ani zásah do Datova checkoutu.
+Další krok: Po Mílově volbě napojit přesný schválený payload do odpovídajícího
+cíle a dokončit již zadané p+n. Do veřejného stromu nikdy nekopírovat kořen
+balíčku s katalogem, plány, schválením nebo podrobnými účtenkami.
+Finální checkpoint/brána a další stav: private vocabulary_fr_jana_release_20261117/completion.json;
+bundle_verification.json, client_verification.json, safari_verification.json,
+targeted_tests.log a final_gate.log. Nový proud ani TVBCP nevzniká.
+<!-- SAMANTHA_CURRENT_STATUS_END -->
+
 ## 2026-11-17 — Společná integrace FR a opravy přenosu Samanthy
 
 Hotovo: Začleněný uzavřený Datův commit a119e84f, obecné exportéry a obsahové
@@ -18,7 +50,7 @@ Technický důkaz: private fr_mint_release_20261117/{private_bundle_verification
 actual_client_verification.json,targeted_tests.log,final_gate.log}.
 
 
-<!-- SAMANTHA_CURRENT_STATUS_START -->
+
 ## 2026-11-17 — Henri v registrovaném Azure adaptéru
 
 Hotovo: fr-FR-HenriNeural je povolený v obecném Azure adaptéru při−10 %;
@@ -41,7 +73,7 @@ audio, nepushuje, nepublikuje, nenasazuje ani nerestartuje Cockpit.
 Důkaz: private vocabulary_fr_henri_adapter_20261117/{targeted_tests.log,
 plan_compatibility.json,final_gate.log,completion.json}; finální bránu a commit
 určuje completion.json. Obsahová, akustická a fyzická přejímka zůstávají otevřené.
-<!-- SAMANTHA_CURRENT_STATUS_END -->
+
 
 # Handoff pracovního proudu: Vocabulary FR
 

@@ -503,24 +503,17 @@ DESKTOP_APP_CATALOG: tuple[dict[str, Any], ...] = (
 )
 WEB_APP_CATALOG: tuple[dict[str, str], ...] = (
     {
+        "id": "vocabulary-fr",
+        "title": "Francouzština Jana",
+        "description": "Francouzské kartičky, věty a vlastní výběry A–D.",
+        "url": "https://belisarius-mila.github.io/PythonMF/vocabulary-fr/",
+        "kind": "GitHub Pages",
+    },
+    {
         "id": "cockpit",
         "title": "Samantha Cockpit",
         "description": "Řídicí panel pro dokumenty, ScanDocu, zálohy a praktické rutiny Samanthy.",
         "url": COCKPIT_URL,
-        "kind": "lokální",
-    },
-    {
-        "id": "lekarna",
-        "title": "Lékárna",
-        "description": "Šifrovaná webová evidence domácí lékárny s vyhledáním léků a stručnými pokyny.",
-        "url": "https://belisarius-mila.github.io/PythonMF/lekarna/",
-        "kind": "GitHub Pages",
-    },
-    {
-        "id": "lekarna-admin",
-        "title": "Lékárna - správa",
-        "description": "Lokální bezpečná správa položek v domácí lékárně včetně potvrzovaného vyřazení a importu fotek.",
-        "url": "/lekarna-admin/",
         "kind": "lokální",
     },
     {
@@ -542,13 +535,6 @@ WEB_APP_CATALOG: tuple[dict[str, str], ...] = (
         "title": "Vocabulary EN",
         "description": "Obrazové kartičky pro anglická slovíčka, připravené z lokální slovníkové evidence.",
         "url": "https://belisarius-mila.github.io/PythonMF/vocabulary-en/",
-        "kind": "GitHub Pages",
-    },
-    {
-        "id": "vocabulary-fr",
-        "title": "Vocabulary FR",
-        "description": "Francouzské kartičky, věty a vlastní výběry A–D.",
-        "url": "https://belisarius-mila.github.io/PythonMF/vocabulary-fr/",
         "kind": "GitHub Pages",
     },
     {
@@ -595,6 +581,20 @@ WEB_APP_CATALOG: tuple[dict[str, str], ...] = (
         "description": "Soukromý lokální organizér rodinných videí, výběru záběrů a podkladů pro sestřih.",
         "url": "/local-apps/family-video-organizer/",
         "kind": "lokální soukromá data",
+    },
+    {
+        "id": "lekarna",
+        "title": "Lékárna",
+        "description": "Šifrovaná webová evidence domácí lékárny s vyhledáním léků a stručnými pokyny.",
+        "url": "https://belisarius-mila.github.io/PythonMF/lekarna/",
+        "kind": "GitHub Pages",
+    },
+    {
+        "id": "lekarna-admin",
+        "title": "Lékárna - správa",
+        "description": "Lokální bezpečná správa položek v domácí lékárně včetně potvrzovaného vyřazení a importu fotek.",
+        "url": "/lekarna-admin/",
+        "kind": "lokální",
     },
 )
 
