@@ -2878,3 +2878,11 @@ strop. Skutečný DALTAC dokončen17,0578/20, sedm původních částí beze zm�
   poruchou, potvrzování incidentů ani odesílání se nemění.
 - Ověření:51 cílených PASS, včetně timeoutu katalogu a vadného handshaku;
   konečné živé vzorky a brána private/agent_supervisor_appserver_20261116/completion.json.
+
+
+### 2026-11-17 09:18 CET — Kontinuální poslech potřebuje skutečné ended a zrušitelnou prodlevu
+
+- Kontext: Vocabulary EN střídá uloženou větu/slovo a opakuje filtrovanou posloupnost bez dalšího klikání.
+- Řešení: první play přímo z uživatelského kliknutí; pro další úseky zachovat stejný odemknutý Audio element, měnit src a volat load (včetně stejné karty). To respektuje per-element autoplay a odstraní závislost na opožděném rewind. Přechod až po ended a plné prodlevě, generační rušení zvuku i timerů; reload/bfcache nikdy neobnovuje běh. Chyba či timeout pozastaví, neodpočítává další karty. Ignorovaný starý ended nesmí spotřebovat jednorázový listener nového úseku.
+- Ověření:115 cílených kontrol PASS včetně80 JS scénářů,12 nových scénářů smyčky. Safari skutečně přehrálo několik nových karet na jediné spuštění a větu→slovo s oběma překlady. Odmítnutý play musí také explicitně pause; jinak zmizí currentAudio reference dřív, než jej zastaví následná obsluha.
+- Navazující oprava: návrat z přímého filtrovaného odkazu musí galerii znovu vykreslit, ne jen označit poslední tile ve starém obsahu. Reprodukce512 místo42, po opravě42 a fokus poslední karty. Report vocabulary_en_continuous_20261117.md; fyzický telefon samostatně.
