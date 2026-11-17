@@ -19,16 +19,28 @@ actual_client_verification.json,targeted_tests.log,final_gate.log}.
 
 
 <!-- SAMANTHA_CURRENT_STATUS_START -->
-## Aktuální stav
+## 2026-11-17 — Henri v registrovaném Azure adaptéru
 
-- Aktualizováno: 2026-11-04 14:40 CET.
-- Mílovo FR má 477 řádků po doplnění 243 celých záznamů pro 235 chybějících hesel od Jany. Původních 234 řádků přesně zachovaných; nové obsahují původní příklady, rod i zdrojové L/HT, pouze Order navazuje 235–477. Jana má 451 řádků a IT 471.
-- Osm nových ilustrací je v obou Pict, společný český abecední mapping má 1119 vazeb a obě kopie jsou shodné. Janiny věty 451/451 úplné, u cent opraveno sto. Společný audit všech tří slovníků bez mezer, 1007 používaných souborů dekódovaných.
-- Terra 6.1/high dokončila p+n čtyř čekajících commitů do b3b302b291d7863a5d5a26796d4f6e5993e5b31c. Účtenka 9ea7a7007816df4117a71a750031c507, project-vocabulary-fr → cockpit, completed, push_state/deployment_state=confirmed.
-- Plná publikační brána prošla: evidováno 2273 testů, 449,8 s. Následná kontrola běhu 5/5 a protected_services_unchanged=true. Jedna Adamova kontrola: skutečný GitHub head shodný s vydaným, health HTTP 200, Cockpit PID 67574 a code_stamp ae3b321d9492092a. Slovníková data, mappingy a všech 16 kopií nových obrázků hashově zachované po nasazení.
-- Caller převzal konečnou účtenku v této terminálové relaci. returned_to_adam=false je portálový příznak a není důvodem retry. Neproběhlo samostatné sestavení nebo vydání VocabularyFR.app ani nové Pages vydání; Janina sdílená data byla doplněná již před p+n. Následný výsledkový zápis je místní pro další balíček.
-- Prompty a náhled: PictNew/generated/20261104_fr_jana_refresh_batch001/generation_report.json a review.html. Soukromé importní důkazy v data/private/vocabularyfr_merge_jana_to_mila_20261104/ a obrazové důkazy ve vocabularyfr_refresh_20261104/; žádná Janina CSV nebo soukromé plány v Gitu.
-- Další krok: načíst aktualizovaná slovníková data v používaných aplikacích. Fyzický reload a vzdálené iCloud doručení tímto vydáním NEOVĚŘENO; dvě ostatní soukromé lexikální poznámky zůstávají k případné samostatné revizi.
+Hotovo: fr-FR-HenriNeural je povolený v obecném Azure adaptéru při−10 %;
+SSML správně používá fr-FR. Původní hlasy, přesný text/escapování, limit10000
+znaků, rezervace před POST a nulové automatické opakování jsou zachované.
+11 syntetických testů PASS včetně ztracené odpovědi, rezervace před přenosem,
+nepovoleného hlasu/tempa a překročeného rozpočtu; bez skutečného Azure volání.
+Rozhodnutí: Míla předal Datovo konkrétní zadání z Downloads. Volba Henriho
+je potvrzená; výroba1664 MP3 ani navržený cenový limit dosud potvrzené nejsou.
+Celý soukromý plán připnutý v Datově13fd015b byl ověřen offline:1664 požadavků,
+88682 escapovaných účtovaných znaků,9 bloků do10000;166 hotových MP3 se nepřepisuje.
+Rozlišujeme kanonický planSha256 (bez vlastního pole) a otisk JSON souboru;
+oba jsou v soukromé účtence. Plán, texty, klíče a média nejsou v tomto commitu.
+Předchozí společné kódové p+n ccae8064 je dokončené: Cockpit5/5,7/7 FR
+klientských souborů exact; skutečný obsah zůstává soukromý, telefon/Mint čeká
+na Mílovu přejímku. Datův13fd015b zůstává na jeho větvi, bez zásahu do ní.
+Další krok: Předat Datovi přesný commit/patch adaptéru a testu. Před výrobou
+samostatně potvrdit celkový cenový limit a připnutý plán; tento krok nevyrábí
+audio, nepushuje, nepublikuje, nenasazuje ani nerestartuje Cockpit.
+Důkaz: private vocabulary_fr_henri_adapter_20261117/{targeted_tests.log,
+plan_compatibility.json,final_gate.log,completion.json}; finální bránu a commit
+určuje completion.json. Obsahová, akustická a fyzická přejímka zůstávají otevřené.
 <!-- SAMANTHA_CURRENT_STATUS_END -->
 
 # TVBCP: Vocabulary FR
@@ -514,3 +526,15 @@ má SHA256446d70dd1ec7c647f0d3f28dffeb99c84775c308f4d74ac2a5ef86fbfc2cd4ad.
 Podklad31c670bb,27 syntetických testů PASS/0,706s. Soukromá účtenka
 shared_chat_transfer_fix_20261117/data_registration_receipt.json. Žádný
 reset/rebase, další checkout, push, nasazení ani zveřejnění Janina obsahu.
+
+
+## Aktuální stav
+
+- Aktualizováno: 2026-11-04 14:40 CET.
+- Mílovo FR má 477 řádků po doplnění 243 celých záznamů pro 235 chybějících hesel od Jany. Původních 234 řádků přesně zachovaných; nové obsahují původní příklady, rod i zdrojové L/HT, pouze Order navazuje 235–477. Jana má 451 řádků a IT 471.
+- Osm nových ilustrací je v obou Pict, společný český abecední mapping má 1119 vazeb a obě kopie jsou shodné. Janiny věty 451/451 úplné, u cent opraveno sto. Společný audit všech tří slovníků bez mezer, 1007 používaných souborů dekódovaných.
+- Terra 6.1/high dokončila p+n čtyř čekajících commitů do b3b302b291d7863a5d5a26796d4f6e5993e5b31c. Účtenka 9ea7a7007816df4117a71a750031c507, project-vocabulary-fr → cockpit, completed, push_state/deployment_state=confirmed.
+- Plná publikační brána prošla: evidováno 2273 testů, 449,8 s. Následná kontrola běhu 5/5 a protected_services_unchanged=true. Jedna Adamova kontrola: skutečný GitHub head shodný s vydaným, health HTTP 200, Cockpit PID 67574 a code_stamp ae3b321d9492092a. Slovníková data, mappingy a všech 16 kopií nových obrázků hashově zachované po nasazení.
+- Caller převzal konečnou účtenku v této terminálové relaci. returned_to_adam=false je portálový příznak a není důvodem retry. Neproběhlo samostatné sestavení nebo vydání VocabularyFR.app ani nové Pages vydání; Janina sdílená data byla doplněná již před p+n. Následný výsledkový zápis je místní pro další balíček.
+- Prompty a náhled: PictNew/generated/20261104_fr_jana_refresh_batch001/generation_report.json a review.html. Soukromé importní důkazy v data/private/vocabularyfr_merge_jana_to_mila_20261104/ a obrazové důkazy ve vocabularyfr_refresh_20261104/; žádná Janina CSV nebo soukromé plány v Gitu.
+- Další krok: načíst aktualizovaná slovníková data v používaných aplikacích. Fyzický reload a vzdálené iCloud doručení tímto vydáním NEOVĚŘENO; dvě ostatní soukromé lexikální poznámky zůstávají k případné samostatné revizi.

@@ -1,5 +1,29 @@
 # Vocabulary FR — současný klient a historický prototyp
 
+## 2026-11-17 — Henri v registrovaném Azure adaptéru
+
+Hotovo: fr-FR-HenriNeural je povolený v obecném Azure adaptéru při−10 %;
+SSML správně používá fr-FR. Původní hlasy, přesný text/escapování, limit10000
+znaků, rezervace před POST a nulové automatické opakování jsou zachované.
+11 syntetických testů PASS včetně ztracené odpovědi, rezervace před přenosem,
+nepovoleného hlasu/tempa a překročeného rozpočtu; bez skutečného Azure volání.
+Rozhodnutí: Míla předal Datovo konkrétní zadání z Downloads. Volba Henriho
+je potvrzená; výroba1664 MP3 ani navržený cenový limit dosud potvrzené nejsou.
+Celý soukromý plán připnutý v Datově13fd015b byl ověřen offline:1664 požadavků,
+88682 escapovaných účtovaných znaků,9 bloků do10000;166 hotových MP3 se nepřepisuje.
+Rozlišujeme kanonický planSha256 (bez vlastního pole) a otisk JSON souboru;
+oba jsou v soukromé účtence. Plán, texty, klíče a média nejsou v tomto commitu.
+Předchozí společné kódové p+n ccae8064 je dokončené: Cockpit5/5,7/7 FR
+klientských souborů exact; skutečný obsah zůstává soukromý, telefon/Mint čeká
+na Mílovu přejímku. Datův13fd015b zůstává na jeho větvi, bez zásahu do ní.
+Další krok: Předat Datovi přesný commit/patch adaptéru a testu. Před výrobou
+samostatně potvrdit celkový cenový limit a připnutý plán; tento krok nevyrábí
+audio, nepushuje, nepublikuje, nenasazuje ani nerestartuje Cockpit.
+Důkaz: private vocabulary_fr_henri_adapter_20261117/{targeted_tests.log,
+plan_compatibility.json,final_gate.log,completion.json}; finální bránu a commit
+určuje completion.json. Obsahová, akustická a fyzická přejímka zůstávají otevřené.
+
+
 ## 2026-11-17 — Společná integrace FR a opravy přenosu Samanthy
 
 Hotovo: Začleněný uzavřený Datův commit a119e84f, obecné exportéry a obsahové

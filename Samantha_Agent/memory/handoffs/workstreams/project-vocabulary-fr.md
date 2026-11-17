@@ -19,57 +19,28 @@ actual_client_verification.json,targeted_tests.log,final_gate.log}.
 
 
 <!-- SAMANTHA_CURRENT_STATUS_START -->
-## 2026-11-17 15:52 CET — Předání registrace prvního Datova FR testu
+## 2026-11-17 — Henri v registrovaném Azure adaptéru
 
-Hotovo: Will připravil přesný registrační patch pro již existující Datův
-syntetický test_vocabularyfr_content.py.27 jeho testů prošlo přímo z Datovy
-větve; patch mění pouze validation_domains.py a cockpit_quality_gate.py,
-git apply --check i strukturální výběr domény vocabulary_fr_content PASS.
-Rozhodnutí: Míla požádal odblokovat Datův checkpoint. Data převezme Willův
-konkrétní patch, pak ověří a checkpointuje svůj hotový obecný kód spolu
-s registrací. Vlastnictví centrálního návrhu zůstává Willovi; jeho pracovní
-kopie nebyla změněná. Na main se registrace přenese až s testem v uzavřeném
-Datově commitu. Soukromý obsah není předmětem této registrace ani commitu.
-Další krok: Data aplikuje předání Vocabulary_FR_Data_registrace_testu_predani_2026-11-17.txt
-z Downloads, spustí vlastní registrovanou bránu a předá přesný checkpoint.
-Navrhované další kroky: Potom Willova integrace a zvláštní přejímka soukromého
-obsahového balíčku. Skutečných464 karet tímto testem nebylo potvrzeno.
-Technický důkaz: uzavřený patch Vocabulary_FR_Data_registrace_testu_2026-11-17.patch
-má SHA256446d70dd1ec7c647f0d3f28dffeb99c84775c308f4d74ac2a5ef86fbfc2cd4ad.
-Podklad31c670bb,27 syntetických testů PASS/0,706s. Soukromá účtenka
-shared_chat_transfer_fix_20261117/data_registration_receipt.json. Žádný
-reset/rebase, další checkout, push, nasazení ani zveřejnění Janina obsahu.
-
-## 2026-11-17 14:55 CET — FR klient pro Janu podle kontraktu v1.1
-
-Hotovo: Samostatný klient Vocabulary FR podle IT31c670bb: galerie18 témat,
-slova/věty FR/CZ, vlastní A–D/PIN/zálohy, obrazová hra, psaní s500ms nápovědou,
-smyčka Slovíčka / Věta + slovíčko a až5 kontextových obrázků. Testovací obsah
-je čistě syntetický; nejde o ověření skutečných464 karet ani hotovou aplikaci
-s Janiným obsahem. Český a francouzský zvuk jsou dostupné nezávisle. Chybějící
-FR zvuk se přizná, smyčka zůstane pozastavená na stejné kartě, hra takový
-hlasový cíl nepoužije. Bez TTS fallbacku nebo automatické výroby.
-Rozhodnutí: Míla potvrdil paralelní dělení Data/Will a kontrakt v1.1.
-Data vlastní katalog/exporty/média/obsahové testy; Will klient, registry,
-společné zápisy a integraci. Skutečný soukromý balíček mimo docs i Git,
-nezměněný živý CSV, budoucí publikace a placená výroba samostatně.
-Další krok: Převzít uzavřený Datův soukromý balíček s manifestem a SHA spolu
-s jeho hotovými obecnými kódovými commity. Teprve při jejich integraci zapojit
-existující obsahové testy a ověřit464 skutečných karet mimo publikační strom.
-Navrhované další kroky: Mílova/Janina obsahová, akustická a telefonní přejímka
-nad skutečným balíčkem; volba FR hlasu a případná výroba až po nové dohodě.
-Technický důkaz:24 skutečných JS scénářů a81 cílených Python kontrol PASS.
-Nativní Safari nad soukromými syntetickými fixtures ověřilo galerii, odhalení,
-kontexty chat/lune, vysvětlení chybějícího FR audia, Stop a návrat/fokus karty.
-Vlastní okno i localhost server zavřené, původní okno zachované. Žádná akustická
-ani telefonní přejímka. Finální programovou bránu, zmrazené otisky a commit
-určuje private vocabulary_fr_client_20261117/completion.json.
-Registrace github_pages/vocabulary-fr/ a vlastní validační domény je pouze
-místní; desktopový launcher i starý FR prototyp zachované. Běžící Cockpit
-se nerestartoval a stále nenačetl tuto změnu registrace/validační mapy.
-Před případným budoucím p+n načíst nové registry autorizovaným postupem;
-současné zadání není oprávněním k restartu, push ani nasazení. Azure adaptér
-beze změny. Nový TVBCP/proud nevzniká, používá se existující FR dvojice.
+Hotovo: fr-FR-HenriNeural je povolený v obecném Azure adaptéru při−10 %;
+SSML správně používá fr-FR. Původní hlasy, přesný text/escapování, limit10000
+znaků, rezervace před POST a nulové automatické opakování jsou zachované.
+11 syntetických testů PASS včetně ztracené odpovědi, rezervace před přenosem,
+nepovoleného hlasu/tempa a překročeného rozpočtu; bez skutečného Azure volání.
+Rozhodnutí: Míla předal Datovo konkrétní zadání z Downloads. Volba Henriho
+je potvrzená; výroba1664 MP3 ani navržený cenový limit dosud potvrzené nejsou.
+Celý soukromý plán připnutý v Datově13fd015b byl ověřen offline:1664 požadavků,
+88682 escapovaných účtovaných znaků,9 bloků do10000;166 hotových MP3 se nepřepisuje.
+Rozlišujeme kanonický planSha256 (bez vlastního pole) a otisk JSON souboru;
+oba jsou v soukromé účtence. Plán, texty, klíče a média nejsou v tomto commitu.
+Předchozí společné kódové p+n ccae8064 je dokončené: Cockpit5/5,7/7 FR
+klientských souborů exact; skutečný obsah zůstává soukromý, telefon/Mint čeká
+na Mílovu přejímku. Datův13fd015b zůstává na jeho větvi, bez zásahu do ní.
+Další krok: Předat Datovi přesný commit/patch adaptéru a testu. Před výrobou
+samostatně potvrdit celkový cenový limit a připnutý plán; tento krok nevyrábí
+audio, nepushuje, nepublikuje, nenasazuje ani nerestartuje Cockpit.
+Důkaz: private vocabulary_fr_henri_adapter_20261117/{targeted_tests.log,
+plan_compatibility.json,final_gate.log,completion.json}; finální bránu a commit
+určuje completion.json. Obsahová, akustická a fyzická přejímka zůstávají otevřené.
 <!-- SAMANTHA_CURRENT_STATUS_END -->
 
 # Handoff pracovního proudu: Vocabulary FR
@@ -460,6 +431,59 @@ synchronizovat VocabularyFR/VocabularyFR.csv a v Pict mapping.json plus
 clothes.webp, these.webp, short.webp, tshirt.webp, strange.webp, suitsyou.webp.
 Mapping patří pouze do Pict. Kód aplikací, instalace, Cockpit ani Pages se
 neměnily; žádné p+n ani externí zpráva nebyly zadané či provedené.
+
+## 2026-11-17 14:55 CET — FR klient pro Janu podle kontraktu v1.1
+
+Hotovo: Samostatný klient Vocabulary FR podle IT31c670bb: galerie18 témat,
+slova/věty FR/CZ, vlastní A–D/PIN/zálohy, obrazová hra, psaní s500ms nápovědou,
+smyčka Slovíčka / Věta + slovíčko a až5 kontextových obrázků. Testovací obsah
+je čistě syntetický; nejde o ověření skutečných464 karet ani hotovou aplikaci
+s Janiným obsahem. Český a francouzský zvuk jsou dostupné nezávisle. Chybějící
+FR zvuk se přizná, smyčka zůstane pozastavená na stejné kartě, hra takový
+hlasový cíl nepoužije. Bez TTS fallbacku nebo automatické výroby.
+Rozhodnutí: Míla potvrdil paralelní dělení Data/Will a kontrakt v1.1.
+Data vlastní katalog/exporty/média/obsahové testy; Will klient, registry,
+společné zápisy a integraci. Skutečný soukromý balíček mimo docs i Git,
+nezměněný živý CSV, budoucí publikace a placená výroba samostatně.
+Další krok: Převzít uzavřený Datův soukromý balíček s manifestem a SHA spolu
+s jeho hotovými obecnými kódovými commity. Teprve při jejich integraci zapojit
+existující obsahové testy a ověřit464 skutečných karet mimo publikační strom.
+Navrhované další kroky: Mílova/Janina obsahová, akustická a telefonní přejímka
+nad skutečným balíčkem; volba FR hlasu a případná výroba až po nové dohodě.
+Technický důkaz:24 skutečných JS scénářů a81 cílených Python kontrol PASS.
+Nativní Safari nad soukromými syntetickými fixtures ověřilo galerii, odhalení,
+kontexty chat/lune, vysvětlení chybějícího FR audia, Stop a návrat/fokus karty.
+Vlastní okno i localhost server zavřené, původní okno zachované. Žádná akustická
+ani telefonní přejímka. Finální programovou bránu, zmrazené otisky a commit
+určuje private vocabulary_fr_client_20261117/completion.json.
+Registrace github_pages/vocabulary-fr/ a vlastní validační domény je pouze
+místní; desktopový launcher i starý FR prototyp zachované. Běžící Cockpit
+se nerestartoval a stále nenačetl tuto změnu registrace/validační mapy.
+Před případným budoucím p+n načíst nové registry autorizovaným postupem;
+současné zadání není oprávněním k restartu, push ani nasazení. Azure adaptér
+beze změny. Nový TVBCP/proud nevzniká, používá se existující FR dvojice.
+
+
+## 2026-11-17 15:52 CET — Předání registrace prvního Datova FR testu
+
+Hotovo: Will připravil přesný registrační patch pro již existující Datův
+syntetický test_vocabularyfr_content.py.27 jeho testů prošlo přímo z Datovy
+větve; patch mění pouze validation_domains.py a cockpit_quality_gate.py,
+git apply --check i strukturální výběr domény vocabulary_fr_content PASS.
+Rozhodnutí: Míla požádal odblokovat Datův checkpoint. Data převezme Willův
+konkrétní patch, pak ověří a checkpointuje svůj hotový obecný kód spolu
+s registrací. Vlastnictví centrálního návrhu zůstává Willovi; jeho pracovní
+kopie nebyla změněná. Na main se registrace přenese až s testem v uzavřeném
+Datově commitu. Soukromý obsah není předmětem této registrace ani commitu.
+Další krok: Data aplikuje předání Vocabulary_FR_Data_registrace_testu_predani_2026-11-17.txt
+z Downloads, spustí vlastní registrovanou bránu a předá přesný checkpoint.
+Navrhované další kroky: Potom Willova integrace a zvláštní přejímka soukromého
+obsahového balíčku. Skutečných464 karet tímto testem nebylo potvrzeno.
+Technický důkaz: uzavřený patch Vocabulary_FR_Data_registrace_testu_2026-11-17.patch
+má SHA256446d70dd1ec7c647f0d3f28dffeb99c84775c308f4d74ac2a5ef86fbfc2cd4ad.
+Podklad31c670bb,27 syntetických testů PASS/0,706s. Soukromá účtenka
+shared_chat_transfer_fix_20261117/data_registration_receipt.json. Žádný
+reset/rebase, další checkout, push, nasazení ani zveřejnění Janina obsahu.
 
 ## 2026-11-17 14:55 CET — FR klient pro Janu podle kontraktu v1.1
 
