@@ -1,3 +1,23 @@
+## 2026-11-17 — Společná integrace FR a opravy přenosu Samanthy
+
+Hotovo: Začleněný uzavřený Datův commit a119e84f, obecné exportéry a obsahové
+syntetické testy včetně Willovy registrace. Soukromý balíček v001 ověřen proti
+předanému SHA-256, všech166 MP3 dekódováno. Skutečný klient v odděleném
+soukromém stagingu přijal464 karet/18 témat/898 větných vazeb, český zvuk
+161 slov a7 vět, žádný FR zvuk.31 cílených Python kontrol PASS.
+Rozhodnutí: Míla zadal po Datově commitu p+n všech čekajících commitů.
+Publikuje se obecný kód a klient, nikoli soukromý katalog nebo média.
+Webová FR karta se v Cockpitu objeví až s veřejným datasetem; desktop zůstává.
+Další krok: Programová společná brána, integrační commit a registrované p+n
+Cockpit + FR Pages pro přesný schválený kódový balíček. Finální stav, head,
+účtenky a kontrola skutečně načtených bajtů: private fr_mint_release_20261117/completion.json.
+Rizika a otevřeno: veřejné schválení konkrétního soukromého obsahu, FR hlas/výroba,
+obsahová a fyzická telefonní přejímka. publicPromotionApproved=false;
+žádná změna Azure, živých CSV ani placená výroba. Datova kopie zachovaná.
+Technický důkaz: private fr_mint_release_20261117/{private_bundle_verification.json,
+actual_client_verification.json,targeted_tests.log,final_gate.log}.
+
+
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 

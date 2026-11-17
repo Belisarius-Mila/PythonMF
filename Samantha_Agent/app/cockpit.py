@@ -755,7 +755,10 @@ DOCUMENT_METADATA_UPDATE_FIELDS: tuple[str, ...] = (
     "case_id",
 )
 def web_apps_catalog() -> dict[str, Any]:
-    return {"ok": True, "apps": [dict(item) for item in WEB_APP_CATALOG]}
+    # The private FR payload is promoted separately from the generic client.
+    french_web_ready = (GIT_ROOT / "docs/data/vocabulary-fr-v2.json").is_file()
+    return {"ok": True, "apps": [dict(item) for item in WEB_APP_CATALOG
+                                  if item["id"] != "vocabulary-fr" or french_web_ready]}
 
 
 def desktop_app_by_id(app_id: str) -> dict[str, Any] | None:

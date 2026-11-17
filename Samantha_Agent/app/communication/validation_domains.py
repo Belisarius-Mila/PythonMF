@@ -15,6 +15,7 @@ CORE_TESTS = ("tests.test_cockpit_http_security", "tests.test_cockpit_server",
 # Full regression is a separate nightly/manual operation. Runtime selection
 # expands domain/consumer contracts; it never selects the whole registry.
 SOURCES = {
+    "vocabulary_fr_content": ("VocabularyFR/vocabulary_fr_*.py", "VocabularyFR/build_sentence_pictures.py"),
     "validation": ("app/communication/validation_*.py", "app/communication/checkpoint_quality_gate.py",
                    "scripts/*quality_gate*.py", "scripts/validation_*.py", "AGENTS.md",
                    "scripts/cockpit_fast_feedback.py", "memory/technical/validation_policy.md", ".github/workflows/*"),
@@ -78,6 +79,7 @@ SOURCES = {
 }
 
 TEST_PREFIXES = {
+    "vocabulary_fr_content": ("tests.test_vocabularyfr_content",),
     "validation": ("tests.test_validation_", "tests.test_cockpit_quality_gate", "tests.test_cockpit_fast_feedback", "tests.test_github_batch",
                    "tests.test_luna_release_submission", "tests.test_simple_main_deploy",
                    "tests.test_simple_main_checkpoint"),

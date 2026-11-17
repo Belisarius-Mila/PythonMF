@@ -30,6 +30,19 @@ class VocabularyFrenchWebGalleryTests(unittest.TestCase):
         self.assertIn('vocabulary-fr.navigation.v1',(CLIENT/'gallery.js').read_text())
         self.assertIn('vocabulary-fr.learner-backup',(CLIENT/'learners.js').read_text())
 
+    def test_private_payload_does_not_advertise_unavailable_public_app(self):
+        from app import cockpit
+        from tempfile import TemporaryDirectory
+        from unittest.mock import patch
+        with TemporaryDirectory() as directory, patch.object(cockpit, 'GIT_ROOT', Path(directory)):
+            ids=lambda: {item['id'] for item in cockpit.web_apps_catalog()['apps']}
+            self.assertNotIn('vocabulary-fr', ids())
+            self.assertIn('vocabulary-fr-trainer', ids())
+            public=Path(directory)/'docs/data/vocabulary-fr-v2.json'
+            public.parent.mkdir(parents=True)
+            public.write_text('{"items": []}')
+            self.assertIn('vocabulary-fr', ids())
+
     def test_registered_web_target_is_distinct_and_desktop_launch_is_preserved(self):
         from app import cockpit
         from app.communication.luna_release import PAGES_PROJECT_PATHS,release_target

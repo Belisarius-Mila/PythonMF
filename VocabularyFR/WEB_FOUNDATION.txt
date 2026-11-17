@@ -1,0 +1,73 @@
+Vocabulary FR — private content pipeline (contract v1.1)
+
+This folder contains generic helpers only. Real learner inventories, media,
+exports and catalogs must stay outside Git and the public docs tree until
+separate content-publication approval. The builders do not publish, send,
+synthesize speech, choose a new voice or modify the original CSV.
+
+Data/Will boundary
+Data owns catalog, export/audio helpers and synthetic content tests.
+Will owns the browser client, registries, gate registration and canonical
+FR handoff/TVBCP/project memory. Do not copy real fixtures into those tests.
+
+Explicit private input layout
+  catalog.json                canonical UTF-8 serialization via encoded()
+  source.csv                  closed original CSV, including all source rows
+  images/<pinned-file>        resident regular originals, SHA pinned by catalog
+  sentence-pictures.json     editorial, reviewed 1–5 concepts per sentence
+
+Keep learner-hints-private.json outside the delivered payload. Personal flags,
+PINs and local source paths are never part of exported card JSON.
+
+UIDs
+Assign vfr-NNNN once and store them in the private catalog. resolve_rows()
+uses exact NFC source FR/CZ/sentence pairs, including explicit approved omitted
+sources. It never derives a UID from the current CSV Order. Renumbering or
+reordering does not change identity. A changed meaning/sentence fails closed
+until an explicit catalog revision. Original and web-corrected text are separate.
+
+Build from the committed helper version; all paths must be explicit:
+  python vocabulary_fr_export.py build --input PRIVATE_INPUT \
+    --output NEW_PRIVATE_BUNDLE --reuse-docs VERIFIED_IT_DOCS \
+    --code-commit FULL_40_CHAR_COMMIT --bundle-id vocabulary-fr-private-v001
+
+The destination must not exist. Inside Git it must be ignored, outside docs,
+with no tracked files. A later revision creates a new destination/version.
+The current helpers must byte-match the supplied commit. The bundle includes
+catalog.json, audio-provenance.json, manifest.json, payload/data and payload/assets.
+The manifest pins every payload file, code files, catalog, bytes and SHA-256.
+It declares private=true and publicPromotionApproved=false.
+
+Czech audio is reused only on exact normalized text, kind, voice and rate,
+current IT source identity and pinned bytes. French audio is null until an
+explicit later production step. Status reflects actual per-channel availability:
+not-generated / partial / complete. An unavailable channel is JSON null, never
+an empty string or a fabricated URL. Supplying --french-voice pins metadata
+only; it does not create audio. No automatic network or TTS fallback exists.
+
+French spelling practice starts with pieces=[whole exact word], reviewed=false,
+displayMode=whole-word. No Italian syllable rules are imported. Editorial
+conflicts supplement shared-image, identical-spelling and related-meaning
+exclusions. Difficulty 1–3 is an internal proposal, not CEFR certification.
+
+Sentence concepts identify exact active UID meanings and literal sentence spans.
+Elisions work at Unicode word boundaries; offsets count UTF-16 units. The
+validator rejects stale text, overlaps, duplicated images and incomplete maps.
+Offline proposals require editorial review; the browser does no live inference.
+
+Verify the sender's exact bundle before integration:
+  python vocabulary_fr_export.py verify --bundle PRIVATE_BUNDLE \
+    --expected-manifest-sha256 SENDER_SHA256 --decode-audio
+
+Verification is read-only; full audio decoding requires ffmpeg. It checks the
+complete file set, image decoding, manifest identities, availability, metadata,
+spelling fallback, sentence spans, hashes and the installed helper code.
+Synthetic tests: python -m unittest tests.test_vocabularyfr_content
+These tests do not attest that any real private inventory was checked. The
+explicit verifier run against the closed bundle is separate evidence.
+
+Integrate by copying the client and this exact payload into a separate ignored
+private staging root. Serve only on 127.0.0.1. Do not stage under docs, push,
+upload, publish or use a public preview. Gallery/text should work with absent
+French audio. A French listening game cannot use a null target; a loop stops
+with an explicit availability message rather than silently reading Czech only.

@@ -1,3 +1,15 @@
+## 2026-11-17 — Společná integrace FR a opravy přenosu Samanthy
+
+Hotovo: Oprava Window časovačů a viditelného stavu sdíleného draftu185d225b
+je připravená ve společném balíčku s FR klientem a Datovým a119e84f.
+Rozhodnutí: Míla výslovně zadal p+n všech čekajících commitů po Datově checkpointu.
+Další krok: Registrované p+n a přesná kontrola živého /samantha/ proti zdroji;
+finální účtenky/head a stav v private fr_mint_release_20261117/completion.json.
+Rizika: Fyzické iPhone/Mint přepárování a přenos textu musí potvrdit Míla.
+Předchozí dva Safari klienti ověřili syntetický rozhovor bez placeného modelu;
+skutečný rozhovor se tímto vydáním neodesílá ani neopakuje.
+
+
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## 2026-11-17 15:35 CET — Oprava přenosu rozepsaného textu Samanthy
 

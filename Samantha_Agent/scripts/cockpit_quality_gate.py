@@ -380,6 +380,7 @@ TEST_MODULES = (
     "tests.test_shared_chat_runtime",
     "tests.test_shared_chat_http",
     "tests.test_vocabulary_authoring",
+    "tests.test_vocabularyfr_content",
     "tests.test_book_legacy_cleanup",
     "tests.test_vocabularyen_gallery",
     "tests.test_vocabularyit_catalog",
