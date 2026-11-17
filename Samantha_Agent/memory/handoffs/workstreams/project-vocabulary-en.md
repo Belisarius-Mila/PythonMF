@@ -1,3 +1,28 @@
+## 2026-11-17 13:42 CET — Obrazové pojmy pro všechny aktivní anglické věty
+
+Hotovo: Všech512 aktivních vět má1–5 významově zkontrolovaných vazeb na
+stávající anglické karty; celkem1255 vazeb. Původních20 pilotních záznamů je
+přesně zachovaných. Větná fáze ukazuje obrázky s EN názvy, slovní fáze vrací
+původní velkou kartu. Nové obrázky, zvuk ani produkční JavaScript nevznikly.
+Rozhodnutí: Míla schválil rozšíření EN analogicky k rozpracované italštině.
+Každá vazba drží konkrétní význam a tvar ve větě; nevyplňuje se všech5 míst
+za cenu nesprávného významu. Export nově vyžaduje pokrytí všech aktivních vět.
+Další krok: Samostatně autorizované p+n úplné mapy; přesný lokální checkpoint
+určuje data/private/vocabulary_en_sentence_pictures_full_20261117/completion.json.
+Navrhované další kroky: Mílova obsahová a akustická přejímka na telefonu.
+Technický důkaz:28 cílených Python testů PASS včetně skutečných JS scénářů
+aplikace, přesného exportu, obrázků, zachování20 pilotů a rozlišení homonym.
+Konečnou programovou doménovou bránu a commit dokládá completion.json;
+bez tohoto důkazu se netvrdí úspěch brány ani publikace. IT práce v Datově
+worktree není změněná. Samostatný EN TVBCP není dohodnutý; vazbou zůstává
+stávající architektura_komunikace_samantha.txt.
+
+Předchozí pilot je již veřejně vydaný jako d4c986ec: Luna jobca67f330
+completed, push i Pages confirmed,44/44 veřejných souborů přesných. Doklad:
+data/private/vocabulary_en_sentence_pictures_release_20261117/completion.json.
+Starší odstavce o čekajícím vydání pilotu níže jsou historické. Tato nová
+úplná mapa je zatím místní; fyzická přejímka telefonu zůstává otevřená.
+
 ## 2026-11-17 12:40 CET — Will přebírá obrazový pilot k úplnému p+n
 
 Hotovo: Zdrojový c6bb0cd4 přenesen do aktuálního main bez opakování již

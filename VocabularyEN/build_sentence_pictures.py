@@ -72,6 +72,8 @@ def build(source: dict, data: dict, *, asset_root: Path | None = None) -> dict:
             end = start + len(text.encode('utf-16-le')) // 2
             result.append({**ref, 'start': start, 'end': end})
         entries[uid] = {**identity, 'reviewed': True, 'concepts': result}
+    if set(entries) != set(items):
+        raise ValueError('Obrazová mapa musí pokrývat všechny aktivní anglické věty.')
     return {'schemaVersion': 1, 'language': 'en', 'kind': 'sentence-pictures',
             'maxPictures': 5, 'batch': source.get('batch'), 'entries': entries}
 

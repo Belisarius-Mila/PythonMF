@@ -335,8 +335,8 @@ samostatné vůči automatickým kontrolám a místnímu Safari.
 14. Obrazové pojmy ve větách kontinuální smyčky (2026-11-17)
 
 Kanonický vstup VocabularyEN/vocabulary_en_sentence_pictures.json váže konkrétní
-větu na1 až5 existujících významových UID. Pilot obsahuje20 ručně zkontrolovaných
-vět. Pořadí pojmů odpovídá větě; neopakovat stejné UID ani stejný obrázek.
+větu na1 až5 existujících významových UID. Mapa obsahuje všech512 aktivních
+vět; původních20 pilotních záznamů zůstává přesně zachovaných. Pořadí pojmů odpovídá větě; neopakovat stejné UID ani stejný obrázek.
 Každý záznam uchovává přesné EN/CZ heslo i oba překlady věty. Každý pojem má
 přesné EN/CZ heslo, doslovné text ve větě (včetně skloňování/časování a velikosti
 písmen) a occurrence od1. Reviewed=true znamená dokončenou významovou revizi.
@@ -354,7 +354,8 @@ Pouze ověřit beze změny:
   Samantha_Agent/.venv/bin/python VocabularyEN/build_sentence_pictures.py --check
 Výstup docs/data/vocabulary-en-sentence-pictures.json se commituje se zdrojem.
 Builder kontroluje aktuální větu, významy, hranice slov, pořadí, jedinečnost a
-existenci přesných místních obrázků/náhledů. Po změně věty nebo významu je
+existenci přesných místních obrázků/náhledů i pokrytí VŠECH aktivních vět.
+Novou aktivní kartu nelze exportovat bez dokončené mapy její věty. Po změně věty nebo významu je
 nutná nová ruční revize; nepřepisovat zdrojovou identitu automaticky.
 
 Pouze větná fáze smyčky Věta + slovíčko ukáže současně všechny obrázky s EN

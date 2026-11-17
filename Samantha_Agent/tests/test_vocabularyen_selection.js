@@ -768,14 +768,21 @@ test('a filtered deep link loop returns to the matching gallery count, tiles and
 
 function contextFigures(view){return view.element('sentencePictures').querySelectorAll('.sentence-picture');}
 function contextLabels(view){return view.element('sentencePictures').querySelectorAll('figcaption').map(n=>n.textContent);}
-test('sentence picture metadata resolves20 exact reviewed rows in sentence order, with at most five existing meanings',()=>{
-  assert.equal(Object.keys(sentencePictureManifest.entries).length,20);let count=0;
+test('sentence picture metadata covers every active English row in sentence order with at most five existing meanings',()=>{
+  assert.deepEqual(Object.keys(sentencePictureManifest.entries).sort(),vocabulary.items.filter(i=>i.active!==false).map(i=>i.uid).sort());
   for(const [uid,record] of Object.entries(sentencePictureManifest.entries)){
-    const item=vocabulary.items.find(i=>i.uid===uid),refs=model.sentencePictures(item,sentencePictureManifest,vocabulary.items);assert.equal(refs.length,record.concepts.length);assert.ok(refs.length>=1&&refs.length<=5);count+=refs.length;
+    const item=vocabulary.items.find(i=>i.uid===uid),refs=model.sentencePictures(item,sentencePictureManifest,vocabulary.items);assert.equal(refs.length,record.concepts.length);assert.ok(refs.length>=1&&refs.length<=5);
     for(const ref of refs)assert.equal(item.sentenceEn.slice(ref.start,ref.end),ref.text);
   }
-  assert.equal(count,51);const cat=vocabulary.items.find(i=>i.uid==='ven-0020');assert.deepEqual(model.sentencePictures(cat,sentencePictureManifest,vocabulary.items).map(r=>r.item.en),['cat','sleep','chair']);
+  const cat=vocabulary.items.find(i=>i.uid==='ven-0020');assert.deepEqual(model.sentencePictures(cat,sentencePictureManifest,vocabulary.items).map(r=>r.item.en),['cat','sleep','chair']);
   const key=vocabulary.items.find(i=>i.uid==='ven-0234');assert.ok(model.sentencePictures(key,sentencePictureManifest,vocabulary.items).some(r=>r.item.uid==='ven-0376'&&r.text==='opens'));
+});
+test('a newly covered inflected sentence restores its original word card and keeps one audio player',async()=>{
+  const view=await app();view.openStudy('ven-0116');loopMode(view,'sentence-word');view.element('studyLoopToggle').click();
+  assert.deepEqual(contextLabels(view),['drink','orange','juice','breakfast']);const player=activePlayer(view);
+  await nextLoopPhase(view);assert.equal(view.element('sentencePictures').hidden,true);
+  assert.equal(view.element('promptText').textContent,'juice');assert.equal(view.element('studyLoopTranslation').textContent,'džus');
+  assert.equal(activePlayer(view),player);view.element('studyLoopStop').click();
 });
 test('sentence picture metadata rejects changed sentences, changed meanings, unknown or retired references and invalid spans',()=>{
   const cat=vocabulary.items.find(i=>i.uid==='ven-0020');

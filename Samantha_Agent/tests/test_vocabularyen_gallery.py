@@ -290,12 +290,14 @@ class SentencePictureTests(unittest.TestCase):
         cls.data=json.loads((ROOT/'docs/data/vocabulary-en.json').read_text())
         cls.export=json.loads((ROOT/'docs/data/vocabulary-en-sentence-pictures.json').read_text())
 
-    def test_reviewed_twenty_sentences_export_exactly_51_real_image_links(self):
+    def test_all_active_sentences_export_one_to_five_real_image_links(self):
         from PIL import Image
         expected=self.builder.build(self.source,self.data,asset_root=ROOT/'docs')
         self.assertEqual(expected,self.export)
-        self.assertEqual(len(expected['entries']),20)
-        self.assertEqual(sum(len(r['concepts']) for r in expected['entries'].values()),51)
+        active={i['uid'] for i in self.data['items'] if i.get('active',True)}
+        self.assertEqual(set(expected['entries']),active)
+        self.assertEqual(len(active),512)
+        self.assertTrue(all(1<=len(r['concepts'])<=5 for r in expected['entries'].values()))
         self.assertEqual(max(len(r['concepts']) for r in expected['entries'].values()),5)
         items={i['uid']:i for i in self.data['items']};seen=set()
         for record in expected['entries'].values():
@@ -306,6 +308,37 @@ class SentencePictureTests(unittest.TestCase):
                     if path in seen:continue
                     with Image.open(path) as image:image.load()
                     seen.add(path)
+
+    def test_authoring_rejects_a_missing_active_sentence(self):
+        source=copy.deepcopy(self.source);source['entries'].pop('ven-0020')
+        with self.assertRaises(ValueError):self.builder.build(source,self.data)
+
+    def test_original_twenty_reviewed_pilot_records_are_unchanged(self):
+        import hashlib
+        pilot=['ven-0020','ven-0027','ven-0211','ven-0384','ven-0117','ven-0074','ven-0111',
+               'ven-0233','ven-0224','ven-0008','ven-0222','ven-0226','ven-0207','ven-0208',
+               'ven-0217','ven-0234','ven-0450','ven-0477','ven-0262','ven-0430']
+        records={uid:self.source['entries'][uid] for uid in pilot}
+        raw=json.dumps(records,sort_keys=True,ensure_ascii=False,separators=(',',':')).encode()
+        self.assertEqual(hashlib.sha256(raw).hexdigest(),'25b2b80939f53f521316f31ff64509b978abba46b1be0adf2c04f143dc62bc12')
+
+    def test_full_review_keeps_homographs_grammatical_roles_and_fixed_expressions(self):
+        cases={
+            1:({30},{426}),35:({44},{428,429}),116:({30,118},{170,426}),
+            170:({170},{118}),192:({118},{170}),243:({519},{204}),
+            277:({431},{119}),300:({431},{119}),433:({433},{144,432}),
+            447:({376},{439}),413:({436},{332}),434:({434,430},{159,58}),
+            504:({159},{434}),510:({510,445},{263,67}),514:({514},{487,5}),
+            86:(set(),{299}),98:(set(),{97}),269:(set(),{86}),
+            405:(set(),{279}),406:(set(),{400}),153:({136},{160}),
+        }
+        for number,(required,forbidden) in cases.items():
+            uid=f'ven-{number:04}';actual={int(r['uid'][4:]) for r in self.source['entries'][uid]['concepts']}
+            with self.subTest(uid=uid):
+                self.assertTrue(required<=actual);self.assertTrue(forbidden.isdisjoint(actual))
+        record=self.export['entries']['ven-0325'];ref=next(r for r in record['concepts'] if r['uid']=='ven-0325')
+        self.assertEqual(ref['occurrence'],2)
+        self.assertEqual(ref['start'],record['sourceSentenceEn'].rindex('do'))
 
     def test_sentence_texts_and_concept_meanings_cannot_drift_silently(self):
         for field in ('sourceEn','sourceCz','sourceSentenceEn','sourceSentenceCz'):
@@ -343,7 +376,7 @@ class SentencePictureTests(unittest.TestCase):
         self.assertNotIn('ven-0081',[r['uid'] for r in records['ven-0207']['concepts']])
 
     def test_offsets_use_javascript_utf16_and_do_not_depend_on_catalog_order(self):
-        source=copy.deepcopy(self.source);source['entries']={'ven-0020':source['entries']['ven-0020']};r=source['entries']['ven-0020']
+        source=copy.deepcopy(self.source);r=source['entries']['ven-0020']
         data=copy.deepcopy(self.data);target=next(i for i in data['items'] if i['uid']=='ven-0020')
         target['sentenceEn']='🐈 '+target['sentenceEn'];r['sourceSentenceEn']=target['sentenceEn']
         result=self.builder.build(source,data);ref=result['entries']['ven-0020']['concepts'][0]
