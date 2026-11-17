@@ -1,5 +1,15 @@
 # Vocabulary FR — klientský kontrakt v1.1
 
+## 17.11.2026 — Konkrétní veřejná propagace v003 schválená
+
+Míla výslovně zvolil zveřejnění finálního klientského payloadu v003 jako EN/IT.
+Do docs/Git patří pouze5 klientských JSON a2520 médií; pracovní katalog,
+CSV, plány, souhlasy a podrobné účtenky zůstávají soukromé. Původní v1.1 níže
+je historický kontrakt před tímto konkrétním souhlasem. Ostatní datová,
+zvuková a vlastnická pravidla jsou zachovaná. Doklad propagace a SHA manifest
+private vocabulary_fr_jana_release_20261117/public_promotion_approval.json.
+
+
 Současná autoritativní dohoda Míly a Data17.11.2026 je kontrakt v1.1 v Downloads.
 Tento git-safe přehled neobsahuje skutečný katalog, soukromé cesty ani osobní stav.
 

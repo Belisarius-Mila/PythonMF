@@ -1,4 +1,34 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
+## 2026-11-17 — Schválené veřejné vydání Francouzština Jana
+
+Hotovo: Míla po výslovné volbě veřejné Pages vs. soukromý Cockpit odpověděl
+„Zveřejnit.“ Schválení se vztahuje na konkrétní finální v003:464 karet,
+1830 MP3,18 témat,898 obrazových vazeb a všechny4 zvukové kanály u všech karet.
+Tím je pro tento obsah překonaná původní hranice kontraktu v1.1 pro veřejný
+klientský payload; neveřejné pracovní podklady zůstávají dál mimo docs/Git.
+Do docs jsou přenesené pouze5 klientských JSON a2520 médií z payloadu,
+celkem2525 souborů/64968870B. Každý soubor má shodnou velikost a SHA-256
+s uzavřeným zdrojem. Bez osobních výběrů, PIN, L/HT, klíčů nebo lokálních cest.
+Katalog, výrobní plány, souhlasy, účtenky a původní CSV se nezveřejňují.
+Neměnný zdrojový soukromý balíček v003 se nepřepisuje; jeho původní
+publicPromotionApproved=false zůstává historickou vlastností předání.
+Samostatný souhlas s propagací a její přesný manifest jsou v soukromé účtence.
+Francouzština Jana je první mezi webovými aplikacemi Cockpitu; Lékárna
+(web) a Lékárna−správa jsou poslední. Desktopový FR launcher a ostatní pořadí
+zachované. Stejný název používá hlavička aplikace i titulky jednotlivých karet.
+Důkaz: předchozí společná brána871 cílených PASS, skutečný obsah1830MP3
+plně dekódovaný,1856 audioodkazů/898 vazeb a464 čtyřmožnostních otázek
+ověřeno.49 cílených Python PASS a Safari soukromý náhled nového názvu,
+galerie464 karet, slova/věty a spuštění FR/CZ bez viditelné chyby.
+Další krok: Dokončit programovou bránu přesných veřejných vstupů, commit,
+registrované p+n nejprve FR Pages a pak Cockpitu. Finální stav/head a oba joby
+určuje private vocabulary_fr_jana_release_20261117/completion.json; neměnit
+main během vydání a nejistý požadavek automaticky neopakovat.
+Rizika a přejímky: lidský poslech a fyzický iPhone zůstávají samostatné.
+Žádná nová TTS výroba, její opakování ani změna Datova checkoutu.
+<!-- SAMANTHA_CURRENT_STATUS_END -->
+
+
 ## 2026-11-17 — Francouzština Jana, finální obsah v003 a pořadí aplikací
 
 Hotovo: Převzaté Datovy uzavřené commity210d0e46/13fd015b/49432092/3c2ce8aa;
@@ -28,7 +58,7 @@ balíčku s katalogem, plány, schválením nebo podrobnými účtenkami.
 Finální checkpoint/brána a další stav: private vocabulary_fr_jana_release_20261117/completion.json;
 bundle_verification.json, client_verification.json, safari_verification.json,
 targeted_tests.log a final_gate.log. Nový proud ani TVBCP nevzniká.
-<!-- SAMANTHA_CURRENT_STATUS_END -->
+
 
 ## 2026-11-17 — Společná integrace FR a opravy přenosu Samanthy
 
