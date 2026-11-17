@@ -1,5 +1,7 @@
 # Rodinný kalendář
 
+Aktuální stav 17.11.: jediný původní test doručen přes RCS, přesná shoda ověřená; p+n a následná aktivace jsou schválené. Finální provozní výsledek je pouze v soukromém completion.json.
+
 ## 2026-11-17 22:06 CET — Soukromé SMS v den rodinné události, vývoj bez aktivace
 
 Hotovo: Samostatné SMS pravidlo pro jednu příjemkyni je připravené místně.
@@ -260,3 +262,26 @@ proměnlivý a git-safe paměť je pouze časovaný snapshot.
 Stav `partial` nebo `delivery_unknown` správně zastaví další automatiku, ale
 zatím neexistuje samostatný potvrzovaný workflow pro jeho ruční uzavření.
 Takový workflow se nesmí spojovat s aktivační branou ani automatickým retry.
+
+## 2026-11-17 22:28 CET — Doručený původní test a schválené zapojení
+
+Hotovo: Jediný schválený test byl po lokálním commitu odeslán a doručen.
+Zprávy jej převedly na RCS; uživatel potvrdil doručení. Ověření původního
+nového řádku nyní prokazuje plný kontakt, přesný dekódovaný text a delivered.
+Nevznikl druhý pokus. Automatické pravidlo je před nasazením stále vypnuté.
+Rozhodnutí: Míla výslovně schválil p+n a následné zapojení automatických
+upozornění témuž soukromému kontaktu od09:00 v den narozenin/svátku;
+hodinové dohnání jen tentýž den. Mac může zprávu odeslat jako SMS nebo RCS.
+Další krok: Dokončit kontrolu a commit opravy, schválené p+n registrovanou
+cestou a teprve po potvrzeném nasazení zapnout přesný soukromý policy.
+Navrhované další kroky: Ověřit první přirozený hodinový běh a stav v Cockpitu.
+Technický důkaz:118 cílených kontrol PASS. Chybějící import json v agentovém
+obalu opraven; syntetické testy nyní skutečně volají registrované FunctionTool
+status/preview/control, včetně verify a chybové větve. Foundation dekóduje
+vlastní attributedBody bez aktivace aplikace; nečitelný text, jiný příjemce,
+iMessage a více přesných shod dál zůstávají unknown. Ověření původního testu
+má transport_called=false, delivered1/unknown0/attention0; enabled=false.
+Soukromé důkazy, finální head/brána a následná aktivace budou v
+family_calendar/sms_development_20261117/completion.json. Při nejistotě žádný
+nový send. Odeslání přes vlastněný hodinový launchd kontext ještě nebylo
+fyzicky potvrzené; test proběhl v terminálovém běhovém prostředí.

@@ -2,7 +2,7 @@
 
 Samostatná CalendarSMS nad kanonickým data/private/family_calendar/sms.
 Výchozí draft je vypnutý, obsahuje jediný E.164 telefon a oslovení. Schema1,
-SMS/09:00/Europe-Prague jsou pevné. Osobní údaje a konkrétní náhled nikdy Git.
+Preferovaná služba SMS/09:00/Europe-Prague jsou pevné; Mac může použít RCS. Osobní údaje a konkrétní náhled nikdy Git.
 Povolené osoby/události vlastní existující registr; datum po probuzení je dnešní,
 žádný včerejší backlog. Oslovení, šablony a pravidlo jsou svázané otiskem.
 
@@ -11,6 +11,8 @@ Povolené osoby/události vlastní existující registr; datum po probuzení je 
   rodinné události; žádné SMS DB, model, send nebo zotavovací zápisy.
 - test: samostatná přesná aktuální zpráva TEST_CONFIRMATION, fingerprint a
   stabilní request_id. Nejasný původní test blokuje i jinou novou identitu.
+- verify: potvrzená kontrola původního request_id/otisku; pouze čtení původního
+  Messages výsledku a doplnění účtenky, nikdy nový send.
 - enable: samostatná ENABLE_CONFIRMATION + fingerprint. Vyžaduje odpovídající
   sent/delivered test do7 dnů, shodu načteného runtime a hodinový policy.
 - disable: potvrzené vypnutí pouze SMS konfigurace; e-maily beze změny.
@@ -21,8 +23,10 @@ Povolené osoby/události vlastní existující registr; datum po probuzení je 
 
 MessagesSMS používá dosavadní Messages sender. Před pokusem čte MAX ROWID
 přes mode=ro; výsledek musí být novější, odchozí, s přesným textem, celým
-příjemcem a službou SMS. Sent není totéž co delivered. Více shod, jen jiné
-zprávy nebo attributed-only text nejsou důkaz. Skutečný transport je třeba
+příjemcem a službou SMS nebo RCS. Null text se zkouší dekódovat přes macOS
+Foundation NSUnarchiver, bez otevření aplikace. Přesná shoda celého
+dekódovaného textu zůstává povinná. Sent není totéž co delivered. Více shod,
+jen jiné zprávy, iMessage nebo nečitelné attributedBody nejsou důkaz. Skutečný transport je třeba
 ověřit v konkrétním běhovém prostředí; testy UI oprávnění samy neprokazují.
 
 Owned family_calendar_delivery_run.scheduled_main volá nezávisle SMS a e-mail,

@@ -201,6 +201,30 @@ class CalendarSMS:
             atomic_write_json(self.config_path, config)
         return self.status()
 
+    def verify_test(self, *, fingerprint, request_id, confirmed):
+        """Resolve the original receipt through read-only Messages correlation."""
+        if confirmed is not True or not isinstance(request_id, str) or not re.fullmatch(r'[A-Za-z0-9_-]{8,80}', request_id):
+            raise ValueError('Chybí potvrzení ověření původního testu.')
+        with exclusive_file_lock(self.root/'worker', timeout=0):
+            config = self._config()
+            if fingerprint != digest(policy(config)):
+                raise ValueError('Původní pravidlo se změnilo.')
+            key = digest([config['recipient_id'], 'test:'+request_id])
+            record = self._ledger()['records'].get(key)
+            if not record or record['kind'] != 'test' or record['policy'] != fingerprint:
+                raise ValueError('Původní test nelze ověřit.')
+            written = False
+            if record['state'] in ('sending', 'unknown'):
+                outcome = (self.adapter or MessagesSMS()).verify(record['phone'], record['text'], record['anchor'], attempts=1)
+                if (isinstance(outcome, SMSOutcome) and outcome.state in ('sent', 'delivered', 'failed')
+                        and type(outcome.row_id) is int and outcome.row_id > record['anchor']):
+                    record.update(state=outcome.state, row_id=outcome.row_id, service=outcome.service)
+                    def update(document):
+                        document['records'][key] = record
+                        return RepositoryMutation(document)
+                    self.repo.transact(update);written = True
+        return {**self.status(), 'transport_called': False, 'writes_performed': written}
+
     def _attempt(self, config, event_key, text, now, *, kind='event'):
         unchanged = {'transport_called': False, 'writes_performed': False}
         def eligible():
@@ -247,7 +271,7 @@ class CalendarSMS:
                 raise ValueError()
             if outcome.state != 'unknown' and (type(outcome.row_id) is not int or outcome.row_id <= anchor):
                 raise ValueError()
-            record.update(state=outcome.state, row_id=outcome.row_id)
+            record.update(state=outcome.state, row_id=outcome.row_id, service=outcome.service)
         except Exception:
             record['state'] = 'unknown'
         try:

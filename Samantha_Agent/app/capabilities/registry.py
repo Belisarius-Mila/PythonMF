@@ -38,7 +38,7 @@ CAPABILITIES: tuple[CapabilityRecord, ...] = (
         requires_confirmation=True, confirmation_policy=ConfirmationPolicy.EXACT_CURRENT_MESSAGE,
         voice_allowed=VoicePolicy.APPROVAL_ONLY, mobile_allowed=MobilePolicy.APPROVAL_CARD,
         tool="family_calendar_sms_control", audit=AuditPolicy.REDACTED,
-        notes="Different exact confirmations for one test and enabling. Activation needs a matching successful test, loaded compatible runtime and active hourly schedule. No retry of uncertain/test sends; per-event durable intent precedes transport. Development/p+n grants no send consent.",
+        notes="Different exact confirmations for one test and enabling. Verify inspects the original receipt without sending; exact decoded text permits the Mac's SMS-to-RCS upgrade. Activation needs a matching successful test, loaded compatible runtime and active hourly schedule. No retry of uncertain/test sends; per-event durable intent precedes transport. Development/p+n grants no send consent.",
     ),
     CapabilityRecord(
         capability_id="shared_chat_library_context", label="Prepare local library evidence for the original Samantha question",

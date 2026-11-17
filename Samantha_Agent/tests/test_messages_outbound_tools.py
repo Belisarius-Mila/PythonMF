@@ -210,6 +210,21 @@ class CalendarSMSCorrelationTests(unittest.TestCase):
         self.transport.sender=lambda *a:self.add(None)
         self.assertEqual(self.transport.send(self.phone,self.text,self.transport.preflight()).state,'unknown')
 
+    def test_original_rcs_receipt_uses_decoded_exact_text_without_sending(self):
+        from unittest.mock import Mock
+        with sqlite3.connect(self.path) as db:
+            db.execute('ALTER TABLE message ADD COLUMN attributedBody BLOB')
+            db.execute('INSERT INTO message VALUES(NULL,1,\'RCS\',1,1,1,0,?)',(b'synthetic archive',))
+        self.transport.decoder=Mock(return_value=self.text)
+        self.transport.sender=Mock(side_effect=AssertionError('verification must never send'))
+        result=self.transport.verify(self.phone,self.text,1,attempts=1)
+        self.assertEqual((result.state,result.service),('delivered','RCS'))
+        self.transport.sender.assert_not_called()
+        self.transport.decoder.return_value=self.text+' different'
+        self.assertEqual(self.transport.verify(self.phone,self.text,1,attempts=1).state,'unknown')
+        self.transport.decoder.side_effect=ValueError('synthetic malformed body')
+        self.assertEqual(self.transport.verify(self.phone,self.text,1,attempts=1).state,'unknown')
+
 
 if __name__ == "__main__":
     unittest.main()

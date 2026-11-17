@@ -2934,3 +2934,13 @@ strop. Skutečný DALTAC dokončen17,0578/20, sedm původních částí beze zm�
   lze zkusit při další hodinové kontrole. SMS oddělit od e-mailového ledgeru.
 - Ověření:115 cílených kontrol PASS, včetně souběhu, půlnoci, ztraceného
   dokončení, cizích zpráv a ochrany testu proti novému ID. Žádná skutečná SMS.
+
+### 2026-11-17 22:28 CET — Ověřit obal nástroje a skutečný kanál Zpráv
+
+- Problém: AST audit přítomnosti toolu neodhalí chybějící globální import;
+  Mac může preferovanou SMS odeslat jako RCS s textem pouze v attributedBody.
+- Řešení: synteticky vyvolat skutečný FunctionTool a jeho chybovou větev.
+  Původní účtenku ověřit bez nového send, dekódovat vlastní Mac archiv a
+  trvat na přesném plném kontaktu, textu a novém řádku SMS/RCS.
+- Důkaz:118 cílených PASS a jediný původní RCS test s přesnou shodou a
+  delivered, bez dalšího odeslání. Soukromý completion.json rodinného kalendáře.

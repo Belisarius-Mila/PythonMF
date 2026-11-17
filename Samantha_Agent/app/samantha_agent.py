@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import argparse
+import json
 from pathlib import Path
 
 from dotenv import load_dotenv
@@ -289,6 +290,8 @@ def family_calendar_sms_control(action: str, fingerprint: str = '', confirmation
             result = service.enable(fingerprint=fingerprint, confirmation=confirmation)
         elif action == 'disable':
             result = service.disable(confirmed=confirmed)
+        elif action == 'verify':
+            result = service.verify_test(fingerprint=fingerprint, request_id=request_id, confirmed=confirmed)
         else:
             raise ValueError()
         return json.dumps(result, ensure_ascii=False)

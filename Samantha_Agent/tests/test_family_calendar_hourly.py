@@ -433,6 +433,23 @@ class PersonalCalendarSMSTests(unittest.TestCase):
             self.assertEqual(other.tick()['status'],'busy');release.set();future.result()
         self.assertEqual(len(self.adapter.calls),2)
 
+    def test_original_test_can_be_verified_without_another_send(self):
+        from app.family_calendar_sms import TEST_CONFIRMATION
+        from app.family_calendar_sms_transport import SMSOutcome
+        fp=self.service.preview()['fingerprint'];self.adapter.fail=True
+        self.service.test(fingerprint=fp,confirmation=TEST_CONFIRMATION,request_id='original-test-001')
+        self.adapter.verify=Mock(return_value=SMSOutcome('delivered',6,'RCS'))
+        with self.assertRaises(ValueError):
+            self.service.verify_test(fingerprint='changed',request_id='original-test-001',confirmed=True)
+        result=self.service.verify_test(fingerprint=fp,request_id='original-test-001',confirmed=True)
+        self.assertFalse(result['transport_called']);self.assertEqual(result['counts']['delivered'],1)
+        self.assertTrue(self.service.preview()['test_verified'])
+        self.service.verify_test(fingerprint=fp,request_id='original-test-001',confirmed=True)
+        self.adapter.verify.assert_called_once()
+        self.service.test(fingerprint=fp,confirmation=TEST_CONFIRMATION,request_id='original-test-001')
+        self.assertEqual(len(self.adapter.calls),1)
+        self.assertFalse(self.service.status()['enabled'])
+
     def test_owned_dispatch_runs_sms_even_if_email_fails_and_never_on_replay_arguments(self):
         import io
         from scripts.family_calendar_delivery_run import scheduled_main
@@ -443,6 +460,30 @@ class PersonalCalendarSMSTests(unittest.TestCase):
         sms.reset_mock()
         self.assertEqual(scheduled_main(['--today','2020-01-01'],email_runner=lambda *a,**k:7,sms_runner=sms,output=io.StringIO()),7)
         sms.assert_not_called()
+
+    def test_registered_agent_tools_return_json_and_never_repeat_uncertain_test(self):
+        import asyncio
+        from agents.tool_context import ToolContext
+        from app.samantha_agent import family_calendar_sms_status,family_calendar_sms_preview,family_calendar_sms_control
+        from app.family_calendar_sms import SMSAttemptError
+        with patch('app.family_calendar_sms.CalendarSMS') as factory:
+            service=factory.return_value
+            service.status.return_value={'status':'disabled'}
+            service.preview.return_value={'enabled':False,'fingerprint':'synthetic'}
+            service.test.return_value={'status':'disabled','transport_called':True}
+            service.enable.return_value={'status':'active'}
+            service.disable.return_value={'status':'disabled'}
+            service.verify_test.return_value={'status':'disabled','transport_called':False}
+            for tool,args in [(family_calendar_sms_status,{}),(family_calendar_sms_preview,{}),
+                              *[(family_calendar_sms_control,{'action':a}) for a in ('test','enable','disable','verify')]]:
+                context=ToolContext(context=None,tool_name=tool.name,tool_call_id='synthetic-call',tool_arguments=json.dumps(args))
+                value=json.loads(asyncio.run(tool.on_invoke_tool(context,json.dumps(args))))
+                self.assertIsInstance(value,dict)
+            service.test.assert_called_once()
+            service.test.side_effect=SMSAttemptError('PRIVATE',transport_called=False)
+            value=json.loads(asyncio.run(family_calendar_sms_control.on_invoke_tool(context,json.dumps({'action':'test'}))))
+            self.assertEqual(value['status'],'unverified');self.assertFalse(value['transport_called'])
+            self.assertNotIn('PRIVATE',json.dumps(value))
 
 
 if __name__=='__main__':unittest.main()

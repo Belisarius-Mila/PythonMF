@@ -7,7 +7,9 @@ přesným fingerprintem a request_id a pak samostatně schválenou aktivaci.
 Trvalý souhlas pokrývá jediný soukromý kontakt, šablonu, narozeniny/svátky
 od09:00 v den události; vývoj/p+n tento souhlas nedávají. Odesílání pouze
 vlastněným dispatcherem, záznam sending před transportem a přesná SQL korelace
-nového výsledku. Nejistý výsledek ani nový test ID neopravňují nový send.
+nového výsledku. Nejistý výsledek ani nový test ID neopravňují nový send. Control verify
+ověří původní účtenku bez senderu; přesně dekódovaný text dovoluje i RCS
+převod provedený Macem.
 Podrobně family_calendar_sms.md; žádná změna SMTP, Keychain nebo LaunchAgentu.
 
 ## Samantha — čtecí Knihovna (2026-11-17)
