@@ -16,6 +16,13 @@
   </details>
   <div id="messages" role="log" aria-label="Zprávy rozhovoru" aria-live="polite"></div>
   <p id="work" role="status"></p>
+  <details id="libraryPanel"><summary>Knihovna — knihy, články, recepty a místa</summary>
+    <p>Můžeš se zeptat v rozhovoru nebo hledat přímo zde. Výsledky a otevřená položka jsou společné s druhým zařízením.</p>
+    <label>Hledat v naší Knihovně<input id="libraryQuery" maxlength="2000" type="search" placeholder="Například knihy o historii nebo Rakousko"></label>
+    <button id="librarySearch" type="button">Hledat v Knihovně</button>
+    <p id="libraryStatus" role="status" aria-live="polite"></p><div id="libraryResults" class="library-results"></div>
+    <article id="libraryReader" hidden aria-label="Otevřená položka Knihovny"><h2 id="libraryTitle"></h2><p id="libraryMeta"></p><a id="librarySource" target="_blank" rel="noopener noreferrer" hidden>Původní zdroj</a><p id="libraryReadingStatus" role="status"></p><div id="libraryText" class="library-text"></div><button id="libraryMore" type="button" hidden>Načíst další část uloženého textu</button></article>
+  </details>
   <div class="composer"><button id="claim" type="button">Převzít psaní zde</button>
     <p id="draftStatus" role="status" aria-live="polite"></p>
     <label>Otázka pro Samanthu<textarea id="input" maxlength="12000" rows="4" readonly placeholder="Klepni sem a piš. Na iPhonu použij mikrofon klávesnice."></textarea></label>

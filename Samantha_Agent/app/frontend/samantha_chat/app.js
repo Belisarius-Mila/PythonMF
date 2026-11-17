@@ -13,11 +13,11 @@
       this.recovery=cached(tabStorage,'samantha-chat-draft');
     }
     notify(){this.render(this);}
-    async api(payload){
+    async api(payload,path='/api/samantha-chat/state'){
       const controller=new AbortController(),timer=setTimeout(()=>controller.abort(),12000);
       try{
         let response;
-        try{response=await this.fetch(payload?'/api/samantha-chat/action':'/api/samantha-chat/state',payload?{
+        try{response=await this.fetch(payload?'/api/samantha-chat/action':path,payload?{
           method:'POST',signal:controller.signal,headers:{'Content-Type':'application/json'},body:JSON.stringify({...payload,editor_id:this.editor,...(this.token?{client_token:this.token}:{})})
         }:{signal:controller.signal,headers:{'X-Samantha-Client':this.token,'X-Samantha-Editor':this.editor}});}
         catch(_){const error=new Error('Spojení s Cockpitem není ověřené. Zachovej text a obnov stav původní zprávy.');error.connectionUnknown=true;throw error;}
@@ -57,6 +57,9 @@
       return this.enqueue(async()=>{const data=await this.api(request);this.token=data.client_token;this.storage.setItem(KEY,this.token);this.tabStorage.removeItem(key);this.apply(data);this.error='';});
     }
     async pair(){return this.enqueue(async()=>{this.apply(await this.api({action:'pair'}));this.error='';});}
+    async librarySearch(query){return this.enqueue(async()=>{this.apply(await this.api({action:'library_search',query,expected_library_revision:this.state.library?.revision||0}));this.error='';});}
+    async libraryOpen(item_id){return this.enqueue(async()=>{this.apply(await this.api({action:'library_open',item_id,expected_library_revision:this.state.library?.revision||0}));this.error='';});}
+    libraryDetail(id,offset=0,digest=''){return this.api(null,'/api/samantha-chat/library/item?'+new URLSearchParams({id,offset:String(offset),sha256:digest}));}
     claim(takeover=true){
       if(this.claimPromise)return this.claimPromise;
       this.claiming=true;
@@ -114,13 +117,14 @@
     disconnect(){this.storage.removeItem(KEY);this.epoch++;this.clearTimer(this.timer);this.token='';this.state=null;this.online=false;this.pending=null;this.text='';this.dirty=false;this.error='';this.notify();}
   }
   function attach(doc){
-    const el=id=>doc.getElementById(id);let fingerprint='';
+    const el=id=>doc.getElementById(id);let fingerprint='',libraryUI=null;
     const client=new Client({fetch:root.fetch.bind(root),storage:root.localStorage,tabStorage:root.sessionStorage,crypto:root.crypto,render(c){
       el('setup').hidden=Boolean(c.token);el('chat').hidden=!c.state;
       el('connection').textContent=c.state?`${c.online?'Připojeno':'Spojení není ověřené'}: ${c.state.name} · ${c.state.client_label}`:c.token?'Obnovuji připojení…':'Vyber rozhovor nebo připoj telefon.';
       el('status').textContent=c.error;
       el('draftStatus').textContent=!c.state?'':c.dirty?(c.online?'Text se průběžně přenáší na druhé zařízení.':'Text je zachovaný zde; čekám na spojení.'):c.state.draft.text?'Rozepsaný text je uložený pro obě zařízení.':c.state.draft.can_edit?'Můžeš psát nebo diktovat. Text se přenáší automaticky.':'Klepni do otázky a začni psát nebo diktovat.';
       el('disconnect').hidden=!c.token;el('disconnect').disabled=c.busy;
+      libraryUI?.render(c);
       if(!c.state)return;
       el('pairPanel').hidden=!c.state.host;el('pairCode').textContent=c.state.pair_code||'';
       const draft=c.state.draft;
@@ -146,6 +150,7 @@
       }
     }});
     function act(fn){void Promise.resolve().then(fn).catch(error=>{client.error=error.message;client.notify();});}
+    if(root.SamanthaLibrary)libraryUI=root.SamanthaLibrary.create(doc,client,act);
     el('create').onclick=()=>act(()=>client.setup('create',el('name').value));
     el('join').onclick=()=>act(()=>client.setup('join','iPhone',el('code').value.trim()));
     el('pair').onclick=()=>act(()=>client.pair());

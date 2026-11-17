@@ -68,12 +68,14 @@ class ValidationDomainsTests(unittest.TestCase):
     def test_shared_chat_frontend_and_node_fixture_keep_the_real_two_client_test(self):
         for path in ('app/frontend/samantha_chat/app.js', 'app/frontend/samantha_chat/page.html',
                      'app/frontend/samantha_chat/styles.css', 'tests/shared_chat_frontend.test.cjs',
-                     'tests/shared_chat_browser_timers.test.cjs'):
+                     'tests/shared_chat_browser_timers.test.cjs', 'app/shared_chat_library.py',
+                     'app/frontend/samantha_chat/library.js', 'tests/shared_chat_library.test.cjs'):
             with self.subTest(path=path):
                 result = self.plan(path)
                 self.assertEqual(result.mode, 'targeted')
                 self.assertIn('tests.test_shared_chat_http', result.modules)
                 self.assertIn('tests.test_shared_chat_runtime', result.modules)
+                self.assertIn('tests.test_shared_chat_library', result.modules)
                 self.assertIn('tests.test_cockpit_http_security', result.modules)
                 self.assertNotIn('tests.test_calendar_writer', result.modules)
 

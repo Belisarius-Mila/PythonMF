@@ -2906,3 +2906,17 @@ strop. Skutečný DALTAC dokončen17,0578/20, sedm původních částí beze zm�
   Vlastnictví vstupu neukončovat každým sendem a automatickou obnovu provádět
   přes CAS bez takeover.9 deterministických JS scénářů a dva HTTP klienti
   prokázali přenos ještě během psaní; lokální410ms není důkaz Tailscale/iPhonu.
+
+
+### 2026-11-17 — Čtecí Knihovna v provozním rozhovoru
+
+- Problém: staré vyhledávání očekává doslovná slova, zatímco hlasový dotaz je
+  celá věta; Konspektové skupiny jsou strukturované objekty, ne prosté řetězce.
+- Typ: opakující se integrace.
+- Řešení nalezeno:17112026.
+- Řešení: číst celý kanonický katalog, hledat normalizované výrazy i v anotaci
+  a metadatech, skupiny převést na code/label/subject. Výsledky vázat na room,
+  výběr na vlastní revizi; zdroje připojit k původnímu send bez druhého modelu.
+  Text stránkovat s otiskem a UI chránit generačním číslem proti pozdnímu GET.
+- Ověření:33 cílených PASS včetně dvou HTTP klientů a3 nových JS scénářů;
+  skutečných145 záznamů pouze čteno0,04–0,21s. Nativní/fyzická přejímka otevřená.

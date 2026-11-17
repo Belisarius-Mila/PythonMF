@@ -17,6 +17,7 @@ FRONTEND_PAGE_IDS = (
     "cockpit",
 )
 FRONTEND_JAVASCRIPT_MODULES = {
+    "samantha_chat": ("library.js",),
     "email_agent": ("../shared/calendar_delete.js", "calendar_draft.js", "followup_time.js", "followups.js"),
     "calendar_task": ("../shared/calendar_delete.js",),
     "calendar_overview": ("../shared/calendar_delete.js", "../shared/calendar_actions.js",),

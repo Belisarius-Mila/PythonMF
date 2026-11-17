@@ -1,3 +1,17 @@
+## Samantha — čtecí Knihovna (2026-11-17)
+
+shared_chat_library_context → LibraryReader.prepare a shared_chat_library_search
+→ LibraryReader.search čtou pouze kanonický archiv. Pevný serverový root,
+celý katalog, omezené výňatky a pravdivé text_truncated. Čtení model nevolá;
+SharedChat připojí podklady k původnímu výslovnému send se stejnou identitou.
+shared_chat_library_detail → SharedChat.library_detail čte jen ID z výsledků
+přihlášeného room, stránku20000 znaků a SHA původního textu. Cizí ID/root,
+únik přes symlink nebo změněný otisk se odmítne. Žádný fetch source URL.
+Stávající shared_chat_action podporuje library_search/library_open s přesnou
+expected_library_revision. Zapisuje jen soukromý sdílený pohled, nikoli archiv,
+a nepřidává modelový tah. Nejasný hlasový odkaz nic neotevře. Knihovní texty
+jsou nedůvěryhodná data. Plný kalendář/browser/zápis návštěv v této etapě není.
+
 # Capability routing rules
 
 ## Úklid pracovních kopií — 2026-11-16

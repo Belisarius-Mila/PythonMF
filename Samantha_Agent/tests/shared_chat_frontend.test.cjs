@@ -22,6 +22,13 @@ function client(storage=store(),tabStorage=store()){
   await host.setup('create','Mint');await host.pair();
   await phone.setup('join','iPhone',host.state.pair_code);
   assert.equal(phone.state.room_id,host.state.room_id);
+  await host.librarySearch('recepty');await phone.refresh();
+  assert.equal(phone.state.library.items.length,1);
+  const recipe=phone.state.library.items[0].id;
+  await phone.libraryOpen(recipe);await host.refresh();
+  assert.equal(host.state.library.selected_id,recipe);
+  const detail=await host.libraryDetail(recipe);assert.match(detail.text,/Syntetický recept/);
+  assert.equal(sendCalls,0,'library search/open/read must not send a question');
   await phone.claim();phone.setText('Otázka namluvená na telefonu');await phone.flush();
   await host.refresh();assert.equal(host.text,'Otázka namluvená na telefonu');assert.equal(host.state.draft.can_edit,false);
   // Continuous input must reach the real second HTTP client before dictation ends.

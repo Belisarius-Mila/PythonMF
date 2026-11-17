@@ -12,6 +12,24 @@ from app.capabilities.models import (
 
 CAPABILITIES: tuple[CapabilityRecord, ...] = (
     CapabilityRecord(
+        capability_id="shared_chat_library_context", label="Prepare local library evidence for the original Samantha question",
+        risk=RiskLevel.READ_ONLY, reads=("explicit original question and prior room-scoped library results", "canonical stored library sources"), writes=(),
+        tool="app.shared_chat_library.LibraryReader.prepare", audit=AuditPolicy.REDACTED,
+        notes="Deterministic retrieval and numbered references; original send enriches one existing model turn. Context limits and missing texts are explicit. No independent model call or archive mutation.",
+    ),
+    CapabilityRecord(
+        capability_id="shared_chat_library_search", label="Read matching books, articles, recipes and places for Samantha",
+        risk=RiskLevel.READ_ONLY, reads=("canonical private library metadata and stored text",), writes=(),
+        tool="app.shared_chat_library.LibraryReader.search", audit=AuditPolicy.REDACTED,
+        notes="Server-owned archive root; local accent-tolerant keyword retrieval over the whole catalog. No model, network, archive writes or visit inference.",
+    ),
+    CapabilityRecord(
+        capability_id="shared_chat_library_detail", label="Read a result's stored text in an authenticated paired conversation",
+        risk=RiskLevel.READ_ONLY, reads=("one result of the authenticated room and exact stored text pages",), writes=(),
+        tool="app.shared_chat.SharedChat.library_detail", audit=AuditPolicy.REDACTED,
+        notes="Room-scoped IDs, contained paths, text fingerprint between pages; no browser-provided roots or source URL fetches.",
+    ),
+    CapabilityRecord(
         capability_id="shared_chat_status", label="Read an explicitly paired operating conversation",
         risk=RiskLevel.READ_ONLY, reads=("authenticated conversation and shared draft",), writes=(),
         tool="app.cockpit_shared_chat.shared_chat_status", audit=AuditPolicy.REDACTED,
@@ -23,7 +41,7 @@ CAPABILITIES: tuple[CapabilityRecord, ...] = (
         writes=("private operating conversation, device pairing and original message receipt",),
         tool="app.cockpit_shared_chat.shared_chat_action", audit=AuditPolicy.REDACTED,
         metadata={"durable_consent": "trusted_external_generation_v1"},
-        notes="Only explicit send starts a model turn, using the existing human-chat model. Draft edits, pairing, GET and reconnect do not call the model. No library/calendar/browser actions in package one; no development-profile mutation or automatic resend.",
+        notes="Only explicit send starts a model turn, using the existing human-chat model. Library search/open shares a read-only result view; relevant stored sources enrich the same original turn. Drafts, pairing, GET and library buttons never call a model. No library saves/calendar/browser control, profile mutation or automatic resend.",
     ),
     CapabilityRecord(
         capability_id="science_news_translation_budget_preview", label="Preview one study's exact translation budget",

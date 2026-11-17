@@ -56,7 +56,7 @@ SOURCES = {
                  "memory/technical/calendar_all_day_boundaries.md"),
     "library": ("app/book_*.py", "app/library_*.py", "app/cockpit_book_*.py", "app/article_archive.py",
                 "app/frontend/cockpit/library_*.js", "tests/book_*.test.cjs"),
-    "shared_chat": ("app/shared_chat.py", "app/shared_chat_runtime.py", "app/cockpit_shared_chat.py",
+    "shared_chat": ("app/shared_chat.py", "app/shared_chat_runtime.py", "app/shared_chat_library.py", "app/cockpit_shared_chat.py",
                     "app/frontend/samantha_chat/*", "tests/shared_chat_*.test.cjs"),
     "frontend": ("app/frontend/cockpit/styles.css", "app/frontend/cockpit/service-worker.js"),
     "email_followups": ("app/email/followup*.py", "app/cockpit_email_followups.py",

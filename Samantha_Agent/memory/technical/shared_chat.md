@@ -1,5 +1,41 @@
 # Společný provozní rozhovor Samanthy
 
+## 2026-11-17 21:11 CET — Samantha, čtecí Knihovna jako první část druhého balíčku
+
+Hotovo: Míla nyní potvrzuje, že propojení iPhone–Mint celkem funguje, a zadal
+pokračování. Samantha místně dostala hledání knih, článků, receptů a míst nad
+celým kanonickým katalogem, sdílené výsledkové karty a čtečku uloženého textu.
+Telefon může otevřít výsledek a monitor uvidí stejnou položku. Přirozené odkazy
+„Otevři druhý“/„Otevři ten recept“ používají předchozí výsledky; nejasný výběr
+se přizná. Na monitoru lze hledání a výběr kdykoli doladit ručně.
+Rozhodnutí: Čtecí část uloženého druhého balíčku (krok4). Míla vývoj schválil;
+nové p+n tím nezadal. Používá stejnou Knihovnu a stávající model/App Server,
+bez nové modelové role, placeného hlasu nebo druhého modelového průchodu.
+Server připojí dohledané zdroje k jediné původní otázce; zobrazovaný user_text
+zůstává původní. Reconnect, polling a knihovní tlačítka model nevolají.
+Další krok: Po samostatném p+n fyzicky přejmout dotaz z iPhonu, výsledky
+na Mintu, hlasové otevření konkrétní položky a ruční otevření v čtečce.
+Navrhované další kroky: Potom krok5 — potvrzené ukládání z rozhovoru a evidence
+Navštíveno/Chceme navštívit/Tip/Neurčeno. Kalendář a webové rozšíření jsou dál.
+Technický důkaz:33 cílených Python kontrol PASS včetně dvou skutečných HTTP/JS
+klientů a3 nových JS případů čtečky (pozdní odpověď, stránkování/retry, URL).
+Skutečný čtecí audit:145 položek,3 dotazy lokálně0,04–0,21s,0 zápisů/modelových
+volání. Testy zahrnují školní i skutečný tvar Konspektových skupin, nové položky,
+poškozený katalog, cestu/symlink mimo archiv, cizí room, CAS výběru a jediný send.
+Safari CUA opakovaně odmítlo ovládání při změně aktivního okna; žádná nativní
+vizuální přejímka se netvrdí. Vlastní syntetický server ukončený, původní okno
+zachované. Fyzický Mint/iPhone a skutečná modelová odpověď nového kroku čekají.
+Meze: Lokální vyhledávání je podle slov a prefixů s tolerancí diakritiky,
+nejvýše12 karet; nejde o sémantický index. Knihy poskytují uloženou anotaci/
+poznámky, ne automaticky plnou knihu. Uložený text lze číst celý po20000 znacích
+s kontrolním otiskem; model dostává omezené výňatky3500 znaků nebo otevřený
+text do120000 znaků a pravdivé text_truncated. Katalog/textový cache je jen RAM.
+Citlivý obsah/podklady zůstávají mimo Git. Žádné uložení do archivu, inference
+návštěv, kalendářový zápis nebo řízení webové záložky.
+Finální doménová brána, head a stav: private shared_chat_library_20261117/
+completion.json; targeted_tests.log, live_readonly.json a safari_verification.json.
+
+
 ## 2026-11-17 — Průběžný diktát a stálý vstup iPhone–Mint
 
 Hotovo: Diktát se průběžně ukládá nejvýše jedním požadavkem;150ms časovač

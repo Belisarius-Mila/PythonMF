@@ -21,6 +21,10 @@ class SharedChatHTTPTests(unittest.TestCase):
         temp=tempfile.TemporaryDirectory();self.addCleanup(temp.cleanup)
         self.root=Path(temp.name)/'shared';self.tasks=[];ChatModel.instances=[];ChatModel.fail_send=False
         self.service=SharedChat(self.root,hub_factory=fixture_hub,launcher=self.tasks.append)
+        from app.shared_chat_library import LibraryReader
+        from tests.test_shared_chat_library import library_fixture
+        self.library_items=library_fixture(self.root.parent/'library')
+        self.service.library_reader=LibraryReader(self.root.parent/'library')
         patched=patch('app.cockpit_shared_chat.CHAT',self.service);patched.start();self.addCleanup(patched.stop)
         self.server=ThreadingHTTPServer(('127.0.0.1',0),cockpit.CockpitServer().make_handler())
         self.thread=threading.Thread(target=self.server.serve_forever,daemon=True);self.thread.start();self.addCleanup(self.stop)
@@ -86,6 +90,26 @@ class SharedChatHTTPTests(unittest.TestCase):
             capture_output=True,text=True,timeout=30,check=False)
         self.assertEqual(result.returncode,0,result.stdout+result.stderr)
         self.assertEqual(sum(c.sent for c in ChatModel.instances),2)
+
+    def test_library_reader_is_authenticated_scoped_paged_and_does_not_start_a_turn(self):
+        host=self.create();token=host['client_token'];editor='http-editor-001'
+        found=self.service.execute({'action':'library_search','client_token':token,'editor_id':editor,
+            'expected_library_revision':0,'query':'studie'})
+        study=self.library_items[-1]['id'];url='/api/samantha-chat/library/item?id='+study
+        code,body=self.request(url,token=token);self.assertEqual(code,200)
+        first=json.loads(body);self.assertTrue(first['more']);self.assertEqual(first['offset'],0)
+        code,body=self.request(url+'&offset='+str(first['next_offset'])+'&sha256='+first['sha256'],token=token)
+        self.assertEqual(code,200);self.assertEqual(json.loads(body)['offset'],first['next_offset'])
+        self.assertEqual(self.request(url)[0],400)
+        self.assertEqual(self.request(url+'&offset=20000',token=token)[0],400)
+        self.assertEqual(self.request(url+'&root=/private',token=token)[0],400)
+        self.assertEqual(self.request('/api/samantha-chat/library/item?id='+self.library_items[0]['id'],token=token)[0],400)
+        self.assertEqual(self.tasks,[]);self.assertEqual(ChatModel.instances,[])
+
+    def test_library_frontend_stale_reads_source_links_and_paging(self):
+        result=subprocess.run([node_binary(),'--test',str(Path(__file__).with_name('shared_chat_library.test.cjs'))],
+            capture_output=True,text=True,timeout=15,check=False)
+        self.assertEqual(result.returncode,0,result.stdout+result.stderr)
 
 
 if __name__=='__main__':unittest.main()

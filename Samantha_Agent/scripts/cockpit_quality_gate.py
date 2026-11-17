@@ -378,6 +378,7 @@ SHELL_PATHS = (
 TEST_MODULES = (
     "tests.test_shared_chat",
     "tests.test_shared_chat_runtime",
+    "tests.test_shared_chat_library",
     "tests.test_shared_chat_http",
     "tests.test_vocabulary_authoring",
     "tests.test_vocabularyfr_content",
