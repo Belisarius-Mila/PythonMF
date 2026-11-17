@@ -1,12 +1,13 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
-- Aktualizováno: 2026-11-16 20:40 CET
-- Místně zařazeno599 nových významových karet LEDA, celkem1096 aktivních v18 původních tématech. Obrázky, vlastní IT/CZ věty, rody/slovní druhy, slabiky i procvičování jsou kompletní.
-- Zvuk:4222 ověřených a plně dekódovaných MP3,4384 reference pro1096 karet. Všech1907 původních MP3 je bajtově zachovaných; doplněno2315. Původních497 katalogových a spelling záznamů, CSV471/mapping/vstupní manifest i osobní profily zachované.
-- Schválený jediný Azure běh dokončen: 2258 unikátních požadavků, 108567 rezervovaných SSML znaků, odhad API 1.62851 USD bez daně při15 USD/1M, pod schváleným limitem2 USD. Elsa/Vlasta -10%; přesné starší nahrávky znovu použité. Nejde o výpis faktury.
-- Účtenky a úplné důkazy pouze private/vocabulary_it_leda_20261116: azure_generation_receipt.json, complete_audio_verification.json, apply_receipt.json a finální validační log/otisky. Žádný další placený požadavek ani retry nyní není potřeba.
-- Zpracovaný TXT obsahuje jen viditelné části lekcí3–8,708 řádků; podklad lekcí1–2 chybí. Nové p+n nebylo zadáno. Místní ověření není veřejné nasazení ani přijetí na Mílově zařízení.
+- Aktualizováno: 2026-11-17 13:26 CET.
+- Místně obrazové kontexty všech1096 italských vět:1963 vazeb,1–5 různých existujících obrázků na větu, IT popisky nad IT větou a CZ překladem.448 vět má1 obraz,459 má2,161 má3,26 má4 a2 mají5.
+- Přenesena EN smyčka Slovíčka / Věta + slovíčko, IT hlas, pause/resume/stop a pauzy1/2/4/6 s po ended. Ve slovní fázi se obnoví velká cílová karta. Zachované IT psaní/hra s vlastním fresh přehráním.
+- Všechny věty významově kontrolované, včetně homografů, reflexiv a idiomů. Žádná online inference, nová média ani placené TTS. Původní1096 karet/18 témat/4222 MP3, CSV471, katalog, obrazy a profily zachované.
+-5 nových Python kontrol PASS,56 skutečných JS scénářů PASS (11 nových). Safari Mac skutečně ukázalo gonna/nero/camicia/bianco + celou IT/CZ větu, pak velkou gonna/sukně kartu; pause/resume/gap/stop ověřeno. Fyzický telefon/akustická přejímka Mílou otevřené.
+- Jeden lokální commit tohoto kroku; přesný finální head, programovou bránu a shodu zdrojů určuje private/vocabulary_it_sentence_pictures_20261117/completion.json. Tento nový krok není pushnutý/nasazený.
+- Další: po uzavření IT commitu navázat FR pro Janu podle TXT v Downloads a schváleného výběru464 karet. P+n samostatně; dříve delegovanou publikaci Willovi neopakovat.
 <!-- SAMANTHA_CURRENT_STATUS_END -->
 
 # TVBCP: Vocabulary IT
@@ -572,3 +573,40 @@ Technický důkaz:
 - Všech4222 MP3 prošlo úplným FFmpeg dekódováním a SHA kontrolou;1907 původních souborů je přesně shodných. Azure 2258 požadavků/108567 znaků, odhad 1.62851 USD bez daně, žádný nejistý placený výsledek ani automatický retry.
 - Uzavřený zdrojový audit1096 karet/659 pinů/657 různých obrazů,1314 webových assetů. Každá karta umí platnou čtveřici v celém výběru. Integrační a UI testy i programem vybraná validation-v3 brána jsou doložené ve finálních privátních účtenkách.
 - Programem vybraná brána168 PASS; Safari na samostatném localhost původu:1096 karet, Posledních20, palazzo/věta/návrat, musica classica včetně správného obrázku, neúplného psaní, nápovědy, dokončení a Další. Testovací okno/server zavřené; produkční profily a Mílova přejímka nedotčené.
+
+
+### 2026-11-17 13:26 CET — Obrazové kontexty všech italských vět a kontinuální smyčka
+
+Hotovo:
+Všech1096 vět má připravené1–5 obrazových pojmů, celkem1963 vazeb na1091
+různých existujících významových karet. Věta + slovíčko ukáže IT popisky,
+IT větu a CZ překlad; po dočtení/pauze ji nahradí velká slovní karta/IT/CZ
+a přečte celé slovo. Slovíčka opakují jen cílová hesla. Pauza, pokračování,
+ukončení a1/2/4/6 s mezery. Původní hra a psaní jsou zachované.
+
+Rozhodnutí:
+Míla zadal nejprve doplnit italštinu, u každé věty nejvýše5 obrázků, udělat
+jeden commit a potom pokračovat FR. Základ je hotové EN řešení; žádná další
+výroba obrazu/zvuku. Filtry vybírají cílové věty, kontextové obrazy mohou být
+z celého slovníku. Krátké věty mají jen tolik pojmů, kolik skutečně obsahují.
+
+Další krok:
+Po jediném ověřeném lokálním commitu navázat FR podle analýzy v Downloads
+s aktualizovaným oddílem13 (464 karet po vynechání5 shodných dvojic).
+
+Navrhované další kroky:
+- Samostatné IT p+n/integrace; publikace zůstává oddělená od tohoto vývoje.
+- Mílova přejímka na používaném zařízení.
+- Chybějící podklad LEDA1–2 zůstává dříve odložený obsahový úkol.
+
+Technický důkaz:
+5 nových Python kontrol: úplnost/přesný export, drift/unknown/retired/pořadí/
+podřetězce, homografy/elize, UTF16/změna pořadí a bezpečné obrazové cesty.
+56 skutečných JS scénářů prošlo včetně11 nových loop/context regresí.
+Safari Mac potvrdilo4 kontexty gonna/nero/camicia/bianco nad IT/CZ větou,
+velkou gonna/sukně kartu po dočtení, pauzu/pokračování/změnu mezery/ukončení.
+Samostatné localhost okno a server zavřené, původní okno zachované.
+Finální programově vybranou validation-v3 bránu a přesné zdroje po commitu
+určuje private/vocabulary_it_sentence_pictures_20261117/completion.json.
+Původní CSV471, katalog1096, audio manifesty/4222MP3, všechna média, EN/FR
+a profily beze změny; žádné publish/restart/release submit/modelový TTS tah.

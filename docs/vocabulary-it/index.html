@@ -58,9 +58,17 @@
 
     <section id="studyView" class="study-view" aria-label="Učení slovíčka" hidden>
       <header class="study-header"><button id="backButton" type="button">← Zpět na přehled</button><p id="studyPosition" tabindex="-1"></p><div class="study-controls"><div class="segmented" aria-label="Co procvičovat"><button data-practice="words" type="button" aria-pressed="true">Slovíčko</button><button data-practice="sentences" type="button" aria-pressed="false">Věta</button></div><div class="segmented direction-switch" aria-label="Směr procvičování"><button data-direction="czToIt" type="button" aria-pressed="true">CZ → IT</button><button data-direction="itToCz" type="button" aria-pressed="false">IT → CZ</button></div></div></header>
+      <div class="study-loop-toolbar" role="group" aria-label="Kontinuální procvičování">
+        <label>Smyčka<select id="studyLoopMode"><option value="words">Slovíčka</option><option value="sentence-word">Věta + slovíčko</option></select></label>
+        <label>Pauza po dočtení<select id="studyLoopGap"><option value="1000">1 sekunda</option><option value="2000" selected>2 sekundy</option><option value="4000">4 sekundy</option><option value="6000">6 sekund</option></select></label>
+        <button id="studyLoopToggle" type="button" class="primary">▶ Spustit smyčku</button>
+        <button id="studyLoopStop" type="button" hidden>Ukončit smyčku</button>
+      </div>
+      <p id="studyLoopStatus" class="meta" role="status" aria-live="polite">Smyčka opakuje aktuální výběr italsky, český překlad zůstává na obrazovce.</p>
       <div class="card-layout">
+        <div id="sentencePictures" class="sentence-pictures" aria-label="Obrázky k větě" hidden></div>
         <div class="picture-panel"><div class="picture-wrap"><img id="wordImage" alt="" hidden><span id="pictureFallback" hidden>Obrázek se nepodařilo načíst.</span></div><button id="speakPromptButton" type="button" class="audio-button">♪ Přehrát zadání</button></div>
-        <article class="study-panel"><p id="promptLabel" class="eyebrow">Řekni italsky</p><h2 id="promptText">…</h2><p id="wordGender" class="word-gender" hidden></p>
+        <article class="study-panel"><p id="promptLabel" class="eyebrow">Řekni italsky</p><h2 id="promptText">…</h2><p id="studyLoopTranslation" class="loop-translation" lang="cs" hidden></p><p id="wordGender" class="word-gender" hidden></p>
           <p id="messageStrip" class="study-message" role="status" aria-live="polite">Nejdřív si odpověď zkus říct.</p>
           <button id="revealButton" type="button" class="primary">Ukázat odpověď</button>
           <div id="answerCard" class="answer-card hidden"><dl class="answer-pair"><div><dt>Italsky</dt><dd id="answerIt" lang="it"></dd></div><div><dt>Česky</dt><dd id="answerCz" lang="cs"></dd></div></dl><div id="sentenceBox"><p id="sentenceIt" lang="it"></p><p id="sentenceCz" class="translation" lang="cs"></p></div><button id="speakAnswerButton" type="button">♪ Přehrát odpověď</button></div>
