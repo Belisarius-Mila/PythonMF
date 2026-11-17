@@ -96,7 +96,28 @@
       language: available ? (english ? "en" : "cs") : "cs", available,
     };
   }
-  const api = {normalize,key,select,buckets,ordered,shuffle,restoreSequence,audioRecord,sentenceAudioRecord,studyPrompt,posLabels,levelLabels,countLabel,groupInfo,isActive,teachingType,teachingTypeLabels,recentCount,latestIds};
+  function sentencePictures(item, manifest, items=[]) {
+    if (manifest?.schemaVersion!==1 || manifest.language!=="en" || manifest.kind!=="sentence-pictures" || manifest.maxPictures!==5) return [];
+    const record=manifest.entries?.[item?.uid];
+    if (!record || record.reviewed!==true || record.sourceEn!==item.en || record.sourceCz!==item.cz
+        || record.sourceSentenceEn!==item.sentenceEn || record.sourceSentenceCz!==item.sentenceCz
+        || typeof item.sentenceEn!=="string" || !Array.isArray(items) || !Array.isArray(record.concepts) || !record.concepts.length || record.concepts.length>5) return [];
+    const known=new Map(items.filter(isActive).map(entry=>[key(entry),entry])), seen=new Set(), images=new Set(), result=[];
+    let end=-1;
+    for (const ref of record.concepts) {
+      const concept=known.get(ref?.uid);
+      if (!concept || concept.en!==ref.sourceEn || concept.cz!==ref.sourceCz || typeof concept.image!=="string" || !concept.image || typeof concept.thumbnail!=="string" || !concept.thumbnail
+          || seen.has(ref.uid) || images.has(concept.image) || typeof ref.text!=="string" || !ref.text.trim()
+          || !Number.isInteger(ref.start) || !Number.isInteger(ref.end) || ref.start<0 || ref.start<end
+          || ref.end<=ref.start || ref.end>item.sentenceEn.length || item.sentenceEn.slice(ref.start,ref.end)!==ref.text) return [];
+      const boundary=/[\p{L}\p{N}_’']/u;
+      if (boundary.test(item.sentenceEn[ref.start-1] || "") || boundary.test(item.sentenceEn[ref.end] || "")) return [];
+      seen.add(ref.uid);images.add(concept.image);end=ref.end;
+      result.push({item:concept,text:ref.text,start:ref.start,end:ref.end});
+    }
+    return result;
+  }
+  const api = {normalize,key,select,buckets,ordered,shuffle,restoreSequence,audioRecord,sentenceAudioRecord,studyPrompt,sentencePictures,posLabels,levelLabels,countLabel,groupInfo,isActive,teachingType,teachingTypeLabels,recentCount,latestIds};
   if (typeof module !== "undefined" && module.exports) module.exports=api;
   else root.VocabularyModel=api;
 })(globalThis);

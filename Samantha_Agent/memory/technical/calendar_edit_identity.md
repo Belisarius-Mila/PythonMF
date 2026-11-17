@@ -50,3 +50,7 @@ private calendar_home_edit_20261117/completion.json; úspěch se netvrdí bez PA
 Po samostatně schváleném p+n zvolit v UI Povolit úpravy na Macu, které sestaví
 nový podpis/helper; macOS může chtít grant. Pak pouze Mílou zvolená fyzická
 úprava a ověření. Živý podpis/grant nejsou součástí tohoto vývojového kroku.
+
+Přejímka 2026-11-17 12:40 CET: Míla po pokynu k nastavení Macu výslovně potvrdil,
+že úprava funguje. Kód je vydaný v b2b6710b; dřívější otevřený další krok výše
+je tím pro tuto konkrétní chybu uzavřený. Žádný další zápis neprovedl Adam.

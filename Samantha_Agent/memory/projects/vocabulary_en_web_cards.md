@@ -1,8 +1,11 @@
 # VocabularyEN web: obrazové kartičky pro opakování slovíček
 
-Aktuální krok 2026-11-17 09:15 CET: místně kontinuální smyčka Slovíčka / Věta + slovíčko,
-EN hlas a text + český překlad, pausa a ovládání; p+n tohoto kroku nezadané.
-Kanonický handoff project-vocabulary-en.md a report vocabulary_en_continuous_20261117.md.
+Aktuální krok 2026-11-17 11:00 CET: místně pilot20 obrazových vět,51 vazeb na35
+existujících karet. Max5 EN popisků nad EN/CZ větou v kontinuální smyčce,
+potom původní velká slovní karta. Bez nových médií a změn A–D. Safari Mac
+ověřeno; finální brána/checkpoint v private completion.json. P+n a servis
+Cockpitu Míla nyní nechal Willovi, zde žádný release/restart/retry.
+Kanonický handoff project-vocabulary-en.md a report vocabulary_en_sentence_pictures_20261117.md.
 
 
 
@@ -1673,3 +1676,28 @@ Technický důkaz:
 - Safari Mac na samostatném localhost původu ověřilo automatické cat→další karty, větu a slovo dog s oběma překlady, pause/stop a návrat ke crocodile v galerii42 karet. Původní produkční okno park zůstalo beze změny, vlastní okno a server zavřené. Telefon a Mílova akustická přejímka zůstávají otevřené.
 - Finální programem vybraná validation-v3 brána, finální zdrojové otisky a checkpoint jsou pouze v private/vocabulary_en_continuous_20261117/completion.json. Bez push/deploy. Zdrojový základ7278e110.
 - Finální funkční kandidát prošel programovou bránou115 PASS (validation-v3), včetně všech80 JS scénářů galerie a samostatných kontrol profilů. Dodatečný zápis důkazu projde dokumentační bránou; přesnou shodu zdrojů po commitu doloží completion.json.
+
+## 2026-11-17 12:40 CET — Will přebírá obrazový pilot k úplnému p+n
+
+Hotovo: Zdrojový c6bb0cd4 přenesen do aktuálního main bez opakování již
+vydaného kontinuálního režimu.20 vět,51 vazeb na35 existujících karet, nejvýše5
+obrázků. Funkční soubory přesně odpovídají Datovu kandidátu; konflikt pouze
+v indexu paměti řešen zachováním novějšího stavu Cockpitu a vydané IT dávky.
+Rozhodnutí: Míla po upozornění na dosud nezačleněný commit požaduje pokračování
+svého zadání všech commitů p+n. Cíl tohoto kroku je pouze Vocabulary EN Pages.
+Další krok: Programová integrační brána, jeden lokální commit a jediné
+registrované submit_release(wait=True); výsledek a přesný vydaný head v
+private vocabulary_en_sentence_pictures_release_20261117/completion.json.
+Navrhované další kroky: Mílova obsahová/akustická a telefonní přejímka20 vět;
+rozšiřování map nebo přenos do IT až samostatně.
+Technický důkaz: Datových161 funkčních a67 dokumentových PASS, zdrojový
+manifest16 souborů a Safari přejímka jsou v původní completion.json.
+Integrovaný konečný důkaz se ověří novou programovou bránou; předání samo
+není tvrzením o publikaci. Nevyrábějí se nové obrázky ani zvuk. Data worktree
+zůstává samostatný. Nový EN TVBCP nevzniká, zápis v dosavadním obecném TVBCP.
+
+Předchozí b2b6710b je již veřejně vydaný: Cockpit2ce5f930 a EN Pages10ca9475
+completed, deployment7849830522/workflow44059746822,7/7 veřejných souborů
+bajtově ověřených. Původní attention účtenky0d4eb5c/71944b17 se neopakují.
+Skutečný aktuální stav dokládá private combined_release_20261117/completion.json;
+starší odstavce o nejistém vydání níže jsou historické.

@@ -1,51 +1,79 @@
+## 2026-11-17 12:40 CET — Will přebírá obrazový pilot k úplnému p+n
+
+Hotovo: Zdrojový c6bb0cd4 přenesen do aktuálního main bez opakování již
+vydaného kontinuálního režimu.20 vět,51 vazeb na35 existujících karet, nejvýše5
+obrázků. Funkční soubory přesně odpovídají Datovu kandidátu; konflikt pouze
+v indexu paměti řešen zachováním novějšího stavu Cockpitu a vydané IT dávky.
+Rozhodnutí: Míla po upozornění na dosud nezačleněný commit požaduje pokračování
+svého zadání všech commitů p+n. Cíl tohoto kroku je pouze Vocabulary EN Pages.
+Další krok: Programová integrační brána, jeden lokální commit a jediné
+registrované submit_release(wait=True); výsledek a přesný vydaný head v
+private vocabulary_en_sentence_pictures_release_20261117/completion.json.
+Navrhované další kroky: Mílova obsahová/akustická a telefonní přejímka20 vět;
+rozšiřování map nebo přenos do IT až samostatně.
+Technický důkaz: Datových161 funkčních a67 dokumentových PASS, zdrojový
+manifest16 souborů a Safari přejímka jsou v původní completion.json.
+Integrovaný konečný důkaz se ověří novou programovou bránou; předání samo
+není tvrzením o publikaci. Nevyrábějí se nové obrázky ani zvuk. Data worktree
+zůstává samostatný. Nový EN TVBCP nevzniká, zápis v dosavadním obecném TVBCP.
+
+Předchozí b2b6710b je již veřejně vydaný: Cockpit2ce5f930 a EN Pages10ca9475
+completed, deployment7849830522/workflow44059746822,7/7 veřejných souborů
+bajtově ověřených. Původní attention účtenky0d4eb5c/71944b17 se neopakují.
+Skutečný aktuální stav dokládá private combined_release_20261117/completion.json;
+starší odstavce o nejistém vydání níže jsou historické.
+
 # Handoff pracovního proudu: Vocabulary EN
 
 Nazev: Vocabulary EN
 Pracovni proud: project-vocabulary-en
 Typ: Project
 Priorita: 2
-Stav: kontinuální režim hotový místně, finální důkaz v completion.json
+Stav: obrazový pilot20 vět hotový místně, finální důkaz v completion.json
 Pripomenout pri startu: ano
-Datum: 2026-11-17 09:15 CET
+Datum: 2026-11-17 11:00 CET
 
 Co se resilo:
-Mílův nový kontinuální režim v učení, nejprve Vocabulary EN.
+Mílou schválené obrazové pojmy nad větou v kontinuální smyčce Věta + slovíčko.
 
 Co je hotove:
-- Smyčka Slovíčka a Věta + slovíčko, vždy EN text/hlas a český překlad; po konci výběru znovu první karta.
-- Přesná současná posloupnost/filtry včetně A–D, obtížných, témat a posledních N. Náhodné pořadí pouze po dřívější výslovné volbě.
-- Spustit/Pozastavit/Pokračovat/Ukončit, mezera1/2/4/6 sekund až po skutečném ended. Chyba zvuku smyčku pozastaví, nepřeskočí kartu potichu. Zrušení všech pozdních callbacků při opuštění/změně profilu, bez autostartu po obnově.
-- Filtrovaný přímý odkaz se vrací do odpovídající galerie a k naposledy přehrávané miniatuře. Ruční učení i hra zachované.
-- Safari místně ověřeno,12 nových JS regresí. Konkrétní finální bránu a checkpoint ověř podle privátní completion.json.
-- Stávající522 UID/512 aktivních,18 témat, veškeré nahrávky/obrazy, A–D/PIN a IT jsou beze změny.
+-20 ručně revidovaných vět,51 vazeb na35 existujících karet, max5 obrázků s EN názvy nad EN/CZ větou. Po dočtení a pauze se obnoví velká cílová karta/EN/CZ a přečte slovo.
+- Trvalé významové UID, přesné znění věty a významu, správné open/help i inflexe. Bez online inference a nových médií. Kontrola exportu --check v build_sentence_pictures.py, pravidlo v GALLERY_AUTHORING.txt.
+- Kontexty z celého slovníku i mimo A–D; filtry stále určují cílové karty. Osobní zásoba/PIN/obtížná se nemění. Ruční věta zachovává skrytou odpověď.
+- Výpadek obrázku/metadata nezastaví zvuk. Pozdní callback nemění novou fázi. Přednačtení náhledů aktuální+další věty omezené na10.
+-6 nových Python a9 nových JS scénářů PASS. Safari skutečně ukázalo5 pojmů a pak velkou bird/pták kartu. Finální bránu/otisky/checkpoint určuje private/vocabulary_en_sentence_pictures_20261117/completion.json.
+-522 UID/512 aktivních,18 témat, slova/věty, oba audio manifesty, assety a IT zachované.
 
 Co neni hotove:
-Nový krok nebyl pushnutý ani nasazený; nové p+n nebylo zadáno. Fyzický telefon,
-Mílova akustická přejímka a přenos do dalších jazyků zůstávají samostatné.
+492 ostatních aktivních vět nemá novou mapu; používají původní obraz. Fyzický
+telefon a Mílova akustická/obsahová přejímka pilotu zůstávají otevřené.
+Nový pilot není tímto vývojem pushnutý ani publikovaný.
 
 Dalsi krok:
-Na samostatný pokyn provést registrované p+n pro project-vocabulary-en.
-Novou výrobu zvuku nespouštět; tento krok používá pouze již uložená média.
+Willova integrace/vydání a poté Mílova přejímka20 vět. Nespouštět p+n zde.
 
 Navrhovane dalsi kroky:
-- Mílova přejímka tempa/smyčky po vydání.
-- Další jazyk až na samostatný pokyn.
-- Oxford a rozlišitelnost abstraktních obrázků zůstávají oddělené obsahové úkoly.
+- Rozšířit mapy po přejímce pilotu.
+- Port do IT až po samostatném zadání.
+- Oxford/abstraktní ilustrace zůstávají oddělené úkoly.
 
 Zmenene nebo relevantni soubory:
-docs/vocabulary-en/gallery.js, gallery.css, index.html;
-tests/test_vocabularyen_selection.js; projects/vocabulary_en_web_cards.md;
-reports/vocabulary_en_continuous_20261117.md. Stávající obecný TVBCP záznam v
-architektura_komunikace_samantha.txt, nový projektový TVBCP nebyl dohodnutý.
+VocabularyEN/build_sentence_pictures.py, vocabulary_en_sentence_pictures.json,
+GALLERY_AUTHORING.txt; docs/data/vocabulary-en-sentence-pictures.json;
+docs/vocabulary-en/gallery.js, model.js, gallery.css, index.html;
+tests/test_vocabularyen_gallery.py, test_vocabularyen_selection.js;
+reports/vocabulary_en_sentence_pictures_20261117.md. Projektová paměť/index/
+ACTIVE a stávající architektura_komunikace_samantha.txt dorovnané.
+Nový samostatný projektový TVBCP není dohodnutý.
 
 Bezpecnost / neukladat:
-Používá se stálý Audio element odemknutý výslovným kliknutím, pro každý úsek
-nový src/load, generační rušení,90s watchdog. Žádná obnova smyčky z URL/úložiště.
-Nahrávky, profily a PIN se nečetly/měnily v produkčním prohlížeči.
-Soukromé důkazy private/vocabulary_en_continuous_20261117, zdroj7278e110.
-Pracovat ve stávajícím Data ebbd worktree; nespojovat svévolně Willův main.
-Starší vydání77b5f652 a jeho attention účtenku neopakovat. Tento nový krok je
-samostatný místní obsah; nevytváří nové audio ani runtime službu.
+Pracovat ve stálém Data ebbd worktree nad2d7e34a6. Willův main neupravovat.
+Předchozí kontinuální režim byl integrovaný na main b2b6710b; jediné p+n
+job0d4eb5c10e0cbe94bbba96e31a06e551 skončilo attention, push uncertain,
+deployment not_started. Tehdejší nezávislý audit originu ukázal neprovedený push.
+Míla výslovně předal další p+n a servis pravidel Willovi. Žádný restart,
+retry ani nový release submit. Aktuální veřejný stav se zde neověřoval.
+Předchozí vydání77b5f652/attention rovněž neopakovat. Žádný nový TTS ani služba.
 
 ## Historie
 
@@ -1244,3 +1272,19 @@ Technický důkaz:
 - Safari Mac na samostatném localhost původu ověřilo automatické cat→další karty, větu a slovo dog s oběma překlady, pause/stop a návrat ke crocodile v galerii42 karet. Původní produkční okno park zůstalo beze změny, vlastní okno a server zavřené. Telefon a Mílova akustická přejímka zůstávají otevřené.
 - Finální programem vybraná validation-v3 brána, finální zdrojové otisky a checkpoint jsou pouze v private/vocabulary_en_continuous_20261117/completion.json. Bez push/deploy. Zdrojový základ7278e110.
 - Finální funkční kandidát prošel programovou bránou115 PASS (validation-v3), včetně všech80 JS scénářů galerie a samostatných kontrol profilů. Dodatečný zápis důkazu projde dokumentační bránou; přesnou shodu zdrojů po commitu doloží completion.json.
+
+
+### 2026-11-17 11:02 CET — Obrazový pilot ve větné fázi kontinuální smyčky
+
+Hotovo:20 revidovaných vět,51 vazeb na35 existujících obrazových významů,
+max5 miniatur s EN názvy nad EN větou/CZ překladem, poté velká slovní karta.
+Původní významy/média/profily/ruční věty zachované. Safari přechod ověřený.
+
+Rozhodnutí: Míla schválil pilot a offline metadata; p+n/pravidla nechal Willovi.
+
+Další krok: Willova integrace a vydání, pak Mílova přejímka pilotu.
+Navrhované další kroky: rozšíření pokrytí, IT samostatně.
+
+Technický důkaz:6 nových Python a9 JS regresí PASS; finální programovou bránu,
+zdroje a checkpoint potvrzuje private/vocabulary_en_sentence_pictures_20261117/completion.json.
+Zde bez release submit/restartu, origin ani veřejný stav se znovu neauditoval.

@@ -1,0 +1,648 @@
+{
+  "schemaVersion": 1,
+  "language": "en",
+  "kind": "sentence-pictures",
+  "maxPictures": 5,
+  "batch": "pilot-20261117",
+  "entries": {
+    "ven-0020": {
+      "sourceEn": "cat",
+      "sourceCz": "kočka",
+      "sourceSentenceEn": "The cat sleeps on the chair all afternoon.",
+      "sourceSentenceCz": "Kočka spí celé odpoledne na židli.",
+      "reviewed": true,
+      "concepts": [
+        {
+          "uid": "ven-0020",
+          "sourceEn": "cat",
+          "sourceCz": "kočka",
+          "text": "cat",
+          "occurrence": 1,
+          "start": 4,
+          "end": 7
+        },
+        {
+          "uid": "ven-0477",
+          "sourceEn": "sleep",
+          "sourceCz": "spát",
+          "text": "sleeps",
+          "occurrence": 1,
+          "start": 8,
+          "end": 14
+        },
+        {
+          "uid": "ven-0222",
+          "sourceEn": "chair",
+          "sourceCz": "židle",
+          "text": "chair",
+          "occurrence": 1,
+          "start": 22,
+          "end": 27
+        }
+      ]
+    },
+    "ven-0027": {
+      "sourceEn": "dog",
+      "sourceCz": "pes",
+      "sourceSentenceEn": "The dog waits by the door for a walk.",
+      "sourceSentenceCz": "Pes čeká u dveří na procházku.",
+      "reviewed": true,
+      "concepts": [
+        {
+          "uid": "ven-0027",
+          "sourceEn": "dog",
+          "sourceCz": "pes",
+          "text": "dog",
+          "occurrence": 1,
+          "start": 4,
+          "end": 7
+        },
+        {
+          "uid": "ven-0262",
+          "sourceEn": "wait",
+          "sourceCz": "počkat",
+          "text": "waits",
+          "occurrence": 1,
+          "start": 8,
+          "end": 13
+        },
+        {
+          "uid": "ven-0230",
+          "sourceEn": "door",
+          "sourceCz": "dveře",
+          "text": "door",
+          "occurrence": 1,
+          "start": 21,
+          "end": 25
+        }
+      ]
+    },
+    "ven-0211": {
+      "sourceEn": "tree",
+      "sourceCz": "strom",
+      "sourceSentenceEn": "A bird is building a nest in the tree.",
+      "sourceSentenceCz": "Pták si staví hnízdo na stromě.",
+      "reviewed": true,
+      "concepts": [
+        {
+          "uid": "ven-0008",
+          "sourceEn": "bird",
+          "sourceCz": "pták",
+          "text": "bird",
+          "occurrence": 1,
+          "start": 2,
+          "end": 6
+        },
+        {
+          "uid": "ven-0211",
+          "sourceEn": "tree",
+          "sourceCz": "strom",
+          "text": "tree",
+          "occurrence": 1,
+          "start": 33,
+          "end": 37
+        }
+      ]
+    },
+    "ven-0384": {
+      "sourceEn": "school",
+      "sourceCz": "škola",
+      "sourceSentenceEn": "I walk to school with my friend.",
+      "sourceSentenceCz": "Chodím do školy s kamarádem.",
+      "reviewed": true,
+      "concepts": [
+        {
+          "uid": "ven-0097",
+          "sourceEn": "walk",
+          "sourceCz": "chodit",
+          "text": "walk",
+          "occurrence": 1,
+          "start": 2,
+          "end": 6
+        },
+        {
+          "uid": "ven-0384",
+          "sourceEn": "school",
+          "sourceCz": "škola",
+          "text": "school",
+          "occurrence": 1,
+          "start": 10,
+          "end": 16
+        },
+        {
+          "uid": "ven-0045",
+          "sourceEn": "friend",
+          "sourceCz": "kamarád",
+          "text": "friend",
+          "occurrence": 1,
+          "start": 25,
+          "end": 31
+        }
+      ]
+    },
+    "ven-0117": {
+      "sourceEn": "apple",
+      "sourceCz": "jablko",
+      "sourceSentenceEn": "I eat an apple on my way to work.",
+      "sourceSentenceCz": "Cestou do práce sním jablko.",
+      "reviewed": true,
+      "concepts": [
+        {
+          "uid": "ven-0292",
+          "sourceEn": "eat",
+          "sourceCz": "jíst",
+          "text": "eat",
+          "occurrence": 1,
+          "start": 2,
+          "end": 5
+        },
+        {
+          "uid": "ven-0117",
+          "sourceEn": "apple",
+          "sourceCz": "jablko",
+          "text": "apple",
+          "occurrence": 1,
+          "start": 9,
+          "end": 14
+        }
+      ]
+    },
+    "ven-0074": {
+      "sourceEn": "mother",
+      "sourceCz": "matka",
+      "sourceSentenceEn": "My mother keeps old photos in a small box.",
+      "sourceSentenceCz": "Moje maminka schovává staré fotky v malé krabičce.",
+      "reviewed": true,
+      "concepts": [
+        {
+          "uid": "ven-0074",
+          "sourceEn": "mother",
+          "sourceCz": "matka",
+          "text": "mother",
+          "occurrence": 1,
+          "start": 3,
+          "end": 9
+        },
+        {
+          "uid": "ven-0079",
+          "sourceEn": "old",
+          "sourceCz": "starý",
+          "text": "old",
+          "occurrence": 1,
+          "start": 16,
+          "end": 19
+        },
+        {
+          "uid": "ven-0090",
+          "sourceEn": "small",
+          "sourceCz": "malý",
+          "text": "small",
+          "occurrence": 1,
+          "start": 32,
+          "end": 37
+        },
+        {
+          "uid": "ven-0012",
+          "sourceEn": "box",
+          "sourceCz": "krabice",
+          "text": "box",
+          "occurrence": 1,
+          "start": 38,
+          "end": 41
+        }
+      ]
+    },
+    "ven-0111": {
+      "sourceEn": "table",
+      "sourceCz": "stůl",
+      "sourceSentenceEn": "We ask for a table for two by the window.",
+      "sourceSentenceCz": "Požádáme o stůl pro dva u okna.",
+      "reviewed": true,
+      "concepts": [
+        {
+          "uid": "ven-0111",
+          "sourceEn": "table",
+          "sourceCz": "stůl",
+          "text": "table",
+          "occurrence": 1,
+          "start": 13,
+          "end": 18
+        },
+        {
+          "uid": "ven-0188",
+          "sourceEn": "two",
+          "sourceCz": "dva",
+          "text": "two",
+          "occurrence": 1,
+          "start": 23,
+          "end": 26
+        },
+        {
+          "uid": "ven-0233",
+          "sourceEn": "window",
+          "sourceCz": "okno",
+          "text": "window",
+          "occurrence": 1,
+          "start": 34,
+          "end": 40
+        }
+      ]
+    },
+    "ven-0233": {
+      "sourceEn": "window",
+      "sourceCz": "okno",
+      "sourceSentenceEn": "Open the window and let in fresh air.",
+      "sourceSentenceCz": "Otevři okno a pusť dovnitř čerstvý vzduch.",
+      "reviewed": true,
+      "concepts": [
+        {
+          "uid": "ven-0376",
+          "sourceEn": "open",
+          "sourceCz": "otevřít",
+          "text": "Open",
+          "occurrence": 1,
+          "start": 0,
+          "end": 4
+        },
+        {
+          "uid": "ven-0233",
+          "sourceEn": "window",
+          "sourceCz": "okno",
+          "text": "window",
+          "occurrence": 1,
+          "start": 9,
+          "end": 15
+        }
+      ]
+    },
+    "ven-0224": {
+      "sourceEn": "bread",
+      "sourceCz": "chleba",
+      "sourceSentenceEn": "We buy fresh bread in the morning.",
+      "sourceSentenceCz": "Ráno kupujeme čerstvý chleba.",
+      "reviewed": true,
+      "concepts": [
+        {
+          "uid": "ven-0224",
+          "sourceEn": "bread",
+          "sourceCz": "chleba",
+          "text": "bread",
+          "occurrence": 1,
+          "start": 13,
+          "end": 18
+        },
+        {
+          "uid": "ven-0465",
+          "sourceEn": "morning",
+          "sourceCz": "ráno",
+          "text": "morning",
+          "occurrence": 1,
+          "start": 26,
+          "end": 33
+        }
+      ]
+    },
+    "ven-0008": {
+      "sourceEn": "bird",
+      "sourceCz": "pták",
+      "sourceSentenceEn": "A small bird sings on the window in the morning.",
+      "sourceSentenceCz": "Ráno zpívá na okně malý pták.",
+      "reviewed": true,
+      "concepts": [
+        {
+          "uid": "ven-0090",
+          "sourceEn": "small",
+          "sourceCz": "malý",
+          "text": "small",
+          "occurrence": 1,
+          "start": 2,
+          "end": 7
+        },
+        {
+          "uid": "ven-0008",
+          "sourceEn": "bird",
+          "sourceCz": "pták",
+          "text": "bird",
+          "occurrence": 1,
+          "start": 8,
+          "end": 12
+        },
+        {
+          "uid": "ven-0088",
+          "sourceEn": "sing",
+          "sourceCz": "zpívat",
+          "text": "sings",
+          "occurrence": 1,
+          "start": 13,
+          "end": 18
+        },
+        {
+          "uid": "ven-0233",
+          "sourceEn": "window",
+          "sourceCz": "okno",
+          "text": "window",
+          "occurrence": 1,
+          "start": 26,
+          "end": 32
+        },
+        {
+          "uid": "ven-0465",
+          "sourceEn": "morning",
+          "sourceCz": "ráno",
+          "text": "morning",
+          "occurrence": 1,
+          "start": 40,
+          "end": 47
+        }
+      ]
+    },
+    "ven-0222": {
+      "sourceEn": "chair",
+      "sourceCz": "židle",
+      "sourceSentenceEn": "The wooden chair stands beside the table.",
+      "sourceSentenceCz": "Dřevěná židle stojí vedle stolu.",
+      "reviewed": true,
+      "concepts": [
+        {
+          "uid": "ven-0222",
+          "sourceEn": "chair",
+          "sourceCz": "židle",
+          "text": "chair",
+          "occurrence": 1,
+          "start": 11,
+          "end": 16
+        },
+        {
+          "uid": "ven-0111",
+          "sourceEn": "table",
+          "sourceCz": "stůl",
+          "text": "table",
+          "occurrence": 1,
+          "start": 35,
+          "end": 40
+        }
+      ]
+    },
+    "ven-0226": {
+      "sourceEn": "bed",
+      "sourceCz": "postel",
+      "sourceSentenceEn": "The cat is sleeping under the bed.",
+      "sourceSentenceCz": "Kočka spí pod postelí.",
+      "reviewed": true,
+      "concepts": [
+        {
+          "uid": "ven-0020",
+          "sourceEn": "cat",
+          "sourceCz": "kočka",
+          "text": "cat",
+          "occurrence": 1,
+          "start": 4,
+          "end": 7
+        },
+        {
+          "uid": "ven-0477",
+          "sourceEn": "sleep",
+          "sourceCz": "spát",
+          "text": "sleeping",
+          "occurrence": 1,
+          "start": 11,
+          "end": 19
+        },
+        {
+          "uid": "ven-0226",
+          "sourceEn": "bed",
+          "sourceCz": "postel",
+          "text": "bed",
+          "occurrence": 1,
+          "start": 30,
+          "end": 33
+        }
+      ]
+    },
+    "ven-0207": {
+      "sourceEn": "car",
+      "sourceCz": "auto",
+      "sourceSentenceEn": "Our car is parked in front of the house.",
+      "sourceSentenceCz": "Naše auto stojí před domem.",
+      "reviewed": true,
+      "concepts": [
+        {
+          "uid": "ven-0207",
+          "sourceEn": "car",
+          "sourceCz": "auto",
+          "text": "car",
+          "occurrence": 1,
+          "start": 4,
+          "end": 7
+        },
+        {
+          "uid": "ven-0061",
+          "sourceEn": "house",
+          "sourceCz": "dům",
+          "text": "house",
+          "occurrence": 1,
+          "start": 34,
+          "end": 39
+        }
+      ]
+    },
+    "ven-0208": {
+      "sourceEn": "train",
+      "sourceCz": "vlak",
+      "sourceSentenceEn": "The train arrives at the station on time.",
+      "sourceSentenceCz": "Vlak přijíždí na nádraží včas.",
+      "reviewed": true,
+      "concepts": [
+        {
+          "uid": "ven-0208",
+          "sourceEn": "train",
+          "sourceCz": "vlak",
+          "text": "train",
+          "occurrence": 1,
+          "start": 4,
+          "end": 9
+        }
+      ]
+    },
+    "ven-0217": {
+      "sourceEn": "bus",
+      "sourceCz": "autobus",
+      "sourceSentenceEn": "The yellow bus stops near the school.",
+      "sourceSentenceCz": "Žlutý autobus zastavuje u školy.",
+      "reviewed": true,
+      "concepts": [
+        {
+          "uid": "ven-0100",
+          "sourceEn": "yellow",
+          "sourceCz": "žlutý",
+          "text": "yellow",
+          "occurrence": 1,
+          "start": 4,
+          "end": 10
+        },
+        {
+          "uid": "ven-0217",
+          "sourceEn": "bus",
+          "sourceCz": "autobus",
+          "text": "bus",
+          "occurrence": 1,
+          "start": 11,
+          "end": 14
+        },
+        {
+          "uid": "ven-0393",
+          "sourceEn": "stop",
+          "sourceCz": "zastavit; přestat",
+          "text": "stops",
+          "occurrence": 1,
+          "start": 15,
+          "end": 20
+        },
+        {
+          "uid": "ven-0384",
+          "sourceEn": "school",
+          "sourceCz": "škola",
+          "text": "school",
+          "occurrence": 1,
+          "start": 30,
+          "end": 36
+        }
+      ]
+    },
+    "ven-0234": {
+      "sourceEn": "key",
+      "sourceCz": "klíč",
+      "sourceSentenceEn": "This small key opens the front door.",
+      "sourceSentenceCz": "Tento malý klíč otevírá přední dveře.",
+      "reviewed": true,
+      "concepts": [
+        {
+          "uid": "ven-0090",
+          "sourceEn": "small",
+          "sourceCz": "malý",
+          "text": "small",
+          "occurrence": 1,
+          "start": 5,
+          "end": 10
+        },
+        {
+          "uid": "ven-0234",
+          "sourceEn": "key",
+          "sourceCz": "klíč",
+          "text": "key",
+          "occurrence": 1,
+          "start": 11,
+          "end": 14
+        },
+        {
+          "uid": "ven-0376",
+          "sourceEn": "open",
+          "sourceCz": "otevřít",
+          "text": "opens",
+          "occurrence": 1,
+          "start": 15,
+          "end": 20
+        },
+        {
+          "uid": "ven-0230",
+          "sourceEn": "door",
+          "sourceCz": "dveře",
+          "text": "door",
+          "occurrence": 1,
+          "start": 31,
+          "end": 35
+        }
+      ]
+    },
+    "ven-0450": {
+      "sourceEn": "hand",
+      "sourceCz": "ruka",
+      "sourceSentenceEn": "I wash my hands.",
+      "sourceSentenceCz": "Myji si ruce.",
+      "reviewed": true,
+      "concepts": [
+        {
+          "uid": "ven-0450",
+          "sourceEn": "hand",
+          "sourceCz": "ruka",
+          "text": "hands",
+          "occurrence": 1,
+          "start": 10,
+          "end": 15
+        }
+      ]
+    },
+    "ven-0477": {
+      "sourceEn": "sleep",
+      "sourceCz": "spát",
+      "sourceSentenceEn": "We sleep in the hut.",
+      "sourceSentenceCz": "Spíme v chatrči.",
+      "reviewed": true,
+      "concepts": [
+        {
+          "uid": "ven-0477",
+          "sourceEn": "sleep",
+          "sourceCz": "spát",
+          "text": "sleep",
+          "occurrence": 1,
+          "start": 3,
+          "end": 8
+        },
+        {
+          "uid": "ven-0458",
+          "sourceEn": "hut",
+          "sourceCz": "chatrč",
+          "text": "hut",
+          "occurrence": 1,
+          "start": 16,
+          "end": 19
+        }
+      ]
+    },
+    "ven-0262": {
+      "sourceEn": "wait",
+      "sourceCz": "počkat",
+      "sourceSentenceEn": "Please wait for me by the door.",
+      "sourceSentenceCz": "Prosím počkej na mě u dveří.",
+      "reviewed": true,
+      "concepts": [
+        {
+          "uid": "ven-0262",
+          "sourceEn": "wait",
+          "sourceCz": "počkat",
+          "text": "wait",
+          "occurrence": 1,
+          "start": 7,
+          "end": 11
+        },
+        {
+          "uid": "ven-0230",
+          "sourceEn": "door",
+          "sourceCz": "dveře",
+          "text": "door",
+          "occurrence": 1,
+          "start": 26,
+          "end": 30
+        }
+      ]
+    },
+    "ven-0430": {
+      "sourceEn": "help",
+      "sourceCz": "pomoci; pomáhat",
+      "sourceSentenceEn": "Can you help me?",
+      "sourceSentenceCz": "Můžeš mi pomoci?",
+      "reviewed": true,
+      "concepts": [
+        {
+          "uid": "ven-0430",
+          "sourceEn": "help",
+          "sourceCz": "pomoci; pomáhat",
+          "text": "help",
+          "occurrence": 1,
+          "start": 8,
+          "end": 12
+        }
+      ]
+    }
+  }
+}

@@ -330,3 +330,37 @@ Responzivní hra má2 sloupce. Nízký viewport může vyžadovat svislé posunu
 po spuštění a Další se obrazovka přesune ke hře. Návrat k filtrům ukáže
 jejich ovládání. Fyzická telefonní a úplná významová přejímka zůstávají
 samostatné vůči automatickým kontrolám a místnímu Safari.
+
+
+14. Obrazové pojmy ve větách kontinuální smyčky (2026-11-17)
+
+Kanonický vstup VocabularyEN/vocabulary_en_sentence_pictures.json váže konkrétní
+větu na1 až5 existujících významových UID. Pilot obsahuje20 ručně zkontrolovaných
+vět. Pořadí pojmů odpovídá větě; neopakovat stejné UID ani stejný obrázek.
+Každý záznam uchovává přesné EN/CZ heslo i oba překlady věty. Každý pojem má
+přesné EN/CZ heslo, doslovné text ve větě (včetně skloňování/časování a velikosti
+písmen) a occurrence od1. Reviewed=true znamená dokončenou významovou revizi.
+
+Vybrat správný slovní druh a význam: opens→open/otevřít, nikoli open/otevřený;
+sleeps/sleeping→sleep; parked není park/parčík. Pokud význam v našem slovníku
+chybí, vynechat jej. Netvořit vazby podle pouhé podobnosti nebo podřetězce.
+Členy, spojky a zájmena zpravidla nejsou obrazové pojmy. Hotové víceslovné
+výrazy se neposkládají do nesouvisejících významů (on time není jen time).
+Není nutné zaplnit všech5 míst; jedna přesná ilustrace je platná.
+
+Z kořene PythonMF vytvořit export:
+  Samantha_Agent/.venv/bin/python VocabularyEN/build_sentence_pictures.py
+Pouze ověřit beze změny:
+  Samantha_Agent/.venv/bin/python VocabularyEN/build_sentence_pictures.py --check
+Výstup docs/data/vocabulary-en-sentence-pictures.json se commituje se zdrojem.
+Builder kontroluje aktuální větu, významy, hranice slov, pořadí, jedinečnost a
+existenci přesných místních obrázků/náhledů. Po změně věty nebo významu je
+nutná nová ruční revize; nepřepisovat zdrojovou identitu automaticky.
+
+Pouze větná fáze smyčky Věta + slovíčko ukáže současně všechny obrázky s EN
+hesly, EN větu a CZ překlad. Slovní fáze obnoví velkou původní kartu. Kontext
+může čerpat z celého slovníku mimo osobní filtr; osobní zásoba se nemění.
+Přednačtou se náhledy aktuální a následující věty, nejvýše10 držených elementů.
+Zvuk nikdy nečeká na obrázky. Vadný obrázek zmizí; bez platných pojmů zůstane
+původní karta i věta/zvuk. Chybějící/pozdní metadata nepřeruší přehrávání.
+Ruční procvičování vět si zachovává skrytou odpověď a kontextové názvy neukazuje.

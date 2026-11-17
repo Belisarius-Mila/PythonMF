@@ -3158,3 +3158,12 @@ Předchozí balíček společné Samanthy e6d68786 je již vydaný: původní jo
 1530 testů převzatých bez opakování. Live HTML obou stránek přesné. Důkaz
 private shared_chat_20261116/completion.json; toto p+n neopakovat.
 Starší bloky níže jsou historické podklady, nikoli dnešní provozní audit.
+
+## 2026-11-17 12:40 CET — Uživatelská přejímka kalendáře
+
+Hotovo: Míla výslovně potvrdil, že opravená editace funguje.
+Rozhodnutí: Potvrzení uzavírá přejímku této konkrétní chyby.
+Další krok: Pokračovat samostatným obrazovým pilotem Vocabulary EN.
+Navrhované další kroky: Přejímka společné Samanthy iPhone/Mint.
+Technický důkaz: Uživatelské potvrzení po nastavení Macu; vydaný ed10127e
+v b2b6710b, původní doklady zachované. Adam neprovedl další calendar write.

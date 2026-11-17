@@ -1,4 +1,14 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
+## 2026-11-17 12:40 CET — Míla přijal opravu kalendářové editace
+
+Míla po pokynu k nastavení Macu výslovně potvrdil, že úprava funguje.
+Jde o uživatelskou přejímku původní chyby, nikoli další testovací zápis
+provedený Adamem. Kód ed10127e je vydaný v b2b6710b. Doklady uchované v
+private calendar_home_edit_20261117 a combined_release_20261117.
+Další krok: samostatně pokračovat pilotem obrazových vět EN; kalendářovou
+opravu ani její vydání znovu neprovádět. Samantha iPhone/Mint má dále vlastní
+uživatelskou přejímku.
+
 ## 2026-11-17 09:00 CET — Místní oprava ukládání editace kalendáře z přehledu
 
 Hotovo: Otisk původní události nově nezávisí na pořadí stejných upozornění.

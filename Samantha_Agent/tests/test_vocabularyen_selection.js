@@ -9,6 +9,7 @@ const vocabulary=JSON.parse(fs.readFileSync(path.join(root,"data/vocabulary-en.j
 const audio=JSON.parse(fs.readFileSync(path.join(root,"data/vocabulary-en-audio.json"),"utf8"));
 const quizCatalog=JSON.parse(fs.readFileSync(path.join(root,"data/vocabulary-en-quiz.json"),"utf8"));
 const quiz=require(path.join(root,"vocabulary-en/quiz.js"));
+const sentencePictureManifest=JSON.parse(fs.readFileSync(path.join(root,"data/vocabulary-en-sentence-pictures.json"),"utf8"));
 const sentenceAudio={kind:"sentences",items:Object.fromEntries(vocabulary.items.map(i=>[i.uid,{uid:i.uid,sourceEn:i.en,sourceCz:i.cz,sourceSentenceEn:i.sentenceEn,sourceSentenceCz:i.sentenceCz,en:`assets/sentence-en/${i.uid}.mp3`,cz:`assets/sentence-cz/${i.uid}.mp3`}]))};
 const html=fs.readFileSync(path.join(root,"vocabulary-en/index.html"),"utf8");
 const source=fs.readFileSync(path.join(root,"vocabulary-en/gallery.js"),"utf8");
@@ -28,7 +29,7 @@ class Element {
   getBoundingClientRect(){return {top:160,width:140,height:180};} focus(){this.doc.activeElement=this;}scrollIntoView(){this.doc.scrolled=this.id;}
 }
 function storage(map=new Map()){return {map,getItem:key=>map.get(key)||null,setItem:(key,value)=>map.set(key,String(value))};}
-async function app({items=vocabulary.items,url="https://example.test/PythonMF/vocabulary-en/",session=storage(),local=storage(),blocked=false,manifest=audio,sentenceManifest=sentenceAudio,failData=false,slowAudio=false,failQuiz=false}={}){
+async function app({items=vocabulary.items,url="https://example.test/PythonMF/vocabulary-en/",session=storage(),local=storage(),blocked=false,manifest=audio,sentenceManifest=sentenceAudio,failData=false,slowAudio=false,failQuiz=false,pictureManifest=sentencePictureManifest,pictureDeferred=null}={}){
   const doc=new Element("document");doc.doc=doc;doc.title="Vocabulary";
   doc.getElementById=id=>doc.descendants().find(node=>node.id===id)||null;
   doc.createElement=tag=>new Element(tag,doc);doc.createDocumentFragment=()=>new Element("fragment",doc);
@@ -56,7 +57,7 @@ async function app({items=vocabulary.items,url="https://example.test/PythonMF/vo
     play(){this.played=true;this.paused=false;this.ended=false;this.playCount++;return Promise.resolve();}
   }
   const data={...vocabulary,items};
-  const ctx=vm.createContext({document:doc,window:win,URL,URLSearchParams,TextEncoder,Audio:AudioFixture,console,fetch:async url=>{if(url.includes("-quiz.json")){if(failQuiz)throw Error("quiz unavailable");return {ok:true,json:async()=>quizCatalog};}if(slowAudio && url.includes("audio"))return new Promise(()=>{});if(failData && !url.includes("audio"))throw Error("offline");const selected=url.includes("sentence-audio")?sentenceManifest:manifest;if(selected===null && url.includes("audio"))throw Error("audio unavailable");return {ok:true,json:async()=>url.includes("audio")?selected:data};}});
+  const ctx=vm.createContext({document:doc,window:win,URL,URLSearchParams,TextEncoder,Audio:AudioFixture,console,fetch:async url=>{if(url.includes("sentence-pictures.json")){if(pictureManifest===null)throw Error("pictures unavailable");return {ok:true,json:async()=>pictureDeferred?await pictureDeferred:pictureManifest};}if(url.includes("-quiz.json")){if(failQuiz)throw Error("quiz unavailable");return {ok:true,json:async()=>quizCatalog};}if(slowAudio && url.includes("audio"))return new Promise(()=>{});if(failData && !url.includes("audio"))throw Error("offline");const selected=url.includes("sentence-audio")?sentenceManifest:manifest;if(selected===null && url.includes("audio"))throw Error("audio unavailable");return {ok:true,json:async()=>url.includes("audio")?selected:data};}});
   vm.runInContext(fs.readFileSync(path.join(root,"vocabulary-en/model.js"),"utf8"),ctx);
   for(const name of ['learners.js','learner-ui.js','quiz.js'])vm.runInContext(fs.readFileSync(path.join(root,'vocabulary-en',name),'utf8'),ctx);
   vm.runInContext(source.replace('void init();','globalThis.ready=init();')+'\nglobalThis.api={state,context,buildSelection,orderedSelection,openStudy,moveStudy,newRandomRound,returnToGallery,renderGallery,selectionChanged,applyRoute,speakPrompt,speakAnswer,stopAudioPlayback,setPracticeMode};',ctx);
@@ -763,4 +764,58 @@ test('a filtered deep link loop returns to the matching gallery count, tiles and
   const view=await app({url:'https://example.test/PythonMF/vocabulary-en/#card=ven-0020&topics=topic-06'});const expected=view.orderedSelection().map(model.key);assert.equal(expected.length,42);
   view.element('studyLoopToggle').click();await nextLoopPhase(view);const last=view.state.currentItem.uid;view.returnToGallery();
   assert.equal(view.element('totalCount').textContent,'42');assert.deepEqual(view.element('galleryGroups').querySelectorAll('.vocab-tile').map(tile=>tile.dataset.uid),Array.from(expected));assert.equal(view.doc.activeElement.id,'tile-'+last);
+});
+
+function contextFigures(view){return view.element('sentencePictures').querySelectorAll('.sentence-picture');}
+function contextLabels(view){return view.element('sentencePictures').querySelectorAll('figcaption').map(n=>n.textContent);}
+test('sentence picture metadata resolves20 exact reviewed rows in sentence order, with at most five existing meanings',()=>{
+  assert.equal(Object.keys(sentencePictureManifest.entries).length,20);let count=0;
+  for(const [uid,record] of Object.entries(sentencePictureManifest.entries)){
+    const item=vocabulary.items.find(i=>i.uid===uid),refs=model.sentencePictures(item,sentencePictureManifest,vocabulary.items);assert.equal(refs.length,record.concepts.length);assert.ok(refs.length>=1&&refs.length<=5);count+=refs.length;
+    for(const ref of refs)assert.equal(item.sentenceEn.slice(ref.start,ref.end),ref.text);
+  }
+  assert.equal(count,51);const cat=vocabulary.items.find(i=>i.uid==='ven-0020');assert.deepEqual(model.sentencePictures(cat,sentencePictureManifest,vocabulary.items).map(r=>r.item.en),['cat','sleep','chair']);
+  const key=vocabulary.items.find(i=>i.uid==='ven-0234');assert.ok(model.sentencePictures(key,sentencePictureManifest,vocabulary.items).some(r=>r.item.uid==='ven-0376'&&r.text==='opens'));
+});
+test('sentence picture metadata rejects changed sentences, changed meanings, unknown or retired references and invalid spans',()=>{
+  const cat=vocabulary.items.find(i=>i.uid==='ven-0020');
+  for(const mode of ['sentence','translation','meaning','foreign','shape','duplicate','order','too-many','span','inside-word','unknown']){
+    const manifest=JSON.parse(JSON.stringify(sentencePictureManifest)),r=manifest.entries[cat.uid];
+    if(mode==='sentence')r.sourceSentenceEn+='changed';if(mode==='translation')r.sourceSentenceCz+='changed';if(mode==='meaning')r.concepts[1].sourceCz='wrong';if(mode==='foreign')manifest.language='it';if(mode==='shape')r.concepts={};if(mode==='duplicate')r.concepts[1]={...r.concepts[0]};if(mode==='order')r.concepts.reverse();if(mode==='too-many')r.concepts.push(...r.concepts);if(mode==='span')r.concepts[0].start=true;if(mode==='inside-word'){r.concepts[1].text='sleep';r.concepts[1].end--;}if(mode==='unknown')r.concepts[0].uid='ven-9999';
+    assert.deepEqual(model.sentencePictures(cat,manifest,vocabulary.items),[],mode);
+  }
+  const items=vocabulary.items.map(i=>i.uid==='ven-0477'?{...i,active:false}:i);assert.deepEqual(model.sentencePictures(cat,sentencePictureManifest,items),[]);
+});
+test('sentence illustrations appear together above EN/CZ during the sentence and disappear for the large word card',async()=>{
+  const view=await app();view.openStudy('ven-0020');loopMode(view,'sentence-word');view.element('studyLoopToggle').click();
+  assert.equal(view.element('sentencePictures').hidden,false);assert.equal(view.element('studyView').classList.contains('sentence-context'),true);assert.deepEqual(contextLabels(view),['cat','sleep','chair']);assert.ok(view.element('sentencePictures').querySelectorAll('figcaption').every(c=>c.lang==='en'));
+  assert.equal(view.element('promptText').textContent,view.state.currentItem.sentenceEn);assert.equal(view.element('studyLoopTranslation').textContent,view.state.currentItem.sentenceCz);const player=activePlayer(view);
+  await nextLoopPhase(view);assert.equal(view.element('sentencePictures').hidden,true);assert.equal(contextFigures(view).length,0);assert.equal(view.element('studyView').classList.contains('sentence-context'),false);assert.equal(view.element('promptText').textContent,'cat');assert.equal(view.element('studyLoopTranslation').textContent,'kočka');assert.equal(activePlayer(view),player);
+  view.element('studyLoopStop').click();assert.equal(view.element('studyView').classList.contains('sentence-context'),false);
+});
+test('sentence illustrations may use concepts outside personal A without modifying membership or its single-card loop',async()=>{
+  const local=storage(),value=learners.empty();value.profiles.A.selected=['ven-0020'];value.profiles.A.hard=['ven-0020'];local.setItem(learners.KEY,JSON.stringify(value));const before=local.getItem(learners.KEY);
+  const view=await app({local});chooseUser(view,'A');view.element('learnerHardFilter').click();view.openStudy('ven-0020');loopMode(view,'sentence-word');view.element('studyLoopToggle').click();assert.deepEqual(contextLabels(view),['cat','sleep','chair']);assert.equal(view.state.sequence.length,1);assert.equal(local.getItem(learners.KEY),before);
+  await nextLoopPhase(view);await nextLoopPhase(view);assert.deepEqual(contextLabels(view),['cat','sleep','chair']);assert.equal(view.state.currentItem.uid,'ven-0020');view.returnToGallery();assert.equal(local.getItem(learners.KEY),before);
+});
+test('absent or stale illustration metadata leaves the sentence, original picture and sound usable',async()=>{
+  for(const pictureManifest of [null,{}, {...sentencePictureManifest,language:'it'}]){
+    const view=await app({pictureManifest});view.openStudy('ven-0020');loopMode(view,'sentence-word');view.element('studyLoopToggle').click();assert.equal(view.element('sentencePictures').hidden,true);assert.equal(view.element('studyView').classList.contains('sentence-context'),false);assert.ok(activePlayer(view));assert.equal(view.element('promptText').textContent,view.state.currentItem.sentenceEn);view.element('studyLoopStop').click();
+  }
+});
+test('illustration image errors remove only the failed tile and never interrupt audio; all failures restore the original picture',async()=>{
+  const view=await app();view.openStudy('ven-0020');loopMode(view,'sentence-word');view.element('studyLoopToggle').click();const player=activePlayer(view);let figures=contextFigures(view);assert.equal(figures.length,3);figures[1].querySelector('img').emit('error');assert.deepEqual(contextLabels(view),['cat','chair']);assert.equal(activePlayer(view),player);assert.equal(player.playCount,1);
+  for(const image of view.element('sentencePictures').querySelectorAll('img'))image.emit('error');assert.equal(view.element('sentencePictures').hidden,true);assert.equal(view.element('studyView').classList.contains('sentence-context'),false);assert.equal(activePlayer(view),player);await nextLoopPhase(view);assert.equal(view.element('promptText').textContent,'cat');view.element('studyLoopStop').click();
+});
+test('late illustration errors cannot alter the next word or a different sentence row',async()=>{
+  const view=await app();view.openStudy('ven-0020');loopMode(view,'sentence-word');view.element('studyLoopToggle').click();const oldImage=contextFigures(view)[0].querySelector('img');await nextLoopPhase(view);oldImage.emit('error');assert.equal(view.element('studyView').classList.contains('sentence-context'),false);assert.equal(view.element('promptText').textContent,'cat');
+  view.element('studyLoopStop').click();view.openStudy('ven-0008');loopMode(view,'sentence-word');view.element('studyLoopToggle').click();assert.equal(contextFigures(view).length,5);const before=contextLabels(view);oldImage.emit('error');assert.deepEqual(contextLabels(view),before);view.element('studyLoopStop').click();
+});
+test('late illustration metadata waits for a new sentence instead of swapping the scene under an active player',async()=>{
+  let resolve;const deferred=new Promise(done=>resolve=done);const view=await app({pictureDeferred:deferred});view.state.query='kočka';view.selectionChanged();view.openStudy('ven-0020');loopMode(view,'sentence-word');view.element('studyLoopToggle').click();const player=activePlayer(view);assert.equal(view.element('sentencePictures').hidden,true);
+  resolve(sentencePictureManifest);await loopTick();assert.equal(view.element('sentencePictures').hidden,true);assert.equal(activePlayer(view),player);assert.equal(player.playCount,1);
+  await nextLoopPhase(view);assert.equal(view.element('sentencePictures').hidden,true);await nextLoopPhase(view);assert.equal(view.element('sentencePictures').hidden,false);assert.deepEqual(contextLabels(view),['cat','sleep','chair']);view.element('studyLoopStop').click();
+});
+test('manual sentence learning keeps its existing hidden-answer behavior and has no contextual vocabulary labels',async()=>{
+  const view=await app();view.openStudy('ven-0020');view.practices[1].click();assert.equal(view.element('sentencePictures').hidden,true);assert.equal(view.element('studyView').classList.contains('sentence-context'),false);assert.equal(view.element('answerCard').classList.contains('hidden'),true);assert.equal(view.element('promptText').textContent,view.state.currentItem.sentenceCz);
 });
