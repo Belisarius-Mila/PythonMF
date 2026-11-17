@@ -2,8 +2,9 @@ Vocabulary FR — private content pipeline (contract v1.1)
 
 This folder contains generic helpers only. Real learner inventories, media,
 exports and catalogs must stay outside Git and the public docs tree until
-separate content-publication approval. The builders do not publish, send,
-synthesize speech, choose a new voice or modify the original CSV.
+separate content-publication approval. Base exporters do not publish, send,
+synthesize speech, choose a new voice or modify the original CSV. Optional
+approved production uses the separate generation helper described below.
 
 Data/Will boundary
 Data owns catalog, export/audio helpers and synthetic content tests.
@@ -71,3 +72,18 @@ private staging root. Serve only on 127.0.0.1. Do not stage under docs, push,
 upload, publish or use a public preview. Gallery/text should work with absent
 French audio. A French listening game cannot use a null target; a loop stops
 with an explicit availability message rather than silently reading Czech only.
+
+Optional explicitly approved Azure production
+vocabulary_fr_generation.py processes a closed plan plus a separate explicit
+approval, including exact voices/rate, source bundle SHA, price and full budget.
+Use check-plan before transport. generate requires a committed code version,
+registered Azure capability, active consent, explicit local env-file and exactly
+one --pilot or --batch N. Each invocation is capped at 10,000 SSML characters;
+a common durable receipt reserves and caps the whole approved plan before POST.
+The pilot takes two jobs from that same plan; subsequent batches reuse them.
+Uncertain/reserved outcomes stop every further request; there is no auto-retry.
+MP3s are fully decoded and stored by byte SHA outside Git/docs. seal creates a
+new private bundle from the unchanged base, preserving existing files, catalog
+revision and all source identities. verify --bundle PRIVATE_BUNDLE
+--expected-manifest-sha256 SENDER_SHA --decode-audio checks the complete bundle,
+production code/plan/approval/receipt and actual media. It never calls TTS.

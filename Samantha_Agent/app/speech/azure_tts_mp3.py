@@ -17,7 +17,8 @@ ENV_PATH = Path(__file__).resolve().parents[2] / '.env'
 MAX_AUDIO_BYTES = 8 * 1024 * 1024
 VOICES = frozenset({'en-US-AndrewNeural', 'en-US-AnaNeural', 'en-US-JennyNeural',
                     'en-US-MichelleNeural', 'en-US-GuyNeural',
-                    'en-US-ChristopherNeural', 'cs-CZ-VlastaNeural', 'it-IT-ElsaNeural'})
+                    'en-US-ChristopherNeural', 'cs-CZ-VlastaNeural', 'it-IT-ElsaNeural',
+                    'fr-FR-HenriNeural'})
 
 
 class AzureTtsError(RuntimeError):

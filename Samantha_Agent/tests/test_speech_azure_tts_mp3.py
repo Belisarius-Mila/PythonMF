@@ -36,6 +36,56 @@ class AzureSpeechTests(unittest.TestCase):
         self.assertIn('it-IT-ElsaNeural', xml)
         self.assertEqual(count, len(text) + 31)
 
+    def test_french_henri_ssml_preserves_exact_text_accents_and_escaping(self):
+        text = " L’été & l'œuf < demain > aujourd’hui.\nÇa va ? "
+        xml, count = ssml_parts(text, 'fr-FR-HenriNeural')
+        root = ElementTree.fromstring(xml)
+        ns = {'s': 'http://www.w3.org/2001/10/synthesis'}
+        self.assertEqual(root.attrib['{http://www.w3.org/XML/1998/namespace}lang'], 'fr-FR')
+        self.assertEqual(root.find('s:voice', ns).attrib['name'], 'fr-FR-HenriNeural')
+        self.assertEqual(root.find('s:voice/s:prosody', ns).attrib['rate'], '-10%')
+        self.assertEqual(''.join(root.itertext()), text)
+        self.assertIn('&amp;', xml)
+        self.assertIn('&lt; demain &gt;', xml)
+        self.assertEqual(count, len(text) + 31 + 4 + 3 + 3)
+
+    def test_henri_transport_reserves_before_single_post_and_keeps_failure_reserved(self):
+        text = "L’été arrive."
+        for outcome in (subprocess.CompletedProcess([], 0, b'ID3audio\n200', b''),
+                        RuntimeError('synthetic transport failure')):
+            with self.subTest(uncertain=isinstance(outcome, Exception)):
+                budget = CharacterBudget()
+                def run(argv, **kwargs):
+                    self.assertEqual(budget.reserved, ssml_parts(text, 'fr-FR-HenriNeural')[1])
+                    self.assertNotIn('--retry', argv)
+                    self.assertNotIn('--location', argv)
+                    self.assertNotIn(os.environ['AZURE_SPEECH_KEY'], ' '.join(argv))
+                    self.assertIn('fr-FR-HenriNeural', kwargs['input'].decode())
+                    if isinstance(outcome, Exception):
+                        raise outcome
+                    return outcome
+                runner = Mock(side_effect=run)
+                with patch('app.speech.azure_tts_mp3.dotenv_values', return_value={}):
+                    if isinstance(outcome, Exception):
+                        with self.assertRaisesRegex(AzureTtsError, 'bez opakování'):
+                            synthesize_azure_tts_mp3_sync(text, voice='fr-FR-HenriNeural', budget=budget, runner=runner)
+                    else:
+                        self.assertEqual(synthesize_azure_tts_mp3_sync(text, voice='fr-FR-HenriNeural', budget=budget, runner=runner), b'ID3audio')
+                runner.assert_called_once()
+                self.assertGreater(budget.reserved, 0)
+
+    def test_french_addition_keeps_unselected_voice_rate_and_budget_blocked(self):
+        for voice, rate, limit in [('fr-FR-DeniseNeural', '-10%', 10000),
+                                   ('fr-FR-HenriNeural', '0%', 10000),
+                                   ('fr-FR-HenriNeural', '-10%', 1)]:
+            with self.subTest(voice=voice, rate=rate, limit=limit):
+                runner = Mock()
+                with patch('app.speech.azure_tts_mp3.dotenv_values', return_value={}):
+                    with self.assertRaises(AzureTtsError):
+                        synthesize_azure_tts_mp3_sync('Bonjour !', voice=voice, rate=rate,
+                                                     budget=CharacterBudget(limit), runner=runner)
+                runner.assert_not_called()
+
     def test_success_keeps_credentials_out_of_argv_and_uses_one_post(self):
         runner = Mock(return_value=subprocess.CompletedProcess([], 0, b'ID3audio\n200', b''))
         budget = CharacterBudget()
