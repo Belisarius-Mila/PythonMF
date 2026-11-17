@@ -1,4 +1,25 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
+## 2026-11-17 15:52 CET — Předání registrace prvního Datova FR testu
+
+Hotovo: Will připravil přesný registrační patch pro již existující Datův
+syntetický test_vocabularyfr_content.py.27 jeho testů prošlo přímo z Datovy
+větve; patch mění pouze validation_domains.py a cockpit_quality_gate.py,
+git apply --check i strukturální výběr domény vocabulary_fr_content PASS.
+Rozhodnutí: Míla požádal odblokovat Datův checkpoint. Data převezme Willův
+konkrétní patch, pak ověří a checkpointuje svůj hotový obecný kód spolu
+s registrací. Vlastnictví centrálního návrhu zůstává Willovi; jeho pracovní
+kopie nebyla změněná. Na main se registrace přenese až s testem v uzavřeném
+Datově commitu. Soukromý obsah není předmětem této registrace ani commitu.
+Další krok: Data aplikuje předání Vocabulary_FR_Data_registrace_testu_predani_2026-11-17.txt
+z Downloads, spustí vlastní registrovanou bránu a předá přesný checkpoint.
+Navrhované další kroky: Potom Willova integrace a zvláštní přejímka soukromého
+obsahového balíčku. Skutečných464 karet tímto testem nebylo potvrzeno.
+Technický důkaz: uzavřený patch Vocabulary_FR_Data_registrace_testu_2026-11-17.patch
+má SHA256446d70dd1ec7c647f0d3f28dffeb99c84775c308f4d74ac2a5ef86fbfc2cd4ad.
+Podklad31c670bb,27 syntetických testů PASS/0,706s. Soukromá účtenka
+shared_chat_transfer_fix_20261117/data_registration_receipt.json. Žádný
+reset/rebase, další checkout, push, nasazení ani zveřejnění Janina obsahu.
+
 ## 2026-11-17 14:55 CET — FR klient pro Janu podle kontraktu v1.1
 
 Hotovo: Samostatný klient Vocabulary FR podle IT31c670bb: galerie18 témat,

@@ -1,4 +1,31 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
+## 2026-11-17 15:35 CET — Oprava přenosu rozepsaného textu Samanthy
+
+Hotovo: Opravený klient po spárování skutečně automaticky ukládá rozepsaný
+text. Safari odmítalo Window.clearTimeout/setTimeout volané přes instanci
+klienta; párování a převzetí psaní prošly, ale debounce ani následný flush
+neproběhly. Výchozí časovače nyní volá uzávěr přes správné Window.
+UI navíc trvale rozlišuje neuložený a sdílený draft i pokyn k převzetí psaní.
+Rozhodnutí: Míla nahlásil, že po spárování kódem se nic nepřenáší. Oprava
+řeší reprodukovaný prohlížečový problém; nemění párování, síť, oprávnění,
+uložené rozhovory ani pravidla jediného odeslání. Vývoj není nové p+n.
+Další krok: Samostatně autorizované p+n opravy a pak Mílova fyzická přejímka
+telefon → rozepsaný text na Mintu → ruční oprava → jedna otázka/odpověď.
+Navrhované další kroky: Pokud po reloadu zůstane lokálně zachovaný text,
+použít explicitní „Použít zachovaný text“. Novou kopii nejisté otázky neposílat.
+Technický důkaz:51 cílených Python kontrol PASS, nová Window-brand regrese
+FAIL→PASS, skutečný automatický debounce uloží právě jeden draft bez otázky.
+Dva nativní Safari klienti s oddělenými úložišti prošli párováním, obnovou
+původně neuloženého testovacího textu, obousměrným automatickým přenosem,
+převzetím/ruční opravou, jedním syntetickým send a společnou odpovědí. Reload
+neodeslal nic znovu. Soukromá fixture, žádný placený model ani změna skutečného
+rozhovoru. Vlastní okno/server ukončené, původní Safari okno zachované.
+Finální programovou bránu, přesné otisky a commit určuje pouze
+private shared_chat_transfer_fix_20261117/completion.json. Fyzický iPhone/Mint
+zůstává samostatnou přejímkou; běžící Cockpit dosud používá starší klient.
+Předchozí kalendářová chyba zůstává uživatelem přijatá. FR klient eafc8161
+je samostatný čekající lokální krok; skutečný Janin obsah zůstává mimo Git/docs.
+
 ## 2026-11-17 12:40 CET — Míla přijal opravu kalendářové editace
 
 Míla po pokynu k nastavení Macu výslovně potvrdil, že úprava funguje.

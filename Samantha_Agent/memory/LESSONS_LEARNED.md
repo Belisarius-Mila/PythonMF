@@ -2886,3 +2886,12 @@ strop. Skutečný DALTAC dokončen17,0578/20, sedm původních částí beze zm�
 - Řešení: první play přímo z uživatelského kliknutí; pro další úseky zachovat stejný odemknutý Audio element, měnit src a volat load (včetně stejné karty). To respektuje per-element autoplay a odstraní závislost na opožděném rewind. Přechod až po ended a plné prodlevě, generační rušení zvuku i timerů; reload/bfcache nikdy neobnovuje běh. Chyba či timeout pozastaví, neodpočítává další karty. Ignorovaný starý ended nesmí spotřebovat jednorázový listener nového úseku.
 - Ověření:115 cílených kontrol PASS včetně80 JS scénářů,12 nových scénářů smyčky. Safari skutečně přehrálo několik nových karet na jediné spuštění a větu→slovo s oběma překlady. Odmítnutý play musí také explicitně pause; jinak zmizí currentAudio reference dřív, než jej zastaví následná obsluha.
 - Navazující oprava: návrat z přímého filtrovaného odkazu musí galerii znovu vykreslit, ne jen označit poslední tile ve starém obsahu. Reprodukce512 místo42, po opravě42 a fokus poslední karty. Report vocabulary_en_continuous_20261117.md; fyzický telefon samostatně.
+
+
+### LL-135 — Prohlížečové časovače v klientu potřebují správný Window receiver
+
+- Problém: párování Samanthy fungovalo, ale Safari při ukládání draftu odmítlo Window.clearTimeout/setTimeout volané jako metody instance klienta. Node test s injektovanými stubs chybu skryl.
+- Typ: opakující se
+- Řešení nalezeno: 17112026
+- Řešení: výchozí adaptéry časovačů tvořit jako uzávěry nad konkrétním Window nebo je správně navázat. Nezaměňovat úspěch párování za přenesený draft; zobrazit jeho trvalý stav u editoru.
+- Ověření: brand-check regrese FAIL→PASS, automatický debounce uloží jeden draft bez modelového send. Dva nativní Safari klienti s oddělenými úložišti prokázali skutečný přenos oběma směry, převzetí a jeden syntetický send/reload bez duplikace. Fyzická zařízení samostatně.

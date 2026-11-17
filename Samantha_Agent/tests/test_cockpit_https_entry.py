@@ -106,7 +106,16 @@ class HttpsCockpitEntryTests(unittest.TestCase):
                               + 'printf \'%s\\n\' ' + "'" + json.dumps(STATUS) + "'\n"
                               + 'else\nprintf "GUI mode is not JSON\\n"\nfi\n')
             binary.chmod(0o700)
-            with patch.dict(os.environ, {'SAMANTHA_TAILSCALE_BIN': str(binary)}, clear=True):
+            # The production two-second bound is asserted in the test above.
+            # This test checks child/parent environment isolation, not OS process
+            # startup latency under a busy validation runner.
+            real_run = subprocess.run
+            def run_fixture(*args, **kwargs):
+                self.assertEqual(kwargs['timeout'], 2)
+                kwargs['timeout'] = 10
+                return real_run(*args, **kwargs)
+            with patch.dict(os.environ, {'SAMANTHA_TAILSCALE_BIN': str(binary)}, clear=True), \
+                    patch('app.cockpit_https_entry.subprocess.run', side_effect=run_fixture):
                 self.assertEqual(read_serve_status(), STATUS)
                 self.assertNotIn('TAILSCALE_BE_CLI', os.environ)
                 self.assertNotIn('TERM', os.environ)

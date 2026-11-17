@@ -25,6 +25,8 @@ class SharedChatHTTPTests(unittest.TestCase):
         self.server=ThreadingHTTPServer(('127.0.0.1',0),cockpit.CockpitServer().make_handler())
         self.thread=threading.Thread(target=self.server.serve_forever,daemon=True);self.thread.start();self.addCleanup(self.stop)
         self.url=f'http://127.0.0.1:{self.server.server_port}'
+        event_patch=patch('app.cockpit.log_cockpit_http_event')
+        self.event_logger=event_patch.start();self.addCleanup(event_patch.stop)
 
     def stop(self):
         self.server.shutdown();self.server.server_close();self.thread.join(timeout=3)
@@ -49,6 +51,7 @@ class SharedChatHTTPTests(unittest.TestCase):
     def test_foreign_origin_cannot_create_or_pair_devices(self):
         status,_=self.request(body={'action':'create','name':'Mint','request_id':'bad-origin-request','editor_id':'http-editor-001'},origin='https://other.invalid')
         self.assertEqual(status,403);self.assertFalse(self.root.exists())
+        self.assertEqual(self.event_logger.call_args.kwargs['event'],'origin_forbidden')
 
     def test_invalid_device_cannot_read_private_messages(self):
         host=self.create()
@@ -64,6 +67,12 @@ class SharedChatHTTPTests(unittest.TestCase):
         with ThreadPoolExecutor(max_workers=2) as pool:responses=list(pool.map(lambda _:self.request(body=payload),range(2)))
         self.assertEqual([r[0] for r in responses],[200,200]);self.assertEqual(len(self.tasks),1)
         self.tasks.pop()();self.assertEqual(sum(c.sent for c in ChatModel.instances),1)
+
+    def test_native_browser_timer_receivers_and_debounce(self):
+        result=subprocess.run([node_binary(),str(Path(__file__).with_name('shared_chat_browser_timers.test.cjs'))],
+            capture_output=True,text=True,timeout=15,check=False)
+        self.assertEqual(result.returncode,0,result.stdout+result.stderr)
+        self.assertIn('PASS: native browser timer receiver',result.stdout)
 
     def test_real_frontend_two_clients_reconnect_conflict_and_lost_response(self):
         self.service.launcher=lambda fn:fn()

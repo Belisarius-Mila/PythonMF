@@ -4,7 +4,7 @@
   function uuid(crypto){const bytes=new Uint8Array(16);crypto.getRandomValues(bytes);return Array.from(bytes,v=>v.toString(16).padStart(2,'0')).join('');}
   function cached(storage,key){try{const value=JSON.parse(storage.getItem(key)||'null');return value&&typeof value==='object'&&!Array.isArray(value)?value:null;}catch(_){return null;}}
   class Client {
-    constructor({fetch,storage,tabStorage,crypto,render=()=>{},setTimer=setTimeout,clearTimer=clearTimeout}){
+    constructor({fetch,storage,tabStorage,crypto,render=()=>{},setTimer=(fn,delay)=>root.setTimeout(fn,delay),clearTimer=id=>root.clearTimeout(id)}){
       Object.assign(this,{fetch,storage,tabStorage,crypto,render,setTimer,clearTimer});
       this.editor=tabStorage.getItem('samantha-chat-editor')||uuid(crypto);tabStorage.setItem('samantha-chat-editor',this.editor);
       this.token=storage.getItem(KEY)||'';this.state=null;this.online=false;this.text='';this.dirty=false;this.editVersion=0;this.epoch=0;this.busy=false;this.claiming=false;this.error='';this.chain=Promise.resolve();this.timer=null;
@@ -92,6 +92,7 @@
       el('setup').hidden=Boolean(c.token);el('chat').hidden=!c.state;
       el('connection').textContent=c.state?`${c.online?'Připojeno':'Spojení není ověřené'}: ${c.state.name} · ${c.state.client_label}`:c.token?'Obnovuji připojení…':'Vyber rozhovor nebo připoj telefon.';
       el('status').textContent=c.error;
+      el('draftStatus').textContent=!c.state?'':c.dirty?'Rozepsaný text zatím není přenesený na druhé zařízení.':c.state.draft.text?'Rozepsaný text je uložený pro obě zařízení.':c.state.draft.can_edit?'Můžeš psát nebo diktovat. Text se přenáší automaticky.':'Pro psaní na tomto zařízení stiskni „Psát / diktovat zde“.';
       el('disconnect').hidden=!c.token;el('disconnect').disabled=c.busy;
       if(!c.state)return;
       el('pairPanel').hidden=!c.state.host;el('pairCode').textContent=c.state.pair_code||'';
