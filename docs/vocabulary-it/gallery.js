@@ -5,10 +5,18 @@ const DATA_URL = appRoot?.dataset.jsonUrl || "../data/vocabulary-it-v2.json";
 const AUDIO_DATA_URL = appRoot?.dataset.audioUrl || "../data/vocabulary-it-audio.json";
 const SENTENCE_AUDIO_URL = "../data/vocabulary-it-sentence-audio.json";
 const QUIZ_DATA_URL = "../data/vocabulary-it-quiz.json";
+const SENTENCE_PICTURES_URL = "../data/vocabulary-it-sentence-pictures.json";
+const sentencePicturesUI=document.getElementById("sentencePictures");
+const sentenceImagePreloads=new Map(),failedSentenceImages=new Set();
+let sentencePicturesManifest=null,sentencePicturesKey="";
 const galleryModeHint=document.getElementById("galleryModeHint");
 const ui = Object.fromEntries(["galleryView","studyView","totalCount","totalLabel","searchInput","topicPicker","topicFilters","topicSummary","clearTopicsButton","filterSelect","teachingTypeSelect","groupSelect","sortSelect","sizeButton","partFilters","levelFilters","sourceFilters","continueButton","shuffleButton","resetButton","emptyResetButton","sectionNav","galleryNotice","galleryGroups","emptyState","galleryFooter","backButton","backBottomButton","studyPosition","wordImage","pictureFallback","speakPromptButton","promptLabel","promptText","messageStrip","revealButton","answerCard","answerIt","answerCz","sentenceBox","sentenceIt","sentenceCz","speakAnswerButton","roundStatus","previousButton","nextButton","newRoundButton"].map(id => [id,document.getElementById(id)]));
 const defaults = () => ({filter:"all",teachingType:"all",query:"",topics:[],sources:[],parts:[],levels:[],groupBy:"topic",sort:"recommended",labelLanguage:"it",direction:"czToIt",practice:"words",large:false,learner:"all",onlyLearnerHard:false,recentCount:0});
 const state = {data:null,audioManifest:null,sentenceAudioManifest:null,items:[],...defaults(),galleryMode:"learn",currentItem:null,revealed:false,view:"gallery",sequence:[],index:0,mode:"ordered",lastUid:"",visitId:"",fromGallery:false,anchorOffset:120};
+const loopUI=Object.fromEntries(["studyLoopMode","studyLoopGap","studyLoopToggle","studyLoopStop","studyLoopStatus","studyLoopTranslation"].map(id=>[id,document.getElementById(id)]));
+// Runtime only: history, reload and bfcache never start sound automatically.
+const studyLoop={mode:"words",gap:2000,active:false,running:false,phase:"words",generation:0,cancelWait:null};
+let loopAudio=null;
 let galleryTranslation=null;
 let learnerUI=null;
 let quizUI=null,quizCatalog=null;
@@ -79,6 +87,7 @@ function syncControls(){
   for(const [id,key] of [["topicFilters","topics"],["partFilters","parts"],["levelFilters","levels"],["sourceFilters","sources"]])ui[id].querySelectorAll("input").forEach(input=>{input.checked=state[key].includes(input.value);});
   const labels=state.topics.map(id=>state.data?.catalog?.groups.find(group=>group.id===id)?.label).filter(Boolean);
   ui.topicSummary.textContent=labels.length ? labels.join(" + ") : "Všechna témata";
+  syncStudyLoopControls();
 }
 function syncGalleryMode(){
   document.querySelectorAll("[data-gallery-mode]").forEach(button=>button.setAttribute("aria-pressed",String(button.dataset.galleryMode===state.galleryMode)));
@@ -241,7 +250,141 @@ function renderCurrentItem(){
   ui.nextButton.textContent=boundary ? `Dál: ${nextGroup.label} →` : "Další →";
   ui.roundStatus.textContent=next ? boundary ? "Poslední slovíčko této skupiny. Dál začíná další skupina." : "" : "To je konec tohoto výběru. Můžeš se vrátit na přehled.";
   syncControls();primeCurrentAudio(item);
+  ui.studyView.classList.toggle("loop-practice",studyLoop.active);
+  loopUI.studyLoopTranslation.hidden=!studyLoop.active;
+  ui.speakPromptButton.hidden=studyLoop.active;
+  if(studyLoop.active)renderStudyLoopCard();
+  const showPictures=studyLoop.active && studyLoop.phase==="sentences" && renderSentencePictures(item);
+  if(!showPictures)hideSentencePictures();
+  primeSentencePictures();
   document.title=state.view==="study" ? `${item.it} · Vocabulary IT` : document.title;
+}
+function sentenceConcepts(item){return M.sentencePictures(item,sentencePicturesManifest,state.data?.items || []);}
+function hideSentencePictures(){
+  sentencePicturesUI.hidden=true;sentencePicturesUI.replaceChildren();sentencePicturesKey="";
+  ui.studyView.classList.remove("sentence-context");
+}
+function primeSentencePictures(){
+  const next=state.sequence[(state.index+1)%state.sequence.length];
+  for(const item of [state.currentItem,next].filter(Boolean))for(const ref of sentenceConcepts(item)){
+    const relative=ref.item.thumbnail;
+    if(sentenceImagePreloads.has(relative) || failedSentenceImages.has(relative))continue;
+    const image=document.createElement("img");image.decoding="async";
+    image.src=new URL(`../${relative}`,window.location.href).toString();
+    sentenceImagePreloads.set(relative,image);
+    if(sentenceImagePreloads.size>10)sentenceImagePreloads.delete(sentenceImagePreloads.keys().next().value);
+  }
+}
+function renderSentencePictures(item){
+  const refs=sentenceConcepts(item).filter(ref=>!failedSentenceImages.has(ref.item.thumbnail));
+  if(!refs.length)return false;
+  const key=JSON.stringify([item.uid,refs.map(ref=>[ref.item.uid,ref.item.it,ref.item.thumbnail])]);
+  if(key!==sentencePicturesKey){
+    sentencePicturesUI.replaceChildren();sentencePicturesKey=key;
+    for(const ref of refs){
+      const figure=document.createElement("figure");figure.className="sentence-picture";figure.dataset.uid=ref.item.uid;
+      const image=document.createElement("img");image.alt="";image.width=240;image.height=240;image.decoding="async";image.loading="eager";
+      image.src=new URL(`../${ref.item.thumbnail}`,window.location.href).toString();
+      const caption=document.createElement("figcaption");caption.lang="it";caption.textContent=ref.item.it;caption.title=`Ve větě: ${ref.text}`;
+      image.addEventListener("error",()=>{
+        failedSentenceImages.add(ref.item.thumbnail);
+        if(figure.parentNode!==sentencePicturesUI)return;
+        figure.remove();sentencePicturesKey="";
+        sentencePicturesUI.setAttribute("data-count",String(sentencePicturesUI.children.length));
+        if(!sentencePicturesUI.children.length)hideSentencePictures();
+      },{once:true});
+      figure.append(image,caption);sentencePicturesUI.append(figure);
+    }
+  }
+  sentencePicturesUI.hidden=false;sentencePicturesUI.setAttribute("data-count",String(refs.length));
+  ui.studyView.classList.add("sentence-context");
+  return true;
+}
+
+function syncStudyLoopControls(){
+  loopUI.studyLoopMode.value=studyLoop.mode;
+  loopUI.studyLoopGap.value=String(studyLoop.gap);
+  loopUI.studyLoopToggle.textContent=studyLoop.running ? "Ⅱ Pozastavit" : studyLoop.active ? "▶ Pokračovat" : "▶ Spustit smyčku";
+  loopUI.studyLoopToggle.disabled=!state.currentItem || !state.sequence.length;
+  loopUI.studyLoopStop.hidden=!studyLoop.active;
+}
+function interruptStudyLoop(exit=true){
+  studyLoop.generation++;
+  studyLoop.running=false;
+  if(studyLoop.cancelWait){studyLoop.cancelWait();studyLoop.cancelWait=null;}
+  if(exit){
+    studyLoop.active=false;
+    hideSentencePictures();
+    loopUI.studyLoopTranslation.hidden=true;
+    ui.studyView.classList.remove("loop-practice");
+    loopUI.studyLoopStatus.textContent="Smyčka opakuje aktuální výběr italsky, český překlad zůstává na obrazovce.";
+  }
+  syncStudyLoopControls();
+}
+function renderStudyLoopCard(){
+  const item=state.currentItem, sentence=studyLoop.phase==="sentences";
+  ui.studyView.classList.toggle("sentence-practice",sentence);
+  ui.studyView.setAttribute("aria-label","Kontinuální procvičování");
+  ui.promptLabel.textContent=sentence ? "VĚTA ITALSKY" : "SLOVÍČKO ITALSKY";
+  ui.promptText.textContent=sentence ? item.sentenceIt || "Věta zatím není doplněná." : item.it;
+  ui.promptText.lang="it";
+  loopUI.studyLoopTranslation.textContent=sentence ? item.sentenceCz || "" : item.cz;
+  ui.wordImage.alt=item.cz;
+  ui.revealButton.hidden=true;ui.answerCard.classList.add("hidden");ui.speakAnswerButton.hidden=true;
+  ui.messageStrip.textContent="";
+  ui.roundStatus.textContent=`Opakování výběru · ${state.index+1}/${state.sequence.length}`;
+}
+function pauseStudyLoop(message="Pozastaveno. Pokračovat přehraje aktuální úsek od začátku."){
+  if(!studyLoop.active)return;
+  interruptStudyLoop(false);stopAudioPlayback({keepStudyLoop:true});
+  loopUI.studyLoopStatus.textContent=message;
+}
+function exitStudyLoop(){
+  stopAudioPlayback();
+  if(state.view==="study")renderCurrentItem();
+}
+function loopDelay(generation){
+  return new Promise(resolve=>{
+    const timer=window.setTimeout(()=>{if(generation===studyLoop.generation)studyLoop.cancelWait=null;resolve(generation===studyLoop.generation);},studyLoop.gap);
+    studyLoop.cancelWait=()=>{window.clearTimeout(timer);resolve(false);};
+  });
+}
+function loopIsCurrent(generation){return studyLoop.running && state.view==="study" && generation===studyLoop.generation;}
+async function runStudyLoop(generation){
+  try{
+    while(loopIsCurrent(generation)){
+      const item=state.currentItem, sentence=studyLoop.phase==="sentences";
+      const record=sentence ? M.sentenceAudioRecord(item,state.sentenceAudioManifest) : M.audioRecord(item,state.audioManifest);
+      renderCurrentItem();
+      if(!record?.it)throw new Error(sentence ? "Chybí ověřený zvuk této věty. Zkus Slovíčka nebo jinou kartu." : "Chybí ověřený zvuk tohoto slovíčka.");
+      loopUI.studyLoopStatus.textContent=sentence ? "Posloucháš větu. Potom se zobrazí a přečte slovíčko." : "Posloucháš slovíčko. Po dočtení a pauze následuje další karta.";
+      // Keep one user-unlocked element for Safari; load() resets each source,
+      // including the single-card wrap, without reusing a pending seek.
+      if(!loopAudio)loopAudio=new Audio();
+      const completed=await playOneAudio(record.it,playbackToken,{player:loopAudio,timeoutMs:90000});
+      if(!completed || !loopIsCurrent(generation))return;
+      loopUI.studyLoopStatus.textContent="Pauza po dočtení…";
+      if(!await loopDelay(generation) || !loopIsCurrent(generation))return;
+      if(sentence){studyLoop.phase="words";}
+      else{
+        studyLoop.phase=studyLoop.mode==="sentence-word" ? "sentences" : "words";
+        state.index=(state.index+1)%state.sequence.length;
+        state.currentItem=state.sequence[state.index];state.lastUid=M.key(state.currentItem);state.revealed=false;
+        writeHistory("study");persist();
+      }
+    }
+  }catch(error){
+    if(loopIsCurrent(generation))pauseStudyLoop(`${error.message} Smyčka je pozastavená; můžeš pokračovat nebo ji ukončit.`);
+  }
+}
+function startStudyLoop(){
+  if(state.view!=="study" || !state.currentItem || !state.sequence.length)return;
+  const resume=studyLoop.active;
+  stopAudioPlayback({keepStudyLoop:true});interruptStudyLoop(false);
+  studyLoop.active=true;studyLoop.running=true;
+  if(!resume)studyLoop.phase=studyLoop.mode==="sentence-word" ? "sentences" : "words";
+  syncStudyLoopControls();
+  void runStudyLoop(studyLoop.generation);
 }
 function setPracticeMode(mode){
   if(state.view!=="study" || !["words","sentences"].includes(mode))return;
@@ -345,7 +488,8 @@ function primeCurrentAudio(item) {
   [record.it, record.cz].forEach((relativePath) => cachedAudio(relativePath));
 }
 
-function stopAudioPlayback() {
+function stopAudioPlayback({keepStudyLoop=false}={}) {
+  if(!keepStudyLoop)interruptStudyLoop();
   clearGalleryTranslation();
   playbackToken += 1;
   if (currentPlaybackCancel) {
@@ -360,24 +504,26 @@ function stopAudioPlayback() {
   }
 }
 
-function playOneAudio(relativePath, token, { fresh = false } = {}) {
+function playOneAudio(relativePath, token, {fresh=false,player=null,timeoutMs=0}={}) {
   return new Promise((resolve, reject) => {
-    // Practice attempts get their own media element: no asynchronous rewind of
-    // an ended player, and no late event can belong to the next attempt.
-    const audio = fresh && relativePath ? new Audio(audioUrl(relativePath)) : cachedAudio(relativePath);
+    const audio = player || (fresh && relativePath ? new Audio(audioUrl(relativePath)) : cachedAudio(relativePath));
     if (!audio || token !== playbackToken) {
       resolve(false);
       return;
     }
 
     currentAudio = audio;
-    if (!fresh) audio.currentTime = 0;
+    if(player){audio.src=audioUrl(relativePath);audio.load();}
+    else if(!fresh)audio.currentTime = 0;
     let settled = false;
+    let watchdog=null;
     const finish = (completed, error = null) => {
       if (settled) {
         return;
       }
       settled = true;
+      if(watchdog!==null)window.clearTimeout(watchdog);
+      if(error)audio.pause();
       audio.removeEventListener("ended", onEnded);
       audio.removeEventListener("error", onError);
       if (currentAudio === audio) {
@@ -390,15 +536,16 @@ function playOneAudio(relativePath, token, { fresh = false } = {}) {
         resolve(completed);
       }
     };
-    const onEnded = () => finish(true);
+    const onEnded = () => {if(!player || audio.ended===true)finish(true);};
     const onError = () => finish(false, new Error("Zvuk se nepodařilo přehrát."));
     currentPlaybackCancel = () => {
       audio.pause();
       audio.currentTime = 0;
       finish(false);
     };
-    audio.addEventListener("ended", onEnded, { once: true });
+    audio.addEventListener("ended", onEnded);
     audio.addEventListener("error", onError, { once: true });
+    if(timeoutMs)watchdog=window.setTimeout(()=>{audio.pause();finish(false,new Error("Přehrávání zvuku se nedokončilo včas."));},timeoutMs);
     audio.play().catch(() => onError());
   });
 }
@@ -427,6 +574,7 @@ async function playAudioSequence(relativePaths) {
 }
 
 function speakPrompt() {
+  if(studyLoop.active)return;
   if (!state.currentItem) {
     return;
   }
@@ -436,6 +584,7 @@ function speakPrompt() {
 }
 
 function speakAnswer() {
+  if(studyLoop.active)return;
   if (!state.currentItem || (state.practice === "sentences" && !state.revealed)) {
     return;
   }
@@ -444,6 +593,19 @@ function speakAnswer() {
 }
 
 function bindEvents(){
+  loopUI.studyLoopToggle.addEventListener("click",()=>{if(studyLoop.running)pauseStudyLoop();else startStudyLoop();});
+  loopUI.studyLoopStop.addEventListener("click",exitStudyLoop);
+  loopUI.studyLoopMode.addEventListener("change",()=>{
+    const mode=loopUI.studyLoopMode.value;if(!["words","sentence-word"].includes(mode))return;
+    if(studyLoop.active)pauseStudyLoop("Režim změněn. Spusť Pokračovat.");
+    studyLoop.mode=mode;studyLoop.phase=mode==="sentence-word" ? "sentences" : "words";
+    if(studyLoop.active)renderCurrentItem();syncStudyLoopControls();
+  });
+  loopUI.studyLoopGap.addEventListener("change",()=>{
+    const gap=Number(loopUI.studyLoopGap.value);if(![1000,2000,4000,6000].includes(gap))return;
+    if(studyLoop.active)pauseStudyLoop("Prodleva změněna. Spusť Pokračovat.");
+    studyLoop.gap=gap;syncStudyLoopControls();
+  });
   document.getElementById("settingsTab").addEventListener("click",()=>learnerUI?.open(state.learner));
   document.getElementById("galleryTab").addEventListener("click",()=>{if(state.view==="settings")learnerUI?.close();else if(state.view==="study")returnToGallery();else if(state.view==="quiz")quizUI?.close();});
   document.getElementById("quizTab").addEventListener("click",()=>{if(state.view!=="quiz")openQuiz();});
@@ -474,13 +636,18 @@ function bindEvents(){
   ui.wordImage.addEventListener("error",()=>{ui.wordImage.hidden=true;ui.pictureFallback.hidden=false;});
   document.addEventListener("keydown",event=>{if(event.key==="Escape"){if(state.view==="study"){event.preventDefault();returnToGallery();}else if(state.view==="quiz"){event.preventDefault();quizUI?.close();}}});
   window.addEventListener("popstate",()=>{stopAudioPlayback();applyRoute();});
-  window.addEventListener("hashchange",()=>{const current=route();if(current.game||state.view==="quiz"||current.card && (state.view!=="study" || M.key(state.currentItem)!==current.card))applyRoute();});
+  window.addEventListener("hashchange",()=>{const current=route();if(current.game||state.view==="quiz"||current.card && (state.view!=="study" || M.key(state.currentItem)!==current.card)){stopAudioPlayback();applyRoute();}});
   window.addEventListener("pagehide",()=>{persist();quizUI?.leave();stopAudioPlayback();});
   window.addEventListener("pageshow",event=>{if(event.persisted){stopAudioPlayback();if(state.view==="gallery")focusLast();else if(state.view==="quiz")quizUI?.open();}});
 }
 async function readJson(url){const response=await fetch(url,{cache:"no-store"});if(!response.ok)throw new Error(`HTTP ${response.status}`);return response.json();}
 async function init(){
   bindEvents();
+  void readJson(SENTENCE_PICTURES_URL).then(manifest=>{
+    sentencePicturesManifest=manifest;primeSentencePictures();
+    // Late optional metadata must not swap pictures in a sentence already playing.
+    if(state.currentItem && state.view==="study" && !studyLoop.running)renderCurrentItem();
+  }).catch(()=>{sentencePicturesManifest=false;});
   // A slow or missing pronunciation file must never hold the picture atlas closed.
   void readJson(AUDIO_DATA_URL).then(manifest=>{
     state.audioManifest=manifest;document.getElementById("audioNotice").hidden=manifest?.status!=="not-generated";if(state.currentItem)primeCurrentAudio(state.currentItem);quizUI?.refresh();

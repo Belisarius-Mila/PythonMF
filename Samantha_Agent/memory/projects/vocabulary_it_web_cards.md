@@ -1,3 +1,22 @@
+## 2026-11-17 14:04 CET — Společné p+n obrazových vět EN a IT
+
+Hotovo: Převzatý Datův commit31c670bb do main s vlastní angličtinou15f9d076.
+EN512 vět/1255 vazeb, IT1096 vět/1963 vazeb; vždy1–5 stávajících obrázků,
+pak původní slovní karta. Datův funkční obsah je přesně zachovaný. Konflikty
+jen v dokumentaci řešené zachováním obou historií a novějšího stavu EN/IT.
+Rozhodnutí: Míla výslovně zadal „p+n pro tebe i Data“. Jeden společný Git
+balíček a Pages deployment, registrovaná účtenka i HTTP ověření obou proudů.
+Druhé předání využije již vydaný stejný Pages head; žádná výroba médií/TTS.
+Další krok: Programová integrační brána, jediný merge commit a registrované
+submit_release(wait=True) pro oba přesné proudy. Konečný výsledek v
+private vocabulary_en_it_release_20261117/completion.json; příprava není
+potvrzením push ani veřejné publikace. Nejistá operace se neopakuje.
+Navrhované další kroky: Mílova telefonní a akustická přejímka obou aplikací.
+Datův další FR vývoj zůstává v jeho oddělené pracovní kopii.
+Technický důkaz: EN164 cílených PASS, IT165 cílených PASS z původních účtenek;
+novou společnou bránu a přesný integrační head určuje completion.json.
+Nový EN TVBCP nevzniká, zachovaný obecný TVBCP a vlastní IT TVBCP.
+
 # Vocabulary IT — samostatná webová aplikace podle EN
 
 Projekt/proud: project-vocabulary-it. Kanonický handoff i existující TVBCP jsou
@@ -18,7 +37,7 @@ Přijatá pravidla
 Základní soubory a hranice
 VocabularyIT/vocabulary_it_catalog.json:1096 identit (471 původních,26 dřívějších webových a599 LEDA). Původní metadata zůstávají zachovaná,599 nových významů redakčně ověřených; obtížnost pouze návrh.
 VocabularyIT/vocabulary_it_input_manifest.json: neměnné otisky777 původních vstupů.
-Aktuální stav: LEDA599 místně zařazeno, celkem1096 karet/18 témat, kompletních4222 MP3. Azure dokončen pod limitem2 USD; nové p+n nebylo zadáno. Podklad1–2 chybí. Viz vocabulary_it_leda_20261116.md.
+Aktuální stav 2026-11-17 13:26 CET: obrazové kontexty1096 vět/1963 vazeb a IT kontinuální smyčka místně. Žádná nová média, hotové4222MP3 zachované. Finální brána a jediný commit v private completion.json. Nový krok bez publikace. Dále FR pro Janu/464 karet; LEDA1–2 zůstává odložené. Viz vocabulary_it_sentence_pictures_20261117.md.
 VocabularyIT/vocabulary_it_catalog.py: pouze čtení a ověření, žádný CSV writer.
 VocabularyIT/vocabulary_it_review_queue.txt:112 prioritních karet k revizi.
 VocabularyIT/WEB_FOUNDATION.txt: identita, přesné kontrolní příkazy a další bod.
@@ -538,3 +557,39 @@ služby beze změny. Autoritativní completion.json a public_verification.json
 v data/private/vocabulary_it_leda_release_20261116/. Původní attention účtenka
 zůstává historickým dokladem timeoutu; není důvodem k dalšímu p+n.
 Fyzická přejímka není prokázaná HTTP testem.
+
+### 2026-11-17 13:26 CET — Obrazové kontexty všech italských vět a kontinuální smyčka
+
+Hotovo:
+Všech1096 vět má připravené1–5 obrazových pojmů, celkem1963 vazeb na1091
+různých existujících významových karet. Věta + slovíčko ukáže IT popisky,
+IT větu a CZ překlad; po dočtení/pauze ji nahradí velká slovní karta/IT/CZ
+a přečte celé slovo. Slovíčka opakují jen cílová hesla. Pauza, pokračování,
+ukončení a1/2/4/6 s mezery. Původní hra a psaní jsou zachované.
+
+Rozhodnutí:
+Míla zadal nejprve doplnit italštinu, u každé věty nejvýše5 obrázků, udělat
+jeden commit a potom pokračovat FR. Základ je hotové EN řešení; žádná další
+výroba obrazu/zvuku. Filtry vybírají cílové věty, kontextové obrazy mohou být
+z celého slovníku. Krátké věty mají jen tolik pojmů, kolik skutečně obsahují.
+
+Další krok:
+Po jediném ověřeném lokálním commitu navázat FR podle analýzy v Downloads
+s aktualizovaným oddílem13 (464 karet po vynechání5 shodných dvojic).
+
+Navrhované další kroky:
+- Samostatné IT p+n/integrace; publikace zůstává oddělená od tohoto vývoje.
+- Mílova přejímka na používaném zařízení.
+- Chybějící podklad LEDA1–2 zůstává dříve odložený obsahový úkol.
+
+Technický důkaz:
+5 nových Python kontrol: úplnost/přesný export, drift/unknown/retired/pořadí/
+podřetězce, homografy/elize, UTF16/změna pořadí a bezpečné obrazové cesty.
+56 skutečných JS scénářů prošlo včetně11 nových loop/context regresí.
+Safari Mac potvrdilo4 kontexty gonna/nero/camicia/bianco nad IT/CZ větou,
+velkou gonna/sukně kartu po dočtení, pauzu/pokračování/změnu mezery/ukončení.
+Samostatné localhost okno a server zavřené, původní okno zachované.
+Finální programově vybranou validation-v3 bránu a přesné zdroje po commitu
+určuje private/vocabulary_it_sentence_pictures_20261117/completion.json.
+Původní CSV471, katalog1096, audio manifesty/4222MP3, všechna média, EN/FR
+a profily beze změny; žádné publish/restart/release submit/modelový TTS tah.

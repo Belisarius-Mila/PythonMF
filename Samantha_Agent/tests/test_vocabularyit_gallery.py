@@ -92,4 +92,69 @@ class VocabularyItalianGalleryTests(unittest.TestCase):
         self.assertEqual(completed.returncode,0,completed.stdout+'\n'+completed.stderr)
 
 
+
+class ItalianSentencePictureTests(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls):
+        import importlib.util
+        spec=importlib.util.spec_from_file_location('italian_sentence_builder',ROOT/'VocabularyIT/build_sentence_pictures.py')
+        cls.builder=importlib.util.module_from_spec(spec);spec.loader.exec_module(cls.builder)
+        cls.source=json.loads((ROOT/'VocabularyIT/vocabulary_it_sentence_pictures.json').read_text())
+        cls.data=json.loads((DOCS/'data/vocabulary-it-v2.json').read_text())
+        cls.export=json.loads((DOCS/'data/vocabulary-it-sentence-pictures.json').read_text())
+
+    def test_complete_exact_reviewed_export_and_all_image_references(self):
+        actual=self.builder.build(self.source,self.data,asset_root=DOCS)
+        self.assertEqual(actual,self.export)
+        self.assertEqual(len(actual['entries']),1096)
+        self.assertEqual(sum(len(r['concepts']) for r in actual['entries'].values()),1963)
+        self.assertEqual(max(len(r['concepts']) for r in actual['entries'].values()),5)
+        self.assertTrue(all(r['reviewed'] and 1<=len(r['concepts'])<=5 for r in actual['entries'].values()))
+
+    def test_changed_sentence_translation_meaning_missing_or_retired_uid_are_rejected(self):
+        for mode in ['sentence','translation','word','meaning','unknown','retired','coverage','too-many','duplicate','order','substring','shape']:
+            source=copy.deepcopy(self.source);data=copy.deepcopy(self.data);record=source['entries']['vit-0083']
+            if mode=='sentence':record['sourceSentenceIt']+='x'
+            if mode=='translation':record['sourceSentenceCz']+='x'
+            if mode=='word':record['sourceIt']+='x'
+            if mode=='meaning':record['concepts'][0]['sourceCz']+='x'
+            if mode=='unknown':record['concepts'][0]['uid']='vit-9999'
+            if mode=='retired':next(i for i in data['items'] if i['uid']=='vit-0083')['active']=False
+            if mode=='coverage':source['entries'].pop('vit-0001')
+            if mode=='too-many':record['concepts']*=2
+            if mode=='duplicate':record['concepts'][1]=record['concepts'][0]
+            if mode=='order':record['concepts'].reverse()
+            if mode=='substring':record['concepts'][1]['text']='ner'
+            if mode=='shape':record['concepts']=None
+            with self.subTest(mode=mode),self.assertRaises(ValueError):self.builder.build(source,data)
+
+    def test_reviewed_homographs_idioms_inflections_and_elisions_have_correct_meanings(self):
+        def ids(uid):return {r['uid'] for r in self.export['entries'][uid]['concepts']}
+        self.assertIn('vit-0682',ids('vit-0443'));self.assertNotIn('vit-0583',ids('vit-0443'))
+        self.assertIn('vit-0525',ids('vit-0065'));self.assertNotIn('vit-0130',ids('vit-0065'))
+        self.assertIn('vit-0107',ids('vit-0106'));self.assertIn('vit-0106',ids('vit-0106'))
+        self.assertIn('vit-1008',ids('vit-1089'));self.assertNotIn('vit-0580',ids('vit-1089'))
+        self.assertIn('vit-0491',ids('vit-0491'));self.assertNotIn('vit-0353',ids('vit-0491'))
+        self.assertIn('vit-1091',ids('vit-0166'));self.assertNotIn('vit-0166',ids('vit-0166'))
+        self.assertIn('vit-1050',ids('vit-1050'));self.assertNotIn('vit-0322',ids('vit-1050'))
+        self.assertIn('vit-0320',ids('vit-1074'));self.assertNotIn('vit-0319',ids('vit-1074'))
+        ref=self.export['entries']['vit-0617']['concepts'][0];self.assertEqual(ref['text'],'acqua')
+
+    def test_utf16_offsets_and_order_independence(self):
+        source=copy.deepcopy(self.source);data=copy.deepcopy(self.data)
+        item=next(i for i in data['items'] if i['uid']=='vit-0617')
+        item['sentenceIt']='💧 '+item['sentenceIt'];source['entries'][item['uid']]['sourceSentenceIt']=item['sentenceIt']
+        result=self.builder.build(source,data);ref=result['entries'][item['uid']]['concepts'][0]
+        expected=len(item['sentenceIt'][:item['sentenceIt'].index('acqua')].encode('utf-16-le'))//2
+        self.assertEqual(ref['start'],expected)
+        data['items'].reverse();self.assertEqual(self.builder.build(source,data),result)
+
+    def test_unsafe_missing_and_repeated_image_assets_are_rejected(self):
+        for mode in ['unsafe','missing','same-image']:
+            data=copy.deepcopy(self.data);items={i['uid']:i for i in data['items']}
+            if mode=='unsafe':items['vit-0083']['thumbnail']='../private.webp'
+            if mode=='missing':items['vit-0083']['thumbnail']='assets/vocabulary-it-v2/thumbs/missing.webp'
+            if mode=='same-image':items['vit-0512']['image']=items['vit-0083']['image']
+            with self.subTest(mode=mode),self.assertRaises(ValueError):self.builder.build(self.source,data,asset_root=DOCS)
+
 if __name__=='__main__':unittest.main()

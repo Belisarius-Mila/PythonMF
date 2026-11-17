@@ -1,3 +1,9 @@
+AKTUÁLNĚ17.11.2026: obrazové kontexty všech1096 vět a kontinuální smyčka IT.
+1963 vazeb,1–5 obrazů/IT popisků nad IT větou a CZ překladem; potom velká
+slovní karta. Ovládání na velké kartě: Smyčka → Věta + slovíčko → Spustit.
+Místní krok; finální brána/otisky/jediný commit v private completion.json.
+Původní knihovna4222MP3 a osobní A–D zachované; bez nového TTS/publikace.
+
 AKTUÁLNĚ16.11.2026: Slovo a obrázek místně implementované,497 karet.
 495 dělení+2 celé přejímky,4 možnosti/hlas/opravy/velká karta/opakování chyb.
 Nové fyzické QA a samostatné Pages p+n otevřené; viz poslední oddíl.
@@ -265,3 +271,41 @@ Fyzická vizuální/přehrávací přejímka tohoto nového režimu není dolož
 CUA Safari i Finder vracejí cgWindowNotFound, browser access host unavailable.
 Nepovažovat DOM/HTTP za skutečný render nebo iPhone/Android přejímku.
 Finální brána, otisk zdrojů a lokální checkpoint: private/vocabulary_it_spelling_20261116.
+
+
+OBRAZY VE VĚTNÉ SMYČCE — AUTORSKÉ PRAVIDLO17.11.2026
+
+Kanonický VocabularyIT/vocabulary_it_sentence_pictures.json pokrývá přesně
+všechny aktivní věty exportu vocabulary-it-v2.json. Každá má1 až5 pojmů.
+Ukládá UID cíle i pojmů a přesné IT/CZ významy, obě aktuální věty, reviewed
+příznak, doslovný povrchový tvar a jeho výskyt occurrence od1. Výběr se dělá
+předem podle celé věty, ne živým hledáním v prohlížeči.
+
+Pojmy řadit podle věty, neopakovat UID, obraz ani překrývající se výrazy.
+Přednost mají pevná spojení: a piedi není obraz chodidla, in contanti není
+hrací karta. Porta/dveře nepoužít pro porta/nese. Lei/lei, práce/pracuji,
+čas/počasí, jmenování/osoba a reflexivní mytí rozlišit významově. Ve slově
+l'acqua je acqua samostatný pojem i po apostrofu; nevyhledávat podřetězce
+uvnitř jiného slova. Přesný doslovný úsek může být i skloňovaná podoba nebo
+revidované delší znění idiomu, pod obrázkem je základní IT heslo.
+
+Z kořene PythonMF:
+  Samantha_Agent/.venv/bin/python VocabularyIT/build_sentence_pictures.py
+  Samantha_Agent/.venv/bin/python VocabularyIT/build_sentence_pictures.py --check
+Builder musí odmítnout drift textů/významů, neznámé nebo vyřazené UID,
+neúplné pokrytí, chybný výskyt/pořadí, více než5 nebo stejný obraz a neplatnou
+lokální obrazovou cestu. Export do docs/data/vocabulary-it-sentence-pictures.json
+se ukládá se zdrojem. Po nové kartě doplnit mapu a po změně věty znovu revidovat.
+
+Jen větná fáze smyčky zobrazuje kontexty; ruční věta nechává odpověď skrytou.
+Kontextové karty smí být mimo A–D/obtížná/téma, ale cílové pořadí i filtry
+smyčky zůstávají stejné jako galerie. Žádný zápis členství z obrázků věty.
+
+Obrazy nikdy nezdržují hlas. Přednačtení aktuální+další věty je omezené na10
+náhledů. Chyba jednoho odstraní jen jeho dlaždici; bez platných kontextů se
+obnoví původní velký obraz. Pozdní metadata nemění už přehrávanou větu.
+Zvuk čeká skutečné ended a celou pauzu1/2/4/6 s, jeden odemknutý přehrávač
+smyčky načítá každou stopu přes src/load. IT hra a psaní dál používají vlastní
+fresh pokusy, včetně opakování po správném napsání a odloženého seek.
+Smyčka se neobnovuje z historie/URL/úložiště/bfcache a při chybě zvuku se
+pozastaví na stejné kartě. Automatické TTS ani tiché přeskakování se nepřidává.

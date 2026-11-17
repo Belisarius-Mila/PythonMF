@@ -9,6 +9,7 @@ const source=fs.readFileSync(path.join(root,'vocabulary-it/gallery.js'),'utf8');
 const audio={language:'it',kind:'words',items:Object.fromEntries(vocabulary.items.map(i=>[i.uid,{uid:i.uid,sourceIt:i.it,sourceCz:i.cz,it:`assets/vocabulary-it-audio/fixture/${i.uid}-it.mp3`,cz:`assets/vocabulary-it-audio/fixture/${i.uid}-cz.mp3`}]))};
 const sentenceAudio={language:'it',kind:'sentences',items:Object.fromEntries(vocabulary.items.map(i=>[i.uid,{uid:i.uid,sourceIt:i.it,sourceCz:i.cz,sourceSentenceIt:i.sentenceIt,sourceSentenceCz:i.sentenceCz,it:`assets/vocabulary-it-sentences/fixture/${i.uid}-it.mp3`,cz:`assets/vocabulary-it-sentences/fixture/${i.uid}-cz.mp3`}]))};
 const quizCatalog=JSON.parse(fs.readFileSync(path.join(root,"data/vocabulary-it-quiz.json"),"utf8"));
+const pictures=JSON.parse(fs.readFileSync(path.join(root,'data/vocabulary-it-sentence-pictures.json'),'utf8'));
 const practice=require(path.join(root,"vocabulary-it/practice.js"));
 class Element {
   constructor(tag="div",doc){this.tagName=tag;this.doc=doc;this.children=[];this.dataset={};this.listeners={};this.attributes={};this.className="";this.hidden=false;this.value="";this._text="";
@@ -26,7 +27,7 @@ class Element {
   getBoundingClientRect(){return {top:160,width:140,height:180};} focus(){this.doc.activeElement=this;}scrollIntoView(){this.doc.scrolled=this.id;}
 }
 function storage(map=new Map()){return {map,getItem:key=>map.get(key)||null,setItem:(key,value)=>map.set(key,String(value))};}
-async function app({items=vocabulary.items,url="https://example.test/PythonMF/vocabulary-it/",session=storage(),local=storage(),blocked=false,manifest=audio,sentenceManifest=sentenceAudio,failData=false,slowAudio=false,audioReject=false,reducedMotion=false,failQuiz=false,delayedSeek=false,dataOverride={}}={}){
+async function app({items=vocabulary.items,url="https://example.test/PythonMF/vocabulary-it/",session=storage(),local=storage(),blocked=false,manifest=audio,sentenceManifest=sentenceAudio,failData=false,slowAudio=false,audioReject=false,reducedMotion=false,failQuiz=false,delayedSeek=false,dataOverride={},pictureManifest=pictures,pictureDeferred=null}={}){
   const doc=new Element("document");doc.doc=doc;doc.title="Vocabulary";
   doc.getElementById=id=>doc.descendants().find(node=>node.id===id)||null;
   doc.createElement=tag=>new Element(tag,doc);doc.createDocumentFragment=()=>new Element("fragment",doc);
@@ -46,13 +47,15 @@ async function app({items=vocabulary.items,url="https://example.test/PythonMF/vo
   win.history={get state(){return historyEntries[historyIndex].state;},replaceState:(state,unused,url)=>{location.href=new URL(url,location.href).href;historyEntries[historyIndex]={url:location.href,state};},pushState:(state,unused,url)=>{location.href=new URL(url,location.href).href;historyEntries.splice(historyIndex+1);historyEntries.push({url:location.href,state});historyIndex++;},back:()=>travel(-1),forward:()=>travel(1)};
   if(blocked){Object.defineProperty(win,"sessionStorage",{get(){throw Error("blocked")}});Object.defineProperty(win,"localStorage",{get(){throw Error("blocked")}});}else{win.sessionStorage=session;win.localStorage=local;}
   let rejectPlayback=audioReject;const players=[];class AudioFixture {
-    constructor(url){this.url=url;this.handlers={};this.position=0;this.playCount=0;this.starts=[];this.paused=true;players.push(this);}
+    constructor(url){this.url=url;this.handlers={};this.position=0;this.playCount=0;this.starts=[];this.paused=true;this.ended=false;this.loadCount=0;players.push(this);}
+    set src(value){this.url=value;}get src(){return this.url;}
+    load(){this.position=0;this.ended=false;this.seekPending=false;this.loadCount++;}
     get currentTime(){return this.position;}set currentTime(value){if(delayedSeek&&value===0&&this.position>0)this.seekPending=true;else this.position=value;}
     addEventListener(name,fn){this.handlers[name]=fn;}removeEventListener(name,fn){if(this.handlers[name]===fn)delete this.handlers[name];}
-    pause(){this.paused=true;}play(){this.played=true;this.paused=false;this.playCount++;this.starts.push(this.position);return rejectPlayback?Promise.reject(Error("blocked")):Promise.resolve();}
+    pause(){this.paused=true;}play(){this.played=true;this.paused=false;this.ended=false;this.playCount++;this.starts.push(this.position);return rejectPlayback?Promise.reject(Error("blocked")):Promise.resolve();}
   }
   const data={...vocabulary,items,...dataOverride};
-  const ctx=vm.createContext({document:doc,window:win,URL,URLSearchParams,TextEncoder,Audio:AudioFixture,console,fetch:async url=>{if(url.includes("-quiz.json")){if(failQuiz)throw Error("quiz unavailable");return {ok:true,json:async()=>quizCatalog};}if(slowAudio && url.includes("audio"))return new Promise(()=>{});if(failData && !url.includes("audio"))throw Error("offline");const selected=url.includes("sentence-audio")?sentenceManifest:manifest;if(selected===null && url.includes("audio"))throw Error("audio unavailable");return {ok:true,json:async()=>url.includes("audio")?selected:data};}});
+  const ctx=vm.createContext({document:doc,window:win,URL,URLSearchParams,TextEncoder,Audio:AudioFixture,console,fetch:async url=>{if(url.includes("sentence-pictures.json")){if(pictureManifest===null)throw Error("optional unavailable");return {ok:true,json:async()=>pictureDeferred?await pictureDeferred:pictureManifest};}if(url.includes("-quiz.json")){if(failQuiz)throw Error("quiz unavailable");return {ok:true,json:async()=>quizCatalog};}if(slowAudio && url.includes("audio"))return new Promise(()=>{});if(failData && !url.includes("audio"))throw Error("offline");const selected=url.includes("sentence-audio")?sentenceManifest:manifest;if(selected===null && url.includes("audio"))throw Error("audio unavailable");return {ok:true,json:async()=>url.includes("audio")?selected:data};}});
   vm.runInContext(fs.readFileSync(path.join(root,"vocabulary-it/model.js"),"utf8"),ctx);
   for(const name of ['learners.js','learner-ui.js','practice.js'])vm.runInContext(fs.readFileSync(path.join(root,'vocabulary-it',name),'utf8'),ctx);
   vm.runInContext(source.replace('void init();','globalThis.ready=init();')+'\nglobalThis.api={state,context,buildSelection,orderedSelection,openStudy,moveStudy,newRandomRound,returnToGallery,renderGallery,selectionChanged,applyRoute,speakPrompt,speakAnswer,stopAudioPlayback,setPracticeMode};',ctx);
@@ -379,4 +382,53 @@ test('leaving during the final reading or its trailing pause cancels every old t
  for(const trailing of [false,true]){const view=await writingView();const word=await beginWriting(view);typeWriting(view,word);view.advance(600);const attempt=view.players.find(p=>p.handlers.ended),lateEnd=attempt.handlers.ended;
   if(trailing){lateEnd();await sleep(0);}view.element('quizBack').click();lateEnd();view.advance(10000);await sleep(0);assert.equal(view.state.view,'gallery');assert.equal(view.element('practiceWritingPanel').hidden,true);assert.equal(view.element('quizRound').hidden,true);
  }
+});
+
+
+// Real Italian gallery module: complete optional sentence map plus inherited loop timing.
+function loopPlayer(view){return view.players.find(p=>p.handlers.ended&&!p.paused);}
+function setLoop(view,mode='sentence-word'){change(view,'studyLoopMode',mode);}
+async function loopPhase(view){const player=loopPlayer(view);assert.ok(player);player.position=2;player.ended=true;player.handlers.ended();await sleep(0);view.advance(2000);await sleep(0);}
+function pictureLabels(view){return view.element('sentencePictures').querySelectorAll('figcaption').map(n=>n.textContent);}
+test('all1096 reviewed Italian sentence rows resolve1–5 exact image meanings and spans',()=>{
+ let total=0;
+ for(const item of vocabulary.items){const refs=model.sentencePictures(item,pictures,vocabulary.items);assert.ok(refs.length>=1&&refs.length<=5,item.uid);assert.equal(new Set(refs.map(r=>r.item.image)).size,refs.length);for(const r of refs)assert.equal(item.sentenceIt.slice(r.start,r.end),r.text);total+=refs.length;}
+ assert.equal(Object.keys(pictures.entries).length,1096);assert.equal(total,1963);
+});
+test('Italian sentence map handles elided nouns and rejects stale, foreign, retired and malformed references',()=>{
+ const item=vocabulary.items.find(i=>i.uid==='vit-0617');assert.equal(model.sentencePictures(item,pictures,vocabulary.items)[0].text,'acqua');
+ for(const mode of ['foreign','sentence','translation','meaning','span','unknown','order','shape','duplicate']){
+  const m=JSON.parse(JSON.stringify(pictures)),r=m.entries['vit-0083'],target=vocabulary.items.find(i=>i.uid==='vit-0083');
+  if(mode==='foreign')m.language='en';if(mode==='sentence')r.sourceSentenceIt+='x';if(mode==='translation')r.sourceSentenceCz+='x';if(mode==='meaning')r.concepts[0].sourceCz+='x';if(mode==='span')r.concepts[0].start=true;if(mode==='unknown')r.concepts[0].uid='vit-9999';if(mode==='order')r.concepts.reverse();if(mode==='shape')r.concepts=null;if(mode==='duplicate')r.concepts[1]=r.concepts[0];assert.deepEqual(model.sentencePictures(target,m,vocabulary.items),[],mode);
+ }
+ const retired=vocabulary.items.map(i=>i.uid===item.uid?{...i,active:false}:i);assert.deepEqual(model.sentencePictures(item,pictures,retired),[]);
+});
+test('Italian pictures show above the sentence then restore its large target word using one fully reloaded player',async()=>{
+ const v=await app();v.openStudy('vit-0083');setLoop(v);v.element('studyLoopToggle').click();assert.deepEqual(pictureLabels(v),['gonna','nero','camicia','bianco']);assert.equal(v.element('promptText').lang,'it');assert.equal(v.element('studyLoopTranslation').textContent,v.state.currentItem.sentenceCz);const player=loopPlayer(v);assert.match(player.url,/sentences/);assert.equal(player.starts.at(-1),0);
+ await loopPhase(v);assert.equal(v.element('sentencePictures').hidden,true);assert.equal(v.element('promptText').textContent,'gonna');assert.equal(v.element('studyLoopTranslation').textContent,'sukně');assert.equal(loopPlayer(v),player);assert.equal(player.loadCount,2);assert.equal(player.starts.at(-1),0);v.element('studyLoopStop').click();
+});
+test('Italian loop waits for true ended and complete gap; stale ended after load cannot cut the next word',async()=>{
+ const v=await app({items:vocabulary.items.slice(0,2)});v.openStudy('vit-0001');setLoop(v);v.element('studyLoopToggle').click();const p=loopPlayer(v),first=p.handlers.ended;v.advance(60000);await sleep(0);assert.equal(p.playCount,1);p.ended=true;p.handlers.ended();await sleep(0);v.advance(1999);await sleep(0);assert.equal(p.playCount,1);v.advance(1);await sleep(0);assert.equal(p.playCount,2);first();p.handlers.ended();await sleep(0);v.advance(10000);await sleep(0);assert.equal(p.playCount,2);await loopPhase(v);assert.equal(v.state.currentItem.uid,'vit-0002');v.element('studyLoopStop').click();
+});
+test('Italian personal A hard single-card loop uses context outside A without changing its profile',async()=>{
+ const local=storage(),value=learners.empty();value.profiles.A.selected=['vit-0083'];value.profiles.A.hard=['vit-0083'];local.setItem(learners.KEY,JSON.stringify(value));const before=local.getItem(learners.KEY);const v=await app({local});change(v,'learnerSelect','A');v.element('learnerHardFilter').click();v.openStudy('vit-0083');setLoop(v);v.element('studyLoopToggle').click();assert.equal(v.state.sequence.length,1);assert.equal(pictureLabels(v).length,4);await loopPhase(v);await loopPhase(v);assert.equal(v.state.currentItem.uid,'vit-0083');assert.equal(pictureLabels(v).length,4);assert.equal(local.getItem(learners.KEY),before);v.returnToGallery();assert.equal(local.getItem(learners.KEY),before);
+});
+test('Italian pause/resume restarts the same phase; stop restores manual question and a late callback cannot restart sound',async()=>{
+ const v=await app();v.openStudy('vit-0083');const original=v.element('promptText').textContent;setLoop(v);v.element('studyLoopToggle').click();const p=loopPlayer(v),late=p.handlers.ended;p.position=.6;v.element('studyLoopToggle').click();assert.ok(p.paused);v.element('studyLoopToggle').click();assert.equal(loopPlayer(v),p);assert.equal(p.starts.at(-1),0);v.element('studyLoopStop').click();late();v.advance(120000);await sleep(0);assert.equal(v.element('promptText').textContent,original);assert.equal(v.element('sentencePictures').hidden,true);assert.equal(loopPlayer(v),undefined);
+});
+test('Italian loop error, timeout and rejected play pause the same card and do not skip',async()=>{
+ for(const failure of ['error','timeout','reject']){const v=await app({audioReject:failure==='reject'});v.openStudy('vit-0083');setLoop(v);v.element('studyLoopToggle').click();const p=loopPlayer(v);if(failure==='error')p.handlers.error();if(failure==='timeout')v.advance(90000);await sleep(0);assert.match(v.element('studyLoopStatus').textContent,/pozastavená/);assert.equal(v.state.currentItem.uid,'vit-0083');assert.equal(loopPlayer(v),undefined);v.element('studyLoopStop').click();}
+});
+test('Italian optional missing pictures preserve sentence audio; failed tiles and detached events never stop or alter a new phase',async()=>{
+ for(const pictureManifest of [null,{}]){const v=await app({pictureManifest});v.openStudy('vit-0083');setLoop(v);v.element('studyLoopToggle').click();assert.equal(v.element('sentencePictures').hidden,true);assert.ok(loopPlayer(v));v.element('studyLoopStop').click();}
+ const v=await app();v.openStudy('vit-0083');setLoop(v);v.element('studyLoopToggle').click();const p=loopPlayer(v),old=v.element('sentencePictures').querySelector('img');old.emit('error');assert.equal(pictureLabels(v).length,3);assert.equal(loopPlayer(v),p);for(const img of v.element('sentencePictures').querySelectorAll('img'))img.emit('error');assert.equal(v.element('sentencePictures').hidden,true);assert.equal(v.element('studyView').classList.contains('sentence-context'),false);await loopPhase(v);old.emit('error');assert.equal(v.element('promptText').textContent,'gonna');assert.equal(v.element('sentencePictures').hidden,true);v.element('studyLoopStop').click();
+});
+test('Italian delayed picture metadata waits for a new sentence and never changes currently playing audio',async()=>{
+ let resolve;const pending=new Promise(done=>resolve=done);const v=await app({pictureDeferred:pending});v.state.query='sukně';v.selectionChanged();v.openStudy('vit-0083');setLoop(v);v.element('studyLoopToggle').click();const p=loopPlayer(v);assert.equal(v.element('sentencePictures').hidden,true);resolve(pictures);await sleep(0);assert.equal(v.element('sentencePictures').hidden,true);assert.equal(loopPlayer(v),p);await loopPhase(v);await loopPhase(v);assert.equal(pictureLabels(v).length,4);v.element('studyLoopStop').click();
+});
+test('Italian loop leaves no autostart through pagehide, bfcache or reload and keeps manual sentence guessing unchanged',async()=>{
+ const v=await app();v.openStudy('vit-0083');v.practices[1].click();assert.equal(v.element('answerCard').classList.contains('hidden'),true);assert.equal(v.element('sentencePictures').hidden,true);setLoop(v);v.element('studyLoopToggle').click();const p=loopPlayer(v);v.emit('pagehide');v.emit('pageshow',{persisted:true});assert.ok(p.paused);assert.equal(loopPlayer(v),undefined);const reopened=await app({local:v.local,session:v.session,url:v.win.location.href});assert.equal(reopened.players.some(p=>p.played),false);assert.equal(reopened.element('sentencePictures').hidden,true);
+});
+test('Italian words-only loop follows the explicit filtered sequence and keeps sentence images hidden',async()=>{
+ const v=await app({items:vocabulary.items.slice(0,3)});v.openStudy('vit-0001','random');const order=v.state.sequence.map(model.key),start=v.state.index;setLoop(v,'words');v.element('studyLoopToggle').click();for(let i=1;i<=4;i++){await loopPhase(v);assert.equal(v.state.currentItem.uid,order[(start+i)%order.length]);assert.equal(v.element('sentencePictures').hidden,true);}v.returnToGallery();assert.equal(v.state.view,'gallery');assert.equal(loopPlayer(v),undefined);
 });

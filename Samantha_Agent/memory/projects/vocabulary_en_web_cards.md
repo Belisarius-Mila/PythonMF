@@ -1,3 +1,22 @@
+## 2026-11-17 14:04 CET — Společné p+n obrazových vět EN a IT
+
+Hotovo: Převzatý Datův commit31c670bb do main s vlastní angličtinou15f9d076.
+EN512 vět/1255 vazeb, IT1096 vět/1963 vazeb; vždy1–5 stávajících obrázků,
+pak původní slovní karta. Datův funkční obsah je přesně zachovaný. Konflikty
+jen v dokumentaci řešené zachováním obou historií a novějšího stavu EN/IT.
+Rozhodnutí: Míla výslovně zadal „p+n pro tebe i Data“. Jeden společný Git
+balíček a Pages deployment, registrovaná účtenka i HTTP ověření obou proudů.
+Druhé předání využije již vydaný stejný Pages head; žádná výroba médií/TTS.
+Další krok: Programová integrační brána, jediný merge commit a registrované
+submit_release(wait=True) pro oba přesné proudy. Konečný výsledek v
+private vocabulary_en_it_release_20261117/completion.json; příprava není
+potvrzením push ani veřejné publikace. Nejistá operace se neopakuje.
+Navrhované další kroky: Mílova telefonní a akustická přejímka obou aplikací.
+Datův další FR vývoj zůstává v jeho oddělené pracovní kopii.
+Technický důkaz: EN164 cílených PASS, IT165 cílených PASS z původních účtenek;
+novou společnou bránu a přesný integrační head určuje completion.json.
+Nový EN TVBCP nevzniká, zachovaný obecný TVBCP a vlastní IT TVBCP.
+
 # VocabularyEN web: obrazové kartičky pro opakování slovíček
 
 ## 2026-11-17 13:42 CET — Obrazové pojmy pro všechny aktivní anglické věty
