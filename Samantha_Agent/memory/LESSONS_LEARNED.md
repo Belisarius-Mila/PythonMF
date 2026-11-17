@@ -2506,6 +2506,10 @@ s mock video-only kamerou, stop tracků a dekódováním WASM.
 - Ověření:48 Node scénářů PASS včetně pozdního importu, quota/corrupt
   storage, cizího snímku a obnovy bez změny ostatních profilů/PINů.
   Plná brána3831 PASS,5 SKIP; vocabulary_en_learners_full_gate_20261114.log.
+- Opakované ověření17.11.FR: samostatný browser-only hard UID formát bez
+  profilů; Všechna odvozovat z aktuálního katalogu. Import add/replace musí
+  být explicitní a export čte uložený stav, nikoli nepotvrzený návrh.
+ 44 cílených Python/35 JS PASS, skutečný464/203 a Safari reload203.
 
 
 ### 2026-11-14 14:38 CET — Online obálka potřebuje povolený origin a funkční lazy box

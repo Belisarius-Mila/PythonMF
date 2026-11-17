@@ -149,7 +149,7 @@ test('IME composition and leaving during writing cannot accept an unfinished acc
 test('actual settings save, PIN and backup import affect only the unlocked FR learner, leaving IT/EN storage intact',async()=>{
  const original=learners.empty();original.profiles.A.pin=await learners.makePin('4826',require('node:crypto').webcrypto);original.profiles.A.selected=[cat.uid];original.profiles.B.selected=['vfr-0002'];
  const local=storage(new Map([[learners.KEY,JSON.stringify(original)],['vocabulary-it.learners.v1','old-it'],['vocabulary-en.learners.v1','old-en']]));
- const view=await app({local});view.element('settingsTab').click();view.element('pinInput').value='4826';view.element('unlockButton').click();await until(()=>!view.element('learnerEditor').hidden);
+ const view=await app({local});view.element('settingsTab').click();view.element('legacySettingsButton').click();view.element('pinInput').value='4826';view.element('unlockButton').click();await until(()=>!view.element('learnerEditor').hidden);
  const replacement=learners.backup(learners.empty());replacement.profiles.A={selected:['vfr-0003','vfr-9999'],hard:['vfr-0003']};replacement.profiles.B.selected=['vfr-0004'];const raw=JSON.stringify(replacement);
  view.element('learnerFile').files=[{size:raw.length,text:async()=>raw}];view.element('learnerFile').emit('change');await until(()=>view.element('settingsNotice').textContent.includes('Načtený návrh'));view.element('saveLearner').click();
  const after=learners.store(()=>local).read().value;assert.deepEqual(after.profiles.A.selected,['vfr-0003','vfr-9999']);assert.deepEqual(after.profiles.A.pin,original.profiles.A.pin);assert.deepEqual(after.profiles.B,original.profiles.B);
@@ -164,3 +164,90 @@ test('invalid source catalog and foreign deep links fail visibly, while blocked 
  const blocked=await app({blocked:true});assert.equal(blocked.state.items.length,vocabulary.items.length);blocked.openStudy(cat.uid);assert.equal(blocked.state.currentItem.uid,cat.uid);
  const foreign=await app({url:'https://example.test/vocabulary-fr/#card=vit-0001'});assert.equal(foreign.state.view,'gallery');assert.match(foreign.element('galleryNotice').textContent,/slovníku|slovíčko/);
 });
+
+// Personal-hard scenarios use only synthetic learner selections.
+{
+const test=require('node:test');
+const {assert,app,storage,fixture,vocabulary,learners,flush,change,active,loop,phase}=require('./fixtures/vocabulary_fr_dom.js');
+const P=require('../../docs/vocabulary-fr/personal.js');
+const backup=hard=>({...P.empty(),hard});
+const ids=vocabulary.items.map(i=>i.uid);
+async function importFile(v,hard,{raw=JSON.stringify(backup(hard)),text=null}={}){
+ v.element('personalFile').files=[{size:Buffer.byteLength(raw),text:text||(async()=>raw)}];v.element('personalFile').emit('change');await flush();
+}
+function editor(v){v.element('settingsTab').click();assert.equal(v.state.view,'personal');}
+function mark(v,uid,checked){const c=v.element('personalGroups').querySelectorAll('.personal-word-check').find(c=>c.dataset.uid===uid);assert.ok(c);c.checked=checked;c.emit('change');}
+const hardCount=v=>v.buildSelection().length;
+
+test('strict FR personal contract rejects foreign formats, duplicates, invalid IDs, extra state and oversized input',()=>{
+ assert.deepEqual(P.parse(JSON.stringify(backup(ids.slice(0,3)))).hard,ids.slice(0,3));
+ for(const value of [{...backup([]),schema:2},{...backup([]),language:'it'},{...backup([]),kind:'vocabulary-fr.learner-backup'},backup(['vit-0001']),backup([ids[0],ids[0]]),backup(['vfr-0001<script>']),{...backup([]),pin:'1234'}])assert.throws(()=>P.parse(JSON.stringify(value)));
+ assert.throws(()=>P.parse('x'.repeat(1000001)));assert.throws(()=>P.parse('{broken'));
+});
+test('All uses the current inventory including future cards, never a fixed selected list',()=>{
+ const value=backup([ids[0]]),next=[...vocabulary.items,{uid:'vfr-8000',active:true}];
+ assert.equal(P.selection(next,value,false).length,19);assert.equal(P.selection(next,value,true).length,1);
+ assert.deepEqual(Object.keys(value).sort(),['hard','kind','language','schema']);
+});
+test('editor includes every topic, persists marking and unmarking after explicit save and reload, without touching A–D or other apps',async()=>{
+ const legacyValue=learners.empty();legacyValue.profiles.A={selected:[ids[0]],hard:[ids[0]],pin:{salt:'00'.repeat(16),hash:'01'.repeat(32),iterations:100000}};const legacy=JSON.stringify(legacyValue),local=storage(new Map([[learners.KEY,legacy],['vocabulary-it.learners.v1','old-it'],['vocabulary-en.learners.v1','old-en']]));
+ const v=await app({local});assert.equal(hardCount(v),18);assert.equal(local.getItem(P.KEY),null);editor(v);
+ assert.equal(v.element('personalGroups').querySelectorAll('h2').length,18);
+ mark(v,ids[0],true);assert.equal(local.getItem(P.KEY),null);v.element('personalSave').click();assert.match(v.element('personalNotice').textContent,/Uloženo/);
+ v.element('personalBack').click();v.element('personalHard').click();assert.equal(hardCount(v),1);
+ const reload=await app({local});reload.element('personalHard').click();assert.equal(hardCount(reload),1);editor(reload);mark(reload,ids[0],false);reload.element('personalSave').click();
+ const again=await app({local});again.element('personalHard').click();assert.equal(hardCount(again),0);assert.equal(local.getItem(learners.KEY),legacy);assert.equal(local.getItem('vocabulary-it.learners.v1'),'old-it');assert.equal(local.getItem('vocabulary-en.learners.v1'),'old-en');
+});
+test('loading an import changes nothing, and adding versus replacing have separate explicit previews',async()=>{
+ const local=storage(new Map([[P.KEY,JSON.stringify(backup([ids[0]]))]]));const v=await app({local});editor(v);const before=local.getItem(P.KEY);
+ await importFile(v,[ids[1],ids[2]]);assert.equal(local.getItem(P.KEY),before);assert.equal(v.element('personalSave').disabled,true);assert.match(v.element('personalPreview').textContent,/2 označení/);
+ change(v,'personalImportMode','add');assert.match(v.element('personalPreview').textContent,/3 označení/);assert.equal(local.getItem(P.KEY),before);
+ change(v,'personalImportMode','replace');assert.match(v.element('personalPreview').textContent,/2 označení/);assert.equal(local.getItem(P.KEY),before);
+ v.element('personalSave').click();assert.deepEqual(P.parse(local.getItem(P.KEY)).hard,ids.slice(1,3));
+});
+test('unknown UIDs are disclosed, retained only after explicit acknowledgment, and round trip in export',async()=>{
+ const v=await app();editor(v);await importFile(v,[ids[0],'vfr-9000']);assert.match(v.element('personalUnknown').textContent,/vfr-9000/);
+ change(v,'personalImportMode','add');assert.equal(v.element('personalSave').disabled,true);change(v,'personalUnknownConfirm',true);v.element('personalSave').click();
+ assert.deepEqual(P.parse(v.local.getItem(P.KEY)).hard,[ids[0],'vfr-9000']);
+ let blob;v.win.URL={createObjectURL:b=>{blob=b;return 'blob:synthetic';},revokeObjectURL:()=>{}};v.element('personalExport').click();
+ const exported=P.parse(await blob.text());assert.deepEqual(exported.hard,[ids[0],'vfr-9000']);assert.equal(exported.kind,'vocabulary-fr.personal-hard-backup');
+});
+test('quota failure, silent storage no-op and failed readback never claim Saved or discard the open draft',async()=>{
+ for(const mode of ['quota','noop','readback']){
+  const local=storage(new Map([[P.KEY,JSON.stringify(backup([ids[0]]))]])),v=await app({local});editor(v);mark(v,ids[1],true);const old=local.getItem(P.KEY),set=local.setItem,get=local.getItem;let wrote=false;
+  local.setItem=(k,value)=>{if(k!==P.KEY)return set(k,value);if(mode==='quota')throw Error('full');if(mode==='noop')return;set(k,value);wrote=true;};
+  local.getItem=k=>{if(k===P.KEY&&mode==='readback'&&wrote)throw Error('blocked');return get(k);};
+  v.element('personalSave').click();assert.doesNotMatch(v.element('personalNotice').textContent,/^Uloženo/);assert.equal(v.state.view,'personal');assert.equal(v.element('personalGroups').querySelectorAll('.personal-word-check')[1].checked,true);
+  if(mode!=='readback')assert.equal(get(P.KEY),old);
+ }
+});
+test('corrupt or inaccessible storage stays untouched while All remains usable without PIN',async()=>{
+ const local=storage(new Map([[P.KEY,'{broken']]));const v=await app({local});assert.equal(hardCount(v),18);editor(v);assert.equal(v.element('personalSave').disabled,true);assert.equal(local.getItem(P.KEY),'{broken');assert.match(v.element('personalNotice').textContent,/nelze načíst/);
+ const blocked=await app({blocked:true});assert.equal(hardCount(blocked),18);assert.equal(blocked.element('personalHard').disabled,true);
+});
+test('conflicting tab writes preserve both the stored other-tab state and the unsaved local draft',async()=>{
+ const local=storage(),v=await app({local});editor(v);mark(v,ids[0],true);local.setItem(P.KEY,JSON.stringify(backup([ids[1]])));v.emit('storage',{key:P.KEY});v.element('personalSave').click();
+ assert.deepEqual(P.parse(local.getItem(P.KEY)).hard,[ids[1]]);assert.match(v.element('personalNotice').textContent,/jiné okno/);assert.equal(v.element('personalGroups').querySelectorAll('.personal-word-check')[0].checked,true);
+});
+test('invalid files and late file reads never replace current editor changes',async()=>{
+ const v=await app();editor(v);mark(v,ids[0],true);await importFile(v,[],{raw:'{"kind":"foreign"}'});assert.match(v.element('personalNotice').textContent,/nebyl načten/);
+ let resolve;await importFile(v,[],{text:()=>new Promise(r=>resolve=r)});mark(v,ids[1],true);resolve(JSON.stringify(backup([ids[2]])));await flush();v.element('personalSave').click();assert.deepEqual(P.parse(v.local.getItem(P.KEY)).hard,[ids[0],ids[1]]);
+});
+test('hard selection is common to gallery, listening, study, loops and practice, with topics and honest small pools',async()=>{
+ const local=storage(new Map([[P.KEY,JSON.stringify(backup(ids.slice(0,4)))]])),v=await app({local});v.element('personalHard').click();assert.equal(hardCount(v),4);
+ assert.equal(v.element('galleryGroups').querySelectorAll('.vocab-tile').length,4);
+ v.galleryModes.find(b=>b.dataset.galleryMode==='listen').click();v.element('galleryGroups').querySelectorAll('.vocab-tile')[0].click();await flush();assert.ok(active(v));v.stopAudioPlayback();
+ v.openStudy(ids[0]);assert.equal(v.state.sequence.length,4);loop(v,'words');await phase(v);assert.ok(v.state.sequence.every(i=>ids.slice(0,4).includes(i.uid)));v.stopAudioPlayback();v.returnToGallery();
+ v.element('quizTab').click();assert.match(v.element('quizSelection').textContent,/Jen obtížná/);assert.match(v.element('quizPoolNotice').textContent,/4/);assert.equal(v.element('quizStart').disabled,false);v.element('quizBack').click();
+ v.state.topics=[vocabulary.groups[0].id];v.selectionChanged();assert.equal(hardCount(v),1);v.element('quizTab').click();assert.equal(v.element('quizStart').disabled,true);assert.match(v.element('quizPoolNotice').textContent,/čtyři|4|alespoň/i);
+});
+
+test('new catalog card appears in All while stale legacy profile and personal hard remain separate',async()=>{
+ const legacy=learners.empty();legacy.profiles.A.selected=[ids[0]];
+ const local=storage(new Map([[learners.KEY,JSON.stringify(legacy)],[P.KEY,JSON.stringify(backup([ids[0]]))]]));
+ const newCard={...vocabulary.items[0],uid:'vfr-8000',id:99,fr:'nouveau'};
+ const v=await app({local,items:[...vocabulary.items,newCard],url:'https://example.test/vocabulary-fr/#learner=A'});
+ assert.equal(hardCount(v),19);v.element('personalHard').click();assert.equal(hardCount(v),1);v.element('personalAll').click();assert.equal(hardCount(v),19);
+});
+
+}

@@ -1,5 +1,19 @@
 # Vocabulary FR — klientský kontrakt v1.1
 
+## 17.11.2026 — Soukromý osobní režim Jany
+
+- Samostatný localStorage klíč vocabulary-fr.personal-hard.v1; pouze hard UID
+  plus schema1/kind vocabulary-fr.personal-hard-backup/language fr.
+- Všechna vždy celý aktuální aktivní katalog; žádné profily A–D ani PIN nutné.
+  Starý learners.v1 zůstává oddělený bez migrace nebo automatického importu HT.
+- Import striktně ověřuje FR formát, limit velikosti a UID, do zápisu je pouze
+  návrh. Přidat/Nahradit je výslovná volba, Uložit samostatné potvrzení.
+  Neznámá UID se přiznávají a zachovávají s potvrzením; nevyhazují se potichu.
+- Zápis porovná původní snímek a ověří read-back, chyby zachovají návrh.
+  Export obsahuje uložený stav; žádná serverová ani automatická mezizařízení synchronizace.
+- Osobní seznam z Downloads zůstává soukromý mimo Git/docs. Všechny režimy
+  mají společný filtr Všechna/Jen obtížná v průniku s okruhy a dalšími filtry.
+
 ## 17.11.2026 — Konkrétní veřejná propagace v003 schválená
 
 Míla výslovně zvolil zveřejnění finálního klientského payloadu v003 jako EN/IT.

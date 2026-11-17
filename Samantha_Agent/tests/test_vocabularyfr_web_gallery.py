@@ -16,7 +16,7 @@ class VocabularyFrenchWebGalleryTests(unittest.TestCase):
 
     def test_client_is_self_contained_and_keeps_language_and_storage_separate(self):
         html=(CLIENT/'index.html').read_text()
-        for name in ('model.js','learners.js','learner-ui.js','practice.js','gallery.js','gallery.css'):
+        for name in ('model.js','learners.js','learner-ui.js','practice.js','personal.js','personal-ui.js','gallery.js','gallery.css'):
             self.assertIn(name,html)
             self.assertTrue((CLIENT/name).is_file())
         self.assertIn('lang="fr"',html)

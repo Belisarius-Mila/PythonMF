@@ -1,4 +1,35 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
+## 2026-11-17 20:17 CET — Osobní obtížná slova Jany v prohlížeči
+
+Hotovo: Francouzština Jana má Všechna / Jen obtížná bez profilu a PINu,
+editor nad celým aktuálním slovníkem a soukromý import/export označení.
+Všechna je vždy celý aktuální katalog včetně budoucích karet; žádný uložený
+pevný seznam. Všech 18 okruhů zůstává a jejich průnik platí společně pro
+galerii, učení, poslech, smyčky i procvičování. Starší data A–D/PIN zůstávají
+oddělená a nezměněná. Datův uzavřený obsahový patch a5f11f68 je začleněný.
+Rozhodnutí: Míla výslovně zvolil soukromé uložení v Janině prohlížeči bez
+synchronizace zařízení. Nový klíč vocabulary-fr.personal-hard.v1 obsahuje
+pouze FR UID a metadata schema/kind/language; osobní seznam nikdy do Git/docs.
+Import nejdřív validuje a ukáže návrh, vyžaduje volbu Přidat/Nahradit a Uložit.
+Neznámá UID přizná a zachová až po výslovném potvrzení. Pozdní čtení souboru,
+cizí změna snímku, poškozené úložiště ani neověřený zápis nesmějí oznámit úspěch.
+Další krok: Po samostatném pokynu p+n vydat tento klientský krok; pak Jana
+na svém zařízení importuje soukromý soubor z Downloads a fyzicky ověří učení.
+Navrhované další kroky: Fyzická přejímka Safari na iPhonu; záloha označení exportem.
+Technický důkaz:44 cílených Python PASS včetně35 JS scénářů. Skutečný soukromý
+soubor proti připnutému otisku:464 Všechna /203 obtížných,0 neznámých UID,
+18 okruhů, načtení bez Uložit beze změny a stav zachovaný po reloadu.
+Nativní Safari: náhled/import203 a reload203, ruční přidání204 i reload204;
+odebrání zpět203 v náhledu. Úzké okno Safari vizuálně ověřené, nikoli emulace
+konkrétního telefonu ani fyzický iPhone. Selhání úložiště, pozdní import,
+add/replace, export a byte-identická legacy data kryjí syntetické testy.
+Brána, finální commit a přesný stav: private vocabulary_fr_personal_hard_20261117/
+completion.json (actual_acceptance.json, safari_verification.json, final_gate.log).
+Předchozí veřejné vydání059634d2 již dokončené; tento nový krok zatím místní.
+Rizika: smazání dat webu nebo jiný prohlížeč označení nepřevezme; používat export.
+Původní CSV/média a Datův checkout se nemění. Žádná TTS výroba ani nové p+n.
+<!-- SAMANTHA_CURRENT_STATUS_END -->
+
 ## 2026-11-17 — Schválené veřejné vydání Francouzština Jana
 
 Hotovo: Míla po výslovné volbě veřejné Pages vs. soukromý Cockpit odpověděl
@@ -26,7 +57,6 @@ určuje private vocabulary_fr_jana_release_20261117/completion.json; neměnit
 main během vydání a nejistý požadavek automaticky neopakovat.
 Rizika a přejímky: lidský poslech a fyzický iPhone zůstávají samostatné.
 Žádná nová TTS výroba, její opakování ani změna Datova checkoutu.
-<!-- SAMANTHA_CURRENT_STATUS_END -->
 
 
 ## 2026-11-17 — Francouzština Jana, finální obsah v003 a pořadí aplikací
@@ -600,3 +630,34 @@ reset/rebase, další checkout, push, nasazení ani zveřejnění Janina obsahu.
 - Caller převzal konečnou účtenku v této terminálové relaci. returned_to_adam=false je portálový příznak a není důvodem retry. Neproběhlo samostatné sestavení nebo vydání VocabularyFR.app ani nové Pages vydání; Janina sdílená data byla doplněná již před p+n. Následný výsledkový zápis je místní pro další balíček.
 - Prompty a náhled: PictNew/generated/20261104_fr_jana_refresh_batch001/generation_report.json a review.html. Soukromé importní důkazy v data/private/vocabularyfr_merge_jana_to_mila_20261104/ a obrazové důkazy ve vocabularyfr_refresh_20261104/; žádná Janina CSV nebo soukromé plány v Gitu.
 - Další krok: načíst aktualizovaná slovníková data v používaných aplikacích. Fyzický reload a vzdálené iCloud doručení tímto vydáním NEOVĚŘENO; dvě ostatní soukromé lexikální poznámky zůstávají k případné samostatné revizi.
+
+
+## 2026-11-17 20:17 CET — Osobní obtížná slova Jany v prohlížeči
+
+Hotovo: Francouzština Jana má Všechna / Jen obtížná bez profilu a PINu,
+editor nad celým aktuálním slovníkem a soukromý import/export označení.
+Všechna je vždy celý aktuální katalog včetně budoucích karet; žádný uložený
+pevný seznam. Všech 18 okruhů zůstává a jejich průnik platí společně pro
+galerii, učení, poslech, smyčky i procvičování. Starší data A–D/PIN zůstávají
+oddělená a nezměněná. Datův uzavřený obsahový patch a5f11f68 je začleněný.
+Rozhodnutí: Míla výslovně zvolil soukromé uložení v Janině prohlížeči bez
+synchronizace zařízení. Nový klíč vocabulary-fr.personal-hard.v1 obsahuje
+pouze FR UID a metadata schema/kind/language; osobní seznam nikdy do Git/docs.
+Import nejdřív validuje a ukáže návrh, vyžaduje volbu Přidat/Nahradit a Uložit.
+Neznámá UID přizná a zachová až po výslovném potvrzení. Pozdní čtení souboru,
+cizí změna snímku, poškozené úložiště ani neověřený zápis nesmějí oznámit úspěch.
+Další krok: Po samostatném pokynu p+n vydat tento klientský krok; pak Jana
+na svém zařízení importuje soukromý soubor z Downloads a fyzicky ověří učení.
+Navrhované další kroky: Fyzická přejímka Safari na iPhonu; záloha označení exportem.
+Technický důkaz:44 cílených Python PASS včetně35 JS scénářů. Skutečný soukromý
+soubor proti připnutému otisku:464 Všechna /203 obtížných,0 neznámých UID,
+18 okruhů, načtení bez Uložit beze změny a stav zachovaný po reloadu.
+Nativní Safari: náhled/import203 a reload203, ruční přidání204 i reload204;
+odebrání zpět203 v náhledu. Úzké okno Safari vizuálně ověřené, nikoli emulace
+konkrétního telefonu ani fyzický iPhone. Selhání úložiště, pozdní import,
+add/replace, export a byte-identická legacy data kryjí syntetické testy.
+Brána, finální commit a přesný stav: private vocabulary_fr_personal_hard_20261117/
+completion.json (actual_acceptance.json, safari_verification.json, final_gate.log).
+Předchozí veřejné vydání059634d2 již dokončené; tento nový krok zatím místní.
+Rizika: smazání dat webu nebo jiný prohlížeč označení nepřevezme; používat export.
+Původní CSV/média a Datův checkout se nemění. Žádná TTS výroba ani nové p+n.

@@ -86,7 +86,7 @@
         signature=nextSignature;pool=next;lastAudio=audio;lastCatalog=catalog;targets=pool.filter(item=>question(item,pool,catalog,()=>.5));
       }
       const context=getContext(),labels=(context.topics||[]).map(id=>getData().groups.find(g=>g.id===id)?.label).filter(Boolean);
-      ui.quizSelection.textContent=[context.learner!=="all"?`Uživatel ${context.learner}${context.onlyLearnerHard?" · obtížná slova":""}`:"Společná slovní zásoba",labels.join(" + "),(context.parts||[]).map(id=>M.posLabels[id]||id).join(" + "),(context.levels||[]).map(id=>M.levelLabels[id]||id).join(" + "),context.teachingType!=="all"?M.teachingTypeLabels[context.teachingType]:"",context.query?`Hledání: ${context.query}`:"",context.recentCount?`Posledních ${context.recentCount}`:""].filter(Boolean).join(" · ");
+      ui.quizSelection.textContent=[context.personalHard?"Jen obtížná":"Všechna slovíčka",labels.join(" + "),(context.parts||[]).map(id=>M.posLabels[id]||id).join(" + "),(context.levels||[]).map(id=>M.levelLabels[id]||id).join(" + "),context.teachingType!=="all"?M.teachingTypeLabels[context.teachingType]:"",context.query?`Hledání: ${context.query}`:"",context.recentCount?`Posledních ${context.recentCount}`:""].filter(Boolean).join(" · ");
       ui.quizStart.disabled=!targets.length;
       ui.quizPoolNotice.textContent=audio===false?"Francouzský zvuk se nepodařilo načíst. Obnov stránku; přehled zůstává dostupný.":catalog===false?"Podklady procvičování se nepodařilo načíst. Obnov stránku; přehled zůstává dostupný.":!audio||!catalog?"Připravuji slova, obrázky a zvuk…":targets.length
         ?`Ve výběru ${M.countLabel(chosen.length)}. Procvičit lze ${M.countLabel(targets.length)}. Všechny čtyři možnosti budou z tvého výběru.`
