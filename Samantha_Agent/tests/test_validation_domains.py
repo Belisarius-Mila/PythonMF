@@ -48,6 +48,13 @@ class ValidationDomainsTests(unittest.TestCase):
             self.assertIn(name,plan.modules)
         self.assertNotIn('tests.test_camino_film_editor',plan.modules)
 
+    def test_shared_calendar_editor_keeps_native_and_dashboard_regressions(self):
+        plan=self.plan('app/frontend/shared/calendar_actions.js')
+        for name in ('tests.test_cockpit_calendar_edit','tests.test_calendar_edit',
+                     'tests.test_cockpit_calendar_agenda','tests.test_cockpit_http_security'):
+            self.assertIn(name,plan.modules)
+        self.assertNotIn('tests.test_camino_film_editor',plan.modules)
+
     def test_shared_and_unknown_changes_use_contracts_without_automatic_full(self):
         for path in ('app/file_persistence.py','app/work_repository.py','app/documents/transactions.py',
                      'app/unknown.py','requirements.txt','config/agent_roles.json','AGENTS.md',

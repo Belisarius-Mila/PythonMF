@@ -1,4 +1,34 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
+## 2026-11-17 09:00 CET — Místní oprava ukládání editace kalendáře z přehledu
+
+Hotovo: Otisk původní události nově nezávisí na pořadí stejných upozornění.
+Odmítnutí zastaralé či blokované úpravy zůstane viditelné přímo v editoru,
+i když hlavní přehled mezitím vymění původní řádek. Takový požadavek je konečný;
+Uložit zůstává nedostupné, Zavřít uvolní editor. Nejisté doručení má původní
+recovery a nikdy neopakuje zápis.
+Rozhodnutí: Míla nahlásil nefunkční uložení na úvodní stránce při funkčním
+samostatném kalendáři. Oba používají tentýž editor/helper. Opravuje se nestabilní
+otisk a viditelnost odmítnutí, nikoli ochrana skutečně změněné události.
+Další krok: Samostatně schválené p+n, pak povolit sestavení opraveného helperu
+v kalendářovém UI na Macu a fyzicky přejmout jednu Mílou vybranou úpravu.
+Navrhované další kroky: Potom pokračovat přejímkou Samanthy iPhone/Mint.
+Technický důkaz: Dva nové regresní testy FAIL→PASS;38 cílených PASS.
+Pět skutečných pouze čtecích inspect stejné události vrátilo dva otisky, žádný
+calendar write. Swift reprodukuje obrácení pole mezi preview a apply; skutečná
+změna alarmu stále odmítnutá před save. Headless Edge ověřil obě obrazovky a
+viditelné odmítnutí po odpojení původního řádku, včetně390px snímku. Oddělený
+SDK build/podpis/7 self-test PASS v /private/tmp, bez grantu a přístupu ke
+kalendáři. Produkční helper/bundle a původní žurnály nebyly přestavované.
+Konečná programová brána/commit: data/private/calendar_home_edit_20261117/completion.json.
+Podrobnosti technical/calendar_edit_identity.md. Bez nového push/nasazení či
+skutečné testovací editace. Samostatný TVBCP nevzniká.
+
+Předchozí balíček společné Samanthy e6d68786 je již vydaný: původní job
+0f148dc4a25a18a2477d22423da44ae4 completed, push/deploy confirmed, smoke5/5,
+1530 testů převzatých bez opakování. Live HTML obou stránek přesné. Důkaz
+private shared_chat_20261116/completion.json; toto p+n neopakovat.
+Starší bloky níže jsou historické podklady, nikoli dnešní provozní audit.
+
 ## 2026-11-16 21:32 CET — Samantha, společný provozní rozhovor iPhone / Cockpit / Mint
 
 Místně dokončený první balíček: samostatný trvalý rozhovor, jednorázový
@@ -3097,3 +3127,34 @@ App Server přijal oddělené připojení bez modelové otázky. Brána/commit j
 private shared_chat_20261116/completion.json. Fyzický iPhone/Mint, živá modelová
 odpověď a p+n tohoto balíčku otevřené. Nejasný tah po restartu zůstává blokovaný
 bez automatického retry. Datův již vydaný7278e110 se neopakuje.
+
+
+## 2026-11-17 09:00 CET — Místní oprava ukládání editace kalendáře z přehledu
+
+Hotovo: Otisk původní události nově nezávisí na pořadí stejných upozornění.
+Odmítnutí zastaralé či blokované úpravy zůstane viditelné přímo v editoru,
+i když hlavní přehled mezitím vymění původní řádek. Takový požadavek je konečný;
+Uložit zůstává nedostupné, Zavřít uvolní editor. Nejisté doručení má původní
+recovery a nikdy neopakuje zápis.
+Rozhodnutí: Míla nahlásil nefunkční uložení na úvodní stránce při funkčním
+samostatném kalendáři. Oba používají tentýž editor/helper. Opravuje se nestabilní
+otisk a viditelnost odmítnutí, nikoli ochrana skutečně změněné události.
+Další krok: Samostatně schválené p+n, pak povolit sestavení opraveného helperu
+v kalendářovém UI na Macu a fyzicky přejmout jednu Mílou vybranou úpravu.
+Navrhované další kroky: Potom pokračovat přejímkou Samanthy iPhone/Mint.
+Technický důkaz: Dva nové regresní testy FAIL→PASS;38 cílených PASS.
+Pět skutečných pouze čtecích inspect stejné události vrátilo dva otisky, žádný
+calendar write. Swift reprodukuje obrácení pole mezi preview a apply; skutečná
+změna alarmu stále odmítnutá před save. Headless Edge ověřil obě obrazovky a
+viditelné odmítnutí po odpojení původního řádku, včetně390px snímku. Oddělený
+SDK build/podpis/7 self-test PASS v /private/tmp, bez grantu a přístupu ke
+kalendáři. Produkční helper/bundle a původní žurnály nebyly přestavované.
+Konečná programová brána/commit: data/private/calendar_home_edit_20261117/completion.json.
+Podrobnosti technical/calendar_edit_identity.md. Bez nového push/nasazení či
+skutečné testovací editace. Samostatný TVBCP nevzniká.
+
+Předchozí balíček společné Samanthy e6d68786 je již vydaný: původní job
+0f148dc4a25a18a2477d22423da44ae4 completed, push/deploy confirmed, smoke5/5,
+1530 testů převzatých bez opakování. Live HTML obou stránek přesné. Důkaz
+private shared_chat_20261116/completion.json; toto p+n neopakovat.
+Starší bloky níže jsou historické podklady, nikoli dnešní provozní audit.

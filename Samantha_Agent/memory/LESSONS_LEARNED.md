@@ -2118,6 +2118,7 @@ prostředí PASS, produkční kód beze změny.
 - Kontext: jediný skutečný save proběhl za 0,32 s, ale stejné dva alarmy se z EventKit vrátily obráceně. Pořadový JSON comparison vrátil edit_unknown a bezpečnostní zámek správně blokoval další úpravy.
 - Řešení: porovnávat multimnožinu přesných časových hodnot alarmů, zachovat počet/duplicity a přesnou rovnost všech ostatních polí i obou nativních ID. Historický žurnál normalizovat při read-backu; nikdy znovu save.
 - Důkaz: Swift FAIL→PASS pro alarm reorder, skutečně změněný alarm dál unknown. Reálný read-only recover potvrdil jediný match obou ID, žádné odlišné pole, alarm_order_normalized=true a calendar_writes=false.
+- Doplnění17.11.2026: stejnou normalizaci multimnožiny provést také v původním identity otisku před save. Neuspořádaná pole nesmějí měnit identitu mezi inspect/apply; skutečná změna upozornění musí dál zastavit save. Swift regrese FAIL→PASS a pět živých pouze čtecích kontrol s dvěma otisky. Odmítnutí musí zůstat vidět v dialogu, ne jen na odpojeném řádku automaticky obnovované agendy.
 - Při novém podpisu helperu může macOS vyžádat nový grant. Nezapomenout původní request_id; UI musí nabídnout povolení a následné read-only ověření. Viditelná lišta zůstává ve viewportu. Report reports/calendar_edit_alarm_order_recovery_20261110.md.
 
 

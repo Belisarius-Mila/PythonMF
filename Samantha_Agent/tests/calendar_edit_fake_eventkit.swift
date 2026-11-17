@@ -25,6 +25,21 @@ func runCalendarEditHarness(_ root: URL) throws {
         ["operation":op,"event":old,"replacement":target,"identity":id,"operation_id":operation]
     }
     let operation=String(repeating:"a",count:32)
+    // Preview and apply may enumerate the same reminders in a different order.
+    do {
+        let (e,dir,old,target)=try setup("preview-alarm-order");let other=EKAlarm();other.relativeOffset = -7200
+        e.alarms?.append(other);let id=try identity(e);e.alarms=Array((e.alarms ?? []).reversed())
+        try check(try encode(identity(e))==encode(id))
+        let v=try transact(request("update",old,target,id,operation),dir)
+        try check(v["status"] as? String=="edited_verified" && editSaves==1)
+    }
+    // A real reminder change between preview and apply must still stop before save.
+    do {
+        let (e,dir,old,target)=try setup("preview-alarm-changed");let id=try identity(e)
+        e.alarms?.first?.relativeOffset = -90
+        let v=try transact(request("update",old,target,id,operation),dir)
+        try check(v["status"] as? String=="changed" && editSaves==0)
+    }
     // Real production code: one update, unchanged fields, duplicate and recovery read-only.
     do {
         let (e,dir,old,target)=try setup("verified");let id=try identity(e)

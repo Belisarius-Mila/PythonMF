@@ -46,6 +46,15 @@ const modal=()=>document.children.find(n=>n.tag==='dialog');
  const third=widget();queue.push(prepared);await third.children[1].listeners.click();dialog=modal();storageFail=true;n=calls.length;
  await find(dialog,'form').listeners.submit({preventDefault(){}});assert.equal(calls.length,n);assert(modal());storageFail=false;
  all(dialog).find(n=>n.textContent==='Zrušit').listeners.click();
+ // A refreshed dashboard may detach the row notice while the editor is open.
+ const fourth=widget();queue.push(prepared);await fourth.children[1].listeners.click();dialog=modal();
+ fourth.remove();queue.push({ok:true,state:'changed',message:'Událost se změnila. Obnov přehled.'});
+ await find(dialog,'form').listeners.submit({preventDefault(){}});
+ assert(modal()&&modal().open,'a refused edit must remain visible even when its row was replaced');
+ assert(all(dialog).some(n=>n.textContent==='Událost se změnila. Obnov přehled.'));
+ assert(all(dialog).find(n=>n.textContent==='Uložit změny').disabled);assert.equal(store.size,0);
+ n=calls.length;await find(dialog,'form').listeners.submit({preventDefault(){}});assert.equal(calls.length,n,'a refused request is terminal');
+ all(dialog).find(n=>n.textContent==='Zavřít').listeners.click();assert(!modal());
  const disabled=widget({disabled:()=>true});n=calls.length;await disabled.children[0].listeners.click();await disabled.children[1].listeners.click();assert.equal(calls.length,n);
  assert.equal(queue.length,0);console.log('Calendar completion/edit frontend: PASS');
 })().catch(error=>{console.error(error);process.exitCode=1;});

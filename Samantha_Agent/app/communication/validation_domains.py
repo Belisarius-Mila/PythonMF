@@ -47,6 +47,7 @@ SOURCES = {
     "calendar": ("app/calendar_*.py", "app/cockpit_calendar*.py", "app/cockpit_email_calendar.py",
                  "app/email/calendar_*.py", "scripts/calendar_*.py", "scripts/calendar_*.swift",
                  "app/frontend/calendar_overview/*", "app/frontend/calendar_task/*",
+                 "app/frontend/shared/calendar_actions.js",
                  "app/frontend/email_agent/calendar_*.js", "tests/calendar_*.swift",
                  "tests/*calendar*frontend.test.cjs", "tests/calendar_actions_frontend.test.cjs",
                  "memory/technical/calendar_all_day_boundaries.md"),

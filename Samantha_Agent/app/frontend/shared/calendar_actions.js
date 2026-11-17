@@ -37,12 +37,12 @@
     form.append(heading,el("p","Kalendář: "+prepared.calendar_title),fields,
       el("p",prepared.recurring?"Upraví se pouze tento výskyt. Délka a ostatní údaje zůstanou zachované.":"Délka a ostatní údaje zůstanou zachované."),save,cancel,status);
     modal.append(form);modal.className="calendar-edit-dialog";document.body.append(modal);
-    let sending=false;
+    let sending=false,terminal=false;
     const close=()=>{if(!sending){modal.close();modal.remove();active=false;update();}};
     cancel.addEventListener("click",close);
     modal.addEventListener("cancel",event=>{event.preventDefault();close();});
     form.addEventListener("submit",async event=>{
-      event.preventDefault();if(sending||!form.reportValidity())return;
+      event.preventDefault();if(sending||terminal||!form.reportValidity())return;
       if(!title.value.trim()){status.textContent="Vyplň název.";return;}
       const changes={title:title.value,date:`${year.value}-${pad(month.value)}-${pad(day.value)}`,time:time.value};
       try {remember(prepared.request_id);}catch(error){status.textContent=error.message;return;}
@@ -52,12 +52,16 @@
         if(value.state==="prepared"&&value.validation_error) {
           forget();keepOpen=true;status.textContent=value.validation_error;
         } else if(value.state==="verified") {forget();notice.textContent=value.message;onChanged(value);}
-        else if(["changed","blocked"].includes(value.state)) {forget();notice.textContent=value.message;}
+        else if(["changed","blocked"].includes(value.state)) {
+          forget();keepOpen=true;terminal=true;
+          status.textContent=value.message||"Úprava neproběhla. Zavři editor a obnov přehled.";
+          cancel.textContent="Zavřít";
+        }
         else {pending=value.request_id;recoveryResult=value;notice.textContent=value.message||"Výsledek není potvrzený. Zvol Ověřit původní úpravu.";}
       } catch(error) {notice.textContent="Výsledek není potvrzený. Zvol Ověřit původní úpravu.";}
       finally {
         sending=false;
-        if(keepOpen){fields.disabled=false;time.disabled=prepared.event.all_day;save.disabled=false;cancel.disabled=false;}
+        if(keepOpen){fields.disabled=terminal;time.disabled=terminal||prepared.event.all_day;save.disabled=terminal;cancel.disabled=false;}
         else {close();active=false;update();showRecovery(recoveryResult||{});}
       }
     });

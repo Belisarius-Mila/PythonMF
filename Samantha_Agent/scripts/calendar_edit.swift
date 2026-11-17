@@ -62,7 +62,7 @@ func identity(_ event: EKEvent) throws -> [String: Any] {
              "yeardays":rule.daysOfTheYear ?? [],"positions":rule.setPositions ?? [],
              "until":rule.recurrenceEnd?.endDate?.timeIntervalSince1970 ?? -1,"count":rule.recurrenceEnd?.occurrenceCount ?? 0]
         },
-        "alarms":(event.alarms ?? []).map { "\($0.relativeOffset):\($0.absoluteDate?.timeIntervalSince1970 ?? -1)" },
+        "alarms":(event.alarms ?? []).map { "\($0.relativeOffset):\($0.absoluteDate?.timeIntervalSince1970 ?? -1)" }.sorted(),
         "attendees":event.hasAttendees,"organizer":event.organizer != nil,"status":event.status.rawValue]
     let hash=SHA256.hash(data:try encode(facts)).map { String(format:"%02x",$0) }.joined()
     let value: [String: Any] = ["event_id":event.eventIdentifier ?? "","item_id":event.calendarItemIdentifier,"fingerprint":hash,"recurring":recurring]
