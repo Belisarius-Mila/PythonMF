@@ -442,3 +442,34 @@ data/private/vocabularyfr_refresh_20261114/.
 
 Další krok: Janin reload dat/obrázků v aplikaci; fyzický telefon dosud
 neověřený. Mapping pouze v Pict, nové soubory uvedené v reportu.
+
+## 2026-11-17 14:55 CET — FR klient pro Janu podle kontraktu v1.1
+
+Hotovo: Samostatný klient Vocabulary FR podle IT31c670bb: galerie18 témat,
+slova/věty FR/CZ, vlastní A–D/PIN/zálohy, obrazová hra, psaní s500ms nápovědou,
+smyčka Slovíčka / Věta + slovíčko a až5 kontextových obrázků. Testovací obsah
+je čistě syntetický; nejde o ověření skutečných464 karet ani hotovou aplikaci
+s Janiným obsahem. Český a francouzský zvuk jsou dostupné nezávisle. Chybějící
+FR zvuk se přizná, smyčka zůstane pozastavená na stejné kartě, hra takový
+hlasový cíl nepoužije. Bez TTS fallbacku nebo automatické výroby.
+Rozhodnutí: Míla potvrdil paralelní dělení Data/Will a kontrakt v1.1.
+Data vlastní katalog/exporty/média/obsahové testy; Will klient, registry,
+společné zápisy a integraci. Skutečný soukromý balíček mimo docs i Git,
+nezměněný živý CSV, budoucí publikace a placená výroba samostatně.
+Další krok: Převzít uzavřený Datův soukromý balíček s manifestem a SHA spolu
+s jeho hotovými obecnými kódovými commity. Teprve při jejich integraci zapojit
+existující obsahové testy a ověřit464 skutečných karet mimo publikační strom.
+Navrhované další kroky: Mílova/Janina obsahová, akustická a telefonní přejímka
+nad skutečným balíčkem; volba FR hlasu a případná výroba až po nové dohodě.
+Technický důkaz:24 skutečných JS scénářů a81 cílených Python kontrol PASS.
+Nativní Safari nad soukromými syntetickými fixtures ověřilo galerii, odhalení,
+kontexty chat/lune, vysvětlení chybějícího FR audia, Stop a návrat/fokus karty.
+Vlastní okno i localhost server zavřené, původní okno zachované. Žádná akustická
+ani telefonní přejímka. Finální programovou bránu, zmrazené otisky a commit
+určuje private vocabulary_fr_client_20261117/completion.json.
+Registrace github_pages/vocabulary-fr/ a vlastní validační domény je pouze
+místní; desktopový launcher i starý FR prototyp zachované. Běžící Cockpit
+se nerestartoval a stále nenačetl tuto změnu registrace/validační mapy.
+Před případným budoucím p+n načíst nové registry autorizovaným postupem;
+současné zadání není oprávněním k restartu, push ani nasazení. Azure adaptér
+beze změny. Nový TVBCP/proud nevzniká, používá se existující FR dvojice.

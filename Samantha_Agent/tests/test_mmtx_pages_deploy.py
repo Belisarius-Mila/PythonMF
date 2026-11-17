@@ -140,6 +140,19 @@ class MmtxPagesDeployTests(unittest.TestCase):
                 triggered = any(call[:3] == ("/usr/local/bin/gh", "workflow", "run") for call in runner.calls)
                 self.assertEqual(triggered, not already_deployed)
 
+    def test_french_client_uses_exact_registered_path_for_new_and_existing_deployment(self):
+        from app.communication.luna_release import PAGES_PROJECT_PATHS,release_target
+        self.assertEqual(release_target('project-vocabulary-fr'),'github_pages')
+        for existing in (False,True):
+            with self.subTest(existing=existing), tempfile.TemporaryDirectory() as directory:
+                urls=[];runner=FakeRunner(already_deployed=existing)
+                result=publish_mmtx_pages_current_main(source_repo=Path(directory),runner=runner,
+                    expected_head=HEAD,smoke_path=PAGES_PROJECT_PATHS['project-vocabulary-fr'],
+                    smoke_fetcher=lambda url:urls.append(url) or 200,sleeper=lambda _:None)
+                self.assertEqual(result['smoke_path'],'vocabulary-fr/')
+                self.assertEqual(urls,[f'https://belisarius-mila.github.io/PythonMF/vocabulary-fr/?verify={HEAD[:12]}'])
+                self.assertEqual(any(call[:3]==('/usr/local/bin/gh','workflow','run') for call in runner.calls),not existing)
+
     def test_vocabulary_it_uses_exact_registered_path_on_an_existing_deployment(self) -> None:
         from app.communication.luna_release import PAGES_PROJECT_PATHS
         with tempfile.TemporaryDirectory() as directory:

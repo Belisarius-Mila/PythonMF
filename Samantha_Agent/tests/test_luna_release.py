@@ -265,7 +265,7 @@ class LunaReleaseTests(unittest.TestCase):
                 self.service.active_workstream_id = record.workstream_id
                 audit = release.audit_release(self.service)
                 self.assertEqual(audit["workstream_id"], record.workstream_id)
-                expected = "github_pages" if record.workstream_id in {"project-mmtx", "project-to-be-to-have", "project-colors-and-numbers", "project-vocabulary-en", "project-vocabulary-it"} else "cockpit"
+                expected = "github_pages" if record.workstream_id in {"project-mmtx", "project-to-be-to-have", "project-colors-and-numbers", "project-vocabulary-en", "project-vocabulary-it", "project-vocabulary-fr"} else "cockpit"
                 self.assertEqual(audit["deployment_target"], expected)
         self.launcher.assert_not_called()
 
@@ -330,7 +330,8 @@ class LunaReleaseTests(unittest.TestCase):
         for index, (identity, path) in enumerate((("project-to-be-to-have", "to-be-to-have/"),
                                                   ("project-colors-and-numbers", "colors-numbers/"),
                                                   ("project-vocabulary-en", "vocabulary-en/"),
-                                                  ("project-vocabulary-it", "vocabulary-it/"))):
+                                                  ("project-vocabulary-it", "vocabulary-it/"),
+                                                  ("project-vocabulary-fr", "vocabulary-fr/"))):
             with self.subTest(workstream=identity):
                 self.service.active_workstream_id = identity
                 job = self.create(client_message_id=f"web-app-release-00{index}")

@@ -199,6 +199,19 @@ class ValidationDomainsTests(unittest.TestCase):
         code=select_validation_plan([*paths,'Samantha_Agent/app/vocabulary_authoring.py'])
         self.assertIn('tests.test_vocabulary_authoring',code.modules)
 
+    def test_french_client_and_synthetic_fixtures_select_only_the_existing_fr_contract(self):
+        for path in ('docs/vocabulary-fr/gallery.js',
+                     'Samantha_Agent/tests/fixtures/vocabulary_fr_dom.js',
+                     'Samantha_Agent/tests/fixtures/vocabulary_fr_client.js'):
+            with self.subTest(path=path):
+                result=select_validation_plan([path])
+                self.assertEqual(result.mode,'targeted')
+                self.assertEqual(result.domains,('vocabulary_fr',))
+                self.assertIn('tests.test_vocabularyfr_web_gallery',result.modules)
+                self.assertIn('tests.test_cockpit_http_security',result.modules)
+                self.assertNotIn('tests.test_vocabularyit_gallery',result.modules)
+                self.assertNotIn('tests.test_vocabularyfr_catalog',result.modules)
+
     def test_italian_foundation_has_its_own_inventory_and_identity_checks(self):
         result=select_validation_plan([
             'VocabularyIT/vocabulary_it_catalog.py', 'VocabularyIT/vocabulary_it_catalog.json',

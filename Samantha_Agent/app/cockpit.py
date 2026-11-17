@@ -545,6 +545,13 @@ WEB_APP_CATALOG: tuple[dict[str, str], ...] = (
         "kind": "GitHub Pages",
     },
     {
+        "id": "vocabulary-fr",
+        "title": "Vocabulary FR",
+        "description": "Francouzské kartičky, věty a vlastní výběry A–D.",
+        "url": "https://belisarius-mila.github.io/PythonMF/vocabulary-fr/",
+        "kind": "GitHub Pages",
+    },
+    {
         "id": "multilo",
         "title": "MultiLO",
         "description": "Desktopová výuková aplikace pro více jazyků s lokálními daty, obrázky a postupem uživatelů.",

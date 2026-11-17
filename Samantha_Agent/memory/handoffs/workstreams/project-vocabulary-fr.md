@@ -1,19 +1,34 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
-## Aktuální stav
+## 2026-11-17 14:55 CET — FR klient pro Janu podle kontraktu v1.1
 
-- Aktualizováno: 2026-11-14 10:36 CET.
-- Jana469/469 úplných Sentence/SentenceT po18 nových dvojicích a4 českých opravách.
-- Šest nových ilustrací1254×1254 WebP <250kB v obou Pict, shodné hashově.
-- Společný český abecední mapping1136 (+17), všechny původní vazby zachované;
-  distribuční kopie bajtově shodné. Mílovo FR477 a IT471 beze změny.
--6 kanonických testů a rychlá statická brána PASS. Společný audit:
-  FR Míla477 / FR Jana469 / IT Míla471, všechny věty úplné, skutečné desktopové i Pythonista resolvery bez chybějících obrázků;1517 obrazových cest dekódováno,0 chybějících mapování/souborů.
-- Foundation potvrdilo nahrání CSV, mappingu a6 obrázků do iCloudu. Fyzický
-  reload na Janině telefonu čeká; vzdálený běh se nepředstírá.
-- Další: načíst nová data v aplikaci; žádný nový build ani p+n nebyly zadané.
-- Podrobnosti reports/vocabularyfr_jana_refresh_20261114.md a
-  projects/pictnew_vocabulary_image_pipeline.md. Soukromé zálohy/účtenky
-  data/private/vocabularyfr_refresh_20261114/; Jana CSV ani nové obrázky v Gitu nejsou.
+Hotovo: Samostatný klient Vocabulary FR podle IT31c670bb: galerie18 témat,
+slova/věty FR/CZ, vlastní A–D/PIN/zálohy, obrazová hra, psaní s500ms nápovědou,
+smyčka Slovíčka / Věta + slovíčko a až5 kontextových obrázků. Testovací obsah
+je čistě syntetický; nejde o ověření skutečných464 karet ani hotovou aplikaci
+s Janiným obsahem. Český a francouzský zvuk jsou dostupné nezávisle. Chybějící
+FR zvuk se přizná, smyčka zůstane pozastavená na stejné kartě, hra takový
+hlasový cíl nepoužije. Bez TTS fallbacku nebo automatické výroby.
+Rozhodnutí: Míla potvrdil paralelní dělení Data/Will a kontrakt v1.1.
+Data vlastní katalog/exporty/média/obsahové testy; Will klient, registry,
+společné zápisy a integraci. Skutečný soukromý balíček mimo docs i Git,
+nezměněný živý CSV, budoucí publikace a placená výroba samostatně.
+Další krok: Převzít uzavřený Datův soukromý balíček s manifestem a SHA spolu
+s jeho hotovými obecnými kódovými commity. Teprve při jejich integraci zapojit
+existující obsahové testy a ověřit464 skutečných karet mimo publikační strom.
+Navrhované další kroky: Mílova/Janina obsahová, akustická a telefonní přejímka
+nad skutečným balíčkem; volba FR hlasu a případná výroba až po nové dohodě.
+Technický důkaz:24 skutečných JS scénářů a81 cílených Python kontrol PASS.
+Nativní Safari nad soukromými syntetickými fixtures ověřilo galerii, odhalení,
+kontexty chat/lune, vysvětlení chybějícího FR audia, Stop a návrat/fokus karty.
+Vlastní okno i localhost server zavřené, původní okno zachované. Žádná akustická
+ani telefonní přejímka. Finální programovou bránu, zmrazené otisky a commit
+určuje private vocabulary_fr_client_20261117/completion.json.
+Registrace github_pages/vocabulary-fr/ a vlastní validační domény je pouze
+místní; desktopový launcher i starý FR prototyp zachované. Běžící Cockpit
+se nerestartoval a stále nenačetl tuto změnu registrace/validační mapy.
+Před případným budoucím p+n načíst nové registry autorizovaným postupem;
+současné zadání není oprávněním k restartu, push ani nasazení. Azure adaptér
+beze změny. Nový TVBCP/proud nevzniká, používá se existující FR dvojice.
 <!-- SAMANTHA_CURRENT_STATUS_END -->
 
 # Handoff pracovního proudu: Vocabulary FR
@@ -22,7 +37,7 @@ Nazev: Vocabulary FR
 Pracovni proud: project-vocabulary-fr
 Typ: Project
 Priorita: 2
-Stav: rozpracovane
+Stav: klient v1.1 místně připravený; čeká uzavřený soukromý obsahový balíček
 Pripomenout pri startu: ne
 
 Co se resilo:
@@ -404,3 +419,34 @@ synchronizovat VocabularyFR/VocabularyFR.csv a v Pict mapping.json plus
 clothes.webp, these.webp, short.webp, tshirt.webp, strange.webp, suitsyou.webp.
 Mapping patří pouze do Pict. Kód aplikací, instalace, Cockpit ani Pages se
 neměnily; žádné p+n ani externí zpráva nebyly zadané či provedené.
+
+## 2026-11-17 14:55 CET — FR klient pro Janu podle kontraktu v1.1
+
+Hotovo: Samostatný klient Vocabulary FR podle IT31c670bb: galerie18 témat,
+slova/věty FR/CZ, vlastní A–D/PIN/zálohy, obrazová hra, psaní s500ms nápovědou,
+smyčka Slovíčka / Věta + slovíčko a až5 kontextových obrázků. Testovací obsah
+je čistě syntetický; nejde o ověření skutečných464 karet ani hotovou aplikaci
+s Janiným obsahem. Český a francouzský zvuk jsou dostupné nezávisle. Chybějící
+FR zvuk se přizná, smyčka zůstane pozastavená na stejné kartě, hra takový
+hlasový cíl nepoužije. Bez TTS fallbacku nebo automatické výroby.
+Rozhodnutí: Míla potvrdil paralelní dělení Data/Will a kontrakt v1.1.
+Data vlastní katalog/exporty/média/obsahové testy; Will klient, registry,
+společné zápisy a integraci. Skutečný soukromý balíček mimo docs i Git,
+nezměněný živý CSV, budoucí publikace a placená výroba samostatně.
+Další krok: Převzít uzavřený Datův soukromý balíček s manifestem a SHA spolu
+s jeho hotovými obecnými kódovými commity. Teprve při jejich integraci zapojit
+existující obsahové testy a ověřit464 skutečných karet mimo publikační strom.
+Navrhované další kroky: Mílova/Janina obsahová, akustická a telefonní přejímka
+nad skutečným balíčkem; volba FR hlasu a případná výroba až po nové dohodě.
+Technický důkaz:24 skutečných JS scénářů a81 cílených Python kontrol PASS.
+Nativní Safari nad soukromými syntetickými fixtures ověřilo galerii, odhalení,
+kontexty chat/lune, vysvětlení chybějícího FR audia, Stop a návrat/fokus karty.
+Vlastní okno i localhost server zavřené, původní okno zachované. Žádná akustická
+ani telefonní přejímka. Finální programovou bránu, zmrazené otisky a commit
+určuje private vocabulary_fr_client_20261117/completion.json.
+Registrace github_pages/vocabulary-fr/ a vlastní validační domény je pouze
+místní; desktopový launcher i starý FR prototyp zachované. Běžící Cockpit
+se nerestartoval a stále nenačetl tuto změnu registrace/validační mapy.
+Před případným budoucím p+n načíst nové registry autorizovaným postupem;
+současné zadání není oprávněním k restartu, push ani nasazení. Azure adaptér
+beze změny. Nový TVBCP/proud nevzniká, používá se existující FR dvojice.

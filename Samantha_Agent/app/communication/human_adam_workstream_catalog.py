@@ -486,6 +486,9 @@ WORKSTREAM_CATALOG = validate_workstream_catalog(
             "active",
             "2",
             "Vocabulary FR",
+            capabilities=CanonicalWorkstreamCapabilities(
+                production_deployment_target="github_pages",
+            ),
         ),
         _record(
             "project-vocabulary-it",
