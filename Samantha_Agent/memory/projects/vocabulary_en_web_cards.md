@@ -1745,3 +1745,14 @@ completed, deployment7849830522/workflow44059746822,7/7 veřejných souborů
 bajtově ověřených. Původní attention účtenky0d4eb5c/71944b17 se neopakují.
 Skutečný aktuální stav dokládá private combined_release_20261117/completion.json;
 starší odstavce o nejistém vydání níže jsou historické.
+
+
+### 2026-11-18 — 40 přepisů a 19 nových slovíček pro smyčku
+
+Hotovo: Přesné schválené EN/CZ texty40 původních a19 nových vět. Nové karty ven-0523–0541,19 vlastních ilustrací/náhledů,156 nových plně dekódovaných MP3. Nyní541 identit/531 aktivních,531 obrazových vět/1492 významových vazeb. Přidaných73 vazeb v68 větách se stejným textem. Safari Mac ověřilo novou větu see se3 obrázky a přechodem na velké slovíčko.
+
+Rozhodnutí: Míla výslovně schválil celý závěrečný TXT a po commitu neprodlené p+n přes Terru. Hlasy/tempo zachované, export podporuje schválený název see-verb.webp.
+
+Důkaz: reports/vocabulary_en_loop_refresh_20261118.md a privátní vocabulary_en_loop_refresh_20261118. Závazný konečný výsledek brány/commitu/p+n je v privátních účtenkách, nikoli v tomto přípravném zápisu.
+
+Další krok: Dokončit bránu, commit a již schválené registrované Terra p+n na Vocabulary EN Pages. Poté fyzická telefonní a Mílova akustická přejímka.

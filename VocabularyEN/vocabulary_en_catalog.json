@@ -13733,6 +13733,500 @@
       "imageStemOverride": "ven0522",
       "galleryOrder": 22,
       "related": []
+    },
+    {
+      "partOfSpeech": [
+        "verb"
+      ],
+      "primaryGroup": "topic-16",
+      "topicIds": [
+        "topic-16"
+      ],
+      "difficultyBand": 1,
+      "teachingType": "word",
+      "id": 523,
+      "uid": "ven-0523",
+      "matches": [
+        {
+          "en": "sit",
+          "cz": "sedět"
+        }
+      ],
+      "expressionType": "word",
+      "active": true,
+      "difficultyStatus": "draft",
+      "editorialStatus": "reviewed",
+      "imageStemOverride": "sit",
+      "galleryOrder": 70,
+      "related": []
+    },
+    {
+      "partOfSpeech": [
+        "preposition"
+      ],
+      "primaryGroup": "topic-12",
+      "topicIds": [
+        "topic-12"
+      ],
+      "difficultyBand": 1,
+      "teachingType": "word",
+      "id": 524,
+      "uid": "ven-0524",
+      "matches": [
+        {
+          "en": "after",
+          "cz": "po"
+        }
+      ],
+      "expressionType": "word",
+      "active": true,
+      "difficultyStatus": "draft",
+      "editorialStatus": "reviewed",
+      "imageStemOverride": "after",
+      "galleryOrder": 20,
+      "related": []
+    },
+    {
+      "partOfSpeech": [
+        "verb"
+      ],
+      "primaryGroup": "topic-16",
+      "topicIds": [
+        "topic-16"
+      ],
+      "difficultyBand": 1,
+      "teachingType": "word",
+      "id": 525,
+      "uid": "ven-0525",
+      "matches": [
+        {
+          "en": "put",
+          "cz": "položit, dát někam"
+        }
+      ],
+      "expressionType": "word",
+      "active": true,
+      "difficultyStatus": "draft",
+      "editorialStatus": "reviewed",
+      "imageStemOverride": "put",
+      "galleryOrder": 71,
+      "related": []
+    },
+    {
+      "partOfSpeech": [
+        "verb"
+      ],
+      "primaryGroup": "topic-16",
+      "topicIds": [
+        "topic-16"
+      ],
+      "difficultyBand": 1,
+      "teachingType": "word",
+      "id": 526,
+      "uid": "ven-0526",
+      "matches": [
+        {
+          "en": "stand",
+          "cz": "stát"
+        }
+      ],
+      "expressionType": "word",
+      "active": true,
+      "difficultyStatus": "draft",
+      "editorialStatus": "reviewed",
+      "imageStemOverride": "stand",
+      "galleryOrder": 72,
+      "related": []
+    },
+    {
+      "partOfSpeech": [
+        "noun"
+      ],
+      "primaryGroup": "topic-01",
+      "topicIds": [
+        "topic-01"
+      ],
+      "difficultyBand": 1,
+      "teachingType": "word",
+      "id": 527,
+      "uid": "ven-0527",
+      "matches": [
+        {
+          "en": "child",
+          "cz": "dítě"
+        }
+      ],
+      "expressionType": "word",
+      "active": true,
+      "difficultyStatus": "draft",
+      "editorialStatus": "reviewed",
+      "imageStemOverride": "child",
+      "galleryOrder": 25,
+      "related": []
+    },
+    {
+      "partOfSpeech": [
+        "verb"
+      ],
+      "primaryGroup": "topic-16",
+      "topicIds": [
+        "topic-16"
+      ],
+      "difficultyBand": 1,
+      "teachingType": "word",
+      "id": 528,
+      "uid": "ven-0528",
+      "matches": [
+        {
+          "en": "buy",
+          "cz": "koupit"
+        }
+      ],
+      "expressionType": "word",
+      "active": true,
+      "difficultyStatus": "draft",
+      "editorialStatus": "reviewed",
+      "imageStemOverride": "buy",
+      "galleryOrder": 73,
+      "related": []
+    },
+    {
+      "partOfSpeech": [
+        "noun"
+      ],
+      "primaryGroup": "topic-07",
+      "topicIds": [
+        "topic-07"
+      ],
+      "difficultyBand": 1,
+      "teachingType": "word",
+      "id": 529,
+      "uid": "ven-0529",
+      "matches": [
+        {
+          "en": "rain",
+          "cz": "déšť"
+        }
+      ],
+      "expressionType": "word",
+      "active": true,
+      "difficultyStatus": "draft",
+      "editorialStatus": "reviewed",
+      "imageStemOverride": "rain",
+      "galleryOrder": 31,
+      "related": []
+    },
+    {
+      "partOfSpeech": [
+        "noun"
+      ],
+      "primaryGroup": "topic-04",
+      "topicIds": [
+        "topic-04"
+      ],
+      "difficultyBand": 1,
+      "teachingType": "word",
+      "id": 530,
+      "uid": "ven-0530",
+      "matches": [
+        {
+          "en": "basket",
+          "cz": "košík"
+        }
+      ],
+      "expressionType": "word",
+      "active": true,
+      "difficultyStatus": "draft",
+      "editorialStatus": "reviewed",
+      "imageStemOverride": "basket",
+      "galleryOrder": 23,
+      "related": []
+    },
+    {
+      "partOfSpeech": [
+        "noun"
+      ],
+      "primaryGroup": "topic-05",
+      "topicIds": [
+        "topic-05"
+      ],
+      "difficultyBand": 1,
+      "teachingType": "word",
+      "id": 531,
+      "uid": "ven-0531",
+      "matches": [
+        {
+          "en": "tea",
+          "cz": "čaj"
+        }
+      ],
+      "expressionType": "word",
+      "active": true,
+      "difficultyStatus": "draft",
+      "editorialStatus": "reviewed",
+      "imageStemOverride": "tea",
+      "galleryOrder": 36,
+      "related": []
+    },
+    {
+      "partOfSpeech": [
+        "noun"
+      ],
+      "primaryGroup": "topic-08",
+      "topicIds": [
+        "topic-08"
+      ],
+      "difficultyBand": 1,
+      "teachingType": "word",
+      "id": 532,
+      "uid": "ven-0532",
+      "matches": [
+        {
+          "en": "road",
+          "cz": "silnice"
+        }
+      ],
+      "expressionType": "word",
+      "active": true,
+      "difficultyStatus": "draft",
+      "editorialStatus": "reviewed",
+      "imageStemOverride": "road",
+      "galleryOrder": 23,
+      "related": []
+    },
+    {
+      "partOfSpeech": [
+        "verb"
+      ],
+      "primaryGroup": "topic-16",
+      "topicIds": [
+        "topic-16"
+      ],
+      "difficultyBand": 1,
+      "teachingType": "word",
+      "id": 533,
+      "uid": "ven-0533",
+      "matches": [
+        {
+          "en": "see",
+          "cz": "vidět"
+        }
+      ],
+      "expressionType": "word",
+      "active": true,
+      "difficultyStatus": "draft",
+      "editorialStatus": "reviewed",
+      "imageStemOverride": "see-verb",
+      "galleryOrder": 74,
+      "related": []
+    },
+    {
+      "partOfSpeech": [
+        "noun"
+      ],
+      "primaryGroup": "topic-12",
+      "topicIds": [
+        "topic-12"
+      ],
+      "difficultyBand": 1,
+      "teachingType": "word",
+      "id": 534,
+      "uid": "ven-0534",
+      "matches": [
+        {
+          "en": "evening",
+          "cz": "večer"
+        }
+      ],
+      "expressionType": "word",
+      "active": true,
+      "difficultyStatus": "draft",
+      "editorialStatus": "reviewed",
+      "imageStemOverride": "evening",
+      "galleryOrder": 21,
+      "related": []
+    },
+    {
+      "partOfSpeech": [
+        "noun"
+      ],
+      "primaryGroup": "topic-05",
+      "topicIds": [
+        "topic-05"
+      ],
+      "difficultyBand": 1,
+      "teachingType": "word",
+      "id": 535,
+      "uid": "ven-0535",
+      "matches": [
+        {
+          "en": "soup",
+          "cz": "polévka"
+        }
+      ],
+      "expressionType": "word",
+      "active": true,
+      "difficultyStatus": "draft",
+      "editorialStatus": "reviewed",
+      "imageStemOverride": "soup",
+      "galleryOrder": 37,
+      "related": []
+    },
+    {
+      "partOfSpeech": [
+        "noun"
+      ],
+      "primaryGroup": "topic-08",
+      "topicIds": [
+        "topic-08"
+      ],
+      "difficultyBand": 1,
+      "teachingType": "word",
+      "id": 536,
+      "uid": "ven-0536",
+      "matches": [
+        {
+          "en": "shop",
+          "cz": "obchod"
+        }
+      ],
+      "expressionType": "word",
+      "active": true,
+      "difficultyStatus": "draft",
+      "editorialStatus": "reviewed",
+      "imageStemOverride": "shop",
+      "galleryOrder": 24,
+      "related": []
+    },
+    {
+      "partOfSpeech": [
+        "noun"
+      ],
+      "primaryGroup": "topic-07",
+      "topicIds": [
+        "topic-07"
+      ],
+      "difficultyBand": 1,
+      "teachingType": "word",
+      "id": 537,
+      "uid": "ven-0537",
+      "matches": [
+        {
+          "en": "wind",
+          "cz": "vítr"
+        }
+      ],
+      "expressionType": "word",
+      "active": true,
+      "difficultyStatus": "draft",
+      "editorialStatus": "reviewed",
+      "imageStemOverride": "wind",
+      "galleryOrder": 32,
+      "related": []
+    },
+    {
+      "partOfSpeech": [
+        "verb"
+      ],
+      "primaryGroup": "topic-16",
+      "topicIds": [
+        "topic-16"
+      ],
+      "difficultyBand": 1,
+      "teachingType": "word",
+      "id": 538,
+      "uid": "ven-0538",
+      "matches": [
+        {
+          "en": "swim",
+          "cz": "plavat"
+        }
+      ],
+      "expressionType": "word",
+      "active": true,
+      "difficultyStatus": "draft",
+      "editorialStatus": "reviewed",
+      "imageStemOverride": "swim",
+      "galleryOrder": 75,
+      "related": []
+    },
+    {
+      "partOfSpeech": [
+        "verb"
+      ],
+      "primaryGroup": "topic-16",
+      "topicIds": [
+        "topic-16"
+      ],
+      "difficultyBand": 1,
+      "teachingType": "word",
+      "id": 539,
+      "uid": "ven-0539",
+      "matches": [
+        {
+          "en": "fly",
+          "cz": "letět, létat"
+        }
+      ],
+      "expressionType": "word",
+      "active": true,
+      "difficultyStatus": "draft",
+      "editorialStatus": "reviewed",
+      "imageStemOverride": "fly",
+      "galleryOrder": 76,
+      "related": []
+    },
+    {
+      "partOfSpeech": [
+        "noun"
+      ],
+      "primaryGroup": "topic-07",
+      "topicIds": [
+        "topic-07"
+      ],
+      "difficultyBand": 1,
+      "teachingType": "word",
+      "id": 540,
+      "uid": "ven-0540",
+      "matches": [
+        {
+          "en": "grass",
+          "cz": "tráva"
+        }
+      ],
+      "expressionType": "word",
+      "active": true,
+      "difficultyStatus": "draft",
+      "editorialStatus": "reviewed",
+      "imageStemOverride": "grass",
+      "galleryOrder": 33,
+      "related": []
+    },
+    {
+      "partOfSpeech": [
+        "verb"
+      ],
+      "primaryGroup": "topic-16",
+      "topicIds": [
+        "topic-16"
+      ],
+      "difficultyBand": 1,
+      "teachingType": "word",
+      "id": 541,
+      "uid": "ven-0541",
+      "matches": [
+        {
+          "en": "share",
+          "cz": "podělit se"
+        }
+      ],
+      "expressionType": "word",
+      "active": true,
+      "difficultyStatus": "draft",
+      "editorialStatus": "reviewed",
+      "imageStemOverride": "share",
+      "galleryOrder": 77,
+      "related": []
     }
   ]
 }

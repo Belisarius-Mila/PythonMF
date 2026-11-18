@@ -2,10 +2,10 @@
   "schemaVersion": 1,
   "language": "en",
   "kind": "sentence-pictures",
-  "batch": "all-active-20261117",
+  "batch": "approved-loop-refresh-20261118",
   "maxPictures": 5,
   "reviewer": "Adam",
-  "reviewScope": "All 512 active English sentences reviewed for literal meanings, homographs, grammatical roles, inflections and fixed expressions. Original 20 reviewed pilot records preserved exactly. Existing accepted image cards only.",
+  "reviewScope": "All active sentences. 40 approved replacements, 19 new meaning cards, and 73 new references in 68 unchanged sentences. Literal reviewed meanings, maximum five distinct images.",
   "entries": {
     "ven-0020": {
       "sourceEn": "cat",
@@ -249,6 +249,13 @@
       "reviewed": true,
       "concepts": [
         {
+          "uid": "ven-0528",
+          "sourceEn": "buy",
+          "sourceCz": "koupit",
+          "text": "buy",
+          "occurrence": 1
+        },
+        {
           "uid": "ven-0224",
           "sourceEn": "bread",
           "sourceCz": "chleba",
@@ -313,10 +320,24 @@
     "ven-0222": {
       "sourceEn": "chair",
       "sourceCz": "židle",
-      "sourceSentenceEn": "The wooden chair stands beside the table.",
-      "sourceSentenceCz": "Dřevěná židle stojí vedle stolu.",
+      "sourceSentenceEn": "Please bring a chair to our table.",
+      "sourceSentenceCz": "Přines nám prosím ke stolu židli.",
       "reviewed": true,
       "concepts": [
+        {
+          "uid": "ven-0139",
+          "sourceEn": "please",
+          "sourceCz": "prosím",
+          "text": "Please",
+          "occurrence": 1
+        },
+        {
+          "uid": "ven-0478",
+          "sourceEn": "bring",
+          "sourceCz": "přinést",
+          "text": "bring",
+          "occurrence": 1
+        },
         {
           "uid": "ven-0222",
           "sourceEn": "chair",
@@ -331,8 +352,7 @@
           "text": "table",
           "occurrence": 1
         }
-      ],
-      "editorialNote": "Wooden nepřevádět na podstatné jméno wood."
+      ]
     },
     "ven-0226": {
       "sourceEn": "bed",
@@ -392,8 +412,8 @@
     "ven-0208": {
       "sourceEn": "train",
       "sourceCz": "vlak",
-      "sourceSentenceEn": "The train arrives at the station on time.",
-      "sourceSentenceCz": "Vlak přijíždí na nádraží včas.",
+      "sourceSentenceEn": "The train crosses the bridge near our school.",
+      "sourceSentenceCz": "Vlak přejíždí přes most u naší školy.",
       "reviewed": true,
       "concepts": [
         {
@@ -402,9 +422,36 @@
           "sourceCz": "vlak",
           "text": "train",
           "occurrence": 1
+        },
+        {
+          "uid": "ven-0322",
+          "sourceEn": "cross",
+          "sourceCz": "přejít; překročit",
+          "text": "crosses",
+          "occurrence": 1
+        },
+        {
+          "uid": "ven-0317",
+          "sourceEn": "bridge",
+          "sourceCz": "most",
+          "text": "bridge",
+          "occurrence": 1
+        },
+        {
+          "uid": "ven-0104",
+          "sourceEn": "near",
+          "sourceCz": "blízko",
+          "text": "near",
+          "occurrence": 1
+        },
+        {
+          "uid": "ven-0384",
+          "sourceEn": "school",
+          "sourceCz": "škola",
+          "text": "school",
+          "occurrence": 1
         }
-      ],
-      "editorialNote": "On time je významové spojení včas; samostatné time=čas se zde nepřipojuje."
+      ]
     },
     "ven-0217": {
       "sourceEn": "bus",
@@ -485,19 +532,39 @@
     "ven-0450": {
       "sourceEn": "hand",
       "sourceCz": "ruka",
-      "sourceSentenceEn": "I wash my hands.",
-      "sourceSentenceCz": "Myji si ruce.",
+      "sourceSentenceEn": "The parrot eats nuts from my hand.",
+      "sourceSentenceCz": "Papoušek mi zobe oříšky z ruky.",
       "reviewed": true,
       "concepts": [
+        {
+          "uid": "ven-0181",
+          "sourceEn": "parrot",
+          "sourceCz": "papoušek",
+          "text": "parrot",
+          "occurrence": 1
+        },
+        {
+          "uid": "ven-0292",
+          "sourceEn": "eat",
+          "sourceCz": "jíst",
+          "text": "eats",
+          "occurrence": 1
+        },
+        {
+          "uid": "ven-0256",
+          "sourceEn": "nuts",
+          "sourceCz": "oříšky",
+          "text": "nuts",
+          "occurrence": 1
+        },
         {
           "uid": "ven-0450",
           "sourceEn": "hand",
           "sourceCz": "ruka",
-          "text": "hands",
+          "text": "hand",
           "occurrence": 1
         }
-      ],
-      "editorialNote": "Hands je ve větě konkrétní množný tvar stejného významu ruka."
+      ]
     },
     "ven-0477": {
       "sourceEn": "sleep",
@@ -550,19 +617,39 @@
     "ven-0430": {
       "sourceEn": "help",
       "sourceCz": "pomoci; pomáhat",
-      "sourceSentenceEn": "Can you help me?",
-      "sourceSentenceCz": "Můžeš mi pomoci?",
+      "sourceSentenceEn": "Help me push this heavy box.",
+      "sourceSentenceCz": "Pomoz mi posunout tu těžkou krabici.",
       "reviewed": true,
       "concepts": [
         {
           "uid": "ven-0430",
           "sourceEn": "help",
           "sourceCz": "pomoci; pomáhat",
-          "text": "help",
+          "text": "Help",
+          "occurrence": 1
+        },
+        {
+          "uid": "ven-0287",
+          "sourceEn": "push",
+          "sourceCz": "tlačit",
+          "text": "push",
+          "occurrence": 1
+        },
+        {
+          "uid": "ven-0344",
+          "sourceEn": "heavy",
+          "sourceCz": "těžký",
+          "text": "heavy",
+          "occurrence": 1
+        },
+        {
+          "uid": "ven-0012",
+          "sourceEn": "box",
+          "sourceCz": "krabice",
+          "text": "box",
           "occurrence": 1
         }
-      ],
-      "editorialNote": "Help je sloveso pomoci; karta help=pomoc se nepoužije."
+      ]
     },
     "ven-0001": {
       "sourceEn": "a glass (of water)",
@@ -680,6 +767,13 @@
       "reviewed": true,
       "concepts": [
         {
+          "uid": "ven-0525",
+          "sourceEn": "put",
+          "sourceCz": "položit, dát někam",
+          "text": "put",
+          "occurrence": 1
+        },
+        {
           "uid": "ven-0005",
           "sourceEn": "bag",
           "sourceCz": "taška",
@@ -752,8 +846,8 @@
     "ven-0009": {
       "sourceEn": "black",
       "sourceCz": "černý",
-      "sourceSentenceEn": "He wears a black jacket in the winter.",
-      "sourceSentenceCz": "V zimě nosí černou bundu.",
+      "sourceSentenceEn": "My black dog has one white ear.",
+      "sourceSentenceCz": "Můj černý pes má jedno bílé ucho.",
       "reviewed": true,
       "concepts": [
         {
@@ -761,6 +855,34 @@
           "sourceEn": "black",
           "sourceCz": "černý",
           "text": "black",
+          "occurrence": 1
+        },
+        {
+          "uid": "ven-0027",
+          "sourceEn": "dog",
+          "sourceCz": "pes",
+          "text": "dog",
+          "occurrence": 1
+        },
+        {
+          "uid": "ven-0187",
+          "sourceEn": "one",
+          "sourceCz": "jedna",
+          "text": "one",
+          "occurrence": 1
+        },
+        {
+          "uid": "ven-0099",
+          "sourceEn": "white",
+          "sourceCz": "bílý",
+          "text": "white",
+          "occurrence": 1
+        },
+        {
+          "uid": "ven-0445",
+          "sourceEn": "ear",
+          "sourceCz": "ucho",
+          "text": "ear",
           "occurrence": 1
         }
       ]
@@ -784,6 +906,20 @@
           "sourceEn": "blue",
           "sourceCz": "modrý",
           "text": "blue",
+          "occurrence": 1
+        },
+        {
+          "uid": "ven-0524",
+          "sourceEn": "after",
+          "sourceCz": "po",
+          "text": "after",
+          "occurrence": 1
+        },
+        {
+          "uid": "ven-0529",
+          "sourceEn": "rain",
+          "sourceCz": "déšť",
+          "text": "rain",
           "occurrence": 1
         }
       ]
@@ -826,6 +962,13 @@
           "occurrence": 1
         },
         {
+          "uid": "ven-0525",
+          "sourceEn": "put",
+          "sourceCz": "položit, dát někam",
+          "text": "put",
+          "occurrence": 1
+        },
+        {
           "uid": "ven-0209",
           "sourceEn": "cup",
           "sourceCz": "hrnek",
@@ -860,6 +1003,13 @@
           "sourceEn": "bread",
           "sourceCz": "chleba",
           "text": "bread",
+          "occurrence": 1
+        },
+        {
+          "uid": "ven-0531",
+          "sourceEn": "tea",
+          "sourceCz": "čaj",
+          "text": "tea",
           "occurrence": 1
         }
       ]
@@ -907,6 +1057,13 @@
           "sourceCz": "volat, telefonovat",
           "text": "calls",
           "occurrence": 1
+        },
+        {
+          "uid": "ven-0534",
+          "sourceEn": "evening",
+          "sourceCz": "večer",
+          "text": "evening",
+          "occurrence": 1
         }
       ],
       "editorialNote": "Sentence reviewed for exact meaning, grammatical role and fixed expressions; no spelling-only sense substitution."
@@ -918,6 +1075,13 @@
       "sourceSentenceCz": "Dáme si jeden burger na půl a smějeme se tomu dni.",
       "reviewed": true,
       "concepts": [
+        {
+          "uid": "ven-0541",
+          "sourceEn": "share",
+          "sourceCz": "podělit se",
+          "text": "share",
+          "occurrence": 1
+        },
         {
           "uid": "ven-0187",
           "sourceEn": "one",
@@ -1046,6 +1210,13 @@
           "occurrence": 1
         },
         {
+          "uid": "ven-0528",
+          "sourceEn": "buy",
+          "sourceCz": "koupit",
+          "text": "buy",
+          "occurrence": 1
+        },
+        {
           "uid": "ven-0082",
           "sourceEn": "popcorn",
           "sourceCz": "popcorn",
@@ -1126,6 +1297,13 @@
           "sourceEn": "cow",
           "sourceCz": "kráva",
           "text": "cow",
+          "occurrence": 1
+        },
+        {
+          "uid": "ven-0526",
+          "sourceEn": "stand",
+          "sourceCz": "stát",
+          "text": "stands",
           "occurrence": 1
         },
         {
@@ -1280,8 +1458,8 @@
     "ven-0032": {
       "sourceEn": "duck",
       "sourceCz": "kachna",
-      "sourceSentenceEn": "A duck swims slowly across the pond.",
-      "sourceSentenceCz": "Kachna pomalu plave přes rybník.",
+      "sourceSentenceEn": "A duck follows a goose to the lake.",
+      "sourceSentenceCz": "Kachna jde za husou k jezeru.",
       "reviewed": true,
       "concepts": [
         {
@@ -1289,6 +1467,27 @@
           "sourceEn": "duck",
           "sourceCz": "kachna",
           "text": "duck",
+          "occurrence": 1
+        },
+        {
+          "uid": "ven-0112",
+          "sourceEn": "follow",
+          "sourceCz": "následovat",
+          "text": "follows",
+          "occurrence": 1
+        },
+        {
+          "uid": "ven-0178",
+          "sourceEn": "goose",
+          "sourceCz": "husa",
+          "text": "goose",
+          "occurrence": 1
+        },
+        {
+          "uid": "ven-0065",
+          "sourceEn": "lake",
+          "sourceCz": "jezero",
+          "text": "lake",
           "occurrence": 1
         }
       ]
@@ -1343,8 +1542,8 @@
     "ven-0035": {
       "sourceEn": "excuse me",
       "sourceCz": "promiňte",
-      "sourceSentenceEn": "Excuse me, is this seat free?",
-      "sourceSentenceCz": "Promiňte, je tohle místo volné?",
+      "sourceSentenceEn": "Excuse me, where is the bus station?",
+      "sourceSentenceCz": "Promiňte, kde je autobusové nádraží?",
       "reviewed": true,
       "concepts": [
         {
@@ -1355,14 +1554,20 @@
           "occurrence": 1
         },
         {
-          "uid": "ven-0044",
-          "sourceEn": "free",
-          "sourceCz": "volný",
-          "text": "free",
+          "uid": "ven-0143",
+          "sourceEn": "where",
+          "sourceCz": "kde, kam",
+          "text": "where",
+          "occurrence": 1
+        },
+        {
+          "uid": "ven-0017",
+          "sourceEn": "bus station",
+          "sourceCz": "autobusové nádraží",
+          "text": "bus station",
           "occurrence": 1
         }
-      ],
-      "editorialNote": "Sentence reviewed for exact meaning, grammatical role and fixed expressions; no spelling-only sense substitution."
+      ]
     },
     "ven-0036": {
       "sourceEn": "eyes",
@@ -1376,6 +1581,13 @@
           "sourceEn": "eyes",
           "sourceCz": "oči",
           "text": "eyes",
+          "occurrence": 1
+        },
+        {
+          "uid": "ven-0524",
+          "sourceEn": "after",
+          "sourceCz": "po",
+          "text": "after",
           "occurrence": 1
         },
         {
@@ -1488,10 +1700,38 @@
     "ven-0040": {
       "sourceEn": "field",
       "sourceCz": "pole",
-      "sourceSentenceEn": "In the field, the grass moves in the wind.",
-      "sourceSentenceCz": "Na poli se tráva hýbe ve větru.",
+      "sourceSentenceEn": "Three horses run across the field.",
+      "sourceSentenceCz": "Tři koně běží přes pole.",
       "reviewed": true,
       "concepts": [
+        {
+          "uid": "ven-0189",
+          "sourceEn": "three",
+          "sourceCz": "tři",
+          "text": "Three",
+          "occurrence": 1
+        },
+        {
+          "uid": "ven-0060",
+          "sourceEn": "horse",
+          "sourceCz": "kůň",
+          "text": "horses",
+          "occurrence": 1
+        },
+        {
+          "uid": "ven-0086",
+          "sourceEn": "run",
+          "sourceCz": "běhat",
+          "text": "run",
+          "occurrence": 1
+        },
+        {
+          "uid": "ven-0308",
+          "sourceEn": "across",
+          "sourceCz": "přes; na druhou stranu",
+          "text": "across",
+          "occurrence": 1
+        },
         {
           "uid": "ven-0040",
           "sourceEn": "field",
@@ -1587,8 +1827,8 @@
     "ven-0044": {
       "sourceEn": "free",
       "sourceCz": "volný",
-      "sourceSentenceEn": "Are you free this evening for a short walk?",
-      "sourceSentenceCz": "Máš dnes večer čas na krátkou procházku?",
+      "sourceSentenceEn": "Are you free to play ball today?",
+      "sourceSentenceCz": "Máš dnes čas zahrát si s míčem?",
       "reviewed": true,
       "concepts": [
         {
@@ -1597,9 +1837,29 @@
           "sourceCz": "volný",
           "text": "free",
           "occurrence": 1
+        },
+        {
+          "uid": "ven-0159",
+          "sourceEn": "play",
+          "sourceCz": "hrát si",
+          "text": "play",
+          "occurrence": 1
+        },
+        {
+          "uid": "ven-0206",
+          "sourceEn": "ball",
+          "sourceCz": "míč",
+          "text": "ball",
+          "occurrence": 1
+        },
+        {
+          "uid": "ven-0404",
+          "sourceEn": "today",
+          "sourceCz": "dnes",
+          "text": "today",
+          "occurrence": 1
         }
-      ],
-      "editorialNote": "Sentence reviewed for exact meaning, grammatical role and fixed expressions; no spelling-only sense substitution."
+      ]
     },
     "ven-0045": {
       "sourceEn": "friend",
@@ -1812,6 +2072,20 @@
           "sourceCz": "strom",
           "text": "tree",
           "occurrence": 1
+        },
+        {
+          "uid": "ven-0524",
+          "sourceEn": "after",
+          "sourceCz": "po",
+          "text": "after",
+          "occurrence": 1
+        },
+        {
+          "uid": "ven-0529",
+          "sourceEn": "rain",
+          "sourceCz": "déšť",
+          "text": "rain",
+          "occurrence": 1
         }
       ],
       "editorialNote": "Sentence reviewed for exact meaning, grammatical role and fixed expressions; no spelling-only sense substitution."
@@ -1845,6 +2119,13 @@
           "occurrence": 1
         },
         {
+          "uid": "ven-0531",
+          "sourceEn": "tea",
+          "sourceCz": "čaj",
+          "text": "tea",
+          "occurrence": 1
+        },
+        {
           "uid": "ven-0430",
           "sourceEn": "help",
           "sourceCz": "pomoci; pomáhat",
@@ -1866,6 +2147,13 @@
           "sourceEn": "hair",
           "sourceCz": "vlasy",
           "text": "hair",
+          "occurrence": 1
+        },
+        {
+          "uid": "ven-0537",
+          "sourceEn": "wind",
+          "sourceCz": "vítr",
+          "text": "wind",
           "occurrence": 1
         }
       ]
@@ -1984,6 +2272,13 @@
       "sourceSentenceCz": "Po práci jdu domů a chvíli si odpočinu.",
       "reviewed": true,
       "concepts": [
+        {
+          "uid": "ven-0524",
+          "sourceEn": "after",
+          "sourceCz": "po",
+          "text": "After",
+          "occurrence": 1
+        },
         {
           "uid": "ven-0474",
           "sourceEn": "work",
@@ -2142,6 +2437,13 @@
       "reviewed": true,
       "concepts": [
         {
+          "uid": "ven-0527",
+          "sourceEn": "child",
+          "sourceCz": "dítě",
+          "text": "child",
+          "occurrence": 1
+        },
+        {
           "uid": "ven-0064",
           "sourceEn": "jump",
           "sourceCz": "skákat",
@@ -2164,6 +2466,13 @@
       "sourceSentenceCz": "Sedíme u rybníka a díváme se na vodu.",
       "reviewed": true,
       "concepts": [
+        {
+          "uid": "ven-0523",
+          "sourceEn": "sit",
+          "sourceCz": "sedět",
+          "text": "sit",
+          "occurrence": 1
+        },
         {
           "uid": "ven-0065",
           "sourceEn": "lake",
@@ -2320,8 +2629,8 @@
     "ven-0071": {
       "sourceEn": "milk",
       "sourceCz": "mléko",
-      "sourceSentenceEn": "I add milk to my tea.",
-      "sourceSentenceCz": "Dám si do čaje mléko.",
+      "sourceSentenceEn": "I like milk in my tea, but I drink my coffee black.",
+      "sourceSentenceCz": "Čaj si dávám s mlékem, ale kávu piju černou.",
       "reviewed": true,
       "concepts": [
         {
@@ -2329,6 +2638,20 @@
           "sourceEn": "milk",
           "sourceCz": "mléko",
           "text": "milk",
+          "occurrence": 1
+        },
+        {
+          "uid": "ven-0531",
+          "sourceEn": "tea",
+          "sourceCz": "čaj",
+          "text": "tea",
+          "occurrence": 1
+        },
+        {
+          "uid": "ven-0022",
+          "sourceEn": "coffee",
+          "sourceCz": "káva",
+          "text": "coffee",
           "occurrence": 1
         }
       ]
@@ -2432,6 +2755,13 @@
       "reviewed": true,
       "concepts": [
         {
+          "uid": "ven-0528",
+          "sourceEn": "buy",
+          "sourceCz": "koupit",
+          "text": "bought",
+          "occurrence": 1
+        },
+        {
           "uid": "ven-0076",
           "sourceEn": "new",
           "sourceCz": "nový",
@@ -2450,10 +2780,17 @@
     "ven-0077": {
       "sourceEn": "nurse",
       "sourceCz": "zdravotní sestra",
-      "sourceSentenceEn": "The nurse checks on the patient with a kind voice.",
-      "sourceSentenceCz": "Sestra zkontroluje pacienta a mluví laskavě.",
+      "sourceSentenceEn": "Show the nurse your right arm.",
+      "sourceSentenceCz": "Ukaž zdravotní sestře pravou paži.",
       "reviewed": true,
       "concepts": [
+        {
+          "uid": "ven-0484",
+          "sourceEn": "show",
+          "sourceCz": "ukázat",
+          "text": "Show",
+          "occurrence": 1
+        },
         {
           "uid": "ven-0077",
           "sourceEn": "nurse",
@@ -2462,10 +2799,17 @@
           "occurrence": 1
         },
         {
-          "uid": "ven-0481",
-          "sourceEn": "check",
-          "sourceCz": "zkontrolovat",
-          "text": "checks",
+          "uid": "ven-0433",
+          "sourceEn": "right",
+          "sourceCz": "pravý",
+          "text": "right",
+          "occurrence": 1
+        },
+        {
+          "uid": "ven-0449",
+          "sourceEn": "arm",
+          "sourceCz": "paže",
+          "text": "arm",
           "occurrence": 1
         }
       ]
@@ -2526,8 +2870,8 @@
     "ven-0080": {
       "sourceEn": "parents",
       "sourceCz": "rodiče",
-      "sourceSentenceEn": "My parents visit us on Sunday.",
-      "sourceSentenceCz": "Moji rodiče nás navštíví v neděli.",
+      "sourceSentenceEn": "My parents visit us on Sundays, and my daughter always runs to greet them.",
+      "sourceSentenceCz": "Rodiče k nám chodí v neděli a dcera jim pokaždé běží naproti.",
       "reviewed": true,
       "concepts": [
         {
@@ -2535,6 +2879,13 @@
           "sourceEn": "parents",
           "sourceCz": "rodiče",
           "text": "parents",
+          "occurrence": 1
+        },
+        {
+          "uid": "ven-0165",
+          "sourceEn": "daughter",
+          "sourceCz": "dcera",
+          "text": "daughter",
           "occurrence": 1
         }
       ]
@@ -2604,6 +2955,13 @@
           "sourceEn": "then",
           "sourceCz": "potom",
           "text": "then",
+          "occurrence": 1
+        },
+        {
+          "uid": "ven-0540",
+          "sourceEn": "grass",
+          "sourceCz": "tráva",
+          "text": "grass",
           "occurrence": 1
         }
       ]
@@ -2902,8 +3260,8 @@
     "ven-0095": {
       "sourceEn": "teacher",
       "sourceCz": "učitel",
-      "sourceSentenceEn": "The teacher explains it with a simple example.",
-      "sourceSentenceCz": "Učitel to vysvětlí na jednoduchém příkladu.",
+      "sourceSentenceEn": "Our teacher opens a book about animals.",
+      "sourceSentenceCz": "Náš učitel otevírá knihu o zvířatech.",
       "reviewed": true,
       "concepts": [
         {
@@ -2912,21 +3270,63 @@
           "sourceCz": "učitel",
           "text": "teacher",
           "occurrence": 1
+        },
+        {
+          "uid": "ven-0376",
+          "sourceEn": "open",
+          "sourceCz": "otevřít",
+          "text": "opens",
+          "occurrence": 1
+        },
+        {
+          "uid": "ven-0011",
+          "sourceEn": "book",
+          "sourceCz": "kniha",
+          "text": "book",
+          "occurrence": 1
+        },
+        {
+          "uid": "ven-0003",
+          "sourceEn": "animal",
+          "sourceCz": "zvíře",
+          "text": "animals",
+          "occurrence": 1
         }
       ]
     },
     "ven-0096": {
       "sourceEn": "ticket",
       "sourceCz": "lístek",
-      "sourceSentenceEn": "I buy a ticket and put it in my pocket.",
-      "sourceSentenceCz": "Koupím si lístek a dám si ho do kapsy.",
+      "sourceSentenceEn": "I buy a train ticket and put it in my pocket.",
+      "sourceSentenceCz": "Koupím si lístek na vlak a strčím ho do kapsy.",
       "reviewed": true,
       "concepts": [
+        {
+          "uid": "ven-0528",
+          "sourceEn": "buy",
+          "sourceCz": "koupit",
+          "text": "buy",
+          "occurrence": 1
+        },
+        {
+          "uid": "ven-0208",
+          "sourceEn": "train",
+          "sourceCz": "vlak",
+          "text": "train",
+          "occurrence": 1
+        },
         {
           "uid": "ven-0096",
           "sourceEn": "ticket",
           "sourceCz": "lístek",
           "text": "ticket",
+          "occurrence": 1
+        },
+        {
+          "uid": "ven-0525",
+          "sourceEn": "put",
+          "sourceCz": "položit, dát někam",
+          "text": "put",
           "occurrence": 1
         }
       ]
@@ -2974,6 +3374,13 @@
           "sourceCz": "dobrý",
           "text": "good",
           "occurrence": 1
+        },
+        {
+          "uid": "ven-0524",
+          "sourceEn": "after",
+          "sourceCz": "po",
+          "text": "after",
+          "occurrence": 1
         }
       ],
       "editorialNote": "Sentence reviewed for exact meaning, grammatical role and fixed expressions; no spelling-only sense substitution."
@@ -2997,6 +3404,13 @@
           "sourceEn": "cat",
           "sourceCz": "kočka",
           "text": "cat",
+          "occurrence": 1
+        },
+        {
+          "uid": "ven-0523",
+          "sourceEn": "sit",
+          "sourceCz": "sedět",
+          "text": "sits",
           "occurrence": 1
         },
         {
@@ -3144,6 +3558,13 @@
       "reviewed": true,
       "concepts": [
         {
+          "uid": "ven-0536",
+          "sourceEn": "shop",
+          "sourceCz": "obchod",
+          "text": "shop",
+          "occurrence": 1
+        },
+        {
           "uid": "ven-0104",
           "sourceEn": "near",
           "sourceCz": "blízko",
@@ -3254,8 +3675,8 @@
     "ven-0108": {
       "sourceEn": "hungry",
       "sourceCz": "hladový",
-      "sourceSentenceEn": "I am hungry, so I make a quick sandwich.",
-      "sourceSentenceCz": "Jsem hladový, tak si udělám rychlý sendvič.",
+      "sourceSentenceEn": "The hungry fox watches the chickens.",
+      "sourceSentenceCz": "Hladová liška pozoruje slepice.",
       "reviewed": true,
       "concepts": [
         {
@@ -3263,6 +3684,27 @@
           "sourceEn": "hungry",
           "sourceCz": "hladový",
           "text": "hungry",
+          "occurrence": 1
+        },
+        {
+          "uid": "ven-0177",
+          "sourceEn": "fox",
+          "sourceCz": "liška",
+          "text": "fox",
+          "occurrence": 1
+        },
+        {
+          "uid": "ven-0410",
+          "sourceEn": "watch",
+          "sourceCz": "sledovat; dívat se",
+          "text": "watches",
+          "occurrence": 1
+        },
+        {
+          "uid": "ven-0431",
+          "sourceEn": "chicken",
+          "sourceCz": "slepice",
+          "text": "chickens",
           "occurrence": 1
         }
       ]
@@ -3301,6 +3743,13 @@
           "sourceCz": "pít",
           "text": "drink",
           "occurrence": 1
+        },
+        {
+          "uid": "ven-0524",
+          "sourceEn": "after",
+          "sourceCz": "po",
+          "text": "after",
+          "occurrence": 1
         }
       ],
       "editorialNote": "Sentence reviewed for exact meaning, grammatical role and fixed expressions; no spelling-only sense substitution."
@@ -3331,6 +3780,13 @@
           "sourceEn": "come",
           "sourceCz": "jít, přijít",
           "text": "come",
+          "occurrence": 1
+        },
+        {
+          "uid": "ven-0523",
+          "sourceEn": "sit",
+          "sourceCz": "sedět",
+          "text": "sit",
           "occurrence": 1
         }
       ]
@@ -3368,15 +3824,36 @@
     "ven-0113": {
       "sourceEn": "menu",
       "sourceCz": "jídelní lístek",
-      "sourceSentenceEn": "I read the menu and choose a simple soup.",
-      "sourceSentenceCz": "Prohlédnu si jídelní lístek a vyberu si jednoduchou polévku.",
+      "sourceSentenceEn": "Chicken and rice are on the menu today.",
+      "sourceSentenceCz": "Dnes je na jídelním lístku kuře s rýží.",
       "reviewed": true,
       "concepts": [
+        {
+          "uid": "ven-0119",
+          "sourceEn": "chicken",
+          "sourceCz": "kuřecí maso",
+          "text": "Chicken",
+          "occurrence": 1
+        },
+        {
+          "uid": "ven-0120",
+          "sourceEn": "rice",
+          "sourceCz": "rýže",
+          "text": "rice",
+          "occurrence": 1
+        },
         {
           "uid": "ven-0113",
           "sourceEn": "menu",
           "sourceCz": "jídelní lístek",
           "text": "menu",
+          "occurrence": 1
+        },
+        {
+          "uid": "ven-0404",
+          "sourceEn": "today",
+          "sourceCz": "dnes",
+          "text": "today",
           "occurrence": 1
         }
       ]
@@ -3485,6 +3962,13 @@
           "sourceCz": "pomeranč",
           "text": "orange",
           "occurrence": 1
+        },
+        {
+          "uid": "ven-0541",
+          "sourceEn": "share",
+          "sourceCz": "podělit se",
+          "text": "shares",
+          "occurrence": 1
         }
       ]
     },
@@ -3580,6 +4064,13 @@
       "reviewed": true,
       "concepts": [
         {
+          "uid": "ven-0525",
+          "sourceEn": "put",
+          "sourceCz": "položit, dát někam",
+          "text": "put",
+          "occurrence": 1
+        },
+        {
           "uid": "ven-0122",
           "sourceEn": "cheese",
           "sourceCz": "sýr",
@@ -3633,6 +4124,13 @@
       "reviewed": true,
       "concepts": [
         {
+          "uid": "ven-0528",
+          "sourceEn": "buy",
+          "sourceCz": "koupit",
+          "text": "buy",
+          "occurrence": 1
+        },
+        {
           "uid": "ven-0124",
           "sourceEn": "potatoes",
           "sourceCz": "brambory",
@@ -3644,8 +4142,8 @@
     "ven-0125": {
       "sourceEn": "ketchup",
       "sourceCz": "kečup",
-      "sourceSentenceEn": "Can I have ketchup, please?",
-      "sourceSentenceCz": "Můžu dostat kečup, prosím?",
+      "sourceSentenceEn": "Could I have some ketchup for my fries, please?",
+      "sourceSentenceCz": "Mohl bych k těm hranolkům dostat kečup, prosím?",
       "reviewed": true,
       "concepts": [
         {
@@ -3653,6 +4151,13 @@
           "sourceEn": "ketchup",
           "sourceCz": "kečup",
           "text": "ketchup",
+          "occurrence": 1
+        },
+        {
+          "uid": "ven-0123",
+          "sourceEn": "fries",
+          "sourceCz": "hranolky",
+          "text": "fries",
           "occurrence": 1
         },
         {
@@ -3718,6 +4223,13 @@
       "reviewed": true,
       "concepts": [
         {
+          "uid": "ven-0531",
+          "sourceEn": "tea",
+          "sourceCz": "čaj",
+          "text": "tea",
+          "occurrence": 1
+        },
+        {
           "uid": "ven-0128",
           "sourceEn": "hot",
           "sourceCz": "horký",
@@ -3752,8 +4264,8 @@
     "ven-0130": {
       "sourceEn": "dessert",
       "sourceCz": "dezert",
-      "sourceSentenceEn": "Would you like dessert after lunch?",
-      "sourceSentenceCz": "Dáš si po obědě dezert?",
+      "sourceSentenceEn": "Would you like ice cream for dessert or just a coffee after lunch?",
+      "sourceSentenceCz": "Dáš si po obědě jako dezert zmrzlinu, nebo jen kávu?",
       "reviewed": true,
       "concepts": [
         {
@@ -3764,10 +4276,24 @@
           "occurrence": 1
         },
         {
+          "uid": "ven-0131",
+          "sourceEn": "ice cream",
+          "sourceCz": "zmrzlina",
+          "text": "ice cream",
+          "occurrence": 1
+        },
+        {
           "uid": "ven-0130",
           "sourceEn": "dessert",
           "sourceCz": "dezert",
           "text": "dessert",
+          "occurrence": 1
+        },
+        {
+          "uid": "ven-0022",
+          "sourceEn": "coffee",
+          "sourceCz": "káva",
+          "text": "coffee",
           "occurrence": 1
         },
         {
@@ -3786,6 +4312,13 @@
       "sourceSentenceCz": "V létě si dáme zmrzlinu v parku.",
       "reviewed": true,
       "concepts": [
+        {
+          "uid": "ven-0541",
+          "sourceEn": "share",
+          "sourceCz": "podělit se",
+          "text": "share",
+          "occurrence": 1
+        },
         {
           "uid": "ven-0131",
           "sourceEn": "ice cream",
@@ -3835,10 +4368,31 @@
     "ven-0133": {
       "sourceEn": "pound",
       "sourceCz": "libra (měna)",
-      "sourceSentenceEn": "It costs twenty pounds in total.",
-      "sourceSentenceCz": "Celkem to stojí dvacet liber.",
+      "sourceSentenceEn": "The brown boots are ten pounds.",
+      "sourceSentenceCz": "Hnědé holínky stojí deset liber.",
       "reviewed": true,
       "concepts": [
+        {
+          "uid": "ven-0318",
+          "sourceEn": "brown",
+          "sourceCz": "hnědý",
+          "text": "brown",
+          "occurrence": 1
+        },
+        {
+          "uid": "ven-0254",
+          "sourceEn": "boots",
+          "sourceCz": "holinky",
+          "text": "boots",
+          "occurrence": 1
+        },
+        {
+          "uid": "ven-0397",
+          "sourceEn": "ten",
+          "sourceCz": "deset",
+          "text": "ten",
+          "occurrence": 1
+        },
         {
           "uid": "ven-0133",
           "sourceEn": "pound",
@@ -3943,6 +4497,13 @@
           "sourceEn": "new",
           "sourceCz": "nový",
           "text": "new",
+          "occurrence": 1
+        },
+        {
+          "uid": "ven-0535",
+          "sourceEn": "soup",
+          "sourceCz": "polévka",
+          "text": "soup",
           "occurrence": 1
         },
         {
@@ -4294,8 +4855,8 @@
     "ven-0150": {
       "sourceEn": "how much",
       "sourceCz": "kolik",
-      "sourceSentenceEn": "How much is it?",
-      "sourceSentenceCz": "Kolik to stojí?",
+      "sourceSentenceEn": "How much is that red toy car?",
+      "sourceSentenceCz": "Kolik stojí to červené autíčko?",
       "reviewed": true,
       "concepts": [
         {
@@ -4303,6 +4864,27 @@
           "sourceEn": "how much",
           "sourceCz": "kolik",
           "text": "How much",
+          "occurrence": 1
+        },
+        {
+          "uid": "ven-0084",
+          "sourceEn": "red",
+          "sourceCz": "červený",
+          "text": "red",
+          "occurrence": 1
+        },
+        {
+          "uid": "ven-0251",
+          "sourceEn": "toy",
+          "sourceCz": "hračka",
+          "text": "toy",
+          "occurrence": 1
+        },
+        {
+          "uid": "ven-0207",
+          "sourceEn": "car",
+          "sourceCz": "auto",
+          "text": "car",
           "occurrence": 1
         }
       ]
@@ -4419,8 +5001,8 @@
     "ven-0155": {
       "sourceEn": "call",
       "sourceCz": "volat, telefonovat",
-      "sourceSentenceEn": "I call Jane.",
-      "sourceSentenceCz": "Zavolám Janě.",
+      "sourceSentenceEn": "I call my aunt on her birthday.",
+      "sourceSentenceCz": "Volám tetě k narozeninám.",
       "reviewed": true,
       "concepts": [
         {
@@ -4428,6 +5010,20 @@
           "sourceEn": "call",
           "sourceCz": "volat, telefonovat",
           "text": "call",
+          "occurrence": 1
+        },
+        {
+          "uid": "ven-0167",
+          "sourceEn": "aunt",
+          "sourceCz": "teta",
+          "text": "aunt",
+          "occurrence": 1
+        },
+        {
+          "uid": "ven-0315",
+          "sourceEn": "birthday",
+          "sourceCz": "narozeniny",
+          "text": "birthday",
           "occurrence": 1
         }
       ]
@@ -4934,6 +5530,13 @@
           "occurrence": 1
         },
         {
+          "uid": "ven-0526",
+          "sourceEn": "stand",
+          "sourceCz": "stát",
+          "text": "stands",
+          "occurrence": 1
+        },
+        {
           "uid": "ven-0104",
           "sourceEn": "near",
           "sourceCz": "blízko",
@@ -4952,8 +5555,8 @@
     "ven-0176": {
       "sourceEn": "eagle",
       "sourceCz": "orel",
-      "sourceSentenceEn": "The eagle flies high above the mountains.",
-      "sourceSentenceCz": "Orel letí vysoko nad horami.",
+      "sourceSentenceEn": "The eagle catches a fish in the river.",
+      "sourceSentenceCz": "Orel chytá rybu v řece.",
       "reviewed": true,
       "concepts": [
         {
@@ -4961,6 +5564,27 @@
           "sourceEn": "eagle",
           "sourceCz": "orel",
           "text": "eagle",
+          "occurrence": 1
+        },
+        {
+          "uid": "ven-0299",
+          "sourceEn": "catch",
+          "sourceCz": "chytit",
+          "text": "catches",
+          "occurrence": 1
+        },
+        {
+          "uid": "ven-0042",
+          "sourceEn": "fish",
+          "sourceCz": "ryba",
+          "text": "fish",
+          "occurrence": 1
+        },
+        {
+          "uid": "ven-0156",
+          "sourceEn": "river",
+          "sourceCz": "řeka",
+          "text": "river",
           "occurrence": 1
         }
       ]
@@ -4984,6 +5608,13 @@
           "sourceEn": "run",
           "sourceCz": "běhat",
           "text": "runs",
+          "occurrence": 1
+        },
+        {
+          "uid": "ven-0540",
+          "sourceEn": "grass",
+          "sourceCz": "tráva",
+          "text": "grass",
           "occurrence": 1
         }
       ]
@@ -5166,6 +5797,13 @@
           "occurrence": 1
         },
         {
+          "uid": "ven-0526",
+          "sourceEn": "stand",
+          "sourceCz": "stát",
+          "text": "stands",
+          "occurrence": 1
+        },
+        {
           "uid": "ven-0104",
           "sourceEn": "near",
           "sourceCz": "blízko",
@@ -5238,6 +5876,13 @@
           "sourceCz": "pták",
           "text": "bird",
           "occurrence": 1
+        },
+        {
+          "uid": "ven-0523",
+          "sourceEn": "sit",
+          "sourceCz": "sedět",
+          "text": "sitting",
+          "occurrence": 1
         }
       ]
     },
@@ -5300,6 +5945,13 @@
           "occurrence": 1
         },
         {
+          "uid": "ven-0523",
+          "sourceEn": "sit",
+          "sourceCz": "sedět",
+          "text": "sit",
+          "occurrence": 1
+        },
+        {
           "uid": "ven-0104",
           "sourceEn": "near",
           "sourceCz": "blízko",
@@ -5327,6 +5979,13 @@
           "sourceEn": "four",
           "sourceCz": "čtyři",
           "text": "Four",
+          "occurrence": 1
+        },
+        {
+          "uid": "ven-0527",
+          "sourceEn": "child",
+          "sourceCz": "dítě",
+          "text": "children",
           "occurrence": 1
         },
         {
@@ -5403,6 +6062,13 @@
           "sourceCz": "pomeranč",
           "text": "oranges",
           "occurrence": 1
+        },
+        {
+          "uid": "ven-0530",
+          "sourceEn": "basket",
+          "sourceCz": "košík",
+          "text": "basket",
+          "occurrence": 1
         }
       ],
       "editorialNote": "Sentence reviewed for exact meaning, grammatical role and fixed expressions; no spelling-only sense substitution."
@@ -5426,6 +6092,13 @@
           "sourceEn": "sheep",
           "sourceCz": "ovce",
           "text": "sheep",
+          "occurrence": 1
+        },
+        {
+          "uid": "ven-0526",
+          "sourceEn": "stand",
+          "sourceCz": "stát",
+          "text": "standing",
           "occurrence": 1
         },
         {
@@ -5456,6 +6129,13 @@
           "sourceEn": "duck",
           "sourceCz": "kachna",
           "text": "ducks",
+          "occurrence": 1
+        },
+        {
+          "uid": "ven-0538",
+          "sourceEn": "swim",
+          "sourceCz": "plavat",
+          "text": "swimming",
           "occurrence": 1
         }
       ]
@@ -5509,6 +6189,13 @@
           "sourceEn": "apple",
           "sourceCz": "jablko",
           "text": "apples",
+          "occurrence": 1
+        },
+        {
+          "uid": "ven-0530",
+          "sourceEn": "basket",
+          "sourceCz": "košík",
+          "text": "basket",
           "occurrence": 1
         }
       ]
@@ -5643,10 +6330,17 @@
     "ven-0206": {
       "sourceEn": "ball",
       "sourceCz": "míč",
-      "sourceSentenceEn": "The child throws the ball to a friend.",
-      "sourceSentenceCz": "Dítě hází míč kamarádovi.",
+      "sourceSentenceEn": "The child throws the ball to a friend on the other side of the fence.",
+      "sourceSentenceCz": "Dítě hodí míč kamarádovi na druhé straně plotu.",
       "reviewed": true,
       "concepts": [
+        {
+          "uid": "ven-0527",
+          "sourceEn": "child",
+          "sourceCz": "dítě",
+          "text": "child",
+          "occurrence": 1
+        },
         {
           "uid": "ven-0206",
           "sourceEn": "ball",
@@ -5659,6 +6353,13 @@
           "sourceEn": "friend",
           "sourceCz": "kamarád",
           "text": "friend",
+          "occurrence": 1
+        },
+        {
+          "uid": "ven-0304",
+          "sourceEn": "fence",
+          "sourceCz": "plot",
+          "text": "fence",
           "occurrence": 1
         }
       ]
@@ -5720,15 +6421,36 @@
     "ven-0212": {
       "sourceEn": "banana",
       "sourceCz": "banán",
-      "sourceSentenceEn": "I peel a banana for my snack.",
-      "sourceSentenceCz": "Oloupu si banán ke svačině.",
+      "sourceSentenceEn": "I need three bananas for the cake.",
+      "sourceSentenceCz": "Na dort potřebuju tři banány.",
       "reviewed": true,
       "concepts": [
+        {
+          "uid": "ven-0367",
+          "sourceEn": "need",
+          "sourceCz": "potřebovat",
+          "text": "need",
+          "occurrence": 1
+        },
+        {
+          "uid": "ven-0189",
+          "sourceEn": "three",
+          "sourceCz": "tři",
+          "text": "three",
+          "occurrence": 1
+        },
         {
           "uid": "ven-0212",
           "sourceEn": "banana",
           "sourceCz": "banán",
-          "text": "banana",
+          "text": "bananas",
+          "occurrence": 1
+        },
+        {
+          "uid": "ven-0228",
+          "sourceEn": "cake",
+          "sourceCz": "dort",
+          "text": "cake",
           "occurrence": 1
         }
       ]
@@ -5775,6 +6497,13 @@
           "sourceEn": "please",
           "sourceCz": "prosím",
           "text": "Please",
+          "occurrence": 1
+        },
+        {
+          "uid": "ven-0525",
+          "sourceEn": "put",
+          "sourceCz": "položit, dát někam",
+          "text": "put",
           "occurrence": 1
         },
         {
@@ -5872,6 +6601,13 @@
           "sourceEn": "eat",
           "sourceCz": "jíst",
           "text": "eats",
+          "occurrence": 1
+        },
+        {
+          "uid": "ven-0535",
+          "sourceEn": "soup",
+          "sourceCz": "polévka",
+          "text": "soup",
           "occurrence": 1
         },
         {
@@ -6016,6 +6752,13 @@
           "sourceCz": "krabice",
           "text": "boxes",
           "occurrence": 1
+        },
+        {
+          "uid": "ven-0536",
+          "sourceEn": "shop",
+          "sourceCz": "obchod",
+          "text": "shop",
+          "occurrence": 1
         }
       ]
     },
@@ -6038,6 +6781,13 @@
           "sourceEn": "star",
           "sourceCz": "hvězda",
           "text": "star",
+          "occurrence": 1
+        },
+        {
+          "uid": "ven-0534",
+          "sourceEn": "evening",
+          "sourceCz": "večer",
+          "text": "evening",
           "occurrence": 1
         },
         {
@@ -6093,6 +6843,13 @@
           "sourceEn": "plane",
           "sourceCz": "letadlo",
           "text": "plane",
+          "occurrence": 1
+        },
+        {
+          "uid": "ven-0539",
+          "sourceEn": "fly",
+          "sourceCz": "letět, létat",
+          "text": "flies",
           "occurrence": 1
         },
         {
@@ -6296,8 +7053,8 @@
     "ven-0239": {
       "sourceEn": "leaf",
       "sourceCz": "list",
-      "sourceSentenceEn": "A red leaf falls from the tree.",
-      "sourceSentenceCz": "Ze stromu padá červený list.",
+      "sourceSentenceEn": "A red leaf falls from the tree and lands in the stream.",
+      "sourceSentenceCz": "Ze stromu spadne červený list a přistane v potoce.",
       "reviewed": true,
       "concepts": [
         {
@@ -6320,6 +7077,13 @@
           "sourceCz": "strom",
           "text": "tree",
           "occurrence": 1
+        },
+        {
+          "uid": "ven-0394",
+          "sourceEn": "stream",
+          "sourceCz": "potok",
+          "text": "stream",
+          "occurrence": 1
         }
       ]
     },
@@ -6330,6 +7094,13 @@
       "sourceSentenceCz": "Položí jednu sušenku na talíř.",
       "reviewed": true,
       "concepts": [
+        {
+          "uid": "ven-0525",
+          "sourceEn": "put",
+          "sourceCz": "položit, dát někam",
+          "text": "puts",
+          "occurrence": 1
+        },
         {
           "uid": "ven-0187",
           "sourceEn": "one",
@@ -6360,6 +7131,13 @@
       "sourceSentenceCz": "Dítě staví věž z modré kostky.",
       "reviewed": true,
       "concepts": [
+        {
+          "uid": "ven-0527",
+          "sourceEn": "child",
+          "sourceCz": "dítě",
+          "text": "child",
+          "occurrence": 1
+        },
         {
           "uid": "ven-0010",
           "sourceEn": "blue",
@@ -6641,6 +7419,20 @@
       "reviewed": true,
       "concepts": [
         {
+          "uid": "ven-0527",
+          "sourceEn": "child",
+          "sourceCz": "dítě",
+          "text": "child",
+          "occurrence": 1
+        },
+        {
+          "uid": "ven-0525",
+          "sourceEn": "put",
+          "sourceCz": "položit, dát někam",
+          "text": "puts",
+          "occurrence": 1
+        },
+        {
           "uid": "ven-0251",
           "sourceEn": "toy",
           "sourceCz": "hračka",
@@ -6659,15 +7451,36 @@
     "ven-0252": {
       "sourceEn": "kite",
       "sourceCz": "drak",
-      "sourceSentenceEn": "The colorful kite flies high in the wind.",
-      "sourceSentenceCz": "Barevný drak létá vysoko ve větru.",
+      "sourceSentenceEn": "My red kite looks like a bird.",
+      "sourceSentenceCz": "Můj červený drak vypadá jako pták.",
       "reviewed": true,
       "concepts": [
+        {
+          "uid": "ven-0084",
+          "sourceEn": "red",
+          "sourceCz": "červený",
+          "text": "red",
+          "occurrence": 1
+        },
         {
           "uid": "ven-0252",
           "sourceEn": "kite",
           "sourceCz": "drak",
           "text": "kite",
+          "occurrence": 1
+        },
+        {
+          "uid": "ven-0510",
+          "sourceEn": "look like",
+          "sourceCz": "vypadat jako",
+          "text": "looks like",
+          "occurrence": 1
+        },
+        {
+          "uid": "ven-0008",
+          "sourceEn": "bird",
+          "sourceCz": "pták",
+          "text": "bird",
           "occurrence": 1
         }
       ]
@@ -6675,8 +7488,8 @@
     "ven-0253": {
       "sourceEn": "lamp",
       "sourceCz": "lampa",
-      "sourceSentenceEn": "The lamp gives us light in the evening.",
-      "sourceSentenceCz": "Lampa nám večer svítí.",
+      "sourceSentenceEn": "I switch on the lamp beside my bed to finish my book.",
+      "sourceSentenceCz": "Rozsvítím lampičku u postele, abych mohl dočíst knihu.",
       "reviewed": true,
       "concepts": [
         {
@@ -6685,9 +7498,29 @@
           "sourceCz": "lampa",
           "text": "lamp",
           "occurrence": 1
+        },
+        {
+          "uid": "ven-0226",
+          "sourceEn": "bed",
+          "sourceCz": "postel",
+          "text": "bed",
+          "occurrence": 1
+        },
+        {
+          "uid": "ven-0331",
+          "sourceEn": "finish",
+          "sourceCz": "dokončit",
+          "text": "finish",
+          "occurrence": 1
+        },
+        {
+          "uid": "ven-0011",
+          "sourceEn": "book",
+          "sourceCz": "kniha",
+          "text": "book",
+          "occurrence": 1
         }
-      ],
-      "editorialNote": "Sentence reviewed for exact meaning, grammatical role and fixed expressions; no spelling-only sense substitution."
+      ]
     },
     "ven-0254": {
       "sourceEn": "boots",
@@ -6907,6 +7740,13 @@
           "occurrence": 1
         },
         {
+          "uid": "ven-0523",
+          "sourceEn": "sit",
+          "sourceCz": "sedět",
+          "text": "sits",
+          "occurrence": 1
+        },
+        {
           "uid": "ven-0304",
           "sourceEn": "fence",
           "sourceCz": "plot",
@@ -6923,10 +7763,31 @@
       "reviewed": true,
       "concepts": [
         {
+          "uid": "ven-0532",
+          "sourceEn": "road",
+          "sourceCz": "silnice",
+          "text": "road",
+          "occurrence": 1
+        },
+        {
           "uid": "ven-0267",
           "sourceEn": "bad",
           "sourceCz": "špatný",
           "text": "bad",
+          "occurrence": 1
+        },
+        {
+          "uid": "ven-0524",
+          "sourceEn": "after",
+          "sourceCz": "po",
+          "text": "after",
+          "occurrence": 1
+        },
+        {
+          "uid": "ven-0529",
+          "sourceEn": "rain",
+          "sourceCz": "déšť",
+          "text": "rain",
           "occurrence": 1
         }
       ]
@@ -7111,6 +7972,13 @@
           "sourceCz": "přejít; překročit",
           "text": "cross",
           "occurrence": 1
+        },
+        {
+          "uid": "ven-0532",
+          "sourceEn": "road",
+          "sourceCz": "silnice",
+          "text": "road",
+          "occurrence": 1
         }
       ]
     },
@@ -7287,8 +8155,8 @@
     "ven-0282": {
       "sourceEn": "bucket",
       "sourceCz": "vědro, kbelík",
-      "sourceSentenceEn": "The bucket is full of clean water.",
-      "sourceSentenceCz": "Kbelík je plný čisté vody.",
+      "sourceSentenceEn": "The bucket is full of clean water from the pump.",
+      "sourceSentenceCz": "Kbelík je plný čisté vody z pumpy.",
       "reviewed": true,
       "concepts": [
         {
@@ -7310,6 +8178,13 @@
           "sourceEn": "water",
           "sourceCz": "voda",
           "text": "water",
+          "occurrence": 1
+        },
+        {
+          "uid": "ven-0280",
+          "sourceEn": "pump",
+          "sourceCz": "pumpa",
+          "text": "pump",
           "occurrence": 1
         }
       ]
@@ -7477,6 +8352,13 @@
           "sourceEn": "come closer",
           "sourceCz": "přijít blíž",
           "text": "Come closer",
+          "occurrence": 1
+        },
+        {
+          "uid": "ven-0533",
+          "sourceEn": "see",
+          "sourceCz": "vidět",
+          "text": "see",
           "occurrence": 1
         },
         {
@@ -7655,6 +8537,13 @@
       "sourceSentenceCz": "Obchod je dnes zavřený.",
       "reviewed": true,
       "concepts": [
+        {
+          "uid": "ven-0536",
+          "sourceEn": "shop",
+          "sourceCz": "obchod",
+          "text": "shop",
+          "occurrence": 1
+        },
         {
           "uid": "ven-0295",
           "sourceEn": "closed",
@@ -7915,6 +8804,13 @@
           "occurrence": 1
         },
         {
+          "uid": "ven-0526",
+          "sourceEn": "stand",
+          "sourceCz": "stát",
+          "text": "stand",
+          "occurrence": 1
+        },
+        {
           "uid": "ven-0304",
           "sourceEn": "fence",
           "sourceCz": "plot",
@@ -7953,6 +8849,13 @@
       "sourceSentenceCz": "Vidím kočku.",
       "reviewed": true,
       "concepts": [
+        {
+          "uid": "ven-0533",
+          "sourceEn": "see",
+          "sourceCz": "vidět",
+          "text": "see",
+          "occurrence": 1
+        },
         {
           "uid": "ven-0306",
           "sourceEn": "a",
@@ -8398,15 +9301,29 @@
     "ven-0323": {
       "sourceEn": "dance",
       "sourceCz": "tancovat",
-      "sourceSentenceEn": "We dance at the party.",
-      "sourceSentenceCz": "Tancujeme na oslavě.",
+      "sourceSentenceEn": "My parents dance at my birthday party.",
+      "sourceSentenceCz": "Moji rodiče tančí na mé narozeninové oslavě.",
       "reviewed": true,
       "concepts": [
+        {
+          "uid": "ven-0080",
+          "sourceEn": "parents",
+          "sourceCz": "rodiče",
+          "text": "parents",
+          "occurrence": 1
+        },
         {
           "uid": "ven-0323",
           "sourceEn": "dance",
           "sourceCz": "tancovat",
           "text": "dance",
+          "occurrence": 1
+        },
+        {
+          "uid": "ven-0315",
+          "sourceEn": "birthday",
+          "sourceCz": "narozeniny",
+          "text": "birthday",
           "occurrence": 1
         },
         {
@@ -8739,6 +9656,13 @@
       "sourceSentenceCz": "Košík je plný jablek.",
       "reviewed": true,
       "concepts": [
+        {
+          "uid": "ven-0530",
+          "sourceEn": "basket",
+          "sourceCz": "košík",
+          "text": "basket",
+          "occurrence": 1
+        },
         {
           "uid": "ven-0335",
           "sourceEn": "full",
@@ -9366,8 +10290,8 @@
     "ven-0358": {
       "sourceEn": "listen",
       "sourceCz": "poslouchat",
-      "sourceSentenceEn": "Listen to the bird.",
-      "sourceSentenceCz": "Poslouchej ptáka.",
+      "sourceSentenceEn": "Listen to the bird tapping on the tree.",
+      "sourceSentenceCz": "Poslouchej, jak pták ťuká do stromu.",
       "reviewed": true,
       "concepts": [
         {
@@ -9382,6 +10306,20 @@
           "sourceEn": "bird",
           "sourceCz": "pták",
           "text": "bird",
+          "occurrence": 1
+        },
+        {
+          "uid": "ven-0396",
+          "sourceEn": "tap",
+          "sourceCz": "klepnout",
+          "text": "tapping",
+          "occurrence": 1
+        },
+        {
+          "uid": "ven-0211",
+          "sourceEn": "tree",
+          "sourceCz": "strom",
+          "text": "tree",
           "occurrence": 1
         }
       ]
@@ -9408,6 +10346,13 @@
           "occurrence": 1
         },
         {
+          "uid": "ven-0523",
+          "sourceEn": "sit",
+          "sourceCz": "sedět",
+          "text": "sits",
+          "occurrence": 1
+        },
+        {
           "uid": "ven-0211",
           "sourceEn": "tree",
           "sourceCz": "strom",
@@ -9423,6 +10368,13 @@
       "sourceSentenceCz": "Položíme kládu přes potok.",
       "reviewed": true,
       "concepts": [
+        {
+          "uid": "ven-0525",
+          "sourceEn": "put",
+          "sourceCz": "položit, dát někam",
+          "text": "put",
+          "occurrence": 1
+        },
         {
           "uid": "ven-0360",
           "sourceEn": "log",
@@ -9661,6 +10613,13 @@
       "sourceSentenceCz": "Vidím devět hvězd.",
       "reviewed": true,
       "concepts": [
+        {
+          "uid": "ven-0533",
+          "sourceEn": "see",
+          "sourceCz": "vidět",
+          "text": "see",
+          "occurrence": 1
+        },
         {
           "uid": "ven-0369",
           "sourceEn": "nine",
@@ -10038,6 +10997,13 @@
           "occurrence": 1
         },
         {
+          "uid": "ven-0532",
+          "sourceEn": "road",
+          "sourceCz": "silnice",
+          "text": "road",
+          "occurrence": 1
+        },
+        {
           "uid": "ven-0382",
           "sourceEn": "safely",
           "sourceCz": "bezpečně",
@@ -10118,6 +11084,13 @@
           "sourceEn": "smile",
           "sourceCz": "usmívat se",
           "text": "smile",
+          "occurrence": 1
+        },
+        {
+          "uid": "ven-0533",
+          "sourceEn": "see",
+          "sourceCz": "vidět",
+          "text": "see",
           "occurrence": 1
         },
         {
@@ -10428,6 +11401,13 @@
           "sourceEn": "apple",
           "sourceCz": "jablko",
           "text": "apples",
+          "occurrence": 1
+        },
+        {
+          "uid": "ven-0530",
+          "sourceEn": "basket",
+          "sourceCz": "košík",
+          "text": "basket",
           "occurrence": 1
         }
       ],
@@ -11062,6 +12042,13 @@
           "sourceCz": "dělat si starosti",
           "text": "worry",
           "occurrence": 1
+        },
+        {
+          "uid": "ven-0529",
+          "sourceEn": "rain",
+          "sourceCz": "déšť",
+          "text": "rain",
+          "occurrence": 1
         }
       ]
     },
@@ -11355,6 +12342,13 @@
           "sourceCz": "pomoci; pomáhat",
           "text": "helps",
           "occurrence": 1
+        },
+        {
+          "uid": "ven-0527",
+          "sourceEn": "child",
+          "sourceCz": "dítě",
+          "text": "children",
+          "occurrence": 1
         }
       ],
       "editorialNote": "Sentence reviewed for exact meaning, grammatical role and fixed expressions; no spelling-only sense substitution."
@@ -11371,6 +12365,13 @@
           "sourceEn": "cross",
           "sourceCz": "přejít; překročit",
           "text": "Cross",
+          "occurrence": 1
+        },
+        {
+          "uid": "ven-0532",
+          "sourceEn": "road",
+          "sourceCz": "silnice",
+          "text": "road",
           "occurrence": 1
         },
         {
@@ -11417,6 +12418,13 @@
           "sourceEn": "guard",
           "sourceCz": "strážce",
           "text": "guard",
+          "occurrence": 1
+        },
+        {
+          "uid": "ven-0526",
+          "sourceEn": "stand",
+          "sourceCz": "stát",
+          "text": "stands",
           "occurrence": 1
         },
         {
@@ -11622,10 +12630,17 @@
     "ven-0446": {
       "sourceEn": "nose",
       "sourceCz": "nos",
-      "sourceSentenceEn": "Touch your nose.",
-      "sourceSentenceCz": "Dotkni se nosu.",
+      "sourceSentenceEn": "Close your eyes and try to touch your nose.",
+      "sourceSentenceCz": "Zavři oči a zkus se dotknout nosu.",
       "reviewed": true,
       "concepts": [
+        {
+          "uid": "ven-0036",
+          "sourceEn": "eyes",
+          "sourceCz": "oči",
+          "text": "eyes",
+          "occurrence": 1
+        },
         {
           "uid": "ven-0446",
           "sourceEn": "nose",
@@ -11662,8 +12677,8 @@
     "ven-0448": {
       "sourceEn": "neck",
       "sourceCz": "krk",
-      "sourceSentenceEn": "This is my neck.",
-      "sourceSentenceCz": "Tohle je můj krk.",
+      "sourceSentenceEn": "My scarf keeps my neck warm, but my ears are cold.",
+      "sourceSentenceCz": "Šála mi hřeje krk, ale uši mě zebou.",
       "reviewed": true,
       "concepts": [
         {
@@ -11671,6 +12686,13 @@
           "sourceEn": "neck",
           "sourceCz": "krk",
           "text": "neck",
+          "occurrence": 1
+        },
+        {
+          "uid": "ven-0445",
+          "sourceEn": "ear",
+          "sourceCz": "ucho",
+          "text": "ears",
           "occurrence": 1
         }
       ]
@@ -11698,6 +12720,13 @@
       "sourceSentenceCz": "Stojím na jedné noze.",
       "reviewed": true,
       "concepts": [
+        {
+          "uid": "ven-0526",
+          "sourceEn": "stand",
+          "sourceCz": "stát",
+          "text": "stand",
+          "occurrence": 1
+        },
         {
           "uid": "ven-0187",
           "sourceEn": "one",
@@ -11798,6 +12827,13 @@
           "occurrence": 1
         },
         {
+          "uid": "ven-0538",
+          "sourceEn": "swim",
+          "sourceCz": "plavat",
+          "text": "swims",
+          "occurrence": 1
+        },
+        {
           "uid": "ven-0065",
           "sourceEn": "lake",
           "sourceCz": "jezero",
@@ -11818,6 +12854,13 @@
           "sourceEn": "woodpecker",
           "sourceCz": "datel",
           "text": "woodpecker",
+          "occurrence": 1
+        },
+        {
+          "uid": "ven-0523",
+          "sourceEn": "sit",
+          "sourceCz": "sedět",
+          "text": "sits",
           "occurrence": 1
         },
         {
@@ -11945,8 +12988,8 @@
     "ven-0461": {
       "sourceEn": "sick",
       "sourceCz": "nemocný",
-      "sourceSentenceEn": "This tree is sick.",
-      "sourceSentenceCz": "Tento strom je nemocný.",
+      "sourceSentenceEn": "The tree is sick and losing its leaves in the middle of summer.",
+      "sourceSentenceCz": "Strom je nemocný a uprostřed léta mu opadává listí.",
       "reviewed": true,
       "concepts": [
         {
@@ -11961,6 +13004,13 @@
           "sourceEn": "sick",
           "sourceCz": "nemocný",
           "text": "sick",
+          "occurrence": 1
+        },
+        {
+          "uid": "ven-0239",
+          "sourceEn": "leaf",
+          "sourceCz": "list",
+          "text": "leaves",
           "occurrence": 1
         }
       ]
@@ -11991,8 +13041,8 @@
     "ven-0463": {
       "sourceEn": "dinner",
       "sourceCz": "večeře",
-      "sourceSentenceEn": "Dinner is on the table.",
-      "sourceSentenceCz": "Večeře je na stole.",
+      "sourceSentenceEn": "Dinner is on the table, but the salad is still in the fridge.",
+      "sourceSentenceCz": "Večeře už je na stole, ale salát je ještě v lednici.",
       "reviewed": true,
       "concepts": [
         {
@@ -12007,6 +13057,13 @@
           "sourceEn": "table",
           "sourceCz": "stůl",
           "text": "table",
+          "occurrence": 1
+        },
+        {
+          "uid": "ven-0126",
+          "sourceEn": "salad",
+          "sourceCz": "salát",
+          "text": "salad",
           "occurrence": 1
         }
       ]
@@ -12037,10 +13094,38 @@
     "ven-0465": {
       "sourceEn": "morning",
       "sourceCz": "ráno",
-      "sourceSentenceEn": "It is morning.",
-      "sourceSentenceCz": "Je ráno.",
+      "sourceSentenceEn": "My father drinks coffee every morning.",
+      "sourceSentenceCz": "Táta pije kávu každé ráno.",
       "reviewed": true,
       "concepts": [
+        {
+          "uid": "ven-0039",
+          "sourceEn": "father",
+          "sourceCz": "otec",
+          "text": "father",
+          "occurrence": 1
+        },
+        {
+          "uid": "ven-0030",
+          "sourceEn": "drink",
+          "sourceCz": "pít",
+          "text": "drinks",
+          "occurrence": 1
+        },
+        {
+          "uid": "ven-0022",
+          "sourceEn": "coffee",
+          "sourceCz": "káva",
+          "text": "coffee",
+          "occurrence": 1
+        },
+        {
+          "uid": "ven-0501",
+          "sourceEn": "every",
+          "sourceCz": "každý",
+          "text": "every",
+          "occurrence": 1
+        },
         {
           "uid": "ven-0465",
           "sourceEn": "morning",
@@ -12083,15 +13168,15 @@
     "ven-0467": {
       "sourceEn": "race",
       "sourceCz": "závod",
-      "sourceSentenceEn": "We run in a race.",
-      "sourceSentenceCz": "Běžíme závod.",
+      "sourceSentenceEn": "The bike race starts at ten.",
+      "sourceSentenceCz": "Závod na kolech začíná v deset.",
       "reviewed": true,
       "concepts": [
         {
-          "uid": "ven-0086",
-          "sourceEn": "run",
-          "sourceCz": "běhat",
-          "text": "run",
+          "uid": "ven-0007",
+          "sourceEn": "bike",
+          "sourceCz": "kolo",
+          "text": "bike",
           "occurrence": 1
         },
         {
@@ -12099,6 +13184,20 @@
           "sourceEn": "race",
           "sourceCz": "závod",
           "text": "race",
+          "occurrence": 1
+        },
+        {
+          "uid": "ven-0485",
+          "sourceEn": "start",
+          "sourceCz": "začít",
+          "text": "starts",
+          "occurrence": 1
+        },
+        {
+          "uid": "ven-0397",
+          "sourceEn": "ten",
+          "sourceCz": "deset",
+          "text": "ten",
           "occurrence": 1
         }
       ]
@@ -12284,8 +13383,8 @@
     "ven-0476": {
       "sourceEn": "practise",
       "sourceCz": "trénovat; procvičovat",
-      "sourceSentenceEn": "I practise with my friends.",
-      "sourceSentenceCz": "Trénuji s kamarády.",
+      "sourceSentenceEn": "I practise skating with my friends on Saturday mornings.",
+      "sourceSentenceCz": "V sobotu dopoledne chodím s kamarády trénovat bruslení.",
       "reviewed": true,
       "concepts": [
         {
@@ -12293,6 +13392,13 @@
           "sourceEn": "practise",
           "sourceCz": "trénovat; procvičovat",
           "text": "practise",
+          "occurrence": 1
+        },
+        {
+          "uid": "ven-0157",
+          "sourceEn": "skating",
+          "sourceCz": "bruslení",
+          "text": "skating",
           "occurrence": 1
         },
         {
@@ -12458,22 +13564,43 @@
     "ven-0483": {
       "sourceEn": "lead",
       "sourceCz": "vést",
-      "sourceSentenceEn": "We lead the team.",
-      "sourceSentenceCz": "Vedeme tým.",
+      "sourceSentenceEn": "Our dog leads the sheep through the gate.",
+      "sourceSentenceCz": "Náš pes vede ovce brankou.",
       "reviewed": true,
       "concepts": [
+        {
+          "uid": "ven-0027",
+          "sourceEn": "dog",
+          "sourceCz": "pes",
+          "text": "dog",
+          "occurrence": 1
+        },
         {
           "uid": "ven-0483",
           "sourceEn": "lead",
           "sourceCz": "vést",
-          "text": "lead",
+          "text": "leads",
           "occurrence": 1
         },
         {
-          "uid": "ven-0470",
-          "sourceEn": "team",
-          "sourceCz": "tým",
-          "text": "team",
+          "uid": "ven-0087",
+          "sourceEn": "sheep",
+          "sourceCz": "ovce",
+          "text": "sheep",
+          "occurrence": 1
+        },
+        {
+          "uid": "ven-0402",
+          "sourceEn": "through",
+          "sourceCz": "skrz; přes",
+          "text": "through",
+          "occurrence": 1
+        },
+        {
+          "uid": "ven-0294",
+          "sourceEn": "gate",
+          "sourceCz": "branka",
+          "text": "gate",
           "occurrence": 1
         }
       ]
@@ -13229,22 +14356,36 @@
     "ven-0511": {
       "sourceEn": "look for",
       "sourceCz": "hledat",
-      "sourceSentenceEn": "We look for the boat.",
-      "sourceSentenceCz": "Hledáme loď.",
+      "sourceSentenceEn": "Look for your shoes under the bed.",
+      "sourceSentenceCz": "Hledej boty pod postelí.",
       "reviewed": true,
       "concepts": [
         {
           "uid": "ven-0511",
           "sourceEn": "look for",
           "sourceCz": "hledat",
-          "text": "look for",
+          "text": "Look for",
           "occurrence": 1
         },
         {
-          "uid": "ven-0213",
-          "sourceEn": "boat",
-          "sourceCz": "loď",
-          "text": "boat",
+          "uid": "ven-0210",
+          "sourceEn": "shoe",
+          "sourceCz": "bota",
+          "text": "shoes",
+          "occurrence": 1
+        },
+        {
+          "uid": "ven-0303",
+          "sourceEn": "under",
+          "sourceCz": "pod",
+          "text": "under",
+          "occurrence": 1
+        },
+        {
+          "uid": "ven-0226",
+          "sourceEn": "bed",
+          "sourceCz": "postel",
+          "text": "bed",
           "occurrence": 1
         }
       ]
@@ -13434,19 +14575,46 @@
     "ven-0519": {
       "sourceEn": "too",
       "sourceCz": "příliš",
-      "sourceSentenceEn": "There is too much candy.",
-      "sourceSentenceCz": "Je tu příliš mnoho sladkostí.",
+      "sourceSentenceEn": "The stream is too wide to jump across.",
+      "sourceSentenceCz": "Potok je na přeskočení moc široký.",
       "reviewed": true,
       "concepts": [
+        {
+          "uid": "ven-0394",
+          "sourceEn": "stream",
+          "sourceCz": "potok",
+          "text": "stream",
+          "occurrence": 1
+        },
         {
           "uid": "ven-0519",
           "sourceEn": "too",
           "sourceCz": "příliš",
           "text": "too",
           "occurrence": 1
+        },
+        {
+          "uid": "ven-0416",
+          "sourceEn": "wide",
+          "sourceCz": "široký",
+          "text": "wide",
+          "occurrence": 1
+        },
+        {
+          "uid": "ven-0064",
+          "sourceEn": "jump",
+          "sourceCz": "skákat",
+          "text": "jump",
+          "occurrence": 1
+        },
+        {
+          "uid": "ven-0308",
+          "sourceEn": "across",
+          "sourceCz": "přes; na druhou stranu",
+          "text": "across",
+          "occurrence": 1
         }
-      ],
-      "editorialNote": "Sentence reviewed for exact meaning, grammatical role and fixed expressions; no spelling-only sense substitution."
+      ]
     },
     "ven-0520": {
       "sourceEn": "turn",
@@ -13510,6 +14678,660 @@
         }
       ],
       "editorialNote": "Sentence reviewed for exact meaning, grammatical role and fixed expressions; no spelling-only sense substitution."
+    },
+    "ven-0523": {
+      "sourceEn": "sit",
+      "sourceCz": "sedět",
+      "sourceSentenceEn": "Sit beside your sister on the bus.",
+      "sourceSentenceCz": "Sedni si v autobuse vedle sestry.",
+      "reviewed": true,
+      "concepts": [
+        {
+          "uid": "ven-0523",
+          "sourceEn": "sit",
+          "sourceCz": "sedět",
+          "text": "Sit",
+          "occurrence": 1
+        },
+        {
+          "uid": "ven-0498",
+          "sourceEn": "beside",
+          "sourceCz": "vedle",
+          "text": "beside",
+          "occurrence": 1
+        },
+        {
+          "uid": "ven-0089",
+          "sourceEn": "sister",
+          "sourceCz": "sestra",
+          "text": "sister",
+          "occurrence": 1
+        },
+        {
+          "uid": "ven-0217",
+          "sourceEn": "bus",
+          "sourceCz": "autobus",
+          "text": "bus",
+          "occurrence": 1
+        }
+      ]
+    },
+    "ven-0524": {
+      "sourceEn": "after",
+      "sourceCz": "po",
+      "sourceSentenceEn": "After lunch, we walk to the lake.",
+      "sourceSentenceCz": "Po obědě jdeme pěšky k jezeru.",
+      "reviewed": true,
+      "concepts": [
+        {
+          "uid": "ven-0524",
+          "sourceEn": "after",
+          "sourceCz": "po",
+          "text": "After",
+          "occurrence": 1
+        },
+        {
+          "uid": "ven-0149",
+          "sourceEn": "lunch",
+          "sourceCz": "oběd",
+          "text": "lunch",
+          "occurrence": 1
+        },
+        {
+          "uid": "ven-0097",
+          "sourceEn": "walk",
+          "sourceCz": "chodit",
+          "text": "walk",
+          "occurrence": 1
+        },
+        {
+          "uid": "ven-0065",
+          "sourceEn": "lake",
+          "sourceCz": "jezero",
+          "text": "lake",
+          "occurrence": 1
+        }
+      ]
+    },
+    "ven-0525": {
+      "sourceEn": "put",
+      "sourceCz": "položit, dát někam",
+      "sourceSentenceEn": "Put the key in your bag.",
+      "sourceSentenceCz": "Dej si klíč do tašky.",
+      "reviewed": true,
+      "concepts": [
+        {
+          "uid": "ven-0525",
+          "sourceEn": "put",
+          "sourceCz": "položit, dát někam",
+          "text": "Put",
+          "occurrence": 1
+        },
+        {
+          "uid": "ven-0234",
+          "sourceEn": "key",
+          "sourceCz": "klíč",
+          "text": "key",
+          "occurrence": 1
+        },
+        {
+          "uid": "ven-0005",
+          "sourceEn": "bag",
+          "sourceCz": "taška",
+          "text": "bag",
+          "occurrence": 1
+        }
+      ]
+    },
+    "ven-0526": {
+      "sourceEn": "stand",
+      "sourceCz": "stát",
+      "sourceSentenceEn": "Two horses stand by the gate.",
+      "sourceSentenceCz": "U brány stojí dva koně.",
+      "reviewed": true,
+      "concepts": [
+        {
+          "uid": "ven-0188",
+          "sourceEn": "two",
+          "sourceCz": "dva",
+          "text": "Two",
+          "occurrence": 1
+        },
+        {
+          "uid": "ven-0060",
+          "sourceEn": "horse",
+          "sourceCz": "kůň",
+          "text": "horses",
+          "occurrence": 1
+        },
+        {
+          "uid": "ven-0526",
+          "sourceEn": "stand",
+          "sourceCz": "stát",
+          "text": "stand",
+          "occurrence": 1
+        },
+        {
+          "uid": "ven-0294",
+          "sourceEn": "gate",
+          "sourceCz": "branka",
+          "text": "gate",
+          "occurrence": 1
+        }
+      ]
+    },
+    "ven-0527": {
+      "sourceEn": "child",
+      "sourceCz": "dítě",
+      "sourceSentenceEn": "The child gives the rabbit a carrot.",
+      "sourceSentenceCz": "Dítě dává králíkovi mrkev.",
+      "reviewed": true,
+      "concepts": [
+        {
+          "uid": "ven-0527",
+          "sourceEn": "child",
+          "sourceCz": "dítě",
+          "text": "child",
+          "occurrence": 1
+        },
+        {
+          "uid": "ven-0336",
+          "sourceEn": "give",
+          "sourceCz": "dát",
+          "text": "gives",
+          "occurrence": 1
+        },
+        {
+          "uid": "ven-0083",
+          "sourceEn": "rabbit",
+          "sourceCz": "králík",
+          "text": "rabbit",
+          "occurrence": 1
+        },
+        {
+          "uid": "ven-0221",
+          "sourceEn": "carrot",
+          "sourceCz": "mrkev",
+          "text": "carrot",
+          "occurrence": 1
+        }
+      ]
+    },
+    "ven-0528": {
+      "sourceEn": "buy",
+      "sourceCz": "koupit",
+      "sourceSentenceEn": "We buy bread and milk for breakfast.",
+      "sourceSentenceCz": "K snídani kupujeme chleba a mléko.",
+      "reviewed": true,
+      "concepts": [
+        {
+          "uid": "ven-0528",
+          "sourceEn": "buy",
+          "sourceCz": "koupit",
+          "text": "buy",
+          "occurrence": 1
+        },
+        {
+          "uid": "ven-0224",
+          "sourceEn": "bread",
+          "sourceCz": "chleba",
+          "text": "bread",
+          "occurrence": 1
+        },
+        {
+          "uid": "ven-0071",
+          "sourceEn": "milk",
+          "sourceCz": "mléko",
+          "text": "milk",
+          "occurrence": 1
+        },
+        {
+          "uid": "ven-0013",
+          "sourceEn": "breakfast",
+          "sourceCz": "snídaně",
+          "text": "breakfast",
+          "occurrence": 1
+        }
+      ]
+    },
+    "ven-0529": {
+      "sourceEn": "rain",
+      "sourceCz": "déšť",
+      "sourceSentenceEn": "From my bed, I can hear the rain.",
+      "sourceSentenceCz": "Z postele slyším déšť.",
+      "reviewed": true,
+      "concepts": [
+        {
+          "uid": "ven-0226",
+          "sourceEn": "bed",
+          "sourceCz": "postel",
+          "text": "bed",
+          "occurrence": 1
+        },
+        {
+          "uid": "ven-0056",
+          "sourceEn": "hear",
+          "sourceCz": "slyšet",
+          "text": "hear",
+          "occurrence": 1
+        },
+        {
+          "uid": "ven-0529",
+          "sourceEn": "rain",
+          "sourceCz": "déšť",
+          "text": "rain",
+          "occurrence": 1
+        }
+      ]
+    },
+    "ven-0530": {
+      "sourceEn": "basket",
+      "sourceCz": "košík",
+      "sourceSentenceEn": "Our cat sleeps in the basket.",
+      "sourceSentenceCz": "Naše kočka spí v košíku.",
+      "reviewed": true,
+      "concepts": [
+        {
+          "uid": "ven-0020",
+          "sourceEn": "cat",
+          "sourceCz": "kočka",
+          "text": "cat",
+          "occurrence": 1
+        },
+        {
+          "uid": "ven-0477",
+          "sourceEn": "sleep",
+          "sourceCz": "spát",
+          "text": "sleeps",
+          "occurrence": 1
+        },
+        {
+          "uid": "ven-0530",
+          "sourceEn": "basket",
+          "sourceCz": "košík",
+          "text": "basket",
+          "occurrence": 1
+        }
+      ]
+    },
+    "ven-0531": {
+      "sourceEn": "tea",
+      "sourceCz": "čaj",
+      "sourceSentenceEn": "Would you like tea with your cake?",
+      "sourceSentenceCz": "Dáš si k dortu čaj?",
+      "reviewed": true,
+      "concepts": [
+        {
+          "uid": "ven-0145",
+          "sourceEn": "would like",
+          "sourceCz": "chtěl bych, rád bych",
+          "text": "Would you like",
+          "occurrence": 1
+        },
+        {
+          "uid": "ven-0531",
+          "sourceEn": "tea",
+          "sourceCz": "čaj",
+          "text": "tea",
+          "occurrence": 1
+        },
+        {
+          "uid": "ven-0228",
+          "sourceEn": "cake",
+          "sourceCz": "dort",
+          "text": "cake",
+          "occurrence": 1
+        }
+      ]
+    },
+    "ven-0532": {
+      "sourceEn": "road",
+      "sourceCz": "silnice",
+      "sourceSentenceEn": "A fox runs across the road.",
+      "sourceSentenceCz": "Liška běží přes silnici.",
+      "reviewed": true,
+      "concepts": [
+        {
+          "uid": "ven-0177",
+          "sourceEn": "fox",
+          "sourceCz": "liška",
+          "text": "fox",
+          "occurrence": 1
+        },
+        {
+          "uid": "ven-0086",
+          "sourceEn": "run",
+          "sourceCz": "běhat",
+          "text": "runs",
+          "occurrence": 1
+        },
+        {
+          "uid": "ven-0308",
+          "sourceEn": "across",
+          "sourceCz": "přes; na druhou stranu",
+          "text": "across",
+          "occurrence": 1
+        },
+        {
+          "uid": "ven-0532",
+          "sourceEn": "road",
+          "sourceCz": "silnice",
+          "text": "road",
+          "occurrence": 1
+        }
+      ]
+    },
+    "ven-0533": {
+      "sourceEn": "see",
+      "sourceCz": "vidět",
+      "sourceSentenceEn": "Can you see the moon from your window?",
+      "sourceSentenceCz": "Vidíš z okna měsíc?",
+      "reviewed": true,
+      "concepts": [
+        {
+          "uid": "ven-0533",
+          "sourceEn": "see",
+          "sourceCz": "vidět",
+          "text": "see",
+          "occurrence": 1
+        },
+        {
+          "uid": "ven-0223",
+          "sourceEn": "moon",
+          "sourceCz": "měsíc",
+          "text": "moon",
+          "occurrence": 1
+        },
+        {
+          "uid": "ven-0233",
+          "sourceEn": "window",
+          "sourceCz": "okno",
+          "text": "window",
+          "occurrence": 1
+        }
+      ]
+    },
+    "ven-0534": {
+      "sourceEn": "evening",
+      "sourceCz": "večer",
+      "sourceSentenceEn": "We play in the park every evening.",
+      "sourceSentenceCz": "Každý večer si hrajeme v parku.",
+      "reviewed": true,
+      "concepts": [
+        {
+          "uid": "ven-0159",
+          "sourceEn": "play",
+          "sourceCz": "hrát si",
+          "text": "play",
+          "occurrence": 1
+        },
+        {
+          "uid": "ven-0081",
+          "sourceEn": "park",
+          "sourceCz": "park",
+          "text": "park",
+          "occurrence": 1
+        },
+        {
+          "uid": "ven-0501",
+          "sourceEn": "every",
+          "sourceCz": "každý",
+          "text": "every",
+          "occurrence": 1
+        },
+        {
+          "uid": "ven-0534",
+          "sourceEn": "evening",
+          "sourceCz": "večer",
+          "text": "evening",
+          "occurrence": 1
+        }
+      ]
+    },
+    "ven-0535": {
+      "sourceEn": "soup",
+      "sourceCz": "polévka",
+      "sourceSentenceEn": "Try the soup with a little cheese.",
+      "sourceSentenceCz": "Zkus tu polévku s trochou sýra.",
+      "reviewed": true,
+      "concepts": [
+        {
+          "uid": "ven-0137",
+          "sourceEn": "try",
+          "sourceCz": "zkusit",
+          "text": "Try",
+          "occurrence": 1
+        },
+        {
+          "uid": "ven-0535",
+          "sourceEn": "soup",
+          "sourceCz": "polévka",
+          "text": "soup",
+          "occurrence": 1
+        },
+        {
+          "uid": "ven-0122",
+          "sourceEn": "cheese",
+          "sourceCz": "sýr",
+          "text": "cheese",
+          "occurrence": 1
+        }
+      ]
+    },
+    "ven-0536": {
+      "sourceEn": "shop",
+      "sourceCz": "obchod",
+      "sourceSentenceEn": "The toy shop is near our school.",
+      "sourceSentenceCz": "Obchod s hračkami je blízko naší školy.",
+      "reviewed": true,
+      "concepts": [
+        {
+          "uid": "ven-0251",
+          "sourceEn": "toy",
+          "sourceCz": "hračka",
+          "text": "toy",
+          "occurrence": 1
+        },
+        {
+          "uid": "ven-0536",
+          "sourceEn": "shop",
+          "sourceCz": "obchod",
+          "text": "shop",
+          "occurrence": 1
+        },
+        {
+          "uid": "ven-0104",
+          "sourceEn": "near",
+          "sourceCz": "blízko",
+          "text": "near",
+          "occurrence": 1
+        },
+        {
+          "uid": "ven-0384",
+          "sourceEn": "school",
+          "sourceCz": "škola",
+          "text": "school",
+          "occurrence": 1
+        }
+      ]
+    },
+    "ven-0537": {
+      "sourceEn": "wind",
+      "sourceCz": "vítr",
+      "sourceSentenceEn": "The wind pushes our boat across the lake.",
+      "sourceSentenceCz": "Vítr žene naši loďku přes jezero.",
+      "reviewed": true,
+      "concepts": [
+        {
+          "uid": "ven-0537",
+          "sourceEn": "wind",
+          "sourceCz": "vítr",
+          "text": "wind",
+          "occurrence": 1
+        },
+        {
+          "uid": "ven-0287",
+          "sourceEn": "push",
+          "sourceCz": "tlačit",
+          "text": "pushes",
+          "occurrence": 1
+        },
+        {
+          "uid": "ven-0213",
+          "sourceEn": "boat",
+          "sourceCz": "loď",
+          "text": "boat",
+          "occurrence": 1
+        },
+        {
+          "uid": "ven-0308",
+          "sourceEn": "across",
+          "sourceCz": "přes; na druhou stranu",
+          "text": "across",
+          "occurrence": 1
+        },
+        {
+          "uid": "ven-0065",
+          "sourceEn": "lake",
+          "sourceCz": "jezero",
+          "text": "lake",
+          "occurrence": 1
+        }
+      ]
+    },
+    "ven-0538": {
+      "sourceEn": "swim",
+      "sourceCz": "plavat",
+      "sourceSentenceEn": "I swim with my brother every morning.",
+      "sourceSentenceCz": "Každé ráno plavu s bratrem.",
+      "reviewed": true,
+      "concepts": [
+        {
+          "uid": "ven-0538",
+          "sourceEn": "swim",
+          "sourceCz": "plavat",
+          "text": "swim",
+          "occurrence": 1
+        },
+        {
+          "uid": "ven-0015",
+          "sourceEn": "brother",
+          "sourceCz": "bratr",
+          "text": "brother",
+          "occurrence": 1
+        },
+        {
+          "uid": "ven-0501",
+          "sourceEn": "every",
+          "sourceCz": "každý",
+          "text": "every",
+          "occurrence": 1
+        },
+        {
+          "uid": "ven-0465",
+          "sourceEn": "morning",
+          "sourceCz": "ráno",
+          "text": "morning",
+          "occurrence": 1
+        }
+      ]
+    },
+    "ven-0539": {
+      "sourceEn": "fly",
+      "sourceCz": "letět, létat",
+      "sourceSentenceEn": "Parrots fly from tree to tree.",
+      "sourceSentenceCz": "Papoušci létají ze stromu na strom.",
+      "reviewed": true,
+      "concepts": [
+        {
+          "uid": "ven-0181",
+          "sourceEn": "parrot",
+          "sourceCz": "papoušek",
+          "text": "Parrots",
+          "occurrence": 1
+        },
+        {
+          "uid": "ven-0539",
+          "sourceEn": "fly",
+          "sourceCz": "letět, létat",
+          "text": "fly",
+          "occurrence": 1
+        },
+        {
+          "uid": "ven-0211",
+          "sourceEn": "tree",
+          "sourceCz": "strom",
+          "text": "tree",
+          "occurrence": 1
+        }
+      ]
+    },
+    "ven-0540": {
+      "sourceEn": "grass",
+      "sourceCz": "tráva",
+      "sourceSentenceEn": "The sheep eat grass in the field.",
+      "sourceSentenceCz": "Ovce na poli žerou trávu.",
+      "reviewed": true,
+      "concepts": [
+        {
+          "uid": "ven-0087",
+          "sourceEn": "sheep",
+          "sourceCz": "ovce",
+          "text": "sheep",
+          "occurrence": 1
+        },
+        {
+          "uid": "ven-0292",
+          "sourceEn": "eat",
+          "sourceCz": "jíst",
+          "text": "eat",
+          "occurrence": 1
+        },
+        {
+          "uid": "ven-0540",
+          "sourceEn": "grass",
+          "sourceCz": "tráva",
+          "text": "grass",
+          "occurrence": 1
+        },
+        {
+          "uid": "ven-0040",
+          "sourceEn": "field",
+          "sourceCz": "pole",
+          "text": "field",
+          "occurrence": 1
+        }
+      ]
+    },
+    "ven-0541": {
+      "sourceEn": "share",
+      "sourceCz": "podělit se",
+      "sourceSentenceEn": "I share my popcorn with my sister.",
+      "sourceSentenceCz": "O popcorn se dělím se sestrou.",
+      "reviewed": true,
+      "concepts": [
+        {
+          "uid": "ven-0541",
+          "sourceEn": "share",
+          "sourceCz": "podělit se",
+          "text": "share",
+          "occurrence": 1
+        },
+        {
+          "uid": "ven-0082",
+          "sourceEn": "popcorn",
+          "sourceCz": "popcorn",
+          "text": "popcorn",
+          "occurrence": 1
+        },
+        {
+          "uid": "ven-0089",
+          "sourceEn": "sister",
+          "sourceCz": "sestra",
+          "text": "sister",
+          "occurrence": 1
+        }
+      ]
     }
   }
 }

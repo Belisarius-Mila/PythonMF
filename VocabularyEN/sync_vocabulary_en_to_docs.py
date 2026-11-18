@@ -326,7 +326,8 @@ def find_picture_path(stem: str, base_dirs: list[Path]) -> Path | None:
     normalized_stem = normalize_word(stem)
     if not normalized_stem:
         return None
-    candidate_names = [f"{normalized_stem}{suffix}" for suffix in SUPPORTED_IMAGE_SUFFIXES]
+    stems = [stem, normalized_stem] if re.fullmatch(r"[a-z0-9]+(?:-[a-z0-9]+)*", stem) else [normalized_stem]
+    candidate_names = [f"{name}{suffix}" for name in dict.fromkeys(stems) for suffix in SUPPORTED_IMAGE_SUFFIXES]
     for base_dir in base_dirs:
         for name in candidate_names:
             path = base_dir / name
@@ -395,7 +396,8 @@ def build_export_payload(
             image_relative = None
             image_missing = True
         else:
-            dest_name = f"{normalize_word(resolved_stem) or 'image'}{source_path.suffix.lower()}"
+            dest_stem = source_path.stem if image_source == "catalog" else normalize_word(resolved_stem) or "image"
+            dest_name = f"{dest_stem}{source_path.suffix.lower()}"
             asset_map[source_path] = dest_name
             image_relative = relative_posix_path(asset_dir / dest_name, output_root)
 

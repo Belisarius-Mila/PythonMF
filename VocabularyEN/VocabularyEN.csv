@@ -7,7 +7,7 @@ bag,taška,5,I put my phone in my bag and close it.,Dám si telefon do tašky a 
 big,velký,6,"This house is big, but it feels warm inside.","Tenhle dům je velký, ale uvnitř je útulno.",,ano,ne
 bike,kolo,7,I ride my bike to the park on sunny days.,Za slunečných dní jedu na kole do parku.,Things,ano,ne
 bird,pták,8,A small bird sings on the window in the morning.,Ráno zpívá na okně malý pták.,Animals,ano,ne
-black,černý,9,He wears a black jacket in the winter.,V zimě nosí černou bundu.,Colors,ano,ne
+black,černý,9,My black dog has one white ear.,Můj černý pes má jedno bílé ucho.,Colors,ano,ne
 blue,modrý,10,The sky is blue after the rain.,Po dešti je nebe modré.,Colors,ano,ne
 book,kniha,11,"This book is short, but I like it a lot.","Ta kniha je krátká, ale moc se mi líbí.",Things,ano,ano
 box,krabice,12,Please put the cups back into the box.,Prosím dej hrnky zpátky do krabice.,Things,ne,ano
@@ -30,19 +30,19 @@ doctor,lékař,28,The doctor listens carefully and speaks calmly.,Doktor pozorn�
 document,dokument,29,Please sign this document at the bottom.,Prosím podepiš tento dokument dole.,Things,ne,ne
 drink,pít,30,"When I feel tired, I drink a little water.","Když jsem unavený, napiju se trochu vody.",Actions,ano,ano
 drawing,kreslení,31,Drawing is fun.,Kreslení je zábava.,Actions,ano,ne
-duck,kachna,32,A duck swims slowly across the pond.,Kachna pomalu plave přes rybník.,Animals,ano,ne
+duck,kachna,32,A duck follows a goose to the lake.,Kachna jde za husou k jezeru.,Animals,ano,ne
 elephant,slon,33,The elephant lifts its trunk and greets the kids.,Slon zvedne chobot a jako by zdravil děti.,Animals,ano,ne
 English,angličtina,34,I read an English story before I sleep.,Před spaním čtu anglický příběh.,,ano,ne
-excuse me,promiňte,35,"Excuse me, is this seat free?","Promiňte, je tohle místo volné?",Greetings,ano,ano
+excuse me,promiňte,35,"Excuse me, where is the bus station?","Promiňte, kde je autobusové nádraží?",Greetings,ano,ano
 eyes,oči,36,Her eyes are tired after a long day.,Po dlouhém dni má unavené oči.,,ne,ne
 fair,světlý (o vlasech),37,He has fair hair and a friendly smile.,Má světlé vlasy a přátelský úsměv.,Colors,ne,ne
 family,rodina,38,My family eats together on weekends.,O víkendu moje rodina jí společně.,Family,ano,ano
 father,otec,39,My father tells me a short story every time we meet.,Můj otec mi vždy při setkání vypráví krátký příběh.,Family,ano,ano
-field,pole,40,"In the field, the grass moves in the wind.",Na poli se tráva hýbe ve větru.,,ne,ne
+field,pole,40,Three horses run across the field.,Tři koně běží přes pole.,,ne,ne
 film,film,41,"This film is quiet, but it stays in my mind.","Ten film je klidný, ale zůstane mi v hlavě.",,ano,ano
 fish,ryba,42,"The fish jumps, and the water makes circles.",Ryba vyskočí a na vodě udělá kruhy.,Animals,ano,ano
 food,jídlo,43,"The food is hot, so I wait a moment.","Jídlo je horké, tak chvilku počkám.",,ne,ano
-free,volný,44,Are you free this evening for a short walk?,Máš dnes večer čas na krátkou procházku?,,ne,ne
+free,volný,44,Are you free to play ball today?,Máš dnes čas zahrát si s míčem?,,ne,ne
 friend,kamarád,45,A good friend helps without asking for anything.,"Dobrý přítel pomůže, aniž by něco chtěl.",,ano,ano
 garden,zahrada,46,I have a big garden.,Mám velkou zahradu.,,ano,ano
 giraffe,žirafa,47,The giraffe reaches the leaves at the top.,Žirafa dosáhne na listy úplně nahoře.,Animals,ano,ne
@@ -69,16 +69,16 @@ like,mít rád,67,I like this song because it is simple.,"Mám rád tuhle písni
 lion,lev,68,The lion sleeps in the sun for hours.,Lev spí na slunci celé hodiny.,Animals,ano,ne
 live,žít; bydlet,69,I live near a quiet park.,Bydlím blízko klidného parku.,,ne,ne
 love,milovat,70,I love calm mornings with no rush.,Miluju klidná rána bez spěchu.,,ano,ne
-milk,mléko,71,I add milk to my tea.,Dám si do čaje mléko.,Food,ano,ne
+milk,mléko,71,"I like milk in my tea, but I drink my coffee black.","Čaj si dávám s mlékem, ale kávu piju černou.",Food,ano,ne
 mom,máma,72,My mom makes me smile even on hard days.,Máma mě rozesměje i v těžkých dnech.,Family,ano,ne
 monkey,opice,73,The monkey steals a banana and runs away.,Opice ukradne banán a uteče.,Animals,ano,ne
 mother,matka,74,My mother keeps old photos in a small box.,Moje maminka schovává staré fotky v malé krabičce.,Family,ano,ano
 name,jméno,75,What is your name?,Jak se jmenuješ?,,ano,ne
 new,nový,76,I bought a new notebook for my ideas.,Koupil jsem si nový sešit na nápady.,,ano,ne
-nurse,zdravotní sestra,77,The nurse checks on the patient with a kind voice.,Sestra zkontroluje pacienta a mluví laskavě.,,ne,ne
+nurse,zdravotní sestra,77,Show the nurse your right arm.,Ukaž zdravotní sestře pravou paži.,,ne,ne
 office,kancelář,78,"In the office, it is quiet in the morning.",V kanceláři je ráno klid.,,ne,ne
 old,starý,79,This old chair is still strong.,Ta stará židle je pořád pevná.,,ne,ne
-parents,rodiče,80,My parents visit us on Sunday.,Moji rodiče nás navštíví v neděli.,Family,ano,ne
+parents,rodiče,80,"My parents visit us on Sundays, and my daughter always runs to greet them.",Rodiče k nám chodí v neděli a dcera jim pokaždé běží naproti.,Family,ano,ne
 park,park,81,We walk through the park and talk slowly.,Projdeme se parkem a v klidu si povídáme.,,ano,ne
 popcorn,popcorn,82,"The popcorn is hot, so I blow on it.","Popcorn je horký, tak na něj fouknu.",Food,ano,ne
 rabbit,králík,83,"A rabbit appears, then disappears in the grass.",Zajíc se objeví a hned zmizí v trávě.,Animals,ano,ne
@@ -93,8 +93,8 @@ smart,chytrý,91,"He is smart, but he stays humble.","Je chytrý, ale zůstává
 slow,pomalý,92,Please speak slow—I want to understand.,Prosím mluv pomalu—chci rozumět.,,ne,ne
 speak,mluvit,93,I speak English a little every day.,Každý den trochu mluvím anglicky.,Actions,ne,ne
 tall,vysoký,94,Peter is very tall.,Petr je velmi vysoký.,,ne,ne
-teacher,učitel,95,The teacher explains it with a simple example.,Učitel to vysvětlí na jednoduchém příkladu.,,ano,ne
-ticket,lístek,96,I buy a ticket and put it in my pocket.,Koupím si lístek a dám si ho do kapsy.,Things,ne,ne
+teacher,učitel,95,Our teacher opens a book about animals.,Náš učitel otevírá knihu o zvířatech.,,ano,ne
+ticket,lístek,96,I buy a train ticket and put it in my pocket.,Koupím si lístek na vlak a strčím ho do kapsy.,Things,ne,ne
 walk,chodit,97,Let’s walk slowly and enjoy the air.,Pojďme jít pomalu a užít si vzduch.,Actions,ano,ano
 water,voda,98,Cold water feels good after a long walk.,Studená voda je příjemná po dlouhé procházce.,Food,ano,ano
 white,bílý,99,The white cat sits on the warm window.,Bílá kočka sedí na teplém parapetu.,Colors,ano,ne
@@ -106,12 +106,12 @@ near,blízko,104,The shop is near my home.,Obchod je blízko mého domova.,,ne,a
 far,daleko,105,Is it far from here?,Je to odtud daleko?,,ne,ano
 straight,rovně,106,Go straight and turn left.,Jdi rovně a zahni doleva.,,ne,ano
 turn,zahnout / odbočit,107,Turn right at the next corner.,Zahni doprava na příštím rohu.,,ne,ano
-hungry,hladový,108,"I am hungry, so I make a quick sandwich.","Jsem hladový, tak si udělám rychlý sendvič.",,ano,ano
+hungry,hladový,108,The hungry fox watches the chickens.,Hladová liška pozoruje slepice.,,ano,ano
 warm,teplý,109,I want something warm to drink after the walk.,Po procházce chci něco teplého k pití.,,ne,ne
 welcome,vítejte,110,Welcome! Please come in and sit down.,Vítejte! Prosím pojďte dál a posaďte se.,Greetings,ano,ano
 table,stůl,111,We ask for a table for two by the window.,Požádáme o stůl pro dva u okna.,Things,ano,ano
 follow,následovat,112,"Please follow me;"" your room is this way.","Prosím následujte mě, váš pokoj je tudy.",Actions,ne,ne
-menu,jídelní lístek,113,I read the menu and choose a simple soup.,Prohlédnu si jídelní lístek a vyberu si jednoduchou polévku.,,ano,ano
+menu,jídelní lístek,113,Chicken and rice are on the menu today.,Dnes je na jídelním lístku kuře s rýží.,,ano,ano
 ready,připravený,114,Are you ready to leave now?,Jsi připravený teď odejít?,,ne,ano
 order,objednat (si),115,"We order food, then we talk quietly.",Objednáme si jídlo a pak si v klidu povídáme.,,ano,ano
 juice,džus,116,She drinks orange juice with breakfast.,K snídani pije pomerančový džus.,Food,ano,ano
@@ -123,15 +123,15 @@ pasta,těstoviny,121,The pasta is ready in ten minutes.,Těstoviny jsou hotové 
 cheese,sýr,122,I put cheese on the bread and heat it.,Dám na chleba sýr a ohřeju ho.,Food,ano,ano
 fries,hranolky,123,"The fries are hot, so I wait a moment.","Hranolky jsou horké, tak chvilku počkám.",Food,ano,ano
 potatoes,brambory,124,We buy potatoes and vegetables at the market.,Na trhu koupíme brambory a zeleninu.,Food,ano,ano
-ketchup,kečup,125,"Can I have ketchup, please?","Můžu dostat kečup, prosím?",Food,ano,ano
+ketchup,kečup,125,"Could I have some ketchup for my fries, please?","Mohl bych k těm hranolkům dostat kečup, prosím?",Food,ano,ano
 salad,salát,126,I make a small salad with tomatoes.,Udělám malý salát s rajčaty.,Food,ano,ano
 meal,jídlo,127,Enjoy your meal!,Dobrou chuť!,Food,ne,ano
 hot,horký,128,"My tea is hot, but it smells great.","Můj čaj je horký, ale krásně voní.",,ano,ano
 sauce,omáčka,129,"This sauce is simple, but very tasty.","Tahle omáčka je jednoduchá, ale moc chutná.",Food,ne,ano
-dessert,dezert,130,Would you like dessert after lunch?,Dáš si po obědě dezert?,Food,ano,ano
+dessert,dezert,130,Would you like ice cream for dessert or just a coffee after lunch?,"Dáš si po obědě jako dezert zmrzlinu, nebo jen kávu?",Food,ano,ano
 ice cream,zmrzlina,131,"In summer, we share ice cream in the park.",V létě si dáme zmrzlinu v parku.,Food,ano,ano
 bill,účet,132,"Excuse me, can we have the bill, please?","Promiňte, můžeme dostat účet, prosím?",,ne,ano
-pound,libra (měna),133,It costs twenty pounds in total.,Celkem to stojí dvacet liber.,,ne,ne
+pound,libra (měna),133,The brown boots are ten pounds.,Hnědé holínky stojí deset liber.,,ne,ne
 card,karta,134,We pay by card because we have no cash.,"Zaplatíme kartou, protože nemáme hotovost.",Things,ano,ano
 pay,zaplatit,135,"I pay now, and we can go.",Teď zaplatím a můžeme jít.,,ano,ano
 next time,příště,136,"Next time, I will try the pizza.",Příště zkusím pizzu.,,ne,ne
@@ -148,12 +148,12 @@ enjoy,užít si,146,Enjoy your meal.,Nechte si chutnat. (Užijte si jídlo).,,an
 of course,samozřejmě,147,Can I have ketchup? Of course.,Mohu si dát kečup? Samozřejmě.,,ne,ne
 sure,jistě,148,"Sure, I can help you.","Jistě, mohu ti pomoci.",,ne,ne
 lunch,oběd,149,We have lunch at twelve o'clock.,Máme oběd ve 12 hodin.,Food,ano,ne
-how much,kolik,150,How much is it?,Kolik to stojí?,,ano,ano
+how much,kolik,150,How much is that red toy car?,Kolik stojí to červené autíčko?,,ano,ano
 something,něco,151,Would you like something to drink?,Dáte si něco k pití.,,ne,ano
 how,jak,152,How are you? How old are you?,Jak se máš? Kolik je ti let?,,ne,ne
 next,příští,153,See you next time.,Uvidíme se příště.,,ne,ne
 crossing,křižovatka,154,At the next crossing turn right.,Na příští křižovatce zahni doprava.,,ano,ne
-call,"volat, telefonovat",155,I call Jane.,Zavolám Janě.,,ano,ne
+call,"volat, telefonovat",155,I call my aunt on her birthday.,Volám tetě k narozeninám.,,ano,ne
 river,řeka,156,I you go to school near the river.,Chodím do školy blízko řeky.,,ano,ne
 skating,bruslení,157,Do you like skating?,Máš ráda bruslení?,,ano,ne
 together,"dohromady, spolu",158,We can play together with Peter.,Můžeme si hrát společně s Petrem.,,ne,ne
@@ -174,7 +174,7 @@ pink,růžový,172,Small pink pig.,Malé růžové prasátko.,Colors,ne,ne
 bear,medvěd,173,The bear walks slowly through the forest.,Medvěd pomalu kráčí lesem.,Animals,ne,ne
 camel,velbloud,174,The camel carries water across the desert.,Velbloud nese vodu přes poušť.,Animals,ne,ne
 deer,jelen,175,A deer stands quietly near the trees.,Jelen tiše stojí u stromů.,Animals,ne,ne
-eagle,orel,176,The eagle flies high above the mountains.,Orel letí vysoko nad horami.,Animals,ne,ne
+eagle,orel,176,The eagle catches a fish in the river.,Orel chytá rybu v řece.,Animals,ne,ne
 fox,liška,177,The fox runs quickly through the grass.,Liška rychle běží trávou.,Animals,ne,ne
 goose,husa,178,The goose walks by the pond and honks.,Husa jde u rybníka a kejhá.,Animals,ne,ne
 hippo,hroch,179,The hippo rests in the water.,Hroch odpočívá ve vodě.,Animals,ne,ne
@@ -204,13 +204,13 @@ let's go,pojďme,202,Let's go to the park now.,Pojďme teď do parku.,Benji,ne,n
 we are,my jsme,203,We are ready to start the lesson.,Jsme připraveni začít lekci.,Benji,ne,ne
 too,také,204,I want to go to the lake too.,Také chci jít k jezeru.,Benji,ne,ne
 going,jdeme,205,We are going to the lake together.,Jdeme společně k jezeru.,Actions|Benji,ne,ne
-ball,míč,206,The child throws the ball to a friend.,Dítě hází míč kamarádovi.,Things|Benji,ne,ne
+ball,míč,206,The child throws the ball to a friend on the other side of the fence.,Dítě hodí míč kamarádovi na druhé straně plotu.,Things|Benji,ne,ne
 car,auto,207,Our car is parked in front of the house.,Naše auto stojí před domem.,Things|Benji,ne,ne
-train,vlak,208,The train arrives at the station on time.,Vlak přijíždí na nádraží včas.,Things|Benji,ne,ne
+train,vlak,208,The train crosses the bridge near our school.,Vlak přejíždí přes most u naší školy.,Things|Benji,ne,ne
 cup,hrnek,209,My blue cup is on the table.,Můj modrý hrnek je na stole.,Things|Benji,ne,ne
 shoe,bota,210,I tie my shoe before we leave.,"Než odejdeme, zavážu si botu.",Things|Benji,ne,ne
 tree,strom,211,A bird is building a nest in the tree.,Pták si staví hnízdo na stromě.,Benji,ne,ne
-banana,banán,212,I peel a banana for my snack.,Oloupu si banán ke svačině.,Food|Benji,ne,ne
+banana,banán,212,I need three bananas for the cake.,Na dort potřebuju tři banány.,Food|Benji,ne,ne
 boat,loď,213,A small boat sails across the lake.,Malá loď pluje přes jezero.,Things|Benji,ne,ne
 plate,talíř,214,Please put the bread on the plate.,Prosím polož chleba na talíř.,Things|Benji,ne,ne
 sock,ponožka,215,I found one sock under the bed.,Našel jsem jednu ponožku pod postelí.,Things|Benji,ne,ne
@@ -220,7 +220,7 @@ spoon,lžička,218,She eats her soup with a spoon.,Jí polévku lžičkou.,Thing
 hat,čepice,219,Her warm hat is on the chair.,Její teplá čepice je na židli.,Things|Benji,ne,ne
 sun,slunce,220,The sun warms the garden in the morning.,Slunce ráno zahřívá zahradu.,Benji,ne,ne
 carrot,mrkev,221,The rabbit eats a fresh carrot.,Králík jí čerstvou mrkev.,Food|Benji,ne,ne
-chair,židle,222,The wooden chair stands beside the table.,Dřevěná židle stojí vedle stolu.,Things|Benji,ne,ne
+chair,židle,222,Please bring a chair to our table.,Přines nám prosím ke stolu židli.,Things|Benji,ne,ne
 moon,měsíc,223,The moon is bright above the forest.,Měsíc jasně svítí nad lesem.,Benji,ne,ne
 bread,chleba,224,We buy fresh bread in the morning.,Ráno kupujeme čerstvý chleba.,Food|Benji,ne,ne
 truck,náklaďák,225,The truck carries boxes to the shop.,Náklaďák veze krabice do obchodu.,Things|Benji,ne,ne
@@ -237,7 +237,7 @@ stone,kámen,235,A smooth stone lies beside the water.,U vody leží hladký ká
 robot,robot,236,The little robot waves its hand.,Malý robot mává rukou.,Things|Benji,ne,ne
 fork,vidlička,237,I eat the salad with a fork.,Jím salát vidličkou.,Things|Benji,ne,ne
 cap,čepice,238,He wears a red cap in the sun.,Na slunci nosí červenou čepici.,Things|Benji,ne,ne
-leaf,list,239,A red leaf falls from the tree.,Ze stromu padá červený list.,Benji,ne,ne
+leaf,list,239,A red leaf falls from the tree and lands in the stream.,Ze stromu spadne červený list a přistane v potoce.,Benji,ne,ne
 cookie,sušenka,240,She puts one cookie on the plate.,Položí jednu sušenku na talíř.,Food|Benji,ne,ne
 block,kostka,241,The child builds a tower with a blue block.,Dítě staví věž z modré kostky.,Things|Benji,ne,ne
 pencil,tužka,242,I write my name with a pencil.,Píšu své jméno tužkou.,Things|Benji,ne,ne
@@ -250,8 +250,8 @@ soap,mýdlo,248,Wash your hands with soap and water.,Umyj si ruce mýdlem a vodo
 pillow,polštář,249,My head rests on a soft pillow.,Hlavu mám položenou na měkkém polštáři.,Things|Benji,ne,ne
 grape,hroznové víno,250,One purple grape falls from the bunch.,Z hroznu spadne jedna fialová kulička vína.,Food|Benji,ne,ne
 toy,hračka,251,The child puts the toy into the box.,Dítě dává hračku do krabice.,Things|Benji,ne,ne
-kite,drak,252,The colorful kite flies high in the wind.,Barevný drak létá vysoko ve větru.,Things|Benji,ne,ne
-lamp,lampa,253,The lamp gives us light in the evening.,Lampa nám večer svítí.,Things|Benji,ne,ne
+kite,drak,252,My red kite looks like a bird.,Můj červený drak vypadá jako pták.,Things|Benji,ne,ne
+lamp,lampa,253,I switch on the lamp beside my bed to finish my book.,"Rozsvítím lampičku u postele, abych mohl dočíst knihu.",Things|Benji,ne,ne
 boots,holinky,254,I wear my boots when it rains.,"Když prší, nosím holinky.",Things|Benji,ne,ne
 pea,hrášek,255,A small green pea is on the plate.,Na talíři je malý zelený hrášek.,Food|Benji,ne,ne
 nuts,oříšky,256,The squirrel keeps its nuts in a bag.,Veverka má oříšky v brašně.,Food|Benji,ne,ne
@@ -280,7 +280,7 @@ stranger,cizinec,278,Do not open the gate for a stranger.,Neotvírej branku cizi
 come,"jít, přijít",279,Please come to the table.,Prosím přijď ke stolu.,Actions|Benji,ne,ne
 pump,pumpa,280,The old pump brings water from the ground.,Stará pumpa čerpá vodu ze země.,Things|Benji,ne,ne
 get,dostat,281,I get a present on my birthday.,K narozeninám dostanu dárek.,Actions|Benji,ne,ne
-bucket,"vědro, kbelík",282,The bucket is full of clean water.,Kbelík je plný čisté vody.,Things|Benji,ne,ne
+bucket,"vědro, kbelík",282,The bucket is full of clean water from the pump.,Kbelík je plný čisté vody z pumpy.,Things|Benji,ne,ne
 empty,prázdný,283,The glass is empty now.,Sklenice je teď prázdná.,Benji,ne,ne
 I don't know,nevím,284,I don't know the answer yet.,Ještě nevím odpověď.,Benji,ne,ne
 forest,les,285,We walk quietly through the green forest.,Tiše procházíme zeleným lesem.,Benji,ne,ne
@@ -321,7 +321,7 @@ cheer,povzbuzovat; jásat,319,We cheer for our friend.,Povzbuzujeme našeho kama
 color,barva,320,What color is your bag?,Jakou barvu má tvoje taška?,Benji,ne,ne
 continue,pokračovat,321,We can continue our journey.,Můžeme pokračovat v cestě.,Benji,ne,ne
 cross,přejít; překročit,322,We cross the bridge together.,Společně přejdeme most.,Benji,ne,ne
-dance,tancovat,323,We dance at the party.,Tancujeme na oslavě.,Benji,ne,ne
+dance,tancovat,323,My parents dance at my birthday party.,Moji rodiče tančí na mé narozeninové oslavě.,Benji,ne,ne
 day,den,324,Today is a happy day.,Dnes je šťastný den.,Benji,ne,ne
 do,dělat,325,What do you want to do?,Co chceš dělat?,Benji,ne,ne
 dream,sen,326,I had a dream about a rabbit.,Zdál se mi sen o králíkovi.,Benji,ne,ne
@@ -356,7 +356,7 @@ laugh,smát se,354,We laugh at the funny story.,Smějeme se legračnímu příb�
 laughter,smích,355,The room is full of laughter.,Místnost je plná smíchu.,Benji,ne,ne
 lesson,lekce; vyučovací hodina,356,Our English lesson starts now.,Naše hodina angličtiny začíná právě teď.,Benji,ne,ne
 let,nechat; dovolit,357,Please let me help you.,"Prosím dovol mi, abych ti pomohl.",Benji,ne,ne
-listen,poslouchat,358,Listen to the bird.,Poslouchej ptáka.,Benji,ne,ne
+listen,poslouchat,358,Listen to the bird tapping on the tree.,"Poslouchej, jak pták ťuká do stromu.",Benji,ne,ne
 little,malý,359,A little rabbit sits under the tree.,Malý králík sedí pod stromem.,Benji,ne,ne
 log,kláda,360,We put a log across the stream.,Položíme kládu přes potok.,Benji,ne,ne
 lots of,hodně,361,There are lots of flowers here.,Je tady hodně květin.,Benji,ne,ne
@@ -428,7 +428,7 @@ drink,nápoj,426,This drink is cold.,Tenhle nápoj je studený.,,ne,ne
 drawing,kresba,427,This drawing shows a house.,Na této kresbě je dům.,,ne,ne
 free,zdarma,428,The water is free.,Voda je zdarma.,,ne,ne
 free,svobodný,429,I feel free.,Cítím se svobodný.,,ne,ne
-help,pomoci; pomáhat,430,Can you help me?,Můžeš mi pomoci?,,ne,ne
+help,pomoci; pomáhat,430,Help me push this heavy box.,Pomoz mi posunout tu těžkou krabici.,,ne,ne
 chicken,slepice,431,The chicken walks in the yard.,Slepice chodí po dvoře.,,ne,ne
 right,správný,432,This is the right shape.,Tohle je správný tvar.,,ne,ne
 right,pravý,433,Raise your right hand.,Zvedni pravou ruku.,,ne,ne
@@ -444,11 +444,11 @@ that,že,442,I think that the bird is beautiful.,"Myslím, že ten pták je krá
 head,hlava,443,I nod my head.,Kývám hlavou.,,ne,ne
 face,obličej,444,I wash my face.,Myji si obličej.,,ne,ne
 ear,ucho,445,This is my ear.,Tohle je moje ucho.,,ne,ne
-nose,nos,446,Touch your nose.,Dotkni se nosu.,,ne,ne
+nose,nos,446,Close your eyes and try to touch your nose.,Zavři oči a zkus se dotknout nosu.,,ne,ne
 mouth,ústa,447,Open your mouth.,Otevři ústa.,,ne,ne
-neck,krk,448,This is my neck.,Tohle je můj krk.,,ne,ne
+neck,krk,448,"My scarf keeps my neck warm, but my ears are cold.","Šála mi hřeje krk, ale uši mě zebou.",,ne,ne
 arm,paže,449,Raise your arm.,Zvedni paži.,,ne,ne
-hand,ruka,450,I wash my hands.,Myji si ruce.,,ne,ne
+hand,ruka,450,The parrot eats nuts from my hand.,Papoušek mi zobe oříšky z ruky.,,ne,ne
 leg,noha,451,I stand on one leg.,Stojím na jedné noze.,,ne,ne
 foot,chodidlo,452,Put your foot on the floor.,Polož chodidlo na podlahu.,,ne,ne
 sky,obloha,453,The sky is blue.,Obloha je modrá.,,ne,ne
@@ -459,13 +459,13 @@ net,podběrák,457,The fish is in the net.,Ryba je v podběráku.,,ne,ne
 hut,chatrč,458,The old hut is near the lake.,Stará chatrč je blízko jezera.,,ne,ne
 shore,břeh,459,The boat is near the shore.,Loď je blízko břehu.,,ne,ne
 fire,oheň,460,The fire is hot.,Oheň je horký.,,ne,ne
-sick,nemocný,461,This tree is sick.,Tento strom je nemocný.,,ne,ne
+sick,nemocný,461,The tree is sick and losing its leaves in the middle of summer.,Strom je nemocný a uprostřed léta mu opadává listí.,,ne,ne
 healthy,zdravý,462,This tree is healthy.,Tento strom je zdravý.,,ne,ne
-dinner,večeře,463,Dinner is on the table.,Večeře je na stole.,,ne,ne
+dinner,večeře,463,"Dinner is on the table, but the salad is still in the fridge.","Večeře už je na stole, ale salát je ještě v lednici.",,ne,ne
 meeting,schůze; setkání,464,We have a meeting today.,Dnes máme schůzi.,,ne,ne
-morning,ráno,465,It is morning.,Je ráno.,,ne,ne
+morning,ráno,465,My father drinks coffee every morning.,Táta pije kávu každé ráno.,,ne,ne
 splash,šplouchnutí,466,I hear a splash in the lake.,Slyším šplouchnutí v jezeře.,,ne,ne
-race,závod,467,We run in a race.,Běžíme závod.,,ne,ne
+race,závod,467,The bike race starts at ten.,Závod na kolech začíná v deset.,,ne,ne
 people,lidé,468,People walk in the park.,Lidé chodí v parku.,,ne,ne
 idea,nápad,469,I have an idea.,Mám nápad.,,ne,ne
 team,tým,470,The team is ready.,Tým je připravený.,,ne,ne
@@ -474,14 +474,14 @@ place,místo,472,This is a good place.,Tohle je dobré místo.,,ne,ne
 side,strana,473,We are on this side.,Jsme na této straně.,,ne,ne
 work,práce,474,We do the work together.,Děláme tu práci společně.,,ne,ne
 shout,křičet,475,Please do not shout.,"Prosím, nekřič.",,ne,ne
-practise,trénovat; procvičovat,476,I practise with my friends.,Trénuji s kamarády.,,ne,ne
+practise,trénovat; procvičovat,476,I practise skating with my friends on Saturday mornings.,V sobotu dopoledne chodím s kamarády trénovat bruslení.,,ne,ne
 sleep,spát,477,We sleep in the hut.,Spíme v chatrči.,,ne,ne
 bring,přinést,478,Please bring the bag here.,"Prosím, přines tašku sem.",,ne,ne
 ask,požádat,479,We ask our friends for help.,Žádáme kamarády o pomoc.,,ne,ne
 think,myslet si,480,I think the plan is good.,"Myslím si, že plán je dobrý.",,ne,ne
 check,zkontrolovat,481,We check the tree.,Kontrolujeme strom.,,ne,ne
 leave,nechat; ponechat,482,We leave the bag here.,Necháme tašku tady.,,ne,ne
-lead,vést,483,We lead the team.,Vedeme tým.,,ne,ne
+lead,vést,483,Our dog leads the sheep through the gate.,Náš pes vede ovce brankou.,,ne,ne
 show,ukázat,484,I show you the map.,Ukazuji ti mapu.,,ne,ne
 start,začít,485,We start the race.,Začínáme závod.,,ne,ne
 find,najít,486,I can find the key.,Dokážu najít klíč.,,ne,ne
@@ -509,7 +509,7 @@ those,tamti; tamty; tamta,507,Those houses are old.,Tamty domy jsou staré.,,ne,
 must,muset,508,I must do my homework.,Musím udělat domácí úkol.,,ne,ne
 may,"možná; může se stát, že",509,It may rain tonight.,Dnes večer možná bude pršet.,,ne,ne
 look like,vypadat jako,510,These clouds look like ears.,Tyto mraky vypadají jako uši.,,ne,ne
-look for,hledat,511,We look for the boat.,Hledáme loď.,,ne,ne
+look for,hledat,511,Look for your shoes under the bed.,Hledej boty pod postelí.,,ne,ne
 find out,zjistit,512,We want to find out what is inside.,"Chceme zjistit, co je uvnitř.",,ne,ne
 cut down,pokácet,513,They cut down a sick tree.,Kácejí nemocný strom.,,ne,ne
 take away,odnést; odvézt,514,We take the bags away.,Odnášíme tašky pryč.,,ne,ne
@@ -517,7 +517,26 @@ no one,nikdo,515,No one is in the hut.,V chatrči nikdo není.,,ne,ne
 one step at a time,postupně; krok za krokem,516,We go one step at a time.,Postupujeme krok za krokem.,,ne,ne
 See you there.,Uvidíme se tam.,517,We are going to the lake. See you there!,Jdeme k jezeru. Uvidíme se tam!,,ne,ne
 call,svolat; přivolat,518,We call our friends to the meeting.,Svoláváme kamarády na schůzi.,,ne,ne
-too,příliš,519,There is too much candy.,Je tu příliš mnoho sladkostí.,,ne,ne
+too,příliš,519,The stream is too wide to jump across.,Potok je na přeskočení moc široký.,,ne,ne
 turn,řada; být na řadě,520,It is my turn.,Teď jsem na řadě já.,,ne,ne
 stag,jelení samec,521,The stag has large antlers.,Jelení samec má velké paroží.,,ne,ne
 fishing hut,rybářská chatrč,522,The fishing hut is by the lake.,Rybářská chatrč je u jezera.,,ne,ne
+sit,sedět,523,Sit beside your sister on the bus.,Sedni si v autobuse vedle sestry.,,ne,ne
+after,po,524,"After lunch, we walk to the lake.",Po obědě jdeme pěšky k jezeru.,,ne,ne
+put,"položit, dát někam",525,Put the key in your bag.,Dej si klíč do tašky.,,ne,ne
+stand,stát,526,Two horses stand by the gate.,U brány stojí dva koně.,,ne,ne
+child,dítě,527,The child gives the rabbit a carrot.,Dítě dává králíkovi mrkev.,,ne,ne
+buy,koupit,528,We buy bread and milk for breakfast.,K snídani kupujeme chleba a mléko.,,ne,ne
+rain,déšť,529,"From my bed, I can hear the rain.",Z postele slyším déšť.,,ne,ne
+basket,košík,530,Our cat sleeps in the basket.,Naše kočka spí v košíku.,,ne,ne
+tea,čaj,531,Would you like tea with your cake?,Dáš si k dortu čaj?,,ne,ne
+road,silnice,532,A fox runs across the road.,Liška běží přes silnici.,,ne,ne
+see,vidět,533,Can you see the moon from your window?,Vidíš z okna měsíc?,,ne,ne
+evening,večer,534,We play in the park every evening.,Každý večer si hrajeme v parku.,,ne,ne
+soup,polévka,535,Try the soup with a little cheese.,Zkus tu polévku s trochou sýra.,,ne,ne
+shop,obchod,536,The toy shop is near our school.,Obchod s hračkami je blízko naší školy.,,ne,ne
+wind,vítr,537,The wind pushes our boat across the lake.,Vítr žene naši loďku přes jezero.,,ne,ne
+swim,plavat,538,I swim with my brother every morning.,Každé ráno plavu s bratrem.,,ne,ne
+fly,"letět, létat",539,Parrots fly from tree to tree.,Papoušci létají ze stromu na strom.,,ne,ne
+grass,tráva,540,The sheep eat grass in the field.,Ovce na poli žerou trávu.,,ne,ne
+share,podělit se,541,I share my popcorn with my sister.,O popcorn se dělím se sestrou.,,ne,ne

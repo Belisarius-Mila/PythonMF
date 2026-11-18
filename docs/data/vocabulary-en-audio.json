@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "source": "VocabularyEN/VocabularyEN.csv",
-  "sourceDigest": "55e377cb2dbcd17d688be84fd8c7f81af67a901469b7f6c5ad138a9b0831ab71",
+  "sourceDigest": "b93c8f427329150ebf357e3c20f944d8fc7516ec804c415a937cb87b2a7b936f",
   "rate": "-10%",
   "voices": {
     "en": {
@@ -16,9 +16,9 @@
     }
   },
   "stats": {
-    "itemCount": 522,
-    "audioReferences": 1044,
-    "uniqueAssets": 1019
+    "itemCount": 541,
+    "audioReferences": 1082,
+    "uniqueAssets": 1057
   },
   "items": {
     "1": {
@@ -4197,6 +4197,158 @@
       "spokenCz": "rybářská chatrč",
       "en": "assets/vocabulary-en-audio/en-us-aria-neural/62782579dc7edeef18e2.mp3",
       "cz": "assets/vocabulary-en-audio/cs-cz-vlasta-neural/b5260bb4464cbf8c931d.mp3"
+    },
+    "523": {
+      "sourceEn": "sit",
+      "sourceCz": "sedět",
+      "spokenEn": "sit",
+      "spokenCz": "sedět",
+      "en": "assets/vocabulary-en-audio/en-us-aria-neural/853cef0aed93d695e908.mp3",
+      "cz": "assets/vocabulary-en-audio/cs-cz-vlasta-neural/8023105f52aca5da7c33.mp3"
+    },
+    "524": {
+      "sourceEn": "after",
+      "sourceCz": "po",
+      "spokenEn": "after",
+      "spokenCz": "po",
+      "en": "assets/vocabulary-en-audio/en-us-aria-neural/82fbe9486d9975075eb1.mp3",
+      "cz": "assets/vocabulary-en-audio/cs-cz-vlasta-neural/a49822ca66214be37b75.mp3"
+    },
+    "525": {
+      "sourceEn": "put",
+      "sourceCz": "položit, dát někam",
+      "spokenEn": "put",
+      "spokenCz": "položit. dát někam",
+      "en": "assets/vocabulary-en-audio/en-us-aria-neural/2fe76eca1c22f7cb636d.mp3",
+      "cz": "assets/vocabulary-en-audio/cs-cz-vlasta-neural/fe297b2f950c98393297.mp3"
+    },
+    "526": {
+      "sourceEn": "stand",
+      "sourceCz": "stát",
+      "spokenEn": "stand",
+      "spokenCz": "stát",
+      "en": "assets/vocabulary-en-audio/en-us-aria-neural/c982e622556639a49ae2.mp3",
+      "cz": "assets/vocabulary-en-audio/cs-cz-vlasta-neural/4be0400e838620be062a.mp3"
+    },
+    "527": {
+      "sourceEn": "child",
+      "sourceCz": "dítě",
+      "spokenEn": "child",
+      "spokenCz": "dítě",
+      "en": "assets/vocabulary-en-audio/en-us-aria-neural/20f3770587f3d3c787b5.mp3",
+      "cz": "assets/vocabulary-en-audio/cs-cz-vlasta-neural/115c2f1331c6627a468b.mp3"
+    },
+    "528": {
+      "sourceEn": "buy",
+      "sourceCz": "koupit",
+      "spokenEn": "buy",
+      "spokenCz": "koupit",
+      "en": "assets/vocabulary-en-audio/en-us-aria-neural/b5125b163dc679b0c618.mp3",
+      "cz": "assets/vocabulary-en-audio/cs-cz-vlasta-neural/888a7191d2f22f2c583e.mp3"
+    },
+    "529": {
+      "sourceEn": "rain",
+      "sourceCz": "déšť",
+      "spokenEn": "rain",
+      "spokenCz": "déšť",
+      "en": "assets/vocabulary-en-audio/en-us-aria-neural/5c88ee59505fbdc6b4b4.mp3",
+      "cz": "assets/vocabulary-en-audio/cs-cz-vlasta-neural/a91f2d34273c4da62338.mp3"
+    },
+    "530": {
+      "sourceEn": "basket",
+      "sourceCz": "košík",
+      "spokenEn": "basket",
+      "spokenCz": "košík",
+      "en": "assets/vocabulary-en-audio/en-us-aria-neural/74dbf7b13b2aa012ddd7.mp3",
+      "cz": "assets/vocabulary-en-audio/cs-cz-vlasta-neural/cdf99a8a38a761c949d0.mp3"
+    },
+    "531": {
+      "sourceEn": "tea",
+      "sourceCz": "čaj",
+      "spokenEn": "tea",
+      "spokenCz": "čaj",
+      "en": "assets/vocabulary-en-audio/en-us-aria-neural/06f37807db1dbb25d3ba.mp3",
+      "cz": "assets/vocabulary-en-audio/cs-cz-vlasta-neural/db1a0e93fce3e1dcb171.mp3"
+    },
+    "532": {
+      "sourceEn": "road",
+      "sourceCz": "silnice",
+      "spokenEn": "road",
+      "spokenCz": "silnice",
+      "en": "assets/vocabulary-en-audio/en-us-aria-neural/bfae3b070d3f41372cf0.mp3",
+      "cz": "assets/vocabulary-en-audio/cs-cz-vlasta-neural/970eb99156f525f4d2d6.mp3"
+    },
+    "533": {
+      "sourceEn": "see",
+      "sourceCz": "vidět",
+      "spokenEn": "see",
+      "spokenCz": "vidět",
+      "en": "assets/vocabulary-en-audio/en-us-aria-neural/17346722fa33e9e3037c.mp3",
+      "cz": "assets/vocabulary-en-audio/cs-cz-vlasta-neural/b3fdfb26fb94fa864c68.mp3"
+    },
+    "534": {
+      "sourceEn": "evening",
+      "sourceCz": "večer",
+      "spokenEn": "evening",
+      "spokenCz": "večer",
+      "en": "assets/vocabulary-en-audio/en-us-aria-neural/d18c2af1aed804c2597b.mp3",
+      "cz": "assets/vocabulary-en-audio/cs-cz-vlasta-neural/67672ebb517b104b3e4e.mp3"
+    },
+    "535": {
+      "sourceEn": "soup",
+      "sourceCz": "polévka",
+      "spokenEn": "soup",
+      "spokenCz": "polévka",
+      "en": "assets/vocabulary-en-audio/en-us-aria-neural/099bd1bbedc59659f0e0.mp3",
+      "cz": "assets/vocabulary-en-audio/cs-cz-vlasta-neural/97f66f1a04fad274527f.mp3"
+    },
+    "536": {
+      "sourceEn": "shop",
+      "sourceCz": "obchod",
+      "spokenEn": "shop",
+      "spokenCz": "obchod",
+      "en": "assets/vocabulary-en-audio/en-us-aria-neural/25f768e6c55267cf2cb6.mp3",
+      "cz": "assets/vocabulary-en-audio/cs-cz-vlasta-neural/6036f6f9b7f288893532.mp3"
+    },
+    "537": {
+      "sourceEn": "wind",
+      "sourceCz": "vítr",
+      "spokenEn": "wind",
+      "spokenCz": "vítr",
+      "en": "assets/vocabulary-en-audio/en-us-aria-neural/40a166936026170c9042.mp3",
+      "cz": "assets/vocabulary-en-audio/cs-cz-vlasta-neural/1c09aae2d4f8d1368078.mp3"
+    },
+    "538": {
+      "sourceEn": "swim",
+      "sourceCz": "plavat",
+      "spokenEn": "swim",
+      "spokenCz": "plavat",
+      "en": "assets/vocabulary-en-audio/en-us-aria-neural/c8384f5cc6e7fea555cf.mp3",
+      "cz": "assets/vocabulary-en-audio/cs-cz-vlasta-neural/886710f33117d06f013a.mp3"
+    },
+    "539": {
+      "sourceEn": "fly",
+      "sourceCz": "letět, létat",
+      "spokenEn": "fly",
+      "spokenCz": "letět. létat",
+      "en": "assets/vocabulary-en-audio/en-us-aria-neural/15ea4fc16764aae6bf11.mp3",
+      "cz": "assets/vocabulary-en-audio/cs-cz-vlasta-neural/a6a298d04c35c6a0a789.mp3"
+    },
+    "540": {
+      "sourceEn": "grass",
+      "sourceCz": "tráva",
+      "spokenEn": "grass",
+      "spokenCz": "tráva",
+      "en": "assets/vocabulary-en-audio/en-us-aria-neural/6e23f542b5f584e80ddb.mp3",
+      "cz": "assets/vocabulary-en-audio/cs-cz-vlasta-neural/d6708ee02595152352cd.mp3"
+    },
+    "541": {
+      "sourceEn": "share",
+      "sourceCz": "podělit se",
+      "spokenEn": "share",
+      "spokenCz": "podělit se",
+      "en": "assets/vocabulary-en-audio/en-us-aria-neural/7d6128b7dd52201289d7.mp3",
+      "cz": "assets/vocabulary-en-audio/cs-cz-vlasta-neural/bbd0ecad41a4c0b125d4.mp3"
     }
   }
 }

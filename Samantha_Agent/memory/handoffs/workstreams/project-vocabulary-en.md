@@ -73,9 +73,9 @@ Nazev: Vocabulary EN
 Pracovni proud: project-vocabulary-en
 Typ: Project
 Priorita: 2
-Stav: obrazový pilot20 vět hotový místně, finální důkaz v completion.json
+Stav: 40 přepisů a19 nových karet hotovo, brána/commit a schválené Terra p+n rozpracované
 Pripomenout pri startu: ano
-Datum: 2026-11-17 11:00 CET
+Datum: 2026-11-18
 
 Co se resilo:
 Mílou schválené obrazové pojmy nad větou v kontinuální smyčce Věta + slovíčko.
@@ -1332,3 +1332,14 @@ Navrhované další kroky: rozšíření pokrytí, IT samostatně.
 Technický důkaz:6 nových Python a9 JS regresí PASS; finální programovou bránu,
 zdroje a checkpoint potvrzuje private/vocabulary_en_sentence_pictures_20261117/completion.json.
 Zde bez release submit/restartu, origin ani veřejný stav se znovu neauditoval.
+
+
+### 2026-11-18 — 40 přepisů a 19 nových slovíček pro smyčku
+
+Hotovo: Přesné schválené EN/CZ texty40 původních a19 nových vět. Nové karty ven-0523–0541,19 vlastních ilustrací/náhledů,156 nových plně dekódovaných MP3. Nyní541 identit/531 aktivních,531 obrazových vět/1492 významových vazeb. Přidaných73 vazeb v68 větách se stejným textem. Safari Mac ověřilo novou větu see se3 obrázky a přechodem na velké slovíčko.
+
+Rozhodnutí: Míla výslovně schválil celý závěrečný TXT a po commitu neprodlené p+n přes Terru. Hlasy/tempo zachované, export podporuje schválený název see-verb.webp.
+
+Důkaz: reports/vocabulary_en_loop_refresh_20261118.md a privátní vocabulary_en_loop_refresh_20261118. Závazný konečný výsledek brány/commitu/p+n je v privátních účtenkách, nikoli v tomto přípravném zápisu.
+
+Další krok: Dokončit bránu, commit a již schválené registrované Terra p+n na Vocabulary EN Pages. Poté fyzická telefonní a Mílova akustická přejímka.

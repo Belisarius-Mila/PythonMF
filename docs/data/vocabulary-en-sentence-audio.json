@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "kind": "sentences",
   "source": "VocabularyEN/VocabularyEN.csv",
-  "sourceDigest": "274f079dc59ff32f64f6b7eb1d96649fcd02085f10d0af119d0a7b8d411512db",
+  "sourceDigest": "16f4dbb4dc8e57ff7302e17221cb7b4de6451a343f43667ac6d97de97c424e25",
   "rate": "-10%",
   "voices": {
     "en": {
@@ -109,12 +109,12 @@
       "uid": "ven-0009",
       "sourceEn": "black",
       "sourceCz": "černý",
-      "sourceSentenceEn": "He wears a black jacket in the winter.",
-      "sourceSentenceCz": "V zimě nosí černou bundu.",
-      "spokenEn": "He wears a black jacket in the winter.",
-      "spokenCz": "V zimě nosí černou bundu.",
-      "en": "assets/vocabulary-en-sentences/en-us-aria-neural/8865aec3d943a7843a4d.mp3",
-      "cz": "assets/vocabulary-en-sentences/cs-cz-vlasta-neural/9d7ac18ef930361eabef.mp3"
+      "sourceSentenceEn": "My black dog has one white ear.",
+      "sourceSentenceCz": "Můj černý pes má jedno bílé ucho.",
+      "spokenEn": "My black dog has one white ear.",
+      "spokenCz": "Můj černý pes má jedno bílé ucho.",
+      "en": "assets/vocabulary-en-sentences/en-us-aria-neural/0ee52f5938571475ee3e.mp3",
+      "cz": "assets/vocabulary-en-sentences/cs-cz-vlasta-neural/c631b9d68349e4bbc043.mp3"
     },
     "ven-0010": {
       "uid": "ven-0010",
@@ -362,12 +362,12 @@
       "uid": "ven-0032",
       "sourceEn": "duck",
       "sourceCz": "kachna",
-      "sourceSentenceEn": "A duck swims slowly across the pond.",
-      "sourceSentenceCz": "Kachna pomalu plave přes rybník.",
-      "spokenEn": "A duck swims slowly across the pond.",
-      "spokenCz": "Kachna pomalu plave přes rybník.",
-      "en": "assets/vocabulary-en-sentences/en-us-aria-neural/0805ca35af6ff167c785.mp3",
-      "cz": "assets/vocabulary-en-sentences/cs-cz-vlasta-neural/608fb41d03d1b5ed4905.mp3"
+      "sourceSentenceEn": "A duck follows a goose to the lake.",
+      "sourceSentenceCz": "Kachna jde za husou k jezeru.",
+      "spokenEn": "A duck follows a goose to the lake.",
+      "spokenCz": "Kachna jde za husou k jezeru.",
+      "en": "assets/vocabulary-en-sentences/en-us-aria-neural/0bbab3edb93cadcbeff0.mp3",
+      "cz": "assets/vocabulary-en-sentences/cs-cz-vlasta-neural/c398e7e29eccd81f7953.mp3"
     },
     "ven-0033": {
       "uid": "ven-0033",
@@ -395,12 +395,12 @@
       "uid": "ven-0035",
       "sourceEn": "excuse me",
       "sourceCz": "promiňte",
-      "sourceSentenceEn": "Excuse me, is this seat free?",
-      "sourceSentenceCz": "Promiňte, je tohle místo volné?",
-      "spokenEn": "Excuse me, is this seat free?",
-      "spokenCz": "Promiňte, je tohle místo volné?",
-      "en": "assets/vocabulary-en-sentences/en-us-aria-neural/b5b5affd46c81550c5de.mp3",
-      "cz": "assets/vocabulary-en-sentences/cs-cz-vlasta-neural/6b53c4e544765e711041.mp3"
+      "sourceSentenceEn": "Excuse me, where is the bus station?",
+      "sourceSentenceCz": "Promiňte, kde je autobusové nádraží?",
+      "spokenEn": "Excuse me, where is the bus station?",
+      "spokenCz": "Promiňte, kde je autobusové nádraží?",
+      "en": "assets/vocabulary-en-sentences/en-us-aria-neural/3b5415d1030acf99bf92.mp3",
+      "cz": "assets/vocabulary-en-sentences/cs-cz-vlasta-neural/51bf9138b870aac0439b.mp3"
     },
     "ven-0036": {
       "uid": "ven-0036",
@@ -450,12 +450,12 @@
       "uid": "ven-0040",
       "sourceEn": "field",
       "sourceCz": "pole",
-      "sourceSentenceEn": "In the field, the grass moves in the wind.",
-      "sourceSentenceCz": "Na poli se tráva hýbe ve větru.",
-      "spokenEn": "In the field, the grass moves in the wind.",
-      "spokenCz": "Na poli se tráva hýbe ve větru.",
-      "en": "assets/vocabulary-en-sentences/en-us-aria-neural/927b2dcc0ff3e6ba8648.mp3",
-      "cz": "assets/vocabulary-en-sentences/cs-cz-vlasta-neural/79eaa3766d1374158d7a.mp3"
+      "sourceSentenceEn": "Three horses run across the field.",
+      "sourceSentenceCz": "Tři koně běží přes pole.",
+      "spokenEn": "Three horses run across the field.",
+      "spokenCz": "Tři koně běží přes pole.",
+      "en": "assets/vocabulary-en-sentences/en-us-aria-neural/8c828f5a049fde4ef404.mp3",
+      "cz": "assets/vocabulary-en-sentences/cs-cz-vlasta-neural/4fe5d28d7be1a794702b.mp3"
     },
     "ven-0041": {
       "uid": "ven-0041",
@@ -494,12 +494,12 @@
       "uid": "ven-0044",
       "sourceEn": "free",
       "sourceCz": "volný",
-      "sourceSentenceEn": "Are you free this evening for a short walk?",
-      "sourceSentenceCz": "Máš dnes večer čas na krátkou procházku?",
-      "spokenEn": "Are you free this evening for a short walk?",
-      "spokenCz": "Máš dnes večer čas na krátkou procházku?",
-      "en": "assets/vocabulary-en-sentences/en-us-aria-neural/b1c9400b446f42d5eb7c.mp3",
-      "cz": "assets/vocabulary-en-sentences/cs-cz-vlasta-neural/b67e551b1271930c6515.mp3"
+      "sourceSentenceEn": "Are you free to play ball today?",
+      "sourceSentenceCz": "Máš dnes čas zahrát si s míčem?",
+      "spokenEn": "Are you free to play ball today?",
+      "spokenCz": "Máš dnes čas zahrát si s míčem?",
+      "en": "assets/vocabulary-en-sentences/en-us-aria-neural/3f50910dca30d5028360.mp3",
+      "cz": "assets/vocabulary-en-sentences/cs-cz-vlasta-neural/62e41e49d360ba071371.mp3"
     },
     "ven-0045": {
       "uid": "ven-0045",
@@ -791,12 +791,12 @@
       "uid": "ven-0071",
       "sourceEn": "milk",
       "sourceCz": "mléko",
-      "sourceSentenceEn": "I add milk to my tea.",
-      "sourceSentenceCz": "Dám si do čaje mléko.",
-      "spokenEn": "I add milk to my tea.",
-      "spokenCz": "Dám si do čaje mléko.",
-      "en": "assets/vocabulary-en-sentences/en-us-aria-neural/ba3645d842b3a8a33c84.mp3",
-      "cz": "assets/vocabulary-en-sentences/cs-cz-vlasta-neural/5872b78ac3ac35e774ce.mp3"
+      "sourceSentenceEn": "I like milk in my tea, but I drink my coffee black.",
+      "sourceSentenceCz": "Čaj si dávám s mlékem, ale kávu piju černou.",
+      "spokenEn": "I like milk in my tea, but I drink my coffee black.",
+      "spokenCz": "Čaj si dávám s mlékem, ale kávu piju černou.",
+      "en": "assets/vocabulary-en-sentences/en-us-aria-neural/ab7ed9fd9608abedb159.mp3",
+      "cz": "assets/vocabulary-en-sentences/cs-cz-vlasta-neural/22d1496697a80bd112a5.mp3"
     },
     "ven-0072": {
       "uid": "ven-0072",
@@ -857,12 +857,12 @@
       "uid": "ven-0077",
       "sourceEn": "nurse",
       "sourceCz": "zdravotní sestra",
-      "sourceSentenceEn": "The nurse checks on the patient with a kind voice.",
-      "sourceSentenceCz": "Sestra zkontroluje pacienta a mluví laskavě.",
-      "spokenEn": "The nurse checks on the patient with a kind voice.",
-      "spokenCz": "Sestra zkontroluje pacienta a mluví laskavě.",
-      "en": "assets/vocabulary-en-sentences/en-us-aria-neural/63eaeb4398556c528a79.mp3",
-      "cz": "assets/vocabulary-en-sentences/cs-cz-vlasta-neural/6cd7be7cffcabe291c17.mp3"
+      "sourceSentenceEn": "Show the nurse your right arm.",
+      "sourceSentenceCz": "Ukaž zdravotní sestře pravou paži.",
+      "spokenEn": "Show the nurse your right arm.",
+      "spokenCz": "Ukaž zdravotní sestře pravou paži.",
+      "en": "assets/vocabulary-en-sentences/en-us-aria-neural/dbbf04779eb451f841ad.mp3",
+      "cz": "assets/vocabulary-en-sentences/cs-cz-vlasta-neural/d78d5d4c4b46a55e3d4e.mp3"
     },
     "ven-0078": {
       "uid": "ven-0078",
@@ -890,12 +890,12 @@
       "uid": "ven-0080",
       "sourceEn": "parents",
       "sourceCz": "rodiče",
-      "sourceSentenceEn": "My parents visit us on Sunday.",
-      "sourceSentenceCz": "Moji rodiče nás navštíví v neděli.",
-      "spokenEn": "My parents visit us on Sunday.",
-      "spokenCz": "Moji rodiče nás navštíví v neděli.",
-      "en": "assets/vocabulary-en-sentences/en-us-aria-neural/3438a525e0ea38f6bd02.mp3",
-      "cz": "assets/vocabulary-en-sentences/cs-cz-vlasta-neural/f2a792c7943ce8dc738c.mp3"
+      "sourceSentenceEn": "My parents visit us on Sundays, and my daughter always runs to greet them.",
+      "sourceSentenceCz": "Rodiče k nám chodí v neděli a dcera jim pokaždé běží naproti.",
+      "spokenEn": "My parents visit us on Sundays, and my daughter always runs to greet them.",
+      "spokenCz": "Rodiče k nám chodí v neděli a dcera jim pokaždé běží naproti.",
+      "en": "assets/vocabulary-en-sentences/en-us-aria-neural/1e65d2819512f9fc6b32.mp3",
+      "cz": "assets/vocabulary-en-sentences/cs-cz-vlasta-neural/0b77e1bca30e5a7a66ae.mp3"
     },
     "ven-0081": {
       "uid": "ven-0081",
@@ -1055,23 +1055,23 @@
       "uid": "ven-0095",
       "sourceEn": "teacher",
       "sourceCz": "učitel",
-      "sourceSentenceEn": "The teacher explains it with a simple example.",
-      "sourceSentenceCz": "Učitel to vysvětlí na jednoduchém příkladu.",
-      "spokenEn": "The teacher explains it with a simple example.",
-      "spokenCz": "Učitel to vysvětlí na jednoduchém příkladu.",
-      "en": "assets/vocabulary-en-sentences/en-us-aria-neural/5ae4812baa799cb3977c.mp3",
-      "cz": "assets/vocabulary-en-sentences/cs-cz-vlasta-neural/546617c3b419811ea4b8.mp3"
+      "sourceSentenceEn": "Our teacher opens a book about animals.",
+      "sourceSentenceCz": "Náš učitel otevírá knihu o zvířatech.",
+      "spokenEn": "Our teacher opens a book about animals.",
+      "spokenCz": "Náš učitel otevírá knihu o zvířatech.",
+      "en": "assets/vocabulary-en-sentences/en-us-aria-neural/70bcbe96e2a16a8dcc4c.mp3",
+      "cz": "assets/vocabulary-en-sentences/cs-cz-vlasta-neural/9788da82fb986c1074c6.mp3"
     },
     "ven-0096": {
       "uid": "ven-0096",
       "sourceEn": "ticket",
       "sourceCz": "lístek",
-      "sourceSentenceEn": "I buy a ticket and put it in my pocket.",
-      "sourceSentenceCz": "Koupím si lístek a dám si ho do kapsy.",
-      "spokenEn": "I buy a ticket and put it in my pocket.",
-      "spokenCz": "Koupím si lístek a dám si ho do kapsy.",
-      "en": "assets/vocabulary-en-sentences/en-us-aria-neural/d2cc5ef56b38a9a267a1.mp3",
-      "cz": "assets/vocabulary-en-sentences/cs-cz-vlasta-neural/7d341aca0e5d5715ccbd.mp3"
+      "sourceSentenceEn": "I buy a train ticket and put it in my pocket.",
+      "sourceSentenceCz": "Koupím si lístek na vlak a strčím ho do kapsy.",
+      "spokenEn": "I buy a train ticket and put it in my pocket.",
+      "spokenCz": "Koupím si lístek na vlak a strčím ho do kapsy.",
+      "en": "assets/vocabulary-en-sentences/en-us-aria-neural/4501a858417b4abf0423.mp3",
+      "cz": "assets/vocabulary-en-sentences/cs-cz-vlasta-neural/15e045f04187109a5bbd.mp3"
     },
     "ven-0097": {
       "uid": "ven-0097",
@@ -1198,12 +1198,12 @@
       "uid": "ven-0108",
       "sourceEn": "hungry",
       "sourceCz": "hladový",
-      "sourceSentenceEn": "I am hungry, so I make a quick sandwich.",
-      "sourceSentenceCz": "Jsem hladový, tak si udělám rychlý sendvič.",
-      "spokenEn": "I am hungry, so I make a quick sandwich.",
-      "spokenCz": "Jsem hladový, tak si udělám rychlý sendvič.",
-      "en": "assets/vocabulary-en-sentences/en-us-aria-neural/693560ad921a29d94bc3.mp3",
-      "cz": "assets/vocabulary-en-sentences/cs-cz-vlasta-neural/ac0d18cbc00d17dbfd29.mp3"
+      "sourceSentenceEn": "The hungry fox watches the chickens.",
+      "sourceSentenceCz": "Hladová liška pozoruje slepice.",
+      "spokenEn": "The hungry fox watches the chickens.",
+      "spokenCz": "Hladová liška pozoruje slepice.",
+      "en": "assets/vocabulary-en-sentences/en-us-aria-neural/380dbf960fc925ed8fe4.mp3",
+      "cz": "assets/vocabulary-en-sentences/cs-cz-vlasta-neural/ccab5e432a6b618a68d1.mp3"
     },
     "ven-0109": {
       "uid": "ven-0109",
@@ -1253,12 +1253,12 @@
       "uid": "ven-0113",
       "sourceEn": "menu",
       "sourceCz": "jídelní lístek",
-      "sourceSentenceEn": "I read the menu and choose a simple soup.",
-      "sourceSentenceCz": "Prohlédnu si jídelní lístek a vyberu si jednoduchou polévku.",
-      "spokenEn": "I read the menu and choose a simple soup.",
-      "spokenCz": "Prohlédnu si jídelní lístek a vyberu si jednoduchou polévku.",
-      "en": "assets/vocabulary-en-sentences/en-us-aria-neural/6d39d264eceb32e240c8.mp3",
-      "cz": "assets/vocabulary-en-sentences/cs-cz-vlasta-neural/24776329b352603a8c9a.mp3"
+      "sourceSentenceEn": "Chicken and rice are on the menu today.",
+      "sourceSentenceCz": "Dnes je na jídelním lístku kuře s rýží.",
+      "spokenEn": "Chicken and rice are on the menu today.",
+      "spokenCz": "Dnes je na jídelním lístku kuře s rýží.",
+      "en": "assets/vocabulary-en-sentences/en-us-aria-neural/b39ba0f8f9b25095b24d.mp3",
+      "cz": "assets/vocabulary-en-sentences/cs-cz-vlasta-neural/c564ac0a467843219bd3.mp3"
     },
     "ven-0114": {
       "uid": "ven-0114",
@@ -1385,12 +1385,12 @@
       "uid": "ven-0125",
       "sourceEn": "ketchup",
       "sourceCz": "kečup",
-      "sourceSentenceEn": "Can I have ketchup, please?",
-      "sourceSentenceCz": "Můžu dostat kečup, prosím?",
-      "spokenEn": "Can I have ketchup, please?",
-      "spokenCz": "Můžu dostat kečup, prosím?",
-      "en": "assets/vocabulary-en-sentences/en-us-aria-neural/acb6cf0167f53fff2b08.mp3",
-      "cz": "assets/vocabulary-en-sentences/cs-cz-vlasta-neural/032c07c8af2347013f07.mp3"
+      "sourceSentenceEn": "Could I have some ketchup for my fries, please?",
+      "sourceSentenceCz": "Mohl bych k těm hranolkům dostat kečup, prosím?",
+      "spokenEn": "Could I have some ketchup for my fries, please?",
+      "spokenCz": "Mohl bych k těm hranolkům dostat kečup, prosím?",
+      "en": "assets/vocabulary-en-sentences/en-us-aria-neural/9ffe25116e03f068a637.mp3",
+      "cz": "assets/vocabulary-en-sentences/cs-cz-vlasta-neural/7fc78815369935c1cd4c.mp3"
     },
     "ven-0126": {
       "uid": "ven-0126",
@@ -1440,12 +1440,12 @@
       "uid": "ven-0130",
       "sourceEn": "dessert",
       "sourceCz": "dezert",
-      "sourceSentenceEn": "Would you like dessert after lunch?",
-      "sourceSentenceCz": "Dáš si po obědě dezert?",
-      "spokenEn": "Would you like dessert after lunch?",
-      "spokenCz": "Dáš si po obědě dezert?",
-      "en": "assets/vocabulary-en-sentences/en-us-aria-neural/cc79784164ab98aa8882.mp3",
-      "cz": "assets/vocabulary-en-sentences/cs-cz-vlasta-neural/48928ee6fe14b5c3b4d9.mp3"
+      "sourceSentenceEn": "Would you like ice cream for dessert or just a coffee after lunch?",
+      "sourceSentenceCz": "Dáš si po obědě jako dezert zmrzlinu, nebo jen kávu?",
+      "spokenEn": "Would you like ice cream for dessert or just a coffee after lunch?",
+      "spokenCz": "Dáš si po obědě jako dezert zmrzlinu, nebo jen kávu?",
+      "en": "assets/vocabulary-en-sentences/en-us-aria-neural/b7f2714a67d7ca7d8a33.mp3",
+      "cz": "assets/vocabulary-en-sentences/cs-cz-vlasta-neural/3983a3f952cb4e97ef49.mp3"
     },
     "ven-0131": {
       "uid": "ven-0131",
@@ -1473,12 +1473,12 @@
       "uid": "ven-0133",
       "sourceEn": "pound",
       "sourceCz": "libra (měna)",
-      "sourceSentenceEn": "It costs twenty pounds in total.",
-      "sourceSentenceCz": "Celkem to stojí dvacet liber.",
-      "spokenEn": "It costs twenty pounds in total.",
-      "spokenCz": "Celkem to stojí dvacet liber.",
-      "en": "assets/vocabulary-en-sentences/en-us-aria-neural/23e8274e9d9145f31650.mp3",
-      "cz": "assets/vocabulary-en-sentences/cs-cz-vlasta-neural/5a4e3efa905f4f48d403.mp3"
+      "sourceSentenceEn": "The brown boots are ten pounds.",
+      "sourceSentenceCz": "Hnědé holínky stojí deset liber.",
+      "spokenEn": "The brown boots are ten pounds.",
+      "spokenCz": "Hnědé holínky stojí deset liber.",
+      "en": "assets/vocabulary-en-sentences/en-us-aria-neural/9eb74435cf50a04d24ff.mp3",
+      "cz": "assets/vocabulary-en-sentences/cs-cz-vlasta-neural/8145785775d61991c618.mp3"
     },
     "ven-0134": {
       "uid": "ven-0134",
@@ -1660,12 +1660,12 @@
       "uid": "ven-0150",
       "sourceEn": "how much",
       "sourceCz": "kolik",
-      "sourceSentenceEn": "How much is it?",
-      "sourceSentenceCz": "Kolik to stojí?",
-      "spokenEn": "How much is it?",
-      "spokenCz": "Kolik to stojí?",
-      "en": "assets/vocabulary-en-sentences/en-us-aria-neural/53073f95e4c01a155858.mp3",
-      "cz": "assets/vocabulary-en-sentences/cs-cz-vlasta-neural/37d7f538d89718d61796.mp3"
+      "sourceSentenceEn": "How much is that red toy car?",
+      "sourceSentenceCz": "Kolik stojí to červené autíčko?",
+      "spokenEn": "How much is that red toy car?",
+      "spokenCz": "Kolik stojí to červené autíčko?",
+      "en": "assets/vocabulary-en-sentences/en-us-aria-neural/c0c2c84167b5f14ed1e9.mp3",
+      "cz": "assets/vocabulary-en-sentences/cs-cz-vlasta-neural/3233c59be428de378e43.mp3"
     },
     "ven-0151": {
       "uid": "ven-0151",
@@ -1715,12 +1715,12 @@
       "uid": "ven-0155",
       "sourceEn": "call",
       "sourceCz": "volat, telefonovat",
-      "sourceSentenceEn": "I call Jane.",
-      "sourceSentenceCz": "Zavolám Janě.",
-      "spokenEn": "I call Jane.",
-      "spokenCz": "Zavolám Janě.",
-      "en": "assets/vocabulary-en-sentences/en-us-aria-neural/5bfd9e57e98f995c7e09.mp3",
-      "cz": "assets/vocabulary-en-sentences/cs-cz-vlasta-neural/be89d89b62a998355954.mp3"
+      "sourceSentenceEn": "I call my aunt on her birthday.",
+      "sourceSentenceCz": "Volám tetě k narozeninám.",
+      "spokenEn": "I call my aunt on her birthday.",
+      "spokenCz": "Volám tetě k narozeninám.",
+      "en": "assets/vocabulary-en-sentences/en-us-aria-neural/432a933b123ff43fb8ae.mp3",
+      "cz": "assets/vocabulary-en-sentences/cs-cz-vlasta-neural/cc8fa99488c2055caf0c.mp3"
     },
     "ven-0156": {
       "uid": "ven-0156",
@@ -1946,12 +1946,12 @@
       "uid": "ven-0176",
       "sourceEn": "eagle",
       "sourceCz": "orel",
-      "sourceSentenceEn": "The eagle flies high above the mountains.",
-      "sourceSentenceCz": "Orel letí vysoko nad horami.",
-      "spokenEn": "The eagle flies high above the mountains.",
-      "spokenCz": "Orel letí vysoko nad horami.",
-      "en": "assets/vocabulary-en-sentences/en-us-aria-neural/9ac5010f10f24a8bdb14.mp3",
-      "cz": "assets/vocabulary-en-sentences/cs-cz-vlasta-neural/618bee4790f5339c78ae.mp3"
+      "sourceSentenceEn": "The eagle catches a fish in the river.",
+      "sourceSentenceCz": "Orel chytá rybu v řece.",
+      "spokenEn": "The eagle catches a fish in the river.",
+      "spokenCz": "Orel chytá rybu v řece.",
+      "en": "assets/vocabulary-en-sentences/en-us-aria-neural/ee65df8949a0a9b88c96.mp3",
+      "cz": "assets/vocabulary-en-sentences/cs-cz-vlasta-neural/e0ff0c51df737714585f.mp3"
     },
     "ven-0177": {
       "uid": "ven-0177",
@@ -2276,12 +2276,12 @@
       "uid": "ven-0206",
       "sourceEn": "ball",
       "sourceCz": "míč",
-      "sourceSentenceEn": "The child throws the ball to a friend.",
-      "sourceSentenceCz": "Dítě hází míč kamarádovi.",
-      "spokenEn": "The child throws the ball to a friend.",
-      "spokenCz": "Dítě hází míč kamarádovi.",
-      "en": "assets/vocabulary-en-sentences/en-us-aria-neural/7aeb88b129a944f90c41.mp3",
-      "cz": "assets/vocabulary-en-sentences/cs-cz-vlasta-neural/4b87500ccefa3dae1a33.mp3"
+      "sourceSentenceEn": "The child throws the ball to a friend on the other side of the fence.",
+      "sourceSentenceCz": "Dítě hodí míč kamarádovi na druhé straně plotu.",
+      "spokenEn": "The child throws the ball to a friend on the other side of the fence.",
+      "spokenCz": "Dítě hodí míč kamarádovi na druhé straně plotu.",
+      "en": "assets/vocabulary-en-sentences/en-us-aria-neural/8ea9a7056221ea8eed1d.mp3",
+      "cz": "assets/vocabulary-en-sentences/cs-cz-vlasta-neural/33c99bfc0dc5d3777b18.mp3"
     },
     "ven-0207": {
       "uid": "ven-0207",
@@ -2298,12 +2298,12 @@
       "uid": "ven-0208",
       "sourceEn": "train",
       "sourceCz": "vlak",
-      "sourceSentenceEn": "The train arrives at the station on time.",
-      "sourceSentenceCz": "Vlak přijíždí na nádraží včas.",
-      "spokenEn": "The train arrives at the station on time.",
-      "spokenCz": "Vlak přijíždí na nádraží včas.",
-      "en": "assets/vocabulary-en-sentences/en-us-aria-neural/b61c561c4e0b5a52cb10.mp3",
-      "cz": "assets/vocabulary-en-sentences/cs-cz-vlasta-neural/0db9946ffe12a48bc43d.mp3"
+      "sourceSentenceEn": "The train crosses the bridge near our school.",
+      "sourceSentenceCz": "Vlak přejíždí přes most u naší školy.",
+      "spokenEn": "The train crosses the bridge near our school.",
+      "spokenCz": "Vlak přejíždí přes most u naší školy.",
+      "en": "assets/vocabulary-en-sentences/en-us-aria-neural/85941a2d20756ca338ad.mp3",
+      "cz": "assets/vocabulary-en-sentences/cs-cz-vlasta-neural/7ddefc7d649311e13ddb.mp3"
     },
     "ven-0209": {
       "uid": "ven-0209",
@@ -2342,12 +2342,12 @@
       "uid": "ven-0212",
       "sourceEn": "banana",
       "sourceCz": "banán",
-      "sourceSentenceEn": "I peel a banana for my snack.",
-      "sourceSentenceCz": "Oloupu si banán ke svačině.",
-      "spokenEn": "I peel a banana for my snack.",
-      "spokenCz": "Oloupu si banán ke svačině.",
-      "en": "assets/vocabulary-en-sentences/en-us-aria-neural/7bbe4e5742cfb4009b75.mp3",
-      "cz": "assets/vocabulary-en-sentences/cs-cz-vlasta-neural/3b368c2a6508c4f44b3e.mp3"
+      "sourceSentenceEn": "I need three bananas for the cake.",
+      "sourceSentenceCz": "Na dort potřebuju tři banány.",
+      "spokenEn": "I need three bananas for the cake.",
+      "spokenCz": "Na dort potřebuju tři banány.",
+      "en": "assets/vocabulary-en-sentences/en-us-aria-neural/0dc0e5a33d848ba67e4c.mp3",
+      "cz": "assets/vocabulary-en-sentences/cs-cz-vlasta-neural/9bc828136ac226cc8a75.mp3"
     },
     "ven-0213": {
       "uid": "ven-0213",
@@ -2452,12 +2452,12 @@
       "uid": "ven-0222",
       "sourceEn": "chair",
       "sourceCz": "židle",
-      "sourceSentenceEn": "The wooden chair stands beside the table.",
-      "sourceSentenceCz": "Dřevěná židle stojí vedle stolu.",
-      "spokenEn": "The wooden chair stands beside the table.",
-      "spokenCz": "Dřevěná židle stojí vedle stolu.",
-      "en": "assets/vocabulary-en-sentences/en-us-aria-neural/a3b840b1e6deebe99a5c.mp3",
-      "cz": "assets/vocabulary-en-sentences/cs-cz-vlasta-neural/76b583fbb8036f0a3c37.mp3"
+      "sourceSentenceEn": "Please bring a chair to our table.",
+      "sourceSentenceCz": "Přines nám prosím ke stolu židli.",
+      "spokenEn": "Please bring a chair to our table.",
+      "spokenCz": "Přines nám prosím ke stolu židli.",
+      "en": "assets/vocabulary-en-sentences/en-us-aria-neural/2b672e69591066bacf1c.mp3",
+      "cz": "assets/vocabulary-en-sentences/cs-cz-vlasta-neural/3acdf37bea69657b14ef.mp3"
     },
     "ven-0223": {
       "uid": "ven-0223",
@@ -2639,12 +2639,12 @@
       "uid": "ven-0239",
       "sourceEn": "leaf",
       "sourceCz": "list",
-      "sourceSentenceEn": "A red leaf falls from the tree.",
-      "sourceSentenceCz": "Ze stromu padá červený list.",
-      "spokenEn": "A red leaf falls from the tree.",
-      "spokenCz": "Ze stromu padá červený list.",
-      "en": "assets/vocabulary-en-sentences/en-us-aria-neural/be00d10aff612f0c33ff.mp3",
-      "cz": "assets/vocabulary-en-sentences/cs-cz-vlasta-neural/0c3aef9a0db9287eb5ae.mp3"
+      "sourceSentenceEn": "A red leaf falls from the tree and lands in the stream.",
+      "sourceSentenceCz": "Ze stromu spadne červený list a přistane v potoce.",
+      "spokenEn": "A red leaf falls from the tree and lands in the stream.",
+      "spokenCz": "Ze stromu spadne červený list a přistane v potoce.",
+      "en": "assets/vocabulary-en-sentences/en-us-aria-neural/c1caee69e62035e5274a.mp3",
+      "cz": "assets/vocabulary-en-sentences/cs-cz-vlasta-neural/cd868043edf9f7e60c80.mp3"
     },
     "ven-0240": {
       "uid": "ven-0240",
@@ -2782,23 +2782,23 @@
       "uid": "ven-0252",
       "sourceEn": "kite",
       "sourceCz": "drak",
-      "sourceSentenceEn": "The colorful kite flies high in the wind.",
-      "sourceSentenceCz": "Barevný drak létá vysoko ve větru.",
-      "spokenEn": "The colorful kite flies high in the wind.",
-      "spokenCz": "Barevný drak létá vysoko ve větru.",
-      "en": "assets/vocabulary-en-sentences/en-us-aria-neural/8da1811b16dbb4e37349.mp3",
-      "cz": "assets/vocabulary-en-sentences/cs-cz-vlasta-neural/521427328145566cd10d.mp3"
+      "sourceSentenceEn": "My red kite looks like a bird.",
+      "sourceSentenceCz": "Můj červený drak vypadá jako pták.",
+      "spokenEn": "My red kite looks like a bird.",
+      "spokenCz": "Můj červený drak vypadá jako pták.",
+      "en": "assets/vocabulary-en-sentences/en-us-aria-neural/c94ff739a16b645c51cd.mp3",
+      "cz": "assets/vocabulary-en-sentences/cs-cz-vlasta-neural/e80c61c3e19d22212aa2.mp3"
     },
     "ven-0253": {
       "uid": "ven-0253",
       "sourceEn": "lamp",
       "sourceCz": "lampa",
-      "sourceSentenceEn": "The lamp gives us light in the evening.",
-      "sourceSentenceCz": "Lampa nám večer svítí.",
-      "spokenEn": "The lamp gives us light in the evening.",
-      "spokenCz": "Lampa nám večer svítí.",
-      "en": "assets/vocabulary-en-sentences/en-us-aria-neural/ba29362a668400fc583c.mp3",
-      "cz": "assets/vocabulary-en-sentences/cs-cz-vlasta-neural/a106b44cf824569976f6.mp3"
+      "sourceSentenceEn": "I switch on the lamp beside my bed to finish my book.",
+      "sourceSentenceCz": "Rozsvítím lampičku u postele, abych mohl dočíst knihu.",
+      "spokenEn": "I switch on the lamp beside my bed to finish my book.",
+      "spokenCz": "Rozsvítím lampičku u postele, abych mohl dočíst knihu.",
+      "en": "assets/vocabulary-en-sentences/en-us-aria-neural/f1f00af0540984e0c0ec.mp3",
+      "cz": "assets/vocabulary-en-sentences/cs-cz-vlasta-neural/444a2bbf51568934c708.mp3"
     },
     "ven-0254": {
       "uid": "ven-0254",
@@ -3112,12 +3112,12 @@
       "uid": "ven-0282",
       "sourceEn": "bucket",
       "sourceCz": "vědro, kbelík",
-      "sourceSentenceEn": "The bucket is full of clean water.",
-      "sourceSentenceCz": "Kbelík je plný čisté vody.",
-      "spokenEn": "The bucket is full of clean water.",
-      "spokenCz": "Kbelík je plný čisté vody.",
-      "en": "assets/vocabulary-en-sentences/en-us-aria-neural/a8b12a0db906a728e837.mp3",
-      "cz": "assets/vocabulary-en-sentences/cs-cz-vlasta-neural/478510ba4bfc5364f7cc.mp3"
+      "sourceSentenceEn": "The bucket is full of clean water from the pump.",
+      "sourceSentenceCz": "Kbelík je plný čisté vody z pumpy.",
+      "spokenEn": "The bucket is full of clean water from the pump.",
+      "spokenCz": "Kbelík je plný čisté vody z pumpy.",
+      "en": "assets/vocabulary-en-sentences/en-us-aria-neural/f7bf0477dd14f0fa5785.mp3",
+      "cz": "assets/vocabulary-en-sentences/cs-cz-vlasta-neural/1e7c094832a631aa0a19.mp3"
     },
     "ven-0283": {
       "uid": "ven-0283",
@@ -3563,12 +3563,12 @@
       "uid": "ven-0323",
       "sourceEn": "dance",
       "sourceCz": "tancovat",
-      "sourceSentenceEn": "We dance at the party.",
-      "sourceSentenceCz": "Tancujeme na oslavě.",
-      "spokenEn": "We dance at the party.",
-      "spokenCz": "Tancujeme na oslavě.",
-      "en": "assets/vocabulary-en-sentences/en-us-aria-neural/85f0f0955c56a603d5e2.mp3",
-      "cz": "assets/vocabulary-en-sentences/cs-cz-vlasta-neural/0ac87cbab7227254d36f.mp3"
+      "sourceSentenceEn": "My parents dance at my birthday party.",
+      "sourceSentenceCz": "Moji rodiče tančí na mé narozeninové oslavě.",
+      "spokenEn": "My parents dance at my birthday party.",
+      "spokenCz": "Moji rodiče tančí na mé narozeninové oslavě.",
+      "en": "assets/vocabulary-en-sentences/en-us-aria-neural/fc00e2f83a15d9981285.mp3",
+      "cz": "assets/vocabulary-en-sentences/cs-cz-vlasta-neural/45f16773305b53bd7185.mp3"
     },
     "ven-0324": {
       "uid": "ven-0324",
@@ -3948,12 +3948,12 @@
       "uid": "ven-0358",
       "sourceEn": "listen",
       "sourceCz": "poslouchat",
-      "sourceSentenceEn": "Listen to the bird.",
-      "sourceSentenceCz": "Poslouchej ptáka.",
-      "spokenEn": "Listen to the bird.",
-      "spokenCz": "Poslouchej ptáka.",
-      "en": "assets/vocabulary-en-sentences/en-us-aria-neural/3e6cddc06e115a155b70.mp3",
-      "cz": "assets/vocabulary-en-sentences/cs-cz-vlasta-neural/81699263316344c9cefa.mp3"
+      "sourceSentenceEn": "Listen to the bird tapping on the tree.",
+      "sourceSentenceCz": "Poslouchej, jak pták ťuká do stromu.",
+      "spokenEn": "Listen to the bird tapping on the tree.",
+      "spokenCz": "Poslouchej, jak pták ťuká do stromu.",
+      "en": "assets/vocabulary-en-sentences/en-us-aria-neural/67a9c02f5cc1dc189758.mp3",
+      "cz": "assets/vocabulary-en-sentences/cs-cz-vlasta-neural/4648884ee0be53655f4c.mp3"
     },
     "ven-0359": {
       "uid": "ven-0359",
@@ -4740,12 +4740,12 @@
       "uid": "ven-0430",
       "sourceEn": "help",
       "sourceCz": "pomoci; pomáhat",
-      "sourceSentenceEn": "Can you help me?",
-      "sourceSentenceCz": "Můžeš mi pomoci?",
-      "spokenEn": "Can you help me?",
-      "spokenCz": "Můžeš mi pomoci?",
-      "en": "assets/vocabulary-en-sentences/en-us-aria-neural/be17daa7fe9a567f375f.mp3",
-      "cz": "assets/vocabulary-en-sentences/cs-cz-vlasta-neural/b3ecded8825921e56544.mp3"
+      "sourceSentenceEn": "Help me push this heavy box.",
+      "sourceSentenceCz": "Pomoz mi posunout tu těžkou krabici.",
+      "spokenEn": "Help me push this heavy box.",
+      "spokenCz": "Pomoz mi posunout tu těžkou krabici.",
+      "en": "assets/vocabulary-en-sentences/en-us-aria-neural/a5318ee12d21cd46266a.mp3",
+      "cz": "assets/vocabulary-en-sentences/cs-cz-vlasta-neural/b68dbdf44561760b7355.mp3"
     },
     "ven-0431": {
       "uid": "ven-0431",
@@ -4916,12 +4916,12 @@
       "uid": "ven-0446",
       "sourceEn": "nose",
       "sourceCz": "nos",
-      "sourceSentenceEn": "Touch your nose.",
-      "sourceSentenceCz": "Dotkni se nosu.",
-      "spokenEn": "Touch your nose.",
-      "spokenCz": "Dotkni se nosu.",
-      "en": "assets/vocabulary-en-sentences/en-us-aria-neural/38c720e6460e4589eafe.mp3",
-      "cz": "assets/vocabulary-en-sentences/cs-cz-vlasta-neural/a54e7ad19ffb10e946f9.mp3"
+      "sourceSentenceEn": "Close your eyes and try to touch your nose.",
+      "sourceSentenceCz": "Zavři oči a zkus se dotknout nosu.",
+      "spokenEn": "Close your eyes and try to touch your nose.",
+      "spokenCz": "Zavři oči a zkus se dotknout nosu.",
+      "en": "assets/vocabulary-en-sentences/en-us-aria-neural/2ce7366c75d0b9bd955f.mp3",
+      "cz": "assets/vocabulary-en-sentences/cs-cz-vlasta-neural/7952a54ff1293007a453.mp3"
     },
     "ven-0447": {
       "uid": "ven-0447",
@@ -4938,12 +4938,12 @@
       "uid": "ven-0448",
       "sourceEn": "neck",
       "sourceCz": "krk",
-      "sourceSentenceEn": "This is my neck.",
-      "sourceSentenceCz": "Tohle je můj krk.",
-      "spokenEn": "This is my neck.",
-      "spokenCz": "Tohle je můj krk.",
-      "en": "assets/vocabulary-en-sentences/en-us-aria-neural/41124259722176e651de.mp3",
-      "cz": "assets/vocabulary-en-sentences/cs-cz-vlasta-neural/b685271f7a0b78a31e41.mp3"
+      "sourceSentenceEn": "My scarf keeps my neck warm, but my ears are cold.",
+      "sourceSentenceCz": "Šála mi hřeje krk, ale uši mě zebou.",
+      "spokenEn": "My scarf keeps my neck warm, but my ears are cold.",
+      "spokenCz": "Šála mi hřeje krk, ale uši mě zebou.",
+      "en": "assets/vocabulary-en-sentences/en-us-aria-neural/ee62c6b1e9f96a74efac.mp3",
+      "cz": "assets/vocabulary-en-sentences/cs-cz-vlasta-neural/e57efed43fcab59e5eea.mp3"
     },
     "ven-0449": {
       "uid": "ven-0449",
@@ -4960,12 +4960,12 @@
       "uid": "ven-0450",
       "sourceEn": "hand",
       "sourceCz": "ruka",
-      "sourceSentenceEn": "I wash my hands.",
-      "sourceSentenceCz": "Myji si ruce.",
-      "spokenEn": "I wash my hands.",
-      "spokenCz": "Myji si ruce.",
-      "en": "assets/vocabulary-en-sentences/en-us-aria-neural/11277d3d843385a53af6.mp3",
-      "cz": "assets/vocabulary-en-sentences/cs-cz-vlasta-neural/1f292b8a21154ba44d67.mp3"
+      "sourceSentenceEn": "The parrot eats nuts from my hand.",
+      "sourceSentenceCz": "Papoušek mi zobe oříšky z ruky.",
+      "spokenEn": "The parrot eats nuts from my hand.",
+      "spokenCz": "Papoušek mi zobe oříšky z ruky.",
+      "en": "assets/vocabulary-en-sentences/en-us-aria-neural/75721918f39d20653ad6.mp3",
+      "cz": "assets/vocabulary-en-sentences/cs-cz-vlasta-neural/78ab707fe38f5d0df274.mp3"
     },
     "ven-0451": {
       "uid": "ven-0451",
@@ -5081,12 +5081,12 @@
       "uid": "ven-0461",
       "sourceEn": "sick",
       "sourceCz": "nemocný",
-      "sourceSentenceEn": "This tree is sick.",
-      "sourceSentenceCz": "Tento strom je nemocný.",
-      "spokenEn": "This tree is sick.",
-      "spokenCz": "Tento strom je nemocný.",
-      "en": "assets/vocabulary-en-sentences/en-us-aria-neural/948e02f95a3791aa7c18.mp3",
-      "cz": "assets/vocabulary-en-sentences/cs-cz-vlasta-neural/024f00192feb98ed49bf.mp3"
+      "sourceSentenceEn": "The tree is sick and losing its leaves in the middle of summer.",
+      "sourceSentenceCz": "Strom je nemocný a uprostřed léta mu opadává listí.",
+      "spokenEn": "The tree is sick and losing its leaves in the middle of summer.",
+      "spokenCz": "Strom je nemocný a uprostřed léta mu opadává listí.",
+      "en": "assets/vocabulary-en-sentences/en-us-aria-neural/b27c9cf6b592e92557be.mp3",
+      "cz": "assets/vocabulary-en-sentences/cs-cz-vlasta-neural/d27288e7b15fe4ca013c.mp3"
     },
     "ven-0462": {
       "uid": "ven-0462",
@@ -5103,12 +5103,12 @@
       "uid": "ven-0463",
       "sourceEn": "dinner",
       "sourceCz": "večeře",
-      "sourceSentenceEn": "Dinner is on the table.",
-      "sourceSentenceCz": "Večeře je na stole.",
-      "spokenEn": "Dinner is on the table.",
-      "spokenCz": "Večeře je na stole.",
-      "en": "assets/vocabulary-en-sentences/en-us-aria-neural/b2f92270a153a32b03c0.mp3",
-      "cz": "assets/vocabulary-en-sentences/cs-cz-vlasta-neural/d630be3b2966e99af512.mp3"
+      "sourceSentenceEn": "Dinner is on the table, but the salad is still in the fridge.",
+      "sourceSentenceCz": "Večeře už je na stole, ale salát je ještě v lednici.",
+      "spokenEn": "Dinner is on the table, but the salad is still in the fridge.",
+      "spokenCz": "Večeře už je na stole, ale salát je ještě v lednici.",
+      "en": "assets/vocabulary-en-sentences/en-us-aria-neural/24dfe47d6bb4dca2952f.mp3",
+      "cz": "assets/vocabulary-en-sentences/cs-cz-vlasta-neural/a7d25964b93105a1937d.mp3"
     },
     "ven-0464": {
       "uid": "ven-0464",
@@ -5125,12 +5125,12 @@
       "uid": "ven-0465",
       "sourceEn": "morning",
       "sourceCz": "ráno",
-      "sourceSentenceEn": "It is morning.",
-      "sourceSentenceCz": "Je ráno.",
-      "spokenEn": "It is morning.",
-      "spokenCz": "Je ráno.",
-      "en": "assets/vocabulary-en-sentences/en-us-aria-neural/47f42ed2f9577bb6afe7.mp3",
-      "cz": "assets/vocabulary-en-sentences/cs-cz-vlasta-neural/ad09cfaaffe55daac8bc.mp3"
+      "sourceSentenceEn": "My father drinks coffee every morning.",
+      "sourceSentenceCz": "Táta pije kávu každé ráno.",
+      "spokenEn": "My father drinks coffee every morning.",
+      "spokenCz": "Táta pije kávu každé ráno.",
+      "en": "assets/vocabulary-en-sentences/en-us-aria-neural/251eb5243a3e6bca90fa.mp3",
+      "cz": "assets/vocabulary-en-sentences/cs-cz-vlasta-neural/5594dbc2a0dbc315887c.mp3"
     },
     "ven-0466": {
       "uid": "ven-0466",
@@ -5147,12 +5147,12 @@
       "uid": "ven-0467",
       "sourceEn": "race",
       "sourceCz": "závod",
-      "sourceSentenceEn": "We run in a race.",
-      "sourceSentenceCz": "Běžíme závod.",
-      "spokenEn": "We run in a race.",
-      "spokenCz": "Běžíme závod.",
-      "en": "assets/vocabulary-en-sentences/en-us-aria-neural/45df87e39de5b1352b50.mp3",
-      "cz": "assets/vocabulary-en-sentences/cs-cz-vlasta-neural/d5d0fa71f1704290eac2.mp3"
+      "sourceSentenceEn": "The bike race starts at ten.",
+      "sourceSentenceCz": "Závod na kolech začíná v deset.",
+      "spokenEn": "The bike race starts at ten.",
+      "spokenCz": "Závod na kolech začíná v deset.",
+      "en": "assets/vocabulary-en-sentences/en-us-aria-neural/414da3d345cdc2f3edd4.mp3",
+      "cz": "assets/vocabulary-en-sentences/cs-cz-vlasta-neural/27e194dec16e15967283.mp3"
     },
     "ven-0468": {
       "uid": "ven-0468",
@@ -5246,12 +5246,12 @@
       "uid": "ven-0476",
       "sourceEn": "practise",
       "sourceCz": "trénovat; procvičovat",
-      "sourceSentenceEn": "I practise with my friends.",
-      "sourceSentenceCz": "Trénuji s kamarády.",
-      "spokenEn": "I practise with my friends.",
-      "spokenCz": "Trénuji s kamarády.",
-      "en": "assets/vocabulary-en-sentences/en-us-aria-neural/0f58e19175fcb8b85a0c.mp3",
-      "cz": "assets/vocabulary-en-sentences/cs-cz-vlasta-neural/0c18ff531516bbff4a69.mp3"
+      "sourceSentenceEn": "I practise skating with my friends on Saturday mornings.",
+      "sourceSentenceCz": "V sobotu dopoledne chodím s kamarády trénovat bruslení.",
+      "spokenEn": "I practise skating with my friends on Saturday mornings.",
+      "spokenCz": "V sobotu dopoledne chodím s kamarády trénovat bruslení.",
+      "en": "assets/vocabulary-en-sentences/en-us-aria-neural/026621c9f1faf8c9a182.mp3",
+      "cz": "assets/vocabulary-en-sentences/cs-cz-vlasta-neural/9158c502ba98dd0185a3.mp3"
     },
     "ven-0477": {
       "uid": "ven-0477",
@@ -5323,12 +5323,12 @@
       "uid": "ven-0483",
       "sourceEn": "lead",
       "sourceCz": "vést",
-      "sourceSentenceEn": "We lead the team.",
-      "sourceSentenceCz": "Vedeme tým.",
-      "spokenEn": "We lead the team.",
-      "spokenCz": "Vedeme tým.",
-      "en": "assets/vocabulary-en-sentences/en-us-aria-neural/dadbd9809b594987d894.mp3",
-      "cz": "assets/vocabulary-en-sentences/cs-cz-vlasta-neural/c2654a918cc854646f2b.mp3"
+      "sourceSentenceEn": "Our dog leads the sheep through the gate.",
+      "sourceSentenceCz": "Náš pes vede ovce brankou.",
+      "spokenEn": "Our dog leads the sheep through the gate.",
+      "spokenCz": "Náš pes vede ovce brankou.",
+      "en": "assets/vocabulary-en-sentences/en-us-aria-neural/5cd18eeb44f5334ddaa4.mp3",
+      "cz": "assets/vocabulary-en-sentences/cs-cz-vlasta-neural/71693a3f5953be73db2e.mp3"
     },
     "ven-0484": {
       "uid": "ven-0484",
@@ -5631,12 +5631,12 @@
       "uid": "ven-0511",
       "sourceEn": "look for",
       "sourceCz": "hledat",
-      "sourceSentenceEn": "We look for the boat.",
-      "sourceSentenceCz": "Hledáme loď.",
-      "spokenEn": "We look for the boat.",
-      "spokenCz": "Hledáme loď.",
-      "en": "assets/vocabulary-en-sentences/en-us-aria-neural/9132c19de2ad0550c346.mp3",
-      "cz": "assets/vocabulary-en-sentences/cs-cz-vlasta-neural/1dcbb48490f856627267.mp3"
+      "sourceSentenceEn": "Look for your shoes under the bed.",
+      "sourceSentenceCz": "Hledej boty pod postelí.",
+      "spokenEn": "Look for your shoes under the bed.",
+      "spokenCz": "Hledej boty pod postelí.",
+      "en": "assets/vocabulary-en-sentences/en-us-aria-neural/4faddc77aa3c2b2fb5ce.mp3",
+      "cz": "assets/vocabulary-en-sentences/cs-cz-vlasta-neural/0f71b4d7f5cd6bd14937.mp3"
     },
     "ven-0512": {
       "uid": "ven-0512",
@@ -5719,12 +5719,12 @@
       "uid": "ven-0519",
       "sourceEn": "too",
       "sourceCz": "příliš",
-      "sourceSentenceEn": "There is too much candy.",
-      "sourceSentenceCz": "Je tu příliš mnoho sladkostí.",
-      "spokenEn": "There is too much candy.",
-      "spokenCz": "Je tu příliš mnoho sladkostí.",
-      "en": "assets/vocabulary-en-sentences/en-us-aria-neural/dac6178267f7d1246923.mp3",
-      "cz": "assets/vocabulary-en-sentences/cs-cz-vlasta-neural/8facec8775a9fa24da7e.mp3"
+      "sourceSentenceEn": "The stream is too wide to jump across.",
+      "sourceSentenceCz": "Potok je na přeskočení moc široký.",
+      "spokenEn": "The stream is too wide to jump across.",
+      "spokenCz": "Potok je na přeskočení moc široký.",
+      "en": "assets/vocabulary-en-sentences/en-us-aria-neural/8018209304183bd22830.mp3",
+      "cz": "assets/vocabulary-en-sentences/cs-cz-vlasta-neural/7bbc915d265089533842.mp3"
     },
     "ven-0520": {
       "uid": "ven-0520",
@@ -5758,11 +5758,220 @@
       "spokenCz": "Rybářská chatrč je u jezera.",
       "en": "assets/vocabulary-en-sentences/en-us-aria-neural/970b3d18b5bce62cfacd.mp3",
       "cz": "assets/vocabulary-en-sentences/cs-cz-vlasta-neural/eb7cb7cc0039f8d9c82b.mp3"
+    },
+    "ven-0523": {
+      "uid": "ven-0523",
+      "sourceEn": "sit",
+      "sourceCz": "sedět",
+      "sourceSentenceEn": "Sit beside your sister on the bus.",
+      "sourceSentenceCz": "Sedni si v autobuse vedle sestry.",
+      "spokenEn": "Sit beside your sister on the bus.",
+      "spokenCz": "Sedni si v autobuse vedle sestry.",
+      "en": "assets/vocabulary-en-sentences/en-us-aria-neural/29069fc0f6e245c9d9cd.mp3",
+      "cz": "assets/vocabulary-en-sentences/cs-cz-vlasta-neural/749058c65b0f115a1acc.mp3"
+    },
+    "ven-0524": {
+      "uid": "ven-0524",
+      "sourceEn": "after",
+      "sourceCz": "po",
+      "sourceSentenceEn": "After lunch, we walk to the lake.",
+      "sourceSentenceCz": "Po obědě jdeme pěšky k jezeru.",
+      "spokenEn": "After lunch, we walk to the lake.",
+      "spokenCz": "Po obědě jdeme pěšky k jezeru.",
+      "en": "assets/vocabulary-en-sentences/en-us-aria-neural/93a449eafe26bb3324f5.mp3",
+      "cz": "assets/vocabulary-en-sentences/cs-cz-vlasta-neural/d7846b253af4f62ed38c.mp3"
+    },
+    "ven-0525": {
+      "uid": "ven-0525",
+      "sourceEn": "put",
+      "sourceCz": "položit, dát někam",
+      "sourceSentenceEn": "Put the key in your bag.",
+      "sourceSentenceCz": "Dej si klíč do tašky.",
+      "spokenEn": "Put the key in your bag.",
+      "spokenCz": "Dej si klíč do tašky.",
+      "en": "assets/vocabulary-en-sentences/en-us-aria-neural/632c4f1e741bd155923e.mp3",
+      "cz": "assets/vocabulary-en-sentences/cs-cz-vlasta-neural/61033683cdbba48d8736.mp3"
+    },
+    "ven-0526": {
+      "uid": "ven-0526",
+      "sourceEn": "stand",
+      "sourceCz": "stát",
+      "sourceSentenceEn": "Two horses stand by the gate.",
+      "sourceSentenceCz": "U brány stojí dva koně.",
+      "spokenEn": "Two horses stand by the gate.",
+      "spokenCz": "U brány stojí dva koně.",
+      "en": "assets/vocabulary-en-sentences/en-us-aria-neural/c2f01c90bf076c65f928.mp3",
+      "cz": "assets/vocabulary-en-sentences/cs-cz-vlasta-neural/9fdea922078f1e53c659.mp3"
+    },
+    "ven-0527": {
+      "uid": "ven-0527",
+      "sourceEn": "child",
+      "sourceCz": "dítě",
+      "sourceSentenceEn": "The child gives the rabbit a carrot.",
+      "sourceSentenceCz": "Dítě dává králíkovi mrkev.",
+      "spokenEn": "The child gives the rabbit a carrot.",
+      "spokenCz": "Dítě dává králíkovi mrkev.",
+      "en": "assets/vocabulary-en-sentences/en-us-aria-neural/c5653f257dfb770f476c.mp3",
+      "cz": "assets/vocabulary-en-sentences/cs-cz-vlasta-neural/679fc44f7d211adc420d.mp3"
+    },
+    "ven-0528": {
+      "uid": "ven-0528",
+      "sourceEn": "buy",
+      "sourceCz": "koupit",
+      "sourceSentenceEn": "We buy bread and milk for breakfast.",
+      "sourceSentenceCz": "K snídani kupujeme chleba a mléko.",
+      "spokenEn": "We buy bread and milk for breakfast.",
+      "spokenCz": "K snídani kupujeme chleba a mléko.",
+      "en": "assets/vocabulary-en-sentences/en-us-aria-neural/b952eba9cc7aca39b0de.mp3",
+      "cz": "assets/vocabulary-en-sentences/cs-cz-vlasta-neural/02a3ab6bceff9f0357f2.mp3"
+    },
+    "ven-0529": {
+      "uid": "ven-0529",
+      "sourceEn": "rain",
+      "sourceCz": "déšť",
+      "sourceSentenceEn": "From my bed, I can hear the rain.",
+      "sourceSentenceCz": "Z postele slyším déšť.",
+      "spokenEn": "From my bed, I can hear the rain.",
+      "spokenCz": "Z postele slyším déšť.",
+      "en": "assets/vocabulary-en-sentences/en-us-aria-neural/0028aa29578683c2d401.mp3",
+      "cz": "assets/vocabulary-en-sentences/cs-cz-vlasta-neural/6dc00b54690fc4ef49dd.mp3"
+    },
+    "ven-0530": {
+      "uid": "ven-0530",
+      "sourceEn": "basket",
+      "sourceCz": "košík",
+      "sourceSentenceEn": "Our cat sleeps in the basket.",
+      "sourceSentenceCz": "Naše kočka spí v košíku.",
+      "spokenEn": "Our cat sleeps in the basket.",
+      "spokenCz": "Naše kočka spí v košíku.",
+      "en": "assets/vocabulary-en-sentences/en-us-aria-neural/1ac32162c1a260757861.mp3",
+      "cz": "assets/vocabulary-en-sentences/cs-cz-vlasta-neural/1770ad61606304332416.mp3"
+    },
+    "ven-0531": {
+      "uid": "ven-0531",
+      "sourceEn": "tea",
+      "sourceCz": "čaj",
+      "sourceSentenceEn": "Would you like tea with your cake?",
+      "sourceSentenceCz": "Dáš si k dortu čaj?",
+      "spokenEn": "Would you like tea with your cake?",
+      "spokenCz": "Dáš si k dortu čaj?",
+      "en": "assets/vocabulary-en-sentences/en-us-aria-neural/76c9903edd6cc4596fa6.mp3",
+      "cz": "assets/vocabulary-en-sentences/cs-cz-vlasta-neural/700176b22e6659db38c3.mp3"
+    },
+    "ven-0532": {
+      "uid": "ven-0532",
+      "sourceEn": "road",
+      "sourceCz": "silnice",
+      "sourceSentenceEn": "A fox runs across the road.",
+      "sourceSentenceCz": "Liška běží přes silnici.",
+      "spokenEn": "A fox runs across the road.",
+      "spokenCz": "Liška běží přes silnici.",
+      "en": "assets/vocabulary-en-sentences/en-us-aria-neural/383621aa2737a6d45523.mp3",
+      "cz": "assets/vocabulary-en-sentences/cs-cz-vlasta-neural/2fb21ac04a124f6bdcec.mp3"
+    },
+    "ven-0533": {
+      "uid": "ven-0533",
+      "sourceEn": "see",
+      "sourceCz": "vidět",
+      "sourceSentenceEn": "Can you see the moon from your window?",
+      "sourceSentenceCz": "Vidíš z okna měsíc?",
+      "spokenEn": "Can you see the moon from your window?",
+      "spokenCz": "Vidíš z okna měsíc?",
+      "en": "assets/vocabulary-en-sentences/en-us-aria-neural/8f091177779258ab25a7.mp3",
+      "cz": "assets/vocabulary-en-sentences/cs-cz-vlasta-neural/250aafd36c1e1059569c.mp3"
+    },
+    "ven-0534": {
+      "uid": "ven-0534",
+      "sourceEn": "evening",
+      "sourceCz": "večer",
+      "sourceSentenceEn": "We play in the park every evening.",
+      "sourceSentenceCz": "Každý večer si hrajeme v parku.",
+      "spokenEn": "We play in the park every evening.",
+      "spokenCz": "Každý večer si hrajeme v parku.",
+      "en": "assets/vocabulary-en-sentences/en-us-aria-neural/c27feefbe87ab234f6a7.mp3",
+      "cz": "assets/vocabulary-en-sentences/cs-cz-vlasta-neural/2ddcb1ef3c1582420ce5.mp3"
+    },
+    "ven-0535": {
+      "uid": "ven-0535",
+      "sourceEn": "soup",
+      "sourceCz": "polévka",
+      "sourceSentenceEn": "Try the soup with a little cheese.",
+      "sourceSentenceCz": "Zkus tu polévku s trochou sýra.",
+      "spokenEn": "Try the soup with a little cheese.",
+      "spokenCz": "Zkus tu polévku s trochou sýra.",
+      "en": "assets/vocabulary-en-sentences/en-us-aria-neural/f17503699580ebd13859.mp3",
+      "cz": "assets/vocabulary-en-sentences/cs-cz-vlasta-neural/bc8acb5251b030c630b0.mp3"
+    },
+    "ven-0536": {
+      "uid": "ven-0536",
+      "sourceEn": "shop",
+      "sourceCz": "obchod",
+      "sourceSentenceEn": "The toy shop is near our school.",
+      "sourceSentenceCz": "Obchod s hračkami je blízko naší školy.",
+      "spokenEn": "The toy shop is near our school.",
+      "spokenCz": "Obchod s hračkami je blízko naší školy.",
+      "en": "assets/vocabulary-en-sentences/en-us-aria-neural/b7ea89fb9ef6c002bd1d.mp3",
+      "cz": "assets/vocabulary-en-sentences/cs-cz-vlasta-neural/67a8ee40ef38d4720f89.mp3"
+    },
+    "ven-0537": {
+      "uid": "ven-0537",
+      "sourceEn": "wind",
+      "sourceCz": "vítr",
+      "sourceSentenceEn": "The wind pushes our boat across the lake.",
+      "sourceSentenceCz": "Vítr žene naši loďku přes jezero.",
+      "spokenEn": "The wind pushes our boat across the lake.",
+      "spokenCz": "Vítr žene naši loďku přes jezero.",
+      "en": "assets/vocabulary-en-sentences/en-us-aria-neural/408840abb0e7da570b78.mp3",
+      "cz": "assets/vocabulary-en-sentences/cs-cz-vlasta-neural/a7a8f2f0834241a9a148.mp3"
+    },
+    "ven-0538": {
+      "uid": "ven-0538",
+      "sourceEn": "swim",
+      "sourceCz": "plavat",
+      "sourceSentenceEn": "I swim with my brother every morning.",
+      "sourceSentenceCz": "Každé ráno plavu s bratrem.",
+      "spokenEn": "I swim with my brother every morning.",
+      "spokenCz": "Každé ráno plavu s bratrem.",
+      "en": "assets/vocabulary-en-sentences/en-us-aria-neural/a60ddf6b7b7e41766dd1.mp3",
+      "cz": "assets/vocabulary-en-sentences/cs-cz-vlasta-neural/18b16b2c99b5fc461702.mp3"
+    },
+    "ven-0539": {
+      "uid": "ven-0539",
+      "sourceEn": "fly",
+      "sourceCz": "letět, létat",
+      "sourceSentenceEn": "Parrots fly from tree to tree.",
+      "sourceSentenceCz": "Papoušci létají ze stromu na strom.",
+      "spokenEn": "Parrots fly from tree to tree.",
+      "spokenCz": "Papoušci létají ze stromu na strom.",
+      "en": "assets/vocabulary-en-sentences/en-us-aria-neural/8a20639844a3d8365f8f.mp3",
+      "cz": "assets/vocabulary-en-sentences/cs-cz-vlasta-neural/c68bb38699e42314467c.mp3"
+    },
+    "ven-0540": {
+      "uid": "ven-0540",
+      "sourceEn": "grass",
+      "sourceCz": "tráva",
+      "sourceSentenceEn": "The sheep eat grass in the field.",
+      "sourceSentenceCz": "Ovce na poli žerou trávu.",
+      "spokenEn": "The sheep eat grass in the field.",
+      "spokenCz": "Ovce na poli žerou trávu.",
+      "en": "assets/vocabulary-en-sentences/en-us-aria-neural/5a1898e29c291332fa8d.mp3",
+      "cz": "assets/vocabulary-en-sentences/cs-cz-vlasta-neural/7039123afb93d3d7f878.mp3"
+    },
+    "ven-0541": {
+      "uid": "ven-0541",
+      "sourceEn": "share",
+      "sourceCz": "podělit se",
+      "sourceSentenceEn": "I share my popcorn with my sister.",
+      "sourceSentenceCz": "O popcorn se dělím se sestrou.",
+      "spokenEn": "I share my popcorn with my sister.",
+      "spokenCz": "O popcorn se dělím se sestrou.",
+      "en": "assets/vocabulary-en-sentences/en-us-aria-neural/ff79dbe65f7c3146f8f1.mp3",
+      "cz": "assets/vocabulary-en-sentences/cs-cz-vlasta-neural/08ef89f1371a0772d60f.mp3"
     }
   },
   "stats": {
-    "itemCount": 522,
-    "audioReferences": 1044,
-    "uniqueAssets": 1044
+    "itemCount": 541,
+    "audioReferences": 1082,
+    "uniqueAssets": 1082
   }
 }

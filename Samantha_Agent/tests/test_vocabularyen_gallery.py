@@ -29,11 +29,11 @@ class VocabularyGalleryTests(unittest.TestCase):
         inactive={item['uid'] for item in self.manifest['items'] if not item['active']}
         self.assertEqual(inactive,{'ven-0195','ven-0197','ven-0199','ven-0200','ven-0203',
                                    'ven-0257','ven-0258','ven-0259','ven-0260','ven-0271'})
-        self.assertEqual(len(self.manifest['items']),522)
+        self.assertEqual(len(self.manifest['items']),541)
         active=[item for item in self.manifest['items'] if item['active']]
-        self.assertEqual(len(active),512)
+        self.assertEqual(len(active),531)
         self.assertEqual(sum(i['teachingType']=='interaction' for i in active),20)
-        self.assertEqual(sum(i['teachingType']=='word' for i in active),492)
+        self.assertEqual(sum(i['teachingType']=='word' for i in active),511)
         self.assertFalse(any(i['teachingType']=='idiom' for i in active))
         for entry in self.catalog['entries']:
             if entry.get('retirementReason')=='regular_plural_duplicate':
@@ -93,7 +93,7 @@ class VocabularyGalleryTests(unittest.TestCase):
             self.assertEqual(module.apply(path),['second'])
             updated=module.load_rows(path)
             self.assertIn('Benji',next(row for row in updated if row['Order']=='385')['WS'])
-            self.assertEqual([row['WS'] for row in updated if int(row['Order'])>425],['']*97)
+            self.assertEqual([row['WS'] for row in updated if int(row['Order'])>425],['']*116)
             self.assertEqual(module.apply(path),[])
 
     def test_body_batch_adds_ten_complete_nouns_and_keeps_original_body_cards(self):
@@ -129,8 +129,8 @@ class VocabularyGalleryTests(unittest.TestCase):
 
     def test_catalog_covers_all_meanings_once_and_does_not_merge_orange(self):
         entries=sync.resolve_catalog_rows(self.rows,self.catalog)
-        self.assertEqual(len(entries),522)
-        self.assertEqual(len({e['uid'] for e in entries}),522)
+        self.assertEqual(len(entries),541)
+        self.assertEqual(len({e['uid'] for e in entries}),541)
         self.assertEqual(len(self.catalog['groups']),18)
         orange=[entry for row,entry in zip(self.rows,entries) if row['EN']=='orange']
         self.assertEqual([e['uid'] for e in orange],['ven-0118','ven-0170'])
@@ -194,11 +194,13 @@ class VocabularyGalleryTests(unittest.TestCase):
                 self.assertEqual((record['sourceEn'],record['sourceCz']),(item['en'],item['cz']))
         yard=next(i for i in self.manifest['items'] if i['uid']=='ven-0300')
         self.assertEqual(yard['image'],'assets/vocabulary-en/courtyard.webp')
-        self.assertEqual(self.manifest['stats']['uniqueImageFiles'],472)
+        see=next(i for i in self.manifest['items'] if i['uid']=='ven-0533')
+        self.assertEqual(see['image'],'assets/vocabulary-en/see-verb.webp')
+        self.assertEqual(self.manifest['stats']['uniqueImageFiles'],491)
 
     def test_every_sentence_and_translation_stays_with_its_source_meaning(self):
         source={(row['EN'],row['CZ']):row for row in self.rows}
-        self.assertEqual(len(self.manifest['items']),522)
+        self.assertEqual(len(self.manifest['items']),541)
         for item in self.manifest['items']:
             with self.subTest(uid=item['uid']):
                 row=source[(item['en'],item['cz'])]
@@ -296,7 +298,7 @@ class SentencePictureTests(unittest.TestCase):
         self.assertEqual(expected,self.export)
         active={i['uid'] for i in self.data['items'] if i.get('active',True)}
         self.assertEqual(set(expected['entries']),active)
-        self.assertEqual(len(active),512)
+        self.assertEqual(len(active),531)
         self.assertTrue(all(1<=len(r['concepts'])<=5 for r in expected['entries'].values()))
         self.assertEqual(max(len(r['concepts']) for r in expected['entries'].values()),5)
         items={i['uid']:i for i in self.data['items']};seen=set()
@@ -313,18 +315,19 @@ class SentencePictureTests(unittest.TestCase):
         source=copy.deepcopy(self.source);source['entries'].pop('ven-0020')
         with self.assertRaises(ValueError):self.builder.build(source,self.data)
 
-    def test_original_twenty_reviewed_pilot_records_are_unchanged(self):
+    def test_unedited_pilot_records_are_unchanged(self):
         import hashlib
         pilot=['ven-0020','ven-0027','ven-0211','ven-0384','ven-0117','ven-0074','ven-0111',
                'ven-0233','ven-0224','ven-0008','ven-0222','ven-0226','ven-0207','ven-0208',
                'ven-0217','ven-0234','ven-0450','ven-0477','ven-0262','ven-0430']
-        records={uid:self.source['entries'][uid] for uid in pilot}
+        approved_changes={'ven-0222','ven-0208','ven-0450','ven-0430','ven-0224'}
+        records={uid:self.source['entries'][uid] for uid in pilot if uid not in approved_changes}
         raw=json.dumps(records,sort_keys=True,ensure_ascii=False,separators=(',',':')).encode()
-        self.assertEqual(hashlib.sha256(raw).hexdigest(),'25b2b80939f53f521316f31ff64509b978abba46b1be0adf2c04f143dc62bc12')
+        self.assertEqual(hashlib.sha256(raw).hexdigest(),'231d09042e2bdf9837b9adac3c3b7d27ba8f1ab87d55563cdfaec1ae0d4aaf8a')
 
     def test_full_review_keeps_homographs_grammatical_roles_and_fixed_expressions(self):
         cases={
-            1:({30},{426}),35:({44},{428,429}),116:({30,118},{170,426}),
+            1:({30},{426}),35:({17},{44,428,429}),116:({30,118},{170,426}),
             170:({170},{118}),192:({118},{170}),243:({519},{204}),
             277:({431},{119}),300:({431},{119}),433:({433},{144,432}),
             447:({376},{439}),413:({436},{332}),434:({434,430},{159,58}),
@@ -370,7 +373,7 @@ class SentencePictureTests(unittest.TestCase):
         self.assertIn(('ven-0477','sleeping'),[(r['uid'],r['text']) for r in records['ven-0226']['concepts']])
         self.assertIn(('ven-0376','opens'),[(r['uid'],r['text']) for r in records['ven-0234']['concepts']])
         self.assertNotIn('ven-0439',[r['uid'] for r in records['ven-0234']['concepts']])
-        self.assertEqual([r['uid'] for r in records['ven-0430']['concepts']],['ven-0430'])
+        self.assertEqual([r['uid'] for r in records['ven-0430']['concepts']],['ven-0430','ven-0287','ven-0344','ven-0012'])
         self.assertNotIn('ven-0058',[r['uid'] for r in records['ven-0430']['concepts']])
         self.assertNotIn('ven-0097',[r['uid'] for r in records['ven-0027']['concepts']])
         self.assertNotIn('ven-0081',[r['uid'] for r in records['ven-0207']['concepts']])

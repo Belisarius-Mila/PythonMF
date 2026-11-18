@@ -128,7 +128,7 @@ class VocabularyEnAudioLibraryTests(unittest.TestCase):
             )
         )
 
-        self.assertEqual(verified, {"items": 522, "references": 1044, "assets": 1019})
+        self.assertEqual(verified, {"items": 541, "references": 1082, "assets": 1057})
         self.assertEqual(manifest["voices"]["en"]["label"], "Aria")
         self.assertEqual(manifest["voices"]["cz"]["label"], "Vlasta")
 
@@ -136,7 +136,7 @@ class VocabularyEnAudioLibraryTests(unittest.TestCase):
 class VocabularyEnSentenceAudioTests(unittest.TestCase):
     def test_production_sentence_library_covers_all_current_sentence_pairs(self):
         result = sentence_builder.audit()
-        self.assertEqual(result, dict(itemCount=522, audioReferences=1044, uniqueAssets=1044,
+        self.assertEqual(result, dict(itemCount=541, audioReferences=1082, uniqueAssets=1082,
                                       missing=0, manifest_matches=True, complete=True))
 
     def fixture(self, root):
