@@ -1,6 +1,6 @@
 # Rodinný kalendář
 
-Aktuální stav 17.11.: jediný původní test doručen přes RCS, přesná shoda ověřená; p+n a následná aktivace jsou schválené. Finální provozní výsledek je pouze v soukromém completion.json.
+Aktuální stav 18. 11.: SMS/RCS nasazené a aktivní. Test doručen, první automatický pokus zastavený před odesláním. Příčina čeká na čtecí diagnostiku podle kanonického handoffu.
 
 ## 2026-11-17 22:06 CET — Soukromé SMS v den rodinné události, vývoj bez aktivace
 

@@ -1,26 +1,20 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
-## 2026-11-17 22:28 CET — Doručený původní test a schválené zapojení
+## 2026-11-18 08:51 CET — Aktivní SMS a otevřená kontrola prvního běhu
 
-Hotovo: Jediný schválený test byl po lokálním commitu odeslán a doručen.
-Zprávy jej převedly na RCS; uživatel potvrdil doručení. Ověření původního
-nového řádku nyní prokazuje plný kontakt, přesný dekódovaný text a delivered.
-Nevznikl druhý pokus. Automatické pravidlo je před nasazením stále vypnuté.
-Rozhodnutí: Míla výslovně schválil p+n a následné zapojení automatických
-upozornění témuž soukromému kontaktu od09:00 v den narozenin/svátku;
-hodinové dohnání jen tentýž den. Mac může zprávu odeslat jako SMS nebo RCS.
-Další krok: Dokončit kontrolu a commit opravy, schválené p+n registrovanou
-cestou a teprve po potvrzeném nasazení zapnout přesný soukromý policy.
-Navrhované další kroky: Ověřit první přirozený hodinový běh a stav v Cockpitu.
-Technický důkaz:118 cílených kontrol PASS. Chybějící import json v agentovém
-obalu opraven; syntetické testy nyní skutečně volají registrované FunctionTool
-status/preview/control, včetně verify a chybové větve. Foundation dekóduje
-vlastní attributedBody bez aktivace aplikace; nečitelný text, jiný příjemce,
-iMessage a více přesných shod dál zůstávají unknown. Ověření původního testu
-má transport_called=false, delivered1/unknown0/attention0; enabled=false.
-Soukromé důkazy, finální head/brána a následná aktivace budou v
-family_calendar/sms_development_20261117/completion.json. Při nejistotě žádný
-nový send. Odeslání přes vlastněný hodinový launchd kontext ještě nebylo
-fyzicky potvrzené; test proběhl v terminálovém běhovém prostředí.
+Hotovo: P+n obou commitů skončilo potvrzeným pushem a nasazením `d8d6df48`.
+Pravidlo od 9:00 je aktivní v Cockpitu. Jediný schválený test byl doručen přes
+RCS a při ověření se znovu neposílal.
+Rozhodnutí: Platí schválené upozorňování v den události s hodinovým dohnáním
+ještě tentýž den.
+Další krok: Jen čtecí diagnostika původního automatického pokusu z 17. 11.
+ve 23:00. Evidence uvádí `not_sent` po kontrole před odesláním, příčina dosud
+neurčena. Nevyvolávat ruční odeslání ani přehrání včerejší události.
+Navrhované další kroky: Po zjištění příčiny ověřit přirozený hodinový běh.
+Technický důkaz: P+n `925ae85e8e6d0729f0aa3eb039253b69`, brána 1440 testů
+převzata z účtenky, živý kód `e68af4b860efb66f`. Při dnešní čtecí kontrole
+byl zaznamenán jeden doručený test a jeden neodeslaný automatický pokus.
+Podrobnosti k nasazení a aktivaci jsou v soukromé účtence
+`family_calendar/sms_development_20261117/completion.json`.
 <!-- SAMANTHA_CURRENT_STATUS_END -->
 
 ## 2026-11-16 12:27 CET — Hodinové kontroly připravené místně
@@ -712,3 +706,20 @@ Soukromé důkazy, finální head/brána a následná aktivace budou v
 family_calendar/sms_development_20261117/completion.json. Při nejistotě žádný
 nový send. Odeslání přes vlastněný hodinový launchd kontext ještě nebylo
 fyzicky potvrzené; test proběhl v terminálovém běhovém prostředí.
+
+## 2026-11-18 08:51 CET — Aktivní SMS a otevřená kontrola prvního běhu
+
+Hotovo: P+n obou commitů skončilo potvrzeným pushem a nasazením `d8d6df48`.
+Pravidlo od 9:00 je aktivní v Cockpitu. Jediný schválený test byl doručen přes
+RCS a při ověření se znovu neposílal.
+Rozhodnutí: Platí schválené upozorňování v den události s hodinovým dohnáním
+ještě tentýž den.
+Další krok: Jen čtecí diagnostika původního automatického pokusu z 17. 11.
+ve 23:00. Evidence uvádí `not_sent` po kontrole před odesláním, příčina dosud
+neurčena. Nevyvolávat ruční odeslání ani přehrání včerejší události.
+Navrhované další kroky: Po zjištění příčiny ověřit přirozený hodinový běh.
+Technický důkaz: P+n `925ae85e8e6d0729f0aa3eb039253b69`, brána 1440 testů
+převzata z účtenky, živý kód `e68af4b860efb66f`. Při dnešní čtecí kontrole
+byl zaznamenán jeden doručený test a jeden neodeslaný automatický pokus.
+Podrobnosti k nasazení a aktivaci jsou v soukromé účtence
+`family_calendar/sms_development_20261117/completion.json`.
