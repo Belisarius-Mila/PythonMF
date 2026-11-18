@@ -134,6 +134,7 @@ class SharedChat:
                 'draft': draft, 'messages': messages,
                 'busy': bool(last and last['status'] in ('pending', 'delivery_unknown')),
                 'library': {k: v for k, v in (room.get('library') or {}).items() if k != 'model_context'},
+                'library_save': dict(room.get('library_save') or {}),
                 'submission': {k: last[k] for k in ('client_message_id', 'status')} if last else None,
                 'pair_code': pair.get('code', '') if client['host'] and pair.get('expires_at', 0) > self.clock() else '',
                 'pair_expires_at': pair.get('expires_at', 0) if client['host'] else 0}
@@ -150,6 +151,9 @@ class SharedChat:
             'library_search': {'query', 'expected_library_revision'},
             'library_open': {'item_id', 'expected_library_revision'},
             'library_visit_state': {'item_id', 'visit_state', 'expected_state', 'expected_library_revision'},
+            'library_save_prepare': {'url', 'category', 'text', 'title', 'visit_state', 'expected_save_id'},
+            'library_save_confirm': {'save_id'},
+            'library_save_verify': {'save_id'},
         }
         if action not in fields or set(payload) - ({'action', 'client_token', 'editor_id'} | fields[action]):
             raise ChatError('Neznámá akce rozhovoru.')
@@ -192,6 +196,89 @@ class SharedChat:
 
         token = payload.get('client_token')
         token_hash(token)
+        if action in ('library_save_prepare', 'library_save_confirm', 'library_save_verify'):
+            if action == 'library_save_prepare':
+                _, snapshot = self._client(self._read(), token)
+                expected_id = payload.get('expected_save_id', (snapshot.get('library_save') or {}).get('id', ''))
+                if not isinstance(expected_id, str):
+                    raise ChatError('Návrh uložení nelze ověřit.')
+                url, category = payload.get('url', ''), payload.get('category')
+                if category not in ('other', 'recipes', 'travel_places'):
+                    raise ChatError('Vyber článek, recept nebo místo.')
+                text, title = payload.get('text', ''), payload.get('title', '')
+                visit_state = payload.get('visit_state', 'unknown')
+                if not isinstance(url, str) or not isinstance(text, str) or not isinstance(title, str) or len(title) > 500:
+                    raise ChatError('Návrh uložení není platný.')
+                if visit_state not in ('unknown', 'visited', 'want_to_visit', 'tip') or (category != 'travel_places' and visit_state != 'unknown'):
+                    raise ChatError('Stav návštěvy není platný.')
+                duplicates = self._library_reader().source_duplicates(url) if url else []
+                if text:
+                    known = {item['id'] for item in duplicates}
+                    duplicates.extend(item for item in self._library_reader().text_duplicates(text) if item['id'] not in known)
+                if not url and not text:
+                    raise ChatError('Vlož adresu stránky nebo text.')
+                save = {'id': uuid4().hex, 'state': 'duplicate' if duplicates else 'draft',
+                        'url': url, 'text': text, 'title': title,
+                        'category': category, 'visit_state': visit_state, 'duplicates': duplicates}
+                def prepare(document):
+                    _, room = self._client(document, token)
+                    if (room.get('library_save') or {}).get('id', '') != expected_id:
+                        raise ChatError('Návrh se mezitím změnil. Obnov stav.')
+                    if (room.get('library_save') or {}).get('state') in ('saving', 'unknown'):
+                        raise ChatError('Nejprve ověř původní uložení.')
+                    room['library_save'] = save
+                    return RepositoryMutation(document)
+                self.repo.transact(prepare)
+                return self.status(token, editor)
+            save_id = identifier(payload.get('save_id'))
+            if action == 'library_save_verify':
+                client, room = self._client(self._read(), token)
+                current = room.get('library_save') or {}
+                if current.get('id') != save_id:
+                    raise ChatError('Uložení neodpovídá původnímu návrhu.')
+                if current.get('state') in ('saving', 'unknown'):
+                    result = self._library_reader().saved_operation(save_id)
+                    if result:
+                        def verified(document):
+                            _, stored = self._client(document, token)
+                            if stored.get('library_save', {}).get('id') != save_id:
+                                raise ChatError('Uložení se mezitím změnilo.')
+                            stored['library_save'].update(state='saved', item=result)
+                            return RepositoryMutation(document)
+                        self.repo.transact(verified)
+                return self.status(token, editor)
+            def reserve(document):
+                _, room = self._client(document, token)
+                current = room.get('library_save') or {}
+                if current.get('id') != save_id:
+                    raise ChatError('Uložení neodpovídá původnímu návrhu.')
+                if current.get('state') != 'draft':
+                    return RepositoryMutation(document, {'start': False}, changed=False)
+                current['state'] = 'saving'
+                return RepositoryMutation(document, {'start': True, 'url': current['url'], 'text': current.get('text', ''),
+                                                     'title': current.get('title', ''), 'category': current['category'],
+                                                     'visit_state': current.get('visit_state', 'unknown')})
+            reservation = self.repo.transact(reserve).result
+            if not reservation['start']:
+                return self.status(token, editor)
+            try:
+                from app.article_archive import SharedSaveNotWritten
+                result = (self._library_reader().save_text(reservation['title'], reservation['text'], reservation['category'], save_id, reservation['visit_state'], reservation['url'])
+                          if reservation['text'] else self._library_reader().save_source(reservation['url'], reservation['category'], save_id, reservation['visit_state']))
+                outcome = {'state': 'duplicate' if result['duplicate'] else 'saved', 'item': result['item']}
+            except SharedSaveNotWritten:
+                outcome = {'state': 'not_saved'}
+            except Exception:
+                outcome = {'state': 'unknown'}
+            def finish(document):
+                _, room = self._client(document, token)
+                current = room.get('library_save') or {}
+                if current.get('id') != save_id or current.get('state') != 'saving':
+                    raise ChatError('Výsledek uložení nelze ověřit.')
+                current.update(outcome)
+                return RepositoryMutation(document)
+            self.repo.transact(finish)
+            return self.status(token, editor)
         if action in ('library_search', 'library_open', 'library_visit_state'):
             client, room = self._client(self._read(), token)
             current = room.get('library') or {}
@@ -302,8 +389,44 @@ class SharedChat:
         try:
             room = self._read()['rooms'][room_id]
             model_input = submission['user_text']
+            from app.shared_chat_library import save_reference
+            messages, _ = self._session(room_id)
+            reference = save_reference(submission['user_text'], messages)
+            if reference is not None:
+                if 'url' in reference or 'text' in reference:
+                    current = room.get('library_save') or {}
+                    if current.get('state') in ('saving', 'unknown'):
+                        reference = {'notice': 'Nejprve ověř původní uložení.'}
+                    else:
+                        duplicates = (self._library_reader().source_duplicates(reference['url']) if reference.get('url')
+                                      else self._library_reader().text_duplicates(reference['text']))
+                        proposal = {'id': uuid4().hex, 'state': 'duplicate' if duplicates else 'draft',
+                                    'url': '', 'text': '', 'title': '', 'visit_state': 'unknown', **reference, 'duplicates': duplicates}
+                        def store_proposal(document):
+                            stored = document['rooms'][room_id]
+                            if stored['submission']['client_message_id'] != submission['client_message_id']:
+                                raise ChatError('Návrh nepatří původní otázce.')
+                            live = stored.get('library_save') or {}
+                            if live.get('id', '') != current.get('id', '') or live.get('state', '') != current.get('state', ''):
+                                return RepositoryMutation(document, {'prepared': False}, changed=False)
+                            if live.get('state') in ('saving', 'unknown'):
+                                return RepositoryMutation(document, {'prepared': False}, changed=False)
+                            stored['library_save'] = proposal
+                            return RepositoryMutation(document, {'prepared': True})
+                        prepared = self.repo.transact(store_proposal).result['prepared']
+                        reference = ({'state': proposal['state'], 'url': proposal['url'], 'text_only': not bool(proposal['url']),
+                                      'category': proposal['category'], 'visit_state': proposal['visit_state'], 'duplicates': len(duplicates)}
+                                     if prepared else {'notice': 'Jiný návrh se mezitím změnil. Obnov stav a vyber znovu.'})
+                model_input += '\n\nSTAV NÁVRHU ULOŽENÍ (uložení provede pouze uživatel tlačítkem):\n' + json.dumps(reference, ensure_ascii=False)
+            else:
+                save = room.get('library_save') or {}
+                if save.get('state') in ('saved', 'duplicate', 'saving', 'unknown', 'not_saved'):
+                    item = save.get('item') or (save.get('duplicates') or [{}])[0]
+                    evidence = {'state': save['state'], 'category': save.get('category', ''),
+                                'title': item.get('title', ''), 'url': save.get('url', '')}
+                    model_input += '\n\nSTAV POSLEDNÍHO ULOŽENÍ V TOMTO ROZHOVORU:\n' + json.dumps(evidence, ensure_ascii=False)
             try:
-                packet = self._library_reader().prepare(model_input, room.get('library') or {})
+                packet = self._library_reader().prepare(submission['user_text'], room.get('library') or {})
             except Exception:
                 packet = {'items': [], 'selected_id': '', 'query': '', 'count': 0,
                           'catalog_count': None, 'notice': 'Knihovnu nelze ověřit. Nejde o potvrzení prázdné knihovny.',
@@ -331,7 +454,7 @@ class SharedChat:
                     self.hubs[room_id] = hub
             started = True
             hub.send(text=submission['user_text'], client_message_id=submission['client_message_id'], read_only=True,
-                     **({'model_input_text': model_input} if packet is not None else {}))
+                     **({'model_input_text': model_input} if model_input != submission['user_text'] else {}))
             messages, running = self._session(room_id)
             room = self._read()['rooms'][room_id]
             state = self._effective_send(room, messages, running)['status']

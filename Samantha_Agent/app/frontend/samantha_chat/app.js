@@ -4,7 +4,7 @@
   const DRAFT_INTERVAL=150,ACTIVE_POLL=400,BACKGROUND_POLL=5000;
   function uuid(crypto){const bytes=new Uint8Array(16);crypto.getRandomValues(bytes);return Array.from(bytes,v=>v.toString(16).padStart(2,'0')).join('');}
   function cached(storage,key){try{const value=JSON.parse(storage.getItem(key)||'null');return value&&typeof value==='object'&&!Array.isArray(value)?value:null;}catch(_){return null;}}
-  function appendAnswer(doc,node,text,safeSource=root.SamanthaLibrary.safeSource){
+  function appendAnswer(doc,node,text,safeSource=root.SamanthaLibrary.safeSource,onSource=null){
     const pattern=/\[([^\]\n]+)\]\((https?:\/\/(?:[^\s<>()[\]]|\([^\s()]*\))+)\)/g;
     let offset=0;
     for(const match of text.matchAll(pattern)){
@@ -16,6 +16,7 @@
       link.textContent=match[1];link.title=url;node.appendChild(link);
       const address=doc.createElement('span');address.className='source-address';
       address.textContent=' ('+url+')';node.appendChild(address);
+      if(onSource){const button=doc.createElement('button');button.type='button';button.className='source-save';button.textContent='Uložit do Knihovny';button.onclick=()=>onSource(url);node.appendChild(button);}
       offset=match.index+match[0].length;
     }
     node.appendChild(doc.createTextNode(text.slice(offset)));
@@ -76,6 +77,9 @@
     async librarySearch(query){return this.enqueue(async()=>{this.apply(await this.api({action:'library_search',query,expected_library_revision:this.state.library?.revision||0}));this.error='';});}
     async libraryOpen(item_id){return this.enqueue(async()=>{this.apply(await this.api({action:'library_open',item_id,expected_library_revision:this.state.library?.revision||0}));this.error='';});}
     async libraryVisitState(item_id,visit_state,expected_state){return this.enqueue(async()=>{this.apply(await this.api({action:'library_visit_state',item_id,visit_state,expected_state,expected_library_revision:this.state.library?.revision||0}));this.error='';});}
+    async savePrepare(url,category,title,text,visit_state){return this.enqueue(async()=>{this.apply(await this.api({action:'library_save_prepare',url,category,title,text,visit_state,expected_save_id:this.state.library_save?.id||''}));this.error='';});}
+    async saveConfirm(save_id){return this.enqueue(async()=>{this.apply(await this.api({action:'library_save_confirm',save_id}));this.error='';});}
+    async saveVerify(save_id){return this.enqueue(async()=>{this.apply(await this.api({action:'library_save_verify',save_id}));this.error='';});}
     libraryDetail(id,offset=0,digest=''){return this.api(null,'/api/samantha-chat/library/item?'+new URLSearchParams({id,offset:String(offset),sha256:digest}));}
     claim(takeover=true){
       if(this.claimPromise)return this.claimPromise;
@@ -134,7 +138,7 @@
     disconnect(){this.storage.removeItem(KEY);this.epoch++;this.clearTimer(this.timer);this.token='';this.state=null;this.online=false;this.pending=null;this.text='';this.dirty=false;this.error='';this.notify();}
   }
   function attach(doc){
-    const el=id=>doc.getElementById(id);let fingerprint='',libraryUI=null;
+    const el=id=>doc.getElementById(id);let fingerprint='',libraryUI=null,lastSaveId='';
     const client=new Client({fetch:root.fetch.bind(root),storage:root.localStorage,tabStorage:root.sessionStorage,crypto:root.crypto,render(c){
       el('setup').hidden=Boolean(c.token);el('chat').hidden=!c.state;
       el('connection').textContent=c.state?`${c.online?'Připojeno':'Spojení není ověřené'}: ${c.state.name} · ${c.state.client_label}`:c.token?'Obnovuji připojení…':'Vyber rozhovor nebo připoj telefon.';
@@ -143,6 +147,19 @@
       el('disconnect').hidden=!c.token;el('disconnect').disabled=c.busy;
       libraryUI?.render(c);
       if(!c.state)return;
+      const save=c.state.library_save||{};
+      if(save.id&&save.id!==lastSaveId){lastSaveId=save.id;el('savePanel').open=true;el('saveUrl').value=save.url||'';el('saveTitle').value=save.title||'';el('saveText').value=save.text||'';el('saveCategory').value=save.category||'other';el('saveVisit').value=save.visit_state||'unknown';el('saveVisitLabel').hidden=save.category!=='travel_places';}
+      el('savePrepare').disabled=c.busy||!c.online||['saving','unknown'].includes(save.state);
+      const sameSave=save.state==='draft'&&el('saveUrl').value.trim()===(save.url||'')&&el('saveCategory').value===save.category&&
+        el('saveText').value===(save.text||'')&&el('saveTitle').value===(save.title||'')&&
+        (save.category!=='travel_places'||el('saveVisit').value===(save.visit_state||'unknown'));
+      el('savePreview').hidden=save.state!=='draft';el('saveConfirm').disabled=c.busy||!c.online||!sameSave;
+      el('saveDetails').textContent=save.state==='draft'?[{other:'Článek',recipes:'Recept',travel_places:'Místo'}[save.category],save.url||save.title,save.category==='travel_places'?{unknown:'Neurčeno',visited:'Navštíveno',want_to_visit:'Chceme navštívit',tip:'Tip'}[save.visit_state]:null].filter(Boolean).join(' · '):'';
+      el('saveDescription').textContent=save.state==='draft'?(save.text?'Po potvrzení se uloží níže uvedený text a případná adresa zdroje.':'Po potvrzení se stáhne stránka a uloží její dostupný text.') : '';
+      el('saveTextPreview').textContent=save.state==='draft'?save.text||'':'';
+      el('saveStatus').textContent=save.state==='saving'?'Uložení probíhá nebo čeká na ověření.':save.state==='unknown'?'Výsledek není ověřený. Ověř původní uložení.':save.state==='not_saved'?'Stránku se nepodařilo načíst. Nic se neuložilo, můžeš návrh připravit znovu.':save.state==='saved'?`Uloženo: ${save.item?.title||''}`:save.state==='duplicate'?`V Knihovně už je: ${(save.item||save.duplicates?.[0])?.title||''}`:'';
+      el('saveVerify').hidden=!['saving','unknown'].includes(save.state);el('saveVerify').disabled=c.busy||!c.online;
+      el('saveOpen').hidden=!['saved','duplicate'].includes(save.state);el('saveOpen').disabled=c.busy||!c.online;
       el('pairPanel').hidden=!c.state.host;el('pairCode').textContent=c.state.pair_code||'';
       const draft=c.state.draft;
       el('input').readOnly=!c.canWriteLocally();
@@ -161,7 +178,7 @@
           for(const [kind,title,text] of [['user','Ty',message.user_text],['assistant','Samantha',message.answer]]){
             if(!text)continue;const node=doc.createElement('div');node.className='message '+kind;
             const who=doc.createElement('strong');who.textContent=title;node.appendChild(who);
-            if(kind==='assistant')appendAnswer(doc,node,text);
+            if(kind==='assistant')appendAnswer(doc,node,text,root.SamanthaLibrary.safeSource,url=>{el('savePanel').open=true;el('saveUrl').value=url;el('saveTitle').value='';el('saveText').value='';client.notify();el('saveUrl').focus();});
             else node.appendChild(doc.createTextNode(text));
             log.appendChild(node);
           }
@@ -174,6 +191,11 @@
     el('create').onclick=()=>act(()=>client.setup('create',el('name').value));
     el('join').onclick=()=>act(()=>client.setup('join','iPhone',el('code').value.trim()));
     el('pair').onclick=()=>act(()=>client.pair());
+    for(const id of ['saveUrl','saveTitle','saveText','saveCategory','saveVisit'])el(id).addEventListener('input',()=>{el('saveVisitLabel').hidden=el('saveCategory').value!=='travel_places';client.notify();});
+    el('savePrepare').onclick=()=>act(()=>client.savePrepare(el('saveUrl').value.trim(),el('saveCategory').value,el('saveTitle').value,el('saveText').value,el('saveCategory').value==='travel_places'?el('saveVisit').value:'unknown'));
+    el('saveConfirm').onclick=()=>act(()=>client.saveConfirm(client.state.library_save.id));
+    el('saveVerify').onclick=()=>act(()=>client.saveVerify(client.state.library_save.id));
+    el('saveOpen').onclick=()=>act(()=>client.librarySearch((client.state.library_save.item||client.state.library_save.duplicates?.[0]).title));
     function beginWriting(){
       if(!client.state||!client.online)return;
       client.focused=true;

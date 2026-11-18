@@ -16,6 +16,18 @@
   </details>
   <div id="messages" role="log" aria-label="Zprávy rozhovoru" aria-live="polite"></div>
   <p id="work" role="status"></p>
+  <details id="savePanel"><summary>Uložit do Knihovny</summary>
+    <label>Adresa stránky<input id="saveUrl" type="url" maxlength="2000" placeholder="https://…"></label>
+    <label>Název textu<input id="saveTitle" maxlength="500" placeholder="Název položky"></label>
+    <label>Text k uložení<textarea id="saveText" maxlength="120000" rows="5" placeholder="Vlož vybraný text, nebo ponech prázdné pro stažení celé stránky."></textarea></label>
+    <label>Uložit jako<select id="saveCategory"><option value="other">Článek</option><option value="recipes">Recept</option><option value="travel_places">Místo</option></select></label>
+    <label id="saveVisitLabel" hidden>Stav místa<select id="saveVisit"><option value="unknown">Neurčeno</option><option value="visited">Navštíveno</option><option value="want_to_visit">Chceme navštívit</option><option value="tip">Tip</option></select></label>
+    <button id="savePrepare" type="button">Zkontrolovat před uložením</button>
+    <p id="saveStatus" role="status" aria-live="polite"></p>
+    <div id="savePreview" hidden><p id="saveDetails"></p><p id="saveDescription"></p><pre id="saveTextPreview"></pre><button id="saveConfirm" type="button">Potvrdit uložení</button></div>
+    <button id="saveVerify" type="button" hidden>Ověřit původní uložení</button>
+    <button id="saveOpen" type="button" hidden>Najít uloženou položku</button>
+  </details>
   <details id="libraryPanel"><summary>Knihovna — knihy, články, recepty a místa</summary>
     <p>Můžeš se zeptat v rozhovoru nebo hledat přímo zde. Výsledky a otevřená položka jsou společné s druhým zařízením.</p>
     <label>Hledat v naší Knihovně<input id="libraryQuery" maxlength="2000" type="search" placeholder="Například knihy o historii nebo Rakousko"></label>

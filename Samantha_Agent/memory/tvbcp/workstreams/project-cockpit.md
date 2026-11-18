@@ -1,4 +1,36 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
+## 2026-11-18 12:43 CET — Potvrzené ukládání z rozhovoru
+
+Hotovo — Samantha připraví uložení článku, receptu nebo místa z jednoznačného
+odkazu či textu předchozí odpovědi. Konkrétní odkaz lze vybrat i tlačítkem.
+Obě zařízení vidí společný návrh, zdroj, kategorii, text a případný stav
+místa. Vybraný text s URL se zachová přesně; samotná URL po potvrzení stáhne
+stránku a uloží dostupný text i originál zdroje. Zápis vyžaduje tlačítko.
+
+Rozhodnutí — Nejasný výběr žádá určení zdroje. Duplicita se kontroluje podle
+shodné normalizované URL nebo shodného normalizovaného textu, nikoli významu.
+Funkční parametry URL zůstávají, běžné sledovací parametry se ignorují.
+Dokončený výsledek i stav nejistého pokusu jsou viditelné v rozhovoru.
+
+Další krok — Po samostatně schváleném p+n fyzicky přejmout na iPhonu a Mintu
+výběr, náhled, potvrzení, duplicitu a otevření uložené položky v Knihovně.
+
+Navrhované další kroky — Vyhrazená webová záložka na Mintu podle bodu7.
+Kalendář zůstává samostatným bodem6.
+
+Technický důkaz — Cílené testy zahrnují dvě zařízení, souběh a konfliktní
+návrh, přesný úryvek s URL, různé parametry, duplicitu po kanonické URL,
+pád po zápisu a ověření původního ID bez nového zápisu. Před fyzickou
+přejímkou prošla také syntetická HTTP/JS integrace. Reálný veřejný zdroj
+example.com byl uložen do odděleného testovacího archivu, druhý pokus našel
+stejnou položku a samostatný úryvek zachoval text, URL a stav místa.
+Důkaz v soukromém dočasném adresáři samantha-save-final-4_zhtoy8.
+Programová brána je doložena podepsanou soukromou účtenkou.
+
+Rizika — Nejasný výběr zůstává k ručnímu určení. Po přerušení před zápisem
+registru může být výsledek neověřený a původní zdroj se automaticky neopakuje.
+Fyzické ověření na iPhonu/Mintu a nové nasazení dosud neproběhly.
+
 ## 2026-11-18 11:35 CET — Stav návštěvy míst ve společném rozhovoru
 
 Hotovo — Otevřené místo ve společném rozhovoru umožňuje uložit stav Neurčeno,
@@ -47,6 +79,38 @@ adresu s query/fragmentem a závorkami i odmítnutí URL s heslem.
 Zdrojové p+n čtecí Knihovny z de12f383 je už dokončené podle předchozího
 předání a Mílova potvrzení. Nové webové hledání je místní, fyzická přejímka
 čeká. Živý test je v dočasné soukromé složce samantha-web-smoke-t87in85r.
+
+## 2026-11-18 12:43 CET — Potvrzené ukládání z rozhovoru
+
+Hotovo — Samantha připraví uložení článku, receptu nebo místa z jednoznačného
+odkazu či textu předchozí odpovědi. Konkrétní odkaz lze vybrat i tlačítkem.
+Obě zařízení vidí společný návrh, zdroj, kategorii, text a případný stav
+místa. Vybraný text s URL se zachová přesně; samotná URL po potvrzení stáhne
+stránku a uloží dostupný text i originál zdroje. Zápis vyžaduje tlačítko.
+
+Rozhodnutí — Nejasný výběr žádá určení zdroje. Duplicita se kontroluje podle
+shodné normalizované URL nebo shodného normalizovaného textu, nikoli významu.
+Funkční parametry URL zůstávají, běžné sledovací parametry se ignorují.
+Dokončený výsledek i stav nejistého pokusu jsou viditelné v rozhovoru.
+
+Další krok — Po samostatně schváleném p+n fyzicky přejmout na iPhonu a Mintu
+výběr, náhled, potvrzení, duplicitu a otevření uložené položky v Knihovně.
+
+Navrhované další kroky — Vyhrazená webová záložka na Mintu podle bodu7.
+Kalendář zůstává samostatným bodem6.
+
+Technický důkaz — Cílené testy zahrnují dvě zařízení, souběh a konfliktní
+návrh, přesný úryvek s URL, různé parametry, duplicitu po kanonické URL,
+pád po zápisu a ověření původního ID bez nového zápisu. Před fyzickou
+přejímkou prošla také syntetická HTTP/JS integrace. Reálný veřejný zdroj
+example.com byl uložen do odděleného testovacího archivu, druhý pokus našel
+stejnou položku a samostatný úryvek zachoval text, URL a stav místa.
+Důkaz v soukromém dočasném adresáři samantha-save-final-4_zhtoy8.
+Programová brána je doložena podepsanou soukromou účtenkou.
+
+Rizika — Nejasný výběr zůstává k ručnímu určení. Po přerušení před zápisem
+registru může být výsledek neověřený a původní zdroj se automaticky neopakuje.
+Fyzické ověření na iPhonu/Mintu a nové nasazení dosud neproběhly.
 
 ## 2026-11-18 11:35 CET — Stav návštěvy míst ve společném rozhovoru
 

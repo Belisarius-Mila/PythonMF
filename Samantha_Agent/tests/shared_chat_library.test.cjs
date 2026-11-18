@@ -49,3 +49,11 @@ test('web answer links show exact addresses while untrusted markup stays text',(
  assert.match(node.children.at(-1).text,/user:secret/);
  assert.equal(node.children[2].textContent,' (https://example.test/a_(b)?q=1#part)');
 });
+test('a source button selects the exact URL without initiating a save',()=>{
+ const {appendAnswer}=require('../app/frontend/samantha_chat/app.js');
+ const doc={createElement:tag=>Object.assign(new Element(),{tag}),createTextNode:text=>({text})};
+ const node=new Element();let selected='';
+ appendAnswer(doc,node,'[Zdroj](https://example.test/recept)',safeSource,url=>{selected=url;});
+ const button=node.children.find(child=>child.tag==='button');assert.ok(button);
+ assert.equal(selected,'');button.onclick();assert.equal(selected,'https://example.test/recept');
+});

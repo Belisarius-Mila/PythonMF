@@ -29,6 +29,13 @@ function client(storage=store(),tabStorage=store()){
   assert.equal(host.state.library.selected_id,recipe);
   const detail=await host.libraryDetail(recipe);assert.match(detail.text,/Syntetický recept/);
   assert.equal(sendCalls,0,'library search/open/read must not send a question');
+  await phone.savePrepare('','travel_places','Syntetické místo','Syntetická poznámka k místu.','want_to_visit');
+  await host.refresh();assert.equal(host.state.library_save.state,'draft');
+  assert.equal(host.state.library_save.text,'Syntetická poznámka k místu.');
+  await host.saveConfirm(host.state.library_save.id);await phone.refresh();
+  assert.equal(phone.state.library_save.state,'saved');
+  assert.equal(phone.state.library_save.item.visit_state,'want_to_visit');
+  assert.equal(sendCalls,0,'save buttons must not start a model turn');
   await phone.claim();phone.setText('Otázka namluvená na telefonu');await phone.flush();
   await host.refresh();assert.equal(host.text,'Otázka namluvená na telefonu');assert.equal(host.state.draft.can_edit,false);
   // Continuous input must reach the real second HTTP client before dictation ends.

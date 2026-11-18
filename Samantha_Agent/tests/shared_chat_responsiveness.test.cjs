@@ -16,6 +16,28 @@ function client(fetch,timer=clock()){
 const response=data=>({ok:true,json:async()=>data});
 function events(){const listeners={};return {listeners,addEventListener(name,fn){(listeners[name]??=[]).push(fn);},fire(name,event={}){for(const fn of listeners[name]||[])fn(event);}};}
 
+test('the save confirmation freezes the visible proposal and disables after an edit',async()=>{
+ const fs=require('node:fs'),vm=require('node:vm'),path=require('node:path');
+ const timer=clock(),browser=Object.assign(events(),timer,{localStorage:storage(),sessionStorage:storage(),crypto:webcrypto});
+ browser.localStorage.setItem('samantha-shared-chat-client','a'.repeat(64));
+ browser.SamanthaLibrary={safeSource:url=>url,create:()=>({render(){}})};
+ const proposal={id:'a'.repeat(32),state:'draft',url:'',text:'Původní text',title:'Název',category:'travel_places',visit_state:'want_to_visit'};
+ browser.fetch=async()=>response({...state(),library_save:proposal});
+ const doc=Object.assign(events(),{hidden:false,activeElement:null});
+ function element(){return Object.assign(events(),{children:[],value:'',hidden:false,disabled:false,readOnly:true,textContent:'',scrollHeight:0,scrollTop:0,clientHeight:0,
+  focus(){doc.activeElement=this;},appendChild(child){this.children.push(child);},replaceChildren(){this.children=[];}});}
+ const elements=new Map();doc.getElementById=id=>{if(!elements.has(id))elements.set(id,element());return elements.get(id);};
+ doc.createElement=element;doc.createTextNode=text=>({textContent:text});
+ const realm={window:browser,module:{exports:{}},Uint8Array,AbortController,setTimeout,clearTimeout};
+ vm.runInNewContext(fs.readFileSync(path.join(__dirname,'../app/frontend/samantha_chat/app.js'),'utf8'),realm);
+ const c=realm.module.exports.attach(doc);await settle();
+ assert.equal(doc.getElementById('saveConfirm').disabled,false);
+ assert.equal(doc.getElementById('saveTextPreview').textContent,'Původní text');
+ const input=doc.getElementById('saveText');input.value='Změněný text';input.fire('input');
+ assert.equal(doc.getElementById('saveConfirm').disabled,true);
+ c.stopPolling();c.disconnect();
+});
+
 test('continuous dictation is saved during input rather than waiting for its end',async()=>{
  const timer=clock(),saved=[];
  const c=client(async(_p,o)=>{const p=JSON.parse(o.body);assert.equal(p.action,'draft');saved.push({at:timer.now,text:p.text});return response(state(p.text,p.expected_revision+1));},timer);

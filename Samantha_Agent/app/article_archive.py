@@ -21,11 +21,11 @@ from html.parser import HTMLParser
 from functools import wraps
 from pathlib import Path
 from typing import Any, Callable
-from urllib.parse import urlparse, urlunparse
+from urllib.parse import unquote_plus, urljoin, urlparse, urlunparse
 from xml.sax.saxutils import escape
 
 from app.book_taxonomy import SUBJECTS, GROUP_OPTIONS, effective_groups, normalize_classification, normalize_manual_subjects, normalize_manual_groups
-from app.file_persistence import atomic_write_text, exclusive_file_lock
+from app.file_persistence import atomic_write_json, atomic_write_text, exclusive_file_lock
 from app.library_images import LIBRARY_PHOTO_STORAGE_POLICY, prepare_library_photo, prepare_library_thumbnail
 
 
@@ -519,6 +519,116 @@ def archive_url(
         "message": "Článek uložen do soukromé knihovny.",
         "item": article_item_from_raw(metadata).to_summary(),
     }
+
+
+class SharedSaveNotWritten(ValueError):
+    """A source failed before any archive write was attempted."""
+
+
+def shared_save_url_key(url: str) -> str:
+    """Keep meaningful query parameters while ignoring common tracking tags."""
+    try:
+        parsed = urlparse(url)
+        if parsed.scheme not in ('http', 'https') or not parsed.netloc:
+            return ''
+        query = []
+        for part in parsed.query.split('&'):
+            name = unquote_plus(part.partition('=')[0]).casefold()
+            if name.startswith('utm_') or name in ('fbclid', 'gclid'):
+                continue
+            if part:
+                query.append(part)
+        return urlunparse((parsed.scheme.casefold(), parsed.netloc.casefold(), parsed.path,
+                           parsed.params, '&'.join(query), ''))
+    except (TypeError, ValueError):
+        return ''
+
+
+def _shared_save_reservations(archive_root: Path) -> tuple[Path, dict[str, Any]]:
+    path = archive_root / 'shared_save_operations.json'
+    if not path.exists():
+        return path, {}
+    if path.is_symlink():
+        raise ValueError('Evidenci ukládání nelze ověřit.')
+    records = json.loads(path.read_text(encoding='utf-8'))
+    if not isinstance(records, dict) or any(
+        not re.fullmatch(r'[0-9a-f]{64}', key) or not isinstance(value, dict)
+        or set(value) != {'operation_id', 'state'}
+        or not re.fullmatch(r'[0-9a-f]{32}', str(value['operation_id']))
+        or value['state'] not in ('pending', 'done') for key, value in records.items()
+    ):
+        raise ValueError('Evidenci ukládání nelze ověřit.')
+    return path, records
+
+
+def _reserve_shared_save(archive_root: Path, targets: set[str], operation_id: str) -> None:
+    path, records = _shared_save_reservations(archive_root)
+    keys = {hashlib.sha256(target.encode('utf-8')).hexdigest() for target in targets}
+    if any(records.get(key, {}).get('state') == 'pending' for key in keys):
+        raise ValueError('Dřívější uložení tohoto zdroje není ověřené.')
+    for key in keys:
+        records[key] = {'operation_id': operation_id, 'state': 'pending'}
+    atomic_write_json(path, records)
+
+
+def _finish_shared_save(archive_root: Path, operation_id: str) -> None:
+    path, records = _shared_save_reservations(archive_root)
+    for record in records.values():
+        if record['operation_id'] == operation_id:
+            record['state'] = 'done'
+    atomic_write_json(path, records)
+
+
+@_serialized_archive_write
+def archive_shared_chat_url(*, url: str, category: str, operation_id: str, visit_state: str = 'unknown',
+                            archive_root: Path = DEFAULT_ARCHIVE_ROOT) -> dict[str, Any]:
+    """Save one explicitly confirmed source with a durable operation identity."""
+    if category not in {"other", "recipes", "travel_places"}:
+        raise ValueError("Vyber článek, recept nebo místo.")
+    if visit_state not in VISIT_STATES or (category != 'travel_places' and visit_state != 'unknown'):
+        raise ValueError("Stav návštěvy není platný.")
+    if not re.fullmatch(r"[0-9a-f]{32}", operation_id):
+        raise ValueError("Identita uložení není platná.")
+    normalized_url = validate_archive_url(url)
+    parsed = urlparse(normalized_url)
+    if parsed.username or parsed.password or any(ord(c) < 32 for c in normalized_url):
+        raise ValueError("Adresa zdroje není platná.")
+
+    from app.shared_chat_library import LibraryReader, safe_url
+    LibraryReader(archive_root)._records()
+
+    def existing_for(urls: set[str]) -> ArticleArchiveItem | None:
+        matches = [item for item in load_article_registry(archive_root)
+                   if urls.intersection({shared_save_url_key(item.source_url), shared_save_url_key(item.canonical_url)} - {""})]
+        return matches[0] if matches else None
+
+    existing = existing_for({shared_save_url_key(normalized_url)})
+    if existing:
+        return {"ok": True, "duplicate": True, "item": existing.to_summary()}
+    response_metadata: dict[str, str] = {}
+    try:
+        html_bytes = fetch_url(normalized_url, timeout=25, response_metadata=response_metadata)
+        article = extract_article(html_bytes, normalized_url, http_encoding=response_metadata.get("charset", ""))
+    except (OSError, ValueError, TimeoutError) as error:
+        raise SharedSaveNotWritten('Stránku se nepodařilo načíst.') from error
+    if not article.text.strip():
+        raise SharedSaveNotWritten("Na stránce se nepodařilo najít čitelný text.")
+    explicit_canonical = extract_canonical_url(decode_html_document(decompress_http_body(html_bytes),
+        http_encoding=response_metadata.get('charset', '')))
+    canonical = safe_url(urljoin(normalized_url, explicit_canonical)) if explicit_canonical else normalized_url
+    existing = existing_for({shared_save_url_key(normalized_url), shared_save_url_key(canonical)} - {""})
+    if existing:
+        return {"ok": True, "duplicate": True, "item": existing.to_summary()}
+    targets = {'url:' + shared_save_url_key(normalized_url)}
+    if canonical:
+        targets.add('url:' + shared_save_url_key(canonical))
+    _reserve_shared_save(archive_root, targets, operation_id)
+    metadata = write_article_archive(source_url=normalized_url, html_bytes=html_bytes,
+        article=ExtractedArticle(title=article.title, text=article.text, canonical_url=canonical),
+        archive_root=archive_root, now=datetime.now(timezone.utc).replace(microsecond=0),
+        category=category, tags=[], operation_id=operation_id, visit_state=visit_state)
+    _finish_shared_save(archive_root, operation_id)
+    return {"ok": True, "duplicate": False, "item": article_item_from_raw(metadata).to_summary()}
 
 
 def archive_text_entry(
@@ -1784,9 +1894,13 @@ def write_article_archive(
     now: datetime,
     category: str,
     tags: list[str],
+    operation_id: str = "",
+    visit_state: str = "unknown",
 ) -> dict[str, Any]:
     item_id = article_id(article.title, article.canonical_url or source_url, now)
     item_dir = archive_root / "articles" / item_id
+    if operation_id and item_dir.exists():
+        raise ValueError("Cílová položka už existuje. Uložení vyžaduje kontrolu.")
     item_dir.mkdir(parents=True, exist_ok=True)
     html_path = item_dir / "source.html"
     text_path = item_dir / "article.txt"
@@ -1809,6 +1923,8 @@ def write_article_archive(
         "read_note": "",
         "read_state_updated_at": "",
         "attachments": [],
+        **({"source_operation_id": operation_id} if operation_id else {}),
+        **({"visit_state": visit_state} if operation_id and category == 'travel_places' else {}),
     }
     metadata_path.write_text(json.dumps(metadata, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
     update_registry(archive_root / "registry.jsonl", metadata)
@@ -1833,6 +1949,9 @@ def write_text_archive(
     book_classification: dict[str, Any] | None = None,
     book_subjects_manual: list[str] | None = None,
     book_groups_manual: list[str] | None = None,
+    operation_id: str = "",
+    visit_state: str = "unknown",
+    source_url: str = "",
 ) -> dict[str, Any]:
     classification = normalize_classification(book_classification, book_isbn) if book_classification is not None else None
     manual_subjects = normalize_manual_subjects(book_subjects_manual) if book_subjects_manual is not None else None
@@ -1840,6 +1959,8 @@ def write_text_archive(
     clean_text = normalize_manual_text(text)
     item_id = text_entry_id(title, clean_text, now)
     item_dir = archive_root / "articles" / item_id
+    if operation_id and item_dir.exists():
+        raise ValueError("Cílová položka už existuje. Uložení vyžaduje kontrolu.")
     item_dir.mkdir(parents=True, exist_ok=True)
     text_path = item_dir / "article.txt"
     metadata_path = item_dir / "metadata.json"
@@ -1857,8 +1978,8 @@ def write_text_archive(
         "book_location": " ".join(str(book_location or "").split())[:300],
         "book_isbn": normalize_book_isbn(book_isbn),
         "book_publication_year": normalize_book_publication_year(book_publication_year),
-        "source_url": "",
-        "canonical_url": "",
+        "source_url": source_url,
+        "canonical_url": source_url,
         "archived_at": now.isoformat(),
         "text_file": str(text_path.relative_to(archive_root)),
         "html_file": "",
@@ -1867,6 +1988,8 @@ def write_text_archive(
         "read_note": "",
         "read_state_updated_at": "",
         "attachments": [],
+        **({"source_operation_id": operation_id} if operation_id else {}),
+        **({"visit_state": visit_state} if operation_id and category == 'travel_places' else {}),
     }
     if classification is not None:
         metadata["book_classification"] = classification
@@ -1877,6 +2000,42 @@ def write_text_archive(
     metadata_path.write_text(json.dumps(metadata, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
     update_registry(archive_root / "registry.jsonl", metadata)
     return metadata
+
+
+@_serialized_archive_write
+def archive_shared_chat_text(*, title: str, text: str, category: str, operation_id: str, visit_state: str = 'unknown', source_url: str = '',
+                             archive_root: Path = DEFAULT_ARCHIVE_ROOT) -> dict[str, Any]:
+    if category not in {"other", "recipes", "travel_places"} or not re.fullmatch(r"[0-9a-f]{32}", operation_id):
+        raise ValueError("Uložení nemá platnou kategorii nebo identitu.")
+    if visit_state not in VISIT_STATES or (category != 'travel_places' and visit_state != 'unknown'):
+        raise ValueError("Stav návštěvy není platný.")
+    clean_text = normalize_manual_text(text)
+    clean_title = compact_title(title)
+    if not clean_text or len(clean_text) > 120000:
+        raise ValueError("Text musí obsahovat nejvýše 120 000 znaků.")
+    if clean_title == "Bez názvu":
+        clean_title = first_text_line(clean_text) or "Text z rozhovoru"
+    from app.shared_chat_library import LibraryReader, safe_url
+    if source_url and not safe_url(source_url):
+        raise ValueError("Adresa zdroje není platná.")
+    source_key = shared_save_url_key(source_url) if source_url else ''
+    items = {item.id: item for item in load_article_registry(archive_root)}
+    for record, stored_text, _, _ in LibraryReader(archive_root)._records():
+        item = items.get(record['id'])
+        if item is None:
+            raise ValueError("Položku nelze ověřit.")
+        if (normalize_manual_text(stored_text) == clean_text or
+                source_key and source_key in {shared_save_url_key(item.source_url), shared_save_url_key(item.canonical_url)}):
+            return {"ok": True, "duplicate": True, "item": item.to_summary()}
+    targets = {'text:' + clean_text}
+    if source_key:
+        targets.add('url:' + source_key)
+    _reserve_shared_save(archive_root, targets, operation_id)
+    metadata = write_text_archive(title=clean_title, text=clean_text, archive_root=archive_root,
+        now=datetime.now(timezone.utc).replace(microsecond=0), category=category, tags=[],
+        source_label="Rozhovor se Samanthou", source_note="", operation_id=operation_id, visit_state=visit_state, source_url=source_url)
+    _finish_shared_save(archive_root, operation_id)
+    return {"ok": True, "duplicate": False, "item": article_item_from_raw(metadata).to_summary()}
 
 
 def update_registry(path: Path, metadata: dict[str, Any]) -> None:

@@ -40,10 +40,74 @@ def categories(text):
 
 def safe_url(value):
     try:
+        if not isinstance(value, str) or len(value) > 2000:
+            return ''
         parsed = urlsplit(value)
         return value if parsed.scheme in ('http', 'https') and parsed.hostname and not parsed.username and not parsed.password and not any(ord(c) < 32 for c in value) else ''
     except ValueError:
         return ''
+
+
+def save_reference(text, messages):
+    """Resolve an explicit save request against its latest confirmed answer."""
+    value = fold(text)
+    if not re.search(r'\buloz(?:it|te|me)?\b', value) or re.search(r'\bneuloz', value):
+        return None
+    detected_categories = categories(text)
+    if 'recipes' in detected_categories:
+        category = 'recipes'
+    elif 'travel_places' in detected_categories:
+        category = 'travel_places'
+    else:
+        category = 'other'
+    visit = {}
+    if category == 'travel_places':
+        signals = []
+        if re.search(r'\b(?:navstivili jsme|byli jsme)\b', value):
+            signals.append('visited')
+        if re.search(r'\b(?:chceme|chci)\b.*\b(?:jet|navstivit|podivat)\b', value):
+            signals.append('want_to_visit')
+        if re.search(r'\btip\b', value):
+            signals.append('tip')
+        if len(signals) == 1:
+            visit['visit_state'] = signals[0]
+    direct = [safe_url(match.rstrip('.,;')) for match in re.findall(r'https?://[^\s<>]+', text)]
+    urls = [url for url in direct if url]
+    previous = None
+    if not urls:
+        previous = next((entry for entry in reversed(messages) if entry.get('status') == 'completed'
+                         and entry.get('delivery_confirmed') and entry.get('answer')), None)
+        answer = previous['answer'] if previous else ''
+        pattern = r'\[[^\]\n]+\]\((https?://(?:[^\s<>()[\]]|\([^\s()]*\))+)\)|(https?://[^\s<>]+)'
+        urls = []
+        for match in re.finditer(pattern, answer):
+            candidate = (match.group(1) or match.group(2)).rstrip('.,;')
+            while candidate.endswith(')') and candidate.count(')') > candidate.count('('):
+                candidate = candidate[:-1]
+            urls.append(safe_url(candidate))
+        urls = list(dict.fromkeys(url for url in urls if url))
+        if not urls and previous:
+            if re.search(r'\b(?:prvni|druh\w*|treti|ctvrt\w*|pat\w*|posledni|[1-9][0-9]?)\b', value) or len(re.findall(r'(?m)^\s*(?:[-*]|\d+[.)])\s+', answer)) > 1:
+                return {'notice': 'Vyber konkrétní text nebo odkaz, potom připrav uložení.'}
+            return {'text': previous['answer'], 'title': '', 'category': category, **visit}
+    ordinal = re.search(r'\b(prvni|druh[yaou]*|treti|ctvrt[yaou]*|pat[yaou]*|posledni|[1-9][0-9]?)\b', value)
+    if ordinal:
+        word = ordinal.group(1)
+        positions = {'prvni': 0, 'treti': 2, 'posledni': len(urls) - 1}
+        if word.isdigit():
+            index = int(word) - 1
+        elif word.startswith('druh'):
+            index = 1
+        elif word.startswith('ctvrt'):
+            index = 3
+        elif word.startswith('pat'):
+            index = 4
+        else:
+            index = positions[word]
+        urls = [urls[index]] if 0 <= index < len(urls) else []
+    if len(urls) != 1:
+        return {'notice': 'Vyber konkrétní odkaz u odpovědi, potom připrav uložení.'}
+    return {'url': urls[0], 'category': category, **visit}
 
 
 class LibraryReader:
@@ -154,6 +218,46 @@ class LibraryReader:
         from app.article_archive import set_place_visit_state
         return set_place_visit_state(article_id=item_id, visit_state=visit_state,
                                      expected_state=expected_state, archive_root=self.root)
+
+    def source_duplicates(self, url):
+        from app.article_archive import load_article_registry, shared_save_url_key
+        if not safe_url(url):
+            raise ValueError('Zadej platnou adresu článku bez přihlašovacích údajů.')
+        with self.lock:
+            self._records()
+            key = shared_save_url_key(url)
+            return [item.to_summary() for item in load_article_registry(self.root)
+                    if key in {shared_save_url_key(item.source_url), shared_save_url_key(item.canonical_url)}][:12]
+
+    def save_source(self, url, category, operation_id, visit_state='unknown'):
+        from app.article_archive import archive_shared_chat_url
+        return archive_shared_chat_url(url=url, category=category, operation_id=operation_id, visit_state=visit_state, archive_root=self.root)
+
+    def text_duplicates(self, text):
+        from app.article_archive import load_article_registry, normalize_manual_text
+        if not isinstance(text, str) or not text.strip() or len(text) > 120000:
+            raise ValueError('Vlož text o délce nejvýše 120 000 znaků.')
+        with self.lock:
+            ids = {record['id'] for record, stored, _, _ in self._records()
+                   if normalize_manual_text(stored) == normalize_manual_text(text)}
+            return [item.to_summary() for item in load_article_registry(self.root) if item.id in ids][:12]
+
+    def save_text(self, title, text, category, operation_id, visit_state='unknown', source_url=''):
+        from app.article_archive import archive_shared_chat_text
+        return archive_shared_chat_text(title=title, text=text, category=category,
+                                        operation_id=operation_id, visit_state=visit_state, source_url=source_url, archive_root=self.root)
+
+    def saved_operation(self, operation_id):
+        registry = self.root / 'registry.jsonl'
+        if not registry.exists():
+            return None
+        with self.lock:
+            self._records()
+            rows = [json.loads(line) for line in registry.read_text(encoding='utf-8').splitlines() if line.strip()]
+            matches = [row for row in rows if row.get('source_operation_id') == operation_id]
+            if len(matches) > 1:
+                raise ValueError('Výsledek uložení nelze jednoznačně ověřit.')
+            return article_item_from_raw(matches[0]).to_summary() if matches else None
 
     def prepare(self, text, previous):
         value = fold(text)
