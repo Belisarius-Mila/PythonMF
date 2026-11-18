@@ -120,15 +120,15 @@ class VocabularyItalianAudioTests(unittest.TestCase):
         self.assertEqual(communicate.WSS_URL,previous)
 
     def test_sources_validate_against_current_catalog_before_planning(self):
-        items=a.load_items(ROOT,ROOT/'docs');self.assertEqual(len(items),1096)
+        items=a.load_items(ROOT,ROOT/'docs');self.assertEqual(len(items),1116)
         with tempfile.TemporaryDirectory() as name:
             out=Path(name);(out/'data').mkdir();data=json.loads((ROOT/'docs/data/vocabulary-it-v2.json').read_text());data['items'][0]['sentenceIt']='Different sentence';(out/'data/vocabulary-it-v2.json').write_text(json.dumps(data))
             with self.assertRaisesRegex(ValueError,'význam nebo věty'):a.load_items(ROOT,out)
 
     def test_complete_production_library_matches_all_current_texts_voices_and_hashes(self):
         items=a.load_items(ROOT,ROOT/'docs');expected=a.plan(items,provider='registered-edge-tts+azure-neural');all_paths=set()
-        self.assertEqual(expected['stats']['references'],4384)
-        self.assertEqual(expected['stats']['uniqueAssets'],4222)
+        self.assertEqual(expected['stats']['references'],4464)
+        self.assertEqual(expected['stats']['uniqueAssets'],4303)
         for kind,name in [('words','vocabulary-it-audio.json'),('sentences','vocabulary-it-sentence-audio.json')]:
             manifest=json.loads((ROOT/'docs/data'/name).read_text())
             self.assertEqual(manifest['status'],'complete')
@@ -139,7 +139,7 @@ class VocabularyItalianAudioTests(unittest.TestCase):
                 self.assertTrue(full.is_file());self.assertGreater(full.stat().st_size,1000)
                 self.assertEqual(a.digest(full),sha);all_paths.add(path)
         self.assertEqual(all_paths,set(expected['jobs']))
-        self.assertEqual(len(all_paths),4222)
+        self.assertEqual(len(all_paths),4303)
         for kind in ('words','sentences'):
             for lang in ('it','cz'):
                 path=next(iter(expected['manifests'][kind]['items'].values()))[lang]

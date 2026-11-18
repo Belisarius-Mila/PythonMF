@@ -3,15 +3,24 @@
   "language": "it",
   "kind": "sentence-pictures",
   "maxPictures": 5,
-  "batch": "all-cards-20261117",
+  "batch": "all-active-loop-refresh-20261118",
   "entries": {
     "vit-0001": {
       "sourceIt": "piatto",
       "sourceCz": "talíř",
-      "sourceSentenceIt": "Metto il piatto nella lavastoviglie.",
-      "sourceSentenceCz": "Dávám talíř do myčky.",
+      "sourceSentenceIt": "Metto un piatto bianco sul tavolo.",
+      "sourceSentenceCz": "Dávám bílý talíř na stůl.",
       "reviewed": true,
       "concepts": [
+        {
+          "uid": "vit-0567",
+          "sourceIt": "mettere",
+          "sourceCz": "dát někam; položit",
+          "text": "Metto",
+          "occurrence": 1,
+          "start": 0,
+          "end": 5
+        },
         {
           "uid": "vit-0001",
           "sourceIt": "piatto",
@@ -20,6 +29,24 @@
           "occurrence": 1,
           "start": 9,
           "end": 15
+        },
+        {
+          "uid": "vit-0501",
+          "sourceIt": "bianco",
+          "sourceCz": "bílý",
+          "text": "bianco",
+          "occurrence": 1,
+          "start": 16,
+          "end": 22
+        },
+        {
+          "uid": "vit-0604",
+          "sourceIt": "tavolo",
+          "sourceCz": "stůl",
+          "text": "tavolo",
+          "occurrence": 1,
+          "start": 27,
+          "end": 33
         }
       ]
     },
@@ -125,8 +152,8 @@
     "vit-0005": {
       "sourceIt": "torta",
       "sourceCz": "dort, koláč",
-      "sourceSentenceIt": "Per il compleanno facciamo una torta.",
-      "sourceSentenceCz": "K narozeninám děláme dort.",
+      "sourceSentenceIt": "Per il compleanno preparo una torta al limone.",
+      "sourceSentenceCz": "K narozeninám připravuji citronový dort.",
       "reviewed": true,
       "concepts": [
         {
@@ -139,57 +166,129 @@
           "end": 17
         },
         {
+          "uid": "vit-0817",
+          "sourceIt": "preparare",
+          "sourceCz": "připravit; připravovat",
+          "text": "preparo",
+          "occurrence": 1,
+          "start": 18,
+          "end": 25
+        },
+        {
           "uid": "vit-0005",
           "sourceIt": "torta",
           "sourceCz": "dort, koláč",
           "text": "torta",
           "occurrence": 1,
-          "start": 31,
-          "end": 36
+          "start": 30,
+          "end": 35
+        },
+        {
+          "uid": "vit-0230",
+          "sourceIt": "limone",
+          "sourceCz": "citron",
+          "text": "limone",
+          "occurrence": 1,
+          "start": 39,
+          "end": 45
         }
       ]
     },
     "vit-0006": {
       "sourceIt": "troppo",
       "sourceCz": "příliš / moc",
-      "sourceSentenceIt": "Parli troppo in classe.",
-      "sourceSentenceCz": "Mluvíš ve třídě příliš moc.",
+      "sourceSentenceIt": "Questa borsa è troppo grande per il bambino.",
+      "sourceSentenceCz": "Tahle taška je pro dítě příliš velká.",
       "reviewed": true,
       "concepts": [
+        {
+          "uid": "vit-0868",
+          "sourceIt": "borsa",
+          "sourceCz": "taška",
+          "text": "borsa",
+          "occurrence": 1,
+          "start": 7,
+          "end": 12
+        },
         {
           "uid": "vit-0006",
           "sourceIt": "troppo",
           "sourceCz": "příliš / moc",
           "text": "troppo",
           "occurrence": 1,
-          "start": 6,
-          "end": 12
+          "start": 15,
+          "end": 21
+        },
+        {
+          "uid": "vit-0506",
+          "sourceIt": "grande",
+          "sourceCz": "velký",
+          "text": "grande",
+          "occurrence": 1,
+          "start": 22,
+          "end": 28
+        },
+        {
+          "uid": "vit-0867",
+          "sourceIt": "bambino",
+          "sourceCz": "dítě, děcko",
+          "text": "bambino",
+          "occurrence": 1,
+          "start": 36,
+          "end": 43
         }
       ]
     },
     "vit-0007": {
       "sourceIt": "forte",
       "sourceCz": "silný",
-      "sourceSentenceIt": "Oggi c’è un vento forte.",
-      "sourceSentenceCz": "Dnes je silný vítr.",
+      "sourceSentenceIt": "Un vento forte piega gli alberi del giardino.",
+      "sourceSentenceCz": "Silný vítr ohýbá stromy v zahradě.",
       "reviewed": true,
       "concepts": [
+        {
+          "uid": "vit-1112",
+          "sourceIt": "vento",
+          "sourceCz": "vítr",
+          "text": "vento",
+          "occurrence": 1,
+          "start": 3,
+          "end": 8
+        },
         {
           "uid": "vit-0007",
           "sourceIt": "forte",
           "sourceCz": "silný",
           "text": "forte",
           "occurrence": 1,
-          "start": 18,
-          "end": 23
+          "start": 9,
+          "end": 14
+        },
+        {
+          "uid": "vit-0452",
+          "sourceIt": "albero",
+          "sourceCz": "strom",
+          "text": "alberi",
+          "occurrence": 1,
+          "start": 25,
+          "end": 31
+        },
+        {
+          "uid": "vit-0453",
+          "sourceIt": "giardino",
+          "sourceCz": "zahrada",
+          "text": "giardino",
+          "occurrence": 1,
+          "start": 36,
+          "end": 44
         }
       ]
     },
     "vit-0008": {
       "sourceIt": "cappello",
       "sourceCz": "klobouk",
-      "sourceSentenceIt": "In estate porto un cappello.",
-      "sourceSentenceCz": "V létě nosím klobouk.",
+      "sourceSentenceIt": "In estate porto un cappello bianco in spiaggia.",
+      "sourceSentenceCz": "V létě nosím na pláži bílý klobouk.",
       "reviewed": true,
       "concepts": [
         {
@@ -202,6 +301,15 @@
           "end": 9
         },
         {
+          "uid": "vit-0682",
+          "sourceIt": "portare",
+          "sourceCz": "nést; nosit; přinést",
+          "text": "porto",
+          "occurrence": 1,
+          "start": 10,
+          "end": 15
+        },
+        {
           "uid": "vit-0008",
           "sourceIt": "cappello",
           "sourceCz": "klobouk",
@@ -209,6 +317,24 @@
           "occurrence": 1,
           "start": 19,
           "end": 27
+        },
+        {
+          "uid": "vit-0501",
+          "sourceIt": "bianco",
+          "sourceCz": "bílý",
+          "text": "bianco",
+          "occurrence": 1,
+          "start": 28,
+          "end": 34
+        },
+        {
+          "uid": "vit-0699",
+          "sourceIt": "spiaggia",
+          "sourceCz": "pláž",
+          "text": "spiaggia",
+          "occurrence": 1,
+          "start": 38,
+          "end": 46
         }
       ]
     },
@@ -530,18 +656,45 @@
     "vit-0022": {
       "sourceIt": "per favore",
       "sourceCz": "prosím",
-      "sourceSentenceIt": "Parla piano, per favore.",
-      "sourceSentenceCz": "Mluv pomalu, prosím.",
+      "sourceSentenceIt": "Chiudi la finestra, per favore: ho freddo.",
+      "sourceSentenceCz": "Zavři prosím okno, je mi zima.",
       "reviewed": true,
       "concepts": [
+        {
+          "uid": "vit-0377",
+          "sourceIt": "chiudere",
+          "sourceCz": "zavřít",
+          "text": "Chiudi",
+          "occurrence": 1,
+          "start": 0,
+          "end": 6
+        },
+        {
+          "uid": "vit-0304",
+          "sourceIt": "finestra",
+          "sourceCz": "okno",
+          "text": "finestra",
+          "occurrence": 1,
+          "start": 10,
+          "end": 18
+        },
         {
           "uid": "vit-0022",
           "sourceIt": "per favore",
           "sourceCz": "prosím",
           "text": "per favore",
           "occurrence": 1,
-          "start": 13,
-          "end": 23
+          "start": 20,
+          "end": 30
+        },
+        {
+          "uid": "vit-0309",
+          "sourceIt": "freddo",
+          "sourceCz": "studený",
+          "text": "freddo",
+          "occurrence": 1,
+          "start": 35,
+          "end": 41
         }
       ]
     },
@@ -580,6 +733,15 @@
           "end": 2
         },
         {
+          "uid": "vit-1099",
+          "sourceIt": "studiare",
+          "sourceCz": "studovat, učit se",
+          "text": "studio",
+          "occurrence": 1,
+          "start": 3,
+          "end": 9
+        },
+        {
           "uid": "vit-0223",
           "sourceIt": "giorno",
           "sourceCz": "den",
@@ -614,6 +776,15 @@
           "occurrence": 1,
           "start": 10,
           "end": 18
+        },
+        {
+          "uid": "vit-1099",
+          "sourceIt": "studiare",
+          "sourceCz": "studovat, učit se",
+          "text": "studia",
+          "occurrence": 1,
+          "start": 19,
+          "end": 25
         }
       ]
     },
@@ -688,6 +859,15 @@
           "end": 6
         },
         {
+          "uid": "vit-1105",
+          "sourceIt": "pane",
+          "sourceCz": "chléb",
+          "text": "pane",
+          "occurrence": 1,
+          "start": 7,
+          "end": 11
+        },
+        {
           "uid": "vit-0028",
           "sourceIt": "e",
           "sourceCz": "a",
@@ -695,6 +875,15 @@
           "occurrence": 1,
           "start": 12,
           "end": 13
+        },
+        {
+          "uid": "vit-1113",
+          "sourceIt": "latte",
+          "sourceCz": "mléko",
+          "text": "latte",
+          "occurrence": 1,
+          "start": 14,
+          "end": 19
         }
       ]
     },
@@ -742,6 +931,15 @@
       "reviewed": true,
       "concepts": [
         {
+          "uid": "vit-1097",
+          "sourceIt": "oggi",
+          "sourceCz": "dnes",
+          "text": "Oggi",
+          "occurrence": 1,
+          "start": 0,
+          "end": 4
+        },
+        {
           "uid": "vit-0031",
           "sourceIt": "bene",
           "sourceCz": "dobře",
@@ -776,6 +974,15 @@
           "occurrence": 1,
           "start": 7,
           "end": 14
+        },
+        {
+          "uid": "vit-1097",
+          "sourceIt": "oggi",
+          "sourceCz": "dnes",
+          "text": "oggi",
+          "occurrence": 1,
+          "start": 15,
+          "end": 19
         }
       ]
     },
@@ -926,8 +1133,8 @@
     "vit-0038": {
       "sourceIt": "figlio",
       "sourceCz": "syn",
-      "sourceSentenceIt": "Mio figlio va a scuola.",
-      "sourceSentenceCz": "Můj syn chodí do školy.",
+      "sourceSentenceIt": "Mio figlio legge un libro sul treno.",
+      "sourceSentenceCz": "Můj syn čte ve vlaku knihu.",
       "reviewed": true,
       "concepts": [
         {
@@ -938,6 +1145,33 @@
           "occurrence": 1,
           "start": 4,
           "end": 10
+        },
+        {
+          "uid": "vit-0228",
+          "sourceIt": "leggere",
+          "sourceCz": "číst",
+          "text": "legge",
+          "occurrence": 1,
+          "start": 11,
+          "end": 16
+        },
+        {
+          "uid": "vit-0259",
+          "sourceIt": "libro",
+          "sourceCz": "kniha",
+          "text": "libro",
+          "occurrence": 1,
+          "start": 20,
+          "end": 25
+        },
+        {
+          "uid": "vit-0165",
+          "sourceIt": "treno",
+          "sourceCz": "vlak",
+          "text": "treno",
+          "occurrence": 1,
+          "start": 30,
+          "end": 35
         }
       ]
     },
@@ -1055,6 +1289,15 @@
           "occurrence": 1,
           "start": 0,
           "end": 3
+        },
+        {
+          "uid": "vit-1099",
+          "sourceIt": "studiare",
+          "sourceCz": "studovat, učit se",
+          "text": "studia",
+          "occurrence": 1,
+          "start": 4,
+          "end": 10
         }
       ]
     },
@@ -1118,6 +1361,15 @@
           "occurrence": 1,
           "start": 0,
           "end": 4
+        },
+        {
+          "uid": "vit-1099",
+          "sourceIt": "studiare",
+          "sourceCz": "studovat, učit se",
+          "text": "studiano",
+          "occurrence": 1,
+          "start": 5,
+          "end": 13
         }
       ]
     },
@@ -1226,6 +1478,15 @@
           "occurrence": 1,
           "start": 7,
           "end": 13
+        },
+        {
+          "uid": "vit-1103",
+          "sourceIt": "nuovo",
+          "sourceCz": "nový",
+          "text": "nuova",
+          "occurrence": 1,
+          "start": 16,
+          "end": 21
         }
       ]
     },
@@ -1295,8 +1556,8 @@
     "vit-0053": {
       "sourceIt": "sorella",
       "sourceCz": "sestra",
-      "sourceSentenceIt": "Mia sorella è insegnante.",
-      "sourceSentenceCz": "Moje sestra je učitelka.",
+      "sourceSentenceIt": "Mia sorella insegna musica ai bambini.",
+      "sourceSentenceCz": "Moje sestra učí děti hudbu.",
       "reviewed": true,
       "concepts": [
         {
@@ -1307,14 +1568,41 @@
           "occurrence": 1,
           "start": 4,
           "end": 11
+        },
+        {
+          "uid": "vit-0110",
+          "sourceIt": "insegnare",
+          "sourceCz": "učit, vyučovat",
+          "text": "insegna",
+          "occurrence": 1,
+          "start": 12,
+          "end": 19
+        },
+        {
+          "uid": "vit-0671",
+          "sourceIt": "musica",
+          "sourceCz": "hudba",
+          "text": "musica",
+          "occurrence": 1,
+          "start": 20,
+          "end": 26
+        },
+        {
+          "uid": "vit-0867",
+          "sourceIt": "bambino",
+          "sourceCz": "dítě, děcko",
+          "text": "bambini",
+          "occurrence": 1,
+          "start": 30,
+          "end": 37
         }
       ]
     },
     "vit-0054": {
       "sourceIt": "fratello",
       "sourceCz": "bratr",
-      "sourceSentenceIt": "Mio fratello è alto.",
-      "sourceSentenceCz": "Můj bratr je vysoký.",
+      "sourceSentenceIt": "Mio fratello gioca a calcio in giardino.",
+      "sourceSentenceCz": "Můj bratr hraje na zahradě fotbal.",
       "reviewed": true,
       "concepts": [
         {
@@ -1325,6 +1613,33 @@
           "occurrence": 1,
           "start": 4,
           "end": 12
+        },
+        {
+          "uid": "vit-0133",
+          "sourceIt": "giocare",
+          "sourceCz": "hrát, hrát si",
+          "text": "gioca",
+          "occurrence": 1,
+          "start": 13,
+          "end": 18
+        },
+        {
+          "uid": "vit-0246",
+          "sourceIt": "calcio",
+          "sourceCz": "fotbal",
+          "text": "calcio",
+          "occurrence": 1,
+          "start": 21,
+          "end": 27
+        },
+        {
+          "uid": "vit-0453",
+          "sourceIt": "giardino",
+          "sourceCz": "zahrada",
+          "text": "giardino",
+          "occurrence": 1,
+          "start": 31,
+          "end": 39
         }
       ]
     },
@@ -1430,8 +1745,8 @@
     "vit-0058": {
       "sourceIt": "nonno",
       "sourceCz": "dědeček",
-      "sourceSentenceIt": "Mio nonno beve il tè.",
-      "sourceSentenceCz": "Můj dědeček pije čaj.",
+      "sourceSentenceIt": "Il nonno legge il giornale in giardino.",
+      "sourceSentenceCz": "Dědeček čte na zahradě noviny.",
       "reviewed": true,
       "concepts": [
         {
@@ -1440,8 +1755,35 @@
           "sourceCz": "dědeček",
           "text": "nonno",
           "occurrence": 1,
-          "start": 4,
-          "end": 9
+          "start": 3,
+          "end": 8
+        },
+        {
+          "uid": "vit-0228",
+          "sourceIt": "leggere",
+          "sourceCz": "číst",
+          "text": "legge",
+          "occurrence": 1,
+          "start": 9,
+          "end": 14
+        },
+        {
+          "uid": "vit-0898",
+          "sourceIt": "giornale",
+          "sourceCz": "noviny",
+          "text": "giornale",
+          "occurrence": 1,
+          "start": 18,
+          "end": 26
+        },
+        {
+          "uid": "vit-0453",
+          "sourceIt": "giardino",
+          "sourceCz": "zahrada",
+          "text": "giardino",
+          "occurrence": 1,
+          "start": 30,
+          "end": 38
         }
       ]
     },
@@ -1577,6 +1919,15 @@
           "occurrence": 1,
           "start": 5,
           "end": 11
+        },
+        {
+          "uid": "vit-1097",
+          "sourceIt": "oggi",
+          "sourceCz": "dnes",
+          "text": "oggi",
+          "occurrence": 1,
+          "start": 12,
+          "end": 16
         }
       ]
     },
@@ -1741,6 +2092,15 @@
           "end": 10
         },
         {
+          "uid": "vit-1097",
+          "sourceIt": "oggi",
+          "sourceCz": "dnes",
+          "text": "oggi",
+          "occurrence": 1,
+          "start": 17,
+          "end": 21
+        },
+        {
           "uid": "vit-0408",
           "sourceIt": "piovere",
           "sourceCz": "pršet",
@@ -1748,6 +2108,15 @@
           "occurrence": 1,
           "start": 23,
           "end": 28
+        },
+        {
+          "uid": "vit-1112",
+          "sourceIt": "vento",
+          "sourceCz": "vítr",
+          "text": "vento",
+          "occurrence": 1,
+          "start": 34,
+          "end": 39
         },
         {
           "uid": "vit-0309",
@@ -2020,6 +2389,15 @@
           "end": 9
         },
         {
+          "uid": "vit-1097",
+          "sourceIt": "oggi",
+          "sourceCz": "dnes",
+          "text": "oggi",
+          "occurrence": 1,
+          "start": 10,
+          "end": 14
+        },
+        {
           "uid": "vit-0081",
           "sourceIt": "cappotto",
           "sourceCz": "kabát",
@@ -2073,6 +2451,15 @@
       "sourceSentenceCz": "Dnes má na sobě černou sukni a bílou košili.",
       "reviewed": true,
       "concepts": [
+        {
+          "uid": "vit-1097",
+          "sourceIt": "oggi",
+          "sourceCz": "dnes",
+          "text": "Oggi",
+          "occurrence": 1,
+          "start": 0,
+          "end": 4
+        },
         {
           "uid": "vit-0083",
           "sourceIt": "gonna",
@@ -2378,6 +2765,15 @@
           "occurrence": 1,
           "start": 25,
           "end": 36
+        },
+        {
+          "uid": "vit-1100",
+          "sourceIt": "sera",
+          "sourceCz": "večer",
+          "text": "sera",
+          "occurrence": 1,
+          "start": 42,
+          "end": 46
         }
       ]
     },
@@ -2407,6 +2803,15 @@
           "end": 11
         },
         {
+          "uid": "vit-1101",
+          "sourceIt": "bere",
+          "sourceCz": "pít",
+          "text": "bevo",
+          "occurrence": 1,
+          "start": 12,
+          "end": 16
+        },
+        {
           "uid": "vit-0285",
           "sourceIt": "caffè",
           "sourceCz": "káva",
@@ -2429,27 +2834,45 @@
     "vit-0095": {
       "sourceIt": "caldo",
       "sourceCz": "teplý",
-      "sourceSentenceIt": "Mi piace il tè caldo quando fuori piove.",
-      "sourceSentenceCz": "Mám rád teplý čaj, když venku prší.",
+      "sourceSentenceIt": "Il caffè caldo è pronto sul tavolo.",
+      "sourceSentenceCz": "Teplá káva je připravená na stole.",
       "reviewed": true,
       "concepts": [
+        {
+          "uid": "vit-0285",
+          "sourceIt": "caffè",
+          "sourceCz": "káva",
+          "text": "caffè",
+          "occurrence": 1,
+          "start": 3,
+          "end": 8
+        },
         {
           "uid": "vit-0095",
           "sourceIt": "caldo",
           "sourceCz": "teplý",
           "text": "caldo",
           "occurrence": 1,
-          "start": 15,
-          "end": 20
+          "start": 9,
+          "end": 14
         },
         {
-          "uid": "vit-0408",
-          "sourceIt": "piovere",
-          "sourceCz": "pršet",
-          "text": "piove",
+          "uid": "vit-0480",
+          "sourceIt": "pronto",
+          "sourceCz": "připravený; hotový",
+          "text": "pronto",
           "occurrence": 1,
-          "start": 34,
-          "end": 39
+          "start": 17,
+          "end": 23
+        },
+        {
+          "uid": "vit-0604",
+          "sourceIt": "tavolo",
+          "sourceCz": "stůl",
+          "text": "tavolo",
+          "occurrence": 1,
+          "start": 28,
+          "end": 34
         }
       ]
     },
@@ -2693,14 +3116,23 @@
           "occurrence": 1,
           "start": 25,
           "end": 33
+        },
+        {
+          "uid": "vit-1105",
+          "sourceIt": "pane",
+          "sourceCz": "chléb",
+          "text": "pane",
+          "occurrence": 1,
+          "start": 37,
+          "end": 41
         }
       ]
     },
     "vit-0103": {
       "sourceIt": "pompelmo",
       "sourceCz": "grep",
-      "sourceSentenceIt": "Il pompelmo è un po’ amaro, ma mi piace.",
-      "sourceSentenceCz": "Grep je trochu hořký, ale chutná mi.",
+      "sourceSentenceIt": "Taglio un pompelmo e mangio una banana.",
+      "sourceSentenceCz": "Krájím grep a jím banán.",
       "reviewed": true,
       "concepts": [
         {
@@ -2709,8 +3141,26 @@
           "sourceCz": "grep",
           "text": "pompelmo",
           "occurrence": 1,
-          "start": 3,
-          "end": 11
+          "start": 10,
+          "end": 18
+        },
+        {
+          "uid": "vit-0138",
+          "sourceIt": "mangiare",
+          "sourceCz": "jíst",
+          "text": "mangio",
+          "occurrence": 1,
+          "start": 21,
+          "end": 27
+        },
+        {
+          "uid": "vit-0237",
+          "sourceIt": "banana",
+          "sourceCz": "banán",
+          "text": "banana",
+          "occurrence": 1,
+          "start": 32,
+          "end": 38
         }
       ]
     },
@@ -2757,6 +3207,15 @@
       "sourceSentenceCz": "Ke snídani jím jogurt s borůvkami.",
       "reviewed": true,
       "concepts": [
+        {
+          "uid": "vit-1107",
+          "sourceIt": "colazione",
+          "sourceCz": "snídaně",
+          "text": "colazione",
+          "occurrence": 1,
+          "start": 2,
+          "end": 11
+        },
         {
           "uid": "vit-0138",
           "sourceIt": "mangiare",
@@ -2900,6 +3359,15 @@
           "occurrence": 1,
           "start": 4,
           "end": 11
+        },
+        {
+          "uid": "vit-1102",
+          "sourceIt": "scuola",
+          "sourceCz": "škola",
+          "text": "scuola",
+          "occurrence": 1,
+          "start": 23,
+          "end": 29
         }
       ]
     },
@@ -2936,6 +3404,15 @@
           "occurrence": 1,
           "start": 29,
           "end": 33
+        },
+        {
+          "uid": "vit-1100",
+          "sourceIt": "sera",
+          "sourceCz": "večer",
+          "text": "sera",
+          "occurrence": 1,
+          "start": 37,
+          "end": 41
         }
       ]
     },
@@ -3199,6 +3676,15 @@
           "end": 30
         },
         {
+          "uid": "vit-1105",
+          "sourceIt": "pane",
+          "sourceCz": "chléb",
+          "text": "pane",
+          "occurrence": 1,
+          "start": 36,
+          "end": 40
+        },
+        {
           "uid": "vit-0095",
           "sourceIt": "caldo",
           "sourceCz": "teplý",
@@ -3305,24 +3791,60 @@
           "occurrence": 1,
           "start": 0,
           "end": 4
+        },
+        {
+          "uid": "vit-1097",
+          "sourceIt": "oggi",
+          "sourceCz": "dnes",
+          "text": "oggi",
+          "occurrence": 1,
+          "start": 10,
+          "end": 14
         }
       ]
     },
     "vit-0123": {
       "sourceIt": "ufficio",
       "sourceCz": "kancelář, úřad",
-      "sourceSentenceIt": "Oggi sono in ufficio fino alle cinque.",
-      "sourceSentenceCz": "Dnes jsem v kanceláři do pěti.",
+      "sourceSentenceIt": "La segretaria apre la finestra dell'ufficio.",
+      "sourceSentenceCz": "Sekretářka otevírá okno kanceláře.",
       "reviewed": true,
       "concepts": [
+        {
+          "uid": "vit-0598",
+          "sourceIt": "segretaria",
+          "sourceCz": "sekretářka",
+          "text": "segretaria",
+          "occurrence": 1,
+          "start": 3,
+          "end": 13
+        },
+        {
+          "uid": "vit-0281",
+          "sourceIt": "aprire",
+          "sourceCz": "otevřít",
+          "text": "apre",
+          "occurrence": 1,
+          "start": 14,
+          "end": 18
+        },
+        {
+          "uid": "vit-0304",
+          "sourceIt": "finestra",
+          "sourceCz": "okno",
+          "text": "finestra",
+          "occurrence": 1,
+          "start": 22,
+          "end": 30
+        },
         {
           "uid": "vit-0123",
           "sourceIt": "ufficio",
           "sourceCz": "kancelář, úřad",
           "text": "ufficio",
           "occurrence": 1,
-          "start": 13,
-          "end": 20
+          "start": 36,
+          "end": 43
         }
       ]
     },
@@ -3359,6 +3881,15 @@
           "occurrence": 1,
           "start": 29,
           "end": 33
+        },
+        {
+          "uid": "vit-1100",
+          "sourceIt": "sera",
+          "sourceCz": "večer",
+          "text": "sera",
+          "occurrence": 1,
+          "start": 37,
+          "end": 41
         }
       ]
     },
@@ -3451,6 +3982,15 @@
           "end": 22
         },
         {
+          "uid": "vit-1097",
+          "sourceIt": "oggi",
+          "sourceCz": "dnes",
+          "text": "oggi",
+          "occurrence": 1,
+          "start": 27,
+          "end": 31
+        },
+        {
           "uid": "vit-0264",
           "sourceIt": "stanco",
           "sourceCz": "unavený",
@@ -3468,6 +4008,15 @@
       "sourceSentenceCz": "Dnes se cítím špatně, tak zůstanu doma.",
       "reviewed": true,
       "concepts": [
+        {
+          "uid": "vit-1097",
+          "sourceIt": "oggi",
+          "sourceCz": "dnes",
+          "text": "Oggi",
+          "occurrence": 1,
+          "start": 0,
+          "end": 4
+        },
         {
           "uid": "vit-0128",
           "sourceIt": "male",
@@ -3550,6 +4099,15 @@
       "reviewed": true,
       "concepts": [
         {
+          "uid": "vit-1097",
+          "sourceIt": "oggi",
+          "sourceCz": "dnes",
+          "text": "Oggi",
+          "occurrence": 1,
+          "start": 0,
+          "end": 4
+        },
+        {
           "uid": "vit-0131",
           "sourceIt": "allegro",
           "sourceCz": "veselý, radostný",
@@ -3611,6 +4169,15 @@
           "occurrence": 1,
           "start": 9,
           "end": 16
+        },
+        {
+          "uid": "vit-1098",
+          "sourceIt": "amico",
+          "sourceCz": "kamarád, přítel",
+          "text": "amici",
+          "occurrence": 1,
+          "start": 34,
+          "end": 39
         },
         {
           "uid": "vit-0372",
@@ -3719,6 +4286,15 @@
           "occurrence": 1,
           "start": 3,
           "end": 9
+        },
+        {
+          "uid": "vit-1101",
+          "sourceIt": "bere",
+          "sourceCz": "pít",
+          "text": "bevo",
+          "occurrence": 1,
+          "start": 10,
+          "end": 14
         },
         {
           "uid": "vit-0285",
@@ -3955,6 +4531,15 @@
       "reviewed": true,
       "concepts": [
         {
+          "uid": "vit-1097",
+          "sourceIt": "oggi",
+          "sourceCz": "dnes",
+          "text": "Oggi",
+          "occurrence": 1,
+          "start": 0,
+          "end": 4
+        },
+        {
           "uid": "vit-0145",
           "sourceIt": "casa",
           "sourceCz": "dům, domov",
@@ -4070,6 +4655,15 @@
           "occurrence": 1,
           "start": 14,
           "end": 21
+        },
+        {
+          "uid": "vit-1099",
+          "sourceIt": "studiare",
+          "sourceCz": "studovat, učit se",
+          "text": "studiare",
+          "occurrence": 1,
+          "start": 29,
+          "end": 37
         }
       ]
     },
@@ -4580,8 +5174,8 @@
     "vit-0165": {
       "sourceIt": "treno",
       "sourceCz": "vlak",
-      "sourceSentenceIt": "Il treno parte alle sette, quindi usciamo presto.",
-      "sourceSentenceCz": "Vlak odjíždí v sedm, tak vyjdeme brzy.",
+      "sourceSentenceIt": "Il treno attraversa il ponte vicino al castello.",
+      "sourceSentenceCz": "Vlak přejíždí most poblíž hradu.",
       "reviewed": true,
       "concepts": [
         {
@@ -4592,6 +5186,42 @@
           "occurrence": 1,
           "start": 3,
           "end": 8
+        },
+        {
+          "uid": "vit-0763",
+          "sourceIt": "attraversare",
+          "sourceCz": "přejít; projet",
+          "text": "attraversa",
+          "occurrence": 1,
+          "start": 9,
+          "end": 19
+        },
+        {
+          "uid": "vit-0335",
+          "sourceIt": "ponte",
+          "sourceCz": "most",
+          "text": "ponte",
+          "occurrence": 1,
+          "start": 23,
+          "end": 28
+        },
+        {
+          "uid": "vit-0076",
+          "sourceIt": "vicino",
+          "sourceCz": "blízko",
+          "text": "vicino",
+          "occurrence": 1,
+          "start": 29,
+          "end": 35
+        },
+        {
+          "uid": "vit-0628",
+          "sourceIt": "castello",
+          "sourceCz": "hrad; zámek",
+          "text": "castello",
+          "occurrence": 1,
+          "start": 39,
+          "end": 47
         }
       ]
     },
@@ -4720,6 +5350,15 @@
           "end": 9
         },
         {
+          "uid": "vit-1101",
+          "sourceIt": "bere",
+          "sourceCz": "pít",
+          "text": "bevo",
+          "occurrence": 1,
+          "start": 10,
+          "end": 14
+        },
+        {
           "uid": "vit-0285",
           "sourceIt": "caffè",
           "sourceCz": "káva",
@@ -4763,6 +5402,15 @@
           "occurrence": 1,
           "start": 3,
           "end": 11
+        },
+        {
+          "uid": "vit-1097",
+          "sourceIt": "oggi",
+          "sourceCz": "dnes",
+          "text": "oggi",
+          "occurrence": 1,
+          "start": 36,
+          "end": 40
         },
         {
           "uid": "vit-0165",
@@ -4898,6 +5546,15 @@
           "occurrence": 1,
           "start": 9,
           "end": 16
+        },
+        {
+          "uid": "vit-1098",
+          "sourceIt": "amico",
+          "sourceCz": "kamarád, přítel",
+          "text": "amici",
+          "occurrence": 1,
+          "start": 34,
+          "end": 39
         }
       ]
     },
@@ -4952,6 +5609,15 @@
           "occurrence": 1,
           "start": 12,
           "end": 18
+        },
+        {
+          "uid": "vit-1099",
+          "sourceIt": "studiare",
+          "sourceCz": "studovat, učit se",
+          "text": "studiare",
+          "occurrence": 1,
+          "start": 34,
+          "end": 42
         }
       ]
     },
@@ -5132,6 +5798,15 @@
           "occurrence": 1,
           "start": 6,
           "end": 11
+        },
+        {
+          "uid": "vit-1097",
+          "sourceIt": "oggi",
+          "sourceCz": "dnes",
+          "text": "oggi",
+          "occurrence": 1,
+          "start": 25,
+          "end": 29
         }
       ]
     },
@@ -5174,8 +5849,8 @@
     "vit-0185": {
       "sourceIt": "rispondere",
       "sourceCz": "odpovědět",
-      "sourceSentenceIt": "Puoi rispondere alla mia domanda?",
-      "sourceSentenceCz": "Můžeš odpovědět na mou otázku?",
+      "sourceSentenceIt": "Puoi rispondere al messaggio di mia sorella?",
+      "sourceSentenceCz": "Můžeš odpovědět na vzkaz od mé sestry?",
       "reviewed": true,
       "concepts": [
         {
@@ -5186,6 +5861,24 @@
           "occurrence": 1,
           "start": 5,
           "end": 15
+        },
+        {
+          "uid": "vit-0801",
+          "sourceIt": "messaggio",
+          "sourceCz": "vzkaz, poselství",
+          "text": "messaggio",
+          "occurrence": 1,
+          "start": 19,
+          "end": 28
+        },
+        {
+          "uid": "vit-0053",
+          "sourceIt": "sorella",
+          "sourceCz": "sestra",
+          "text": "sorella",
+          "occurrence": 1,
+          "start": 36,
+          "end": 43
         }
       ]
     },
@@ -5368,6 +6061,15 @@
       "reviewed": true,
       "concepts": [
         {
+          "uid": "vit-1103",
+          "sourceIt": "nuovo",
+          "sourceCz": "nový",
+          "text": "nuovo",
+          "occurrence": 1,
+          "start": 3,
+          "end": 8
+        },
+        {
           "uid": "vit-0191",
           "sourceIt": "simpatico",
           "sourceCz": "sympatický",
@@ -5386,6 +6088,15 @@
       "reviewed": true,
       "concepts": [
         {
+          "uid": "vit-1098",
+          "sourceIt": "amico",
+          "sourceCz": "kamarád, přítel",
+          "text": "amico",
+          "occurrence": 1,
+          "start": 7,
+          "end": 12
+        },
+        {
           "uid": "vit-0192",
           "sourceIt": "slovacco",
           "sourceCz": "Slovák, slovenský",
@@ -5393,6 +6104,15 @@
           "occurrence": 1,
           "start": 13,
           "end": 21
+        },
+        {
+          "uid": "vit-1099",
+          "sourceIt": "studiare",
+          "sourceCz": "studovat, učit se",
+          "text": "studia",
+          "occurrence": 1,
+          "start": 22,
+          "end": 28
         }
       ]
     },
@@ -5411,6 +6131,15 @@
           "occurrence": 1,
           "start": 4,
           "end": 6
+        },
+        {
+          "uid": "vit-1108",
+          "sourceIt": "risposta",
+          "sourceCz": "odpověď",
+          "text": "risposta",
+          "occurrence": 1,
+          "start": 10,
+          "end": 18
         }
       ]
     },
@@ -5484,6 +6213,24 @@
       "sourceSentenceCz": "K snídani piju čerstvou pomerančovou šťávu.",
       "reviewed": true,
       "concepts": [
+        {
+          "uid": "vit-1107",
+          "sourceIt": "colazione",
+          "sourceCz": "snídaně",
+          "text": "colazione",
+          "occurrence": 1,
+          "start": 2,
+          "end": 11
+        },
+        {
+          "uid": "vit-1101",
+          "sourceIt": "bere",
+          "sourceCz": "pít",
+          "text": "bevo",
+          "occurrence": 1,
+          "start": 12,
+          "end": 16
+        },
         {
           "uid": "vit-0196",
           "sourceIt": "spremuta",
@@ -5629,6 +6376,15 @@
       "reviewed": true,
       "concepts": [
         {
+          "uid": "vit-1110",
+          "sourceIt": "banca",
+          "sourceCz": "banka",
+          "text": "banca",
+          "occurrence": 1,
+          "start": 3,
+          "end": 8
+        },
+        {
           "uid": "vit-0201",
           "sourceIt": "trovarsi",
           "sourceCz": "nacházet se, být",
@@ -5728,6 +6484,15 @@
           "end": 6
         },
         {
+          "uid": "vit-1101",
+          "sourceIt": "bere",
+          "sourceCz": "pít",
+          "text": "bevo",
+          "occurrence": 1,
+          "start": 7,
+          "end": 11
+        },
+        {
           "uid": "vit-0104",
           "sourceIt": "bicchiere",
           "sourceCz": "sklenice",
@@ -5781,6 +6546,15 @@
       "sourceSentenceCz": "Dnes mám nulový volný čas.",
       "reviewed": true,
       "concepts": [
+        {
+          "uid": "vit-1097",
+          "sourceIt": "oggi",
+          "sourceCz": "dnes",
+          "text": "Oggi",
+          "occurrence": 1,
+          "start": 0,
+          "end": 4
+        },
         {
           "uid": "vit-0206",
           "sourceIt": "zero",
@@ -5969,6 +6743,15 @@
           "occurrence": 1,
           "start": 7,
           "end": 16
+        },
+        {
+          "uid": "vit-1098",
+          "sourceIt": "amico",
+          "sourceCz": "kamarád, přítel",
+          "text": "amici",
+          "occurrence": 1,
+          "start": 31,
+          "end": 36
         }
       ]
     },
@@ -6002,18 +6785,54 @@
     "vit-0214": {
       "sourceIt": "dopo",
       "sourceCz": "po, potom",
-      "sourceSentenceIt": "A dopo.",
-      "sourceSentenceCz": "Zatím.",
+      "sourceSentenceIt": "Dopo il concerto torno a casa a piedi.",
+      "sourceSentenceCz": "Po koncertě se vracím domů pěšky.",
       "reviewed": true,
       "concepts": [
         {
           "uid": "vit-0214",
           "sourceIt": "dopo",
           "sourceCz": "po, potom",
-          "text": "dopo",
+          "text": "Dopo",
           "occurrence": 1,
-          "start": 2,
-          "end": 6
+          "start": 0,
+          "end": 4
+        },
+        {
+          "uid": "vit-0540",
+          "sourceIt": "concerto",
+          "sourceCz": "koncert",
+          "text": "concerto",
+          "occurrence": 1,
+          "start": 8,
+          "end": 16
+        },
+        {
+          "uid": "vit-0164",
+          "sourceIt": "tornare",
+          "sourceCz": "vrátit se",
+          "text": "torno",
+          "occurrence": 1,
+          "start": 17,
+          "end": 22
+        },
+        {
+          "uid": "vit-0145",
+          "sourceIt": "casa",
+          "sourceCz": "dům, domov",
+          "text": "casa",
+          "occurrence": 1,
+          "start": 25,
+          "end": 29
+        },
+        {
+          "uid": "vit-1008",
+          "sourceIt": "a piedi",
+          "sourceCz": "pěšky",
+          "text": "a piedi",
+          "occurrence": 1,
+          "start": 30,
+          "end": 37
         }
       ]
     },
@@ -6032,6 +6851,15 @@
           "occurrence": 1,
           "start": 0,
           "end": 4
+        },
+        {
+          "uid": "vit-1115",
+          "sourceIt": "quaderno",
+          "sourceCz": "sešit",
+          "text": "quaderno",
+          "occurrence": 1,
+          "start": 12,
+          "end": 20
         },
         {
           "uid": "vit-0604",
@@ -6338,6 +7166,15 @@
           "occurrence": 1,
           "start": 16,
           "end": 20
+        },
+        {
+          "uid": "vit-1098",
+          "sourceIt": "amico",
+          "sourceCz": "kamarád, přítel",
+          "text": "amici",
+          "occurrence": 1,
+          "start": 24,
+          "end": 29
         }
       ]
     },
@@ -6348,6 +7185,15 @@
       "sourceSentenceCz": "Jeden italský kamarád mi píše každý týden.",
       "reviewed": true,
       "concepts": [
+        {
+          "uid": "vit-1098",
+          "sourceIt": "amico",
+          "sourceCz": "kamarád, přítel",
+          "text": "amico",
+          "occurrence": 1,
+          "start": 3,
+          "end": 8
+        },
         {
           "uid": "vit-0227",
           "sourceIt": "italiano",
@@ -6443,18 +7289,45 @@
     "vit-0230": {
       "sourceIt": "limone",
       "sourceCz": "citron",
-      "sourceSentenceIt": "Metto un po' di limone nel tè.",
-      "sourceSentenceCz": "Dávám si trochu citronu do čaje.",
+      "sourceSentenceIt": "Metto il limone nella borsa con una mela.",
+      "sourceSentenceCz": "Dávám citron do tašky k jablku.",
       "reviewed": true,
       "concepts": [
+        {
+          "uid": "vit-0567",
+          "sourceIt": "mettere",
+          "sourceCz": "dát někam; položit",
+          "text": "Metto",
+          "occurrence": 1,
+          "start": 0,
+          "end": 5
+        },
         {
           "uid": "vit-0230",
           "sourceIt": "limone",
           "sourceCz": "citron",
           "text": "limone",
           "occurrence": 1,
-          "start": 16,
-          "end": 22
+          "start": 9,
+          "end": 15
+        },
+        {
+          "uid": "vit-0868",
+          "sourceIt": "borsa",
+          "sourceCz": "taška",
+          "text": "borsa",
+          "occurrence": 1,
+          "start": 22,
+          "end": 27
+        },
+        {
+          "uid": "vit-0106",
+          "sourceIt": "mela",
+          "sourceCz": "jablko",
+          "text": "mela",
+          "occurrence": 1,
+          "start": 36,
+          "end": 40
         }
       ]
     },
@@ -6502,6 +7375,15 @@
       "reviewed": true,
       "concepts": [
         {
+          "uid": "vit-1097",
+          "sourceIt": "oggi",
+          "sourceCz": "dnes",
+          "text": "Oggi",
+          "occurrence": 1,
+          "start": 0,
+          "end": 4
+        },
+        {
           "uid": "vit-0232",
           "sourceIt": "meno",
           "sourceCz": "méně",
@@ -6536,6 +7418,15 @@
           "occurrence": 1,
           "start": 19,
           "end": 24
+        },
+        {
+          "uid": "vit-1114",
+          "sourceIt": "pranzo",
+          "sourceCz": "oběd",
+          "text": "pranzo",
+          "occurrence": 1,
+          "start": 29,
+          "end": 35
         }
       ]
     },
@@ -6554,6 +7445,15 @@
           "occurrence": 1,
           "start": 0,
           "end": 12
+        },
+        {
+          "uid": "vit-1116",
+          "sourceIt": "sedersi",
+          "sourceCz": "sednout si, posadit se",
+          "text": "sederti",
+          "occurrence": 1,
+          "start": 19,
+          "end": 26
         }
       ]
     },
@@ -6572,6 +7472,15 @@
           "occurrence": 1,
           "start": 7,
           "end": 12
+        },
+        {
+          "uid": "vit-1115",
+          "sourceIt": "quaderno",
+          "sourceCz": "sešit",
+          "text": "quaderno",
+          "occurrence": 1,
+          "start": 13,
+          "end": 21
         },
         {
           "uid": "vit-0135",
@@ -6608,6 +7517,15 @@
           "occurrence": 1,
           "start": 10,
           "end": 17
+        },
+        {
+          "uid": "vit-1114",
+          "sourceIt": "pranzo",
+          "sourceCz": "oběd",
+          "text": "pranzo",
+          "occurrence": 1,
+          "start": 23,
+          "end": 29
         }
       ]
     },
@@ -6618,6 +7536,15 @@
       "sourceSentenceCz": "K snídani si dám banán a kávu.",
       "reviewed": true,
       "concepts": [
+        {
+          "uid": "vit-1107",
+          "sourceIt": "colazione",
+          "sourceCz": "snídaně",
+          "text": "colazione",
+          "occurrence": 1,
+          "start": 2,
+          "end": 11
+        },
         {
           "uid": "vit-0237",
           "sourceIt": "banana",
@@ -6735,6 +7662,15 @@
       "sourceSentenceCz": "Tenhle chléb je velmi dobrý.",
       "reviewed": true,
       "concepts": [
+        {
+          "uid": "vit-1105",
+          "sourceIt": "pane",
+          "sourceCz": "chléb",
+          "text": "pane",
+          "occurrence": 1,
+          "start": 7,
+          "end": 11
+        },
         {
           "uid": "vit-0241",
           "sourceIt": "buono",
@@ -6905,6 +7841,15 @@
           "occurrence": 1,
           "start": 19,
           "end": 25
+        },
+        {
+          "uid": "vit-1098",
+          "sourceIt": "amico",
+          "sourceCz": "kamarád, přítel",
+          "text": "amici",
+          "occurrence": 1,
+          "start": 34,
+          "end": 39
         }
       ]
     },
@@ -6960,6 +7905,15 @@
       "sourceSentenceCz": "Dnešní úlovek dne je velmi čerstvý.",
       "reviewed": true,
       "concepts": [
+        {
+          "uid": "vit-1097",
+          "sourceIt": "oggi",
+          "sourceCz": "dnes",
+          "text": "Oggi",
+          "occurrence": 1,
+          "start": 0,
+          "end": 4
+        },
         {
           "uid": "vit-0248",
           "sourceIt": "pescato",
@@ -7193,6 +8147,15 @@
           "occurrence": 1,
           "start": 0,
           "end": 3
+        },
+        {
+          "uid": "vit-1103",
+          "sourceIt": "nuovo",
+          "sourceCz": "nový",
+          "text": "nuovi",
+          "occurrence": 1,
+          "start": 15,
+          "end": 20
         }
       ]
     },
@@ -7303,6 +8266,15 @@
       "reviewed": true,
       "concepts": [
         {
+          "uid": "vit-1097",
+          "sourceIt": "oggi",
+          "sourceCz": "dnes",
+          "text": "Oggi",
+          "occurrence": 1,
+          "start": 0,
+          "end": 4
+        },
+        {
           "uid": "vit-0260",
           "sourceIt": "solo",
           "sourceCz": "sám",
@@ -7406,18 +8378,45 @@
     "vit-0264": {
       "sourceIt": "stanco",
       "sourceCz": "unavený",
-      "sourceSentenceIt": "Oggi sono stanco.",
-      "sourceSentenceCz": "Dnes jsem unavený.",
+      "sourceSentenceIt": "Il bambino stanco dorme nel letto.",
+      "sourceSentenceCz": "Unavené dítě spí v posteli.",
       "reviewed": true,
       "concepts": [
+        {
+          "uid": "vit-0867",
+          "sourceIt": "bambino",
+          "sourceCz": "dítě, děcko",
+          "text": "bambino",
+          "occurrence": 1,
+          "start": 3,
+          "end": 10
+        },
         {
           "uid": "vit-0264",
           "sourceIt": "stanco",
           "sourceCz": "unavený",
           "text": "stanco",
           "occurrence": 1,
-          "start": 10,
-          "end": 16
+          "start": 11,
+          "end": 17
+        },
+        {
+          "uid": "vit-0297",
+          "sourceIt": "dormire",
+          "sourceCz": "spát",
+          "text": "dorme",
+          "occurrence": 1,
+          "start": 18,
+          "end": 23
+        },
+        {
+          "uid": "vit-0798",
+          "sourceIt": "letto",
+          "sourceCz": "postel, lůžko",
+          "text": "letto",
+          "occurrence": 1,
+          "start": 28,
+          "end": 33
         }
       ]
     },
@@ -7436,6 +8435,15 @@
           "occurrence": 1,
           "start": 0,
           "end": 9
+        },
+        {
+          "uid": "vit-1097",
+          "sourceIt": "oggi",
+          "sourceCz": "dnes",
+          "text": "oggi",
+          "occurrence": 1,
+          "start": 10,
+          "end": 14
         }
       ]
     },
@@ -7446,6 +8454,15 @@
       "sourceSentenceCz": "Tento čaj je příliš sladký.",
       "reviewed": true,
       "concepts": [
+        {
+          "uid": "vit-1106",
+          "sourceIt": "tè",
+          "sourceCz": "čaj",
+          "text": "tè",
+          "occurrence": 1,
+          "start": 7,
+          "end": 9
+        },
         {
           "uid": "vit-0266",
           "sourceIt": "dolce",
@@ -7491,6 +8508,15 @@
       "sourceSentenceCz": "Dnes jsem nemocný.",
       "reviewed": true,
       "concepts": [
+        {
+          "uid": "vit-1097",
+          "sourceIt": "oggi",
+          "sourceCz": "dnes",
+          "text": "Oggi",
+          "occurrence": 1,
+          "start": 0,
+          "end": 4
+        },
         {
           "uid": "vit-0268",
           "sourceIt": "malato",
@@ -7553,6 +8579,15 @@
           "occurrence": 1,
           "start": 0,
           "end": 10
+        },
+        {
+          "uid": "vit-1106",
+          "sourceIt": "tè",
+          "sourceCz": "čaj",
+          "text": "tè",
+          "occurrence": 1,
+          "start": 14,
+          "end": 16
         },
         {
           "uid": "vit-0285",
@@ -7730,18 +8765,45 @@
     "vit-0277": {
       "sourceIt": "aereo",
       "sourceCz": "letadlo",
-      "sourceSentenceIt": "Preferiamo l'aereo.",
-      "sourceSentenceCz": "Máme raději letadlo.",
+      "sourceSentenceIt": "Guardo l'aereo dalla finestra della mia camera.",
+      "sourceSentenceCz": "Dívám se z okna svého pokoje na letadlo.",
       "reviewed": true,
       "concepts": [
+        {
+          "uid": "vit-0100",
+          "sourceIt": "guardare",
+          "sourceCz": "dívat se, sledovat",
+          "text": "Guardo",
+          "occurrence": 1,
+          "start": 0,
+          "end": 6
+        },
         {
           "uid": "vit-0277",
           "sourceIt": "aereo",
           "sourceCz": "letadlo",
           "text": "aereo",
           "occurrence": 1,
-          "start": 13,
-          "end": 18
+          "start": 9,
+          "end": 14
+        },
+        {
+          "uid": "vit-0304",
+          "sourceIt": "finestra",
+          "sourceCz": "okno",
+          "text": "finestra",
+          "occurrence": 1,
+          "start": 21,
+          "end": 29
+        },
+        {
+          "uid": "vit-0242",
+          "sourceIt": "camera",
+          "sourceCz": "pokoj",
+          "text": "camera",
+          "occurrence": 1,
+          "start": 40,
+          "end": 46
         }
       ]
     },
@@ -7924,6 +8986,15 @@
       "reviewed": true,
       "concepts": [
         {
+          "uid": "vit-1106",
+          "sourceIt": "tè",
+          "sourceCz": "čaj",
+          "text": "tè",
+          "occurrence": 1,
+          "start": 14,
+          "end": 16
+        },
+        {
           "uid": "vit-0285",
           "sourceIt": "caffè",
           "sourceCz": "káva",
@@ -8093,6 +9164,15 @@
           "occurrence": 1,
           "start": 11,
           "end": 17
+        },
+        {
+          "uid": "vit-1097",
+          "sourceIt": "oggi",
+          "sourceCz": "dnes",
+          "text": "oggi",
+          "occurrence": 1,
+          "start": 18,
+          "end": 22
         }
       ]
     },
@@ -8207,18 +9287,45 @@
     "vit-0295": {
       "sourceIt": "destro",
       "sourceCz": "pravý",
-      "sourceSentenceIt": "Il braccio destro è più forte.",
-      "sourceSentenceCz": "Pravá paže je silnější.",
+      "sourceSentenceIt": "Metto il guanto destro nella borsa.",
+      "sourceSentenceCz": "Dávám pravou rukavici do tašky.",
       "reviewed": true,
       "concepts": [
+        {
+          "uid": "vit-0567",
+          "sourceIt": "mettere",
+          "sourceCz": "dát někam; položit",
+          "text": "Metto",
+          "occurrence": 1,
+          "start": 0,
+          "end": 5
+        },
+        {
+          "uid": "vit-0440",
+          "sourceIt": "guanti",
+          "sourceCz": "rukavice",
+          "text": "guanto",
+          "occurrence": 1,
+          "start": 9,
+          "end": 15
+        },
         {
           "uid": "vit-0295",
           "sourceIt": "destro",
           "sourceCz": "pravý",
           "text": "destro",
           "occurrence": 1,
-          "start": 11,
-          "end": 17
+          "start": 16,
+          "end": 22
+        },
+        {
+          "uid": "vit-0868",
+          "sourceIt": "borsa",
+          "sourceCz": "taška",
+          "text": "borsa",
+          "occurrence": 1,
+          "start": 29,
+          "end": 34
         }
       ]
     },
@@ -8396,18 +9503,45 @@
     "vit-0304": {
       "sourceIt": "finestra",
       "sourceCz": "okno",
-      "sourceSentenceIt": "La finestra è aperta.",
-      "sourceSentenceCz": "Okno je otevřené.",
+      "sourceSentenceIt": "Il gatto guarda il giardino dalla finestra.",
+      "sourceSentenceCz": "Kočka pozoruje zahradu z okna.",
       "reviewed": true,
       "concepts": [
+        {
+          "uid": "vit-0140",
+          "sourceIt": "gatto",
+          "sourceCz": "kočka",
+          "text": "gatto",
+          "occurrence": 1,
+          "start": 3,
+          "end": 8
+        },
+        {
+          "uid": "vit-0100",
+          "sourceIt": "guardare",
+          "sourceCz": "dívat se, sledovat",
+          "text": "guarda",
+          "occurrence": 1,
+          "start": 9,
+          "end": 15
+        },
+        {
+          "uid": "vit-0453",
+          "sourceIt": "giardino",
+          "sourceCz": "zahrada",
+          "text": "giardino",
+          "occurrence": 1,
+          "start": 19,
+          "end": 27
+        },
         {
           "uid": "vit-0304",
           "sourceIt": "finestra",
           "sourceCz": "okno",
           "text": "finestra",
           "occurrence": 1,
-          "start": 3,
-          "end": 11
+          "start": 34,
+          "end": 42
         }
       ]
     },
@@ -8652,6 +9786,15 @@
       "sourceSentenceCz": "Kdy přijedou Janovi přátelé?",
       "reviewed": true,
       "concepts": [
+        {
+          "uid": "vit-1098",
+          "sourceIt": "amico",
+          "sourceCz": "kamarád, přítel",
+          "text": "amici",
+          "occurrence": 1,
+          "start": 19,
+          "end": 24
+        },
         {
           "uid": "vit-0313",
           "sourceIt": "Giovanni",
@@ -9427,6 +10570,15 @@
       "reviewed": true,
       "concepts": [
         {
+          "uid": "vit-1097",
+          "sourceIt": "oggi",
+          "sourceCz": "dnes",
+          "text": "Oggi",
+          "occurrence": 1,
+          "start": 0,
+          "end": 4
+        },
+        {
           "uid": "vit-0344",
           "sourceIt": "sentirsi",
           "sourceCz": "cítit se",
@@ -9992,6 +11144,15 @@
           "occurrence": 1,
           "start": 11,
           "end": 18
+        },
+        {
+          "uid": "vit-1100",
+          "sourceIt": "sera",
+          "sourceCz": "večer",
+          "text": "sera",
+          "occurrence": 1,
+          "start": 19,
+          "end": 23
         }
       ]
     },
@@ -10498,6 +11659,15 @@
           "end": 14
         },
         {
+          "uid": "vit-1102",
+          "sourceIt": "scuola",
+          "sourceCz": "škola",
+          "text": "scuola",
+          "occurrence": 1,
+          "start": 19,
+          "end": 25
+        },
+        {
           "uid": "vit-0399",
           "sourceIt": "interprete",
           "sourceCz": "tlumočník",
@@ -10574,18 +11744,54 @@
     "vit-0394": {
       "sourceIt": "grigio",
       "sourceCz": "šedý",
-      "sourceSentenceIt": "È grigio.",
-      "sourceSentenceCz": "Je šedá.",
+      "sourceSentenceIt": "Il gatto grigio dorme sotto il tavolo.",
+      "sourceSentenceCz": "Šedá kočka spí pod stolem.",
       "reviewed": true,
       "concepts": [
+        {
+          "uid": "vit-0140",
+          "sourceIt": "gatto",
+          "sourceCz": "kočka",
+          "text": "gatto",
+          "occurrence": 1,
+          "start": 3,
+          "end": 8
+        },
         {
           "uid": "vit-0394",
           "sourceIt": "grigio",
           "sourceCz": "šedý",
           "text": "grigio",
           "occurrence": 1,
-          "start": 2,
-          "end": 8
+          "start": 9,
+          "end": 15
+        },
+        {
+          "uid": "vit-0297",
+          "sourceIt": "dormire",
+          "sourceCz": "spát",
+          "text": "dorme",
+          "occurrence": 1,
+          "start": 16,
+          "end": 21
+        },
+        {
+          "uid": "vit-0348",
+          "sourceIt": "sotto",
+          "sourceCz": "pod",
+          "text": "sotto",
+          "occurrence": 1,
+          "start": 22,
+          "end": 27
+        },
+        {
+          "uid": "vit-0604",
+          "sourceIt": "tavolo",
+          "sourceCz": "stůl",
+          "text": "tavolo",
+          "occurrence": 1,
+          "start": 31,
+          "end": 37
         }
       ]
     },
@@ -10912,6 +12118,15 @@
       "reviewed": true,
       "concepts": [
         {
+          "uid": "vit-1097",
+          "sourceIt": "oggi",
+          "sourceCz": "dnes",
+          "text": "oggi",
+          "occurrence": 1,
+          "start": 10,
+          "end": 14
+        },
+        {
           "uid": "vit-0409",
           "sourceIt": "pomeriggio",
           "sourceCz": "odpoledne",
@@ -11046,6 +12261,15 @@
       "sourceSentenceCz": "Jdeš do té nové restaurace?",
       "reviewed": true,
       "concepts": [
+        {
+          "uid": "vit-1103",
+          "sourceIt": "nuovo",
+          "sourceCz": "nový",
+          "text": "nuovo",
+          "occurrence": 1,
+          "start": 12,
+          "end": 17
+        },
         {
           "uid": "vit-0414",
           "sourceIt": "ristorante",
@@ -11191,6 +12415,15 @@
       "reviewed": true,
       "concepts": [
         {
+          "uid": "vit-1097",
+          "sourceIt": "oggi",
+          "sourceCz": "dnes",
+          "text": "oggi",
+          "occurrence": 1,
+          "start": 7,
+          "end": 11
+        },
+        {
           "uid": "vit-0100",
           "sourceIt": "guardare",
           "sourceCz": "dívat se, sledovat",
@@ -11333,6 +12566,15 @@
           "occurrence": 1,
           "start": 14,
           "end": 18
+        },
+        {
+          "uid": "vit-1097",
+          "sourceIt": "oggi",
+          "sourceCz": "dnes",
+          "text": "oggi",
+          "occurrence": 1,
+          "start": 19,
+          "end": 23
         }
       ]
     },
@@ -11702,6 +12944,15 @@
           "occurrence": 1,
           "start": 2,
           "end": 11
+        },
+        {
+          "uid": "vit-1103",
+          "sourceIt": "nuovo",
+          "sourceCz": "nový",
+          "text": "nuovi",
+          "occurrence": 1,
+          "start": 12,
+          "end": 17
         }
       ]
     },
@@ -11801,6 +13052,15 @@
           "occurrence": 1,
           "start": 7,
           "end": 15
+        },
+        {
+          "uid": "vit-1103",
+          "sourceIt": "nuovo",
+          "sourceCz": "nový",
+          "text": "nuovo",
+          "occurrence": 1,
+          "start": 18,
+          "end": 23
         }
       ]
     },
@@ -12170,6 +13430,15 @@
           "occurrence": 1,
           "start": 4,
           "end": 13
+        },
+        {
+          "uid": "vit-1111",
+          "sourceIt": "domanda",
+          "sourceCz": "otázka",
+          "text": "domanda",
+          "occurrence": 1,
+          "start": 21,
+          "end": 28
         }
       ]
     },
@@ -12523,6 +13792,15 @@
       "reviewed": true,
       "concepts": [
         {
+          "uid": "vit-1099",
+          "sourceIt": "studiare",
+          "sourceCz": "studovat, učit se",
+          "text": "Studio",
+          "occurrence": 1,
+          "start": 0,
+          "end": 6
+        },
+        {
           "uid": "vit-0473",
           "sourceIt": "tedesco",
           "sourceCz": "němčina",
@@ -12729,6 +14007,15 @@
       "sourceSentenceCz": "Mléko obsahuje vápník.",
       "reviewed": true,
       "concepts": [
+        {
+          "uid": "vit-1113",
+          "sourceIt": "latte",
+          "sourceCz": "mléko",
+          "text": "latte",
+          "occurrence": 1,
+          "start": 3,
+          "end": 8
+        },
         {
           "uid": "vit-0481",
           "sourceIt": "calcio",
@@ -12991,6 +14278,15 @@
       "reviewed": true,
       "concepts": [
         {
+          "uid": "vit-1097",
+          "sourceIt": "oggi",
+          "sourceCz": "dnes",
+          "text": "Oggi",
+          "occurrence": 1,
+          "start": 0,
+          "end": 4
+        },
+        {
           "uid": "vit-0491",
           "sourceIt": "tempo",
           "sourceCz": "počasí",
@@ -13220,18 +14516,45 @@
     "vit-0501": {
       "sourceIt": "bianco",
       "sourceCz": "bílý",
-      "sourceSentenceIt": "Il muro è bianco.",
-      "sourceSentenceCz": "Zeď je bílá.",
+      "sourceSentenceIt": "Il gatto bianco dorme sulla sedia.",
+      "sourceSentenceCz": "Bílá kočka spí na židli.",
       "reviewed": true,
       "concepts": [
+        {
+          "uid": "vit-0140",
+          "sourceIt": "gatto",
+          "sourceCz": "kočka",
+          "text": "gatto",
+          "occurrence": 1,
+          "start": 3,
+          "end": 8
+        },
         {
           "uid": "vit-0501",
           "sourceIt": "bianco",
           "sourceCz": "bílý",
           "text": "bianco",
           "occurrence": 1,
-          "start": 10,
-          "end": 16
+          "start": 9,
+          "end": 15
+        },
+        {
+          "uid": "vit-0297",
+          "sourceIt": "dormire",
+          "sourceCz": "spát",
+          "text": "dorme",
+          "occurrence": 1,
+          "start": 16,
+          "end": 21
+        },
+        {
+          "uid": "vit-0838",
+          "sourceIt": "sedia",
+          "sourceCz": "židle",
+          "text": "sedia",
+          "occurrence": 1,
+          "start": 28,
+          "end": 33
         }
       ]
     },
@@ -13535,18 +14858,45 @@
     "vit-0513": {
       "sourceIt": "occhio",
       "sourceCz": "oko",
-      "sourceSentenceIt": "Ecco l'occhio.",
-      "sourceSentenceCz": "Tady je oko.",
+      "sourceSentenceIt": "Il bambino chiude un occhio davanti allo specchio.",
+      "sourceSentenceCz": "Dítě před zrcadlem zavírá jedno oko.",
       "reviewed": true,
       "concepts": [
+        {
+          "uid": "vit-0867",
+          "sourceIt": "bambino",
+          "sourceCz": "dítě, děcko",
+          "text": "bambino",
+          "occurrence": 1,
+          "start": 3,
+          "end": 10
+        },
+        {
+          "uid": "vit-0377",
+          "sourceIt": "chiudere",
+          "sourceCz": "zavřít",
+          "text": "chiude",
+          "occurrence": 1,
+          "start": 11,
+          "end": 17
+        },
         {
           "uid": "vit-0513",
           "sourceIt": "occhio",
           "sourceCz": "oko",
           "text": "occhio",
           "occurrence": 1,
-          "start": 7,
-          "end": 13
+          "start": 21,
+          "end": 27
+        },
+        {
+          "uid": "vit-0071",
+          "sourceIt": "specchio",
+          "sourceCz": "zrcadlo",
+          "text": "specchio",
+          "occurrence": 1,
+          "start": 41,
+          "end": 49
         }
       ]
     },
@@ -13646,6 +14996,15 @@
           "occurrence": 1,
           "start": 0,
           "end": 6
+        },
+        {
+          "uid": "vit-1104",
+          "sourceIt": "autobus",
+          "sourceCz": "autobus",
+          "text": "autobus",
+          "occurrence": 1,
+          "start": 16,
+          "end": 23
         }
       ]
     },
@@ -13670,8 +15029,8 @@
     "vit-0519": {
       "sourceIt": "topo",
       "sourceCz": "myš",
-      "sourceSentenceIt": "Ecco il topo.",
-      "sourceSentenceCz": "Tady je myš.",
+      "sourceSentenceIt": "Il topo mangia una mela sotto l'albero.",
+      "sourceSentenceCz": "Myš jí jablko pod stromem.",
       "reviewed": true,
       "concepts": [
         {
@@ -13680,8 +15039,44 @@
           "sourceCz": "myš",
           "text": "topo",
           "occurrence": 1,
+          "start": 3,
+          "end": 7
+        },
+        {
+          "uid": "vit-0138",
+          "sourceIt": "mangiare",
+          "sourceCz": "jíst",
+          "text": "mangia",
+          "occurrence": 1,
           "start": 8,
-          "end": 12
+          "end": 14
+        },
+        {
+          "uid": "vit-0106",
+          "sourceIt": "mela",
+          "sourceCz": "jablko",
+          "text": "mela",
+          "occurrence": 1,
+          "start": 19,
+          "end": 23
+        },
+        {
+          "uid": "vit-0348",
+          "sourceIt": "sotto",
+          "sourceCz": "pod",
+          "text": "sotto",
+          "occurrence": 1,
+          "start": 24,
+          "end": 29
+        },
+        {
+          "uid": "vit-0452",
+          "sourceIt": "albero",
+          "sourceCz": "strom",
+          "text": "albero",
+          "occurrence": 1,
+          "start": 32,
+          "end": 38
         }
       ]
     },
@@ -13904,18 +15299,45 @@
     "vit-0530": {
       "sourceIt": "appartamento",
       "sourceCz": "byt",
-      "sourceSentenceIt": "Ecco l'appartamento.",
-      "sourceSentenceCz": "Tady je byt.",
+      "sourceSentenceIt": "Il nostro appartamento è vicino alla stazione.",
+      "sourceSentenceCz": "Náš byt je blízko nádraží.",
       "reviewed": true,
       "concepts": [
+        {
+          "uid": "vit-0569",
+          "sourceIt": "nostro",
+          "sourceCz": "náš",
+          "text": "nostro",
+          "occurrence": 1,
+          "start": 3,
+          "end": 9
+        },
         {
           "uid": "vit-0530",
           "sourceIt": "appartamento",
           "sourceCz": "byt",
           "text": "appartamento",
           "occurrence": 1,
-          "start": 7,
-          "end": 19
+          "start": 10,
+          "end": 22
+        },
+        {
+          "uid": "vit-0076",
+          "sourceIt": "vicino",
+          "sourceCz": "blízko",
+          "text": "vicino",
+          "occurrence": 1,
+          "start": 25,
+          "end": 31
+        },
+        {
+          "uid": "vit-0129",
+          "sourceIt": "stazione",
+          "sourceCz": "nádraží, stanice",
+          "text": "stazione",
+          "occurrence": 1,
+          "start": 37,
+          "end": 45
         }
       ]
     },
@@ -13940,18 +15362,45 @@
     "vit-0532": {
       "sourceIt": "biglietto",
       "sourceCz": "vstupenka",
-      "sourceSentenceIt": "Ecco il biglietto.",
-      "sourceSentenceCz": "Tady je vstupenka.",
+      "sourceSentenceIt": "Compro due biglietti per il concerto.",
+      "sourceSentenceCz": "Kupuji dvě vstupenky na koncert.",
       "reviewed": true,
       "concepts": [
+        {
+          "uid": "vit-0432",
+          "sourceIt": "comprare",
+          "sourceCz": "koupit, kupovat",
+          "text": "Compro",
+          "occurrence": 1,
+          "start": 0,
+          "end": 6
+        },
+        {
+          "uid": "vit-0712",
+          "sourceIt": "due",
+          "sourceCz": "dva",
+          "text": "due",
+          "occurrence": 1,
+          "start": 7,
+          "end": 10
+        },
         {
           "uid": "vit-0532",
           "sourceIt": "biglietto",
           "sourceCz": "vstupenka",
-          "text": "biglietto",
+          "text": "biglietti",
           "occurrence": 1,
-          "start": 8,
-          "end": 17
+          "start": 11,
+          "end": 20
+        },
+        {
+          "uid": "vit-0540",
+          "sourceIt": "concerto",
+          "sourceCz": "koncert",
+          "text": "concerto",
+          "occurrence": 1,
+          "start": 28,
+          "end": 36
         }
       ]
     },
@@ -14066,18 +15515,45 @@
     "vit-0537": {
       "sourceIt": "cinema",
       "sourceCz": "kino",
-      "sourceSentenceIt": "Ecco il cinema.",
-      "sourceSentenceCz": "Tady je kino.",
+      "sourceSentenceIt": "Sabato vado al cinema con mia sorella.",
+      "sourceSentenceCz": "V sobotu jdu se sestrou do kina.",
       "reviewed": true,
       "concepts": [
+        {
+          "uid": "vit-0371",
+          "sourceIt": "sabato",
+          "sourceCz": "sobota",
+          "text": "Sabato",
+          "occurrence": 1,
+          "start": 0,
+          "end": 6
+        },
+        {
+          "uid": "vit-0143",
+          "sourceIt": "andare",
+          "sourceCz": "jít, jet",
+          "text": "vado",
+          "occurrence": 1,
+          "start": 7,
+          "end": 11
+        },
         {
           "uid": "vit-0537",
           "sourceIt": "cinema",
           "sourceCz": "kino",
           "text": "cinema",
           "occurrence": 1,
-          "start": 8,
-          "end": 14
+          "start": 15,
+          "end": 21
+        },
+        {
+          "uid": "vit-0053",
+          "sourceIt": "sorella",
+          "sourceCz": "sestra",
+          "text": "sorella",
+          "occurrence": 1,
+          "start": 30,
+          "end": 37
         }
       ]
     },
@@ -14120,8 +15596,8 @@
     "vit-0540": {
       "sourceIt": "concerto",
       "sourceCz": "koncert",
-      "sourceSentenceIt": "Ecco il concerto.",
-      "sourceSentenceCz": "Tady je koncert.",
+      "sourceSentenceIt": "Il concerto comincia alle otto in teatro.",
+      "sourceSentenceCz": "Koncert začíná v osm v divadle.",
       "reviewed": true,
       "concepts": [
         {
@@ -14130,8 +15606,35 @@
           "sourceCz": "koncert",
           "text": "concerto",
           "occurrence": 1,
-          "start": 8,
-          "end": 16
+          "start": 3,
+          "end": 11
+        },
+        {
+          "uid": "vit-0381",
+          "sourceIt": "cominciare",
+          "sourceCz": "začít, začínat",
+          "text": "comincia",
+          "occurrence": 1,
+          "start": 12,
+          "end": 20
+        },
+        {
+          "uid": "vit-0447",
+          "sourceIt": "otto",
+          "sourceCz": "osm",
+          "text": "otto",
+          "occurrence": 1,
+          "start": 26,
+          "end": 30
+        },
+        {
+          "uid": "vit-0706",
+          "sourceIt": "teatro",
+          "sourceCz": "divadlo",
+          "text": "teatro",
+          "occurrence": 1,
+          "start": 34,
+          "end": 40
         }
       ]
     },
@@ -14246,8 +15749,8 @@
     "vit-0546": {
       "sourceIt": "famiglia",
       "sourceCz": "rodina",
-      "sourceSentenceIt": "Ecco la famiglia.",
-      "sourceSentenceCz": "Tady je rodina.",
+      "sourceSentenceIt": "La famiglia mangia insieme in giardino.",
+      "sourceSentenceCz": "Rodina jí společně na zahradě.",
       "reviewed": true,
       "concepts": [
         {
@@ -14256,8 +15759,35 @@
           "sourceCz": "rodina",
           "text": "famiglia",
           "occurrence": 1,
-          "start": 8,
-          "end": 16
+          "start": 3,
+          "end": 11
+        },
+        {
+          "uid": "vit-0138",
+          "sourceIt": "mangiare",
+          "sourceCz": "jíst",
+          "text": "mangia",
+          "occurrence": 1,
+          "start": 12,
+          "end": 18
+        },
+        {
+          "uid": "vit-0141",
+          "sourceIt": "insieme",
+          "sourceCz": "společně, dohromady",
+          "text": "insieme",
+          "occurrence": 1,
+          "start": 19,
+          "end": 26
+        },
+        {
+          "uid": "vit-0453",
+          "sourceIt": "giardino",
+          "sourceCz": "zahrada",
+          "text": "giardino",
+          "occurrence": 1,
+          "start": 30,
+          "end": 38
         }
       ]
     },
@@ -14291,18 +15821,45 @@
     "vit-0548": {
       "sourceIt": "fermata",
       "sourceCz": "zastávka, stanice",
-      "sourceSentenceIt": "Ecco la fermata.",
-      "sourceSentenceCz": "Tady je zastávka.",
+      "sourceSentenceIt": "Aspetto mia sorella alla fermata del tram.",
+      "sourceSentenceCz": "Čekám na sestru na tramvajové zastávce.",
       "reviewed": true,
       "concepts": [
+        {
+          "uid": "vit-0144",
+          "sourceIt": "aspettare",
+          "sourceCz": "čekat",
+          "text": "Aspetto",
+          "occurrence": 1,
+          "start": 0,
+          "end": 7
+        },
+        {
+          "uid": "vit-0053",
+          "sourceIt": "sorella",
+          "sourceCz": "sestra",
+          "text": "sorella",
+          "occurrence": 1,
+          "start": 12,
+          "end": 19
+        },
         {
           "uid": "vit-0548",
           "sourceIt": "fermata",
           "sourceCz": "zastávka, stanice",
           "text": "fermata",
           "occurrence": 1,
-          "start": 8,
-          "end": 15
+          "start": 25,
+          "end": 32
+        },
+        {
+          "uid": "vit-0707",
+          "sourceIt": "tram",
+          "sourceCz": "tramvaj",
+          "text": "tram",
+          "occurrence": 1,
+          "start": 37,
+          "end": 41
         }
       ]
     },
@@ -14321,6 +15878,15 @@
           "occurrence": 1,
           "start": 3,
           "end": 14
+        },
+        {
+          "uid": "vit-1100",
+          "sourceIt": "sera",
+          "sourceCz": "večer",
+          "text": "sera",
+          "occurrence": 1,
+          "start": 28,
+          "end": 32
         }
       ]
     },
@@ -14507,18 +16073,54 @@
     "vit-0557": {
       "sourceIt": "incrocio",
       "sourceCz": "křižovatka",
-      "sourceSentenceIt": "Ecco l'incrocio.",
-      "sourceSentenceCz": "Tady je křižovatka.",
+      "sourceSentenceIt": "Gira a destra dopo il prossimo incrocio.",
+      "sourceSentenceCz": "Za příští křižovatkou zahni doprava.",
       "reviewed": true,
       "concepts": [
+        {
+          "uid": "vit-0314",
+          "sourceIt": "girare",
+          "sourceCz": "otočit, odbočit, zahnout",
+          "text": "Gira",
+          "occurrence": 1,
+          "start": 0,
+          "end": 4
+        },
+        {
+          "uid": "vit-0486",
+          "sourceIt": "a destra",
+          "sourceCz": "vpravo; doprava",
+          "text": "a destra",
+          "occurrence": 1,
+          "start": 5,
+          "end": 13
+        },
+        {
+          "uid": "vit-0214",
+          "sourceIt": "dopo",
+          "sourceCz": "po, potom",
+          "text": "dopo",
+          "occurrence": 1,
+          "start": 14,
+          "end": 18
+        },
+        {
+          "uid": "vit-0686",
+          "sourceIt": "prossimo",
+          "sourceCz": "příští",
+          "text": "prossimo",
+          "occurrence": 1,
+          "start": 22,
+          "end": 30
+        },
         {
           "uid": "vit-0557",
           "sourceIt": "incrocio",
           "sourceCz": "křižovatka",
           "text": "incrocio",
           "occurrence": 1,
-          "start": 7,
-          "end": 15
+          "start": 31,
+          "end": 39
         }
       ]
     },
@@ -14547,6 +16149,15 @@
       "sourceSentenceCz": "Dnes je hustý provoz.",
       "reviewed": true,
       "concepts": [
+        {
+          "uid": "vit-1097",
+          "sourceIt": "oggi",
+          "sourceCz": "dnes",
+          "text": "Oggi",
+          "occurrence": 1,
+          "start": 0,
+          "end": 4
+        },
         {
           "uid": "vit-0606",
           "sourceIt": "traffico",
@@ -14651,8 +16262,8 @@
     "vit-0563": {
       "sourceIt": "mamma",
       "sourceCz": "maminka, mamka",
-      "sourceSentenceIt": "Ecco la mamma.",
-      "sourceSentenceCz": "Tady je maminka.",
+      "sourceSentenceIt": "La mamma prepara una torta al limone.",
+      "sourceSentenceCz": "Maminka připravuje citronový dort.",
       "reviewed": true,
       "concepts": [
         {
@@ -14661,8 +16272,35 @@
           "sourceCz": "maminka, mamka",
           "text": "mamma",
           "occurrence": 1,
-          "start": 8,
-          "end": 13
+          "start": 3,
+          "end": 8
+        },
+        {
+          "uid": "vit-0817",
+          "sourceIt": "preparare",
+          "sourceCz": "připravit; připravovat",
+          "text": "prepara",
+          "occurrence": 1,
+          "start": 9,
+          "end": 16
+        },
+        {
+          "uid": "vit-0005",
+          "sourceIt": "torta",
+          "sourceCz": "dort, koláč",
+          "text": "torta",
+          "occurrence": 1,
+          "start": 21,
+          "end": 26
+        },
+        {
+          "uid": "vit-0230",
+          "sourceIt": "limone",
+          "sourceCz": "citron",
+          "text": "limone",
+          "occurrence": 1,
+          "start": 30,
+          "end": 36
         }
       ]
     },
@@ -14673,6 +16311,15 @@
       "sourceSentenceCz": "Dnes se mám lépe.",
       "reviewed": true,
       "concepts": [
+        {
+          "uid": "vit-1097",
+          "sourceIt": "oggi",
+          "sourceCz": "dnes",
+          "text": "Oggi",
+          "occurrence": 1,
+          "start": 0,
+          "end": 4
+        },
         {
           "uid": "vit-0564",
           "sourceIt": "meglio",
@@ -14723,18 +16370,45 @@
     "vit-0566": {
       "sourceIt": "metropolitana",
       "sourceCz": "metro",
-      "sourceSentenceIt": "Ecco la metropolitana.",
-      "sourceSentenceCz": "Tady je metro.",
+      "sourceSentenceIt": "Prendo la metropolitana per andare al museo.",
+      "sourceSentenceCz": "Jedu metrem do muzea.",
       "reviewed": true,
       "concepts": [
+        {
+          "uid": "vit-0181",
+          "sourceIt": "prendere",
+          "sourceCz": "vzít, brát",
+          "text": "Prendo",
+          "occurrence": 1,
+          "start": 0,
+          "end": 6
+        },
         {
           "uid": "vit-0566",
           "sourceIt": "metropolitana",
           "sourceCz": "metro",
           "text": "metropolitana",
           "occurrence": 1,
-          "start": 8,
-          "end": 21
+          "start": 10,
+          "end": 23
+        },
+        {
+          "uid": "vit-0143",
+          "sourceIt": "andare",
+          "sourceCz": "jít, jet",
+          "text": "andare",
+          "occurrence": 1,
+          "start": 28,
+          "end": 34
+        },
+        {
+          "uid": "vit-0670",
+          "sourceIt": "museo",
+          "sourceCz": "muzeum",
+          "text": "museo",
+          "occurrence": 1,
+          "start": 38,
+          "end": 43
         }
       ]
     },
@@ -14853,6 +16527,15 @@
       "sourceSentenceCz": "Chceš čaj, nebo kávu?",
       "reviewed": true,
       "concepts": [
+        {
+          "uid": "vit-1106",
+          "sourceIt": "tè",
+          "sourceCz": "čaj",
+          "text": "tè",
+          "occurrence": 1,
+          "start": 8,
+          "end": 10
+        },
         {
           "uid": "vit-0571",
           "sourceIt": "oppure",
@@ -15068,6 +16751,15 @@
           "occurrence": 1,
           "start": 10,
           "end": 15
+        },
+        {
+          "uid": "vit-1105",
+          "sourceIt": "pane",
+          "sourceCz": "chléb",
+          "text": "pane",
+          "occurrence": 1,
+          "start": 19,
+          "end": 23
         }
       ]
     },
@@ -15133,6 +16825,15 @@
       "reviewed": true,
       "concepts": [
         {
+          "uid": "vit-1097",
+          "sourceIt": "oggi",
+          "sourceCz": "dnes",
+          "text": "Oggi",
+          "occurrence": 1,
+          "start": 0,
+          "end": 4
+        },
+        {
           "uid": "vit-0582",
           "sourceIt": "più",
           "sourceCz": "více",
@@ -15146,18 +16847,45 @@
     "vit-0583": {
       "sourceIt": "porta",
       "sourceCz": "dveře",
-      "sourceSentenceIt": "Ecco la porta.",
-      "sourceSentenceCz": "Tady jsou dveře.",
+      "sourceSentenceIt": "Il gatto aspetta davanti alla porta chiusa.",
+      "sourceSentenceCz": "Kočka čeká před zavřenými dveřmi.",
       "reviewed": true,
       "concepts": [
+        {
+          "uid": "vit-0140",
+          "sourceIt": "gatto",
+          "sourceCz": "kočka",
+          "text": "gatto",
+          "occurrence": 1,
+          "start": 3,
+          "end": 8
+        },
+        {
+          "uid": "vit-0144",
+          "sourceIt": "aspettare",
+          "sourceCz": "čekat",
+          "text": "aspetta",
+          "occurrence": 1,
+          "start": 9,
+          "end": 16
+        },
         {
           "uid": "vit-0583",
           "sourceIt": "porta",
           "sourceCz": "dveře",
           "text": "porta",
           "occurrence": 1,
-          "start": 8,
-          "end": 13
+          "start": 30,
+          "end": 35
+        },
+        {
+          "uid": "vit-0291",
+          "sourceIt": "chiuso",
+          "sourceCz": "zavřený, zavřeno",
+          "text": "chiusa",
+          "occurrence": 1,
+          "start": 36,
+          "end": 42
         }
       ]
     },
@@ -15248,6 +16976,15 @@
           "occurrence": 1,
           "start": 18,
           "end": 24
+        },
+        {
+          "uid": "vit-1102",
+          "sourceIt": "scuola",
+          "sourceCz": "škola",
+          "text": "scuola",
+          "occurrence": 1,
+          "start": 28,
+          "end": 34
         }
       ]
     },
@@ -15329,24 +17066,60 @@
           "occurrence": 1,
           "start": 0,
           "end": 2
+        },
+        {
+          "uid": "vit-1108",
+          "sourceIt": "risposta",
+          "sourceCz": "odpověď",
+          "text": "risposta",
+          "occurrence": 1,
+          "start": 6,
+          "end": 14
         }
       ]
     },
     "vit-0591": {
       "sourceIt": "scacchi",
       "sourceCz": "šachy",
-      "sourceSentenceIt": "Ecco gli scacchi.",
-      "sourceSentenceCz": "Tady jsou šachy.",
+      "sourceSentenceIt": "Mio nonno gioca a scacchi con Luca.",
+      "sourceSentenceCz": "Můj dědeček hraje s Lukášem šachy.",
       "reviewed": true,
       "concepts": [
+        {
+          "uid": "vit-0058",
+          "sourceIt": "nonno",
+          "sourceCz": "dědeček",
+          "text": "nonno",
+          "occurrence": 1,
+          "start": 4,
+          "end": 9
+        },
+        {
+          "uid": "vit-0133",
+          "sourceIt": "giocare",
+          "sourceCz": "hrát, hrát si",
+          "text": "gioca",
+          "occurrence": 1,
+          "start": 10,
+          "end": 15
+        },
         {
           "uid": "vit-0591",
           "sourceIt": "scacchi",
           "sourceCz": "šachy",
           "text": "scacchi",
           "occurrence": 1,
-          "start": 9,
-          "end": 16
+          "start": 18,
+          "end": 25
+        },
+        {
+          "uid": "vit-0322",
+          "sourceIt": "Luca",
+          "sourceCz": "Lukáš",
+          "text": "Luca",
+          "occurrence": 1,
+          "start": 30,
+          "end": 34
         }
       ]
     },
@@ -15428,6 +17201,15 @@
           "occurrence": 1,
           "start": 11,
           "end": 18
+        },
+        {
+          "uid": "vit-1098",
+          "sourceIt": "amico",
+          "sourceCz": "kamarád, přítel",
+          "text": "amico",
+          "occurrence": 1,
+          "start": 24,
+          "end": 29
         }
       ]
     },
@@ -15551,18 +17333,36 @@
     "vit-0600": {
       "sourceIt": "stadio",
       "sourceCz": "stadion",
-      "sourceSentenceIt": "Ecco lo stadio.",
-      "sourceSentenceCz": "Tady je stadion.",
+      "sourceSentenceIt": "La squadra entra nello stadio con l'allenatore.",
+      "sourceSentenceCz": "Tým vstupuje s trenérem na stadion.",
       "reviewed": true,
       "concepts": [
+        {
+          "uid": "vit-0518",
+          "sourceIt": "squadra",
+          "sourceCz": "tým; družstvo",
+          "text": "squadra",
+          "occurrence": 1,
+          "start": 3,
+          "end": 10
+        },
+        {
+          "uid": "vit-0784",
+          "sourceIt": "entrare",
+          "sourceCz": "vstoupit; vejít",
+          "text": "entra",
+          "occurrence": 1,
+          "start": 11,
+          "end": 16
+        },
         {
           "uid": "vit-0600",
           "sourceIt": "stadio",
           "sourceCz": "stadion",
           "text": "stadio",
           "occurrence": 1,
-          "start": 8,
-          "end": 14
+          "start": 23,
+          "end": 29
         }
       ]
     },
@@ -15668,18 +17468,54 @@
     "vit-0604": {
       "sourceIt": "tavolo",
       "sourceCz": "stůl",
-      "sourceSentenceIt": "Ecco il tavolo.",
-      "sourceSentenceCz": "Tady je stůl.",
+      "sourceSentenceIt": "Metto tre bicchieri puliti sul tavolo.",
+      "sourceSentenceCz": "Dávám na stůl tři čisté sklenice.",
       "reviewed": true,
       "concepts": [
+        {
+          "uid": "vit-0567",
+          "sourceIt": "mettere",
+          "sourceCz": "dát někam; položit",
+          "text": "Metto",
+          "occurrence": 1,
+          "start": 0,
+          "end": 5
+        },
+        {
+          "uid": "vit-0713",
+          "sourceIt": "tre",
+          "sourceCz": "tři",
+          "text": "tre",
+          "occurrence": 1,
+          "start": 6,
+          "end": 9
+        },
+        {
+          "uid": "vit-0104",
+          "sourceIt": "bicchiere",
+          "sourceCz": "sklenice",
+          "text": "bicchieri",
+          "occurrence": 1,
+          "start": 10,
+          "end": 19
+        },
+        {
+          "uid": "vit-0339",
+          "sourceIt": "pulito",
+          "sourceCz": "čistý",
+          "text": "puliti",
+          "occurrence": 1,
+          "start": 20,
+          "end": 26
+        },
         {
           "uid": "vit-0604",
           "sourceIt": "tavolo",
           "sourceCz": "stůl",
           "text": "tavolo",
           "occurrence": 1,
-          "start": 8,
-          "end": 14
+          "start": 31,
+          "end": 37
         }
       ]
     },
@@ -15691,6 +17527,15 @@
       "reviewed": true,
       "concepts": [
         {
+          "uid": "vit-1109",
+          "sourceIt": "farmacia",
+          "sourceCz": "lékárna",
+          "text": "farmacia",
+          "occurrence": 1,
+          "start": 3,
+          "end": 11
+        },
+        {
           "uid": "vit-0605",
           "sourceIt": "tra",
           "sourceCz": "mezi",
@@ -15698,6 +17543,15 @@
           "occurrence": 1,
           "start": 14,
           "end": 17
+        },
+        {
+          "uid": "vit-1110",
+          "sourceIt": "banca",
+          "sourceCz": "banka",
+          "text": "banca",
+          "occurrence": 1,
+          "start": 21,
+          "end": 26
         }
       ]
     },
@@ -15983,8 +17837,8 @@
     "vit-0617": {
       "sourceIt": "acqua",
       "sourceCz": "voda",
-      "sourceSentenceIt": "Ecco l'acqua.",
-      "sourceSentenceCz": "Tady je voda.",
+      "sourceSentenceIt": "Verso l'acqua fredda nel bicchiere di Luca.",
+      "sourceSentenceCz": "Nalévám studenou vodu do Lukášovy sklenice.",
       "reviewed": true,
       "concepts": [
         {
@@ -15993,8 +17847,35 @@
           "sourceCz": "voda",
           "text": "acqua",
           "occurrence": 1,
-          "start": 7,
-          "end": 12
+          "start": 8,
+          "end": 13
+        },
+        {
+          "uid": "vit-0309",
+          "sourceIt": "freddo",
+          "sourceCz": "studený",
+          "text": "fredda",
+          "occurrence": 1,
+          "start": 14,
+          "end": 20
+        },
+        {
+          "uid": "vit-0104",
+          "sourceIt": "bicchiere",
+          "sourceCz": "sklenice",
+          "text": "bicchiere",
+          "occurrence": 1,
+          "start": 25,
+          "end": 34
+        },
+        {
+          "uid": "vit-0322",
+          "sourceIt": "Luca",
+          "sourceCz": "Lukáš",
+          "text": "Luca",
+          "occurrence": 1,
+          "start": 38,
+          "end": 42
         }
       ]
     },
@@ -16033,6 +17914,15 @@
           "end": 6
         },
         {
+          "uid": "vit-1098",
+          "sourceIt": "amico",
+          "sourceCz": "kamarád, přítel",
+          "text": "amici",
+          "occurrence": 1,
+          "start": 7,
+          "end": 12
+        },
+        {
           "uid": "vit-0622",
           "sourceIt": "arrivare",
           "sourceCz": "dorazit; přijít; přijet",
@@ -16040,6 +17930,15 @@
           "occurrence": 1,
           "start": 13,
           "end": 21
+        },
+        {
+          "uid": "vit-1097",
+          "sourceIt": "oggi",
+          "sourceCz": "dnes",
+          "text": "oggi",
+          "occurrence": 1,
+          "start": 22,
+          "end": 26
         }
       ]
     },
@@ -16109,8 +18008,8 @@
     "vit-0623": {
       "sourceIt": "barca",
       "sourceCz": "loďka, člun",
-      "sourceSentenceIt": "Ecco la barca.",
-      "sourceSentenceCz": "Tady je loďka.",
+      "sourceSentenceIt": "La barca è sotto il ponte antico.",
+      "sourceSentenceCz": "Loďka je pod starobylým mostem.",
       "reviewed": true,
       "concepts": [
         {
@@ -16119,8 +18018,35 @@
           "sourceCz": "loďka, člun",
           "text": "barca",
           "occurrence": 1,
-          "start": 8,
-          "end": 13
+          "start": 3,
+          "end": 8
+        },
+        {
+          "uid": "vit-0348",
+          "sourceIt": "sotto",
+          "sourceCz": "pod",
+          "text": "sotto",
+          "occurrence": 1,
+          "start": 11,
+          "end": 16
+        },
+        {
+          "uid": "vit-0335",
+          "sourceIt": "ponte",
+          "sourceCz": "most",
+          "text": "ponte",
+          "occurrence": 1,
+          "start": 20,
+          "end": 25
+        },
+        {
+          "uid": "vit-0434",
+          "sourceIt": "antico",
+          "sourceCz": "starobylý, dávný, antický",
+          "text": "antico",
+          "occurrence": 1,
+          "start": 26,
+          "end": 32
         }
       ]
     },
@@ -16154,36 +18080,90 @@
     "vit-0625": {
       "sourceIt": "binario",
       "sourceCz": "kolej; nástupiště",
-      "sourceSentenceIt": "Ecco il binario.",
-      "sourceSentenceCz": "Tady je kolej.",
+      "sourceSentenceIt": "Il treno arriva al binario numero quattro.",
+      "sourceSentenceCz": "Vlak přijíždí na kolej číslo čtyři.",
       "reviewed": true,
       "concepts": [
+        {
+          "uid": "vit-0165",
+          "sourceIt": "treno",
+          "sourceCz": "vlak",
+          "text": "treno",
+          "occurrence": 1,
+          "start": 3,
+          "end": 8
+        },
+        {
+          "uid": "vit-0622",
+          "sourceIt": "arrivare",
+          "sourceCz": "dorazit; přijít; přijet",
+          "text": "arriva",
+          "occurrence": 1,
+          "start": 9,
+          "end": 15
+        },
         {
           "uid": "vit-0625",
           "sourceIt": "binario",
           "sourceCz": "kolej; nástupiště",
           "text": "binario",
           "occurrence": 1,
-          "start": 8,
-          "end": 15
+          "start": 19,
+          "end": 26
+        },
+        {
+          "uid": "vit-0173",
+          "sourceIt": "numero",
+          "sourceCz": "číslo",
+          "text": "numero",
+          "occurrence": 1,
+          "start": 27,
+          "end": 33
+        },
+        {
+          "uid": "vit-0714",
+          "sourceIt": "quattro",
+          "sourceCz": "čtyři",
+          "text": "quattro",
+          "occurrence": 1,
+          "start": 34,
+          "end": 41
         }
       ]
     },
     "vit-0626": {
       "sourceIt": "bosco",
       "sourceCz": "les",
-      "sourceSentenceIt": "Ecco il bosco.",
-      "sourceSentenceCz": "Tady je les.",
+      "sourceSentenceIt": "Cammino nel bosco con mio padre.",
+      "sourceSentenceCz": "Jdu lesem se svým otcem.",
       "reviewed": true,
       "concepts": [
+        {
+          "uid": "vit-0274",
+          "sourceIt": "camminare",
+          "sourceCz": "chodit, kráčet",
+          "text": "Cammino",
+          "occurrence": 1,
+          "start": 0,
+          "end": 7
+        },
         {
           "uid": "vit-0626",
           "sourceIt": "bosco",
           "sourceCz": "les",
           "text": "bosco",
           "occurrence": 1,
-          "start": 8,
-          "end": 13
+          "start": 12,
+          "end": 17
+        },
+        {
+          "uid": "vit-0056",
+          "sourceIt": "padre",
+          "sourceCz": "otec",
+          "text": "padre",
+          "occurrence": 1,
+          "start": 26,
+          "end": 31
         }
       ]
     },
@@ -16208,8 +18188,8 @@
     "vit-0628": {
       "sourceIt": "castello",
       "sourceCz": "hrad; zámek",
-      "sourceSentenceIt": "Ecco il castello.",
-      "sourceSentenceCz": "Tady je hrad.",
+      "sourceSentenceIt": "Il castello antico è vicino al fiume.",
+      "sourceSentenceCz": "Starobylý hrad stojí blízko řeky.",
       "reviewed": true,
       "concepts": [
         {
@@ -16218,8 +18198,35 @@
           "sourceCz": "hrad; zámek",
           "text": "castello",
           "occurrence": 1,
-          "start": 8,
-          "end": 16
+          "start": 3,
+          "end": 11
+        },
+        {
+          "uid": "vit-0434",
+          "sourceIt": "antico",
+          "sourceCz": "starobylý, dávný, antický",
+          "text": "antico",
+          "occurrence": 1,
+          "start": 12,
+          "end": 18
+        },
+        {
+          "uid": "vit-0076",
+          "sourceIt": "vicino",
+          "sourceCz": "blízko",
+          "text": "vicino",
+          "occurrence": 1,
+          "start": 21,
+          "end": 27
+        },
+        {
+          "uid": "vit-0892",
+          "sourceIt": "fiume",
+          "sourceCz": "řeka",
+          "text": "fiume",
+          "occurrence": 1,
+          "start": 31,
+          "end": 36
         }
       ]
     },
@@ -16319,6 +18326,15 @@
           "occurrence": 1,
           "start": 0,
           "end": 8
+        },
+        {
+          "uid": "vit-1097",
+          "sourceIt": "oggi",
+          "sourceCz": "dnes",
+          "text": "oggi",
+          "occurrence": 1,
+          "start": 17,
+          "end": 21
         }
       ]
     },
@@ -16391,6 +18407,15 @@
           "occurrence": 1,
           "start": 8,
           "end": 20
+        },
+        {
+          "uid": "vit-1102",
+          "sourceIt": "scuola",
+          "sourceCz": "škola",
+          "text": "scuola",
+          "occurrence": 1,
+          "start": 21,
+          "end": 27
         }
       ]
     },
@@ -16589,6 +18614,15 @@
           "occurrence": 1,
           "start": 16,
           "end": 22
+        },
+        {
+          "uid": "vit-1103",
+          "sourceIt": "nuovo",
+          "sourceCz": "nový",
+          "text": "nuova",
+          "occurrence": 1,
+          "start": 23,
+          "end": 28
         }
       ]
     },
@@ -16613,18 +18647,45 @@
     "vit-0646": {
       "sourceIt": "fiore",
       "sourceCz": "květ, květina",
-      "sourceSentenceIt": "Ecco il fiore.",
-      "sourceSentenceCz": "Tady je květ.",
+      "sourceSentenceIt": "Metto un fiore bianco sul tavolo.",
+      "sourceSentenceCz": "Dávám bílou květinu na stůl.",
       "reviewed": true,
       "concepts": [
+        {
+          "uid": "vit-0567",
+          "sourceIt": "mettere",
+          "sourceCz": "dát někam; položit",
+          "text": "Metto",
+          "occurrence": 1,
+          "start": 0,
+          "end": 5
+        },
         {
           "uid": "vit-0646",
           "sourceIt": "fiore",
           "sourceCz": "květ, květina",
           "text": "fiore",
           "occurrence": 1,
-          "start": 8,
-          "end": 13
+          "start": 9,
+          "end": 14
+        },
+        {
+          "uid": "vit-0501",
+          "sourceIt": "bianco",
+          "sourceCz": "bílý",
+          "text": "bianco",
+          "occurrence": 1,
+          "start": 15,
+          "end": 21
+        },
+        {
+          "uid": "vit-0604",
+          "sourceIt": "tavolo",
+          "sourceCz": "stůl",
+          "text": "tavolo",
+          "occurrence": 1,
+          "start": 26,
+          "end": 32
         }
       ]
     },
@@ -16762,6 +18823,15 @@
           "end": 6
         },
         {
+          "uid": "vit-1098",
+          "sourceIt": "amico",
+          "sourceCz": "kamarád, přítel",
+          "text": "amici",
+          "occurrence": 1,
+          "start": 11,
+          "end": 16
+        },
+        {
           "uid": "vit-0207",
           "sourceIt": "cena",
           "sourceCz": "večeře",
@@ -16775,18 +18845,36 @@
     "vit-0654": {
       "sourceIt": "lago",
       "sourceCz": "jezero",
-      "sourceSentenceIt": "Ecco il lago.",
-      "sourceSentenceCz": "Tady je jezero.",
+      "sourceSentenceIt": "Nuoto nel lago con mio fratello.",
+      "sourceSentenceCz": "Plavu v jezeře se svým bratrem.",
       "reviewed": true,
       "concepts": [
+        {
+          "uid": "vit-0244",
+          "sourceIt": "nuotare",
+          "sourceCz": "plavat",
+          "text": "Nuoto",
+          "occurrence": 1,
+          "start": 0,
+          "end": 5
+        },
         {
           "uid": "vit-0654",
           "sourceIt": "lago",
           "sourceCz": "jezero",
           "text": "lago",
           "occurrence": 1,
-          "start": 8,
-          "end": 12
+          "start": 10,
+          "end": 14
+        },
+        {
+          "uid": "vit-0054",
+          "sourceIt": "fratello",
+          "sourceCz": "bratr",
+          "text": "fratello",
+          "occurrence": 1,
+          "start": 23,
+          "end": 31
         }
       ]
     },
@@ -16865,18 +18953,45 @@
     "vit-0658": {
       "sourceIt": "mare",
       "sourceCz": "moře",
-      "sourceSentenceIt": "Ecco il mare.",
-      "sourceSentenceCz": "Tady je moře.",
+      "sourceSentenceIt": "La nave attraversa il mare di notte.",
+      "sourceSentenceCz": "Loď v noci pluje přes moře.",
       "reviewed": true,
       "concepts": [
+        {
+          "uid": "vit-0330",
+          "sourceIt": "nave",
+          "sourceCz": "loď",
+          "text": "nave",
+          "occurrence": 1,
+          "start": 3,
+          "end": 7
+        },
+        {
+          "uid": "vit-0763",
+          "sourceIt": "attraversare",
+          "sourceCz": "přejít; projet",
+          "text": "attraversa",
+          "occurrence": 1,
+          "start": 8,
+          "end": 18
+        },
         {
           "uid": "vit-0658",
           "sourceIt": "mare",
           "sourceCz": "moře",
           "text": "mare",
           "occurrence": 1,
-          "start": 8,
-          "end": 12
+          "start": 22,
+          "end": 26
+        },
+        {
+          "uid": "vit-0807",
+          "sourceIt": "notte",
+          "sourceCz": "noc",
+          "text": "notte",
+          "occurrence": 1,
+          "start": 30,
+          "end": 35
         }
       ]
     },
@@ -16958,6 +19073,15 @@
           "occurrence": 1,
           "start": 3,
           "end": 10
+        },
+        {
+          "uid": "vit-1101",
+          "sourceIt": "bere",
+          "sourceCz": "pít",
+          "text": "bevo",
+          "occurrence": 1,
+          "start": 11,
+          "end": 15
         },
         {
           "uid": "vit-0285",
@@ -17144,18 +19268,36 @@
     "vit-0670": {
       "sourceIt": "museo",
       "sourceCz": "muzeum",
-      "sourceSentenceIt": "Ecco il museo.",
-      "sourceSentenceCz": "Tady je muzeum.",
+      "sourceSentenceIt": "Visitiamo il museo con la nostra guida.",
+      "sourceSentenceCz": "Prohlížíme si muzeum s naším průvodcem.",
       "reviewed": true,
       "concepts": [
+        {
+          "uid": "vit-0710",
+          "sourceIt": "visitare",
+          "sourceCz": "navštívit; prohlédnout si",
+          "text": "Visitiamo",
+          "occurrence": 1,
+          "start": 0,
+          "end": 9
+        },
         {
           "uid": "vit-0670",
           "sourceIt": "museo",
           "sourceCz": "muzeum",
           "text": "museo",
           "occurrence": 1,
-          "start": 8,
-          "end": 13
+          "start": 13,
+          "end": 18
+        },
+        {
+          "uid": "vit-0651",
+          "sourceIt": "guida",
+          "sourceCz": "průvodce jako osoba",
+          "text": "guida",
+          "occurrence": 1,
+          "start": 33,
+          "end": 38
         }
       ]
     },
@@ -17183,6 +19325,15 @@
           "occurrence": 1,
           "start": 11,
           "end": 17
+        },
+        {
+          "uid": "vit-1100",
+          "sourceIt": "sera",
+          "sourceCz": "večer",
+          "text": "sera",
+          "occurrence": 1,
+          "start": 23,
+          "end": 27
         }
       ]
     },
@@ -17225,18 +19376,45 @@
     "vit-0674": {
       "sourceIt": "neve",
       "sourceCz": "sníh",
-      "sourceSentenceIt": "Ecco la neve.",
-      "sourceSentenceCz": "Tady je sníh.",
+      "sourceSentenceIt": "Il cane gioca nella neve in giardino.",
+      "sourceSentenceCz": "Pes si hraje ve sněhu na zahradě.",
       "reviewed": true,
       "concepts": [
+        {
+          "uid": "vit-0093",
+          "sourceIt": "cane",
+          "sourceCz": "pes",
+          "text": "cane",
+          "occurrence": 1,
+          "start": 3,
+          "end": 7
+        },
+        {
+          "uid": "vit-0133",
+          "sourceIt": "giocare",
+          "sourceCz": "hrát, hrát si",
+          "text": "gioca",
+          "occurrence": 1,
+          "start": 8,
+          "end": 13
+        },
         {
           "uid": "vit-0674",
           "sourceIt": "neve",
           "sourceCz": "sníh",
           "text": "neve",
           "occurrence": 1,
-          "start": 8,
-          "end": 12
+          "start": 20,
+          "end": 24
+        },
+        {
+          "uid": "vit-0453",
+          "sourceIt": "giardino",
+          "sourceCz": "zahrada",
+          "text": "giardino",
+          "occurrence": 1,
+          "start": 28,
+          "end": 36
         }
       ]
     },
@@ -17360,18 +19538,45 @@
     "vit-0681": {
       "sourceIt": "piscina",
       "sourceCz": "bazén, plovárna",
-      "sourceSentenceIt": "Ecco la piscina.",
-      "sourceSentenceCz": "Tady je bazén.",
+      "sourceSentenceIt": "Domani vado in piscina con mia sorella.",
+      "sourceSentenceCz": "Zítra jdu se sestrou do bazénu.",
       "reviewed": true,
       "concepts": [
+        {
+          "uid": "vit-0148",
+          "sourceIt": "domani",
+          "sourceCz": "zítra",
+          "text": "Domani",
+          "occurrence": 1,
+          "start": 0,
+          "end": 6
+        },
+        {
+          "uid": "vit-0143",
+          "sourceIt": "andare",
+          "sourceCz": "jít, jet",
+          "text": "vado",
+          "occurrence": 1,
+          "start": 7,
+          "end": 11
+        },
         {
           "uid": "vit-0681",
           "sourceIt": "piscina",
           "sourceCz": "bazén, plovárna",
           "text": "piscina",
           "occurrence": 1,
-          "start": 8,
-          "end": 15
+          "start": 15,
+          "end": 22
+        },
+        {
+          "uid": "vit-0053",
+          "sourceIt": "sorella",
+          "sourceCz": "sestra",
+          "text": "sorella",
+          "occurrence": 1,
+          "start": 31,
+          "end": 38
         }
       ]
     },
@@ -17819,18 +20024,45 @@
     "vit-0699": {
       "sourceIt": "spiaggia",
       "sourceCz": "pláž",
-      "sourceSentenceIt": "Ecco la spiaggia.",
-      "sourceSentenceCz": "Tady je pláž.",
+      "sourceSentenceIt": "Porto l'ombrellone e l'asciugamano in spiaggia.",
+      "sourceSentenceCz": "Nesu na pláž slunečník a ručník.",
       "reviewed": true,
       "concepts": [
+        {
+          "uid": "vit-0682",
+          "sourceIt": "portare",
+          "sourceCz": "nést; nosit; přinést",
+          "text": "Porto",
+          "occurrence": 1,
+          "start": 0,
+          "end": 5
+        },
+        {
+          "uid": "vit-0810",
+          "sourceIt": "ombrellone",
+          "sourceCz": "plážový slunečník",
+          "text": "ombrellone",
+          "occurrence": 1,
+          "start": 8,
+          "end": 18
+        },
+        {
+          "uid": "vit-0282",
+          "sourceIt": "asciugamano",
+          "sourceCz": "ručník",
+          "text": "asciugamano",
+          "occurrence": 1,
+          "start": 23,
+          "end": 34
+        },
         {
           "uid": "vit-0699",
           "sourceIt": "spiaggia",
           "sourceCz": "pláž",
           "text": "spiaggia",
           "occurrence": 1,
-          "start": 8,
-          "end": 16
+          "start": 38,
+          "end": 46
         }
       ]
     },
@@ -18011,6 +20243,15 @@
           "occurrence": 1,
           "start": 9,
           "end": 15
+        },
+        {
+          "uid": "vit-1104",
+          "sourceIt": "autobus",
+          "sourceCz": "autobus",
+          "text": "autobus",
+          "occurrence": 1,
+          "start": 16,
+          "end": 23
         }
       ]
     },
@@ -19520,8 +21761,8 @@
     "vit-0765": {
       "sourceIt": "bambina",
       "sourceCz": "děvčátko, holčička",
-      "sourceSentenceIt": "Ecco la bambina.",
-      "sourceSentenceCz": "Tady je děvčátko.",
+      "sourceSentenceIt": "La bambina disegna un fiore in giardino.",
+      "sourceSentenceCz": "Holčička kreslí na zahradě květinu.",
       "reviewed": true,
       "concepts": [
         {
@@ -19530,8 +21771,35 @@
           "sourceCz": "děvčátko, holčička",
           "text": "bambina",
           "occurrence": 1,
-          "start": 8,
-          "end": 15
+          "start": 3,
+          "end": 10
+        },
+        {
+          "uid": "vit-0252",
+          "sourceIt": "disegnare",
+          "sourceCz": "kreslit",
+          "text": "disegna",
+          "occurrence": 1,
+          "start": 11,
+          "end": 18
+        },
+        {
+          "uid": "vit-0646",
+          "sourceIt": "fiore",
+          "sourceCz": "květ, květina",
+          "text": "fiore",
+          "occurrence": 1,
+          "start": 22,
+          "end": 27
+        },
+        {
+          "uid": "vit-0453",
+          "sourceIt": "giardino",
+          "sourceCz": "zahrada",
+          "text": "giardino",
+          "occurrence": 1,
+          "start": 31,
+          "end": 39
         }
       ]
     },
@@ -19559,6 +21827,15 @@
           "occurrence": 1,
           "start": 13,
           "end": 24
+        },
+        {
+          "uid": "vit-1098",
+          "sourceIt": "amico",
+          "sourceCz": "kamarád, přítel",
+          "text": "amici",
+          "occurrence": 1,
+          "start": 30,
+          "end": 35
         }
       ]
     },
@@ -19703,6 +21980,15 @@
           "occurrence": 1,
           "start": 0,
           "end": 8
+        },
+        {
+          "uid": "vit-1111",
+          "sourceIt": "domanda",
+          "sourceCz": "otázka",
+          "text": "domanda",
+          "occurrence": 1,
+          "start": 19,
+          "end": 26
         }
       ]
     },
@@ -20002,6 +22288,15 @@
       "reviewed": true,
       "concepts": [
         {
+          "uid": "vit-1097",
+          "sourceIt": "oggi",
+          "sourceCz": "dnes",
+          "text": "Oggi",
+          "occurrence": 1,
+          "start": 0,
+          "end": 4
+        },
+        {
           "uid": "vit-0786",
           "sourceIt": "felice",
           "sourceCz": "šťastný",
@@ -20240,18 +22535,45 @@
     "vit-0798": {
       "sourceIt": "letto",
       "sourceCz": "postel, lůžko",
-      "sourceSentenceIt": "Ecco il letto.",
-      "sourceSentenceCz": "Tady je postel.",
+      "sourceSentenceIt": "Il gatto dorme sul letto della bambina.",
+      "sourceSentenceCz": "Kočka spí na posteli holčičky.",
       "reviewed": true,
       "concepts": [
+        {
+          "uid": "vit-0140",
+          "sourceIt": "gatto",
+          "sourceCz": "kočka",
+          "text": "gatto",
+          "occurrence": 1,
+          "start": 3,
+          "end": 8
+        },
+        {
+          "uid": "vit-0297",
+          "sourceIt": "dormire",
+          "sourceCz": "spát",
+          "text": "dorme",
+          "occurrence": 1,
+          "start": 9,
+          "end": 14
+        },
         {
           "uid": "vit-0798",
           "sourceIt": "letto",
           "sourceCz": "postel, lůžko",
           "text": "letto",
           "occurrence": 1,
-          "start": 8,
-          "end": 13
+          "start": 19,
+          "end": 24
+        },
+        {
+          "uid": "vit-0765",
+          "sourceIt": "bambina",
+          "sourceCz": "děvčátko, holčička",
+          "text": "bambina",
+          "occurrence": 1,
+          "start": 31,
+          "end": 38
         }
       ]
     },
@@ -20352,6 +22674,15 @@
       "sourceSentenceCz": "Autobus je dopravní prostředek.",
       "reviewed": true,
       "concepts": [
+        {
+          "uid": "vit-1104",
+          "sourceIt": "autobus",
+          "sourceCz": "autobus",
+          "text": "autobus",
+          "occurrence": 1,
+          "start": 2,
+          "end": 9
+        },
         {
           "uid": "vit-0803",
           "sourceIt": "mezzo",
@@ -20749,6 +23080,15 @@
       "reviewed": true,
       "concepts": [
         {
+          "uid": "vit-1110",
+          "sourceIt": "banca",
+          "sourceCz": "banka",
+          "text": "banca",
+          "occurrence": 1,
+          "start": 3,
+          "end": 8
+        },
+        {
           "uid": "vit-0820",
           "sourceIt": "prestito",
           "sourceCz": "půjčka",
@@ -20920,6 +23260,15 @@
       "reviewed": true,
       "concepts": [
         {
+          "uid": "vit-1104",
+          "sourceIt": "autobus",
+          "sourceCz": "autobus",
+          "text": "autobus",
+          "occurrence": 1,
+          "start": 18,
+          "end": 25
+        },
+        {
           "uid": "vit-0827",
           "sourceIt": "regolare",
           "sourceCz": "pravidelný; řádný",
@@ -20972,6 +23321,15 @@
           "occurrence": 1,
           "start": 3,
           "end": 11
+        },
+        {
+          "uid": "vit-1100",
+          "sourceIt": "sera",
+          "sourceCz": "večer",
+          "text": "sera",
+          "occurrence": 1,
+          "start": 19,
+          "end": 23
         }
       ]
     },
@@ -21080,6 +23438,15 @@
           "occurrence": 1,
           "start": 9,
           "end": 17
+        },
+        {
+          "uid": "vit-1098",
+          "sourceIt": "amico",
+          "sourceCz": "kamarád, přítel",
+          "text": "amici",
+          "occurrence": 1,
+          "start": 32,
+          "end": 37
         }
       ]
     },
@@ -21185,8 +23552,8 @@
     "vit-0838": {
       "sourceIt": "sedia",
       "sourceCz": "židle",
-      "sourceSentenceIt": "Ecco la sedia.",
-      "sourceSentenceCz": "Tady je židle.",
+      "sourceSentenceIt": "La sedia bianca è vicino alla finestra.",
+      "sourceSentenceCz": "Bílá židle stojí blízko okna.",
       "reviewed": true,
       "concepts": [
         {
@@ -21195,8 +23562,35 @@
           "sourceCz": "židle",
           "text": "sedia",
           "occurrence": 1,
-          "start": 8,
-          "end": 13
+          "start": 3,
+          "end": 8
+        },
+        {
+          "uid": "vit-0501",
+          "sourceIt": "bianco",
+          "sourceCz": "bílý",
+          "text": "bianca",
+          "occurrence": 1,
+          "start": 9,
+          "end": 15
+        },
+        {
+          "uid": "vit-0076",
+          "sourceIt": "vicino",
+          "sourceCz": "blízko",
+          "text": "vicino",
+          "occurrence": 1,
+          "start": 18,
+          "end": 24
+        },
+        {
+          "uid": "vit-0304",
+          "sourceIt": "finestra",
+          "sourceCz": "okno",
+          "text": "finestra",
+          "occurrence": 1,
+          "start": 30,
+          "end": 38
         }
       ]
     },
@@ -21521,6 +23915,15 @@
           "occurrence": 1,
           "start": 0,
           "end": 8
+        },
+        {
+          "uid": "vit-1107",
+          "sourceIt": "colazione",
+          "sourceCz": "snídaně",
+          "text": "colazione",
+          "occurrence": 1,
+          "start": 23,
+          "end": 32
         }
       ]
     },
@@ -21869,8 +24272,8 @@
     "vit-0867": {
       "sourceIt": "bambino",
       "sourceCz": "dítě, děcko",
-      "sourceSentenceIt": "Ecco il bambino.",
-      "sourceSentenceCz": "Tady je dítě.",
+      "sourceSentenceIt": "Il bambino porta un libro al nonno.",
+      "sourceSentenceCz": "Dítě nese dědečkovi knihu.",
       "reviewed": true,
       "concepts": [
         {
@@ -21879,26 +24282,80 @@
           "sourceCz": "dítě, děcko",
           "text": "bambino",
           "occurrence": 1,
-          "start": 8,
-          "end": 15
+          "start": 3,
+          "end": 10
+        },
+        {
+          "uid": "vit-0682",
+          "sourceIt": "portare",
+          "sourceCz": "nést; nosit; přinést",
+          "text": "porta",
+          "occurrence": 1,
+          "start": 11,
+          "end": 16
+        },
+        {
+          "uid": "vit-0259",
+          "sourceIt": "libro",
+          "sourceCz": "kniha",
+          "text": "libro",
+          "occurrence": 1,
+          "start": 20,
+          "end": 25
+        },
+        {
+          "uid": "vit-0058",
+          "sourceIt": "nonno",
+          "sourceCz": "dědeček",
+          "text": "nonno",
+          "occurrence": 1,
+          "start": 29,
+          "end": 34
         }
       ]
     },
     "vit-0868": {
       "sourceIt": "borsa",
       "sourceCz": "taška",
-      "sourceSentenceIt": "Ecco la borsa.",
-      "sourceSentenceCz": "Tady je taška.",
+      "sourceSentenceIt": "Metto le chiavi nella borsa di mia madre.",
+      "sourceSentenceCz": "Dávám klíče do tašky své matky.",
       "reviewed": true,
       "concepts": [
+        {
+          "uid": "vit-0567",
+          "sourceIt": "mettere",
+          "sourceCz": "dát někam; položit",
+          "text": "Metto",
+          "occurrence": 1,
+          "start": 0,
+          "end": 5
+        },
+        {
+          "uid": "vit-0874",
+          "sourceIt": "chiave",
+          "sourceCz": "klíč",
+          "text": "chiavi",
+          "occurrence": 1,
+          "start": 9,
+          "end": 15
+        },
         {
           "uid": "vit-0868",
           "sourceIt": "borsa",
           "sourceCz": "taška",
           "text": "borsa",
           "occurrence": 1,
-          "start": 8,
-          "end": 13
+          "start": 22,
+          "end": 27
+        },
+        {
+          "uid": "vit-0055",
+          "sourceIt": "madre",
+          "sourceCz": "matka",
+          "text": "madre",
+          "occurrence": 1,
+          "start": 35,
+          "end": 40
         }
       ]
     },
@@ -21995,18 +24452,45 @@
     "vit-0874": {
       "sourceIt": "chiave",
       "sourceCz": "klíč",
-      "sourceSentenceIt": "Ecco la chiave.",
-      "sourceSentenceCz": "Tady je klíč.",
+      "sourceSentenceIt": "Cerco la chiave sotto il tavolo.",
+      "sourceSentenceCz": "Hledám klíč pod stolem.",
       "reviewed": true,
       "concepts": [
+        {
+          "uid": "vit-0146",
+          "sourceIt": "cercare",
+          "sourceCz": "hledat",
+          "text": "Cerco",
+          "occurrence": 1,
+          "start": 0,
+          "end": 5
+        },
         {
           "uid": "vit-0874",
           "sourceIt": "chiave",
           "sourceCz": "klíč",
           "text": "chiave",
           "occurrence": 1,
-          "start": 8,
-          "end": 14
+          "start": 9,
+          "end": 15
+        },
+        {
+          "uid": "vit-0348",
+          "sourceIt": "sotto",
+          "sourceCz": "pod",
+          "text": "sotto",
+          "occurrence": 1,
+          "start": 16,
+          "end": 21
+        },
+        {
+          "uid": "vit-0604",
+          "sourceIt": "tavolo",
+          "sourceCz": "stůl",
+          "text": "tavolo",
+          "occurrence": 1,
+          "start": 25,
+          "end": 31
         }
       ]
     },
@@ -22205,6 +24689,15 @@
           "occurrence": 1,
           "start": 5,
           "end": 12
+        },
+        {
+          "uid": "vit-1108",
+          "sourceIt": "risposta",
+          "sourceCz": "odpověď",
+          "text": "risposta",
+          "occurrence": 1,
+          "start": 26,
+          "end": 34
         }
       ]
     },
@@ -22391,18 +24884,45 @@
     "vit-0892": {
       "sourceIt": "fiume",
       "sourceCz": "řeka",
-      "sourceSentenceIt": "Ecco il fiume.",
-      "sourceSentenceCz": "Tady je řeka.",
+      "sourceSentenceIt": "Il vecchio ponte attraversa il fiume.",
+      "sourceSentenceCz": "Starý most překlenuje řeku.",
       "reviewed": true,
       "concepts": [
+        {
+          "uid": "vit-0358",
+          "sourceIt": "vecchio",
+          "sourceCz": "starý",
+          "text": "vecchio",
+          "occurrence": 1,
+          "start": 3,
+          "end": 10
+        },
+        {
+          "uid": "vit-0335",
+          "sourceIt": "ponte",
+          "sourceCz": "most",
+          "text": "ponte",
+          "occurrence": 1,
+          "start": 11,
+          "end": 16
+        },
+        {
+          "uid": "vit-0763",
+          "sourceIt": "attraversare",
+          "sourceCz": "přejít; projet",
+          "text": "attraversa",
+          "occurrence": 1,
+          "start": 17,
+          "end": 27
+        },
         {
           "uid": "vit-0892",
           "sourceIt": "fiume",
           "sourceCz": "řeka",
           "text": "fiume",
           "occurrence": 1,
-          "start": 8,
-          "end": 13
+          "start": 31,
+          "end": 36
         }
       ]
     },
@@ -22440,6 +24960,15 @@
       "sourceSentenceCz": "Dnes mám štěstí: hned najdu místo.",
       "reviewed": true,
       "concepts": [
+        {
+          "uid": "vit-1097",
+          "sourceIt": "oggi",
+          "sourceCz": "dnes",
+          "text": "Oggi",
+          "occurrence": 1,
+          "start": 0,
+          "end": 4
+        },
         {
           "uid": "vit-0894",
           "sourceIt": "fortunato",
@@ -22513,6 +25042,24 @@
       "reviewed": true,
       "concepts": [
         {
+          "uid": "vit-1102",
+          "sourceIt": "scuola",
+          "sourceCz": "škola",
+          "text": "scuola",
+          "occurrence": 1,
+          "start": 2,
+          "end": 8
+        },
+        {
+          "uid": "vit-1099",
+          "sourceIt": "studiare",
+          "sourceCz": "studovat, učit se",
+          "text": "studiamo",
+          "occurrence": 1,
+          "start": 9,
+          "end": 17
+        },
+        {
           "uid": "vit-0896",
           "sourceIt": "geografia",
           "sourceCz": "zeměpis",
@@ -22566,6 +25113,15 @@
       "sourceSentenceCz": "Tohle je správná odpověď.",
       "reviewed": true,
       "concepts": [
+        {
+          "uid": "vit-1108",
+          "sourceIt": "risposta",
+          "sourceCz": "odpověď",
+          "text": "risposta",
+          "occurrence": 1,
+          "start": 12,
+          "end": 20
+        },
         {
           "uid": "vit-0899",
           "sourceIt": "giusto",
@@ -22736,6 +25292,15 @@
           "occurrence": 1,
           "start": 0,
           "end": 8
+        },
+        {
+          "uid": "vit-1098",
+          "sourceIt": "amico",
+          "sourceCz": "kamarád, přítel",
+          "text": "amico",
+          "occurrence": 1,
+          "start": 12,
+          "end": 17
         },
         {
           "uid": "vit-0089",
@@ -23017,6 +25582,15 @@
       "reviewed": true,
       "concepts": [
         {
+          "uid": "vit-1101",
+          "sourceIt": "bere",
+          "sourceCz": "pít",
+          "text": "bevo",
+          "occurrence": 1,
+          "start": 4,
+          "end": 8
+        },
+        {
           "uid": "vit-0918",
           "sourceIt": "né… né",
           "sourceCz": "ani… ani",
@@ -23156,18 +25730,45 @@
     "vit-0924": {
       "sourceIt": "panchina",
       "sourceCz": "lavička",
-      "sourceSentenceIt": "Ecco la panchina.",
-      "sourceSentenceCz": "Tady je lavička.",
+      "sourceSentenceIt": "Il nonno legge il giornale sulla panchina.",
+      "sourceSentenceCz": "Dědeček čte na lavičce noviny.",
       "reviewed": true,
       "concepts": [
+        {
+          "uid": "vit-0058",
+          "sourceIt": "nonno",
+          "sourceCz": "dědeček",
+          "text": "nonno",
+          "occurrence": 1,
+          "start": 3,
+          "end": 8
+        },
+        {
+          "uid": "vit-0228",
+          "sourceIt": "leggere",
+          "sourceCz": "číst",
+          "text": "legge",
+          "occurrence": 1,
+          "start": 9,
+          "end": 14
+        },
+        {
+          "uid": "vit-0898",
+          "sourceIt": "giornale",
+          "sourceCz": "noviny",
+          "text": "giornale",
+          "occurrence": 1,
+          "start": 18,
+          "end": 26
+        },
         {
           "uid": "vit-0924",
           "sourceIt": "panchina",
           "sourceCz": "lavička",
           "text": "panchina",
           "occurrence": 1,
-          "start": 8,
-          "end": 16
+          "start": 33,
+          "end": 41
         }
       ]
     },
@@ -23277,6 +25878,15 @@
       "sourceSentenceCz": "Studuji italské malířství.",
       "reviewed": true,
       "concepts": [
+        {
+          "uid": "vit-1099",
+          "sourceIt": "studiare",
+          "sourceCz": "studovat, učit se",
+          "text": "Studio",
+          "occurrence": 1,
+          "start": 0,
+          "end": 6
+        },
         {
           "uid": "vit-0930",
           "sourceIt": "pittura",
@@ -23417,18 +26027,45 @@
     "vit-0936": {
       "sourceIt": "quadro",
       "sourceCz": "obraz",
-      "sourceSentenceIt": "Ecco il quadro.",
-      "sourceSentenceCz": "Tady je obraz.",
+      "sourceSentenceIt": "Il pittore mostra un quadro alla bambina.",
+      "sourceSentenceCz": "Malíř ukazuje holčičce obraz.",
       "reviewed": true,
       "concepts": [
+        {
+          "uid": "vit-0929",
+          "sourceIt": "pittore",
+          "sourceCz": "malíř",
+          "text": "pittore",
+          "occurrence": 1,
+          "start": 3,
+          "end": 10
+        },
+        {
+          "uid": "vit-0805",
+          "sourceIt": "mostrare",
+          "sourceCz": "ukázat",
+          "text": "mostra",
+          "occurrence": 1,
+          "start": 11,
+          "end": 17
+        },
         {
           "uid": "vit-0936",
           "sourceIt": "quadro",
           "sourceCz": "obraz",
           "text": "quadro",
           "occurrence": 1,
-          "start": 8,
-          "end": 14
+          "start": 21,
+          "end": 27
+        },
+        {
+          "uid": "vit-0765",
+          "sourceIt": "bambina",
+          "sourceCz": "děvčátko, holčička",
+          "text": "bambina",
+          "occurrence": 1,
+          "start": 33,
+          "end": 40
         }
       ]
     },
@@ -23537,6 +26174,15 @@
           "occurrence": 1,
           "start": 10,
           "end": 14
+        },
+        {
+          "uid": "vit-1100",
+          "sourceIt": "sera",
+          "sourceCz": "večer",
+          "text": "sera",
+          "occurrence": 1,
+          "start": 22,
+          "end": 26
         }
       ]
     },
@@ -24308,18 +26954,45 @@
     "vit-0971": {
       "sourceIt": "valigia",
       "sourceCz": "kufr, zavazadlo",
-      "sourceSentenceIt": "Ecco la valigia.",
-      "sourceSentenceCz": "Tady je kufr.",
+      "sourceSentenceIt": "Metto la camicia bianca nella valigia.",
+      "sourceSentenceCz": "Dávám bílou košili do kufru.",
       "reviewed": true,
       "concepts": [
+        {
+          "uid": "vit-0567",
+          "sourceIt": "mettere",
+          "sourceCz": "dát někam; položit",
+          "text": "Metto",
+          "occurrence": 1,
+          "start": 0,
+          "end": 5
+        },
+        {
+          "uid": "vit-0072",
+          "sourceIt": "camicia",
+          "sourceCz": "košile",
+          "text": "camicia",
+          "occurrence": 1,
+          "start": 9,
+          "end": 16
+        },
+        {
+          "uid": "vit-0501",
+          "sourceIt": "bianco",
+          "sourceCz": "bílý",
+          "text": "bianca",
+          "occurrence": 1,
+          "start": 17,
+          "end": 23
+        },
         {
           "uid": "vit-0971",
           "sourceIt": "valigia",
           "sourceCz": "kufr, zavazadlo",
           "text": "valigia",
           "occurrence": 1,
-          "start": 8,
-          "end": 15
+          "start": 30,
+          "end": 37
         }
       ]
     },
@@ -24428,6 +27101,15 @@
           "occurrence": 1,
           "start": 0,
           "end": 10
+        },
+        {
+          "uid": "vit-1099",
+          "sourceIt": "studiare",
+          "sourceCz": "studovat, učit se",
+          "text": "studio",
+          "occurrence": 1,
+          "start": 11,
+          "end": 17
         }
       ]
     },
@@ -24763,6 +27445,15 @@
       "reviewed": true,
       "concepts": [
         {
+          "uid": "vit-1097",
+          "sourceIt": "oggi",
+          "sourceCz": "dnes",
+          "text": "Oggi",
+          "occurrence": 1,
+          "start": 0,
+          "end": 4
+        },
+        {
           "uid": "vit-0987",
           "sourceIt": "Fa caldo.",
           "sourceCz": "Je horko.",
@@ -24870,6 +27561,15 @@
       "sourceSentenceCz": "Lékárna je kousek odsud.",
       "reviewed": true,
       "concepts": [
+        {
+          "uid": "vit-1109",
+          "sourceIt": "farmacia",
+          "sourceCz": "lékárna",
+          "text": "farmacia",
+          "occurrence": 1,
+          "start": 3,
+          "end": 11
+        },
         {
           "uid": "vit-0991",
           "sourceIt": "È a due passi.",
@@ -25005,6 +27705,15 @@
       "sourceSentenceCz": "Večer hrajeme karty.",
       "reviewed": true,
       "concepts": [
+        {
+          "uid": "vit-1100",
+          "sourceIt": "sera",
+          "sourceCz": "večer",
+          "text": "sera",
+          "occurrence": 1,
+          "start": 3,
+          "end": 7
+        },
         {
           "uid": "vit-0996",
           "sourceIt": "giocare a carte",
@@ -25276,6 +27985,15 @@
       "reviewed": true,
       "concepts": [
         {
+          "uid": "vit-1109",
+          "sourceIt": "farmacia",
+          "sourceCz": "lékárna",
+          "text": "farmacia",
+          "occurrence": 1,
+          "start": 3,
+          "end": 11
+        },
+        {
           "uid": "vit-1006",
           "sourceIt": "dall'altra parte",
           "sourceCz": "na druhé straně",
@@ -25365,6 +28083,15 @@
       "sourceSentenceCz": "V autobuse stojím.",
       "reviewed": true,
       "concepts": [
+        {
+          "uid": "vit-1104",
+          "sourceIt": "autobus",
+          "sourceCz": "autobus",
+          "text": "autobus",
+          "occurrence": 1,
+          "start": 3,
+          "end": 10
+        },
         {
           "uid": "vit-1009",
           "sourceIt": "stare in piedi",
@@ -25544,6 +28271,15 @@
           "occurrence": 1,
           "start": 0,
           "end": 11
+        },
+        {
+          "uid": "vit-1097",
+          "sourceIt": "oggi",
+          "sourceCz": "dnes",
+          "text": "oggi",
+          "occurrence": 1,
+          "start": 13,
+          "end": 17
         }
       ]
     },
@@ -25724,6 +28460,15 @@
           "occurrence": 1,
           "start": 0,
           "end": 5
+        },
+        {
+          "uid": "vit-1102",
+          "sourceIt": "scuola",
+          "sourceCz": "škola",
+          "text": "scuola",
+          "occurrence": 1,
+          "start": 19,
+          "end": 25
         }
       ]
     },
@@ -25924,6 +28669,15 @@
       "reviewed": true,
       "concepts": [
         {
+          "uid": "vit-1109",
+          "sourceIt": "farmacia",
+          "sourceCz": "lékárna",
+          "text": "farmacia",
+          "occurrence": 1,
+          "start": 3,
+          "end": 11
+        },
+        {
           "uid": "vit-1031",
           "sourceIt": "in fondo a",
           "sourceCz": "na konci",
@@ -25951,6 +28705,15 @@
       "reviewed": true,
       "concepts": [
         {
+          "uid": "vit-1110",
+          "sourceIt": "banca",
+          "sourceCz": "banka",
+          "text": "banca",
+          "occurrence": 1,
+          "start": 3,
+          "end": 8
+        },
+        {
           "uid": "vit-1032",
           "sourceIt": "di fronte",
           "sourceCz": "naproti; protější",
@@ -25958,6 +28721,15 @@
           "occurrence": 1,
           "start": 11,
           "end": 20
+        },
+        {
+          "uid": "vit-1102",
+          "sourceIt": "scuola",
+          "sourceCz": "škola",
+          "text": "scuola",
+          "occurrence": 1,
+          "start": 26,
+          "end": 32
         }
       ]
     },
@@ -26121,6 +28893,15 @@
       "sourceSentenceCz": "Sedám si do plážové rozkládací židle.",
       "reviewed": true,
       "concepts": [
+        {
+          "uid": "vit-1116",
+          "sourceIt": "sedersi",
+          "sourceCz": "sednout si, posadit se",
+          "text": "Mi siedo",
+          "occurrence": 1,
+          "start": 0,
+          "end": 8
+        },
         {
           "uid": "vit-1039",
           "sourceIt": "sedia a sdraio",
@@ -27166,6 +29947,15 @@
           "end": 6
         },
         {
+          "uid": "vit-1104",
+          "sourceIt": "autobus",
+          "sourceCz": "autobus",
+          "text": "autobus",
+          "occurrence": 1,
+          "start": 12,
+          "end": 19
+        },
+        {
           "uid": "vit-0548",
           "sourceIt": "fermata",
           "sourceCz": "zastávka, stanice",
@@ -27533,6 +30323,870 @@
           "occurrence": 1,
           "start": 0,
           "end": 5
+        }
+      ]
+    },
+    "vit-1097": {
+      "sourceIt": "oggi",
+      "sourceCz": "dnes",
+      "sourceSentenceIt": "Oggi porto mio figlio al museo.",
+      "sourceSentenceCz": "Dnes beru svého syna do muzea.",
+      "reviewed": true,
+      "concepts": [
+        {
+          "uid": "vit-1097",
+          "sourceIt": "oggi",
+          "sourceCz": "dnes",
+          "text": "Oggi",
+          "occurrence": 1,
+          "start": 0,
+          "end": 4
+        },
+        {
+          "uid": "vit-0682",
+          "sourceIt": "portare",
+          "sourceCz": "nést; nosit; přinést",
+          "text": "porto",
+          "occurrence": 1,
+          "start": 5,
+          "end": 10
+        },
+        {
+          "uid": "vit-0038",
+          "sourceIt": "figlio",
+          "sourceCz": "syn",
+          "text": "figlio",
+          "occurrence": 1,
+          "start": 15,
+          "end": 21
+        },
+        {
+          "uid": "vit-0670",
+          "sourceIt": "museo",
+          "sourceCz": "muzeum",
+          "text": "museo",
+          "occurrence": 1,
+          "start": 25,
+          "end": 30
+        }
+      ]
+    },
+    "vit-1098": {
+      "sourceIt": "amico",
+      "sourceCz": "kamarád, přítel",
+      "sourceSentenceIt": "Il mio amico gioca a calcio.",
+      "sourceSentenceCz": "Můj kamarád hraje fotbal.",
+      "reviewed": true,
+      "concepts": [
+        {
+          "uid": "vit-1098",
+          "sourceIt": "amico",
+          "sourceCz": "kamarád, přítel",
+          "text": "amico",
+          "occurrence": 1,
+          "start": 7,
+          "end": 12
+        },
+        {
+          "uid": "vit-0133",
+          "sourceIt": "giocare",
+          "sourceCz": "hrát, hrát si",
+          "text": "gioca",
+          "occurrence": 1,
+          "start": 13,
+          "end": 18
+        },
+        {
+          "uid": "vit-0246",
+          "sourceIt": "calcio",
+          "sourceCz": "fotbal",
+          "text": "calcio",
+          "occurrence": 1,
+          "start": 21,
+          "end": 27
+        }
+      ]
+    },
+    "vit-1099": {
+      "sourceIt": "studiare",
+      "sourceCz": "studovat, učit se",
+      "sourceSentenceIt": "Studio in camera con mio fratello.",
+      "sourceSentenceCz": "Učím se ve svém pokoji s bratrem.",
+      "reviewed": true,
+      "concepts": [
+        {
+          "uid": "vit-1099",
+          "sourceIt": "studiare",
+          "sourceCz": "studovat, učit se",
+          "text": "Studio",
+          "occurrence": 1,
+          "start": 0,
+          "end": 6
+        },
+        {
+          "uid": "vit-0242",
+          "sourceIt": "camera",
+          "sourceCz": "pokoj",
+          "text": "camera",
+          "occurrence": 1,
+          "start": 10,
+          "end": 16
+        },
+        {
+          "uid": "vit-0054",
+          "sourceIt": "fratello",
+          "sourceCz": "bratr",
+          "text": "fratello",
+          "occurrence": 1,
+          "start": 25,
+          "end": 33
+        }
+      ]
+    },
+    "vit-1100": {
+      "sourceIt": "sera",
+      "sourceCz": "večer",
+      "sourceSentenceIt": "La sera leggo un libro a letto.",
+      "sourceSentenceCz": "Večer čtu v posteli knihu.",
+      "reviewed": true,
+      "concepts": [
+        {
+          "uid": "vit-1100",
+          "sourceIt": "sera",
+          "sourceCz": "večer",
+          "text": "sera",
+          "occurrence": 1,
+          "start": 3,
+          "end": 7
+        },
+        {
+          "uid": "vit-0228",
+          "sourceIt": "leggere",
+          "sourceCz": "číst",
+          "text": "leggo",
+          "occurrence": 1,
+          "start": 8,
+          "end": 13
+        },
+        {
+          "uid": "vit-0259",
+          "sourceIt": "libro",
+          "sourceCz": "kniha",
+          "text": "libro",
+          "occurrence": 1,
+          "start": 17,
+          "end": 22
+        },
+        {
+          "uid": "vit-0798",
+          "sourceIt": "letto",
+          "sourceCz": "postel, lůžko",
+          "text": "letto",
+          "occurrence": 1,
+          "start": 25,
+          "end": 30
+        }
+      ]
+    },
+    "vit-1101": {
+      "sourceIt": "bere",
+      "sourceCz": "pít",
+      "sourceSentenceIt": "Bevo un bicchiere d'acqua dopo la passeggiata.",
+      "sourceSentenceCz": "Po procházce piju sklenici vody.",
+      "reviewed": true,
+      "concepts": [
+        {
+          "uid": "vit-1101",
+          "sourceIt": "bere",
+          "sourceCz": "pít",
+          "text": "Bevo",
+          "occurrence": 1,
+          "start": 0,
+          "end": 4
+        },
+        {
+          "uid": "vit-0104",
+          "sourceIt": "bicchiere",
+          "sourceCz": "sklenice",
+          "text": "bicchiere",
+          "occurrence": 1,
+          "start": 8,
+          "end": 17
+        },
+        {
+          "uid": "vit-0617",
+          "sourceIt": "acqua",
+          "sourceCz": "voda",
+          "text": "acqua",
+          "occurrence": 1,
+          "start": 20,
+          "end": 25
+        },
+        {
+          "uid": "vit-0214",
+          "sourceIt": "dopo",
+          "sourceCz": "po, potom",
+          "text": "dopo",
+          "occurrence": 1,
+          "start": 26,
+          "end": 30
+        },
+        {
+          "uid": "vit-0575",
+          "sourceIt": "passeggiata",
+          "sourceCz": "procházka",
+          "text": "passeggiata",
+          "occurrence": 1,
+          "start": 34,
+          "end": 45
+        }
+      ]
+    },
+    "vit-1102": {
+      "sourceIt": "scuola",
+      "sourceCz": "škola",
+      "sourceSentenceIt": "Mio figlio va a scuola in bicicletta.",
+      "sourceSentenceCz": "Můj syn jezdí do školy na kole.",
+      "reviewed": true,
+      "concepts": [
+        {
+          "uid": "vit-0038",
+          "sourceIt": "figlio",
+          "sourceCz": "syn",
+          "text": "figlio",
+          "occurrence": 1,
+          "start": 4,
+          "end": 10
+        },
+        {
+          "uid": "vit-0143",
+          "sourceIt": "andare",
+          "sourceCz": "jít, jet",
+          "text": "va",
+          "occurrence": 1,
+          "start": 11,
+          "end": 13
+        },
+        {
+          "uid": "vit-1102",
+          "sourceIt": "scuola",
+          "sourceCz": "škola",
+          "text": "scuola",
+          "occurrence": 1,
+          "start": 16,
+          "end": 22
+        },
+        {
+          "uid": "vit-0375",
+          "sourceIt": "bicicletta",
+          "sourceCz": "jízdní kolo",
+          "text": "bicicletta",
+          "occurrence": 1,
+          "start": 26,
+          "end": 36
+        }
+      ]
+    },
+    "vit-1103": {
+      "sourceIt": "nuovo",
+      "sourceCz": "nový",
+      "sourceSentenceIt": "Metto il vestito nuovo nella valigia.",
+      "sourceSentenceCz": "Dávám nové šaty do kufru.",
+      "reviewed": true,
+      "concepts": [
+        {
+          "uid": "vit-0567",
+          "sourceIt": "mettere",
+          "sourceCz": "dát někam; položit",
+          "text": "Metto",
+          "occurrence": 1,
+          "start": 0,
+          "end": 5
+        },
+        {
+          "uid": "vit-0853",
+          "sourceIt": "vestito",
+          "sourceCz": "šaty; oděv",
+          "text": "vestito",
+          "occurrence": 1,
+          "start": 9,
+          "end": 16
+        },
+        {
+          "uid": "vit-1103",
+          "sourceIt": "nuovo",
+          "sourceCz": "nový",
+          "text": "nuovo",
+          "occurrence": 1,
+          "start": 17,
+          "end": 22
+        },
+        {
+          "uid": "vit-0971",
+          "sourceIt": "valigia",
+          "sourceCz": "kufr, zavazadlo",
+          "text": "valigia",
+          "occurrence": 1,
+          "start": 29,
+          "end": 36
+        }
+      ]
+    },
+    "vit-1104": {
+      "sourceIt": "autobus",
+      "sourceCz": "autobus",
+      "sourceSentenceIt": "L'autobus si ferma davanti al museo.",
+      "sourceSentenceCz": "Autobus zastavuje před muzeem.",
+      "reviewed": true,
+      "concepts": [
+        {
+          "uid": "vit-1104",
+          "sourceIt": "autobus",
+          "sourceCz": "autobus",
+          "text": "autobus",
+          "occurrence": 1,
+          "start": 2,
+          "end": 9
+        },
+        {
+          "uid": "vit-0303",
+          "sourceIt": "fermarsi",
+          "sourceCz": "zdržet se, zastavit se",
+          "text": "si ferma",
+          "occurrence": 1,
+          "start": 10,
+          "end": 18
+        },
+        {
+          "uid": "vit-0670",
+          "sourceIt": "museo",
+          "sourceCz": "muzeum",
+          "text": "museo",
+          "occurrence": 1,
+          "start": 30,
+          "end": 35
+        }
+      ]
+    },
+    "vit-1105": {
+      "sourceIt": "pane",
+      "sourceCz": "chléb",
+      "sourceSentenceIt": "Metto il pane sul tavolo della cucina.",
+      "sourceSentenceCz": "Dávám chléb na kuchyňský stůl.",
+      "reviewed": true,
+      "concepts": [
+        {
+          "uid": "vit-0567",
+          "sourceIt": "mettere",
+          "sourceCz": "dát někam; položit",
+          "text": "Metto",
+          "occurrence": 1,
+          "start": 0,
+          "end": 5
+        },
+        {
+          "uid": "vit-1105",
+          "sourceIt": "pane",
+          "sourceCz": "chléb",
+          "text": "pane",
+          "occurrence": 1,
+          "start": 9,
+          "end": 13
+        },
+        {
+          "uid": "vit-0604",
+          "sourceIt": "tavolo",
+          "sourceCz": "stůl",
+          "text": "tavolo",
+          "occurrence": 1,
+          "start": 18,
+          "end": 24
+        }
+      ]
+    },
+    "vit-1106": {
+      "sourceIt": "tè",
+      "sourceCz": "čaj",
+      "sourceSentenceIt": "Il nonno prepara il tè al limone.",
+      "sourceSentenceCz": "Dědeček připravuje čaj s citronem.",
+      "reviewed": true,
+      "concepts": [
+        {
+          "uid": "vit-0058",
+          "sourceIt": "nonno",
+          "sourceCz": "dědeček",
+          "text": "nonno",
+          "occurrence": 1,
+          "start": 3,
+          "end": 8
+        },
+        {
+          "uid": "vit-0817",
+          "sourceIt": "preparare",
+          "sourceCz": "připravit; připravovat",
+          "text": "prepara",
+          "occurrence": 1,
+          "start": 9,
+          "end": 16
+        },
+        {
+          "uid": "vit-1106",
+          "sourceIt": "tè",
+          "sourceCz": "čaj",
+          "text": "tè",
+          "occurrence": 1,
+          "start": 20,
+          "end": 22
+        },
+        {
+          "uid": "vit-0230",
+          "sourceIt": "limone",
+          "sourceCz": "citron",
+          "text": "limone",
+          "occurrence": 1,
+          "start": 26,
+          "end": 32
+        }
+      ]
+    },
+    "vit-1107": {
+      "sourceIt": "colazione",
+      "sourceCz": "snídaně",
+      "sourceSentenceIt": "A colazione mangio una banana in giardino.",
+      "sourceSentenceCz": "K snídani jím na zahradě banán.",
+      "reviewed": true,
+      "concepts": [
+        {
+          "uid": "vit-1107",
+          "sourceIt": "colazione",
+          "sourceCz": "snídaně",
+          "text": "colazione",
+          "occurrence": 1,
+          "start": 2,
+          "end": 11
+        },
+        {
+          "uid": "vit-0138",
+          "sourceIt": "mangiare",
+          "sourceCz": "jíst",
+          "text": "mangio",
+          "occurrence": 1,
+          "start": 12,
+          "end": 18
+        },
+        {
+          "uid": "vit-0237",
+          "sourceIt": "banana",
+          "sourceCz": "banán",
+          "text": "banana",
+          "occurrence": 1,
+          "start": 23,
+          "end": 29
+        },
+        {
+          "uid": "vit-0453",
+          "sourceIt": "giardino",
+          "sourceCz": "zahrada",
+          "text": "giardino",
+          "occurrence": 1,
+          "start": 33,
+          "end": 41
+        }
+      ]
+    },
+    "vit-1108": {
+      "sourceIt": "risposta",
+      "sourceCz": "odpověď",
+      "sourceSentenceIt": "Scrivo la risposta nel messaggio per Luca.",
+      "sourceSentenceCz": "Píšu odpověď do zprávy pro Lukáše.",
+      "reviewed": true,
+      "concepts": [
+        {
+          "uid": "vit-0594",
+          "sourceIt": "scrivere",
+          "sourceCz": "psát; napsat",
+          "text": "Scrivo",
+          "occurrence": 1,
+          "start": 0,
+          "end": 6
+        },
+        {
+          "uid": "vit-1108",
+          "sourceIt": "risposta",
+          "sourceCz": "odpověď",
+          "text": "risposta",
+          "occurrence": 1,
+          "start": 10,
+          "end": 18
+        },
+        {
+          "uid": "vit-0801",
+          "sourceIt": "messaggio",
+          "sourceCz": "vzkaz, poselství",
+          "text": "messaggio",
+          "occurrence": 1,
+          "start": 23,
+          "end": 32
+        },
+        {
+          "uid": "vit-0322",
+          "sourceIt": "Luca",
+          "sourceCz": "Lukáš",
+          "text": "Luca",
+          "occurrence": 1,
+          "start": 37,
+          "end": 41
+        }
+      ]
+    },
+    "vit-1109": {
+      "sourceIt": "farmacia",
+      "sourceCz": "lékárna",
+      "sourceSentenceIt": "La farmacia è vicino alla stazione.",
+      "sourceSentenceCz": "Lékárna je blízko nádraží.",
+      "reviewed": true,
+      "concepts": [
+        {
+          "uid": "vit-1109",
+          "sourceIt": "farmacia",
+          "sourceCz": "lékárna",
+          "text": "farmacia",
+          "occurrence": 1,
+          "start": 3,
+          "end": 11
+        },
+        {
+          "uid": "vit-0076",
+          "sourceIt": "vicino",
+          "sourceCz": "blízko",
+          "text": "vicino",
+          "occurrence": 1,
+          "start": 14,
+          "end": 20
+        },
+        {
+          "uid": "vit-0129",
+          "sourceIt": "stazione",
+          "sourceCz": "nádraží, stanice",
+          "text": "stazione",
+          "occurrence": 1,
+          "start": 26,
+          "end": 34
+        }
+      ]
+    },
+    "vit-1110": {
+      "sourceIt": "banca",
+      "sourceCz": "banka",
+      "sourceSentenceIt": "La banca è vicino al nostro appartamento.",
+      "sourceSentenceCz": "Banka je blízko našeho bytu.",
+      "reviewed": true,
+      "concepts": [
+        {
+          "uid": "vit-1110",
+          "sourceIt": "banca",
+          "sourceCz": "banka",
+          "text": "banca",
+          "occurrence": 1,
+          "start": 3,
+          "end": 8
+        },
+        {
+          "uid": "vit-0076",
+          "sourceIt": "vicino",
+          "sourceCz": "blízko",
+          "text": "vicino",
+          "occurrence": 1,
+          "start": 11,
+          "end": 17
+        },
+        {
+          "uid": "vit-0569",
+          "sourceIt": "nostro",
+          "sourceCz": "náš",
+          "text": "nostro",
+          "occurrence": 1,
+          "start": 21,
+          "end": 27
+        },
+        {
+          "uid": "vit-0530",
+          "sourceIt": "appartamento",
+          "sourceCz": "byt",
+          "text": "appartamento",
+          "occurrence": 1,
+          "start": 28,
+          "end": 40
+        }
+      ]
+    },
+    "vit-1111": {
+      "sourceIt": "domanda",
+      "sourceCz": "otázka",
+      "sourceSentenceIt": "Il bambino fa una domanda alla madre.",
+      "sourceSentenceCz": "Dítě se ptá své matky.",
+      "reviewed": true,
+      "concepts": [
+        {
+          "uid": "vit-0867",
+          "sourceIt": "bambino",
+          "sourceCz": "dítě, děcko",
+          "text": "bambino",
+          "occurrence": 1,
+          "start": 3,
+          "end": 10
+        },
+        {
+          "uid": "vit-0427",
+          "sourceIt": "fare",
+          "sourceCz": "dělat",
+          "text": "fa",
+          "occurrence": 1,
+          "start": 11,
+          "end": 13
+        },
+        {
+          "uid": "vit-1111",
+          "sourceIt": "domanda",
+          "sourceCz": "otázka",
+          "text": "domanda",
+          "occurrence": 1,
+          "start": 18,
+          "end": 25
+        },
+        {
+          "uid": "vit-0055",
+          "sourceIt": "madre",
+          "sourceCz": "matka",
+          "text": "madre",
+          "occurrence": 1,
+          "start": 31,
+          "end": 36
+        }
+      ]
+    },
+    "vit-1112": {
+      "sourceIt": "vento",
+      "sourceCz": "vítr",
+      "sourceSentenceIt": "Il vento forte muove gli alberi.",
+      "sourceSentenceCz": "Silný vítr hýbe stromy.",
+      "reviewed": true,
+      "concepts": [
+        {
+          "uid": "vit-1112",
+          "sourceIt": "vento",
+          "sourceCz": "vítr",
+          "text": "vento",
+          "occurrence": 1,
+          "start": 3,
+          "end": 8
+        },
+        {
+          "uid": "vit-0007",
+          "sourceIt": "forte",
+          "sourceCz": "silný",
+          "text": "forte",
+          "occurrence": 1,
+          "start": 9,
+          "end": 14
+        },
+        {
+          "uid": "vit-0452",
+          "sourceIt": "albero",
+          "sourceCz": "strom",
+          "text": "alberi",
+          "occurrence": 1,
+          "start": 25,
+          "end": 31
+        }
+      ]
+    },
+    "vit-1113": {
+      "sourceIt": "latte",
+      "sourceCz": "mléko",
+      "sourceSentenceIt": "Metto il latte nel bicchiere del bambino.",
+      "sourceSentenceCz": "Dávám mléko do dětské sklenice.",
+      "reviewed": true,
+      "concepts": [
+        {
+          "uid": "vit-0567",
+          "sourceIt": "mettere",
+          "sourceCz": "dát někam; položit",
+          "text": "Metto",
+          "occurrence": 1,
+          "start": 0,
+          "end": 5
+        },
+        {
+          "uid": "vit-1113",
+          "sourceIt": "latte",
+          "sourceCz": "mléko",
+          "text": "latte",
+          "occurrence": 1,
+          "start": 9,
+          "end": 14
+        },
+        {
+          "uid": "vit-0104",
+          "sourceIt": "bicchiere",
+          "sourceCz": "sklenice",
+          "text": "bicchiere",
+          "occurrence": 1,
+          "start": 19,
+          "end": 28
+        },
+        {
+          "uid": "vit-0867",
+          "sourceIt": "bambino",
+          "sourceCz": "dítě, děcko",
+          "text": "bambino",
+          "occurrence": 1,
+          "start": 33,
+          "end": 40
+        }
+      ]
+    },
+    "vit-1114": {
+      "sourceIt": "pranzo",
+      "sourceCz": "oběd",
+      "sourceSentenceIt": "Dopo pranzo cammino nel bosco con Luca.",
+      "sourceSentenceCz": "Po obědě jdu s Lukášem do lesa.",
+      "reviewed": true,
+      "concepts": [
+        {
+          "uid": "vit-0214",
+          "sourceIt": "dopo",
+          "sourceCz": "po, potom",
+          "text": "Dopo",
+          "occurrence": 1,
+          "start": 0,
+          "end": 4
+        },
+        {
+          "uid": "vit-1114",
+          "sourceIt": "pranzo",
+          "sourceCz": "oběd",
+          "text": "pranzo",
+          "occurrence": 1,
+          "start": 5,
+          "end": 11
+        },
+        {
+          "uid": "vit-0274",
+          "sourceIt": "camminare",
+          "sourceCz": "chodit, kráčet",
+          "text": "cammino",
+          "occurrence": 1,
+          "start": 12,
+          "end": 19
+        },
+        {
+          "uid": "vit-0626",
+          "sourceIt": "bosco",
+          "sourceCz": "les",
+          "text": "bosco",
+          "occurrence": 1,
+          "start": 24,
+          "end": 29
+        },
+        {
+          "uid": "vit-0322",
+          "sourceIt": "Luca",
+          "sourceCz": "Lukáš",
+          "text": "Luca",
+          "occurrence": 1,
+          "start": 34,
+          "end": 38
+        }
+      ]
+    },
+    "vit-1115": {
+      "sourceIt": "quaderno",
+      "sourceCz": "sešit",
+      "sourceSentenceIt": "Cerco il quaderno nella borsa di Luca.",
+      "sourceSentenceCz": "Hledám sešit v Lukášově tašce.",
+      "reviewed": true,
+      "concepts": [
+        {
+          "uid": "vit-0146",
+          "sourceIt": "cercare",
+          "sourceCz": "hledat",
+          "text": "Cerco",
+          "occurrence": 1,
+          "start": 0,
+          "end": 5
+        },
+        {
+          "uid": "vit-1115",
+          "sourceIt": "quaderno",
+          "sourceCz": "sešit",
+          "text": "quaderno",
+          "occurrence": 1,
+          "start": 9,
+          "end": 17
+        },
+        {
+          "uid": "vit-0868",
+          "sourceIt": "borsa",
+          "sourceCz": "taška",
+          "text": "borsa",
+          "occurrence": 1,
+          "start": 24,
+          "end": 29
+        },
+        {
+          "uid": "vit-0322",
+          "sourceIt": "Luca",
+          "sourceCz": "Lukáš",
+          "text": "Luca",
+          "occurrence": 1,
+          "start": 33,
+          "end": 37
+        }
+      ]
+    },
+    "vit-1116": {
+      "sourceIt": "sedersi",
+      "sourceCz": "sednout si, posadit se",
+      "sourceSentenceIt": "Mi siedo sulla panchina vicino al lago.",
+      "sourceSentenceCz": "Sedám si na lavičku poblíž jezera.",
+      "reviewed": true,
+      "concepts": [
+        {
+          "uid": "vit-1116",
+          "sourceIt": "sedersi",
+          "sourceCz": "sednout si, posadit se",
+          "text": "Mi siedo",
+          "occurrence": 1,
+          "start": 0,
+          "end": 8
+        },
+        {
+          "uid": "vit-0924",
+          "sourceIt": "panchina",
+          "sourceCz": "lavička",
+          "text": "panchina",
+          "occurrence": 1,
+          "start": 15,
+          "end": 23
+        },
+        {
+          "uid": "vit-0076",
+          "sourceIt": "vicino",
+          "sourceCz": "blízko",
+          "text": "vicino",
+          "occurrence": 1,
+          "start": 24,
+          "end": 30
+        },
+        {
+          "uid": "vit-0654",
+          "sourceIt": "lago",
+          "sourceCz": "jezero",
+          "text": "lago",
+          "occurrence": 1,
+          "start": 34,
+          "end": 38
         }
       ]
     }

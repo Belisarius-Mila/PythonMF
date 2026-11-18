@@ -79,6 +79,43 @@ class VocabularyItalianExportTests(unittest.TestCase):
                 with self.assertRaises(ValueError): export.prepare_export(root, **args)
                 self.assertFalse((root / "output").exists())
 
+    def test_scoped_italian_images_keep_shared_library_frozen_and_reject_drift(self):
+        with tempfile.TemporaryDirectory() as name:
+            root = Path(name); args = self.fixture(root)
+            shared = (root / "Pict/Photo.webp").read_bytes()
+            local = root / "VocabularyIT/Pict/New.webp"
+            local.parent.mkdir(); Image.new("RGB", (300, 250), "blue").save(local)
+            document = json.loads(args['catalog_path'].read_text())
+            document['entries'][2].update(imageFile='VocabularyIT/Pict/New.webp',
+                                          imageSha256=catalog.digest(local))
+            args['catalog_path'].write_text(json.dumps(document))
+            manifest = json.loads(args['image_manifest_path'].read_text())
+            manifest['files']['VocabularyIT/Pict/New.webp'] = {
+                'sha256': catalog.digest(local), 'bytes': local.stat().st_size, 'kind': 'image'}
+            args['image_manifest_path'].write_text(json.dumps(manifest))
+            payload, _ = export.prepare_export(root, **args)
+            self.assertEqual(payload['stats']['uniqueSourceImages'], 2)
+            self.assertEqual((root / 'Pict/Photo.webp').read_bytes(), shared)
+            local.write_bytes(local.read_bytes() + b'changed')
+            with self.assertRaises(ValueError): export.prepare_export(root, **args)
+
+    def test_scoped_image_paths_reject_other_projects_traversal_and_symlinks(self):
+        for relative in ('VocabularyFR/Pict/New.webp', 'VocabularyIT/Pict/../New.webp',
+                         'VocabularyIT/Pict/new.webp', 'VocabularyIT/Pict/Link.webp'):
+            with self.subTest(relative=relative), tempfile.TemporaryDirectory() as name:
+                root = Path(name); args = self.fixture(root)
+                local = root / 'VocabularyIT/Pict/New.webp'
+                local.parent.mkdir(); Image.new('RGB', (100, 100), 'blue').save(local)
+                (local.parent / 'Link.webp').symlink_to(local)
+                document = json.loads(args['catalog_path'].read_text())
+                document['entries'][2].update(imageFile=relative, imageSha256=catalog.digest(local))
+                args['catalog_path'].write_text(json.dumps(document))
+                manifest = json.loads(args['image_manifest_path'].read_text())
+                manifest['files'][relative] = {'sha256': catalog.digest(local),
+                                             'bytes': local.stat().st_size, 'kind': 'image'}
+                args['image_manifest_path'].write_text(json.dumps(manifest))
+                with self.assertRaises(ValueError): export.prepare_export(root, **args)
+
     def test_changes_during_conversion_cannot_escape_source_pins(self):
         for relative in ("Pict/Photo.webp", "VocabularyIT/VocabularyIT.csv", "catalog.json"):
             with self.subTest(relative=relative), tempfile.TemporaryDirectory() as name:

@@ -1,3 +1,10 @@
+AKTUÁLNĚ18.11.2026: schválených60 přepisů a20 nových karet/ilustrací.
+1116 vět,2349 obrazových vazeb,4303 používaných MP3;187 nových syntéz+13
+přesných převzetí,200 nových cest plně dekódováno.4222 starých MP3 zachovaných.
+Vlastní obrazy VocabularyIT/Pict; CSV471 a sdílené mapování beze změny.
+Safari Mac ověřený; finální brána/commit v private/vocabulary_it_loop_refresh_20261118/completion.json.
+Telefon/přejímka a p+n samostatně. Starší záznamy níže jsou historie.
+
 AKTUÁLNĚ17.11.2026: obrazové kontexty všech1096 vět a kontinuální smyčka IT.
 1963 vazeb,1–5 obrazů/IT popisků nad IT větou a CZ překladem; potom velká
 slovní karta. Ovládání na velké kartě: Smyčka → Věta + slovíčko → Spustit.

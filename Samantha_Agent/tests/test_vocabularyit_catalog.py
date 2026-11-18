@@ -19,6 +19,30 @@ it = importlib.util.module_from_spec(SPEC)
 SPEC.loader.exec_module(it)
 
 
+def catalog_before_loop(current):
+    """Reconstruct the historical batch, asserting only approved sentences changed."""
+    batch = json.loads((ROOT / 'VocabularyIT/batches/loop_refresh_20261118.json').read_text())
+    result = copy.deepcopy(current)
+    result['entries'] = result['entries'][:batch['baseCount']]
+    for entry in result['entries']:
+        change = batch['sentenceChanges'].get(entry['uid'])
+        if not change:
+            continue
+        previous = change['beforeEntry']
+        if entry.get('origin', 'legacy') == 'web':
+            assert entry['webText']['sentenceIt'] == change['afterIt']
+            assert entry['webText']['sentenceCz'] == change['afterCz']
+            entry['webText'] = copy.deepcopy(previous['webText'])
+        else:
+            assert entry['sentenceOverride']['it'] == change['afterIt']
+            assert entry['sentenceOverride']['cz'] == change['afterCz']
+            entry.pop('sentenceOverride')
+            if 'sentenceOverride' in previous:
+                entry['sentenceOverride'] = copy.deepcopy(previous['sentenceOverride'])
+        assert entry == previous, entry['uid']
+    return result
+
+
 class VocabularyItalianCatalogTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
@@ -112,9 +136,9 @@ class VocabularyItalianCatalogTests(unittest.TestCase):
         entries = self.catalog["entries"]
         self.assertEqual(len(self.catalog["groups"]), 18)
         self.assertEqual({entry["primaryGroup"] for entry in entries}, {f"topic-{n:02d}" for n in range(1, 19)})
-        self.assertEqual(sum(entry["editorialStatus"] == "reviewed" for entry in entries), 649)
+        self.assertEqual(sum(entry["editorialStatus"] == "reviewed" for entry in entries), 669)
         self.assertTrue(all(entry["difficultyStatus"] == "proposed" for entry in entries))
-        self.assertEqual(sum(entry["imageStatus"] == "reviewed" for entry in entries), 1096)
+        self.assertEqual(sum(entry["imageStatus"] == "reviewed" for entry in entries), 1116)
         self.assertEqual(sum(entry["imageStatus"] == "replacement-needed" for entry in entries), 0)
         self.assertEqual(sum(entry["imageStatus"] == "pending-review" for entry in entries), 0)
         self.assertTrue(all(entry["legacyAddedAt"] is None for entry in entries))
@@ -146,13 +170,13 @@ class VocabularyItalianCatalogTests(unittest.TestCase):
         manifest = json.loads((ROOT / "VocabularyIT/vocabulary_it_image_manifest.json").read_text())
         source_files = self.snapshot["files"]
         self.assertEqual(manifest["foundationManifestSha256"], it.digest(it.MANIFEST))
-        self.assertEqual(len(manifest["files"]), 659)
+        self.assertEqual(len(manifest["files"]), 679)
         for path, record in manifest["files"].items():
             if path in source_files:
                 self.assertEqual(record["sha256"], source_files[path]["sha256"])
                 self.assertEqual(record["bytes"], source_files[path]["bytes"])
             else:
-                self.assertTrue(path.startswith(("Pict/it_web_vit_", "Pict/it_leda_")))
+                self.assertTrue(path.startswith(("Pict/it_web_vit_", "Pict/it_leda_", "VocabularyIT/Pict/loop-20261118-")))
                 self.assertEqual(record["sha256"], it.digest(ROOT / path))
                 self.assertEqual(record["bytes"], (ROOT / path).stat().st_size)
         entries = self.catalog["entries"]
@@ -220,10 +244,10 @@ class VocabularyItalianCatalogTests(unittest.TestCase):
             for uid in proposal["createdUids"]:
                 self.assertEqual(by_uid[uid]["origin"], "web")
                 self.assertIn(entry["uid"], [link["uid"] for link in by_uid[uid]["related"]])
-        self.assertEqual(len(by_uid), 1096)
+        self.assertEqual(len(by_uid), 1116)
         self.assertEqual(sum(len(p["createdUids"]) for p in review["items"]), 26)
         cards = it.all_card_texts(self.rows, self.catalog)
-        self.assertEqual(len(cards), 1096)
+        self.assertEqual(len(cards), 1116)
         self.assertEqual(cards[471][0]["uid"], "vit-0472")
         self.assertEqual(cards[471][1]["sentenceCz"], "Tady nemluv nahlas.")
         self.assertEqual(cards[412][1]["genderIt"], "")
@@ -329,7 +353,7 @@ class VocabularyItalianLedaBatchTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         cls.batch = json.loads((ROOT / "VocabularyIT/batches/leda_20261116.json").read_text())
-        cls.active = it.load_catalog()
+        cls.active = catalog_before_loop(it.load_catalog())
 
     def test_applied_batch_preserves_original_catalog_entries_and_inputs(self):
         b = self.batch
@@ -394,13 +418,11 @@ class VocabularyItalianLedaBatchTests(unittest.TestCase):
 
     def test_original_1907_mp3_hashes_survive_the_azure_additions(self):
         b=self.batch
-        old_assets={}
-        for filename in ('vocabulary-it-audio.json','vocabulary-it-sentence-audio.json'):
-            manifest=json.loads((ROOT/'docs/data'/filename).read_text())
-            for uid,record in manifest['items'].items():
-                if int(uid.split('-')[1])<=b['baseCount']:
-                    for language in ('it','cz'):
-                        relative=record[language];old_assets[relative]=manifest['assetSha256'][relative]
+        original_items=[{'uid':entry['uid'], **body} for entry,body in
+                        it.all_card_texts(it.load_rows(ROOT/'VocabularyIT/VocabularyIT.csv'),self.active)
+                        if entry['id']<=b['baseCount']]
+        planned=audio.plan(original_items,provider='registered-edge-tts+azure-neural')
+        old_assets={relative:audio.digest(ROOT/'docs'/relative) for relative in planned['jobs']}
         self.assertEqual(len(old_assets),1907)
         self.assertEqual(leda_canonical(old_assets),b['audio']['originalAssetsSha256'])
 
@@ -409,7 +431,8 @@ class VocabularyItalianLedaBatchTests(unittest.TestCase):
         self.assertEqual(set(b["spelling"]), {e["uid"] for e in b["entries"]})
         old_spelling = json.loads((ROOT / "VocabularyIT/vocabulary_it_spelling.json").read_text())
         decompositions = {e["it"]: e["pieces"] for e in old_spelling["entries"].values()}
-        items = json.loads((ROOT / "docs/data/vocabulary-it-v2.json").read_text())["items"]
+        items = [{'uid':entry['uid'], **body} for entry,body in
+                 it.all_card_texts(it.load_rows(ROOT/'VocabularyIT/VocabularyIT.csv'),self.active)]
         for e in b["entries"]:
             s = b["spelling"][e["uid"]]
             self.assertEqual((s["it"], s["cz"]), (e["it"], e["cz"]))
@@ -427,6 +450,65 @@ class VocabularyItalianLedaBatchTests(unittest.TestCase):
         self.assertEqual(b["audio"]["newAssetsReady"], 2315)
         self.assertEqual(b["audio"]["uncertainRequests"], 0)
 
+
+
+class VocabularyItalianLoopRefreshTests(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls):
+        cls.batch = json.loads((ROOT/'VocabularyIT/batches/loop_refresh_20261118.json').read_text())
+        cls.catalog = it.load_catalog()
+        cls.data = json.loads((ROOT/'docs/data/vocabulary-it-v2.json').read_text())
+        cls.pictures = json.loads((ROOT/'docs/data/vocabulary-it-sentence-pictures.json').read_text())
+
+    def test_only_sixty_approved_sentences_change_existing_catalog_entries(self):
+        b = self.batch
+        self.assertEqual(len(b['sentenceChanges']),60)
+        previous = catalog_before_loop(self.catalog)
+        self.assertEqual(hashlib.sha256(audio.encoded(previous['entries'])).hexdigest(),b['beforeEntriesSha256'])
+        current = {x['uid']:x for x in self.data['items']}
+        for uid,change in b['sentenceChanges'].items():
+            item = current[uid]
+            self.assertEqual((item['sentenceIt'],item['sentenceCz']),(change['afterIt'],change['afterCz']))
+            self.assertTrue(6<=len(item['sentenceIt'].split())<=8)
+        for relative,sha in b['preservedSources'].items():
+            self.assertEqual(it.digest(ROOT/relative),sha)
+
+    def test_twenty_new_meanings_have_own_images_spelling_and_unambiguous_ids(self):
+        expected={'oggi','amico','studiare','sera','bere','scuola','nuovo','autobus','pane','tè',
+                  'colazione','risposta','farmacia','banca','domanda','vento','latte','pranzo','quaderno','sedersi'}
+        entries=self.catalog['entries'][1096:]
+        self.assertEqual({e['it'] for e in entries},expected)
+        self.assertEqual([e['id'] for e in entries],list(range(1097,1117)))
+        self.assertEqual(len({e['imageSha256'] for e in entries}),20)
+        self.assertTrue(all(e['imageFile'].startswith('VocabularyIT/Pict/loop-20261118-') for e in entries))
+        self.assertEqual(entries,self.batch['entries'])
+        spelling=json.loads((ROOT/'VocabularyIT/vocabulary_it_spelling.json').read_text())
+        self.assertEqual(spelling['entries']['vit-1109']['pieces'],['far','ma','ci','a'])
+        self.assertEqual(spelling['entries']['vit-1116']['pieces'],['se','der','si'])
+
+    def test_new_links_preserve_unchanged_texts_and_exclude_numeric_venti(self):
+        b=self.batch;data={x['uid']:x for x in self.data['items']}
+        new_ids={e['uid'] for e in b['entries']}
+        untouched={f'vit-{sid:04d}' for ids in b['newPictureAssignments'].values() for sid in ids}-set(b['sentenceChanges'])
+        self.assertEqual(len(untouched),123)
+        self.assertEqual(sum(r['uid'] in new_ids for uid in untouched for r in self.pictures['entries'][uid]['concepts']),131)
+        wind=next(e['uid'] for e in b['entries'] if e['it']=='vento')
+        for uid in ('vit-0728','vit-0956'):
+            self.assertNotIn(wind,{r['uid'] for r in self.pictures['entries'][uid]['concepts']})
+        self.assertEqual(data['vit-0028']['sentenceIt'],'Compro pane e latte.')
+        for uid in untouched:
+            record=self.pictures['entries'][uid]
+            self.assertEqual((data[uid]['sentenceIt'],data[uid]['sentenceCz']),
+                             (record['sourceSentenceIt'],record['sourceSentenceCz']))
+
+    def test_all_4222_previous_mp3_bytes_survive_sentence_replacements(self):
+        previous=catalog_before_loop(self.catalog)
+        old_items=[{'uid':entry['uid'],**body} for entry,body in
+                   it.all_card_texts(it.load_rows(ROOT/'VocabularyIT/VocabularyIT.csv'),previous)]
+        plan=audio.plan(old_items,provider='registered-edge-tts+azure-neural')
+        self.assertEqual(len(plan['jobs']),4222)
+        actual={relative:audio.digest(ROOT/'docs'/relative) for relative in plan['jobs']}
+        self.assertEqual(hashlib.sha256(audio.encoded(actual)).hexdigest(),self.batch['previousAudioAssetSha256'])
 
 
 if __name__ == "__main__":

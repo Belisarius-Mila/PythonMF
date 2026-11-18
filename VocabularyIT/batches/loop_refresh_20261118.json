@@ -1,0 +1,6305 @@
+{
+  "schemaVersion": 1,
+  "project": "VocabularyIT",
+  "id": "loop-refresh-20261118",
+  "state": "applied",
+  "approvedProposalSha256": "dbea6add504fbb39ce75bc0799171b2e1889a19d9e553d211e9588cc2be34360",
+  "baseCount": 1096,
+  "beforeEntriesSha256": "c5b61ef5cc138eeded7064b435029fc84fb4daf0415ed5de8854b175ee56c0b0",
+  "newCount": 20,
+  "totalAfter": 1116,
+  "sentenceChanges": {
+    "vit-0001": {
+      "beforeEntry": {
+        "id": 1,
+        "uid": "vit-0001",
+        "it": "piatto",
+        "cz": "talíř",
+        "matches": [
+          {
+            "it": "piatto",
+            "cz": "talíř"
+          }
+        ],
+        "legacyOrder": 1,
+        "legacyAddedAt": null,
+        "primaryGroup": "topic-04",
+        "topicIds": [
+          "topic-04"
+        ],
+        "partOfSpeech": [
+          "noun"
+        ],
+        "teachingType": "word",
+        "expressionType": "word",
+        "difficultyBand": 1,
+        "difficultyStatus": "proposed",
+        "editorialStatus": "needs-review",
+        "reviewPriority": "normal",
+        "reviewReasons": [
+          "metadata-proposal"
+        ],
+        "lemma": "piatto",
+        "formOfUid": null,
+        "related": [],
+        "active": true,
+        "imageFile": "Pict/plate.png",
+        "imageStatus": "reviewed",
+        "imageReviewNote": "Vizuálně zkontrolovaná existující ilustrace k významu nebo příkladovému kontextu; u abstraktních hesel mnemotechnická pomůcka.",
+        "imageSha256": "881f8534763b37132056a4b4d1b42ea97b10d63dbe092f071000ff712cf0385f",
+        "imageRole": "contextual",
+        "reviewOutcome": "visual-context-checked"
+      },
+      "beforeIt": "Metto il piatto nella lavastoviglie.",
+      "beforeCz": "Dávám talíř do myčky.",
+      "afterIt": "Metto un piatto bianco sul tavolo.",
+      "afterCz": "Dávám bílý talíř na stůl.",
+      "concepts": [
+        {
+          "id": 567,
+          "text": "Metto"
+        },
+        {
+          "id": 1,
+          "text": "piatto"
+        },
+        {
+          "id": 501,
+          "text": "bianco"
+        },
+        {
+          "id": 604,
+          "text": "tavolo"
+        }
+      ]
+    },
+    "vit-0005": {
+      "beforeEntry": {
+        "id": 5,
+        "uid": "vit-0005",
+        "it": "torta",
+        "cz": "dort, koláč",
+        "matches": [
+          {
+            "it": "torta",
+            "cz": "dort, koláč"
+          }
+        ],
+        "legacyOrder": 5,
+        "legacyAddedAt": null,
+        "primaryGroup": "topic-05",
+        "topicIds": [
+          "topic-05"
+        ],
+        "partOfSpeech": [
+          "noun"
+        ],
+        "teachingType": "word",
+        "expressionType": "word",
+        "difficultyBand": 1,
+        "difficultyStatus": "proposed",
+        "editorialStatus": "needs-review",
+        "reviewPriority": "normal",
+        "reviewReasons": [
+          "metadata-proposal"
+        ],
+        "lemma": "torta",
+        "formOfUid": null,
+        "related": [],
+        "active": true,
+        "imageFile": "Pict/cake.png",
+        "imageStatus": "reviewed",
+        "imageReviewNote": "Vizuálně zkontrolovaná existující ilustrace k významu nebo příkladovému kontextu; u abstraktních hesel mnemotechnická pomůcka.",
+        "imageSha256": "0edc9856c5e8db802eb9a5ccd5d3c4b1f74bfa0db5ab1330d559fe07d5b3235b",
+        "imageRole": "contextual",
+        "reviewOutcome": "visual-context-checked"
+      },
+      "beforeIt": "Per il compleanno facciamo una torta.",
+      "beforeCz": "K narozeninám děláme dort.",
+      "afterIt": "Per il compleanno preparo una torta al limone.",
+      "afterCz": "K narozeninám připravuji citronový dort.",
+      "concepts": [
+        {
+          "id": 87,
+          "text": "compleanno"
+        },
+        {
+          "id": 817,
+          "text": "preparo"
+        },
+        {
+          "id": 5,
+          "text": "torta"
+        },
+        {
+          "id": 230,
+          "text": "limone"
+        }
+      ]
+    },
+    "vit-0006": {
+      "beforeEntry": {
+        "id": 6,
+        "uid": "vit-0006",
+        "it": "troppo",
+        "cz": "příliš / moc",
+        "matches": [
+          {
+            "it": "troppo",
+            "cz": "příliš / moc"
+          }
+        ],
+        "legacyOrder": 6,
+        "legacyAddedAt": null,
+        "primaryGroup": "topic-11",
+        "topicIds": [
+          "topic-11"
+        ],
+        "partOfSpeech": [
+          "adverb"
+        ],
+        "teachingType": "word",
+        "expressionType": "word",
+        "difficultyBand": 2,
+        "difficultyStatus": "proposed",
+        "editorialStatus": "needs-review",
+        "reviewPriority": "normal",
+        "reviewReasons": [
+          "metadata-proposal"
+        ],
+        "lemma": "troppo",
+        "formOfUid": null,
+        "related": [],
+        "active": true,
+        "imageFile": "Pict/toomuch.png",
+        "imageStatus": "reviewed",
+        "imageReviewNote": "Vizuálně zkontrolovaná existující ilustrace k významu nebo příkladovému kontextu; u abstraktních hesel mnemotechnická pomůcka.",
+        "imageSha256": "2118c2867eb77eb73390d475b8a5d402c60e8fc1453a2c093a1155bb10022dda",
+        "imageRole": "mnemonic",
+        "reviewOutcome": "visual-context-checked"
+      },
+      "beforeIt": "Parli troppo in classe.",
+      "beforeCz": "Mluvíš ve třídě příliš moc.",
+      "afterIt": "Questa borsa è troppo grande per il bambino.",
+      "afterCz": "Tahle taška je pro dítě příliš velká.",
+      "concepts": [
+        {
+          "id": 868,
+          "text": "borsa"
+        },
+        {
+          "id": 6,
+          "text": "troppo"
+        },
+        {
+          "id": 506,
+          "text": "grande"
+        },
+        {
+          "id": 867,
+          "text": "bambino"
+        }
+      ]
+    },
+    "vit-0007": {
+      "beforeEntry": {
+        "id": 7,
+        "uid": "vit-0007",
+        "it": "forte",
+        "cz": "silný",
+        "matches": [
+          {
+            "it": "forte",
+            "cz": "silný, hlasitě (nahlas)"
+          },
+          {
+            "it": "forte",
+            "cz": "silný"
+          }
+        ],
+        "legacyOrder": 7,
+        "legacyAddedAt": null,
+        "primaryGroup": "topic-14",
+        "topicIds": [
+          "topic-14"
+        ],
+        "partOfSpeech": [
+          "adjective"
+        ],
+        "teachingType": "word",
+        "expressionType": "word",
+        "difficultyBand": 3,
+        "difficultyStatus": "proposed",
+        "editorialStatus": "reviewed",
+        "reviewPriority": "high",
+        "reviewReasons": [
+          "metadata-proposal",
+          "mixed-meanings"
+        ],
+        "lemma": "forte",
+        "formOfUid": null,
+        "related": [
+          {
+            "uid": "vit-0472",
+            "kind": "same-spelling"
+          }
+        ],
+        "active": true,
+        "imageFile": "Pict/strong.png",
+        "imageStatus": "reviewed",
+        "imageReviewNote": "Vizuálně zkontrolovaná existující ilustrace k významu nebo příkladovému kontextu; u abstraktních hesel mnemotechnická pomůcka.",
+        "imageSha256": "c48b3b94a0f3137c29376c66fceb9cf4cb2127efaff9176cc9c82517fd76a2a9",
+        "imageRole": "contextual",
+        "reviewOutcome": "approved-content-applied",
+        "sentenceOverride": {
+          "sourceIt": "Oggi c'è un vento forte. Non parlare forte qui.",
+          "sourceCz": "Dnes je silný vítr. Tady nemluv nahlas.",
+          "it": "Oggi c’è un vento forte.",
+          "cz": "Dnes je silný vítr."
+        },
+        "origin": "legacy"
+      },
+      "beforeIt": "Oggi c’è un vento forte.",
+      "beforeCz": "Dnes je silný vítr.",
+      "afterIt": "Un vento forte piega gli alberi del giardino.",
+      "afterCz": "Silný vítr ohýbá stromy v zahradě.",
+      "concepts": [
+        {
+          "id": 7,
+          "text": "forte"
+        },
+        {
+          "id": 452,
+          "text": "alberi"
+        },
+        {
+          "id": 453,
+          "text": "giardino"
+        }
+      ]
+    },
+    "vit-0008": {
+      "beforeEntry": {
+        "id": 8,
+        "uid": "vit-0008",
+        "it": "cappello",
+        "cz": "klobouk",
+        "matches": [
+          {
+            "it": "cappello",
+            "cz": "klobouk"
+          }
+        ],
+        "legacyOrder": 8,
+        "legacyAddedAt": null,
+        "primaryGroup": "topic-03",
+        "topicIds": [
+          "topic-03"
+        ],
+        "partOfSpeech": [
+          "noun"
+        ],
+        "teachingType": "word",
+        "expressionType": "word",
+        "difficultyBand": 1,
+        "difficultyStatus": "proposed",
+        "editorialStatus": "needs-review",
+        "reviewPriority": "normal",
+        "reviewReasons": [
+          "metadata-proposal"
+        ],
+        "lemma": "cappello",
+        "formOfUid": null,
+        "related": [],
+        "active": true,
+        "imageFile": "Pict/hat.png",
+        "imageStatus": "reviewed",
+        "imageReviewNote": "Vizuálně zkontrolovaná existující ilustrace k významu nebo příkladovému kontextu; u abstraktních hesel mnemotechnická pomůcka.",
+        "imageSha256": "95ba5ef3cbb32e95749e0dbf5de850bd0010979f30b81a1be2ad353732cef7ac",
+        "imageRole": "contextual",
+        "reviewOutcome": "visual-context-checked"
+      },
+      "beforeIt": "In estate porto un cappello.",
+      "beforeCz": "V létě nosím klobouk.",
+      "afterIt": "In estate porto un cappello bianco in spiaggia.",
+      "afterCz": "V létě nosím na pláži bílý klobouk.",
+      "concepts": [
+        {
+          "id": 134,
+          "text": "estate"
+        },
+        {
+          "id": 682,
+          "text": "porto"
+        },
+        {
+          "id": 8,
+          "text": "cappello"
+        },
+        {
+          "id": 501,
+          "text": "bianco"
+        },
+        {
+          "id": 699,
+          "text": "spiaggia"
+        }
+      ]
+    },
+    "vit-0022": {
+      "beforeEntry": {
+        "id": 22,
+        "uid": "vit-0022",
+        "it": "per favore",
+        "cz": "prosím",
+        "matches": [
+          {
+            "it": "per favore",
+            "cz": "prosím"
+          }
+        ],
+        "legacyOrder": 22,
+        "legacyAddedAt": null,
+        "primaryGroup": "topic-17",
+        "topicIds": [
+          "topic-17"
+        ],
+        "partOfSpeech": [],
+        "teachingType": "interaction",
+        "expressionType": "phrase",
+        "difficultyBand": 2,
+        "difficultyStatus": "proposed",
+        "editorialStatus": "needs-review",
+        "reviewPriority": "normal",
+        "reviewReasons": [
+          "metadata-proposal"
+        ],
+        "lemma": null,
+        "formOfUid": null,
+        "related": [],
+        "active": true,
+        "imageFile": "Pict/please.webp",
+        "imageStatus": "reviewed",
+        "imageReviewNote": "Vizuálně zkontrolovaná existující ilustrace k významu nebo příkladovému kontextu; u abstraktních hesel mnemotechnická pomůcka.",
+        "imageSha256": "d3fe08042e09f2d5ffe1efb269fd9a1422dd2dd8601c8773c65165eb7906fc00",
+        "imageRole": "contextual",
+        "reviewOutcome": "visual-context-checked"
+      },
+      "beforeIt": "Parla piano, per favore.",
+      "beforeCz": "Mluv pomalu, prosím.",
+      "afterIt": "Chiudi la finestra, per favore: ho freddo.",
+      "afterCz": "Zavři prosím okno, je mi zima.",
+      "concepts": [
+        {
+          "id": 377,
+          "text": "Chiudi"
+        },
+        {
+          "id": 304,
+          "text": "finestra"
+        },
+        {
+          "id": 22,
+          "text": "per favore"
+        },
+        {
+          "id": 309,
+          "text": "freddo"
+        }
+      ]
+    },
+    "vit-0038": {
+      "beforeEntry": {
+        "id": 38,
+        "uid": "vit-0038",
+        "it": "figlio",
+        "cz": "syn",
+        "matches": [
+          {
+            "it": "figlio",
+            "cz": "syn"
+          }
+        ],
+        "legacyOrder": 38,
+        "legacyAddedAt": null,
+        "primaryGroup": "topic-01",
+        "topicIds": [
+          "topic-01"
+        ],
+        "partOfSpeech": [
+          "noun"
+        ],
+        "teachingType": "word",
+        "expressionType": "word",
+        "difficultyBand": 1,
+        "difficultyStatus": "proposed",
+        "editorialStatus": "needs-review",
+        "reviewPriority": "normal",
+        "reviewReasons": [
+          "metadata-proposal"
+        ],
+        "lemma": "figlio",
+        "formOfUid": null,
+        "related": [],
+        "active": true,
+        "imageFile": "Pict/man.png",
+        "imageStatus": "reviewed",
+        "imageReviewNote": "Vizuálně zkontrolovaná existující ilustrace k významu nebo příkladovému kontextu; u abstraktních hesel mnemotechnická pomůcka.",
+        "imageSha256": "738047ee61b90a800cc46af78b6450a212f62be2c1ff9eecc63c9f9b056cd0be",
+        "imageRole": "contextual",
+        "reviewOutcome": "visual-context-checked"
+      },
+      "beforeIt": "Mio figlio va a scuola.",
+      "beforeCz": "Můj syn chodí do školy.",
+      "afterIt": "Mio figlio legge un libro sul treno.",
+      "afterCz": "Můj syn čte ve vlaku knihu.",
+      "concepts": [
+        {
+          "id": 38,
+          "text": "figlio"
+        },
+        {
+          "id": 228,
+          "text": "legge"
+        },
+        {
+          "id": 259,
+          "text": "libro"
+        },
+        {
+          "id": 165,
+          "text": "treno"
+        }
+      ]
+    },
+    "vit-0053": {
+      "beforeEntry": {
+        "id": 53,
+        "uid": "vit-0053",
+        "it": "sorella",
+        "cz": "sestra",
+        "matches": [
+          {
+            "it": "sorella",
+            "cz": "sestra"
+          }
+        ],
+        "legacyOrder": 53,
+        "legacyAddedAt": null,
+        "primaryGroup": "topic-01",
+        "topicIds": [
+          "topic-01"
+        ],
+        "partOfSpeech": [
+          "noun"
+        ],
+        "teachingType": "word",
+        "expressionType": "word",
+        "difficultyBand": 1,
+        "difficultyStatus": "proposed",
+        "editorialStatus": "needs-review",
+        "reviewPriority": "normal",
+        "reviewReasons": [
+          "metadata-proposal"
+        ],
+        "lemma": "sorella",
+        "formOfUid": null,
+        "related": [],
+        "active": true,
+        "imageFile": "Pict/sister.png",
+        "imageStatus": "reviewed",
+        "imageReviewNote": "Vizuálně zkontrolovaná existující ilustrace k významu nebo příkladovému kontextu; u abstraktních hesel mnemotechnická pomůcka.",
+        "imageSha256": "968dfe9aad169868b068e14872fbf934cd78571c5fa67c476e422bd0b16d0045",
+        "imageRole": "contextual",
+        "reviewOutcome": "visual-context-checked"
+      },
+      "beforeIt": "Mia sorella è insegnante.",
+      "beforeCz": "Moje sestra je učitelka.",
+      "afterIt": "Mia sorella insegna musica ai bambini.",
+      "afterCz": "Moje sestra učí děti hudbu.",
+      "concepts": [
+        {
+          "id": 53,
+          "text": "sorella"
+        },
+        {
+          "id": 110,
+          "text": "insegna"
+        },
+        {
+          "id": 671,
+          "text": "musica"
+        },
+        {
+          "id": 867,
+          "text": "bambini"
+        }
+      ]
+    },
+    "vit-0054": {
+      "beforeEntry": {
+        "id": 54,
+        "uid": "vit-0054",
+        "it": "fratello",
+        "cz": "bratr",
+        "matches": [
+          {
+            "it": "fratello",
+            "cz": "bratr"
+          }
+        ],
+        "legacyOrder": 54,
+        "legacyAddedAt": null,
+        "primaryGroup": "topic-01",
+        "topicIds": [
+          "topic-01"
+        ],
+        "partOfSpeech": [
+          "noun"
+        ],
+        "teachingType": "word",
+        "expressionType": "word",
+        "difficultyBand": 1,
+        "difficultyStatus": "proposed",
+        "editorialStatus": "needs-review",
+        "reviewPriority": "normal",
+        "reviewReasons": [
+          "metadata-proposal"
+        ],
+        "lemma": "fratello",
+        "formOfUid": null,
+        "related": [],
+        "active": true,
+        "imageFile": "Pict/man.png",
+        "imageStatus": "reviewed",
+        "imageReviewNote": "Vizuálně zkontrolovaná existující ilustrace k významu nebo příkladovému kontextu; u abstraktních hesel mnemotechnická pomůcka.",
+        "imageSha256": "738047ee61b90a800cc46af78b6450a212f62be2c1ff9eecc63c9f9b056cd0be",
+        "imageRole": "contextual",
+        "reviewOutcome": "visual-context-checked"
+      },
+      "beforeIt": "Mio fratello è alto.",
+      "beforeCz": "Můj bratr je vysoký.",
+      "afterIt": "Mio fratello gioca a calcio in giardino.",
+      "afterCz": "Můj bratr hraje na zahradě fotbal.",
+      "concepts": [
+        {
+          "id": 54,
+          "text": "fratello"
+        },
+        {
+          "id": 133,
+          "text": "gioca"
+        },
+        {
+          "id": 246,
+          "text": "calcio"
+        },
+        {
+          "id": 453,
+          "text": "giardino"
+        }
+      ]
+    },
+    "vit-0058": {
+      "beforeEntry": {
+        "id": 58,
+        "uid": "vit-0058",
+        "it": "nonno",
+        "cz": "dědeček",
+        "matches": [
+          {
+            "it": "nonno",
+            "cz": "dědeček"
+          }
+        ],
+        "legacyOrder": 58,
+        "legacyAddedAt": null,
+        "primaryGroup": "topic-01",
+        "topicIds": [
+          "topic-01"
+        ],
+        "partOfSpeech": [
+          "noun"
+        ],
+        "teachingType": "word",
+        "expressionType": "word",
+        "difficultyBand": 1,
+        "difficultyStatus": "proposed",
+        "editorialStatus": "needs-review",
+        "reviewPriority": "normal",
+        "reviewReasons": [
+          "metadata-proposal"
+        ],
+        "lemma": "nonno",
+        "formOfUid": null,
+        "related": [],
+        "active": true,
+        "imageFile": "Pict/gradfather.png",
+        "imageStatus": "reviewed",
+        "imageReviewNote": "Vizuálně zkontrolovaná existující ilustrace k významu nebo příkladovému kontextu; u abstraktních hesel mnemotechnická pomůcka.",
+        "imageSha256": "c9529d03240c9f640cc7eca5e0b011cca12c7cc1fe323d0f041b93d3772eca55",
+        "imageRole": "contextual",
+        "reviewOutcome": "visual-context-checked"
+      },
+      "beforeIt": "Mio nonno beve il tè.",
+      "beforeCz": "Můj dědeček pije čaj.",
+      "afterIt": "Il nonno legge il giornale in giardino.",
+      "afterCz": "Dědeček čte na zahradě noviny.",
+      "concepts": [
+        {
+          "id": 58,
+          "text": "nonno"
+        },
+        {
+          "id": 228,
+          "text": "legge"
+        },
+        {
+          "id": 898,
+          "text": "giornale"
+        },
+        {
+          "id": 453,
+          "text": "giardino"
+        }
+      ]
+    },
+    "vit-0095": {
+      "beforeEntry": {
+        "id": 95,
+        "uid": "vit-0095",
+        "it": "caldo",
+        "cz": "teplý",
+        "matches": [
+          {
+            "it": "caldo",
+            "cz": "teplý"
+          }
+        ],
+        "legacyOrder": 95,
+        "legacyAddedAt": null,
+        "primaryGroup": "topic-14",
+        "topicIds": [
+          "topic-14"
+        ],
+        "partOfSpeech": [
+          "adjective"
+        ],
+        "teachingType": "word",
+        "expressionType": "word",
+        "difficultyBand": 2,
+        "difficultyStatus": "proposed",
+        "editorialStatus": "needs-review",
+        "reviewPriority": "normal",
+        "reviewReasons": [
+          "metadata-proposal"
+        ],
+        "lemma": "caldo",
+        "formOfUid": null,
+        "related": [],
+        "active": true,
+        "imageFile": "Pict/warm.jpg",
+        "imageStatus": "reviewed",
+        "imageReviewNote": "Vizuálně zkontrolovaná existující ilustrace k významu nebo příkladovému kontextu; u abstraktních hesel mnemotechnická pomůcka.",
+        "imageSha256": "d49a7cd65058822e0f965c033d0e45c8d4ca31c64b43493f163f99ec3d805d2f",
+        "imageRole": "contextual",
+        "reviewOutcome": "visual-context-checked"
+      },
+      "beforeIt": "Mi piace il tè caldo quando fuori piove.",
+      "beforeCz": "Mám rád teplý čaj, když venku prší.",
+      "afterIt": "Il caffè caldo è pronto sul tavolo.",
+      "afterCz": "Teplá káva je připravená na stole.",
+      "concepts": [
+        {
+          "id": 285,
+          "text": "caffè"
+        },
+        {
+          "id": 95,
+          "text": "caldo"
+        },
+        {
+          "id": 480,
+          "text": "pronto"
+        },
+        {
+          "id": 604,
+          "text": "tavolo"
+        }
+      ]
+    },
+    "vit-0103": {
+      "beforeEntry": {
+        "id": 103,
+        "uid": "vit-0103",
+        "it": "pompelmo",
+        "cz": "grep",
+        "matches": [
+          {
+            "it": "pompelmo",
+            "cz": "grep"
+          }
+        ],
+        "legacyOrder": 103,
+        "legacyAddedAt": null,
+        "primaryGroup": "topic-05",
+        "topicIds": [
+          "topic-05"
+        ],
+        "partOfSpeech": [
+          "noun"
+        ],
+        "teachingType": "word",
+        "expressionType": "word",
+        "difficultyBand": 1,
+        "difficultyStatus": "proposed",
+        "editorialStatus": "needs-review",
+        "reviewPriority": "normal",
+        "reviewReasons": [
+          "metadata-proposal"
+        ],
+        "lemma": "pompelmo",
+        "formOfUid": null,
+        "related": [],
+        "active": true,
+        "imageFile": "Pict/grapefruit.jpg",
+        "imageStatus": "reviewed",
+        "imageReviewNote": "Vizuálně zkontrolovaná existující ilustrace k významu nebo příkladovému kontextu; u abstraktních hesel mnemotechnická pomůcka.",
+        "imageSha256": "d551e8deec7d858c571b4a824edda0dbd2f91d4860e3e58b37438b0152a9ece3",
+        "imageRole": "contextual",
+        "reviewOutcome": "visual-context-checked"
+      },
+      "beforeIt": "Il pompelmo è un po’ amaro, ma mi piace.",
+      "beforeCz": "Grep je trochu hořký, ale chutná mi.",
+      "afterIt": "Taglio un pompelmo e mangio una banana.",
+      "afterCz": "Krájím grep a jím banán.",
+      "concepts": [
+        {
+          "id": 103,
+          "text": "pompelmo"
+        },
+        {
+          "id": 138,
+          "text": "mangio"
+        },
+        {
+          "id": 237,
+          "text": "banana"
+        }
+      ]
+    },
+    "vit-0123": {
+      "beforeEntry": {
+        "id": 123,
+        "uid": "vit-0123",
+        "it": "ufficio",
+        "cz": "kancelář, úřad",
+        "matches": [
+          {
+            "it": "ufficio",
+            "cz": "kancelář, úřad"
+          }
+        ],
+        "legacyOrder": 123,
+        "legacyAddedAt": null,
+        "primaryGroup": "topic-08",
+        "topicIds": [
+          "topic-08"
+        ],
+        "partOfSpeech": [
+          "noun"
+        ],
+        "teachingType": "word",
+        "expressionType": "word",
+        "difficultyBand": 1,
+        "difficultyStatus": "proposed",
+        "editorialStatus": "needs-review",
+        "reviewPriority": "normal",
+        "reviewReasons": [
+          "metadata-proposal"
+        ],
+        "lemma": "ufficio",
+        "formOfUid": null,
+        "related": [],
+        "active": true,
+        "imageFile": "Pict/office.webp",
+        "imageStatus": "reviewed",
+        "imageReviewNote": "Vizuálně zkontrolovaná existující ilustrace k významu nebo příkladovému kontextu; u abstraktních hesel mnemotechnická pomůcka.",
+        "imageSha256": "8e81ca1a71b1af8938a5f54413f869d6e690ee3fb59b03a2e233cce7eb4c2531",
+        "imageRole": "contextual",
+        "reviewOutcome": "visual-context-checked"
+      },
+      "beforeIt": "Oggi sono in ufficio fino alle cinque.",
+      "beforeCz": "Dnes jsem v kanceláři do pěti.",
+      "afterIt": "La segretaria apre la finestra dell'ufficio.",
+      "afterCz": "Sekretářka otevírá okno kanceláře.",
+      "concepts": [
+        {
+          "id": 598,
+          "text": "segretaria"
+        },
+        {
+          "id": 281,
+          "text": "apre"
+        },
+        {
+          "id": 304,
+          "text": "finestra"
+        },
+        {
+          "id": 123,
+          "text": "ufficio"
+        }
+      ]
+    },
+    "vit-0165": {
+      "beforeEntry": {
+        "id": 165,
+        "uid": "vit-0165",
+        "it": "treno",
+        "cz": "vlak",
+        "matches": [
+          {
+            "it": "treno",
+            "cz": "vlak"
+          }
+        ],
+        "legacyOrder": 165,
+        "legacyAddedAt": null,
+        "primaryGroup": "topic-08",
+        "topicIds": [
+          "topic-08"
+        ],
+        "partOfSpeech": [
+          "noun"
+        ],
+        "teachingType": "word",
+        "expressionType": "word",
+        "difficultyBand": 1,
+        "difficultyStatus": "proposed",
+        "editorialStatus": "needs-review",
+        "reviewPriority": "normal",
+        "reviewReasons": [
+          "metadata-proposal"
+        ],
+        "lemma": "treno",
+        "formOfUid": null,
+        "related": [],
+        "active": true,
+        "imageFile": "Pict/train.png",
+        "imageStatus": "reviewed",
+        "imageReviewNote": "Vizuálně zkontrolovaná existující ilustrace k významu nebo příkladovému kontextu; u abstraktních hesel mnemotechnická pomůcka.",
+        "imageSha256": "fefe112d45c70da235e60c5d93390bbe02a17a93c32a3e87be8edc61b241e6d4",
+        "imageRole": "contextual",
+        "reviewOutcome": "visual-context-checked"
+      },
+      "beforeIt": "Il treno parte alle sette, quindi usciamo presto.",
+      "beforeCz": "Vlak odjíždí v sedm, tak vyjdeme brzy.",
+      "afterIt": "Il treno attraversa il ponte vicino al castello.",
+      "afterCz": "Vlak přejíždí most poblíž hradu.",
+      "concepts": [
+        {
+          "id": 165,
+          "text": "treno"
+        },
+        {
+          "id": 763,
+          "text": "attraversa"
+        },
+        {
+          "id": 335,
+          "text": "ponte"
+        },
+        {
+          "id": 76,
+          "text": "vicino"
+        },
+        {
+          "id": 628,
+          "text": "castello"
+        }
+      ]
+    },
+    "vit-0185": {
+      "beforeEntry": {
+        "id": 185,
+        "uid": "vit-0185",
+        "it": "rispondere",
+        "cz": "odpovědět",
+        "matches": [
+          {
+            "it": "rispondere",
+            "cz": "odpovědět"
+          }
+        ],
+        "legacyOrder": 185,
+        "legacyAddedAt": null,
+        "primaryGroup": "topic-17",
+        "topicIds": [
+          "topic-17"
+        ],
+        "partOfSpeech": [
+          "verb"
+        ],
+        "teachingType": "word",
+        "expressionType": "word",
+        "difficultyBand": 2,
+        "difficultyStatus": "proposed",
+        "editorialStatus": "needs-review",
+        "reviewPriority": "normal",
+        "reviewReasons": [
+          "metadata-proposal"
+        ],
+        "lemma": "rispondere",
+        "formOfUid": null,
+        "related": [],
+        "active": true,
+        "imageFile": "Pict/answer.PNG",
+        "imageStatus": "reviewed",
+        "imageReviewNote": "Vizuálně zkontrolovaná existující ilustrace k významu nebo příkladovému kontextu; u abstraktních hesel mnemotechnická pomůcka.",
+        "imageSha256": "815083ae44afce0cda73837e8e01e0c89f4ec8e0b2a2a67d1ed4257b74e7a75f",
+        "imageRole": "contextual",
+        "reviewOutcome": "visual-context-checked"
+      },
+      "beforeIt": "Puoi rispondere alla mia domanda?",
+      "beforeCz": "Můžeš odpovědět na mou otázku?",
+      "afterIt": "Puoi rispondere al messaggio di mia sorella?",
+      "afterCz": "Můžeš odpovědět na vzkaz od mé sestry?",
+      "concepts": [
+        {
+          "id": 185,
+          "text": "rispondere"
+        },
+        {
+          "id": 801,
+          "text": "messaggio"
+        },
+        {
+          "id": 53,
+          "text": "sorella"
+        }
+      ]
+    },
+    "vit-0214": {
+      "beforeEntry": {
+        "id": 214,
+        "uid": "vit-0214",
+        "it": "dopo",
+        "cz": "po, potom",
+        "matches": [
+          {
+            "it": "dopo",
+            "cz": "po, potom"
+          }
+        ],
+        "legacyOrder": 214,
+        "legacyAddedAt": null,
+        "primaryGroup": "topic-12",
+        "topicIds": [
+          "topic-12"
+        ],
+        "partOfSpeech": [
+          "preposition",
+          "adverb"
+        ],
+        "teachingType": "word",
+        "expressionType": "word",
+        "difficultyBand": 3,
+        "difficultyStatus": "proposed",
+        "editorialStatus": "needs-review",
+        "reviewPriority": "normal",
+        "reviewReasons": [
+          "metadata-proposal"
+        ],
+        "lemma": "dopo",
+        "formOfUid": null,
+        "related": [],
+        "active": true,
+        "imageFile": "Pict/after.webp",
+        "imageStatus": "reviewed",
+        "imageReviewNote": "Vizuálně zkontrolovaná existující ilustrace k významu nebo příkladovému kontextu; u abstraktních hesel mnemotechnická pomůcka.",
+        "imageSha256": "5c65469b0d9869bbb9c09346594bf062ccf38de645bad67a78e56c1fd5ce764c",
+        "imageRole": "contextual",
+        "reviewOutcome": "visual-context-checked"
+      },
+      "beforeIt": "A dopo.",
+      "beforeCz": "Zatím.",
+      "afterIt": "Dopo il concerto torno a casa a piedi.",
+      "afterCz": "Po koncertě se vracím domů pěšky.",
+      "concepts": [
+        {
+          "id": 214,
+          "text": "Dopo"
+        },
+        {
+          "id": 540,
+          "text": "concerto"
+        },
+        {
+          "id": 164,
+          "text": "torno"
+        },
+        {
+          "id": 145,
+          "text": "casa"
+        },
+        {
+          "id": 1008,
+          "text": "a piedi"
+        }
+      ]
+    },
+    "vit-0230": {
+      "beforeEntry": {
+        "id": 230,
+        "uid": "vit-0230",
+        "it": "limone",
+        "cz": "citron",
+        "matches": [
+          {
+            "it": "limone",
+            "cz": "citron"
+          }
+        ],
+        "legacyOrder": 230,
+        "legacyAddedAt": null,
+        "primaryGroup": "topic-05",
+        "topicIds": [
+          "topic-05"
+        ],
+        "partOfSpeech": [
+          "noun"
+        ],
+        "teachingType": "word",
+        "expressionType": "word",
+        "difficultyBand": 1,
+        "difficultyStatus": "proposed",
+        "editorialStatus": "needs-review",
+        "reviewPriority": "normal",
+        "reviewReasons": [
+          "metadata-proposal"
+        ],
+        "lemma": "limone",
+        "formOfUid": null,
+        "related": [],
+        "active": true,
+        "imageFile": "Pict/lemone.PNG",
+        "imageStatus": "reviewed",
+        "imageReviewNote": "Vizuálně zkontrolovaná existující ilustrace k významu nebo příkladovému kontextu; u abstraktních hesel mnemotechnická pomůcka.",
+        "imageSha256": "59c2a306f717bd2c621d822b689df84edc5ff966f8f302ed80ff4ee2b696ef94",
+        "imageRole": "contextual",
+        "reviewOutcome": "visual-context-checked"
+      },
+      "beforeIt": "Metto un po' di limone nel tè.",
+      "beforeCz": "Dávám si trochu citronu do čaje.",
+      "afterIt": "Metto il limone nella borsa con una mela.",
+      "afterCz": "Dávám citron do tašky k jablku.",
+      "concepts": [
+        {
+          "id": 567,
+          "text": "Metto"
+        },
+        {
+          "id": 230,
+          "text": "limone"
+        },
+        {
+          "id": 868,
+          "text": "borsa"
+        },
+        {
+          "id": 106,
+          "text": "mela"
+        }
+      ]
+    },
+    "vit-0264": {
+      "beforeEntry": {
+        "id": 264,
+        "uid": "vit-0264",
+        "it": "stanco",
+        "cz": "unavený",
+        "matches": [
+          {
+            "it": "stanco",
+            "cz": "unavený"
+          }
+        ],
+        "legacyOrder": 264,
+        "legacyAddedAt": null,
+        "primaryGroup": "topic-02",
+        "topicIds": [
+          "topic-02"
+        ],
+        "partOfSpeech": [
+          "adjective"
+        ],
+        "teachingType": "word",
+        "expressionType": "word",
+        "difficultyBand": 2,
+        "difficultyStatus": "proposed",
+        "editorialStatus": "needs-review",
+        "reviewPriority": "normal",
+        "reviewReasons": [
+          "metadata-proposal"
+        ],
+        "lemma": "stanco",
+        "formOfUid": null,
+        "related": [],
+        "active": true,
+        "imageFile": "Pict/tired.PNG",
+        "imageStatus": "reviewed",
+        "imageReviewNote": "Vizuálně zkontrolovaná existující ilustrace k významu nebo příkladovému kontextu; u abstraktních hesel mnemotechnická pomůcka.",
+        "imageSha256": "31c11016e65892c872ce712f63605709f73be4c08d8254df9847c9d8cce35326",
+        "imageRole": "contextual",
+        "reviewOutcome": "visual-context-checked"
+      },
+      "beforeIt": "Oggi sono stanco.",
+      "beforeCz": "Dnes jsem unavený.",
+      "afterIt": "Il bambino stanco dorme nel letto.",
+      "afterCz": "Unavené dítě spí v posteli.",
+      "concepts": [
+        {
+          "id": 867,
+          "text": "bambino"
+        },
+        {
+          "id": 264,
+          "text": "stanco"
+        },
+        {
+          "id": 297,
+          "text": "dorme"
+        },
+        {
+          "id": 798,
+          "text": "letto"
+        }
+      ]
+    },
+    "vit-0277": {
+      "beforeEntry": {
+        "id": 277,
+        "uid": "vit-0277",
+        "it": "aereo",
+        "cz": "letadlo",
+        "matches": [
+          {
+            "it": "aereo",
+            "cz": "letadlo"
+          }
+        ],
+        "legacyOrder": 277,
+        "legacyAddedAt": null,
+        "primaryGroup": "topic-08",
+        "topicIds": [
+          "topic-08"
+        ],
+        "partOfSpeech": [
+          "noun"
+        ],
+        "teachingType": "word",
+        "expressionType": "word",
+        "difficultyBand": 1,
+        "difficultyStatus": "proposed",
+        "editorialStatus": "needs-review",
+        "reviewPriority": "normal",
+        "reviewReasons": [
+          "metadata-proposal"
+        ],
+        "lemma": "aereo",
+        "formOfUid": null,
+        "related": [],
+        "active": true,
+        "imageFile": "Pict/airplane.webp",
+        "imageStatus": "reviewed",
+        "imageReviewNote": "Vizuálně zkontrolovaná existující ilustrace k významu nebo příkladovému kontextu; u abstraktních hesel mnemotechnická pomůcka.",
+        "imageSha256": "aa8cc5cdc1e38ff6fc4e73eddaa1c8206953f21eb6fcdfe7e67ac53f9fbd0e3d",
+        "imageRole": "contextual",
+        "reviewOutcome": "visual-context-checked"
+      },
+      "beforeIt": "Preferiamo l'aereo.",
+      "beforeCz": "Máme raději letadlo.",
+      "afterIt": "Guardo l'aereo dalla finestra della mia camera.",
+      "afterCz": "Dívám se z okna svého pokoje na letadlo.",
+      "concepts": [
+        {
+          "id": 100,
+          "text": "Guardo"
+        },
+        {
+          "id": 277,
+          "text": "aereo"
+        },
+        {
+          "id": 304,
+          "text": "finestra"
+        },
+        {
+          "id": 242,
+          "text": "camera"
+        }
+      ]
+    },
+    "vit-0295": {
+      "beforeEntry": {
+        "id": 295,
+        "uid": "vit-0295",
+        "it": "destro",
+        "cz": "pravý",
+        "matches": [
+          {
+            "it": "destro",
+            "cz": "pravý, a destra vpravo, napravo"
+          },
+          {
+            "it": "destro",
+            "cz": "pravý"
+          }
+        ],
+        "legacyOrder": 295,
+        "legacyAddedAt": null,
+        "primaryGroup": "topic-13",
+        "topicIds": [
+          "topic-13"
+        ],
+        "partOfSpeech": [
+          "adjective"
+        ],
+        "teachingType": "word",
+        "expressionType": "word",
+        "difficultyBand": 3,
+        "difficultyStatus": "proposed",
+        "editorialStatus": "reviewed",
+        "reviewPriority": "high",
+        "reviewReasons": [
+          "metadata-proposal",
+          "mixed-meanings"
+        ],
+        "lemma": "destro",
+        "formOfUid": null,
+        "related": [
+          {
+            "uid": "vit-0486",
+            "kind": "related"
+          }
+        ],
+        "active": true,
+        "imageFile": "Pict/right.jpg",
+        "imageStatus": "reviewed",
+        "imageReviewNote": "Vizuálně zkontrolovaná existující ilustrace k významu nebo příkladovému kontextu; u abstraktních hesel mnemotechnická pomůcka.",
+        "imageSha256": "21fdd7f15405fde429741b7964ca2d5af24bd91e2a56353b9be43ae20e55bc38",
+        "imageRole": "contextual",
+        "reviewOutcome": "approved-content-applied",
+        "sentenceOverride": {
+          "sourceIt": "Gira a destra.",
+          "sourceCz": "Odboč doprava.",
+          "it": "Il braccio destro è più forte.",
+          "cz": "Pravá paže je silnější."
+        },
+        "origin": "legacy"
+      },
+      "beforeIt": "Il braccio destro è più forte.",
+      "beforeCz": "Pravá paže je silnější.",
+      "afterIt": "Metto il guanto destro nella borsa.",
+      "afterCz": "Dávám pravou rukavici do tašky.",
+      "concepts": [
+        {
+          "id": 567,
+          "text": "Metto"
+        },
+        {
+          "id": 440,
+          "text": "guanto"
+        },
+        {
+          "id": 295,
+          "text": "destro"
+        },
+        {
+          "id": 868,
+          "text": "borsa"
+        }
+      ]
+    },
+    "vit-0304": {
+      "beforeEntry": {
+        "id": 304,
+        "uid": "vit-0304",
+        "it": "finestra",
+        "cz": "okno",
+        "matches": [
+          {
+            "it": "finestra",
+            "cz": "okno"
+          }
+        ],
+        "legacyOrder": 304,
+        "legacyAddedAt": null,
+        "primaryGroup": "topic-04",
+        "topicIds": [
+          "topic-04"
+        ],
+        "partOfSpeech": [
+          "noun"
+        ],
+        "teachingType": "word",
+        "expressionType": "word",
+        "difficultyBand": 1,
+        "difficultyStatus": "proposed",
+        "editorialStatus": "needs-review",
+        "reviewPriority": "normal",
+        "reviewReasons": [
+          "metadata-proposal"
+        ],
+        "lemma": "finestra",
+        "formOfUid": null,
+        "related": [],
+        "active": true,
+        "imageFile": "Pict/window.webp",
+        "imageStatus": "reviewed",
+        "imageReviewNote": "Vizuálně zkontrolovaná existující ilustrace k významu nebo příkladovému kontextu; u abstraktních hesel mnemotechnická pomůcka.",
+        "imageSha256": "2843bd964e9e191b4c59f89b90ee32ea196e063579f47e4f1707c34e5be87b31",
+        "imageRole": "contextual",
+        "reviewOutcome": "visual-context-checked"
+      },
+      "beforeIt": "La finestra è aperta.",
+      "beforeCz": "Okno je otevřené.",
+      "afterIt": "Il gatto guarda il giardino dalla finestra.",
+      "afterCz": "Kočka pozoruje zahradu z okna.",
+      "concepts": [
+        {
+          "id": 140,
+          "text": "gatto"
+        },
+        {
+          "id": 100,
+          "text": "guarda"
+        },
+        {
+          "id": 453,
+          "text": "giardino"
+        },
+        {
+          "id": 304,
+          "text": "finestra"
+        }
+      ]
+    },
+    "vit-0394": {
+      "beforeEntry": {
+        "id": 394,
+        "uid": "vit-0394",
+        "it": "grigio",
+        "cz": "šedý",
+        "matches": [
+          {
+            "it": "grigio",
+            "cz": "šedý"
+          }
+        ],
+        "legacyOrder": 394,
+        "legacyAddedAt": null,
+        "primaryGroup": "topic-10",
+        "topicIds": [
+          "topic-10"
+        ],
+        "partOfSpeech": [
+          "adjective"
+        ],
+        "teachingType": "word",
+        "expressionType": "word",
+        "difficultyBand": 2,
+        "difficultyStatus": "proposed",
+        "editorialStatus": "needs-review",
+        "reviewPriority": "normal",
+        "reviewReasons": [
+          "metadata-proposal"
+        ],
+        "lemma": "grigio",
+        "formOfUid": null,
+        "related": [],
+        "active": true,
+        "imageFile": "Pict/grey.webp",
+        "imageStatus": "reviewed",
+        "imageReviewNote": "Vizuálně zkontrolovaná existující ilustrace k významu nebo příkladovému kontextu; u abstraktních hesel mnemotechnická pomůcka.",
+        "imageSha256": "4efb906f115942f618c476ca650eb0deb99eb7aa43d60ce72838f6eba68c6cdf",
+        "imageRole": "contextual",
+        "reviewOutcome": "visual-context-checked"
+      },
+      "beforeIt": "È grigio.",
+      "beforeCz": "Je šedá.",
+      "afterIt": "Il gatto grigio dorme sotto il tavolo.",
+      "afterCz": "Šedá kočka spí pod stolem.",
+      "concepts": [
+        {
+          "id": 140,
+          "text": "gatto"
+        },
+        {
+          "id": 394,
+          "text": "grigio"
+        },
+        {
+          "id": 297,
+          "text": "dorme"
+        },
+        {
+          "id": 348,
+          "text": "sotto"
+        },
+        {
+          "id": 604,
+          "text": "tavolo"
+        }
+      ]
+    },
+    "vit-0501": {
+      "beforeEntry": {
+        "id": 501,
+        "uid": "vit-0501",
+        "it": "bianco",
+        "cz": "bílý",
+        "matches": [
+          {
+            "it": "bianco",
+            "cz": "bílý"
+          }
+        ],
+        "legacyOrder": null,
+        "legacyAddedAt": null,
+        "primaryGroup": "topic-10",
+        "topicIds": [
+          "topic-10"
+        ],
+        "partOfSpeech": [
+          "adjective"
+        ],
+        "teachingType": "word",
+        "expressionType": "word",
+        "difficultyBand": 1,
+        "difficultyStatus": "proposed",
+        "editorialStatus": "reviewed",
+        "reviewPriority": "normal",
+        "reviewReasons": [],
+        "lemma": "bianco",
+        "formOfUid": null,
+        "related": [],
+        "active": true,
+        "imageFile": "Pict/it_leda_graphic_white.webp",
+        "imageSha256": "55d97bd887bdd13ecc96ab8844d71de2424025cf4ba8734079630ce9e7bdb993",
+        "imageStatus": "reviewed",
+        "imageRole": "mnemonic",
+        "imageReviewNote": "Reviewed for this meaning and original example; contextual/mnemonic pictures illustrate usage and do not define an abstract word by themselves.",
+        "reviewOutcome": "approved-new-meaning",
+        "origin": "web",
+        "addedAt": "2026-11-16",
+        "webText": {
+          "sentenceIt": "Il muro è bianco.",
+          "sentenceCz": "Zeď je bílá.",
+          "genderIt": ""
+        },
+        "authoringBatch": "leda-visible-lessons-3-8-20261116",
+        "sourceRefs": {
+          "kind": "user-provided-vocabulary-transcript",
+          "lessons": [
+            4
+          ],
+          "lines": [
+            119
+          ]
+        }
+      },
+      "beforeIt": "Il muro è bianco.",
+      "beforeCz": "Zeď je bílá.",
+      "afterIt": "Il gatto bianco dorme sulla sedia.",
+      "afterCz": "Bílá kočka spí na židli.",
+      "concepts": [
+        {
+          "id": 140,
+          "text": "gatto"
+        },
+        {
+          "id": 501,
+          "text": "bianco"
+        },
+        {
+          "id": 297,
+          "text": "dorme"
+        },
+        {
+          "id": 838,
+          "text": "sedia"
+        }
+      ]
+    },
+    "vit-0513": {
+      "beforeEntry": {
+        "id": 513,
+        "uid": "vit-0513",
+        "it": "occhio",
+        "cz": "oko",
+        "matches": [
+          {
+            "it": "occhio",
+            "cz": "oko"
+          }
+        ],
+        "legacyOrder": null,
+        "legacyAddedAt": null,
+        "primaryGroup": "topic-02",
+        "topicIds": [
+          "topic-02"
+        ],
+        "partOfSpeech": [
+          "noun"
+        ],
+        "teachingType": "word",
+        "expressionType": "word",
+        "difficultyBand": 1,
+        "difficultyStatus": "proposed",
+        "editorialStatus": "reviewed",
+        "reviewPriority": "normal",
+        "reviewReasons": [],
+        "lemma": "occhio",
+        "formOfUid": null,
+        "related": [],
+        "active": true,
+        "imageFile": "Pict/it_leda_eyes.webp",
+        "imageSha256": "8a6e1aa5cfa4fd3b7073ae16189585d5b960eedcdb7d5512f2a9d07e64a91ec4",
+        "imageStatus": "reviewed",
+        "imageRole": "literal",
+        "imageReviewNote": "Reviewed for this meaning and original example; contextual/mnemonic pictures illustrate usage and do not define an abstract word by themselves.",
+        "reviewOutcome": "approved-new-meaning",
+        "origin": "web",
+        "addedAt": "2026-11-16",
+        "webText": {
+          "sentenceIt": "Ecco l'occhio.",
+          "sentenceCz": "Tady je oko.",
+          "genderIt": "m"
+        },
+        "authoringBatch": "leda-visible-lessons-3-8-20261116",
+        "sourceRefs": {
+          "kind": "user-provided-vocabulary-transcript",
+          "lessons": [
+            4
+          ],
+          "lines": [
+            179
+          ]
+        }
+      },
+      "beforeIt": "Ecco l'occhio.",
+      "beforeCz": "Tady je oko.",
+      "afterIt": "Il bambino chiude un occhio davanti allo specchio.",
+      "afterCz": "Dítě před zrcadlem zavírá jedno oko.",
+      "concepts": [
+        {
+          "id": 867,
+          "text": "bambino"
+        },
+        {
+          "id": 377,
+          "text": "chiude"
+        },
+        {
+          "id": 513,
+          "text": "occhio"
+        },
+        {
+          "id": 71,
+          "text": "specchio"
+        }
+      ]
+    },
+    "vit-0519": {
+      "beforeEntry": {
+        "id": 519,
+        "uid": "vit-0519",
+        "it": "topo",
+        "cz": "myš",
+        "matches": [
+          {
+            "it": "topo",
+            "cz": "myš"
+          }
+        ],
+        "legacyOrder": null,
+        "legacyAddedAt": null,
+        "primaryGroup": "topic-06",
+        "topicIds": [
+          "topic-06"
+        ],
+        "partOfSpeech": [
+          "noun"
+        ],
+        "teachingType": "word",
+        "expressionType": "word",
+        "difficultyBand": 1,
+        "difficultyStatus": "proposed",
+        "editorialStatus": "reviewed",
+        "reviewPriority": "normal",
+        "reviewReasons": [],
+        "lemma": "topo",
+        "formOfUid": null,
+        "related": [],
+        "active": true,
+        "imageFile": "Pict/mouse.png",
+        "imageSha256": "c68efffa308cf43da92e4fe648fd116f410465516947b768f5390f13b4b08ad2",
+        "imageStatus": "reviewed",
+        "imageRole": "contextual",
+        "imageReviewNote": "Reviewed for this meaning and original example; contextual/mnemonic pictures illustrate usage and do not define an abstract word by themselves.",
+        "reviewOutcome": "approved-new-meaning",
+        "origin": "web",
+        "addedAt": "2026-11-16",
+        "webText": {
+          "sentenceIt": "Ecco il topo.",
+          "sentenceCz": "Tady je myš.",
+          "genderIt": "m"
+        },
+        "authoringBatch": "leda-visible-lessons-3-8-20261116",
+        "sourceRefs": {
+          "kind": "user-provided-vocabulary-transcript",
+          "lessons": [
+            4
+          ],
+          "lines": [
+            210
+          ]
+        }
+      },
+      "beforeIt": "Ecco il topo.",
+      "beforeCz": "Tady je myš.",
+      "afterIt": "Il topo mangia una mela sotto l'albero.",
+      "afterCz": "Myš jí jablko pod stromem.",
+      "concepts": [
+        {
+          "id": 519,
+          "text": "topo"
+        },
+        {
+          "id": 138,
+          "text": "mangia"
+        },
+        {
+          "id": 106,
+          "text": "mela"
+        },
+        {
+          "id": 348,
+          "text": "sotto"
+        },
+        {
+          "id": 452,
+          "text": "albero"
+        }
+      ]
+    },
+    "vit-0530": {
+      "beforeEntry": {
+        "id": 530,
+        "uid": "vit-0530",
+        "it": "appartamento",
+        "cz": "byt",
+        "matches": [
+          {
+            "it": "appartamento",
+            "cz": "byt"
+          }
+        ],
+        "legacyOrder": null,
+        "legacyAddedAt": null,
+        "primaryGroup": "topic-04",
+        "topicIds": [
+          "topic-04"
+        ],
+        "partOfSpeech": [
+          "noun"
+        ],
+        "teachingType": "word",
+        "expressionType": "word",
+        "difficultyBand": 1,
+        "difficultyStatus": "proposed",
+        "editorialStatus": "reviewed",
+        "reviewPriority": "normal",
+        "reviewReasons": [],
+        "lemma": "appartamento",
+        "formOfUid": null,
+        "related": [],
+        "active": true,
+        "imageFile": "Pict/apartment.png",
+        "imageSha256": "0249e38044aeb2631b308b6743aef0639bd0499c9f7383d4855a3cc0ee79f759",
+        "imageStatus": "reviewed",
+        "imageRole": "contextual",
+        "imageReviewNote": "Reviewed for this meaning and original example; contextual/mnemonic pictures illustrate usage and do not define an abstract word by themselves.",
+        "reviewOutcome": "approved-new-meaning",
+        "origin": "web",
+        "addedAt": "2026-11-16",
+        "webText": {
+          "sentenceIt": "Ecco l'appartamento.",
+          "sentenceCz": "Tady je byt.",
+          "genderIt": "m"
+        },
+        "authoringBatch": "leda-visible-lessons-3-8-20261116",
+        "sourceRefs": {
+          "kind": "user-provided-vocabulary-transcript",
+          "lessons": [
+            5
+          ],
+          "lines": [
+            230
+          ]
+        }
+      },
+      "beforeIt": "Ecco l'appartamento.",
+      "beforeCz": "Tady je byt.",
+      "afterIt": "Il nostro appartamento è vicino alla stazione.",
+      "afterCz": "Náš byt je blízko nádraží.",
+      "concepts": [
+        {
+          "id": 569,
+          "text": "nostro"
+        },
+        {
+          "id": 530,
+          "text": "appartamento"
+        },
+        {
+          "id": 76,
+          "text": "vicino"
+        },
+        {
+          "id": 129,
+          "text": "stazione"
+        }
+      ]
+    },
+    "vit-0532": {
+      "beforeEntry": {
+        "id": 532,
+        "uid": "vit-0532",
+        "it": "biglietto",
+        "cz": "vstupenka",
+        "matches": [
+          {
+            "it": "biglietto",
+            "cz": "vstupenka"
+          }
+        ],
+        "legacyOrder": null,
+        "legacyAddedAt": null,
+        "primaryGroup": "topic-08",
+        "topicIds": [
+          "topic-08"
+        ],
+        "partOfSpeech": [
+          "noun"
+        ],
+        "teachingType": "word",
+        "expressionType": "word",
+        "difficultyBand": 1,
+        "difficultyStatus": "proposed",
+        "editorialStatus": "reviewed",
+        "reviewPriority": "normal",
+        "reviewReasons": [],
+        "lemma": "biglietto",
+        "formOfUid": null,
+        "related": [
+          {
+            "uid": "vit-0994",
+            "kind": "same-spelling"
+          }
+        ],
+        "active": true,
+        "imageFile": "Pict/ticket.webp",
+        "imageSha256": "49945c6e1c739c9fc944ee2e1d449a10b566fdcbee53c9e6c1d171b921dd9668",
+        "imageStatus": "reviewed",
+        "imageRole": "contextual",
+        "imageReviewNote": "Reviewed for this meaning and original example; contextual/mnemonic pictures illustrate usage and do not define an abstract word by themselves.",
+        "reviewOutcome": "approved-new-meaning",
+        "origin": "web",
+        "addedAt": "2026-11-16",
+        "webText": {
+          "sentenceIt": "Ecco il biglietto.",
+          "sentenceCz": "Tady je vstupenka.",
+          "genderIt": "m"
+        },
+        "authoringBatch": "leda-visible-lessons-3-8-20261116",
+        "sourceRefs": {
+          "kind": "user-provided-vocabulary-transcript",
+          "lessons": [
+            5
+          ],
+          "lines": [
+            232
+          ]
+        }
+      },
+      "beforeIt": "Ecco il biglietto.",
+      "beforeCz": "Tady je vstupenka.",
+      "afterIt": "Compro due biglietti per il concerto.",
+      "afterCz": "Kupuji dvě vstupenky na koncert.",
+      "concepts": [
+        {
+          "id": 432,
+          "text": "Compro"
+        },
+        {
+          "id": 712,
+          "text": "due"
+        },
+        {
+          "id": 532,
+          "text": "biglietti"
+        },
+        {
+          "id": 540,
+          "text": "concerto"
+        }
+      ]
+    },
+    "vit-0537": {
+      "beforeEntry": {
+        "id": 537,
+        "uid": "vit-0537",
+        "it": "cinema",
+        "cz": "kino",
+        "matches": [
+          {
+            "it": "cinema",
+            "cz": "kino"
+          }
+        ],
+        "legacyOrder": null,
+        "legacyAddedAt": null,
+        "primaryGroup": "topic-09",
+        "topicIds": [
+          "topic-09"
+        ],
+        "partOfSpeech": [
+          "noun"
+        ],
+        "teachingType": "word",
+        "expressionType": "word",
+        "difficultyBand": 1,
+        "difficultyStatus": "proposed",
+        "editorialStatus": "reviewed",
+        "reviewPriority": "normal",
+        "reviewReasons": [],
+        "lemma": "cinema",
+        "formOfUid": null,
+        "related": [],
+        "active": true,
+        "imageFile": "Pict/cinema.png",
+        "imageSha256": "e3513f0d5849253a10737244e848419341e0c6fbaa8ccd1d37cc715c5b56786b",
+        "imageStatus": "reviewed",
+        "imageRole": "contextual",
+        "imageReviewNote": "Reviewed for this meaning and original example; contextual/mnemonic pictures illustrate usage and do not define an abstract word by themselves.",
+        "reviewOutcome": "approved-new-meaning",
+        "origin": "web",
+        "addedAt": "2026-11-16",
+        "webText": {
+          "sentenceIt": "Ecco il cinema.",
+          "sentenceCz": "Tady je kino.",
+          "genderIt": "m"
+        },
+        "authoringBatch": "leda-visible-lessons-3-8-20261116",
+        "sourceRefs": {
+          "kind": "user-provided-vocabulary-transcript",
+          "lessons": [
+            5
+          ],
+          "lines": [
+            247
+          ]
+        }
+      },
+      "beforeIt": "Ecco il cinema.",
+      "beforeCz": "Tady je kino.",
+      "afterIt": "Sabato vado al cinema con mia sorella.",
+      "afterCz": "V sobotu jdu se sestrou do kina.",
+      "concepts": [
+        {
+          "id": 371,
+          "text": "Sabato"
+        },
+        {
+          "id": 143,
+          "text": "vado"
+        },
+        {
+          "id": 537,
+          "text": "cinema"
+        },
+        {
+          "id": 53,
+          "text": "sorella"
+        }
+      ]
+    },
+    "vit-0540": {
+      "beforeEntry": {
+        "id": 540,
+        "uid": "vit-0540",
+        "it": "concerto",
+        "cz": "koncert",
+        "matches": [
+          {
+            "it": "concerto",
+            "cz": "koncert"
+          }
+        ],
+        "legacyOrder": null,
+        "legacyAddedAt": null,
+        "primaryGroup": "topic-09",
+        "topicIds": [
+          "topic-09"
+        ],
+        "partOfSpeech": [
+          "noun"
+        ],
+        "teachingType": "word",
+        "expressionType": "word",
+        "difficultyBand": 1,
+        "difficultyStatus": "proposed",
+        "editorialStatus": "reviewed",
+        "reviewPriority": "normal",
+        "reviewReasons": [],
+        "lemma": "concerto",
+        "formOfUid": null,
+        "related": [],
+        "active": true,
+        "imageFile": "Pict/it_leda_orchestra.webp",
+        "imageSha256": "68dbe6936c0e379376170224828369000d7283175ca01389a92836f475fca66d",
+        "imageStatus": "reviewed",
+        "imageRole": "literal",
+        "imageReviewNote": "Reviewed for this meaning and original example; contextual/mnemonic pictures illustrate usage and do not define an abstract word by themselves.",
+        "reviewOutcome": "approved-new-meaning",
+        "origin": "web",
+        "addedAt": "2026-11-16",
+        "webText": {
+          "sentenceIt": "Ecco il concerto.",
+          "sentenceCz": "Tady je koncert.",
+          "genderIt": "m"
+        },
+        "authoringBatch": "leda-visible-lessons-3-8-20261116",
+        "sourceRefs": {
+          "kind": "user-provided-vocabulary-transcript",
+          "lessons": [
+            5
+          ],
+          "lines": [
+            251
+          ]
+        }
+      },
+      "beforeIt": "Ecco il concerto.",
+      "beforeCz": "Tady je koncert.",
+      "afterIt": "Il concerto comincia alle otto in teatro.",
+      "afterCz": "Koncert začíná v osm v divadle.",
+      "concepts": [
+        {
+          "id": 540,
+          "text": "concerto"
+        },
+        {
+          "id": 381,
+          "text": "comincia"
+        },
+        {
+          "id": 447,
+          "text": "otto"
+        },
+        {
+          "id": 706,
+          "text": "teatro"
+        }
+      ]
+    },
+    "vit-0546": {
+      "beforeEntry": {
+        "id": 546,
+        "uid": "vit-0546",
+        "it": "famiglia",
+        "cz": "rodina",
+        "matches": [
+          {
+            "it": "famiglia",
+            "cz": "rodina"
+          }
+        ],
+        "legacyOrder": null,
+        "legacyAddedAt": null,
+        "primaryGroup": "topic-01",
+        "topicIds": [
+          "topic-01"
+        ],
+        "partOfSpeech": [
+          "noun"
+        ],
+        "teachingType": "word",
+        "expressionType": "word",
+        "difficultyBand": 1,
+        "difficultyStatus": "proposed",
+        "editorialStatus": "reviewed",
+        "reviewPriority": "normal",
+        "reviewReasons": [],
+        "lemma": "famiglia",
+        "formOfUid": null,
+        "related": [],
+        "active": true,
+        "imageFile": "Pict/family.jpg",
+        "imageSha256": "b32c7ae079dfeb58b90855aab7a02680a017af38b92983834364f1da277c12e8",
+        "imageStatus": "reviewed",
+        "imageRole": "contextual",
+        "imageReviewNote": "Reviewed for this meaning and original example; contextual/mnemonic pictures illustrate usage and do not define an abstract word by themselves.",
+        "reviewOutcome": "approved-new-meaning",
+        "origin": "web",
+        "addedAt": "2026-11-16",
+        "webText": {
+          "sentenceIt": "Ecco la famiglia.",
+          "sentenceCz": "Tady je rodina.",
+          "genderIt": "f"
+        },
+        "authoringBatch": "leda-visible-lessons-3-8-20261116",
+        "sourceRefs": {
+          "kind": "user-provided-vocabulary-transcript",
+          "lessons": [
+            5
+          ],
+          "lines": [
+            257
+          ]
+        }
+      },
+      "beforeIt": "Ecco la famiglia.",
+      "beforeCz": "Tady je rodina.",
+      "afterIt": "La famiglia mangia insieme in giardino.",
+      "afterCz": "Rodina jí společně na zahradě.",
+      "concepts": [
+        {
+          "id": 546,
+          "text": "famiglia"
+        },
+        {
+          "id": 138,
+          "text": "mangia"
+        },
+        {
+          "id": 141,
+          "text": "insieme"
+        },
+        {
+          "id": 453,
+          "text": "giardino"
+        }
+      ]
+    },
+    "vit-0548": {
+      "beforeEntry": {
+        "id": 548,
+        "uid": "vit-0548",
+        "it": "fermata",
+        "cz": "zastávka, stanice",
+        "matches": [
+          {
+            "it": "fermata",
+            "cz": "zastávka, stanice"
+          }
+        ],
+        "legacyOrder": null,
+        "legacyAddedAt": null,
+        "primaryGroup": "topic-08",
+        "topicIds": [
+          "topic-08"
+        ],
+        "partOfSpeech": [
+          "noun"
+        ],
+        "teachingType": "word",
+        "expressionType": "word",
+        "difficultyBand": 1,
+        "difficultyStatus": "proposed",
+        "editorialStatus": "reviewed",
+        "reviewPriority": "normal",
+        "reviewReasons": [],
+        "lemma": "fermata",
+        "formOfUid": null,
+        "related": [],
+        "active": true,
+        "imageFile": "Pict/busstation.webp",
+        "imageSha256": "6d2225da68a1dcc39dbb7121720e25eb5af93c38f46e020380fbb6dd47a3398d",
+        "imageStatus": "reviewed",
+        "imageRole": "contextual",
+        "imageReviewNote": "Reviewed for this meaning and original example; contextual/mnemonic pictures illustrate usage and do not define an abstract word by themselves.",
+        "reviewOutcome": "approved-new-meaning",
+        "origin": "web",
+        "addedAt": "2026-11-16",
+        "webText": {
+          "sentenceIt": "Ecco la fermata.",
+          "sentenceCz": "Tady je zastávka.",
+          "genderIt": "f"
+        },
+        "authoringBatch": "leda-visible-lessons-3-8-20261116",
+        "sourceRefs": {
+          "kind": "user-provided-vocabulary-transcript",
+          "lessons": [
+            5
+          ],
+          "lines": [
+            259
+          ]
+        }
+      },
+      "beforeIt": "Ecco la fermata.",
+      "beforeCz": "Tady je zastávka.",
+      "afterIt": "Aspetto mia sorella alla fermata del tram.",
+      "afterCz": "Čekám na sestru na tramvajové zastávce.",
+      "concepts": [
+        {
+          "id": 144,
+          "text": "Aspetto"
+        },
+        {
+          "id": 53,
+          "text": "sorella"
+        },
+        {
+          "id": 548,
+          "text": "fermata"
+        },
+        {
+          "id": 707,
+          "text": "tram"
+        }
+      ]
+    },
+    "vit-0557": {
+      "beforeEntry": {
+        "id": 557,
+        "uid": "vit-0557",
+        "it": "incrocio",
+        "cz": "křižovatka",
+        "matches": [
+          {
+            "it": "incrocio",
+            "cz": "křižovatka"
+          }
+        ],
+        "legacyOrder": null,
+        "legacyAddedAt": null,
+        "primaryGroup": "topic-08",
+        "topicIds": [
+          "topic-08"
+        ],
+        "partOfSpeech": [
+          "noun"
+        ],
+        "teachingType": "word",
+        "expressionType": "word",
+        "difficultyBand": 1,
+        "difficultyStatus": "proposed",
+        "editorialStatus": "reviewed",
+        "reviewPriority": "normal",
+        "reviewReasons": [],
+        "lemma": "incrocio",
+        "formOfUid": null,
+        "related": [],
+        "active": true,
+        "imageFile": "Pict/crossing.PNG",
+        "imageSha256": "438fb477e06726f04c4d257f8e51256591a9f21af0ccbbecc57fdaebbefb3e56",
+        "imageStatus": "reviewed",
+        "imageRole": "contextual",
+        "imageReviewNote": "Reviewed for this meaning and original example; contextual/mnemonic pictures illustrate usage and do not define an abstract word by themselves.",
+        "reviewOutcome": "approved-new-meaning",
+        "origin": "web",
+        "addedAt": "2026-11-16",
+        "webText": {
+          "sentenceIt": "Ecco l'incrocio.",
+          "sentenceCz": "Tady je křižovatka.",
+          "genderIt": "m"
+        },
+        "authoringBatch": "leda-visible-lessons-3-8-20261116",
+        "sourceRefs": {
+          "kind": "user-provided-vocabulary-transcript",
+          "lessons": [
+            5
+          ],
+          "lines": [
+            269
+          ]
+        }
+      },
+      "beforeIt": "Ecco l'incrocio.",
+      "beforeCz": "Tady je křižovatka.",
+      "afterIt": "Gira a destra dopo il prossimo incrocio.",
+      "afterCz": "Za příští křižovatkou zahni doprava.",
+      "concepts": [
+        {
+          "id": 314,
+          "text": "Gira"
+        },
+        {
+          "id": 486,
+          "text": "a destra"
+        },
+        {
+          "id": 214,
+          "text": "dopo"
+        },
+        {
+          "id": 686,
+          "text": "prossimo"
+        },
+        {
+          "id": 557,
+          "text": "incrocio"
+        }
+      ]
+    },
+    "vit-0563": {
+      "beforeEntry": {
+        "id": 563,
+        "uid": "vit-0563",
+        "it": "mamma",
+        "cz": "maminka, mamka",
+        "matches": [
+          {
+            "it": "mamma",
+            "cz": "maminka, mamka"
+          }
+        ],
+        "legacyOrder": null,
+        "legacyAddedAt": null,
+        "primaryGroup": "topic-01",
+        "topicIds": [
+          "topic-01"
+        ],
+        "partOfSpeech": [
+          "noun"
+        ],
+        "teachingType": "word",
+        "expressionType": "word",
+        "difficultyBand": 1,
+        "difficultyStatus": "proposed",
+        "editorialStatus": "reviewed",
+        "reviewPriority": "normal",
+        "reviewReasons": [],
+        "lemma": "mamma",
+        "formOfUid": null,
+        "related": [
+          {
+            "uid": "vit-0055",
+            "kind": "related"
+          }
+        ],
+        "active": true,
+        "imageFile": "Pict/mother.webp",
+        "imageSha256": "df448faa0479f81179a795d077e698167eebfe254f6080d8e4f179394ee98b00",
+        "imageStatus": "reviewed",
+        "imageRole": "contextual",
+        "imageReviewNote": "Reviewed for this meaning and original example; contextual/mnemonic pictures illustrate usage and do not define an abstract word by themselves.",
+        "reviewOutcome": "approved-new-meaning",
+        "origin": "web",
+        "addedAt": "2026-11-16",
+        "webText": {
+          "sentenceIt": "Ecco la mamma.",
+          "sentenceCz": "Tady je maminka.",
+          "genderIt": "f"
+        },
+        "authoringBatch": "leda-visible-lessons-3-8-20261116",
+        "sourceRefs": {
+          "kind": "user-provided-vocabulary-transcript",
+          "lessons": [
+            5
+          ],
+          "lines": [
+            278
+          ]
+        }
+      },
+      "beforeIt": "Ecco la mamma.",
+      "beforeCz": "Tady je maminka.",
+      "afterIt": "La mamma prepara una torta al limone.",
+      "afterCz": "Maminka připravuje citronový dort.",
+      "concepts": [
+        {
+          "id": 563,
+          "text": "mamma"
+        },
+        {
+          "id": 817,
+          "text": "prepara"
+        },
+        {
+          "id": 5,
+          "text": "torta"
+        },
+        {
+          "id": 230,
+          "text": "limone"
+        }
+      ]
+    },
+    "vit-0566": {
+      "beforeEntry": {
+        "id": 566,
+        "uid": "vit-0566",
+        "it": "metropolitana",
+        "cz": "metro",
+        "matches": [
+          {
+            "it": "metropolitana",
+            "cz": "metro"
+          }
+        ],
+        "legacyOrder": null,
+        "legacyAddedAt": null,
+        "primaryGroup": "topic-08",
+        "topicIds": [
+          "topic-08"
+        ],
+        "partOfSpeech": [
+          "noun"
+        ],
+        "teachingType": "word",
+        "expressionType": "word",
+        "difficultyBand": 1,
+        "difficultyStatus": "proposed",
+        "editorialStatus": "reviewed",
+        "reviewPriority": "normal",
+        "reviewReasons": [],
+        "lemma": "metropolitana",
+        "formOfUid": null,
+        "related": [],
+        "active": true,
+        "imageFile": "Pict/it_leda_metro.webp",
+        "imageSha256": "7e93e1f245aa1bd446b67957aef4224ca99713b7b4f5c3701df0601a8a5f750f",
+        "imageStatus": "reviewed",
+        "imageRole": "literal",
+        "imageReviewNote": "Reviewed for this meaning and original example; contextual/mnemonic pictures illustrate usage and do not define an abstract word by themselves.",
+        "reviewOutcome": "approved-new-meaning",
+        "origin": "web",
+        "addedAt": "2026-11-16",
+        "webText": {
+          "sentenceIt": "Ecco la metropolitana.",
+          "sentenceCz": "Tady je metro.",
+          "genderIt": "f"
+        },
+        "authoringBatch": "leda-visible-lessons-3-8-20261116",
+        "sourceRefs": {
+          "kind": "user-provided-vocabulary-transcript",
+          "lessons": [
+            5
+          ],
+          "lines": [
+            282
+          ]
+        }
+      },
+      "beforeIt": "Ecco la metropolitana.",
+      "beforeCz": "Tady je metro.",
+      "afterIt": "Prendo la metropolitana per andare al museo.",
+      "afterCz": "Jedu metrem do muzea.",
+      "concepts": [
+        {
+          "id": 181,
+          "text": "Prendo"
+        },
+        {
+          "id": 566,
+          "text": "metropolitana"
+        },
+        {
+          "id": 143,
+          "text": "andare"
+        },
+        {
+          "id": 670,
+          "text": "museo"
+        }
+      ]
+    },
+    "vit-0583": {
+      "beforeEntry": {
+        "id": 583,
+        "uid": "vit-0583",
+        "it": "porta",
+        "cz": "dveře",
+        "matches": [
+          {
+            "it": "porta",
+            "cz": "dveře"
+          }
+        ],
+        "legacyOrder": null,
+        "legacyAddedAt": null,
+        "primaryGroup": "topic-04",
+        "topicIds": [
+          "topic-04"
+        ],
+        "partOfSpeech": [
+          "noun"
+        ],
+        "teachingType": "word",
+        "expressionType": "word",
+        "difficultyBand": 1,
+        "difficultyStatus": "proposed",
+        "editorialStatus": "reviewed",
+        "reviewPriority": "normal",
+        "reviewReasons": [],
+        "lemma": "porta",
+        "formOfUid": null,
+        "related": [
+          {
+            "uid": "vit-1011",
+            "kind": "same-spelling"
+          },
+          {
+            "uid": "vit-1012",
+            "kind": "same-spelling"
+          }
+        ],
+        "active": true,
+        "imageFile": "Pict/door.png",
+        "imageSha256": "31b18ba699fce4ab8a4e9eb0a769f27d36a9349f7a4d5bde796aa457930746b6",
+        "imageStatus": "reviewed",
+        "imageRole": "contextual",
+        "imageReviewNote": "Reviewed for this meaning and original example; contextual/mnemonic pictures illustrate usage and do not define an abstract word by themselves.",
+        "reviewOutcome": "approved-new-meaning",
+        "origin": "web",
+        "addedAt": "2026-11-16",
+        "webText": {
+          "sentenceIt": "Ecco la porta.",
+          "sentenceCz": "Tady jsou dveře.",
+          "genderIt": "f"
+        },
+        "authoringBatch": "leda-visible-lessons-3-8-20261116",
+        "sourceRefs": {
+          "kind": "user-provided-vocabulary-transcript",
+          "lessons": [
+            5
+          ],
+          "lines": [
+            310
+          ]
+        }
+      },
+      "beforeIt": "Ecco la porta.",
+      "beforeCz": "Tady jsou dveře.",
+      "afterIt": "Il gatto aspetta davanti alla porta chiusa.",
+      "afterCz": "Kočka čeká před zavřenými dveřmi.",
+      "concepts": [
+        {
+          "id": 140,
+          "text": "gatto"
+        },
+        {
+          "id": 144,
+          "text": "aspetta"
+        },
+        {
+          "id": 583,
+          "text": "porta"
+        },
+        {
+          "id": 291,
+          "text": "chiusa"
+        }
+      ]
+    },
+    "vit-0591": {
+      "beforeEntry": {
+        "id": 591,
+        "uid": "vit-0591",
+        "it": "scacchi",
+        "cz": "šachy",
+        "matches": [
+          {
+            "it": "scacchi",
+            "cz": "šachy"
+          }
+        ],
+        "legacyOrder": null,
+        "legacyAddedAt": null,
+        "primaryGroup": "topic-09",
+        "topicIds": [
+          "topic-09"
+        ],
+        "partOfSpeech": [
+          "noun"
+        ],
+        "teachingType": "word",
+        "expressionType": "word",
+        "difficultyBand": 1,
+        "difficultyStatus": "proposed",
+        "editorialStatus": "reviewed",
+        "reviewPriority": "normal",
+        "reviewReasons": [],
+        "lemma": "scacchi",
+        "formOfUid": null,
+        "related": [],
+        "active": true,
+        "imageFile": "Pict/it_leda_chess.webp",
+        "imageSha256": "57f221a17f43df3535988cb42a850da8a2972eee9ac51ce03d76232802344fdf",
+        "imageStatus": "reviewed",
+        "imageRole": "literal",
+        "imageReviewNote": "Reviewed for this meaning and original example; contextual/mnemonic pictures illustrate usage and do not define an abstract word by themselves.",
+        "reviewOutcome": "approved-new-meaning",
+        "origin": "web",
+        "addedAt": "2026-11-16",
+        "webText": {
+          "sentenceIt": "Ecco gli scacchi.",
+          "sentenceCz": "Tady jsou šachy.",
+          "genderIt": "m"
+        },
+        "authoringBatch": "leda-visible-lessons-3-8-20261116",
+        "sourceRefs": {
+          "kind": "user-provided-vocabulary-transcript",
+          "lessons": [
+            5
+          ],
+          "lines": [
+            318
+          ]
+        }
+      },
+      "beforeIt": "Ecco gli scacchi.",
+      "beforeCz": "Tady jsou šachy.",
+      "afterIt": "Mio nonno gioca a scacchi con Luca.",
+      "afterCz": "Můj dědeček hraje s Lukášem šachy.",
+      "concepts": [
+        {
+          "id": 58,
+          "text": "nonno"
+        },
+        {
+          "id": 133,
+          "text": "gioca"
+        },
+        {
+          "id": 591,
+          "text": "scacchi"
+        },
+        {
+          "id": 322,
+          "text": "Luca"
+        }
+      ]
+    },
+    "vit-0600": {
+      "beforeEntry": {
+        "id": 600,
+        "uid": "vit-0600",
+        "it": "stadio",
+        "cz": "stadion",
+        "matches": [
+          {
+            "it": "stadio",
+            "cz": "stadion"
+          }
+        ],
+        "legacyOrder": null,
+        "legacyAddedAt": null,
+        "primaryGroup": "topic-09",
+        "topicIds": [
+          "topic-09"
+        ],
+        "partOfSpeech": [
+          "noun"
+        ],
+        "teachingType": "word",
+        "expressionType": "word",
+        "difficultyBand": 1,
+        "difficultyStatus": "proposed",
+        "editorialStatus": "reviewed",
+        "reviewPriority": "normal",
+        "reviewReasons": [],
+        "lemma": "stadio",
+        "formOfUid": null,
+        "related": [],
+        "active": true,
+        "imageFile": "Pict/it_leda_stadium.webp",
+        "imageSha256": "59e331530191aa8aa3b6e3b6d12fce13b59aa68d18fd1a89446b36b62a210795",
+        "imageStatus": "reviewed",
+        "imageRole": "literal",
+        "imageReviewNote": "Reviewed for this meaning and original example; contextual/mnemonic pictures illustrate usage and do not define an abstract word by themselves.",
+        "reviewOutcome": "approved-new-meaning",
+        "origin": "web",
+        "addedAt": "2026-11-16",
+        "webText": {
+          "sentenceIt": "Ecco lo stadio.",
+          "sentenceCz": "Tady je stadion.",
+          "genderIt": "m"
+        },
+        "authoringBatch": "leda-visible-lessons-3-8-20261116",
+        "sourceRefs": {
+          "kind": "user-provided-vocabulary-transcript",
+          "lessons": [
+            5
+          ],
+          "lines": [
+            328
+          ]
+        }
+      },
+      "beforeIt": "Ecco lo stadio.",
+      "beforeCz": "Tady je stadion.",
+      "afterIt": "La squadra entra nello stadio con l'allenatore.",
+      "afterCz": "Tým vstupuje s trenérem na stadion.",
+      "concepts": [
+        {
+          "id": 518,
+          "text": "squadra"
+        },
+        {
+          "id": 784,
+          "text": "entra"
+        },
+        {
+          "id": 600,
+          "text": "stadio"
+        }
+      ]
+    },
+    "vit-0604": {
+      "beforeEntry": {
+        "id": 604,
+        "uid": "vit-0604",
+        "it": "tavolo",
+        "cz": "stůl",
+        "matches": [
+          {
+            "it": "tavolo",
+            "cz": "stůl"
+          }
+        ],
+        "legacyOrder": null,
+        "legacyAddedAt": null,
+        "primaryGroup": "topic-04",
+        "topicIds": [
+          "topic-04"
+        ],
+        "partOfSpeech": [
+          "noun"
+        ],
+        "teachingType": "word",
+        "expressionType": "word",
+        "difficultyBand": 1,
+        "difficultyStatus": "proposed",
+        "editorialStatus": "reviewed",
+        "reviewPriority": "normal",
+        "reviewReasons": [],
+        "lemma": "tavolo",
+        "formOfUid": null,
+        "related": [],
+        "active": true,
+        "imageFile": "Pict/table.jpg",
+        "imageSha256": "f8890079b9b2173f1d4522cc147aea8ecd9346ff9f6f83abc4a9c2204a3531d5",
+        "imageStatus": "reviewed",
+        "imageRole": "contextual",
+        "imageReviewNote": "Reviewed for this meaning and original example; contextual/mnemonic pictures illustrate usage and do not define an abstract word by themselves.",
+        "reviewOutcome": "approved-new-meaning",
+        "origin": "web",
+        "addedAt": "2026-11-16",
+        "webText": {
+          "sentenceIt": "Ecco il tavolo.",
+          "sentenceCz": "Tady je stůl.",
+          "genderIt": "m"
+        },
+        "authoringBatch": "leda-visible-lessons-3-8-20261116",
+        "sourceRefs": {
+          "kind": "user-provided-vocabulary-transcript",
+          "lessons": [
+            5
+          ],
+          "lines": [
+            337
+          ]
+        }
+      },
+      "beforeIt": "Ecco il tavolo.",
+      "beforeCz": "Tady je stůl.",
+      "afterIt": "Metto tre bicchieri puliti sul tavolo.",
+      "afterCz": "Dávám na stůl tři čisté sklenice.",
+      "concepts": [
+        {
+          "id": 567,
+          "text": "Metto"
+        },
+        {
+          "id": 713,
+          "text": "tre"
+        },
+        {
+          "id": 104,
+          "text": "bicchieri"
+        },
+        {
+          "id": 339,
+          "text": "puliti"
+        },
+        {
+          "id": 604,
+          "text": "tavolo"
+        }
+      ]
+    },
+    "vit-0617": {
+      "beforeEntry": {
+        "id": 617,
+        "uid": "vit-0617",
+        "it": "acqua",
+        "cz": "voda",
+        "matches": [
+          {
+            "it": "acqua",
+            "cz": "voda"
+          }
+        ],
+        "legacyOrder": null,
+        "legacyAddedAt": null,
+        "primaryGroup": "topic-05",
+        "topicIds": [
+          "topic-05"
+        ],
+        "partOfSpeech": [
+          "noun"
+        ],
+        "teachingType": "word",
+        "expressionType": "word",
+        "difficultyBand": 1,
+        "difficultyStatus": "proposed",
+        "editorialStatus": "reviewed",
+        "reviewPriority": "normal",
+        "reviewReasons": [],
+        "lemma": "acqua",
+        "formOfUid": null,
+        "related": [],
+        "active": true,
+        "imageFile": "Pict/water.jpg",
+        "imageSha256": "39a7b9c332d157afd3ea6e17c086dd8e842f75d455af9c108c05b22796e7da49",
+        "imageStatus": "reviewed",
+        "imageRole": "contextual",
+        "imageReviewNote": "Reviewed for this meaning and original example; contextual/mnemonic pictures illustrate usage and do not define an abstract word by themselves.",
+        "reviewOutcome": "approved-new-meaning",
+        "origin": "web",
+        "addedAt": "2026-11-16",
+        "webText": {
+          "sentenceIt": "Ecco l'acqua.",
+          "sentenceCz": "Tady je voda.",
+          "genderIt": "f"
+        },
+        "authoringBatch": "leda-visible-lessons-3-8-20261116",
+        "sourceRefs": {
+          "kind": "user-provided-vocabulary-transcript",
+          "lessons": [
+            6
+          ],
+          "lines": [
+            366
+          ]
+        }
+      },
+      "beforeIt": "Ecco l'acqua.",
+      "beforeCz": "Tady je voda.",
+      "afterIt": "Verso l'acqua fredda nel bicchiere di Luca.",
+      "afterCz": "Nalévám studenou vodu do Lukášovy sklenice.",
+      "concepts": [
+        {
+          "id": 617,
+          "text": "acqua"
+        },
+        {
+          "id": 309,
+          "text": "fredda"
+        },
+        {
+          "id": 104,
+          "text": "bicchiere"
+        },
+        {
+          "id": 322,
+          "text": "Luca"
+        }
+      ]
+    },
+    "vit-0623": {
+      "beforeEntry": {
+        "id": 623,
+        "uid": "vit-0623",
+        "it": "barca",
+        "cz": "loďka, člun",
+        "matches": [
+          {
+            "it": "barca",
+            "cz": "loďka, člun"
+          }
+        ],
+        "legacyOrder": null,
+        "legacyAddedAt": null,
+        "primaryGroup": "topic-08",
+        "topicIds": [
+          "topic-08"
+        ],
+        "partOfSpeech": [
+          "noun"
+        ],
+        "teachingType": "word",
+        "expressionType": "word",
+        "difficultyBand": 1,
+        "difficultyStatus": "proposed",
+        "editorialStatus": "reviewed",
+        "reviewPriority": "normal",
+        "reviewReasons": [],
+        "lemma": "barca",
+        "formOfUid": null,
+        "related": [],
+        "active": true,
+        "imageFile": "Pict/boat.png",
+        "imageSha256": "d3a10039b389137d10e2f7aad9959c5bccb95e3c0c0607141acb7c24fea8bfa6",
+        "imageStatus": "reviewed",
+        "imageRole": "contextual",
+        "imageReviewNote": "Reviewed for this meaning and original example; contextual/mnemonic pictures illustrate usage and do not define an abstract word by themselves.",
+        "reviewOutcome": "approved-new-meaning",
+        "origin": "web",
+        "addedAt": "2026-11-16",
+        "webText": {
+          "sentenceIt": "Ecco la barca.",
+          "sentenceCz": "Tady je loďka.",
+          "genderIt": "f"
+        },
+        "authoringBatch": "leda-visible-lessons-3-8-20261116",
+        "sourceRefs": {
+          "kind": "user-provided-vocabulary-transcript",
+          "lessons": [
+            6
+          ],
+          "lines": [
+            375
+          ]
+        }
+      },
+      "beforeIt": "Ecco la barca.",
+      "beforeCz": "Tady je loďka.",
+      "afterIt": "La barca è sotto il ponte antico.",
+      "afterCz": "Loďka je pod starobylým mostem.",
+      "concepts": [
+        {
+          "id": 623,
+          "text": "barca"
+        },
+        {
+          "id": 348,
+          "text": "sotto"
+        },
+        {
+          "id": 335,
+          "text": "ponte"
+        },
+        {
+          "id": 434,
+          "text": "antico"
+        }
+      ]
+    },
+    "vit-0625": {
+      "beforeEntry": {
+        "id": 625,
+        "uid": "vit-0625",
+        "it": "binario",
+        "cz": "kolej; nástupiště",
+        "matches": [
+          {
+            "it": "binario",
+            "cz": "kolej; nástupiště"
+          }
+        ],
+        "legacyOrder": null,
+        "legacyAddedAt": null,
+        "primaryGroup": "topic-08",
+        "topicIds": [
+          "topic-08"
+        ],
+        "partOfSpeech": [
+          "noun"
+        ],
+        "teachingType": "word",
+        "expressionType": "word",
+        "difficultyBand": 1,
+        "difficultyStatus": "proposed",
+        "editorialStatus": "reviewed",
+        "reviewPriority": "normal",
+        "reviewReasons": [],
+        "lemma": "binario",
+        "formOfUid": null,
+        "related": [],
+        "active": true,
+        "imageFile": "Pict/it_leda_platform.webp",
+        "imageSha256": "7c095fc9947e82e8d8bac712026bb6ced7c0fa8870f81784d8dc4fb6a606cd9e",
+        "imageStatus": "reviewed",
+        "imageRole": "literal",
+        "imageReviewNote": "Reviewed for this meaning and original example; contextual/mnemonic pictures illustrate usage and do not define an abstract word by themselves.",
+        "reviewOutcome": "approved-new-meaning",
+        "origin": "web",
+        "addedAt": "2026-11-16",
+        "webText": {
+          "sentenceIt": "Ecco il binario.",
+          "sentenceCz": "Tady je kolej.",
+          "genderIt": "m"
+        },
+        "authoringBatch": "leda-visible-lessons-3-8-20261116",
+        "sourceRefs": {
+          "kind": "user-provided-vocabulary-transcript",
+          "lessons": [
+            6
+          ],
+          "lines": [
+            377
+          ]
+        }
+      },
+      "beforeIt": "Ecco il binario.",
+      "beforeCz": "Tady je kolej.",
+      "afterIt": "Il treno arriva al binario numero quattro.",
+      "afterCz": "Vlak přijíždí na kolej číslo čtyři.",
+      "concepts": [
+        {
+          "id": 165,
+          "text": "treno"
+        },
+        {
+          "id": 622,
+          "text": "arriva"
+        },
+        {
+          "id": 625,
+          "text": "binario"
+        },
+        {
+          "id": 173,
+          "text": "numero"
+        },
+        {
+          "id": 714,
+          "text": "quattro"
+        }
+      ]
+    },
+    "vit-0626": {
+      "beforeEntry": {
+        "id": 626,
+        "uid": "vit-0626",
+        "it": "bosco",
+        "cz": "les",
+        "matches": [
+          {
+            "it": "bosco",
+            "cz": "les"
+          }
+        ],
+        "legacyOrder": null,
+        "legacyAddedAt": null,
+        "primaryGroup": "topic-07",
+        "topicIds": [
+          "topic-07"
+        ],
+        "partOfSpeech": [
+          "noun"
+        ],
+        "teachingType": "word",
+        "expressionType": "word",
+        "difficultyBand": 1,
+        "difficultyStatus": "proposed",
+        "editorialStatus": "reviewed",
+        "reviewPriority": "normal",
+        "reviewReasons": [],
+        "lemma": "bosco",
+        "formOfUid": null,
+        "related": [],
+        "active": true,
+        "imageFile": "Pict/forest.webp",
+        "imageSha256": "f29e2bfcfee6c042ae0a6ea86b4c28e146d1c76abe54a2e7cc4d3e2df9fc5378",
+        "imageStatus": "reviewed",
+        "imageRole": "contextual",
+        "imageReviewNote": "Reviewed for this meaning and original example; contextual/mnemonic pictures illustrate usage and do not define an abstract word by themselves.",
+        "reviewOutcome": "approved-new-meaning",
+        "origin": "web",
+        "addedAt": "2026-11-16",
+        "webText": {
+          "sentenceIt": "Ecco il bosco.",
+          "sentenceCz": "Tady je les.",
+          "genderIt": "m"
+        },
+        "authoringBatch": "leda-visible-lessons-3-8-20261116",
+        "sourceRefs": {
+          "kind": "user-provided-vocabulary-transcript",
+          "lessons": [
+            6
+          ],
+          "lines": [
+            378
+          ]
+        }
+      },
+      "beforeIt": "Ecco il bosco.",
+      "beforeCz": "Tady je les.",
+      "afterIt": "Cammino nel bosco con mio padre.",
+      "afterCz": "Jdu lesem se svým otcem.",
+      "concepts": [
+        {
+          "id": 274,
+          "text": "Cammino"
+        },
+        {
+          "id": 626,
+          "text": "bosco"
+        },
+        {
+          "id": 56,
+          "text": "padre"
+        }
+      ]
+    },
+    "vit-0628": {
+      "beforeEntry": {
+        "id": 628,
+        "uid": "vit-0628",
+        "it": "castello",
+        "cz": "hrad; zámek",
+        "matches": [
+          {
+            "it": "castello",
+            "cz": "hrad; zámek"
+          }
+        ],
+        "legacyOrder": null,
+        "legacyAddedAt": null,
+        "primaryGroup": "topic-08",
+        "topicIds": [
+          "topic-08"
+        ],
+        "partOfSpeech": [
+          "noun"
+        ],
+        "teachingType": "word",
+        "expressionType": "word",
+        "difficultyBand": 1,
+        "difficultyStatus": "proposed",
+        "editorialStatus": "reviewed",
+        "reviewPriority": "normal",
+        "reviewReasons": [],
+        "lemma": "castello",
+        "formOfUid": null,
+        "related": [],
+        "active": true,
+        "imageFile": "Pict/it_leda_castle.webp",
+        "imageSha256": "95b5a9af23b38fbb0eadd00f6b7c6fcddf615c3d283e1e09e92a5e889a2f28da",
+        "imageStatus": "reviewed",
+        "imageRole": "literal",
+        "imageReviewNote": "Reviewed for this meaning and original example; contextual/mnemonic pictures illustrate usage and do not define an abstract word by themselves.",
+        "reviewOutcome": "approved-new-meaning",
+        "origin": "web",
+        "addedAt": "2026-11-16",
+        "webText": {
+          "sentenceIt": "Ecco il castello.",
+          "sentenceCz": "Tady je hrad.",
+          "genderIt": "m"
+        },
+        "authoringBatch": "leda-visible-lessons-3-8-20261116",
+        "sourceRefs": {
+          "kind": "user-provided-vocabulary-transcript",
+          "lessons": [
+            6
+          ],
+          "lines": [
+            380
+          ]
+        }
+      },
+      "beforeIt": "Ecco il castello.",
+      "beforeCz": "Tady je hrad.",
+      "afterIt": "Il castello antico è vicino al fiume.",
+      "afterCz": "Starobylý hrad stojí blízko řeky.",
+      "concepts": [
+        {
+          "id": 628,
+          "text": "castello"
+        },
+        {
+          "id": 434,
+          "text": "antico"
+        },
+        {
+          "id": 76,
+          "text": "vicino"
+        },
+        {
+          "id": 892,
+          "text": "fiume"
+        }
+      ]
+    },
+    "vit-0646": {
+      "beforeEntry": {
+        "id": 646,
+        "uid": "vit-0646",
+        "it": "fiore",
+        "cz": "květ, květina",
+        "matches": [
+          {
+            "it": "fiore",
+            "cz": "květ, květina"
+          }
+        ],
+        "legacyOrder": null,
+        "legacyAddedAt": null,
+        "primaryGroup": "topic-07",
+        "topicIds": [
+          "topic-07"
+        ],
+        "partOfSpeech": [
+          "noun"
+        ],
+        "teachingType": "word",
+        "expressionType": "word",
+        "difficultyBand": 1,
+        "difficultyStatus": "proposed",
+        "editorialStatus": "reviewed",
+        "reviewPriority": "normal",
+        "reviewReasons": [],
+        "lemma": "fiore",
+        "formOfUid": null,
+        "related": [],
+        "active": true,
+        "imageFile": "Pict/flower.png",
+        "imageSha256": "00fb210b68a82ea01ff841825f3c1531393096c1380cfc38788f3b86e8e91446",
+        "imageStatus": "reviewed",
+        "imageRole": "contextual",
+        "imageReviewNote": "Reviewed for this meaning and original example; contextual/mnemonic pictures illustrate usage and do not define an abstract word by themselves.",
+        "reviewOutcome": "approved-new-meaning",
+        "origin": "web",
+        "addedAt": "2026-11-16",
+        "webText": {
+          "sentenceIt": "Ecco il fiore.",
+          "sentenceCz": "Tady je květ.",
+          "genderIt": "m"
+        },
+        "authoringBatch": "leda-visible-lessons-3-8-20261116",
+        "sourceRefs": {
+          "kind": "user-provided-vocabulary-transcript",
+          "lessons": [
+            6
+          ],
+          "lines": [
+            404
+          ]
+        }
+      },
+      "beforeIt": "Ecco il fiore.",
+      "beforeCz": "Tady je květ.",
+      "afterIt": "Metto un fiore bianco sul tavolo.",
+      "afterCz": "Dávám bílou květinu na stůl.",
+      "concepts": [
+        {
+          "id": 567,
+          "text": "Metto"
+        },
+        {
+          "id": 646,
+          "text": "fiore"
+        },
+        {
+          "id": 501,
+          "text": "bianco"
+        },
+        {
+          "id": 604,
+          "text": "tavolo"
+        }
+      ]
+    },
+    "vit-0654": {
+      "beforeEntry": {
+        "id": 654,
+        "uid": "vit-0654",
+        "it": "lago",
+        "cz": "jezero",
+        "matches": [
+          {
+            "it": "lago",
+            "cz": "jezero"
+          }
+        ],
+        "legacyOrder": null,
+        "legacyAddedAt": null,
+        "primaryGroup": "topic-07",
+        "topicIds": [
+          "topic-07"
+        ],
+        "partOfSpeech": [
+          "noun"
+        ],
+        "teachingType": "word",
+        "expressionType": "word",
+        "difficultyBand": 1,
+        "difficultyStatus": "proposed",
+        "editorialStatus": "reviewed",
+        "reviewPriority": "normal",
+        "reviewReasons": [],
+        "lemma": "lago",
+        "formOfUid": null,
+        "related": [],
+        "active": true,
+        "imageFile": "Pict/lakepond.webp",
+        "imageSha256": "a2a8900cfa43707ce14688cfefd61d50effb664447f51e89ad08a3f277fa9e6f",
+        "imageStatus": "reviewed",
+        "imageRole": "contextual",
+        "imageReviewNote": "Reviewed for this meaning and original example; contextual/mnemonic pictures illustrate usage and do not define an abstract word by themselves.",
+        "reviewOutcome": "approved-new-meaning",
+        "origin": "web",
+        "addedAt": "2026-11-16",
+        "webText": {
+          "sentenceIt": "Ecco il lago.",
+          "sentenceCz": "Tady je jezero.",
+          "genderIt": "m"
+        },
+        "authoringBatch": "leda-visible-lessons-3-8-20261116",
+        "sourceRefs": {
+          "kind": "user-provided-vocabulary-transcript",
+          "lessons": [
+            6
+          ],
+          "lines": [
+            415
+          ]
+        }
+      },
+      "beforeIt": "Ecco il lago.",
+      "beforeCz": "Tady je jezero.",
+      "afterIt": "Nuoto nel lago con mio fratello.",
+      "afterCz": "Plavu v jezeře se svým bratrem.",
+      "concepts": [
+        {
+          "id": 244,
+          "text": "Nuoto"
+        },
+        {
+          "id": 654,
+          "text": "lago"
+        },
+        {
+          "id": 54,
+          "text": "fratello"
+        }
+      ]
+    },
+    "vit-0658": {
+      "beforeEntry": {
+        "id": 658,
+        "uid": "vit-0658",
+        "it": "mare",
+        "cz": "moře",
+        "matches": [
+          {
+            "it": "mare",
+            "cz": "moře"
+          }
+        ],
+        "legacyOrder": null,
+        "legacyAddedAt": null,
+        "primaryGroup": "topic-07",
+        "topicIds": [
+          "topic-07"
+        ],
+        "partOfSpeech": [
+          "noun"
+        ],
+        "teachingType": "word",
+        "expressionType": "word",
+        "difficultyBand": 1,
+        "difficultyStatus": "proposed",
+        "editorialStatus": "reviewed",
+        "reviewPriority": "normal",
+        "reviewReasons": [],
+        "lemma": "mare",
+        "formOfUid": null,
+        "related": [],
+        "active": true,
+        "imageFile": "Pict/it_leda_beach.webp",
+        "imageSha256": "1e5f2b22dd2dc6234e5a431e7aca0a00d80c9ab9d18f0ce1ebb531e46aa2c670",
+        "imageStatus": "reviewed",
+        "imageRole": "literal",
+        "imageReviewNote": "Reviewed for this meaning and original example; contextual/mnemonic pictures illustrate usage and do not define an abstract word by themselves.",
+        "reviewOutcome": "approved-new-meaning",
+        "origin": "web",
+        "addedAt": "2026-11-16",
+        "webText": {
+          "sentenceIt": "Ecco il mare.",
+          "sentenceCz": "Tady je moře.",
+          "genderIt": "m"
+        },
+        "authoringBatch": "leda-visible-lessons-3-8-20261116",
+        "sourceRefs": {
+          "kind": "user-provided-vocabulary-transcript",
+          "lessons": [
+            6
+          ],
+          "lines": [
+            419
+          ]
+        }
+      },
+      "beforeIt": "Ecco il mare.",
+      "beforeCz": "Tady je moře.",
+      "afterIt": "La nave attraversa il mare di notte.",
+      "afterCz": "Loď v noci pluje přes moře.",
+      "concepts": [
+        {
+          "id": 330,
+          "text": "nave"
+        },
+        {
+          "id": 763,
+          "text": "attraversa"
+        },
+        {
+          "id": 658,
+          "text": "mare"
+        },
+        {
+          "id": 807,
+          "text": "notte"
+        }
+      ]
+    },
+    "vit-0670": {
+      "beforeEntry": {
+        "id": 670,
+        "uid": "vit-0670",
+        "it": "museo",
+        "cz": "muzeum",
+        "matches": [
+          {
+            "it": "museo",
+            "cz": "muzeum"
+          }
+        ],
+        "legacyOrder": null,
+        "legacyAddedAt": null,
+        "primaryGroup": "topic-09",
+        "topicIds": [
+          "topic-09"
+        ],
+        "partOfSpeech": [
+          "noun"
+        ],
+        "teachingType": "word",
+        "expressionType": "word",
+        "difficultyBand": 1,
+        "difficultyStatus": "proposed",
+        "editorialStatus": "reviewed",
+        "reviewPriority": "normal",
+        "reviewReasons": [],
+        "lemma": "museo",
+        "formOfUid": null,
+        "related": [],
+        "active": true,
+        "imageFile": "Pict/it_leda_museum.webp",
+        "imageSha256": "7029faa21076b7071898416402c28f25f915adac1bcb951641266d16e1750821",
+        "imageStatus": "reviewed",
+        "imageRole": "literal",
+        "imageReviewNote": "Reviewed for this meaning and original example; contextual/mnemonic pictures illustrate usage and do not define an abstract word by themselves.",
+        "reviewOutcome": "approved-new-meaning",
+        "origin": "web",
+        "addedAt": "2026-11-16",
+        "webText": {
+          "sentenceIt": "Ecco il museo.",
+          "sentenceCz": "Tady je muzeum.",
+          "genderIt": "m"
+        },
+        "authoringBatch": "leda-visible-lessons-3-8-20261116",
+        "sourceRefs": {
+          "kind": "user-provided-vocabulary-transcript",
+          "lessons": [
+            6
+          ],
+          "lines": [
+            435
+          ]
+        }
+      },
+      "beforeIt": "Ecco il museo.",
+      "beforeCz": "Tady je muzeum.",
+      "afterIt": "Visitiamo il museo con la nostra guida.",
+      "afterCz": "Prohlížíme si muzeum s naším průvodcem.",
+      "concepts": [
+        {
+          "id": 710,
+          "text": "Visitiamo"
+        },
+        {
+          "id": 670,
+          "text": "museo"
+        },
+        {
+          "id": 651,
+          "text": "guida"
+        }
+      ]
+    },
+    "vit-0674": {
+      "beforeEntry": {
+        "id": 674,
+        "uid": "vit-0674",
+        "it": "neve",
+        "cz": "sníh",
+        "matches": [
+          {
+            "it": "neve",
+            "cz": "sníh"
+          }
+        ],
+        "legacyOrder": null,
+        "legacyAddedAt": null,
+        "primaryGroup": "topic-07",
+        "topicIds": [
+          "topic-07"
+        ],
+        "partOfSpeech": [
+          "noun"
+        ],
+        "teachingType": "word",
+        "expressionType": "word",
+        "difficultyBand": 1,
+        "difficultyStatus": "proposed",
+        "editorialStatus": "reviewed",
+        "reviewPriority": "normal",
+        "reviewReasons": [],
+        "lemma": "neve",
+        "formOfUid": null,
+        "related": [],
+        "active": true,
+        "imageFile": "Pict/winter.PNG",
+        "imageSha256": "51b04a00f6934226cded8dfc009d3d224b053446dfdc6246a7e578895d03bd9c",
+        "imageStatus": "reviewed",
+        "imageRole": "contextual",
+        "imageReviewNote": "Reviewed for this meaning and original example; contextual/mnemonic pictures illustrate usage and do not define an abstract word by themselves.",
+        "reviewOutcome": "approved-new-meaning",
+        "origin": "web",
+        "addedAt": "2026-11-16",
+        "webText": {
+          "sentenceIt": "Ecco la neve.",
+          "sentenceCz": "Tady je sníh.",
+          "genderIt": "f"
+        },
+        "authoringBatch": "leda-visible-lessons-3-8-20261116",
+        "sourceRefs": {
+          "kind": "user-provided-vocabulary-transcript",
+          "lessons": [
+            6
+          ],
+          "lines": [
+            439
+          ]
+        }
+      },
+      "beforeIt": "Ecco la neve.",
+      "beforeCz": "Tady je sníh.",
+      "afterIt": "Il cane gioca nella neve in giardino.",
+      "afterCz": "Pes si hraje ve sněhu na zahradě.",
+      "concepts": [
+        {
+          "id": 93,
+          "text": "cane"
+        },
+        {
+          "id": 133,
+          "text": "gioca"
+        },
+        {
+          "id": 674,
+          "text": "neve"
+        },
+        {
+          "id": 453,
+          "text": "giardino"
+        }
+      ]
+    },
+    "vit-0681": {
+      "beforeEntry": {
+        "id": 681,
+        "uid": "vit-0681",
+        "it": "piscina",
+        "cz": "bazén, plovárna",
+        "matches": [
+          {
+            "it": "piscina",
+            "cz": "bazén, plovárna"
+          }
+        ],
+        "legacyOrder": null,
+        "legacyAddedAt": null,
+        "primaryGroup": "topic-08",
+        "topicIds": [
+          "topic-08"
+        ],
+        "partOfSpeech": [
+          "noun"
+        ],
+        "teachingType": "word",
+        "expressionType": "word",
+        "difficultyBand": 1,
+        "difficultyStatus": "proposed",
+        "editorialStatus": "reviewed",
+        "reviewPriority": "normal",
+        "reviewReasons": [],
+        "lemma": "piscina",
+        "formOfUid": null,
+        "related": [],
+        "active": true,
+        "imageFile": "Pict/swimmingpool.webp",
+        "imageSha256": "e51e64225a5771648cf7e545030fc38ce715195b9a5aaf5784a3118eb1176160",
+        "imageStatus": "reviewed",
+        "imageRole": "contextual",
+        "imageReviewNote": "Reviewed for this meaning and original example; contextual/mnemonic pictures illustrate usage and do not define an abstract word by themselves.",
+        "reviewOutcome": "approved-new-meaning",
+        "origin": "web",
+        "addedAt": "2026-11-16",
+        "webText": {
+          "sentenceIt": "Ecco la piscina.",
+          "sentenceCz": "Tady je bazén.",
+          "genderIt": "f"
+        },
+        "authoringBatch": "leda-visible-lessons-3-8-20261116",
+        "sourceRefs": {
+          "kind": "user-provided-vocabulary-transcript",
+          "lessons": [
+            6
+          ],
+          "lines": [
+            450
+          ]
+        }
+      },
+      "beforeIt": "Ecco la piscina.",
+      "beforeCz": "Tady je bazén.",
+      "afterIt": "Domani vado in piscina con mia sorella.",
+      "afterCz": "Zítra jdu se sestrou do bazénu.",
+      "concepts": [
+        {
+          "id": 148,
+          "text": "Domani"
+        },
+        {
+          "id": 143,
+          "text": "vado"
+        },
+        {
+          "id": 681,
+          "text": "piscina"
+        },
+        {
+          "id": 53,
+          "text": "sorella"
+        }
+      ]
+    },
+    "vit-0699": {
+      "beforeEntry": {
+        "id": 699,
+        "uid": "vit-0699",
+        "it": "spiaggia",
+        "cz": "pláž",
+        "matches": [
+          {
+            "it": "spiaggia",
+            "cz": "pláž"
+          }
+        ],
+        "legacyOrder": null,
+        "legacyAddedAt": null,
+        "primaryGroup": "topic-07",
+        "topicIds": [
+          "topic-07"
+        ],
+        "partOfSpeech": [
+          "noun"
+        ],
+        "teachingType": "word",
+        "expressionType": "word",
+        "difficultyBand": 1,
+        "difficultyStatus": "proposed",
+        "editorialStatus": "reviewed",
+        "reviewPriority": "normal",
+        "reviewReasons": [],
+        "lemma": "spiaggia",
+        "formOfUid": null,
+        "related": [],
+        "active": true,
+        "imageFile": "Pict/it_leda_beach.webp",
+        "imageSha256": "1e5f2b22dd2dc6234e5a431e7aca0a00d80c9ab9d18f0ce1ebb531e46aa2c670",
+        "imageStatus": "reviewed",
+        "imageRole": "literal",
+        "imageReviewNote": "Reviewed for this meaning and original example; contextual/mnemonic pictures illustrate usage and do not define an abstract word by themselves.",
+        "reviewOutcome": "approved-new-meaning",
+        "origin": "web",
+        "addedAt": "2026-11-16",
+        "webText": {
+          "sentenceIt": "Ecco la spiaggia.",
+          "sentenceCz": "Tady je pláž.",
+          "genderIt": "f"
+        },
+        "authoringBatch": "leda-visible-lessons-3-8-20261116",
+        "sourceRefs": {
+          "kind": "user-provided-vocabulary-transcript",
+          "lessons": [
+            6
+          ],
+          "lines": [
+            470
+          ]
+        }
+      },
+      "beforeIt": "Ecco la spiaggia.",
+      "beforeCz": "Tady je pláž.",
+      "afterIt": "Porto l'ombrellone e l'asciugamano in spiaggia.",
+      "afterCz": "Nesu na pláž slunečník a ručník.",
+      "concepts": [
+        {
+          "id": 682,
+          "text": "Porto"
+        },
+        {
+          "id": 810,
+          "text": "ombrellone"
+        },
+        {
+          "id": 282,
+          "text": "asciugamano"
+        },
+        {
+          "id": 699,
+          "text": "spiaggia"
+        }
+      ]
+    },
+    "vit-0765": {
+      "beforeEntry": {
+        "id": 765,
+        "uid": "vit-0765",
+        "it": "bambina",
+        "cz": "děvčátko, holčička",
+        "matches": [
+          {
+            "it": "bambina",
+            "cz": "děvčátko, holčička"
+          }
+        ],
+        "legacyOrder": null,
+        "legacyAddedAt": null,
+        "primaryGroup": "topic-01",
+        "topicIds": [
+          "topic-01"
+        ],
+        "partOfSpeech": [
+          "noun"
+        ],
+        "teachingType": "word",
+        "expressionType": "word",
+        "difficultyBand": 1,
+        "difficultyStatus": "proposed",
+        "editorialStatus": "reviewed",
+        "reviewPriority": "normal",
+        "reviewReasons": [],
+        "lemma": "bambina",
+        "formOfUid": null,
+        "related": [],
+        "active": true,
+        "imageFile": "Pict/clevergirl.webp",
+        "imageSha256": "7f29e1a9ac85908c688e607b400daf52755d078031f0fbcbfcb63e4bf694e790",
+        "imageStatus": "reviewed",
+        "imageRole": "contextual",
+        "imageReviewNote": "Reviewed for this meaning and original example; contextual/mnemonic pictures illustrate usage and do not define an abstract word by themselves.",
+        "reviewOutcome": "approved-new-meaning",
+        "origin": "web",
+        "addedAt": "2026-11-16",
+        "webText": {
+          "sentenceIt": "Ecco la bambina.",
+          "sentenceCz": "Tady je děvčátko.",
+          "genderIt": "f"
+        },
+        "authoringBatch": "leda-visible-lessons-3-8-20261116",
+        "sourceRefs": {
+          "kind": "user-provided-vocabulary-transcript",
+          "lessons": [
+            7
+          ],
+          "lines": [
+            553
+          ]
+        }
+      },
+      "beforeIt": "Ecco la bambina.",
+      "beforeCz": "Tady je děvčátko.",
+      "afterIt": "La bambina disegna un fiore in giardino.",
+      "afterCz": "Holčička kreslí na zahradě květinu.",
+      "concepts": [
+        {
+          "id": 765,
+          "text": "bambina"
+        },
+        {
+          "id": 252,
+          "text": "disegna"
+        },
+        {
+          "id": 646,
+          "text": "fiore"
+        },
+        {
+          "id": 453,
+          "text": "giardino"
+        }
+      ]
+    },
+    "vit-0798": {
+      "beforeEntry": {
+        "id": 798,
+        "uid": "vit-0798",
+        "it": "letto",
+        "cz": "postel, lůžko",
+        "matches": [
+          {
+            "it": "letto",
+            "cz": "postel, lůžko"
+          }
+        ],
+        "legacyOrder": null,
+        "legacyAddedAt": null,
+        "primaryGroup": "topic-04",
+        "topicIds": [
+          "topic-04"
+        ],
+        "partOfSpeech": [
+          "noun"
+        ],
+        "teachingType": "word",
+        "expressionType": "word",
+        "difficultyBand": 1,
+        "difficultyStatus": "proposed",
+        "editorialStatus": "reviewed",
+        "reviewPriority": "normal",
+        "reviewReasons": [],
+        "lemma": "letto",
+        "formOfUid": null,
+        "related": [],
+        "active": true,
+        "imageFile": "Pict/bed.webp",
+        "imageSha256": "78a55d55704eab6d9dbdd61999b2949df115eb910e7d9f0f3f3f6aa347bf241c",
+        "imageStatus": "reviewed",
+        "imageRole": "contextual",
+        "imageReviewNote": "Reviewed for this meaning and original example; contextual/mnemonic pictures illustrate usage and do not define an abstract word by themselves.",
+        "reviewOutcome": "approved-new-meaning",
+        "origin": "web",
+        "addedAt": "2026-11-16",
+        "webText": {
+          "sentenceIt": "Ecco il letto.",
+          "sentenceCz": "Tady je postel.",
+          "genderIt": "m"
+        },
+        "authoringBatch": "leda-visible-lessons-3-8-20261116",
+        "sourceRefs": {
+          "kind": "user-provided-vocabulary-transcript",
+          "lessons": [
+            7
+          ],
+          "lines": [
+            591
+          ]
+        }
+      },
+      "beforeIt": "Ecco il letto.",
+      "beforeCz": "Tady je postel.",
+      "afterIt": "Il gatto dorme sul letto della bambina.",
+      "afterCz": "Kočka spí na posteli holčičky.",
+      "concepts": [
+        {
+          "id": 140,
+          "text": "gatto"
+        },
+        {
+          "id": 297,
+          "text": "dorme"
+        },
+        {
+          "id": 798,
+          "text": "letto"
+        },
+        {
+          "id": 765,
+          "text": "bambina"
+        }
+      ]
+    },
+    "vit-0838": {
+      "beforeEntry": {
+        "id": 838,
+        "uid": "vit-0838",
+        "it": "sedia",
+        "cz": "židle",
+        "matches": [
+          {
+            "it": "sedia",
+            "cz": "židle"
+          }
+        ],
+        "legacyOrder": null,
+        "legacyAddedAt": null,
+        "primaryGroup": "topic-04",
+        "topicIds": [
+          "topic-04"
+        ],
+        "partOfSpeech": [
+          "noun"
+        ],
+        "teachingType": "word",
+        "expressionType": "word",
+        "difficultyBand": 1,
+        "difficultyStatus": "proposed",
+        "editorialStatus": "reviewed",
+        "reviewPriority": "normal",
+        "reviewReasons": [],
+        "lemma": "sedia",
+        "formOfUid": null,
+        "related": [],
+        "active": true,
+        "imageFile": "Pict/chair.png",
+        "imageSha256": "6311267ea9acf4d040f41de931bd9acd973bab0f7fe6bfd41d50ceebb16c9ddd",
+        "imageStatus": "reviewed",
+        "imageRole": "contextual",
+        "imageReviewNote": "Reviewed for this meaning and original example; contextual/mnemonic pictures illustrate usage and do not define an abstract word by themselves.",
+        "reviewOutcome": "approved-new-meaning",
+        "origin": "web",
+        "addedAt": "2026-11-16",
+        "webText": {
+          "sentenceIt": "Ecco la sedia.",
+          "sentenceCz": "Tady je židle.",
+          "genderIt": "f"
+        },
+        "authoringBatch": "leda-visible-lessons-3-8-20261116",
+        "sourceRefs": {
+          "kind": "user-provided-vocabulary-transcript",
+          "lessons": [
+            7
+          ],
+          "lines": [
+            640
+          ]
+        }
+      },
+      "beforeIt": "Ecco la sedia.",
+      "beforeCz": "Tady je židle.",
+      "afterIt": "La sedia bianca è vicino alla finestra.",
+      "afterCz": "Bílá židle stojí blízko okna.",
+      "concepts": [
+        {
+          "id": 838,
+          "text": "sedia"
+        },
+        {
+          "id": 501,
+          "text": "bianca"
+        },
+        {
+          "id": 76,
+          "text": "vicino"
+        },
+        {
+          "id": 304,
+          "text": "finestra"
+        }
+      ]
+    },
+    "vit-0867": {
+      "beforeEntry": {
+        "id": 867,
+        "uid": "vit-0867",
+        "it": "bambino",
+        "cz": "dítě, děcko",
+        "matches": [
+          {
+            "it": "bambino",
+            "cz": "dítě, děcko"
+          }
+        ],
+        "legacyOrder": null,
+        "legacyAddedAt": null,
+        "primaryGroup": "topic-01",
+        "topicIds": [
+          "topic-01"
+        ],
+        "partOfSpeech": [
+          "noun"
+        ],
+        "teachingType": "word",
+        "expressionType": "word",
+        "difficultyBand": 1,
+        "difficultyStatus": "proposed",
+        "editorialStatus": "reviewed",
+        "reviewPriority": "normal",
+        "reviewReasons": [],
+        "lemma": "bambino",
+        "formOfUid": null,
+        "related": [],
+        "active": true,
+        "imageFile": "Pict/boy.png",
+        "imageSha256": "16ab5290bd74c392eb165b17bf8f1f7277bc1d4ad958e7c554a6f648b28e5029",
+        "imageStatus": "reviewed",
+        "imageRole": "contextual",
+        "imageReviewNote": "Reviewed for this meaning and original example; contextual/mnemonic pictures illustrate usage and do not define an abstract word by themselves.",
+        "reviewOutcome": "approved-new-meaning",
+        "origin": "web",
+        "addedAt": "2026-11-16",
+        "webText": {
+          "sentenceIt": "Ecco il bambino.",
+          "sentenceCz": "Tady je dítě.",
+          "genderIt": "m"
+        },
+        "authoringBatch": "leda-visible-lessons-3-8-20261116",
+        "sourceRefs": {
+          "kind": "user-provided-vocabulary-transcript",
+          "lessons": [
+            8
+          ],
+          "lines": [
+            677
+          ]
+        }
+      },
+      "beforeIt": "Ecco il bambino.",
+      "beforeCz": "Tady je dítě.",
+      "afterIt": "Il bambino porta un libro al nonno.",
+      "afterCz": "Dítě nese dědečkovi knihu.",
+      "concepts": [
+        {
+          "id": 867,
+          "text": "bambino"
+        },
+        {
+          "id": 682,
+          "text": "porta"
+        },
+        {
+          "id": 259,
+          "text": "libro"
+        },
+        {
+          "id": 58,
+          "text": "nonno"
+        }
+      ]
+    },
+    "vit-0868": {
+      "beforeEntry": {
+        "id": 868,
+        "uid": "vit-0868",
+        "it": "borsa",
+        "cz": "taška",
+        "matches": [
+          {
+            "it": "borsa",
+            "cz": "taška"
+          }
+        ],
+        "legacyOrder": null,
+        "legacyAddedAt": null,
+        "primaryGroup": "topic-04",
+        "topicIds": [
+          "topic-04"
+        ],
+        "partOfSpeech": [
+          "noun"
+        ],
+        "teachingType": "word",
+        "expressionType": "word",
+        "difficultyBand": 1,
+        "difficultyStatus": "proposed",
+        "editorialStatus": "reviewed",
+        "reviewPriority": "normal",
+        "reviewReasons": [],
+        "lemma": "borsa",
+        "formOfUid": null,
+        "related": [],
+        "active": true,
+        "imageFile": "Pict/bag.jpg",
+        "imageSha256": "258e6830305bebcb3653526e069de2c290eba86ce5d168390ebe14c34e88a075",
+        "imageStatus": "reviewed",
+        "imageRole": "contextual",
+        "imageReviewNote": "Reviewed for this meaning and original example; contextual/mnemonic pictures illustrate usage and do not define an abstract word by themselves.",
+        "reviewOutcome": "approved-new-meaning",
+        "origin": "web",
+        "addedAt": "2026-11-16",
+        "webText": {
+          "sentenceIt": "Ecco la borsa.",
+          "sentenceCz": "Tady je taška.",
+          "genderIt": "f"
+        },
+        "authoringBatch": "leda-visible-lessons-3-8-20261116",
+        "sourceRefs": {
+          "kind": "user-provided-vocabulary-transcript",
+          "lessons": [
+            8
+          ],
+          "lines": [
+            678
+          ]
+        }
+      },
+      "beforeIt": "Ecco la borsa.",
+      "beforeCz": "Tady je taška.",
+      "afterIt": "Metto le chiavi nella borsa di mia madre.",
+      "afterCz": "Dávám klíče do tašky své matky.",
+      "concepts": [
+        {
+          "id": 567,
+          "text": "Metto"
+        },
+        {
+          "id": 874,
+          "text": "chiavi"
+        },
+        {
+          "id": 868,
+          "text": "borsa"
+        },
+        {
+          "id": 55,
+          "text": "madre"
+        }
+      ]
+    },
+    "vit-0874": {
+      "beforeEntry": {
+        "id": 874,
+        "uid": "vit-0874",
+        "it": "chiave",
+        "cz": "klíč",
+        "matches": [
+          {
+            "it": "chiave",
+            "cz": "klíč"
+          }
+        ],
+        "legacyOrder": null,
+        "legacyAddedAt": null,
+        "primaryGroup": "topic-04",
+        "topicIds": [
+          "topic-04"
+        ],
+        "partOfSpeech": [
+          "noun"
+        ],
+        "teachingType": "word",
+        "expressionType": "word",
+        "difficultyBand": 1,
+        "difficultyStatus": "proposed",
+        "editorialStatus": "reviewed",
+        "reviewPriority": "normal",
+        "reviewReasons": [],
+        "lemma": "chiave",
+        "formOfUid": null,
+        "related": [],
+        "active": true,
+        "imageFile": "Pict/key.png",
+        "imageSha256": "331ef9c2d08f018e03161fc53ed73eb678502a6eb35cb8f300869026b00bbfe8",
+        "imageStatus": "reviewed",
+        "imageRole": "contextual",
+        "imageReviewNote": "Reviewed for this meaning and original example; contextual/mnemonic pictures illustrate usage and do not define an abstract word by themselves.",
+        "reviewOutcome": "approved-new-meaning",
+        "origin": "web",
+        "addedAt": "2026-11-16",
+        "webText": {
+          "sentenceIt": "Ecco la chiave.",
+          "sentenceCz": "Tady je klíč.",
+          "genderIt": "f"
+        },
+        "authoringBatch": "leda-visible-lessons-3-8-20261116",
+        "sourceRefs": {
+          "kind": "user-provided-vocabulary-transcript",
+          "lessons": [
+            8
+          ],
+          "lines": [
+            685
+          ]
+        }
+      },
+      "beforeIt": "Ecco la chiave.",
+      "beforeCz": "Tady je klíč.",
+      "afterIt": "Cerco la chiave sotto il tavolo.",
+      "afterCz": "Hledám klíč pod stolem.",
+      "concepts": [
+        {
+          "id": 146,
+          "text": "Cerco"
+        },
+        {
+          "id": 874,
+          "text": "chiave"
+        },
+        {
+          "id": 348,
+          "text": "sotto"
+        },
+        {
+          "id": 604,
+          "text": "tavolo"
+        }
+      ]
+    },
+    "vit-0892": {
+      "beforeEntry": {
+        "id": 892,
+        "uid": "vit-0892",
+        "it": "fiume",
+        "cz": "řeka",
+        "matches": [
+          {
+            "it": "fiume",
+            "cz": "řeka"
+          }
+        ],
+        "legacyOrder": null,
+        "legacyAddedAt": null,
+        "primaryGroup": "topic-07",
+        "topicIds": [
+          "topic-07"
+        ],
+        "partOfSpeech": [
+          "noun"
+        ],
+        "teachingType": "word",
+        "expressionType": "word",
+        "difficultyBand": 1,
+        "difficultyStatus": "proposed",
+        "editorialStatus": "reviewed",
+        "reviewPriority": "normal",
+        "reviewReasons": [],
+        "lemma": "fiume",
+        "formOfUid": null,
+        "related": [],
+        "active": true,
+        "imageFile": "Pict/river.png",
+        "imageSha256": "117cb47ac543ca59b9bc8dd49d3c850582fd5b96b254f6085d6ab2bd5dcca5c4",
+        "imageStatus": "reviewed",
+        "imageRole": "contextual",
+        "imageReviewNote": "Reviewed for this meaning and original example; contextual/mnemonic pictures illustrate usage and do not define an abstract word by themselves.",
+        "reviewOutcome": "approved-new-meaning",
+        "origin": "web",
+        "addedAt": "2026-11-16",
+        "webText": {
+          "sentenceIt": "Ecco il fiume.",
+          "sentenceCz": "Tady je řeka.",
+          "genderIt": "m"
+        },
+        "authoringBatch": "leda-visible-lessons-3-8-20261116",
+        "sourceRefs": {
+          "kind": "user-provided-vocabulary-transcript",
+          "lessons": [
+            8
+          ],
+          "lines": [
+            712
+          ]
+        }
+      },
+      "beforeIt": "Ecco il fiume.",
+      "beforeCz": "Tady je řeka.",
+      "afterIt": "Il vecchio ponte attraversa il fiume.",
+      "afterCz": "Starý most překlenuje řeku.",
+      "concepts": [
+        {
+          "id": 358,
+          "text": "vecchio"
+        },
+        {
+          "id": 335,
+          "text": "ponte"
+        },
+        {
+          "id": 763,
+          "text": "attraversa"
+        },
+        {
+          "id": 892,
+          "text": "fiume"
+        }
+      ]
+    },
+    "vit-0924": {
+      "beforeEntry": {
+        "id": 924,
+        "uid": "vit-0924",
+        "it": "panchina",
+        "cz": "lavička",
+        "matches": [
+          {
+            "it": "panchina",
+            "cz": "lavička"
+          }
+        ],
+        "legacyOrder": null,
+        "legacyAddedAt": null,
+        "primaryGroup": "topic-04",
+        "topicIds": [
+          "topic-04"
+        ],
+        "partOfSpeech": [
+          "noun"
+        ],
+        "teachingType": "word",
+        "expressionType": "word",
+        "difficultyBand": 1,
+        "difficultyStatus": "proposed",
+        "editorialStatus": "reviewed",
+        "reviewPriority": "normal",
+        "reviewReasons": [],
+        "lemma": "panchina",
+        "formOfUid": null,
+        "related": [],
+        "active": true,
+        "imageFile": "Pict/it_leda_bench.webp",
+        "imageSha256": "0d5936b85fdd32609584a704587778ec008946228874367de975b73a2dd7b224",
+        "imageStatus": "reviewed",
+        "imageRole": "literal",
+        "imageReviewNote": "Reviewed for this meaning and original example; contextual/mnemonic pictures illustrate usage and do not define an abstract word by themselves.",
+        "reviewOutcome": "approved-new-meaning",
+        "origin": "web",
+        "addedAt": "2026-11-16",
+        "webText": {
+          "sentenceIt": "Ecco la panchina.",
+          "sentenceCz": "Tady je lavička.",
+          "genderIt": "f"
+        },
+        "authoringBatch": "leda-visible-lessons-3-8-20261116",
+        "sourceRefs": {
+          "kind": "user-provided-vocabulary-transcript",
+          "lessons": [
+            8
+          ],
+          "lines": [
+            751
+          ]
+        }
+      },
+      "beforeIt": "Ecco la panchina.",
+      "beforeCz": "Tady je lavička.",
+      "afterIt": "Il nonno legge il giornale sulla panchina.",
+      "afterCz": "Dědeček čte na lavičce noviny.",
+      "concepts": [
+        {
+          "id": 58,
+          "text": "nonno"
+        },
+        {
+          "id": 228,
+          "text": "legge"
+        },
+        {
+          "id": 898,
+          "text": "giornale"
+        },
+        {
+          "id": 924,
+          "text": "panchina"
+        }
+      ]
+    },
+    "vit-0936": {
+      "beforeEntry": {
+        "id": 936,
+        "uid": "vit-0936",
+        "it": "quadro",
+        "cz": "obraz",
+        "matches": [
+          {
+            "it": "quadro",
+            "cz": "obraz"
+          }
+        ],
+        "legacyOrder": null,
+        "legacyAddedAt": null,
+        "primaryGroup": "topic-09",
+        "topicIds": [
+          "topic-09"
+        ],
+        "partOfSpeech": [
+          "noun"
+        ],
+        "teachingType": "word",
+        "expressionType": "word",
+        "difficultyBand": 1,
+        "difficultyStatus": "proposed",
+        "editorialStatus": "reviewed",
+        "reviewPriority": "normal",
+        "reviewReasons": [],
+        "lemma": "quadro",
+        "formOfUid": null,
+        "related": [],
+        "active": true,
+        "imageFile": "Pict/it_leda_painting.webp",
+        "imageSha256": "2e4c0f6f590b48df3f6797175201fce772d179d7debb89164a670316a3930a2e",
+        "imageStatus": "reviewed",
+        "imageRole": "literal",
+        "imageReviewNote": "Reviewed for this meaning and original example; contextual/mnemonic pictures illustrate usage and do not define an abstract word by themselves.",
+        "reviewOutcome": "approved-new-meaning",
+        "origin": "web",
+        "addedAt": "2026-11-16",
+        "webText": {
+          "sentenceIt": "Ecco il quadro.",
+          "sentenceCz": "Tady je obraz.",
+          "genderIt": "m"
+        },
+        "authoringBatch": "leda-visible-lessons-3-8-20261116",
+        "sourceRefs": {
+          "kind": "user-provided-vocabulary-transcript",
+          "lessons": [
+            8
+          ],
+          "lines": [
+            763
+          ]
+        }
+      },
+      "beforeIt": "Ecco il quadro.",
+      "beforeCz": "Tady je obraz.",
+      "afterIt": "Il pittore mostra un quadro alla bambina.",
+      "afterCz": "Malíř ukazuje holčičce obraz.",
+      "concepts": [
+        {
+          "id": 929,
+          "text": "pittore"
+        },
+        {
+          "id": 805,
+          "text": "mostra"
+        },
+        {
+          "id": 936,
+          "text": "quadro"
+        },
+        {
+          "id": 765,
+          "text": "bambina"
+        }
+      ]
+    },
+    "vit-0971": {
+      "beforeEntry": {
+        "id": 971,
+        "uid": "vit-0971",
+        "it": "valigia",
+        "cz": "kufr, zavazadlo",
+        "matches": [
+          {
+            "it": "valigia",
+            "cz": "kufr, zavazadlo"
+          }
+        ],
+        "legacyOrder": null,
+        "legacyAddedAt": null,
+        "primaryGroup": "topic-04",
+        "topicIds": [
+          "topic-04"
+        ],
+        "partOfSpeech": [
+          "noun"
+        ],
+        "teachingType": "word",
+        "expressionType": "word",
+        "difficultyBand": 1,
+        "difficultyStatus": "proposed",
+        "editorialStatus": "reviewed",
+        "reviewPriority": "normal",
+        "reviewReasons": [],
+        "lemma": "valigia",
+        "formOfUid": null,
+        "related": [],
+        "active": true,
+        "imageFile": "Pict/suitcase.webp",
+        "imageSha256": "f6c2aaf88967adce7ab3acace1b930146ab8468e7a9db015192aadb974e8ec91",
+        "imageStatus": "reviewed",
+        "imageRole": "contextual",
+        "imageReviewNote": "Reviewed for this meaning and original example; contextual/mnemonic pictures illustrate usage and do not define an abstract word by themselves.",
+        "reviewOutcome": "approved-new-meaning",
+        "origin": "web",
+        "addedAt": "2026-11-16",
+        "webText": {
+          "sentenceIt": "Ecco la valigia.",
+          "sentenceCz": "Tady je kufr.",
+          "genderIt": "f"
+        },
+        "authoringBatch": "leda-visible-lessons-3-8-20261116",
+        "sourceRefs": {
+          "kind": "user-provided-vocabulary-transcript",
+          "lessons": [
+            8
+          ],
+          "lines": [
+            806
+          ]
+        }
+      },
+      "beforeIt": "Ecco la valigia.",
+      "beforeCz": "Tady je kufr.",
+      "afterIt": "Metto la camicia bianca nella valigia.",
+      "afterCz": "Dávám bílou košili do kufru.",
+      "concepts": [
+        {
+          "id": 567,
+          "text": "Metto"
+        },
+        {
+          "id": 72,
+          "text": "camicia"
+        },
+        {
+          "id": 501,
+          "text": "bianca"
+        },
+        {
+          "id": 971,
+          "text": "valigia"
+        }
+      ]
+    }
+  },
+  "entries": [
+    {
+      "id": 1097,
+      "uid": "vit-1097",
+      "it": "oggi",
+      "cz": "dnes",
+      "matches": [
+        {
+          "it": "oggi",
+          "cz": "dnes"
+        }
+      ],
+      "legacyOrder": null,
+      "legacyAddedAt": null,
+      "primaryGroup": "topic-12",
+      "topicIds": [
+        "topic-12"
+      ],
+      "partOfSpeech": [
+        "adverb"
+      ],
+      "teachingType": "word",
+      "expressionType": "word",
+      "difficultyBand": 1,
+      "difficultyStatus": "proposed",
+      "editorialStatus": "reviewed",
+      "reviewPriority": "normal",
+      "reviewReasons": [],
+      "lemma": "oggi",
+      "formOfUid": null,
+      "related": [],
+      "active": true,
+      "imageFile": "VocabularyIT/Pict/loop-20261118-oggi.webp",
+      "imageSha256": "a0ec52ab840e028fcd463cf999cd910a4960b7b14c0a72c09838d162e02541ea",
+      "imageStatus": "reviewed",
+      "imageRole": "mnemonic",
+      "imageReviewNote": "New scoped IT illustration visually reviewed by Adam after explicit implementation approval; human visual/acoustic/device acceptance remains open.",
+      "reviewOutcome": "agent-visual-reviewed",
+      "origin": "web",
+      "addedAt": "2026-11-18",
+      "webText": {
+        "sentenceIt": "Oggi porto mio figlio al museo.",
+        "sentenceCz": "Dnes beru svého syna do muzea.",
+        "genderIt": ""
+      },
+      "authoringBatch": "loop-refresh-20261118",
+      "sourceRefs": {
+        "kind": "user-approved-proposal",
+        "document": "Vocabulary_IT_navrh_vet_pro_obrazkovou_smycku_2026-11-18.txt",
+        "proposalSha256": "dbea6add504fbb39ce75bc0799171b2e1889a19d9e553d211e9588cc2be34360"
+      }
+    },
+    {
+      "id": 1098,
+      "uid": "vit-1098",
+      "it": "amico",
+      "cz": "kamarád, přítel",
+      "matches": [
+        {
+          "it": "amico",
+          "cz": "kamarád, přítel"
+        }
+      ],
+      "legacyOrder": null,
+      "legacyAddedAt": null,
+      "primaryGroup": "topic-01",
+      "topicIds": [
+        "topic-01"
+      ],
+      "partOfSpeech": [
+        "noun"
+      ],
+      "teachingType": "word",
+      "expressionType": "word",
+      "difficultyBand": 1,
+      "difficultyStatus": "proposed",
+      "editorialStatus": "reviewed",
+      "reviewPriority": "normal",
+      "reviewReasons": [],
+      "lemma": "amico",
+      "formOfUid": null,
+      "related": [
+        {
+          "uid": "vit-0009",
+          "kind": "related"
+        }
+      ],
+      "active": true,
+      "imageFile": "VocabularyIT/Pict/loop-20261118-amico.webp",
+      "imageSha256": "bf7f1fa2fa1643d397382776fdc72aacaf5d9f77d18183bea362eace95dac679",
+      "imageStatus": "reviewed",
+      "imageRole": "contextual",
+      "imageReviewNote": "New scoped IT illustration visually reviewed by Adam after explicit implementation approval; human visual/acoustic/device acceptance remains open.",
+      "reviewOutcome": "agent-visual-reviewed",
+      "origin": "web",
+      "addedAt": "2026-11-18",
+      "webText": {
+        "sentenceIt": "Il mio amico gioca a calcio.",
+        "sentenceCz": "Můj kamarád hraje fotbal.",
+        "genderIt": "m"
+      },
+      "authoringBatch": "loop-refresh-20261118",
+      "sourceRefs": {
+        "kind": "user-approved-proposal",
+        "document": "Vocabulary_IT_navrh_vet_pro_obrazkovou_smycku_2026-11-18.txt",
+        "proposalSha256": "dbea6add504fbb39ce75bc0799171b2e1889a19d9e553d211e9588cc2be34360"
+      }
+    },
+    {
+      "id": 1099,
+      "uid": "vit-1099",
+      "it": "studiare",
+      "cz": "studovat, učit se",
+      "matches": [
+        {
+          "it": "studiare",
+          "cz": "studovat, učit se"
+        }
+      ],
+      "legacyOrder": null,
+      "legacyAddedAt": null,
+      "primaryGroup": "topic-09",
+      "topicIds": [
+        "topic-09"
+      ],
+      "partOfSpeech": [
+        "verb"
+      ],
+      "teachingType": "word",
+      "expressionType": "word",
+      "difficultyBand": 1,
+      "difficultyStatus": "proposed",
+      "editorialStatus": "reviewed",
+      "reviewPriority": "normal",
+      "reviewReasons": [],
+      "lemma": "studiare",
+      "formOfUid": null,
+      "related": [],
+      "active": true,
+      "imageFile": "VocabularyIT/Pict/loop-20261118-studiare.webp",
+      "imageSha256": "c87cab6811a9689d0d574285b7f27981927a39495ebe4a64ca43c2b7e959dbc3",
+      "imageStatus": "reviewed",
+      "imageRole": "literal",
+      "imageReviewNote": "New scoped IT illustration visually reviewed by Adam after explicit implementation approval; human visual/acoustic/device acceptance remains open.",
+      "reviewOutcome": "agent-visual-reviewed",
+      "origin": "web",
+      "addedAt": "2026-11-18",
+      "webText": {
+        "sentenceIt": "Studio in camera con mio fratello.",
+        "sentenceCz": "Učím se ve svém pokoji s bratrem.",
+        "genderIt": ""
+      },
+      "authoringBatch": "loop-refresh-20261118",
+      "sourceRefs": {
+        "kind": "user-approved-proposal",
+        "document": "Vocabulary_IT_navrh_vet_pro_obrazkovou_smycku_2026-11-18.txt",
+        "proposalSha256": "dbea6add504fbb39ce75bc0799171b2e1889a19d9e553d211e9588cc2be34360"
+      }
+    },
+    {
+      "id": 1100,
+      "uid": "vit-1100",
+      "it": "sera",
+      "cz": "večer",
+      "matches": [
+        {
+          "it": "sera",
+          "cz": "večer"
+        }
+      ],
+      "legacyOrder": null,
+      "legacyAddedAt": null,
+      "primaryGroup": "topic-12",
+      "topicIds": [
+        "topic-12"
+      ],
+      "partOfSpeech": [
+        "noun"
+      ],
+      "teachingType": "word",
+      "expressionType": "word",
+      "difficultyBand": 1,
+      "difficultyStatus": "proposed",
+      "editorialStatus": "reviewed",
+      "reviewPriority": "normal",
+      "reviewReasons": [],
+      "lemma": "sera",
+      "formOfUid": null,
+      "related": [],
+      "active": true,
+      "imageFile": "VocabularyIT/Pict/loop-20261118-sera.webp",
+      "imageSha256": "cd9201cf3fdb4a21fa8b00ab9ce80c794938cbc97c4e84c9c7f9fc40cbfb4997",
+      "imageStatus": "reviewed",
+      "imageRole": "contextual",
+      "imageReviewNote": "New scoped IT illustration visually reviewed by Adam after explicit implementation approval; human visual/acoustic/device acceptance remains open.",
+      "reviewOutcome": "agent-visual-reviewed",
+      "origin": "web",
+      "addedAt": "2026-11-18",
+      "webText": {
+        "sentenceIt": "La sera leggo un libro a letto.",
+        "sentenceCz": "Večer čtu v posteli knihu.",
+        "genderIt": "f"
+      },
+      "authoringBatch": "loop-refresh-20261118",
+      "sourceRefs": {
+        "kind": "user-approved-proposal",
+        "document": "Vocabulary_IT_navrh_vet_pro_obrazkovou_smycku_2026-11-18.txt",
+        "proposalSha256": "dbea6add504fbb39ce75bc0799171b2e1889a19d9e553d211e9588cc2be34360"
+      }
+    },
+    {
+      "id": 1101,
+      "uid": "vit-1101",
+      "it": "bere",
+      "cz": "pít",
+      "matches": [
+        {
+          "it": "bere",
+          "cz": "pít"
+        }
+      ],
+      "legacyOrder": null,
+      "legacyAddedAt": null,
+      "primaryGroup": "topic-16",
+      "topicIds": [
+        "topic-16"
+      ],
+      "partOfSpeech": [
+        "verb"
+      ],
+      "teachingType": "word",
+      "expressionType": "word",
+      "difficultyBand": 1,
+      "difficultyStatus": "proposed",
+      "editorialStatus": "reviewed",
+      "reviewPriority": "normal",
+      "reviewReasons": [],
+      "lemma": "bere",
+      "formOfUid": null,
+      "related": [],
+      "active": true,
+      "imageFile": "VocabularyIT/Pict/loop-20261118-bere.webp",
+      "imageSha256": "d6fde9f266da54de2fb1374baa8069634a8926ef5b7eeff15b135c736d6505a1",
+      "imageStatus": "reviewed",
+      "imageRole": "literal",
+      "imageReviewNote": "New scoped IT illustration visually reviewed by Adam after explicit implementation approval; human visual/acoustic/device acceptance remains open.",
+      "reviewOutcome": "agent-visual-reviewed",
+      "origin": "web",
+      "addedAt": "2026-11-18",
+      "webText": {
+        "sentenceIt": "Bevo un bicchiere d'acqua dopo la passeggiata.",
+        "sentenceCz": "Po procházce piju sklenici vody.",
+        "genderIt": ""
+      },
+      "authoringBatch": "loop-refresh-20261118",
+      "sourceRefs": {
+        "kind": "user-approved-proposal",
+        "document": "Vocabulary_IT_navrh_vet_pro_obrazkovou_smycku_2026-11-18.txt",
+        "proposalSha256": "dbea6add504fbb39ce75bc0799171b2e1889a19d9e553d211e9588cc2be34360"
+      }
+    },
+    {
+      "id": 1102,
+      "uid": "vit-1102",
+      "it": "scuola",
+      "cz": "škola",
+      "matches": [
+        {
+          "it": "scuola",
+          "cz": "škola"
+        }
+      ],
+      "legacyOrder": null,
+      "legacyAddedAt": null,
+      "primaryGroup": "topic-09",
+      "topicIds": [
+        "topic-09"
+      ],
+      "partOfSpeech": [
+        "noun"
+      ],
+      "teachingType": "word",
+      "expressionType": "word",
+      "difficultyBand": 1,
+      "difficultyStatus": "proposed",
+      "editorialStatus": "reviewed",
+      "reviewPriority": "normal",
+      "reviewReasons": [],
+      "lemma": "scuola",
+      "formOfUid": null,
+      "related": [],
+      "active": true,
+      "imageFile": "VocabularyIT/Pict/loop-20261118-scuola.webp",
+      "imageSha256": "f1db2bab09ed54147e2630f8e3000753d12ad057598e5adee1ffb38536200962",
+      "imageStatus": "reviewed",
+      "imageRole": "literal",
+      "imageReviewNote": "New scoped IT illustration visually reviewed by Adam after explicit implementation approval; human visual/acoustic/device acceptance remains open.",
+      "reviewOutcome": "agent-visual-reviewed",
+      "origin": "web",
+      "addedAt": "2026-11-18",
+      "webText": {
+        "sentenceIt": "Mio figlio va a scuola in bicicletta.",
+        "sentenceCz": "Můj syn jezdí do školy na kole.",
+        "genderIt": "f"
+      },
+      "authoringBatch": "loop-refresh-20261118",
+      "sourceRefs": {
+        "kind": "user-approved-proposal",
+        "document": "Vocabulary_IT_navrh_vet_pro_obrazkovou_smycku_2026-11-18.txt",
+        "proposalSha256": "dbea6add504fbb39ce75bc0799171b2e1889a19d9e553d211e9588cc2be34360"
+      }
+    },
+    {
+      "id": 1103,
+      "uid": "vit-1103",
+      "it": "nuovo",
+      "cz": "nový",
+      "matches": [
+        {
+          "it": "nuovo",
+          "cz": "nový"
+        }
+      ],
+      "legacyOrder": null,
+      "legacyAddedAt": null,
+      "primaryGroup": "topic-14",
+      "topicIds": [
+        "topic-14"
+      ],
+      "partOfSpeech": [
+        "adjective"
+      ],
+      "teachingType": "word",
+      "expressionType": "word",
+      "difficultyBand": 1,
+      "difficultyStatus": "proposed",
+      "editorialStatus": "reviewed",
+      "reviewPriority": "normal",
+      "reviewReasons": [],
+      "lemma": "nuovo",
+      "formOfUid": null,
+      "related": [],
+      "active": true,
+      "imageFile": "VocabularyIT/Pict/loop-20261118-nuovo.webp",
+      "imageSha256": "ef96dbabe71267bdd1f72e761dfd07f39ba87f1a962f295ed1a1fc447eac2c7d",
+      "imageStatus": "reviewed",
+      "imageRole": "mnemonic",
+      "imageReviewNote": "New scoped IT illustration visually reviewed by Adam after explicit implementation approval; human visual/acoustic/device acceptance remains open.",
+      "reviewOutcome": "agent-visual-reviewed",
+      "origin": "web",
+      "addedAt": "2026-11-18",
+      "webText": {
+        "sentenceIt": "Metto il vestito nuovo nella valigia.",
+        "sentenceCz": "Dávám nové šaty do kufru.",
+        "genderIt": ""
+      },
+      "authoringBatch": "loop-refresh-20261118",
+      "sourceRefs": {
+        "kind": "user-approved-proposal",
+        "document": "Vocabulary_IT_navrh_vet_pro_obrazkovou_smycku_2026-11-18.txt",
+        "proposalSha256": "dbea6add504fbb39ce75bc0799171b2e1889a19d9e553d211e9588cc2be34360"
+      }
+    },
+    {
+      "id": 1104,
+      "uid": "vit-1104",
+      "it": "autobus",
+      "cz": "autobus",
+      "matches": [
+        {
+          "it": "autobus",
+          "cz": "autobus"
+        }
+      ],
+      "legacyOrder": null,
+      "legacyAddedAt": null,
+      "primaryGroup": "topic-08",
+      "topicIds": [
+        "topic-08"
+      ],
+      "partOfSpeech": [
+        "noun"
+      ],
+      "teachingType": "word",
+      "expressionType": "word",
+      "difficultyBand": 1,
+      "difficultyStatus": "proposed",
+      "editorialStatus": "reviewed",
+      "reviewPriority": "normal",
+      "reviewReasons": [],
+      "lemma": "autobus",
+      "formOfUid": null,
+      "related": [],
+      "active": true,
+      "imageFile": "VocabularyIT/Pict/loop-20261118-autobus.webp",
+      "imageSha256": "b76b0d583e6667d23b9800d83ffc54f7dd516eef3a87699105aeb071c875772b",
+      "imageStatus": "reviewed",
+      "imageRole": "literal",
+      "imageReviewNote": "New scoped IT illustration visually reviewed by Adam after explicit implementation approval; human visual/acoustic/device acceptance remains open.",
+      "reviewOutcome": "agent-visual-reviewed",
+      "origin": "web",
+      "addedAt": "2026-11-18",
+      "webText": {
+        "sentenceIt": "L'autobus si ferma davanti al museo.",
+        "sentenceCz": "Autobus zastavuje před muzeem.",
+        "genderIt": "m"
+      },
+      "authoringBatch": "loop-refresh-20261118",
+      "sourceRefs": {
+        "kind": "user-approved-proposal",
+        "document": "Vocabulary_IT_navrh_vet_pro_obrazkovou_smycku_2026-11-18.txt",
+        "proposalSha256": "dbea6add504fbb39ce75bc0799171b2e1889a19d9e553d211e9588cc2be34360"
+      }
+    },
+    {
+      "id": 1105,
+      "uid": "vit-1105",
+      "it": "pane",
+      "cz": "chléb",
+      "matches": [
+        {
+          "it": "pane",
+          "cz": "chléb"
+        }
+      ],
+      "legacyOrder": null,
+      "legacyAddedAt": null,
+      "primaryGroup": "topic-05",
+      "topicIds": [
+        "topic-05"
+      ],
+      "partOfSpeech": [
+        "noun"
+      ],
+      "teachingType": "word",
+      "expressionType": "word",
+      "difficultyBand": 1,
+      "difficultyStatus": "proposed",
+      "editorialStatus": "reviewed",
+      "reviewPriority": "normal",
+      "reviewReasons": [],
+      "lemma": "pane",
+      "formOfUid": null,
+      "related": [],
+      "active": true,
+      "imageFile": "VocabularyIT/Pict/loop-20261118-pane.webp",
+      "imageSha256": "391fad7684ac9f7205d5b4c997096df82582f3cc7c385c0121bee342bec539a6",
+      "imageStatus": "reviewed",
+      "imageRole": "literal",
+      "imageReviewNote": "New scoped IT illustration visually reviewed by Adam after explicit implementation approval; human visual/acoustic/device acceptance remains open.",
+      "reviewOutcome": "agent-visual-reviewed",
+      "origin": "web",
+      "addedAt": "2026-11-18",
+      "webText": {
+        "sentenceIt": "Metto il pane sul tavolo della cucina.",
+        "sentenceCz": "Dávám chléb na kuchyňský stůl.",
+        "genderIt": "m"
+      },
+      "authoringBatch": "loop-refresh-20261118",
+      "sourceRefs": {
+        "kind": "user-approved-proposal",
+        "document": "Vocabulary_IT_navrh_vet_pro_obrazkovou_smycku_2026-11-18.txt",
+        "proposalSha256": "dbea6add504fbb39ce75bc0799171b2e1889a19d9e553d211e9588cc2be34360"
+      }
+    },
+    {
+      "id": 1106,
+      "uid": "vit-1106",
+      "it": "tè",
+      "cz": "čaj",
+      "matches": [
+        {
+          "it": "tè",
+          "cz": "čaj"
+        }
+      ],
+      "legacyOrder": null,
+      "legacyAddedAt": null,
+      "primaryGroup": "topic-05",
+      "topicIds": [
+        "topic-05"
+      ],
+      "partOfSpeech": [
+        "noun"
+      ],
+      "teachingType": "word",
+      "expressionType": "word",
+      "difficultyBand": 1,
+      "difficultyStatus": "proposed",
+      "editorialStatus": "reviewed",
+      "reviewPriority": "normal",
+      "reviewReasons": [],
+      "lemma": "tè",
+      "formOfUid": null,
+      "related": [],
+      "active": true,
+      "imageFile": "VocabularyIT/Pict/loop-20261118-te.webp",
+      "imageSha256": "db67731401118f5243a8c095455daf69c7ba44a5dc1e7ce122436f979717b619",
+      "imageStatus": "reviewed",
+      "imageRole": "literal",
+      "imageReviewNote": "New scoped IT illustration visually reviewed by Adam after explicit implementation approval; human visual/acoustic/device acceptance remains open.",
+      "reviewOutcome": "agent-visual-reviewed",
+      "origin": "web",
+      "addedAt": "2026-11-18",
+      "webText": {
+        "sentenceIt": "Il nonno prepara il tè al limone.",
+        "sentenceCz": "Dědeček připravuje čaj s citronem.",
+        "genderIt": "m"
+      },
+      "authoringBatch": "loop-refresh-20261118",
+      "sourceRefs": {
+        "kind": "user-approved-proposal",
+        "document": "Vocabulary_IT_navrh_vet_pro_obrazkovou_smycku_2026-11-18.txt",
+        "proposalSha256": "dbea6add504fbb39ce75bc0799171b2e1889a19d9e553d211e9588cc2be34360"
+      }
+    },
+    {
+      "id": 1107,
+      "uid": "vit-1107",
+      "it": "colazione",
+      "cz": "snídaně",
+      "matches": [
+        {
+          "it": "colazione",
+          "cz": "snídaně"
+        }
+      ],
+      "legacyOrder": null,
+      "legacyAddedAt": null,
+      "primaryGroup": "topic-05",
+      "topicIds": [
+        "topic-05"
+      ],
+      "partOfSpeech": [
+        "noun"
+      ],
+      "teachingType": "word",
+      "expressionType": "word",
+      "difficultyBand": 1,
+      "difficultyStatus": "proposed",
+      "editorialStatus": "reviewed",
+      "reviewPriority": "normal",
+      "reviewReasons": [],
+      "lemma": "colazione",
+      "formOfUid": null,
+      "related": [],
+      "active": true,
+      "imageFile": "VocabularyIT/Pict/loop-20261118-colazione.webp",
+      "imageSha256": "cc274ee6c80e53a4d905374c259a94bf36634fbc1a537bcc69e8523803e2c70d",
+      "imageStatus": "reviewed",
+      "imageRole": "contextual",
+      "imageReviewNote": "New scoped IT illustration visually reviewed by Adam after explicit implementation approval; human visual/acoustic/device acceptance remains open.",
+      "reviewOutcome": "agent-visual-reviewed",
+      "origin": "web",
+      "addedAt": "2026-11-18",
+      "webText": {
+        "sentenceIt": "A colazione mangio una banana in giardino.",
+        "sentenceCz": "K snídani jím na zahradě banán.",
+        "genderIt": "f"
+      },
+      "authoringBatch": "loop-refresh-20261118",
+      "sourceRefs": {
+        "kind": "user-approved-proposal",
+        "document": "Vocabulary_IT_navrh_vet_pro_obrazkovou_smycku_2026-11-18.txt",
+        "proposalSha256": "dbea6add504fbb39ce75bc0799171b2e1889a19d9e553d211e9588cc2be34360"
+      }
+    },
+    {
+      "id": 1108,
+      "uid": "vit-1108",
+      "it": "risposta",
+      "cz": "odpověď",
+      "matches": [
+        {
+          "it": "risposta",
+          "cz": "odpověď"
+        }
+      ],
+      "legacyOrder": null,
+      "legacyAddedAt": null,
+      "primaryGroup": "topic-18",
+      "topicIds": [
+        "topic-18"
+      ],
+      "partOfSpeech": [
+        "noun"
+      ],
+      "teachingType": "word",
+      "expressionType": "word",
+      "difficultyBand": 1,
+      "difficultyStatus": "proposed",
+      "editorialStatus": "reviewed",
+      "reviewPriority": "normal",
+      "reviewReasons": [],
+      "lemma": "risposta",
+      "formOfUid": null,
+      "related": [],
+      "active": true,
+      "imageFile": "VocabularyIT/Pict/loop-20261118-risposta.webp",
+      "imageSha256": "788c24d0b58ab21977e9ce18a2896da2f0c6d2cb019cebb855920ef720b1e9b1",
+      "imageStatus": "reviewed",
+      "imageRole": "mnemonic",
+      "imageReviewNote": "New scoped IT illustration visually reviewed by Adam after explicit implementation approval; human visual/acoustic/device acceptance remains open.",
+      "reviewOutcome": "agent-visual-reviewed",
+      "origin": "web",
+      "addedAt": "2026-11-18",
+      "webText": {
+        "sentenceIt": "Scrivo la risposta nel messaggio per Luca.",
+        "sentenceCz": "Píšu odpověď do zprávy pro Lukáše.",
+        "genderIt": "f"
+      },
+      "authoringBatch": "loop-refresh-20261118",
+      "sourceRefs": {
+        "kind": "user-approved-proposal",
+        "document": "Vocabulary_IT_navrh_vet_pro_obrazkovou_smycku_2026-11-18.txt",
+        "proposalSha256": "dbea6add504fbb39ce75bc0799171b2e1889a19d9e553d211e9588cc2be34360"
+      }
+    },
+    {
+      "id": 1109,
+      "uid": "vit-1109",
+      "it": "farmacia",
+      "cz": "lékárna",
+      "matches": [
+        {
+          "it": "farmacia",
+          "cz": "lékárna"
+        }
+      ],
+      "legacyOrder": null,
+      "legacyAddedAt": null,
+      "primaryGroup": "topic-08",
+      "topicIds": [
+        "topic-08"
+      ],
+      "partOfSpeech": [
+        "noun"
+      ],
+      "teachingType": "word",
+      "expressionType": "word",
+      "difficultyBand": 1,
+      "difficultyStatus": "proposed",
+      "editorialStatus": "reviewed",
+      "reviewPriority": "normal",
+      "reviewReasons": [],
+      "lemma": "farmacia",
+      "formOfUid": null,
+      "related": [],
+      "active": true,
+      "imageFile": "VocabularyIT/Pict/loop-20261118-farmacia.webp",
+      "imageSha256": "46ea98513805b753d9e937ba89114571a9d7a0605b3711a3034b70f50cac517f",
+      "imageStatus": "reviewed",
+      "imageRole": "literal",
+      "imageReviewNote": "New scoped IT illustration visually reviewed by Adam after explicit implementation approval; human visual/acoustic/device acceptance remains open.",
+      "reviewOutcome": "agent-visual-reviewed",
+      "origin": "web",
+      "addedAt": "2026-11-18",
+      "webText": {
+        "sentenceIt": "La farmacia è vicino alla stazione.",
+        "sentenceCz": "Lékárna je blízko nádraží.",
+        "genderIt": "f"
+      },
+      "authoringBatch": "loop-refresh-20261118",
+      "sourceRefs": {
+        "kind": "user-approved-proposal",
+        "document": "Vocabulary_IT_navrh_vet_pro_obrazkovou_smycku_2026-11-18.txt",
+        "proposalSha256": "dbea6add504fbb39ce75bc0799171b2e1889a19d9e553d211e9588cc2be34360"
+      }
+    },
+    {
+      "id": 1110,
+      "uid": "vit-1110",
+      "it": "banca",
+      "cz": "banka",
+      "matches": [
+        {
+          "it": "banca",
+          "cz": "banka"
+        }
+      ],
+      "legacyOrder": null,
+      "legacyAddedAt": null,
+      "primaryGroup": "topic-08",
+      "topicIds": [
+        "topic-08"
+      ],
+      "partOfSpeech": [
+        "noun"
+      ],
+      "teachingType": "word",
+      "expressionType": "word",
+      "difficultyBand": 1,
+      "difficultyStatus": "proposed",
+      "editorialStatus": "reviewed",
+      "reviewPriority": "normal",
+      "reviewReasons": [],
+      "lemma": "banca",
+      "formOfUid": null,
+      "related": [],
+      "active": true,
+      "imageFile": "VocabularyIT/Pict/loop-20261118-banca.webp",
+      "imageSha256": "0680ad70a054e57a22b0eb917fccf43975edf443c47f06cd670dd373ef88dbf0",
+      "imageStatus": "reviewed",
+      "imageRole": "literal",
+      "imageReviewNote": "New scoped IT illustration visually reviewed by Adam after explicit implementation approval; human visual/acoustic/device acceptance remains open.",
+      "reviewOutcome": "agent-visual-reviewed",
+      "origin": "web",
+      "addedAt": "2026-11-18",
+      "webText": {
+        "sentenceIt": "La banca è vicino al nostro appartamento.",
+        "sentenceCz": "Banka je blízko našeho bytu.",
+        "genderIt": "f"
+      },
+      "authoringBatch": "loop-refresh-20261118",
+      "sourceRefs": {
+        "kind": "user-approved-proposal",
+        "document": "Vocabulary_IT_navrh_vet_pro_obrazkovou_smycku_2026-11-18.txt",
+        "proposalSha256": "dbea6add504fbb39ce75bc0799171b2e1889a19d9e553d211e9588cc2be34360"
+      }
+    },
+    {
+      "id": 1111,
+      "uid": "vit-1111",
+      "it": "domanda",
+      "cz": "otázka",
+      "matches": [
+        {
+          "it": "domanda",
+          "cz": "otázka"
+        }
+      ],
+      "legacyOrder": null,
+      "legacyAddedAt": null,
+      "primaryGroup": "topic-18",
+      "topicIds": [
+        "topic-18"
+      ],
+      "partOfSpeech": [
+        "noun"
+      ],
+      "teachingType": "word",
+      "expressionType": "word",
+      "difficultyBand": 1,
+      "difficultyStatus": "proposed",
+      "editorialStatus": "reviewed",
+      "reviewPriority": "normal",
+      "reviewReasons": [],
+      "lemma": "domanda",
+      "formOfUid": null,
+      "related": [],
+      "active": true,
+      "imageFile": "VocabularyIT/Pict/loop-20261118-domanda.webp",
+      "imageSha256": "2ded9670ff64a909fcaec3e5319bb15824f76a0eec0a3e06c0531735f84aceef",
+      "imageStatus": "reviewed",
+      "imageRole": "mnemonic",
+      "imageReviewNote": "New scoped IT illustration visually reviewed by Adam after explicit implementation approval; human visual/acoustic/device acceptance remains open.",
+      "reviewOutcome": "agent-visual-reviewed",
+      "origin": "web",
+      "addedAt": "2026-11-18",
+      "webText": {
+        "sentenceIt": "Il bambino fa una domanda alla madre.",
+        "sentenceCz": "Dítě se ptá své matky.",
+        "genderIt": "f"
+      },
+      "authoringBatch": "loop-refresh-20261118",
+      "sourceRefs": {
+        "kind": "user-approved-proposal",
+        "document": "Vocabulary_IT_navrh_vet_pro_obrazkovou_smycku_2026-11-18.txt",
+        "proposalSha256": "dbea6add504fbb39ce75bc0799171b2e1889a19d9e553d211e9588cc2be34360"
+      }
+    },
+    {
+      "id": 1112,
+      "uid": "vit-1112",
+      "it": "vento",
+      "cz": "vítr",
+      "matches": [
+        {
+          "it": "vento",
+          "cz": "vítr"
+        }
+      ],
+      "legacyOrder": null,
+      "legacyAddedAt": null,
+      "primaryGroup": "topic-07",
+      "topicIds": [
+        "topic-07"
+      ],
+      "partOfSpeech": [
+        "noun"
+      ],
+      "teachingType": "word",
+      "expressionType": "word",
+      "difficultyBand": 1,
+      "difficultyStatus": "proposed",
+      "editorialStatus": "reviewed",
+      "reviewPriority": "normal",
+      "reviewReasons": [],
+      "lemma": "vento",
+      "formOfUid": null,
+      "related": [],
+      "active": true,
+      "imageFile": "VocabularyIT/Pict/loop-20261118-vento.webp",
+      "imageSha256": "f32a87f6f209ea5d61f80d6713260ccafbe5807cb3199118ff020eb1ea371b99",
+      "imageStatus": "reviewed",
+      "imageRole": "contextual",
+      "imageReviewNote": "New scoped IT illustration visually reviewed by Adam after explicit implementation approval; human visual/acoustic/device acceptance remains open.",
+      "reviewOutcome": "agent-visual-reviewed",
+      "origin": "web",
+      "addedAt": "2026-11-18",
+      "webText": {
+        "sentenceIt": "Il vento forte muove gli alberi.",
+        "sentenceCz": "Silný vítr hýbe stromy.",
+        "genderIt": "m"
+      },
+      "authoringBatch": "loop-refresh-20261118",
+      "sourceRefs": {
+        "kind": "user-approved-proposal",
+        "document": "Vocabulary_IT_navrh_vet_pro_obrazkovou_smycku_2026-11-18.txt",
+        "proposalSha256": "dbea6add504fbb39ce75bc0799171b2e1889a19d9e553d211e9588cc2be34360"
+      }
+    },
+    {
+      "id": 1113,
+      "uid": "vit-1113",
+      "it": "latte",
+      "cz": "mléko",
+      "matches": [
+        {
+          "it": "latte",
+          "cz": "mléko"
+        }
+      ],
+      "legacyOrder": null,
+      "legacyAddedAt": null,
+      "primaryGroup": "topic-05",
+      "topicIds": [
+        "topic-05"
+      ],
+      "partOfSpeech": [
+        "noun"
+      ],
+      "teachingType": "word",
+      "expressionType": "word",
+      "difficultyBand": 1,
+      "difficultyStatus": "proposed",
+      "editorialStatus": "reviewed",
+      "reviewPriority": "normal",
+      "reviewReasons": [],
+      "lemma": "latte",
+      "formOfUid": null,
+      "related": [],
+      "active": true,
+      "imageFile": "VocabularyIT/Pict/loop-20261118-latte.webp",
+      "imageSha256": "28c52793a2b663a1b2d85c36cebd3bb4e9af19938ec2c7fac4b46379ac4404b8",
+      "imageStatus": "reviewed",
+      "imageRole": "literal",
+      "imageReviewNote": "New scoped IT illustration visually reviewed by Adam after explicit implementation approval; human visual/acoustic/device acceptance remains open.",
+      "reviewOutcome": "agent-visual-reviewed",
+      "origin": "web",
+      "addedAt": "2026-11-18",
+      "webText": {
+        "sentenceIt": "Metto il latte nel bicchiere del bambino.",
+        "sentenceCz": "Dávám mléko do dětské sklenice.",
+        "genderIt": "m"
+      },
+      "authoringBatch": "loop-refresh-20261118",
+      "sourceRefs": {
+        "kind": "user-approved-proposal",
+        "document": "Vocabulary_IT_navrh_vet_pro_obrazkovou_smycku_2026-11-18.txt",
+        "proposalSha256": "dbea6add504fbb39ce75bc0799171b2e1889a19d9e553d211e9588cc2be34360"
+      }
+    },
+    {
+      "id": 1114,
+      "uid": "vit-1114",
+      "it": "pranzo",
+      "cz": "oběd",
+      "matches": [
+        {
+          "it": "pranzo",
+          "cz": "oběd"
+        }
+      ],
+      "legacyOrder": null,
+      "legacyAddedAt": null,
+      "primaryGroup": "topic-05",
+      "topicIds": [
+        "topic-05"
+      ],
+      "partOfSpeech": [
+        "noun"
+      ],
+      "teachingType": "word",
+      "expressionType": "word",
+      "difficultyBand": 1,
+      "difficultyStatus": "proposed",
+      "editorialStatus": "reviewed",
+      "reviewPriority": "normal",
+      "reviewReasons": [],
+      "lemma": "pranzo",
+      "formOfUid": null,
+      "related": [],
+      "active": true,
+      "imageFile": "VocabularyIT/Pict/loop-20261118-pranzo.webp",
+      "imageSha256": "52505fe26c21e19ac40e6b04f34eeb005d41d3c5342cdff844f6be024ddbc9ba",
+      "imageStatus": "reviewed",
+      "imageRole": "contextual",
+      "imageReviewNote": "New scoped IT illustration visually reviewed by Adam after explicit implementation approval; human visual/acoustic/device acceptance remains open.",
+      "reviewOutcome": "agent-visual-reviewed",
+      "origin": "web",
+      "addedAt": "2026-11-18",
+      "webText": {
+        "sentenceIt": "Dopo pranzo cammino nel bosco con Luca.",
+        "sentenceCz": "Po obědě jdu s Lukášem do lesa.",
+        "genderIt": "m"
+      },
+      "authoringBatch": "loop-refresh-20261118",
+      "sourceRefs": {
+        "kind": "user-approved-proposal",
+        "document": "Vocabulary_IT_navrh_vet_pro_obrazkovou_smycku_2026-11-18.txt",
+        "proposalSha256": "dbea6add504fbb39ce75bc0799171b2e1889a19d9e553d211e9588cc2be34360"
+      }
+    },
+    {
+      "id": 1115,
+      "uid": "vit-1115",
+      "it": "quaderno",
+      "cz": "sešit",
+      "matches": [
+        {
+          "it": "quaderno",
+          "cz": "sešit"
+        }
+      ],
+      "legacyOrder": null,
+      "legacyAddedAt": null,
+      "primaryGroup": "topic-09",
+      "topicIds": [
+        "topic-09"
+      ],
+      "partOfSpeech": [
+        "noun"
+      ],
+      "teachingType": "word",
+      "expressionType": "word",
+      "difficultyBand": 1,
+      "difficultyStatus": "proposed",
+      "editorialStatus": "reviewed",
+      "reviewPriority": "normal",
+      "reviewReasons": [],
+      "lemma": "quaderno",
+      "formOfUid": null,
+      "related": [],
+      "active": true,
+      "imageFile": "VocabularyIT/Pict/loop-20261118-quaderno.webp",
+      "imageSha256": "4a585faba5933763f2a5973995f57fa21a657a090a1fbee2f8459971e69ffb71",
+      "imageStatus": "reviewed",
+      "imageRole": "literal",
+      "imageReviewNote": "New scoped IT illustration visually reviewed by Adam after explicit implementation approval; human visual/acoustic/device acceptance remains open.",
+      "reviewOutcome": "agent-visual-reviewed",
+      "origin": "web",
+      "addedAt": "2026-11-18",
+      "webText": {
+        "sentenceIt": "Cerco il quaderno nella borsa di Luca.",
+        "sentenceCz": "Hledám sešit v Lukášově tašce.",
+        "genderIt": "m"
+      },
+      "authoringBatch": "loop-refresh-20261118",
+      "sourceRefs": {
+        "kind": "user-approved-proposal",
+        "document": "Vocabulary_IT_navrh_vet_pro_obrazkovou_smycku_2026-11-18.txt",
+        "proposalSha256": "dbea6add504fbb39ce75bc0799171b2e1889a19d9e553d211e9588cc2be34360"
+      }
+    },
+    {
+      "id": 1116,
+      "uid": "vit-1116",
+      "it": "sedersi",
+      "cz": "sednout si, posadit se",
+      "matches": [
+        {
+          "it": "sedersi",
+          "cz": "sednout si, posadit se"
+        }
+      ],
+      "legacyOrder": null,
+      "legacyAddedAt": null,
+      "primaryGroup": "topic-16",
+      "topicIds": [
+        "topic-16"
+      ],
+      "partOfSpeech": [
+        "verb"
+      ],
+      "teachingType": "word",
+      "expressionType": "word",
+      "difficultyBand": 1,
+      "difficultyStatus": "proposed",
+      "editorialStatus": "reviewed",
+      "reviewPriority": "normal",
+      "reviewReasons": [],
+      "lemma": "sedersi",
+      "formOfUid": null,
+      "related": [
+        {
+          "uid": "vit-0755",
+          "kind": "related"
+        },
+        {
+          "uid": "vit-0802",
+          "kind": "related"
+        }
+      ],
+      "active": true,
+      "imageFile": "VocabularyIT/Pict/loop-20261118-sedersi.webp",
+      "imageSha256": "e15bc555f31f4dbab6f2840cd8ef26c1a9b1c170b470205af815b5d728ef42c0",
+      "imageStatus": "reviewed",
+      "imageRole": "literal",
+      "imageReviewNote": "New scoped IT illustration visually reviewed by Adam after explicit implementation approval; human visual/acoustic/device acceptance remains open.",
+      "reviewOutcome": "agent-visual-reviewed",
+      "origin": "web",
+      "addedAt": "2026-11-18",
+      "webText": {
+        "sentenceIt": "Mi siedo sulla panchina vicino al lago.",
+        "sentenceCz": "Sedám si na lavičku poblíž jezera.",
+        "genderIt": ""
+      },
+      "authoringBatch": "loop-refresh-20261118",
+      "sourceRefs": {
+        "kind": "user-approved-proposal",
+        "document": "Vocabulary_IT_navrh_vet_pro_obrazkovou_smycku_2026-11-18.txt",
+        "proposalSha256": "dbea6add504fbb39ce75bc0799171b2e1889a19d9e553d211e9588cc2be34360"
+      }
+    }
+  ],
+  "spelling": {
+    "vit-1097": {
+      "it": "oggi",
+      "cz": "dnes",
+      "pieces": [
+        "og",
+        "gi"
+      ],
+      "reviewed": true,
+      "reviewNote": "Explicit editorial segmentation for approved loop refresh; doubles, diphthongs and farmacia hiatus checked."
+    },
+    "vit-1098": {
+      "it": "amico",
+      "cz": "kamarád, přítel",
+      "pieces": [
+        "a",
+        "mi",
+        "co"
+      ],
+      "reviewed": true,
+      "reviewNote": "Explicit editorial segmentation for approved loop refresh; doubles, diphthongs and farmacia hiatus checked."
+    },
+    "vit-1099": {
+      "it": "studiare",
+      "cz": "studovat, učit se",
+      "pieces": [
+        "stu",
+        "dia",
+        "re"
+      ],
+      "reviewed": true,
+      "reviewNote": "Explicit editorial segmentation for approved loop refresh; doubles, diphthongs and farmacia hiatus checked."
+    },
+    "vit-1100": {
+      "it": "sera",
+      "cz": "večer",
+      "pieces": [
+        "se",
+        "ra"
+      ],
+      "reviewed": true,
+      "reviewNote": "Explicit editorial segmentation for approved loop refresh; doubles, diphthongs and farmacia hiatus checked."
+    },
+    "vit-1101": {
+      "it": "bere",
+      "cz": "pít",
+      "pieces": [
+        "be",
+        "re"
+      ],
+      "reviewed": true,
+      "reviewNote": "Explicit editorial segmentation for approved loop refresh; doubles, diphthongs and farmacia hiatus checked."
+    },
+    "vit-1102": {
+      "it": "scuola",
+      "cz": "škola",
+      "pieces": [
+        "scuo",
+        "la"
+      ],
+      "reviewed": true,
+      "reviewNote": "Explicit editorial segmentation for approved loop refresh; doubles, diphthongs and farmacia hiatus checked."
+    },
+    "vit-1103": {
+      "it": "nuovo",
+      "cz": "nový",
+      "pieces": [
+        "nuo",
+        "vo"
+      ],
+      "reviewed": true,
+      "reviewNote": "Explicit editorial segmentation for approved loop refresh; doubles, diphthongs and farmacia hiatus checked."
+    },
+    "vit-1104": {
+      "it": "autobus",
+      "cz": "autobus",
+      "pieces": [
+        "au",
+        "to",
+        "bus"
+      ],
+      "reviewed": true,
+      "reviewNote": "Explicit editorial segmentation for approved loop refresh; doubles, diphthongs and farmacia hiatus checked."
+    },
+    "vit-1105": {
+      "it": "pane",
+      "cz": "chléb",
+      "pieces": [
+        "pa",
+        "ne"
+      ],
+      "reviewed": true,
+      "reviewNote": "Explicit editorial segmentation for approved loop refresh; doubles, diphthongs and farmacia hiatus checked."
+    },
+    "vit-1106": {
+      "it": "tè",
+      "cz": "čaj",
+      "pieces": [
+        "tè"
+      ],
+      "reviewed": true,
+      "reviewNote": "Explicit editorial segmentation for approved loop refresh; doubles, diphthongs and farmacia hiatus checked."
+    },
+    "vit-1107": {
+      "it": "colazione",
+      "cz": "snídaně",
+      "pieces": [
+        "co",
+        "la",
+        "zio",
+        "ne"
+      ],
+      "reviewed": true,
+      "reviewNote": "Explicit editorial segmentation for approved loop refresh; doubles, diphthongs and farmacia hiatus checked."
+    },
+    "vit-1108": {
+      "it": "risposta",
+      "cz": "odpověď",
+      "pieces": [
+        "ri",
+        "spo",
+        "sta"
+      ],
+      "reviewed": true,
+      "reviewNote": "Explicit editorial segmentation for approved loop refresh; doubles, diphthongs and farmacia hiatus checked."
+    },
+    "vit-1109": {
+      "it": "farmacia",
+      "cz": "lékárna",
+      "pieces": [
+        "far",
+        "ma",
+        "ci",
+        "a"
+      ],
+      "reviewed": true,
+      "reviewNote": "Explicit editorial segmentation for approved loop refresh; doubles, diphthongs and farmacia hiatus checked."
+    },
+    "vit-1110": {
+      "it": "banca",
+      "cz": "banka",
+      "pieces": [
+        "ban",
+        "ca"
+      ],
+      "reviewed": true,
+      "reviewNote": "Explicit editorial segmentation for approved loop refresh; doubles, diphthongs and farmacia hiatus checked."
+    },
+    "vit-1111": {
+      "it": "domanda",
+      "cz": "otázka",
+      "pieces": [
+        "do",
+        "man",
+        "da"
+      ],
+      "reviewed": true,
+      "reviewNote": "Explicit editorial segmentation for approved loop refresh; doubles, diphthongs and farmacia hiatus checked."
+    },
+    "vit-1112": {
+      "it": "vento",
+      "cz": "vítr",
+      "pieces": [
+        "ven",
+        "to"
+      ],
+      "reviewed": true,
+      "reviewNote": "Explicit editorial segmentation for approved loop refresh; doubles, diphthongs and farmacia hiatus checked."
+    },
+    "vit-1113": {
+      "it": "latte",
+      "cz": "mléko",
+      "pieces": [
+        "lat",
+        "te"
+      ],
+      "reviewed": true,
+      "reviewNote": "Explicit editorial segmentation for approved loop refresh; doubles, diphthongs and farmacia hiatus checked."
+    },
+    "vit-1114": {
+      "it": "pranzo",
+      "cz": "oběd",
+      "pieces": [
+        "pran",
+        "zo"
+      ],
+      "reviewed": true,
+      "reviewNote": "Explicit editorial segmentation for approved loop refresh; doubles, diphthongs and farmacia hiatus checked."
+    },
+    "vit-1115": {
+      "it": "quaderno",
+      "cz": "sešit",
+      "pieces": [
+        "qua",
+        "der",
+        "no"
+      ],
+      "reviewed": true,
+      "reviewNote": "Explicit editorial segmentation for approved loop refresh; doubles, diphthongs and farmacia hiatus checked."
+    },
+    "vit-1116": {
+      "it": "sedersi",
+      "cz": "sednout si, posadit se",
+      "pieces": [
+        "se",
+        "der",
+        "si"
+      ],
+      "reviewed": true,
+      "reviewNote": "Explicit editorial segmentation for approved loop refresh; doubles, diphthongs and farmacia hiatus checked."
+    }
+  },
+  "practiceChanges": {
+    "extend": {
+      "young-man": "amico",
+      "teaching": "studiare|scuola",
+      "evening": "sera",
+      "calendar": "oggi",
+      "coffee-drink": "bere|tè|latte",
+      "food-meal": "colazione|pranzo",
+      "book": "quaderno",
+      "shop": "farmacia|banca"
+    },
+    "new": {
+      "sit-down": "sedersi|accomodarsi|mettersi|sedia|panchina",
+      "question-answer": "domanda|risposta|rispondere|sì",
+      "new-bag": "nuovo|zaino|borsa",
+      "study-read": "studiare|leggere|libro|quaderno|esercizio"
+    }
+  },
+  "newPictureAssignments": {
+    "oggi": [
+      31,
+      32,
+      63,
+      70,
+      81,
+      83,
+      122,
+      127,
+      128,
+      131,
+      145,
+      170,
+      183,
+      206,
+      232,
+      248,
+      260,
+      265,
+      268,
+      291,
+      344,
+      409,
+      421,
+      427,
+      491,
+      559,
+      564,
+      582,
+      619,
+      633,
+      786,
+      894,
+      987,
+      1016
+    ],
+    "amico": [
+      133,
+      175,
+      192,
+      212,
+      226,
+      227,
+      246,
+      313,
+      594,
+      619,
+      653,
+      766,
+      833,
+      905
+    ],
+    "studiare": [
+      24,
+      25,
+      43,
+      46,
+      148,
+      177,
+      192,
+      473,
+      896,
+      930,
+      975
+    ],
+    "sera": [
+      93,
+      111,
+      124,
+      367,
+      549,
+      671,
+      829,
+      940,
+      996
+    ],
+    "bere": [
+      94,
+      137,
+      169,
+      196,
+      204,
+      661,
+      918
+    ],
+    "scuola": [
+      110,
+      390,
+      586,
+      636,
+      896,
+      1023,
+      1032
+    ],
+    "nuovo": [
+      50,
+      191,
+      255,
+      414,
+      441,
+      445,
+      644
+    ],
+    "autobus": [
+      517,
+      708,
+      803,
+      827,
+      1009,
+      1082
+    ],
+    "pane": [
+      28,
+      102,
+      119,
+      241,
+      579
+    ],
+    "tè": [
+      266,
+      271,
+      285,
+      571
+    ],
+    "colazione": [
+      105,
+      196,
+      237,
+      852
+    ],
+    "risposta": [
+      193,
+      590,
+      884,
+      899
+    ],
+    "farmacia": [
+      605,
+      991,
+      1006,
+      1031
+    ],
+    "banca": [
+      201,
+      605,
+      820,
+      1032
+    ],
+    "domanda": [
+      458,
+      773
+    ],
+    "vento": [
+      7,
+      70
+    ],
+    "latte": [
+      28,
+      481
+    ],
+    "pranzo": [
+      233,
+      236
+    ],
+    "quaderno": [
+      215,
+      235
+    ],
+    "sedersi": [
+      234,
+      1039
+    ]
+  },
+  "newOwnConcepts": {
+    "vit-1097": [
+      {
+        "id": 0,
+        "text": "Oggi",
+        "key": "oggi"
+      },
+      {
+        "id": 682,
+        "text": "porto"
+      },
+      {
+        "id": 38,
+        "text": "figlio"
+      },
+      {
+        "id": 670,
+        "text": "museo"
+      }
+    ],
+    "vit-1098": [
+      {
+        "id": 0,
+        "text": "amico",
+        "key": "amico"
+      },
+      {
+        "id": 133,
+        "text": "gioca"
+      },
+      {
+        "id": 246,
+        "text": "calcio"
+      }
+    ],
+    "vit-1099": [
+      {
+        "id": 0,
+        "text": "Studio",
+        "key": "studiare"
+      },
+      {
+        "id": 242,
+        "text": "camera"
+      },
+      {
+        "id": 54,
+        "text": "fratello"
+      }
+    ],
+    "vit-1100": [
+      {
+        "id": 0,
+        "text": "sera",
+        "key": "sera"
+      },
+      {
+        "id": 228,
+        "text": "leggo"
+      },
+      {
+        "id": 259,
+        "text": "libro"
+      },
+      {
+        "id": 798,
+        "text": "letto"
+      }
+    ],
+    "vit-1101": [
+      {
+        "id": 0,
+        "text": "Bevo",
+        "key": "bere"
+      },
+      {
+        "id": 104,
+        "text": "bicchiere"
+      },
+      {
+        "id": 617,
+        "text": "acqua"
+      },
+      {
+        "id": 214,
+        "text": "dopo"
+      },
+      {
+        "id": 575,
+        "text": "passeggiata"
+      }
+    ],
+    "vit-1102": [
+      {
+        "id": 38,
+        "text": "figlio"
+      },
+      {
+        "id": 143,
+        "text": "va"
+      },
+      {
+        "id": 0,
+        "text": "scuola",
+        "key": "scuola"
+      },
+      {
+        "id": 375,
+        "text": "bicicletta"
+      }
+    ],
+    "vit-1103": [
+      {
+        "id": 567,
+        "text": "Metto"
+      },
+      {
+        "id": 853,
+        "text": "vestito"
+      },
+      {
+        "id": 0,
+        "text": "nuovo",
+        "key": "nuovo"
+      },
+      {
+        "id": 971,
+        "text": "valigia"
+      }
+    ],
+    "vit-1104": [
+      {
+        "id": 0,
+        "text": "autobus",
+        "key": "autobus"
+      },
+      {
+        "id": 303,
+        "text": "si ferma"
+      },
+      {
+        "id": 670,
+        "text": "museo"
+      }
+    ],
+    "vit-1105": [
+      {
+        "id": 567,
+        "text": "Metto"
+      },
+      {
+        "id": 0,
+        "text": "pane",
+        "key": "pane"
+      },
+      {
+        "id": 604,
+        "text": "tavolo"
+      }
+    ],
+    "vit-1106": [
+      {
+        "id": 58,
+        "text": "nonno"
+      },
+      {
+        "id": 817,
+        "text": "prepara"
+      },
+      {
+        "id": 0,
+        "text": "tè",
+        "key": "tè"
+      },
+      {
+        "id": 230,
+        "text": "limone"
+      }
+    ],
+    "vit-1107": [
+      {
+        "id": 0,
+        "text": "colazione",
+        "key": "colazione"
+      },
+      {
+        "id": 138,
+        "text": "mangio"
+      },
+      {
+        "id": 237,
+        "text": "banana"
+      },
+      {
+        "id": 453,
+        "text": "giardino"
+      }
+    ],
+    "vit-1108": [
+      {
+        "id": 594,
+        "text": "Scrivo"
+      },
+      {
+        "id": 0,
+        "text": "risposta",
+        "key": "risposta"
+      },
+      {
+        "id": 801,
+        "text": "messaggio"
+      },
+      {
+        "id": 322,
+        "text": "Luca"
+      }
+    ],
+    "vit-1109": [
+      {
+        "id": 0,
+        "text": "farmacia",
+        "key": "farmacia"
+      },
+      {
+        "id": 76,
+        "text": "vicino"
+      },
+      {
+        "id": 129,
+        "text": "stazione"
+      }
+    ],
+    "vit-1110": [
+      {
+        "id": 0,
+        "text": "banca",
+        "key": "banca"
+      },
+      {
+        "id": 76,
+        "text": "vicino"
+      },
+      {
+        "id": 569,
+        "text": "nostro"
+      },
+      {
+        "id": 530,
+        "text": "appartamento"
+      }
+    ],
+    "vit-1111": [
+      {
+        "id": 867,
+        "text": "bambino"
+      },
+      {
+        "id": 427,
+        "text": "fa"
+      },
+      {
+        "id": 0,
+        "text": "domanda",
+        "key": "domanda"
+      },
+      {
+        "id": 55,
+        "text": "madre"
+      }
+    ],
+    "vit-1112": [
+      {
+        "id": 0,
+        "text": "vento",
+        "key": "vento"
+      },
+      {
+        "id": 7,
+        "text": "forte"
+      },
+      {
+        "id": 452,
+        "text": "alberi"
+      }
+    ],
+    "vit-1113": [
+      {
+        "id": 567,
+        "text": "Metto"
+      },
+      {
+        "id": 0,
+        "text": "latte",
+        "key": "latte"
+      },
+      {
+        "id": 104,
+        "text": "bicchiere"
+      },
+      {
+        "id": 867,
+        "text": "bambino"
+      }
+    ],
+    "vit-1114": [
+      {
+        "id": 214,
+        "text": "Dopo"
+      },
+      {
+        "id": 0,
+        "text": "pranzo",
+        "key": "pranzo"
+      },
+      {
+        "id": 274,
+        "text": "cammino"
+      },
+      {
+        "id": 626,
+        "text": "bosco"
+      },
+      {
+        "id": 322,
+        "text": "Luca"
+      }
+    ],
+    "vit-1115": [
+      {
+        "id": 146,
+        "text": "Cerco"
+      },
+      {
+        "id": 0,
+        "text": "quaderno",
+        "key": "quaderno"
+      },
+      {
+        "id": 868,
+        "text": "borsa"
+      },
+      {
+        "id": 322,
+        "text": "Luca"
+      }
+    ],
+    "vit-1116": [
+      {
+        "id": 0,
+        "text": "Mi siedo",
+        "key": "sedersi"
+      },
+      {
+        "id": 924,
+        "text": "panchina"
+      },
+      {
+        "id": 76,
+        "text": "vicino"
+      },
+      {
+        "id": 654,
+        "text": "lago"
+      }
+    ]
+  },
+  "expectedSentencePictures": 2349,
+  "previousAudioAssetSha256": "f104c960e455b9ea39d48449eb05ded7788edd888f84a1b6989742842b68232e",
+  "preservedSources": {
+    "VocabularyIT/vocabulary_it_input_manifest.json": "306d6ce98936cd4861d7fe204ef7250187a3b99bb47d09ba6c72a562ebed693c",
+    "VocabularyIT/VocabularyIT.csv": "ed9b24c3f9cda8e7873f37adea3e71070d388fd00890b67b34c29a93d30a3ec5"
+  },
+  "audioStats": {
+    "cards": 1116,
+    "references": 4464,
+    "uniqueAssets": 4303,
+    "characters": 77942,
+    "italianAssets": 2120,
+    "czechAssets": 2183
+  },
+  "audioProduction": {
+    "newSynthesis": 187,
+    "exactReused": 13,
+    "newAssetPaths": 200,
+    "oldAssetsPreserved": 4222
+  }
+}

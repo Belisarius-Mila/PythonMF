@@ -1,9 +1,9 @@
 {
   "schemaVersion": 1,
   "language": "it",
-  "reviewedAt": "2026-11-16",
+  "reviewedAt": "2026-11-18",
   "reviewMethod": "Explicit reviewed decompositions; original 497 records preserved; 599 additions checked against Italian syllable rules.",
-  "sourceDataSha256": "5f4850ad122b7c4b02733f94ad3bd61d263466583a3ab23ce1dbdcf3886691eb",
+  "sourceDataSha256": "54c03678645f116000ac203949f5e8cd41e0d3b1df53b1480410ba709c03b135",
   "sources": [
     {
       "url": "https://www.treccani.it/vocabolario/libreria/",
@@ -44,7 +44,8 @@
     {
       "url": "https://www.treccani.it/vocabolario/restituire/",
       "use": "Restituire: vyslovené samohlásky u-i."
-    }
+    },
+    "Approved loop-refresh-20261118: 20 editorially segmented words."
   ],
   "entries": {
     "vit-0001": {
@@ -12274,6 +12275,216 @@
       ],
       "reviewed": true,
       "reviewNote": "LEDA batch: explicit editorial segmentation, doubles/digraphs/hiatus and apostrophes checked; acronym CD shown intact."
+    },
+    "vit-1097": {
+      "it": "oggi",
+      "cz": "dnes",
+      "pieces": [
+        "og",
+        "gi"
+      ],
+      "reviewed": true,
+      "reviewNote": "Explicit editorial segmentation for approved loop refresh; doubles, diphthongs and farmacia hiatus checked."
+    },
+    "vit-1098": {
+      "it": "amico",
+      "cz": "kamarád, přítel",
+      "pieces": [
+        "a",
+        "mi",
+        "co"
+      ],
+      "reviewed": true,
+      "reviewNote": "Explicit editorial segmentation for approved loop refresh; doubles, diphthongs and farmacia hiatus checked."
+    },
+    "vit-1099": {
+      "it": "studiare",
+      "cz": "studovat, učit se",
+      "pieces": [
+        "stu",
+        "dia",
+        "re"
+      ],
+      "reviewed": true,
+      "reviewNote": "Explicit editorial segmentation for approved loop refresh; doubles, diphthongs and farmacia hiatus checked."
+    },
+    "vit-1100": {
+      "it": "sera",
+      "cz": "večer",
+      "pieces": [
+        "se",
+        "ra"
+      ],
+      "reviewed": true,
+      "reviewNote": "Explicit editorial segmentation for approved loop refresh; doubles, diphthongs and farmacia hiatus checked."
+    },
+    "vit-1101": {
+      "it": "bere",
+      "cz": "pít",
+      "pieces": [
+        "be",
+        "re"
+      ],
+      "reviewed": true,
+      "reviewNote": "Explicit editorial segmentation for approved loop refresh; doubles, diphthongs and farmacia hiatus checked."
+    },
+    "vit-1102": {
+      "it": "scuola",
+      "cz": "škola",
+      "pieces": [
+        "scuo",
+        "la"
+      ],
+      "reviewed": true,
+      "reviewNote": "Explicit editorial segmentation for approved loop refresh; doubles, diphthongs and farmacia hiatus checked."
+    },
+    "vit-1103": {
+      "it": "nuovo",
+      "cz": "nový",
+      "pieces": [
+        "nuo",
+        "vo"
+      ],
+      "reviewed": true,
+      "reviewNote": "Explicit editorial segmentation for approved loop refresh; doubles, diphthongs and farmacia hiatus checked."
+    },
+    "vit-1104": {
+      "it": "autobus",
+      "cz": "autobus",
+      "pieces": [
+        "au",
+        "to",
+        "bus"
+      ],
+      "reviewed": true,
+      "reviewNote": "Explicit editorial segmentation for approved loop refresh; doubles, diphthongs and farmacia hiatus checked."
+    },
+    "vit-1105": {
+      "it": "pane",
+      "cz": "chléb",
+      "pieces": [
+        "pa",
+        "ne"
+      ],
+      "reviewed": true,
+      "reviewNote": "Explicit editorial segmentation for approved loop refresh; doubles, diphthongs and farmacia hiatus checked."
+    },
+    "vit-1106": {
+      "it": "tè",
+      "cz": "čaj",
+      "pieces": [
+        "tè"
+      ],
+      "reviewed": true,
+      "reviewNote": "Explicit editorial segmentation for approved loop refresh; doubles, diphthongs and farmacia hiatus checked."
+    },
+    "vit-1107": {
+      "it": "colazione",
+      "cz": "snídaně",
+      "pieces": [
+        "co",
+        "la",
+        "zio",
+        "ne"
+      ],
+      "reviewed": true,
+      "reviewNote": "Explicit editorial segmentation for approved loop refresh; doubles, diphthongs and farmacia hiatus checked."
+    },
+    "vit-1108": {
+      "it": "risposta",
+      "cz": "odpověď",
+      "pieces": [
+        "ri",
+        "spo",
+        "sta"
+      ],
+      "reviewed": true,
+      "reviewNote": "Explicit editorial segmentation for approved loop refresh; doubles, diphthongs and farmacia hiatus checked."
+    },
+    "vit-1109": {
+      "it": "farmacia",
+      "cz": "lékárna",
+      "pieces": [
+        "far",
+        "ma",
+        "ci",
+        "a"
+      ],
+      "reviewed": true,
+      "reviewNote": "Explicit editorial segmentation for approved loop refresh; doubles, diphthongs and farmacia hiatus checked."
+    },
+    "vit-1110": {
+      "it": "banca",
+      "cz": "banka",
+      "pieces": [
+        "ban",
+        "ca"
+      ],
+      "reviewed": true,
+      "reviewNote": "Explicit editorial segmentation for approved loop refresh; doubles, diphthongs and farmacia hiatus checked."
+    },
+    "vit-1111": {
+      "it": "domanda",
+      "cz": "otázka",
+      "pieces": [
+        "do",
+        "man",
+        "da"
+      ],
+      "reviewed": true,
+      "reviewNote": "Explicit editorial segmentation for approved loop refresh; doubles, diphthongs and farmacia hiatus checked."
+    },
+    "vit-1112": {
+      "it": "vento",
+      "cz": "vítr",
+      "pieces": [
+        "ven",
+        "to"
+      ],
+      "reviewed": true,
+      "reviewNote": "Explicit editorial segmentation for approved loop refresh; doubles, diphthongs and farmacia hiatus checked."
+    },
+    "vit-1113": {
+      "it": "latte",
+      "cz": "mléko",
+      "pieces": [
+        "lat",
+        "te"
+      ],
+      "reviewed": true,
+      "reviewNote": "Explicit editorial segmentation for approved loop refresh; doubles, diphthongs and farmacia hiatus checked."
+    },
+    "vit-1114": {
+      "it": "pranzo",
+      "cz": "oběd",
+      "pieces": [
+        "pran",
+        "zo"
+      ],
+      "reviewed": true,
+      "reviewNote": "Explicit editorial segmentation for approved loop refresh; doubles, diphthongs and farmacia hiatus checked."
+    },
+    "vit-1115": {
+      "it": "quaderno",
+      "cz": "sešit",
+      "pieces": [
+        "qua",
+        "der",
+        "no"
+      ],
+      "reviewed": true,
+      "reviewNote": "Explicit editorial segmentation for approved loop refresh; doubles, diphthongs and farmacia hiatus checked."
+    },
+    "vit-1116": {
+      "it": "sedersi",
+      "cz": "sednout si, posadit se",
+      "pieces": [
+        "se",
+        "der",
+        "si"
+      ],
+      "reviewed": true,
+      "reviewNote": "Explicit editorial segmentation for approved loop refresh; doubles, diphthongs and farmacia hiatus checked."
     }
   }
 }

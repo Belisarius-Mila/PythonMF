@@ -67,17 +67,17 @@ const sleep=ms=>new Promise(resolve=>setTimeout(resolve,ms));
 async function until(check){for(let i=0;i<300;i++){if(check())return;await sleep(10);}throw Error('Timed out');}
 function change(view,id,value){const node=view.element(id);if(typeof value==='boolean')node.checked=value;else node.value=value;node.emit('change');}
 
-test('1096 Italian meanings and18 topics; new20 intersect filters without source order mutation',()=>{
- assert.equal(vocabulary.items.length,1096);assert.equal(vocabulary.groups.length,18);
+test('1116 Italian meanings and18 topics; new20 intersect filters without source order mutation',()=>{
+ assert.equal(vocabulary.items.length,1116);assert.equal(vocabulary.groups.length,18);
  assert.equal(vocabulary.imageReviewComplete,true);assert.ok(vocabulary.items.every(i=>i.imageReviewed));
  const before=JSON.stringify(vocabulary);
  const latest=model.select(vocabulary.items,{recentCount:20});
- assert.equal(latest.length,20);assert.ok(latest.every(i=>i.id>=1077));
+ assert.equal(latest.length,20);assert.ok(latest.every(i=>i.id>=1097));
  assert.equal(model.select(vocabulary.items,{query:'eclair'})[0].it,'éclair');
  assert.equal(model.select(vocabulary.items,{query:'němčina'})[0].uid,'vit-0473');
  assert.equal(model.select(vocabulary.items,{topics:['topic-09'],recentCount:20}).every(i=>i.topicIds.includes('topic-09')),true);
  const ordered=model.ordered(vocabulary.items,{groupBy:'topic'},catalog);
- assert.equal(new Set(ordered.map(i=>i.uid)).size,1096);
+ assert.equal(new Set(ordered.map(i=>i.uid)).size,1116);
  assert.equal(JSON.stringify(vocabulary),before);
 });
 test('Italian and Czech prompts preserve complete sentences and correct lang',()=>{
@@ -98,9 +98,9 @@ test('audio must match Italian UID, language, texts and own asset namespace',()=
  assert.equal(model.sentenceAudioRecord(i,{...sentenceAudio,items:{[i.uid]:{...sentenceAudio.items[i.uid],sourceSentenceIt:'changed'}}}),null);
  assert.equal(model.audioRecord(i,{language:'it',kind:'words',items:{}}),null);
 });
-test('actual gallery opens, shows1096 thumbnails, ordered next and returns to the current tile',async()=>{
- const view=await app();assert.equal(view.state.view,'gallery');assert.equal(view.buildSelection().length,1096);
- assert.equal(view.element('galleryGroups').querySelectorAll('.vocab-tile').length,1096);
+test('actual gallery opens, shows1116 thumbnails, ordered next and returns to the current tile',async()=>{
+ const view=await app();assert.equal(view.state.view,'gallery');assert.equal(view.buildSelection().length,1116);
+ assert.equal(view.element('galleryGroups').querySelectorAll('.vocab-tile').length,1116);
  assert.equal(view.element('galleryGroups').querySelectorAll('img').every(i=>i.width===240),true);
  const target=view.orderedSelection()[3];view.openStudy(target.uid);
  assert.equal(view.state.currentItem.uid,target.uid);assert.equal(view.state.mode,'ordered');
@@ -132,7 +132,7 @@ test('gender is shown for nouns, not old noun metadata on reactions',async()=>{
 });
 test('missing audio never blocks gallery, never constructs a player, and keeps listening recent filter',async()=>{
  const view=await app({manifest:{language:'it',kind:'words',status:'not-generated',items:{}},sentenceManifest:null});
- assert.equal(view.buildSelection().length,1096);change(view,'recentOnly',true);
+ assert.equal(view.buildSelection().length,1116);change(view,'recentOnly',true);
  view.galleryModes.find(b=>b.dataset.galleryMode==='listen').click();
  const tile=view.element('galleryGroups').querySelectorAll('.vocab-tile')[0];const caption=tile.querySelector('.tile-label').textContent;
  tile.click();await sleep(0);assert.equal(view.state.view,'gallery');assert.equal(view.players.length,0);
@@ -150,7 +150,7 @@ test('Italian listening flashes Czech for1s and restores after rapid click/mode 
  view.advance(1000);assert.equal(tiles[1].querySelector('.tile-label').textContent,words[1]);
  tiles[0].click();view.galleryModes.find(b=>b.dataset.galleryMode==='learn').click();assert.equal(tiles[0].querySelector('.tile-label').textContent,words[0]);
 });
-test('complete real libraries resolve all1096 meanings and drive both word and sentence players',async()=>{
+test('complete real libraries resolve all1116 meanings and drive both word and sentence players',async()=>{
  const words=JSON.parse(fs.readFileSync(path.join(root,'data/vocabulary-it-audio.json'),'utf8'));
  const sentences=JSON.parse(fs.readFileSync(path.join(root,'data/vocabulary-it-sentence-audio.json'),'utf8'));
  assert.equal(words.status,'complete');assert.equal(sentences.status,'complete');
@@ -166,7 +166,7 @@ test('complete real libraries resolve all1096 meanings and drive both word and s
  assert.ok(view.players.some(p=>p.played && p.url===new URL('../'+sentences.items['vit-0108'].cz,view.win.location.href).href));
 });
 test('blocked storage leaves common Italian gallery usable and settings honest',async()=>{
- const view=await app({blocked:true});assert.equal(view.buildSelection().length,1096);
+ const view=await app({blocked:true});assert.equal(view.buildSelection().length,1116);
  assert.equal(view.element('learnerSelect').disabled,true);assert.match(view.element('learnerNotice').textContent,/nelze načíst/);
 });
 test('IT profiles begin empty; EN backup and IDs are rejected; EN storage is untouched',()=>{
@@ -218,8 +218,8 @@ function correctChoice(view){const word=view.element('practiceWord').textContent
 async function readyQuestion(view){completeImages(view);await animateWord(view);endSound(view);await sleep(0);}
 async function practiceView(options={}){const view=await app({items:fourItems,...options});view.element('quizTab').click();view.element('quizStart').click();return view;}
 
-test('reviewed practice metadata covers1096 cards; all can form a valid four-picture question in the full selection',()=>{
- const pool=practice.eligible(vocabulary.items,audio,quizCatalog);assert.equal(pool.length,1096);
+test('reviewed practice metadata covers1116 cards; all can form a valid four-picture question in the full selection',()=>{
+ const pool=practice.eligible(vocabulary.items,audio,quizCatalog);assert.equal(pool.length,1116);
  const latest=practice.eligible(model.select(vocabulary.items,{recentCount:20}),audio,quizCatalog);assert.equal(latest.length,20);assert.ok(latest.every(i=>practice.question(i,latest,quizCatalog,()=>.5)));
  for(const item of pool){const q=practice.question(item,pool,quizCatalog,()=>.5);assert.equal(q.choices.length,4);assert.ok(q.choices.some(i=>i.uid===item.uid));assert.equal(new Set(q.choices.map(i=>i.image)).size,4);for(let a=0;a<4;a++)for(let b=a+1;b<4;b++)assert.ok(practice.compatible(q.choices[a],q.choices[b],quizCatalog));}
  assert.equal(practice.question(pool[0],pool.slice(0,3),quizCatalog),null);
@@ -390,10 +390,10 @@ function loopPlayer(view){return view.players.find(p=>p.handlers.ended&&!p.pause
 function setLoop(view,mode='sentence-word'){change(view,'studyLoopMode',mode);}
 async function loopPhase(view){const player=loopPlayer(view);assert.ok(player);player.position=2;player.ended=true;player.handlers.ended();await sleep(0);view.advance(2000);await sleep(0);}
 function pictureLabels(view){return view.element('sentencePictures').querySelectorAll('figcaption').map(n=>n.textContent);}
-test('all1096 reviewed Italian sentence rows resolve1–5 exact image meanings and spans',()=>{
+test('all1116 reviewed Italian sentence rows resolve1–5 exact image meanings and spans',()=>{
  let total=0;
  for(const item of vocabulary.items){const refs=model.sentencePictures(item,pictures,vocabulary.items);assert.ok(refs.length>=1&&refs.length<=5,item.uid);assert.equal(new Set(refs.map(r=>r.item.image)).size,refs.length);for(const r of refs)assert.equal(item.sentenceIt.slice(r.start,r.end),r.text);total+=refs.length;}
- assert.equal(Object.keys(pictures.entries).length,1096);assert.equal(total,1963);
+ assert.equal(Object.keys(pictures.entries).length,1116);assert.equal(total,2349);
 });
 test('Italian sentence map handles elided nouns and rejects stale, foreign, retired and malformed references',()=>{
  const item=vocabulary.items.find(i=>i.uid==='vit-0617');assert.equal(model.sentencePictures(item,pictures,vocabulary.items)[0].text,'acqua');
@@ -404,14 +404,14 @@ test('Italian sentence map handles elided nouns and rejects stale, foreign, reti
  const retired=vocabulary.items.map(i=>i.uid===item.uid?{...i,active:false}:i);assert.deepEqual(model.sentencePictures(item,pictures,retired),[]);
 });
 test('Italian pictures show above the sentence then restore its large target word using one fully reloaded player',async()=>{
- const v=await app();v.openStudy('vit-0083');setLoop(v);v.element('studyLoopToggle').click();assert.deepEqual(pictureLabels(v),['gonna','nero','camicia','bianco']);assert.equal(v.element('promptText').lang,'it');assert.equal(v.element('studyLoopTranslation').textContent,v.state.currentItem.sentenceCz);const player=loopPlayer(v);assert.match(player.url,/sentences/);assert.equal(player.starts.at(-1),0);
+ const v=await app();v.openStudy('vit-0083');setLoop(v);v.element('studyLoopToggle').click();assert.deepEqual(pictureLabels(v),['oggi','gonna','nero','camicia','bianco']);assert.equal(v.element('promptText').lang,'it');assert.equal(v.element('studyLoopTranslation').textContent,v.state.currentItem.sentenceCz);const player=loopPlayer(v);assert.match(player.url,/sentences/);assert.equal(player.starts.at(-1),0);
  await loopPhase(v);assert.equal(v.element('sentencePictures').hidden,true);assert.equal(v.element('promptText').textContent,'gonna');assert.equal(v.element('studyLoopTranslation').textContent,'sukně');assert.equal(loopPlayer(v),player);assert.equal(player.loadCount,2);assert.equal(player.starts.at(-1),0);v.element('studyLoopStop').click();
 });
 test('Italian loop waits for true ended and complete gap; stale ended after load cannot cut the next word',async()=>{
  const v=await app({items:vocabulary.items.slice(0,2)});v.openStudy('vit-0001');setLoop(v);v.element('studyLoopToggle').click();const p=loopPlayer(v),first=p.handlers.ended;v.advance(60000);await sleep(0);assert.equal(p.playCount,1);p.ended=true;p.handlers.ended();await sleep(0);v.advance(1999);await sleep(0);assert.equal(p.playCount,1);v.advance(1);await sleep(0);assert.equal(p.playCount,2);first();p.handlers.ended();await sleep(0);v.advance(10000);await sleep(0);assert.equal(p.playCount,2);await loopPhase(v);assert.equal(v.state.currentItem.uid,'vit-0002');v.element('studyLoopStop').click();
 });
 test('Italian personal A hard single-card loop uses context outside A without changing its profile',async()=>{
- const local=storage(),value=learners.empty();value.profiles.A.selected=['vit-0083'];value.profiles.A.hard=['vit-0083'];local.setItem(learners.KEY,JSON.stringify(value));const before=local.getItem(learners.KEY);const v=await app({local});change(v,'learnerSelect','A');v.element('learnerHardFilter').click();v.openStudy('vit-0083');setLoop(v);v.element('studyLoopToggle').click();assert.equal(v.state.sequence.length,1);assert.equal(pictureLabels(v).length,4);await loopPhase(v);await loopPhase(v);assert.equal(v.state.currentItem.uid,'vit-0083');assert.equal(pictureLabels(v).length,4);assert.equal(local.getItem(learners.KEY),before);v.returnToGallery();assert.equal(local.getItem(learners.KEY),before);
+ const local=storage(),value=learners.empty();value.profiles.A.selected=['vit-0083'];value.profiles.A.hard=['vit-0083'];local.setItem(learners.KEY,JSON.stringify(value));const before=local.getItem(learners.KEY);const v=await app({local});change(v,'learnerSelect','A');v.element('learnerHardFilter').click();v.openStudy('vit-0083');setLoop(v);v.element('studyLoopToggle').click();assert.equal(v.state.sequence.length,1);assert.equal(pictureLabels(v).length,5);await loopPhase(v);await loopPhase(v);assert.equal(v.state.currentItem.uid,'vit-0083');assert.equal(pictureLabels(v).length,5);assert.equal(local.getItem(learners.KEY),before);v.returnToGallery();assert.equal(local.getItem(learners.KEY),before);
 });
 test('Italian pause/resume restarts the same phase; stop restores manual question and a late callback cannot restart sound',async()=>{
  const v=await app();v.openStudy('vit-0083');const original=v.element('promptText').textContent;setLoop(v);v.element('studyLoopToggle').click();const p=loopPlayer(v),late=p.handlers.ended;p.position=.6;v.element('studyLoopToggle').click();assert.ok(p.paused);v.element('studyLoopToggle').click();assert.equal(loopPlayer(v),p);assert.equal(p.starts.at(-1),0);v.element('studyLoopStop').click();late();v.advance(120000);await sleep(0);assert.equal(v.element('promptText').textContent,original);assert.equal(v.element('sentencePictures').hidden,true);assert.equal(loopPlayer(v),undefined);
@@ -421,14 +421,46 @@ test('Italian loop error, timeout and rejected play pause the same card and do n
 });
 test('Italian optional missing pictures preserve sentence audio; failed tiles and detached events never stop or alter a new phase',async()=>{
  for(const pictureManifest of [null,{}]){const v=await app({pictureManifest});v.openStudy('vit-0083');setLoop(v);v.element('studyLoopToggle').click();assert.equal(v.element('sentencePictures').hidden,true);assert.ok(loopPlayer(v));v.element('studyLoopStop').click();}
- const v=await app();v.openStudy('vit-0083');setLoop(v);v.element('studyLoopToggle').click();const p=loopPlayer(v),old=v.element('sentencePictures').querySelector('img');old.emit('error');assert.equal(pictureLabels(v).length,3);assert.equal(loopPlayer(v),p);for(const img of v.element('sentencePictures').querySelectorAll('img'))img.emit('error');assert.equal(v.element('sentencePictures').hidden,true);assert.equal(v.element('studyView').classList.contains('sentence-context'),false);await loopPhase(v);old.emit('error');assert.equal(v.element('promptText').textContent,'gonna');assert.equal(v.element('sentencePictures').hidden,true);v.element('studyLoopStop').click();
+ const v=await app();v.openStudy('vit-0083');setLoop(v);v.element('studyLoopToggle').click();const p=loopPlayer(v),old=v.element('sentencePictures').querySelector('img');old.emit('error');assert.equal(pictureLabels(v).length,4);assert.equal(loopPlayer(v),p);for(const img of v.element('sentencePictures').querySelectorAll('img'))img.emit('error');assert.equal(v.element('sentencePictures').hidden,true);assert.equal(v.element('studyView').classList.contains('sentence-context'),false);await loopPhase(v);old.emit('error');assert.equal(v.element('promptText').textContent,'gonna');assert.equal(v.element('sentencePictures').hidden,true);v.element('studyLoopStop').click();
 });
 test('Italian delayed picture metadata waits for a new sentence and never changes currently playing audio',async()=>{
- let resolve;const pending=new Promise(done=>resolve=done);const v=await app({pictureDeferred:pending});v.state.query='sukně';v.selectionChanged();v.openStudy('vit-0083');setLoop(v);v.element('studyLoopToggle').click();const p=loopPlayer(v);assert.equal(v.element('sentencePictures').hidden,true);resolve(pictures);await sleep(0);assert.equal(v.element('sentencePictures').hidden,true);assert.equal(loopPlayer(v),p);await loopPhase(v);await loopPhase(v);assert.equal(pictureLabels(v).length,4);v.element('studyLoopStop').click();
+ let resolve;const pending=new Promise(done=>resolve=done);const v=await app({pictureDeferred:pending});v.state.query='sukně';v.selectionChanged();v.openStudy('vit-0083');setLoop(v);v.element('studyLoopToggle').click();const p=loopPlayer(v);assert.equal(v.element('sentencePictures').hidden,true);resolve(pictures);await sleep(0);assert.equal(v.element('sentencePictures').hidden,true);assert.equal(loopPlayer(v),p);await loopPhase(v);await loopPhase(v);assert.equal(pictureLabels(v).length,5);v.element('studyLoopStop').click();
 });
 test('Italian loop leaves no autostart through pagehide, bfcache or reload and keeps manual sentence guessing unchanged',async()=>{
  const v=await app();v.openStudy('vit-0083');v.practices[1].click();assert.equal(v.element('answerCard').classList.contains('hidden'),true);assert.equal(v.element('sentencePictures').hidden,true);setLoop(v);v.element('studyLoopToggle').click();const p=loopPlayer(v);v.emit('pagehide');v.emit('pageshow',{persisted:true});assert.ok(p.paused);assert.equal(loopPlayer(v),undefined);const reopened=await app({local:v.local,session:v.session,url:v.win.location.href});assert.equal(reopened.players.some(p=>p.played),false);assert.equal(reopened.element('sentencePictures').hidden,true);
 });
 test('Italian words-only loop follows the explicit filtered sequence and keeps sentence images hidden',async()=>{
  const v=await app({items:vocabulary.items.slice(0,3)});v.openStudy('vit-0001','random');const order=v.state.sequence.map(model.key),start=v.state.index;setLoop(v,'words');v.element('studyLoopToggle').click();for(let i=1;i<=4;i++){await loopPhase(v);assert.equal(v.state.currentItem.uid,order[(start+i)%order.length]);assert.equal(v.element('sentencePictures').hidden,true);}v.returnToGallery();assert.equal(v.state.view,'gallery');assert.equal(loopPlayer(v),undefined);
+});
+
+test('approved refresh reuses new meanings in old text and preserves homographs',()=>{
+ const row=id=>vocabulary.items.find(i=>i.id===id);
+ const concepts=id=>model.sentencePictures(row(id),pictures,vocabulary.items);
+ assert.equal(row(28).sentenceIt,'Compro pane e latte.');
+ assert.deepEqual(concepts(28).map(c=>c.item.it),['comprare','pane','e','latte']);
+ assert.deepEqual(concepts(604).map(c=>c.item.it),['mettere','tre','bicchiere','pulito','tavolo']);
+ assert.equal(concepts(867).find(c=>c.text==='porta').item.uid,'vit-0682');
+ assert.equal(concepts(936).find(c=>c.text==='mostra').item.uid,'vit-0805');
+ for(const id of [728,956])assert.ok(!concepts(id).some(c=>c.item.it==='vento'));
+ const latest=model.select(vocabulary.items,{recentCount:20});
+ assert.deepEqual(new Set(latest.map(i=>i.id)),new Set(Array.from({length:20},(_,i)=>1097+i)));
+});
+
+test('new word loops show context then its own correct word without changing profiles',async()=>{
+ const v=await app();v.openStudy('vit-1097');setLoop(v);v.element('studyLoopToggle').click();
+ assert.deepEqual(pictureLabels(v),['oggi','portare','figlio','museo']);
+ assert.equal(v.element('promptText').textContent,'Oggi porto mio figlio al museo.');
+ assert.equal(v.element('studyLoopTranslation').textContent,'Dnes beru svého syna do muzea.');
+ await loopPhase(v);
+ assert.equal(v.element('sentencePictures').hidden,true);
+ assert.equal(v.element('promptText').textContent,'oggi');
+ assert.equal(v.element('studyLoopTranslation').textContent,'dnes');
+ v.element('studyLoopStop').click();
+});
+
+test('new ambiguous picture motifs cannot be distractors for their close meanings',()=>{
+ for(const heads of [['risposta','sì'],['nuovo','zaino'],['studiare','leggere'],['sedersi','accomodarsi']]){
+  const left=vocabulary.items.find(i=>i.it===heads[0]),right=vocabulary.items.find(i=>i.it===heads[1]);
+  assert.ok(quizCatalog.entries[left.uid].conflicts.some(group=>quizCatalog.entries[right.uid].conflicts.includes(group)));
+ }
 });

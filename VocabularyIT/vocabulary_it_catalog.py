@@ -127,8 +127,8 @@ def validate_catalog(catalog: dict) -> dict:
             raise ValueError(f"Neplatný stav obrazové revize {uid}.")
         image_file = entry.get("imageFile")
         if image_status == "reviewed":
-            if (not isinstance(image_file, str) or not image_file.startswith("Pict/")
-                    or len(PurePosixPath(image_file).parts) != 2
+            if (not isinstance(image_file, str)
+                    or PurePosixPath(image_file).parent.as_posix() not in {"Pict", "VocabularyIT/Pict"}
                     or PurePosixPath(image_file).as_posix() != image_file
                     or PurePosixPath(image_file).suffix.lower() not in IMAGE_SUFFIXES
                     or not re.fullmatch(r"[0-9a-f]{64}", entry.get("imageSha256", ""))
@@ -217,13 +217,15 @@ def verify_image_bindings(root: Path, catalog: dict, manifest: dict, *, require_
     files = manifest.get("files")
     if not isinstance(files, dict) or set(files) != {entry["imageFile"] for entry in ready}:
         raise ValueError("Manifest nepokrývá přesně připnuté obrázky.")
-    expected_paths = {path.name for path in (root / "Pict").iterdir() if path.is_file()}
     for relative, record in files.items():
         path = root / relative
         if (not isinstance(record, dict) or type(record.get("bytes")) is not int
                 or record["bytes"] < 1 or not isinstance(record.get("sha256"), str)
                 or not re.fullmatch(r"[0-9a-f]{64}", record["sha256"])
-                or PurePosixPath(relative).name not in expected_paths or not path.is_file()
+                or PurePosixPath(relative).parent.as_posix() not in {"Pict", "VocabularyIT/Pict"}
+                or PurePosixPath(relative).as_posix() != relative
+                or not path.is_file() or path.is_symlink()
+                or path.name not in {p.name for p in path.parent.iterdir()}
                 or not path.resolve().is_relative_to(root.resolve())
                 or path.stat().st_size != record["bytes"] or digest(path) != record["sha256"]):
             raise ValueError(f"Změněná nebo nepřesná ilustrace {relative}.")
@@ -279,7 +281,8 @@ def audit(root: Path, catalog_path: Path = CATALOG, manifest_path: Path = MANIFE
                 or not isinstance(image_manifest.get("files"), dict)):
             raise ValueError("Obrazová revize patří jinému vstupnímu snímku.")
         extra_images = set(image_manifest["files"]) - set(manifest["files"])
-    proof = verify_input_manifest(root, manifest, extra_images=extra_images)
+    proof = verify_input_manifest(root, manifest, extra_images={
+        path for path in extra_images if PurePosixPath(path).parent.as_posix() == "Pict"})
     rows = load_rows(root / "VocabularyIT/VocabularyIT.csv")
     entries = resolve_catalog_rows(rows, catalog, require_all=True)
     cards = all_card_texts(rows, catalog)

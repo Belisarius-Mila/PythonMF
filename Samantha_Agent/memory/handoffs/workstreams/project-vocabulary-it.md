@@ -1,3 +1,41 @@
+<!-- SAMANTHA_CURRENT_STATUS_START -->
+## 2026-11-18 15:29 CET — Schválené věty, 20 ilustrací a nové MP3
+
+Hotovo: Místně zapracovaný celý schválený návrh z Downloads:60 přepisů IT/CZ,
+20 nových karet vit-1097–1116 a20 nových ilustrací. Celkem1116 aktivních vět,
+2349 explicitních obrazových vazeb a4303 právě používaných unikátních MP3.
+132 nových vazeb přibylo do124 stávajících vět;131 z nich ve123 větách bez
+změny textu. Všech80 nových/přepsaných vět má6–8 slov a vlastní IT/CZ audio.
+187 nově syntetizovaných MP3 +13 přesných převzetí, celkem200 nových cest;
+4222 předchozích MP3 zůstalo bajtově zachovaných. Stejná Elsa/Vlasta/-10 %.
+
+Rozhodnutí: Míla „Souhlas implementuj. Počítej s novými ilustracemi i novými
+mp3.“ schválil celý návrh; není to pokyn k push ani nasazení. Vlastní IT
+ilustrace jsou ve VocabularyIT/Pict, sdílené Pict/mapping a původní CSV471
+zachované. Ověření podporuje jen dvě pevné knihovny, přesné cesty/case/SHA.
+Souběžná EN práce zachovaná. Export využil původní ověřený777souborový
+uzavřený snímek: dnešní EN se legitimně liší od historické předlohy15.11.,
+proto se základní manifest nepřepisoval ani jeho ochrany neobcházely.
+
+Další krok: Mílův poslech a fyzická iPhone přejímka; případné p+n zadat
+samostatně. Konečnou programovou bránu a jediný lokální commit určuje
+private/vocabulary_it_loop_refresh_20261118/completion.json.
+
+Navrhované další kroky: Mílův poslech a fyzická iPhone přejímka; samostatně
+zadané p+n. Kontrolní samostatné HTML s20 obrázky i IT zvuky je v Downloads
+jako Vocabulary_IT_nove_ilustrace_2026-11-18.html. Podklady LEDA1–2 zůstávají
+samostatně odložené. Žádná výroba starých médií ani opakování vydání.
+
+Technický důkaz:20/20 ilustrací vizuálně zkontrolovaných Adamem,200/200 nových
+MP3 cest plně dekódovaných FFmpeg. Čtyři nové obsahové regrese PASS;13 testů
+exportéru včetně vlastních složek/case/drift/symlink PASS před obsahovou změnou.
+Nativní Safari na Macu: tavolo5 obrázků + přesná IT/CZ věta, velká slovní
+karta po dočtení, nové tè4 obrázky, automatický přechod na latte, pause/resume/
+stop. Vlastní náhledový panel zavřený, původní panely zachované. Finální
+bránu/commit a přesné otisky určuje completion.json. Telefonní a úplná lidská
+akustická přejímka zůstávají otevřené. Bez nového push/deploy.
+<!-- SAMANTHA_CURRENT_STATUS_END -->
+
 ## 2026-11-17 14:04 CET — Společné p+n obrazových vět EN a IT
 
 Hotovo: Převzatý Datův commit31c670bb do main s vlastní angličtinou15f9d076.
@@ -17,7 +55,7 @@ Technický důkaz: EN164 cílených PASS, IT165 cílených PASS z původních ú
 novou společnou bránu a přesný integrační head určuje completion.json.
 Nový EN TVBCP nevzniká, zachovaný obecný TVBCP a vlastní IT TVBCP.
 
-<!-- SAMANTHA_CURRENT_STATUS_START -->
+
 ## 2026-11-16 21:40 CET — LEDA dávka veřejně vydaná a převzatá
 
 Hotovo:599 nových karet z7278e110 je veřejně dostupných ve Vocabulary IT,
@@ -55,7 +93,7 @@ v private/vocabulary_it_leda_release_20261116/completion.json a release_result.j
 Žádná nová výroba zvuků/obrázků, změna placeného limitu ani plná lokální sada.
 Připravené předání není důkaz veřejného nasazení; fyzická přejímka zůstává otevřená.
 
-## Aktuální stav
+## Stav před změnou — 17.11.2026
 
 - Aktualizováno: 2026-11-17 13:26 CET.
 - Místně obrazové kontexty všech1096 italských vět:1963 vazeb,1–5 různých existujících obrázků na větu, IT popisky nad IT větou a CZ překladem.448 vět má1 obraz,459 má2,161 má3,26 má4 a2 mají5.
@@ -64,7 +102,7 @@ Připravené předání není důkaz veřejného nasazení; fyzická přejímka 
 -5 nových Python kontrol PASS,56 skutečných JS scénářů PASS (11 nových). Safari Mac skutečně ukázalo gonna/nero/camicia/bianco + celou IT/CZ větu, pak velkou gonna/sukně kartu; pause/resume/gap/stop ověřeno. Fyzický telefon/akustická přejímka Mílou otevřené.
 - Jeden lokální commit tohoto kroku; přesný finální head, programovou bránu a shodu zdrojů určuje private/vocabulary_it_sentence_pictures_20261117/completion.json. Tento nový krok není pushnutý/nasazený.
 - Další: po uzavření IT commitu navázat FR pro Janu podle TXT v Downloads a schváleného výběru464 karet. P+n samostatně; dříve delegovanou publikaci Willovi neopakovat.
-<!-- SAMANTHA_CURRENT_STATUS_END -->
+
 
 # Handoff pracovního proudu: Vocabulary IT
 

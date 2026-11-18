@@ -43,7 +43,8 @@
     {
       "url": "https://www.treccani.it/vocabolario/restituire/",
       "use": "Restituire: vyslovené samohlásky u-i."
-    }
+    },
+    "Approved loop-refresh-20261118: 20 editorially segmented words."
   ],
   "entries": {
     "vit-0001": {
@@ -447,7 +448,9 @@
       "reviewed": true,
       "displayMode": "syllables",
       "format": "objects",
-      "conflicts": []
+      "conflicts": [
+        "question-answer"
+      ]
     },
     "vit-0024": {
       "uid": "vit-0024",
@@ -2330,7 +2333,9 @@
       "reviewed": true,
       "displayMode": "syllables",
       "format": "objects",
-      "conflicts": []
+      "conflicts": [
+        "new-bag"
+      ]
     },
     "vit-0136": {
       "uid": "vit-0136",
@@ -2583,7 +2588,8 @@
       "displayMode": "syllables",
       "format": "objects",
       "conflicts": [
-        "teaching"
+        "teaching",
+        "study-read"
       ]
     },
     "vit-0151": {
@@ -3188,7 +3194,8 @@
       "displayMode": "syllables",
       "format": "objects",
       "conflicts": [
-        "speaking"
+        "speaking",
+        "question-answer"
       ]
     },
     "vit-0186": {
@@ -3910,7 +3917,8 @@
       "displayMode": "syllables",
       "format": "objects",
       "conflicts": [
-        "book"
+        "book",
+        "study-read"
       ]
     },
     "vit-0229": {
@@ -4441,7 +4449,8 @@
       "displayMode": "syllables",
       "format": "objects",
       "conflicts": [
-        "book"
+        "book",
+        "study-read"
       ]
     },
     "vit-0260": {
@@ -12840,7 +12849,9 @@
       "reviewed": true,
       "displayMode": "syllables",
       "format": "objects",
-      "conflicts": []
+      "conflicts": [
+        "sit-down"
+      ]
     },
     "vit-0756": {
       "uid": "vit-0756",
@@ -13627,7 +13638,8 @@
       "displayMode": "syllables",
       "format": "objects",
       "conflicts": [
-        "give-take"
+        "give-take",
+        "sit-down"
       ]
     },
     "vit-0803": {
@@ -14242,7 +14254,9 @@
       "reviewed": true,
       "displayMode": "syllables",
       "format": "objects",
-      "conflicts": []
+      "conflicts": [
+        "sit-down"
+      ]
     },
     "vit-0839": {
       "uid": "vit-0839",
@@ -14758,7 +14772,9 @@
       "reviewed": true,
       "displayMode": "syllables",
       "format": "objects",
-      "conflicts": []
+      "conflicts": [
+        "new-bag"
+      ]
     },
     "vit-0869": {
       "uid": "vit-0869",
@@ -15724,7 +15740,9 @@
       "reviewed": true,
       "displayMode": "syllables",
       "format": "objects",
-      "conflicts": []
+      "conflicts": [
+        "sit-down"
+      ]
     },
     "vit-0925": {
       "uid": "vit-0925",
@@ -17722,7 +17740,8 @@
       "displayMode": "syllables",
       "format": "objects",
       "conflicts": [
-        "give-take"
+        "give-take",
+        "sit-down"
       ]
     },
     "vit-1037": {
@@ -18694,7 +18713,9 @@
       "reviewed": true,
       "displayMode": "syllables",
       "format": "objects",
-      "conflicts": []
+      "conflicts": [
+        "sit-down"
+      ]
     },
     "vit-1089": {
       "uid": "vit-1089",
@@ -18842,6 +18863,352 @@
       "displayMode": "syllables",
       "format": "objects",
       "conflicts": []
+    },
+    "vit-1097": {
+      "uid": "vit-1097",
+      "it": "oggi",
+      "cz": "dnes",
+      "image": "assets/vocabulary-it-v2/images/38a9da12bfe10a6d5b6f7055195d3793b2ad2ee1469ed359206c0a07ebb410ae.webp",
+      "thumbnail": "assets/vocabulary-it-v2/thumbs/d4c92d3ab6d7a5a1837dde754ea08e54f4725b10b6a0b4e3eb5a820f635dcaf9.webp",
+      "pieces": [
+        "og",
+        "gi"
+      ],
+      "reviewed": true,
+      "displayMode": "syllables",
+      "format": "objects",
+      "conflicts": [
+        "calendar"
+      ]
+    },
+    "vit-1098": {
+      "uid": "vit-1098",
+      "it": "amico",
+      "cz": "kamarád, přítel",
+      "image": "assets/vocabulary-it-v2/images/54e816becc47ed68d8a675ff333c7014cb0601c5503eacbc0bb4a4c59dbc5bf1.webp",
+      "thumbnail": "assets/vocabulary-it-v2/thumbs/e0f4a786d76e8b81dd21e928f0e6314d2fdd537a15e36ace65c447a86b152581.webp",
+      "pieces": [
+        "a",
+        "mi",
+        "co"
+      ],
+      "reviewed": true,
+      "displayMode": "syllables",
+      "format": "objects",
+      "conflicts": [
+        "young-man"
+      ]
+    },
+    "vit-1099": {
+      "uid": "vit-1099",
+      "it": "studiare",
+      "cz": "studovat, učit se",
+      "image": "assets/vocabulary-it-v2/images/200dc01bfa2a5a3b6cd3873dc98275e81a86e8532c966ee8624cd0fe136ab08d.webp",
+      "thumbnail": "assets/vocabulary-it-v2/thumbs/b00398cf9637ab2fbd07fa2ea70c9bc468e8b0b11a4463ebb9d6fc53237c6910.webp",
+      "pieces": [
+        "stu",
+        "dia",
+        "re"
+      ],
+      "reviewed": true,
+      "displayMode": "syllables",
+      "format": "objects",
+      "conflicts": [
+        "teaching",
+        "study-read"
+      ]
+    },
+    "vit-1100": {
+      "uid": "vit-1100",
+      "it": "sera",
+      "cz": "večer",
+      "image": "assets/vocabulary-it-v2/images/54d1c95592bb62cf3b16b002d6cbdefbc2bbbb598cf38284fb23cb0f72f9f9db.webp",
+      "thumbnail": "assets/vocabulary-it-v2/thumbs/cb6001fbf70b2f4486c8c4fdc02cfa5286e2d5007677a237378db2f6783e6c8e.webp",
+      "pieces": [
+        "se",
+        "ra"
+      ],
+      "reviewed": true,
+      "displayMode": "syllables",
+      "format": "objects",
+      "conflicts": [
+        "evening"
+      ]
+    },
+    "vit-1101": {
+      "uid": "vit-1101",
+      "it": "bere",
+      "cz": "pít",
+      "image": "assets/vocabulary-it-v2/images/2ed911b124c7ce14d78bd549b6e9cba8dfff30961dbf4d14ef9b0442fe410a30.webp",
+      "thumbnail": "assets/vocabulary-it-v2/thumbs/5d6b47d12a99f9a163b9d6413e1c99143c7e8e25d3b7ae6880ecc7632a911481.webp",
+      "pieces": [
+        "be",
+        "re"
+      ],
+      "reviewed": true,
+      "displayMode": "syllables",
+      "format": "objects",
+      "conflicts": [
+        "coffee-drink"
+      ]
+    },
+    "vit-1102": {
+      "uid": "vit-1102",
+      "it": "scuola",
+      "cz": "škola",
+      "image": "assets/vocabulary-it-v2/images/f99b6c763a11925698b4c3c1b8f94558f03ee3fb4df6c97e30f6d4de0b6bf3d6.webp",
+      "thumbnail": "assets/vocabulary-it-v2/thumbs/d02b4721191bca9a2aea1fba96b3ba1cc9e91bb869c1b2d5026f2cd1f159923f.webp",
+      "pieces": [
+        "scuo",
+        "la"
+      ],
+      "reviewed": true,
+      "displayMode": "syllables",
+      "format": "objects",
+      "conflicts": [
+        "teaching"
+      ]
+    },
+    "vit-1103": {
+      "uid": "vit-1103",
+      "it": "nuovo",
+      "cz": "nový",
+      "image": "assets/vocabulary-it-v2/images/5d691bce392dda6d326168767d5875dea458efeb727e4a87d938eb1396fccc52.webp",
+      "thumbnail": "assets/vocabulary-it-v2/thumbs/315bad87a69e6fb87298418793503c6bd656cfbbb494de020cef1da867f2bb03.webp",
+      "pieces": [
+        "nuo",
+        "vo"
+      ],
+      "reviewed": true,
+      "displayMode": "syllables",
+      "format": "objects",
+      "conflicts": [
+        "new-bag"
+      ]
+    },
+    "vit-1104": {
+      "uid": "vit-1104",
+      "it": "autobus",
+      "cz": "autobus",
+      "image": "assets/vocabulary-it-v2/images/dd98af6dd02a3fafbaaa0b41600881ade542b767ac390a383d2c7c79f9c3fff9.webp",
+      "thumbnail": "assets/vocabulary-it-v2/thumbs/6c92e75fe0c63d6d4a798c8dca4b26ece6d4585f6f91c88996dce9fe379c56d2.webp",
+      "pieces": [
+        "au",
+        "to",
+        "bus"
+      ],
+      "reviewed": true,
+      "displayMode": "syllables",
+      "format": "objects",
+      "conflicts": []
+    },
+    "vit-1105": {
+      "uid": "vit-1105",
+      "it": "pane",
+      "cz": "chléb",
+      "image": "assets/vocabulary-it-v2/images/3f7fb4e80459be073d6919ab9293abba0a963ea9dfda5db174bdef6d50099041.webp",
+      "thumbnail": "assets/vocabulary-it-v2/thumbs/9ebd5e1580bbf146fd8d47612414e8a73dcb9c049ac5063d062e3736d5484187.webp",
+      "pieces": [
+        "pa",
+        "ne"
+      ],
+      "reviewed": true,
+      "displayMode": "syllables",
+      "format": "objects",
+      "conflicts": []
+    },
+    "vit-1106": {
+      "uid": "vit-1106",
+      "it": "tè",
+      "cz": "čaj",
+      "image": "assets/vocabulary-it-v2/images/5ea7cfc90c939e8fe1442d21c6d4a5eb8725fa583147495a0cd03cc86250e7ec.webp",
+      "thumbnail": "assets/vocabulary-it-v2/thumbs/ed34e0f5c2c637fccda575b74f7b02450c469fee8d244fbffc7a1be4a1ec10cc.webp",
+      "pieces": [
+        "tè"
+      ],
+      "reviewed": true,
+      "displayMode": "syllables",
+      "format": "objects",
+      "conflicts": [
+        "coffee-drink"
+      ]
+    },
+    "vit-1107": {
+      "uid": "vit-1107",
+      "it": "colazione",
+      "cz": "snídaně",
+      "image": "assets/vocabulary-it-v2/images/831cdcc351806068c865009ccea653ab4483e9857d436f0bcfc47dc98a261e68.webp",
+      "thumbnail": "assets/vocabulary-it-v2/thumbs/d27880aa67b5b50ed61a0d7fedbbe26e9085809542ace71eca6c85cd2459eba6.webp",
+      "pieces": [
+        "co",
+        "la",
+        "zio",
+        "ne"
+      ],
+      "reviewed": true,
+      "displayMode": "syllables",
+      "format": "objects",
+      "conflicts": [
+        "food-meal"
+      ]
+    },
+    "vit-1108": {
+      "uid": "vit-1108",
+      "it": "risposta",
+      "cz": "odpověď",
+      "image": "assets/vocabulary-it-v2/images/363e59e7537a885110a126c478fddf240ca7b1842fea0b2d4c63c3883eccf1d2.webp",
+      "thumbnail": "assets/vocabulary-it-v2/thumbs/f2ed40216f6d9016ece82d42bcae31f5b4706710031fdaaa829e3f93aa173c9e.webp",
+      "pieces": [
+        "ri",
+        "spo",
+        "sta"
+      ],
+      "reviewed": true,
+      "displayMode": "syllables",
+      "format": "objects",
+      "conflicts": [
+        "question-answer"
+      ]
+    },
+    "vit-1109": {
+      "uid": "vit-1109",
+      "it": "farmacia",
+      "cz": "lékárna",
+      "image": "assets/vocabulary-it-v2/images/56fc2a99d4c6f7f9af449ea06a8e1b4ec2d35de94f477c9fbe2786539fe1dd64.webp",
+      "thumbnail": "assets/vocabulary-it-v2/thumbs/7ac590e283f03a468ad5787181e5cfb0ea126179c4c8f5b6bd7a2e79f9feafc3.webp",
+      "pieces": [
+        "far",
+        "ma",
+        "ci",
+        "a"
+      ],
+      "reviewed": true,
+      "displayMode": "syllables",
+      "format": "objects",
+      "conflicts": [
+        "shop"
+      ]
+    },
+    "vit-1110": {
+      "uid": "vit-1110",
+      "it": "banca",
+      "cz": "banka",
+      "image": "assets/vocabulary-it-v2/images/32667dc4a181789c4fb6fdf37d88b5c485587d89c58a1efc0535ab0022683936.webp",
+      "thumbnail": "assets/vocabulary-it-v2/thumbs/15bae8cf6e4fbcc82bb28c688ab00b990ffcd4eb06fe45ab026d5d968354b9e6.webp",
+      "pieces": [
+        "ban",
+        "ca"
+      ],
+      "reviewed": true,
+      "displayMode": "syllables",
+      "format": "objects",
+      "conflicts": [
+        "shop"
+      ]
+    },
+    "vit-1111": {
+      "uid": "vit-1111",
+      "it": "domanda",
+      "cz": "otázka",
+      "image": "assets/vocabulary-it-v2/images/b01bb13cc12bf51d77dd87d31eeef1739ecc0725bce878d0925fff638ccf1c22.webp",
+      "thumbnail": "assets/vocabulary-it-v2/thumbs/fadf9762e9c13ebb34d84bed992cb06e614b77a8a4084970e29431c90a60d359.webp",
+      "pieces": [
+        "do",
+        "man",
+        "da"
+      ],
+      "reviewed": true,
+      "displayMode": "syllables",
+      "format": "objects",
+      "conflicts": [
+        "question-answer"
+      ]
+    },
+    "vit-1112": {
+      "uid": "vit-1112",
+      "it": "vento",
+      "cz": "vítr",
+      "image": "assets/vocabulary-it-v2/images/ef82b334767f552e4deb1a5e43abce271267ff6e2636e5f6fca1e62cc34d61af.webp",
+      "thumbnail": "assets/vocabulary-it-v2/thumbs/4e06e6b9547adfceb537cbdb4c54b9c0e720de9d20861e3194dada59bbb936f9.webp",
+      "pieces": [
+        "ven",
+        "to"
+      ],
+      "reviewed": true,
+      "displayMode": "syllables",
+      "format": "objects",
+      "conflicts": []
+    },
+    "vit-1113": {
+      "uid": "vit-1113",
+      "it": "latte",
+      "cz": "mléko",
+      "image": "assets/vocabulary-it-v2/images/0eb858b1f122db93ec8b28f8ab919aa7c571305583794e8e65085082d13a16d5.webp",
+      "thumbnail": "assets/vocabulary-it-v2/thumbs/a9ff7d1c7b2f25c5e87c5f2ddb2cb65a6e97066fe1e12cb6f5b6fc507e474d26.webp",
+      "pieces": [
+        "lat",
+        "te"
+      ],
+      "reviewed": true,
+      "displayMode": "syllables",
+      "format": "objects",
+      "conflicts": [
+        "coffee-drink"
+      ]
+    },
+    "vit-1114": {
+      "uid": "vit-1114",
+      "it": "pranzo",
+      "cz": "oběd",
+      "image": "assets/vocabulary-it-v2/images/32d6374d2f11059c5f170902d10dbf66ee17f34780bbef37259f5643d5a1dfb8.webp",
+      "thumbnail": "assets/vocabulary-it-v2/thumbs/d22984dec4fab60f4ff3164831394e29a67644dba9065f44517adf221669b1e5.webp",
+      "pieces": [
+        "pran",
+        "zo"
+      ],
+      "reviewed": true,
+      "displayMode": "syllables",
+      "format": "objects",
+      "conflicts": [
+        "food-meal"
+      ]
+    },
+    "vit-1115": {
+      "uid": "vit-1115",
+      "it": "quaderno",
+      "cz": "sešit",
+      "image": "assets/vocabulary-it-v2/images/14b4d28e26d7c46e2e9bf3e958bb782351755fe069892cd40deab888eb7d2663.webp",
+      "thumbnail": "assets/vocabulary-it-v2/thumbs/23dd62ba222cc12146f2ae2bfe749356f6da11334ffbde747cecea18166faf64.webp",
+      "pieces": [
+        "qua",
+        "der",
+        "no"
+      ],
+      "reviewed": true,
+      "displayMode": "syllables",
+      "format": "objects",
+      "conflicts": [
+        "book",
+        "study-read"
+      ]
+    },
+    "vit-1116": {
+      "uid": "vit-1116",
+      "it": "sedersi",
+      "cz": "sednout si, posadit se",
+      "image": "assets/vocabulary-it-v2/images/9204139f8ab9817ee62745fabe9f20538538981e54b2180b471f8634d86cf9e1.webp",
+      "thumbnail": "assets/vocabulary-it-v2/thumbs/59df59223dfef4e0cd26686688d4df8fdc70735a3ebb2c4a3045a37bdf6659b7.webp",
+      "pieces": [
+        "se",
+        "der",
+        "si"
+      ],
+      "reviewed": true,
+      "displayMode": "syllables",
+      "format": "objects",
+      "conflicts": [
+        "sit-down"
+      ]
     }
   }
 }

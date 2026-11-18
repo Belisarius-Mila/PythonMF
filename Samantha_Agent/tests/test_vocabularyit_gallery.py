@@ -21,23 +21,23 @@ class VocabularyItalianGalleryTests(unittest.TestCase):
     def setUpClass(cls):
         cls.data=json.loads((DOCS/'data/vocabulary-it-v2.json').read_text())
 
-    def test_all_1096_cards_have_accepted_complete_italian_data(self):
+    def test_all_1116_cards_have_accepted_complete_italian_data(self):
         data=self.data
         self.assertEqual((data['schemaVersion'],data['language'],data['appName']),(2,'it','VocabularyIT'))
-        self.assertEqual((data['itemCount'],data['sourceRowCount']),(1096,471))
-        self.assertEqual(len({item['uid'] for item in data['items']}),1096)
+        self.assertEqual((data['itemCount'],data['sourceRowCount']),(1116,471))
+        self.assertEqual(len({item['uid'] for item in data['items']}),1116)
         self.assertTrue(data['imageReviewComplete']);self.assertEqual(data['mode'],'release')
         self.assertEqual(data['stats']['pendingImageReview'],0)
         self.assertTrue(all(item['active'] and item['imageReviewed'] and item['sentenceIt'] and item['sentenceCz'] for item in data['items']))
-        self.assertEqual(data['stats']['teachingTypes'],{'word':1062,'interaction':30,'idiom':4})
+        self.assertEqual(data['stats']['teachingTypes'],{'word':1082,'interaction':30,'idiom':4})
         for item in data['items']:
             self.assertNotIn('en',item);self.assertNotIn('L',item);self.assertNotIn('HT',item)
 
-    def test_all_1314_visual_assets_decode_and_match_case_hash_and_dimensions(self):
+    def test_all_1354_visual_assets_decode_and_match_case_hash_and_dimensions(self):
         refs={}
         for item in self.data['items']:
             refs[item['image']]=900;refs[item['thumbnail']]=240
-        self.assertEqual(len(refs),1314)
+        self.assertEqual(len(refs),1354)
         for relative,limit in refs.items():
             path=DOCS/relative
             self.assertTrue(relative.startswith('assets/vocabulary-it-v2/'))
@@ -54,7 +54,7 @@ class VocabularyItalianGalleryTests(unittest.TestCase):
         for kind,name in [('words','vocabulary-it-audio.json'),('sentences','vocabulary-it-sentence-audio.json')]:
             manifest=json.loads((DOCS/'data'/name).read_text())
             self.assertEqual((manifest['language'],manifest['kind'],manifest['status']),('it',kind,'complete'))
-            self.assertEqual(len(manifest['items']),1096)
+            self.assertEqual(len(manifest['items']),1116)
         self.assertEqual(self.data['audioStatus'],'complete')
         self.assertIn('lang="it"',html)
         self.assertNotIn('vocabulary-en',html)
@@ -67,8 +67,8 @@ class VocabularyItalianGalleryTests(unittest.TestCase):
         self.assertEqual(spelling['sourceDataSha256'],hashlib.sha256((DOCS/'data/vocabulary-it-v2.json').read_bytes()).hexdigest())
         expected=practice.build(self.data,spelling)
         self.assertEqual(json.loads((DOCS/'data/vocabulary-it-quiz.json').read_text()),expected)
-        self.assertEqual(len(expected['entries']),1096)
-        self.assertEqual(sum(e['reviewed'] for e in expected['entries'].values()),1094)
+        self.assertEqual(len(expected['entries']),1116)
+        self.assertEqual(sum(e['reviewed'] for e in expected['entries'].values()),1114)
         self.assertEqual({e['it'] for e in expected['entries'].values() if not e['reviewed']},{'éclair','brioche'})
         self.assertEqual(expected['entries']['vit-0320']['pieces'],['la','var','si'])
         self.assertEqual(expected['entries']['vit-0285']['pieces'],['caf','fè'])
@@ -106,8 +106,8 @@ class ItalianSentencePictureTests(unittest.TestCase):
     def test_complete_exact_reviewed_export_and_all_image_references(self):
         actual=self.builder.build(self.source,self.data,asset_root=DOCS)
         self.assertEqual(actual,self.export)
-        self.assertEqual(len(actual['entries']),1096)
-        self.assertEqual(sum(len(r['concepts']) for r in actual['entries'].values()),1963)
+        self.assertEqual(len(actual['entries']),1116)
+        self.assertEqual(sum(len(r['concepts']) for r in actual['entries'].values()),2349)
         self.assertEqual(max(len(r['concepts']) for r in actual['entries'].values()),5)
         self.assertTrue(all(r['reviewed'] and 1<=len(r['concepts'])<=5 for r in actual['entries'].values()))
 

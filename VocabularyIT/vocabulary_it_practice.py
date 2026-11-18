@@ -85,6 +85,12 @@ for _group, _words in _LEDA_CHANGES['extend'].items():
     CONFLICTS[_group] += '|' + _words
 CONFLICTS.update(_LEDA_CHANGES['new'])
 
+_LOOP_CHANGES = json.loads((Path(__file__).with_name('batches') / 'loop_refresh_20261118.json').read_text())['practiceChanges']
+for _group, _words in _LOOP_CHANGES['extend'].items():
+    CONFLICTS[_group] += '|' + _words
+CONFLICTS.update(_LOOP_CHANGES['new'])
+
+
 
 
 def build(data, spelling):

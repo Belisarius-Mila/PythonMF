@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "project": "VocabularyIT-images",
   "foundationManifestSha256": "306d6ce98936cd4861d7fe204ef7250187a3b99bb47d09ba6c72a562ebed693c",
-  "reviewKind": "exact image pins; 497 prior cards preserved; reviewed LEDA additions",
+  "reviewKind": "exact image pins; 497 prior cards preserved; reviewed LEDA additions; 20 scoped IT illustrations reviewed by Adam",
   "files": {
     "Pict/Iam.PNG": {
       "sha256": "eeb04f048c5531b69f5619d3d1e41d9b6f27bcbac20037d92d50b25b55a4cec9",
@@ -4616,6 +4616,106 @@
       "width": 1024,
       "height": 1024,
       "format": "WEBP"
+    },
+    "VocabularyIT/Pict/loop-20261118-oggi.webp": {
+      "sha256": "a0ec52ab840e028fcd463cf999cd910a4960b7b14c0a72c09838d162e02541ea",
+      "bytes": 50448,
+      "kind": "image"
+    },
+    "VocabularyIT/Pict/loop-20261118-amico.webp": {
+      "sha256": "bf7f1fa2fa1643d397382776fdc72aacaf5d9f77d18183bea362eace95dac679",
+      "bytes": 67646,
+      "kind": "image"
+    },
+    "VocabularyIT/Pict/loop-20261118-studiare.webp": {
+      "sha256": "c87cab6811a9689d0d574285b7f27981927a39495ebe4a64ca43c2b7e959dbc3",
+      "bytes": 100620,
+      "kind": "image"
+    },
+    "VocabularyIT/Pict/loop-20261118-sera.webp": {
+      "sha256": "cd9201cf3fdb4a21fa8b00ab9ce80c794938cbc97c4e84c9c7f9fc40cbfb4997",
+      "bytes": 83574,
+      "kind": "image"
+    },
+    "VocabularyIT/Pict/loop-20261118-bere.webp": {
+      "sha256": "d6fde9f266da54de2fb1374baa8069634a8926ef5b7eeff15b135c736d6505a1",
+      "bytes": 84052,
+      "kind": "image"
+    },
+    "VocabularyIT/Pict/loop-20261118-scuola.webp": {
+      "sha256": "f1db2bab09ed54147e2630f8e3000753d12ad057598e5adee1ffb38536200962",
+      "bytes": 148518,
+      "kind": "image"
+    },
+    "VocabularyIT/Pict/loop-20261118-nuovo.webp": {
+      "sha256": "ef96dbabe71267bdd1f72e761dfd07f39ba87f1a962f295ed1a1fc447eac2c7d",
+      "bytes": 107650,
+      "kind": "image"
+    },
+    "VocabularyIT/Pict/loop-20261118-autobus.webp": {
+      "sha256": "b76b0d583e6667d23b9800d83ffc54f7dd516eef3a87699105aeb071c875772b",
+      "bytes": 57084,
+      "kind": "image"
+    },
+    "VocabularyIT/Pict/loop-20261118-pane.webp": {
+      "sha256": "391fad7684ac9f7205d5b4c997096df82582f3cc7c385c0121bee342bec539a6",
+      "bytes": 164748,
+      "kind": "image"
+    },
+    "VocabularyIT/Pict/loop-20261118-te.webp": {
+      "sha256": "db67731401118f5243a8c095455daf69c7ba44a5dc1e7ce122436f979717b619",
+      "bytes": 57704,
+      "kind": "image"
+    },
+    "VocabularyIT/Pict/loop-20261118-colazione.webp": {
+      "sha256": "cc274ee6c80e53a4d905374c259a94bf36634fbc1a537bcc69e8523803e2c70d",
+      "bytes": 58144,
+      "kind": "image"
+    },
+    "VocabularyIT/Pict/loop-20261118-risposta.webp": {
+      "sha256": "788c24d0b58ab21977e9ce18a2896da2f0c6d2cb019cebb855920ef720b1e9b1",
+      "bytes": 33648,
+      "kind": "image"
+    },
+    "VocabularyIT/Pict/loop-20261118-farmacia.webp": {
+      "sha256": "46ea98513805b753d9e937ba89114571a9d7a0605b3711a3034b70f50cac517f",
+      "bytes": 116328,
+      "kind": "image"
+    },
+    "VocabularyIT/Pict/loop-20261118-banca.webp": {
+      "sha256": "0680ad70a054e57a22b0eb917fccf43975edf443c47f06cd670dd373ef88dbf0",
+      "bytes": 113216,
+      "kind": "image"
+    },
+    "VocabularyIT/Pict/loop-20261118-domanda.webp": {
+      "sha256": "2ded9670ff64a909fcaec3e5319bb15824f76a0eec0a3e06c0531735f84aceef",
+      "bytes": 89070,
+      "kind": "image"
+    },
+    "VocabularyIT/Pict/loop-20261118-vento.webp": {
+      "sha256": "f32a87f6f209ea5d61f80d6713260ccafbe5807cb3199118ff020eb1ea371b99",
+      "bytes": 69412,
+      "kind": "image"
+    },
+    "VocabularyIT/Pict/loop-20261118-latte.webp": {
+      "sha256": "28c52793a2b663a1b2d85c36cebd3bb4e9af19938ec2c7fac4b46379ac4404b8",
+      "bytes": 29938,
+      "kind": "image"
+    },
+    "VocabularyIT/Pict/loop-20261118-pranzo.webp": {
+      "sha256": "52505fe26c21e19ac40e6b04f34eeb005d41d3c5342cdff844f6be024ddbc9ba",
+      "bytes": 93874,
+      "kind": "image"
+    },
+    "VocabularyIT/Pict/loop-20261118-quaderno.webp": {
+      "sha256": "4a585faba5933763f2a5973995f57fa21a657a090a1fbee2f8459971e69ffb71",
+      "bytes": 56540,
+      "kind": "image"
+    },
+    "VocabularyIT/Pict/loop-20261118-sedersi.webp": {
+      "sha256": "e15bc555f31f4dbab6f2840cd8ef26c1a9b1c170b470205af815b5d728ef42c0",
+      "bytes": 44362,
+      "kind": "image"
     }
   }
 }
