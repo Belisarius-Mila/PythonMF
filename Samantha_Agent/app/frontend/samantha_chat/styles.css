@@ -2,7 +2,7 @@
 *{box-sizing:border-box}body{margin:0}main{max-width:1000px;margin:auto;padding:20px}
 header{border-bottom:1px solid #d2dae5;margin-bottom:20px}h1{margin:10px 0 0}h2{font-size:1.15rem}a{color:#245ca4}
 section{background:white;border-radius:14px;padding:20px;margin-bottom:18px}label{display:block;margin:12px 0}
-input,textarea{font:inherit;border:1px solid #8797ad;border-radius:8px;padding:10px;width:100%;background:white;color:inherit}
+input,textarea,select{font:inherit;border:1px solid #8797ad;border-radius:8px;padding:10px;width:100%;background:white;color:inherit}
 textarea{resize:vertical;min-height:115px}textarea[readonly]{background:#f1f4f8}button{font:inherit;border:0;border-radius:8px;padding:11px 16px;background:#235c9f;color:white;cursor:pointer;min-height:44px}
 button:disabled{opacity:.5;cursor:default}.secondary{background:#e7edf5;color:#203047}.actions{display:flex;gap:10px;flex-wrap:wrap}
 details{margin:12px 0}summary{cursor:pointer}#pairCode{font-size:2rem;letter-spacing:.3em;font-weight:bold}#messages{min-height:160px;max-height:55vh;overflow:auto;padding:10px 0;scrollbar-gutter:stable}

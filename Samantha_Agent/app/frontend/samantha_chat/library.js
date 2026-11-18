@@ -11,7 +11,7 @@
       try{
         const data=await client.libraryDetail(id,offset,digest);if(ticket!==epoch)return;
         if(data.item.id!==id||data.offset!==offset||offset&&data.sha256!==digest)throw Error('Část textu neodpovídá původní položce. Otevři ji znovu.');
-        if(offset===0){el('libraryText').textContent=data.text;el('libraryTitle').textContent=data.item.title;el('libraryMeta').textContent=[data.item.content_kind,data.item.book_author,data.item.book_location].filter(Boolean).join(' · ');const url=safeSource(data.item.source_url);el('librarySource').hidden=!url;el('librarySource').href=url;}
+        if(offset===0){el('libraryText').textContent=data.text;el('libraryTitle').textContent=data.item.title;el('libraryMeta').textContent=[data.item.content_kind,data.item.book_author,data.item.book_location].filter(Boolean).join(' · ');const url=safeSource(data.item.source_url);el('librarySource').hidden=!url;el('librarySource').href=url;el('libraryVisit').hidden=data.item.category!=='travel_places';if(data.item.category==='travel_places')el('libraryVisitState').value=data.item.visit_state;}
         else el('libraryText').textContent+=data.text;
         loaded=data;el('libraryMore').textContent='Načíst další část uloženého textu';el('libraryMore').hidden=!data.more;
         el('libraryReadingStatus').textContent=!data.item.text_available?'U položky není dostupný uložený text.':`Zobrazeno ${data.next_offset} z ${data.total_chars} znaků uloženého textu.${data.more?' Další část načteš tlačítkem.':' Uložený text je zobrazený celý.'}`;
@@ -19,12 +19,13 @@
       finally{if(ticket===epoch){pending=false;el('libraryMore').disabled=false;}}
     }
     el('libraryMore').onclick=()=>{if(!pending&&lastRequest){const r=loaded?{id:loaded.item.id,offset:loaded.next_offset,digest:loaded.sha256}:lastRequest;void read(r.id,r.offset,r.digest);}};
+    el('libraryVisitSave').onclick=()=>{if(loaded)act(()=>client.libraryVisitState(loaded.item.id,el('libraryVisitState').value,loaded.item.visit_state));};
     function render(c){
       const view=c.state?.library||{},next=JSON.stringify([c.token,c.state?.room_id,view]);
       el('librarySearch').disabled=!c.online||c.busy||Boolean(c.state?.busy);
       if(next===fingerprint)return;
       fingerprint=next;epoch++;loaded=null;lastRequest=null;pending=false;el('libraryResults').replaceChildren();
-      el('libraryText').textContent='';el('libraryReadingStatus').textContent='';el('libraryReader').hidden=true;el('librarySource').hidden=true;el('libraryMore').hidden=true;
+      el('libraryText').textContent='';el('libraryReadingStatus').textContent='';el('libraryReader').hidden=true;el('librarySource').hidden=true;el('libraryMore').hidden=true;el('libraryVisit').hidden=true;
       el('libraryStatus').textContent=view.notice||(view.items?`${view.count} výsledků z ${view.catalog_count} položek; zobrazeno ${view.items.length}.`:'Zeptej se Samanthy na vlastní Knihovnu nebo napiš hledaný výraz.');
       if(!c.state)return;
       if(view.revision)el('libraryPanel').open=true;
@@ -32,7 +33,7 @@
         const card=doc.createElement('div');card.className='library-card';
         if(item.image){const img=doc.createElement('img');img.alt='';img.loading='lazy';img.src='/api/library/attachment?'+new URLSearchParams({id:item.id,attachment_id:item.image.attachment_id,variant:item.image.variant});card.appendChild(img);}
         const title=doc.createElement('h3');title.textContent=`[${index+1}] ${item.title}`;card.appendChild(title);
-        for(const text of [[item.category_label,item.book_author,item.book_location].filter(Boolean).join(' · '),item.preview]){const p=doc.createElement('p');p.textContent=text;card.appendChild(p);}
+        for(const text of [[item.category_label,item.book_author,item.book_location,item.visit_state_label].filter(Boolean).join(' · '),item.preview]){const p=doc.createElement('p');p.textContent=text;card.appendChild(p);}
         const button=doc.createElement('button');button.type='button';button.textContent='Otevřít';button.onclick=()=>act(()=>client.libraryOpen(item.id));card.appendChild(button);el('libraryResults').appendChild(card);
       });
       if(view.selected_id){el('libraryReader').hidden=false;void read(view.selected_id);}

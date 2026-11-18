@@ -75,6 +75,7 @@
     async pair(){return this.enqueue(async()=>{this.apply(await this.api({action:'pair'}));this.error='';});}
     async librarySearch(query){return this.enqueue(async()=>{this.apply(await this.api({action:'library_search',query,expected_library_revision:this.state.library?.revision||0}));this.error='';});}
     async libraryOpen(item_id){return this.enqueue(async()=>{this.apply(await this.api({action:'library_open',item_id,expected_library_revision:this.state.library?.revision||0}));this.error='';});}
+    async libraryVisitState(item_id,visit_state,expected_state){return this.enqueue(async()=>{this.apply(await this.api({action:'library_visit_state',item_id,visit_state,expected_state,expected_library_revision:this.state.library?.revision||0}));this.error='';});}
     libraryDetail(id,offset=0,digest=''){return this.api(null,'/api/samantha-chat/library/item?'+new URLSearchParams({id,offset:String(offset),sha256:digest}));}
     claim(takeover=true){
       if(this.claimPromise)return this.claimPromise;

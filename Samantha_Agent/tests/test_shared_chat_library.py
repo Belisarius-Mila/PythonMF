@@ -3,7 +3,7 @@ import json
 import tempfile
 import unittest
 
-from app.article_archive import archive_book_entry, archive_text_entry
+from app.article_archive import archive_book_entry, archive_text_entry, update_article
 from app.shared_chat import SharedChat, ChatError
 from app.shared_chat_library import LibraryReader, PAGE_CHARS
 from tests.test_shared_chat import fixture_hub, ChatModel
@@ -42,6 +42,21 @@ class LibraryTests(unittest.TestCase):
         self.assertEqual({r['id'] for r in all_types['items']}, {self.book['id'], self.place['id']})
         self.assertEqual(self.reader.search('recepty v knihovně')['count'], 1)
         self.assertEqual(self.reader.search('knihy o neexistujicimtematu')['count'], 0)
+
+    def test_place_state_defaults_to_unknown_and_refuses_stale_or_non_place_updates(self):
+        item_id = self.place['id']
+        self.assertEqual(self.reader.detail(item_id)['item']['visit_state'], 'unknown')
+        self.reader.set_visit_state(item_id, 'visited', 'unknown')
+        self.assertEqual(self.reader.detail(item_id)['item']['visit_state'], 'visited')
+        update_article(article_id=item_id, title='Salcburk', text='Nová poznámka',
+                       category='travel_places', archive_root=self.root)
+        self.assertEqual(self.reader.detail(item_id)['item']['visit_state'], 'visited')
+        self.assertEqual(self.reader.prepare('Doporuč mi místo v Rakousku', {})['count'], 0)
+        with self.assertRaises(ValueError):
+            self.reader.set_visit_state(item_id, 'tip', 'unknown')
+        with self.assertRaises(ValueError):
+            self.reader.set_visit_state(self.recipe['id'], 'visited', 'unknown')
+        self.assertEqual(self.reader.detail(item_id)['item']['visit_state'], 'visited')
 
     def test_new_items_and_text_edits_invalidate_cache_without_writing_archive(self):
         first = self.reader.search('recepty'); self.assertEqual(first['count'], 1)
@@ -119,6 +134,23 @@ class SharedLibraryTests(unittest.TestCase):
         with self.assertRaises(ChatError): self.action('library_open', self.token, item_id=self.recipe['id'], expected_library_revision=0)
         reload = SharedChat(self.root/'chat', library_reader=self.service.library_reader)
         self.assertEqual(reload.status(self.token, 'library-editor-001')['library']['selected_id'], self.recipe['id'])
+
+    def test_place_state_requires_selected_room_item_and_preserves_newer_state(self):
+        found = self.action('library_search', self.token, query='Salcburk', expected_library_revision=0)
+        revision = found['library']['revision']
+        with self.assertRaises(ChatError):
+            self.action('library_visit_state', self.token, item_id=self.place['id'], visit_state='visited',
+                        expected_state='unknown', expected_library_revision=revision)
+        opened = self.action('library_open', self.token, item_id=self.place['id'], expected_library_revision=revision)
+        revision = opened['library']['revision']
+        saved = self.action('library_visit_state', self.token, item_id=self.place['id'], visit_state='visited',
+                            expected_state='unknown', expected_library_revision=revision)
+        self.assertEqual(saved['library']['items'][0]['visit_state'], 'visited')
+        with self.assertRaises(ChatError):
+            self.action('library_visit_state', self.token, item_id=self.place['id'], visit_state='tip',
+                        expected_state='unknown', expected_library_revision=revision)
+        self.assertEqual(self.service.library_reader.detail(self.place['id'])['item']['visit_state'], 'visited')
+        self.assertEqual(self.tasks, [])
 
     def test_authenticated_room_result_scope_and_no_raw_paths_or_model_context_in_status(self):
         self.action('library_search', self.token, query='recepty', expected_library_revision=0)

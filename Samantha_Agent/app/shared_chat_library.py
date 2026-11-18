@@ -102,6 +102,8 @@ class LibraryReader:
                           text_available=path is not None, text_chars=len(text),
                           content_kind='Uložená anotace / poznámky ke knize' if item.category == 'books' else 'Uložený text',
                           preview=text[:300], image=None)
+            if item.category == 'travel_places':
+                record.update(visit_state=item.visit_state, visit_state_label=summary['visit_state_label'])
             image = next((a for a in item.attachments if a.mime_type.startswith('image/') and (a.thumb_file or a.readable_file or a.original_file)), None)
             if image:
                 record['image'] = {'attachment_id': image.id, 'variant': 'thumb' if image.thumb_file else 'readable' if image.readable_file else 'original'}
@@ -111,7 +113,7 @@ class LibraryReader:
         self.signature, self.records = signature, records
         return records
 
-    def search(self, query):
+    def search(self, query, *, exclude_visited=False):
         if not isinstance(query, str) or not query.strip() or len(query) > 2000:
             raise ValueError('Napiš hledanou knihu, článek, recept nebo místo (nejvýše 2000 znaků).')
         wanted, needles = categories(query), terms(query)
@@ -121,6 +123,8 @@ class LibraryReader:
             records = self._records()
             ranked = []
             for record, text, metadata, body in records:
+                if exclude_visited and record.get('visit_state') == 'visited':
+                    continue
                 if wanted and record['category'] not in wanted:
                     continue
                 score = sum(5 * metadata.count(n) + min(20, body.count(n)) for n in needles)
@@ -145,6 +149,11 @@ class LibraryReader:
             end = min(len(text), offset + PAGE_CHARS)
             return {'ok': True, 'item': dict(item), 'text': text[offset:end], 'offset': offset,
                     'next_offset': end, 'more': end < len(text), 'total_chars': len(text), 'sha256': sha}
+
+    def set_visit_state(self, item_id, visit_state, expected_state):
+        from app.article_archive import set_place_visit_state
+        return set_place_visit_state(article_id=item_id, visit_state=visit_state,
+                                     expected_state=expected_state, archive_root=self.root)
 
     def prepare(self, text, previous):
         value = fold(text)
@@ -171,7 +180,8 @@ class LibraryReader:
             if opening and len(candidates) == 1:
                 selected = candidates[0]['id']
         else:
-            result = self.search(text)
+            recommend_places = bool(re.search(r'\b(?:doporuc\w*|tip\w*)\b', value) and 'travel_places' in wanted)
+            result = self.search(text, exclude_visited=recommend_places)
             if opening and len(result['items']) == 1:
                 selected = result['items'][0]['id']
         result.update(selected_id=selected, notice='')

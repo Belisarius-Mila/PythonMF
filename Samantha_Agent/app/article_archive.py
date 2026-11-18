@@ -82,6 +82,7 @@ LIBRARY_EXPORT_EMAIL_MARKER_VALUE = "true"
 LIBRARY_EXPORT_SUBJECT_PREFIX = "[SamanthaLibraryExport]"
 LIBRARY_EXPORT_SEND_CONFIRMATION_PREFIX = "Potvrzuji odeslání exportu knihovny"
 READ_STATES = {"normal", "to_read", "done"}
+VISIT_STATES = {"unknown": "Neurčeno", "visited": "Navštíveno", "want_to_visit": "Chceme navštívit", "tip": "Tip"}
 READ_STATE_LABELS = {
     "normal": "běžné",
     "to_read": "k přečtení",
@@ -154,6 +155,7 @@ class ArticleArchiveItem:
     read_state_label: str = "běžné"
     read_note: str = ""
     read_state_updated_at: str = ""
+    visit_state: str = "unknown"
     attachments: tuple[ArticleAttachment, ...] = ()
 
     def to_summary(self, snippet: str = "", include_attachments: bool = False) -> dict[str, Any]:
@@ -197,6 +199,8 @@ class ArticleArchiveItem:
             "read_state_label": self.read_state_label,
             "read_note": self.read_note,
             "read_state_updated_at": self.read_state_updated_at,
+            **({"visit_state": self.visit_state, "visit_state_label": VISIT_STATES.get(self.visit_state, "Neověřený stav")}
+               if self.category == "travel_places" else {}),
             "attachment_count": len(self.attachments),
             "attachment_types": attachment_types,
             "attachment_roles": attachment_roles,
@@ -1886,6 +1890,8 @@ def update_registry(path: Path, metadata: dict[str, Any]) -> None:
             except json.JSONDecodeError:
                 continue
             if str(item.get("id", "")) == metadata["id"]:
+                if metadata.get("category") == "travel_places" and "visit_state" in item:
+                    metadata["visit_state"] = item["visit_state"]
                 rows.append(metadata)
                 replaced = True
             elif isinstance(item, dict):
@@ -1996,6 +2002,7 @@ def article_item_from_raw(raw: dict[str, Any]) -> ArticleArchiveItem:
         read_state_label=READ_STATE_LABELS[read_state],
         read_note=str(raw.get("read_note", "")).strip(),
         read_state_updated_at=str(raw.get("read_state_updated_at", "")).strip(),
+        visit_state=str(raw.get("visit_state", "unknown")),
         attachments=attachments,
     )
 
@@ -2271,6 +2278,29 @@ def set_article_read_state(
         "message": article_read_state_message(updated_item),
         "item": updated_item.to_summary(include_attachments=True),
     }
+
+
+@_serialized_archive_write
+def set_place_visit_state(*, article_id: str, visit_state: str, expected_state: str,
+                          archive_root: Path = DEFAULT_ARCHIVE_ROOT) -> dict[str, Any]:
+    if visit_state not in VISIT_STATES or expected_state not in VISIT_STATES:
+        raise ValueError("Stav návštěvy není platný.")
+    item = find_article(article_id, archive_root=archive_root)
+    if item is None or item.category != "travel_places":
+        raise ValueError("Místo nebylo nalezeno.")
+    if item.visit_state == visit_state:
+        return {"ok": True, "item": item.to_summary()}
+    if item.visit_state != expected_state:
+        raise ValueError("Stav místa se mezitím změnil. Obnov ho a zkus to znovu.")
+    path = archive_root / "registry.jsonl"
+    rows = [json.loads(line) for line in path.read_text(encoding="utf-8").splitlines() if line.strip()]
+    matches = [row for row in rows if isinstance(row, dict) and row.get("id") == item.id]
+    if len(matches) != 1 or matches[0].get("visit_state", "unknown") != expected_state:
+        raise ValueError("Záznam místa nelze ověřit.")
+    raw = matches[0]
+    raw["visit_state"] = visit_state
+    atomic_write_text(path, "".join(json.dumps(row, ensure_ascii=False) + "\n" for row in rows), encoding="utf-8")
+    return {"ok": True, "item": article_item_from_raw(raw).to_summary()}
 
 
 def article_metadata_path(item: ArticleArchiveItem, archive_root: Path = DEFAULT_ARCHIVE_ROOT) -> Path:

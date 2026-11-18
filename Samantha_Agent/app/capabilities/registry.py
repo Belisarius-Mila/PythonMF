@@ -59,6 +59,14 @@ CAPABILITIES: tuple[CapabilityRecord, ...] = (
         notes="Room-scoped IDs, contained paths, text fingerprint between pages; no browser-provided roots or source URL fetches.",
     ),
     CapabilityRecord(
+        capability_id="shared_chat_library_visit_state", label="Set the visit state of an opened place",
+        risk=RiskLevel.LOCAL_WRITE, reads=("authenticated room selection", "current place visit state"),
+        writes=("one visit state in the private library registry",),
+        tool="app.shared_chat_library.LibraryReader.set_visit_state", requires_confirmation=True,
+        confirmation_policy=ConfirmationPolicy.SUMMARY_BEFORE_ACTION, audit=AuditPolicy.REDACTED,
+        notes="An explicit save button submits the selected place, requested and expected states; the registry update is atomic and stale states are rejected. No model call or inference of visits.",
+    ),
+    CapabilityRecord(
         capability_id="shared_chat_status", label="Read an explicitly paired operating conversation",
         risk=RiskLevel.READ_ONLY, reads=("authenticated conversation and shared draft",), writes=(),
         tool="app.cockpit_shared_chat.shared_chat_status", audit=AuditPolicy.REDACTED,
@@ -67,10 +75,10 @@ CAPABILITIES: tuple[CapabilityRecord, ...] = (
     CapabilityRecord(
         capability_id="shared_chat_action", label="Pair devices, share a draft and explicitly submit a chat message",
         risk=RiskLevel.EXTERNAL_GENERATION, reads=("explicit paired-browser action and current draft revision",),
-        writes=("private operating conversation, device pairing and original message receipt",),
+        writes=("private operating conversation, device pairing, original message receipt and explicit place visit state",),
         tool="app.cockpit_shared_chat.shared_chat_action", audit=AuditPolicy.REDACTED,
         metadata={"durable_consent": "trusted_external_generation_v1"},
-        notes="Only explicit send starts a model turn, using the existing human-chat model with live web search for public internet questions. Instructions prohibit private library/history data in search queries. Sources are credential-free HTTP(S) links rendered as text nodes. Library search/open shares a read-only result view; relevant stored sources enrich the same original turn. Drafts, pairing, GET and library buttons never call a model. No library saves/calendar/browser control, profile mutation or automatic resend.",
+        notes="Only explicit send starts a model turn, using the existing human-chat model with live web search for public internet questions. Instructions prohibit private library/history data in search queries. Sources are credential-free HTTP(S) links rendered as text nodes. Library search/open shares a read-only result view; relevant stored sources enrich the same original turn. An explicit button saves a selected place's visit state. Drafts, pairing, GET and library buttons never call a model. No new library entries, calendar or browser control, profile mutation or automatic resend.",
     ),
     CapabilityRecord(
         capability_id="science_news_translation_budget_preview", label="Preview one study's exact translation budget",

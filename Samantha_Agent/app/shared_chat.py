@@ -149,6 +149,7 @@ class SharedChat:
             'send': {'expected_revision', 'client_message_id'},
             'library_search': {'query', 'expected_library_revision'},
             'library_open': {'item_id', 'expected_library_revision'},
+            'library_visit_state': {'item_id', 'visit_state', 'expected_state', 'expected_library_revision'},
         }
         if action not in fields or set(payload) - ({'action', 'client_token', 'editor_id'} | fields[action]):
             raise ChatError('Neznámá akce rozhovoru.')
@@ -191,7 +192,7 @@ class SharedChat:
 
         token = payload.get('client_token')
         token_hash(token)
-        if action in ('library_search', 'library_open'):
+        if action in ('library_search', 'library_open', 'library_visit_state'):
             client, room = self._client(self._read(), token)
             current = room.get('library') or {}
             revision = payload.get('expected_library_revision')
@@ -203,10 +204,18 @@ class SharedChat:
                 if last and last['status'] in ('pending', 'delivery_unknown'):
                     raise ChatError('Nejdřív ověř dokončení původní otázky.')
                 value = {**self._library_reader().search(payload.get('query')), 'selected_id': '', 'notice': ''}
-            else:
+            elif action == 'library_open':
                 item_id = payload.get('item_id')
                 self.library_detail(token, editor, item_id)
                 value = {**current, 'selected_id': item_id, 'notice': ''}
+            else:
+                item_id = payload.get('item_id')
+                if item_id != current.get('selected_id'):
+                    raise ChatError('Nejdřív otevři konkrétní místo.')
+                self.library_detail(token, editor, item_id)
+                self._library_reader().set_visit_state(item_id, payload.get('visit_state'), payload.get('expected_state'))
+                result = self._library_reader().search(current['query'])
+                value = {**current, **result, 'selected_id': item_id, 'notice': 'Stav místa byl uložen.'}
             def library_update(document):
                 _, stored = self._client(document, token)
                 if (stored.get('library') or {}).get('revision', 0) != revision:

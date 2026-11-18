@@ -1,5 +1,27 @@
 # Společný provozní rozhovor Samanthy
 <!-- SAMANTHA_CURRENT_STATUS_START -->
+## 2026-11-18 11:35 CET — Stav návštěvy míst ve společném rozhovoru
+
+Hotovo — Otevřené místo ve společném rozhovoru umožňuje uložit stav Neurčeno,
+Navštíveno, Chceme navštívit nebo Tip. Starší záznamy se čtou jako Neurčeno.
+Doporučení míst s explicitním dotazem vynechá označené navštívené položky.
+Všichni spárovaní účastníci vidí společný stav.
+
+Rozhodnutí — Změna stavu vyžaduje výslovné tlačítko a kontrolu původní hodnoty.
+Při nesouladu se stav nepřepíše. Nové položky se z tohoto kroku zatím neukládají.
+
+Další krok — Dokončit návrh a potvrzené ukládání článku, receptu či místa
+z rozhovoru včetně kontroly duplicit a uchování zdrojového URL a obsahu.
+
+Navrhované další kroky — Přejmout funkci na iPhonu a Mintu po samostatném p+n,
+poté navázat ovládáním webové záložky.
+
+Technický důkaz — 66 cílených kontrol a programová brána737 PASS. Testy
+zahrnují staré záznamy, nepřípustnou kategorii, změnu druhým zařízením a
+vynechání navštíveného místa. Vizuální fyzická přejímka nebyla provedena.
+Stav návštěvy má jedinou autoritu v atomicky zapisovaném registru. Běžná
+editace místa jej zachovává.
+
 ## 2026-11-18 09:52 CET — Internetové hledání ve společném rozhovoru
 
 Hotovo — Samantha má místně připojené živé webové hledání ve stejném
