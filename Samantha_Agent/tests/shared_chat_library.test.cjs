@@ -37,3 +37,15 @@ test('only credential-free HTTP sources can become clickable links',()=>{
  for(const value of ['javascript:alert(1)','data:text/html,hi','file:///private','https://user:secret@example.test','https://example.test/\nprivate'])assert.equal(safeSource(value),'');
  assert.equal(safeSource('https://example.test/source'),'https://example.test/source');
 });
+test('web answer links show exact addresses while untrusted markup stays text',()=>{
+ const {appendAnswer}=require('../app/frontend/samantha_chat/app.js');
+ const doc={createElement:tag=>Object.assign(new Element(),{tag}),createTextNode:text=>({text})};
+ const node=new Element();
+ appendAnswer(doc,node,'Text <img onerror=x> [Zdroj](https://example.test/a_(b)?q=1#part) a [útok](https://user:secret@example.test).',safeSource);
+ const links=node.children.filter(c=>c.tag==='a');assert.equal(links.length,1);
+ assert.equal(links[0].href,'https://example.test/a_(b)?q=1#part');
+ assert.equal(links[0].rel,'noopener noreferrer');assert.equal(links[0].textContent,'Zdroj');
+ assert.equal(node.children[0].text,'Text <img onerror=x> ');
+ assert.match(node.children.at(-1).text,/user:secret/);
+ assert.equal(node.children[2].textContent,' (https://example.test/a_(b)?q=1#part)');
+});

@@ -20,6 +20,7 @@ class RuntimeTests(unittest.TestCase):
             self.assertEqual(hub.model,'already-selected-model')
             self.assertEqual(hub.state_path,root/'session.json')
             self.assertEqual(hub.sandbox_policy,{'type':'readOnly','networkAccess':False})
+            self.assertEqual(hub.config_overrides['web_search'],'live')
             self.assertEqual(hub.config_overrides['mcp_servers'],{'private-provider':{'enabled':False}})
             self.assertFalse(any(hub.config_overrides['features'].values()))
             self.assertFalse((root/'session.json').exists())

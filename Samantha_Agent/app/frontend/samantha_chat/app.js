@@ -4,6 +4,22 @@
   const DRAFT_INTERVAL=150,ACTIVE_POLL=400,BACKGROUND_POLL=5000;
   function uuid(crypto){const bytes=new Uint8Array(16);crypto.getRandomValues(bytes);return Array.from(bytes,v=>v.toString(16).padStart(2,'0')).join('');}
   function cached(storage,key){try{const value=JSON.parse(storage.getItem(key)||'null');return value&&typeof value==='object'&&!Array.isArray(value)?value:null;}catch(_){return null;}}
+  function appendAnswer(doc,node,text,safeSource=root.SamanthaLibrary.safeSource){
+    const pattern=/\[([^\]\n]+)\]\((https?:\/\/(?:[^\s<>()[\]]|\([^\s()]*\))+)\)/g;
+    let offset=0;
+    for(const match of text.matchAll(pattern)){
+      const url=safeSource(match[2]);
+      if(!url)continue;
+      node.appendChild(doc.createTextNode(text.slice(offset,match.index)));
+      const link=doc.createElement('a');
+      link.href=url;link.target='_blank';link.rel='noopener noreferrer';
+      link.textContent=match[1];link.title=url;node.appendChild(link);
+      const address=doc.createElement('span');address.className='source-address';
+      address.textContent=' ('+url+')';node.appendChild(address);
+      offset=match.index+match[0].length;
+    }
+    node.appendChild(doc.createTextNode(text.slice(offset)));
+  }
   class Client {
     constructor({fetch,storage,tabStorage,crypto,render=()=>{},setTimer=(fn,delay)=>root.setTimeout(fn,delay),clearTimer=id=>root.clearTimeout(id)}){
       Object.assign(this,{fetch,storage,tabStorage,crypto,render,setTimer,clearTimer});
@@ -143,7 +159,10 @@
         for(const message of c.state.messages){
           for(const [kind,title,text] of [['user','Ty',message.user_text],['assistant','Samantha',message.answer]]){
             if(!text)continue;const node=doc.createElement('div');node.className='message '+kind;
-            const who=doc.createElement('strong');who.textContent=title;node.appendChild(who);node.appendChild(doc.createTextNode(text));log.appendChild(node);
+            const who=doc.createElement('strong');who.textContent=title;node.appendChild(who);
+            if(kind==='assistant')appendAnswer(doc,node,text);
+            else node.appendChild(doc.createTextNode(text));
+            log.appendChild(node);
           }
         }
         fingerprint=next;if(bottom)log.scrollTop=log.scrollHeight;
@@ -195,6 +214,6 @@
     browser.addEventListener('pageshow',()=>{stopped=false;kick();});
     kick();return ()=>{stopped=true;browser.clearTimeout(timer);};
   }
-  if(typeof module!=='undefined'&&module.exports)module.exports={Client,startPolling,attach};
+  if(typeof module!=='undefined'&&module.exports)module.exports={Client,startPolling,attach,appendAnswer};
   if(root.document)attach(root.document);
 })(typeof window==='undefined'?globalThis:window);

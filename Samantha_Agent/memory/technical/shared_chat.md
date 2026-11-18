@@ -1,5 +1,32 @@
 # Společný provozní rozhovor Samanthy
+<!-- SAMANTHA_CURRENT_STATUS_START -->
+## 2026-11-18 09:52 CET — Internetové hledání ve společném rozhovoru
 
+Hotovo — Samantha má místně připojené živé webové hledání ve stejném
+modelovém tahu. Nalezené zdroje zobrazuje jako klikatelné názvy s celou
+adresou. Telefon a monitor dostávají stejnou odpověď i odkazy.
+
+Rozhodnutí — Míla schválil čtecí hledání jako první krok ovládání internetu.
+Použije se stávající model a App Server. Instrukce zakazují vkládat soukromé
+knihovní podklady a historii do webových dotazů. Toto omezení je instrukční.
+Knihovní hledání nadále používá stávající místní čtečku.
+
+Další krok — Samostatně schválené p+n do Cockpitu a fyzická přejímka
+jednoho internetového dotazu na iPhonu a Mintu.
+
+Navrhované další kroky — Vyhrazená záložka Firefoxu na Mintu podle kroku7
+uloženého plánu, následně potvrzené ukládání vybrané stránky.
+
+Technický důkaz — 33 cílených kontrol a programová doménová brána458 PASS.
+Jediný oddělený živý test vrátil oficiální web Českého rozhlasu Vltava.
+App Server doložil item/started i item/completed typu webSearch a potvrzené
+dokončení původního tahu. Odkazy používají textové uzly a existující HTTP(S)
+validátor bez přihlašovacích údajů. Nová regrese pokrývá HTML injekci,
+adresu s query/fragmentem a závorkami i odmítnutí URL s heslem.
+Zdrojové p+n čtecí Knihovny z de12f383 je už dokončené podle předchozího
+předání a Mílova potvrzení. Nové webové hledání je místní, fyzická přejímka
+čeká. Živý test je v dočasné soukromé složce samantha-web-smoke-t87in85r.
+<!-- SAMANTHA_CURRENT_STATUS_END -->
 ## 2026-11-17 21:11 CET — Samantha, čtecí Knihovna jako první část druhého balíčku
 
 Hotovo: Míla nyní potvrzuje, že propojení iPhone–Mint celkem funguje, a zadal

@@ -70,7 +70,7 @@ CAPABILITIES: tuple[CapabilityRecord, ...] = (
         writes=("private operating conversation, device pairing and original message receipt",),
         tool="app.cockpit_shared_chat.shared_chat_action", audit=AuditPolicy.REDACTED,
         metadata={"durable_consent": "trusted_external_generation_v1"},
-        notes="Only explicit send starts a model turn, using the existing human-chat model. Library search/open shares a read-only result view; relevant stored sources enrich the same original turn. Drafts, pairing, GET and library buttons never call a model. No library saves/calendar/browser control, profile mutation or automatic resend.",
+        notes="Only explicit send starts a model turn, using the existing human-chat model with live web search for public internet questions. Instructions prohibit private library/history data in search queries. Sources are credential-free HTTP(S) links rendered as text nodes. Library search/open shares a read-only result view; relevant stored sources enrich the same original turn. Drafts, pairing, GET and library buttons never call a model. No library saves/calendar/browser control, profile mutation or automatic resend.",
     ),
     CapabilityRecord(
         capability_id="science_news_translation_budget_preview", label="Preview one study's exact translation budget",
