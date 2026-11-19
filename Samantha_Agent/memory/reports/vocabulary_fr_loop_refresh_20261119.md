@@ -22,3 +22,10 @@ Doménová brána107 testů PASS. Konečný důkaz lokálního commitu a shody s
 Navázání
 
 Privátní kořen data/private/vocabulary_fr_loop_refresh_20261119 obsahuje plán, input-v004, bundle-ready-v004, audit-ready.json, client-smoke.json, http-smoke.json a hlasový plán/souhlas/účtenku. Konkrétní umístění pracovního stromu a hashe jsou pouze v privátní účtence. Pro případné vydání použít samostatně schválené registrované p+n, project-vocabulary-fr → GitHub Pages.
+
+## 19.11.2026 — Vydání přes Terru dokončené
+
+Míla výslovně zadal p+n. Registrované submit_release(wait=True) předalo jediný přesný commit aedb8b69 Terře gpt-6.1-terra/high. Job74d9ba485996e7b5c9c0db4befaeb87a completed, push i deployment confirmed. Program převzal platnou validation-v3 účtenku67 PASS. Vrácený příznak returned_to_adam=false označuje terminálový caller, výsledek byl přímo převzatý v této relaci.
+Pages deployment7910994188/workflow44509422262 jsou pro tentýž commit. HTTP smoke200 pro vocabulary-fr/. Následná nezávislá kontrola164 veřejných souborů potvrdila přesné bajty, včetně nových MP3/obrázků. Veřejný katalog má481 karet, otázku #070 a původní větu #259. Origin/main odpovídá aedb8b69.
+Zveřejněná jsou klientská data a média. Uzavřená v004, zdrojový CSV, katalog, plány a hlasové účtenky zůstávají v soukromé výrobní složce. Samostatný schvalovací záznam propagace je v private/vocabulary_fr_loop_refresh_release_20261119/approval.json.
+Výsledek a veřejné SHA jsou v result.json a public-verification.json téže složky. Fyzická přejímka na Janině zařízení zůstává otevřená. Závěrečný dokumentační checkpoint se uchová pro příští GitHub balíček.

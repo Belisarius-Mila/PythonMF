@@ -1,6 +1,6 @@
 # Vocabulary FR — současný klient a historický prototyp
 
-## 2026-11-19 — Schválená místní optimalizace Janiných vět
+## 2026-11-19 — Zveřejněná optimalizace Janiných vět
 
 Hotovo:23 obsahových přepisů, oprava apostrofu v #092,4 doplnění obrazových vazeb a17 nových karet vfr-0465–0481. Otázka #070 zní „Tu es prête pour le cours de maths ?“, české znění je také otázka. #259 beurre zachovává původní FR/CZ text i obě větné MP3, využije však nový obrázek pain.
 
@@ -8,7 +8,7 @@ Rozhodnutí: Míla schválil návrh z TXT s těmito dvěma upřesněními. Míst
 
 Důkaz:481 aktivních karet,1924 platných zvukových odkazů,1141 obrazových vazeb,362 různých ilustrací.115 nových MP3, celá knihovna1898 MP3 dekódovaná. Skutečný klient přijal všechny481 položky i481 čtyřmožnostních otázek;164 HTTP odpovědí bajtově přesných. Vizuální Safari přejímka otevřená kvůli nedostupnému ovládání prohlížeče.
 
-Stav a další krok: Implementace je ověřená místně, doménová brána107 PASS. Konečný důkaz a ID lokálního commitu určuje private/vocabulary_fr_loop_refresh_20261119/completion.json, podrobnosti reports/vocabulary_fr_loop_refresh_20261119.md. Další krok je fyzická přejímka a samostatně zadané p+n Francouzština Jana.
+Stav a další krok: Zveřejněno na Francouzštině Jana přes Terru. Commit aedb8b69, job74d9ba485996e7b5c9c0db4befaeb87a completed, push/deploy confirmed. Pages deployment7910994188 a workflow44509422262 odpovídají přesnému commitu. Všech164 veřejných souborů včetně nových médií má HTTP200 a přesné bajty zdroje, katalog481 karet. Otázka #070 i původní věta #259 ověřené na veřejných datech. Podrobné důkazy jsou v private/vocabulary_fr_loop_refresh_release_20261119. Další krok je fyzická přejímka na Janině zařízení. Závěrečný dokumentační checkpoint patří do příštího GitHub balíčku.
 
 
 ## 2026-11-17 20:21 CET — Společné předání osobního režimu a Datových commitů k p+n
