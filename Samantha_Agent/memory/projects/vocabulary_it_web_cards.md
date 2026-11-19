@@ -1,3 +1,24 @@
+## 2026-11-19 07:58 CET — Schválené společné p+n všech čekajících commitů přes Terru
+
+Hotovo: Připravený čistý společný balíček Datovy EN fda0ec85 a Willovy IT
+bb70b88c. EN531 aktivních karet/1492 obrazových vazeb; IT1116/2349. Nová
+média hotová, původní data i samostatný Data worktree zachované.
+Rozhodnutí: Míla výslovně zadal „všechny i Datovy commity p+n prosím přes
+Terra“. Registrovaný release_executor je centrálně gpt-6.1-terra/high.
+Společný push a Pages vydání s vlastními potvrzeními obou slovníků. Druhý
+proud převezme tentýž již publikovaný Pages head, nevytváří další média.
+Předchozí Cockpit vydání826edaf7 je dokončené; žádný starý job se neopakuje.
+Další krok: Registrované submit_release(wait=True) pro oba přesné proudy;
+autoritou finální brány, vydaného SHA a veřejného ověření je výhradně
+private/vocabulary_loop_release_20261119/completion.json a obě původní
+release_result účtenky. Připravené předání samo neznamená dokončené vydání.
+Navrhované další kroky: Mílův poslech a fyzická iPhone přejímka obou webů.
+Technický důkaz: Oba profilové workspaces čisté a zarovnané, veřejný GitHub
+rozsah přesně2 obsahové commity. Poslední IT společná brána228 PASS a59 JS
+PASS; čerstvou publikační bránu pro celý kandidát vybírá program. Tento
+zápis se přidává před zmrazením vydání. Během jobs se main nemění. Žádný
+restart Cockpitu, zásah do Camino, nové nastavení autosave ani výroba médií.
+
 ## 2026-11-18 15:29 CET — Schválené věty, 20 ilustrací a nové MP3
 
 Hotovo: Místně zapracovaný celý schválený návrh z Downloads:60 přepisů IT/CZ,
