@@ -3,20 +3,47 @@
     "vfr-0001": {
       "concepts": [
         {
-          "end": 28,
+          "end": 10,
           "occurrence": 1,
           "sourceCz": "talíř",
           "sourceFr": "assiette",
-          "start": 20,
+          "start": 2,
           "text": "assiette",
           "uid": "vfr-0001"
+        },
+        {
+          "end": 15,
+          "occurrence": 1,
+          "sourceCz": "špinavý",
+          "sourceFr": "sale",
+          "start": 11,
+          "text": "sale",
+          "uid": "vfr-0291"
+        },
+        {
+          "end": 23,
+          "occurrence": 1,
+          "sourceCz": "na",
+          "sourceFr": "sur",
+          "start": 20,
+          "text": "sur",
+          "uid": "vfr-0002"
+        },
+        {
+          "end": 32,
+          "occurrence": 1,
+          "sourceCz": "stůl",
+          "sourceFr": "table",
+          "start": 27,
+          "text": "table",
+          "uid": "vfr-0140"
         }
       ],
       "reviewed": true,
       "sourceCz": "talíř",
       "sourceFr": "assiette",
-      "sourceSentenceCz": "Po rodinné večeři vždy uklidím talíř do myčky.",
-      "sourceSentenceFr": "Je range toujours l'assiette dans le lave-vaisselle."
+      "sourceSentenceCz": "Špinavý talíř je na stole.",
+      "sourceSentenceFr": "L'assiette sale est sur la table."
     },
     "vfr-0002": {
       "concepts": [
@@ -56,6 +83,15 @@
     },
     "vfr-0003": {
       "concepts": [
+        {
+          "end": 6,
+          "occurrence": 1,
+          "sourceCz": "číst",
+          "sourceFr": "lire",
+          "start": 3,
+          "text": "lis",
+          "uid": "vfr-0472"
+        },
         {
           "end": 21,
           "occurrence": 1,
@@ -111,20 +147,47 @@
     "vfr-0005": {
       "concepts": [
         {
-          "end": 24,
+          "end": 9,
           "occurrence": 1,
           "sourceCz": "dort",
           "sourceFr": "gâteau",
-          "start": 18,
+          "start": 3,
           "text": "gâteau",
           "uid": "vfr-0005"
+        },
+        {
+          "end": 18,
+          "occurrence": 1,
+          "sourceCz": "připravený",
+          "sourceFr": "prêt",
+          "start": 14,
+          "text": "prêt",
+          "uid": "vfr-0097"
+        },
+        {
+          "end": 23,
+          "occurrence": 1,
+          "sourceCz": "pro, aby, abyste",
+          "sourceFr": "pour",
+          "start": 19,
+          "text": "pour",
+          "uid": "vfr-0141"
+        },
+        {
+          "end": 35,
+          "occurrence": 1,
+          "sourceCz": "host pozvaný na návštěvu",
+          "sourceFr": "invité",
+          "start": 28,
+          "text": "invités",
+          "uid": "vfr-0297"
         }
       ],
       "reviewed": true,
       "sourceCz": "dort",
       "sourceFr": "gâteau",
-      "sourceSentenceCz": "Připravujeme dort k jeho narozeninám.",
-      "sourceSentenceFr": "Nous préparons un gâteau pour son anniversaire."
+      "sourceSentenceCz": "Dort je připravený pro hosty.",
+      "sourceSentenceFr": "Le gâteau est prêt pour les invités."
     },
     "vfr-0006": {
       "concepts": [
@@ -289,6 +352,15 @@
           "start": 16,
           "text": "voyager",
           "uid": "vfr-0077"
+        },
+        {
+          "end": 32,
+          "occurrence": 1,
+          "sourceCz": "vlak",
+          "sourceFr": "train",
+          "start": 27,
+          "text": "train",
+          "uid": "vfr-0467"
         }
       ],
       "reviewed": true,
@@ -406,6 +478,15 @@
           "start": 0,
           "text": "Ça va",
           "uid": "vfr-0017"
+        },
+        {
+          "end": 16,
+          "occurrence": 1,
+          "sourceCz": "po, potom",
+          "sourceFr": "après",
+          "start": 11,
+          "text": "après",
+          "uid": "vfr-0474"
         }
       ],
       "reviewed": true,
@@ -541,6 +622,15 @@
           "start": 5,
           "text": "faim",
           "uid": "vfr-0024"
+        },
+        {
+          "end": 15,
+          "occurrence": 1,
+          "sourceCz": "po, potom",
+          "sourceFr": "après",
+          "start": 10,
+          "text": "après",
+          "uid": "vfr-0474"
         }
       ],
       "reviewed": true,
@@ -694,6 +784,15 @@
           "start": 4,
           "text": "idée",
           "uid": "vfr-0316"
+        },
+        {
+          "end": 21,
+          "occurrence": 1,
+          "sourceCz": "dokonalý; skvělý",
+          "sourceFr": "parfait",
+          "start": 13,
+          "text": "parfaite",
+          "uid": "vfr-0030"
         }
       ],
       "reviewed": true,
@@ -712,6 +811,15 @@
           "start": 12,
           "text": "ou",
           "uid": "vfr-0031"
+        },
+        {
+          "end": 28,
+          "occurrence": 1,
+          "sourceCz": "restaurace",
+          "sourceFr": "restaurant",
+          "start": 18,
+          "text": "restaurant",
+          "uid": "vfr-0480"
         }
       ],
       "reviewed": true,
@@ -732,6 +840,15 @@
           "uid": "vfr-0408"
         },
         {
+          "end": 16,
+          "occurrence": 1,
+          "sourceCz": "chléb",
+          "sourceFr": "pain",
+          "start": 12,
+          "text": "pain",
+          "uid": "vfr-0466"
+        },
+        {
           "end": 19,
           "occurrence": 1,
           "sourceCz": "a",
@@ -739,6 +856,15 @@
           "start": 17,
           "text": "et",
           "uid": "vfr-0032"
+        },
+        {
+          "end": 30,
+          "occurrence": 1,
+          "sourceCz": "sýr",
+          "sourceFr": "fromage",
+          "start": 23,
+          "text": "fromage",
+          "uid": "vfr-0469"
         }
       ],
       "reviewed": true,
@@ -847,6 +973,15 @@
           "start": 3,
           "text": "habite",
           "uid": "vfr-0037"
+        },
+        {
+          "end": 36,
+          "occurrence": 1,
+          "sourceCz": "rodina",
+          "sourceFr": "famille",
+          "start": 29,
+          "text": "famille",
+          "uid": "vfr-0481"
         }
       ],
       "reviewed": true,
@@ -862,16 +997,52 @@
           "occurrence": 1,
           "sourceCz": "máš",
           "sourceFr": "tu as",
-          "start": 3,
-          "text": "as",
+          "start": 0,
+          "text": "Tu as",
           "uid": "vfr-0038"
+        },
+        {
+          "end": 14,
+          "occurrence": 1,
+          "sourceCz": "kniha",
+          "sourceFr": "livre",
+          "start": 9,
+          "text": "livre",
+          "uid": "vfr-0188"
+        },
+        {
+          "end": 19,
+          "occurrence": 1,
+          "sourceCz": "v, ve",
+          "sourceFr": "dans",
+          "start": 15,
+          "text": "dans",
+          "uid": "vfr-0130"
+        },
+        {
+          "end": 23,
+          "occurrence": 1,
+          "sourceCz": "tvůj",
+          "sourceFr": "ton",
+          "start": 20,
+          "text": "ton",
+          "uid": "vfr-0151"
+        },
+        {
+          "end": 27,
+          "occurrence": 1,
+          "sourceCz": "taška",
+          "sourceFr": "sac",
+          "start": 24,
+          "text": "sac",
+          "uid": "vfr-0128"
         }
       ],
       "reviewed": true,
       "sourceCz": "máš",
       "sourceFr": "tu as",
-      "sourceSentenceCz": "Máš s dětmi hodně trpělivosti, to je obdivuhodné.",
-      "sourceSentenceFr": "Tu as beaucoup de patience avec les enfants, c'est admirable."
+      "sourceSentenceCz": "Máš ve své tašce knihu.",
+      "sourceSentenceFr": "Tu as un livre dans ton sac."
     },
     "vfr-0039": {
       "concepts": [
@@ -883,13 +1054,40 @@
           "start": 4,
           "text": "neveu",
           "uid": "vfr-0039"
+        },
+        {
+          "end": 16,
+          "occurrence": 1,
+          "sourceCz": "ukázat",
+          "sourceFr": "montrer",
+          "start": 10,
+          "text": "montre",
+          "uid": "vfr-0393"
+        },
+        {
+          "end": 28,
+          "occurrence": 1,
+          "sourceCz": "nový",
+          "sourceFr": "nouveau",
+          "start": 21,
+          "text": "nouveau",
+          "uid": "vfr-0319"
+        },
+        {
+          "end": 33,
+          "occurrence": 1,
+          "sourceCz": "jízdní kolo",
+          "sourceFr": "vélo",
+          "start": 29,
+          "text": "vélo",
+          "uid": "vfr-0325"
         }
       ],
       "reviewed": true,
       "sourceCz": "synovec",
       "sourceFr": "neveu",
-      "sourceSentenceCz": "Můj synovec staví roboty ze dřeva.",
-      "sourceSentenceFr": "Mon neveu construit des robots en bois."
+      "sourceSentenceCz": "Můj synovec ukazuje své nové kolo.",
+      "sourceSentenceFr": "Mon neveu montre son nouveau vélo."
     },
     "vfr-0040": {
       "concepts": [
@@ -928,6 +1126,15 @@
           "start": 3,
           "text": "fille",
           "uid": "vfr-0041"
+        },
+        {
+          "end": 12,
+          "occurrence": 1,
+          "sourceCz": "číst",
+          "sourceFr": "lire",
+          "start": 9,
+          "text": "lit",
+          "uid": "vfr-0472"
         },
         {
           "end": 24,
@@ -984,6 +1191,15 @@
     "vfr-0043": {
       "concepts": [
         {
+          "end": 18,
+          "occurrence": 1,
+          "sourceCz": "odejít, odjet",
+          "sourceFr": "partir",
+          "start": 12,
+          "text": "partir",
+          "uid": "vfr-0476"
+        },
+        {
           "end": 29,
           "occurrence": 1,
           "sourceCz": "teď",
@@ -991,6 +1207,15 @@
           "start": 19,
           "text": "maintenant",
           "uid": "vfr-0043"
+        },
+        {
+          "end": 42,
+          "occurrence": 1,
+          "sourceCz": "přijet, přijít, dorazit",
+          "sourceFr": "arriver",
+          "start": 35,
+          "text": "arriver",
+          "uid": "vfr-0473"
         },
         {
           "end": 52,
@@ -1022,18 +1247,45 @@
         {
           "end": 16,
           "occurrence": 1,
-          "sourceCz": "připravovat",
-          "sourceFr": "préparer",
+          "sourceCz": "vařit",
+          "sourceFr": "cuisiner",
           "start": 9,
-          "text": "prépare",
-          "uid": "vfr-0246"
+          "text": "cuisine",
+          "uid": "vfr-0306"
+        },
+        {
+          "end": 23,
+          "occurrence": 1,
+          "sourceCz": "rýže",
+          "sourceFr": "du riz",
+          "start": 20,
+          "text": "riz",
+          "uid": "vfr-0447"
+        },
+        {
+          "end": 28,
+          "occurrence": 1,
+          "sourceCz": "s, se",
+          "sourceFr": "avec",
+          "start": 24,
+          "text": "avec",
+          "uid": "vfr-0117"
+        },
+        {
+          "end": 40,
+          "occurrence": 1,
+          "sourceCz": "zelenina",
+          "sourceFr": "légumes",
+          "start": 33,
+          "text": "légumes",
+          "uid": "vfr-0358"
         }
       ],
       "reviewed": true,
       "sourceCz": "teta",
       "sourceFr": "tante",
-      "sourceSentenceCz": "Moje teta vždy v neděli připravuje výbornou polévku.",
-      "sourceSentenceFr": "Ma tante prépare toujours une soupe délicieuse le dimanche."
+      "sourceSentenceCz": "Moje teta vaří rýži se zeleninou.",
+      "sourceSentenceFr": "Ma tante cuisine du riz avec des légumes."
     },
     "vfr-0045": {
       "concepts": [
@@ -1065,20 +1317,47 @@
           "uid": "vfr-0046"
         },
         {
-          "end": 12,
+          "end": 10,
           "occurrence": 1,
-          "sourceCz": "připravený",
-          "sourceFr": "prêt",
-          "start": 8,
-          "text": "prêt",
-          "uid": "vfr-0097"
+          "sourceCz": "připravovat",
+          "sourceFr": "préparer",
+          "start": 3,
+          "text": "prépare",
+          "uid": "vfr-0246"
+        },
+        {
+          "end": 19,
+          "occurrence": 1,
+          "sourceCz": "večeře",
+          "sourceFr": "dîner",
+          "start": 14,
+          "text": "dîner",
+          "uid": "vfr-0359"
+        },
+        {
+          "end": 24,
+          "occurrence": 1,
+          "sourceCz": "v, ve",
+          "sourceFr": "dans",
+          "start": 20,
+          "text": "dans",
+          "uid": "vfr-0130"
+        },
+        {
+          "end": 35,
+          "occurrence": 1,
+          "sourceCz": "kuchyně",
+          "sourceFr": "cuisine",
+          "start": 28,
+          "text": "cuisine",
+          "uid": "vfr-0135"
         }
       ],
       "reviewed": true,
       "sourceCz": "já",
       "sourceFr": "je",
-      "sourceSentenceCz": "Já jsem připravený na zkoušku, tento týden jsem hodně opakoval.",
-      "sourceSentenceFr": "Je suis prêt pour l'examen, j'ai beaucoup révisé cette semaine."
+      "sourceSentenceCz": "Připravuji večeři v kuchyni.",
+      "sourceSentenceFr": "Je prépare le dîner dans la cuisine."
     },
     "vfr-0047": {
       "concepts": [
@@ -1099,6 +1378,24 @@
           "start": 3,
           "text": "peux",
           "uid": "vfr-0310"
+        },
+        {
+          "end": 14,
+          "occurrence": 1,
+          "sourceCz": "zavřít, zavírat",
+          "sourceFr": "fermer",
+          "start": 8,
+          "text": "fermer",
+          "uid": "vfr-0475"
+        },
+        {
+          "end": 25,
+          "occurrence": 1,
+          "sourceCz": "okno",
+          "sourceFr": "fenêtre",
+          "start": 18,
+          "text": "fenêtre",
+          "uid": "vfr-0470"
         }
       ],
       "reviewed": true,
@@ -1182,6 +1479,15 @@
           "uid": "vfr-0050"
         },
         {
+          "end": 12,
+          "occurrence": 1,
+          "sourceCz": "přijet, přijít, dorazit",
+          "sourceFr": "arriver",
+          "start": 5,
+          "text": "arrivez",
+          "uid": "vfr-0473"
+        },
+        {
           "end": 27,
           "occurrence": 1,
           "sourceCz": "hodina; čas (na hodinách)",
@@ -1216,6 +1522,15 @@
           "start": 5,
           "text": "allons",
           "uid": "vfr-0242"
+        },
+        {
+          "end": 21,
+          "occurrence": 1,
+          "sourceCz": "trh",
+          "sourceFr": "marché",
+          "start": 15,
+          "text": "marché",
+          "uid": "vfr-0471"
         },
         {
           "end": 50,
@@ -1261,6 +1576,15 @@
           "start": 31,
           "text": "parc",
           "uid": "vfr-0170"
+        },
+        {
+          "end": 41,
+          "occurrence": 1,
+          "sourceCz": "po, potom",
+          "sourceFr": "après",
+          "start": 36,
+          "text": "après",
+          "uid": "vfr-0474"
         },
         {
           "end": 49,
@@ -1405,13 +1729,40 @@
           "start": 4,
           "text": "amie",
           "uid": "vfr-0236"
+        },
+        {
+          "end": 15,
+          "occurrence": 1,
+          "sourceCz": "čekat, očekávat, počkat",
+          "sourceFr": "attendre",
+          "start": 9,
+          "text": "attend",
+          "uid": "vfr-0115"
+        },
+        {
+          "end": 22,
+          "occurrence": 1,
+          "sourceCz": "před",
+          "sourceFr": "devant",
+          "start": 16,
+          "text": "devant",
+          "uid": "vfr-0228"
+        },
+        {
+          "end": 37,
+          "occurrence": 1,
+          "sourceCz": "pekárna",
+          "sourceFr": "boulangerie",
+          "start": 26,
+          "text": "boulangerie",
+          "uid": "vfr-0210"
         }
       ],
       "reviewed": true,
       "sourceCz": "jedna (neurčitý člen)",
       "sourceFr": "une",
-      "sourceSentenceCz": "Jedna kamarádka z Prahy nás přijede o víkendu navštívit.",
-      "sourceSentenceFr": "Une amie de Prague vient nous rendre visite ce week-end."
+      "sourceSentenceCz": "Jedna kamarádka čeká před pekárnou.",
+      "sourceSentenceFr": "Une amie attend devant la boulangerie."
     },
     "vfr-0058": {
       "concepts": [
@@ -1495,6 +1846,15 @@
           "start": 4,
           "text": "frère",
           "uid": "vfr-0060"
+        },
+        {
+          "end": 16,
+          "occurrence": 1,
+          "sourceCz": "přijet, přijít, dorazit",
+          "sourceFr": "arriver",
+          "start": 10,
+          "text": "arrive",
+          "uid": "vfr-0473"
         },
         {
           "end": 29,
@@ -1605,20 +1965,29 @@
           "uid": "vfr-0063"
         },
         {
-          "end": 21,
+          "end": 20,
           "occurrence": 1,
-          "sourceCz": "znát, umět",
-          "sourceFr": "connaître",
+          "sourceCz": "ukázat",
+          "sourceFr": "montrer",
           "start": 14,
-          "text": "connaît",
-          "uid": "vfr-0159"
+          "text": "montre",
+          "uid": "vfr-0393"
+        },
+        {
+          "end": 42,
+          "occurrence": 1,
+          "sourceCz": "notový sešit, noty",
+          "sourceFr": "cahier de musique",
+          "start": 25,
+          "text": "cahier de musique",
+          "uid": "vfr-0269"
         }
       ],
       "reviewed": true,
       "sourceCz": "babička",
       "sourceFr": "grand-mère",
-      "sourceSentenceCz": "Moje babička zná zpaměti spoustu starých písní.",
-      "sourceSentenceFr": "Ma grand-mère connaît beaucoup de chansons anciennes par cœur."
+      "sourceSentenceCz": "Moje babička ukazuje svůj notový sešit.",
+      "sourceSentenceFr": "Ma grand-mère montre son cahier de musique."
     },
     "vfr-0064": {
       "concepts": [
@@ -1659,6 +2028,15 @@
     "vfr-0065": {
       "concepts": [
         {
+          "end": 7,
+          "occurrence": 1,
+          "sourceCz": "film",
+          "sourceFr": "film",
+          "start": 3,
+          "text": "film",
+          "uid": "vfr-0477"
+        },
+        {
           "end": 16,
           "occurrence": 1,
           "sourceCz": "velmi",
@@ -1666,6 +2044,15 @@
           "start": 12,
           "text": "très",
           "uid": "vfr-0065"
+        },
+        {
+          "end": 39,
+          "occurrence": 1,
+          "sourceCz": "hudba",
+          "sourceFr": "musique",
+          "start": 32,
+          "text": "musique",
+          "uid": "vfr-0478"
         },
         {
           "end": 54,
@@ -1713,11 +2100,38 @@
     "vfr-0067": {
       "concepts": [
         {
-          "end": 24,
+          "end": 8,
+          "occurrence": 1,
+          "sourceCz": "kniha",
+          "sourceFr": "livre",
+          "start": 3,
+          "text": "livre",
+          "uid": "vfr-0188"
+        },
+        {
+          "end": 12,
+          "occurrence": 1,
+          "sourceCz": "o (na téma)",
+          "sourceFr": "sur",
+          "start": 9,
+          "text": "sur",
+          "uid": "vfr-0003"
+        },
+        {
+          "end": 23,
+          "occurrence": 1,
+          "sourceCz": "strom",
+          "sourceFr": "arbre",
+          "start": 17,
+          "text": "arbres",
+          "uid": "vfr-0444"
+        },
+        {
+          "end": 39,
           "occurrence": 1,
           "sourceCz": "zajímavý",
           "sourceFr": "intéressant",
-          "start": 13,
+          "start": 28,
           "text": "intéressant",
           "uid": "vfr-0067"
         }
@@ -1725,26 +2139,35 @@
       "reviewed": true,
       "sourceCz": "zajímavý",
       "sourceFr": "intéressant",
-      "sourceSentenceCz": "To téma je zajímavé, takže si o něm přečtu ještě víc.",
-      "sourceSentenceFr": "Le sujet est intéressant, alors je vais lire encore davantage."
+      "sourceSentenceCz": "Tato kniha o stromech je zajímavá.",
+      "sourceSentenceFr": "Ce livre sur les arbres est intéressant."
     },
     "vfr-0068": {
       "concepts": [
         {
-          "end": 9,
+          "end": 8,
+          "occurrence": 1,
+          "sourceCz": "pes",
+          "sourceFr": "chien",
+          "start": 3,
+          "text": "chien",
+          "uid": "vfr-0144"
+        },
+        {
+          "end": 18,
           "occurrence": 1,
           "sourceCz": "soused",
           "sourceFr": "voisin",
-          "start": 3,
+          "start": 12,
           "text": "voisin",
           "uid": "vfr-0161"
         },
         {
-          "end": 24,
+          "end": 30,
           "occurrence": 1,
           "sourceCz": "zlý, protivný",
           "sourceFr": "méchant",
-          "start": 17,
+          "start": 23,
           "text": "méchant",
           "uid": "vfr-0068"
         }
@@ -1752,8 +2175,8 @@
       "reviewed": true,
       "sourceCz": "zlý, protivný",
       "sourceFr": "méchant",
-      "sourceSentenceCz": "Ten soused působí protivně, ale ve skutečnosti je stydlivý.",
-      "sourceSentenceFr": "Ce voisin paraît méchant, mais en réalité il est timide."
+      "sourceSentenceCz": "Sousedův pes je zlý.",
+      "sourceSentenceFr": "Le chien du voisin est méchant."
     },
     "vfr-0069": {
       "concepts": [
@@ -1798,16 +2221,52 @@
           "occurrence": 1,
           "sourceCz": "ty jsi",
           "sourceFr": "tu es",
-          "start": 3,
-          "text": "es",
+          "start": 0,
+          "text": "Tu es",
           "uid": "vfr-0070"
+        },
+        {
+          "end": 11,
+          "occurrence": 1,
+          "sourceCz": "připravená",
+          "sourceFr": "prête",
+          "start": 6,
+          "text": "prête",
+          "uid": "vfr-0122"
+        },
+        {
+          "end": 16,
+          "occurrence": 1,
+          "sourceCz": "pro, aby, abyste",
+          "sourceFr": "pour",
+          "start": 12,
+          "text": "pour",
+          "uid": "vfr-0141"
+        },
+        {
+          "end": 25,
+          "occurrence": 1,
+          "sourceCz": "kurz",
+          "sourceFr": "cours",
+          "start": 20,
+          "text": "cours",
+          "uid": "vfr-0388"
+        },
+        {
+          "end": 34,
+          "occurrence": 1,
+          "sourceCz": "matika",
+          "sourceFr": "maths",
+          "start": 29,
+          "text": "maths",
+          "uid": "vfr-0384"
         }
       ],
       "reviewed": true,
       "sourceCz": "ty jsi",
       "sourceFr": "tu es",
-      "sourceSentenceCz": "Ty jsi vždy dochvilný, a to je pro společnou práci moc příjemné.",
-      "sourceSentenceFr": "Tu es toujours ponctuel, c'est très agréable pour travailler ensemble."
+      "sourceSentenceCz": "Jsi připravená na hodinu matematiky?",
+      "sourceSentenceFr": "Tu es prête pour le cours de maths ?"
     },
     "vfr-0071": {
       "concepts": [
@@ -1892,6 +2351,15 @@
     },
     "vfr-0074": {
       "concepts": [
+        {
+          "end": 11,
+          "occurrence": 1,
+          "sourceCz": "přijet, přijít, dorazit",
+          "sourceFr": "arriver",
+          "start": 5,
+          "text": "arrive",
+          "uid": "vfr-0473"
+        },
         {
           "end": 20,
           "occurrence": 1,
@@ -2037,6 +2505,15 @@
     "vfr-0080": {
       "concepts": [
         {
+          "end": 8,
+          "occurrence": 1,
+          "sourceCz": "vlak",
+          "sourceFr": "train",
+          "start": 3,
+          "text": "train",
+          "uid": "vfr-0467"
+        },
+        {
           "end": 22,
           "occurrence": 1,
           "sourceCz": "včas, na čas",
@@ -2108,6 +2585,15 @@
     },
     "vfr-0083": {
       "concepts": [
+        {
+          "end": 7,
+          "occurrence": 1,
+          "sourceCz": "káva",
+          "sourceFr": "café",
+          "start": 3,
+          "text": "café",
+          "uid": "vfr-0465"
+        },
         {
           "end": 30,
           "occurrence": 1,
@@ -2338,10 +2824,19 @@
       "sourceCz": "přestávka",
       "sourceFr": "pause",
       "sourceSentenceCz": "Je vždy včas na přestávce.",
-      "sourceSentenceFr": "Il est toujours à l`heure pour la pause."
+      "sourceSentenceFr": "Il est toujours à l'heure pour la pause."
     },
     "vfr-0093": {
       "concepts": [
+        {
+          "end": 6,
+          "occurrence": 1,
+          "sourceCz": "číst",
+          "sourceFr": "lire",
+          "start": 3,
+          "text": "lis",
+          "uid": "vfr-0472"
+        },
         {
           "end": 14,
           "occurrence": 1,
@@ -2467,6 +2962,15 @@
           "start": 17,
           "text": "peut",
           "uid": "vfr-0310"
+        },
+        {
+          "end": 28,
+          "occurrence": 1,
+          "sourceCz": "odejít, odjet",
+          "sourceFr": "partir",
+          "start": 22,
+          "text": "partir",
+          "uid": "vfr-0476"
         }
       ],
       "reviewed": true,
@@ -2721,6 +3225,15 @@
     "vfr-0105": {
       "concepts": [
         {
+          "end": 18,
+          "occurrence": 1,
+          "sourceCz": "káva",
+          "sourceFr": "café",
+          "start": 14,
+          "text": "café",
+          "uid": "vfr-0465"
+        },
+        {
           "end": 23,
           "occurrence": 1,
           "sourceCz": "černý",
@@ -2739,20 +3252,56 @@
     "vfr-0106": {
       "concepts": [
         {
-          "end": 15,
+          "end": 6,
+          "occurrence": 1,
+          "sourceCz": "je tam, existuje",
+          "sourceFr": "il y a",
+          "start": 0,
+          "text": "Il y a",
+          "uid": "vfr-0288"
+        },
+        {
+          "end": 10,
           "occurrence": 1,
           "sourceCz": "krátce",
           "sourceFr": "peu",
-          "start": 12,
+          "start": 7,
           "text": "peu",
           "uid": "vfr-0106"
+        },
+        {
+          "end": 21,
+          "occurrence": 1,
+          "sourceCz": "zelenina",
+          "sourceFr": "légumes",
+          "start": 14,
+          "text": "légumes",
+          "uid": "vfr-0358"
+        },
+        {
+          "end": 25,
+          "occurrence": 1,
+          "sourceCz": "na",
+          "sourceFr": "sur",
+          "start": 22,
+          "text": "sur",
+          "uid": "vfr-0002"
+        },
+        {
+          "end": 34,
+          "occurrence": 1,
+          "sourceCz": "stůl",
+          "sourceFr": "table",
+          "start": 29,
+          "text": "table",
+          "uid": "vfr-0140"
         }
       ],
       "reviewed": true,
       "sourceCz": "krátce",
       "sourceFr": "peu",
-      "sourceSentenceCz": "Přes týden spolu mluvíme jen krátce, ale v neděli se vídáme.",
-      "sourceSentenceFr": "On se parle peu en semaine, mais on se voit le dimanche."
+      "sourceSentenceCz": "Na stole je málo zeleniny.",
+      "sourceSentenceFr": "Il y a peu de légumes sur la table."
     },
     "vfr-0107": {
       "concepts": [
@@ -2811,20 +3360,47 @@
     "vfr-0109": {
       "concepts": [
         {
-          "end": 17,
+          "end": 9,
+          "occurrence": 1,
+          "sourceCz": "strýc",
+          "sourceFr": "oncle",
+          "start": 4,
+          "text": "oncle",
+          "uid": "vfr-0045"
+        },
+        {
+          "end": 19,
           "occurrence": 1,
           "sourceCz": "vtipný",
           "sourceFr": "drôle",
-          "start": 12,
+          "start": 14,
           "text": "drôle",
           "uid": "vfr-0109"
+        },
+        {
+          "end": 24,
+          "occurrence": 1,
+          "sourceCz": "s, se",
+          "sourceFr": "avec",
+          "start": 20,
+          "text": "avec",
+          "uid": "vfr-0117"
+        },
+        {
+          "end": 35,
+          "occurrence": 1,
+          "sourceCz": "klobouk",
+          "sourceFr": "chapeau",
+          "start": 28,
+          "text": "chapeau",
+          "uid": "vfr-0010"
         }
       ],
       "reviewed": true,
       "sourceCz": "vtipný",
       "sourceFr": "drôle",
-      "sourceSentenceCz": "Ten film je vtipný, smáli jsme se od začátku do konce.",
-      "sourceSentenceFr": "Ce film est drôle, on a ri du début à la fin."
+      "sourceSentenceCz": "Můj strýc je s tímto kloboukem legrační.",
+      "sourceSentenceFr": "Mon oncle est drôle avec ce chapeau."
     },
     "vfr-0110": {
       "concepts": [
@@ -2874,6 +3450,15 @@
           "uid": "vfr-0111"
         },
         {
+          "end": 12,
+          "occurrence": 1,
+          "sourceCz": "číst",
+          "sourceFr": "lire",
+          "start": 9,
+          "text": "lit",
+          "uid": "vfr-0472"
+        },
+        {
           "end": 21,
           "occurrence": 1,
           "sourceCz": "kniha",
@@ -2881,6 +3466,15 @@
           "start": 16,
           "text": "livre",
           "uid": "vfr-0188"
+        },
+        {
+          "end": 35,
+          "occurrence": 1,
+          "sourceCz": "vlak",
+          "sourceFr": "train",
+          "start": 30,
+          "text": "train",
+          "uid": "vfr-0467"
         }
       ],
       "reviewed": true,
@@ -2919,20 +3513,56 @@
     "vfr-0113": {
       "concepts": [
         {
-          "end": 40,
+          "end": 5,
+          "occurrence": 1,
+          "sourceCz": "tato, tahle",
+          "sourceFr": "cette",
+          "start": 0,
+          "text": "Cette",
+          "uid": "vfr-0449"
+        },
+        {
+          "end": 15,
           "occurrence": 1,
           "sourceCz": "Němka",
           "sourceFr": "Allemande",
-          "start": 31,
+          "start": 6,
           "text": "Allemande",
           "uid": "vfr-0113"
+        },
+        {
+          "end": 25,
+          "occurrence": 1,
+          "sourceCz": "pracuje (on)",
+          "sourceFr": "travaille",
+          "start": 16,
+          "text": "travaille",
+          "uid": "vfr-0119"
+        },
+        {
+          "end": 30,
+          "occurrence": 1,
+          "sourceCz": "v, ve",
+          "sourceFr": "dans",
+          "start": 26,
+          "text": "dans",
+          "uid": "vfr-0130"
+        },
+        {
+          "end": 47,
+          "occurrence": 1,
+          "sourceCz": "společnost, podnik",
+          "sourceFr": "entreprise",
+          "start": 37,
+          "text": "entreprise",
+          "uid": "vfr-0349"
         }
       ],
       "reviewed": true,
       "sourceCz": "Němka",
       "sourceFr": "Allemande",
-      "sourceSentenceCz": "Naše nová učitelka je Němka, ale už deset let žije v Paříži.",
-      "sourceSentenceFr": "Notre nouvelle professeure est Allemande, mais elle vit à Paris depuis dix ans."
+      "sourceSentenceCz": "Tato Němka pracuje v naší firmě.",
+      "sourceSentenceFr": "Cette Allemande travaille dans notre entreprise."
     },
     "vfr-0114": {
       "concepts": [
@@ -2971,6 +3601,15 @@
           "start": 24,
           "text": "bus",
           "uid": "vfr-0213"
+        },
+        {
+          "end": 34,
+          "occurrence": 1,
+          "sourceCz": "před",
+          "sourceFr": "devant",
+          "start": 28,
+          "text": "devant",
+          "uid": "vfr-0228"
         }
       ],
       "reviewed": true,
@@ -3261,6 +3900,15 @@
     "vfr-0126": {
       "concepts": [
         {
+          "end": 8,
+          "occurrence": 1,
+          "sourceCz": "vlak",
+          "sourceFr": "train",
+          "start": 3,
+          "text": "train",
+          "uid": "vfr-0467"
+        },
+        {
           "end": 34,
           "occurrence": 1,
           "sourceCz": "zpoždění, pozdě",
@@ -3511,6 +4159,15 @@
           "start": 3,
           "text": "cuisine",
           "uid": "vfr-0135"
+        },
+        {
+          "end": 23,
+          "occurrence": 1,
+          "sourceCz": "káva",
+          "sourceFr": "café",
+          "start": 19,
+          "text": "café",
+          "uid": "vfr-0465"
         },
         {
           "end": 29,
@@ -3801,6 +4458,15 @@
     "vfr-0145": {
       "concepts": [
         {
+          "end": 5,
+          "occurrence": 1,
+          "sourceCz": "po, potom",
+          "sourceFr": "après",
+          "start": 0,
+          "text": "Après",
+          "uid": "vfr-0474"
+        },
+        {
           "end": 14,
           "occurrence": 1,
           "sourceCz": "večeře",
@@ -3808,6 +4474,15 @@
           "start": 9,
           "text": "dîner",
           "uid": "vfr-0359"
+        },
+        {
+          "end": 22,
+          "occurrence": 1,
+          "sourceCz": "číst",
+          "sourceFr": "lire",
+          "start": 19,
+          "text": "lis",
+          "uid": "vfr-0472"
         },
         {
           "end": 46,
@@ -3999,6 +4674,15 @@
           "uid": "vfr-0060"
         },
         {
+          "end": 16,
+          "occurrence": 1,
+          "sourceCz": "přijet, přijít, dorazit",
+          "sourceFr": "arriver",
+          "start": 10,
+          "text": "arrive",
+          "uid": "vfr-0473"
+        },
+        {
           "end": 29,
           "occurrence": 1,
           "sourceCz": "ráno",
@@ -4051,6 +4735,15 @@
           "start": 6,
           "text": "vite",
           "uid": "vfr-0153"
+        },
+        {
+          "end": 20,
+          "occurrence": 1,
+          "sourceCz": "vlak",
+          "sourceFr": "train",
+          "start": 15,
+          "text": "train",
+          "uid": "vfr-0467"
         },
         {
           "end": 39,
@@ -4125,6 +4818,15 @@
           "uid": "vfr-0155"
         },
         {
+          "end": 17,
+          "occurrence": 1,
+          "sourceCz": "přijet, přijít, dorazit",
+          "sourceFr": "arriver",
+          "start": 11,
+          "text": "arrive",
+          "uid": "vfr-0473"
+        },
+        {
           "end": 25,
           "occurrence": 1,
           "sourceCz": "večer - část dne",
@@ -4159,6 +4861,15 @@
           "start": 0,
           "text": "Bienvenue",
           "uid": "vfr-0156"
+        },
+        {
+          "end": 54,
+          "occurrence": 1,
+          "sourceCz": "okno",
+          "sourceFr": "fenêtre",
+          "start": 47,
+          "text": "fenêtre",
+          "uid": "vfr-0470"
         }
       ],
       "reviewed": true,
@@ -4204,6 +4915,15 @@
           "start": 14,
           "text": "confortable",
           "uid": "vfr-0158"
+        },
+        {
+          "end": 36,
+          "occurrence": 1,
+          "sourceCz": "po, potom",
+          "sourceFr": "après",
+          "start": 31,
+          "text": "après",
+          "uid": "vfr-0474"
         },
         {
           "end": 48,
@@ -4258,6 +4978,15 @@
           "start": 3,
           "text": "voisine",
           "uid": "vfr-0160"
+        },
+        {
+          "end": 28,
+          "occurrence": 1,
+          "sourceCz": "květina",
+          "sourceFr": "fleur",
+          "start": 22,
+          "text": "fleurs",
+          "uid": "vfr-0479"
         },
         {
           "end": 41,
@@ -4377,6 +5106,15 @@
           "uid": "vfr-0171"
         },
         {
+          "end": 34,
+          "occurrence": 1,
+          "sourceCz": "po, potom",
+          "sourceFr": "après",
+          "start": 29,
+          "text": "après",
+          "uid": "vfr-0474"
+        },
+        {
           "end": 45,
           "occurrence": 1,
           "sourceCz": "hodina; čas (na hodinách)",
@@ -4494,6 +5232,15 @@
           "uid": "vfr-0167"
         },
         {
+          "end": 29,
+          "occurrence": 1,
+          "sourceCz": "po, potom",
+          "sourceFr": "après",
+          "start": 24,
+          "text": "après",
+          "uid": "vfr-0474"
+        },
+        {
           "end": 38,
           "occurrence": 1,
           "sourceCz": "večeře",
@@ -4519,6 +5266,15 @@
           "start": 6,
           "text": "bois",
           "uid": "vfr-0201"
+        },
+        {
+          "end": 22,
+          "occurrence": 1,
+          "sourceCz": "káva",
+          "sourceFr": "café",
+          "start": 18,
+          "text": "café",
+          "uid": "vfr-0465"
         },
         {
           "end": 36,
@@ -4647,6 +5403,15 @@
           "uid": "vfr-0173"
         },
         {
+          "end": 29,
+          "occurrence": 1,
+          "sourceCz": "trh",
+          "sourceFr": "marché",
+          "start": 23,
+          "text": "marché",
+          "uid": "vfr-0471"
+        },
+        {
           "end": 45,
           "occurrence": 1,
           "sourceCz": "ráno",
@@ -4728,6 +5493,15 @@
           "uid": "vfr-0201"
         },
         {
+          "end": 15,
+          "occurrence": 1,
+          "sourceCz": "káva",
+          "sourceFr": "café",
+          "start": 11,
+          "text": "café",
+          "uid": "vfr-0465"
+        },
+        {
           "end": 34,
           "occurrence": 1,
           "sourceCz": "každý den",
@@ -4755,6 +5529,15 @@
           "uid": "vfr-0177"
         },
         {
+          "end": 15,
+          "occurrence": 1,
+          "sourceCz": "zavřít, zavírat",
+          "sourceFr": "fermer",
+          "start": 10,
+          "text": "ferme",
+          "uid": "vfr-0475"
+        },
+        {
           "end": 30,
           "occurrence": 1,
           "sourceCz": "hodina; čas (na hodinách)",
@@ -4772,6 +5555,15 @@
     },
     "vfr-0178": {
       "concepts": [
+        {
+          "end": 13,
+          "occurrence": 1,
+          "sourceCz": "restaurace",
+          "sourceFr": "restaurant",
+          "start": 3,
+          "text": "restaurant",
+          "uid": "vfr-0480"
+        },
         {
           "end": 21,
           "occurrence": 1,
@@ -4854,6 +5646,15 @@
           "uid": "vfr-0230"
         },
         {
+          "end": 36,
+          "occurrence": 1,
+          "sourceCz": "chléb",
+          "sourceFr": "pain",
+          "start": 32,
+          "text": "pain",
+          "uid": "vfr-0466"
+        },
+        {
           "end": 42,
           "occurrence": 1,
           "sourceCz": "čerstvý, nově vyrobený; chladivý",
@@ -4897,6 +5698,24 @@
           "start": 8,
           "text": "prendre",
           "uid": "vfr-0183"
+        },
+        {
+          "end": 23,
+          "occurrence": 1,
+          "sourceCz": "káva",
+          "sourceFr": "café",
+          "start": 19,
+          "text": "café",
+          "uid": "vfr-0465"
+        },
+        {
+          "end": 38,
+          "occurrence": 1,
+          "sourceCz": "vlak",
+          "sourceFr": "train",
+          "start": 33,
+          "text": "train",
+          "uid": "vfr-0467"
         }
       ],
       "reviewed": true,
@@ -4951,6 +5770,15 @@
           "start": 3,
           "text": "magasin",
           "uid": "vfr-0218"
+        },
+        {
+          "end": 21,
+          "occurrence": 1,
+          "sourceCz": "otevřená",
+          "sourceFr": "ouverte",
+          "start": 15,
+          "text": "ouvert",
+          "uid": "vfr-0211"
         },
         {
           "end": 26,
@@ -5016,20 +5844,56 @@
     "vfr-0187": {
       "concepts": [
         {
-          "end": 14,
+          "end": 13,
           "occurrence": 1,
           "sourceCz": "profesor",
           "sourceFr": "professeur",
-          "start": 4,
+          "start": 3,
           "text": "professeur",
           "uid": "vfr-0187"
+        },
+        {
+          "end": 20,
+          "occurrence": 1,
+          "sourceCz": "ukázat",
+          "sourceFr": "montrer",
+          "start": 14,
+          "text": "montre",
+          "uid": "vfr-0393"
+        },
+        {
+          "end": 29,
+          "occurrence": 1,
+          "sourceCz": "strom",
+          "sourceFr": "arbre",
+          "start": 24,
+          "text": "arbre",
+          "uid": "vfr-0444"
+        },
+        {
+          "end": 34,
+          "occurrence": 1,
+          "sourceCz": "v, ve",
+          "sourceFr": "dans",
+          "start": 30,
+          "text": "dans",
+          "uid": "vfr-0130"
+        },
+        {
+          "end": 44,
+          "occurrence": 1,
+          "sourceCz": "zahrada",
+          "sourceFr": "jardin",
+          "start": 38,
+          "text": "jardin",
+          "uid": "vfr-0149"
         }
       ],
       "reviewed": true,
       "sourceCz": "profesor",
       "sourceFr": "professeur",
-      "sourceSentenceCz": "Můj profesor vysvětluje gramatiku s velkou trpělivostí.",
-      "sourceSentenceFr": "Mon professeur explique la grammaire avec beaucoup de patience."
+      "sourceSentenceCz": "Profesor ukazuje strom na zahradě.",
+      "sourceSentenceFr": "Le professeur montre un arbre dans le jardin."
     },
     "vfr-0188": {
       "concepts": [
@@ -5248,6 +6112,15 @@
           "start": 8,
           "text": "un petit peu",
           "uid": "vfr-0195"
+        },
+        {
+          "end": 30,
+          "occurrence": 1,
+          "sourceCz": "přijet, přijít, dorazit",
+          "sourceFr": "arriver",
+          "start": 24,
+          "text": "arrive",
+          "uid": "vfr-0473"
         }
       ],
       "reviewed": true,
@@ -5365,6 +6238,15 @@
           "start": 0,
           "text": "Lequel",
           "uid": "vfr-0200"
+        },
+        {
+          "end": 39,
+          "occurrence": 1,
+          "sourceCz": "káva",
+          "sourceFr": "café",
+          "start": 34,
+          "text": "cafés",
+          "uid": "vfr-0465"
         }
       ],
       "reviewed": true,
@@ -5446,6 +6328,15 @@
           "start": 24,
           "text": "fraîche",
           "uid": "vfr-0258"
+        },
+        {
+          "end": 37,
+          "occurrence": 1,
+          "sourceCz": "po, potom",
+          "sourceFr": "après",
+          "start": 32,
+          "text": "après",
+          "uid": "vfr-0474"
         }
       ],
       "reviewed": true,
@@ -5527,6 +6418,15 @@
           "start": 11,
           "text": "autre",
           "uid": "vfr-0206"
+        },
+        {
+          "end": 21,
+          "occurrence": 1,
+          "sourceCz": "káva",
+          "sourceFr": "café",
+          "start": 17,
+          "text": "café",
+          "uid": "vfr-0465"
         }
       ],
       "reviewed": true,
@@ -5734,6 +6634,15 @@
           "start": 3,
           "text": "bus",
           "uid": "vfr-0213"
+        },
+        {
+          "end": 13,
+          "occurrence": 1,
+          "sourceCz": "přijet, přijít, dorazit",
+          "sourceFr": "arriver",
+          "start": 7,
+          "text": "arrive",
+          "uid": "vfr-0473"
         }
       ],
       "reviewed": true,
@@ -5826,6 +6735,15 @@
           "uid": "vfr-0217"
         },
         {
+          "end": 16,
+          "occurrence": 1,
+          "sourceCz": "zavřít, zavírat",
+          "sourceFr": "fermer",
+          "start": 11,
+          "text": "ferme",
+          "uid": "vfr-0475"
+        },
+        {
           "end": 44,
           "occurrence": 1,
           "sourceCz": "hodina; čas (na hodinách)",
@@ -5860,6 +6778,15 @@
           "start": 11,
           "text": "vend",
           "uid": "vfr-0023"
+        },
+        {
+          "end": 37,
+          "occurrence": 1,
+          "sourceCz": "sýr",
+          "sourceFr": "fromage",
+          "start": 29,
+          "text": "fromages",
+          "uid": "vfr-0469"
         }
       ],
       "reviewed": true,
@@ -5942,6 +6869,15 @@
     },
     "vfr-0222": {
       "concepts": [
+        {
+          "end": 5,
+          "occurrence": 1,
+          "sourceCz": "po, potom",
+          "sourceFr": "après",
+          "start": 0,
+          "text": "Après",
+          "uid": "vfr-0474"
+        },
         {
           "end": 41,
           "occurrence": 1,
@@ -6186,6 +7122,15 @@
           "uid": "vfr-0230"
         },
         {
+          "end": 17,
+          "occurrence": 1,
+          "sourceCz": "chléb",
+          "sourceFr": "pain",
+          "start": 13,
+          "text": "pain",
+          "uid": "vfr-0466"
+        },
+        {
           "end": 23,
           "occurrence": 1,
           "sourceCz": "čerstvý, nově vyrobený; chladivý",
@@ -6220,6 +7165,15 @@
           "start": 4,
           "text": "livrent",
           "uid": "vfr-0231"
+        },
+        {
+          "end": 22,
+          "occurrence": 1,
+          "sourceCz": "květina",
+          "sourceFr": "fleur",
+          "start": 16,
+          "text": "fleurs",
+          "uid": "vfr-0479"
         }
       ],
       "reviewed": true,
@@ -6312,6 +7266,15 @@
           "uid": "vfr-0235"
         },
         {
+          "end": 23,
+          "occurrence": 1,
+          "sourceCz": "po, potom",
+          "sourceFr": "après",
+          "start": 18,
+          "text": "après",
+          "uid": "vfr-0474"
+        },
+        {
           "end": 32,
           "occurrence": 1,
           "sourceCz": "jídlo",
@@ -6337,6 +7300,15 @@
           "start": 4,
           "text": "amie",
           "uid": "vfr-0236"
+        },
+        {
+          "end": 15,
+          "occurrence": 1,
+          "sourceCz": "přijet, přijít, dorazit",
+          "sourceFr": "arriver",
+          "start": 9,
+          "text": "arrive",
+          "uid": "vfr-0473"
         },
         {
           "end": 28,
@@ -6400,6 +7372,15 @@
           "start": 6,
           "text": "table",
           "uid": "vfr-0140"
+        },
+        {
+          "end": 34,
+          "occurrence": 1,
+          "sourceCz": "okno",
+          "sourceFr": "fenêtre",
+          "start": 27,
+          "text": "fenêtre",
+          "uid": "vfr-0470"
         }
       ],
       "reviewed": true,
@@ -6490,6 +7471,15 @@
           "start": 5,
           "text": "allons",
           "uid": "vfr-0242"
+        },
+        {
+          "end": 21,
+          "occurrence": 1,
+          "sourceCz": "trh",
+          "sourceFr": "marché",
+          "start": 15,
+          "text": "marché",
+          "uid": "vfr-0471"
         }
       ],
       "reviewed": true,
@@ -6654,6 +7644,15 @@
           "uid": "vfr-0249"
         },
         {
+          "end": 18,
+          "occurrence": 1,
+          "sourceCz": "zavřít, zavírat",
+          "sourceFr": "fermer",
+          "start": 13,
+          "text": "ferme",
+          "uid": "vfr-0475"
+        },
+        {
           "end": 33,
           "occurrence": 1,
           "sourceCz": "hodina; čas (na hodinách)",
@@ -6671,6 +7670,15 @@
     },
     "vfr-0250": {
       "concepts": [
+        {
+          "end": 8,
+          "occurrence": 1,
+          "sourceCz": "polévka",
+          "sourceFr": "soupe",
+          "start": 3,
+          "text": "soupe",
+          "uid": "vfr-0468"
+        },
         {
           "end": 18,
           "occurrence": 1,
@@ -6778,6 +7786,15 @@
           "start": 8,
           "text": "coûte",
           "uid": "vfr-0254"
+        },
+        {
+          "end": 21,
+          "occurrence": 1,
+          "sourceCz": "chléb",
+          "sourceFr": "pain",
+          "start": 17,
+          "text": "pain",
+          "uid": "vfr-0466"
         }
       ],
       "reviewed": true,
@@ -6897,6 +7914,15 @@
     "vfr-0258": {
       "concepts": [
         {
+          "end": 11,
+          "occurrence": 1,
+          "sourceCz": "zelenina",
+          "sourceFr": "légumes",
+          "start": 4,
+          "text": "légumes",
+          "uid": "vfr-0358"
+        },
+        {
           "end": 17,
           "occurrence": 1,
           "sourceCz": "čerstvý, nově vyrobený; chladivý",
@@ -6904,13 +7930,31 @@
           "start": 12,
           "text": "frais",
           "uid": "vfr-0258"
+        },
+        {
+          "end": 27,
+          "occurrence": 1,
+          "sourceCz": "v, ve",
+          "sourceFr": "dans",
+          "start": 23,
+          "text": "dans",
+          "uid": "vfr-0130"
+        },
+        {
+          "end": 34,
+          "occurrence": 1,
+          "sourceCz": "taška",
+          "sourceFr": "sac",
+          "start": 31,
+          "text": "sac",
+          "uid": "vfr-0128"
         }
       ],
       "reviewed": true,
       "sourceCz": "čerstvý, nově vyrobený; chladivý",
       "sourceFr": "frais",
-      "sourceSentenceCz": "Chléb je čerstvý.",
-      "sourceSentenceFr": "Le pain est frais."
+      "sourceSentenceCz": "Čerstvá zelenina je v tašce.",
+      "sourceSentenceFr": "Les légumes frais sont dans le sac."
     },
     "vfr-0259": {
       "concepts": [
@@ -6922,6 +7966,15 @@
           "start": 11,
           "text": "beurre",
           "uid": "vfr-0259"
+        },
+        {
+          "end": 29,
+          "occurrence": 1,
+          "sourceCz": "chléb",
+          "sourceFr": "pain",
+          "start": 25,
+          "text": "pain",
+          "uid": "vfr-0466"
         }
       ],
       "reviewed": true,
@@ -7093,6 +8146,15 @@
           "start": 3,
           "text": "cousine",
           "uid": "vfr-0266"
+        },
+        {
+          "end": 26,
+          "occurrence": 1,
+          "sourceCz": "hudba",
+          "sourceFr": "musique",
+          "start": 19,
+          "text": "musique",
+          "uid": "vfr-0478"
         }
       ],
       "reviewed": true,
@@ -7248,20 +8310,47 @@
     "vfr-0273": {
       "concepts": [
         {
-          "end": 19,
+          "end": 11,
           "occurrence": 1,
           "sourceCz": "sirka",
           "sourceFr": "allumette",
-          "start": 10,
+          "start": 2,
           "text": "allumette",
           "uid": "vfr-0273"
+        },
+        {
+          "end": 20,
+          "occurrence": 1,
+          "sourceCz": "v, ve",
+          "sourceFr": "dans",
+          "start": 16,
+          "text": "dans",
+          "uid": "vfr-0130"
+        },
+        {
+          "end": 29,
+          "occurrence": 1,
+          "sourceCz": "kapsa",
+          "sourceFr": "poche",
+          "start": 24,
+          "text": "poche",
+          "uid": "vfr-0129"
+        },
+        {
+          "end": 41,
+          "occurrence": 1,
+          "sourceCz": "bunda",
+          "sourceFr": "veste",
+          "start": 36,
+          "text": "veste",
+          "uid": "vfr-0427"
         }
       ],
       "reviewed": true,
       "sourceCz": "sirka",
       "sourceFr": "allumette",
-      "sourceSentenceCz": "Tady je sirka.",
-      "sourceSentenceFr": "Voici une allumette."
+      "sourceSentenceCz": "Sirka je v kapse mé bundy.",
+      "sourceSentenceFr": "L'allumette est dans la poche de ma veste."
     },
     "vfr-0274": {
       "concepts": [
@@ -7545,20 +8634,56 @@
     "vfr-0286": {
       "concepts": [
         {
-          "end": 20,
+          "end": 5,
+          "occurrence": 1,
+          "sourceCz": "vaše, Vaše",
+          "sourceFr": "votre",
+          "start": 0,
+          "text": "Votre",
+          "uid": "vfr-0238"
+        },
+        {
+          "end": 14,
           "occurrence": 1,
           "sourceCz": "objednávka, zakázka",
           "sourceFr": "commande",
-          "start": 12,
+          "start": 6,
           "text": "commande",
           "uid": "vfr-0286"
+        },
+        {
+          "end": 24,
+          "occurrence": 1,
+          "sourceCz": "připravená",
+          "sourceFr": "prête",
+          "start": 19,
+          "text": "prête",
+          "uid": "vfr-0122"
+        },
+        {
+          "end": 28,
+          "occurrence": 1,
+          "sourceCz": "na",
+          "sourceFr": "sur",
+          "start": 25,
+          "text": "sur",
+          "uid": "vfr-0002"
+        },
+        {
+          "end": 37,
+          "occurrence": 1,
+          "sourceCz": "stůl",
+          "sourceFr": "table",
+          "start": 32,
+          "text": "table",
+          "uid": "vfr-0140"
         }
       ],
       "reviewed": true,
       "sourceCz": "objednávka, zakázka",
       "sourceFr": "commande",
-      "sourceSentenceCz": "Tady je vaše objednávka.",
-      "sourceSentenceFr": "Voici votre commande."
+      "sourceSentenceCz": "Vaše objednávka je připravená na stole.",
+      "sourceSentenceFr": "Votre commande est prête sur la table."
     },
     "vfr-0287": {
       "concepts": [
@@ -7698,6 +8823,15 @@
           "uid": "vfr-0291"
         },
         {
+          "end": 26,
+          "occurrence": 1,
+          "sourceCz": "po, potom",
+          "sourceFr": "après",
+          "start": 21,
+          "text": "après",
+          "uid": "vfr-0474"
+        },
+        {
           "end": 38,
           "occurrence": 1,
           "sourceCz": "obědvat, oběd",
@@ -7723,6 +8857,15 @@
           "start": 3,
           "text": "bois",
           "uid": "vfr-0201"
+        },
+        {
+          "end": 16,
+          "occurrence": 1,
+          "sourceCz": "káva",
+          "sourceFr": "café",
+          "start": 12,
+          "text": "café",
+          "uid": "vfr-0465"
         },
         {
           "end": 32,
@@ -7867,6 +9010,15 @@
           "start": 6,
           "text": "invité",
           "uid": "vfr-0297"
+        },
+        {
+          "end": 19,
+          "occurrence": 1,
+          "sourceCz": "přijet, přijít, dorazit",
+          "sourceFr": "arriver",
+          "start": 13,
+          "text": "arrive",
+          "uid": "vfr-0473"
         },
         {
           "end": 33,
@@ -8031,6 +9183,15 @@
           "uid": "vfr-0302"
         },
         {
+          "end": 29,
+          "occurrence": 1,
+          "sourceCz": "po, potom",
+          "sourceFr": "après",
+          "start": 24,
+          "text": "après",
+          "uid": "vfr-0474"
+        },
+        {
           "end": 38,
           "occurrence": 1,
           "sourceCz": "večeře",
@@ -8049,6 +9210,15 @@
     "vfr-0303": {
       "concepts": [
         {
+          "end": 10,
+          "occurrence": 1,
+          "sourceCz": "sýr",
+          "sourceFr": "fromage",
+          "start": 3,
+          "text": "fromage",
+          "uid": "vfr-0469"
+        },
+        {
           "end": 24,
           "occurrence": 1,
           "sourceCz": "vynikající",
@@ -8056,6 +9226,15 @@
           "start": 15,
           "text": "excellent",
           "uid": "vfr-0303"
+        },
+        {
+          "end": 37,
+          "occurrence": 1,
+          "sourceCz": "chléb",
+          "sourceFr": "pain",
+          "start": 33,
+          "text": "pain",
+          "uid": "vfr-0466"
         },
         {
           "end": 43,
@@ -8094,6 +9273,15 @@
           "uid": "vfr-0304"
         },
         {
+          "end": 25,
+          "occurrence": 1,
+          "sourceCz": "káva",
+          "sourceFr": "café",
+          "start": 21,
+          "text": "café",
+          "uid": "vfr-0465"
+        },
+        {
           "end": 33,
           "occurrence": 1,
           "sourceCz": "večer - část dne",
@@ -8121,6 +9309,15 @@
           "uid": "vfr-0305"
         },
         {
+          "end": 30,
+          "occurrence": 1,
+          "sourceCz": "přijet, přijít, dorazit",
+          "sourceFr": "arriver",
+          "start": 23,
+          "text": "arriver",
+          "uid": "vfr-0473"
+        },
+        {
           "end": 40,
           "occurrence": 1,
           "sourceCz": "zpoždění, pozdě",
@@ -8146,6 +9343,15 @@
           "start": 7,
           "text": "cuisiner",
           "uid": "vfr-0306"
+        },
+        {
+          "end": 25,
+          "occurrence": 1,
+          "sourceCz": "polévka",
+          "sourceFr": "soupe",
+          "start": 20,
+          "text": "soupe",
+          "uid": "vfr-0468"
         }
       ],
       "reviewed": true,
@@ -8191,6 +9397,15 @@
           "start": 30,
           "text": "ami",
           "uid": "vfr-0204"
+        },
+        {
+          "end": 38,
+          "occurrence": 1,
+          "sourceCz": "odejít, odjet",
+          "sourceFr": "partir",
+          "start": 34,
+          "text": "part",
+          "uid": "vfr-0476"
         }
       ],
       "reviewed": true,
@@ -8209,6 +9424,15 @@
           "start": 18,
           "text": "argent",
           "uid": "vfr-0309"
+        },
+        {
+          "end": 39,
+          "occurrence": 1,
+          "sourceCz": "trh",
+          "sourceFr": "marché",
+          "start": 33,
+          "text": "marché",
+          "uid": "vfr-0471"
         }
       ],
       "reviewed": true,
@@ -8580,6 +9804,15 @@
     "vfr-0323": {
       "concepts": [
         {
+          "end": 11,
+          "occurrence": 1,
+          "sourceCz": "polévka",
+          "sourceFr": "soupe",
+          "start": 6,
+          "text": "soupe",
+          "uid": "vfr-0468"
+        },
+        {
           "end": 21,
           "occurrence": 1,
           "sourceCz": "dobrý / dobrá",
@@ -8677,6 +9910,15 @@
           "start": 0,
           "text": "Merci pour",
           "uid": "vfr-0327"
+        },
+        {
+          "end": 18,
+          "occurrence": 1,
+          "sourceCz": "káva",
+          "sourceFr": "café",
+          "start": 14,
+          "text": "café",
+          "uid": "vfr-0465"
         },
         {
           "end": 31,
@@ -8814,6 +10056,15 @@
     "vfr-0332": {
       "concepts": [
         {
+          "end": 8,
+          "occurrence": 1,
+          "sourceCz": "polévka",
+          "sourceFr": "soupe",
+          "start": 3,
+          "text": "soupe",
+          "uid": "vfr-0468"
+        },
+        {
           "end": 26,
           "occurrence": 1,
           "sourceCz": "horký / horká",
@@ -8850,6 +10101,15 @@
     "vfr-0334": {
       "concepts": [
         {
+          "end": 8,
+          "occurrence": 1,
+          "sourceCz": "přijet, přijít, dorazit",
+          "sourceFr": "arriver",
+          "start": 2,
+          "text": "arrive",
+          "uid": "vfr-0473"
+        },
+        {
           "end": 14,
           "occurrence": 1,
           "sourceCz": "přesně, správně, zrovna",
@@ -8857,6 +10117,15 @@
           "start": 9,
           "text": "juste",
           "uid": "vfr-0334"
+        },
+        {
+          "end": 20,
+          "occurrence": 1,
+          "sourceCz": "po, potom",
+          "sourceFr": "après",
+          "start": 15,
+          "text": "après",
+          "uid": "vfr-0474"
         },
         {
           "end": 32,
@@ -8884,6 +10153,15 @@
           "start": 3,
           "text": "magasin",
           "uid": "vfr-0335"
+        },
+        {
+          "end": 16,
+          "occurrence": 1,
+          "sourceCz": "zavřít, zavírat",
+          "sourceFr": "fermer",
+          "start": 11,
+          "text": "ferme",
+          "uid": "vfr-0475"
         },
         {
           "end": 29,
@@ -9057,6 +10335,15 @@
           "uid": "vfr-0341"
         },
         {
+          "end": 31,
+          "occurrence": 1,
+          "sourceCz": "po, potom",
+          "sourceFr": "après",
+          "start": 26,
+          "text": "après",
+          "uid": "vfr-0474"
+        },
+        {
           "end": 40,
           "occurrence": 1,
           "sourceCz": "večeře",
@@ -9100,6 +10387,15 @@
           "start": 0,
           "text": "Quand",
           "uid": "vfr-0343"
+        },
+        {
+          "end": 10,
+          "occurrence": 1,
+          "sourceCz": "odejít, odjet",
+          "sourceFr": "partir",
+          "start": 6,
+          "text": "pars",
+          "uid": "vfr-0476"
         }
       ],
       "reviewed": true,
@@ -9118,6 +10414,15 @@
           "start": 10,
           "text": "quand",
           "uid": "vfr-0344"
+        },
+        {
+          "end": 24,
+          "occurrence": 1,
+          "sourceCz": "přijet, přijít, dorazit",
+          "sourceFr": "arriver",
+          "start": 18,
+          "text": "arrive",
+          "uid": "vfr-0473"
         },
         {
           "end": 34,
@@ -9145,6 +10450,24 @@
           "start": 0,
           "text": "Enfin",
           "uid": "vfr-0345"
+        },
+        {
+          "end": 15,
+          "occurrence": 1,
+          "sourceCz": "vlak",
+          "sourceFr": "train",
+          "start": 10,
+          "text": "train",
+          "uid": "vfr-0467"
+        },
+        {
+          "end": 22,
+          "occurrence": 1,
+          "sourceCz": "přijet, přijít, dorazit",
+          "sourceFr": "arriver",
+          "start": 16,
+          "text": "arrive",
+          "uid": "vfr-0473"
         },
         {
           "end": 32,
@@ -9388,6 +10711,15 @@
           "start": 0,
           "text": "À plus tard",
           "uid": "vfr-0353"
+        },
+        {
+          "end": 27,
+          "occurrence": 1,
+          "sourceCz": "odejít, odjet",
+          "sourceFr": "partir",
+          "start": 21,
+          "text": "partir",
+          "uid": "vfr-0476"
         }
       ],
       "reviewed": true,
@@ -9577,6 +10909,15 @@
           "start": 11,
           "text": "supermarché",
           "uid": "vfr-0360"
+        },
+        {
+          "end": 28,
+          "occurrence": 1,
+          "sourceCz": "po, potom",
+          "sourceFr": "après",
+          "start": 23,
+          "text": "après",
+          "uid": "vfr-0474"
         },
         {
           "end": 39,
@@ -9822,6 +11163,15 @@
     "vfr-0370": {
       "concepts": [
         {
+          "end": 13,
+          "occurrence": 1,
+          "sourceCz": "film",
+          "sourceFr": "film",
+          "start": 9,
+          "text": "film",
+          "uid": "vfr-0477"
+        },
+        {
           "end": 20,
           "occurrence": 1,
           "sourceCz": "skvělé, skvělá, paráda",
@@ -9884,6 +11234,15 @@
     },
     "vfr-0373": {
       "concepts": [
+        {
+          "end": 12,
+          "occurrence": 1,
+          "sourceCz": "odejít, odjet",
+          "sourceFr": "partir",
+          "start": 5,
+          "text": "partons",
+          "uid": "vfr-0476"
+        },
         {
           "end": 24,
           "occurrence": 1,
@@ -10164,38 +11523,47 @@
     "vfr-0385": {
       "concepts": [
         {
-          "end": 20,
+          "end": 11,
+          "occurrence": 1,
+          "sourceCz": "nový, nová",
+          "sourceFr": "nouveau, nouvelle",
+          "start": 4,
+          "text": "nouveau",
+          "uid": "vfr-0385"
+        },
+        {
+          "end": 16,
           "occurrence": 1,
           "sourceCz": "jízdní kolo",
           "sourceFr": "vélo",
-          "start": 16,
+          "start": 12,
           "text": "vélo",
           "uid": "vfr-0325"
         },
         {
-          "end": 43,
+          "end": 27,
           "occurrence": 1,
-          "sourceCz": "nový, nová",
-          "sourceFr": "nouveau, nouvelle",
-          "start": 35,
-          "text": "nouvelle",
-          "uid": "vfr-0385"
+          "sourceCz": "před",
+          "sourceFr": "devant",
+          "start": 21,
+          "text": "devant",
+          "uid": "vfr-0228"
         },
         {
-          "end": 48,
+          "end": 45,
           "occurrence": 1,
-          "sourceCz": "šaty, róba",
-          "sourceFr": "robe",
-          "start": 44,
-          "text": "robe",
-          "uid": "vfr-0099"
+          "sourceCz": "škola",
+          "sourceFr": "école",
+          "start": 40,
+          "text": "école",
+          "uid": "vfr-0175"
         }
       ],
       "reviewed": true,
       "sourceCz": "nový, nová",
       "sourceFr": "nouveau, nouvelle",
-      "sourceSentenceCz": "On má nové kolo a ona má nové šaty.",
-      "sourceSentenceFr": "Il a un nouveau vélo et elle a une nouvelle robe."
+      "sourceSentenceCz": "Moje nové kolo je před novou školou.",
+      "sourceSentenceFr": "Mon nouveau vélo est devant la nouvelle école."
     },
     "vfr-0386": {
       "concepts": [
@@ -10281,6 +11649,15 @@
     "vfr-0390": {
       "concepts": [
         {
+          "end": 5,
+          "occurrence": 1,
+          "sourceCz": "tato, tahle",
+          "sourceFr": "cette",
+          "start": 0,
+          "text": "Cette",
+          "uid": "vfr-0449"
+        },
+        {
           "end": 13,
           "occurrence": 1,
           "sourceCz": "recept",
@@ -10288,13 +11665,40 @@
           "start": 6,
           "text": "recette",
           "uid": "vfr-0390"
+        },
+        {
+          "end": 23,
+          "occurrence": 1,
+          "sourceCz": "dort",
+          "sourceFr": "gâteau",
+          "start": 17,
+          "text": "gâteau",
+          "uid": "vfr-0005"
+        },
+        {
+          "end": 32,
+          "occurrence": 1,
+          "sourceCz": "v, ve",
+          "sourceFr": "dans",
+          "start": 28,
+          "text": "dans",
+          "uid": "vfr-0130"
+        },
+        {
+          "end": 43,
+          "occurrence": 1,
+          "sourceCz": "sešit, periodikum",
+          "sourceFr": "cahier",
+          "start": 37,
+          "text": "cahier",
+          "uid": "vfr-0268"
         }
       ],
       "reviewed": true,
       "sourceCz": "recept",
       "sourceFr": "recette",
-      "sourceSentenceCz": "Tento recept je snadný.",
-      "sourceSentenceFr": "Cette recette est facile."
+      "sourceSentenceCz": "Tento recept na dort je v mém sešitě.",
+      "sourceSentenceFr": "Cette recette de gâteau est dans mon cahier."
     },
     "vfr-0391": {
       "concepts": [
@@ -10351,13 +11755,40 @@
           "start": 3,
           "text": "montre",
           "uid": "vfr-0393"
+        },
+        {
+          "end": 17,
+          "occurrence": 1,
+          "sourceCz": "mapa (města)",
+          "sourceFr": "plan",
+          "start": 13,
+          "text": "plan",
+          "uid": "vfr-0339"
+        },
+        {
+          "end": 29,
+          "occurrence": 1,
+          "sourceCz": "město",
+          "sourceFr": "ville",
+          "start": 24,
+          "text": "ville",
+          "uid": "vfr-0194"
+        },
+        {
+          "end": 42,
+          "occurrence": 1,
+          "sourceCz": "řidič",
+          "sourceFr": "chauffeur",
+          "start": 33,
+          "text": "chauffeur",
+          "uid": "vfr-0209"
         }
       ],
       "reviewed": true,
       "sourceCz": "ukázat",
       "sourceFr": "montrer",
-      "sourceSentenceCz": "Ukazuji fotku.",
-      "sourceSentenceFr": "Je montre une photo."
+      "sourceSentenceCz": "Ukazuji řidiči plán města.",
+      "sourceSentenceFr": "Je montre le plan de la ville au chauffeur."
     },
     "vfr-0394": {
       "concepts": [
@@ -10369,6 +11800,15 @@
           "start": 3,
           "text": "livraison",
           "uid": "vfr-0394"
+        },
+        {
+          "end": 19,
+          "occurrence": 1,
+          "sourceCz": "přijet, přijít, dorazit",
+          "sourceFr": "arriver",
+          "start": 13,
+          "text": "arrive",
+          "uid": "vfr-0473"
         }
       ],
       "reviewed": true,
@@ -10558,13 +11998,31 @@
           "start": 3,
           "text": "course",
           "uid": "vfr-0402"
+        },
+        {
+          "end": 25,
+          "occurrence": 1,
+          "sourceCz": "před",
+          "sourceFr": "devant",
+          "start": 19,
+          "text": "devant",
+          "uid": "vfr-0228"
+        },
+        {
+          "end": 34,
+          "occurrence": 1,
+          "sourceCz": "stadion",
+          "sourceFr": "stade",
+          "start": 29,
+          "text": "stade",
+          "uid": "vfr-0398"
         }
       ],
       "reviewed": true,
       "sourceCz": "závody, měření sil",
       "sourceFr": "course",
-      "sourceSentenceCz": "Závod začíná.",
-      "sourceSentenceFr": "La course commence."
+      "sourceSentenceCz": "Závod začíná před stadionem.",
+      "sourceSentenceFr": "La course commence devant le stade."
     },
     "vfr-0403": {
       "concepts": [
@@ -10630,6 +12088,15 @@
           "start": 12,
           "text": "sortir",
           "uid": "vfr-0405"
+        },
+        {
+          "end": 24,
+          "occurrence": 1,
+          "sourceCz": "po, potom",
+          "sourceFr": "après",
+          "start": 19,
+          "text": "après",
+          "uid": "vfr-0474"
         },
         {
           "end": 36,
@@ -10702,6 +12169,15 @@
           "start": 23,
           "text": "télé",
           "uid": "vfr-0407"
+        },
+        {
+          "end": 43,
+          "occurrence": 1,
+          "sourceCz": "rodina",
+          "sourceFr": "famille",
+          "start": 36,
+          "text": "famille",
+          "uid": "vfr-0481"
         }
       ],
       "reviewed": true,
@@ -10720,6 +12196,15 @@
           "start": 8,
           "text": "acheter",
           "uid": "vfr-0408"
+        },
+        {
+          "end": 23,
+          "occurrence": 1,
+          "sourceCz": "chléb",
+          "sourceFr": "pain",
+          "start": 19,
+          "text": "pain",
+          "uid": "vfr-0466"
         },
         {
           "end": 40,
@@ -10884,6 +12369,15 @@
     "vfr-0413": {
       "concepts": [
         {
+          "end": 7,
+          "occurrence": 1,
+          "sourceCz": "film",
+          "sourceFr": "film",
+          "start": 3,
+          "text": "film",
+          "uid": "vfr-0477"
+        },
+        {
           "end": 15,
           "occurrence": 1,
           "sourceCz": "hrozný; mizerný",
@@ -10965,11 +12459,29 @@
     "vfr-0416": {
       "concepts": [
         {
-          "end": 26,
+          "end": 8,
+          "occurrence": 1,
+          "sourceCz": "kniha",
+          "sourceFr": "livre",
+          "start": 3,
+          "text": "livre",
+          "uid": "vfr-0188"
+        },
+        {
+          "end": 17,
+          "occurrence": 1,
+          "sourceCz": "matika",
+          "sourceFr": "maths",
+          "start": 12,
+          "text": "maths",
+          "uid": "vfr-0384"
+        },
+        {
+          "end": 31,
           "occurrence": 1,
           "sourceCz": "těžký, nesnadný, obtížný",
           "sourceFr": "difficile",
-          "start": 17,
+          "start": 22,
           "text": "difficile",
           "uid": "vfr-0416"
         }
@@ -10977,11 +12489,20 @@
       "reviewed": true,
       "sourceCz": "těžký, nesnadný, obtížný",
       "sourceFr": "difficile",
-      "sourceSentenceCz": "Toto cvičení je obtížné.",
-      "sourceSentenceFr": "Cet exercice est difficile."
+      "sourceSentenceCz": "Tato učebnice matematiky je obtížná.",
+      "sourceSentenceFr": "Ce livre de maths est difficile."
     },
     "vfr-0417": {
       "concepts": [
+        {
+          "end": 11,
+          "occurrence": 1,
+          "sourceCz": "chtěl bych",
+          "sourceFr": "je voudrais",
+          "start": 0,
+          "text": "Je voudrais",
+          "uid": "vfr-0025"
+        },
         {
           "end": 25,
           "occurrence": 1,
@@ -11008,6 +12529,15 @@
           "start": 6,
           "text": "vol",
           "uid": "vfr-0418"
+        },
+        {
+          "end": 14,
+          "occurrence": 1,
+          "sourceCz": "odejít, odjet",
+          "sourceFr": "partir",
+          "start": 10,
+          "text": "part",
+          "uid": "vfr-0476"
         },
         {
           "end": 28,
@@ -11109,6 +12639,15 @@
           "uid": "vfr-0183"
         },
         {
+          "end": 18,
+          "occurrence": 1,
+          "sourceCz": "káva",
+          "sourceFr": "café",
+          "start": 14,
+          "text": "café",
+          "uid": "vfr-0465"
+        },
+        {
           "end": 23,
           "occurrence": 1,
           "sourceCz": "bez",
@@ -11134,6 +12673,15 @@
           "start": 5,
           "text": "soif",
           "uid": "vfr-0423"
+        },
+        {
+          "end": 15,
+          "occurrence": 1,
+          "sourceCz": "po, potom",
+          "sourceFr": "après",
+          "start": 10,
+          "text": "après",
+          "uid": "vfr-0474"
         }
       ],
       "reviewed": true,
@@ -11298,6 +12846,15 @@
           "uid": "vfr-0429"
         },
         {
+          "end": 38,
+          "occurrence": 1,
+          "sourceCz": "po, potom",
+          "sourceFr": "après",
+          "start": 33,
+          "text": "après",
+          "uid": "vfr-0474"
+        },
+        {
           "end": 47,
           "occurrence": 1,
           "sourceCz": "jídlo",
@@ -11378,6 +12935,15 @@
     },
     "vfr-0433": {
       "concepts": [
+        {
+          "end": 18,
+          "occurrence": 1,
+          "sourceCz": "káva",
+          "sourceFr": "café",
+          "start": 14,
+          "text": "café",
+          "uid": "vfr-0465"
+        },
         {
           "end": 28,
           "occurrence": 1,
@@ -12257,6 +13823,780 @@
       "sourceFr": "belle avec",
       "sourceSentenceCz": "S tímto kloboukem ti to sluší.",
       "sourceSentenceFr": "Tu es belle avec ce chapeau."
+    },
+    "vfr-0465": {
+      "concepts": [
+        {
+          "end": 9,
+          "occurrence": 1,
+          "sourceCz": "brát; vzít; dát si (jídlo, pití)",
+          "sourceFr": "prendre",
+          "start": 3,
+          "text": "prends",
+          "uid": "vfr-0183"
+        },
+        {
+          "end": 17,
+          "occurrence": 1,
+          "sourceCz": "káva",
+          "sourceFr": "café",
+          "start": 13,
+          "text": "café",
+          "uid": "vfr-0465"
+        },
+        {
+          "end": 22,
+          "occurrence": 1,
+          "sourceCz": "s, se",
+          "sourceFr": "avec",
+          "start": 18,
+          "text": "avec",
+          "uid": "vfr-0117"
+        },
+        {
+          "end": 30,
+          "occurrence": 1,
+          "sourceCz": "sestra",
+          "sourceFr": "sœur",
+          "start": 26,
+          "text": "sœur",
+          "uid": "vfr-0059"
+        }
+      ],
+      "reviewed": true,
+      "sourceCz": "káva",
+      "sourceFr": "café",
+      "sourceSentenceCz": "Dám si se sestrou kávu.",
+      "sourceSentenceFr": "Je prends un café avec ma sœur."
+    },
+    "vfr-0466": {
+      "concepts": [
+        {
+          "end": 7,
+          "occurrence": 1,
+          "sourceCz": "chléb",
+          "sourceFr": "pain",
+          "start": 3,
+          "text": "pain",
+          "uid": "vfr-0466"
+        },
+        {
+          "end": 17,
+          "occurrence": 1,
+          "sourceCz": "čerstvý, nově vyrobený; chladivý",
+          "sourceFr": "frais",
+          "start": 12,
+          "text": "frais",
+          "uid": "vfr-0258"
+        },
+        {
+          "end": 22,
+          "occurrence": 1,
+          "sourceCz": "v, ve",
+          "sourceFr": "dans",
+          "start": 18,
+          "text": "dans",
+          "uid": "vfr-0130"
+        },
+        {
+          "end": 28,
+          "occurrence": 1,
+          "sourceCz": "tato, tahle",
+          "sourceFr": "cette",
+          "start": 23,
+          "text": "cette",
+          "uid": "vfr-0449"
+        },
+        {
+          "end": 40,
+          "occurrence": 1,
+          "sourceCz": "pekárna",
+          "sourceFr": "boulangerie",
+          "start": 29,
+          "text": "boulangerie",
+          "uid": "vfr-0210"
+        }
+      ],
+      "reviewed": true,
+      "sourceCz": "chléb",
+      "sourceFr": "pain",
+      "sourceSentenceCz": "Chléb je v této pekárně čerstvý.",
+      "sourceSentenceFr": "Le pain est frais dans cette boulangerie."
+    },
+    "vfr-0467": {
+      "concepts": [
+        {
+          "end": 8,
+          "occurrence": 1,
+          "sourceCz": "vlak",
+          "sourceFr": "train",
+          "start": 3,
+          "text": "train",
+          "uid": "vfr-0467"
+        },
+        {
+          "end": 22,
+          "occurrence": 1,
+          "sourceCz": "zpoždění, pozdě",
+          "sourceFr": "retard",
+          "start": 16,
+          "text": "retard",
+          "uid": "vfr-0126"
+        },
+        {
+          "end": 31,
+          "occurrence": 1,
+          "sourceCz": "ráno",
+          "sourceFr": "matin",
+          "start": 26,
+          "text": "matin",
+          "uid": "vfr-0409"
+        }
+      ],
+      "reviewed": true,
+      "sourceCz": "vlak",
+      "sourceFr": "train",
+      "sourceSentenceCz": "Vlak má dnes ráno zpoždění.",
+      "sourceSentenceFr": "Le train est en retard ce matin."
+    },
+    "vfr-0468": {
+      "concepts": [
+        {
+          "end": 8,
+          "occurrence": 1,
+          "sourceCz": "teta",
+          "sourceFr": "tante",
+          "start": 3,
+          "text": "tante",
+          "uid": "vfr-0044"
+        },
+        {
+          "end": 16,
+          "occurrence": 1,
+          "sourceCz": "připravovat",
+          "sourceFr": "préparer",
+          "start": 9,
+          "text": "prépare",
+          "uid": "vfr-0246"
+        },
+        {
+          "end": 26,
+          "occurrence": 1,
+          "sourceCz": "polévka",
+          "sourceFr": "soupe",
+          "start": 21,
+          "text": "soupe",
+          "uid": "vfr-0468"
+        },
+        {
+          "end": 37,
+          "occurrence": 1,
+          "sourceCz": "zelenina",
+          "sourceFr": "légumes",
+          "start": 30,
+          "text": "légumes",
+          "uid": "vfr-0358"
+        }
+      ],
+      "reviewed": true,
+      "sourceCz": "polévka",
+      "sourceFr": "soupe",
+      "sourceSentenceCz": "Moje teta připravuje zeleninovou polévku.",
+      "sourceSentenceFr": "Ma tante prépare une soupe de légumes."
+    },
+    "vfr-0469": {
+      "concepts": [
+        {
+          "end": 9,
+          "occurrence": 1,
+          "sourceCz": "brát; vzít; dát si (jídlo, pití)",
+          "sourceFr": "prendre",
+          "start": 3,
+          "text": "prends",
+          "uid": "vfr-0183"
+        },
+        {
+          "end": 20,
+          "occurrence": 1,
+          "sourceCz": "sýr",
+          "sourceFr": "fromage",
+          "start": 13,
+          "text": "fromage",
+          "uid": "vfr-0469"
+        },
+        {
+          "end": 25,
+          "occurrence": 1,
+          "sourceCz": "s, se",
+          "sourceFr": "avec",
+          "start": 21,
+          "text": "avec",
+          "uid": "vfr-0117"
+        },
+        {
+          "end": 35,
+          "occurrence": 1,
+          "sourceCz": "jídlo",
+          "sourceFr": "repas",
+          "start": 30,
+          "text": "repas",
+          "uid": "vfr-0245"
+        }
+      ],
+      "reviewed": true,
+      "sourceCz": "sýr",
+      "sourceFr": "fromage",
+      "sourceSentenceCz": "Dám si k jídlu sýr.",
+      "sourceSentenceFr": "Je prends du fromage avec mon repas."
+    },
+    "vfr-0470": {
+      "concepts": [
+        {
+          "end": 7,
+          "occurrence": 1,
+          "sourceCz": "kočka",
+          "sourceFr": "chat",
+          "start": 3,
+          "text": "chat",
+          "uid": "vfr-0143"
+        },
+        {
+          "end": 12,
+          "occurrence": 1,
+          "sourceCz": "spát",
+          "sourceFr": "dormir",
+          "start": 8,
+          "text": "dort",
+          "uid": "vfr-0439"
+        },
+        {
+          "end": 20,
+          "occurrence": 1,
+          "sourceCz": "blízko u",
+          "sourceFr": "près de",
+          "start": 13,
+          "text": "près de",
+          "uid": "vfr-0260"
+        },
+        {
+          "end": 31,
+          "occurrence": 1,
+          "sourceCz": "okno",
+          "sourceFr": "fenêtre",
+          "start": 24,
+          "text": "fenêtre",
+          "uid": "vfr-0470"
+        }
+      ],
+      "reviewed": true,
+      "sourceCz": "okno",
+      "sourceFr": "fenêtre",
+      "sourceSentenceCz": "Kočka spí u okna.",
+      "sourceSentenceFr": "Le chat dort près de la fenêtre."
+    },
+    "vfr-0471": {
+      "concepts": [
+        {
+          "end": 11,
+          "occurrence": 1,
+          "sourceCz": "jít; jet",
+          "sourceFr": "aller",
+          "start": 5,
+          "text": "allons",
+          "uid": "vfr-0242"
+        },
+        {
+          "end": 21,
+          "occurrence": 1,
+          "sourceCz": "trh",
+          "sourceFr": "marché",
+          "start": 15,
+          "text": "marché",
+          "uid": "vfr-0471"
+        },
+        {
+          "end": 26,
+          "occurrence": 1,
+          "sourceCz": "s, se",
+          "sourceFr": "avec",
+          "start": 22,
+          "text": "avec",
+          "uid": "vfr-0117"
+        },
+        {
+          "end": 35,
+          "occurrence": 1,
+          "sourceCz": "taška",
+          "sourceFr": "sac",
+          "start": 31,
+          "text": "sacs",
+          "uid": "vfr-0128"
+        }
+      ],
+      "reviewed": true,
+      "sourceCz": "trh",
+      "sourceFr": "marché",
+      "sourceSentenceCz": "Jdeme na trh s taškami.",
+      "sourceSentenceFr": "Nous allons au marché avec nos sacs."
+    },
+    "vfr-0472": {
+      "concepts": [
+        {
+          "end": 8,
+          "occurrence": 1,
+          "sourceCz": "dcera",
+          "sourceFr": "fille",
+          "start": 3,
+          "text": "fille",
+          "uid": "vfr-0041"
+        },
+        {
+          "end": 13,
+          "occurrence": 1,
+          "sourceCz": "moci, moct, umět, dokázat, být schopen",
+          "sourceFr": "pouvoir",
+          "start": 9,
+          "text": "peut",
+          "uid": "vfr-0310"
+        },
+        {
+          "end": 18,
+          "occurrence": 1,
+          "sourceCz": "číst",
+          "sourceFr": "lire",
+          "start": 14,
+          "text": "lire",
+          "uid": "vfr-0472"
+        },
+        {
+          "end": 23,
+          "occurrence": 1,
+          "sourceCz": "v, ve",
+          "sourceFr": "dans",
+          "start": 19,
+          "text": "dans",
+          "uid": "vfr-0130"
+        },
+        {
+          "end": 31,
+          "occurrence": 1,
+          "sourceCz": "postel",
+          "sourceFr": "lit",
+          "start": 28,
+          "text": "lit",
+          "uid": "vfr-0352"
+        }
+      ],
+      "reviewed": true,
+      "sourceCz": "číst",
+      "sourceFr": "lire",
+      "sourceSentenceCz": "Moje dcera může číst v posteli.",
+      "sourceSentenceFr": "Ma fille peut lire dans son lit."
+    },
+    "vfr-0473": {
+      "concepts": [
+        {
+          "end": 9,
+          "occurrence": 1,
+          "sourceCz": "bratr",
+          "sourceFr": "frère",
+          "start": 4,
+          "text": "frère",
+          "uid": "vfr-0060"
+        },
+        {
+          "end": 16,
+          "occurrence": 1,
+          "sourceCz": "přijet, přijít, dorazit",
+          "sourceFr": "arriver",
+          "start": 10,
+          "text": "arrive",
+          "uid": "vfr-0473"
+        },
+        {
+          "end": 23,
+          "occurrence": 1,
+          "sourceCz": "zítra",
+          "sourceFr": "demain",
+          "start": 17,
+          "text": "demain",
+          "uid": "vfr-0207"
+        },
+        {
+          "end": 38,
+          "occurrence": 1,
+          "sourceCz": "kufr",
+          "sourceFr": "valise",
+          "start": 32,
+          "text": "valise",
+          "uid": "vfr-0124"
+        }
+      ],
+      "reviewed": true,
+      "sourceCz": "přijet, přijít, dorazit",
+      "sourceFr": "arriver",
+      "sourceSentenceCz": "Můj bratr přijede zítra se svým kufrem.",
+      "sourceSentenceFr": "Mon frère arrive demain avec sa valise."
+    },
+    "vfr-0474": {
+      "concepts": [
+        {
+          "end": 5,
+          "occurrence": 1,
+          "sourceCz": "po, potom",
+          "sourceFr": "après",
+          "start": 0,
+          "text": "Après",
+          "uid": "vfr-0474"
+        },
+        {
+          "end": 14,
+          "occurrence": 1,
+          "sourceCz": "večeře",
+          "sourceFr": "dîner",
+          "start": 9,
+          "text": "dîner",
+          "uid": "vfr-0359"
+        },
+        {
+          "end": 26,
+          "occurrence": 1,
+          "sourceCz": "dívat se",
+          "sourceFr": "regarder",
+          "start": 19,
+          "text": "regarde",
+          "uid": "vfr-0341"
+        },
+        {
+          "end": 34,
+          "occurrence": 1,
+          "sourceCz": "televize",
+          "sourceFr": "télé",
+          "start": 30,
+          "text": "télé",
+          "uid": "vfr-0407"
+        }
+      ],
+      "reviewed": true,
+      "sourceCz": "po, potom",
+      "sourceFr": "après",
+      "sourceSentenceCz": "Po večeři se dívám na televizi.",
+      "sourceSentenceFr": "Après le dîner, je regarde la télé."
+    },
+    "vfr-0475": {
+      "concepts": [
+        {
+          "end": 14,
+          "occurrence": 1,
+          "sourceCz": "zavřít, zavírat",
+          "sourceFr": "fermer",
+          "start": 8,
+          "text": "fermer",
+          "uid": "vfr-0475"
+        },
+        {
+          "end": 23,
+          "occurrence": 1,
+          "sourceCz": "dveře",
+          "sourceFr": "porte",
+          "start": 18,
+          "text": "porte",
+          "uid": "vfr-0225"
+        },
+        {
+          "end": 37,
+          "occurrence": 1,
+          "sourceCz": "kuchyně",
+          "sourceFr": "cuisine",
+          "start": 30,
+          "text": "cuisine",
+          "uid": "vfr-0135"
+        }
+      ],
+      "reviewed": true,
+      "sourceCz": "zavřít, zavírat",
+      "sourceFr": "fermer",
+      "sourceSentenceCz": "Zavřu dveře do kuchyně.",
+      "sourceSentenceFr": "Je vais fermer la porte de la cuisine."
+    },
+    "vfr-0476": {
+      "concepts": [
+        {
+          "end": 9,
+          "occurrence": 1,
+          "sourceCz": "bratr",
+          "sourceFr": "frère",
+          "start": 4,
+          "text": "frère",
+          "uid": "vfr-0060"
+        },
+        {
+          "end": 19,
+          "occurrence": 1,
+          "sourceCz": "odejít, odjet",
+          "sourceFr": "partir",
+          "start": 13,
+          "text": "partir",
+          "uid": "vfr-0476"
+        },
+        {
+          "end": 26,
+          "occurrence": 1,
+          "sourceCz": "zítra",
+          "sourceFr": "demain",
+          "start": 20,
+          "text": "demain",
+          "uid": "vfr-0207"
+        },
+        {
+          "end": 32,
+          "occurrence": 1,
+          "sourceCz": "ráno",
+          "sourceFr": "matin",
+          "start": 27,
+          "text": "matin",
+          "uid": "vfr-0409"
+        }
+      ],
+      "reviewed": true,
+      "sourceCz": "odejít, odjet",
+      "sourceFr": "partir",
+      "sourceSentenceCz": "Můj bratr zítra ráno odjede.",
+      "sourceSentenceFr": "Mon frère va partir demain matin."
+    },
+    "vfr-0477": {
+      "concepts": [
+        {
+          "end": 7,
+          "occurrence": 1,
+          "sourceCz": "film",
+          "sourceFr": "film",
+          "start": 3,
+          "text": "film",
+          "uid": "vfr-0477"
+        },
+        {
+          "end": 11,
+          "occurrence": 1,
+          "sourceCz": "o (na téma)",
+          "sourceFr": "sur",
+          "start": 8,
+          "text": "sur",
+          "uid": "vfr-0003"
+        },
+        {
+          "end": 23,
+          "occurrence": 1,
+          "sourceCz": "město",
+          "sourceFr": "ville",
+          "start": 18,
+          "text": "ville",
+          "uid": "vfr-0194"
+        },
+        {
+          "end": 39,
+          "occurrence": 1,
+          "sourceCz": "zajímavý",
+          "sourceFr": "intéressant",
+          "start": 28,
+          "text": "intéressant",
+          "uid": "vfr-0067"
+        }
+      ],
+      "reviewed": true,
+      "sourceCz": "film",
+      "sourceFr": "film",
+      "sourceSentenceCz": "Tento film o našem městě je zajímavý.",
+      "sourceSentenceFr": "Ce film sur notre ville est intéressant."
+    },
+    "vfr-0478": {
+      "concepts": [
+        {
+          "end": 10,
+          "occurrence": 1,
+          "sourceCz": "sestřenice",
+          "sourceFr": "cousine",
+          "start": 3,
+          "text": "cousine",
+          "uid": "vfr-0266"
+        },
+        {
+          "end": 16,
+          "occurrence": 1,
+          "sourceCz": "zbožňovat",
+          "sourceFr": "adore",
+          "start": 11,
+          "text": "adore",
+          "uid": "vfr-0146"
+        },
+        {
+          "end": 27,
+          "occurrence": 1,
+          "sourceCz": "hudba",
+          "sourceFr": "musique",
+          "start": 20,
+          "text": "musique",
+          "uid": "vfr-0478"
+        }
+      ],
+      "reviewed": true,
+      "sourceCz": "hudba",
+      "sourceFr": "musique",
+      "sourceSentenceCz": "Moje sestřenice zbožňuje hudbu.",
+      "sourceSentenceFr": "Ma cousine adore la musique."
+    },
+    "vfr-0479": {
+      "concepts": [
+        {
+          "end": 10,
+          "occurrence": 1,
+          "sourceCz": "sousedka",
+          "sourceFr": "voisine",
+          "start": 3,
+          "text": "voisine",
+          "uid": "vfr-0160"
+        },
+        {
+          "end": 18,
+          "occurrence": 1,
+          "sourceCz": "poskytnout, donést, přinést",
+          "sourceFr": "apporter",
+          "start": 11,
+          "text": "apporte",
+          "uid": "vfr-0230"
+        },
+        {
+          "end": 29,
+          "occurrence": 1,
+          "sourceCz": "květina",
+          "sourceFr": "fleur",
+          "start": 23,
+          "text": "fleurs",
+          "uid": "vfr-0479"
+        },
+        {
+          "end": 34,
+          "occurrence": 1,
+          "sourceCz": "pro, aby, abyste",
+          "sourceFr": "pour",
+          "start": 30,
+          "text": "pour",
+          "uid": "vfr-0141"
+        },
+        {
+          "end": 43,
+          "occurrence": 1,
+          "sourceCz": "večeře",
+          "sourceFr": "dîner",
+          "start": 38,
+          "text": "dîner",
+          "uid": "vfr-0359"
+        }
+      ],
+      "reviewed": true,
+      "sourceCz": "květina",
+      "sourceFr": "fleur",
+      "sourceSentenceCz": "Moje sousedka přináší na večeři květiny.",
+      "sourceSentenceFr": "Ma voisine apporte des fleurs pour le dîner."
+    },
+    "vfr-0480": {
+      "concepts": [
+        {
+          "end": 13,
+          "occurrence": 1,
+          "sourceCz": "restaurace",
+          "sourceFr": "restaurant",
+          "start": 3,
+          "text": "restaurant",
+          "uid": "vfr-0480"
+        },
+        {
+          "end": 21,
+          "occurrence": 1,
+          "sourceCz": "italský",
+          "sourceFr": "italien",
+          "start": 14,
+          "text": "italien",
+          "uid": "vfr-0178"
+        },
+        {
+          "end": 33,
+          "occurrence": 1,
+          "sourceCz": "blízko u",
+          "sourceFr": "près de",
+          "start": 26,
+          "text": "près de",
+          "uid": "vfr-0260"
+        },
+        {
+          "end": 41,
+          "occurrence": 1,
+          "sourceCz": "nádraží",
+          "sourceFr": "gare",
+          "start": 37,
+          "text": "gare",
+          "uid": "vfr-0336"
+        }
+      ],
+      "reviewed": true,
+      "sourceCz": "restaurace",
+      "sourceFr": "restaurant",
+      "sourceSentenceCz": "Italská restaurace je blízko nádraží.",
+      "sourceSentenceFr": "Le restaurant italien est près de la gare."
+    },
+    "vfr-0481": {
+      "concepts": [
+        {
+          "end": 10,
+          "occurrence": 1,
+          "sourceCz": "rodina",
+          "sourceFr": "famille",
+          "start": 3,
+          "text": "famille",
+          "uid": "vfr-0481"
+        },
+        {
+          "end": 18,
+          "occurrence": 1,
+          "sourceCz": "připravovat",
+          "sourceFr": "préparer",
+          "start": 11,
+          "text": "prépare",
+          "uid": "vfr-0246"
+        },
+        {
+          "end": 27,
+          "occurrence": 1,
+          "sourceCz": "jídlo",
+          "sourceFr": "repas",
+          "start": 22,
+          "text": "repas",
+          "uid": "vfr-0245"
+        },
+        {
+          "end": 32,
+          "occurrence": 1,
+          "sourceCz": "v, ve",
+          "sourceFr": "dans",
+          "start": 28,
+          "text": "dans",
+          "uid": "vfr-0130"
+        },
+        {
+          "end": 42,
+          "occurrence": 1,
+          "sourceCz": "zahrada",
+          "sourceFr": "jardin",
+          "start": 36,
+          "text": "jardin",
+          "uid": "vfr-0149"
+        }
+      ],
+      "reviewed": true,
+      "sourceCz": "rodina",
+      "sourceFr": "famille",
+      "sourceSentenceCz": "Moje rodina připravuje jídlo na zahradě.",
+      "sourceSentenceFr": "Ma famille prépare le repas dans le jardin."
     }
   },
   "kind": "sentence-pictures",

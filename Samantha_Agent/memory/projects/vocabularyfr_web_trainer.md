@@ -1,5 +1,16 @@
 # Vocabulary FR — současný klient a historický prototyp
 
+## 2026-11-19 — Schválená místní optimalizace Janiných vět
+
+Hotovo:23 obsahových přepisů, oprava apostrofu v #092,4 doplnění obrazových vazeb a17 nových karet vfr-0465–0481. Otázka #070 zní „Tu es prête pour le cours de maths ?“, české znění je také otázka. #259 beurre zachovává původní FR/CZ text i obě větné MP3, využije však nový obrázek pain.
+
+Rozhodnutí: Míla schválil návrh z TXT s těmito dvěma upřesněními. Místní implementace zahrnuje vlastní ilustrace/náhledy a všechny4 hlasové reference nových karet. Hlasy Henri/Vlasta a tempo−10 % zachované. Původní CSV a uzavřená v003 zůstávají zdrojem pro přesné ověření.
+
+Důkaz:481 aktivních karet,1924 platných zvukových odkazů,1141 obrazových vazeb,362 různých ilustrací.115 nových MP3, celá knihovna1898 MP3 dekódovaná. Skutečný klient přijal všechny481 položky i481 čtyřmožnostních otázek;164 HTTP odpovědí bajtově přesných. Vizuální Safari přejímka otevřená kvůli nedostupnému ovládání prohlížeče.
+
+Stav a další krok: Implementace je ověřená místně, doménová brána107 PASS. Konečný důkaz a ID lokálního commitu určuje private/vocabulary_fr_loop_refresh_20261119/completion.json, podrobnosti reports/vocabulary_fr_loop_refresh_20261119.md. Další krok je fyzická přejímka a samostatně zadané p+n Francouzština Jana.
+
+
 ## 2026-11-17 20:21 CET — Společné předání osobního režimu a Datových commitů k p+n
 
 Hotovo: Uzavřené Datovy a5f11f68/c07df87b jsou začleněné včetně úplné

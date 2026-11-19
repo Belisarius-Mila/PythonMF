@@ -8455,6 +8455,295 @@
       "reviewed": false,
       "thumbnail": "assets/vocabulary-fr-v2/thumbs/06e701fdbba4e392441259c72e043e38eba06c533f019bd44a5acce1188fff0b.webp",
       "uid": "vfr-0464"
+    },
+    "vfr-0465": {
+      "conflicts": [
+        "image:3ec85fda67d93d786d81341fda89a40a18b626f1ec095055471597c5be6584f6.webp",
+        "spelling:café"
+      ],
+      "cz": "káva",
+      "displayMode": "whole-word",
+      "format": "objects",
+      "fr": "café",
+      "image": "assets/vocabulary-fr-v2/images/3ec85fda67d93d786d81341fda89a40a18b626f1ec095055471597c5be6584f6.webp",
+      "pieces": [
+        "café"
+      ],
+      "reviewed": false,
+      "thumbnail": "assets/vocabulary-fr-v2/thumbs/6810f76f48ef227ad35e4c699a1880fc61216523b80f7c20367c217791e38699.webp",
+      "uid": "vfr-0465"
+    },
+    "vfr-0466": {
+      "conflicts": [
+        "image:7a242b7d4795e4373d97bd54cf5a9b1bc9b170ab00b4c94936d7fb2d20c9f8e3.webp",
+        "spelling:pain"
+      ],
+      "cz": "chléb",
+      "displayMode": "whole-word",
+      "format": "objects",
+      "fr": "pain",
+      "image": "assets/vocabulary-fr-v2/images/7a242b7d4795e4373d97bd54cf5a9b1bc9b170ab00b4c94936d7fb2d20c9f8e3.webp",
+      "pieces": [
+        "pain"
+      ],
+      "reviewed": false,
+      "thumbnail": "assets/vocabulary-fr-v2/thumbs/42265dd14c1198199322807ff40c86e2046bdeeedacdb91145b8c1f5d229d965.webp",
+      "uid": "vfr-0466"
+    },
+    "vfr-0467": {
+      "conflicts": [
+        "image:b9c64841271aa9c505928b2ceb0f0ecce0bd3adb1ec1969d5d4aefe3c1892493.webp",
+        "spelling:train"
+      ],
+      "cz": "vlak",
+      "displayMode": "whole-word",
+      "format": "objects",
+      "fr": "train",
+      "image": "assets/vocabulary-fr-v2/images/b9c64841271aa9c505928b2ceb0f0ecce0bd3adb1ec1969d5d4aefe3c1892493.webp",
+      "pieces": [
+        "train"
+      ],
+      "reviewed": false,
+      "thumbnail": "assets/vocabulary-fr-v2/thumbs/5b10a0885f8b64654bc883fef54a3606f89d09f8930c18485bd23a5b57154ff5.webp",
+      "uid": "vfr-0467"
+    },
+    "vfr-0468": {
+      "conflicts": [
+        "image:df9f3582bed67836a714c9fc6d4c3a22d77a28d7c5f93a9da64d186e4d167083.webp",
+        "spelling:soupe"
+      ],
+      "cz": "polévka",
+      "displayMode": "whole-word",
+      "format": "objects",
+      "fr": "soupe",
+      "image": "assets/vocabulary-fr-v2/images/df9f3582bed67836a714c9fc6d4c3a22d77a28d7c5f93a9da64d186e4d167083.webp",
+      "pieces": [
+        "soupe"
+      ],
+      "reviewed": false,
+      "thumbnail": "assets/vocabulary-fr-v2/thumbs/9577accc19e3f5e8b591d7718e4ae4faabbbc955368565adfe074654ed2f2c21.webp",
+      "uid": "vfr-0468"
+    },
+    "vfr-0469": {
+      "conflicts": [
+        "image:cc51fe54783a5f89b2950589ab70fa19726ee9d147304812109352519ae05422.webp",
+        "spelling:fromage"
+      ],
+      "cz": "sýr",
+      "displayMode": "whole-word",
+      "format": "objects",
+      "fr": "fromage",
+      "image": "assets/vocabulary-fr-v2/images/cc51fe54783a5f89b2950589ab70fa19726ee9d147304812109352519ae05422.webp",
+      "pieces": [
+        "fromage"
+      ],
+      "reviewed": false,
+      "thumbnail": "assets/vocabulary-fr-v2/thumbs/290d955cb809b6a29f93ac0a6cb1bad4cc057e811fbca7a37f66f8b5cdbd2c6b.webp",
+      "uid": "vfr-0469"
+    },
+    "vfr-0470": {
+      "conflicts": [
+        "image:82ddcd7aef6b620f36d0ef97cb1d952d910b8483804d93272c57cf7f6a38b63e.webp",
+        "spelling:fenêtre"
+      ],
+      "cz": "okno",
+      "displayMode": "whole-word",
+      "format": "objects",
+      "fr": "fenêtre",
+      "image": "assets/vocabulary-fr-v2/images/82ddcd7aef6b620f36d0ef97cb1d952d910b8483804d93272c57cf7f6a38b63e.webp",
+      "pieces": [
+        "fenêtre"
+      ],
+      "reviewed": false,
+      "thumbnail": "assets/vocabulary-fr-v2/thumbs/3b285115541242984e0ec1bd6158bf272589f64c1a7bdd64bf60b85eb3386cb7.webp",
+      "uid": "vfr-0470"
+    },
+    "vfr-0471": {
+      "conflicts": [
+        "image:fe08d8bcda37550861e0a105a94dee915333d659b561e9ddcd2482b75bf5400c.webp",
+        "spelling:marché"
+      ],
+      "cz": "trh",
+      "displayMode": "whole-word",
+      "format": "objects",
+      "fr": "marché",
+      "image": "assets/vocabulary-fr-v2/images/fe08d8bcda37550861e0a105a94dee915333d659b561e9ddcd2482b75bf5400c.webp",
+      "pieces": [
+        "marché"
+      ],
+      "reviewed": false,
+      "thumbnail": "assets/vocabulary-fr-v2/thumbs/b89bc6cfae986f42fd7ac64379176b99736115acde1878e961ee6000b58832f4.webp",
+      "uid": "vfr-0471"
+    },
+    "vfr-0472": {
+      "conflicts": [
+        "image:ab7c60769c5cd4227037ddc4c57000b7c201def9fa750324fc3aeca8d3673417.webp",
+        "spelling:lire"
+      ],
+      "cz": "číst",
+      "displayMode": "whole-word",
+      "format": "objects",
+      "fr": "lire",
+      "image": "assets/vocabulary-fr-v2/images/ab7c60769c5cd4227037ddc4c57000b7c201def9fa750324fc3aeca8d3673417.webp",
+      "pieces": [
+        "lire"
+      ],
+      "reviewed": false,
+      "thumbnail": "assets/vocabulary-fr-v2/thumbs/930312d2b7ca73f00f2fad94ce7404385ec7d5f60bbb0762c6546b10a18accea.webp",
+      "uid": "vfr-0472"
+    },
+    "vfr-0473": {
+      "conflicts": [
+        "image:78e12c885810034a444584b2f02c41d7a349e75205f4718a932119e85abe7bd5.webp",
+        "spelling:arriver"
+      ],
+      "cz": "přijet, přijít, dorazit",
+      "displayMode": "whole-word",
+      "format": "objects",
+      "fr": "arriver",
+      "image": "assets/vocabulary-fr-v2/images/78e12c885810034a444584b2f02c41d7a349e75205f4718a932119e85abe7bd5.webp",
+      "pieces": [
+        "arriver"
+      ],
+      "reviewed": false,
+      "thumbnail": "assets/vocabulary-fr-v2/thumbs/a19ea4ecc492313f94d39e434e56f29d739674f5ad3ec000ab49385fab2cb4ee.webp",
+      "uid": "vfr-0473"
+    },
+    "vfr-0474": {
+      "conflicts": [
+        "image:2dc9f2dbbae10da407c77c9fb31929d926700f3f92050a5fe0cbe39eb2f09668.webp",
+        "spelling:après"
+      ],
+      "cz": "po, potom",
+      "displayMode": "whole-word",
+      "format": "objects",
+      "fr": "après",
+      "image": "assets/vocabulary-fr-v2/images/2dc9f2dbbae10da407c77c9fb31929d926700f3f92050a5fe0cbe39eb2f09668.webp",
+      "pieces": [
+        "après"
+      ],
+      "reviewed": false,
+      "thumbnail": "assets/vocabulary-fr-v2/thumbs/6d069fa4246c670be4ea1c20c70e3866c1bea482222f862db0d5d76d1d4d7770.webp",
+      "uid": "vfr-0474"
+    },
+    "vfr-0475": {
+      "conflicts": [
+        "image:bd5ed9597b1ede23cc9df55919118ff998c3c7e68310e20c41321d1fbdff272d.webp",
+        "spelling:fermer"
+      ],
+      "cz": "zavřít, zavírat",
+      "displayMode": "whole-word",
+      "format": "objects",
+      "fr": "fermer",
+      "image": "assets/vocabulary-fr-v2/images/bd5ed9597b1ede23cc9df55919118ff998c3c7e68310e20c41321d1fbdff272d.webp",
+      "pieces": [
+        "fermer"
+      ],
+      "reviewed": false,
+      "thumbnail": "assets/vocabulary-fr-v2/thumbs/4a8a27cfbd4d0ea795bb42c92651342e4ab0f0670b3031a583805b6f13ec9359.webp",
+      "uid": "vfr-0475"
+    },
+    "vfr-0476": {
+      "conflicts": [
+        "image:c14ef0595a70bf16b83e9c8a4701bce0001334674a8564944cb4b7e6e910d334.webp",
+        "spelling:partir"
+      ],
+      "cz": "odejít, odjet",
+      "displayMode": "whole-word",
+      "format": "objects",
+      "fr": "partir",
+      "image": "assets/vocabulary-fr-v2/images/c14ef0595a70bf16b83e9c8a4701bce0001334674a8564944cb4b7e6e910d334.webp",
+      "pieces": [
+        "partir"
+      ],
+      "reviewed": false,
+      "thumbnail": "assets/vocabulary-fr-v2/thumbs/5a81ab4effecb73959910a05fb714732897305dea770a1517b856c339d6a88ec.webp",
+      "uid": "vfr-0476"
+    },
+    "vfr-0477": {
+      "conflicts": [
+        "image:b10a228304af7ee122afadf3fae61fa1181e91f58ea9a97cc378e025366454fd.webp",
+        "spelling:film"
+      ],
+      "cz": "film",
+      "displayMode": "whole-word",
+      "format": "objects",
+      "fr": "film",
+      "image": "assets/vocabulary-fr-v2/images/b10a228304af7ee122afadf3fae61fa1181e91f58ea9a97cc378e025366454fd.webp",
+      "pieces": [
+        "film"
+      ],
+      "reviewed": false,
+      "thumbnail": "assets/vocabulary-fr-v2/thumbs/027c36bc050ff2d130569ded090b54f93ad3772ef3ce94f794024e5d872f433c.webp",
+      "uid": "vfr-0477"
+    },
+    "vfr-0478": {
+      "conflicts": [
+        "image:bddcbcc3731839465f8e5dbbb7afc58124c22a613cb04e2aa36f57e6bd408dc5.webp",
+        "spelling:musique"
+      ],
+      "cz": "hudba",
+      "displayMode": "whole-word",
+      "format": "objects",
+      "fr": "musique",
+      "image": "assets/vocabulary-fr-v2/images/bddcbcc3731839465f8e5dbbb7afc58124c22a613cb04e2aa36f57e6bd408dc5.webp",
+      "pieces": [
+        "musique"
+      ],
+      "reviewed": false,
+      "thumbnail": "assets/vocabulary-fr-v2/thumbs/ce9dc244f787e56989077784a19b856037eca243724a3ea417aca954fc1bb2b5.webp",
+      "uid": "vfr-0478"
+    },
+    "vfr-0479": {
+      "conflicts": [
+        "image:47b9e22fe587bc5deff2d14ebe4977e6d9821d42d8b86410df43d7e627ac0f41.webp",
+        "spelling:fleur"
+      ],
+      "cz": "květina",
+      "displayMode": "whole-word",
+      "format": "objects",
+      "fr": "fleur",
+      "image": "assets/vocabulary-fr-v2/images/47b9e22fe587bc5deff2d14ebe4977e6d9821d42d8b86410df43d7e627ac0f41.webp",
+      "pieces": [
+        "fleur"
+      ],
+      "reviewed": false,
+      "thumbnail": "assets/vocabulary-fr-v2/thumbs/8573b2f59ff53046e25498357d0fcbd884306ee11afd932dea769bac90ae4442.webp",
+      "uid": "vfr-0479"
+    },
+    "vfr-0480": {
+      "conflicts": [
+        "image:df8899576545d46d48c92f993097cb0856d6e5925d043f5ff8f5d01fcf10e173.webp",
+        "spelling:restaurant"
+      ],
+      "cz": "restaurace",
+      "displayMode": "whole-word",
+      "format": "objects",
+      "fr": "restaurant",
+      "image": "assets/vocabulary-fr-v2/images/df8899576545d46d48c92f993097cb0856d6e5925d043f5ff8f5d01fcf10e173.webp",
+      "pieces": [
+        "restaurant"
+      ],
+      "reviewed": false,
+      "thumbnail": "assets/vocabulary-fr-v2/thumbs/b2169dedcf0cccc7397d8e4b019792d1c535fbfc74d968389451f2f30dc8bd77.webp",
+      "uid": "vfr-0480"
+    },
+    "vfr-0481": {
+      "conflicts": [
+        "image:ec3c369b168b873ebbf246a51ed2f8e9276529603e18160bf46378c63e51348f.webp",
+        "spelling:famille"
+      ],
+      "cz": "rodina",
+      "displayMode": "whole-word",
+      "format": "objects",
+      "fr": "famille",
+      "image": "assets/vocabulary-fr-v2/images/ec3c369b168b873ebbf246a51ed2f8e9276529603e18160bf46378c63e51348f.webp",
+      "pieces": [
+        "famille"
+      ],
+      "reviewed": false,
+      "thumbnail": "assets/vocabulary-fr-v2/thumbs/38053611bac54ed136097a31c4cdfcb9d4d45d16b7f2e50fc5f6511aa33225f6.webp",
+      "uid": "vfr-0481"
     }
   },
   "kind": "spelling-pictures",

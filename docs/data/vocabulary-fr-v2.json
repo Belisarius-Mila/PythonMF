@@ -94,7 +94,7 @@
     }
   ],
   "imageReviewComplete": true,
-  "itemCount": 464,
+  "itemCount": 481,
   "items": [
     {
       "active": true,
@@ -118,8 +118,8 @@
       ],
       "primaryGroup": "topic-05",
       "related": [],
-      "sentenceCz": "Po rodinné večeři vždy uklidím talíř do myčky.",
-      "sentenceFr": "Je range toujours l'assiette dans le lave-vaisselle.",
+      "sentenceCz": "Špinavý talíř je na stole.",
+      "sentenceFr": "L'assiette sale est sur la table.",
       "teachingType": "word",
       "thumbnail": "assets/vocabulary-fr-v2/thumbs/a9227bb6b26645979312d1bac01c43bc6e24854a9876802f72c7dd2d683a6a13.webp",
       "topicIds": [
@@ -250,8 +250,8 @@
       "related": [
         "vfr-0006"
       ],
-      "sentenceCz": "Připravujeme dort k jeho narozeninám.",
-      "sentenceFr": "Nous préparons un gâteau pour son anniversaire.",
+      "sentenceCz": "Dort je připravený pro hosty.",
+      "sentenceFr": "Le gâteau est prêt pour les invités.",
       "teachingType": "word",
       "thumbnail": "assets/vocabulary-fr-v2/thumbs/d8c001a6ce03f5c3a30ef800b92e5350a9afcadfc39b6bca3fe673c32408da30.webp",
       "topicIds": [
@@ -1288,8 +1288,8 @@
       ],
       "primaryGroup": "topic-16",
       "related": [],
-      "sentenceCz": "Máš s dětmi hodně trpělivosti, to je obdivuhodné.",
-      "sentenceFr": "Tu as beaucoup de patience avec les enfants, c'est admirable.",
+      "sentenceCz": "Máš ve své tašce knihu.",
+      "sentenceFr": "Tu as un livre dans ton sac.",
       "teachingType": "word",
       "thumbnail": "assets/vocabulary-fr-v2/thumbs/f007d55d363a028912d97372f986c3f16ec8ff6a7c60d4d0c754d95f5385d161.webp",
       "topicIds": [
@@ -1319,8 +1319,8 @@
       ],
       "primaryGroup": "topic-01",
       "related": [],
-      "sentenceCz": "Můj synovec staví roboty ze dřeva.",
-      "sentenceFr": "Mon neveu construit des robots en bois.",
+      "sentenceCz": "Můj synovec ukazuje své nové kolo.",
+      "sentenceFr": "Mon neveu montre son nouveau vélo.",
       "teachingType": "word",
       "thumbnail": "assets/vocabulary-fr-v2/thumbs/1b55e6de65ef5e2955f8f20ed4e0ab86497adadeb09b11aa85a758e221f693bd.webp",
       "topicIds": [
@@ -1474,8 +1474,8 @@
       ],
       "primaryGroup": "topic-01",
       "related": [],
-      "sentenceCz": "Moje teta vždy v neděli připravuje výbornou polévku.",
-      "sentenceFr": "Ma tante prépare toujours une soupe délicieuse le dimanche.",
+      "sentenceCz": "Moje teta vaří rýži se zeleninou.",
+      "sentenceFr": "Ma tante cuisine du riz avec des légumes.",
       "teachingType": "word",
       "thumbnail": "assets/vocabulary-fr-v2/thumbs/fb17e7fc0607be67b22a569c0bbd665776aba013e9ef27d47c0ca5d4e4e95992.webp",
       "topicIds": [
@@ -1536,8 +1536,8 @@
       ],
       "primaryGroup": "topic-18",
       "related": [],
-      "sentenceCz": "Já jsem připravený na zkoušku, tento týden jsem hodně opakoval.",
-      "sentenceFr": "Je suis prêt pour l'examen, j'ai beaucoup révisé cette semaine.",
+      "sentenceCz": "Připravuji večeři v kuchyni.",
+      "sentenceFr": "Je prépare le dîner dans la cuisine.",
       "teachingType": "word",
       "thumbnail": "assets/vocabulary-fr-v2/thumbs/198bd68d00cdc35946afafde6b5b3578b9b4d62306c9ea4d91a44fb654047893.webp",
       "topicIds": [
@@ -1877,8 +1877,8 @@
       ],
       "primaryGroup": "topic-18",
       "related": [],
-      "sentenceCz": "Jedna kamarádka z Prahy nás přijede o víkendu navštívit.",
-      "sentenceFr": "Une amie de Prague vient nous rendre visite ce week-end.",
+      "sentenceCz": "Jedna kamarádka čeká před pekárnou.",
+      "sentenceFr": "Une amie attend devant la boulangerie.",
       "teachingType": "word",
       "thumbnail": "assets/vocabulary-fr-v2/thumbs/e51fa22df7dab698e7a0b908881fbe604931286e49420421f097ba5e51bc395f.webp",
       "topicIds": [
@@ -2063,8 +2063,8 @@
       ],
       "primaryGroup": "topic-01",
       "related": [],
-      "sentenceCz": "Moje babička zná zpaměti spoustu starých písní.",
-      "sentenceFr": "Ma grand-mère connaît beaucoup de chansons anciennes par cœur.",
+      "sentenceCz": "Moje babička ukazuje svůj notový sešit.",
+      "sentenceFr": "Ma grand-mère montre son cahier de musique.",
       "teachingType": "word",
       "thumbnail": "assets/vocabulary-fr-v2/thumbs/50157d03820e880364ba0cd0c3747cde88ada6c8f7fb02e9845af5355719ba9a.webp",
       "topicIds": [
@@ -2187,8 +2187,8 @@
       ],
       "primaryGroup": "topic-14",
       "related": [],
-      "sentenceCz": "To téma je zajímavé, takže si o něm přečtu ještě víc.",
-      "sentenceFr": "Le sujet est intéressant, alors je vais lire encore davantage.",
+      "sentenceCz": "Tato kniha o stromech je zajímavá.",
+      "sentenceFr": "Ce livre sur les arbres est intéressant.",
       "teachingType": "word",
       "thumbnail": "assets/vocabulary-fr-v2/thumbs/b8b29203a15554168139b9a1db3dc0b2902fb7b46a4c0baf061fe3d918a2368a.webp",
       "topicIds": [
@@ -2218,8 +2218,8 @@
       ],
       "primaryGroup": "topic-14",
       "related": [],
-      "sentenceCz": "Ten soused působí protivně, ale ve skutečnosti je stydlivý.",
-      "sentenceFr": "Ce voisin paraît méchant, mais en réalité il est timide.",
+      "sentenceCz": "Sousedův pes je zlý.",
+      "sentenceFr": "Le chien du voisin est méchant.",
       "teachingType": "word",
       "thumbnail": "assets/vocabulary-fr-v2/thumbs/6ba1705c5789e1c72dc300ea20e2dc9c71fe0dd9f14364e03767fabb86006926.webp",
       "topicIds": [
@@ -2280,8 +2280,8 @@
       ],
       "primaryGroup": "topic-18",
       "related": [],
-      "sentenceCz": "Ty jsi vždy dochvilný, a to je pro společnou práci moc příjemné.",
-      "sentenceFr": "Tu es toujours ponctuel, c'est très agréable pour travailler ensemble.",
+      "sentenceCz": "Jsi připravená na hodinu matematiky?",
+      "sentenceFr": "Tu es prête pour le cours de maths ?",
       "teachingType": "word",
       "thumbnail": "assets/vocabulary-fr-v2/thumbs/cff921a6297d051815b50e18df05311c39d0568672289afe6eb310b4958fe480.webp",
       "topicIds": [
@@ -2975,7 +2975,7 @@
       "primaryGroup": "topic-12",
       "related": [],
       "sentenceCz": "Je vždy včas na přestávce.",
-      "sentenceFr": "Il est toujours à l`heure pour la pause.",
+      "sentenceFr": "Il est toujours à l'heure pour la pause.",
       "teachingType": "word",
       "thumbnail": "assets/vocabulary-fr-v2/thumbs/231d1a10703a65c8d7573833ea2bebbf6311c61b5460d31d51af3a8c135d28da.webp",
       "topicIds": [
@@ -3412,8 +3412,8 @@
       ],
       "primaryGroup": "topic-11",
       "related": [],
-      "sentenceCz": "Přes týden spolu mluvíme jen krátce, ale v neděli se vídáme.",
-      "sentenceFr": "On se parle peu en semaine, mais on se voit le dimanche.",
+      "sentenceCz": "Na stole je málo zeleniny.",
+      "sentenceFr": "Il y a peu de légumes sur la table.",
       "teachingType": "word",
       "thumbnail": "assets/vocabulary-fr-v2/thumbs/ce9268a5a807fa2b18dfc27b147c69b24d0fab6baf9b185a3da61f63d1510ddd.webp",
       "topicIds": [
@@ -3505,8 +3505,8 @@
       ],
       "primaryGroup": "topic-14",
       "related": [],
-      "sentenceCz": "Ten film je vtipný, smáli jsme se od začátku do konce.",
-      "sentenceFr": "Ce film est drôle, on a ri du début à la fin.",
+      "sentenceCz": "Můj strýc je s tímto kloboukem legrační.",
+      "sentenceFr": "Mon oncle est drôle avec ce chapeau.",
       "teachingType": "word",
       "thumbnail": "assets/vocabulary-fr-v2/thumbs/7ce9e1fa0a924f7684d6e2418c1e5f9c4cf1c52db0e7346883343a37629a12b2.webp",
       "topicIds": [
@@ -3630,8 +3630,8 @@
       ],
       "primaryGroup": "topic-01",
       "related": [],
-      "sentenceCz": "Naše nová učitelka je Němka, ale už deset let žije v Paříži.",
-      "sentenceFr": "Notre nouvelle professeure est Allemande, mais elle vit à Paris depuis dix ans.",
+      "sentenceCz": "Tato Němka pracuje v naší firmě.",
+      "sentenceFr": "Cette Allemande travaille dans notre entreprise.",
       "teachingType": "word",
       "thumbnail": "assets/vocabulary-fr-v2/thumbs/e0495b3df8c7d7c802b3330f8cf341e0fdbb0cda8476d2f0b0da9759f7f85197.webp",
       "topicIds": [
@@ -5942,8 +5942,8 @@
       ],
       "primaryGroup": "topic-01",
       "related": [],
-      "sentenceCz": "Můj profesor vysvětluje gramatiku s velkou trpělivostí.",
-      "sentenceFr": "Mon professeur explique la grammaire avec beaucoup de patience.",
+      "sentenceCz": "Profesor ukazuje strom na zahradě.",
+      "sentenceFr": "Le professeur montre un arbre dans le jardin.",
       "teachingType": "word",
       "thumbnail": "assets/vocabulary-fr-v2/thumbs/68a807f69498209927e5561226f53ba798884f75c0acd3f1a2cfc3a129646812.webp",
       "topicIds": [
@@ -8157,8 +8157,8 @@
       ],
       "primaryGroup": "topic-05",
       "related": [],
-      "sentenceCz": "Chléb je čerstvý.",
-      "sentenceFr": "Le pain est frais.",
+      "sentenceCz": "Čerstvá zelenina je v tašce.",
+      "sentenceFr": "Les légumes frais sont dans le sac.",
       "teachingType": "word",
       "thumbnail": "assets/vocabulary-fr-v2/thumbs/d0bb6d1bcb0aeaaaef3d0cd7f3cbcac92698f2468ab1cf5e9b34cdec81ff472f.webp",
       "topicIds": [
@@ -8623,8 +8623,8 @@
       ],
       "primaryGroup": "topic-04",
       "related": [],
-      "sentenceCz": "Tady je sirka.",
-      "sentenceFr": "Voici une allumette.",
+      "sentenceCz": "Sirka je v kapse mé bundy.",
+      "sentenceFr": "L'allumette est dans la poche de ma veste.",
       "teachingType": "word",
       "thumbnail": "assets/vocabulary-fr-v2/thumbs/b9997fc23c54cd5e40a6e2c5963665e54728fd39f32ff730c29ef2ae69646f74.webp",
       "topicIds": [
@@ -9032,8 +9032,8 @@
       ],
       "primaryGroup": "topic-05",
       "related": [],
-      "sentenceCz": "Tady je vaše objednávka.",
-      "sentenceFr": "Voici votre commande.",
+      "sentenceCz": "Vaše objednávka je připravená na stole.",
+      "sentenceFr": "Votre commande est prête sur la table.",
       "teachingType": "word",
       "thumbnail": "assets/vocabulary-fr-v2/thumbs/fd05aedb613901b91abacf5a31ea4372b1235d343e4c6f46695f473cf2d0b529.webp",
       "topicIds": [
@@ -12124,8 +12124,8 @@
       ],
       "primaryGroup": "topic-14",
       "related": [],
-      "sentenceCz": "On má nové kolo a ona má nové šaty.",
-      "sentenceFr": "Il a un nouveau vélo et elle a une nouvelle robe.",
+      "sentenceCz": "Moje nové kolo je před novou školou.",
+      "sentenceFr": "Mon nouveau vélo est devant la nouvelle école.",
       "teachingType": "word",
       "thumbnail": "assets/vocabulary-fr-v2/thumbs/df93d8dd4c15951dd2b15ae5c6e4a318fcf9eeab1abdf67254d0d00b74f7a6f0.webp",
       "topicIds": [
@@ -12283,8 +12283,8 @@
       ],
       "primaryGroup": "topic-05",
       "related": [],
-      "sentenceCz": "Tento recept je snadný.",
-      "sentenceFr": "Cette recette est facile.",
+      "sentenceCz": "Tento recept na dort je v mém sešitě.",
+      "sentenceFr": "Cette recette de gâteau est dans mon cahier.",
       "teachingType": "word",
       "thumbnail": "assets/vocabulary-fr-v2/thumbs/94dc326dc2fac5a98ef8a6b735927b2d674673e1633bccd1e29f1f3caf7549d4.webp",
       "topicIds": [
@@ -12376,8 +12376,8 @@
       ],
       "primaryGroup": "topic-16",
       "related": [],
-      "sentenceCz": "Ukazuji fotku.",
-      "sentenceFr": "Je montre une photo.",
+      "sentenceCz": "Ukazuji řidiči plán města.",
+      "sentenceFr": "Je montre le plan de la ville au chauffeur.",
       "teachingType": "word",
       "thumbnail": "assets/vocabulary-fr-v2/thumbs/e1135788026cf402cff78fdc9acd355bcb2324105425e4080ff8828a34c1b037.webp",
       "topicIds": [
@@ -12656,8 +12656,8 @@
       ],
       "primaryGroup": "topic-09",
       "related": [],
-      "sentenceCz": "Závod začíná.",
-      "sentenceFr": "La course commence.",
+      "sentenceCz": "Závod začíná před stadionem.",
+      "sentenceFr": "La course commence devant le stade.",
       "teachingType": "word",
       "thumbnail": "assets/vocabulary-fr-v2/thumbs/d8628c604b781cd9ba7d2d0d238b6cf7c06ba43be89166b56a57bba4a67ee62c.webp",
       "topicIds": [
@@ -13091,8 +13091,8 @@
       ],
       "primaryGroup": "topic-14",
       "related": [],
-      "sentenceCz": "Toto cvičení je obtížné.",
-      "sentenceFr": "Cet exercice est difficile.",
+      "sentenceCz": "Tato učebnice matematiky je obtížná.",
+      "sentenceFr": "Ce livre de maths est difficile.",
       "teachingType": "word",
       "thumbnail": "assets/vocabulary-fr-v2/thumbs/7ede3ea34ede3480dad533af5ce5ba9995602630779a4e10a2736dac57697192.webp",
       "topicIds": [
@@ -14600,6 +14600,533 @@
         "topic-14"
       ],
       "uid": "vfr-0464"
+    },
+    {
+      "active": true,
+      "addedAt": "2026-11-19T10:15:08.568680+00:00",
+      "cz": "káva",
+      "difficultyBand": 1,
+      "difficultyStatus": "proposed",
+      "expressionType": "word",
+      "formOfUid": null,
+      "fr": "café",
+      "genderFr": "m",
+      "id": 465,
+      "image": "assets/vocabulary-fr-v2/images/3ec85fda67d93d786d81341fda89a40a18b626f1ec095055471597c5be6584f6.webp",
+      "imageReviewed": true,
+      "imageRole": "literal",
+      "legacyAddedAt": null,
+      "lemma": null,
+      "origin": "editorial",
+      "partOfSpeech": [
+        "noun"
+      ],
+      "primaryGroup": "topic-05",
+      "related": [],
+      "sentenceCz": "Dám si se sestrou kávu.",
+      "sentenceFr": "Je prends un café avec ma sœur.",
+      "teachingType": "word",
+      "thumbnail": "assets/vocabulary-fr-v2/thumbs/6810f76f48ef227ad35e4c699a1880fc61216523b80f7c20367c217791e38699.webp",
+      "topicIds": [
+        "topic-05"
+      ],
+      "uid": "vfr-0465"
+    },
+    {
+      "active": true,
+      "addedAt": "2026-11-19T10:15:09.065149+00:00",
+      "cz": "chléb",
+      "difficultyBand": 1,
+      "difficultyStatus": "proposed",
+      "expressionType": "word",
+      "formOfUid": null,
+      "fr": "pain",
+      "genderFr": "m",
+      "id": 466,
+      "image": "assets/vocabulary-fr-v2/images/7a242b7d4795e4373d97bd54cf5a9b1bc9b170ab00b4c94936d7fb2d20c9f8e3.webp",
+      "imageReviewed": true,
+      "imageRole": "literal",
+      "legacyAddedAt": null,
+      "lemma": null,
+      "origin": "editorial",
+      "partOfSpeech": [
+        "noun"
+      ],
+      "primaryGroup": "topic-05",
+      "related": [],
+      "sentenceCz": "Chléb je v této pekárně čerstvý.",
+      "sentenceFr": "Le pain est frais dans cette boulangerie.",
+      "teachingType": "word",
+      "thumbnail": "assets/vocabulary-fr-v2/thumbs/42265dd14c1198199322807ff40c86e2046bdeeedacdb91145b8c1f5d229d965.webp",
+      "topicIds": [
+        "topic-05"
+      ],
+      "uid": "vfr-0466"
+    },
+    {
+      "active": true,
+      "addedAt": "2026-11-19T10:15:09.465940+00:00",
+      "cz": "vlak",
+      "difficultyBand": 1,
+      "difficultyStatus": "proposed",
+      "expressionType": "word",
+      "formOfUid": null,
+      "fr": "train",
+      "genderFr": "m",
+      "id": 467,
+      "image": "assets/vocabulary-fr-v2/images/b9c64841271aa9c505928b2ceb0f0ecce0bd3adb1ec1969d5d4aefe3c1892493.webp",
+      "imageReviewed": true,
+      "imageRole": "literal",
+      "legacyAddedAt": null,
+      "lemma": null,
+      "origin": "editorial",
+      "partOfSpeech": [
+        "noun"
+      ],
+      "primaryGroup": "topic-08",
+      "related": [],
+      "sentenceCz": "Vlak má dnes ráno zpoždění.",
+      "sentenceFr": "Le train est en retard ce matin.",
+      "teachingType": "word",
+      "thumbnail": "assets/vocabulary-fr-v2/thumbs/5b10a0885f8b64654bc883fef54a3606f89d09f8930c18485bd23a5b57154ff5.webp",
+      "topicIds": [
+        "topic-08"
+      ],
+      "uid": "vfr-0467"
+    },
+    {
+      "active": true,
+      "addedAt": "2026-11-19T10:15:09.914777+00:00",
+      "cz": "polévka",
+      "difficultyBand": 1,
+      "difficultyStatus": "proposed",
+      "expressionType": "word",
+      "formOfUid": null,
+      "fr": "soupe",
+      "genderFr": "f",
+      "id": 468,
+      "image": "assets/vocabulary-fr-v2/images/df9f3582bed67836a714c9fc6d4c3a22d77a28d7c5f93a9da64d186e4d167083.webp",
+      "imageReviewed": true,
+      "imageRole": "literal",
+      "legacyAddedAt": null,
+      "lemma": null,
+      "origin": "editorial",
+      "partOfSpeech": [
+        "noun"
+      ],
+      "primaryGroup": "topic-05",
+      "related": [],
+      "sentenceCz": "Moje teta připravuje zeleninovou polévku.",
+      "sentenceFr": "Ma tante prépare une soupe de légumes.",
+      "teachingType": "word",
+      "thumbnail": "assets/vocabulary-fr-v2/thumbs/9577accc19e3f5e8b591d7718e4ae4faabbbc955368565adfe074654ed2f2c21.webp",
+      "topicIds": [
+        "topic-05"
+      ],
+      "uid": "vfr-0468"
+    },
+    {
+      "active": true,
+      "addedAt": "2026-11-19T10:15:10.244654+00:00",
+      "cz": "sýr",
+      "difficultyBand": 1,
+      "difficultyStatus": "proposed",
+      "expressionType": "word",
+      "formOfUid": null,
+      "fr": "fromage",
+      "genderFr": "m",
+      "id": 469,
+      "image": "assets/vocabulary-fr-v2/images/cc51fe54783a5f89b2950589ab70fa19726ee9d147304812109352519ae05422.webp",
+      "imageReviewed": true,
+      "imageRole": "literal",
+      "legacyAddedAt": null,
+      "lemma": null,
+      "origin": "editorial",
+      "partOfSpeech": [
+        "noun"
+      ],
+      "primaryGroup": "topic-05",
+      "related": [],
+      "sentenceCz": "Dám si k jídlu sýr.",
+      "sentenceFr": "Je prends du fromage avec mon repas.",
+      "teachingType": "word",
+      "thumbnail": "assets/vocabulary-fr-v2/thumbs/290d955cb809b6a29f93ac0a6cb1bad4cc057e811fbca7a37f66f8b5cdbd2c6b.webp",
+      "topicIds": [
+        "topic-05"
+      ],
+      "uid": "vfr-0469"
+    },
+    {
+      "active": true,
+      "addedAt": "2026-11-19T10:15:10.779478+00:00",
+      "cz": "okno",
+      "difficultyBand": 1,
+      "difficultyStatus": "proposed",
+      "expressionType": "word",
+      "formOfUid": null,
+      "fr": "fenêtre",
+      "genderFr": "f",
+      "id": 470,
+      "image": "assets/vocabulary-fr-v2/images/82ddcd7aef6b620f36d0ef97cb1d952d910b8483804d93272c57cf7f6a38b63e.webp",
+      "imageReviewed": true,
+      "imageRole": "literal",
+      "legacyAddedAt": null,
+      "lemma": null,
+      "origin": "editorial",
+      "partOfSpeech": [
+        "noun"
+      ],
+      "primaryGroup": "topic-04",
+      "related": [],
+      "sentenceCz": "Kočka spí u okna.",
+      "sentenceFr": "Le chat dort près de la fenêtre.",
+      "teachingType": "word",
+      "thumbnail": "assets/vocabulary-fr-v2/thumbs/3b285115541242984e0ec1bd6158bf272589f64c1a7bdd64bf60b85eb3386cb7.webp",
+      "topicIds": [
+        "topic-04"
+      ],
+      "uid": "vfr-0470"
+    },
+    {
+      "active": true,
+      "addedAt": "2026-11-19T10:15:11.419142+00:00",
+      "cz": "trh",
+      "difficultyBand": 1,
+      "difficultyStatus": "proposed",
+      "expressionType": "word",
+      "formOfUid": null,
+      "fr": "marché",
+      "genderFr": "m",
+      "id": 471,
+      "image": "assets/vocabulary-fr-v2/images/fe08d8bcda37550861e0a105a94dee915333d659b561e9ddcd2482b75bf5400c.webp",
+      "imageReviewed": true,
+      "imageRole": "literal",
+      "legacyAddedAt": null,
+      "lemma": null,
+      "origin": "editorial",
+      "partOfSpeech": [
+        "noun"
+      ],
+      "primaryGroup": "topic-08",
+      "related": [],
+      "sentenceCz": "Jdeme na trh s taškami.",
+      "sentenceFr": "Nous allons au marché avec nos sacs.",
+      "teachingType": "word",
+      "thumbnail": "assets/vocabulary-fr-v2/thumbs/b89bc6cfae986f42fd7ac64379176b99736115acde1878e961ee6000b58832f4.webp",
+      "topicIds": [
+        "topic-08"
+      ],
+      "uid": "vfr-0471"
+    },
+    {
+      "active": true,
+      "addedAt": "2026-11-19T10:15:11.972258+00:00",
+      "cz": "číst",
+      "difficultyBand": 1,
+      "difficultyStatus": "proposed",
+      "expressionType": "word",
+      "formOfUid": null,
+      "fr": "lire",
+      "genderFr": "",
+      "id": 472,
+      "image": "assets/vocabulary-fr-v2/images/ab7c60769c5cd4227037ddc4c57000b7c201def9fa750324fc3aeca8d3673417.webp",
+      "imageReviewed": true,
+      "imageRole": "literal",
+      "legacyAddedAt": null,
+      "lemma": null,
+      "origin": "editorial",
+      "partOfSpeech": [
+        "verb"
+      ],
+      "primaryGroup": "topic-16",
+      "related": [],
+      "sentenceCz": "Moje dcera může číst v posteli.",
+      "sentenceFr": "Ma fille peut lire dans son lit.",
+      "teachingType": "word",
+      "thumbnail": "assets/vocabulary-fr-v2/thumbs/930312d2b7ca73f00f2fad94ce7404385ec7d5f60bbb0762c6546b10a18accea.webp",
+      "topicIds": [
+        "topic-16"
+      ],
+      "uid": "vfr-0472"
+    },
+    {
+      "active": true,
+      "addedAt": "2026-11-19T10:15:12.550050+00:00",
+      "cz": "přijet, přijít, dorazit",
+      "difficultyBand": 1,
+      "difficultyStatus": "proposed",
+      "expressionType": "word",
+      "formOfUid": null,
+      "fr": "arriver",
+      "genderFr": "",
+      "id": 473,
+      "image": "assets/vocabulary-fr-v2/images/78e12c885810034a444584b2f02c41d7a349e75205f4718a932119e85abe7bd5.webp",
+      "imageReviewed": true,
+      "imageRole": "literal",
+      "legacyAddedAt": null,
+      "lemma": null,
+      "origin": "editorial",
+      "partOfSpeech": [
+        "verb"
+      ],
+      "primaryGroup": "topic-16",
+      "related": [],
+      "sentenceCz": "Můj bratr přijede zítra se svým kufrem.",
+      "sentenceFr": "Mon frère arrive demain avec sa valise.",
+      "teachingType": "word",
+      "thumbnail": "assets/vocabulary-fr-v2/thumbs/a19ea4ecc492313f94d39e434e56f29d739674f5ad3ec000ab49385fab2cb4ee.webp",
+      "topicIds": [
+        "topic-16"
+      ],
+      "uid": "vfr-0473"
+    },
+    {
+      "active": true,
+      "addedAt": "2026-11-19T10:15:12.923320+00:00",
+      "cz": "po, potom",
+      "difficultyBand": 1,
+      "difficultyStatus": "proposed",
+      "expressionType": "word",
+      "formOfUid": null,
+      "fr": "après",
+      "genderFr": "",
+      "id": 474,
+      "image": "assets/vocabulary-fr-v2/images/2dc9f2dbbae10da407c77c9fb31929d926700f3f92050a5fe0cbe39eb2f09668.webp",
+      "imageReviewed": true,
+      "imageRole": "mnemonic",
+      "legacyAddedAt": null,
+      "lemma": null,
+      "origin": "editorial",
+      "partOfSpeech": [
+        "preposition"
+      ],
+      "primaryGroup": "topic-12",
+      "related": [],
+      "sentenceCz": "Po večeři se dívám na televizi.",
+      "sentenceFr": "Après le dîner, je regarde la télé.",
+      "teachingType": "word",
+      "thumbnail": "assets/vocabulary-fr-v2/thumbs/6d069fa4246c670be4ea1c20c70e3866c1bea482222f862db0d5d76d1d4d7770.webp",
+      "topicIds": [
+        "topic-12"
+      ],
+      "uid": "vfr-0474"
+    },
+    {
+      "active": true,
+      "addedAt": "2026-11-19T10:15:13.370885+00:00",
+      "cz": "zavřít, zavírat",
+      "difficultyBand": 1,
+      "difficultyStatus": "proposed",
+      "expressionType": "word",
+      "formOfUid": null,
+      "fr": "fermer",
+      "genderFr": "",
+      "id": 475,
+      "image": "assets/vocabulary-fr-v2/images/bd5ed9597b1ede23cc9df55919118ff998c3c7e68310e20c41321d1fbdff272d.webp",
+      "imageReviewed": true,
+      "imageRole": "literal",
+      "legacyAddedAt": null,
+      "lemma": null,
+      "origin": "editorial",
+      "partOfSpeech": [
+        "verb"
+      ],
+      "primaryGroup": "topic-16",
+      "related": [],
+      "sentenceCz": "Zavřu dveře do kuchyně.",
+      "sentenceFr": "Je vais fermer la porte de la cuisine.",
+      "teachingType": "word",
+      "thumbnail": "assets/vocabulary-fr-v2/thumbs/4a8a27cfbd4d0ea795bb42c92651342e4ab0f0670b3031a583805b6f13ec9359.webp",
+      "topicIds": [
+        "topic-16"
+      ],
+      "uid": "vfr-0475"
+    },
+    {
+      "active": true,
+      "addedAt": "2026-11-19T10:15:13.853024+00:00",
+      "cz": "odejít, odjet",
+      "difficultyBand": 1,
+      "difficultyStatus": "proposed",
+      "expressionType": "word",
+      "formOfUid": null,
+      "fr": "partir",
+      "genderFr": "",
+      "id": 476,
+      "image": "assets/vocabulary-fr-v2/images/c14ef0595a70bf16b83e9c8a4701bce0001334674a8564944cb4b7e6e910d334.webp",
+      "imageReviewed": true,
+      "imageRole": "literal",
+      "legacyAddedAt": null,
+      "lemma": null,
+      "origin": "editorial",
+      "partOfSpeech": [
+        "verb"
+      ],
+      "primaryGroup": "topic-16",
+      "related": [],
+      "sentenceCz": "Můj bratr zítra ráno odjede.",
+      "sentenceFr": "Mon frère va partir demain matin.",
+      "teachingType": "word",
+      "thumbnail": "assets/vocabulary-fr-v2/thumbs/5a81ab4effecb73959910a05fb714732897305dea770a1517b856c339d6a88ec.webp",
+      "topicIds": [
+        "topic-16"
+      ],
+      "uid": "vfr-0476"
+    },
+    {
+      "active": true,
+      "addedAt": "2026-11-19T10:15:14.408867+00:00",
+      "cz": "film",
+      "difficultyBand": 1,
+      "difficultyStatus": "proposed",
+      "expressionType": "word",
+      "formOfUid": null,
+      "fr": "film",
+      "genderFr": "m",
+      "id": 477,
+      "image": "assets/vocabulary-fr-v2/images/b10a228304af7ee122afadf3fae61fa1181e91f58ea9a97cc378e025366454fd.webp",
+      "imageReviewed": true,
+      "imageRole": "literal",
+      "legacyAddedAt": null,
+      "lemma": null,
+      "origin": "editorial",
+      "partOfSpeech": [
+        "noun"
+      ],
+      "primaryGroup": "topic-09",
+      "related": [],
+      "sentenceCz": "Tento film o našem městě je zajímavý.",
+      "sentenceFr": "Ce film sur notre ville est intéressant.",
+      "teachingType": "word",
+      "thumbnail": "assets/vocabulary-fr-v2/thumbs/027c36bc050ff2d130569ded090b54f93ad3772ef3ce94f794024e5d872f433c.webp",
+      "topicIds": [
+        "topic-09"
+      ],
+      "uid": "vfr-0477"
+    },
+    {
+      "active": true,
+      "addedAt": "2026-11-19T10:15:14.877990+00:00",
+      "cz": "hudba",
+      "difficultyBand": 1,
+      "difficultyStatus": "proposed",
+      "expressionType": "word",
+      "formOfUid": null,
+      "fr": "musique",
+      "genderFr": "f",
+      "id": 478,
+      "image": "assets/vocabulary-fr-v2/images/bddcbcc3731839465f8e5dbbb7afc58124c22a613cb04e2aa36f57e6bd408dc5.webp",
+      "imageReviewed": true,
+      "imageRole": "literal",
+      "legacyAddedAt": null,
+      "lemma": null,
+      "origin": "editorial",
+      "partOfSpeech": [
+        "noun"
+      ],
+      "primaryGroup": "topic-09",
+      "related": [],
+      "sentenceCz": "Moje sestřenice zbožňuje hudbu.",
+      "sentenceFr": "Ma cousine adore la musique.",
+      "teachingType": "word",
+      "thumbnail": "assets/vocabulary-fr-v2/thumbs/ce9dc244f787e56989077784a19b856037eca243724a3ea417aca954fc1bb2b5.webp",
+      "topicIds": [
+        "topic-09"
+      ],
+      "uid": "vfr-0478"
+    },
+    {
+      "active": true,
+      "addedAt": "2026-11-19T10:15:15.443797+00:00",
+      "cz": "květina",
+      "difficultyBand": 1,
+      "difficultyStatus": "proposed",
+      "expressionType": "word",
+      "formOfUid": null,
+      "fr": "fleur",
+      "genderFr": "f",
+      "id": 479,
+      "image": "assets/vocabulary-fr-v2/images/47b9e22fe587bc5deff2d14ebe4977e6d9821d42d8b86410df43d7e627ac0f41.webp",
+      "imageReviewed": true,
+      "imageRole": "literal",
+      "legacyAddedAt": null,
+      "lemma": null,
+      "origin": "editorial",
+      "partOfSpeech": [
+        "noun"
+      ],
+      "primaryGroup": "topic-07",
+      "related": [],
+      "sentenceCz": "Moje sousedka přináší na večeři květiny.",
+      "sentenceFr": "Ma voisine apporte des fleurs pour le dîner.",
+      "teachingType": "word",
+      "thumbnail": "assets/vocabulary-fr-v2/thumbs/8573b2f59ff53046e25498357d0fcbd884306ee11afd932dea769bac90ae4442.webp",
+      "topicIds": [
+        "topic-07"
+      ],
+      "uid": "vfr-0479"
+    },
+    {
+      "active": true,
+      "addedAt": "2026-11-19T10:15:16.155391+00:00",
+      "cz": "restaurace",
+      "difficultyBand": 1,
+      "difficultyStatus": "proposed",
+      "expressionType": "word",
+      "formOfUid": null,
+      "fr": "restaurant",
+      "genderFr": "m",
+      "id": 480,
+      "image": "assets/vocabulary-fr-v2/images/df8899576545d46d48c92f993097cb0856d6e5925d043f5ff8f5d01fcf10e173.webp",
+      "imageReviewed": true,
+      "imageRole": "literal",
+      "legacyAddedAt": null,
+      "lemma": null,
+      "origin": "editorial",
+      "partOfSpeech": [
+        "noun"
+      ],
+      "primaryGroup": "topic-08",
+      "related": [],
+      "sentenceCz": "Italská restaurace je blízko nádraží.",
+      "sentenceFr": "Le restaurant italien est près de la gare.",
+      "teachingType": "word",
+      "thumbnail": "assets/vocabulary-fr-v2/thumbs/b2169dedcf0cccc7397d8e4b019792d1c535fbfc74d968389451f2f30dc8bd77.webp",
+      "topicIds": [
+        "topic-08"
+      ],
+      "uid": "vfr-0480"
+    },
+    {
+      "active": true,
+      "addedAt": "2026-11-19T10:15:16.915038+00:00",
+      "cz": "rodina",
+      "difficultyBand": 1,
+      "difficultyStatus": "proposed",
+      "expressionType": "word",
+      "formOfUid": null,
+      "fr": "famille",
+      "genderFr": "f",
+      "id": 481,
+      "image": "assets/vocabulary-fr-v2/images/ec3c369b168b873ebbf246a51ed2f8e9276529603e18160bf46378c63e51348f.webp",
+      "imageReviewed": true,
+      "imageRole": "literal",
+      "legacyAddedAt": null,
+      "lemma": null,
+      "origin": "editorial",
+      "partOfSpeech": [
+        "noun"
+      ],
+      "primaryGroup": "topic-01",
+      "related": [],
+      "sentenceCz": "Moje rodina připravuje jídlo na zahradě.",
+      "sentenceFr": "Ma famille prépare le repas dans le jardin.",
+      "teachingType": "word",
+      "thumbnail": "assets/vocabulary-fr-v2/thumbs/38053611bac54ed136097a31c4cdfcb9d4d45d16b7f2e50fc5f6511aa33225f6.webp",
+      "topicIds": [
+        "topic-01"
+      ],
+      "uid": "vfr-0481"
     }
   ],
   "language": "fr",
@@ -14639,30 +15166,30 @@
     }
   ],
   "provenance": {
-    "catalogSha256": "d67bf2dd8e2c21a2a4c4c0967fe08c08b1afa425ed5963f81729b8c373d28370",
-    "sourceCsvSha256": "bbca70b3dd781e576ef04107da6375af70f87da9b5daac23fd3f44d9057090f9"
+    "catalogSha256": "1f6ee5686fd1a5a5cbea1af8c32e13fddeb85545fc60eb6c425f566e74e36060",
+    "sourceCsvSha256": "9600710c52ff8a2790aacea9d8bf2f86083e4d677ebd7f935007944e97f4a701"
   },
   "schemaVersion": 2,
-  "sourceRowCount": 469,
+  "sourceRowCount": 486,
   "stats": {
-    "active": 464,
+    "active": 481,
     "groups": {
-      "topic-01": 53,
+      "topic-01": 54,
       "topic-02": 6,
       "topic-03": 13,
-      "topic-04": 24,
-      "topic-05": 35,
+      "topic-04": 25,
+      "topic-05": 39,
       "topic-06": 2,
-      "topic-07": 9,
-      "topic-08": 31,
-      "topic-09": 26,
+      "topic-07": 10,
+      "topic-08": 34,
+      "topic-09": 28,
       "topic-10": 5,
       "topic-11": 18,
-      "topic-12": 29,
+      "topic-12": 30,
       "topic-13": 20,
       "topic-14": 67,
       "topic-15": 11,
-      "topic-16": 39,
+      "topic-16": 43,
       "topic-17": 32,
       "topic-18": 44
     }
