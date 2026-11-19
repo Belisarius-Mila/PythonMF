@@ -20,41 +20,36 @@ zápis se přidává před zmrazením vydání. Během jobs se main nemění. Ž
 restart Cockpitu, zásah do Camino, nové nastavení autosave ani výroba médií.
 
 <!-- SAMANTHA_CURRENT_STATUS_START -->
-## 2026-11-18 15:29 CET — Schválené věty, 20 ilustrací a nové MP3
+## 2026-11-19 09:30 CET — Schválené delší věty bez Ecco a nové větné audio
 
-Hotovo: Místně zapracovaný celý schválený návrh z Downloads:60 přepisů IT/CZ,
-20 nových karet vit-1097–1116 a20 nových ilustrací. Celkem1116 aktivních vět,
-2349 explicitních obrazových vazeb a4303 právě používaných unikátních MP3.
-132 nových vazeb přibylo do124 stávajících vět;131 z nich ve123 větách bez
-změny textu. Všech80 nových/přepsaných vět má6–8 slov a vlastní IT/CZ audio.
-187 nově syntetizovaných MP3 +13 přesných převzetí, celkem200 nových cest;
-4222 předchozích MP3 zůstalo bajtově zachovaných. Stejná Elsa/Vlasta/-10 %.
+Hotovo: Zapracovaných90 náhrad bez Ecco a jedna rozšířená nabídka ručníku;
+přesně dvě věty s Ecco zůstávají (#0215 a #0282). Všech91 upravených vět má
+6–9 slov a3–5 různých stávajících ilustrací.1116 hesel/2631 obrazových vazeb.
+182 nových větných IT/CZ MP3 (Elsa/Vlasta,-10 %), všech4422 starších MP3
+bajtově zachovaných. Samostatné slovní audio, identity, ilustrace, původní
+CSV, ostatních1025 vět a osobní A–D zachované; žádné nové heslo/obrázek.
 
-Rozhodnutí: Míla „Souhlas implementuj. Počítej s novými ilustracemi i novými
-mp3.“ schválil celý návrh; není to pokyn k push ani nasazení. Vlastní IT
-ilustrace jsou ve VocabularyIT/Pict, sdílené Pict/mapping a původní CSV471
-zachované. Ověření podporuje jen dvě pevné knihovny, přesné cesty/case/SHA.
-Souběžná EN práce zachovaná. Export využil původní ověřený777souborový
-uzavřený snímek: dnešní EN se legitimně liší od historické předlohy15.11.,
-proto se základní manifest nepřepisoval ani jeho ochrany neobcházely.
+Rozhodnutí: Míla schválil celý návrh z Downloads a zadal „OK, vše p+n“.
+Publikaci provede jediná registrovaná role release_executor/Terra pro
+project-vocabulary-it na GitHub Pages. Předchozí společné vydání d2a42b9a
+je dokončené a neopakuje se; nynější vydání má vlastní stabilní identitu.
 
-Další krok: Mílův poslech a fyzická iPhone přejímka; případné p+n zadat
-samostatně. Konečnou programovou bránu a jediný lokální commit určuje
-private/vocabulary_it_loop_refresh_20261118/completion.json.
+Další krok: Dokončit programovou bránu, jediný lokální commit a registrované
+submit_release(wait=True). Přesný finální SHA, brána a výsledek publikace
+jsou výhradně v private/vocabulary_it_ecco_20261119/completion.json a původní
+release_result.json. Tento zápis před zmrazením vydání není potvrzení push.
 
-Navrhované další kroky: Mílův poslech a fyzická iPhone přejímka; samostatně
-zadané p+n. Kontrolní samostatné HTML s20 obrázky i IT zvuky je v Downloads
-jako Vocabulary_IT_nove_ilustrace_2026-11-18.html. Podklady LEDA1–2 zůstávají
-samostatně odložené. Žádná výroba starých médií ani opakování vydání.
+Navrhované další kroky: Mílův poslech a fyzická iPhone přejímka. LEDA1–2
+zůstávají samostatně odložené. Při nejistém vydání ověřit stejný job bez retry.
 
-Technický důkaz:20/20 ilustrací vizuálně zkontrolovaných Adamem,200/200 nových
-MP3 cest plně dekódovaných FFmpeg. Čtyři nové obsahové regrese PASS;13 testů
-exportéru včetně vlastních složek/case/drift/symlink PASS před obsahovou změnou.
-Nativní Safari na Macu: tavolo5 obrázků + přesná IT/CZ věta, velká slovní
-karta po dočtení, nové tè4 obrázky, automatický přechod na latte, pause/resume/
-stop. Vlastní náhledový panel zavřený, původní panely zachované. Finální
-bránu/commit a přesné otisky určuje completion.json. Telefonní a úplná lidská
-akustická přejímka zůstávají otevřené. Bez nového push/deploy.
+Technický důkaz:182/182 nových nahrávek plně dekódovaných FFmpeg,187/187
+místních HTTP souborů přesných; před/po všechny4422 starší MP3 shodné.
+Safari Mac: nové IT/CZ věty a obrázky čistého stolu a ručníku, přehrání,
+pauza/stop a návrat velké slovní karty. Tři obsahové regrese navíc chrání
+přesný rozsah91, dvojici Ecco, homografy a audio; historické šedesátkové
+kontroly obnovují předchozí stav pouze přes schválené změny. Finální bránu
+vybírá program, její výsledek je v completion.json. HTTP/JS/Safari Mac nejsou
+fyzická iPhone ani úplná lidská akustická přejímka. Cockpit se nerestartuje.
 <!-- SAMANTHA_CURRENT_STATUS_END -->
 
 ## 2026-11-17 14:04 CET — Společné p+n obrazových vět EN a IT
@@ -723,3 +718,34 @@ Finální programově vybranou validation-v3 bránu a přesné zdroje po commitu
 určuje private/vocabulary_it_sentence_pictures_20261117/completion.json.
 Původní CSV471, katalog1096, audio manifesty/4222MP3, všechna média, EN/FR
 a profily beze změny; žádné publish/restart/release submit/modelový TTS tah.
+
+## 2026-11-19 09:30 CET — Schválené delší věty bez Ecco a nové větné audio
+
+Hotovo: Zapracovaných90 náhrad bez Ecco a jedna rozšířená nabídka ručníku;
+přesně dvě věty s Ecco zůstávají (#0215 a #0282). Všech91 upravených vět má
+6–9 slov a3–5 různých stávajících ilustrací.1116 hesel/2631 obrazových vazeb.
+182 nových větných IT/CZ MP3 (Elsa/Vlasta,-10 %), všech4422 starších MP3
+bajtově zachovaných. Samostatné slovní audio, identity, ilustrace, původní
+CSV, ostatních1025 vět a osobní A–D zachované; žádné nové heslo/obrázek.
+
+Rozhodnutí: Míla schválil celý návrh z Downloads a zadal „OK, vše p+n“.
+Publikaci provede jediná registrovaná role release_executor/Terra pro
+project-vocabulary-it na GitHub Pages. Předchozí společné vydání d2a42b9a
+je dokončené a neopakuje se; nynější vydání má vlastní stabilní identitu.
+
+Další krok: Dokončit programovou bránu, jediný lokální commit a registrované
+submit_release(wait=True). Přesný finální SHA, brána a výsledek publikace
+jsou výhradně v private/vocabulary_it_ecco_20261119/completion.json a původní
+release_result.json. Tento zápis před zmrazením vydání není potvrzení push.
+
+Navrhované další kroky: Mílův poslech a fyzická iPhone přejímka. LEDA1–2
+zůstávají samostatně odložené. Při nejistém vydání ověřit stejný job bez retry.
+
+Technický důkaz:182/182 nových nahrávek plně dekódovaných FFmpeg,187/187
+místních HTTP souborů přesných; před/po všechny4422 starší MP3 shodné.
+Safari Mac: nové IT/CZ věty a obrázky čistého stolu a ručníku, přehrání,
+pauza/stop a návrat velké slovní karty. Tři obsahové regrese navíc chrání
+přesný rozsah91, dvojici Ecco, homografy a audio; historické šedesátkové
+kontroly obnovují předchozí stav pouze přes schválené změny. Finální bránu
+vybírá program, její výsledek je v completion.json. HTTP/JS/Safari Mac nejsou
+fyzická iPhone ani úplná lidská akustická přejímka. Cockpit se nerestartuje.

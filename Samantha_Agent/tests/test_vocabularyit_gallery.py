@@ -107,7 +107,7 @@ class ItalianSentencePictureTests(unittest.TestCase):
         actual=self.builder.build(self.source,self.data,asset_root=DOCS)
         self.assertEqual(actual,self.export)
         self.assertEqual(len(actual['entries']),1116)
-        self.assertEqual(sum(len(r['concepts']) for r in actual['entries'].values()),2349)
+        self.assertEqual(sum(len(r['concepts']) for r in actual['entries'].values()),2631)
         self.assertEqual(max(len(r['concepts']) for r in actual['entries'].values()),5)
         self.assertTrue(all(r['reviewed'] and 1<=len(r['concepts'])<=5 for r in actual['entries'].values()))
 

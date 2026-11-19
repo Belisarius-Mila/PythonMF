@@ -1,3 +1,9 @@
+AKTUÁLNĚ19.11.2026: schválených90 náhrad bez Ecco+1 rozšířená věta.
+Dvě věty s Ecco zůstávají,1116 hesel/2631 obrazových vazeb.182 nových
+větných IT/CZ MP3,4422 starších MP3 zachovaných; žádné nové ilustrace.
+Míla zadal vše p+n přes Terru; finální SHA/brána/vydání pouze private
+vocabulary_it_ecco_20261119/completion.json. Poslech/iPhone otevřené.
+
 AKTUÁLNĚ18.11.2026: schválených60 přepisů a20 nových karet/ilustrací.
 1116 vět,2349 obrazových vazeb,4303 používaných MP3;187 nových syntéz+13
 přesných převzetí,200 nových cest plně dekódováno.4222 starých MP3 zachovaných.

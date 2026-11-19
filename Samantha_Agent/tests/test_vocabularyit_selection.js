@@ -393,7 +393,7 @@ function pictureLabels(view){return view.element('sentencePictures').querySelect
 test('all1116 reviewed Italian sentence rows resolve1–5 exact image meanings and spans',()=>{
  let total=0;
  for(const item of vocabulary.items){const refs=model.sentencePictures(item,pictures,vocabulary.items);assert.ok(refs.length>=1&&refs.length<=5,item.uid);assert.equal(new Set(refs.map(r=>r.item.image)).size,refs.length);for(const r of refs)assert.equal(item.sentenceIt.slice(r.start,r.end),r.text);total+=refs.length;}
- assert.equal(Object.keys(pictures.entries).length,1116);assert.equal(total,2349);
+ assert.equal(Object.keys(pictures.entries).length,1116);assert.equal(total,2631);
 });
 test('Italian sentence map handles elided nouns and rejects stale, foreign, retired and malformed references',()=>{
  const item=vocabulary.items.find(i=>i.uid==='vit-0617');assert.equal(model.sentencePictures(item,pictures,vocabulary.items)[0].text,'acqua');

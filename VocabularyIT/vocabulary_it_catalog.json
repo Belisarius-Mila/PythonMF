@@ -11956,7 +11956,13 @@
       "imageReviewNote": "Vizuálně zkontrolovaná existující ilustrace k významu nebo příkladovému kontextu; u abstraktních hesel mnemotechnická pomůcka.",
       "imageSha256": "870dabdecc8aff139b2055be0a753b1e03492b5dbba73d5e9154912d5b4feac3",
       "imageRole": "contextual",
-      "reviewOutcome": "visual-context-checked"
+      "reviewOutcome": "visual-context-checked",
+      "sentenceOverride": {
+        "sourceIt": "Ecco un asciugamano pulito.",
+        "sourceCz": "Tady je čistý ručník.",
+        "it": "Ecco un asciugamano pulito per la piscina.",
+        "cz": "Tady je čistý ručník do bazénu."
+      }
     },
     {
       "id": 283,
@@ -14326,7 +14332,13 @@
       "imageReviewNote": "Vizuálně zkontrolovaná existující ilustrace k významu nebo příkladovému kontextu; u abstraktních hesel mnemotechnická pomůcka.",
       "imageSha256": "0a738612e587f2d748f1cb8a62e61fabef6ced72a3d1e2ab59572b2fc2e0c5f2",
       "imageRole": "contextual",
-      "reviewOutcome": "visual-context-checked"
+      "reviewOutcome": "visual-context-checked",
+      "sentenceOverride": {
+        "sourceIt": "Ecco un asciugamano pulito.",
+        "sourceCz": "Tady je čistý ručník.",
+        "it": "Il tavolo è pulito: possiamo mangiare insieme.",
+        "cz": "Stůl je čistý, můžeme se společně najíst."
+      }
     },
     {
       "id": 340,
@@ -22269,8 +22281,8 @@
       "origin": "web",
       "addedAt": "2026-11-16",
       "webText": {
-        "sentenceIt": "Ecco la squadra.",
-        "sentenceCz": "Tady je tým.",
+        "sentenceIt": "La squadra vince la partita allo stadio.",
+        "sentenceCz": "Tým vyhrává zápas na stadionu.",
         "genderIt": "f"
       },
       "authoringBatch": "leda-visible-lessons-3-8-20261116",
@@ -22769,8 +22781,8 @@
       "origin": "web",
       "addedAt": "2026-11-16",
       "webText": {
-        "sentenceIt": "Ecco l'America.",
-        "sentenceCz": "Tady je Amerika.",
+        "sentenceIt": "Vorrei viaggiare in America con la famiglia.",
+        "sentenceCz": "Chtěl bych cestovat s rodinou po Americe.",
         "genderIt": "f"
       },
       "authoringBatch": "leda-visible-lessons-3-8-20261116",
@@ -23164,8 +23176,8 @@
       "origin": "web",
       "addedAt": "2026-11-16",
       "webText": {
-        "sentenceIt": "Ecco la carta.",
-        "sentenceCz": "Tady je hrací karta.",
+        "sentenceIt": "Mio padre prende una carta dal tavolo.",
+        "sentenceCz": "Můj otec bere ze stolu hrací kartu.",
         "genderIt": "f"
       },
       "authoringBatch": "leda-visible-lessons-3-8-20261116",
@@ -23554,8 +23566,8 @@
       "origin": "web",
       "addedAt": "2026-11-16",
       "webText": {
-        "sentenceIt": "Ecco la cosa.",
-        "sentenceCz": "Tady je věc.",
+        "sentenceIt": "Metto tutte le cose nella borsa nuova.",
+        "sentenceCz": "Dávám všechny věci do nové tašky.",
         "genderIt": "f"
       },
       "authoringBatch": "leda-visible-lessons-3-8-20261116",
@@ -23669,8 +23681,8 @@
       "origin": "web",
       "addedAt": "2026-11-16",
       "webText": {
-        "sentenceIt": "Ecco il direttore.",
-        "sentenceCz": "Tady je ředitel.",
+        "sentenceIt": "Il direttore parla con la segretaria in ufficio.",
+        "sentenceCz": "Ředitel mluví se sekretářkou v kanceláři.",
         "genderIt": "m"
       },
       "authoringBatch": "leda-visible-lessons-3-8-20261116",
@@ -23779,8 +23791,8 @@
       "origin": "web",
       "addedAt": "2026-11-16",
       "webText": {
-        "sentenceIt": "Ecco la fabbrica.",
-        "sentenceCz": "Tady je továrna.",
+        "sentenceIt": "Mio padre torna dalla fabbrica alle sei.",
+        "sentenceCz": "Můj otec se vrací z továrny v šest.",
         "genderIt": "f"
       },
       "authoringBatch": "leda-visible-lessons-3-8-20261116",
@@ -24494,8 +24506,8 @@
       "origin": "web",
       "addedAt": "2026-11-16",
       "webText": {
-        "sentenceIt": "Ecco l'indovinello.",
-        "sentenceCz": "Tady je hádanka.",
+        "sentenceIt": "La bambina risolve un indovinello con suo padre.",
+        "sentenceCz": "Holčička řeší hádanku se svým otcem.",
         "genderIt": "m"
       },
       "authoringBatch": "leda-visible-lessons-3-8-20261116",
@@ -25067,8 +25079,8 @@
       "origin": "web",
       "addedAt": "2026-11-16",
       "webText": {
-        "sentenceIt": "Ecco la mostra.",
-        "sentenceCz": "Tady je výstava.",
+        "sentenceIt": "Visitiamo la mostra di pittura con una guida.",
+        "sentenceCz": "S průvodcem si prohlížíme výstavu maleb.",
         "genderIt": "f"
       },
       "authoringBatch": "leda-visible-lessons-3-8-20261116",
@@ -25351,8 +25363,8 @@
       "origin": "web",
       "addedAt": "2026-11-16",
       "webText": {
-        "sentenceIt": "Ecco la parte.",
-        "sentenceCz": "Tady je část.",
+        "sentenceIt": "Mangio una parte della torta al limone.",
+        "sentenceCz": "Jím část citronového dortu.",
         "genderIt": "f"
       },
       "authoringBatch": "leda-visible-lessons-3-8-20261116",
@@ -25411,8 +25423,8 @@
       "origin": "web",
       "addedAt": "2026-11-16",
       "webText": {
-        "sentenceIt": "Ecco la partita.",
-        "sentenceCz": "Tady je partie.",
+        "sentenceIt": "La partita a scacchi comincia alle otto.",
+        "sentenceCz": "Šachová partie začíná v osm.",
         "genderIt": "f"
       },
       "authoringBatch": "leda-visible-lessons-3-8-20261116",
@@ -25471,8 +25483,8 @@
       "origin": "web",
       "addedAt": "2026-11-16",
       "webText": {
-        "sentenceIt": "Ecco la passeggiata.",
-        "sentenceCz": "Tady je procházka.",
+        "sentenceIt": "Dopo la passeggiata riposiamo sulla panchina.",
+        "sentenceCz": "Po procházce odpočíváme na lavičce.",
         "genderIt": "f"
       },
       "authoringBatch": "leda-visible-lessons-3-8-20261116",
@@ -25755,8 +25767,8 @@
       "origin": "web",
       "addedAt": "2026-11-16",
       "webText": {
-        "sentenceIt": "Ecco il piede.",
-        "sentenceCz": "Tady je chodidlo.",
+        "sentenceIt": "Il bambino si lava il piede sinistro.",
+        "sentenceCz": "Dítě si myje levé chodidlo.",
         "genderIt": "m"
       },
       "authoringBatch": "leda-visible-lessons-3-8-20261116",
@@ -26613,8 +26625,8 @@
       "origin": "web",
       "addedAt": "2026-11-16",
       "webText": {
-        "sentenceIt": "Ecco lo scultore.",
-        "sentenceCz": "Tady je sochař.",
+        "sentenceIt": "Lo scultore lavora a un monumento in piazza.",
+        "sentenceCz": "Sochař pracuje na pomníku na náměstí.",
         "genderIt": "m"
       },
       "authoringBatch": "leda-visible-lessons-3-8-20261116",
@@ -26778,8 +26790,8 @@
       "origin": "web",
       "addedAt": "2026-11-16",
       "webText": {
-        "sentenceIt": "Ecco la segretaria.",
-        "sentenceCz": "Tady je sekretářka.",
+        "sentenceIt": "La segretaria risponde al telefono in ufficio.",
+        "sentenceCz": "Sekretářka v kanceláři odpovídá na telefonní hovor.",
         "genderIt": "f"
       },
       "authoringBatch": "leda-visible-lessons-3-8-20261116",
@@ -27223,8 +27235,8 @@
       "origin": "web",
       "addedAt": "2026-11-16",
       "webText": {
-        "sentenceIt": "Ecco il traffico.",
-        "sentenceCz": "Tady je provoz.",
+        "sentenceIt": "Nel traffico l'autobus arriva spesso in ritardo.",
+        "sentenceCz": "Autobus kvůli provozu často přijíždí pozdě.",
         "genderIt": "m"
       },
       "authoringBatch": "leda-visible-lessons-3-8-20261116",
@@ -27283,8 +27295,8 @@
       "origin": "web",
       "addedAt": "2026-11-16",
       "webText": {
-        "sentenceIt": "Ecco la tivù.",
-        "sentenceCz": "Tady je televize.",
+        "sentenceIt": "La sera guardiamo un film alla tivù.",
+        "sentenceCz": "Večer se díváme na film v televizi.",
         "genderIt": "f"
       },
       "authoringBatch": "leda-visible-lessons-3-8-20261116",
@@ -27338,8 +27350,8 @@
       "origin": "web",
       "addedAt": "2026-11-16",
       "webText": {
-        "sentenceIt": "Ecco l'università.",
-        "sentenceCz": "Tady je univerzita.",
+        "sentenceIt": "Mia cugina studia lingue all'università di Milano.",
+        "sentenceCz": "Moje sestřenice studuje jazyky na univerzitě v Miláně.",
         "genderIt": "f"
       },
       "authoringBatch": "leda-visible-lessons-3-8-20261116",
@@ -27728,8 +27740,8 @@
       "origin": "web",
       "addedAt": "2026-11-16",
       "webText": {
-        "sentenceIt": "Ecco la zona.",
-        "sentenceCz": "Tady je oblast.",
+        "sentenceIt": "Questa zona della città è molto tranquilla.",
+        "sentenceCz": "Tahle část města je velmi klidná.",
         "genderIt": "f"
       },
       "authoringBatch": "leda-visible-lessons-3-8-20261116",
@@ -27893,8 +27905,8 @@
       "origin": "web",
       "addedAt": "2026-11-16",
       "webText": {
-        "sentenceIt": "Ecco l'Africa.",
-        "sentenceCz": "Tady je Afrika.",
+        "sentenceIt": "Mio zio viaggia in Africa per lavoro.",
+        "sentenceCz": "Můj strýc cestuje pracovně po Africe.",
         "genderIt": "f"
       },
       "authoringBatch": "leda-visible-lessons-3-8-20261116",
@@ -28003,8 +28015,8 @@
       "origin": "web",
       "addedAt": "2026-11-16",
       "webText": {
-        "sentenceIt": "Ecco l'animale.",
-        "sentenceCz": "Tady je zvíře.",
+        "sentenceIt": "Questo animale vive nel bosco vicino al fiume.",
+        "sentenceCz": "Tohle zvíře žije v lese blízko řeky.",
         "genderIt": "m"
       },
       "authoringBatch": "leda-visible-lessons-3-8-20261116",
@@ -28388,8 +28400,8 @@
       "origin": "web",
       "addedAt": "2026-11-16",
       "webText": {
-        "sentenceIt": "Ecco la capitale.",
-        "sentenceCz": "Tady je hlavní město.",
+        "sentenceIt": "Visito la capitale con una guida italiana.",
+        "sentenceCz": "Prohlížím si hlavní město s italským průvodcem.",
         "genderIt": "f"
       },
       "authoringBatch": "leda-visible-lessons-3-8-20261116",
@@ -28663,8 +28675,8 @@
       "origin": "web",
       "addedAt": "2026-11-16",
       "webText": {
-        "sentenceIt": "Ecco la collezione.",
-        "sentenceCz": "Tady je sbírka.",
+        "sentenceIt": "Il nonno mostra la collezione di francobolli.",
+        "sentenceCz": "Dědeček ukazuje sbírku poštovních známek.",
         "genderIt": "f"
       },
       "authoringBatch": "leda-visible-lessons-3-8-20261116",
@@ -29117,8 +29129,8 @@
       "origin": "web",
       "addedAt": "2026-11-16",
       "webText": {
-        "sentenceIt": "Ecco la discoteca.",
-        "sentenceCz": "Tady je diskotéka.",
+        "sentenceIt": "Sabato balliamo in discoteca con i nostri amici.",
+        "sentenceCz": "V sobotu tančíme s kamarády na diskotéce.",
         "genderIt": "f"
       },
       "authoringBatch": "leda-visible-lessons-3-8-20261116",
@@ -29282,8 +29294,8 @@
       "origin": "web",
       "addedAt": "2026-11-16",
       "webText": {
-        "sentenceIt": "Ecco l'elenco.",
-        "sentenceCz": "Tady je seznam.",
+        "sentenceIt": "Scrivo un elenco di libri sul quaderno.",
+        "sentenceCz": "Píšu do sešitu seznam knih.",
         "genderIt": "m"
       },
       "authoringBatch": "leda-visible-lessons-3-8-20261116",
@@ -29392,8 +29404,8 @@
       "origin": "web",
       "addedAt": "2026-11-16",
       "webText": {
-        "sentenceIt": "Ecco la fila.",
-        "sentenceCz": "Tady je řada.",
+        "sentenceIt": "La fila di alberi è vicino al fiume.",
+        "sentenceCz": "Řada stromů je blízko řeky.",
         "genderIt": "f"
       },
       "authoringBatch": "leda-visible-lessons-3-8-20261116",
@@ -29557,8 +29569,8 @@
       "origin": "web",
       "addedAt": "2026-11-16",
       "webText": {
-        "sentenceIt": "Ecco la galleria d'arte.",
-        "sentenceCz": "Tady je galerie.",
+        "sentenceIt": "Visitiamo la galleria d'arte prima del concerto.",
+        "sentenceCz": "Před koncertem si prohlížíme galerii.",
         "genderIt": "f"
       },
       "authoringBatch": "leda-visible-lessons-3-8-20261116",
@@ -29612,8 +29624,8 @@
       "origin": "web",
       "addedAt": "2026-11-16",
       "webText": {
-        "sentenceIt": "Ecco il giro.",
-        "sentenceCz": "Tady je okruh.",
+        "sentenceIt": "Facciamo un giro del lago in bicicletta.",
+        "sentenceCz": "Objíždíme jezero na kole.",
         "genderIt": "m"
       },
       "authoringBatch": "leda-visible-lessons-3-8-20261116",
@@ -29784,8 +29796,8 @@
       "origin": "web",
       "addedAt": "2026-11-16",
       "webText": {
-        "sentenceIt": "Ecco l'indirizzo.",
-        "sentenceCz": "Tady je adresa.",
+        "sentenceIt": "Scrivo l'indirizzo nel messaggio per Luca.",
+        "sentenceCz": "Píšu adresu do zprávy pro Lukáše.",
         "genderIt": "m"
       },
       "authoringBatch": "leda-visible-lessons-3-8-20261116",
@@ -29949,8 +29961,8 @@
       "origin": "web",
       "addedAt": "2026-11-16",
       "webText": {
-        "sentenceIt": "Ecco il libro giallo.",
-        "sentenceCz": "Tady je detektivka.",
+        "sentenceIt": "Leggo un libro giallo prima di dormire.",
+        "sentenceCz": "Před spaním čtu detektivku.",
         "genderIt": "m"
       },
       "authoringBatch": "leda-visible-lessons-3-8-20261116",
@@ -30174,8 +30186,8 @@
       "origin": "web",
       "addedAt": "2026-11-16",
       "webText": {
-        "sentenceIt": "Ecco il marito.",
-        "sentenceCz": "Tady je manžel.",
+        "sentenceIt": "Mio marito prepara la cena per la famiglia.",
+        "sentenceCz": "Můj manžel připravuje večeři pro rodinu.",
         "genderIt": "m"
       },
       "authoringBatch": "leda-visible-lessons-3-8-20261116",
@@ -30575,8 +30587,8 @@
       "origin": "web",
       "addedAt": "2026-11-16",
       "webText": {
-        "sentenceIt": "Ecco la moglie.",
-        "sentenceCz": "Tady je manželka.",
+        "sentenceIt": "Mia moglie legge un giornale sul treno.",
+        "sentenceCz": "Moje manželka čte ve vlaku noviny.",
         "genderIt": "f"
       },
       "authoringBatch": "leda-visible-lessons-3-8-20261116",
@@ -30635,8 +30647,8 @@
       "origin": "web",
       "addedAt": "2026-11-16",
       "webText": {
-        "sentenceIt": "Ecco il monte.",
-        "sentenceCz": "Tady je hora.",
+        "sentenceIt": "Dal monte vedo il lago e il bosco.",
+        "sentenceCz": "Z hory vidím jezero a les.",
         "genderIt": "m"
       },
       "authoringBatch": "leda-visible-lessons-3-8-20261116",
@@ -30690,8 +30702,8 @@
       "origin": "web",
       "addedAt": "2026-11-16",
       "webText": {
-        "sentenceIt": "Ecco il monumento.",
-        "sentenceCz": "Tady je památka.",
+        "sentenceIt": "I turisti guardano il monumento in piazza.",
+        "sentenceCz": "Turisté si prohlížejí pomník na náměstí.",
         "genderIt": "m"
       },
       "authoringBatch": "leda-visible-lessons-3-8-20261116",
@@ -30745,8 +30757,8 @@
       "origin": "web",
       "addedAt": "2026-11-16",
       "webText": {
-        "sentenceIt": "Ecco il municipio.",
-        "sentenceCz": "Tady je radnice.",
+        "sentenceIt": "Dopo il ponte trovi il municipio a destra.",
+        "sentenceCz": "Za mostem najdeš vpravo radnici.",
         "genderIt": "m"
       },
       "authoringBatch": "leda-visible-lessons-3-8-20261116",
@@ -31644,8 +31656,8 @@
       "origin": "web",
       "addedAt": "2026-11-16",
       "webText": {
-        "sentenceIt": "Ecco la primavera.",
-        "sentenceCz": "Tady je jaro.",
+        "sentenceIt": "In primavera gli alberi sono in fiore.",
+        "sentenceCz": "Na jaře jsou stromy v květu.",
         "genderIt": "f"
       },
       "authoringBatch": "leda-visible-lessons-3-8-20261116",
@@ -32382,8 +32394,8 @@
       "origin": "web",
       "addedAt": "2026-11-16",
       "webText": {
-        "sentenceIt": "Ecco lo spettacolo.",
-        "sentenceCz": "Tady je podívaná.",
+        "sentenceIt": "Lo spettacolo comincia alle otto in teatro.",
+        "sentenceCz": "Představení začíná v osm v divadle.",
         "genderIt": "m"
       },
       "authoringBatch": "leda-visible-lessons-3-8-20261116",
@@ -32492,8 +32504,8 @@
       "origin": "web",
       "addedAt": "2026-11-16",
       "webText": {
-        "sentenceIt": "Ecco lo sportello.",
-        "sentenceCz": "Tady je přepážka.",
+        "sentenceIt": "Pago il biglietto del treno allo sportello.",
+        "sentenceCz": "Platím u přepážky za jízdenku na vlak.",
         "genderIt": "m"
       },
       "authoringBatch": "leda-visible-lessons-3-8-20261116",
@@ -32547,8 +32559,8 @@
       "origin": "web",
       "addedAt": "2026-11-16",
       "webText": {
-        "sentenceIt": "Ecco la sposa.",
-        "sentenceCz": "Tady je nevěsta.",
+        "sentenceIt": "La sposa porta un vestito bianco.",
+        "sentenceCz": "Nevěsta má na sobě bílé šaty.",
         "genderIt": "f"
       },
       "authoringBatch": "leda-visible-lessons-3-8-20261116",
@@ -32657,8 +32669,8 @@
       "origin": "web",
       "addedAt": "2026-11-16",
       "webText": {
-        "sentenceIt": "Ecco lo sposo.",
-        "sentenceCz": "Tady je ženich.",
+        "sentenceIt": "Lo sposo aspetta la sposa davanti alla chiesa.",
+        "sentenceCz": "Ženich čeká na nevěstu před kostelem.",
         "genderIt": "m"
       },
       "authoringBatch": "leda-visible-lessons-3-8-20261116",
@@ -32827,8 +32839,8 @@
       "origin": "web",
       "addedAt": "2026-11-16",
       "webText": {
-        "sentenceIt": "Ecco il teatro.",
-        "sentenceCz": "Tady je divadlo.",
+        "sentenceIt": "Vado a teatro con mia sorella stasera.",
+        "sentenceCz": "Dnes večer jdu se sestrou do divadla.",
         "genderIt": "m"
       },
       "authoringBatch": "leda-visible-lessons-3-8-20261116",
@@ -32882,8 +32894,8 @@
       "origin": "web",
       "addedAt": "2026-11-16",
       "webText": {
-        "sentenceIt": "Ecco il tram.",
-        "sentenceCz": "Tady je tramvaj.",
+        "sentenceIt": "Prendo il tram per andare in centro.",
+        "sentenceCz": "Jedu tramvají do centra města.",
         "genderIt": "m"
       },
       "authoringBatch": "leda-visible-lessons-3-8-20261116",
@@ -35587,8 +35599,8 @@
       "origin": "web",
       "addedAt": "2026-11-16",
       "webText": {
-        "sentenceIt": "Ecco l'agenzia.",
-        "sentenceCz": "Tady je agentura.",
+        "sentenceIt": "L'agenzia prepara il viaggio della nostra famiglia.",
+        "sentenceCz": "Agentura připravuje cestu naší rodiny.",
         "genderIt": "f"
       },
       "authoringBatch": "leda-visible-lessons-3-8-20261116",
@@ -36037,8 +36049,8 @@
       "origin": "web",
       "addedAt": "2026-11-16",
       "webText": {
-        "sentenceIt": "Ecco il babbo.",
-        "sentenceCz": "Tady je tatínek.",
+        "sentenceIt": "Il babbo legge una storia alla bambina.",
+        "sentenceCz": "Tatínek čte holčičce příběh.",
         "genderIt": "m"
       },
       "authoringBatch": "leda-visible-lessons-3-8-20261116",
@@ -36257,8 +36269,8 @@
       "origin": "web",
       "addedAt": "2026-11-16",
       "webText": {
-        "sentenceIt": "Ecco il campo.",
-        "sentenceCz": "Tady je pole.",
+        "sentenceIt": "Il campo è tra il fiume e il bosco.",
+        "sentenceCz": "Pole leží mezi řekou a lesem.",
         "genderIt": "m"
       },
       "authoringBatch": "leda-visible-lessons-3-8-20261116",
@@ -36367,8 +36379,8 @@
       "origin": "web",
       "addedAt": "2026-11-16",
       "webText": {
-        "sentenceIt": "Ecco il cellulare.",
-        "sentenceCz": "Tady je mobilní telefon.",
+        "sentenceIt": "Mia madre cerca il cellulare nella borsa.",
+        "sentenceCz": "Moje matka hledá mobilní telefon v tašce.",
         "genderIt": "m"
       },
       "authoringBatch": "leda-visible-lessons-3-8-20261116",
@@ -36482,8 +36494,8 @@
       "origin": "web",
       "addedAt": "2026-11-16",
       "webText": {
-        "sentenceIt": "Ecco il centro.",
-        "sentenceCz": "Tady je střed.",
+        "sentenceIt": "Metto un fiore al centro del tavolo.",
+        "sentenceCz": "Dávám květinu doprostřed stolu.",
         "genderIt": "m"
       },
       "authoringBatch": "leda-visible-lessons-3-8-20261116",
@@ -36592,8 +36604,8 @@
       "origin": "web",
       "addedAt": "2026-11-16",
       "webText": {
-        "sentenceIt": "Ecco la cifra.",
-        "sentenceCz": "Tady je číslice.",
+        "sentenceIt": "Scrivo la cifra quattro sul quaderno nuovo.",
+        "sentenceCz": "Píšu číslici čtyři do nového sešitu.",
         "genderIt": "f"
       },
       "authoringBatch": "leda-visible-lessons-3-8-20261116",
@@ -36647,8 +36659,8 @@
       "origin": "web",
       "addedAt": "2026-11-16",
       "webText": {
-        "sentenceIt": "Ecco il colle.",
-        "sentenceCz": "Tady je pahorek.",
+        "sentenceIt": "Dalla barca vedo un castello sul colle.",
+        "sentenceCz": "Z loďky vidím hrad na pahorku.",
         "genderIt": "m"
       },
       "authoringBatch": "leda-visible-lessons-3-8-20261116",
@@ -36762,8 +36774,8 @@
       "origin": "web",
       "addedAt": "2026-11-16",
       "webText": {
-        "sentenceIt": "Ecco il cugino.",
-        "sentenceCz": "Tady je bratranec.",
+        "sentenceIt": "Mio cugino nuota in piscina con Luca.",
+        "sentenceCz": "Můj bratranec plave v bazénu s Lukášem.",
         "genderIt": "m"
       },
       "authoringBatch": "leda-visible-lessons-3-8-20261116",
@@ -37501,8 +37513,8 @@
       "origin": "web",
       "addedAt": "2026-11-16",
       "webText": {
-        "sentenceIt": "Ecco il fondo.",
-        "sentenceCz": "Tady je dno.",
+        "sentenceIt": "Trovo una chiave sul fondo della borsa.",
+        "sentenceCz": "Na dně tašky nacházím klíč.",
         "genderIt": "m"
       },
       "authoringBatch": "leda-visible-lessons-3-8-20261116",
@@ -37556,8 +37568,8 @@
       "origin": "web",
       "addedAt": "2026-11-16",
       "webText": {
-        "sentenceIt": "Ecco la fronte.",
-        "sentenceCz": "Tady je čelo.",
+        "sentenceIt": "La madre lava la fronte del bambino.",
+        "sentenceCz": "Matka myje dítěti čelo.",
         "genderIt": "f"
       },
       "authoringBatch": "leda-visible-lessons-3-8-20261116",
@@ -37611,8 +37623,8 @@
       "origin": "web",
       "addedAt": "2026-11-16",
       "webText": {
-        "sentenceIt": "Ecco la gamba.",
-        "sentenceCz": "Tady je noha.",
+        "sentenceIt": "Il medico guarda la gamba del bambino.",
+        "sentenceCz": "Lékař se dívá dítěti na nohu.",
         "genderIt": "f"
       },
       "authoringBatch": "leda-visible-lessons-3-8-20261116",
@@ -37831,8 +37843,8 @@
       "origin": "web",
       "addedAt": "2026-11-16",
       "webText": {
-        "sentenceIt": "Ecco la lettera.",
-        "sentenceCz": "Tady je dopis.",
+        "sentenceIt": "Scrivo una lettera a mia zia in Francia.",
+        "sentenceCz": "Píšu dopis své tetě ve Francii.",
         "genderIt": "f"
       },
       "authoringBatch": "leda-visible-lessons-3-8-20261116",
@@ -37886,8 +37898,8 @@
       "origin": "web",
       "addedAt": "2026-11-16",
       "webText": {
-        "sentenceIt": "Ecco il lettino.",
-        "sentenceCz": "Tady je lehátko.",
+        "sentenceIt": "Il nonno riposa sul lettino sotto l'ombrellone.",
+        "sentenceCz": "Dědeček odpočívá na lehátku pod slunečníkem.",
         "genderIt": "m"
       },
       "authoringBatch": "leda-visible-lessons-3-8-20261116",
@@ -38625,8 +38637,8 @@
       "origin": "web",
       "addedAt": "2026-11-16",
       "webText": {
-        "sentenceIt": "Ecco l'ombrellone.",
-        "sentenceCz": "Tady je plážový slunečník.",
+        "sentenceIt": "Apriamo l'ombrellone bianco vicino al mare.",
+        "sentenceCz": "Otevíráme bílý slunečník blízko moře.",
         "genderIt": "m"
       },
       "authoringBatch": "leda-visible-lessons-3-8-20261116",
@@ -38685,8 +38697,8 @@
       "origin": "web",
       "addedAt": "2026-11-16",
       "webText": {
-        "sentenceIt": "Ecco il palazzo.",
-        "sentenceCz": "Tady je palác.",
+        "sentenceIt": "Visitiamo il palazzo antico con una guida.",
+        "sentenceCz": "Prohlížíme si s průvodcem starobylý palác.",
         "genderIt": "m"
       },
       "authoringBatch": "leda-visible-lessons-3-8-20261116",
@@ -38905,8 +38917,8 @@
       "origin": "web",
       "addedAt": "2026-11-16",
       "webText": {
-        "sentenceIt": "Ecco la posta.",
-        "sentenceCz": "Tady je pošta.",
+        "sentenceIt": "Vado alla posta a comprare un francobollo.",
+        "sentenceCz": "Jdu na poštu koupit poštovní známku.",
         "genderIt": "f"
       },
       "authoringBatch": "leda-visible-lessons-3-8-20261116",
@@ -40235,8 +40247,8 @@
       "origin": "web",
       "addedAt": "2026-11-16",
       "webText": {
-        "sentenceIt": "Ecco la segreteria.",
-        "sentenceCz": "Tady je sekretariát.",
+        "sentenceIt": "La segretaria lavora in segreteria fino a mezzogiorno.",
+        "sentenceCz": "Sekretářka pracuje na sekretariátu až do poledne.",
         "genderIt": "f"
       },
       "authoringBatch": "leda-visible-lessons-3-8-20261116",
@@ -40413,8 +40425,8 @@
       "origin": "web",
       "addedAt": "2026-11-16",
       "webText": {
-        "sentenceIt": "Ecco la telefonata.",
-        "sentenceCz": "Tady je telefonní hovor.",
+        "sentenceIt": "Dopo la telefonata scrivo un messaggio a Luca.",
+        "sentenceCz": "Po telefonním hovoru píšu zprávu Lukášovi.",
         "genderIt": "f"
       },
       "authoringBatch": "leda-visible-lessons-3-8-20261116",
@@ -40468,8 +40480,8 @@
       "origin": "web",
       "addedAt": "2026-11-16",
       "webText": {
-        "sentenceIt": "Ecco il telefono.",
-        "sentenceCz": "Tady je telefon.",
+        "sentenceIt": "Il telefono suona sul tavolo in ufficio.",
+        "sentenceCz": "Telefon zvoní na stole v kanceláři.",
         "genderIt": "m"
       },
       "authoringBatch": "leda-visible-lessons-3-8-20261116",
@@ -40633,8 +40645,8 @@
       "origin": "web",
       "addedAt": "2026-11-16",
       "webText": {
-        "sentenceIt": "Ecco la torre.",
-        "sentenceCz": "Tady je věž.",
+        "sentenceIt": "Dal castello vedo una torre vicino al fiume.",
+        "sentenceCz": "Z hradu vidím věž blízko řeky.",
         "genderIt": "f"
       },
       "authoringBatch": "leda-visible-lessons-3-8-20261116",
@@ -40853,8 +40865,8 @@
       "origin": "web",
       "addedAt": "2026-11-16",
       "webText": {
-        "sentenceIt": "Ecco l'uomo.",
-        "sentenceCz": "Tady je muž.",
+        "sentenceIt": "L'uomo apre la porta della macchina.",
+        "sentenceCz": "Muž otevírá dveře auta.",
         "genderIt": "m"
       },
       "authoringBatch": "leda-visible-lessons-3-8-20261116",
@@ -41028,8 +41040,8 @@
       "origin": "web",
       "addedAt": "2026-11-16",
       "webText": {
-        "sentenceIt": "Ecco il vestito.",
-        "sentenceCz": "Tady jsou šaty.",
+        "sentenceIt": "Provo il vestito blu davanti allo specchio.",
+        "sentenceCz": "Zkouším si tmavě modré šaty před zrcadlem.",
         "genderIt": "m"
       },
       "authoringBatch": "leda-visible-lessons-3-8-20261116",
@@ -41483,8 +41495,8 @@
       "origin": "web",
       "addedAt": "2026-11-16",
       "webText": {
-        "sentenceIt": "Ecco l'arte.",
-        "sentenceCz": "Tady je umění.",
+        "sentenceIt": "Mia sorella studia arte all'università di Milano.",
+        "sentenceCz": "Moje sestra studuje umění na univerzitě v Miláně.",
         "genderIt": "f"
       },
       "authoringBatch": "leda-visible-lessons-3-8-20261116",
@@ -42038,8 +42050,8 @@
       "origin": "web",
       "addedAt": "2026-11-16",
       "webText": {
-        "sentenceIt": "Ecco la canzone.",
-        "sentenceCz": "Tady je píseň.",
+        "sentenceIt": "Ascoltiamo una canzone prima di andare a letto.",
+        "sentenceCz": "Před spaním posloucháme píseň.",
         "genderIt": "f"
       },
       "authoringBatch": "leda-visible-lessons-3-8-20261116",
@@ -42093,8 +42105,8 @@
       "origin": "web",
       "addedAt": "2026-11-16",
       "webText": {
-        "sentenceIt": "Ecco la carta d'imbarco.",
-        "sentenceCz": "Tady je palubní vstupenka.",
+        "sentenceIt": "Mostro la carta d'imbarco prima di partire.",
+        "sentenceCz": "Před odletem ukazuji palubní vstupenku.",
         "genderIt": "f"
       },
       "authoringBatch": "leda-visible-lessons-3-8-20261116",
@@ -42148,8 +42160,8 @@
       "origin": "web",
       "addedAt": "2026-11-16",
       "webText": {
-        "sentenceIt": "Ecco il CD.",
-        "sentenceCz": "Tady je cédéčko.",
+        "sentenceIt": "Metto il CD nella borsa di mia sorella.",
+        "sentenceCz": "Dávám cédéčko do tašky své sestry.",
         "genderIt": "m"
       },
       "authoringBatch": "leda-visible-lessons-3-8-20261116",
@@ -42258,8 +42270,8 @@
       "origin": "web",
       "addedAt": "2026-11-16",
       "webText": {
-        "sentenceIt": "Ecco la chitarra.",
-        "sentenceCz": "Tady je kytara.",
+        "sentenceIt": "Mio fratello porta la chitarra alla festa.",
+        "sentenceCz": "Můj bratr nese kytaru na oslavu.",
         "genderIt": "f"
       },
       "authoringBatch": "leda-visible-lessons-3-8-20261116",
@@ -42313,8 +42325,8 @@
       "origin": "web",
       "addedAt": "2026-11-16",
       "webText": {
-        "sentenceIt": "Ecco la cognata.",
-        "sentenceCz": "Tady je švagrová.",
+        "sentenceIt": "Mia cognata prepara il pranzo in giardino.",
+        "sentenceCz": "Moje švagrová připravuje oběd na zahradě.",
         "genderIt": "f"
       },
       "authoringBatch": "leda-visible-lessons-3-8-20261116",
@@ -42368,8 +42380,8 @@
       "origin": "web",
       "addedAt": "2026-11-16",
       "webText": {
-        "sentenceIt": "Ecco il cognato.",
-        "sentenceCz": "Tady je švagr.",
+        "sentenceIt": "Mio cognato lava la macchina davanti a casa.",
+        "sentenceCz": "Můj švagr myje auto před domem.",
         "genderIt": "m"
       },
       "authoringBatch": "leda-visible-lessons-3-8-20261116",
@@ -42648,8 +42660,8 @@
       "origin": "web",
       "addedAt": "2026-11-16",
       "webText": {
-        "sentenceIt": "Ecco la crocetta.",
-        "sentenceCz": "Tady je křížek.",
+        "sentenceIt": "Metto una crocetta vicino alla risposta giusta.",
+        "sentenceCz": "Dělám křížek vedle správné odpovědi.",
         "genderIt": "f"
       },
       "authoringBatch": "leda-visible-lessons-3-8-20261116",
@@ -42703,8 +42715,8 @@
       "origin": "web",
       "addedAt": "2026-11-16",
       "webText": {
-        "sentenceIt": "Ecco la cugina.",
-        "sentenceCz": "Tady je sestřenice.",
+        "sentenceIt": "Mia cugina disegna un fiore sul quaderno.",
+        "sentenceCz": "Moje sestřenice kreslí květinu do sešitu.",
         "genderIt": "f"
       },
       "authoringBatch": "leda-visible-lessons-3-8-20261116",
@@ -43038,8 +43050,8 @@
       "origin": "web",
       "addedAt": "2026-11-16",
       "webText": {
-        "sentenceIt": "Ecco la donna.",
-        "sentenceCz": "Tady je žena.",
+        "sentenceIt": "La donna attraversa il ponte con la bambina.",
+        "sentenceCz": "Žena přechází s holčičkou přes most.",
         "genderIt": "f"
       },
       "authoringBatch": "leda-visible-lessons-3-8-20261116",
@@ -43478,8 +43490,8 @@
       "origin": "web",
       "addedAt": "2026-11-16",
       "webText": {
-        "sentenceIt": "Ecco la Germania.",
-        "sentenceCz": "Tady je Německo.",
+        "sentenceIt": "Domani parto per la Germania in treno.",
+        "sentenceCz": "Zítra odjíždím vlakem do Německa.",
         "genderIt": "f"
       },
       "authoringBatch": "leda-visible-lessons-3-8-20261116",
@@ -43533,8 +43545,8 @@
       "origin": "web",
       "addedAt": "2026-11-16",
       "webText": {
-        "sentenceIt": "Ecco il giornale.",
-        "sentenceCz": "Tady jsou noviny.",
+        "sentenceIt": "Il nonno compra il giornale prima del viaggio.",
+        "sentenceCz": "Dědeček si před cestou kupuje noviny.",
         "genderIt": "m"
       },
       "authoringBatch": "leda-visible-lessons-3-8-20261116",
@@ -43973,8 +43985,8 @@
       "origin": "web",
       "addedAt": "2026-11-16",
       "webText": {
-        "sentenceIt": "Ecco l'incidente.",
-        "sentenceCz": "Tady je nehoda.",
+        "sentenceIt": "Dopo l'incidente il medico arriva in fretta.",
+        "sentenceCz": "Po nehodě lékař rychle přijíždí.",
         "genderIt": "m"
       },
       "authoringBatch": "leda-visible-lessons-3-8-20261116",
@@ -44193,8 +44205,8 @@
       "origin": "web",
       "addedAt": "2026-11-16",
       "webText": {
-        "sentenceIt": "Ecco la lotteria.",
-        "sentenceCz": "Tady je loterie.",
+        "sentenceIt": "Con i soldi vinti alla lotteria compro una bicicletta.",
+        "sentenceCz": "Za peníze vyhrané v loterii si kupuji kolo.",
         "genderIt": "f"
       },
       "authoringBatch": "leda-visible-lessons-3-8-20261116",
@@ -44248,8 +44260,8 @@
       "origin": "web",
       "addedAt": "2026-11-16",
       "webText": {
-        "sentenceIt": "Ecco la luce.",
-        "sentenceCz": "Tady je světlo.",
+        "sentenceIt": "La luce entra nella camera dalla finestra.",
+        "sentenceCz": "Světlo proniká do pokoje oknem.",
         "genderIt": "f"
       },
       "authoringBatch": "leda-visible-lessons-3-8-20261116",
@@ -44578,8 +44590,8 @@
       "origin": "web",
       "addedAt": "2026-11-16",
       "webText": {
-        "sentenceIt": "Ecco la natura morta.",
-        "sentenceCz": "Tady je zátiší.",
+        "sentenceIt": "Il pittore mostra una natura morta al museo.",
+        "sentenceCz": "Malíř ukazuje v muzeu zátiší.",
         "genderIt": "f"
       },
       "authoringBatch": "leda-visible-lessons-3-8-20261116",
@@ -44923,8 +44935,8 @@
       "origin": "web",
       "addedAt": "2026-11-16",
       "webText": {
-        "sentenceIt": "Ecco il paesaggio.",
-        "sentenceCz": "Tady je krajina.",
+        "sentenceIt": "Dalla finestra del treno guardo il paesaggio.",
+        "sentenceCz": "Z okna vlaku pozoruji krajinu.",
         "genderIt": "m"
       },
       "authoringBatch": "leda-visible-lessons-3-8-20261116",
@@ -45033,8 +45045,8 @@
       "origin": "web",
       "addedAt": "2026-11-16",
       "webText": {
-        "sentenceIt": "Ecco il passeggero.",
-        "sentenceCz": "Tady je cestující.",
+        "sentenceIt": "Il passeggero legge il giornale sul treno.",
+        "sentenceCz": "Cestující čte ve vlaku noviny.",
         "genderIt": "m"
       },
       "authoringBatch": "leda-visible-lessons-3-8-20261116",
@@ -45198,8 +45210,8 @@
       "origin": "web",
       "addedAt": "2026-11-16",
       "webText": {
-        "sentenceIt": "Ecco il pianoforte.",
-        "sentenceCz": "Tady je klavír.",
+        "sentenceIt": "Mia sorella studia pianoforte ogni pomeriggio.",
+        "sentenceCz": "Moje sestra se každé odpoledne učí hrát na klavír.",
         "genderIt": "m"
       },
       "authoringBatch": "leda-visible-lessons-3-8-20261116",
@@ -45253,8 +45265,8 @@
       "origin": "web",
       "addedAt": "2026-11-16",
       "webText": {
-        "sentenceIt": "Ecco il pittore.",
-        "sentenceCz": "Tady je malíř.",
+        "sentenceIt": "Il pittore prepara un quadro per la mostra.",
+        "sentenceCz": "Malíř připravuje obraz na výstavu.",
         "genderIt": "m"
       },
       "authoringBatch": "leda-visible-lessons-3-8-20261116",
@@ -46308,8 +46320,8 @@
       "origin": "web",
       "addedAt": "2026-11-16",
       "webText": {
-        "sentenceIt": "Ecco la Sardegna.",
-        "sentenceCz": "Tady je Sardinie.",
+        "sentenceIt": "In estate nuoto nel mare della Sardegna.",
+        "sentenceCz": "V létě plavu v moři u Sardinie.",
         "genderIt": "f"
       },
       "authoringBatch": "leda-visible-lessons-3-8-20261116",
@@ -46583,8 +46595,8 @@
       "origin": "web",
       "addedAt": "2026-11-16",
       "webText": {
-        "sentenceIt": "Ecco la Sicilia.",
-        "sentenceCz": "Tady je Sicílie.",
+        "sentenceIt": "Dalla nave vedo un vulcano in Sicilia.",
+        "sentenceCz": "Z lodi vidím na Sicílii sopku.",
         "genderIt": "f"
       },
       "authoringBatch": "leda-visible-lessons-3-8-20261116",
@@ -47088,8 +47100,8 @@
       "origin": "web",
       "addedAt": "2026-11-16",
       "webText": {
-        "sentenceIt": "Ecco la suocera.",
-        "sentenceCz": "Tady je tchyně.",
+        "sentenceIt": "Mia suocera compra i fiori al mercato.",
+        "sentenceCz": "Moje tchyně kupuje květiny na trhu.",
         "genderIt": "f"
       },
       "authoringBatch": "leda-visible-lessons-3-8-20261116",
@@ -47143,8 +47155,8 @@
       "origin": "web",
       "addedAt": "2026-11-16",
       "webText": {
-        "sentenceIt": "Ecco il suocero.",
-        "sentenceCz": "Tady je tchán.",
+        "sentenceIt": "Mio suocero porta la valigia alla stazione.",
+        "sentenceCz": "Můj tchán nese kufr na nádraží.",
         "genderIt": "m"
       },
       "authoringBatch": "leda-visible-lessons-3-8-20261116",
@@ -47253,8 +47265,8 @@
       "origin": "web",
       "addedAt": "2026-11-16",
       "webText": {
-        "sentenceIt": "Ecco la sveglia.",
-        "sentenceCz": "Tady je budík.",
+        "sentenceIt": "La sveglia suona alle sette ogni mattina.",
+        "sentenceCz": "Budík zvoní každé ráno v sedm.",
         "genderIt": "f"
       },
       "authoringBatch": "leda-visible-lessons-3-8-20261116",
@@ -47308,8 +47320,8 @@
       "origin": "web",
       "addedAt": "2026-11-16",
       "webText": {
-        "sentenceIt": "Ecco il testimone.",
-        "sentenceCz": "Tady je svědek.",
+        "sentenceIt": "Il testimone parla dell'incidente con un medico.",
+        "sentenceCz": "Svědek mluví o nehodě s lékařem.",
         "genderIt": "m"
       },
       "authoringBatch": "leda-visible-lessons-3-8-20261116",

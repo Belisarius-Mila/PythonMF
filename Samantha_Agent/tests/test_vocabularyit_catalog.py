@@ -19,10 +19,34 @@ it = importlib.util.module_from_spec(SPEC)
 SPEC.loader.exec_module(it)
 
 
+def catalog_before_ecco(current):
+    """Undo only the approved sentence fields before checking earlier batches."""
+    batch = json.loads((ROOT / 'VocabularyIT/batches/ecco_refresh_20261119.json').read_text())
+    result = copy.deepcopy(current)
+    for entry in result['entries']:
+        change = batch['sentenceChanges'].get(entry['uid'])
+        if not change:
+            continue
+        previous = change['beforeEntry']
+        if entry.get('origin', 'legacy') == 'web':
+            assert entry['webText']['sentenceIt'] == change['afterIt']
+            assert entry['webText']['sentenceCz'] == change['afterCz']
+            entry['webText'] = copy.deepcopy(previous['webText'])
+        else:
+            assert entry['sentenceOverride']['it'] == change['afterIt']
+            assert entry['sentenceOverride']['cz'] == change['afterCz']
+            entry.pop('sentenceOverride')
+            if 'sentenceOverride' in previous:
+                entry['sentenceOverride'] = copy.deepcopy(previous['sentenceOverride'])
+        assert entry == previous, entry['uid']
+    assert hashlib.sha256(audio.encoded(result['entries'])).hexdigest() == batch['beforeEntriesSha256']
+    return result
+
+
 def catalog_before_loop(current):
     """Reconstruct the historical batch, asserting only approved sentences changed."""
     batch = json.loads((ROOT / 'VocabularyIT/batches/loop_refresh_20261118.json').read_text())
-    result = copy.deepcopy(current)
+    result = catalog_before_ecco(current)
     result['entries'] = result['entries'][:batch['baseCount']]
     for entry in result['entries']:
         change = batch['sentenceChanges'].get(entry['uid'])
@@ -509,6 +533,68 @@ class VocabularyItalianLoopRefreshTests(unittest.TestCase):
         self.assertEqual(len(plan['jobs']),4222)
         actual={relative:audio.digest(ROOT/'docs'/relative) for relative in plan['jobs']}
         self.assertEqual(hashlib.sha256(audio.encoded(actual)).hexdigest(),self.batch['previousAudioAssetSha256'])
+
+
+class VocabularyItalianEccoRefreshTests(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls):
+        cls.batch = json.loads((ROOT/'VocabularyIT/batches/ecco_refresh_20261119.json').read_text())
+        cls.catalog = it.load_catalog()
+        cls.data = json.loads((ROOT/'docs/data/vocabulary-it-v2.json').read_text())
+        cls.pictures = json.loads((ROOT/'docs/data/vocabulary-it-sentence-pictures.json').read_text())
+
+    def test_only_approved_sentences_change_and_exactly_two_ecco_remain(self):
+        b = self.batch
+        self.assertEqual(len(b['sentenceChanges']), 91)
+        self.assertEqual(len(catalog_before_ecco(self.catalog)['entries']), 1116)
+        current = {x['uid']: x for x in self.data['items']}
+        self.assertEqual({uid for uid, x in current.items() if x['sentenceIt'].startswith('Ecco ')},
+                         {'vit-0215', 'vit-0282'})
+        for uid, change in b['sentenceChanges'].items():
+            self.assertTrue(change['beforeIt'].startswith('Ecco '))
+            self.assertEqual((current[uid]['sentenceIt'], current[uid]['sentenceCz']),
+                             (change['afterIt'], change['afterCz']))
+            self.assertTrue(6 <= len(change['afterIt'].split()) <= 9)
+            if uid != 'vit-0282':
+                self.assertNotIn('ecco', change['afterIt'].casefold())
+        for relative, sha in b['preservedSources'].items():
+            self.assertEqual(it.digest(ROOT/relative), sha)
+
+    def test_changed_loops_have_distinct_images_and_correct_polysemous_meanings(self):
+        items = {x['uid']: x for x in self.data['items']}
+        for uid in self.batch['sentenceChanges']:
+            refs = self.pictures['entries'][uid]['concepts']
+            self.assertTrue(3 <= len(refs) <= 5)
+            self.assertIn(uid, {r['uid'] for r in refs})
+            self.assertEqual(len({it.digest(ROOT/'docs'/items[r['uid']]['image']) for r in refs}), len(refs))
+            for ref in refs:
+                self.assertEqual(items[uid]['sentenceIt'][ref['start']:ref['end']], ref['text'])
+        for target, required, excluded in [('vit-0871','vit-1034','vit-0143'),
+                                           ('vit-0872','vit-0872','vit-0534'),
+                                           ('vit-0655','vit-0655','vit-0091'),
+                                           ('vit-0792','vit-0792','vit-0580')]:
+            ids = {r['uid'] for r in self.pictures['entries'][target]['concepts']}
+            self.assertIn(required, ids)
+            self.assertNotIn(excluded, ids)
+
+    def test_old_audio_is_preserved_and_new_it_cz_sentences_are_exact(self):
+        previous = catalog_before_ecco(self.catalog)
+        old_items = [{'uid': entry['uid'], **body} for entry, body in
+                     it.all_card_texts(it.load_rows(ROOT/'VocabularyIT/VocabularyIT.csv'), previous)]
+        plan = audio.plan(old_items, provider='registered-edge-tts+azure-neural')
+        self.assertTrue(all((ROOT/'docs'/relative).is_file() for relative in plan['jobs']))
+        sentence = json.loads((ROOT/'docs/data/vocabulary-it-sentence-audio.json').read_text())
+        old_plan = {x['uid']: x for x in old_items}
+        for item in self.data['items']:
+            uid = item['uid']; record = sentence['items'][uid]
+            self.assertEqual((record['sourceSentenceIt'], record['sourceSentenceCz']),
+                             (item['sentenceIt'], item['sentenceCz']))
+            for language, field in [('it', 'sentenceIt'), ('cz', 'sentenceCz')]:
+                path = audio.asset_path(language, 'sentences', audio.text(item[field], 'sentences'))
+                self.assertEqual(record[language], path)
+                self.assertEqual(it.digest(ROOT/'docs'/path), sentence['assetSha256'][path])
+                old_path = audio.asset_path(language, 'sentences', audio.text(old_plan[uid][field], 'sentences'))
+                self.assertEqual(path != old_path, uid in self.batch['sentenceChanges'])
 
 
 if __name__ == "__main__":
