@@ -251,3 +251,107 @@ test('new catalog card appears in All while stale legacy profile and personal ha
 });
 
 }
+
+const memory=require('../../docs/vocabulary-fr/memory.js');
+const memoryPool=memory.choose(vocabulary.items,audio,quizCatalog,()=>.5);
+const memorySaved=v=>JSON.parse(v.session.getItem(memory.KEY));
+const memoryButton=(v,n)=>v.element('memoryBoard').children[n].querySelector('button');
+async function memoryView(count=2,options={}){
+ const v=await app(options);v.element('memoryTab').click();change(v,'memoryPlayerCount',String(count));
+ v.element('memoryNames').querySelectorAll('input').forEach((input,i)=>{input.value=['Jana','Eva','Petr','Tom'][i];input.emit('input');});
+ v.element('memoryStart').click();await flush();return v;
+}
+async function memoryHear(v,n){memoryButton(v,n).click();await until(()=>active(v));assert.match(active(v).url,/-fr\.mp3$/);ended(v);await flush();v.advance(2000);await flush();}
+async function memoryPair(v,a,b){await memoryHear(v,a);await memoryHear(v,b);v.advance(1000);await flush();}
+function memoryPositions(g,uid){return g.deck.flatMap((x,i)=>x===uid?[i]:[]);}
+
+test('FR memory chooses12 distinct compatible meanings with French audio and keeps source metadata intact',()=>{
+ const before=JSON.stringify([vocabulary,audio,quizCatalog]);assert.equal(memoryPool.length,12);
+ const game=memory.newGame(memoryPool,['Jana']);assert.equal(game.deck.length,24);assert.equal(new Set(game.deck).size,12);
+ for(const uid of new Set(game.deck))assert.equal(memoryPositions(game,uid).length,2);
+ const changed=clone(audio);changed.items[cat.uid].fr=null;assert.equal(memory.choose([cat],changed,quizCatalog).length,0);
+ const sameAudio=clone(audio);sameAudio.items[vocabulary.items[1].uid].fr=sameAudio.items[cat.uid].fr;
+ assert.equal(memory.choose([cat,vocabulary.items[1]],sameAudio,quizCatalog).length,1);
+ assert.equal(memory.choose(memoryPool.slice(0,11),audio,quizCatalog).length,11);
+ assert.equal(JSON.stringify([vocabulary,audio,quizCatalog]),before);
+});
+test('FR memory keeps consecutive successful turns for one named player and cycles1–4 players on misses',()=>{
+ for(let n=1;n<=4;n++){
+  let g=memory.newGame(memoryPool,['Jana','Eva','Petr','Tom'].slice(0,n));
+  assert.throws(()=>memory.settle(g,0,24));assert.throws(()=>memory.settle(g,0,0));
+  g=memory.settle(g,0,g.deck.findIndex(x=>x!==g.deck[0]));assert.equal(g.active,1%n);
+  const owner=g.active;for(const uid of new Set(g.deck)){g=memory.settle(g,...memoryPositions(g,uid));assert.equal(g.active,owner);}
+  assert.equal(Object.keys(g.owners).length,12);assert.equal(Object.values(g.owners).filter(x=>x===owner).length,12);
+  assert.throws(()=>memory.settle(g,...memoryPositions(g,g.deck[0])));
+ }
+});
+test('FR memory opens24 numbered backs, short names and projector view without leaking French answers',async()=>{
+ const v=await memoryView(4);assert.equal(v.state.view,'memory');assert.match(v.win.location.href,/game=memory-pairs/);
+ assert.equal(v.element('memoryBoard').children.length,24);assert.equal(v.element('memoryBoard').querySelectorAll('img').length,0);
+ v.element('memoryBoard').children.forEach((slot,n)=>{const b=slot.querySelector('button');assert.equal(b.textContent,String(n+1));assert.equal(b.getAttribute('aria-label'),`Kartička ${n+1}, zavřená`);});
+ assert.deepEqual(memorySaved(v).game.players,['Jana','Eva','Petr','Tom']);assert.equal(v.element('memoryScores').children.length,4);
+ v.element('memoryProjector').click();assert.equal(v.element('memoryView').classList.contains('memory-projector'),true);
+});
+test('FR memory waits for French audio completion and two-second Czech hint and ignores rapid extra clicks',async()=>{
+ const v=await memoryView();memoryButton(v,0).click();await until(()=>active(v));const p=active(v);
+ assert.match(p.url,/-fr\.mp3$/);assert.equal(v.element('memoryBoard').querySelector('.memory-word').lang,'fr');
+ assert.equal(v.element('memoryBoard').querySelectorAll('.memory-translation').length,1);
+ memoryButton(v,1).click();v.advance(2000);await flush();assert.equal(v.element('memoryBoard').querySelectorAll('.memory-translation').length,0);
+ assert.equal(memoryButton(v,1).disabled,true);assert.equal(v.players.filter(p=>p.playCount>0).length,1);
+ ended(v);await flush();assert.equal(memoryButton(v,1).disabled,false);assert.equal(memorySaved(v).game.turns,0);
+});
+test('FR memory awards a pair once, leaves two grey holes and preserves the same player for another pair',async()=>{
+ const v=await memoryView(3),g=memorySaved(v).game,[a,b]=memoryPositions(g,g.deck[0]);
+ await memoryHear(v,a);await memoryHear(v,b);assert.equal(v.element('memoryBoard').querySelectorAll('.memory-match').length,2);
+ v.advance(1000);await flush();assert.equal(v.element('memoryBoard').querySelectorAll('.memory-empty').length,2);
+ assert.equal(memorySaved(v).game.active,0);assert.match(v.element('memoryScores').children[0].textContent,/Jana.*Dvojice: 1/);
+ const uid=g.deck.find(x=>x!==g.deck[0]);await memoryPair(v,...memoryPositions(g,uid));assert.equal(memorySaved(v).game.active,0);assert.equal(Object.keys(memorySaved(v).game.owners).length,2);
+});
+test('FR memory mismatch closes both cards and changes to the next player',async()=>{
+ const v=await memoryView(3),g=memorySaved(v).game;await memoryPair(v,0,g.deck.findIndex(x=>x!==g.deck[0]));
+ assert.equal(memorySaved(v).game.active,1);assert.equal(v.element('memoryBoard').querySelectorAll('img').length,0);assert.equal(v.element('memoryBoard').children.length,24);
+});
+test('FR memory restores completed turns and original selection after reload without autoplay',async()=>{
+ const v=await memoryView(),g=memorySaved(v).game;await memoryPair(v,...memoryPositions(g,g.deck[0]));
+ memoryButton(v,g.deck.findIndex(x=>x!==g.deck[0])).click();await until(()=>active(v));v.emit('pagehide');
+ const reloaded=await app({session:v.session,local:v.local,url:v.win.location.href+'&topics=topic-01'});assert.equal(reloaded.state.view,'memory');assert.equal(active(reloaded),undefined);
+ reloaded.element('memoryResume').click();assert.equal(reloaded.element('memoryBoard').children.length,24);assert.deepEqual([...reloaded.state.topics],['topic-01']);
+ assert.equal(reloaded.element('memoryBoard').querySelectorAll('.memory-empty').length,2);assert.equal(reloaded.element('memoryBoard').querySelectorAll('img').length,0);assert.equal(memorySaved(reloaded).game.turns,1);
+ const saved=memorySaved(reloaded);assert.deepEqual(memory.restore(saved,vocabulary.items,audio,quizCatalog),saved.game);
+ const bad=clone(saved);bad.game.deck[0]='ven-0001';assert.equal(memory.restore(bad,vocabulary.items,audio,quizCatalog),null);
+ const changed=clone(audio);changed.items[g.deck[0]].fr=null;assert.equal(memory.restore(saved,vocabulary.items,changed,quizCatalog),null);
+});
+test('FR memory respects Jana hard words and every gallery filter without writing personal or legacy state',async()=>{
+ const personalKey='vocabulary-fr.personal-hard.v1',legacy='legacy untouched';
+ const local=storage(new Map([[personalKey,JSON.stringify({schema:1,kind:'vocabulary-fr.personal-hard-backup',language:'fr',hard:memoryPool.map(i=>i.uid)})],[learners.KEY,legacy],['vocabulary-en.memory-pairs.v1','unrelated']]));
+ const v=await app({local});v.element('personalHard').click();const before=JSON.stringify([...local.map]);
+ v.element('memoryTab').click();assert.match(v.element('memorySelection').textContent,/Jen obtížná/);assert.equal(v.element('memoryStart').disabled,false);v.element('memoryStart').click();
+ assert.ok(memorySaved(v).game.deck.every(uid=>memoryPool.some(i=>i.uid===uid)));await memoryHear(v,0);assert.equal(JSON.stringify([...local.map]),before);
+ v.element('memoryBack').click();change(v,'searchInput','chat');v.element('searchInput').emit('input');v.element('memoryTab').click();assert.equal(v.element('memoryStart').disabled,true);
+ v.element('memorySetupChange').click();v.state.query='';v.state.topics=['topic-01'];v.selectionChanged();v.element('memoryTab').click();assert.equal(v.element('memoryStart').disabled,true);
+ assert.equal(local.getItem(learners.KEY),legacy);assert.equal(local.getItem('vocabulary-en.memory-pairs.v1'),'unrelated');
+});
+test('FR memory failures offer retry or explicit skip and never borrow the Czech channel',async()=>{
+ const v=await memoryView(2,{audioReject:true});memoryButton(v,0).click();await flush();v.advance(2000);await flush();
+ assert.equal(v.element('memorySkip').hidden,false);assert.equal(memorySaved(v).game.turns,0);assert.ok(v.players.filter(p=>p.playCount).every(p=>/-fr\.mp3$/.test(p.url)));
+ v.setAudioReject(false);v.element('memoryRetry').click();await until(()=>active(v));ended(v);await flush();v.advance(2000);await flush();assert.equal(memoryButton(v,1).disabled,false);
+ const none=await memoryView(2,{manifest:null});assert.equal(none.element('memoryStart').disabled,true);assert.equal(active(none),undefined);
+});
+test('FR memory confirms leaving for gallery, practice or settings and cancels stale audio when approved',async()=>{
+ const v=await memoryView();memoryButton(v,0).click();await until(()=>active(v));const p=active(v);
+ v.win.confirm=()=>false;for(const id of ['galleryTab','quizTab','settingsTab']){v.element(id).click();assert.equal(v.state.view,'memory');}
+ v.win.confirm=()=>true;v.element('quizTab').click();assert.equal(v.state.view,'quiz');assert.equal(p.paused,true);v.advance(10000);await flush();assert.equal(memorySaved(v).game.turns,0);
+ v.element('memoryTab').click();v.element('memoryResume').click();v.win.confirm=()=>false;v.win.location.href='https://example.test/PythonMF/vocabulary-fr/#card='+cat.uid;v.emit('hashchange');assert.equal(v.state.view,'memory');assert.match(v.win.location.href,/memory-pairs/);
+});
+test('FR memory finishes12 pairs with tie, player collections and replay of the same vocabulary',async()=>{
+ const g=memory.newGame(memoryPool,['Jana','Eva']),uids=[...new Set(g.deck)];g.owners=Object.fromEntries(uids.slice(0,11).map((uid,n)=>[uid,n<6?0:1]));g.active=1;g.turns=11;
+ const session=storage();session.setItem(memory.KEY,JSON.stringify({version:1,filters:{},game:g,source:memory.signature(g.deck,vocabulary.items,audio)}));
+ const v=await app({session,url:'https://example.test/PythonMF/vocabulary-fr/#game=memory-pairs'});v.element('memoryResume').click();await memoryPair(v,...memoryPositions(g,uids[11]));
+ assert.equal(v.element('memoryEnd').hidden,false);assert.match(v.element('memoryResult').textContent,/Remíza/);assert.equal(v.element('memoryCollections').children.length,2);assert.equal(v.element('memoryBoard').querySelectorAll('.memory-empty').length,24);
+ v.element('memoryAgain').click();assert.equal(v.element('memoryEnd').hidden,true);assert.equal(Object.keys(memorySaved(v).game.owners).length,0);assert.deepEqual([...new Set(memorySaved(v).game.deck)].sort(),uids.sort());
+});
+test('FR memory works with blocked storage and never starts or resumes audio from its link',async()=>{
+ const v=await memoryView(1,{blocked:true,url:'https://example.test/PythonMF/vocabulary-fr/#game=memory-pairs'});
+ assert.equal(v.element('memoryBoard').children.length,24);assert.match(v.element('memoryStorageNotice').textContent,/nepodařilo uložit/);assert.equal(active(v),undefined);
+ const missing=await app({failQuiz:true});missing.element('memoryTab').click();assert.equal(missing.element('memoryStart').disabled,true);
+});

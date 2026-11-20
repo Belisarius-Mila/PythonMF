@@ -1,13 +1,32 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
-## 2026-11-19 — Zveřejněná optimalizace Janiných vět
+## 2026-11-20 23:44 CET — Janino francouzské pexeso 6 × 4
 
-Hotovo:23 obsahových přepisů, oprava apostrofu v #092,4 doplnění obrazových vazeb a17 nových karet vfr-0465–0481. Otázka #070 zní „Tu es prête pour le cours de maths ?“, české znění je také otázka. #259 beurre zachovává původní FR/CZ text i obě větné MP3, využije však nový obrázek pain.
+Hotovo: V Janině francouzštině nová část Pexeso se stejnými pravidly jako
+EN:24 číslovaných rubů,12 různých dvojic,1–4 krátká jména, skóre a sbírky.
+Po otočení obrázek, francouzská MP3 a čeština2 s; porovnání po dočtení,
+zelená shoda, dvě šedá místa a pokračování stejného hráče, při neshodě
+střídání. Konec/remíza, rozbalení sbírek, stejná/nová zásoba, projektor
+a ruční obnova dokončených tahů bez autoplay. PC6×4, úzký displej4×6.
 
-Rozhodnutí: Míla schválil návrh z TXT s těmito dvěma upřesněními. Místní implementace zahrnuje vlastní ilustrace/náhledy a všechny4 hlasové reference nových karet. Hlasy Henri/Vlasta a tempo−10 % zachované. Původní CSV a uzavřená v003 zůstávají zdrojem pro přesné ověření.
+Rozhodnutí: Míla zadal stejné pexeso v Janině Francouzštině. Francouzský
+klient používá svůj společný výběr Všechna/Jen obtížná, témata a další
+filtry; hra osobní označení ani A–D nemění. Samostatný sessionStorage
+vocabulary-fr.memory-pairs.v1, validace FR UID a existujících FR médií.
+Přenos současného EN pravidla, bez nových ilustrací, MP3 nebo změn obsahu.
+Nové p+n nezadané. Stávající FR TVBCP zůstává kanonický, žádný nový dokument.
 
-Důkaz:481 aktivních karet,1924 platných zvukových odkazů,1141 obrazových vazeb,362 různých ilustrací.115 nových MP3, celá knihovna1898 MP3 dekódovaná. Skutečný klient přijal všechny481 položky i481 čtyřmožnostních otázek;164 HTTP odpovědí bajtově přesných. Vizuální Safari přejímka otevřená kvůli nedostupnému ovládání prohlížeče.
-
-Stav a další krok: Zveřejněno na Francouzštině Jana přes Terru. Commit aedb8b69, job74d9ba485996e7b5c9c0db4befaeb87a completed, push/deploy confirmed. Pages deployment7910994188 a workflow44509422262 odpovídají přesnému commitu. Všech164 veřejných souborů včetně nových médií má HTTP200 a přesné bajty zdroje, katalog481 karet. Otázka #070 i původní věta #259 ověřené na veřejných datech. Podrobné důkazy jsou v private/vocabulary_fr_loop_refresh_release_20261119. Další krok je fyzická přejímka na Janině zařízení. Závěrečný dokumentační checkpoint patří do příštího GitHub balíčku.
+Další krok: Dokončit programem vybranou doménovou bránu a jeden lokální
+commit; přesný head/bránu určuje private/vocabulary_fr_memory_20261120/
+completion.json. Míla může přezkoušet místní náhled; publikace až na p+n.
+Navrhované další kroky: Fyzická přejímka na Janině zařízení po vydání.
+Technický důkaz:47 klientských JS scénářů PASS včetně12 nových pro pexeso,
+FR bez CZ fallbacku, načasování, skóre, obnova, filtry a neměnnost osobních
+záznamů. Finální stav po posledním zpřesnění ověří doménová brána v gate.log.
+Skutečný481kartový katalog vytvoří12 kompatibilních dvojic se zvukem.
+Safari Mac:24 míst6×4,4 jména a skóre současně, FR/krátká CZ, neshoda
+Jana→Eva, reload a ruční pokračování Evy. Fyzický iPhone zůstává otevřený.
+Veškeré FR datové JSON a EN zdroje hashově zachované. Původní média ani
+osobní soubory se neupravují; bez push, nasazení, TTS nebo restartu služeb.
 <!-- SAMANTHA_CURRENT_STATUS_END -->
 
 ## 2026-11-17 20:21 CET — Společné předání osobního režimu a Datových commitů k p+n
@@ -689,3 +708,14 @@ Python/35 JS, skutečný464/203, Safari reload. Převzetí mění jen dokumentac
 programová brána a přesný commit/p+n jsou v private
 vocabulary_fr_personal_hard_release_20261117/completion.json. Skutečný seznam,
 původní CSV a Janino zařízení nejsou součástí publikačního stromu ani přejímky.
+
+
+## 2026-11-19 — Zveřejněná optimalizace Janiných vět
+
+Hotovo:23 obsahových přepisů, oprava apostrofu v #092,4 doplnění obrazových vazeb a17 nových karet vfr-0465–0481. Otázka #070 zní „Tu es prête pour le cours de maths ?“, české znění je také otázka. #259 beurre zachovává původní FR/CZ text i obě větné MP3, využije však nový obrázek pain.
+
+Rozhodnutí: Míla schválil návrh z TXT s těmito dvěma upřesněními. Místní implementace zahrnuje vlastní ilustrace/náhledy a všechny4 hlasové reference nových karet. Hlasy Henri/Vlasta a tempo−10 % zachované. Původní CSV a uzavřená v003 zůstávají zdrojem pro přesné ověření.
+
+Důkaz:481 aktivních karet,1924 platných zvukových odkazů,1141 obrazových vazeb,362 různých ilustrací.115 nových MP3, celá knihovna1898 MP3 dekódovaná. Skutečný klient přijal všechny481 položky i481 čtyřmožnostních otázek;164 HTTP odpovědí bajtově přesných. Vizuální Safari přejímka otevřená kvůli nedostupnému ovládání prohlížeče.
+
+Stav a další krok: Zveřejněno na Francouzštině Jana přes Terru. Commit aedb8b69, job74d9ba485996e7b5c9c0db4befaeb87a completed, push/deploy confirmed. Pages deployment7910994188 a workflow44509422262 odpovídají přesnému commitu. Všech164 veřejných souborů včetně nových médií má HTTP200 a přesné bajty zdroje, katalog481 karet. Otázka #070 i původní věta #259 ověřené na veřejných datech. Podrobné důkazy jsou v private/vocabulary_fr_loop_refresh_release_20261119. Další krok je fyzická přejímka na Janině zařízení. Závěrečný dokumentační checkpoint patří do příštího GitHub balíčku.

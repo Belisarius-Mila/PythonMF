@@ -19,7 +19,7 @@ const studyLoop={mode:"words",gap:2000,active:false,running:false,phase:"words",
 let loopAudio=null;
 let galleryTranslation=null;
 let learnerUI=null,personalUI=null;
-let quizUI=null,quizCatalog=null;
+let quizUI=null,quizCatalog=null,memoryUI=null;
 const learnerSelect=document.getElementById("learnerSelect"),learnerHardFilter=document.getElementById("learnerHardFilter"),editLearnerHard=document.getElementById("editLearnerHard");
 const STORAGE_KEY="vocabulary-fr.navigation.v1", LAST_KEY="vocabulary-fr.last-card.v1";
 function context() { return Object.fromEntries(Object.keys(defaults()).map(key => [key,Array.isArray(state[key]) ? [...state[key]] : state[key]])); }
@@ -45,6 +45,7 @@ function persist() {
 function routeUrl(kind,uid="") {
   const params=new URLSearchParams(), current=context();
   if(kind==="quiz")params.set("game","word-pictures");
+  if(kind==="memory")params.set("game","memory-pairs");
   if(uid)params.set(kind==="study" ? "card" : "last",uid);
   for(const key of Object.keys(defaults())) {
     const value=current[key], fallback=defaults()[key];
@@ -60,7 +61,7 @@ function route() {
   const params=new URLSearchParams(new URL(window.location.href).hash.slice(1));
   const raw={};
   for(const key of Object.keys(defaults()))if(params.has(key))raw[key]=Array.isArray(defaults()[key]) ? params.get(key).split(",") : ["large","onlyLearnerHard","personalHard"].includes(key) ? params.get(key)==="true" : params.get(key);
-  return {hasContext:Object.keys(raw).length>0,context:sanitizeContext(raw),card:params.get("card") || "",last:params.get("last") || "",game:["word-pictures","listen-pictures"].includes(params.get("game"))};
+  return {hasContext:Object.keys(raw).length>0,context:sanitizeContext(raw),card:params.get("card") || "",last:params.get("last") || "",game:["word-pictures","listen-pictures"].includes(params.get("game")),memory:params.get("game")==="memory-pairs"};
 }
 function personalItems(){return personalUI?personalUI.filter(state.items,state.personalHard):state.personalHard?[]:state.items;}
 function buildSelection(){return M.select(personalItems(),context(),state.items);}
@@ -190,8 +191,11 @@ function selectionChanged(){
 function resetFilters(){Object.assign(state,{filter:"all",teachingType:"all",query:"",topics:[],sources:[],parts:[],levels:[],learner:"all",onlyLearnerHard:false,personalHard:false,recentCount:0});selectionChanged();}
 function switchView(kind){
   if(kind!=="quiz")quizUI?.leave();
+  if(kind!=="memory")memoryUI?.leave();
   state.view=kind;ui.galleryView.hidden=kind!=="gallery";ui.studyView.hidden=kind!=="study";
   document.getElementById("quizView").hidden=kind!=="quiz";
+  document.getElementById("memoryView").hidden=kind!=="memory";
+  document.getElementById("memoryTab").setAttribute("aria-pressed",String(kind==="memory"));
   document.getElementById("quizTab").setAttribute("aria-pressed",String(kind==="quiz"));
   document.getElementById("settingsView").hidden=kind!=="settings";
   document.getElementById("personalSettingsView").hidden=kind!=="personal";
@@ -201,6 +205,7 @@ function switchView(kind){
 }
 function openQuiz({fromHistory=false}={}){
   if(!quizUI)return;
+  if(state.view==="memory"&&!memoryUI?.canLeave())return;
   if(state.view==="settings"&&!learnerUI?.close())return;
   if(state.view==="personal"&&!personalUI?.close())return;
   if(state.view!=="quiz")persist();
@@ -211,6 +216,15 @@ function returnFromQuiz(){
   if(state.view!=="quiz")return;
   showGallery({render:true});
 }
+function openMemory({fromHistory=false}={}){
+  if(!memoryUI)return;
+  if(state.view==="settings"&&!learnerUI?.close())return;
+  if(state.view==="personal"&&!personalUI?.close())return;
+  if(state.view!=="memory")persist();
+  memoryUI.open();
+  if(!fromHistory)writeHistory("memory","pushState");
+}
+function returnFromMemory(){if(state.view==="memory")showGallery({render:true});}
 function freshVisit(){return `${Date.now().toString(36)}-${Math.random().toString(36).slice(2,10)}`;}
 function openStudy(uid,mode="ordered",tile=null){
   stopAudioPlayback();let sequence=orderedSelection();
@@ -428,9 +442,13 @@ function returnToGallery(){
 }
 function applyRoute({initial=false}={}){
   const current=route(),saved=savedNavigation(),last=savedLast();
+  if(state.view==="memory"&&current.memory)return;
+  if(state.view==="memory"&&!memoryUI?.canLeave()){writeHistory("memory");return;}
+  stopAudioPlayback();
   if(state.view==="personal"&&!personalUI?.close())return;
   if(initial)Object.assign(state,current.hasContext ? current.context : sanitizeContext(saved?.context || last?.context || {}));
   if(!personalUI?.available)state.personalHard=false;
+  if(current.memory&&memoryUI){if(current.hasContext)Object.assign(state,current.context);openMemory({fromHistory:true});return;}
   if(current.game&&quizUI){if(current.hasContext)Object.assign(state,current.context);openQuiz({fromHistory:true});return;}
   if(current.card){
     const target=state.items.find(item=>M.key(item)===current.card);
@@ -621,14 +639,15 @@ function bindEvents(){
     if(studyLoop.active)pauseStudyLoop("Prodleva změněna. Spusť Pokračovat.");
     studyLoop.gap=gap;syncStudyLoopControls();
   });
-  function openPersonal(){if(state.view==="settings"&&!learnerUI?.close())return;personalUI?.open();}
+  function openPersonal(){if(state.view==="memory"&&!memoryUI?.canLeave())return;if(state.view==="settings"&&!learnerUI?.close())return;personalUI?.open();}
   document.getElementById("settingsTab").addEventListener("click",openPersonal);
   document.getElementById("editPersonalHard").addEventListener("click",openPersonal);
   document.getElementById("personalAll").addEventListener("click",()=>{state.personalHard=false;selectionChanged();});
   document.getElementById("personalHard").addEventListener("click",()=>{if(personalUI?.available){state.personalHard=true;selectionChanged();}});
   document.getElementById("legacySettingsButton").addEventListener("click",()=>{if(personalUI?.close())learnerUI?.open("A");});
-  document.getElementById("galleryTab").addEventListener("click",()=>{if(state.view==="settings")learnerUI?.close();else if(state.view==="personal")personalUI?.close();else if(state.view==="study")returnToGallery();else if(state.view==="quiz")quizUI?.close();});
+  document.getElementById("galleryTab").addEventListener("click",()=>{if(state.view==="settings")learnerUI?.close();else if(state.view==="personal")personalUI?.close();else if(state.view==="study")returnToGallery();else if(state.view==="quiz")quizUI?.close();else if(state.view==="memory")memoryUI?.close();});
   document.getElementById("quizTab").addEventListener("click",()=>{if(state.view!=="quiz")openQuiz();});
+  document.getElementById("memoryTab").addEventListener("click",()=>{if(state.view!=="memory")openMemory();});
   const recentInput=document.getElementById("recentCount"),recentOnly=document.getElementById("recentOnly");
   function changeRecent(){
     const count=recentOnly.checked?M.recentCount(recentInput.value):0;
@@ -654,11 +673,11 @@ function bindEvents(){
   ui.revealButton.addEventListener("click",()=>{if(!state.currentItem || !M.studyPrompt(state.currentItem,context()).available)return;state.revealed=true;renderCurrentItem();});
   ui.speakPromptButton.addEventListener("click",speakPrompt);ui.wordImage.addEventListener("click",speakPrompt);ui.speakAnswerButton.addEventListener("click",speakAnswer);ui.speakCzechButton.addEventListener("click",()=>playStudyChannel("cz"));
   ui.wordImage.addEventListener("error",()=>{ui.wordImage.hidden=true;ui.pictureFallback.hidden=false;});
-  document.addEventListener("keydown",event=>{if(event.key==="Escape"){if(state.view==="study"){event.preventDefault();returnToGallery();}else if(state.view==="quiz"){event.preventDefault();quizUI?.close();}}});
-  window.addEventListener("popstate",()=>{stopAudioPlayback();applyRoute();});
-  window.addEventListener("hashchange",()=>{const current=route();if(current.game||state.view==="quiz"||current.card && (state.view!=="study" || M.key(state.currentItem)!==current.card)){stopAudioPlayback();applyRoute();}});
-  window.addEventListener("pagehide",()=>{persist();quizUI?.leave();stopAudioPlayback();});
-  window.addEventListener("pageshow",event=>{if(event.persisted){stopAudioPlayback();if(state.view==="gallery")focusLast();else if(state.view==="quiz")quizUI?.open();}});
+  document.addEventListener("keydown",event=>{if(event.key==="Escape"){if(state.view==="study"){event.preventDefault();returnToGallery();}else if(state.view==="quiz"){event.preventDefault();quizUI?.close();}else if(state.view==="memory"){event.preventDefault();memoryUI?.close();}}});
+  window.addEventListener("popstate",()=>applyRoute());
+  window.addEventListener("hashchange",()=>{const current=route();if(current.game||current.memory||state.view==="quiz"||state.view==="memory"||current.card && (state.view!=="study" || M.key(state.currentItem)!==current.card)){applyRoute();}});
+  window.addEventListener("pagehide",()=>{persist();quizUI?.leave();memoryUI?.leave();stopAudioPlayback();});
+  window.addEventListener("pageshow",event=>{if(event.persisted){stopAudioPlayback();if(state.view==="gallery")focusLast();else if(state.view==="quiz")quizUI?.open();else if(state.view==="memory")memoryUI?.open();}});
 }
 async function readJson(url){const response=await fetch(url,{cache:"no-store"});if(!response.ok)throw new Error(`HTTP ${response.status}`);return response.json();}
 async function init(){
@@ -670,9 +689,9 @@ async function init(){
   }).catch(()=>{sentencePicturesManifest=false;});
   // A slow or missing pronunciation file must never hold the picture atlas closed.
   void readJson(AUDIO_DATA_URL).then(manifest=>{
-    state.audioManifest=manifest;document.getElementById("audioNotice").hidden=manifest?.status==="complete";if(state.currentItem){primeCurrentAudio(state.currentItem);syncAudioAvailability();}quizUI?.refresh();
-  }).catch(()=>{state.audioManifest=false;if(state.currentItem)syncAudioAvailability();ui.galleryNotice.textContent="Zvuk se nepodařilo načíst. Slovíčka můžeš dál procházet.";quizUI?.refresh();});
-  if(globalThis.VocabularyFRPractice)void readJson(QUIZ_DATA_URL).then(data=>{if(data?.schemaVersion!==1||data.language!=="fr"||data.kind!=="spelling-pictures"||!data.entries||typeof data.entries!=="object"||Array.isArray(data.entries))throw new Error("Neplatný výběr obrázků.");quizCatalog=data;quizUI?.refresh();}).catch(()=>{quizCatalog=false;quizUI?.refresh();});
+    state.audioManifest=manifest;document.getElementById("audioNotice").hidden=manifest?.status==="complete";if(state.currentItem){primeCurrentAudio(state.currentItem);syncAudioAvailability();}quizUI?.refresh();memoryUI?.refresh();
+  }).catch(()=>{state.audioManifest=false;if(state.currentItem)syncAudioAvailability();ui.galleryNotice.textContent="Zvuk se nepodařilo načíst. Slovíčka můžeš dál procházet.";quizUI?.refresh();memoryUI?.refresh();});
+  if(globalThis.VocabularyFRPractice)void readJson(QUIZ_DATA_URL).then(data=>{if(data?.schemaVersion!==1||data.language!=="fr"||data.kind!=="spelling-pictures"||!data.entries||typeof data.entries!=="object"||Array.isArray(data.entries))throw new Error("Neplatný výběr obrázků.");quizCatalog=data;quizUI?.refresh();memoryUI?.refresh();}).catch(()=>{quizCatalog=false;quizUI?.refresh();memoryUI?.refresh();});
   void readJson(SENTENCE_AUDIO_URL).then(manifest=>{
     state.sentenceAudioManifest=manifest;if(state.currentItem && state.practice==="sentences"){primeCurrentAudio(state.currentItem);syncAudioAvailability();}
   }).catch(()=>{}); // Sentence text and word audio work even if this optional file is unavailable.
@@ -687,11 +706,11 @@ async function init(){
   if(globalThis.VocabularyFRPersonalUI&&globalThis.VocabularyFRPersonal)personalUI=globalThis.VocabularyFRPersonalUI.create({doc:document,win:window,data,model:M,
     onOpen:()=>{stopAudioPlayback();switchView("personal");window.scrollTo({top:0});},
     onClose:()=>{switchView("gallery");renderGallery();writeHistory("gallery");persist();},
-    onChange:()=>{if(state.view==="gallery")selectionChanged();else if(state.view==="study")applyRoute();quizUI?.refresh();}});
+    onChange:()=>{if(state.view==="gallery")selectionChanged();else if(state.view==="study")applyRoute();quizUI?.refresh();memoryUI?.refresh();}});
   if(globalThis.VocabularyFRLearnerUI&&globalThis.VocabularyFRLearners)learnerUI=globalThis.VocabularyFRLearnerUI.create({doc:document,win:window,data,model:M,
     onOpen:()=>{stopAudioPlayback();switchView("settings");window.scrollTo({top:0});},
     onClose:()=>showGallery({render:true}),
-    onChange:edited=>{if(edited){if(edited!==state.learner)state.onlyLearnerHard=false;state.learner=edited;}if(state.view==="gallery"){selectionChanged();}else if(state.view==="study"){applyRoute();}quizUI?.refresh();}
+    onChange:edited=>{if(edited){if(edited!==state.learner)state.onlyLearnerHard=false;state.learner=edited;}if(state.view==="gallery"){selectionChanged();}else if(state.view==="study"){applyRoute();}quizUI?.refresh();memoryUI?.refresh();}
   });
   else document.getElementById("learnerNotice").textContent="Osobní výběry se nepodařilo načíst. Zkus obnovit stránku; společný slovník zůstává dostupný.";
   if(globalThis.VocabularyFRPractice)quizUI=globalThis.VocabularyFRPractice.create({doc:document,win:window,getData:()=>state.data,getAudio:()=>state.audioManifest,getCatalog:()=>quizCatalog,
@@ -700,6 +719,13 @@ async function init(){
     prepare:item=>cachedAudio(M.audioRecord(item,state.audioManifest)?.fr),
     play:item=>{stopAudioPlayback();return playOneAudio(M.audioRecord(item,state.audioManifest)?.fr,playbackToken,{fresh:true});},stop:stopAudioPlayback});
   document.getElementById("quizTab").disabled=!quizUI;
+  if(globalThis.VocabularyFRMemory)memoryUI=globalThis.VocabularyFRMemory.create({doc:document,win:window,getData:()=>state.data,getAudio:()=>state.audioManifest,getCatalog:()=>quizCatalog,
+    getContext:context,sanitizeContext,
+    getSelection:filters=>M.select(personalUI?personalUI.filter(state.items,filters.personalHard):filters.personalHard?[]:state.items,filters,state.items),
+    onOpen:()=>{stopAudioPlayback();switchView("memory");document.title="Pexeso · Francouzština Jana";window.scrollTo({top:0});},onClose:returnFromMemory,
+    play:item=>{stopAudioPlayback();return playOneAudio(M.audioRecord(item,state.audioManifest)?.fr,playbackToken,{fresh:true,timeoutMs:20000});},stop:stopAudioPlayback});
+  document.getElementById("memoryTab").disabled=!memoryUI;
+
   buildFilterControls();renderGallery();applyRoute({initial:true});
 }
 void init();

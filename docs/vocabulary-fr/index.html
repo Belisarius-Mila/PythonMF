@@ -6,18 +6,19 @@
   <meta name="theme-color" content="#f5f1e8">
   <meta name="description" content="Obrázková francouzština: vyber si téma, poslouchej a uč se po jednom slovíčku.">
   <title>Francouzština Jana · Slovíčka v obrázcích</title>
-  <link rel="stylesheet" href="gallery.css?v=20261117-hard1">
+  <link rel="stylesheet" href="gallery.css?v=20261120-memory1">
   <script src="model.js" defer></script>
   <script src="learners.js" defer></script>
   <script src="learner-ui.js" defer></script>
-  <script src="personal.js?v=20261117-hard1" defer></script>
-  <script src="personal-ui.js?v=20261117-hard1" defer></script>
-  <script src="practice.js?v=20261117-hard1" defer></script>
-  <script src="gallery.js?v=20261117-hard1" defer></script>
+  <script src="personal.js?v=20261120-memory1" defer></script>
+  <script src="personal-ui.js?v=20261120-memory1" defer></script>
+  <script src="practice.js?v=20261120-memory1" defer></script>
+  <script src="memory.js?v=20261120-memory1" defer></script>
+  <script src="gallery.js?v=20261120-memory1" defer></script>
 </head>
 <body>
   <main class="page-shell" data-json-url="../data/vocabulary-fr-v2.json" data-audio-url="../data/vocabulary-fr-audio.json">
-    <nav class="app-navigation" aria-label="Část aplikace"><button id="galleryTab" type="button" aria-pressed="true">Přehled</button><button id="quizTab" type="button" aria-pressed="false" disabled>Slovo a obrázek</button><button id="settingsTab" type="button" aria-pressed="false">Nastavení</button></nav>
+    <nav class="app-navigation" aria-label="Část aplikace"><button id="galleryTab" type="button" aria-pressed="true">Přehled</button><button id="quizTab" type="button" aria-pressed="false" disabled>Slovo a obrázek</button><button id="memoryTab" type="button" aria-pressed="false" disabled>Pexeso</button><button id="settingsTab" type="button" aria-pressed="false">Nastavení</button></nav>
     <section id="galleryView" aria-label="Přehled slovíček">
       <header class="hero">
         <div><p class="eyebrow">Slovíčka v obrázcích</p><h1>Francouzština Jana</h1><p class="intro">Vyber si obrázek. Uč se vlastním tempem.</p></div>
@@ -98,6 +99,24 @@
         <div class="quiz-actions"><button id="quizNext" class="primary" type="button" disabled>Další →</button></div>
       </div>
       <div id="quizEnd" class="quiz-end" hidden><h2>Kolo dokončeno</h2><p id="quizResult"></p><button id="quizAgain" class="primary" type="button">Znovu celý výběr</button><button id="quizErrors" type="button">Zopakovat chyby z kola</button><button id="quizEndChange" type="button">Změnit výběr</button></div>
+    </section>
+    <section id="memoryView" class="memory-view" aria-labelledby="memoryTitle" hidden>
+      <header class="memory-header"><div><p class="eyebrow">Obrázková francouzština · 12 dvojic</p><h1 id="memoryTitle">Pexeso</h1><p>Řekni čísla dvou kartiček. Poslouchej, zapamatuj si obrázky a najdi dvojici.</p></div><div class="memory-actions"><button id="memoryProjector" type="button" aria-pressed="false">Větší herní plocha</button><button id="memoryBack" type="button">← Zpět</button></div></header>
+      <div id="memorySetup" class="memory-setup">
+        <label>Počet hráčů<select id="memoryPlayerCount"><option value="1">1 hráč</option><option value="2" selected>2 hráči</option><option value="3">3 hráči</option><option value="4">4 hráči</option></select></label>
+        <div id="memoryNames" class="memory-names" aria-label="Jména hráčů"></div>
+        <p id="memorySelection"></p><p>Platí stejný výběr jako v Přehledu: Všechna / Jen obtížná, témata, hledání a další filtry.</p>
+        <p class="meta">24 kartiček · 6 × 4 na větší obrazovce · každý význam dvakrát. Jména hráčů platí jen pro tuto partii.</p>
+        <p id="memoryPoolNotice" class="notice" role="status" aria-live="polite"></p>
+        <div class="memory-actions"><button id="memoryStart" class="primary" type="button" disabled>Spustit novou partii</button><button id="memorySetupChange" type="button">Změnit filtr v Přehledu</button><button id="memoryResume" type="button" hidden>Pokračovat v partii</button></div>
+      </div>
+      <p id="memoryStorageNotice" class="notice" role="status" aria-live="polite"></p>
+      <div id="memoryRound" hidden>
+        <div class="memory-round-header"><p id="memoryProgress"></p><p id="memoryStatus" role="status" aria-live="polite"></p><button id="memoryRetry" type="button" hidden>♪ Zopakovat zvuk</button><button id="memorySkip" type="button" hidden>Pokračovat bez zvuku</button></div>
+        <div id="memoryBoard" class="memory-board" aria-label="24 očíslovaných míst pexesa"></div>
+        <div id="memoryScores" class="memory-scores" aria-label="Hráči a získané dvojice"></div>
+      </div>
+      <div id="memoryEnd" class="memory-end" hidden><h2>Všechny dvojice jsou doma!</h2><p id="memoryResult" role="status"></p><div class="memory-actions"><button id="memoryAgain" class="primary" type="button">Ještě jednou se stejnými slovy</button><button id="memoryNew" type="button">Nová slovíčka</button><button id="memoryChange" type="button">Změnit hráče a výběr</button></div><div id="memoryCollections"></div></div>
     </section>
     <section id="personalSettingsView" aria-label="Osobní obtížná slova" hidden>
       <h1>Moje obtížná slova</h1>

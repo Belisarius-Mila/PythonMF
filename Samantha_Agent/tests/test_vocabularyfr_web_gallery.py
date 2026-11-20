@@ -16,14 +16,14 @@ class VocabularyFrenchWebGalleryTests(unittest.TestCase):
 
     def test_client_is_self_contained_and_keeps_language_and_storage_separate(self):
         html=(CLIENT/'index.html').read_text()
-        for name in ('model.js','learners.js','learner-ui.js','practice.js','personal.js','personal-ui.js','gallery.js','gallery.css'):
+        for name in ('model.js','learners.js','learner-ui.js','practice.js','personal.js','personal-ui.js','memory.js','gallery.js','gallery.css'):
             self.assertIn(name,html)
             self.assertTrue((CLIENT/name).is_file())
         self.assertIn('lang="fr"',html)
         self.assertIn('speakCzechButton',html)
         css=(CLIENT/'gallery.css').read_text()
         self.assertIn('repeat(2,minmax(0,1fr))',css)
-        for name in ('index.html','model.js','gallery.js','learners.js','learner-ui.js','practice.js'):
+        for name in ('index.html','model.js','gallery.js','learners.js','learner-ui.js','practice.js','memory.js'):
             content=(CLIENT/name).read_text()
             for foreign in ('vocabulary-it','vocabulary-en','VocabularyIT','vit-','speechSynthesis'):
                 self.assertNotIn(foreign,content,name)
