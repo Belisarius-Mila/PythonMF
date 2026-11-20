@@ -365,3 +365,13 @@ Přednačtou se náhledy aktuální a následující věty, nejvýše10 držený
 Zvuk nikdy nečeká na obrázky. Vadný obrázek zmizí; bez platných pojmů zůstane
 původní karta i věta/zvuk. Chybějící/pozdní metadata nepřeruší přehrávání.
 Ruční procvičování vět si zachovává skrytou odpověď a kontextové názvy neukazuje.
+
+PEXESO — 20.11.2026
+Nová část Pexeso:32 pevných pozic/16 dvojic/1–4 hráči. Zdroj memory.js,
+zapojení index.html a gallery.js, styly gallery.css. Start v navigaci Pexeso
+nebo #game=memory-pairs. Vlastní sessionStorage vocabulary-en.memory-pairs.v1;
+jména a výsledky pouze v panelu. Stávající A–D, data, obrázky a audio se nemění.
+Nové zásoby musí mít alespoň16 vzájemně rozlišitelných obrazových významů.
+Obnova po reloadu nabídne pokračování a nezapíná zvuk. Programová brána a
+lokální commit podle private vocabulary_en_memory_20261120/completion.json;
+nové p+n vyžaduje samostatný pokyn. Fyzická přejímka zůstává otevřená.

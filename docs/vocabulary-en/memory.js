@@ -1,0 +1,222 @@
+/* Numbered, local-only classroom pairs. Personal vocabulary is read-only. */
+(function(root){
+  'use strict';
+  const M=typeof module!=='undefined'&&module.exports?require('./model.js'):root.VocabularyModel;
+  const Q=typeof module!=='undefined'&&module.exports?require('./quiz.js'):root.VocabularyQuiz;
+  const KEY='vocabulary-en.memory-pairs.v1', PAIRS=16;
+  const names=values=>values.slice(0,4).map((v,i)=>Array.from(String(v||'').trim()).slice(0,12).join('')||`Hráč ${i+1}`);
+  function uniform(catalog){
+    return {...catalog,entries:Object.fromEntries(Object.entries(catalog?.entries||{}).map(([uid,e])=>[uid,{...e,format:'objects'}]))};
+  }
+  function compatible(a,b,audio,catalog){
+    const thumbnailKey=item=>item.thumbnail?.match(/-([a-f0-9]{16})\.webp$/i)?.[1];
+    const left=thumbnailKey(a),right=thumbnailKey(b);
+    return !(left&&right&&left===right)&&Q.compatible(a,b,audio,catalog);
+  }
+  function choose(items,audio,catalog,random=Math.random){
+    const pool=Q.eligible(items,audio,catalog).filter(i=>!i.imageMissing), meta=uniform(catalog);
+    let best=[];
+    for(let attempt=0;attempt<32;attempt++){
+      const selected=[];
+      for(const item of M.shuffle(pool,random)){
+        if(selected.every(other=>compatible(item,other,audio,meta)))selected.push(item);
+        if(selected.length===PAIRS)return selected;
+      }
+      if(selected.length>best.length)best=selected;
+    }
+    return best;
+  }
+  function newGame(items,players,random=Math.random){
+    if(items.length!==PAIRS||new Set(items.map(M.key)).size!==PAIRS||!Array.isArray(players)||players.length<1||players.length>4)throw Error('Pexeso potřebuje 16 různých významů a 1–4 hráče.');
+    return {deck:M.shuffle(items.flatMap(i=>[M.key(i),M.key(i)]),random),players:names(players),owners:{},active:0,turns:0};
+  }
+  function settle(game,a,b){
+    if(!Number.isInteger(a)||!Number.isInteger(b)||a<0||b<0||a>=32||b>=32||a===b||Object.hasOwn(game.owners,game.deck[a])||Object.hasOwn(game.owners,game.deck[b]))throw Error('Neplatný tah.');
+    const result={...game,owners:{...game.owners},turns:game.turns+1};
+    if(game.deck[a]===game.deck[b])result.owners[game.deck[a]]=game.active;
+    else result.active=(game.active+1)%game.players.length;
+    return result;
+  }
+  function signature(deck,items,audio){
+    const known=new Map(items.map(i=>[M.key(i),i]));
+    return JSON.stringify([...new Set(deck)].sort().map(uid=>{
+      const i=known.get(uid);return i?[uid,i.en,i.cz,i.image,i.thumbnail,M.audioRecord(i,audio)?.en]:null;
+    }));
+  }
+  function restore(saved,items,audio,catalog){
+    try{
+      const g=saved?.game;
+      if(saved.version!==1||!g||!Array.isArray(g.deck)||g.deck.length!==32||!Array.isArray(g.players)||g.players.length<1||g.players.length>4||g.players.some(p=>typeof p!=='string'||!p.trim()||Array.from(p).length>12)||!Number.isInteger(g.active)||g.active<0||g.active>=g.players.length||!Number.isInteger(g.turns)||g.turns<0||g.turns>100000||!g.owners||typeof g.owners!=='object'||Array.isArray(g.owners))return null;
+      const counts=new Map();for(const uid of g.deck){if(typeof uid!=='string')return null;counts.set(uid,(counts.get(uid)||0)+1);}
+      if(counts.size!==PAIRS||[...counts.values()].some(n=>n!==2)||Object.keys(g.owners).length>g.turns||Object.entries(g.owners).some(([uid,p])=>!counts.has(uid)||!Number.isInteger(p)||p<0||p>=g.players.length))return null;
+      const known=new Map(Q.eligible(items,audio,catalog).map(i=>[M.key(i),i]));
+      const selected=[...counts.keys()].map(uid=>known.get(uid));if(selected.some(i=>!i))return null;
+      const meta=uniform(catalog);if(selected.some((i,n)=>selected.slice(n+1).some(j=>!compatible(i,j,audio,meta))))return null;
+      if(saved.source!==signature(g.deck,items,audio))return null;
+      return JSON.parse(JSON.stringify(g));
+    }catch(_){return null;}
+  }
+  function create({doc,win,getData,getAudio,getCatalog,getPersonal,isAvailable,onOpen,onClose,play,stop}){
+    const ids=['memoryView','memorySetup','memoryLearner','memoryHard','memoryTopics','memoryRecentOnly','memoryRecentCount','memoryPlayerCount','memoryNames','memoryPoolNotice','memoryStorageNotice','memoryStart','memoryResume','memoryRound','memoryBoard','memoryScores','memoryStatus','memoryProgress','memoryRetry','memorySkip','memoryEnd','memoryResult','memoryCollections','memoryAgain','memoryNew','memoryChange','memoryBack','memoryProjector'];
+    const ui=Object.fromEntries(ids.map(id=>[id,doc.getElementById(id)]));
+    let filters={learner:'all',hard:false,topics:[],recentCount:0}, gameFilters=null, game=null, source='', selected=[], opened=false, busy=false, error=false, success=false, openCards=[], hint=-1, epoch=0, draftNames=['Hráč 1','Hráč 2'], saved=null;
+    const waits=new Map();
+    function status(s){ui.memoryStatus.textContent=s;}
+    function finished(){return game&&Object.keys(game.owners).length===PAIRS;}
+    function sanitize(v={}){
+      const groups=new Set(getData().catalog.groups.map(g=>g.id));
+      return {learner:['A','B','C','D'].includes(v.learner)?v.learner:'all',hard:v.hard===true,topics:Array.isArray(v.topics)?[...new Set(v.topics.filter(t=>groups.has(t)))]:[],recentCount:M.recentCount(v.recentCount)};
+    }
+    function pool(f=filters){
+      if(f.learner!=='all'&&!isAvailable())return [];
+      let items=f.learner==='all'?getData().items:getPersonal(f.learner,f.hard);
+      if(f.learner==='all'&&f.hard)items=items.filter(i=>i.hardTraining);
+      return M.select(items,{topics:f.topics,recentCount:f.recentCount},getData().items);
+    }
+    function save(){
+      if(!game)return;
+      saved={version:1,filters:gameFilters,game,source};
+      try{win.sessionStorage.setItem(KEY,JSON.stringify(saved));ui.memoryStorageNotice.textContent='';}
+      catch(_){ui.memoryStorageNotice.textContent='Partie funguje, ale v tomto panelu se ji nepodařilo uložit pro obnovení stránky.';}
+    }
+    function cancel(){
+      epoch++;stop();for(const [id,resolve] of waits){win.clearTimeout(id);resolve(false);}waits.clear();busy=false;error=false;success=false;openCards=[];hint=-1;
+      ui.memoryRetry.hidden=ui.memorySkip.hidden=true;
+    }
+    function delay(ms,ticket){return new Promise(resolve=>{const id=win.setTimeout(()=>{waits.delete(id);resolve(ticket===epoch&&opened);},ms);waits.set(id,resolve);});}
+    function renderNames(){
+      ui.memoryNames.replaceChildren();
+      const n=Number(ui.memoryPlayerCount.value)||2;
+      for(let i=0;i<n;i++){
+        const label=doc.createElement('label');label.textContent=`Hráč ${i+1}`;
+        const input=doc.createElement('input');input.type='text';input.maxLength=12;input.value=draftNames[i]||`Hráč ${i+1}`;input.autocomplete='off';
+        input.addEventListener('input',()=>{draftNames[i]=input.value;});label.append(input);ui.memoryNames.append(label);
+      }
+    }
+    for(const group of getData().catalog.groups){
+      const label=doc.createElement('label');label.className='check-option';const input=doc.createElement('input');input.type='checkbox';input.value=group.id;
+      const text=doc.createElement('span');text.textContent=group.label;label.append(input,text);ui.memoryTopics.append(label);input.addEventListener('change',configure);
+    }
+    function controls(){
+      ui.memoryLearner.value=filters.learner;ui.memoryHard.checked=filters.hard;
+      ui.memoryLearner.querySelectorAll('option').forEach(o=>{o.disabled=o.value!=='all'&&!isAvailable();});
+      ui.memoryRecentOnly.checked=filters.recentCount>0;ui.memoryRecentCount.value=String(filters.recentCount||20);ui.memoryRecentCount.disabled=!filters.recentCount;
+      ui.memoryTopics.querySelectorAll('input').forEach(i=>{i.checked=filters.topics.includes(i.value);});
+    }
+    function refresh(){
+      if(!opened)return;
+      const ready=Boolean(getAudio()&&getCatalog());
+      selected=ready?choose(pool(),getAudio(),getCatalog(),()=>.5):[];
+      ui.memoryStart.disabled=selected.length!==PAIRS;
+      ui.memoryPoolNotice.textContent=!ready?'Připravuji obrázky a zvuk…':selected.length===PAIRS?`Ve výběru ${pool().length} karet. Připraveno 16 různých dvojic · 32 kartiček.`:`Pro plán potřebujeme 16 dostatečně odlišných obrázků s anglickým zvukem. Rozšiř témata nebo výběr (${pool().length} karet ve filtru).`;
+      if(getAudio()===false||getCatalog()===false)ui.memoryPoolNotice.textContent='Obrázky nebo zvuk pro pexeso se nepodařilo načíst. Zkus obnovit stránku.';
+      ui.memoryResume.hidden=!saved;
+      ui.memoryResume.textContent=saved?.game?.players?`Pokračovat v partii (${saved.game.players.join(', ')})`:'Pokračovat v partii';
+      controls();
+    }
+    function configure(){
+      const n=ui.memoryRecentOnly.checked?M.recentCount(ui.memoryRecentCount.value):0;
+      if(ui.memoryRecentOnly.checked&&!n){ui.memoryPoolNotice.textContent='Počet musí být celé číslo od 1 do 5000.';ui.memoryStart.disabled=true;return;}
+      filters=sanitize({learner:ui.memoryLearner.value,hard:ui.memoryHard.checked,topics:Array.from(ui.memoryTopics.querySelectorAll('input')).filter(i=>i.checked).map(i=>i.value),recentCount:n});refresh();
+    }
+    function draw(){
+      if(!game)return;
+      ui.memoryView.classList.add('memory-playing');
+      const byUid=new Map(getData().items.map(i=>[M.key(i),i]));
+      ui.memorySetup.hidden=true;ui.memoryRound.hidden=false;ui.memoryEnd.hidden=!finished();
+      ui.memoryProgress.textContent=`Nalezeno ${Object.keys(game.owners).length} z 16 dvojic · ${game.turns} ${game.turns===1?'tah':game.turns>=2&&game.turns<=4?'tahy':'tahů'}`;
+      ui.memoryBoard.replaceChildren();
+      game.deck.forEach((uid,index)=>{
+        const slot=doc.createElement('div');slot.className='memory-slot';
+        if(success&&openCards.includes(index))slot.classList.add('memory-match');
+        if(Object.hasOwn(game.owners,uid)){slot.classList.add('memory-empty');slot.setAttribute('aria-label',`Prázdné místo ${index+1}`);ui.memoryBoard.append(slot);return;}
+        const item=byUid.get(uid),face=openCards.includes(index),button=doc.createElement('button');button.type='button';button.className='memory-card'+(face?' memory-face':'');button.disabled=busy||face;button.setAttribute('aria-label',face?`Kartička ${index+1}: ${item.en}`:`Kartička ${index+1}, zavřená`);
+        const number=doc.createElement('span');number.className='memory-number';number.textContent=String(index+1);button.append(number);
+        if(face){
+          const image=doc.createElement('img');image.src=new URL('../'+(item.thumbnail||item.image),win.location.href).toString();image.alt='';
+          image.addEventListener('error',()=>{image.hidden=true;});
+          const word=doc.createElement('span');word.className='memory-word';word.lang='en';word.textContent=item.en;button.append(image,word);
+          if(hint===index){const cz=doc.createElement('span');cz.className='memory-translation';cz.lang='cs';cz.textContent=item.cz;button.append(cz);}
+        }
+        button.addEventListener('click',()=>flip(index));slot.append(button);
+        if(face){const replay=doc.createElement('button');replay.type='button';replay.className='memory-replay';replay.textContent='♪';replay.setAttribute('aria-label',`Zopakovat anglicky: ${item.en}`);replay.disabled=busy;replay.addEventListener('click',()=>repeat(item));slot.append(replay);}
+        ui.memoryBoard.append(slot);
+      });
+      ui.memoryScores.replaceChildren();
+      game.players.forEach((name,index)=>{
+        const panel=doc.createElement('div');panel.className='memory-player memory-player-'+index+(game.active===index&&!finished()?' memory-current':'');
+        const label=doc.createElement('strong');label.textContent='🃏 '+name;
+        const count=doc.createElement('span');count.textContent=`Dvojice: ${Object.values(game.owners).filter(n=>n===index).length}`;panel.append(label,count);
+        if(game.active===index&&!finished()){const turn=doc.createElement('span');turn.className='memory-turn';turn.textContent='NA TAHU';panel.append(turn);}ui.memoryScores.append(panel);
+      });
+      if(finished()){
+        const scores=game.players.map((_,i)=>Object.values(game.owners).filter(n=>n===i).length),max=Math.max(...scores),winners=game.players.filter((_,i)=>scores[i]===max);
+        const unit=max<=4?'dvojice':'dvojic';
+        ui.memoryResult.textContent=game.players.length===1?'Našel/a jsi všech 16 dvojic!':winners.length>1?`Remíza: ${winners.join(', ')} · ${max} ${unit}.`:`Vyhrává ${winners[0]} · ${max} ${unit}!`;
+        ui.memoryCollections.replaceChildren();
+        game.players.forEach((name,i)=>{
+          const details=doc.createElement('details'),summary=doc.createElement('summary');summary.textContent=`${name} · získané dvojice`;details.append(summary);
+          const list=doc.createElement('div');list.className='memory-collection';
+          Object.entries(game.owners).filter(([,owner])=>owner===i).forEach(([uid])=>{const item=byUid.get(uid),b=doc.createElement('button');b.type='button';const img=doc.createElement('img');img.src=new URL('../'+(item.thumbnail||item.image),win.location.href).toString();img.alt='';const text=doc.createElement('span');text.textContent=`${item.en} · ${item.cz}`;b.append(img,text);b.addEventListener('click',()=>repeat(item));list.append(b);});details.append(list);ui.memoryCollections.append(details);
+        });
+      }
+    }
+    async function repeat(item){
+      if(busy)return;busy=true;const ticket=epoch;draw();
+      try{await play(item);}catch(_){if(ticket===epoch)status('Zvuk se nepodařilo přehrát. Zkus ho zopakovat.');}
+      if(ticket===epoch&&opened){busy=false;draw();}
+    }
+    async function resolveTurn(){
+      if(openCards.length===2){
+        const matched=game.deck[openCards[0]]===game.deck[openCards[1]],player=game.players[game.active];
+        busy=true;success=matched;status(matched?`Správná dvojice · ${player}!`:'Porovnej oba obrázky…');draw();const ticket=epoch;
+        if(!await delay(1000,ticket))return;
+        game=settle(game,...openCards);save();openCards=[];busy=false;success=false;draw();status(finished()?'Všech 16 dvojic je nalezených.':matched?`${player} získává dvojici a hraje znovu.`:`Na tahu: ${game.players[game.active]}.`);
+        if(finished())ui.memoryEnd.scrollIntoView({block:'start'});
+      }else{busy=false;draw();status(`Vyber druhou kartičku · ${game.players[game.active]}.`);}
+    }
+    async function reveal(index){
+      busy=true;error=false;hint=index;const ticket=epoch;ui.memoryRetry.hidden=ui.memorySkip.hidden=true;draw();status('Posloucháme…');
+      const item=getData().items.find(i=>M.key(i)===game.deck[index]);
+      let failed=false;
+      await Promise.all([delay(2000,ticket).then(()=>{if(ticket===epoch&&opened){hint=-1;draw();}}),(async()=>{try{if(!await play(item))failed=true;}catch(_){failed=true;}})()]);
+      if(ticket!==epoch||!opened)return;
+      if(failed){error=true;ui.memoryRetry.hidden=ui.memorySkip.hidden=false;status('Zvuk se nepodařilo přehrát. Zkus ho zopakovat nebo pokračuj bez zvuku.');return;}
+      await resolveTurn();
+    }
+    function flip(index){
+      if(!opened||!game||busy||finished()||openCards.includes(index)||Object.hasOwn(game.owners,game.deck[index]))return;
+      openCards.push(index);void reveal(index);
+    }
+    function approveLeave(){return !game||finished()||win.confirm('Opustit rozehranou partii? Ve stejném panelu v ní můžeš později pokračovat.');}
+    function setup(){cancel();ui.memorySetup.hidden=false;ui.memoryRound.hidden=ui.memoryEnd.hidden=true;ui.memoryView.classList.remove('memory-playing');ui.memoryView.classList.remove('memory-projector');ui.memoryProjector.setAttribute('aria-pressed','false');doc.querySelector('[data-json-url]')?.classList.remove('memory-projector-shell');refresh();}
+    function start(same=false){
+      if((game&&!finished()||!game&&saved?.game&&Object.keys(saved.game.owners||{}).length<PAIRS)&&!win.confirm('Spustit novou partii a nahradit rozehranou hru?'))return;
+      const count=Number(ui.memoryPlayerCount.value)||2;
+      const chosen=same&&game?[...new Set(game.deck)].map(uid=>getData().items.find(i=>M.key(i)===uid)):choose(pool(),getAudio(),getCatalog());
+      if(chosen.length!==PAIRS){refresh();return;}
+      const players=same&&game?game.players:Array.from(ui.memoryNames.querySelectorAll('input')).map(i=>i.value);
+      if(!same&&players.length!==count)return;
+      cancel();game=newGame(chosen,players);gameFilters={...filters,topics:[...filters.topics]};source=signature(game.deck,getData().items,getAudio());save();draw();status(`Na tahu: ${game.players[0]}. Vyber první kartičku.`);ui.memoryView.scrollIntoView({block:'start'});
+    }
+    function resume(){
+      const f=sanitize(saved?.filters),restored=restore(saved,pool(f),getAudio(),getCatalog());
+      if(!restored){ui.memoryPoolNotice.textContent='Uložená partie už neodpovídá slovům nebo dostupné zásobě. Spusť novou hru.';return;}
+      cancel();game=restored;gameFilters=f;filters=f;source=saved.source;draftNames=[...game.players];ui.memoryPlayerCount.value=String(game.players.length);renderNames();controls();draw();status(finished()?'Dokončená partie.':`Pokračujeme · ${game.players[game.active]}. Vyber první kartičku.`);
+    }
+    try{const raw=win.sessionStorage.getItem(KEY);if(raw&&raw.length<20000){const value=JSON.parse(raw);if(value?.version===1&&Array.isArray(value.game?.players)&&value.game.players.length>=1&&value.game.players.length<=4&&value.game.players.every(n=>typeof n==='string'&&Array.from(n).length<=12))saved=value;}}catch(_){}
+    ui.memoryPlayerCount.value='2';renderNames();
+    for(const id of ['memoryLearner','memoryHard','memoryRecentOnly','memoryRecentCount'])ui[id].addEventListener('change',configure);
+    ui.memoryPlayerCount.addEventListener('change',()=>{if(![1,2,3,4].includes(Number(ui.memoryPlayerCount.value)))ui.memoryPlayerCount.value='2';draftNames=Array.from(ui.memoryNames.querySelectorAll('input')).map(i=>i.value);renderNames();});
+    ui.memoryStart.addEventListener('click',()=>start());ui.memoryResume.addEventListener('click',resume);
+    ui.memoryAgain.addEventListener('click',()=>start(true));ui.memoryNew.addEventListener('click',()=>start());ui.memoryChange.addEventListener('click',setup);
+    ui.memoryBack.addEventListener('click',()=>{if(approveLeave()){leave();onClose();}});
+    ui.memoryRetry.addEventListener('click',()=>{if(error)void reveal(openCards.at(-1));});
+    ui.memorySkip.addEventListener('click',()=>{if(!error)return;error=false;ui.memoryRetry.hidden=ui.memorySkip.hidden=true;void resolveTurn();});
+    ui.memoryProjector.addEventListener('click',()=>{ui.memoryView.classList.toggle('memory-projector');doc.querySelector('[data-json-url]')?.classList.toggle('memory-projector-shell');ui.memoryProjector.setAttribute('aria-pressed',String(ui.memoryView.classList.contains('memory-projector')));});
+    function leave(){save();opened=false;cancel();ui.memoryView.classList.remove('memory-projector');ui.memoryProjector.setAttribute('aria-pressed','false');doc.querySelector('[data-json-url]')?.classList.remove('memory-projector-shell');}
+    return {open:()=>{opened=true;setup();onOpen();},leave,refresh,canLeave:approveLeave,close:()=>{if(approveLeave()){leave();onClose();}},checkpoint:()=>save()};
+  }
+  const api={KEY,PAIRS,choose,newGame,settle,signature,restore,create};
+  if(typeof module!=='undefined'&&module.exports)module.exports=api;else root.VocabularyMemory=api;
+})(globalThis);
