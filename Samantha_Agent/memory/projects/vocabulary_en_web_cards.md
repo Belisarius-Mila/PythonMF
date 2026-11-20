@@ -1,3 +1,31 @@
+## 2026-11-20 13:59 CET — Pexeso zmenšené na 6 × 4
+
+Hotovo:24 očíslovaných kartiček /12 různých dvojic, šest sloupců a čtyři
+řady na větší obrazovce; úzký displej zachovává čtyři sloupce, nyní šest řad.
+Počet sjednocený ve výběru, validaci partie, skóre, průběhu i konci hry.
+Ostatní pravidla,1–4 hráči a jména, EN zvuk, krátká čeština, načasování,
+šedá místa, sbírky, filtry i opakování zůstávají stejné. Data a média beze změny.
+Starší32kartová partie se automaticky nemaže ani neobnovuje v novém formátu;
+nová partie ji nahradí až po stávajícím potvrzení.
+
+Rozhodnutí: Míla zadal „Předělej to prosím na6x4 jinak vše zůstane stejné“
+a poté „Po dokončení prosím p+n.“ Publikace přes registrovanou centrální
+roli Terra. Předchozí32kartová verze3df0ffd5 již skutečně vydaná; původní
+job3e880e4e01c3cd2fba5c7baa0df1c7ba se neopakuje. Vazba TVBCP zůstává
+architektura_komunikace_samantha.txt, nový EN TVBCP se nezakládá.
+
+Další krok: Dokončit programovou doménovou bránu, lokální commit a schválené
+p+n přes submit_release(wait=True). Autorita přesného headu, konečné brány,
+publikační účtenky a veřejných hashů je private/vocabulary_en_memory24_20261120/
+completion.json; tento zápis sám nepotvrzuje budoucí vydání. Během vydání
+se main nemění; nejistý výsledek ověřit u stejného jobu, znovu neposílat.
+
+Navrhované další kroky: Mílova přejímka skutečné výuky a fyzického telefonu.
+Technický důkaz:14 herních JS scénářů PASS včetně24 míst,12 dvojic,
+nezměněného střídání/skóre a bezpečného přechodu ze staré partie. Nativní
+Safari Mac skutečně ukázalo6×4, čísla1–24, průběh0 z12 a obě skóre dole.
+Finální doménová brána v gate.log. Fyzická iPhone přejímka zůstává otevřená.
+
 ## 2026-11-20 13:08 CET — Pexeso pro děti, 32 číslovaných míst a 1–4 hráči
 
 Hotovo: Místně zapojená samostatná část Pexeso.16 různých významů každý

@@ -375,3 +375,9 @@ Nové zásoby musí mít alespoň16 vzájemně rozlišitelných obrazových výz
 Obnova po reloadu nabídne pokračování a nezapíná zvuk. Programová brána a
 lokální commit podle private vocabulary_en_memory_20261120/completion.json;
 nové p+n vyžaduje samostatný pokyn. Fyzická přejímka zůstává otevřená.
+
+PEXESO — zmenšení 20.11.2026
+Aktuální plán24 pevných pozic/12 dvojic, na větší obrazovce6×4, na úzké4×6.
+Výběr vyžaduje alespoň12 odlišných významů. Ostatní pravidla a média zachovaná.
+Starší32kartová session zůstane uložená do potvrzeného spuštění nové partie.
+Míla schválil p+n; skutečný výsledek pouze v soukromé memory24 completion.json.

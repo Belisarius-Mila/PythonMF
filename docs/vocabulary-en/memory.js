@@ -3,7 +3,7 @@
   'use strict';
   const M=typeof module!=='undefined'&&module.exports?require('./model.js'):root.VocabularyModel;
   const Q=typeof module!=='undefined'&&module.exports?require('./quiz.js'):root.VocabularyQuiz;
-  const KEY='vocabulary-en.memory-pairs.v1', PAIRS=16;
+  const KEY='vocabulary-en.memory-pairs.v1', PAIRS=12, CARDS=PAIRS*2;
   const names=values=>values.slice(0,4).map((v,i)=>Array.from(String(v||'').trim()).slice(0,12).join('')||`Hráč ${i+1}`);
   function uniform(catalog){
     return {...catalog,entries:Object.fromEntries(Object.entries(catalog?.entries||{}).map(([uid,e])=>[uid,{...e,format:'objects'}]))};
@@ -27,11 +27,11 @@
     return best;
   }
   function newGame(items,players,random=Math.random){
-    if(items.length!==PAIRS||new Set(items.map(M.key)).size!==PAIRS||!Array.isArray(players)||players.length<1||players.length>4)throw Error('Pexeso potřebuje 16 různých významů a 1–4 hráče.');
+    if(items.length!==PAIRS||new Set(items.map(M.key)).size!==PAIRS||!Array.isArray(players)||players.length<1||players.length>4)throw Error(`Pexeso potřebuje ${PAIRS} různých významů a 1–4 hráče.`);
     return {deck:M.shuffle(items.flatMap(i=>[M.key(i),M.key(i)]),random),players:names(players),owners:{},active:0,turns:0};
   }
   function settle(game,a,b){
-    if(!Number.isInteger(a)||!Number.isInteger(b)||a<0||b<0||a>=32||b>=32||a===b||Object.hasOwn(game.owners,game.deck[a])||Object.hasOwn(game.owners,game.deck[b]))throw Error('Neplatný tah.');
+    if(!Number.isInteger(a)||!Number.isInteger(b)||a<0||b<0||a>=CARDS||b>=CARDS||a===b||Object.hasOwn(game.owners,game.deck[a])||Object.hasOwn(game.owners,game.deck[b]))throw Error('Neplatný tah.');
     const result={...game,owners:{...game.owners},turns:game.turns+1};
     if(game.deck[a]===game.deck[b])result.owners[game.deck[a]]=game.active;
     else result.active=(game.active+1)%game.players.length;
@@ -46,7 +46,7 @@
   function restore(saved,items,audio,catalog){
     try{
       const g=saved?.game;
-      if(saved.version!==1||!g||!Array.isArray(g.deck)||g.deck.length!==32||!Array.isArray(g.players)||g.players.length<1||g.players.length>4||g.players.some(p=>typeof p!=='string'||!p.trim()||Array.from(p).length>12)||!Number.isInteger(g.active)||g.active<0||g.active>=g.players.length||!Number.isInteger(g.turns)||g.turns<0||g.turns>100000||!g.owners||typeof g.owners!=='object'||Array.isArray(g.owners))return null;
+      if(saved.version!==1||!g||!Array.isArray(g.deck)||g.deck.length!==CARDS||!Array.isArray(g.players)||g.players.length<1||g.players.length>4||g.players.some(p=>typeof p!=='string'||!p.trim()||Array.from(p).length>12)||!Number.isInteger(g.active)||g.active<0||g.active>=g.players.length||!Number.isInteger(g.turns)||g.turns<0||g.turns>100000||!g.owners||typeof g.owners!=='object'||Array.isArray(g.owners))return null;
       const counts=new Map();for(const uid of g.deck){if(typeof uid!=='string')return null;counts.set(uid,(counts.get(uid)||0)+1);}
       if(counts.size!==PAIRS||[...counts.values()].some(n=>n!==2)||Object.keys(g.owners).length>g.turns||Object.entries(g.owners).some(([uid,p])=>!counts.has(uid)||!Number.isInteger(p)||p<0||p>=g.players.length))return null;
       const known=new Map(Q.eligible(items,audio,catalog).map(i=>[M.key(i),i]));
@@ -108,9 +108,10 @@
       const ready=Boolean(getAudio()&&getCatalog());
       selected=ready?choose(pool(),getAudio(),getCatalog(),()=>.5):[];
       ui.memoryStart.disabled=selected.length!==PAIRS;
-      ui.memoryPoolNotice.textContent=!ready?'Připravuji obrázky a zvuk…':selected.length===PAIRS?`Ve výběru ${pool().length} karet. Připraveno 16 různých dvojic · 32 kartiček.`:`Pro plán potřebujeme 16 dostatečně odlišných obrázků s anglickým zvukem. Rozšiř témata nebo výběr (${pool().length} karet ve filtru).`;
+      ui.memoryPoolNotice.textContent=!ready?'Připravuji obrázky a zvuk…':selected.length===PAIRS?`Ve výběru ${pool().length} karet. Připraveno ${PAIRS} různých dvojic · ${CARDS} kartiček.`:`Pro plán potřebujeme ${PAIRS} dostatečně odlišných obrázků s anglickým zvukem. Rozšiř témata nebo výběr (${pool().length} karet ve filtru).`;
       if(getAudio()===false||getCatalog()===false)ui.memoryPoolNotice.textContent='Obrázky nebo zvuk pro pexeso se nepodařilo načíst. Zkus obnovit stránku.';
-      ui.memoryResume.hidden=!saved;
+      ui.memoryResume.hidden=!saved||saved.game?.deck?.length!==CARDS;
+      if(saved?.game?.deck?.length&&saved.game.deck.length!==CARDS)ui.memoryPoolNotice.textContent+=' Starší partie má jiný počet kartiček. Pro nový formát spusť novou partii.';
       ui.memoryResume.textContent=saved?.game?.players?`Pokračovat v partii (${saved.game.players.join(', ')})`:'Pokračovat v partii';
       controls();
     }
@@ -124,7 +125,7 @@
       ui.memoryView.classList.add('memory-playing');
       const byUid=new Map(getData().items.map(i=>[M.key(i),i]));
       ui.memorySetup.hidden=true;ui.memoryRound.hidden=false;ui.memoryEnd.hidden=!finished();
-      ui.memoryProgress.textContent=`Nalezeno ${Object.keys(game.owners).length} z 16 dvojic · ${game.turns} ${game.turns===1?'tah':game.turns>=2&&game.turns<=4?'tahy':'tahů'}`;
+      ui.memoryProgress.textContent=`Nalezeno ${Object.keys(game.owners).length} z ${PAIRS} dvojic · ${game.turns} ${game.turns===1?'tah':game.turns>=2&&game.turns<=4?'tahy':'tahů'}`;
       ui.memoryBoard.replaceChildren();
       game.deck.forEach((uid,index)=>{
         const slot=doc.createElement('div');slot.className='memory-slot';
@@ -152,7 +153,7 @@
       if(finished()){
         const scores=game.players.map((_,i)=>Object.values(game.owners).filter(n=>n===i).length),max=Math.max(...scores),winners=game.players.filter((_,i)=>scores[i]===max);
         const unit=max<=4?'dvojice':'dvojic';
-        ui.memoryResult.textContent=game.players.length===1?'Našel/a jsi všech 16 dvojic!':winners.length>1?`Remíza: ${winners.join(', ')} · ${max} ${unit}.`:`Vyhrává ${winners[0]} · ${max} ${unit}!`;
+        ui.memoryResult.textContent=game.players.length===1?`Našel/a jsi všech ${PAIRS} dvojic!`:winners.length>1?`Remíza: ${winners.join(', ')} · ${max} ${unit}.`:`Vyhrává ${winners[0]} · ${max} ${unit}!`;
         ui.memoryCollections.replaceChildren();
         game.players.forEach((name,i)=>{
           const details=doc.createElement('details'),summary=doc.createElement('summary');summary.textContent=`${name} · získané dvojice`;details.append(summary);
@@ -171,7 +172,7 @@
         const matched=game.deck[openCards[0]]===game.deck[openCards[1]],player=game.players[game.active];
         busy=true;success=matched;status(matched?`Správná dvojice · ${player}!`:'Porovnej oba obrázky…');draw();const ticket=epoch;
         if(!await delay(1000,ticket))return;
-        game=settle(game,...openCards);save();openCards=[];busy=false;success=false;draw();status(finished()?'Všech 16 dvojic je nalezených.':matched?`${player} získává dvojici a hraje znovu.`:`Na tahu: ${game.players[game.active]}.`);
+        game=settle(game,...openCards);save();openCards=[];busy=false;success=false;draw();status(finished()?`Všech ${PAIRS} dvojic je nalezených.`:matched?`${player} získává dvojici a hraje znovu.`:`Na tahu: ${game.players[game.active]}.`);
         if(finished())ui.memoryEnd.scrollIntoView({block:'start'});
       }else{busy=false;draw();status(`Vyber druhou kartičku · ${game.players[game.active]}.`);}
     }
@@ -191,7 +192,7 @@
     function approveLeave(){return !game||finished()||win.confirm('Opustit rozehranou partii? Ve stejném panelu v ní můžeš později pokračovat.');}
     function setup(){cancel();ui.memorySetup.hidden=false;ui.memoryRound.hidden=ui.memoryEnd.hidden=true;ui.memoryView.classList.remove('memory-playing');ui.memoryView.classList.remove('memory-projector');ui.memoryProjector.setAttribute('aria-pressed','false');doc.querySelector('[data-json-url]')?.classList.remove('memory-projector-shell');refresh();}
     function start(same=false){
-      if((game&&!finished()||!game&&saved?.game&&Object.keys(saved.game.owners||{}).length<PAIRS)&&!win.confirm('Spustit novou partii a nahradit rozehranou hru?'))return;
+      if((game&&!finished()||!game&&saved?.game&&Object.keys(saved.game.owners||{}).length<(Array.isArray(saved.game.deck)?new Set(saved.game.deck).size:0))&&!win.confirm('Spustit novou partii a nahradit rozehranou hru?'))return;
       const count=Number(ui.memoryPlayerCount.value)||2;
       const chosen=same&&game?[...new Set(game.deck)].map(uid=>getData().items.find(i=>M.key(i)===uid)):choose(pool(),getAudio(),getCatalog());
       if(chosen.length!==PAIRS){refresh();return;}
@@ -217,6 +218,6 @@
     function leave(){save();opened=false;cancel();ui.memoryView.classList.remove('memory-projector');ui.memoryProjector.setAttribute('aria-pressed','false');doc.querySelector('[data-json-url]')?.classList.remove('memory-projector-shell');}
     return {open:()=>{opened=true;setup();onOpen();},leave,refresh,canLeave:approveLeave,close:()=>{if(approveLeave()){leave();onClose();}},checkpoint:()=>save()};
   }
-  const api={KEY,PAIRS,choose,newGame,settle,signature,restore,create};
+  const api={KEY,PAIRS,CARDS,choose,newGame,settle,signature,restore,create};
   if(typeof module!=='undefined'&&module.exports)module.exports=api;else root.VocabularyMemory=api;
 })(globalThis);
