@@ -110,6 +110,32 @@ class VocabularyEnAudioLibraryTests(unittest.TestCase):
             self.assertEqual(result["generated"], 0)
             self.assertEqual(len(calls), 4)
 
+    def test_live_verb_context_is_scoped_and_reused_after_rebuild(self) -> None:
+        items = [{"id": 69, "en": "live", "cz": "žít; bydlet"},
+                 {"id": 70, "en": "live", "cz": "živý; přímý"}]
+        calls = []
+
+        def synthesize(text, *, voice, rate):
+            calls.append((text, voice, rate))
+            return b"ID3" + b"x" * 1500
+
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            (root / "data").mkdir()
+            (root / "data/vocabulary-en.json").write_text(json.dumps({"items": items}))
+            csv_path = root / "VocabularyEN.csv"
+            csv_path.write_text("EN,CZ,Order\nlive,žít; bydlet,69\nlive,živý; přímý,70\n")
+            builder.build_library(root, synthesize=synthesize, csv_path=csv_path)
+            result = builder.build_library(root, synthesize=synthesize, csv_path=csv_path)
+            records = json.loads((root / builder.MANIFEST_RELATIVE_PATH).read_text())["items"]
+            self.assertEqual(records["69"]["sourceEn"], "live")
+            self.assertEqual(records["69"]["spokenEn"], "to live")
+            self.assertEqual(records["70"]["spokenEn"], "live")
+            self.assertNotEqual(records["69"]["en"], records["70"]["en"])
+            self.assertIn(("to live", "en-US-AriaNeural", "-10%"), calls)
+            self.assertEqual(result["generated"], 0)
+            self.assertEqual(len(calls), 4)
+
     def test_production_web_uses_mp3_manifest_without_system_speech_fallback(self) -> None:
         html = (REPO_ROOT / "docs" / "vocabulary-en" / "index.html").read_text(encoding="utf-8")
         javascript = (REPO_ROOT / "docs" / "vocabulary-en" / "gallery.js").read_text(encoding="utf-8")

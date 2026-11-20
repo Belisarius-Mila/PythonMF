@@ -2135,7 +2135,8 @@
       "galleryOrder": 15,
       "related": [],
       "active": true,
-      "teachingType": "word"
+      "teachingType": "word",
+      "imageStemOverride": "nurse-professional"
     },
     {
       "id": 78,
@@ -9325,7 +9326,8 @@
       "galleryOrder": 26,
       "related": [],
       "active": true,
-      "teachingType": "word"
+      "teachingType": "word",
+      "imageStemOverride": "let-allow-help"
     },
     {
       "id": 358,

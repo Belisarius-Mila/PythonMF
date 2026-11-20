@@ -75,7 +75,8 @@ class VocabularyGalleryTests(unittest.TestCase):
                 self.assertEqual(item['imageStem'],entry['imageStemOverride'])
                 self.assertNotIn('others',item['image'])
         for uid,stem in [('ven-0275','warning'),('ven-0030','drink'),('ven-0119','chicken'),
-                         ('ven-0144','right'),('ven-0398','that')]:
+                         ('ven-0144','right'),('ven-0398','that'),
+                         ('ven-0077','nurse-professional'),('ven-0357','let-allow-help')]:
             self.assertEqual((by_uid[uid]['imageStem'],by_uid[uid]['imageSource']),(stem,'catalog'))
         self.assertFalse(any(i['editorialStatus']=='needs-review' for i in by_uid.values() if i['active']))
 
@@ -196,7 +197,7 @@ class VocabularyGalleryTests(unittest.TestCase):
         self.assertEqual(yard['image'],'assets/vocabulary-en/courtyard.webp')
         see=next(i for i in self.manifest['items'] if i['uid']=='ven-0533')
         self.assertEqual(see['image'],'assets/vocabulary-en/see-verb.webp')
-        self.assertEqual(self.manifest['stats']['uniqueImageFiles'],491)
+        self.assertEqual(self.manifest['stats']['uniqueImageFiles'],492)
 
     def test_every_sentence_and_translation_stays_with_its_source_meaning(self):
         source={(row['EN'],row['CZ']):row for row in self.rows}

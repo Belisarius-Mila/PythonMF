@@ -16,6 +16,13 @@ Aria ho opakovaně vyslovovala jako jméno Kate. Výjimka je v generátoru
 nahrávka se nemění. Hlas je součástí názvu MP3, takže oprava používá novou
 adresu a nespoléhá na vypršení cache staré nahrávky.
 
+Výjimka pro sloveso `live` = `žít; bydlet`: Aria čte krátký infinitiv
+`to live`, aby samostatné homografní heslo nečetla jako přídavné jméno /laɪv/.
+Zobrazené `live`, české audio i věta zůstávají stejné. Výjimka v
+`SPOKEN_TEXT_OVERRIDES` je vázaná na přesný EN/CZ význam, ne na všechna
+budoucí hesla `live`. Změna čteného textu vytváří novou adresu MP3;
+původní soubor zůstává zachovaný a opakovaný build opravu udrží.
+
 ## Po každé změně VocabularyEN.csv
 
 Z kořene projektu spusť v tomto pořadí:

@@ -40,6 +40,10 @@ VOICES = {
 # spoken text intact; use the verified voice for this pronunciation only.
 VOICE_OVERRIDES = {("en", "cat"): "en-US-JennyNeural"}
 
+# Isolated "live" is read as /laɪv/. The infinitive makes the intended verb
+# /lɪv/ explicit, scoped to this meaning; the card still displays "live".
+SPOKEN_TEXT_OVERRIDES = {("live", "žít; bydlet"): "to live"}
+
 
 def asset_voice(language: str, spoken_text: str) -> str:
     return VOICE_OVERRIDES.get((language, spoken_text), str(VOICES[language]["id"]))
@@ -116,7 +120,9 @@ def _source_digest(items: list[dict[str, object]]) -> str:
 def build_manifest(items: list[dict[str, object]]) -> dict[str, object]:
     records: dict[str, dict[str, object]] = {}
     for item in items:
-        spoken_en = normalize_spoken_text(str(item["en"]))
+        spoken_en = normalize_spoken_text(SPOKEN_TEXT_OVERRIDES.get(
+            (str(item["en"]), str(item["cz"])), str(item["en"])
+        ))
         spoken_cz = normalize_spoken_text(str(item["cz"]))
         records[str(item["id"])] = {
             "sourceEn": item["en"],

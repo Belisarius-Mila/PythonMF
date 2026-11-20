@@ -2944,3 +2944,13 @@ strop. Skutečný DALTAC dokončen17,0578/20, sedm původních částí beze zm�
   trvat na přesném plném kontaktu, textu a novém řádku SMS/RCS.
 - Důkaz:118 cílených PASS a jediný původní RCS test s přesnou shodou a
   delivered, bez dalšího odeslání. Soukromý completion.json rodinného kalendáře.
+
+### 2026-11-20 — Homografní výslovnost a české významové kolize v EN
+
+- Problém: izolované live čte TTS jako /laɪv/; globální český mapping
+  přidělil nurse obrázek sister a anglickému let český let=flight.
+- Řešení: v katalogu připnout přesné vlastní obrázky konkrétním UID;
+  globální mapping zachovat. Slovesné live číst jako krátké „to live“,
+  výjimku omezit přesným EN/CZ významem a odvodit novou MP3 adresu z textu.
+- Důkaz:15 audio testů PASS včetně jiného významu live a opakovaného buildu;
+  ostatní karty a původní MP3 hashově stejné, Safari nové obrázky/přehrávání.

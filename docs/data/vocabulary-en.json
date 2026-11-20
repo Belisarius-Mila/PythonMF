@@ -1,6 +1,6 @@
 {
   "app": "VocabularyEN",
-  "generatedAt": "2026-11-18T14:07:52.979858+00:00",
+  "generatedAt": "2026-11-20T15:50:18.412048+00:00",
   "sourceCsv": "VocabularyEN/VocabularyEN.csv",
   "itemCount": 541,
   "wordSets": [
@@ -20,11 +20,11 @@
     "withSentence": 541,
     "withSentenceTranslation": 541,
     "imageSources": {
-      "catalog": 136,
+      "catalog": 138,
       "direct": 342,
-      "mapping": 63
+      "mapping": 61
     },
-    "uniqueImageFiles": 491
+    "uniqueImageFiles": 492
   },
   "items": [
     {
@@ -2774,10 +2774,10 @@
       "wordSets": [],
       "selected": false,
       "hardTraining": false,
-      "image": "assets/vocabulary-en/sister.png",
-      "imageStem": "sister",
-      "imageRequestedStem": "sister",
-      "imageSource": "mapping",
+      "image": "assets/vocabulary-en/nurse-professional.webp",
+      "imageStem": "nurse-professional",
+      "imageRequestedStem": "nurse-professional",
+      "imageSource": "catalog",
       "imageMissing": false,
       "uid": "ven-0077",
       "primaryGroup": "topic-01",
@@ -2796,7 +2796,7 @@
       "active": true,
       "teachingType": "word",
       "sourceIds": [],
-      "thumbnail": "assets/vocabulary-en-thumbs/sister-968dfe9aad169868.webp"
+      "thumbnail": "assets/vocabulary-en-thumbs/nurse-professional-0e3a2f2da729294b.webp"
     },
     {
       "id": 78,
@@ -13298,10 +13298,10 @@
       ],
       "selected": false,
       "hardTraining": false,
-      "image": "assets/vocabulary-en/flight.webp",
-      "imageStem": "flight",
-      "imageRequestedStem": "flight",
-      "imageSource": "mapping",
+      "image": "assets/vocabulary-en/let-allow-help.webp",
+      "imageStem": "let-allow-help",
+      "imageRequestedStem": "let-allow-help",
+      "imageSource": "catalog",
       "imageMissing": false,
       "uid": "ven-0357",
       "primaryGroup": "topic-16",
@@ -13322,7 +13322,7 @@
       "sourceIds": [
         "benji"
       ],
-      "thumbnail": "assets/vocabulary-en-thumbs/flight-fce5c4eac2fc9557.webp"
+      "thumbnail": "assets/vocabulary-en-thumbs/let-allow-help-ad2a410c63cfc32d.webp"
     },
     {
       "id": 358,
@@ -20126,5 +20126,5 @@
       }
     ]
   },
-  "revision": "98f1425dd0d65edc5e00"
+  "revision": "a6496af97f918116b3e5"
 }
