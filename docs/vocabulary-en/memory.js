@@ -57,10 +57,11 @@
     }catch(_){return null;}
   }
   function create({doc,win,getData,getAudio,getCatalog,getPersonal,isAvailable,onOpen,onClose,play,stop}){
-    const ids=['memoryView','memorySetup','memoryLearner','memoryHard','memoryTopics','memoryRecentOnly','memoryRecentCount','memoryPlayerCount','memoryNames','memoryPoolNotice','memoryStorageNotice','memoryStart','memoryResume','memoryRound','memoryBoard','memoryScores','memoryStatus','memoryProgress','memoryRetry','memorySkip','memoryEnd','memoryResult','memoryCollections','memoryAgain','memoryNew','memoryChange','memoryBack','memoryProjector'];
+    const ids=['memoryView','memorySetup','memoryLearner','memoryHard','memoryTopics','memoryRecentOnly','memoryRecentCount','memoryPlayerCount','memoryNames','memoryPoolNotice','memoryStorageNotice','memoryStart','memoryResume','memoryRound','memoryBoard','memoryScores','memoryStatus','memoryProgress','memoryRetry','memorySkip','memoryEnd','memoryResult','memoryCollections','memoryAgain','memoryNew','memoryChange','memoryBack','memoryProjector','memoryReward','memoryRewardImage','memoryRewardWord'];
     const ui=Object.fromEntries(ids.map(id=>[id,doc.getElementById(id)]));
     let filters={learner:'all',hard:false,topics:[],recentCount:0}, gameFilters=null, game=null, source='', selected=[], opened=false, busy=false, error=false, success=false, openCards=[], hint=-1, epoch=0, draftNames=['Hráč 1','Hráč 2'], saved=null;
     const waits=new Map();
+    let rewarding=false;
     function status(s){ui.memoryStatus.textContent=s;}
     function finished(){return game&&Object.keys(game.owners).length===PAIRS;}
     function sanitize(v={}){
@@ -79,8 +80,25 @@
       try{win.sessionStorage.setItem(KEY,JSON.stringify(saved));ui.memoryStorageNotice.textContent='';}
       catch(_){ui.memoryStorageNotice.textContent='Partie funguje, ale v tomto panelu se ji nepodařilo uložit pro obnovení stránky.';}
     }
+    function hideReward(){
+      if(ui.memoryReward.open)ui.memoryReward.close();
+      ui.memoryReward.hidden=true;
+    }
+    function primeReward(item){
+      ui.memoryRewardImage.hidden=false;
+      ui.memoryRewardImage.src=new URL('../'+item.image,win.location.href).toString();
+    }
+    async function reward(item,ticket){
+      primeReward(item);ui.memoryRewardWord.textContent=item.en;
+      ui.memoryReward.hidden=false;ui.memoryReward.showModal();ui.memoryRewardWord.focus({preventScroll:true});
+      let heard=true;
+      await Promise.all([delay(2000,ticket).then(()=>{if(ticket===epoch)hideReward();}),
+        (async()=>{try{heard=await play(item);}catch(_){heard=false;}})()]);
+      return heard;
+    }
     function cancel(){
       epoch++;stop();for(const [id,resolve] of waits){win.clearTimeout(id);resolve(false);}waits.clear();busy=false;error=false;success=false;openCards=[];hint=-1;
+      rewarding=false;hideReward();
       ui.memoryRetry.hidden=ui.memorySkip.hidden=true;
     }
     function delay(ms,ticket){return new Promise(resolve=>{const id=win.setTimeout(()=>{waits.delete(id);resolve(ticket===epoch&&opened);},ms);waits.set(id,resolve);});}
@@ -124,7 +142,7 @@
       if(!game)return;
       ui.memoryView.classList.add('memory-playing');
       const byUid=new Map(getData().items.map(i=>[M.key(i),i]));
-      ui.memorySetup.hidden=true;ui.memoryRound.hidden=false;ui.memoryEnd.hidden=!finished();
+      ui.memorySetup.hidden=true;ui.memoryRound.hidden=false;ui.memoryEnd.hidden=!finished()||rewarding;
       ui.memoryProgress.textContent=`Nalezeno ${Object.keys(game.owners).length} z ${PAIRS} dvojic · ${game.turns} ${game.turns===1?'tah':game.turns>=2&&game.turns<=4?'tahy':'tahů'}`;
       ui.memoryBoard.replaceChildren();
       game.deck.forEach((uid,index)=>{
@@ -172,13 +190,21 @@
         const matched=game.deck[openCards[0]]===game.deck[openCards[1]],player=game.players[game.active];
         busy=true;success=matched;status(matched?`Správná dvojice · ${player}!`:'Porovnej oba obrázky…');draw();const ticket=epoch;
         if(!await delay(1000,ticket))return;
-        game=settle(game,...openCards);save();openCards=[];busy=false;success=false;draw();status(finished()?`Všech ${PAIRS} dvojic je nalezených.`:matched?`${player} získává dvojici a hraje znovu.`:`Na tahu: ${game.players[game.active]}.`);
-        if(finished())ui.memoryEnd.scrollIntoView({block:'start'});
+        const item=getData().items.find(i=>M.key(i)===game.deck[openCards[0]]);
+        game=settle(game,...openCards);save();openCards=[];success=false;busy=rewarding=matched;draw();
+        let heard=true;
+        if(matched){status('Správně! Poslechni si slovo ještě jednou.');heard=await reward(item,ticket);}
+        if(ticket!==epoch||!opened)return;
+        busy=rewarding=false;draw();
+        status((finished()?`Všech ${PAIRS} dvojic je nalezených.`:matched?`${player} získává dvojici a hraje znovu.`:`Na tahu: ${game.players[game.active]}.`)+(heard?'':' Dodatečný zvuk se nepodařilo přehrát; dvojice platí.'));
+        if(finished()){ui.memoryEnd.scrollIntoView({block:'start'});ui.memoryResult.focus({preventScroll:true});}
+        else if(matched)ui.memoryBoard.querySelector('button')?.focus({preventScroll:true});
       }else{busy=false;draw();status(`Vyber druhou kartičku · ${game.players[game.active]}.`);}
     }
     async function reveal(index){
       busy=true;error=false;hint=index;const ticket=epoch;ui.memoryRetry.hidden=ui.memorySkip.hidden=true;draw();status('Posloucháme…');
       const item=getData().items.find(i=>M.key(i)===game.deck[index]);
+      primeReward(item);
       let failed=false;
       await Promise.all([delay(2000,ticket).then(()=>{if(ticket===epoch&&opened){hint=-1;draw();}}),(async()=>{try{if(!await play(item))failed=true;}catch(_){failed=true;}})()]);
       if(ticket!==epoch||!opened)return;
@@ -212,6 +238,9 @@
     ui.memoryStart.addEventListener('click',()=>start());ui.memoryResume.addEventListener('click',resume);
     ui.memoryAgain.addEventListener('click',()=>start(true));ui.memoryNew.addEventListener('click',()=>start());ui.memoryChange.addEventListener('click',setup);
     ui.memoryBack.addEventListener('click',()=>{if(approveLeave()){leave();onClose();}});
+    ui.memoryReward.addEventListener('cancel',event=>event.preventDefault());
+    ui.memoryReward.addEventListener('keydown',event=>{if(event.key==='Escape')event.stopPropagation();});
+    ui.memoryRewardImage.addEventListener('error',()=>{ui.memoryRewardImage.hidden=true;});
     ui.memoryRetry.addEventListener('click',()=>{if(error)void reveal(openCards.at(-1));});
     ui.memorySkip.addEventListener('click',()=>{if(!error)return;error=false;ui.memoryRetry.hidden=ui.memorySkip.hidden=true;void resolveTurn();});
     ui.memoryProjector.addEventListener('click',()=>{ui.memoryView.classList.toggle('memory-projector');doc.querySelector('[data-json-url]')?.classList.toggle('memory-projector-shell');ui.memoryProjector.setAttribute('aria-pressed',String(ui.memoryView.classList.contains('memory-projector')));});

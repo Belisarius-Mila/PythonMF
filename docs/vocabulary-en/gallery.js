@@ -698,7 +698,7 @@ async function init(){
   if(globalThis.VocabularyMemory)memoryUI=globalThis.VocabularyMemory.create({doc:document,win:window,getData:()=>state.data,getAudio:()=>state.audioManifest,getCatalog:()=>quizCatalog,
     getPersonal:(id,hard)=>learnerUI?.filter(state.items,id,hard)||[],isAvailable:()=>Boolean(learnerUI?.available),
     onOpen:()=>{stopAudioPlayback();switchView("memory");document.title="Pexeso · Vocabulary EN";window.scrollTo({top:0});},onClose:returnFromMemory,
-    play:item=>{stopAudioPlayback();return playOneAudio(M.audioRecord(item,state.audioManifest)?.en,playbackToken,{timeoutMs:20000});},stop:stopAudioPlayback});
+    play:item=>{stopAudioPlayback();return playOneAudio(M.audioRecord(item,state.audioManifest)?.en,playbackToken,{player:new Audio(),timeoutMs:20000});},stop:stopAudioPlayback});
   document.getElementById("memoryTab").disabled=!memoryUI;
   buildFilterControls();renderGallery();applyRoute({initial:true});
 }

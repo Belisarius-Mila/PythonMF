@@ -282,7 +282,7 @@ class VocabularyGalleryTests(unittest.TestCase):
         legacy=(ROOT/'docs/vocabulary-en/app.js').read_text()
         self.assertNotIn('VocabularyModel',legacy)
         gallery=(ROOT/'docs/vocabulary-en/index.html').read_text()
-        self.assertIn('src="gallery.js"',gallery)
+        self.assertRegex(gallery,r'<script\b[^>]*\bsrc="gallery\.js(?:\?[^\"]*)?"')
 
 class SentencePictureTests(unittest.TestCase):
     @classmethod

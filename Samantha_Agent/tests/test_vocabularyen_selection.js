@@ -22,7 +22,7 @@ class Element {
   remove(){if(this.parentNode)this.parentNode.children=this.parentNode.children.filter(child=>child!==this);this.parentNode=null;}
   addEventListener(name,handler){(this.listeners[name]??=[]).push(handler);} removeEventListener(name,handler){this.listeners[name]=(this.listeners[name]||[]).filter(fn=>fn!==handler);}
   emit(name,extra={}){for(const fn of this.listeners[name]||[])fn({target:this,preventDefault(){},...extra});}
-  click(){this.emit("click");} setAttribute(name,value){this.attributes[name]=String(value);}getAttribute(name){return this.attributes[name];}removeAttribute(name){delete this.attributes[name];}
+  click(){this.emit("click");} showModal(){this.open=true;} close(){this.open=false;} setAttribute(name,value){this.attributes[name]=String(value);}getAttribute(name){return this.attributes[name];}removeAttribute(name){delete this.attributes[name];}
   descendants(){return this.children.flatMap(child=>[child,...child.descendants()]);}
   matches(selector){if(selector.startsWith("."))return this.classList.contains(selector.slice(1));if(selector.startsWith("[data-"))return selector.slice(6,-1).replace(/-([a-z])/g,(_,c)=>c.toUpperCase()) in this.dataset;return this.tagName===selector;}
   querySelectorAll(selector){return this.descendants().filter(node=>node.matches(selector));}querySelector(selector){return this.querySelectorAll(selector)[0]||null;}
@@ -840,7 +840,8 @@ async function memoryView(players=2,options={}){
 async function memoryHear(v,n){
  memoryButton(v,n).click();await until(()=>activePlayer(v));const p=activePlayer(v);p.ended=true;p.handlers.ended();v.advance(2000);await sleep(0);return p;
 }
-async function memoryPair(v,a,b){await memoryHear(v,a);await memoryHear(v,b);v.advance(1000);await sleep(0);}
+async function memoryFinishReward(v){await until(()=>activePlayer(v));const p=activePlayer(v);p.ended=true;p.handlers.ended();await sleep(0);v.advance(2000);await sleep(0);}
+async function memoryPair(v,a,b){await memoryHear(v,a);await memoryHear(v,b);v.advance(1000);await sleep(0);if(v.element('memoryReward').open)await memoryFinishReward(v);}
 test('memory builds12 distinct meanings twice and preserves all existing data',()=>{
  const before=JSON.stringify(vocabulary),catalogBefore=JSON.stringify(quizCatalog);
  assert.equal(memoryPool.length,12);assert.equal(new Set(memoryPool.map(i=>i.image)).size,12);
@@ -884,7 +885,7 @@ test('memory awards one pair once, leaves two grey holes and keeps the same play
  await memoryHear(v,a);await memoryHear(v,b);assert.equal(v.element('memoryBoard').querySelectorAll('.memory-match').length,2);v.advance(1000);await sleep(0);const after=checkpoint(v).game;assert.equal(after.active,0);assert.equal(Object.keys(after.owners).length,1);assert.equal(after.turns,1);
  assert.equal(v.element('memoryBoard').children.length,24);for(const i of [a,b]){assert.ok(v.element('memoryBoard').children[i].classList.contains('memory-empty'));assert.equal(memoryButton(v,i),null);}
  assert.match(v.element('memoryScores').children[0].textContent,/Dvojice: 1/);
- const next=g.deck.findIndex(uid=>uid!==g.deck[a]),other=g.deck.findIndex((uid,i)=>i!==next&&uid===g.deck[next]);await memoryPair(v,next,other);assert.equal(Object.keys(checkpoint(v).game.owners).length,2);assert.equal(checkpoint(v).game.active,0);
+ await memoryFinishReward(v);const next=g.deck.findIndex(uid=>uid!==g.deck[a]),other=g.deck.findIndex((uid,i)=>i!==next&&uid===g.deck[next]);await memoryPair(v,next,other);assert.equal(Object.keys(checkpoint(v).game.owners).length,2);assert.equal(checkpoint(v).game.active,0);
 });
 test('memory mismatch turns both cards back and moves to the next player',async()=>{
  const v=await memoryView(3),g=checkpoint(v).game,a=0,b=g.deck.findIndex(x=>x!==g.deck[a]);await memoryPair(v,a,b);
@@ -929,4 +930,48 @@ test('memory keeps a legacy32-card checkpoint until an explicitly confirmed new2
  const v=await app({session});v.element('memoryTab').click();assert.equal(v.element('memoryResume').hidden,true);assert.match(v.element('memoryPoolNotice').textContent,/Starší partie/);assert.equal(session.getItem(memory.KEY),raw);
  v.win.confirm=()=>false;v.element('memoryStart').click();assert.equal(session.getItem(memory.KEY),raw);
  v.win.confirm=()=>true;v.element('memoryStart').click();assert.equal(checkpoint(v).game.deck.length,24);assert.equal(v.element('memoryBoard').children.length,24);
+});
+
+function memoryPositions(g,uid){return g.deck.flatMap((x,i)=>x===uid?[i]:[]);}
+async function memoryAward(v){const g=checkpoint(v).game,[a,b]=memoryPositions(g,g.deck[0]);await memoryHear(v,a);await memoryHear(v,b);v.advance(1000);await sleep(0);return vocabulary.items.find(i=>i.uid===g.deck[0]);}
+test('memory reward shows the large original image and English only for exactly two seconds',async()=>{
+ const v=await memoryView(),item=await memoryAward(v),dialog=v.element('memoryReward');
+ assert.equal(dialog.open,true);assert.equal(dialog.hidden,false);assert.equal(v.element('memoryRewardWord').textContent,item.en);
+ assert.equal(v.element('memoryRewardImage').src,new URL('../'+item.image,v.win.location.href).toString());
+ assert.equal(activePlayer(v).url,new URL('../'+model.audioRecord(item,audio).en,v.win.location.href).toString());
+ assert.equal(v.players.filter(p=>p.played).length,3);assert.equal(Object.keys(checkpoint(v).game.owners).length,1);
+ let prevented=false,stopped=false;dialog.emit('cancel',{preventDefault:()=>{prevented=true;}});dialog.emit('keydown',{key:'Escape',stopPropagation:()=>{stopped=true;}});assert.equal(prevented&&stopped,true);
+ const p=activePlayer(v);p.ended=true;p.handlers.ended();await sleep(0);v.advance(1999);await sleep(0);assert.equal(dialog.open,true);
+ assert.equal(v.element('memoryBoard').querySelector('button').disabled,true);v.advance(1);await sleep(0);
+ assert.equal(dialog.open,false);assert.equal(dialog.hidden,true);assert.equal(checkpoint(v).game.active,0);
+ assert.equal(v.element('memoryBoard').querySelector('button').disabled,false);assert.equal(v.doc.activeElement,v.element('memoryBoard').querySelector('button'));
+});
+test('memory reward closes after two seconds while a longer English recording keeps play locked until ended',async()=>{
+ const v=await memoryView();await memoryAward(v);v.advance(2000);await sleep(0);
+ assert.equal(v.element('memoryReward').open,false);assert.equal(v.element('memoryBoard').querySelector('button').disabled,true);
+ v.element('memoryBoard').querySelector('button').click();assert.equal(v.players.filter(p=>p.played).length,3);
+ const p=activePlayer(v);p.ended=true;p.handlers.ended();await sleep(0);assert.equal(v.element('memoryBoard').querySelector('button').disabled,false);assert.equal(checkpoint(v).game.turns,1);
+});
+test('memory mismatch never opens the large card or adds an extra playback',async()=>{
+ const v=await memoryView(),g=checkpoint(v).game;await memoryPair(v,0,g.deck.findIndex(x=>x!==g.deck[0]));
+ assert.notEqual(v.element('memoryReward').open,true);assert.equal(v.players.filter(p=>p.played).length,2);assert.equal(checkpoint(v).game.active,1);
+});
+test('memory interrupted reward closes and preserves the earned pair on reload without replay or double scoring',async()=>{
+ const v=await memoryView();await memoryAward(v);const p=activePlayer(v);v.emit('pagehide');assert.equal(p.paused,true);assert.equal(v.element('memoryReward').hidden,true);
+ v.advance(5000);await sleep(0);const raw=v.session.getItem(memory.KEY),after=await app({session:v.session,url:v.win.location.href});
+ assert.equal(activePlayer(after),undefined);after.element('memoryTab').click();after.element('memoryResume').click();assert.notEqual(after.element('memoryReward').open,true);
+ assert.equal(after.element('memoryBoard').querySelectorAll('.memory-empty').length,2);assert.equal(after.session.getItem(memory.KEY),raw);assert.equal(checkpoint(after).game.turns,1);
+});
+test('memory failed reward sound preserves the pair and unlocks play without borrowing Czech audio',async()=>{
+ const v=await memoryView(),item=await memoryAward(v),p=activePlayer(v);p.handlers.error();await sleep(0);v.advance(2000);await sleep(0);
+ assert.equal(v.element('memoryReward').hidden,true);assert.equal(Object.keys(checkpoint(v).game.owners).length,1);assert.equal(checkpoint(v).game.active,0);
+ assert.equal(v.element('memoryBoard').querySelector('button').disabled,false);assert.match(v.element('memoryStatus').textContent,/Dodatečný zvuk/);
+ assert.equal(p.url,new URL('../'+model.audioRecord(item,audio).en,v.win.location.href).toString());
+});
+test('memory plays the final large English card before showing the completed game',async()=>{
+ const g=memory.newGame(memoryPool,['Eva']),uids=[...new Set(g.deck)];g.owners=Object.fromEntries(uids.slice(0,11).map(uid=>[uid,0]));g.turns=11;
+ const session=storage();session.setItem(memory.KEY,JSON.stringify({version:1,filters:{learner:'all',hard:false,topics:[],recentCount:0},game:g,source:memory.signature(g.deck,vocabulary.items,audio)}));
+ const v=await app({session});v.element('memoryTab').click();v.element('memoryResume').click();const [a,b]=memoryPositions(g,uids[11]);await memoryHear(v,a);await memoryHear(v,b);v.advance(1000);await sleep(0);
+ assert.equal(v.element('memoryReward').open,true);assert.equal(v.element('memoryEnd').hidden,true);assert.equal(Object.keys(checkpoint(v).game.owners).length,12);
+ await memoryFinishReward(v);assert.equal(v.element('memoryEnd').hidden,false);assert.match(v.element('memoryResult').textContent,/všech 12/);assert.equal(v.doc.activeElement,v.element('memoryResult'));
 });

@@ -97,3 +97,6 @@ fieldset {border:1px solid var(--line);border-radius:12px;margin:0;padding:14px}
 .memory-playing .memory-slot{height:clamp(84px,calc((100dvh - 360px)/4),170px)}.memory-projector.memory-playing .memory-slot{height:clamp(90px,calc((100dvh - 265px)/4),210px)}
 @media(max-width:779px){.memory-playing .memory-slot,.memory-projector.memory-playing .memory-slot{height:clamp(100px,24vw,160px)}}
 .memory-match .memory-card{background:#d9f1de;border-color:#338454;box-shadow:0 0 0 2px #33845455}
+
+.memory-reward{width:min(760px,92vw);max-height:92dvh;overflow:auto;margin:auto;padding:clamp(16px,3vw,30px);border:3px solid #338454;border-radius:24px;background:var(--paper);color:var(--ink);text-align:center;box-shadow:0 16px 65px #122b3655}.memory-reward::backdrop{background:#17352dcc}.memory-reward img{display:block;width:100%;height:min(58dvh,520px);object-fit:contain;border-radius:14px;background:#fff}.memory-reward p{font-size:clamp(1.6rem,4vw,3rem);line-height:1.2;font-weight:750;overflow-wrap:anywhere;margin:18px 0 0}.memory-reward p:focus{outline:none}
+@media(max-width:599px){.memory-reward{padding:14px;border-radius:18px}.memory-reward img{height:52dvh}}
