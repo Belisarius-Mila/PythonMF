@@ -6,14 +6,14 @@
   <meta name="theme-color" content="#f5f1e8">
   <meta name="description" content="Obrázková francouzština: vyber si téma, poslouchej a uč se po jednom slovíčku.">
   <title>Francouzština Jana · Slovíčka v obrázcích</title>
-  <link rel="stylesheet" href="gallery.css?v=20261120-memory1">
+  <link rel="stylesheet" href="gallery.css?v=20261121-reward1">
   <script src="model.js" defer></script>
   <script src="learners.js" defer></script>
   <script src="learner-ui.js" defer></script>
   <script src="personal.js?v=20261120-memory1" defer></script>
   <script src="personal-ui.js?v=20261120-memory1" defer></script>
   <script src="practice.js?v=20261120-memory1" defer></script>
-  <script src="memory.js?v=20261120-memory1" defer></script>
+  <script src="memory.js?v=20261121-reward1" defer></script>
   <script src="gallery.js?v=20261120-memory1" defer></script>
 </head>
 <body>
@@ -116,7 +116,8 @@
         <div id="memoryBoard" class="memory-board" aria-label="24 očíslovaných míst pexesa"></div>
         <div id="memoryScores" class="memory-scores" aria-label="Hráči a získané dvojice"></div>
       </div>
-      <div id="memoryEnd" class="memory-end" hidden><h2>Všechny dvojice jsou doma!</h2><p id="memoryResult" role="status"></p><div class="memory-actions"><button id="memoryAgain" class="primary" type="button">Ještě jednou se stejnými slovy</button><button id="memoryNew" type="button">Nová slovíčka</button><button id="memoryChange" type="button">Změnit hráče a výběr</button></div><div id="memoryCollections"></div></div>
+      <dialog id="memoryReward" class="memory-reward" aria-labelledby="memoryRewardWord" hidden><img id="memoryRewardImage" alt=""><p id="memoryRewardWord" lang="fr" tabindex="-1"></p></dialog>
+      <div id="memoryEnd" class="memory-end" hidden><h2>Všechny dvojice jsou doma!</h2><p id="memoryResult" role="status" tabindex="-1"></p><div class="memory-actions"><button id="memoryAgain" class="primary" type="button">Ještě jednou se stejnými slovy</button><button id="memoryNew" type="button">Nová slovíčka</button><button id="memoryChange" type="button">Změnit hráče a výběr</button></div><div id="memoryCollections"></div></div>
     </section>
     <section id="personalSettingsView" aria-label="Osobní obtížná slova" hidden>
       <h1>Moje obtížná slova</h1>

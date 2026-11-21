@@ -262,7 +262,8 @@ async function memoryView(count=2,options={}){
  v.element('memoryStart').click();await flush();return v;
 }
 async function memoryHear(v,n){memoryButton(v,n).click();await until(()=>active(v));assert.match(active(v).url,/-fr\.mp3$/);ended(v);await flush();v.advance(2000);await flush();}
-async function memoryPair(v,a,b){await memoryHear(v,a);await memoryHear(v,b);v.advance(1000);await flush();}
+async function memoryFinishReward(v){await until(()=>active(v));ended(v);await flush();v.advance(2000);await flush();}
+async function memoryPair(v,a,b){await memoryHear(v,a);await memoryHear(v,b);v.advance(1000);await flush();if(v.element('memoryReward').open)await memoryFinishReward(v);}
 function memoryPositions(g,uid){return g.deck.flatMap((x,i)=>x===uid?[i]:[]);}
 
 test('FR memory chooses12 distinct compatible meanings with French audio and keeps source metadata intact',()=>{
@@ -305,7 +306,7 @@ test('FR memory awards a pair once, leaves two grey holes and preserves the same
  await memoryHear(v,a);await memoryHear(v,b);assert.equal(v.element('memoryBoard').querySelectorAll('.memory-match').length,2);
  v.advance(1000);await flush();assert.equal(v.element('memoryBoard').querySelectorAll('.memory-empty').length,2);
  assert.equal(memorySaved(v).game.active,0);assert.match(v.element('memoryScores').children[0].textContent,/Jana.*Dvojice: 1/);
- const uid=g.deck.find(x=>x!==g.deck[0]);await memoryPair(v,...memoryPositions(g,uid));assert.equal(memorySaved(v).game.active,0);assert.equal(Object.keys(memorySaved(v).game.owners).length,2);
+ await memoryFinishReward(v);const uid=g.deck.find(x=>x!==g.deck[0]);await memoryPair(v,...memoryPositions(g,uid));assert.equal(memorySaved(v).game.active,0);assert.equal(Object.keys(memorySaved(v).game.owners).length,2);
 });
 test('FR memory mismatch closes both cards and changes to the next player',async()=>{
  const v=await memoryView(3),g=memorySaved(v).game;await memoryPair(v,0,g.deck.findIndex(x=>x!==g.deck[0]));
@@ -354,4 +355,46 @@ test('FR memory works with blocked storage and never starts or resumes audio fro
  const v=await memoryView(1,{blocked:true,url:'https://example.test/PythonMF/vocabulary-fr/#game=memory-pairs'});
  assert.equal(v.element('memoryBoard').children.length,24);assert.match(v.element('memoryStorageNotice').textContent,/nepodařilo uložit/);assert.equal(active(v),undefined);
  const missing=await app({failQuiz:true});missing.element('memoryTab').click();assert.equal(missing.element('memoryStart').disabled,true);
+});
+
+async function memoryAward(v){const g=memorySaved(v).game,[a,b]=memoryPositions(g,g.deck[0]);await memoryHear(v,a);await memoryHear(v,b);v.advance(1000);await flush();return vocabulary.items.find(i=>i.uid===g.deck[0]);}
+test('FR memory reward shows a large source image and French word only for exactly two seconds after a match',async()=>{
+ const v=await memoryView(),item=await memoryAward(v),dialog=v.element('memoryReward');
+ assert.equal(dialog.open,true);assert.equal(dialog.hidden,false);assert.equal(v.element('memoryRewardWord').textContent,item.fr);
+ let prevented=false,stopped=false;dialog.emit('cancel',{preventDefault:()=>{prevented=true;}});dialog.emit('keydown',{key:'Escape',stopPropagation:()=>{stopped=true;}});assert.equal(prevented&&stopped,true);assert.equal(dialog.open,true);
+ assert.equal(v.element('memoryRewardImage').src,new URL('../'+item.image,v.win.location.href).toString());
+ assert.equal(v.element('memoryRewardWord').textContent.includes(item.cz),false);assert.match(active(v).url,/-fr\.mp3$/);
+ assert.equal(v.players.filter(p=>p.playCount).length,3);assert.equal(Object.keys(memorySaved(v).game.owners).length,1);
+ ended(v);await flush();v.advance(1999);await flush();assert.equal(dialog.open,true);assert.equal(v.element('memoryBoard').querySelector('button').disabled,true);
+ v.advance(1);await flush();assert.equal(dialog.open,false);assert.equal(dialog.hidden,true);assert.equal(memorySaved(v).game.active,0);
+ const next=v.element('memoryBoard').querySelector('button');assert.equal(next.disabled,false);assert.equal(v.doc.activeElement,next);
+});
+test('FR memory reward closes after two seconds but a longer French recording keeps the next turn locked until ended',async()=>{
+ const v=await memoryView();await memoryAward(v);const p=active(v);v.advance(2000);await flush();
+ assert.equal(v.element('memoryReward').open,false);assert.equal(v.element('memoryBoard').querySelector('button').disabled,true);
+ v.element('memoryBoard').querySelector('button').click();assert.equal(v.players.filter(p=>p.playCount).length,3);
+ ended(v);await flush();assert.equal(p.paused,true);assert.equal(v.element('memoryBoard').querySelector('button').disabled,false);assert.equal(memorySaved(v).game.turns,1);
+});
+test('FR memory reward never appears or adds a third playback for a mismatch',async()=>{
+ const v=await memoryView(),g=memorySaved(v).game;await memoryPair(v,0,g.deck.findIndex(x=>x!==g.deck[0]));
+ assert.notEqual(v.element('memoryReward').open,true);assert.equal(v.players.filter(p=>p.playCount).length,2);assert.equal(memorySaved(v).game.active,1);
+});
+test('FR memory interrupted reward is cancelled and the awarded pair survives reload without replay or duplicate scoring',async()=>{
+ const v=await memoryView();await memoryAward(v);const p=active(v);v.emit('pagehide');assert.equal(p.paused,true);assert.equal(v.element('memoryReward').hidden,true);
+ v.advance(5000);await flush();const raw=v.session.getItem(memory.KEY),reloaded=await app({session:v.session,url:v.win.location.href});
+ assert.equal(active(reloaded),undefined);reloaded.element('memoryResume').click();assert.notEqual(reloaded.element('memoryReward').open,true);
+ assert.equal(reloaded.element('memoryBoard').querySelectorAll('.memory-empty').length,2);assert.equal(reloaded.session.getItem(memory.KEY),raw);assert.equal(memorySaved(reloaded).game.turns,1);
+});
+test('FR memory failed reward audio preserves the earned pair, unlocks play and never substitutes Czech',async()=>{
+ const v=await memoryView(),g=memorySaved(v).game,[a,b]=memoryPositions(g,g.deck[0]);await memoryHear(v,a);await memoryHear(v,b);v.setAudioReject(true);v.advance(1000);await flush();
+ assert.equal(v.element('memoryReward').open,true);v.advance(2000);await flush();assert.equal(v.element('memoryReward').hidden,true);
+ assert.equal(Object.keys(memorySaved(v).game.owners).length,1);assert.equal(memorySaved(v).game.active,0);assert.equal(v.element('memoryBoard').querySelector('button').disabled,false);
+ assert.match(v.element('memoryStatus').textContent,/Dodatečný zvuk/);assert.ok(v.players.filter(p=>p.playCount).every(p=>/-fr\.mp3$/.test(p.url)));
+});
+test('FR memory shows the last reward before the final result, then completes the game',async()=>{
+ const g=memory.newGame(memoryPool,['Jana']),uids=[...new Set(g.deck)];g.owners=Object.fromEntries(uids.slice(0,11).map(uid=>[uid,0]));g.turns=11;
+ const session=storage();session.setItem(memory.KEY,JSON.stringify({version:1,filters:{},game:g,source:memory.signature(g.deck,vocabulary.items,audio)}));
+ const v=await app({session,url:'https://example.test/PythonMF/vocabulary-fr/#game=memory-pairs'});v.element('memoryResume').click();const [a,b]=memoryPositions(g,uids[11]);await memoryHear(v,a);await memoryHear(v,b);v.advance(1000);await flush();
+ assert.equal(v.element('memoryReward').open,true);assert.equal(v.element('memoryEnd').hidden,true);assert.equal(Object.keys(memorySaved(v).game.owners).length,12);
+ await memoryFinishReward(v);assert.equal(v.element('memoryEnd').hidden,false);assert.match(v.element('memoryResult').textContent,/všech 12/);assert.equal(v.doc.activeElement,v.element('memoryResult'));
 });

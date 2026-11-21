@@ -1,32 +1,32 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
-## 2026-11-20 23:44 CET — Janino francouzské pexeso 6 × 4
+## 2026-11-21 08:39 CET — Velká karta po správné dvojici v Janině pexesu
 
-Hotovo: V Janině francouzštině nová část Pexeso se stejnými pravidly jako
-EN:24 číslovaných rubů,12 různých dvojic,1–4 krátká jména, skóre a sbírky.
-Po otočení obrázek, francouzská MP3 a čeština2 s; porovnání po dočtení,
-zelená shoda, dvě šedá místa a pokračování stejného hráče, při neshodě
-střídání. Konec/remíza, rozbalení sbírek, stejná/nová zásoba, projektor
-a ruční obnova dokončených tahů bez autoplay. PC6×4, úzký displej4×6.
+Hotovo: Po započítání správné dvojice se na2 sekundy otevře velký obrázek
+s francouzským zápisem a ještě jednou zazní FR MP3. Český překlad v okně
+není. Potom se okno samo zavře; delší nahrávka bezpečně dohraje před dalším
+tahem. Stejný hráč pokračuje, skóre a šedá místa zůstávají stejné. Poslední
+velká karta předchází výsledku hry. Při odchodu se okno i zvuk zruší;
+uložená dvojice přežije reload bez opakování ani dvojího bodu.
 
-Rozhodnutí: Míla zadal stejné pexeso v Janině Francouzštině. Francouzský
-klient používá svůj společný výběr Všechna/Jen obtížná, témata a další
-filtry; hra osobní označení ani A–D nemění. Samostatný sessionStorage
-vocabulary-fr.memory-pairs.v1, validace FR UID a existujících FR médií.
-Přenos současného EN pravidla, bez nových ilustrací, MP3 nebo změn obsahu.
-Nové p+n nezadané. Stávající FR TVBCP zůstává kanonický, žádný nový dokument.
+Rozhodnutí: Mílův didaktický návrh se týká Janiny francouzštiny. Přesné2 s
+platí pro viditelnost okna; čekání na delší zvuk bylo uvedené při zahájení.
+Používají se existující velké ilustrace a FR audio bez CZ fallbacku.
+EN pexeso a veškerá média/obsah/osobní označení se nemění. Nové p+n nezadané.
+Předchozí6e2f1c34 je skutečně vydané: původní workflow44832338166/deployment
+7954409332 success a39 veřejných souborů exact; job9988da0cc9996f13fa0b4877e3311e3a
+zůstal attention/uncertain, nezávislý důkaz je v private vocabulary_fr_memory_20261120.
+Původní vydání neopakovat.
 
-Další krok: Dokončit programem vybranou doménovou bránu a jeden lokální
-commit; přesný head/bránu určuje private/vocabulary_fr_memory_20261120/
-completion.json. Míla může přezkoušet místní náhled; publikace až na p+n.
+Další krok: Dokončit programovou doménovou bránu a jediný lokální commit.
+Přesný head/bránu a výsledný stav určuje private/vocabulary_fr_memory_reward_20261121/
+completion.json; následně Mílova přejímka a samostatné p+n přes Terru.
 Navrhované další kroky: Fyzická přejímka na Janině zařízení po vydání.
-Technický důkaz:47 klientských JS scénářů PASS včetně12 nových pro pexeso,
-FR bez CZ fallbacku, načasování, skóre, obnova, filtry a neměnnost osobních
-záznamů. Finální stav po posledním zpřesnění ověří doménová brána v gate.log.
-Skutečný481kartový katalog vytvoří12 kompatibilních dvojic se zvukem.
-Safari Mac:24 míst6×4,4 jména a skóre současně, FR/krátká CZ, neshoda
-Jana→Eva, reload a ruční pokračování Evy. Fyzický iPhone zůstává otevřený.
-Veškeré FR datové JSON a EN zdroje hashově zachované. Původní média ani
-osobní soubory se neupravují; bez push, nasazení, TTS nebo restartu služeb.
+Technický důkaz:53 klientských JS scénářů PASS včetně6 nových pro okno,
+přesné2 s, krátký/dlouhý zvuk, neshodu, přerušení/reload, chybu zvuku a
+poslední dvojici. Poslední zpřesnění Escape ověří doménová brána v gate.log.
+Safari Mac: skutečná shoda alors1+5, velký původní obrázek/FR nápis a zvuk,
+automatický návrat, dvě šedá místa a stejný hráč se skóre1. Fyzický iPhone
+zůstává otevřený. Přednačtení velkého obrázku při otočení; bez nové výroby médií.
 <!-- SAMANTHA_CURRENT_STATUS_END -->
 
 ## 2026-11-17 20:21 CET — Společné předání osobního režimu a Datových commitů k p+n
@@ -719,3 +719,33 @@ Rozhodnutí: Míla schválil návrh z TXT s těmito dvěma upřesněními. Míst
 Důkaz:481 aktivních karet,1924 platných zvukových odkazů,1141 obrazových vazeb,362 různých ilustrací.115 nových MP3, celá knihovna1898 MP3 dekódovaná. Skutečný klient přijal všechny481 položky i481 čtyřmožnostních otázek;164 HTTP odpovědí bajtově přesných. Vizuální Safari přejímka otevřená kvůli nedostupnému ovládání prohlížeče.
 
 Stav a další krok: Zveřejněno na Francouzštině Jana přes Terru. Commit aedb8b69, job74d9ba485996e7b5c9c0db4befaeb87a completed, push/deploy confirmed. Pages deployment7910994188 a workflow44509422262 odpovídají přesnému commitu. Všech164 veřejných souborů včetně nových médií má HTTP200 a přesné bajty zdroje, katalog481 karet. Otázka #070 i původní věta #259 ověřené na veřejných datech. Podrobné důkazy jsou v private/vocabulary_fr_loop_refresh_release_20261119. Další krok je fyzická přejímka na Janině zařízení. Závěrečný dokumentační checkpoint patří do příštího GitHub balíčku.
+
+
+## 2026-11-20 23:44 CET — Janino francouzské pexeso 6 × 4
+
+Hotovo: V Janině francouzštině nová část Pexeso se stejnými pravidly jako
+EN:24 číslovaných rubů,12 různých dvojic,1–4 krátká jména, skóre a sbírky.
+Po otočení obrázek, francouzská MP3 a čeština2 s; porovnání po dočtení,
+zelená shoda, dvě šedá místa a pokračování stejného hráče, při neshodě
+střídání. Konec/remíza, rozbalení sbírek, stejná/nová zásoba, projektor
+a ruční obnova dokončených tahů bez autoplay. PC6×4, úzký displej4×6.
+
+Rozhodnutí: Míla zadal stejné pexeso v Janině Francouzštině. Francouzský
+klient používá svůj společný výběr Všechna/Jen obtížná, témata a další
+filtry; hra osobní označení ani A–D nemění. Samostatný sessionStorage
+vocabulary-fr.memory-pairs.v1, validace FR UID a existujících FR médií.
+Přenos současného EN pravidla, bez nových ilustrací, MP3 nebo změn obsahu.
+Nové p+n nezadané. Stávající FR TVBCP zůstává kanonický, žádný nový dokument.
+
+Další krok: Dokončit programem vybranou doménovou bránu a jeden lokální
+commit; přesný head/bránu určuje private/vocabulary_fr_memory_20261120/
+completion.json. Míla může přezkoušet místní náhled; publikace až na p+n.
+Navrhované další kroky: Fyzická přejímka na Janině zařízení po vydání.
+Technický důkaz:47 klientských JS scénářů PASS včetně12 nových pro pexeso,
+FR bez CZ fallbacku, načasování, skóre, obnova, filtry a neměnnost osobních
+záznamů. Finální stav po posledním zpřesnění ověří doménová brána v gate.log.
+Skutečný481kartový katalog vytvoří12 kompatibilních dvojic se zvukem.
+Safari Mac:24 míst6×4,4 jména a skóre současně, FR/krátká CZ, neshoda
+Jana→Eva, reload a ruční pokračování Evy. Fyzický iPhone zůstává otevřený.
+Veškeré FR datové JSON a EN zdroje hashově zachované. Původní média ani
+osobní soubory se neupravují; bez push, nasazení, TTS nebo restartu služeb.
