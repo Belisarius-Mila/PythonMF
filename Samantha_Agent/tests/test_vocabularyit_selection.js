@@ -21,6 +21,7 @@ class Element {
   addEventListener(name,handler){(this.listeners[name]??=[]).push(handler);} removeEventListener(name,handler){this.listeners[name]=(this.listeners[name]||[]).filter(fn=>fn!==handler);}
   emit(name,extra={}){for(const fn of this.listeners[name]||[])fn({target:this,preventDefault(){},...extra});}
   click(){this.emit("click");} setAttribute(name,value){this.attributes[name]=String(value);}getAttribute(name){return this.attributes[name];}removeAttribute(name){delete this.attributes[name];}
+  showModal(){this.open=true;}close(){this.open=false;}
   descendants(){return this.children.flatMap(child=>[child,...child.descendants()]);}
   matches(selector){if(selector.startsWith("."))return this.classList.contains(selector.slice(1));if(selector.startsWith("[data-"))return selector.slice(6,-1).replace(/-([a-z])/g,(_,c)=>c.toUpperCase()) in this.dataset;return this.tagName===selector;}
   querySelectorAll(selector){return this.descendants().filter(node=>node.matches(selector));}querySelector(selector){return this.querySelectorAll(selector)[0]||null;}
@@ -57,7 +58,7 @@ async function app({items=vocabulary.items,url="https://example.test/PythonMF/vo
   const data={...vocabulary,items,...dataOverride};
   const ctx=vm.createContext({document:doc,window:win,URL,URLSearchParams,TextEncoder,Audio:AudioFixture,console,fetch:async url=>{if(url.includes("sentence-pictures.json")){if(pictureManifest===null)throw Error("optional unavailable");return {ok:true,json:async()=>pictureDeferred?await pictureDeferred:pictureManifest};}if(url.includes("-quiz.json")){if(failQuiz)throw Error("quiz unavailable");return {ok:true,json:async()=>quizCatalog};}if(slowAudio && url.includes("audio"))return new Promise(()=>{});if(failData && !url.includes("audio"))throw Error("offline");const selected=url.includes("sentence-audio")?sentenceManifest:manifest;if(selected===null && url.includes("audio"))throw Error("audio unavailable");return {ok:true,json:async()=>url.includes("audio")?selected:data};}});
   vm.runInContext(fs.readFileSync(path.join(root,"vocabulary-it/model.js"),"utf8"),ctx);
-  for(const name of ['learners.js','learner-ui.js','practice.js'])vm.runInContext(fs.readFileSync(path.join(root,'vocabulary-it',name),'utf8'),ctx);
+  for(const name of ['learners.js','learner-ui.js','practice.js','memory.js'])vm.runInContext(fs.readFileSync(path.join(root,'vocabulary-it',name),'utf8'),ctx);
   vm.runInContext(source.replace('void init();','globalThis.ready=init();')+'\nglobalThis.api={state,context,buildSelection,orderedSelection,openStudy,moveStudy,newRandomRound,returnToGallery,renderGallery,selectionChanged,applyRoute,speakPrompt,speakAnswer,stopAudioPlayback,setPracticeMode};',ctx);
   await ctx.ready;
   return {...ctx.api,doc,win,emit,advance,players,setAudioReject:value=>{rejectPlayback=value;},session,local,historyEntries,element:id=>doc.getElementById(id),directions:doc.querySelectorAll("[data-direction]"),labels:doc.querySelectorAll("[data-label]"),practices:doc.querySelectorAll("[data-practice]"),galleryModes:doc.querySelectorAll("[data-gallery-mode]")};
@@ -463,4 +464,162 @@ test('new ambiguous picture motifs cannot be distractors for their close meaning
   const left=vocabulary.items.find(i=>i.it===heads[0]),right=vocabulary.items.find(i=>i.it===heads[1]);
   assert.ok(quizCatalog.entries[left.uid].conflicts.some(group=>quizCatalog.entries[right.uid].conflicts.includes(group)));
  }
+});
+
+const flush=async()=>{for(let n=0;n<12;n++)await Promise.resolve();};
+const clone=value=>JSON.parse(JSON.stringify(value));
+const cat=vocabulary.items[0];
+function active(view){return view.players.find(p=>!p.paused);}
+function ended(view){const player=active(view);assert.ok(player);player.ended=true;player.paused=true;player.handlers.ended?.();}
+const memory=require('../../docs/vocabulary-it/memory.js');
+const memoryPool=memory.choose(vocabulary.items,audio,quizCatalog,()=>.5);
+const memorySaved=v=>JSON.parse(v.session.getItem(memory.KEY));
+const memoryButton=(v,n)=>v.element('memoryBoard').children[n].querySelector('button');
+async function memoryView(count=2,options={}){
+ const v=await app(options);v.element('memoryTab').click();change(v,'memoryPlayerCount',String(count));
+ v.element('memoryNames').querySelectorAll('input').forEach((input,i)=>{input.value=['Jana','Eva','Petr','Tom'][i];input.emit('input');});
+ v.element('memoryStart').click();await flush();return v;
+}
+async function memoryHear(v,n){memoryButton(v,n).click();await until(()=>active(v));assert.match(active(v).url,/-it\.mp3$/);ended(v);await flush();v.advance(2000);await flush();}
+async function memoryFinishReward(v){await until(()=>active(v));ended(v);await flush();v.advance(2000);await flush();}
+async function memoryPair(v,a,b){await memoryHear(v,a);await memoryHear(v,b);v.advance(1000);await flush();if(v.element('memoryReward').open)await memoryFinishReward(v);}
+function memoryPositions(g,uid){return g.deck.flatMap((x,i)=>x===uid?[i]:[]);}
+
+test('IT memory chooses12 distinct compatible meanings with Italian audio and keeps source metadata intact',()=>{
+ const before=JSON.stringify([vocabulary,audio,quizCatalog]);assert.equal(memoryPool.length,12);
+ const game=memory.newGame(memoryPool,['Jana']);assert.equal(game.deck.length,24);assert.equal(new Set(game.deck).size,12);
+ for(const uid of new Set(game.deck))assert.equal(memoryPositions(game,uid).length,2);
+ const changed=clone(audio);changed.items[cat.uid].it=null;assert.equal(memory.choose([cat],changed,quizCatalog).length,0);
+ const sameAudio=clone(audio);sameAudio.items[vocabulary.items[1].uid].it=sameAudio.items[cat.uid].it;
+ assert.equal(memory.choose([cat,vocabulary.items[1]],sameAudio,quizCatalog).length,1);
+ assert.equal(memory.choose(memoryPool.slice(0,11),audio,quizCatalog).length,11);
+ assert.equal(JSON.stringify([vocabulary,audio,quizCatalog]),before);
+});
+test('IT memory keeps consecutive successful turns for one named player and cycles1–4 players on misses',()=>{
+ for(let n=1;n<=4;n++){
+  let g=memory.newGame(memoryPool,['Jana','Eva','Petr','Tom'].slice(0,n));
+  assert.throws(()=>memory.settle(g,0,24));assert.throws(()=>memory.settle(g,0,0));
+  g=memory.settle(g,0,g.deck.findIndex(x=>x!==g.deck[0]));assert.equal(g.active,1%n);
+  const owner=g.active;for(const uid of new Set(g.deck)){g=memory.settle(g,...memoryPositions(g,uid));assert.equal(g.active,owner);}
+  assert.equal(Object.keys(g.owners).length,12);assert.equal(Object.values(g.owners).filter(x=>x===owner).length,12);
+  assert.throws(()=>memory.settle(g,...memoryPositions(g,g.deck[0])));
+ }
+});
+test('IT memory opens24 numbered backs, short names and projector view without leaking Italian answers',async()=>{
+ const v=await memoryView(4);assert.equal(v.state.view,'memory');assert.match(v.win.location.href,/game=memory-pairs/);
+ assert.equal(v.element('memoryBoard').children.length,24);assert.equal(v.element('memoryBoard').querySelectorAll('img').length,0);
+ v.element('memoryBoard').children.forEach((slot,n)=>{const b=slot.querySelector('button');assert.equal(b.textContent,String(n+1));assert.equal(b.getAttribute('aria-label'),`Kartička ${n+1}, zavřená`);});
+ assert.deepEqual(memorySaved(v).game.players,['Jana','Eva','Petr','Tom']);assert.equal(v.element('memoryScores').children.length,4);
+ v.element('memoryProjector').click();assert.equal(v.element('memoryView').classList.contains('memory-projector'),true);
+});
+test('IT memory waits for Italian audio completion and two-second Czech hint and ignores rapid extra clicks',async()=>{
+ const v=await memoryView();memoryButton(v,0).click();await until(()=>active(v));const p=active(v);
+ assert.match(p.url,/-it\.mp3$/);assert.equal(v.element('memoryBoard').querySelector('.memory-word').lang,'it');
+ assert.equal(v.element('memoryBoard').querySelectorAll('.memory-translation').length,1);
+ memoryButton(v,1).click();v.advance(2000);await flush();assert.equal(v.element('memoryBoard').querySelectorAll('.memory-translation').length,0);
+ assert.equal(memoryButton(v,1).disabled,true);assert.equal(v.players.filter(p=>p.playCount>0).length,1);
+ ended(v);await flush();assert.equal(memoryButton(v,1).disabled,false);assert.equal(memorySaved(v).game.turns,0);
+});
+test('IT memory awards a pair once, leaves two grey holes and preserves the same player for another pair',async()=>{
+ const v=await memoryView(3),g=memorySaved(v).game,[a,b]=memoryPositions(g,g.deck[0]);
+ await memoryHear(v,a);await memoryHear(v,b);assert.equal(v.element('memoryBoard').querySelectorAll('.memory-match').length,2);
+ v.advance(1000);await flush();assert.equal(v.element('memoryBoard').querySelectorAll('.memory-empty').length,2);
+ assert.equal(memorySaved(v).game.active,0);assert.match(v.element('memoryScores').children[0].textContent,/Jana.*Dvojice: 1/);
+ await memoryFinishReward(v);const uid=g.deck.find(x=>x!==g.deck[0]);await memoryPair(v,...memoryPositions(g,uid));assert.equal(memorySaved(v).game.active,0);assert.equal(Object.keys(memorySaved(v).game.owners).length,2);
+});
+test('IT memory mismatch closes both cards and changes to the next player',async()=>{
+ const v=await memoryView(3),g=memorySaved(v).game;await memoryPair(v,0,g.deck.findIndex(x=>x!==g.deck[0]));
+ assert.equal(memorySaved(v).game.active,1);assert.equal(v.element('memoryBoard').querySelectorAll('img').length,0);assert.equal(v.element('memoryBoard').children.length,24);
+});
+test('IT memory restores completed turns and original selection after reload without autoplay',async()=>{
+ const v=await memoryView(),g=memorySaved(v).game;await memoryPair(v,...memoryPositions(g,g.deck[0]));
+ memoryButton(v,g.deck.findIndex(x=>x!==g.deck[0])).click();await until(()=>active(v));v.emit('pagehide');
+ const reloaded=await app({session:v.session,local:v.local,url:v.win.location.href+'&topics=topic-01'});assert.equal(reloaded.state.view,'memory');assert.equal(active(reloaded),undefined);
+ reloaded.element('memoryResume').click();assert.equal(reloaded.element('memoryBoard').children.length,24);assert.deepEqual([...reloaded.state.topics],['topic-01']);
+ assert.equal(reloaded.element('memoryBoard').querySelectorAll('.memory-empty').length,2);assert.equal(reloaded.element('memoryBoard').querySelectorAll('img').length,0);assert.equal(memorySaved(reloaded).game.turns,1);
+ const saved=memorySaved(reloaded);assert.deepEqual(memory.restore(saved,vocabulary.items,audio,quizCatalog),saved.game);
+ const bad=clone(saved);bad.game.deck[0]='ven-0001';assert.equal(memory.restore(bad,vocabulary.items,audio,quizCatalog),null);
+ const changed=clone(audio);changed.items[g.deck[0]].it=null;assert.equal(memory.restore(saved,vocabulary.items,changed,quizCatalog),null);
+});
+test('IT memory respects A–D selections and hard words plus gallery filters without modifying profiles',async()=>{
+ const saved=learners.empty();saved.profiles.A.selected=memoryPool.map(i=>i.uid);saved.profiles.A.hard=[...saved.profiles.A.selected];saved.profiles.B.selected=[vocabulary.items[1].uid];
+ const raw=JSON.stringify(saved),local=storage(new Map([[learners.KEY,raw],['vocabulary-en.memory-pairs.v1','unrelated']]));
+ const v=await app({local});change(v,'learnerSelect','A');v.element('learnerHardFilter').click();const before=JSON.stringify([...local.map]);
+ v.element('memoryTab').click();assert.match(v.element('memorySelection').textContent,/Uživatel A.*Jen obtížná/);assert.equal(v.element('memoryStart').disabled,false);v.element('memoryStart').click();
+ assert.ok(memorySaved(v).game.deck.every(uid=>memoryPool.some(i=>i.uid===uid)));await memoryHear(v,0);assert.equal(JSON.stringify([...local.map]),before);
+ v.element('memoryBack').click();v.state.query='nonexistent-xyz';v.selectionChanged();v.element('memoryTab').click();assert.equal(v.element('memoryStart').disabled,true);
+ v.element('memorySetupChange').click();v.state.query='';v.state.recentCount=1;v.selectionChanged();v.element('memoryTab').click();assert.equal(v.element('memoryStart').disabled,true);
+ assert.equal(local.getItem(learners.KEY),raw);assert.equal(local.getItem('vocabulary-en.memory-pairs.v1'),'unrelated');
+});
+test('IT memory failures offer retry or explicit skip and never borrow the Czech channel',async()=>{
+ const v=await memoryView(2,{audioReject:true});memoryButton(v,0).click();await flush();v.advance(2000);await flush();
+ assert.equal(v.element('memorySkip').hidden,false);assert.equal(memorySaved(v).game.turns,0);assert.ok(v.players.filter(p=>p.playCount).every(p=>/-it\.mp3$/.test(p.url)));
+ v.setAudioReject(false);v.element('memoryRetry').click();await until(()=>active(v));ended(v);await flush();v.advance(2000);await flush();assert.equal(memoryButton(v,1).disabled,false);
+ const none=await memoryView(2,{manifest:null});assert.equal(none.element('memoryStart').disabled,true);assert.equal(active(none),undefined);
+});
+test('IT memory confirms leaving for gallery, practice or settings and cancels stale audio when approved',async()=>{
+ const v=await memoryView();memoryButton(v,0).click();await until(()=>active(v));const p=active(v);
+ v.win.confirm=()=>false;for(const id of ['galleryTab','quizTab','settingsTab']){v.element(id).click();assert.equal(v.state.view,'memory');}
+ v.win.confirm=()=>true;v.element('quizTab').click();assert.equal(v.state.view,'quiz');assert.equal(p.paused,true);v.advance(10000);await flush();assert.equal(memorySaved(v).game.turns,0);
+ v.element('memoryTab').click();v.element('memoryResume').click();v.win.confirm=()=>false;v.win.location.href='https://example.test/PythonMF/vocabulary-it/#card='+cat.uid;v.emit('hashchange');assert.equal(v.state.view,'memory');assert.match(v.win.location.href,/memory-pairs/);
+});
+test('IT memory finishes12 pairs with tie, player collections and replay of the same vocabulary',async()=>{
+ const g=memory.newGame(memoryPool,['Jana','Eva']),uids=[...new Set(g.deck)];g.owners=Object.fromEntries(uids.slice(0,11).map((uid,n)=>[uid,n<6?0:1]));g.active=1;g.turns=11;
+ const session=storage();session.setItem(memory.KEY,JSON.stringify({version:1,filters:{},game:g,source:memory.signature(g.deck,vocabulary.items,audio)}));
+ const v=await app({session,url:'https://example.test/PythonMF/vocabulary-it/#game=memory-pairs'});v.element('memoryResume').click();await memoryPair(v,...memoryPositions(g,uids[11]));
+ assert.equal(v.element('memoryEnd').hidden,false);assert.match(v.element('memoryResult').textContent,/Remíza/);assert.equal(v.element('memoryCollections').children.length,2);assert.equal(v.element('memoryBoard').querySelectorAll('.memory-empty').length,24);
+ v.element('memoryAgain').click();assert.equal(v.element('memoryEnd').hidden,true);assert.equal(Object.keys(memorySaved(v).game.owners).length,0);assert.deepEqual([...new Set(memorySaved(v).game.deck)].sort(),uids.sort());
+});
+test('IT memory works with blocked storage and never starts or resumes audio from its link',async()=>{
+ const v=await memoryView(1,{blocked:true,url:'https://example.test/PythonMF/vocabulary-it/#game=memory-pairs'});
+ assert.equal(v.element('memoryBoard').children.length,24);assert.match(v.element('memoryStorageNotice').textContent,/nepodařilo uložit/);assert.equal(active(v),undefined);
+ const missing=await app({failQuiz:true});missing.element('memoryTab').click();assert.equal(missing.element('memoryStart').disabled,true);
+});
+
+async function memoryAward(v){const g=memorySaved(v).game,[a,b]=memoryPositions(g,g.deck[0]);await memoryHear(v,a);await memoryHear(v,b);v.advance(1000);await flush();return vocabulary.items.find(i=>i.uid===g.deck[0]);}
+test('IT memory reward shows a large source image and Italian word only for exactly two seconds after a match',async()=>{
+ const v=await memoryView(),item=await memoryAward(v),dialog=v.element('memoryReward');
+ assert.equal(dialog.open,true);assert.equal(dialog.hidden,false);assert.equal(v.element('memoryRewardWord').textContent,item.it);
+ let prevented=false,stopped=false;dialog.emit('cancel',{preventDefault:()=>{prevented=true;}});dialog.emit('keydown',{key:'Escape',stopPropagation:()=>{stopped=true;}});assert.equal(prevented&&stopped,true);assert.equal(dialog.open,true);
+ assert.equal(v.element('memoryRewardImage').src,new URL('../'+item.image,v.win.location.href).toString());
+ assert.equal(v.element('memoryRewardWord').textContent.includes(item.cz),false);assert.match(active(v).url,/-it\.mp3$/);
+ assert.equal(v.players.filter(p=>p.playCount).length,3);assert.equal(Object.keys(memorySaved(v).game.owners).length,1);
+ ended(v);await flush();v.advance(1999);await flush();assert.equal(dialog.open,true);assert.equal(v.element('memoryBoard').querySelector('button').disabled,true);
+ v.advance(1);await flush();assert.equal(dialog.open,false);assert.equal(dialog.hidden,true);assert.equal(memorySaved(v).game.active,0);
+ const next=v.element('memoryBoard').querySelector('button');assert.equal(next.disabled,false);assert.equal(v.doc.activeElement,next);
+});
+test('IT memory reward closes after two seconds but a longer Italian recording keeps the next turn locked until ended',async()=>{
+ const v=await memoryView();await memoryAward(v);const p=active(v);v.advance(2000);await flush();
+ assert.equal(v.element('memoryReward').open,false);assert.equal(v.element('memoryBoard').querySelector('button').disabled,true);
+ v.element('memoryBoard').querySelector('button').click();assert.equal(v.players.filter(p=>p.playCount).length,3);
+ ended(v);await flush();assert.equal(p.paused,true);assert.equal(v.element('memoryBoard').querySelector('button').disabled,false);assert.equal(memorySaved(v).game.turns,1);
+});
+test('IT memory reward never appears or adds a third playback for a mismatch',async()=>{
+ const v=await memoryView(),g=memorySaved(v).game;await memoryPair(v,0,g.deck.findIndex(x=>x!==g.deck[0]));
+ assert.notEqual(v.element('memoryReward').open,true);assert.equal(v.players.filter(p=>p.playCount).length,2);assert.equal(memorySaved(v).game.active,1);
+});
+test('IT memory interrupted reward is cancelled and the awarded pair survives reload without replay or duplicate scoring',async()=>{
+ const v=await memoryView();await memoryAward(v);const p=active(v);v.emit('pagehide');assert.equal(p.paused,true);assert.equal(v.element('memoryReward').hidden,true);
+ v.advance(5000);await flush();const raw=v.session.getItem(memory.KEY),reloaded=await app({session:v.session,url:v.win.location.href});
+ assert.equal(active(reloaded),undefined);reloaded.element('memoryResume').click();assert.notEqual(reloaded.element('memoryReward').open,true);
+ assert.equal(reloaded.element('memoryBoard').querySelectorAll('.memory-empty').length,2);assert.equal(reloaded.session.getItem(memory.KEY),raw);assert.equal(memorySaved(reloaded).game.turns,1);
+});
+test('IT memory failed reward audio preserves the earned pair, unlocks play and never substitutes Czech',async()=>{
+ const v=await memoryView(),g=memorySaved(v).game,[a,b]=memoryPositions(g,g.deck[0]);await memoryHear(v,a);await memoryHear(v,b);v.setAudioReject(true);v.advance(1000);await flush();
+ assert.equal(v.element('memoryReward').open,true);v.advance(2000);await flush();assert.equal(v.element('memoryReward').hidden,true);
+ assert.equal(Object.keys(memorySaved(v).game.owners).length,1);assert.equal(memorySaved(v).game.active,0);assert.equal(v.element('memoryBoard').querySelector('button').disabled,false);
+ assert.match(v.element('memoryStatus').textContent,/Dodatečný zvuk/);assert.ok(v.players.filter(p=>p.playCount).every(p=>/-it\.mp3$/.test(p.url)));
+});
+test('IT memory shows the last reward before the final result, then completes the game',async()=>{
+ const g=memory.newGame(memoryPool,['Jana']),uids=[...new Set(g.deck)];g.owners=Object.fromEntries(uids.slice(0,11).map(uid=>[uid,0]));g.turns=11;
+ const session=storage();session.setItem(memory.KEY,JSON.stringify({version:1,filters:{},game:g,source:memory.signature(g.deck,vocabulary.items,audio)}));
+ const v=await app({session,url:'https://example.test/PythonMF/vocabulary-it/#game=memory-pairs'});v.element('memoryResume').click();const [a,b]=memoryPositions(g,uids[11]);await memoryHear(v,a);await memoryHear(v,b);v.advance(1000);await flush();
+ assert.equal(v.element('memoryReward').open,true);assert.equal(v.element('memoryEnd').hidden,true);assert.equal(Object.keys(memorySaved(v).game.owners).length,12);
+ await memoryFinishReward(v);assert.equal(v.element('memoryEnd').hidden,false);assert.match(v.element('memoryResult').textContent,/všech 12/);assert.equal(v.doc.activeElement,v.element('memoryResult'));
+});
+test('IT memory chooses twelve compatible real cards with existing Italian MP3 and full-size images',()=>{
+ const realAudio=JSON.parse(fs.readFileSync(path.join(root,'data/vocabulary-it-audio.json'),'utf8'));
+ const pool=memory.choose(vocabulary.items,realAudio,quizCatalog,()=>.5);assert.equal(pool.length,12);
+ for(const item of pool)for(const file of [item.image,item.thumbnail,model.audioRecord(item,realAudio).it])assert.ok(fs.statSync(path.join(root,file)).size>0,file);
+ assert.equal(memory.KEY,'vocabulary-it.memory-pairs.v1');
 });

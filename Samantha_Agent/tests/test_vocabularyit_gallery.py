@@ -48,7 +48,7 @@ class VocabularyItalianGalleryTests(unittest.TestCase):
 
     def test_page_modules_are_local_and_both_audio_kinds_are_ready(self):
         html=(DOCS/'vocabulary-it/index.html').read_text()
-        for name in ('model.js','learners.js','learner-ui.js','practice.js','gallery.js','gallery.css'):
+        for name in ('model.js','learners.js','learner-ui.js','practice.js','memory.js','gallery.js','gallery.css'):
             self.assertIn(name,html)
             self.assertTrue((DOCS/'vocabulary-it'/name).is_file())
         for kind,name in [('words','vocabulary-it-audio.json'),('sentences','vocabulary-it-sentence-audio.json')]:
@@ -88,7 +88,7 @@ class VocabularyItalianGalleryTests(unittest.TestCase):
 
     def test_real_gallery_and_learner_javascript_scenarios(self):
         completed=subprocess.run([node_binary(),'--test','tests/test_vocabularyit_selection.js'],
-                                 cwd=ROOT/'Samantha_Agent',capture_output=True,text=True,timeout=45)
+                                 cwd=ROOT/'Samantha_Agent',capture_output=True,text=True,timeout=120)
         self.assertEqual(completed.returncode,0,completed.stdout+'\n'+completed.stderr)
 
 
