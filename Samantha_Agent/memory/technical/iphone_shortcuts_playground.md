@@ -185,3 +185,20 @@ Nazev zkratky
   builder jsou v repozitáři bez skutečného tokenu a bez private repo slugu.
 - Produkční import a živý iPhone test čekají na fine-grained token omezený jen
   na inbox s oprávněním Issues read/write a na samostatně potvrzené nasazení.
+
+
+## 2026-11-23 19:44 CET — Obnova GitHub přihlášení připomenutí
+
+- Hlavička „Důležitá připomenutí: chyba načtení“ může znamenat selhání pouze
+  GitHub zálohy. Diagnostikovat github_fallback.errors; lokální index a přímé
+  doručování mohou zůstat funkční. V tomto případě GitHub vracel HTTP401.
+- Cockpit načítá přihlášení inboxu z místního ignorovaného .env při startu.
+  Výměna tokenu v Klíčence sama konfiguraci ani běžící proces neaktualizuje.
+- Po výslovném souhlasu vznikla místní kopie tokenu z iCloud Klíčenky; původní
+  položka zůstala zachovaná. Nová hodnota byla nejprve ověřena čtecím API,
+  poté promítnuta pouze do příslušného tajného nastavení s oprávněním0600.
+- Samostatně potvrzený bezpečný restart obnovil přístup. Živá odpověď potvrzuje
+  ok=true, github_fallback.ok=true a nulové chyby, při zachování dvou otevřených
+  připomínek. Žádný nový testovací send ani změna aplikačního kódu.
+- Tokeny, privátní repozitář a obsah připomínek nepatří do tohoto zápisu;
+  redigované provozní účtenky zůstávají v soukromém adresáři opravy.

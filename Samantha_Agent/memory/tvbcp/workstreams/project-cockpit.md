@@ -3465,3 +3465,24 @@ adresu s query/fragmentem a závorkami i odmítnutí URL s heslem.
 Zdrojové p+n čtecí Knihovny z de12f383 je už dokončené podle předchozího
 předání a Mílova potvrzení. Nové webové hledání je místní, fyzická přejímka
 čeká. Živý test je v dočasné soukromé složce samantha-web-smoke-t87in85r.
+
+
+## 2026-11-23 19:44 CET — Obnovené přihlášení záložního inboxu připomenutí
+
+Hotovo — Přehled důležitých připomenutí a synchronizace GitHub zálohy znovu
+fungují. Dvě otevřené připomínky zůstaly zachované.
+
+Rozhodnutí — Míla schválil místní kopii uloženého tokenu a samostatně bezpečný
+restart Cockpitu. Opravená je pouze soukromá konfigurace, aplikační kód se neměnil.
+
+Další krok — Obnovit stránku Cockpitu a fyzicky potvrdit zobrazení přehledu.
+
+Navrhované další kroky — Žádné další změny v tomto zásahu.
+
+Technický důkaz — Původní GitHub HTTP401; nový uložený token ověřen čtecím
+požadavkem. Změněna jen hodnota přihlášení inboxu v ignorovaném .env, ostatní
+konfigurace beze změny a oprávnění0600 zachovaná. Jediný potvrzený restart přes
+registrované API, nový PID a shodný kódový otisk. Živý status: ok=true,
+github_fallback.ok=true, error_count=0 a dvě otevřené položky. Redigované účtenky
+jsou v data/private/cockpit_urgent_auth_fix_20261123/. Žádný nový testovací send
+ani vydání kódu; fyzická přejímka prohlížeče zůstává Mílovi.

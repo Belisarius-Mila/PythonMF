@@ -2954,3 +2954,22 @@ strop. Skutečný DALTAC dokončen17,0578/20, sedm původních částí beze zm�
   výjimku omezit přesným EN/CZ významem a odvodit novou MP3 adresu z textu.
 - Důkaz:15 audio testů PASS včetně jiného významu live a opakovaného buildu;
   ostatní karty a původní MP3 hashově stejné, Safari nové obrázky/přehrávání.
+
+
+### 2026-11-23 19:44 CET — Chyba přehledu připomenutí při neplatném GitHub tokenu
+
+- Problém: upozornění dál chodí, ale Cockpit hlásí chybu načtení důležitých
+  připomenutí; záložní inbox vrací HTTP401 a lokální index zůstává čitelný.
+- Typ: opakovatelná provozní diagnostika a obnova přihlášení.
+- Řešení: číst redigovaný github_fallback stav, ověřit nový uložený token
+  čtecím API a aktualizovat pouze jeho soukromou konfiguraci. Samotná změna
+  v Klíčence neaktualizuje .env ani proces. Případná kopie z iCloudu vyžaduje
+  souhlas a zachování originálu; hodnotu tokenu nikdy nevypisovat do chatu.
+- iCloud položka může být vidět v Klíčence, zatímco systémový nástroj ji
+  nenajde. Přímé kopírování celé položky zde selhalo na neplatných parametrech;
+  ověřený postup byl vytvořit v místní klíčence novou položku se stejnou
+  hodnotou vloženou do skrytého pole. Potom nahradit tajný obsah schránky
+  neškodným textem a ověřit token čtecím API před změnou konfigurace.
+- Ověření: po samostatně potvrzeném jediném restartu nový PID a shodný kódový
+  otisk, status i GitHub záloha ok=true, nulové chyby a dvě zachované otevřené
+  připomínky. Bez nového testovacího sendu nebo změny aplikačního kódu.
