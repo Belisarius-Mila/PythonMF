@@ -381,7 +381,7 @@ class Handler(BaseHTTPRequestHandler):
     def log_message(self, *_):
         pass  # No room IDs, invitation tokens or player names in access logs.
 
-    def _headers(self, status, kind, length):
+    def _headers(self, status, kind, length, extra=None):
         self.send_response(status)
         self.send_header("Content-Type", kind)
         self.send_header("Content-Length", str(length))
@@ -389,6 +389,8 @@ class Handler(BaseHTTPRequestHandler):
         self.send_header("X-Content-Type-Options", "nosniff")
         self.send_header("Referrer-Policy", "no-referrer")
         self.send_header("Content-Security-Policy", "default-src 'self'; img-src 'self' data:; media-src 'self'; connect-src 'self'; script-src 'self'; style-src 'self'; base-uri 'none'; frame-ancestors 'none'; form-action 'none'")
+        for key, value in (extra or {}).items():
+            self.send_header(key, value)
         self.end_headers()
 
     def _json(self, value, status=200):
@@ -424,7 +426,24 @@ class Handler(BaseHTTPRequestHandler):
                 if not allowed or ".." in Path(path).parts or not target.is_relative_to(docs) or not target.is_file():
                     raise GameError("Soubor nebyl nalezen.", 404)
                 body = target.read_bytes()
-                self._headers(200, mimetypes.guess_type(target.name)[0] or "application/octet-stream", len(body))
+                kind = mimetypes.guess_type(target.name)[0] or "application/octet-stream"
+                extra, code = {"Accept-Ranges": "bytes"}, 200
+                if requested := self.headers.get("Range"):
+                    match = re.fullmatch(r"bytes=([0-9]{0,16})-([0-9]{0,16})", requested)
+                    total = len(body)
+                    if match and any(match.groups()):
+                        first, last = match.groups()
+                        start = int(first) if first else max(0, total - int(last))
+                        end = min(int(last), total - 1) if first and last else total - 1
+                    else:
+                        start, end = total, -1
+                    if not 0 <= start <= end < total:
+                        self._headers(416, kind, 0, {"Content-Range": f"bytes */{total}"})
+                        return
+                    body = body[start:end + 1]
+                    extra["Content-Range"] = f"bytes {start}-{end}/{total}"
+                    code = 206
+                self._headers(code, kind, len(body), extra)
             if not head:
                 self.wfile.write(body)
         except GameError as exc:

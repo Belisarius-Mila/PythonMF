@@ -341,6 +341,21 @@ class HTTPTests(RoomFixture):
             status, body, _ = request("/" + path)
             self.assertEqual(status, 200, path)
             self.assertEqual(body, (self.catalog.docs / path).read_bytes())
+        sound = self.catalog.items[self.uids[0]]["audio"]
+        full = (self.catalog.docs / sound).read_bytes()
+        for header, expected, bounds in [("bytes=0-1", full[:2], (0, 1)),
+                                         ("bytes=-5", full[-5:], (len(full)-5, len(full)-1)),
+                                         ("bytes=2-", full[2:], (2, len(full)-1))]:
+            status, body, headers = request("/"+sound, headers={"Range": header})
+            self.assertEqual((status, body), (206, expected))
+            self.assertEqual(headers["Content-Range"], f"bytes {bounds[0]}-{bounds[1]}/{len(full)}")
+            self.assertEqual(int(headers["Content-Length"]), len(expected))
+        for header in [f"bytes={len(full)}-", "bytes=-0", "bytes=4-1", "bytes=0-1,4-5", "bytes=--", "bytes="+"9"*500+"-"]:
+            status, body, headers = request("/"+sound, headers={"Range": header})
+            self.assertEqual((status, body), (416, b""))
+            self.assertEqual(headers["Content-Range"], f"bytes */{len(full)}")
+        status, body, headers = request("/"+sound, method="HEAD", headers={"Range":"bytes=0-1"})
+        self.assertEqual((status, body, headers["Content-Length"]), (206, b"", "2"))
         with self.assertRaises(ValueError):
             GameServer(("127.0.0.1", 0), self.rooms, "http://public.example")
 

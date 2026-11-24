@@ -50,6 +50,7 @@ class ValidationDomainsTests(unittest.TestCase):
 
     def test_french_online_game_always_keeps_server_and_original_client_regressions(self):
         for path in ('Samantha_Agent/app/vocabulary_fr_multiplayer.py',
+                     'Samantha_Agent/app/vocabulary_fr_hosting.py',
                      'docs/vocabulary-fr/online.js', 'docs/vocabulary-fr/online.html',
                      'Samantha_Agent/tests/test_vocabularyfr_online.js'):
             with self.subTest(path=path):
@@ -57,6 +58,7 @@ class ValidationDomainsTests(unittest.TestCase):
                 self.assertEqual(plan.mode,'targeted')
                 self.assertIn('tests.test_vocabularyfr_multiplayer',plan.modules)
                 self.assertIn('tests.test_vocabularyfr_web_gallery',plan.modules)
+                self.assertIn('tests.test_vocabularyfr_hosting',plan.modules)
                 self.assertNotIn('tests.test_camino_film_editor',plan.modules)
 
     def test_shared_calendar_editor_keeps_native_and_dashboard_regressions(self):

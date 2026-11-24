@@ -513,3 +513,12 @@ původní data a neznámý modelový pokus i rezervu; nevolá model ani publikac
 Obnova původního výsledku nepovoluje nový thread/start/turn/start; výjimka je
 trvale doložený preflight před prvním thread/start, který pokračuje prvním
 požadavkem v původním schváleném rozsahu a se stejnou rezervací.
+
+## Francouzština Jana — dočasný HTTPS pilot (2026-11-24)
+
+`vocabulary_fr_hosting_prepare/status/start/stop` směrují na
+`app.vocabulary_fr_hosting.Pilot`. Pythonové operace vyžadují přesný schválený
+commit, ověřený projektový konektor a pro start/stop současný výslovný souhlas.
+Bez zásahu do systému, VPN, Cockpitu, Camina, Gitu či účtů. Export pouze veřejné
+FR části; původní request se při nejistotě ověří, automaticky neopakuje.
+Jde o dočasnou adresu závislou na běžícím Macu. Podrobnosti vocabulary_fr_online.md.

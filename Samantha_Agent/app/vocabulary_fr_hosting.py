@@ -1,0 +1,204 @@
+"""Owned, temporary FR HTTPS pilot. No launchd, VPN or Cockpit changes.
+
+The connector is supplied explicitly after verifying its official release digest.
+This controller only exports committed public FR files and starts owned processes.
+"""
+from __future__ import annotations
+
+from contextlib import contextmanager
+import fcntl
+import hashlib
+import io
+import json
+import os
+from pathlib import Path
+import re
+import signal
+import socket
+import subprocess
+import sys
+import tarfile
+import time
+import uuid
+
+PUBLIC = ("docs/vocabulary-fr", "docs/data/vocabulary-fr-v2.json", "docs/data/vocabulary-fr-audio.json",
+          "docs/data/vocabulary-fr-quiz.json", "docs/data/vocabulary-fr-sentence-audio.json",
+          "docs/data/vocabulary-fr-sentence-pictures.json", "docs/assets/vocabulary-fr-v2",
+          "docs/assets/vocabulary-fr-audio", "docs/assets/vocabulary-fr-sentences")
+SERVER = "Samantha_Agent/app/vocabulary_fr_multiplayer.py"
+ORIGIN = re.compile(r"https://[a-z0-9]+(?:-[a-z0-9]+)+\.trycloudflare\.com\b")
+
+
+def _sha(path):
+    with Path(path).open("rb") as source:
+        return hashlib.file_digest(source, "sha256").hexdigest()
+
+
+def _write(path, value):
+    path = Path(path)
+    temporary = path.with_name(path.name + "." + uuid.uuid4().hex)
+    with temporary.open("x") as stream:
+        os.chmod(temporary, 0o600)
+        json.dump(value, stream, ensure_ascii=False, indent=2)
+        stream.write("\n")
+    os.replace(temporary, path)
+
+
+def _git(repo, *args):
+    return subprocess.check_output(["git", "-C", str(repo), *args], text=True).strip()
+
+
+class Pilot:
+    def __init__(self, repo: Path):
+        self.repo = Path(repo).resolve()
+        self.root = self.repo / "Samantha_Agent/data/private/vocabulary-fr-hosting"
+
+    @contextmanager
+    def _lock(self):
+        self.root.mkdir(mode=0o700, parents=True, exist_ok=True)
+        with (self.root / "operation.lock").open("a") as lock:
+            fcntl.flock(lock, fcntl.LOCK_EX | fcntl.LOCK_NB)
+            yield
+
+    def prepare(self, *, expected_head: str, connector: Path, connector_sha256: str) -> dict:
+        """Freeze one clean committed FR release and an explicitly verified binary."""
+        with self._lock():
+            if not re.fullmatch(r"[a-f0-9]{40}", expected_head) or _git(self.repo, "rev-parse", "HEAD") != expected_head:
+                raise ValueError("Approved commit differs")
+            if _git(self.repo, "status", "--porcelain") or _git(self.repo, "branch", "--show-current") != "main":
+                raise ValueError("Clean main required")
+            connector = Path(connector).resolve()
+            private = self.repo / "Samantha_Agent/data/private"
+            if not connector.is_relative_to(private) or not re.fullmatch(r"[a-f0-9]{64}", connector_sha256) or _sha(connector) != connector_sha256:
+                raise ValueError("Verified project-local connector required")
+            release = self.root / "releases" / expected_head
+            manifest = release / "manifest.json"
+            if manifest.exists():
+                result = json.loads(manifest.read_text())
+                self._verify(result)
+                if result["connectorSha256"] != connector_sha256 or result["connector"] != str(connector):
+                    raise ValueError("Release already has another connector")
+                return result
+            release.mkdir(mode=0o700, parents=True, exist_ok=False)
+            files = {}
+            archive = subprocess.check_output(["git", "-C", str(self.repo), "archive", expected_head, "--", SERVER, *PUBLIC])
+            with tarfile.open(fileobj=io.BytesIO(archive)) as source:
+                for member in source:
+                    if member.isdir():
+                        continue
+                    path = Path(member.name)
+                    if not member.isfile() or path.is_absolute() or ".." in path.parts or not (member.name == SERVER or any(member.name == p or member.name.startswith(p + "/") for p in PUBLIC)):
+                        raise ValueError("Unsafe release member")
+                    target = release / path
+                    target.parent.mkdir(mode=0o700, parents=True, exist_ok=True)
+                    with target.open("xb") as output:
+                        output.write(source.extractfile(member).read())
+                    files[member.name] = _sha(target)
+            if SERVER not in files or "docs/vocabulary-fr/online.html" not in files:
+                raise ValueError("Incomplete FR release")
+            if _git(self.repo, "rev-parse", "HEAD") != expected_head or _git(self.repo, "status", "--porcelain"):
+                raise ValueError("Source changed during release preparation")
+            result = {"head": expected_head, "release": str(release), "files": files,
+                      "connector": str(connector), "connectorSha256": connector_sha256}
+            _write(manifest, result)
+            return result
+
+    def _verify(self, prepared):
+        release = Path(prepared["release"])
+        if release.resolve() != self.root / "releases" / prepared["head"]:
+            raise ValueError("Foreign release")
+        if any(_sha(release / name) != sha for name, sha in prepared["files"].items()):
+            raise ValueError("Release content changed")
+        if _sha(prepared["connector"]) != prepared["connectorSha256"]:
+            raise ValueError("Connector content changed")
+
+    @staticmethod
+    def _identity(pid):
+        result = subprocess.run(["ps", "-p", str(pid), "-o", "lstart=", "-o", "command="], capture_output=True, text=True)
+        return result.stdout.strip() if result.returncode == 0 else ""
+
+    def status(self):
+        path = self.root / "active.json"
+        if not path.exists():
+            return {"state": "not_started"}
+        result = json.loads(path.read_text())
+        result["alive"] = {name: bool(record["identity"] and self._identity(record["pid"]) == record["identity"])
+                           for name, record in result.get("processes", {}).items()}
+        result["running"] = result.get("state") == "started" and result["alive"] == {"connector": True, "server": True}
+        return result
+
+    def start(self, *, expected_head: str, request_id: str, confirmed: bool) -> dict:
+        """One explicit pilot; uncertain/previous requests never start twice."""
+        if confirmed is not True or not re.fullmatch(r"[a-zA-Z0-9_-]{12,80}", request_id):
+            raise ValueError("Explicit deployment confirmation and request identity required")
+        with self._lock():
+            previous = self.status()
+            if previous["state"] != "not_started":
+                if previous.get("requestId") == request_id and previous.get("head") == expected_head:
+                    return previous
+                if previous["state"] != "stopped":
+                    raise ValueError("Existing pilot must be checked or stopped; no automatic restart")
+            prepared = json.loads((self.root / "releases" / expected_head / "manifest.json").read_text())
+            self._verify(prepared)
+            with socket.socket() as probe:
+                probe.bind(("127.0.0.1", 8791))
+            state = {"state": "starting", "head": expected_head, "requestId": request_id,
+                     "processes": {}, "origin": None, "temporary": True, "created": time.time()}
+            active = self.root / "active.json"
+            _write(active, state)
+            env = {k: v for k, v in os.environ.items() if k not in ("PYTHONPATH", "PYTHONHOME")
+                   and not k.startswith(("TUNNEL_", "CLOUDFLARED_"))}
+            directory = self.root / request_id
+            directory.mkdir(mode=0o700)
+            # A pilot never consumes an existing home/account tunnel configuration.
+            (directory / "connector.yaml").write_text("{}\n")
+            def launch(name, args):
+                with (directory / (name + ".log")).open("xb") as output:
+                    os.chmod(output.name, 0o600)
+                    process = subprocess.Popen(args, cwd=prepared["release"], stdin=subprocess.DEVNULL, stdout=output, stderr=output,
+                                               start_new_session=True, env=env)
+                identity = self._identity(process.pid)
+                state["processes"][name] = {"pid": process.pid, "identity": identity}
+                _write(active, state)
+                if not identity:
+                    raise RuntimeError(name + " exited during startup")
+                return process
+            try:
+                connector = launch("connector", [prepared["connector"], "--no-autoupdate", "tunnel", "--config", str(directory / "connector.yaml"), "--loglevel", "info", "--protocol", "http2", "--edge-ip-version", "4",
+                                                   "--url", "http://127.0.0.1:8791", "--metrics", "127.0.0.1:0"])
+                deadline = time.monotonic() + 45
+                while time.monotonic() < deadline:
+                    found = ORIGIN.findall((directory / "connector.log").read_text(errors="replace"))
+                    if found:
+                        state["origin"] = found[0]
+                        break
+                    if connector.poll() is not None:
+                        raise RuntimeError("HTTPS connector stopped; inspect its original log")
+                    time.sleep(.2)
+                if not state["origin"]:
+                    raise RuntimeError("HTTPS address not confirmed; inspect original connector")
+                launch("server", [sys.executable, "-I", str(Path(prepared["release"]) / SERVER), "--port", "8791",
+                                  "--database", str(self.root / "rooms.sqlite3"), "--public-origin", state["origin"]])
+                state["state"] = "started"
+                _write(active, state)
+                return self.status()
+            except Exception:
+                state["state"] = "attention"
+                _write(active, state)
+                raise
+
+    def stop(self, *, request_id: str, confirmed: bool) -> dict:
+        """Stop only exact owned processes; preserve games, logs and release files."""
+        if confirmed is not True:
+            raise ValueError("Explicit stop required")
+        with self._lock():
+            state = self.status()
+            if state.get("requestId") != request_id:
+                raise ValueError("Pilot identity differs")
+            for name in ("connector", "server"):
+                record = state.get("processes", {}).get(name)
+                if record and state["alive"].get(name):
+                    os.kill(record["pid"], signal.SIGTERM)
+            state["state"] = "stopped"
+            _write(self.root / "active.json", state)
+            return state

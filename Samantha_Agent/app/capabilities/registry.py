@@ -12,6 +12,35 @@ from app.capabilities.models import (
 
 CAPABILITIES: tuple[CapabilityRecord, ...] = (
     CapabilityRecord(
+        capability_id="vocabulary_fr_hosting_prepare", label="Freeze the public French pairs pilot release",
+        risk=RiskLevel.LOCAL_WRITE, reads=("exact clean local main commit", "explicit verified connector digest"),
+        writes=("isolated committed public FR release in data/private",),
+        tool="app.vocabulary_fr_hosting.Pilot.prepare", audit=AuditPolicy.REDACTED,
+        notes="Allowlisted FR client/media and standalone server only. No private data, repository, system installation, network mutation, launchd or model call.",
+    ),
+    CapabilityRecord(
+        capability_id="vocabulary_fr_hosting_status", label="Read the original temporary FR pilot state",
+        risk=RiskLevel.READ_ONLY, reads=("original private pilot receipt and exact process identities",), writes=(),
+        tool="app.vocabulary_fr_hosting.Pilot.status", audit=AuditPolicy.REDACTED,
+        notes="No start, retry, VPN, grants or system configuration change.",
+    ),
+    CapabilityRecord(
+        capability_id="vocabulary_fr_hosting_start", label="Start the explicitly authorized temporary FR HTTPS pilot",
+        risk=RiskLevel.GIT_PUBLISH, reads=("frozen public release and verified connector", "current scoped deployment instruction"),
+        writes=("two owned detached project processes", "temporary HTTPS public endpoint for FR only", "private game database and receipt"),
+        tool="app.vocabulary_fr_hosting.Pilot.start", requires_confirmation=True,
+        confirmation_policy=ConfirmationPolicy.EXACT_CURRENT_MESSAGE, audit=AuditPolicy.REDACTED,
+        notes="No Git push, system installation, launchd, VPN, firewall, Cockpit or Camino changes. Original request is idempotent; uncertain state cannot automatically restart. Temporary address changes after explicit new start; Mac must stay online and awake.",
+    ),
+    CapabilityRecord(
+        capability_id="vocabulary_fr_hosting_stop", label="Stop only the original owned FR pilot processes",
+        risk=RiskLevel.LOCAL_WRITE, reads=("exact original request and current process identities",),
+        writes=("terminate only matching owned pilot processes", "private stopped receipt"),
+        tool="app.vocabulary_fr_hosting.Pilot.stop", requires_confirmation=True,
+        confirmation_policy=ConfirmationPolicy.EXACT_CURRENT_MESSAGE, audit=AuditPolicy.REDACTED,
+        notes="No file deletion, games reset, system service change or retry. Reused or missing process identities are never killed.",
+    ),
+    CapabilityRecord(
         capability_id="family_calendar_sms_prepare", label="Prepare a disabled private personal SMS rule",
         risk=RiskLevel.LOCAL_WRITE, reads=("explicitly supplied recipient and salutation",),
         writes=("create-only disabled private SMS draft and empty delivery ledger",),

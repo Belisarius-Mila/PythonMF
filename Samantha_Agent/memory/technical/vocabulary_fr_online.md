@@ -102,3 +102,33 @@ dvou fyzických Macích přes skutečné připojení Německo–domov.
 
 Podklad k odemykání zvuku v Safari:
 https://webkit.org/blog/7734/auto-play-policy-changes-for-macos/
+
+## Dočasný večerní HTTPS pilot — 24. 11. 2026
+
+Registrované `vocabulary_fr_hosting_prepare/status/start/stop` používají
+`app.vocabulary_fr_hosting.Pilot`. Prepare přijímá celý schválený SHA čistého
+main a ověřenou projektovou binárku cloudflared s přesným SHA256. Export je
+pouze veřejná FR část z Gitu a samostatný Python server, bez .git či soukromých
+souborů. Stav, logy, databáze a exporty zůstávají v data/private/vocabulary-fr-hosting.
+
+Start vyžaduje current scoped consent a request_id. Nepotvrzený či nejasný
+předchozí start se neopakuje. Status je čtecí, stop ukončí jen procesy s přesně
+shodnou totožností a nic nemaže. Není zde žádná instalace, launchd, nový účet,
+změna Tailscale, Funnel, DNS záznamů, firewallu ani Cockpitu/Camina.
+
+Quick Tunnel vytvoří náhodnou dočasnou HTTPS adresu. Herní pozvánka zůstává
+soukromá a hra má dva chráněné sloty; samotný veřejný FR klient je přes tuto
+adresu dostupný. Prohlížeč, média a API jsou na stejném původu. Po skončení
+tunelu adresa přestane fungovat, při novém spuštění se změní. Mac musí zůstat
+zapnutý, online a neuspaný. Nejde o trvalou produkční adresu ani automatickou
+službu po restartu Macu. Další rozšíření vyžaduje konkrétní provozní rozhodnutí.
+
+Oficiální omezení: https://developers.cloudflare.com/tunnel/get-started/quick-tunnels/
+Provozní URL a finální důkazy pouze v private vocabulary_fr_hosting_20261124/completion.json
+a v předaném TXT Downloads; soukromé adresy nepatří do Gitu.
+
+HTTP podávání médií podporuje jednoduché byte Range, otevřený i koncový rozsah,
+206/Content-Range, neplatné rozsahy416 a odpovídající HEAD. To je potřeba
+pro kompatibilitu přehrávání v Safari; soubory MP3 se nemění. Testy ověřují
+přesné bajty a délku. Podklad Apple:
+https://developer.apple.com/library/archive/documentation/AppleApplications/Reference/SafariWebContent/CreatingVideoforSafarioniPhone/CreatingVideoforSafarioniPhone.html
