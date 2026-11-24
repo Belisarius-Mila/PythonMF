@@ -717,3 +717,27 @@ Terra job72406ba0984b0bceeb526afe4a1b1a2f completed, push/deploy confirmed,
 3876 testů PASS /750,5s. Pages43583524806 success nad přesným SHA,
 deployment7785989199. HTTP200/audio/mp3, veřejné JS a SHA audia shodné.
 Účtenka data/daily_3am/receipts/20261114_publication.json.
+
+
+## 2026-11-24 08:25 CET — Jednorázová soví promluva pro 24. listopadu
+
+Hotovo: Doslovně dodaný text je v jediném řádku pro24.11. a v hotové MP3
+owl_241126.mp3 (116496 B /19.416 s). Obě kopie přehrávače
+vybírají novou nahrávku s čerstvými cache otisky; starší audio je zachované.
+
+Rozhodnutí: Míla výslovně zadal vytvoření a produkční nasazení. Zachovaný hlas
+Antonin a tempo -10 %, jediná syntéza. Soví automatika se neobnovuje; Pages
+workflow dál pouze ručně publikuje hotové statické soubory, bez cronu a TTS.
+
+Další krok: Registrované vydání project-colors-and-numbers přes jedinou
+submit_release(wait=True) a ověření veřejného JS/MP3 proti místnímu souboru.
+Tento zápis je příprava vydání, nikoli tvrzení o dokončeném nasazení.
+
+Navrhované další kroky: Uživatelský poslech po publikaci. Samostatný TVBCP
+pro tento obsahový krok není dohodnutý a nový se nezakládá.
+
+Technický důkaz:25 cílených testů PASS, úplné dekódování FFmpeg PASS a shoda
+obou webových kopií. SHA-256 bd5a33984b941689567dac67ce8f8c7a2fce6d8fc1436d442e7217c7d1c15882;
+app.js?v=e453abeedf0d4ad0. Soukromé podklady a původní release účtenka:
+data/daily_3am/revisions/20261124_manual/. Konečné veřejné ověření bude v
+data/daily_3am/receipts/20261124_publication.json. Text se do paměti nekopíruje.
