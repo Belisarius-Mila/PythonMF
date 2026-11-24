@@ -66,7 +66,9 @@ function fixture({variants = {}, initial = null, cachedDraft = null, roomBasis =
         if (selected==='A' && holdStatusA) await holdStatusA;
         result={ok:true,enabled:true,image_generation:true,model:'approved-model',image_tool:{provider:'codex_app_server'},jobs:captured,
           brief:{title:draft.title,changes:draft.prompt,preserve:draft.fixed_elements,unresolved:[],revision:draft.revision,
-            working_image:'Private photo',source_count:basis.plan_source_id?2:1,drawing_count:0,can_generate:true,token:'review-'+draft.revision,room_basis:clone(basis)}};
+            working_image:'Private photo',source_count:basis.plan_source_id?2:1,drawing_count:draft.annotations.length,
+            drawing_separate:Boolean(draft.annotations.length),model_image_count:(basis.plan_source_id?2:1)+(draft.annotations.length?1:0),
+            can_generate:true,token:'review-'+draft.revision,room_basis:clone(basis)}};
       } else if (url==='/api/interior/action') {
         if (payload.action==='save_room_basis') {
           if (payload.expected_basis_revision!==basis.revision) result={ok:false,error:'conflict',message:'Spolecny zaklad se zmenil.'};
@@ -400,5 +402,19 @@ test('legacy image evidence is explicitly missing and history uses the original 
   assert.match(f.ids.imageProvenanceBody.textContent,/old-architect/);
   assert.match(f.ids.aiConversation.textContent,/Jak vznikl obrázek/);
   assert.match(f.ids.aiConversation.textContent,/old-architect/);
+  assert.equal(f.paid.size,0);
+});
+
+test('drawing confirmation shows the clean photo separately without another paid call',async()=>{
+  const f=fixture();await flush();
+  f.draft.annotations=[[[0,0.5],[1,0.5]]];f.draft.revision++;
+  f.intervals[0]();await flush();
+  assert.match(f.ids.briefContext.textContent,/Kresba se přiloží jako samostatná kopie/);
+  assert.match(f.ids.briefContext.textContent,/Pro AI celkem 2 obrázků/);
+  const preview=f.ids.briefVisual.innerHTML;
+  assert.match(preview,/Čistý pracovní obrázek/);
+  assert.match(preview,/Kreslené pokyny/);
+  assert.equal((preview.match(/<figure>/g)||[]).length,2);
+  assert.equal((preview.match(/<path /g)||[]).length,1,'Only the guide has a stroke');
   assert.equal(f.paid.size,0);
 });

@@ -17,6 +17,18 @@ from app.interior_atelier import AtelierError, InteriorAtelier
 from tests.test_interior_atelier import image_bytes
 
 
+class InteriorExecutionDigestTests(unittest.TestCase):
+    def test_input_preparation_changes_invalidate_processing_only_pilot_replay(self):
+        source, execution = activation.source_digest(), activation.execution_digest()
+        read_bytes = Path.read_bytes
+        def changed(path):
+            raw = read_bytes(path)
+            return raw + b"\n# changed input preparation\n" if path.name == "interior_inputs.py" else raw
+        with patch.object(Path, "read_bytes", changed):
+            self.assertNotEqual(activation.source_digest(), source)
+            self.assertNotEqual(activation.execution_digest(), execution)
+
+
 class InteriorActivationTests(unittest.TestCase):
     def setUp(self):
         self.temp = tempfile.TemporaryDirectory()
@@ -102,6 +114,8 @@ class InteriorActivationTests(unittest.TestCase):
         self.assertEqual(result["state"], "review_required")
         self.assertTrue(result["chat_passed"] and result["image_passed"])
         self.assertEqual(len(self.calls), 2)
+        self.assertIn("drawing_guide", self.threads[0]["developer_instructions"])
+        self.assertIn("drawing_guide", self.threads[1]["developer_instructions"])
         self.assertTrue(self.probe(confirmed=True, include_image=True, probe_id=probe_id)["replayed"])
         self.assertEqual(len(self.calls), 2)
         self.assertEqual(json.loads(self.config.read_text()), self.document)

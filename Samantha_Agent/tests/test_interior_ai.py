@@ -183,10 +183,76 @@ class InteriorAITests(unittest.TestCase):
         self.action("save_draft", project_id=self.project, room_id=self.room, base_id="base", expected_revision=1,
             draft={**self.draft, "annotations": [[[0, 0.5], [1, 0.5]]]})
         original = self.store.asset(self.project, self.room, self.asset, "original")
+        preview = self.store.asset(self.project, self.room, self.asset, "preview")[0]
         self.ai.start(self.payload(expected_revision=2)); self.queue.pop()()
-        with Image.open(self.driver.calls[0][1][0]) as image:
+        job, paths = self.driver.calls[0]
+        self.assertEqual(len(paths), 2)
+        self.assertEqual(paths[0].read_bytes(), preview)
+        self.assertNotEqual(paths[1].read_bytes(), preview)
+        self.assertEqual([m["role"] for m in job["context"]["images"]], ["working_clean", "drawing_guide"])
+        self.assertEqual(job["context"]["images"][1]["clean_image_number"], 1)
+        self.assertFalse(job["context"]["images"][1]["working_image"])
+        with Image.open(paths[1]) as image:
             self.assertEqual(image.getpixel((image.width // 2, image.height // 2))[:3], (209, 109, 57))
         self.assertEqual(self.store.asset(self.project, self.room, self.asset, "original"), original)
+
+    def test_six_sources_keep_their_bytes_and_plan_number_with_a_seventh_drawing(self):
+        ids = [self.asset]
+        plan = self.action("add_source", project_id=self.project, room_id=self.room, title="Plan", kind="plan",
+            data=base64.b64encode(image_bytes((540, 340))).decode())["asset_id"]
+        self.action("save_room_basis", project_id=self.project, room_id=self.room,
+            expected_basis_revision=0, plan_source_id=plan, measurements="300 × 220 cm")
+        ids += [self.action("add_source", project_id=self.project, room_id=self.room,
+            title="Reference", kind="inspiration", data=base64.b64encode(image_bytes((550+i, 350))).decode())["asset_id"] for i in range(4)]
+        self.action("save_draft", project_id=self.project, room_id=self.room, base_id="base", expected_revision=1,
+            draft={**self.draft, "source_ids": ids, "annotations": [[[0, 0.5], [1, 0.5]]]})
+        self.ai.start(self.payload(expected_revision=2)); self.queue.pop()()
+        job, paths = self.driver.calls[0]
+        self.assertEqual(job["source_count"], 6)
+        self.assertEqual(job["image_count"], 7)
+        self.assertEqual(len(job["image_hashes"]), 7)
+        self.assertEqual([p.read_bytes() for p in paths[:6]],
+            [self.store.asset(self.project, self.room, i, "preview")[0] for i in [self.asset, plan, *ids[1:]]])
+        self.assertEqual(job["context"]["room_basis"]["plan_image_number"], 2)
+        self.assertEqual([m["number"] for m in job["context"]["images"]], list(range(1, 8)))
+        self.assertTrue(job["context"]["images"][1]["room_plan"])
+        self.assertEqual(job["context"]["images"][-1]["role"], "drawing_guide")
+        self.assertFalse(job["context"]["images"][-1]["room_plan"])
+        home = paths[0].parent
+        self.assertTrue((home / "input_7.png").exists())
+        from app.interior_cleanup import DELETE_CONFIRMATION
+        plan_view = self.store.deletion_preview(self.project, self.room, self.asset)
+        self.action("delete_source", project_id=self.project, room_id=self.room, asset_id=self.asset,
+            plan_token=plan_view["plan_token"], confirmation=DELETE_CONFIRMATION)
+        self.assertFalse(home.exists())
+        self.assertIn(plan, self.store.state(self.project, self.room)["room"]["sources"])
+
+    def test_drawing_snapshots_survive_replay_and_recovery_after_later_draft_edits(self):
+        self.action("save_draft", project_id=self.project, room_id=self.room, base_id="base", expected_revision=1,
+            draft={**self.draft, "annotations": [[[0, 0.5], [1, 0.5]]]})
+        payload = self.payload(expected_revision=2, mode="image")
+        job_id = self.ai.start(payload)["request_id"]
+        self.assertTrue(self.ai.start(payload)["replayed"])
+        self.driver.with_image = True
+        with patch.object(self.ai, "_complete_result", side_effect=OSError("synthetic storage failure")):
+            self.queue.pop()()
+        _, paths = self.driver.calls[0]
+        frozen = [p.read_bytes() for p in paths]
+        self.action("save_draft", project_id=self.project, room_id=self.room, base_id="base", expected_revision=2,
+            draft={**self.draft, "annotations": [[[0.2, 0], [0.2, 1]]]})
+        self.assertTrue(self.ai.recover(self.project, self.room, job_id)["verified"])
+        self.ai.recover(self.project, self.room, job_id)
+        self.assertEqual([p.read_bytes() for p in paths], frozen)
+        self.assertEqual(len(self.driver.calls), 1)
+        self.assertEqual(len(self.queue), 0)
+
+    def test_unrecorded_seventh_snapshot_remains_unknown_and_is_not_deleted(self):
+        self.ai.start(self.payload()); self.queue.pop()()
+        _, paths = self.driver.calls[0]
+        unknown = paths[0].parent / "input_7.png"
+        unknown.write_bytes(b"unknown file")
+        with self.assertRaises(AtelierError): self.store.deletion_preview(self.project, self.room, self.asset)
+        self.assertEqual(unknown.read_bytes(), b"unknown file")
 
     def test_action_rejects_untrusted_extra_fields_and_missing_scope(self):
         self.assertFalse(interior_ai_start_action({**self.payload(), "path": "/private"}, service=self.ai)["ok"])

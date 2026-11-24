@@ -12,6 +12,7 @@ from app.interior_atelier import (
 )
 from app.work_repository import RepositoryMutation
 from app.interior_room_basis import room_basis, detach_room_plan
+from app.interior_inputs import IMAGE_INPUT_PROTOCOL
 
 DELETE_CONFIRMATION = "Potvrzuji globální brzdu: rozumím riziku a chci pokračovat."
 BLOCKING = {"queued", "running", "delivery_unknown", "result_ready"}
@@ -86,7 +87,14 @@ def _plan(store, data, project_id, room_id, asset_id):
         if not folder.is_dir():
             raise AtelierError("Pracovní kopie požadavku nemají bezpečný adresář.")
         for path in sorted(folder.iterdir()):
-            if not re.fullmatch(r"input_[1-6]\.png|result\.json(?:\.lock)?", path.name):
+            job = room["ai_requests"][job_id]
+            images = job.get("context", {}).get("images", [])
+            guide = images[-1] if images else {}
+            guide_seven = (path.name == "input_7.png" and job.get("image_input_protocol") == IMAGE_INPUT_PROTOCOL
+                           and job.get("image_count") == 7 and len(job.get("image_hashes", [])) == 7
+                           and len(images) == 7 and guide.get("role") == "drawing_guide"
+                           and guide.get("number") == 7 and guide.get("clean_image_number") == 1)
+            if not re.fullmatch(r"input_[1-6]\.png|result\.json(?:\.lock)?", path.name) and not guide_seven:
                 raise AtelierError("Požadavek obsahuje neznámé pracovní soubory; smazání je zastavené.")
             entry = _file(store, f"ai_inputs/{job_id}/{path.name}")
             if entry:

@@ -6,6 +6,7 @@ import copy
 
 from app.interior_atelier import AtelierError, _fingerprint, _text
 from app.interior_room_basis import room_basis, effective_sources
+from app.interior_inputs import IMAGE_INPUT_PROTOCOL, MAX_SOURCE_IMAGES, has_drawing_guide
 from app.interior_titles import TITLE_PROTOCOL, proposal_title, fallback_title, unique_proposal_title
 
 BRIEF_PROTOCOL = "interior-brief-v1"
@@ -134,10 +135,11 @@ def brief_view(room, base_id, draft, project_id, room_id):
             reason = "V Podkladech vyber pracovní obrázek."
         elif not summary["changes"].strip():
             reason = "Popiš architektovi požadované změny; připraví souhrn zadání."
-        elif len(selected) > 6:
+        elif len(selected) > MAX_SOURCE_IMAGES:
             reason = "Vyber nejvýše šest obrazových podkladů včetně společného půdorysu."
     title = unique_proposal_title(room, draft["title"] or fallback_title(room, summary["changes"]))
-    token = _fingerprint({"protocol": BRIEF_PROTOCOL, "project_id": project_id, "room_id": room_id,
+    token = _fingerprint({"protocol": BRIEF_PROTOCOL, "image_input_protocol": IMAGE_INPUT_PROTOCOL,
+        "project_id": project_id, "room_id": room_id,
         "base_id": base_id, "draft": draft, "brief": summary, "title": title,
         "proposal_id": latest["id"] if latest else "", "proposal_status": latest["status"] if latest else "",
         "files": {i: room["sources"][i]["files"] for i in selected if i in room["sources"]},
@@ -148,5 +150,8 @@ def brief_view(room, base_id, draft, project_id, room_id):
             "working_image": source["title"] if source else "",
             "references": [room["sources"][i]["title"] for i in selected if i in room["sources"] and i != draft["image_source_id"]],
             "source_count": len(selected),
+            "image_input_protocol": IMAGE_INPUT_PROTOCOL,
+            "model_image_count": len(selected) + int(has_drawing_guide(draft)),
+            "drawing_separate": has_drawing_guide(draft),
             "drawing_count": len(draft["annotations"]),
             "room_basis": {**basis, "plan_title": room["sources"].get(basis["plan_source_id"], {}).get("title", "")}}

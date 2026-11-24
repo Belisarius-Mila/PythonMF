@@ -81,6 +81,24 @@ class InteriorBriefTests(unittest.TestCase):
         with self.assertRaises(AtelierConflict): self.ai.start(old)
         self.assertFalse(self.brief()['can_generate'])
         self.assertEqual(self.brief()['drawing_count'], 1)
+        self.assertTrue(self.brief()['drawing_separate'])
+        self.assertEqual(self.brief()['model_image_count'], 2)
+
+    def test_approval_pins_separate_input_protocol_without_a_new_paid_chat(self):
+        draft = {**self.draft, 'annotations': [[[0.1, 0.1], [0.2, 0.2]]]}
+        self.action('save_draft', project_id=self.project, room_id=self.room, base_id='base', expected_revision=1, draft=draft)
+        view = self.brief()
+        self.assertTrue(view['can_generate'])
+        with patch('app.interior_brief.IMAGE_INPUT_PROTOCOL', 'old-combined-drawing'):
+            old_token = self.brief()['token']
+        self.assertNotEqual(view['token'], old_token)
+        with self.assertRaises(AtelierConflict): self.ai.start({**self.image_request(), 'brief_token': old_token})
+        self.assertEqual(len(self.driver.calls), 0)
+        self.driver.with_image = True
+        self.ai.start(self.image_request()); self.queue.pop()()
+        job, paths = self.driver.calls[0]
+        self.assertEqual(job['context']['image_input_protocol'], view['image_input_protocol'])
+        self.assertEqual(len(paths), view['model_image_count'])
 
     def test_identical_save_keeps_proposal_but_invalidates_old_token(self):
         self.propose()

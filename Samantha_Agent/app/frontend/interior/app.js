@@ -262,13 +262,16 @@
     $("saveProposalTitle").disabled = busy || loading || aiSending || !dirty;
     const unsent = Boolean($("aiText").value.trim());
     const reviewable = brief && brief.revision === revision && !dirty && !basisDirty && (brief.room_basis?.revision || 0) === savedBasis.revision;
-    $("briefContext").textContent = brief ? `Pracovní obrázek: ${brief.working_image || "nevybraný"} · podkladů: ${brief.source_count} · tahů kresby: ${brief.drawing_count}. Reference: ${(brief.references || []).join(", ") || "žádné další"}` : "Načítám souhrn…";
+    $("briefContext").textContent = brief ? `Pracovní obrázek: ${brief.working_image || "nevybraný"} · podkladů: ${brief.source_count} · tahů kresby: ${brief.drawing_count}. Reference: ${(brief.references || []).join(", ") || "žádné další"}` +
+      (brief.drawing_separate ? ` Kresba se přiloží jako samostatná kopie. Pro AI celkem ${brief.model_image_count} obrázků.` : "") : "Načítám souhrn…";
     const basis = brief?.room_basis || savedBasis;
     $("briefRoomBasis").textContent = "Půdorys: " + (basis.plan_title || data.room.sources[basis.plan_source_id]?.title || "nenastavený") +
       "\nMíry: " + (basis.measurements || "zatím nezadané");
     const planPreview = basis.plan_source_id ? picture({image_source_id:basis.plan_source_id,annotations:[]}) : "";
     if ($("briefPlanVisual").innerHTML !== planPreview) $("briefPlanVisual").innerHTML = planPreview;
-    const workPreview = picture(draft);
+    const workPreview = brief?.drawing_separate ? '<div class="brief-inputs"><figure>' +
+      picture({...draft,annotations:[]}) + '<figcaption>Čistý pracovní obrázek</figcaption></figure><figure>' +
+      picture(draft) + '<figcaption>Kreslené pokyny · samostatná kopie</figcaption></figure></div>' : picture(draft);
     if ($("briefVisual").innerHTML !== workPreview) $("briefVisual").innerHTML = workPreview;
     $("briefChanges").textContent = brief?.changes || "Zatím není zadání. Napiš architektovi, co chceš upravit.";
     $("briefPreserve").textContent = brief?.preserve || "Bez dalších podmínek zachování.";

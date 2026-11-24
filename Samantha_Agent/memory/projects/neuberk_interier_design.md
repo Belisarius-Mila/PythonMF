@@ -407,3 +407,16 @@ Další krok: Samostatně autorizované p+n, poté přejímka zobrazení v běž
 Navrhované další kroky: Oddělit čistou fotografii od kreslených pokynů podle původního bodu 2, až po samostatném zadání.
 
 Technický důkaz: Živý initialize i lokální schéma Codex0.169.0 bez vlákna/tahu; zdokumentovaný allowlist generationId/transparentBackground, engine/quality/complexity bez odhadu. Registrovaná cílená brána139 modulů,2459 testů/31SKIP PASS,448,4s, včetně20 Node scénářů. Regrese ověřují per-output metadata, obnovu původního výsledku bez nového tahu, historické údaje bez zápisu a bezpečné vykreslení. Fyzický Mac/iPhone a skutečná placená obrazová přejímka nejsou tímto nahrazené. Report reports/interior_image_provenance_20261124.md. Data/MMTX zachované; pouze místní vývoj, bez p+n a restartu Cockpitu. Vazba TVBCP pro případný budoucí Human–Adam zůstává nedohodnutá.
+
+
+## 2026-11-24 12:46 CET — Čistý pracovní obrázek a samostatná kresba (bod 2)
+
+Hotovo: AI dostává čistý pracovní obrázek a zvlášť jeho kopii s kreslenými pokyny. V potvrzení jsou dva označené náhledy a skutečný počet obrázků. Všech šest vybraných zdrojů včetně půdorysu zůstává zachovaných; kopie kresby je až sedmá, takže nemění číslování referencí. Bez kresby žádný vstup navíc nevzniká.
+
+Rozhodnutí: Míla schválil vývoj následovaný p+n. Terra/high Standard, engine a oprávnění zůstávají stejné; nejde o masku ani příslib přesné geometrie. Neměnné snapshoty a potvrzení vážou nový formát, obnova nevyvolá další generování. Starší požadavky se nepřepočítávají a stávající souhrny nevyžadují nový placený chat. Nový TVBCP nebyl dohodnutý.
+
+Další krok: Jediné již schválené p+n přes Terru a ověření živého Ateliéru. Autorita výsledku: job53e1c9f217b1dea04c7ce1f72fd25e2a, private interior_separate_drawing_20261124/release/receipt.json a verification.json, konečný completion.json. Zápis předchází zmrazení commitu a sám publikaci nepotvrzuje; po vydání se kvůli výsledkovému zápisu netvoří další čekající commit.
+
+Navrhované další kroky: Lidská přejímka s vlastní fotografií při běžné práci. Původní bod3 (skutečná maska) zatím není zadaný k vývoji.
+
+Technický důkaz: Brána validation-v3,12 modulů/182 testů/0SKIP PASS,109,4s, včetně21 Node. Safari synteticky ověřilo čistý levý a kreslený pravý náhled a počet2; bez modelového tahu. Regrese pokrývají všechny reference, číslo půdorysu, schválení formátu, neměnné snapshoty, replay/recover bez nového generování a bezpečné odstranění nové kopie pouze v potvrzovaném mazání. Skutečné podklady ani Data/MMTX se neměnily, placený obrazový pokus nebyl proveden. Report reports/interior_separate_drawing_20261124.md. Předchozí bod1 již nasazený77f71125 přes bf5124129a4a4fd9f5a618744136d34c, smoke5/5; viz private interior_image_provenance_20261124/completion.json. Vazba TVBCP pro případný budoucí Human–Adam zůstává nedohodnutá.

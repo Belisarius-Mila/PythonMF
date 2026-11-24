@@ -3,15 +3,12 @@ from __future__ import annotations
 
 import copy
 import hashlib
-import io
 import json
 import os
 import re
 from pathlib import Path
 import threading
 import uuid
-
-from PIL import Image, ImageDraw
 
 from app.codex_appserver import AppServerError, AppServerRpcError, AppServerTurnError, CodexAppServerClient, UnixSocketAppServerTransport, completed_generated_images, final_agent_answer
 from app.communication import agent_roles
@@ -20,6 +17,7 @@ from app.file_persistence import FilePersistenceError, atomic_write_json
 from app.interior_atelier import AtelierConflict, AtelierError, InteriorAtelier, REQUEST_RE, _now, _safe_path
 from app.work_repository import RepositoryMutation, WorkRepositoryError
 from app.interior_room_basis import room_basis, effective_sources
+from app.interior_inputs import IMAGE_INPUT_PROTOCOL, MAX_SOURCE_IMAGES, DRAWING_INPUT_INSTRUCTIONS, prepare_image_inputs
 from app.interior_titles import TITLE_PROTOCOL, unique_proposal_title
 from app.interior_brief import (BRIEF_PROTOCOL, CHAT_RESPONSE_SCHEMA, CHAT_BRIEF_INSTRUCTIONS,
     IMAGE_BRIEF_INSTRUCTIONS, NAMED_CHAT_RESPONSE_SCHEMA, TITLE_BRIEF_INSTRUCTIONS, brief_basis, brief_view, parse_chat_answer)
@@ -136,6 +134,8 @@ class CodexInteriorDriver:
                         "shell_tool": False, "view_image": False, "sleep_tool": False, "tool_suggest": False,
                         "image_generation": job["mode"] == "image"}}
             instructions = INSTRUCTIONS
+            if job.get("image_input_protocol") == IMAGE_INPUT_PROTOCOL:
+                instructions += DRAWING_INPUT_INSTRUCTIONS
             if job.get("brief_protocol") == BRIEF_PROTOCOL:
                 instructions += CHAT_BRIEF_INSTRUCTIONS if job["mode"] == "chat" else IMAGE_BRIEF_INSTRUCTIONS
                 if job["mode"] == "chat" and job.get("title_protocol") == TITLE_PROTOCOL:
@@ -206,6 +206,7 @@ class InteriorAI:
         return {"ok": True, "protocol": PROTOCOL, "brief_protocol": BRIEF_PROTOCOL, "role": agent_roles.INTERIOR_ROLE,
                 "role_schema": 1, "enabled": enabled, "model": model,
                 "image_tool": image_tool_capabilities(),
+                "image_input_protocol": IMAGE_INPUT_PROTOCOL,
                 "image_generation": image_generation if enabled else False,
                 "message": "" if enabled else "AI architekt ještě nemá aktivované schválené nastavení modelu."}
 
@@ -222,7 +223,7 @@ class InteriorAI:
             if status in ACTIVE and (job.get("run_nonce") != self.nonce or job["id"] not in self._running):
                 status = "delivery_unknown"
             visible = {k: copy.deepcopy(job[k]) for k in ("id", "mode", "message", "created_at",
-                "answer", "variant_id", "variant_ids", "output_count", "image_count", "client_request_id",
+                "answer", "variant_id", "variant_ids", "output_count", "image_count", "source_count", "image_input_protocol", "client_request_id",
                 "applied_revision", "brief_error") if k in job} | {"status": status}
             if job["mode"] == "image":
                 ids = job.get("variant_ids") or ([job["variant_id"]] if job.get("variant_id") else [])
@@ -282,7 +283,7 @@ class InteriorAI:
                 if not summary["can_generate"]:
                     raise AtelierError(summary["reason"])
             selected = effective_sources(room, draft)
-            if not selected or len(selected) > 6:
+            if not selected or len(selected) > MAX_SOURCE_IMAGES:
                 raise AtelierError("Vyber jeden až šest podkladů pro architekta v Podkladech.")
             if payload["mode"] == "image" and not draft["image_source_id"]:
                 raise AtelierError("Pro obrazový návrh vyber pracovní obrázek v Podkladech.")
@@ -293,18 +294,7 @@ class InteriorAI:
                 if not caps["enabled"] or payload["mode"] == "image" and not caps["image_generation"]:
                     raise AtelierError("Tato funkce architekta ještě nemá přijatý pilot a aktivované nastavení.")
             selection = self.driver.selection()  # Catalog/approval only, no model turn.
-            inputs = []
-            for source_id in selected:
-                raw, _ = self.store.asset(project_id, room_id, source_id, "preview")
-                if source_id == draft["image_source_id"] and draft["annotations"]:
-                    with Image.open(io.BytesIO(raw)) as source:
-                        image = source.convert("RGB")
-                    draw = ImageDraw.Draw(image)
-                    for stroke in draft["annotations"]:
-                        draw.line([(round(x * image.width), round(y * image.height)) for x, y in stroke],
-                                  fill="#d16d39", width=4)
-                    output = io.BytesIO(); image.save(output, format="PNG"); raw = output.getvalue()
-                inputs.append((source_id, raw))
+            inputs, image_manifest = prepare_image_inputs(self.store, project_id, room_id, room, draft, selected)
             home = _safe_path(self.store.root / "ai_inputs" / job_id)
             home.mkdir(parents=True, exist_ok=True, mode=0o700)
             paths = []
@@ -324,9 +314,7 @@ class InteriorAI:
             context = {"mode": payload["mode"], "project": project["title"], "room": room["title"],
                 "question": payload["message"].strip(), "draft": copy.deepcopy(draft), "history": history,
                 "notes": [n["text"] for n in room["notes"] if n["base_id"] == base_id],
-                "images": [{"number": i + 1, "kind": room["sources"][source_id]["kind"],
-                    "working_image": source_id == draft["image_source_id"],
-                    "room_plan": source_id == room_basis(room)["plan_source_id"]} for i, (source_id, _) in enumerate(inputs)]}
+                "images": image_manifest, "image_input_protocol": IMAGE_INPUT_PROTOCOL}
             basis = room_basis(room)
             if basis["revision"]:
                 context["room_basis"] = {**basis, "plan_image_number":
@@ -345,6 +333,7 @@ class InteriorAI:
                 "message": payload["message"].strip(), "context": context, "selection": selection,
                 "image_hashes": [hashlib.sha256(raw).hexdigest() for _, raw in inputs],
                 "image_count": len(inputs), "status": "queued", "run_nonce": self.nonce,
+                "source_count": len(selected), "image_input_protocol": IMAGE_INPUT_PROTOCOL,
                 "created_at": _now(), "answer": "", "variant_id": ""}
             if payload["mode"] == "image":
                 job["image_execution"] = {"provider": "codex_app_server", "service_tier": "default"}
