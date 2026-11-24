@@ -9,6 +9,7 @@ from app.cockpit_calendar_edit import calendar_edit_action
 from app.cockpit_calendar_tasks import calendar_task_status, calendar_task_action, task_page_route
 from app.cockpit_pwa import cockpit_manifest_route
 from app.cockpit_https_entry import HttpsCockpitEntry
+from app.vocabulary_fr_hosting import cockpit_french_url
 from app.cockpit_agent_supervisor import agent_supervisor_overview
 from app.cockpit_housekeeping import housekeeping_overview
 from app.cockpit_book_inventory import BOOK_INVENTORY_GET_PATHS, book_inventory_get_route, inventory_action
@@ -757,8 +758,11 @@ DOCUMENT_METADATA_UPDATE_FIELDS: tuple[str, ...] = (
 def web_apps_catalog() -> dict[str, Any]:
     # The private FR payload is promoted separately from the generic client.
     french_web_ready = (GIT_ROOT / "docs/data/vocabulary-fr-v2.json").is_file()
-    return {"ok": True, "apps": [dict(item) for item in WEB_APP_CATALOG
-                                  if item["id"] != "vocabulary-fr" or french_web_ready]}
+    apps = [dict(item) for item in WEB_APP_CATALOG if item["id"] != "vocabulary-fr" or french_web_ready]
+    for item in apps:
+        if item["id"] == "vocabulary-fr":
+            item["url"] = cockpit_french_url(item["url"], GIT_ROOT)
+    return {"ok": True, "apps": apps}
 
 
 def desktop_app_by_id(app_id: str) -> dict[str, Any] | None:

@@ -61,5 +61,20 @@ class VocabularyFrenchWebGalleryTests(unittest.TestCase):
         self.assertEqual(PAGES_PROJECT_PATHS['project-vocabulary-fr'],'vocabulary-fr/')
         self.assertEqual(sum(r.workstream_id=='project-vocabulary-fr' for r in WORKSTREAM_CATALOG),1)
 
+    def test_cockpit_integrates_game_entry_without_changing_other_apps_or_the_base_catalog(self):
+        from app import cockpit
+        from app.vocabulary_fr_hosting import Pilot
+        from unittest.mock import patch
+        from urllib.parse import parse_qs,urlsplit
+        base={item['id']:dict(item) for item in cockpit.WEB_APP_CATALOG}
+        origin='https://fixture-friendly-family-game.trycloudflare.com'
+        with patch.object(Pilot,'status',return_value={'running':True,'origin':origin}):
+            apps={item['id']:item for item in cockpit.web_apps_catalog()['apps']}
+        self.assertEqual(parse_qs(urlsplit(apps['vocabulary-fr']['url']).fragment),{'onlineOrigin':[origin]})
+        self.assertEqual(urlsplit(apps['vocabulary-fr']['url']).netloc,'belisarius-mila.github.io')
+        self.assertEqual(base,{item['id']:item for item in cockpit.WEB_APP_CATALOG})
+        for key,item in apps.items():
+            if key!='vocabulary-fr':self.assertEqual(item,base[key])
+
 
 if __name__=='__main__':unittest.main()

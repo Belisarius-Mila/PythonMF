@@ -132,3 +132,34 @@ HTTP podávání médií podporuje jednoduché byte Range, otevřený i koncový
 pro kompatibilitu přehrávání v Safari; soubory MP3 se nemění. Testy ověřují
 přesné bajty a délku. Podklad Apple:
 https://developer.apple.com/library/archive/documentation/AppleApplications/Reference/SafariWebContent/CreatingVideoforSafarioniPhone/CreatingVideoforSafarioniPhone.html
+
+## Přímý vstup z Cockpitu — místně připraveno 24. 11. 2026
+
+`web_apps_catalog()` mění pouze dynamický odkaz „Francouzština Jana“. Základní
+WEB_APP_CATALOG, Pages původ, ostatní aplikace i desktopový FR trainer zůstávají.
+`cockpit_french_url()` čte existující Pilot.status; nic nevytváří ani nespouští.
+Pouze při skutečně běžících vlastněných procesech a platné HTTPS Quick Tunnel
+adrese připojí onlineOrigin do URL fragmentu. Žádné PID, tokeny či herní data
+se nepředávají a konkrétní dočasný hostname se nedostane do Gitu ani do Pages GET.
+
+FR memory.js zachytí adresu před změnou interního routování a případně ji drží
+v odděleném sessionStorage klíči vocabulary-fr.online-origin.v1. Povoluje jen
+HTTPS původ odpovídající Quick Tunnel bez přihlašovacích údajů, portu, cesty,
+query či fragmentu. Nový vstup z Cockpitu nahradí předchozí dočasnou adresu.
+Blokované úložiště neblokuje použití platného vstupu v právě otevřené stránce.
+
+Tlačítko Hrát spolu na dálku otevírá oddělenou kartu s noopener/noreferrer.
+Předává pouze12 UID z již platného výběru ve fragmentu words. Osobní localStorage,
+filtry a původní stránka zůstávají na původní adrese, bez migrace a exportu dat.
+Samostatná hra nadále funguje svým dosavadním místním vstupem. Při neověřené
+službě se katalog vrací k původnímu běžnému odkazu, nezkouší automatický start.
+
+Pro živé zapojení je potřeba samostatně schválené registrované p+n FR Pages
+(aktualizovaný klient) a Cockpitu (dynamický katalog). Samotná lokální změna
+není publikace; stávající dočasný herní backend není potřeba restartovat.
+
+Katalogová kontrola PID si pro ps vynutí C locale a systémové časové pásmo
+bez změny prostředí rodiče. Porovnání normalizuje starší české i anglické
+datum narození procesu a jen známý přechod Python launcheru; nadále musí
+souhlasit čas vzniku, PID a všechny argumenty. To dovoluje stejnou původní
+partii rozpoznat i z launchd/UTC prostředí, bez nového tunelu či restartu.

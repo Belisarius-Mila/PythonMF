@@ -1,31 +1,37 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
-## 2026-11-24 14:25 CET — Pexeso na dálku: dočasná HTTPS adresa skutečně nasazená
+## 2026-11-24 14:49 CET — Přímý vstup do společného pexesa z Francouzštiny v Cockpitu
 
-Hotovo: Francouzština Jana běží na oddělené dočasné HTTPS adrese. Dva klienty
-přes veřejný internet ověřily společný plán, oba poslechové protokoly,
-neshodu i shodu, správné skóre a šedá místa, odměnu a návrat po přerušení.
-Přesná URL a provozní procesy zůstávají v soukromé účtence a TXT Downloads.
-Původní osobní označení se mezi odlišnými adresami automaticky nepřenášejí.
+Hotovo: Místně připravené propojení stávajícího vstupu „Francouzština Jana“
+v Cockpitu s tlačítkem „Hrát spolu na dálku“ uvnitř jejího pexesa. Jana
+nemusí ručně kopírovat adresu herní služby. Společná hra se otevře v nové
+kartě se 12 právě vybranými slovíčky; původní Francouzština zůstane otevřená
+na své adrese se stejnými osobními označeními a filtry. Kopíruje se už jen
+pozvánka pro spoluhráče. Běžící dočasný pilot zůstává beze změny.
 
-Rozhodnutí: Platí výslovné schválení adresy a nasazení. Jde o večerní pilot
-přes Cloudflare Quick Tunnel, nikoli trvalou adresu nebo automatický start
-po restartu. Mac musí zůstat zapnutý, online a neuspaný. Změna Tailscale,
-Funnel, firewallu, LaunchAgents, Cockpitu či Camina nebyla provedena.
+Rozhodnutí: Míla požádal o integraci přímo do Francouzštiny otevírané
+z Cockpitu. Zachovat její dosavadní Pages původ a osobní data. Cockpit
+předá aktuální adresu pouze ověřené běžící hry ve fragmentu vstupního
+odkazu; konkrétní dočasná adresa se neukládá do Gitu. Katalog nic nespouští.
+Nové vydání webu ani restart Cockpitu tímto vývojem ještě neproběhly.
 
-Další krok: Míla a Jana otevřou nový odkaz, zakladatel založí partii a pošle
-součástí hry vygenerovanou pozvánku. Ověřit zvuk a hraní na dvou fyzických Macích.
-Navrhované další kroky: Po této přejímce vybrat trvalý hosting a stabilní
-adresu. Večerní pilot není důkaz fyzického spojení Německo–domov.
+Další krok: Samostatně schválit p+n FR Pages a Cockpitu přes registrované
+předání Terře; potom ověřit skutečný katalog, publikovaný klient a vstup
+Jany do nové partie. Stávající HTTPS pilot mezitím zůstává použitelný.
+Navrhované další kroky: Fyzicky ověřit jeden vstup z Cockpitu a poslání
+pozvánky druhému Macu/Linuxu. Trvalou adresu řešit až po večerní přejímce.
 
-Technický důkaz: 694 doménových testů PASS, 74 cílených kontrol PASS;
-54/54 veřejných HTTPS souborů bajtově přesných, včetně skutečných
-obrázků a MP3. Veřejné MP3 Range/206 ověřené; lokálně také suffix/open-range,
-416 a HEAD. Dva samostatné HTTP klienty prošly partii s neshodou/shodou,
-FR odměnou, skóre, šedými místy a pause/resume. Neplatný původ, třetí hráč
-ani soukromé routy nejsou přijaty. Stejný zdravý Cockpit PID a přesně stejná
-Serve konfigurace před/po. Grafické ovládání prohlížeče nebylo dostupné;
-fyzická GUI přejímka zůstává otevřená. Přesný runtime SHA, veřejná URL,
-procesy, finální head a účtenka: private vocabulary_fr_hosting_20261124/completion.json.
+Technický důkaz: 39 cílených Python kontrol PASS včetně 60 FR JS scénářů
+(5 nových pro vstup z Cockpitu) a 16 online JS scénářů. Výběr a osobní
+stav zůstávají zachované, adresu lze obnovit po změně filtrů/reloadu,
+nové spuštění z Cockpitu nahradí starou dočasnou adresu. Neplatné adresy,
+cizí původ, credentials, port, cesta, query či fragment se nepoužijí jako
+cíl. Při chybě či zastavené službě zůstane běžná Francouzština dostupná.
+Lokální katalog poskytuje propojený odkaz, živý Cockpit má ještě původní
+odkaz: vydání je nutné. Stávající hra přes HTTPS odpovídá200 a její procesy
+nebyly restartovány. Kontrola totožnosti procesů je nezávislá na LC_ALL/TZ
+volající služby a rozpozná starší české i nové anglické datum startu.
+První doménová brána1377 PASS; finální brána, SHA a počet čekajících commitů:
+private vocabulary_fr_cockpit_entry_20261124/completion.json.
 <!-- SAMANTHA_CURRENT_STATUS_END -->
 
 ## 2026-11-17 20:21 CET — Společné předání osobního režimu a Datových commitů k p+n
@@ -842,3 +848,37 @@ ani soukromé routy nejsou přijaty. Stejný zdravý Cockpit PID a přesně stej
 Serve konfigurace před/po. Grafické ovládání prohlížeče nebylo dostupné;
 fyzická GUI přejímka zůstává otevřená. Přesný runtime SHA, veřejná URL,
 procesy, finální head a účtenka: private vocabulary_fr_hosting_20261124/completion.json.
+
+## 2026-11-24 14:49 CET — Přímý vstup do společného pexesa z Francouzštiny v Cockpitu
+
+Hotovo: Místně připravené propojení stávajícího vstupu „Francouzština Jana“
+v Cockpitu s tlačítkem „Hrát spolu na dálku“ uvnitř jejího pexesa. Jana
+nemusí ručně kopírovat adresu herní služby. Společná hra se otevře v nové
+kartě se 12 právě vybranými slovíčky; původní Francouzština zůstane otevřená
+na své adrese se stejnými osobními označeními a filtry. Kopíruje se už jen
+pozvánka pro spoluhráče. Běžící dočasný pilot zůstává beze změny.
+
+Rozhodnutí: Míla požádal o integraci přímo do Francouzštiny otevírané
+z Cockpitu. Zachovat její dosavadní Pages původ a osobní data. Cockpit
+předá aktuální adresu pouze ověřené běžící hry ve fragmentu vstupního
+odkazu; konkrétní dočasná adresa se neukládá do Gitu. Katalog nic nespouští.
+Nové vydání webu ani restart Cockpitu tímto vývojem ještě neproběhly.
+
+Další krok: Samostatně schválit p+n FR Pages a Cockpitu přes registrované
+předání Terře; potom ověřit skutečný katalog, publikovaný klient a vstup
+Jany do nové partie. Stávající HTTPS pilot mezitím zůstává použitelný.
+Navrhované další kroky: Fyzicky ověřit jeden vstup z Cockpitu a poslání
+pozvánky druhému Macu/Linuxu. Trvalou adresu řešit až po večerní přejímce.
+
+Technický důkaz: 39 cílených Python kontrol PASS včetně 60 FR JS scénářů
+(5 nových pro vstup z Cockpitu) a 16 online JS scénářů. Výběr a osobní
+stav zůstávají zachované, adresu lze obnovit po změně filtrů/reloadu,
+nové spuštění z Cockpitu nahradí starou dočasnou adresu. Neplatné adresy,
+cizí původ, credentials, port, cesta, query či fragment se nepoužijí jako
+cíl. Při chybě či zastavené službě zůstane běžná Francouzština dostupná.
+Lokální katalog poskytuje propojený odkaz, živý Cockpit má ještě původní
+odkaz: vydání je nutné. Stávající hra přes HTTPS odpovídá200 a její procesy
+nebyly restartovány. Kontrola totožnosti procesů je nezávislá na LC_ALL/TZ
+volající služby a rozpozná starší české i nové anglické datum startu.
+První doménová brána1377 PASS; finální brána, SHA a počet čekajících commitů:
+private vocabulary_fr_cockpit_entry_20261124/completion.json.

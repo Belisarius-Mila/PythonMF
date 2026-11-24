@@ -6,6 +6,7 @@ This controller only exports committed public FR files and starts owned processe
 from __future__ import annotations
 
 from contextlib import contextmanager
+from datetime import datetime
 import fcntl
 import hashlib
 import io
@@ -21,6 +22,7 @@ import sys
 import tarfile
 import time
 import uuid
+from urllib.parse import parse_qsl, urlencode, urlsplit, urlunsplit
 
 PUBLIC = ("docs/vocabulary-fr", "docs/data/vocabulary-fr-v2.json", "docs/data/vocabulary-fr-audio.json",
           "docs/data/vocabulary-fr-quiz.json", "docs/data/vocabulary-fr-sentence-audio.json",
@@ -47,6 +49,25 @@ def _write(path, value):
 
 def _git(repo, *args):
     return subprocess.check_output(["git", "-C", str(repo), *args], text=True).strip()
+
+
+def cockpit_french_url(original: str, repo: Path) -> str:
+    """Attach the owned running game's origin without moving personal browser data.
+
+    The fragment stays out of the Pages HTTP request. Reading the catalog never
+    starts a game service, changes a tunnel, or exposes process/player details.
+    """
+    try:
+        state = Pilot(repo).status()
+        origin = state.get("origin")
+        if state.get("running") is not True or not isinstance(origin, str) or not ORIGIN.fullmatch(origin):
+            return original
+        url = urlsplit(original)
+        params = dict(parse_qsl(url.fragment))
+        params["onlineOrigin"] = origin
+        return urlunsplit((url.scheme, url.netloc, url.path, url.query, urlencode(params)))
+    except (OSError, ValueError, KeyError, TypeError, AttributeError, subprocess.SubprocessError):
+        return original
 
 
 class Pilot:
@@ -115,7 +136,10 @@ class Pilot:
 
     @staticmethod
     def _identity(pid):
-        result = subprocess.run(["ps", "-p", str(pid), "-o", "lstart=", "-o", "command="], capture_output=True, text=True)
+        environment = {**os.environ, "LC_ALL": "C", "LANG": "C"}
+        environment.pop("TZ", None)  # Match the host clock, independent of a caller's UTC test environment.
+        result = subprocess.run(["ps", "-p", str(pid), "-o", "lstart=", "-o", "command="],
+                                capture_output=True, text=True, env=environment)
         return result.stdout.strip() if result.returncode == 0 else ""
 
     @staticmethod
@@ -126,13 +150,21 @@ class Pilot:
         if len(parts) == 6:
             try:
                 args = shlex.split(parts[5])
-            except ValueError:
+                months = {name: n for n, name in enumerate("jan feb mar apr may jun jul aug sep oct nov dec".split(), 1)}
+                months.update(dict(zip("led úno bře dub kvě čer čvc srp zář říj lis pro".split(), range(1, 13))))
+                # Legacy macOS receipts used Czech day-month order; new C output uses month-day.
+                if parts[1].lower() in months:
+                    month, day = months[parts[1].lower()], int(parts[2])
+                else:
+                    month, day = months[parts[2].lower()], int(parts[1])
+                birth = datetime(int(parts[4]), month, day, *map(int, parts[3].split(":"))).isoformat()
+            except (ValueError, KeyError, TypeError):
                 return value
             interpreters = {sys.executable, str(Path(sys.executable).resolve()),
                             str(Path(sys.base_prefix) / "Resources/Python.app/Contents/MacOS/Python")}
             if len(args) > 2 and args[0] in interpreters and args[1] == "-I" and args[2].endswith("/Samantha_Agent/app/vocabulary_fr_multiplayer.py"):
                 args[0] = "<owned-python>"
-                return " ".join(parts[:5]) + " " + json.dumps(args)
+            return birth + " " + json.dumps(args)
         return value
 
     def status(self):

@@ -264,6 +264,35 @@ test('FR online entry cannot bypass a selection with fewer than twelve usable pi
  const v=await app();v.state.query='chat';v.selectionChanged();v.element('memoryTab').click();const before=v.win.location.href;
  assert.equal(v.element('memoryOnline').disabled,true);v.element('memoryOnline').click();assert.equal(v.win.location.href,before);
 });
+const cockpitGameOrigin='https://fixture-friendly-family-game.trycloudflare.com';
+const cockpitFrenchUrl=origin=>'https://belisarius-mila.github.io/PythonMF/vocabulary-fr/#'+new URLSearchParams({onlineOrigin:origin});
+test('Cockpit entry opens the chosen hard words directly and preserves the original French tab and personal data',async()=>{
+ const personalKey='vocabulary-fr.personal-hard.v1',local=storage(new Map([[personalKey,JSON.stringify({schema:1,kind:'vocabulary-fr.personal-hard-backup',language:'fr',hard:memoryPool.map(i=>i.uid)})]]));
+ const v=await app({url:cockpitFrenchUrl(cockpitGameOrigin),local});v.element('personalHard').click();v.element('memoryTab').click();
+ const before=v.win.location.href,personal=JSON.stringify([...local.map]),opened=[];v.win.open=(...args)=>{opened.push(args);return null;};v.element('memoryOnline').click();
+ assert.equal(opened.length,1);const url=new URL(opened[0][0]),params=new URLSearchParams(url.hash.slice(1));
+ assert.equal(url.origin,cockpitGameOrigin);assert.equal(url.pathname,'/vocabulary-fr/online.html');assert.equal(params.size,1);
+ assert.equal(params.get('words').split(',').length,12);assert.ok(params.get('words').split(',').every(uid=>memoryPool.some(i=>i.uid===uid)));
+ assert.deepEqual(opened[0].slice(1),['_blank','noopener,noreferrer']);assert.equal(v.win.location.href,before);assert.equal(JSON.stringify([...local.map]),personal);
+ assert.equal(v.session.getItem('vocabulary-fr.online-origin.v1'),cockpitGameOrigin);assert.match(v.element('memoryPoolNotice').textContent,/nové kartě/);
+});
+test('the Cockpit game address survives route changes and reload and a fresh launch replaces the prior temporary address',async()=>{
+ const session=storage(),first=await app({url:cockpitFrenchUrl(cockpitGameOrigin),session});first.element('memoryTab').click();
+ const reloaded=await app({url:first.win.location.href,session}),opened=[];reloaded.win.open=url=>opened.push(url);reloaded.element('memoryTab').click();reloaded.element('memoryOnline').click();
+ assert.equal(new URL(opened[0]).origin,cockpitGameOrigin);
+ const newer='https://fixture-next-family-game.trycloudflare.com',fresh=await app({url:cockpitFrenchUrl(newer),session});fresh.win.open=url=>opened.push(url);fresh.element('memoryTab').click();fresh.element('memoryOnline').click();assert.equal(new URL(opened[1]).origin,newer);
+});
+test('an arbitrary URL or credentials cannot be used as the remote game address',async()=>{
+ for(const origin of ['javascript:alert(1)','https://untrusted.example','http://fixture-friendly-family-game.trycloudflare.com',cockpitGameOrigin+'/path',cockpitGameOrigin+'?token=x',cockpitGameOrigin+'#x',cockpitGameOrigin+':8443','https://name:secret@fixture-friendly-family-game.trycloudflare.com',cockpitGameOrigin+'.untrusted.example']){
+  const v=await app({url:cockpitFrenchUrl(origin)}),opened=[];v.win.open=url=>opened.push(url);v.element('memoryTab').click();v.element('memoryOnline').click();assert.equal(opened.length,0);assert.equal(new URL(v.win.location.href).origin,'https://belisarius-mila.github.io');
+ }
+});
+test('a Cockpit entry works with blocked storage for the current page without moving the personal app',async()=>{
+ const v=await app({url:cockpitFrenchUrl(cockpitGameOrigin),blocked:true}),opened=[];v.win.open=url=>opened.push(url);v.element('memoryTab').click();v.element('memoryOnline').click();assert.equal(new URL(opened[0]).origin,cockpitGameOrigin);assert.equal(new URL(v.win.location.href).origin,'https://belisarius-mila.github.io');
+});
+test('the Cockpit game shortcut cannot open a room with too few selected pictures',async()=>{
+ const v=await app({url:cockpitFrenchUrl(cockpitGameOrigin)}),opened=[];v.win.open=url=>opened.push(url);v.state.query='chat';v.selectionChanged();v.element('memoryTab').click();v.element('memoryOnline').click();assert.equal(v.element('memoryOnline').disabled,true);assert.equal(opened.length,0);
+});
 const memorySaved=v=>JSON.parse(v.session.getItem(memory.KEY));
 const memoryButton=(v,n)=>v.element('memoryBoard').children[n].querySelector('button');
 async function memoryView(count=2,options={}){

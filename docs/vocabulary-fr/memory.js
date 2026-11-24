@@ -57,6 +57,16 @@
     }catch(_){return null;}
   }
   function create({doc,win,getData,getAudio,getCatalog,getSelection,getContext,sanitizeContext,onOpen,onClose,play,stop}){
+    const remoteKey='vocabulary-fr.online-origin.v1';
+    function verifiedOrigin(value){
+      try{const url=new URL(value);return url.protocol==='https:'&&!url.username&&!url.password&&!url.port&&!url.search&&!url.hash&&url.pathname==='/'&&/^[a-z0-9]+(?:-[a-z0-9]+)+\.trycloudflare\.com$/.test(url.hostname)&&url.origin===value?url.origin:null;}catch(_){return null;}
+    }
+    const entry=new URLSearchParams(new URL(win.location.href).hash.slice(1));
+    let remoteOrigin=null;
+    if(entry.has('onlineOrigin')){
+      remoteOrigin=verifiedOrigin(entry.get('onlineOrigin'));
+      try{if(remoteOrigin)win.sessionStorage.setItem(remoteKey,remoteOrigin);else win.sessionStorage.removeItem?.(remoteKey);}catch(_){}
+    }else try{remoteOrigin=verifiedOrigin(win.sessionStorage.getItem(remoteKey));}catch(_){}
     const ids=['memoryOnline','memoryView','memorySetup','memorySelection','memorySetupChange','memoryPlayerCount','memoryNames','memoryPoolNotice','memoryStorageNotice','memoryStart','memoryResume','memoryRound','memoryBoard','memoryScores','memoryStatus','memoryProgress','memoryRetry','memorySkip','memoryEnd','memoryResult','memoryCollections','memoryAgain','memoryNew','memoryChange','memoryBack','memoryProjector','memoryReward','memoryRewardImage','memoryRewardWord'];
     const ui=Object.fromEntries(ids.map(id=>[id,doc.getElementById(id)]));
     let filters=sanitizeContext(getContext()), gameFilters=null, game=null, source='', selected=[], opened=false, busy=false, error=false, success=false, openCards=[], hint=-1, epoch=0, draftNames=['Hráč 1','Hráč 2'], saved=null;
@@ -114,6 +124,7 @@
       selected=ready?choose(pool(),getAudio(),getCatalog(),()=>.5):[];
       ui.memoryStart.disabled=selected.length!==PAIRS;ui.memoryOnline.disabled=selected.length!==PAIRS;
       ui.memoryPoolNotice.textContent=!ready?'Připravuji obrázky a zvuk…':selected.length===PAIRS?`Ve výběru ${pool().length} karet. Připraveno ${PAIRS} různých dvojic · ${CARDS} kartiček.`:`Pro plán potřebujeme ${PAIRS} dostatečně odlišných obrázků s francouzským zvukem. Rozšiř témata nebo výběr (${pool().length} karet ve filtru).`;
+      if(remoteOrigin)ui.memoryPoolNotice.textContent+=' Společná hra se otevře v nové kartě; tento výběr zůstane zachovaný.';
       if(getAudio()===false||getCatalog()===false)ui.memoryPoolNotice.textContent='Obrázky nebo zvuk pro pexeso se nepodařilo načíst. Zkus obnovit stránku.';
       ui.memoryResume.hidden=!saved||saved.game?.deck?.length!==CARDS;
       if(saved?.game?.deck?.length&&saved.game.deck.length!==CARDS)ui.memoryPoolNotice.textContent+=' Starší partie má jiný počet kartiček. Pro nový formát spusť novou partii.';
@@ -214,7 +225,13 @@
       cancel();game=restored;gameFilters=f;filters=f;source=saved.source;draftNames=[...game.players];ui.memoryPlayerCount.value=String(game.players.length);renderNames();controls();draw();status(finished()?'Dokončená partie.':`Pokračujeme · ${game.players[game.active]}. Vyber první kartičku.`);
     }
     try{const raw=win.sessionStorage.getItem(KEY);if(raw&&raw.length<20000){const value=JSON.parse(raw);if(value?.version===1&&Array.isArray(value.game?.players)&&value.game.players.length>=1&&value.game.players.length<=4&&value.game.players.every(n=>typeof n==='string'&&Array.from(n).length<=12))saved=value;}}catch(_){}
-    ui.memoryOnline.addEventListener('click',()=>{if(selected.length!==PAIRS)return;const url=new URL('online.html',win.location.href);url.hash=new URLSearchParams({words:selected.map(i=>i.uid).join(',')}).toString();win.location.href=url.toString();});
+    ui.memoryOnline.addEventListener('click',()=>{
+      if(selected.length!==PAIRS)return;
+      const url=remoteOrigin?new URL('/vocabulary-fr/online.html',remoteOrigin):new URL('online.html',win.location.href);
+      url.hash=new URLSearchParams({words:selected.map(i=>i.uid).join(',')}).toString();
+      if(remoteOrigin&&remoteOrigin!==new URL(win.location.href).origin&&typeof win.open==='function')win.open(url.toString(),'_blank','noopener,noreferrer');
+      else win.location.href=url.toString();
+    });
     ui.memoryPlayerCount.value='2';renderNames();
     ui.memorySetupChange.addEventListener('click',()=>{if(approveLeave()){leave();onClose();}});
     ui.memoryPlayerCount.addEventListener('change',()=>{if(![1,2,3,4].includes(Number(ui.memoryPlayerCount.value)))ui.memoryPlayerCount.value='2';draftNames=Array.from(ui.memoryNames.querySelectorAll('input')).map(i=>i.value);renderNames();});

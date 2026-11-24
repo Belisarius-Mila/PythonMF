@@ -8,6 +8,8 @@ import unittest
 from unittest.mock import patch, MagicMock
 
 from app.vocabulary_fr_hosting import Pilot, PUBLIC, SERVER, _sha, _write
+from app.vocabulary_fr_hosting import cockpit_french_url
+from urllib.parse import parse_qs, urlsplit
 
 
 class HostingTests(unittest.TestCase):
@@ -120,6 +122,41 @@ class HostingTests(unittest.TestCase):
         self.assertNotEqual(Pilot._stable_identity(before),Pilot._stable_identity(after.replace('14:23:33','14:23:34')))
         self.assertNotEqual(Pilot._stable_identity(before),Pilot._stable_identity(after.replace('8791','8770')))
         self.assertNotEqual(Pilot._stable_identity(before),Pilot._stable_identity(after.replace(str(Path(sys.base_prefix)/'Resources/Python.app/Contents/MacOS/Python'),'/foreign/python')))
+
+    def test_cockpit_launch_retains_pages_origin_and_attaches_only_live_game_origin(self):
+        original='https://belisarius-mila.github.io/PythonMF/vocabulary-fr/#personalHard=true'
+        origin='https://fixture-friendly-family-game.trycloudflare.com'
+        with patch.object(Pilot,'status',return_value={'running':True,'origin':origin,'processes':{'private':'never expose'},'token':'never expose'}):
+            result=cockpit_french_url(original,self.repo)
+        url=urlsplit(result);params=parse_qs(url.fragment)
+        self.assertEqual(url.netloc,'belisarius-mila.github.io');self.assertEqual(url.path,'/PythonMF/vocabulary-fr/')
+        self.assertEqual(params,{'personalHard':['true'],'onlineOrigin':[origin]})
+        self.assertNotIn('never',result);self.assertFalse(self.pilot.root.exists())
+
+    def test_legacy_czech_birth_dates_match_english_process_output_for_server_and_connector(self):
+        for command in ['/private/connector --url http://127.0.0.1:8791',sys.executable+' -I /release/Samantha_Agent/app/vocabulary_fr_multiplayer.py --port 8791']:
+            old='út 24 lis 14:23:33 2026 '+command
+            fresh='Tue Nov 24 14:23:33 2026 '+command
+            self.assertEqual(Pilot._stable_identity(old),Pilot._stable_identity(fresh))
+            self.assertNotEqual(Pilot._stable_identity(old),Pilot._stable_identity(fresh.replace('14:23:33','14:23:34')))
+
+    def test_process_query_is_independent_of_a_caller_locale_and_utc_environment(self):
+        response=subprocess.CompletedProcess([],0,'Tue Nov 24 14:23:33 2026 /private/connector --url local\n','')
+        with patch.dict('os.environ',{'LC_ALL':'cs_CZ.UTF-8','LANG':'cs_CZ.UTF-8','TZ':'UTC'}),patch('app.vocabulary_fr_hosting.subprocess.run',return_value=response) as run:
+            self.assertTrue(Pilot._identity(123))
+            environment=run.call_args.kwargs['env'];self.assertEqual(environment['LC_ALL'],'C');self.assertEqual(environment['LANG'],'C');self.assertNotIn('TZ',environment)
+
+    def test_stopped_or_malformed_pilot_cannot_redirect_cockpit_to_foreign_content(self):
+        original='https://belisarius-mila.github.io/PythonMF/vocabulary-fr/'
+        for state in [{'running':False,'origin':'https://fixture-friendly-family-game.trycloudflare.com'},
+                      {'running':True,'origin':'https://untrusted.example'},
+                      {'running':True,'origin':'https://fixture-friendly-family-game.trycloudflare.com/path'},
+                      {'running':True,'origin':None}]:
+            with self.subTest(state=state),patch.object(Pilot,'status',return_value=state):
+                self.assertEqual(cockpit_french_url(original,self.repo),original)
+        for error in [ValueError('bad receipt'),AttributeError('malformed receipt')]:
+            with patch.object(Pilot,'status',side_effect=error):
+                self.assertEqual(cockpit_french_url(original,self.repo),original)
 
 
 if __name__ == "__main__":unittest.main()

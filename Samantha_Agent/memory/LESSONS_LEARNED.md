@@ -2988,3 +2988,15 @@ strop. Skutečný DALTAC dokončen17,0578/20, sedm původních částí beze zm�
 - Problém: Python launcher změní po startu cestu k interpretu při zachování PID, času vzniku a argumentů. Přesné porovnání celého ps command pak falešně hlásí mrtvou službu.
 - Řešení: Normalizovat jen známé cesty stejného interpretu a jen pro přesně určený server; zachovat kontrolu narození procesu i všech argumentů. Původní běh ověřit, nezakládat nový tunel.
 - Ověření: Živý stejný PID před/po přechodu, test rozlišuje jiný čas startu, port i cizí interpret; dvě veřejné HTTPS relace a MP3 Range ověřené.
+
+### 2026-11-24 — Propojení osobního webu se samostatnou společnou hrou
+
+- Problém: Přesměrování celého původního webu na nový dočasný původ skryje jeho osobní localStorage a nutí uživatele přesouvat data.
+- Řešení: Ponechat osobní web na jeho původu, z ověřeného katalogu dodat adresu hry ve fragmentu a otevřít oddělenou kartu pouze s12 zvolenými veřejnými UID.
+- Ověření: Produkční FR klient zachová osobní označení, filtry i původní kartu; funguje reload a výměna dočasné adresy, cizí adresy jsou odmítnuté.
+
+### 2026-11-24 — Kontrola živého procesu nezávislá na prostředí volající služby
+
+- Problém: Stejný ps lstart mění pořadí měsíce/dne a čas podle locale a TZ. Služba v C/UTC pak nerozpoznala původní českou účtenku procesu.
+- Řešení: Jen podproces ps spouštět v C locale bez zděděného TZ a normalizovat český/anglický formát data. Zachovat narození procesu a celé argumenty, neoslabit vlastnictví.
+- Ověření: Stejné dva živé PID se rozpoznají z C i cs_CZ.UTF-8 s UTC volajícího, bez změny prostředí rodiče nebo restartu původní hry.
