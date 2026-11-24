@@ -246,6 +246,17 @@ class HostingTests(unittest.TestCase):
             self.assertEqual(Pilot._stable_identity(old),Pilot._stable_identity(fresh))
             self.assertNotEqual(Pilot._stable_identity(old),Pilot._stable_identity(fresh.replace('14:23:33','14:23:34')))
 
+    def test_permanent_game_origin_is_available_in_cockpit_without_a_local_mac_pilot(self):
+        path=self.repo/'docs/vocabulary-fr/online-hosting.json'
+        path.write_text(json.dumps({'schemaVersion':1,'origin':'https://fixture-fr.onrender.com'}))
+        with patch.object(Pilot,'status',side_effect=AssertionError('Local pilot must not be needed')):
+            linked=cockpit_french_url('https://belisarius-mila.github.io/PythonMF/vocabulary-fr/#personalHard=true',self.repo)
+        self.assertEqual(parse_qs(urlsplit(linked).fragment),{'personalHard':['true'],'onlineOrigin':['https://fixture-fr.onrender.com']})
+        for config in [{'schemaVersion':2,'origin':'https://fixture-fr.onrender.com'}, {'schemaVersion':1,'origin':'https://foreign.example'}, {'schemaVersion':1,'origin':'https://fixture-fr.onrender.com/path'}, None]:
+            path.write_text(json.dumps(config))
+            with patch.object(Pilot,'status',return_value={'running':False}):
+                self.assertEqual(cockpit_french_url('https://example.test/fr/',self.repo),'https://example.test/fr/')
+
     def test_process_query_is_independent_of_a_caller_locale_and_utc_environment(self):
         response=subprocess.CompletedProcess([],0,'Tue Nov 24 14:23:33 2026 /private/connector --url local\n','')
         with patch.dict('os.environ',{'LC_ALL':'cs_CZ.UTF-8','LANG':'cs_CZ.UTF-8','TZ':'UTC'}),patch('app.vocabulary_fr_hosting.subprocess.run',return_value=response) as run:

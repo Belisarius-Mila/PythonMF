@@ -19,7 +19,7 @@ const studyLoop={mode:"words",gap:2000,active:false,running:false,phase:"words",
 let loopAudio=null;
 let galleryTranslation=null;
 let learnerUI=null,personalUI=null;
-let quizUI=null,quizCatalog=null,memoryUI=null;
+let quizUI=null,quizCatalog=null,memoryUI=null,onlineHostingOrigin=null;
 const learnerSelect=document.getElementById("learnerSelect"),learnerHardFilter=document.getElementById("learnerHardFilter"),editLearnerHard=document.getElementById("editLearnerHard");
 const STORAGE_KEY="vocabulary-fr.navigation.v1", LAST_KEY="vocabulary-fr.last-card.v1";
 function context() { return Object.fromEntries(Object.keys(defaults()).map(key => [key,Array.isArray(state[key]) ? [...state[key]] : state[key]])); }
@@ -682,6 +682,10 @@ function bindEvents(){
 async function readJson(url){const response=await fetch(url,{cache:"no-store"});if(!response.ok)throw new Error(`HTTP ${response.status}`);return response.json();}
 async function init(){
   bindEvents();
+  void readJson('online-hosting.json').then(config=>{
+    if(config?.schemaVersion===1&&typeof config.origin==='string'&&/^https:\/\/[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.onrender\.com$/.test(config.origin))onlineHostingOrigin=config.origin;
+    memoryUI?.refresh();
+  }).catch(()=>{}); // Missing hosting configuration does not block the vocabulary app.
   void readJson(SENTENCE_PICTURES_URL).then(manifest=>{
     sentencePicturesManifest=manifest;primeSentencePictures();
     // Late optional metadata must not swap pictures in a sentence already playing.
@@ -720,7 +724,7 @@ async function init(){
     play:item=>{stopAudioPlayback();return playOneAudio(M.audioRecord(item,state.audioManifest)?.fr,playbackToken,{fresh:true});},stop:stopAudioPlayback});
   document.getElementById("quizTab").disabled=!quizUI;
   if(globalThis.VocabularyFRMemory)memoryUI=globalThis.VocabularyFRMemory.create({doc:document,win:window,getData:()=>state.data,getAudio:()=>state.audioManifest,getCatalog:()=>quizCatalog,
-    getContext:context,sanitizeContext,
+    getContext:context,sanitizeContext,getOnlineOrigin:()=>onlineHostingOrigin,
     getSelection:filters=>M.select(personalUI?personalUI.filter(state.items,filters.personalHard):filters.personalHard?[]:state.items,filters,state.items),
     onOpen:()=>{stopAudioPlayback();switchView("memory");document.title="Pexeso · Francouzština Jana";window.scrollTo({top:0});},onClose:returnFromMemory,
     play:item=>{stopAudioPlayback();return playOneAudio(M.audioRecord(item,state.audioManifest)?.fr,playbackToken,{fresh:true,timeoutMs:20000});},stop:stopAudioPlayback});

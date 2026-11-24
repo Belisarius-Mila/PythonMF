@@ -194,3 +194,18 @@ Aktualizace není tímto návodem schválená ani provedená. Po skutečném nas
 stačí oběma obnovit stávající herní panel a kliknout na pokračování se zvukem.
 SessionStorage ve stejném panelu/původu zachová soukromý přístup. Nová pozvánka
 není nutná; časová platnost místnosti24h/2h bez aktivity zůstává.
+
+## Trvalý cloud — příprava 24. 11. 2026
+
+Míla zadal přípravu trvalého hostingu. Nasazovací podklad, cenu, provoz a
+přejímku drží deploy/vocabulary-fr/README.md a render.yaml. Placená aktivace
+čeká na potvrzení účtu a ceny. Registrované vocabulary_fr_cloud_prepare
+exportuje pouze committed veřejnou FR část; vocabulary_fr_cloud_backup
+vytváří konzistentní soukromou SQLite kopii bez přepisu/mazání či uploadu.
+
+Online-hosting.json v docs/vocabulary-fr má schemaVersion1 a origin:null.
+Po ověřeném nasazení se aktivuje pouze konkrétní HTTPS původ onrender.com
+přidělený vlastněné službě. Klient i Cockpit jej používají před případným
+starým tunelem. Fragment ani sessionStorage nemohou povolit libovolný Render
+hostname. Osobní Pages původ/filtry zůstávají; hra se otevírá zvlášť se12 UID.
+První přechod původu vyžaduje novou místnost. Databáze Macu se neexportuje.

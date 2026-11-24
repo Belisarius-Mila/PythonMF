@@ -31,6 +31,7 @@ PUBLIC = ("docs/vocabulary-fr", "docs/data/vocabulary-fr-v2.json", "docs/data/vo
           "docs/assets/vocabulary-fr-audio", "docs/assets/vocabulary-fr-sentences")
 SERVER = "Samantha_Agent/app/vocabulary_fr_multiplayer.py"
 ORIGIN = re.compile(r"https://[a-z0-9]+(?:-[a-z0-9]+)+\.trycloudflare\.com\b")
+CLOUD_ORIGIN = re.compile(r"https://[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.onrender\.com\Z")
 
 
 def _sha(path):
@@ -59,10 +60,16 @@ def cockpit_french_url(original: str, repo: Path) -> str:
     starts a game service, changes a tunnel, or exposes process/player details.
     """
     try:
-        state = Pilot(repo).status()
-        origin = state.get("origin")
-        if state.get("running") is not True or not isinstance(origin, str) or not ORIGIN.fullmatch(origin):
-            return original
+        try:
+            config = json.loads((Path(repo) / "docs/vocabulary-fr/online-hosting.json").read_text())
+        except (OSError, ValueError):
+            config = {}
+        origin = config.get("origin") if isinstance(config, dict) and config.get("schemaVersion") == 1 else None
+        if not isinstance(origin, str) or not CLOUD_ORIGIN.fullmatch(origin):
+            state = Pilot(repo).status()
+            origin = state.get("origin")
+            if state.get("running") is not True or not isinstance(origin, str) or not ORIGIN.fullmatch(origin):
+                return original
         url = urlsplit(original)
         params = dict(parse_qsl(url.fragment))
         params["onlineOrigin"] = origin

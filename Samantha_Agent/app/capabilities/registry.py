@@ -12,6 +12,20 @@ from app.capabilities.models import (
 
 CAPABILITIES: tuple[CapabilityRecord, ...] = (
     CapabilityRecord(
+        capability_id="vocabulary_fr_cloud_prepare", label="Prepare an isolated committed FR release for cloud hosting",
+        risk=RiskLevel.LOCAL_WRITE, reads=("exact approved Git commit and public FR allowlist",),
+        writes=("isolated local cloud release and content manifest",),
+        tool="app.vocabulary_fr_cloud.prepare_release", audit=AuditPolicy.REDACTED,
+        notes="Preparation only: no account, billing, upload, provider API, DNS change or live deployment. Never exports private rooms, secrets or other applications.",
+    ),
+    CapabilityRecord(
+        capability_id="vocabulary_fr_cloud_backup", label="Create a consistent private game database backup",
+        risk=RiskLevel.LOCAL_WRITE, reads=("existing FR cloud SQLite database",),
+        writes=("one new private local SQLite backup on the persistent disk",),
+        tool="app.vocabulary_fr_cloud.backup_database", audit=AuditPolicy.REDACTED,
+        notes="No overwrite, removal, external upload, access-token output or change to active rooms. Requires a separate approved export for off-site backup.",
+    ),
+    CapabilityRecord(
         capability_id="vocabulary_fr_hosting_prepare", label="Freeze the public French pairs pilot release",
         risk=RiskLevel.LOCAL_WRITE, reads=("exact clean local main commit", "explicit verified connector digest"),
         writes=("isolated committed public FR release in data/private",),

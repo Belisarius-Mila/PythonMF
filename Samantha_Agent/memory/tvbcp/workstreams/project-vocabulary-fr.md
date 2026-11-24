@@ -1,39 +1,39 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
-## 2026-11-24 19:39 CET — Další partie s jinými slovíčky ve stejné místnosti
+## 2026-11-24 20:44 CET — Příprava trvalého hostingu Francouzštiny
 
-Hotovo: Místně doplněné tlačítko „Další partie s jinými slovíčky“. Zakladatel
-vybere okruh, zkontroluje návrh 12 nových slov, případně výběr změní, a zahájí
-hru pro oba dosavadní hráče. Předchozích 12 UID se vynechá; malý okruh nabídne
-rozšíření místo tichého opakování slov. Zůstávají jména, hráčské přístupy,
-místnost i pozvánka. Skóre a plán se obnoví pro další kolo. Původní tlačítko
-pro stejná slova zůstává. Soukromý osobní seznam se nepřenáší.
+Hotovo: Místně připravený samostatný cloudový balíček pro Render: placená
+jedna instance ve Frankfurtu, disk1GB, přidělená stabilní HTTPS adresa,
+izolovaný export veřejné FR části z přesného commitu a start bez Samanthy.
+Health kontroluje i databázi, korektní SIGTERM/restart zachová úložiště,
+SQLite backup vytváří novou soukromou kopii. Připravený trvalý vstup z Pages
+Francouzštiny i Cockpitu má přednost před starým tunelem; vyžaduje přesnou
+schválenou konfiguraci. Ta nyní obsahuje origin=null, nic se neaktivuje.
 
-Rozhodnutí: Míla potvrdil jednu skutečně odehranou společnou partii a upozornil,
-že jiná slova vyžadují novou pozvánku. Příčina byla potvrzená v kódu: rematch
-pouze zamíchal původní balíček. Řešení mění výběr uvnitř stávající místnosti.
-Předchozí p+n a nasazení vstupu Cockpit → FR byly dokončené na5205fc43;
-následná samostatná oprava dočasného tunelu je doložená v private
-vocabulary_fr_dns_repair_20261124/completion.json. Nový vývoj sám nové
-publikování ani nasazení nepovoluje.
+Rozhodnutí: Míla výslovně zadal připravit trvalý hosting po opakovaném zániku
+Quick Tunnel při usnutí Macu. Render je doporučený podklad přípravy, jeho
+placená aktivace ani účet nebyly schválené. Návrh7,25USD/měsíc před daněmi
+(7 compute +0,25 disk), případný přenos navíc; žádný cenový strop. Stávající
+hra má zůstat funkčně stejná. Nepřenáší se soukromá lokální databáze.
 
-Další krok: Po samostatném souhlasu vydat tuto změnu přes Terru a registrovaně
-aktualizovat pouze herní server na stávající adrese. Oba hráči pak obnoví
-svůj herní panel a výslovně zapnou zvuk; nový odkaz nebude potřeba.
-Navrhované další kroky: Fyzicky ověřit druhou partii s jinými slovy; trvalou
-adresu nadále řešit zvlášť. Cockpit se pro tuto změnu nemusí restartovat.
+Další krok: Potvrdit poskytovatele/účet a placený základ; pak registrovaně
+vydat přípravu, aktivovat schválenou službu, ověřit její skutečný release a
+teprve potom vydat přesný cloudový původ v konfiguraci FR Pages/Cockpitu.
+Navrhované další kroky: Dva skutečné hráče a restart ověřit na nové službě;
+nezávislou off-site zálohu řešit jako další vymezený krok. První přechod
+na jiný původ vyžaduje jednu novou místnost a pozvánku, další kola již ne.
 
-Technický důkaz: Dosavadních44 cílených Python kontrol PASS, včetně60 FR JS
-scénářů a20 online JS scénářů. Skutečný veřejný katalog481 karet: výběry pro
-všechny okruhy prošly společnou kompatibilitou klient/server, žádné navržené
-UID není z předchozí partie. Dva samostatné JS klienty zachovají místnost,
-URL, soukromý přístup i jména, po ztracené odpovědi neopakují rematch. Server
-ověřuje zakladatele, dokončenou hru, očekávané kolo/fázi a12 kompatibilních UID;
-opakovaná stejná akce nepřelosuje karty. Registrované Pilot.upgrade zachová
-konektor, původ a databázi, vyžaduje stejné katalogové vstupy a explicitní
-souhlas, před jediným restartem ukládá účtenku. Selhání/nejistota se neopakuje.
-Živý server5205fc43 a původní procesy zůstaly během vývoje beze změny.
-Fyzická přejímka nové druhé partie čeká. Finální brána, cílené počty, commit
-a provozní stav jsou v private vocabulary_fr_rematch_20261124/completion.json.
+Technický důkaz:56 cílených Python kontrol PASS včetně63 FR JS scénářů a20
+online JS. Cloudové testy ověřují export bez tajemství/ostatních aplikací,
+Git identity, symlinky, disk/HTTPS/port, databázový health503, konzistentní
+zálohy, SIGTERM a restart se stejnou databází. Nový klient přijímá pouze
+konkrétní konfigurovaný Render původ; fragment s libovolnou Render adresou
+neaktivuje cizí službu. Pozdní konfigurace neblokuje slovník. Předchozí
+3d1d4483 je na GitHubu a Pages; místní herní upgrade i druhá partie jsou
+ověřené v private vocabulary_fr_rematch_20261124/completion.json. Veřejný
+Quick Tunnel je stále nedostupný. Nová cloudová služba ani účet nejsou
+vytvořené. Finální brána, SHA, export a limity přejímky jsou v private
+vocabulary_fr_cloud_20261124/completion.json. Návrh a plný postup jsou
+v Downloads/Vocabulary_FR_trvaly_hosting_navrh_a_nasazeni_2026-11-24.txt.
 <!-- SAMANTHA_CURRENT_STATUS_END -->
 
 ## 2026-11-17 20:21 CET — Společné předání osobního režimu a Datových commitů k p+n
@@ -971,3 +971,39 @@ souhlas, před jediným restartem ukládá účtenku. Selhání/nejistota se neo
 Živý server5205fc43 a původní procesy zůstaly během vývoje beze změny.
 Fyzická přejímka nové druhé partie čeká. Finální brána, cílené počty, commit
 a provozní stav jsou v private vocabulary_fr_rematch_20261124/completion.json.
+
+## 2026-11-24 20:44 CET — Příprava trvalého hostingu Francouzštiny
+
+Hotovo: Místně připravený samostatný cloudový balíček pro Render: placená
+jedna instance ve Frankfurtu, disk1GB, přidělená stabilní HTTPS adresa,
+izolovaný export veřejné FR části z přesného commitu a start bez Samanthy.
+Health kontroluje i databázi, korektní SIGTERM/restart zachová úložiště,
+SQLite backup vytváří novou soukromou kopii. Připravený trvalý vstup z Pages
+Francouzštiny i Cockpitu má přednost před starým tunelem; vyžaduje přesnou
+schválenou konfiguraci. Ta nyní obsahuje origin=null, nic se neaktivuje.
+
+Rozhodnutí: Míla výslovně zadal připravit trvalý hosting po opakovaném zániku
+Quick Tunnel při usnutí Macu. Render je doporučený podklad přípravy, jeho
+placená aktivace ani účet nebyly schválené. Návrh7,25USD/měsíc před daněmi
+(7 compute +0,25 disk), případný přenos navíc; žádný cenový strop. Stávající
+hra má zůstat funkčně stejná. Nepřenáší se soukromá lokální databáze.
+
+Další krok: Potvrdit poskytovatele/účet a placený základ; pak registrovaně
+vydat přípravu, aktivovat schválenou službu, ověřit její skutečný release a
+teprve potom vydat přesný cloudový původ v konfiguraci FR Pages/Cockpitu.
+Navrhované další kroky: Dva skutečné hráče a restart ověřit na nové službě;
+nezávislou off-site zálohu řešit jako další vymezený krok. První přechod
+na jiný původ vyžaduje jednu novou místnost a pozvánku, další kola již ne.
+
+Technický důkaz:56 cílených Python kontrol PASS včetně63 FR JS scénářů a20
+online JS. Cloudové testy ověřují export bez tajemství/ostatních aplikací,
+Git identity, symlinky, disk/HTTPS/port, databázový health503, konzistentní
+zálohy, SIGTERM a restart se stejnou databází. Nový klient přijímá pouze
+konkrétní konfigurovaný Render původ; fragment s libovolnou Render adresou
+neaktivuje cizí službu. Pozdní konfigurace neblokuje slovník. Předchozí
+3d1d4483 je na GitHubu a Pages; místní herní upgrade i druhá partie jsou
+ověřené v private vocabulary_fr_rematch_20261124/completion.json. Veřejný
+Quick Tunnel je stále nedostupný. Nová cloudová služba ani účet nejsou
+vytvořené. Finální brána, SHA, export a limity přejímky jsou v private
+vocabulary_fr_cloud_20261124/completion.json. Návrh a plný postup jsou
+v Downloads/Vocabulary_FR_trvaly_hosting_navrh_a_nasazeni_2026-11-24.txt.

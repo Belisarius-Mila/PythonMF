@@ -1,0 +1,38 @@
+{
+  "services": [
+    {
+      "type": "web",
+      "name": "vocabulary-fr-pexeso",
+      "runtime": "python",
+      "plan": "0.5c-512mb",
+      "region": "frankfurt",
+      "repo": "https://github.com/Belisarius-Mila/PythonMF",
+      "branch": "main",
+      "numInstances": 1,
+      "autoDeployTrigger": "off",
+      "buildCommand": "python -I Samantha_Agent/app/vocabulary_fr_cloud.py build --output \".fr-cloud/releases/$RENDER_GIT_COMMIT\"",
+      "startCommand": "python -I \".fr-cloud/releases/$RENDER_GIT_COMMIT/Samantha_Agent/app/vocabulary_fr_cloud.py\" serve",
+      "healthCheckPath": "/api/vocabulary-fr/rooms/health",
+      "maxShutdownDelaySeconds": 30,
+      "envVars": [
+        {
+          "key": "PYTHON_VERSION",
+          "value": "3.12.16"
+        },
+        {
+          "key": "PYTHONDONTWRITEBYTECODE",
+          "value": "1"
+        },
+        {
+          "key": "VOCABULARY_FR_DATA_DIR",
+          "value": "/var/data"
+        }
+      ],
+      "disk": {
+        "name": "vocabulary-fr-games",
+        "mountPath": "/var/data",
+        "sizeGB": 1
+      }
+    }
+  ]
+}

@@ -393,6 +393,7 @@ TEST_MODULES = (
     "tests.test_vocabularyfr_web_gallery",
     "tests.test_vocabularyfr_multiplayer",
     "tests.test_vocabularyfr_hosting",
+    "tests.test_vocabularyfr_cloud",
     "tests.test_vocabularyit_audio",
     "tests.test_vocabularyen_audio_library",
     "tests.test_cockpit_pwa",

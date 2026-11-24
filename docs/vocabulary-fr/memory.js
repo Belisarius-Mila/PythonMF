@@ -56,7 +56,7 @@
       return JSON.parse(JSON.stringify(g));
     }catch(_){return null;}
   }
-  function create({doc,win,getData,getAudio,getCatalog,getSelection,getContext,sanitizeContext,onOpen,onClose,play,stop}){
+  function create({doc,win,getData,getAudio,getCatalog,getSelection,getContext,sanitizeContext,onOpen,onClose,play,stop,getOnlineOrigin=()=>null}){
     const remoteKey='vocabulary-fr.online-origin.v1';
     function verifiedOrigin(value){
       try{const url=new URL(value);return url.protocol==='https:'&&!url.username&&!url.password&&!url.port&&!url.search&&!url.hash&&url.pathname==='/'&&/^[a-z0-9]+(?:-[a-z0-9]+)+\.trycloudflare\.com$/.test(url.hostname)&&url.origin===value?url.origin:null;}catch(_){return null;}
@@ -67,6 +67,12 @@
       remoteOrigin=verifiedOrigin(entry.get('onlineOrigin'));
       try{if(remoteOrigin)win.sessionStorage.setItem(remoteKey,remoteOrigin);else win.sessionStorage.removeItem?.(remoteKey);}catch(_){}
     }else try{remoteOrigin=verifiedOrigin(win.sessionStorage.getItem(remoteKey));}catch(_){}
+    function currentOrigin(){
+      const value=getOnlineOrigin();
+      // Only the exact reviewed configuration can select a permanent service.
+      if(typeof value==='string'&&/^https:\/\/[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.onrender\.com$/.test(value))return value;
+      return remoteOrigin;
+    }
     const ids=['memoryOnline','memoryView','memorySetup','memorySelection','memorySetupChange','memoryPlayerCount','memoryNames','memoryPoolNotice','memoryStorageNotice','memoryStart','memoryResume','memoryRound','memoryBoard','memoryScores','memoryStatus','memoryProgress','memoryRetry','memorySkip','memoryEnd','memoryResult','memoryCollections','memoryAgain','memoryNew','memoryChange','memoryBack','memoryProjector','memoryReward','memoryRewardImage','memoryRewardWord'];
     const ui=Object.fromEntries(ids.map(id=>[id,doc.getElementById(id)]));
     let filters=sanitizeContext(getContext()), gameFilters=null, game=null, source='', selected=[], opened=false, busy=false, error=false, success=false, openCards=[], hint=-1, epoch=0, draftNames=['Hráč 1','Hráč 2'], saved=null;
@@ -124,7 +130,7 @@
       selected=ready?choose(pool(),getAudio(),getCatalog(),()=>.5):[];
       ui.memoryStart.disabled=selected.length!==PAIRS;ui.memoryOnline.disabled=selected.length!==PAIRS;
       ui.memoryPoolNotice.textContent=!ready?'Připravuji obrázky a zvuk…':selected.length===PAIRS?`Ve výběru ${pool().length} karet. Připraveno ${PAIRS} různých dvojic · ${CARDS} kartiček.`:`Pro plán potřebujeme ${PAIRS} dostatečně odlišných obrázků s francouzským zvukem. Rozšiř témata nebo výběr (${pool().length} karet ve filtru).`;
-      if(remoteOrigin)ui.memoryPoolNotice.textContent+=' Společná hra se otevře v nové kartě; tento výběr zůstane zachovaný.';
+      if(currentOrigin())ui.memoryPoolNotice.textContent+=' Společná hra se otevře v nové kartě; tento výběr zůstane zachovaný.';
       if(getAudio()===false||getCatalog()===false)ui.memoryPoolNotice.textContent='Obrázky nebo zvuk pro pexeso se nepodařilo načíst. Zkus obnovit stránku.';
       ui.memoryResume.hidden=!saved||saved.game?.deck?.length!==CARDS;
       if(saved?.game?.deck?.length&&saved.game.deck.length!==CARDS)ui.memoryPoolNotice.textContent+=' Starší partie má jiný počet kartiček. Pro nový formát spusť novou partii.';
@@ -227,9 +233,9 @@
     try{const raw=win.sessionStorage.getItem(KEY);if(raw&&raw.length<20000){const value=JSON.parse(raw);if(value?.version===1&&Array.isArray(value.game?.players)&&value.game.players.length>=1&&value.game.players.length<=4&&value.game.players.every(n=>typeof n==='string'&&Array.from(n).length<=12))saved=value;}}catch(_){}
     ui.memoryOnline.addEventListener('click',()=>{
       if(selected.length!==PAIRS)return;
-      const url=remoteOrigin?new URL('/vocabulary-fr/online.html',remoteOrigin):new URL('online.html',win.location.href);
+      const target=currentOrigin(),url=target?new URL('/vocabulary-fr/online.html',target):new URL('online.html',win.location.href);
       url.hash=new URLSearchParams({words:selected.map(i=>i.uid).join(',')}).toString();
-      if(remoteOrigin&&remoteOrigin!==new URL(win.location.href).origin&&typeof win.open==='function')win.open(url.toString(),'_blank','noopener,noreferrer');
+      if(target&&target!==new URL(win.location.href).origin&&typeof win.open==='function')win.open(url.toString(),'_blank','noopener,noreferrer');
       else win.location.href=url.toString();
     });
     ui.memoryPlayerCount.value='2';renderNames();

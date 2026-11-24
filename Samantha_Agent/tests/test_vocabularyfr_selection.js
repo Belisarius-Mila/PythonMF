@@ -294,6 +294,24 @@ test('the Cockpit game shortcut cannot open a room with too few selected picture
  const v=await app({url:cockpitFrenchUrl(cockpitGameOrigin)}),opened=[];v.win.open=url=>opened.push(url);v.state.query='chat';v.selectionChanged();v.element('memoryTab').click();v.element('memoryOnline').click();assert.equal(v.element('memoryOnline').disabled,true);assert.equal(opened.length,0);
 });
 const memorySaved=v=>JSON.parse(v.session.getItem(memory.KEY));
+test('permanent hosting configuration replaces an expired tunnel and preserves personal data and filters',async()=>{
+ const origin='https://fixture-french-pairs.onrender.com',hosting={schemaVersion:1,origin},session=storage(new Map([['vocabulary-fr.online-origin.v1',cockpitGameOrigin]]));
+ const v=await app({hosting,session,url:cockpitFrenchUrl('https://other-service.onrender.com')}),opened=[];
+ v.win.open=url=>opened.push(url);v.element('memoryTab').click();const context=JSON.stringify(v.context()),personal=JSON.stringify([...v.local.map]);
+ v.element('memoryOnline').click();assert.equal(new URL(opened[0]).origin,origin);assert.equal(JSON.stringify(v.context()),context);assert.equal(JSON.stringify([...v.local.map]),personal);
+ assert.equal(new URLSearchParams(new URL(opened[0]).hash.slice(1)).get('words').split(',').length,12);
+});
+test('late hosting metadata updates an already open pairs screen without blocking the vocabulary',async()=>{
+ let resolve;const pending=new Promise(done=>{resolve=done;}),v=await app({hostingDeferred:pending}),opened=[];
+ v.win.open=url=>opened.push(url);v.element('memoryTab').click();assert.equal(v.element('memoryStart').disabled,false);
+ resolve({schemaVersion:1,origin:'https://fixture-late-fr.onrender.com'});await flush();
+ v.element('memoryOnline').click();assert.equal(new URL(opened[0]).origin,'https://fixture-late-fr.onrender.com');
+});
+test('invalid hosting metadata and a fragment alone cannot enable arbitrary Render services',async()=>{
+ for(const hosting of [null,{schemaVersion:2,origin:'https://fixture-fr.onrender.com'},...['https://foreign.example','http://fixture-fr.onrender.com','https://fixture-fr.onrender.com/path','https://name:secret@fixture-fr.onrender.com','https://fixture-fr.onrender.com:8443','https://fixture-fr.onrender.com?x=1'].map(origin=>({schemaVersion:1,origin}))]){
+  const v=await app({hosting,url:cockpitFrenchUrl('https://another-fr.onrender.com')}),opened=[];v.win.open=url=>opened.push(url);v.element('memoryTab').click();v.element('memoryOnline').click();assert.equal(opened.length,0);
+ }
+});
 const memoryButton=(v,n)=>v.element('memoryBoard').children[n].querySelector('button');
 async function memoryView(count=2,options={}){
  const v=await app(options);v.element('memoryTab').click();change(v,'memoryPlayerCount',String(count));
