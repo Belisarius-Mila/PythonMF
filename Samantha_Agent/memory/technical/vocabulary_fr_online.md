@@ -163,3 +163,34 @@ bez změny prostředí rodiče. Porovnání normalizuje starší české i angli
 datum narození procesu a jen známý přechod Python launcheru; nadále musí
 souhlasit čas vzniku, PID a všechny argumenty. To dovoluje stejnou původní
 partii rozpoznat i z launchd/UTC prostředí, bez nového tunelu či restartu.
+
+## Další partie ve stejné místnosti — 24. 11. 2026
+
+Po dokončení může zakladatel použít „Další partie s jinými slovíčky“. V místnosti
+vybere veřejný okruh a zkontroluje návrh12 významů. Návrh vynechá všech12 UID
+z dokončené partie; pokud okruh nestačí, zahájení je vypnuté a nabídne širší
+výběr. „Změnit výběr“ znovu losuje; „Zrušit výběr“ zachová výsledek. Soukromé
+osobní filtry původní Francouzštiny zůstávají v původním panelu.
+
+Rematch přijímá volitelná uids (12 kompatibilních veřejných významů). Bez uids
+platí původní rematch se stejnými slovy. Jen zakladatel po finished a za
+přítomnosti obou hráčů může změnu provést; requestId/expectedRound/expectedStage
+zabraňují opakování a opožděnému restartu. Místnost, pozvánka, oba tokeny a
+jména se zachovají, kolo se zvýší a skóre/tahy/plán se obnoví. Spoluhráč zůstává
+v panelu a nové kolo načte běžným sync. Po nejisté odpovědi klient nejprve
+načte autoritativní stav, žádný create/join/rematch neopakuje automaticky.
+
+Registrované vocabulary_fr_hosting_upgrade → Pilot.upgrade aktualizuje jen
+přesně vlastněný server na stávajícím konektoru. Vyžaduje explicitní aktuální
+souhlas, čistý schválený SHA, expected_running_head a trvalé request_id, předem
+připravený neměnný export se stejným katalogem/audio/quiz i konektorem. Před
+SIGTERM serveru zapisuje soukromou účtenku. Počká na zánik původního procesu,
+ověří volný loopback port, spustí jediný server na stejné databázi/původu a
+ověří jeho health/katalog i oba PID. Konektor se neukončuje, žádný nový tunel
+nevzniká. Nejasný výsledek je attention a stejný požadavek se pouze přečte;
+žádný automatický druhý start. Soubory, hry a staré exporty se nemažou.
+
+Aktualizace není tímto návodem schválená ani provedená. Po skutečném nasazení
+stačí oběma obnovit stávající herní panel a kliknout na pokračování se zvukem.
+SessionStorage ve stejném panelu/původu zachová soukromý přístup. Nová pozvánka
+není nutná; časová platnost místnosti24h/2h bez aktivity zůstává.

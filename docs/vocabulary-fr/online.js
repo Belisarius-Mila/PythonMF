@@ -7,10 +7,10 @@
   const tokenPattern=/^[a-f0-9]{64}$/,roomPattern=/^[a-f0-9]{24}$/;
   function random(win){const bytes=new Uint8Array(32);win.crypto.getRandomValues(bytes);return Array.from(bytes,b=>b.toString(16).padStart(2,'0')).join('');}
   function create({doc,win,fetcher=root.fetch.bind(root),AudioClass=root.Audio}){
-    const ids=['onlineView','onlineBack','onlineStatus','onlineStorage','onlineSetup','onlineName','onlineSelection','onlineEnter','onlineRoom','onlineInvitePanel','onlineInvite','onlineCopy','onlineProgress','onlineStart','onlineResume','onlineRetry','onlineSkip','onlineBoard','onlineScores','onlineEnd','onlineResult','onlineAgain','onlineCollections','onlineReward','onlineRewardImage','onlineRewardWord'];
+    const ids=['onlineView','onlineBack','onlineStatus','onlineStorage','onlineSetup','onlineName','onlineSelection','onlineEnter','onlineRoom','onlineInvitePanel','onlineInvite','onlineCopy','onlineProgress','onlineStart','onlineResume','onlineRetry','onlineSkip','onlineBoard','onlineScores','onlineEnd','onlineResult','onlineAgain','onlineNewWords','onlinePicker','onlineTopic','onlineCandidatesInfo','onlineCandidates','onlineShuffle','onlineNextStart','onlineNextCancel','onlineCollections','onlineReward','onlineRewardImage','onlineRewardWord'];
     const ui=Object.fromEntries(ids.map(id=>[id,doc.getElementById(id)]));
     const audio=new AudioClass();let data=null,manifest=null,quiz=null,revision='',selection=[],snapshot=null,session=null,active=false,network=false,sending=false,pollTimer=null,stage=null,epoch=0,available=false;
-    let cancelAudio=null;
+    let cancelAudio=null,picking=false,candidates=[];
     const route=new URLSearchParams(new URL(win.location.href).hash.slice(1));
     const status=text=>{ui.onlineStatus.textContent=text;};
     function save(){try{win.sessionStorage.setItem(KEY,JSON.stringify(session));}catch(_){ui.onlineStorage.textContent='Obnovení po zavření tohoto panelu není dostupné. Pozvánka dál funguje pro spoluhráče.';}}
@@ -49,7 +49,7 @@
       if(value.protocol!==1||value.catalog!==revision||value.room!==session.room||!Array.isArray(value.cards)||value.cards.length!==24||![0,1].includes(value.you))throw Error('Partie neodpovídá této verzi slovníku.');
       if(snapshot&&value.revision<snapshot.revision)return;
       const changed=!snapshot||value.revision!==snapshot.revision||!network||JSON.stringify(value.players)!==JSON.stringify(snapshot.players);
-      if(snapshot&&snapshot.round!==value.round)cancelStage();
+      if(snapshot&&snapshot.round!==value.round){cancelStage();picking=false;candidates=[];}
       snapshot=value;network=true;
       if(changed)render();
       syncStage();
@@ -71,6 +71,16 @@
       finally{if(ticket===epoch){sending=false;render();schedule();}}
     }
     function currentUid(){return snapshot.phase==='reward'?snapshot.reward:snapshot.cards[snapshot.focus]?.uid;}
+    function chooseNext(){
+      if(snapshot?.phase!=='finished'||snapshot.you!==0)return;
+      const previous=new Set(Object.keys(snapshot.owners)),topic=ui.onlineTopic.value;
+      const pool=M.select(data.items,{topics:topic?[topic]:[]}).filter(item=>!previous.has(item.uid));
+      candidates=Memory.choose(pool,manifest,quiz);picking=true;
+      ui.onlineCandidates.replaceChildren();
+      candidates.forEach(item=>{const word=doc.createElement('li');word.lang='fr';word.textContent=item.fr;ui.onlineCandidates.append(word);});
+      ui.onlineCandidatesInfo.textContent=candidates.length===12?'Připraveno 12 nových dvojic. Spoluhráč zůstává ve stejné místnosti.':'V tomto okruhu není dost jiných obrázků se zvukem pro 12 dvojic. Zvol širší okruh.';
+      render();
+    }
     function primeReward(item){
       const source=new URL('../'+item.image,win.location.href).toString();
       if(ui.onlineRewardImage.src!==source){ui.onlineRewardImage.src=source;ui.onlineRewardImage.hidden=false;}
@@ -103,6 +113,10 @@
       ui.onlineStart.hidden=snapshot.phase!=='waiting'||snapshot.you!==0;ui.onlineStart.disabled=locked||!snapshot.players.every(p=>p?.connected);
       ui.onlineResume.hidden=active;ui.onlineResume.disabled=sending||!available;ui.onlineRetry.hidden=ui.onlineSkip.hidden=!stage?.failed;
       ui.onlineEnd.hidden=!finished;ui.onlineAgain.hidden=snapshot.you!==0;ui.onlineAgain.disabled=locked;
+      ui.onlineNewWords.hidden=snapshot.you!==0;ui.onlineNewWords.disabled=locked;
+      ui.onlinePicker.hidden=!finished||snapshot.you!==0||!picking;
+      ui.onlineTopic.disabled=ui.onlineShuffle.disabled=ui.onlineNextCancel.disabled=locked;
+      ui.onlineNextStart.disabled=locked||candidates.length!==12;
       ui.onlineProgress.textContent=`Nalezeno ${Object.keys(snapshot.owners).length} z 12 dvojic · ${snapshot.turns} tahů`;
       const byUid=new Map(data.items.map(i=>[i.uid,i]));
       ui.onlineBoard.replaceChildren();
@@ -139,7 +153,7 @@
       else if(!network)status('Spojení vypadlo. Čekáme na návrat k partii.');
       else if(snapshot.paused)status('Partie je pozastavená. Čekáme na připojení spoluhráče.');
       else if(snapshot.phase==='waiting')status(snapshot.players[1]?'Oba jste v místnosti. Zakladatel může zahájit hru.':'Pošli soukromý odkaz spoluhráči.');
-      else if(finished)status('Všech 12 dvojic je nalezených.');
+      else if(finished)status(snapshot.you===0?'Všech 12 dvojic je nalezených. Můžeš připravit další partii tady ve stejné místnosti.':'Všech 12 dvojic je nalezených. Počkej tady, zakladatel může připravit další partii.');
       else if(snapshot.phase==='choose')status(snapshot.active===snapshot.you?'Jsi na tahu. Vyber '+(snapshot.cards.some(c=>c.state==='open')?'druhou':'první')+' kartičku.':`Na tahu: ${snapshot.players[snapshot.active].name}.`);
       else if(!stage?.failed)status(snapshot.phase==='compare'?'Porovnej oba obrázky…':snapshot.phase==='reward'?'Správně! Poslechni si slovo ještě jednou.':'Posloucháme na obou počítačích…');
     }
@@ -175,6 +189,8 @@
       try{
         const texts=await Promise.all(['vocabulary-fr-v2.json','vocabulary-fr-audio.json','vocabulary-fr-quiz.json'].map(name=>read('../data/'+name,true)));
         [data,manifest,quiz]=texts.map(JSON.parse);data.catalog={groups:data.groups,parents:data.parents};
+        ui.onlineTopic.replaceChildren();
+        [{id:'',label:'Všechny okruhy'},...(data.groups||[])].forEach(group=>{const option=doc.createElement('option');option.value=group.id;option.textContent=group.label;ui.onlineTopic.append(option);});
         const digest=await win.crypto.subtle.digest('SHA-256',new TextEncoder().encode(texts.join('\0')));revision=Array.from(new Uint8Array(digest),b=>b.toString(16).padStart(2,'0')).join('');
         const requested=route.get('words')?.split(',');const pool=requested?data.items.filter(i=>requested.includes(i.uid)):data.items;selection=Memory.choose(pool,manifest,quiz,()=>.5);
         if(route.has('room')&&!roomPattern.test(route.get('room')))throw Error('Pozvánka není platná.');
@@ -192,6 +208,10 @@
     }
     ui.onlineEnter.addEventListener('click',()=>{void enter();});ui.onlineResume.addEventListener('click',()=>{void enter();});
     ui.onlineStart.addEventListener('click',()=>{void command('start');});ui.onlineAgain.addEventListener('click',()=>{void command('rematch');});
+    ui.onlineNewWords.addEventListener('click',()=>{ui.onlineTopic.value='';chooseNext();});
+    ui.onlineTopic.addEventListener('change',chooseNext);ui.onlineShuffle.addEventListener('click',chooseNext);
+    ui.onlineNextCancel.addEventListener('click',()=>{picking=false;candidates=[];render();});
+    ui.onlineNextStart.addEventListener('click',()=>{if(picking&&candidates.length===12)void command('rematch',{uids:candidates.map(item=>item.uid)});});
     ui.onlineRetry.addEventListener('click',()=>{cancelStage();syncStage();});ui.onlineSkip.addEventListener('click',()=>{if(stage?.failed){stage.failed=false;void command('heard',{stage:snapshot.stage});}});
     ui.onlineCopy.addEventListener('click',()=>{const copy=win.navigator?.clipboard?.writeText(ui.onlineInvite.value);void Promise.resolve(copy||Promise.reject(Error('clipboard'))).then(()=>status('Pozvánka je zkopírovaná. Pošli ji spoluhráči.'),()=>status('Odkaz můžeš označit v poli a zkopírovat ručně.'));});
     ui.onlineBack.addEventListener('click',event=>{if(snapshot&&snapshot.phase!=='finished'&&!win.confirm('Opustit společnou partii? Spoluhráč počká na tvůj návrat.'))event.preventDefault();else leave();});

@@ -237,6 +237,45 @@ class RoomsTests(RoomFixture):
         state = self.action("rematch")
         self.assertEqual((state["round"], state["owners"], state["turns"], state["phase"]), (2, {}, 0, "choose"))
         self.assertTrue(all(c["state"] == "hidden" for c in state["cards"]))
+        self.assertEqual(set(self.raw()["deck"]), set(deck))
+
+    def test_new_words_rematch_keeps_room_access_and_survives_restart_without_repeating(self):
+        self.start()
+        deck = self.raw()["deck"]
+        for uid in self.uids:
+            self.pair(*[i for i, candidate in enumerate(deck) if candidate == uid])
+        before = self.raw()
+        chosen = []
+        for uid in self.catalog.items:
+            if uid not in self.uids and all(self.catalog.compatible(uid, other) for other in chosen):
+                chosen.append(uid)
+            if len(chosen) == 12:
+                break
+        payload = {"requestId": "e" * 64, "expectedRound": before["round"], "expectedStage": before["stage"], "uids": chosen}
+        for token, values in [(self.guest, payload), (self.host, {**payload, "uids": chosen[:11]}),
+                              (self.host, {**payload, "uids": [chosen[0]] * 12}),
+                              (self.host, {**payload, "uids": chosen[:-1] + ["unknown"]})]:
+            with self.assertRaises(GameError):
+                self.rooms.act(self.room, token, "rematch", values)
+            self.assertEqual(self.raw(), before)
+        state = self.rooms.act(self.room, self.host, "rematch", payload)
+        self.assertEqual((state["room"], state["round"], state["phase"], state["owners"], state["turns"], state["active"]),
+                         (self.room, 2, "choose", {}, 0, 0))
+        after = self.raw()
+        self.assertEqual(set(after["deck"]), set(chosen))
+        self.assertTrue(set(after["deck"]).isdisjoint(deck))
+        self.assertEqual(after["players"], before["players"])
+        self.assertEqual(after["inviteHash"], before["inviteHash"])
+        self.assertTrue(all(card["state"] == "hidden" and "uid" not in card for card in state["cards"]))
+        self.rooms = Rooms(self.path, self.catalog, clock=self.clock)
+        self.assertEqual(self.rooms.act(self.room, self.host, "rematch", payload), state)
+        self.assertEqual(self.raw()["deck"], after["deck"])
+        self.assertEqual(self.action("sync", self.guest)["round"], 2)
+        with self.assertRaises(GameError):
+            self.rooms.act(self.room, self.host, "rematch", {**payload, "requestId": "f" * 64})
+        with self.assertRaises(GameError):
+            self.action("rematch", uids=self.uids)
+        self.assertEqual(self.raw()["deck"], after["deck"])
 
     def test_expiry_catalog_drift_authentication_capacity_and_bad_selection(self):
         for bad in ["x", "e" * 64]:

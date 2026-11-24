@@ -2,13 +2,21 @@ const test=require('node:test'),assert=require('node:assert/strict'),fs=require(
 const {Element,fixture,storage,flush,until}=require('./fixtures/vocabulary_fr_dom.js');
 const online=require('../../docs/vocabulary-fr/online.js'),memory=require('../../docs/vocabulary-fr/memory.js');
 const html=fs.readFileSync(path.resolve(__dirname,'../../docs/vocabulary-fr/online.html'),'utf8');
-const base=fixture.make(),files=[base.data,base.audio,base.quiz],texts=files.map(JSON.stringify);
+const base=fixture.make();
+// Enough independent synthetic meanings to play a wholly different second round.
+for(let n=19;n<=36;n++){
+ const uid=`vfr-${String(n).padStart(4,'0')}`,fr=`mot test ${n}`,cz=`testovací význam ${n}`;
+ const item={...base.data.items[0],id:n,uid,fr,cz,image:`assets/vocabulary-fr-v2/images/fixture-${n}.webp`,thumbnail:`assets/vocabulary-fr-v2/thumbs/fixture-${n}.webp`,related:[]};
+ base.data.items.push(item);base.audio.items[uid]={...base.audio.items['vfr-0001'],uid,sourceFr:fr,sourceCz:cz,fr:`assets/vocabulary-fr-audio/fixture/${uid}-fr.mp3`};
+ base.quiz.entries[uid]={...base.quiz.entries['vfr-0001'],uid,fr,cz,image:item.image,thumbnail:item.thumbnail,pieces:[fr]};
+}
+const files=[base.data,base.audio,base.quiz],texts=files.map(JSON.stringify);
 const revision=crypto.createHash('sha256').update(texts.join('\0')).digest('hex');
 const uids=memory.choose(base.data.items,base.audio,base.quiz,()=>.5).map(i=>i.uid);
 const room='d'.repeat(24);
 
 function bridge(){
- let state=null,hostToken=null,guestToken=null,invite=null,failed=false,loseFlip=false;
+ let state=null,hostToken=null,guestToken=null,invite=null,failed=false,loseFlip=false,loseRematch=false;
  const requests=[];
  const result=(status,value)=>({ok:status===200,status,json:async()=>structuredClone(value)});
  function view(you){const value=structuredClone(state);value.you=you;return value;}
@@ -41,10 +49,10 @@ function bridge(){
    if(!state.acks.includes(you))state.acks.push(you);state.revision++;
    if(state.acks.length===2){if(state.phase==='reveal')state.phase=state.open.length===1?'choose':'compare';else if(state.phase==='reward'){state.phase=Object.keys(state.owners).length===12?'finished':'choose';state.reward=null;}}
   }
-  if(action==='rematch'){state.phase='choose';state.owners={};state.open=[];state.round++;state.turns=0;state.revision++;board();}
+  if(action==='rematch'){if(payload.uids)state.deck=payload.uids.flatMap(uid=>[uid,uid]);state.phase='choose';state.owners={};state.open=[];state.round++;state.turns=0;state.active=0;state.acks=[];state.reward=null;state.revision++;board();if(loseRematch){loseRematch=false;throw Error('reply lost');}}
   return result(200,view(you));
  }
- return {fetcher,requests,get state(){return state;},set failed(value){failed=value;},set loseFlip(value){loseFlip=value;},reward(uid){state.owners[uid]=state.active;state.open=[];state.turns++;state.reward=uid;state.phase='reward';state.stage++;state.acks=[];state.revision++;board();},mismatch(){state.active=1-state.active;state.open=[];state.turns++;state.phase='choose';state.revision++;board();}};
+ return {fetcher,requests,get state(){return state;},set failed(value){failed=value;},set loseFlip(value){loseFlip=value;},set loseRematch(value){loseRematch=value;},reward(uid){state.owners[uid]=state.active;state.open=[];state.turns++;state.reward=uid;state.phase='reward';state.stage++;state.acks=[];state.revision++;board();},mismatch(){state.active=1-state.active;state.open=[];state.turns++;state.phase='choose';state.revision++;board();}};
 }
 
 async function client(server,{url='http://localhost/vocabulary-fr/online.html',session=storage(),name='Jana',blocked=false}={}){
@@ -67,6 +75,7 @@ async function client(server,{url='http://localhost/vocabulary-fr/online.html',s
 async function enter(view){const task=view.api.enter();await until(()=>!view.players[0].paused);view.ended();await task;await flush();}
 async function pairClients(){const server=bridge(),a=await client(server);await enter(a);const b=await client(server,{url:a.element('onlineInvite').value,name:'Míla'});await enter(b);await a.api.poll();await a.api.command('start');await b.api.poll();return {server,a,b};}
 async function finish(view){view.ended();view.advance(2000);await flush();await until(()=>!view.element('onlineBoard').children.length||view.players[0].paused);await flush();}
+async function finishedGame(server,...clients){server.state.owners=Object.fromEntries(uids.map((uid,n)=>[uid,n%2]));server.state.phase='finished';server.state.revision++;for(const view of clients)await view.api.poll();}
 
 test('online stays silent until explicit entry and unavailable service cannot start a room',async()=>{
  const server=bridge(),a=await client(server);assert.equal(a.players[0].starts.length,0);assert.equal(server.requests.length,0);
@@ -150,4 +159,43 @@ test('a stalled request times out and rechecks state without replaying a move',a
  const transport={fetcher:async(url,options)=>{if(stall&&String(url).endsWith('/flip')){await normal(url,options);return new Promise(()=>{});}return normal(url,options);}};
  const b=await client(transport,{url:a.win.location.href,session:a.session});await enter(b);const pending=b.api.command('flip',{index:7});await flush();b.advance(8000);await pending;stall=false;await b.api.poll();
  assert.equal(b.api.getState().phase,'reveal');assert.equal(server.requests.filter(r=>r.url.endsWith('/flip')).length,1);
+});
+test('host starts different words while both clients keep the room, names, access and invitation',async()=>{
+ const {server,a,b}=await pairClients();await finishedGame(server,a,b);
+ const oldDeck=[...server.state.deck],urls=[a.win.location.href,b.win.location.href],sessions=[a.session.getItem(online.KEY),b.session.getItem(online.KEY)];
+ assert.equal(a.element('onlineNewWords').hidden,false);assert.equal(b.element('onlineNewWords').hidden,true);
+ a.element('onlineNewWords').click();assert.equal(a.element('onlinePicker').hidden,false);assert.equal(a.element('onlineCandidates').children.length,12);
+ const preview=a.element('onlineCandidates').textContent;await a.api.poll();assert.equal(a.element('onlineCandidates').textContent,preview);
+ a.element('onlineNextStart').click();await until(()=>server.state.round===2);await flush();await b.api.poll();
+ const sent=server.requests.filter(r=>r.url.endsWith('/rematch'));assert.equal(sent.length,1);assert.equal(sent[0].payload.uids.length,12);
+ assert.ok(sent[0].payload.uids.every(uid=>!oldDeck.includes(uid)));assert.deepEqual(new Set(server.state.deck),new Set(sent[0].payload.uids));
+ for(const [n,view] of [a,b].entries()){
+  assert.equal(view.api.getState().room,room);assert.equal(view.api.getState().round,2);assert.deepEqual(view.api.getState().owners,{});assert.equal(view.api.getState().turns,0);
+  assert.equal(view.win.location.href,urls[n]);assert.equal(view.session.getItem(online.KEY),sessions[n]);assert.equal(view.element('onlinePicker').hidden,true);
+  assert.equal(view.element('onlineBoard').querySelectorAll('.memory-empty').length,0);assert.equal(view.players[0].starts.length,1);
+ }
+ assert.deepEqual(server.state.players.map(p=>p.name),['Jana','Míla']);
+ assert.equal(server.requests.filter(r=>r.url.endsWith('/rooms')).length,1);assert.equal(server.requests.filter(r=>r.url.endsWith('/join')).length,1);
+ await a.api.command('flip',{index:0});await b.api.poll();assert.equal(a.players[0].src,b.players[0].src);
+});
+test('small topic cannot silently repeat old words; choosing a broader topic and cancelling preserves scores',async()=>{
+ const {server,a}=await pairClients();await finishedGame(server,a);const scores=structuredClone(server.state.owners);
+ a.element('onlineNewWords').click();a.element('onlineTopic').value='topic-18';a.element('onlineTopic').emit('change');
+ assert.equal(a.element('onlineNextStart').disabled,true);assert.match(a.element('onlineCandidatesInfo').textContent,/není dost/);
+ a.element('onlineTopic').value='';a.element('onlineTopic').emit('change');assert.equal(a.element('onlineNextStart').disabled,false);
+ a.element('onlineNextCancel').click();assert.equal(a.element('onlinePicker').hidden,true);assert.deepEqual(server.state.owners,scores);
+ assert.equal(server.requests.filter(r=>r.url.endsWith('/rematch')).length,0);
+});
+test('disconnect locks the new-round picker and a lost rematch reply recovers without another room or rematch',async()=>{
+ const {server,a,b}=await pairClients();await finishedGame(server,a,b);a.element('onlineNewWords').click();
+ server.failed=true;await a.api.poll();assert.equal(a.element('onlineNextStart').disabled,true);assert.equal(a.element('onlineTopic').disabled,true);
+ server.failed=false;await a.api.poll();assert.equal(a.element('onlineNextStart').disabled,false);
+ server.loseRematch=true;a.element('onlineNextStart').click();await until(()=>server.state.round===2);await flush();await a.api.poll();await b.api.poll();
+ assert.equal(a.api.getState().round,2);assert.equal(b.api.getState().round,2);assert.equal(a.element('onlinePicker').hidden,true);
+ assert.equal(server.requests.filter(r=>r.url.endsWith('/rematch')).length,1);assert.equal(server.requests.filter(r=>r.url.endsWith('/join')).length,1);
+});
+test('same-words rematch remains available without transmitting a replacement selection',async()=>{
+ const {server,a,b}=await pairClients();await finishedGame(server,a,b);const before=[...server.state.deck];
+ a.element('onlineAgain').click();await until(()=>server.state.round===2);await flush();await b.api.poll();
+ assert.deepEqual(server.state.deck,before);assert.equal(b.api.getState().round,2);assert.equal('uids' in server.requests.find(r=>r.url.endsWith('/rematch')).payload,false);
 });

@@ -334,6 +334,8 @@ class Rooms:
         elif action == "rematch":
             if player != 0 or room["phase"] != "finished":
                 raise GameError("Novou partii zahájí zakladatel po dokončení hry.", 409)
+            if "uids" in payload:
+                room["deck"] = self.catalog.selection(payload["uids"]) * 2
             self.shuffle(room["deck"])
             room.update(owners={}, active=0, turns=0, open=[], reward=None, acks=[], round=room["round"] + 1)
             self._phase(room, "choose")

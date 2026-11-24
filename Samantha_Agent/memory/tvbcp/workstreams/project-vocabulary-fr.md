@@ -1,37 +1,39 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
-## 2026-11-24 14:49 CET — Přímý vstup do společného pexesa z Francouzštiny v Cockpitu
+## 2026-11-24 19:39 CET — Další partie s jinými slovíčky ve stejné místnosti
 
-Hotovo: Místně připravené propojení stávajícího vstupu „Francouzština Jana“
-v Cockpitu s tlačítkem „Hrát spolu na dálku“ uvnitř jejího pexesa. Jana
-nemusí ručně kopírovat adresu herní služby. Společná hra se otevře v nové
-kartě se 12 právě vybranými slovíčky; původní Francouzština zůstane otevřená
-na své adrese se stejnými osobními označeními a filtry. Kopíruje se už jen
-pozvánka pro spoluhráče. Běžící dočasný pilot zůstává beze změny.
+Hotovo: Místně doplněné tlačítko „Další partie s jinými slovíčky“. Zakladatel
+vybere okruh, zkontroluje návrh 12 nových slov, případně výběr změní, a zahájí
+hru pro oba dosavadní hráče. Předchozích 12 UID se vynechá; malý okruh nabídne
+rozšíření místo tichého opakování slov. Zůstávají jména, hráčské přístupy,
+místnost i pozvánka. Skóre a plán se obnoví pro další kolo. Původní tlačítko
+pro stejná slova zůstává. Soukromý osobní seznam se nepřenáší.
 
-Rozhodnutí: Míla požádal o integraci přímo do Francouzštiny otevírané
-z Cockpitu. Zachovat její dosavadní Pages původ a osobní data. Cockpit
-předá aktuální adresu pouze ověřené běžící hry ve fragmentu vstupního
-odkazu; konkrétní dočasná adresa se neukládá do Gitu. Katalog nic nespouští.
-Nové vydání webu ani restart Cockpitu tímto vývojem ještě neproběhly.
+Rozhodnutí: Míla potvrdil jednu skutečně odehranou společnou partii a upozornil,
+že jiná slova vyžadují novou pozvánku. Příčina byla potvrzená v kódu: rematch
+pouze zamíchal původní balíček. Řešení mění výběr uvnitř stávající místnosti.
+Předchozí p+n a nasazení vstupu Cockpit → FR byly dokončené na5205fc43;
+následná samostatná oprava dočasného tunelu je doložená v private
+vocabulary_fr_dns_repair_20261124/completion.json. Nový vývoj sám nové
+publikování ani nasazení nepovoluje.
 
-Další krok: Samostatně schválit p+n FR Pages a Cockpitu přes registrované
-předání Terře; potom ověřit skutečný katalog, publikovaný klient a vstup
-Jany do nové partie. Stávající HTTPS pilot mezitím zůstává použitelný.
-Navrhované další kroky: Fyzicky ověřit jeden vstup z Cockpitu a poslání
-pozvánky druhému Macu/Linuxu. Trvalou adresu řešit až po večerní přejímce.
+Další krok: Po samostatném souhlasu vydat tuto změnu přes Terru a registrovaně
+aktualizovat pouze herní server na stávající adrese. Oba hráči pak obnoví
+svůj herní panel a výslovně zapnou zvuk; nový odkaz nebude potřeba.
+Navrhované další kroky: Fyzicky ověřit druhou partii s jinými slovy; trvalou
+adresu nadále řešit zvlášť. Cockpit se pro tuto změnu nemusí restartovat.
 
-Technický důkaz: 39 cílených Python kontrol PASS včetně 60 FR JS scénářů
-(5 nových pro vstup z Cockpitu) a 16 online JS scénářů. Výběr a osobní
-stav zůstávají zachované, adresu lze obnovit po změně filtrů/reloadu,
-nové spuštění z Cockpitu nahradí starou dočasnou adresu. Neplatné adresy,
-cizí původ, credentials, port, cesta, query či fragment se nepoužijí jako
-cíl. Při chybě či zastavené službě zůstane běžná Francouzština dostupná.
-Lokální katalog poskytuje propojený odkaz, živý Cockpit má ještě původní
-odkaz: vydání je nutné. Stávající hra přes HTTPS odpovídá200 a její procesy
-nebyly restartovány. Kontrola totožnosti procesů je nezávislá na LC_ALL/TZ
-volající služby a rozpozná starší české i nové anglické datum startu.
-První doménová brána1377 PASS; finální brána, SHA a počet čekajících commitů:
-private vocabulary_fr_cockpit_entry_20261124/completion.json.
+Technický důkaz: Dosavadních44 cílených Python kontrol PASS, včetně60 FR JS
+scénářů a20 online JS scénářů. Skutečný veřejný katalog481 karet: výběry pro
+všechny okruhy prošly společnou kompatibilitou klient/server, žádné navržené
+UID není z předchozí partie. Dva samostatné JS klienty zachovají místnost,
+URL, soukromý přístup i jména, po ztracené odpovědi neopakují rematch. Server
+ověřuje zakladatele, dokončenou hru, očekávané kolo/fázi a12 kompatibilních UID;
+opakovaná stejná akce nepřelosuje karty. Registrované Pilot.upgrade zachová
+konektor, původ a databázi, vyžaduje stejné katalogové vstupy a explicitní
+souhlas, před jediným restartem ukládá účtenku. Selhání/nejistota se neopakuje.
+Živý server5205fc43 a původní procesy zůstaly během vývoje beze změny.
+Fyzická přejímka nové druhé partie čeká. Finální brána, cílené počty, commit
+a provozní stav jsou v private vocabulary_fr_rematch_20261124/completion.json.
 <!-- SAMANTHA_CURRENT_STATUS_END -->
 
 ## 2026-11-17 20:21 CET — Společné předání osobního režimu a Datových commitů k p+n
@@ -933,3 +935,39 @@ nebyly restartovány. Kontrola totožnosti procesů je nezávislá na LC_ALL/TZ
 volající služby a rozpozná starší české i nové anglické datum startu.
 První doménová brána1377 PASS; finální brána, SHA a počet čekajících commitů:
 private vocabulary_fr_cockpit_entry_20261124/completion.json.
+
+## 2026-11-24 19:39 CET — Další partie s jinými slovíčky ve stejné místnosti
+
+Hotovo: Místně doplněné tlačítko „Další partie s jinými slovíčky“. Zakladatel
+vybere okruh, zkontroluje návrh 12 nových slov, případně výběr změní, a zahájí
+hru pro oba dosavadní hráče. Předchozích 12 UID se vynechá; malý okruh nabídne
+rozšíření místo tichého opakování slov. Zůstávají jména, hráčské přístupy,
+místnost i pozvánka. Skóre a plán se obnoví pro další kolo. Původní tlačítko
+pro stejná slova zůstává. Soukromý osobní seznam se nepřenáší.
+
+Rozhodnutí: Míla potvrdil jednu skutečně odehranou společnou partii a upozornil,
+že jiná slova vyžadují novou pozvánku. Příčina byla potvrzená v kódu: rematch
+pouze zamíchal původní balíček. Řešení mění výběr uvnitř stávající místnosti.
+Předchozí p+n a nasazení vstupu Cockpit → FR byly dokončené na5205fc43;
+následná samostatná oprava dočasného tunelu je doložená v private
+vocabulary_fr_dns_repair_20261124/completion.json. Nový vývoj sám nové
+publikování ani nasazení nepovoluje.
+
+Další krok: Po samostatném souhlasu vydat tuto změnu přes Terru a registrovaně
+aktualizovat pouze herní server na stávající adrese. Oba hráči pak obnoví
+svůj herní panel a výslovně zapnou zvuk; nový odkaz nebude potřeba.
+Navrhované další kroky: Fyzicky ověřit druhou partii s jinými slovy; trvalou
+adresu nadále řešit zvlášť. Cockpit se pro tuto změnu nemusí restartovat.
+
+Technický důkaz: Dosavadních44 cílených Python kontrol PASS, včetně60 FR JS
+scénářů a20 online JS scénářů. Skutečný veřejný katalog481 karet: výběry pro
+všechny okruhy prošly společnou kompatibilitou klient/server, žádné navržené
+UID není z předchozí partie. Dva samostatné JS klienty zachovají místnost,
+URL, soukromý přístup i jména, po ztracené odpovědi neopakují rematch. Server
+ověřuje zakladatele, dokončenou hru, očekávané kolo/fázi a12 kompatibilních UID;
+opakovaná stejná akce nepřelosuje karty. Registrované Pilot.upgrade zachová
+konektor, původ a databázi, vyžaduje stejné katalogové vstupy a explicitní
+souhlas, před jediným restartem ukládá účtenku. Selhání/nejistota se neopakuje.
+Živý server5205fc43 a původní procesy zůstaly během vývoje beze změny.
+Fyzická přejímka nové druhé partie čeká. Finální brána, cílené počty, commit
+a provozní stav jsou v private vocabulary_fr_rematch_20261124/completion.json.

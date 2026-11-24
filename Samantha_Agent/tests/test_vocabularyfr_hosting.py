@@ -36,6 +36,22 @@ class HostingTests(unittest.TestCase):
     def prepare(self):
         return self.pilot.prepare(expected_head=self.head, connector=self.binary, connector_sha256=_sha(self.binary))
 
+    def upgrade_fixture(self, *, change_catalog=False):
+        old = self.prepare()
+        (self.pilot.root / "rooms.sqlite3").write_bytes(b"preserved private room and player fixture")
+        state = {"state": "started", "head": self.head, "requestId": "fixture-original-start", "origin": "https://fixture-first-second-third.trycloudflare.com",
+                 "processes": {"connector": {"pid": 100, "identity": "connector-owned"}, "server": {"pid": 101, "identity": "server-old"}}}
+        _write(self.pilot.root / "active.json", state)
+        (self.repo / SERVER).write_text("updated public server fixture")
+        if change_catalog:
+            (self.repo / "docs/data/vocabulary-fr-v2.json").write_text("different catalog fixture")
+        self.git("add", "--", SERVER, "docs/data/vocabulary-fr-v2.json");self.git("commit", "-m", "updated fixture")
+        self.head = self.git("rev-parse", "HEAD")
+        self.prepare()
+        self.upgrade_git = {command: self.git(*command) for command in [("rev-parse", "HEAD"), ("status", "--porcelain"), ("branch", "--show-current")]}
+        args = {"expected_head": self.head, "expected_running_head": old["head"], "request_id": "fixture-upgrade-0001", "confirmed": True}
+        return state, args
+
     def test_export_contains_only_committed_public_fr_and_no_repository_or_secrets(self):
         prepared = self.prepare();release = Path(prepared["release"])
         self.assertFalse((release / ".git").exists());self.assertFalse((release / "Samantha_Agent/.env").exists())
@@ -110,9 +126,99 @@ class HostingTests(unittest.TestCase):
         start=get_capability("vocabulary_fr_hosting_start")
         self.assertTrue(start.requires_confirmation)
         self.assertEqual(start.confirmation_policy,ConfirmationPolicy.EXACT_CURRENT_MESSAGE)
+        upgrade=get_capability("vocabulary_fr_hosting_upgrade")
+        self.assertTrue(upgrade.requires_confirmation)
+        self.assertEqual(upgrade.confirmation_policy,ConfirmationPolicy.EXACT_CURRENT_MESSAGE)
         self.assertEqual(get_capability("vocabulary_fr_hosting_status").risk,RiskLevel.READ_ONLY)
         self.assertEqual(self.pilot.status(),{"state":"not_started"})
         self.assertFalse(self.pilot.root.exists())
+
+    def test_upgrade_replaces_only_backend_once_preserving_origin_connector_and_database(self):
+        before, args = self.upgrade_fixture()
+        identities = {100: "connector-owned", 101: "server-old", 201: "server-new"}
+        def stopped(pid, sig):
+            operation = json.loads((self.pilot.root / "upgrades" / (args["request_id"] + ".json")).read_text())
+            self.assertEqual(operation["state"], "upgrading")
+            self.assertEqual(pid, 101)
+            identities[pid] = ""
+        process = MagicMock(pid=201)
+        with patch("app.vocabulary_fr_hosting._git", side_effect=lambda repo, *command: self.upgrade_git[command]), \
+             patch.object(self.pilot, "_identity", side_effect=lambda pid: identities.get(pid, "")), \
+             patch("app.vocabulary_fr_hosting.os.kill", side_effect=stopped) as kill, \
+             patch("app.vocabulary_fr_hosting.subprocess.Popen", return_value=process) as launch, \
+             patch("app.vocabulary_fr_hosting.socket.socket"), patch.object(self.pilot, "_wait_for_server") as health, \
+             patch.dict("os.environ", {"TUNNEL_TOKEN": "secret", "PYTHONPATH": "bad"}):
+            result = self.pilot.upgrade(**args)
+            self.assertTrue(result["running"]);self.assertEqual(result["upgrade"]["state"], "completed")
+            self.assertEqual(result["origin"], before["origin"])
+            self.assertEqual(result["requestId"], before["requestId"])
+            self.assertEqual(result["processes"]["connector"], before["processes"]["connector"])
+            self.assertEqual(result["processes"]["server"]["pid"], 201)
+            self.assertEqual(result["head"], args["expected_head"])
+            health.assert_called_once();self.assertEqual(self.pilot.upgrade(**args), result)
+            self.assertEqual(kill.call_count, 1);self.assertEqual(launch.call_count, 1)
+            command = launch.call_args.args[0]
+            self.assertIn(before["origin"], command);self.assertIn(str(self.pilot.root / "rooms.sqlite3"), command)
+            self.assertIn(args["expected_head"], " ".join(command))
+            self.assertNotIn("TUNNEL_TOKEN", launch.call_args.kwargs["env"])
+            self.assertNotIn("PYTHONPATH", launch.call_args.kwargs["env"])
+            with self.assertRaises(ValueError):self.pilot.upgrade(**{**args, "expected_running_head": "a" * 40})
+        self.assertEqual((self.pilot.root / "rooms.sqlite3").read_bytes(), b"preserved private room and player fixture")
+        self.assertTrue((self.pilot.root / "releases" / args["expected_running_head"]).exists())
+
+    def test_upgrade_rejects_unapproved_stale_foreign_or_changed_catalog_before_stop(self):
+        _, args = self.upgrade_fixture(change_catalog=True)
+        with patch("app.vocabulary_fr_hosting._git", side_effect=lambda repo, *command: self.upgrade_git[command]), \
+             patch.object(self.pilot, "_identity", side_effect=lambda pid: {100: "connector-owned", 101: "server-old"}.get(pid, "")), \
+             patch("app.vocabulary_fr_hosting.os.kill") as kill, patch("app.vocabulary_fr_hosting.subprocess.Popen") as launch:
+            for values in [{**args, "confirmed": False}, {**args, "expected_running_head": "f" * 40}, args]:
+                with self.assertRaises(ValueError):self.pilot.upgrade(**values)
+            kill.assert_not_called();launch.assert_not_called()
+        with patch.object(self.pilot, "_identity", return_value="reused-foreign"), patch("app.vocabulary_fr_hosting.os.kill") as kill:
+            with self.assertRaises(ValueError):self.pilot.upgrade(**args)
+            kill.assert_not_called()
+
+    def test_failed_upgrade_keeps_tunnel_and_never_replays_uncertain_start(self):
+        before, args = self.upgrade_fixture()
+        identities = {100: "connector-owned", 101: "server-old"}
+        def stop(pid, sig):identities[pid] = ""
+        with patch("app.vocabulary_fr_hosting._git", side_effect=lambda repo, *command: self.upgrade_git[command]), \
+             patch.object(self.pilot, "_identity", side_effect=lambda pid: identities.get(pid, "")), \
+             patch("app.vocabulary_fr_hosting.os.kill", side_effect=stop) as kill, patch("app.vocabulary_fr_hosting.socket.socket"), \
+             patch("app.vocabulary_fr_hosting.subprocess.Popen", side_effect=OSError("fixture start uncertain")) as launch:
+            with self.assertRaises(OSError):self.pilot.upgrade(**args)
+            result = self.pilot.upgrade(**args)
+            self.assertEqual(result["state"], "attention");self.assertEqual(result["upgrade"]["state"], "attention")
+            self.assertTrue(result["alive"]["connector"])
+            self.assertEqual(result["origin"], before["origin"])
+            self.assertEqual(kill.call_count, 1);self.assertEqual(launch.call_count, 1)
+            with self.assertRaises(ValueError):self.pilot.upgrade(**{**args, "request_id": "fixture-upgrade-0002"})
+
+    def test_upgrade_does_not_start_replacement_while_original_server_still_lives(self):
+        _, args = self.upgrade_fixture()
+        with patch("app.vocabulary_fr_hosting._git", side_effect=lambda repo, *command: self.upgrade_git[command]), \
+             patch.object(self.pilot, "_identity", side_effect=lambda pid: {100: "connector-owned", 101: "server-old"}.get(pid, "")), \
+             patch("app.vocabulary_fr_hosting.os.kill") as kill, patch("app.vocabulary_fr_hosting.subprocess.Popen") as launch, \
+             patch("app.vocabulary_fr_hosting.time.monotonic", side_effect=[0, 31]):
+            with self.assertRaisesRegex(RuntimeError, "not exited"):self.pilot.upgrade(**args)
+            self.assertEqual(kill.call_count, 1);launch.assert_not_called()
+            self.assertEqual(self.pilot.upgrade(**args)["upgrade"]["state"], "attention")
+
+    def test_upgrade_records_new_process_but_does_not_report_success_after_failed_health(self):
+        _, args = self.upgrade_fixture()
+        identities = {100: "connector-owned", 101: "server-old", 201: "server-new"}
+        def stop(pid, sig):identities[pid] = ""
+        with patch("app.vocabulary_fr_hosting._git", side_effect=lambda repo, *command: self.upgrade_git[command]), \
+             patch.object(self.pilot, "_identity", side_effect=lambda pid: identities.get(pid, "")), \
+             patch("app.vocabulary_fr_hosting.os.kill", side_effect=stop) as kill, patch("app.vocabulary_fr_hosting.socket.socket"), \
+             patch("app.vocabulary_fr_hosting.subprocess.Popen", return_value=MagicMock(pid=201)) as launch, \
+             patch.object(self.pilot, "_wait_for_server", side_effect=RuntimeError("health not confirmed")):
+            with self.assertRaisesRegex(RuntimeError, "health"):self.pilot.upgrade(**args)
+            result = self.pilot.upgrade(**args)
+            self.assertFalse(result["running"]);self.assertEqual(result["state"], "attention")
+            self.assertEqual(result["processes"]["server"]["pid"], 201)
+            self.assertTrue(result["alive"]["connector"])
+            self.assertEqual(kill.call_count, 1);self.assertEqual(launch.call_count, 1)
 
     def test_macos_launcher_transition_keeps_exact_pid_birth_and_server_arguments(self):
         args=' -I /release/Samantha_Agent/app/vocabulary_fr_multiplayer.py --port 8791 --database /private/rooms.sqlite3'

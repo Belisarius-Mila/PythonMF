@@ -33,6 +33,14 @@ CAPABILITIES: tuple[CapabilityRecord, ...] = (
         notes="No Git push, system installation, launchd, VPN, firewall, Cockpit or Camino changes. Original request is idempotent; uncertain state cannot automatically restart. Temporary address changes after explicit new start; Mac must stay online and awake.",
     ),
     CapabilityRecord(
+        capability_id="vocabulary_fr_hosting_upgrade", label="Upgrade only the owned FR game server at its current address",
+        risk=RiskLevel.GIT_PUBLISH, reads=("exact clean approved release and current owned pilot", "unchanged catalog and connector", "current scoped deployment instruction"),
+        writes=("replace one owned game server process", "private upgrade receipt; preserve origin, connector and game database"),
+        tool="app.vocabulary_fr_hosting.Pilot.upgrade", requires_confirmation=True,
+        confirmation_policy=ConfirmationPolicy.EXACT_CURRENT_MESSAGE, audit=AuditPolicy.REDACTED,
+        notes="Same HTTPS address and player access. No connector restart, Git push, data reset, deletion, Cockpit or system configuration change. Durable request is never automatically replayed after uncertainty.",
+    ),
+    CapabilityRecord(
         capability_id="vocabulary_fr_hosting_stop", label="Stop only the original owned FR pilot processes",
         risk=RiskLevel.LOCAL_WRITE, reads=("exact original request and current process identities",),
         writes=("terminate only matching owned pilot processes", "private stopped receipt"),

@@ -3000,3 +3000,9 @@ strop. Skutečný DALTAC dokončen17,0578/20, sedm původních částí beze zm�
 - Problém: Stejný ps lstart mění pořadí měsíce/dne a čas podle locale a TZ. Služba v C/UTC pak nerozpoznala původní českou účtenku procesu.
 - Řešení: Jen podproces ps spouštět v C locale bez zděděného TZ a normalizovat český/anglický formát data. Zachovat narození procesu a celé argumenty, neoslabit vlastnictví.
 - Ověření: Stejné dva živé PID se rozpoznají z C i cs_CZ.UTF-8 s UTC volajícího, bez změny prostředí rodiče nebo restartu původní hry.
+
+### 2026-11-24 — Nová slovíčka při pokračování společné hry
+
+- Problém: Rematch jen zamíchal původní balíček. Návrat na výběr vedl k nové místnosti a zbytečnému posílání další pozvánky.
+- Řešení: Další výběr potvrzuje zakladatel uvnitř dokončené místnosti; server v jediné transakci ověří12 významů, vymění balíček a zvýší kolo, ale zachová hráčské přístupy. Starý typ rematche zůstává.
+- Ověření: Dva oddělené klienty přejdou na jiná slova bez create/join a změny URL/tokenů; ztracená odpověď se dočte přes sync. Reálný server zachová databázovou identitu i po restartu a opakovanou akci neprovede znovu.

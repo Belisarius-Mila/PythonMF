@@ -9,6 +9,7 @@ from contextlib import contextmanager
 from datetime import datetime
 import fcntl
 import hashlib
+import http.client
 import io
 import json
 import os
@@ -252,3 +253,105 @@ class Pilot:
             state["state"] = "stopped"
             _write(self.root / "active.json", state)
             return state
+
+    def _wait_for_server(self, origin, prepared):
+        names = ("vocabulary-fr-v2.json", "vocabulary-fr-audio.json", "vocabulary-fr-quiz.json")
+        expected = hashlib.sha256(b"\0".join((Path(prepared["release"]) / "docs/data" / name).read_bytes() for name in names)).hexdigest()
+        deadline = time.monotonic() + 20
+        while time.monotonic() < deadline:
+            connection = http.client.HTTPConnection("127.0.0.1", 8791, timeout=1)
+            try:
+                connection.request("GET", "/api/vocabulary-fr/rooms/health", headers={"Host": urlsplit(origin).netloc})
+                response = connection.getresponse()
+                result = json.loads(response.read(4096))
+                if response.status == 200 and isinstance(result, dict) and result.get("protocol") == 1 and result.get("catalog") == expected:
+                    return
+            except (OSError, ValueError, http.client.HTTPException):
+                pass
+            finally:
+                connection.close()
+            time.sleep(.2)
+        raise RuntimeError("Updated game server health not confirmed; inspect original upgrade")
+
+    def upgrade(self, *, expected_head: str, expected_running_head: str, request_id: str, confirmed: bool) -> dict:
+        """Replace only the owned backend; retain the connector, origin and games.
+
+        Each durable request executes at most once, including partial failures.
+        Catalog changes require a separately planned migration, never this path.
+        """
+        if confirmed is not True or not re.fullmatch(r"[a-zA-Z0-9_-]{12,80}", request_id):
+            raise ValueError("Explicit game upgrade confirmation and request identity required")
+        if not all(re.fullmatch(r"[a-f0-9]{40}", head) for head in (expected_head, expected_running_head)):
+            raise ValueError("Exact approved and running commits required")
+        with self._lock():
+            directory = self.root / "upgrades"
+            receipt = directory / (request_id + ".json")
+            if receipt.exists():
+                prior = json.loads(receipt.read_text())
+                if (prior["head"], prior["fromHead"]) != (expected_head, expected_running_head):
+                    raise ValueError("Upgrade request already belongs to different commits")
+                return {**self.status(), "upgrade": prior}
+            state = self.status()
+            if not state.get("running") or state.get("head") != expected_running_head or expected_head == expected_running_head:
+                raise ValueError("Exact owned running pilot required; no automatic restart")
+            if not ORIGIN.fullmatch(state.get("origin", "")) or not (self.root / "rooms.sqlite3").is_file():
+                raise ValueError("Original game origin and database required")
+            if (_git(self.repo, "rev-parse", "HEAD") != expected_head or _git(self.repo, "status", "--porcelain")
+                    or _git(self.repo, "branch", "--show-current") != "main"):
+                raise ValueError("Exact clean approved main required")
+            prepared = json.loads((self.root / "releases" / expected_head / "manifest.json").read_text())
+            old = json.loads((self.root / "releases" / expected_running_head / "manifest.json").read_text())
+            if prepared.get("head") != expected_head or old.get("head") != expected_running_head:
+                raise ValueError("Prepared release does not match approved commits")
+            self._verify(prepared)
+            self._verify(old)
+            metadata = ("docs/data/vocabulary-fr-v2.json", "docs/data/vocabulary-fr-audio.json", "docs/data/vocabulary-fr-quiz.json")
+            if (any(prepared["files"][name] != old["files"][name] for name in metadata)
+                    or prepared["connector"] != old["connector"] or prepared["connectorSha256"] != old["connectorSha256"]):
+                raise ValueError("Game catalog and connector must remain unchanged")
+            if self.status() != state:
+                raise ValueError("Pilot changed during upgrade preparation")
+            directory.mkdir(mode=0o700, exist_ok=True)
+            operation = {"requestId": request_id, "head": expected_head, "fromHead": expected_running_head, "state": "upgrading"}
+            _write(receipt, operation)  # Durable intent precedes the single stop/start.
+            state["state"] = "upgrading"
+            _write(self.root / "active.json", state)
+            try:
+                server = state["processes"]["server"]
+                if self._stable_identity(self._identity(server["pid"])) != self._stable_identity(server["identity"]):
+                    raise RuntimeError("Original game process changed; nothing stopped")
+                os.kill(server["pid"], signal.SIGTERM)
+                deadline = time.monotonic() + 30
+                while self._stable_identity(self._identity(server["pid"])) == self._stable_identity(server["identity"]):
+                    if time.monotonic() >= deadline:
+                        raise RuntimeError("Original game process has not exited; no replacement started")
+                    time.sleep(.2)
+                with socket.socket() as probe:
+                    probe.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+                    probe.bind(("127.0.0.1", 8791))
+                env = {k: v for k, v in os.environ.items() if k not in ("PYTHONPATH", "PYTHONHOME")
+                       and not k.startswith(("TUNNEL_", "CLOUDFLARED_"))}
+                args = [sys.executable, "-I", str(Path(prepared["release"]) / SERVER), "--port", "8791",
+                        "--database", str(self.root / "rooms.sqlite3"), "--public-origin", state["origin"]]
+                with (directory / (request_id + "-server.log")).open("xb") as output:
+                    os.chmod(output.name, 0o600)
+                    process = subprocess.Popen(args, cwd=prepared["release"], stdin=subprocess.DEVNULL, stdout=output,
+                                               stderr=output, start_new_session=True, env=env)
+                identity = self._identity(process.pid)
+                state["processes"]["server"] = {"pid": process.pid, "identity": identity}
+                _write(self.root / "active.json", state)
+                if not identity:
+                    raise RuntimeError("Updated game process exited during startup")
+                self._wait_for_server(state["origin"], prepared)
+                state.update(state="started", head=expected_head)
+                if self.status()["alive"] != {"connector": True, "server": True}:
+                    raise RuntimeError("Owned connector or game process stopped during upgrade")
+                operation["state"] = "completed"
+                _write(self.root / "active.json", state)
+                _write(receipt, operation)
+                return {**self.status(), "upgrade": operation}
+            except Exception:
+                state["state"] = operation["state"] = "attention"
+                _write(self.root / "active.json", state)
+                _write(receipt, operation)
+                raise
