@@ -164,7 +164,7 @@ class TurnReceipt:
     turn_started_confirmed: bool
     user_item_count: int
     duration_ms: int
-    generated_images: tuple[dict[str, str], ...] = ()
+    generated_images: tuple[dict[str, Any], ...] = ()
     thread_token_usage: dict[str, int] | None = None
     token_measurement: dict | None = None
 
@@ -186,12 +186,12 @@ class TurnReceipt:
         }
 
 
-def completed_generated_images(items: object) -> tuple[dict[str, str], ...]:
+def completed_generated_images(items: object) -> tuple[dict[str, Any], ...]:
     """Return bounded image-generation outputs without local saved paths."""
 
     if not isinstance(items, list):
         return ()
-    images: list[dict[str, str]] = []
+    images: list[dict[str, Any]] = []
     seen_ids: set[str] = set()
     for item in items:
         if not isinstance(item, dict) or item.get("type") != "imageGeneration":
@@ -215,6 +215,13 @@ def completed_generated_images(items: object) -> tuple[dict[str, str], ...]:
                 "revised_prompt": revised_prompt[:8_000],
             }
         )
+        # Only documented, non-path metadata from ImageGenerationThreadItem.
+        # The protocol does not expose the image model, quality or complexity.
+        generation_id = item.get("generationId")
+        if isinstance(generation_id, str) and re.fullmatch(r"[A-Za-z0-9_-]{1,200}", generation_id):
+            images[-1]["generation_id"] = generation_id
+        if isinstance(item.get("transparentBackground"), bool):
+            images[-1]["transparent_background"] = item["transparentBackground"]
         if len(images) >= 8:
             break
     return tuple(images)

@@ -558,6 +558,10 @@ class CodexContractTests(unittest.TestCase):
                 "result": "aW1hZ2U=",
                 "revisedPrompt": "Smyšlená modrá sova",
                 "savedPath": "/private/secret/generated.png",
+                "generationId": "gen-verified-123",
+                "transparentBackground": False,
+                "model": "unverified-image-model",
+                "quality": "high",
             },
             {
                 "type": "imageGeneration",
@@ -579,6 +583,17 @@ class CodexContractTests(unittest.TestCase):
         self.assertEqual(images[0]["item_id"], "exec-image-12345678")
         self.assertEqual(images[0]["result"], "aW1hZ2U=")
         self.assertNotIn("savedPath", images[0])
+        self.assertEqual(images[0]["generation_id"], "gen-verified-123")
+        self.assertIs(images[0]["transparent_background"], False)
+        self.assertNotIn("model", images[0])
+        self.assertNotIn("quality", images[0])
+
+    def test_image_metadata_rejects_paths_and_preserves_legacy_outputs(self):
+        image = {"type": "imageGeneration", "id": "image-12345678", "status": "completed", "result": "aW1hZ2U="}
+        self.assertNotIn("generation_id", completed_generated_images([image])[0])
+        output = completed_generated_images([{**image, "generationId": "/private/secret", "transparentBackground": "false"}])[0]
+        self.assertNotIn("generation_id", output)
+        self.assertNotIn("transparent_background", output)
 
 
 class _FakeUnixConnection:

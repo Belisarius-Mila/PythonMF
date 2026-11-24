@@ -222,11 +222,34 @@
   function pendingAIKey(captured = scope) { return "samantha-interior-ai-send-v1:" + scopeKey(captured); }
   function pendingAI() { return cacheRead(pendingAIKey()); }
   function aiBlocked() { return (aiState.jobs || []).some(job => ["queued","running","delivery_unknown","result_ready"].includes(job.status)); }
+  function imageProvenanceText(info = {}) {
+    const missing = info.recorded ? "Codex tento údaj nevrací" : "nezaznamenáno";
+    const lines = [];
+    if (!info.recorded) lines.push("U tohoto návrhu nebyly podrobnosti obrazového nástroje zaznamenané.");
+    lines.push("Architekt: " + (info.architect_model || "nezaznamenáno") +
+      (info.architect_effort ? " · přemýšlení " + info.architect_effort : ""));
+    lines.push("Obrazový nástroj: " + (info.provider === "codex_app_server" ? "Codex" : "nezaznamenáno"),
+      "Obrazový model: " + (info.model || missing),
+      "Kvalita: " + (info.quality || missing), "Složitost obrázku: " + (info.complexity || missing));
+    if (info.service_tier === "default") lines.push("Režim: Standard");
+    if (info.codex_version) lines.push("Server: " + info.codex_version);
+    if (info.width && info.height) lines.push(`Výstup: ${info.width} × ${info.height} px`);
+    if (typeof info.transparent_background === "boolean") lines.push("Průhledné pozadí: " + (info.transparent_background ? "ano" : "ne"));
+    if (info.generation_id) lines.push("ID generování: " + info.generation_id);
+    if (info.item_id) lines.push("ID výstupu: " + info.item_id);
+    return lines.join("\n");
+  }
   function renderAI() {
     if (!data.room) return;
     const savedBasis = data.room.room_basis || emptyRoomBasis();
     const count = new Set([draft.image_source_id, savedBasis.plan_source_id, ...draft.source_ids].filter(Boolean)).size;
     $("aiStatus").textContent = aiState.enabled ? `AI architekt · ${aiState.model}` : aiState.message || "AI architekt zatím není aktivovaný.";
+    $("imageToolStatus").textContent = aiState.image_tool ?
+      "Obrázky: Codex · přesný obrazový model, kvalitu a složitost toto propojení nezpřístupňuje." : "";
+    const current = data.room.variants[scope.base];
+    $("imageProvenance").hidden = current?.kind !== "ai_proposal" || view === "edit";
+    const observed = (aiState.jobs || []).flatMap(job => job.image_outputs || []).find(output => output.variant_id === scope.base);
+    $("imageProvenanceBody").textContent = imageProvenanceText(current?.image_provenance || observed);
     $("aiSources").textContent = count ? `Pro architekta vybráno podkladů: ${count}. Výběr změníš v Podkladech.` : "Nejprve vyber podklady pro architekta.";
     $("useRoomSources").hidden = count > 0 || !Object.keys(data.room.sources).length;
     $("useRoomSources").disabled = busy || loading || aiSending;
@@ -266,6 +289,12 @@
         delivery_unknown:"Výsledek vyžaduje ověření. Požadavek znovu neposílej.",result_ready:"Výsledek AI je zachovaný; dokonči jeho uložení.",
         not_started:"Požadavek se nespustil.",failed:"Model požadavek nedokončil. Nový pokus se automaticky nespustí.",no_image:"AI odpověděla, ale obrazový návrh nevytvořila."}[job.status] || "");
       article.append(question, answer);
+      for (const [index, output] of (job.image_outputs || []).entries()) {
+        const details = document.createElement("details"), summary = document.createElement("summary");
+        summary.textContent = "Jak vznikl obrázek" + (job.image_outputs.length > 1 ? ` ${index + 1}` : "");
+        const info = document.createElement("p"); info.className = "stage-note";
+        info.textContent = imageProvenanceText(output); details.append(summary, info); article.append(details);
+      }
       if (job.status === "no_image") {
         const notice = document.createElement("p"); notice.className = "stage-note";
         notice.textContent = "Obrazový návrh nevznikl. Další placený pokus se automaticky nespustí."; article.append(notice);

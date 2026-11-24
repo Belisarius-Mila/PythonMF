@@ -353,3 +353,16 @@ Další krok: Po potvrzeném vydání obnovit Ateliér a při příštím běžn
 Navrhované další kroky: Žádné nové; TVBCP bez nové dohody nevzniká.
 
 Technický důkaz: Stabilní request_id=interior-proposal-titles-final-pn-c7efd566-20261111-v1, job_id=7c39e3b6bc3779200de7a3355028d00f. Autorita skutečného push/nasazení: registrovaná soukromá účtenka tohoto job ID a data/private/interior_proposal_titles_20261111/release/receipt.json. Jednorázové závěrečné ověření je verification.json; čistota a zarovnání repa/profilů alignment.json. Při navázání načíst tuto konkrétní účtenku a použít registrovaný živý audit. Samotný tento předávací zápis nasazení nepotvrzuje. TVBCP vazba pro budoucí Human–Adam zůstává otevřená.
+
+
+## 2026-11-24 10:26 CET — Doložený původ obrazových návrhů (bod 1)
+
+Hotovo: Nové AI obrázky ukládají vlastní údaje o původu a zobrazují rozbalovací „Jak vznikl obrázek“ v galerii i historii. Architekt a jeho přemýšlení jsou oddělené od obrazového nástroje. Ukládá se Standard, připojená verze Codexu, rozměry a vrácené ID/průhlednost. Obrazový engine, kvalita a složitost zůstávají neznámé, protože je tento protokol nevrací. Starší návrhy se nemigrují a nedoplňuje se do nich dnešní model architekta.
+
+Rozhodnutí: Míla schválil vývoj bodu 1. Bez změny role Terry, instrukcí, oprávnění, generování či cenové cesty; bez nového API adaptéru a placeného pokusu. Nový TVBCP nebyl dohodnutý; pro terminálový krok platí tento handoff, projektová paměť a report.
+
+Další krok: Samostatně autorizované p+n, poté přejímka zobrazení v běžícím Ateliéru. Skutečná volitelná metadata ověřit při příštím běžném obrazovém požadavku, bez dalšího pokusu jen kvůli přehledu.
+
+Navrhované další kroky: Oddělit čistou fotografii od kreslených pokynů podle původního bodu 2, až po samostatném zadání.
+
+Technický důkaz: Živý initialize i lokální schéma Codex0.169.0 bez vlákna/tahu; zdokumentovaný allowlist generationId/transparentBackground, engine/quality/complexity bez odhadu. Registrovaná cílená brána139 modulů,2459 testů/31SKIP PASS,448,4s, včetně20 Node scénářů. Regrese ověřují per-output metadata, obnovu původního výsledku bez nového tahu, historické údaje bez zápisu a bezpečné vykreslení. Fyzický Mac/iPhone a skutečná placená obrazová přejímka nejsou tímto nahrazené. Report reports/interior_image_provenance_20261124.md. Data/MMTX zachované; pouze místní vývoj, bez p+n a restartu Cockpitu. Vazba TVBCP pro případný budoucí Human–Adam zůstává nedohodnutá.

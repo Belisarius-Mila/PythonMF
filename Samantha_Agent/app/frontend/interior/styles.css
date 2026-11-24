@@ -16,6 +16,7 @@ label{display:grid;gap:5px}h1,h2,h3,p{margin:0}h1{font:500 25px Georgia,serif}h2
 .panel-title{display:grid;gap:10px}.panel-title button{font-size:13px}.workspace,.sources-view{padding:18px}
 .workspace-heading{display:flex;gap:14px;align-items:start;justify-content:space-between;flex-wrap:wrap;margin-bottom:14px}
 .muted{color:var(--muted);font-size:13px}.stage-note{font-size:13px;padding:10px;background:var(--soft);border-radius:7px}
+#imageProvenanceBody{white-space:pre-wrap;overflow-wrap:anywhere}
 .thumb{display:block;width:100%;margin-top:14px;padding:0;background:var(--panel);color:var(--ink);border:1px solid var(--line);overflow:hidden;text-align:left}
 .thumb.selected{outline:2px solid var(--accent);outline-offset:2px}.thumb img{width:100%;height:90px;object-fit:contain;background:var(--bg);display:block}.thumb .thumb-label{padding:8px;display:block;overflow-wrap:anywhere}
 .thumb .muted{display:block}.placeholder{padding:28px;color:var(--muted);text-align:center;border:1px dashed var(--line);border-radius:8px}

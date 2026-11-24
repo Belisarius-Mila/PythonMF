@@ -64,7 +64,7 @@ function fixture({variants = {}, initial = null, cachedDraft = null, roomBasis =
         const selected=new URLSearchParams(url.split('?')[1]).get('room_id');
         const captured=clone(jobs[selected]);
         if (selected==='A' && holdStatusA) await holdStatusA;
-        result={ok:true,enabled:true,image_generation:true,model:'approved-model',jobs:captured,
+        result={ok:true,enabled:true,image_generation:true,model:'approved-model',image_tool:{provider:'codex_app_server'},jobs:captured,
           brief:{title:draft.title,changes:draft.prompt,preserve:draft.fixed_elements,unresolved:[],revision:draft.revision,
             working_image:'Private photo',source_count:basis.plan_source_id?2:1,drawing_count:0,can_generate:true,token:'review-'+draft.revision,room_basis:clone(basis)}};
       } else if (url==='/api/interior/action') {
@@ -370,4 +370,35 @@ test('private proposed title is rendered as text and changing it never submits a
   f.intervals[0]();await flush();
   assert.match(f.ids.proposalTitlePreview.textContent,/<img src=x onerror=evil\(\)>/);
   assert.equal(f.ids.proposalTitlePreview.innerHTML,'');assert.equal(f.paid.size,0);
+});
+
+test('image evidence stays distinct from the architect and renders plain text without a paid call', async()=>{
+  const evidence={recorded:true,provider:'codex_app_server',architect_model:'historical-architect',architect_effort:'high',
+    model:null,quality:null,complexity:null,service_tier:'default',codex_version:'codex-cli 0.169.0',
+    generation_id:'<img src=x onerror=evil()>',transparent_background:false,width:1672,height:941};
+  const variant={...proposal('live','photo'),image_provenance:evidence};
+  const f=fixture({variants:{live:variant},initial:{project:'project',room:'A',base:'live'}});await flush();
+  assert.equal(f.ids.imageProvenance.hidden,false);
+  const text=f.ids.imageProvenanceBody.textContent;
+  assert.match(text,/Architekt: historical-architect/);
+  assert.match(f.ids.imageToolStatus.textContent,/přesný obrazový model/);
+  assert.match(text,/Obrazový model: Codex tento údaj nevrací/);
+  assert.match(text,/Průhledné pozadí: ne/);
+  assert.match(text,/1672 × 941 px/);
+  assert.match(text,/<img src=x onerror=evil\(\)>/);
+  assert.equal(f.ids.imageProvenanceBody.innerHTML,'');
+  assert.equal(f.paid.size,0);
+});
+
+test('legacy image evidence is explicitly missing and history uses the original output metadata',async()=>{
+  const f=fixture({variants:{live:proposal('live','photo')},initial:{project:'project',room:'A',base:'live'}});await flush();
+  assert.match(f.ids.imageProvenanceBody.textContent,/nebyly.*zaznamenané/);
+  assert.doesNotMatch(f.ids.imageProvenanceBody.textContent,/approved-model/);
+  f.jobs.A.push({id:'original',mode:'image',status:'completed',message:'Original',answer:'Saved',
+    image_outputs:[{variant_id:'live',recorded:false,architect_model:'old-architect'}]});
+  f.intervals[0]();await flush();
+  assert.match(f.ids.imageProvenanceBody.textContent,/old-architect/);
+  assert.match(f.ids.aiConversation.textContent,/Jak vznikl obrázek/);
+  assert.match(f.ids.aiConversation.textContent,/old-architect/);
+  assert.equal(f.paid.size,0);
 });

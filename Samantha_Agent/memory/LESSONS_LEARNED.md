@@ -67,6 +67,8 @@ nebo jejichž princip lze znovu použít v jiné části projektu.
 - Ověřeno znovu 07112026 u kalendářového návrhu: stejný named profile potvrzen prázdným thread/start bez modelového tahu; skutečný syntetický e-mailový tah pak uspěl bez kalendářových dat a nástrojů. Vypnout také zděděné browser/computer use, pluginy a image generation podle skutečného experimentalFeature/list. K návrhu neposílat přehled kalendářů; celý původní EML svázat digestem, uložit jediný pokus a nejistý výsledek neopakovat.
 - Doplnění 11112026: `unknown field result_buffered_for_ns` při Code Mode exec není zákaz čtení složky; selhal i `pwd`. Ověřit skutečné serverInfo.version odděleně od instalovaného CLI a přímý read-only command/exec. Na peer0.163.0 / CLI0.167.0 prošlo čtení obou AGENTS.md. Lokální per-thread vypnutí code_mode/code_mode_host nemění sandbox; přijetí přepínačů ani RPC čtení samo nedokládá následné použití nástroje modelem. Neopakovat automaticky původní modelový tah.
 
+- Doplnění 24.11.2026 pro původ obrázků: schéma a živý initialize stejného Codexu0.169.0 dokládají generationId/transparentBackground, nikoli obrazový model, quality nebo complexity. Model architekta není obrazový engine; chybějící hodnoty se neodhadují. Metadata vážou původní požadavek a konkrétní výstup; recover nepřipisuje starému obrázku novou verzi čtecího serveru. Zobrazovat jen omezená pole bez privátních cest. Regrese a cílená brána2459/31SKIP PASS; reports/interior_image_provenance_20261124.md.
+
 ### LL-101 — Unix socket nezaručuje shodný aplikační protokol
 
 - Problém: kandidátní SDK konfigurace s `app-server proxy --sock` vypadá jako náhrada přímého Unix spojení; současná Samantha ale používá WebSocket a CLI proxy přenáší prosté bajty.

@@ -11,7 +11,7 @@ from pathlib import Path
 
 from PIL import Image
 
-from app.interior_ai import InteriorAI, CodexInteriorDriver, interior_ai_start_action
+from app.interior_ai import InteriorAI, CodexInteriorDriver, interior_ai_start_action, image_provenance
 from app.interior_atelier import AtelierConflict, AtelierError, InteriorAtelier
 from app.codex_appserver import AppServerTurnError
 from tests.test_interior_atelier import image_bytes
@@ -219,6 +219,88 @@ class InteriorAITests(unittest.TestCase):
         self.ai.recover(self.project, self.room, job_id)
         self.assertEqual(len(self.driver.calls), 1)
         self.assertEqual(len(self.store.state(self.project, self.room)["room"]["variants"]), 1)
+
+    def test_image_evidence_survives_storage_recovery_and_does_not_guess_engine(self):
+        self.driver.outputs = [{"result": base64.b64encode(image_bytes()).decode(),
+            "item_id": "image-12345678", "generation_id": "gen-12345678", "transparent_background": False,
+            "model": "unverified-model", "savedPath": "/private/do-not-expose"}]
+        job_id = self.ai.start(self.payload(mode="image"))["request_id"]
+        with patch.object(self.ai, "_complete_result", side_effect=OSError("storage")):
+            self.queue.pop()()
+        self.ai.recover(self.project, self.room, job_id)
+        evidence = self.jobs()[0]["image_outputs"][0]
+        self.assertTrue(evidence["recorded"])
+        self.assertEqual(evidence["architect_model"], "approved-test")
+        self.assertEqual(evidence["architect_effort"], "high")
+        self.assertEqual(evidence["service_tier"], "default")
+        self.assertIsNone(evidence["model"])
+        self.assertIsNone(evidence["quality"])
+        self.assertEqual(evidence["generation_id"], "gen-12345678")
+        self.assertIs(evidence["transparent_background"], False)
+        self.assertGreater(evidence["width"], 0)
+        self.assertNotIn("/private/", str(evidence))
+        variants = self.store.state(self.project, self.room)["room"]["variants"]
+        self.assertEqual(variants[evidence["variant_id"]]["image_provenance"]["generation_id"], "gen-12345678")
+        self.ai.recover(self.project, self.room, job_id)
+        self.assertEqual(self.jobs()[0]["image_outputs"][0], evidence)
+        self.assertEqual(len(self.driver.calls), 1)
+
+    def test_old_image_results_are_read_without_migration_or_current_role_backfill(self):
+        self.driver.with_image = True
+        self.ai.start(self.payload(mode="image")); self.queue.pop()()
+        state = self.store._read()
+        room = self.store._room(state, self.project, self.room)[1]
+        for job in room["ai_requests"].values():
+            job.pop("image_execution", None)
+            job["selection"]["model"] = "historical-architect"
+        for variant in room["variants"].values(): variant.pop("image_provenance", None)
+        # Fixture only: represent a pre-feature repository, then assert pure reads.
+        from app.work_repository import RepositoryMutation
+        self.store.repository.transact(lambda _: RepositoryMutation(state))
+        before = self.store._read()
+        evidence = self.jobs()[0]["image_outputs"][0]
+        self.assertFalse(evidence["recorded"])
+        self.assertEqual(evidence["architect_model"], "historical-architect")
+        self.assertIsNone(evidence["provider"])
+        self.assertIsNone(evidence["service_tier"])
+        self.assertEqual(self.store._read(), before)
+
+    def test_runtime_metadata_is_bounded_and_capabilities_offer_no_image_controls(self):
+        caps = self.ai.capabilities()["image_tool"]
+        self.assertEqual(caps["selectable"], {"model": False, "quality": False, "complexity": False})
+        job = {"image_execution": {"provider": "codex_app_server"}, "selection": {"model": "frozen-model"}}
+        self.assertEqual(image_provenance(job, runtime={"codex_version": "codex-cli 0.169.0"})["codex_version"], "codex-cli 0.169.0")
+        self.assertIsNone(image_provenance(job, runtime={"codex_version": "/private/secret"})["codex_version"])
+
+    def test_remote_image_recovery_preserves_observed_ids_without_a_second_turn(self):
+        self.driver.fail = True
+        job_id = self.ai.start(self.payload(mode="image"))["request_id"]; self.queue.pop()()
+        requests = []
+        encoded = base64.b64encode(image_bytes()).decode()
+        class Client:
+            def __enter__(self): return self
+            def __exit__(self, *_): pass
+            @property
+            def transport(self): return self
+            def request(self, method, payload):
+                requests.append(method)
+                return {"thread": {"id": "synthetic-thread", "turns": [{"id": "original-turn",
+                    "status": "completed", "items": [
+                        {"type": "userMessage", "clientId": "atelier-" + job_id},
+                        {"type": "imageGeneration", "id": "image-12345678", "status": "completed",
+                         "result": encoded, "generationId": "gen-original", "transparentBackground": True,
+                         "savedPath": "/private/hidden.png"}]}]}}
+        self.driver.client_factory = Client
+        self.assertTrue(self.ai.recover(self.project, self.room, job_id)["verified"])
+        evidence = self.jobs()[0]["image_outputs"][0]
+        self.assertEqual(evidence["generation_id"], "gen-original")
+        self.assertIs(evidence["transparent_background"], True)
+        self.assertIsNone(evidence["codex_version"])
+        self.assertIsNone(evidence["model"])
+        self.assertNotIn("/private/", str(evidence))
+        self.ai.recover(self.project, self.room, job_id)
+        self.assertEqual(requests, ["thread/read"])
+        self.assertEqual(len(self.driver.calls), 1)
 
     def test_remote_recovery_only_reads_original_thread_and_prefers_final_answer(self):
         self.driver.fail = True

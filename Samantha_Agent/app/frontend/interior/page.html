@@ -26,6 +26,7 @@
 <button id="editVariant" type="button">Upravit návrh</button></div></div>
 <div id="visual" class="visual"></div>
 <p id="visualCaption" class="muted"></p>
+<details id="imageProvenance" hidden><summary>Jak vznikl obrázek</summary><p id="imageProvenanceBody" class="stage-note"></p></details>
 <section class="brief-card" aria-labelledby="briefTitle"><h2 id="briefTitle">Zadání pro příští obrázek</h2>
 <p class="muted">Změny domluv s architektem v rozhovoru. Zde zkontroluj jeho souhrn před vytvořením obrázku.</p>
 <form id="proposalTitleForm"><label>Název nového návrhu<input id="draftTitle" maxlength="120" autocomplete="off" placeholder="Například Koupelna – vana v rohu u okna"></label>
@@ -51,6 +52,7 @@
 </main>
 <aside id="notesPanel" class="notes" aria-label="AI architekt a připomínky"><h2>Architekt</h2>
 <p id="notesContext" class="muted"></p><p id="aiStatus" class="stage-note" role="status">Ověřuji připojení architekta…</p>
+<p id="imageToolStatus" class="muted"></p>
 <p id="aiSources" class="muted"></p><button id="useRoomSources" type="button" class="secondary" hidden>Použít nahrané podklady</button>
 <div id="aiConversation" aria-live="polite"></div>
 <form id="aiForm"><label>Otázka nebo požadovaná změna<textarea id="aiText" maxlength="12000" rows="4" placeholder="Například: Co bys v této místnosti změnil a proč?"></textarea></label>
