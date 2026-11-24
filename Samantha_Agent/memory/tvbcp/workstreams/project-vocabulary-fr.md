@@ -1,32 +1,44 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
-## 2026-11-21 08:39 CET — Velká karta po správné dvojici v Janině pexesu
+## 2026-11-24 13:20 CET — Místní první verze pexesa na dálku pro dva hráče
 
-Hotovo: Po započítání správné dvojice se na2 sekundy otevře velký obrázek
-s francouzským zápisem a ještě jednou zazní FR MP3. Český překlad v okně
-není. Potom se okno samo zavře; delší nahrávka bezpečně dohraje před dalším
-tahem. Stejný hráč pokračuje, skóre a šedá místa zůstávají stejné. Poslední
-velká karta předchází výsledku hry. Při odchodu se okno i zvuk zruší;
-uložená dvojice přežije reload bez opakování ani dvojího bodu.
+Hotovo: Francouzština Jana má vstup „Hrát spolu na dálku“ ze současného
+výběru pexesa. Samostatná herní služba spojuje dva klienty soukromou
+pozvánkou bez účtů: stejných 24 míst 6×4, 12 dvojic, krátká jména, společné
+tahy a skóre. Shoda ponechá hráče a dvě šedá místa. Oba musí dokončit FR
+poslech a krátkou 2s CZ nápovědu. Po shodě se na 2 s ukáže velká FR karta
+s opakovaným FR poslechem bez CZ; delší zvuk dál zamyká tah. Obrázek se
+přednačítá již při otočení. Poslední odměna předchází výsledku.
+Při odpojení se fáze pozastaví; ruční návrat zachová stav bez nového bodu.
+Ztracená odpověď se ověří čtením stavu, neposílá se znovu další klik.
 
-Rozhodnutí: Mílův didaktický návrh se týká Janiny francouzštiny. Přesné2 s
-platí pro viditelnost okna; čekání na delší zvuk bylo uvedené při zahájení.
-Používají se existující velké ilustrace a FR audio bez CZ fallbacku.
-EN pexeso a veškerá média/obsah/osobní označení se nemění. Nové p+n nezadané.
-Předchozí6e2f1c34 je skutečně vydané: původní workflow44832338166/deployment
-7954409332 success a39 veřejných souborů exact; job9988da0cc9996f13fa0b4877e3311e3a
-zůstal attention/uncertain, nezávislý důkaz je v private vocabulary_fr_memory_20261120.
-Původní vydání neopakovat.
+Rozhodnutí: Míla schválil vývoj jedné partie Jana v Německu ↔ Míla doma,
+první rozsah dva hráči a soukromý odkaz. Klient vybírá pouze 12 UID;
+osobní označení, původní lokální pexeso pro 1–4 hráče, obsah a všechna média
+zůstávají zachované. Backend je izolovaný od Cockpitu/App Serveru,
+SQLite transakce drží jednu autoritu. Pozvánka je jen ve fragmentu adresy,
+hráčské tokeny v sessionStorage/Bearer a hashované v privátní databázi;
+skrytý plán se klientům nepředává. Host/Origin, souběh, identita požadavku,
+očekávané kolo/fáze, limity a odmítnutí třetího hráče mají vlastní testy.
+Žádná nová výroba médií, modelové volání ani zásah do živé služby.
 
-Další krok: Dokončit programovou doménovou bránu a jediný lokální commit.
-Přesný head/bránu a výsledný stav určuje private/vocabulary_fr_memory_reward_20261121/
-completion.json; následně Mílova přejímka a samostatné p+n přes Terru.
-Navrhované další kroky: Fyzická přejímka na Janině zařízení po vydání.
-Technický důkaz:53 klientských JS scénářů PASS včetně6 nových pro okno,
-přesné2 s, krátký/dlouhý zvuk, neshodu, přerušení/reload, chybu zvuku a
-poslední dvojici. Poslední zpřesnění Escape ověří doménová brána v gate.log.
-Safari Mac: skutečná shoda alors1+5, velký původní obrázek/FR nápis a zvuk,
-automatický návrat, dvě šedá místa a stejný hráč se skóre1. Fyzický iPhone
-zůstává otevřený. Přednačtení velkého obrázku při otočení; bez nové výroby médií.
+Další krok: Určit a samostatně schválit konkrétní HTTPS adresu, hosting
+a způsob nasazení izolované služby; poté fyzická přejímka obou Maců.
+Pouhé FR Pages p+n backend nezprovozní. Při změně původu se osobní data
+nepřenášejí automaticky; řešit je existujícím výslovným exportem/importem.
+Navrhované další kroky: Projít připravený scénář Německo–domov včetně
+výpadku, zvuku, poslední dvojice a další partie. Zde není nové p+n.
+
+Technický důkaz: 23 cílených Python kontrol PASS; 16 nových online JS a 55 FR
+JS včetně 2 nových kontrol předání výběru. Dva nezávislé klienty ověřují
+oba poslechy, nižší druhé číslo, přednačtení obrázku, 2s odměnu/delší zvuk,
+chybu/retry/skip, reload, síťový timeout i ztracenou odpověď bez další mutace.
+Serverové zkoušky pokrývají celou partii s 12 dvojicemi, skóre, opakování,
+restart DB, souběhy, přístupy a oddělení HTTP cest. 54/54 místních HTTP souborů
+bajtově přesných; 25 původních klientských/datových souborů zachovaných.
+GUI Safari nebylo dostupné: cgWindowNotFound, browser access host unavailable.
+Není to fyzická ani přeshraniční přejímka. Finální brána a commit jsou
+autoritativně v private vocabulary_fr_online_20261124/completion.json.
+Návod: technical/vocabulary_fr_online.md; přejímací TXT v Downloads.
 <!-- SAMANTHA_CURRENT_STATUS_END -->
 
 ## 2026-11-17 20:21 CET — Společné předání osobního režimu a Datových commitů k p+n
@@ -800,3 +812,44 @@ poslední dvojici. Poslední zpřesnění Escape ověří doménová brána v ga
 Safari Mac: skutečná shoda alors1+5, velký původní obrázek/FR nápis a zvuk,
 automatický návrat, dvě šedá místa a stejný hráč se skóre1. Fyzický iPhone
 zůstává otevřený. Přednačtení velkého obrázku při otočení; bez nové výroby médií.
+
+## 2026-11-24 13:20 CET — Místní první verze pexesa na dálku pro dva hráče
+
+Hotovo: Francouzština Jana má vstup „Hrát spolu na dálku“ ze současného
+výběru pexesa. Samostatná herní služba spojuje dva klienty soukromou
+pozvánkou bez účtů: stejných 24 míst 6×4, 12 dvojic, krátká jména, společné
+tahy a skóre. Shoda ponechá hráče a dvě šedá místa. Oba musí dokončit FR
+poslech a krátkou 2s CZ nápovědu. Po shodě se na 2 s ukáže velká FR karta
+s opakovaným FR poslechem bez CZ; delší zvuk dál zamyká tah. Obrázek se
+přednačítá již při otočení. Poslední odměna předchází výsledku.
+Při odpojení se fáze pozastaví; ruční návrat zachová stav bez nového bodu.
+Ztracená odpověď se ověří čtením stavu, neposílá se znovu další klik.
+
+Rozhodnutí: Míla schválil vývoj jedné partie Jana v Německu ↔ Míla doma,
+první rozsah dva hráči a soukromý odkaz. Klient vybírá pouze 12 UID;
+osobní označení, původní lokální pexeso pro 1–4 hráče, obsah a všechna média
+zůstávají zachované. Backend je izolovaný od Cockpitu/App Serveru,
+SQLite transakce drží jednu autoritu. Pozvánka je jen ve fragmentu adresy,
+hráčské tokeny v sessionStorage/Bearer a hashované v privátní databázi;
+skrytý plán se klientům nepředává. Host/Origin, souběh, identita požadavku,
+očekávané kolo/fáze, limity a odmítnutí třetího hráče mají vlastní testy.
+Žádná nová výroba médií, modelové volání ani zásah do živé služby.
+
+Další krok: Určit a samostatně schválit konkrétní HTTPS adresu, hosting
+a způsob nasazení izolované služby; poté fyzická přejímka obou Maců.
+Pouhé FR Pages p+n backend nezprovozní. Při změně původu se osobní data
+nepřenášejí automaticky; řešit je existujícím výslovným exportem/importem.
+Navrhované další kroky: Projít připravený scénář Německo–domov včetně
+výpadku, zvuku, poslední dvojice a další partie. Zde není nové p+n.
+
+Technický důkaz: 23 cílených Python kontrol PASS; 16 nových online JS a 55 FR
+JS včetně 2 nových kontrol předání výběru. Dva nezávislé klienty ověřují
+oba poslechy, nižší druhé číslo, přednačtení obrázku, 2s odměnu/delší zvuk,
+chybu/retry/skip, reload, síťový timeout i ztracenou odpověď bez další mutace.
+Serverové zkoušky pokrývají celou partii s 12 dvojicemi, skóre, opakování,
+restart DB, souběhy, přístupy a oddělení HTTP cest. 54/54 místních HTTP souborů
+bajtově přesných; 25 původních klientských/datových souborů zachovaných.
+GUI Safari nebylo dostupné: cgWindowNotFound, browser access host unavailable.
+Není to fyzická ani přeshraniční přejímka. Finální brána a commit jsou
+autoritativně v private vocabulary_fr_online_20261124/completion.json.
+Návod: technical/vocabulary_fr_online.md; přejímací TXT v Downloads.

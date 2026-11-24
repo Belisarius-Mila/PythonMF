@@ -57,7 +57,7 @@
     }catch(_){return null;}
   }
   function create({doc,win,getData,getAudio,getCatalog,getSelection,getContext,sanitizeContext,onOpen,onClose,play,stop}){
-    const ids=['memoryView','memorySetup','memorySelection','memorySetupChange','memoryPlayerCount','memoryNames','memoryPoolNotice','memoryStorageNotice','memoryStart','memoryResume','memoryRound','memoryBoard','memoryScores','memoryStatus','memoryProgress','memoryRetry','memorySkip','memoryEnd','memoryResult','memoryCollections','memoryAgain','memoryNew','memoryChange','memoryBack','memoryProjector','memoryReward','memoryRewardImage','memoryRewardWord'];
+    const ids=['memoryOnline','memoryView','memorySetup','memorySelection','memorySetupChange','memoryPlayerCount','memoryNames','memoryPoolNotice','memoryStorageNotice','memoryStart','memoryResume','memoryRound','memoryBoard','memoryScores','memoryStatus','memoryProgress','memoryRetry','memorySkip','memoryEnd','memoryResult','memoryCollections','memoryAgain','memoryNew','memoryChange','memoryBack','memoryProjector','memoryReward','memoryRewardImage','memoryRewardWord'];
     const ui=Object.fromEntries(ids.map(id=>[id,doc.getElementById(id)]));
     let filters=sanitizeContext(getContext()), gameFilters=null, game=null, source='', selected=[], opened=false, busy=false, error=false, success=false, openCards=[], hint=-1, epoch=0, draftNames=['Hráč 1','Hráč 2'], saved=null;
     const waits=new Map();
@@ -112,7 +112,7 @@
       filters=sanitize(getContext());
       const ready=Boolean(getAudio()&&getCatalog());
       selected=ready?choose(pool(),getAudio(),getCatalog(),()=>.5):[];
-      ui.memoryStart.disabled=selected.length!==PAIRS;
+      ui.memoryStart.disabled=selected.length!==PAIRS;ui.memoryOnline.disabled=selected.length!==PAIRS;
       ui.memoryPoolNotice.textContent=!ready?'Připravuji obrázky a zvuk…':selected.length===PAIRS?`Ve výběru ${pool().length} karet. Připraveno ${PAIRS} různých dvojic · ${CARDS} kartiček.`:`Pro plán potřebujeme ${PAIRS} dostatečně odlišných obrázků s francouzským zvukem. Rozšiř témata nebo výběr (${pool().length} karet ve filtru).`;
       if(getAudio()===false||getCatalog()===false)ui.memoryPoolNotice.textContent='Obrázky nebo zvuk pro pexeso se nepodařilo načíst. Zkus obnovit stránku.';
       ui.memoryResume.hidden=!saved||saved.game?.deck?.length!==CARDS;
@@ -214,6 +214,7 @@
       cancel();game=restored;gameFilters=f;filters=f;source=saved.source;draftNames=[...game.players];ui.memoryPlayerCount.value=String(game.players.length);renderNames();controls();draw();status(finished()?'Dokončená partie.':`Pokračujeme · ${game.players[game.active]}. Vyber první kartičku.`);
     }
     try{const raw=win.sessionStorage.getItem(KEY);if(raw&&raw.length<20000){const value=JSON.parse(raw);if(value?.version===1&&Array.isArray(value.game?.players)&&value.game.players.length>=1&&value.game.players.length<=4&&value.game.players.every(n=>typeof n==='string'&&Array.from(n).length<=12))saved=value;}}catch(_){}
+    ui.memoryOnline.addEventListener('click',()=>{if(selected.length!==PAIRS)return;const url=new URL('online.html',win.location.href);url.hash=new URLSearchParams({words:selected.map(i=>i.uid).join(',')}).toString();win.location.href=url.toString();});
     ui.memoryPlayerCount.value='2';renderNames();
     ui.memorySetupChange.addEventListener('click',()=>{if(approveLeave()){leave();onClose();}});
     ui.memoryPlayerCount.addEventListener('change',()=>{if(![1,2,3,4].includes(Number(ui.memoryPlayerCount.value)))ui.memoryPlayerCount.value='2';draftNames=Array.from(ui.memoryNames.querySelectorAll('input')).map(i=>i.value);renderNames();});

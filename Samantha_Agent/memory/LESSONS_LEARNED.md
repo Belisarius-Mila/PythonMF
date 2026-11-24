@@ -2976,3 +2976,9 @@ strop. Skutečný DALTAC dokončen17,0578/20, sedm původních částí beze zm�
 - Ověření: po samostatně potvrzeném jediném restartu nový PID a shodný kódový
   otisk, status i GitHub záloha ok=true, nulové chyby a dvě zachované otevřené
   připomínky. Bez nového testovacího sendu nebo změny aplikačního kódu.
+
+### 2026-11-24 — Pořadí otočení ve společném pexesu
+
+- Problém: Pole kartiček je řazené podle místa na plánu. Výběr poslední otevřené položky z tohoto pole přehraje první slovo, pokud druhá otočená karta má nižší číslo.
+- Řešení: Server vrací výslovný index posledního otočení (focus). Poslech a česká nápověda se vážou na něj; server současně ověřuje očekávané kolo a fázi požadavku.
+- Ověření: Dva oddělené JS klienty otočí10 a potom1, oba přehrají vlastní druhé slovo; server odmítne opožděný klik i po dokončení předchozího poslechu.

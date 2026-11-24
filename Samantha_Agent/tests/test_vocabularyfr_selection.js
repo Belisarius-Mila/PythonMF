@@ -254,6 +254,16 @@ test('new catalog card appears in All while stale legacy profile and personal ha
 
 const memory=require('../../docs/vocabulary-fr/memory.js');
 const memoryPool=memory.choose(vocabulary.items,audio,quizCatalog,()=>.5);
+test('FR online entry transfers only twelve chosen hard-word IDs and preserves personal state',async()=>{
+ const personalKey='vocabulary-fr.personal-hard.v1';const local=storage(new Map([[personalKey,JSON.stringify({schema:1,kind:'vocabulary-fr.personal-hard-backup',language:'fr',hard:memoryPool.map(i=>i.uid)})]]));
+ const v=await app({local});v.element('personalHard').click();v.element('memoryTab').click();const before=JSON.stringify([...local.map]);
+ assert.equal(v.element('memoryOnline').disabled,false);v.element('memoryOnline').click();const url=new URL(v.win.location.href),ids=new URLSearchParams(url.hash.slice(1)).get('words').split(',');
+ assert.ok(url.pathname.endsWith('/online.html'));assert.equal(ids.length,12);assert.equal(new Set(ids).size,12);assert.ok(ids.every(uid=>memoryPool.some(i=>i.uid===uid)));assert.equal(JSON.stringify([...local.map]),before);
+});
+test('FR online entry cannot bypass a selection with fewer than twelve usable pictures',async()=>{
+ const v=await app();v.state.query='chat';v.selectionChanged();v.element('memoryTab').click();const before=v.win.location.href;
+ assert.equal(v.element('memoryOnline').disabled,true);v.element('memoryOnline').click();assert.equal(v.win.location.href,before);
+});
 const memorySaved=v=>JSON.parse(v.session.getItem(memory.KEY));
 const memoryButton=(v,n)=>v.element('memoryBoard').children[n].querySelector('button');
 async function memoryView(count=2,options={}){

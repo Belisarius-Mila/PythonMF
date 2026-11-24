@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="cs">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="referrer" content="no-referrer">
+  <title>Pexeso na dálku · Francouzština Jana</title>
+  <link rel="stylesheet" href="gallery.css?v=20261124-online1">
+  <link rel="stylesheet" href="online.css?v=20261124-online1">
+  <script src="model.js" defer></script><script src="practice.js" defer></script>
+  <script src="memory.js?v=20261124-online1" defer></script><script src="online.js?v=20261124-online1" defer></script>
+</head>
+<body><main class="page-shell" id="onlineView">
+  <header class="memory-header"><div><p class="eyebrow">Francouzština Jana · Dva hráči</p><h1>Pexeso na dálku</h1><p>Jedna partie, každý na svém počítači.</p></div><a id="onlineBack" href="./#game=memory-pairs">← Zpět na výběr</a></header>
+  <p id="onlineStatus" role="status" aria-live="polite">Připravuji společnou hru…</p>
+  <p id="onlineStorage" class="notice" role="status"></p>
+  <section id="onlineSetup" class="memory-setup" aria-label="Připojení do partie">
+    <label>Tvoje jméno<input id="onlineName" maxlength="12" autocomplete="off" value="Hráč"></label>
+    <p id="onlineSelection"></p><p>Po vstupu zazní krátká ukázka francouzštiny. Potom se zvuk přehrává na obou počítačích při otočení kartiček.</p>
+    <button id="onlineEnter" class="primary" type="button" disabled>Založit partii a zapnout zvuk</button>
+  </section>
+  <section id="onlineRoom" hidden>
+    <div id="onlineInvitePanel" class="online-invite" hidden><label>Soukromý odkaz pro druhého hráče<input id="onlineInvite" readonly spellcheck="false" autocomplete="off"></label><button id="onlineCopy" type="button">Kopírovat pozvánku</button></div>
+    <div class="memory-round-header"><p id="onlineProgress"></p><button id="onlineStart" type="button" class="primary" hidden>Zahájit společnou partii</button><button id="onlineResume" type="button" hidden>Pokračovat a zapnout zvuk</button><button id="onlineRetry" type="button" hidden>Zopakovat zvuk</button><button id="onlineSkip" type="button" hidden>Pokračovat bez zvuku</button></div>
+    <div id="onlineBoard" class="memory-board" aria-label="24 očíslovaných míst společného pexesa"></div>
+    <div id="onlineScores" class="memory-scores" aria-label="Hráči a získané dvojice"></div>
+    <section id="onlineEnd" class="memory-end" hidden><h2>Všechny dvojice jsou doma!</h2><p id="onlineResult" tabindex="-1"></p><button id="onlineAgain" class="primary" type="button">Ještě jednou se stejnými slovy</button><div id="onlineCollections"></div></section>
+  </section>
+  <dialog id="onlineReward" class="memory-reward" aria-labelledby="onlineRewardWord" hidden><img id="onlineRewardImage" alt=""><p id="onlineRewardWord" lang="fr" tabindex="-1"></p></dialog>
+  <p class="meta online-help">Pozvánku sdílej jen se spoluhráčem. Místnost má dvě místa a omezenou platnost. Při výpadku čeká hra na připojení obou hráčů.</p>
+  <noscript>Pro společnou hru je potřeba povolit JavaScript.</noscript>
+</main></body></html>

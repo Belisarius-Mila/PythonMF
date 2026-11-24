@@ -66,4 +66,4 @@ function ended(view){const player=active(view);assert.ok(player);player.ended=tr
 function loop(view,mode='sentence-word'){change(view,'studyLoopMode',mode);view.element('studyLoopToggle').click();}
 async function phase(view){ended(view);await flush();view.advance(2000);await flush();}
 function clone(value){return structuredClone(value);}
-module.exports={assert,fixture,vocabulary,audio,sentenceAudio,quizCatalog,pictures,model,learners,practice,app,flush,until,change,active,ended,loop,phase,clone,storage};
+module.exports={Element,assert,fixture,vocabulary,audio,sentenceAudio,quizCatalog,pictures,model,learners,practice,app,flush,until,change,active,ended,loop,phase,clone,storage};
