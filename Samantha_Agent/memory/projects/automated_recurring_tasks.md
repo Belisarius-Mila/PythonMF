@@ -741,3 +741,27 @@ obou webových kopií. SHA-256 bd5a33984b941689567dac67ce8f8c7a2fce6d8fc1436d442
 app.js?v=e453abeedf0d4ad0. Soukromé podklady a původní release účtenka:
 data/daily_3am/revisions/20261124_manual/. Konečné veřejné ověření bude v
 data/daily_3am/receipts/20261124_publication.json. Text se do paměti nekopíruje.
+
+
+## 2026-11-24 08:38 CET — Promluva pro 24. listopadu veřejně ověřená
+
+Hotovo: Nová jednorázová promluva je veřejně dostupná v ColorsAndNumbers.
+Přehrávač vybírá owl_241126.mp3; stažených116496 B /19.416 s má
+přesný připravený SHA-256 a celé audio se dekóduje bez chyby. Text beze změn.
+
+Rozhodnutí: Dokončené výslovně zadané vydání, jediná syntéza a jediný release.
+Soví automatika zůstává vypnutá, ostatní služby beze změny.
+
+Další krok: Uživatelský poslech; technické nasazení je hotové.
+Navrhované další kroky: Žádné nové. Původní pracovní proud Vocabulary FR
+byl po vydání registrovaně obnoven.
+
+Technický důkaz: Zdroj31b5384d08b8d2f6be4cf6da6ab1cfe6c34860ad; Terra job58d564ecbc3f7da268680b8a0aac85f5
+completed, push/deploy confirmed.25 cílených testů a programová brána107 PASS;
+Pages45349024769 success nad přesným SHA, deployment8021604510.
+Veřejné HTML vybírá app.js?v=e453abeedf0d4ad0 a JS vybírá nové audio;
+HTTP200/audio/mp3, shoda SHA-256bd5a33984b941689567dac67ce8f8c7a2fce6d8fc1436d442e7217c7d1c15882.
+Protected_services_unchanged=true, bez restartu Cockpitu. Veřejná účtenka:
+data/daily_3am/receipts/20261124_publication.json. Původní release účtenka:
+data/daily_3am/revisions/20261124_manual/release_receipt.json.
+Tento výsledkový místní dokumentační checkpoint neopakuje publikaci.
