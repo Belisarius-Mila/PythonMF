@@ -1,3 +1,8 @@
+> Aktuální volba 24.11.2026 je bezplatný soukromý Tailscale Serve na Macu.
+> Placený Render nebyl aktivován. Níže je zachovaný historický nasazovací podklad.
+> Aktuální pravidla a přejímka: memory/technical/vocabulary_fr_online.md;
+> aktuální plán: private vocabulary_fr_tailnet_20261124/completion.json.
+
 # Francouzština Jana — příprava trvalého hostingu
 
 Render: Hobby workspace, jedna placená instance `0.5c-512mb`, Frankfurt,

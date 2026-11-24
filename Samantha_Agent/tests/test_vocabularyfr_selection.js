@@ -266,6 +266,14 @@ test('FR online entry cannot bypass a selection with fewer than twelve usable pi
 });
 const cockpitGameOrigin='https://fixture-friendly-family-game.trycloudflare.com';
 const cockpitFrenchUrl=origin=>'https://belisarius-mila.github.io/PythonMF/vocabulary-fr/#'+new URLSearchParams({onlineOrigin:origin});
+test('private Tailscale game uses only its dedicated HTTPS port and survives reload',async()=>{
+ const origin='https://fixture-mac.fixture-tail.ts.net:8443',session=storage(),first=await app({url:cockpitFrenchUrl(origin),session}),opened=[];
+ first.win.open=url=>opened.push(url);first.element('memoryTab').click();first.element('memoryOnline').click();assert.equal(new URL(opened[0]).origin,origin);
+ const next=await app({url:first.win.location.href,session});next.win.open=url=>opened.push(url);next.element('memoryTab').click();next.element('memoryOnline').click();assert.equal(new URL(opened[1]).origin,origin);
+ for(const bad of [origin.replace(':8443',''),origin.replace(':8443',':8770'),origin.replace(':8443',':443'),origin+'/path','http://fixture-mac.fixture-tail.ts.net:8443','https://user@fixture-mac.fixture-tail.ts.net:8443',origin+'.untrusted.example']){
+  const view=await app({url:cockpitFrenchUrl(bad)}),wrong=[];view.win.open=url=>wrong.push(url);view.element('memoryTab').click();view.element('memoryOnline').click();assert.equal(wrong.length,0);
+ }
+});
 test('Cockpit entry opens the chosen hard words directly and preserves the original French tab and personal data',async()=>{
  const personalKey='vocabulary-fr.personal-hard.v1',local=storage(new Map([[personalKey,JSON.stringify({schema:1,kind:'vocabulary-fr.personal-hard-backup',language:'fr',hard:memoryPool.map(i=>i.uid)})]]));
  const v=await app({url:cockpitFrenchUrl(cockpitGameOrigin),local});v.element('personalHard').click();v.element('memoryTab').click();

@@ -1,39 +1,37 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
-## 2026-11-24 20:44 CET — Příprava trvalého hostingu Francouzštiny
+## 2026-11-24 21:13 CET — Bezplatný soukromý provoz přes Tailscale
 
-Hotovo: Místně připravený samostatný cloudový balíček pro Render: placená
-jedna instance ve Frankfurtu, disk1GB, přidělená stabilní HTTPS adresa,
-izolovaný export veřejné FR části z přesného commitu a start bez Samanthy.
-Health kontroluje i databázi, korektní SIGTERM/restart zachová úložiště,
-SQLite backup vytváří novou soukromou kopii. Připravený trvalý vstup z Pages
-Francouzštiny i Cockpitu má přednost před starým tunelem; vyžaduje přesnou
-schválenou konfiguraci. Ta nyní obsahuje origin=null, nic se neaktivuje.
+Hotovo: Místně připravený soukromý Tailscale Serve pro pexeso: vlastní
+HTTPS8443 → loopback8792, samostatný per-user LaunchAgent a databáze na Macu.
+Přesný plán drží commit, export, definici služby a snímek původní sítě.
+Aktivace zachovává Cockpit443/8770 a Camino a odmítne jakýkoli Funnel,
+cizí port/LaunchAgent či změněný podklad. Jediná trvalá účtenka brání
+opakování nejasného startu; verify ověří původní výsledek bez nové akce.
+Klient a Cockpit mají připravený vstup z ověřené soukromé služby.
 
-Rozhodnutí: Míla výslovně zadal připravit trvalý hosting po opakovaném zániku
-Quick Tunnel při usnutí Macu. Render je doporučený podklad přípravy, jeho
-placená aktivace ani účet nebyly schválené. Návrh7,25USD/měsíc před daněmi
-(7 compute +0,25 disk), případný přenos navíc; žádný cenový strop. Stávající
-hra má zůstat funkčně stejná. Nepřenáší se soukromá lokální databáze.
+Rozhodnutí: Míla odmítl měsíční placený hosting, potvrdil zapnutý Mac,
+souhlasí s Tailscale a výslovně potvrdil funkční Tailscale i Cockpit u Jany.
+Volíme soukromý Serve bez dalšího hostingového poplatku, nikoli veřejný
+Funnel. Render zůstává neaktivním historickým podkladem; žádná placená
+aktivace není schválená. Soukromý hostname se neukládá do Gitu.
 
-Další krok: Potvrdit poskytovatele/účet a placený základ; pak registrovaně
-vydat přípravu, aktivovat schválenou službu, ověřit její skutečný release a
-teprve potom vydat přesný cloudový původ v konfiguraci FR Pages/Cockpitu.
-Navrhované další kroky: Dva skutečné hráče a restart ověřit na nové službě;
-nezávislou off-site zálohu řešit jako další vymezený krok. První přechod
-na jiný původ vyžaduje jednu novou místnost a pozvánku, další kola již ne.
+Další krok: Předložit hotový přesný plán k povinnému potvrzení globální
+brzdy pro Tailscale/LaunchAgent; po souhlasu p+n přes Terru a odpovídající
+nasazení Cockpitu, potom aktivovat plán a ověřit HTTPS i oba hráče.
+Navrhované další kroky: Fyzicky ověřit port8443 z Janina Macu. Případné
+omezení ACL navrhnout zvlášť, žádné granty automaticky neměnit. Hostitelský
+Mac musí při hraní zůstat online, neuspaný a přihlášený.
 
-Technický důkaz:56 cílených Python kontrol PASS včetně63 FR JS scénářů a20
-online JS. Cloudové testy ověřují export bez tajemství/ostatních aplikací,
-Git identity, symlinky, disk/HTTPS/port, databázový health503, konzistentní
-zálohy, SIGTERM a restart se stejnou databází. Nový klient přijímá pouze
-konkrétní konfigurovaný Render původ; fragment s libovolnou Render adresou
-neaktivuje cizí službu. Pozdní konfigurace neblokuje slovník. Předchozí
-3d1d4483 je na GitHubu a Pages; místní herní upgrade i druhá partie jsou
-ověřené v private vocabulary_fr_rematch_20261124/completion.json. Veřejný
-Quick Tunnel je stále nedostupný. Nová cloudová služba ani účet nejsou
-vytvořené. Finální brána, SHA, export a limity přejímky jsou v private
-vocabulary_fr_cloud_20261124/completion.json. Návrh a plný postup jsou
-v Downloads/Vocabulary_FR_trvaly_hosting_navrh_a_nasazeni_2026-11-24.txt.
+Technický důkaz:70 cílených Python kontrol PASS,64 FR JS a20 online JS.
+Syntetický Tailscale/launchd ověřuje plán bez mutace, přesnou frázi/digest,
+zachování ostatních cest, vlastnictví služby, cizí port/soubor/PID label,
+aktualizaci s uchovanou databází a důkaz ztracené odpovědi bez replay.
+Živý čtecí audit potvrdil soukromý Cockpit, vypnutý Funnel a volný8443;
+8792 nemá cizí listener. Tailscale1.104.7 zachovává původní HTTP Host pro
+TCP proxy podle zdroje stejné verze. Dosavadní služba se nespustila ani
+síť/LaunchAgents nebyly změněné. Skutečná přejímka HTTPS/Jana čeká.
+Finální brána, SHA a plán v private vocabulary_fr_tailnet_20261124/completion.json.
+TXT v Downloads: Vocabulary_FR_Tailscale_bezplatny_provoz_a_aktivace_2026-11-24.txt.
 <!-- SAMANTHA_CURRENT_STATUS_END -->
 
 ## 2026-11-17 20:21 CET — Společné předání osobního režimu a Datových commitů k p+n
@@ -1007,3 +1005,37 @@ Quick Tunnel je stále nedostupný. Nová cloudová služba ani účet nejsou
 vytvořené. Finální brána, SHA, export a limity přejímky jsou v private
 vocabulary_fr_cloud_20261124/completion.json. Návrh a plný postup jsou
 v Downloads/Vocabulary_FR_trvaly_hosting_navrh_a_nasazeni_2026-11-24.txt.
+
+## 2026-11-24 21:13 CET — Bezplatný soukromý provoz přes Tailscale
+
+Hotovo: Místně připravený soukromý Tailscale Serve pro pexeso: vlastní
+HTTPS8443 → loopback8792, samostatný per-user LaunchAgent a databáze na Macu.
+Přesný plán drží commit, export, definici služby a snímek původní sítě.
+Aktivace zachovává Cockpit443/8770 a Camino a odmítne jakýkoli Funnel,
+cizí port/LaunchAgent či změněný podklad. Jediná trvalá účtenka brání
+opakování nejasného startu; verify ověří původní výsledek bez nové akce.
+Klient a Cockpit mají připravený vstup z ověřené soukromé služby.
+
+Rozhodnutí: Míla odmítl měsíční placený hosting, potvrdil zapnutý Mac,
+souhlasí s Tailscale a výslovně potvrdil funkční Tailscale i Cockpit u Jany.
+Volíme soukromý Serve bez dalšího hostingového poplatku, nikoli veřejný
+Funnel. Render zůstává neaktivním historickým podkladem; žádná placená
+aktivace není schválená. Soukromý hostname se neukládá do Gitu.
+
+Další krok: Předložit hotový přesný plán k povinnému potvrzení globální
+brzdy pro Tailscale/LaunchAgent; po souhlasu p+n přes Terru a odpovídající
+nasazení Cockpitu, potom aktivovat plán a ověřit HTTPS i oba hráče.
+Navrhované další kroky: Fyzicky ověřit port8443 z Janina Macu. Případné
+omezení ACL navrhnout zvlášť, žádné granty automaticky neměnit. Hostitelský
+Mac musí při hraní zůstat online, neuspaný a přihlášený.
+
+Technický důkaz:70 cílených Python kontrol PASS,64 FR JS a20 online JS.
+Syntetický Tailscale/launchd ověřuje plán bez mutace, přesnou frázi/digest,
+zachování ostatních cest, vlastnictví služby, cizí port/soubor/PID label,
+aktualizaci s uchovanou databází a důkaz ztracené odpovědi bez replay.
+Živý čtecí audit potvrdil soukromý Cockpit, vypnutý Funnel a volný8443;
+8792 nemá cizí listener. Tailscale1.104.7 zachovává původní HTTP Host pro
+TCP proxy podle zdroje stejné verze. Dosavadní služba se nespustila ani
+síť/LaunchAgents nebyly změněné. Skutečná přejímka HTTPS/Jana čeká.
+Finální brána, SHA a plán v private vocabulary_fr_tailnet_20261124/completion.json.
+TXT v Downloads: Vocabulary_FR_Tailscale_bezplatny_provoz_a_aktivace_2026-11-24.txt.

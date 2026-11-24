@@ -12,6 +12,34 @@ from app.capabilities.models import (
 
 CAPABILITIES: tuple[CapabilityRecord, ...] = (
     CapabilityRecord(
+        capability_id="vocabulary_fr_tailnet_prepare", label="Prepare the private free FR Tailscale service",
+        risk=RiskLevel.LOCAL_WRITE, reads=("exact clean commit", "owned Tailscale device and private Serve configuration",),
+        writes=("frozen local release and activation plan in data/private",),
+        tool="app.vocabulary_fr_tailnet.PrivateGame.prepare", audit=AuditPolicy.REDACTED,
+        notes="No network mutation, LaunchAgent installation, grants, Funnel, billing or publication. Private hostname stays outside Git.",
+    ),
+    CapabilityRecord(
+        capability_id="vocabulary_fr_tailnet_status", label="Read the owned private FR Tailscale service",
+        risk=RiskLevel.READ_ONLY, reads=("original private receipt, exact service definition, process and private route health",), writes=(),
+        tool="app.vocabulary_fr_tailnet.PrivateGame.status", audit=AuditPolicy.REDACTED,
+        notes="Never starts, restarts, retries or changes Tailscale, other services, grants or permissions.",
+    ),
+    CapabilityRecord(
+        capability_id="vocabulary_fr_tailnet_verify", label="Verify the original private FR activation without retry",
+        risk=RiskLevel.LOCAL_WRITE, reads=("original exact activation plan and live owned process, route and health",),
+        writes=("original private completion evidence only if exact live proof succeeds",),
+        tool="app.vocabulary_fr_tailnet.PrivateGame.verify", audit=AuditPolicy.REDACTED,
+        notes="No start, restart, bootstrap, Serve mutation, grants, Funnel or paid call. Never replaces the original activation or resets unknown network changes.",
+    ),
+    CapabilityRecord(
+        capability_id="vocabulary_fr_tailnet_activate", label="Activate the exact private FR Tailscale plan",
+        risk=RiskLevel.SYSTEM_CHANGE, reads=("exact plan digest and clean commit", "unchanged private network and owned service",),
+        writes=("one owned per-user LaunchAgent", "one private HTTPS 8443 route to game loopback 8792", "private intent and game database"),
+        tool="app.vocabulary_fr_tailnet.PrivateGame.activate", requires_confirmation=True,
+        confirmation_policy=ConfirmationPolicy.EXACT_PHRASE, audit=AuditPolicy.REDACTED,
+        notes="Exact global safety phrase required after plan review. No Funnel, policy grants, public endpoint, deletion, payments or change to Cockpit/Camino ports/routes. Uncertain activation is never automatically replayed.",
+    ),
+    CapabilityRecord(
         capability_id="vocabulary_fr_cloud_prepare", label="Prepare an isolated committed FR release for cloud hosting",
         risk=RiskLevel.LOCAL_WRITE, reads=("exact approved Git commit and public FR allowlist",),
         writes=("isolated local cloud release and content manifest",),

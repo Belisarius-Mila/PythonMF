@@ -59,7 +59,7 @@
   function create({doc,win,getData,getAudio,getCatalog,getSelection,getContext,sanitizeContext,onOpen,onClose,play,stop,getOnlineOrigin=()=>null}){
     const remoteKey='vocabulary-fr.online-origin.v1';
     function verifiedOrigin(value){
-      try{const url=new URL(value);return url.protocol==='https:'&&!url.username&&!url.password&&!url.port&&!url.search&&!url.hash&&url.pathname==='/'&&/^[a-z0-9]+(?:-[a-z0-9]+)+\.trycloudflare\.com$/.test(url.hostname)&&url.origin===value?url.origin:null;}catch(_){return null;}
+      try{const url=new URL(value),temporary=!url.port&&/^[a-z0-9]+(?:-[a-z0-9]+)+\.trycloudflare\.com$/.test(url.hostname),privateGame=url.port==='8443'&&/^(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.)+ts\.net$/.test(url.hostname);return url.protocol==='https:'&&!url.username&&!url.password&&!url.search&&!url.hash&&url.pathname==='/'&&(temporary||privateGame)&&url.origin===value?url.origin:null;}catch(_){return null;}
     }
     const entry=new URLSearchParams(new URL(win.location.href).hash.slice(1));
     let remoteOrigin=null;

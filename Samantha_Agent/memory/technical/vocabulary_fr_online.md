@@ -209,3 +209,35 @@ přidělený vlastněné službě. Klient i Cockpit jej používají před pří
 starým tunelem. Fragment ani sessionStorage nemohou povolit libovolný Render
 hostname. Osobní Pages původ/filtry zůstávají; hra se otevírá zvlášť se12 UID.
 První přechod původu vyžaduje novou místnost. Databáze Macu se neexportuje.
+
+## Bezplatný soukromý Tailscale — aktuální volba 24. 11. 2026
+
+Míla odmítl placenou aktivaci a potvrdil zapnutý Mac i fungující Tailscale/
+Cockpit u Jany. Aktuální připravený cíl je soukromý Serve8443→127.0.0.1:8792.
+Render zůstává neaktivní podklad. Žádný Funnel, veřejný vstup, ACL změna,
+sdílení zařízení ani platba nejsou součástí této varianty.
+
+Registrované vocabulary_fr_tailnet_prepare/status/activate/verify vlastní
+PrivateGame v app/vocabulary_fr_tailnet.py. Prepare freeze: čistý přesný
+commit, veřejný export, aktuální vlastní node/DNS, původní Serve/Funnel a
+LaunchAgent com.samantha.vocabulary-fr. Aktivace vyžaduje přesnou globální
+frázi a otisk plánu. Jediný intent před bootstrap/Serve; nejistý výsledek
+se neopakuje. Verify pouze doloží původní fungující proces a trasu proti
+původnímu snímku; nikdy nespustí druhou aktivaci ani neresetuje síť.
+
+Vlastní GUI-user LaunchAgent startuje loopback-only server po přihlášení.
+Privátní soubory/manifesty/DB jsou pod data/private/vocabulary-fr-tailnet.
+Ostatní443/8770 posluchače i Camino se kontrolují beze změny; cizí8443/8792
+nebo systémový soubor blokuje. Nový endpoint není důkaz přístupu z Janina
+Macu: po aktivaci je nutná skutečná HTTPS/přístupová přejímka a ověření
+obou hráčů. Případné ACL omezení vyžaduje nový samostatný návrh.
+
+Cockpit předá pouze živě ověřenou soukromou adresu přes fragment. Klient
+povoluje pouze kanonický HTTPS ts.net původ na8443, žádné credentials,
+cesty, query/fragment nebo jiné porty. Osobní Pages původ/filtry a12 UID
+zůstávají. Konkrétní privátní hostname nikdy do Git konfigurace.
+
+Podklady: https://tailscale.com/docs/features/tailscale-serve a
+https://tailscale.com/docs/reference/tailscale-cli/serve . Původní Host
+u nainstalované1.104.7 zachovává TCP proxy podle
+https://github.com/tailscale/tailscale/blob/v1.104.7/ipn/ipnlocal/serve.go .

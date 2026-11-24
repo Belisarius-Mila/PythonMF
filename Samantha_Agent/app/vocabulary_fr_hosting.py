@@ -32,6 +32,7 @@ PUBLIC = ("docs/vocabulary-fr", "docs/data/vocabulary-fr-v2.json", "docs/data/vo
 SERVER = "Samantha_Agent/app/vocabulary_fr_multiplayer.py"
 ORIGIN = re.compile(r"https://[a-z0-9]+(?:-[a-z0-9]+)+\.trycloudflare\.com\b")
 CLOUD_ORIGIN = re.compile(r"https://[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.onrender\.com\Z")
+TAILNET_ORIGIN = re.compile(r"https://(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.)+ts\.net:8443\Z")
 
 
 def _sha(path):
@@ -60,6 +61,13 @@ def cockpit_french_url(original: str, repo: Path) -> str:
     starts a game service, changes a tunnel, or exposes process/player details.
     """
     try:
+        from app.vocabulary_fr_tailnet import PrivateGame
+        private = PrivateGame(repo).status()
+        origin = private.get("origin")
+        if private.get("running") is True and isinstance(origin, str) and TAILNET_ORIGIN.fullmatch(origin):
+            url = urlsplit(original)
+            params = dict(parse_qsl(url.fragment));params["onlineOrigin"] = origin
+            return urlunsplit((url.scheme, url.netloc, url.path, url.query, urlencode(params)))
         try:
             config = json.loads((Path(repo) / "docs/vocabulary-fr/online-hosting.json").read_text())
         except (OSError, ValueError):

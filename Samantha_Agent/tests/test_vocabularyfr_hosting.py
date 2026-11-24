@@ -257,6 +257,13 @@ class HostingTests(unittest.TestCase):
             with patch.object(Pilot,'status',return_value={'running':False}):
                 self.assertEqual(cockpit_french_url('https://example.test/fr/',self.repo),'https://example.test/fr/')
 
+    def test_owned_private_game_is_linked_without_publishing_its_hostname_in_configuration(self):
+        from app.vocabulary_fr_tailnet import PrivateGame
+        original='https://example.test/fr/#personalHard=true'
+        with patch.object(PrivateGame,'status',return_value={'running':True,'origin':'https://fixture-mac.fixture-tail.ts.net:8443'}),patch.object(Pilot,'status',side_effect=AssertionError('Old tunnel must not be needed')):
+            url=cockpit_french_url(original,self.repo)
+        self.assertEqual(parse_qs(urlsplit(url).fragment),{'personalHard':['true'],'onlineOrigin':['https://fixture-mac.fixture-tail.ts.net:8443']})
+
     def test_process_query_is_independent_of_a_caller_locale_and_utc_environment(self):
         response=subprocess.CompletedProcess([],0,'Tue Nov 24 14:23:33 2026 /private/connector --url local\n','')
         with patch.dict('os.environ',{'LC_ALL':'cs_CZ.UTF-8','LANG':'cs_CZ.UTF-8','TZ':'UTC'}),patch('app.vocabulary_fr_hosting.subprocess.run',return_value=response) as run:
