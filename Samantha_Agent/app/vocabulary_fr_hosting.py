@@ -14,6 +14,7 @@ import os
 from pathlib import Path
 import re
 import signal
+import shlex
 import socket
 import subprocess
 import sys
@@ -117,12 +118,29 @@ class Pilot:
         result = subprocess.run(["ps", "-p", str(pid), "-o", "lstart=", "-o", "command="], capture_output=True, text=True)
         return result.stdout.strip() if result.returncode == 0 else ""
 
+    @staticmethod
+    def _stable_identity(value):
+        # macOS Python's launcher execs its framework interpreter in the same PID.
+        # Preserve birth time and every server argument; normalize only known executables.
+        parts = value.split(None, 5)
+        if len(parts) == 6:
+            try:
+                args = shlex.split(parts[5])
+            except ValueError:
+                return value
+            interpreters = {sys.executable, str(Path(sys.executable).resolve()),
+                            str(Path(sys.base_prefix) / "Resources/Python.app/Contents/MacOS/Python")}
+            if len(args) > 2 and args[0] in interpreters and args[1] == "-I" and args[2].endswith("/Samantha_Agent/app/vocabulary_fr_multiplayer.py"):
+                args[0] = "<owned-python>"
+                return " ".join(parts[:5]) + " " + json.dumps(args)
+        return value
+
     def status(self):
         path = self.root / "active.json"
         if not path.exists():
             return {"state": "not_started"}
         result = json.loads(path.read_text())
-        result["alive"] = {name: bool(record["identity"] and self._identity(record["pid"]) == record["identity"])
+        result["alive"] = {name: bool(record["identity"] and self._stable_identity(self._identity(record["pid"])) == self._stable_identity(record["identity"]))
                            for name, record in result.get("processes", {}).items()}
         result["running"] = result.get("state") == "started" and result["alive"] == {"connector": True, "server": True}
         return result

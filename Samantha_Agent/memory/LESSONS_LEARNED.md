@@ -2982,3 +2982,9 @@ strop. Skutečný DALTAC dokončen17,0578/20, sedm původních částí beze zm�
 - Problém: Pole kartiček je řazené podle místa na plánu. Výběr poslední otevřené položky z tohoto pole přehraje první slovo, pokud druhá otočená karta má nižší číslo.
 - Řešení: Server vrací výslovný index posledního otočení (focus). Poslech a česká nápověda se vážou na něj; server současně ověřuje očekávané kolo a fázi požadavku.
 - Ověření: Dva oddělené JS klienty otočí10 a potom1, oba přehrají vlastní druhé slovo; server odmítne opožděný klik i po dokončení předchozího poslechu.
+
+### 2026-11-24 — Totožnost Python procesu při startu na macOS
+
+- Problém: Python launcher změní po startu cestu k interpretu při zachování PID, času vzniku a argumentů. Přesné porovnání celého ps command pak falešně hlásí mrtvou službu.
+- Řešení: Normalizovat jen známé cesty stejného interpretu a jen pro přesně určený server; zachovat kontrolu narození procesu i všech argumentů. Původní běh ověřit, nezakládat nový tunel.
+- Ověření: Živý stejný PID před/po přechodu, test rozlišuje jiný čas startu, port i cizí interpret; dvě veřejné HTTPS relace a MP3 Range ověřené.

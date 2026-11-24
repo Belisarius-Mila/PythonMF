@@ -2,6 +2,7 @@
 import json
 from pathlib import Path
 import subprocess
+import sys
 from tempfile import TemporaryDirectory
 import unittest
 from unittest.mock import patch, MagicMock
@@ -110,6 +111,15 @@ class HostingTests(unittest.TestCase):
         self.assertEqual(get_capability("vocabulary_fr_hosting_status").risk,RiskLevel.READ_ONLY)
         self.assertEqual(self.pilot.status(),{"state":"not_started"})
         self.assertFalse(self.pilot.root.exists())
+
+    def test_macos_launcher_transition_keeps_exact_pid_birth_and_server_arguments(self):
+        args=' -I /release/Samantha_Agent/app/vocabulary_fr_multiplayer.py --port 8791 --database /private/rooms.sqlite3'
+        before='Tue Nov 24 14:23:33 2026 '+sys.executable+args
+        after='Tue Nov 24 14:23:33 2026 '+str(Path(sys.base_prefix)/'Resources/Python.app/Contents/MacOS/Python')+args
+        self.assertEqual(Pilot._stable_identity(before),Pilot._stable_identity(after))
+        self.assertNotEqual(Pilot._stable_identity(before),Pilot._stable_identity(after.replace('14:23:33','14:23:34')))
+        self.assertNotEqual(Pilot._stable_identity(before),Pilot._stable_identity(after.replace('8791','8770')))
+        self.assertNotEqual(Pilot._stable_identity(before),Pilot._stable_identity(after.replace(str(Path(sys.base_prefix)/'Resources/Python.app/Contents/MacOS/Python'),'/foreign/python')))
 
 
 if __name__ == "__main__":unittest.main()
