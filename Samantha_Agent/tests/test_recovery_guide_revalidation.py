@@ -131,3 +131,21 @@ class Revalidation(unittest.TestCase):
     def test_alias_state_is_refused(self):
         destination=self.root/'outside';destination.mkdir();r.STATE.symlink_to(destination,target_is_directory=True)
         with self.assertRaises(ValueError):self.prepare()
+
+    def test_optional_call_limit_is_explicit_bound_and_applied_only_after_verified_probe(self):
+        self.original['limits']['max_calls']=20;self.original['schedule']['max_calls']=20
+        self.configpath.write_text(canonical_json(self.original))
+        for options in ({'proposed_max_calls':21},{'refresh_budget':True,'proposed_max_calls':0}):
+            with self.assertRaises(ValueError):r.prepare(request_id=self.request,client_factory=self.client,**options)
+        budget={'run_credits':250,'inspection_output_tokens':3000,'month_credits':1000,'max_calls':21}
+        with patch.object(r,'_budget_plan',return_value=budget):
+            card=r.prepare(request_id=self.request,refresh_budget=True,proposed_max_calls=21,client_factory=self.client)
+        self.assertEqual(card['plan']['call_limit_refresh'],{'before':20,'after':21})
+        self.assertEqual(json.loads(self.configpath.read_text())['limits']['max_calls'],20)
+        with self.assertRaises(ValueError):r.prepare(request_id=self.request,refresh_budget=True,proposed_max_calls=22,client_factory=self.client)
+        with patch.object(r,'_assert_budget'):
+            self.runprobe(card)
+            with patch.object(r.configuration,'validate_payload',side_effect=lambda value:value):
+                r.accept(request_id=self.request,approved_digest=card['digest'],confirmed=True,client_factory=self.client)
+        after=json.loads(self.configpath.read_text());self.assertEqual(after['limits']['max_calls'],21);self.assertEqual(after['schedule']['max_calls'],21)
+        self.assertEqual(after['limits']['month_credits'],1000);self.assertEqual(self.turns,1)

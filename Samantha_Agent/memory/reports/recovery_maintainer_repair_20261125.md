@@ -144,3 +144,27 @@ Následuje ověření archivu, šifrovaná recovery a izolovaná zkouška obnovy
 Živý konečný stav, brána, commit a provozní účtenky jsou v soukromém
  data/private/recovery_maintainer_repair_20261125/completion.json.
 Tento tematický krok nezahrnuje push, restart ani nasazení Cockpitu.
+
+## 2026-11-25 — Provozní návod uploadován, návrh21 kroků bez aktivace
+
+Hotovo: Cílená ruční redakce sjednoceného TXT prošla PublicationStore;
+obě pevné kopie mají shodné SHA,80726B a iCloud potvrdil uploaded.
+Návod uvádí omezení ruční redakce, nikoli úspěch automatické revize.
+Registrované převzetí změnilo pouze bootstrap a zachovalo předchozí aktivaci.
+Servisní archiv ověřený:45 souborů včetně konzistentní FR SQLite a čtyř
+protokolových podkladů. Hlavní opravný commit073abf6a, brána1269 PASS.
+
+Po rozšíření provozního originálu úplné nové plánování odmítlo20 kroků.
+Připravuje se proto výslovný call_limit_refresh z20 na21; všechny zdroje
+zůstávají celé, kredity250/běh a1000/měsíc se nezvyšují. Nová volba je
+v neměnném plánu, ověřuje scheduler i limits a nepřechází do aktivace bez
+úspěšné přesně přijaté revalidace. Samotná příprava není placený pokus.
+Nový skutečný pokus navíc k původní nejisté účtence vyžaduje nové přijetí.
+
+Stav: Automatický správce je stále blokovaný; důkaz0.163, mez200 a základ
+macOS15.8.2 nebyly přepnuté. První pokus má delivery_unknown, neopakovat.
+Nový plán navrhne i přezkoumanou publikační baseline pozorovaného15.8.3,
+nikoli aktualizaci OS. Záloha a izolovaná zkouška obnovy se dokončují
+nezávisle. Aktuální konečné důkazy, snapshot a další krok jsou v soukromém
+ data/private/recovery_maintainer_repair_20261125/completion.json.
+Push, nasazení Cockpitu ani nový model nejsou součástí tohoto kroku.

@@ -44,7 +44,7 @@ CAPABILITIES: tuple[CapabilityRecord, ...] = (
         risk=RiskLevel.LOCAL_WRITE, reads=("successful exact probe receipt and unchanged activation",),
         writes=("preserved private activation before-image, runtime_evidence and optional exact approved budget_refresh",), tool="app.recovery_guide_revalidation.accept",
         requires_confirmation=True, confirmation_policy=ConfirmationPolicy.EXACT_CURRENT_MESSAGE, audit=AuditPolicy.REDACTED,
-        notes="No model call, LaunchAgent, model role, schedule time, monthly limit or destination change. Optional exact approved full-corpus budget_refresh changes per-run ceiling and inspection reserve; an explicit observed macos_refresh may update only the publication baseline, never the OS. Existing approved weekly schedule can resume after acceptance.",
+        notes="No model call, LaunchAgent, model role, schedule time, monthly limit or destination change. Optional exact approved full-corpus budget_refresh changes per-run ceiling and inspection reserve; an explicitly approved call_limit_refresh may update both scheduler and generator call limits. An explicit observed macos_refresh may update only the publication baseline, never the OS. Existing approved weekly schedule can resume after acceptance.",
     ),
     CapabilityRecord(
         capability_id="vocabulary_fr_tailnet_prepare", label="Prepare the private free FR Tailscale service",
