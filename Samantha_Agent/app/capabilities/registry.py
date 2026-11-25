@@ -12,6 +12,14 @@ from app.capabilities.models import (
 
 CAPABILITIES: tuple[CapabilityRecord, ...] = (
     CapabilityRecord(
+        capability_id="recovery_incremental_activate", label="Activate weekly recovery procedure changes for the owned service",
+        risk=RiskLevel.LOCAL_WRITE, reads=("reviewed commit, exact failed weekly receipt, both accepted guide copies",),
+        writes=("recovery modules only, private migration before-image and weekly delta baseline",),
+        tool="app.recovery_guide_known_result.activate_incremental", requires_confirmation=True,
+        confirmation_policy=ConfirmationPolicy.EXACT_CURRENT_MESSAGE, audit=AuditPolicy.REDACTED,
+        notes="Preserve original provider history and reservations. Never replay an earlier turn.",
+    ),
+    CapabilityRecord(
         capability_id="recovery_known_result_prepare", label="Prepare same-job continuation from a proven completed inspection prefix",
         risk=RiskLevel.LOCAL_WRITE, reads=("owned attention job, full delivered receipt, exact source prefix and measured usage",),
         writes=("private immutable continuation plan; preview never calls the model",),tool="app.recovery_guide_known_result.prepare",

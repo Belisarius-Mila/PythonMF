@@ -178,6 +178,9 @@ class RecoveryRuntime:
         return self.accept(job['request_id'],draft,confirmed_binding=draft.sha256,
             confirmed_identity=job['identity_sha256'],confirmed=True,now=self.now)
 
+    def _scheduler_options(self):
+        return {}
+
     def tick(self,now:datetime,*,trigger='timer'):
         if not self.lock.acquire(blocking=False):return {'state':'busy','model_calls':0}
         try:
@@ -185,7 +188,7 @@ class RecoveryRuntime:
             def once():
                 return self.scheduler.tick(now,readiness=self.readiness,preflight=self._preflight,analyze=self._analyze,
                     delivery_status=lambda r:self.publication.status(r['request_id']),deliver=self._deliver,trigger=trigger,
-                    delivery_readiness=self.delivery_readiness)
+                    delivery_readiness=self.delivery_readiness, **self._scheduler_options())
             result=once()
             if (self.automatic_profile is not None and result.get('state')=='awaiting_acceptance'
                 and result.get('action')!='policy_changed'):

@@ -45,7 +45,15 @@ def main(argv: list[str] | None = None) -> int:
             from app.recovery_guide_preflight import runtime_observation
             result = runtime_observation()
         elif args.action == "schedule-preview":
-            result = {"state": "schedule_unapproved", **schedule_preview(datetime.now(ZoneInfo("Europe/Prague")))}
+            from app.recovery_guide_runtime_config import load
+            from app.recovery_guide_scheduler import SchedulerPolicy
+            now = datetime.now(ZoneInfo("Europe/Prague"))
+            active = load(ROOT)
+            if active is not None and active.payload["enabled"]:
+                active.guard()
+                result = {"state": "scheduled", **schedule_preview(now, SchedulerPolicy(**active.payload["schedule"]))}
+            else:
+                result = {"state": "schedule_unapproved", **schedule_preview(now)}
         elif args.action == "status":
             from app.recovery_guide_runtime_live import entry
             result = status(ROOT / "data/private/recovery_guide", weekly_slot(datetime.now(ZoneInfo("Europe/Prague"))))

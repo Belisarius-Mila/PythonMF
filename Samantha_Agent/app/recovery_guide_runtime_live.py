@@ -87,15 +87,18 @@ def live_calls(directory,executor,*,assert_current,client_factory=None,inspectio
         counter=start_index;threads=set()
         def call(payload,kind):
             nonlocal counter
-            if kind not in {'inspect','synthesize'}:raise ValueError('runtime_unknown_phase')
+            if kind not in {'inspect','synthesize','amend'}:raise ValueError('runtime_unknown_phase')
             agent_roles.assert_current(executor,role=m.ROLE)
             if assert_current() is not True:raise ValueError('runtime_inputs_changed_before_thread')
             counter+=1
             from app import recovery_guide_inspection as inspection
             logical=payload
             payload=inspection.wire(logical) if kind=='inspect' else logical
-            schema=inspection.schema(logical) if kind=='inspect' else c.schema(payload)
+            schema=inspection.schema(logical) if kind=='inspect' else c.schema(payload) if kind=='synthesize' else None
             instructions=m.REVIEW_INSTRUCTIONS+(inspection.instructions(inspection_output_tokens) if kind=='inspect' else '')
+            if kind == 'amend':
+                from app.recovery_guide_incremental import EDIT_SCHEMA, EDIT_INSTRUCTIONS
+                schema, instructions = EDIT_SCHEMA, EDIT_INSTRUCTIONS
             request=SimpleNamespace(payload=payload,schema=schema)
             context=directory/'context'/str(counter);path=directory/'transport'/f'{counter:03d}.json'
             def before_send(thread):
@@ -145,7 +148,7 @@ def configuration_source(p):
     return Source('recovery_guide_runtime_configuration',digest(text),text,'documented_not_live')
 
 
-def build(config):
+def build(config, *, runtime_type=RecoveryRuntime):
     config.guard();p=config.payload
     policy=SchedulerPolicy(**p['schedule']);limits=m.Limits(**p['limits'])
     scheduler=WeeklyScheduler(config.root/'schedule',sandbox_root=config.root,policy=policy,
@@ -205,7 +208,7 @@ def build(config):
                 source_scope_approved=bool(p['scopes']))
         except Exception:pass
         return ready
-    runtime=RecoveryRuntime(scheduler=scheduler,publication=publication,limits=limits,
+    runtime=runtime_type(scheduler=scheduler,publication=publication,limits=limits,
         bootstrap=Path(p['bootstrap']['path']),bootstrap_sha256=p['bootstrap']['sha256'],snapshot_provider=snapshot,
         count_tokens=counter,call_factory=__import__('functools').partial(live_calls,inspection_output_tokens=limits.inspection_reserve),readiness=readiness,assert_snapshot=assert_snapshot,
         cloud_audit=icloud_metadata,delivery_readiness=common_readiness,assert_activation=config.guard,
@@ -220,10 +223,14 @@ def entry(action,*,project=configuration.ROOT,home=None,now=None):
             'runtime_integrated':True,'format_contract':c.VERSION,
             'reason':'Nutná samostatně schválená aktivační konfigurace, role, rozsah a rozpočet.'}
     config.guard()
-    if action=='status':return inspect_status(config.root/'schedule',scope='production')
+    from app.recovery_guide_incremental import IncrementalRuntime, incremental_status
+    incremental = (config.root / 'incremental.json').exists()
+    if action=='status':
+        result = inspect_status(config.root/'schedule',scope='production')
+        return incremental_status(config, result, now) if incremental else result
     if action not in {'run','tick'}:raise ValueError('runtime_unknown_action')
     from datetime import datetime
     from zoneinfo import ZoneInfo
-    runtime,counter=build(config)
+    runtime,counter=build(config, runtime_type=IncrementalRuntime) if incremental else build(config)
     try:return runtime.tick(now or datetime.now(ZoneInfo('Europe/Prague')),trigger='manual' if action=='run' else 'timer')
     finally:counter.close()

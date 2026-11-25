@@ -1023,3 +1023,11 @@ regrese ověřují zachování strukturované chyby bez retry. Živá přejímka
 opraveného schématu zatím chybí. Kód opravy není nainstalovaný do aktivní
 Data služby; její definice, role, síť a dosavadní historie jsou zachované.
 Push, restart ani nasazení Cockpitu nebyly zadány.
+
+## Nedělní kontrola změn postupu obnovy od 29. listopadu 2026
+
+Každou neděli od 09:00 pražského času správce porovná přijatou verzi projektu s aktuální větví main. Porovnává změny v instalačních a obnovovacích postupech, nastavení spouštěných služeb, síti, zdrojích záloh a přístupu k aplikacím. Externí zálohovací disk k aktualizaci návodu nepotřebuješ. Pro zápis druhé kopie musí fungovat iCloud Drive.
+
+Pokud se postup obnovy nezměnil, návod a datum jeho poslední věcné změny zůstanou stejné. Kontrola bez vybraných změn spotřebuje nula modelových volání. Při relevantním rozdílu použije správce nejvýše jedno čtení změn a aktuálního návodu. Nové pokyny vloží do příslušné kapitoly. Před zápisem ověří citace a zachování ostatních pokynů a po zápisu kontroluje obě kopie i upload na iCloud.
+
+Po obnově samotného správce ověř v jeho příkazu status režim incremental, příští místní termín a seznam pending. Uchovej stav plánovače včetně poslední přijaté verze. Při nejasném doručení se původní modelový tah neopakuje. Po spánku Macu plánovač při nejbližší příležitosti zpracuje poslední splatný týden.

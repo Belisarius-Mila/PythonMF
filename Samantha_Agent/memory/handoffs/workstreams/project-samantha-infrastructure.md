@@ -1,5 +1,12 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 
+## Nedělní kontrola změn postupu obnovy od 29. listopadu 2026
+
+Míla schválil cílenou aktualizaci provozního TXT každou neděli od 09:00 Europe/Prague. Kontrola porovná Git změny od přijatého základu, použije nejvýše jeden modelový tah a ověřenou publikaci do PythonMF a iCloud Dokumentů. Prázdný rozdíl zachová soubor i datum bez modelu. Externí disk slouží zálohování a obnově, týdenní kontrola ho nečte.
+
+Původní W47 má vlastní předchozí účtenku, známou spotřebu a původní rezervaci. Instalace přidělí nedokončenému běhu konečný stav superseded a zachová jeho originál i historii. Nevydává jej za dokončenou revizi. Provozní kontrola a lokální zkouška nedělního termínu se zapisují do soukromé účtenky incremental-deployment.json v recovery_maintainer_repair_20261125. Příští skutečný výsledek ověř v provozním statusu po plánovaném čase.
+
+
 ## 2026-11-25 — Limit znaků před tokenovou bránou
 
 Míla přijal doplňkový plán15/250/1000,21 kroků a publikační baseline15.8.3.

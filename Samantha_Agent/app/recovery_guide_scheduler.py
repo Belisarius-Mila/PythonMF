@@ -23,8 +23,9 @@ from app.release_usage import normalize_usage, estimate_standard_credits
 
 ZONE = ZoneInfo("Europe/Prague")
 DONE = {"completed", "completed_no_change"}
+TERMINAL = DONE | {"superseded"}
 DELIVERY = {"delivery_ready", "delivery_in_flight", "pending_icloud"}
-STATES = DONE | DELIVERY | {"analysis_in_flight","awaiting_acceptance","attention"}
+STATES = TERMINAL | DELIVERY | {"analysis_in_flight","awaiting_acceptance","attention"}
 COMMON_READY = ("mac_available", "user_session", "network", "icloud_auth")
 ANALYSIS_READY = (*COMMON_READY, "codex_auth", "role_current", "standard_tier", "context_proven", "source_scope_approved")
 HASH = re.compile(r"[0-9a-f]{64}")
@@ -107,7 +108,7 @@ def inspect_status(root: Path, *, scope="sandbox_only") -> dict:
     if root.exists():
         for path in sorted(root.glob("recovery-????-W??.json")):
             jobs.append(_read_job(path, simulation=scope=="sandbox_only"))
-    pending=[j for j in jobs if j["state"] not in DONE]
+    pending=[j for j in jobs if j["state"] not in TERMINAL]
     last=jobs[-1] if jobs else None
     fields=("request_id","slot","state","candidate_sha256","snapshot_sha256","source_count","coverage",
             "credits","reserved_credits","reported_model_turns","delivery","reason","updated_at","executor","usage")
@@ -124,7 +125,7 @@ def _read_job(path, *, simulation=True):
     if not isinstance(job,dict):raise ValueError("invalid_job")
     if (job.get("schema")!=1 or job.get("simulation") is not simulation or not isinstance(job.get("request_id"),str) or not ID.fullmatch(job["request_id"])
             or path.name!=job["request_id"]+".json" or not isinstance(job.get("state"),str) or job["state"] not in STATES
-            or type(job.get("source_count")) is not int or job["source_count"]<=0):raise ValueError("invalid_job")
+            or type(job.get("source_count")) is not int or job["source_count"]<0 or (job["source_count"]==0 and job["state"]!="completed_no_change")):raise ValueError("invalid_job")
     for key in ("snapshot_sha256","original_sha256","policy_sha256","identity_sha256"):
         if not isinstance(job.get(key),str) or not HASH.fullmatch(job[key]):raise ValueError("invalid_job_hash")
     for key in ("reserved_credits","credits"):
@@ -278,7 +279,7 @@ class WeeklyScheduler:
 
     def tick(self,now:datetime,*,readiness:Callable,preflight:Callable,analyze:Callable,
              delivery_status:Callable,deliver:Callable,trigger="timer",verify_unchanged:Callable|None=None,
-             delivery_readiness:Callable|None=None) -> dict:
+             delivery_readiness:Callable|None=None, incremental_preflight=False) -> dict:
         self._guard()
         if trigger not in {"timer","manual"}:raise ValueError("invalid_trigger")
         slot,due=due_slot(now,self.policy)
@@ -286,7 +287,7 @@ class WeeklyScheduler:
         self.root.mkdir(parents=True,exist_ok=True,mode=0o700)
         try:
             with exclusive_file_lock(self.root/"scheduler",timeout=0):
-                jobs=self._jobs();pending=[j for j in jobs if j["state"] not in DONE]
+                jobs=self._jobs();pending=[j for j in jobs if j["state"] not in TERMINAL]
                 if len(pending)>1:raise ValueError("multiple_pending_jobs")
                 if pending:
                     job=pending[0]
@@ -303,21 +304,26 @@ class WeeklyScheduler:
                 previous=next((j for j in jobs if j["request_id"]==request_id),None)
                 if previous:return self._public(previous,"replayed_receipt")
                 if jobs and due<=max(_instant(j["due_utc"]) for j in jobs):return {"state":"obsolete_clock_slot","model_calls":0}
-                ready=self._ready(readiness)
-                if any(ready.get(key) is not True for key in ANALYSIS_READY):
-                    return {"state":"waiting_dependencies","missing":[k for k in ANALYSIS_READY if ready.get(k) is not True],"model_calls":0}
-                prepared=preflight({"request_id":request_id,"slot":slot})
+                identity = {"request_id":request_id, "slot":slot}
+                prepared = preflight(identity) if incremental_preflight else None
+                no_changes = incremental_preflight and prepared["source_count"] == 0
+                if not no_changes:
+                    ready=self._ready(readiness)
+                    if any(ready.get(key) is not True for key in ANALYSIS_READY):
+                        return {"state":"waiting_dependencies","missing":[k for k in ANALYSIS_READY if ready.get(k) is not True],"model_calls":0}
+                if prepared is None:
+                    prepared=preflight(identity)
                 for key in ("snapshot_sha256","original_sha256"):
                     if not isinstance(prepared.get(key),str) or not HASH.fullmatch(prepared[key]):raise ValueError("invalid_preflight")
-                if (type(prepared.get("source_count")) is not int or prepared["source_count"]<=0
+                if (type(prepared.get("source_count")) is not int or prepared["source_count"] < (0 if no_changes else 1)
                         or type(prepared.get("copies_current")) is not bool
-                        or type(prepared.get("planned_calls")) is not int or not 1<=prepared["planned_calls"]<=self.policy.max_calls):raise ValueError("invalid_preflight")
+                        or type(prepared.get("planned_calls")) is not int or not (prepared["planned_calls"] == 0 if no_changes else 1<=prepared["planned_calls"]<=self.policy.max_calls)):raise ValueError("invalid_preflight")
                 reserve=prepared.get("reserved_credits")
-                if type(reserve) not in {int,float} or not math.isfinite(reserve) or not 0<reserve<=self.policy.run_credits:
+                if type(reserve) not in {int,float} or not math.isfinite(reserve) or not (reserve == 0 if no_changes else 0<reserve<=self.policy.run_credits):
                     return {"state":"budget_blocked","model_calls":0}
                 month=now.astimezone(ZONE).strftime("%Y-%m")
                 spent=sum(max(j["reserved_credits"],j.get("credits",0)) for j in jobs if j["month"]==month)
-                if spent+reserve>self.policy.month_credits:return {"state":"budget_blocked","model_calls":0}
+                if not no_changes and spent+reserve>self.policy.month_credits:return {"state":"budget_blocked","model_calls":0}
                 job={"schema":1,"simulation":self.simulation,"request_id":request_id,"slot":slot,"due_utc":due.isoformat(),"month":month,
                      "policy_sha256":self.policy.sha256,"trigger":trigger,"state":"analysis_in_flight",
                      "executor":{"role":ROLE,"model":MODEL,"reasoning_effort":"medium","policy_digest":self.policy.role_policy_digest},
@@ -326,7 +332,16 @@ class WeeklyScheduler:
                      "copies_current":prepared["copies_current"],
                      "reserved_credits":reserve,"analysis_invocations":1,"updated_at":now.isoformat()}
                 if self.activation is not None:job["activation_sha256"]=self.activation.sha256
-                job["identity_sha256"]=digest(canonical_json(job));self._save(job)
+                if incremental_preflight:
+                    job["source_head"] = prepared["source_head"]
+                job["identity_sha256"]=digest(canonical_json(job))
+                if no_changes:
+                    job.update(state="completed_no_change", candidate_sha256=job["original_sha256"],
+                               analysis_invocations=0, reported_model_turns=0, coverage=0, credits=0)
+                    self._verify_no_change(job, verify_unchanged)
+                    self._save(job)
+                    return self._public(job, "no_recovery_changes")
+                self._save(job)
                 start=self.clock()
                 try:
                     result=analyze(json.loads(canonical_json(job)))

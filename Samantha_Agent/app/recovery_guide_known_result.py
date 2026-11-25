@@ -296,6 +296,11 @@ def apply_owned_code(*,request_id,expected_main_head,confirmed=False):
     job=json.loads((config.root/'schedule'/(request_id+'.json')).read_text())
     if job['state'] not in {'completed','completed_no_change'}:raise ValueError('known_code_job_not_complete')
     names=('app/recovery_guide_sources.py','app/recovery_guide_inspection.py','app/recovery_guide_maintainer.py','app/recovery_guide_runtime_live.py','app/recovery_guide_anchor_transport.py','tests/test_recovery_guide_runtime.py')
+    return _install_committed(config, expected_main_head, names)
+
+
+def _install_committed(config, expected_main_head, names, *, from_git=False):
+    import os
     journal=config.root/'owned-code'/expected_main_head;journal.mkdir(parents=True,mode=0o700,exist_ok=True)
     receipt=journal/'receipt.json'
     with exclusive_file_lock(config.root/'schedule/scheduler',timeout=0),exclusive_file_lock(journal/'operation',timeout=0):
@@ -314,7 +319,7 @@ def apply_owned_code(*,request_id,expected_main_head,confirmed=False):
             if target.exists() and target.stat().st_uid!=os.getuid():raise ValueError('known_code_foreign_owner')
             dirty=subprocess.check_output(['git','status','--porcelain','--',name],cwd=config.project,text=True).strip()
             committed=subprocess.check_output(['git','show',expected_main_head+':Samantha_Agent/'+name],cwd=ROOT)
-            if source.read_bytes()!=committed:raise ValueError('known_code_uncommitted_source')
+            if not from_git and source.read_bytes()!=committed:raise ValueError('known_code_uncommitted_source')
             contents[name]=committed.decode('utf-8')
             before=target.read_bytes() if target.exists() else None
             if previous:
@@ -338,3 +343,56 @@ def apply_owned_code(*,request_id,expected_main_head,confirmed=False):
             atomic_write_text(target,contents[row['path']])
         if any(digest((config.project/row['path']).read_bytes())!=row['after_sha256'] for row in rows):raise ValueError('known_code_deployment_not_verified')
         result={'state':'completed','source_head':expected_main_head,'files':rows,'service_definition_changed':False,'restart':False,'unrelated_changes_preserved':True};atomic_write_json(receipt,result);return result
+
+
+def activate_incremental(*, expected_main_head, request_id, expected_job_sha256, confirmed=False):
+    """Install the approved weekly mode and close the specified failed full review."""
+    from app.recovery_guide_publish import icloud_metadata, uploaded
+    from app.recovery_guide_scheduler import ID, TERMINAL
+    if confirmed is not True or not ID.fullmatch(request_id):raise ValueError('incremental_confirmation_required')
+    config,_=owned_configuration()
+    if subprocess.check_output(['git','rev-parse','HEAD'],cwd=ROOT,text=True).strip()!=expected_main_head:
+        raise ValueError('incremental_commit_changed')
+    runtime,counter=build(config)
+    path=config.root/'schedule'/(request_id+'.json')
+    record=config.root/'incremental.json'
+    journal=config.root/'incremental-migration'/request_id
+    config.permits(journal); journal.mkdir(mode=0o700,parents=True,exist_ok=True)
+    def check():
+        config.guard()
+        job=next(j for j in runtime.scheduler._jobs() if j['request_id']==request_id)
+        if (job['state']=='superseded' and record.exists() and
+                json.loads(record.read_text()).get('previous_job_sha256')==expected_job_sha256):
+            return job
+        if (digest(path.read_bytes())!=expected_job_sha256 or job['state']!='attention'
+                or job.get('reason')!='analysis_not_verified' or job.get('publication')
+                or any(j['state'] not in TERMINAL and j['request_id']!=request_id for j in runtime.scheduler._jobs())):
+            raise ValueError('incremental_expected_failed_analysis_required')
+        if not all(p.is_file() and not p.is_symlink() and digest(p.read_bytes())==job['original_sha256'] for p in config.destinations):
+            raise ValueError('incremental_original_changed')
+        if not uploaded(icloud_metadata(config.destinations[1])):raise ValueError('incremental_upload_not_verified')
+        return job
+    try:
+        with exclusive_file_lock(config.root/'schedule/scheduler',timeout=0):
+            job=check()
+            if job['state']=='superseded':return json.loads(record.read_text())
+        names=('app/recovery_guide_sources.py','app/recovery_guide_inspection.py','app/recovery_guide_anchor_transport.py',
+               'app/recovery_guide_scheduler.py','app/recovery_guide_runtime.py','app/recovery_guide_incremental.py','app/recovery_guide_runtime_live.py',
+               'scripts/recovery_guide.py')
+        _install_committed(config,expected_main_head,names,from_git=True)
+        with exclusive_file_lock(config.root/'schedule/scheduler',timeout=0):
+            job=check()
+            if job['state']=='superseded':return json.loads(record.read_text())
+            packet=json.loads((config.root/'analysis'/request_id/'packet.json').read_text())
+            snapshot=hydrate(packet['snapshot'])
+            if snapshot.original.sha256!=job['original_sha256'] or snapshot.sha256!=job['snapshot_sha256'] or packet['job_identity']!=job['identity_sha256']:
+                raise ValueError('incremental_baseline_not_bound')
+            before=path.read_text()
+            _once(journal/'previous-job.json',before)
+            baseline={'version':1,'base_head':snapshot.head,'candidate_sha256':snapshot.original.sha256,
+                      'previous_job':request_id,'previous_job_sha256':digest(before),'installed_main_head':expected_main_head}
+            _once(record,canonical_json(baseline))
+            job.update(state='superseded',superseded_by='incremental_v1',updated_at=datetime.now(timezone.utc).isoformat())
+            runtime.scheduler._save(job)
+            return baseline
+    finally:counter.close()
