@@ -24,11 +24,13 @@ FILES=('app/recovery_guide_known_result.py','app/recovery_guide_maintainer.py','
 
 def implementation():return {name:digest((ROOT/name).read_bytes()) for name in FILES}
 
-def _paths(config,request_id):
+def _paths(config,request_id,stage="first"):
     from app.recovery_guide_scheduler import ID
     if not ID.fullmatch(request_id):raise ValueError('known_result_invalid_job')
     original=config.root/'analysis'/request_id
     recovery=config.root/'known-result'/request_id
+    if stage not in {'first','received'}:raise ValueError('known_result_invalid_stage')
+    if stage=='received':recovery=recovery/'received-prefix'
     if any(path.is_symlink() for path in (original,*original.parents,recovery,*recovery.parents)):raise ValueError('known_result_alias')
     return original,recovery
 
@@ -59,7 +61,8 @@ def _known(config,request_id,counter):
         or receipt.get('turn_started_confirmed') is not True or receipt.get('user_item_count')!=1
         or transport.get('unexpected_item_types')!=[] or not receipt.get('turn_id') or not receipt.get('thread_id')
         or receipt.get('client_message_id')!=request_id+'-1'
-        or sorted(path.name for path in (original/'raw').glob('*.json'))!=['001.json']):raise ValueError('known_result_delivery_not_proven')
+        or sorted(path.name for path in (original/'raw').glob('*.json'))!=['001.json']
+        or sorted(path.name for path in (original/'transport').glob('*.json'))!=['001.json']):raise ValueError('known_result_delivery_not_proven')
     usage=normalize_usage(receipt.get('thread_token_usage'));cost=estimate_standard_credits(m.MODEL,usage)
     duration=receipt.get('duration_ms')
     if type(duration) is not int or not 0<=duration<=config.payload['limits']['seconds']*1000:raise ValueError('known_result_duration_invalid')
@@ -83,35 +86,79 @@ def _known(config,request_id,counter):
         'elapsed_seconds':math.ceil(duration/1000),'raw_sha256':digest(rawpath.read_bytes()),'transport_sha256':digest(transportpath.read_bytes()),'delivery_confirmed':True}
     return job,packet,snapshot,proof
 
-def prepare(*,request_id,preview=False):
+def _prefix(config,request_id,counter,stage):
+    job,packet,snapshot,first=_known(config,request_id,counter)
+    if stage=='first':return job,packet,snapshot,first
+    _,base=_paths(config,request_id);_,target=_paths(config,request_id,stage)
+    prior=json.loads((base/'plan.json').read_text());attempt=json.loads((base/'attempt.json').read_text());directory=base/request_id
+    controller=json.loads((directory/'controller'/(job['slot']+'.json')).read_text())
+    if (prior['digest']!=digest(canonical_json(prior['plan'])) or attempt['plan_digest']!=prior['digest'] or attempt['state']!='attention'
+        or controller['model_calls']!=2 or controller['completed_calls']!=1 or controller['coverage']!=len(first['payload']['sources'])
+        or controller['state']!='attention' or controller['snapshot_sha256']!=snapshot.sha256 or controller['credits']!=first['credits']
+        or prior['plan']['snapshot_sha256']!=snapshot.sha256 or prior['plan']['known_raw_sha256']!=first['raw_sha256']
+        or len(controller['turns'])!=2 or controller['turns'][1]['state']!='in_flight'
+        or sorted(p.name for p in (directory/'transport').glob('*.json'))!=['002.json']
+        or list((directory/'raw').glob('*.json'))):raise ValueError('received_prefix_not_exact')
+    path=directory/'transport/002.json'
+    if any(p.is_symlink() for p in (path,*path.parents)):raise ValueError('received_prefix_alias')
+    transport=json.loads(path.read_text());receipt=transport.get('receipt',{})
+    if (transport.get('phase')!='inspect' or transport.get('state')!='received_unreviewed' or transport.get('unexpected_item_types')!=[]
+        or receipt.get('delivered') is not True or receipt.get('status')!='completed' or receipt.get('turn_started_confirmed') is not True
+        or receipt.get('user_item_count')!=1 or not receipt.get('thread_id') or not receipt.get('turn_id')
+        or receipt.get('client_message_id')!=request_id+'-2'):raise ValueError('received_prefix_delivery_not_proven')
+    start=len(first['payload']['sources']);count=prior['plan']['inspection_source_counts'][1]
+    payload={'original':asdict(snapshot.original),'sources':[asdict(row) for row in snapshot.sources[start:start+count]]}
+    if controller['turns'][1]['payload_sha256']!=digest(canonical_json(payload)):raise ValueError('received_prefix_payload_changed')
+    raw=json.loads(receipt['answer']);review=json.loads((target/'reviewed-second.json').read_text())
+    if review['transport_sha256']!=digest(path.read_bytes()):raise ValueError('received_prefix_receipt_changed')
+    answer=review['answer'];accepted=inspection.normalize_known(answer,payload)
+    # Editorial changes may repair quotations only; preserve complete original
+    # indices, source identities, notes and all provider bytes.
+    if (set(raw)!={'covered','notes'} or raw['notes']!=answer['notes'] or len(raw['covered'])!=count
+        or any(type(row.get('i')) not in {int,float} or not math.isfinite(row['i']) or int(row['i'])!=row['i'] for row in raw['covered'])
+        or sorted(row.get('i') for row in raw['covered'])!=list(range(count))
+        or [row['source'] for row in accepted['covered']]!=[payload['sources'][int(row['i'])]['path'] for row in raw['covered']]):raise ValueError('received_prefix_edit_scope')
+    usage=normalize_usage(receipt.get('thread_token_usage'));cost=estimate_standard_credits(m.MODEL,usage)
+    maximum=(prior['plan']['limits']['input_tokens']*50+prior['plan']['limits']['inspection_output_tokens']*250)/1_000_000
+    duration=receipt.get('duration_ms')
+    if (usage is None or cost is None or cost>maximum or usage['input_tokens']+usage['output_tokens']>prior['plan']['limits']['input_tokens']
+        or usage['output_tokens']>prior['plan']['limits']['inspection_output_tokens'] or type(duration) is not int or not 0<=duration<=prior['plan']['limits']['seconds']*1000):raise ValueError('received_prefix_usage_not_proven')
+    second={'payload':payload,'response':{'answer':accepted,'usage':usage},'credits':cost,'maximum_known_credits':maximum,
+        'elapsed_seconds':math.ceil(duration/1000),'raw_sha256':digest(path.read_bytes()),'transport_sha256':digest(path.read_bytes()),'delivery_confirmed':True}
+    return job,packet,snapshot,[first,second]
+
+
+def prepare(*,request_id,preview=False,stage='first',reviewed_second=None):
     config,_=owned_configuration();runtime,counter=build(config)
     try:
-        original,recovery=_paths(config,request_id);recovery.mkdir(parents=True,mode=0o700,exist_ok=True)
+        original,recovery=_paths(config,request_id,stage);recovery.mkdir(parents=True,mode=0o700,exist_ok=True)
         with exclusive_file_lock(recovery/'operation',timeout=0):
+            if stage=='received' and reviewed_second is not None:_once(recovery/'reviewed-second.json',canonical_json(reviewed_second))
             if not preview and subprocess.check_output(['git','status','--porcelain'],cwd=ROOT,text=True).strip():raise ValueError('known_result_source_not_committed')
             if not preview and (recovery/'plan.json').exists():return json.loads((recovery/'plan.json').read_text())
-            job,packet,snapshot,known=_known(config,request_id,counter)
+            job,packet,snapshot,known=_prefix(config,request_id,counter,stage)
             head=subprocess.check_output(['git','rev-parse','HEAD'],cwd=ROOT,text=True).strip()
             if not _current(runtime,snapshot,Path(packet['source_path']),head,config):raise ValueError('known_result_documents_changed')
             # Lower future output reserve; compact evidence keeps the complete corpus.
-            limits=replace(runtime.limits,inspection_output_tokens=min(2800,runtime.limits.inspection_reserve),run_credits=min(runtime.limits.run_credits,job['reserved_credits']),seconds=runtime.limits.seconds-known['elapsed_seconds'])
+            limits=replace(runtime.limits,inspection_output_tokens=min(2800,runtime.limits.inspection_reserve),run_credits=min(runtime.limits.run_credits,job['reserved_credits']),seconds=runtime.limits.seconds-sum(row['elapsed_seconds'] for row in (known if isinstance(known,list) else [known])))
             now=datetime.fromisoformat(packet['revision_time'])
             planned=m.plan(snapshot,counter,limits,review_date=now.date(),known_first=known)
             if planned['calls']>job['planned_calls'] or planned['reserved_credits']>job['reserved_credits']:raise ValueError('known_result_remaining_budget_not_approved')
             with _client() as client:runtime_observation=_observe(client,config)
             record={'runtime':runtime_observation,'request_id':request_id,'job_sha256':digest((config.root/'schedule'/(request_id+'.json')).read_bytes()),
                 'activation_sha256':config.sha256,'source_head':head,'snapshot_sha256':snapshot.sha256,
-                'known_raw_sha256':known['raw_sha256'],'known_transport_sha256':known['transport_sha256'],
-                'known_credits':known['credits'],'elapsed_known_seconds':known['elapsed_seconds'],'original_result_sha256':digest((original/'result.json').read_bytes()),'original_reserved_credits':job['reserved_credits'],
-                'inspection_source_counts':[len(row['sources']) for row in planned['shards']],'planned_credits':planned['reserved_credits'],'total_calls':planned['calls'],'remaining_provider_turns':planned['calls']-1,
+                'known_review_sha256':digest((recovery/'reviewed-second.json').read_bytes()) if stage=='received' else None,'stage':stage,'known_count':len(known) if isinstance(known,list) else 1,'known_proofs':[{key:row[key] for key in ('raw_sha256','transport_sha256','credits','elapsed_seconds')} for row in (known if isinstance(known,list) else [known])],
+                'known_raw_sha256':(known[0] if isinstance(known,list) else known)['raw_sha256'],'known_transport_sha256':(known[0] if isinstance(known,list) else known)['transport_sha256'],
+                'known_credits':sum(row['credits'] for row in (known if isinstance(known,list) else [known])),'elapsed_known_seconds':sum(row['elapsed_seconds'] for row in (known if isinstance(known,list) else [known])),'original_result_sha256':digest((original/'result.json').read_bytes()),'original_reserved_credits':job['reserved_credits'],
+                'inspection_source_counts':[len(row['sources']) for row in planned['shards']],'planned_credits':planned['reserved_credits'],'total_calls':planned['calls'],'remaining_provider_turns':planned['calls']-(len(known) if isinstance(known,list) else 1),
                 'limits':asdict(limits),'implementation':implementation(),'automatic_retry':False}
             envelope={'plan':record,'digest':digest(canonical_json(record))}
             if not preview:atomic_create_text(recovery/'plan.json',canonical_json(envelope))
             return envelope
     finally:counter.close()
 
-def run(*,request_id,approved_digest,confirmed=False):
-    config,_=owned_configuration();runtime,counter=build(config);original,recovery=_paths(config,request_id)
+def run(*,request_id,approved_digest,confirmed=False,stage='first'):
+    config,_=owned_configuration();runtime,counter=build(config);original,recovery=_paths(config,request_id,stage)
     try:
         with exclusive_file_lock(config.root/'schedule/scheduler',timeout=0),exclusive_file_lock(recovery/'operation',timeout=0):
             envelope=json.loads((recovery/'plan.json').read_text());plan=envelope['plan'];marker=recovery/'attempt.json'
@@ -120,21 +167,23 @@ def run(*,request_id,approved_digest,confirmed=False):
             if config.sha256!=plan['activation_sha256'] or implementation()!=plan['implementation']:raise ValueError('known_result_implementation_changed')
             jobpath=config.root/'schedule'/(request_id+'.json')
             if digest(jobpath.read_bytes())!=plan['job_sha256']:raise ValueError('known_result_job_changed')
-            job,packet,snapshot,known=_known(config,request_id,counter)
+            job,packet,snapshot,known=_prefix(config,request_id,counter,stage)
             def current():
                 return (implementation()==plan['implementation'] and _current(runtime,snapshot,Path(packet['source_path']),plan['source_head'],config)
                     and digest((original/'raw/001.json').read_bytes())==plan['known_raw_sha256']
-                    and digest((original/'transport/001.json').read_bytes())==plan['known_transport_sha256'])
+                    and digest((original/'transport/001.json').read_bytes())==plan['known_transport_sha256']
+                    and (stage=='first' or (digest((_paths(config,request_id)[1]/request_id/'transport/002.json').read_bytes())==plan['known_proofs'][1]['transport_sha256']
+                        and digest((recovery/'reviewed-second.json').read_bytes())==plan['known_review_sha256'])))
             if not current():raise ValueError('known_result_inputs_changed')
-            state={'state':'reserved','request_id':request_id,'plan_digest':approved_digest,'automatic_retry':False,'known_provider_turns':1};atomic_create_text(marker,canonical_json(state))
+            state={'state':'reserved','request_id':request_id,'plan_digest':approved_digest,'automatic_retry':False,'known_provider_turns':plan.get('known_count',1)};atomic_create_text(marker,canonical_json(state))
             directory=recovery/request_id;directory.mkdir(mode=0o700,exist_ok=True)
             @contextmanager
             def verified_client():
                 with _client() as client:
                     if _observe(client,config)!=plan['runtime']:raise ValueError('known_result_runtime_changed')
                     yield client
-            with live_calls(directory,job['executor'],assert_current=current,inspection_output_tokens=plan['limits']['inspection_output_tokens'],start_index=1,client_factory=verified_client) as call:
-                # This m.run invocation replays turn1 locally, never through call().
+            with live_calls(directory,job['executor'],assert_current=current,inspection_output_tokens=plan['limits']['inspection_output_tokens'],start_index=plan.get('known_count',1),client_factory=verified_client) as call:
+                # Completed prefix turns are replayed locally, never through call().
                 result=m.run(snapshot,state_dir=directory/'controller',now=datetime.fromisoformat(packet['revision_time']),
                     limits=m.Limits(**plan['limits']),count_tokens=counter,call=call,approved_snapshot=snapshot.sha256,
                     assert_sources=current,confirmed=True,known_first=known,weekday=runtime.scheduler.policy.weekday,hour=runtime.scheduler.policy.hour)
@@ -154,9 +203,9 @@ def _review_state(recovery):
     return plan,state
 
 
-def prepare_publication(*,request_id,manual_answer=None):
+def prepare_publication(*,request_id,manual_answer=None,stage='first'):
     """Nonpaid editorial/quality review; original generated evidence is retained."""
-    config,_=owned_configuration();runtime,counter=build(config);original,recovery=_paths(config,request_id)
+    config,_=owned_configuration();runtime,counter=build(config);original,recovery=_paths(config,request_id,stage)
     try:
         plan,state=_review_state(recovery)
         if state['state']!='review' or implementation()!=plan['implementation']:raise ValueError('known_result_review_not_ready')
@@ -177,11 +226,11 @@ def _once(path,text):
     else:atomic_create_text(path,text)
 
 
-def publish(*,request_id,confirmed_binding,confirmed=False):
+def publish(*,request_id,confirmed_binding,confirmed=False,stage='first'):
     """Reconcile exact known analysis, then deliver; no analysis callback exists."""
     from app.recovery_guide_publication import PublicationDraft
     from app.recovery_guide_scheduler import DELIVERY,DONE
-    config,_=owned_configuration();runtime,counter=build(config);original,recovery=_paths(config,request_id)
+    config,_=owned_configuration();runtime,counter=build(config);original,recovery=_paths(config,request_id,stage)
     try:
         with exclusive_file_lock(recovery/'operation',timeout=0):
             plan,state=_review_state(recovery);review=json.loads((recovery/'publication-review.json').read_text());draft=PublicationDraft(review['packet'])

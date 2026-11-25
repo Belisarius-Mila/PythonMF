@@ -1,6 +1,6 @@
 """Compact evidence on the wire, exact full-path citations in stored findings."""
 from copy import deepcopy
-import math
+import math,re
 from app.recovery_guide_sources import canonical_json
 
 SCHEMA = {'type':'object','properties':{
@@ -9,17 +9,30 @@ SCHEMA = {'type':'object','properties':{
     'notes':{'type':'string'}},'required':['covered','notes'],'additionalProperties':False}
 
 
+def anchor(text):
+    words=list(re.finditer(r'\S+',text))[:6]
+    if not words:raise ValueError('inspection_empty_source')
+    return text[:min(words[-1].end(),128)].strip()
+
+
+def schema(payload):
+    choices=[]
+    for i,row in enumerate(payload['sources']):
+        choices.append({'type':'object','properties':{'i':{'type':'integer','enum':[i]},'q':{'type':'string','enum':[anchor(row['text'])]}},'required':['i','q'],'additionalProperties':False})
+    return {'type':'object','properties':{'covered':{'type':'array','items':{'anyOf':choices}},'notes':{'type':'string'}},'required':['covered','notes'],'additionalProperties':False}
+
+
 def instructions(budget):
-    return ('\nINSPECTION OUTPUT: covered contains ONLY entries in sources, never original. '
-        'Use the explicit integer i in each source; return covered entries as {i,q}. '
-        'q is a short exact quote, preferably 3 to 6 words. notes is at most 150 words, '
-        'only material recovery findings. Be concise: the ENTIRE response including '
-        f'evidence and reasoning must fit {budget} output tokens. Do not omit sources.')
+    return ('\nINSPECTION OUTPUT: read ALL complete sources and original. covered contains ONLY '
+        'entries in sources, never original. Return every explicit integer i exactly once; '
+        'q must copy the source citation field EXACTLY, including newlines and Markdown. '
+        'Do not paraphrase citations. notes is at most 150 words, only material recovery findings. '
+        f'The ENTIRE response including evidence and reasoning must fit {budget} output tokens.')
 
 
 def wire(payload):
     value=deepcopy(payload)
-    for index,row in enumerate(value['sources']):row['i']=index
+    for index,row in enumerate(value['sources']):row.update(i=index,citation=anchor(row['text']))
     return value
 
 

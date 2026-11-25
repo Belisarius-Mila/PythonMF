@@ -114,20 +114,24 @@ def plan(snapshot: Snapshot, count_tokens: Callable[[str], int], limits: Limits,
     available = limits.input_tokens - count_tokens(inspect_instructions) - count_tokens(canonical_json(inspect_schema)) - 512
     def wire_count(text):
         value=json.loads(text)
-        return count_tokens(canonical_json(value if legacy_format else inspection.wire(value)))
+        return count_tokens(canonical_json(value if legacy_format else inspection.wire(value))) + (0 if legacy_format else count_tokens(canonical_json(inspection.schema(value))))
     existing=[];known_input=known_output=0;known_findings=[]
     tail=snapshot
-    if known_first is not None:
+    known_rows=known_first if isinstance(known_first,list) else [known_first] if known_first is not None else []
+    offset=0
+    for known in known_rows:
         from dataclasses import asdict,replace
-        if legacy_format or known_first.get('delivery_confirmed') is not True:raise ValueError('known_result_not_confirmed')
-        payload=known_first['payload'];count=len(payload['sources'])
-        if (count<=0 or payload!={'original':asdict(snapshot.original),'sources':[asdict(row) for row in snapshot.sources[:count]]}):raise ValueError('known_payload_not_exact_prefix')
-        response=known_first['response'];usage=normalize_usage(response['usage']);cost=estimate_standard_credits(MODEL,usage)
-        if usage is None or cost!=known_first['credits'] or cost>known_first['maximum_known_credits'] or usage['input_tokens']+usage['output_tokens']>limits.input_tokens:raise ValueError('known_usage_not_acceptable')
+        if legacy_format or known.get('delivery_confirmed') is not True:raise ValueError('known_result_not_confirmed')
+        payload=known['payload'];count=len(payload['sources'])
+        if count<=0 or payload!={'original':asdict(snapshot.original),'sources':[asdict(row) for row in snapshot.sources[offset:offset+count]]}:raise ValueError('known_payload_not_exact_prefix')
+        response=known['response'];usage=normalize_usage(response['usage']);cost=estimate_standard_credits(MODEL,usage)
+        if usage is None or cost!=known['credits'] or cost>known['maximum_known_credits'] or usage['input_tokens']+usage['output_tokens']>limits.input_tokens:raise ValueError('known_usage_not_acceptable')
         accepted=inspection.normalize_known(response['answer'],payload)
         if accepted!=response['answer']:raise ValueError('known_result_must_be_prevalidated')
-        existing=[payload];known_input=usage['input_tokens'];known_output=usage['output_tokens'];known_findings=[accepted]
-        tail=replace(snapshot,sources=snapshot.sources[count:])
+        existing.append(payload);known_input+=usage['input_tokens'];known_output+=usage['output_tokens'];known_findings.append(accepted);offset+=count
+    if offset:
+        from dataclasses import replace
+        tail=replace(snapshot,sources=snapshot.sources[offset:])
     remaining=batches(tail,wire_count,input_limit=available,output_reserve=limits.inspection_reserve,max_calls=limits.max_calls-len(existing)) if tail.sources else []
     shards=existing+remaining
     # Final turn receives original plus all bounded findings. Reserve the full
@@ -225,9 +229,10 @@ def run(snapshot: Snapshot, *, state_dir: Path, now: datetime, limits: Limits,
                 output_allowance = limits.inspection_reserve if kind == "inspect" else limits.output_tokens
                 if len(canonical_json(payload)) > MAX_USER_INPUT_TEXT_CHARS:
                     raise ValueError("Vstup překročil limit znaků; bez dalšího tahu.")
-                replay=known_first is not None and index==0
+                known_rows=known_first if isinstance(known_first,list) else [known_first] if known_first is not None else []
+                replay=index<len(known_rows)
                 wire_payload=payload if legacy_format or kind!='inspect' or replay else inspection.wire(payload)
-                wire_schema=INSPECT_SCHEMA if replay else schema if legacy_format or kind!='inspect' else inspection.SCHEMA
+                wire_schema=INSPECT_SCHEMA if replay else schema if legacy_format or kind!='inspect' else inspection.schema(payload)
                 wire_instructions=INSTRUCTIONS if legacy_format else REVIEW_INSTRUCTIONS + (inspection.instructions(output_allowance) if kind=='inspect' and not replay else '')
                 actual_input = count_tokens(canonical_json(wire_payload)) + count_tokens(wire_instructions) + count_tokens(canonical_json(wire_schema)) + 512
                 if actual_input + output_allowance > limits.input_tokens or time.monotonic() - started > limits.seconds:
@@ -241,7 +246,7 @@ def run(snapshot: Snapshot, *, state_dir: Path, now: datetime, limits: Limits,
                 turn = {"phase": kind, "payload_sha256": digest(canonical_json(payload)), "state": "in_flight"}
                 record["turns"].append(turn)
                 atomic_write_json(path, record)  # MUST precede every possible paid send.
-                response = known_first["response"] if replay else call(payload, kind)
+                response = known_rows[index]["response"] if replay else call(payload, kind)
                 usage = normalize_usage(response.get("usage"))
                 cost = estimate_standard_credits(MODEL, usage)
                 if usage is None or cost is None:
@@ -249,7 +254,7 @@ def run(snapshot: Snapshot, *, state_dir: Path, now: datetime, limits: Limits,
                 record["credits"] += cost
                 record["completed_calls"] += 1
                 turn.update(state="received", usage=usage, credits=cost)
-                if replay:turn.update(origin="existing_completed_receipt",raw_sha256=known_first["raw_sha256"])
+                if replay:turn.update(origin="existing_completed_receipt",raw_sha256=known_rows[index]["raw_sha256"])
                 if usage["output_tokens"] > output_allowance and not replay:
                     raise ValueError("Nadlimitní výstup; skutečnou známou spotřebu zachovat.")
                 if record["credits"] > limits.run_credits or time.monotonic() - started > limits.seconds:

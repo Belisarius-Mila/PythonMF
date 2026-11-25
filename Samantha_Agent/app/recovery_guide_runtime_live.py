@@ -94,7 +94,7 @@ def live_calls(directory,executor,*,assert_current,client_factory=None,inspectio
             from app import recovery_guide_inspection as inspection
             logical=payload
             payload=inspection.wire(logical) if kind=='inspect' else logical
-            schema=inspection.SCHEMA if kind=='inspect' else c.schema(payload)
+            schema=inspection.schema(logical) if kind=='inspect' else c.schema(payload)
             instructions=m.REVIEW_INSTRUCTIONS+(inspection.instructions(inspection_output_tokens) if kind=='inspect' else '')
             request=SimpleNamespace(payload=payload,schema=schema)
             context=directory/'context'/str(counter);path=directory/'transport'/f'{counter:03d}.json'

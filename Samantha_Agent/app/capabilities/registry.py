@@ -12,18 +12,18 @@ from app.capabilities.models import (
 
 CAPABILITIES: tuple[CapabilityRecord, ...] = (
     CapabilityRecord(
-        capability_id="recovery_known_result_prepare", label="Prepare same-job continuation from one proven completed inspection",
+        capability_id="recovery_known_result_prepare", label="Prepare same-job continuation from a proven completed inspection prefix",
         risk=RiskLevel.LOCAL_WRITE, reads=("owned attention job, full delivered receipt, exact source prefix and measured usage",),
         writes=("private immutable continuation plan; preview never calls the model",),tool="app.recovery_guide_known_result.prepare",
         requires_confirmation=False,confirmation_policy=ConfirmationPolicy.NONE,audit=AuditPolicy.REDACTED,
-        notes="Unknown delivery, another paid turn, changed documents, missing usage or larger than original financial admission are refused. All original receipts remain unchanged.",
+        notes="Unknown delivery, unexpected paid steps, changed documents, missing usage or larger financial admission are refused. An explicit second completed receipt permits quote-only operator repair in a separate immutable stage; no original marker is reset.",
     ),
     CapabilityRecord(
         capability_id="recovery_known_result_run", label="Continue only unstarted steps of the same approved recovery job",
-        risk=RiskLevel.LOCAL_WRITE,reads=("exact frozen continuation plan and proven completed first receipt",),
+        risk=RiskLevel.LOCAL_WRITE,reads=("exact frozen continuation plan and proven completed prefix receipts",),
         writes=("one durable continuation marker, local replay and remaining approved model steps",),tool="app.recovery_guide_known_result.run",
         requires_confirmation=True,confirmation_policy=ConfirmationPolicy.EXACT_CURRENT_MESSAGE,audit=AuditPolicy.REDACTED,
-        notes="First provider turn is never called again. Total turns, credits and elapsed provider time stay inside the original admission; failed or unknown continuation never retries.",
+        notes="Completed provider turns are never called again. Total turns, credits and elapsed provider time stay inside the original admission; failed or unknown continuation never retries.",
     ),
     CapabilityRecord(
         capability_id="recovery_known_result_review",label="Review recovered guide without another model call",

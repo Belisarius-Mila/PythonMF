@@ -213,3 +213,43 @@ class AttemptReplay(unittest.TestCase):
                 with patch.object(k,'owned_configuration',return_value=(cfg,'agent')),patch.object(k,'build',return_value=(object(),SimpleNamespace(close=lambda:None))),patch.object(k,'_known',side_effect=AssertionError('must not reenter model setup')),patch.object(k,'live_calls',side_effect=AssertionError('no provider retry')):
                     self.assertEqual(k.run(request_id=rid,approved_digest=binding,confirmed=True),marker)
                     with self.assertRaises(ValueError):k.run(request_id=rid,approved_digest='bad',confirmed=True)
+
+
+class ReceivedPrefix(OriginalProof):
+    def setUp(self):
+        super().setUp();self.base=self.root/'known-result'/self.rid;self.directory=self.base/self.rid;self.target=self.base/'received-prefix'
+        (self.directory/'controller').mkdir(parents=True);(self.directory/'transport').mkdir();self.target.mkdir()
+        payload={'original':asdict(self.snap.original),'sources':[asdict(self.snap.sources[1])]}
+        self.second={'covered':[{'i':0,'q':'provider paraphrase'}],'notes':'preserve complete notes'}
+        usage={**self.usage,'output_tokens':50,'total_tokens':150}
+        receipt={**self.receipt,'client_message_id':self.rid+'-2','answer':json.dumps(self.second),'thread_token_usage':usage}
+        self.path=self.directory/'transport/002.json';atomic_write_json(self.path,{'state':'received_unreviewed','phase':'inspect','unexpected_item_types':[],'receipt':receipt})
+        plan={'inspection_source_counts':[1,1],'limits':self.cfg.payload['limits'],'snapshot_sha256':self.snap.sha256,'known_raw_sha256':digest((self.folder/'raw/001.json').read_bytes())}
+        binding=digest(canonical_json(plan));atomic_write_json(self.base/'plan.json',{'plan':plan,'digest':binding});atomic_write_json(self.base/'attempt.json',{'state':'attention','plan_digest':binding})
+        atomic_write_json(self.directory/'controller/2026-W47.json',{'state':'attention','snapshot_sha256':self.snap.sha256,'credits':self.cost,'model_calls':2,'completed_calls':1,'coverage':1,'turns':[{}, {'state':'in_flight','payload_sha256':digest(canonical_json(payload))}]})
+        self.answer={'covered':[{'source':self.snap.sources[1].path,'quote':self.snap.sources[1].text}],'notes':self.second['notes']};self.save_review()
+    def save_review(self):atomic_write_json(self.target/'reviewed-second.json',{'transport_sha256':digest(self.path.read_bytes()),'answer':self.answer})
+    def prefix(self):return k._prefix(self.cfg,self.rid,len,'received')
+    def test_complete_second_receipt_reuses_exact_usage_and_records_editorial_quotes(self):
+        before=self.path.read_bytes();proofs=self.prefix()[3];self.assertEqual(len(proofs),2);self.assertEqual(proofs[1]['response']['answer'],self.answer);self.assertEqual(self.path.read_bytes(),before)
+    def test_unknown_extra_transport_or_changed_notes_refuse_all_new_model_work(self):
+        self.answer['notes']='changed finding';self.save_review()
+        with self.assertRaises(ValueError):self.prefix()
+        self.answer['notes']=self.second['notes'];self.save_review();atomic_write_json(self.directory/'transport/003.json',{'state':'delivery_unknown'})
+        with self.assertRaises(ValueError):self.prefix()
+    def test_failed_second_receipt_cannot_be_editorially_accepted(self):
+        value=json.loads(self.path.read_text());value['receipt']['delivered']=False;atomic_write_json(self.path,value);self.save_review()
+        with self.assertRaises(ValueError):self.prefix()
+
+class MultipleKnown(Continuation):
+    def test_two_known_prefix_turns_preserve_separate_costs_and_no_inspection_rpc(self):
+        second=copy.deepcopy(self.known);second['payload']['sources']=[asdict(self.snap.sources[1])];second['response']['answer']['covered']=[{'source':self.snap.sources[1].path,'quote':self.snap.sources[1].text}]
+        result=self.run_known([self.known,second]);self.assertEqual(result['state'],'review');self.assertEqual(self.calls,['synthesize']);self.assertEqual(result['model_calls'],3)
+        self.assertAlmostEqual(result['credits'],2*self.known['credits']+estimate_standard_credits(m.MODEL,USAGE))
+        self.assertEqual(result['turns'][1]['origin'],'existing_completed_receipt')
+
+class BoundSchema(Wire):
+    def test_every_index_is_bound_to_one_exact_provided_quote(self):
+        schema=w.schema(self.payload);choices=schema['properties']['covered']['items']['anyOf']
+        for i,choice in enumerate(choices):
+            self.assertEqual(choice['properties']['i']['enum'],[i]);quote=choice['properties']['q']['enum'][0];self.assertIn(quote,self.payload['sources'][i]['text']);self.assertEqual(w.wire(self.payload)['sources'][i]['citation'],quote)
