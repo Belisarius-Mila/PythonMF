@@ -1,5 +1,32 @@
 # Samantha external backup
 
+## 2026-11-25 — Limit znaků před tokenovou bránou
+
+Míla přijal doplňkový plán15/250/1000,21 kroků a publikační baseline15.8.3.
+Jeho jeden RPC pokus byl odmítnut turn/start -32602: syntetická zpráva měla
+1340529 znaků proti serverovému maximu1048576. Přesný zdroj rust-v0.169.0
+potvrzuje odmítnutí před submit_core_op; soukromý oddělený disposition uchovává
+SHA nezměněné účtenky a oficiálního zdroje. Nejde o přijetí testu ani runtime
+proof. Původní starší účtenka bez podrobné RPC chyby zůstává nejistá.
+
+Oprava: syntetický obsah s vyšší hustotou tokenů, dvojí omezení tokenů i
+Unicode znaků v přípravě, guard před předodesílací značkou a síťovým RPC.
+Dávkování zachovává celé zdroje, zohledňuje oba limity a skutečná finální
+syntéza se znovu kontroluje před označením dalšího placeného tahu.
+73 cílených testů PASS včetně tokenově vyhovujícího nadlimitního textu,
+celých souborů a Unicode hranice, která není počtem bajtů.
+
+Další krok: doménová brána a místní commit; zmrazit opravené přesné vstupy
+při stejných schválených omezeních. Žádná automatická smyčka retry, změna
+role, deployment či navýšení rozpočtu. Automatický správce se nezapnul.
+Ruční provozní TXT a šifrovaná recovery20261125_175722 se zkouškou obnovy
+zůstávají platné. Konečný důkaz a opravené vstupy mají soukromou autoritu
+ data/private/recovery_maintainer_repair_20261125/completion.json.
+
+Zdroj protokolu:
+https://github.com/openai/codex/blob/rust-v0.169.0/codex-rs/app-server/src/request_processors/turn_processor.rs#L588-L595
+
+
 ## 2026-11-25 — Provozní návod uploadován, návrh21 kroků bez aktivace
 
 Hotovo: Cílená ruční redakce sjednoceného TXT prošla PublicationStore;

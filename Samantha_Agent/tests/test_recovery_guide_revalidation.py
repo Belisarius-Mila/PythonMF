@@ -149,3 +149,38 @@ class Revalidation(unittest.TestCase):
                 r.accept(request_id=self.request,approved_digest=card['digest'],confirmed=True,client_factory=self.client)
         after=json.loads(self.configpath.read_text());self.assertEqual(after['limits']['max_calls'],21);self.assertEqual(after['schedule']['max_calls'],21)
         self.assertEqual(after['limits']['month_credits'],1000);self.assertEqual(self.turns,1)
+
+    def test_character_limit_is_independent_of_token_admission_and_precedes_any_send(self):
+        with patch.object(Counter,'__call__',side_effect=lambda text:len(text)//8):
+            card=self.prepare()
+        payload=json.loads((r.STATE/self.request/'payload.json').read_text())
+        self.assertLessEqual(len(canonical_json(payload)),1_048_576)
+        self.assertEqual(card['plan']['input_text_chars'],len(canonical_json(payload)))
+        self.assertEqual(self.turns,0)
+
+    def test_guard_refuses_oversize_before_marker_and_counts_unicode_characters(self):
+        from unittest.mock import Mock
+        from app import recovery_guide_anchor_transport as t
+        def attempt(n):
+            payload={'text':'😀'*n};inner=Mock();inner.request.return_value={'turn':{'id':'ok'}};marker=Mock()
+            guard=t.StandardTurn(inner,context=self.root,request=SimpleNamespace(payload=payload,schema={}),instructions='synthetic',before_send=marker);guard.thread_id='one'
+            params={'threadId':'one','model':r.MODEL,'effort':'medium','approvalPolicy':'never','sandboxPolicy':{'type':'readOnly','networkAccess':False},'input':[{'type':'text','text':canonical_json(payload)}],'outputSchema':{}}
+            return guard,params,inner,marker
+        with patch.object(t,'MAX_USER_INPUT_TEXT_CHARS',100):
+            guard,params,inner,marker=attempt(90)
+            with self.assertRaises(ValueError):guard.request('turn/start',params)
+            self.assertFalse(guard.attempted);inner.request.assert_not_called();marker.assert_not_called()
+            guard,params,inner,marker=attempt(89);self.assertEqual(len(params['input'][0]['text']),100)
+            guard.request('turn/start',params);marker.assert_called_once();inner.request.assert_called_once()
+
+    def test_character_limited_batches_keep_whole_files_with_a_small_token_count(self):
+        from app import recovery_guide_sources as s
+        original=s.Source('original',digest('guide'),'guide','previous_version')
+        rows=tuple(s.Source(str(n),digest('x'*200),'x'*200,'documented_not_live') for n in range(2))
+        snapshot=s.Snapshot('a'*40,original,rows)
+        with patch.object(s,'MAX_USER_INPUT_TEXT_CHARS',500):
+            parts=s.batches(snapshot,lambda text:1,input_limit=1000,output_reserve=1,max_calls=4)
+            self.assertEqual(len(parts),2);self.assertEqual([row['text'] for part in parts for row in part['sources']],['x'*200,'x'*200])
+            self.assertTrue(all(len(canonical_json(part))<=500 for part in parts))
+            too_large=s.Snapshot('a'*40,original,(s.Source('big',digest('x'*501),'x'*501,'documented_not_live'),))
+            with self.assertRaises(ValueError):s.batches(too_large,lambda text:1,input_limit=1000,output_reserve=1,max_calls=4)

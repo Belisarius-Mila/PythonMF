@@ -29,6 +29,14 @@ nebo jejichž princip lze znovu použít v jiné části projektu.
 
 ## Záznamy
 
+### LL-136 — Tokenová mez sama nezaručuje přípustnou zprávu pro App Server
+
+- Problém: syntetický kontext prošel tokenovou rezervací, ale turn/start jej odmítl kvůli1048576 Unicode znakům.
+- Typ: opakující se
+- Řešení nalezeno: 25112026
+- Řešení: kontrolovat skutečný serializovaný text proti tokenové i znakové mezi už při přípravě a znovu před předodesílací značkou. Zachovat celé soubory při dávkování; u syntetické zkoušky změnit hustotu obsahu. Unicode znaky nejsou UTF-8 bajty. Přesné odmítnutí před modelem doložit verzovaným handlerem, zachovat původní účtenku a neodvozovat z něj výsledek jiného nejasného pokusu.
+
+
 ### LL-104 — Ukončení hlasu není konec úlohy ani potvrzení ceny
 
 - Stav 2026-11-07: placený pilot 15/P2 Míla kompletně zrušil jako nerelevantní pro Agenta SDK Samantha. Níže uvedené zkušenosti jsou historické obecné poznatky, nejsou pokynem projekt obnovit. Provedený rozsah odstranění je v paid_voice_retirement_20261107.md.

@@ -1,6 +1,6 @@
 """One guarded Standard turn over the existing client connection; no daemon."""
 from app import recovery_guide_trial as calibration
-from app.recovery_guide_sources import canonical_json
+from app.recovery_guide_sources import canonical_json, MAX_USER_INPUT_TEXT_CHARS
 
 
 class StandardTurn:
@@ -55,6 +55,8 @@ class StandardTurn:
                     or params.get('outputSchema') != self.request_spec.schema
                     or 'serviceTier' in params or 'serviceTierForTurn' in params):
                 raise ValueError('anchor_turn_scope_changed')
+            if len(params['input'][0]['text']) > MAX_USER_INPUT_TEXT_CHARS:
+                raise ValueError('anchor_input_character_limit')
             self.attempted = True
             self.before_send(self.thread_id)  # Persistent marker MUST succeed before wire.
             reply = self.inner.request(method, {**params, 'serviceTierForTurn': 'default'})

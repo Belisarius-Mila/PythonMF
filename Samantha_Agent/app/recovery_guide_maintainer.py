@@ -16,7 +16,7 @@ from typing import Callable
 from zoneinfo import ZoneInfo
 
 from app.file_persistence import atomic_create_text, atomic_write_json, exclusive_file_lock
-from app.recovery_guide_sources import Snapshot, batches, canonical_json, digest, reject_secrets
+from app.recovery_guide_sources import MAX_USER_INPUT_TEXT_CHARS, Snapshot, batches, canonical_json, digest, reject_secrets
 from app.release_usage import estimate_standard_credits, normalize_usage
 from app import recovery_guide_consolidation as consolidation
 
@@ -118,6 +118,8 @@ def plan(snapshot: Snapshot, count_tokens: Callable[[str], int], limits: Limits,
                            + instruction_tokens + count_tokens(canonical_json(SYNTHESIS_SCHEMA)) + 2048)
     else:
         synthesis_request = consolidation.prepare(snapshot, [], review_date or date(2000,1,1))
+        if len(canonical_json(synthesis_request.payload)) > MAX_USER_INPUT_TEXT_CHARS:
+            raise ValueError("Syntéza překročila limit znaků; bez modelu.")
         synthesis_schema = consolidation.schema(synthesis_request.payload)
         synthesis_bound = (count_tokens(canonical_json(synthesis_request.payload))
                            + len(shards) * limits.inspection_reserve + instruction_tokens
@@ -200,6 +202,8 @@ def run(snapshot: Snapshot, *, state_dir: Path, now: datetime, limits: Limits,
                         atomic_create_text(state_dir / f"{slot}-request.json", request.envelope)
                 schema = INSPECT_SCHEMA if kind == "inspect" else SYNTHESIS_SCHEMA if legacy_format else consolidation.schema(payload)
                 output_allowance = limits.inspection_reserve if kind == "inspect" else limits.output_tokens
+                if len(canonical_json(payload)) > MAX_USER_INPUT_TEXT_CHARS:
+                    raise ValueError("Vstup překročil limit znaků; bez dalšího tahu.")
                 actual_input = count_tokens(canonical_json(payload)) + count_tokens(INSTRUCTIONS if legacy_format else REVIEW_INSTRUCTIONS) + count_tokens(canonical_json(schema)) + 512
                 if actual_input + output_allowance > limits.input_tokens or time.monotonic() - started > limits.seconds:
                     raise ValueError("Překročený předběžný rozsah nebo čas.")

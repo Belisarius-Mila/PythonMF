@@ -15,7 +15,7 @@ import plistlib
 import re
 
 from app.file_persistence import atomic_create_text, atomic_write_json, exclusive_file_lock
-from app.recovery_guide_sources import canonical_json, digest
+from app.recovery_guide_sources import canonical_json, digest, MAX_USER_INPUT_TEXT_CHARS
 from app import recovery_guide_runtime_config as configuration
 from app.recovery_guide_runtime_live import IsolatedCounter
 from app.recovery_guide_anchor_transport import StandardTurn
@@ -106,7 +106,7 @@ def _budget_plan(config,counter,macos_baseline=None,max_calls=None):
     planned=maintainer.plan(snapshot,counter,maintainer.Limits(**proposed['limits']),review_date=datetime.now(ZoneInfo('Europe/Prague')).date())
     return {'max_calls':proposed['limits']['max_calls'],'run_credits':250,'inspection_output_tokens':3000,'month_credits':proposed['schedule']['month_credits'],
         'source_head':snapshot.head,'snapshot_sha256':snapshot.sha256,'source_count':len(snapshot.sources),
-        'calls':planned['calls'],'reserved_credits':planned['reserved_credits'],'input_bound':planned['input_bound'],'output_bound':planned['output_bound']}
+        'calls':planned['calls'],'reserved_credits':planned['reserved_credits'],'input_bound':planned['input_bound'],'output_bound':planned['output_bound'],'inspection_max_chars':max(len(canonical_json(shard)) for shard in planned['shards'])}
 
 def _assert_budget(config,plan):
     macos=plan.get('macos_refresh')
@@ -136,14 +136,14 @@ def prepare(*,request_id,client_factory=None,refresh_budget=False,proposed_macos
         counter = IsolatedCounter(config)
         try:
             tags={k:digest(request_id+k)[:24] for k in SCHEMA['required']}
-            def payload(n):return {'headTag':tags['headTag'],'firstSyntheticSection':'synthetic recovery context. '*n,'middleTag':tags['middleTag'],'secondSyntheticSection':'synthetic recovery context. '*n,'tailTag':tags['tailTag']}
+            def payload(n):return {'headTag':tags['headTag'],'firstSyntheticSection':'0123456789abcdef '*n,'middleTag':tags['middleTag'],'secondSyntheticSection':'0123456789abcdef '*n,'tailTag':tags['tailTag']}
             ceiling = min(config.payload['limits']['input_tokens'],config.payload['runtime_evidence']['input_tokens'])
             if ceiling<200000:raise ValueError('revalidation_context_plan_required')
             overhead=counter(INSTRUCTIONS*2+canonical_json(SCHEMA))+8000
             low,high=1,50000
             while low<high:
                 middle=(low+high+1)//2
-                if counter(canonical_json(payload(middle)))+overhead<=ceiling-2000:low=middle
+                if len(canonical_json(payload(middle)))<=MAX_USER_INPUT_TEXT_CHARS and counter(canonical_json(payload(middle)))+overhead<=ceiling-2000:low=middle
                 else:high=middle-1
             data=payload(low);bound=counter(canonical_json(data))+overhead
             budget=_budget_plan(config,counter,proposed_macos,proposed_max_calls) if refresh_budget else None
@@ -151,7 +151,7 @@ def prepare(*,request_id,client_factory=None,refresh_budget=False,proposed_macos
         plan={'request_id':request_id,'prepared_at':_now(),'activation_sha256':config.sha256,'agent_sha256':agent_sha,
             'runtime':observed,'implementation':_implementation(),'payload_sha256':digest(canonical_json(data)),
             'expected_answer':tags,'input_reservation_tokens':bound,'output_reservation_tokens':1024,
-            'context_admission_tokens':ceiling,'call_limit_refresh':call_refresh,'macos_observation':observed_macos,'macos_refresh':macos_refresh,'budget_refresh':budget,'acceptance_standard_credits':15,'billing_hard_cap':False,
+            'input_text_chars':len(canonical_json(data)),'max_input_text_chars':MAX_USER_INPUT_TEXT_CHARS,'context_admission_tokens':ceiling,'call_limit_refresh':call_refresh,'macos_observation':observed_macos,'macos_refresh':macos_refresh,'budget_refresh':budget,'acceptance_standard_credits':15,'billing_hard_cap':False,
             'model':MODEL,'effort':'medium','model_turns':1,'serviceTierForTurn':'default',
             'changes_after_accept':('runtime_evidence plus only explicitly bound optional budget_refresh, call_limit_refresh and macos_refresh; same role, monthly credit limit, schedule time, LaunchAgent and destinations')}
         envelope={'plan':plan,'digest':digest(canonical_json(plan))}
@@ -168,6 +168,7 @@ def run(*,request_id,approved_digest,confirmed=False,client_factory=None):
         config,agent_sha=owned_configuration()
         if config.sha256!=plan['activation_sha256'] or agent_sha!=plan['agent_sha256'] or _implementation()!=plan['implementation']:raise ValueError('revalidation_inputs_changed')
         payload=json.loads((path/'payload.json').read_text())
+        if len(canonical_json(payload))>MAX_USER_INPUT_TEXT_CHARS:raise ValueError('revalidation_input_character_limit')
         if digest(canonical_json(payload))!=plan['payload_sha256']:raise ValueError('revalidation_payload_changed')
         _assert_budget(config,plan)
         record={'state':'reserved','request_id':request_id,'plan_digest':approved_digest,'model_turn_attempts':0,'automatic_retry':False,'started_at':_now()}

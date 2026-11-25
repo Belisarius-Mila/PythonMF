@@ -17,6 +17,8 @@ TEXT_SUFFIXES = {".md", ".txt", ".rst"}
 SENSITIVE_PARTS = {"private", "session_autosave", "transcripts", "sessions", "node_modules", ".git", ".venv"}
 SECRET = re.compile(r"-----BEGIN (?:RSA |EC |OPENSSH )?PRIVATE KEY-----|\bsk-[A-Za-z0-9_-]{20,}")
 ROOT = Path(__file__).resolve().parents[1]
+# Codex App Server rust-v0.169.0 counts Unicode characters before starting a turn.
+MAX_USER_INPUT_TEXT_CHARS = 1_048_576
 GUIDE_NAME = "OBNOVA_SAMANTHY_NOVY_MAC.txt"
 
 
@@ -152,7 +154,8 @@ def batches(snapshot: Snapshot, count_tokens: Callable[[str], int], *, input_lim
         return {"original": asdict(snapshot.original), "sources": [asdict(s) for s in rows]}
 
     def fits(rows: list[Source]) -> bool:
-        return count_tokens(canonical_json(payload(rows))) + output_reserve <= input_limit
+        text = canonical_json(payload(rows))
+        return len(text) <= MAX_USER_INPUT_TEXT_CHARS and count_tokens(text) + output_reserve <= input_limit
 
     for source in snapshot.sources:
         if not fits([source]):
