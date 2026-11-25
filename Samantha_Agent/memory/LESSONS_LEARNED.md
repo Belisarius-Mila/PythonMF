@@ -1898,6 +1898,12 @@ Doplnění 12112026 — obnova Data po restartu ve druhém okně VS Code:
 
 ### LL-115 — Přesný text může dodat resolver, model jen vybrat odkaz
 
+Doplnění25112026: skutečný provider odmítl strict-schema string enum s novým
+řádkem. Při přípravě pevných citací vybrat doslovný souvislý úsek jediného
+řádku bez uvozovek, nikoli normalizovanou parafrázi. Všech683 zdrojů offline
+prošlo; to samo není živé přijetí providerem. Uchovat plnou strukturovanou
+chybu v privátní účtence a neodvozovat cenu0 z chybějící usage.
+
 - Problém: model věcně správnou citaci při přepisu kapitalizuje; přesný kontrakt selže.
 - Typ: zobecnitelné
 - Řešení nalezeno: 07112026

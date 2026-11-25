@@ -119,10 +119,12 @@ def live_calls(directory,executor,*,assert_current,client_factory=None,inspectio
                 agent_roles.assert_current(executor,role=m.ROLE)
                 answer=json.loads(result.answer)
                 return {'answer':inspection.normalize(answer,logical) if kind=='inspect' else answer,'usage':normalize_usage(result.thread_token_usage)}
-            except Exception:
+            except Exception as exc:
                 # Preserve any full receipt already saved above. Before-send
                 # unknown markers must never be replaced with fabricated failure.
                 saved=json.loads(path.read_text()) if path.exists() else {'state':'not_verified_before_send','phase':kind}
+                details={key:getattr(exc,key) for key in ('method','code','data','server_message','status','turn_error','will_retry') if getattr(exc,key,None) is not None}
+                if details:saved['structured_error']=details
                 if saved['state']=='delivery_unknown':
                     saved.update(turn_id=guard.turn_id,terminal_status=guard.terminal_status,
                         observed_usage=guard.observed_usage)

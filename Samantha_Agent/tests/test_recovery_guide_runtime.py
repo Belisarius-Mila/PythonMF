@@ -357,6 +357,20 @@ class TransportBinding(unittest.TestCase):
         self.assertEqual(marker['thread_id'],'thread-1');self.assertIs(self.client.transport,self.wire)
         self.assertEqual(len([x for x in self.wire.calls if x[0]=='turn/start']),1)
 
+    def test_terminal_schema_error_details_survive_without_retry(self):
+        original=self.wire.request
+        def rejected(method,params):
+            reply=original(method,params)
+            if method=='turn/start':
+                self.wire.events[-1]['params']['turn'].update(status='failed',error={'message':'invalid_json_schema: unsafe literal'})
+            return reply
+        self.wire.request=rejected
+        with self.binding() as call:
+            with self.assertRaises(Exception):call({'original':'data','sources':[]},'inspect')
+        marker=json.loads((self.root/'transport/001.json').read_text())
+        self.assertEqual(marker['terminal_status'],'failed');self.assertEqual(marker['structured_error']['turn_error']['message'],'invalid_json_schema: unsafe literal')
+        self.assertEqual(len([row for row in self.wire.calls if row[0]=='turn/start']),1)
+
     def test_drift_between_thread_and_turn_prevents_paid_send(self):
         answers=iter([True,False]);self.current=lambda:next(answers)
         with self.binding() as call:

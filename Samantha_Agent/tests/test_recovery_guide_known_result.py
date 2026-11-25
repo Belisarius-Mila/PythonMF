@@ -253,3 +253,10 @@ class BoundSchema(Wire):
         schema=w.schema(self.payload);choices=schema['properties']['covered']['items']['anyOf']
         for i,choice in enumerate(choices):
             self.assertEqual(choice['properties']['i']['enum'],[i]);quote=choice['properties']['q']['enum'][0];self.assertIn(quote,self.payload['sources'][i]['text']);self.assertEqual(w.wire(self.payload)['sources'][i]['citation'],quote)
+
+
+class SafeLiterals(unittest.TestCase):
+    def test_exact_anchors_avoid_backend_quote_and_newline_rejection(self):
+        for text in ['# Project Registry\n\nRegistr projektu a dat', '"Quoted title"\nnext line', '\n  \n# One two three four five six seven', '"\r\n  only exact source text  "']:
+            value=w.anchor(text);self.assertTrue(value);self.assertIn(value,text);self.assertFalse(any(c in value for c in '\r\n"'))
+        with self.assertRaises(ValueError):w.anchor('"\n\r"')

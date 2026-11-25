@@ -983,3 +983,43 @@ zůstávají platné. Konečný důkaz a opravené vstupy mají soukromou autori
 
 Zdroj protokolu:
 https://github.com/openai/codex/blob/rust-v0.169.0/codex-rs/app-server/src/request_processors/turn_processor.rs#L588-L595
+
+## 2026-11-25 20:28 CET — Obnova: runtime ověřen, úplná revize zastavená na schématu
+
+### Hotovo
+Provozní návod po cílené ruční redakci zůstává v PythonMF i iCloud Dokumentech
+shodný a uploadovaný. Skutečná kalibrace přijala runtime0.169.0, oddělené
+rezervy poznámek a původně schválené250/běh,1000/měsíc,21 kroků; publikační
+baseline15.8.3 byla přezkoumaná bez instalace operačního systému.
+První šifrovaná recovery se zkouškou obnovy je ověřená. Závěrečný servisní
+archiv je připravený; aktualizovaný snapshot má zachovat také nové účtenky. Jejich přesný
+výsledek má private/recovery_maintainer_repair_20261125/completion.json.
+
+### Rozhodnutí
+Úplná automatická revize není dokončená. Dvě dokončené čtecí dávky pokryly
+102 z683 zdrojů a byly převzaté místně bez opětovného placeného čtení.
+Třetí tah provider odmítl invalid_json_schema kvůli novému řádku v pevném
+řetězci. Zachované jsou všechny původní záznamy, attention i RPC odmítnutí;
+žádný marker se neresetoval a po této chybě nebyl další modelový tah.
+Známá spotřeba kalibrace a dvou čtení je30,96955 kreditu. Starší nejistý
+pokus a odmítnutý tah bez usage nedostaly vymyšlenou nulovou cenu.
+
+### Další krok
+Dokončit závěrečné ověření šifrované zálohy a před dalším modelovým pokusem
+přijmout nový konkrétní plán pokračování. Původní hranice21 pokusů se tiše
+nezvyšuje. Žádné další placené čtení není součástí tohoto dokončení.
+
+### Navrhované další kroky
+- Případné pokračování musí doložit původní102 nezměněné zdroje, známé usage
+  a explicitní dispozici odmítnutého schématu; nejistý tah se neopakuje.
+- Úplnou instalaci náhradního Macu a otevření návodu na fyzickém iPhonu ověřit
+  samostatně. Nesouvisející necommitovaná Data práce není servisním archivem.
+
+### Technický důkaz
+Brána813 PASS pro předchozí kód; závěrečná brána a commit jsou v soukromé
+účtence. Oprava výběru citací je offline ověřená na všech683 zdrojích:
+exact substring, žádné uvozovky ani nový řádek v enum literálu. Doplňkové
+regrese ověřují zachování strukturované chyby bez retry. Živá přejímka
+opraveného schématu zatím chybí. Kód opravy není nainstalovaný do aktivní
+Data služby; její definice, role, síť a dosavadní historie jsou zachované.
+Push, restart ani nasazení Cockpitu nebyly zadány.

@@ -10,9 +10,12 @@ SCHEMA = {'type':'object','properties':{
 
 
 def anchor(text):
-    words=list(re.finditer(r'\S+',text))[:6]
-    if not words:raise ValueError('inspection_empty_source')
-    return text[:min(words[-1].end(),128)].strip()
+    # The live strict-schema backend rejects quote/newline string literals.
+    # Choose an exact contiguous excerpt; never normalize source whitespace.
+    for span in re.finditer(r'[^"\r\n]+',text):
+        value=span.group().strip();words=list(re.finditer(r'\S+',value))[:6]
+        if words:return value[:min(words[-1].end(),128)].strip()
+    raise ValueError('inspection_no_safe_literal')
 
 
 def schema(payload):
@@ -25,7 +28,7 @@ def schema(payload):
 def instructions(budget):
     return ('\nINSPECTION OUTPUT: read ALL complete sources and original. covered contains ONLY '
         'entries in sources, never original. Return every explicit integer i exactly once; '
-        'q must copy the source citation field EXACTLY, including newlines and Markdown. '
+        'q must copy the source citation field EXACTLY, including its Markdown punctuation. '
         'Do not paraphrase citations. notes is at most 150 words, only material recovery findings. '
         f'The ENTIRE response including evidence and reasoning must fit {budget} output tokens.')
 
