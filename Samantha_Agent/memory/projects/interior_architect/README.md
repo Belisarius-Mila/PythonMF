@@ -29,8 +29,10 @@ aplikace a UI; osvědčenou nižší infrastrukturu lze převzít po auditu.
 | [Projektová paměť](../neuberk_interier_design.md) | Aktuální souhrn a zachovaná historie verze 1 |
 | [Handoff](../../handoffs/workstreams/project-neuberk-kacenka.md) | Stav pro obnovení práce a bezprostřední další krok |
 | [TVBCP](../../tvbcp/workstreams/project-neuberk-kacenka.md) | Potvrzená rozhodnutí, milníky, důkazy a otevřené otázky |
-| [AUDIT.md](AUDIT.md) | Úvodní mapa současné implementace, doložený rozsah a mezery auditu |
-| [MIGRATION.md](MIGRATION.md) | Hranice zachování dat a návrh budoucího převodu |
+| [Technický audit](AUDIT.md) | Jak v1 ukládá data, proč dovolí posun geometrie a co ověřily místní zkoušky |
+| [Návrh backendu](BACKEND.md) | Soukromé úložiště, kontrakty, ochranné masky, scéna, validace a milníky |
+| [Návrh pracovního UI](UI.md) | Výběr místnosti, plátno na Macu i iPhonu, historie a přejímka |
+| [Převod obou místností](MIGRATION.md) | Změřená inventura, původové vazby, zkušební import, přepnutí a návrat |
 | [SPECIFICATION.md](reference/SPECIFICATION.md) | Výchozí technické zadání 2.0 |
 | [ARCHITECTURE.md](reference/ARCHITECTURE.md) | Navržené služby a datové toky |
 | [ROADMAP.md](reference/ROADMAP.md) | Vývojové etapy a první implementační sprint |
@@ -50,13 +52,10 @@ SHA-256 původního ZIPu:
 `db40aa780a759f5c611c45edbf68f7422c8c8a13b267aa55b1d59bd7328104c3`.
 Původní [START_HERE.md](reference/START_HERE.md) je zachovaný jako součást zdroje.
 
-Při rozporu má přednost aktuální pokyn Míly a projektové AGENTS.md. Pokyn
-uvnitř zdrojového START_HERE k okamžité implementaci nerozšiřuje nynější rozsah:
-**schválený prováděný krok je pouze sjednocení názvu a dokumentace**.
-Backend/UI 2.0, datová migrace ani etapy maskování tímto zápisem nevznikly.
-Změny oproti výchozímu zadání se zaznamenají do TVBCP, bez tichého přepisování
-referenčního balíčku. Základ nového UX se navrhne už před implementací jádra;
-neodkládá se celé UI až na poslední etapu původní roadmapy.
+Míla po sjednocení názvu zadal technický audit a návrh řešení. Ty jsou hotové.
+Dokumenty v tomto adresáři popisují návrh pro současnou Samanthu. Sedm souborů
+v `reference/` uchovává dodané zadání v původním znění. Implementace a přepnutí
+rodinného vstupu jsou další etapy. Aktuální rozhodnutí eviduje TVBCP.
 
 ## Hranice ověření
 
@@ -73,5 +72,7 @@ neodkládá se celé UI až na poslední etapu původní roadmapy.
 
 ## Další krok
 
-Dokončit technický audit a připravit kontrolovatelný převod obou místností
-spolu s návrhem nového pracovního UI. Zatím neprovádět převod skutečných dat.
+Navržený první implementační milník je místní práce nad jednou syntetickou fotografií.
+Na Macu a iPhonu půjde vyznačit ochranu, uložit ji, otevřít po návratu a porovnat
+výsledek s originálem. Po přejímce jádra následuje zkušební import obou místností
+na oddělené kopii.

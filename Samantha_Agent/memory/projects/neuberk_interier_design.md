@@ -1,30 +1,27 @@
 # Interiérový architekt
 
-## Aktuální vymezení — 2026-11-25
+## Aktuální stav — 25. 11. 2026
 
-Kanonický název je **Interiérový architekt**, vývojový směr **Interior Architect 2.0**.
-Jde o jeden aktivní projekt s prioritou 2 a stabilním ID `project-neuberk-kacenka`.
-Kačenka a místnost dosavadního Ateliéru jsou jeho dvě rozpracované místnosti.
-Aktuální soukromá evidence druhé místnosti používá název Koupelna dolní;
-případný nový zobrazovaný název dosud není potvrzený. Data se nyní nepřejmenovávají.
+Interiérový architekt je jeden aktivní projekt s prioritou 2. Stabilní ID je
+`project-neuberk-kacenka`. Místnosti jsou Kačenka a Koupelna dolní ze starého Ateliéru.
+Dnešní vstup vede přes Janička → Rodinné projekty → Otevřít Ateliér.
 
-Míla schválil nové vymezení a nejdříve výslovně zadal sjednocení názvu
-s dokumentací. Návrhy a historie obou místností se zachovají. Backend aplikace
-a UI se mají navrhnout znovu; v tomto dokumentačním kroku ještě nejsou
-implementované a migrace neproběhla. Současný vstup Janička → Rodinné projekty
-→ Otevřít Ateliér → `/interior/` se nemění.
+Technický audit a konkrétní návrh backendu, UI a převodu jsou hotové.
+Kanonický rozcestník je `memory/projects/interior_architect/README.md`.
+Vedle zachovaného zadání obsahuje AUDIT.md, BACKEND.md, UI.md a MIGRATION.md.
+Pro 2.0 je navržen soukromý SQLite s neměnnými médii a verzovanými maskami/scénou,
+pracovní plátno po místnostech a převod obou zdrojů na kopii.
 
-Kanonický technický rozcestník: `memory/projects/interior_architect/README.md`.
-Obsahuje odkazy na úvodní audit, plán zachování dat a sedm původních dokumentů
-balíčku `Samantha_Interior_Architect_2.0.zip` v `reference/`.
-Nový TVBCP `memory/tvbcp/workstreams/project-neuberk-kacenka.md` je tímto
-výslovně schválený a založený. Starší výroky o chybějícím TVBCP jsou historické.
-Handoff zůstává `memory/handoffs/workstreams/project-neuberk-kacenka.md`.
-Názvy souborů a technické ID jsou záměrně stabilní kvůli existujícím vazbám.
+Důkaz zahrnuje 146 regresních testů, reprodukci přijetí překresleného a rozměrově
+odlišného kandidáta a dvojí kontrolu mapy soukromých zdrojů. Kačenka má 26
+indexovaných obrazových výstupů. Koupelna má 27 položek historie, z nich 4 s
+připojeným obrázkem. Nejasné míry, místní drafty prohlížečů a geometrie starých
+obrazů zůstávají otevřené při přejímce. Evidence je v
+`data/private/interior_architect_audit_20261125/`.
 
-**Další krok:** dokončit technický audit a návrh převodu obou místností spolu
-s návrhem nového pracovního UI. Skutečné rodinné podklady se zatím nepřevádějí.
-Bez změny modelových rolí, transportu, běžících služeb a bez p+n.
+**Další krok** je po rozhodnutí Míly postavit první místní řez na syntetické
+fotografii, s uložením masky, porovnáním a kontrolou pixelů po PNG. Suchý import
+na kopii naváže na funkční jádro. Skutečná migrace ani nasazení neproběhly.
 
 ## Historie verze 1 — původní Neuberk / Kačenka a Ateliér
 

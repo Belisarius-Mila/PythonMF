@@ -1,0 +1,100 @@
+<!doctype html>
+<html lang="cs">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'unsafe-inline'; script-src 'unsafe-inline'; img-src data:; connect-src 'none'; base-uri 'none'; form-action 'none'">
+<title>Interiérový architekt · návrh pracovního prostoru</title>
+<style>
+:root{color-scheme:light;--ink:#243830;--muted:#52645b;--line:#c9d1c9;--paper:#faf9f5;--green:#234d3d;--soft:#dfe8de;--accent:#aa5736}
+*{box-sizing:border-box}body{margin:0;background:var(--paper);color:var(--ink);font:16px/1.5 "Inter",-apple-system,sans-serif}button,a,input{font:inherit}button{cursor:pointer;color:inherit}a{color:var(--green)}button:focus-visible,a:focus-visible,input:focus-visible{outline:3px solid #ac5d23;outline-offset:4px}header{border-bottom:1px solid var(--line);padding:15px clamp(16px,6vw,100px);display:flex;align-items:center;justify-content:space-between;gap:.6rem}header strong{font:600 20px Georgia,serif}header span,.meta,.lead{color:var(--muted)}header span{font-size:13px}main{max-width:1240px;margin:auto;padding:clamp(18px,4vw,54px)}h1,h2,p{margin:0}h1{font:normal clamp(36px,5.2vw,68px)/1.1 Georgia,serif;letter-spacing:-.04em;margin:16px 0 12px}h2{font:normal 25px/1.3 Georgia,serif}.meta{font-size:13px}.lead{max-width:62ch}.rooms{display:grid;grid-template-columns:repeat(2,1fr);gap:20px;margin:30px 0}.room{padding:clamp(18px,3vw,34px);border:1px solid var(--line);background:#fff;border-radius:10px;display:grid;align-content:space-between;gap:20px;min-height:216px}.room h2{font-size:32px;margin-bottom:8px}.btn{display:inline-block;justify-self:start;background:var(--green);color:white;border-radius:5px;padding:8px 15px;text-decoration:none}.back{font-size:14px}.info{margin-top:24px;border-top:1px solid var(--line);padding-top:14px;font-size:14px;color:var(--muted)}[hidden]{display:none!important}.mode{margin:26px 0 16px;border-bottom:1px solid var(--line);padding-bottom:8px;color:var(--green);font-weight:650}.work{display:grid;grid-template-columns:minmax(0,2.5fr) minmax(210px,1fr);gap:16px}.canvas-box,.panel{border:1px solid var(--line);border-radius:8px;overflow:hidden;background:white}.art{display:block;width:100%;height:auto;background:#eee8df}.caption,.panel{padding:16px}.panel p{margin:.65rem 0}.row{display:flex;align-items:center;gap:.6rem;margin:12px 0}.dot{height:11px;width:11px;border-radius:50%;border:1px solid #454f46;display:inline-block}.red{background:#cb715d}.blue{background:#83a99a}input[type=checkbox],input[type=range]{accent-color:var(--green)}input[type=range]{width:100%;min-height:32px}label{cursor:pointer}.legend{color:var(--muted);font-size:14px}.history{padding:0;list-style:none;margin:0;border:1px solid var(--line);border-radius:8px;overflow:hidden;background:white}.history li{display:grid;grid-template-columns:1fr auto;gap:12px;padding:18px;border-bottom:1px solid var(--line)}.history li:last-child{border:0}.history li div{min-width:0}.history small{display:block;color:var(--muted)}.tag{font-size:13px;color:var(--green);align-self:start;background:var(--soft);padding:3px 8px;border-radius:4px}.filter{display:flex;gap:6px;flex-wrap:wrap;margin:15px 0}.filter button{background:white;color:var(--ink);border:1px solid var(--line);border-radius:5px;padding:7px 12px}.filter button[aria-pressed=true]{background:var(--green);color:white}.caption{border-top:1px solid var(--line)}.actions{display:flex;gap:20px;flex-wrap:wrap;margin-top:22px}.room a{min-height:44px}output{font-variant-numeric:tabular-nums}
+@media(max-width:700px){.rooms,.work{grid-template-columns:1fr}.rooms{gap:12px}.room{min-height:0;gap:18px}.room h2{font-size:27px}h1{font-size:39px}header{align-items:flex-start}header strong{font-size:17px}.history li{grid-template-columns:1fr}.tag{justify-self:start}.panel{padding:14px}.mode{margin-top:20px}main{padding-bottom:45px}.actions a{min-height:44px}}
+</style>
+<header><strong>Interiérový architekt</strong><span>Místní návrh rozhraní · 2.0</span></header>
+<main>
+<section id="home" aria-labelledby="rooms-title">
+<p class="meta">Janička / Rodinné projekty</p>
+<h1 id="rooms-title" tabindex="-1">Místnosti</h1>
+<p class="lead">Vyber si, na které místnosti chceš pokračovat.</p>
+<div class="rooms">
+<article class="room"><div><h2>Kačenka</h2><p>21 interiérových konceptů<br>5 studií prázdné místnosti</p></div><a class="btn" href="#kacenka">Otevřít pracovní pohled</a></article>
+<article class="room"><div><h2>Koupelna dolní</h2><p>27 variant v historii<br>4 s připojeným obrázkem</p></div><a class="btn" href="#koupelna">Otevřít historii</a></article>
+</div><p class="info">Počty vycházejí z auditu 25. listopadu 2026. Obě ukázky používají ilustrační obsah.</p>
+</section>
+<section id="kacenka" hidden aria-labelledby="photo-title">
+<a class="back" href="#home">← Místnosti</a><h1 id="photo-title" tabindex="-1">Kačenka</h1>
+<p class="lead">Pracovní pohled · ukázka ochrany okna při změně povrchu stěny</p>
+<div class="mode">Fotografie / Porovnat</div>
+<div class="work"><div class="canvas-box"><canvas class="art" id="photo" width="840" height="480" role="img" aria-label="Schematická stěna s oknem. Posuvník odkrývá nové zbarvení stěny, rám a výplň okna se nemění."></canvas>
+<div class="caption"><label for="ratio">Původní povrch / nový povrch · <output id="percent" for="ratio">50 %</output> nového</label><input type="range" id="ratio" min="0" max="100" value="50"></div></div>
+<aside class="panel"><h2>Vrstvy</h2><label class="row"><input type="checkbox" id="outlines" checked> Zobrazit obrysy ochrany</label><p><span class="dot red"></span> Okno · zámek pixelů</p><p><span class="dot blue"></span> Stěna · upravit povrch</p><p class="legend">Posuvník odkrývá změnu. Přepínač ovládá pouze obrysy vrstev.</p><p class="info">Schematický pohled slouží k posouzení ovládání. Skutečné výsledky v aplikaci dostanou vlastní kontrolu pixelů a geometrie.</p></aside></div>
+<nav class="actions"><a href="#koupelna">Prohlédnout historii Koupelny dolní →</a></nav>
+</section>
+<section id="koupelna" hidden aria-labelledby="history-title">
+<a class="back" href="#home">← Místnosti</a><h1 id="history-title" tabindex="-1">Koupelna dolní</h1>
+<p class="lead">Historie · ukázka tří typů záznamů</p><div class="mode">Historie místnosti</div>
+<div class="filter" aria-label="Filtr historie" role="group"><button type="button" data-filter="all" aria-pressed="true">Vše</button><button type="button" data-filter="picture" aria-pressed="false">S obrázkem</button><button type="button" data-filter="draft" aria-pressed="false">Rozpracované</button></div>
+<ul class="history"><li data-kind="picture"><div><strong>Obrazová varianta</strong><small>Původní výsledek a jeho podklady</small></div><span class="tag">S obrázkem</span></li>
+<li data-kind="text"><div><strong>Historický návrh</strong><small>Text, poznámky a původ zůstávají dostupné.</small></div><span class="tag">Bez připojeného obrázku</span></li>
+<li data-kind="draft"><div><strong>Rozepsaná změna</strong><small>Práce nad konkrétní variantou</small></div><span class="tag">Rozpracované</span></li></ul>
+<p class="info" id="filter-status" aria-live="polite">V ukázce jsou 3 položky.</p>
+<nav class="actions"><a href="#kacenka">Prohlédnout pracovní pohled Kačenky →</a></nav>
+</section>
+<noscript>Pro přepínání obrazovek otevři soubor v prohlížeči se zapnutým JavaScriptem.</noscript>
+</main>
+<script>
+const sections = [...document.querySelectorAll('main section')];
+const range = document.querySelector('#ratio');
+const outlines = document.querySelector('#outlines');
+function draw() {
+  const c = document.querySelector('#photo').getContext('2d');
+  const split = 840 * (1 - Number(range.value) / 100);
+  function polygon(color, points) {
+    c.fillStyle = color; c.beginPath();
+    points.forEach(([x,y],i) => i ? c.lineTo(x,y) : c.moveTo(x,y));
+    c.closePath(); c.fill();
+  }
+  c.fillStyle = '#e7dfcf'; c.fillRect(0,0,840,480);
+  polygon('#ccc1ac', [[0,0],[100,54],[100,381],[0,480]]);
+  polygon('#d7cdb8', [[840,0],[740,54],[740,381],[840,480]]);
+  polygon('#f1ebdf', [[0,0],[840,0],[740,54],[100,54]]);
+  polygon('#ad9278', [[100,381],[740,381],[840,480],[0,480]]);
+  c.fillStyle = '#e9decc'; c.fillRect(100,54,640,327);
+  c.save(); c.beginPath(); c.rect(split,0,840-split,480); c.clip();
+  c.fillStyle = '#9eafa1'; c.fillRect(100,54,640,327); c.restore();
+  c.fillStyle = '#554c40'; c.fillRect(326,102,186,170);
+  c.fillStyle = '#e9ebe2'; c.fillRect(332,108,174,158);
+  c.fillStyle = '#c3d4d2'; c.fillRect(338,114,76,145); c.fillRect(424,114,76,145);
+  c.fillStyle = '#f3f0e7'; c.fillRect(320,271,198,9);
+  if (outlines.checked) {
+    c.strokeStyle='#954332'; c.lineWidth=3; c.setLineDash([8,5]); c.strokeRect(318,98,202,184);
+    c.strokeStyle='#486e60'; c.strokeRect(102,56,636,323); c.setLineDash([]);
+  }
+  if (split>0 && split<840) {
+    c.strokeStyle='#fff'; c.lineWidth=4; c.beginPath(); c.moveTo(split,0); c.lineTo(split,480); c.stroke();
+    c.fillStyle='#234d3d'; c.beginPath(); c.arc(split,335,15,0,Math.PI*2); c.fill();
+    c.fillStyle='#fff'; c.font='bold 16px sans-serif'; c.textAlign='center'; c.fillText('↔',split,340);
+  }
+  document.querySelector('#percent').value = range.value+' %';
+}
+function showSection(focus) {
+  const active=sections.find(section=>section.id===location.hash.slice(1)) || sections[0];
+  sections.forEach(section => section.hidden=section!==active);
+  if (active.id==='kacenka') draw();
+  if (focus) active.querySelector('h1').focus();
+}
+range.addEventListener('input',draw);
+outlines.addEventListener('change',draw);
+document.querySelector('.filter').addEventListener('click',event=>{
+  const button=event.target.closest('[data-filter]');
+  if (!button) return;
+  const filter=button.dataset.filter;
+  document.querySelectorAll('[data-filter]').forEach(el=>el.setAttribute('aria-pressed',String(el===button)));
+  const items=[...document.querySelectorAll('[data-kind]')];
+  items.forEach(item=>item.hidden=filter!=='all' && filter!==item.dataset.kind);
+  const count=items.filter(item=>!item.hidden).length;
+  document.querySelector('#filter-status').textContent=count===1?'V ukázce je 1 položka.':'V ukázce jsou '+count+' položky.';
+});
+window.addEventListener('hashchange',()=>showSection(true));
+showSection(false);
+</script>
+</html>

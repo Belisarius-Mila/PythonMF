@@ -1,59 +1,33 @@
-# Interiérový architekt — zachování dat a návrh migrace
+# Převod Kačenky a Koupelny dolní
 
-Stav 25. 11. 2026: **návrh, migrace neprovedena**. Rozhodnutí: jeden projekt,
-dvě rozpracované místnosti a zachování veškeré dostupné dosavadní práce.
+Návrh, 25. 11. 2026. Cílem je jeden projekt **Interiérový architekt** se dvěma nezávislými místnostmi. Druhou zobrazit stávajícím názvem **Koupelna dolní**, „Ateliér“ ponechat jako označení původní aplikace. Zobrazované jméno lze později změnit bez změny ID.
 
-## Identita a názvy
+## Co musí být po převodu vidět
 
-- Jeden proud Human–Adam: Interiérový architekt, ID `project-neuberk-kacenka`.
-- Cílová hierarchie: projekt → místnosti → podklady, model, drafty a varianty.
-- Starší Kačenka a místnost současného Ateliéru patří do tohoto jednoho
-  projektu. Aktuální data Ateliéru používají název Koupelna dolní; případné
-  přejmenování této místnosti čeká na upřesnění, neblokuje dokumentaci.
-- ID proudu, cesty k handoffu/TVBCP ani původní soukromé cesty se nyní nemění.
-  Staré názvy jsou aliasy, nevzniká duplicitní proud nebo druhá aplikace.
+| Zdroj | Zjištění ze skutečných dat | Cíl a kontrola |
+|---|---|---|
+| Kačenka, zadání a sbírka | 72 souborů, z toho 3 soubory Finderu. Z 69 obsahových cest má 66 různých otisků. Celkem 52 rastrových obrázků, 4 SVG, 10 textů a 3 pomocné Python skripty. | Všechny obsahové cesty dostanou samostatný záznam původu. Stejné bajty mohou sdílet uložený objekt. Finder evidovat v soupisu, vynechat z UI. Skripty uchovat jako přílohu bez spouštění. |
+| Kačenka, návrhy | Složka návrhů má 36 obrázků. Původní indexy označují za výstup 21 interiérových konceptů a 5 studií prázdné místnosti. Všech 26 názvů lze spárovat se souborem. Zbývá 10 obrázků mimo seznam výstupů. | V historii dvě skupiny, každá s původním pořadím a komentářem. Zamítnuté a překonané varianty zachovat s původním posudkem. Dalších deset zpřístupnit mezi podklady, u nejasné role uvést „k zařazení“. Zamýšlené A/B/C v textu nejsou tři hotové varianty. |
+| Kačenka, plánky a míry | Složka plánků obsahuje zdrojové obrázky, pracovní překresy, textové indexy i pomocné soubory. Sedm z 52 rastrů Kačenky překračuje současný limit 6 MiB. Největší má 9,96 MiB, nejvyšší rozlišení je 4032 × 3024. | Importuje se z ověřeného lokálního soupisu mimo veřejný upload. Originály zůstanou po bajtech shodné. Text měr uchovat s citací podkladu a jednotkou. Do přesné scény povýšit teprve potvrzený údaj. |
+| Koupelna dolní, podklady a varianty | Jeden původní projekt, jedna místnost, 7 podkladů se 21 ověřenými soubory. 27 variant (25 AI, 2 vlastní), z toho 4 s dostupným přímým obrázkem a 23 bez něj. 4 kořeny a 23 rodičovských vazeb bez cyklu. | Zachovat staré ID v mapě a u každé varianty druh, rodiče, titul, texty, kresbu i zbylé odkazy. Historie ukáže všech 27 položek. Galerie nabídne přímý obrázek jen u čtyř. Podklad používaný jako reference se nesmí vydávat za obrázek varianty. |
+| Koupelna dolní, rozpracovaná práce | 15 uložených draftů, 1 poznámka, 36 dokončených požadavků (23 chatů a 13 obrazových). Ve stávající místnosti chybí uložený společný základ `room_basis`. Počet obrazových požadavků a počet obrázků se liší. | Přenést revize, base ID, texty, normalizované tahy v původním významu, původní otázky/odpovědi a stav požadavků. Půdorys a míry označit jako nedoplněné. Starou kresbu lze zobrazit jako vodítko, jako ochrannou masku ji musí nově určit uživatel. |
+| Dřívější odstranění a journal | 22 dokončených záznamů mazání. 28 požadavků nese příznak čištění zdroje. U 8 požadavků zůstala složka snapshotů (19 vstupních PNG s odpovídajícími otisky, 8 výsledkových JSON a 8 souborů zámků). | Záznamy o smazání načíst před médii. Dříve odpojený obraz zůstane nedostupný. Journal a snapshoty ponechat jako soukromé servisní důkazy s omezeným přístupem, nikdy z nich znovu nestavět galerii ani spouštět AI. |
 
-## Co zachovat
+Původní kořenový manifest, README, sdílený prostor a pracovní nástroj uchovat jako doprovodnou evidenci projektu. Při inventuře byl prostor sdílených referencí prázdný a `tools_workbench` obsahoval jeden HTML soubor. Oddělené servisní experimenty `ai_probes` (11 souborů) zůstanou pouze ve zdrojovém archivu. O tom, co uvidí galerie, rozhodují vazby a indexy. Názvy souborů normalizovat pro vyhledání v indexu, původní zápis a relativní cestu uchovat. Nejednoznačnou shodu předat k zařazení. Historická publikace a pracovní kopie používají stejná data pouze tehdy, prokáže-li to vstupní soupis.
 
-- Původní soubory, fotografie, plánky, náčrty, starší obrazové koncepty a
-  dostupné původní indexy Kačenky.
-- Originály i odvozené soubory současného Ateliéru, všechny záznamy variant,
-  rodičovské vazby, kresby, názvy, poznámky a rozpracovaná zadání s revizemi.
-- Historii rozhovorů a původních požadavků, jejich identity a stavy, přijaté
-  výsledky a dostupné údaje o původu. Žádný nový modelový tah při převodu.
-- Evidenci dřívějšího smazání a její význam. Import ani obnova nesmějí vrátit
-  záměrně odstraněný obrázek nebo vykreslit prázdný záznam jako platný obraz.
+## Identita a pořadí importu
 
-Požadavek zachovat návrhy platí pro to, co je skutečně dostupné. Neznámé
-nebo již odstraněné soubory se nevymýšlejí ani automaticky neregenerují.
+1. **Soupis a zdrojový bod.** Pořídit konzistentní kopii sevřenou stejným zámkem jako současné zápisy médií a manifestu. Vytvořit soukromý soupis velikostí a SHA-256 všech souborů, verzí a počtů entit. Prohlížečové drafty jsou samostatné. Na původní doméně nabídnout na Macu i iPhonu načíst jejich lokální změny a porovnat je se serverovou revizí. Konflikt nabídne samostatnou pracovní kopii. Nejisté požadavky zachovat pod původním ID. Neznámý stav jiného zařízení bude uveden v přejímce.
+2. **První mapování v odděleném cíli.** Jedno pevné ID projektu a dvě pevné identity místností. U Ateliéru klíč importu tvoří ID zdrojového projektu, ID místnosti, typ a původní ID (u draftu base ID). U Kačenky je klíčem původní relativní cesta v přijatém soupisu. Záznamy původu a blob mají různé identity. Hash obsahu ověřuje bajty, název nestačí pro sloučení. V auditu vyšlo při dvou průchodech stejných 180 klíčů včetně projektu, místností, 69 cest Kačenky a doménových položek Ateliéru. Jde o zkoušku mapování v paměti, počet nezahrnuje každý odvozený soubor ani každou budoucí řádku SQL.
+3. **Převod.** Do nové DB a adresáře objektů zapsat běh ve stavu rozpracováno, mapu ID a evidenci smazání. Dále média, podklady, explicitní varianty, jejich rodiče, drafty, poznámky, operace a soukromé odkazy na journal. Uchovat původní manifest včetně starých idempotentních účtenek (ve snímku 66 a prázdný outbox). Staré účtenky slouží historii v1, nesmí se přehrát jako nové příkazy v2. Míru, původ obrázku, rodiče ani vazbu na místnost nedoplňovat podle podobnosti. Zhotovit místní odvozeniny až po kontrole originálů.
+4. **Přerušení a opakování.** Import zpracovává položky transakčně podle stejné mapy a digestu vstupu, každý dokončený blok je dohledatelný. Pád před zápisem metadat zanechá nejvýše neodkazovaný objekt. Po opakování smí přibýt pouze chybějící blok. Změna zdrojového otisku během běhu, cyklus, nejednoznačný odkaz, chybějící povinný objekt či neznámá verze zastaví označení místnosti za dokončenou. Stav nejprve opravit na kopii nebo výslovně zdokumentovat historicky chybějící podklad.
+5. **Přejímka a přepnutí.** Nejprve v2 otevřít proti kopii na oddělené adrese. Před skutečným přepnutím dočasně zastavit nové zápisy v1 a počkat na potvrzený stav jejích operací. Při nejistotě ověřit původní účtenku. Zopakovat soupis a převést změny od zkoušky, porovnat výstup a atomicky přepnout jeden rodinný vstup na připravený cíl. Zápis má v každém okamžiku jediného vlastníka.
 
-## Pořadí budoucího převodu
+## Co musí projít na kopii
 
-1. **Inventura a mapa vazeb.** Soukromý manifest s cestami, velikostmi,
-   otisky, stávajícími ID a vazbou zdroj → cílová místnost. Rozlišit soubory,
-   obrazové varianty, textové/historické záznamy a neznámé vazby.
-2. **Kontrakt verze 2.** Definovat skutečné verzované schéma projektu,
-   místnosti, varianty, masek a scény. Ilustrační SCENE_MODEL.json není schéma.
-   Historický obraz bez ověřených měr nedostane domyšlenou přesnou geometrii.
-3. **Suchý převod na oddělené kopii.** Zachovat původní identitu nebo
-   jednoznačnou původovou mapu, historii a kontrolní otisky. Opakované spuštění
-   stejného převodu nesmí násobit místnosti ani varianty. Neúplný převod se
-   nesmí vydávat za dokončený a nesmí přepsat zdrojová data.
-4. **Ověření úplnosti a návratu.** Porovnat všechny položky a vazby před/po,
-   otevřít zachované obrazy, texty a historii obou místností. Ověřit zotavení
-   z přerušení, chybějící soubor, konflikt revize i zachování markerů smazání.
-5. **Kontrolované přepnutí.** Až po vyhodnoceném suchém převodu, přejímce
-   a odpovídajícím oprávnění. Původní úložiště ponechat zachované a dostupné
-   pro návrat. Bez automatického smazání staré aplikace nebo rodinných dat.
+- Porovnat **každý** originál a přebíranou odvozeninu podle SHA-256. Zkontrolovat počty, všechny rodičovské vazby, odkazy na obrázky, revize draftů, historii a markery smazání. Porovnat i role 26 obrazových výstupů Kačenky a jejich původní posudky. Odchylku proti živým datům po datu auditu zaznamenat jako změnu snímku.
+- Otevřít např. zamítnutý a následný koncept Kačenky s komentářem a původním podkladem. V Koupelně otevřít obrazovou variantu, variantu bez obrázku s dochovaným textem a rozpracovaný draft na jeho původní větvi. Ověřit, že dřívější odstranění přetrvá i po obnově journalu. Porovnat na Macu a iPhonu včetně nabídky místního draftu.
+- Dvakrát spustit stejný import, přerušit jej mezi souborem a DB, vyzkoušet poškozený soubor a kolizi starého ID. Vyžadovat konstantní počet identit, shodnou mapu, shodné hashe i prázdný seznam neočekávaných chyb. Žádný síťový přenos ani nová modelová operace.
+- Před prvním zápisem ve v2 stačí pro návrat přepnout čtení/zápis zpět na zachovanou v1. Po prvním novém zápisu zastavit zápisy, uložit konzistentní snapshot v2 i přehled všech nových operací a zpřístupnit dočasně v1 pouze ke čtení. Obnovit bezpečnou v2 nebo prokazatelně převést a odsouhlasit změny podporované v1. Masky a scény v1 uložit neumí. Jednoduché vrácení zapisovatelné v1 by tyto změny skrylo.
 
-## Přejímací kritéria
-
-- Obě místnosti a všechny dostupné historické návrhy jsou dohledatelné
-  v novém UI; počet databázových záznamů se nevydává za počet obrázků.
-- Neměnné originály i původní metadata mají stejné otisky; nové odvozeniny
-  mají vlastní identitu a nemění význam historického výsledku.
-- Převod nesmí odesílat soukromé podklady poskytovateli, instalovat modely,
-  zakládat nové AI požadavky ani měnit rozpočty a role.
-- Spuštění a ověření proběhne nejprve na testovací kopii, nikoli na živých datech.
-- Nové UI a geometrický model se přejímají samostatně; zachovaná historie není
-  důkazem implementace masek, správné geometrie nebo dokončení verze 2.0.
+Tento audit na zdrojích pouze četl. Skutečný importér, zkušební cílová DB, přepnutí a zkouška obnovy po zápisu patří do implementace.
