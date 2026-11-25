@@ -65,7 +65,7 @@ SOURCES = {
     "email_agent": ("app/email/continuous_*.py", "app/email/proposal_policy.py",
                     "app/cockpit_email_agent.py",
                     "app/frontend/email_agent/app.js", "tests/email_agent_frontend.test.cjs"),
-    "interior": ("app/interior_*.py", "app/cockpit_interior.py", "app/frontend/interior/*",
+    "interior": ("app/interior_*.py", "app/cockpit_interior.py", "app/frontend/interior/*", "app/frontend/interior_masks/*",
                  "tests/interior_*.test.cjs"),
     "science": ("app/science_news*.py", "app/cockpit_science_news.py", "scripts/science_news*.py",
                 "tests/science_news*.test.cjs"),

@@ -75,3 +75,32 @@ jsou evidované v místní účtence a
 **Navrhované další kroky.** Po přijetí vyzkoušet editor masky a bezeztrátovou kompozici. Na funkčním jádře ověřit převod na kopii. Poté doplnit scénu, půdorys a sdílené 3D pohledy.
 
 **Technický důkaz.** 146 regresních testů v1 prošlo. Stávající příjem přijal i jiný poměr stran. Lokální syntetická kompozice měla 0 změn chráněných pixelů po načtení PNG. Dva průchody inventurou měly shodnou mapu 180 klíčů. Rizikem zůstávají neověřená geometrie fotografie a drafty konkrétního prohlížeče.
+
+### 2026-11-25 21:25 CET — První editor masek a místní varianty
+
+**Hotovo.** První řez na adrese `/interior/masks/` otevírá zkušební místnost s oknem.
+Obdélník, polygon, štětec a guma kreslí do pojmenovaných vrstev. UI má zoom, posun,
+dvouprsté gesto, zpět/znovu, místní rozepsanou kopii, uložení draftu, barevnou
+variantu, Před/Po a mapu změn. Nový vstup je dostupný odkazem ze stávajícího Ateliéru.
+Masky, originál, PNG varianty, report a účtenky patří do odděleného soukromého pilotu.
+Originál je reprodukovatelný syntetický obrázek, uložené varianty jsou neměnné PNG.
+
+**Rozhodnutí.** Míla zadal první vývojový krok. P+n vlastní Will.
+Pixelová a kontextová ochrana vítězí nad povolenou změnou. GEOMETRY_LOCK
+v tomto řezu chrání celou oblast, protože ověřování povrchové geometrie ještě
+není dostupné. Report geometrie uvádí neověřeno. SQLite pilot ukládá PNG přímo
+do stejné transakce jako revizi a účtenku, budoucí souborové objekty budou mít
+vlastní přejímku.
+
+**Další krok.** Will převezme lokální commit a důkazy pro své p+n.
+Po vydání Míla převezme fyzické ovládání na Macu a iPhonu.
+
+**Navrhované další kroky.** Po přejímce prvního řezu naváže převod obou místností
+na kopii a doplnění autoritativních normalizovaných fotografií.
+
+**Technický důkaz.** Cílená sada backendu a HTTP ověřuje ochranu RGB/RGBA,
+překryv všech režimů, vnitřní feathering po PNG round-trip, špatné rozměry,
+revizní konflikt, paralelní zápis, návrat po chybě, idempotenci a původ HTTP.
+WebKit nad izolovaným skutečným HTTP serverem ověřil práci v šířkách 390 a 1180 px.
+Účtenka závěrečné programové brány a logy jsou v
+`data/private/interior_masks_20261125/`. Fyzický dotyk na iPhonu zůstává k přejímce.

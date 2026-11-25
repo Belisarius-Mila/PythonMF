@@ -70,9 +70,17 @@ rodinného vstupu jsou další etapy. Aktuální rozhodnutí eviduje TVBCP.
 - Bez nových placených volání, instalace velkých modelů, migrace soukromých dat,
   změny rolí, restartu služeb a p+n v tomto dokumentačním kroku.
 
+## První implementovaný řez
+
+Odkaz „Vyzkoušet nový editor“ v Ateliéru vede na `/interior/masks/`.
+Používá syntetickou místnost a oddělené úložiště
+`data/private/interior_architect_v2/pilot.sqlite3`. PNG, report, draft i účtenka
+jsou potvrzené jednou transakcí. Nabízí vrstvy všech pěti režimů, nativní
+souřadnice, obdélník/polygon/štětec/gumu, undo/redo, posun/přiblížení, uložení
+a místní barevnou variantu. Originál, výsledek a rozdílová mapa sdílejí pohled.
+Geometrický zámek dočasně chrání celou oblast. Report uvádí geometrii neověřenou.
+
 ## Další krok
 
-Navržený první implementační milník je místní práce nad jednou syntetickou fotografií.
-Na Macu a iPhonu půjde vyznačit ochranu, uložit ji, otevřít po návratu a porovnat
-výsledek s originálem. Po přejímce jádra následuje zkušební import obou místností
-na oddělené kopii.
+P+n vlastní Will podle pokynu Míly. Po vydání navazuje fyzická přejímka na
+Macu/iPhonu a zkušební převod skutečných místností na oddělené kopii.

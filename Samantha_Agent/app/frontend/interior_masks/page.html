@@ -1,0 +1,146 @@
+<!doctype html>
+<html lang="cs">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Interiérový architekt · Zkušební místnost</title>
+    <style>
+      {{SAMANTHA_CSS}}
+    </style>
+  </head>
+  <body>
+    <header>
+      <a href="/interior/">← Ateliér</a>
+      <h1>Interiérový architekt</h1>
+      <span>Zkušební místnost</span>
+    </header>
+    <main>
+      <p id="status" role="status" aria-live="polite">
+        Načítám uloženou práci…
+      </p>
+      <div class="toolbar">
+        <label
+          >Nástroj<select id="tool">
+            <option value="rect">Obdélník</option>
+            <option value="polygon">Polygon</option>
+            <option value="brush">Štětec</option>
+            <option value="erase">Guma ve vrstvě</option>
+            <option value="pan">Posun pohledu</option>
+          </select></label
+        >
+        <label
+          >Šířka štětce<input
+            id="width"
+            type="range"
+            min="2"
+            max="100"
+            value="20"
+        /></label>
+        <button id="finishPolygon">Dokončit polygon</button
+        ><button id="undo">Zpět</button><button id="redo">Znovu</button>
+        <button id="zoomOut" aria-label="Oddálit">−</button
+        ><button id="fit">Přizpůsobit</button
+        ><button id="zoomIn" aria-label="Přiblížit">+</button>
+      </div>
+      <div class="workspace">
+        <section class="image-area" aria-label="Pracovní obrázek">
+          <div id="viewport">
+            <canvas
+              id="canvas"
+              width="1000"
+              height="650"
+              tabindex="0"
+              aria-label="Modelová místnost. Označ oblast tažením. Polygon dokonči tlačítkem."
+            ></canvas>
+          </div>
+          <p class="hint">
+            Neoznačené plochy jsou chráněné. Dva prsty posouvají a přibližují
+            pohled.
+          </p>
+          <div class="compare">
+            <label
+              >Pohled<select id="view">
+                <option value="edit">Oblasti</option>
+                <option value="before">Originál</option>
+                <option value="after">Výsledek</option>
+                <option value="compare">Před / Po</option>
+                <option value="diff">Mapa změn</option>
+              </select></label
+            >
+            <label id="sliderLabel" hidden
+              >Podíl výsledku<input
+                id="split"
+                type="range"
+                min="0"
+                max="100"
+                value="50"
+            /></label>
+          </div>
+        </section>
+        <aside>
+          <h2>Oblasti</h2>
+          <select id="layers" size="5" aria-label="Vybraná oblast"></select>
+          <button id="add">Nová oblast</button>
+          <label>Název<input id="name" maxlength="100" /></label>
+          <label
+            >Režim<select id="mode">
+              <option value="PIXEL_LOCK">Zámek pixelů</option>
+              <option value="EDITABLE">Upravit povrch</option>
+              <option value="FREE_DESIGN">Volný návrh</option>
+              <option value="GEOMETRY_LOCK">Zámek geometrie</option>
+              <option value="CONTEXT_ONLY">Pouze kontext</option>
+            </select></label
+          >
+          <label class="check"
+            ><input id="visible" type="checkbox" checked />Zobrazit tuto
+            vrstvu</label
+          >
+          <p class="hint">
+            Skrytí obrysu nevypne ochranu. Zámek geometrie zde chrání celou
+            oblast do přidání geometrického ověření.
+          </p>
+          <button id="save">Uložit rozpracované</button>
+          <label
+            >Název varianty<input
+              id="title"
+              value="Zkouška povrchu"
+              maxlength="120"
+          /></label>
+          <label
+            >Nová barva povrchu<input type="color" id="color" value="#93ada0"
+          /></label>
+          <label
+            >Vyhlazení dovnitř oblasti<input
+              id="feather"
+              type="range"
+              min="0"
+              max="20"
+              value="0"
+          /></label>
+          <button id="generate" class="primary">
+            Vyzkoušet místní úpravu a uložit
+          </button>
+          <p id="report" aria-live="polite"></p>
+        </aside>
+      </div>
+      <section id="conflict" hidden>
+        <h2>Konflikt revize</h2>
+        <p>
+          Místní kresba zůstává otevřená. Můžeš načíst serverovou práci nebo
+          uložit svou kresbu jako novou variantu nad aktuální revizí.
+        </p>
+        <button id="reload">Načíst serverovou práci</button
+        ><button id="copy">Uložit místní jako novou variantu</button>
+      </section>
+      <section>
+        <h2>Uložené varianty</h2>
+        <div id="variants"></div>
+      </section>
+      <p class="hint">
+        Místní barevná zkouška. Geometrie fotografie má samostatný stav ověření.
+      </p>
+    </main>
+    <!-- prettier-ignore -->
+    <script>{{SAMANTHA_JAVASCRIPT}}</script>
+  </body>
+</html>

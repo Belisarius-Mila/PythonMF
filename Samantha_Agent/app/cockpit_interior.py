@@ -4,7 +4,9 @@ from __future__ import annotations
 from http import HTTPStatus
 from urllib.parse import parse_qs
 
-from app.cockpit_frontend import INTERIOR_HTML
+from app.cockpit_frontend import INTERIOR_HTML, INTERIOR_MASKS_HTML
+from app.interior_mask_store import InteriorMaskStore
+import sqlite3
 from app.file_persistence import FilePersistenceError
 from app.interior_atelier import AtelierConflict, AtelierError, InteriorAtelier
 from app.interior_ai import INTERIOR_AI
@@ -30,6 +32,28 @@ class InteriorRoutes:
         self.store_factory = store_factory or InteriorAtelier
 
     def dispatch(self, *, parsed, responder):
+        if parsed.path in ("/interior/masks/", "/api/interior/masks/state", "/api/interior/masks/image"):
+            try:
+                params = parse_qs(parsed.query, keep_blank_values=True, strict_parsing=True)
+                if parsed.path != "/api/interior/masks/image" and params:
+                    raise ValueError("Neplatný výběr.")
+                if set(params) - {"variant"} or any(len(values) != 1 for values in params.values()):
+                    raise ValueError("Neplatný výběr.")
+                if parsed.path == "/interior/masks/":
+                    responder.respond_html(INTERIOR_MASKS_HTML)
+                elif parsed.path.endswith("/state"):
+                    responder.respond_json(InteriorMaskStore().state())
+                else:
+                    raw = InteriorMaskStore().image(params.get("variant", [None])[0])
+                    responder.send_response(HTTPStatus.OK)
+                    responder.send_header("Content-Type", "image/png")
+                    responder.send_header("Content-Length", str(len(raw)))
+                    responder.send_header("Cache-Control", "no-store")
+                    responder.end_headers()
+                    responder.wfile.write(raw)
+            except (ValueError, OSError, sqlite3.Error):
+                responder.respond_json({"ok": False, "message": "Zkušební místnost není dostupná."}, status=HTTPStatus.BAD_REQUEST)
+            return True
         if parsed.path == "/interior/":
             responder.respond_html(INTERIOR_HTML)
             return True

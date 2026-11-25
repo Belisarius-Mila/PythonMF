@@ -11,6 +11,7 @@ FRONTEND_PAGE_IDS = (
     "calendar_task",
     "calendar_overview",
     "interior",
+    "interior_masks",
     "email_agent",
     "email_archive",
     "email_processing",
@@ -72,6 +73,7 @@ def _read_asset(path: Path) -> str:
         ) from exc
 
 
+INTERIOR_MASKS_HTML = load_frontend_page("interior_masks")
 INTERIOR_HTML = load_frontend_page("interior")
 CALENDAR_OVERVIEW_HTML = load_frontend_page("calendar_overview")
 CALENDAR_TASK_HTML = load_frontend_page("calendar_task")

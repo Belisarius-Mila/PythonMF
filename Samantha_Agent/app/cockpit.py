@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from app.interior_mask_store import interior_mask_action
 from app.cockpit_interior import INTERIOR_HTML, InteriorRoutes, interior_atelier_action
 from app.cockpit_calendar import CalendarOverviewRoutes, calendar_overview_action
 from app.cockpit_shared_chat import shared_chat_get, shared_chat_action
@@ -8748,6 +8749,9 @@ COCKPIT_POST_ACTIONS: tuple[dict[str, str], ...] = (
     {"path": "/api/calendar/action", "label": "Načíst kalendáře nebo uložit jejich soukromý výběr",
      "risk": "private_write", "confirmation": "explicit_calendar_read_selection_or_permission_button",
      "handler_name": "calendar_overview_action", "test_level": "direct"},
+    {"path": "/api/interior/masks/action", "label": "Uložit masku nebo místní zkušební variantu",
+     "risk": "private_write", "confirmation": "explicit_mask_save_button",
+     "handler_name": "interior_mask_action", "test_level": "direct"},
     {"path": "/api/interior/action", "label": "Uložit vlastní práci v interiérovém Ateliéru",
      "risk": "private_write", "confirmation": "explicit_edit_or_exact_global_phrase_and_source_plan",
      "handler_name": "interior_atelier_action", "test_level": "direct"},
@@ -10299,6 +10303,11 @@ class CockpitServer:
                     result = calendar_overview_action(self.read_json()) if not parsed.query else {"ok": False, "error": "invalid_request"}
                     self.respond_json(result, status=HTTPStatus.OK if result["ok"] else (
                         HTTPStatus.CONFLICT if result.get("error") in {"conflict", "unavailable"} else HTTPStatus.BAD_REQUEST))
+                    return
+                if parsed.path == "/api/interior/masks/action":
+                    result = interior_mask_action(self.read_json()) if not parsed.query else {"ok": False, "error": "invalid_request"}
+                    self.respond_json(result, status=HTTPStatus.OK if result["ok"] else (
+                        HTTPStatus.CONFLICT if result.get("error") == "conflict" else HTTPStatus.BAD_REQUEST))
                     return
                 if parsed.path == "/api/interior/action":
                     result = interior_atelier_action(self.read_json())

@@ -409,6 +409,7 @@ TEST_MODULES = (
     "tests.test_cockpit_calendar_edit",
     "tests.test_calendar_delete",
     "tests.test_cockpit_calendar_delete",
+    "tests.test_interior_masks",
     "tests.test_interior_atelier",
     "tests.test_interior_ai",
     "tests.test_interior_brief",
@@ -902,6 +903,10 @@ def main(argv: Sequence[str] | None = None) -> int:
     run_checked(
         "Library photo worker javascript syntax",
         [node_binary(), "--check", "app/frontend/cockpit/library_image_worker.js"],
+    )
+    run_checked(
+        "Interior mask editor javascript syntax",
+        [node_binary(), "--check", "app/frontend/interior_masks/app.js"],
     )
     run_checked(
         "Interior atelier javascript syntax",
