@@ -1,43 +1,31 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
-2026-11-16 18:30 CET: Dohlížitel opraven proti pomalému model/list. Místní ověřený
-handshake, stávající dvoukontrolní potvrzení i spánek zachované;51 cílených PASS.
-Běžný worker načte zdroj automaticky; GitHub/společný runtime čekají na p+n.
-Konečný důkaz private/agent_supervisor_appserver_20261116/completion.json.
+## 2026-11-25 16:15 CET — Oprava obnovovacího správce po změně runtime
 
-16.11.11:16 CET: Míla schválil konkrétní úklid v2, GiB vpravo, vývoj+p+n.
-Gitové obsahy se znovu nezálohují; malé unikáty se ověří odděleně, pak
-uzavřené kopie po publikaci odstraní. Jen přesné staré build cache,
-autosave latest/previous+2 hodinové časy. V1 se bez vlastní aktivace nerozšiřuje.
-Preflight4kopie8,85GiB/unikáty10,22MiB;127 integrací PASS. Skutečný konec,
-zisk a účtenka pouze private/workspace_housekeeping/v2_completion.json.
+Hotovo: Živě zjištěná příčina zastavené revize návodu: aktivace váže důkaz
+na0.163.0, sdílený server je0.169.0. Provozní PythonMF/iCloud TXT shodné
+s datem8.11.; žádný týdenní job, poslední ticky waiting_dependencies bez modelu.
+Místně připravený omezený jednorázový revalidační řadič se soukromým plánem,
+žurnálem před odesláním a bez opakování nejistého modelového pokusu.
 
-16.11.10:19 CET: Místně čtecí karta Servis → Provoz → Úklid pracovních kopií,
-54 cílených PASS, konečný důkaz private/workspace_housekeeping/ui_development.json.
-Plánovač/poslední běh/volné místo/důvody kopií, bezpečné pozadí/cache/stáří.
-Skutečný čtecí probe0 čekajících/4 ponechané, loaded/exit0, aktivační kontrakt
-shodný. Karta čeká na samostatné p+n a fyzickou přejímku; daemon je již aktivní.
+Rozhodnutí: Míla výslovně zadal opravit správce, sjednotit návod podle
+současného provozu a udělat čerstvou externí zálohu se zkouškou obnovy.
+Nevypínat kontroly, neměnit roli/model/plánovač ani rozpočty správce.
+Připravuje se jediný syntetický Sol/medium Standard test s přijímací mezí15
+kreditů; je to plán k výslovnému přijetí, nikoli uskutečněný placený pokus.
 
-16.11.09:32 CET: Hodinový úklid po přesné globální větě aktivovaný; definice
-shodná, loaded/runs1/exit0/3600s. První běh dokončený:48 starých autosave,
-skutečně+0,5002GiB, pracovní kopie0. Kód41b16b1c/705 cílených PASS,
-bez push/restartu Cockpitu. Další krok: zachovat lokální data starých kopií
-a uzavřít je; potom ScienceNews. Důkaz private/workspace_housekeeping/
-activation_verification.json. Starší čekání na aktivaci níže je historické.
+Další krok: Ověřit nový řadič doménovou bránou, přijmout přesný nákladový
+plán a teprve potom znovuověřit současný runtime a obnovit řádný týdenní běh.
+Navrhované další kroky: Doručit sjednocené provozní TXT a ověřit upload;
+záloha a zkouška obnovy po odemčení SamanthaSecureBackup. Falta připojený,
+šifrovaný svazek v prvním auditu chyběl; žádný náhradní cíl se nepoužil.
 
-16.11.: Hodinový úklid výslovně dokončených dočasných worktrees a12 časů
-autosave je implementovaný;57 cílených PASS, finální brána/commit v private
-workspace_housekeeping/development.json. Samostatná aktivace čeká na přesnou
-globální větu a aktuální digest. Živá data se nemažou;4 současné kopie blokují
-neověřená lokální data nebo rozpracované změny. Stav a pravidla mají přednost
-před níže zachovaným historickým souhrnem; zálohy a vydání se neopakují.
-
-15.11.: Místní v3 ruší automatické plné brány při přípravě commitu, checkpointu
-i p+n. Doménové/smluvní sady bez plného základu; full jen noční/ruční.
-Datova dávka503 cest →99 testů/53,881s,42 regresí PASS; finální cílený důkaz
-v private validation_focused_20261115/completion.json. Menší okamžité pokrytí
-mezimodulových vazeb je vědomý kompromis. Poslední vydané95037bfe má oba
-cíle potvrzené; v3 zatím bez p+n/restartu. Další krok samostatně povolené
-p+n v3 s načtením nového validatoru. Data/zálohy/kalendářové unknown zachované.
+Technický důkaz:13 syntetických testů PASS pro neměnný plán, změnu vstupů,
+ztracenou odpověď bez retry, vlastnictví a změnu pouze runtime_evidence.
+Aktuální provoz a další důkazy: private/recovery_maintainer_repair_20261125/completion.json.
+Doplněný nemazající privátní servisní archiv pro konfiguraci mimo checkout
+a konzistentní FR SQLite; všechny kopie ověřené manifestem.
+Netajné podklady recovery_maintainer_repair_20261125.md. Žádný modelový tah,
+konfigurační přepnutí, aktualizace TXT nebo externí záloha zatím neproběhly.
 <!-- SAMANTHA_CURRENT_STATUS_END -->
 
 ### Předchozí stav infrastruktury
@@ -2363,3 +2351,31 @@ uzavření, spánku a incidentů. Živé nové vzorky, pravidelný tik a konečn
 programová brána/commit: private/agent_supervisor_appserver_20261116/
 completion.json. Konfigurace, LaunchAgent, proces serveru a Pushcut se
 ručně nemění. Sonda prokazuje místní RPC, nikoli úspěch placeného modelu.
+
+## 2026-11-25 16:15 CET — Oprava obnovovacího správce po změně runtime
+
+Hotovo: Živě zjištěná příčina zastavené revize návodu: aktivace váže důkaz
+na0.163.0, sdílený server je0.169.0. Provozní PythonMF/iCloud TXT shodné
+s datem8.11.; žádný týdenní job, poslední ticky waiting_dependencies bez modelu.
+Místně připravený omezený jednorázový revalidační řadič se soukromým plánem,
+žurnálem před odesláním a bez opakování nejistého modelového pokusu.
+
+Rozhodnutí: Míla výslovně zadal opravit správce, sjednotit návod podle
+současného provozu a udělat čerstvou externí zálohu se zkouškou obnovy.
+Nevypínat kontroly, neměnit roli/model/plánovač ani rozpočty správce.
+Připravuje se jediný syntetický Sol/medium Standard test s přijímací mezí15
+kreditů; je to plán k výslovnému přijetí, nikoli uskutečněný placený pokus.
+
+Další krok: Ověřit nový řadič doménovou bránou, přijmout přesný nákladový
+plán a teprve potom znovuověřit současný runtime a obnovit řádný týdenní běh.
+Navrhované další kroky: Doručit sjednocené provozní TXT a ověřit upload;
+záloha a zkouška obnovy po odemčení SamanthaSecureBackup. Falta připojený,
+šifrovaný svazek v prvním auditu chyběl; žádný náhradní cíl se nepoužil.
+
+Technický důkaz:13 syntetických testů PASS pro neměnný plán, změnu vstupů,
+ztracenou odpověď bez retry, vlastnictví a změnu pouze runtime_evidence.
+Aktuální provoz a další důkazy: private/recovery_maintainer_repair_20261125/completion.json.
+Doplněný nemazající privátní servisní archiv pro konfiguraci mimo checkout
+a konzistentní FR SQLite; všechny kopie ověřené manifestem.
+Netajné podklady recovery_maintainer_repair_20261125.md. Žádný modelový tah,
+konfigurační přepnutí, aktualizace TXT nebo externí záloha zatím neproběhly.

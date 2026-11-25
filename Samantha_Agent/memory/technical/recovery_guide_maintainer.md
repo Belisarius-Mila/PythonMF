@@ -877,3 +877,23 @@ kopie se neřeší resetem a návratem ke starému originálu. Status je pouze �
   brána a git diff --check OK; plný základ převzatý2882 testů/5 skipped.
 - Všechny aktuální readiness závislosti true v čtecím auditu; nový provider
   tah se dnes nekonal. Fyzický iPhone a první placený týdenní slot teprve přijdou.
+
+## Údržba po upgradu runtime — 25. 11. 2026
+
+Rozdíl schválené a pozorované verze není důkaz, že přestala fungovat
+Standard větev nebo provider context; je to důvod znovuověřit podmínky.
+Nevypínat původní guard ani jen nepřepsat číslo verze v aktivaci.
+Registrované recovery_guide_revalidation.prepare/run/accept připraví
+neměnný jednorázový syntetický test s přijímací mezí15 kreditů.
+Run vyžaduje aktuální výslovné přijetí přesného otisku; pouze jeden tah
+Sol/medium Standard bez nástrojů. Při nejistotě se vrací původní účtenka.
+Accept smí po úspěšném a znovu ověřeném původním pokusu vyměnit pouze
+runtime_evidence; zachová původní aktivaci, roli, budget, rozvrh a plist.
+Jde o novou přípravu, současný výsledek podle private
+recovery_maintainer_repair_20261125/completion.json.
+
+Servisní archiv pro recovery má registrovaný vstup recovery_service_archive_preserve.
+Jde pouze o novou soukromou kopii pod hlavním projektem; jeho externí
+zašifrované zazálohování je zvláštní krok. Manifest a verify odmítnou
+neúplnost, změnu souborů a symlinky. Po obnově neinstalovat staré definice
+služeb bez přezkoumání nových cest a runtime proofu.

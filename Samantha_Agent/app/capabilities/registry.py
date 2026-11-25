@@ -12,6 +12,33 @@ from app.capabilities.models import (
 
 CAPABILITIES: tuple[CapabilityRecord, ...] = (
     CapabilityRecord(
+        capability_id="recovery_service_archive_preserve", label="Preserve owned service states for encrypted recovery",
+        risk=RiskLevel.LOCAL_WRITE, reads=("owned recovery maintainer private activation, journal and reviewed protocol", "two owned LaunchAgent definitions", "consistent FR SQLite snapshot",),
+        writes=("one new private archive in the canonical recovery-backup source",),
+        tool="app.recovery_guide_service_archive.preserve", audit=AuditPolicy.REDACTED,
+        notes="No installation, original state change, deletion or external send. Completed manifest and hashes verify every archived file; source drift or symlink refuses completion. External backup is separately authorized.",
+    ),
+    CapabilityRecord(
+        capability_id="recovery_guide_revalidation_prepare", label="Prepare a bounded recovery maintainer runtime revalidation",
+        risk=RiskLevel.LOCAL_WRITE, reads=("owned recovery LaunchAgent and activation", "shared runtime metadata and approved role",),
+        writes=("one immutable private synthetic probe plan",), tool="app.recovery_guide_revalidation.prepare", audit=AuditPolicy.REDACTED,
+        notes="No model turn, service change, guide publication or activation edit.",
+    ),
+    CapabilityRecord(
+        capability_id="recovery_guide_revalidation_run", label="Run one explicitly approved Standard context probe",
+        risk=RiskLevel.EXTERNAL_GENERATION, reads=("exact approved immutable probe and current owned activation",),
+        writes=("one private before-send receipt and one synthetic model turn",), tool="app.recovery_guide_revalidation.run",
+        requires_confirmation=False, confirmation_policy=ConfirmationPolicy.NONE, audit=AuditPolicy.REDACTED, metadata={"durable_consent": "trusted_external_generation_v1"},
+        notes="Sol/medium Standard, one attempt, acceptance15 credits not an upstream billing cap. No private source content, no automatic retry, no guide write.",
+    ),
+    CapabilityRecord(
+        capability_id="recovery_guide_revalidation_accept", label="Bind verified runtime evidence to the existing recovery maintainer",
+        risk=RiskLevel.LOCAL_WRITE, reads=("successful exact probe receipt and unchanged activation",),
+        writes=("preserved private activation before-image and only runtime_evidence replacement",), tool="app.recovery_guide_revalidation.accept",
+        requires_confirmation=True, confirmation_policy=ConfirmationPolicy.EXACT_CURRENT_MESSAGE, audit=AuditPolicy.REDACTED,
+        notes="No model call, LaunchAgent, model role, schedule, budget or destination change. Existing approved weekly schedule can resume after acceptance.",
+    ),
+    CapabilityRecord(
         capability_id="vocabulary_fr_tailnet_prepare", label="Prepare the private free FR Tailscale service",
         risk=RiskLevel.LOCAL_WRITE, reads=("exact clean commit", "owned Tailscale device and private Serve configuration",),
         writes=("frozen local release and activation plan in data/private",),

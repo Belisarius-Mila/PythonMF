@@ -2,6 +2,35 @@
 
 Projekt zalozen 2026-05-19.
 
+## 2026-11-25 16:15 CET — Oprava obnovovacího správce po změně runtime
+
+Hotovo: Živě zjištěná příčina zastavené revize návodu: aktivace váže důkaz
+na0.163.0, sdílený server je0.169.0. Provozní PythonMF/iCloud TXT shodné
+s datem8.11.; žádný týdenní job, poslední ticky waiting_dependencies bez modelu.
+Místně připravený omezený jednorázový revalidační řadič se soukromým plánem,
+žurnálem před odesláním a bez opakování nejistého modelového pokusu.
+
+Rozhodnutí: Míla výslovně zadal opravit správce, sjednotit návod podle
+současného provozu a udělat čerstvou externí zálohu se zkouškou obnovy.
+Nevypínat kontroly, neměnit roli/model/plánovač ani rozpočty správce.
+Připravuje se jediný syntetický Sol/medium Standard test s přijímací mezí15
+kreditů; je to plán k výslovnému přijetí, nikoli uskutečněný placený pokus.
+
+Další krok: Ověřit nový řadič doménovou bránou, přijmout přesný nákladový
+plán a teprve potom znovuověřit současný runtime a obnovit řádný týdenní běh.
+Navrhované další kroky: Doručit sjednocené provozní TXT a ověřit upload;
+záloha a zkouška obnovy po odemčení SamanthaSecureBackup. Falta připojený,
+šifrovaný svazek v prvním auditu chyběl; žádný náhradní cíl se nepoužil.
+
+Technický důkaz:13 syntetických testů PASS pro neměnný plán, změnu vstupů,
+ztracenou odpověď bez retry, vlastnictví a změnu pouze runtime_evidence.
+Aktuální provoz a další důkazy: private/recovery_maintainer_repair_20261125/completion.json.
+Doplněný nemazající privátní servisní archiv pro konfiguraci mimo checkout
+a konzistentní FR SQLite; všechny kopie ověřené manifestem.
+Netajné podklady recovery_maintainer_repair_20261125.md. Žádný modelový tah,
+konfigurační přepnutí, aktualizace TXT nebo externí záloha zatím neproběhly.
+
+
 ## 2026-11-16 11:16 CET — Schválené zjednodušení místních kopií v2
 
 Míla výslovně schválil konkrétní úklid, vývoj+p+n a velikosti vpravo.

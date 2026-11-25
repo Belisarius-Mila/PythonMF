@@ -426,6 +426,14 @@ WORKFLOW_COMMANDS: tuple[WorkflowCommand, ...] = (
         cwd=SAMANTHA_DIR, risk="private_model_processing", requires_confirmation=True,
         writes="Soukromé pozice, návrhy a počítadlo pokusů; bez SMTP, archivace a změn schránky.",
     ),
+    WorkflowCommand(
+        command_id="recovery_guide_revalidation_prepare",
+        title="Obnovovací návod: příprava znovuověření runtime",
+        purpose="Připraví přesný jednorázový syntetický test současného sdíleného runtime a návrh obnovení stávajícího správce.",
+        aliases=("připrav znovuověření obnovovacího správce",),
+        argv=(str(PYTHON_BIN), str(SAMANTHA_DIR / "scripts/recovery_guide_revalidate.py"), "prepare", "--request-id", "recovery-runtime-operator-reviewed-01"),
+        cwd=SAMANTHA_DIR, risk="read_only_preview", writes="Pouze soukromý neměnný plán a syntetický vstup; bez modelu a změny aktivace.",
+    ),
     *(WorkflowCommand(
         command_id="recovery_guide_" + action.replace("-", "_"),
         title="Obnovovací návod: " + action,
