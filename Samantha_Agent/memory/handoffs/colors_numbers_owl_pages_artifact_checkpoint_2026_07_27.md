@@ -458,3 +458,26 @@ Protected_services_unchanged=true, bez restartu Cockpitu. Veřejná účtenka:
 data/daily_3am/receipts/20261124_publication.json. Původní release účtenka:
 data/daily_3am/revisions/20261124_manual/release_receipt.json.
 Tento výsledkový místní dokumentační checkpoint neopakuje publikaci.
+
+
+## 2026-11-25 — Jednorázová soví promluva připravená k vydání
+
+Hotovo: Přesně dodaný text je v jednom novém řádku CSV pro 25.11.
+MP3 owl_251126.mp3 má 204336 B / 34,056 s, úplné dekódování FFmpeg PASS.
+Obě kopie přehrávače vybírají nové audio s aktualizovaným otiskem audia i JS.
+25 cílených testů PASS.
+
+Rozhodnutí: Výslovně zadané produkční nasazení, hlas Antonin a tempo -10 %.
+První TTS pokus skončil explicitní chybou HTTP429 bez audia. Po pauze jeden
+opakovaný pokus uspěl. Hotová MP3 byla převzata bez další syntézy.
+Automatika zůstává vypnutá. Text se do paměťového zápisu nekopíruje.
+
+Další krok: Programová doménová brána, konkrétní lokální commit a jediné
+registrované submit_release(wait=True) pro project-colors-and-numbers.
+Pak ověřit přesný původní Pages běh a veřejné HTML/JS/MP3 proti místnímu souboru.
+Produkční nasazení a uživatelský poslech v této chvíli nejsou doložené.
+
+Technický důkaz: SHA-256 778fe11a2eb84b4b088f5d97386ed77f8ea46fe83ce5ea400163fecd1ad5063c.
+Soukromé podklady data/daily_3am/revisions/20261125_manual/.
+Log cílených testů logs/owl_20261125_targeted.log.
+Samostatný TVBCP není dohodnutý, nový se nezakládá.
