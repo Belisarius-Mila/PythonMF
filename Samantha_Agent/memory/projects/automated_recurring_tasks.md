@@ -788,3 +788,27 @@ Technický důkaz: SHA-256 778fe11a2eb84b4b088f5d97386ed77f8ea46fe83ce5ea400163f
 Soukromé podklady data/daily_3am/revisions/20261125_manual/.
 Log cílených testů logs/owl_20261125_targeted.log.
 Samostatný TVBCP není dohodnutý, nový se nezakládá.
+
+
+## 2026-11-25 07:40 CET — Nová soví promluva veřejně ověřená
+
+Hotovo: Jednorázová promluva je nasazená na produkci ColorsAndNumbers.
+Veřejné HTML vybírá app.js?v=67f6842166f9955a a JS vybírá
+owl_251126.mp3?v=20261125a-778fe11a2eb8. Stažené audio má 204336 B / 34,056 s,
+HTTP200/audio/mp3, přesný připravený SHA-256 a úplné dekódování FFmpeg PASS.
+
+Rozhodnutí: Dokončené výslovně zadané vydání. Automatika zůstává vypnutá.
+Po prvním odmítnutém předání v preflightu byly registrovaným přepnutím
+dorovnány čisté profilové workspaces. Stejná identita požadavku poté spustila
+jediný skutečný release a jediný Pages běh.
+
+Další krok: Uživatelský poslech. Původní proud project-vocabulary-fr bude
+po výsledkovém checkpointu registrovaně obnoven. Nové vydání se neopakuje.
+
+Technický důkaz: Zdroj b3fdb0da575ef5f7253d96cf913ad813a7e62897,
+release job e5cd1da6a6ac5666e37715f71ae008fd completed, push/deploy confirmed.
+25 cílených testů a programová brána 107 PASS. Pages45562040062 success nad
+přesným zdrojem, deployment8050345081, protected_services_unchanged=true.
+Veřejná účtenka data/daily_3am/receipts/20261125_publication.json.
+Původní účtenka data/daily_3am/revisions/20261125_manual/release_receipt.json.
+Tento výsledkový dokumentační checkpoint sám neopakuje publikaci.
