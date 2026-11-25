@@ -34,9 +34,9 @@ CAPABILITIES: tuple[CapabilityRecord, ...] = (
     CapabilityRecord(
         capability_id="recovery_guide_revalidation_accept", label="Bind verified runtime evidence to the existing recovery maintainer",
         risk=RiskLevel.LOCAL_WRITE, reads=("successful exact probe receipt and unchanged activation",),
-        writes=("preserved private activation before-image and only runtime_evidence replacement",), tool="app.recovery_guide_revalidation.accept",
+        writes=("preserved private activation before-image, runtime_evidence and optional exact approved budget_refresh",), tool="app.recovery_guide_revalidation.accept",
         requires_confirmation=True, confirmation_policy=ConfirmationPolicy.EXACT_CURRENT_MESSAGE, audit=AuditPolicy.REDACTED,
-        notes="No model call, LaunchAgent, model role, schedule, budget or destination change. Existing approved weekly schedule can resume after acceptance.",
+        notes="No model call, LaunchAgent, model role, schedule time, monthly limit or destination change. Optional exact approved full-corpus budget_refresh changes only per-run ceiling and inspection reserve. Existing approved weekly schedule can resume after acceptance.",
     ),
     CapabilityRecord(
         capability_id="vocabulary_fr_tailnet_prepare", label="Prepare the private free FR Tailscale service",

@@ -1,12 +1,14 @@
 """One explicit, immutable runtime revalidation; never retries a model turn.
 
-Keeps the existing scheduler, role, budgets, files and LaunchAgent. A successful
-probe permits replacing only runtime_evidence in the owned private activation.
+Keeps the existing role, files, schedule time and LaunchAgent. A successful
+probe permits runtime_evidence replacement and only an exact explicitly
+approved optional per-run budget/inspection-reserve refresh.
 """
 from pathlib import Path
 from types import SimpleNamespace
 from datetime import datetime, timezone
 import json
+from dataclasses import replace
 import os
 import plistlib
 import re
@@ -78,10 +80,41 @@ def _root(request_id):
     path.mkdir(parents=True,mode=0o700,exist_ok=True)
     return path
 
-def prepare(*,request_id,client_factory=None):
+def _budget_snapshot(config):
+    from app.recovery_guide_runtime_live import build,configuration_source
+    runtime,unused=build(config)
+    try:snapshot=runtime.snapshot_provider(runtime._original())
+    finally:unused.close()
+    proposed=config.payload
+    proposed['schedule']['run_credits']=250
+    proposed['limits'].update(run_credits=250,inspection_output_tokens=3000)
+    configuration.validate_payload(proposed)
+    source=configuration_source(proposed)
+    return replace(snapshot,sources=tuple(source if item.path==source.path else item for item in snapshot.sources)),proposed
+
+def _budget_plan(config,counter):
+    from app import recovery_guide_maintainer as maintainer
+    from zoneinfo import ZoneInfo
+    snapshot,proposed=_budget_snapshot(config)
+    planned=maintainer.plan(snapshot,counter,maintainer.Limits(**proposed['limits']),review_date=datetime.now(ZoneInfo('Europe/Prague')).date())
+    return {'run_credits':250,'inspection_output_tokens':3000,'month_credits':proposed['schedule']['month_credits'],
+        'source_head':snapshot.head,'snapshot_sha256':snapshot.sha256,'source_count':len(snapshot.sources),
+        'calls':planned['calls'],'reserved_credits':planned['reserved_credits'],'input_bound':planned['input_bound'],'output_bound':planned['output_bound']}
+
+def _assert_budget(config,plan):
+    approved=plan.get('budget_refresh')
+    if approved:
+        snapshot,_=_budget_snapshot(config)
+        if snapshot.sha256!=approved['snapshot_sha256'] or snapshot.head!=approved['source_head']:
+            raise ValueError('revalidation_budget_sources_changed')
+
+def prepare(*,request_id,client_factory=None,refresh_budget=False):
     path = _root(request_id)
     with exclusive_file_lock(path/'operation'):
-        if (path/'plan.json').exists():return json.loads((path/'plan.json').read_text())
+        if (path/'plan.json').exists():
+            prior=json.loads((path/'plan.json').read_text())
+            if bool(prior['plan'].get('budget_refresh'))!=bool(refresh_budget):raise ValueError('revalidation_request_scope_changed')
+            return prior
         config,agent_sha = owned_configuration()
         with (client_factory or _client)() as client:observed = _observe(client,config)
         counter = IsolatedCounter(config)
@@ -97,13 +130,14 @@ def prepare(*,request_id,client_factory=None):
                 if counter(canonical_json(payload(middle)))+overhead<=ceiling-2000:low=middle
                 else:high=middle-1
             data=payload(low);bound=counter(canonical_json(data))+overhead
+            budget=_budget_plan(config,counter) if refresh_budget else None
         finally:counter.close()
         plan={'request_id':request_id,'prepared_at':_now(),'activation_sha256':config.sha256,'agent_sha256':agent_sha,
             'runtime':observed,'implementation':_implementation(),'payload_sha256':digest(canonical_json(data)),
             'expected_answer':tags,'input_reservation_tokens':bound,'output_reservation_tokens':1024,
-            'context_admission_tokens':ceiling,'acceptance_standard_credits':15,'billing_hard_cap':False,
+            'context_admission_tokens':ceiling,'budget_refresh':budget,'acceptance_standard_credits':15,'billing_hard_cap':False,
             'model':MODEL,'effort':'medium','model_turns':1,'serviceTierForTurn':'default',
-            'changes_after_accept':'only runtime_evidence; same role, budgets, schedule, LaunchAgent and destinations'}
+            'changes_after_accept':('runtime_evidence plus exact optional budget_refresh; same role, monthly limit, schedule time, LaunchAgent and destinations' if budget else 'only runtime_evidence; same role, budgets, schedule, LaunchAgent and destinations')}
         envelope={'plan':plan,'digest':digest(canonical_json(plan))}
         atomic_create_text(path/'payload.json',canonical_json(data));atomic_create_text(path/'plan.json',canonical_json(envelope))
         return envelope
@@ -119,6 +153,7 @@ def run(*,request_id,approved_digest,confirmed=False,client_factory=None):
         if config.sha256!=plan['activation_sha256'] or agent_sha!=plan['agent_sha256'] or _implementation()!=plan['implementation']:raise ValueError('revalidation_inputs_changed')
         payload=json.loads((path/'payload.json').read_text())
         if digest(canonical_json(payload))!=plan['payload_sha256']:raise ValueError('revalidation_payload_changed')
+        _assert_budget(config,plan)
         record={'state':'reserved','request_id':request_id,'plan_digest':approved_digest,'model_turn_attempts':0,'automatic_retry':False,'started_at':_now()}
         atomic_create_text(receipt,canonical_json(record));guard=None
         try:
@@ -156,7 +191,11 @@ def accept(*,request_id,approved_digest,confirmed=False,client_factory=None):
         if config.sha256!=plan['activation_sha256'] or agent_sha!=plan['agent_sha256'] or _implementation()!=plan['implementation']:raise ValueError('revalidation_inputs_changed')
         with (client_factory or _client)() as client:
             if _observe(client,config)!=plan['runtime']:raise ValueError('revalidation_runtime_changed')
+        _assert_budget(config,plan)
         payload=config.payload
+        if plan.get('budget_refresh'):
+            budget=plan['budget_refresh'];payload['schedule']['run_credits']=budget['run_credits']
+            payload['limits'].update(run_credits=budget['run_credits'],inspection_output_tokens=budget['inspection_output_tokens'])
         payload['runtime_evidence']={'server_version':plan['runtime']['server_version'],'protocol_sha256':plan['runtime']['protocol_sha256'],
             'input_tokens':plan['context_admission_tokens'],'reference':'Verified owned shared peer, Sol/medium Standard synthetic context probe '+request_id+'; padded reference admission, not exact prompt token mapping. Receipt '+digest(canonical_json(record))}
         configuration.validate_payload(payload)

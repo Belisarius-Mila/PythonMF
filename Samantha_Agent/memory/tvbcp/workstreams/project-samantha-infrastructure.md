@@ -1,31 +1,30 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
-## 2026-11-25 16:15 CET — Oprava obnovovacího správce po změně runtime
+## 2026-11-25 16:35 CET — Úplný korpus a oddělená rezerva poznámek
 
-Hotovo: Živě zjištěná příčina zastavené revize návodu: aktivace váže důkaz
-na0.163.0, sdílený server je0.169.0. Provozní PythonMF/iCloud TXT shodné
-s datem8.11.; žádný týdenní job, poslední ticky waiting_dependencies bez modelu.
-Místně připravený omezený jednorázový revalidační řadič se soukromým plánem,
-žurnálem před odesláním a bez opakování nejistého modelového pokusu.
+Hotovo: První opravný řadič a servisní archiv jsou místně commitnuté,
+programová doménová brána1256 PASS. Neplacené plánování celého korpusu
+prokázalo druhý blokátor: aktuální682 dokumenty se s původní společnou
+rezervou32000 výstupních tokenů na kontrolu nevejdou do20 kroků.
 
-Rozhodnutí: Míla výslovně zadal opravit správce, sjednotit návod podle
-současného provozu a udělat čerstvou externí zálohu se zkouškou obnovy.
-Nevypínat kontroly, neměnit roli/model/plánovač ani rozpočty správce.
-Připravuje se jediný syntetický Sol/medium Standard test s přijímací mezí15
-kreditů; je to plán k výslovnému přijetí, nikoli uskutečněný placený pokus.
+Rozhodnutí: Nový rozpočet se bez Mílova výslovného přijetí nemění.
+Připravená volba budget_refresh zachovává úplné podklady,20 kroků,
+finální návod32000, měsíční mez1000, roli, čas i plist. Pro kontrolní
+poznámky navrhuje3000 tokenů a přijímací mez250 kreditů/běh místo200.
+Předběžná rezervace232,02615 (před posledním commitem); jednorázová
+syntetická revalidace samostatně s přijímací mezí15. Nejde o tvrdý
+upstream billing cap. Oficiální Standard sazby pro Sol50/2,5/250
+kreditů za1M input/cache/output ověřené25.11. na ChatGPT Learn pricing.
 
-Další krok: Ověřit nový řadič doménovou bránou, přijmout přesný nákladový
-plán a teprve potom znovuověřit současný runtime a obnovit řádný týdenní běh.
-Navrhované další kroky: Doručit sjednocené provozní TXT a ověřit upload;
-záloha a zkouška obnovy po odemčení SamanthaSecureBackup. Falta připojený,
-šifrovaný svazek v prvním auditu chyběl; žádný náhradní cíl se nepoužil.
+Další krok: Dokončit bránu druhého kroku a místní commit; připravit
+přesný společný otisk zdrojů a rozpočtu k rozhodnutí Míly. Žádný placený
+pokus, nové limity ani publikace provozních TXT se zatím neuskutečnily.
+Navrhované další kroky: Po přijetí znovuověřit runtime, obnovit celý
+běh, servisní archiv a šifrovanou zálohu. Svazek čeká na odemčení.
 
-Technický důkaz:13 syntetických testů PASS pro neměnný plán, změnu vstupů,
-ztracenou odpověď bez retry, vlastnictví a změnu pouze runtime_evidence.
-Aktuální provoz a další důkazy: private/recovery_maintainer_repair_20261125/completion.json.
-Doplněný nemazající privátní servisní archiv pro konfiguraci mimo checkout
-a konzistentní FR SQLite; všechny kopie ověřené manifestem.
-Netajné podklady recovery_maintainer_repair_20261125.md. Žádný modelový tah,
-konfigurační přepnutí, aktualizace TXT nebo externí záloha zatím neproběhly.
+Technický důkaz:16 cílených syntetických PASS, včetně volitelné přesné
+změny per-run limitu, zachování ostatních polí, odmítnutí změněného
+korpusu a jiné přípravy pod stejným request ID. Přesný konečný stav
+private/recovery_maintainer_repair_20261125/completion.json.
 <!-- SAMANTHA_CURRENT_STATUS_END -->
 
 ### Předchozí stav infrastruktury
@@ -2379,3 +2378,30 @@ Doplněný nemazající privátní servisní archiv pro konfiguraci mimo checkou
 a konzistentní FR SQLite; všechny kopie ověřené manifestem.
 Netajné podklady recovery_maintainer_repair_20261125.md. Žádný modelový tah,
 konfigurační přepnutí, aktualizace TXT nebo externí záloha zatím neproběhly.
+
+## 2026-11-25 16:35 CET — Úplný korpus a oddělená rezerva poznámek
+
+Hotovo: První opravný řadič a servisní archiv jsou místně commitnuté,
+programová doménová brána1256 PASS. Neplacené plánování celého korpusu
+prokázalo druhý blokátor: aktuální682 dokumenty se s původní společnou
+rezervou32000 výstupních tokenů na kontrolu nevejdou do20 kroků.
+
+Rozhodnutí: Nový rozpočet se bez Mílova výslovného přijetí nemění.
+Připravená volba budget_refresh zachovává úplné podklady,20 kroků,
+finální návod32000, měsíční mez1000, roli, čas i plist. Pro kontrolní
+poznámky navrhuje3000 tokenů a přijímací mez250 kreditů/běh místo200.
+Předběžná rezervace232,02615 (před posledním commitem); jednorázová
+syntetická revalidace samostatně s přijímací mezí15. Nejde o tvrdý
+upstream billing cap. Oficiální Standard sazby pro Sol50/2,5/250
+kreditů za1M input/cache/output ověřené25.11. na ChatGPT Learn pricing.
+
+Další krok: Dokončit bránu druhého kroku a místní commit; připravit
+přesný společný otisk zdrojů a rozpočtu k rozhodnutí Míly. Žádný placený
+pokus, nové limity ani publikace provozních TXT se zatím neuskutečnily.
+Navrhované další kroky: Po přijetí znovuověřit runtime, obnovit celý
+běh, servisní archiv a šifrovanou zálohu. Svazek čeká na odemčení.
+
+Technický důkaz:16 cílených syntetických PASS, včetně volitelné přesné
+změny per-run limitu, zachování ostatních polí, odmítnutí změněného
+korpusu a jiné přípravy pod stejným request ID. Přesný konečný stav
+private/recovery_maintainer_repair_20261125/completion.json.

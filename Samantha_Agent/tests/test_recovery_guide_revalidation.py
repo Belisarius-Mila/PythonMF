@@ -76,6 +76,29 @@ class Revalidation(unittest.TestCase):
         card=self.prepare();self.runprobe(card);changed={**self.original,'unchanged':'foreign edit'};self.configpath.write_text(canonical_json(changed))
         with self.assertRaises(ValueError):r.accept(request_id=self.request,approved_digest=card['digest'],confirmed=True)
         self.assertEqual(json.loads(self.configpath.read_text()),changed)
+    def test_exact_optional_budget_refresh_preserves_monthly_limit_and_other_settings(self):
+        budget={'run_credits':250,'inspection_output_tokens':3000,'month_credits':1000}
+        with patch.object(r,'_budget_plan',return_value=budget):
+            card=r.prepare(request_id=self.request,client_factory=self.client,refresh_budget=True)
+        self.assertEqual(card['plan']['budget_refresh'],budget)
+        with patch.object(r,'_assert_budget') as guard:
+            self.runprobe(card)
+            with patch.object(r.configuration,'validate_payload',side_effect=lambda v:v):
+                r.accept(request_id=self.request,approved_digest=card['digest'],confirmed=True,client_factory=self.client)
+            self.assertEqual(guard.call_count,2)
+        after=json.loads(self.configpath.read_text());self.assertEqual(after['limits']['run_credits'],250);self.assertEqual(after['schedule']['run_credits'],250)
+        self.assertEqual(after['limits']['month_credits'],1000);self.assertEqual(after['limits']['inspection_output_tokens'],3000);self.assertEqual(after['unchanged'],'keep this')
+    def test_changed_budget_sources_block_before_paid_turn(self):
+        card=self.prepare()
+        with patch.object(r,'_assert_budget',side_effect=ValueError('source changed')):
+            with self.assertRaises(ValueError):self.runprobe(card)
+        self.assertEqual(self.turns,0)
+
+    def test_existing_request_cannot_silently_change_budget_scope(self):
+        self.prepare()
+        with self.assertRaises(ValueError):r.prepare(request_id=self.request,refresh_budget=True,client_factory=self.client)
+        self.assertEqual(self.turns,0)
+
     def test_alias_state_is_refused(self):
         destination=self.root/'outside';destination.mkdir();r.STATE.symlink_to(destination,target_is_directory=True)
         with self.assertRaises(ValueError):self.prepare()

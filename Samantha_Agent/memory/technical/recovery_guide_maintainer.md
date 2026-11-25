@@ -887,8 +887,12 @@ Registrované recovery_guide_revalidation.prepare/run/accept připraví
 neměnný jednorázový syntetický test s přijímací mezí15 kreditů.
 Run vyžaduje aktuální výslovné přijetí přesného otisku; pouze jeden tah
 Sol/medium Standard bez nástrojů. Při nejistotě se vrací původní účtenka.
-Accept smí po úspěšném a znovu ověřeném původním pokusu vyměnit pouze
-runtime_evidence; zachová původní aktivaci, roli, budget, rozvrh a plist.
+Accept bez budget_refresh smí po úspěšném a znovu ověřeném původním pokusu
+vyměnit pouze runtime_evidence. Volitelný budget_refresh vyžaduje výslovně
+přijatý přesný plán úplného korpusu a jeho neměnné SHA/head. Mění jen
+přijímací mez za běh a oddělenou rezervu pro kontrolní poznámky; měsíční
+mez, role, čas rozvrhu, cíle i plist zůstávají. Nový plán250/1000 a3000
+pro poznámky je zatím pouze návrh, stará konfigurace se nemění.
 Jde o novou přípravu, současný výsledek podle private
 recovery_maintainer_repair_20261125/completion.json.
 

@@ -91,3 +91,30 @@ Obnovený konfigurační soubor není důkaz platného přihlášení nebo syst�
 oprávnění. Hesla, Keychain, SSH, externí data a chybějící soukromé runtime
 kopie je nutné určit zvlášť; kompletní novou instalaci Macu prokáže až
 samostatná fyzická zkouška. Žádné tvrzení o úplné obnově všech osobních dat.
+
+## Druhý blokátor a připravený návrh limitů
+
+Neplacený inventář zmrazil682 podkladů, celkem3331261 referenčních tokenů
+s přijatou bezpečnostní přirážkou; jde o plánování, nikoli účetní spotřebu.
+Původní konfigurace nemá oddělenou inspection_output_tokens, a proto
+rezervuje celých32000 výstupních tokenů i pro každou kontrolní dávku.
+Takový plán překročí20 kroků a po samotném přepnutí runtime nezačne.
+
+Návrh zachová úplný korpus a limit20 kroků, finální návod32000 tokenů,
+čas, roli, Standard i měsíční mez1000 kreditů. Pro poznámky z kontrolní
+dávky zavede samostatnou rezervu3000 tokenů a navrhuje přijímací mez250
+kreditů za celý běh. Naměřená celková rezervace před konečným commitem
+byla232,02615 kreditu,20 kroků. Není to uskutečněná spotřeba ani tvrdý
+upstream billing cap. Nový limit250 není dosud schválený ani zapnutý.
+
+Volitelný refresh_budget v přesném revalidačním plánu obsahuje celý otisk
+korpusu, jeho Git head, skutečný rozpad rezervace a konkrétní dvě změny
+limitů. Převzetí bez této položky rozpočty vůbec nemění. Při změně zdrojů
+se před placeným tahem i před změnou aktivace odmítne původní plán.
+Přesné přijetí rozpočtového plánu musí navíc předcházet aktivaci.
+
+Standard sazby programu pro Sol50/2,5/250 kreditů za1M input/cache/output
+byly při přípravě25.11. potvrzené proti oficiálnímu ceníku:
+https://learn.chatgpt.com/docs/pricing#token-rates
+Ceny a limity zkontrolovat znovu při budoucí změně; nerozšiřovat rozpočet
+jen podle ceny nástupnického modelu. Model role se zde nemění.

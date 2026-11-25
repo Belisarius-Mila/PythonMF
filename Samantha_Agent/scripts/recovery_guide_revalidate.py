@@ -11,8 +11,10 @@ def main():
     parser.add_argument('--request-id',required=True)
     parser.add_argument('--approved-digest')
     parser.add_argument('--confirmed',action='store_true')
+    parser.add_argument('--refresh-budget',action='store_true')
     args=parser.parse_args()
     options={'request_id':args.request_id}
+    if args.action=='prepare':options['refresh_budget']=args.refresh_budget
     if args.action!='prepare':options.update(approved_digest=args.approved_digest,confirmed=args.confirmed)
     result=getattr(recovery,args.action)(**options)
     print(json.dumps(result,ensure_ascii=False,indent=2))
