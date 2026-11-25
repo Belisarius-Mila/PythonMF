@@ -105,3 +105,45 @@ def validate_payload(p):
     instant=datetime.fromisoformat(p['approved_at'])
     if instant.tzinfo is None:raise ValueError('runtime_approval_timezone_required')
     return p
+
+
+def adopt_manual_guide(*, request_id: str, expected_activation_sha256: str,
+                       confirmed: bool = False, cloud_audit=None):
+    """Adopt a separately accepted manual guide only before the first weekly job.
+
+    No model, scheduler history reset, runtime proof, budget, OS baseline or
+    LaunchAgent change. Publication must already be uploaded to both fixed paths.
+    """
+    from app.recovery_guide_revalidation import owned_configuration
+    from app.recovery_guide_publication import PublicationStore
+    from app.recovery_guide_publish import icloud_metadata, uploaded
+    from app.file_persistence import atomic_write_json, exclusive_file_lock
+    import re
+    if confirmed is not True or not re.fullmatch('[a-zA-Z0-9_-]{1,80}',request_id):
+        raise ValueError('manual_guide_confirmation_required')
+    config,_=owned_configuration()
+    journal=config.root/'manual_baseline'
+    journal.mkdir(mode=0o700,exist_ok=True)
+    if journal.is_symlink():raise ValueError('manual_guide_journal_alias')
+    with exclusive_file_lock(journal/'operation'):
+        receipt=journal/(request_id+'.json')
+        if receipt.exists():
+            result=json.loads(receipt.read_text())
+            if result['activation_after_sha256']!=config.sha256:raise ValueError('manual_guide_activation_changed')
+            result['state']='completed';atomic_write_json(receipt,result);return result
+        if config.sha256!=expected_activation_sha256:raise ValueError('manual_guide_activation_changed')
+        if list((config.root/'schedule').glob('recovery-*.json')):raise ValueError('manual_guide_existing_weekly_history')
+        store=PublicationStore(config.root/'manual_publication',sandbox_root=config.root,
+            destinations=config.destinations,mode='production',activation=config)
+        result=store.status(request_id)
+        if result.get('state')!='uploaded':raise ValueError('manual_guide_publication_not_verified')
+        sha=result['candidate_sha256'];audit=cloud_audit or icloud_metadata
+        if not all(path.is_file() and not path.is_symlink() and digest(path.read_bytes())==sha for path in config.destinations):raise ValueError('manual_guide_copies_changed')
+        if not uploaded(audit(config.destinations[1])):raise ValueError('manual_guide_upload_not_verified')
+        payload=config.payload;payload['bootstrap']={'path':str(config.destinations[0]),'sha256':sha};validate_payload(payload)
+        outcome={'state':'applying','request_id':request_id,'activation_before_sha256':config.sha256,
+            'activation_after_sha256':digest(canonical_json(payload)),'candidate_sha256':sha,
+            'publication_approval_sha256':result['approval_sha256']}
+        atomic_write_json(journal/(request_id+'-before.json'),config.payload)
+        atomic_write_json(receipt,outcome);config.guard();atomic_write_json(config.path,payload)
+        outcome['state']='completed';atomic_write_json(receipt,outcome);return outcome

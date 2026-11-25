@@ -8,6 +8,7 @@ from pathlib import Path
 from types import SimpleNamespace
 from datetime import datetime, timezone
 import json
+import subprocess
 from dataclasses import replace
 import os
 import plistlib
@@ -80,42 +81,53 @@ def _root(request_id):
     path.mkdir(parents=True,mode=0o700,exist_ok=True)
     return path
 
-def _budget_snapshot(config):
+def _macos():
+    return subprocess.check_output(["/usr/bin/sw_vers","-productVersion"],text=True,timeout=10).strip()
+
+def _budget_snapshot(config,macos_baseline=None):
     from app.recovery_guide_runtime_live import build,configuration_source
     runtime,unused=build(config)
     try:snapshot=runtime.snapshot_provider(runtime._original())
     finally:unused.close()
     proposed=config.payload
+    if macos_baseline is not None:proposed['publication_policy']['macos_baseline']=macos_baseline
     proposed['schedule']['run_credits']=250
     proposed['limits'].update(run_credits=250,inspection_output_tokens=3000)
     configuration.validate_payload(proposed)
     source=configuration_source(proposed)
     return replace(snapshot,sources=tuple(source if item.path==source.path else item for item in snapshot.sources)),proposed
 
-def _budget_plan(config,counter):
+def _budget_plan(config,counter,macos_baseline=None):
     from app import recovery_guide_maintainer as maintainer
     from zoneinfo import ZoneInfo
-    snapshot,proposed=_budget_snapshot(config)
+    snapshot,proposed=_budget_snapshot(config,macos_baseline)
     planned=maintainer.plan(snapshot,counter,maintainer.Limits(**proposed['limits']),review_date=datetime.now(ZoneInfo('Europe/Prague')).date())
     return {'run_credits':250,'inspection_output_tokens':3000,'month_credits':proposed['schedule']['month_credits'],
         'source_head':snapshot.head,'snapshot_sha256':snapshot.sha256,'source_count':len(snapshot.sources),
         'calls':planned['calls'],'reserved_credits':planned['reserved_credits'],'input_bound':planned['input_bound'],'output_bound':planned['output_bound']}
 
 def _assert_budget(config,plan):
+    macos=plan.get('macos_refresh')
+    if macos and _macos()!=macos['after']:raise ValueError('revalidation_macos_changed')
     approved=plan.get('budget_refresh')
     if approved:
-        snapshot,_=_budget_snapshot(config)
+        snapshot,_=_budget_snapshot(config,macos['after'] if macos else None)
         if snapshot.sha256!=approved['snapshot_sha256'] or snapshot.head!=approved['source_head']:
             raise ValueError('revalidation_budget_sources_changed')
 
-def prepare(*,request_id,client_factory=None,refresh_budget=False):
+def prepare(*,request_id,client_factory=None,refresh_budget=False,proposed_macos=None):
     path = _root(request_id)
     with exclusive_file_lock(path/'operation'):
         if (path/'plan.json').exists():
             prior=json.loads((path/'plan.json').read_text())
-            if bool(prior['plan'].get('budget_refresh'))!=bool(refresh_budget):raise ValueError('revalidation_request_scope_changed')
+            previous_macos=(prior['plan'].get('macos_refresh') or {}).get('after')
+            if bool(prior['plan'].get('budget_refresh'))!=bool(refresh_budget) or previous_macos!=proposed_macos:raise ValueError('revalidation_request_scope_changed')
             return prior
         config,agent_sha = owned_configuration()
+        observed_macos=_macos();baseline=config.payload.get('publication_policy',{}).get('macos_baseline')
+        if proposed_macos is not None and proposed_macos!=observed_macos:raise ValueError('revalidation_macos_proposal_not_observed')
+        if refresh_budget and baseline and baseline!=observed_macos and proposed_macos is None:raise ValueError('revalidation_macos_review_required')
+        macos_refresh={'before':baseline,'after':proposed_macos} if proposed_macos is not None else None
         with (client_factory or _client)() as client:observed = _observe(client,config)
         counter = IsolatedCounter(config)
         try:
@@ -130,12 +142,12 @@ def prepare(*,request_id,client_factory=None,refresh_budget=False):
                 if counter(canonical_json(payload(middle)))+overhead<=ceiling-2000:low=middle
                 else:high=middle-1
             data=payload(low);bound=counter(canonical_json(data))+overhead
-            budget=_budget_plan(config,counter) if refresh_budget else None
+            budget=_budget_plan(config,counter,proposed_macos) if refresh_budget else None
         finally:counter.close()
         plan={'request_id':request_id,'prepared_at':_now(),'activation_sha256':config.sha256,'agent_sha256':agent_sha,
             'runtime':observed,'implementation':_implementation(),'payload_sha256':digest(canonical_json(data)),
             'expected_answer':tags,'input_reservation_tokens':bound,'output_reservation_tokens':1024,
-            'context_admission_tokens':ceiling,'budget_refresh':budget,'acceptance_standard_credits':15,'billing_hard_cap':False,
+            'context_admission_tokens':ceiling,'macos_observation':observed_macos,'macos_refresh':macos_refresh,'budget_refresh':budget,'acceptance_standard_credits':15,'billing_hard_cap':False,
             'model':MODEL,'effort':'medium','model_turns':1,'serviceTierForTurn':'default',
             'changes_after_accept':('runtime_evidence plus exact optional budget_refresh; same role, monthly limit, schedule time, LaunchAgent and destinations' if budget else 'only runtime_evidence; same role, budgets, schedule, LaunchAgent and destinations')}
         envelope={'plan':plan,'digest':digest(canonical_json(plan))}
@@ -177,6 +189,10 @@ def run(*,request_id,approved_digest,confirmed=False,client_factory=None):
                 record.update(state='verified' if passed else 'attention',accepted=passed,usage=usage,estimated_standard_credits=cost)
         except Exception as error:
             record.update(state='attention',accepted=False,error_type=type(error).__name__,delivery_unknown=record['state']=='delivery_unknown')
+            from app.codex_appserver import AppServerRpcError
+            if isinstance(error,AppServerRpcError):
+                record['rpc_error']={'method':error.method,'code':error.code,'server_message':str(error.server_message or '')[:4096],'data_sha256':digest(canonical_json(error.data))}
+                record['rpc_rejection_observed']=True
         record['finished_at']=_now();atomic_write_json(receipt,record);return record
 
 def accept(*,request_id,approved_digest,confirmed=False,client_factory=None):
@@ -193,6 +209,7 @@ def accept(*,request_id,approved_digest,confirmed=False,client_factory=None):
             if _observe(client,config)!=plan['runtime']:raise ValueError('revalidation_runtime_changed')
         _assert_budget(config,plan)
         payload=config.payload
+        if plan.get('macos_refresh'):payload['publication_policy']['macos_baseline']=plan['macos_refresh']['after']
         if plan.get('budget_refresh'):
             budget=plan['budget_refresh'];payload['schedule']['run_credits']=budget['run_credits']
             payload['limits'].update(run_credits=budget['run_credits'],inspection_output_tokens=budget['inspection_output_tokens'])

@@ -12,6 +12,14 @@ from app.capabilities.models import (
 
 CAPABILITIES: tuple[CapabilityRecord, ...] = (
     CapabilityRecord(
+        capability_id="recovery_guide_manual_baseline_adopt", label="Adopt a verified manual guide before the first weekly revision",
+        risk=RiskLevel.LOCAL_WRITE, reads=("accepted uploaded publication and both matching fixed copies", "unchanged owned activation and empty weekly history",),
+        writes=("private before-image and only bootstrap reference/hash update",),
+        tool="app.recovery_guide_runtime_config.adopt_manual_guide", requires_confirmation=True,
+        confirmation_policy=ConfirmationPolicy.EXACT_CURRENT_MESSAGE, audit=AuditPolicy.REDACTED,
+        notes="No model call, role, runtime proof, budgets, macOS baseline, service or history change. Foreign copies, unverified cloud upload and existing weekly jobs block adoption.",
+    ),
+    CapabilityRecord(
         capability_id="recovery_service_archive_preserve", label="Preserve owned service states for encrypted recovery",
         risk=RiskLevel.LOCAL_WRITE, reads=("owned recovery maintainer private activation, journal and reviewed protocol", "two owned LaunchAgent definitions", "consistent FR SQLite snapshot",),
         writes=("one new private archive in the canonical recovery-backup source",),
@@ -36,7 +44,7 @@ CAPABILITIES: tuple[CapabilityRecord, ...] = (
         risk=RiskLevel.LOCAL_WRITE, reads=("successful exact probe receipt and unchanged activation",),
         writes=("preserved private activation before-image, runtime_evidence and optional exact approved budget_refresh",), tool="app.recovery_guide_revalidation.accept",
         requires_confirmation=True, confirmation_policy=ConfirmationPolicy.EXACT_CURRENT_MESSAGE, audit=AuditPolicy.REDACTED,
-        notes="No model call, LaunchAgent, model role, schedule time, monthly limit or destination change. Optional exact approved full-corpus budget_refresh changes only per-run ceiling and inspection reserve. Existing approved weekly schedule can resume after acceptance.",
+        notes="No model call, LaunchAgent, model role, schedule time, monthly limit or destination change. Optional exact approved full-corpus budget_refresh changes per-run ceiling and inspection reserve; an explicit observed macos_refresh may update only the publication baseline, never the OS. Existing approved weekly schedule can resume after acceptance.",
     ),
     CapabilityRecord(
         capability_id="vocabulary_fr_tailnet_prepare", label="Prepare the private free FR Tailscale service",

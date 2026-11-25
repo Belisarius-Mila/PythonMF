@@ -105,7 +105,7 @@ Návrh zachová úplný korpus a limit20 kroků, finální návod32000 tokenů,
 dávky zavede samostatnou rezervu3000 tokenů a navrhuje přijímací mez250
 kreditů za celý běh. Naměřená celková rezervace před konečným commitem
 byla232,02615 kreditu,20 kroků. Není to uskutečněná spotřeba ani tvrdý
-upstream billing cap. Nový limit250 není dosud schválený ani zapnutý.
+upstream billing cap. Plán250 je po výslovném přijetí schválený, dosud však není zapnutý.
 
 Volitelný refresh_budget v přesném revalidačním plánu obsahuje celý otisk
 korpusu, jeho Git head, skutečný rozpad rezervace a konkrétní dvě změny
@@ -118,3 +118,29 @@ byly při přípravě25.11. potvrzené proti oficiálnímu ceníku:
 https://learn.chatgpt.com/docs/pricing#token-rates
 Ceny a limity zkontrolovat znovu při budoucí změně; nerozšiřovat rozpočet
 jen podle ceny nástupnického modelu. Model role se zde nemění.
+
+## 2026-11-25 — Přijatý plán, nejistý původní pokus a ruční aktualizace
+
+Míla výslovně přijal nákladový plán: jeden syntetický pokus s mezí15,
+oddělené poznámky3000 a250 za revizi při zachování1000 měsíčně.
+Původní pokus byl odeslán právě jednou. RPC chyba po značce před odesláním
+neposkytla potvrzený tah ani spotřebu; jeho účtenka zůstává delivery_unknown.
+Dočasné vlákno není dostupné. Žádné opakování ani změna runtime proofu,
+limitů či automatického OS baseline se neprovedly. Další placený pokus
+vyžaduje nové informované přijetí, původní rezervace se neuvolňuje.
+
+Doplněné kontroly uchovávají strukturovanou RPC chybu pro budoucí pokus.
+Pozorovaný macOS15.8.3 se liší od schváleného15.8.2; volitelná navržená
+baseline v novém plánu vyžaduje výslovnou kontrolu a nesmí driftovat.
+Nejde o aktualizaci operačního systému.26 cílených testů PASS.
+
+Nezávislá dokončovací cesta je cílená ruční redakce provozních TXT přes
+PublicationStore, potvrzený upload obou kopií a registrované převzetí pouze
+bootstrap SHA před prvním týdenním jobem. Nepředstírá úplnou modelovou revizi
+ani neruší historii. Servisní archiv uchovává protocol-package.json v ploché
+cestě reviewed-proof, aby jej nevyloučil filtr node_modules v externí záloze.
+Následuje ověření archivu, šifrovaná recovery a izolovaná zkouška obnovy.
+
+Živý konečný stav, brána, commit a provozní účtenky jsou v soukromém
+ data/private/recovery_maintainer_repair_20261125/completion.json.
+Tento tematický krok nezahrnuje push, restart ani nasazení Cockpitu.

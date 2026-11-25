@@ -17,11 +17,11 @@ class Counter:
 class Revalidation(unittest.TestCase):
     def setUp(self):
         self.tmp=TemporaryDirectory();self.addCleanup(self.tmp.cleanup);self.root=Path(self.tmp.name).resolve();self.configpath=self.root/'activation.json'
-        self.original={'enabled':True,'limits':{'input_tokens':240000,'run_credits':200,'month_credits':1000},'schedule':{'enabled':True,'hour':9,'role_policy_digest':'d'*64},'runtime_evidence':{'server_version':'old','input_tokens':240000,'protocol_sha256':'a'*64,'reference':'old proof'},'unchanged':'keep this'}
+        self.original={'enabled':True,'limits':{'input_tokens':240000,'run_credits':200,'month_credits':1000},'schedule':{'enabled':True,'hour':9,'role_policy_digest':'d'*64},'runtime_evidence':{'server_version':'old','input_tokens':240000,'protocol_sha256':'a'*64,'reference':'old proof'},'publication_policy':{'mode':'validated_auto_v1','macos_baseline':'15.8.3'},'unchanged':'keep this'}
         self.configpath.write_text(canonical_json(self.original));self.configpath.chmod(0o600)
         self.observed={'server_version':'new','protocol_sha256':'a'*64,'socket':{'identity':'same'},'role_policy_digest':'d'*64}
-        self.turns=0;self.fail=False;self.factory_calls=0;self.request='revalidation-test-one-01'
-        for name,value in [('STATE',self.root/'state'),('_implementation',lambda:{'code':'v1'}),('owned_configuration',self.owned),('_observe',lambda client,config:self.observed),('_socket',lambda client:self.observed['socket']),('IsolatedCounter',Counter)]:self.enterContext(patch.object(r,name,value))
+        self.turns=0;self.fail=False;self.rpc_fail=False;self.factory_calls=0;self.request='revalidation-test-one-01'
+        for name,value in [('STATE',self.root/'state'),('_implementation',lambda:{'code':'v1'}),('owned_configuration',self.owned),('_observe',lambda client,config:self.observed),('_socket',lambda client:self.observed['socket']),('IsolatedCounter',Counter),('_macos',lambda:'15.8.3')]:self.enterContext(patch.object(r,name,value))
         self.enterContext(patch('app.routine_tasks.start_data_only_thread',return_value={'thread_id':'one'}))
     def owned(self):
         return RuntimeConfig(self.configpath,canonical_json(json.loads(self.configpath.read_text())),self.root,self.root),'agent'
@@ -35,6 +35,9 @@ class Revalidation(unittest.TestCase):
                 owner.turns+=1;self.transport.before_send('one')
                 receipt=json.loads((r.STATE/owner.request/'receipt.json').read_text());owner.assertEqual(receipt['state'],'delivery_unknown')
                 if owner.fail:raise TimeoutError('uncertain')
+                if owner.rpc_fail:
+                    from app.codex_appserver import AppServerRpcError
+                    raise AppServerRpcError('turn/start',{'code':-32600,'message':'synthetic rejection','data':{'hint':'fixture'}})
                 plan=json.loads((r.STATE/owner.request/'plan.json').read_text())['plan'];answer=json.dumps(plan['expected_answer'])
                 return SimpleNamespace(delivered=True,answer=answer,thread_token_usage={'input_tokens':160000,'cached_input_tokens':0,'output_tokens':40,'reasoning_output_tokens':0,'total_tokens':160040},as_dict=lambda:{'delivered':True,'answer':answer})
         return Client()
@@ -97,6 +100,32 @@ class Revalidation(unittest.TestCase):
     def test_existing_request_cannot_silently_change_budget_scope(self):
         self.prepare()
         with self.assertRaises(ValueError):r.prepare(request_id=self.request,refresh_budget=True,client_factory=self.client)
+        self.assertEqual(self.turns,0)
+
+    def test_rpc_rejection_details_are_preserved_without_clearing_uncertainty_or_retry(self):
+        card=self.prepare();self.rpc_fail=True;record=self.runprobe(card)
+        self.assertEqual(record['rpc_error']['method'],'turn/start');self.assertEqual(record['rpc_error']['code'],-32600)
+        self.assertEqual(record['rpc_error']['server_message'],'synthetic rejection');self.assertTrue(record['delivery_unknown'])
+        self.assertTrue(record['rpc_rejection_observed']);self.assertEqual(self.runprobe(card),record);self.assertEqual(self.turns,1)
+
+    def test_changed_macos_requires_explicit_observed_baseline_in_budget_plan(self):
+        self.original['publication_policy']['macos_baseline']='15.8.2';self.configpath.write_text(canonical_json(self.original))
+        with self.assertRaises(ValueError):r.prepare(request_id=self.request,refresh_budget=True,client_factory=self.client)
+        with self.assertRaises(ValueError):r.prepare(request_id=self.request,proposed_macos='15.9',client_factory=self.client)
+        budget={'run_credits':250,'inspection_output_tokens':3000,'month_credits':1000}
+        with patch.object(r,'_budget_plan',return_value=budget):
+            card=r.prepare(request_id=self.request,refresh_budget=True,proposed_macos='15.8.3',client_factory=self.client)
+        self.assertEqual(card['plan']['macos_refresh'],{'before':'15.8.2','after':'15.8.3'})
+        with patch.object(r,'_assert_budget'):
+            self.runprobe(card)
+            with patch.object(r.configuration,'validate_payload',side_effect=lambda v:v):
+                r.accept(request_id=self.request,approved_digest=card['digest'],confirmed=True,client_factory=self.client)
+        self.assertEqual(json.loads(self.configpath.read_text())['publication_policy']['macos_baseline'],'15.8.3')
+    def test_macos_drift_after_prepare_blocks_before_turn(self):
+        with patch.object(r,'_budget_plan',return_value={}):
+            card=r.prepare(request_id=self.request,proposed_macos='15.8.3',client_factory=self.client)
+        with patch.object(r,'_macos',return_value='15.8.4'):
+            with self.assertRaises(ValueError):self.runprobe(card)
         self.assertEqual(self.turns,0)
 
     def test_alias_state_is_refused(self):

@@ -25,7 +25,7 @@ def sources():
         if path.is_file():rows.append((path,'recovery-runtime/'+path.relative_to(config.root).as_posix()))
     bootstrap=Path(config.payload['bootstrap']['path']);rows.append((bootstrap,'recovery-bootstrap.txt'))
     for name in ('.venv/recovery_rec06_peer_schema/v2/TurnStartParams.json','.venv/recovery_rec06_peer_schema/v2/ThreadStartResponse.json','.venv/recovery_rec06_cli/node_modules/@openai/codex/package.json','.venv/recovery_rec06_disabled_features.txt'):
-        rows.append((config.project/name,'reviewed-proof/'+name.removeprefix('.venv/')))
+        rows.append((config.project/name,'reviewed-proof/'+('protocol-package.json' if name.endswith('package.json') else 'disabled-features.txt' if name.endswith('disabled_features.txt') else Path(name).name)))
     game=ROOT/'data/private/vocabulary-fr-tailnet'
     if (game/'rooms.sqlite3').is_file():rows.append((backup_database(directory=game),'vocabulary-fr/rooms.sqlite3'))
     return rows

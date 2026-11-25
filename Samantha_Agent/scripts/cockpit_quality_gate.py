@@ -443,6 +443,7 @@ TEST_MODULES = (
     "tests.test_recovery_guide_runtime",
     "tests.test_recovery_guide_revalidation",
     "tests.test_recovery_guide_service_archive",
+    "tests.test_recovery_guide_manual_baseline",
     "tests.test_recovery_guide_activation",
     "tests.test_recovery_guide_publication",
     "tests.test_recovery_guide_scheduler",
