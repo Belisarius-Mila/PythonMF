@@ -45,7 +45,7 @@ Příklad souběhu: iPhone i Mac mají masku v revizi 4. Mac uloží revizi 5. i
 
 | Milník | Ukázka pro Mílu | Ověření |
 |---|---|---|
-| 1. První pracovní řez | Na syntetickém projektu otevřít místnost, v jedné fotce ochránit okno, upravit část stěny lokálním kandidátem, uložit, znovu otevřít a porovnat. | T01–T07, T14–T16 a příslušná T18 ze [zadání](reference/TEST_PLAN.md). Zvlášť Mac a iPhone, konflikt revize, RGBA, nulová změna po PNG a odmítnutí změněného rozlišení. |
+| 1. První pracovní řez | Na syntetickém projektu otevřít místnost, v jedné fotce ochránit okno, upravit část stěny lokálním kandidátem, uložit, znovu otevřít a porovnat. | T01–T07, T14–T16 a příslušná T18 ze [zadání](reference/TEST_PLAN.md). Zvlášť Mac a Linux Mint, konflikt revize, RGBA, nulová změna po PNG a odmítnutí změněného rozlišení. |
 | 2. Historie místností | Verze čte oddělenou zkušební kopii obou místností. Návrhy, dostupné obrazy, drafty i stará smazání jsou dohledatelné. | T08/T14/T18 a úplná [přejímka importu](MIGRATION.md), včetně opakování a pádu. |
 | 3. Scéna a půdorys | Změřit stěnu, osadit otvor, posunout nábytek. Zamčené dveře zůstávají na místě, oblouk ukáže kolizi. | T09–T12 a T17 pro 2D. Neznámé hodnoty a odhady mají vlastní vykreslení. |
 | 4. Jeden model pro 3D a obraz | Dvě kamery zobrazí stejný otvor. Kontrola fotografie pravdivě přizná neověřenou perspektivu. Připojení skutečného adaptéru je oddělené rozhodnutí. | T13, T15–T19, lokální výkon a licence konkrétní verze, offline 3D a lidská přejímka obou zařízení. |

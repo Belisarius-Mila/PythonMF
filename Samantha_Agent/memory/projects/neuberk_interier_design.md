@@ -23,8 +23,8 @@ obrazů zůstávají otevřené při přejímce. Evidence je v
 `/interior/masks/`, s odkazem z Ateliéru. Pracuje se syntetickým obrazem místnosti.
 P+n podle Míly provádí Will. Důkazy a závěrečná účtenka jsou v
 `data/private/interior_masks_20261125/`. Geometrie zůstává neověřená,
-GEOMETRY_LOCK dočasně chrání celou oblast. Fyzická přejímka na obou zařízeních
-navazuje na Willovo vydání.
+GEOMETRY_LOCK dočasně chrání celou oblast. Míla funkčnost vydaného prvního řezu potvrdil. Aktuální změna zjednodušuje UI
+pro Mac a Linux Mint, iPhone je doplňkový. P+n změny vlastní Will.
 
 ## Historie verze 1 — původní Neuberk / Kačenka a Ateliér
 
@@ -506,3 +506,22 @@ revizní konflikt, paralelní zápis, návrat po chybě, idempotenci a původ HT
 WebKit nad izolovaným skutečným HTTP serverem ověřil práci v šířkách 390 a 1180 px.
 Účtenka závěrečné programové brány a logy jsou v
 `data/private/interior_masks_20261125/`. Fyzický dotyk na iPhonu zůstává k přejímce.
+
+### 2026-11-25 22:07 CET — Přehlednější editor pro Mac a Linux Mint
+
+**Hotovo.** Míla potvrdil, že první vydaný řez funguje. Po výhradě k přehlednosti
+je připravené jednodušší rozložení. Běžné akce jsou Zachovat oblast a Změnit
+povrch. Pokročilé volby jsou rozbalovací, nástroje ukazují jen své parametry.
+Obrázek dostal větší pracovní plochu a uložení stálé místo v horní liště.
+
+**Rozhodnutí.** Ateliér se ovládá prioritně na Macu nebo Linux Mint. iPhone je
+doplňkový. P+n vlastní Will.
+
+**Další krok.** Will převezme změnu pro vydání, potom Míla posoudí přehlednost
+desktopového rozložení. Skutečný prohlížeč Linux Mint vyžaduje vlastní přejímku.
+
+**Navrhované další kroky.** Navázat převodem místností na kopii podle stávajícího plánu.
+
+**Technický důkaz.** 30 cílených backendových a HTTP testů prošlo. Desktopové
+WebKit scénáře a programová brána jsou evidované v
+`data/private/interior_desktop_ui_20261125/`. Rodinná data se při zkoušce neotevírají.

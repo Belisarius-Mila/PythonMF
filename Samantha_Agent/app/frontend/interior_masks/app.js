@@ -64,6 +64,19 @@
     refreshLayers();
     draw();
   }
+  function refreshView() {
+    const editing = $("view").value === "edit";
+    $("drawingTools").hidden = !editing;
+    $("drawingHint").hidden = !editing;
+    $("sliderLabel").hidden = $("view").value !== "compare";
+    const tool = $("tool").value;
+    $("brushSettings").hidden = !["brush", "erase"].includes(tool);
+    $("finishPolygon").hidden = tool !== "polygon";
+    const layer = current();
+    $("drawingHint").textContent = layer
+      ? "Označuješ oblast „" + layer.name + "“. Neoznačené části zůstanou stejné."
+      : "Vpravo vyber, co chceš zachovat nebo změnit. Potom oblast označ v obrázku.";
+  }
   function refreshLayers() {
     $("layers").replaceChildren(
       ...layers.map((layer) => {
@@ -77,7 +90,7 @@
     if (pending) {
       document
         .querySelectorAll(
-          ".toolbar button,.toolbar input,.toolbar select,aside input,aside select,#add,#reload,#copy",
+          ".toolbar button,.toolbar input,.toolbar select,aside input,aside select,#add,#protectArea,#editArea,#reload,#copy",
         )
         .forEach((el) => (el.disabled = true));
     }
@@ -91,6 +104,7 @@
     }
     $("undo").disabled = busy || !!pending || !undo.length;
     $("redo").disabled = busy || !!pending || !redo.length;
+    refreshView();
   }
   function fit() {
     scale = Math.min(canvas.width / 1000, canvas.height / 650);
@@ -314,22 +328,28 @@
     polygon = [];
     changed();
   };
-  $("add").onclick = () => {
+  function addLayer(mode) {
     snapshot();
     const id = crypto.randomUUID();
+    const prefix = mode === "EDITABLE" ? "Povrch" : "Chráněná oblast";
     layers.push({
       id,
-      name: "Oblast " + (layers.length + 1),
-      mode: "PIXEL_LOCK",
+      name: prefix + " " + (layers.length + 1),
+      mode,
       visible: true,
       strokes: [],
     });
     selected = id;
     polygon = [];
+    $("view").value = "edit";
     changed();
-  };
+  }
+  $("add").onclick = () => addLayer("PIXEL_LOCK");
+  $("protectArea").onclick = () => addLayer("PIXEL_LOCK");
+  $("editArea").onclick = () => addLayer("EDITABLE");
   $("layers").onchange = () => {
     selected = $("layers").value;
+    $("view").value = "edit";
     polygon = [];
     cache();
     refreshLayers();
@@ -374,10 +394,11 @@
   $("fit").onclick = fit;
   $("tool").onchange = () => {
     polygon = [];
+    refreshView();
     draw();
   };
   $("view").onchange = () => {
-    $("sliderLabel").hidden = $("view").value !== "compare";
+    refreshView();
     draw();
   };
   $("split").oninput = draw;
@@ -401,6 +422,7 @@
     return response.json();
   }
   function renderVariants() {
+    $("variantCount").textContent = variants.length ? "(" + variants.length + ")" : "";
     $("variants").replaceChildren(
       ...variants.map((variant) => {
         const button = document.createElement("button"),
@@ -419,8 +441,12 @@
     result.onload = draw;
     result.src = "/api/interior/masks/image?variant=" + variant.id;
     $("view").value = "compare";
-    $("sliderLabel").hidden = false;
+    refreshView();
+    $("reportDetails").hidden = false;
     const r = variant.report;
+    $("resultSummary").textContent = r.protected_changed_pixels === 0
+      ? "Chráněné části zůstaly stejné."
+      : "Výsledek porušil ochranu oblasti.";
     $("report").textContent =
       "Změněné chráněné pixely: " +
       r.protected_changed_pixels +
@@ -560,7 +586,7 @@
           ? "Obnovena místní rozepsaná práce."
           : "Uloženo · revize " + revision,
       );
-      if (variants[0]) openVariant(variants[0]);
+      if (variants[0] && !dirty) openVariant(variants[0]);
     } catch (error) {
       status(error.message);
     }

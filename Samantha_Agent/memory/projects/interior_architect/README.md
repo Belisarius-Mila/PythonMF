@@ -31,7 +31,7 @@ aplikace a UI; osvědčenou nižší infrastrukturu lze převzít po auditu.
 | [TVBCP](../../tvbcp/workstreams/project-neuberk-kacenka.md) | Potvrzená rozhodnutí, milníky, důkazy a otevřené otázky |
 | [Technický audit](AUDIT.md) | Jak v1 ukládá data, proč dovolí posun geometrie a co ověřily místní zkoušky |
 | [Návrh backendu](BACKEND.md) | Soukromé úložiště, kontrakty, ochranné masky, scéna, validace a milníky |
-| [Návrh pracovního UI](UI.md) | Výběr místnosti, plátno na Macu i iPhonu, historie a přejímka |
+| [Návrh pracovního UI](UI.md) | Desktopové plátno pro Mac/Linux Mint, historie a přejímka |
 | [Převod obou místností](MIGRATION.md) | Změřená inventura, původové vazby, zkušební import, přepnutí a návrat |
 | [SPECIFICATION.md](reference/SPECIFICATION.md) | Výchozí technické zadání 2.0 |
 | [ARCHITECTURE.md](reference/ARCHITECTURE.md) | Navržené služby a datové toky |
@@ -82,5 +82,7 @@ Geometrický zámek dočasně chrání celou oblast. Report uvádí geometrii ne
 
 ## Další krok
 
-P+n vlastní Will podle pokynu Míly. Po vydání navazuje fyzická přejímka na
-Macu/iPhonu a zkušební převod skutečných místností na oddělené kopii.
+Míla potvrdil funkčnost vydaného prvního řezu. Upřesnil desktopovou prioritu
+Mac/Linux Mint a požádal o přehlednější UI. Zjednodušené rozložení má dvě
+základní akce pro označení oblastí a kontextové nástroje. P+n vlastní Will.
+Přejímka desktopového rozložení předchází převodu skutečných místností na kopii.

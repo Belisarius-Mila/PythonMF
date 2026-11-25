@@ -50,10 +50,23 @@ Historie je seznam větví s rodičem, titulkem, rozpracovanou revizí, původem
 
 **Konzultace** je spojena s konkrétní místností a větví. Uživatel vidí otázku, odpověď a schválené zadání. Budoucí **Vytvořit vizualizaci** nejprve ukáže přesné podklady, podporu masky, očekávanou cenu nebo limit a schopnosti adaptéru. Volby, které adaptér nesplní, vysvětlí před startem. Při nejistém výsledku je k dispozici „Ověřit původní požadavek“. Při provozu bez připojení k poskytovateli zůstávají místní nástroje dostupné přes Cockpit. Při výpadku spojení s Cockpitem UI ponechá místní rozepsanou práci a obnoví ji po návratu spojení.
 
-## iPhone a lidská přejímka
+## Desktopová priorita a přejímka
 
-Na telefonu jsou místnosti pod sebou. Ve fotografii patří plocha obrázku a spodní lišta aktivnímu nástroji. Tlačítko „Vrstvy“ otevře spodní panel, po výběru se vrátí celé plátno. Jeden prst kreslí ve vybraném nástroji, dva posunují a přibližují. Zpět a Porovnat zůstanou dostupné u plátna. Porovnání lze ovládat i tlačítky Před/Po. Na Macu mají stejné akce klávesnicové ovládání a popsané ovládací prvky.
+Míla potvrdil funkčnost prvního kroku a upřesnil hlavní způsob práce.
+Ateliér se ovládá prioritně na **Macu a Linux Mint**, myší a klávesnicí.
+Desktopová přejímka a přehlednost mají přednost. iPhone je doplňkový klient.
 
-První přejímka na obou zařízeních projde stejný úkol: vybrat fotografii, zamknout oblast, přiblížit, opravit tah, uložit draft, znovu otevřít, vytvořit místní variantu a přečíst oba výsledky kontroly. Druhá přejímka po zkušebním importu ověří dohledání konkrétního konceptu Kačenky a návrat k rozepsané variantě Koupelny. Tento dokument je návrh obrazovek. Fyzické ovládání bude možné převzít až na implementovaném řezu.
+První editor má velkou stálou plochu obrázku a pravý panel. Běžná práce začíná
+dvěma tlačítky „Zachovat oblast“ a „Změnit povrch“. Každé rovnou založí příslušnou
+vrstvu a přepne pohled na kreslení. Šířka štětce a dokončení polygonu se
+ukazují u příslušného nástroje. Pokročilé režimy a viditelnost jsou v nastavení
+oblasti, název a vyhlazení v nastavení varianty. Historie a technický report
+jsou rozbalovací. Při porovnávání se kreslicí lišta skryje.
 
-[Otevřít klikací návrh obrazovek](UI_PREVIEW.html). Přepínání místností, obrysy ochrany, posuvník porovnání a filtry historie běží místně. Obsah ukázky je schematický.
+Přejímka na Macu a Mint projde stejný úkol od označení okna po uložení, obnovení
+a porovnání varianty. Rozložení se kontroluje v desktopových šířkách. Ověření
+WebKitem na Macu se eviduje zvlášť od skutečné zkoušky prohlížeče v Linux Mint.
+Funkčnost prvního řezu Míla potvrdil, nové zjednodušení UI čeká na přejímku.
+
+Původní [klikací návrh obrazovek](UI_PREVIEW.html) uchovává předchozí návrh.
+Aktuální editor je na `/interior/masks/`.
