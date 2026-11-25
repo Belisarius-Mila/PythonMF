@@ -1,0 +1,83 @@
+{
+  "schema_version": "0.1-example",
+  "units": "mm",
+  "coordinate_system": {
+    "x": "width",
+    "y": "depth",
+    "z": "up",
+    "origin": "user_confirmed_corner_pending"
+  },
+  "room": {
+    "width": 4000,
+    "depth": 2000,
+    "height": 2400,
+    "source": "user_reported"
+  },
+  "objects": [
+    {
+      "id": "door-1",
+      "type": "door",
+      "position": null,
+      "dimensions": null,
+      "orientation": null,
+      "lock": "GEOMETRY_LOCK",
+      "opening": "inward",
+      "hinge_side_from_outside": "right",
+      "handle_side_from_outside": "left",
+      "source": "user_reported",
+      "status": "position_unconfirmed"
+    },
+    {
+      "id": "window-1",
+      "type": "window",
+      "position": null,
+      "dimensions": null,
+      "orientation": null,
+      "lock": "GEOMETRY_LOCK",
+      "status": "position_unconfirmed"
+    },
+    {
+      "id": "bathtub-1",
+      "type": "bathtub",
+      "position": null,
+      "dimensions": null,
+      "orientation": null,
+      "lock": "EDITABLE",
+      "status": "unknown"
+    },
+    {
+      "id": "washbasin-1",
+      "type": "washbasin",
+      "position": null,
+      "dimensions": null,
+      "orientation": null,
+      "lock": "EDITABLE",
+      "status": "unknown"
+    },
+    {
+      "id": "shower-1",
+      "type": "shower",
+      "position": null,
+      "dimensions": null,
+      "orientation": null,
+      "lock": "EDITABLE",
+      "status": "unknown"
+    },
+    {
+      "id": "furniture-1",
+      "type": "furniture",
+      "position": null,
+      "dimensions": null,
+      "orientation": null,
+      "lock": "EDITABLE",
+      "status": "unknown"
+    }
+  ],
+  "constraints": {
+    "room_geometry_locked": true,
+    "unknown_values_must_not_be_invented": true
+  },
+  "cameras": [],
+  "masks": [],
+  "history": []
+}

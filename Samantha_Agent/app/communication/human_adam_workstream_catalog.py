@@ -304,10 +304,22 @@ WORKSTREAM_CATALOG = validate_workstream_catalog(
         _record(
             "project-neuberk-kacenka",
             "Project",
-            "Neuberk interiér / Kačenka",
+            "Interiérový architekt",
             "active",
             "2",
-            "Neuberk interier design / Kacenka",
+            "Interiérový architekt",
+            query_aliases=(
+                "Neuberk interiér / Kačenka",
+                "Neuberk interier design / Kacenka",
+                "Interiérový ateliér",
+                "Ateliér",
+                "Interiérový architekt 2.0",
+                "Interior Architect 2.0",
+            ),
+            binding_aliases=(
+                "Neuberk interiér / Kačenka",
+                "Neuberk interier design / Kacenka",
+            ),
         ),
         _record(
             "project-samantha-agent-rag",

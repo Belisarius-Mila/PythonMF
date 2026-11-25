@@ -50,7 +50,7 @@ nesmi smesovat s Knihovnou clanku.
 | `project-janicka-cockpit` | `Project` | Janička Cockpit | active | 1 | Janička Cockpit / používání a převzetí Samanthy |
 | `project-r2-adam-janicka` | `Project` | R2-Adam / Janička | active | 2 | R2-Adam / Janička |
 | `project-family-emergency-plan` | `Project` | Pozůstalost / rodinný nouzový balík | active | 1 | Pozustalost / rodinny nouzovy balik |
-| `project-neuberk-kacenka` | `Project` | Neuberk interiér / Kačenka | active | 2 | Neuberk interier design / Kacenka |
+| `project-neuberk-kacenka` | `Project` | Interiérový architekt | active | 2 | Interiérový architekt |
 | `project-samantha-agent-rag` | `Project` | Samantha Agent / RAG | active | 1 | Samantha Agent/RAG |
 | `project-knowledge-library` | `Project` | Knihovna | active | 2 | Znalostni databaze / Knihovna clanku / Knowledge inbox |
 | `project-family-calendar` | `Project` | Rodinný kalendář | active | 1 | Rodinný kalendář |

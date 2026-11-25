@@ -1,5 +1,37 @@
-# Neuberk interier design
+# Interiérový architekt
 
+## Aktuální vymezení — 2026-11-25
+
+Kanonický název je **Interiérový architekt**, vývojový směr **Interior Architect 2.0**.
+Jde o jeden aktivní projekt s prioritou 2 a stabilním ID `project-neuberk-kacenka`.
+Kačenka a místnost dosavadního Ateliéru jsou jeho dvě rozpracované místnosti.
+Aktuální soukromá evidence druhé místnosti používá název Koupelna dolní;
+případný nový zobrazovaný název dosud není potvrzený. Data se nyní nepřejmenovávají.
+
+Míla schválil nové vymezení a nejdříve výslovně zadal sjednocení názvu
+s dokumentací. Návrhy a historie obou místností se zachovají. Backend aplikace
+a UI se mají navrhnout znovu; v tomto dokumentačním kroku ještě nejsou
+implementované a migrace neproběhla. Současný vstup Janička → Rodinné projekty
+→ Otevřít Ateliér → `/interior/` se nemění.
+
+Kanonický technický rozcestník: `memory/projects/interior_architect/README.md`.
+Obsahuje odkazy na úvodní audit, plán zachování dat a sedm původních dokumentů
+balíčku `Samantha_Interior_Architect_2.0.zip` v `reference/`.
+Nový TVBCP `memory/tvbcp/workstreams/project-neuberk-kacenka.md` je tímto
+výslovně schválený a založený. Starší výroky o chybějícím TVBCP jsou historické.
+Handoff zůstává `memory/handoffs/workstreams/project-neuberk-kacenka.md`.
+Názvy souborů a technické ID jsou záměrně stabilní kvůli existujícím vazbám.
+
+**Další krok:** dokončit technický audit a návrh převodu obou místností spolu
+s návrhem nového pracovního UI. Skutečné rodinné podklady se zatím nepřevádějí.
+Bez změny modelových rolí, transportu, běžících služeb a bez p+n.
+
+## Historie verze 1 — původní Neuberk / Kačenka a Ateliér
+
+Následující původní zápisy do 24.11.2026 jsou zachované jako datovaná historie.
+Jejich mezistavy, staré další kroky a tehdy nedohodnutý TVBCP nenahrazují výše
+uvedené aktuální vymezení. Nejnovější rozhodnutí jsou v TVBCP a v závěrečném
+záznamu z 25.11.2026. Historické příkazy nejsou pokyn k opakování vydání.
 
 ## 2026-11-10 19:02 CET — Oprava prázdných AI miniatur po smazání
 
@@ -420,3 +452,28 @@ Další krok: Jediné již schválené p+n přes Terru a ověření živého Ate
 Navrhované další kroky: Lidská přejímka s vlastní fotografií při běžné práci. Původní bod3 (skutečná maska) zatím není zadaný k vývoji.
 
 Technický důkaz: Brána validation-v3,12 modulů/182 testů/0SKIP PASS,109,4s, včetně21 Node. Safari synteticky ověřilo čistý levý a kreslený pravý náhled a počet2; bez modelového tahu. Regrese pokrývají všechny reference, číslo půdorysu, schválení formátu, neměnné snapshoty, replay/recover bez nového generování a bezpečné odstranění nové kopie pouze v potvrzovaném mazání. Skutečné podklady ani Data/MMTX se neměnily, placený obrazový pokus nebyl proveden. Report reports/interior_separate_drawing_20261124.md. Předchozí bod1 již nasazený77f71125 přes bf5124129a4a4fd9f5a618744136d34c, smoke5/5; viz private interior_image_provenance_20261124/completion.json. Vazba TVBCP pro případný budoucí Human–Adam zůstává nedohodnutá.
+
+
+## 2026-11-25 20:51 CET — Sjednocení názvu a dokumentace projektu
+
+Hotovo: Jeden projekt Interiérový architekt zahrnuje obě rozpracované místnosti.
+Název je shodný v katalogu a registrech, staré názvy zůstávají aliasy. Aktuální
+rozcestník, úvodní audit, migrační plán a schválený nový TVBCP oddělují budoucí
+verzi 2.0 od zachované historie. Sedm dokumentů dodaného ZIPu je převzatých
+beze změn; původní rodinná data se neupravují.
+
+Rozhodnutí: Míla schválil návrh sjednocení a výslovně zadal nejdřív název
+s dokumentací. Technické ID a kanonické cesty zůstávají. Kačenka a místnost
+současného Ateliéru nejsou oddělené projekty. Nové aplikační jádro a UI budou
+navazujícím vývojem; současný krok je neimplementuje.
+
+Další krok: Dokončit technický audit a návrh převodu dat obou místností
+spolu s návrhem nového UI, zatím bez převodu skutečných dat.
+
+Navrhované další kroky: Po auditu ověřit převod na kopii a pokračovat
+funkčními milníky podle technického rozcestníku a výchozí roadmapy.
+
+Technický důkaz: 43 existujících testů katalogu, vazeb, paměti a výběru PASS.
+Konečná programová brána a ověření zachování soukromých dat mají autoritu
+v místní účtence a `data/private/interior_project_reset_20261125/completion.json`.
+Bez push/nasazení, restartu služeb, placeného tahu a implementace backendu/UI.
