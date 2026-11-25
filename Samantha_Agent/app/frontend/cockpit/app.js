@@ -3366,6 +3366,24 @@ Soubor nebude trvale smazán.`);
       }
     }
 
+    createDocumentScanner(document, fetch, async (scanId, button) => {
+      const target = window.open("about:blank", "SamanthaScanDocu");
+      button.disabled = true;
+      try {
+        const response = await fetch("/api/scandocu/open", {method:"POST",
+          headers:{"Content-Type":"application/json"}, body:JSON.stringify({})});
+        const result = await response.json();
+        if (!response.ok || !result.ok) throw new Error(result.message || "ScanDocu není dostupné.");
+        const url = new URL(result.url, window.location.href);
+        url.searchParams.set("scan_ref", scanId);
+        if (target) target.location.href = url.href;
+        else window.location.href = url.href;
+      } catch (err) {
+        if (target) target.close();
+        showMessage(String(err.message));
+      } finally {button.disabled = false;}
+    });
+
     function openScanDocuReview(item, button) {
       const documentRef = item.document_ref || "";
       if (!documentRef) return;

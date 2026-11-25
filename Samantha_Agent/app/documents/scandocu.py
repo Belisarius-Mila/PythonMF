@@ -1406,6 +1406,11 @@ class ScanDocuServer:
                     if parsed.path == "/api/next":
                         params = parse_qs(parsed.query)
                         mode = params.get("mode", ["downloads"])[0]
+                        scan_ref = params.get("scan_ref", [""])[0]
+                        if scan_ref:
+                            from app.documents.scan_inbox import prepare_scan_for_scandocu
+                            self.respond_json(prepare_scan_for_scandocu(scan_ref, vault_dir=app.vault_dir))
+                            return
                         if mode == "review":
                             document_ref = params.get("document_ref", [""])[0]
                             candidate = (
@@ -1925,6 +1930,7 @@ SCANDOCU_HTML = """<!doctype html>
       ? `${appBasePath}${value}`
       : value;
     const queryParams = new URLSearchParams(window.location.search);
+    let requestedScanRef = queryParams.get("scan_ref") || "";
     const appMode = queryParams.get("mode") === "review" ? "review" : "downloads";
     let requestedReviewDocumentRef = appMode === "review" ? (queryParams.get("document_ref") || "") : "";
     const isReviewMode = appMode === "review";
@@ -1942,8 +1948,10 @@ SCANDOCU_HTML = """<!doctype html>
       fields.previewFallback.classList.add("hidden");
       const params = new URLSearchParams({mode: appMode});
       if (requestedReviewDocumentRef) params.set("document_ref", requestedReviewDocumentRef);
+      if (requestedScanRef) params.set("scan_ref", requestedScanRef);
       const res = await fetch(appApiUrl(`/api/next?${params.toString()}`));
       const data = await res.json();
+      if (data.found) requestedScanRef = "";
       if (!data.found) {
         current = null;
         fields.status.textContent = data.message || "Nenalezeno.";

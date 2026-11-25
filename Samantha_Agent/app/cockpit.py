@@ -237,6 +237,8 @@ from app.documents.due_date_service import (
     document_payment_options,
 )
 from app.documents.ai_metadata import AIMetadataError
+from app.documents import scan_inbox
+from app.documents.scan_inbox import save_scan as save_document_scan, save_scan_action as save_document_scan_action
 from app.documents.intake_service import document_intake_status as build_document_intake_status
 from app.documents.scandocu import DEFAULT_DOWNLOADS_DIR, reviewed_document_ids, scan_downloads_for_pdfs
 from app.documents.review_service import (
@@ -618,7 +620,7 @@ COCKPIT_SECURITY_HEADERS: tuple[tuple[str, str], ...] = (
         "default-src 'self'; base-uri 'none'; object-src 'none'; frame-ancestors 'self'; "
         "script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; "
         "img-src 'self' data: blob:; media-src 'self' data: blob:; connect-src 'self'; "
-        "frame-src 'self'; form-action 'self'",
+        "frame-src 'self' blob:; form-action 'self'",
     ),
 )
 
@@ -8731,6 +8733,22 @@ def shell_quote_for_applescript(value: str) -> str:
 
 COCKPIT_POST_ACTIONS: tuple[dict[str, str], ...] = (
     {"path": "/api/samantha-chat/action", "label": "Společný rozhovor Samanthy", "risk": "external_ai", "confirmation": "explicit_chat_action", "handler_name": "shared_chat_action", "test_level": "direct"},
+    {
+        "path": "/api/documents/scans",
+        "label": "Uložit potvrzený vícestránkový sken",
+        "risk": "private_write",
+        "confirmation": "explicit_scan_save_button",
+        "handler_name": "save_document_scan_action",
+        "test_level": "direct",
+    },
+    {
+        "path": "/api/documents/scans/pdf",
+        "label": "Uložit potvrzené naskenované PDF",
+        "risk": "private_write",
+        "confirmation": "explicit_scan_save_button",
+        "handler_name": "save_document_scan",
+        "test_level": "direct",
+    },
     {"path":"/api/calendar/edit", "label":"Upravit název, datum a čas jedné původní události",
      "risk":"external_send", "confirmation":"explicit_existing_event_title_date_time_single_occurrence",
      "handler_name":"calendar_edit_action", "test_level":"direct"},
@@ -9849,6 +9867,25 @@ class CockpitServer:
                     return
                 if task_page_route(parsed, self):
                     return
+                if parsed.path == "/api/documents/scans":
+                    self.respond_json({"ok": True, "items": scan_inbox.list_scans()})
+                    return
+                if parsed.path == "/api/documents/scans/pdf":
+                    scan_id = parse_qs(parsed.query).get("scan_id", [""])[0]
+                    try:
+                        path = scan_inbox.resolve_scan(scan_id)
+                    except (ValueError, OSError):
+                        self.respond_json({"ok":False, "message":"Sken nebyl nalezen."}, status=HTTPStatus.NOT_FOUND)
+                        return
+                    raw = path.read_bytes()
+                    self.send_response(HTTPStatus.OK)
+                    self.send_header("Content-Type", "application/pdf")
+                    self.send_header("Cache-Control", "no-store")
+                    self.send_header("X-Content-Type-Options", "nosniff")
+                    self.send_header("Content-Length", str(len(raw)))
+                    self.end_headers()
+                    self.wfile.write(raw)
+                    return
                 if parsed.path == "/api/calendar/tasks":
                     result = calendar_task_status() if not parsed.query else {"ok":False,"message":"Neplatný požadavek."}
                     self.respond_json(result,status=HTTPStatus.OK if result["ok"] else HTTPStatus.BAD_REQUEST)
@@ -10279,6 +10316,21 @@ class CockpitServer:
                         self.respond_json({"ok": False, "message": "Vykonavatel zpracovává přesný balíček; další změna počká na ověření."},
                                           status=HTTPStatus.CONFLICT)
                         return
+                if parsed.path == "/api/documents/scans":
+                    result = scan_inbox.save_scan_action(self.read_json())
+                    self.respond_json(result, status=HTTPStatus.OK if result["ok"] else HTTPStatus.BAD_REQUEST)
+                    return
+                if parsed.path == "/api/documents/scans/pdf":
+                    raw = self.read_scan_pdf()
+                    params = parse_qs(parsed.query)
+                    try:
+                        title = params.get("title", [""])[0]
+                        item = scan_inbox.save_scan(scan_id=params.get("scan_id", [""])[0],title=title,
+                            raw=raw,confirmed=self.headers.get("X-Confirm-Save") == "yes")
+                        self.respond_json({"ok":True,"scan":item})
+                    except (ValueError, OSError) as exc:
+                        self.respond_json({"ok":False,"message":str(exc)},status=HTTPStatus.BAD_REQUEST)
+                    return
                 if parsed.path == "/api/calendar/edit":
                     result = calendar_edit_action(self.read_json()) if not parsed.query else {"ok":False,"message":"Neplatný požadavek."}
                     self.respond_json(result, status=HTTPStatus.OK if result.get("ok") else HTTPStatus.BAD_REQUEST)
@@ -11083,6 +11135,23 @@ class CockpitServer:
                     return
                 self.respond_json({"error": "not_found"}, status=HTTPStatus.NOT_FOUND)
 
+            def read_scan_pdf(self) -> bytes:
+                lengths = self.headers.get_all("Content-Length") or []
+                if (len(lengths) != 1 or not lengths[0].isdigit()
+                        or self.headers.get("Transfer-Encoding")
+                        or self.headers.get_content_type() != "application/pdf"):
+                    raise CockpitHttpError(status=HTTPStatus.BAD_REQUEST,error="invalid_scan_request",
+                        message="Očekávám PDF s určenou délkou.",close_connection=True)
+                length = int(lengths[0])
+                if not 0 < length <= scan_inbox.MAX_SCAN_BYTES:
+                    raise CockpitHttpError(status=HTTPStatus.REQUEST_ENTITY_TOO_LARGE,error="scan_too_large",
+                        message="PDF musí mít nejvýše 24 MB.",close_connection=True)
+                raw = self.rfile.read(length)
+                if len(raw) != length:
+                    raise CockpitHttpError(status=HTTPStatus.BAD_REQUEST,error="incomplete_scan",
+                        message="PDF nebylo přijato celé.",close_connection=True)
+                return raw
+
             def read_library_image(self) -> bytes:
                 """A bounded binary route; the general JSON limit stays unchanged."""
                 transfer = str(self.headers.get("Transfer-Encoding", "") or "").casefold()
@@ -11221,6 +11290,18 @@ class CockpitServer:
                         {"ok": False, "error": "not_found", "message": "Tato cesta ScanDocu není povolená."},
                         status=HTTPStatus.NOT_FOUND,
                     )
+                    return
+                scan_ref = parse_qs(parsed.query).get("scan_ref", [""])[0]
+                if method == "GET" and scan_ref and upstream_path in {"/", "/api/next"}:
+                    try:
+                        if upstream_path == "/":
+                            scan_inbox.resolve_scan(scan_ref)
+                            from app.documents.scandocu import SCANDOCU_HTML
+                            self.respond_html(SCANDOCU_HTML)
+                        else:
+                            self.respond_json(scan_inbox.prepare_scan_for_scandocu(scan_ref))
+                    except (ValueError, OSError) as exc:
+                        self.respond_json({"ok":False,"message":str(exc)},status=HTTPStatus.BAD_REQUEST)
                     return
                 started = start_scandocu()
                 if not started.get("ok"):

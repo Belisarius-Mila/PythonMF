@@ -1,4 +1,31 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
+
+## 2026-11-25 — Vícestránkové skeny v Cockpitu
+
+Míla zadal čtení dokumentů fotoaparátem iPhonu, více stran, kontrolu a uložení
+až po potvrzení. Následné OCR, zařazení a konečný import obstarává ScanDocu.
+
+Implementované ovládání v Dokumentech umožní postupně přidat fotografie,
+změnit pořadí nebo odebrat stranu, zkontrolovat náhled a název a potvrdit
+jediné soukromé PDF. Přijme také hotové PDF z vestavěného skeneru iPhonu.
+Safari fotografie zmenší na delší stranu 1800 pixelů. Automatické ořezání hran
+zajistí systémový skener při přípravě vstupního PDF. Jeden dokument může mít
+nejvýše30stran a24MB. Potvrzené dokumenty jsou ve scans uvnitř soukromého
+dokumentového úložiště, dostupné v Cockpitu i pro otevření konkrétního skenu
+ve ScanDocu pod stejným původem.
+
+Důkaz tvoří testy skutečných HTTP požadavků, potvrzení, cizího Origin,
+opakovaného a souběžného přenosu, obnovy po zápisu PDF před manifestem,
+orientace EXIF a deterministického sestavení více stran. JS scénáře prověřují
+náhled bez přenosu, pořadí, potvrzení a opakování se stejným ID. Syntetický
+ScanDocu přijme přesně zvolený sken a jeho název. Výsledek brány má soukromá
+účtenka document_scan_20261125. Příjem neprovádí placenou analýzu.
+
+Vazba vývoje je project-cockpit s existujícím handoffem a TVBCP, dokumentový
+model má popis v projects/document_management_private_vault.md. Nový TVBCP
+pro dokumentový proud nebyl zakládán. Dosud je otevřená fyzická přejímka
+fotoaparátu a systémového skeneru na Mílově iPhonu. Nasazení podléhá
+samostatnému p+n.
 ## 2026-11-18 12:43 CET — Potvrzené ukládání z rozhovoru
 
 Hotovo — Samantha připraví uložení článku, receptu nebo místa z jednoznačného

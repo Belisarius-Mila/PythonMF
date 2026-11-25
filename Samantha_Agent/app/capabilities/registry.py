@@ -12,6 +12,14 @@ from app.capabilities.models import (
 
 CAPABILITIES: tuple[CapabilityRecord, ...] = (
     CapabilityRecord(
+        capability_id="document_scan_save", label="Uložit potvrzený vícestránkový sken",
+        risk=RiskLevel.LOCAL_WRITE, reads=("confirmed ordered page images and title",),
+        writes=("private PDF and completed scan manifest",),
+        tool="app.documents.scan_inbox.save_scan_action",requires_confirmation=True,
+        confirmation_policy=ConfirmationPolicy.EXACT_CURRENT_MESSAGE,audit=AuditPolicy.REDACTED,
+        notes="One opaque scan ID binds retries to the same PDF. ScanDocu handles later OCR and classification.",
+    ),
+    CapabilityRecord(
         capability_id="recovery_incremental_activate", label="Activate weekly recovery procedure changes for the owned service",
         risk=RiskLevel.LOCAL_WRITE, reads=("reviewed commit, exact failed weekly receipt, both accepted guide copies",),
         writes=("recovery modules only, private migration before-image and weekly delta baseline",),

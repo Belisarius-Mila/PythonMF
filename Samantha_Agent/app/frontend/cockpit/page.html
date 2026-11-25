@@ -132,9 +132,34 @@
       <h2>Práce s dokumenty</h2>
       <div class="body">
         <div class="quick-actions">
+          <button class="primary" id="documentScanBtn">Naskenovat dokument</button>
           <button class="primary" id="scanDocuBtn">Otevřít ScanDocu</button>
           <button class="secondary" id="scanDocuReviewBtn">Vyřešit dokumenty</button>
         </div>
+        <details id="documentScanner" class="work-card">
+          <summary>Nový sken a uložené skeny</summary>
+          <div class="work-card-body">
+            <label for="scanTitle">Název dokumentu</label>
+            <input id="scanTitle" maxlength="160" placeholder="Například pojistná smlouva">
+            <div class="actions">
+              <button type="button" id="scanCamera">Vyfotit stránku</button>
+              <button type="button" id="scanFiles">Přidat fotografie</button>
+              <button type="button" id="scanPdf">Vybrat naskenované PDF</button>
+            </div>
+            <input type="file" id="scanCameraInput" accept="image/*" capture="environment" hidden>
+            <input type="file" id="scanFilesInput" accept="image/*" multiple hidden>
+            <input type="file" id="scanPdfInput" accept="application/pdf,.pdf" hidden>
+            <p id="scanStatus" role="status" aria-live="polite">Přidej stránky nebo PDF. Před uložením zkontroluj jejich pořadí a čitelnost.</p>
+            <ol id="scanPages" class="scan-pages"></ol>
+            <a id="scanPdfFullPreview" target="_blank" rel="noopener" hidden>Otevřít celý náhled PDF</a>
+            <iframe id="scanPdfPreview" title="Náhled naskenovaného PDF" hidden></iframe>
+            <div class="actions">
+              <button type="button" id="scanSave" class="primary" disabled>Potvrdit a uložit do Cockpitu</button>
+              <button type="button" id="scanReset">Nový sken</button>
+            </div>
+            <div id="scanSaved" class="work-list"></div>
+          </div>
+        </details>
         <div class="work-grid">
           <details class="work-card" open>
             <summary><h3>Nová PDF (7 dní)</h3><span id="newPdfCount" class="work-count">?</span></summary>
