@@ -277,7 +277,7 @@ class Rooms:
 
     def act(self, room_id: str, token: str, action: str, payload: dict | None = None) -> dict:
         token, payload = _token(token), payload or {}
-        if action not in ("sync", "ready", "leave", "start", "flip", "heard", "rematch"):
+        if action not in ("sync", "ready", "leave", "start", "flip", "heard", "rematch", "restart"):
             raise GameError("Neznámá herní akce.")
         with self._db() as conn:
             room = self._load(conn, room_id)
@@ -293,7 +293,7 @@ class Rooms:
                 room["players"][player]["ready"] = False
             self._presence(room)
             self._advance(room)
-            if action in ("start", "flip", "heard", "rematch"):
+            if action in ("start", "flip", "heard", "rematch", "restart"):
                 request_id = _request(payload.get("requestId"))
                 fingerprint = _hash(json.dumps([player, action, payload], sort_keys=True))
                 prior = room["requests"].get(request_id)
@@ -331,8 +331,10 @@ class Rooms:
                 raise GameError("Tento poslech už není aktuální.", 409)
             if player not in room["acks"]:
                 room["acks"].append(player)
-        elif action == "rematch":
-            if player != 0 or room["phase"] != "finished":
+        elif action in ("rematch", "restart"):
+            if action == "restart" and (player != 0 or not room["started"] or "uids" not in payload):
+                raise GameError("Filtr společné partie může změnit její zakladatel s novým výběrem slov.", 409)
+            if action == "rematch" and (player != 0 or room["phase"] != "finished"):
                 raise GameError("Novou partii zahájí zakladatel po dokončení hry.", 409)
             if "uids" in payload:
                 room["deck"] = self.catalog.selection(payload["uids"]) * 2
@@ -474,7 +476,7 @@ class Handler(BaseHTTPRequestHandler):
                 self._rate()
                 value = self.server.rooms.create(payload)
             else:
-                match = re.fullmatch(re.escape(API) + r"/([a-f0-9]{24})/(join|sync|ready|leave|start|flip|heard|rematch)", path)
+                match = re.fullmatch(re.escape(API) + r"/([a-f0-9]{24})/(join|sync|ready|leave|start|flip|heard|rematch|restart)", path)
                 if not match:
                     raise GameError("Herní akce nebyla nalezena.", 404)
                 room, action = match.groups()

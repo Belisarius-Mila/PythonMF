@@ -1,37 +1,33 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
-## 2026-11-24 21:13 CET — Bezplatný soukromý provoz přes Tailscale
+## 2026-11-25 13:08 CET — Změna filtru bez ztráty společné místnosti
 
-Hotovo: Místně připravený soukromý Tailscale Serve pro pexeso: vlastní
-HTTPS8443 → loopback8792, samostatný per-user LaunchAgent a databáze na Macu.
-Přesný plán drží commit, export, definici služby a snímek původní sítě.
-Aktivace zachovává Cockpit443/8770 a Camino a odmítne jakýkoli Funnel,
-cizí port/LaunchAgent či změněný podklad. Jediná trvalá účtenka brání
-opakování nejasného startu; verify ověří původní výsledek bez nové akce.
-Klient a Cockpit mají připravený vstup z ověřené soukromé služby.
+Hotovo: Zakladatel rozehrané i dokončené partie má přímo ve společné
+místnosti „Změnit filtr a začít znovu“. Volí okruh, slovní druh, obtížnost,
+typ výrazu, posledních20/50 nebo hledání FR/CZ. Náhled12 dvojic lze zrušit
+návratem do původní hry. Potvrzení rozehrané hry výslovně vynuluje skóre,
+vymění24 karet a zachová místnost, jména, přístupy i původní pozvánku.
+Druhý hráč dostane nové kolo synchronizací; sám filtr měnit nemůže.
 
-Rozhodnutí: Míla odmítl měsíční placený hosting, potvrdil zapnutý Mac,
-souhlasí s Tailscale a výslovně potvrdil funkční Tailscale i Cockpit u Jany.
-Volíme soukromý Serve bez dalšího hostingového poplatku, nikoli veřejný
-Funnel. Render zůstává neaktivním historickým podkladem; žádná placená
-aktivace není schválená. Soukromý hostname se neukládá do Gitu.
+Rozhodnutí: Míla požádal o změnu filtru u zakladatele bez dalšího posílání
+odkazu i před dohráním. Stávající rematch po dokončení zůstává. Nová akce
+restart používá12 veřejných UID, žádný osobní seznam se neposílá.
+Míla následně výslovně zadal p+n i spuštění aktualizovaného serveru.
+Dřívější Tailscale aktivace be9aeaa8 běží podle živého čtecího statusu;
+tento nový krok nemění síť, LaunchAgent ani běžící export.
 
-Další krok: Předložit hotový přesný plán k povinnému potvrzení globální
-brzdy pro Tailscale/LaunchAgent; po souhlasu p+n přes Terru a odpovídající
-nasazení Cockpitu, potom aktivovat plán a ověřit HTTPS i oba hráče.
-Navrhované další kroky: Fyzicky ověřit port8443 z Janina Macu. Případné
-omezení ACL navrhnout zvlášť, žádné granty automaticky neměnit. Hostitelský
-Mac musí při hraní zůstat online, neuspaný a přihlášený.
+Další krok: Dokončit výslovně zadané p+n přes Terru a připravit přesný
+plán aktualizace samostatné herní služby se zachováním databáze. Pages samotné server
+restart nerozšíří; současná živá verze stále be9aeaa8 tuto akci neumí.
+Navrhované další kroky: Na Janině a Mílově Macu ověřit zrušení filtru,
+potvrzený restart uprostřed hry a další partii bez nového odkazu.
 
-Technický důkaz:70 cílených Python kontrol PASS,64 FR JS a20 online JS.
-Syntetický Tailscale/launchd ověřuje plán bez mutace, přesnou frázi/digest,
-zachování ostatních cest, vlastnictví služby, cizí port/soubor/PID label,
-aktualizaci s uchovanou databází a důkaz ztracené odpovědi bez replay.
-Živý čtecí audit potvrdil soukromý Cockpit, vypnutý Funnel a volný8443;
-8792 nemá cizí listener. Tailscale1.104.7 zachovává původní HTTP Host pro
-TCP proxy podle zdroje stejné verze. Dosavadní služba se nespustila ani
-síť/LaunchAgents nebyly změněné. Skutečná přejímka HTTPS/Jana čeká.
-Finální brána, SHA a plán v private vocabulary_fr_tailnet_20261124/completion.json.
-TXT v Downloads: Vocabulary_FR_Tailscale_bezplatny_provoz_a_aktivace_2026-11-24.txt.
+Technický důkaz:23 cílených Python kontrol včetně23 JS scénářů PASS před
+finální programovou bránou; doplněný HTTP test dvou přístupů a nové routy.
+Testy drží idempotenci po obnově databáze, host-only, chybné výběry,
+staré kolo/poslech, zrušení bez leave a ukončení starého odměnového zvuku.
+Finální brána a commit: private vocabulary_fr_filter_restart_20261125/completion.json.
+Doplněná izolace staršího testu katalogu od živého Tailscale statusu.
+Fyzická přejímka a provedení schválené publikace tohoto kroku otevřené.
 <!-- SAMANTHA_CURRENT_STATUS_END -->
 
 ## 2026-11-17 20:21 CET — Společné předání osobního režimu a Datových commitů k p+n
@@ -1039,3 +1035,33 @@ TCP proxy podle zdroje stejné verze. Dosavadní služba se nespustila ani
 síť/LaunchAgents nebyly změněné. Skutečná přejímka HTTPS/Jana čeká.
 Finální brána, SHA a plán v private vocabulary_fr_tailnet_20261124/completion.json.
 TXT v Downloads: Vocabulary_FR_Tailscale_bezplatny_provoz_a_aktivace_2026-11-24.txt.
+
+## 2026-11-25 13:08 CET — Změna filtru bez ztráty společné místnosti
+
+Hotovo: Zakladatel rozehrané i dokončené partie má přímo ve společné
+místnosti „Změnit filtr a začít znovu“. Volí okruh, slovní druh, obtížnost,
+typ výrazu, posledních20/50 nebo hledání FR/CZ. Náhled12 dvojic lze zrušit
+návratem do původní hry. Potvrzení rozehrané hry výslovně vynuluje skóre,
+vymění24 karet a zachová místnost, jména, přístupy i původní pozvánku.
+Druhý hráč dostane nové kolo synchronizací; sám filtr měnit nemůže.
+
+Rozhodnutí: Míla požádal o změnu filtru u zakladatele bez dalšího posílání
+odkazu i před dohráním. Stávající rematch po dokončení zůstává. Nová akce
+restart používá12 veřejných UID, žádný osobní seznam se neposílá.
+Míla následně výslovně zadal p+n i spuštění aktualizovaného serveru.
+Dřívější Tailscale aktivace be9aeaa8 běží podle živého čtecího statusu;
+tento nový krok nemění síť, LaunchAgent ani běžící export.
+
+Další krok: Dokončit výslovně zadané p+n přes Terru a připravit přesný
+plán aktualizace samostatné herní služby se zachováním databáze. Pages samotné server
+restart nerozšíří; současná živá verze stále be9aeaa8 tuto akci neumí.
+Navrhované další kroky: Na Janině a Mílově Macu ověřit zrušení filtru,
+potvrzený restart uprostřed hry a další partii bez nového odkazu.
+
+Technický důkaz:23 cílených Python kontrol včetně23 JS scénářů PASS před
+finální programovou bránou; doplněný HTTP test dvou přístupů a nové routy.
+Testy drží idempotenci po obnově databáze, host-only, chybné výběry,
+staré kolo/poslech, zrušení bez leave a ukončení starého odměnového zvuku.
+Finální brána a commit: private vocabulary_fr_filter_restart_20261125/completion.json.
+Doplněná izolace staršího testu katalogu od živého Tailscale statusu.
+Fyzická přejímka a provedení schválené publikace tohoto kroku otevřené.

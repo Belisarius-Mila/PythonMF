@@ -5,12 +5,12 @@
   <meta name="referrer" content="no-referrer">
   <title>Pexeso na dálku · Francouzština Jana</title>
   <link rel="stylesheet" href="gallery.css?v=20261124-online1">
-  <link rel="stylesheet" href="online.css?v=20261124-rematch1">
+  <link rel="stylesheet" href="online.css?v=20261125-filter1">
   <script src="model.js" defer></script><script src="practice.js" defer></script>
-  <script src="memory.js?v=20261124-online1" defer></script><script src="online.js?v=20261124-rematch1" defer></script>
+  <script src="memory.js?v=20261124-online1" defer></script><script src="online.js?v=20261125-filter1" defer></script>
 </head>
 <body><main class="page-shell" id="onlineView">
-  <header class="memory-header"><div><p class="eyebrow">Francouzština Jana · Dva hráči</p><h1>Pexeso na dálku</h1><p>Jedna partie, každý na svém počítači.</p></div><a id="onlineBack" href="./#game=memory-pairs">← Zpět na výběr</a></header>
+  <header class="memory-header"><div><p class="eyebrow">Francouzština Jana · Dva hráči</p><h1>Pexeso na dálku</h1><p>Jedna partie, každý na svém počítači.</p></div><a id="onlineBack" href="./#game=memory-pairs">← Odejít na přehled</a></header>
   <p id="onlineStatus" role="status" aria-live="polite">Připravuji společnou hru…</p>
   <p id="onlineStorage" class="notice" role="status"></p>
   <section id="onlineSetup" class="memory-setup" aria-label="Připojení do partie">
@@ -21,19 +21,25 @@
   <section id="onlineRoom" hidden>
     <div id="onlineInvitePanel" class="online-invite" hidden><label>Soukromý odkaz pro druhého hráče<input id="onlineInvite" readonly spellcheck="false" autocomplete="off"></label><button id="onlineCopy" type="button">Kopírovat pozvánku</button></div>
     <div class="memory-round-header"><p id="onlineProgress"></p><button id="onlineStart" type="button" class="primary" hidden>Zahájit společnou partii</button><button id="onlineResume" type="button" hidden>Pokračovat a zapnout zvuk</button><button id="onlineRetry" type="button" hidden>Zopakovat zvuk</button><button id="onlineSkip" type="button" hidden>Pokračovat bez zvuku</button></div>
+    <p><button id="onlineChangeFilter" type="button" hidden>Změnit filtr a začít znovu</button></p>
     <div id="onlineBoard" class="memory-board" aria-label="24 očíslovaných míst společného pexesa"></div>
     <div id="onlineScores" class="memory-scores" aria-label="Hráči a získané dvojice"></div>
+      <section id="onlinePicker" class="online-picker" aria-labelledby="onlinePickerTitle" hidden>
+        <h3 id="onlinePickerTitle">Slovíčka pro další partii</h3>
+        <p id="onlinePickerHelp">Vybereme 12 jiných slov z veřejného slovníku.</p>
+        <label>Okruh<select id="onlineTopic"></select></label>
+        <label>Slovní druh<select id="onlinePart"></select></label>
+        <label>Obtížnost<select id="onlineLevel"></select></label>
+        <label>Typ výrazu<select id="onlineType"></select></label>
+        <label>Poslední slovíčka<select id="onlineRecent"><option value="0">Všechna</option><option value="20">Posledních 20</option><option value="50">Posledních 50</option></select></label>
+        <label>Hledání FR / CZ<input id="onlineQuery" type="search" autocomplete="off"></label>
+        <p id="onlineCandidatesInfo" role="status" aria-live="polite"></p><ul id="onlineCandidates" class="online-candidates"></ul>
+        <div class="online-next-actions"><button id="onlineShuffle" type="button">Změnit výběr</button><button id="onlineNextStart" class="primary" type="button">Zahájit další partii</button><button id="onlineNextCancel" type="button">Zrušit výběr</button></div>
+      </section>
     <section id="onlineEnd" class="memory-end" hidden>
       <h2>Všechny dvojice jsou doma!</h2><p id="onlineResult" tabindex="-1"></p>
       <p id="onlineNextHelp">Další partii připraví zakladatel. Oba zůstaňte tady, novou pozvánku nepotřebujete.</p>
       <div class="online-next-actions"><button id="onlineNewWords" class="primary" type="button" hidden>Další partie s jinými slovíčky</button><button id="onlineAgain" type="button">Ještě jednou se stejnými slovy</button></div>
-      <section id="onlinePicker" class="online-picker" aria-labelledby="onlinePickerTitle" hidden>
-        <h3 id="onlinePickerTitle">Slovíčka pro další partii</h3>
-        <p>Vybereme 12 jiných slov z veřejného slovníku. Slovíčka z právě dokončené partie vynecháme.</p>
-        <label>Okruh<select id="onlineTopic"></select></label>
-        <p id="onlineCandidatesInfo" role="status" aria-live="polite"></p><ul id="onlineCandidates" class="online-candidates"></ul>
-        <div class="online-next-actions"><button id="onlineShuffle" type="button">Změnit výběr</button><button id="onlineNextStart" class="primary" type="button">Zahájit další partii</button><button id="onlineNextCancel" type="button">Zrušit výběr</button></div>
-      </section>
       <div id="onlineCollections"></div>
     </section>
   </section>

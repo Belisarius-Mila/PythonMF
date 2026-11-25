@@ -40,7 +40,7 @@ opakování nebo výslovné pokračování bez zvuku; francouzštinu nenahrazuje
   reward nejméně 2 s a dohrání obou zvuků. Obnovení zachová stejnou fázi.
 - Plán zamíchá server. Klient před otočením nedostává UID skrytých míst.
 - API `/api/vocabulary-fr/rooms`: create; `/{room}/join`, sync, ready,
-  leave, start, flip, heard, rematch. Všechny operace s místností po join
+  leave, start, flip, heard, rematch, restart. Všechny operace s místností po join
   používají hráčský Bearer token. `GET /health` vrací protokol a otisk katalogu.
 - Každá pozvánka a hráčský token má 256 bitů náhody. Tokeny jsou v databázi
   hashované, pozvánka je v URL fragmentu a po vstupu se z adresy odstraní.
@@ -241,3 +241,24 @@ Podklady: https://tailscale.com/docs/features/tailscale-serve a
 https://tailscale.com/docs/reference/tailscale-cli/serve . Původní Host
 u nainstalované1.104.7 zachovává TCP proxy podle
 https://github.com/tailscale/tailscale/blob/v1.104.7/ipn/ipnlocal/serve.go .
+
+## Změna filtru rozehrané i dokončené hry — 25. 11. 2026
+
+Zakladatel mění filtr uvnitř online místnosti, bez navigace na přehled.
+Nabídka obsahuje okruh, slovní druh, obtížnost, typ výrazu, posledních20/50
+nebo FR/CZ hledání a náhled12 kompatibilních slov. Zrušení nic neodesílá.
+Potvrzený restart rozehrané partie vyžaduje výslovné potvrzení vynulování;
+dokončená hra může začít s novým filtrem přímo. Místnost se nevytváří znovu.
+
+Akce restart vyžaduje zakladatele, již zahájenou hru, oba připojené hráče,
+validní12 UID a aktuální expectedRound/expectedStage. V jediné transakci
+vymění plán, vynuluje skóre/tahy/poslechy a zvýší kolo; tokeny, pozvánka,
+jména a expirace zůstávají. Duplicitní requestId vrátí původní výsledek,
+starý klik/poslech nemůže zasáhnout nové kolo. Klient při novém kole ukončí
+předchozí zvuk i odměnu a dál používá stejnou sessionStorage identitu.
+Původní rematch zůstává omezený na dokončenou hru.
+
+Tento krok je místní. Vydání vyžaduje kromě Pages také samostatný aktualizovaný
+herní export/server. Neměnit stávající databázi a nepřidávat nové síťové granty.
+Publikace a změna běžící služby potřebují odpovídající autorizaci; historické
+potvrzení předchozí aktivace se nevztahuje na nový plán služby.

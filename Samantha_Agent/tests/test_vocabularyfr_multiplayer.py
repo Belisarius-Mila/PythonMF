@@ -277,6 +277,63 @@ class RoomsTests(RoomFixture):
             self.action("rematch", uids=self.uids)
         self.assertEqual(self.raw()["deck"], after["deck"])
 
+    def test_host_filter_restart_during_reveal_preserves_access_and_rejects_old_round(self):
+        self.start()
+        self.action("flip", index=0)
+        before = self.raw()
+        chosen = self.uids[1:] + [next(uid for uid in self.catalog.items if uid not in self.uids and all(self.catalog.compatible(uid, old) for old in self.uids[1:]))]
+        payload = {"requestId": "e" * 64, "expectedRound": before["round"], "expectedStage": before["stage"], "uids": chosen}
+        for token, values in [(self.guest, payload), (self.host, {k: v for k, v in payload.items() if k != "uids"}),
+                              (self.host, {**payload, "uids": chosen[:11]}),
+                              (self.host, {**payload, "uids": [chosen[0]] * 12})]:
+            with self.assertRaises(GameError):
+                self.rooms.act(self.room, token, "restart", values)
+            self.assertEqual(self.raw(), before)
+        state = self.rooms.act(self.room, self.host, "restart", payload)
+        after = self.raw()
+        self.assertEqual((state["room"], state["round"], state["phase"], state["owners"], state["turns"]), (self.room, 2, "choose", {}, 0))
+        self.assertEqual(set(after["deck"]), set(chosen))
+        for key in ("players", "inviteHash", "expires", "created", "catalog"):
+            self.assertEqual(after[key], before[key])
+        self.assertTrue(all(card["state"] == "hidden" and "uid" not in card for card in state["cards"]))
+        self.assertEqual((state["reward"], state["acks"], state["focus"]), (None, [], None))
+        self.rooms = Rooms(self.path, self.catalog, clock=self.clock)
+        self.assertEqual(self.rooms.act(self.room, self.host, "restart", payload), state)
+        for action, values in [("heard", {"stage": before["stage"]}), ("flip", {"index": 1})]:
+            with self.assertRaises(GameError):
+                self.rooms.act(self.room, self.guest, action, {"requestId": "f" * 64, "expectedRound": 1, "expectedStage": before["stage"], **values})
+            self.assertEqual(self.raw(), after)
+        self.assertEqual(self.action("sync", self.guest)["round"], 2)
+
+    def test_filter_restart_from_reward_and_finished_clears_scores_without_new_invitation(self):
+        self.start()
+        deck = self.raw()["deck"]
+        a, b = [i for i, uid in enumerate(deck) if uid == self.uids[0]]
+        self.action("flip", index=a);self.heard();self.action("flip", index=b);self.heard()
+        self.clock.advance(1)
+        state = self.action("sync")
+        self.assertEqual(state["phase"], "reward")
+        self.assertEqual(len(state["owners"]), 1)
+        state = self.action("restart", uids=self.uids)
+        self.assertEqual((state["phase"], state["owners"], state["round"]), ("choose", {}, 2))
+        deck = self.raw()["deck"]
+        for uid in self.uids:
+            self.pair(*[i for i, candidate in enumerate(deck) if candidate == uid])
+        self.assertEqual(self.action("sync")["phase"], "finished")
+        state = self.action("restart", uids=self.uids)
+        self.assertEqual((state["round"], state["owners"], state["turns"]), (3, {}, 0))
+        self.assertEqual(self.action("sync", self.guest)["round"], 3)
+
+    def test_filter_restart_requires_started_room_and_connected_guest(self):
+        with self.assertRaises(GameError):
+            self.action("restart", uids=self.uids)
+        self.start()
+        self.action("leave", self.guest)
+        before = self.raw()
+        with self.assertRaises(GameError):
+            self.action("restart", uids=self.uids)
+        self.assertEqual(self.raw(), before)
+
     def test_expiry_catalog_drift_authentication_capacity_and_bad_selection(self):
         for bad in ["x", "e" * 64]:
             with self.assertRaises(GameError):
@@ -372,6 +429,14 @@ class HTTPTests(RoomFixture):
         self.assertEqual(request(API, self.payload, headers={"Host": "untrusted.example"})[0], 403)
         self.assertEqual(request(API, self.payload, headers={"Content-Type": "text/plain"})[0], 415)
         self.assertEqual(request(API, {"padding": "x" * 33000})[0], 413)
+        payload = {"requestId": "1" * 64, "expectedRound": state["round"], "expectedStage": state["stage"], "uids": self.uids}
+        self.assertEqual(request(API + "/" + self.room + "/restart", payload, self.guest)[0], 409)
+        status, raw, _ = request(API + "/" + self.room + "/restart", payload, self.host)
+        self.assertEqual((status, json.loads(raw)["round"], json.loads(raw)["phase"]), (200, 2, "choose"))
+        status, raw, _ = request(API + "/" + self.room + "/sync", {}, self.guest)
+        self.assertEqual((status, json.loads(raw)["round"], json.loads(raw)["owners"]), (200, 2, {}))
+        self.assertEqual(request(API + "/" + self.room + "/restart", payload, self.host)[0], 200)
+        self.assertEqual(json.loads(request(API + "/" + self.room + "/sync", {}, self.guest)[1])["round"], 2)
         for path in ["/api/server/health", "/.env", "/data/private/test", "/vocabulary-it/", "/vocabulary-fr/%2e%2e/%2e%2e/AGENTS.md"]:
             self.assertEqual(request(path)[0], 404, path)
         for path in ["/vocabulary-fr/", "/vocabulary-fr/online.html", "/vocabulary-fr/online.js", "/data/vocabulary-fr-v2.json"]:

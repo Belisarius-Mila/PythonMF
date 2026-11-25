@@ -3006,3 +3006,9 @@ strop. Skutečný DALTAC dokončen17,0578/20, sedm původních částí beze zm�
 - Problém: Rematch jen zamíchal původní balíček. Návrat na výběr vedl k nové místnosti a zbytečnému posílání další pozvánky.
 - Řešení: Další výběr potvrzuje zakladatel uvnitř dokončené místnosti; server v jediné transakci ověří12 významů, vymění balíček a zvýší kolo, ale zachová hráčské přístupy. Starý typ rematche zůstává.
 - Ověření: Dva oddělené klienty přejdou na jiná slova bez create/join a změny URL/tokenů; ztracená odpověď se dočte přes sync. Reálný server zachová databázovou identitu i po restartu a opakovanou akci neprovede znovu.
+
+### 2026-11-25 — Filtr uvnitř rozehrané společné místnosti
+
+- Problém: Výběr po dohrání řeší jen rematch; odchod na obecný filtr ztratí přímý návrat do společné hry.
+- Řešení: Hostitelský filtr držet v online místnosti. Zrušení bez serverové mutace; potvrzený restart atomicky vymění12 dvojic a zvýší kolo při zachování tokenů/pozvánky. Staré akce odmítnout podle kola/fáze a ukončit starý zvuk.
+- Ověření: Dva JS klienty zachovají URL/session a nemají nový create/join; serverové testy odmítnou hosta, neplatný výběr i starý poslech a po obnově databáze neopakují restart. HTTP test ověřuje novou routu i synchronizaci druhého hráče.

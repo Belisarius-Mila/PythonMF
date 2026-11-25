@@ -7,10 +7,10 @@
   const tokenPattern=/^[a-f0-9]{64}$/,roomPattern=/^[a-f0-9]{24}$/;
   function random(win){const bytes=new Uint8Array(32);win.crypto.getRandomValues(bytes);return Array.from(bytes,b=>b.toString(16).padStart(2,'0')).join('');}
   function create({doc,win,fetcher=root.fetch.bind(root),AudioClass=root.Audio}){
-    const ids=['onlineView','onlineBack','onlineStatus','onlineStorage','onlineSetup','onlineName','onlineSelection','onlineEnter','onlineRoom','onlineInvitePanel','onlineInvite','onlineCopy','onlineProgress','onlineStart','onlineResume','onlineRetry','onlineSkip','onlineBoard','onlineScores','onlineEnd','onlineResult','onlineAgain','onlineNewWords','onlinePicker','onlineTopic','onlineCandidatesInfo','onlineCandidates','onlineShuffle','onlineNextStart','onlineNextCancel','onlineCollections','onlineReward','onlineRewardImage','onlineRewardWord'];
+    const ids=['onlineView','onlineBack','onlineStatus','onlineStorage','onlineSetup','onlineName','onlineSelection','onlineEnter','onlineRoom','onlineInvitePanel','onlineInvite','onlineCopy','onlineProgress','onlineStart','onlineResume','onlineRetry','onlineSkip','onlineBoard','onlineScores','onlineEnd','onlineResult','onlineAgain','onlineNewWords','onlineChangeFilter','onlinePicker','onlinePickerTitle','onlinePickerHelp','onlinePart','onlineLevel','onlineType','onlineRecent','onlineQuery','onlineTopic','onlineCandidatesInfo','onlineCandidates','onlineShuffle','onlineNextStart','onlineNextCancel','onlineCollections','onlineReward','onlineRewardImage','onlineRewardWord'];
     const ui=Object.fromEntries(ids.map(id=>[id,doc.getElementById(id)]));
     const audio=new AudioClass();let data=null,manifest=null,quiz=null,revision='',selection=[],snapshot=null,session=null,active=false,network=false,sending=false,pollTimer=null,stage=null,epoch=0,available=false;
-    let cancelAudio=null,picking=false,candidates=[];
+    let cancelAudio=null,picking=false,filtering=false,candidates=[];
     const route=new URLSearchParams(new URL(win.location.href).hash.slice(1));
     const status=text=>{ui.onlineStatus.textContent=text;};
     function save(){try{win.sessionStorage.setItem(KEY,JSON.stringify(session));}catch(_){ui.onlineStorage.textContent='Obnovení po zavření tohoto panelu není dostupné. Pozvánka dál funguje pro spoluhráče.';}}
@@ -72,13 +72,17 @@
     }
     function currentUid(){return snapshot.phase==='reward'?snapshot.reward:snapshot.cards[snapshot.focus]?.uid;}
     function chooseNext(){
-      if(snapshot?.phase!=='finished'||snapshot.you!==0)return;
-      const previous=new Set(Object.keys(snapshot.owners)),topic=ui.onlineTopic.value;
-      const pool=M.select(data.items,{topics:topic?[topic]:[]}).filter(item=>!previous.has(item.uid));
+      if(!snapshot||snapshot.you!==0||snapshot.phase==='waiting'||(!filtering&&snapshot.phase!=='finished'))return;
+      const previous=new Set(filtering?[]:Object.keys(snapshot.owners)),topic=ui.onlineTopic.value;
+      const pool=M.select(data.items,{topics:topic?[topic]:[],parts:ui.onlinePart.value?[ui.onlinePart.value]:[],levels:ui.onlineLevel.value?[ui.onlineLevel.value]:[],teachingType:ui.onlineType.value,query:ui.onlineQuery.value,recentCount:Number(ui.onlineRecent.value)}).filter(item=>!previous.has(item.uid));
       candidates=Memory.choose(pool,manifest,quiz);picking=true;
       ui.onlineCandidates.replaceChildren();
       candidates.forEach(item=>{const word=doc.createElement('li');word.lang='fr';word.textContent=item.fr;ui.onlineCandidates.append(word);});
-      ui.onlineCandidatesInfo.textContent=candidates.length===12?'Připraveno 12 nových dvojic. Spoluhráč zůstává ve stejné místnosti.':'V tomto okruhu není dost jiných obrázků se zvukem pro 12 dvojic. Zvol širší okruh.';
+      ui.onlinePickerTitle.textContent=filtering?'Změnit filtr společné hry':'Slovíčka pro další partii';
+      ui.onlinePickerHelp.textContent=filtering?'Po potvrzení vyměníme všech 24 kartiček a vynulujeme skóre. Oba hráči i pozvánka zůstanou. Zrušením se vrátíš k původní partii.':'Slovíčka z právě dokončené partie vynecháme. Oba zůstanete ve stejné místnosti.';
+      ui.onlineNextStart.textContent=filtering?'Použít filtr a začít od začátku':'Zahájit další partii';
+      ui.onlineNextCancel.textContent='Zpět do původní partie';
+      ui.onlineCandidatesInfo.textContent=candidates.length===12?'Připraveno 12 dvojic. Spoluhráč zůstává ve stejné místnosti.':'V tomto výběru není dost různých obrázků se zvukem pro 12 dvojic. Rozšiř filtr.';
       render();
     }
     function primeReward(item){
@@ -114,8 +118,10 @@
       ui.onlineResume.hidden=active;ui.onlineResume.disabled=sending||!available;ui.onlineRetry.hidden=ui.onlineSkip.hidden=!stage?.failed;
       ui.onlineEnd.hidden=!finished;ui.onlineAgain.hidden=snapshot.you!==0;ui.onlineAgain.disabled=locked;
       ui.onlineNewWords.hidden=snapshot.you!==0;ui.onlineNewWords.disabled=locked;
-      ui.onlinePicker.hidden=!finished||snapshot.you!==0||!picking;
-      ui.onlineTopic.disabled=ui.onlineShuffle.disabled=ui.onlineNextCancel.disabled=locked;
+      ui.onlineChangeFilter.hidden=snapshot.you!==0||snapshot.phase==='waiting';ui.onlineChangeFilter.disabled=locked;
+      ui.onlinePicker.hidden=snapshot.you!==0||!picking;
+      for(const control of ['onlineTopic','onlinePart','onlineLevel','onlineType','onlineRecent','onlineQuery','onlineShuffle'])ui[control].disabled=locked;
+      ui.onlineNextCancel.disabled=sending;
       ui.onlineNextStart.disabled=locked||candidates.length!==12;
       ui.onlineProgress.textContent=`Nalezeno ${Object.keys(snapshot.owners).length} z 12 dvojic · ${snapshot.turns} tahů`;
       const byUid=new Map(data.items.map(i=>[i.uid,i]));
@@ -189,6 +195,12 @@
       try{
         const texts=await Promise.all(['vocabulary-fr-v2.json','vocabulary-fr-audio.json','vocabulary-fr-quiz.json'].map(name=>read('../data/'+name,true)));
         [data,manifest,quiz]=texts.map(JSON.parse);data.catalog={groups:data.groups,parents:data.parents};
+        for(const [id,labels,all] of [['onlinePart',M.posLabels,'Všechny druhy'],['onlineLevel',M.levelLabels,'Všechny obtížnosti'],['onlineType',M.teachingTypeLabels,'Všechny typy']]){
+          ui[id].replaceChildren();
+          for(const [value,label] of [['',all],...Object.entries(labels)]){const option=doc.createElement('option');option.value=value;option.textContent=label;ui[id].append(option);}
+          ui[id].value='';
+        }
+        ui.onlineRecent.value='0';ui.onlineQuery.value='';
         ui.onlineTopic.replaceChildren();
         [{id:'',label:'Všechny okruhy'},...(data.groups||[])].forEach(group=>{const option=doc.createElement('option');option.value=group.id;option.textContent=group.label;ui.onlineTopic.append(option);});
         const digest=await win.crypto.subtle.digest('SHA-256',new TextEncoder().encode(texts.join('\0')));revision=Array.from(new Uint8Array(digest),b=>b.toString(16).padStart(2,'0')).join('');
@@ -208,10 +220,22 @@
     }
     ui.onlineEnter.addEventListener('click',()=>{void enter();});ui.onlineResume.addEventListener('click',()=>{void enter();});
     ui.onlineStart.addEventListener('click',()=>{void command('start');});ui.onlineAgain.addEventListener('click',()=>{void command('rematch');});
-    ui.onlineNewWords.addEventListener('click',()=>{ui.onlineTopic.value='';chooseNext();});
-    ui.onlineTopic.addEventListener('change',chooseNext);ui.onlineShuffle.addEventListener('click',chooseNext);
+    function openPicker(changeFilter){
+      if(!snapshot||snapshot.you!==0||snapshot.phase==='waiting')return;
+      filtering=changeFilter;
+      if(!changeFilter){for(const id of ['onlineTopic','onlinePart','onlineLevel','onlineType','onlineQuery'])ui[id].value='';ui.onlineRecent.value='0';}
+      chooseNext();ui.onlinePicker.scrollIntoView({block:'nearest'});ui.onlineTopic.focus({preventScroll:true});
+    }
+    ui.onlineChangeFilter.addEventListener('click',()=>openPicker(true));
+    ui.onlineNewWords.addEventListener('click',()=>openPicker(false));
+    for(const id of ['onlineTopic','onlinePart','onlineLevel','onlineType','onlineRecent'])ui[id].addEventListener('change',chooseNext);
+    ui.onlineQuery.addEventListener('input',chooseNext);ui.onlineShuffle.addEventListener('click',chooseNext);
     ui.onlineNextCancel.addEventListener('click',()=>{picking=false;candidates=[];render();});
-    ui.onlineNextStart.addEventListener('click',()=>{if(picking&&candidates.length===12)void command('rematch',{uids:candidates.map(item=>item.uid)});});
+    ui.onlineNextStart.addEventListener('click',()=>{
+      if(!picking||candidates.length!==12||snapshot.you!==0)return;
+      if(filtering&&snapshot.phase!=='finished'&&!win.confirm('Začít s vybranými slovíčky od začátku? Dosavadní skóre se vynuluje. Spoluhráč a pozvánka zůstanou.'))return;
+      void command(filtering?'restart':'rematch',{uids:candidates.map(item=>item.uid)});
+    });
     ui.onlineRetry.addEventListener('click',()=>{cancelStage();syncStage();});ui.onlineSkip.addEventListener('click',()=>{if(stage?.failed){stage.failed=false;void command('heard',{stage:snapshot.stage});}});
     ui.onlineCopy.addEventListener('click',()=>{const copy=win.navigator?.clipboard?.writeText(ui.onlineInvite.value);void Promise.resolve(copy||Promise.reject(Error('clipboard'))).then(()=>status('Pozvánka je zkopírovaná. Pošli ji spoluhráči.'),()=>status('Odkaz můžeš označit v poli a zkopírovat ručně.'));});
     ui.onlineBack.addEventListener('click',event=>{if(snapshot&&snapshot.phase!=='finished'&&!win.confirm('Opustit společnou partii? Spoluhráč počká na tvůj návrat.'))event.preventDefault();else leave();});

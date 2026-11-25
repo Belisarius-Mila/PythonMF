@@ -49,7 +49,7 @@ function bridge(){
    if(!state.acks.includes(you))state.acks.push(you);state.revision++;
    if(state.acks.length===2){if(state.phase==='reveal')state.phase=state.open.length===1?'choose':'compare';else if(state.phase==='reward'){state.phase=Object.keys(state.owners).length===12?'finished':'choose';state.reward=null;}}
   }
-  if(action==='rematch'){if(payload.uids)state.deck=payload.uids.flatMap(uid=>[uid,uid]);state.phase='choose';state.owners={};state.open=[];state.round++;state.turns=0;state.active=0;state.acks=[];state.reward=null;state.revision++;board();if(loseRematch){loseRematch=false;throw Error('reply lost');}}
+  if(action==='rematch'||action==='restart'){if(payload.uids)state.deck=payload.uids.flatMap(uid=>[uid,uid]);state.phase='choose';state.owners={};state.open=[];state.round++;state.turns=0;state.active=0;state.acks=[];state.reward=null;state.revision++;board();if(loseRematch){loseRematch=false;throw Error('reply lost');}}
   return result(200,view(you));
  }
  return {fetcher,requests,get state(){return state;},set failed(value){failed=value;},set loseFlip(value){loseFlip=value;},set loseRematch(value){loseRematch=value;},reward(uid){state.owners[uid]=state.active;state.open=[];state.turns++;state.reward=uid;state.phase='reward';state.stage++;state.acks=[];state.revision++;board();},mismatch(){state.active=1-state.active;state.open=[];state.turns++;state.phase='choose';state.revision++;board();}};
@@ -198,4 +198,36 @@ test('same-words rematch remains available without transmitting a replacement se
  const {server,a,b}=await pairClients();await finishedGame(server,a,b);const before=[...server.state.deck];
  a.element('onlineAgain').click();await until(()=>server.state.round===2);await flush();await b.api.poll();
  assert.deepEqual(server.state.deck,before);assert.equal(b.api.getState().round,2);assert.equal('uids' in server.requests.find(r=>r.url.endsWith('/rematch')).payload,false);
+});
+
+test('host changes filters during play and can cancel back without leaving either client',async()=>{
+ const {server,a,b}=await pairClients();const before=structuredClone(server.state),sessions=[a.session.getItem(online.KEY),b.session.getItem(online.KEY)];
+ assert.equal(a.element('onlineChangeFilter').hidden,false);assert.equal(b.element('onlineChangeFilter').hidden,true);
+ a.element('onlineChangeFilter').click();assert.equal(a.element('onlinePicker').hidden,false);assert.equal(a.element('onlineCandidates').children.length,12);
+ a.element('onlineQuery').value='neexistuje';a.element('onlineQuery').emit('input');assert.equal(a.element('onlineNextStart').disabled,true);
+ a.element('onlineNextCancel').click();assert.equal(a.element('onlinePicker').hidden,true);
+ assert.deepEqual(server.state,before);assert.equal(server.requests.filter(r=>r.url.endsWith('/leave')||r.url.endsWith('/restart')).length,0);
+ assert.deepEqual([a.session.getItem(online.KEY),b.session.getItem(online.KEY)],sessions);
+ a.element('onlineChangeFilter').click();a.element('onlineQuery').value='';a.element('onlineQuery').emit('input');
+ a.element('onlinePart').value='interjection';a.element('onlinePart').emit('change');
+ assert.ok(a.element('onlineCandidates').children.length<12);assert.equal(a.element('onlineNextStart').disabled,true);
+ a.element('onlinePart').value='';a.element('onlinePart').emit('change');assert.equal(a.element('onlineNextStart').disabled,false);
+ a.win.confirm=()=>false;a.element('onlineNextStart').click();await flush();assert.equal(server.state.round,1);
+ a.win.confirm=()=>true;server.loseRematch=true;a.element('onlineNextStart').click();await until(()=>server.state.round===2);await flush();await a.api.poll();await b.api.poll();
+ assert.equal(server.requests.filter(r=>r.url.endsWith('/restart')).length,1);assert.equal(server.requests.filter(r=>r.url.endsWith('/rooms')).length,1);assert.equal(server.requests.filter(r=>r.url.endsWith('/join')).length,1);
+ for(const view of [a,b]){assert.equal(view.api.getState().round,2);assert.equal(view.api.getState().room,room);assert.deepEqual(view.api.getState().owners,{});assert.equal(view.element('onlinePicker').hidden,true);}
+ assert.deepEqual([a.session.getItem(online.KEY),b.session.getItem(online.KEY)],sessions);
+});
+test('filter restart cancels old reward sound and guest cannot open the picker',async()=>{
+ const {server,a,b}=await pairClients();b.element('onlineChangeFilter').click();assert.equal(b.element('onlinePicker').hidden,true);
+ server.reward(uids[0]);await a.api.poll();await b.api.poll();a.advance(2000);b.advance(2000);await flush();
+ a.element('onlineChangeFilter').click();a.element('onlineNextStart').click();await until(()=>server.state.round===2);await flush();await b.api.poll();
+ for(const view of [a,b]){assert.equal(view.players[0].paused,true);assert.equal(view.element('onlineReward').hidden,true);view.advance(20000);}
+ await flush();assert.equal(server.requests.filter(r=>r.url.endsWith('/heard')).length,0);assert.deepEqual(server.state.owners,{});
+});
+test('completed game can change filter without requiring twelve entirely different meanings',async()=>{
+ const {server,a,b}=await pairClients();await finishedGame(server,a,b);a.element('onlineChangeFilter').click();
+ assert.equal(a.element('onlinePicker').hidden,false);assert.equal(a.element('onlineNextStart').disabled,false);
+ a.element('onlineNextStart').click();await until(()=>server.state.round===2);await flush();await b.api.poll();
+ assert.equal(server.requests.filter(r=>r.url.endsWith('/restart')).length,1);assert.equal(b.api.getState().round,2);
 });
