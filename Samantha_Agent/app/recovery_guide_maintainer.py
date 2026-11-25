@@ -19,6 +19,7 @@ from app.file_persistence import atomic_create_text, atomic_write_json, exclusiv
 from app.recovery_guide_sources import MAX_USER_INPUT_TEXT_CHARS, Snapshot, batches, canonical_json, digest, reject_secrets
 from app.release_usage import estimate_standard_credits, normalize_usage
 from app import recovery_guide_consolidation as consolidation
+from app import recovery_guide_inspection as inspection
 
 TASK = "recovery_guide_review"
 MODEL = "gpt-6.1-sol"
@@ -104,12 +105,31 @@ def validate_candidate(answer: dict, snapshot: Snapshot, *, request=None) -> str
     return validate(answer, snapshot)
 
 
-def plan(snapshot: Snapshot, count_tokens: Callable[[str], int], limits: Limits, *, review_date: date | None = None, legacy_format: bool = False) -> dict:
+def plan(snapshot: Snapshot, count_tokens: Callable[[str], int], limits: Limits, *, review_date: date | None = None, legacy_format: bool = False, known_first: dict | None = None) -> dict:
     limits.check()
+    extra = '' if legacy_format else inspection.instructions(limits.inspection_reserve)
+    inspect_instructions = INSTRUCTIONS if legacy_format else REVIEW_INSTRUCTIONS + extra
+    inspect_schema = INSPECT_SCHEMA if legacy_format else inspection.SCHEMA
     instruction_tokens = count_tokens(INSTRUCTIONS if legacy_format else REVIEW_INSTRUCTIONS)
-    available = limits.input_tokens - instruction_tokens - count_tokens(canonical_json(INSPECT_SCHEMA)) - 512
-    shards = batches(snapshot, count_tokens, input_limit=available,
-                     output_reserve=limits.inspection_reserve, max_calls=limits.max_calls)
+    available = limits.input_tokens - count_tokens(inspect_instructions) - count_tokens(canonical_json(inspect_schema)) - 512
+    def wire_count(text):
+        value=json.loads(text)
+        return count_tokens(canonical_json(value if legacy_format else inspection.wire(value)))
+    existing=[];known_input=known_output=0;known_findings=[]
+    tail=snapshot
+    if known_first is not None:
+        from dataclasses import asdict,replace
+        if legacy_format or known_first.get('delivery_confirmed') is not True:raise ValueError('known_result_not_confirmed')
+        payload=known_first['payload'];count=len(payload['sources'])
+        if (count<=0 or payload!={'original':asdict(snapshot.original),'sources':[asdict(row) for row in snapshot.sources[:count]]}):raise ValueError('known_payload_not_exact_prefix')
+        response=known_first['response'];usage=normalize_usage(response['usage']);cost=estimate_standard_credits(MODEL,usage)
+        if usage is None or cost!=known_first['credits'] or cost>known_first['maximum_known_credits'] or usage['input_tokens']+usage['output_tokens']>limits.input_tokens:raise ValueError('known_usage_not_acceptable')
+        accepted=inspection.normalize_known(response['answer'],payload)
+        if accepted!=response['answer']:raise ValueError('known_result_must_be_prevalidated')
+        existing=[payload];known_input=usage['input_tokens'];known_output=usage['output_tokens'];known_findings=[accepted]
+        tail=replace(snapshot,sources=snapshot.sources[count:])
+    remaining=batches(tail,wire_count,input_limit=available,output_reserve=limits.inspection_reserve,max_calls=limits.max_calls-len(existing)) if tail.sources else []
+    shards=existing+remaining
     # Final turn receives original plus all bounded findings. Reserve the full
     # output allowance for every inspection, with JSON/framing overhead.
     if legacy_format:
@@ -117,18 +137,19 @@ def plan(snapshot: Snapshot, count_tokens: Callable[[str], int], limits: Limits,
         synthesis_bound = (count_tokens(snapshot.original.text) + len(shards) * limits.inspection_reserve
                            + instruction_tokens + count_tokens(canonical_json(SYNTHESIS_SCHEMA)) + 2048)
     else:
-        synthesis_request = consolidation.prepare(snapshot, [], review_date or date(2000,1,1))
+        synthesis_request = consolidation.prepare(snapshot, known_findings, review_date or date(2000,1,1))
         if len(canonical_json(synthesis_request.payload)) > MAX_USER_INPUT_TEXT_CHARS:
             raise ValueError("Syntéza překročila limit znaků; bez modelu.")
         synthesis_schema = consolidation.schema(synthesis_request.payload)
         synthesis_bound = (count_tokens(canonical_json(synthesis_request.payload))
-                           + len(shards) * limits.inspection_reserve + instruction_tokens
+                           + len(remaining) * limits.inspection_reserve + instruction_tokens
+                           + sum(count_tokens(row.path)+12 for row in tail.sources)
                            + count_tokens(canonical_json(synthesis_schema)) + 2048)
     if synthesis_bound + limits.output_tokens > limits.input_tokens:
         raise ValueError("Syntéza se nevejde; potřebuje samostatně zkontrolovaný plán.")
-    inputs = sum(count_tokens(canonical_json(s)) + instruction_tokens + 512
-                 + count_tokens(canonical_json(INSPECT_SCHEMA)) for s in shards) + synthesis_bound
-    output = len(shards) * limits.inspection_reserve + limits.output_tokens
+    inputs = known_input + sum(wire_count(canonical_json(row)) + count_tokens(inspect_instructions) + 512
+                 + count_tokens(canonical_json(inspect_schema)) for row in remaining) + synthesis_bound
+    output = known_output + len(remaining) * limits.inspection_reserve + limits.output_tokens
     reservation = (inputs * 50 + output * 250) / 1_000_000
     if reservation > limits.run_credits:
         raise ValueError("Předběžná rezervace překročila rozpočet; bez modelu.")
@@ -148,7 +169,7 @@ def status(state_dir: Path, slot: str) -> dict:
 
 def run(snapshot: Snapshot, *, state_dir: Path, now: datetime, limits: Limits,
         count_tokens: Callable[[str], int], call: Callable[[dict, str], dict],
-        approved_snapshot: str, assert_sources: Callable[[], bool], confirmed: bool = False, legacy_format: bool = False, weekday: int = 6, hour: int = 9) -> dict:
+        approved_snapshot: str, assert_sources: Callable[[], bool], confirmed: bool = False, legacy_format: bool = False, weekday: int = 6, hour: int = 9, known_first: dict | None = None) -> dict:
     """One slot, frozen snapshot, persistent before-send marker, no retries.
 
     Injected transport returns {answer:dict, usage:normalized_usage}. Production
@@ -167,7 +188,7 @@ def run(snapshot: Snapshot, *, state_dir: Path, now: datetime, limits: Limits,
             # Includes running after process death and attention after unknown
             # delivery. A tick never creates another call for this slot.
             return {**previous, "replayed_receipt": True}
-        prepared = plan(snapshot, count_tokens, limits, review_date=now.astimezone(ZoneInfo("Europe/Prague")).date(), legacy_format=legacy_format)
+        prepared = plan(snapshot, count_tokens, limits, review_date=now.astimezone(ZoneInfo("Europe/Prague")).date(), legacy_format=legacy_format, known_first=known_first)
         month = now.astimezone(ZoneInfo("Europe/Prague")).strftime("%Y-%m")
         previous_month = [json.loads(p.read_text()) for p in state_dir.glob("????-W??.json")]
         used = sum(max(row.get("reserved_credits", 0), row.get("credits", 0))
@@ -204,7 +225,11 @@ def run(snapshot: Snapshot, *, state_dir: Path, now: datetime, limits: Limits,
                 output_allowance = limits.inspection_reserve if kind == "inspect" else limits.output_tokens
                 if len(canonical_json(payload)) > MAX_USER_INPUT_TEXT_CHARS:
                     raise ValueError("Vstup překročil limit znaků; bez dalšího tahu.")
-                actual_input = count_tokens(canonical_json(payload)) + count_tokens(INSTRUCTIONS if legacy_format else REVIEW_INSTRUCTIONS) + count_tokens(canonical_json(schema)) + 512
+                replay=known_first is not None and index==0
+                wire_payload=payload if legacy_format or kind!='inspect' or replay else inspection.wire(payload)
+                wire_schema=INSPECT_SCHEMA if replay else schema if legacy_format or kind!='inspect' else inspection.SCHEMA
+                wire_instructions=INSTRUCTIONS if legacy_format else REVIEW_INSTRUCTIONS + (inspection.instructions(output_allowance) if kind=='inspect' and not replay else '')
+                actual_input = count_tokens(canonical_json(wire_payload)) + count_tokens(wire_instructions) + count_tokens(canonical_json(wire_schema)) + 512
                 if actual_input + output_allowance > limits.input_tokens or time.monotonic() - started > limits.seconds:
                     raise ValueError("Překročený předběžný rozsah nebo čas.")
                 next_bound = (actual_input * 50 + output_allowance * 250) / 1_000_000
@@ -216,7 +241,7 @@ def run(snapshot: Snapshot, *, state_dir: Path, now: datetime, limits: Limits,
                 turn = {"phase": kind, "payload_sha256": digest(canonical_json(payload)), "state": "in_flight"}
                 record["turns"].append(turn)
                 atomic_write_json(path, record)  # MUST precede every possible paid send.
-                response = call(payload, kind)
+                response = known_first["response"] if replay else call(payload, kind)
                 usage = normalize_usage(response.get("usage"))
                 cost = estimate_standard_credits(MODEL, usage)
                 if usage is None or cost is None:
@@ -224,7 +249,8 @@ def run(snapshot: Snapshot, *, state_dir: Path, now: datetime, limits: Limits,
                 record["credits"] += cost
                 record["completed_calls"] += 1
                 turn.update(state="received", usage=usage, credits=cost)
-                if usage["output_tokens"] > output_allowance:
+                if replay:turn.update(origin="existing_completed_receipt",raw_sha256=known_first["raw_sha256"])
+                if usage["output_tokens"] > output_allowance and not replay:
                     raise ValueError("Nadlimitní výstup; skutečnou známou spotřebu zachovat.")
                 if record["credits"] > limits.run_credits or time.monotonic() - started > limits.seconds:
                     raise ValueError("Překročená přijatelná spotřeba nebo čas.")

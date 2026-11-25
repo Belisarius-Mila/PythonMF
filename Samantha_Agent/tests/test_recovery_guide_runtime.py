@@ -312,7 +312,7 @@ class TransportBinding(unittest.TestCase):
                 outer.assertEqual(marker['state'],'delivery_unknown')
                 thread=params['threadId'];turn='turn-'+str(self.threads)
                 items=[{'type':'userMessage','clientId':params['clientUserMessageId']},
-                    {'type':'agentMessage','id':'final','phase':'final_answer','text':'{"ok":true}'}]
+                    {'type':'agentMessage','id':'final','phase':'final_answer','text':'{"covered":[],"notes":""}'}]
                 self.events=[{'method':'turn/started','params':{'turn':{'id':turn}}},
                     {'method':'thread/tokenUsage/updated','params':{'tokenUsage':{'total':self.usage}}},
                     {'method':'turn/completed','params':{'turn':{'id':turn,'status':'completed','items':items}}}]
@@ -333,7 +333,7 @@ class TransportBinding(unittest.TestCase):
 
     def test_standard_is_explicit_and_threads_are_read_only_without_project_tools(self):
         with self.binding() as call:
-            self.assertTrue(call({'original':'data','sources':[]},'inspect')['answer']['ok'])
+            self.assertEqual(call({'original':'data','sources':[]},'inspect')['answer']['covered'],[])
             request=c.prepare(fixtures.snap(),[],self.now_date())
             call(request.payload,'synthesize')
         turns=[p for name,p in self.wire.calls if name=='turn/start']
@@ -351,7 +351,7 @@ class TransportBinding(unittest.TestCase):
     def test_disconnect_preserves_unknown_thread_turn_and_restores_transport(self):
         self.wire.fail='receive'
         with self.binding() as call:
-            with self.assertRaises(Exception):call({},'inspect')
+            with self.assertRaises(Exception):call({'original':'data','sources':[]},'inspect')
         marker=json.loads((self.root/'transport/001.json').read_text())
         self.assertEqual(marker['state'],'delivery_unknown');self.assertEqual(marker['turn_id'],'turn-1')
         self.assertEqual(marker['thread_id'],'thread-1');self.assertIs(self.client.transport,self.wire)
@@ -360,14 +360,14 @@ class TransportBinding(unittest.TestCase):
     def test_drift_between_thread_and_turn_prevents_paid_send(self):
         answers=iter([True,False]);self.current=lambda:next(answers)
         with self.binding() as call:
-            with self.assertRaisesRegex(ValueError,'changed_before_send'):call({},'inspect')
+            with self.assertRaisesRegex(ValueError,'changed_before_send'):call({'original':'data','sources':[]},'inspect')
         self.assertFalse(any(name=='turn/start' for name,_ in self.wire.calls))
 
     def test_reused_thread_is_rejected_before_second_turn(self):
         self.wire.reuse=True
         with self.binding() as call:
-            call({},'inspect')
-            with self.assertRaisesRegex(ValueError,'thread_reused'):call({},'inspect')
+            call({'original':'data','sources':[]},'inspect')
+            with self.assertRaisesRegex(ValueError,'thread_reused'):call({'original':'data','sources':[]},'inspect')
         self.assertEqual(len([x for x in self.wire.calls if x[0]=='turn/start']),1)
 
 

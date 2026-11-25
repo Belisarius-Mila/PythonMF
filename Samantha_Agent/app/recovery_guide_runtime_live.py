@@ -71,7 +71,7 @@ for line in sys.stdin:
 
 
 @contextmanager
-def live_calls(directory,executor,*,assert_current,client_factory=None):
+def live_calls(directory,executor,*,assert_current,client_factory=None,inspection_output_tokens=3000,start_index=0):
     from app.communication import agent_roles
     from app.communication.luna_release import new_luna_client
     from app.recovery_guide_anchor_full_pilot import ObservedTurn
@@ -84,14 +84,18 @@ def live_calls(directory,executor,*,assert_current,client_factory=None):
         if (any(selected[k]!=executor[k] for k in ('role','model','reasoning_effort','policy_digest'))
                 or selected.get('fallback') or selected['model']!=m.MODEL or selected['reasoning_effort']!='medium'):
             raise ValueError('runtime_executor_changed')
-        counter=0;threads=set()
+        counter=start_index;threads=set()
         def call(payload,kind):
             nonlocal counter
             if kind not in {'inspect','synthesize'}:raise ValueError('runtime_unknown_phase')
             agent_roles.assert_current(executor,role=m.ROLE)
             if assert_current() is not True:raise ValueError('runtime_inputs_changed_before_thread')
             counter+=1
-            schema=m.INSPECT_SCHEMA if kind=='inspect' else c.schema(payload)
+            from app import recovery_guide_inspection as inspection
+            logical=payload
+            payload=inspection.wire(logical) if kind=='inspect' else logical
+            schema=inspection.SCHEMA if kind=='inspect' else c.schema(payload)
+            instructions=m.REVIEW_INSTRUCTIONS+(inspection.instructions(inspection_output_tokens) if kind=='inspect' else '')
             request=SimpleNamespace(payload=payload,schema=schema)
             context=directory/'context'/str(counter);path=directory/'transport'/f'{counter:03d}.json'
             def before_send(thread):
@@ -102,10 +106,10 @@ def live_calls(directory,executor,*,assert_current,client_factory=None):
                 atomic_write_json(path,{'state':'delivery_unknown','phase':kind,'thread_id':thread,
                     'request_sha256':digest(canonical_json(payload))})
             original=client.transport
-            guard=ObservedTurn(original,context=context,request=request,instructions=m.REVIEW_INSTRUCTIONS,before_send=before_send)
+            guard=ObservedTurn(original,context=context,request=request,instructions=instructions,before_send=before_send)
             client.transport=guard
             try:
-                thread=start_data_only_thread(client,context,m.MODEL,m.REVIEW_INSTRUCTIONS)
+                thread=start_data_only_thread(client,context,m.MODEL,instructions)
                 result=client.send_text(thread_id=thread['thread_id'],text=canonical_json(payload),model=m.MODEL,
                     effort='medium',approval_policy='never',sandbox_policy={'type':'readOnly','networkAccess':False},
                     output_schema=schema,client_message_id=directory.name+'-'+str(counter))
@@ -113,7 +117,8 @@ def live_calls(directory,executor,*,assert_current,client_factory=None):
                     'unexpected_item_types':sorted(guard.unexpected_items)})
                 if not result.delivered or guard.unexpected_items:raise ValueError('runtime_delivery_not_verified')
                 agent_roles.assert_current(executor,role=m.ROLE)
-                return {'answer':json.loads(result.answer),'usage':normalize_usage(result.thread_token_usage)}
+                answer=json.loads(result.answer)
+                return {'answer':inspection.normalize(answer,logical) if kind=='inspect' else answer,'usage':normalize_usage(result.thread_token_usage)}
             except Exception:
                 # Preserve any full receipt already saved above. Before-send
                 # unknown markers must never be replaced with fabricated failure.
@@ -200,7 +205,7 @@ def build(config):
         return ready
     runtime=RecoveryRuntime(scheduler=scheduler,publication=publication,limits=limits,
         bootstrap=Path(p['bootstrap']['path']),bootstrap_sha256=p['bootstrap']['sha256'],snapshot_provider=snapshot,
-        count_tokens=counter,call_factory=live_calls,readiness=readiness,assert_snapshot=assert_snapshot,
+        count_tokens=counter,call_factory=__import__('functools').partial(live_calls,inspection_output_tokens=limits.inspection_reserve),readiness=readiness,assert_snapshot=assert_snapshot,
         cloud_audit=icloud_metadata,delivery_readiness=common_readiness,assert_activation=config.guard,
         automatic_profile=automatic_profile if p['publication_policy']['mode']=='validated_auto_v1' else None)
     return runtime,counter

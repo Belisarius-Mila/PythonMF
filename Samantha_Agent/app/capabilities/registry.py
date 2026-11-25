@@ -12,6 +12,41 @@ from app.capabilities.models import (
 
 CAPABILITIES: tuple[CapabilityRecord, ...] = (
     CapabilityRecord(
+        capability_id="recovery_known_result_prepare", label="Prepare same-job continuation from one proven completed inspection",
+        risk=RiskLevel.LOCAL_WRITE, reads=("owned attention job, full delivered receipt, exact source prefix and measured usage",),
+        writes=("private immutable continuation plan; preview never calls the model",),tool="app.recovery_guide_known_result.prepare",
+        requires_confirmation=False,confirmation_policy=ConfirmationPolicy.NONE,audit=AuditPolicy.REDACTED,
+        notes="Unknown delivery, another paid turn, changed documents, missing usage or larger than original financial admission are refused. All original receipts remain unchanged.",
+    ),
+    CapabilityRecord(
+        capability_id="recovery_known_result_run", label="Continue only unstarted steps of the same approved recovery job",
+        risk=RiskLevel.LOCAL_WRITE,reads=("exact frozen continuation plan and proven completed first receipt",),
+        writes=("one durable continuation marker, local replay and remaining approved model steps",),tool="app.recovery_guide_known_result.run",
+        requires_confirmation=True,confirmation_policy=ConfirmationPolicy.EXACT_CURRENT_MESSAGE,audit=AuditPolicy.REDACTED,
+        notes="First provider turn is never called again. Total turns, credits and elapsed provider time stay inside the original admission; failed or unknown continuation never retries.",
+    ),
+    CapabilityRecord(
+        capability_id="recovery_known_result_review",label="Review recovered guide without another model call",
+        risk=RiskLevel.LOCAL_WRITE,reads=("completed same-job result and optional explicit operator edits",),
+        writes=("private quality-checked publication packet",),tool="app.recovery_guide_known_result.prepare_publication",
+        requires_confirmation=False,confirmation_policy=ConfirmationPolicy.NONE,audit=AuditPolicy.REDACTED,
+        notes="All citations, complete coverage and original safety controls still pass deterministic gates. Raw generated evidence stays intact.",
+    ),
+    CapabilityRecord(
+        capability_id="recovery_known_result_publish",label="Publish exactly reviewed same-job recovery guide",
+        risk=RiskLevel.LOCAL_WRITE,reads=("exact reviewed publication binding and measured complete result",),
+        writes=("preserved original before-images, same job attachment and fixed guide copies",),tool="app.recovery_guide_known_result.publish",
+        requires_confirmation=True,confirmation_policy=ConfirmationPolicy.EXACT_CURRENT_MESSAGE,audit=AuditPolicy.REDACTED,
+        notes="No model call or new job; original failure evidence is preserved and delivery uses the existing idempotent publisher.",
+    ),
+    CapabilityRecord(
+        capability_id="recovery_owned_code_apply",label="Apply reviewed recovery-only code to the owned existing service",
+        risk=RiskLevel.LOCAL_WRITE,reads=("clean exact whitelisted Data files and committed reviewed main modules",),
+        writes=("private before-images and six recovery-only code/test files",),tool="app.recovery_guide_known_result.apply_owned_code",
+        requires_confirmation=True,confirmation_policy=ConfirmationPolicy.EXACT_CURRENT_MESSAGE,audit=AuditPolicy.REDACTED,
+        notes="After completed job only. Refuses dirty targets, aliases and foreign ownership; no LaunchAgent, restart, role, network or unrelated worktree changes.",
+    ),
+    CapabilityRecord(
         capability_id="recovery_guide_manual_baseline_adopt", label="Adopt a verified manual guide before the first weekly revision",
         risk=RiskLevel.LOCAL_WRITE, reads=("accepted uploaded publication and both matching fixed copies", "unchanged owned activation and empty weekly history",),
         writes=("private before-image and only bootstrap reference/hash update",),
