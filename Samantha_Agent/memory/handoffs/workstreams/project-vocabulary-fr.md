@@ -1,10 +1,10 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
-- Obnoveno potvrzeným checkpointem: 2026-11-26 10:35 CET
+- Obnoveno potvrzeným checkpointem: 2026-11-26 12:37 CET
 
 ### Hotovo
-- Poslechový duel umožňuje společnou hru na dálku s třísekundovým výběrem a dalšími partiemi bez nové pozvánky.
+- Poslechový duel nejprve ukáže francouzský text a obrázky odkryje až v poslední sekundě.
 - Předchozí stav main byl před tímto checkpointem serverově nasazený a ověřený.
 
 ### Otevřeno
@@ -14,19 +14,19 @@
 - Žádné další doložené provozní riziko.
 
 ### Další krok
-- Po samostatném schválení aktualizovat herní službu a vydat webový vstup.
+- Připnout večerní aktualizaci herní služby k novému potvrzenému checkpointu.
 
 ### Rozhodnutí
-- Duel má 12 kol, české zadání a třísekundový výběr z 12 kartiček. Zadání se v partii neopakují; další hra i změna filtru zachovají místnost a oba hráče.
+- Třísekundový výběr má dvě sekundy pouze francouzský text a jednu sekundu obrázek s textem; první odpověď zůstává zamčená.
 
 ### Navrhované další kroky
-- Na Janině a Mílově Macu ověřit zobrazení, oba zvuky a třísekundový výběr.
-- Vyzkoušet novou hru, změnu filtru a návrat po výpadku bez nové pozvánky.
+- Aktualizovat připravený operátorský postup na nový checkpoint.
+- Po nasazení ověřit časování, zvuk a výběr na obou Macích.
 
 ### Technický stav checkpointu
-- Změna je otestovaná (237 testů).
-- Git před checkpointem: lokální `main` na `6dfe35967f54`; GitHub může být starší a čeká na denní balíček.
-- Poslední serverově potvrzené nasazení: `6dfe35967f54` · odpovídá ověřenému main před tímto checkpointem · 67 testů · smoke 5/5 · 2026-11-26T05:07:04+00:00.
+- Změna je otestovaná (193 testů).
+- Git před checkpointem: lokální `main` na `a1c352faa867`; GitHub může být starší a čeká na denní balíček.
+- Poslední serverově potvrzené nasazení: `a1c352faa867` · odpovídá ověřenému main před tímto checkpointem · 67 testů · smoke 5/5 · 2026-11-26T09:46:38+00:00.
 - Read-only živý stav: main=`aligned`, deployment=`verified_current`, runtime=`connected`.
 - Tento snapshot je součástí lokálního checkpointu; push na GitHub zůstává odložený do potvrzeného denního balíčku.
 - Tato sekce nahrazuje pouze předchozí aktuální souhrn; chronologické bloky níže zůstávají historickými snapshoty.
@@ -1028,3 +1028,38 @@ Fyzická přejímka a provedení schválené publikace tohoto kroku otevřené.
 - Změněné cesty před paměťovým zápisem (10): `Samantha_Agent/app/vocabulary_fr_multiplayer.py`, `Samantha_Agent/memory/technical/vocabulary_fr_online.md`, `Samantha_Agent/tests/test_vocabularyfr_multiplayer.py`, `Samantha_Agent/tests/test_vocabularyfr_online.js`, `Samantha_Agent/tests/test_vocabularyfr_selection.js`, `docs/vocabulary-fr/index.html`, `docs/vocabulary-fr/memory.js`, `docs/vocabulary-fr/duel.css`, `docs/vocabulary-fr/duel.html`, `docs/vocabulary-fr/duel.js`
 - Commit: `Add two-player French listening duel`
 - Další krok: Po samostatném schválení aktualizovat herní službu a vydat webový vstup.
+
+
+## 2026-11-26 12:35 CET — Duel: text před obrazovou nápovědou
+
+Hotovo: Místní klient ukazuje na všech 12 kartách první dvě sekundy pouze
+velký francouzský text. V poslední sekundě se odkryje obrázek nad menším
+textem. První odpověď zůstává zamčená přes obě fáze; celkový limit je stále
+tři sekundy. Filtry, skórování a zachování společné místnosti se nemění.
+
+Rozhodnutí: Míla schválil rozdělení výběru na 2 s textu a 1 s obrazové
+nápovědy, aby obrázek neprozradil odpověď hned od začátku.
+
+Další krok: Po potvrzeném novém checkpointu k němu připnout večerní
+aktualizaci herní služby; tento tah neprovádí push ani nasazení.
+Navrhované další kroky: Na obou Macích ověřit skutečné časování, oba zvuky
+a zamknutí odpovědi. Již připravený operátorský postup připnutý ke staršímu
+checkpointu nejprve aktualizovat, jinak nebude obsahovat tuto změnu.
+Rizika: Fyzická přejímka a nasazení nové úpravy zůstávají otevřené.
+
+Technický důkaz: 41 online JS scénářů PASS včetně hranic 1999/2000/2999/3000 ms
+a odpovědí v obou fázích. Programově vybraná cílená brána: 179 testů PASS,
+vstupy během běhu nezměněné; nejde o publikační účtenku. Obrázky se při
+přechodu znovu nestahují a synchronizace neobnovuje třísekundový limit.
+
+### Automatický checkpoint 2026-11-26 12:37 CET
+
+- Pracovní proud: `project-vocabulary-fr`
+- Hotovo: Poslechový duel nejprve ukáže francouzský text a obrázky odkryje až v poslední sekundě.; Předchozí stav main byl před tímto checkpointem serverově nasazený a ověřený.
+- Otevřeno: Pozdější nasazení nového checkpointu zatím není tímto snapshotem doložené.
+- Rizika: Žádné další doložené provozní riziko.
+- Stav při vytvoření checkpointu: testy prošly; tento historický blok sám nepotvrzuje pozdější nasazení.
+- Ověření: cílená Cockpit brána: 193 testů, 62.2 s, výsledek OK
+- Změněné cesty před paměťovým zápisem (7): `Samantha_Agent/memory/handoffs/workstreams/project-vocabulary-fr.md`, `Samantha_Agent/memory/technical/vocabulary_fr_online.md`, `Samantha_Agent/memory/tvbcp/workstreams/project-vocabulary-fr.md`, `Samantha_Agent/tests/test_vocabularyfr_online.js`, `docs/vocabulary-fr/duel.css`, `docs/vocabulary-fr/duel.html`, `docs/vocabulary-fr/duel.js`
+- Commit: `Show French text before picture hints in listening duel`
+- Další krok: Připnout večerní aktualizaci herní služby k novému potvrzenému checkpointu.

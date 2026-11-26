@@ -277,7 +277,12 @@ Příprava čeká na dohrání a načtení všech 12 náhledů u obou hráčů. 
 potom naplánuje společné otevření s krátkým předstihem pro doručení stavu.
 Do kartiček se přesunou již dekódované obrazové elementy bez nového načítání;
 stejně tak velká odpověď před zahájením FR zvuku a dvousekundové ukázky.
-Oba mají stejné 4×3 kartičky s francouzskými popisky po dobu 3 s.
+Oba mají stejné 4×3 kartičky po dobu 3 s. Podle následného Mílova upřesnění
+ukazují první 2 s pouze velký FR zápis přes plochu karty; poslední 1 s se
+objeví již připravený obrázek nad zmenšeným textem. Přechod používá čas od
+stejného společného otevření; polling ani kliknutí ho nespouští znovu.
+Kliknout lze v obou částech okna a první odpověď zůstává zamčená i po
+odhalení obrázků. Na hranici 3 s se celá nabídka skryje jako dříve.
 Každý má jedinou uzamčenou odpověď; rychlost nepřidává body. Oba mohou
 získat 1 bod, chyba nebo chybějící odpověď dává 0. Použité zadání se v této
 hře neopakuje, pomocné kartičky se mohou opakovat z původní zásoby.

@@ -143,7 +143,8 @@
         const current=windowState;current.closedSent=true;
         void command('closed').then(ok=>{if(!ok&&active&&windowState===current){current.closedSent=false;current.retryAt=now()+600;}});
       }
-      const boundary=now()<windowState.opens?windowState.opens:now()<windowState.closes?windowState.closes:now()<windowState.closes+180?windowState.closes+180:Infinity;
+      const pictureAt=windowState.opens+2000;
+      const boundary=now()<windowState.opens?windowState.opens:now()<pictureAt?pictureAt:now()<windowState.closes?windowState.closes:now()<windowState.closes+180?windowState.closes+180:Infinity;
       windowTimer=win.setTimeout(tick,Math.max(1,Math.min(40,boundary-now())));
     }
     function renderBoard(locked){
@@ -162,7 +163,12 @@
           });ui.duelBoard.append(button);
         });
       }
-      for(const button of ui.duelBoard.children)button.disabled=locked||choice!==null;
+      const textOnly=now()<windowState.opens+2000;
+      for(const button of ui.duelBoard.children){
+        button.disabled=locked||choice!==null;
+        button.classList.toggle('duel-text-only',textOnly);
+        button.querySelector('img').hidden=textOnly;
+      }
     }
     function render(){
       ui.duelSetup.hidden=Boolean(snapshot);ui.duelRoom.hidden=!snapshot;ui.duelEnter.disabled=!available||sending;

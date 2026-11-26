@@ -330,6 +330,31 @@ test('duel waits for the Czech audio, all images and three seconds before displa
  assert.deepEqual(a.api.getState().choices,b.api.getState().choices);a.element('duelBoard').children[0].click();a.element('duelBoard').children[1].click();await flush();assert.equal(server.requests.filter(r=>r.action==='answer').length,1);
  a.advance(2999);assert.equal(a.element('duelBoard').hidden,false);a.advance(1);assert.equal(a.element('duelBoard').hidden,true);
 });
+test('duel shows only large French text for two seconds, then the prepared images for exactly the final second',async()=>{
+ const {server,a,b}=await duelClients();await duelWindow(a,b);
+ function check(view,textOnly){
+  assert.equal(view.element('duelBoard').hidden,false);assert.equal(view.element('duelBoard').children.length,12);
+  for(const card of view.element('duelBoard').children){assert.equal(card.classList.contains('duel-text-only'),textOnly);assert.equal(card.querySelector('img').hidden,textOnly);assert.equal(card.querySelector('span').lang,'fr');assert.ok(card.querySelector('span').textContent);}
+ }
+ for(const view of [a,b])check(view,true);
+ a.advance(1999);b.advance(1999);await flush();for(const view of [a,b])check(view,true);
+ const images=a.element('duelBoard').querySelectorAll('img');
+ a.advance(1);b.advance(1);await flush();for(const view of [a,b])check(view,false);
+ await a.api.poll();await b.api.poll();for(const view of [a,b])check(view,false);
+ assert.deepEqual(a.element('duelBoard').querySelectorAll('img'),images);assert.ok(images.every(img=>img.assignments===1));
+ a.advance(999);b.advance(999);for(const view of [a,b])check(view,false);
+ a.advance(1);b.advance(1);for(const view of [a,b])assert.equal(view.element('duelBoard').hidden,true);
+ assert.equal(server.requests.filter(r=>r.action==='answer').length,0);
+});
+test('duel accepts a first click in either visual phase and revealing pictures never unlocks a previous answer',async()=>{
+ const {server,a,b}=await duelClients();await duelWindow(a,b);
+ a.element('duelBoard').children[0].click();await flush();assert.equal(a.api.getState().ownAnswer,0);
+ a.advance(2000);b.advance(2000);await flush();
+ for(const card of a.element('duelBoard').children){assert.equal(card.disabled,true);assert.equal(card.querySelector('img').hidden,false);}
+ a.element('duelBoard').children[1].click();b.element('duelBoard').children[1].click();await flush();
+ assert.equal(server.requests.filter(r=>r.action==='answer').length,2);assert.equal(b.api.getState().ownAnswer,1);assert.equal(a.api.getState().ownAnswer,0);
+ a.advance(1000);b.advance(1000);assert.equal(a.element('duelBoard').hidden,true);assert.equal(b.element('duelBoard').hidden,true);
+});
 test('duel result awards either or both players and waits for both French playbacks before host Next',async()=>{
  const {server,a,b}=await duelClients();await duelWindow(a,b);a.element('duelBoard').children[0].click();b.element('duelBoard').children[1].click();await flush();
  assert.equal(b.api.getState().answers,null);await duelClose(a,b);
