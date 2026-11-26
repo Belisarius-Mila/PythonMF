@@ -557,6 +557,33 @@ class DuelTests(RoomFixture):
         self.assertEqual(restarted["closesAt"] - restarted["opensAt"], 4)
         self.assertEqual([p["tokenHash"] for p in self.raw()["players"]], credentials)
 
+    def _assert_pending_timing_survives_interruption(self, legacy=False):
+        self.start()
+        if legacy:
+            current = self.raw()
+            for key in ("textSeconds", "imageSeconds", "roundTextSeconds", "roundImageSeconds"):
+                current.pop(key, None)
+            with sqlite3.connect(self.path) as conn:
+                conn.execute("UPDATE rooms SET body=? WHERE id=?", (json.dumps(current), self.room))
+        self.open_window()
+        self.action("timing", textSeconds=4, imageSeconds=2)
+        self.action("leave", self.guest)
+        self.action("ready", self.guest)
+        repeated = self.open_window()
+        self.assertEqual(repeated["pictureAt"] - repeated["opensAt"], 2)
+        self.assertEqual(repeated["closesAt"] - repeated["opensAt"], 3)
+        self.close_window()
+        self.finish_sound()
+        self.action("next")
+        following = self.open_window()
+        self.assertEqual(following["closesAt"] - following["opensAt"], 6)
+
+    def test_pending_timing_preserves_interrupted_question(self):
+        self._assert_pending_timing_survives_interruption()
+
+    def test_pending_timing_preserves_interrupted_legacy_question(self):
+        self._assert_pending_timing_survives_interruption(legacy=True)
+
     def test_old_persisted_duel_and_pairs_keep_original_defaults_and_isolation(self):
         self.start()
         current = self.raw()

@@ -260,7 +260,7 @@ class Rooms:
             room["pausedSince"], room["acks"] = now, []
             if room.get("mode") == "duel" and room["phase"] == "duel_choose":
                 # An interrupted, unscored window is replayed, never shortened.
-                self._duel_question(room)
+                self._duel_question(room, replay=True)
             elif room.get("mode") == "duel":
                 # A client may miss the whole pause; still invalidate its audio ACK.
                 room["stage"] += 1
@@ -319,7 +319,7 @@ class Rooms:
             if action == "ready":
                 room["players"][player]["ready"] = True
                 if room.get("mode") == "duel" and room["phase"] == "duel_choose":
-                    self._duel_question(room)
+                    self._duel_question(room, replay=True)
             elif action == "leave":
                 room["players"][player]["ready"] = False
             self._presence(room)
@@ -402,11 +402,12 @@ class Rooms:
                 return questions
         raise GameError("Ve filtru není 12 zadání s dostatečně odlišnými obrázky. Rozšiř výběr.")
 
-    def _duel_question(self, room):
+    def _duel_question(self, room, *, replay=False):
         room.update(answers={}, closed=[], acks=[], opensAt=None, closesAt=None)
         # Freeze each question's durations. Later settings never alter a live window.
-        room["roundTextSeconds"] = room.get("textSeconds", 2)
-        room["roundImageSeconds"] = room.get("imageSeconds", 1)
+        if not replay:
+            room["roundTextSeconds"] = room.get("textSeconds", 2)
+            room["roundImageSeconds"] = room.get("imageSeconds", 1)
         self._phase(room, "duel_intro")
         room["stage"] += 1
 

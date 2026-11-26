@@ -329,3 +329,5 @@ Vstup z galerie kryje `tests.test_vocabularyfr_web_gallery`. Vizuální a
 akustická přejímka na fyzických zařízeních zůstává samostatná. Před živým
 použitím je nutné vydat klienta a zvlášť aktualizovat export/server herní
 služby. Tento vývoj neaktivuje síť ani neaktualizuje běžící server.
+
+Při obnovení přerušené otázky se zachovává její roundTextSeconds a roundImageSeconds; čekající nastavení se převezme až pro další otázku. Starší místnosti bez těchto polí používají při opakování původní 2 + 1 s.

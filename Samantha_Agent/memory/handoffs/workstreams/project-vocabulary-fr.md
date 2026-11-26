@@ -1112,3 +1112,16 @@ Autorita provozního stavu: data/private/vocabulary_fr_duel_current_release_2026
 - Změněné cesty před paměťovým zápisem (9): `Samantha_Agent/app/vocabulary_fr_multiplayer.py`, `Samantha_Agent/memory/handoffs/workstreams/project-vocabulary-fr.md`, `Samantha_Agent/memory/technical/vocabulary_fr_online.md`, `Samantha_Agent/memory/tvbcp/workstreams/project-vocabulary-fr.md`, `Samantha_Agent/tests/test_vocabularyfr_multiplayer.py`, `Samantha_Agent/tests/test_vocabularyfr_online.js`, `docs/vocabulary-fr/duel.css`, `docs/vocabulary-fr/duel.html`, `docs/vocabulary-fr/duel.js`
 - Commit: `Add host-controlled listening duel timing settings`
 - Další krok: Po potvrzeném checkpointu samostatně vydat web a aktualizovat herní službu se zachováním databáze.
+
+## 2026-11-26 — Převzetí vydání nastavitelného časování duelu
+
+Převzat původní checkpoint `d950b94b`: zakladatel mění text 2/3/4 s a obrázek
+1/2 s během partie, společně pro oba hráče a od následující otázky. Při
+opakování přerušené otázky se nyní zachová její zmrazené časování včetně
+starších uložených místností. Důkaz: 42 serverových testů PASS; klientské
+hranice všech šesti kombinací a skutečné HTTP zahrnuje programová brána.
+Vydání webu přes Terru a aktualizace soukromé služby se připravují; dosavadní
+nasazení `42f75f44` ještě nemá nastavení časů. Databáze i pozvánky se zachovají.
+Nová aktivace LaunchAgentu vyžaduje přesnou globální brzdu pro konkrétní plán.
+Fyzický poslech na Janině Macu zůstává samostatnou přejímkou.
+Účtenky: `data/private/vocabulary_fr_duel_timing_20261126/` (mimo Git).
