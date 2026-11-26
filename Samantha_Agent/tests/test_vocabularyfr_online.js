@@ -237,20 +237,20 @@ const duel=require('../../docs/vocabulary-fr/duel.js');
 const duelHtml=fs.readFileSync(path.resolve(__dirname,'../../docs/vocabulary-fr/duel.html'),'utf8');
 function duelBridge(){
  let state=null,host=null,guest=null,invite=null;
- const bridge={now:0,failed:false,loseAnswer:false,loseRestart:false,games:['pairs','duel'],requests:[]};
+ const bridge={now:0,failed:false,loseAnswer:false,loseRestart:false,loseTiming:false,games:['pairs','duel'],requests:[]};
  const time=()=>1800000000+bridge.now/1000;
  const result=(value,status=200)=>({ok:status===200,status,json:async()=>structuredClone(value)});
- function question(){state.choices=[state.pool[state.question-1],...state.pool.filter(uid=>uid!==state.pool[state.question-1]).slice(0,11)];state.answers={};state.closed=[];state.acks=[];state.phase='duel_intro';state.since=time();state.stage++;state.revision++;}
+ function question(){state.choices=[state.pool[state.question-1],...state.pool.filter(uid=>uid!==state.pool[state.question-1]).slice(0,11)];state.answers={};state.closed=[];state.acks=[];state.phase='duel_intro';state.since=time();state.stage++;state.roundTextSeconds=state.textSeconds;state.roundImageSeconds=state.imageSeconds;state.revision++;}
  function advance(){
   if(state.paused)return;
-  if(state.phase==='duel_intro'&&state.acks.length===2&&time()-state.since>=3){state.phase='duel_choose';state.stage++;state.opensAt=time()+1.5;state.closesAt=state.opensAt+3;state.revision++;}
+  if(state.phase==='duel_intro'&&state.acks.length===2&&time()-state.since>=3){state.phase='duel_choose';state.stage++;state.opensAt=time()+1.5;state.pictureAt=state.opensAt+state.roundTextSeconds;state.closesAt=state.pictureAt+state.roundImageSeconds;state.revision++;}
   else if(state.phase==='duel_choose'&&state.closed.length===2&&time()>=state.closesAt){for(let i=0;i<2;i++)state.scores[i]+=Number(state.answers[i]===0);state.phase='duel_result';state.stage++;state.acks=[];state.since=time();state.revision++;}
   else if(state.phase==='duel_result'&&state.acks.length===2&&time()-state.since>=2){state.phase=state.question===12?'finished':'duel_between';state.revision++;}
  }
  function view(you){
   const showing=['duel_result','duel_between','finished'].includes(state.phase);
   return {protocol:1,mode:'duel',room,revision:state.revision,catalog:revision,you,players:state.players,round:state.round,stage:state.stage,phase:state.phase,question:state.question,questionCount:12,poolCount:state.pool.length,pool:you===0?state.pool:null,choices:state.phase==='waiting'?[]:state.choices,
-   promptAudio:state.phase==='duel_intro'?base.audio.items[state.choices[0]].cz:null,target:showing?state.choices[0]:null,scores:state.scores,ownAnswer:state.answers[you]??null,answers:showing?state.answers:null,acks:state.acks,closed:state.closed.includes(you),serverTime:time(),opensAt:state.opensAt,closesAt:state.closesAt,paused:state.paused,expires:time()+86400};
+   promptAudio:state.phase==='duel_intro'?base.audio.items[state.choices[0]].cz:null,target:showing?state.choices[0]:null,scores:state.scores,ownAnswer:state.answers[you]??null,answers:showing?state.answers:null,acks:state.acks,closed:state.closed.includes(you),serverTime:time(),opensAt:state.opensAt,closesAt:state.closesAt,pictureAt:state.pictureAt,textSeconds:state.textSeconds,imageSeconds:state.imageSeconds,paused:state.paused,expires:time()+86400};
  }
  bridge.fetcher=async(url,options={})=>{
   if(bridge.failed)throw Error('offline');
@@ -260,7 +260,7 @@ function duelBridge(){
   const payload=JSON.parse(options.body),action=String(url).split('/').at(-1),token=options.headers.Authorization?.replace('Bearer ','');bridge.requests.push({action,payload,token});
   if(action==='rooms'){
    host=payload.playerToken;invite=payload.invite;
-   state={players:[{name:payload.name,connected:true},null],pool:payload.uids,question:1,round:1,stage:0,revision:1,scores:[0,0],answers:{},closed:[],acks:[],phase:'waiting',paused:false,choices:[]};return result(view(0));
+   state={players:[{name:payload.name,connected:true},null],pool:payload.uids,question:1,round:1,stage:0,revision:1,scores:[0,0],answers:{},closed:[],acks:[],phase:'waiting',paused:false,choices:[],textSeconds:2,imageSeconds:1};return result(view(0));
   }
   if(action==='join'){
    if(invite!==payload.invite)return result({error:'Neplatná pozvánka'},403);
@@ -268,6 +268,12 @@ function duelBridge(){
   }
   const you=token===host?0:token===guest?1:-1;if(you<0)return result({error:'Neplatný přístup'},403);
   advance();
+  if(action==='timing'){
+   if(you!==0)return result({error:'Pouze zakladatel'},403);
+   if(![2,3,4].includes(payload.textSeconds)||![1,2].includes(payload.imageSeconds))return result({error:'Neplatné časy'},400);
+   state.textSeconds=payload.textSeconds;state.imageSeconds=payload.imageSeconds;state.revision++;
+   if(bridge.loseTiming){bridge.loseTiming=false;throw Error('lost timing response');}
+  }
   if(action==='ready'){state.players[you].connected=true;state.paused=!state.players.every(p=>p?.connected);if(state.phase==='duel_choose')question();state.revision++;}
   if(action==='leave'){state.players[you].connected=false;state.paused=true;if(state.phase==='duel_choose')question();state.revision++;}
   if(action==='start')question();
@@ -311,6 +317,75 @@ async function enterDuel(view){const task=view.api.enter();await until(()=>!view
 async function duelClients(){const server=duelBridge(),a=await duelClient(server);await enterDuel(a);const b=await duelClient(server,{url:a.element('duelInvite').value,name:'Míla'});await enterDuel(b);await a.api.poll();await a.api.command('start');await b.api.poll();return {server,a,b};}
 async function duelWindow(a,b){a.ended();b.ended();a.advance(3000);b.advance(3000);await flush();await a.api.poll();await b.api.poll();a.advance(1500);b.advance(1500);await flush();}
 async function duelClose(a,b){a.advance(3000);b.advance(3000);await flush();assert.equal(a.element('duelBoard').hidden,true);assert.equal(b.element('duelBoard').hidden,true);a.advance(200);b.advance(200);await flush();await a.api.poll();await b.api.poll();}
+
+test('duel host menus work before a guest arrives; guest cannot change timings',async()=>{
+ const server=duelBridge(),a=await duelClient(server);await enterDuel(a);
+ assert.equal(a.element('duelTiming').hidden,false);assert.equal(a.element('duelTextSeconds').value,'2');
+ a.element('duelTextSeconds').value='4';a.element('duelTextSeconds').emit('change');await flush();
+ a.element('duelImageSeconds').value='2';a.element('duelImageSeconds').emit('change');await flush();
+ assert.deepEqual([server.state.textSeconds,server.state.imageSeconds],[4,2]);assert.match(a.element('duelTimingNotice').textContent,/6 s/);
+ const b=await duelClient(server,{url:a.element('duelInvite').value});await enterDuel(b);
+ assert.equal(b.element('duelTiming').hidden,true);assert.equal(b.element('duelTextSeconds').disabled,true);
+ b.element('duelTextSeconds').value='3';b.element('duelTextSeconds').emit('change');await flush();
+ assert.equal(server.requests.filter(r=>r.action==='timing').length,2);
+ await a.api.poll();await a.api.command('start');await b.api.poll();await duelWindow(a,b);
+ assert.equal(a.api.getState().closesAt-a.api.getState().opensAt,6);
+});
+test('duel six timing combinations reveal and hide all cards at exact shared boundaries',async()=>{
+ for(const text of [2,3,4])for(const image of [1,2]){
+  const server=duelBridge(),a=await duelClient(server);await enterDuel(a);
+  await a.api.command('timing',{textSeconds:text,imageSeconds:image});
+  const b=await duelClient(server,{url:a.element('duelInvite').value,clockOffset:10000000});await enterDuel(b);
+  await a.api.poll();await a.api.command('start');await b.api.poll();await duelWindow(a,b);
+  a.advance(text*1000-1);b.advance(text*1000-1);await flush();
+  for(const view of [a,b])assert.ok(view.element('duelBoard').querySelectorAll('img').every(img=>img.hidden));
+  a.advance(1);b.advance(1);await flush();
+  for(const view of [a,b])assert.ok(view.element('duelBoard').querySelectorAll('img').every(img=>!img.hidden));
+  await a.api.poll();await b.api.poll();
+  a.advance(image*1000-1);b.advance(image*1000-1);await flush();
+  for(const view of [a,b])assert.equal(view.element('duelBoard').hidden,false);
+  b.element('duelBoard').children[0].click();await flush();assert.equal(b.api.getState().ownAnswer,0);
+  a.advance(1);b.advance(1);await flush();
+  for(const view of [a,b])assert.equal(view.element('duelBoard').hidden,true);
+ }
+});
+test('duel midround timing changes preserve the answer window, scores and room until next question',async()=>{
+ const {server,a,b}=await duelClients();await duelWindow(a,b);
+ const sessions=[a.session.getItem(duel.KEY),b.session.getItem(duel.KEY)],urls=[a.win.location.href,b.win.location.href];
+ const closes=a.api.getState().closesAt,picture=a.api.getState().pictureAt;
+ a.element('duelBoard').children[0].click();await flush();
+ a.element('duelTextSeconds').value='4';a.element('duelTextSeconds').emit('change');await flush();
+ a.element('duelImageSeconds').value='2';a.element('duelImageSeconds').emit('change');await flush();await b.api.poll();
+ assert.equal(b.api.getState().closesAt,closes);assert.equal(b.api.getState().pictureAt,picture);
+ assert.deepEqual(a.api.getState().scores,[0,0]);assert.equal(a.api.getState().ownAnswer,0);
+ a.advance(2000);b.advance(2000);await flush();assert.ok(a.element('duelBoard').children.every(card=>card.disabled));
+ a.advance(1000);b.advance(1000);await flush();assert.equal(a.element('duelBoard').hidden,true);
+ a.advance(200);b.advance(200);await flush();await a.api.poll();await b.api.poll();
+ a.ended();b.ended();a.advance(2000);b.advance(2000);await flush();await a.api.poll();await b.api.poll();
+ assert.deepEqual(a.api.getState().scores,[1,0]);await a.api.command('next');await b.api.poll();await duelWindow(a,b);
+ assert.equal(b.api.getState().pictureAt-b.api.getState().opensAt,4);assert.equal(b.api.getState().closesAt-b.api.getState().opensAt,6);
+ assert.deepEqual([a.session.getItem(duel.KEY),b.session.getItem(duel.KEY)],sessions);assert.deepEqual([a.win.location.href,b.win.location.href],urls);
+ assert.equal(server.requests.filter(r=>r.action==='rooms').length,1);
+ await a.api.command('restart',{uids:server.state.pool});await b.api.poll();await duelWindow(a,b);
+ assert.equal(a.api.getState().closesAt-a.api.getState().opensAt,6);
+});
+test('duel old service keeps playable default timing but disables unsupported settings',async()=>{
+ const server=duelBridge(),fetcher=server.fetcher;
+ server.fetcher=async(...args)=>{const r=await fetcher(...args),value=await r.json?.();if(!value)return r;delete value.textSeconds;delete value.imageSeconds;delete value.pictureAt;return {...r,json:async()=>value};};
+ const a=await duelClient(server);await enterDuel(a);
+ assert.equal(a.element('duelTextSeconds').disabled,true);assert.match(a.element('duelTimingNotice').textContent,/aktualizaci/);
+ const b=await duelClient(server,{url:a.element('duelInvite').value});await enterDuel(b);
+ await a.api.poll();await a.api.command('start');await b.api.poll();await duelWindow(a,b);
+ a.advance(2000);b.advance(2000);await flush();assert.ok(a.element('duelBoard').querySelectorAll('img').every(img=>!img.hidden));
+ a.advance(1000);b.advance(1000);assert.equal(a.element('duelBoard').hidden,true);
+});
+test('duel lost timing reply recovers saved settings without repeating the change',async()=>{
+ const {server,a,b}=await duelClients();server.loseTiming=true;
+ a.element('duelTextSeconds').value='4';a.element('duelTextSeconds').emit('change');await flush();
+ assert.equal(a.element('duelResume').hidden,false);assert.equal(a.element('duelTextSeconds').disabled,true);
+ const again=await duelClient(server,{url:a.win.location.href,session:a.session});await enterDuel(again);await b.api.poll();
+ assert.equal(again.element('duelTextSeconds').value,'4');assert.equal(server.requests.filter(r=>r.action==='timing').length,1);
+});
 
 test('duel starts silently, keeps its own session, and refuses an older server without this game',async()=>{
  const server=duelBridge(),a=await duelClient(server);assert.equal(a.players[0].starts.length,0);assert.equal(server.requests.length,0);assert.equal(a.element('duelEnter').disabled,false);

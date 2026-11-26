@@ -493,6 +493,86 @@ class DuelTests(RoomFixture):
         self.action("heard", stage=state["stage"])
         return self.action("heard", self.guest, stage=state["stage"])
 
+    def test_all_six_timing_combinations_have_server_authoritative_boundaries(self):
+        for text, image in ((2, 1), (2, 2), (3, 1), (3, 2), (4, 1), (4, 2)):
+            with self.subTest(text=text, image=image):
+                self.action("timing", textSeconds=text, imageSeconds=image)
+                if self.raw()["started"]:
+                    self.action("next")
+                else:
+                    self.start()
+                state = self.open_window()
+                self.assertEqual(state["pictureAt"] - state["opensAt"], text)
+                self.assertEqual(state["closesAt"] - state["pictureAt"], image)
+                self.assertEqual(state["closesAt"] - state["opensAt"], text + image)
+                self.clock.advance(text + image - .01)
+                self.action("answer", index=0)
+                self.clock.advance(.01)
+                with self.assertRaises(GameError):
+                    self.action("answer", self.guest, index=0)
+                self.close_window()
+                self.finish_sound()
+
+    def test_timing_is_host_only_strict_and_available_before_guest_arrives(self):
+        state = self.action("timing", textSeconds=4, imageSeconds=2)
+        self.assertEqual((state["textSeconds"], state["imageSeconds"]), (4, 2))
+        self.assertEqual(state["phase"], "waiting")
+        self.start()
+        for token, text, image in ((self.guest, 3, 1), (self.host, True, 1), (self.host, 2., 1),
+                                   (self.host, "3", 1), (self.host, 5, 1), (self.host, 3, False),
+                                   (self.host, 3, 3), (self.host, 3, None)):
+            before = self.raw()
+            with self.assertRaises(GameError):
+                self.action("timing", token, textSeconds=text, imageSeconds=image)
+            self.assertEqual(self.raw(), before)
+
+    def test_midround_timing_is_deferred_persisted_idempotent_and_retained_on_restart(self):
+        self.action("timing", textSeconds=4, imageSeconds=2)
+        self.start()
+        original = self.open_window()
+        self.action("answer", index=0)
+        raw = self.raw()
+        request = {"requestId": "f" * 64, "expectedRound": raw["round"], "expectedStage": raw["stage"],
+                   "textSeconds": 3, "imageSeconds": 1}
+        updated = self.rooms.act(self.room, self.host, "timing", request)
+        for field in ("room", "round", "stage", "question", "scores", "choices", "opensAt", "pictureAt", "closesAt"):
+            self.assertEqual(updated[field], original[field], field)
+        self.assertEqual(updated["ownAnswer"], 0)
+        self.assertEqual(self.rooms.act(self.room, self.host, "timing", request), updated)
+        with self.assertRaises(GameError):
+            self.rooms.act(self.room, self.host, "timing", {**request, "textSeconds": 2})
+        with self.assertRaises(GameError):
+            self.action("timing", textSeconds=2, imageSeconds=1, expectedStage=-1)
+        self.rooms = Rooms(self.path, self.catalog, clock=self.clock, shuffle=random.Random(8).shuffle)
+        self.assertEqual(self.action("sync", self.guest)["textSeconds"], 3)
+        self.close_window()
+        self.finish_sound()
+        self.action("next")
+        state = self.open_window()
+        self.assertEqual(state["pictureAt"] - state["opensAt"], 3)
+        self.assertEqual(state["closesAt"] - state["opensAt"], 4)
+        credentials = [(p["tokenHash"]) for p in self.raw()["players"]]
+        self.action("restart", uids=self.pool)
+        restarted = self.open_window()
+        self.assertEqual(restarted["closesAt"] - restarted["opensAt"], 4)
+        self.assertEqual([p["tokenHash"] for p in self.raw()["players"]], credentials)
+
+    def test_old_persisted_duel_and_pairs_keep_original_defaults_and_isolation(self):
+        self.start()
+        current = self.raw()
+        for key in ("textSeconds", "imageSeconds", "roundTextSeconds", "roundImageSeconds"):
+            current.pop(key, None)
+        with sqlite3.connect(self.path) as conn:
+            conn.execute("UPDATE rooms SET body=? WHERE id=?", (json.dumps(current), self.room))
+        state = self.open_window()
+        self.assertEqual((state["textSeconds"], state["imageSeconds"]), (2, 1))
+        self.assertEqual(state["pictureAt"] - state["opensAt"], 2)
+        self.assertEqual(state["closesAt"] - state["opensAt"], 3)
+        pairs = self.rooms.create({**self.payload, "mode": "pairs", "uids": self.uids, "requestId": "9" * 64})
+        with self.assertRaises(GameError):
+            self.rooms.act(pairs["room"], self.host, "timing", {"requestId": "8" * 64,
+                "expectedRound": pairs["round"], "expectedStage": pairs["stage"], "textSeconds": 4, "imageSeconds": 2})
+
     def test_pool_keeps_all_fifty_words_and_questions_are_distinct_compatible_and_private(self):
         self.assertEqual(self.initial["pool"], self.pool)
         questions = self.raw()["questions"]
@@ -717,18 +797,21 @@ class DuelTests(RoomFixture):
             return result
 
         request("join", self.guest, name="Míla", invite=self.invite, playerToken=self.guest)
+        configured = request("timing", self.host, textSeconds=4, imageSeconds=2)
+        self.assertEqual((configured["textSeconds"], configured["imageSeconds"]), (4, 2))
         state = request("start", self.host)
         self.clock.advance(3)
         request("heard", self.host, stage=state["stage"])
         state = request("heard", self.guest, stage=state["stage"])
         self.clock.advance(state["opensAt"] - self.clock())
         correct = state["choices"].index(self.raw()["questions"][0]["target"])
+        self.assertEqual((state["pictureAt"] - state["opensAt"], state["closesAt"] - state["pictureAt"]), (4, 2))
         request("answer", self.host, index=correct)
         guest = request("sync", self.guest)
         self.assertIsNone(guest["ownAnswer"])
         self.assertIsNone(guest["answers"])
         request("answer", self.guest, index=(correct+1) % 12)
-        self.clock.advance(3)
+        self.clock.advance(6)
         request("closed", self.host)
         state = request("closed", self.guest)
         self.assertEqual(state["scores"], [1, 0])

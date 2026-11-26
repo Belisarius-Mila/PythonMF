@@ -9,6 +9,7 @@
 
   function create({doc,win,fetcher=root.fetch.bind(root),AudioClass=root.Audio,ImageClass=win.Image}){
     const ids=['duelView','duelStatus','duelStorage','duelSetup','duelName','duelSelection','duelEnter','duelRoom','duelInvitePanel','duelInvite','duelCopy','duelProgress','duelStart','duelResume','duelRetry','duelSkip','duelChangeFilter','duelAnnouncement','duelCountdown','duelBoard','duelFeedback','duelImage','duelWord','duelRoundResult','duelNext','duelEnd','duelResult','duelAgain','duelPicker','duelTopic','duelPart','duelLevel','duelType','duelRecent','duelQuery','duelPoolNotice','duelApply','duelCancel','duelScores','duelBack'];
+    ids.push('duelTiming','duelTextSeconds','duelImageSeconds','duelTimingNotice');
     const ui=Object.fromEntries(ids.map(id=>[id,doc.getElementById(id)]));
     const route=new URLSearchParams(new URL(win.location.href).hash.slice(1));
     const audio=new AudioClass(),images=new Map(),loadedImages=new Map();
@@ -103,7 +104,9 @@
           const opens=now()+snapshot.opensAt*1000-serverNow();
           // A late/reloaded client must receive a fresh full window, not a fraction.
           if(opens<now()-150){disconnect('Časové okno dorazilo pozdě. Pokračuj a současné kolo zopakujeme.');return;}
-          windowState={key,opens,closes:opens+3000,choice:snapshot.ownAnswer,closedSent:snapshot.closed};
+          const pictureAt=snapshot.pictureAt??snapshot.opensAt+2;
+          if(!Number.isFinite(pictureAt)||!Number.isFinite(snapshot.closesAt)||pictureAt<=snapshot.opensAt||snapshot.closesAt<=pictureAt){disconnect('Herní služba poslala neplatné časování.');return;}
+          windowState={key,opens,pictureAt:opens+(pictureAt-snapshot.opensAt)*1000,closes:opens+(snapshot.closesAt-snapshot.opensAt)*1000,choice:snapshot.ownAnswer,closedSent:snapshot.closed};
         }
         tick();return;
       }
@@ -143,7 +146,7 @@
         const current=windowState;current.closedSent=true;
         void command('closed').then(ok=>{if(!ok&&active&&windowState===current){current.closedSent=false;current.retryAt=now()+600;}});
       }
-      const pictureAt=windowState.opens+2000;
+      const pictureAt=windowState.pictureAt;
       const boundary=now()<windowState.opens?windowState.opens:now()<pictureAt?pictureAt:now()<windowState.closes?windowState.closes:now()<windowState.closes+180?windowState.closes+180:Infinity;
       windowTimer=win.setTimeout(tick,Math.max(1,Math.min(40,boundary-now())));
     }
@@ -163,7 +166,7 @@
           });ui.duelBoard.append(button);
         });
       }
-      const textOnly=now()<windowState.opens+2000;
+      const textOnly=now()<windowState.pictureAt;
       for(const button of ui.duelBoard.children){
         button.disabled=locked||choice!==null;
         button.classList.toggle('duel-text-only',textOnly);
@@ -175,6 +178,11 @@
       if(!snapshot)return;
       ui.duelView.dataset.playing=String(snapshot.phase!=='waiting');
       const locked=!active||!network||snapshot.paused||sending,host=snapshot.you===0,finished=snapshot.phase==='finished';
+      const timingSupported=[2,3,4].includes(snapshot.textSeconds)&&[1,2].includes(snapshot.imageSeconds);
+      ui.duelTiming.hidden=!host;
+      ui.duelTextSeconds.value=String(snapshot.textSeconds??2);ui.duelImageSeconds.value=String(snapshot.imageSeconds??1);
+      ui.duelTextSeconds.disabled=ui.duelImageSeconds.disabled=!host||!active||!network||sending||!timingSupported;
+      ui.duelTimingNotice.textContent=!timingSupported?'Změna časů vyžaduje aktualizaci herní služby.':`Pro další kola: text ${snapshot.textSeconds} s + obrázek ${snapshot.imageSeconds} s = ${snapshot.textSeconds+snapshot.imageSeconds} s. Rozehrané kolo se nemění.`;
       ui.duelResume.hidden=active;ui.duelResume.disabled=sending||!available;
       ui.duelInvitePanel.hidden=!session.invite||session.mode!=='host'||snapshot.players[1]!==null;
       const invite=new URL('duel.html',win.location.href);invite.hash=new URLSearchParams({room:session.room,invite:session.invite||''}).toString();ui.duelInvite.value=invite.toString();
@@ -269,6 +277,10 @@
     }
     ui.duelEnter.addEventListener('click',()=>{void enter();});ui.duelResume.addEventListener('click',()=>{void enter();});
     ui.duelStart.addEventListener('click',()=>{void command('start');});ui.duelNext.addEventListener('click',()=>{void command('next');});
+    for(const id of ['duelTextSeconds','duelImageSeconds'])ui[id].addEventListener('change',()=>{
+      if(snapshot?.you!==0||ui[id].disabled)return;
+      void command('timing',{textSeconds:Number(ui.duelTextSeconds.value),imageSeconds:Number(ui.duelImageSeconds.value)});
+    });
     ui.duelAgain.addEventListener('click',()=>{void command('rematch');});
     ui.duelChangeFilter.addEventListener('click',()=>{if(snapshot?.you!==0)return;picking=true;choosePool();ui.duelPicker.scrollIntoView({block:'nearest'});});
     for(const id of ['duelTopic','duelPart','duelLevel','duelType','duelRecent'])ui[id].addEventListener('change',choosePool);

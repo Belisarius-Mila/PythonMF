@@ -6,23 +6,28 @@
   <title>Poslechový duel · Francouzština Jana</title>
   <link rel="stylesheet" href="gallery.css?v=20261126-duel1">
   <link rel="stylesheet" href="online.css?v=20261125-filter1">
-  <link rel="stylesheet" href="duel.css?v=20261126-duel2">
+  <link rel="stylesheet" href="duel.css?v=20261126-timing1">
   <script src="model.js" defer></script><script src="practice.js" defer></script>
-  <script src="memory.js?v=20261126-duel1" defer></script><script src="duel.js?v=20261126-duel2" defer></script>
+  <script src="memory.js?v=20261126-duel1" defer></script><script src="duel.js?v=20261126-timing1" defer></script>
 </head>
 <body><main id="duelView" class="page-shell">
-  <header class="memory-header"><div><p class="eyebrow">Francouzština Jana · Dva hráči na dálku</p><h1>Poslechový duel</h1><p>Poslechni české slovo. Za 3 sekundy najdi správnou kartičku.</p></div><a id="duelBack" href="./#game=memory-pairs">← Odejít na přehled</a></header>
+  <header class="memory-header"><div><p class="eyebrow">Francouzština Jana · Dva hráči na dálku</p><h1>Poslechový duel</h1><p>Poslechni české slovo a najdi správnou kartičku.</p></div><a id="duelBack" href="./#game=memory-pairs">← Odejít na přehled</a></header>
   <p id="duelStatus" role="status" aria-live="polite">Připravuji společnou hru…</p>
   <p id="duelStorage" class="notice" role="status"></p>
   <section id="duelSetup" class="memory-setup">
     <label>Tvoje jméno<input id="duelName" maxlength="12" autocomplete="off" value="Hráč"></label>
-    <p id="duelSelection"></p><p>Partie má 12 kol. První 2 sekundy vybíráš podle velkého francouzského textu, poslední sekundu pomůže obrázek. Každý má jednu odpověď; správně mohou odpovědět oba. Před vstupem zazní krátká francouzská ukázka.</p>
+    <p id="duelSelection"></p><p>Partie má 12 kol. Nejdřív vybíráš podle velkého francouzského textu, potom pomůže obrázek. Zakladatel volí text 2–4 s a obrázek 1–2 s; výchozí časy jsou 2 + 1 s. Každý má jednu odpověď; správně mohou odpovědět oba. Před vstupem zazní krátká francouzská ukázka.</p>
     <button id="duelEnter" class="primary" type="button" disabled>Založit duel a zapnout zvuk</button>
   </section>
   <section id="duelRoom" hidden>
     <div id="duelInvitePanel" class="online-invite" hidden><label>Soukromý odkaz pro spoluhráče<input id="duelInvite" readonly spellcheck="false" autocomplete="off"></label><button id="duelCopy" type="button">Kopírovat pozvánku</button></div>
     <div class="memory-round-header"><p id="duelProgress"></p><button id="duelStart" class="primary" type="button" hidden>Zahájit společnou hru</button><button id="duelResume" type="button" hidden>Pokračovat a zapnout zvuk</button><button id="duelRetry" type="button" hidden>Zopakovat přípravu a zvuk</button><button id="duelSkip" type="button" hidden>Pokračovat bez zvuku</button></div>
     <p><button id="duelChangeFilter" type="button" hidden>Změnit filtr a začít novou hru</button></p>
+    <section id="duelTiming" class="duel-timing" aria-label="Časování dalších kol" hidden>
+      <label>Text <select id="duelTextSeconds"><option value="2">2 s</option><option value="3">3 s</option><option value="4">4 s</option></select></label>
+      <label>Obrázek <select id="duelImageSeconds"><option value="1">1 s</option><option value="2">2 s</option></select></label>
+      <small id="duelTimingNotice" role="status" aria-live="polite"></small>
+    </section>
     <div id="duelAnnouncement" class="duel-announcement" role="status" aria-live="polite" hidden></div>
     <p id="duelCountdown" class="duel-countdown" role="timer" aria-label="Čas na odpověď" hidden></p>
     <div id="duelBoard" class="duel-board" aria-label="12 obrázků, čtyři sloupce a tři řádky" hidden></div>

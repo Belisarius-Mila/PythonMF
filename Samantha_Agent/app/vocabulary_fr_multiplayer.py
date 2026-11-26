@@ -306,7 +306,7 @@ class Rooms:
 
     def act(self, room_id: str, token: str, action: str, payload: dict | None = None) -> dict:
         token, payload = _token(token), payload or {}
-        if action not in ("sync", "ready", "leave", "start", "flip", "heard", "rematch", "restart", "answer", "closed", "next"):
+        if action not in ("sync", "ready", "leave", "start", "flip", "heard", "rematch", "restart", "answer", "closed", "next", "timing"):
             raise GameError("Neznámá herní akce.")
         with self._db() as conn:
             room = self._load(conn, room_id)
@@ -324,7 +324,7 @@ class Rooms:
                 room["players"][player]["ready"] = False
             self._presence(room)
             self._advance(room)
-            if action in ("start", "flip", "heard", "rematch", "restart", "answer", "closed", "next"):
+            if action in ("start", "flip", "heard", "rematch", "restart", "answer", "closed", "next", "timing"):
                 request_id = _request(payload.get("requestId"))
                 fingerprint = _hash(json.dumps([player, action, payload], sort_keys=True))
                 prior = room["requests"].get(request_id)
@@ -344,7 +344,8 @@ class Rooms:
         if (type(payload.get("expectedRound")) is not int or type(payload.get("expectedStage")) is not int
                 or payload["expectedRound"] != room["round"] or payload["expectedStage"] != room["stage"]):
             raise GameError("Partie mezitím pokročila. Ověř její aktuální stav.", 409)
-        if not all(self._connected(p) for p in room["players"]) or room["pausedSince"] is not None:
+        if not (room.get("mode") == "duel" and action == "timing") and (
+                not all(self._connected(p) for p in room["players"]) or room["pausedSince"] is not None):
             raise GameError("Čekáme na připojení obou hráčů.", 409)
         if room.get("mode") == "duel":
             self._duel_action(room, player, action, payload)
@@ -403,6 +404,9 @@ class Rooms:
 
     def _duel_question(self, room):
         room.update(answers={}, closed=[], acks=[], opensAt=None, closesAt=None)
+        # Freeze each question's durations. Later settings never alter a live window.
+        room["roundTextSeconds"] = room.get("textSeconds", 2)
+        room["roundImageSeconds"] = room.get("imageSeconds", 1)
         self._phase(room, "duel_intro")
         room["stage"] += 1
 
@@ -412,7 +416,7 @@ class Rooms:
             self._phase(room, "duel_choose")
             room["stage"] += 1
             room["opensAt"] = self.clock() + DUEL_LEAD_SECONDS
-            room["closesAt"] = room["opensAt"] + DUEL_SECONDS
+            room["closesAt"] = room["opensAt"] + room.get("roundTextSeconds", 2) + room.get("roundImageSeconds", 1)
         elif room["phase"] == "duel_choose" and self.clock() >= room["closesAt"] and set(room["closed"]) == {0, 1}:
             question = room["questions"][room["question"]]
             correct = question["choices"].index(question["target"])
@@ -426,7 +430,14 @@ class Rooms:
 
     def _duel_action(self, room, player, action, payload):
         phase = room["phase"]
-        if action == "start":
+        if action == "timing":
+            text, image = payload.get("textSeconds"), payload.get("imageSeconds")
+            if player != 0:
+                raise GameError("Časy duelu mění pouze zakladatel hry.", 403)
+            if type(text) is not int or text not in (2, 3, 4) or type(image) is not int or image not in (1, 2):
+                raise GameError("Zvol text 2, 3 nebo 4 s a obrázek 1 nebo 2 s.")
+            room.update(textSeconds=text, imageSeconds=image)
+        elif action == "start":
             if player != 0 or room["started"]:
                 raise GameError("Partii může zahájit její zakladatel.", 409)
             room["started"] = True
@@ -481,6 +492,8 @@ class Rooms:
                 "ownAnswer": room["answers"].get(str(player)), "answers": room["answers"] if result else None,
                 "acks": room["acks"], "closed": player in room["closed"],
                 "serverTime": self.clock(), "opensAt": room["opensAt"], "closesAt": room["closesAt"],
+                "textSeconds": room.get("textSeconds", 2), "imageSeconds": room.get("imageSeconds", 1),
+                "pictureAt": (room["opensAt"] + room.get("roundTextSeconds", 2)) if room["opensAt"] is not None else None,
                 "paused": room["pausedSince"] is not None, "expires": room["expires"]}
 
     def _snapshot(self, room, player):
@@ -619,7 +632,7 @@ class Handler(BaseHTTPRequestHandler):
                 self._rate()
                 value = self.server.rooms.create(payload)
             else:
-                match = re.fullmatch(re.escape(API) + r"/([a-f0-9]{24})/(join|sync|ready|leave|start|flip|heard|rematch|restart|answer|closed|next)", path)
+                match = re.fullmatch(re.escape(API) + r"/([a-f0-9]{24})/(join|sync|ready|leave|start|flip|heard|rematch|restart|answer|closed|next|timing)", path)
                 if not match:
                     raise GameError("Herní akce nebyla nalezena.", 404)
                 room, action = match.groups()

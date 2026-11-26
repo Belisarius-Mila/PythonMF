@@ -1,41 +1,34 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
-## 2026-11-26 16:23 CET — Duel vydaný a herní služba aktualizovaná
+## Aktuální stav
+
+- Obnoveno potvrzeným checkpointem: 2026-11-26 21:09 CET
 
 ### Hotovo
+- Zakladatel poslechového duelu může nastavit dobu textu i obrázku před hrou a pro další kola během partie.
 
-Poslechový duel je vydaný na veřejném webu Francouzština Jana i v soukromé
-herní službě. První dvě sekundy výběru ukazují francouzský text a poslední
-sekundu obrázek s textem. Pexeso i původní místnosti zůstaly zachované.
+### Otevřeno
+- Pozdější nasazení nového checkpointu zatím není tímto snapshotem doložené.
 
-### Rozhodnutí
-
-Dokončeno dříve schválené vydání a aktualizace stejné herní služby.
-Zůstává stávající databáze, soukromá adresa a síťové oprávnění.
+### Rizika
+- Poslední ověřené nasazení patří jinému commitu než main před tímto checkpointem.
 
 ### Další krok
+- Po potvrzeném checkpointu samostatně vydat web a aktualizovat herní službu se zachováním databáze.
 
-Míla a Jana obnoví Francouzštinu, otevřou Pexeso → Poslechový duel na dálku
-a ověří zobrazení, časování a skutečně slyšitelný zvuk na obou Macích.
+### Rozhodnutí
+- Text lze zobrazovat 2, 3 nebo 4 sekundy a obrázek 1 nebo 2 sekundy. Nastavení mění pouze zakladatel, platí pro oba hráče a rozehrané kolo zůstává beze změny.
 
 ### Navrhované další kroky
+- Po vydání obnovit stránku u obou hráčů a vyzkoušet nastavení 4 + 2 sekundy.
+- Ověřit změnu časování během partie a novou hru bez ztráty spojení.
 
-- Vyzkoušet novou partii a změnu filtru bez nové pozvánky.
-- Ověřit návrat do stejné místnosti po přerušení spojení.
-
-### Technický důkaz
-
-Vydaný kód 42f75f44 obsahuje celý duel i úpravu dvou sekund textu a jedné
-sekundy obrázku. Registrované Pages vydání je potvrzené, validační účtenka
-67 kontrol převzatá; deployment8089183408 a workflow45847718140.
-Herní služba má stejný head a hlásí podporu pairs i duel. SQLite záloha
-má ověřenou integritu a všech7 původních místností zachovalo přístupy,
-pozvánky a expiraci. Přes skutečné HTTPS souhlasí17 soukromých klientských
-souborů a5 veřejných souborů. Dva syntetičtí hráči dokončili první kolo,
-ověřili skóre a přechod na další otázku; MP3 Range vrátil206. Jedna
-oddělená QA místnost zůstává do běžného vypršení. Fyzická přejímka a
-slyšitelný zvuk na Janině Macu nejsou touto kontrolou potvrzené.
-Autorita provozního stavu: data/private/vocabulary_fr_duel_current_release_20261126/.
-
+### Technický stav checkpointu
+- Změna je otestovaná (255 testů).
+- Git před checkpointem: lokální `main` na `dc950a265ed5`; GitHub může být starší a čeká na denní balíček.
+- Poslední serverově potvrzené nasazení: `42f75f44b7b5` · je starší než ověřený main před tímto checkpointem · 67 testů · smoke 5/5 · 2026-11-26T15:05:08+00:00.
+- Read-only živý stav: main=`aligned`, deployment=`verified_other_main`, runtime=`connected`.
+- Tento snapshot je součástí lokálního checkpointu; push na GitHub zůstává odložený do potvrzeného denního balíčku.
+- Tato sekce nahrazuje pouze předchozí aktuální souhrn; chronologické bloky níže zůstávají historickými snapshoty.
 <!-- SAMANTHA_CURRENT_STATUS_END -->
 
 ## 2026-11-17 20:21 CET — Společné předání osobního režimu a Datových commitů k p+n
@@ -1107,3 +1100,15 @@ ověřili skóre a přechod na další otázku; MP3 Range vrátil206. Jedna
 oddělená QA místnost zůstává do běžného vypršení. Fyzická přejímka a
 slyšitelný zvuk na Janině Macu nejsou touto kontrolou potvrzené.
 Autorita provozního stavu: data/private/vocabulary_fr_duel_current_release_20261126/.
+
+### Automatický checkpoint 2026-11-26 21:09 CET
+
+- Pracovní proud: `project-vocabulary-fr`
+- Hotovo: Zakladatel poslechového duelu může nastavit dobu textu i obrázku před hrou a pro další kola během partie.
+- Otevřeno: Pozdější nasazení nového checkpointu zatím není tímto snapshotem doložené.
+- Rizika: Poslední ověřené nasazení patří jinému commitu než main před tímto checkpointem.
+- Stav při vytvoření checkpointu: testy prošly; tento historický blok sám nepotvrzuje pozdější nasazení.
+- Ověření: cílená Cockpit brána: 255 testů, 204.8 s, výsledek OK
+- Změněné cesty před paměťovým zápisem (9): `Samantha_Agent/app/vocabulary_fr_multiplayer.py`, `Samantha_Agent/memory/handoffs/workstreams/project-vocabulary-fr.md`, `Samantha_Agent/memory/technical/vocabulary_fr_online.md`, `Samantha_Agent/memory/tvbcp/workstreams/project-vocabulary-fr.md`, `Samantha_Agent/tests/test_vocabularyfr_multiplayer.py`, `Samantha_Agent/tests/test_vocabularyfr_online.js`, `docs/vocabulary-fr/duel.css`, `docs/vocabulary-fr/duel.html`, `docs/vocabulary-fr/duel.js`
+- Commit: `Add host-controlled listening duel timing settings`
+- Další krok: Po potvrzeném checkpointu samostatně vydat web a aktualizovat herní službu se zachováním databáze.

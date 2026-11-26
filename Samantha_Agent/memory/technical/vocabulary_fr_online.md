@@ -277,12 +277,20 @@ Příprava čeká na dohrání a načtení všech 12 náhledů u obou hráčů. 
 potom naplánuje společné otevření s krátkým předstihem pro doručení stavu.
 Do kartiček se přesunou již dekódované obrazové elementy bez nového načítání;
 stejně tak velká odpověď před zahájením FR zvuku a dvousekundové ukázky.
-Oba mají stejné 4×3 kartičky po dobu 3 s. Podle následného Mílova upřesnění
-ukazují první 2 s pouze velký FR zápis přes plochu karty; poslední 1 s se
+Oba mají stejné 4×3 kartičky. Zakladatel dvěma krátkými menu volí text
+2/3/4 s a obrázek 1/2 s; výchozí nastavení zůstává 2 + 1 s.
+Nejprve ukazují pouze velký FR zápis přes plochu karty, potom se
 objeví již připravený obrázek nad zmenšeným textem. Přechod používá čas od
 stejného společného otevření; polling ani kliknutí ho nespouští znovu.
 Kliknout lze v obou částech okna a první odpověď zůstává zamčená i po
-odhalení obrázků. Na hranici 3 s se celá nabídka skryje jako dříve.
+odhalení obrázků. Nabídka se skryje po součtu obou délek (3–6 s).
+Server při přípravě otázky zmrazí délky tohoto kola; pozdější změna menu
+platí až pro další kolo a nikdy neobnoví běžící časovač ani odpověď.
+Nastavení patří místnosti, přežije restart služby, další hru i změnu filtru.
+Zakladatel jej může uložit i před připojením spoluhráče. Druhý hráč menu
+nevidí a server jeho pokus o změnu odmítne. Zůstávají přístupy, skóre a pozvánka.
+Nový klient proti starší službě zachová původní 2 + 1 s, ale menu zablokuje
+s vysvětlením. Po vydání je potřeba obnovit stránku u obou hráčů.
 Každý má jedinou uzamčenou odpověď; rychlost nepřidává body. Oba mohou
 získat 1 bod, chyba nebo chybějící odpověď dává 0. Použité zadání se v této
 hře neopakuje, pomocné kartičky se mohou opakovat z původní zásoby.
@@ -293,7 +301,7 @@ FR zápis a přehraje se FR slovo. Vyhodnocení trvá nejméně 2 s a dohrání
 obou poslechů. Následující kolo zahájí vyzyvatel tlačítkem „Další kolo“.
 Průběžné skóre zůstává dole. Na konci lze zahájit hru se stejnou konkrétní
 zásobou nebo změnit filtr; reset skóre a 12 kol zachová místnost, obě
-identity, přístupy i pozvánku. Změna během hry vyžaduje potvrzení resetu,
+identity, přístupy i pozvánku. Změna filtru během hry vyžaduje potvrzení resetu,
 zrušení výběru nemění serverový stav.
 
 Autoritou časového limitu je server; klient odvozuje čas od serverového
@@ -306,7 +314,7 @@ Již vyhodnocené body se neopakují. Chyba obrázků zastaví přípravu; chybu
 zvuku lze opakovat nebo výslovně přeskočit, nikdy se nenahradí jiným jazykem.
 
 Služba zachovává pexesový protokol1; nový `mode=duel` přidává akce
-`answer`, `closed`, `next` a vlastní fáze `duel_intro`, `duel_choose`,
+`answer`, `closed`, `next`, `timing` a vlastní fáze `duel_intro`, `duel_choose`,
 `duel_result`, `duel_between`. Akce obou režimů se nemíchají. Budoucí otázky
 a cizí odpověď před vyhodnocením server klientovi nepředává. Klient má
 oddělený klíč `vocabulary-fr.duel-session.v1`. Health zveřejňuje podporované
