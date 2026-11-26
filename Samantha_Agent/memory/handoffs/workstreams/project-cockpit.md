@@ -1,5 +1,15 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 
+## 2026-11-26 06:02 CET — Vazba čtečky na Správu dokumentů
+
+Čtečka má kanonický stav v proudu project-document-vault, v jeho handoffu
+a TVBCP pod memory/handoffs/workstreams a memory/tvbcp/workstreams.
+Cockpit poskytuje její uživatelské rozhraní. Stav nasazení a další fyzická
+přejímka jsou vedené v dokumentovém proudu. Záznam z 25. listopadu zachycuje
+původní umístění vývoje.
+
+
+
 ## 2026-11-25 — Vícestránkové skeny v Cockpitu
 
 Míla zadal čtení dokumentů fotoaparátem iPhonu, více stran, kontrolu a uložení

@@ -1,5 +1,15 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 
+## 2026-11-26 06:02 CET — Vazba čtečky na Správu dokumentů
+
+Čtečka má kanonický stav v proudu project-document-vault, v jeho handoffu
+a TVBCP pod memory/handoffs/workstreams a memory/tvbcp/workstreams.
+Cockpit poskytuje její uživatelské rozhraní. Stav nasazení a další fyzická
+přejímka jsou vedené v dokumentovém proudu. Záznam z 25. listopadu zachycuje
+původní umístění vývoje.
+
+
+
 ## 2026-11-25 — Vícestránkové skeny v Cockpitu
 
 Míla zadal čtení dokumentů fotoaparátem iPhonu, více stran, kontrolu a uložení
@@ -3513,3 +3523,26 @@ registrované API, nový PID a shodný kódový otisk. Živý status: ok=true,
 github_fallback.ok=true, error_count=0 a dvě otevřené položky. Redigované účtenky
 jsou v data/private/cockpit_urgent_auth_fix_20261123/. Žádný nový testovací send
 ani vydání kódu; fyzická přejímka prohlížeče zůstává Mílovi.
+
+## 2026-11-26 06:02 CET — Oprava projektové vazby čtečky
+
+### Hotovo
+
+Human–Adam má pro čtečku kanonický handoff a TVBCP ve Správě dokumentů.
+
+### Rozhodnutí
+
+Čtečku a ScanDocu zastřešuje project-document-vault. Cockpit zajišťuje rozhraní.
+
+### Další krok
+
+Fyzická přejímka čtečky na iPhonu podle dokumentového handoffu.
+
+### Navrhované další kroky
+
+Vyzkoušet rovněž PDF ze systémového skeneru iPhonu.
+
+### Technický důkaz
+
+Existující registr směřuje na oba doplněné soubory project-document-vault.md.
+Nasazení čtečky 7cc346bd je doložené soukromou účtenkou document_scan_20261125.

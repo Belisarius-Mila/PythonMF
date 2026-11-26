@@ -654,3 +654,11 @@ model má popis v projects/document_management_private_vault.md. Nový TVBCP
 pro dokumentový proud nebyl zakládán. Dosud je otevřená fyzická přejímka
 fotoaparátu a systémového skeneru na Mílově iPhonu. Nasazení podléhá
 samostatnému p+n.
+
+## 2026-11-26 06:02 CET — Kanonický proud pro čtečku
+
+Čtečka a její návaznost na ScanDocu mají kanonické podklady v
+memory/handoffs/workstreams/project-document-vault.md a
+memory/tvbcp/workstreams/project-document-vault.md. Tato vazba nahrazuje
+dřívější vedení samotné čtečky pod project-cockpit. Nasazení 7cc346bd je
+ověřené, další krok je fyzická přejímka iPhonu.
