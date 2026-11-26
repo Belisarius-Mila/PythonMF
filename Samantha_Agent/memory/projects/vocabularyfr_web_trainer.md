@@ -770,3 +770,41 @@ staré kolo/poslech, zrušení bez leave a ukončení starého odměnového zvuk
 Finální brána a commit: private vocabulary_fr_filter_restart_20261125/completion.json.
 Doplněná izolace staršího testu katalogu od živého Tailscale statusu.
 Fyzická přejímka a provedení schválené publikace tohoto kroku otevřené.
+
+
+## 2026-11-26 16:23 CET — Poslechový duel vydaný
+
+### Hotovo
+
+Poslechový duel je vydaný na veřejném webu Francouzština Jana i v soukromé
+herní službě. První dvě sekundy výběru ukazují francouzský text a poslední
+sekundu obrázek s textem. Pexeso i původní místnosti zůstaly zachované.
+
+### Rozhodnutí
+
+Dokončeno dříve schválené vydání a aktualizace stejné herní služby.
+Zůstává stávající databáze, soukromá adresa a síťové oprávnění.
+
+### Další krok
+
+Míla a Jana obnoví Francouzštinu, otevřou Pexeso → Poslechový duel na dálku
+a ověří zobrazení, časování a skutečně slyšitelný zvuk na obou Macích.
+
+### Navrhované další kroky
+
+- Vyzkoušet novou partii a změnu filtru bez nové pozvánky.
+- Ověřit návrat do stejné místnosti po přerušení spojení.
+
+### Technický důkaz
+
+Vydaný kód 42f75f44 obsahuje celý duel i úpravu dvou sekund textu a jedné
+sekundy obrázku. Registrované Pages vydání je potvrzené, validační účtenka
+67 kontrol převzatá; deployment8089183408 a workflow45847718140.
+Herní služba má stejný head a hlásí podporu pairs i duel. SQLite záloha
+má ověřenou integritu a všech7 původních místností zachovalo přístupy,
+pozvánky a expiraci. Přes skutečné HTTPS souhlasí17 soukromých klientských
+souborů a5 veřejných souborů. Dva syntetičtí hráči dokončili první kolo,
+ověřili skóre a přechod na další otázku; MP3 Range vrátil206. Jedna
+oddělená QA místnost zůstává do běžného vypršení. Fyzická přejímka a
+slyšitelný zvuk na Janině Macu nejsou touto kontrolou potvrzené.
+Autorita provozního stavu: data/private/vocabulary_fr_duel_current_release_20261126/.

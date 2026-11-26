@@ -1,35 +1,41 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
-## Aktuální stav
-
-- Obnoveno potvrzeným checkpointem: 2026-11-26 12:37 CET
+## 2026-11-26 16:23 CET — Duel vydaný a herní služba aktualizovaná
 
 ### Hotovo
-- Poslechový duel nejprve ukáže francouzský text a obrázky odkryje až v poslední sekundě.
-- Předchozí stav main byl před tímto checkpointem serverově nasazený a ověřený.
 
-### Otevřeno
-- Pozdější nasazení nového checkpointu zatím není tímto snapshotem doložené.
-
-### Rizika
-- Žádné další doložené provozní riziko.
-
-### Další krok
-- Připnout večerní aktualizaci herní služby k novému potvrzenému checkpointu.
+Poslechový duel je vydaný na veřejném webu Francouzština Jana i v soukromé
+herní službě. První dvě sekundy výběru ukazují francouzský text a poslední
+sekundu obrázek s textem. Pexeso i původní místnosti zůstaly zachované.
 
 ### Rozhodnutí
-- Třísekundový výběr má dvě sekundy pouze francouzský text a jednu sekundu obrázek s textem; první odpověď zůstává zamčená.
+
+Dokončeno dříve schválené vydání a aktualizace stejné herní služby.
+Zůstává stávající databáze, soukromá adresa a síťové oprávnění.
+
+### Další krok
+
+Míla a Jana obnoví Francouzštinu, otevřou Pexeso → Poslechový duel na dálku
+a ověří zobrazení, časování a skutečně slyšitelný zvuk na obou Macích.
 
 ### Navrhované další kroky
-- Aktualizovat připravený operátorský postup na nový checkpoint.
-- Po nasazení ověřit časování, zvuk a výběr na obou Macích.
 
-### Technický stav checkpointu
-- Změna je otestovaná (193 testů).
-- Git před checkpointem: lokální `main` na `a1c352faa867`; GitHub může být starší a čeká na denní balíček.
-- Poslední serverově potvrzené nasazení: `a1c352faa867` · odpovídá ověřenému main před tímto checkpointem · 67 testů · smoke 5/5 · 2026-11-26T09:46:38+00:00.
-- Read-only živý stav: main=`aligned`, deployment=`verified_current`, runtime=`connected`.
-- Tento snapshot je součástí lokálního checkpointu; push na GitHub zůstává odložený do potvrzeného denního balíčku.
-- Tato sekce nahrazuje pouze předchozí aktuální souhrn; chronologické bloky níže zůstávají historickými snapshoty.
+- Vyzkoušet novou partii a změnu filtru bez nové pozvánky.
+- Ověřit návrat do stejné místnosti po přerušení spojení.
+
+### Technický důkaz
+
+Vydaný kód 42f75f44 obsahuje celý duel i úpravu dvou sekund textu a jedné
+sekundy obrázku. Registrované Pages vydání je potvrzené, validační účtenka
+67 kontrol převzatá; deployment8089183408 a workflow45847718140.
+Herní služba má stejný head a hlásí podporu pairs i duel. SQLite záloha
+má ověřenou integritu a všech7 původních místností zachovalo přístupy,
+pozvánky a expiraci. Přes skutečné HTTPS souhlasí17 soukromých klientských
+souborů a5 veřejných souborů. Dva syntetičtí hráči dokončili první kolo,
+ověřili skóre a přechod na další otázku; MP3 Range vrátil206. Jedna
+oddělená QA místnost zůstává do běžného vypršení. Fyzická přejímka a
+slyšitelný zvuk na Janině Macu nejsou touto kontrolou potvrzené.
+Autorita provozního stavu: data/private/vocabulary_fr_duel_current_release_20261126/.
+
 <!-- SAMANTHA_CURRENT_STATUS_END -->
 
 ## 2026-11-17 20:21 CET — Společné předání osobního režimu a Datových commitů k p+n
@@ -1144,3 +1150,41 @@ Technický důkaz:
 - cílená Cockpit brána: 193 testů, 62.2 s, výsledek OK.
 - Pracovní proud: `project-vocabulary-fr`.
 - Read-only živý stav při checkpointu: main=`aligned`, deployment=`verified_current`, runtime=`connected`.
+
+
+## 2026-11-26 16:23 CET — Dokončení vydání poslechového duelu
+
+### Hotovo
+
+Poslechový duel je vydaný na veřejném webu Francouzština Jana i v soukromé
+herní službě. První dvě sekundy výběru ukazují francouzský text a poslední
+sekundu obrázek s textem. Pexeso i původní místnosti zůstaly zachované.
+
+### Rozhodnutí
+
+Dokončeno dříve schválené vydání a aktualizace stejné herní služby.
+Zůstává stávající databáze, soukromá adresa a síťové oprávnění.
+
+### Další krok
+
+Míla a Jana obnoví Francouzštinu, otevřou Pexeso → Poslechový duel na dálku
+a ověří zobrazení, časování a skutečně slyšitelný zvuk na obou Macích.
+
+### Navrhované další kroky
+
+- Vyzkoušet novou partii a změnu filtru bez nové pozvánky.
+- Ověřit návrat do stejné místnosti po přerušení spojení.
+
+### Technický důkaz
+
+Vydaný kód 42f75f44 obsahuje celý duel i úpravu dvou sekund textu a jedné
+sekundy obrázku. Registrované Pages vydání je potvrzené, validační účtenka
+67 kontrol převzatá; deployment8089183408 a workflow45847718140.
+Herní služba má stejný head a hlásí podporu pairs i duel. SQLite záloha
+má ověřenou integritu a všech7 původních místností zachovalo přístupy,
+pozvánky a expiraci. Přes skutečné HTTPS souhlasí17 soukromých klientských
+souborů a5 veřejných souborů. Dva syntetičtí hráči dokončili první kolo,
+ověřili skóre a přechod na další otázku; MP3 Range vrátil206. Jedna
+oddělená QA místnost zůstává do běžného vypršení. Fyzická přejímka a
+slyšitelný zvuk na Janině Macu nejsou touto kontrolou potvrzené.
+Autorita provozního stavu: data/private/vocabulary_fr_duel_current_release_20261126/.
