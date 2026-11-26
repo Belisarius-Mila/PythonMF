@@ -821,3 +821,29 @@ nasazení `42f75f44` ještě nemá nastavení časů. Databáze i pozvánky se z
 Nová aktivace LaunchAgentu vyžaduje přesnou globální brzdu pro konkrétní plán.
 Fyzický poslech na Janině Macu zůstává samostatnou přejímkou.
 Účtenky: `data/private/vocabulary_fr_duel_timing_20261126/` (mimo Git).
+
+## 2026-11-26 — Časování poslechového duelu vydané
+
+
+### Hotovo
+- Poslechový duel má nastavitelné časy: text 2/3/4 s, obrázek 1/2 s.
+- Nastavení mění zakladatel i během hry; platí pro oba hráče od další otázky.
+- Přerušená otázka se opakuje s původními časy, včetně starších místností.
+- Web i soukromá služba byly vydané a živě ověřené na kódu `de271467`.
+
+### Důkaz
+- Programová brána: 257 PASS, receipt `4d1b3ae1f405aca4831cabbbcfde2c21e0163b7813b370951affe447237f6c85`.
+- Terra Pages job `c3934866d228faabdd4195bdf380df9f`, deployment `8095444938`, completed.
+- HTTPS dva hráči: 4 + 2 s, host-only, změna během otázky zachová limit,
+  další otázka 2 + 1 s, skóre 1:1, audio Range 206.
+- 17/17 klientských souborů odpovídá commitu na Pages i soukromé službě.
+- Zachováno 13 původních místností, přístupy a pozvánky; konzistentní záloha SQLite integrity OK.
+- Podrobné soukromé účtenky: `data/private/vocabulary_fr_duel_timing_20261126/completion.json`.
+
+### Otevřeno a rizika
+- Fyzický poslech a ovládání na Janině a Mílově zařízení ještě nebyly ověřené.
+- Závěrečný dokumentační commit se vydává samostatně; nemění herní kód služby.
+
+### Další krok
+- U obou hráčů obnovit stránku, zakladatel nastaví 4 + 2 s a společně ověřit jednu otázku.
+- Další partii nebo filtr lze dál měnit bez nové pozvánky.

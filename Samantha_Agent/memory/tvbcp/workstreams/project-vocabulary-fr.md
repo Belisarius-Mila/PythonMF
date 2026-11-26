@@ -1,34 +1,28 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
-- Obnoveno potvrzeným checkpointem: 2026-11-26 21:09 CET
-
 ### Hotovo
-- Zakladatel poslechového duelu může nastavit dobu textu i obrázku před hrou a pro další kola během partie.
+- Poslechový duel má nastavitelné časy: text 2/3/4 s, obrázek 1/2 s.
+- Nastavení mění zakladatel i během hry; platí pro oba hráče od další otázky.
+- Přerušená otázka se opakuje s původními časy, včetně starších místností.
+- Web i soukromá služba byly vydané a živě ověřené na kódu `de271467`.
 
-### Otevřeno
-- Pozdější nasazení nového checkpointu zatím není tímto snapshotem doložené.
+### Důkaz
+- Programová brána: 257 PASS, receipt `4d1b3ae1f405aca4831cabbbcfde2c21e0163b7813b370951affe447237f6c85`.
+- Terra Pages job `c3934866d228faabdd4195bdf380df9f`, deployment `8095444938`, completed.
+- HTTPS dva hráči: 4 + 2 s, host-only, změna během otázky zachová limit,
+  další otázka 2 + 1 s, skóre 1:1, audio Range 206.
+- 17/17 klientských souborů odpovídá commitu na Pages i soukromé službě.
+- Zachováno 13 původních místností, přístupy a pozvánky; konzistentní záloha SQLite integrity OK.
+- Podrobné soukromé účtenky: `data/private/vocabulary_fr_duel_timing_20261126/completion.json`.
 
-### Rizika
-- Poslední ověřené nasazení patří jinému commitu než main před tímto checkpointem.
+### Otevřeno a rizika
+- Fyzický poslech a ovládání na Janině a Mílově zařízení ještě nebyly ověřené.
+- Závěrečný dokumentační commit se vydává samostatně; nemění herní kód služby.
 
 ### Další krok
-- Po potvrzeném checkpointu samostatně vydat web a aktualizovat herní službu se zachováním databáze.
-
-### Rozhodnutí
-- Text lze zobrazovat 2, 3 nebo 4 sekundy a obrázek 1 nebo 2 sekundy. Nastavení mění pouze zakladatel, platí pro oba hráče a rozehrané kolo zůstává beze změny.
-
-### Navrhované další kroky
-- Po vydání obnovit stránku u obou hráčů a vyzkoušet nastavení 4 + 2 sekundy.
-- Ověřit změnu časování během partie a novou hru bez ztráty spojení.
-
-### Technický stav checkpointu
-- Změna je otestovaná (255 testů).
-- Git před checkpointem: lokální `main` na `dc950a265ed5`; GitHub může být starší a čeká na denní balíček.
-- Poslední serverově potvrzené nasazení: `42f75f44b7b5` · je starší než ověřený main před tímto checkpointem · 67 testů · smoke 5/5 · 2026-11-26T15:05:08+00:00.
-- Read-only živý stav: main=`aligned`, deployment=`verified_other_main`, runtime=`connected`.
-- Tento snapshot je součástí lokálního checkpointu; push na GitHub zůstává odložený do potvrzeného denního balíčku.
-- Tato sekce nahrazuje pouze předchozí aktuální souhrn; chronologické bloky níže zůstávají historickými snapshoty.
+- U obou hráčů obnovit stránku, zakladatel nastaví 4 + 2 s a společně ověřit jednu otázku.
+- Další partii nebo filtr lze dál měnit bez nové pozvánky.
 <!-- SAMANTHA_CURRENT_STATUS_END -->
 
 ## 2026-11-17 20:21 CET — Společné předání osobního režimu a Datových commitů k p+n
