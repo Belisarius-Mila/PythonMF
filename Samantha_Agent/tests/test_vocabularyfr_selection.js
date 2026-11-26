@@ -264,6 +264,19 @@ test('FR online entry cannot bypass a selection with fewer than twelve usable pi
  const v=await app();v.state.query='chat';v.selectionChanged();v.element('memoryTab').click();const before=v.win.location.href;
  assert.equal(v.element('memoryOnline').disabled,true);v.element('memoryOnline').click();assert.equal(v.win.location.href,before);
 });
+test('FR duel entry keeps the whole filtered pool and the original personal page unchanged',async()=>{
+ const origin='https://fixture-mac.fixture-tail.ts.net:8443',v=await app({url:cockpitFrenchUrl(origin)}),opened=[];
+ v.win.open=url=>opened.push(url);v.element('memoryTab').click();const before=v.win.location.href,local=JSON.stringify([...v.local.map]);
+ assert.equal(v.element('memoryDuel').disabled,false);v.element('memoryDuel').click();
+ const url=new URL(opened[0]),pool=new URLSearchParams(url.hash.slice(1)).get('words').split(',');
+ assert.equal(url.origin,origin);assert.equal(url.pathname,'/vocabulary-fr/duel.html');assert.equal(pool.length,vocabulary.items.length);assert.ok(pool.length>12);
+ assert.equal(v.win.location.href,before);assert.equal(JSON.stringify([...v.local.map]),local);
+ v.element('memorySetupChange').click();v.state.query='chat';v.selectionChanged();v.element('memoryTab').click();assert.equal(v.element('memoryDuel').disabled,true);v.element('memoryDuel').click();assert.equal(opened.length,1);
+});
+test('FR duel requires both language channels while pairs remain usable without Czech audio',async()=>{
+ const partial=clone(audio);for(const item of Object.values(partial.items))item.cz=null;
+ const v=await app({manifest:partial});v.element('memoryTab').click();assert.equal(v.element('memoryOnline').disabled,false);assert.equal(v.element('memoryDuel').disabled,true);
+});
 const cockpitGameOrigin='https://fixture-friendly-family-game.trycloudflare.com';
 const cockpitFrenchUrl=origin=>'https://belisarius-mila.github.io/PythonMF/vocabulary-fr/#'+new URLSearchParams({onlineOrigin:origin});
 test('private Tailscale game uses only its dedicated HTTPS port and survives reload',async()=>{

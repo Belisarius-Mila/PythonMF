@@ -262,3 +262,57 @@ Tento krok je místní. Vydání vyžaduje kromě Pages také samostatný aktual
 herní export/server. Neměnit stávající databázi a nepřidávat nové síťové granty.
 Publikace a změna běžící služby potřebují odpovídající autorizaci; historické
 potvrzení předchozí aktivace se nevztahuje na nový plán služby.
+
+## Poslechový duel pro dva — 26. 11. 2026
+
+Místně doplněný druhý herní režim. V pexesu je „Poslechový duel na dálku“;
+otevře `duel.html` na stejném ověřeném herním původu. Předá celou zásobu
+veřejných UID z aktuálního filtru (například posledních 50), nikoli jen
+12 karet ani soukromé osobní značky. Původní karta a její data zůstanou.
+Zásoba musí umožnit alespoň 12 vzájemně odlišných obrázků s oběma zvuky.
+
+Jedna hra má 12 náhodných, neopakovaných zadání. Před každým kolem se
+nejméně 3 s ukazuje „Začíná nové kolo“ / „Další kolo“ a přehraje české slovo.
+Příprava čeká na dohrání a načtení všech 12 náhledů u obou hráčů. Server
+potom naplánuje společné otevření s krátkým předstihem pro doručení stavu.
+Do kartiček se přesunou již dekódované obrazové elementy bez nového načítání;
+stejně tak velká odpověď před zahájením FR zvuku a dvousekundové ukázky.
+Oba mají stejné 4×3 kartičky s francouzskými popisky po dobu 3 s.
+Každý má jedinou uzamčenou odpověď; rychlost nepřidává body. Oba mohou
+získat 1 bod, chyba nebo chybějící odpověď dává 0. Použité zadání se v této
+hře neopakuje, pomocné kartičky se mohou opakovat z původní zásoby.
+
+Po skrytí kartiček oba klienty potvrdí uzavření výběru. Teprve pak server
+jednou započte body, odhalí odpovědi a oba uvidí velký správný obrázek,
+FR zápis a přehraje se FR slovo. Vyhodnocení trvá nejméně 2 s a dohrání
+obou poslechů. Následující kolo zahájí vyzyvatel tlačítkem „Další kolo“.
+Průběžné skóre zůstává dole. Na konci lze zahájit hru se stejnou konkrétní
+zásobou nebo změnit filtr; reset skóre a 12 kol zachová místnost, obě
+identity, přístupy i pozvánku. Změna během hry vyžaduje potvrzení resetu,
+zrušení výběru nemění serverový stav.
+
+Autoritou časového limitu je server; klient odvozuje čas od serverového
+času a monotónních hodin, nikoli od nastavení data na počítači. Kartičky
+se skryjí i bez další síťové odpovědi. Příliš pozdní doručení okna vyžaduje
+ruční návrat a nové celé okno. Odchod, skrytí stránky či chyba spojení
+zastaví lokální časovače a zvuk. Návrat do nezapočítaného výběru zopakuje
+stejné zadání, vymaže jeho nevyhodnocené odpovědi a změní číslo fáze.
+Již vyhodnocené body se neopakují. Chyba obrázků zastaví přípravu; chybu
+zvuku lze opakovat nebo výslovně přeskočit, nikdy se nenahradí jiným jazykem.
+
+Služba zachovává pexesový protokol1; nový `mode=duel` přidává akce
+`answer`, `closed`, `next` a vlastní fáze `duel_intro`, `duel_choose`,
+`duel_result`, `duel_between`. Akce obou režimů se nemíchají. Budoucí otázky
+a cizí odpověď před vyhodnocením server klientovi nepředává. Klient má
+oddělený klíč `vocabulary-fr.duel-session.v1`. Health zveřejňuje podporované
+`games`; starší služba bez duelu způsobí jasnou zprávu místo založení pexesa.
+Používají se pouze existující veřejná FR/CZ média.
+
+Přejímka: `tests.test_vocabularyfr_multiplayer` spouští i skutečný JS duel
+nad dvěma nezávislými syntetickými prohlížeči; HTTP test používá skutečný
+server a dvě identity. Stejná sada ověřuje všech 12 kol, časové hranice,
+zálohu stavu v SQLite, skryté odpovědi, idempotenci, návrat a změnu filtru.
+Vstup z galerie kryje `tests.test_vocabularyfr_web_gallery`. Vizuální a
+akustická přejímka na fyzických zařízeních zůstává samostatná. Před živým
+použitím je nutné vydat klienta a zvlášť aktualizovat export/server herní
+služby. Tento vývoj neaktivuje síť ani neaktualizuje běžící server.

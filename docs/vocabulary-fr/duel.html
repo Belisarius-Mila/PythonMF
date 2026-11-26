@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="cs">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="referrer" content="no-referrer">
+  <title>Poslechový duel · Francouzština Jana</title>
+  <link rel="stylesheet" href="gallery.css?v=20261126-duel1">
+  <link rel="stylesheet" href="online.css?v=20261125-filter1">
+  <link rel="stylesheet" href="duel.css?v=20261126-duel1">
+  <script src="model.js" defer></script><script src="practice.js" defer></script>
+  <script src="memory.js?v=20261126-duel1" defer></script><script src="duel.js?v=20261126-duel1" defer></script>
+</head>
+<body><main id="duelView" class="page-shell">
+  <header class="memory-header"><div><p class="eyebrow">Francouzština Jana · Dva hráči na dálku</p><h1>Poslechový duel</h1><p>Poslechni české slovo. Za 3 sekundy najdi správnou kartičku.</p></div><a id="duelBack" href="./#game=memory-pairs">← Odejít na přehled</a></header>
+  <p id="duelStatus" role="status" aria-live="polite">Připravuji společnou hru…</p>
+  <p id="duelStorage" class="notice" role="status"></p>
+  <section id="duelSetup" class="memory-setup">
+    <label>Tvoje jméno<input id="duelName" maxlength="12" autocomplete="off" value="Hráč"></label>
+    <p id="duelSelection"></p><p>Partie má 12 kol. Každý má jednu odpověď; správně mohou odpovědět oba. Před vstupem zazní krátká francouzská ukázka.</p>
+    <button id="duelEnter" class="primary" type="button" disabled>Založit duel a zapnout zvuk</button>
+  </section>
+  <section id="duelRoom" hidden>
+    <div id="duelInvitePanel" class="online-invite" hidden><label>Soukromý odkaz pro spoluhráče<input id="duelInvite" readonly spellcheck="false" autocomplete="off"></label><button id="duelCopy" type="button">Kopírovat pozvánku</button></div>
+    <div class="memory-round-header"><p id="duelProgress"></p><button id="duelStart" class="primary" type="button" hidden>Zahájit společnou hru</button><button id="duelResume" type="button" hidden>Pokračovat a zapnout zvuk</button><button id="duelRetry" type="button" hidden>Zopakovat přípravu a zvuk</button><button id="duelSkip" type="button" hidden>Pokračovat bez zvuku</button></div>
+    <p><button id="duelChangeFilter" type="button" hidden>Změnit filtr a začít novou hru</button></p>
+    <div id="duelAnnouncement" class="duel-announcement" role="status" aria-live="polite" hidden></div>
+    <p id="duelCountdown" class="duel-countdown" role="timer" aria-label="Čas na odpověď" hidden></p>
+    <div id="duelBoard" class="duel-board" aria-label="12 obrázků, čtyři sloupce a tři řádky" hidden></div>
+    <section id="duelFeedback" class="duel-feedback" aria-label="Správná odpověď" hidden><img id="duelImage" width="600" height="600" alt=""><h2 id="duelWord" lang="fr"></h2><p id="duelRoundResult" role="status"></p></section>
+    <p><button id="duelNext" class="primary" type="button" hidden>Další kolo →</button></p>
+    <section id="duelEnd" class="memory-end" hidden><h2>Hra dokončena</h2><p id="duelResult" role="status"></p><button id="duelAgain" class="primary" type="button">Nová hra se stejnou sadou</button><p>Filtr můžeš změnit tlačítkem výše. Oba zůstáváte v této místnosti.</p></section>
+    <section id="duelPicker" class="online-picker" aria-labelledby="duelPickerTitle" hidden>
+      <h2 id="duelPickerTitle">Slovíčka pro novou hru</h2><p>Změna vynuluje skóre a začne 12 nových kol. Spojení, hráči a pozvánka zůstanou zachované.</p>
+      <label>Okruh<select id="duelTopic"></select></label>
+      <label>Slovní druh<select id="duelPart"></select></label>
+      <label>Obtížnost<select id="duelLevel"></select></label>
+      <label>Typ výrazu<select id="duelType"></select></label>
+      <label>Poslední slovíčka<select id="duelRecent"><option value="0">Všechna</option><option value="20">Posledních 20</option><option value="50">Posledních 50</option></select></label>
+      <label>Hledání FR / CZ<input id="duelQuery" type="search" autocomplete="off"></label>
+      <p id="duelPoolNotice" role="status" aria-live="polite"></p>
+      <div class="online-next-actions"><button id="duelApply" class="primary" type="button">Použít filtr a začít novou hru</button><button id="duelCancel" type="button">Zpět do původní hry</button></div>
+    </section>
+    <div id="duelScores" class="memory-scores" aria-label="Průběžné skóre hráčů"></div>
+  </section>
+  <p class="meta">Pozvánku pošli jen spoluhráči. Při přerušení výběru se po návratu zopakuje současné nezapočítané kolo. Místnost má omezenou platnost.</p>
+  <noscript>Pro společnou hru je potřeba povolit JavaScript.</noscript>
+</main></body></html>

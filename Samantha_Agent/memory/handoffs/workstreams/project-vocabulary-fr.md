@@ -1,33 +1,35 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
-## 2026-11-25 13:08 CET — Změna filtru bez ztráty společné místnosti
+## Aktuální stav
 
-Hotovo: Zakladatel rozehrané i dokončené partie má přímo ve společné
-místnosti „Změnit filtr a začít znovu“. Volí okruh, slovní druh, obtížnost,
-typ výrazu, posledních20/50 nebo hledání FR/CZ. Náhled12 dvojic lze zrušit
-návratem do původní hry. Potvrzení rozehrané hry výslovně vynuluje skóre,
-vymění24 karet a zachová místnost, jména, přístupy i původní pozvánku.
-Druhý hráč dostane nové kolo synchronizací; sám filtr měnit nemůže.
+- Obnoveno potvrzeným checkpointem: 2026-11-26 10:35 CET
 
-Rozhodnutí: Míla požádal o změnu filtru u zakladatele bez dalšího posílání
-odkazu i před dohráním. Stávající rematch po dokončení zůstává. Nová akce
-restart používá12 veřejných UID, žádný osobní seznam se neposílá.
-Míla následně výslovně zadal p+n i spuštění aktualizovaného serveru.
-Dřívější Tailscale aktivace be9aeaa8 běží podle živého čtecího statusu;
-tento nový krok nemění síť, LaunchAgent ani běžící export.
+### Hotovo
+- Poslechový duel umožňuje společnou hru na dálku s třísekundovým výběrem a dalšími partiemi bez nové pozvánky.
+- Předchozí stav main byl před tímto checkpointem serverově nasazený a ověřený.
 
-Další krok: Dokončit výslovně zadané p+n přes Terru a připravit přesný
-plán aktualizace samostatné herní služby se zachováním databáze. Pages samotné server
-restart nerozšíří; současná živá verze stále be9aeaa8 tuto akci neumí.
-Navrhované další kroky: Na Janině a Mílově Macu ověřit zrušení filtru,
-potvrzený restart uprostřed hry a další partii bez nového odkazu.
+### Otevřeno
+- Pozdější nasazení nového checkpointu zatím není tímto snapshotem doložené.
 
-Technický důkaz:23 cílených Python kontrol včetně23 JS scénářů PASS před
-finální programovou bránou; doplněný HTTP test dvou přístupů a nové routy.
-Testy drží idempotenci po obnově databáze, host-only, chybné výběry,
-staré kolo/poslech, zrušení bez leave a ukončení starého odměnového zvuku.
-Finální brána a commit: private vocabulary_fr_filter_restart_20261125/completion.json.
-Doplněná izolace staršího testu katalogu od živého Tailscale statusu.
-Fyzická přejímka a provedení schválené publikace tohoto kroku otevřené.
+### Rizika
+- Žádné další doložené provozní riziko.
+
+### Další krok
+- Po samostatném schválení aktualizovat herní službu a vydat webový vstup.
+
+### Rozhodnutí
+- Duel má 12 kol, české zadání a třísekundový výběr z 12 kartiček. Zadání se v partii neopakují; další hra i změna filtru zachovají místnost a oba hráče.
+
+### Navrhované další kroky
+- Na Janině a Mílově Macu ověřit zobrazení, oba zvuky a třísekundový výběr.
+- Vyzkoušet novou hru, změnu filtru a návrat po výpadku bez nové pozvánky.
+
+### Technický stav checkpointu
+- Změna je otestovaná (237 testů).
+- Git před checkpointem: lokální `main` na `6dfe35967f54`; GitHub může být starší a čeká na denní balíček.
+- Poslední serverově potvrzené nasazení: `6dfe35967f54` · odpovídá ověřenému main před tímto checkpointem · 67 testů · smoke 5/5 · 2026-11-26T05:07:04+00:00.
+- Read-only živý stav: main=`aligned`, deployment=`verified_current`, runtime=`connected`.
+- Tento snapshot je součástí lokálního checkpointu; push na GitHub zůstává odložený do potvrzeného denního balíčku.
+- Tato sekce nahrazuje pouze předchozí aktuální souhrn; chronologické bloky níže zůstávají historickými snapshoty.
 <!-- SAMANTHA_CURRENT_STATUS_END -->
 
 ## 2026-11-17 20:21 CET — Společné předání osobního režimu a Datových commitů k p+n
@@ -1014,3 +1016,15 @@ staré kolo/poslech, zrušení bez leave a ukončení starého odměnového zvuk
 Finální brána a commit: private vocabulary_fr_filter_restart_20261125/completion.json.
 Doplněná izolace staršího testu katalogu od živého Tailscale statusu.
 Fyzická přejímka a provedení schválené publikace tohoto kroku otevřené.
+
+### Automatický checkpoint 2026-11-26 10:35 CET
+
+- Pracovní proud: `project-vocabulary-fr`
+- Hotovo: Poslechový duel umožňuje společnou hru na dálku s třísekundovým výběrem a dalšími partiemi bez nové pozvánky.; Předchozí stav main byl před tímto checkpointem serverově nasazený a ověřený.
+- Otevřeno: Pozdější nasazení nového checkpointu zatím není tímto snapshotem doložené.
+- Rizika: Žádné další doložené provozní riziko.
+- Stav při vytvoření checkpointu: testy prošly; tento historický blok sám nepotvrzuje pozdější nasazení.
+- Ověření: cílená Cockpit brána: 237 testů, 161.9 s, výsledek OK
+- Změněné cesty před paměťovým zápisem (10): `Samantha_Agent/app/vocabulary_fr_multiplayer.py`, `Samantha_Agent/memory/technical/vocabulary_fr_online.md`, `Samantha_Agent/tests/test_vocabularyfr_multiplayer.py`, `Samantha_Agent/tests/test_vocabularyfr_online.js`, `Samantha_Agent/tests/test_vocabularyfr_selection.js`, `docs/vocabulary-fr/index.html`, `docs/vocabulary-fr/memory.js`, `docs/vocabulary-fr/duel.css`, `docs/vocabulary-fr/duel.html`, `docs/vocabulary-fr/duel.js`
+- Commit: `Add two-player French listening duel`
+- Další krok: Po samostatném schválení aktualizovat herní službu a vydat webový vstup.

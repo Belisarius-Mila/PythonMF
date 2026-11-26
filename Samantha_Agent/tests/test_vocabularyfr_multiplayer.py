@@ -464,6 +464,288 @@ class HTTPTests(RoomFixture):
             GameServer(("127.0.0.1", 0), self.rooms, "http://public.example")
 
 
+class DuelTests(RoomFixture):
+    def setUp(self):
+        super().setUp()
+        self.pool = [uid for uid, item in self.catalog.items.items() if item["czAudio"]][:50]
+        self.payload = {**self.payload, "mode": "duel", "uids": self.pool, "requestId": "e" * 64}
+        self.initial = self.rooms.create(self.payload)
+        self.room = self.initial["room"]
+
+    def open_window(self):
+        state = self.action("sync")
+        self.assertEqual(state["phase"], "duel_intro")
+        self.clock.advance(3)
+        self.action("heard", stage=state["stage"])
+        state = self.action("heard", self.guest, stage=state["stage"])
+        self.assertEqual(state["phase"], "duel_choose")
+        self.clock.advance(state["opensAt"] - self.clock())
+        return self.action("sync")
+
+    def close_window(self):
+        self.clock.advance(max(0, self.raw()["closesAt"] - self.clock()))
+        self.action("closed")
+        return self.action("closed", self.guest)
+
+    def finish_sound(self):
+        state = self.action("sync")
+        self.clock.advance(2)
+        self.action("heard", stage=state["stage"])
+        return self.action("heard", self.guest, stage=state["stage"])
+
+    def test_pool_keeps_all_fifty_words_and_questions_are_distinct_compatible_and_private(self):
+        self.assertEqual(self.initial["pool"], self.pool)
+        questions = self.raw()["questions"]
+        self.assertEqual(len(questions), 12)
+        self.assertEqual(len({q["target"] for q in questions}), 12)
+        self.assertTrue(all(q["target"] in self.pool and len(set(q["choices"])) == 12
+                            and set(q["choices"]).issubset(self.pool) for q in questions))
+        for question in questions:
+            self.catalog.selection(question["choices"])
+        self.assertEqual(self.initial["choices"], [])
+        self.assertIsNone(self.initial["target"])
+        self.assertNotIn("questions", self.initial)
+        joined = self.rooms.join(self.room, {"name": "Míla", "playerToken": self.guest, "invite": self.invite})
+        self.assertIsNone(joined["pool"])
+        self.assertEqual(self.rooms.create(self.payload)["room"], self.room)
+
+    def test_intro_waits_three_seconds_and_both_czech_completions(self):
+        state = self.start()
+        self.assertEqual(state["phase"], "duel_intro")
+        self.assertTrue(state["promptAudio"].endswith(".mp3"))
+        self.action("heard", stage=state["stage"])
+        self.clock.advance(3)
+        self.assertEqual(self.action("sync")["phase"], "duel_intro")
+        state = self.action("heard", self.guest, stage=state["stage"])
+        self.assertEqual(state["closesAt"] - state["opensAt"], 3)
+        self.assertGreater(state["opensAt"], self.clock())
+        self.assertIsNone(state["target"])
+        with self.assertRaises(GameError):
+            self.action("answer", index=0)
+
+    def test_timed_single_answers_are_private_until_both_windows_close_and_can_award_both(self):
+        self.start()
+        state = self.open_window()
+        target = self.raw()["questions"][0]["target"]
+        correct = state["choices"].index(target)
+        state = self.action("answer", index=correct)
+        self.assertEqual(state["ownAnswer"], correct)
+        guest = self.action("sync", self.guest)
+        self.assertIsNone(guest["ownAnswer"])
+        self.assertIsNone(guest["answers"])
+        self.assertIsNone(guest["target"])
+        self.assertEqual(guest["scores"], [0, 0])
+        self.action("answer", self.guest, index=correct)
+        for token in (self.host, self.guest):
+            with self.assertRaises(GameError):
+                self.action("answer", token, index=correct)
+        with self.assertRaises(GameError):
+            self.action("closed")
+        self.clock.advance(3)
+        self.assertEqual(self.action("sync")["scores"], [0, 0])
+        self.action("closed")
+        state = self.action("closed", self.guest)
+        self.assertEqual((state["phase"], state["target"], state["scores"]), ("duel_result", target, [1, 1]))
+        self.assertEqual(self.action("sync")["scores"], [1, 1])
+
+    def test_missing_or_wrong_answers_get_zero_and_late_or_noninteger_clicks_are_rejected(self):
+        self.start()
+        state = self.open_window()
+        correct = state["choices"].index(self.raw()["questions"][0]["target"])
+        for index in (True, -1, 12, "1"):
+            with self.assertRaises(GameError):
+                self.action("answer", index=index)
+        self.action("answer", index=(correct+1) % 12)
+        self.clock.advance(3)
+        with self.assertRaises(GameError):
+            self.action("answer", self.guest, index=correct)
+        result = self.close_window()
+        self.assertEqual(result["scores"], [0, 0])
+        self.assertEqual(result["answers"], {"0": (correct+1) % 12})
+
+    def test_french_result_and_both_audio_completions_precede_host_next(self):
+        self.start()
+        self.open_window()
+        state = self.close_window()
+        self.clock.advance(2)
+        self.action("heard", stage=state["stage"])
+        with self.assertRaises(GameError):
+            self.action("next")
+        state = self.action("heard", self.guest, stage=state["stage"])
+        self.assertEqual(state["phase"], "duel_between")
+        with self.assertRaises(GameError):
+            self.action("next", self.guest)
+        state = self.action("next")
+        self.assertEqual((state["phase"], state["question"]), ("duel_intro", 2))
+
+    def test_all_twelve_questions_then_same_pool_new_game_preserve_both_accesses(self):
+        self.start()
+        seen = set()
+        for number in range(1, 13):
+            state = self.open_window()
+            target = self.raw()["questions"][number-1]["target"]
+            self.assertNotIn(target, seen)
+            seen.add(target)
+            self.action("answer", index=state["choices"].index(target))
+            self.close_window()
+            state = self.finish_sound()
+            if number < 12:
+                self.assertEqual(state["phase"], "duel_between")
+                self.action("next")
+        self.assertEqual((state["phase"], state["scores"]), ("finished", [12, 0]))
+        raw = self.raw()
+        state = self.action("rematch")
+        self.assertEqual((state["room"], state["round"], state["question"], state["scores"]), (self.room, 2, 1, [0, 0]))
+        self.assertEqual(self.raw()["pool"], self.pool)
+        self.assertEqual(self.raw()["inviteHash"], raw["inviteHash"])
+        self.assertEqual([p["tokenHash"] for p in self.raw()["players"]], [p["tokenHash"] for p in raw["players"]])
+        self.assertEqual(self.action("sync", self.guest)["phase"], "duel_intro")
+
+    def test_new_filter_restart_is_host_only_atomic_and_stale_actions_cannot_affect_new_game(self):
+        self.start()
+        self.open_window()
+        old = self.raw()
+        pool = self.pool[:20]
+        for token, uids in ((self.guest, pool), (self.host, pool[:11]), (self.host, pool+[pool[0]])):
+            with self.assertRaises(GameError):
+                self.action("restart", token, uids=uids)
+            self.assertEqual(self.raw()["round"], 1)
+            self.assertEqual(self.raw()["pool"], self.pool)
+        request = {"requestId": "f"*64, "expectedRound": old["round"], "expectedStage": old["stage"], "uids": pool}
+        state = self.rooms.act(self.room, self.host, "restart", request)
+        self.assertEqual((state["round"], state["poolCount"]), (2, 20))
+        self.rooms = Rooms(self.path, self.catalog, clock=self.clock)
+        self.assertEqual(self.rooms.act(self.room, self.host, "restart", request)["round"], 2)
+        with self.assertRaises(GameError):
+            self.action("answer", expectedRound=old["round"], expectedStage=old["stage"], index=0)
+        self.assertTrue(set(self.raw()["pool"]).issubset(self.pool))
+
+    def test_disconnect_or_reload_during_window_replays_unscored_question_with_fresh_stage(self):
+        self.start()
+        state = self.open_window()
+        self.action("answer", index=0)
+        state = self.action("leave", self.guest)
+        self.assertTrue(state["paused"])
+        self.assertEqual(state["phase"], "duel_intro")
+        self.assertGreater(state["stage"], 2)
+        self.clock.advance(60)
+        self.action("sync")
+        self.action("ready", self.guest)
+        state = self.open_window()
+        self.assertEqual(state["scores"], [0, 0])
+        self.assertIsNone(state["ownAnswer"])
+        self.assertEqual(state["question"], 1)
+        # Even if pagehide never reached the server, explicit reentry starts fresh.
+        state = self.action("ready", self.guest)
+        self.assertEqual(state["phase"], "duel_intro")
+        self.assertIsNone(state["closesAt"])
+
+    def test_missed_pause_still_invalidates_old_audio_ack_and_future_questions_stay_private(self):
+        state = self.start()
+        old_stage = state["stage"]
+        self.action("heard", stage=old_stage)
+        self.action("leave", self.guest)
+        state = self.action("ready", self.guest)
+        self.assertGreater(state["stage"], old_stage)
+        self.assertEqual(state["acks"], [])
+        with self.assertRaises(GameError):
+            self.action("heard", stage=old_stage)
+        self.assertNotIn("questions", state)
+        self.assertIsNone(state["target"])
+
+    def test_concurrent_closes_score_each_player_only_once(self):
+        self.start()
+        state = self.open_window()
+        target = self.raw()["questions"][0]["target"]
+        correct = state["choices"].index(target)
+        self.action("answer", index=correct)
+        self.action("answer", self.guest, index=correct)
+        self.clock.advance(3)
+        values = [(self.host, "a"*64), (self.guest, "b"*64)]
+        with ThreadPoolExecutor(max_workers=2) as executor:
+            list(executor.map(lambda v: self.rooms.act(self.room, v[0], "closed", {
+                "requestId": v[1], "expectedRound":state["round"], "expectedStage":state["stage"]}), values))
+        self.assertEqual(self.action("sync")["scores"], [1, 1])
+
+    def test_lost_answer_reply_and_duplicate_close_survive_database_restart_without_double_score(self):
+        self.start()
+        state = self.open_window()
+        correct = state["choices"].index(self.raw()["questions"][0]["target"])
+        payload = {"requestId":"f"*64, "expectedRound":state["round"], "expectedStage":state["stage"], "index":correct}
+        self.rooms.act(self.room, self.host, "answer", payload)
+        self.rooms = Rooms(self.path, self.catalog, clock=self.clock)
+        self.assertEqual(self.rooms.act(self.room, self.host, "answer", payload)["ownAnswer"], correct)
+        with self.assertRaises(GameError):
+            self.rooms.act(self.room, self.host, "answer", {**payload, "index":(correct+1) % 12})
+        self.clock.advance(3)
+        self.action("closed")
+        closing = {"requestId":"1"*64, "expectedRound":state["round"], "expectedStage":state["stage"]}
+        self.rooms.act(self.room, self.guest, "closed", closing)
+        self.rooms = Rooms(self.path, self.catalog, clock=self.clock)
+        self.assertEqual(self.rooms.act(self.room, self.guest, "closed", closing)["scores"], [1, 0])
+
+    def test_pairs_and_duel_actions_are_isolated_and_missing_czech_audio_cannot_start(self):
+        self.start()
+        with self.assertRaises(GameError):
+            self.action("flip", index=0)
+        item = self.catalog.items[self.pool[0]]
+        old = item["czAudio"]
+        try:
+            item["czAudio"] = None
+            with self.assertRaises(GameError):
+                self.catalog.duel_pool(self.pool)
+        finally:
+            item["czAudio"] = old
+
+    def test_real_http_duel_two_players_timing_answers_result_and_next(self):
+        server = GameServer(("127.0.0.1", 0), self.rooms)
+        threading.Thread(target=server.serve_forever, daemon=True).start()
+        self.addCleanup(server.server_close)
+        self.addCleanup(server.shutdown)
+
+        def request(action, token, **extra):
+            current = self.raw()
+            self.count += 1
+            payload = {"requestId": f"{self.count:064x}", "expectedRound": current["round"], "expectedStage": current["stage"], **extra}
+            conn = http.client.HTTPConnection("127.0.0.1", server.server_port, timeout=5)
+            conn.request("POST", f"{API}/{self.room}/{action}", json.dumps(payload),
+                         {"Origin": server.origin, "Content-Type": "application/json", "Authorization": "Bearer " + token})
+            response = conn.getresponse()
+            status, result = response.status, json.loads(response.read())
+            conn.close()
+            self.assertEqual(status, 200, result)
+            return result
+
+        request("join", self.guest, name="Míla", invite=self.invite, playerToken=self.guest)
+        state = request("start", self.host)
+        self.clock.advance(3)
+        request("heard", self.host, stage=state["stage"])
+        state = request("heard", self.guest, stage=state["stage"])
+        self.clock.advance(state["opensAt"] - self.clock())
+        correct = state["choices"].index(self.raw()["questions"][0]["target"])
+        request("answer", self.host, index=correct)
+        guest = request("sync", self.guest)
+        self.assertIsNone(guest["ownAnswer"])
+        self.assertIsNone(guest["answers"])
+        request("answer", self.guest, index=(correct+1) % 12)
+        self.clock.advance(3)
+        request("closed", self.host)
+        state = request("closed", self.guest)
+        self.assertEqual(state["scores"], [1, 0])
+        self.clock.advance(2)
+        request("heard", self.host, stage=state["stage"])
+        request("heard", self.guest, stage=state["stage"])
+        state = request("next", self.host)
+        self.assertEqual((state["question"], state["phase"]), (2, "duel_intro"))
+        for filename in ("duel.html", "duel.js", "duel.css"):
+            conn = http.client.HTTPConnection("127.0.0.1", server.server_port, timeout=5)
+            conn.request("GET", "/vocabulary-fr/"+filename)
+            response = conn.getresponse()
+            self.assertEqual(response.status, 200)
+            self.assertEqual(response.read(), (self.catalog.docs/"vocabulary-fr"/filename).read_bytes())
+            conn.close()
+
+
 class ClientTests(unittest.TestCase):
     def test_real_online_client_with_two_independent_browser_fixtures(self):
         result = subprocess.run([node_binary(), "--test", "tests/test_vocabularyfr_online.js"], cwd=Path(__file__).resolve().parents[1], capture_output=True, text=True, timeout=60)

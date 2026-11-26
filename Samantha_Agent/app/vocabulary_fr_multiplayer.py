@@ -1,4 +1,4 @@
-"""Isolated, same-origin French pairs service. No Cockpit routes or accounts.
+"""Isolated, same-origin French pairs and listening duel service.
 
 Run locally: python -m app.vocabulary_fr_multiplayer --port 8791
 Public operation requires a separately approved HTTPS reverse proxy and origin.
@@ -23,6 +23,8 @@ from urllib.parse import unquote, urlsplit
 
 PROTOCOL = 1
 PAIR_COUNT = 12
+DUEL_SECONDS = 3
+DUEL_LEAD_SECONDS = 1.5
 OFFLINE_SECONDS = 15
 ROOM_SECONDS = 24 * 3600
 IDLE_SECONDS = 2 * 3600
@@ -106,7 +108,8 @@ class Catalog:
             media = [item.get("image"), item.get("thumbnail"), sound["fr"]]
             if any(not self._asset(path) for path in media):
                 continue
-            self.items[uid] = {**item, "audio": sound["fr"]}
+            self.items[uid] = {**item, "audio": sound["fr"],
+                               "czAudio": sound.get("cz") if self._asset(sound.get("cz")) else None}
 
     def _asset(self, path: object) -> bool:
         if not isinstance(path, str) or not path.startswith(("assets/vocabulary-fr-v2/", "assets/vocabulary-fr-audio/")) or ".." in Path(path).parts or "//" in path:
@@ -128,6 +131,13 @@ class Catalog:
             raise GameError("Vyber 12 různých slovíček.")
         if any(uid not in self.items for uid in uids) or any(not self.compatible(a, b) for n, a in enumerate(uids) for b in uids[n + 1:]):
             raise GameError("Výběr nemá 12 dostatečně odlišných obrázků s francouzským zvukem.")
+        return list(uids)
+
+    def duel_pool(self, uids: object) -> list[str]:
+        if (not isinstance(uids, list) or not PAIR_COUNT <= len(uids) <= len(self.items)
+                or any(not isinstance(uid, str) for uid in uids) or len(set(uids)) != len(uids)
+                or any(uid not in self.items or not self.items[uid]["czAudio"] for uid in uids)):
+            raise GameError("Duel potřebuje alespoň 12 různých slov s českým i francouzským zvukem.")
         return list(uids)
 
 
@@ -179,8 +189,14 @@ class Rooms:
     def create(self, payload: dict) -> dict:
         request_id = _request(payload.get("requestId"))
         token, invite = _token(payload.get("playerToken")), _token(payload.get("invite"))
-        name, uids = _name(payload.get("name")), self.catalog.selection(payload.get("uids"))
-        fingerprint = _hash(json.dumps([name, uids, _hash(token), _hash(invite)]))
+        mode = payload.get("mode", "pairs")
+        if mode not in ("pairs", "duel"):
+            raise GameError("Neznámý typ hry.")
+        name = _name(payload.get("name"))
+        uids = (self.catalog.duel_pool if mode == "duel" else self.catalog.selection)(payload.get("uids"))
+        # Keep the original pairs fingerprint valid for retries after an upgrade.
+        identity = [name, uids, _hash(token), _hash(invite)]
+        fingerprint = _hash(json.dumps(identity + ([mode] if mode == "duel" else [])))
         now = self.clock()
         with self._db() as conn:
             prior = conn.execute("SELECT id,body FROM rooms WHERE request=?", (request_id,)).fetchone()
@@ -200,6 +216,10 @@ class Rooms:
                     "deck": deck, "owners": {}, "active": 0, "turns": 0, "round": 1, "revision": 1,
                     "phase": "waiting", "since": now, "stage": 0, "acks": [], "open": [], "reward": None,
                     "started": False, "pausedSince": None, "requests": {}}
+            if mode == "duel":
+                room.update(mode="duel", pool=uids, questions=self._duel_plan(uids), question=0,
+                            scores=[0, 0], answers={}, closed=[], opensAt=None, closesAt=None)
+                room["deck"] = []
             conn.execute("INSERT INTO rooms VALUES(?,?,?)", (room["id"], request_id, json.dumps(room, ensure_ascii=False)))
             return self._snapshot(room, 0)
 
@@ -238,6 +258,12 @@ class Rooms:
         now = self.clock()
         if paused and room["pausedSince"] is None:
             room["pausedSince"], room["acks"] = now, []
+            if room.get("mode") == "duel" and room["phase"] == "duel_choose":
+                # An interrupted, unscored window is replayed, never shortened.
+                self._duel_question(room)
+            elif room.get("mode") == "duel":
+                # A client may miss the whole pause; still invalidate its audio ACK.
+                room["stage"] += 1
         elif not paused and room["pausedSince"] is not None:
             room["since"] += now - room["pausedSince"]
             room["pausedSince"] = None
@@ -250,6 +276,9 @@ class Rooms:
 
     def _advance(self, room):
         if room["pausedSince"] is not None:
+            return
+        if room.get("mode") == "duel":
+            self._duel_advance(room)
             return
         elapsed = self.clock() - room["since"]
         if room["phase"] == "reveal" and elapsed >= 2 and set(room["acks"]) == {0, 1}:
@@ -277,7 +306,7 @@ class Rooms:
 
     def act(self, room_id: str, token: str, action: str, payload: dict | None = None) -> dict:
         token, payload = _token(token), payload or {}
-        if action not in ("sync", "ready", "leave", "start", "flip", "heard", "rematch", "restart"):
+        if action not in ("sync", "ready", "leave", "start", "flip", "heard", "rematch", "restart", "answer", "closed", "next"):
             raise GameError("Neznámá herní akce.")
         with self._db() as conn:
             room = self._load(conn, room_id)
@@ -289,11 +318,13 @@ class Rooms:
             room["touched"] = self.clock()
             if action == "ready":
                 room["players"][player]["ready"] = True
+                if room.get("mode") == "duel" and room["phase"] == "duel_choose":
+                    self._duel_question(room)
             elif action == "leave":
                 room["players"][player]["ready"] = False
             self._presence(room)
             self._advance(room)
-            if action in ("start", "flip", "heard", "rematch", "restart"):
+            if action in ("start", "flip", "heard", "rematch", "restart", "answer", "closed", "next"):
                 request_id = _request(payload.get("requestId"))
                 fingerprint = _hash(json.dumps([player, action, payload], sort_keys=True))
                 prior = room["requests"].get(request_id)
@@ -315,6 +346,9 @@ class Rooms:
             raise GameError("Partie mezitím pokročila. Ověř její aktuální stav.", 409)
         if not all(self._connected(p) for p in room["players"]) or room["pausedSince"] is not None:
             raise GameError("Čekáme na připojení obou hráčů.", 409)
+        if room.get("mode") == "duel":
+            self._duel_action(room, player, action, payload)
+            return
         if action == "start":
             if player != 0 or room["started"]:
                 raise GameError("Partii může zahájit její zakladatel.", 409)
@@ -341,8 +375,117 @@ class Rooms:
             self.shuffle(room["deck"])
             room.update(owners={}, active=0, turns=0, open=[], reward=None, acks=[], round=room["round"] + 1)
             self._phase(room, "choose")
+        else:
+            raise GameError("Tato akce do pexesa nepatří.", 409)
+
+    def _duel_plan(self, pool):
+        """Choose twelve distinct prompts; distractors may be reused from the pool."""
+        targets = list(pool)
+        self.shuffle(targets)
+        questions = []
+        for target in targets:
+            for _ in range(16):
+                others = [uid for uid in pool if uid != target]
+                self.shuffle(others)
+                choices = [target]
+                for uid in others:
+                    if all(self.catalog.compatible(uid, other) for other in choices):
+                        choices.append(uid)
+                    if len(choices) == PAIR_COUNT:
+                        break
+                if len(choices) == PAIR_COUNT:
+                    self.shuffle(choices)
+                    questions.append({"target": target, "choices": choices})
+                    break
+            if len(questions) == PAIR_COUNT:
+                return questions
+        raise GameError("Ve filtru není 12 zadání s dostatečně odlišnými obrázky. Rozšiř výběr.")
+
+    def _duel_question(self, room):
+        room.update(answers={}, closed=[], acks=[], opensAt=None, closesAt=None)
+        self._phase(room, "duel_intro")
+        room["stage"] += 1
+
+    def _duel_advance(self, room):
+        elapsed = self.clock() - room["since"]
+        if room["phase"] == "duel_intro" and elapsed >= DUEL_SECONDS and set(room["acks"]) == {0, 1}:
+            self._phase(room, "duel_choose")
+            room["stage"] += 1
+            room["opensAt"] = self.clock() + DUEL_LEAD_SECONDS
+            room["closesAt"] = room["opensAt"] + DUEL_SECONDS
+        elif room["phase"] == "duel_choose" and self.clock() >= room["closesAt"] and set(room["closed"]) == {0, 1}:
+            question = room["questions"][room["question"]]
+            correct = question["choices"].index(question["target"])
+            for player in (0, 1):
+                room["scores"][player] += int(room["answers"].get(str(player)) == correct)
+            self._phase(room, "duel_result")
+            room["stage"] += 1
+            room["acks"] = []
+        elif room["phase"] == "duel_result" and elapsed >= 2 and set(room["acks"]) == {0, 1}:
+            self._phase(room, "finished" if room["question"] == PAIR_COUNT - 1 else "duel_between")
+
+    def _duel_action(self, room, player, action, payload):
+        phase = room["phase"]
+        if action == "start":
+            if player != 0 or room["started"]:
+                raise GameError("Partii může zahájit její zakladatel.", 409)
+            room["started"] = True
+            self._duel_question(room)
+        elif action == "answer":
+            index = payload.get("index")
+            if (phase != "duel_choose" or not room["opensAt"] <= self.clock() < room["closesAt"]
+                    or type(index) is not int or not 0 <= index < PAIR_COUNT or str(player) in room["answers"]):
+                raise GameError("Odpověď už nelze změnit nebo vypršel čas.", 409)
+            room["answers"][str(player)] = index
+        elif action == "closed":
+            if phase != "duel_choose" or self.clock() < room["closesAt"]:
+                raise GameError("Výběr ještě není uzavřený.", 409)
+            if player not in room["closed"]:
+                room["closed"].append(player)
+        elif action == "heard":
+            if phase not in ("duel_intro", "duel_result") or type(payload.get("stage")) is not int or payload["stage"] != room["stage"]:
+                raise GameError("Tento poslech už není aktuální.", 409)
+            if player not in room["acks"]:
+                room["acks"].append(player)
+        elif action == "next":
+            if player != 0 or phase != "duel_between":
+                raise GameError("Další kolo spustí vyzyvatel po vyhodnocení.", 409)
+            room["question"] += 1
+            self._duel_question(room)
+        elif action in ("rematch", "restart"):
+            if player != 0 or (action == "rematch" and phase != "finished") or not room["started"]:
+                raise GameError("Novou hru spouští vyzyvatel.", 409)
+            if action == "restart" and "uids" not in payload:
+                raise GameError("Chybí nový výběr slov.")
+            pool = self.catalog.duel_pool(payload["uids"]) if "uids" in payload else room["pool"]
+            questions = self._duel_plan(pool)
+            room.update(pool=pool, questions=questions, question=0, scores=[0, 0], round=room["round"] + 1)
+            self._duel_question(room)
+        else:
+            raise GameError("Tato akce do duelu nepatří.", 409)
+
+    def _duel_snapshot(self, room, player):
+        question = room["questions"][room["question"]]
+        result = room["phase"] in ("duel_result", "duel_between", "finished")
+        target = self.catalog.items[question["target"]]
+        # Future questions, the other player's choice and the answer key stay private.
+        return {"protocol": PROTOCOL, "mode": "duel", "room": room["id"], "revision": room["revision"],
+                "catalog": room["catalog"], "you": player,
+                "players": [{"name": p["name"], "connected": self._connected(p)} if p else None for p in room["players"]],
+                "round": room["round"], "stage": room["stage"], "phase": room["phase"],
+                "question": room["question"] + 1, "questionCount": PAIR_COUNT, "poolCount": len(room["pool"]),
+                "pool": room["pool"] if player == 0 else None,
+                "choices": question["choices"] if room["started"] else [],
+                "promptAudio": target["czAudio"] if room["phase"] == "duel_intro" else None,
+                "target": question["target"] if result else None, "scores": room["scores"],
+                "ownAnswer": room["answers"].get(str(player)), "answers": room["answers"] if result else None,
+                "acks": room["acks"], "closed": player in room["closed"],
+                "serverTime": self.clock(), "opensAt": room["opensAt"], "closesAt": room["closesAt"],
+                "paused": room["pausedSince"] is not None, "expires": room["expires"]}
 
     def _snapshot(self, room, player):
+        if room.get("mode") == "duel":
+            return self._duel_snapshot(room, player)
         cards = []
         for index, uid in enumerate(room["deck"]):
             state = "matched" if uid in room["owners"] else "open" if index in room["open"] else "hidden"
@@ -417,7 +560,7 @@ class Handler(BaseHTTPRequestHandler):
             self._host()
             path = unquote(urlsplit(self.path).path)
             if path == API + "/health":
-                body = json.dumps({"protocol": PROTOCOL, "available": True, "catalog": self.server.rooms.catalog.revision}).encode()
+                body = json.dumps({"protocol": PROTOCOL, "available": True, "games": ["pairs", "duel"], "catalog": self.server.rooms.catalog.revision}).encode()
                 self._headers(200, "application/json", len(body))
             else:
                 if path in ("/", "/vocabulary-fr/"):
@@ -476,7 +619,7 @@ class Handler(BaseHTTPRequestHandler):
                 self._rate()
                 value = self.server.rooms.create(payload)
             else:
-                match = re.fullmatch(re.escape(API) + r"/([a-f0-9]{24})/(join|sync|ready|leave|start|flip|heard|rematch|restart)", path)
+                match = re.fullmatch(re.escape(API) + r"/([a-f0-9]{24})/(join|sync|ready|leave|start|flip|heard|rematch|restart|answer|closed|next)", path)
                 if not match:
                     raise GameError("Herní akce nebyla nalezena.", 404)
                 room, action = match.groups()

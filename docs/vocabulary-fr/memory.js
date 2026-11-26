@@ -26,6 +26,9 @@
     }
     return best;
   }
+  function duelPool(items,audio,catalog){
+    return Q.eligible(items,audio,catalog).filter(item=>!item.imageMissing&&M.audioRecord(item,audio)?.cz);
+  }
   function newGame(items,players,random=Math.random){
     if(items.length!==PAIRS||new Set(items.map(M.key)).size!==PAIRS||!Array.isArray(players)||players.length<1||players.length>4)throw Error(`Pexeso potřebuje ${PAIRS} různých významů a 1–4 hráče.`);
     return {deck:M.shuffle(items.flatMap(i=>[M.key(i),M.key(i)]),random),players:names(players),owners:{},active:0,turns:0};
@@ -73,7 +76,7 @@
       if(typeof value==='string'&&/^https:\/\/[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.onrender\.com$/.test(value))return value;
       return remoteOrigin;
     }
-    const ids=['memoryOnline','memoryView','memorySetup','memorySelection','memorySetupChange','memoryPlayerCount','memoryNames','memoryPoolNotice','memoryStorageNotice','memoryStart','memoryResume','memoryRound','memoryBoard','memoryScores','memoryStatus','memoryProgress','memoryRetry','memorySkip','memoryEnd','memoryResult','memoryCollections','memoryAgain','memoryNew','memoryChange','memoryBack','memoryProjector','memoryReward','memoryRewardImage','memoryRewardWord'];
+    const ids=['memoryDuel','memoryOnline','memoryView','memorySetup','memorySelection','memorySetupChange','memoryPlayerCount','memoryNames','memoryPoolNotice','memoryStorageNotice','memoryStart','memoryResume','memoryRound','memoryBoard','memoryScores','memoryStatus','memoryProgress','memoryRetry','memorySkip','memoryEnd','memoryResult','memoryCollections','memoryAgain','memoryNew','memoryChange','memoryBack','memoryProjector','memoryReward','memoryRewardImage','memoryRewardWord'];
     const ui=Object.fromEntries(ids.map(id=>[id,doc.getElementById(id)]));
     let filters=sanitizeContext(getContext()), gameFilters=null, game=null, source='', selected=[], opened=false, busy=false, error=false, success=false, openCards=[], hint=-1, epoch=0, draftNames=['Hráč 1','Hráč 2'], saved=null;
     const waits=new Map();
@@ -129,6 +132,7 @@
       const ready=Boolean(getAudio()&&getCatalog());
       selected=ready?choose(pool(),getAudio(),getCatalog(),()=>.5):[];
       ui.memoryStart.disabled=selected.length!==PAIRS;ui.memoryOnline.disabled=selected.length!==PAIRS;
+      ui.memoryDuel.disabled=!ready||choose(duelPool(pool(),getAudio(),getCatalog()),getAudio(),getCatalog(),()=>.5).length!==PAIRS;
       ui.memoryPoolNotice.textContent=!ready?'Připravuji obrázky a zvuk…':selected.length===PAIRS?`Ve výběru ${pool().length} karet. Připraveno ${PAIRS} různých dvojic · ${CARDS} kartiček.`:`Pro plán potřebujeme ${PAIRS} dostatečně odlišných obrázků s francouzským zvukem. Rozšiř témata nebo výběr (${pool().length} karet ve filtru).`;
       if(currentOrigin())ui.memoryPoolNotice.textContent+=' Společná hra se otevře v nové kartě; tento výběr zůstane zachovaný.';
       if(getAudio()===false||getCatalog()===false)ui.memoryPoolNotice.textContent='Obrázky nebo zvuk pro pexeso se nepodařilo načíst. Zkus obnovit stránku.';
@@ -238,6 +242,14 @@
       if(target&&target!==new URL(win.location.href).origin&&typeof win.open==='function')win.open(url.toString(),'_blank','noopener,noreferrer');
       else win.location.href=url.toString();
     });
+    ui.memoryDuel.addEventListener('click',()=>{
+      if(ui.memoryDuel.disabled)return;
+      const words=duelPool(pool(),getAudio(),getCatalog()),target=currentOrigin();
+      const url=target?new URL('/vocabulary-fr/duel.html',target):new URL('duel.html',win.location.href);
+      url.hash=new URLSearchParams({words:words.map(item=>item.uid).join(',')}).toString();
+      if(target&&target!==new URL(win.location.href).origin&&typeof win.open==='function')win.open(url.toString(),'_blank','noopener,noreferrer');
+      else win.location.href=url.toString();
+    });
     ui.memoryPlayerCount.value='2';renderNames();
     ui.memorySetupChange.addEventListener('click',()=>{if(approveLeave()){leave();onClose();}});
     ui.memoryPlayerCount.addEventListener('change',()=>{if(![1,2,3,4].includes(Number(ui.memoryPlayerCount.value)))ui.memoryPlayerCount.value='2';draftNames=Array.from(ui.memoryNames.querySelectorAll('input')).map(i=>i.value);renderNames();});
@@ -253,6 +265,6 @@
     function leave(){save();opened=false;cancel();ui.memoryView.classList.remove('memory-projector');ui.memoryProjector.setAttribute('aria-pressed','false');doc.querySelector('[data-json-url]')?.classList.remove('memory-projector-shell');}
     return {open:()=>{opened=true;setup();onOpen();},leave,refresh,canLeave:approveLeave,close:()=>{if(approveLeave()){leave();onClose();}},checkpoint:()=>save()};
   }
-  const api={KEY,PAIRS,CARDS,choose,newGame,settle,signature,restore,create};
+  const api={KEY,PAIRS,CARDS,choose,duelPool,newGame,settle,signature,restore,create};
   if(typeof module!=='undefined'&&module.exports)module.exports=api;else root.VocabularyFRMemory=api;
 })(globalThis);
