@@ -238,6 +238,8 @@ from app.documents.due_date_service import (
 )
 from app.documents.ai_metadata import AIMetadataError
 from app.documents import scan_inbox
+from app.documents import lifecycle as document_lifecycle
+from app.documents.lifecycle import apply_action as document_trash_action
 from app.documents.scan_inbox import save_scan as save_document_scan, save_scan_action as save_document_scan_action
 from app.documents.intake_service import document_intake_status as build_document_intake_status
 from app.documents.scandocu import DEFAULT_DOWNLOADS_DIR, reviewed_document_ids, scan_downloads_for_pdfs
@@ -6123,6 +6125,8 @@ def resolve_openable_document_file(
         return {"ok": False, "message": "Dokument nebyl nalezen ve vault indexu."}
     row = documents[row_index]
     stored_path = str(row.get("stored_path", ""))
+    if document_lifecycle.hidden(row):
+        return {"ok": False, "message": "Dokument je v koši."}
     target = resolve_document_stored_path(stored_path, vault_dir=vault_dir)
     if target is None:
         return {"ok": False, "message": "Soubor dokumentu není dostupný nebo neleží ve vaultu."}
@@ -8741,6 +8745,9 @@ COCKPIT_POST_ACTIONS: tuple[dict[str, str], ...] = (
         "handler_name": "save_document_scan_action",
         "test_level": "direct",
     },
+    {"path": "/api/documents/trash", "label": "Potvrzený koš a obnova jednoho dokumentu",
+     "risk": "private_write", "confirmation": "explicit_selected_document_revision",
+     "handler_name": "document_trash_action", "test_level": "direct"},
     {
         "path": "/api/documents/scans/pdf",
         "label": "Uložit potvrzené naskenované PDF",
@@ -9861,6 +9868,18 @@ class CockpitServer:
             def do_GET(self) -> None:  # noqa: N802
                 self.validate_request_access(require_origin=False)
                 parsed = urlparse(self.path)
+                if document_lifecycle.dispatch_get(parsed, self):
+                    return
+                if parsed.path == "/documents/scans/read":
+                    scan_id = parse_qs(parsed.query).get("scan_id", [""])[0]
+                    try:
+                        path = scan_inbox.resolve_scan(scan_id)
+                        from app.cockpit_document_readers import document_reader_page_html
+                        record = read_json_file(path.parent / "scan.json")
+                        self.respond_html(document_reader_page_html("", str(record["title"]), scan_id=scan_id))
+                    except (ValueError, OSError):
+                        self.respond_html('<a href="/#dokumenty">Zpět do Dokumentů</a><p>Sken není dostupný.</p>', status=HTTPStatus.NOT_FOUND)
+                    return
                 if book_inventory_get_route(parsed, self):
                     return
                 if cockpit_manifest_route(parsed, self):
@@ -10318,6 +10337,10 @@ class CockpitServer:
                         return
                 if parsed.path == "/api/documents/scans":
                     result = scan_inbox.save_scan_action(self.read_json())
+                    self.respond_json(result, status=HTTPStatus.OK if result["ok"] else HTTPStatus.BAD_REQUEST)
+                    return
+                if parsed.path == "/api/documents/trash":
+                    result = document_trash_action(self.read_json())
                     self.respond_json(result, status=HTTPStatus.OK if result["ok"] else HTTPStatus.BAD_REQUEST)
                     return
                 if parsed.path == "/api/documents/scans/pdf":
@@ -11292,6 +11315,22 @@ class CockpitServer:
                     )
                     return
                 scan_ref = parse_qs(parsed.query).get("scan_ref", [""])[0]
+                candidate_token = str((payload or {}).get("token", "")) if method == "POST" else (
+                    upstream_path.rsplit("/", 1)[-1] if upstream_path.startswith(("/pdf/", "/file/", "/preview/")) else "")
+                if candidate_token:
+                    from app.documents.scandocu import get_scandocu_candidate, find_scandocu_candidate_metadata_path
+                    candidate_token = safe_slug(candidate_token, default="", limit=80)
+                    if candidate_token and find_scandocu_candidate_metadata_path(candidate_token, DEFAULT_DOCUMENTS_DIR).is_file():
+                        try:
+                            get_scandocu_candidate(candidate_token)
+                        except (ValueError, OSError):
+                            self.respond_json({"ok": False, "message": "Dokument není aktivní nebo dostupný. Obnov seznam."}, status=HTTPStatus.CONFLICT)
+                            return
+                if method == "GET" and upstream_path == "/" and not scan_ref:
+                    from app.documents.scandocu import SCANDOCU_HTML, SCANDOCU_ARCHIVE_HTML
+                    mode = parse_qs(parsed.query).get("mode", [""])[0]
+                    self.respond_html(SCANDOCU_ARCHIVE_HTML if mode == "browse" else SCANDOCU_HTML)
+                    return
                 if method == "GET" and scan_ref and upstream_path in {"/", "/api/next"}:
                     try:
                         if upstream_path == "/":

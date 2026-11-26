@@ -14,6 +14,8 @@ from typing import Any
 from urllib.parse import parse_qs, urlparse
 
 from .ai_metadata import AIMetadataError, request_codex_metadata_suggestion
+from . import lifecycle as document_lifecycle
+from .search_service import document_reference
 from .archive_browser import (
     IMAGE_EXTENSIONS as ARCHIVE_IMAGE_EXTENSIONS,
     resolve_stored_document_file,
@@ -101,6 +103,13 @@ class ScanDocuCandidate:
     probable_duplicates: list[dict[str, Any]] | None = None
 
     def to_api(self) -> dict[str, Any]:
+        scan_ref = ""
+        try:
+            source = self.source_path.relative_to(self.metadata_path.parents[3] / "scans")
+            if len(source.parts) == 2 and re.fullmatch(r"[a-f0-9]{32}", source.parts[0]):
+                scan_ref = source.parts[0]
+        except (ValueError, IndexError):
+            pass
         extension = self.working_path.suffix.lower()
         if extension == ".pdf":
             preview_kind = "pdf"
@@ -114,6 +123,8 @@ class ScanDocuCandidate:
         inline_preview = preview_kind != "none"
         return {
             "found": True,
+            "lifecycle_kind": "document" if self.review_document_id else ("scan" if scan_ref else ""),
+            "lifecycle_reference": document_reference(self.review_document_id) if self.review_document_id else scan_ref,
             "source_mode": self.source_mode,
             "token": self.token,
             "source_name": self.source_path.name,
@@ -465,7 +476,20 @@ def get_scandocu_candidate(token: str, vault_dir: Path = DEFAULT_DOCUMENTS_DIR) 
     if not metadata_path.exists():
         raise ValueError("ScanDocu kandidat nebyl nalezen.")
     data = read_json_file(metadata_path)
-    return candidate_from_record(data, metadata_path=metadata_path)
+    candidate = candidate_from_record(data, metadata_path=metadata_path)
+    if candidate.review_document_id:
+        item = document_lifecycle.preview("document", document_reference(candidate.review_document_id), vault_dir=vault_dir)
+        if item["trashed"]:
+            raise ValueError("Dokument je v koši. Nejdřív jej obnov.")
+    try:
+        scan_relative = candidate.source_path.relative_to(Path(vault_dir) / "scans")
+    except ValueError:
+        pass
+    else:
+        if len(scan_relative.parts) == 2:
+            from .scan_inbox import resolve_scan
+            resolve_scan(scan_relative.parts[0], vault_dir=vault_dir)
+    return candidate
 
 
 def suggest_scandocu_candidate_metadata_with_ai(
@@ -589,6 +613,8 @@ def prepare_stored_document_review_candidate(
     stored_path: Path,
     vault_dir: Path = DEFAULT_DOCUMENTS_DIR,
 ) -> ScanDocuCandidate:
+    if document_lifecycle.hidden(document_record):
+        raise ValueError("Dokument je v koši. Nejdřív jej obnov.")
     validate_source_file(stored_path)
     digest = sha256_file(stored_path)
     document_id = safe_slug(str(document_record.get("document_id", "")), default=f"doc-{digest[:8]}", limit=140)
@@ -1395,6 +1421,8 @@ class ScanDocuServer:
             def do_GET(self) -> None:  # noqa: N802
                 parsed = urlparse(self.path)
                 try:
+                    if document_lifecycle.dispatch_get(parsed, self, vault_dir=app.vault_dir):
+                        return
                     if parsed.path == "/":
                         mode = parse_qs(parsed.query).get("mode", [""])[0]
                         self.respond_html(
@@ -1550,6 +1578,14 @@ class ScanDocuServer:
                 parsed = urlparse(self.path)
                 try:
                     payload = self.read_json()
+                    if parsed.path == "/api/documents/trash":
+                        origin = self.headers.get("Origin")
+                        if origin and urlparse(origin).netloc != self.headers.get("Host"):
+                            self.respond_json({"ok": False, "message": "Nepovolený původ požadavku."}, status=HTTPStatus.FORBIDDEN)
+                            return
+                        result = document_lifecycle.apply_action(payload, vault_dir=app.vault_dir)
+                        self.respond_json(result, status=HTTPStatus.OK if result["ok"] else HTTPStatus.BAD_REQUEST)
+                        return
                     if parsed.path == "/api/save":
                         result = import_scandocu_candidate(
                             token=str(payload.get("token", "")),
@@ -1854,6 +1890,7 @@ SCANDOCU_HTML = """<!doctype html>
         <div class="actions">
           <button type="button" class="primary" id="saveBtn">Uložit</button>
           <button type="button" class="secondary" id="skipBtn">Přeskočit</button>
+          <button type="button" class="danger" id="trashBtn" hidden>Přesunout do koše</button>
           <button type="button" class="danger" id="stopBtn">Ukončit</button>
         </div>
       </div>
@@ -1938,6 +1975,7 @@ SCANDOCU_HTML = """<!doctype html>
     document.getElementById("nextBtn").textContent = isReviewMode ? "Další uložený dokument" : "Další PDF";
 
     async function loadNext() {
+      if (saving) return;
       fields.status.textContent = isReviewMode ? "Hledám další uložený dokument..." : "Hledám další PDF...";
       fields.formWrap.classList.add("hidden");
       fields.completionActions.classList.add("hidden");
@@ -1963,6 +2001,33 @@ SCANDOCU_HTML = """<!doctype html>
 
     function loadCandidate(data) {
       current = data;
+      if (!data.lifecycle_kind && data.review_document_id) {
+        // Older helper processes can omit the new lifecycle fields. Resolve
+        // their token on the current server instead of exposing a raw ID.
+        fetch(`/api/documents/trash/candidate?token=${encodeURIComponent(data.token)}`, {cache: "no-store"})
+          .then(response => response.json()).then(item => {
+            if (current === data && item.ok && item.kind) loadCandidate({...data, lifecycle_kind: item.kind, lifecycle_reference: item.reference});
+          }).catch(error => {fields.status.textContent = error.message;});
+      }
+      const trashButton = document.getElementById("trashBtn");
+      trashButton.hidden = !data.lifecycle_kind;
+      trashButton.onclick = async () => {
+        if (saving || !current) return;
+        saving = true;
+        fields.saveBtn.disabled = true;
+        fields.skipBtn.disabled = true;
+        try {
+          if (await SamanthaDocumentLifecycle.apply(current.lifecycle_kind, current.lifecycle_reference, "trash", trashButton)) {
+            current = null;
+            fields.formWrap.classList.add("hidden");
+            fields.pdfFrame.removeAttribute("src");
+            fields.imagePreview.removeAttribute("src");
+            fields.completionActions.classList.remove("hidden");
+            fields.status.textContent = "Položka je v koši. Obnovíš ji v Uložené dokumenty → Koš.";
+          }
+        } catch (error) {fields.status.textContent = error.message;}
+        finally {saving = false; fields.saveBtn.disabled = false; fields.skipBtn.disabled = false;}
+      };
       aiSuggestion = null;
       fields.aiBox.classList.add("hidden");
       fields.aiFields.textContent = "";
@@ -2341,7 +2406,7 @@ SCANDOCU_HTML = """<!doctype html>
     }
 
     async function skipCurrent() {
-      if (!current) return;
+      if (saving || !current) return;
       await fetch(appApiUrl("/api/skip"), {
         method: "POST",
         headers: {"Content-Type": "application/json"},
@@ -2774,6 +2839,7 @@ SCANDOCU_ARCHIVE_HTML = """<!doctype html>
       <button class="quiet" id="newDocumentBtn">Nový dokument</button>
       <button class="quiet" id="reviewBtn">Dokumenty k revizi</button>
       <button class="primary" id="refreshBtn">Obnovit</button>
+      <button class="quiet" id="trashFolderBtn">Koš</button>
     </div>
   </header>
 
@@ -2791,8 +2857,7 @@ SCANDOCU_ARCHIVE_HTML = """<!doctype html>
       <div class="folder-title" style="margin-top: 18px;">Oblasti</div>
       <div class="domain-folders" id="domainFolders"></div>
       <div class="folder-note">
-        Toto je pouze čtení místního trezoru. Dokumenty se zde nemažou,
-        nepřesouvají ani neupravují.
+        Vybraný dokument můžeš po potvrzení přesunout do koše a později obnovit.
       </div>
     </aside>
 
@@ -2845,6 +2910,7 @@ SCANDOCU_ARCHIVE_HTML = """<!doctype html>
     let activeReadingStatus = "";
     let activeDomain = "";
     let requestNumber = 0;
+    let trashMode = new URLSearchParams(window.location.search).get("trash") === "1";
 
     function escapeHtml(value) {
       return String(value ?? "").replace(/[&<>"']/g, (character) => ({
@@ -2909,6 +2975,7 @@ SCANDOCU_ARCHIVE_HTML = """<!doctype html>
       `).join("");
       domainFolders.querySelectorAll("[data-domain]").forEach((button) => {
         button.addEventListener("click", () => {
+          trashMode = false;
           activeDomain = activeDomain === button.dataset.domain ? "" : (button.dataset.domain || "");
           loadDocuments();
         });
@@ -2921,6 +2988,25 @@ SCANDOCU_ARCHIVE_HTML = """<!doctype html>
     }
 
     function renderList() {
+      if (trashMode) {
+        listNode.replaceChildren();
+        items.forEach(item => {
+          const row = document.createElement("div"), title = document.createElement("p");
+          title.textContent = `${item.title} · ${item.kind === "scan" ? "Původní sken" : "Dokument v trezoru"}`;
+          row.append(title);
+          const button = document.createElement("button");
+          button.type = "button"; button.textContent = "Obnovit z koše";
+          button.disabled = !item.can_restore;
+          button.onclick = async () => {
+            try {
+              if (await SamanthaDocumentLifecycle.apply(item.kind, item.reference, "restore", button)) await loadDocuments();
+            } catch (error) {statusNode.textContent = error.message;}
+          };
+          row.append(button); listNode.append(row);
+        });
+        if (!items.length) listNode.textContent = "Koš je prázdný.";
+        return;
+      }
       if (!items.length) {
         listNode.innerHTML = '<div class="empty-list">Tomuto hledání neodpovídá žádný dokument.</div>';
         return;
@@ -2956,6 +3042,17 @@ SCANDOCU_ARCHIVE_HTML = """<!doctype html>
       if (activeDomain) params.set("domain", activeDomain);
       if (activeReadingStatus) params.set("reading_status", activeReadingStatus);
       try {
+        if (trashMode) {
+          const response = await fetch("/api/documents/trash", {cache: "no-store"});
+          const data = await response.json();
+          if (currentRequest !== requestNumber) return;
+          if (!response.ok || !data.ok) throw new Error(data.message || "Koš není dostupný.");
+          items = data.items || [];
+          selectedDocumentRef = ""; renderEmptyDetail(); renderList();
+          listTitle.textContent = "Koš dokumentů a skenů";
+          statusNode.textContent = `${items.length} položek · soubory lze obnovit`;
+          return;
+        }
         const response = await fetch(archiveApiUrl(`/api/documents?${params.toString()}`));
         const data = await response.json();
         if (currentRequest !== requestNumber) return;
@@ -3036,9 +3133,10 @@ SCANDOCU_ARCHIVE_HTML = """<!doctype html>
           <header class="document-heading">
             <h2>${escapeHtml(data.title || "Dokument bez názvu")}</h2>
             <div class="detail-actions">
-              <a class="action-link" target="_blank" rel="noopener" href="${fileUrl}">
-                Otevřít samostatně
+              <a class="action-link" href="${archiveResourceUrl('/?mode=browse&document_ref=' + encodeURIComponent(data.document_ref))}">
+                Otevřít čtečku
               </a>
+              <button type="button" id="storedDocumentTrash">Přesunout do koše</button>
               <span class="badge ${data.reading_status === "needs_review" ? "review" : "ok"}">
                 ${escapeHtml(data.reading_status_label || "")}
               </span>
@@ -3057,6 +3155,14 @@ SCANDOCU_ARCHIVE_HTML = """<!doctype html>
           ${textPreview}
         </article>
       `;
+      const trashButton = document.getElementById("storedDocumentTrash");
+      trashButton.onclick = async () => {
+        try {
+          if (await SamanthaDocumentLifecycle.apply("document", data.document_ref, "trash", trashButton)) {
+            selectedDocumentRef = ""; renderEmptyDetail(); await loadDocuments();
+          }
+        } catch (error) {statusNode.textContent = error.message;}
+      };
     }
 
     async function loadDetail(documentRef) {
@@ -3092,6 +3198,7 @@ SCANDOCU_ARCHIVE_HTML = """<!doctype html>
 
     document.querySelectorAll("[data-reading-status]").forEach((button) => {
       button.addEventListener("click", () => {
+        trashMode = false;
         activeReadingStatus = button.dataset.readingStatus || "";
         activeDomain = "";
         loadDocuments();
@@ -3105,6 +3212,9 @@ SCANDOCU_ARCHIVE_HTML = """<!doctype html>
       }
     });
     document.getElementById("refreshBtn").addEventListener("click", loadDocuments);
+    document.getElementById("trashFolderBtn").addEventListener("click", () => {
+      trashMode = true; loadDocuments();
+    });
     document.getElementById("cockpitBtn").addEventListener("click", returnToCockpit);
     document.getElementById("newDocumentBtn").addEventListener("click", () => {
       window.location.href = archiveUrl("/");
@@ -3115,11 +3225,19 @@ SCANDOCU_ARCHIVE_HTML = """<!doctype html>
     document.getElementById("documentBackBtn").addEventListener("click", () => {
       document.body.classList.remove("reader-open");
     });
-    loadDocuments();
+    loadDocuments().then(() => {
+      const reference = new URLSearchParams(window.location.search).get("document_ref");
+      if (reference && !trashMode) loadDetail(reference);
+    });
   </script>
 </body>
 </html>
 """
+
+
+_lifecycle_script = (Path(__file__).resolve().parents[1] / "frontend/shared/document_lifecycle.js").read_text(encoding="utf-8")
+SCANDOCU_HTML = SCANDOCU_HTML.replace("<script>", "<script>" + _lifecycle_script + "</script><script>", 1)
+SCANDOCU_ARCHIVE_HTML = SCANDOCU_ARCHIVE_HTML.replace("<script>", "<script>" + _lifecycle_script + "</script><script>", 1)
 
 
 def run_scandocu_server(

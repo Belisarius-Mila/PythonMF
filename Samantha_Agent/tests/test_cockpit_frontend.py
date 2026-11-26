@@ -302,7 +302,7 @@ const disabled = {...active, state:"disabled", message:"Automatika vypnutá"};
 
         self.assertEqual(
             FRONTEND_JAVASCRIPT_MODULES["cockpit"],
-            ("../shared/calendar_delete.js", "../shared/calendar_actions.js", "calendar_agenda.js", "navigation.js", "health_recovery_autosave.js", "agent_supervisor.js", "housekeeping.js", "codex_sessions.js", "library_photos.js", "library_travel.js", "book_facets.js", "book_quick_add.js", "document_review.js",
+            ("../shared/calendar_delete.js", "../shared/calendar_actions.js", "../shared/document_lifecycle.js", "calendar_agenda.js", "navigation.js", "health_recovery_autosave.js", "agent_supervisor.js", "housekeeping.js", "codex_sessions.js", "library_photos.js", "library_travel.js", "book_facets.js", "book_quick_add.js", "document_review.js",
                 "document_scan.js", "document_search.js", "film_feedback.js", "film_editor.js", "film_library.js", "science_news.js"),
         )
         self.assertIn("createHealthRecoveryAutosaveFrontend", module_source)

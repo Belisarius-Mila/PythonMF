@@ -3026,3 +3026,11 @@ strop. Skutečný DALTAC dokončen17,0578/20, sedm původních částí beze zm�
 - Problém: Výběr po dohrání řeší jen rematch; odchod na obecný filtr ztratí přímý návrat do společné hry.
 - Řešení: Hostitelský filtr držet v online místnosti. Zrušení bez serverové mutace; potvrzený restart atomicky vymění12 dvojic a zvýší kolo při zachování tokenů/pozvánky. Staré akce odmítnout podle kola/fáze a ukončit starý zvuk.
 - Ověření: Dva JS klienty zachovají URL/session a nemají nový create/join; serverové testy odmítnou hosta, neplatný výběr i starý poslech a po obnově databáze neopakují restart. HTTP test ověřuje novou routu i synchronizaci druhého hráče.
+
+
+### 2026-11-26 15:35 CET — Nový test a registr dlouho běžícího checkpointu
+
+- Problém: model doplnil nový test i jeho registraci do pracovní kopie, ale dokončovací server použil dosavadní načtený registr a odmítl kandidáta jako neregistrovaný. Zůstal vlastněný WIP bez commitu.
+- Typ: nesoulad zdrojové kopie a načteného validačního runtime.
+- Řešení: po servisním schválení ověřit původní přesný otisk, vlastníka a neaktivní dokončovací úlohu. Registrovaný checkpoint provést v novém procesu z kontrolované kopie s výslovným zdrojovým main, původním idempotentním ID a bez push/deploy. Test se nemaže a validační politika ani podpis se neobcházejí.
+- Ověření: původní chyba byla reprodukovaná, nový proces načetl doplněný registr a vydal podepsaný doménový důkaz. Dokončení dokládá soukromá účtenka document_vault_checkpoint_recovery_20261126. Již běžící Cockpit tím nezíská nové moduly; jejich načtení zůstává součástí samostatně autorizovaného vydání.

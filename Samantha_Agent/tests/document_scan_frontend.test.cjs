@@ -11,6 +11,8 @@ class Element {
   scrollIntoView() {}
   focus() {this.focused = true;}
   click() {this.clicked = true;}
+  showModal() {this.open = true;}
+  close() {this.open = false; if (this.onclose) this.onclose();}
 }
 function fixture() {
   const elements = new Map();
@@ -98,4 +100,66 @@ test("saved documents use text labels and open the selected opaque reference", a
   assert.equal(row.children[0].textContent, "<img onerror=bad> · 2 stran");
   row.children[2].onclick();
   assert.equal(f.opened[0][0], "a".repeat(32));
+});
+
+test("saved PDF and draft preview stay inside Cockpit and return without losing pages", async () => {
+  const f = fixture();
+  await f.el("scanCameraInput").onchange({target: {files: [{}], value: ""}});
+  const id = f.scanner.state.id;
+  await f.scanner.saved();
+  const link = f.el("scanSaved").children[0].children[1];
+  let prevented = false;
+  link.onclick({preventDefault() {prevented = true;}});
+  assert.ok(prevented);
+  assert.equal(link.target, undefined);
+  assert.equal(f.el("scanPreviewDialog").open, true);
+  assert.ok(f.el("scanPreviewFrame").src.startsWith("/api/documents/scans/pdf?scan_id="));
+  f.el("scanPreviewBack").onclick();
+  assert.equal(f.el("scanPreviewDialog").open, false);
+  assert.equal(f.el("scanPreviewFrame").src, undefined);
+  assert.equal(f.scanner.state.pages.length, 1);
+  assert.equal(f.scanner.state.id, id);
+  f.scanner.reset();
+  const file = new Blob(["%PDF-test"], {type: "application/pdf"});
+  file.name = "Preview.pdf";
+  f.el("scanPdfInput").onchange({target: {files: [file], value: ""}});
+  f.el("scanPdfFullPreview").onclick({preventDefault() {}});
+  assert.equal(f.el("scanPreviewFrame").src, "blob:preview");
+  f.el("scanPreviewBack").onclick();
+  assert.equal(f.scanner.state.pdf, file);
+});
+
+test("consecutive camera captures retain all pages in the same document", async () => {
+  const f = fixture(), id = f.scanner.state.id;
+  for (let count = 1; count <= 3; count++) {
+    await f.el("scanCameraInput").onchange({target: {files: [{}], value: ""}});
+    assert.equal(f.scanner.state.pages.length, count);
+    assert.equal(f.scanner.state.id, id);
+  }
+});
+
+test("trash cancellation has no write; uncertain retry preserves exact operation", async () => {
+  let confirmed = false, fail = true;
+  const posts = [];
+  const context = {URLSearchParams, crypto: require("node:crypto").webcrypto,
+    window: {confirm: () => confirmed}, fetch: async (url, options) => {
+      if (options && options.method === "POST") {
+        posts.push(JSON.parse(options.body));
+        if (fail) throw new Error("lost response");
+        return {ok: true, json: async () => ({ok: true})};
+      }
+      return {ok: true, json: async () => ({ok: true, title: "Synthetic", revision: "revision"})};
+    }};
+  vm.createContext(context);
+  vm.runInContext(fs.readFileSync(path.join(__dirname, "../app/frontend/shared/document_lifecycle.js"), "utf8"), context);
+  const button = {disabled: false};
+  const apply = () => context.SamanthaDocumentLifecycle.apply("document", "docref-test", "trash", button);
+  assert.equal(await apply(), false);
+  assert.equal(posts.length, 0);
+  confirmed = true;
+  await assert.rejects(apply(), /lost response/);
+  assert.equal(button.disabled, false);
+  fail = false;
+  assert.equal(await apply(), true);
+  assert.deepEqual(posts[0], posts[1]);
 });

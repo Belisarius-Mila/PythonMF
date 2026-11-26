@@ -6,47 +6,97 @@ Cílem je příjem, kontrola, uložení a další zpracování soukromých dokum
 Dokumenty a extrahované texty patří mimo Git.
 
 <!-- SAMANTHA_CURRENT_STATUS_START -->
+## Aktuální stav
 
-## 2026-11-26 06:02 CET — Čtečka dokumentů a ScanDocu
+- Obnoveno potvrzeným checkpointem: 2026-11-26 15:36 CET
+
+### Hotovo
+- PDF má návrat do Dokumentů a ScanDocu umožňuje přesun skenů i uložených dokumentů do obnovitelného koše.
+
+### Otevřeno
+- Potřeba následného nasazení tohoto checkpointu není v provozním snapshotu určená.
+
+### Rizika
+- Žádné další doložené provozní riziko.
+
+### Další krok
+- Samostatně potvrdit vydání lokální opravy; poté fyzicky ověřit návrat z PDF a koš na iPhonu.
+
+### Rozhodnutí
+- PDF se otevírá ve stejném okně s návratem do Dokumentů. Původní sken a zařazený dokument se přesouvají do koše jednotlivě po potvrzení.
+
+### Navrhované další kroky
+- Po nasazení ověřit návrat z vícestránkového PDF na iPhonu v Safari i aplikaci z plochy.
+- Vyzkoušet koš a obnovu původního skenu i již zařazeného dokumentu.
+- Vyzkoušet vícestránkové PDF ze systémového skeneru iPhonu.
+
+### Technický stav checkpointu
+- Změna je otestovaná (67 testů).
+- Git před checkpointem: lokální `main` na `75b3d27a9172`; GitHub může být starší a čeká na denní balíček.
+- Poslední serverově potvrzené nasazení: serverová deployment receipt pro tento proud není dostupná.
+- Read-only živý stav: main=`aligned`, deployment=`unverified`, runtime=`unverified`.
+- Tento snapshot je součástí lokálního checkpointu; push na GitHub zůstává odložený do potvrzeného denního balíčku.
+- Tato sekce nahrazuje pouze předchozí aktuální souhrn; chronologické bloky níže zůstávají historickými snapshoty.
+<!-- SAMANTHA_CURRENT_STATUS_END -->
+
+## 2026-11-26 14:05 CET — Návrat z PDF a koš uložených dokumentů
 
 ### Hotovo
 
-V Cockpitu v sekci Dokumenty funguje tlačítko Naskenovat dokument. Z iPhonu
-lze postupně přidat fotografie, upravit pořadí stran, odebrat chybnou stranu,
-zkontrolovat náhled a název a potvrdit uložení jednoho soukromého PDF.
-Lze také vložit PDF z vestavěného skeneru iPhonu. Uložené skeny mají vlastní
-seznam a lze je jednotlivě otevřít nebo předat do ScanDocu.
+Lokální změna otevírá PDF skenů v Cockpitu s návratem do Dokumentů bez
+ztráty rozpracovaných stran. ScanDocu nabízí přesun skenu i už zařazeného
+dokumentu do koše a jejich jednotlivou obnovu. Položky v koši jsou skryté
+z aktivních seznamů, vyhledávání a revizí; původní soubory zůstávají zachované.
 
 ### Rozhodnutí
 
-Čtečka, příjem, soukromé uložení a návazné zpracování ve ScanDocu patří do
-proudu project-document-vault. Cockpit zajišťuje společné uživatelské rozhraní.
-Potvrzení uložení PDF je první krok. OCR, metadata a konečné zařazení
-do trezoru se provedou následně ve ScanDocu. Přijetí skenu nepoužívá placenou
-analýzu. Soukromé dokumenty zůstávají mimo Git.
-
-První verze snímá fotografie přímo v prohlížeči a zmenší delší stranu na
-1800 pixelů. Pro automatický ořez hran lze použít PDF ze systémového skeneru.
-Jeden dokument podporuje nejvýše 30 stran, vstupní PDF nejvýše 24 MB.
-Přenos při opakování používá stejné ID a chrání uložený dokument před přepsáním.
-Cockpit předává vybraný sken i staršímu běžícímu ScanDocu.
+Míla schválil obě opravy a výslovně zahrnul odstranění již uložených
+nekvalitních nebo chybných dokumentů. Přesun do obnovitelného koše potvrzuje
+konkrétní kopii; původní sken a dokument v trezoru se neodstraňují společně.
 
 ### Další krok
 
-Fyzicky vyzkoušet na Mílově iPhonu několik stránek včetně čitelnosti náhledu,
-pořadí, potvrzení uložení a otevření správného skenu ve ScanDocu.
+Předat lokální změnu Cockpitu pro checkpoint a zvlášť potvrzené nasazení.
 
 ### Navrhované další kroky
 
-Vyzkoušet také vícestránkové PDF z vestavěného skeneru iPhonu.
+- Po nasazení ověřit návrat z vícestránkového PDF na iPhonu v obou způsobech spuštění.
+- Ověřit koš a obnovu původního skenu i zařazeného dokumentu.
+- Vyzkoušet PDF ze systémového skeneru iPhonu.
 
 ### Technický důkaz
 
-Implementace 7cc346bd byla přes Terru vydaná spolu s Datovým commitem 74e6c660.
-Brána prošla 1779 testy a nasazení pěti provozními kontrolami. Následný živý
-audit ověřil stránku čtečky, příjem skenů, cestu ke ScanDocu a shodu GitHubu.
-Samostatná regrese staršího ScanDocu prošla 13 testy. Fyzický test iPhonu
-dosud není přijatý. Autorita vydání je soukromá účtenka
-data/private/document_scan_20261125/completion.json.
+Závěrečné programově vybrané statické kontroly a 1739 testů prošly.
+Protokol je v povolené dočasné oblasti; prostředí blokuje podpis účtenky
+do Git metadat. Podepsané dokončovací potvrzení musí vystavit Cockpit. Kontroly koše zahrnují revizi,
+otisk souboru, souběh, nejisté opakování, rollback a obnovu. Automatická
+obnova nepokrývá starší fyzický koš bez obnovovacích metadat. Změna zatím
+není nasazená a fyzická přejímka telefonu zůstává otevřená; skutečné
+soukromé dokumenty nebyly upravovány.
 
-<!-- SAMANTHA_CURRENT_STATUS_END -->
+### 2026-11-26 15:36 CET – PDF má návrat do Dokumentů a ScanDocu umožňuje přesun skenů i uložených dokumentů do obnovitelného koše.
+
+Hotovo:
+- PDF má návrat do Dokumentů a ScanDocu umožňuje přesun skenů i uložených dokumentů do obnovitelného koše.
+
+Otevřeno:
+- Potřeba následného nasazení tohoto checkpointu není v provozním snapshotu určená.
+
+Rizika:
+- Žádné další doložené provozní riziko.
+
+Rozhodnutí:
+- PDF se otevírá ve stejném okně s návratem do Dokumentů. Původní sken a zařazený dokument se přesouvají do koše jednotlivě po potvrzení.
+
+Další krok:
+- Samostatně potvrdit vydání lokální opravy; poté fyzicky ověřit návrat z PDF a koš na iPhonu.
+
+Navrhované další kroky:
+- Po nasazení ověřit návrat z vícestránkového PDF na iPhonu v Safari i aplikaci z plochy.
+- Vyzkoušet koš a obnovu původního skenu i již zařazeného dokumentu.
+- Vyzkoušet vícestránkové PDF ze systémového skeneru iPhonu.
+
+Technický důkaz:
+- cílená Cockpit brána: 67 testů, 52.3 s, výsledek OK.
+- Pracovní proud: `project-document-vault`.
+- Read-only živý stav při checkpointu: main=`aligned`, deployment=`unverified`, runtime=`unverified`.

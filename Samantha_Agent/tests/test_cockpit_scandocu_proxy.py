@@ -68,14 +68,16 @@ class CockpitScanDocuProxyTests(unittest.TestCase):
         self.upstream.server_close()
         self.upstream_thread.join(timeout=5)
 
-    def test_same_origin_get_forwards_scandocu_page_and_query(self) -> None:
+    def test_same_origin_get_uses_current_ui_even_with_older_helper(self) -> None:
         with urlopen(
             f"{self.cockpit_url}/scandocu/?mode=review&document_ref=docref-0123456789abcdef",
             timeout=5,
         ) as response:
             page = response.read().decode("utf-8")
 
-        self.assertIn("Synthetic ScanDocu", page)
+        self.assertIn('id="trashBtn"', page)
+        self.assertIn('queryParams.get("document_ref")', page)
+        self.assertNotIn("Synthetic ScanDocu", page)
         self.assertEqual(response.headers.get("Cross-Origin-Resource-Policy"), "same-origin")
 
     def test_same_origin_post_forwards_only_allowlisted_scandocu_action(self) -> None:

@@ -151,13 +151,19 @@
             <input type="file" id="scanPdfInput" accept="application/pdf,.pdf" hidden>
             <p id="scanStatus" role="status" aria-live="polite">Přidej stránky nebo PDF. Před uložením zkontroluj jejich pořadí a čitelnost.</p>
             <ol id="scanPages" class="scan-pages"></ol>
-            <a id="scanPdfFullPreview" target="_blank" rel="noopener" hidden>Otevřít celý náhled PDF</a>
+            <a id="scanPdfFullPreview" hidden>Otevřít celý náhled PDF</a>
             <iframe id="scanPdfPreview" title="Náhled naskenovaného PDF" hidden></iframe>
             <div class="actions">
               <button type="button" id="scanSave" class="primary" disabled>Potvrdit a uložit do Cockpitu</button>
               <button type="button" id="scanReset">Nový sken</button>
             </div>
             <div id="scanSaved" class="work-list"></div>
+            <a href="/scandocu/?mode=browse&amp;trash=1">Koš dokumentů a skenů</a>
+            <dialog id="scanPreviewDialog" style="width:96vw;height:94dvh;max-width:1100px;padding:12px">
+              <button type="button" id="scanPreviewBack">Zpět do Dokumentů</button>
+              <p id="scanPreviewTitle"></p>
+              <iframe id="scanPreviewFrame" title="Celý naskenovaný dokument" style="width:100%;height:calc(100% - 100px);border:0"></iframe>
+            </dialog>
           </div>
         </details>
         <div class="work-grid">

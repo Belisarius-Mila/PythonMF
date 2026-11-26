@@ -127,6 +127,8 @@ def search_document_index(
     }
     scored: list[tuple[int, dict[str, Any], str, int]] = []
     for document_id, metadata in documents.items():
+        if str(metadata.get("lifecycle_status", "")).casefold() in {"trashed", "deleted"} or "/trash/" in str(metadata.get("stored_path", "")).replace("\\", "/"):
+            continue
         text = text_by_id.get(document_id, "")
         haystack = " ".join(
             [

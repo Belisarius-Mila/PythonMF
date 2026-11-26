@@ -1751,6 +1751,12 @@ print(json.dumps(result, ensure_ascii=False))
     def test_scandocu_review_lookup_finds_legacy_trailing_dash_token_dir(self) -> None:
         with tempfile.TemporaryDirectory(dir="/private/tmp") as temp_dir:
             vault = Path(temp_dir) / "documents"
+            source = vault / "vault/other/doc-test/test2025-12-09-001438.pdf"
+            source.parent.mkdir(parents=True)
+            source.write_bytes(b"%PDF-1.4\nsynthetic legacy token fixture\n")
+            index = vault / "index/documents_index.jsonl"
+            index.parent.mkdir(parents=True)
+            index.write_text(json.dumps({"document_id": "doc-test", "stored_path": str(source)}) + "\n")
             token_with_dash = "review-doc-2026-06-15-other-email-attachment-pdf-test2025-12-09-001438-e4d14e52-"
             token_without_dash = token_with_dash.rstrip("-")
             candidate_dir = scandocu_processing_dir(vault) / token_with_dash
@@ -1765,11 +1771,11 @@ print(json.dumps(result, ensure_ascii=False))
                         "review_document_id": "doc-test",
                         "source_mode": "vault_review",
                         "source_name": "test2025-12-09-001438.pdf",
-                        "source_path": str(Path(temp_dir) / "test2025-12-09-001438.pdf"),
+                        "source_path": str(source),
                         "tags": [],
                         "title": "E-mail UID 150328 příloha test2025-12-09-001438.pdf",
                         "token": token_with_dash,
-                        "working_path": str(Path(temp_dir) / "test2025-12-09-001438.pdf"),
+                        "working_path": str(source),
                     },
                     ensure_ascii=False,
                 ),

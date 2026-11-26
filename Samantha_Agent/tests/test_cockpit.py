@@ -169,7 +169,7 @@ class CockpitTests(unittest.TestCase):
         document_routes = re.findall(r'if parsed\.path == "([^"]+)":', document_source)
         archive_source = inspect.getsource(cockpit_module.EmailArchiveReadRoutes.dispatch)
         archive_routes = re.findall(r'if parsed\.path == "([^"]+)":', archive_source)
-        return inline_routes + document_routes + archive_routes + list(cockpit_module.HEALTH_RECOVERY_STATUS_GET_PATHS) + list(cockpit_module.InteriorRoutes.paths) + list(cockpit_module.BOOK_INVENTORY_GET_PATHS)
+        return inline_routes + document_routes + archive_routes + list(cockpit_module.HEALTH_RECOVERY_STATUS_GET_PATHS) + list(cockpit_module.InteriorRoutes.paths) + list(cockpit_module.BOOK_INVENTORY_GET_PATHS) + list(cockpit_module.document_lifecycle.READ_PATHS)
 
     def cockpit_do_get_prefix_routes(self) -> list[str]:
         source = Path(cockpit_module.__file__).read_text(encoding="utf-8")
@@ -6267,14 +6267,14 @@ Dalsi krok:
         page = cockpit_module.document_reader_page_html("doc-open", "Doklad & smlouva")
 
         self.assertIn("Tisknout", page)
-        self.assertIn("Zpět do Cockpitu", page)
+        self.assertIn("Zpět do Dokumentů", page)
         self.assertIn("Zavřít okno", page)
         self.assertIn("printFromReader", page)
         self.assertIn("/api/documents/print/prepare", page)
         self.assertIn("/api/documents/print/run", page)
         self.assertIn("window.opener.focus", page)
         self.assertIn("window.close()", page)
-        self.assertIn('window.location.href = "/"', page)
+        self.assertIn('window.location.href = "/#dokumenty"', page)
         self.assertIn("/documents/pdf?document_id=doc-open", page)
         self.assertIn("Doklad &amp; smlouva", page)
 

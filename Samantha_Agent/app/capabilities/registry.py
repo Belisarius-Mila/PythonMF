@@ -12,6 +12,20 @@ from app.capabilities.models import (
 
 CAPABILITIES: tuple[CapabilityRecord, ...] = (
     CapabilityRecord(
+        capability_id="document_trash_read", label="Náhled koše a konkrétní položky",
+        risk=RiskLevel.READ_ONLY, reads=("private scan and vault lifecycle metadata",), writes=(),
+        tool="app.documents.lifecycle.trash_status", audit=AuditPolicy.REDACTED,
+        notes="Read-only list and revision preview; no recovery, deletion or model call.",
+    ),
+    CapabilityRecord(
+        capability_id="document_trash_action", label="Přesunout jednu položku do koše nebo ji obnovit",
+        risk=RiskLevel.LOCAL_WRITE, reads=("exact private scan or indexed document and current revision",),
+        writes=("confirmed recoverable lifecycle state and private receipt",),
+        tool="app.documents.lifecycle.apply_action", requires_confirmation=True,
+        confirmation_policy=ConfirmationPolicy.EXACT_CURRENT_MESSAGE, audit=AuditPolicy.REDACTED,
+        notes="One selected opaque reference, action and revision. Durable idempotency; no permanent deletion or implicit linked-copy removal.",
+    ),
+    CapabilityRecord(
         capability_id="document_scan_save", label="Uložit potvrzený vícestránkový sken",
         risk=RiskLevel.LOCAL_WRITE, reads=("confirmed ordered page images and title",),
         writes=("private PDF and completed scan manifest",),

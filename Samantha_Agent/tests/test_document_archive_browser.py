@@ -229,7 +229,7 @@ class DocumentArchiveBrowserTests(unittest.TestCase):
         self.assertEqual(api_candidate["review_document_id"], "selected-review-document")
         self.assertEqual(api_candidate["source_mode"], "vault_review")
 
-    def test_scandocu_frontends_keep_browser_discoverable_and_read_only(self) -> None:
+    def test_scandocu_frontends_keep_browser_discoverable_with_confirmed_trash(self) -> None:
         self.assertIn('id="archiveBtn">Uložené dokumenty', SCANDOCU_HTML)
         self.assertIn('window.location.pathname.startsWith("/scandocu")', SCANDOCU_HTML)
         self.assertIn('queryParams.get("document_ref")', SCANDOCU_HTML)
@@ -240,8 +240,10 @@ class DocumentArchiveBrowserTests(unittest.TestCase):
             "/api/documents",
             "/api/document?document_ref=",
             "Text nalezený v dokumentu",
-            "Otevřít samostatně",
-            "Toto je pouze čtení místního trezoru",
+            "Otevřít čtečku",
+            "Přesunout do koše",
+            "Obnovit z koše",
+            "SamanthaDocumentLifecycle.apply",
         ):
             with self.subTest(expected=expected):
                 self.assertIn(expected, SCANDOCU_ARCHIVE_HTML)

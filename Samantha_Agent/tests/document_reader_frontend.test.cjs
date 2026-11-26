@@ -51,14 +51,14 @@ test('return focuses the original Cockpit and retains the navigation fallback', 
   assert.equal(calls.closed, 1);
   assert.equal(calls.timers[0].delay, 350);
   calls.timers[0].callback();
-  assert.equal(window.location.href, '/');
+  assert.equal(window.location.href, page === 'document' ? '/#dokumenty' : '/');
   assert.deepEqual(calls.requests, []);
 });
 
 test('standalone return navigates to Cockpit without attempting to close it', () => {
   const {elements, calls, window} = setup({page});
   elements.readerBackBtn.listeners.click();
-  assert.equal(window.location.href, '/');
+  assert.equal(window.location.href, page === 'document' ? '/#dokumenty' : '/');
   assert.equal(calls.closed, 0);
   assert.deepEqual(calls.requests, []);
 });
@@ -81,7 +81,7 @@ test(`${page}: closed or inaccessible opener cannot block return`, () => {
     window.opener.focus = () => { throw new Error('inaccessible opener'); };
     elements.readerBackBtn.listeners.click();
     for (const timer of calls.timers) timer.callback();
-    assert.equal(window.location.href, '/');
+    assert.equal(window.location.href, page === 'document' ? '/#dokumenty' : '/');
     assert.deepEqual(calls.requests, []);
   }
 });

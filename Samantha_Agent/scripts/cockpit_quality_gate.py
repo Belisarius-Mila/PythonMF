@@ -674,6 +674,7 @@ TEST_MODULES = (
     "tests.test_document_due_date_service",
     "tests.test_document_intake_service",
     "tests.test_document_scan_inbox",
+    "tests.test_document_lifecycle",
     "tests.test_document_intake_models",
     "tests.test_document_review_service",
     "tests.test_document_search_service",

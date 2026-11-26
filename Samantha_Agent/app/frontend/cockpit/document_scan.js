@@ -4,6 +4,17 @@
     const el = id => doc.getElementById(id);
     const status = el("scanStatus"), save = el("scanSave"), pagesEl = el("scanPages");
     const state = {pages: [], pdf: null, pdfUrl: "", id: "", busy: false, committed: false};
+    function preview(url, title) {
+      el("scanPreviewTitle").textContent = title || "Náhled PDF";
+      el("scanPreviewFrame").src = url;
+      el("scanPreviewDialog").showModal();
+    }
+    el("scanPreviewBack").onclick = () => el("scanPreviewDialog").close();
+    el("scanPreviewDialog").onclose = () => el("scanPreviewFrame").removeAttribute("src");
+    el("scanPdfFullPreview").onclick = event => {
+      event.preventDefault();
+      preview(state.pdfUrl, el("scanTitle").value);
+    };
     function identifier() {
       const bytes = new Uint8Array(16);
       crypto.getRandomValues(bytes);
@@ -77,11 +88,26 @@
         const row = doc.createElement("div"), title = doc.createElement("p");
         title.textContent = `${item.title} · ${item.pages} stran`; row.append(title);
         const link = doc.createElement("a");
-        link.textContent = "Otevřít PDF"; link.href = `/api/documents/scans/pdf?scan_id=${encodeURIComponent(item.scan_id)}`;
-        link.target = "_blank"; link.rel = "noopener"; row.append(link);
+        link.textContent = "Otevřít PDF"; link.href = `/documents/scans/read?scan_id=${encodeURIComponent(item.scan_id)}`;
+        link.onclick = event => {
+          event.preventDefault();
+          preview(`/api/documents/scans/pdf?scan_id=${encodeURIComponent(item.scan_id)}`, item.title);
+        };
+        row.append(link);
         const button = doc.createElement("button");
         button.type = "button"; button.textContent = "Zpracovat ve ScanDocu";
         button.onclick = () => openProcessor(item.scan_id, button); row.append(button);
+        const trash = doc.createElement("button");
+        trash.type = "button"; trash.textContent = "Přesunout sken do koše";
+        trash.onclick = async () => {
+          try {
+            if (await SamanthaDocumentLifecycle.apply("scan", item.scan_id, "trash", trash)) {
+              status.textContent = "Sken je v koši. Případný dokument v trezoru zůstal zachovaný.";
+              await saved();
+            }
+          } catch (error) {status.textContent = error.message;}
+        };
+        row.append(trash);
         el("scanSaved").append(row);
       });
     }

@@ -662,3 +662,30 @@ memory/handoffs/workstreams/project-document-vault.md a
 memory/tvbcp/workstreams/project-document-vault.md. Tato vazba nahrazuje
 dřívější vedení samotné čtečky pod project-cockpit. Nasazení 7cc346bd je
 ověřené, další krok je fyzická přejímka iPhonu.
+
+
+## 2026-11-26 14:05 CET — Lokální opravy čtečky a obnovitelný koš
+
+Míla při zkoušce potvrdil vytvoření vícestránkového dokumentu a upozornil
+na chybějící návrat z otevřeného PDF a odstranění uloženého testovacího
+dokumentu. Schválil opravu čtečky i koš pro skeny a již zařazené dokumenty.
+
+Lokální implementace ponechává náhled PDF ve stejném okně s návratem do
+Dokumentů a zachováním rozpracovaných stran. ScanDocu má potvrzení jedné
+konkrétní kopie a Koš s obnovou. Jde o logický lifecycle stav; původní
+soukromé soubory se trvale nemažou ani se automaticky neodstraňuje jiná
+kopie. Dokumentové transakce synchronizují index a manifest, přenosy mají
+trvalou identitu a revize zahrnuje také aktuální otisk souboru.
+
+Kanonická dvojice zůstává project-document-vault. Závěrečné programově
+vybrané statické kontroly a 1739 testů prošly; nezměněný kód se již znovu
+netestuje. Protokol je dočasný, podpis účtenky v chráněných Git metadatech
+prostředí odmítá. Podepsané dokončovací potvrzení musí vystavit Cockpit. Následuje checkpoint, samostatně
+potvrzené nasazení a fyzický retest návratu i koše na iPhonu. Starší fyzický
+koš bez obnovovacích metadat není automaticky migrován. Skutečná produkční
+data, Git historie a běžící nasazení nebyly tímto vývojem měněny.
+
+
+## 2026-11-26 15:35 CET — Servisní dokončení checkpointu
+
+Původní checkpoint zastavil nesoulad registru nového testu mezi pracovní kopií a dlouho běžícím validátorem. Přesný otisk všech 23 změn a jejich vlastnictví byly ověřené proti původní dokončovací úloze. Servisní dokončení používá nový proces registrovaného checkpointu, který načte registr kontrolované kopie; nový test zůstává zachovaný. Doménová brána vystavila podepsaný důkaz. Checkpoint zachovává původní idempotentní identitu a zahrnuje aktualizaci kanonického handoffu a TVBCP. Jde o místní dokončení bez pushnutí a nasazení; další krok je samostatně potvrzené vydání a poté přejímka na iPhonu. Tento postup neaktualizuje validační moduly v již běžícím Cockpitu.

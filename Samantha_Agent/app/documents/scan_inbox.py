@@ -114,6 +114,8 @@ def resolve_scan(scan_id, *, vault_dir=DEFAULT_DOCUMENTS_DIR):
     if manifest.is_symlink() or pdf.is_symlink() or (not manifest.is_file()) or (not pdf.is_file()):
         raise ValueError('Uložený sken nebyl nalezen.')
     record = json.loads(manifest.read_text())
+    if record.get('lifecycle_status') in {'trashed', 'deleted'}:
+        raise ValueError('Sken je v koši. Nejdřív jej obnov.')
     if record['scan_id'] != scan_id or digest(pdf.read_bytes()) != record['sha256']:
         raise ValueError('Uložený sken neodpovídá záznamu.')
     return pdf
@@ -128,6 +130,8 @@ def list_scans(*, vault_dir=DEFAULT_DOCUMENTS_DIR):
             continue
         try:
             record = json.loads(path.read_text())
+            if record.get('lifecycle_status') in {'trashed', 'deleted'}:
+                continue
             if path.parent == scan_directory(record['scan_id'], vault_dir):
                 rows.append(public_scan(record))
         except (ValueError, KeyError, OSError):
@@ -150,4 +154,6 @@ def prepare_scan_for_scandocu(scan_id, *, vault_dir=DEFAULT_DOCUMENTS_DIR):
     candidate = prepare_scandocu_candidate(source, vault_dir=vault_dir)
     result = candidate.to_api()
     result["title"] = json.loads((source.parent / "scan.json").read_text())["title"]
+    result["lifecycle_kind"] = "scan"
+    result["lifecycle_reference"] = scan_id
     return result

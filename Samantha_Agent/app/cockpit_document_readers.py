@@ -11,11 +11,13 @@ import json
 from urllib.parse import quote
 
 
-def document_reader_page_html(document_id: str, title: str, viewer_kind: str = "pdf") -> str:
+def document_reader_page_html(document_id: str, title: str, viewer_kind: str = "pdf", *, scan_id: str = "") -> str:
     safe_title = html.escape(title or "Dokument")
     safe_document_id = html.escape(document_id)
     document_id_json = json.dumps(document_id, ensure_ascii=False)
-    pdf_url = f"/documents/pdf?document_id={quote(document_id, safe='')}"
+    pdf_url = (f"/api/documents/scans/pdf?scan_id={quote(scan_id, safe='')}" if scan_id
+               else f"/documents/pdf?document_id={quote(document_id, safe='')}")
+    print_hidden = "hidden disabled" if scan_id else ""
     safe_pdf_url = html.escape(pdf_url, quote=True)
     if viewer_kind == "image":
         viewer_html = (
@@ -65,8 +67,8 @@ def document_reader_page_html(document_id: str, title: str, viewer_kind: str = "
       <strong>{safe_title}</strong>
       <span>{safe_document_id}</span>
     </div>
-    <button type="button" class="primary" id="readerPrintBtn">Tisknout</button>
-    <button type="button" id="readerBackBtn">Zpět do Cockpitu</button>
+    <button type="button" class="primary" id="readerPrintBtn" {print_hidden}>Tisknout</button>
+    <button type="button" id="readerBackBtn">Zpět do Dokumentů</button>
     <button type="button" id="readerCloseBtn">Zavřít okno</button>
     <div class="status" id="readerStatus">Dokument je otevřený ke čtení. Po kontrole ho můžeš rovnou vytisknout.</div>
   </div>
@@ -93,11 +95,11 @@ def document_reader_page_html(document_id: str, title: str, viewer_kind: str = "
         readerStatus.textContent = "Vracím zpět původní Cockpit.";
         window.close();
         window.setTimeout(() => {{
-          window.location.href = "/";
+          window.location.href = "/#dokumenty";
         }}, 350);
         return true;
       }}
-      window.location.href = "/";
+      window.location.href = "/#dokumenty";
       return false;
     }}
 
