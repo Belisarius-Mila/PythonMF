@@ -525,3 +525,25 @@ Technický důkaz. Úplné dekódování MP3 FFmpeg PASS, kopie jsou shodné.
 SHA-256 164270603a6ed76245fdde99bc42ed8c95cd69fc87402299289ae313c4d31700.
 Důkazy data/daily_3am/revisions/20261127_manual/. Samostatný TVBCP pro tento
 obsahový krok nebyl dohodnutý.
+
+## 2026-11-27 08:36 CET — Promluva pro 27. listopadu veřejně ověřená
+
+Hotovo. Jednorázová promluva je na produkci ColorsAndNumbers. Veřejné HTML
+vybírá správnou verzi JS a přehrávač odkazuje na owl_271126.mp3.
+Stažené audio má 126432 B / 21.072 s, shodný SHA-256,
+HTTP 200 audio/mp3 a prošlo úplným dekódováním.
+
+Rozhodnutí. Dokončené výslovně zadané vydání, jeden TTS výsledek a jeden
+release. Před prvním předáním byl registrovaně připojen původní lazy pracovní
+proud a byly dorovnány čisté profily. Text má jednu oznámenou opravu překlepu.
+
+Další krok. Uživatelský poslech. Původní pracovní proud se po tomto místním
+dokumentačním checkpointu registrovaně obnoví.
+
+Navrhované další kroky. Žádné nové.
+
+Technický důkaz. Produkční commit 1c3967486a77629ce7d778a51d82299e6e53fdb3, job a9aedeb0c31dbfae08ae0eee9da21d23.
+Pages 45959449347 success nad přesným zdrojem, deployment 8104391644.
+25 cílených testů a programová brána 107 PASS. Protected services unchanged.
+Veřejná účtenka data/daily_3am/receipts/20261127_publication.json.
+Výsledkový místní zápis neopakuje publikaci.
