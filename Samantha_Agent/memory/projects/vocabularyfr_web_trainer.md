@@ -879,3 +879,27 @@ skóre1:1, další otázku a žádnou duplicitní odpověď. Po aktivaci17/17 so
 na obou původech shodných, všech17 původních místností a přístupů zachovaných,
 SQLite integrity OK, audioRange206. Skutečné Mac GUI/zvuk zůstává k přejímce.
 Aktuální účtenka: data/private/vocabulary_fr_duel_recovery_20261127/completion.json.
+
+
+## 27.11.2026 — Příprava obsahového doplnění před La phrase éclair
+
+Míla schválil372 herních vět a nejprve zadal nové karty, věty a MP3 do Janiny
+sdílené VocabularyFR, potom do webu. Živý iCloud má469 řádků; web481 karet.
+Připraveno42 nových karet s příkladem, navíc17 dosavadních webových karet pro
+iCloud: plán528 zdrojových řádků /523 webových karet. Všechna původní data
+a osobní příznaky mají zůstat zachovaná. Živé datové soubory zatím nezměněné.
+
+Připravená volitelná podpora MP3 pro desktop s přesným textem, FR/CZ kanálem,
+SHA kontrolou a návratem k dosavadnímu say při chybě. Builder přibaluje modul;
+11 cílených testů PASS. App zatím není sestavená ani instalovaná. Herní vývoj,
+publikace a placená výroba nezačaly. Audio nových karet:165 nových MP3,
+7639 znaků, odhad0,115 USD bez daně; čeká potvrzení stropu0,20 USD a rozsahu.
+Volitelně včetně372 herních vět:531 nových MP3,28306 znaků, odhad0,425 USD,
+navržený strop0,50 USD. Nejistá výroba se nikdy automaticky neopakuje.
+
+Důkaz a pokračování: reports/vocabulary_fr_content_additions_20261127.md;
+privátní vocabulary_fr_content_additions_20261127 obsahuje přesné karty,
+návrh CSV, živé výchozí SHA, retail sazbu a oba rozsahy audia. Cílenou bránu,
+commit a aktuální stav určuje completion.json. Po cenovém potvrzení dokončit
+média, aktualizovat iCloud přes zálohu/SHA kontrolu, ověřit bundle a upload,
+pak stejný webový přírůstek. Fyzická Janina přejímka se nepředstírá.

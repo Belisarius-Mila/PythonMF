@@ -22,7 +22,7 @@ ROOT = Path(__file__).resolve().parents[2]
 SOURCE = ROOT / "VocabularyFR"
 DEFAULT_REQUEST = ROOT / "Samantha_Agent/data/private/vocabularyfr_jana_release/request.json"
 CODE = ("vocab_trainer_fr.py", "vocabulary_csv_store.py", "verb_training.py",
-        "verb_training_screen.py", "jana_launcher.py", "bundle_check.py")
+        "verb_training_screen.py", "jana_launcher.py", "bundle_check.py", "local_audio.py")
 CONTENT = ("VerbeTraining.csv", "VerbeSentences.csv", "verb_training_pictures.json")
 DATA = ("VocabularyFR.csv", "VerbeFR.csv", "FR_Pict.csv")
 IMAGES = {".png", ".jpg", ".jpeg", ".gif", ".webp"}

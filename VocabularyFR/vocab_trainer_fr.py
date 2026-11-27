@@ -27,6 +27,7 @@ from vocabulary_csv_store import (  # noqa: E402
     read_csv_document,
     save_csv_atomic,
 )
+from local_audio import LocalAudio  # noqa: E402
 
 APP_NAME = "VocabularyFR"
 CSV_FILENAME = "VocabularyFR.csv"
@@ -205,6 +206,7 @@ class VocabularyTrainerApp:
     def __init__(self, master, csv_path, pict_dir=None):
         self.master = master
         self.csv_path = csv_path
+        self.local_audio = LocalAudio(os.path.join(os.path.dirname(csv_path), "Audio"))
         self.pict_dir = (
             os.path.abspath(os.path.expanduser(pict_dir)) if pict_dir else None
         )
@@ -1508,6 +1510,13 @@ class VocabularyTrainerApp:
         text = ". ".join([t for t in (fr, sentence) if t])
         if not text:
             return
+        if all(self.local_audio.resolve("fr", part) for part in (fr, sentence) if part):
+            def worker():
+                for part in (fr, sentence):
+                    if part:
+                        self._say_blocking(self.fr_voice, part, channel="fr")
+            threading.Thread(target=worker, daemon=True).start()
+            return
         try:
             subprocess.Popen(["say", "-v", self.fr_voice, text])
         except Exception:
@@ -1534,9 +1543,11 @@ class VocabularyTrainerApp:
                     return voice
         return self.fr_voice
 
-    def _say_blocking(self, voice, text, rate_wpm=None):
+    def _say_blocking(self, voice, text, rate_wpm=None, channel=None):
         text = (text or "").strip()
         if not text:
+            return
+        if channel is not None and self.local_audio.play(channel, text):
             return
         try:
             cmd = ["say", "-v", voice]
@@ -1571,28 +1582,28 @@ class VocabularyTrainerApp:
         sentence = (row.get("Sentence") or "").strip()
         if self.all_mode:
             sequence = [
-                (self.fr_voice, fr),
-                (self.cz_voice, cz),
-                (self.cz_voice, sentence_t),
-                (self.fr_voice, sentence),
+                (self.fr_voice, fr, "fr"),
+                (self.cz_voice, cz, "cz"),
+                (self.cz_voice, sentence_t, "cz"),
+                (self.fr_voice, sentence, "fr"),
             ]
         else:
             sequence = [
-                (self.fr_voice, fr),
-                (self.cz_voice, cz),
-                (self.fr_voice, fr),
+                (self.fr_voice, fr, "fr"),
+                (self.cz_voice, cz, "cz"),
+                (self.fr_voice, fr, "fr"),
             ]
-        sequence = [(voice, text) for voice, text in sequence if text]
+        sequence = [(voice, text, channel) for voice, text, channel in sequence if text]
         if not sequence:
             if self.turbo_running:
                 self._schedule_next_turbo_cycle(generation)
             return
 
         def worker():
-            for voice, text in sequence:
+            for voice, text, channel in sequence:
                 if generation != self.turbo_speech_generation:
                     return
-                self._say_blocking(voice, text)
+                self._say_blocking(voice, text, channel=channel)
 
             if generation == self.turbo_speech_generation and self.turbo_running:
                 try:
