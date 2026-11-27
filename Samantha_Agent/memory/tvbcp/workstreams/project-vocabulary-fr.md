@@ -19,6 +19,10 @@
 - Oba hráči obnoví Francouzštinu z Cockpitu, otevřou La phrase éclair a výslovně zapnou zvuk. Zakladatel pošle pozvánku, druhý potvrdí nastavení.
 - Fyzické UI na dvou Macích, úzké okno a skutečný poslech čekají na přejímku. Nativní browser host zde nebyl dostupný; API/DOM testy fyzickou přejímku nenahrazují.
 - Závěrečný provozní zápis nemění herní kód ani nevyžaduje další restart služby.
+### Nová místní úprava vzhledu
+- Potvrzený návrh: desktopové zájmeno1/3 a sloveso1/2 původní šířky; česká i francouzská věta/popisky2×, obrázkové karty včetně infinitivu2× v obou rozměrech.
+- Číselné poměry ověřené, finální brána/SHA v private la_phrase_eclair_layout_20261127/completion.json. Změna je místní a čeká na samostatné p+n/nasazení; stávající služba zatím používá předchozí vzhled.
+- Browser host nedostupný; skutečný vzhled ověřit na Mílově Macu po nasazení.
 <!-- SAMANTHA_CURRENT_STATUS_END -->
 
 ## 27.11.2026 — P+n523 a kompatibilní přechod existujících místností
@@ -1444,3 +1448,27 @@ Produkční API ověřilo oba hráče, potvrzení nastavení,2s přípravu/4s li
 4 přijaté odpovědi, stav stejným tokenem a host/guest handshake do2.kola.
 Soukromé účtenky la_phrase_eclair_release_20261127/completion.json;
 finální dokumentační zápis nevyžaduje nový restart. Fyzický browser/zvuk otevřené.
+
+
+## 2026-11-27 22:40 CET — Větší zadání a obrázky La phrase éclair
+
+Hotovo místně: Podle Mílova obrázku a potvrzených poměrů má desktopový sloupec
+zájmen třetinu původní šířky a sloupec sloves polovinu. Uvolněný prostor dostává
+větná nápověda. Česká věta, francouzské pokračování, popisky i celá výsledná
+věta/varianta mají dvojnásobné písmo. Obrázkové karty včetně infinitivu mají
+dvojnásobné obrázky, popisky, vnitřní mezery a rámečky; jde o vykreslení hotových
+médií, nová výroba nevzniká. Na telefonu zůstává zalomení a dva ovladatelné sloupce.
+
+Rozhodnutí: Míla výslovně potvrdil1/3 a1/2 současných šířek,2× font a2× šířku
+i výšku karet a následně zadal změnu. Herní pravidla ani nastavení se nemění.
+
+Další krok: Po ověření a lokálním commitu samostatné p+n/aktualizace služby,
+pak vizuální kontrola na stejném Macu jako referenční fotografie.
+Navrhované další kroky: Žádný další rozsah.
+
+Technický důkaz: Výpočet skutečného CSS pro1024/1280/1440/1920 px potvrdil
+šířky přesně1/3 a1/2 proti výchozímu rozložení;2× velikosti textu a obrázků
+ověřené přes běžné i kompaktní breakpointy. Aktualizovaný existující kontrakt
+sloupců, nová verze CSS v HTML. Finální programová brána/commit/pending počet
+v private la_phrase_eclair_layout_20261127/completion.json. Nativní browser
+host je stále nedostupný, fyzické vykreslení není označené za ověřené.

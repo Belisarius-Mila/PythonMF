@@ -18,7 +18,7 @@ test('pure presentation helpers keep opaque assets and tied maximum scores',()=>
  for(const s of ['https://evil.test/a.mp3','/eclair-media/../rounds.json','javascript:alert(1)'])assert.equal(mediaPath(s),false);
  assert.match(finalText({players:[{name:'A'},{name:'B'}],scores:[40,40],maxScore:40}),/Remíza/);
  const css=fs.readFileSync(path.resolve(__dirname,'../../docs/vocabulary-fr/eclair.css'),'utf8');
- assert.match(css,/\.eclair-choices\{display:grid;grid-template-columns:minmax\(0,1fr\) minmax\(0,1fr\)/);
+ assert.match(css,/\.eclair-choices\{display:grid;grid-template-columns:minmax\(0,2fr\) minmax\(0,3fr\)/);
  assert.match(css,/@media\(max-width:760px\)/);assert.match(css,/\.solved/);assert.match(css,/\.wrong/);
  assert.match(css,/@media\(min-width:761px\) and \(max-height:780px\)/);assert.match(css,/eclair-in-game \.eclair-card\{min-height:2\.1rem/);
 });
