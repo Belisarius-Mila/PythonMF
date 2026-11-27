@@ -11,7 +11,7 @@ from tempfile import TemporaryDirectory
 import threading
 import unittest
 
-from app.vocabulary_fr_multiplayer import Catalog, GameError, GameServer, Rooms, API, OFFLINE_SECONDS
+from app.vocabulary_fr_multiplayer import Catalog, EclairCatalog, GameError, GameServer, Rooms, API, OFFLINE_SECONDS
 from scripts.cockpit_quality_gate import node_binary
 
 
@@ -856,7 +856,259 @@ class DuelTests(RoomFixture):
             conn.close()
 
 
+def eclair_fixture(directory, count=60, overrides=None):
+    directory.mkdir();(directory / 'media').mkdir()
+    media = {}
+    for suffix, body in [('mp3', b'synthetic audio'), ('webp', b'synthetic picture')]:
+        filename = hashlib.sha256(body).hexdigest() + '.' + suffix
+        (directory / 'media' / filename).write_bytes(body);media[suffix] = filename
+    rows = []
+    for n in range(count):
+        rows.append({'id':f'fr-pe-{n+1:04d}', 'infinitive':'parler' if n % 2 else 'fixture',
+                     'promptCs':'On/ona mluví.', 'sentenceFr':'Il parle.', 'canonicalPronoun':'il',
+                     'acceptedPronouns':['il','elle'], 'acceptedVerb':'parle',
+                     'verbForms':['parle','parles','parle','parlons','parlez','parlent'],
+                     'variants':{'il':'Il parle.','elle':'Elle parle.'}, 'audio':media['mp3'],
+                     'segments':[{'text':'parler','type':'verb_image','role':'hint_only','image':media['webp']},
+                                 {'text':'.','type':'text','role':'separator'}]})
+    for row in rows:row.update(overrides or {})
+    blob=json.dumps({'schemaVersion':1,'kind':'la-phrase-eclair-runtime-v1','rounds':rows}).encode()
+    (directory/'rounds.json').write_bytes(blob)
+    (directory/'manifest.json').write_text(json.dumps({'kind':'la-phrase-eclair-private-bundle-v1',
+        'roundCount':count,'files':{'rounds.json':hashlib.sha256(blob).hexdigest(),
+                                 **{'media/'+v:v.split('.')[0] for v in media.values()}}}))
+    return EclairCatalog(directory)
+
+
+class EclairTests(unittest.TestCase):
+    def setUp(self):
+        self.temp=TemporaryDirectory();self.addCleanup(self.temp.cleanup);self.root=Path(self.temp.name)
+        self.clock=Clock();self.catalog=Catalog();self.eclair=eclair_fixture(self.root/'sentences')
+        self.path=self.root/'rooms.sqlite3';self.rooms=Rooms(self.path,self.catalog,clock=self.clock,shuffle=lambda _:None,eclair=self.eclair)
+        self.host,self.guest,self.invite='a'*64,'b'*64,'c'*64;self.counter=0
+        self.payload={'mode':'eclair','name':'A','playerToken':self.host,'invite':self.invite,'requestId':'d'*64}
+        self.initial=self.rooms.create(self.payload);self.room=self.initial['room']
+        self.rooms.join(self.room,{'name':'B','playerToken':self.guest,'invite':self.invite})
+
+    def raw(self):
+        with sqlite3.connect(self.path) as c:return json.loads(c.execute('SELECT body FROM rooms WHERE id=?',(self.room,)).fetchone()[0])
+
+    def call(self,action,who=None,**payload):
+        self.counter+=1;r=self.raw()
+        return self.rooms.act(self.room,who or self.host,action,{'requestId':f'{self.counter:064x}','expectedRound':r['round'],'expectedStage':r['stage'],**payload})
+
+    def start(self):
+        self.call('confirm',self.guest);self.call('start');self.call('prepared');return self.call('prepared',self.guest)
+
+    def active(self):
+        self.start();self.clock.advance(2);return self.call('sync')
+
+    def answer(self,column,text,who=None):
+        cards=self.raw()['pronounCards' if column=='pronoun' else 'verbCards']
+        return self.call('answer',who,column=column,cardId=next(v['id'] for v in cards if v['text']==text))
+
+    def finish_round(self):
+        self.clock.now=self.raw()['deadlineAt'];return self.call('sync')
+
+    def test_guest_confirms_settings_before_host_can_start_and_settings_are_frozen(self):
+        self.assertEqual(self.initial['settings'],{'rounds':20,'seconds':6})
+        with self.assertRaises(GameError):self.call('start')
+        with self.assertRaises(GameError):self.call('confirm')
+        self.call('confirm',self.guest)
+        with self.assertRaises(GameError):self.call('timing',textSeconds=4,imageSeconds=2)
+        self.assertEqual(self.call('start')['phase'],'eclair_loading')
+
+    def test_preload_barrier_two_seconds_and_same_shuffled_cards_without_answer_key(self):
+        self.call('confirm',self.guest);state=self.call('start');self.call('prepared')
+        self.clock.advance(5);self.assertEqual(self.call('sync')['phase'],'eclair_loading')
+        state=self.call('prepared',self.guest);self.assertEqual(state['phase'],'eclair_prepare')
+        self.assertEqual(state['deadlineAt']-state['startAt'],6)
+        self.assertEqual(state['startAt']-self.clock(),2)
+        self.assertEqual(state['pronounCards'],[]);self.assertEqual(state['verbCards'],[])
+        for key in ['acceptedPronouns','acceptedVerb','variants','sentenceFr','plan','audio','target','fr-pe-']:
+            self.assertNotIn(key,json.dumps(state))
+        self.clock.advance(1.999);self.assertEqual(self.call('sync')['phase'],'eclair_prepare')
+        self.clock.advance(.001);a=self.call('sync');b=self.call('sync',self.guest)
+        self.assertEqual(a['phase'],'eclair_active');self.assertEqual(len(a['pronounCards']),8);self.assertEqual(len(a['verbCards']),6)
+        self.assertEqual(a['pronounCards'],b['pronounCards']);self.assertEqual(a['verbCards'],b['verbCards'])
+        self.assertEqual(len({v['id'] for v in a['verbCards']}),6)
+
+    def test_each_player_can_score_two_and_round_keeps_full_deadline(self):
+        self.active()
+        for who in (self.host,self.guest):
+            self.answer('pronoun','elle',who);s=self.answer('verb','parle',who)
+        self.assertEqual(s['phase'],'eclair_active');self.assertEqual(s['scores'],[0,0])
+        self.assertNotIn('result',s)
+        result=self.finish_round();self.assertEqual(result['scores'],[2,2]);self.assertEqual(result['result']['points'],[2,2])
+        self.assertEqual(result['result']['variantFr'],'Elle parle.');self.assertEqual(result['result']['sentenceFr'],'Il parle.')
+        self.assertEqual(result['result']['audioLabel'],'Vzor');self.assertEqual(self.call('sync')['scores'],[2,2])
+
+    def test_zero_and_one_point_independent_of_opponent(self):
+        self.active();self.answer('verb','parle');self.assertEqual(self.finish_round()['scores'],[1,0])
+
+    def test_wrong_column_penalty_is_local_and_ignored_click_does_not_extend(self):
+        self.active();s=self.answer('pronoun','je');until=s['ownColumns']['pronoun']['lockUntil']
+        self.assertEqual(until,self.clock()+1)
+        self.clock.advance(.2);s=self.answer('pronoun','il');self.assertFalse(s['ownColumns']['pronoun']['solved'])
+        self.assertEqual(s['ownColumns']['pronoun']['lockUntil'],until)
+        self.assertTrue(self.answer('verb','parle')['ownColumns']['verb']['solved'])
+        self.assertFalse(self.call('sync',self.guest)['ownColumns']['pronoun']['solved'])
+        self.clock.now=until;self.assertTrue(self.answer('pronoun','il')['ownColumns']['pronoun']['solved'])
+
+    def test_duplicate_verb_text_is_accepted_for_either_card_id(self):
+        self.active();cards=[v for v in self.raw()['verbCards'] if v['text']=='parle'];self.assertEqual(len(cards),2)
+        self.call('answer',column='verb',cardId=cards[1]['id']);s=self.call('answer',self.guest,column='verb',cardId=cards[0]['id'])
+        self.assertTrue(s['ownColumns']['verb']['solved']);self.assertEqual(self.finish_round()['scores'],[1,1])
+
+    def test_solved_column_is_permanently_locked_and_never_loses_points(self):
+        self.active();self.answer('pronoun','il');s=self.answer('pronoun','je')
+        self.assertEqual(s['ownColumns']['pronoun']['chosen'],'il');self.assertEqual(self.finish_round()['scores'],[1,0])
+
+    def test_replayed_event_is_not_scored_twice_and_reusing_id_for_other_click_is_refused(self):
+        self.active();r=self.raw();card=next(v['id'] for v in r['verbCards'] if v['text']=='parle')
+        payload={'requestId':'f'*64,'expectedRound':r['round'],'expectedStage':r['stage'],'column':'verb','cardId':card}
+        self.rooms.act(self.room,self.host,'answer',payload);self.rooms.act(self.room,self.host,'answer',payload)
+        with self.assertRaises(GameError):self.rooms.act(self.room,self.host,'answer',{**payload,'column':'pronoun'})
+        self.assertEqual(self.finish_round()['scores'],[1,0])
+
+    def test_deadline_is_exclusive_and_client_supplied_time_cannot_override_it(self):
+        self.active();self.clock.now=self.raw()['deadlineAt']
+        with self.assertRaises(GameError):self.answer('verb','parle')
+        self.assertEqual(self.call('sync')['scores'],[0,0])
+
+    def test_preparation_stale_round_unknown_card_and_unauthorized_player_are_refused(self):
+        self.start()
+        with self.assertRaises(GameError):self.answer('verb','parle')
+        self.clock.advance(2);self.call('sync')
+        for extra in [{'cardId':'unknown','column':'verb'}, {'cardId':self.raw()['verbCards'][0]['id'],'column':'pronoun'},
+                      {'cardId':self.raw()['verbCards'][0]['id'],'column':'verb','expectedRound':999}]:
+            with self.assertRaises(GameError):self.call('answer',**extra)
+        with self.assertRaises(GameError):self.rooms.act(self.room,'e'*64,'sync')
+
+    def test_host_next_requires_guest_handshake_and_double_confirm_only_advances_once(self):
+        self.active();self.finish_round()
+        with self.assertRaises(GameError):self.call('confirm',self.guest)
+        with self.assertRaises(GameError):self.call('next',self.guest)
+        s=self.call('next');self.assertEqual(s['phase'],'eclair_wait_guest')
+        with self.assertRaises(GameError):self.call('confirm')
+        s=self.call('confirm',self.guest);self.assertEqual((s['roundIndex'],s['phase']),(2,'eclair_loading'))
+        with self.assertRaises(GameError):self.call('confirm',self.guest)
+
+    def test_disconnect_does_not_pause_or_repeat_active_round_and_can_still_score(self):
+        self.active();self.call('leave',self.guest);self.answer('verb','parle');self.clock.advance(7)
+        s=self.call('ready',self.guest);self.assertEqual(s['phase'],'eclair_result');self.assertEqual(s['scores'],[1,0])
+        self.assertEqual(s['roundIndex'],1);self.assertEqual(self.call('ready')['scores'],[1,0])
+
+    def test_hidden_opponent_choices_and_current_round_points_are_private(self):
+        self.active();self.answer('pronoun','elle');s=self.call('sync',self.guest)
+        self.assertFalse(s['ownColumns']['pronoun']['solved']);self.assertNotIn('chosen',json.dumps(s['players']))
+        self.assertEqual(s['scores'],[0,0]);self.assertNotIn('result',s)
+
+    def test_full_game_tie_maximum_nonrepeating_ids_and_rematch_same_invitation(self):
+        self.active();plan=self.raw()['plan'];self.assertEqual(len(plan),len(set(plan)))
+        for index in range(20):
+            for who in (self.host,self.guest):self.answer('pronoun','il',who);self.answer('verb','parle',who)
+            s=self.finish_round()
+            if index<19:
+                self.call('sync',self.guest);self.call('next');self.call('confirm',self.guest)
+                self.call('prepared');self.call('prepared',self.guest);self.clock.advance(2);self.call('sync')
+        self.assertEqual((s['phase'],s['scores'],s['maxScore']),('finished',[40,40],40))
+        self.call('sync',self.guest);self.call('rematch');s=self.call('confirm',self.guest)
+        self.assertEqual((s['room'],s['scores'],s['roundIndex']),(self.room,[0,0],1))
+        self.assertEqual(self.rooms.join(self.room,{'name':'B','invite':self.invite,'playerToken':self.guest})['you'],1)
+
+    def test_missing_media_falls_back_but_corrupt_or_escaping_inputs_are_rejected(self):
+        (self.eclair.directory/'media'/self.eclair.items[next(iter(self.eclair.items))]['audio']).unlink()
+        catalog=EclairCatalog(self.eclair.directory);self.assertEqual(len(catalog.items),60)
+        self.assertIsNone(catalog.href(next(iter(catalog.items.values()))['audio']))
+        (self.eclair.directory/'rounds.json').write_text('{}')
+        with self.assertRaises(ValueError):EclairCatalog(self.eclair.directory)
+
+    def test_normalization_preserves_accents_reflexives_and_elision(self):
+        self.assertEqual(EclairCatalog.norm('  m’appelle '),"m'appelle")
+        self.assertEqual(EclairCatalog.norm('nous  appelons'),'nous appelons')
+        self.assertNotEqual(EclairCatalog.norm('êtes'),EclairCatalog.norm('etes'))
+
+    def test_explicit_gender_reflexive_forms_and_elision_use_reviewed_full_variants(self):
+        reflexive=["m'appelle","t'appelles","s'appelle","nous appelons","vous appelez","s'appellent"]
+        cases=[('elle',"s'appelle",reflexive,"Elle s'appelle Claire."),
+               ('nous','nous appelons',reflexive,'Nous nous appelons Luc et Marc.'),
+               ('je','ai',['ai','as','a','avons','avez','ont'],"J'ai un sac.")]
+        for number,(pronoun,verb,forms,sentence) in enumerate(cases):
+            with self.subTest(sentence=sentence):
+                e=eclair_fixture(self.root/f'language-{number}',overrides={'canonicalPronoun':pronoun,
+                    'acceptedPronouns':[pronoun],'acceptedVerb':verb,'verbForms':forms,
+                    'sentenceFr':sentence,'variants':{pronoun:sentence}})
+                self.path=self.root/f'language-{number}.sqlite3';self.rooms=Rooms(self.path,self.catalog,clock=self.clock,eclair=e)
+                self.room=self.rooms.create(self.payload)['room'];self.rooms.join(self.room,{'name':'B','playerToken':self.guest,'invite':self.invite})
+                self.active()
+                if pronoun=='elle':
+                    self.answer('pronoun','il');self.clock.advance(1)
+                self.answer('pronoun',pronoun);self.answer('verb',verb)
+                result=self.finish_round();self.assertEqual(result['scores'],[2,0]);self.assertEqual(result['result']['variantFr'],sentence)
+
+    def test_unavailable_small_catalog_invalid_settings_and_catalog_drift(self):
+        plain=Rooms(self.root/'plain.sqlite3',self.catalog)
+        with self.assertRaises(GameError):plain.create(self.payload)
+        for values in [{'rounds':True},{'rounds':11},{'seconds':0},{'seconds':6.0}]:
+            with self.assertRaises(GameError):self.rooms.create({**self.payload,**values})
+        self.rooms.eclair=eclair_fixture(self.root/'small',6)
+        with self.assertRaises(GameError):self.rooms.create({**self.payload,'requestId':'e'*64})
+        with self.assertRaises(GameError):self.call('sync')
+
+    def test_http_serves_only_opaque_media_with_range_and_never_the_answer_key(self):
+        server=GameServer(('127.0.0.1',0),self.rooms)
+        thread=threading.Thread(target=server.serve_forever,daemon=True);thread.start()
+        try:
+            def get(path,headers=None):
+                c=http.client.HTTPConnection('127.0.0.1',server.server_port,timeout=5)
+                c.request('GET',path,headers=headers or {});r=c.getresponse();value=(r.status,r.read(),dict(r.getheaders()));c.close();return value
+            status,body,_=get(API+'/health');health=json.loads(body)
+            self.assertEqual(status,200);self.assertEqual(health['eclair']['roundCount'],60)
+            self.assertEqual(health['games'],['pairs','duel','eclair']);self.assertNotIn('rounds',health['eclair'])
+            filename=next(v for v in self.eclair.media if v.endswith('.mp3'))
+            status,body,headers=get('/eclair-media/'+filename,{'Range':'bytes=0-3'})
+            self.assertEqual(status,206);self.assertEqual(body,b'synt');self.assertIn('Content-Range',headers)
+            for path in ['/private/vocabulary-fr-eclair/rounds.json','/eclair-media/rounds.json',
+                         '/eclair-media/%2e%2e/rounds.json','/data/vocabulary-fr-eclair.json']:
+                self.assertEqual(get(path)[0],404,path)
+            for name in ('eclair.html','eclair.js','eclair.css'):
+                status,body,_=get('/vocabulary-fr/'+name)
+                self.assertEqual(status,200);self.assertEqual(body,(self.catalog.docs/'vocabulary-fr'/name).read_bytes())
+        finally:
+            server.shutdown();server.server_close();thread.join(5)
+
+
 class ClientTests(unittest.TestCase):
+    def test_real_eclair_clients_against_authoritative_http_and_injected_server_clock(self):
+        import os
+        from app.vocabulary_fr_multiplayer import Handler
+        with TemporaryDirectory() as directory:
+            root=Path(directory);clock=Clock()
+            rooms=Rooms(root/'rooms.sqlite3',Catalog(),clock=clock,shuffle=lambda _:None,
+                        eclair=eclair_fixture(root/'sentences'))
+            server=GameServer(('127.0.0.1',0),rooms)
+            class ControlledHandler(Handler):
+                def do_POST(self):
+                    if self.path=='/test/advance':
+                        self._host()
+                        value=json.loads(self.rfile.read(int(self.headers['Content-Length'])))
+                        seconds=value['seconds']
+                        if type(seconds) not in (int,float) or not 0<=seconds<=120:
+                            self._json({'error':'invalid test clock'},400);return
+                        clock.advance(seconds);self._json({'now':clock()});return
+                    super().do_POST()
+            server.RequestHandlerClass=ControlledHandler
+            thread=threading.Thread(target=server.serve_forever,daemon=True);thread.start()
+            try:
+                result=subprocess.run([node_binary(),'--test','tests/test_vocabularyfr_eclair.js'],
+                    cwd=Path(__file__).resolve().parents[1],capture_output=True,text=True,timeout=90,
+                    env={**os.environ,'ECLAIR_TEST_ORIGIN':server.origin})
+                self.assertEqual(result.returncode,0,result.stdout+result.stderr)
+                self.assertIn('fail 0',result.stdout)
+            finally:
+                server.shutdown();server.server_close();thread.join(5)
+
     def test_real_online_client_with_two_independent_browser_fixtures(self):
         result = subprocess.run([node_binary(), "--test", "tests/test_vocabularyfr_online.js"], cwd=Path(__file__).resolve().parents[1], capture_output=True, text=True, timeout=60)
         self.assertEqual(result.returncode, 0, result.stdout + result.stderr)

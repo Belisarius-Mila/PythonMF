@@ -113,6 +113,12 @@ class TailnetTests(unittest.TestCase):
         with self.assertRaises(ValueError):self.activate(envelope)
         self.assertEqual(self.runner.actions, [])
 
+    def test_release_manifest_is_bound_to_the_plan_before_any_system_change(self):
+        envelope=self.prepare();release=self.service.root/'releases'/envelope['plan']['head']
+        manifest=release/'manifest.json';manifest.write_text(manifest.read_text()+'\n')
+        with self.assertRaisesRegex(ValueError,'manifest changed'):self.activate(envelope)
+        self.assertEqual(self.runner.actions,[])
+
     def test_foreign_route_launchagent_or_service_label_is_preserved(self):
         self.runner.serve["TCP"]["8443"] = {"HTTPS": True}
         with self.assertRaises(ValueError):self.prepare()

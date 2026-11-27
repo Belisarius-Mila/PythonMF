@@ -279,6 +279,14 @@ test('FR duel requires both language channels while pairs remain usable without 
 });
 const cockpitGameOrigin='https://fixture-friendly-family-game.trycloudflare.com';
 const cockpitFrenchUrl=origin=>'https://belisarius-mila.github.io/PythonMF/vocabulary-fr/#'+new URLSearchParams({onlineOrigin:origin});
+test('La phrase éclair opens directly from the main navigation at the verified game origin without personal filters',async()=>{
+ const origin='https://fixture-mac.fixture-tail.ts.net:8443',v=await app({url:cockpitFrenchUrl(origin)}),opened=[];
+ v.win.open=url=>opened.push(url);
+ v.state.query='chat';v.selectionChanged();const local=JSON.stringify([...v.local.map]),before=v.win.location.href;assert.equal(v.element('eclairTab').disabled,false);v.element('eclairTab').click();
+ const target=new URL(opened[0]);assert.equal(target.origin,origin);assert.equal(target.pathname,'/vocabulary-fr/eclair.html');assert.equal(target.hash,'');
+ assert.equal(v.win.location.href,before);assert.equal(JSON.stringify([...v.local.map]),local);
+ v.element('memoryTab').click();const memoryUrl=v.win.location.href,memoryLocal=JSON.stringify([...v.local.map]);v.element('memoryEclair').click();assert.equal(opened[1],opened[0]);assert.equal(v.win.location.href,memoryUrl);assert.equal(JSON.stringify([...v.local.map]),memoryLocal);
+});
 test('private Tailscale game uses only its dedicated HTTPS port and survives reload',async()=>{
  const origin='https://fixture-mac.fixture-tail.ts.net:8443',session=storage(),first=await app({url:cockpitFrenchUrl(origin),session}),opened=[];
  first.win.open=url=>opened.push(url);first.element('memoryTab').click();first.element('memoryOnline').click();assert.equal(new URL(opened[0]).origin,origin);

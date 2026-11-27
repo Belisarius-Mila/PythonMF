@@ -1,22 +1,23 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
-### Hotovo
-- Janin iCloud VocabularyFR má528 řádků; veřejný web i soukromá herní služba mají523 karet, nová MP3 a obrázky. Obsah i herní služba vydané z f6d16ded.
-- Po aktuálním přesném potvrzení globální brzdy aktivovaný plán v2. Stejná soukromá adresa, pozvánky, hráčské přístupy a skóre; původních17 místností zachováno.
-- Obnova spojení, nastavení textu2/3/4s a obrázku1/2s i ostatní herní funkce zachované.
+**Práce obnovená na Mílův pokyn. První verze místně; finální brána a SHA podle soukromé účtenky. Publikace a nasazení nové hry zatím neprovedené.**
+
+### Hotovo místně
+- La phrase éclair jako samostatná společná hra z hlavní navigace Francouzštiny Jana;372 ověřených vět,62 slovesných skupin,494 variant a hotová média.
+- Nastavení10/20/30/50 kol a4/6/8/10/15s (výchozí20/6);2s příprava po připravenosti obou, dvě nezávislé volby, každý sloupec+1, lokální1s penalizace a celý čas kola.
+- Serverové vyhodnocení, důvěrné soupeřovy volby, souhlas obou mezi koly, Vzor jednou + ruční opakování, obnova stejné session a nová hra ve stejné místnosti.
+- Soukromý odpovědní katalog a550 hotových médií mimo docs/Git; soukromý export a SHA manifestu připnutý do plánu aktivace. Nová výroba nebyla potřeba.
 
 ### Důkaz
-- Pages workflow46038924063 / deployment8115378758 úspěšné pro přesný f6d16ded; předtím potvrzený push všech3 commitů. Původní časově neurčitá release účtenka se nepřepisovala a publikace se neopakovala.
-- Na Pages i soukromé službě265/265 souborů byteově shodných, MP3 Range206; služba running/health OK.
-- SQLite integrity OK. Skutečná záloha po zastavení procesu proti živé DB:17 původních místností změnilo pouze catalog; ID/request/pozvánky/přístupy/skóre/balíček/kolo/expirace přesně zachované.
-- Dva HTTPS klienti spustili Pexeso i duel s12 pouze novými slovy; stejná místnost/kolo/fáze pro oba, QA hráči poté odešli.
-- Programová brána476 PASS a závěrečná dokumentační67 PASS; konečné provozní účtenky v data/private/vocabulary_fr_content_release_20261127/completion.json.
+- Pravidla testovaná s injektovaným časem. Dva skuteční HTTP klienti se syntetickým DOM/audio dokončili20kolovou partii včetně potvrzování, skóre a obnovy.
+- Skutečný372-kolový korpus proti schválenému zdroji beze změny vět/tvarů/variant; všechna média přítomná. Dva autentizované HTTP klienty s reálnými daty:2:2, vzor Range206 a druhé kolo, Pexeso/duel funkční.
+- Finální programová brána/commit a soukromé účtenky: data/private/la_phrase_eclair_implementation_20261127/completion.json. Podrobnosti reports/la_phrase_eclair_implementation_20261127.md.
 
-### Rizika a další krok
-- Oba hráči obnoví stránku a zapnou zvuk; fyzický poslech a ovládání na dvou Macích zůstávají samostatnou přejímkou.
-- Záloha SQLite zachovaná, vypršené místnosti se neprodlužují. Soukromá adresa a skutečné přístupy zůstávají mimo Git.
--372 vět a MP3 pro budoucí LaPhraseEclair jsou připravená média; nová hra se v tomto kroku neimplementovala.
+### Provoz a další krok
+- Nová hra zatím není publikovaná ani nasazená. Dosavadní web obsahuje523 karet a běžící služba f6d16ded zůstává zachovaná; její17 původních místností dříve ověřeně zachovaných.
+- Další krok: samostatně autorizované p+n nové hry a aktivace služby s privátním balíčkem; pak oba hráči obnoví stránku a otevřou La phrase éclair.
+- Nativní browser host je zde nedostupný. Fyzické UI na dvou Macích, úzké okno a skutečný poslech čekají na přejímku; automatický DOM je nenahrazuje.
 <!-- SAMANTHA_CURRENT_STATUS_END -->
 
 ## 27.11.2026 — P+n523 a kompatibilní přechod existujících místností
@@ -1336,3 +1337,86 @@ Finální služba running f6d16ded,523 karet. Účtenky zůstávají soukromé v
 vocabulary_fr_content_release_20261127/completion.json; původní release
 attention zachovaná, úspěch původního workflow nezávisle potvrzen bez retry.
 Fyzická dvě zařízení a poslech nejsou nahrazené automatickým ověřením.
+
+
+## 2026-11-27 18:59 CET — La phrase éclair, první místní implementace
+
+Hotovo: Samostatná hra pro dva s372 větami, dvěma nezávislými volbami,
+serverovým skóre, přípravou2s, volitelným časem, potvrzením obou mezi koly,
+francouzským vzorem a obnovením stejného přístupu. Vstup přímo z hlavní
+navigace i od Pexesa. Všechny předem vyrobené zvuky a použité obrázky zapojené.
+
+Rozhodnutí: Míla výslovně zadal vývoj první verze ze schválených372 vět.
+Zůstává stejný backend, pozvánky a autentizace. Klíč odpovědí se nepodává jako
+veřejný JSON; soukromý export nově připíná obsahový manifest do plánu aktivace.
+
+Další krok: Samostatné p+n a aktualizace herní služby s private approved-v1.
+Navrhované další kroky: Fyzická společná přejímka dvou Maců včetně zvuku.
+
+Technický důkaz: dva klienty proti skutečnému HTTP enginu dokončily20 kol;
+chyby, duplicity, deadline, skóre, handshake, ztracená odpověď a opakované audio
+jsou kryté regresními scénáři. Skutečný korpus372/62/494 a všech550 médií
+ověřený; další dvě reálné datové HTTP relace získaly2:2 a pokračovaly ve stejné
+místnosti. Pexeso i duel funkční. Finální brána/SHA jsou v soukromé účtence
+la_phrase_eclair_implementation_20261127/completion.json; nativní browser
+nedostupný, fyzická přejímka otevřená. Produkční služba vývojem neměněná.
+
+
+## 2026-11-27 19:01 CET — Práce přerušená na výslovné přání Míly
+
+Nazev: La phrase éclair — dokončení první implementace
+Priorita: 2
+Stav: rozpracovane
+Pripomenout pri startu: ano
+Datum: 2026-11-27 19:01 CET
+
+Co se resilo: Nový režim podle schváleného zadání a372 vět.
+Co je hotove: Herní server, soukromý runtime korpus approved-v1, UI a vstup
+z hlavní navigace, audio a reconnect. Poslední klientská sada9 Node scénářů
+proti skutečnému HTTP serveru PASS;20kolová partie a obnova, celkem původní
+backendová integrační regrese142 PASS před závěrečnými doplněními. Skutečný
+372-kolový korpus,550 médií a2 datové HTTP relace2:2/2.kolo ověřené.
+Nový test pin manifestu PASS. Celé aktuální vstupy ještě nemají finální účtenku.
+Co neni hotove: Finální programová validační brána byla na přání Míly zastavená.
+Změny nejsou commitnuté, pushnuté ani nasazené. Browser host nedostupný;
+fyzické UI/poslech na dvou Macích čekají. Běžící produkční služba f6d16ded zachovaná.
+Dalsi krok: Po Mílově pokynu obnovit práci kontrolou git status a tohoto zápisu;
+spustit scripts/validation_gate.py bez --full, opravit případné skutečné chyby,
+zkontrolovat diff, vytvořit lokální commit a zarovnat pouze čisté profily.
+Navrhovane dalsi kroky: Samostatné p+n a aktivace hry s privátním korpusem;
+poté společná fyzická přejímka obou Maců a zvuku.
+Zmenene nebo relevantni soubory: vocabulary_fr_multiplayer.py,
+vocabulary_fr_cloud.py, vocabulary_fr_tailnet.py, VocabularyFR/vocabulary_fr_eclair.py,
+docs/vocabulary-fr/eclair.html/.js/.css, index.html, memory.js, FR testy
+včetně test_vocabularyfr_eclair.js a fixtures/vocabulary_fr_eclair_browser.js.
+Podrobnosti: reports/la_phrase_eclair_implementation_20261127.md a soukromé
+la_phrase_eclair_implementation_20261127/completion.json. Runtime korpus:
+data/private/vocabulary-fr-eclair/approved-v1; zdroj v006 už se znovu nevyrábí.
+Bezpecnost / neukladat: Klíč odpovědí, tokeny a soukromá data nepatří do Git/docs.
+Nespouštět publikaci ani restart jen při obnově. Vývoj zůstává pozastavený,
+dokud Míla nepožádá pokračovat. Žádný nový placený požadavek.
+
+
+## 2026-11-27 20:19 CET — Obnovení a dokončení La phrase éclair
+
+Hotovo: Míla obnovil vývoj z uloženého checkpointu. Implementace, soukromý
+372-kolový korpus a dosavadní důkazy zůstaly zachované. Doplněné ověření
+nejistého založení po reloadu používá původní identitu i nastavení; ovládání
+jasně ukazuje Ověřit původní vstup a zabraňuje změně původního požadavku.
+
+Rozhodnutí: Pokračovat závěrečným ověřením a lokálním commitem. Samostatné
+publikování a změna běžící herní služby zatím nejsou součástí tohoto dokončení.
+
+Další krok: Po úspěšné programové bráně připravit samostatně autorizované p+n
+nové hry a aktualizaci služby s privátním balíčkem; pak přejímka dvou Maců.
+Navrhovane dalsi kroky: Fyzické vykreslení úzkého okna a poslech obou klientů.
+Pripomenout pri startu: ne
+
+Technický důkaz: Závěrečné přesné vstupy/brána/SHA a počet čekajících commitů
+jsou v la_phrase_eclair_implementation_20261127/completion.json. Obnova
+neopakuje výrobu médií a neaktivuje službu. Původní přerušení zůstává historické.
+
+Závěrečná kontrola rozložení doplnila kompaktní herní režim pro notebooky:
+při hře se schová hotová pozvánka a úvodní popis, zmenší se svislé mezery
+a při nižším desktopovém okně výška karet. Oba sloupce zůstávají vedle sebe;
+telefon zachovává větší dotykové plochy. Fyzické vykreslení zůstává k přejímce.

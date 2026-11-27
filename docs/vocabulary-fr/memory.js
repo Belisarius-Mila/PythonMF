@@ -242,6 +242,11 @@
       if(target&&target!==new URL(win.location.href).origin&&typeof win.open==='function')win.open(url.toString(),'_blank','noopener,noreferrer');
       else win.location.href=url.toString();
     });
+    for(const id of ['eclairTab','memoryEclair']){const button=doc.getElementById(id);if(button){button.disabled=false;button.addEventListener('click',()=>{
+      const target=currentOrigin(),url=target?new URL('/vocabulary-fr/eclair.html',target):new URL('eclair.html',win.location.href);
+      if(target&&target!==new URL(win.location.href).origin&&typeof win.open==='function')win.open(url.toString(),'_blank','noopener,noreferrer');
+      else win.location.href=url.toString();
+    });}}
     ui.memoryDuel.addEventListener('click',()=>{
       if(ui.memoryDuel.disabled)return;
       const words=duelPool(pool(),getAudio(),getCatalog()),target=currentOrigin();

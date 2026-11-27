@@ -253,7 +253,8 @@ class PrivateGame:
                           "StandardOutPath": str(self.root / "server.log"), "StandardErrorPath": str(self.root / "server-error.log")}
             plan = {"requestId": request_id, "head": expected_head, "origin": origin, "network": network,
                     "definition": definition, "priorAgentSha256": hashlib.sha256(installed).hexdigest() if installed is not None else None,
-                    "files": len(prepared["files"])}
+                    "files": len(prepared["files"]),
+                    "releaseManifestSha256": hashlib.sha256((release / "manifest.json").read_bytes()).hexdigest()}
             if old.get("running"):
                 transition = _catalog_transition(self.root / "releases" / old["head"],
                                                  release, self.root / "rooms.sqlite3")
@@ -289,6 +290,11 @@ class PrivateGame:
                 raise ValueError("Original owned running service is not confirmed")
             release = self.root / "releases" / plan["head"]
             prepare_release(repo=self.repo, output=release, expected_head=plan["head"])
+            manifest_sha = hashlib.sha256((release / "manifest.json").read_bytes()).hexdigest()
+            if plan.get("releaseManifestSha256") and manifest_sha != plan["releaseManifestSha256"]:
+                raise ValueError("Frozen release manifest changed; nothing activated")
+            if (release / "private/vocabulary-fr-eclair").exists() and not plan.get("releaseManifestSha256"):
+                raise ValueError("Private sentence content requires a newly frozen plan")
             if plan.get("catalogTransition"):
                 actual = _catalog_transition(self.root / "releases" / plan["previousHead"],
                                              release, self.root / "rooms.sqlite3")

@@ -53,6 +53,20 @@ class ExportTests(unittest.TestCase):
         self.assertFalse((self.output / "Samantha_Agent/data").exists())
         self.assertFalse((self.output / "docs/vocabulary-en").exists())
 
+    def test_approved_eclair_bundle_is_frozen_outside_public_docs_and_tampering_is_detected(self):
+        from tests.test_vocabularyfr_multiplayer import eclair_fixture
+        private=self.repo/'Samantha_Agent/data/private/vocabulary-fr-eclair/approved-v1'
+        private.parent.mkdir(parents=True);catalog=eclair_fixture(private)
+        result=self.prepare();exported=self.output/cloud.PRIVATE_ECLAIR
+        self.assertTrue((exported/'rounds.json').is_file())
+        self.assertFalse((self.output/'docs/private').exists())
+        self.assertEqual((exported/'rounds.json').stat().st_mode&0o777,0o600)
+        self.assertEqual(cloud._game().EclairCatalog(exported).revision,catalog.revision)
+        self.assertIn(cloud.PRIVATE_ECLAIR+'/rounds.json',result['files'])
+        self.assertEqual(self.prepare(),result)
+        (exported/'rounds.json').write_text('changed')
+        with self.assertRaises(ValueError):self.prepare()
+
     def test_unapproved_head_modified_release_and_git_metadata_destination_are_rejected(self):
         with self.assertRaises(ValueError):cloud.prepare_release(repo=self.repo, output=self.output, expected_head="a" * 40)
         with self.assertRaises(ValueError):cloud.prepare_release(repo=self.repo, output=self.repo / ".git/export", expected_head=self.head)

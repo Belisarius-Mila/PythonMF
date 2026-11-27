@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="cs">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="referrer" content="no-referrer">
+  <title>La phrase éclair · Francouzština Jana</title>
+  <link rel="stylesheet" href="gallery.css"><link rel="stylesheet" href="eclair.css?v=20261127-1">
+  <script src="eclair.js?v=20261127-1" defer></script>
+</head>
+<body><main class="eclair-page">
+  <header class="eclair-header"><div><p class="eyebrow">Francouzština Jana · Dva hráči na dálku</p><h1 lang="fr">La phrase éclair</h1><p>Najdi zájmeno a správný tvar slovesa. Dvě volby, dva body.</p></div><a id="eclairBack" href="./#game=memory-pairs">Zpět do Francouzštiny</a></header>
+  <p id="eclairStatus" class="eclair-status" role="status" aria-live="polite">Připravuji společnou hru…</p>
+  <p id="eclairStorage" class="notice" role="status"></p>
+  <section id="eclairSetup" class="eclair-setup">
+    <label>Tvoje jméno<input id="eclairName" maxlength="12" autocomplete="off" value="Hráč"></label>
+    <div id="eclairOptions" class="eclair-options">
+      <label>Počet kol<select id="eclairRounds"><option>10</option><option selected>20</option><option>30</option><option>50</option></select></label>
+      <label>Čas na odpověď<select id="eclairSeconds"><option value="4">4 s</option><option value="6" selected>6 s</option><option value="8">8 s</option><option value="10">10 s</option><option value="15">15 s</option></select></label>
+    </div>
+    <p id="eclairRules">Příprava trvá 2 sekundy. Za každou správnou volbu získáš bod; po chybě se jen daný sloupec na sekundu zamkne. Kolo běží celý zvolený čas a oba můžete získat dva body. Nové kolo začíná po potvrzení obou hráčů.</p>
+    <button id="eclairEnter" class="primary" type="button" disabled>Založit hru a zapnout zvuk</button>
+  </section>
+  <section id="eclairRoom" hidden>
+    <div id="eclairInvitePanel" class="eclair-invite" hidden><label>Soukromá pozvánka pro spoluhráče<input id="eclairInvite" readonly autocomplete="off" spellcheck="false"></label><button id="eclairCopy" type="button">Kopírovat pozvánku</button></div>
+    <div id="eclairScores" class="eclair-scores" aria-label="Skóre hráčů"></div>
+    <div class="eclair-toolbar"><p id="eclairProgress"></p><p id="eclairTimer" class="eclair-timer" role="timer" aria-label="Zbývající čas"></p></div>
+    <div class="eclair-controls"><button id="eclairConfirm" class="primary" type="button" hidden>Souhlasím s nastavením</button><button id="eclairStart" class="primary" type="button" hidden>Zahájit hru</button><button id="eclairResume" type="button" hidden>Pokračovat a zapnout zvuk</button><button id="eclairNext" class="primary" type="button" hidden>Další kolo</button><button id="eclairAgain" class="primary" type="button" hidden>Nová hra ve stejné místnosti</button></div>
+    <section id="eclairPlay" hidden>
+      <p id="eclairPrompt" class="eclair-prompt" lang="cs"></p>
+      <div class="eclair-play">
+        <div class="eclair-choices" aria-label="Dva nezávislé výběry">
+          <section><h2>Zájmeno</h2><div id="eclairPronouns" class="eclair-column" lang="fr"></div><p id="eclairPronounNotice" class="eclair-column-notice" role="status"></p></section>
+          <section><h2>Sloveso</h2><div id="eclairVerbs" class="eclair-column" lang="fr"></div><p id="eclairVerbNotice" class="eclair-column-notice" role="status"></p></section>
+        </div>
+        <section class="eclair-hints" aria-label="Nápověda a pokračování věty"><h2>Pokračování věty</h2><div id="eclairHint" class="eclair-verb-hint" lang="fr"></div><div id="eclairSegments" class="eclair-segments" lang="fr"></div></section>
+      </div>
+    </section>
+    <section id="eclairFeedback" class="eclair-feedback" hidden aria-label="Výsledek kola"><h2 id="eclairSentence" lang="fr"></h2><p id="eclairVariant" lang="fr"></p><p id="eclairRoundPoints"></p><button id="eclairRepeat" type="button">Přehrát vzor</button><p id="eclairAudioNotice" role="status" aria-live="polite"></p></section>
+    <section id="eclairEnd" class="eclair-end" hidden><h2>Hra dokončena</h2><p id="eclairFinal" role="status"></p></section>
+  </section>
+</main></body></html>

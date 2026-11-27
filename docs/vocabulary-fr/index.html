@@ -13,12 +13,12 @@
   <script src="personal.js?v=20261120-memory1" defer></script>
   <script src="personal-ui.js?v=20261120-memory1" defer></script>
   <script src="practice.js?v=20261120-memory1" defer></script>
-  <script src="memory.js?v=20261126-duel1" defer></script>
+  <script src="memory.js?v=20261127-eclair1" defer></script>
   <script src="gallery.js?v=20261124-cloud1" defer></script>
 </head>
 <body>
   <main class="page-shell" data-json-url="../data/vocabulary-fr-v2.json" data-audio-url="../data/vocabulary-fr-audio.json">
-    <nav class="app-navigation" aria-label="Část aplikace"><button id="galleryTab" type="button" aria-pressed="true">Přehled</button><button id="quizTab" type="button" aria-pressed="false" disabled>Slovo a obrázek</button><button id="memoryTab" type="button" aria-pressed="false" disabled>Pexeso</button><button id="settingsTab" type="button" aria-pressed="false">Nastavení</button></nav>
+    <nav class="app-navigation" aria-label="Část aplikace"><button id="galleryTab" type="button" aria-pressed="true">Přehled</button><button id="quizTab" type="button" aria-pressed="false" disabled>Slovo a obrázek</button><button id="memoryTab" type="button" aria-pressed="false" disabled>Pexeso</button><button id="eclairTab" type="button" disabled>La phrase éclair</button><button id="settingsTab" type="button" aria-pressed="false">Nastavení</button></nav>
     <section id="galleryView" aria-label="Přehled slovíček">
       <header class="hero">
         <div><p class="eyebrow">Slovíčka v obrázcích</p><h1>Francouzština Jana</h1><p class="intro">Vyber si obrázek. Uč se vlastním tempem.</p></div>
@@ -108,7 +108,7 @@
         <p id="memorySelection"></p><p>Platí stejný výběr jako v Přehledu: Všechna / Jen obtížná, témata, hledání a další filtry.</p>
         <p class="meta">24 kartiček · 6 × 4 na větší obrazovce · každý význam dvakrát. Jména hráčů platí jen pro tuto partii.</p>
         <p id="memoryPoolNotice" class="notice" role="status" aria-live="polite"></p>
-        <div class="memory-actions"><button id="memoryStart" class="primary" type="button" disabled>Spustit novou partii</button><button id="memoryOnline" type="button" disabled>Hrát spolu na dálku</button><button id="memoryDuel" type="button" disabled>Poslechový duel na dálku</button><button id="memorySetupChange" type="button">Změnit filtr v Přehledu</button><button id="memoryResume" type="button" hidden>Pokračovat v partii</button></div>
+        <div class="memory-actions"><button id="memoryStart" class="primary" type="button" disabled>Spustit novou partii</button><button id="memoryOnline" type="button" disabled>Hrát spolu na dálku</button><button id="memoryDuel" type="button" disabled>Poslechový duel na dálku</button><button id="memoryEclair" type="button">La phrase éclair · věty na dálku</button><button id="memorySetupChange" type="button">Změnit filtr v Přehledu</button><button id="memoryResume" type="button" hidden>Pokračovat v partii</button></div>
       </div>
       <p id="memoryStorageNotice" class="notice" role="status" aria-live="polite"></p>
       <div id="memoryRound" hidden>

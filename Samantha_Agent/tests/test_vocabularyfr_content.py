@@ -484,5 +484,43 @@ class LocalAudioTests(unittest.TestCase):
             self.assertEqual(run.call_args.args[0], ["say", "-v", "Thomas", "Missing clip"])
 
 
+class EclairBundleTests(unittest.TestCase):
+    def setUp(self):
+        import vocabulary_fr_eclair
+        self.build = vocabulary_fr_eclair.build
+        self.tmp = tempfile.TemporaryDirectory();self.addCleanup(self.tmp.cleanup)
+        self.source=Path(self.tmp.name)/'source';self.source.mkdir();self.output=Path(self.tmp.name)/'private-runtime'
+        self.sound=b'synthetic immutable audio';(self.source/'voice.mp3').write_bytes(self.sound)
+        self.row={'id':'fr-pe-0001','infinitive':'parler','promptCs':'Mluvím.','sentenceFr':'Je parle.',
+                  'canonicalPronoun':'je','acceptedPronouns':['je'],'acceptedVerb':'parle',
+                  'verbForms':['parle','parles','parle','parlons','parlez','parlent'],
+                  'variants':{'je':'Je parle.'},'segments':[{'type':'verb_image','role':'hint_only','text':'parler'}],
+                  'audio':{'text':'Je parle.','asset':'voice.mp3','sha256':hashlib.sha256(self.sound).hexdigest()},
+                  'recommendedForInitialRelease':True,'editorialStatus':'ready'}
+        (self.source/'image-bindings.json').write_text('[]');self.save()
+
+    def save(self):
+        (self.source/'rounds.json').write_text(json.dumps({'rounds':[self.row]}))
+
+    def test_private_export_preserves_answers_duplicate_forms_and_source_media_without_generation(self):
+        manifest=self.build(self.source,self.output,expected_rounds=1)
+        data=json.loads((self.output/'rounds.json').read_text());row=data['rounds'][0]
+        self.assertEqual(row['verbForms'],self.row['verbForms']);self.assertEqual(row['variants'],self.row['variants'])
+        self.assertEqual((self.output/'media'/row['audio']).read_bytes(),self.sound)
+        self.assertEqual(manifest['roundCount'],1);self.assertEqual((self.source/'voice.mp3').read_bytes(),self.sound)
+        self.assertEqual((self.output/'rounds.json').stat().st_mode&0o777,0o600)
+        with self.assertRaises(ValueError):self.build(self.source,self.output,expected_rounds=1)
+
+    def test_incomplete_core_unapproved_text_mismatching_audio_and_changed_media_are_refused(self):
+        with self.assertRaises(ValueError):self.build(self.source,self.output,expected_rounds=372)
+        self.row['recommendedForInitialRelease']=False;self.save()
+        with self.assertRaises(ValueError):self.build(self.source,self.output,expected_rounds=1)
+        self.row['recommendedForInitialRelease']=True;self.row['audio']['text']='Other sentence';self.save()
+        with self.assertRaises(ValueError):self.build(self.source,self.output,expected_rounds=1)
+        self.row['audio']['text']='Je parle.';self.save();(self.source/'voice.mp3').write_bytes(b'changed')
+        with self.assertRaises(ValueError):self.build(self.source,self.output,expected_rounds=1)
+        self.assertFalse(self.output.exists())
+
+
 if __name__ == '__main__':
     unittest.main()

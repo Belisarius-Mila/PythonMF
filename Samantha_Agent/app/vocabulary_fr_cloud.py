@@ -28,6 +28,7 @@ PUBLIC = ("docs/vocabulary-fr", "docs/data/vocabulary-fr-v2.json", "docs/data/vo
           "docs/data/vocabulary-fr-sentence-pictures.json", "docs/assets/vocabulary-fr-v2",
           "docs/assets/vocabulary-fr-audio", "docs/assets/vocabulary-fr-sentences")
 RENDER_ORIGIN = re.compile(r"https://[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.onrender\.com\Z")
+PRIVATE_ECLAIR = "private/vocabulary-fr-eclair"
 
 
 def _sha(path):
@@ -35,8 +36,8 @@ def _sha(path):
         return hashlib.file_digest(stream, "sha256").hexdigest()
 
 
-def prepare_release(*, repo: Path, output: Path, expected_head: str) -> dict:
-    """Export committed public FR inputs only; never copy the working directory."""
+def prepare_release(*, repo: Path, output: Path, expected_head: str, eclair_bundle: Path | None = None) -> dict:
+    """Export committed FR code and optionally seal its approved private corpus."""
     repo, output = Path(repo).resolve(), Path(output).resolve()
     head = subprocess.check_output(["git", "-C", str(repo), "rev-parse", "HEAD"], text=True).strip()
     if not re.fullmatch(r"[a-f0-9]{40}", expected_head) or head != expected_head:
@@ -50,7 +51,8 @@ def prepare_release(*, repo: Path, output: Path, expected_head: str) -> dict:
             raise ValueError("Existing release belongs to other inputs")
         for name, digest in prior["files"].items():
             path = Path(name)
-            allowed = name in (SERVER, CLOUD) or any(name == p or name.startswith(p + "/") for p in PUBLIC)
+            allowed = (name in (SERVER, CLOUD) or any(name == p or name.startswith(p + "/") for p in PUBLIC)
+                       or name.startswith(PRIVATE_ECLAIR + "/"))
             if not allowed or path.is_absolute() or ".." in path.parts or (output / path).is_symlink() or _sha(output / path) != digest:
                 raise ValueError("Existing release changed")
         actual = set()
@@ -80,6 +82,25 @@ def prepare_release(*, repo: Path, output: Path, expected_head: str) -> dict:
             files[member.name] = _sha(target)
     if not {SERVER, CLOUD, "docs/vocabulary-fr/online.html"}.issubset(files):
         raise ValueError("Incomplete cloud release")
+    bundle = Path(eclair_bundle) if eclair_bundle is not None else repo / "Samantha_Agent/data/private/vocabulary-fr-eclair/approved-v1"
+    if bundle.exists():
+        if bundle.is_symlink() or bundle.resolve().is_relative_to(repo / "docs"):
+            raise ValueError("Eclair must use a private regular bundle")
+        _game().EclairCatalog(bundle)  # Validate all answers and media before freezing them.
+        sealed = json.loads((bundle / "manifest.json").read_text())
+        for name in ["manifest.json", *sealed["files"]]:
+            relative = Path(name)
+            source = bundle / relative
+            if relative.is_absolute() or ".." in relative.parts or source.is_symlink() or not source.is_file():
+                raise ValueError("Unsafe private Eclair bundle")
+            destination = output / PRIVATE_ECLAIR / relative
+            destination.parent.mkdir(mode=0o700, parents=True, exist_ok=True)
+            with destination.open("xb") as stream:
+                os.chmod(destination, 0o600)
+                stream.write(source.read_bytes())
+            files[PRIVATE_ECLAIR + "/" + relative.as_posix()] = _sha(destination)
+        # Verify the frozen copy, including protection against source drift.
+        _game().EclairCatalog(output / PRIVATE_ECLAIR)
     result = {"kind": "vocabulary-fr-cloud-v1", "head": head, "files": files}
     with manifest.open("x") as stream:
         json.dump(result, stream, indent=2)
@@ -112,7 +133,8 @@ def _game():
 
 def create_server(settings: dict, *, bind: str = "0.0.0.0"):
     game = _game()
-    server = game.GameServer((bind, settings["port"]), game.Rooms(settings["directory"] / "rooms.sqlite3", game.Catalog()), settings["origin"])
+    private = Path(__file__).resolve().parents[2] / PRIVATE_ECLAIR
+    server = game.GameServer((bind, settings["port"]), game.Rooms(settings["directory"] / "rooms.sqlite3", game.Catalog(), eclair=game.load_eclair(private)), settings["origin"])
     server.daemon_threads = False  # Drain bounded requests before Render's SIGTERM deadline.
     class CloudHandler(game.Handler):
         def _get(self, head=False):

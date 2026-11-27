@@ -141,9 +141,99 @@ class Catalog:
         return list(uids)
 
 
+class EclairCatalog:
+    """Private answer key and opaque media; never expose this catalog via HTTP."""
+    PRONOUNS = ("je", "tu", "il", "elle", "nous", "vous", "ils", "elles")
+    MEDIA = re.compile(r"[a-f0-9]{64}\.(?:mp3|webp|png|svg)\Z")
+
+    def __init__(self, directory: Path):
+        self.directory = Path(directory).resolve()
+        for name in ("rounds.json", "manifest.json", "media"):
+            if (self.directory / name).is_symlink():
+                raise ValueError("Private Eclair inputs cannot be symlinks")
+        blob = (self.directory / "rounds.json").read_bytes()
+        manifest_blob = (self.directory / "manifest.json").read_bytes()
+        data, manifest = json.loads(blob), json.loads(manifest_blob)
+        if (data.get("schemaVersion") != 1 or data.get("kind") != "la-phrase-eclair-runtime-v1"
+                or manifest.get("kind") != "la-phrase-eclair-private-bundle-v1"
+                or manifest.get("files", {}).get("rounds.json") != hashlib.sha256(blob).hexdigest()):
+            raise ValueError("Invalid sealed Eclair catalog")
+        self.revision = hashlib.sha256(blob + b"\0" + manifest_blob).hexdigest()
+        self.media, self.items = {}, {}
+        for name, digest in manifest["files"].items():
+            if name == "rounds.json":
+                continue
+            filename = name.removeprefix("media/")
+            if name != "media/" + filename or not self.MEDIA.fullmatch(filename) or digest != filename.split(".")[0]:
+                raise ValueError("Unsafe Eclair media reference")
+            path = self.directory / name
+            if path.is_symlink() or not path.resolve().is_relative_to(self.directory):
+                raise ValueError("Unsafe Eclair media file")
+            if path.is_file():
+                if hashlib.sha256(path.read_bytes()).hexdigest() != digest:
+                    raise ValueError("Sealed Eclair media changed")
+                self.media[filename] = path
+        for item in data["rounds"]:
+            uid = item["id"]
+            if (not re.fullmatch(r"fr-pe-[0-9]{4}", uid) or uid in self.items
+                    or not isinstance(item["verbForms"], list) or len(item["verbForms"]) != 6
+                    or any(not isinstance(v, str) or not v.strip() for v in item["verbForms"])
+                    or self.norm(item["acceptedVerb"]) not in [self.norm(v) for v in item["verbForms"]]
+                    or not item["acceptedPronouns"] or not set(item["acceptedPronouns"]).issubset(self.PRONOUNS)
+                    or set(item["variants"]) != set(item["acceptedPronouns"])
+                    or item["canonicalPronoun"] not in item["acceptedPronouns"]
+                    or item["variants"][item["canonicalPronoun"]] != item["sentenceFr"]
+                    or not all(isinstance(item[k], str) and 0 < len(item[k]) <= 500 for k in ("infinitive", "promptCs", "sentenceFr"))):
+                raise ValueError("Invalid Eclair round")
+            references = [item.get("audio")] + [s.get("image") for s in item["segments"]]
+            if any(v is not None and (not isinstance(v, str) or not self.MEDIA.fullmatch(v)
+                                     or "media/" + v not in manifest["files"]) for v in references):
+                raise ValueError("Unsealed Eclair asset")
+            if any(not isinstance(s.get("text"), str) or len(s["text"]) > 500 for s in item["segments"]):
+                raise ValueError("Invalid Eclair segment")
+            self.items[uid] = item
+        if not self.items or len(self.items) != manifest.get("roundCount"):
+            raise ValueError("Incomplete Eclair catalog")
+
+    @staticmethod
+    def norm(value):
+        return " ".join(unicodedata.normalize("NFC", value).replace("’", "'").split())
+
+    def select(self, count, shuffle):
+        if count > len(self.items):
+            raise GameError("Pro tento počet kol není dostatek ověřených vět.")
+        buckets = {}
+        for uid, item in self.items.items():
+            buckets.setdefault(item["infinitive"], []).append(uid)
+        groups = list(buckets.values())
+        for group in groups:
+            shuffle(group)
+        result = []
+        while len(result) < count:
+            shuffle(groups)
+            for group in groups:
+                if group:
+                    result.append(group.pop())
+                    if len(result) == count:
+                        return result
+
+    def href(self, filename):
+        return "/eclair-media/" + filename if filename in self.media else None
+
+
+def load_eclair(directory=None):
+    if directory is None:
+        root = Path(__file__).resolve().parents[2]
+        exported = root / "private/vocabulary-fr-eclair"
+        directory = exported if exported.is_dir() else root / "Samantha_Agent/data/private/vocabulary-fr-eclair/approved-v1"
+    directory = Path(directory)
+    return EclairCatalog(directory) if directory.is_dir() else None
+
+
 class Rooms:
-    def __init__(self, database: Path, catalog: Catalog, *, clock=time.time, shuffle=None, capacity=64):
+    def __init__(self, database: Path, catalog: Catalog, *, clock=time.time, shuffle=None, capacity=64, eclair=None):
         self.database, self.catalog, self.clock = Path(database), catalog, clock
+        self.eclair = eclair
         self.shuffle = shuffle or secrets.SystemRandom().shuffle
         self.capacity = capacity
         self.database.parent.mkdir(parents=True, exist_ok=True, mode=0o700)
@@ -184,19 +274,32 @@ class Rooms:
             raise GameError("Platnost partie skončila. Založ novou.", 410)
         if room["catalog"] != self.catalog.revision:
             raise GameError("Slovník se změnil. Založ novou partii.", 409)
+        if room.get("mode") == "eclair" and (not self.eclair or room.get("eclairCatalog") != self.eclair.revision):
+            raise GameError("Sada vět se změnila. Založ novou partii.", 409)
         return room
 
     def create(self, payload: dict) -> dict:
         request_id = _request(payload.get("requestId"))
         token, invite = _token(payload.get("playerToken")), _token(payload.get("invite"))
         mode = payload.get("mode", "pairs")
-        if mode not in ("pairs", "duel"):
+        if mode not in ("pairs", "duel", "eclair"):
             raise GameError("Neznámý typ hry.")
         name = _name(payload.get("name"))
-        uids = (self.catalog.duel_pool if mode == "duel" else self.catalog.selection)(payload.get("uids"))
+        if mode == "eclair":
+            if self.eclair is None:
+                raise GameError("La phrase éclair zatím na této službě není připravená.", 503)
+            settings = {"rounds": payload.get("rounds", 20), "seconds": payload.get("seconds", 6)}
+            if (type(settings["rounds"]) is not int or settings["rounds"] not in (10, 20, 30, 50)
+                    or type(settings["seconds"]) is not int or settings["seconds"] not in (4, 6, 8, 10, 15)):
+                raise GameError("Vyber počet kol 10/20/30/50 a čas 4/6/8/10/15 sekund.")
+            if settings["rounds"] > len(self.eclair.items):
+                raise GameError("Pro tento počet kol není dostatek ověřených vět.")
+            uids = []
+        else:
+            uids = (self.catalog.duel_pool if mode == "duel" else self.catalog.selection)(payload.get("uids"))
         # Keep the original pairs fingerprint valid for retries after an upgrade.
         identity = [name, uids, _hash(token), _hash(invite)]
-        fingerprint = _hash(json.dumps(identity + ([mode] if mode == "duel" else [])))
+        fingerprint = _hash(json.dumps(identity + ([mode] if mode == "duel" else [mode, settings] if mode == "eclair" else [])))
         now = self.clock()
         with self._db() as conn:
             prior = conn.execute("SELECT id,body FROM rooms WHERE request=?", (request_id,)).fetchone()
@@ -220,6 +323,10 @@ class Rooms:
                 room.update(mode="duel", pool=uids, questions=self._duel_plan(uids), question=0,
                             scores=[0, 0], answers={}, closed=[], opensAt=None, closesAt=None)
                 room["deck"] = []
+            elif mode == "eclair":
+                room.update(mode="eclair", eclairCatalog=self.eclair.revision, settings=settings,
+                            plan=self.eclair.select(settings["rounds"], self.shuffle), question=0,
+                            scores=[0, 0], confirmed=[True, False], prepared=[], columns=[{}, {}])
             conn.execute("INSERT INTO rooms VALUES(?,?,?)", (room["id"], request_id, json.dumps(room, ensure_ascii=False)))
             return self._snapshot(room, 0)
 
@@ -254,6 +361,8 @@ class Rooms:
         return bool(player and player["ready"] and self.clock() - player["seen"] <= OFFLINE_SECONDS)
 
     def _presence(self, room):
+        if room.get("mode") == "eclair":
+            return  # Its server deadline continues even while a player is offline.
         paused = room["started"] and room["phase"] != "finished" and not all(self._connected(p) for p in room["players"])
         now = self.clock()
         if paused and room["pausedSince"] is None:
@@ -275,6 +384,9 @@ class Rooms:
             room["acks"] = []
 
     def _advance(self, room):
+        if room.get("mode") == "eclair":
+            self._eclair_advance(room)
+            return
         if room["pausedSince"] is not None:
             return
         if room.get("mode") == "duel":
@@ -306,7 +418,7 @@ class Rooms:
 
     def act(self, room_id: str, token: str, action: str, payload: dict | None = None) -> dict:
         token, payload = _token(token), payload or {}
-        if action not in ("sync", "ready", "leave", "start", "flip", "heard", "rematch", "restart", "answer", "closed", "next", "timing"):
+        if action not in ("sync", "ready", "leave", "start", "flip", "heard", "rematch", "restart", "answer", "closed", "next", "timing", "confirm", "prepared"):
             raise GameError("Neznámá herní akce.")
         with self._db() as conn:
             room = self._load(conn, room_id)
@@ -324,7 +436,7 @@ class Rooms:
                 room["players"][player]["ready"] = False
             self._presence(room)
             self._advance(room)
-            if action in ("start", "flip", "heard", "rematch", "restart", "answer", "closed", "next", "timing"):
+            if action in ("start", "flip", "heard", "rematch", "restart", "answer", "closed", "next", "timing", "confirm", "prepared"):
                 request_id = _request(payload.get("requestId"))
                 fingerprint = _hash(json.dumps([player, action, payload], sort_keys=True))
                 prior = room["requests"].get(request_id)
@@ -344,6 +456,9 @@ class Rooms:
         if (type(payload.get("expectedRound")) is not int or type(payload.get("expectedStage")) is not int
                 or payload["expectedRound"] != room["round"] or payload["expectedStage"] != room["stage"]):
             raise GameError("Partie mezitím pokročila. Ověř její aktuální stav.", 409)
+        if room.get("mode") == "eclair":
+            self._eclair_action(room, player, action, payload)
+            return
         if not (room.get("mode") == "duel" and action == "timing") and (
                 not all(self._connected(p) for p in room["players"]) or room["pausedSince"] is not None):
             raise GameError("Čekáme na připojení obou hráčů.", 409)
@@ -378,6 +493,122 @@ class Rooms:
             self._phase(room, "choose")
         else:
             raise GameError("Tato akce do pexesa nepatří.", 409)
+
+    def _eclair_load_round(self, room):
+        item = self.eclair.items[room["plan"][room["question"]]]
+        def cards(values, prefix):
+            result = [{"id": prefix + secrets.token_hex(8), "text": v} for v in values]
+            self.shuffle(result)
+            return result
+        room.update(pronounCards=cards(EclairCatalog.PRONOUNS, "p"), verbCards=cards(item["verbForms"], "v"),
+                    prepared=[], columns=[{c: {"solved": False, "lockUntil": 0, "chosen": None, "wrong": None}
+                                           for c in ("pronoun", "verb")} for _ in range(2)],
+                    startAt=None, deadlineAt=None)
+        self._phase(room, "eclair_loading")
+        room["stage"] += 1
+
+    def _eclair_advance(self, room):
+        if room["phase"] == "eclair_loading" and set(room["prepared"]) == {0, 1} and all(self._connected(p) for p in room["players"]):
+            now = self.clock()
+            room.update(startAt=now + 2, deadlineAt=now + 2 + room["settings"]["seconds"])
+            self._phase(room, "eclair_prepare")
+            room["stage"] += 1
+        if room["phase"] == "eclair_prepare" and self.clock() >= room["startAt"]:
+            self._phase(room, "eclair_active")
+            room["stage"] += 1
+        if room["phase"] == "eclair_active" and self.clock() >= room["deadlineAt"]:
+            for player, columns in enumerate(room["columns"]):
+                room["scores"][player] += sum(int(v["solved"]) for v in columns.values())
+            self._phase(room, "finished" if room["question"] + 1 == room["settings"]["rounds"] else "eclair_result")
+            room["stage"] += 1
+
+    def _eclair_action(self, room, player, action, payload):
+        phase = room["phase"]
+        if action == "confirm":
+            if player != 1:
+                raise GameError("Potvrzení patří spoluhráči.", 409)
+            if phase == "waiting":
+                room["confirmed"][1] = True
+            elif phase == "eclair_wait_guest":
+                if not all(self._connected(p) for p in room["players"]):
+                    raise GameError("Čekáme na připojení obou hráčů.", 409)
+                room["round"] += 1
+                if room.pop("newGame", False):
+                    room.update(question=0, scores=[0, 0], plan=self.eclair.select(room["settings"]["rounds"], self.shuffle))
+                else:
+                    room["question"] += 1
+                self._eclair_load_round(room)
+            else:
+                raise GameError("Na potvrzení se nyní nečeká.", 409)
+        elif action == "start":
+            if player != 0 or phase != "waiting" or room["started"] or room["confirmed"] != [True, True]:
+                raise GameError("Po potvrzení nastavení spoluhráčem zahájí hru zakladatel.", 409)
+            if not all(self._connected(p) for p in room["players"]):
+                raise GameError("Čekáme na připojení obou hráčů.", 409)
+            room["started"] = True
+            self._eclair_load_round(room)
+        elif action == "prepared":
+            if phase != "eclair_loading":
+                raise GameError("Příprava tohoto kola už skončila.", 409)
+            if player not in room["prepared"]:
+                room["prepared"].append(player)
+        elif action == "answer":
+            now = self.clock()
+            if phase != "eclair_active" or not room["startAt"] <= now < room["deadlineAt"]:
+                raise GameError("Odpověď už není v časovém okně kola.", 409)
+            column, card_id = payload.get("column"), payload.get("cardId")
+            if column not in ("pronoun", "verb") or not isinstance(card_id, str):
+                raise GameError("Neznámá karta nebo sloupec.")
+            cards = room["pronounCards" if column == "pronoun" else "verbCards"]
+            card = next((v for v in cards if v["id"] == card_id), None)
+            if card is None:
+                raise GameError("Tato karta nepatří do kola.")
+            state = room["columns"][player][column]
+            if state["solved"] or now < state["lockUntil"]:
+                return  # Ignore blocked clicks without extending the penalty.
+            item = self.eclair.items[room["plan"][room["question"]]]
+            correct = (card["text"] in item["acceptedPronouns"] if column == "pronoun"
+                       else EclairCatalog.norm(card["text"]) == EclairCatalog.norm(item["acceptedVerb"]))
+            if correct:
+                state.update(solved=True, chosen=card["text"], wrong=None)
+            else:
+                state.update(lockUntil=now + 1, wrong=card_id)
+        elif action in ("next", "rematch"):
+            expected = "eclair_result" if action == "next" else "finished"
+            if player != 0 or phase != expected:
+                raise GameError("Další kolo nabídne po výsledku zakladatel.", 409)
+            room["newGame"] = action == "rematch"
+            self._phase(room, "eclair_wait_guest")
+            room["stage"] += 1
+        else:
+            raise GameError("Tato akce do La phrase éclair nepatří.", 409)
+
+    def _eclair_snapshot(self, room, player):
+        phase = room["phase"]
+        item = self.eclair.items[room["plan"][room["question"]]]
+        result = phase in ("eclair_result", "eclair_wait_guest", "finished")
+        prompt = phase != "waiting"
+        own = room["columns"][player] if room["started"] else {}
+        segments = [{**{k: v for k, v in s.items() if k != "image"},
+                     **({"image": self.eclair.href(s["image"])} if s.get("image") else {})}
+                    for s in item["segments"]] if prompt else []
+        value = {"protocol": PROTOCOL, "mode": "eclair", "room": room["id"], "revision": room["revision"],
+                 "catalog": room["catalog"], "eclairCatalog": room["eclairCatalog"], "you": player,
+                 "players": [{"name": p["name"], "connected": self._connected(p)} if p else None for p in room["players"]],
+                 "round": room["round"], "roundIndex": room["question"] + 1, "roundCount": room["settings"]["rounds"],
+                 "stage": room["stage"], "phase": phase, "settings": room["settings"], "confirmed": room["confirmed"],
+                 "prepared": player in room["prepared"], "serverTime": self.clock(), "startAt": room.get("startAt"),
+                 "deadlineAt": room.get("deadlineAt"), "scores": room["scores"], "maxScore": 2 * room["settings"]["rounds"],
+                 "promptCs": item["promptCs"] if prompt else None, "segments": segments,
+                 "pronounCards": room["pronounCards"] if phase == "eclair_active" else [],
+                 "verbCards": room["verbCards"] if phase == "eclair_active" else [],
+                 "ownColumns": own, "paused": False, "expires": room["expires"]}
+        if result:
+            pronoun = own["pronoun"].get("chosen") or item["canonicalPronoun"]
+            value["result"] = {"sentenceFr": item["sentenceFr"], "variantFr": item["variants"].get(pronoun, item["sentenceFr"]),
+                               "audio": self.eclair.href(item.get("audio")), "audioLabel": "Vzor",
+                               "points": [sum(int(v["solved"]) for v in cols.values()) for cols in room["columns"]]}
+        return value
 
     def _duel_plan(self, pool):
         """Choose twelve distinct prompts; distractors may be reused from the pool."""
@@ -498,6 +729,8 @@ class Rooms:
                 "paused": room["pausedSince"] is not None, "expires": room["expires"]}
 
     def _snapshot(self, room, player):
+        if room.get("mode") == "eclair":
+            return self._eclair_snapshot(room, player)
         if room.get("mode") == "duel":
             return self._duel_snapshot(room, player)
         cards = []
@@ -574,7 +807,13 @@ class Handler(BaseHTTPRequestHandler):
             self._host()
             path = unquote(urlsplit(self.path).path)
             if path == API + "/health":
-                body = json.dumps({"protocol": PROTOCOL, "available": True, "games": ["pairs", "duel"], "catalog": self.server.rooms.catalog.revision}).encode()
+                catalog, eclair = self.server.rooms.catalog, self.server.rooms.eclair
+                health = {"protocol": PROTOCOL, "available": True, "games": ["pairs", "duel"] + (["eclair"] if eclair else []), "catalog": catalog.revision}
+                if eclair:
+                    sample = next(iter(catalog.items.values()), {})
+                    health["eclair"] = {"catalog": eclair.revision, "roundCount": len(eclair.items),
+                                        "sampleAudio": "/" + sample["audio"] if sample.get("audio") else None}
+                body = json.dumps(health).encode()
                 self._headers(200, "application/json", len(body))
             else:
                 if path in ("/", "/vocabulary-fr/"):
@@ -584,7 +823,11 @@ class Handler(BaseHTTPRequestHandler):
                     "/data/vocabulary-fr-sentence-audio.json", "/data/vocabulary-fr-sentence-pictures.json"}
                 docs = self.server.rooms.catalog.docs
                 target = (docs / path.lstrip("/")).resolve()
-                if not allowed or ".." in Path(path).parts or not target.is_relative_to(docs) or not target.is_file():
+                if path.startswith("/eclair-media/") and self.server.rooms.eclair:
+                    target = self.server.rooms.eclair.media.get(path.removeprefix("/eclair-media/"))
+                    if not target or not target.is_file() or target.is_symlink():
+                        raise GameError("Soubor nebyl nalezen.", 404)
+                elif not allowed or ".." in Path(path).parts or not target.is_relative_to(docs) or not target.is_file():
                     raise GameError("Soubor nebyl nalezen.", 404)
                 body = target.read_bytes()
                 kind = mimetypes.guess_type(target.name)[0] or "application/octet-stream"
@@ -633,7 +876,7 @@ class Handler(BaseHTTPRequestHandler):
                 self._rate()
                 value = self.server.rooms.create(payload)
             else:
-                match = re.fullmatch(re.escape(API) + r"/([a-f0-9]{24})/(join|sync|ready|leave|start|flip|heard|rematch|restart|answer|closed|next|timing)", path)
+                match = re.fullmatch(re.escape(API) + r"/([a-f0-9]{24})/(join|sync|ready|leave|start|flip|heard|rematch|restart|answer|closed|next|timing|confirm|prepared)", path)
                 if not match:
                     raise GameError("Herní akce nebyla nalezena.", 404)
                 room, action = match.groups()
@@ -665,11 +908,12 @@ def main():
     parser.add_argument("--port", type=int, default=8791)
     parser.add_argument("--bind", default="127.0.0.1")
     parser.add_argument("--public-origin")
+    parser.add_argument("--eclair-bundle", type=Path, help="Sealed private sentence bundle (never a docs directory)")
     parser.add_argument("--database", type=Path, default=Path(__file__).resolve().parents[1] / "data/private/vocabulary-fr-online/rooms.sqlite3")
     args = parser.parse_args()
     if args.bind not in ("127.0.0.1", "localhost", "::1"):
         parser.error("Bind only to loopback; use a separately approved HTTPS reverse proxy.")
-    server = GameServer((args.bind, args.port), Rooms(args.database, Catalog()), args.public_origin)
+    server = GameServer((args.bind, args.port), Rooms(args.database, Catalog(), eclair=load_eclair(args.eclair_bundle)), args.public_origin)
     print(f"Francouzština Jana: {server.origin}/vocabulary-fr/", flush=True)
     try:
         server.serve_forever()
