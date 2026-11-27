@@ -1,8 +1,16 @@
 # Interiérový architekt — dokumentace projektu
 
-Aktualizováno: 2026-11-25. Pracovní proud: `project-neuberk-kacenka`.
+Aktualizováno: 2026-11-27. Pracovní proud: `project-neuberk-kacenka`.
 Kanonický název: **Interiérový architekt**. Vývojový směr: **Interior Architect 2.0**.
-Typ `Project`, stav `active`, priorita 2.
+Typ `Project`, stav `paused` (zmrazeno), priorita 2.
+
+## Zmrazení projektu — 27. 11. 2026
+
+Míla projekt Interiérový architekt / Ateliér výslovně zmrazil.
+Stav je **pozastaveno (paused)**, priorita **2**. K projektu se vrátíme později,
+až Míla výslovně zadá pokračování. Do té doby je dalším krokem vyčkat.
+Dosavadní návrhy obou místností, dokumentace a rozpracovaná práce jsou
+podkladem pro pozdější obnovení. Hlavními klienty zůstávají Mac a Linux Mint.
 
 ## Účel a rozsah
 
@@ -82,7 +90,5 @@ Geometrický zámek dočasně chrání celou oblast. Report uvádí geometrii ne
 
 ## Další krok
 
-Míla potvrdil funkčnost vydaného prvního řezu. Upřesnil desktopovou prioritu
-Mac/Linux Mint a požádal o přehlednější UI. Zjednodušené rozložení má dvě
-základní akce pro označení oblastí a kontextové nástroje. P+n vlastní Will.
-Přejímka desktopového rozložení předchází převodu skutečných místností na kopii.
+Vyčkat na Mílův výslovný pokyn k obnovení. Po návratu navázat na uložený
+handoff a ověřit tehdy aktuální stav rozpracovaných kroků.

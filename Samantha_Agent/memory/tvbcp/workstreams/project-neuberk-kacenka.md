@@ -2,10 +2,18 @@
 
 Pracovní proud: `project-neuberk-kacenka`
 Typ: `Project`
-Režim: `active`
+Režim: `paused`
 Priorita: 2
 Založeno: 2026-11-25, výslovným souhlasem Míly s návrhem nového vymezení
 a následným pokynem nejprve narovnat název a dokumentaci.
+
+## Zmrazení projektu — 27. 11. 2026
+
+Míla projekt Interiérový architekt / Ateliér výslovně zmrazil.
+Stav je **pozastaveno (paused)**, priorita **2**. K projektu se vrátíme později,
+až Míla výslovně zadá pokračování. Do té doby je dalším krokem vyčkat.
+Dosavadní návrhy obou místností, dokumentace a rozpracovaná práce jsou
+podkladem pro pozdější obnovení. Hlavními klienty zůstávají Mac a Linux Mint.
 
 ## Cíl a kanonická rozhodnutí
 
@@ -123,3 +131,17 @@ desktopového rozložení. Skutečný prohlížeč Linux Mint vyžaduje vlastní
 **Technický důkaz.** 30 cílených backendových a HTTP testů prošlo. Desktopové
 WebKit scénáře a programová brána jsou evidované v
 `data/private/interior_desktop_ui_20261125/`. Rodinná data se při zkoušce neotevírají.
+
+### 2026-11-27 09:37 CET — Projekt zmrazený, priorita 2
+
+**Hotovo.** Zmrazení Ateliéru je zapsané v rozcestníku, projektové paměti,
+handoffu, TVBCP a přehledu projektů.
+
+**Rozhodnutí.** Míla odkládá další práci na později. Stav paused, priorita 2.
+
+**Další krok.** Vyčkat na Mílův výslovný pokyn k obnovení projektu.
+
+**Navrhované další kroky.** Dosavadní plán se obnoví až při návratu k tématu.
+
+**Technický důkaz.** Dokumentační změna podle přímého pokynu z 27.11.
+Dosavadní technické podklady a historie zůstávají dohledatelné.
