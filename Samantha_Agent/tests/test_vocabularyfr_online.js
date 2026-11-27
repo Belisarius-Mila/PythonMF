@@ -514,11 +514,11 @@ async function betweenQuestions(a,b){
  assert.equal(a.api.getState().phase,'duel_between');
 }
 test('duel automatically unlocks host Next after a brief sync failure without losing scores or invitation',async()=>{
- const {server,a,b}=await duelClients();await betweenQuestions(a,b);const saved=a.session.getItem(a.api.KEY),sounds=a.players[0].starts.length;
+ const {server,a,b}=await duelClients();await betweenQuestions(a,b);const saved=a.session.getItem(duel.KEY),sounds=a.players[0].starts.length;assert.ok(saved);
  server.failed=true;await a.api.poll();assert.equal(a.element('duelNext').hidden,false);assert.equal(a.element('duelNext').disabled,true);assert.match(a.element('duelStatus').textContent,/pokus za 1 s/);
  server.failed=false;a.advance(999);await flush();assert.equal(a.element('duelNext').disabled,true);
  a.advance(1);await flush();await b.api.poll();assert.equal(a.element('duelNext').disabled,false);assert.deepEqual(a.api.getState().scores,[1,1]);
- assert.equal(a.session.getItem(a.api.KEY),saved);assert.equal(a.players[0].starts.length,sounds);
+ assert.equal(a.session.getItem(duel.KEY),saved);assert.equal(a.players[0].starts.length,sounds);
  a.element('duelNext').click();await flush();await b.api.poll();assert.equal(b.api.getState().question,2);
  assert.equal(server.requests.filter(r=>r.action==='rooms').length,1);assert.equal(server.requests.filter(r=>r.action==='join').length,1);
 });
