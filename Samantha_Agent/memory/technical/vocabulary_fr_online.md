@@ -353,3 +353,13 @@ Programová brána a finální vydání se dokončují; aktuální účtenky jso
 `vocabulary_fr_duel_recovery_20261127/completion.json`. Databáze a pozvánky se
 nemění; aktualizace privátního exportu vyžaduje konkrétní potvrzený plán služby.
 Fyzická přejímka dvou Maců včetně zvuku zůstává otevřená.
+
+## 2026-11-27 — Automatické obnovení duelu vydané a ověřené
+
+Kód e3968858 vydaný přes Terru (job1d26cf7f871d8169a28c0ba2e6c7bba6) a po přesném
+potvrzení aktivovaný v privátní službě. 54 JS, doménové brány199 a145 PASS;
+dva klienti se skutečným serverem ověřili návrat po výpadku a ztraceném ACK,
+skóre1:1, další otázku a žádnou duplicitní odpověď. Po aktivaci17/17 souborů
+na obou původech shodných, všech17 původních místností a přístupů zachovaných,
+SQLite integrity OK, audioRange206. Skutečné Mac GUI/zvuk zůstává k přejímce.
+Aktuální účtenka: data/private/vocabulary_fr_duel_recovery_20261127/completion.json.

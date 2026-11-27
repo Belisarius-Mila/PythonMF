@@ -2,27 +2,24 @@
 ## Aktuální stav
 
 ### Hotovo
-- Poslechový duel má nastavitelné časy: text 2/3/4 s, obrázek 1/2 s.
-- Nastavení mění zakladatel i během hry; platí pro oba hráče od další otázky.
-- Přerušená otázka se opakuje s původními časy, včetně starších místností.
-- Web i soukromá služba byly vydané a živě ověřené na kódu `de271467`.
+- Poslechový duel má nastavitelné texty 2/3/4 s a obrázky 1/2 s, společně pro oba hráče od další otázky.
+- Od 27. 11. automaticky obnovuje připojení po 1/2/4/8 s, pak každých 8 s; návrat do panelu a online zkusí přihlášení ihned.
+- Opravené ztracené potvrzení poslechu při souběhu se změnou časů.
+- Zachovává místnost, pozvánku a vyhodnocené skóre. Přerušená nevyhodnocená otázka se může zopakovat s původním plným časem.
+- Web i soukromá služba ověřené na kódu `e3968858` po konkrétním potvrzení globální brzdy.
 
 ### Důkaz
-- Programová brána: 257 PASS, receipt `4d1b3ae1f405aca4831cabbbcfde2c21e0163b7813b370951affe447237f6c85`.
-- Terra Pages job `c3934866d228faabdd4195bdf380df9f`, deployment `8095444938`, completed.
-- HTTPS dva hráči: 4 + 2 s, host-only, změna během otázky zachová limit,
-  další otázka 2 + 1 s, skóre 1:1, audio Range 206.
-- 17/17 klientských souborů odpovídá commitu na Pages i soukromé službě.
-- Zachováno 13 původních místností, přístupy a pozvánky; konzistentní záloha SQLite integrity OK.
-- Podrobné soukromé účtenky: `data/private/vocabulary_fr_duel_timing_20261126/completion.json`.
+- 54 klientských testů včetně 72 otázek přes všechny kombinace časů; registrované brány199 a145 PASS (nejde o součet odlišných testů).
+- Terra Pages job `1d26cf7f871d8169a28c0ba2e6c7bba6`: push i nasazení potvrzené.
+- Dva klienti proti skutečnému serveru: ztracené ACK i krátký výpadek obnoví hostitelské Další kolo; skóre1:1, druhá otázka, žádná duplicitní odpověď.
+- Po aktivaci17/17 souborů shodných na Pages i soukromé službě; health OK, audio Range206, SQLite integrity OK, všech17 původních místností i přístupů zachovaných.
+- Účtenky: `data/private/vocabulary_fr_duel_recovery_20261127/completion.json`.
 
-### Otevřeno a rizika
-- Fyzický poslech a ovládání na Janině a Mílově zařízení ještě nebyly ověřené.
-- Závěrečný dokumentační commit se vydává samostatně; nemění herní kód služby.
-
-### Další krok
-- U obou hráčů obnovit stránku, zakladatel nastaví 4 + 2 s a společně ověřit jednu otázku.
-- Další partii nebo filtr lze dál měnit bez nové pozvánky.
+### Rizika a další krok
+- Fyzický poslech a ovládání na dvou Macích stále vyžadují společnou přejímku.
+- Oba hráči jednou obnoví stránku. Pokud prohlížeč blokuje zvuk po automatickém návratu, nabídne se výslovné opakování/zapnutí.
+- Vypršená místnost a trvalá chyba přístupu automatické pokusy zastaví; vědomý odchod je ruší.
+- Závěrečný dokumentační commit nemění herní kód.
 <!-- SAMANTHA_CURRENT_STATUS_END -->
 
 ## 2026-11-17 20:21 CET — Společné předání osobního režimu a Datových commitů k p+n
