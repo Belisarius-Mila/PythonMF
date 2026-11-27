@@ -1,23 +1,24 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 ## Aktuální stav
 
-**Práce obnovená na Mílův pokyn. První verze místně; finální brána a SHA podle soukromé účtenky. Publikace a nasazení nové hry zatím neprovedené.**
-
-### Hotovo místně
-- La phrase éclair jako samostatná společná hra z hlavní navigace Francouzštiny Jana;372 ověřených vět,62 slovesných skupin,494 variant a hotová média.
-- Nastavení10/20/30/50 kol a4/6/8/10/15s (výchozí20/6);2s příprava po připravenosti obou, dvě nezávislé volby, každý sloupec+1, lokální1s penalizace a celý čas kola.
-- Serverové vyhodnocení, důvěrné soupeřovy volby, souhlas obou mezi koly, Vzor jednou + ruční opakování, obnova stejné session a nová hra ve stejné místnosti.
-- Soukromý odpovědní katalog a550 hotových médií mimo docs/Git; soukromý export a SHA manifestu připnutý do plánu aktivace. Nová výroba nebyla potřeba.
+### Hotovo a nasazené
+- La phrase éclair dostupná v hlavní navigaci Francouzštiny Jana;372 vět,62 slovesných skupin,494 variant a550 hotových médií. Veřejný web i soukromá herní služba vydané z b19e6c1e.
+-10/20/30/50 kol a4/6/8/10/15s (výchozí20/6);2s příprava, nezávislé volby zájmena/slovesa, každý sloupec+1,1s penalizace, celý čas kola, serverové skóre a souhlas obou mezi koly.
+- Vzor jednou za kolo + ruční opakování, obnova stejné session, další hra ve stejné místnosti. Odpovědní katalog zůstává soukromý mimo docs/Git.
+- Po konkrétním globálním potvrzení jednou aktivovaný neměnný plán. Stejná adresa a všech19 dosavadních místností, pozvánek, hráčských přístupů a skóre zachovaných.
 
 ### Důkaz
-- Pravidla testovaná s injektovaným časem. Dva skuteční HTTP klienti se syntetickým DOM/audio dokončili20kolovou partii včetně potvrzování, skóre a obnovy.
-- Skutečný372-kolový korpus proti schválenému zdroji beze změny vět/tvarů/variant; všechna média přítomná. Dva autentizované HTTP klienty s reálnými daty:2:2, vzor Range206 a druhé kolo, Pexeso/duel funkční.
-- Finální programová brána/commit a soukromé účtenky: data/private/la_phrase_eclair_implementation_20261127/completion.json. Podrobnosti reports/la_phrase_eclair_implementation_20261127.md.
+- Původní331-testová cílená brána PASS; registrovaný Terra Pages job58d4ea7fcc40ee3601fc5cc87a19169c potvrdil push i deployment8118125267/workflow46059073466/HTTP200.
+- Aktivovaný3491-souborový export s připnutým SHA manifestu a soukromým korpusem. Health potvrzuje pairs/duel/eclair a372 kol.
+- Pět nových/upravených klientských souborů přesně na Pages i soukromé službě; MP3 Range206, dvě skutečné obrázkové reference přesně, odpovědní katalog přes HTTP404.
+- Konzistentní SQLite záloha zachovaná, integrity OK. Všech19 původních těl místností i request ID proti záloze přesně shodných.
+- Dva autentizované HTTPS klienty na produkční službě: potvrzení nastavení, příprava2s a limit4s, oba2 body, čtyři odpovědi bez replay, načtení stavu stejným tokenem a druhé kolo po potvrzení hosta ve stejné místnosti/pozvánce. QA hráči poté odešli.
+- Konečné SHA, dokumentační checkpoint a účtenky: data/private/la_phrase_eclair_release_20261127/completion.json.
 
-### Provoz a další krok
-- Nová hra zatím není publikovaná ani nasazená. Dosavadní web obsahuje523 karet a běžící služba f6d16ded zůstává zachovaná; její17 původních místností dříve ověřeně zachovaných.
-- Další krok: samostatně autorizované p+n nové hry a aktivace služby s privátním balíčkem; pak oba hráči obnoví stránku a otevřou La phrase éclair.
-- Nativní browser host je zde nedostupný. Fyzické UI na dvou Macích, úzké okno a skutečný poslech čekají na přejímku; automatický DOM je nenahrazuje.
+### Další krok a otevřená přejímka
+- Oba hráči obnoví Francouzštinu z Cockpitu, otevřou La phrase éclair a výslovně zapnou zvuk. Zakladatel pošle pozvánku, druhý potvrdí nastavení.
+- Fyzické UI na dvou Macích, úzké okno a skutečný poslech čekají na přejímku. Nativní browser host zde nebyl dostupný; API/DOM testy fyzickou přejímku nenahrazují.
+- Závěrečný provozní zápis nemění herní kód ani nevyžaduje další restart služby.
 <!-- SAMANTHA_CURRENT_STATUS_END -->
 
 ## 27.11.2026 — P+n523 a kompatibilní přechod existujících místností
@@ -1420,3 +1421,26 @@ Závěrečná kontrola rozložení doplnila kompaktní herní režim pro noteboo
 při hře se schová hotová pozvánka a úvodní popis, zmenší se svislé mezery
 a při nižším desktopovém okně výška karet. Oba sloupce zůstávají vedle sebe;
 telefon zachovává větší dotykové plochy. Fyzické vykreslení zůstává k přejímce.
+
+
+## 2026-11-27 21:35 CET — La phrase éclair vydaná a služba aktivovaná
+
+Hotovo: Nová hra dostupná z Francouzštiny Jana pro dva hráče se372 větami,
+hotovými obrázky a MP3. Zachovaná adresa a všech19 dosavadních místností,
+přístupů, pozvánek i skóre. Dvě skutečné HTTPS relace získaly2:2 a po souhlasu
+spoluhráče pokračovaly do druhého kola ve stejné místnosti.
+
+Rozhodnutí: Míla zadal p+n a následně přesně potvrdil globální brzdu pro
+připravenou systémovou aktivaci. Provedený původní plán jednou, bez nové výroby.
+
+Další krok: Společná fyzická přejímka dvou Maců včetně zvuku a úzkého okna.
+Navrhované další kroky: Žádný nový vývojový rozsah se tímto krokem nezavádí.
+
+Technický důkaz: b19e6c1e,331 testů PASS; Pages job58d4ea7f, deployment8118125267,
+workflow46059073466. Služba health pairs/duel/eclair,372 kol;5 klientských souborů
+na obou původech přesně, MP3 Range206, odpovědní JSON nepřístupný404. SQLite
+integrity OK a19 původních řádků/requestů/těl přesně proti konzistentní záloze.
+Produkční API ověřilo oba hráče, potvrzení nastavení,2s přípravu/4s limit,
+4 přijaté odpovědi, stav stejným tokenem a host/guest handshake do2.kola.
+Soukromé účtenky la_phrase_eclair_release_20261127/completion.json;
+finální dokumentační zápis nevyžaduje nový restart. Fyzický browser/zvuk otevřené.

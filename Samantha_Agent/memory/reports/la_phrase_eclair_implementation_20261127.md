@@ -122,3 +122,26 @@ Závěrečná kontrola rozložení doplnila kompaktní herní režim pro noteboo
 při hře se schová hotová pozvánka a úvodní popis, zmenší se svislé mezery
 a při nižším desktopovém okně výška karet. Oba sloupce zůstávají vedle sebe;
 telefon zachovává větší dotykové plochy. Fyzické vykreslení zůstává k přejímce.
+
+
+## 2026-11-27 21:35 CET — La phrase éclair vydaná a služba aktivovaná
+
+Hotovo: Nová hra dostupná z Francouzštiny Jana pro dva hráče se372 větami,
+hotovými obrázky a MP3. Zachovaná adresa a všech19 dosavadních místností,
+přístupů, pozvánek i skóre. Dvě skutečné HTTPS relace získaly2:2 a po souhlasu
+spoluhráče pokračovaly do druhého kola ve stejné místnosti.
+
+Rozhodnutí: Míla zadal p+n a následně přesně potvrdil globální brzdu pro
+připravenou systémovou aktivaci. Provedený původní plán jednou, bez nové výroby.
+
+Další krok: Společná fyzická přejímka dvou Maců včetně zvuku a úzkého okna.
+Navrhované další kroky: Žádný nový vývojový rozsah se tímto krokem nezavádí.
+
+Technický důkaz: b19e6c1e,331 testů PASS; Pages job58d4ea7f, deployment8118125267,
+workflow46059073466. Služba health pairs/duel/eclair,372 kol;5 klientských souborů
+na obou původech přesně, MP3 Range206, odpovědní JSON nepřístupný404. SQLite
+integrity OK a19 původních řádků/requestů/těl přesně proti konzistentní záloze.
+Produkční API ověřilo oba hráče, potvrzení nastavení,2s přípravu/4s limit,
+4 přijaté odpovědi, stav stejným tokenem a host/guest handshake do2.kola.
+Soukromé účtenky la_phrase_eclair_release_20261127/completion.json;
+finální dokumentační zápis nevyžaduje nový restart. Fyzický browser/zvuk otevřené.
