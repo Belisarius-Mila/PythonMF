@@ -2,25 +2,43 @@
 ## Aktuální stav
 
 ### Hotovo
-- Poslechový duel má nastavitelné texty 2/3/4 s a obrázky 1/2 s, společně pro oba hráče od další otázky.
-- Od 27. 11. automaticky obnovuje připojení po 1/2/4/8 s, pak každých 8 s; návrat do panelu a online zkusí přihlášení ihned.
-- Opravené ztracené potvrzení poslechu při souběhu se změnou časů.
-- Zachovává místnost, pozvánku a vyhodnocené skóre. Přerušená nevyhodnocená otázka se může zopakovat s původním plným časem.
-- Web i soukromá služba ověřené na kódu `e3968858` po konkrétním potvrzení globální brzdy.
+- Vyrobený a ověřený balíček523 webových karet; iCloud VocabularyFR Jany528 řádků včetně všech původních469. Nová MP3 i obrázky hotové, další výroba se neopakuje.
+- Míla zadal p+n a aktualizaci herní služby. Doplněná ochrana původních místností při rozšíření katalogu: přesně stejné staré významy/metadatové vazby, SQLite záloha a transakční změna pouze verze katalogu.
+- Původní herní funkce včetně obnovy spojení a časování zůstávají zachované.
 
 ### Důkaz
-- 54 klientských testů včetně 72 otázek přes všechny kombinace časů; registrované brány199 a145 PASS (nejde o součet odlišných testů).
-- Terra Pages job `1d26cf7f871d8169a28c0ba2e6c7bba6`: push i nasazení potvrzené.
-- Dva klienti proti skutečnému serveru: ztracené ACK i krátký výpadek obnoví hostitelské Další kolo; skóre1:1, druhá otázka, žádná duplicitní odpověď.
-- Po aktivaci17/17 souborů shodných na Pages i soukromé službě; health OK, audio Range206, SQLite integrity OK, všech17 původních místností i přístupů zachovaných.
-- Účtenky: `data/private/vocabulary_fr_duel_recovery_20261127/completion.json`.
+- Programová cílená brána476 testů PASS; účtenka ff3cd252f0388dbb64408896df82cec25b0b991f42c0ecd2ebede9fcf9edf806.
+- Skutečná kopie17 původních místností a2 rozehraných QA partií: zachovaná všechna pole kromě catalog; Pexeso i duel fungují se stejnými přístupy a pozvánkou.
+- První publikační job567563bef skončil před potvrzeným push; ukončení workeru a původní GitHub0068a369 ověřené, stejný nejistý požadavek se neopakuje.
+- Přesný finální stav/SHA/publikační účtenka: data/private/vocabulary_fr_content_release_20261127/completion.json; podrobnosti reports/vocabulary_fr_content_release_20261127.md.
 
 ### Rizika a další krok
-- Fyzický poslech a ovládání na dvou Macích stále vyžadují společnou přejímku.
-- Oba hráči jednou obnoví stránku. Pokud prohlížeč blokuje zvuk po automatickém návratu, nabídne se výslovné opakování/zapnutí.
-- Vypršená místnost a trvalá chyba přístupu automatické pokusy zastaví; vědomý odchod je ruší.
-- Závěrečný dokumentační commit nemění herní kód.
+- Dokončit nové registrované p+n integračního commitu a ověřit veřejné bajty.
+- Služba zatím zůstává e3968858/481; nový neměnný plán aktivovat až po přesné aktuální globální potvrzovací větě. Starý plán v1 se nepoužije pro jiný commit.
+- Zachovat adresu, pozvánky, přístupy i skóre. Oba hráči po výměně verze obnoví stránku; fyzický poslech na dvou Macích čeká na přejímku.
 <!-- SAMANTHA_CURRENT_STATUS_END -->
+
+## 27.11.2026 — P+n523 a kompatibilní přechod existujících místností
+
+Míla zadal p+n a aktualizaci herní služby. Původní předání567563bef skončilo
+před potvrzením push; původní worker i transport jsou ukončené a GitHub
+zůstává0068a369. Není provedena publikace ani aktivace plánu v1.
+
+Připravená úzká oprava: kontroluje totožnost všech481 původních významů a
+quiz metadat před rozšířením523. Po zastavení služby a SQLite záloze převede
+v jedné transakci pouze verzi katalogu; ostatní stav/přístupy/skóre/pozvánky
+zůstanou stejné. Skutečná kopie17 původních místností a2 rozehraných QA her
+PASS, v obou režimech fungují původní tokeny i pozvánka. Živá DB se neměnila.
+6 mediálních testů je zachovaných v již registrované FR obsahové sadě, bez
+nové validační domény/registru.63 content/tailnet a60 release testů PASS.
+
+Další krok: programová brána/commit, nové registrované vydání opraveného
+balíčku a po přesné globální větě aktivace nového plánu s migrací. Konečný
+stav, SHA a všechny účtenky určuje privátní
+vocabulary_fr_content_release_20261127/completion.json; zdrojové médium v006
+zůstává beze změny. Podrobně reports/vocabulary_fr_content_release_20261127.md.
+
+
 
 ## 27.11.2026 — Nové karty a média vyrobené, iCloud instalace a místní web
 

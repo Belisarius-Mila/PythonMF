@@ -740,7 +740,9 @@ def run_release(
                     "expected_origin_head": job["origin_head"], "expected_local_head": job["target_head"],
                     "confirmation": GITHUB_BATCH_CONFIRMATION}, token=token)
                 if not pushed.get("ok") or not pushed.get("pushed"):
-                    raise LunaReleaseError("Odeslání balíčku nebylo potvrzené. Řízení má Adam.")
+                    detail = str(pushed.get("message") or "")[:500]
+                    raise LunaReleaseError("Odeslání balíčku nebylo potvrzené. Řízení má Adam."
+                                           + (" " + detail if detail else ""))
                 job = store.update(job_id, pushed=True, push_state="confirmed", gate=pushed.get("gate", {}))
             else:
                 job = store.update(job_id, phase="validation", push_state="already_aligned",

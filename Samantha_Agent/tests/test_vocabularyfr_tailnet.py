@@ -182,3 +182,63 @@ class TailnetTests(unittest.TestCase):
 
 
 if __name__ == "__main__":unittest.main()
+
+
+class CompatibleCatalogMigrationTests(unittest.TestCase):
+    def setUp(self):
+        import sqlite3
+        self.tmp = TemporaryDirectory();self.addCleanup(self.tmp.cleanup)
+        self.root = Path(self.tmp.name);self.database = self.root / 'rooms.sqlite3'
+        with sqlite3.connect(self.database) as c:
+            c.execute('CREATE TABLE rooms (id TEXT PRIMARY KEY, request TEXT UNIQUE, body TEXT NOT NULL)')
+        self.transition = {'from':'old-catalog','to':'new-catalog','uids':['vfr-0001','vfr-0002']}
+
+    def write_room(self, uid, **extra):
+        import sqlite3
+        room = {'id':uid,'catalog':'old-catalog','deck':['vfr-0001','vfr-0002']*12,
+                'players':[{'name':'A','tokenHash':'private-hash'},None],
+                'inviteHash':'private-invite','expires':9999999999,'revision':7,
+                'scores':[2,1],'owners':{'vfr-0001':0},'round':3,**extra}
+        with sqlite3.connect(self.database) as c:
+            c.execute('INSERT INTO rooms VALUES (?,?,?)',(uid,'request-'+uid,json.dumps(room)))
+        return room
+
+    def read_rooms(self):
+        import sqlite3
+        with sqlite3.connect(self.database) as c:
+            return {uid:json.loads(body) for uid,body in c.execute('SELECT id,body FROM rooms')}
+
+    def test_transaction_preserves_invites_access_scores_and_both_game_modes(self):
+        a=self.write_room('pairs');b=self.write_room('duel',mode='duel',pool=['vfr-0001','vfr-0002'],questions=[{'target':'vfr-0001','choices':['vfr-0001','vfr-0002']}])
+        result=t._migrate_rooms(self.root,self.transition)
+        self.assertEqual(result['rooms'],2);self.assertTrue(Path(result['backup']).is_file())
+        for uid,old in [('pairs',a),('duel',b)]:
+            self.assertEqual(self.read_rooms()[uid],{**old,'catalog':'new-catalog'})
+        self.assertEqual(t._migrate_rooms(self.root,self.transition)['rooms'],0)
+
+    def test_unknown_uid_rolls_back_all_rooms_and_keeps_backup(self):
+        self.write_room('first');self.write_room('second',deck=['vfr-9999'])
+        before=self.read_rooms()
+        with self.assertRaisesRegex(ValueError,'unknown meaning'):t._migrate_rooms(self.root,self.transition)
+        self.assertEqual(self.read_rooms(),before)
+        self.assertEqual(len(list((self.root/'backups').glob('*.sqlite3'))),1)
+
+    def test_other_catalog_versions_are_never_relabelled(self):
+        old=self.write_room('unrelated',catalog='different-version')
+        self.assertEqual(t._migrate_rooms(self.root,self.transition)['rooms'],0)
+        self.assertEqual(self.read_rooms()['unrelated'],old)
+
+    def test_only_identical_old_meanings_and_quiz_metadata_allow_extension(self):
+        from types import SimpleNamespace
+        previous=self.root/'previous';current=self.root/'current'
+        for base,value in [(previous,'old'),(current,'new')]:
+            (base/'docs/data').mkdir(parents=True)
+            for name in ('vocabulary-fr-v2.json','vocabulary-fr-audio.json','vocabulary-fr-quiz.json'):(base/'docs/data'/name).write_text(value)
+        old=SimpleNamespace(revision='old-catalog',items={'vfr-0001':{'fr':'fixture'}},metadata={'vfr-0001':{'conflicts':[]}})
+        new=copy.deepcopy(old);new.revision='new-catalog';new.items['vfr-0002']={'fr':'new fixture'};new.metadata['vfr-0002']={'conflicts':[]}
+        with patch.object(t,'Catalog',side_effect=[old,new]):
+            value=t._catalog_transition(previous,current,self.database)
+        self.assertEqual(value,{'from':'old-catalog','to':'new-catalog','uids':['vfr-0001']})
+        new.metadata['vfr-0001']['conflicts'].append('changed')
+        with patch.object(t,'Catalog',side_effect=[old,new]), self.assertRaisesRegex(ValueError,'Existing vocabulary changed'):
+            t._catalog_transition(previous,current,self.database)

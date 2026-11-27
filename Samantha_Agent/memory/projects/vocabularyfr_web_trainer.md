@@ -939,3 +939,23 @@ serveru se zachováním místností/SQLite a jeho systémovými oprávněními.
 Handoff rozlišuje místní dokončení, cloudové doručení a veřejné vydání.
 Podrobně reports/vocabulary_fr_content_additions_20261127.md; privátní důkazy
 vocabulary_fr_content_additions_20261127/{current-bundle,completion}.json.
+
+## 27.11.2026 — P+n523 a kompatibilní přechod existujících místností
+
+Míla zadal p+n a aktualizaci herní služby. Původní předání567563bef skončilo
+před potvrzením push; původní worker i transport jsou ukončené a GitHub
+zůstává0068a369. Není provedena publikace ani aktivace plánu v1.
+
+Připravená úzká oprava: kontroluje totožnost všech481 původních významů a
+quiz metadat před rozšířením523. Po zastavení služby a SQLite záloze převede
+v jedné transakci pouze verzi katalogu; ostatní stav/přístupy/skóre/pozvánky
+zůstanou stejné. Skutečná kopie17 původních místností a2 rozehraných QA her
+PASS, v obou režimech fungují původní tokeny i pozvánka. Živá DB se neměnila.
+6 mediálních testů je zachovaných v již registrované FR obsahové sadě, bez
+nové validační domény/registru.63 content/tailnet a60 release testů PASS.
+
+Další krok: programová brána/commit, nové registrované vydání opraveného
+balíčku a po přesné globální větě aktivace nového plánu s migrací. Konečný
+stav, SHA a všechny účtenky určuje privátní
+vocabulary_fr_content_release_20261127/completion.json; zdrojové médium v006
+zůstává beze změny. Podrobně reports/vocabulary_fr_content_release_20261127.md.

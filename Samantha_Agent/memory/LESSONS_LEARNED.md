@@ -3041,3 +3041,16 @@ strop. Skutečný DALTAC dokončen17,0578/20, sedm původních částí beze zm�
 - Problém: Poslechový duel čeká po otázce; command(heard) při sending=true skončil bez odeslání a work se stejným klíčem jej již nezopakoval. Jediná síťová chyba navíc ukončila polling a trvale zašedila Další kolo.
 - Řešení: ponechat ackPending pro konkrétní kolo/fázi do uvolnění odesílání. Při nejistém výsledku načíst původní session přes ready; neopakovat odpověď ani restart. Síť obnovovat s omezenou frekvencí, zrušit návrat po vědomém odchodu a u trvalých chyb.
 - Ověření: 54 JS testů včetně souběhu timing/ACK, ztracené odpovědi ACK bez dvojího skóre, návratu Next, backoff 1/2/4/8 s a 72 otázek ve všech kombinacích časů. Fyzická přejímka je samostatná.
+
+### 2026-11-27 — Rozšíření FR katalogu nesmí zneplatnit kompatibilní místnost
+
+- Problém: vazba Rooms na přesný hash katalogu odmítne původní partii409 i při
+  přidání nových karet, jestliže se při nasazení jen zachová SQLite soubor.
+- Řešení: do plánu aktualizace připnout přechod až po přesné shodě všech
+  původních hratelných významů a quiz metadat. Po zastavení služby vytvořit
+  konzistentní zálohu a transakčně změnit jen catalog; tokeny, pozvánku, skóre,
+  balíček a expiraci zachovat. Neznámé UID vrátí celou transakci, jiné verze
+  nepřeznačovat a dokončený request neopakovat.
+- Ověření:4 syntetické regrese a kopie skutečných17 místností +2 rozehraných
+  kontrolovaných her; původní přístupy/pozvánky platí v obou režimech. Jde
+  o offline důkaz, skutečnou aktivaci dokládá až privátní provozní účtenka.

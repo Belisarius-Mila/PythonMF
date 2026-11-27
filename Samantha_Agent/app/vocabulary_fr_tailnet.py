@@ -16,12 +16,14 @@ from pathlib import Path
 import plistlib
 import re
 import socket
+import sqlite3
 import subprocess
 import sys
 import time
 import uuid
 
-from app.vocabulary_fr_cloud import prepare_release, SERVER
+from app.vocabulary_fr_cloud import prepare_release, backup_database, SERVER
+from app.vocabulary_fr_multiplayer import Catalog
 
 CONFIRMATION = "Potvrzuji globální brzdu: rozumím riziku a chci pokračovat."
 TAILSCALE = "/Applications/Tailscale.app/Contents/MacOS/Tailscale"
@@ -73,6 +75,49 @@ def _without_game(value, endpoint):
 def _route(value, endpoint):
     return (value.get("TCP", {}).get(HTTPS_PORT) == {"HTTPS": True}
             and value.get("Web", {}).get(endpoint) == {"Handlers": {"/": {"Proxy": PROXY}}})
+
+
+def _catalog_transition(previous, current, database):
+    """Allow existing rooms only when every old playable meaning is identical."""
+    if not Path(database).exists():
+        return None
+    if Path(database).is_symlink():
+        raise ValueError("Foreign game database must be preserved")
+    names = ("vocabulary-fr-v2.json", "vocabulary-fr-audio.json", "vocabulary-fr-quiz.json")
+    if all((Path(previous) / "docs/data" / name).read_bytes()
+           == (Path(current) / "docs/data" / name).read_bytes() for name in names):
+        return None
+    before, after = Catalog(Path(previous) / "docs"), Catalog(Path(current) / "docs")
+    if before.revision == after.revision:
+        return None
+    for uid, item in before.items.items():
+        if item != after.items.get(uid) or before.metadata[uid] != after.metadata.get(uid):
+            raise ValueError("Existing vocabulary changed; automatic room migration refused")
+    return {"from": before.revision, "to": after.revision, "uids": sorted(before.items)}
+
+
+def _migrate_rooms(directory, transition):
+    """One backed-up transaction; preserve all fields except the catalog version."""
+    backup = backup_database(directory=directory)
+    database = Path(directory) / "rooms.sqlite3"
+    allowed = set(transition["uids"])
+    with sqlite3.connect(database) as connection:
+        connection.execute("BEGIN IMMEDIATE")
+        updates = []
+        for uid, body in connection.execute("SELECT id, body FROM rooms"):
+            room = json.loads(body)
+            if room.get("catalog") != transition["from"]:
+                continue
+            references = list(room.get("deck", [])) + list(room.get("pool", []))
+            for question in room.get("questions", []):
+                references += [question["target"], *question["choices"]]
+            if room.get("id") != uid or any(word not in allowed for word in references):
+                raise ValueError("Room contains an unknown meaning; no room was changed")
+            room["catalog"] = transition["to"]
+            updates.append((json.dumps(room, ensure_ascii=False), uid))
+        connection.executemany("UPDATE rooms SET body=? WHERE id=?", updates)
+    return {"rooms": len(updates), "backup": str(backup),
+            "from": transition["from"], "to": transition["to"]}
 
 
 class PrivateGame:
@@ -209,6 +254,12 @@ class PrivateGame:
             plan = {"requestId": request_id, "head": expected_head, "origin": origin, "network": network,
                     "definition": definition, "priorAgentSha256": hashlib.sha256(installed).hexdigest() if installed is not None else None,
                     "files": len(prepared["files"])}
+            if old.get("running"):
+                transition = _catalog_transition(self.root / "releases" / old["head"],
+                                                 release, self.root / "rooms.sqlite3")
+                if transition:
+                    plan["catalogTransition"] = transition
+                    plan["previousHead"] = old["head"]
             result = {"plan": plan, "digest": _digest(plan)}
             _write(path, result)
             return result
@@ -238,6 +289,11 @@ class PrivateGame:
                 raise ValueError("Original owned running service is not confirmed")
             release = self.root / "releases" / plan["head"]
             prepare_release(repo=self.repo, output=release, expected_head=plan["head"])
+            if plan.get("catalogTransition"):
+                actual = _catalog_transition(self.root / "releases" / plan["previousHead"],
+                                             release, self.root / "rooms.sqlite3")
+                if actual != plan["catalogTransition"]:
+                    raise ValueError("Frozen catalog migration differs; nothing activated")
             definition = plistlib.dumps(plan["definition"], sort_keys=True)
             operation = {"requestId": request_id, "digest": plan_digest, "state": "activating"}
             state = {"state": "activating", "head": plan["head"], "origin": plan["origin"], "dns": plan["network"]["dns"],
@@ -258,6 +314,9 @@ class PrivateGame:
                     except OSError:
                         if time.monotonic() >= deadline:raise RuntimeError("Game port has not become free")
                         time.sleep(.2)
+                if plan.get("catalogTransition"):
+                    operation["catalogMigration"] = _migrate_rooms(self.root, plan["catalogTransition"])
+                    _write(receipt, operation)
                 self.agent.parent.mkdir(parents=True, exist_ok=True)
                 if installed is None:
                     with self.agent.open("xb") as stream:
