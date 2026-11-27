@@ -3034,3 +3034,10 @@ strop. Skutečný DALTAC dokončen17,0578/20, sedm původních částí beze zm�
 - Typ: nesoulad zdrojové kopie a načteného validačního runtime.
 - Řešení: po servisním schválení ověřit původní přesný otisk, vlastníka a neaktivní dokončovací úlohu. Registrovaný checkpoint provést v novém procesu z kontrolované kopie s výslovným zdrojovým main, původním idempotentním ID a bez push/deploy. Test se nemaže a validační politika ani podpis se neobcházejí.
 - Ověření: původní chyba byla reprodukovaná, nový proces načetl doplněný registr a vydal podepsaný doménový důkaz. Dokončení dokládá soukromá účtenka document_vault_checkpoint_recovery_20261126. Již běžící Cockpit tím nezíská nové moduly; jejich načtení zůstává součástí samostatně autorizovaného vydání.
+
+
+### 2026-11-27 — Potvrzení poslechu nesmí zahodit souběžný požadavek
+
+- Problém: Poslechový duel čeká po otázce; command(heard) při sending=true skončil bez odeslání a work se stejným klíčem jej již nezopakoval. Jediná síťová chyba navíc ukončila polling a trvale zašedila Další kolo.
+- Řešení: ponechat ackPending pro konkrétní kolo/fázi do uvolnění odesílání. Při nejistém výsledku načíst původní session přes ready; neopakovat odpověď ani restart. Síť obnovovat s omezenou frekvencí, zrušit návrat po vědomém odchodu a u trvalých chyb.
+- Ověření: 54 JS testů včetně souběhu timing/ACK, ztracené odpovědi ACK bez dvojího skóre, návratu Next, backoff 1/2/4/8 s a 72 otázek ve všech kombinacích časů. Fyzická přejímka je samostatná.

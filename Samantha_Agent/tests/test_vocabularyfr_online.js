@@ -240,7 +240,7 @@ function duelBridge(){
  const bridge={now:0,failed:false,loseAnswer:false,loseRestart:false,loseTiming:false,games:['pairs','duel'],requests:[]};
  const time=()=>1800000000+bridge.now/1000;
  const result=(value,status=200)=>({ok:status===200,status,json:async()=>structuredClone(value)});
- function question(){state.choices=[state.pool[state.question-1],...state.pool.filter(uid=>uid!==state.pool[state.question-1]).slice(0,11)];state.answers={};state.closed=[];state.acks=[];state.phase='duel_intro';state.since=time();state.stage++;state.roundTextSeconds=state.textSeconds;state.roundImageSeconds=state.imageSeconds;state.revision++;}
+ function question(replay=false){state.choices=[state.pool[state.question-1],...state.pool.filter(uid=>uid!==state.pool[state.question-1]).slice(0,11)];state.answers={};state.closed=[];state.acks=[];state.phase='duel_intro';state.since=time();state.stage++;if(!replay){state.roundTextSeconds=state.textSeconds;state.roundImageSeconds=state.imageSeconds;}state.revision++;}
  function advance(){
   if(state.paused)return;
   if(state.phase==='duel_intro'&&state.acks.length===2&&time()-state.since>=3){state.phase='duel_choose';state.stage++;state.opensAt=time()+1.5;state.pictureAt=state.opensAt+state.roundTextSeconds;state.closesAt=state.pictureAt+state.roundImageSeconds;state.revision++;}
@@ -274,8 +274,8 @@ function duelBridge(){
    state.textSeconds=payload.textSeconds;state.imageSeconds=payload.imageSeconds;state.revision++;
    if(bridge.loseTiming){bridge.loseTiming=false;throw Error('lost timing response');}
   }
-  if(action==='ready'){state.players[you].connected=true;state.paused=!state.players.every(p=>p?.connected);if(state.phase==='duel_choose')question();state.revision++;}
-  if(action==='leave'){state.players[you].connected=false;state.paused=true;if(state.phase==='duel_choose')question();state.revision++;}
+  if(action==='ready'){state.players[you].connected=true;state.paused=!state.players.every(p=>p?.connected);if(state.phase==='duel_choose')question(true);state.revision++;}
+  if(action==='leave'){state.players[you].connected=false;state.paused=true;if(state.phase==='duel_choose')question(true);state.revision++;}
   if(action==='start')question();
   if(action==='heard'){if(!state.acks.includes(you))state.acks.push(you);state.revision++;}
   if(action==='answer'){
@@ -485,8 +485,8 @@ test('duel lost restart reply is verified by explicit reentry without repeating 
 });
 test('duel late window delivery never gives one player a shortened answer window',async()=>{
  const {server,a,b}=await duelClients();a.ended();b.ended();a.advance(3000);b.advance(3000);await flush();
- server.now+=4000;await a.api.poll();assert.equal(a.element('duelResume').hidden,false);assert.equal(a.element('duelBoard').hidden,true);assert.equal(server.state.phase,'duel_intro');
- await enterDuel(a);assert.equal(a.api.getState().question,1);assert.deepEqual(a.api.getState().scores,[0,0]);
+ server.now+=4000;await a.api.poll();assert.equal(a.element('duelResume').hidden,false);assert.equal(a.element('duelBoard').hidden,true);assert.equal(server.state.phase,'duel_choose');
+ a.advance(1000);await flush();assert.equal(server.state.phase,'duel_intro');assert.equal(a.api.getState().question,1);assert.deepEqual(a.api.getState().scores,[0,0]);
 });
 test('duel moves already decoded images into cards and feedback without assigning their URL again',async()=>{
  const {a,b}=await duelClients();await duelWindow(a,b);
@@ -500,4 +500,89 @@ test('duel French feedback and its minimum display time wait for the large image
  assert.equal(a.players[0].starts.length,2);assert.equal(a.element('duelImage').hidden,true);a.advance(2000);b.advance(2000);b.ended();await flush();assert.equal(server.state.phase,'duel_result');
  a.releaseImages();await flush();assert.equal(a.players[0].starts.length,3);assert.equal(a.element('duelImage').hidden,false);a.ended();await flush();assert.equal(server.state.phase,'duel_result');
  a.advance(2000);await flush();assert.equal(server.state.phase,'duel_between');
+});
+
+async function recoveryClients(configure=()=>{}){
+ const server=duelBridge();configure(server);
+ const a=await duelClient(server);await enterDuel(a);
+ const b=await duelClient(server,{url:a.element('duelInvite').value});await enterDuel(b);
+ await a.api.poll();await a.api.command('start');await b.api.poll();return {server,a,b};
+}
+async function betweenQuestions(a,b){
+ await duelWindow(a,b);a.element('duelBoard').children[0].click();b.element('duelBoard').children[0].click();await flush();await duelClose(a,b);
+ a.ended();b.ended();a.advance(2000);b.advance(2000);await flush();await a.api.poll();await b.api.poll();
+ assert.equal(a.api.getState().phase,'duel_between');
+}
+test('duel automatically unlocks host Next after a brief sync failure without losing scores or invitation',async()=>{
+ const {server,a,b}=await duelClients();await betweenQuestions(a,b);const saved=a.session.getItem(a.api.KEY),sounds=a.players[0].starts.length;
+ server.failed=true;await a.api.poll();assert.equal(a.element('duelNext').hidden,false);assert.equal(a.element('duelNext').disabled,true);assert.match(a.element('duelStatus').textContent,/pokus za 1 s/);
+ server.failed=false;a.advance(999);await flush();assert.equal(a.element('duelNext').disabled,true);
+ a.advance(1);await flush();await b.api.poll();assert.equal(a.element('duelNext').disabled,false);assert.deepEqual(a.api.getState().scores,[1,1]);
+ assert.equal(a.session.getItem(a.api.KEY),saved);assert.equal(a.players[0].starts.length,sounds);
+ a.element('duelNext').click();await flush();await b.api.poll();assert.equal(b.api.getState().question,2);
+ assert.equal(server.requests.filter(r=>r.action==='rooms').length,1);assert.equal(server.requests.filter(r=>r.action==='join').length,1);
+});
+test('duel retries after 1, 2, 4 and 8 seconds and explicit leave cancels further retries',async()=>{
+ const attempts=[];const {server,a}=await recoveryClients(server=>{const original=server.fetcher;server.fetcher=(url,options)=>{if(String(url).endsWith('/ready'))attempts.push(server.now);return original(url,options);};});
+ server.failed=true;await a.api.poll();
+ for(const delay of [1000,2000,4000,8000,8000]){a.advance(delay-1);await flush();const count=attempts.length;a.advance(1);await flush();assert.equal(attempts.length,count+1);}
+ assert.deepEqual(attempts,[1000,3000,7000,15000,23000]);a.api.leave();a.advance(60000);await flush();assert.equal(attempts.length,5);
+});
+test('duel stops automatic recovery for an expired room and ignores a late ready after leaving',async()=>{
+ let expired=false,holdReady=false,release;const {server,a}=await recoveryClients(server=>{const original=server.fetcher;server.fetcher=async(url,options)=>{if(String(url).endsWith('/ready')&&expired)return {ok:false,status:410,json:async()=>({error:'Platnost partie skončila.'})};const response=await original(url,options);if(holdReady&&String(url).endsWith('/ready'))await new Promise(resolve=>{release=resolve;});return response;};});
+ server.failed=true;await a.api.poll();server.failed=false;expired=true;a.advance(1000);await flush();assert.match(a.element('duelStatus').textContent,/Platnost/);
+ const count=server.requests.length;a.advance(60000);await flush();assert.equal(server.requests.length,count);
+ expired=false;const entering=a.api.enter();await until(()=>!a.players[0].paused);a.ended();await entering;holdReady=true;
+ server.failed=true;await a.api.poll();server.failed=false;a.advance(1000);await flush();assert.equal(typeof release,'function');
+ a.api.leave();release();await flush();assert.equal(a.element('duelResume').hidden,false);assert.equal(a.element('duelBoard').hidden,true);
+});
+test('duel resumes when the tab becomes visible and online wakes a pending retry',async()=>{
+ const {server,a,b}=await duelClients();await betweenQuestions(a,b);
+ a.doc.hidden=true;a.doc.emit('visibilitychange');await flush();assert.equal(a.element('duelNext').disabled,true);
+ a.doc.hidden=false;a.doc.emit('visibilitychange');await flush();await b.api.poll();assert.equal(a.element('duelNext').disabled,false);
+ server.failed=true;await a.api.poll();server.failed=false;a.emit('online');await flush();assert.equal(a.element('duelNext').disabled,false);
+ a.emit('offline');a.emit('pagehide');const count=server.requests.length;a.emit('online');a.advance(10000);await flush();assert.equal(server.requests.length,count);
+});
+test('duel automatic recovery never repeats an uncertain answer or restart and preserves frozen question timing',async()=>{
+ const {server,a,b}=await duelClients();await duelWindow(a,b);
+ await a.api.command('timing',{textSeconds:4,imageSeconds:2});server.loseAnswer=true;a.element('duelBoard').children[0].click();await flush();
+ a.advance(1000);await flush();await b.api.poll();assert.equal(a.api.getState().phase,'duel_intro');assert.equal(a.api.getState().question,1);
+ assert.equal(server.requests.filter(r=>r.action==='answer').length,1);assert.equal(server.state.roundTextSeconds,2);assert.equal(server.state.roundImageSeconds,1);
+ server.loseRestart=true;a.element('duelChangeFilter').click();a.element('duelApply').click();await flush();a.advance(1000);await flush();await b.api.poll();
+ assert.equal(a.api.getState().round,2);assert.equal(server.requests.filter(r=>r.action==='restart').length,1);assert.equal(server.requests.filter(r=>r.action==='rooms').length,1);
+});
+test('duel queues a completed French playback while a timing change is in flight',async()=>{
+ let release;const {server,a,b}=await recoveryClients(server=>{const original=server.fetcher;server.fetcher=async(url,options)=>{const response=await original(url,options);if(String(url).endsWith('/timing'))await new Promise(resolve=>{release=resolve;});return response;};});
+ await duelWindow(a,b);await duelClose(a,b);a.ended();b.ended();a.advance(1950);b.advance(1950);await flush();
+ const pending=a.api.command('timing',{textSeconds:3,imageSeconds:2});await flush();a.advance(50);b.advance(50);await flush();
+ release();await pending;await flush();await a.api.poll();await b.api.poll();assert.equal(a.api.getState().phase,'duel_between');assert.equal(a.element('duelNext').disabled,false);
+ const hostHeard=server.requests.filter(r=>r.action==='heard'&&r.payload.stage===a.api.getState().stage&&r.token===server.requests.find(r=>r.action==='timing').token);
+ assert.equal(hostHeard.length,1);
+});
+
+test('duel host Next stays enabled for host across 12 questions and all six durations',async()=>{
+ for(const text of [2,3,4])for(const image of [1,2]){
+  const server=duelBridge(),a=await duelClient(server);await enterDuel(a);
+  await a.api.command('timing',{textSeconds:text,imageSeconds:image});
+  const b=await duelClient(server,{url:a.element('duelInvite').value,name:'Guest'});await enterDuel(b);
+  await a.api.poll();await a.api.command('start');await b.api.poll();
+  for(let question=1;question<=12;question++){
+   await duelWindow(a,b);
+   a.advance((text+image)*1000);b.advance((text+image)*1000);await flush();
+   a.advance(200);b.advance(200);await flush();await a.api.poll();await b.api.poll();
+   a.ended();b.ended();a.advance(2000);b.advance(2000);await flush();await a.api.poll();await b.api.poll();
+   assert.equal(a.api.getState().phase,question===12?'finished':'duel_between',JSON.stringify({text,image,question,status:a.element('duelStatus').textContent}));
+   if(question<12){
+    assert.equal(a.element('duelNext').hidden,false);assert.equal(a.element('duelNext').disabled,false);
+    assert.equal(b.element('duelNext').hidden,true);
+    a.element('duelNext').click();await flush();await b.api.poll();assert.equal(a.api.getState().question,question+1);
+   }
+  }
+ }
+});
+test('duel verifies a lost playback acknowledgement without awarding points or playing sound again',async()=>{
+ const {server,a,b}=await recoveryClients(server=>{const original=server.fetcher;server.fetcher=async(url,options)=>{const lost=server.loseResultAck&&String(url).endsWith('/heard')&&server.state.phase==='duel_result';if(lost)server.loseResultAck=false;const response=await original(url,options);if(lost)throw Error('lost ACK reply');return response;};});
+ await duelWindow(a,b);a.element('duelBoard').children[0].click();b.element('duelBoard').children[0].click();await flush();await duelClose(a,b);
+ const sounds=a.players[0].starts.length;server.loseResultAck=true;a.ended();b.ended();a.advance(2000);b.advance(2000);await flush();
+ a.advance(1000);await flush();await b.api.poll();assert.equal(a.api.getState().phase,'duel_between');assert.equal(a.element('duelNext').disabled,false);assert.deepEqual(a.api.getState().scores,[1,1]);assert.equal(a.players[0].starts.length,sounds);
 });

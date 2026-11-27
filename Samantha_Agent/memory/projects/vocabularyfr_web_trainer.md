@@ -847,3 +847,25 @@ Fyzický poslech na Janině Macu zůstává samostatnou přejímkou.
 ### Další krok
 - U obou hráčů obnovit stránku, zakladatel nastaví 4 + 2 s a společně ověřit jednu otázku.
 - Další partii nebo filtr lze dál měnit bez nové pozvánky.
+
+## 2026-11-27 — Automatické obnovení poslechového duelu
+
+Míla schválil robustnější připojení a následné p+n. Klient zachytí výpadek,
+ukáže stav a přihlásí stejnou session přes ready po 1/2/4/8 s, dále po 8 s;
+online a návrat viditelného panelu pokus urychlí. Opuštění hry ruší časovače
+včetně pozdních odpovědí; 403/404/410 a nekompatibilní katalog pokusy ukončí.
+Nikdy se automaticky neopakuje create/join/answer/restart/next/timing.
+Uložený stav se načte ze serveru, vyhodnocené skóre zůstává; přerušená otázka
+se podle existujícího serverového protokolu zopakuje se zmrazenými časy.
+Pokud prohlížeč blokuje automatický zvuk, zůstává výslovné zapnutí/opakování.
+Potvrzení poslechu čeká na uvolnění právě probíhajícího požadavku a ověřuje se
+serverovým stavem, místo aby jej sending=true zahodilo.
+
+Důkaz: 54 klientských testů PASS včetně nově 8 regresí, 6 celých her /72 otázek,
+backoff, viditelnosti, online, vypršení, ztracených odpovědí a souběhu timing/ACK.
+Nasazené původní soubory byly před změnou shodné na Pages i soukromé službě.
+Přesnou příčinu včerejší uživatelské partie nelze z uloženého stavu prokázat.
+Programová brána a finální vydání se dokončují; aktuální účtenky jsou v private
+`vocabulary_fr_duel_recovery_20261127/completion.json`. Databáze a pozvánky se
+nemění; aktualizace privátního exportu vyžaduje konkrétní potvrzený plán služby.
+Fyzická přejímka dvou Maců včetně zvuku zůstává otevřená.

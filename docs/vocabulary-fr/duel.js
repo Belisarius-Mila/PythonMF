@@ -16,6 +16,7 @@
     let data,manifest,quiz,revision='',selection=[],candidates=[],snapshot=null,session=null;
     let available=false,active=false,network=false,sending=false,picking=false,candidateValid=false,epoch=0,pollTimer=null;
     let work=null,windowState=null,windowTimer=null,cancelAudio=null,boardKey='';
+    let reconnecting=false,recoveryBusy=false,retryTimer=null,retryAttempt=0,retryDelay=1000,returnOnVisible=false,connectionError='';
     let clockBase={local:0,server:0};
     const now=()=>win.performance?.now?.()??Date.now();
     const serverNow=()=>clockBase.server+now()-clockBase.local;
@@ -72,26 +73,67 @@
       return value;
     }
     function accept(value){
-      if(value.protocol!==1||value.mode!=='duel'||value.catalog!==revision||value.room!==session.room||![0,1].includes(value.you)||!Array.isArray(value.choices)||![0,12].includes(value.choices.length)||value.choices.some(uid=>!itemFor(uid))||!Number.isFinite(value.serverTime))throw Error('Partie neodpovídá této verzi duelu.');
+      if(value.protocol!==1||value.mode!=='duel'||value.catalog!==revision||value.room!==session.room||![0,1].includes(value.you)||!Array.isArray(value.choices)||![0,12].includes(value.choices.length)||value.choices.some(uid=>!itemFor(uid))||!Number.isFinite(value.serverTime))throw Object.assign(Error('Partie neodpovídá této verzi duelu.'),{status:409});
       if(snapshot&&value.revision<snapshot.revision)return;
       if(snapshot&&value.round!==snapshot.round){picking=false;candidates=[];cancelWork();cancelWindow();}
-      snapshot=value;network=true;render();syncPhase();
+      snapshot=value;network=true;
+      if(active&&value.phase!=='finished'&&!value.players[value.you]?.connected){disconnect('Obnovuji přihlášení do hry.');return;}
+      render();syncPhase();
     }
     function schedule(){win.clearTimeout(pollTimer);if(active)pollTimer=win.setTimeout(()=>{void poll();},600);}
-    function disconnect(message){leave();status(message||'Spojení se přerušilo. Pokračuj opětovným zapnutím zvuku.');}
+    function stopRecovery(){win.clearTimeout(retryTimer);retryTimer=null;reconnecting=false;recoveryBusy=false;retryAttempt=0;}
+    function retryConnection(){
+      win.clearTimeout(retryTimer);
+      if(!reconnecting||doc.hidden)return;
+      retryDelay=Math.min(8000,1000*2**Math.min(retryAttempt,3));retryAttempt++;
+      retryTimer=win.setTimeout(()=>{void recover();},retryDelay);render();
+    }
+    function disconnect(message,retry=true){
+      // Never resend an uncertain answer or restart. Rejoin the existing room
+      // and read its committed state; ready safely replays an interrupted window.
+      active=false;network=false;sending=false;epoch++;win.clearTimeout(pollTimer);
+      cancelWork();cancelWindow();stopRecovery();connectionError=message||'Spojení se přerušilo.';
+      reconnecting=retry&&Boolean(session?.room);render();
+      if(reconnecting)retryConnection();
+    }
+    function recoverable(error){return !error.status||error.status===408||error.status===429||error.status>=500;}
+    async function recover(){
+      if(!reconnecting||recoveryBusy||doc.hidden)return;
+      win.clearTimeout(retryTimer);const ticket=epoch;recoveryBusy=true;render();
+      try{
+        const value=await post('ready');
+        if(ticket!==epoch||!reconnecting)return;
+        reconnecting=false;active=true;network=true;connectionError='';retryAttempt=0;
+        accept(value);schedule();
+      }catch(error){
+        if(ticket===epoch){
+          connectionError=error.message;
+          active=false;network=false;if(!recoverable(error))reconnecting=false;
+        }
+      }finally{
+        if(ticket===epoch){recoveryBusy=false;render();if(reconnecting)retryConnection();}
+      }
+    }
+    async function flushHeard(){
+      const local=work;
+      if(!local?.ackPending||local.ackInFlight||sending||!active||!network||snapshot.paused||snapshot.acks.includes(snapshot.you))return;
+      local.ackInFlight=true;
+      const ok=await command('heard',{stage:local.stage});
+      local.ackInFlight=false;if(ok)local.ackPending=false;
+    }
     async function poll(){
       if(!active)return;if(sending){schedule();return;}
       const ticket=epoch;
       try{const value=await post('sync');if(ticket===epoch&&active)accept(value);}
-      catch(error){if(ticket===epoch)disconnect(error.message);}
+      catch(error){if(ticket===epoch)disconnect(error.message,recoverable(error));}
       finally{if(ticket===epoch)schedule();}
     }
     async function command(action,payload={}){
       if(sending||!active||!snapshot)return false;
       sending=true;const ticket=epoch;let failure=null;render();
       try{const value=await post(action,{requestId:random(win),expectedRound:snapshot.round,expectedStage:snapshot.stage,...payload});if(ticket===epoch&&active)accept(value);return true;}
-      catch(error){if(ticket===epoch){if(error.status)failure=error.message;else disconnect('Spojení se přerušilo. Připoj se znovu; uloženou odpověď ověříme bez opakovaného kliknutí.');}return false;}
-      finally{if(ticket===epoch){sending=false;render();if(failure)status(failure);schedule();}}
+      catch(error){if(ticket===epoch){if(recoverable(error))disconnect('Spojení se přerušilo. Obnovuji připojení a ověřuji uložený stav.');else if([403,404,410].includes(error.status))disconnect(error.message,false);else failure=error.message;}return false;}
+      finally{if(ticket===epoch){sending=false;render();if(failure)status(failure);schedule();void flushHeard();}}
     }
     function syncPhase(){
       if(!active||!network||snapshot.paused){cancelWork();cancelWindow();return;}
@@ -105,7 +147,7 @@
           // A late/reloaded client must receive a fresh full window, not a fraction.
           if(opens<now()-150){disconnect('Časové okno dorazilo pozdě. Pokračuj a současné kolo zopakujeme.');return;}
           const pictureAt=snapshot.pictureAt??snapshot.opensAt+2;
-          if(!Number.isFinite(pictureAt)||!Number.isFinite(snapshot.closesAt)||pictureAt<=snapshot.opensAt||snapshot.closesAt<=pictureAt){disconnect('Herní služba poslala neplatné časování.');return;}
+          if(!Number.isFinite(pictureAt)||!Number.isFinite(snapshot.closesAt)||pictureAt<=snapshot.opensAt||snapshot.closesAt<=pictureAt){disconnect('Herní služba poslala neplatné časování.',false);return;}
           windowState={key,opens,pictureAt:opens+(pictureAt-snapshot.opensAt)*1000,closes:opens+(snapshot.closesAt-snapshot.opensAt)*1000,choice:snapshot.ownAnswer,closedSent:snapshot.closed};
         }
         tick();return;
@@ -113,9 +155,9 @@
       cancelWindow();
       if(!['duel_intro','duel_result'].includes(snapshot.phase)){cancelWork();return;}
       const key=snapshot.round+':'+snapshot.stage;
-      if(work?.key===key)return;
+      if(work?.key===key){void flushHeard();return;}
       cancelWork();if(snapshot.acks.includes(snapshot.you))return;
-      const local={key,stage:snapshot.stage,cancelled:false,waits:new Map(),failed:null,imagesReady:false};work=local;
+      const local={key,stage:snapshot.stage,cancelled:false,waits:new Map(),failed:null,imagesReady:false,ackPending:false,ackInFlight:false};work=local;
       const intro=snapshot.phase==='duel_intro',item=intro?null:itemFor(snapshot.target);
       const sound=intro?snapshot.promptAudio:M.audioRecord(item,manifest)?.fr;
       const paths=intro?snapshot.choices.map(uid=>itemFor(uid).thumbnail):[item.image];
@@ -130,7 +172,7 @@
         if(local.cancelled||work!==local||!active)return;
         local.imagesReady=loaded;
         if(!loaded||!played){local.failed=loaded?'audio':'images';render();status(loaded?'Zvuk se nepodařilo přehrát. Zopakuj ho nebo výslovně pokračuj bez zvuku.':'Obrázky se nepodařilo načíst. Zopakuj přípravu; čas na odpověď ještě neběží.');return;}
-        await command('heard',{stage:local.stage});
+        local.ackPending=true;void flushHeard();
       })();
     }
     function tick(){
@@ -183,7 +225,8 @@
       ui.duelTextSeconds.value=String(snapshot.textSeconds??2);ui.duelImageSeconds.value=String(snapshot.imageSeconds??1);
       ui.duelTextSeconds.disabled=ui.duelImageSeconds.disabled=!host||!active||!network||sending||!timingSupported;
       ui.duelTimingNotice.textContent=!timingSupported?'Změna časů vyžaduje aktualizaci herní služby.':`Pro další kola: text ${snapshot.textSeconds} s + obrázek ${snapshot.imageSeconds} s = ${snapshot.textSeconds+snapshot.imageSeconds} s. Rozehrané kolo se nemění.`;
-      ui.duelResume.hidden=active;ui.duelResume.disabled=sending||!available;
+      ui.duelResume.hidden=active;ui.duelResume.disabled=sending||!available||recoveryBusy;
+      ui.duelResume.textContent=reconnecting?'Připojit hned a zapnout zvuk':'Pokračovat a zapnout zvuk';
       ui.duelInvitePanel.hidden=!session.invite||session.mode!=='host'||snapshot.players[1]!==null;
       const invite=new URL('duel.html',win.location.href);invite.hash=new URLSearchParams({room:session.room,invite:session.invite||''}).toString();ui.duelInvite.value=invite.toString();
       ui.duelStart.hidden=!host||snapshot.phase!=='waiting';ui.duelStart.disabled=locked||!snapshot.players.every(p=>p?.connected);
@@ -211,7 +254,8 @@
       });
       if(finished)ui.duelResult.textContent=snapshot.scores[0]===snapshot.scores[1]?'Remíza!':`Vyhrává ${snapshot.players[snapshot.scores[0]>snapshot.scores[1]?0:1].name}!`;
       renderBoard(locked);
-      if(!active||!network)status('Hra čeká na návrat. Pokračuj se zapnutým zvukem.');
+      if(reconnecting)status(recoveryBusy?'Obnovuji spojení…':`${connectionError||'Spojení se přerušilo.'} Další pokus za ${retryDelay/1000} s (pokus ${retryAttempt}).`);
+      else if(!active||!network)status(connectionError||'Hra čeká na návrat. Pokračuj se zapnutým zvukem.');
       else if(snapshot.paused)status('Čekáme na připojení spoluhráče.');
       else if(snapshot.phase==='waiting')status(snapshot.players[1]?'Oba jste připraveni. Vyzyvatel může zahájit hru.':'Pošli pozvánku spoluhráči.');
       else if(snapshot.phase==='duel_intro')status('Posloucháme české zadání a připravujeme obrázky na obou počítačích.');
@@ -229,7 +273,7 @@
     }
     async function enter(){
       if(sending||!available)return;
-      sending=true;const ticket=++epoch;render();
+      stopRecovery();returnOnVisible=false;connectionError='';sending=true;const ticket=++epoch;render();
       try{
         const sample=data.items.find(i=>M.audioRecord(i,manifest)?.fr);
         if(!await play(M.audioRecord(sample,manifest).fr))throw Error('Zvuk se nepodařilo zapnout. Klikni na vstup znovu.');
@@ -247,7 +291,7 @@
       }catch(error){if(ticket===epoch){sending=false;render();status(error.message||'Připojení se nepodařilo.');}}
     }
     function leave(){
-      const prior=active;active=false;network=false;sending=false;epoch++;win.clearTimeout(pollTimer);cancelWork();cancelWindow();
+      stopRecovery();returnOnVisible=false;connectionError='';const prior=active;active=false;network=false;sending=false;epoch++;win.clearTimeout(pollTimer);cancelWork();cancelWindow();
       if(prior&&session?.room)void fetcher(API+'/'+session.room+'/leave',{method:'POST',headers:{'Content-Type':'application/json',Authorization:'Bearer '+session.token},body:'{}',credentials:'omit',keepalive:true}).catch(()=>{});
       render();
     }
@@ -294,7 +338,13 @@
     ui.duelSkip.addEventListener('click',()=>{if(work?.failed==='audio'&&work.imagesReady)void command('heard',{stage:work.stage});});
     ui.duelCopy.addEventListener('click',()=>{void Promise.resolve(win.navigator?.clipboard?.writeText(ui.duelInvite.value)||Promise.reject(Error('clipboard'))).then(()=>status('Pozvánka je zkopírovaná.'),()=>status('Označ odkaz v poli a zkopíruj ho ručně.'));});
     ui.duelBack.addEventListener('click',event=>{if(snapshot&&snapshot.phase!=='finished'&&!win.confirm('Opustit duel? Spoluhráč počká na tvůj návrat.'))event.preventDefault();else leave();});
-    win.addEventListener('pagehide',leave);doc.addEventListener('visibilitychange',()=>{if(doc.hidden)leave();});
+    win.addEventListener('pagehide',leave);
+    doc.addEventListener('visibilitychange',()=>{
+      if(doc.hidden){const resume=active||reconnecting;leave();returnOnVisible=resume;}
+      else if(returnOnVisible){returnOnVisible=false;disconnect('Obnovuji hru po návratu do okna.');void recover();}
+    });
+    win.addEventListener('offline',()=>{if(active)disconnect('Síť není dostupná. Čekám na obnovení spojení.');});
+    win.addEventListener('online',()=>{if(reconnecting&&!doc.hidden)void recover();});
     return {init,enter,poll,command,leave,getState:()=>snapshot};
   }
   const api={KEY,create};if(typeof module!=='undefined'&&module.exports)module.exports=api;else{root.VocabularyFRDuel=api;void create({doc:root.document,win:root.window}).init();}
