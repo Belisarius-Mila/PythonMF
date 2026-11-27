@@ -505,3 +505,23 @@ přesným zdrojem, deployment8050345081, protected_services_unchanged=true.
 Veřejná účtenka data/daily_3am/receipts/20261125_publication.json.
 Původní účtenka data/daily_3am/revisions/20261125_manual/release_receipt.json.
 Tento výsledkový dokumentační checkpoint sám neopakuje publikaci.
+
+## 2026-11-27 08:31 CET — Soví promluva pro 27. listopadu připravená k vydání
+
+Hotovo. Nová jednorázová promluva je připravená v MP3 owl_271126.mp3.
+Má 126432 B a 21.072 s. Obě webové kopie vybírají
+novou nahrávku a mají aktuální otisky pro obnovu cache.
+
+Rozhodnutí. Míla výslovně zadal produkční vydání. Použit obvyklý hlas
+Antonin a tempo -10 %, jediná syntéza. Opraven jeden zjevný překlep.
+Text se do paměťového zápisu nekopíruje.
+
+Další krok. Programová brána, lokální commit a jediné registrované vydání
+project-colors-and-numbers. Potom ověřit skutečný veřejný JS a MP3.
+
+Navrhované další kroky. Uživatelský poslech po publikaci.
+
+Technický důkaz. Úplné dekódování MP3 FFmpeg PASS, kopie jsou shodné.
+SHA-256 164270603a6ed76245fdde99bc42ed8c95cd69fc87402299289ae313c4d31700.
+Důkazy data/daily_3am/revisions/20261127_manual/. Samostatný TVBCP pro tento
+obsahový krok nebyl dohodnutý.
