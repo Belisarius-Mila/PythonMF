@@ -2,7 +2,8 @@
 from app.calendar_delete import CalendarDeletion
 from app.cockpit_calendar_agenda import AGENDA
 
-DELETIONS = CalendarDeletion(on_deleted=lambda: AGENDA.request_refresh(force=True))
+DELETIONS = CalendarDeletion(on_deleted=lambda: AGENDA.request_refresh(force=True),
+                             on_deleted_event=AGENDA.follow_deleted)
 
 
 def calendar_delete_action(payload):

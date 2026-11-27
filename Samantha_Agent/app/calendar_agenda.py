@@ -9,19 +9,12 @@ from pathlib import Path
 import threading
 from uuid import uuid4
 
-from app.calendar_overview import CalendarOverview, instant
+from app.calendar_overview import CalendarOverview, instant, event_key, event_end
 from app.email.continuous_agent import DEFAULT_ROOT as EMAIL_ROOT
 from app.file_persistence import atomic_replace_text_under_external_lock, exclusive_file_lock, FileLockTimeoutError
 
 PROJECT = Path(__file__).resolve().parents[1]
 KINDS = {'meeting', 'task_deadline'}
-
-
-def event_key(event):
-    # A display annotation follows this exact content, never an unverified native ID.
-    values = [event['calendar_id'], event['title'], instant(event['start']).astimezone(timezone.utc).isoformat(),
-              instant(event['end']).astimezone(timezone.utc).isoformat(), event['all_day']]
-    return hashlib.sha256(json.dumps(values, ensure_ascii=False).encode()).hexdigest()
 
 
 def read_json(path, default=None):
@@ -112,6 +105,12 @@ class CalendarAgenda:
                          'can_edit':unique and source['ready'] and row['calendar_id'] in writable})
         return {**source, 'events':rows, 'labels_revision':labels['revision'], 'completion_partial':partial}
 
+    def _display_events(self, source):
+        current = source["events"]
+        keys = {event_key(row) for row in current}
+        return current + [row for row in source.get("retained_events", [])
+                          if event_key(row) not in keys]
+
     def set_completed(self, payload):
         expected = {'action','key','completed','expected_selection_revision','expected_labels_revision','confirmed'}
         if (set(payload)!=expected or payload['confirmed'] is not True or type(payload['completed']) is not bool
@@ -119,8 +118,9 @@ class CalendarAgenda:
             raise ValueError('Potvrď splnění aktuální položky.')
         with exclusive_file_lock(self.labels_path, timeout=0):
             source = self.overview.snapshot(); labels = self._labels()
-            matches = [row for row in source['events'] if event_key(row)==payload['key']]
-            if (not source['ready'] or len(matches)!=1 or source['revision']!=payload['expected_selection_revision']
+            matches = [row for row in self._display_events(source) if event_key(row)==payload['key']]
+            if (len(matches)!=1 or (not source['ready'] and event_end(matches[0]) > self.clock())
+                    or source['revision']!=payload['expected_selection_revision']
                     or labels['revision']!=payload['expected_labels_revision']):
                 raise ValueError('Přehled se změnil. Obnov jej a označ splnění znovu.')
             completed = labels.setdefault('completed', {})
@@ -129,6 +129,18 @@ class CalendarAgenda:
             labels['revision'] += 1
             save_locked(self.labels_path, labels)
         return self.snapshot()
+
+    def follow_deleted(self, event):
+        """A verified explicit calendar deletion also retires its display reminder."""
+        with exclusive_file_lock(self.labels_path, timeout=0):
+            labels = self._labels()
+            completed = labels.setdefault("completed", {})
+            key = event_key(event)
+            if completed.get(key):
+                return
+            completed[key] = True
+            labels["revision"] += 1
+            save_locked(self.labels_path, labels)
 
     def follow_edit(self, before, after):
         with exclusive_file_lock(self.labels_path, timeout=0):
@@ -139,6 +151,7 @@ class CalendarAgenda:
             if labels.get('completed', {}).get(old): labels['completed'][new] = True
             labels['revision'] += 1
             save_locked(self.labels_path, labels)
+        self.overview.follow_retained_edit(before, after)
 
     def _attempt(self):
         try: return read_json(self.attempt_path, {})
@@ -157,21 +170,25 @@ class CalendarAgenda:
         except (OSError,ValueError): labels={'revision':0,'items':{}};partial=True
         try: known, missing_types = self.written_kinds(); partial |= missing_types
         except (OSError,ValueError,KeyError,TypeError): known={};partial=True
-        events = [row for row in source['events'] if instant(row['end'])>now and instant(row['start'])<end]
+        events = [row for row in self._display_events(source) if instant(row['start'])<end]
+        current_keys = {event_key(row) for row in source['events']}
         counts = Counter(event_key(row) for row in events)
         writable = {row['id'] for row in source['calendars'] if row['writable']}
         deadlines, meetings = [], []
         for row in sorted(events,key=lambda e:(instant(e['start']),e['title'],e['calendar_id'])):
             key = event_key(row); unique = counts[key]==1
+            overdue = event_end(row) <= now
+            retained = key not in current_keys
             if unique and labels.get('completed', {}).get(key): continue
             manual = labels['items'].get(key) if unique else None
             suggested = known.get(key) if unique else None
             kind = manual or suggested or 'event'
             item = {**row,'key':key,'kind':kind,'type_source':'display' if manual else 'samantha' if suggested else 'calendar',
-                    'display_kind':manual or 'auto','can_classify':unique and source['ready'] and not last_failed and not partial,
-                    'can_complete':unique and source['ready'] and not last_failed and not partial,
-                    'can_edit':unique and source['ready'] and not last_failed and row['calendar_id'] in writable,
-                    'can_delete':unique and source['ready'] and not last_failed and row['calendar_id'] in writable}
+                    'display_kind':manual or 'auto','can_classify':unique and not retained and source['ready'] and not last_failed and not partial,
+                    'can_complete':unique and not partial and (overdue or (source['ready'] and not last_failed)),
+                    'overdue':overdue, 'retained':retained,
+                    'can_edit':unique and not retained and source['ready'] and not last_failed and row['calendar_id'] in writable,
+                    'can_delete':unique and not retained and source['ready'] and not last_failed and row['calendar_id'] in writable}
             (deadlines if kind=='task_deadline' else meetings).append(item)
         fresh = bool(source['ready'] and not last_failed)
         status = 'source_unavailable' if last_failed else source['status']

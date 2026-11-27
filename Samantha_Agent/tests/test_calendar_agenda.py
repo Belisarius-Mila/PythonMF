@@ -83,10 +83,10 @@ class CalendarAgendaTests(unittest.TestCase):
         self.agenda.request_refresh();self.callbacks.pop()()
         self.assertFalse(self.agenda.snapshot()['fresh'])
 
-    def test_thirty_day_window_excludes_finished_and_far_events_keeps_ongoing(self):
+    def test_thirty_day_window_keeps_uncompleted_finished_and_ongoing_events(self):
         self.prepare();current=self.event(start=(self.now-timedelta(hours=1)).isoformat(),end=(self.now+timedelta(hours=1)).isoformat())
-        finished=self.event(title='Hotovo',end=self.now.isoformat());far=self.event(title='Později',start=(self.now+timedelta(days=30)).isoformat(),end=(self.now+timedelta(days=31)).isoformat())
-        self.events([far,finished,current]);v=self.agenda.snapshot();self.assertEqual(len(v['meetings']),1);self.assertEqual(v['meetings'][0]['title'],'Schůzka')
+        finished=self.event(title='Hotovo',start=(self.now-timedelta(hours=2)).isoformat(),end=self.now.isoformat());far=self.event(title='Později',start=(self.now+timedelta(days=30)).isoformat(),end=(self.now+timedelta(days=31)).isoformat())
+        self.events([far,finished,current]);v=self.agenda.snapshot();self.assertEqual(len(v['meetings']),2);self.assertTrue(v['meetings'][0]['overdue']);self.assertEqual(v['meetings'][1]['title'],'Schůzka')
 
     def test_known_types_and_user_override_split_lists_without_calendar_writes(self):
         self.prepare();event=self.event();self.events([event]);self.hints[event_key(event)]='task_deadline'
@@ -184,3 +184,118 @@ class CalendarAgendaTests(unittest.TestCase):
         self.complete(new);self.assertEqual(self.agenda.snapshot()['deadlines'],[])
         changed={**new,'title':'Změna'};self.agenda.follow_edit(new,changed);self.events([changed])
         self.assertEqual(self.agenda.snapshot()['deadlines'],[])
+
+
+    def test_overdue_survives_refresh_restart_and_months_until_completed(self):
+        self.prepare()
+        event=self.event()
+        self.events([event])
+        self.now+=timedelta(days=2)
+        self.pilot.extra["events"]=[]
+        self.overview.refresh(confirmed=True)
+        self.now+=timedelta(days=90)
+        self.overview.refresh(confirmed=True)
+        restarted=CalendarAgenda(CalendarOverview(self.pilot,clock=lambda:self.now),
+                                 written_kinds=lambda:({},False))
+        row=restarted.snapshot()["meetings"][0]
+        self.assertEqual(row["key"],event_key(event))
+        self.assertTrue(row["overdue"])
+        self.assertTrue(row["retained"])
+        self.assertTrue(row["can_complete"])
+        self.assertFalse(row["can_edit"])
+        self.assertFalse(row["can_delete"])
+        before=self.overview.path.read_bytes()
+        calls=list(self.pilot.calls)
+        self.complete(event)
+        self.assertEqual(restarted.snapshot()["meetings"],[])
+        self.assertEqual(self.overview.path.read_bytes(),before)
+        self.assertEqual(self.pilot.calls,calls)
+        self.overview.refresh(confirmed=True)
+        self.assertEqual(restarted.snapshot()["meetings"],[])
+        self.complete(event,completed=False)
+        self.assertEqual(restarted.snapshot()["meetings"][0]["key"],event_key(event))
+
+    def test_overdue_completion_works_from_cache_during_native_read_failure(self):
+        self.prepare()
+        event=self.event()
+        self.events([event])
+        self.now+=timedelta(days=3)
+        self.pilot.fail=True
+        self.overview.refresh(confirmed=True)
+        row=self.agenda.snapshot()["meetings"][0]
+        self.assertTrue(row["overdue"])
+        self.assertTrue(row["can_complete"])
+        self.assertFalse(self.agenda.snapshot()["fresh"])
+        calls=list(self.pilot.calls)
+        self.complete(event)
+        self.assertEqual(self.agenda.snapshot()["meetings"],[])
+        self.assertEqual(self.pilot.calls,calls)
+
+    def test_retained_occurrences_respect_calendar_selection_and_duplicate_safety(self):
+        self.prepare()
+        event=self.event()
+        self.events([event,event])
+        self.now+=timedelta(days=2)
+        self.pilot.extra["events"]=[]
+        self.overview.refresh(confirmed=True)
+        rows=self.agenda.snapshot()["meetings"]
+        self.assertEqual(len(rows),2)
+        self.assertTrue(all(row["overdue"] and not row["can_complete"] for row in rows))
+        with self.assertRaises(ValueError):
+            self.complete(event)
+        self.overview.save_selection({"action":"save_selection","confirmed":True,"expected_revision":1,
+                                      "read_calendar_ids":["b"],"target_calendar_id":"a"})
+        self.assertEqual(self.agenda.snapshot()["meetings"],[])
+        self.overview.save_selection({"action":"save_selection","confirmed":True,"expected_revision":2,
+                                      "read_calendar_ids":["a"],"target_calendar_id":"a"})
+        self.assertEqual(len(self.agenda.snapshot()["meetings"]),2)
+
+    def test_completed_occurrence_stays_hidden_when_it_ages_out_of_read_window(self):
+        self.prepare()
+        event=self.event()
+        self.events([event])
+        self.complete(event)
+        self.now+=timedelta(days=3)
+        self.pilot.extra["events"]=[]
+        self.overview.refresh(confirmed=True)
+        self.assertEqual(self.agenda.snapshot()["meetings"],[])
+        self.assertEqual(self.overview.snapshot()["events"],[])
+
+    def test_verified_edit_updates_retained_occurrence_without_leaving_old_copy(self):
+        self.prepare()
+        event=self.event()
+        self.events([event])
+        self.now+=timedelta(days=3)
+        self.pilot.extra["events"]=[]
+        self.overview.refresh(confirmed=True)
+        changed={**event,"title":"Opravená událost"}
+        self.agenda.follow_edit(event,changed)
+        rows=self.agenda.snapshot()["meetings"]
+        self.assertEqual([row["key"] for row in rows],[event_key(changed)])
+
+
+    def test_verified_deletion_does_not_resurrect_as_an_overdue_reminder(self):
+        self.prepare()
+        event=self.event()
+        self.events([event])
+        self.agenda.follow_deleted(event)
+        self.now+=timedelta(days=3)
+        self.pilot.extra["events"]=[]
+        self.overview.refresh(confirmed=True)
+        self.assertEqual(self.agenda.snapshot()["meetings"],[])
+        revision=self.agenda._labels()["revision"]
+        self.agenda.follow_deleted(event)
+        self.assertEqual(self.agenda._labels()["revision"],revision)
+
+
+    def test_all_day_overdue_starts_at_exclusive_local_midnight(self):
+        self.prepare()
+        event=self.event(start="2026-11-06T23:00:00Z",end="2026-11-07T22:59:59Z",
+                         all_day=True,start_day="2026-11-07",end_day="2026-11-08")
+        self.events([event])
+        self.now=datetime(2026,11,7,22,59,59,tzinfo=timezone.utc)
+        self.assertFalse(self.agenda.snapshot()["meetings"][0]["overdue"])
+        self.now+=timedelta(seconds=1)
+        self.assertTrue(self.agenda.snapshot()["meetings"][0]["overdue"])
+        self.complete(event)
+        self.assertEqual(self.agenda.snapshot()["meetings"],[])

@@ -36,6 +36,17 @@ class CalendarDeleteTests(unittest.TestCase):
     def action(self,action,request_id):
         return self.service.execute({'action':action,'request_id':request_id,**({} if action=='status' else {'confirmed':True})})
 
+    def test_verified_deletion_notifies_exact_event_once_without_another_native_call(self):
+        from unittest.mock import Mock
+        notified=Mock()
+        self.service.on_deleted_event=notified
+        prepared=self.prepare()
+        payload={"action":"delete","request_id":prepared["request_id"],"confirmed":True}
+        self.service.execute(payload)
+        self.service.execute(payload)
+        notified.assert_called_once_with(EVENT)
+        self.assertEqual([r[0] for r in self.calls],["inspect","delete"])
+
     def test_prepare_only_reads_and_keeps_native_identity_server_side(self):
         p=self.prepare();self.assertEqual(p['state'],'prepared');self.assertEqual(self.calls[0][0],'inspect')
         self.assertNotIn('identity',p);self.assertNotIn('native-event',json.dumps(p));self.assertEqual(self.refreshed,[])

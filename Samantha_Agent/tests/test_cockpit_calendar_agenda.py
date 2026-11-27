@@ -66,3 +66,28 @@ class CalendarAgendaHTTPTests(unittest.TestCase):
             code,raw,_=self.request('/api/calendar/overview')
             self.assertEqual(code,200);self.assertNotIn(row['key'],[r['key'] for r in json.loads(raw)['events']])
         self.assertEqual(before,self.overview.path.read_bytes());self.assertEqual(self.request(body=body)[0],400)
+
+
+    def test_overdue_retained_row_can_be_completed_over_http_after_refresh(self):
+        from datetime import timedelta
+        self.prepare()
+        self.now+=timedelta(days=3)
+        self.pilot.extra["events"]=[]
+        self.overview.refresh(confirmed=True)
+        self.now+=timedelta(minutes=20)
+        code,raw,_=self.request()
+        view=json.loads(raw)
+        row=view["meetings"][0]
+        self.assertFalse(view["fresh"])
+        self.assertTrue(row["overdue"])
+        self.assertTrue(row["can_complete"])
+        before=self.overview.path.read_bytes()
+        calls=list(self.pilot.calls)
+        payload={"action":"set_completed","key":row["key"],"completed":True,"confirmed":True,
+                 "expected_selection_revision":view["selection_revision"],
+                 "expected_labels_revision":view["labels_revision"]}
+        code,raw,_=self.request(body=payload)
+        self.assertEqual(code,200,raw)
+        self.assertEqual(json.loads(raw)["meetings"],[])
+        self.assertEqual(self.overview.path.read_bytes(),before)
+        self.assertEqual(self.pilot.calls,calls)

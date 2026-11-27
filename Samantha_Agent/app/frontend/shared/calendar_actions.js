@@ -79,7 +79,7 @@
         try {
           const value=await api({action:"set_completed",key:row.key,completed:true,confirmed:true,
             expected_selection_revision:current.selection_revision??current.revision,expected_labels_revision:current.labels_revision},"/api/calendar/agenda");
-          notice.textContent="Splněno. Položka zůstává v kalendáři.";onChanged(value);
+          notice.textContent="Splněno. Položka je vyřízená v přehledu.";onChanged(value);
         } catch(error) {notice.textContent=error.message;}
         finally {active=false;update();}
       });wrap.append(done);

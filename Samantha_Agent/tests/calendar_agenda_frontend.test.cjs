@@ -62,6 +62,14 @@ const timer=async()=>{const pair=[...timers].find(([,v])=>v.ms===1500);assert(pa
  // Unavailable type metadata must not be presented as a confirmed empty deadline list.
  const partial={...fresh,classification_partial:true};queue.push(partial,partial);await ids.calendarAgendaRefresh.listeners.click();
  assert(ids.calendarAgendaDeadlines.children[0].textContent.includes('není úplné'));
+ // Retained overdue rows remain visibly marked and locally completable during an outage.
+ let actions=[];
+ window.SamanthaCalendarActions={attach:(host,row,options)=>actions.push({row,options}),update:()=>{}};
+ const overdue={...fresh,fresh:false,meetings:[event(9,{overdue:true,retained:true,can_complete:true,can_classify:false,can_edit:false})]};
+ queue.push(overdue,overdue);await ids.calendarAgendaRefresh.listeners.click();
+ assert(ids.calendarAgendaMeetings.querySelectorAll('span').some(n=>n.textContent.includes('Po termínu')));
+ assert.equal(actions.at(-1).options.disabled(),false);
+ assert.equal(actions.at(-1).row.can_edit,false);
  // With no selected calendars, startup/refresh never requests a native read and does not claim an empty success.
  queue.push({...fresh,fresh:false,status:'selection_required',selected_count:0,deadlines:[],meetings:[]});await ids.calendarAgendaRefresh.listeners.click();
  assert.equal(calls.at(-1).payload,null);assert(ids.calendarAgendaStatus.textContent.includes('Vyber kalendáře'));

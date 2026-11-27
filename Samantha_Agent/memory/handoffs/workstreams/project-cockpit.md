@@ -1,5 +1,13 @@
 <!-- SAMANTHA_CURRENT_STATUS_START -->
 
+## Aktuální kalendářová změna — 27. 11. 2026
+
+Místně připravené uchování nevyřízených událostí po termínu až do Splněno.
+Přehled je označuje „Po termínu“, historie přežije obnovení a restart.
+Přejímka běžící verze naváže po samostatném p+n. Podrobnosti jsou v
+`memory/technical/calendar_pending_events.md` a závěrečném záznamu tohoto souboru.
+
+
 ## 2026-11-26 06:02 CET — Vazba čtečky na Správu dokumentů
 
 Čtečka má kanonický stav v proudu project-document-vault, v jeho handoffu
@@ -3349,3 +3357,28 @@ registrované API, nový PID a shodný kódový otisk. Živý status: ok=true,
 github_fallback.ok=true, error_count=0 a dvě otevřené položky. Redigované účtenky
 jsou v data/private/cockpit_urgent_auth_fix_20261123/. Žádný nový testovací send
 ani vydání kódu; fyzická přejímka prohlížeče zůstává Mílovi.
+
+## 2026-11-27 09:50 CET — Kalendář uchová nevyřízené položky po termínu
+
+**Hotovo.** Místně připravené uchování již načtených nevyřízených událostí
+v úvodní agendě. Po termínu dostanou viditelné označení a čekají na Splněno
+i po novém načtení, restartu a delší době. Nadcházející část dál pokrývá 30 dní.
+
+**Rozhodnutí.** Míla požádal, aby události přestaly mizet pouhým uplynutím termínu.
+Splněno dál vyřizuje konkrétní výskyt v přehledu. Historická položka je dostupná
+pro místní potvrzení také při výpadku čtečky. Editace a mazání vyžadují
+odpovídající aktuální zdroj. Výslovné ověřené smazání se znovu neobjeví jako
+nevyřízená připomínka.
+
+**Další krok.** Samostatné p+n a přejímka na běžícím Cockpitu.
+
+**Navrhované další kroky.** Ověřit na vybrané položce přechod po termínu,
+obnovení stránky a následné Splněno.
+
+**Technický důkaz.** Syntetické Python/HTTP/Node regrese zahrnují restart,
+90 dní, výpadek zdroje, opakovaný výskyt, duplicity, revize, výběr kalendářů,
+celodenní půlnoc i návaznost potvrzené editace a smazání. Důkazy
+`data/private/calendar_retained_20261127/`. Zpětné uchování vychází z obsahu
+dosud dostupného v cache; původní ztracená historie se ze starších období
+automaticky nedohledává. Regrese používají syntetické údaje. Čtecí kontrola stávající cache uchovává
+jen počty a nevolá nativní kalendář.

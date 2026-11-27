@@ -2,6 +2,8 @@
 from __future__ import annotations
 
 from datetime import datetime, timezone
+from collections import defaultdict
+import hashlib
 import json
 import subprocess
 from pathlib import Path
@@ -32,6 +34,17 @@ def text(value, limit):
     if not isinstance(value, str) or len(value) > limit:
         raise CalendarOverviewError("Neplatný údaj v přehledu.")
     return value
+
+
+def event_key(event):
+    """One display identity shared by current and retained occurrences."""
+    values = [event['calendar_id'], event['title'], instant(event['start']).astimezone(timezone.utc).isoformat(),
+              instant(event['end']).astimezone(timezone.utc).isoformat(), event['all_day']]
+    return hashlib.sha256(json.dumps(values, ensure_ascii=False).encode()).hexdigest()
+
+
+def event_end(event):
+    return exclusive_all_day_end(instant(event['end']), all_day=event['all_day'], time_zone=event['timezone'])
 
 
 class CalendarOverview:
@@ -65,7 +78,10 @@ class CalendarOverview:
                  "ready" if ready else "refresh_required")
         return {"ok": True, "revision": value["revision"], "read_calendar_ids": selected,
                 "target_calendar_id": value["target_calendar_id"], "calendars": value["calendars"],
-                "events": events, "last_loaded_at": value.get("last_loaded_at"),
+                "events": events,
+                "retained_events": [row for row in value.get("retained_events", [])
+                                    if row["calendar_id"] in selected],
+                "last_loaded_at": value.get("last_loaded_at"),
                 "inventory_at": value.get("inventory_at"), "start": value.get("start"),
                 "end": value.get("end"), "ready": ready, "status": reason,
                 "missing_calendar_ids": value.get("missing_calendar_ids", []),
@@ -95,6 +111,7 @@ class CalendarOverview:
             inventory = {row["id"]: row for row in value["calendars"]}
             if any(item not in inventory for item in ids) or (target and (target not in inventory or not inventory[target]["writable"])):
                 raise CalendarOverviewError("Kalendář chybí nebo není vhodný jako budoucí cíl zápisu.")
+            self._remember_overdue(value)
             value.update(revision=value["revision"] + 1, read_calendar_ids=sorted(ids),
                          target_calendar_id=target, events=[], last_error=None)
             self.pilot._write(self.path, value)
@@ -151,6 +168,32 @@ class CalendarOverview:
                                  "all_day": row["all_day"], **days})
         return inventory, sorted(clean_events, key=lambda row: instant(row["start"])), missing
 
+    def _remember_overdue(self, value, current_events=()):
+        # Keep duplicate occurrences ambiguous. A later authoritative group replaces
+        # the previous group for the same exact display identity.
+        groups = defaultdict(list)
+        for row in value.get("retained_events", []):
+            groups[event_key(row)].append(row)
+        for rows in (value.get("events", []), current_events):
+            expired = defaultdict(list)
+            for row in rows:
+                if event_end(row) <= self.clock():
+                    expired[event_key(row)].append(row)
+            groups.update(expired)
+        value["retained_events"] = [row for rows in groups.values() for row in rows]
+
+    def follow_retained_edit(self, before, after):
+        with self._lock():
+            value = self._load()
+            old = event_key(before)
+            retained = value.get("retained_events", [])
+            if not any(event_key(row) == old for row in retained):
+                return
+            value["retained_events"] = [row for row in retained if event_key(row) != old]
+            if event_end(after) <= self.clock():
+                value["retained_events"].append(after)
+            self.pilot._write(self.path, value)
+
     def refresh(self, *, confirmed=False):
         if confirmed is not True:
             raise CalendarOverviewError("Načtení vyžaduje výslovný pokyn.")
@@ -163,6 +206,7 @@ class CalendarOverview:
                     value.update(last_error="authorization_required", inventory_verified=False)
                 else:
                     inventory, events, missing = self._validated_read(result, value["read_calendar_ids"])
+                    self._remember_overdue(value, events)
                     value.update(calendars=inventory, events=events, missing_calendar_ids=missing,
                                  truncated=result["truncated"], start=result["start"], end=result["end"],
                                  inventory_at=result["observed_at"], inventory_verified=True,

@@ -2,7 +2,7 @@
   const panel = document.getElementById("calendarAgenda");
   if (!panel) return;
   const notice = document.getElementById("calendarAgendaStatus"), refreshButton = document.getElementById("calendarAgendaRefresh");
-  const date = new Intl.DateTimeFormat("cs-CZ", {timeZone:"Europe/Prague",day:"numeric",month:"short"});
+  const date = new Intl.DateTimeFormat("cs-CZ", {timeZone:"Europe/Prague",day:"numeric",month:"short",year:"numeric"});
   const time = new Intl.DateTimeFormat("cs-CZ", {timeZone:"Europe/Prague",hour:"2-digit",minute:"2-digit"});
   let state = null, busy = false, generation = 0, pollTimer = null, polls = 0, lastStarted = 0;
   const element = (tag, text, cls) => { const n=document.createElement(tag); if(text!==undefined)n.textContent=text; if(cls)n.className=cls; return n; };
@@ -25,8 +25,12 @@
   function row(item) {
     const li=element("li",undefined,"calendar-agenda-row"), text=element("div",undefined,"calendar-agenda-content");
     text.append(element("span",timing(item),"calendar-agenda-time"),element("strong",item.title||"Bez názvu"));
+    if(item.overdue) {
+      li.className+=" calendar-agenda-overdue";
+      text.append(element("span","Po termínu · čeká na potvrzení Splněno","calendar-agenda-pending"));
+    }
     li.append(text);
-    window.SamanthaCalendarActions?.attach(text,item,{disabled:()=>busy||!state?.fresh,context:()=>state,onChanged:()=>refresh(true)});
+    window.SamanthaCalendarActions?.attach(text,item,{disabled:()=>busy||(!state?.fresh&&!item.overdue),context:()=>state,onChanged:()=>refresh(true)});
     if(item.can_delete&&window.SamanthaCalendarDelete)window.SamanthaCalendarDelete.attach(text,item,{disabled:()=>busy||!state?.fresh,onDeleted:()=>refresh(true)});
     const types=element("details",undefined,"calendar-agenda-type");types.append(element("summary","Typ"));
     const label=element("label","Typ pro tento přehled"), select=element("select");select.setAttribute("aria-label","Typ události "+item.title);
@@ -48,12 +52,12 @@
   }
   function render(value) {
     state=value;
-    let message=value.selected_count===0?"Vyber kalendáře v Komunikace → Kalendář.":value.refreshing?"Načítám aktuální kalendáře…":value.fresh?"Aktuální přehled na příštích 30 dní.":"Přehled není aktuálně ověřený. Zobrazené dřívější údaje mohou být zastaralé.";
+    let message=value.selected_count===0?"Vyber kalendáře v Komunikace → Kalendář.":value.refreshing?"Načítám aktuální kalendáře…":value.fresh?"Nadcházející události na 30 dní a dříve načtené položky čekající na Splněno.":"Přehled není aktuálně ověřený. Zobrazené dřívější údaje mohou být zastaralé.";
     if(value.loaded_at)message+=" Aktualizováno "+date.format(new Date(value.loaded_at))+" v "+time.format(new Date(value.loaded_at))+".";
     if(value.classification_partial)message+=" Část označení typů a splnění nelze načíst; položky zůstávají mezi ostatními událostmi.";
     notice.textContent=message;notice.dataset.fresh=String(value.fresh);panel.setAttribute("aria-busy",String(value.refreshing));
-    list("calendarAgendaDeadlines",value.deadlines,"V příštích 30 dnech nejsou označené termíny.");
-    list("calendarAgendaMeetings",value.meetings,"V příštích 30 dnech nejsou schůzky ani další události.");
+    list("calendarAgendaDeadlines",value.deadlines,"Žádné nevyřízené ani nadcházející termíny.");
+    list("calendarAgendaMeetings",value.meetings,"Žádné nevyřízené ani nadcházející události.");
     document.getElementById("calendarAgendaDeadlineCount").textContent=String(value.deadlines.length);
     document.getElementById("calendarAgendaMeetingCount").textContent=String(value.meetings.length);
     if(value.refreshing)schedulePoll();

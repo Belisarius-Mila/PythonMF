@@ -82,10 +82,11 @@ class CalendarDeleteHelper(CalendarAccessPilot):
 
 
 class CalendarDeletion:
-    def __init__(self, root=PROJECT/'data/private/calendar_deletions', *, calendar=None, helper=None, clock=None, on_deleted=None):
+    def __init__(self, root=PROJECT/'data/private/calendar_deletions', *, calendar=None, helper=None, clock=None, on_deleted=None, on_deleted_event=None):
         self.root = Path(root).absolute(); self.calendar = calendar or CalendarOverview()
         self.helper = helper or CalendarDeleteHelper()
         self.clock = clock or (lambda:datetime.now(timezone.utc)); self.on_deleted = on_deleted or (lambda:None)
+        self.on_deleted_event = on_deleted_event or (lambda event: None)
 
     def _path(self, request_id, create=False):
         if not isinstance(request_id,str) or not ID.fullmatch(request_id): raise ValueError('Neplatná identita smazání.')
@@ -188,6 +189,8 @@ class CalendarDeletion:
                 value['state']='unknown'
             notify=value['state']=='deleted';self._save(path,value);view=self._view(value)
         if notify:
+            try: self.on_deleted_event(value['event'])
+            except Exception: pass  # Preserve the verified native result if display bookkeeping fails.
             try: self.on_deleted()
             except Exception: pass  # A failed refresh cannot turn a known delete into a retry.
         return view
