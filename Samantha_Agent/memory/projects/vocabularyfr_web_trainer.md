@@ -1110,3 +1110,24 @@ ověřené přes běžné i kompaktní breakpointy. Aktualizovaný existující 
 sloupců, nová verze CSS v HTML. Finální programová brána/commit/pending počet
 v private la_phrase_eclair_layout_20261127/completion.json. Nativní browser
 host je stále nedostupný, fyzické vykreslení není označené za ověřené.
+
+
+## 2026-11-27 22:56 CET — Větší vzhled La phrase éclair nasazený
+
+Hotovo: Na Pages i soukromé herní adrese je potvrzený nový vzhled: zájmeno1/3,
+sloveso1/2 původní šířky; české/francouzské věty a popisky2×, obrázkové karty
+včetně infinitivu2× šířka i výška. Zachovaná adresa a23 dosavadních místností,
+přístupů, karet a skóre. Obnovit stránku a pokračovat se zapnutým zvukem.
+
+Rozhodnutí: Míla zadal p+n a za běhu publikace potvrdil přesnou globální brzdu.
+Aktivovaný připravený plán pro8731df9d jednou, po konzistentní SQLite záloze.
+Další krok: Vizuálně porovnat nové rozložení na stejném Macu s referenční fotografií.
+Navrhované další kroky: Žádný nový rozsah.
+
+Technický důkaz:225 testů PASS, Terra job0f41c6ec, Pages workflow46072900939 /
+deployment8119994443. HTML/CSS i další3 klientské soubory byteově shodné na
+Pages a soukromé službě, health372 kol, MP3 Range206, odpovědní katalog HTTP404.
+SQLite integrity OK;23 původních ID/requestů a všechna herní/přístupová pole
+shodná se zálohou, měnily se pouze časy signálů přítomnosti. Přesné finální SHA,
+závěrečný zápis a stav p+n: private la_phrase_eclair_layout_release_20261127/completion.json.
+Nativní browser host nedostupný; fyzický vzhled po této změně vyžaduje přejímku.

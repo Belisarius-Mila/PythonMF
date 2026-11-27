@@ -19,10 +19,10 @@
 - Oba hráči obnoví Francouzštinu z Cockpitu, otevřou La phrase éclair a výslovně zapnou zvuk. Zakladatel pošle pozvánku, druhý potvrdí nastavení.
 - Fyzické UI na dvou Macích, úzké okno a skutečný poslech čekají na přejímku. Nativní browser host zde nebyl dostupný; API/DOM testy fyzickou přejímku nenahrazují.
 - Závěrečný provozní zápis nemění herní kód ani nevyžaduje další restart služby.
-### Nová místní úprava vzhledu
-- Potvrzený návrh: desktopové zájmeno1/3 a sloveso1/2 původní šířky; česká i francouzská věta/popisky2×, obrázkové karty včetně infinitivu2× v obou rozměrech.
-- Číselné poměry ověřené, finální brána/SHA v private la_phrase_eclair_layout_20261127/completion.json. Změna je místní a čeká na samostatné p+n/nasazení; stávající služba zatím používá předchozí vzhled.
-- Browser host nedostupný; skutečný vzhled ověřit na Mílově Macu po nasazení.
+### Aktuální vzhled nasazený
+- Desktopové zájmeno1/3 a sloveso1/2 původní šířky; česká i francouzská věta/popisky2×, obrázkové karty včetně infinitivu2× v obou rozměrech. Web i služba8731df9d ověřené po potvrzeném p+n a aktivaci.
+-225 testů PASS,5 klientských souborů přesně na obou adresách.23 původních místností/přístupů/skóre zachováno, konzistentní záloha a integrity OK. Přesné finální účtenky: private la_phrase_eclair_layout_release_20261127/completion.json.
+- Obnovit stránku a Pokračovat a zapnout zvuk. Browser host zde nedostupný; nový fyzický vzhled ověřit na Mílově Macu. Závěrečný zápis nemění herní soubory ani nevyžaduje další restart.
 <!-- SAMANTHA_CURRENT_STATUS_END -->
 
 ## 27.11.2026 — P+n523 a kompatibilní přechod existujících místností
@@ -1377,3 +1377,24 @@ ověřené přes běžné i kompaktní breakpointy. Aktualizovaný existující 
 sloupců, nová verze CSS v HTML. Finální programová brána/commit/pending počet
 v private la_phrase_eclair_layout_20261127/completion.json. Nativní browser
 host je stále nedostupný, fyzické vykreslení není označené za ověřené.
+
+
+## 2026-11-27 22:56 CET — Větší vzhled La phrase éclair nasazený
+
+Hotovo: Na Pages i soukromé herní adrese je potvrzený nový vzhled: zájmeno1/3,
+sloveso1/2 původní šířky; české/francouzské věty a popisky2×, obrázkové karty
+včetně infinitivu2× šířka i výška. Zachovaná adresa a23 dosavadních místností,
+přístupů, karet a skóre. Obnovit stránku a pokračovat se zapnutým zvukem.
+
+Rozhodnutí: Míla zadal p+n a za běhu publikace potvrdil přesnou globální brzdu.
+Aktivovaný připravený plán pro8731df9d jednou, po konzistentní SQLite záloze.
+Další krok: Vizuálně porovnat nové rozložení na stejném Macu s referenční fotografií.
+Navrhované další kroky: Žádný nový rozsah.
+
+Technický důkaz:225 testů PASS, Terra job0f41c6ec, Pages workflow46072900939 /
+deployment8119994443. HTML/CSS i další3 klientské soubory byteově shodné na
+Pages a soukromé službě, health372 kol, MP3 Range206, odpovědní katalog HTTP404.
+SQLite integrity OK;23 původních ID/requestů a všechna herní/přístupová pole
+shodná se zálohou, měnily se pouze časy signálů přítomnosti. Přesné finální SHA,
+závěrečný zápis a stav p+n: private la_phrase_eclair_layout_release_20261127/completion.json.
+Nativní browser host nedostupný; fyzický vzhled po této změně vyžaduje přejímku.
