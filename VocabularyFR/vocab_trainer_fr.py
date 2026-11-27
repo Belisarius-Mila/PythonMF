@@ -27,7 +27,7 @@ from vocabulary_csv_store import (  # noqa: E402
     read_csv_document,
     save_csv_atomic,
 )
-from local_audio import LocalAudio  # noqa: E402
+from local_audio import LocalAudio, LocalPictures  # noqa: E402
 
 APP_NAME = "VocabularyFR"
 CSV_FILENAME = "VocabularyFR.csv"
@@ -207,6 +207,7 @@ class VocabularyTrainerApp:
         self.master = master
         self.csv_path = csv_path
         self.local_audio = LocalAudio(os.path.join(os.path.dirname(csv_path), "Audio"))
+        self.local_pictures = LocalPictures(os.path.join(os.path.dirname(csv_path), "Pictures"))
         self.pict_dir = (
             os.path.abspath(os.path.expanduser(pict_dir)) if pict_dir else None
         )
@@ -1075,6 +1076,8 @@ class VocabularyTrainerApp:
             return
         stem = self._choose_picture_stem(row) if row else "others"
         path = self._find_picture_path(stem) or self._find_picture_path("others")
+        if row:
+            path = self.local_pictures.resolve(row.get("FR", ""), row.get("CZ", "")) or path
         self._render_image_label(self.picture_label, path, "picture_photo")
         if hasattr(self, "gender_picture_label"):
             gender = (row.get("gender_fr") or "").strip().lower() if row else ""

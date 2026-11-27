@@ -1,4 +1,4 @@
-"""Optional exact-text MP3s beside the portable dictionary; never synthesize."""
+"""Optional exact-content media beside the portable dictionary; no generation."""
 from __future__ import annotations
 
 import hashlib
@@ -18,9 +18,11 @@ def _stamp(path):
     return stat.st_ino, stat.st_size, stat.st_mtime_ns, stat.st_ctime_ns
 
 
-class LocalAudio:
-    def __init__(self, directory):
+class LocalMedia:
+    def __init__(self, directory, *, kind, extensions):
         self.directory = Path(directory)
+        self.kind = kind
+        self.extensions = extensions
         self._manifest_stamp = None
         self._index = {}
         self._verified = {}
@@ -39,7 +41,7 @@ class LocalAudio:
                 self._manifest_stamp = None
                 body = json.loads(manifest.read_text(encoding="utf-8"))
                 if (body.get("schemaVersion") != 1
-                        or body.get("kind") != "vocabulary-fr-local-audio"
+                        or body.get("kind") != self.kind
                         or not isinstance(body.get("items"), list)
                         or len(body["items"]) > 10000):
                     return None
@@ -55,7 +57,7 @@ class LocalAudio:
                     parts = rel.split("/")
                     if (PurePosixPath(rel).is_absolute() or "\\" in rel
                             or any(p in ("", ".", "..") for p in parts)
-                            or not rel.endswith(".mp3")):
+                            or not rel.endswith(self.extensions)):
                         return None
                     key = (ch, _text(content))
                     value = (rel, digest)
@@ -86,6 +88,11 @@ class LocalAudio:
             self._manifest_stamp = None
             return None
 
+
+class LocalAudio(LocalMedia):
+    def __init__(self, directory):
+        super().__init__(directory, kind="vocabulary-fr-local-audio", extensions=(".mp3",))
+
     def play(self, channel, text):
         path = self.resolve(channel, text)
         if path is None:
@@ -97,3 +104,14 @@ class LocalAudio:
             return result.returncode == 0
         except (OSError, subprocess.TimeoutExpired):
             return False
+
+
+class LocalPictures(LocalMedia):
+    def __init__(self, directory):
+        super().__init__(directory, kind="vocabulary-fr-local-pictures",
+                         extensions=(".webp", ".png", ".jpg", ".jpeg"))
+
+    def resolve(self, fr, cz):
+        # A meaning pair disambiguates carte and bypasses English the for thé.
+        pair = json.dumps([_text(fr), _text(cz)], ensure_ascii=False)
+        return super().resolve("fr", pair)

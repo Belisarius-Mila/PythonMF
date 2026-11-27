@@ -13,7 +13,7 @@ import unittest
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT / "VocabularyFR"))
 from jana_launcher import portable_arguments  # noqa: E402
-from local_audio import LocalAudio  # noqa: E402
+from local_audio import LocalAudio, LocalPictures  # noqa: E402
 from vocab_trainer_fr import VocabularyTrainerApp  # noqa: E402
 
 spec = importlib.util.spec_from_file_location(
@@ -114,6 +114,19 @@ class LocalAudioTests(unittest.TestCase):
         self.body["items"].append({**self.body["items"][0], "asset": "other.mp3"})
         self.save()
         self.assertIsNone(self.audio.resolve("fr", "Le thé est chaud."))
+
+    def test_picture_lookup_disambiguates_full_meaning_without_touching_audio(self):
+        self.body["kind"] = "vocabulary-fr-local-pictures"
+        self.body["items"] = [
+            {"channel": "fr", "text": json.dumps(["carte", "platební karta"], ensure_ascii=False),
+             "asset": "card.webp", "sha256": hashlib.sha256(self.raw).hexdigest()}]
+        (self.root / "card.webp").write_bytes(self.raw)
+        self.save()
+        pictures = LocalPictures(self.root)
+        self.assertEqual(pictures.resolve("carte", "platební karta"), self.root / "card.webp")
+        self.assertIsNone(pictures.resolve("carte", "hrací karta"))
+        self.assertIsNone(pictures.resolve("carte", "platební karty"))
+        self.assertIsNone(self.audio.resolve("fr", self.body["items"][0]["text"]))
 
     def test_playback_failure_reports_fallback_without_retry(self):
         with patch("local_audio.subprocess.run", side_effect=OSError) as run:

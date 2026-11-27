@@ -14597,6 +14597,969 @@
       "sourceFr": "famille",
       "sourceSentenceCz": "Moje rodina připravuje jídlo na zahradě.",
       "sourceSentenceFr": "Ma famille prépare le repas dans le jardin."
+    },
+    "vfr-0482": {
+      "concepts": [
+        {
+          "end": 24,
+          "occurrence": 1,
+          "sourceCz": "otázka",
+          "sourceFr": "question",
+          "start": 16,
+          "text": "question",
+          "uid": "vfr-0482"
+        }
+      ],
+      "reviewed": true,
+      "sourceCz": "otázka",
+      "sourceFr": "question",
+      "sourceSentenceCz": "Odpovídám na otázku.",
+      "sourceSentenceFr": "Je réponds à la question."
+    },
+    "vfr-0483": {
+      "concepts": [
+        {
+          "end": 24,
+          "occurrence": 1,
+          "sourceCz": "pravidlo",
+          "sourceFr": "règle",
+          "start": 19,
+          "text": "règle",
+          "uid": "vfr-0483"
+        }
+      ],
+      "reviewed": true,
+      "sourceCz": "pravidlo",
+      "sourceFr": "règle",
+      "sourceSentenceCz": "Rozumíme pravidlu.",
+      "sourceSentenceFr": "Nous comprenons la règle."
+    },
+    "vfr-0484": {
+      "concepts": [
+        {
+          "end": 14,
+          "occurrence": 1,
+          "sourceCz": "čaj",
+          "sourceFr": "thé",
+          "start": 11,
+          "text": "thé",
+          "uid": "vfr-0484"
+        }
+      ],
+      "reviewed": true,
+      "sourceCz": "čaj",
+      "sourceFr": "thé",
+      "sourceSentenceCz": "Piji teplý čaj.",
+      "sourceSentenceFr": "Je bois du thé chaud."
+    },
+    "vfr-0485": {
+      "concepts": [
+        {
+          "end": 15,
+          "occurrence": 1,
+          "sourceCz": "mléko",
+          "sourceFr": "lait",
+          "start": 11,
+          "text": "lait",
+          "uid": "vfr-0485"
+        }
+      ],
+      "reviewed": true,
+      "sourceCz": "mléko",
+      "sourceFr": "lait",
+      "sourceSentenceCz": "Piješ mléko.",
+      "sourceSentenceFr": "Tu bois du lait."
+    },
+    "vfr-0486": {
+      "concepts": [
+        {
+          "end": 21,
+          "occurrence": 1,
+          "sourceCz": "platební karta",
+          "sourceFr": "carte",
+          "start": 16,
+          "text": "carte",
+          "uid": "vfr-0486"
+        }
+      ],
+      "reviewed": true,
+      "sourceCz": "platební karta",
+      "sourceFr": "carte",
+      "sourceSentenceCz": "Platím svou platební kartou.",
+      "sourceSentenceFr": "Je paie avec ma carte."
+    },
+    "vfr-0487": {
+      "concepts": [
+        {
+          "end": 22,
+          "occurrence": 1,
+          "sourceCz": "hrací karta",
+          "sourceFr": "carte",
+          "start": 16,
+          "text": "cartes",
+          "uid": "vfr-0487"
+        }
+      ],
+      "reviewed": true,
+      "sourceCz": "hrací karta",
+      "sourceFr": "carte",
+      "sourceSentenceCz": "Hrajeme karty.",
+      "sourceSentenceFr": "Nous jouons aux cartes."
+    },
+    "vfr-0488": {
+      "concepts": [
+        {
+          "end": 23,
+          "occurrence": 1,
+          "sourceCz": "hotel",
+          "sourceFr": "hôtel",
+          "start": 18,
+          "text": "hôtel",
+          "uid": "vfr-0488"
+        }
+      ],
+      "reviewed": true,
+      "sourceCz": "hotel",
+      "sourceFr": "hôtel",
+      "sourceSentenceCz": "Hledáme hotel.",
+      "sourceSentenceFr": "Nous cherchons un hôtel."
+    },
+    "vfr-0489": {
+      "concepts": [
+        {
+          "end": 21,
+          "occurrence": 1,
+          "sourceCz": "fotografie",
+          "sourceFr": "photo",
+          "start": 16,
+          "text": "photo",
+          "uid": "vfr-0489"
+        },
+        {
+          "end": 35,
+          "occurrence": 1,
+          "sourceCz": "rodina",
+          "sourceFr": "famille",
+          "start": 28,
+          "text": "famille",
+          "uid": "vfr-0481"
+        }
+      ],
+      "reviewed": true,
+      "sourceCz": "fotografie",
+      "sourceFr": "photo",
+      "sourceSentenceCz": "Ona ukazuje fotografii své rodiny.",
+      "sourceSentenceFr": "Elle montre une photo de sa famille."
+    },
+    "vfr-0490": {
+      "concepts": [
+        {
+          "end": 17,
+          "occurrence": 1,
+          "sourceCz": "zpráva",
+          "sourceFr": "message",
+          "start": 10,
+          "text": "message",
+          "uid": "vfr-0490"
+        }
+      ],
+      "reviewed": true,
+      "sourceCz": "zpráva",
+      "sourceFr": "message",
+      "sourceSentenceCz": "Čteš zprávu.",
+      "sourceSentenceFr": "Tu lis un message."
+    },
+    "vfr-0491": {
+      "concepts": [
+        {
+          "end": 23,
+          "occurrence": 1,
+          "sourceCz": "hra",
+          "sourceFr": "jeu",
+          "start": 20,
+          "text": "jeu",
+          "uid": "vfr-0491"
+        }
+      ],
+      "reviewed": true,
+      "sourceCz": "hra",
+      "sourceFr": "jeu",
+      "sourceSentenceCz": "Vybíráme hru.",
+      "sourceSentenceFr": "Nous choisissons un jeu."
+    },
+    "vfr-0492": {
+      "concepts": [
+        {
+          "end": 21,
+          "occurrence": 1,
+          "sourceCz": "kresba",
+          "sourceFr": "dessin",
+          "start": 15,
+          "text": "dessin",
+          "uid": "vfr-0492"
+        }
+      ],
+      "reviewed": true,
+      "sourceCz": "kresba",
+      "sourceFr": "dessin",
+      "sourceSentenceCz": "Dívám se na tvou kresbu.",
+      "sourceSentenceFr": "Je regarde ton dessin."
+    },
+    "vfr-0493": {
+      "concepts": [
+        {
+          "end": 20,
+          "occurrence": 1,
+          "sourceCz": "pravda",
+          "sourceFr": "vérité",
+          "start": 14,
+          "text": "vérité",
+          "uid": "vfr-0493"
+        }
+      ],
+      "reviewed": true,
+      "sourceCz": "pravda",
+      "sourceFr": "vérité",
+      "sourceSentenceCz": "Říkáte pravdu.",
+      "sourceSentenceFr": "Vous dites la vérité."
+    },
+    "vfr-0494": {
+      "concepts": [
+        {
+          "end": 22,
+          "occurrence": 1,
+          "sourceCz": "fotbal",
+          "sourceFr": "football",
+          "start": 14,
+          "text": "football",
+          "uid": "vfr-0494"
+        }
+      ],
+      "reviewed": true,
+      "sourceCz": "fotbal",
+      "sourceFr": "football",
+      "sourceSentenceCz": "Oni hrají fotbal.",
+      "sourceSentenceFr": "Ils jouent au football."
+    },
+    "vfr-0495": {
+      "concepts": [
+        {
+          "end": 23,
+          "occurrence": 1,
+          "sourceCz": "zápas",
+          "sourceFr": "match",
+          "start": 18,
+          "text": "match",
+          "uid": "vfr-0495"
+        }
+      ],
+      "reviewed": true,
+      "sourceCz": "zápas",
+      "sourceFr": "match",
+      "sourceSentenceCz": "Díváme se na zápas.",
+      "sourceSentenceFr": "Nous regardons un match."
+    },
+    "vfr-0496": {
+      "concepts": [
+        {
+          "end": 17,
+          "occurrence": 1,
+          "sourceCz": "bod ve hře",
+          "sourceFr": "point",
+          "start": 12,
+          "text": "point",
+          "uid": "vfr-0496"
+        }
+      ],
+      "reviewed": true,
+      "sourceCz": "bod ve hře",
+      "sourceFr": "point",
+      "sourceSentenceCz": "Získávám bod.",
+      "sourceSentenceFr": "Je gagne un point."
+    },
+    "vfr-0497": {
+      "concepts": [
+        {
+          "end": 28,
+          "occurrence": 1,
+          "sourceCz": "den jako časová jednotka",
+          "sourceFr": "jour",
+          "start": 23,
+          "text": "jours",
+          "uid": "vfr-0497"
+        }
+      ],
+      "reviewed": true,
+      "sourceCz": "den jako časová jednotka",
+      "sourceFr": "jour",
+      "sourceSentenceCz": "Odjíždíme za dva dny.",
+      "sourceSentenceFr": "Nous partons dans deux jours."
+    },
+    "vfr-0498": {
+      "concepts": [
+        {
+          "end": 26,
+          "occurrence": 1,
+          "sourceCz": "den; průběh dne",
+          "sourceFr": "journée",
+          "start": 19,
+          "text": "journée",
+          "uid": "vfr-0498"
+        }
+      ],
+      "reviewed": true,
+      "sourceCz": "den; průběh dne",
+      "sourceFr": "journée",
+      "sourceSentenceCz": "Prožívám hezký den.",
+      "sourceSentenceFr": "Je passe une bonne journée."
+    },
+    "vfr-0499": {
+      "concepts": [
+        {
+          "end": 5,
+          "occurrence": 1,
+          "sourceCz": "máš",
+          "sourceFr": "tu as",
+          "start": 0,
+          "text": "Tu as",
+          "uid": "vfr-0038"
+        },
+        {
+          "end": 15,
+          "occurrence": 1,
+          "sourceCz": "potřebovat",
+          "sourceFr": "besoin de",
+          "start": 6,
+          "text": "besoin de",
+          "uid": "vfr-0454"
+        },
+        {
+          "end": 21,
+          "occurrence": 1,
+          "sourceCz": "odpočinek",
+          "sourceFr": "repos",
+          "start": 16,
+          "text": "repos",
+          "uid": "vfr-0499"
+        }
+      ],
+      "reviewed": true,
+      "sourceCz": "odpočinek",
+      "sourceFr": "repos",
+      "sourceSentenceCz": "Potřebuješ odpočinek.",
+      "sourceSentenceFr": "Tu as besoin de repos."
+    },
+    "vfr-0500": {
+      "concepts": [
+        {
+          "end": 25,
+          "occurrence": 1,
+          "sourceCz": "schůzka; domluvený termín",
+          "sourceFr": "rendez-vous",
+          "start": 14,
+          "text": "rendez-vous",
+          "uid": "vfr-0500"
+        }
+      ],
+      "reviewed": true,
+      "sourceCz": "schůzka; domluvený termín",
+      "sourceFr": "rendez-vous",
+      "sourceSentenceCz": "Máme zítra schůzku.",
+      "sourceSentenceFr": "Nous avons un rendez-vous demain."
+    },
+    "vfr-0501": {
+      "concepts": [
+        {
+          "end": 6,
+          "occurrence": 1,
+          "sourceCz": "číst",
+          "sourceFr": "lire",
+          "start": 3,
+          "text": "lit",
+          "uid": "vfr-0472"
+        },
+        {
+          "end": 17,
+          "occurrence": 1,
+          "sourceCz": "noviny",
+          "sourceFr": "journal",
+          "start": 10,
+          "text": "journal",
+          "uid": "vfr-0501"
+        }
+      ],
+      "reviewed": true,
+      "sourceCz": "noviny",
+      "sourceFr": "journal",
+      "sourceSentenceCz": "On čte noviny.",
+      "sourceSentenceFr": "Il lit le journal."
+    },
+    "vfr-0502": {
+      "concepts": [
+        {
+          "end": 19,
+          "occurrence": 1,
+          "sourceCz": "policie",
+          "sourceFr": "police",
+          "start": 13,
+          "text": "police",
+          "uid": "vfr-0502"
+        }
+      ],
+      "reviewed": true,
+      "sourceCz": "policie",
+      "sourceFr": "police",
+      "sourceSentenceCz": "Volám policii.",
+      "sourceSentenceFr": "J'appelle la police."
+    },
+    "vfr-0503": {
+      "concepts": [
+        {
+          "end": 17,
+          "occurrence": 1,
+          "sourceCz": "útěk",
+          "sourceFr": "fuite",
+          "start": 12,
+          "text": "fuite",
+          "uid": "vfr-0503"
+        }
+      ],
+      "reviewed": true,
+      "sourceCz": "útěk",
+      "sourceFr": "fuite",
+      "sourceSentenceCz": "On se dává na útěk.",
+      "sourceSentenceFr": "Il prend la fuite."
+    },
+    "vfr-0504": {
+      "concepts": [
+        {
+          "end": 30,
+          "occurrence": 1,
+          "sourceCz": "odpor; kladení odporu",
+          "sourceFr": "résistance",
+          "start": 20,
+          "text": "résistance",
+          "uid": "vfr-0504"
+        }
+      ],
+      "reviewed": true,
+      "sourceCz": "odpor; kladení odporu",
+      "sourceFr": "résistance",
+      "sourceSentenceCz": "Oni se vzdávají bez odporu.",
+      "sourceSentenceFr": "Ils se livrent sans résistance."
+    },
+    "vfr-0505": {
+      "concepts": [
+        {
+          "end": 18,
+          "occurrence": 1,
+          "sourceCz": "čas",
+          "sourceFr": "temps",
+          "start": 13,
+          "text": "temps",
+          "uid": "vfr-0505"
+        },
+        {
+          "end": 26,
+          "occurrence": 1,
+          "sourceCz": "číst",
+          "sourceFr": "lire",
+          "start": 22,
+          "text": "lire",
+          "uid": "vfr-0472"
+        }
+      ],
+      "reviewed": true,
+      "sourceCz": "čas",
+      "sourceFr": "temps",
+      "sourceSentenceCz": "Dávám si čas na čtení.",
+      "sourceSentenceFr": "Je prends le temps de lire."
+    },
+    "vfr-0506": {
+      "concepts": [
+        {
+          "end": 21,
+          "occurrence": 1,
+          "sourceCz": "sport",
+          "sourceFr": "sport",
+          "start": 16,
+          "text": "sport",
+          "uid": "vfr-0506"
+        }
+      ],
+      "reviewed": true,
+      "sourceCz": "sport",
+      "sourceFr": "sport",
+      "sourceSentenceCz": "Sportujeme.",
+      "sourceSentenceFr": "Nous faisons du sport."
+    },
+    "vfr-0507": {
+      "concepts": [
+        {
+          "end": 16,
+          "occurrence": 1,
+          "sourceCz": "směrem k; k",
+          "sourceFr": "vers",
+          "start": 12,
+          "text": "vers",
+          "uid": "vfr-0507"
+        },
+        {
+          "end": 26,
+          "occurrence": 1,
+          "sourceCz": "dům",
+          "sourceFr": "maison",
+          "start": 20,
+          "text": "maison",
+          "uid": "vfr-0147"
+        }
+      ],
+      "reviewed": true,
+      "sourceCz": "směrem k; k",
+      "sourceFr": "vers",
+      "sourceSentenceCz": "Ona jde směrem k domu.",
+      "sourceSentenceFr": "Elle marche vers la maison."
+    },
+    "vfr-0508": {
+      "concepts": [
+        {
+          "end": 25,
+          "occurrence": 1,
+          "sourceCz": "venku",
+          "sourceFr": "dehors",
+          "start": 19,
+          "text": "dehors",
+          "uid": "vfr-0508"
+        }
+      ],
+      "reviewed": true,
+      "sourceCz": "venku",
+      "sourceFr": "dehors",
+      "sourceSentenceCz": "Děti si hrají venku.",
+      "sourceSentenceFr": "Les enfants jouent dehors."
+    },
+    "vfr-0509": {
+      "concepts": [
+        {
+          "end": 22,
+          "occurrence": 1,
+          "sourceCz": "dlouho",
+          "sourceFr": "longtemps",
+          "start": 13,
+          "text": "longtemps",
+          "uid": "vfr-0509"
+        },
+        {
+          "end": 32,
+          "occurrence": 1,
+          "sourceCz": "zahrada",
+          "sourceFr": "jardin",
+          "start": 26,
+          "text": "jardin",
+          "uid": "vfr-0149"
+        }
+      ],
+      "reviewed": true,
+      "sourceCz": "dlouho",
+      "sourceFr": "longtemps",
+      "sourceSentenceCz": "Zůstáváme dlouho na zahradě.",
+      "sourceSentenceFr": "Nous restons longtemps au jardin."
+    },
+    "vfr-0510": {
+      "concepts": [
+        {
+          "end": 18,
+          "occurrence": 1,
+          "sourceCz": "jídlo",
+          "sourceFr": "repas",
+          "start": 13,
+          "text": "repas",
+          "uid": "vfr-0245"
+        },
+        {
+          "end": 29,
+          "occurrence": 1,
+          "sourceCz": "doma; domů na adresu",
+          "sourceFr": "à domicile",
+          "start": 19,
+          "text": "à domicile",
+          "uid": "vfr-0510"
+        }
+      ],
+      "reviewed": true,
+      "sourceCz": "doma; domů na adresu",
+      "sourceFr": "à domicile",
+      "sourceSentenceCz": "On doručuje jídlo domů na adresu.",
+      "sourceSentenceFr": "Il livre les repas à domicile."
+    },
+    "vfr-0511": {
+      "concepts": [
+        {
+          "end": 26,
+          "occurrence": 1,
+          "sourceCz": "francouzština",
+          "sourceFr": "français",
+          "start": 18,
+          "text": "français",
+          "uid": "vfr-0511"
+        }
+      ],
+      "reviewed": true,
+      "sourceCz": "francouzština",
+      "sourceFr": "français",
+      "sourceSentenceCz": "Učíme se francouzsky.",
+      "sourceSentenceFr": "Nous apprenons le français."
+    },
+    "vfr-0512": {
+      "concepts": [
+        {
+          "end": 14,
+          "occurrence": 1,
+          "sourceCz": "mluvit",
+          "sourceFr": "parler",
+          "start": 8,
+          "text": "parler",
+          "uid": "vfr-0512"
+        },
+        {
+          "end": 23,
+          "occurrence": 1,
+          "sourceCz": "francouzština",
+          "sourceFr": "français",
+          "start": 15,
+          "text": "français",
+          "uid": "vfr-0511"
+        }
+      ],
+      "reviewed": true,
+      "sourceCz": "mluvit",
+      "sourceFr": "parler",
+      "sourceSentenceCz": "Chci mluvit francouzsky.",
+      "sourceSentenceFr": "Je veux parler français."
+    },
+    "vfr-0513": {
+      "concepts": [
+        {
+          "end": 14,
+          "occurrence": 1,
+          "sourceCz": "dobrý den",
+          "sourceFr": "bonjour",
+          "start": 7,
+          "text": "bonjour",
+          "uid": "vfr-0513"
+        },
+        {
+          "end": 24,
+          "occurrence": 1,
+          "sourceCz": "matka",
+          "sourceFr": "mère",
+          "start": 20,
+          "text": "mère",
+          "uid": "vfr-0061"
+        }
+      ],
+      "reviewed": true,
+      "sourceCz": "dobrý den",
+      "sourceFr": "bonjour",
+      "sourceSentenceCz": "Zdravím svou matku.",
+      "sourceSentenceFr": "Je dis bonjour à ma mère."
+    },
+    "vfr-0514": {
+      "concepts": [
+        {
+          "end": 18,
+          "occurrence": 1,
+          "sourceCz": "dlouhý / dlouhá",
+          "sourceFr": "long / longue",
+          "start": 14,
+          "text": "long",
+          "uid": "vfr-0514"
+        }
+      ],
+      "reviewed": true,
+      "sourceCz": "dlouhý / dlouhá",
+      "sourceFr": "long / longue",
+      "sourceSentenceCz": "Cesta je dlouhá.",
+      "sourceSentenceFr": "Le voyage est long."
+    },
+    "vfr-0515": {
+      "concepts": [
+        {
+          "end": 13,
+          "occurrence": 1,
+          "sourceCz": "telefon",
+          "sourceFr": "téléphone",
+          "start": 4,
+          "text": "téléphone",
+          "uid": "vfr-0515"
+        },
+        {
+          "end": 30,
+          "occurrence": 1,
+          "sourceCz": "taška",
+          "sourceFr": "sac",
+          "start": 27,
+          "text": "sac",
+          "uid": "vfr-0128"
+        }
+      ],
+      "reviewed": true,
+      "sourceCz": "telefon",
+      "sourceFr": "téléphone",
+      "sourceSentenceCz": "Můj telefon je v mé tašce.",
+      "sourceSentenceFr": "Mon téléphone est dans mon sac."
+    },
+    "vfr-0516": {
+      "concepts": [
+        {
+          "end": 4,
+          "occurrence": 1,
+          "sourceCz": "mám",
+          "sourceFr": "j'ai",
+          "start": 0,
+          "text": "J'ai",
+          "uid": "vfr-0036"
+        },
+        {
+          "end": 9,
+          "occurrence": 1,
+          "sourceCz": "dva; dvě",
+          "sourceFr": "deux",
+          "start": 5,
+          "text": "deux",
+          "uid": "vfr-0516"
+        },
+        {
+          "end": 16,
+          "occurrence": 1,
+          "sourceCz": "bratr",
+          "sourceFr": "frère",
+          "start": 10,
+          "text": "frères",
+          "uid": "vfr-0060"
+        }
+      ],
+      "reviewed": true,
+      "sourceCz": "dva; dvě",
+      "sourceFr": "deux",
+      "sourceSentenceCz": "Mám dva bratry.",
+      "sourceSentenceFr": "J'ai deux frères."
+    },
+    "vfr-0517": {
+      "concepts": [
+        {
+          "end": 19,
+          "occurrence": 1,
+          "sourceCz": "osm",
+          "sourceFr": "huit",
+          "start": 15,
+          "text": "huit",
+          "uid": "vfr-0517"
+        },
+        {
+          "end": 26,
+          "occurrence": 1,
+          "sourceCz": "hodina; čas (na hodinách)",
+          "sourceFr": "heure",
+          "start": 20,
+          "text": "heures",
+          "uid": "vfr-0342"
+        }
+      ],
+      "reviewed": true,
+      "sourceCz": "osm",
+      "sourceFr": "huit",
+      "sourceSentenceCz": "Odjíždíme v osm hodin.",
+      "sourceSentenceFr": "Nous partons à huit heures."
+    },
+    "vfr-0518": {
+      "concepts": [
+        {
+          "end": 4,
+          "occurrence": 1,
+          "sourceCz": "mám",
+          "sourceFr": "j'ai",
+          "start": 0,
+          "text": "J'ai",
+          "uid": "vfr-0036"
+        },
+        {
+          "end": 8,
+          "occurrence": 1,
+          "sourceCz": "deset",
+          "sourceFr": "dix",
+          "start": 5,
+          "text": "dix",
+          "uid": "vfr-0518"
+        },
+        {
+          "end": 15,
+          "occurrence": 1,
+          "sourceCz": "kniha",
+          "sourceFr": "livre",
+          "start": 9,
+          "text": "livres",
+          "uid": "vfr-0188"
+        }
+      ],
+      "reviewed": true,
+      "sourceCz": "deset",
+      "sourceFr": "dix",
+      "sourceSentenceCz": "Mám deset knih.",
+      "sourceSentenceFr": "J'ai dix livres."
+    },
+    "vfr-0519": {
+      "concepts": [
+        {
+          "end": 8,
+          "occurrence": 1,
+          "sourceCz": "kniha",
+          "sourceFr": "livre",
+          "start": 3,
+          "text": "livre",
+          "uid": "vfr-0188"
+        },
+        {
+          "end": 24,
+          "occurrence": 1,
+          "sourceCz": "euro",
+          "sourceFr": "euro",
+          "start": 19,
+          "text": "euros",
+          "uid": "vfr-0519"
+        }
+      ],
+      "reviewed": true,
+      "sourceCz": "euro",
+      "sourceFr": "euro",
+      "sourceSentenceCz": "Tato kniha stojí deset eur.",
+      "sourceSentenceFr": "Ce livre coûte dix euros."
+    },
+    "vfr-0520": {
+      "concepts": [
+        {
+          "end": 16,
+          "occurrence": 1,
+          "sourceCz": "jeho; její",
+          "sourceFr": "son / sa",
+          "start": 13,
+          "text": "son",
+          "uid": "vfr-0520"
+        },
+        {
+          "end": 22,
+          "occurrence": 1,
+          "sourceCz": "kniha",
+          "sourceFr": "livre",
+          "start": 17,
+          "text": "livre",
+          "uid": "vfr-0188"
+        },
+        {
+          "end": 32,
+          "occurrence": 1,
+          "sourceCz": "klíč",
+          "sourceFr": "clé",
+          "start": 29,
+          "text": "clé",
+          "uid": "vfr-0131"
+        }
+      ],
+      "reviewed": true,
+      "sourceCz": "jeho; její",
+      "sourceFr": "son / sa",
+      "sourceSentenceCz": "Ona hledá svou knihu a svůj klíč.",
+      "sourceSentenceFr": "Elle cherche son livre et sa clé."
+    },
+    "vfr-0521": {
+      "concepts": [
+        {
+          "end": 5,
+          "occurrence": 1,
+          "sourceCz": "náš; naše; naši",
+          "sourceFr": "notre / nos",
+          "start": 0,
+          "text": "Notre",
+          "uid": "vfr-0521"
+        },
+        {
+          "end": 13,
+          "occurrence": 1,
+          "sourceCz": "rodina",
+          "sourceFr": "famille",
+          "start": 6,
+          "text": "famille",
+          "uid": "vfr-0481"
+        },
+        {
+          "end": 29,
+          "occurrence": 1,
+          "sourceCz": "fotografie",
+          "sourceFr": "photo",
+          "start": 23,
+          "text": "photos",
+          "uid": "vfr-0489"
+        }
+      ],
+      "reviewed": true,
+      "sourceCz": "náš; naše; naši",
+      "sourceFr": "notre / nos",
+      "sourceSentenceCz": "Naše rodina má ráda naše fotografie.",
+      "sourceSentenceFr": "Notre famille aime nos photos."
+    },
+    "vfr-0522": {
+      "concepts": [
+        {
+          "end": 4,
+          "occurrence": 1,
+          "sourceCz": "jejich",
+          "sourceFr": "leur / leurs",
+          "start": 0,
+          "text": "Leur",
+          "uid": "vfr-0522"
+        },
+        {
+          "end": 10,
+          "occurrence": 1,
+          "sourceCz": "dcera",
+          "sourceFr": "fille",
+          "start": 5,
+          "text": "fille",
+          "uid": "vfr-0041"
+        },
+        {
+          "end": 30,
+          "occurrence": 1,
+          "sourceCz": "fotografie",
+          "sourceFr": "photo",
+          "start": 24,
+          "text": "photos",
+          "uid": "vfr-0489"
+        }
+      ],
+      "reviewed": true,
+      "sourceCz": "jejich",
+      "sourceFr": "leur / leurs",
+      "sourceSentenceCz": "Jejich dcera ukazuje jejich fotografie.",
+      "sourceSentenceFr": "Leur fille montre leurs photos."
+    },
+    "vfr-0523": {
+      "concepts": [
+        {
+          "end": 32,
+          "occurrence": 1,
+          "sourceCz": "jízdenka na vlak",
+          "sourceFr": "billet de train",
+          "start": 16,
+          "text": "billets de train",
+          "uid": "vfr-0523"
+        }
+      ],
+      "reviewed": true,
+      "sourceCz": "jízdenka na vlak",
+      "sourceFr": "billet de train",
+      "sourceSentenceCz": "Platíme za své jízdenky na vlak.",
+      "sourceSentenceFr": "Nous payons nos billets de train."
     }
   },
   "kind": "sentence-pictures",

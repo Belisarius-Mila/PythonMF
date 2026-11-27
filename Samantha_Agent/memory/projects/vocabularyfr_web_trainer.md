@@ -903,3 +903,39 @@ návrh CSV, živé výchozí SHA, retail sazbu a oba rozsahy audia. Cílenou br�
 commit a aktuální stav určuje completion.json. Po cenovém potvrzení dokončit
 média, aktualizovat iCloud přes zálohu/SHA kontrolu, ověřit bundle a upload,
 pak stejný webový přírůstek. Fyzická Janina přejímka se nepředstírá.
+
+## 27.11.2026 — Nové karty a média vyrobené, iCloud instalace a místní web
+
+Míla schválil výrobu všeho včetně372 herních vět a strop0,50 USD bez daně.
+Vyrobeno531 MP3,28305 účtovaných znaků, odhad0,424575 USD; žádný automatický
+opakovaný požadavek.11 ilustrací vytvořených a zkontrolovaných. Nová hra se
+neimplementovala;372 vět se zvukem je neveřejná příprava LaPhraseEclair.
+
+Janin iCloud CSV469→528: všech469 původních řádků/vět/L/HT zachovaných,
+přidáno17 starších webových karet a42 nových. Nová .app, Audio a Pictures
+instalované; stará .app/CSV v datované záloze. Reálný bundle check528/107
+slovesných obrázků/recall a podpis PASS. Všech168 nových zvukových referencí
+a59 přesných dvojic obrázek/význam dohledatelných; bez anglického the pro thé.
+Mílovo FR477 i IT471 hashově beze změny;1175 mapování v obou Pict shodně,
+39 nových klíčů, žádná původní vazba přepsaná. Sdílený audit0 chybějících.
+
+Web je místně523 karet /2092 zvukových referencí /1206 obrazových vazeb.
+Všech481 předchozích karet zachováno; reálný klient523 čtyřmožnostních otázek
+PASS,248 HTTP souborů přesně. Zdrojová v006 uzavřená; pracovní data a herní
+odpovědi zůstávají mimo docs/Git. Není to publikace ani upgrade herní služby.
+
+iCloud upload dokončený:2743 použitelných položek uploaded=true,0 uploading,
+0 chyb; celý .app balíček ověřen zvlášť. Vnitřní binární soubor má samostatná
+metadata nil a kryje ho potvrzený balíček. Úvodní chyba4355 odezněla bez zásahu
+do účtu/DNS/služeb a bez nového kopírování. Důkaz icloud-upload-confirmed.json.
+Fyzické spuštění na Janině Macu se tím nepotvrzuje.
+Browser access host nebyl dostupný; lidský poslech na Janině Macu čeká.
+12 cílených mediálních testů a6 kanonických mapping testů PASS; programovou
+bránu/commit/pending count dokládá completion.json stejného privátního kořene.
+
+Další krok: po výslovném p+n
+vydat web registrovanou cestou a připravit přesný upgrade soukromého herního
+serveru se zachováním místností/SQLite a jeho systémovými oprávněními.
+Handoff rozlišuje místní dokončení, cloudové doručení a veřejné vydání.
+Podrobně reports/vocabulary_fr_content_additions_20261127.md; privátní důkazy
+vocabulary_fr_content_additions_20261127/{current-bundle,completion}.json.
