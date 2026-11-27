@@ -1,7 +1,8 @@
 # Nevyřízené události po termínu
 
 Aktualizováno 27. 11. 2026. Proud project-cockpit.
-Stav je místně připravené, přejímka naváže po p+n.
+Nasazeno v dca28fe8, push a deployment potvrzené 27.11. Provozní kontrola 5/5
+a živé API prošly. Následuje uživatelská přejímka.
 
 Úvodní agenda zobrazuje nadcházejících 30 dní a dříve načtené nevyřízené
 události. Po termínu jsou označené „Po termínu · čeká na potvrzení Splněno“.
@@ -38,4 +39,5 @@ data/private/calendar_retained_20261127/.
 
 ## Další krok
 
-Samostatné vydání a fyzická přejímka prošlé položky v hlavním Cockpitu.
+Uživatelská přejímka prošlé položky v hlavním Cockpitu po obnovení stránky.
+Účtenka vydání a živé ověření jsou v data/private/calendar_retained_20261127/release/.

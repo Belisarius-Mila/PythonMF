@@ -2,11 +2,11 @@
 
 ## Kalendářová změna — 27. 11. 2026
 
-Místně je připravené uchování nevyřízených položek po termínu až do Splněno.
+V dca28fe8 je nasazené uchování nevyřízených položek po termínu až do Splněno.
 Úvodní agenda u nich ukazuje stav Po termínu. Přehled uchová dříve načtené
 položky přes obnovení i restart. Podrobnosti a hranice zpětného zachování
-jsou v `memory/technical/calendar_pending_events.md`. Vydání a přejímka
-běžícího Cockpitu jsou další krok.
+jsou v `memory/technical/calendar_pending_events.md`. Provozní kontrola 5/5
+a živé API prošly, uživatelská přejímka je další krok.
 
 ## Aktuální stav od 2026-07-28
 

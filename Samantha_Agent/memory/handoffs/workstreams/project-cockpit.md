@@ -2,9 +2,9 @@
 
 ## Aktuální kalendářová změna — 27. 11. 2026
 
-Místně připravené uchování nevyřízených událostí po termínu až do Splněno.
-Přehled je označuje „Po termínu“, historie přežije obnovení a restart.
-Přejímka běžící verze naváže po samostatném p+n. Podrobnosti jsou v
+Uchování nevyřízených událostí po termínu až do Splněno je nasazené
+v dca28fe8. Přehled je označuje „Po termínu“, historie přežije obnovení
+a restart. Provozní kontrola 5/5 a živé API prošly. Následuje uživatelská přejímka. Podrobnosti jsou v
 `memory/technical/calendar_pending_events.md` a závěrečném záznamu tohoto souboru.
 
 
@@ -3382,3 +3382,25 @@ celodenní půlnoc i návaznost potvrzené editace a smazání. Důkazy
 dosud dostupného v cache; původní ztracená historie se ze starších období
 automaticky nedohledává. Regrese používají syntetické údaje. Čtecí kontrola stávající cache uchovává
 jen počty a nevolá nativní kalendář.
+
+## 2026-11-27 10:11 CET — Uchování nevyřízených událostí nasazené
+
+**Hotovo.** Připravený commit dca28fe8 je potvrzeně odeslaný a nasazený
+v Cockpitu. Živá agenda vrací nové příznaky a také jednu prošlou položku.
+Všech pět provozních kontrol prošlo. Názvy ani obsah osobních událostí
+nejsou součástí tohoto zápisu.
+
+**Rozhodnutí.** Míla výslovně potvrdil commit a p+n. Registrované vydání
+má jedinou identitu aadccb2466a84115ca606ca28043e882. Výsledkový dokumentační checkpoint
+publikaci neopakuje.
+
+**Další krok.** Uživatelská přejímka po obnovení Cockpitu. Ověřit přítomnost
+položky po termínu a její vyřízení tlačítkem Splněno.
+
+**Navrhované další kroky.** Žádné nové.
+
+**Technický důkaz.** Push i deployment confirmed nad
+dca28fe88061bf3074fdacccb4de66b508b44197. Runtime code_stamp
+8a9b92010e754f6c, smoke 5/5 a čtecí kontrola živého API PASS.
+416 doménových testů a 98 cílených testů zůstávají důkazem vývoje.
+Účtenka a ověření jsou v `data/private/calendar_retained_20261127/release/`.
