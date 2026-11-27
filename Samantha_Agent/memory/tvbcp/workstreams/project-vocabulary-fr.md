@@ -2,20 +2,21 @@
 ## Aktuální stav
 
 ### Hotovo
-- Vyrobený a ověřený balíček523 webových karet; iCloud VocabularyFR Jany528 řádků včetně všech původních469. Nová MP3 i obrázky hotové, další výroba se neopakuje.
-- Míla zadal p+n a aktualizaci herní služby. Doplněná ochrana původních místností při rozšíření katalogu: přesně stejné staré významy/metadatové vazby, SQLite záloha a transakční změna pouze verze katalogu.
-- Původní herní funkce včetně obnovy spojení a časování zůstávají zachované.
+- Janin iCloud VocabularyFR má528 řádků; veřejný web i soukromá herní služba mají523 karet, nová MP3 a obrázky. Obsah i herní služba vydané z f6d16ded.
+- Po aktuálním přesném potvrzení globální brzdy aktivovaný plán v2. Stejná soukromá adresa, pozvánky, hráčské přístupy a skóre; původních17 místností zachováno.
+- Obnova spojení, nastavení textu2/3/4s a obrázku1/2s i ostatní herní funkce zachované.
 
 ### Důkaz
-- Programová cílená brána476 testů PASS; účtenka ff3cd252f0388dbb64408896df82cec25b0b991f42c0ecd2ebede9fcf9edf806.
-- Skutečná kopie17 původních místností a2 rozehraných QA partií: zachovaná všechna pole kromě catalog; Pexeso i duel fungují se stejnými přístupy a pozvánkou.
-- První publikační job567563bef skončil před potvrzeným push; ukončení workeru a původní GitHub0068a369 ověřené, stejný nejistý požadavek se neopakuje.
-- Přesný finální stav/SHA/publikační účtenka: data/private/vocabulary_fr_content_release_20261127/completion.json; podrobnosti reports/vocabulary_fr_content_release_20261127.md.
+- Pages workflow46038924063 / deployment8115378758 úspěšné pro přesný f6d16ded; předtím potvrzený push všech3 commitů. Původní časově neurčitá release účtenka se nepřepisovala a publikace se neopakovala.
+- Na Pages i soukromé službě265/265 souborů byteově shodných, MP3 Range206; služba running/health OK.
+- SQLite integrity OK. Skutečná záloha po zastavení procesu proti živé DB:17 původních místností změnilo pouze catalog; ID/request/pozvánky/přístupy/skóre/balíček/kolo/expirace přesně zachované.
+- Dva HTTPS klienti spustili Pexeso i duel s12 pouze novými slovy; stejná místnost/kolo/fáze pro oba, QA hráči poté odešli.
+- Programová brána476 PASS a závěrečná dokumentační67 PASS; konečné provozní účtenky v data/private/vocabulary_fr_content_release_20261127/completion.json.
 
 ### Rizika a další krok
-- Dokončit nové registrované p+n integračního commitu a ověřit veřejné bajty.
-- Služba zatím zůstává e3968858/481; nový neměnný plán aktivovat až po přesné aktuální globální potvrzovací větě. Starý plán v1 se nepoužije pro jiný commit.
-- Zachovat adresu, pozvánky, přístupy i skóre. Oba hráči po výměně verze obnoví stránku; fyzický poslech na dvou Macích čeká na přejímku.
+- Oba hráči obnoví stránku a zapnou zvuk; fyzický poslech a ovládání na dvou Macích zůstávají samostatnou přejímkou.
+- Záloha SQLite zachovaná, vypršené místnosti se neprodlužují. Soukromá adresa a skutečné přístupy zůstávají mimo Git.
+-372 vět a MP3 pro budoucí LaPhraseEclair jsou připravená média; nová hra se v tomto kroku neimplementovala.
 <!-- SAMANTHA_CURRENT_STATUS_END -->
 
 ## 27.11.2026 — P+n523 a kompatibilní přechod existujících místností
@@ -1314,3 +1315,24 @@ Programová brána a finální vydání se dokončují; aktuální účtenky jso
 `vocabulary_fr_duel_recovery_20261127/completion.json`. Databáze a pozvánky se
 nemění; aktualizace privátního exportu vyžaduje konkrétní potvrzený plán služby.
 Fyzická přejímka dvou Maců včetně zvuku zůstává otevřená.
+
+
+## 2026-11-27 18:16 CET — Slovník523 a herní služba společně aktualizované
+
+Hotovo: Jana má nová slovíčka, věty, obrázky a MP3 ve webu i soukromých hrách.
+Stejná adresa a všechny původní17 místnosti zachovávají pozvánky, přístupy,
+skóre i rozehraný stav. Ověřené dva HTTPS klienty v Pexesu i duelu s12 novými slovy.
+
+Rozhodnutí: Míla potvrdil přesnou globální brzdu pro připravený plán v2;
+aktivace provedena jednou z f6d16ded. Žádné nové architektonické rozhodnutí.
+
+Další krok: oba hráči obnoví stránku a provedou společnou fyzickou přejímku zvuku.
+Navrhované další kroky: navázat na již dohodnutou přípravu nové hry LaPhraseEclair.
+
+Technický důkaz: Pages workflow46038924063 a deployment8115378758 potvrzené;
+265 souborů přesně na obou adresách, MP3 Range206. SQLite integrity OK;
+porovnání se skutečnou zálohou dokládá pouze změnu catalog u17 místností.
+Finální služba running f6d16ded,523 karet. Účtenky zůstávají soukromé v
+vocabulary_fr_content_release_20261127/completion.json; původní release
+attention zachovaná, úspěch původního workflow nezávisle potvrzen bez retry.
+Fyzická dvě zařízení a poslech nejsou nahrazené automatickým ověřením.

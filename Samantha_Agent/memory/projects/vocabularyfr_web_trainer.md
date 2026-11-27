@@ -959,3 +959,24 @@ balíčku a po přesné globální větě aktivace nového plánu s migrací. Ko
 stav, SHA a všechny účtenky určuje privátní
 vocabulary_fr_content_release_20261127/completion.json; zdrojové médium v006
 zůstává beze změny. Podrobně reports/vocabulary_fr_content_release_20261127.md.
+
+
+## 2026-11-27 18:16 CET — Slovník523 a herní služba společně aktualizované
+
+Hotovo: Jana má nová slovíčka, věty, obrázky a MP3 ve webu i soukromých hrách.
+Stejná adresa a všechny původní17 místnosti zachovávají pozvánky, přístupy,
+skóre i rozehraný stav. Ověřené dva HTTPS klienty v Pexesu i duelu s12 novými slovy.
+
+Rozhodnutí: Míla potvrdil přesnou globální brzdu pro připravený plán v2;
+aktivace provedena jednou z f6d16ded. Žádné nové architektonické rozhodnutí.
+
+Další krok: oba hráči obnoví stránku a provedou společnou fyzickou přejímku zvuku.
+Navrhované další kroky: navázat na již dohodnutou přípravu nové hry LaPhraseEclair.
+
+Technický důkaz: Pages workflow46038924063 a deployment8115378758 potvrzené;
+265 souborů přesně na obou adresách, MP3 Range206. SQLite integrity OK;
+porovnání se skutečnou zálohou dokládá pouze změnu catalog u17 místností.
+Finální služba running f6d16ded,523 karet. Účtenky zůstávají soukromé v
+vocabulary_fr_content_release_20261127/completion.json; původní release
+attention zachovaná, úspěch původního workflow nezávisle potvrzen bez retry.
+Fyzická dvě zařízení a poslech nejsou nahrazené automatickým ověřením.
